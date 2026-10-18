@@ -1,350 +1,336 @@
 # RealSaS-OPT — Current Plan
 
-**Date:** 2026-10-16
-**Status:** USER-AUTHORIZED IRIS VNEXT / SINGLE-CARRIER / GRAPHICS IMPLEMENTATION
-**Review line:** `research/iris-vnext-single-carrier-graphics` / draft PR #116
-**Production authority:** `main` until this review line passes and is merged
+**Date:** 2026-10-18  
+**Status:** ACTIVE POST-V8 QUALITY / TRUTH / CONSUMPTION PROGRAM  
+**Active source line:** `research/iris-vnext-post-v8-quality-plan-20261018`  
+**Review vehicle:** draft PR #116, to be fast-forwarded to this source line  
+**Production authority:** `main` until reviewed merge  
+**Training policy:** no new broad Fit8 run until the courts below justify it
 
-## 0. Non-negotiable architecture rule
+## 0. Non-negotiable architecture rules
 
-RealSaS must never reintroduce independent mechanical and visual carriers.
+### Single canonical carrier
 
 ```text
-K x learned candidate M*
+K x candidate M*
         ↓
-Compiler static admission
+static admission + candidate mechanics
         ↓
-candidate AXIS + MIRA
-        ↓
-bounded mechanical selection probes
-        ↓
-Compiler survivor selection
+deterministic selection
         ↓
 ONE canonical M/G/W_M
         ↓
 Graphics + Motion + Runtime
 ```
 
-Candidates are evidence only. No candidate has product authority. There is exactly one canonical mechanics bundle after selection.
+Candidates are evidence only. A second deformable visual mesh remains forbidden.
 
-Graphics may add 2D presentation support derived from canonical M, but it may not create or deform a second 3D mesh.
+### Post-M1 shared-carrier seal
+
+```text
+Geometry + Mechanics
+        ↓
+shared carrier H
+        ↓
+M1 seal
+        ↓
+Appearance / Relations / TESSA / Joint specialist learning
+```
+
+A1/R1/T1/J1 may not optimize `scene_core` unless a separately preregistered carrier-falsification court explicitly authorizes reopening it and specifies non-regression gates.
+
+### Compiler law
+
+> Compiler may enforce and globally reconcile admissible evidence; Compiler may not hide model incapacity or fabricate unavailable truth.
+
+### Truth law
+
+> Unknown is a first-class outcome. An unidentifiable owner/amodal/presentation target must abstain instead of inheriting a convenient geometric proxy.
 
 ---
 
-## 1. IRIS vNext
+## 1. Completed architectural baseline: V8
 
-Keep frozen DINOv2-S as the controlled image-token front end and replace the demo-sized trainable scene core with one stronger shared scene representation.
+V8 is complete at step12000 and is the current architectural/measurement baseline, not a scientific PASS.
 
-Baseline:
+Supported result:
 
-```text
-scene width          512
-camera embedding     128
-scene layers           6
-attention heads         8
-FF multiplier           4
-triplane          3x96x64x64
-field width            384
-field residual blocks    6
-local H(x)             384
-```
+- sealing the shared carrier after M1 preserved geometry/extraction exactly across downstream specialist training;
+- sealed H still supported substantial appearance/relation/topology learning;
+- therefore generic semantic classes or generic adapters are not currently justified by capacity evidence.
 
-The shared core fans out into evidence heads rather than separate scene-understanding networks:
-
-```text
-Geometry
-  H(x), field, uncertainty,
-  bounded extraction displacement,
-  21-D Flexi-style cube extraction freedom
-
-MechanicalDemand
-  stretch major/minor,
-  principal tangent direction,
-  bend demand,
-  rigidity probability,
-  uncertainty
-
-Graphics Appearance
-  RGBA candidate/confidence,
-  appearance descriptor,
-  alpha/appearance boundaries
-
-Graphics Relations
-  same-drawable affinity,
-  cut probability,
-  fragment embedding,
-  visibility/front/occlusion,
-  attachment affinity,
-  boundary evidence,
-  uncertainty
-
-Structure
-  shared-scene + SurfaceWitness memory
-  -> TESSA topology grammar decoder
-```
-
-No named semantic taxonomy is permitted.
+Do not rerun or reinterpret V8 merely to produce a prettier final number. Preserve it as the baseline against which focused post-V8 experiments are compared.
 
 ---
 
-## 2. Training-time mechanical truth
+## 2. Workstream A — carrier hardening and CI
 
-Authored source mechanics are teacher truth only.
+### A1. Exact stage identity
 
-```text
-authored M/G/W/native motion
-        ↓
-per-edge strain
-per-face deformation/Jacobian
-area change
-condition ratio
-principal direction
-bend demand
-rigidity
-optional persistent contact
-        ↓
-MechanicalDemandTruth
-```
+**Status: IMPLEMENTED**
 
-Inference remains image/camera only. Teacher G/W/motion may never enter the inference forward call.
+The quality contract now uses canonical V8 stage IDs and fails on unknown A/R/T/J aliases.
 
-This is not a feedback loop from post-hoc pass/fail. It is direct supervised teaching of the expected mechanical life of a surface.
+### A2. Runtime optimizer guard
 
----
+**Status: IMPLEMENTED**
 
-## 3. Structure / TESSA role
+Future V8-line execution validates both configured `scene_lr_scale` and actual `scene_core` optimizer-group LR after every stage application.
 
-TESSA remains useful as an explicit topology language, but it is no longer a second scene-understanding model.
+### A3. Branch CI
 
-Baseline:
+**Status: IMPLEMENTED / GREEN REQUIRED**
 
-```text
-topology width          512
-heads                      8
-decoder layers              8
-memory tokens             256
-memory refinement layers    2
-```
+The focused vNext workflow now runs on relevant pushes to the active post-V8 branch and includes post-V8 quality/boundary/trainer gates.
 
-Structure memory sees:
+No commit is promoted merely because files compile locally; GitHub Actions must be green.
 
-```text
-shared triplane tokens
-+
-SurfaceWitness {
-  XYZ,
-  normal,
-  H(x),
-  uncertainty,
-  MechanicalDemandEvidence
-}
-```
+### A4. Review-line consolidation
 
-The grammar remains explicit. Candidate generation must produce a bounded diverse set, initially `K=4`.
+**Status: PENDING FINAL FAST-FORWARD**
+
+The historical vNext draft PR #116 is a direct ancestor of the post-V8 branch. Fast-forward the PR head to the active source head after this tranche, so repo navigation has one visible vNext review vehicle rather than diverging review narratives.
 
 ---
 
-## 4. Geometry / extraction quality
+## 3. Workstream B — truth cleanup
 
-Adopt the useful StdGEN++/FlexiCubes lessons without copying their semantic ontology:
+### B1. Boundary Causality Teacher V1
 
-- coarse-to-fine active-surface evaluation;
-- learnable bounded extraction freedom;
-- connectivity supervision at source;
-- high-resolution extraction where topology is actually active;
-- model failure rather than large Compiler repair.
+**Status: CONTRACT IMPLEMENTED / PRODUCER WIRING PENDING**
 
-Teacher connectivity uses actual authored surface/component truth where valid. Do not invent inside/outside labels for open/non-watertight teachers.
-
----
-
-## 5. Canonical mechanics timing
-
-The old rule `Stage19 static canonical M -> AXIS/MIRA -> dynamic qualification` is not the vNext authority model.
-
-The vNext mechanics graph is:
+Allowed causal labels:
 
 ```text
-MeshCandidateSet
-        ↓
-static admission only
-        ↓
-candidate AXIS G
-        ↓
-candidate MIRA W_M
-        ↓
-topology-selection mechanical probes
-        ↓
-SOLE canonical M/G/W_M
+GEOMETRIC_TERMINATION
+MATERIAL_BOUNDARY
+ALPHA_BOUNDARY
+OCCLUSION_VISIBILITY_BOUNDARY
+SOURCE_PRIMITIVE_COMPONENT_SEAM
+RESIDUAL_UNKNOWN
 ```
 
-A separate production dynamic-motion proof remains downstream of the selected canonical puppet. Candidate-selection probes and production motion proof are different courts and must stay different.
+`RESIDUAL_UNKNOWN` is abstention and emits no training target.
 
-Compiler may select among model candidates; it may not design a replacement mesh.
+### B2. Deprecate proxy cut truth
+
+**Status: REQUIRED NEXT SCHEMA**
+
+Historical `graphics_truth_v1.py` defines adjacent-pair `cut = 1 - same_drawable`. This must remain readable for V8 provenance but may not remain the authoritative future cut target.
+
+Next truth schema must provide:
+
+- explicit target-validity mask / abstention;
+- source/provenance for every positive cut/boundary target;
+- no automatic `cut = 1 - owner` promotion;
+- per-family support/class-balance statistics;
+- compatibility migration that leaves historical V8 shards immutable.
+
+### B3. Salvage measurable foundation producers
+
+**Status: NEXT IMPLEMENTATION TRANCHE**
+
+Port from `agent/unified-iris-stdgenpp-foundation` only source-defensible producers:
+
+- source geometry/topology provenance;
+- material provenance;
+- rig/deformation truth;
+- all-hit rays;
+- fixed-frame dynamic visibility/order;
+- residual-boundary diagnostics;
+- local geometric continuation evidence.
+
+Do not import owner/amodal/presentation labels that the source cannot identify.
+
+Exit criterion: boundary/visibility corpus rows carry explicit authority class and provenance; support counts are auditable.
 
 ---
 
-## 6. Graphics
+## 4. Workstream C — Compiler/runtime consumption
 
-`CAA` is legacy compatibility vocabulary only. The active domain name is **Graphics**.
+Machine-readable starting audit:
 
-Observed source pixels remain source-wins. Learned appearance can support unobserved/ambiguous areas but cannot silently override observed art.
+`docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`
 
-The model does not output persistent fragment IDs. It emits relation evidence. Compiler canonicalizes identities and solves the global composition problem:
+### Already source-proven
+
+- same/cut/boundary influence Compiler fragment clustering;
+- visibility becomes runtime visible fragments and changes native raster output;
+- front+occlusion become explicit directed order edges;
+- native order edges override contradictory physical depth;
+- Graphics content, not only a hash, is serialized into `graphics.bin`.
+
+### Open consumption debt
+
+- attachment records are serialized but current native reference raster does not behaviorally use them;
+- support-band values are serialized/validated but not behaviorally used by the current native renderer.
+
+Required actions:
+
+1. identify the intended attachment owner in playback/motion runtime;
+2. add a behavioral test if it exists, otherwise explicitly mark attachment as transport-only/non-behavioral for this runtime version;
+3. either implement an authorized bounded 2D support consumer or remove any claim that support-band data currently affects output;
+4. add a fragment-clustering behavioral court showing changed same/cut/boundary evidence changes compiled/runtime fragmentation as expected.
+
+Exit criterion: every learned Graphics signal is classified as `BEHAVIORALLY_USED`, `TRANSPORT_ONLY`, or `UNCONSUMED`; no ambiguous “consumed” status remains.
+
+---
+
+## 5. Workstream D — independent TESSA topology court
+
+**Status: NOT YET BUILT**
+
+Training loss is not qualification.
+
+Build a held-out court over actual proposed topology/surface behavior:
+
+- valid/degenerate face counts;
+- connected-component error;
+- boundary-loop and hole behavior;
+- non-manifold diagnostics without assuming all sources are closed;
+- canonical surface deviation;
+- source-support coverage;
+- stability under held-out views/contexts;
+- subject-level and cohort-level worst-case reporting.
+
+Only after this court identifies a concrete failure may we introduce:
+
+- StdGEN++-style sign/hole regularization;
+- higher-resolution extraction;
+- topology-specific specialist capacity.
+
+Every such change requires ablation and geometry non-regression.
+
+---
+
+## 6. Workstream E — specialist convergence / optimization
+
+V8 proved architectural isolation, not optimal downstream convergence.
+
+For each active head/family record at fixed intervals:
 
 ```text
-role-free learned relation evidence
-+ source RGBA / alpha
-+ canonical-M physical depth
-+ canonical M/G/W motion
-+ persistent contact
-+ temporal evidence
-        ↓
-Compiler global solve
-        ↓
-GraphicsFragments
-per-view visibility
-per-view partial order
-attachment anchors
-fragment motion fields
-bounded silhouette support
+train p50 / p95
+held-out p50 / p95
+active example count
+positive / negative balance
+trivial-negative fraction
+gradient L2 norm
+parameter update L2 norm
+update / parameter ratio
+optimizer group + LR
+best held-out checkpoint
+prior-family non-regression metrics
 ```
 
-Graphics must bind to the sole canonical M.
+Rules:
+
+- separate optimizer groups by evidence family where convergence differs materially;
+- do not use one blanket evidence LR as an article of faith;
+- diagnose missing gradient, tiny update, class imbalance, trivial negatives and target ambiguity before changing LR;
+- allow preregistered stage extension only while held-out improvement remains meaningful;
+- select best qualified checkpoint, not automatically the final step;
+- keep `scene_core` sealed throughout specialist optimization.
+
+`0.1–0.2` comparable normalized residuals remain optimization debt by default. `~0.05` is a planning reference only, not a universal scientific gate.
 
 ---
 
-## 7. Runtime consumption
+## 7. Workstream F — StdGEN++ transfer program
 
-A hash reference is not behavioral consumption.
+Re-audit source:
 
-vNext RSS/native runtime must materialize and consume:
+`docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md`
 
-- canonical face -> Graphics fragment ownership;
-- visible fragments per view;
-- explicit partial-order edges;
-- attachment anchors;
-- bounded 2D support parameters.
+### Adopt now as design discipline
 
-Native raster ordering rule:
+- stable shared carrier / constrained specialization;
+- preserve relevant geometric/raster supervision through representation transitions;
+- treat decomposition truth as a data-identifiability problem;
+- explicit thin-structure/topology courts;
+- specialist branches only where scale/task demands them.
 
-1. if Compiler provides explicit precedence between the two fragments, that precedence wins;
-2. otherwise physical camera depth wins;
-3. exact depth ties use deterministic fallback;
-4. triangle-array order is never presentation authority.
+### Investigate after current courts
 
-This allows relation evidence to solve real draw-order/occlusion cases without turning the entire character into a fixed painter-order stack.
+- sparse coarse-to-fine high-resolution extraction;
+- continuity-conditioned hole/sign regularization;
+- evidence-specific LoRA/adapters;
+- local high-resolution geometry specialist;
+- richer TESSA boundary/component summaries.
+
+### Do not copy
+
+- fixed body/hair/cloth inference ontology;
+- silent forced SDF-sign repair as authority;
+- anatomical branch names as RealSaS architecture;
+- hidden/amodal truth that current source assets cannot identify.
+
+Exact StdGEN++ training source is not publicly available in the StdGEN repository as of this state. Paper claims and public-code facts must remain separately labeled.
 
 ---
 
-## 8. Paperman-style 2D support
+## 8. Workstream G — capacity decision court
 
-Allow a bounded 2D support sidecar derived from canonical mechanics:
+Do not expand model capacity merely because a residual is high.
+
+A specialist adapter/branch becomes eligible only if:
+
+1. target authority is defensible;
+2. held-out sampling and class balance are adequate;
+3. gradients and updates are healthy;
+4. bounded specialist LR/schedule search does not solve the plateau;
+5. sealed-H probes show the required information is not reasonably decodable;
+6. earlier capabilities remain non-regressed.
+
+If the bottleneck is head capacity, change the specialist first. Shared-carrier reopening remains the highest-cost option and needs a separate falsification court.
+
+---
+
+## 9. Workstream H — future focused training
+
+There is no authorization for another blind 12k curriculum run.
+
+Future experiments should be narrow and preregistered, for example:
+
+- boundary truth V2 + boundary-head optimization;
+- relation sampling/class-balance repair;
+- topology court-driven regularization;
+- coarse-to-fine extraction ablation;
+- specialist adapter ablation if capacity court becomes eligible.
+
+Each experiment must state before running:
+
+- exact hypothesis;
+- source authority;
+- target family;
+- trainable parameter set;
+- frozen parameter set;
+- held-out court;
+- pass/fail gate;
+- non-regression gates;
+- exact parent checkpoint;
+- what result would falsify the intervention.
+
+---
+
+## 10. Execution order
 
 ```text
-posed canonical M/G/W
-        ↓
-fragment projection
-        ↓
-FragmentMotionField
-+ bounded SilhouetteSupportBand
-        ↓
-final Graphics composition
+1. carrier policy / canonical stage IDs / runtime optimizer guard      [DONE]
+2. focused post-V8 branch CI                                           [DONE; GREEN REQUIRED]
+3. StdGEN++ / StdGEN / InstantMesh re-audit                            [DONE; dossier maintained]
+4. decision/falsification ledger                                       [DONE; maintain continuously]
+5. Graphics source-consumption lineage                                 [DONE initial audit]
+6. update root navigation/state/agent docs                              [IN PROGRESS]
+7. consolidate draft PR #116 onto current source head                   [NEXT]
+8. salvage identifiable foundation evidence producers                  [NEXT]
+9. replace proxy cut truth with validity-aware/abstaining truth V2     [NEXT]
+10. complete attachment/support behavioral ownership audit              [NEXT]
+11. independent TESSA topology court                                   [NEXT]
+12. convergence telemetry + best-held-out checkpoint machinery         [NEXT]
+13. preregister metric-specific gates                                  [AFTER 8–12]
+14. focused optimization experiments                                   [AFTER COURTS]
+15. capacity/extraction changes only from court evidence                [CONDITIONAL]
 ```
 
-This support is not another mesh. It cannot change 3D mechanical geometry or own independent deformation.
-
-Use it to distinguish:
-
-```text
-true geometric hole      -> IRIS/topology problem
-small projected art crack -> Graphics support problem
-```
-
----
-
-## 9. Compiler rule
-
-> Compiler may enforce truth; Compiler may not compensate for model incapacity.
-
-Compiler owns validation, hashes/IDs/addressing, global relation solving, candidate selection, exact contact/barycentric solves, bounded numerical sanitation and fail-closed qualification.
-
-Large topology repair, large hole filling, hundreds of collapses/relaxations, or semantic skin transfer hiding carrier drift are failures of learned output, not Compiler success.
-
-Record per-subject mutation amount, repair count, invented information, abstention and failure during Fit8 as the behavioral genericity court.
-
----
-
-## 10. Trainer
-
-Retire the old eight-times-serial model update.
-
-New scientific update:
-
-```text
-8 exact subjects resident/pinned
-        ↓
-B=8 source scene encode
-        ↓
-batched query banks / teacher surface banks
-        ↓
-one scalar objective
-        ↓
-one backward
-        ↓
-one AdamW optimizer step
-```
-
-Use BF16 tensor cores, SDPA/Flash paths and fused optimizer where available. Training does not require bitwise deterministic CUDA kernels. Scientific reproducibility comes from exact source/policy/model/manifest binding, immutable checkpoints, and fixed FP32 evaluation courts.
-
-Use one optimizer lineage with controlled parameter groups and curriculum, not optimizer resets/LR shocks.
-
-Initial curriculum:
-
-```text
-G0 engineering throughput preflight
-G1 geometry / field
-G2 extraction + connectivity + MechanicalDemand
-A1 Graphics appearance evidence
-R1 Graphics relation evidence
-T1 structure / animation-aware topology
-J1 controlled joint alignment only if previous courts do not regress
-```
-
----
-
-## 11. Fit8
-
-The legacy run that reached roughly step 5400 is preserved as a control artifact only. vNext invalidates its model/optimizer continuation.
-
-Fit8 remains the same eight subjects and one shared architecture/parameter set. Knight remains a separate regression witness.
-
-Before the fresh vNext run:
-
-1. all vNext CI and legacy-regression gates PASS;
-2. native Graphics content consumption PASS;
-3. exact vNext eight-subject shards are produced and hashed;
-4. MechanicalDemand teacher truth exists for all eight;
-5. role-free Graphics teacher truth exists where source evidence supports it;
-6. A100 G0 proves B=8 execution, memory headroom and finite numerics;
-7. manifest/policy/model/source binding is sealed.
-
-Then start fresh IRIS vNext Fit8. Do not weaken any binding guard to reuse the old checkpoint.
-
----
-
-## 12. Immediate implementation order
-
-```text
-A. model + teacher contracts                         [implemented on PR #116]
-B. single-carrier candidate/canonical mechanics     [implemented core]
-C. role-free Graphics compiler                      [implemented core]
-D. Graphics RSS/native consumption                  [in integration/gate]
-E. vNext DAG invariants                             [implemented]
-F. exact B=8 Fit8 trainer                           [implemented core]
-G. teacher/shard materialization for real Fit8      [next]
-H. A100 G0 preflight                                [next]
-I. fresh IRIS vNext Fit8                            [after G0 PASS]
-```
-
-No merge to `main` until the review branch gates are green and the state/plan files match the code. Do not reactivate PR #113/#114 or the old subject-serial trainer.
+No merge to `main` until CI is green, PR state matches these files, and the decision ledger has no unresolved contradiction with code behavior.

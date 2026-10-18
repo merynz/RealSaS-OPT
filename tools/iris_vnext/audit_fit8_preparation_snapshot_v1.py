@@ -61,7 +61,9 @@ def audit_snapshot(snapshot_root: Path, expected_current_source_sha: str) -> dic
         "required_missing": missing,
         "file_count": len(file_rows),
         "files": file_rows,
+        "remote_source_current": False,
         "remote_consumption_authorized": False,
+        "authorization_note": "READ_ONLY_AUDIT_NEVER_AUTHORIZES_CONSUMPTION__REGENERATION_AND_FULL_ROUNDTRIP_REQUIRED",
         "scientific_fit_pass_claimed": False,
     }
 
@@ -107,7 +109,7 @@ def audit_snapshot(snapshot_root: Path, expected_current_source_sha: str) -> dic
         return report
 
     report["status"] = STATUS_CURRENT
-    report["remote_consumption_authorized"] = True
+    report["remote_source_current"] = True
     return report
 
 
@@ -128,6 +130,7 @@ def main() -> int:
         f"files={report['file_count']}",
         f"expected={report['expected_current_source_sha']}",
         f"remote_source={report.get('remote_preparation_source_commit_sha')}",
+        "consumption_authorized=false",
     )
     if args.fail_unless_current and report["status"] != STATUS_CURRENT:
         return 2

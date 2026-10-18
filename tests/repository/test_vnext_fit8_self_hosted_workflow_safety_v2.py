@@ -40,10 +40,12 @@ def _snapshot(root: Path, source_sha: str) -> Path:
     return root
 
 
-def test_remote_snapshot_audit_marks_exact_current_source_candidate(tmp_path: Path):
+def test_remote_snapshot_audit_marks_exact_current_source_candidate_but_never_authorizes_consumption(tmp_path: Path):
     report = audit_snapshot(_snapshot(tmp_path, CURRENT_SHA), CURRENT_SHA)
     assert report["status"] == STATUS_CURRENT
-    assert report["remote_consumption_authorized"] is True
+    assert report["remote_source_current"] is True
+    assert report["remote_consumption_authorized"] is False
+    assert "READ_ONLY_AUDIT_NEVER_AUTHORIZES_CONSUMPTION" in report["authorization_note"]
     assert report["remote_preparation_source_commit_sha"] == CURRENT_SHA
     assert report["file_count"] == 4
     assert len(report["preparation_receipt_sha256"]) == 64
@@ -52,6 +54,7 @@ def test_remote_snapshot_audit_marks_exact_current_source_candidate(tmp_path: Pa
 def test_remote_snapshot_audit_marks_stale_source_fail_closed(tmp_path: Path):
     report = audit_snapshot(_snapshot(tmp_path, STALE_SHA), CURRENT_SHA)
     assert report["status"] == STATUS_STALE
+    assert report["remote_source_current"] is False
     assert report["remote_consumption_authorized"] is False
     assert report["remote_preparation_source_commit_sha"] == STALE_SHA
 
@@ -60,6 +63,7 @@ def test_remote_snapshot_audit_marks_missing_required_files_incomplete(tmp_path:
     _write_json(tmp_path / "prepared/PREPARATION_RECEIPT.json", {"source_commit_sha": STALE_SHA, "source_commit_bound": True})
     report = audit_snapshot(tmp_path, CURRENT_SHA)
     assert report["status"] == STATUS_INCOMPLETE
+    assert report["remote_source_current"] is False
     assert report["remote_consumption_authorized"] is False
     assert set(report["required_missing"]) == {"teacher_batch_receipt", "cohort_manifest", "hydration_receipt"}
 

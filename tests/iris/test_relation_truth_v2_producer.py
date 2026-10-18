@@ -2,11 +2,14 @@ import unittest
 
 import numpy as np
 
+from models.iris.vnext.boundary_causality_v1 import EvidenceAuthority
 from models.iris.vnext.graphics_truth_v2 import (
     STATIC_RELATION_KEYS_V2,
     VIEW_RELATION_KEYS_V2,
 )
 from tools.iris_vnext.build_fit8_relation_truth_v2 import (
+    _STATIC_AUTHORITY,
+    _VIEW_AUTHORITY,
     _binary_stats,
     _empty_static_targets,
     _orient_two_hit_rows_v2,
@@ -14,6 +17,10 @@ from tools.iris_vnext.build_fit8_relation_truth_v2 import (
 
 
 class RelationTruthV2ProducerTests(unittest.TestCase):
+    def test_authority_classes_are_explicit_and_match_validity_policy(self):
+        self.assertEqual(_STATIC_AUTHORITY, EvidenceAuthority.DIAGNOSTIC_ONLY.value)
+        self.assertEqual(_VIEW_AUTHORITY, EvidenceAuthority.DETERMINISTIC_DERIVED.value)
+
     def test_static_targets_abstain_without_independent_authority(self):
         values, validity = _empty_static_targets(7)
         self.assertEqual(set(values), set(STATIC_RELATION_KEYS_V2))

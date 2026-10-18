@@ -1,107 +1,233 @@
 # RealSaS Structural System Index
 
-## 2026-10-11 canonical main
+## 2026-10-18 post-V8 review state
 
-## Current continuation details
+> Navigation and ownership index. `CURRENT_STATE.md` and `CURRENT_PLAN.md` define the active program. Historical recovery/runtime-audit documents remain provenance only.
 
-Current continuation authority is `canonical/CANONICAL_HANDOFF_20261007.md` plus `CURRENT_STATE.md`.
+## Current continuation
 
-The current render baseline uses the same M for mechanics and appearance:
-source-wins RGB with sealed CAA fallback at M-face/barycentric addresses.
-See `CURRENT_STATE.md`, `compiler/realsas_compiler_core/single_m_caa_v1.py`
-and `tests/fixtures/single_m_caa_knight_v1/baseline.json`.
-The old independent visual pipeline is accessible only on
-`archive/visual-v-before-m-caa-20261011`. Grip, overlap/depth ordering and native
-exact parity remain explicit open gates. Shared IRIS heads remain unapproved.
+Read first:
 
-> Navigation only. Historical recovery/runtime-audit documents are provenance and must not override current continuation authority.
+1. `CURRENT_STATE.md`
+2. `CURRENT_PLAN.md`
+3. `docs/research/IRIS_VNEXT_DECISION_LEDGER_20261018.md`
+4. `docs/research/IRIS_VNEXT_POST_V8_QUALITY_PLAN_20261018.md`
+5. `docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md`
+6. `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`
+7. `AGENTS.md`
 
-| Product authority | Canonical home | Current rule |
+`main` remains merged production-code authority until reviewed vNext merges. The active post-V8 source line is temporary review source, not research/product authority. The completed V8 artifact remains bound to exact V8 source `5083c9915533ec8ec6530c7d229c635887abfea7` plus its checkpoint/receipt lineage.
+
+## Current architecture summary
+
+```text
+source observations + cameras
+        ↓
+      IRIS
+ shared scene carrier H
+   ┌────┼──────────────┐
+   ↓    ↓              ↓
+Geometry Mechanics  Graphics/Structure evidence
+   │    │              │
+   └────┴──── M1 SEAL ─┘
+             ↓
+     specialist heads only
+             ↓
+       Evidence Package
+             ↓
+          Compiler
+     ┌───────┼────────┐
+     ↓       ↓        ↓
+ fragments  order  contact/attachment
+     └───────┼────────┘
+             ↓
+       one canonical M/G/W
+             ↓
+          Runtime
+```
+
+There is no mandatory named body-part taxonomy in the inference contract and no independent deformable visual mesh.
+
+## Product / research ownership map
+
+| Domain | Canonical source area | Current rule |
 |---|---|---|
-| Observation | observation/camera authority | exact source evidence; source cardinality is separate from output-direction authority |
-| Geometry / IRIS | `models/iris/` + geometry adapters | current signed field/surface evidence; a separate RGB head is proposed, not implemented |
-| Surface evidence / GSA | `compiler/realsas_compiler_core/substrate/` | compact mechanical/evidence substrate with provenance |
-| Learned topology/geometry / TESSA | `models/tessa/` + Stage18 TESSA proposal bridge | learned proposal only; Compiler support-bind/repair/qualification required |
-| Canonical mechanical carrier | Stage18/19 + `surface_addressing_v1.py` | Compiler-owned repaired/qualified static carrier; Stage19 is exact carrier authority |
-| Rig / AXIS | `models/axis/` + learned mechanics adapters | AXIS V5.4.1 owns hard causal required parents + deterministic discrete XYZ; Compiler validates/materializes, no tree reselection on this path |
-| Skin / MIRA | `models/mira/` + Stage32 carrier-native qualification | MIRA V5.5 predicts `W_M` directly on the exact Stage19 carrier basis |
-| Appearance / CAA | `appearance_authority_v2.py` + appearance compile/bake/quality modules | total source-preserving art; source wins; proof-bound |
-| Presentation | Stage37 qualified presentation on M | role-free editable presentation authority; no invented categorical identity |
-| Motion | `motion_compile_v2.py` + proof | sealed mechanics; exact authored motion semantics where admitted |
-| Runtime | `runtime_authority_v2.py` + C++ runtime/native renderer | package/playback/render hot path; no generative/corrective inference during ordinary render |
-| Orchestration | Go platform + Python Engine activities | Platform owns durable time/state; Engine owns scientific meaning |
+| Observation / cameras | observation + camera authority | source evidence remains exact; source cardinality and output-direction authority are separate |
+| IRIS shared carrier | `models/iris/vnext/scene_core_v1.py` | shared scene representation; post-M1 sealed for downstream specialist training by current baseline |
+| IRIS geometry/extraction | `models/iris/vnext/` + pinned FlexiCubes | learned field/extraction; fail closed on invalid surface; future high-res changes require court |
+| Mechanical demand | `models/iris/vnext/heads_v1.py`, `teacher_truth_v1.py` | training evidence only; authored mechanics never inference input |
+| Appearance evidence | `AppearanceEvidenceHeadV1` | RGBA/confidence/descriptor + alpha/appearance boundaries; evidence, not source override authority |
+| Graphics relations | `GraphicsRelationHeadV1` | role-free same/cut/attachment/front/occlusion/visibility evidence; current cut teacher has explicit truth debt |
+| Boundary truth | `boundary_causality_v1.py` | provable causes + unknown/abstention; producer/corpus wiring in progress |
+| Topology / TESSA | `structure_v1.py`, `structure_v2.py`, TESSA modules | learned proposal/grammar; no topology PASS until independent held-out court |
+| Canonical mechanical carrier | candidate selection + canonical M/G/W path | exactly one product mechanical carrier after deterministic selection |
+| AXIS | `models/axis/` + Compiler bindings | rig proposal/qualification on exact canonical carrier |
+| MIRA | `models/mira/` + Compiler bindings | skin on exact canonical carrier; no semantic transfer to another mesh |
+| Graphics Compiler | `compiler/realsas_compiler_core/graphics_v1.py` | globally resolves role-free evidence into fragments/order/attachments on canonical M |
+| Graphics runtime materialization | `graphics_runtime_v1.py`, `runtime_graphics_binary_v1.py` | graph content is serialized, not hash-only |
+| Native Graphics behavior | `runtime/realsas_cpp/src/graphics_v1.hpp`, `runtime_v2_graphics_reference.cpp` | visibility and explicit order are behaviorally consumed; attachment/support-band still have consumption debt |
+| Appearance material | source-wins single-M material path | observed art remains source-wins; learned evidence cannot silently rewrite observed source |
+| Motion | motion compile/proof modules | exact admitted motion semantics on qualified mechanical carrier |
+| Runtime | C++ runtime / package consumers | playback/render only; no corrective generative inference in ordinary runtime |
+| Orchestration | Go Platform + Engine activities | Platform owns durable lifecycle; Engine owns scientific/compiler semantics |
 | Research state | Go `Attempt` | immutable research execution truth, not branch chronology |
-| Production state | Go `ProductRevision` | qualified production truth; promotion is platform state, not Git merge semantics |
-| Artifacts | Artifact Registry/store | immutable typed bytes + semantic dependencies |
-| Closure | proof/qualification + product promotion | promotion eligibility must be explicit and fail-closed |
+| Production state | Go `ProductRevision` | qualified production truth |
+| Artifacts | Artifact Registry/store | immutable typed bytes + dependency identities |
+| Closure | proof/qualification | promotion eligibility is explicit and fail-closed |
+
+## IRIS training authority
+
+Historical curriculum families G1/G2/M1/A1/R1/T1/J1 remain useful identifiers, but current post-V8 law is not “all stages may rewrite the shared trunk”.
+
+Canonical post-M1 stage IDs are:
+
+```text
+A1_APPEARANCE_EVIDENCE
+R1_ROLE_FREE_RELATIONS
+T1_MECHANICAL_STRUCTURE
+J1_JOINT_FINETUNE
+```
+
+`quality_policy_v1.py` fails on unknown post-M1 aliases and future V8-line trainer execution checks the actual `scene_core` optimizer-group LR.
+
+Reopening the carrier requires an explicit falsification court.
+
+## Graphics evidence / truth status
+
+Current learned outputs include:
+
+```text
+same_drawable_affinity
+cut_probability
+attachment_affinity
+alpha_boundary_probability
+appearance_boundary_probability
+front_probability
+occlusion_probability
+visibility_probability_a/b
+fragment embeddings
+confidence
+```
+
+Important distinction:
+
+- **model output availability** does not imply teacher correctness;
+- **serialization** does not imply runtime behavior;
+- **low training loss** does not imply scientific authority.
+
+Historical `graphics_truth_v1.py` uses anonymous drawable identity and sets `cut = 1 - same`. This is retained for V8 provenance but is explicitly marked for replacement by validity-aware/abstaining truth.
+
+## Graphics Compiler/runtime path
+
+```text
+IRIS relation evidence
+        ↓
+GraphicsEvidenceV1
+        ↓
+compile_graphics_v1
+        ├─ adjacent fragment union
+        ├─ per-view visibility
+        ├─ directed order edges + DAG cycle handling
+        └─ attachment candidates + mechanical contact
+        ↓
+CompiledGraphicsV1
+        ↓
+RuntimeGraphicsV1
+        ↓
+graphics.bin in RSS
+        ↓
+C++ Graphics-native runtime
+```
+
+Current behavioral proof:
+
+- native `graphics_v1_contract_test.cpp` proves explicit fragment precedence can override contradictory physical depth;
+- `test_vnext_graphics_native_e2e.py` proves Graphics visibility content changes final native RGBA behavior.
+
+Current consumption debt:
+
+- attachment data is serialized but not used by the reference raster path;
+- support-band pixels are serialized/validated but not applied by the reference renderer.
+
+See the machine-readable lineage report before making stronger claims.
+
+## Topology / extraction status
+
+V8 showed topology objective learnability from sealed H but did not seal an independent topology PASS.
+
+The next topology authority must come from a held-out court over actual topology/surface outcomes, not training loss.
+
+StdGEN++ ideas under conditional investigation:
+
+- coarse-to-fine sparse active-grid high-resolution extraction;
+- thin-structure sign/hole regularization;
+- specialist LoRA/branches if clean-target capacity court fails.
+
+None is current authority merely because it appears in the paper.
+
+## StdGEN++ evidence discipline
+
+`docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md` labels evidence as:
+
+```text
+CODE_EXACT
+PAPER_EXACT
+REALSAS_INFERENCE
+UNAVAILABLE
+```
+
+Public StdGEN code confirms constrained LoRA transformer adaptation, shared triplane features and separate SDF/RGB/deformation/FlexiCubes/semantic decoders. StdGEN++ paper supplies the three-stage, dual-branch, multilayer, coarse-to-fine and hole-regularization design claims. Exact StdGEN/StdGEN++ training-loop source is not currently available in the public StdGEN repository.
+
+Transfer the method discipline, not the fixed semantic vocabulary.
 
 ## Canonical code-line policy
 
-`main` is the single canonical continuation line. Long-lived research/promotion/integration branches are not authority. A temporary review branch may exist briefly for code review, but research/product separation belongs to Platform state (`Attempt`, `ProductRevision`), not Git topology.
+`main` remains the single merged continuation line. Temporary review branches may exist for code review, but must not become Attempt/ProductRevision authority.
 
-## Current mechanics boundary
+The vNext draft PR #116 is the intended visible review vehicle. Its head should track the current post-V8 review source by fast-forward rather than leaving multiple divergent vNext narratives.
 
-The canonical mechanics chain is carrier-native:
+## Mechanics boundary
+
+Historical carrier-native mechanics remain:
 
 ```text
-Stage19 M
-  -> AXIS V5.4.1 G
-  -> MIRA V5.5 W_M on the same M
-  -> Compiler post-bind qualification
-  -> Stage35 exact carrier mechanics
-  -> Stage36 identity re-key/seal
+canonical M
+  -> AXIS G
+  -> MIRA W_M on the same M
+  -> Compiler qualification
+  -> motion/runtime proof
 ```
 
-No semantic skin transfer to another mechanical basis is canonical. Generic coincident-frame handling is post-bind and subject-free: a subtree with zero final mechanical influence may inherit its parent frame; an active coincident subtree fails closed and requires explicit AXIS orientation/tail evidence.
+Knight FIT1 evidence remains scoped historical/regression evidence. It does not establish Fit8/unseen/product generalization.
 
-Knight FIT1 mechanics are closed relative to the sealed teacher/source motion envelope. Absolute universal G3, FIT8/FITK, unseen and product-generalization remain unclaimed.
-
-### Canonical mesh domain
-
-`compiler/realsas_compiler_core/surface_addressing_v1.py` provides SurfaceAddressing and the stable mechanical carrier addressing domain. Stage18/19 construct and statically qualify that domain; the mechanics path must preserve the same exact carrier basis through MIRA prediction and dynamic proof.
-
-### Appearance / CAA
-
-`compiler/realsas_compiler_core/appearance_authority_v2.py` owns complete appearance qualification. `compiler/realsas_compiler_core/runtime_authority_v2.py` governs qualified runtime consumption. Appearance remains source-preserving and may not silently become mechanical correction.
-
-The current Compiler compatibility plan is a 46-stage **dependency DAG**.
-Go seals the selected DAG in each EngineRelease. Research releases can evolve
-nodes/edges without rewriting old releases or invalidating independent artifacts.
-
-## Fresh render baseline
-
-`recover-and-verify-knight-frozen-canonical` run `37578120472` on `main@287eabef757cb2b1e6b532a4c2d0a71eb62cd324` rebuilt Stage23, requalified Stage24 and freshly rerendered IDLE/RUN/SLASH with exact reference hashes. Models were not reinferred. This proves regression reproducibility of the sealed artifact consumer path, not source-to-product compilation.
-
-## Platform
-
-The accepted implementation boundary remains:
+## Platform boundary
 
 ```text
-Go Platform  = durable product/research state, Artifact Registry metadata,
-               Attempt/ProductRevision lifecycle, promotion, scheduling/workflows
+Go Platform   = durable product/research state, Artifact Registry metadata,
+                Attempt/ProductRevision lifecycle, promotion, workflow state
 Python Engine = compiler semantics, model inference/training, geometry/ML,
-                proof logic and typed stage failures
+                proof logic and typed failures
 C++ Runtime   = playback, deformation/render hot paths, package consumption
 ```
 
-The current defect is **enforcement**, not absence: legacy workflows can still bypass the Go control plane via direct authority-root scripts. Closing that bypass is the next active platform program.
+Legacy direct workflows may remain for CI/reproducibility but do not mint durable research/product authority by themselves.
 
-## Performance
+## Machine-readable architecture / impact
 
-The fresh regression run measured the dominant costs directly: renderer ~463.8 s, Stage21 CAA compile ~321.7 s, Stage24 qualification ~131.5 s. Optimization must attack measured dependency/rebuild and hot-path costs before additional visual-runtime research.
+Architecture discovery remains available through `platform/internal/architecture/registry.go` and `tools/realsas_architecture.py`.
 
-## Machine-readable ownership
+Use source/manifest impact tools for dependency discovery. Unknown impact must be investigated; it never means zero consumers.
 
-Architecture ownership remains queryable from `platform/internal/architecture/registry.go` and `tools/realsas_architecture.py`. Every canonical stage must resolve to one Engine owner; Platform separately owns durable state/orchestration and Runtime owns hot playback/render paths.
+## Platform execution entrypoints
 
-[Dynamic architecture](docs/platform/DYNAMIC_ARCHITECTURE.md) documents the
-source-derived JSON/interactive HTML map and source/manifest impact commands.
-CI regenerates these views; they never replace Go's sealed release/Registry.
+- `docs/platform/EXECUTION_LANES.md`
+- `platform/cmd/realsasctl`
+- `tools/platform_release_snapshot.py`
+- `compiler/realsas_compiler_services/platform_worker/stage_inputs.py`
+- `canonical/PLATFORM_MAIN_AUDIT_20261008.json`
 
-## Platform execution entrypoints — 2026-10-08
+## Historical compatibility vocabulary
 
-- `docs/platform/EXECUTION_LANES.md`: development/product operations and limits.
-- `platform/cmd/realsasctl`: Go operator commands.
-- `tools/platform_release_snapshot.py`: source-only pinned stage/version request.
-- `compiler/realsas_compiler_services/platform_worker/stage_inputs.py`: immutable CAS stage hydration.
-- `canonical/PLATFORM_MAIN_AUDIT_20261008.json`: main and current evidence audit.
+`CAA` remains compatibility/provenance terminology for historical material paths. The active vNext decomposition/composition domain is **Graphics**.
+
+Old independent visual-pipeline continuation is historical only and must not be revived.

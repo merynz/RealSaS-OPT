@@ -3,7 +3,7 @@
 **Date:** 2026-10-18  
 **Canonical production line:** `main` until reviewed vNext is merged  
 **Active source line:** `research/iris-vnext-post-v8-quality-plan-20261018`  
-**Review vehicle:** draft PR #116, to be fast-forwarded to the active source head  
+**Review vehicle:** draft PR #116; its head must match the active source head before review/merge  
 **Active program:** **POST-V8 QUALITY / TRUTH / CONSUMPTION QUALIFICATION**  
 **Scientific status:** **NO IRIS FIT8 SCIENTIFIC PASS**
 
@@ -65,6 +65,8 @@ Future `IRISVNextFit8TrainerV8` execution validates both configured `scene_lr_sc
 
 The historical completed V8 artifact remains authority-bound to `5083...`; this hardening governs future source execution.
 
+A focused CI run also exposed a pre-existing TESSA compatibility regression: `structure_v2.py` used `sequence_position_offset=None` while the decoder expects a scalar/tensor offset. The default/explicit-`None` path is now normalized back to offset `0`; the existing direct topology contract remains in CI so this cannot be hidden by dropping the test.
+
 ## Current architecture
 
 ```text
@@ -101,7 +103,7 @@ This is **decodability evidence**, not proof that every teacher target is semant
 
 Near-zero relation residual must not be promoted to “graphics solved” without teacher, held-out and runtime courts.
 
-## Highest-priority truth debt: boundary / decomposition causality
+## Highest-priority truth/conditioning debt: boundary / decomposition
 
 Boundary evidence may reflect geometric termination, material transition, alpha transition, occlusion, source seam, drawable ownership or intentional presentation logic. Current generic FIT8 assets do not uniquely identify all of those.
 
@@ -115,11 +117,23 @@ There are two distinct V1-era paths and they must not be conflated:
 models/iris/vnext/graphics_truth_v1.py helper:
     cut = 1 - anonymous-owner-equivalence
 
-active Fit8 shard builder used by V8:
+Fit8 shard builder used by V8:
     relation_cut_probability = (owner differs) OR (material id differs)
 ```
 
 Therefore V8's cut metric is about the historical **owner-or-material boundary proxy**, not simply `1 - same_drawable`, and not authoritative drawable-cut truth.
+
+### Newly confirmed V1 relation-boundary conditioning mismatch
+
+The Fit8 builder computes relation alpha/appearance boundary targets from a specific render view using local 3×3 raster alpha/RGB variation.
+
+But `GraphicsRelationHeadV1.static_relations(feature_a, feature_b)` predicts both relation boundary probabilities without camera input. Only the separate `view_relations(...)` branch receives camera features.
+
+The V8 trainer compares those camera-free static predictions against current-view raster-derived boundary targets.
+
+Therefore V8 relation-boundary debt is not merely an optimizer-rate problem. It includes a supervision/conditioning mismatch: projected alpha/appearance boundaries are not generally view-invariant functions of `(H_a, H_b)`.
+
+This mismatch does **not** explain all boundary debt: `AppearanceEvidenceHeadV1` is already camera-conditioned, so its remaining boundary residual still requires truth/sampling/optimization analysis.
 
 Exact audit: `docs/research/IRIS_VNEXT_RELATION_TRUTH_AUDIT_20261018.md`.
 
@@ -132,6 +146,8 @@ New contracts:
 - `tests/iris/test_graphics_truth_v2.py`
 
 V2 requires explicit value + authority + provenance + `valid_for_training` for each relation target. Missing truth abstains. The new loss requires explicit per-family/sample validity masks and refuses implicit all-negative supervision.
+
+Before new relation training, V2 producer design must also split view-invariant structural pair targets from view-conditioned projected boundary targets. Historical V1/V8 head/shards remain immutable provenance.
 
 V2 is **not yet a populated corpus/training authority**. Producers and support statistics must be wired before a focused run.
 
@@ -206,6 +222,7 @@ RealSaS translation:
 
 - keep the post-M1 carrier seal;
 - do not add generic adapters yet;
+- correct target authority/conditioning before optimizer search;
 - if a clean authoritative target later proves undecodable, modify the specialist first;
 - evaluate high-resolution active extraction only if topology/surface courts show resolution is limiting;
 - evaluate sign/hole regularization only after measured thin-structure failure;
@@ -228,7 +245,7 @@ COURT_PASS
 
 ## CI state
 
-`.github/workflows/iris_vnext_single_carrier_v1.yml` now runs on relevant pushes to the active branch and gates:
+`.github/workflows/iris_vnext_single_carrier_v1.yml` runs on relevant pushes to the active branch and gates:
 
 - post-V8 policy/trainer compilation;
 - carrier-seal tests;

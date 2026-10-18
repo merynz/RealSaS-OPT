@@ -6,6 +6,10 @@ This tool does not train. It verifies exact materialized truth, Boundary
 Causality V1, the deterministic TRAIN/HELD-OUT split-support court, the V8->V2
 zero-step relation migration, and an artifact-bound preregistration before any
 optimizer step may be considered.
+
+The Python API accepts missing boundary/support paths only for compatibility with
+older diagnostic callers; missing evidence is converted into explicit blockers.
+The CLI requires both paths, and no missing-evidence call can authorize training.
 """
 
 import argparse
@@ -163,17 +167,15 @@ def audit_readiness(
     expected_source_sha: str,
     materialization_receipt_path: Path,
     relation_manifest_path: Path,
-    boundary_manifest_path: Path,
     migration_receipt_path: Path,
-    support_receipt_path: Path,
     preregistration_path: Path | None,
+    boundary_manifest_path: Path | None = None,
+    support_receipt_path: Path | None = None,
 ) -> dict[str, Any]:
     source = _sha40(expected_source_sha)
     materialization = _load(materialization_receipt_path)
     relation = _load(relation_manifest_path)
-    boundary = _load(boundary_manifest_path)
     migration = _load(migration_receipt_path)
-    support_receipt = _load(support_receipt_path)
     blockers: list[str] = []
 
     if materialization.get("schema") != "RealSaS.IRISVNextFit8PretrainingMaterializationReceipt.v1":
@@ -193,15 +195,22 @@ def audit_readiness(
     if materialization.get("relation_truth_v2_manifest_sha256") != relation_sha:
         blockers.append("RELATION_MANIFEST_BINDING_DRIFT")
 
-    boundary_sha = _sha(boundary_manifest_path)
-    if boundary.get("schema") != BOUNDARY_SCHEMA:
-        blockers.append("BOUNDARY_MANIFEST_SCHEMA_INVALID")
-    if materialization.get("boundary_causality_v1_manifest_sha256") != boundary_sha:
-        blockers.append("BOUNDARY_MANIFEST_BINDING_DRIFT")
-    if boundary.get("relation_truth_v2_manifest_sha256") != relation_sha:
-        blockers.append("BOUNDARY_TO_RELATION_BINDING_DRIFT")
-    if boundary.get("scientific_fit_started") is not False:
-        blockers.append("BOUNDARY_ALREADY_CLAIMS_TRAINING_STARTED")
+    boundary_sha: str | None = None
+    boundary: dict[str, Any] = {}
+    if boundary_manifest_path is None:
+        blockers.append("BOUNDARY_MANIFEST_REQUIRED")
+    else:
+        boundary_manifest_path = boundary_manifest_path.resolve()
+        boundary = _load(boundary_manifest_path)
+        boundary_sha = _sha(boundary_manifest_path)
+        if boundary.get("schema") != BOUNDARY_SCHEMA:
+            blockers.append("BOUNDARY_MANIFEST_SCHEMA_INVALID")
+        if materialization.get("boundary_causality_v1_manifest_sha256") != boundary_sha:
+            blockers.append("BOUNDARY_MANIFEST_BINDING_DRIFT")
+        if boundary.get("relation_truth_v2_manifest_sha256") != relation_sha:
+            blockers.append("BOUNDARY_TO_RELATION_BINDING_DRIFT")
+        if boundary.get("scientific_fit_started") is not False:
+            blockers.append("BOUNDARY_ALREADY_CLAIMS_TRAINING_STARTED")
 
     support_report: dict[str, Any] = {}
     try:
@@ -236,27 +245,39 @@ def audit_readiness(
         if support["occlusion_probability"].court_eligible:
             blockers.append("OCCLUSION_BINARY_COURT_UNEXPECTEDLY_ELIGIBLE")
 
-    support_sha = _sha(support_receipt_path)
-    if support_receipt.get("schema") != SUPPORT_SCHEMA:
-        blockers.append("SPLIT_SUPPORT_RECEIPT_SCHEMA_INVALID")
-    if support_receipt.get("status") != "PASS__SPLIT_SUPPORT_QUALIFIED__NO_TRAINING":
-        blockers.append("SPLIT_SUPPORT_RECEIPT_NOT_PASS")
-    if support_receipt.get("source_commit_sha") != source:
-        blockers.append("SPLIT_SUPPORT_SOURCE_DRIFT")
-    if support_receipt.get("relation_truth_v2_manifest_sha256") != relation_sha:
-        blockers.append("SPLIT_SUPPORT_RELATION_BINDING_DRIFT")
-    if support_receipt.get("supervision_policy") != V9_SUPERVISION_POLICY:
-        blockers.append("SPLIT_SUPPORT_SUPERVISION_POLICY_DRIFT")
-    if support_receipt.get("blockers") not in ([], None):
-        blockers.append("SPLIT_SUPPORT_HAS_BLOCKERS")
-    split = support_receipt.get("split") or {}
-    if (
-        split.get("policy") != V9_SPLIT_POLICY
-        or int(split.get("seed", -1)) != V9_SPLIT_SEED
-        or abs(float(split.get("holdout_fraction", -1.0)) - V9_HOLDOUT_FRACTION) > 1.0e-12
-        or split.get("orientation_grouped") is not True
-    ):
-        blockers.append("SPLIT_SUPPORT_POLICY_DRIFT")
+    support_sha: str | None = None
+    support_receipt: dict[str, Any] = {}
+    if support_receipt_path is None:
+        blockers.append("SPLIT_SUPPORT_RECEIPT_REQUIRED")
+    else:
+        support_receipt_path = support_receipt_path.resolve()
+        support_receipt = _load(support_receipt_path)
+        support_sha = _sha(support_receipt_path)
+        if support_receipt.get("schema") != SUPPORT_SCHEMA:
+            blockers.append("SPLIT_SUPPORT_RECEIPT_SCHEMA_INVALID")
+        if support_receipt.get("status") != "PASS__SPLIT_SUPPORT_QUALIFIED__NO_TRAINING":
+            blockers.append("SPLIT_SUPPORT_RECEIPT_NOT_PASS")
+        if support_receipt.get("source_commit_sha") != source:
+            blockers.append("SPLIT_SUPPORT_SOURCE_DRIFT")
+        if support_receipt.get("relation_truth_v2_manifest_sha256") != relation_sha:
+            blockers.append("SPLIT_SUPPORT_RELATION_BINDING_DRIFT")
+        if support_receipt.get("supervision_policy") != V9_SUPERVISION_POLICY:
+            blockers.append("SPLIT_SUPPORT_SUPERVISION_POLICY_DRIFT")
+        if support_receipt.get("blockers") not in ([], None):
+            blockers.append("SPLIT_SUPPORT_HAS_BLOCKERS")
+        split = support_receipt.get("split") or {}
+        try:
+            split_fraction = float(split.get("holdout_fraction", -1.0))
+        except (TypeError, ValueError):
+            blockers.append("SPLIT_SUPPORT_POLICY_DRIFT")
+        else:
+            if (
+                split.get("policy") != V9_SPLIT_POLICY
+                or int(split.get("seed", -1)) != V9_SPLIT_SEED
+                or abs(split_fraction - V9_HOLDOUT_FRACTION) > 1.0e-12
+                or split.get("orientation_grouped") is not True
+            ):
+                blockers.append("SPLIT_SUPPORT_POLICY_DRIFT")
 
     migration_sha = _sha(migration_receipt_path)
     if migration.get("schema") != "RealSaS.IRISVNextV8RelationHeadToV2ArtifactReceipt.v1":
@@ -274,6 +295,8 @@ def audit_readiness(
     prereg_sha = None
     if preregistration_path is None:
         blockers.append("ARTIFACT_BOUND_PREREGISTRATION_REQUIRED")
+    elif boundary_sha is None or support_sha is None:
+        blockers.append("PREREGISTRATION_CANNOT_VALIDATE_WITHOUT_BOUNDARY_AND_SUPPORT")
     else:
         prereg = _load(preregistration_path)
         prereg_sha = _sha(preregistration_path)

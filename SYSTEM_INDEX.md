@@ -11,12 +11,13 @@ Read first:
 1. `CURRENT_STATE.md`
 2. `CURRENT_PLAN.md`
 3. `docs/research/IRIS_VNEXT_DECISION_LEDGER_20261018.md`
-4. `docs/research/IRIS_VNEXT_POST_V8_QUALITY_PLAN_20261018.md`
-5. `docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md`
-6. `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`
-7. `AGENTS.md`
+4. `docs/research/IRIS_VNEXT_RELATION_TRUTH_AUDIT_20261018.md`
+5. `docs/research/IRIS_VNEXT_POST_V8_QUALITY_PLAN_20261018.md`
+6. `docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md`
+7. `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`
+8. `AGENTS.md`
 
-`main` remains merged production-code authority until reviewed vNext merges. The active post-V8 source line is temporary review source, not research/product authority. The completed V8 artifact remains bound to exact V8 source `5083c9915533ec8ec6530c7d229c635887abfea7` plus its checkpoint/receipt lineage.
+`main` remains merged production-code authority until reviewed vNext merges. The active post-V8 source line is temporary review source, not research/product authority. Draft PR #116 is the canonical vNext review vehicle and its head is required to match the active review source before review/merge. The completed V8 artifact remains bound to exact V8 source `5083c9915533ec8ec6530c7d229c635887abfea7` plus its checkpoint/receipt lineage.
 
 ## Current architecture summary
 
@@ -57,7 +58,8 @@ There is no mandatory named body-part taxonomy in the inference contract and no 
 | IRIS geometry/extraction | `models/iris/vnext/` + pinned FlexiCubes | learned field/extraction; fail closed on invalid surface; future high-res changes require court |
 | Mechanical demand | `models/iris/vnext/heads_v1.py`, `teacher_truth_v1.py` | training evidence only; authored mechanics never inference input |
 | Appearance evidence | `AppearanceEvidenceHeadV1` | RGBA/confidence/descriptor + alpha/appearance boundaries; evidence, not source override authority |
-| Graphics relations | `GraphicsRelationHeadV1` | role-free same/cut/attachment/front/occlusion/visibility evidence; current cut teacher has explicit truth debt |
+| Graphics relations | `GraphicsRelationHeadV1` | role-free same/cut/attachment/front/occlusion/visibility evidence; historical relation targets have explicit truth debt |
+| Relation truth V2 | `graphics_truth_v2.py`, `training_v2.py` | explicit authority/provenance/validity; missing truth abstains; producer wiring pending |
 | Boundary truth | `boundary_causality_v1.py` | provable causes + unknown/abstention; producer/corpus wiring in progress |
 | Topology / TESSA | `structure_v1.py`, `structure_v2.py`, TESSA modules | learned proposal/grammar; no topology PASS until independent held-out court |
 | Canonical mechanical carrier | candidate selection + canonical M/G/W path | exactly one product mechanical carrier after deterministic selection |
@@ -88,9 +90,9 @@ T1_MECHANICAL_STRUCTURE
 J1_JOINT_FINETUNE
 ```
 
-`quality_policy_v1.py` fails on unknown post-M1 aliases and future V8-line trainer execution checks the actual `scene_core` optimizer-group LR.
+`quality_policy_v1.py` fails on unknown post-M1 aliases and future V8-line trainer execution checks the actual `scene_core` optimizer-group LR. Reopening the carrier requires an explicit falsification court.
 
-Reopening the carrier requires an explicit falsification court.
+`structure_v2.py` preserves the established TESSA sequence-position default: omitted/explicit-`None` offset means zero, while explicit batched offsets remain supported.
 
 ## Graphics evidence / truth status
 
@@ -111,11 +113,23 @@ confidence
 
 Important distinction:
 
-- **model output availability** does not imply teacher correctness;
-- **serialization** does not imply runtime behavior;
-- **low training loss** does not imply scientific authority.
+- model output availability does not imply teacher correctness;
+- serialization does not imply runtime behavior;
+- low training loss does not imply scientific authority.
 
-Historical `graphics_truth_v1.py` uses anonymous drawable identity and sets `cut = 1 - same`. This is retained for V8 provenance but is explicitly marked for replacement by validity-aware/abstaining truth.
+Do not conflate the two historical relation-truth producers:
+
+```text
+graphics_truth_v1.py helper:
+    cut = 1 - anonymous-owner-equivalence
+
+Fit8 shard builder used by V8:
+    relation_cut_probability = (owner differs) OR (material id differs)
+```
+
+Thus V8's cut metric concerns the historical **owner-or-material boundary proxy**, not pure `1 - same` and not authoritative drawable-cut truth.
+
+`graphics_truth_v2.py` is the replacement contract for new work: every scalar target has explicit authority/provenance/validity and may abstain. Historical V8 shards remain immutable.
 
 ## Graphics Compiler/runtime path
 
@@ -178,13 +192,13 @@ UNAVAILABLE
 
 Public StdGEN code confirms constrained LoRA transformer adaptation, shared triplane features and separate SDF/RGB/deformation/FlexiCubes/semantic decoders. StdGEN++ paper supplies the three-stage, dual-branch, multilayer, coarse-to-fine and hole-regularization design claims. Exact StdGEN/StdGEN++ training-loop source is not currently available in the public StdGEN repository.
 
-Transfer the method discipline, not the fixed semantic vocabulary.
+Transfer method discipline, not a fixed semantic vocabulary.
 
 ## Canonical code-line policy
 
 `main` remains the single merged continuation line. Temporary review branches may exist for code review, but must not become Attempt/ProductRevision authority.
 
-The vNext draft PR #116 is the intended visible review vehicle. Its head should track the current post-V8 review source by fast-forward rather than leaving multiple divergent vNext narratives.
+The vNext draft PR #116 is the intended visible review vehicle. Its head must track the current post-V8 review source by fast-forward rather than leaving multiple divergent vNext narratives.
 
 ## Mechanics boundary
 
@@ -214,9 +228,7 @@ Legacy direct workflows may remain for CI/reproducibility but do not mint durabl
 
 ## Machine-readable architecture / impact
 
-Architecture discovery remains available through `platform/internal/architecture/registry.go` and `tools/realsas_architecture.py`.
-
-Use source/manifest impact tools for dependency discovery. Unknown impact must be investigated; it never means zero consumers.
+Architecture discovery remains available through `platform/internal/architecture/registry.go` and `tools/realsas_architecture.py`. Use source/manifest impact tools for dependency discovery. Unknown impact must be investigated; it never means zero consumers.
 
 ## Platform execution entrypoints
 
@@ -228,6 +240,4 @@ Use source/manifest impact tools for dependency discovery. Unknown impact must b
 
 ## Historical compatibility vocabulary
 
-`CAA` remains compatibility/provenance terminology for historical material paths. The active vNext decomposition/composition domain is **Graphics**.
-
-Old independent visual-pipeline continuation is historical only and must not be revived.
+`CAA` remains compatibility/provenance terminology for historical material paths. The active vNext decomposition/composition domain is **Graphics**. Old independent visual-pipeline continuation is historical only and must not be revived.

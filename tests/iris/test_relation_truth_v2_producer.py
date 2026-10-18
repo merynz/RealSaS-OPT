@@ -45,7 +45,7 @@ class RelationTruthV2ProducerTests(unittest.TestCase):
         self.assertTrue(np.array_equal(row["point_a"][1], back[0]))
         self.assertTrue(np.array_equal(row["point_b"][1], front[0]))
         self.assertTrue(np.array_equal(row["front_probability"], [1.0, 0.0, 1.0, 0.0]))
-        self.assertTrue(np.array_equal(row["occlusion_probability"], [1.0, 0.0, 1.0, 0.0]))
+        self.assertTrue(np.array_equal(row["occlusion_probability"], [1.0, 1.0, 1.0, 1.0]))
         self.assertTrue(np.array_equal(row["visibility_probability_a"], [1.0, 0.0, 1.0, 0.0]))
         self.assertTrue(np.array_equal(row["visibility_probability_b"], [0.0, 1.0, 0.0, 1.0]))
 
@@ -66,7 +66,7 @@ class RelationTruthV2ProducerTests(unittest.TestCase):
         for name in VIEW_RELATION_KEYS_V2:
             self.assertTrue(row[f"{name}__valid"].all())
 
-    def test_directional_class_balance_is_exact(self):
+    def test_directional_front_and_visibility_balance_is_exact(self):
         n = 5
         row = _orient_two_hit_rows_v2(
             point_front=np.zeros((n, 3), dtype=np.float32),
@@ -77,7 +77,6 @@ class RelationTruthV2ProducerTests(unittest.TestCase):
         )
         for name in (
             "front_probability",
-            "occlusion_probability",
             "visibility_probability_a",
             "visibility_probability_b",
         ):
@@ -86,6 +85,23 @@ class RelationTruthV2ProducerTests(unittest.TestCase):
             self.assertEqual(stats["positive"], 5)
             self.assertEqual(stats["negative"], 5)
             self.assertEqual(stats["positive_fraction"], 0.5)
+
+    def test_occlusion_is_symmetric_pair_gate_not_directional_class(self):
+        n = 5
+        row = _orient_two_hit_rows_v2(
+            point_front=np.zeros((n, 3), dtype=np.float32),
+            point_back=np.ones((n, 3), dtype=np.float32),
+            alpha_boundary=np.zeros(n, dtype=np.float32),
+            appearance_boundary=np.zeros(n, dtype=np.float32),
+            max_oriented_pairs=10,
+        )
+        stats = _binary_stats(
+            row["occlusion_probability"], row["occlusion_probability__valid"]
+        )
+        self.assertEqual(stats["valid"], 10)
+        self.assertEqual(stats["positive"], 10)
+        self.assertEqual(stats["negative"], 0)
+        self.assertEqual(stats["positive_fraction"], 1.0)
 
     def test_odd_pair_budget_fails_closed(self):
         with self.assertRaisesRegex(ValueError, "BUDGET_MUST_BE_POSITIVE_EVEN"):

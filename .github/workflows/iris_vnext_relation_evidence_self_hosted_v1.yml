@@ -1,0 +1,217 @@
+name: iris-vnext-relation-evidence-self-hosted-v1
+
+on:
+  push:
+    branches: [research/iris-vnext-post-v8-quality-plan-20261018]
+    paths:
+      - '.github/workflows/iris_vnext_relation_evidence_self_hosted_v1.yml'
+      - 'tools/iris_vnext/audit_authored_motion_relation_conditioning_v1.py'
+      - 'tools/iris_vnext/build_fit8_relation_all_hit_evidence_v1.py'
+      - 'tests/iris/test_authored_motion_relation_conditioning_v1.py'
+      - 'tests/iris/test_relation_all_hit_evidence_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONPATH: .
+  PYTHONHASHSEED: '0'
+  V9_EVIDENCE_SOURCE_SHA: 7029ee3f48787aa9f7e27eecef89155eb9368a96
+  V9_CANDIDATE_REMOTE: gdrive:RealSaS_Fit8_IRIS_vNext_candidates/7029ee3f48787aa9f7e27eecef89155eb9368a96
+  STAGE01_FILE_ID: 1PcxT2rfb9jCHfP75gaqMAo90OU7JRypH
+  STAGE01_SHA256: 9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936
+  RUN_ROOT: /home/monster/realsas_authority/runs/IRIS_VNEXT_RELATION_EVIDENCE/${{ github.run_id }}-${{ github.run_attempt }}
+
+concurrency:
+  group: iris-vnext-relation-evidence-self-hosted-v1
+  cancel-in-progress: true
+
+jobs:
+  materialize-evidence:
+    if: github.repository == 'merynz/RealSaS-OPT'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Exact research source and read-only policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'research/iris-vnext-post-v8-quality-plan-20261018'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          rm -rf "$RUN_ROOT"
+          mkdir -p "$RUN_ROOT"/{stage01,legacy,teachers,outputs}
+          command -v rclone >/dev/null
+          command -v unzip >/dev/null
+          if grep -R -nE 'optimizer\.step|torch\.optim|AUTHORIZE_IRIS_V9_FOCUSED_RELATION_OPTIMIZER_STEPS' \
+              tools/iris_vnext/audit_authored_motion_relation_conditioning_v1.py \
+              tools/iris_vnext/build_fit8_relation_all_hit_evidence_v1.py; then
+            echo 'VNEXT_RELATION_EVIDENCE_TRAINING_CODE_FORBIDDEN'
+            exit 2
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install focused evidence dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m py_compile \
+            tools/iris_vnext/audit_authored_motion_relation_conditioning_v1.py \
+            tools/iris_vnext/build_fit8_relation_all_hit_evidence_v1.py
+          python -m pytest -q \
+            tests/iris/test_authored_motion_relation_conditioning_v1.py \
+            tests/iris/test_relation_all_hit_evidence_v1.py
+
+      - name: Hydrate exact Stage01 and legacy IRIS shards
+        shell: bash
+        run: |
+          set -euo pipefail
+          stage_zip="$RUN_ROOT/FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip"
+          rclone backend copyid gdrive: "$STAGE01_FILE_ID" "$stage_zip"
+          printf '%s  %s\n' "$STAGE01_SHA256" "$stage_zip" | sha256sum --check -
+          unzip -q "$stage_zip" -d "$RUN_ROOT/stage01"
+
+          while IFS='|' read -r name file_id digest; do
+            test -n "$name" || continue
+            dst="$RUN_ROOT/legacy/$name"
+            rclone backend copyid gdrive: "$file_id" "$dst"
+            printf '%s  %s\n' "$digest" "$dst" | sha256sum --check -
+          done <<'SHARDS'
+          fit8_snake_v1.pt|1KrcgJueaYVbYNoLrwXpvaUGamJQ_AZ92|fbc4d8f51cd77bd48d979bbc4faccf22b441fe18d1c7db0855b0752f65de738b
+          fit8_bat_v1.pt|1zNA0TK6CWkWWQjVkBPD87f2v3CexdK4V|2997b59a9bdc4e4f82609ee6738636341702a4d62fadc2be4aaca7dd89460b6a
+          fit8_trex_v1.pt|12de0elFVuqe2sEJGPdyuHACJ4pMdlxli|0901431908fa2f3694efc93baffa9a6ef5da0d9cb141b6e1003dd53fbbfff6d8
+          fit8_horse_v1.pt|1rpa6Mx2-iBtCgMlvsZfFinyuZu1WM-mC|3a1e7ef895d753048f5a82d9f0bfce9815845d4f60788a4f2fc7d08d9b08fee8
+          fit8_spider_v1.pt|1wKAwOAecDF8s36613E4lIFNmuSVl3JcR|6d6e05890c95c36743a8b2286c2b132e60de164e09b1de28c1ee2146b5387d70
+          fit8_greenblob_v1.pt|1vEUlTHQwSK42LtTFU2AUjHFoe1FBApuO|03ff4acbc22e753f900081f8a9c0ce36dcfd247711aa7811fefe3ed976742f0d
+          fit8_shark_v1.pt|1c3H2eR9ESuL6RV51ZVs5WY8mGmwYw3QA|06f2316b0379aa16a0d06c70e304a1c4626bfeaa1c01aef14f74452bccc94480
+          fit8_george_v1.pt|1jx4GAFr-SuL0zDpPhbT0kX75v_shfGbm|9683b2d87b16de727179c90d130f0d42c0b485fcfa82fc885502b0d63dbec46b
+          SHARDS
+
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          roots=list((Path(os.environ['RUN_ROOT'])/'stage01').rglob('BOOTSTRAP_MANIFEST.json'))
+          if len(roots)!=1:
+              raise RuntimeError(f'VNEXT_RELATION_EVIDENCE_STAGE01_ROOT_CARDINALITY:{len(roots)}')
+          with Path(os.environ['GITHUB_ENV']).open('a') as handle:
+              handle.write(f"STAGE01_ROOT={roots[0].parent.resolve()}\n")
+          print('VNEXT_RELATION_EVIDENCE_BASE_INPUTS_PASS')
+          PY
+
+      - name: Hydrate and verify sealed V9 teacher bytes read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          rclone copy "$V9_CANDIDATE_REMOTE/teachers" "$RUN_ROOT/teachers" --checksum
+          mkdir -p "$RUN_ROOT/v9_receipts"
+          rclone copy "$V9_CANDIDATE_REMOTE/receipts" "$RUN_ROOT/v9_receipts" \
+            --include 'CANDIDATE_ROUNDTRIP_RECEIPT.json'
+          test -s "$RUN_ROOT/v9_receipts/CANDIDATE_ROUNDTRIP_RECEIPT.json"
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])
+          receipt=json.loads((root/'v9_receipts/CANDIDATE_ROUNDTRIP_RECEIPT.json').read_text())
+          if receipt.get('expected_source_sha') != os.environ['V9_EVIDENCE_SOURCE_SHA']:
+              raise RuntimeError('VNEXT_RELATION_EVIDENCE_V9_SOURCE_DRIFT')
+          if receipt.get('status') != 'ROUNDTRIP_VERIFIED_CANDIDATE' or receipt.get('file_count') != 57:
+              raise RuntimeError('VNEXT_RELATION_EVIDENCE_V9_ROUNDTRIP_NOT_VERIFIED')
+          rows={row['path']:row for row in receipt['files'] if row['path'].startswith('teachers/')}
+          if len(rows) != 17:
+              raise RuntimeError(f'VNEXT_RELATION_EVIDENCE_TEACHER_FILE_COUNT:{len(rows)}')
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for block in iter(lambda:f.read(4*1024*1024),b''): h.update(block)
+              return h.hexdigest()
+          for rel,row in rows.items():
+              path=root/rel
+              if not path.is_file() or path.stat().st_size != int(row['bytes']) or sha(path) != row['sha256']:
+                  raise RuntimeError('VNEXT_RELATION_EVIDENCE_TEACHER_BYTE_DRIFT:'+rel)
+          print('VNEXT_RELATION_EVIDENCE_TEACHERS_PASS',len(rows))
+          PY
+
+      - name: Materialize authored-motion conditioning court
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/iris_vnext/audit_authored_motion_relation_conditioning_v1.py \
+            --teacher-dir "$RUN_ROOT/teachers" \
+            --stage01-root "$STAGE01_ROOT" \
+            --candidate-rays-per-view 1024 \
+            --output "$RUN_ROOT/outputs/AUTHORED_MOTION_RELATION_CONDITIONING_V1.json"
+
+      - name: Materialize complete static all-hit relation evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUN_ROOT/outputs/all_hit_v1"
+          python tools/iris_vnext/build_fit8_relation_all_hit_evidence_v1.py \
+            --legacy-shard-dir "$RUN_ROOT/legacy" \
+            --teacher-dir "$RUN_ROOT/teachers" \
+            --stage01-root "$STAGE01_ROOT" \
+            --candidate-rays-per-view 8192 \
+            --output-dir "$RUN_ROOT/outputs/all_hit_v1"
+
+      - name: Seal evidence-only batch receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])
+          outputs=root/'outputs'
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for block in iter(lambda:f.read(4*1024*1024),b''): h.update(block)
+              return h.hexdigest()
+          files=[]
+          for path in sorted(p for p in outputs.rglob('*') if p.is_file()):
+              files.append({'path':str(path.relative_to(outputs)),'bytes':path.stat().st_size,'sha256':sha(path)})
+          motion=json.loads((outputs/'AUTHORED_MOTION_RELATION_CONDITIONING_V1.json').read_text())
+          allhit=json.loads((outputs/'all_hit_v1/ALL_HIT_RELATION_EVIDENCE_V1_MANIFEST.json').read_text())
+          receipt={
+              'schema':'RealSaS.IRISVNextRelationTeacherEvidenceBatchReceipt.v1',
+              'status':'PASS__EVIDENCE_MATERIALIZED__TRAINING_NOT_AUTHORIZED',
+              'source_commit_sha':os.environ['GITHUB_SHA'],
+              'v9_teacher_authority_source_sha':os.environ['V9_EVIDENCE_SOURCE_SHA'],
+              'stage01_bundle_sha256':os.environ['STAGE01_SHA256'],
+              'motion_audit_value_sha256':motion['value_sha256'],
+              'all_hit_manifest_value_sha256':allhit['manifest_value_sha256'],
+              'training_authorized':False,
+              'scientific_fit_started':False,
+              'teacher_inputs_in_inference_forward':False,
+              'files':files,
+          }
+          path=outputs/'RELATION_TEACHER_EVIDENCE_BATCH_RECEIPT.json'
+          path.write_text(json.dumps(receipt,sort_keys=True,indent=2)+'\n')
+          print('VNEXT_RELATION_TEACHER_EVIDENCE_BATCH_PASS',len(files))
+          PY
+
+      - name: Upload evidence artifact only
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-vnext-relation-teacher-evidence-${{ github.run_id }}
+          path: ${{ env.RUN_ROOT }}/outputs
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Summary
+        shell: bash
+        run: |
+          echo 'IRIS_VNEXT_RELATION_EVIDENCE_SELF_HOSTED_PASS'
+          echo "source_sha=$GITHUB_SHA"
+          echo 'remote_writes=false'
+          echo 'training_authorized=false'
+          echo 'next=artifact_otopsy_then_truth_v3_design'

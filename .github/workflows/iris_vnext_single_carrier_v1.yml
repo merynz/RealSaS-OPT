@@ -2,6 +2,19 @@ name: iris-vnext-single-carrier-v1
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [research/iris-vnext-post-v8-quality-plan-20261018]
+    paths:
+      - 'models/iris/vnext/**'
+      - 'tests/iris/**'
+      - 'compiler/realsas_compiler_core/**'
+      - 'tests/compiler/**'
+      - 'docs/research/**'
+      - 'CURRENT_STATE.md'
+      - 'CURRENT_PLAN.md'
+      - 'AGENTS.md'
+      - 'SYSTEM_INDEX.md'
+      - '.github/workflows/iris_vnext_single_carrier_v1.yml'
   workflow_dispatch:
 concurrency:
   group: iris-vnext-single-carrier-v1-${{ github.ref }}
@@ -34,12 +47,15 @@ jobs:
           git clone --filter=blob:none https://github.com/nv-tlabs/FlexiCubes.git "$REALSAS_FLEXICUBES_ROOT"
           git -C "$REALSAS_FLEXICUBES_ROOT" checkout --detach 4cc7d6c3d0cee83c011ce36721b81adff0dd7db6
           test "$(git -C "$REALSAS_FLEXICUBES_ROOT" rev-parse HEAD)" = "4cc7d6c3d0cee83c011ce36721b81adff0dd7db6"
-      - name: Compile preparation, preflight and scientific entrypoints
+      - name: Compile preparation, trainer and scientific entrypoints
         run: |
           python -m py_compile \
             models/iris/vnext/contracts_v1.py \
             models/iris/vnext/topology_teacher_v1.py \
             models/iris/vnext/teacher_truth_v1.py \
+            models/iris/vnext/quality_policy_v1.py \
+            models/iris/vnext/boundary_causality_v1.py \
+            models/iris/vnext/cohort_v8.py \
             tools/iris_vnext/input_binding_v1.py \
             tools/iris_vnext/blender_authored_teacher_export_v1.py \
             tools/iris_vnext/blender_authored_teacher_export_v2.py \
@@ -60,6 +76,8 @@ jobs:
           PY
       - name: IRIS vNext model, teacher and batched Fit8 contracts
         run: python -m pytest -q tests/iris/test_iris_vnext_v1.py tests/iris/test_graphics_truth_v1.py tests/iris/test_iris_vnext_fit8_cohort_v1.py tests/iris/test_vnext_topology_teacher_v1.py tests/iris/test_vnext_mechanical_truth_rank_deficiency_v1.py tests/iris/test_vnext_preparation_acceleration_v1.py tests/iris/test_a100_preflight_v2.py
+      - name: Post-V8 quality, carrier seal and boundary causality contracts
+        run: python -m pytest -q tests/iris/test_quality_policy_v1.py tests/iris/test_boundary_causality_v1.py
       - name: Single-carrier mechanics, Graphics, DAG and preparation provenance contracts
         run: python -m pytest -q tests/compiler/test_vnext_single_carrier_graphics_v1.py tests/repository/test_vnext_architecture_contract_v1.py tests/repository/test_vnext_execution_graph_v1.py tests/repository/test_vnext_fit8_preparation_contract_v1.py tests/repository/test_vnext_fit8_active_preparation_provenance_v1.py
       - name: Native Graphics ordering contract
@@ -87,7 +105,11 @@ jobs:
           echo 'fit8_batch_subjects=8'
           echo 'fit8_shared_scene_encodes_per_optimizer_step=1'
           echo 'fit8_subject_serial_model_forward=false'
-          echo 'fit8_active_trainer=IRISVNextFit8TrainerV2'
+          echo 'completed_fit8_baseline=V8@5083c9915533ec8ec6530c7d229c635887abfea7'
+          echo 'post_m1_scene_core=sealed_fail_closed'
+          echo 'post_v8_scientific_fit_pass=false'
+          echo 'boundary_unknown=abstain_no_training_target'
+          echo 'official_numeric_quality_thresholds=false'
           echo 'fit8_active_builder=build_fit8_vnext_shards_v2.py'
           echo 'fit8_exact_input_binding_required=true'
           echo 'fit8_preparation_receipt_required=true'
@@ -100,4 +122,3 @@ jobs:
           echo 'a100_preflight_scientific_fit=false'
           echo 'a100_preflight_analytic_gradients=independent_vertex_field_parameter_v2'
           echo 'flexicubes_commit=4cc7d6c3d0cee83c011ce36721b81adff0dd7db6'
-          echo 'fit8_scientific_pass_claimed=false'

@@ -1,6 +1,6 @@
 # IRIS vNext Post-V8 Quality Plan — 2026-10-18
 
-Status: **ACTIVE RESEARCH PLAN / IMPLEMENTATION IN PROGRESS**
+Status: **ACTIVE RESEARCH PLAN / SOURCE HARDENING GREEN; EXPERIMENTAL QUALIFICATION IN PROGRESS**
 
 Scope: IRIS/Fit8 post-V8 quality work. The layered-2D-asset program is intentionally out of scope.
 
@@ -28,7 +28,7 @@ No raw training metric becomes `COURT_PASS` by convention.
 
 ## Workstream A — Carrier seal and non-regression
 
-**Status: HARDENED IN SOURCE; CI REQUIRED**
+**Status: HARDENED IN SOURCE / CI GREEN at `b38feee7...`, run `39126288809`**
 
 Implemented:
 
@@ -37,6 +37,8 @@ Implemented:
 - stage definition requires zero post-M1 `scene_lr_scale` unless explicit reopening court;
 - actual optimizer `scene_core` group LR is checked by `IRISVNextFit8TrainerV8._apply_stage_lrs()`;
 - policy tests consume the real `vnext_fit8_policy_v5()` curriculum.
+
+Historical V8 already had the M1 carrier seal and stage-level specialist isolation. V8's physical optimizer topology was `scene_core` + combined `evidence_heads` + `structure`. Post-V8 `optimization_v2.py` separates future mechanical/appearance/relation/structure groups for independent LR and gradient/update telemetry while keeping `scene_core=0` fail-closed. This is instrumentation/optimization hardening, not a reinterpretation of historical V8.
 
 Remaining:
 
@@ -47,7 +49,7 @@ Remaining:
 
 ### Boundary Causality V1
 
-**Status: CONTRACT + TESTS IMPLEMENTED; PRODUCER/CORPUS PENDING**
+**Status: CONTRACT + TESTS IMPLEMENTED; POPULATED CORPUS PENDING**
 
 Allowed causes:
 
@@ -76,69 +78,84 @@ Fit8 shard builder used by V8:
 
 The V8 cut metric therefore measures an **owner-or-material boundary proxy**, not pure `1 - same` and not authoritative drawable-cut truth.
 
-See `IRIS_VNEXT_RELATION_TRUTH_AUDIT_20261018.md`.
+### Graphics / Relation Truth V2
 
-### Graphics Truth V2
+**Status: CONTRACT + LOSS + PRODUCER + SUPPORT AUDIT SOURCE + HEAD V2 IMPLEMENTED / CI GREEN; ACTUAL CORPUS MATERIALIZATION PENDING**
 
-**Status: CONTRACT + EXPLICIT-VALIDITY LOSS + TESTS IMPLEMENTED; PRODUCER PENDING**
+Implemented source:
 
-`graphics_truth_v2.py` requires each scalar target to carry:
+- `models/iris/vnext/graphics_truth_v2.py` — value + evidence authority + provenance + `valid_for_training`;
+- `models/iris/vnext/training_v2.py` — explicit validity-mask loss;
+- `tools/iris_vnext/build_fit8_relation_truth_v2.py` — versioned sidecar/manifest producer with support statistics;
+- `models/iris/vnext/relation_support_v2.py` — no-support/single-class/binary-support eligibility;
+- `models/iris/vnext/heads_v2.py` — projected alpha/appearance boundaries moved to the camera-conditioned view branch; compatible V1 weights are migrated and new projected-boundary rows begin from neutral logits;
+- `models/iris/vnext/optimization_v2.py` — specialist optimizer groups and convergence telemetry.
 
-- probability value;
-- evidence authority;
-- provenance;
-- `valid_for_training`.
+Historical V8 shards stay immutable. No repository evidence yet seals a materialized Fit8 Relation Truth V2 corpus as experiment authority.
 
-`training_v2.py` consumes explicit per-family/sample validity masks. An abstained family contributes no loss; an all-abstained batch fails closed.
+Current authority facts:
 
-Historical V8 shards stay immutable. V2 must be populated by a new source-audited producer before any focused training.
+- static `same_drawable`, `cut`, `attachment` abstain without independent authority;
+- valid deterministic `occlusion_probability` rows currently have single-class positive support;
+- single-class support is not eligible for a binary held-out PASS court;
+- do not fabricate negative labels.
 
-Exit criterion for Workstream B: new corpus rows include authority/provenance/validity, plus support counts, positive/negative balance and abstention rates per family.
+Exit criterion for Workstream B: materialized corpus rows include authority/provenance/validity, support counts, positive/negative balance and abstention rates per family; manifest and sidecars are bound to exact admitted inputs and source.
 
 ## Workstream C — Salvage measurable foundation evidence
 
-**Status: SOURCE AUDIT COMPLETE; SELECTIVE PORTING NEXT**
+**Status: SOURCE AUDIT COMPLETE; SELECTIVE PORTING/USE ONLY**
 
-Port only evidence whose authority can be defended:
+Foundation provenance: `agent/unified-iris-stdgenpp-foundation@d90c82e24ccbf43081ca19f105bc4e4c7dfe9531`.
 
-- source/provenance binding;
+Selective source-defensible families:
+
+- geometry/topology qualification;
 - render↔geometry equivalence;
+- glTF/FBX material/skin/topology provenance;
 - static all-hit ray census;
-- fixed-frame dynamic visibility/order;
-- material provenance where authored;
-- rig/skin/deformation truth;
-- component/boundary diagnostics;
-- residual-boundary and local continuation evidence.
+- fixed-frame authored-motion visibility/order/mechanics;
+- residual-boundary diagnostics;
+- local continuation evidence/courts.
 
-Do not import inferred drawable-owner/amodal/presentation labels as authority.
+Exact paths are listed in `CURRENT_PLAN.md` and the decision ledger.
+
+Do not import inferred drawable-owner/amodal/presentation/semantic-partition labels as authority.
 
 Every salvaged producer must label authority as `RAW_AUTHORED`, `DETERMINISTIC_DERIVED`, `QUALIFIED_DERIVED`, or `DIAGNOSTIC_ONLY`.
 
 ## Workstream D — Specialist convergence / optimization
 
-**Status: POLICY DEFINED; INSTRUMENTATION PENDING**
+**Status: OPTIMIZER + BASIC TELEMETRY IMPLEMENTED / FOCUSED EXPERIMENT PENDING**
 
-Required telemetry per head/family:
+`optimization_v2.py` now provides disjoint complete groups:
+
+```text
+scene_core       LR = 0
+mechanical_head  explicit LR
+appearance_head  explicit LR
+relation_head    explicit LR
+structure        explicit LR
+```
+
+and captures per-group parameter L2, gradient L2, optional update L2 and update/parameter ratio. Experiments must preregister specialist LRs; no arbitrary defaults are invented.
+
+Focused experiment must still add/record per family:
 
 - train and held-out p50/p95;
-- gradient L2 norm;
-- parameter-update L2 norm and update/parameter ratio;
 - active-example count;
 - positive/negative balance;
-- trivial-negative fraction;
-- LR and optimizer-group identity;
+- abstention/trivial-negative fraction;
+- group/LR and gradient/update telemetry;
 - best-so-far held-out checkpoint;
 - prior-family non-regression metrics.
 
 Rules:
 
-- use head/family-specific optimizer groups where convergence differs materially;
-- diagnose missing gradient, tiny updates, imbalance, trivial negatives and target ambiguity before changing LR;
+- diagnose authority, conditioning, sampling/support, gradients and updates before changing LR;
 - preregister any stage extension;
 - never reopen `scene_core` merely because a specialist converges slowly;
 - target unidentifiability is solved by abstention/producer repair, not more steps.
-
-For comparable normalized residuals, `~0.05` remains a planning reference. `0.1–0.2` remains explicit debt unless a metric-specific preregistered court justifies otherwise.
 
 ## Workstream E — Compiler/runtime consumption audit
 
@@ -174,20 +191,21 @@ Training loss is insufficient. Build a held-out court measuring, where applicabl
 - source-support coverage;
 - stability under held-out views/contexts.
 
-Open surfaces are first-class.
-
 Only after this court identifies a concrete failure may StdGEN++-style hole/sign regularization, sparse high-resolution extraction or topology-specific specialist capacity be introduced. Every intervention needs an ablation and geometry non-regression.
 
 ## Workstream G — StdGEN++ transfer
 
 **Status: FRESH RE-AUDIT COMPLETE; CONDITIONAL TRANSFERS RECORDED**
 
-See `IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md`.
+Pinned public sources:
+
+- `hyz317/StdGEN@f1b0c822689dc2539c774bb73090a67c66e2e766`;
+- `TencentARC/InstantMesh@08822c5200a4bcc0e2c1a4573409ac10b9f6692c`.
 
 Adopt as discipline now:
 
 - stable shared carrier / constrained specialization;
-- preserve relevant geometric/raster supervision through mesh refinement;
+- preserve relevant geometric/raster supervision through representation transitions;
 - make decomposition truth identifiable in data;
 - explicit topology/thin-structure courts;
 - specialist branches only where evidence requires them.
@@ -217,17 +235,28 @@ A specialist adapter/branch becomes eligible only if all are true:
 
 Modify the specialist first. Shared-carrier reopening is the highest-cost option.
 
+## Self-hosted preparation safety event
+
+Run `39121291171` / prepare #22 used stale PR head `90c9c2f...`, locally sealed a source-bound V4 preparation, then entered Drive persistence to `gdrive:RealSaS_Fit8_IRIS_vNext_20261016`. It was cancelled during that persistence step before round-trip SHA verification.
+
+Policy consequence:
+
+- remote preparation path is quarantined until explicit SHA/provenance re-audit;
+- the stale local/GitHub artifact is forensic evidence only;
+- current training must not consume the Drive path based on presence alone;
+- self-hosted execution must be owned by the current review source before another preparation write.
+
 ## Execution order from current state
 
 1. keep carrier/runtime seal + focused CI green;
-2. consolidate vNext review into draft PR #116;
-3. port identifiable foundation producers with explicit authority/provenance;
-4. populate Graphics Truth V2 and Boundary Causality corpus statistics;
-5. close attachment/support-band runtime ownership audit;
-6. build independent TESSA topology court;
-7. instrument specialist convergence and held-out checkpoint selection;
-8. preregister metric-specific gates;
-9. run narrow focused optimization experiments;
+2. keep stale remote preparation quarantined and reverify it;
+3. establish a current-branch-owned safe self-hosted verification/preparation flow;
+4. materialize Relation Truth V2 and Boundary Causality statistics;
+5. seal real V8→GraphicsRelationHeadV2 migration receipt/checkpoint;
+6. run focused frozen-carrier specialist optimization with independent telemetry;
+7. close attachment/support-band runtime ownership audit;
+8. build independent TESSA topology court;
+9. synchronize draft PR #116 only after final green review head is coherent;
 10. consider adapters/high-res extraction/hole regularization only from court evidence.
 
 ## Non-goals

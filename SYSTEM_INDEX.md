@@ -17,7 +17,7 @@ Read first:
 7. `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`
 8. `AGENTS.md`
 
-`main` remains merged production-code authority until reviewed vNext merges. The active post-V8 source line is temporary review source, not research/product authority. Draft PR #116 is the canonical vNext review vehicle and its head is required to match the active review source before review/merge. The completed V8 artifact remains bound to exact V8 source `5083c9915533ec8ec6530c7d229c635887abfea7` plus its checkpoint/receipt lineage.
+`main` remains merged production-code authority until reviewed vNext merges. The active post-V8 source line is `research/iris-vnext-post-v8-quality-plan-20261018`; it is temporary review source, not research/product authority. Draft PR #116 currently points to stale vNext history and must be synchronized before review/merge. The completed V8 artifact remains bound to source `5083c9915533ec8ec6530c7d229c635887abfea7` plus exact checkpoint/receipt lineage.
 
 ## Current architecture summary
 
@@ -58,9 +58,11 @@ There is no mandatory named body-part taxonomy in the inference contract and no 
 | IRIS geometry/extraction | `models/iris/vnext/` + pinned FlexiCubes | learned field/extraction; fail closed on invalid surface; future high-res changes require court |
 | Mechanical demand | `models/iris/vnext/heads_v1.py`, `teacher_truth_v1.py` | training evidence only; authored mechanics never inference input |
 | Appearance evidence | `AppearanceEvidenceHeadV1` | RGBA/confidence/descriptor + alpha/appearance boundaries; evidence, not source override authority |
-| Graphics relations | `GraphicsRelationHeadV1` | role-free same/cut/attachment/front/occlusion/visibility evidence; historical relation targets have explicit truth debt |
-| Relation truth V2 | `graphics_truth_v2.py`, `training_v2.py` | explicit authority/provenance/validity; missing truth abstains; producer wiring pending |
-| Boundary truth | `boundary_causality_v1.py` | provable causes + unknown/abstention; producer/corpus wiring in progress |
+| Graphics relations V1 | `GraphicsRelationHeadV1` | historical role-free relation path; projected-boundary conditioning debt recorded |
+| Graphics relations V2 | `models/iris/vnext/heads_v2.py` | static same/cut/attachment separated from camera-conditioned front/occlusion/visibility/projected boundaries; real migrated checkpoint pending |
+| Relation truth V2 | `graphics_truth_v2.py`, `training_v2.py`, `build_fit8_relation_truth_v2.py`, `relation_support_v2.py` | explicit authority/provenance/validity + producer + support audit source implemented; actual corpus materialization/seal pending |
+| Specialist optimization V2 | `models/iris/vnext/optimization_v2.py` | future head-separated optimizer/telemetry; `scene_core=0` fail-closed; historical V8 optimizer remains immutable |
+| Boundary truth | `boundary_causality_v1.py` | provable causes + unknown/abstention; populated corpus still pending |
 | Topology / TESSA | `structure_v1.py`, `structure_v2.py`, TESSA modules | learned proposal/grammar; no topology PASS until independent held-out court |
 | Canonical mechanical carrier | candidate selection + canonical M/G/W path | exactly one product mechanical carrier after deterministic selection |
 | AXIS | `models/axis/` + Compiler bindings | rig proposal/qualification on exact canonical carrier |
@@ -81,7 +83,7 @@ There is no mandatory named body-part taxonomy in the inference contract and no 
 
 Historical curriculum families G1/G2/M1/A1/R1/T1/J1 remain useful identifiers, but current post-V8 law is not “all stages may rewrite the shared trunk”.
 
-Canonical post-M1 stage IDs are:
+Canonical post-M1 stage IDs:
 
 ```text
 A1_APPEARANCE_EVIDENCE
@@ -92,11 +94,13 @@ J1_JOINT_FINETUNE
 
 `quality_policy_v1.py` fails on unknown post-M1 aliases and future V8-line trainer execution checks the actual `scene_core` optimizer-group LR. Reopening the carrier requires an explicit falsification court.
 
+Historical V8 already enforced post-M1 `scene_core=0` by stage policy but used physical groups `scene_core`, combined `evidence_heads`, and `structure`. Post-V8 `optimization_v2.py` splits future specialist groups into mechanical/appearance/relation/structure for independent LR/gradient/update telemetry. Do not rewrite V8 history as if this physical split existed in V8.
+
 `structure_v2.py` preserves the established TESSA sequence-position default: omitted/explicit-`None` offset means zero, while explicit batched offsets remain supported.
 
 ## Graphics evidence / truth status
 
-Current learned outputs include:
+Current output families include:
 
 ```text
 same_drawable_affinity
@@ -117,7 +121,7 @@ Important distinction:
 - serialization does not imply runtime behavior;
 - low training loss does not imply scientific authority.
 
-Do not conflate the two historical relation-truth producers:
+Do not conflate historical relation-truth producers:
 
 ```text
 graphics_truth_v1.py helper:
@@ -129,7 +133,25 @@ Fit8 shard builder used by V8:
 
 Thus V8's cut metric concerns the historical **owner-or-material boundary proxy**, not pure `1 - same` and not authoritative drawable-cut truth.
 
-`graphics_truth_v2.py` is the replacement contract for new work: every scalar target has explicit authority/provenance/validity and may abstain. Historical V8 shards remain immutable.
+### V2 source state
+
+Implemented and focused-CI green:
+
+- explicit Truth V2 target authority/provenance/validity;
+- validity-aware loss;
+- versioned Fit8 relation sidecar/manifest producer;
+- support/class-balance eligibility audit;
+- `GraphicsRelationHeadV2` with projected boundaries camera-conditioned;
+- deterministic V1→V2 migration semantics;
+- future head-separated optimizer telemetry.
+
+Still pending:
+
+- materialized/sealed actual Fit8 Truth V2 corpus;
+- real V8 checkpoint→V2 migrated artifact/receipt;
+- focused training and held-out PASS.
+
+Static same/cut/attachment abstain without independent authority. Current valid occlusion rows are single-class positive support and are binary-court ineligible until authoritative negative support exists.
 
 ## Graphics Compiler/runtime path
 
@@ -163,8 +185,6 @@ Current consumption debt:
 - attachment data is serialized but not used by the reference raster path;
 - support-band pixels are serialized/validated but not applied by the reference renderer.
 
-See the machine-readable lineage report before making stronger claims.
-
 ## Topology / extraction status
 
 V8 showed topology objective learnability from sealed H but did not seal an independent topology PASS.
@@ -190,15 +210,43 @@ REALSAS_INFERENCE
 UNAVAILABLE
 ```
 
-Public StdGEN code confirms constrained LoRA transformer adaptation, shared triplane features and separate SDF/RGB/deformation/FlexiCubes/semantic decoders. StdGEN++ paper supplies the three-stage, dual-branch, multilayer, coarse-to-fine and hole-regularization design claims. Exact StdGEN/StdGEN++ training-loop source is not currently available in the public StdGEN repository.
+Pinned public code for this audit:
+
+```text
+StdGEN      hyz317/StdGEN@f1b0c822689dc2539c774bb73090a67c66e2e766
+InstantMesh TencentARC/InstantMesh@08822c5200a4bcc0e2c1a4573409ac10b9f6692c
+```
+
+Public StdGEN confirms constrained LoRA transformer adaptation, shared triplane features and separate SDF/RGB/deformation/FlexiCubes/semantic decoders. StdGEN++ paper supplies the three-stage, dual-branch, multilayer, coarse-to-fine and hole-regularization claims. Exact full StdGEN/StdGEN++ training-loop source is not available in the inspected public repository.
 
 Transfer method discipline, not a fixed semantic vocabulary.
+
+## Foundation research salvage
+
+Provenance source: `agent/unified-iris-stdgenpp-foundation@d90c82e24ccbf43081ca19f105bc4e4c7dfe9531`.
+
+Selective reuse candidates are recorded path-by-path in `CURRENT_PLAN.md` and the decision ledger. They cover source geometry/topology, material/skin provenance, all-hit rays, authored-motion fixed-frame evidence, residual boundary diagnostics and local continuation courts.
+
+Owner/amodal/presentation/semantic-partition claims are not generic FIT8 authority.
+
+## Self-hosted preparation status
+
+Known runner: `realsas-wsl-1660ti` with labels `[self-hosted, linux, x64, realsas]`.
+
+Run `39121291171` / prepare #22 on stale PR head `90c9c2f...` started when the runner came online. It locally sealed stale-source preparation, then entered persistence to `gdrive:RealSaS_Fit8_IRIS_vNext_20261016` and was cancelled before round-trip SHA verification.
+
+Consequences:
+
+- runner remains offline until a current-branch-owned safe flow is ready;
+- the affected Drive path is quarantined/unverified;
+- stale local/GitHub artifact `12137271848` is forensic evidence only;
+- current experiments must not consume the Drive path based on file presence.
 
 ## Canonical code-line policy
 
 `main` remains the single merged continuation line. Temporary review branches may exist for code review, but must not become Attempt/ProductRevision authority.
 
-The vNext draft PR #116 is the intended visible review vehicle. Its head must track the current post-V8 review source by fast-forward rather than leaving multiple divergent vNext narratives.
+The active post-V8 branch is the current review source. Draft PR #116 must be synchronized to the final green review head rather than leaving multiple divergent vNext narratives.
 
 ## Mechanics boundary
 
@@ -225,10 +273,6 @@ C++ Runtime   = playback, deformation/render hot paths, package consumption
 ```
 
 Legacy direct workflows may remain for CI/reproducibility but do not mint durable research/product authority by themselves.
-
-## Machine-readable architecture / impact
-
-Architecture discovery remains available through `platform/internal/architecture/registry.go` and `tools/realsas_architecture.py`. Use source/manifest impact tools for dependency discovery. Unknown impact must be investigated; it never means zero consumers.
 
 ## Platform execution entrypoints
 

@@ -33,9 +33,9 @@ ProductRevision   = durable production truth
 Workflow Engine   = durable execution state
 ```
 
-The completed V8 run is an architectural/measurement baseline bound to exact source commit `5083c9915533ec8ec6530c7d229c635887abfea7` plus its exact checkpoint/receipt lineage. Later source hardening does not rewrite that artifact.
+The completed V8 run is an architectural/measurement baseline bound to exact source commit `5083c9915533ec8ec6530c7d229c635887abfea7` plus exact checkpoint/receipt lineage. Later source hardening does not rewrite that artifact.
 
-The active post-V8 review source is temporary. Draft PR #116 is the canonical vNext review vehicle; before review/merge its head must match the active post-V8 source head.
+The active post-V8 review source is `research/iris-vnext-post-v8-quality-plan-20261018`. Draft PR #116 currently points to stale `research/iris-vnext-single-carrier-graphics` history; before review/merge its head must be synchronized to the final green active source.
 
 ## Current scientific program
 
@@ -45,6 +45,7 @@ Observed lineage:
 
 - V5 falsified single-objective downstream rewriting of shared H.
 - V6 showed cumulative retention can preserve mechanics while geometry/extraction still drift.
+- V7 repaired TESSA coordinate compatibility only; it retained V6 policy.
 - V8 sealed `scene_core` after M1 and kept geometry/extraction stable while specialist heads continued learning.
 
 Current default law:
@@ -60,6 +61,8 @@ scene_core remains sealed
 ```
 
 A post-M1 non-zero `scene_core` optimizer LR requires an explicit carrier-falsification court. Exact canonical downstream stage IDs are enforced by `quality_policy_v1.py`; unknown A/R/T/J aliases fail closed.
+
+Important historical distinction: V8 already had the carrier seal and stage-level specialist isolation, but its physical optimizer groups were `scene_core`, combined `evidence_heads`, and `structure`. `optimization_v2.py` is post-V8 experiment instrumentation: it splits mechanical/appearance/relation/structure groups for independent LR/gradient/update telemetry while keeping `scene_core=0` fail-closed.
 
 V8 is **not** a scientific Fit8 PASS.
 
@@ -92,13 +95,31 @@ Fit8 shard builder used by V8:
 
 The V8 cut metric therefore measures decodability of an **owner-or-material boundary proxy**, not authoritative drawable-cut truth.
 
-New work uses `graphics_truth_v2.py` + `training_v2.py`: every relation target must carry authority, provenance and explicit validity. Missing truth abstains; it does not become a negative label.
+### Current V2 relation stack
+
+Source now implemented and CI-green:
+
+- `models/iris/vnext/graphics_truth_v2.py` — explicit target authority/provenance/validity;
+- `models/iris/vnext/training_v2.py` — validity-aware loss;
+- `tools/iris_vnext/build_fit8_relation_truth_v2.py` — sidecar/manifest producer;
+- `models/iris/vnext/relation_support_v2.py` — support/class eligibility;
+- `models/iris/vnext/heads_v2.py` — projected boundaries camera-conditioned; deterministic V1→V2 migration semantics;
+- `models/iris/vnext/optimization_v2.py` — head-separated future optimizer/telemetry.
+
+Do not overclaim:
+
+- no actual Fit8 Truth V2 corpus is yet sealed as experiment authority;
+- no real V8 checkpoint→V2 migrated artifact/receipt is sealed;
+- no focused post-V8 training has run;
+- no scientific PASS exists.
+
+Static same/cut/attachment abstain without independent authority. Current valid occlusion rows are single-class positive support; they are not eligible for a binary held-out PASS court. Do not fabricate negatives.
 
 Historical V8 bytes remain immutable provenance.
 
 ## Foundation branch rule
 
-`agent/unified-iris-stdgenpp-foundation` is research provenance, not current authority.
+`agent/unified-iris-stdgenpp-foundation@d90c82e24ccbf43081ca19f105bc4e4c7dfe9531` is research provenance, not current authority.
 
 Salvage only source-defensible producers such as:
 
@@ -109,6 +130,8 @@ Salvage only source-defensible producers such as:
 - fixed-frame geometric visibility/order;
 - residual-boundary diagnostics;
 - local continuation evidence.
+
+Exact salvage paths are recorded in `CURRENT_PLAN.md` and the decision ledger.
 
 Do not promote from generic FIT8 3D alone:
 
@@ -166,6 +189,13 @@ StdGEN++-style hole/sign regularization, sparse high-resolution extraction or to
 
 Read `docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md` before citing StdGEN/StdGEN++ as design authority.
 
+Pinned public source commits for the current re-audit:
+
+```text
+StdGEN      hyz317/StdGEN@f1b0c822689dc2539c774bb73090a67c66e2e766
+InstantMesh TencentARC/InstantMesh@08822c5200a4bcc0e2c1a4573409ac10b9f6692c
+```
+
 Keep evidence classes separate:
 
 ```text
@@ -175,18 +205,33 @@ REALSAS_INFERENCE our translation
 UNAVAILABLE       exact implementation not public
 ```
 
-As of this state, the public StdGEN repository does not expose the exact StdGEN/StdGEN++ training loop; open issues still request training code. Do not convert paper inference into “code analysis”.
+The inspected public StdGEN repository does not expose the exact full StdGEN/StdGEN++ training loop. Do not convert paper claims into “code analysis”.
 
 Transfer discipline, not ontology:
 
 - protect useful shared representation;
 - use constrained specialization when a capacity court justifies it;
-- preserve geometry/raster supervision through mesh refinement;
+- preserve geometry/raster supervision through representation transitions;
 - make decomposition targets identifiable in data;
 - treat topology/thin structures as explicit courts;
 - use coarse-to-fine extraction only if resolution is proven limiting.
 
 Do not copy body/hair/cloth as mandatory RealSaS inference classes.
+
+## Self-hosted execution safety
+
+Known runner: `realsas-wsl-1660ti`, labels `[self-hosted, linux, x64, realsas]`.
+
+On 2026-10-18, bringing the runner online caused queued stale run `39121291171` / prepare #22 on `research/iris-vnext-single-carrier-graphics@90c9c2f...` to start. The stale run locally sealed a source-bound preparation and then entered Drive persistence to `gdrive:RealSaS_Fit8_IRIS_vNext_20261016`. It was cancelled before round-trip SHA verification completed.
+
+Therefore:
+
+- runner stays offline until a current-branch-owned self-hosted flow is ready;
+- the affected Drive path is quarantined until explicit file-level SHA/provenance verification;
+- GitHub artifact `12137271848` is forensic evidence only, not current authority;
+- never infer “remote exists = current preparation”.
+
+If an execution unexpectedly starts from a stale branch/head, stop it before persistence/promotion and record exact run/head/artifact impact in current state + ledger.
 
 ## Compiler rule
 
@@ -230,7 +275,7 @@ Historical `~0.05` p95 expectations are planning context only for genuinely comp
 
 For stateful research/product work, read `docs/platform/EXECUTION_LANES.md` and use the Go Platform/`realsasctl` Attempt flow where supported.
 
-Colab/A100 is a compute worker, not authority. Checkpoints/receipts become authoritative only after the owning Platform/Compiler path validates and binds them.
+Colab/A100 and self-hosted Actions are compute/execution workers, not authority. Checkpoints/receipts become authoritative only after the owning Platform/Compiler path validates and binds them.
 
 For Fit8/campaign work, also read:
 

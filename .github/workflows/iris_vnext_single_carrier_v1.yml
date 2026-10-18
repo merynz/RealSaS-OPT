@@ -65,6 +65,9 @@ jobs:
             models/iris/vnext/heads_v2.py \
             models/iris/vnext/training_v2.py \
             models/iris/vnext/cohort_v8.py \
+            models/iris/vnext/cohort_v9.py \
+            models/iris/vnext/cohort_v9_fp32.py \
+            models/iris/vnext/cohort_v9_balanced_fp32.py \
             tools/iris_vnext/input_binding_v1.py \
             tools/iris_vnext/blender_authored_teacher_export_v1.py \
             tools/iris_vnext/blender_authored_teacher_export_v2.py \
@@ -75,6 +78,11 @@ jobs:
             tools/iris_vnext/build_fit8_relation_truth_v2.py \
             tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py \
             tools/iris_vnext/audit_fit8_preparation_snapshot_v1.py \
+            tools/iris_vnext/audit_v9_relation_split_support_v1.py \
+            tools/iris_vnext/build_v9_focused_relation_preregistration_v1.py \
+            tools/iris_vnext/audit_fit8_pretraining_readiness_v1.py \
+            tools/iris_vnext/run_v9_focused_relation.py \
+            tools/iris_vnext/audit_v9_scientific_court_v1.py \
             tools/iris_vnext/a100_preflight_v1.py \
             tools/iris_vnext/a100_preflight_v2.py \
             tools/iris_vnext/run_fit8_vnext_scientific_v1.py
@@ -88,7 +96,7 @@ jobs:
       - name: IRIS vNext model, teacher and batched Fit8 contracts
         run: python -m pytest -q tests/iris/test_iris_vnext_v1.py tests/iris/test_graphics_truth_v1.py tests/iris/test_iris_vnext_fit8_cohort_v1.py tests/iris/test_vnext_topology_teacher_v1.py tests/iris/test_vnext_mechanical_truth_rank_deficiency_v1.py tests/iris/test_vnext_preparation_acceleration_v1.py tests/iris/test_a100_preflight_v2.py
       - name: Post-V8 quality, carrier seal, optimizer and truth contracts
-        run: python -m pytest -q tests/iris/test_quality_policy_v1.py tests/iris/test_boundary_causality_v1.py tests/iris/test_graphics_truth_v2.py tests/iris/test_relation_truth_v2_producer.py tests/iris/test_relation_support_v2.py tests/iris/test_optimization_v2.py tests/iris/test_graphics_relation_head_v2.py
+        run: python -m pytest -q tests/iris/test_quality_policy_v1.py tests/iris/test_boundary_causality_v1.py tests/iris/test_graphics_truth_v2.py tests/iris/test_relation_truth_v2_producer.py tests/iris/test_relation_support_v2.py tests/iris/test_optimization_v2.py tests/iris/test_graphics_relation_head_v2.py tests/iris/test_v9_focused_relation_training_contract_v1.py
       - name: Single-carrier mechanics, Graphics, DAG and preparation provenance contracts
         run: python -m pytest -q tests/compiler/test_vnext_single_carrier_graphics_v1.py tests/repository/test_vnext_architecture_contract_v1.py tests/repository/test_vnext_execution_graph_v1.py tests/repository/test_vnext_fit8_preparation_contract_v1.py tests/repository/test_vnext_fit8_active_preparation_provenance_v1.py tests/repository/test_vnext_fit8_self_hosted_workflow_safety_v2.py
       - name: Native Graphics ordering contract
@@ -116,7 +124,7 @@ jobs:
           echo 'fit8_batch_subjects=8'
           echo 'fit8_shared_scene_encodes_per_optimizer_step=1'
           echo 'fit8_subject_serial_model_forward=false'
-          echo 'completed_fit8_baseline=V8@5083c9915533ec8ec6530c7d229c635887abfea7'
+          echo 'completed_fit8_baseline=V8@5083c9915533ec6530c7d229c635887abfea7'
           echo 'post_m1_scene_core=sealed_fail_closed'
           echo 'post_v8_specialist_optimizer=head_separated_scene_core_lr_zero'
           echo 'post_v8_scientific_fit_pass=false'
@@ -126,7 +134,11 @@ jobs:
           echo 'relation_head_v2=projected_boundaries_camera_conditioned_v1_behavior_migrated'
           echo 'relation_truth_v2_binary_court_requires_two_class_support=true'
           echo 'relation_truth_v2_static_same_cut_attachment=abstain_without_independent_authority'
-          echo 'official_numeric_quality_thresholds=false'
+          echo 'completed_v8_official_numeric_quality_thresholds=false'
+          echo 'v9_thresholds=source_locked_before_training_and_artifact_bound_at_preregistration'
+          echo 'v9_supervision=balanced_grouped_boundary_plus_ordering__occlusion_metric_only'
+          echo 'v9_heldout=step0_baseline_plus_fixed_schedule_final_only'
+          echo 'v9_scientific_pass=locked_machine_court_only'
           echo 'fit8_active_builder=build_fit8_vnext_shards_v2.py'
           echo 'fit8_exact_input_binding_required=true'
           echo 'fit8_preparation_receipt_required=true'

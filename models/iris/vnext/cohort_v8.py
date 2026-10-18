@@ -3,10 +3,15 @@ from __future__ import annotations
 """IRIS vNext Fit8 trainer v8: seal shared scene core after M1.
 
 The V6 authority run proved that cumulative loss retention preserves mechanics
-but still allows A1 to rewrite shared geometry/extraction features.  V8 uses the
+but still allows A1 to rewrite shared geometry/extraction features. V8 uses the
 model's existing modular boundary directly: after M1, scene_core is frozen and
-head-specific stages train only the head that owns the new evidence.  J1 then
+head-specific stages train only the head that owns the new evidence. J1 then
 jointly fine-tunes evidence/structure heads while scene_core remains sealed.
+
+The completed V8 scientific artifact remains authority-bound to commit
+5083c9915533ec8ec6530c7d229c635887abfea7. The current source line adds a
+fail-closed runtime guard around the already-zero post-M1 scene LR; it does not
+retroactively mutate that completed artifact.
 
 The V7 TESSA witness-coordinate repair is retained unchanged.
 """
@@ -21,6 +26,7 @@ from .cohort_v1 import VNextCheckpointStoreV1, VNextFit8PolicyV1, _sha, _vh
 from .cohort_v7 import IRISVNextFit8TrainerV7, _source_identity_v7
 from .cohort_v6 import vnext_fit8_policy_v4
 from .contracts_v1 import IRISVNextConfigV1
+from .quality_policy_v1 import quality_policy_v1
 
 
 V6_M1_END_STEP = 3600
@@ -100,12 +106,22 @@ def vnext_fit8_policy_v5() -> VNextFit8PolicyV1:
     policy.validate()
     if policy.total_steps != 12000:
         raise RuntimeError("VNEXT_V8_TOTAL_STEP_DRIFT")
+
+    seal_policy, _ = quality_policy_v1()
+    for stage in policy.stages:
+        seal_policy.assert_stage_definition(
+            stage_name=stage.stage_id,
+            scene_lr_scale=stage.scene_lr_scale,
+        )
     return policy
 
 
 def _source_identity_v8(root: Path):
     value = dict(_source_identity_v7(root))
     value["models/iris/vnext/cohort_v8.py"] = _sha(root / "models/iris/vnext/cohort_v8.py")
+    value["models/iris/vnext/quality_policy_v1.py"] = _sha(
+        root / "models/iris/vnext/quality_policy_v1.py"
+    )
     return value
 
 
@@ -146,7 +162,7 @@ class IRISVNextFit8TrainerV8(IRISVNextFit8TrainerV7):
             "source": _source_identity_v8(self.repo_root),
             "policy": asdict(policy),
             "post_m1_parameter_authority": {
-                "scene_core": "SEALED_LR_ZERO",
+                "scene_core": "SEALED_LR_ZERO__FAIL_CLOSED_RUNTIME_GUARD",
                 "A1": "APPEARANCE_HEAD_ONLY",
                 "R1": "RELATION_HEAD_ONLY",
                 "T1": "STRUCTURE_HEAD_ONLY",
@@ -170,6 +186,21 @@ class IRISVNextFit8TrainerV8(IRISVNextFit8TrainerV7):
             self.stage_index = 0
             self.stage_step = 0
             self._apply_stage_lrs()
+
+    def _apply_stage_lrs(self):
+        super()._apply_stage_lrs()
+        seal_policy, _ = quality_policy_v1()
+        seal_policy.assert_stage_definition(
+            stage_name=self.stage.stage_id,
+            scene_lr_scale=self.stage.scene_lr_scale,
+        )
+        seal_policy.assert_optimizer_configuration(
+            stage_name=self.stage.stage_id,
+            group_lrs={
+                str(group["name"]): float(group["lr"])
+                for group in self.optimizer.param_groups
+            },
+        )
 
     def migrate_v6_m1_end(self, payload: dict, *, source_checkpoint_sha256: str):
         if self.step != 0 or self.stage_index != 0 or self.stage_step != 0:

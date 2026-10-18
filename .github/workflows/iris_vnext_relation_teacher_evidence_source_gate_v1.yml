@@ -1,0 +1,55 @@
+name: iris-vnext-relation-teacher-evidence-source-gate-v1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/iris_vnext_relation_teacher_evidence_source_gate_v1.yml'
+      - 'tools/iris_vnext/audit_authored_motion_relation_conditioning_v1.py'
+      - 'tests/iris/test_authored_motion_relation_conditioning_v1.py'
+  push:
+    branches: [research/iris-vnext-post-v8-quality-plan-20261018]
+    paths:
+      - '.github/workflows/iris_vnext_relation_teacher_evidence_source_gate_v1.yml'
+      - 'tools/iris_vnext/audit_authored_motion_relation_conditioning_v1.py'
+      - 'tests/iris/test_authored_motion_relation_conditioning_v1.py'
+  workflow_dispatch:
+
+concurrency:
+  group: iris-vnext-relation-teacher-evidence-source-gate-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
+      - name: Install focused dependencies
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Compile authored-motion relation evidence court
+        run: |
+          python -m py_compile \
+            tools/iris_vnext/audit_authored_motion_relation_conditioning_v1.py \
+            tests/iris/test_authored_motion_relation_conditioning_v1.py
+      - name: Authored-motion relation evidence contracts
+        run: |
+          python -m pytest -q tests/iris/test_authored_motion_relation_conditioning_v1.py
+      - name: Summary
+        run: |
+          echo 'IRIS_VNEXT_RELATION_TEACHER_EVIDENCE_SOURCE_GATE_PASS'
+          echo 'authored_motion_evidence=diagnostic_court_only'
+          echo 'optimizer_steps=forbidden'
+          echo 'training_authorization=false'
+          echo 'next=materialize_exact_teacher_motion_evidence_before_v10_supervision'

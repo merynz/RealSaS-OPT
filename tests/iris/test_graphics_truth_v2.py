@@ -5,42 +5,63 @@ import torch
 from models.iris.vnext.boundary_causality_v1 import EvidenceAuthority
 from models.iris.vnext.graphics_truth_v2 import (
     GraphicsStaticTruthRowV2,
+    GraphicsViewTruthRowV2,
     QualifiedProbabilityTargetV2,
     static_row_to_training_maps_v2,
+    view_row_to_training_maps_v2,
 )
 from models.iris.vnext.training_v2 import RELATION_KEYS_V2, graphics_relation_loss_v2
 
 
 class GraphicsTruthV2Tests(unittest.TestCase):
-    def test_abstained_cut_is_not_training_truth(self):
-        valid = QualifiedProbabilityTargetV2(
-            value=1.0,
-            authority=EvidenceAuthority.RAW_AUTHORED,
-            provenance="authored_material_slot:face=1|2",
+    @staticmethod
+    def _valid(value: float, provenance: str) -> QualifiedProbabilityTargetV2:
+        return QualifiedProbabilityTargetV2(
+            value=value,
+            authority=EvidenceAuthority.DETERMINISTIC_DERIVED,
+            provenance=provenance,
             valid_for_training=True,
         )
-        unknown_cut = QualifiedProbabilityTargetV2.abstain(
-            provenance="drawable_cut_not_identifiable_from_current_source"
-        )
+
+    def test_abstained_cut_is_not_training_truth(self):
         row = GraphicsStaticTruthRowV2(
             face_a=1,
             face_b=2,
             same_drawable_affinity=QualifiedProbabilityTargetV2.abstain(
                 provenance="anonymous_object_id_is_not_authoritative_drawable_owner"
             ),
-            cut_probability=unknown_cut,
+            cut_probability=QualifiedProbabilityTargetV2.abstain(
+                provenance="drawable_cut_not_identifiable_from_current_source"
+            ),
             attachment_affinity=QualifiedProbabilityTargetV2.abstain(
                 provenance="no_authoritative_attachment_relation"
             ),
-            alpha_boundary_probability=QualifiedProbabilityTargetV2.abstain(
-                provenance="no_raster_sample_for_this_static_pair"
-            ),
-            appearance_boundary_probability=valid,
         )
         values, validity = static_row_to_training_maps_v2(row)
         self.assertEqual(values["cut_probability"], 0.0)
         self.assertFalse(validity["cut_probability"])
-        self.assertTrue(validity["appearance_boundary_probability"])
+        self.assertNotIn("projected_alpha_boundary_probability", values)
+
+    def test_projected_boundaries_exist_only_in_view_truth(self):
+        row = GraphicsViewTruthRowV2(
+            view_index=3,
+            face_a=1,
+            face_b=2,
+            front_probability=self._valid(1.0, "ray_stack:view=3:front"),
+            occlusion_probability=self._valid(1.0, "ray_stack:view=3:occlusion"),
+            visibility_probability_a=self._valid(1.0, "ray_stack:view=3:vis_a"),
+            visibility_probability_b=self._valid(0.0, "ray_stack:view=3:vis_b"),
+            projected_alpha_boundary_probability=self._valid(
+                1.0, "rgba_3x3:view=3:alpha_range"
+            ),
+            projected_appearance_boundary_probability=self._valid(
+                1.0, "rgba_3x3:view=3:rgb_distance"
+            ),
+        )
+        values, validity = view_row_to_training_maps_v2(row)
+        self.assertEqual(values["projected_alpha_boundary_probability"], 1.0)
+        self.assertTrue(validity["projected_appearance_boundary_probability"])
+        self.assertNotIn("cut_probability", values)
 
     def test_diagnostic_only_target_cannot_be_marked_trainable(self):
         with self.assertRaisesRegex(ValueError, "DIAGNOSTIC_TARGET_CANNOT_TRAIN"):
@@ -67,6 +88,14 @@ class GraphicsTruthV2Tests(unittest.TestCase):
             predicted["front_probability"], truth["front_probability"]
         )
         self.assertTrue(torch.allclose(loss, expected))
+
+    def test_legacy_static_boundary_prediction_names_are_forbidden(self):
+        predicted = {name: torch.full((2,), 0.5) for name in RELATION_KEYS_V2}
+        predicted["alpha_boundary_probability"] = torch.full((2,), 0.5)
+        truth = {name: torch.zeros(2) for name in RELATION_KEYS_V2}
+        validity = {name: torch.ones(2, dtype=torch.bool) for name in RELATION_KEYS_V2}
+        with self.assertRaisesRegex(ValueError, "LEGACY_STATIC_BOUNDARY_KEY_FORBIDDEN"):
+            graphics_relation_loss_v2(predicted, truth, validity)
 
     def test_all_abstained_is_fail_closed(self):
         predicted = {name: torch.full((2,), 0.5) for name in RELATION_KEYS_V2}

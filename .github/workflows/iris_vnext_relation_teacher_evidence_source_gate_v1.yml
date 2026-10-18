@@ -5,18 +5,22 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/iris_vnext_relation_teacher_evidence_source_gate_v1.yml'
+      - '.github/workflows/iris_vnext_relation_evidence_self_hosted_v1.yml'
       - 'tools/iris_vnext/audit_authored_motion_relation_conditioning_v1.py'
       - 'tools/iris_vnext/build_fit8_relation_all_hit_evidence_v1.py'
       - 'tests/iris/test_authored_motion_relation_conditioning_v1.py'
       - 'tests/iris/test_relation_all_hit_evidence_v1.py'
+      - 'tests/repository/test_relation_evidence_self_hosted_v1.py'
   push:
     branches: [research/iris-vnext-post-v8-quality-plan-20261018]
     paths:
       - '.github/workflows/iris_vnext_relation_teacher_evidence_source_gate_v1.yml'
+      - '.github/workflows/iris_vnext_relation_evidence_self_hosted_v1.yml'
       - 'tools/iris_vnext/audit_authored_motion_relation_conditioning_v1.py'
       - 'tools/iris_vnext/build_fit8_relation_all_hit_evidence_v1.py'
       - 'tests/iris/test_authored_motion_relation_conditioning_v1.py'
       - 'tests/iris/test_relation_all_hit_evidence_v1.py'
+      - 'tests/repository/test_relation_evidence_self_hosted_v1.py'
   workflow_dispatch:
 
 concurrency:
@@ -48,12 +52,14 @@ jobs:
             tools/iris_vnext/audit_authored_motion_relation_conditioning_v1.py \
             tools/iris_vnext/build_fit8_relation_all_hit_evidence_v1.py \
             tests/iris/test_authored_motion_relation_conditioning_v1.py \
-            tests/iris/test_relation_all_hit_evidence_v1.py
+            tests/iris/test_relation_all_hit_evidence_v1.py \
+            tests/repository/test_relation_evidence_self_hosted_v1.py
       - name: Rich relation evidence contracts
         run: |
           python -m pytest -q \
             tests/iris/test_authored_motion_relation_conditioning_v1.py \
-            tests/iris/test_relation_all_hit_evidence_v1.py
+            tests/iris/test_relation_all_hit_evidence_v1.py \
+            tests/repository/test_relation_evidence_self_hosted_v1.py
       - name: Summary
         run: |
           echo 'IRIS_VNEXT_RELATION_TEACHER_EVIDENCE_SOURCE_GATE_PASS'
@@ -61,6 +67,7 @@ jobs:
           echo 'static_all_hit_evidence=complete_stack__front_visibility_decoupled'
           echo 'pair_coordinates=exact_legacy_iris_normalization'
           echo 'occlusion=positive_support_only__no_fabricated_negatives'
+          echo 'execution_lane=read_only_remote_inputs__actions_artifact_output_only'
           echo 'optimizer_steps=forbidden'
           echo 'training_authorization=false'
           echo 'next=materialize_exact_motion_plus_all_hit_evidence_before_v10_truth'

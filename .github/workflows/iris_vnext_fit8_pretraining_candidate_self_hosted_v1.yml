@@ -1,0 +1,429 @@
+name: iris-vnext-fit8-pretraining-candidate-self-hosted-v1
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_source_sha:
+        description: 'Exact active review SHA; must equal selected ref HEAD.'
+        required: true
+        type: string
+      quarantine_audit_run_id:
+        description: 'Run id of the exact-SHA read-only quarantine audit.'
+        required: true
+        type: string
+      quarantine_audit_report_sha256:
+        description: 'SHA256 of QUARANTINE_AUDIT.json from that run.'
+        required: true
+        type: string
+      confirm_candidate_write:
+        description: 'Write only to the exact-SHA candidate remote, never the quarantined shared remote.'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: iris-vnext-fit8-pretraining-candidate-self-hosted-v1
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    if: github.repository == 'merynz/RealSaS-OPT'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
+      CONFIRM_CANDIDATE_WRITE: ${{ inputs.confirm_candidate_write }}
+      RUN_ROOT: /home/monster/realsas_authority/runs/IRIS_VNEXT_PRETRAINING_CANDIDATES/${{ github.run_id }}-${{ github.run_attempt }}
+      CANDIDATE_REMOTE: gdrive:RealSaS_Fit8_IRIS_vNext_candidates/${{ github.sha }}
+      QUARANTINED_REMOTE: gdrive:RealSaS_Fit8_IRIS_vNext_20261016
+      STAGE01_FILE_ID: 1PcxT2rfb9jCHfP75gaqMAo90OU7JRypH
+      STAGE01_SHA256: 9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936
+      LEGACY_MANIFEST_FILE_ID: 1PJ-SxGVS6F6pHUFgB8Kws69X9wS5aywa
+      LEGACY_MANIFEST_SHA256: 088283fbca5ac6c95dc8d9fedadaafbf9bf82603cc6bee28948af995945e5053
+      SHARD_ROOT_A: 177ZjtvXH0mwtrpfow53hwo-QiE49KXOV
+      SHARD_ROOT_B: 19S7ec8gLSa6SfyVcLXmpkLwpIHDuk7BR
+      SHARD_ROOT_C: 1ibJMCIO1DCpQ8CPBd2XhgRfNNlYqVN2L
+      V8_CHECKPOINT_FILE_ID: 1xttwuxgC8y9EVmf7xxMEN4yj84yhm4zH
+      V8_CHECKPOINT_FILE: step_00012000_ac23a9ea448e465cb668773a131981be.pt
+      V8_CHECKPOINT_SHA256: 0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5
+      V8_LATEST_FILE_ID: 1t5Wk4Xj1SGRmqAq3-eo5wR5NTSt-7sij
+      V8_LATEST_SHA256: 6238c2a792364beb241dd6ee044778da6280854483303a1502626562515c3a9f
+      V8_COMPLETION_FILE_ID: 1AHDGBtViB8KDGRPpn7uF53OWqM-DBQwS
+      V8_COMPLETION_SHA256: 61c207adcbdb9ab398c58acf4ca7afa55eb95aa3a1ef23dc859e7deb8ab4059d
+      V8_START_FILE_ID: 1iQcLM3oKloIxw5YpybavM4ekxOX75rg3
+      V8_START_SHA256: 6bcb92c830ae918978bb60b23ccde528cde477c56bb41ac1ade60ef5065aee55
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Fail closed unless dispatch owns exact active review source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CONFIRM_CANDIDATE_WRITE" = 'true' || {
+            echo 'VNEXT_CANDIDATE_EXPLICIT_CONFIRMATION_REQUIRED'; exit 2;
+          }
+          test "$GITHUB_REF_NAME" = 'research/iris-vnext-post-v8-quality-plan-20261018' || {
+            echo "VNEXT_CANDIDATE_WRONG_BRANCH:$GITHUB_REF_NAME"; exit 2;
+          }
+          case "$EXPECTED_SOURCE_SHA" in
+            *[!0-9a-fA-F]*|'') echo 'VNEXT_CANDIDATE_EXPECTED_SHA_INVALID'; exit 2 ;;
+          esac
+          test "${#EXPECTED_SOURCE_SHA}" -eq 40 || {
+            echo 'VNEXT_CANDIDATE_EXPECTED_SHA_LENGTH_INVALID'; exit 2;
+          }
+          head_sha="$(git rev-parse HEAD)"
+          test "$head_sha" = "${EXPECTED_SOURCE_SHA,,}" || {
+            echo "VNEXT_CANDIDATE_HEAD_MISMATCH:expected=${EXPECTED_SOURCE_SHA,,}:actual=$head_sha"; exit 2;
+          }
+          test "$GITHUB_SHA" = "$head_sha" || {
+            echo "VNEXT_CANDIDATE_GITHUB_SHA_MISMATCH:$GITHUB_SHA:$head_sha"; exit 2;
+          }
+          test "$CANDIDATE_REMOTE" = "gdrive:RealSaS_Fit8_IRIS_vNext_candidates/$head_sha" || {
+            echo 'VNEXT_CANDIDATE_REMOTE_SHA_SCOPE_DRIFT'; exit 2;
+          }
+          test "$CANDIDATE_REMOTE" != "$QUARANTINED_REMOTE" || {
+            echo 'VNEXT_CANDIDATE_QUARANTINED_REMOTE_WRITE_FORBIDDEN'; exit 2;
+          }
+          rm -rf "$RUN_ROOT"
+          mkdir -p "$RUN_ROOT"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: iris-vnext-fit8-quarantine-audit-${{ inputs.quarantine_audit_run_id }}
+          path: ${{ env.RUN_ROOT }}/quarantine_audit
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.quarantine_audit_run_id }}
+
+      - name: Bind reviewed quarantine audit without authorizing the old remote
+        shell: bash
+        env:
+          EXPECTED_AUDIT_SHA256: ${{ inputs.quarantine_audit_report_sha256 }}
+        run: |
+          set -euo pipefail
+          audit_report="$(find "$RUN_ROOT/quarantine_audit" -name QUARANTINE_AUDIT.json -type f -print)"
+          test "$(printf '%s\n' "$audit_report" | sed '/^$/d' | wc -l)" -eq 1 || {
+            echo 'VNEXT_CANDIDATE_QUARANTINE_AUDIT_REPORT_CARDINALITY_INVALID'; exit 2;
+          }
+          case "$EXPECTED_AUDIT_SHA256" in
+            *[!0-9a-fA-F]*|'') echo 'VNEXT_CANDIDATE_AUDIT_SHA_INVALID'; exit 2 ;;
+          esac
+          test "${#EXPECTED_AUDIT_SHA256}" -eq 64 || {
+            echo 'VNEXT_CANDIDATE_AUDIT_SHA_LENGTH_INVALID'; exit 2;
+          }
+          printf '%s  %s\n' "${EXPECTED_AUDIT_SHA256,,}" "$audit_report" | sha256sum --check -
+          python - "$audit_report" "$GITHUB_SHA" <<'PY'
+          import json,sys
+          report=json.load(open(sys.argv[1],encoding='utf-8'))
+          expected=sys.argv[2].lower()
+          assert report['schema']=='RealSaS.IRISVNextFit8RemotePreparationAudit.v1'
+          assert report['expected_current_source_sha']==expected
+          assert report['remote_consumption_authorized'] is False
+          assert report['status'] in {
+              'CURRENT_SOURCE_REMOTE_CANDIDATE',
+              'STALE_SOURCE_REMOTE',
+              'UNBOUND_REMOTE_SNAPSHOT',
+              'INCOMPLETE_REMOTE_SNAPSHOT',
+              'INVALID_REMOTE_SNAPSHOT',
+          }
+          print('VNEXT_CANDIDATE_QUARANTINE_AUDIT_BOUND',report['status'])
+          PY
+          echo "QUARANTINE_AUDIT_REPORT=$audit_report" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install preparation/materialization dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          python -m py_compile \
+            tools/iris_vnext/export_fit8_authored_teachers_v1.py \
+            tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py \
+            tools/iris_vnext/build_fit8_relation_truth_v2.py \
+            tools/iris_vnext/build_fit8_boundary_causality_v1.py \
+            tools/iris_vnext/migrate_v8_relation_head_v2.py \
+            tools/iris_vnext/verify_fit8_candidate_roundtrip_v1.py \
+            tools/iris_vnext/seal_fit8_pretraining_materialization_v1.py \
+            tools/iris_vnext/audit_fit8_pretraining_readiness_v1.py
+          command -v rclone >/dev/null
+          command -v unzip >/dev/null
+
+      - name: Resolve pinned Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          version='4.5.14'
+          cache_root="$HOME/.cache/realsas/blender"
+          install_root="$cache_root/blender-${version}-linux-x64"
+          blender_path="$install_root/blender"
+          if test -x "$blender_path"; then
+            echo "BLENDER_EXE=$blender_path" >> "$GITHUB_ENV"
+            "$blender_path" --version | head -n 2
+            exit 0
+          fi
+          if system_blender="$(command -v blender 2>/dev/null)" && test -x "$system_blender"; then
+            echo "BLENDER_EXE=$system_blender" >> "$GITHUB_ENV"
+            "$system_blender" --version | head -n 2
+            exit 0
+          fi
+          base="https://download.blender.org/release/Blender4.5"
+          archive="blender-${version}-linux-x64.tar.xz"
+          download_root="$HOME/.cache/realsas/downloads"
+          archive_path="$download_root/$archive"
+          checksum_path="$download_root/blender-${version}.sha256"
+          mkdir -p "$cache_root" "$download_root"
+          if ! test -s "$archive_path" || ! test -s "$checksum_path"; then
+            curl --fail --location --retry 3 --retry-delay 2 "$base/$archive" --output "$archive_path"
+            curl --fail --location --retry 3 --retry-delay 2 "$base/blender-${version}.sha256" --output "$checksum_path"
+          fi
+          (
+            cd "$download_root"
+            grep "  $archive\$" "$(basename "$checksum_path")" | sha256sum --check -
+          )
+          rm -rf "$install_root"
+          tar -xJf "$archive_path" -C "$cache_root"
+          test -x "$blender_path"
+          echo "BLENDER_EXE=$blender_path" >> "$GITHUB_ENV"
+
+      - name: Hydrate exact admitted Fit8 inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUN_ROOT/stage01" "$RUN_ROOT/legacy_download" "$RUN_ROOT/legacy_bound"
+          stage_zip="$RUN_ROOT/FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip"
+          rclone backend copyid gdrive: "$STAGE01_FILE_ID" "$stage_zip"
+          printf '%s  %s\n' "$STAGE01_SHA256" "$stage_zip" | sha256sum --check -
+          unzip -q "$stage_zip" -d "$RUN_ROOT/stage01"
+
+          for spec in "A:$SHARD_ROOT_A" "B:$SHARD_ROOT_B" "C:$SHARD_ROOT_C"; do
+            label="${spec%%:*}"
+            folder_id="${spec#*:}"
+            mkdir -p "$RUN_ROOT/legacy_download/$label"
+            rclone copy gdrive: "$RUN_ROOT/legacy_download/$label" --drive-root-folder-id "$folder_id" --checksum
+          done
+          rclone backend copyid gdrive: "$LEGACY_MANIFEST_FILE_ID" "$RUN_ROOT/legacy_download/COHORT_MANIFEST.json"
+          printf '%s  %s\n' "$LEGACY_MANIFEST_SHA256" "$RUN_ROOT/legacy_download/COHORT_MANIFEST.json" | sha256sum --check -
+
+          python - <<'PY'
+          import hashlib,json,os,shutil
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])
+          binding=json.loads(Path('canonical/VNEXT_FIT8_INPUT_BINDING_V1.json').read_text())
+          def sha(p):
+              h=hashlib.sha256()
+              with p.open('rb') as f:
+                  for b in iter(lambda:f.read(4*1024*1024),b''): h.update(b)
+              return h.hexdigest()
+          def exact_named(name,digest):
+              rows=sorted(p for p in (root/'legacy_download').rglob(name) if p.is_file() and sha(p)==digest)
+              if not rows: raise RuntimeError(f'VNEXT_CANDIDATE_EXACT_FILE_RESOLUTION_FAILED:{name}')
+              return rows[0],len(rows)
+          out=root/'legacy_bound'
+          manifest=binding['legacy_iris_cohort_manifest']
+          src,manifest_copies=exact_named(manifest['file'],manifest['sha256'])
+          shutil.copy2(src,out/manifest['file'])
+          receipt=[]
+          for row in binding['subjects']:
+              src,copies=exact_named(row['legacy_shard_file'],row['legacy_shard_sha256'])
+              dst=out/row['legacy_shard_file']; shutil.copy2(src,dst)
+              receipt.append({'subject_id':row['subject_id'],'file':dst.name,'sha256':sha(dst),'exact_copy_count':copies})
+          (out/'HYDRATION_RECEIPT.json').write_text(json.dumps({
+              'schema':'RealSaS.VNextFit8LegacyHydration.v1',
+              'subjects':receipt,
+              'cohort_manifest_sha256':sha(out/manifest['file']),
+              'cohort_manifest_exact_copy_count':manifest_copies,
+              'legacy_optimizer_state_reused':False,
+          },sort_keys=True,indent=2))
+          boots=list((root/'stage01').rglob('BOOTSTRAP_MANIFEST.json'))
+          if len(boots)!=1: raise RuntimeError(f'VNEXT_CANDIDATE_STAGE01_ROOT_RESOLUTION_FAILED:{len(boots)}')
+          with Path(os.environ['GITHUB_ENV']).open('a') as f:
+              f.write(f"STAGE01_ROOT={boots[0].parent.resolve()}\n")
+              f.write(f"STAGE01_ZIP={(root/'FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip').resolve()}\n")
+              f.write(f"LEGACY_BOUND={out.resolve()}\n")
+          print('VNEXT_CANDIDATE_INPUT_HYDRATION_PASS',len(receipt))
+          PY
+
+      - name: Export exact authored-motion teacher batch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUN_ROOT/teachers"
+          python tools/iris_vnext/export_fit8_authored_teachers_v1.py \
+            --blender "$BLENDER_EXE" \
+            --binding canonical/VNEXT_FIT8_INPUT_BINDING_V1.json \
+            --stage01-bundle "$STAGE01_ZIP" \
+            --stage01-root "$STAGE01_ROOT" \
+            --legacy-shard-dir "$LEGACY_BOUND" \
+            --legacy-cohort-manifest "$LEGACY_BOUND/COHORT_MANIFEST.json" \
+            --output-dir "$RUN_ROOT/teachers" \
+            --max-frames-per-clip 16
+          test -s "$RUN_ROOT/teachers/TEACHER_BATCH_RECEIPT.json"
+
+      - name: Build sealed topology-safe V4 cohort
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUN_ROOT/prepared"
+          python tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py \
+            --binding canonical/VNEXT_FIT8_INPUT_BINDING_V1.json \
+            --stage01-bundle "$STAGE01_ZIP" \
+            --stage01-root "$STAGE01_ROOT" \
+            --legacy-shard-dir "$LEGACY_BOUND" \
+            --legacy-cohort-manifest "$LEGACY_BOUND/COHORT_MANIFEST.json" \
+            --teacher-dir "$RUN_ROOT/teachers" \
+            --output-dir "$RUN_ROOT/prepared"
+
+      - name: Materialize Relation Truth V2 and Boundary Causality V1
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUN_ROOT/truth/relation_v2" "$RUN_ROOT/truth/boundary_v1"
+          python tools/iris_vnext/build_fit8_relation_truth_v2.py \
+            --legacy-shard-dir "$LEGACY_BOUND" \
+            --teacher-dir "$RUN_ROOT/teachers" \
+            --stage01-root "$STAGE01_ROOT" \
+            --output-dir "$RUN_ROOT/truth/relation_v2"
+          python tools/iris_vnext/build_fit8_boundary_causality_v1.py \
+            --teacher-dir "$RUN_ROOT/teachers" \
+            --stage01-root "$STAGE01_ROOT" \
+            --relation-truth-dir "$RUN_ROOT/truth/relation_v2" \
+            --output-dir "$RUN_ROOT/truth/boundary_v1"
+          test -s "$RUN_ROOT/truth/relation_v2/RELATION_TRUTH_V2_MANIFEST.json"
+          test -s "$RUN_ROOT/truth/boundary_v1/BOUNDARY_CAUSALITY_V1_MANIFEST.json"
+
+      - name: Hydrate exact completed V8 authority artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUN_ROOT/v8"
+          rclone backend copyid gdrive: "$V8_CHECKPOINT_FILE_ID" "$RUN_ROOT/v8/$V8_CHECKPOINT_FILE"
+          rclone backend copyid gdrive: "$V8_LATEST_FILE_ID" "$RUN_ROOT/v8/LATEST.json"
+          rclone backend copyid gdrive: "$V8_COMPLETION_FILE_ID" "$RUN_ROOT/v8/TRAINING_COMPLETE_V8_M1_SEALED.json"
+          rclone backend copyid gdrive: "$V8_START_FILE_ID" "$RUN_ROOT/v8/SCIENTIFIC_START_V8_M1_SEALED.json"
+          printf '%s  %s\n' "$V8_CHECKPOINT_SHA256" "$RUN_ROOT/v8/$V8_CHECKPOINT_FILE" | sha256sum --check -
+          printf '%s  %s\n' "$V8_LATEST_SHA256" "$RUN_ROOT/v8/LATEST.json" | sha256sum --check -
+          printf '%s  %s\n' "$V8_COMPLETION_SHA256" "$RUN_ROOT/v8/TRAINING_COMPLETE_V8_M1_SEALED.json" | sha256sum --check -
+          printf '%s  %s\n' "$V8_START_SHA256" "$RUN_ROOT/v8/SCIENTIFIC_START_V8_M1_SEALED.json" | sha256sum --check -
+
+      - name: Migrate exact V8 relation head to conditioning-correct V2
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUN_ROOT/migration"
+          python tools/iris_vnext/migrate_v8_relation_head_v2.py \
+            --checkpoint "$RUN_ROOT/v8/$V8_CHECKPOINT_FILE" \
+            --latest-pointer "$RUN_ROOT/v8/LATEST.json" \
+            --completion-receipt "$RUN_ROOT/v8/TRAINING_COMPLETE_V8_M1_SEALED.json" \
+            --scientific-start "$RUN_ROOT/v8/SCIENTIFIC_START_V8_M1_SEALED.json" \
+            --output-dir "$RUN_ROOT/migration"
+          test -s "$RUN_ROOT/migration/V8_RELATION_HEAD_TO_V2_MIGRATION_RECEIPT.json"
+
+      - name: Assemble exact-SHA pretraining candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate="$RUN_ROOT/candidate"
+          rm -rf "$candidate"
+          mkdir -p "$candidate/receipts" "$candidate/truth" "$candidate/migration"
+          cp -a "$RUN_ROOT/teachers" "$candidate/teachers"
+          cp -a "$RUN_ROOT/prepared" "$candidate/prepared"
+          cp "$LEGACY_BOUND/HYDRATION_RECEIPT.json" "$candidate/receipts/HYDRATION_RECEIPT.json"
+          cp -a "$RUN_ROOT/truth/relation_v2" "$candidate/truth/relation_v2"
+          cp -a "$RUN_ROOT/truth/boundary_v1" "$candidate/truth/boundary_v1"
+          cp -a "$RUN_ROOT/migration/." "$candidate/migration/"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])/'candidate'
+          value={
+              'schema':'RealSaS.IRISVNextFit8PretrainingCandidate.v1',
+              'source_commit_sha':os.environ['GITHUB_SHA'],
+              'candidate_remote':os.environ['CANDIDATE_REMOTE'],
+              'quarantined_remote_consumed':False,
+              'scientific_fit_started':False,
+              'scientific_fit_pass_claimed':False,
+              'training_authorized':False,
+          }
+          (root/'CANDIDATE.json').write_text(json.dumps(value,sort_keys=True,indent=2)+'\n')
+          PY
+
+      - name: Persist only to empty exact-SHA candidate remote
+        shell: bash
+        run: |
+          set -euo pipefail
+          existing="$(rclone lsf "$CANDIDATE_REMOTE" --recursive 2>/dev/null || true)"
+          test -z "$existing" || {
+            echo 'VNEXT_CANDIDATE_REMOTE_ALREADY_NONEMPTY__NO_OVERWRITE'; exit 2;
+          }
+          rclone copy "$RUN_ROOT/candidate" "$CANDIDATE_REMOTE" --checksum
+
+      - name: Verify full remote round-trip byte identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$RUN_ROOT/roundtrip"
+          mkdir -p "$RUN_ROOT/roundtrip" "$RUN_ROOT/evidence"
+          rclone copy "$CANDIDATE_REMOTE" "$RUN_ROOT/roundtrip" --checksum
+          python tools/iris_vnext/verify_fit8_candidate_roundtrip_v1.py \
+            --local-root "$RUN_ROOT/candidate" \
+            --roundtrip-root "$RUN_ROOT/roundtrip" \
+            --expected-source-sha "$GITHUB_SHA" \
+            --candidate-remote "$CANDIDATE_REMOTE" \
+            --output "$RUN_ROOT/evidence/CANDIDATE_ROUNDTRIP_RECEIPT.json"
+
+      - name: Seal pretraining materialization without authorizing training
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/iris_vnext/seal_fit8_pretraining_materialization_v1.py \
+            --expected-source-sha "$GITHUB_SHA" \
+            --candidate-roundtrip-receipt "$RUN_ROOT/evidence/CANDIDATE_ROUNDTRIP_RECEIPT.json" \
+            --relation-manifest "$RUN_ROOT/truth/relation_v2/RELATION_TRUTH_V2_MANIFEST.json" \
+            --boundary-manifest "$RUN_ROOT/truth/boundary_v1/BOUNDARY_CAUSALITY_V1_MANIFEST.json" \
+            --quarantine-audit-report "$QUARANTINE_AUDIT_REPORT" \
+            --migration-receipt "$RUN_ROOT/migration/V8_RELATION_HEAD_TO_V2_MIGRATION_RECEIPT.json" \
+            --output "$RUN_ROOT/evidence/PRETRAINING_MATERIALIZATION_RECEIPT.json"
+          echo 'VNEXT_PRETRAINING_CANDIDATE_SEALED__TRAINING_NOT_STARTED'
+
+      - name: Upload compact pretraining evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-vnext-fit8-pretraining-candidate-${{ github.run_id }}
+          path: |
+            ${{ env.RUN_ROOT }}/evidence/CANDIDATE_ROUNDTRIP_RECEIPT.json
+            ${{ env.RUN_ROOT }}/evidence/PRETRAINING_MATERIALIZATION_RECEIPT.json
+            ${{ env.RUN_ROOT }}/candidate/CANDIDATE.json
+            ${{ env.RUN_ROOT }}/teachers/TEACHER_BATCH_RECEIPT.json
+            ${{ env.RUN_ROOT }}/prepared/COHORT_MANIFEST.json
+            ${{ env.RUN_ROOT }}/prepared/PREPARATION_RECEIPT.json
+            ${{ env.RUN_ROOT }}/truth/relation_v2/RELATION_TRUTH_V2_MANIFEST.json
+            ${{ env.RUN_ROOT }}/truth/boundary_v1/BOUNDARY_CAUSALITY_V1_MANIFEST.json
+            ${{ env.RUN_ROOT }}/migration/V8_RELATION_HEAD_TO_V2_MIGRATION_RECEIPT.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          echo "source_sha=$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "candidate_remote=$CANDIDATE_REMOTE" >> "$GITHUB_STEP_SUMMARY"
+          echo "quarantined_remote_consumed=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "training_started=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "training_authorized=false" >> "$GITHUB_STEP_SUMMARY"
+          if test -s "$RUN_ROOT/evidence/PRETRAINING_MATERIALIZATION_RECEIPT.json"; then
+            cat "$RUN_ROOT/evidence/PRETRAINING_MATERIALIZATION_RECEIPT.json" >> "$GITHUB_STEP_SUMMARY"
+          fi

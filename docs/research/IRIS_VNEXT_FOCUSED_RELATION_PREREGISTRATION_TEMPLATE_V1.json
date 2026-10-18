@@ -1,0 +1,39 @@
+{
+  "court_notes": {
+    "directional_front_visibility": "REQUIRE_BINARY_SUPPORT",
+    "occlusion_probability": "CURRENT_TRUTH_V2_IS_SINGLE_CLASS_POSITIVE__NOT_BINARY_COURT_ELIGIBLE",
+    "static_same_cut_attachment": "ABSTAIN_UNLESS_INDEPENDENT_AUTHORITY_EXISTS",
+    "threshold_rule": "METRIC_SPECIFIC_THRESHOLDS_LOCKED_BEFORE_TRAINING__NO_POST_HOC_RELAXATION"
+  },
+  "exact_artifact_bindings": {
+    "materialization_receipt_sha256": null,
+    "migration_receipt_sha256": null,
+    "relation_truth_v2_manifest_sha256": null,
+    "source_commit_sha": null
+  },
+  "held_out": {
+    "no_training_example_leakage": true,
+    "split_policy": null,
+    "split_seed": null
+  },
+  "held_out_gates": [],
+  "non_regression_gates": [],
+  "optimizer": {
+    "relation_head_learning_rate": null,
+    "scene_core_learning_rate": 0.0,
+    "weight_decay": null
+  },
+  "purpose": "Focused post-V8 relation/boundary specialist optimization with scene_core sealed",
+  "scene_core_reopening_authorized": false,
+  "schedule": {
+    "checkpoint_interval": null,
+    "evaluation_interval": null,
+    "maximum_optimizer_steps": null,
+    "stage_extension_policy": "NO_EXTENSION_WITHOUT_SEPARATE_PREREGISTERED_AMENDMENT"
+  },
+  "schema": "RealSaS.IRISVNextFocusedRelationPreregistration.v1",
+  "scientific_fit_pass_claimed": false,
+  "scientific_fit_started": false,
+  "status": "TEMPLATE_NOT_EXECUTABLE",
+  "thresholds_locked_before_training": false
+}

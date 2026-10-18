@@ -1,16 +1,16 @@
 # RealSaS-OPT — Current Plan
 
 **Date:** 2026-10-18  
-**Status:** ACTIVE POST-V8 QUALITY / TRUTH / CONSUMPTION PROGRAM  
+**Status:** PRETRAINING MATERIALIZATION / FOCUSED POST-V8 RELATION PROGRAM  
 **Active source line:** `research/iris-vnext-post-v8-quality-plan-20261018`  
-**Latest verified code parent before this docs sync:** `b6d77d1805d17ffb59e19d6a8b8626d8d8e6cb69` (`39130204378` green)  
-**Review vehicle:** draft PR #116; fast-forward only after this docs head is green  
+**Verified executable pretraining source:** `726768813c523081166cc1ac49f08453260b66b9`  
+**Review vehicle:** PR #116  
 **Production authority:** `main` until reviewed merge  
-**Training policy:** no new broad Fit8 run until focused courts justify it
+**Training policy:** reach artifact-bound readiness first; execute no optimizer step before readiness PASS
 
-## 0. Non-negotiable architecture rules
+## 0. Non-negotiable rules
 
-### Single canonical carrier
+### One canonical carrier
 
 ```text
 K x candidate M*
@@ -24,7 +24,7 @@ ONE canonical M/G/W_M
 Graphics + Motion + Runtime
 ```
 
-Candidates are evidence only. A second deformable visual mesh remains forbidden.
+A second deformable visual mesh remains forbidden.
 
 ### Post-M1 carrier seal
 
@@ -32,244 +32,175 @@ Candidates are evidence only. A second deformable visual mesh remains forbidden.
 Geometry + Mechanics -> shared H -> M1 seal -> A/R/T/J specialist learning
 ```
 
-A1/R1/T1/J1 may not optimize `scene_core` unless a separately preregistered carrier-falsification court authorizes reopening and defines non-regression gates.
+`scene_core` LR remains zero unless a separate preregistered carrier-falsification court authorizes reopening with non-regression gates.
 
-V8 already established this structural seal. Historical V8 physically grouped mechanical/appearance/relation parameters under one `evidence_heads` AdamW group while stage objectives isolated which specialist received gradients. Post-V8 `optimization_v2.py` adds separate physical groups/LRs/gradient-update telemetry; it is diagnostic/optimization hardening, not a new freeze idea.
+### Truth / conditioning
 
-### Compiler / truth / conditioning laws
+- unknown is first-class;
+- unidentifiable owner/amodal/presentation targets abstain;
+- view-conditioned truth requires matching prediction conditioning;
+- Compiler may reconcile admissible evidence but may not fabricate truth or hide model incapacity.
 
-> Compiler may globally reconcile admissible evidence; it may not hide model incapacity or fabricate unavailable truth.
+## 1. Completed source tranche
 
-> Unknown is first-class. Unidentifiable owner/amodal/presentation targets abstain.
+Exact source `726768813c523081166cc1ac49f08453260b66b9` passed:
 
-> View-conditioned targets require matching prediction conditioning unless a court proves view invariance.
+- pretraining candidate source gate run `39137955380`;
+- full vNext suite run `39137955347`;
+- PR #116 broad gate set **15/15 success** on the same executable head.
 
----
+Implemented source now includes:
 
-## 1. Completed baseline: V8
+- SHA-scoped candidate preparation writer;
+- no-write quarantine separation;
+- full remote round-trip verifier;
+- Relation Truth V2 materializer;
+- Boundary Causality V1 materializer;
+- exact completed-V8 relation-head → HeadV2 zero-step migration;
+- materialization seal;
+- artifact-bound preregistration/readiness audit.
 
-V8 completed step12000 and remains the architecture/measurement baseline, not a scientific PASS.
+Training remains zero-step.
 
-Supported result: post-M1 carrier sealing preserved geometry/extraction while appearance/relation/topology objectives remained learnable from sealed H. This weakens any present claim that generic semantic classes, generic LoRA, or broad carrier reopening are required.
+## 2. Quarantined remote — forensic result CLOSED
 
----
-
-## 2. Workstream A — source hardening / CI
-
-Current status: **GREEN at `b6d77d...`, run `39130204378`.**
-
-Completed source hardening:
-
-- canonical post-M1 stage IDs + fail-closed scene guard;
-- TESSA default-offset regression repair + gate;
-- specialist optimizer V2 with `scene_core=0`, separate mechanical/appearance/relation/structure groups, explicit LRs, per-group telemetry;
-- Graphics Truth V2 contract/loss/producer source;
-- Relation Head V2 conditioning/migration source;
-- support/class-balance court eligibility source;
-- native Graphics regression coverage;
-- self-hosted stale-writer retirement + read-only quarantine audit contract.
-
-Review-line consolidation remains a gate: PR #116 must be fast-forwarded only to the **final green docs/source head**.
-
----
-
-## 3. Workstream B — self-hosted / remote preparation quarantine
-
-Incident run: `39121291171` / prepare #22 / stale source `90c9c2f...`.
-
-Affected remote:
+Remote:
 
 `gdrive:RealSaS_Fit8_IRIS_vNext_20261016`
 
-The run was cancelled during remote persistence before round-trip verification. Therefore the remote is **QUARANTINED / UNVERIFIED**.
+Read-only inspection result:
 
-Safety source now green:
+`INCOMPLETE_REMOTE_SNAPSHOT`
 
-- legacy `iris_vnext_fit8_prepare_self_hosted_v1.yml` is retired and cannot queue a self-hosted writer from push;
-- it contains no `rclone` write path;
-- `iris_vnext_fit8_quarantine_audit_self_hosted_v2.yml` is manual-dispatch only, active-branch/exact-SHA bound and read-only;
-- `audit_fit8_preparation_snapshot_v1.py` records all downloaded file SHA256 values and source binding;
-- read-only audit **never authorizes consumption**, even if remote source SHA matches current source;
-- forensic output is uploaded as a GitHub artifact.
+Observed facts:
 
-Immediate rule: keep runner offline until we deliberately dispatch the read-only audit. There is currently **no authorized self-hosted preparation writer**.
+- only `teachers/` exists at top level;
+- `prepared/` and `receipts/` are missing;
+- teacher batch SHA256 is `7ac1c66cc5f749e0f6f8cac43a9b79a135c8c45ed1138303d42c102f04c15d27` and matches stale run `39121291171`;
+- George `.teacher.npz` is absent while its receipt exists.
 
-After the read-only audit:
+Decision: **never consume or promote this remote**. Preserve only as forensic evidence.
 
-1. classify actual remote contents;
-2. preserve forensic evidence;
-3. build a new manual SHA-scoped candidate preparation writer;
-4. write to a commit-SHA-specific candidate remote, not the quarantined shared path;
-5. require full local↔remote round-trip hash equality before the candidate can be considered for later authority binding;
-6. do not auto-promote to a canonical shared remote.
+Machine record: `docs/research/IRIS_VNEXT_QUARANTINE_CONNECTOR_AUDIT_20261018.json`.
 
----
+## 3. Candidate materialization — NEXT EXECUTION
 
-## 4. Workstream C — truth + conditioning cleanup
+Use only the manual candidate workflow:
 
-### Boundary Causality V1
+`.github/workflows/iris_vnext_fit8_pretraining_candidate_self_hosted_v1.yml`
 
-Contract implemented. `RESIDUAL_UNKNOWN` abstains. Populated corpus remains pending.
+For one exact final active-review SHA:
 
-### Relation Truth V2
+1. obtain a read-only quarantine audit artifact bound to the same SHA;
+2. hydrate exact Stage01 and legacy admitted inputs by immutable file ids/hashes;
+3. export exact authored-motion teacher batch;
+4. build the V4 cohort + PreparationReceipt;
+5. materialize Relation Truth V2;
+6. materialize Boundary Causality V1;
+7. hydrate exact completed V8 authority artifacts;
+8. migrate only the V8 relation head to `GraphicsRelationHeadV2`, with **zero training steps**;
+9. assemble candidate under `gdrive:RealSaS_Fit8_IRIS_vNext_candidates/<exact_sha>`;
+10. refuse any non-empty candidate destination;
+11. copy Drive candidate back locally and require complete fileset + SHA256 equality;
+12. seal `PRETRAINING_MATERIALIZATION_RECEIPT.json` with `training_authorized=false`.
 
-Implemented and CI-green source:
+No automatic shared-remote promotion.
 
-- `models/iris/vnext/graphics_truth_v2.py`;
-- `models/iris/vnext/training_v2.py`;
-- `tools/iris_vnext/build_fit8_relation_truth_v2.py`;
-- `models/iris/vnext/relation_support_v2.py`;
-- `models/iris/vnext/heads_v2.py`;
-- `models/iris/vnext/optimization_v2.py`.
+## 4. Exact V8 migration source
 
-`GraphicsRelationHeadV2` keeps static same/cut/attachment separate and moves projected alpha/appearance boundaries to the camera-conditioned view branch with front/occlusion/visibility. Compatible V1 rows migrate; new projected-boundary rows start neutral.
-
-Still pending:
-
-- actual Fit8 Truth V2 corpus materialization/seal;
-- real V8 checkpoint→V2 migration receipt/checkpoint;
-- focused optimization;
-- held-out scientific PASS.
-
-Static same/cut/attachment abstain without independent authority. Current valid occlusion rows are single-class positive support and therefore binary-court ineligible. Do not synthesize negative truth.
-
-### Foundation salvage — exact source map
-
-Provenance: `agent/unified-iris-stdgenpp-foundation@d90c82e24ccbf43081ca19f105bc4e4c7dfe9531`.
-
-Selective source-defensible paths:
+The only authorized completed-V8 migration source is selected by V8 `LATEST.json`:
 
 ```text
-geometry/topology
-  tools/corpus/qualify_f_geometry_carrier_v1.py
-  tools/corpus/fit8_surface_topology_invariants_v1.py
-
-render/geometric + material/skin provenance
-  tools/corpus/fit8_render_vertex_equivalence_v1.py
-  tools/corpus/fit8_gltf_static_carrier_v1.py
-  tools/corpus/ufbx_static_census_probe_v2.c
-  tools/corpus/ufbx_static_census_probe_v3.c
-  tools/corpus/fit8_fbx_static_carrier_v1.py
-  tools/corpus/fit8_fbx_static_carrier_v2.py
-
-static all-hit evidence
-  tools/corpus/fit8_static_ray_census_v1.py
-  tools/corpus/fit8_static_ray_census_v2.py
-  tools/corpus/fit8_static_ray_census_v3.py
-
-authored-motion fixed-frame evidence
-  tools/corpus/fit8_gltf_dynamic_pose_v1.py
-  tools/corpus/fit8_dynamic_fixed_frame_presentation_v1.py
-  tools/corpus/fit8_dynamic_mechanics_metrics_v1.py
-  tools/corpus/fit8_gltf_dynamic_census_v2.py
-
-residual boundary
-  tools/corpus/fit8_f_residual_boundary_graph_v1.py
-  tools/corpus/fit8_f_residual_signature_v1.py
-  tools/corpus/fit8_face_strand_boundary_incidence_v1.py
-
-local continuation
-  tools/corpus/fit8_local_patch_teacher_v1.py
-  tools/corpus/fit8_patch_face_support_v1.py
-  tools/corpus/fit8_f_patch_continuation_court_v1.py
-  tools/corpus/fit8_f_face_qualified_continuation_court_v1.py
+source commit:
+  5083c9915533ec8ec6530c7d229c635887abfea7
+checkpoint:
+  step_00012000_ac23a9ea448e465cb668773a131981be.pt
+step:
+  12000
+checkpoint sha256:
+  0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5
+binding sha256:
+  735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2
 ```
 
-Do not port owner/amodal/presentation/semantic-partition claims as generic FIT8 truth.
+A second step-12000 file is not authority because `LATEST.json` does not select it.
 
-Exit criterion for new truth: authority/provenance, valid support, positive/negative balance and abstention statistics per family.
+Migration requirements:
 
----
+- historical V8 file unchanged;
+- scene_core excluded from migrated artifact;
+- optimizer state excluded;
+- no training step;
+- compatible V1 relation parameters copied exactly;
+- new projected-boundary rows neutral-initialized and camera-conditioned.
 
-## 5. Workstream D — Compiler/runtime consumption
+## 5. Truth support audit after materialization
 
-Audit: `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`.
+For each family record valid/abstained/positive/negative counts before defining held-out courts.
 
-Already source-proven:
+Current expected policy:
 
-- fragment clustering from same/cut/boundary;
-- visibility changing final native RGBA;
-- front+occlusion producing directed order;
-- native order overriding contradictory physical depth;
-- Graphics content serialized into `graphics.bin`.
+- `same_drawable_affinity`: abstain absent independent authority;
+- `cut_probability`: abstain absent independent authority;
+- `attachment_affinity`: abstain absent independent authority;
+- `front_probability`: require positive + negative support;
+- `visibility_probability_a/b`: require positive + negative support;
+- `occlusion_probability`: current truth is positive-only; not a binary PASS court;
+- projected alpha/appearance boundaries: camera-conditioned evidence, evaluate only under valid support.
 
-Open debt:
+No fabricated negatives.
 
-- attachment remains transport-only for current native raster behavior;
-- support-band values are serialized/validated but not applied by the reference renderer.
+## 6. Preregistration gate — FINAL STEP BEFORE TRAINING
 
-Every family must end with an explicit `BEHAVIORALLY_USED`, `TRANSPORT_ONLY`, or `UNCONSUMED` classification.
+Start from:
 
----
+`docs/research/IRIS_VNEXT_FOCUSED_RELATION_PREREGISTRATION_TEMPLATE_V1.json`
 
-## 6. Workstream E — independent TESSA topology court
+Fill it only after materialization, because exact artifact hashes are part of the preregistration.
 
-**NOT YET SEALED.** Training loss is not qualification.
+Required fields include:
 
-Court must report actual valid/degenerate faces, component error, boundary loops/holes, meaningful manifold diagnostics, canonical-surface deviation, source support, held-out stability and worst-case cohort behavior.
+- final source commit SHA;
+- materialization receipt SHA256;
+- migration receipt SHA256;
+- Relation Truth V2 manifest SHA256;
+- held-out split policy + seed;
+- metric-specific held-out gates and thresholds;
+- non-regression gates;
+- relation-head LR, weight decay, maximum steps, eval/checkpoint cadence;
+- `scene_core_learning_rate = 0.0`;
+- `thresholds_locked_before_training = true`.
 
-Only after a concrete failure is measured may StdGEN++-style sign/hole regularization, sparse high-resolution extraction or topology-specific capacity become eligible; require ablation + geometry non-regression.
+Then run:
 
----
+`tools/iris_vnext/audit_fit8_pretraining_readiness_v1.py`
 
-## 7. Workstream F — specialist convergence
+Required terminal state:
 
-For each authoritative valid family record:
+`READY_FOR_FOCUSED_TRAINING_ENTRY__NO_STEP_EXECUTED`
 
-- train and held-out p50/p95;
-- active count, class balance, abstention/trivial-negative fraction;
-- gradient L2;
-- parameter/update L2 and update/parameter ratio;
-- optimizer group/LR;
-- best held-out checkpoint;
-- prior-family non-regression.
+That exact status is the requested stopping point before training.
 
-Diagnosis order:
+## 7. Work after the training boundary
+
+Not execute yet:
+
+- focused frozen-carrier relation/boundary optimization;
+- independent TESSA topology court;
+- remaining Compiler/runtime attachment/support-band behavioral closure;
+- any capacity/LoRA/extraction change not justified by a failed court.
+
+No broad 12k rerun is authorized by source readiness alone.
+
+## Execution order from here
 
 ```text
-authority
-→ conditioning
-→ sampling/class support
-→ gradients/updates
-→ LR/schedule
-→ capacity last
+A. make this final state/plan/docs head green
+B. fast-forward PR #116 to the same green head
+C. dispatch exact-SHA read-only quarantine audit
+D. dispatch exact-SHA candidate materialization
+E. inspect round-trip/materialization/truth/migration receipts
+F. write artifact-bound preregistration
+G. run readiness audit
+H. STOP at READY_FOR_FOCUSED_TRAINING_ENTRY__NO_STEP_EXECUTED
 ```
-
-`scene_core` remains sealed. `0.1–0.2` comparable residuals remain optimization debt by default; historical `~0.05` is only planning context for genuinely comparable normalized metrics.
-
----
-
-## 8. StdGEN++ transfer program
-
-Pinned public code:
-
-- StdGEN `f1b0c822689dc2539c774bb73090a67c66e2e766`;
-- InstantMesh `08822c5200a4bcc0e2c1a4573409ac10b9f6692c`.
-
-Adopt now as discipline: stable carrier, constrained specialization, retained supervision, explicit topology courts, special data for hidden/internal truth.
-
-Conditional after courts: coarse-to-fine extraction, continuity/hole regularization, evidence-specific adapters/LoRA, local high-resolution specialist.
-
-Do not copy body/hair/cloth ontology. Public StdGEN lacks the exact full training loop; paper-only claims remain `PAPER_EXACT`.
-
----
-
-## 9. Immediate execution order
-
-```text
-1. commit this state/plan sync and require green CI
-2. fast-forward PR #116 branch to the final green head without force
-3. confirm no queued self-hosted write jobs
-4. deliberately dispatch read-only quarantine audit on the final active head
-5. inspect audit artifact and classify remote contamination/staleness
-6. design SHA-scoped candidate preparation writer + full round-trip verifier
-7. materialize Relation Truth V2 on exact admitted Fit8 inputs
-8. audit per-family validity/support/class balance/abstention
-9. seal real V8 relation-head -> GraphicsRelationHeadV2 migration receipt/checkpoint
-10. preregister and run focused frozen-carrier relation/boundary optimization
-11. build independent TESSA topology court
-12. close Compiler/runtime behavioral-consumption gaps
-13. capacity/extraction/LoRA changes only from court evidence
-```
-
-No blind 12k curriculum run and no broad A100 notebook is authorized by source hardening alone. No merge to `main` until review is complete and final source/docs state is coherent.

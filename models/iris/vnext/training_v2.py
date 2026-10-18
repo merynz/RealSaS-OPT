@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-"""Post-V8 specialist losses with explicit target validity.
+"""Post-V8 specialist losses with explicit target validity and conditioning.
 
 This module is intentionally separate from `training_v1.py`: V1 remains part of
-historical V8 provenance.  V2 relation training refuses implicit fallback rules
-for cut/boundary/ownership targets.  Future shards must supply one validity mask
-per relation family.
+historical V8 provenance. V2 refuses implicit fallback rules and expects
+projected boundary outputs to come from a view-conditioned prediction path.
 """
 
 from typing import Mapping
@@ -13,20 +12,10 @@ from typing import Mapping
 import torch
 import torch.nn.functional as F
 
-from .graphics_truth_v2 import assert_required_validity_keys_v2
+from .graphics_truth_v2 import ALL_RELATION_KEYS_V2, assert_required_validity_keys_v2
 
 
-RELATION_KEYS_V2 = (
-    "same_drawable_affinity",
-    "cut_probability",
-    "attachment_affinity",
-    "alpha_boundary_probability",
-    "appearance_boundary_probability",
-    "front_probability",
-    "occlusion_probability",
-    "visibility_probability_a",
-    "visibility_probability_b",
-)
+RELATION_KEYS_V2 = ALL_RELATION_KEYS_V2
 
 
 def graphics_relation_loss_v2(
@@ -36,9 +25,13 @@ def graphics_relation_loss_v2(
 ) -> torch.Tensor:
     """Average BCE only over explicitly valid targets.
 
-    The caller may abstain independently per family and per sample.  A family
+    The caller may abstain independently per family and per sample. A family
     with no valid examples contributes no loss rather than becoming an invented
-    all-negative target.  At least one family must contain valid supervision.
+    all-negative target. At least one family must contain valid supervision.
+
+    Naming is part of the contract: projected boundary targets use the
+    `projected_*` keys so a caller cannot silently feed historical camera-free
+    static boundary outputs under the same name.
     """
 
     assert_required_validity_keys_v2(truth, validity, required=RELATION_KEYS_V2)
@@ -47,6 +40,13 @@ def graphics_relation_loss_v2(
         raise ValueError(
             "IRIS_VNEXT_RELATION_V2_PREDICTION_MISSING:" + ",".join(missing_prediction)
         )
+
+    forbidden_historical_boundary_keys = {
+        "alpha_boundary_probability",
+        "appearance_boundary_probability",
+    }
+    if forbidden_historical_boundary_keys.intersection(predicted):
+        raise ValueError("IRIS_VNEXT_RELATION_V2_LEGACY_STATIC_BOUNDARY_KEY_FORBIDDEN")
 
     terms: list[torch.Tensor] = []
     for name in RELATION_KEYS_V2:

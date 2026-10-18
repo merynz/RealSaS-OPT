@@ -18,6 +18,11 @@ Do not collapse these into one notion of current:
 3. The active post-V8 branch is review source only; it does not retroactively mutate V8.
 4. Artifact Registry / Attempt / ProductRevision remain durable research/product authority. Git chronology and green CI are not scientific authority by themselves.
 
+## Platform execution continuity
+
+- **Execution/runtime/spec gate id:** `PLATFORM_EXECUTION_LANES`
+- This active platform gate governs durable execution-lane / Attempt / ProductRevision / workflow ownership. It is orthogonal to the IRIS post-V8 scientific qualification program and does **not** grant an IRIS scientific PASS.
+
 ## Training lineage and current invariant
 
 - V5 falsified unsafe single-objective downstream rewriting of shared H.

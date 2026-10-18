@@ -1,0 +1,40 @@
+{
+  "schema": "RealSaS.VNextExecutionGraph.v1",
+  "date": "2026-10-16",
+  "status": "USER_AUTHORIZED__IMPLEMENTATION_REVIEW",
+  "graph_rule": "CANDIDATES_ARE_EVIDENCE__ONE_CANONICAL_M_G_W__GRAPHICS_BINDS_ONLY_CANONICAL_M",
+  "stages": [
+    {"id":"01_SOURCE_OBSERVATION_SEALED","group":"source","depends_on":[],"authority":"SOURCE_EVIDENCE"},
+    {"id":"02_IRIS_VNEXT_FIT","group":"geometry","depends_on":["01_SOURCE_OBSERVATION_SEALED"],"authority":"LEARNED_EVIDENCE_ONLY"},
+    {"id":"03_SURFACE_WITNESS_SEALED","group":"geometry","depends_on":["02_IRIS_VNEXT_FIT"],"authority":"QUALIFIED_EVIDENCE"},
+    {"id":"04_GRAPHICS_RELATION_EVIDENCE_SEALED","group":"graphics","depends_on":["02_IRIS_VNEXT_FIT","03_SURFACE_WITNESS_SEALED"],"authority":"LEARNED_EVIDENCE_ONLY"},
+    {"id":"05_MESH_CANDIDATE_SET_PROPOSED","group":"mesh","depends_on":["02_IRIS_VNEXT_FIT","03_SURFACE_WITNESS_SEALED"],"authority":"PROPOSAL_EVIDENCE_ONLY"},
+    {"id":"06_MESH_CANDIDATES_STATIC_ADMITTED","group":"mesh","depends_on":["03_SURFACE_WITNESS_SEALED","05_MESH_CANDIDATE_SET_PROPOSED"],"authority":"ADMISSION_EVIDENCE_ONLY","compiler_large_repair_forbidden":true},
+    {"id":"07_CANDIDATE_AXIS_FIT","group":"rig","depends_on":["06_MESH_CANDIDATES_STATIC_ADMITTED"],"authority":"CANDIDATE_MECHANICS_ONLY"},
+    {"id":"08_CANDIDATE_MIRA_FIT","group":"skin","depends_on":["07_CANDIDATE_AXIS_FIT"],"authority":"CANDIDATE_MECHANICS_ONLY"},
+    {"id":"09_CANDIDATE_MECHANICAL_PROBES","group":"mesh","depends_on":["06_MESH_CANDIDATES_STATIC_ADMITTED","07_CANDIDATE_AXIS_FIT","08_CANDIDATE_MIRA_FIT"],"authority":"SELECTION_EVIDENCE_ONLY","production_motion_proof":false},
+    {"id":"10_CANONICAL_MECHANICS_SELECTED","group":"product_state","depends_on":["05_MESH_CANDIDATE_SET_PROPOSED","06_MESH_CANDIDATES_STATIC_ADMITTED","09_CANDIDATE_MECHANICAL_PROBES"],"authority":"SOLE_CANONICAL_M_G_W"},
+    {"id":"11_GRAPHICS_APPEARANCE_COMPILED","group":"graphics","depends_on":["01_SOURCE_OBSERVATION_SEALED","02_IRIS_VNEXT_FIT","10_CANONICAL_MECHANICS_SELECTED"],"authority":"SOURCE_WINS_GRAPHICS_ON_CANONICAL_M"},
+    {"id":"12_GRAPHICS_COMPILED","group":"graphics","depends_on":["04_GRAPHICS_RELATION_EVIDENCE_SEALED","10_CANONICAL_MECHANICS_SELECTED","11_GRAPHICS_APPEARANCE_COMPILED"],"authority":"COMPILED_GRAPHICS_ON_CANONICAL_M"},
+    {"id":"13_MOTION_SOURCE_SEALED","group":"motion","depends_on":["10_CANONICAL_MECHANICS_SELECTED","12_GRAPHICS_COMPILED"],"authority":"MOTION_SOURCE"},
+    {"id":"14_MOTION_COMPILED","group":"motion","depends_on":["10_CANONICAL_MECHANICS_SELECTED","13_MOTION_SOURCE_SEALED"],"authority":"COMPILED_MOTION"},
+    {"id":"15_PRODUCTION_DYNAMIC_PROOF","group":"motion","depends_on":["10_CANONICAL_MECHANICS_SELECTED","12_GRAPHICS_COMPILED","14_MOTION_COMPILED"],"authority":"PRODUCTION_DYNAMIC_QUALIFICATION","candidate_selection_probe":false},
+    {"id":"16_GRAPHICS_MOTION_SIDECARS_COMPILED","group":"graphics","depends_on":["10_CANONICAL_MECHANICS_SELECTED","12_GRAPHICS_COMPILED","14_MOTION_COMPILED","15_PRODUCTION_DYNAMIC_PROOF"],"authority":"CANONICAL_M_DERIVED_2D_SUPPORT_ONLY","independent_visual_mesh":false},
+    {"id":"17_RUNTIME_GRAPHICS_PROJECTED","group":"runtime","depends_on":["10_CANONICAL_MECHANICS_SELECTED","11_GRAPHICS_APPEARANCE_COMPILED","12_GRAPHICS_COMPILED","15_PRODUCTION_DYNAMIC_PROOF","16_GRAPHICS_MOTION_SIDECARS_COMPILED"],"authority":"RUNTIME_PROJECTION"},
+    {"id":"18_RSS_GRAPHICS_MATERIALIZED","group":"runtime","depends_on":["17_RUNTIME_GRAPHICS_PROJECTED"],"authority":"RUNTIME_PACKAGE","graphics_content_required":true},
+    {"id":"19_NATIVE_GRAPHICS_PLAYBACK_PROVEN","group":"runtime","depends_on":["18_RSS_GRAPHICS_MATERIALIZED"],"authority":"NATIVE_PLAYBACK_PROOF","hash_only_binding_forbidden":true},
+    {"id":"20_PRODUCT_CLOSURE","group":"closure","depends_on":["15_PRODUCTION_DYNAMIC_PROOF","19_NATIVE_GRAPHICS_PLAYBACK_PROVEN"],"authority":"PRODUCT_CLOSURE"}
+  ],
+  "invariants": {
+    "canonical_mechanics_stage_count": 1,
+    "canonical_mechanics_stage": "10_CANONICAL_MECHANICS_SELECTED",
+    "candidate_selection_before_canonical": true,
+    "graphics_compilation_after_canonical": true,
+    "appearance_compile_after_canonical": true,
+    "production_motion_proof_after_canonical": true,
+    "candidate_and_production_dynamic_courts_distinct": true,
+    "independent_visual_mesh_forbidden": true,
+    "named_semantic_taxonomy_forbidden": true,
+    "legacy_CAA_is_not_a_vnext_stage": true
+  }
+}

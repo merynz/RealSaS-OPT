@@ -4,16 +4,8 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from models.tessa.v1.model_v1 import (
-    TESSAConfigV1,
-    TESSADecoderBlockV1,
-    TESSAOutputV1,
-)
-
-from .scene_memory_v1 import (
-    IRISTopologySceneMemoryConfigV1,
-    IRISTopologySceneMemoryV1,
-)
+from models.tessa.v1.model_v1 import TESSAConfigV1, TESSADecoderBlockV1, TESSAOutputV1
+from .scene_memory_v1 import IRISTopologySceneMemoryConfigV1, IRISTopologySceneMemoryV1
 
 
 class TESSADecoderOnlyV1(nn.Module):
@@ -26,13 +18,8 @@ class TESSADecoderOnlyV1(nn.Module):
         self.cfg = config or TESSAConfigV1()
         self.cfg.scaling_policy()
         self.token_embedding = nn.Embedding(self.cfg.vocab_size, self.cfg.d_model)
-        self.position_embedding = nn.Embedding(
-            self.cfg.local_attention_window,
-            self.cfg.d_model,
-        )
-        self.decoder = nn.ModuleList(
-            [TESSADecoderBlockV1(self.cfg) for _ in range(self.cfg.decoder_layers)]
-        )
+        self.position_embedding = nn.Embedding(self.cfg.local_attention_window, self.cfg.d_model)
+        self.decoder = nn.ModuleList([TESSADecoderBlockV1(self.cfg) for _ in range(self.cfg.decoder_layers)])
         self.final_norm = nn.LayerNorm(self.cfg.d_model)
         self.lm_head = nn.Linear(self.cfg.d_model, self.cfg.vocab_size, bias=False)
 
@@ -41,13 +28,20 @@ class TESSADecoderOnlyV1(nn.Module):
         length: int,
         device: torch.device,
         *,
-        offset: int = 0,
+        offset: int | torch.Tensor = 0,
+        batch_size: int | None = None,
     ) -> torch.Tensor:
-        if offset < 0:
+        base = torch.arange(length, device=device)
+        if isinstance(offset, torch.Tensor):
+            value = offset.to(device=device, dtype=torch.long)
+            if value.ndim != 1 or batch_size is None or value.shape != (batch_size,):
+                raise ValueError("TESSA_POSITION_OFFSET_BATCH_SHAPE_INVALID")
+            if value.numel() and int(value.min()) < 0:
+                raise ValueError("TESSA_POSITION_OFFSET_NEGATIVE")
+            return (base[None, :] + value[:, None]) % self.cfg.local_attention_window
+        if int(offset) < 0:
             raise ValueError("TESSA_POSITION_OFFSET_NEGATIVE")
-        return (
-            torch.arange(length, device=device) + int(offset)
-        ) % self.cfg.local_attention_window
+        return (base + int(offset)) % self.cfg.local_attention_window
 
     def forward(
         self,
@@ -55,7 +49,7 @@ class TESSADecoderOnlyV1(nn.Module):
         memory: torch.Tensor,
         input_ids: torch.Tensor,
         labels: torch.Tensor | None = None,
-        sequence_position_offset: int = 0,
+        sequence_position_offset: int | torch.Tensor = 0,
     ) -> TESSAOutputV1:
         if memory.ndim != 3 or memory.shape[-1] != self.cfg.d_model:
             raise ValueError("IRIS_TESSA_MEMORY_SHAPE_INVALID")
@@ -70,8 +64,13 @@ class TESSADecoderOnlyV1(nn.Module):
             input_ids.shape[1],
             input_ids.device,
             offset=sequence_position_offset,
+            batch_size=input_ids.shape[0],
         )
-        x = self.token_embedding(input_ids) + self.position_embedding(pos)[None]
+        token = self.token_embedding(input_ids)
+        position = self.position_embedding(pos)
+        if pos.ndim == 1:
+            position = position[None]
+        x = token + position
         for block in self.decoder:
             x = block(x, memory)
         logits = self.lm_head(self.final_norm(x))
@@ -85,20 +84,11 @@ class TESSADecoderOnlyV1(nn.Module):
                 labels.reshape(-1),
                 ignore_index=self.cfg.PAD,
             )
-        return TESSAOutputV1(
-            logits=logits,
-            surface_latents=memory,
-            loss=loss,
-        )
+        return TESSAOutputV1(logits=logits, surface_latents=memory, loss=loss)
 
 
 class IRISSceneTopologyHeadV1(nn.Module):
-    """Scene-native topology head over the existing IRIS triplane.
-
-    This module is deliberately downstream of the existing IRIS scene encoder but
-    upstream of Compiler authority.  It does not accept GSA 17-D conditioning and
-    does not claim canonical mesh authority.
-    """
+    """Scene-native topology head over the existing IRIS triplane."""
 
     architecture_id = "RealSaS.IRIS.SceneTopologyHead.v1"
     input_authority = "IRIS_SCENE_EVIDENCE_ONLY"
@@ -125,7 +115,6 @@ class IRISSceneTopologyHeadV1(nn.Module):
             raise ValueError("IRIS_TESSA_MEMORY_TOKEN_POLICY_MISMATCH")
         if memory.attention_heads != tessa.n_heads:
             raise ValueError("IRIS_TESSA_ATTENTION_HEAD_POLICY_MISMATCH")
-
         self.tessa_config = tessa
         self.memory_config = memory
         self.scene_memory = IRISTopologySceneMemoryV1(memory)
@@ -140,11 +129,10 @@ class IRISSceneTopologyHeadV1(nn.Module):
         scene_planes: torch.Tensor,
         input_ids: torch.Tensor,
         labels: torch.Tensor | None = None,
-        sequence_position_offset: int = 0,
+        sequence_position_offset: int | torch.Tensor = 0,
     ) -> TESSAOutputV1:
-        memory = self.encode_scene_memory(scene_planes)
         return self.topology_decoder(
-            memory=memory,
+            memory=self.encode_scene_memory(scene_planes),
             input_ids=input_ids,
             labels=labels,
             sequence_position_offset=sequence_position_offset,

@@ -1,0 +1,59 @@
+{
+  "schema": "RealSaS.IRISVNextFit8RemoteConnectorForensicAudit.v1",
+  "status": "INCOMPLETE_REMOTE_SNAPSHOT",
+  "date": "2026-10-18",
+  "inspection_mode": "READ_ONLY_GOOGLE_DRIVE_CONNECTOR",
+  "remote": {
+    "title": "RealSaS_Fit8_IRIS_vNext_20261016",
+    "drive_folder_id": "1QgrZSGKxnhFWKq-HYiycUi3i_0oIJp2B",
+    "quarantined": true,
+    "consumption_authorized": false
+  },
+  "observed_top_level": [
+    "teachers/"
+  ],
+  "required_top_level_missing": [
+    "prepared/",
+    "receipts/"
+  ],
+  "teachers": {
+    "drive_folder_id": "1ReMXkx3za6FyuXbpKZKwXCxY35AJrPSv",
+    "observed_item_count": 16,
+    "teacher_batch_receipt_drive_file_id": "12oYs8wB_JpW6n_oMar4Fo2bXI5I576CI",
+    "teacher_batch_receipt_sha256": "7ac1c66cc5f749e0f6f8cac43a9b79a135c8c45ed1138303d42c102f04c15d27",
+    "teacher_batch_schema": "RealSaS.IRISVNextFit8TeacherBatch.v1",
+    "complete_subject_npz_pairs": [
+      "Snake",
+      "Bat",
+      "T-Rex",
+      "Horse",
+      "Spider",
+      "GreenBlob",
+      "Shark"
+    ],
+    "incomplete_subjects": [
+      {
+        "subject_id": "George",
+        "receipt_present": true,
+        "teacher_npz_present": false
+      }
+    ]
+  },
+  "stale_run_lineage": {
+    "run_id": 39121291171,
+    "source_commit_sha": "90c9c2f35ffc77aeea10cd99391bbe9a4d4a31c6",
+    "forensic_teacher_batch_sha256": "7ac1c66cc5f749e0f6f8cac43a9b79a135c8c45ed1138303d42c102f04c15d27",
+    "remote_teacher_batch_matches_stale_forensic_sha256": true
+  },
+  "classification_reasons": [
+    "TOP_LEVEL_PREPARED_MISSING",
+    "TOP_LEVEL_RECEIPTS_MISSING",
+    "GEORGE_TEACHER_NPZ_MISSING",
+    "TEACHER_BATCH_RECEIPT_MATCHES_CANCELLED_STALE_RUN"
+  ],
+  "remote_consumption_authorized": false,
+  "canonical_authority_promoted": false,
+  "scientific_fit_started": false,
+  "scientific_fit_pass_claimed": false,
+  "note": "Read-only connector evidence is sufficient to classify the remote as incomplete and stale-lineage. It does not authorize consumption or replace SHA-scoped regeneration and full round-trip verification."
+}

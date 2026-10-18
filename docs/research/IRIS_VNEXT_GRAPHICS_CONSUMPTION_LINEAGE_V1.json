@@ -1,0 +1,151 @@
+{
+  "schema": "RealSaS.IRISVNextGraphicsConsumptionLineage.v1",
+  "date": "2026-10-18",
+  "status": "SOURCE_AUDITED_NOT_SCIENTIFIC_PASS",
+  "scope": "post-V8 role-free graphics evidence from IRIS heads through Compiler, RSS and native reference runtime",
+  "authority_note": "This is a source-lineage audit. It proves implemented consumption paths and cited behavioral tests, not teacher correctness or Fit8 scientific quality.",
+  "relation_truth_note": {
+    "graphics_truth_v1_helper": "adjacent helper uses cut = 1 - anonymous-owner-equivalence",
+    "v8_fit8_shard_builder": "relation_cut_probability uses (owner differs) OR (material id differs)",
+    "interpretation": "V8 cut residual measures decodability of an owner-or-material boundary proxy, not authoritative drawable-cut truth",
+    "replacement": "Graphics Truth V2 requires explicit authority/provenance/validity and can abstain"
+  },
+  "signals": {
+    "same_drawable_affinity": {
+      "defined": true,
+      "produced": true,
+      "serialized": true,
+      "consumed": true,
+      "behaviorally_used": true,
+      "producer": "models/iris/vnext/heads_v1.py::GraphicsRelationHeadV1.static_relations",
+      "compiler_use": "compiler/realsas_compiler_core/graphics_v1.py::compile_graphics_v1 uses thresholded same_drawable with cut/boundary/confidence to union adjacent canonical-M faces into fragments",
+      "runtime_materialization": "face_fragment_index and fragment_ids in RuntimeGraphicsV1 -> graphics.bin",
+      "behavioral_path": "fragment ownership changes visibility domain and explicit precedence domain used by native graphics runtime",
+      "limitations": [
+        "historical Fit8 target uses anonymous source-object ownership as the same-drawable proxy",
+        "low V8 loss is decodability evidence, not proof of correct real-world drawable ownership"
+      ]
+    },
+    "cut_probability": {
+      "defined": true,
+      "produced": true,
+      "serialized": true,
+      "consumed": true,
+      "behaviorally_used": true,
+      "producer": "models/iris/vnext/heads_v1.py::GraphicsRelationHeadV1.static_relations",
+      "compiler_use": "compile_graphics_v1 blocks fragment union when cut exceeds policy.cut_max",
+      "runtime_materialization": "effect is compiled into fragment ownership rather than emitted as a raw runtime probability",
+      "behavioral_path": "fragment ownership changes visibility/order behavior",
+      "truth_status": "TRUTH_DEBT",
+      "limitations": [
+        "the helper graphics_truth_v1 path uses cut=1-same, but the Fit8 builder used by V8 instead writes owner-difference OR material-difference",
+        "neither historical target is independently identified causal drawable-cut truth",
+        "new work must use explicit validity/provenance or abstain"
+      ]
+    },
+    "alpha_boundary_probability": {
+      "defined": true,
+      "produced": true,
+      "serialized": true,
+      "consumed": true,
+      "behaviorally_used": true,
+      "producer": "AppearanceEvidenceHeadV1 and GraphicsRelationHeadV1",
+      "compiler_use": "compile_graphics_v1 uses alpha boundary in fragment-union gate and derives support_band_pixels",
+      "runtime_materialization": "fragment ownership and support_band_pixels are serialized",
+      "behavioral_path": "fragment ownership is behaviorally consumed; support_band_pixels itself is not yet consumed by the native reference renderer",
+      "limitations": [
+        "support-band transport must not be credited as behavior until an authorized runtime consumer exists"
+      ]
+    },
+    "appearance_boundary_probability": {
+      "defined": true,
+      "produced": true,
+      "serialized": true,
+      "consumed": true,
+      "behaviorally_used": true,
+      "producer": "AppearanceEvidenceHeadV1 and GraphicsRelationHeadV1",
+      "compiler_use": "compile_graphics_v1 uses appearance boundary in fragment-union gate",
+      "runtime_materialization": "effect is compiled into face_fragment_index",
+      "behavioral_path": "fragment ownership changes native visibility/order domain",
+      "quality_status": "OPTIMIZATION_DEBT_AND_TRUTH_DEBT"
+    },
+    "front_probability": {
+      "defined": true,
+      "produced": true,
+      "serialized": true,
+      "consumed": true,
+      "behaviorally_used": true,
+      "producer": "models/iris/vnext/heads_v1.py::GraphicsRelationHeadV1.view_relations",
+      "compiler_use": "compile_graphics_v1 aggregates front probabilities into directed GraphicsOrderEdgeV1 edges",
+      "runtime_materialization": "order_edges and topological_fragment_order -> graphics.bin",
+      "behavioral_path": "runtime/realsas_cpp/src/graphics_v1.hpp::order_pixel_layers gives explicit graph precedence priority over contradictory physical depth",
+      "behavioral_test": "runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp"
+    },
+    "occlusion_probability": {
+      "defined": true,
+      "produced": true,
+      "serialized": true,
+      "consumed": true,
+      "behaviorally_used": true,
+      "producer": "GraphicsRelationHeadV1.view_relations",
+      "compiler_use": "compile_graphics_v1 requires occlusion probability above policy threshold before front evidence becomes an order edge",
+      "runtime_materialization": "accepted evidence is compiled into order_edges",
+      "behavioral_path": "accepted order edges control native pixel layer order",
+      "limitations": [
+        "occlusion probability is a compiler gate; the raw value is not serialized to native runtime"
+      ]
+    },
+    "visibility_probability_a_b": {
+      "defined": true,
+      "produced": true,
+      "serialized": true,
+      "consumed": true,
+      "behaviorally_used": true,
+      "producer": "GraphicsRelationHeadV1.view_relations",
+      "compiler_use": "compile_graphics_v1 aggregates per-face probabilities to visible_fragment_ids",
+      "runtime_materialization": "visible_fragment_indices -> graphics.bin",
+      "behavioral_path": "native renderer calls face_visible and skips invisible faces before rasterization",
+      "behavioral_test": "tests/compiler/test_vnext_graphics_native_e2e.py proves graphics.bin visibility alone changes final native RGBA from visible pixels to zero alpha"
+    },
+    "attachment_affinity": {
+      "defined": true,
+      "produced": true,
+      "serialized": true,
+      "consumed": true,
+      "behaviorally_used": false,
+      "producer": "GraphicsRelationHeadV1.static_relations",
+      "compiler_use": "compile_graphics_v1 combines attachment affinity with mechanical persistent_contact and emits GraphicsAttachmentV1",
+      "runtime_materialization": "attachments are carried into RuntimeGraphicsV1 and graphics.bin",
+      "behavioral_debt": "native reference graphics renderer parses attachments but does not use them in raster/playback behavior",
+      "required_next": "identify and test the owning attachment/motion consumer or keep attachment explicitly non-behavioral in runtime claims"
+    },
+    "fragment_support_band_pixels": {
+      "defined": true,
+      "produced": true,
+      "serialized": true,
+      "consumed": false,
+      "behaviorally_used": false,
+      "producer": "compile_graphics_v1 derives support band from alpha-boundary evidence",
+      "runtime_materialization": "RuntimeGraphicsV1 and graphics.bin carry the integer support band",
+      "behavioral_debt": "graphics_v1.hpp parses/validates it but runtime_v2_graphics_reference.cpp does not apply it",
+      "required_next": "wire an explicitly authorized 2D support consumer or remove support-band behavior from claims"
+    }
+  },
+  "behavioral_tests": [
+    {
+      "path": "runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp",
+      "proves": "explicit graph precedence overrides contradictory physical depth in native ordering"
+    },
+    {
+      "path": "tests/compiler/test_vnext_graphics_native_e2e.py",
+      "proves": "serialized graphics visibility content changes final native raster output"
+    }
+  ],
+  "next_actions": [
+    "wire Graphics Truth V2 producers with authority/provenance/validity and corpus statistics",
+    "add behavior court for fragment changes caused by same/cut/boundary decisions",
+    "resolve attachment runtime ownership",
+    "resolve or remove support-band behavioral claims",
+    "re-run this lineage after each producer/compiler/runtime schema change"
+  ]
+}

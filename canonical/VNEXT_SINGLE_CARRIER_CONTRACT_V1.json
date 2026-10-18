@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-16",
+  "dynamic_courts": {
+    "candidate_selection_probe": "BOUNDED_MECHANICAL_TOPOLOGY_SELECTION",
+    "must_remain_distinct": true,
+    "production_motion_proof": "POST_CANONICAL_AUTHORED_MOTION_PROOF"
+  },
+  "graphics": {
+    "binds_only_canonical_M": true,
+    "canonical_domain_name": "GRAPHICS",
+    "compiler_outputs": ["GRAPHICS_FRAGMENTS","PER_VIEW_PARTIAL_ORDER","VISIBILITY_STATE","ATTACHMENT_ANCHORS","FRAGMENT_MOTION_FIELD","BOUNDED_SILHOUETTE_SUPPORT_BAND"],
+    "learned_relation_evidence": ["same_drawable_affinity","cut_probability","fragment_embedding","visibility_probability","front_probability","occlusion_probability","rigidity_probability","attachment_affinity","alpha_boundary_probability","appearance_boundary_probability","uncertainty"],
+    "legacy_caa_name_is_compatibility_only": true,
+    "named_body_part_semantics_forbidden": true,
+    "source_pixels_win_where_observed": true
+  },
+  "mechanics": {
+    "candidate_authority": "PROPOSAL_EVIDENCE_ONLY",
+    "candidate_axis_mira_required": true,
+    "candidate_mechanical_probe_required": true,
+    "candidate_mesh_count_default": 4,
+    "canonical_authority_count": 1,
+    "canonical_bundle": ["M","G","W_M"],
+    "canonical_mechanics_minted_after_dynamic_selection": true,
+    "compiler_large_repair_forbidden": true,
+    "independent_visual_mesh_forbidden": true,
+    "static_admission_before_axis_mira": true
+  },
+  "model": {
+    "heads": ["GEOMETRY_FIELD","EXTRACTION_FREEDOM","MECHANICAL_DEMAND_EVIDENCE","GRAPHICS_APPEARANCE_EVIDENCE","GRAPHICS_RELATION_EVIDENCE","STRUCTURE_TOPOLOGY_DECODER"],
+    "input": "8_RGBA_PLUS_CAMERAS_VIA_FROZEN_DINOV2_S_TOKENS",
+    "semantic_taxonomy": false,
+    "shared_scene_core": true,
+    "teacher_inputs_in_inference_forward": false,
+    "teacher_only_inputs": ["AUTHORED_M","AUTHORED_G","AUTHORED_W","AUTHORED_NATIVE_MOTION","ANONYMOUS_DRAWABLE_EQUIVALENCE","RASTERIZED_DEPTH_VISIBILITY_OCCLUSION"]
+  },
+  "program": "IRIS_VNEXT_SINGLE_CARRIER_GRAPHICS",
+  "runtime": {
+    "graphics_content_consumption_required": true,
+    "graphics_hash_only_binding_forbidden": true,
+    "runtime_generation_forbidden": true,
+    "triangle_array_order_as_presentation_authority_forbidden": true
+  },
+  "schema": "RealSaS.VNextSingleCarrierArchitectureContract.v1",
+  "status": "USER_AUTHORIZED__IMPLEMENTATION_IN_REVIEW",
+  "trainer": {
+    "bf16_cuda_training": true,
+    "bitwise_training_determinism_required": false,
+    "evaluation_precision": "FP32_FIXED_COURTS",
+    "expected_fit8_batch_subjects": 8,
+    "legacy_subject_serial_loop_forbidden": true,
+    "single_optimizer_lineage_with_parameter_groups": true
+  }
+}

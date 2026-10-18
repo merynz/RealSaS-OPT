@@ -34,12 +34,11 @@ EXTENSION_PATHS = (
     Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V16_20261001.json"),
     Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V17_20261009.json"),
     Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V18_20261011.json"),
+    Path("canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V19_20261016.json"),
 )
 SUBTREE_CLOSURE = "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
 RUNTIME_ROLE = "subordinate_deployment_consumer"
 
-# Compatibility aliases retained for scripts/tests that imported the old
-# explicit constants.  The verifier itself is data-driven now.
 for _index, _path in enumerate(EXTENSION_PATHS, start=1):
     globals()[f"EXT{_index}"] = _path
 
@@ -93,8 +92,6 @@ def _verify_chain(base: dict, extensions: list[dict]) -> None:
             raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_PRIOR_MUTATION_CLAIM")
         if authority.get("runtime_role") != RUNTIME_ROLE:
             raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_ROLE_DRIFT")
-        # Immutable V4 predates consistent retention of this metadata field.
-        # Its bytes remain pinned by V5 and the final exact subtree check still applies.
         historical_v4_omission = version == 4 and "subtree_closure" not in authority
         if version >= 3 and not historical_v4_omission and authority.get("subtree_closure") != SUBTREE_CLOSURE:
             raise RuntimeError(f"NATIVE_SOURCE_EXT{version}_SUBTREE_CLOSURE_DRIFT")
@@ -157,9 +154,6 @@ def verify() -> dict:
             )
         )
 
-    # The latest extension is the only closure declaration that can describe the
-    # current reconstructed subtree.  Using an older closure here would silently
-    # make an append-only addition unverifiable.
     closure = dict(extensions[-1].get("closure") or {})
     if int(closure.get("runtime_realsas_cpp_blob_count", -1)) != len(tracked):
         raise RuntimeError("NATIVE_SOURCE_LATEST_CLOSURE_COUNT_DRIFT")

@@ -1,0 +1,143 @@
+name: iris-vnext-single-carrier-v1
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [research/iris-vnext-post-v8-quality-plan-20261018]
+    paths:
+      - 'models/iris/vnext/**'
+      - 'tools/iris_vnext/**'
+      - 'tests/iris/**'
+      - 'tests/repository/**'
+      - 'compiler/realsas_compiler_core/**'
+      - 'tests/compiler/**'
+      - 'docs/research/**'
+      - 'CURRENT_STATE.md'
+      - 'CURRENT_PLAN.md'
+      - 'AGENTS.md'
+      - 'SYSTEM_INDEX.md'
+      - '.github/workflows/iris_vnext_single_carrier_v1.yml'
+      - '.github/workflows/iris_vnext_fit8_prepare_self_hosted_v1.yml'
+      - '.github/workflows/iris_vnext_fit8_quarantine_audit_self_hosted_v2.yml'
+  workflow_dispatch:
+concurrency:
+  group: iris-vnext-single-carrier-v1-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  vnext-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      REALSAS_FLEXICUBES_ROOT: /tmp/realsas-flexicubes
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
+      - name: Install focused dependencies
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libpng-dev zlib1g-dev
+      - name: Pin Apache-2.0 FlexiCubes source
+        run: |
+          git clone --filter=blob:none https://github.com/nv-tlabs/FlexiCubes.git "$REALSAS_FLEXICUBES_ROOT"
+          git -C "$REALSAS_FLEXICUBES_ROOT" checkout --detach 4cc7d6c3d0cee83c011ce36721b81adff0dd7db6
+          test "$(git -C "$REALSAS_FLEXICUBES_ROOT" rev-parse HEAD)" = "4cc7d6c3d0cee83c011ce36721b81adff0dd7db6"
+      - name: Compile preparation, trainer and scientific entrypoints
+        run: |
+          python -m py_compile \
+            models/iris/vnext/contracts_v1.py \
+            models/iris/vnext/topology_teacher_v1.py \
+            models/iris/vnext/teacher_truth_v1.py \
+            models/iris/vnext/quality_policy_v1.py \
+            models/iris/vnext/boundary_causality_v1.py \
+            models/iris/vnext/graphics_truth_v2.py \
+            models/iris/vnext/relation_support_v2.py \
+            models/iris/vnext/optimization_v2.py \
+            models/iris/vnext/heads_v2.py \
+            models/iris/vnext/training_v2.py \
+            models/iris/vnext/cohort_v8.py \
+            tools/iris_vnext/input_binding_v1.py \
+            tools/iris_vnext/blender_authored_teacher_export_v1.py \
+            tools/iris_vnext/blender_authored_teacher_export_v2.py \
+            tools/iris_vnext/blender_authored_teacher_export_v3.py \
+            tools/iris_vnext/export_fit8_authored_teachers_v1.py \
+            tools/iris_vnext/build_fit8_vnext_shards_v1.py \
+            tools/iris_vnext/build_fit8_vnext_shards_v2.py \
+            tools/iris_vnext/build_fit8_relation_truth_v2.py \
+            tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py \
+            tools/iris_vnext/audit_fit8_preparation_snapshot_v1.py \
+            tools/iris_vnext/a100_preflight_v1.py \
+            tools/iris_vnext/a100_preflight_v2.py \
+            tools/iris_vnext/run_fit8_vnext_scientific_v1.py
+          python - <<'PY'
+          from tools.iris_vnext.input_binding_v1 import load_binding_v1
+          value = load_binding_v1('canonical/VNEXT_FIT8_INPUT_BINDING_V1.json')
+          assert len(value['subjects']) == 8
+          assert value['legacy_optimizer_state_reused'] is False
+          print('VNEXT_FIT8_INPUT_BINDING_PARSE_PASS')
+          PY
+      - name: IRIS vNext model, teacher and batched Fit8 contracts
+        run: python -m pytest -q tests/iris/test_iris_vnext_v1.py tests/iris/test_graphics_truth_v1.py tests/iris/test_iris_vnext_fit8_cohort_v1.py tests/iris/test_vnext_topology_teacher_v1.py tests/iris/test_vnext_mechanical_truth_rank_deficiency_v1.py tests/iris/test_vnext_preparation_acceleration_v1.py tests/iris/test_a100_preflight_v2.py
+      - name: Post-V8 quality, carrier seal, optimizer and truth contracts
+        run: python -m pytest -q tests/iris/test_quality_policy_v1.py tests/iris/test_boundary_causality_v1.py tests/iris/test_graphics_truth_v2.py tests/iris/test_relation_truth_v2_producer.py tests/iris/test_relation_support_v2.py tests/iris/test_optimization_v2.py tests/iris/test_graphics_relation_head_v2.py
+      - name: Single-carrier mechanics, Graphics, DAG and preparation provenance contracts
+        run: python -m pytest -q tests/compiler/test_vnext_single_carrier_graphics_v1.py tests/repository/test_vnext_architecture_contract_v1.py tests/repository/test_vnext_execution_graph_v1.py tests/repository/test_vnext_fit8_preparation_contract_v1.py tests/repository/test_vnext_fit8_active_preparation_provenance_v1.py tests/repository/test_vnext_fit8_self_hosted_workflow_safety_v2.py
+      - name: Native Graphics ordering contract
+        run: |
+          g++ -std=c++17 -O2 runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp -o /tmp/realsas_graphics_v1_test
+          /tmp/realsas_graphics_v1_test
+      - name: Build Graphics-authorized native player
+        run: |
+          g++ -std=c++17 -O2 runtime/realsas_cpp/src/runtime_v2_graphics_reference.cpp -lpng -lz -o /tmp/realsas_graphics_v1_player
+      - name: RSS to native Graphics behavior E2E
+        env:
+          REALSAS_GRAPHICS_V1_PLAYER: /tmp/realsas_graphics_v1_player
+        run: python -m pytest -q tests/compiler/test_vnext_graphics_native_e2e.py
+      - name: Preserve decoder regressions
+        run: python -m pytest -q tests/iris/test_iris_scene_topology_head_v1.py tests/models/test_tessa_v1.py
+      - name: Summary
+        run: |
+          echo 'IRIS_VNEXT_SINGLE_CARRIER_ENGINEERING_CONTRACT_PASS'
+          echo 'candidate_mesh_authority=proposal_only'
+          echo 'canonical_M_G_W_count=1'
+          echo 'independent_visual_mesh=false'
+          echo 'graphics_runtime_hash_only_binding=false'
+          echo 'native_graphics_rss_behavior_consumed=true'
+          echo 'semantic_taxonomy=false'
+          echo 'fit8_batch_subjects=8'
+          echo 'fit8_shared_scene_encodes_per_optimizer_step=1'
+          echo 'fit8_subject_serial_model_forward=false'
+          echo 'completed_fit8_baseline=V8@5083c9915533ec8ec6530c7d229c635887abfea7'
+          echo 'post_m1_scene_core=sealed_fail_closed'
+          echo 'post_v8_specialist_optimizer=head_separated_scene_core_lr_zero'
+          echo 'post_v8_scientific_fit_pass=false'
+          echo 'boundary_unknown=abstain_no_training_target'
+          echo 'graphics_truth_v2=explicit_validity_required'
+          echo 'relation_truth_v2=source_audited_view_conditioned_sidecar'
+          echo 'relation_head_v2=projected_boundaries_camera_conditioned_v1_behavior_migrated'
+          echo 'relation_truth_v2_binary_court_requires_two_class_support=true'
+          echo 'relation_truth_v2_static_same_cut_attachment=abstain_without_independent_authority'
+          echo 'official_numeric_quality_thresholds=false'
+          echo 'fit8_active_builder=build_fit8_vnext_shards_v2.py'
+          echo 'fit8_exact_input_binding_required=true'
+          echo 'fit8_preparation_receipt_required=true'
+          echo 'fit8_active_preparation_source_provenance_required=true'
+          echo 'fit8_self_hosted_prepare_v1=retired_no_push_no_self_hosted_write'
+          echo 'fit8_self_hosted_quarantine_audit_v2=manual_dispatch_read_only_fail_unless_current'
+          echo 'fit8_raycast_backend=parallel_orthographic_projected_grid_batched_exact_equivalent_v2'
+          echo 'fit8_boundary_maps=cached_exact_equivalent_v2'
+          echo 'fit8_mechanical_bend_precomputed_vectorized=true'
+          echo 'topology_teacher_motion_safe_seam_weld=true'
+          echo 'topology_teacher_residual_coordinate_collision_required=0'
+          echo 'a100_preflight_scientific_fit=false'
+          echo 'a100_preflight_analytic_gradients=independent_vertex_field_parameter_v2'
+          echo 'flexicubes_commit=4cc7d6c3d0cee83c011ce36721b81adff0dd7db6'

@@ -51,11 +51,14 @@ def test_operator_never_crosses_remote_roundtrip_or_training_boundary():
     assert "final_materialization_receipt_minted\": False" in text
     assert "training_steps_executed\": 0" in text
     assert "scientific_fit_started\": False" in text
-    # The read-only builder may consume the zero-step migration tool, but it must
-    # not mint the final remote materialization court or invoke any trainer.
+    # The read-only builder may describe the training boundary in prose and may
+    # consume the zero-step migration tool, but executable training machinery is
+    # forbidden from this operator.
     assert "seal_fit8_pretraining_materialization_v1.py" not in text
     assert "verify_fit8_candidate_roundtrip_v1.py" not in text
-    assert "trainer" not in text.lower()
+    assert "IRISVNextFit8Trainer" not in text
+    assert "build_specialist_optimizer_v2" not in text
+    assert "torch.optim" not in text
     assert "optimizer.step" not in text.lower()
     assert "rclone copyto" not in text.lower()
     assert "rclone sync" not in text.lower()

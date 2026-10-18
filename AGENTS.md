@@ -16,6 +16,22 @@ This repository must be resumable without conversational memory.
 8. `SYSTEM_INDEX.md`
 9. `docs/platform/EXECUTION_LANES.md`
 
+### Continuity authority pointers
+
+Current continuity files must be read and treated as current before their historical predecessors:
+
+- current experiment registry: `canonical/EXPERIMENT_REGISTRY_V3.json`
+- current scientific journal: `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+- active run ledger: `canonical/ACTIVE_RUN_V2.json`
+- current pipeline plan: `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
+- current product architecture authority: `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+- current appearance authority: `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+
+Historical continuity files remain provenance only and do not override current authority:
+
+- historical experiment registry: `canonical/EXPERIMENT_REGISTRY_V2.json`
+- historical scientific journal: `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
+
 Historical Knight/V2/V5/V6 documents are provenance/regression evidence. They do not override the files above.
 
 If the user says only `continue / devam et`, continue the active work in `CURRENT_PLAN.md`. Do not revive an older recovery branch, V5/V6 continuation, subject-serial Fit8 trainer, hidden semantic-owner program, or independent visual mesh merely because historical files still exist.
@@ -35,7 +51,7 @@ Workflow Engine   = durable execution state
 
 The completed V8 run is an architectural/measurement baseline bound to exact source commit `5083c9915533ec8ec6530c7d229c635887abfea7` plus exact checkpoint/receipt lineage. Later source hardening does not rewrite that artifact.
 
-The active post-V8 review source is `research/iris-vnext-post-v8-quality-plan-20261018`. Draft PR #116 currently points to stale `research/iris-vnext-single-carrier-graphics` history; before review/merge its head must be synchronized to the final green active source.
+The active post-V8 review source is `research/iris-vnext-post-v8-quality-plan-20261018`. Draft PR #116 is synchronized by fast-forward with the active review line; before any merge, require the final PR head and all required review gates to be green.
 
 ## Current scientific program
 
@@ -224,11 +240,18 @@ Known runner: `realsas-wsl-1660ti`, labels `[self-hosted, linux, x64, realsas]`.
 
 On 2026-10-18, bringing the runner online caused queued stale run `39121291171` / prepare #22 on `research/iris-vnext-single-carrier-graphics@90c9c2f...` to start. The stale run locally sealed a source-bound preparation and then entered Drive persistence to `gdrive:RealSaS_Fit8_IRIS_vNext_20261016`. It was cancelled before round-trip SHA verification completed.
 
+Current source hardening:
+
+- `.github/workflows/iris_vnext_fit8_prepare_self_hosted_v1.yml` is retired and has no self-hosted/rclone write path;
+- `.github/workflows/iris_vnext_fit8_quarantine_audit_self_hosted_v2.yml` is manual-dispatch only, active-branch/exact-SHA bound and read-only;
+- `tools/iris_vnext/audit_fit8_preparation_snapshot_v1.py` can classify a remote snapshot but never authorizes its consumption;
+- the affected Drive path remains quarantined until explicit forensic verification and a separate regenerated/full-round-trip-qualified candidate exists.
+
 Therefore:
 
-- runner stays offline until a current-branch-owned self-hosted flow is ready;
-- the affected Drive path is quarantined until explicit file-level SHA/provenance verification;
-- GitHub artifact `12137271848` is forensic evidence only, not current authority;
+- keep the runner offline by default;
+- only bring it online after deliberately dispatching the read-only quarantine audit on the exact final review SHA;
+- GitHub artifact `12137271848` remains forensic evidence only, not current authority;
 - never infer “remote exists = current preparation”.
 
 If an execution unexpectedly starts from a stale branch/head, stop it before persistence/promotion and record exact run/head/artifact impact in current state + ledger.

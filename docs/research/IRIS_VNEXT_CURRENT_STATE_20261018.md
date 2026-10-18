@@ -1,8 +1,8 @@
-# IRIS vNext Current State — 2026-10-18
+# IRIS vNext V8 Baseline State — 2026-10-18
 
-Status: **POST-V8 MEASUREMENT BASELINE / NO SCIENTIFIC FIT PASS**
+Status: **IMMUTABLE INTERPRETATION OF COMPLETED V8 / NO SCIENTIFIC FIT PASS**
 
-This note freezes the engineering interpretation of the completed V8 Fit8 run before the next quality program begins. It does not retroactively create numeric scientific thresholds.
+> This file records what the completed V8 artifact established. It is intentionally not the live source-work state. For current code, truth replacements, CI and next actions read root `CURRENT_STATE.md`, `CURRENT_PLAN.md` and the decision ledger.
 
 ## Authority
 
@@ -13,70 +13,86 @@ This note freezes the engineering interpretation of the completed V8 Fit8 run be
 - `scientific_fit_pass_claimed = false`.
 - `official_numeric_quality_thresholds_present = false`.
 
-The completed V8 run is therefore an architectural/measurement baseline, not a scientific PASS artifact.
+Later source hardening does not retroactively mutate this artifact or its target semantics.
 
 ## What V8 established
 
-### 1. M1 carrier sealing is the current architectural invariant
+### 1. M1 carrier sealing is a supported architectural baseline
 
-After M1, the shared `scene_core` remained sealed while the downstream specialist heads continued training. Geometry/extraction diagnostics remained stable through the remainder of training. This closes the earlier failure mode in which downstream objectives rewrote a carrier that had already acquired useful geometry/mechanics structure.
-
-Current rule:
+After M1, shared `scene_core` remained sealed while downstream specialist heads continued training. Geometry/extraction diagnostics remained stable through the rest of the run.
 
 ```text
 G/M establish the shared carrier
         ↓
 M1 seal
         ↓
-A/R/T/J train specialist heads against the sealed carrier
+A/R/T/J train specialist heads against sealed H
 ```
 
-Reopening `scene_core` after M1 is forbidden by default. It requires a separately preregistered falsification court proving that the sealed carrier is the limiting factor and specifying non-regression gates for already-qualified structure.
+This experiment closed the observed V5/V6 failure mode in which later objectives rewrote a carrier that already contained useful geometry/mechanics structure. It supports structural isolation over loss-only retention for this apparatus.
 
-This is a structural freeze, not loss balancing and not a temporary learning-rate trick.
+It does **not** prove that the carrier should never be reopened under any future apparatus; reopening requires a separate preregistered falsification court with non-regression gates.
 
-### 2. Frozen H contains substantial downstream graphics structure
+### 2. Frozen H contains substantial downstream-decodable structure
 
-With the carrier sealed, several relation heads reached very small residuals while appearance/topology objectives continued to improve. The correct interpretation is capacity evidence for the frozen representation, not proof that the corresponding semantic ontology is scientifically correct.
+With H sealed, appearance, relation and topology objectives continued improving. Several relation residuals became very small under the historical Fit8 teacher targets.
 
-Particularly strong decoded relations include `same_drawable`, `attachment`, `front`, `occlusion`, and `visibility` under the current teacher definitions.
+Correct claim:
 
-### 3. Boundary-family quality is not acceptable yet
+> current targets are substantially decodable from sealed H.
 
-The completed run does **not** justify normalizing 0.1–0.2-class residuals as acceptable merely because training completed. Boundary/cut families remain material optimization/truth debt, with appearance-boundary behavior especially weak.
+Incorrect stronger claim:
 
-A historical engineering expectation around the ~0.05 scale may be used only as a planning reference for genuinely comparable normalized residual metrics. It is **not** an official global threshold and must never be applied across heterogeneous metrics by unit-blind comparison.
+> the corresponding real-world semantic/presentation relations are scientifically solved.
 
-Future PASS claims require metric-specific, preregistered courts.
+Teacher correctness, balance, held-out sampling and runtime behavioral consumption remain separate obligations.
 
-### 4. Training loss is not topology qualification
+### 3. Historical relation-target semantics must remain exact
 
-TESSA/topology objectives improved during V8, but no independent held-out topology-validity court was sealed with the run. Therefore V8 does not establish a topology PASS.
+Do not retroactively simplify the V8 relation producer.
 
-### 5. Low relation loss is not semantic authority
+Two historical code paths exist:
 
-Near-zero loss proves that the current targets are decodable from the sealed carrier. It does not prove that subject-local drawable ownership, intentional presentation override, or hidden/amodal structure were correctly identified by current FIT8 3D evidence.
+```text
+graphics_truth_v1.py helper:
+    cut = 1 - anonymous-owner-equivalence
 
-Teacher correctness, class balance, trivial-negative prevalence, held-out sampling, and compiler consumption remain separate obligations.
+Fit8 shard builder used by V8:
+    relation_cut_probability = (owner differs) OR (material id differs)
+```
 
-## StdGEN++ foundation branch disposition
+V8's recorded cut residual therefore belongs to the **owner-or-material boundary proxy** written by its shard builder. It is not authoritative drawable-cut truth.
 
-The branch `agent/unified-iris-stdgenpp-foundation` is retained as research evidence and a source of measurable tools, not adopted wholesale as current authority.
+The post-V8 `Graphics Truth V2` replacement does not rewrite V8 shards; it exists only for future work.
 
-### Salvage into the current line
+### 4. Boundary-family quality is not acceptable yet
+
+The completed run does not justify normalizing `0.1–0.2` residuals into success. Boundary/cut families remain quality/truth debt; appearance-boundary behavior was especially weak.
+
+Historical `~0.05` expectations are a planning reference only for genuinely comparable normalized metrics. No global official threshold existed for V8.
+
+### 5. Training loss is not topology qualification
+
+TESSA/topology objectives improved, but no independent held-out topology-validity court was sealed with V8. Therefore V8 does not establish topology PASS.
+
+## Foundation branch disposition learned before/around V8
+
+`agent/unified-iris-stdgenpp-foundation` remains research evidence and a source of measurable tools.
+
+Salvageable:
 
 - exact source geometry/topology provenance;
 - rig/skin/deformation evidence;
 - authored material-region provenance when present;
 - static all-hit ray stacks;
-- dynamic fixed-frame visibility/order evidence;
-- geometric `front` / `occlusion` / `visibility` evidence;
+- fixed-frame dynamic visibility/order;
+- geometric front/occlusion/visibility;
 - geometric-component census;
 - residual-boundary analysis;
-- local geometric continuation as evidence, never hidden-state truth;
-- subject-local partition contracts where their authority is explicit.
+- local geometric continuation as evidence;
+- subject-local partition contracts where authority is explicit.
 
-### Do not promote from FIT8 3D alone
+Not promotable from generic FIT8 3D alone:
 
 - authoritative drawable-owner truth;
 - hidden/amodal support truth;
@@ -84,14 +100,16 @@ The branch `agent/unified-iris-stdgenpp-foundation` is retained as research evid
 - global semantic class identities;
 - inferred hidden continuation as ground truth.
 
-When the source cannot identify a target, the correct result is `UNKNOWN`/abstention rather than a proxy silently promoted to truth.
+The correct result for an unidentifiable target is unknown/abstention.
 
-## Current priority
+## What V8 handed to the post-V8 program
 
-The next program is not a generic model-capacity expansion. It is:
+V8 did **not** authorize another generic capacity expansion or broad rerun. It handed off these questions:
 
-1. strict post-V8 convergence/quality courts;
-2. boundary-causality truth cleanup;
-3. compiler consumption/behavior audit for learned evidence;
-4. independent held-out topology qualification;
-5. only then, evidence-driven specialist-capacity changes if the sealed carrier is shown insufficient.
+1. clean/abstaining boundary and relation truth;
+2. strict specialist convergence/quality courts;
+3. Compiler→runtime behavioral consumption;
+4. independent topology qualification;
+5. only then capacity/extraction/topology interventions if evidence requires them.
+
+For the live implementation status, do not continue from this file alone; return to root `CURRENT_STATE.md` and `CURRENT_PLAN.md`.

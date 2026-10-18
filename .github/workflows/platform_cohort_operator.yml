@@ -14,7 +14,7 @@ on:
         type: boolean
         default: false
   workflow_run:
-    workflows: [platform-developer-deployment]
+    workflows: [platform-developer-deployment, current-mainline-ci]
     types: [completed]
 
 concurrency:
@@ -59,6 +59,7 @@ jobs:
           EXPECTED_SHA: ${{ steps.sha.outputs.expected_sha }}
           DISPATCH_DESCRIPTOR: ${{ inputs.descriptor }}
           DISPATCH_SUBMIT: ${{ inputs.submit }}
+          WORKFLOW_RUN_NAME: ${{ github.event.workflow_run.name }}
           WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
@@ -80,7 +81,8 @@ jobs:
               descriptor = os.environ.get('DISPATCH_DESCRIPTOR', '').strip()
               submit = os.environ.get('DISPATCH_SUBMIT', '').strip().lower() == 'true'
           elif event == 'workflow_run':
-              if (os.environ.get('WORKFLOW_RUN_CONCLUSION') == 'success' and
+              if (os.environ.get('WORKFLOW_RUN_NAME') == 'platform-developer-deployment' and
+                      os.environ.get('WORKFLOW_RUN_CONCLUSION') == 'success' and
                       os.environ.get('WORKFLOW_RUN_HEAD_BRANCH') == 'main'):
                   changed = subprocess.check_output(
                       ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD^1', 'HEAD'],
@@ -216,7 +218,9 @@ jobs:
           retention-days: 30
 
   research-activation:
-    if: github.event_name == 'workflow_run'
+    if: >
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.name == 'current-mainline-ci'
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.resolve.outputs.should_run }}
@@ -229,48 +233,58 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 2
 
-      - name: Resolve typed research operation trigger
+      - name: Resolve typed research operation request
         id: resolve
         env:
           WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
           WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          REQUEST_PATH: canonical/V9_PRETRAINING_ARTIFACT_REQUEST_V1.json
+          TRIGGER_PATH: canonical/RESEARCH_OPERATOR_TRIGGER_V1.json
         run: |
           set -euo pipefail
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import json, os, re, subprocess
           from pathlib import Path
+
           should = False
-          request_path = ''
+          request_path = os.environ['REQUEST_PATH']
           target_sha = ''
           main_sha = os.environ.get('WORKFLOW_RUN_HEAD_SHA', '').strip().lower()
+
           if os.environ.get('WORKFLOW_RUN_CONCLUSION') == 'success' and os.environ.get('WORKFLOW_RUN_HEAD_BRANCH') == 'main':
               changed = subprocess.check_output(
                   ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD^1', 'HEAD'],
                   text=True,
               ).splitlines()
-              trigger_path = Path('canonical/RESEARCH_OPERATOR_TRIGGER_V1.json')
-              if trigger_path.as_posix() in changed:
+              if request_path in changed:
+                  trigger_path = Path(os.environ['TRIGGER_PATH'])
                   trigger = json.loads(trigger_path.read_text(encoding='utf-8'))
                   assert trigger.get('schema') == 'RealSaS.ResearchOperatorTrigger.v1', 'RESEARCH_OPERATOR_TRIGGER_SCHEMA'
                   assert trigger.get('enabled') is True, 'RESEARCH_OPERATOR_TRIGGER_NOT_ENABLED'
+                  assert trigger.get('request') == request_path, 'RESEARCH_OPERATOR_TRIGGER_REQUEST_DRIFT'
                   assert trigger.get('operation') == 'IRIS_VNEXT_V9_PRETRAINING_ARTIFACT_BUILD', 'RESEARCH_OPERATOR_OPERATION_NOT_ALLOWLISTED'
                   assert trigger.get('training_allowed') is False, 'RESEARCH_OPERATOR_TRAINING_FORBIDDEN'
-                  request_path = str(trigger.get('request') or '')
+
                   request = Path(request_path)
-                  assert request_path and not request.is_absolute() and '..' not in request.parts, 'RESEARCH_OPERATOR_REQUEST_PATH_INVALID'
-                  assert request_path.startswith('canonical/'), 'RESEARCH_OPERATOR_REQUEST_MUST_BE_CANONICAL'
                   value = json.loads(request.read_text(encoding='utf-8'))
                   assert value.get('schema') == 'RealSaS.IRISVNextV9PretrainingArtifactRequest.v1', 'RESEARCH_OPERATOR_REQUEST_SCHEMA_INVALID'
                   assert value.get('operation') == trigger['operation'], 'RESEARCH_OPERATOR_REQUEST_OPERATION_DRIFT'
+                  assert value.get('target_branch') == 'research/iris-vnext-post-v8-quality-plan-20261018', 'RESEARCH_OPERATOR_TARGET_BRANCH_DRIFT'
                   target_sha = str(value.get('target_source_sha') or '').lower()
-                  assert target_sha == str(trigger.get('target_source_sha') or '').lower(), 'RESEARCH_OPERATOR_TRIGGER_SHA_DRIFT'
                   assert re.fullmatch(r'[0-9a-f]{40}', target_sha), 'RESEARCH_OPERATOR_TARGET_SHA_INVALID'
                   assert value.get('training_allowed') is False, 'RESEARCH_OPERATOR_REQUEST_TRAINING_FORBIDDEN'
                   assert value.get('external_storage_write_allowed') is False, 'RESEARCH_OPERATOR_EXTERNAL_WRITE_FORBIDDEN'
+
+                  remote_target = subprocess.check_output(
+                      ['git', 'ls-remote', 'origin', 'refs/heads/research/iris-vnext-post-v8-quality-plan-20261018'],
+                      text=True,
+                  ).strip().split('\t', 1)[0].lower()
+                  assert remote_target == target_sha, 'RESEARCH_OPERATOR_TARGET_BRANCH_SHA_DRIFT'
                   should = True
+
           print(f"should_run={'true' if should else 'false'}")
-          print(f'request={request_path}')
+          print(f'request={request_path if should else ""}')
           print(f'target_sha={target_sha}')
           print(f'main_sha={main_sha}')
           PY
@@ -292,17 +306,11 @@ jobs:
           ref: ${{ env.EXPECTED_MAIN_SHA }}
           fetch-depth: 2
 
-      - name: Require current deployed canonical main
+      - name: Require exact canonical main source
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$EXPECTED_MAIN_SHA"
           test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_MAIN_SHA"
-          python - <<'PY'
-          import json, os
-          from pathlib import Path
-          deployment=json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
-          assert deployment['code_sha']==os.environ['EXPECTED_MAIN_SHA'], 'RESEARCH_OPERATOR_DEPLOYED_MAIN_DRIFT'
-          PY
 
       - uses: actions/setup-python@v5
         with:

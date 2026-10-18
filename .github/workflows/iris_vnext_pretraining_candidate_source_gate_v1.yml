@@ -6,22 +6,38 @@ on:
     paths:
       - '.github/workflows/iris_vnext_fit8_pretraining_candidate_self_hosted_v1.yml'
       - '.github/workflows/iris_vnext_pretraining_candidate_source_gate_v1.yml'
+      - 'models/iris/vnext/cohort_v9.py'
+      - 'models/iris/vnext/cohort_v9_fp32.py'
+      - 'models/iris/vnext/cohort_v9_balanced_fp32.py'
       - 'tools/iris_vnext/build_fit8_boundary_causality_v1.py'
       - 'tools/iris_vnext/migrate_v8_relation_head_v2.py'
       - 'tools/iris_vnext/verify_fit8_candidate_roundtrip_v1.py'
       - 'tools/iris_vnext/seal_fit8_pretraining_materialization_v1.py'
+      - 'tools/iris_vnext/audit_v9_relation_split_support_v1.py'
+      - 'tools/iris_vnext/build_v9_focused_relation_preregistration_v1.py'
       - 'tools/iris_vnext/audit_fit8_pretraining_readiness_v1.py'
+      - 'tools/iris_vnext/run_v9_focused_relation.py'
+      - 'tools/iris_vnext/audit_v9_scientific_court_v1.py'
+      - 'tests/iris/test_v9_focused_relation_training_contract_v1.py'
       - 'tests/repository/test_vnext_fit8_self_hosted_workflow_safety_v2.py'
   push:
     branches: [research/iris-vnext-post-v8-quality-plan-20261018]
     paths:
       - '.github/workflows/iris_vnext_fit8_pretraining_candidate_self_hosted_v1.yml'
       - '.github/workflows/iris_vnext_pretraining_candidate_source_gate_v1.yml'
+      - 'models/iris/vnext/cohort_v9.py'
+      - 'models/iris/vnext/cohort_v9_fp32.py'
+      - 'models/iris/vnext/cohort_v9_balanced_fp32.py'
       - 'tools/iris_vnext/build_fit8_boundary_causality_v1.py'
       - 'tools/iris_vnext/migrate_v8_relation_head_v2.py'
       - 'tools/iris_vnext/verify_fit8_candidate_roundtrip_v1.py'
       - 'tools/iris_vnext/seal_fit8_pretraining_materialization_v1.py'
+      - 'tools/iris_vnext/audit_v9_relation_split_support_v1.py'
+      - 'tools/iris_vnext/build_v9_focused_relation_preregistration_v1.py'
       - 'tools/iris_vnext/audit_fit8_pretraining_readiness_v1.py'
+      - 'tools/iris_vnext/run_v9_focused_relation.py'
+      - 'tools/iris_vnext/audit_v9_scientific_court_v1.py'
+      - 'tests/iris/test_v9_focused_relation_training_contract_v1.py'
       - 'tests/repository/test_vnext_fit8_self_hosted_workflow_safety_v2.py'
   workflow_dispatch:
 
@@ -48,17 +64,26 @@ jobs:
         run: |
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
           python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
-      - name: Compile pretraining candidate machinery
+      - name: Compile complete V9 pretraining and scientific machinery
         run: |
           python -m py_compile \
+            models/iris/vnext/cohort_v9.py \
+            models/iris/vnext/cohort_v9_fp32.py \
+            models/iris/vnext/cohort_v9_balanced_fp32.py \
             tools/iris_vnext/build_fit8_boundary_causality_v1.py \
             tools/iris_vnext/migrate_v8_relation_head_v2.py \
             tools/iris_vnext/verify_fit8_candidate_roundtrip_v1.py \
             tools/iris_vnext/seal_fit8_pretraining_materialization_v1.py \
-            tools/iris_vnext/audit_fit8_pretraining_readiness_v1.py
-      - name: Safety and pretraining-boundary contracts
+            tools/iris_vnext/audit_v9_relation_split_support_v1.py \
+            tools/iris_vnext/build_v9_focused_relation_preregistration_v1.py \
+            tools/iris_vnext/audit_fit8_pretraining_readiness_v1.py \
+            tools/iris_vnext/run_v9_focused_relation.py \
+            tools/iris_vnext/audit_v9_scientific_court_v1.py
+      - name: V9 authority and pretraining-boundary contracts
         run: |
-          python -m pytest -q tests/repository/test_vnext_fit8_self_hosted_workflow_safety_v2.py
+          python -m pytest -q \
+            tests/iris/test_v9_focused_relation_training_contract_v1.py \
+            tests/repository/test_vnext_fit8_self_hosted_workflow_safety_v2.py
       - name: Summary
         run: |
           echo 'IRIS_VNEXT_PRETRAINING_CANDIDATE_SOURCE_GATE_PASS'
@@ -66,4 +91,7 @@ jobs:
           echo 'candidate_remote=exact_source_sha_scoped'
           echo 'v8_relation_migration=exact_authority_artifact_zero_training_steps'
           echo 'truth_materialization=relation_v2_plus_boundary_causality_v1'
-          echo 'training_entry=preregistration_and_readiness_required'
+          echo 'supervision=balanced_grouped_boundary_plus_ordering__occlusion_metric_only'
+          echo 'heldout=step0_plus_fixed_final_only'
+          echo 'training_entry=split_support_plus_artifact_preregistration_plus_readiness_required'
+          echo 'scientific_pass=locked_post_training_court_only'

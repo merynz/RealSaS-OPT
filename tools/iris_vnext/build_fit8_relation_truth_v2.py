@@ -8,12 +8,13 @@ post-V8 truth/conditioning contract:
 
 - static same/cut/attachment targets abstain unless a future source authority is
   added explicitly;
-- front/occlusion/visibility come from exact first/second ray ordering;
+- front/visibility direction come from exact first/second ray ordering;
+- occlusion remains a symmetric same-pixel pair gate, matching the historical
+  truth/Compiler contract;
 - projected alpha/appearance boundaries come from the current source RGBA view;
 - target values, validity, evidence authority and provenance remain explicit;
 - every two-hit ray is emitted in both pair orientations, giving exact balanced
-  directional front/occlusion/visibility supervision without fabricated fallback
-  negatives.
+  directional front/visibility supervision without fabricated fallback negatives.
 
 The output is training evidence only. Teacher source data is never placed on an
 inference forward path.
@@ -87,7 +88,7 @@ def _orient_two_hit_rows_v2(
     appearance_boundary: np.ndarray,
     max_oriented_pairs: int,
 ) -> dict[str, np.ndarray]:
-    """Emit front/back rows in both orientations with exact balanced labels."""
+    """Emit front/back rows in both orientations with contract-correct labels."""
 
     front = np.asarray(point_front, dtype=np.float32)
     back = np.asarray(point_back, dtype=np.float32)
@@ -136,7 +137,10 @@ def _orient_two_hit_rows_v2(
         "point_a": point_a,
         "point_b": point_b,
         "front_probability": interleave(ones, zeros),
-        "occlusion_probability": interleave(ones, zeros),
+        # Occlusion is a symmetric pair gate in GraphicsViewTruthV1 and in the
+        # Compiler: pair orientation chooses front/back; it does not erase the
+        # fact that these two faces overlap on the same ray.
+        "occlusion_probability": np.ones(count, dtype=np.float32),
         "visibility_probability_a": interleave(ones, zeros),
         "visibility_probability_b": interleave(zeros, ones),
         "projected_alpha_boundary_probability": projected_alpha,
@@ -237,8 +241,8 @@ def _view_truth(
                 "attachment_affinity": "ABSTAIN:no_independent_attachment_truth_in_relation_v2_source_contract",
             },
             "view_truth": {
-                "front_probability": "DETERMINISTIC_DERIVED:first_second_exact_ray_order",
-                "occlusion_probability": "DETERMINISTIC_DERIVED:same_pixel_first_hit_occludes_second_hit",
+                "front_probability": "DETERMINISTIC_DERIVED:first_second_exact_ray_order_directional",
+                "occlusion_probability": "DETERMINISTIC_DERIVED:same_pixel_two_hit_pair_symmetric_gate",
                 "visibility_probability_a": "DETERMINISTIC_DERIVED:pair_orientation_and_exact_ray_order",
                 "visibility_probability_b": "DETERMINISTIC_DERIVED:pair_orientation_and_exact_ray_order",
                 "projected_alpha_boundary_probability": "DETERMINISTIC_DERIVED:current_view_source_RGBA_3x3_alpha_range_gt_0.20",
@@ -381,7 +385,7 @@ def main():
         },
         "static_target_policy": "ABSTAIN_UNLESS_INDEPENDENT_SOURCE_AUTHORITY_EXISTS",
         "view_target_policy": "EXACT_RAY_ORDER_PLUS_CURRENT_VIEW_PROJECTED_BOUNDARY_EVIDENCE",
-        "pair_orientation_policy": "TWO_HIT_RAY_BOTH_ORIENTATIONS_EXACT_BALANCE",
+        "pair_orientation_policy": "TWO_HIT_RAY_BOTH_ORIENTATIONS__FRONT_VIS_DIRECTIONAL__OCCLUSION_SYMMETRIC",
         "policy": {
             "candidate_rays_per_view": int(args.candidate_rays_per_view),
             "max_oriented_pairs_per_view": int(args.max_oriented_pairs_per_view),

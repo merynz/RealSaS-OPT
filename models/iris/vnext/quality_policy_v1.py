@@ -2,17 +2,22 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
+from typing import Mapping, Optional
 
 
 OFFICIAL_NUMERIC_QUALITY_THRESHOLDS_PRESENT = False
 HISTORICAL_COMPARABLE_NORMALIZED_RESIDUAL_REFERENCE_P95 = 0.05
 SEALED_SHARED_PARAMETER_PREFIXES = ("scene_core.",)
+
+# These IDs are the actual stage identifiers emitted by the V8 curriculum.
+# Do not introduce aliases here: a renamed stage must fail the integration court
+# until this contract and the trainer are changed together.
+M1_SEAL_STAGE = "M1_MECHANICAL_DEMAND"
 DOWNSTREAM_SPECIALIST_STAGES = (
-    "A1_APPEARANCE",
-    "R1_RELATIONS",
-    "T1_TOPOLOGY",
-    "J1_JOINT",
+    "A1_APPEARANCE_EVIDENCE",
+    "R1_ROLE_FREE_RELATIONS",
+    "T1_MECHANICAL_STRUCTURE",
+    "J1_JOINT_FINETUNE",
 )
 
 
@@ -25,7 +30,7 @@ class QualityStatus(str, Enum):
 
 @dataclass(frozen=True)
 class CarrierSealPolicyV1:
-    seal_after_stage: str = "M1_MECHANICS"
+    seal_after_stage: str = M1_SEAL_STAGE
     sealed_parameter_prefixes: tuple[str, ...] = SEALED_SHARED_PARAMETER_PREFIXES
     downstream_stages: tuple[str, ...] = DOWNSTREAM_SPECIALIST_STAGES
     reopen_requires_explicit_court: bool = True
@@ -34,6 +39,10 @@ class CarrierSealPolicyV1:
     def is_sealed_parameter(self, parameter_name: str) -> bool:
         return any(parameter_name.startswith(prefix) for prefix in self.sealed_parameter_prefixes)
 
+    def assert_known_downstream_stage(self, stage_name: str) -> None:
+        if stage_name.startswith(("A1_", "R1_", "T1_", "J1_")) and stage_name not in self.downstream_stages:
+            raise RuntimeError(f"UNKNOWN_POST_M1_STAGE_ID:{stage_name}")
+
     def assert_downstream_parameter_allowed(
         self,
         *,
@@ -41,6 +50,7 @@ class CarrierSealPolicyV1:
         parameter_name: str,
         reopening_court_id: Optional[str] = None,
     ) -> None:
+        self.assert_known_downstream_stage(stage_name)
         if stage_name not in self.downstream_stages:
             return
         if not self.is_sealed_parameter(parameter_name):
@@ -50,6 +60,47 @@ class CarrierSealPolicyV1:
                 "SEALED_SHARED_CARRIER_REOPEN_REQUIRES_EXPLICIT_COURT:"
                 f"{stage_name}:{parameter_name}"
             )
+
+    def assert_stage_definition(
+        self,
+        *,
+        stage_name: str,
+        scene_lr_scale: float,
+        reopening_court_id: Optional[str] = None,
+    ) -> None:
+        self.assert_known_downstream_stage(stage_name)
+        if stage_name not in self.downstream_stages:
+            return
+        if float(scene_lr_scale) == 0.0:
+            return
+        if reopening_court_id:
+            return
+        raise RuntimeError(
+            "POST_M1_STAGE_REOPENS_SEALED_SCENE_CORE_WITHOUT_COURT:"
+            f"{stage_name}:scene_lr_scale={scene_lr_scale}"
+        )
+
+    def assert_optimizer_configuration(
+        self,
+        *,
+        stage_name: str,
+        group_lrs: Mapping[str, float],
+        reopening_court_id: Optional[str] = None,
+    ) -> None:
+        self.assert_known_downstream_stage(stage_name)
+        if stage_name not in self.downstream_stages:
+            return
+        if "scene_core" not in group_lrs:
+            raise RuntimeError(f"SEALED_SCENE_CORE_OPTIMIZER_GROUP_MISSING:{stage_name}")
+        scene_lr = float(group_lrs["scene_core"])
+        if scene_lr == 0.0:
+            return
+        if reopening_court_id:
+            return
+        raise RuntimeError(
+            "SEALED_SHARED_CARRIER_OPTIMIZER_LR_NONZERO_WITHOUT_COURT:"
+            f"{stage_name}:lr={scene_lr}"
+        )
 
 
 @dataclass(frozen=True)

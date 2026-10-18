@@ -43,6 +43,17 @@ def _canonical_sha(value: Any) -> str:
     ).hexdigest()
 
 
+def _source_provenance() -> dict[str, str]:
+    repo = Path(__file__).resolve().parents[2]
+    paths = (
+        Path(__file__).resolve(),
+        repo / "models/iris/vnext/cohort_v1.py",
+        repo / "tools/iris_vnext/build_fit8_vnext_shards_v1.py",
+        repo / "tools/iris_vnext/build_fit8_vnext_shards_v2.py",
+    )
+    return {str(path.relative_to(repo)): _sha(path) for path in paths}
+
+
 def _two_hit_mask(hits: dict[str, np.ndarray]) -> np.ndarray:
     first = np.asarray(hits["first_face"], dtype=np.int64)
     second = np.asarray(hits["second_face"], dtype=np.int64)
@@ -299,8 +310,8 @@ def main() -> None:
         "subjects": subjects,
         "source_bindings": {
             "stage01_bootstrap_sha256": _sha(bootstrap_path),
-            "producer_sha256": _sha(Path(__file__).resolve()),
         },
+        "source_provenance": _source_provenance(),
     }
     payload["value_sha256"] = _canonical_sha(payload)
     output.parent.mkdir(parents=True, exist_ok=True)

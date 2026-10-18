@@ -4,7 +4,7 @@
 
 > Navigation and ownership index. `CURRENT_STATE.md` and `CURRENT_PLAN.md` define the active program. Historical recovery/runtime-audit documents remain provenance only.
 
-## Current continuation
+## Current continuation details
 
 Read first:
 
@@ -17,7 +17,9 @@ Read first:
 7. `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`
 8. `AGENTS.md`
 
-`main` remains merged production-code authority until reviewed vNext merges. The active post-V8 source line is `research/iris-vnext-post-v8-quality-plan-20261018`; it is temporary review source, not research/product authority. Draft PR #116 currently points to stale vNext history and must be synchronized before review/merge. The completed V8 artifact remains bound to source `5083c9915533ec8ec6530c7d229c635887abfea7` plus exact checkpoint/receipt lineage.
+`main` remains merged production-code authority until reviewed vNext merges. The active post-V8 source line is `research/iris-vnext-post-v8-quality-plan-20261018`; it is temporary review source, not research/product authority. Draft PR #116 is kept fast-forward synchronized to green active-review heads. The completed V8 artifact remains bound to source `5083c9915533ec8ec6530c7d229c635887abfea7` plus exact checkpoint/receipt lineage.
+
+Current V2/product continuity is preserved alongside the narrower post-V8 IRIS program. The machine-readable readiness pointer remains `canonical/V2_IMPLEMENTATION_READINESS.json`; the existing product/compiler control plane remains a dependency DAG rather than branch history. Post-V8 research changes do not silently supersede current canonical mesh, appearance or runtime authority.
 
 ## Current architecture summary
 
@@ -78,6 +80,16 @@ There is no mandatory named body-part taxonomy in the inference contract and no 
 | Production state | Go `ProductRevision` | qualified production truth |
 | Artifacts | Artifact Registry/store | immutable typed bytes + dependency identities |
 | Closure | proof/qualification | promotion eligibility is explicit and fail-closed |
+
+### Canonical mesh domain
+
+`compiler/realsas_compiler_core/surface_addressing_v1.py` provides the current `SurfaceAddressing` / `SurfaceAddressingIR` implementation for the stable canonical-M mechanical addressing domain. Existing Stage18/19 product continuity still treats mesh birth/qualification as a Compiler-owned authority boundary; post-V8 IRIS proposals/evidence do not bypass it. `QualifiedMeshIR` remains a product-authority type after its own qualification.
+
+### Appearance / CAA
+
+`compiler/realsas_compiler_core/appearance_authority_v2.py` remains the current product appearance authority home for Complete Appearance Authority / CAA semantics. `compiler/realsas_compiler_core/runtime_authority_v2.py` remains the qualified runtime-consumption authority boundary. Post-V8 learned Graphics evidence may feed Compiler structure but may not silently rewrite source-preserving appearance or runtime authority.
+
+The existing V2 implementation remains governed through its current dependency DAG/readiness records. These product navigation anchors coexist with the narrower post-V8 IRIS experiment program; they are not scientific PASS claims for that program.
 
 ## IRIS training authority
 
@@ -237,16 +249,17 @@ Run `39121291171` / prepare #22 on stale PR head `90c9c2f...` started when the r
 
 Consequences:
 
-- runner remains offline until a current-branch-owned safe flow is ready;
+- runner remains offline until the deliberate read-only quarantine-audit workflow has been queued on the exact final review SHA;
 - the affected Drive path is quarantined/unverified;
 - stale local/GitHub artifact `12137271848` is forensic evidence only;
-- current experiments must not consume the Drive path based on file presence.
+- current experiments must not consume the Drive path based on file presence;
+- the legacy self-hosted preparation writer is retired; no current write workflow is authorized.
 
 ## Canonical code-line policy
 
 `main` remains the single merged continuation line. Temporary review branches may exist for code review, but must not become Attempt/ProductRevision authority.
 
-The active post-V8 branch is the current review source. Draft PR #116 must be synchronized to the final green review head rather than leaving multiple divergent vNext narratives.
+The active post-V8 branch is the current review source. Draft PR #116 is fast-forward synchronized only after an active-review head passes focused gates.
 
 ## Mechanics boundary
 

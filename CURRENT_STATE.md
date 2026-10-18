@@ -3,8 +3,8 @@
 **Date:** 2026-10-18  
 **Canonical production line:** `main` until reviewed vNext is merged  
 **Active review source:** `research/iris-vnext-post-v8-quality-plan-20261018`  
-**Latest verified focused source before this continuity repair:** `3d732df81939c30c7ebf0f501515a8bd66529869`  
-**Verified focused workflow:** `39132203602` = `completed/success`  
+**Latest verified focused source before this continuity repair:** `c22850ae4fd8ca31f315a5488633768f1bfa3fe6`  
+**Verified focused workflows on that source:** completion audit `39132578331` + full vNext suite `39132578290` = `completed/success`  
 **Review vehicle:** draft PR #116; keep it fast-forward synchronized only to green active-review heads  
 **Active program:** **POST-V8 QUALITY / TRUTH / CONSUMPTION QUALIFICATION**  
 **Scientific status:** **NO IRIS FIT8 SCIENTIFIC PASS**
@@ -18,20 +18,26 @@ Do not collapse these into one notion of current:
 3. The active post-V8 branch is review source only; it does not retroactively mutate V8.
 4. Artifact Registry / Attempt / ProductRevision remain durable research/product authority. Git chronology and green CI are not scientific authority by themselves.
 
-## Platform execution continuity
+## Preserved V2 / product continuity
 
-- **Execution/runtime/spec gate id:** `PLATFORM_EXECUTION_LANES`
-- **Pre-existing control-plane continuity state token:** `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED`
-- `QualifiedMeshIR` remains the single product geometry authority after its own mesh qualification. Naming it here preserves current product-authority continuity; it does not claim that the post-V8 IRIS review line has newly qualified a product mesh.
-- **Complete Appearance Authority** remains the current product appearance authority boundary. It is separate from the post-V8 learned Graphics evidence work and does not upgrade Relation Truth V2 or boundary evidence to product authority.
-- These platform/product continuity anchors are orthogonal to the IRIS post-V8 scientific qualification program and do **not** grant an IRIS Fit8 scientific PASS, absolute G3 PASS, unseen generalization, or product qualification.
+The post-V8 IRIS research program does **not** erase or replace the current V2 control-plane and product authority records already present on `main`.
+
+- Current implementation-readiness pointer: `canonical/V2_IMPLEMENTATION_READINESS.json`.
+- Current control-plane continuity includes the existing **43-stage dependency DAG** and gate id `PLATFORM_EXECUTION_LANES`.
+- Pre-existing continuity state token: `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED`.
+- **Geometry**, **Mechanics**, and **Appearance** remain separate product-quality authority domains.
+- `QualifiedMeshIR` remains the typed qualified-mesh authority entering the canonical carrier boundary after its own qualification.
+- `SurfaceAddressing` remains the stable canonical-M addressing boundary; current implementation home is `compiler/realsas_compiler_core/surface_addressing_v1.py`.
+- **Complete Appearance Authority** remains the source-preserving appearance authority downstream of canonical M; post-V8 learned Graphics evidence does not silently replace that product authority.
+
+These continuity anchors are orthogonal to the active IRIS scientific program. Naming them here does **not** grant a new IRIS/Fit8 scientific PASS, absolute G3 PASS, unseen generalization, or product qualification.
 
 ## Training lineage and current invariant
 
 - V5 falsified unsafe single-objective downstream rewriting of shared H.
-- V6 showed cumulative retention can preserve mechanics while geometry/extraction still drift because post-M1 `scene_core` remained trainable.
+- V6 showed cumulative retention can preserve Mechanics while Geometry/extraction still drift because post-M1 `scene_core` remained trainable.
 - V7 repaired TESSA coordinate compatibility only; V6 optimizer/curriculum policy remained.
-- V8 migrated exact V6 M1-end, sealed `scene_core`, completed step12000, and held geometry/extraction invariant while downstream appearance/relation/topology objectives remained learnable.
+- V8 migrated exact V6 M1-end, sealed `scene_core`, completed step12000, and held Geometry/extraction invariant while downstream Appearance/relation/topology objectives remained learnable.
 
 Current default:
 
@@ -51,7 +57,7 @@ V8 remains a **measurement baseline**, not a scientific Fit8 PASS.
 
 ## Verified post-V8 source stack
 
-The focused source contract is green at `3d732df...`, run `39132203602`. The green run covers:
+The focused post-V8 contracts on `c22850ae...` are green via completion audit `39132578331` and full vNext suite `39132578290`. They cover:
 
 - exact canonical post-M1 stage IDs and fail-closed carrier guard;
 - Truth V2 authority/provenance/validity contract and validity-aware loss;
@@ -77,7 +83,7 @@ Implemented replacement source:
 - `models/iris/vnext/training_v2.py` — explicit validity-mask loss;
 - `tools/iris_vnext/build_fit8_relation_truth_v2.py` — versioned Relation Truth V2 sidecar/manifest producer;
 - `models/iris/vnext/relation_support_v2.py` — support/class-balance court eligibility;
-- `models/iris/vnext/heads_v2.py` — projected boundaries moved to camera-conditioned view branch;
+- `models/iris/vnext/heads_v2.py` — projected boundaries moved to the camera-conditioned view branch;
 - `models/iris/vnext/optimization_v2.py` — head-separated focused optimizer and convergence telemetry.
 
 Still **not established**:
@@ -187,15 +193,16 @@ COURT_PASS
 
 ## Immediate next execution tranche
 
-1. keep this continuity repair green and fast-forward PR #116 to it without force;
-2. require the broad PR gate set to be green on that exact head;
-3. deliberately run the read-only self-hosted quarantine audit and inspect its forensic artifact;
-4. only after that, design a SHA-scoped candidate preparation writer; do not write the quarantined shared remote automatically;
-5. materialize Relation Truth V2 sidecars/manifest on exact admitted Fit8 inputs and audit per-family support/class/abstention;
-6. seal a real V8 relation-head state → `GraphicsRelationHeadV2` migration checkpoint/receipt;
-7. preregister and run focused relation/boundary optimization with `scene_core` frozen and head-specific telemetry;
-8. build the independent TESSA topology court;
-9. close remaining evidence→Compiler→runtime behavioral-consumption gaps.
+1. require this continuity repair to pass focused CI;
+2. fast-forward PR #116 to that exact green head without force;
+3. require the broad PR gate set to be green on that exact head;
+4. deliberately run the read-only self-hosted quarantine audit and inspect its forensic artifact;
+5. only after that, design a SHA-scoped candidate preparation writer; do not write the quarantined shared remote automatically;
+6. materialize Relation Truth V2 sidecars/manifest on exact admitted Fit8 inputs and audit per-family support/class/abstention;
+7. seal a real V8 relation-head state → `GraphicsRelationHeadV2` migration checkpoint/receipt;
+8. preregister and run focused relation/boundary optimization with `scene_core` frozen and head-specific telemetry;
+9. build the independent TESSA topology court;
+10. close remaining evidence→Compiler→runtime behavioral-consumption gaps.
 
 No broad 12k/A100 rerun is authorized merely because source hardening is green.
 

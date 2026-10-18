@@ -54,6 +54,7 @@ def _trainer(args: argparse.Namespace) -> IRISVNextFocusedRelationTrainerV9Balan
         materialization_receipt_path=Path(args.materialization_receipt),
         preregistration_path=Path(args.preregistration),
         readiness_receipt_path=Path(args.readiness_receipt),
+        support_receipt_path=Path(args.support_receipt),
         checkpoint_root=Path(args.checkpoint_root),
         expected_source_sha=expected,
         device=args.device,
@@ -135,6 +136,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--migration-artifact", required=True)
     p.add_argument("--migration-receipt", required=True)
     p.add_argument("--materialization-receipt", required=True)
+    p.add_argument("--support-receipt", required=True)
     p.add_argument("--preregistration", required=True)
     p.add_argument("--readiness-receipt", required=True)
     p.add_argument("--checkpoint-root", required=True)

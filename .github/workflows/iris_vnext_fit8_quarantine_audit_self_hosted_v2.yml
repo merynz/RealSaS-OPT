@@ -1,0 +1,119 @@
+name: iris-vnext-fit8-quarantine-audit-self-hosted-v2
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_source_sha:
+        description: 'Exact 40-char source SHA expected to own this audit; must equal the selected ref HEAD.'
+        required: true
+        type: string
+      confirm_read_only:
+        description: 'Confirm this run is a read-only audit of the quarantined remote.'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iris-vnext-fit8-quarantine-audit-self-hosted-v2
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    if: github.repository == 'merynz/RealSaS-OPT'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
+      CONFIRM_READ_ONLY: ${{ inputs.confirm_read_only }}
+      QUARANTINED_REMOTE: 'gdrive:RealSaS_Fit8_IRIS_vNext_20261016'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Fail closed unless dispatch owns current review source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CONFIRM_READ_ONLY" = 'true' || { echo 'VNEXT_QUARANTINE_AUDIT_CONFIRMATION_REQUIRED'; exit 2; }
+          test "$GITHUB_REF_NAME" = 'research/iris-vnext-post-v8-quality-plan-20261018' || {
+            echo "VNEXT_QUARANTINE_AUDIT_WRONG_BRANCH:$GITHUB_REF_NAME"
+            exit 2
+          }
+          case "$EXPECTED_SOURCE_SHA" in
+            *[!0-9a-fA-F]*|'') echo 'VNEXT_QUARANTINE_AUDIT_EXPECTED_SHA_INVALID'; exit 2 ;;
+          esac
+          test "${#EXPECTED_SOURCE_SHA}" -eq 40 || { echo 'VNEXT_QUARANTINE_AUDIT_EXPECTED_SHA_LENGTH_INVALID'; exit 2; }
+          head_sha="$(git rev-parse HEAD)"
+          test "$head_sha" = "${EXPECTED_SOURCE_SHA,,}" || {
+            echo "VNEXT_QUARANTINE_AUDIT_HEAD_MISMATCH:expected=${EXPECTED_SOURCE_SHA,,}:actual=$head_sha"
+            exit 2
+          }
+          test "$GITHUB_SHA" = "$head_sha" || {
+            echo "VNEXT_QUARANTINE_AUDIT_GITHUB_SHA_MISMATCH:$GITHUB_SHA:$head_sha"
+            exit 2
+          }
+          audit_root="/home/monster/realsas_authority/runs/IRIS_VNEXT_REMOTE_AUDITS/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          echo "AUDIT_ROOT=$audit_root" >> "$GITHUB_ENV"
+          echo "VNEXT_QUARANTINE_AUDIT_SOURCE_BOUND $head_sha"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate read-only audit dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v rclone >/dev/null
+          python -m py_compile tools/iris_vnext/audit_fit8_preparation_snapshot_v1.py
+
+      - name: Snapshot quarantined remote read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$AUDIT_ROOT"
+          mkdir -p "$AUDIT_ROOT/teachers" "$AUDIT_ROOT/prepared" "$AUDIT_ROOT/receipts"
+          rclone copy "$QUARANTINED_REMOTE/teachers" "$AUDIT_ROOT/teachers" --checksum || echo 'VNEXT_QUARANTINE_AUDIT_TEACHERS_COPY_INCOMPLETE'
+          rclone copy "$QUARANTINED_REMOTE/prepared" "$AUDIT_ROOT/prepared" --checksum || echo 'VNEXT_QUARANTINE_AUDIT_PREPARED_COPY_INCOMPLETE'
+          rclone copy "$QUARANTINED_REMOTE/receipts/HYDRATION_RECEIPT.json" "$AUDIT_ROOT/receipts" --checksum || echo 'VNEXT_QUARANTINE_AUDIT_RECEIPT_COPY_INCOMPLETE'
+
+      - name: Audit exact SHA and source provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/iris_vnext/audit_fit8_preparation_snapshot_v1.py \
+            --snapshot-root "$AUDIT_ROOT" \
+            --expected-current-source-sha "$GITHUB_SHA" \
+            --output "$AUDIT_ROOT/QUARANTINE_AUDIT.json" \
+            --fail-unless-current
+
+      - name: Upload quarantine forensic audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-vnext-fit8-quarantine-audit-${{ github.run_id }}
+          path: |
+            ${{ env.AUDIT_ROOT }}/QUARANTINE_AUDIT.json
+            ${{ env.AUDIT_ROOT }}/teachers/TEACHER_BATCH_RECEIPT.json
+            ${{ env.AUDIT_ROOT }}/prepared/COHORT_MANIFEST.json
+            ${{ env.AUDIT_ROOT }}/prepared/PREPARATION_RECEIPT.json
+            ${{ env.AUDIT_ROOT }}/receipts/HYDRATION_RECEIPT.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          if test -s "$AUDIT_ROOT/QUARANTINE_AUDIT.json"; then
+            cat "$AUDIT_ROOT/QUARANTINE_AUDIT.json" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'VNEXT_QUARANTINE_AUDIT_REPORT_MISSING' >> "$GITHUB_STEP_SUMMARY"
+          fi

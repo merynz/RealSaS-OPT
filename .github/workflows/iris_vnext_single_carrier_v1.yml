@@ -8,6 +8,7 @@ on:
       - 'models/iris/vnext/**'
       - 'tools/iris_vnext/**'
       - 'tests/iris/**'
+      - 'tests/repository/**'
       - 'compiler/realsas_compiler_core/**'
       - 'tests/compiler/**'
       - 'docs/research/**'
@@ -16,6 +17,8 @@ on:
       - 'AGENTS.md'
       - 'SYSTEM_INDEX.md'
       - '.github/workflows/iris_vnext_single_carrier_v1.yml'
+      - '.github/workflows/iris_vnext_fit8_prepare_self_hosted_v1.yml'
+      - '.github/workflows/iris_vnext_fit8_quarantine_audit_self_hosted_v2.yml'
   workflow_dispatch:
 concurrency:
   group: iris-vnext-single-carrier-v1-${{ github.ref }}
@@ -71,6 +74,7 @@ jobs:
             tools/iris_vnext/build_fit8_vnext_shards_v2.py \
             tools/iris_vnext/build_fit8_relation_truth_v2.py \
             tools/iris_vnext/prepare_fit8_vnext_cohort_v1.py \
+            tools/iris_vnext/audit_fit8_preparation_snapshot_v1.py \
             tools/iris_vnext/a100_preflight_v1.py \
             tools/iris_vnext/a100_preflight_v2.py \
             tools/iris_vnext/run_fit8_vnext_scientific_v1.py
@@ -86,7 +90,7 @@ jobs:
       - name: Post-V8 quality, carrier seal, optimizer and truth contracts
         run: python -m pytest -q tests/iris/test_quality_policy_v1.py tests/iris/test_boundary_causality_v1.py tests/iris/test_graphics_truth_v2.py tests/iris/test_relation_truth_v2_producer.py tests/iris/test_relation_support_v2.py tests/iris/test_optimization_v2.py tests/iris/test_graphics_relation_head_v2.py
       - name: Single-carrier mechanics, Graphics, DAG and preparation provenance contracts
-        run: python -m pytest -q tests/compiler/test_vnext_single_carrier_graphics_v1.py tests/repository/test_vnext_architecture_contract_v1.py tests/repository/test_vnext_execution_graph_v1.py tests/repository/test_vnext_fit8_preparation_contract_v1.py tests/repository/test_vnext_fit8_active_preparation_provenance_v1.py
+        run: python -m pytest -q tests/compiler/test_vnext_single_carrier_graphics_v1.py tests/repository/test_vnext_architecture_contract_v1.py tests/repository/test_vnext_execution_graph_v1.py tests/repository/test_vnext_fit8_preparation_contract_v1.py tests/repository/test_vnext_fit8_active_preparation_provenance_v1.py tests/repository/test_vnext_fit8_self_hosted_workflow_safety_v2.py
       - name: Native Graphics ordering contract
         run: |
           g++ -std=c++17 -O2 runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp -o /tmp/realsas_graphics_v1_test
@@ -127,6 +131,8 @@ jobs:
           echo 'fit8_exact_input_binding_required=true'
           echo 'fit8_preparation_receipt_required=true'
           echo 'fit8_active_preparation_source_provenance_required=true'
+          echo 'fit8_self_hosted_prepare_v1=retired_no_push_no_self_hosted_write'
+          echo 'fit8_self_hosted_quarantine_audit_v2=manual_dispatch_read_only_fail_unless_current'
           echo 'fit8_raycast_backend=parallel_orthographic_projected_grid_batched_exact_equivalent_v2'
           echo 'fit8_boundary_maps=cached_exact_equivalent_v2'
           echo 'fit8_mechanical_bend_precomputed_vectorized=true'

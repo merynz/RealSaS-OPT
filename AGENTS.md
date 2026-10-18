@@ -1,62 +1,218 @@
 # RealSaS-OPT Agent Entry Contract
 
-## Mandatory current handoff — 2026-10-11
-
-**First read:** `CURRENT_STATE.md`, then `docs/platform/EXECUTION_LANES.md`.
-Use `canonical/CANONICAL_HANDOFF_20261007.md` for the sealed mechanics handoff.
-
-If the user says only “continue / devam et”, resume from canonical `main` and the priority order in `CURRENT_STATE.md`. Do not resurrect an older runtime-audit, VF-11, recovery, research-branch or promotion-branch continuation merely because historical files still exist.
+## Mandatory current handoff — 2026-10-18
 
 This repository must be resumable without conversational memory.
 
-Before research execution, read `realsasctl agent-context --id <subject UUID>`
-and enter with `agent-enter`: exact deployed main SHA, Attempt, released DAG,
-immutable SubjectInput and explicit target. A live session must be explicitly
-resumed; never resubmit a timed-out run blindly. `research-run` requires that
-session ID. Exit with `agent-exit`, its exact scope hash, and the next action;
-the Go owner seals current state/artifact bindings and returns a handoff hash.
-The next entry must acknowledge that hash and stay on the same Attempt or an
-explicit child. Read `docs/platform/AGENT_HANDOFF.md` for the command contract.
+**First read, in order:**
+
+1. `CURRENT_STATE.md`
+2. `CURRENT_PLAN.md`
+3. `docs/research/IRIS_VNEXT_DECISION_LEDGER_20261018.md`
+4. `docs/research/IRIS_VNEXT_POST_V8_QUALITY_PLAN_20261018.md`
+5. `docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md`
+6. `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`
+7. `SYSTEM_INDEX.md`
+8. `docs/platform/EXECUTION_LANES.md`
+9. platform/corpus authority files relevant to the requested execution
+
+Use `canonical/CANONICAL_HANDOFF_20261007.md` for sealed historical Knight mechanics handoff, not as a replacement for the current post-V8 IRIS state.
+
+If the user says only `continue / devam et`, continue the active program recorded in `CURRENT_PLAN.md`. Do not revive an older runtime audit, recovery branch, V5/V6 trainer continuation, subject-serial Fit8 trainer or independent visual-mesh architecture because historical files still exist.
+
+## Current source / artifact distinction
+
+Keep these separate:
+
+```text
+main
+  = merged production-code continuation
+
+active review source
+  = temporary source collaboration for post-V8 work
+
+V8 completed artifact
+  = measurement/architecture baseline bound to exact source + checkpoint/receipt lineage
+
+Attempt
+  = durable research truth
+
+ProductRevision
+  = durable production truth
+```
+
+The completed V8 run is not rewritten by later source hardening. Future source may retain the class name `IRISVNextFit8TrainerV8` for compatibility, but binding/source hashes must distinguish future execution from the completed V8 artifact.
+
+Git is source-code history, not research/product authority.
+
+## Current scientific program
+
+The active program is **post-V8 quality / truth / consumption qualification**, not another blind 12k run.
+
+V5 falsified single-objective rewriting of the shared representation. V6 showed cumulative retention can preserve mechanics but still fail geometry retention. V8 sealed `scene_core` after M1 and demonstrated stable geometry/extraction while specialist heads kept learning.
+
+Current default law:
+
+```text
+G / M establish H
+      ↓
+M1 seal
+      ↓
+A / R / T / J specialists
+      ↓
+scene_core remains sealed
+```
+
+A post-M1 non-zero `scene_core` optimizer LR requires an explicit carrier-falsification court. Do not bypass this by renaming stages or constructing another optimizer path.
+
+V8 is a measurement baseline, **not** a scientific Fit8 PASS.
+
+## Current truth boundary
+
+Do not manufacture hidden/amodal/presentation truth from generic FIT8 3D assets.
+
+`BoundaryCausalityTeacherV1` recognizes only source-defensible causes:
+
+- geometric termination;
+- material boundary;
+- alpha boundary;
+- occlusion/visibility boundary;
+- source primitive/component seam;
+- residual unknown/abstention.
+
+`RESIDUAL_UNKNOWN` is not a negative class and must not emit a training target.
+
+Historical `graphics_truth_v1.py` defines `cut = 1 - same_drawable` for adjacent pairs. Treat this as V8 provenance and explicit truth debt, not independent causal cut truth. Future cut supervision must have target validity/provenance or abstain.
+
+The old `agent/unified-iris-stdgenpp-foundation` branch is research provenance. Salvage measurable ray/depth/visibility/material/rig/deformation/residual-boundary producers only. Do not promote generic drawable owner, hidden support or intentional 2D presentation override from that branch.
+
+## Current Graphics consumption boundary
+
+Read `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json` before claiming a learned signal solved runtime behavior.
+
+Current source evidence supports:
+
+- same/cut/boundary affect fragment clustering;
+- front+occlusion affect directed order edges;
+- explicit graph precedence can override physical depth in native ordering;
+- visibility changes real native RGBA behavior.
+
+Current source evidence does **not** yet support behavioral claims for:
+
+- attachment records in the native reference raster path;
+- `support_band_pixels` in the native reference renderer.
+
+Serialized is not the same as behaviorally used.
+
+## Current topology boundary
+
+TESSA training loss is not topology qualification.
+
+Do not claim topology PASS until an independent held-out court measures actual face validity, component error, hole/boundary-loop behavior, non-manifold diagnostics where applicable, canonical-surface deviation, source support and held-out stability.
+
+StdGEN++-style hole/sign regularization, sparse coarse-to-fine extraction or topology-specific capacity are conditional interventions after that court identifies a concrete failure.
+
+## Current StdGEN++ transfer rule
+
+Read `docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md` before citing StdGEN/StdGEN++ as design authority.
+
+Evidence levels must remain distinct:
+
+- public StdGEN source = `CODE_EXACT`;
+- StdGEN/StdGEN++ paper = `PAPER_EXACT`;
+- RealSaS translation = `REALSAS_INFERENCE`;
+- unavailable exact training implementation = `UNAVAILABLE`.
+
+Do not say the public StdGEN repository contains exact training-loop code; as of the current state its open issues still request that code.
+
+Transfer the discipline, not the ontology:
+
+- stable carrier / constrained specialization;
+- preserve geometry/raster supervision through mesh refinement;
+- explicit decomposition truth in data;
+- topology/hole courts;
+- coarse-to-fine extraction if resolution is proven limiting;
+- specialist LoRA/adapters only after a capacity court.
+
+Do not copy body/hair/cloth as mandatory RealSaS inference classes.
 
 ## Required operating path
 
-Read `docs/platform/EXECUTION_LANES.md` before stateful development. Use Go
-`realsasctl research-start` and `research-run` for component replacement;
-explicitly select the target and inspect the resolved reuse/execute scope.
-Use `product-compile` for product construction and `product-render` only for an
-exact qualified ProductRevision. Research results, including scoped FIT PASS,
-must not silently mint product authority. Preserve independent artifacts and
-report code/artifact identities with timings. Do not drive a new result by
-searching old branch names or editing a historical execution ledger.
+Before stateful research execution, read `docs/platform/EXECUTION_LANES.md`. Use the Go Platform/`realsasctl` Attempt flow where the platform supports the operation. Exact deployed source, Attempt, released DAG, immutable SubjectInput and explicit target must be recorded.
 
-For Fit8 or later multi-subject genericization campaigns, do **not** create a
-notebook-owned authority or eight ad-hoc agent continuations. Read
-`canonical/FIT8_PLATFORM_CAMPAIGN_V1.json` and
-`docs/platform/FIT8_PLATFORM_CAMPAIGN.md`; use `realsasctl campaign-start`,
-`campaign-run` and `campaign --id`. Every Fit8 subject enters the released DAG
-at Stage01 and targets the same final product-closure stage. Knight is a separate
-regression member. Colab/A100 may execute preregistered learned work, but it is a
-compute worker only; imported receipts/checkpoints remain non-authoritative until
-the subject-bound Compiler stages validate them. A campaign failure is a signal
-to fix the owning generic module, never permission for a subject-specific branch.
+A live session must be explicitly resumed; do not blindly resubmit a timed-out run. Exit with exact scope/source/artifact identities and pending decision so the next entry can remain on the same Attempt or an explicit child.
 
-Targets include model inference and Compiler modules, not only render. Treat
-DAG nodes/edges as versioned release data: add, remove or rewire in a new
-EngineRelease, inspect graph-aware impact, and preserve unrelated artifacts.
-Keep implementation and plan changes on canonical main through short reviewed
-PRs; research continuation belongs to the Attempt, never a long-lived branch.
+Research results, including scoped FIT results, must not silently mint product authority. Product compile/render consumes qualified ProductRevision state.
 
-M/G/W preservation is a boundary of the current Knight witness, not a global
-architecture rule. Models, heads, datasets and evaluations may change under a
-declared intervention. Only their actual DAG consumers invalidate; independent
-artifacts retain identity. A shared trunk change legitimately affects its heads.
-Never hide a dependency hash to make a requested scope appear smaller.
+## Fit8 / campaign rule
 
-Use standard GitHub-hosted `ubuntu-latest` for host-independent CPU CI while
-the repository is public; private-repository jobs skip. Notebook/Colab is the
-default research/GPU lane. Local WSL/GTX remains an explicit native-host or
-selected inference option. Old frozen recovery is manual provenance only.
-Absolute G3 remains an open gap without cancelling teacher-relative FIT1 PASS.
+For Fit8 or later multi-subject genericization campaigns, do not create notebook-owned authority or eight ad-hoc continuations.
+
+Read:
+
+- `canonical/FIT8_PLATFORM_CAMPAIGN_V1.json`
+- `docs/platform/FIT8_PLATFORM_CAMPAIGN.md`
+- `docs/corpus/FIT8_ADMISSION.md`
+
+Colab/A100 is a compute worker. Checkpoints/receipts become authoritative only after the owning platform/Compiler path validates and binds them.
+
+A subject failure is evidence about the generic system, not permission for a per-character production rescue branch.
+
+## Single-carrier rule
+
+The current vNext architecture keeps one product mechanical carrier:
+
+```text
+candidate proposals
+  -> static/mechanical candidate courts
+  -> deterministic selection
+  -> sole canonical M/G/W_M
+  -> Graphics / Motion / Runtime
+```
+
+No independent deformable visual mesh is permitted.
+
+Paperman-style or silhouette support may exist only as an explicitly bounded 2D sidecar driven by canonical mechanics. It cannot hide missing 3D geometry or mint a second mesh.
+
+## Compiler rule
+
+> Compiler may enforce truth and global consistency; Compiler may not compensate for model incapacity.
+
+Allowed:
+
+- exact validation;
+- IDs/hashes/addressing;
+- source-bound deterministic derivation;
+- global graph/constraint solving;
+- candidate selection;
+- exact contact/barycentric solves;
+- bounded numerical sanitation;
+- fail closed / abstain.
+
+Forbidden:
+
+- large topology or hole repair presented as model success;
+- semantic skin transfer hiding carrier drift;
+- invented hidden/amodal/presentation truth;
+- independent visual mesh;
+- subject-specific production rescue branches.
+
+## Quality / PASS discipline
+
+Training completion is not PASS.
+
+Status vocabulary:
+
+```text
+MEASUREMENT_ONLY
+OPTIMIZATION_DEBT
+ELIGIBLE_FOR_COURT
+COURT_PASS
+```
+
+Only an authoritative target + held-out metric + preregistered metric-specific threshold may produce `COURT_PASS`.
+
+Historical `~0.05` p95 expectations are planning context only for genuinely comparable normalized residuals. They are not a universal threshold. Values in the `0.1–0.2` range must not be normalized into success because a schedule ended.
 
 ## Current machine authority spine
 
@@ -76,103 +232,64 @@ Historical provenance only:
 
 ## Canonical code-line rule
 
-`main` is the single canonical continuation line.
+`main` remains the single merged continuation line.
 
-Long-lived research/promotion/integration branches must not be used as scientific, product or execution authority. Temporary review branches are allowed only as short-lived source-code collaboration; they must merge promptly and must never become a second continuation state.
-
-**Git is source-code history, not product/research state.**
+Temporary review branches are allowed for source collaboration, but must not become a second research/product authority. Current post-V8 source review is temporary and should consolidate into the existing vNext draft review vehicle rather than spawning parallel continuation narratives.
 
 ## Research / product / execution separation
 
-The normative state model is:
-
 ```text
-Git/main          = code truth
-Artifact Registry = immutable typed artifacts + dependencies
-Attempt           = research truth
-ProductRevision   = production truth
-Workflow Engine   = durable execution truth
+Git/main            = merged code truth
+Artifact Registry   = immutable typed artifacts + dependencies
+Attempt             = research truth
+ProductRevision     = production truth
+Workflow Engine     = durable execution truth
 Proof/Qualification = promotion eligibility
 ```
 
-Research experiments belong in `Attempt`, not branch chronology. Product promotion belongs in `ProductRevision`, not Git merge semantics.
+Reuse exact qualified upstream artifacts by dependency identity. Never hide a dependency hash to make impact appear smaller.
 
-Research execution should reuse exact qualified upstream artifacts according to dependency identity. Product compile must execute the required model/Compiler construction path for a new subject unless an exact semantic cache hit is proven. Product render/playback consumes a qualified ProductRevision and must not rerun model inference merely to render it.
+## Platform-first rule
 
-## Platform-first execution rule
+Go Platform owns durable product/research state, Artifact Registry metadata, Attempt/ProductRevision lifecycle, promotion and workflow state. Python Engine owns compiler/model/geometry/scientific semantics. C++ Runtime owns playback/render hot paths.
 
-The Go control plane is the intended sole owner of durable product/research state, Artifact Registry metadata, Attempt/ProductRevision lifecycle, promotion, dependency scheduling and workflow state.
+Legacy direct scripts/Actions may still exist for CI/reproducibility. Do not treat them as a normal way to mint durable research/product authority.
 
-Current known enforcement gap: legacy GitHub Actions and direct `$REALSAS_AUTHORITY_ROOT` scripts can still bypass Platform state. Until that gap is closed, such direct paths are allowed only for CI/reproducibility of already sealed evidence. They must not be treated as the normal way to mint new research/product authority.
+## Historical mechanics / Knight boundary
 
-The active platform program is to make this rule mechanically unavoidable.
+Knight FIT1 carrier-native mechanics remain scoped historical/regression evidence. The carrier chain is Stage19 M → AXIS V5.4.1 G → MIRA V5.5 W_M → Compiler qualification. This does not establish FIT8/unseen/product generalization.
 
-## Current scientific boundary
+Canonical public model naming remains `IRIS -> TESSA -> AXIS -> MIRA`.
 
-The latest developed FIT1 mechanics line is carrier-native: Stage19 owns frozen mechanical carrier `M`; AXIS V5.4.1 owns the hard causal required tree plus deterministic 256-bin XYZ; MIRA V5.5 predicts `W_M` directly on that exact `M`; Compiler validates/materializes the required tree and exact `(M,G,W_M)` bindings without semantic skin transfer.
+The single-M Knight source-wins fixture remains a regression witness. CAA terminology is historical compatibility vocabulary; active vNext product vocabulary is **Graphics**.
 
-Coincident controls are handled subject-free after binding: a mechanically unobservable subtree may inherit its parent frame; any coincident subtree with non-zero final `W_M` influence fails closed and requires explicit AXIS orientation/tail evidence.
+## Source-work rule
 
-Knight FIT1 mechanics are closed relative to the sealed source/teacher motion envelope. The absolute frozen G3 threshold remains inconclusive because the sealed teacher itself is outside that absolute threshold. This is not FIT8/FITK/unseen/product/generalization evidence.
+Use `tools/realsas_architecture.py map` and `impact` for discovery/impact inspection where applicable. Unknown impact must be investigated; it never means zero consumers.
 
-Canonical public model naming is `IRIS -> TESSA -> AXIS -> MIRA`; legacy Geppetto/Arachne/ATLAS names may remain only where compatibility requires them.
+For every meaningful change, update current state/plan/decision ledger when the change affects interpretation. Record:
 
-## Current render baseline and priority
-
-The user approved the single-M source-wins + existing CAA cutover. Read
-`CURRENT_STATE.md` and `tests/fixtures/single_m_caa_knight_v1/baseline.json`.
-Use `tools/demo/render_knight_m_caa_v1.py --output <directory>` for exact sealed
-RUN regression, never the old retarget trial. Geometry, topology and recorded
-motion all use M. There is no independent visual mesh/rebind continuation.
-The previous main is retained only at `archive/visual-v-before-m-caa-20261011`.
-
-Priority after source cutover: grip/weapon relation, then semantic overlap/draw
-order. Preserve the approved CPU pixels and recorded M poses while investigating.
-Native exact parity at diagonal depth ties and linear-light composition remain
-open; do not mint scientific/product PASS from engineering regression.
-IRIS shared-head research remains a proposal awaiting user approval.
-
-For source work, generate the current map and inspect edited files with
-`tools/realsas_architecture.py map` and `impact`; see
-`docs/platform/DYNAMIC_ARCHITECTURE.md`. This is discovery, not reuse authority.
-An unknown impact must be investigated; it never means zero consumers. At exit,
-record exact source/Attempt/artifacts and the pending decision in the handoff.
+1. source/commit;
+2. owning module;
+3. why it exists;
+4. evidence/court;
+5. what it proves;
+6. what it does not prove;
+7. what it replaces or falsifies;
+8. next action.
 
 ## Product-quality rule
 
-Geometry, Mechanics and Appearance are co-equal product authorities; Presentation is first-class editable addressing authority. A visually incorrect puppet is not accepted merely because mechanics are valid.
+Geometry, Mechanics and Appearance/Graphics are co-equal product authorities. A visually wrong puppet is not accepted merely because mechanics are valid.
 
 ## Runtime invariant
 
-Runtime consumes qualified product artifacts. It may not create a second topology, silently re-solve skin, perform donor search/generative correction, or mutate scientific authority during playback/render.
+Runtime consumes qualified product artifacts. It may not create a second topology, silently re-solve skin, perform donor search/generative correction, or mutate scientific authority during ordinary playback/render.
 
 ## Corpus status
 
-`canonical/TRUTH_CORPUS_V1_STATUS_20261004.md` remains corpus authority. Current status is `SEALED_RAW__STRUCTURALLY_AUDITED__ADMISSION_PENDING`. Do not overclaim it as training-ready canonical truth.
-
-The user authorized diverse Fit8 as the next program. Read
-`canonical/FIT8_DIVERSITY_SELECTION_V1.json`, `canonical/FIT8_PLATFORM_CAMPAIGN_V1.json`,
-`docs/corpus/FIT8_ADMISSION.md`, `docs/platform/FIT8_PLATFORM_CAMPAIGN.md` and
-`docs/platform/PRODUCTIZATION.md`. Eight source identities are verified; every
-subject must independently close source/import/rest pose, camera, observation and
-normalization before learned-stage evidence is consumed. Knight stays the separate
-regression witness. Shared model parameters and common contracts are required; no
-per-character production fix or silent substitution. New Fit8 scientific state is
-owned by the platform campaign/Attempts, never by notebook completion alone.
+`canonical/TRUTH_CORPUS_V1_STATUS_20261004.md` remains historical/general corpus authority where applicable. Do not overclaim it as automatically sufficient for post-V8 boundary/amodal truth.
 
 ## Claim discipline
 
-A FIT/witness PASS is scoped evidence for the exact subject/apparatus. Engineering CI is not unseen/generalization evidence. Knight FIT1 teacher-relative mechanics closure is not unseen/generalization or product authority.
-
-## Read order
-
-1. `CURRENT_STATE.md`
-2. `canonical/CANONICAL_HANDOFF_20261007.md`
-3. `SYSTEM_INDEX.md`
-4. `canonical/V2_IMPLEMENTATION_READINESS.json`
-5. `canonical/KNIGHT_AXIS541_MIRA55_CARRIER_NATIVE_PROMOTION_20261007.json`
-6. `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
-7. `docs/platform/adr/0002-compiler-platform-boundary.md`
-8. `docs/platform/adr/0003-go-control-plane.md`
-9. `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md`
-10. older recovery/scientific material only as needed for provenance
+A FIT/witness PASS is scoped evidence for the exact subject/apparatus. Engineering CI is not unseen/generalization evidence. A near-zero training relation loss is not automatically semantic authority. A serialized field is not automatically behaviorally consumed.

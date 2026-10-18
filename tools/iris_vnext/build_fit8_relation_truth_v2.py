@@ -3,19 +3,19 @@ from __future__ import annotations
 """Build source-audited IRIS vNext relation-truth V2 sidecars.
 
 This producer intentionally does not reinterpret or overwrite historical Fit8
-shards.  It creates a new relation-only corpus whose target validity matches the
+shards. It creates a new relation-only corpus whose target validity matches the
 post-V8 truth/conditioning contract:
 
 - static same/cut/attachment targets abstain unless a future source authority is
   added explicitly;
 - front/occlusion/visibility come from exact first/second ray ordering;
 - projected alpha/appearance boundaries come from the current source RGBA view;
-- every view target is paired with an explicit validity mask;
-- every two-hit ray is emitted in both pair orientations, giving non-trivial
-  balanced front/occlusion/visibility supervision without invented fallback
+- target values, validity, evidence authority and provenance remain explicit;
+- every two-hit ray is emitted in both pair orientations, giving exact balanced
+  directional front/occlusion/visibility supervision without fabricated fallback
   negatives.
 
-The output is training evidence only.  Teacher source data is never placed on an
+The output is training evidence only. Teacher source data is never placed on an
 inference forward path.
 """
 
@@ -28,11 +28,9 @@ import numpy as np
 from PIL import Image
 import torch
 
+from models.iris.vnext.boundary_causality_v1 import EvidenceAuthority
 from models.iris.vnext.cohort_v1 import SUBJECT_IDS
-from models.iris.vnext.graphics_truth_v2 import (
-    STATIC_RELATION_KEYS_V2,
-    VIEW_RELATION_KEYS_V2,
-)
+from models.iris.vnext.graphics_truth_v2 import STATIC_RELATION_KEYS_V2, VIEW_RELATION_KEYS_V2
 from tools.iris_vnext.build_fit8_vnext_shards_v1 import (
     SUBJECT_SOURCE_IDS,
     _boundary_flags,
@@ -48,6 +46,8 @@ from tools.iris_vnext.build_fit8_vnext_shards_v2 import (
 
 _SCHEMA = "RealSaS.IRISVNextFit8RelationTruth.v2"
 _MANIFEST_SCHEMA = "RealSaS.IRISVNextFit8RelationTruthManifest.v2"
+_STATIC_AUTHORITY = EvidenceAuthority.DIAGNOSTIC_ONLY.value
+_VIEW_AUTHORITY = EvidenceAuthority.DETERMINISTIC_DERIVED.value
 
 
 def _args():
@@ -114,8 +114,6 @@ def _orient_two_hit_rows_v2(
     alpha = alpha[:base_count]
     appearance = appearance[:base_count]
 
-    # Interleave A=front/B=back and A=back/B=front per ray.  This preserves a
-    # deterministic local pairing and exact 50/50 directional class balance.
     point_a = np.empty((base_count * 2, 3), dtype=np.float32)
     point_b = np.empty((base_count * 2, 3), dtype=np.float32)
     point_a[0::2], point_b[0::2] = front, back
@@ -222,11 +220,15 @@ def _view_truth(
         "point_b": torch.from_numpy(view.pop("point_b")),
         "static_truth": {name: torch.from_numpy(static_values[name]) for name in STATIC_RELATION_KEYS_V2},
         "static_validity": {name: torch.from_numpy(static_validity[name]) for name in STATIC_RELATION_KEYS_V2},
-        "view_truth": {
-            name: torch.from_numpy(view[name]) for name in VIEW_RELATION_KEYS_V2
-        },
+        "static_authority": {name: _STATIC_AUTHORITY for name in STATIC_RELATION_KEYS_V2},
+        "view_truth": {name: torch.from_numpy(view[name]) for name in VIEW_RELATION_KEYS_V2},
         "view_validity": {
             name: torch.from_numpy(view[f"{name}__valid"]) for name in VIEW_RELATION_KEYS_V2
+        },
+        "view_authority": {name: _VIEW_AUTHORITY for name in VIEW_RELATION_KEYS_V2},
+        "source_binding": {
+            "rgba_sha256": _sha(png_path),
+            "mask_sha256": _sha(mask_path),
         },
         "provenance": {
             "static_truth": {
@@ -250,6 +252,7 @@ def _view_truth(
         "two_hit_rays": int(len(two_hit)),
         "selected_two_hit_rays": int(len(selected)),
         "oriented_rows": count,
+        "source_binding": dict(payload["source_binding"]),
         "static": {
             name: _binary_stats(static_values[name], static_validity[name])
             for name in STATIC_RELATION_KEYS_V2
@@ -355,8 +358,11 @@ def main():
                 "sha256": _sha(path),
                 "bytes": path.stat().st_size,
                 "source_asset_sha256": boot["raw_source"]["sha256"],
+                "legacy_shard_sha256": _sha(legacy_path),
                 "teacher_export_sha256": _sha(teacher_path),
                 "teacher_receipt_sha256": _sha(teacher_receipt_path),
+                "stage01_bootstrap_sha256": _sha(bootstrap_path),
+                "camera_bundle_sha256": _sha(camera_bundle_path),
                 "views": view_stats,
             }
         )
@@ -369,6 +375,10 @@ def main():
         "subjects": manifest_subjects,
         "subject_order": list(SUBJECT_IDS),
         "teacher_inputs_in_inference_forward": False,
+        "authority_policy": {
+            "static": _STATIC_AUTHORITY,
+            "view": _VIEW_AUTHORITY,
+        },
         "static_target_policy": "ABSTAIN_UNLESS_INDEPENDENT_SOURCE_AUTHORITY_EXISTS",
         "view_target_policy": "EXACT_RAY_ORDER_PLUS_CURRENT_VIEW_PROJECTED_BOUNDARY_EVIDENCE",
         "pair_orientation_policy": "TWO_HIT_RAY_BOTH_ORIENTATIONS_EXACT_BALANCE",

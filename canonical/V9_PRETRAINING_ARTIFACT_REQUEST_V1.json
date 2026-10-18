@@ -2,11 +2,11 @@
   "schema": "RealSaS.IRISVNextV9PretrainingArtifactRequest.v1",
   "operation": "IRIS_VNEXT_V9_PRETRAINING_ARTIFACT_BUILD",
   "target_branch": "research/iris-vnext-post-v8-quality-plan-20261018",
-  "target_source_sha": "920a20ba273469ef596cd7219923c9c0a7f5c3d8",
+  "target_source_sha": "7ce4c9f30c7dfe3b67132970cc36a21ef74ed0ff",
   "training_allowed": false,
   "external_storage_write_allowed": false,
   "quarantined_remote": "gdrive:RealSaS_Fit8_IRIS_vNext_20261016",
-  "candidate_remote_planned": "gdrive:RealSaS_Fit8_IRIS_vNext_candidates/920a20ba273469ef596cd7219923c9c0a7f5c3d8",
+  "candidate_remote_planned": "gdrive:RealSaS_Fit8_IRIS_vNext_candidates/7ce4c9f30c7dfe3b67132970cc36a21ef74ed0ff",
   "inputs": {
     "stage01": {
       "file": "FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip",

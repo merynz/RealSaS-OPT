@@ -1,4 +1,5 @@
 name: platform-cohort-operator
+# Canonical control plane for typed self-hosted operations. Research extensions must remain allowlisted.
 
 on:
   workflow_dispatch:

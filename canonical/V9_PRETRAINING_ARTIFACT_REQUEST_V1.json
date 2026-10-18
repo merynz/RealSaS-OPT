@@ -1,0 +1,44 @@
+{
+  "schema": "RealSaS.IRISVNextV9PretrainingArtifactRequest.v1",
+  "operation": "IRIS_VNEXT_V9_PRETRAINING_ARTIFACT_BUILD",
+  "target_branch": "research/iris-vnext-post-v8-quality-plan-20261018",
+  "target_source_sha": "920a20ba273469ef596cd7219923c9c0a7f5c3d8",
+  "training_allowed": false,
+  "external_storage_write_allowed": false,
+  "quarantined_remote": "gdrive:RealSaS_Fit8_IRIS_vNext_20261016",
+  "candidate_remote_planned": "gdrive:RealSaS_Fit8_IRIS_vNext_candidates/920a20ba273469ef596cd7219923c9c0a7f5c3d8",
+  "inputs": {
+    "stage01": {
+      "file": "FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip",
+      "file_id": "1PcxT2rfb9jCHfP75gaqMAo90OU7JRypH",
+      "sha256": "9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936"
+    },
+    "legacy": {
+      "manifest_file": "COHORT_MANIFEST.json",
+      "manifest_file_id": "1PJ-SxGVS6F6pHUFgB8Kws69X9wS5aywa",
+      "manifest_sha256": "088283fbca5ac6c95dc8d9fedadaafbf9bf82603cc6bee28948af995945e5053",
+      "shards": [
+        {"file": "fit8_snake_v1.pt", "file_id": "1KrcgJueaYVbYNoLrwXpvaUGamJQ_AZ92", "sha256": "fbc4d8f51cd77bd48d979bbc4faccf22b441fe18d1c7db0855b0752f65de738b"},
+        {"file": "fit8_bat_v1.pt", "file_id": "1zNA0TK6CWkWWQjVkBPD87f2v3CexdK4V", "sha256": "2997b59a9bdc4e4f82609ee6738636341702a4d62fadc2be4aaca7dd89460b6a"},
+        {"file": "fit8_trex_v1.pt", "file_id": "12de0elFVuqe2sEJGPdyuHACJ4pMdlxli", "sha256": "0901431908fa2f3694efc93baffa9a6ef5da0d9cb141b6e1003dd53fbbfff6d8"},
+        {"file": "fit8_horse_v1.pt", "file_id": "1rpa6Mx2-iBtCgMlvsZfFinyuZu1WM-mC", "sha256": "3a1e7ef895d753048f5a82d9f0bfce9815845d4f60788a4f2fc7d08d9b08fee8"},
+        {"file": "fit8_spider_v1.pt", "file_id": "1wKAwOAecDF8s36613E4lIFNmuSVl3JcR", "sha256": "6d6e05890c95c36743a8b2286c2b132e60de164e09b1de28c1ee2146b5387d70"},
+        {"file": "fit8_greenblob_v1.pt", "file_id": "1vEUlTHQwSK42LtTFU2AUjHFoe1FBApuO", "sha256": "03ff4acbc22e753f900081f8a9c0ce36dcfd247711aa7811fefe3ed976742f0d"},
+        {"file": "fit8_shark_v1.pt", "file_id": "1c3H2eR9ESuL6RV51ZVs5WY8mGmwYw3QA", "sha256": "06f2316b0379aa16a0d06c70e304a1c4626bfeaa1c01aef14f74452bccc94480"},
+        {"file": "fit8_george_v1.pt", "file_id": "1jx4GAFr-SuL0zDpPhbT0kX75v_shfGbm", "sha256": "9683b2d87b16de727179c90d130f0d42c0b485fcfa82fc885502b0d63dbec46b"}
+      ]
+    },
+    "v8": {
+      "checkpoint": {"file": "step_00012000_ac23a9ea448e465cb668773a131981be.pt", "file_id": "1xttwuxgC8y9EVmf7xxMEN4yj84yhm4zH", "sha256": "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5"},
+      "latest": {"file": "LATEST.json", "file_id": "1t5Wk4Xj1SGRmqAq3-eo5wR5NTSt-7sij", "sha256": "6238c2a792364beb241dd6ee044778da6280854483303a1502626562515c3a9f"},
+      "completion": {"file": "TRAINING_COMPLETE_V8_M1_SEALED.json", "file_id": "1AHDGBtViB8KDGRPpn7uF53OWqM-DBQwS", "sha256": "61c207adcbdb9ab398c58acf4ca7afa55eb95aa3a1ef23dc859e7deb8ab4059d"},
+      "scientific_start": {"file": "SCIENTIFIC_START_V8_M1_SEALED.json", "file_id": "1iQcLM3oKloIxw5YpybavM4ekxOX75rg3", "sha256": "6bcb92c830ae918978bb60b23ccde528cde477c56bb41ac1ade60ef5065aee55"}
+    }
+  },
+  "claims": {
+    "scientific_fit_started": false,
+    "scientific_fit_pass": false,
+    "training_authorized": false,
+    "remote_roundtrip_verified": false
+  }
+}

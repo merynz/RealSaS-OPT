@@ -9,7 +9,7 @@ WORKFLOW = ROOT / ".github/workflows/platform_cohort_operator.yml"
 OPERATOR = ROOT / "tools/iris_vnext/v9_pretraining_artifact_operator_v1.py"
 REQUEST = ROOT / "canonical/V9_PRETRAINING_ARTIFACT_REQUEST_V1.json"
 TRIGGER = ROOT / "canonical/RESEARCH_OPERATOR_TRIGGER_V1.json"
-TARGET = "920a20ba273469ef596cd7219923c9c0a7f5c3d8"
+TARGET = "7ce4c9f30c7dfe3b67132970cc36a21ef74ed0ff"
 
 
 def test_v9_request_is_exact_source_and_pretraining_only():

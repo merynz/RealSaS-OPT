@@ -22,10 +22,10 @@ from models.iris.v5.indexed_sparse_tetra_decoder_v5 import (
 class VNextSparseSurfaceQueryPolicyV3:
     """Execution policy for querying a sealed vNext scalar field during extraction.
 
-    The V5 sparse decoder already chunks the regular grid.  vNext still needs a
+    The V5 sparse decoder already chunks the regular grid. vNext still needs a
     smaller internal chunk because LocalEvidenceField materializes full-width H
-    before producing the scalar field.  This policy changes only execution memory,
-    never coordinates, field sign or extraction authority.
+    before producing the scalar field. This changes execution memory only, never
+    coordinates, field sign or extraction authority.
     """
 
     model_query_chunk: int = 32768
@@ -38,14 +38,16 @@ class VNextSparseSurfaceQueryPolicyV3:
 
 
 class VNextScalarFieldQueryV3:
-    """NumPy query adapter from the V5 sparse decoder to vNext query_local().
+    """NumPy adapter from the selected V5 sparse decoder to a vNext scalar field.
 
-    Contract:
-    - one already-encoded scene only;
-    - normalized coordinates are passed through unchanged in [-1, 1];
-    - raw learned field sign is preserved (no hidden sign flip / offset);
-    - inference-only and teacher-free;
-    - no extraction_delta or uncertainty is mixed into the scalar field.
+    It deliberately supports both exact source APIs that matter for the A/B court:
+
+    - historical V8 ``IRISVNextV1``: ``model.scene_core.query(...)``;
+    - post-redesign evidence V3: ``model.query_local(...)``.
+
+    The adapter does not migrate V8 into V3. The historical path therefore measures
+    the exact sealed V8 scene_core bytes. In both cases coordinates and scalar sign
+    are identity transforms; extraction_delta and uncertainty are not consumed.
     """
 
     architecture_id = "RealSaS.IRIS.VNextSparseScalarFieldAdapter.v3"
@@ -69,8 +71,18 @@ class VNextScalarFieldQueryV3:
             raise ValueError("IRIS_VNEXT_SPARSE_SCENE_PLANES_DTYPE_INVALID")
         if not bool(torch.isfinite(scene_planes).all().item()):
             raise ValueError("IRIS_VNEXT_SPARSE_SCENE_PLANES_NONFINITE")
-        if not hasattr(model, "query_local"):
-            raise TypeError("IRIS_VNEXT_SPARSE_QUERY_LOCAL_REQUIRED")
+
+        query_local = getattr(model, "query_local", None)
+        scene_core = getattr(model, "scene_core", None)
+        scene_query = getattr(scene_core, "query", None) if scene_core is not None else None
+        if callable(query_local):
+            self.query_api = "MODEL_QUERY_LOCAL_V3"
+            self._query_local = query_local
+        elif callable(scene_query):
+            self.query_api = "HISTORICAL_SCENE_CORE_QUERY_V1"
+            self._query_local = scene_query
+        else:
+            raise TypeError("IRIS_VNEXT_SPARSE_FIELD_QUERY_API_REQUIRED")
 
         self.model = model
         self.scene_planes = scene_planes.detach()
@@ -95,7 +107,7 @@ class VNextScalarFieldQueryV3:
             for start in range(0, len(q), chunk):
                 end = min(len(q), start + chunk)
                 points_t = torch.from_numpy(q[start:end]).to(device=device, dtype=dtype)
-                local = self.model.query_local(self.scene_planes, points_t.unsqueeze(0))
+                local = self._query_local(self.scene_planes, points_t.unsqueeze(0))
                 if not isinstance(local, dict) or "field" not in local:
                     raise ValueError("IRIS_VNEXT_SPARSE_FIELD_OUTPUT_MISSING")
                 field = local["field"]
@@ -213,6 +225,7 @@ def decode_vnext_sparse_surface_v3(
     diagnostics.update(
         {
             "vnext_surface_bridge": VNextScalarFieldQueryV3.architecture_id,
+            "vnext_field_query_api": query.query_api,
             "field_coordinate_transform": VNextScalarFieldQueryV3.coordinate_transform,
             "field_scalar_transform": VNextScalarFieldQueryV3.scalar_transform,
             "model_query_chunk": int(query_policy.model_query_chunk),

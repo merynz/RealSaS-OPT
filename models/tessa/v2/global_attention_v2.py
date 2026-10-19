@@ -13,10 +13,12 @@ from .config_v2 import TESSAStructuralizerConfigV2
 class TESSAGlobalHistoryPolicyV2:
     """Causal global-history policy for long topology sequences.
 
-    Exact token attention is retained in the local trailing window. Older
-    completed token blocks are represented by one K/V summary each. Summaries
-    contain only positions strictly earlier than the local region, so training
-    remains causal and matches incremental generation semantics.
+    Exact token attention is retained in the local trailing region. Older
+    completed token blocks are represented by one K/V summary each. The
+    coarse/local partition is anchored to an absolute query-chunk start rather
+    than the currently available prefix end. This is essential: an already
+    generated token must never change its representation merely because another
+    token later arrives in the same execution chunk.
     """
 
     block_size: int = 256
@@ -28,15 +30,13 @@ class TESSAGlobalHistoryPolicyV2:
 
 
 class HierarchicalCausalSelfAttentionV2(nn.Module):
-    """Local exact causal attention plus persistent coarse global history.
+    """Prefix-stable local exact attention plus coarse causal global history.
 
-    This is deliberately simpler than importing a paper-specific sparse-attention
-    implementation. The required invariant is causal structural memory:
-
-      recent topology -> exact token context
-      old topology    -> bounded summaries of every completed history block
-
-    No future token contributes to a history summary seen by a query.
+    The execution query chunk is only a vectorization unit. It must not change
+    the mathematical history available to a token when the prefix later grows.
+    Therefore every query in one absolute chunk uses the coarse/local partition
+    fixed when that chunk begins. Causal masking still prevents future-token
+    access inside the chunk.
     """
 
     def __init__(
@@ -54,6 +54,25 @@ class HierarchicalCausalSelfAttentionV2(nn.Module):
         self.head_dim = config.d_model // config.n_heads
         self.qkv = nn.Linear(config.d_model, config.d_model * 3, bias=False)
         self.out = nn.Linear(config.d_model, config.d_model, bias=False)
+
+    def summary_end_for_query_position(self, position: int) -> int:
+        """Return the prefix-stable exclusive end of summarized history.
+
+        `position` is the absolute zero-based query position. All queries in the
+        same execution chunk intentionally share the same summary boundary. The
+        block-floor keeps any partial history block exact so no token disappears
+        at the coarse/local boundary.
+        """
+
+        if position < 0:
+            raise ValueError("TESSA_V2_GLOBAL_ATTN_POSITION_NEGATIVE")
+        query_chunk = int(self.config.query_chunk_size)
+        local_window = int(self.config.local_attention_window)
+        block = int(self.history.block_size)
+        chunk_start = (int(position) // query_chunk) * query_chunk
+        prefix_stable_end = chunk_start + 1
+        desired_local_start = max(0, prefix_stable_end - local_window)
+        return (desired_local_start // block) * block
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if x.ndim != 3 or x.shape[-1] != self.config.d_model:
@@ -76,17 +95,11 @@ class HierarchicalCausalSelfAttentionV2(nn.Module):
 
         chunks: list[torch.Tensor] = []
         query_chunk = int(self.config.query_chunk_size)
-        local_window = int(self.config.local_attention_window)
         block = int(self.history.block_size)
 
         for start in range(0, length, query_chunk):
             end = min(length, start + query_chunk)
-            desired_local_start = max(0, end - local_window)
-
-            # Everything before summary_end is represented once per completed
-            # block. The partial remainder stays exact in local attention, so no
-            # past token disappears at the coarse/local boundary.
-            summary_end = (desired_local_start // block) * block
+            summary_end = self.summary_end_for_query_position(start)
             local_start = summary_end
             summary_count = summary_end // block
             if summary_count > int(self.history.max_summary_tokens):
@@ -120,8 +133,6 @@ class HierarchicalCausalSelfAttentionV2(nn.Module):
                 key = local_k
                 value = local_v
 
-            # History summaries are all strictly in the past. Only the exact
-            # local token suffix requires a triangular causal mask.
             q_pos = torch.arange(start, end, device=x.device)[:, None]
             local_pos = torch.arange(local_start, end, device=x.device)[None, :]
             local_allow = local_pos <= q_pos

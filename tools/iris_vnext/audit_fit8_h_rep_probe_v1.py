@@ -107,7 +107,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
         raise RuntimeError("H_REP_P0_COURT_CHECKPOINT_SCENE_HASH_DRIFT")
 
     parameter_counts = training.get("parameter_counts") or {}
-    if tuple(parameter_counts) != PROBE_ARMS_V1 or len(set(parameter_counts.values())) != 1:
+    if set(parameter_counts) != set(PROBE_ARMS_V1) or len(set(parameter_counts.values())) != 1:
         raise RuntimeError("H_REP_P0_COURT_PARAMETER_COUNT_DRIFT")
     if payload.get("parameter_counts") != parameter_counts:
         raise RuntimeError("H_REP_P0_COURT_CHECKPOINT_PARAMETER_COUNT_DRIFT")
@@ -323,8 +323,12 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
     }
     output = Path(args.output).resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print("H_REP_P0_COURT", status, json.dumps(aggregate, sort_keys=True), flush=True)
+    output.write_text(
+        json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    print(
+        "H_REP_P0_COURT", status, json.dumps(aggregate, sort_keys=True), flush=True
+    )
     return result
 
 

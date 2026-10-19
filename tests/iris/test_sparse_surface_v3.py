@@ -30,6 +30,26 @@ class SphereEvidenceModel(nn.Module):
         }
 
 
+class HistoricalSceneCore(nn.Module):
+    def query(self, scene_planes: torch.Tensor, points_normalized: torch.Tensor):
+        radius = torch.linalg.vector_norm(points_normalized, dim=-1)
+        field = radius - 0.55
+        return {
+            "field": field,
+            "H": torch.zeros((*field.shape, 4), device=field.device, dtype=field.dtype),
+            "log_uncertainty": torch.zeros_like(field),
+            "extraction_delta": torch.zeros((*field.shape, 3), device=field.device, dtype=field.dtype),
+        }
+
+
+class HistoricalV8LikeModel(nn.Module):
+    """Matches the field-query surface of IRISVNextV1: no query_local method."""
+
+    def __init__(self):
+        super().__init__()
+        self.scene_core = HistoricalSceneCore()
+
+
 def _scene() -> torch.Tensor:
     return torch.zeros((1, 3, 4, 2, 2), dtype=torch.float32)
 
@@ -54,18 +74,27 @@ def test_vnext_query_adapter_preserves_coordinates_and_field_sign():
         policy=VNextSparseSurfaceQueryPolicyV3(model_query_chunk=2),
     )
     points = np.asarray(
-        [
-            [0.0, 0.0, 0.0],
-            [0.55, 0.0, 0.0],
-            [0.8, 0.0, 0.0],
-        ],
+        [[0.0, 0.0, 0.0], [0.55, 0.0, 0.0], [0.8, 0.0, 0.0]],
         dtype=np.float32,
     )
     values = adapter(points)
     np.testing.assert_allclose(values, np.asarray([-0.55, 0.0, 0.25], dtype=np.float32), atol=1e-6)
+    assert adapter.query_api == "MODEL_QUERY_LOCAL_V3"
     assert adapter.coordinate_transform == "IDENTITY_NORMALIZED_MINUS1_PLUS1"
     assert adapter.scalar_transform == "IDENTITY_LEARNED_FIELD"
     assert adapter.teacher_truth_used is False
+
+
+def test_exact_v8_style_scene_core_query_api_is_supported_without_migration():
+    model = HistoricalV8LikeModel().eval()
+    adapter = VNextScalarFieldQueryV3(
+        model,
+        _scene(),
+        policy=VNextSparseSurfaceQueryPolicyV3(model_query_chunk=2),
+    )
+    points = np.asarray([[0.0, 0.0, 0.0], [0.8, 0.0, 0.0]], dtype=np.float32)
+    np.testing.assert_allclose(adapter(points), np.asarray([-0.55, 0.25], dtype=np.float32), atol=1e-6)
+    assert adapter.query_api == "HISTORICAL_SCENE_CORE_QUERY_V1"
 
 
 def test_vnext_query_adapter_fails_closed_on_training_mode_and_out_of_domain():
@@ -98,6 +127,21 @@ def test_vnext_sparse_surface_reuses_selected_tetra_decoder_without_hidden_defor
     assert mesh.diagnostics["compiler_qualified"] is False
     assert mesh.diagnostics["scientific_pass_claimed"] is False
     assert mesh.diagnostics["field_scalar_transform"] == "IDENTITY_LEARNED_FIELD"
+    assert mesh.diagnostics["vnext_field_query_api"] == "MODEL_QUERY_LOCAL_V3"
+
+
+def test_historical_v8_style_model_can_drive_selected_sparse_decoder(tmp_path: Path):
+    model = HistoricalV8LikeModel().eval()
+    mesh = decode_vnext_sparse_surface_v3(
+        model,
+        _scene(),
+        sparse_policy=_small_sparse_policy(),
+        query_policy=VNextSparseSurfaceQueryPolicyV3(model_query_chunk=128),
+        work_dir=tmp_path / "v8_decoder",
+    )
+    radius = np.linalg.norm(mesh.vertices_normalized, axis=1)
+    assert float(np.max(np.abs(radius - 0.55))) < 0.025
+    assert mesh.diagnostics["vnext_field_query_api"] == "HISTORICAL_SCENE_CORE_QUERY_V1"
 
 
 def test_direct_surface_bundle_is_hash_bound_but_never_self_qualifies(tmp_path: Path):

@@ -46,7 +46,8 @@
   "training_truth": {
     "source": "EXACT_AUTHORED_REST_TEACHER_MESH_PLUS_EXACT_STAGE01_CAMERAS_AND_MASKS",
     "truth_sidecar_resolution": 256,
-    "mask": "MAX_POOLED_EXACT_STAGE01_BINARY_FOREGROUND",
+    "mask": "MAX_POOLED_EXACT_STAGE01_BINARY_FOREGROUND__SILHOUETTE_OPTIMIZATION_TRUTH",
+    "teacher_center_coverage": "FIRST_PARTY_PIXEL_CENTER_RASTER_OF_EXACT_AUTHORED_REST_MESH__APPARATUS_PARITY_TRUTH_ONLY",
     "depth": "TEACHER_REST_MESH_PIXEL_CENTER_ZBUFFER__CAMERA_FORWARD_DEPTH_NORMALIZED_BY_COMMON_HALF_EXTENT",
     "normal": "TEACHER_REST_MESH_FACE_NORMAL__TWO_SIDED_COMPARISON",
     "depth_normal_validity": "TEACHER_CENTER_COVERAGE_INTERSECT_SOURCE_FOREGROUND",
@@ -58,7 +59,9 @@
     "license": "BSD",
     "training_resolution": 256,
     "hard_proxy_parity_before_optimizer": {"minimum_recall":0.98,"minimum_precision":0.98},
-    "proxy_parity_reference": "EXACT_FIRST_PARTY_STAGE01_CAMERA_RASTER_SEMANTICS",
+    "proxy_parity_reference": "FIRST_PARTY_PIXEL_CENTER_TEACHER_GEOMETRY_COVERAGE",
+    "source_mask_is_proxy_parity_reference": false,
+    "source_mask_role": "SEPARATE_SILHOUETTE_OPTIMIZATION_TRUTH",
     "preflight_optimizer_step_allowed": false,
     "nvdiffrast_allowed": false
   },

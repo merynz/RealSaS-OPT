@@ -9,6 +9,11 @@ from models.iris.vnext.h_rep_probe_v1 import (
     build_probe_input_v1,
     h_rep_probe_objective_v1,
 )
+from tools.iris_vnext.train_fit8_h_rep_probe_v1 import (
+    SAMPLER_SCHEMA,
+    deterministic_batch_indices_v1,
+    deterministic_batch_seed_v1,
+)
 
 
 def test_all_probe_arms_have_exact_equal_capacity_and_input_envelope():
@@ -72,6 +77,29 @@ def test_probe_objective_is_finite_and_backpropagates():
     assert all(torch.isfinite(v).all() for v in loss.values())
     loss["total"].backward()
     assert any(p.grad is not None for p in model.parameters())
+
+
+def test_step_seeded_sampler_is_exact_across_resume_boundaries():
+    assert SAMPLER_SCHEMA == "RealSaS.HRepP0StepSeededSampler.v1"
+    step = 417
+    subject_index = step % 8
+    first = deterministic_batch_indices_v1(
+        step=step, subject_index=subject_index, row_count=32768, batch_size=2048
+    )
+    resumed = deterministic_batch_indices_v1(
+        step=step, subject_index=subject_index, row_count=32768, batch_size=2048
+    )
+    next_step = deterministic_batch_indices_v1(
+        step=step + 1,
+        subject_index=(step + 1) % 8,
+        row_count=32768,
+        batch_size=2048,
+    )
+    assert deterministic_batch_seed_v1(step, subject_index) == deterministic_batch_seed_v1(
+        step, subject_index
+    )
+    assert torch.equal(first, resumed)
+    assert not torch.equal(first, next_step)
 
 
 def test_preregistration_keeps_controls_runtime_and_tessa_blocked():

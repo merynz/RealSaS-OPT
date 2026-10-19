@@ -1,0 +1,55 @@
+{
+  "schema": "RealSaS.ColabResearchWorkerUX.v1",
+  "date_utc": "2026-10-19",
+  "scope": "IRIS_TESSA_RESEARCH_NOTEBOOKS",
+  "role": "COMPUTE_WORKER__NOT_SCIENTIFIC_AUTHORITY",
+  "interaction_contract": {
+    "drive_user_consent_count": 1,
+    "drive_mount_api": "google.colab.drive.mount",
+    "drive_mount_calls_allowed": 1,
+    "additional_google_oauth_ui_allowed": false,
+    "auth_authenticate_user_allowed": false,
+    "rclone_interactive_config_allowed": false,
+    "gcloud_interactive_auth_allowed": false,
+    "manual_cell_sequence_required": false,
+    "intended_operator_action": "OPEN_NOTEBOOK__RUN_ALL__APPROVE_DRIVE_ONCE__OBSERVE_LOGS"
+  },
+  "source_contract": {
+    "checkout_exact_sha_required": true,
+    "dirty_source_allowed": false,
+    "precompiled_source_validation_required": true,
+    "preflight_before_training_required": true,
+    "preflight_optimizer_step_allowed": false,
+    "hidden_fallback_allowed": false
+  },
+  "drive_contract": {
+    "transport_identity_is_authority": false,
+    "every_hydrated_scientific_input_hash_verified": true,
+    "drive_output_root_must_include_source_sha": true,
+    "large_ephemeral_work_memmaps_mirrored": false,
+    "compact_receipts_and_checkpoints_mirrored": true,
+    "resume_requires_receipt_and_hash_revalidation": true
+  },
+  "logging_contract": {
+    "phase_headers_required": true,
+    "subject_or_cohort_progress_required": true,
+    "optimizer_step_progress_required": true,
+    "loss_components_required_when_training": true,
+    "memory_and_timing_telemetry_required_for_expensive_phases": true,
+    "exact_failure_stage_required": true,
+    "preserved_traceback_required": true,
+    "final_authority_claims_required": true,
+    "silent_long_running_cell_forbidden": true
+  },
+  "fail_closed": [
+    "SECOND_DRIVE_AUTH_PATH_REQUESTED",
+    "SOURCE_SHA_DRIFT",
+    "INPUT_HASH_DRIFT",
+    "PRECOMPILE_FAILURE",
+    "PREFLIGHT_FAILURE",
+    "NONFINITE_LOSS_OR_GEOMETRY",
+    "UNPREREGISTERED_OPTIMIZER_STEP",
+    "HIDDEN_REDUCED_RESOLUTION_ESCAPE",
+    "TEACHER_TRUTH_IN_INFERENCE_FORWARD"
+  ]
+}

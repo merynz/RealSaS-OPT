@@ -3,13 +3,14 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
+FROZEN_H_REP_SOURCE = "479e8e53cf0d7df234a3e64b824bb704b861bf19"
 
 
 def _json(rel: str):
     return json.loads((ROOT / rel).read_text(encoding="utf-8"))
 
 
-def test_surf_a1_result_is_sealed_as_fail_and_h_rep_is_active():
+def test_surf_a1_result_is_sealed_and_h_rep_source_is_green():
     result = _json("docs/research/IRIS_SURF_A1_FROZEN_H_RESULT_20261019.json")
     ledger = _json("canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json")
     state = (ROOT / "CURRENT_STATE.md").read_text(encoding="utf-8")
@@ -27,12 +28,20 @@ def test_surf_a1_result_is_sealed_as_fail_and_h_rep_is_active():
     assert ledger["active_experiment"] == "H-REP-P0"
     experiments = {row["id"]: row for row in ledger["experiments"]}
     assert experiments["SURF-A1-FROZEN-H"]["status"] == "SCIENTIFIC_FAIL"
-    assert experiments["H-REP-P0"]["tessa_authorized"] is False
+    hrep = experiments["H-REP-P0"]
+    assert hrep["status"] == "SOURCE_GREEN__A100_RUN_PENDING"
+    assert hrep["frozen_execution_source_sha"] == FROZEN_H_REP_SOURCE
+    assert hrep["source_gate"]["all_required_source_gates_green"] is True
+    assert hrep["a100_run_started"] is False
+    assert hrep["scientific_result_available"] is False
+    assert hrep["tessa_authorized"] is False
     assert experiments["SURF-A2-HIRES"]["status"].startswith("BLOCKED_")
     assert experiments["TESSA-V2-B1"]["status"] == "BLOCKED_ON_SURF_A2_READINESS"
     assert "SURF-A1 COMPLETED SCIENTIFIC FAIL" in state
-    assert "H-REP-P0" in state
-    assert "SURF-A1 CLOSED FAIL; H-REP-P0 ACTIVE" in plan
+    assert "H-REP-P0 SOURCE GREEN, A100 RUN PENDING" in state
+    assert FROZEN_H_REP_SOURCE in state
+    assert "SURF-A1 CLOSED FAIL; H-REP-P0 SOURCE GREEN; A100 RUN NEXT" in plan
+    assert FROZEN_H_REP_SOURCE in plan
     assert "IRIS_H_REP_P0_DECISION_LEDGER_20261019.md" in state
 
 

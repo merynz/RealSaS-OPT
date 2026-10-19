@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import json
 from pathlib import Path
 
@@ -22,6 +21,10 @@ def test_preregistration_exact_contract_is_valid():
     assert value["architecture"]["d_model"] == 1024
     assert value["free_running"]["teacher_prefix_allowed"] is False
     assert value["interpretation"]["tessa_mandatory_authorized_by_this_experiment"] is False
+    assert value["upstream_surface_authority"]["required_experiment"] == "SURF-A2-HIRES"
+    assert value["upstream_surface_authority"]["surf_a1_frozen_h_allowed_as_final_direct_arm"] is False
+    assert value["runtime_admission"]["qualified_surf_a2_direct_surface_required"] is True
+    assert value["runtime_admission"]["historical_raw_t512_t1024_surface_allowed"] is False
 
 
 def test_preregistration_rejects_capacity_reduction_and_authority_escalation():
@@ -30,6 +33,18 @@ def test_preregistration_rejects_capacity_reduction_and_authority_escalation():
         validate_preregistration_v1(value)
     value = load(); value["interpretation"]["canonical_m_authorized_by_this_experiment"] = True
     with pytest.raises(ValueError, match="AUTHORITY_ESCALATION"):
+        validate_preregistration_v1(value)
+
+
+def test_preregistration_rejects_bypassing_qualified_surf_a2():
+    value = load(); value["upstream_surface_authority"]["surf_a1_frozen_h_allowed_as_final_direct_arm"] = True
+    with pytest.raises(ValueError, match="UPSTREAM_SURFACE_AUTHORITY_DRIFT"):
+        validate_preregistration_v1(value)
+    value = load(); value["runtime_admission"]["qualified_surf_a2_direct_surface_required"] = False
+    with pytest.raises(ValueError, match="RUNTIME_DRIFT"):
+        validate_preregistration_v1(value)
+    value = load(); value["conditioning"]["surface"] = "SURF_A1_FROZEN_H"
+    with pytest.raises(ValueError, match="CONDITIONING_DRIFT"):
         validate_preregistration_v1(value)
 
 

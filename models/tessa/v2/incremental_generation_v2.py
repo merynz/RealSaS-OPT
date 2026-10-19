@@ -42,8 +42,8 @@ def _append_cache(
     v: torch.Tensor,
     attention: HierarchicalCausalSelfAttentionV2,
 ) -> tuple[torch.Tensor, torch.Tensor]:
-    # k/v are [B,H,1,D]. Generation is single-asset but keeping B generic makes
-    # parity tests easier and does not change cache semantics.
+    """Append one token and expose the exact prefix-stable reference K/V set."""
+
     if cache.local_k is None:
         cache.local_k = k
         cache.local_v = v
@@ -52,10 +52,9 @@ def _append_cache(
         cache.local_v = torch.cat((cache.local_v, v), dim=2)
     cache.total_tokens += 1
 
-    window = int(attention.config.local_attention_window)
     block = int(attention.history.block_size)
-    desired_local_start = max(0, cache.total_tokens - window)
-    summary_end = (desired_local_start // block) * block
+    query_position = cache.total_tokens - 1
+    summary_end = attention.summary_end_for_query_position(query_position)
     while cache.local_start < summary_end:
         if cache.local_k is None or cache.local_k.shape[2] < block:
             raise AssertionError("TESSA_V2_INCREMENTAL_CACHE_BLOCK_UNDERFLOW")
@@ -63,8 +62,16 @@ def _append_cache(
         block_v = cache.local_v[:, :, :block]
         mean_k = block_k.mean(dim=2, keepdim=True)
         mean_v = block_v.mean(dim=2, keepdim=True)
-        cache.summary_k = mean_k if cache.summary_k is None else torch.cat((cache.summary_k, mean_k), dim=2)
-        cache.summary_v = mean_v if cache.summary_v is None else torch.cat((cache.summary_v, mean_v), dim=2)
+        cache.summary_k = (
+            mean_k
+            if cache.summary_k is None
+            else torch.cat((cache.summary_k, mean_k), dim=2)
+        )
+        cache.summary_v = (
+            mean_v
+            if cache.summary_v is None
+            else torch.cat((cache.summary_v, mean_v), dim=2)
+        )
         cache.local_k = cache.local_k[:, :, block:]
         cache.local_v = cache.local_v[:, :, block:]
         cache.local_start += block
@@ -126,18 +133,26 @@ def incremental_decode_step_v2(
         raise ValueError("TESSA_V2_INCREMENTAL_TOKEN_BATCH_INVALID")
     if len(state.layers) != len(model.decoder):
         raise ValueError("TESSA_V2_INCREMENTAL_LAYER_CACHE_COUNT_INVALID")
-    if token_ids.numel() and (int(token_ids.min()) < 0 or int(token_ids.max()) >= model.config.vocab_size):
+    if token_ids.numel() and (
+        int(token_ids.min()) < 0
+        or int(token_ids.max()) >= model.config.vocab_size
+    ):
         raise ValueError("TESSA_V2_INCREMENTAL_TOKEN_OUT_OF_RANGE")
 
     position = state.token_count % int(model.config.local_attention_window)
     pos = torch.full_like(token_ids, position)
-    x = model.token_embedding(token_ids)[:, None, :] + model.position_embedding(pos)[:, None, :]
+    x = (
+        model.token_embedding(token_ids)[:, None, :]
+        + model.position_embedding(pos)[:, None, :]
+    )
 
     for layer_index, block in enumerate(model.decoder):
         if not isinstance(block.self_attn, HierarchicalCausalSelfAttentionV2):
             raise TypeError("TESSA_V2_INCREMENTAL_REQUIRES_GLOBAL_HISTORY_MODEL")
         normed = block.norm1(x)
-        x = x + _incremental_self_attention(block.self_attn, normed, state.layers[layer_index])
+        x = x + _incremental_self_attention(
+            block.self_attn, normed, state.layers[layer_index]
+        )
         q = block.norm2(x)
         cross, _ = block.cross(q, memory, memory, need_weights=False)
         x = x + cross
@@ -154,8 +169,6 @@ def incremental_prefix_logits_v2(
     memory: torch.Tensor,
     input_ids: torch.Tensor,
 ) -> torch.Tensor:
-    """Reference helper used by parity tests and engineering diagnostics."""
-
     if input_ids.ndim != 2 or input_ids.shape[0] != memory.shape[0]:
         raise ValueError("TESSA_V2_INCREMENTAL_PREFIX_SHAPE_INVALID")
     previous = model.training
@@ -185,15 +198,17 @@ def generate_tessa_candidate_incremental_v2(
     policy: TESSAGenerationPolicyV2 = TESSAGenerationPolicyV2(),
     seed: int | None = None,
 ) -> TESSAGeneratedCandidateV2:
-    """Strict grammar-constrained free-running generation with exact KV caching.
-
-    This path may replace the prefix-recompute reference generator only while the
-    dedicated parity court remains green.
-    """
+    """Strict grammar-constrained free-running generation with exact KV caching."""
 
     policy.validate()
-    if memory.ndim != 3 or memory.shape[0] != 1 or memory.shape[-1] != model.config.d_model:
-        raise ValueError("TESSA_V2_INCREMENTAL_GENERATION_REQUIRES_SINGLE_ASSET_MEMORY")
+    if (
+        memory.ndim != 3
+        or memory.shape[0] != 1
+        or memory.shape[-1] != model.config.d_model
+    ):
+        raise ValueError(
+            "TESSA_V2_INCREMENTAL_GENERATION_REQUIRES_SINGLE_ASSET_MEMORY"
+        )
     previous = model.training
     model.eval()
     grammar = TESSAGrammarStateV2()
@@ -209,12 +224,18 @@ def generate_tessa_candidate_incremental_v2(
         logits = incremental_decode_step_v2(
             model,
             memory=memory,
-            token_ids=torch.tensor([model.config.BOS], device=memory.device, dtype=torch.long),
+            token_ids=torch.tensor(
+                [model.config.BOS], device=memory.device, dtype=torch.long
+            ),
             state=cache,
         )[0]
         for _ in range(policy.maximum_new_tokens):
-            allowed = grammar.allowed_token_mask(config=model.config, device=memory.device)
-            token, logp = _choose_token(logits, allowed, policy=policy, generator=generator)
+            allowed = grammar.allowed_token_mask(
+                config=model.config, device=memory.device
+            )
+            token, logp = _choose_token(
+                logits, allowed, policy=policy, generator=generator
+            )
             tokens.append(token)
             logp_sum += logp
             grammar.advance(token, config=model.config)
@@ -224,7 +245,9 @@ def generate_tessa_candidate_incremental_v2(
             logits = incremental_decode_step_v2(
                 model,
                 memory=memory,
-                token_ids=torch.tensor([token], device=memory.device, dtype=torch.long),
+                token_ids=torch.tensor(
+                    [token], device=memory.device, dtype=torch.long
+                ),
                 state=cache,
             )[0]
     finally:

@@ -4,6 +4,12 @@
   "training_allowed": false,
   "external_storage_write_allowed": false,
   "scientific_pass_claimed": false,
+  "stage01": {
+    "file": "FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip",
+    "file_id": "1PcxT2rfb9jCHfP75gaqMAo90OU7JRypH",
+    "sha256": "9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936",
+    "scope": "EXACT_ADMITTED_8_VIEW_SOURCE_MASKS_CAMERAS_AND_RAW_ASSETS"
+  },
   "prepared": {
     "source_commit_sha": "7029ee3f48787aa9f7e27eecef89155eb9368a96",
     "folder_id": "1KF8SztfN_NrfjbgLvQZ5BqSRczS5dwv4",
@@ -50,6 +56,7 @@
     "tessa_invoked": false
   },
   "authority": {
+    "stage01_bytes": "READ_ONLY_EXACT_ADMITTED_SOURCE_OBSERVATION_AUTHORITY",
     "prepared_bytes": "READ_ONLY_REUSE_OF_SEALED_V9_PREPARATION",
     "v8_scene_core": "EXACT_COMPLETED_V8__SEALED",
     "surface_candidate": "EVIDENCE_ONLY__COMPILER_COURT_REQUIRED",

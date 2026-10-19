@@ -144,7 +144,8 @@ Authority:
 - `tools/iris_vnext/build_fit8_h_rep_probe_dataset_v1.py`;
 - `tools/iris_vnext/h_rep_probe_runtime_v1.py`;
 - `tools/iris_vnext/train_fit8_h_rep_probe_v1.py`;
-- `tools/iris_vnext/audit_fit8_h_rep_probe_v1.py`.
+- `tools/iris_vnext/audit_fit8_h_rep_probe_v1.py`;
+- `docs/research/IRIS_H_REP_P0_DECISION_LEDGER_20261019.md`.
 
 ### 5.1 Four equal-capacity arms
 
@@ -255,6 +256,7 @@ NO TESSA UNTIL QUALIFIED SURF-A2
 5. `canonical/H_REP_P0_INPUT_BINDING_V1.json`
 6. `canonical/H_REP_P0_PREREGISTRATION_V1.json`
 7. `canonical/SURF_A1_FROZEN_H_PREREGISTRATION_V1.json`
-8. `docs/research/IRIS_TESSA_V2_DECISION_LEDGER_20261019.md`
-9. `docs/research/IRIS_TESSA_V2_STRUCTURALIZATION_PLAN_20261019.md`
-10. `docs/research/IRIS_VNEXT_POST_V8_QUALITY_PLAN_20261018.md`
+8. `docs/research/IRIS_H_REP_P0_DECISION_LEDGER_20261019.md`
+9. `docs/research/IRIS_TESSA_V2_DECISION_LEDGER_20261019.md`
+10. `docs/research/IRIS_TESSA_V2_STRUCTURALIZATION_PLAN_20261019.md`
+11. `docs/research/IRIS_VNEXT_POST_V8_QUALITY_PLAN_20261018.md`

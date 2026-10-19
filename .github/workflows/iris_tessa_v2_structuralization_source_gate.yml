@@ -94,6 +94,7 @@ jobs:
             models/iris/vnext/stack_v3.py \
             models/iris/vnext/sparse_surface_v3.py \
             tools/iris_vnext/materialize_fit8_direct_surface_v1.py \
+            tools/iris_vnext/materialize_fit8_direct_surface_staged_v2.py \
             tools/iris_vnext/hydrate_fit8_direct_surface_inputs_v1.py \
             tools/iris_vnext/preflight_fit8_direct_surface_a100_v1.py \
             tools/iris_vnext/audit_fit8_direct_surface_geometry_v1.py \
@@ -155,6 +156,7 @@ jobs:
             tests/iris/test_evidence_model_v3.py \
             tests/iris/test_sparse_surface_v3.py \
             tests/iris/test_direct_surface_materialization_v1.py \
+            tests/iris/test_direct_surface_staged_materializer_v2.py \
             tests/iris/test_direct_surface_input_binding_v1.py \
             tests/iris/test_direct_surface_a100_preflight_v1.py \
             tests/iris/test_direct_surface_geometry_court_v1.py \

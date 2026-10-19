@@ -25,7 +25,7 @@ def test_exact_bvh_matches_all_triangle_bruteforce():
 
 
 def test_normalization_replay_recovers_exact_isotropic_transform():
-    vertices=np.array([[0.,0.,0.],[2.,0.,0.],[0.,3.,0.],[0.,0.,4.]],dtype=np.float64); faces=np.array([[0,1,2],[0,1,3],[0,2,3],[1,2,3]],dtype=np.int64); source,_,_,_=sample_surface_exact_replay_v1(vertices,faces,4096,seed_text="Snake"); scale=.37; translation=np.array([.12,-.23,.08]); stored=source*scale+translation; r=recover_prepared_normalization_v1(subject_id="Snake",rest_vertices_source_world=vertices,faces=faces,stored_surface_points_iris=stored,maximum_error_iris=1e-10); assert abs(r.scale-scale)<1e-12; assert np.max(np.abs(np.asarray(r.translation)-translation))<1e-12; assert r.maximum_replay_error_iris<1e-12
+    vertices=np.array([[0.,0.,0.],[2.,0.,0.],[0.,3.,0.],[0.,0.,4.]],dtype=np.float64); faces=np.array([[0,1,2],[0,1,3],[0,2,3],[1,2,3]],dtype=np.int64); source,_,_,_=sample_surface_exact_replay_v1(vertices,faces,4096,seed_text="Snake"); scale=.17; translation=np.array([.12,-.23,.08]); stored=source*scale+translation; r=recover_prepared_normalization_v1(subject_id="Snake",rest_vertices_source_world=vertices,faces=faces,stored_surface_points_iris=stored,maximum_error_iris=1e-10); assert abs(r.scale-scale)<1e-12; assert np.max(np.abs(np.asarray(r.translation)-translation))<1e-12; assert r.maximum_replay_error_iris<1e-12
 
 
 def test_prereg_is_minimal_existing_carrier_retraining_and_tessa_blocked():

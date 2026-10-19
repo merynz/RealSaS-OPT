@@ -38,6 +38,18 @@ def validate_preregistration_v1(value: dict[str, Any]) -> None:
     if value.get("scope") != "FIT8_SHARED_ARCHITECTURE_FIT__NOT_UNSEEN_GENERALIZATION__NOT_PRODUCT_PROMOTION":
         raise ValueError("TESSA_V2_PREREG_SCOPE_DRIFT")
 
+    upstream = value.get("upstream_surface_authority") or {}
+    exact_upstream = {
+        "required_experiment": "SURF-A2-HIRES",
+        "required_status": "QUALIFIED_HIGH_RESOLUTION_DIRECT_A_ARM",
+        "surf_a0_raw_field_sparse_allowed": False,
+        "surf_c0_native_r24_allowed_as_training_surface": False,
+        "surf_a1_frozen_h_allowed_as_final_direct_arm": False,
+        "reason": "TESSA_MUST_COMPARE_AGAINST_A_QUALIFIED_DIRECT_SURFACE__NOT_REPAIR_A_GROSSLY_WRONG_OR_DIAGNOSTIC_WITNESS",
+    }
+    if upstream != exact_upstream:
+        raise ValueError("TESSA_V2_PREREG_UPSTREAM_SURFACE_AUTHORITY_DRIFT")
+
     cfg = TESSAStructuralizerConfigV2(); cfg.validate()
     arch = value.get("architecture") or {}
     exact_arch = {
@@ -60,6 +72,20 @@ def validate_preregistration_v1(value: dict[str, Any]) -> None:
     if arch != exact_arch:
         raise ValueError("TESSA_V2_PREREG_ARCHITECTURE_DRIFT")
 
+    conditioning = value.get("conditioning") or {}
+    exact_conditioning = {
+        "scene": "SEALED_V8_SCENE_PLANES_OR_EXPLICITLY_QUALIFIED_SUCCESSOR_CARRIER",
+        "surface": "QUALIFIED_SURF_A2_HIGH_RESOLUTION_DIRECT_WITNESS",
+        "local_features": "MODEL_PRODUCED_H_AT_QUALIFIED_SURFACE_WITNESS",
+        "mechanics": "EXPLICITLY_TRAINED_ROLE_FREE_MECHANICAL_EVIDENCE_AT_MODEL_WITNESS",
+        "contact_persistence": "ABSTAIN_VALIDITY_FALSE_UNTIL_SOURCE_AUTHORITY_EXISTS",
+        "teacher_topology_in_conditioning": False,
+        "teacher_rig_skin_in_conditioning": False,
+        "uncalibrated_uncertainty_in_conditioning": False,
+    }
+    if conditioning != exact_conditioning:
+        raise ValueError("TESSA_V2_PREREG_CONDITIONING_DRIFT")
+
     corpus = value.get("training_corpus") or {}
     window = TESSATrainingWindowPolicyV2(); window.validate(cfg)
     if (
@@ -69,6 +95,7 @@ def validate_preregistration_v1(value: dict[str, Any]) -> None:
         or int(corpus.get("stride_tokens", -1)) != window.stride_tokens
         or corpus.get("global_sequence_reconstructed_from_sealed_v4_windows") is not True
         or corpus.get("overlap_equality_required") is not True
+        or corpus.get("every_next_token_target_scored_exactly_once_per_epochal_sequence") is not True
     ):
         raise ValueError("TESSA_V2_PREREG_CORPUS_DRIFT")
 
@@ -106,15 +133,38 @@ def validate_preregistration_v1(value: dict[str, Any]) -> None:
         raise ValueError("TESSA_V2_PREREG_OPTIMIZER_DRIFT")
 
     runtime = value.get("runtime_admission") or {}
-    if (
-        runtime.get("accelerator") != "NVIDIA_A100_CLASS"
-        or int(runtime.get("minimum_cuda_memory_gib", -1)) != 39
-        or runtime.get("full_t512_t1024_direct_surface_required") is not True
-        or runtime.get("low_resolution_surface_fallback_allowed") is not False
-        or runtime.get("full_reference_capacity_tessa_forward_backward_preflight_required") is not True
-        or runtime.get("preflight_optimizer_step_allowed") is not False
-    ):
+    exact_runtime = {
+        "accelerator": "NVIDIA_A100_CLASS",
+        "minimum_cuda_memory_gib": 39,
+        "minimum_host_memory_gib": 24,
+        "minimum_free_disk_gib": 12,
+        "compute_capability_major_minimum": 8,
+        "exact_prepared_fit8_bytes_required": True,
+        "qualified_surf_a2_direct_surface_required": True,
+        "surf_a2_independent_court_required": True,
+        "low_resolution_surface_fallback_allowed": False,
+        "historical_raw_t512_t1024_surface_allowed": False,
+        "full_reference_capacity_tessa_forward_backward_preflight_required": True,
+        "preflight_optimizer_step_allowed": False,
+    }
+    if runtime != exact_runtime:
         raise ValueError("TESSA_V2_PREREG_RUNTIME_DRIFT")
+
+    direct_surface = value.get("direct_surface_admission") or {}
+    if (
+        direct_surface.get("all_8_subjects_materialized") is not True
+        or direct_surface.get("finite_geometry_required") is not True
+        or int(direct_surface.get("maximum_nonmanifold_edges_per_subject", -1)) != 0
+        or int(direct_surface.get("maximum_zero_area_faces_per_subject", -1)) != 0
+        or float(direct_surface.get("maximum_surface_p95_distance_iris", -1)) != 0.025
+        or float(direct_surface.get("maximum_surface_max_distance_iris", -1)) != 0.1
+        or float(direct_surface.get("minimum_global_mean_subject_mask_iou", -1)) != 0.9
+        or float(direct_surface.get("minimum_subject_mean_mask_iou", -1)) != 0.8
+        or float(direct_surface.get("minimum_view_mask_iou", -1)) != 0.7
+        or float(direct_surface.get("maximum_global_mask_gap_px", -1)) != 32.0
+        or direct_surface.get("component_count_is_admission_gate") is not False
+    ):
+        raise ValueError("TESSA_V2_PREREG_DIRECT_SURFACE_ADMISSION_DRIFT")
 
     free = value.get("free_running") or {}
     if (

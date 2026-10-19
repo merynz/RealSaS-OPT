@@ -13,8 +13,8 @@ from .config_v2 import TESSAStructuralizerConfigV2
 class TESSAGlobalHistoryPolicyV2:
     """Causal global-history policy for long topology sequences.
 
-    Exact token attention is retained in the local trailing window.  Older
-    completed token blocks are represented by one K/V summary each.  Summaries
+    Exact token attention is retained in the local trailing window. Older
+    completed token blocks are represented by one K/V summary each. Summaries
     contain only positions strictly earlier than the local region, so training
     remains causal and matches incremental generation semantics.
     """
@@ -31,7 +31,7 @@ class HierarchicalCausalSelfAttentionV2(nn.Module):
     """Local exact causal attention plus persistent coarse global history.
 
     This is deliberately simpler than importing a paper-specific sparse-attention
-    implementation.  The required invariant is causal structural memory:
+    implementation. The required invariant is causal structural memory:
 
       recent topology -> exact token context
       old topology    -> bounded summaries of every completed history block
@@ -84,7 +84,7 @@ class HierarchicalCausalSelfAttentionV2(nn.Module):
             desired_local_start = max(0, end - local_window)
 
             # Everything before summary_end is represented once per completed
-            # block.  The partial remainder stays exact in local attention, so no
+            # block. The partial remainder stays exact in local attention, so no
             # past token disappears at the coarse/local boundary.
             summary_end = (desired_local_start // block) * block
             local_start = summary_end
@@ -120,7 +120,7 @@ class HierarchicalCausalSelfAttentionV2(nn.Module):
                 key = local_k
                 value = local_v
 
-            # History summaries are all strictly in the past.  Only the exact
+            # History summaries are all strictly in the past. Only the exact
             # local token suffix requires a triangular causal mask.
             q_pos = torch.arange(start, end, device=x.device)[:, None]
             local_pos = torch.arange(local_start, end, device=x.device)[None, :]
@@ -146,17 +146,10 @@ class HierarchicalCausalSelfAttentionV2(nn.Module):
             )
             chunks.append(y)
 
-        return (
+        combined = (
             torch.cat(chunks, dim=2)
             .transpose(1, 2)
             .contiguous()
             .view(b, length, dim)
-            .pipe(self.out)
-            if hasattr(torch.Tensor, "pipe")
-            else self.out(
-                torch.cat(chunks, dim=2)
-                .transpose(1, 2)
-                .contiguous()
-                .view(b, length, dim)
-            )
         )
+        return self.out(combined)

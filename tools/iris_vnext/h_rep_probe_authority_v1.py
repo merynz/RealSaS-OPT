@@ -49,6 +49,39 @@ def git_head(repo_root: Path) -> str:
     ).strip().lower()
 
 
+def require_exact_clean_source_v1(repo_root: Path, expected_sha: str) -> str:
+    repo_root = repo_root.resolve()
+    expected = str(expected_sha).lower()
+    head = git_head(repo_root)
+    if head != expected:
+        raise RuntimeError(f"H_REP_P0_SOURCE_SHA_DRIFT:{head}:{expected}")
+    dirty = subprocess.check_output(
+        ["git", "-C", str(repo_root), "status", "--porcelain"], text=True
+    )
+    if dirty.strip():
+        raise RuntimeError("H_REP_P0_SOURCE_REPO_DIRTY")
+    return head
+
+
+def require_a100_runtime_v1(minimum_memory_gib: float = 39.0) -> dict[str, Any]:
+    if not torch.cuda.is_available():
+        raise RuntimeError("H_REP_P0_A100_CUDA_REQUIRED")
+    properties = torch.cuda.get_device_properties(0)
+    memory_gib = float(properties.total_memory) / (1024.0 ** 3)
+    if "A100" not in str(properties.name).upper():
+        raise RuntimeError(f"H_REP_P0_EXACT_A100_CLASS_REQUIRED:{properties.name}")
+    if memory_gib < float(minimum_memory_gib):
+        raise RuntimeError(
+            f"H_REP_P0_MINIMUM_CUDA_MEMORY_GIB_REQUIRED:{memory_gib}:{minimum_memory_gib}"
+        )
+    return {
+        "name": str(properties.name),
+        "total_memory_gib": memory_gib,
+        "torch": str(torch.__version__),
+        "cuda": str(torch.version.cuda),
+    }
+
+
 def module_state_sha256_v1(module: torch.nn.Module) -> str:
     h = hashlib.sha256()
     for name, tensor in sorted(module.state_dict().items()):

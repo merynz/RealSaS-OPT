@@ -56,6 +56,25 @@
     "same_subject_schedule_for_all_arms": true,
     "equal_capacity_predictors": true
   },
+  "runtime_admission": {
+    "accelerator": "NVIDIA_A100_CLASS",
+    "minimum_cuda_memory_gib": 39,
+    "exact_execution_source_sha_required": true,
+    "clean_source_checkout_required": true,
+    "source_precompile_required": true,
+    "exact_v8_checkpoint_required": true,
+    "exact_prepared_manifest_and_shards_required": true,
+    "exact_input_binding_required": true,
+    "exact_preregistration_required": true,
+    "probe_dataset_receipt_bound_to_input_binding_required": true,
+    "frozen_v8_scene_core_hash_required": true,
+    "equal_parameter_count_all_arms_required": true,
+    "optimizer_step_allowed_before_all_authority_gates": false,
+    "single_drive_mount_consent_required": true,
+    "drive_tree_discovery_allowed": false,
+    "additional_google_oauth_allowed": false,
+    "reduced_capacity_or_subject_fallback_allowed": false
+  },
   "heldout_court": {
     "maximum_h_mean_distance_mae_iris": 0.025,
     "maximum_h_subject_endpoint_p95_iris": 0.075,

@@ -1,25 +1,30 @@
 # RealSaS-OPT Agent Entry Contract
 
-## Mandatory current handoff — 2026-10-18
+## Mandatory current handoff — 2026-10-19
 
-This repository must be resumable without conversational memory.
+This repository must be resumable without conversational memory. **Current state and machine-readable experiment authority outrank historical recovery notes.**
 
 ### Read first
 
 1. `CURRENT_STATE.md`
 2. `CURRENT_PLAN.md`
-3. `docs/research/IRIS_VNEXT_DECISION_LEDGER_20261018.md`
-4. `docs/research/IRIS_VNEXT_RELATION_TRUTH_AUDIT_20261018.md`
-5. `docs/research/IRIS_VNEXT_POST_V8_QUALITY_PLAN_20261018.md`
-6. `docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md`
-7. `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`
-8. `SYSTEM_INDEX.md`
-9. `docs/platform/EXECUTION_LANES.md`
+3. `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json`
+4. `canonical/H_REP_P0_INPUT_BINDING_V1.json`
+5. `canonical/H_REP_P0_PREREGISTRATION_V1.json`
+6. `docs/research/IRIS_H_REP_P0_DECISION_LEDGER_20261019.md`
+7. `docs/research/IRIS_SURF_A1_FROZEN_H_RESULT_20261019.json`
+8. `canonical/SURF_A1_FROZEN_H_PREREGISTRATION_V1.json`
+9. `docs/research/IRIS_TESSA_V2_DECISION_LEDGER_20261019.md`
+10. `docs/research/IRIS_TESSA_V2_STRUCTURALIZATION_PLAN_20261019.md`
+11. `docs/research/IRIS_VNEXT_POST_V8_QUALITY_PLAN_20261018.md`
+12. `SYSTEM_INDEX.md`
+13. `docs/platform/EXECUTION_LANES.md`
 
 ### Continuity authority pointers
 
-Current continuity files must be read and treated as current before their historical predecessors:
+Current continuity files must be read and treated as current before historical predecessors:
 
+- research experiment authority: `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json`
 - current experiment registry: `canonical/EXPERIMENT_REGISTRY_V3.json`
 - current scientific journal: `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
 - active run ledger: `canonical/ACTIVE_RUN_V2.json`
@@ -27,21 +32,16 @@ Current continuity files must be read and treated as current before their histor
 - current product architecture authority: `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
 - current appearance authority: `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
 
-Historical continuity files remain provenance only and do not override current authority:
+Historical continuity files, Knight/V2/V5/V6 notes and old recovery branches are provenance/regression evidence. They do not override current authority.
 
-- historical experiment registry: `canonical/EXPERIMENT_REGISTRY_V2.json`
-- historical scientific journal: `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
-
-Historical Knight/V2/V5/V6 documents are provenance/regression evidence. They do not override the files above.
-
-If the user says only `continue / devam et`, continue the active work in `CURRENT_PLAN.md`. Do not revive an older recovery branch, V5/V6 continuation, subject-serial Fit8 trainer, hidden semantic-owner program, or independent visual mesh merely because historical files still exist.
+If the user says only `continue / devam et`, continue the active work in `CURRENT_PLAN.md`. Do not revive an older branch, trainer, hidden semantic-owner program, independent visual mesh or superseded relation/surface experiment merely because historical files still exist.
 
 ## Authority model
 
 Keep source, experiment and product authority separate:
 
 ```text
-main              = merged code truth
+main              = merged product code truth
 review branch     = temporary source collaboration
 Artifact Registry = immutable artifact/dependency identity
 Attempt           = durable research truth
@@ -49,113 +49,110 @@ ProductRevision   = durable production truth
 Workflow Engine   = durable execution state
 ```
 
-The completed V8 run is an architectural/measurement baseline bound to exact source commit `5083c9915533ec8ec6530c7d229c635887abfea7` plus exact checkpoint/receipt lineage. Later source hardening does not rewrite that artifact.
+Repository source and green CI are **not** scientific PASS. A Drive path is not authority. Scientific authority requires the exact artifact hash plus typed receipt/court bound to the exact source and preregistration.
 
-The active post-V8 review source is `research/iris-vnext-post-v8-quality-plan-20261018`. Draft PR #116 is synchronized by fast-forward with the active review line; before any merge, require the final PR head and all required review gates to be green.
+Completed IRIS-V8 is immutable model/history authority:
+
+- source `5083c9915533ec8ec6530c7d229c635887abfea7`;
+- global step `12000`;
+- checkpoint SHA256 `0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5`;
+- binding SHA256 `735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2`;
+- shared `scene_core` sealed after M1.
+
+Later source hardening does not rewrite those bytes or their scientific lineage.
+
+Active review source is `research/iris-vnext-hybrid-tessa-v2-20261019` / PR #122. H-REP-P0 may be staged on a child source-gate branch while source review is incomplete; only an exact final green head may be used by an A100 worker.
 
 ## Current scientific program
 
-The active program is **post-V8 quality / truth / consumption qualification**, not another blind 12k run.
+The active experiment is **H-REP-P0**, opened because `SURF-A1-FROZEN-H` completed a real preregistered scientific FAIL after all apparatus gates passed.
 
-Observed lineage:
+SURF-A1 facts that must not drift:
 
-- V5 falsified single-objective downstream rewriting of shared H.
-- V6 showed cumulative retention can preserve mechanics while geometry/extraction still drift.
-- V7 repaired TESSA coordinate compatibility only; it retained V6 policy.
-- V8 sealed `scene_core` after M1 and kept geometry/extraction stable while specialist heads continued learning.
+- exact execution source `afc18debbc4d5858a4a632884b7cfd2141dcc35a`;
+- A100 preflight passed; 64/64 hard raster views had precision/recall `1.0`;
+- native R24 parity was exact on faces for all 8 subjects;
+- all `2400` extraction-only optimizer steps completed;
+- final independent R48 court status: `SCIENTIFIC_FAIL_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE`;
+- A1 substantially improved native V8 C0 but missed locked global IoU, Chamfer, mask-gap, normal-alignment and per-subject p95 gates;
+- next action is representation investigation, not threshold relaxation, SURF-A2 promotion or TESSA training.
 
-Current default law:
+Do **not** summarize this as “H contains no geometry.” H-REP-P0 exists specifically to separate representation decodability from mesh-extraction debt.
 
-```text
-G / M establish H
-      ↓
-M1 seal
-      ↓
-A / R / T / J specialists
-      ↓
-scene_core remains sealed
-```
+## H-REP-P0 law
 
-A post-M1 non-zero `scene_core` optimizer LR requires an explicit carrier-falsification court. Exact canonical downstream stage IDs are enforced by `quality_policy_v1.py`; unknown A/R/T/J aliases fail closed.
+Question:
 
-Important historical distinction: V8 already had the carrier seal and stage-level specialist isolation, but its physical optimizer groups were `scene_core`, combined `evidence_heads`, and `structure`. `optimization_v2.py` is post-V8 experiment instrumentation: it splits mechanical/appearance/relation/structure groups for independent LR/gradient/update telemetry while keeping `scene_core=0` fail-closed.
+> Is local surface geometry decodable from exact sealed V8 `H(x)` or the sealed raw field without FlexiCubes, SURF-A1 mesh extraction, TESSA or Compiler repair?
 
-V8 is **not** a scientific Fit8 PASS.
-
-## Truth law
-
-> Unknown is a first-class result. Do not turn an unidentifiable proxy into training truth.
-
-`BoundaryCausalityTeacherV1` recognizes only source-defensible causes:
-
-- geometric termination;
-- authored material boundary;
-- alpha boundary;
-- occlusion/visibility boundary;
-- source primitive/component seam;
-- residual unknown / abstention.
-
-`RESIDUAL_UNKNOWN` emits no training target.
-
-### Relation-truth producer distinction
-
-Do not repeat the shorthand that “V8 cut was simply `1 - same_drawable`.” There are two historical producer paths:
+Four controls have exact equal parameter count and the same `387-D` input envelope:
 
 ```text
-models/iris/vnext/graphics_truth_v1.py helper:
-    cut = 1 - anonymous-owner-equivalence
-
-Fit8 shard builder used by V8:
-    relation_cut_probability = (owner differs) OR (material id differs)
+H_XYZ              sealed local 384-D H + XYZ
+RAW_FIELD_XYZ      raw field in evidence channel 0 + zero padding + XYZ
+XYZ_ONLY            all evidence channels zero + XYZ
+SHUFFLED_H_XYZ     fixed within-subject permuted H + original XYZ
 ```
 
-The V8 cut metric therefore measures decodability of an **owner-or-material boundary proxy**, not authoritative drawable-cut truth.
+No subject ID, subject-specific trainable parameters or semantic-class routing is allowed.
 
-### Current V2 relation stack
+Probe truth uses only sealed V4 geometry already admitted by independent courts:
 
-Source now implemented and CI-green:
+- `teacher_surface_points_iris`;
+- `mechanical_points`;
+- `mechanical_normals`.
 
-- `models/iris/vnext/graphics_truth_v2.py` — explicit target authority/provenance/validity;
-- `models/iris/vnext/training_v2.py` — validity-aware loss;
-- `tools/iris_vnext/build_fit8_relation_truth_v2.py` — sidecar/manifest producer;
-- `models/iris/vnext/relation_support_v2.py` — support/class eligibility;
-- `models/iris/vnext/heads_v2.py` — projected boundaries camera-conditioned; deterministic V1→V2 migration semantics;
-- `models/iris/vnext/optimization_v2.py` — head-separated future optimizer/telemetry.
+Nearest-point distance/offset is an explicit **point-cloud geometry proxy**, not exact SDF or occupancy truth. Teacher truth is target-only and must never enter the probe input.
 
-Do not overclaim:
+V8 `scene_core` remains frozen and hash-checked. H-REP-P0 does not authorize carrier retraining merely because it exists or fails.
 
-- no actual Fit8 Truth V2 corpus is yet sealed as experiment authority;
-- no real V8 checkpoint→V2 migrated artifact/receipt is sealed;
-- no focused post-V8 training has run;
-- no scientific PASS exists.
+### H-REP outcome boundary
 
-Static same/cut/attachment abstain without independent authority. Current valid occlusion rows are single-class positive support; they are not eligible for a binary held-out PASS court. Do not fabricate negatives.
+If H or raw field earns its entire preregistered held-out gate set:
 
-Historical V8 bytes remain immutable provenance.
+```text
+DESIGN_EXTRACTION_TRANSITION_ALTERNATIVE
+DO_NOT_RETRAIN_H_YET
+DO_NOT_TRAIN_TESSA
+```
 
-## Foundation branch rule
+If neither earns its gate set:
 
-`agent/unified-iris-stdgenpp-foundation@d90c82e24ccbf43081ca19f105bc4e4c7dfe9531` is research provenance, not current authority.
+```text
+PREREGISTER_CARRIER_REPRESENTATION_RETRAINING_EXPERIMENT
+DO_NOT_TRAIN_TESSA
+```
 
-Salvage only source-defensible producers such as:
+Neither outcome directly authorizes SURF-A2.
 
-- source geometry/topology provenance;
-- authored material provenance;
-- rig/deformation evidence;
-- all-hit rays;
-- fixed-frame geometric visibility/order;
-- residual-boundary diagnostics;
-- local continuation evidence.
+## Runtime / notebook contract
 
-Exact salvage paths are recorded in `CURRENT_PLAN.md` and the decision ledger.
+Research notebooks are compute workers, not authority. Required operator UX:
 
-Do not promote from generic FIT8 3D alone:
+```text
+Open notebook
+→ Run all
+→ approve Google Drive exactly once
+→ autonomous exact-hash execution
+→ meaningful phase logs
+→ resumable Drive checkpoints/receipts
+→ independent final court
+```
 
-- authoritative drawable owner;
-- hidden/amodal support;
-- intentional 2D presentation override;
-- global named body-part semantics;
-- inferred hidden continuation as ground truth.
+All new A100 notebooks must:
+
+- use physically separated phase cells like the successful V8 worker;
+- contain exactly one `google.colab.drive.mount('/content/drive', force_remount=False)`;
+- never call `auth.authenticate_user()` or interactive rclone/gcloud auth;
+- never scan full Drive with `os.walk`, `rglob` or broad recursive discovery for known inputs;
+- use exact pre-resolved mounted paths plus hashes for scientific inputs;
+- check exact source SHA and clean checkout;
+- precompile before optimizer authorization;
+- enforce the experiment’s explicit accelerator/memory gate;
+- fail closed on source/input/prereg/checkpoint drift;
+- forbid hidden reduced-capacity/resolution/subject fallback.
+
+For H-REP-P0 specifically: exact A100-class accelerator with at least `39 GiB` CUDA memory is preregistered. Optimizer step 1 is forbidden until source, input binding, preregistration, V8 checkpoint, V4 prepared shards, probe dataset receipt, scene-core hash and equal probe parameter counts all pass.
 
 ## Single-carrier product rule
 
@@ -163,56 +160,43 @@ There is exactly one product mechanical carrier after candidate selection:
 
 ```text
 candidate M*
-  -> static/mechanical courts
-  -> deterministic selection
-  -> ONE canonical M/G/W_M
-  -> Graphics / Motion / Runtime
+  → static/mechanical courts
+  → deterministic selection
+  → ONE canonical M/G/W_M
+  → Graphics / Motion / Runtime
 ```
 
-No independent deformable visual mesh is allowed.
+No independent deformable visual mesh is allowed. Bounded 2D presentation support may exist only as an explicitly authorized sidecar driven by canonical mechanics; it may not hide missing 3D geometry or mint another mesh.
 
-Bounded 2D presentation support may exist only as an explicitly authorized sidecar driven by canonical mechanics. It may not hide missing 3D geometry or mint another mesh.
-
-## Graphics consumption rule
-
-A learned or serialized field is not automatically behaviorally consumed.
-
-Read `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json` before making runtime claims.
-
-Current source evidence supports:
-
-- same/cut/boundary can change Compiler fragment clustering;
-- front + occlusion can become directed order edges;
-- native explicit precedence can override contradictory physical depth;
-- visibility is behaviorally consumed and changes native RGBA in E2E.
-
-Current consumption debt:
-
-- attachment survives to `graphics.bin` but the native reference raster does not use it behaviorally;
-- `support_band_pixels` is serialized/validated but not applied by the reference renderer.
-
-Use `BEHAVIORALLY_USED`, `TRANSPORT_ONLY`, or `UNCONSUMED`; avoid ambiguous “consumed”.
-
-## Topology rule
-
-TESSA training loss is not topology qualification.
-
-No topology PASS exists until an independent held-out court measures actual face validity, component error, boundary loops/holes, non-manifold behavior where meaningful, canonical-surface deviation, source support and held-out stability.
-
-StdGEN++-style hole/sign regularization, sparse high-resolution extraction or topology-specific capacity are conditional interventions after that court identifies a concrete failure.
-
-## StdGEN++ evidence discipline
-
-Read `docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md` before citing StdGEN/StdGEN++ as design authority.
-
-Pinned public source commits for the current re-audit:
+## IRIS / TESSA / Compiler boundary
 
 ```text
-StdGEN      hyz317/StdGEN@f1b0c822689dc2539c774bb73090a67c66e2e766
-InstantMesh TencentARC/InstantMesh@08822c5200a4bcc0e2c1a4573409ac10b9f6692c
+8-view observations
+        ↓
+IRIS continuous visual/geometric/mechanical evidence H
+        ↓
+qualified high-fidelity direct surface
+        ↓
+OPTIONAL TESSA structuralization / learned retopology
+        ↓
+Compiler qualification
+        ↓
+ONE canonical animation-ready M
 ```
 
-Keep evidence classes separate:
+TESSA is optional. It is not a second reconstructor and cannot repair a grossly wrong upstream witness. `TESSA-V2-B1` remains blocked until a genuinely qualified `SURF-A2-HIRES` direct arm exists.
+
+> Compiler may enforce admissible truth and global consistency; Compiler may not compensate for model incapacity or fabricate unavailable truth.
+
+Allowed Compiler work includes exact validation, IDs/hashes/addressing, source-bound deterministic derivation, global graph/constraint solving, candidate selection, exact contact/barycentric solves, bounded numerical sanitation and fail-closed/abstain behavior.
+
+Forbidden Compiler work includes large topology/hole repair presented as model success, semantic skin transfer hiding carrier drift, invented hidden/amodal/presentation truth, an independent visual mesh or subject-specific production rescue branches.
+
+## Truth law
+
+> Unknown is a first-class result. Do not turn an unidentifiable proxy into training truth.
+
+External papers/repos are design references, never authority. Keep evidence classes separate:
 
 ```text
 CODE_EXACT        public code directly verified
@@ -221,63 +205,23 @@ REALSAS_INFERENCE our translation
 UNAVAILABLE       exact implementation not public
 ```
 
-The inspected public StdGEN repository does not expose the exact full StdGEN/StdGEN++ training loop. Do not convert paper claims into “code analysis”.
+StdGEN/StdGEN++ lessons may inform training discipline and representation transitions, but do not copy body/hair/cloth ontology as mandatory RealSaS inference classes.
 
-Transfer discipline, not ontology:
+## Fit8 law
 
-- protect useful shared representation;
-- use constrained specialization when a capacity court justifies it;
-- preserve geometry/raster supervision through representation transitions;
-- make decomposition targets identifiable in data;
-- treat topology/thin structures as explicit courts;
-- use coarse-to-fine extraction only if resolution is proven limiting.
+Fit8 is a **shared-system qualification cohort**, not merely eight subjects and not an unseen-generalization claim. It forces the same models, contracts, Compiler layers and workflow across heterogeneous assets before future large unseen campaigns.
 
-Do not copy body/hair/cloth as mandatory RealSaS inference classes.
+A subject failure is evidence about the generic system, not permission for a per-character production rescue branch.
 
-## Self-hosted execution safety
+## Graphics consumption rule
 
-Known runner: `realsas-wsl-1660ti`, labels `[self-hosted, linux, x64, realsas]`.
+A learned or serialized field is not automatically behaviorally consumed. Use explicit states such as `BEHAVIORALLY_USED`, `TRANSPORT_ONLY`, or `UNCONSUMED`; avoid ambiguous “consumed”.
 
-On 2026-10-18, bringing the runner online caused queued stale run `39121291171` / prepare #22 on `research/iris-vnext-single-carrier-graphics@90c9c2f...` to start. The stale run locally sealed a source-bound preparation and then entered Drive persistence to `gdrive:RealSaS_Fit8_IRIS_vNext_20261016`. It was cancelled before round-trip SHA verification completed.
+Read `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json` before making runtime claims.
 
-Current source hardening:
+## Topology rule
 
-- `.github/workflows/iris_vnext_fit8_prepare_self_hosted_v1.yml` is retired and has no self-hosted/rclone write path;
-- `.github/workflows/iris_vnext_fit8_quarantine_audit_self_hosted_v2.yml` is manual-dispatch only, active-branch/exact-SHA bound and read-only;
-- `tools/iris_vnext/audit_fit8_preparation_snapshot_v1.py` can classify a remote snapshot but never authorizes its consumption;
-- the affected Drive path remains quarantined until explicit forensic verification and a separate regenerated/full-round-trip-qualified candidate exists.
-
-Therefore:
-
-- keep the runner offline by default;
-- only bring it online after deliberately dispatching the read-only quarantine audit on the exact final review SHA;
-- GitHub artifact `12137271848` remains forensic evidence only, not current authority;
-- never infer “remote exists = current preparation”.
-
-If an execution unexpectedly starts from a stale branch/head, stop it before persistence/promotion and record exact run/head/artifact impact in current state + ledger.
-
-## Compiler rule
-
-> Compiler may enforce admissible truth and global consistency; Compiler may not compensate for model incapacity or fabricate unavailable truth.
-
-Allowed:
-
-- exact validation;
-- IDs/hashes/addressing;
-- source-bound deterministic derivation;
-- global graph/constraint solving;
-- candidate selection;
-- exact contact/barycentric solves;
-- bounded numerical sanitation;
-- fail closed / abstain.
-
-Forbidden:
-
-- large topology/hole repair presented as model success;
-- semantic skin transfer hiding carrier drift;
-- invented hidden/amodal/presentation truth;
-- independent visual mesh;
-- subject-specific production rescue branches.
+TESSA training loss is not topology qualification. No topology PASS exists until an independent held-out court measures actual face validity, component error, boundary loops/holes, non-manifold behavior where meaningful, canonical-surface deviation, source support and held-out stability.
 
 ## Quality / PASS discipline
 
@@ -290,23 +234,23 @@ ELIGIBLE_FOR_COURT
 COURT_PASS
 ```
 
-`COURT_PASS` requires an authoritative target, held-out metric, preregistered metric-specific threshold and required non-regression.
+`COURT_PASS` requires authoritative target, held-out metric, preregistered metric-specific threshold and required non-regression. Thresholds may not be changed after seeing results.
 
-Historical `~0.05` p95 expectations are planning context only for genuinely comparable normalized residuals. They are not a universal threshold. Do not normalize `0.1–0.2` residuals into success merely because a schedule ended.
+## Relation lane
+
+Relation V10 is **parked, not cancelled**. Do not context-switch back to it while H-REP-P0 is unresolved. Preserve its separate Truth-V3/all-hit/ray-stack readiness boundary.
+
+## Self-hosted execution safety
+
+Known runner: `realsas-wsl-1660ti`, labels `[self-hosted, linux, x64, realsas]`.
+
+Keep it offline by default. Historical stale-run Drive snapshots remain forensic evidence only unless explicitly requalified. If execution unexpectedly starts from a stale branch/head, stop it before persistence/promotion and record exact run/head/artifact impact.
 
 ## Platform-first execution
 
 For stateful research/product work, read `docs/platform/EXECUTION_LANES.md` and use the Go Platform/`realsasctl` Attempt flow where supported.
 
-Colab/A100 and self-hosted Actions are compute/execution workers, not authority. Checkpoints/receipts become authoritative only after the owning Platform/Compiler path validates and binds them.
-
-For Fit8/campaign work, also read:
-
-- `canonical/FIT8_PLATFORM_CAMPAIGN_V1.json`
-- `docs/platform/FIT8_PLATFORM_CAMPAIGN.md`
-- `docs/corpus/FIT8_ADMISSION.md`
-
-A subject failure is evidence about the generic system, not permission for a per-character production rescue branch.
+Colab/A100 and self-hosted Actions are compute workers, not authority. Checkpoints/receipts become authoritative only after the owning scientific/Platform path validates and binds them.
 
 ## Source-work exit rule
 
@@ -321,7 +265,7 @@ Every meaningful architectural/training change must leave a recoverable record o
 7. what it replaces or falsifies;
 8. next action.
 
-Update `CURRENT_STATE.md`, `CURRENT_PLAN.md` and the decision ledger whenever interpretation changes. Keep the repo more current than the conversation, never the reverse.
+Update `CURRENT_STATE.md`, `CURRENT_PLAN.md`, `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json` and the active decision ledger whenever interpretation changes. Keep the repo more current than the conversation, never the reverse.
 
 ## Claim discipline
 

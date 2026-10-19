@@ -5,7 +5,7 @@
 **Post-V8 base:** `research/iris-vnext-post-v8-quality-plan-20261018`  
 **Active architecture/evidence branch:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
 **Review vehicle:** draft PR #122 — `IRIS: TESSA V2 structuralization + geometry-explicit evidence redesign`  
-**Scientific status:** **NO GLOBAL IRIS FIT8 PASS / NO TESSA PASS / V9 HAS SCOPED RELATION PASS ONLY**  
+**Scientific status:** **NO GLOBAL IRIS FIT8 PASS / NO TESSA PASS / RAW-FIELD SPARSE A-ARM FALSIFIED ON SNAKE / NATIVE V8 SURFACE CONTROL PENDING**  
 **Training authorization:** **NO NEW OPTIMIZER STEP AUTHORIZED**
 
 ## 1. Authority separation
@@ -16,6 +16,7 @@
 4. PR #122 is review/research source only.
 5. Green CI proves source contracts, not scientific quality.
 6. Model evidence, Compiler qualification and product canonical state remain separate authorities.
+7. The 2026-10-19 Snake sparse failure is a real scientific falsification of one post-V8 extraction adaptation, not a V8 checkpoint mutation.
 
 ## 2. Preserved product invariants
 
@@ -43,7 +44,7 @@ Earned V8 interpretation:
 - this does **not** establish a global Fit8 scientific PASS;
 - topology loss reduction is not an independent topology qualification court.
 
-Default remains: do not reopen H merely because one specialist path is weak.
+Default remains: do not reopen H merely because one specialist/extraction transition is weak.
 
 ## 4. V9 focused relation — completed scoped result
 
@@ -62,7 +63,7 @@ Interpretation:
 
 - clean camera-conditioned projected-boundary truth is genuinely learnable from the sealed V8 representation/path;
 - V9 does not prove ordering solved;
-- V9 visibility targets duplicated pair orientation (`visA=front`, `visB=1-front`) and do not establish complete-stack visibility;
+- V9 visibility targets duplicated pair orientation and do not establish complete-stack visibility;
 - weak V9 ordering does not by itself prove raw H lacks order information because V9 retained the historical frozen 384→64 relation embedding.
 
 ## 5. Relation redesign state
@@ -127,7 +128,6 @@ TESSA V2 source defaults:
 - `512` scene + `512` surface/mechanics memory tokens;
 - exact local causal context `4096`;
 - causal global structural-history summaries;
-- AMT-compatible adjacency-aware grammar retained;
 - strict free-running grammar/generator;
 - independent decoded-mesh topology court;
 - token CE + coordinate metric + structural-token objective.
@@ -136,129 +136,166 @@ These are research defaults, not mobile runtime promises and not demonstrated 32
 
 ## 8. Why TESSA remains optional
 
-StdGEN++-class and MeshAnything-class ideas solve different problems:
+IRIS/StdGEN++-class surface reconstruction and TESSA/MeshAnything-class structuralization solve different problems.
 
-- IRIS/StdGEN++ side: high-fidelity continuous/sparse surface reconstruction, geometric/raster supervision, thin-structure continuity;
-- TESSA/MeshAnything side: explicit structural connectivity / production-style retopology prior.
-
-Therefore TESSA survives only if an A/B court proves value:
+TESSA survives only if an A/B court proves value:
 
 ```text
-A = same IRIS evidence → direct high-res surface → Compiler
-B = same IRIS evidence → TESSA V2 → Compiler
+A = same IRIS evidence → qualified direct surface witness → Compiler
+B = same IRIS evidence/witness → TESSA V2 → Compiler
 ```
 
 If A qualifies and B adds no meaningful topology/face-economy value, policy prefers A.
 
-## 9. Direct high-resolution surface baseline — source implemented
+## 9. Raw-field sparse T512→T1024 A-arm — FALSIFIED
 
-The selected historical sparse decoder has been connected to vNext/V8 field authority:
+Historical sparse decoder candidate:
 
 `RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT.v5`
 
-Scientific baseline policy is fixed:
+The adapter deliberately used exact completed V8, raw `scene_core.query()["field"]`, identity coordinates/sign, FP32/no-autocast, no extraction delta and no TESSA.
 
-- T512 coarse grid;
-- sparse T1024 refinement;
-- no hidden deformation;
-- normalized coordinate identity;
-- raw learned field sign identity;
-- no `extraction_delta` or uncalibrated uncertainty mixed into the A-arm baseline;
-- FP32 / no autocast.
+A100 engineering preflight passed. Full scientific materialization then failed on the first subject, Snake, at execution source:
 
-Reduced grids exist only in unit tests. The scientific CLI provides no grid-resolution override.
+`d9701923b2c19bd1c9b9771fe071bb92264a041d`
 
-Important compatibility correction already implemented:
+Failure:
 
-- historical V8 `IRISVNextV1` uses `model.scene_core.query()`;
-- post-redesign V3 can use `model.query_local()`;
-- the sparse adapter supports both but the direct A arm explicitly uses exact historical V8, not a V3 migration.
+```text
+stage: INDEXED_MT_BUILD_AND_NORMALS
+exception: SparseSurfaceTruncationError
+message: SPARSE_SHELL_TRUNCATES_ZERO_SURFACE:62735467 boundary crossing tetrahedra
+```
 
-## 10. Exact direct-surface input binding
+Preserved diagnostics:
 
-Machine-readable authority:
+- coarse field min/max: `-0.3515409529 / 0.5678277612`;
+- coarse zero bracket: `true`;
+- T512 query points: `135,005,697`;
+- refined coarse cells: `6,525,575` (`~4.8619%` of T512 cells);
+- candidate fine tetrahedra: `313,227,600`;
+- crossing tetrahedra: `95,514,148`;
+- conservative boundary-crossing tetrahedra: `62,735,467`;
+- exact faces counted before fail-closed truncation: `125,076,400`;
+- fine field min/max: `-0.1913980544 / 0.2545053363`;
+- fine zero bracket: `true`.
 
-`canonical/VNEXT_DIRECT_SURFACE_INPUT_BINDING_V1.json`
+Interpretation:
 
-Prepared observations are read-only reuse of the sealed V9 V4 cohort:
+- this is **not** a CUDA/resource failure;
+- do not widen the refinement band after observing this result;
+- do not disable `fail_on_boundary_crossing`;
+- do not force the ~125M-face raw zero-field candidate through as a success;
+- the conservative boundary counter may overcount literal shell intersections because it flags crossings in boundary-parent coarse cells, but the overall raw-field complexity is independently large;
+- the result falsifies the **raw V8 scalar field + historical distance-like sparse selector** as the current direct A-arm baseline.
 
-- preparation source `7029ee3f48787aa9f7e27eecef89155eb9368a96`;
+It does **not** yet falsify sealed H or V8's native learned FlexiCubes witness.
+
+## 10. Why the previous A-arm definition drifted from V8-trained surface semantics
+
+V8 G2 did not supervise the raw zero-field surface alone. The trained extraction path is:
+
+```text
+R24 regular grid
+        ↓
+V8 query_evidence
+        ↓
+field + H + learned extraction_delta
+        ↓
+learned 21-D cube parameters from cube_extraction(H corners)
+        ↓
+pinned FlexiCubes
+        ↓
+extracted surface witness
+        ↓
+teacher-surface Chamfer + FlexiCubes deviation/L1
+```
+
+Therefore the failed raw-field T512/T1024 experiment is clean falsification evidence, but it is not the native V8 surface witness promised by the architectural A/B plan.
+
+## 11. Native V8 FlexiCubes control — source implemented, runtime pending
+
+New source:
+
+- `tools/iris_vnext/audit_v8_raw_field_sparse_compatibility_v1.py` — preserved T512 raw-field compatibility forensics; no model re-query and no failure override;
+- `tools/iris_vnext/materialize_fit8_v8_native_flexicubes_v1.py` — exact V8 native R24 trained extraction witness;
+- `tools/iris_vnext/audit_fit8_v8_native_flexicubes_control_v1.py` — independent sealed-V4 geometry + exact Stage01 eight-view mask measurement;
+- `tests/iris/test_v8_surface_control_v1.py` — distance-like vs oscillatory field diagnostics and native cube-head path source tests.
+
+Native control semantics:
+
+- exact V8 checkpoint/scene planes;
+- exact training resolution `R24`;
+- exact learned field;
+- exact learned `extraction_delta`;
+- exact learned 21-D FlexiCubes cube parameters;
+- pinned upstream FlexiCubes commit;
+- FP32/no-autocast;
+- no teacher input in inference forward;
+- no TESSA;
+- zero optimizer steps;
+- measurement only;
+- `high_resolution_capability_claimed = false`.
+
+## 12. High-resolution transition is now an open design debt
+
+No naive R24→T1024 reuse of V8 `extraction_delta` is authorized.
+
+`maximum_extraction_delta = 0.03` is an absolute normalized displacement. Relative to the grid it is sub-cell scale at R24 but many fine cells at T1024. The learned cube parameters and deformation semantics therefore need an explicit resolution-aware transition rather than blind supersampling.
+
+The next design decision depends on the native R24 control:
+
+```text
+native R24 control good
+        → sealed H/native V8 surface likely retained
+        → redesign high-resolution transition/field regularity/extraction semantics
+
+native R24 control bad
+        → reopen geometry/extraction quality workstream
+        → still do not reopen H without a dedicated carrier falsification court
+```
+
+## 13. Exact input authority remains unchanged
+
+`canonical/VNEXT_DIRECT_SURFACE_INPUT_BINDING_V1.json` still binds the exact Stage01, sealed V4 prepared cohort and immutable V8 checkpoint bytes.
+
+Its historical T512/T1024 purpose now records a **falsified experiment**; it must not be silently reinterpreted as a successful A-arm baseline.
+
+Prepared cohort:
+
+- source `7029ee3f48787aa9f7e27eecef89155eb9368a96`;
 - manifest schema `RealSaS.IRISVNextFit8Manifest.v4`;
-- manifest SHA256 `6561bf2087f4fac3699c673b5c93fb3d8dbc2d1ff90a5065d976cae70688b4d8`;
-- 8 bound shard file IDs + SHA256 values;
-- exact V8 checkpoint file ID + SHA256.
+- manifest SHA256 `6561bf2087f4fac3699c673b5c93fb3d8dbc2d1ff90a5065d976cae70688b4d8`.
 
-Read-only hydration source:
+Stage01 bundle SHA256:
 
-`tools/iris_vnext/hydrate_fit8_direct_surface_inputs_v1.py`
+`9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936`
 
-It verifies bytes, manifest rows and preparation receipt. It has no remote write path and authorizes no training.
-
-## 11. Direct-surface execution source
-
-Implemented:
-
-- `models/iris/vnext/sparse_surface_v3.py` — exact field→T512/T1024 adapter and candidate receipt;
-- `tools/iris_vnext/hydrate_fit8_direct_surface_inputs_v1.py` — exact read-only input hydration;
-- `tools/iris_vnext/preflight_fit8_direct_surface_a100_v1.py` — A100-class engineering-only probe;
-- `tools/iris_vnext/materialize_fit8_direct_surface_v1.py` — 8-subject full-resolution materializer;
-- unit/source contracts that forbid reduced scientific resolution and prove exact-V8 query API compatibility.
-
-A100 preflight semantics:
-
-- exact V8 + one real prepared scene;
-- exact production field-query chunk;
-- no reduced-resolution mesh;
-- no quality verdict;
-- minimum 39 GiB CUDA-memory admission envelope;
-- resource/throughput result only.
-
-## 12. Direct-surface scientific state
-
-**No full direct-surface artifact has been executed yet on this branch.**
-
-Therefore currently absent:
-
-- 8/8 full T512→T1024 surface receipts;
-- source-fidelity mask/depth/normal/surface-distance court;
-- direct-surface Compiler qualification;
-- G5/multiview direct-surface court;
-- G3/authored-motion direct-surface court;
-- sealed A-arm baseline.
-
-Source-contract green must never be reported as those results.
-
-## 13. Current execution threshold
+## 14. Current execution threshold
 
 Exact next state machine:
 
 ```text
-FINAL SOURCE GATE ON CURRENT PR HEAD
+GREEN SOURCE HEAD WITH NATIVE CONTROL TOOLS
         ↓
-READ-ONLY INPUT HYDRATION
+RUN PRESERVED SNAKE T512 RAW-FIELD COMPATIBILITY FORENSIC
         ↓
-BYTE/HASH/LINEAGE RECEIPT PASS
+MATERIALIZE EXACT V8 NATIVE R24 FLEXICUBES WITNESSES FOR FIT8
         ↓
-A100-CLASS ENGINEERING PREFLIGHT
+RUN SEALED-V4 GEOMETRY + EXACT STAGE01 64-VIEW MASK CONTROL
         ↓
-FULL FIT8 T512→T1024 MATERIALIZATION
+DECIDE: NATIVE SURFACE DEBT vs HIGH-RES TRANSITION DEBT
         ↓
-8/8 MODEL-ONLY SURFACE RECEIPTS
+DEFINE / PREREGISTER CORRECTED HIGH-RES DIRECT A-ARM
         ↓
-SOURCE-FIDELITY + COMPILER/G5/G3 COURTS
-        ↓
-DIRECT A-ARM SEALED
-        ↓
-TESSA V2 TRAINING READINESS
+ONLY AFTER A-ARM READINESS → TESSA V2 TRAINING READINESS
 ```
 
-TESSA optimizer steps are premature before the A arm exists.
+TESSA optimizer steps remain premature.
 
-## 14. Parallel post-V8 relation workstream
+## 15. Parallel post-V8 relation workstream
 
-The surface/TESSA work does not cancel the relation evidence program.
-
-Relation V10 remains blocked on:
+Relation V10 remains separately blocked on:
 
 - exact all-hit relation evidence support;
 - authored-motion conditioning disposition;
@@ -270,17 +307,11 @@ Relation V10 remains blocked on:
 
 Do not mix relation V10 authorization with TESSA/surface authorization.
 
-## 15. Required read order
+## 16. Required read order
 
 1. `CURRENT_STATE.md`
 2. `CURRENT_PLAN.md`
 3. `docs/research/IRIS_TESSA_V2_STRUCTURALIZATION_PLAN_20261019.md`
-4. `docs/research/IRIS_DIRECT_SURFACE_BASELINE_EXECUTION_PLAN_20261019.md`
-5. `docs/research/IRIS_TESSA_V2_DECISION_LEDGER_20261019.md`
+4. `docs/research/IRIS_TESSA_V2_DECISION_LEDGER_20261019.md`
+5. `docs/research/IRIS_VNEXT_POST_V8_QUALITY_PLAN_20261018.md`
 6. `docs/research/IRIS_V9_FOCUSED_RELATION_RESULT_20261019.json`
-7. `docs/research/IRIS_VNEXT_POST_V8_QUALITY_PLAN_20261018.md`
-8. `docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md`
-9. `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`
-10. `docs/research/IRIS_VNEXT_DECISION_LEDGER_20261018.md`
-11. `AGENTS.md`
-12. `SYSTEM_INDEX.md`

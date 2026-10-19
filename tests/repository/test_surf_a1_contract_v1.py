@@ -43,7 +43,7 @@ class SurfA1RepositoryContractTests(unittest.TestCase):
         self.assertEqual(len(b["authored_teachers"]["subjects"]), 8)
         self.assertEqual(b["authored_teachers"]["batch_receipt"]["sha256"], "37b203f9c16e1a5dddbab1709ebb3806e486d66d1ed5b48a42817bc0044a7843")
         self.assertTrue(b["transport_policy"]["sha256_is_authority"])
-        self.assertFalse(b["transport_policy"]["mounted_path_is_not_authority"] is False)
+        self.assertTrue(b["transport_policy"]["mounted_path_is_not_authority"])
 
 
 if __name__ == "__main__":

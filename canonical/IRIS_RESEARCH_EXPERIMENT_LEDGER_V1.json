@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.IRISResearchExperimentLedger.v1",
-  "date_utc": "2026-10-19",
+  "date_utc": "2026-10-20",
   "purpose": "SINGLE_MACHINE_READABLE_CONTINUATION_AUTHORITY_FOR_POST_V8_IRIS_TESSA_RESEARCH",
   "production_authority": "main",
   "review_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
@@ -14,10 +14,8 @@
     "fit8_is_unseen_generalization": false
   },
   "active_lane": "SURFACE_TESSA",
-  "active_experiment": "H-REP-P0",
-  "parked_lanes": [
-    "RELATION_V10"
-  ],
+  "active_experiment": "H-GEO-P2-SCENE-FIELD",
+  "parked_lanes": ["RELATION_V10"],
   "immutable_model_authority": {
     "model": "IRIS_V8",
     "source_commit": "5083c9915533ec8ec6530c7d229c635887abfea7",
@@ -33,7 +31,6 @@
       "status": "FALSIFIED",
       "apparatus_source_sha": "d9701923b2c19bd1c9b9771fe071bb92264a041d",
       "result_sha256": "39f222729e9215c544ea52a5f333f59d568fd00e9c4c737b69104550637bb502",
-      "result": "EXACT_V8_RAW_FIELD_PLUS_HISTORICAL_DISTANCE_LIKE_T512_T1024_SPARSE_SELECTOR_IS_NOT_A_VALID_DIRECT_A_ARM",
       "optimizer_steps_executed": 0,
       "next_gate": "PRESERVE_AS_FALSIFICATION_ONLY"
     },
@@ -41,9 +38,6 @@
       "id": "SURF-C0-NATIVE-R24",
       "kind": "NATIVE_V8_CONTROL",
       "status": "MEASURED_DIAGNOSTIC",
-      "apparatus_source_sha": "ccb71011f41b041bc5c137544bc1b97ca394ea9c",
-      "drive_evidence_root": "RealSaS_IRIS_TESSA_V2_FIT8_20261019/ccb71011f41b/V5_NATIVE_V8_CONTROL",
-      "batch_receipt_sha256": "a83c0c466d5251c8cc1bc13475866c766c4796e7b0b08c7b96d031c0662667de",
       "control_court_sha256": "656f674e12cf3a4ffe79fd16dd25f8ffe4949f736a8e39c9dcd4987df19f3617",
       "global_measurements": {
         "mean_subject_mask_iou": 0.5605675253734139,
@@ -52,10 +46,7 @@
         "maximum_mask_gap_px": 392.42069262463724,
         "mean_symmetric_chamfer_distance_iris": 0.06120461101817451
       },
-      "diagnosis": "NATIVE_V8_SURFACE_QUALITY_DEBT_PRESENT__HIGH_RESOLUTION_TRANSITION_DEBT_REMAINS_OPEN",
       "scientific_pass_claimed": false,
-      "high_resolution_capability_claimed": false,
-      "optimizer_steps_executed": 0,
       "next_gate": "SURF-A1-FROZEN-H"
     },
     {
@@ -63,101 +54,90 @@
       "kind": "SURFACE_RESCUE_CAPACITY_EXPERIMENT",
       "status": "SCIENTIFIC_FAIL",
       "execution_source_sha": "afc18debbc4d5858a4a632884b7cfd2141dcc35a",
-      "hypothesis": "SEALED_V8_H_CONTAINS_SUFFICIENT_GEOMETRIC_EVIDENCE_FOR_A_NEW_RESOLUTION_AWARE_RASTER_SUPERVISED_SURFACE_DECODER",
       "scene_core_trainable": false,
       "teacher_truth_in_inference_forward": false,
-      "compiler_rescue_allowed": false,
       "tessa_invoked": false,
-      "preflight": {
-        "drive_file_id": "12rEV36p_qTdzIkbmlszrTNouuj862aOr",
-        "sha256": "0fd889134164ee0cb80bf05d3409967ce5a37ff2f9f2c38b41a7218c2392ce75",
-        "status": "PASS_SURF_A1_A100_PREFLIGHT__TRAINING_AUTHORIZED",
-        "hard_raster_parity_views": 64,
-        "minimum_precision": 1.0,
-        "minimum_recall": 1.0,
-        "zero_step_native_r24_faces_exact_8_of_8": true
-      },
-      "training": {
-        "drive_file_id": "1fI6CXDFgmvTTZARo3aAjQm0ubfsVORVm",
-        "sha256": "9d5ac2f01b5e84d8a9c91e93008dfd2a50a7a8908b0626950e4d11a43d918123",
-        "optimizer_steps_executed": 2400,
-        "final_resolution": 48,
-        "final_checkpoint_sha256": "431b29030722fa69b51d037d2a6b39dc1d4857c9d0cd9d2a5aad8c13ba37d04a"
-      },
       "independent_court": {
-        "drive_file_id": "1eptd5tfwI74FHvaUkD--Rias0DOgMLCa",
         "sha256": "a8c4070a126edaddd602853c62b3e2b58335ef2fb62750c52f088ef8e15e631e",
         "status": "SCIENTIFIC_FAIL_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE",
-        "gates_passed": [
-          "MINIMUM_SUBJECT_MEAN_MASK_IOU",
-          "MINIMUM_VIEW_MASK_IOU",
-          "NONMANIFOLD_EDGES",
-          "ZERO_AREA_FACES"
-        ],
-        "gates_failed": [
-          "GLOBAL_MEAN_SUBJECT_MASK_IOU",
-          "MAXIMUM_GLOBAL_MASK_GAP_PX",
-          "MEAN_SYMMETRIC_CHAMFER",
-          "MINIMUM_SUBJECT_MEAN_ABSOLUTE_NORMAL_ALIGNMENT",
-          "PER_SUBJECT_TEACHER_TO_CANDIDATE_P95"
-        ],
         "global_measurements": {
           "mean_subject_mask_iou": 0.7795254327050275,
-          "minimum_subject_mask_iou": 0.6790115284210942,
-          "minimum_view_mask_iou": 0.6521258770935006,
           "maximum_mask_gap_px": 258.6600085053737,
           "mean_symmetric_chamfer_distance_iris": 0.043048756610927164,
           "maximum_subject_teacher_to_candidate_p95_distance_iris": 0.11117027121264922,
           "minimum_subject_mean_absolute_normal_alignment": 0.5782190561294556
         }
       },
-      "interpretation": "SUBSTANTIAL_RESCUE_VS_NATIVE_C0_BUT_PREREGISTERED_QUALIFICATION_NOT_EARNED__ISOLATE_LOCAL_REPRESENTATION_DECODABILITY_BEFORE_CARRIER_RETRAINING",
       "scientific_pass_claimed": false,
       "next_gate": "H-REP-P0"
     },
     {
       "id": "H-REP-P0",
       "kind": "SEALED_V8_LOCAL_GEOMETRY_REPRESENTATION_DIAGNOSTIC",
-      "status": "SOURCE_GREEN__A100_RUN_PENDING",
+      "status": "SCIENTIFIC_FAIL",
       "frozen_execution_source_sha": "479e8e53cf0d7df234a3e64b824bb704b861bf19",
-      "source_gate": {
-        "vehicle": "PR_124",
-        "iris_h_rep_p0_source_gate_run_id": 39328166614,
-        "model_mainline_source_gate_run_id": 39328166550,
-        "iris_tessa_v2_structuralization_source_gate_run_id": 39328166521,
-        "iris_v2_source_contract_run_id": 39328166542,
-        "architecture_freeze_source_gate_run_id": 39328166544,
-        "all_required_source_gates_green": true
+      "scientific_result_available": true,
+      "result": "H_LOCAL_ALIGNMENT_STRONGLY_PRESENT_BUT_ABSOLUTE_METRIC_GEOMETRY_GATES_NOT_EARNED",
+      "aggregate": {
+        "h_mean_distance_mae_iris": 0.04528,
+        "h_mean_near_balanced_accuracy": 0.7684,
+        "shuffled_h_mean_distance_mae_iris": 0.13005,
+        "xyz_mean_distance_mae_iris": 0.12911
       },
-      "question": "IS_LOCAL_SURFACE_GEOMETRY_DECODABLE_FROM_SEALED_V8_H_OR_RAW_FIELD_WITHOUT_MESH_EXTRACTION",
-      "probe_arms": [
-        "H_XYZ",
-        "RAW_FIELD_XYZ",
-        "XYZ_ONLY",
-        "SHUFFLED_H_XYZ"
-      ],
-      "same_parameter_count_all_arms": true,
-      "exact_resume_sampler": "RealSaS.HRepP0StepSeededSampler.v1",
-      "scene_core_trainable": false,
       "teacher_truth_in_probe_input": false,
       "mesh_extraction_invoked": false,
       "tessa_invoked": false,
-      "input_binding": "canonical/H_REP_P0_INPUT_BINDING_V1.json",
-      "preregistration": "canonical/H_REP_P0_PREREGISTRATION_V1.json",
-      "notebook_revision": "NB-r1",
-      "notebook_scientific_authority": false,
+      "tessa_authorized": false,
+      "next_gate": "H-GEO-P1"
+    },
+    {
+      "id": "H-GEO-P1",
+      "kind": "EXACT_TRIANGLE_METRIC_CARRIER_RETRAINING_FIELD_ONLY_CONTROL",
+      "status": "SCIENTIFIC_FAIL",
+      "execution_source_sha": "4a4236db120ffec32dc33d278341e21f58d93529",
+      "result_authority": "docs/research/IRIS_H_GEO_P1_RESULT_20261020.json",
+      "dataset_receipt_sha256": "6c27974a03e9f202adeda1b25f642d95006dcca7cbbf0ceb660484ea91c78dc5",
+      "training_checkpoint_sha256": "2f73a783391a16f09d12e50f240c0fbaaae40f0e044d1546bf12590eba0c5e5d",
+      "independent_court_sha256": "975c8ab13a178d17eca1557bd3670fbae752fe33a508c8c207812b0a5f23a620",
+      "optimizer_steps_executed": 3600,
+      "aggregate": {
+        "p1_mean_distance_mae_iris": 0.03320289263501763,
+        "p1_maximum_subject_endpoint_p95_iris": 0.10369804501533508,
+        "p1_minimum_subject_normal_alignment": 0.6691970825195312,
+        "p1_minimum_subject_near_balanced_accuracy": 0.747372955083847
+      },
+      "absolute_gates_passed": false,
+      "vs_v8_distance_near_normal_improved": true,
+      "vs_v8_endpoint_improvement_gate_passed": false,
+      "scientific_pass_claimed": false,
+      "tessa_authorized": false,
+      "next_gate": "H-GEO-P2-SCENE-FIELD"
+    },
+    {
+      "id": "H-GEO-P2-SCENE-FIELD",
+      "kind": "EXISTING_V8_ARCHITECTURE_SCENE_PLUS_FIELD_METRIC_GEOMETRY_CONTROL",
+      "status": "SOURCE_PREPARATION",
+      "question": "CAN_EXISTING_V8_ARCHITECTURE_REACH_METRIC_GEOMETRY_WHEN_SCENE_AND_FIELD_ARE_JOINTLY_SUPERVISED_WITH_EXACT_P1_TRIANGLE_TRUTH",
+      "base_initialization": "EXACT_V8_NOT_P1",
+      "architecture_expansion": false,
+      "trainable_existing_modules": ["scene_core.scene", "scene_core.field"],
+      "p1_dataset_reused_byte_exact": true,
+      "p1_checkpoint_initialization_allowed": false,
+      "input_binding": "canonical/H_GEO_P2_INPUT_BINDING_V1.json",
+      "preregistration": "canonical/H_GEO_P2_PREREGISTRATION_V1.json",
+      "source_gate_vehicle": "PR_126",
       "a100_run_started": false,
       "scientific_result_available": false,
-      "pass_next_gate": "DESIGN_EXTRACTION_TRANSITION_ALTERNATIVE__DO_NOT_RETRAIN_H_YET",
-      "fail_next_gate": "PREREGISTER_CARRIER_REPRESENTATION_RETRAINING_EXPERIMENT",
       "surf_a2_authorized": false,
-      "tessa_authorized": false
+      "tessa_authorized": false,
+      "pass_next_gate": "DESIGN_NEW_HIGH_RES_DIRECT_SURFACE_EXPERIMENT_FROM_EXISTING_IRIS_ARCHITECTURE",
+      "fail_next_gate": "PREREGISTER_EXPLICIT_GEOMETRY_CARRIER_BRANCH_EXPERIMENT"
     },
     {
       "id": "SURF-A2-HIRES",
       "kind": "QUALIFIED_HIGH_RESOLUTION_DIRECT_A_ARM",
-      "status": "BLOCKED_ON_H_REP_P0_AND_NEW_DIRECT_SURFACE_DECISION",
-      "next_gate": "H_REP_P0_RESULT"
+      "status": "BLOCKED_ON_H_GEO_P2_AND_DIRECT_SURFACE_DECISION",
+      "next_gate": "H-GEO-P2-SCENE-FIELD_RESULT"
     },
     {
       "id": "TESSA-V2-B1",
@@ -173,15 +153,13 @@
     }
   ],
   "fit8_program_role": {
-    "subject_diversity_only": false,
     "system_contract_qualification": true,
-    "goal": "FORCE_SHARED_MODEL_COMPILER_AND_RUNTIME_INTERFACES_TOWARD_SUBJECT_AGNOSTIC_GENERIC_BEHAVIOR_BEFORE_LARGE_UNSEEN_CAMPAIGNS",
-    "unseen_scale_target_context": "FUTURE_LARGE_UNSEEN_CAMPAIGNS__FIT8_DOES_NOT_CLAIM_THEM"
+    "unseen_generalization_claimed": false
   },
   "naming_policy": {
     "model_versions": "IRIS-V8_IRIS-V9-R_IRIS-V10-R",
     "surface_experiments": "SURF-A0_SURF-C0_SURF-A1_SURF-A2",
-    "representation_diagnostics": "H-REP-P0_H-REP-P1",
+    "representation_experiments": "H-REP-P0_H-GEO-P1_H-GEO-P2",
     "tessa_experiments": "TESSA-V2-B1",
     "notebook_revisions": "NB-rN__NEVER_REUSE_MODEL_VNUMBERS"
   }

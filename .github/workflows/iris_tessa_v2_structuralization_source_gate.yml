@@ -15,6 +15,7 @@ on:
       - tools/iris_vnext/materialize_fit8_direct_surface_v1.py
       - tools/iris_vnext/hydrate_fit8_direct_surface_inputs_v1.py
       - tools/iris_vnext/preflight_fit8_direct_surface_a100_v1.py
+      - tools/iris_vnext/audit_fit8_direct_surface_geometry_v1.py
       - canonical/VNEXT_DIRECT_SURFACE_INPUT_BINDING_V1.json
       - tests/iris/test_tessa_structuralizer_v2.py
       - tests/iris/test_tessa_global_history_v2.py
@@ -28,6 +29,7 @@ on:
       - tests/iris/test_direct_surface_materialization_v1.py
       - tests/iris/test_direct_surface_input_binding_v1.py
       - tests/iris/test_direct_surface_a100_preflight_v1.py
+      - tests/iris/test_direct_surface_geometry_court_v1.py
       - docs/research/IRIS_TESSA_V2_STRUCTURALIZATION_PLAN_20261019.md
       - .github/workflows/iris_tessa_v2_structuralization_source_gate.yml
   workflow_dispatch:
@@ -101,6 +103,7 @@ jobs:
             tools/iris_vnext/materialize_fit8_direct_surface_v1.py \
             tools/iris_vnext/hydrate_fit8_direct_surface_inputs_v1.py \
             tools/iris_vnext/preflight_fit8_direct_surface_a100_v1.py \
+            tools/iris_vnext/audit_fit8_direct_surface_geometry_v1.py \
             tests/iris/test_tessa_structuralizer_v2.py \
             tests/iris/test_tessa_global_history_v2.py \
             tests/iris/test_tessa_decoded_court_v2.py \
@@ -112,7 +115,8 @@ jobs:
             tests/iris/test_sparse_surface_v3.py \
             tests/iris/test_direct_surface_materialization_v1.py \
             tests/iris/test_direct_surface_input_binding_v1.py \
-            tests/iris/test_direct_surface_a100_preflight_v1.py
+            tests/iris/test_direct_surface_a100_preflight_v1.py \
+            tests/iris/test_direct_surface_geometry_court_v1.py
           echo "IRIS_TESSA_V2_COMPILE_PASS"
 
       - name: Verify reference-capacity and authority boundary
@@ -161,7 +165,8 @@ jobs:
             tests/iris/test_sparse_surface_v3.py \
             tests/iris/test_direct_surface_materialization_v1.py \
             tests/iris/test_direct_surface_input_binding_v1.py \
-            tests/iris/test_direct_surface_a100_preflight_v1.py
+            tests/iris/test_direct_surface_a100_preflight_v1.py \
+            tests/iris/test_direct_surface_geometry_court_v1.py
           echo "IRIS_TESSA_V2_ARCHITECTURE_TEST_PASS"
 
       - name: Run historical relation and TESSA regressions

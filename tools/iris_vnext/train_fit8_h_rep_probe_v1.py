@@ -21,14 +21,10 @@ from models.iris.vnext.h_rep_probe_v1 import (
     build_probe_input_v1,
     h_rep_probe_objective_v1,
 )
+from tools.iris_vnext.h_rep_probe_authority_v1 import git_head, load_json, sha256_file
 from tools.iris_vnext.h_rep_probe_runtime_v1 import (
     cache_frozen_v8_probe_features_v1,
     load_h_rep_binding_v1,
-)
-from tools.iris_vnext.materialize_fit8_direct_surface_v1 import (
-    git_head,
-    load_json,
-    sha256_file,
 )
 
 SCHEMA = "RealSaS.HRepP0TrainingResult.v1"

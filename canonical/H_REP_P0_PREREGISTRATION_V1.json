@@ -15,16 +15,25 @@
   },
   "probe_arms": {
     "H_XYZ": "SEALED_LOCAL_H_PLUS_QUERY_XYZ",
-    "RAW_FIELD_XYZ": "SEALED_V8_RAW_FIELD_PLUS_QUERY_XYZ",
-    "XYZ_ONLY": "QUERY_XYZ_NEGATIVE_CONTROL",
+    "RAW_FIELD_XYZ": "SEALED_V8_RAW_FIELD_IN_CHANNEL_0_PLUS_ZERO_PADDED_EVIDENCE_ENVELOPE_PLUS_QUERY_XYZ",
+    "XYZ_ONLY": "ZERO_EVIDENCE_ENVELOPE_PLUS_QUERY_XYZ_NEGATIVE_CONTROL",
     "SHUFFLED_H_XYZ": "WITHIN_SUBJECT_FIXED_PERMUTED_H_PLUS_QUERY_XYZ_LOCAL_ALIGNMENT_CONTROL"
   },
   "shared_probe_architecture": {
+    "evidence_envelope_dim": 384,
+    "xyz_dim": 3,
+    "input_dim_all_arms": 387,
     "width": 256,
     "residual_blocks": 2,
     "subject_id_input": false,
     "subject_specific_parameters": false,
-    "heads": ["POINT_CLOUD_DISTANCE", "OFFSET_TO_REFERENCE_POINT", "NORMAL_UP_TO_SIGN", "NEAR_SURFACE_LOGIT"]
+    "equal_parameter_count_across_arms": true,
+    "heads": [
+      "POINT_CLOUD_DISTANCE",
+      "OFFSET_TO_REFERENCE_POINT",
+      "NORMAL_UP_TO_SIGN",
+      "NEAR_SURFACE_LOGIT"
+    ]
   },
   "probe_truth": {
     "source": "SEALED_V4_TEACHER_SURFACE_POINTS_IRIS_PLUS_MECHANICAL_POINTS_NORMALS",

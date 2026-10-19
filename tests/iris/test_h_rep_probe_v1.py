@@ -74,12 +74,22 @@ def test_probe_objective_is_finite_and_backpropagates():
     assert any(p.grad is not None for p in model.parameters())
 
 
-def test_preregistration_keeps_controls_and_tessa_blocked():
+def test_preregistration_keeps_controls_runtime_and_tessa_blocked():
     path = Path("canonical/H_REP_P0_PREREGISTRATION_V1.json")
     value = json.loads(path.read_text())
     assert value["schema"] == "RealSaS.HRepP0Preregistration.v1"
     assert tuple(value["probe_arms"]) == PROBE_ARMS_V1
     assert value["shared_probe_architecture"]["equal_parameter_count_across_arms"] is True
+    runtime = value["runtime_admission"]
+    assert runtime["accelerator"] == "NVIDIA_A100_CLASS"
+    assert runtime["minimum_cuda_memory_gib"] == 39
+    assert runtime["source_precompile_required"] is True
+    assert runtime["optimizer_step_allowed_before_all_authority_gates"] is False
+    assert runtime["single_drive_mount_consent_required"] is True
+    assert runtime["drive_tree_discovery_allowed"] is False
+    assert runtime["additional_google_oauth_allowed"] is False
+    assert runtime["reduced_capacity_or_subject_fallback_allowed"] is False
     assert value["interpretation"]["pass_authorizes_tessa"] is False
     assert value["interpretation"]["pass_authorizes_surf_a2"] is False
+    assert value["interpretation"]["fail_authorizes_carrier_retraining"] is False
     assert value["heldout_court"]["thresholds_may_change_after_results"] is False

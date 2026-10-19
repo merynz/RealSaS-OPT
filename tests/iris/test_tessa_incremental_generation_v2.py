@@ -34,7 +34,7 @@ def _model():
     ).eval()
 
 
-def test_incremental_logits_match_full_prefix_across_global_history_boundary():
+def test_incremental_logits_match_autoregressive_prefix_recompute_across_history_boundary():
     model = _model()
     torch.manual_seed(11)
     scene = torch.randn(1, 9, 11)
@@ -42,14 +42,21 @@ def test_incremental_logits_match_full_prefix_across_global_history_boundary():
     memory = model.encode_memory(scene_source=scene, surface_source=surface)
     ids = torch.randint(0, model.config.vocab_size, (1, 15))
     with torch.no_grad():
-        full = model.decode_tokens(memory=memory, input_ids=ids).logits
         incremental = incremental_prefix_logits_v2(model, memory=memory, input_ids=ids)
-    # SDPA may accumulate tiny backend-dependent rounding differences; parity is
-    # about semantic equality, not bit identity.
-    assert torch.allclose(full, incremental, atol=2e-5, rtol=2e-5), (full - incremental).abs().max().item()
+        reference_rows = []
+        for end in range(1, ids.shape[1] + 1):
+            # Reference generation re-evaluates the whole prefix and consumes the
+            # final-position logits. That is the exact behavior the cache replaces.
+            reference_rows.append(
+                model.decode_tokens(memory=memory, input_ids=ids[:, :end]).logits[:, -1]
+            )
+        reference = torch.stack(reference_rows, dim=1)
+    assert torch.allclose(reference, incremental, atol=2e-5, rtol=2e-5), (
+        reference - incremental
+    ).abs().max().item()
 
 
-def test_incremental_path_rejects_local_only_model_shape_contract():
+def test_incremental_single_token_shape_contract():
     model = _model()
     memory = model.encode_memory(
         scene_source=torch.randn(1, 3, 11),

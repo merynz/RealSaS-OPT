@@ -19,14 +19,10 @@ from models.iris.vnext.h_rep_probe_v1 import (
     build_probe_input_v1,
     h_rep_probe_metrics_v1,
 )
+from tools.iris_vnext.h_rep_probe_authority_v1 import git_head, load_json, sha256_file
 from tools.iris_vnext.h_rep_probe_runtime_v1 import (
     cache_frozen_v8_probe_features_v1,
     load_h_rep_binding_v1,
-)
-from tools.iris_vnext.materialize_fit8_direct_surface_v1 import (
-    git_head,
-    load_json,
-    sha256_file,
 )
 
 SCHEMA = "RealSaS.HRepP0HeldoutCourt.v1"
@@ -190,18 +186,10 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
         aggregate[arm] = {
             "mean_distance_mae_iris": _mean(rows, "distance_mae_iris"),
             "maximum_subject_distance_mae_iris": _max(rows, "distance_mae_iris"),
-            "mean_distance_abs_error_p95_iris": _mean(
-                rows, "distance_abs_error_p95_iris"
-            ),
-            "maximum_subject_endpoint_error_p95_iris": _max(
-                rows, "endpoint_error_p95_iris"
-            ),
-            "minimum_subject_normal_absolute_dot_mean": _min(
-                rows, "normal_absolute_dot_mean"
-            ),
-            "minimum_subject_near_balanced_accuracy": _min(
-                rows, "near_balanced_accuracy"
-            ),
+            "mean_distance_abs_error_p95_iris": _mean(rows, "distance_abs_error_p95_iris"),
+            "maximum_subject_endpoint_error_p95_iris": _max(rows, "endpoint_error_p95_iris"),
+            "minimum_subject_normal_absolute_dot_mean": _min(rows, "normal_absolute_dot_mean"),
+            "minimum_subject_near_balanced_accuracy": _min(rows, "near_balanced_accuracy"),
             "mean_near_balanced_accuracy": _mean(rows, "near_balanced_accuracy"),
         }
     _require_finite_tree(aggregate, "aggregate")
@@ -216,47 +204,24 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
         return 1.0 - value / max(baseline, 1.0e-12)
 
     h_absolute = {
-        "mean_distance_mae": h["mean_distance_mae_iris"]
-        <= float(thresholds["maximum_h_mean_distance_mae_iris"]),
-        "max_subject_endpoint_p95": h["maximum_subject_endpoint_error_p95_iris"]
-        <= float(thresholds["maximum_h_subject_endpoint_p95_iris"]),
-        "min_subject_normal": h["minimum_subject_normal_absolute_dot_mean"]
-        >= float(thresholds["minimum_h_subject_normal_alignment"]),
-        "min_subject_near_ba": h["minimum_subject_near_balanced_accuracy"]
-        >= float(thresholds["minimum_h_subject_near_balanced_accuracy"]),
+        "mean_distance_mae": h["mean_distance_mae_iris"] <= float(thresholds["maximum_h_mean_distance_mae_iris"]),
+        "max_subject_endpoint_p95": h["maximum_subject_endpoint_error_p95_iris"] <= float(thresholds["maximum_h_subject_endpoint_p95_iris"]),
+        "min_subject_normal": h["minimum_subject_normal_absolute_dot_mean"] >= float(thresholds["minimum_h_subject_normal_alignment"]),
+        "min_subject_near_ba": h["minimum_subject_near_balanced_accuracy"] >= float(thresholds["minimum_h_subject_near_balanced_accuracy"]),
     }
     h_alignment = {
-        "distance_reduction_vs_xyz": reduction(
-            h["mean_distance_mae_iris"], xyz["mean_distance_mae_iris"]
-        )
-        >= float(thresholds["minimum_h_distance_mae_reduction_vs_xyz"]),
-        "distance_reduction_vs_shuffled": reduction(
-            h["mean_distance_mae_iris"], shuffled["mean_distance_mae_iris"]
-        )
-        >= float(thresholds["minimum_h_distance_mae_reduction_vs_shuffled"]),
-        "near_ba_gain_vs_xyz": h["mean_near_balanced_accuracy"]
-        - xyz["mean_near_balanced_accuracy"]
-        >= float(thresholds["minimum_h_near_ba_gain_vs_xyz"]),
-        "near_ba_gain_vs_shuffled": h["mean_near_balanced_accuracy"]
-        - shuffled["mean_near_balanced_accuracy"]
-        >= float(thresholds["minimum_h_near_ba_gain_vs_shuffled"]),
+        "distance_reduction_vs_xyz": reduction(h["mean_distance_mae_iris"], xyz["mean_distance_mae_iris"]) >= float(thresholds["minimum_h_distance_mae_reduction_vs_xyz"]),
+        "distance_reduction_vs_shuffled": reduction(h["mean_distance_mae_iris"], shuffled["mean_distance_mae_iris"]) >= float(thresholds["minimum_h_distance_mae_reduction_vs_shuffled"]),
+        "near_ba_gain_vs_xyz": h["mean_near_balanced_accuracy"] - xyz["mean_near_balanced_accuracy"] >= float(thresholds["minimum_h_near_ba_gain_vs_xyz"]),
+        "near_ba_gain_vs_shuffled": h["mean_near_balanced_accuracy"] - shuffled["mean_near_balanced_accuracy"] >= float(thresholds["minimum_h_near_ba_gain_vs_shuffled"]),
     }
     raw_absolute = {
-        "mean_distance_mae": raw["mean_distance_mae_iris"]
-        <= float(thresholds["maximum_raw_mean_distance_mae_iris"]),
-        "max_subject_endpoint_p95": raw["maximum_subject_endpoint_error_p95_iris"]
-        <= float(thresholds["maximum_raw_subject_endpoint_p95_iris"]),
-        "min_subject_normal": raw["minimum_subject_normal_absolute_dot_mean"]
-        >= float(thresholds["minimum_raw_subject_normal_alignment"]),
-        "min_subject_near_ba": raw["minimum_subject_near_balanced_accuracy"]
-        >= float(thresholds["minimum_raw_subject_near_balanced_accuracy"]),
-        "distance_reduction_vs_xyz": reduction(
-            raw["mean_distance_mae_iris"], xyz["mean_distance_mae_iris"]
-        )
-        >= float(thresholds["minimum_raw_distance_mae_reduction_vs_xyz"]),
-        "near_ba_gain_vs_xyz": raw["mean_near_balanced_accuracy"]
-        - xyz["mean_near_balanced_accuracy"]
-        >= float(thresholds["minimum_raw_near_ba_gain_vs_xyz"]),
+        "mean_distance_mae": raw["mean_distance_mae_iris"] <= float(thresholds["maximum_raw_mean_distance_mae_iris"]),
+        "max_subject_endpoint_p95": raw["maximum_subject_endpoint_error_p95_iris"] <= float(thresholds["maximum_raw_subject_endpoint_p95_iris"]),
+        "min_subject_normal": raw["minimum_subject_normal_absolute_dot_mean"] >= float(thresholds["minimum_raw_subject_normal_alignment"]),
+        "min_subject_near_ba": raw["minimum_subject_near_balanced_accuracy"] >= float(thresholds["minimum_raw_subject_near_balanced_accuracy"]),
+        "distance_reduction_vs_xyz": reduction(raw["mean_distance_mae_iris"], xyz["mean_distance_mae_iris"]) >= float(thresholds["minimum_raw_distance_mae_reduction_vs_xyz"]),
+        "near_ba_gain_vs_xyz": raw["mean_near_balanced_accuracy"] - xyz["mean_near_balanced_accuracy"] >= float(thresholds["minimum_raw_near_ba_gain_vs_xyz"]),
     }
 
     h_pass = all(h_absolute.values()) and all(h_alignment.values())
@@ -273,21 +238,12 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
         else "PREREGISTER_CARRIER_REPRESENTATION_RETRAINING_EXPERIMENT__DO_NOT_TRAIN_TESSA"
     )
     derived = {
-        "h_distance_mae_reduction_vs_xyz": reduction(
-            h["mean_distance_mae_iris"], xyz["mean_distance_mae_iris"]
-        ),
-        "h_distance_mae_reduction_vs_shuffled": reduction(
-            h["mean_distance_mae_iris"], shuffled["mean_distance_mae_iris"]
-        ),
-        "h_near_ba_gain_vs_xyz": h["mean_near_balanced_accuracy"]
-        - xyz["mean_near_balanced_accuracy"],
-        "h_near_ba_gain_vs_shuffled": h["mean_near_balanced_accuracy"]
-        - shuffled["mean_near_balanced_accuracy"],
-        "raw_distance_mae_reduction_vs_xyz": reduction(
-            raw["mean_distance_mae_iris"], xyz["mean_distance_mae_iris"]
-        ),
-        "raw_near_ba_gain_vs_xyz": raw["mean_near_balanced_accuracy"]
-        - xyz["mean_near_balanced_accuracy"],
+        "h_distance_mae_reduction_vs_xyz": reduction(h["mean_distance_mae_iris"], xyz["mean_distance_mae_iris"]),
+        "h_distance_mae_reduction_vs_shuffled": reduction(h["mean_distance_mae_iris"], shuffled["mean_distance_mae_iris"]),
+        "h_near_ba_gain_vs_xyz": h["mean_near_balanced_accuracy"] - xyz["mean_near_balanced_accuracy"],
+        "h_near_ba_gain_vs_shuffled": h["mean_near_balanced_accuracy"] - shuffled["mean_near_balanced_accuracy"],
+        "raw_distance_mae_reduction_vs_xyz": reduction(raw["mean_distance_mae_iris"], xyz["mean_distance_mae_iris"]),
+        "raw_near_ba_gain_vs_xyz": raw["mean_near_balanced_accuracy"] - xyz["mean_near_balanced_accuracy"],
     }
     _require_finite_tree(derived, "derived")
 
@@ -323,12 +279,8 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
     }
     output = Path(args.output).resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(
-        json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
-    print(
-        "H_REP_P0_COURT", status, json.dumps(aggregate, sort_keys=True), flush=True
-    )
+    output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print("H_REP_P0_COURT", status, json.dumps(aggregate, sort_keys=True), flush=True)
     return result
 
 
@@ -337,9 +289,7 @@ def main() -> int:
     parser.add_argument("--repo-root", required=True)
     parser.add_argument("--expected-source-sha", required=True)
     parser.add_argument("--binding", default="canonical/H_REP_P0_INPUT_BINDING_V1.json")
-    parser.add_argument(
-        "--preregistration", default="canonical/H_REP_P0_PREREGISTRATION_V1.json"
-    )
+    parser.add_argument("--preregistration", default="canonical/H_REP_P0_PREREGISTRATION_V1.json")
     parser.add_argument("--training-result", required=True)
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument("--dataset-root", required=True)

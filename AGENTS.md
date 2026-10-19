@@ -32,7 +32,12 @@ Current continuity files must be read and treated as current before historical p
 - current product architecture authority: `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
 - current appearance authority: `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
 
-Historical continuity files, Knight/V2/V5/V6 notes and old recovery branches are provenance/regression evidence. They do not override current authority.
+Historical continuity files remain provenance only and do not override current authority:
+
+- historical experiment registry: `canonical/EXPERIMENT_REGISTRY_V2.json`
+- historical scientific journal: `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
+
+Historical Knight/V2/V5/V6 notes and old recovery branches are provenance/regression evidence. They do not override current authority.
 
 If the user says only `continue / devam et`, continue the active work in `CURRENT_PLAN.md`. Do not revive an older branch, trainer, hidden semantic-owner program, independent visual mesh or superseded relation/surface experiment merely because historical files still exist.
 
@@ -90,7 +95,7 @@ Four controls have exact equal parameter count and the same `387-D` input envelo
 ```text
 H_XYZ              sealed local 384-D H + XYZ
 RAW_FIELD_XYZ      raw field in evidence channel 0 + zero padding + XYZ
-XYZ_ONLY            all evidence channels zero + XYZ
+XYZ_ONLY           all evidence channels zero + XYZ
 SHUFFLED_H_XYZ     fixed within-subject permuted H + original XYZ
 ```
 

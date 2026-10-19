@@ -1,0 +1,102 @@
+{
+  "schema": "RealSaS.IRISResearchExperimentLedger.v1",
+  "date_utc": "2026-10-19",
+  "purpose": "SINGLE_MACHINE_READABLE_CONTINUATION_AUTHORITY_FOR_POST_V8_IRIS_TESSA_RESEARCH",
+  "production_authority": "main",
+  "review_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
+  "review_vehicle": "PR_122",
+  "authority_law": {
+    "repository_source_is_scientific_result": false,
+    "drive_path_is_scientific_authority": false,
+    "artifact_hash_plus_typed_receipt_required": true,
+    "compiler_mints_canonical_M_only": true,
+    "teacher_truth_allowed_in_inference_forward": false,
+    "fit8_is_unseen_generalization": false
+  },
+  "active_lane": "SURFACE_TESSA",
+  "parked_lanes": [
+    "RELATION_V10"
+  ],
+  "immutable_model_authority": {
+    "model": "IRIS_V8",
+    "source_commit": "5083c9915533ec8ec6530c7d229c635887abfea7",
+    "global_step": 12000,
+    "checkpoint_sha256": "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5",
+    "binding_sha256": "735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2",
+    "scene_core_policy": "SEALED_AFTER_M1"
+  },
+  "experiments": [
+    {
+      "id": "SURF-A0-RAWFIELD",
+      "kind": "DIRECT_SURFACE_BASELINE",
+      "status": "FALSIFIED",
+      "apparatus_source_sha": "d9701923b2c19bd1c9b9771fe071bb92264a041d",
+      "result_sha256": "39f222729e9215c544ea52a5f333f59d568fd00e9c4c737b69104550637bb502",
+      "result": "EXACT_V8_RAW_FIELD_PLUS_HISTORICAL_DISTANCE_LIKE_T512_T1024_SPARSE_SELECTOR_IS_NOT_A_VALID_DIRECT_A_ARM",
+      "optimizer_steps_executed": 0,
+      "next_gate": "PRESERVE_AS_FALSIFICATION_ONLY"
+    },
+    {
+      "id": "SURF-C0-NATIVE-R24",
+      "kind": "NATIVE_V8_CONTROL",
+      "status": "MEASURED_DIAGNOSTIC",
+      "apparatus_source_sha": "ccb71011f41b041bc5c137544bc1b97ca394ea9c",
+      "drive_evidence_root": "RealSaS_IRIS_TESSA_V2_FIT8_20261019/ccb71011f41b/V5_NATIVE_V8_CONTROL",
+      "batch_receipt_sha256": "a83c0c466d5251c8cc1bc13475866c766c4796e7b0b08c7b96d031c0662667de",
+      "control_court_sha256": "656f674e12cf3a4ffe79fd16dd25f8ffe4949f736a8e39c9dcd4987df19f3617",
+      "global_measurements": {
+        "mean_subject_mask_iou": 0.5605675253734139,
+        "minimum_subject_mask_iou": 0.40535492756009806,
+        "minimum_view_mask_iou": 0.3425416143468882,
+        "maximum_mask_gap_px": 392.42069262463724,
+        "mean_symmetric_chamfer_distance_iris": 0.06120461101817451
+      },
+      "diagnosis": "NATIVE_V8_SURFACE_QUALITY_DEBT_PRESENT__HIGH_RESOLUTION_TRANSITION_DEBT_REMAINS_OPEN",
+      "scientific_pass_claimed": false,
+      "high_resolution_capability_claimed": false,
+      "optimizer_steps_executed": 0,
+      "next_gate": "SURF-A1-FROZEN-H"
+    },
+    {
+      "id": "SURF-A1-FROZEN-H",
+      "kind": "SURFACE_RESCUE_CAPACITY_EXPERIMENT",
+      "status": "SOURCE_AND_PREREG_IN_PROGRESS",
+      "hypothesis": "SEALED_V8_H_CONTAINS_SUFFICIENT_GEOMETRIC_EVIDENCE_FOR_A_NEW_RESOLUTION_AWARE_RASTER_SUPERVISED_SURFACE_DECODER",
+      "scene_core_trainable": false,
+      "teacher_truth_in_inference_forward": false,
+      "compiler_rescue_allowed": false,
+      "tessa_invoked": false,
+      "next_gate": "SOURCE_CONTRACT_AND_ZERO_STEP_A100_PREFLIGHT"
+    },
+    {
+      "id": "SURF-A2-HIRES",
+      "kind": "QUALIFIED_HIGH_RESOLUTION_DIRECT_A_ARM",
+      "status": "BLOCKED_ON_SURF_A1",
+      "next_gate": "SURF_A1_REPRESENTATION_RESULT"
+    },
+    {
+      "id": "TESSA-V2-B1",
+      "kind": "STRUCTURALIZATION_B_ARM",
+      "status": "BLOCKED_ON_SURF_A2_READINESS",
+      "next_gate": "QUALIFIED_DIRECT_A_ARM"
+    },
+    {
+      "id": "REL-V10",
+      "kind": "RELATION_VISIBILITY",
+      "status": "PARKED_NOT_CANCELLED",
+      "next_gate": "RELATION_TRUTH_V3_READINESS"
+    }
+  ],
+  "fit8_program_role": {
+    "subject_diversity_only": false,
+    "system_contract_qualification": true,
+    "goal": "FORCE_SHARED_MODEL_COMPILER_AND_RUNTIME_INTERFACES_TOWARD_SUBJECT_AGNOSTIC_GENERIC_BEHAVIOR_BEFORE_LARGE_UNSEEN_CAMPAIGNS",
+    "unseen_scale_target_context": "FUTURE_LARGE_UNSEEN_CAMPAIGNS__FIT8_DOES_NOT_CLAIM_THEM"
+  },
+  "naming_policy": {
+    "model_versions": "IRIS-V8_IRIS-V9-R_IRIS-V10-R",
+    "surface_experiments": "SURF-A0_SURF-C0_SURF-A1_SURF-A2",
+    "tessa_experiments": "TESSA-V2-B1",
+    "notebook_revisions": "NB-rN__NEVER_REUSE_MODEL_VNUMBERS"
+  }
+}

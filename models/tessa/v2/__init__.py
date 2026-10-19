@@ -1,3 +1,9 @@
+from .ab_court_v2 import (
+    StructuralizationABPolicyV2,
+    StructuralizationABReceiptV2,
+    StructuralizationVariantEvidenceV2,
+    evaluate_structuralization_ab_v2,
+)
 from .config_v2 import TESSAStructuralizerConfigV2
 from .court_v2 import TESSADecodedTopologyCourtV2, evaluate_decoded_topology_v2
 from .generation_v2 import (
@@ -25,6 +31,9 @@ from .objective_v2 import (
 
 __all__ = [
     "HierarchicalCausalSelfAttentionV2",
+    "StructuralizationABPolicyV2",
+    "StructuralizationABReceiptV2",
+    "StructuralizationVariantEvidenceV2",
     "TESSADecodedTopologyCourtV2",
     "TESSADualStreamMemoryV2",
     "TESSAGeneratedCandidateV2",
@@ -39,6 +48,7 @@ __all__ = [
     "TESSAStructuralizerOutputV2",
     "TESSAStructuralizerV2",
     "evaluate_decoded_topology_v2",
+    "evaluate_structuralization_ab_v2",
     "generate_tessa_candidate_v2",
     "topology_sequence_objective_v2",
 ]

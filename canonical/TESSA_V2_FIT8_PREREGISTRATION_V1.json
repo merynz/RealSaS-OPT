@@ -4,6 +4,14 @@
   "scope": "FIT8_SHARED_ARCHITECTURE_FIT__NOT_UNSEEN_GENERALIZATION__NOT_PRODUCT_PROMOTION",
   "source_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
   "training_authorization_policy": "RUNTIME_ADMISSION_ONLY__ALL_PREOPTIMIZER_GATES_MUST_PASS",
+  "upstream_surface_authority": {
+    "required_experiment": "SURF-A2-HIRES",
+    "required_status": "QUALIFIED_HIGH_RESOLUTION_DIRECT_A_ARM",
+    "surf_a0_raw_field_sparse_allowed": false,
+    "surf_c0_native_r24_allowed_as_training_surface": false,
+    "surf_a1_frozen_h_allowed_as_final_direct_arm": false,
+    "reason": "TESSA_MUST_COMPARE_AGAINST_A_QUALIFIED_DIRECT_SURFACE__NOT_REPAIR_A_GROSSLY_WRONG_OR_DIAGNOSTIC_WITNESS"
+  },
   "architecture": {
     "architecture_id": "RealSaS.TESSA.Structuralizer.GlobalHistory.v2",
     "d_model": 1024,
@@ -22,11 +30,11 @@
     "reduced_capacity_fallback_allowed": false
   },
   "conditioning": {
-    "scene": "SEALED_V8_SCENE_PLANES",
-    "surface": "DIRECT_IRIS_FULL_T512_TO_SPARSE_T1024_WITNESS",
-    "local_features": "SEALED_V8_H_AT_MODEL_WITNESS",
-    "mechanics": "SEALED_V8_TRAINED_STRETCH_TANGENT_BEND_RIGIDITY_AT_MODEL_WITNESS",
-    "contact_persistence": "ABSTAIN_VALIDITY_FALSE",
+    "scene": "SEALED_V8_SCENE_PLANES_OR_EXPLICITLY_QUALIFIED_SUCCESSOR_CARRIER",
+    "surface": "QUALIFIED_SURF_A2_HIGH_RESOLUTION_DIRECT_WITNESS",
+    "local_features": "MODEL_PRODUCED_H_AT_QUALIFIED_SURFACE_WITNESS",
+    "mechanics": "EXPLICITLY_TRAINED_ROLE_FREE_MECHANICAL_EVIDENCE_AT_MODEL_WITNESS",
+    "contact_persistence": "ABSTAIN_VALIDITY_FALSE_UNTIL_SOURCE_AUTHORITY_EXISTS",
     "teacher_topology_in_conditioning": false,
     "teacher_rig_skin_in_conditioning": false,
     "uncalibrated_uncertainty_in_conditioning": false
@@ -72,11 +80,11 @@
     "minimum_host_memory_gib": 24,
     "minimum_free_disk_gib": 12,
     "compute_capability_major_minimum": 8,
-    "exact_v8_checkpoint_required": true,
-    "exact_prepared_v4_bytes_required": true,
-    "exact_stage01_bundle_required": true,
-    "full_t512_t1024_direct_surface_required": true,
+    "exact_prepared_fit8_bytes_required": true,
+    "qualified_surf_a2_direct_surface_required": true,
+    "surf_a2_independent_court_required": true,
     "low_resolution_surface_fallback_allowed": false,
+    "historical_raw_t512_t1024_surface_allowed": false,
     "full_reference_capacity_tessa_forward_backward_preflight_required": true,
     "preflight_optimizer_step_allowed": false
   },

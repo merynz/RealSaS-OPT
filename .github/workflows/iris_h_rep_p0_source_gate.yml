@@ -92,6 +92,15 @@ jobs:
           assert p['frozen_authority']['flexicubes_used'] is False
           assert p['frozen_authority']['tessa_used'] is False
           assert p['shared_probe_architecture']['equal_parameter_count_across_arms'] is True
+          r = p['runtime_admission']
+          assert r['accelerator'] == 'NVIDIA_A100_CLASS'
+          assert r['minimum_cuda_memory_gib'] == 39
+          assert r['source_precompile_required'] is True
+          assert r['optimizer_step_allowed_before_all_authority_gates'] is False
+          assert r['single_drive_mount_consent_required'] is True
+          assert r['drive_tree_discovery_allowed'] is False
+          assert r['additional_google_oauth_allowed'] is False
+          assert r['reduced_capacity_or_subject_fallback_allowed'] is False
           assert p['interpretation']['pass_authorizes_tessa'] is False
           assert p['interpretation']['pass_authorizes_surf_a2'] is False
           assert p['interpretation']['fail_authorizes_carrier_retraining'] is False

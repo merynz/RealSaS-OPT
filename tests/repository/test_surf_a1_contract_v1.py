@@ -9,15 +9,22 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class SurfA1RepositoryContractTests(unittest.TestCase):
-    def test_experiment_ledger_has_one_active_lane_and_parked_relation_v10(self):
+    def test_experiment_ledger_preserves_a1_result_and_advances_next_gate(self):
         ledger = json.loads((ROOT / "canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json").read_text())
         self.assertEqual(ledger["active_lane"], "SURFACE_TESSA")
+        self.assertEqual(ledger["active_experiment"], "H-REP-P0")
         self.assertIn("RELATION_V10", ledger["parked_lanes"])
         rows = {row["id"]: row for row in ledger["experiments"]}
         self.assertEqual(rows["SURF-A0-RAWFIELD"]["status"], "FALSIFIED")
         self.assertEqual(rows["SURF-C0-NATIVE-R24"]["status"], "MEASURED_DIAGNOSTIC")
-        self.assertEqual(rows["SURF-A1-FROZEN-H"]["next_gate"], "SOURCE_CONTRACT_AND_ZERO_STEP_A100_PREFLIGHT")
-        self.assertEqual(rows["SURF-A2-HIRES"]["status"], "BLOCKED_ON_SURF_A1")
+        self.assertEqual(rows["SURF-A1-FROZEN-H"]["status"], "SCIENTIFIC_FAIL")
+        self.assertEqual(rows["SURF-A1-FROZEN-H"]["next_gate"], "H-REP-P0")
+        self.assertFalse(rows["SURF-A1-FROZEN-H"]["scientific_pass_claimed"])
+        self.assertEqual(
+            rows["SURF-A1-FROZEN-H"]["independent_court"]["status"],
+            "SCIENTIFIC_FAIL_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE",
+        )
+        self.assertTrue(rows["SURF-A2-HIRES"]["status"].startswith("BLOCKED_"))
         self.assertEqual(rows["TESSA-V2-B1"]["status"], "BLOCKED_ON_SURF_A2_READINESS")
 
     def test_a1_prereg_seals_v8_and_forbids_teacher_forward(self):
@@ -83,6 +90,7 @@ class SurfA1RepositoryContractTests(unittest.TestCase):
         self.assertIn("PASS_SURF_A1_A100_PREFLIGHT__TRAINING_AUTHORIZED", preflight)
         self.assertIn("COMPLETED_SURF_A1_2400_STEPS__AWAITING_INDEPENDENT_COURT", trainer)
         self.assertIn("SCIENTIFIC_PASS_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE", court)
+        self.assertIn("SCIENTIFIC_FAIL_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE", court)
         self.assertNotIn("optimizer.step()", preflight)
         self.assertNotIn("optimizer.step()", court)
 

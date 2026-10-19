@@ -9,6 +9,9 @@ from models.tessa.v2 import TESSAStructuralizerConfigV2, evaluate_decoded_topolo
 
 class TESSADecodedTopologyCourtV2Tests(unittest.TestCase):
     def setUp(self):
+        # The V2 court intentionally reuses the strict V1-compatible grammar
+        # decoder. Keep this tiny unit fixture above V1's historical scaling
+        # policy minimum rather than weakening that survivor contract for a test.
         self.cfg = TESSAStructuralizerConfigV2(
             d_model=64,
             n_heads=8,
@@ -18,7 +21,7 @@ class TESSADecodedTopologyCourtV2Tests(unittest.TestCase):
             surface_memory_tokens=4,
             memory_source_width=32,
             memory_refinement_layers=0,
-            local_attention_window=16,
+            local_attention_window=128,
             query_chunk_size=4,
             gradient_checkpointing=False,
         )
@@ -29,7 +32,7 @@ class TESSADecodedTopologyCourtV2Tests(unittest.TestCase):
             decoder_layers=1,
             coordinate_bins=128,
             surface_latent_count=8,
-            local_attention_window=16,
+            local_attention_window=128,
             query_chunk_size=4,
             max_faces=self.cfg.max_faces,
             max_vertices=self.cfg.max_vertices,

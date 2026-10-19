@@ -152,11 +152,68 @@ These are distance-like/Lipschitz compatibility indicators only. They are not an
 
 ## D22 — TESSA V2 training remains blocked on the replacement A-arm boundary
 
-**Decision:** no TESSA optimizer step until:
+**Decision:** no TESSA optimizer step until the direct surface program reaches a qualified replacement A-arm. The Snake raw-field sparse failure is evidence to redesign the A-arm transition, not permission to skip A and train TESSA.
 
-1. native V8 R24 FlexiCubes witness is materialized for Fit8;
-2. independent geometry + exact Stage01 mask measurements are recorded;
-3. the program decides from those measurements whether the debt is primarily native V8 surface quality or high-resolution transition design;
-4. a corrected high-resolution direct A-arm is defined and reaches its preregistered readiness boundary.
+## D23 — native V8 R24 control completed and closes the pending-control state
 
-The Snake raw-field sparse failure is evidence to redesign the A-arm transition, not permission to skip A and train TESSA.
+**Runtime authority:** apparatus source `ccb71011f41b041bc5c137544bc1b97ca394ea9c`; Drive evidence root `RealSaS_IRIS_TESSA_V2_FIT8_20261019/ccb71011f41b/V5_NATIVE_V8_CONTROL`; batch receipt SHA256 `a83c0c466d5251c8cc1bc13475866c766c4796e7b0b08c7b96d031c0662667de`; independent control court SHA256 `656f674e12cf3a4ffe79fd16dd25f8ffe4949f736a8e39c9dcd4987df19f3617`.
+
+All eight exact V8 native R24 FlexiCubes witnesses materialized with zero optimizer steps, no TESSA and no high-resolution capability claim.
+
+Measured global values: mean subject mask IoU `0.5605675`, minimum subject mask IoU `0.4053549`, minimum view IoU `0.3425416`, maximum mask gap `392.4207 px`, mean symmetric Chamfer `0.0612046` IRIS units.
+
+Because no PASS/FAIL threshold was preregistered for this diagnostic, the control remains **measurement-only**.
+
+## D24 — native extraction debt and high-resolution transition debt are both open
+
+**Decision:** the runtime evidence no longer supports the simpler hypothesis “native V8 surface is good and only high-resolution adaptation is wrong.”
+
+Compact-teacher fragmentation includes Snake `3→85`, T-Rex `1→59`, Spider `15→88`, GreenBlob `4→92`, Shark `1→67` components; Bat is close at `63→65`. Combined with mask and distance measurements, this establishes actionable native extraction-quality debt without converting the diagnostic into a retroactive formal FAIL.
+
+**Rejected:** immediately blaming or reopening sealed H. Native extraction quality and representation capacity are separate questions.
+
+## D25 — SURF-A1-FROZEN-H is the next information-maximizing experiment
+
+**Decision:** freeze exact V8 scene core/H and train only a new extraction decoder.
+
+**Hypothesis:** sealed V8 H contains enough geometric information for a resolution-aware, raster-supervised surface decoder to recover materially better geometry/source fidelity.
+
+**Why:** this isolates carrier information sufficiency from the known weaknesses of V8's native R24 extraction training. It is cleaner than simultaneously retraining H, surface extraction and topology.
+
+**Interpretation:** A1 PASS permits design of `SURF-A2-HIRES`; A1 FAIL after all apparatus gates pass opens a dedicated H representation investigation. Neither result directly authorizes TESSA.
+
+## D26 — SURF-A1 deformation is cell-relative and zero-step native identity is mandatory
+
+**Decision:** inherited V8 extraction delta is converted from absolute normalized coordinates into native R24 cell units. Learned correction is bounded in cell space; current-grid absolute displacement is obtained by multiplying by `2/resolution`.
+
+At zero step R24, field and V8 21-D cube parameters remain exact baseline values; faces must match the native V8 witness exactly and vertices must differ by at most `2e-6` IRIS units.
+
+**Rejected:** naive reuse of absolute `0.03` at finer resolution; hidden migration that changes the baseline before optimizer step 1.
+
+## D27 — source mask truth and raster-apparatus truth are separate
+
+**Decision:** exact Stage01 source alpha masks remain silhouette optimization truth. They are not used to prove the differentiable renderer is correct.
+
+Independent authored-rest teacher geometry is rasterized with first-party pixel-center semantics to create a teacher-geometry coverage reference. PyTorch3D hard coverage must reach precision and recall ≥ `0.98` on all 64 Fit8 views before optimizer admission.
+
+Teacher depth/normal supervision is valid only where teacher geometry coverage intersects source foreground. Teacher topology/rig/skin remains training-side truth and never inference conditioning.
+
+## D28 — Fit8 is a generic-system forcing function, not merely eight subject scores
+
+**Decision:** every post-V8 experiment must preserve one shared architecture/configuration, one typed contract family and generic Compiler/runtime consumption across all Fit8 subjects. No subject-specific trainable parameters, subject-name branching or hidden semantic shortcuts are allowed.
+
+Fit8 does not claim unseen generalization. Its role is to eliminate one-subject assumptions in models, Compiler boundaries, failure semantics, receipts and execution machinery before future large unseen campaigns.
+
+## D29 — single-consent notebook worker and lane discipline
+
+**Decision:** research notebooks are compute workers. Required UX is `open → Run all → approve Drive once → autonomous execution` with exact-SHA source, precompile/source tests, input hash validation, meaningful progress telemetry and resumable typed checkpoints/receipts.
+
+A second Google OAuth path, `auth.authenticate_user()`, interactive rclone/gcloud auth, manual cell sequencing or hidden reduced-resolution fallback is forbidden.
+
+Operationally only `SURFACE_TESSA` is active now. `RELATION_V10` is parked, not cancelled. TESSA V2 training is blocked specifically on a qualified `SURF-A2-HIRES` direct A-arm; historical raw T512/T1024, native R24 control and SURF-A1 are not eligible substitutes.
+
+## D30 — downstream module boundaries follow the qualified carrier, not vice versa
+
+**Decision:** the long-term target is one generic visual/geometric/mechanical animation-ready canonical carrier M. AXIS, MIRA, GSA and later consumers must be evaluated against that carrier contract rather than freezing historical module boundaries as requirements on the learned representation.
+
+GSA may later shrink, change role or disappear if IRIS/TESSA/Compiler can prove the same responsibilities with stronger typed authority and no regression. This ledger does **not** authorize a GSA removal today; that decision waits for a qualified direct A-arm / TESSA comparison and downstream contract audit.

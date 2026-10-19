@@ -14,6 +14,7 @@ on:
       - tests/iris/test_tessa_structuralizer_v2.py
       - tests/iris/test_tessa_global_history_v2.py
       - tests/iris/test_tessa_decoded_court_v2.py
+      - tests/iris/test_tessa_generation_v2.py
       - tests/iris/test_relation_head_v3.py
       - tests/iris/test_structure_bridge_v3.py
       - tests/iris/test_evidence_model_v3.py
@@ -74,6 +75,7 @@ jobs:
             models/tessa/v2/config_v2.py \
             models/tessa/v2/objective_v2.py \
             models/tessa/v2/court_v2.py \
+            models/tessa/v2/generation_v2.py \
             models/tessa/v2/model_v2.py \
             models/tessa/v2/global_attention_v2.py \
             models/tessa/v2/model_global_v2.py \
@@ -87,6 +89,7 @@ jobs:
             tests/iris/test_tessa_structuralizer_v2.py \
             tests/iris/test_tessa_global_history_v2.py \
             tests/iris/test_tessa_decoded_court_v2.py \
+            tests/iris/test_tessa_generation_v2.py \
             tests/iris/test_relation_head_v3.py \
             tests/iris/test_structure_bridge_v3.py \
             tests/iris/test_evidence_model_v3.py
@@ -119,6 +122,7 @@ jobs:
             tests/iris/test_tessa_structuralizer_v2.py \
             tests/iris/test_tessa_global_history_v2.py \
             tests/iris/test_tessa_decoded_court_v2.py \
+            tests/iris/test_tessa_generation_v2.py \
             tests/iris/test_relation_head_v3.py \
             tests/iris/test_structure_bridge_v3.py \
             tests/iris/test_evidence_model_v3.py

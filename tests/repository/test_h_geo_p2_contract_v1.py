@@ -50,8 +50,10 @@ def test_p2_preregistered_court_does_not_authorize_tessa_or_surf_a2():
     assert p["interpretation"]["pass_authorizes_tessa"] is False
     assert p["interpretation"]["fail_authorizes_unpreregistered_explicit_geometry_training"] is False
 
-def test_p2_training_forward_recomputes_scene_planes_inside_loop():
+def test_p2_training_forward_recomputes_scene_planes_and_has_no_p1_init_input():
     text=(ROOT/"tools/iris_vnext/train_fit8_h_geo_p2_v1.py").read_text()
     assert 'planes=model.encode_scene(src["image_tokens"],src["token_xy"],src["camera_features"])' in text
-    assert 'p1_checkpoint' not in text
+    assert 'p.add_argument("--p1-checkpoint"' not in text
+    assert 'torch.load(Path(args.p1_checkpoint)' not in text
     assert 'model.scene_core.scene.load_state_dict(ck["scene_state"]' in text
+    assert '"p1_checkpoint_used_for_initialization":False' in text

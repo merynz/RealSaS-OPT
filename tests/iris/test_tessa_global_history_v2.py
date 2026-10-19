@@ -39,12 +39,20 @@ class TESSAGlobalHistoryV2Tests(unittest.TestCase):
         mutated = self.attn(changed)
         self.assertTrue(torch.allclose(baseline[:, :6], mutated[:, :6], atol=1e-6, rtol=1e-6))
 
+    def test_every_token_is_prefix_invariant_across_query_chunk_growth(self):
+        x = torch.randn(1, 10, self.cfg.d_model)
+        full = self.attn(x)
+        for end in range(1, x.shape[1] + 1):
+            prefix_last = self.attn(x[:, :end])[:, -1]
+            self.assertTrue(
+                torch.allclose(prefix_last, full[:, end - 1], atol=1e-6, rtol=1e-6),
+                msg=f"prefix representation drifted at token {end - 1}",
+            )
+
     def test_old_tokens_beyond_local_window_reach_tail_through_global_history(self):
         x = torch.randn(1, 8, self.cfg.d_model)
         baseline = self.attn(x)
         changed = x.clone()
-        # Token 0 is outside the exact local window for the final query. It is
-        # nevertheless part of a completed global-history summary.
         changed[:, 0] += 3.0
         mutated = self.attn(changed)
         delta = torch.max(torch.abs(baseline[:, -1] - mutated[:, -1])).item()

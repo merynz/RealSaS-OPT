@@ -3,10 +3,11 @@ from __future__ import annotations
 """Materialize source-defensible SURF-A1 mask/depth/normal training truth.
 
 The authored teacher mesh and Stage01 cameras/masks are training truth only.  The
-output is never an IRIS inference input.  Mask authority remains the exact Stage01
-foreground bytes; depth and normal are rendered from the exact authored rest mesh
-at pixel centers and are valid only where that mesh coverage intersects source
-foreground.
+output is never an IRIS inference input.  Source mask remains the exact Stage01
+silhouette target.  Separately, first-party pixel-center rasterization of the exact
+authored rest mesh records teacher geometry coverage for differentiable-raster
+apparatus parity.  Depth/normal truth is valid only where teacher coverage
+intersects source foreground.
 """
 
 import argparse
@@ -140,10 +141,10 @@ def _raster_depth_normal(
             nview = normal[lo[1]:hi[1] + 1, lo[0]:hi[0] + 1]
             nview[update] = tri_normal[face_index].astype(np.float32)
 
-    valid = np.isfinite(zbuf)
+    coverage = np.isfinite(zbuf)
     depth = np.zeros_like(zbuf, dtype=np.float32)
-    depth[valid] = (zbuf[valid] / common_half).astype(np.float32)
-    return depth, normal, valid
+    depth[coverage] = (zbuf[coverage] / common_half).astype(np.float32)
+    return depth, normal, coverage
 
 
 def build(args: argparse.Namespace) -> dict:
@@ -195,8 +196,9 @@ def build(args: argparse.Namespace) -> dict:
             if len(camera_rows) != 8 or cameras.get("per_view_pose_change") or cameras.get("per_view_recenter"):
                 raise ValueError("SURF_A1_RASTER_CAMERA_CONTRACT_DRIFT:" + subject_id)
             common_half = float(cameras["common_half_extent"])
-            masks, depths, normals, valids = [], [], [], []
+            masks, coverages, depths, normals, valids = [], [], [], [], []
             source_mask_hashes = []
+            coverage_fractions = []
             valid_fractions = []
             base_prefix = camera_name[: -len("camera_bundle.json")]
             for camera in camera_rows:
@@ -207,19 +209,22 @@ def build(args: argparse.Namespace) -> dict:
                 source_mask_hashes.append(sha256_bytes(raw_mask))
                 mask = np.frombuffer(raw_mask, dtype=np.uint8).reshape(source_resolution, source_resolution) > 0
                 mask = _downsample_mask(mask, target)
-                depth, normal, valid = _raster_depth_normal(vertices, faces, camera, resolution=target, common_half_extent=common_half)
-                valid &= mask
+                depth, normal, coverage = _raster_depth_normal(vertices, faces, camera, resolution=target, common_half_extent=common_half)
+                valid = coverage & mask
                 depth[~valid] = 0.0
                 normal[~valid] = 0.0
                 masks.append(mask.astype(np.uint8))
+                coverages.append(coverage.astype(np.uint8))
                 depths.append(depth)
                 normals.append(normal)
                 valids.append(valid.astype(np.uint8))
+                coverage_fractions.append(float(coverage.mean()))
                 valid_fractions.append(float(valid.mean()))
             payload_path = output_root / f"{subject_id}.surf_a1_raster_truth.npz"
             np.savez_compressed(
                 payload_path,
                 mask=np.stack(masks),
+                teacher_center_coverage=np.stack(coverages),
                 depth_normalized=np.stack(depths),
                 normal_world=np.stack(normals),
                 depth_normal_valid=np.stack(valids),
@@ -233,9 +238,12 @@ def build(args: argparse.Namespace) -> dict:
                 "source_mask_sha256": source_mask_hashes,
                 "resolution": target,
                 "view_count": 8,
+                "mean_teacher_center_coverage_fraction": float(np.mean(coverage_fractions)),
                 "mean_depth_normal_valid_fraction": float(np.mean(valid_fractions)),
                 "payload_file": payload_path.name,
                 "payload_sha256": sha256_file(payload_path),
+                "teacher_center_coverage_role": "DIFFERENTIABLE_RASTER_APPARATUS_PARITY_REFERENCE",
+                "source_mask_role": "SILHOUETTE_OPTIMIZATION_TRUTH",
                 "teacher_truth_in_inference_forward": False,
                 "optimizer_steps_executed": 0,
                 "scientific_pass_claimed": False,
@@ -244,7 +252,12 @@ def build(args: argparse.Namespace) -> dict:
             receipt_path.write_text(json.dumps(row, indent=2, sort_keys=True) + "\n", encoding="utf-8")
             row["receipt_sha256"] = sha256_file(receipt_path)
             subject_rows.append(row)
-            print(f"SURF_A1_RASTER_TRUTH {subject_id} res={target} valid={row['mean_depth_normal_valid_fraction']:.4f}", flush=True)
+            print(
+                f"SURF_A1_RASTER_TRUTH {subject_id} res={target} "
+                f"coverage={row['mean_teacher_center_coverage_fraction']:.4f} "
+                f"valid={row['mean_depth_normal_valid_fraction']:.4f}",
+                flush=True,
+            )
 
     result = {
         "schema": SCHEMA,
@@ -255,6 +268,8 @@ def build(args: argparse.Namespace) -> dict:
         "resolution": target,
         "subject_order": list(EXPECTED_SUBJECTS),
         "subjects": subject_rows,
+        "teacher_center_coverage_role": "DIFFERENTIABLE_RASTER_APPARATUS_PARITY_REFERENCE",
+        "source_mask_role": "SILHOUETTE_OPTIMIZATION_TRUTH",
         "teacher_truth_in_inference_forward": False,
         "optimizer_steps_executed": 0,
         "training_authorized": False,

@@ -1,15 +1,17 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-10-19  
+**Date:** 2026-10-20  
 **Production authority:** `main` until reviewed merge  
 **Active research branch / PR head:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
-**Source staging branch:** `research/iris-vnext-hybrid-tessa-v2-20261019-hrep-p0`  
 **Review vehicle:** draft PR #122 — `IRIS: TESSA V2 structuralization + geometry-explicit evidence redesign`  
 **Active research lane:** `SURFACE_TESSA`  
 **Active experiment:** `H-REP-P0` — sealed-V8 representation diagnostic  
+**Frozen H-REP-P0 runtime source:** `479e8e53cf0d7df234a3e64b824bb704b861bf19`  
+**Source-gate vehicle:** PR #124 — fast-forwarded; required source gates green  
+**Runtime worker:** `NB-r1` generated, **not yet scientifically run**  
 **Parked lane:** `RELATION_V10` — not cancelled, no optimizer authorization  
-**Scientific status:** **NO GLOBAL IRIS FIT8 PASS / NO TESSA PASS / SURF-A0 FALSIFIED / SURF-C0 MEASURED / SURF-A1 COMPLETED SCIENTIFIC FAIL / H-REP-P0 SOURCE+PREREG STAGED, NOT YET RUN**  
-**Optimizer authorization:** **No SURF-A2 or TESSA optimizer step. H-REP-P0 probe optimization is permitted only after its exact source/input/A100 admission is green. Carrier retraining is not authorized.**
+**Scientific status:** **NO GLOBAL IRIS FIT8 PASS / NO TESSA PASS / SURF-A0 FALSIFIED / SURF-C0 MEASURED / SURF-A1 COMPLETED SCIENTIFIC FAIL / H-REP-P0 SOURCE GREEN, A100 RUN PENDING**  
+**Optimizer authorization:** **No SURF-A2 or TESSA optimizer step. H-REP-P0 probe optimization is authorized only under frozen source `479e8e53...` after its exact runtime/input/A100 admission passes. Carrier retraining is not authorized.**
 
 Machine-readable continuation authority: `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json`.
 
@@ -23,6 +25,7 @@ Machine-readable continuation authority: `canonical/IRIS_RESEARCH_EXPERIMENT_LED
 6. Teacher topology/rig/skin may supervise training truth but never enter inference conditioning.
 7. Fit8 is a shared-system qualification cohort, not an unseen-generalization claim.
 8. Failed preregistered courts are never repaired by changing thresholds after results.
+9. A post-freeze documentation commit may advance branch state without changing the frozen scientific execution source. H-REP-P0 runtime must still execute exact `479e8e53cf0d7df234a3e64b824bb704b861bf19`.
 
 ## 2. Long-term product invariant
 
@@ -130,17 +133,24 @@ Interpretation:
 
 Do not relax A1 thresholds. Do not promote SURF-A1 to SURF-A2. Do not train TESSA.
 
-## 5. H-REP-P0 — active representation investigation
+## 5. H-REP-P0 — source green, A100 run pending
 
 The next information-maximizing question is deliberately extractor-free:
 
 > Is local surface geometry actually decodable from sealed V8 `H(x)` or the sealed raw field, independent of FlexiCubes / SURF-A1 mesh extraction?
+
+Frozen scientific execution source:
+
+`479e8e53cf0d7df234a3e64b824bb704b861bf19`
+
+PR #124 source gates all passed before freeze, including the dedicated H-REP gate, model-mainline, TESSA structuralization source gate, IRIS V2 source contract, and architecture-freeze source gate. The source also hard-enforces exact clean checkout, A100-class GPU with at least `39 GiB`, and exact step-seeded resume semantics before/through probe optimization.
 
 Authority:
 
 - `canonical/H_REP_P0_INPUT_BINDING_V1.json`;
 - `canonical/H_REP_P0_PREREGISTRATION_V1.json`;
 - `models/iris/vnext/h_rep_probe_v1.py`;
+- `tools/iris_vnext/h_rep_probe_authority_v1.py`;
 - `tools/iris_vnext/build_fit8_h_rep_probe_dataset_v1.py`;
 - `tools/iris_vnext/h_rep_probe_runtime_v1.py`;
 - `tools/iris_vnext/train_fit8_h_rep_probe_v1.py`;
@@ -168,7 +178,13 @@ Probe targets reuse source-defensible geometry already sealed in V4 prepared sha
 
 Distance/offset targets are nearest-point **point-cloud proxies**, explicitly not exact SDF truth. Normal targets are validity-gated nearest mechanical normals. Teacher truth is target-only and never a probe input.
 
-### 5.3 Decision boundary
+### 5.3 Exact-resume sampler
+
+Probe batches are indexed by a deterministic seed derived from the absolute global step and subject index. Resume therefore does not restart an RNG stream: the same global step receives the same batch whether the run is continuous or resumed.
+
+Sampler authority: `RealSaS.HRepP0StepSeededSampler.v1`.
+
+### 5.4 Decision boundary
 
 H-REP-P0 PASS requires absolute held-out quality plus improvement over both `XYZ_ONLY` and `SHUFFLED_H_XYZ`; raw-field has its own absolute + XYZ-control gates. Thresholds are preregistered before runtime.
 
@@ -210,28 +226,30 @@ open notebook
 → resumable Drive checkpoint/receipt writes
 ```
 
+H-REP-P0 worker revision `NB-r1` is generated against frozen source `479e8e53...`; its execution is the next boundary. It has not been run yet and therefore contributes no scientific evidence.
+
 For all new notebooks:
 
 - physical cells must separate major phases like the successful V8 worker;
 - exactly one `google.colab.drive.mount('/content/drive', force_remount=False)`;
 - no `auth.authenticate_user()`, second OAuth, rclone/gcloud interactive auth;
 - **no Drive-tree discovery** (`os.walk`, `rglob`, full-MyDrive scan) for known scientific inputs;
-- exact mounted paths + IDs + byte/hash authority are resolved before notebook generation;
+- exact mounted paths + IDs/hashes are resolved before notebook generation;
 - source SHA, inputs, prereg, model and checkpoints fail closed;
 - no hidden reduced-capacity/resolution fallback.
 
 ## 8. Immediate continuation state machine
 
 ```text
-SURF-A1 SCIENTIFIC FAIL SEALED
+SURF-A1 SCIENTIFIC FAIL SEALED                         [DONE]
         ↓
-H-REP-P0 SOURCE + PREREG
+H-REP-P0 SOURCE + PREREG                              [DONE]
         ↓
-SOURCE CONTRACT / CI GREEN
+SOURCE CONTRACT / CI GREEN                            [DONE]
         ↓
-FREEZE EXACT GREEN SHA
+FREEZE EXACT GREEN SHA 479e8e53...                    [DONE]
         ↓
-V8-STYLE MULTI-CELL A100 RUN-ALL WORKER
+V8-STYLE MULTI-CELL A100 RUN-ALL WORKER NB-r1         [READY / NEXT]
         ↓
 BUILD DETERMINISTIC TRAIN/HOLDOUT POINT-PROXY DATASET
         ↓

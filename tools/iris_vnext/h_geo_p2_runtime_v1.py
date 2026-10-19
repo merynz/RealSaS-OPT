@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-import json
 import torch
 
 from tools.iris_vnext.h_geo_p1_geometry_v1 import SUBJECT_IDS
@@ -69,19 +68,30 @@ def frozen_module_hashes_v1(model):
 
 
 def build_subject_runtime_v1(*,model,prepared_root:Path,prepared_manifest:Path,dataset_root:Path,dataset_receipt:Path,binding:dict[str,Any],split:str,device,feature_chunk:int=4096,cache_v8_baseline:bool=False):
-    prepared_root=prepared_root.resolve(); manifest=load_json(prepared_manifest.resolve()); rows={str(r["subject_id"]):r for r in manifest.get("subjects") or ()}; expected={str(r["subject_id"]):r for r in binding["prepared"]["subjects"]}
-    if tuple(rows)!=SUBJECT_IDS or sha256_file(prepared_manifest.resolve())!=binding["prepared"]["manifest"]["sha256"]: raise ValueError("H_GEO_P2_MANIFEST_DRIFT")
+    prepared_root=prepared_root.resolve(); manifest_path=prepared_manifest.resolve(); manifest=load_json(manifest_path); rows={str(r["subject_id"]):r for r in manifest.get("subjects") or ()}; expected={str(r["subject_id"]):r for r in binding["prepared"]["subjects"]}
+    if tuple(rows)!=SUBJECT_IDS or sha256_file(manifest_path)!=binding["prepared"]["manifest"]["sha256"]: raise ValueError("H_GEO_P2_MANIFEST_DRIFT")
     _,dsrows=verify_p1_dataset_v1(dataset_root=dataset_root,dataset_receipt=dataset_receipt,binding=binding)
     runtime={}; model.eval()
-    with torch.inference_mode():
-        for subject in SUBJECT_IDS:
-            row=rows[subject]; ex=expected[subject]
-            if row["shard_file"]!=ex["file"] or row["shard_sha256"]!=ex["sha256"]: raise ValueError("H_GEO_P2_PREPARED_BINDING_DRIFT:"+subject)
-            shard=(prepared_root/ex["file"]).resolve(); source=load_subject_source(shard,ex["sha256"],device); arrays=load_dataset_split_v1((dataset_root/dsrows[subject]["payload_file"]).resolve(),split)
-            if cache_v8_baseline:
-                planes=model.encode_scene(source["image_tokens"],source["token_xy"],source["camera_features"]).float(); hs=[]; fs=[]; xyz=arrays["xyz_iris"]
+    for subject in SUBJECT_IDS:
+        row=rows[subject]; ex=expected[subject]
+        if row["shard_file"]!=ex["file"] or row["shard_sha256"]!=ex["sha256"]: raise ValueError("H_GEO_P2_PREPARED_BINDING_DRIFT:"+subject)
+        shard=(prepared_root/ex["file"]).resolve()
+        # Keep live P2 source tensors ordinary (not inference tensors): scene-core
+        # parameter gradients may need to save these values for backward.
+        source=load_subject_source(shard,ex["sha256"],device)
+        arrays=load_dataset_split_v1((dataset_root/dsrows[subject]["payload_file"]).resolve(),split)
+        if cache_v8_baseline:
+            hs=[]; fs=[]; xyz=arrays["xyz_iris"]
+            with torch.inference_mode():
+                planes=model.encode_scene(source["image_tokens"],source["token_xy"],source["camera_features"]).float()
                 for start in range(0,len(xyz),int(feature_chunk)):
-                    q=xyz[start:start+int(feature_chunk)].to(device=device,dtype=torch.float32)[None]; local=model.scene_core.query(planes,q); hs.append(local["H"].squeeze(0).cpu().float()); fs.append(local["field"].squeeze(0).cpu().float())
-                arrays["baseline_H"]=torch.cat(hs); arrays["baseline_field"]=torch.cat(fs)
-            runtime[subject]={"source":source,"arrays":arrays,"shard":shard}; print(f"H_GEO_P2_RUNTIME_CACHE split={split} subject={subject} rows={len(arrays['xyz_iris'])}",flush=True)
+                    q=xyz[start:start+int(feature_chunk)].to(device=device,dtype=torch.float32)[None]
+                    local=model.scene_core.query(planes,q)
+                    hs.append(local["H"].squeeze(0).detach().cpu().float())
+                    fs.append(local["field"].squeeze(0).detach().cpu().float())
+            # clone outside inference_mode so retention targets are ordinary tensors.
+            arrays["baseline_H"]=torch.cat(hs).clone()
+            arrays["baseline_field"]=torch.cat(fs).clone()
+        runtime[subject]={"source":source,"arrays":arrays,"shard":shard}
+        print(f"H_GEO_P2_RUNTIME_CACHE split={split} subject={subject} rows={len(arrays['xyz_iris'])}",flush=True)
     return runtime

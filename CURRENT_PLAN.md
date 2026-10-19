@@ -1,13 +1,15 @@
 # RealSaS-OPT — Current Plan
 
 **Date:** 2026-10-19  
-**Status:** **POST-V8 SURFACE/TESSA PROGRAM — SURF-A1 FROZEN-H RESCUE ACTIVE**  
-**Active source:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
+**Status:** **POST-V8 SURFACE PROGRAM — SURF-A1 CLOSED FAIL; H-REP-P0 ACTIVE**  
+**Active PR source:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
+**Staging source:** `research/iris-vnext-hybrid-tessa-v2-20261019-hrep-p0`  
 **Review vehicle:** draft PR #122  
 **Production authority:** `main` until reviewed merge  
 **Active lane:** `SURFACE_TESSA`  
+**Active experiment:** `H-REP-P0`  
 **Parked lane:** `RELATION_V10`  
-**Optimizer policy:** **SURF-A1 only after exact zero-step A100 admission. No TESSA or Relation V10 optimizer step.**
+**Optimizer policy:** **Only H-REP-P0 low-capacity probes may optimize after exact source/input/A100 admission. V8 H stays sealed. No SURF-A2, TESSA, Relation V10 or carrier-retraining optimizer step is authorized.**
 
 ## 0. Program objective
 
@@ -29,259 +31,264 @@ ONE canonical animation-ready M
 AXIS / MIRA / graphics-motion-runtime consumers
 ```
 
-The intended synthesis is:
+The intended synthesis remains:
 
-- **StdGEN++-class strength:** high-fidelity learned surface, raster supervision, explicit thin/high-resolution continuity work;
-- **MeshAnythingV2-class strength:** explicit structural topology when a dense/extracted witness is not the best production/animation mesh;
-- **RealSaS authority law:** neither external system is copied as authority. Compiler remains canonical-M authority, and TESSA is optional until an A/B court earns it.
-
-GSA, AXIS and MIRA must eventually position themselves around the qualified carrier rather than force the carrier to preserve historical module boundaries. GSA may shrink/change/disappear if IRIS/TESSA/Compiler assume its useful responsibilities with stronger typed authority; no such removal is authorized yet.
+- **StdGEN++-class lesson:** preserve geometry/raster supervision through representation transitions; address thin/high-resolution structure explicitly;
+- **MeshAnythingV2-class lesson:** high-fidelity extracted surface and production topology are different problems;
+- **RealSaS law:** external methods are references, not authority; Compiler alone mints canonical M and TESSA stays optional until an A/B court earns it.
 
 ## 1. Non-negotiable rules
 
-- one canonical deformable `M`; no second visual deformation mesh;
-- V8 `scene_core/H` stays sealed during SURF-A1;
-- teacher topology/rig/skin never enters model inference conditioning;
-- Compiler may qualify but may not rescue model incapacity and turn it into a model PASS;
-- source CI is not scientific evidence;
+- one canonical deformable `M`; no independent deformable visual mesh;
+- exact V8 `scene_core/H` stays sealed during H-REP-P0;
+- teacher topology/rig/skin never enters inference/probe conditioning;
 - failed courts are not relaxed after results;
-- unknown/unsupported truth abstains;
-- Fit8 uses one shared architecture and shared contracts: no subject-specific trainable parameters;
-- Fit8 is not an unseen-generalization claim, but it is the current system-genericity forcing function before future large unseen campaigns.
+- Compiler may qualify but may not hide model incapacity;
+- source CI is not scientific evidence;
+- Fit8 uses one shared architecture/contracts and no subject-specific trainable parameters;
+- Fit8 does not claim unseen generalization;
+- TESSA cannot rescue an unqualified direct surface;
+- carrier retraining requires its own future preregistration and is not authorized by A1 failure alone.
 
-## 2. Historical anchors
+## 2. Evidence chain that led here
 
-### IRIS-V8 — immutable
+### SURF-A0 — raw-field sparse path falsified
 
-- source `5083c9915533ec8ec6530c7d229c635887abfea7`;
-- step `12000`;
-- checkpoint `0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5`;
-- binding `735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2`;
-- shared scene core sealed after M1.
+Exact V8 raw field did not satisfy the historical distance-like `T512→sparse-T1024` materialization policy. Preserve this as a clean falsification of that transition only.
 
-### IRIS-V9-R — completed scoped relation experiment
+### SURF-C0 — native V8 R24 measured
 
-Boundary evidence learned; full ordering/visibility did not. Keep as history, not final relation architecture.
+Native V8 extraction retained useful but insufficient surface fidelity:
 
-### SURF-A0-RAWFIELD — falsified
+- mean subject mask IoU `0.56057`;
+- min subject IoU `0.40535`;
+- min view IoU `0.34254`;
+- max mask gap `392.42 px`;
+- mean symmetric Chamfer `0.06120` IRIS.
 
-Exact V8 raw field + historical distance-like T512→sparse-T1024 selector failed closed on Snake. Preserve the failure as evidence; do not repair it into success.
+This diagnostic had no preregistered pass threshold.
 
-### SURF-C0-NATIVE-R24 — measured
+### SURF-A1 — frozen-H rescue completed and failed preregistered court
 
-Exact V8 trained FlexiCubes path materialized 8/8. Global mask/geometry and fragmentation measurements show native surface debt; because the control had no preregistered PASS/FAIL threshold it remains diagnostic rather than a formal scientific FAIL.
+All admission gates passed before step 1:
 
-Decision from A0 + C0:
+- exact source `afc18debbc4d5858a4a632884b7cfd2141dcc35a`;
+- exact A100 / pinned renderer/extractor;
+- R24 native parity faces exact `8/8`;
+- all 64 teacher-geometry raster views precision/recall `1.0`;
+- sealed scene-core hash unchanged.
 
-> Do not jump to TESSA and do not immediately retrain H. First test whether sealed V8 H supports a better extraction decoder.
+The shared extraction-only decoder completed all `2400` steps and improved C0 substantially, but final R48 court remained below preregistration:
 
-## 3. Active experiment — SURF-A1-FROZEN-H
+- mean IoU `0.77953 < 0.80`;
+- mean symmetric Chamfer `0.04305 > 0.04`;
+- max gap `258.66 > 128 px`;
+- worst teacher→candidate p95 `0.11117 > 0.075`;
+- min normal abs-dot `0.57822 < 0.70`.
 
-### 3.1 Question
+Meanwhile min subject IoU `0.67901`, min view IoU `0.65213`, non-manifold edges `0`, and zero-area faces `0` passed.
 
-Can a new extraction-only decoder, with exact V8 scene/H frozen, recover substantially better surface fidelity when given resolution-aware deformation semantics and source-defensible raster supervision?
+Decision:
 
-This is a representation-capacity separation experiment:
+> A1 did not earn SURF-A2. Because it improved native C0 strongly, do not infer “H contains no geometry.” First isolate local representation decodability without mesh extraction.
 
-```text
-A1 PASS
-→ H contains useful geometry that V8 native extraction did not fully exploit
-→ proceed to true high-resolution direct A-arm design
+## 3. Active experiment — H-REP-P0
 
-A1 FAIL after apparatus/admission gates pass
-→ do not train TESSA
-→ open dedicated H representation investigation
-→ carrier retraining still requires a separate preregistered decision
-```
+### 3.1 Exact question
 
-### 3.2 Fixed model boundary
+Can exact sealed V8 local evidence encode surface geometry strongly enough that a low-capacity point probe can decode it **without** FlexiCubes, a surface decoder, TESSA or Compiler repair?
 
-Trainable: `FrozenHSurfaceRescueV1` only.
-
-Frozen: V8 scene core/scene planes, V8 appearance/relation/mechanical/structure domains, and all teacher data from inference forward.
-
-Decoder inputs:
-
-- sealed local H;
-- raw V8 field;
-- inherited V8 extraction delta expressed in native-cell units;
-- normalized XYZ;
-- explicit resolution ratio.
-
-Cube output starts as exact V8 21-D raw FlexiCubes parameters plus zero-initialized residual. At zero step R24 the new decoder must reproduce native V8 faces exactly and vertices within `2e-6` IRIS units.
-
-### 3.3 Resolution semantics
-
-No blind reuse of V8 absolute `0.03` extraction delta.
+This experiment separates two hypotheses:
 
 ```text
-cell_step = 2 / resolution
-base_delta_cells = V8_delta / (2/24)
-new_absolute_delta = bounded_cell_relative_delta × current_cell_step
+H-REP-P0 PASS
+→ local geometry is demonstrably present in H or raw field
+→ A1 failure is still compatible with extraction/transition debt
+→ redesign extraction transition; do not retrain H yet
+
+H-REP-P0 FAIL
+→ local geometry decodability is not demonstrated even before extraction
+→ open a separately preregistered carrier-representation retraining study
 ```
 
-A1 schedule is fixed before runtime:
+Neither branch authorizes TESSA or SURF-A2 directly.
 
-- R24 — 400 steps;
-- R32 — 600 steps;
-- R48 — 1400 steps;
-- total — 2400 optimizer steps.
+## 4. H-REP-P0 controls
 
-A1 R48 is a representation-rescue court, **not** the final high-resolution direct A-arm.
+Four probes are trained with **identical architecture and exact equal parameter count**. Every arm receives the same `384 evidence + 3 XYZ = 387` dimensional envelope.
 
-## 4. SURF-A1 truth and differentiable raster apparatus
+1. `H_XYZ`
+   - channels `0:384`: exact sealed local H;
+   - channels `384:387`: query XYZ.
+2. `RAW_FIELD_XYZ`
+   - channel `0`: exact sealed V8 raw field;
+   - channels `1:384`: zero;
+   - XYZ appended.
+3. `XYZ_ONLY`
+   - all 384 evidence channels zero;
+   - XYZ appended.
+4. `SHUFFLED_H_XYZ`
+   - within-subject fixed permutation of H, destroying local H↔XYZ alignment while preserving subject-level H statistics;
+   - XYZ appended.
 
-Exact immutable inputs are bound by `canonical/SURF_A1_FROZEN_H_INPUT_BINDING_V1.json`.
+No subject ID or semantic label enters any arm.
 
-Training truth sidecar:
+Probe architecture:
 
-- Stage01 source alpha masks → silhouette truth;
-- authored rest teacher mesh + exact Stage01 camera → pixel-center teacher geometry coverage;
-- teacher depth normalized by common half extent;
-- teacher face normal;
-- depth/normal valid only on `teacher geometry coverage ∩ source foreground`.
+- width `256`;
+- `2` residual blocks;
+- point-cloud distance head;
+- offset-to-reference head;
+- normal-up-to-sign head;
+- near-surface binary head;
+- identical parameter count for all four arms.
 
-Important separation:
+## 5. H-REP-P0 truth
 
-- source mask is **not** used to validate the renderer implementation;
-- independent first-party teacher-geometry center coverage is the raster apparatus parity authority;
-- PyTorch3D hard raster must achieve precision/recall ≥ `0.98` for all 64 views before optimizer step 1.
+Use only exact sealed V4 geometry already admitted for independent surface courts:
 
-PyTorch3D is pinned to commit `978cd99221b9e0a6a568f1d427854d73363265cf`. FlexiCubes remains pinned to `4cc7d6c3d0cee83c011ce36721b81adff0dd7db6`.
+- `teacher_surface_points_iris`;
+- `mechanical_points`;
+- `mechanical_normals`.
 
-## 5. SURF-A1 objective
+Build deterministic train and holdout query sets independently for all eight subjects. Targets:
 
-Fixed objective:
+- nearest-reference distance;
+- vector offset to nearest reference point;
+- nearest mechanical normal with validity radius;
+- near-surface class.
 
-```text
-L =
-    1.00 * surface_chamfer
-  + 1.00 * source_silhouette
-  + 0.50 * teacher_depth
-  + 0.25 * teacher_normal
-  + 0.01 * flexicubes_deviation
-  + 0.01 * cell_offset_residual_l2
-  + 0.001 * field_residual_l2
-  + 0.0001 * cube_parameter_residual_l2
-```
+Important claim boundary:
 
-Component count is measured independently, not used as a hidden topology gradient in A1.
+> nearest-point distance here is a **point-cloud geometry proxy**, not an exact signed distance field and not occupancy authority.
 
-Optimizer: AdamW `1e-4`, betas `0.9/0.95`, weight decay `0.01`, gradient clip `1.0`, 120-step warmup then cosine to `1e-5`.
+Teacher data supplies targets only. It never enters the probe input or V8 forward.
 
-## 6. A100 admission — zero optimizer steps
+## 6. Fixed training protocol
 
-Before SURF-A1 step 1:
+Per arm:
+
+- one shared model across all eight subjects;
+- AdamW;
+- `1200` optimizer steps;
+- batch `2048`;
+- peak LR `2e-4`;
+- `60`-step warmup;
+- cosine to `2e-5`;
+- gradient clip `1.0`;
+- checkpoint every `200` steps;
+- deterministic subject round-robin and RNG;
+- resumable exact hash-bound checkpoint.
+
+All arms see the same subject schedule and batch indices at each step.
+
+V8 model remains entirely frozen and its full scene-core hash is checked before/after feature caching.
+
+## 7. Independent held-out court
+
+Preregistered before runtime.
+
+### H_XYZ absolute gates
+
+- mean distance MAE `<= 0.025` IRIS;
+- worst-subject endpoint p95 `<= 0.075` IRIS;
+- minimum-subject normal abs-dot mean `>= 0.70`;
+- minimum-subject near-surface balanced accuracy `>= 0.80`.
+
+### H_XYZ local-information controls
+
+- distance MAE reduction vs `XYZ_ONLY` `>=20%`;
+- distance MAE reduction vs `SHUFFLED_H_XYZ` `>=15%`;
+- mean near-BA gain vs `XYZ_ONLY` `>=0.08`;
+- mean near-BA gain vs `SHUFFLED_H_XYZ` `>=0.05`.
+
+### RAW_FIELD_XYZ gates
+
+Same absolute geometry targets plus:
+
+- distance MAE reduction vs XYZ `>=20%`;
+- near-BA gain vs XYZ `>=0.08`.
+
+The carrier-local-geometry result is positive if **H_XYZ passes both its absolute and local-alignment gates OR RAW_FIELD_XYZ passes its absolute and XYZ-control gates**.
+
+Thresholds may not change after results.
+
+## 8. Source authority / fail-closed requirements
+
+Before optimization:
 
 1. exact reviewed source SHA and clean checkout;
-2. A100-class GPU with ≥39 GiB;
-3. exact V8 checkpoint and sealed V4 prepared bytes;
-4. exact Stage01 bundle;
-5. exact authored-teacher batch;
-6. exact pinned FlexiCubes checkout;
-7. exact pinned PyTorch3D checkout/import source;
-8. raster-truth sidecar hash/shape validation;
-9. zero-step R24 native V8 parity for all eight subjects;
-10. all 64 teacher-geometry raster parity views pass;
-11. full V8 scene-core hash unchanged;
-12. optimizer steps executed = 0.
+2. exact `canonical/H_REP_P0_INPUT_BINDING_V1.json` hash;
+3. exact `canonical/H_REP_P0_PREREGISTRATION_V1.json` hash;
+4. exact sealed V8 checkpoint and binding;
+5. exact V4 prepared manifest and shard hashes;
+6. deterministic probe-dataset receipt hash-bound to the current input binding;
+7. frozen scene-core hash established;
+8. all four arms have exact equal parameter count;
+9. A100-class GPU resource gate;
+10. optimizer steps executed = 0 before authorization.
 
-Only a typed `PASS_SURF_A1_A100_PREFLIGHT__TRAINING_AUTHORIZED` receipt may open the trainer.
+Resume requires exact source + binding + prereg + dataset receipt + V8 scene hash + parameter counts.
 
-## 7. Training execution
+The independent court rechecks the same chain and refuses a training result/checkpoint from another authority tuple.
 
-Use one shared decoder, deterministic subject round-robin, two deterministic rotating views per step. No subject-specific parameters.
+## 9. Notebook contract
 
-Operational rules:
+Generate a notebook only after the exact source gate is green.
 
-- cache exact frozen V8 scene planes once per subject;
-- query frozen V8 local evidence in FP32/no-autocast;
-- new decoder may use BF16 autocast;
-- FlexiCubes extraction remains FP32;
-- log every 10 steps: resolution, subject/views, LR, total + component losses, overlap, grad norm, step seconds and GPU memory;
-- checkpoint every 200 steps;
-- maintain exactly one hash-bound resumable `checkpoint_latest.pt` + `LATEST.json` in mounted Drive;
-- validate source/prereg/input/scene hashes before resume;
-- fail on non-finite loss/gradient or frozen-scene mutation.
-
-## 8. Independent A1 scientific court
-
-After step 2400, an evaluator independent of the training objective materializes R48 surfaces for all eight subjects and uses exact Stage01 source masks plus sealed geometry truth.
-
-Preregistered gates:
-
-- all 8 subjects complete and finite;
-- non-manifold edges per subject = 0;
-- zero-area faces per subject = 0;
-- mean symmetric Chamfer ≤ `0.04` IRIS;
-- every subject teacher→candidate p95 ≤ `0.075` IRIS;
-- global mean subject mask IoU ≥ `0.80`;
-- minimum subject mean mask IoU ≥ `0.65`;
-- minimum view IoU ≥ `0.55`;
-- maximum global mask gap ≤ `128 px`;
-- minimum subject mean absolute normal alignment ≥ `0.70`.
-
-Component fragmentation is recorded in A1 but is not an A1 gate; topology authority remains a later direct-A/TESSA decision.
-
-## 9. Next branch only if A1 passes — SURF-A2-HIRES
-
-A1 PASS does not mean final surface capability. It only shows the sealed carrier can support a better decoder.
-
-SURF-A2 must then define a serious high-resolution direct witness with explicit sparse/active-resolution semantics and stronger final admission: high-resolution geometry, mask/depth/normal/source fidelity, topology diagnostics, Compiler static qualification, support binding, G5 multiview and G3 dynamic/mechanical behavior. The A2 thresholds and exact resolution strategy must be preregistered before evaluation.
-
-## 10. TESSA-V2-B1 remains blocked
-
-TESSA trains only after a qualified SURF-A2 direct A-arm exists.
-
-TESSA's job is **structuralization**, not rescue:
-
-```text
-A = qualified high-resolution direct IRIS surface → Compiler
-B = same admissible evidence/surface → TESSA V2 → Compiler
-```
-
-B must preserve fidelity/mechanics/support while providing meaningful animation/production topology or face economy. If it does not, prefer A and remove TESSA from the required product path.
-
-## 11. Relation V10 is parked, not lost
-
-The V10 relation program remains valid but is intentionally parked to stop context switching. When SURFACE_TESSA reaches a clean boundary, resume from Truth V3/all-hit/ray-stack readiness rather than from another ad-hoc optimizer run.
-
-## 12. Fit8 generic-system criterion
-
-Every new SURF/TESSA stage must answer both:
-
-1. does it improve the eight measured subjects? and
-2. did it make the **same system** more subject-agnostic?
-
-Required genericity checks include one architecture/config across all subjects, no subject-name or semantic-role branching, exact shared input/output contracts, shared Compiler consumers, generic failure/abstention semantics, source+data-bound receipts and execution resumable without chat context.
-
-This is the bridge from Fit8 to future large unseen evaluation.
-
-## 13. Notebook contract
-
-Notebook generation occurs only from an exact source SHA whose dedicated source gate is green.
-
-Operator UX must be:
+Operator UX must be the successful V8 pattern:
 
 ```text
 Open → Run all → one Drive approval → autonomous execution
 ```
 
-No second OAuth UI, no `auth.authenticate_user()`, no interactive rclone/gcloud configuration, no manual sequencing. The notebook must precompile current source, run source sanity gates, pin external dependencies, hash-check all scientific inputs, print meaningful phase/progress logs, and resume from exact receipts/checkpoints.
+Use physically separated cells/phases, not a single giant worker cell. At minimum:
 
-## 14. Immediate execution order
+1. Drive mount + immutable authority constants;
+2. exact runtime/A100 gate;
+3. exact source checkout + clean-tree gate;
+4. exact direct-path hydration/hash verification;
+5. deterministic probe dataset build/receipt;
+6. frozen V8 feature-cache/admission checks;
+7. four-arm trainer setup;
+8. 1200-step probe training;
+9. independent held-out court;
+10. final typed receipt summary.
+
+Forbidden:
+
+- second OAuth / `auth.authenticate_user()`;
+- interactive rclone/gcloud;
+- full Drive scan, `os.walk`, `rglob` discovery for known inputs;
+- hidden fallback;
+- manual cell sequencing.
+
+Known exact mounted scientific roots must be bound directly before notebook generation.
+
+## 10. SURF-A2 and TESSA remain blocked
+
+`SURF-A2-HIRES` cannot start merely because H-REP-P0 passes. A PASS first requires an extraction-transition design/preregistration that can produce a new direct A-arm.
+
+`TESSA-V2-B1` remains blocked until that later direct A-arm itself qualifies.
+
+## 11. Relation V10 remains parked
+
+Do not context-switch back to relation training while H-REP-P0 is unresolved. Preserve Relation V10 at its Truth-V3/all-hit/ray-stack readiness boundary.
+
+## 12. Immediate execution order
 
 ```text
-P0. synchronize CURRENT_STATE / CURRENT_PLAN / decision ledger
-P1. dedicated SURF-A1 source gate GREEN
-P2. freeze exact green SHA
-P3. generate single-consent A100 Run-All notebook pinned to that SHA
-P4. build/verify raster truth
-P5. zero-step A100 preflight
-P6. only if PASS → 2400-step SURF-A1 fit
-P7. independent R48 court
-P8a. PASS → design/preregister SURF-A2-HIRES
-P8b. FAIL → H representation investigation; no TESSA
+P0. seal SURF-A1 result in state/ledger                       [IN PROGRESS]
+P1. implement H-REP-P0 source + prereg + controls             [IMPLEMENTED ON STAGING BRANCH]
+P2. source contract / CI green                                [NEXT]
+P3. freeze exact green SHA
+P4. generate V8-style multi-cell single-consent zero-scan A100 notebook
+P5. build deterministic train/holdout point-proxy dataset
+P6. cache/verify frozen V8 H + raw field
+P7. train four exact equal-capacity arms, 1200 steps each
+P8. independent held-out court
+P9a. PASS → extraction-transition redesign; keep H sealed
+P9b. FAIL → preregister carrier-representation retraining
 ```
 
-No rush-driven gate skipping is allowed.
+No TESSA or SURF-A2 shortcut exists around this state machine.

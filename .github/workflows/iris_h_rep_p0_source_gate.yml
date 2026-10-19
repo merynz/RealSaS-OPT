@@ -11,6 +11,7 @@ on:
       - 'docs/research/IRIS_SURF_A1_FROZEN_H_RESULT_20261019.json'
       - 'docs/research/IRIS_H_REP_P0_DECISION_LEDGER_20261019.md'
       - 'models/iris/vnext/h_rep_probe_v1.py'
+      - 'tools/iris_vnext/h_rep_probe_authority_v1.py'
       - 'tools/iris_vnext/build_fit8_h_rep_probe_dataset_v1.py'
       - 'tools/iris_vnext/h_rep_probe_runtime_v1.py'
       - 'tools/iris_vnext/train_fit8_h_rep_probe_v1.py'
@@ -30,6 +31,7 @@ on:
       - 'docs/research/IRIS_SURF_A1_FROZEN_H_RESULT_20261019.json'
       - 'docs/research/IRIS_H_REP_P0_DECISION_LEDGER_20261019.md'
       - 'models/iris/vnext/h_rep_probe_v1.py'
+      - 'tools/iris_vnext/h_rep_probe_authority_v1.py'
       - 'tools/iris_vnext/build_fit8_h_rep_probe_dataset_v1.py'
       - 'tools/iris_vnext/h_rep_probe_runtime_v1.py'
       - 'tools/iris_vnext/train_fit8_h_rep_probe_v1.py'
@@ -64,6 +66,7 @@ jobs:
         run: |
           python -m py_compile \
             models/iris/vnext/h_rep_probe_v1.py \
+            tools/iris_vnext/h_rep_probe_authority_v1.py \
             tools/iris_vnext/build_fit8_h_rep_probe_dataset_v1.py \
             tools/iris_vnext/h_rep_probe_runtime_v1.py \
             tools/iris_vnext/train_fit8_h_rep_probe_v1.py \

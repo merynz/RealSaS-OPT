@@ -34,6 +34,7 @@ from tools.iris_vnext.h_rep_probe_runtime_v1 import (
 
 SCHEMA = "RealSaS.HRepP0TrainingResult.v1"
 CHECKPOINT_SCHEMA = "RealSaS.HRepP0Checkpoint.v1"
+SAMPLER_SCHEMA = "RealSaS.HRepP0StepSeededSampler.v1"
 TOTAL_STEPS = 1200
 BATCH_SIZE = 2048
 
@@ -58,6 +59,27 @@ def _lr(step: int) -> float:
         return 2.0e-4 * float(step + 1) / float(warm)
     t = (step - warm) / max(1, TOTAL_STEPS - warm - 1)
     return 2.0e-5 + 0.5 * (2.0e-4 - 2.0e-5) * (1.0 + math.cos(math.pi * t))
+
+
+def deterministic_batch_seed_v1(step: int, subject_index: int) -> int:
+    if step < 0 or not (0 <= subject_index < len(SUBJECT_IDS)):
+        raise ValueError("H_REP_P0_BATCH_SEED_INPUT_INVALID")
+    return 26_104_000 + int(step) * 4099 + int(subject_index) * 131
+
+
+def deterministic_batch_indices_v1(
+    *, step: int, subject_index: int, row_count: int, batch_size: int = BATCH_SIZE
+) -> torch.Tensor:
+    if row_count <= 0 or batch_size <= 0:
+        raise ValueError("H_REP_P0_BATCH_INDEX_INPUT_INVALID")
+    generator = torch.Generator(device="cpu")
+    generator.manual_seed(deterministic_batch_seed_v1(step, subject_index))
+    return torch.randint(
+        0,
+        int(row_count),
+        (min(int(batch_size), int(row_count)),),
+        generator=generator,
+    )
 
 
 def train(args: argparse.Namespace) -> dict[str, Any]:
@@ -120,6 +142,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
     }
     print("H_REP_P0_A100_AUTHORITY", json.dumps(gpu, sort_keys=True), flush=True)
     print("H_REP_P0_EQUAL_CAPACITY", json.dumps(parameter_counts, sort_keys=True), flush=True)
+    print("H_REP_P0_SAMPLER", SAMPLER_SCHEMA, flush=True)
 
     output = Path(args.output_dir).resolve()
     mirror = Path(args.checkpoint_mirror_dir).resolve()
@@ -137,6 +160,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         "preregistration_sha256": prereg_sha,
         "dataset_receipt_sha256": dataset_sha,
         "v8_scene_core_sha256": scene_hash,
+        "sampler_schema": SAMPLER_SCHEMA,
     }
     if local.is_file():
         checkpoint = torch.load(local, map_location="cpu", weights_only=True)
@@ -153,19 +177,19 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         completed = int(checkpoint["completed_steps"])
         if completed < 0 or completed > TOTAL_STEPS:
             raise RuntimeError("H_REP_P0_RESUME_STEP_INVALID")
-        print("H_REP_P0_RESUME", completed, flush=True)
+        print("H_REP_P0_RESUME", completed, "sampler", SAMPLER_SCHEMA, flush=True)
 
     started = time.perf_counter()
-    generators = {
-        subject: torch.Generator(device="cpu").manual_seed(26104000 + index)
-        for index, subject in enumerate(SUBJECT_IDS)
-    }
     for step in range(completed, TOTAL_STEPS):
-        subject = SUBJECT_IDS[step % len(SUBJECT_IDS)]
+        subject_index = step % len(SUBJECT_IDS)
+        subject = SUBJECT_IDS[subject_index]
         item = cache[subject]
         n = len(item["xyz_iris"])
-        index = torch.randint(
-            0, n, (min(BATCH_SIZE, n),), generator=generators[subject]
+        index = deterministic_batch_indices_v1(
+            step=step,
+            subject_index=subject_index,
+            row_count=n,
+            batch_size=BATCH_SIZE,
         )
         batch = {
             key: value[index].to(device=device)
@@ -210,6 +234,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
                 "H_REP_P0_STEP",
                 f"step={done}/{TOTAL_STEPS}",
                 f"subject={subject}",
+                f"batch_seed={deterministic_batch_seed_v1(step, subject_index)}",
                 f"lr={lr:.8g}",
                 *(f"{arm}={logs[arm]:.6f}" for arm in PROBE_ARMS_V1),
                 flush=True,

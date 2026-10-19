@@ -33,6 +33,7 @@ def test_surf_a1_result_is_sealed_as_fail_and_h_rep_is_active():
     assert "SURF-A1 COMPLETED SCIENTIFIC FAIL" in state
     assert "H-REP-P0" in state
     assert "SURF-A1 CLOSED FAIL; H-REP-P0 ACTIVE" in plan
+    assert "IRIS_H_REP_P0_DECISION_LEDGER_20261019.md" in state
 
 
 def test_h_rep_binding_is_exactly_triggered_by_a1_evidence():
@@ -65,6 +66,16 @@ def test_h_rep_preregistration_keeps_representation_question_narrow():
     assert architecture["subject_specific_parameters"] is False
     assert prereg["probe_truth"]["distance_semantics"] == "POINT_CLOUD_PROXY__NOT_EXACT_SDF"
     assert prereg["probe_truth"]["teacher_truth_in_probe_input"] is False
+    runtime = prereg["runtime_admission"]
+    assert runtime["accelerator"] == "NVIDIA_A100_CLASS"
+    assert runtime["minimum_cuda_memory_gib"] == 39
+    assert runtime["exact_execution_source_sha_required"] is True
+    assert runtime["source_precompile_required"] is True
+    assert runtime["optimizer_step_allowed_before_all_authority_gates"] is False
+    assert runtime["single_drive_mount_consent_required"] is True
+    assert runtime["drive_tree_discovery_allowed"] is False
+    assert runtime["additional_google_oauth_allowed"] is False
+    assert runtime["reduced_capacity_or_subject_fallback_allowed"] is False
     assert prereg["heldout_court"]["thresholds_may_change_after_results"] is False
     assert prereg["interpretation"]["pass_authorizes_surf_a2"] is False
     assert prereg["interpretation"]["pass_authorizes_tessa"] is False

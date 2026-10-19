@@ -19,7 +19,12 @@ from models.iris.vnext.h_rep_probe_v1 import (
     build_probe_input_v1,
     h_rep_probe_metrics_v1,
 )
-from tools.iris_vnext.h_rep_probe_authority_v1 import git_head, load_json, sha256_file
+from tools.iris_vnext.h_rep_probe_authority_v1 import (
+    load_json,
+    require_a100_runtime_v1,
+    require_exact_clean_source_v1,
+    sha256_file,
+)
 from tools.iris_vnext.h_rep_probe_runtime_v1 import (
     cache_frozen_v8_probe_features_v1,
     load_h_rep_binding_v1,
@@ -51,8 +56,7 @@ def _require_finite_tree(value: Any, prefix: str = "root") -> None:
 def audit(args: argparse.Namespace) -> dict[str, Any]:
     repo = Path(args.repo_root).resolve()
     source_sha = str(args.expected_source_sha).lower()
-    if git_head(repo) != source_sha:
-        raise RuntimeError("H_REP_P0_COURT_SOURCE_SHA_DRIFT")
+    require_exact_clean_source_v1(repo, source_sha)
 
     binding_path = Path(args.binding).resolve()
     prereg_path = Path(args.preregistration).resolve()
@@ -62,6 +66,13 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
     prereg = load_json(prereg_path)
     if prereg.get("schema") != "RealSaS.HRepP0Preregistration.v1":
         raise ValueError("H_REP_P0_COURT_PREREG_INVALID")
+    runtime = prereg.get("runtime_admission") or {}
+    if runtime.get("accelerator") != "NVIDIA_A100_CLASS":
+        raise ValueError("H_REP_P0_COURT_ACCELERATOR_PREREG_DRIFT")
+    minimum_memory_gib = float(runtime.get("minimum_cuda_memory_gib", -1))
+    if minimum_memory_gib != 39.0:
+        raise ValueError("H_REP_P0_COURT_MEMORY_PREREG_DRIFT")
+    gpu = require_a100_runtime_v1(minimum_memory_gib)
 
     binding_sha = sha256_file(binding_path)
     prereg_sha = sha256_file(prereg_path)
@@ -109,8 +120,6 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
         raise RuntimeError("H_REP_P0_COURT_CHECKPOINT_PARAMETER_COUNT_DRIFT")
 
     device = torch.device("cuda")
-    if not torch.cuda.is_available():
-        raise RuntimeError("H_REP_P0_COURT_CUDA_REQUIRED")
     cache, scene_hash = cache_frozen_v8_probe_features_v1(
         v8_checkpoint=Path(args.v8_checkpoint),
         prepared_root=Path(args.prepared_root),
@@ -257,6 +266,7 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
         "training_result_sha256": sha256_file(training_result_path),
         "training_checkpoint_sha256": checkpoint_sha,
         "v8_scene_core_sha256": scene_hash,
+        "gpu": gpu,
         "parameter_counts": parameter_counts,
         "subjects": subject_results,
         "aggregate": aggregate,

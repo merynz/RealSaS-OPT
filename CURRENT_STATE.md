@@ -1,173 +1,286 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-10-18  
-**Canonical production line:** `main` until reviewed vNext is merged  
-**Active review source:** `research/iris-vnext-post-v8-quality-plan-20261018`  
-**Review vehicle:** PR #116 (`research/iris-vnext-single-carrier-graphics`)  
-**Verified executable pretraining source:** `726768813c523081166cc1ac49f08453260b66b9`  
-**Verification:** pretraining source gate `39137955380` PASS; full vNext suite `39137955347` PASS; PR #116 exact-head gate set **15/15 PASS**  
-**Active program:** **POST-V8 QUALITY / TRUTH / CONSUMPTION QUALIFICATION**  
-**Scientific status:** **NO IRIS FIT8 SCIENTIFIC PASS**  
-**Focused post-V8 training steps executed:** **0**
+**Date:** 2026-10-19  
+**Production authority:** `main` until reviewed merge  
+**Post-V8 base:** `research/iris-vnext-post-v8-quality-plan-20261018`  
+**Active architecture/evidence branch:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
+**Review vehicle:** draft PR #122 — `IRIS: TESSA V2 structuralization + geometry-explicit evidence redesign`  
+**Scientific status:** **NO GLOBAL IRIS FIT8 PASS / NO TESSA PASS / V9 HAS SCOPED RELATION PASS ONLY**  
+**Training authorization:** **NO NEW OPTIMIZER STEP AUTHORIZED**
 
-## Authority separation
+## 1. Authority separation
 
-1. `main` remains merged production-code authority.
-2. Completed V8 remains an immutable architecture/measurement baseline bound to source `5083c9915533ec8ec6530c7d229c635887abfea7` plus exact checkpoint/receipt lineage.
-3. The active post-V8 branch is review source only; later source hardening does not rewrite V8 history.
-4. Green CI proves source contracts, not scientific quality.
-5. Artifact Registry / Attempt / ProductRevision and sealed experiment artifacts remain durable research/product authority.
+1. `main` remains merged product-code authority.
+2. Completed V8 remains immutable architecture/measurement history bound to source `5083c9915533ec8ec6530c7d229c635887abfea7` and its exact checkpoint lineage.
+3. Completed V9 remains immutable focused-relation experiment history; later redesign does not rewrite V9 truth, model or result.
+4. PR #122 is review/research source only.
+5. Green CI proves source contracts, not scientific quality.
+6. Model evidence, Compiler qualification and product canonical state remain separate authorities.
 
-## Preserved product continuity
+## 2. Preserved product invariants
 
-The post-V8 IRIS program does not replace current V2 product/control-plane authority on `main`.
+- one canonical mechanical carrier `M` after deterministic Compiler qualification/selection;
+- no second deformable visual mesh;
+- IRIS emits learned scene/evidence, not final product mesh authority;
+- TESSA may emit mesh proposals only;
+- Compiler remains the authority that may mint canonical M;
+- unknown/unsupported truth must abstain rather than become fabricated negative or semantic intent.
 
-- `canonical/V2_IMPLEMENTATION_READINESS.json` remains the implementation-readiness pointer.
-- The 43-stage dependency DAG and `PLATFORM_EXECUTION_LANES` remain existing control-plane continuity.
-- `QualifiedMeshIR`, `SurfaceAddressing`, Geometry, Mechanics, and Complete Appearance Authority retain their scoped product meanings.
-- Existing `CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED` continuity is not a new IRIS/Fit8 PASS.
+## 3. V8 baseline — immutable
 
-## Training lineage and invariant
+Exact completed V8 authority:
 
-V5 exposed unsafe downstream rewriting of shared H. V6 showed loss retention alone did not prevent Geometry/extraction drift while `scene_core` remained trainable. V7 repaired TESSA coordinate compatibility. V8 migrated exact V6 M1-end, sealed `scene_core`, completed step 12000, and preserved Geometry/extraction while downstream specialist objectives remained learnable.
+- source: `5083c9915533ec8ec6530c7d229c635887abfea7`;
+- global step: `12000`;
+- checkpoint SHA256: `0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5`;
+- binding SHA256: `735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2`;
+- `scene_core` sealed after M1.
 
-Current default:
+Earned V8 interpretation:
+
+- post-M1 geometry/extraction retention was materially improved by sealing shared H;
+- downstream appearance/relation/topology objectives remained learnable from sealed H;
+- this does **not** establish a global Fit8 scientific PASS;
+- topology loss reduction is not an independent topology qualification court.
+
+Default remains: do not reopen H merely because one specialist path is weak.
+
+## 4. V9 focused relation — completed scoped result
+
+V9 focused relation `ATTEMPT_001` completed 1600 optimizer steps at source `7029ee3f48787aa9f7e27eecef89155eb9368a96`.
+
+Scoped result:
+
+- projected alpha-boundary held-out balanced accuracy ~`0.7599`;
+- projected appearance-boundary held-out balanced accuracy ~`0.8209`;
+- front held-out balanced accuracy ~`0.5588`;
+- visibility A ~`0.5659`;
+- visibility B ~`0.5534`;
+- occlusion support was positive-only and is not a binary discrimination court.
+
+Interpretation:
+
+- clean camera-conditioned projected-boundary truth is genuinely learnable from the sealed V8 representation/path;
+- V9 does not prove ordering solved;
+- V9 visibility targets duplicated pair orientation (`visA=front`, `visB=1-front`) and do not establish complete-stack visibility;
+- weak V9 ordering does not by itself prove raw H lacks order information because V9 retained the historical frozen 384→64 relation embedding.
+
+## 5. Relation redesign state
+
+PR #122 contains `GraphicsRelationHeadV3` / evidence V3 source changes:
+
+- full/raw H is available to the relation path rather than forcing the historical 64-D bottleneck;
+- explicit `XYZ_A/XYZ_B`, delta geometry, camera-space depth, projected UV and same-ray residual are conditioning inputs;
+- front/order remains pairwise;
+- visibility is removed from the pair abstraction and moved to complete-ray-stack evidence;
+- new pair API has no free unsupervised neural confidence;
+- appearance/mechanical V3 remove orphan confidence/descriptor/uncertainty outputs from authority;
+- historical uncalibrated scene uncertainty remains frozen/hidden from V3 evidence.
+
+No V10 relation optimizer step is authorized. Relation Truth V3 still requires measured all-hit/authored-motion support, exact materialization, preregistration and readiness.
+
+## 6. Contact persistence state
+
+The historical teacher type can represent contact persistence, but the active Fit8 mechanical preparation did not provide `contact_face_mask`.
+
+Therefore:
 
 ```text
-G / M establish shared carrier H
+no source-defensible contact mask
         ↓
-M1 seal
+contact_persistence_valid = false
         ↓
-A / R / T / J specialist learning
-        ↓
-scene_core remains sealed
+ABSTAIN / zero gradient
 ```
 
-Post-V8 `optimization_v2.py` separates future specialist parameter groups and telemetry; it does not rewrite historical V8 optimizer provenance.
+Stored zero must not be interpreted as negative contact truth.
 
-## Verified post-V8 source stack
+## 7. TESSA V2 architectural decision
 
-At `726768813c523081166cc1ac49f08453260b66b9`, exact source CI is green for:
+TESSA is no longer treated as a mandatory small IRIS structure head.
 
-- canonical post-M1 stage IDs and fail-closed carrier guard;
-- Graphics Truth V2 authority/provenance/validity and validity-aware loss;
-- Relation Truth V2 producer and support/class-balance eligibility;
-- `GraphicsRelationHeadV2` conditioning plus deterministic V1→V2 migration semantics;
-- head-separated specialist optimizer/telemetry;
-- source-defensible Boundary Causality V1 materializer;
-- exact completed-V8 relation-head migration tool;
-- SHA-scoped candidate preparation lane and full remote round-trip verifier;
-- materialization seal and preregistration/readiness gate;
-- self-hosted writer safety contracts;
-- single-carrier Compiler/runtime behavior, native Graphics ordering/E2E, and decoder regressions.
+Current preferred split:
 
-No training is invoked by this lane.
+```text
+8-view observations
+        ↓
+IRIS continuous scene carrier H / field
+        ↓
+high-fidelity surface witness
+        ↓
+OPTIONAL TESSA V2 structuralization / learned retopology
+        ↓
+mesh proposal
+        ↓
+Compiler qualification
+        ↓
+canonical M
+```
 
-## Quarantined remote forensic result
+TESSA V2 source defaults:
 
-Cancelled stale run `39121291171` wrote partially to:
+- width `1024`;
+- `16` attention heads;
+- `24` decoder layers;
+- FFN `4096`;
+- `1024` coordinate bins;
+- `512` scene + `512` surface/mechanics memory tokens;
+- exact local causal context `4096`;
+- causal global structural-history summaries;
+- AMT-compatible adjacency-aware grammar retained;
+- strict free-running grammar/generator;
+- independent decoded-mesh topology court;
+- token CE + coordinate metric + structural-token objective.
 
-`gdrive:RealSaS_Fit8_IRIS_vNext_20261016`
+These are research defaults, not mobile runtime promises and not demonstrated 32k free-running capability.
 
-Read-only Drive inspection now establishes **`INCOMPLETE_REMOTE_SNAPSHOT`**:
+## 8. Why TESSA remains optional
 
-- remote folder id `1QgrZSGKxnhFWKq-HYiycUi3i_0oIJp2B`;
-- top-level contains only `teachers/`;
-- `prepared/` and `receipts/` are absent;
-- `TEACHER_BATCH_RECEIPT.json` SHA256 is `7ac1c66cc5f749e0f6f8cac43a9b79a135c8c45ed1138303d42c102f04c15d27`, exactly matching stale-run forensic evidence;
-- George teacher receipt is present but George `.teacher.npz` is absent.
+StdGEN++-class and MeshAnything-class ideas solve different problems:
 
-Therefore the remote is both incomplete and stale-lineage. It remains **QUARANTINED / CONSUMPTION FORBIDDEN**. Machine-readable evidence is in `docs/research/IRIS_VNEXT_QUARANTINE_CONNECTOR_AUDIT_20261018.json`.
+- IRIS/StdGEN++ side: high-fidelity continuous/sparse surface reconstruction, geometric/raster supervision, thin-structure continuity;
+- TESSA/MeshAnything side: explicit structural connectivity / production-style retopology prior.
 
-## Pretraining materialization lane
+Therefore TESSA survives only if an A/B court proves value:
 
-The old writer is retired. A new manual, fail-closed candidate writer is now source-implemented:
+```text
+A = same IRIS evidence → direct high-res surface → Compiler
+B = same IRIS evidence → TESSA V2 → Compiler
+```
 
-`.github/workflows/iris_vnext_fit8_pretraining_candidate_self_hosted_v1.yml`
+If A qualifies and B adds no meaningful topology/face-economy value, policy prefers A.
 
-It is designed to:
+## 9. Direct high-resolution surface baseline — source implemented
 
-1. bind one exact active-review SHA;
-2. consume a read-only quarantine audit artifact without authorizing the old remote;
-3. hydrate exact admitted Fit8 inputs;
-4. export authored-motion teachers;
-5. build the sealed V4 cohort;
-6. materialize Relation Truth V2 and Boundary Causality V1;
-7. hydrate the exact completed-V8 authority checkpoint;
-8. perform zero-step relation-head V1→V2 migration;
-9. write only to `gdrive:RealSaS_Fit8_IRIS_vNext_candidates/<exact_sha>`;
-10. refuse overwrite of a non-empty candidate remote;
-11. require full Drive round-trip byte equality;
-12. seal a pretraining materialization receipt with `training_authorized=false`.
+The selected historical sparse decoder has been connected to vNext/V8 field authority:
 
-**Source-ready does not mean artifact-ready.** This workflow has not yet materialized the final candidate artifact for the current final source SHA.
+`RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT.v5`
 
-## Exact V8 migration authority
+Scientific baseline policy is fixed:
 
-Drive folder `v8_m1_sealed_5083c991` contains the completed V8 lineage. Authoritative `LATEST.json` selects:
+- T512 coarse grid;
+- sparse T1024 refinement;
+- no hidden deformation;
+- normalized coordinate identity;
+- raw learned field sign identity;
+- no `extraction_delta` or uncalibrated uncertainty mixed into the A-arm baseline;
+- FP32 / no autocast.
 
-- checkpoint `step_00012000_ac23a9ea448e465cb668773a131981be.pt`;
-- step `12000`;
-- checkpoint SHA256 `0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5`;
-- binding SHA256 `735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2`.
+Reduced grids exist only in unit tests. The scientific CLI provides no grid-resolution override.
 
-The migration source is pinned to that exact artifact. Historical V8 remains `scientific_fit_pass_claimed=false`.
+Important compatibility correction already implemented:
 
-## Relation truth / Boundary Causality
+- historical V8 `IRISVNextV1` uses `model.scene_core.query()`;
+- post-redesign V3 can use `model.query_local()`;
+- the sparse adapter supports both but the direct A arm explicitly uses exact historical V8, not a V3 migration.
 
-Replacement source is implemented, but the new final-source corpus is **not yet sealed**.
+## 10. Exact direct-surface input binding
 
-- static same/cut/attachment abstain when independent authority is absent;
-- view-conditioned front/visibility and projected boundaries are camera-conditioned;
-- current deterministic occlusion rows are single-class positive support and are not binary-court eligible;
-- Boundary Causality accepts only source-defensible causes and explicit abstention.
+Machine-readable authority:
 
-Do not fabricate negative truth or semantic/drawable intent unavailable from the source.
+`canonical/VNEXT_DIRECT_SURFACE_INPUT_BINDING_V1.json`
 
-## Compiler/runtime consumption
+Prepared observations are read-only reuse of the sealed V9 V4 cohort:
 
-Source evidence currently supports fragment clustering from admissible same/cut/boundary evidence, front+occlusion order edges, precedence overriding contradictory physical depth, and visibility changing final native RGBA.
+- preparation source `7029ee3f48787aa9f7e27eecef89155eb9368a96`;
+- manifest schema `RealSaS.IRISVNextFit8Manifest.v4`;
+- manifest SHA256 `6561bf2087f4fac3699c673b5c93fb3d8dbc2d1ff90a5065d976cae70688b4d8`;
+- 8 bound shard file IDs + SHA256 values;
+- exact V8 checkpoint file ID + SHA256.
 
-Open behavioral debt remains for attachment and support-band application in the native reference renderer. Serialization is not behavioral use.
+Read-only hydration source:
 
-## TESSA/topology
+`tools/iris_vnext/hydrate_fit8_direct_surface_inputs_v1.py`
 
-V8 topology loss was not an independent topology court. Held-out qualification must measure actual valid/degenerate faces, component error, holes/boundary loops, meaningful manifold diagnostics, canonical-surface deviation, source support and cohort worst cases.
+It verifies bytes, manifest rows and preparation receipt. It has no remote write path and authorizes no training.
 
-## Immediate execution state
+## 11. Direct-surface execution source
 
-Completed now:
+Implemented:
 
-- source pretraining lane implemented;
-- executable source gate green;
-- full vNext source suite green;
-- PR #116 exact executable head 15/15 green;
-- quarantined Drive remote classified read-only as incomplete/stale-lineage;
-- exact completed-V8 migration checkpoint identity established.
+- `models/iris/vnext/sparse_surface_v3.py` — exact field→T512/T1024 adapter and candidate receipt;
+- `tools/iris_vnext/hydrate_fit8_direct_surface_inputs_v1.py` — exact read-only input hydration;
+- `tools/iris_vnext/preflight_fit8_direct_surface_a100_v1.py` — A100-class engineering-only probe;
+- `tools/iris_vnext/materialize_fit8_direct_surface_v1.py` — 8-subject full-resolution materializer;
+- unit/source contracts that forbid reduced scientific resolution and prove exact-V8 query API compatibility.
 
-Still required before **any** focused optimizer step:
+A100 preflight semantics:
 
-1. run the exact-SHA read-only audit artifact on the final source head;
-2. materialize the SHA-scoped candidate remote;
-3. verify full remote round-trip hashes;
-4. seal actual Relation Truth V2 + Boundary Causality manifests;
-5. seal actual zero-step V8→HeadV2 migration artifact/receipt;
-6. seal pretraining materialization receipt;
-7. preregister held-out and non-regression gates against exact artifact hashes;
-8. require readiness status `READY_FOR_FOCUSED_TRAINING_ENTRY__NO_STEP_EXECUTED`.
+- exact V8 + one real prepared scene;
+- exact production field-query chunk;
+- no reduced-resolution mesh;
+- no quality verdict;
+- minimum 39 GiB CUDA-memory admission envelope;
+- resource/throughput result only.
 
-At that point the project has reached the training boundary. No focused training has started yet, and no broad 12k/A100 rerun is authorized.
+## 12. Direct-surface scientific state
 
-## Required read order
+**No full direct-surface artifact has been executed yet on this branch.**
+
+Therefore currently absent:
+
+- 8/8 full T512→T1024 surface receipts;
+- source-fidelity mask/depth/normal/surface-distance court;
+- direct-surface Compiler qualification;
+- G5/multiview direct-surface court;
+- G3/authored-motion direct-surface court;
+- sealed A-arm baseline.
+
+Source-contract green must never be reported as those results.
+
+## 13. Current execution threshold
+
+Exact next state machine:
+
+```text
+FINAL SOURCE GATE ON CURRENT PR HEAD
+        ↓
+READ-ONLY INPUT HYDRATION
+        ↓
+BYTE/HASH/LINEAGE RECEIPT PASS
+        ↓
+A100-CLASS ENGINEERING PREFLIGHT
+        ↓
+FULL FIT8 T512→T1024 MATERIALIZATION
+        ↓
+8/8 MODEL-ONLY SURFACE RECEIPTS
+        ↓
+SOURCE-FIDELITY + COMPILER/G5/G3 COURTS
+        ↓
+DIRECT A-ARM SEALED
+        ↓
+TESSA V2 TRAINING READINESS
+```
+
+TESSA optimizer steps are premature before the A arm exists.
+
+## 14. Parallel post-V8 relation workstream
+
+The surface/TESSA work does not cancel the relation evidence program.
+
+Relation V10 remains blocked on:
+
+- exact all-hit relation evidence support;
+- authored-motion conditioning disposition;
+- Truth V3 authority/validity;
+- support/class-balance/abstention courts;
+- V9-state vs neutral initialization court;
+- frozen-domain hot-path fix;
+- preregistration/materialization/readiness.
+
+Do not mix relation V10 authorization with TESSA/surface authorization.
+
+## 15. Required read order
 
 1. `CURRENT_STATE.md`
 2. `CURRENT_PLAN.md`
-3. `docs/research/IRIS_VNEXT_PRETRAINING_EXECUTION_STATE_20261018.md`
-4. `docs/research/IRIS_VNEXT_QUARANTINE_CONNECTOR_AUDIT_20261018.json`
-5. `docs/research/IRIS_VNEXT_DECISION_LEDGER_20261018.md`
-6. `docs/research/IRIS_VNEXT_RELATION_TRUTH_AUDIT_20261018.md`
+3. `docs/research/IRIS_TESSA_V2_STRUCTURALIZATION_PLAN_20261019.md`
+4. `docs/research/IRIS_DIRECT_SURFACE_BASELINE_EXECUTION_PLAN_20261019.md`
+5. `docs/research/IRIS_TESSA_V2_DECISION_LEDGER_20261019.md`
+6. `docs/research/IRIS_V9_FOCUSED_RELATION_RESULT_20261019.json`
 7. `docs/research/IRIS_VNEXT_POST_V8_QUALITY_PLAN_20261018.md`
 8. `docs/research/IRIS_VNEXT_STDGENPP_REAUDIT_20261018.md`
 9. `docs/research/IRIS_VNEXT_GRAPHICS_CONSUMPTION_LINEAGE_V1.json`
-10. `AGENTS.md`
-11. `SYSTEM_INDEX.md`
+10. `docs/research/IRIS_VNEXT_DECISION_LEDGER_20261018.md`
+11. `AGENTS.md`
+12. `SYSTEM_INDEX.md`

@@ -58,7 +58,7 @@
     "commit": "978cd99221b9e0a6a568f1d427854d73363265cf",
     "license": "BSD",
     "training_resolution": 256,
-    "hard_proxy_parity_before_optimizer": {"minimum_recall":0.98,"minimum_precision":0.98},
+    "hard_proxy_parity_before_optimizer": {"minimum_recall":0.98,"minimum_precision":0.98,"all_64_views_required":true},
     "proxy_parity_reference": "FIRST_PARTY_PIXEL_CENTER_TEACHER_GEOMETRY_COVERAGE",
     "source_mask_is_proxy_parity_reference": false,
     "source_mask_role": "SEPARATE_SILHOUETTE_OPTIMIZATION_TRUTH",
@@ -90,8 +90,8 @@
     "checkpoint_interval": 200,
     "telemetry_interval": 10,
     "seed": 26101924,
-    "subject_policy": "BATCH8_SHARED_ARCHITECTURE__NO_SUBJECT_SPECIFIC_PARAMETERS",
-    "view_policy": "DETERMINISTIC_ROTATING_TWO_SOURCE_VIEWS_PER_STEP__ALL_64_VIEWS_AT_CHECKPOINT_COURT"
+    "subject_policy": "FIT8_SHARED_ARCHITECTURE__DETERMINISTIC_SUBJECT_ROUND_ROBIN__NO_SUBJECT_SPECIFIC_PARAMETERS",
+    "view_policy": "DETERMINISTIC_ROTATING_TWO_SOURCE_VIEWS_PER_STEP__ALL_64_VIEWS_AT_INDEPENDENT_FINAL_COURT"
   },
   "runtime_admission": {
     "accelerator": "NVIDIA_A100_CLASS",
@@ -103,7 +103,10 @@
     "single_drive_mount_consent_required": true,
     "source_precompile_required": true,
     "zero_step_native_r24_surface_parity_required": true,
+    "zero_step_native_r24_faces_exact_required": true,
+    "maximum_zero_step_native_r24_vertex_difference_iris": 0.000002,
     "pytorch3d_camera_raster_parity_required": true,
+    "all_64_raster_parity_views_required": true,
     "full_frozen_scene_core_hash_required": true,
     "reduced_capacity_or_resolution_fallback_allowed": false
   },

@@ -1,0 +1,48 @@
+{
+  "schema": "RealSaS.SurfA1FrozenHInputBinding.v1",
+  "experiment_id": "SURF-A1-FROZEN-H",
+  "purpose": "EXACT_POST_V8_FROZEN_H_SURFACE_RESCUE_INPUT_AUTHORITY",
+  "source_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
+  "training_allowed_only_after_runtime_admission": true,
+  "teacher_truth_allowed_in_inference_forward": false,
+  "stage01": {
+    "file": "FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip",
+    "file_id": "1PcxT2rfb9jCHfP75gaqMAo90OU7JRypH",
+    "sha256": "9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936"
+  },
+  "prepared": {
+    "source_commit_sha": "7029ee3f48787aa9f7e27eecef89155eb9368a96",
+    "folder_id": "1KF8SztfN_NrfjbgLvQZ5BqSRczS5dwv4",
+    "manifest": {"file": "COHORT_MANIFEST.json", "file_id": "18YLO2fY88ZvZDkjWH383rmsht3wZV1bh", "sha256": "6561bf2087f4fac3699c673b5c93fb3d8dbc2d1ff90a5065d976cae70688b4d8", "schema": "RealSaS.IRISVNextFit8Manifest.v4"},
+    "preparation_receipt": {"file": "PREPARATION_RECEIPT.json", "file_id": "1I2OkL7ENV2SkP02FBXrA2bHIn_LMk8dP", "sha256": "b3d8e72f980bdb194319e6c128257a20b2d46a71c7b86d1e2ed9ea6d1e16c93f"}
+  },
+  "v8": {
+    "source_commit_sha": "5083c9915533ec8ec6530c7d229c635887abfea7",
+    "global_step": 12000,
+    "binding_sha256": "735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2",
+    "checkpoint": {"file": "step_00012000_ac23a9ea448e465cb668773a131981be.pt", "file_id": "1xttwuxgC8y9EVmf7xxMEN4yj84yhm4zH", "sha256": "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5"}
+  },
+  "authored_teachers": {
+    "source_commit_sha": "7029ee3f48787aa9f7e27eecef89155eb9368a96",
+    "folder_id": "1v2FRC9nRRQxvrAHXMHXYhpXm8MZFHjPL",
+    "mydrive_relative_path": "RealSaS_Fit8_IRIS_vNext_candidates/7029ee3f48787aa9f7e27eecef89155eb9368a96/teachers",
+    "batch_receipt": {"file": "TEACHER_BATCH_RECEIPT.json", "file_id": "1RLfXAQwPgA0xIleZBxEPbthUOpw54t9C", "sha256": "37b203f9c16e1a5dddbab1709ebb3806e486d66d1ed5b48a42817bc0044a7843", "schema": "RealSaS.IRISVNextFit8TeacherBatch.v1", "blender_version": "Blender 4.5.14 LTS", "transport_revision": 3},
+    "subjects": [
+      {"subject_id":"Snake","legacy_subject_id":"fit8_snake_v1","file":"fit8_snake_v1.teacher.npz","sha256":"9cf4fef3873bfd551beb5a2c2ca48ff691d6fbd60d320397044c2128c2da3798"},
+      {"subject_id":"Bat","legacy_subject_id":"fit8_bat_v1","file":"fit8_bat_v1.teacher.npz","sha256":"dfb5f81f34d353a751bfb678e895c14e08b061f7517ce31b2be9b2706a3bb930"},
+      {"subject_id":"T-Rex","legacy_subject_id":"fit8_trex_v1","file":"fit8_trex_v1.teacher.npz","sha256":"3997476dbac532026984039d2e12d683036d37039fdabe0017f69518b8de52fa"},
+      {"subject_id":"Horse","legacy_subject_id":"fit8_horse_v1","file":"fit8_horse_v1.teacher.npz","sha256":"600899aba1cef4af7433b2ae750a47238c5f84c7231a68a294457bfd98033613"},
+      {"subject_id":"Spider","legacy_subject_id":"fit8_spider_v1","file":"fit8_spider_v1.teacher.npz","sha256":"f146109f1e4e264cc647db9a7b8fd47b5f91862f75c508b1634a373480074a54"},
+      {"subject_id":"GreenBlob","legacy_subject_id":"fit8_greenblob_v1","file":"fit8_greenblob_v1.teacher.npz","sha256":"9567f1f0f20c1892e179abfab7e8aae117245e9501dd4592290830128c54ca0a"},
+      {"subject_id":"Shark","legacy_subject_id":"fit8_shark_v1","file":"fit8_shark_v1.teacher.npz","sha256":"65eddea1bd430a58c002c4890b3bb6a21826ff4276e7b4eb243902c3bf44e43e"},
+      {"subject_id":"George","legacy_subject_id":"fit8_george_v1","file":"fit8_george_v1.teacher.npz","sha256":"04380b00fed04226afb9f6a1466e549ecbb24a875a4641720ce70c1b208c7458"}
+    ],
+    "authority": "TRAINING_TRUTH_ONLY__NEVER_INFERENCE_CONDITIONING"
+  },
+  "transport_policy": {
+    "colab_drive_mount_only": true,
+    "second_google_oauth_forbidden": true,
+    "mounted_path_is_not_authority": true,
+    "sha256_is_authority": true
+  }
+}

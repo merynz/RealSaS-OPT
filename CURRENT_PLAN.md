@@ -1,11 +1,11 @@
 # RealSaS-OPT — Current Plan
 
 **Date:** 2026-10-19  
-**Status:** **POST-V8 QUALITY PROGRAM — DIRECT-SURFACE A-ARM EXECUTION + RELATION V10 EVIDENCE QUALIFICATION**  
+**Status:** **POST-V8 QUALITY PROGRAM — NATIVE V8 SURFACE CONTROL BEFORE HIGH-RES A-ARM REDESIGN**  
 **Active source:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
 **Review vehicle:** draft PR #122  
 **Production authority:** `main` until reviewed merge  
-**New optimizer policy:** **NO RELATION V10 OR TESSA V2 OPTIMIZER STEP** until each workstream independently reaches its readiness boundary.
+**Optimizer policy:** **NO RELATION V10 OR TESSA V2 OPTIMIZER STEP** until each workstream independently reaches its readiness boundary.
 
 ## 0. Non-negotiable rules
 
@@ -31,7 +31,7 @@ A second deformable visual mesh remains forbidden.
 Geometry + Mechanics → shared H → M1 seal → specialist learning
 ```
 
-Do not reopen `scene_core` merely because a specialist path is weak. Reopening H requires a separate representation-falsification court.
+Do not reopen `scene_core` merely because a specialist or extraction transition is weak. Reopening H requires a separate representation-falsification court.
 
 ### Truth / conditioning
 
@@ -47,7 +47,8 @@ Do not reopen `scene_core` merely because a specialist path is weak. Reopening H
 - source compile/test green = implementation evidence only;
 - loss decreasing = optimization evidence only;
 - teacher-forced topology CE = not free-running topology quality;
-- product qualification = not automatically a model-learning PASS.
+- product qualification = not automatically a model-learning PASS;
+- a fail-closed scientific extraction result remains a failure; do not relax the observed court after seeing it.
 
 ## 1. Historical anchors
 
@@ -60,7 +61,7 @@ Immutable completed baseline:
 - checkpoint SHA256 `0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5`;
 - binding SHA256 `735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2`.
 
-Keep the V8 carrier seal unless a proper raw-H probe falsifies it.
+Keep the V8 carrier seal unless a proper raw-H court falsifies it.
 
 ### V9
 
@@ -77,26 +78,25 @@ Scoped earned result:
 
 V9 is retained as a clean-boundary experiment, not final relation architecture proof.
 
-## 2. Program split after the architecture audit
+## 2. Program split
 
-Two parallel research workstreams now exist:
+Two parallel post-V8 workstreams remain:
 
 ```text
 WORKSTREAM R — RELATION / VISIBILITY
   truth + conditioning + representation probes
 
 WORKSTREAM S — SURFACE / STRUCTURALIZATION
-  direct high-res IRIS surface A-arm
-  then optional TESSA structuralization B-arm
+  native V8 surface control
+  → corrected high-resolution direct A-arm
+  → optional TESSA B-arm
 ```
 
 Neither workstream authorizes the other.
 
 ## 3. Workstream R — Relation Truth V3 / V10 remains blocked
 
-### 3.1 What changed architecturally
-
-Relation V3 source now follows:
+Relation V3 source uses:
 
 ```text
 raw H_A/H_B
@@ -110,34 +110,9 @@ raw H_A/H_B
 pairwise front/order head
 ```
 
-Visibility is a separate complete-ray-stack problem.
+Visibility is a separate complete-ray-stack problem. Pair relation emits no free neural confidence or pairwise global visibility.
 
-The pair path no longer emits free neural confidence or pairwise global visibility.
-
-### 3.2 Why V9 did not falsify H
-
-V9 trained only a view branch on top of the historical frozen relation embedding. Therefore weak front performance establishes:
-
-> historical relation embedding + V9 view path is weak for ordering
-
-not:
-
-> raw sealed H contains no ordering information.
-
-If needed before V10, use the frozen-carrier probe ladder:
-
-```text
-A: historical 64-D relation embedding + camera
-B: raw H pair + fresh head + camera
-C: raw H + explicit geometry + camera
-D: C + complete ray-stack context
-```
-
-Only A≈B≈C≈D justifies suspecting H itself.
-
-### 3.3 Truth/support prerequisites
-
-Before V10 step 1:
+Before V10 step 1 still require:
 
 1. exact all-hit relation evidence artifact;
 2. complete stack support per subject/view;
@@ -145,53 +120,227 @@ Before V10 step 1:
 4. authored-motion pair/order flip statistics;
 5. conditioning disposition for motion-derived truth;
 6. no fabricated occlusion negatives;
-7. same/cut/attachment abstention unless new independent authority exists;
+7. same/cut/attachment abstention unless independent authority exists;
 8. Truth V3 manifest with explicit validity/provenance;
 9. support/class-balance/split leakage court;
 10. hot-path frozen hash fix;
 11. V9-final vs neutral initialization court;
-12. preregistered absolute held-out thresholds;
+12. preregistered held-out thresholds;
 13. materialization/round-trip/readiness seal.
 
-### 3.4 V10 model capacity policy
+Do not increase relation capacity merely because V9 front was weak. Resolve truth → conditioning → representation bottleneck → pair-vs-stack abstraction first.
 
-Do not increase relation capacity merely because V9 front was weak. First resolve:
+## 4. Workstream S — raw-field sparse A-arm result
 
-```text
-truth → conditioning → representation bottleneck → pair-vs-stack abstraction
-```
+### 4.1 What was tested
 
-Only then use capacity/adapters if the clean-target court demonstrates need.
-
-## 4. Workstream S — direct IRIS high-resolution surface first
-
-This is the current immediate execution workstream.
-
-Scientific question:
-
-> Before TESSA learns anything, how good is the exact completed V8 continuous field when decoded through the selected high-resolution sparse surface path?
-
-### 4.1 Exact direct A-arm
+The first post-V8 direct A-arm implementation deliberately isolated the exact completed V8 raw scalar field:
 
 ```text
 sealed V9 prepared 8-view observations
         ↓
 exact completed V8 IRISVNextV1
         ↓
-sealed V8 scene_core / raw scalar field
+sealed scene_core / raw scalar field only
         ↓
-selected T512 coarse → sparse T1024 zero-surface decoder
+T512 coarse → sparse T1024 historical zero-surface decoder
         ↓
-model-only surface candidate
-        ↓
-independent source-fidelity + Compiler/G5/G3 courts
+model-only candidate
 ```
 
-No TESSA is involved in A.
+Fixed policy:
 
-### 4.2 Input authority
+- `SparseRegularTetraPolicyV5()`;
+- base cells `512`;
+- fine cells `1024`;
+- raw field sign identity;
+- no extraction delta;
+- no learned FlexiCubes cube parameters;
+- FP32/no-autocast;
+- no TESSA;
+- no reduced-resolution scientific escape.
 
-Machine-readable binding:
+This made the experiment clean, but runtime evidence now shows that this was not a valid baseline for the **V8-trained extraction semantics**.
+
+### 4.2 Exact runtime falsification
+
+A100 engineering preflight passed. Full materialization at apparatus source
+`d9701923b2c19bd1c9b9771fe071bb92264a041d` then failed on the first subject, Snake:
+
+```text
+failed stage = INDEXED_MT_BUILD_AND_NORMALS
+exception    = SparseSurfaceTruncationError
+message      = SPARSE_SHELL_TRUNCATES_ZERO_SURFACE:62735467 boundary crossing tetrahedra
+```
+
+Measured before fail-closed termination:
+
+- coarse field range `[-0.3515409529, 0.5678277612]`;
+- T512 zero bracket = true;
+- T512 query points = `135,005,697`;
+- refined coarse cells = `6,525,575` (`~4.8619%`);
+- candidate fine tetrahedra = `313,227,600`;
+- crossing tetrahedra = `95,514,148`;
+- conservative boundary-crossing tetrahedra = `62,735,467`;
+- exact faces counted = `125,076,400`;
+- fine field range `[-0.1913980544, 0.2545053363]`;
+- fine zero bracket = true.
+
+Decision:
+
+> **RAW V8 FIELD + HISTORICAL DISTANCE-LIKE SPARSE SELECTOR IS FALSIFIED AS THE CURRENT DIRECT A-ARM BASELINE.**
+
+Do not:
+
+- widen `refine_band` after observing the result;
+- set `fail_on_boundary_crossing=False`;
+- flip/repair field signs;
+- accept the enormous raw candidate as a scientific success;
+- interpret the failure as proof that sealed H is bad.
+
+The boundary-crossing count is conservative because boundary-parent cells label all crossing tetrahedra inside them; the count is not a literal exact clipping census. That caveat does not erase the independently huge crossing/face complexity.
+
+## 5. Why the failed A-arm did not test V8's trained surface witness
+
+V8 G2 surface supervision used:
+
+```text
+native R24 grid
+        ↓
+query_evidence
+        ├─ field
+        ├─ H
+        └─ learned extraction_delta
+        ↓
+learned 21-D cube parameters from cube_extraction(H corners)
+        ↓
+pinned FlexiCubes
+        ↓
+extracted witness
+        ↓
+teacher-surface Chamfer + FlexiCubes deviation/L1
+```
+
+The raw zero-field alone was only one input to this learned extraction system.
+
+Therefore the next question is not “how far should we widen the T512 shell?” It is:
+
+> Does exact V8 still produce a useful surface through the path that actually received V8 extraction supervision?
+
+## 6. Mandatory native V8 control
+
+New source control:
+
+- `tools/iris_vnext/audit_v8_raw_field_sparse_compatibility_v1.py`;
+- `tools/iris_vnext/materialize_fit8_v8_native_flexicubes_v1.py`;
+- `tools/iris_vnext/audit_fit8_v8_native_flexicubes_control_v1.py`;
+- `tests/iris/test_v8_surface_control_v1.py`.
+
+The native materializer must use:
+
+- exact V8 checkpoint and binding;
+- exact sealed V4 prepared observations;
+- exact V8 `extraction_training_resolution = 24`;
+- model field;
+- learned extraction delta;
+- learned 21-D cube parameters;
+- pinned upstream FlexiCubes source;
+- FP32/no-autocast;
+- zero optimizer steps;
+- no teacher topology/input in inference forward;
+- no TESSA.
+
+Status is measurement-only:
+
+`MATERIALIZED_NATIVE_V8_FLEXICUBES_WITNESSES__MEASUREMENT_ONLY`
+
+It must explicitly retain:
+
+`high_resolution_capability_claimed = false`.
+
+## 7. Native control court
+
+For all eight Fit8 subjects measure independently:
+
+### Geometry
+
+- symmetric surface distance / Chamfer;
+- candidate→teacher and teacher→candidate p50/p95/p99/max;
+- mechanical surface distance;
+- normal alignment against sealed V4 mechanical normals;
+- finite/domain validity;
+- degenerates;
+- component count;
+- boundary/non-manifold diagnostics.
+
+### Exact source masks
+
+Using the already admitted Stage01 cameras/masks and existing conservative triangle/unit-pixel-square raster semantics:
+
+- 8 views × 8 subjects = 64 masks;
+- IoU;
+- precision;
+- recall;
+- symmetric maximum mask gap.
+
+There is still no preregistered scientific PASS threshold for this control. It is a diagnosis separating native V8 surface quality from high-resolution transition failure.
+
+## 8. Raw-field compatibility forensic
+
+The preserved Snake `.work/Snake/v5_coarse_field.f32` remains useful evidence.
+
+`audit_v8_raw_field_sparse_compatibility_v1.py` measures without re-querying the model:
+
+- coarse sign-crossing cell support;
+- band-only refinement support;
+- boundary-parent fraction;
+- sign-crossing boundary-parent fraction;
+- domain-boundary sign support;
+- grid-edge sign-flip rate;
+- finite-difference field-change / spatial-step indicators.
+
+These are **distance-like/Lipschitz compatibility indicators**, not a formal Eikonal proof.
+
+The audit cannot override the failed extraction.
+
+## 9. High-resolution transition redesign boundary
+
+Do not naively execute V8 native FlexiCubes at T1024.
+
+V8 `maximum_extraction_delta = 0.03` is an absolute normalized displacement. Nominal grid step is:
+
+- R24: `2/24 ≈ 0.08333` → max delta ≈ `0.36` cell;
+- T1024: `2/1024 ≈ 0.001953` → same max delta ≈ `15.36` cells.
+
+So blindly reusing the native extraction-delta head at T1024 changes its geometric meaning by more than an order of magnitude.
+
+After native R24 measurement:
+
+```text
+IF native R24 witness is good:
+    treat debt as high-resolution transition / field regularity / extraction semantics
+    design resolution-aware high-res surface path
+    preserve sealed H unless separately falsified
+
+IF native R24 witness is poor:
+    reopen geometry/extraction quality workstream
+    audit G2/native witness quality first
+    still require a separate court before reopening shared H
+```
+
+Possible future interventions are eligible only after this split is measured:
+
+- resolution-normalized extraction deformation;
+- surface-conditioned sparse refinement rather than raw-field-magnitude shell alone;
+- field gradient/Eikonal-like regularity only if source/ablation justifies it;
+- mask/depth/normal/surface supervision through the chosen high-res transition;
+- continuity/hole regularization under source-defensible selectors.
+
+No intervention is authorized merely because the raw sparse adapter failed.
+
+## 10. Exact input authority
+
+Machine-readable byte binding remains:
 
 `canonical/VNEXT_DIRECT_SURFACE_INPUT_BINDING_V1.json`
 
@@ -199,111 +348,26 @@ Prepared cohort:
 
 - source `7029ee3f48787aa9f7e27eecef89155eb9368a96`;
 - V4 manifest SHA256 `6561bf2087f4fac3699c673b5c93fb3d8dbc2d1ff90a5065d976cae70688b4d8`;
-- exact 8 shard Drive IDs + SHA256s;
-- exact preparation receipt.
+- exact preparation receipt and 8 shard IDs/hashes.
 
-V8 checkpoint:
+Stage01 bundle SHA256:
 
-- exact file ID bound;
-- exact SHA256 `0be15df...`;
-- step 12000 and binding `735b37f...` required;
+`9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936`
+
+V8:
+
+- exact checkpoint SHA256 `0be15df...`;
+- step 12000;
+- binding `735b37f...`;
 - sealed scene_core required.
 
-### 4.3 Full-resolution policy
+The binding's T512/T1024 purpose now describes a falsified experiment and must not be silently treated as a successful scientific A-arm.
 
-Only `SparseRegularTetraPolicyV5()` is scientific baseline authority:
+## 11. TESSA V2 remains blocked
 
-- base cells = `512`;
-- fine cells = `1024`;
-- no deformation;
-- raw field sign unchanged;
-- normalized coordinate mapping unchanged;
-- no uncalibrated uncertainty;
-- no extraction delta in the baseline;
-- FP32/no-autocast.
+TESSA V2 stays optional and untrained.
 
-The execution CLI intentionally has no base/fine resolution flags.
-
-### 4.4 Exact source path
-
-- `models/iris/vnext/sparse_surface_v3.py`
-- `tools/iris_vnext/hydrate_fit8_direct_surface_inputs_v1.py`
-- `tools/iris_vnext/preflight_fit8_direct_surface_a100_v1.py`
-- `tools/iris_vnext/materialize_fit8_direct_surface_v1.py`
-- `docs/research/IRIS_DIRECT_SURFACE_BASELINE_EXECUTION_PLAN_20261019.md`
-
-### 4.5 A100 engineering preflight
-
-Preflight is not a reduced scientific experiment.
-
-It may:
-
-- hydrate exact bytes;
-- load exact V8;
-- encode one real prepared subject;
-- benchmark the real 32k field-query chunk;
-- measure VRAM/host RAM/disk/throughput;
-- estimate engineering runtime.
-
-It may not:
-
-- generate a reduced mesh;
-- claim geometry quality;
-- change resolution;
-- run an optimizer.
-
-Current admission envelope requires >=39 GiB CUDA memory plus host/disk constraints. This admits A100-40GB class or better rather than silently using the 1660Ti self-hosted runner for the full scientific materialization.
-
-## 5. Direct surface source-fidelity court
-
-After all 8 full surfaces exist, evaluate from independent source-defensible authority:
-
-- silhouette/mask fidelity;
-- depth fidelity;
-- normal fidelity;
-- surface distance including p95/max;
-- finite/domain validity;
-- degenerate faces;
-- connected components;
-- boundary/open-chain diagnostics;
-- thin-structure continuity where the observation can actually identify it.
-
-Do not invent hidden RGB/semantic truth.
-
-The threshold document must be locked before using the same measurements to decide TESSA promotion.
-
-## 6. Direct surface Compiler court
-
-A model-only Stage12-like candidate is not canonical M.
-
-Required A-arm qualification:
-
-1. static Compiler qualification;
-2. source/support binding;
-3. G5/multiview qualification;
-4. G3/authored-motion qualification;
-5. no unacceptable component/non-manifold/degenerate/open-chain failure;
-6. exact receipt/hash lineage.
-
-Compiler repair must be reported separately from raw model-surface quality.
-
-## 7. TESSA V2 role and capacity
-
-Only after A is sealed do we fit/evaluate B.
-
-TESSA V2 is an optional second learned structuralization layer:
-
-```text
-same IRIS evidence / high-res witness
-        ↓
-TESSA V2
-        ↓
-structured mesh proposal
-        ↓
-Compiler
-```
-
-Reference-class first serious fit:
+Reference-class first serious fit remains:
 
 - d_model 1024;
 - 16 heads;
@@ -315,40 +379,17 @@ Reference-class first serious fit:
 - local exact context 4096;
 - causal global structural-history summaries.
 
-Do not start from a reduced diagnostic model and infer incapacity from that result.
+But no TESSA optimizer step until a corrected direct A-arm reaches readiness.
 
-## 8. TESSA objective / free-running court
+The raw-field sparse failure is not permission to skip A and move straight to B.
 
-Training objective:
+## 12. Future A/B promotion policy
 
-```text
-L_tessa =
-    λ_token   * next-token CE
-  + λ_coord   * metric coordinate loss
-  + λ_special * structural-token loss
-```
-
-A falling loss is not a topology PASS.
-
-Independent free-running court must inspect:
-
-- grammar/EOS completion;
-- component count;
-- boundary loops/open chains;
-- non-manifold edges;
-- degenerate faces;
-- source-surface p95/max;
-- mask/depth/normal preservation;
-- support binding;
-- static/G5/G3 Compiler results;
-- face-count/structural economy;
-- cohort worst subject.
-
-## 9. TESSA A/B promotion policy
+Once a corrected high-resolution A-arm exists:
 
 ```text
-A = exact V8 → full high-res direct surface → Compiler
-B = same admissible IRIS evidence → TESSA V2 → Compiler
+A = exact V8/admitted IRIS evidence → corrected high-res surface witness → Compiler
+B = same admissible IRIS evidence/witness → TESSA V2 → Compiler
 ```
 
 TESSA is promotable only if B:
@@ -357,53 +398,30 @@ TESSA is promotable only if B:
 2. preserves G5;
 3. preserves G3;
 4. preserves support binding;
-5. remains inside preregistered source-surface p95/max tolerance;
+5. stays inside preregistered source-surface p95/max tolerance;
 6. preserves mask/depth/normal fidelity;
-7. does not introduce unacceptable component/non-manifold/degenerate/open-chain regression;
+7. avoids unacceptable component/non-manifold/degenerate/open-chain regression;
 8. provides meaningful structural economy/topology value.
 
 If A passes and B provides no meaningful benefit, prefer A.
 
-## 10. Other authority cleanup preserved
-
-### Confidence / uncertainty
-
-No inference scalar may influence product authority without supervision/calibration/deterministic derivation or explicit diagnostic-only typing.
-
-### Contact persistence
-
-Current Fit8 preparation has no authoritative `contact_face_mask`; contact persistence remains invalid/abstained.
-
-### Geometry supervision after baseline
-
-If A reveals genuine field/extraction quality debt, the next geometry training design may adopt source-defensible:
-
-- mask/silhouette;
-- depth;
-- normal;
-- surface distance;
-- FlexiCubes deviation;
-- continuity/hole regularization.
-
-Do not increase spatial resolution further until the independent court shows the selected T512/T1024 path is the limiting factor rather than learned-field quality.
-
-## 11. Current execution order
+## 13. Current execution order
 
 ### Immediate — Workstream S
 
 ```text
-S0. exact final PR #122 source gate green
-S1. hydrate canonical direct-surface binding read-only
-S2. verify hydration receipt and exact bytes
-S3. run A100-class engineering preflight
-S4. if resource PASS, execute full 8-subject T512→T1024 materializer
-S5. inspect 8/8 receipts; no quality conclusion yet
-S6. lock and run source-fidelity court
-S7. run direct-surface Compiler + G5 + G3 courts
-S8. seal direct A-arm baseline
-S9. build TESSA V2 exact teacher/readiness corpus
-S10. run reference-capacity TESSA V2 fit
-S11. free-run B and execute preregistered A/B court
+S0. keep current PR #122 source gates green
+S1. run preserved Snake raw-field sparse compatibility forensic
+S2. materialize exact V8 native R24 FlexiCubes witnesses for all Fit8 subjects
+S3. run sealed-V4 geometry + exact Stage01 64-view mask control
+S4. record native-surface-vs-high-res-transition diagnosis
+S5. define corrected resolution-aware high-resolution A-arm
+S6. preregister its source-fidelity and failure courts before evaluation
+S7. materialize corrected A for all 8 subjects
+S8. run source-fidelity + Compiler + G5 + G3 courts
+S9. seal qualified direct A-arm if earned
+S10. only then build/qualify TESSA V2 fit readiness
+S11. reference-capacity TESSA fit, strict free-run B, preregistered A/B court
 ```
 
 ### Parallel — Workstream R
@@ -421,27 +439,28 @@ R8. materialize/readiness
 R9. only then optimizer step 1
 ```
 
-## 12. Current hard stops
+## 14. Current hard stops
 
 Do **not**:
 
-- run TESSA training before A-arm baseline exists;
+- run TESSA training before corrected A-arm readiness;
 - run V10 relation training before Relation Truth V3 readiness;
-- use 1660Ti source runner as full high-resolution scientific surface lane;
-- reduce T512/T1024 to obtain a quicker scientific answer;
+- use a reduced grid to turn the failed raw sparse path into a scientific answer;
+- widen sparse thresholds after seeing Snake;
+- disable sparse truncation fail-closed policy to force output;
+- naively apply native R24 extraction delta at T1024;
+- call native R24 measurement a high-resolution PASS;
 - call source CI a surface/TESSA PASS;
 - fabricate occlusion negatives/contact negatives/hidden appearance truth;
-- reopen H because V9 ordering was weak;
+- reopen H because an extraction transition failed;
 - let Compiler repair hide raw model failure.
 
-## 13. Next artifact threshold
+## 15. Next artifact threshold
 
-The next meaningful scientific artifact is not another architecture commit. It is:
+The next meaningful scientific artifacts are now, in order:
 
-`FIT8_DIRECT_IRIS_SURFACE_BATCH_RECEIPT.json`
+1. `V8_RAW_FIELD_SPARSE_COMPATIBILITY.json` from the preserved failed Snake T512 field;
+2. `FIT8_V8_NATIVE_FLEXICUBES_BATCH_RECEIPT.json` with 8/8 exact native V8 R24 witnesses;
+3. `FIT8_V8_NATIVE_FLEXICUBES_CONTROL_COURT.json` containing sealed-V4 geometry and exact Stage01 64-view mask measurements.
 
-with all eight exact-V8 subjects materialized at full T512→sparse T1024 and status:
-
-`MATERIALIZED_MODEL_SURFACES__COMPILER_COURT_PENDING`
-
-Only after that artifact exists should the program move to the direct-surface quality/Compiler court and then TESSA training readiness.
+Only those measurements authorize the next high-resolution transition design. They do not authorize TESSA training by themselves.

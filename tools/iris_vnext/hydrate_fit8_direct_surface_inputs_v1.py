@@ -12,7 +12,6 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-import shutil
 import subprocess
 from typing import Any
 
@@ -61,6 +60,11 @@ def validate_binding(binding: dict[str, Any]) -> None:
     if binding.get("scientific_pass_claimed") is not False:
         raise ValueError("DIRECT_SURFACE_INPUT_BINDING_SCIENTIFIC_CLAIM_INVALID")
 
+    stage01 = binding.get("stage01") or {}
+    if stage01.get("file") != "FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip" or not stage01.get("file_id"):
+        raise ValueError("DIRECT_SURFACE_STAGE01_BINDING_INVALID")
+    require_sha64(stage01.get("sha256"), "DIRECT_SURFACE_STAGE01_SHA_INVALID")
+
     prepared = binding.get("prepared") or {}
     if prepared.get("source_commit_sha") != "7029ee3f48787aa9f7e27eecef89155eb9368a96":
         raise ValueError("DIRECT_SURFACE_PREPARED_SOURCE_DRIFT")
@@ -105,10 +109,7 @@ def copyid(file_id: str, destination: Path) -> None:
     if not file_id or "/" in file_id or " " in file_id:
         raise ValueError("DIRECT_SURFACE_HYDRATION_FILE_ID_INVALID")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
-        ["rclone", "backend", "copyid", "gdrive:", file_id, str(destination)],
-        check=True,
-    )
+    subprocess.run(["rclone", "backend", "copyid", "gdrive:", file_id, str(destination)], check=True)
 
 
 def hydrate(binding_path: Path, output_root: Path) -> dict[str, Any]:
@@ -120,6 +121,7 @@ def hydrate(binding_path: Path, output_root: Path) -> dict[str, Any]:
         raise RuntimeError("DIRECT_SURFACE_HYDRATION_OUTPUT_MUST_BE_EMPTY")
     output_root.mkdir(parents=True, exist_ok=True)
 
+    stage01_out = output_root / "stage01"
     prepared_out = output_root / "prepared"
     v8_out = output_root / "v8"
     hydrated: list[dict[str, Any]] = []
@@ -130,23 +132,14 @@ def hydrate(binding_path: Path, output_root: Path) -> dict[str, Any]:
         actual = sha256_file(destination)
         if actual != expected:
             raise RuntimeError(f"DIRECT_SURFACE_HYDRATION_SHA_DRIFT:{role}:{expected}:{actual}")
-        hydrated.append(
-            {
-                "role": role,
-                "file": destination.relative_to(output_root).as_posix(),
-                "file_id": str(spec["file_id"]),
-                "sha256": actual,
-                "bytes": destination.stat().st_size,
-            }
-        )
+        hydrated.append({"role": role, "file": destination.relative_to(output_root).as_posix(), "file_id": str(spec["file_id"]), "sha256": actual, "bytes": destination.stat().st_size})
+
+    stage01 = binding["stage01"]
+    hydrate_one(stage01, stage01_out / str(stage01["file"]), "STAGE01_BUNDLE")
 
     prepared = binding["prepared"]
     hydrate_one(prepared["manifest"], prepared_out / str(prepared["manifest"]["file"]), "PREPARED_MANIFEST")
-    hydrate_one(
-        prepared["preparation_receipt"],
-        prepared_out / str(prepared["preparation_receipt"]["file"]),
-        "PREPARATION_RECEIPT",
-    )
+    hydrate_one(prepared["preparation_receipt"], prepared_out / str(prepared["preparation_receipt"]["file"]), "PREPARATION_RECEIPT")
     for row in prepared["subjects"]:
         hydrate_one(row, prepared_out / str(row["file"]), "PREPARED_SHARD:" + str(row["subject_id"]))
     hydrate_one(binding["v8"]["checkpoint"], v8_out / str(binding["v8"]["checkpoint"]["file"]), "V8_CHECKPOINT")
@@ -159,11 +152,7 @@ def hydrate(binding_path: Path, output_root: Path) -> dict[str, Any]:
     if tuple(row.get("subject_id") for row in manifest_rows) != SUBJECT_IDS:
         raise RuntimeError("DIRECT_SURFACE_HYDRATED_MANIFEST_SUBJECT_ORDER_DRIFT")
     for manifest_row, bound_row in zip(manifest_rows, expected_rows, strict=True):
-        if (
-            manifest_row.get("subject_id") != bound_row.get("subject_id")
-            or manifest_row.get("shard_file") != bound_row.get("file")
-            or manifest_row.get("shard_sha256") != bound_row.get("sha256")
-        ):
+        if manifest_row.get("subject_id") != bound_row.get("subject_id") or manifest_row.get("shard_file") != bound_row.get("file") or manifest_row.get("shard_sha256") != bound_row.get("sha256"):
             raise RuntimeError("DIRECT_SURFACE_HYDRATED_MANIFEST_BINDING_DRIFT")
 
     prep_receipt = load_json(prepared_out / str(prepared["preparation_receipt"]["file"]))
@@ -173,12 +162,16 @@ def hydrate(binding_path: Path, output_root: Path) -> dict[str, Any]:
         raise RuntimeError("DIRECT_SURFACE_HYDRATED_PREPARATION_SOURCE_DRIFT")
     if prep_receipt.get("cohort_manifest_sha256") != prepared["manifest"]["sha256"]:
         raise RuntimeError("DIRECT_SURFACE_HYDRATED_PREPARATION_MANIFEST_DRIFT")
+    stage_receipt = ((prep_receipt.get("verified_inputs") or {}).get("stage01") or {})
+    if stage_receipt.get("stage01_bundle_sha256") != stage01["sha256"]:
+        raise RuntimeError("DIRECT_SURFACE_HYDRATED_STAGE01_PREPARATION_DRIFT")
 
     receipt = {
         "schema": RECEIPT_SCHEMA,
         "status": "PASS__EXACT_INPUT_BYTES_HYDRATED__NO_TRAINING__NO_REMOTE_WRITE",
         "input_binding_sha256": sha256_file(binding_path),
         "files": hydrated,
+        "stage01_bundle_sha256": stage01["sha256"],
         "prepared_source_commit_sha": prepared["source_commit_sha"],
         "v8_source_commit_sha": V8_SOURCE_COMMIT,
         "v8_checkpoint_sha256": V8_CHECKPOINT_SHA256,
@@ -187,11 +180,9 @@ def hydrate(binding_path: Path, output_root: Path) -> dict[str, Any]:
         "training_allowed": False,
         "remote_write_performed": False,
         "scientific_pass_claimed": False,
-        "next_action": "A100_DIRECT_SURFACE_ENGINEERING_PREFLIGHT_THEN_FULL_T512_T1024_MATERIALIZATION",
+        "next_action": "A100_DIRECT_SURFACE_ENGINEERING_PREFLIGHT_THEN_FULL_T512_T1024_MATERIALIZATION_AND_SOURCE_FIDELITY_COURTS",
     }
-    (output_root / "DIRECT_SURFACE_HYDRATION_RECEIPT.json").write_text(
-        json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    (output_root / "DIRECT_SURFACE_HYDRATION_RECEIPT.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return receipt
 
 

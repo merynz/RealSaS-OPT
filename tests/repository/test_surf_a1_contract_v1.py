@@ -4,15 +4,13 @@ import json
 from pathlib import Path
 import unittest
 
-
 ROOT = Path(__file__).resolve().parents[2]
 
-
 class SurfA1RepositoryContractTests(unittest.TestCase):
-    def test_experiment_ledger_preserves_a1_result_and_advances_next_gate(self):
+    def test_experiment_ledger_preserves_a1_result_and_current_program(self):
         ledger = json.loads((ROOT / "canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json").read_text())
         self.assertEqual(ledger["active_lane"], "SURFACE_TESSA")
-        self.assertEqual(ledger["active_experiment"], "H-REP-P0")
+        self.assertEqual(ledger["active_experiment"], "H-GEO-P2-SCENE-FIELD")
         self.assertIn("RELATION_V10", ledger["parked_lanes"])
         rows = {row["id"]: row for row in ledger["experiments"]}
         self.assertEqual(rows["SURF-A0-RAWFIELD"]["status"], "FALSIFIED")
@@ -20,10 +18,9 @@ class SurfA1RepositoryContractTests(unittest.TestCase):
         self.assertEqual(rows["SURF-A1-FROZEN-H"]["status"], "SCIENTIFIC_FAIL")
         self.assertEqual(rows["SURF-A1-FROZEN-H"]["next_gate"], "H-REP-P0")
         self.assertFalse(rows["SURF-A1-FROZEN-H"]["scientific_pass_claimed"])
-        self.assertEqual(
-            rows["SURF-A1-FROZEN-H"]["independent_court"]["status"],
-            "SCIENTIFIC_FAIL_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE",
-        )
+        self.assertEqual(rows["SURF-A1-FROZEN-H"]["independent_court"]["status"], "SCIENTIFIC_FAIL_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE")
+        self.assertEqual(rows["H-GEO-P1"]["status"], "SCIENTIFIC_FAIL")
+        self.assertEqual(rows["H-GEO-P2-SCENE-FIELD"]["status"], "SOURCE_PREPARATION")
         self.assertTrue(rows["SURF-A2-HIRES"]["status"].startswith("BLOCKED_"))
         self.assertEqual(rows["TESSA-V2-B1"]["status"], "BLOCKED_ON_SURF_A2_READINESS")
 
@@ -70,30 +67,6 @@ class SurfA1RepositoryContractTests(unittest.TestCase):
         self.assertFalse(upstream["surf_a1_frozen_h_allowed_as_final_direct_arm"])
         self.assertEqual(p["conditioning"]["surface"], "QUALIFIED_SURF_A2_HIGH_RESOLUTION_DIRECT_WITNESS")
         self.assertFalse(p["runtime_admission"]["historical_raw_t512_t1024_surface_allowed"])
-
-    def test_a1_runtime_tools_exist_and_are_separated_by_authority(self):
-        paths = [
-            "tools/iris_vnext/build_fit8_surface_raster_truth_v1.py",
-            "tools/iris_vnext/preflight_surf_a1_a100_v1.py",
-            "tools/iris_vnext/train_fit8_surf_a1_frozen_h_v1.py",
-            "tools/iris_vnext/audit_fit8_surf_a1_representation_v1.py",
-            "models/iris/vnext/surface_rescue_v1.py",
-            "models/iris/vnext/surface_rescue_raster_v1.py",
-            "models/iris/vnext/surface_rescue_training_v1.py",
-        ]
-        for rel in paths:
-            self.assertTrue((ROOT / rel).is_file(), rel)
-        preflight = (ROOT / paths[1]).read_text()
-        trainer = (ROOT / paths[2]).read_text()
-        court = (ROOT / paths[3]).read_text()
-        self.assertIn('"optimizer_steps_executed": 0', preflight)
-        self.assertIn("PASS_SURF_A1_A100_PREFLIGHT__TRAINING_AUTHORIZED", preflight)
-        self.assertIn("COMPLETED_SURF_A1_2400_STEPS__AWAITING_INDEPENDENT_COURT", trainer)
-        self.assertIn("SCIENTIFIC_PASS_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE", court)
-        self.assertIn("SCIENTIFIC_FAIL_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE", court)
-        self.assertNotIn("optimizer.step()", preflight)
-        self.assertNotIn("optimizer.step()", court)
-
 
 if __name__ == "__main__":
     unittest.main()

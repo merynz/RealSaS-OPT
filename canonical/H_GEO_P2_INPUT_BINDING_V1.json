@@ -33,7 +33,7 @@
     },
     "subjects": [
       {"subject_id":"Snake","file":"snake.vnext.pt","sha256":"0d9a5806e5a8e37fb0df47464d674f43f4f0a83f5f1175d702ab237580de6490"},
-      {"subject_id":"Bat","file":"bat.vnext.pt","sha256":"8692f562b324f074d2f6628689816664f6f89bcfd911cdbyf32ba0dc17de3c4ad"},
+      {"subject_id":"Bat","file":"bat.vnext.pt","sha256":"8692f562b324f074d2f6628689816664f6f89bcfd911cdbf32ba0dc17de3c4ad"},
       {"subject_id":"T-Rex","file":"trex.vnext.pt","sha256":"852d18310f186cc7394c421c1739cf6e6e4c27d5435d10818d8b814d4c525e19"},
       {"subject_id":"Horse","file":"horse.vnext.pt","sha256":"cbd72727547a55f2769004921e36e93758eeb9895d07567e51d52892581fd09b"},
       {"subject_id":"Spider","file":"spider.vnext.pt","sha256":"50d7076897e58da56d0606eac7b1e548b56675e0aacde1e27ecf351b60faa003"},

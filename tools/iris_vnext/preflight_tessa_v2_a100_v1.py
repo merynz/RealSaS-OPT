@@ -20,6 +20,7 @@ from typing import Any
 import torch
 
 from models.iris.vnext.structure_global_v3 import IRISVNextGlobalStructuralizationBridgeV3
+from models.tessa.v2.config_v2 import TESSAStructuralizerConfigV2
 from models.tessa.v2.experiment_v2 import load_preregistration_v1, sha256_file
 from models.tessa.v2.objective_v2 import TESSAObjectiveWeightsV2
 
@@ -76,6 +77,7 @@ def batch_from_subject(subject: dict[str, Any], window_index: int, device: torch
 def preflight(args: argparse.Namespace) -> dict[str, Any]:
     prereg_path = Path(args.preregistration).resolve()
     prereg = load_preregistration_v1(prereg_path)
+    config = TESSAStructuralizerConfigV2(); config.validate()
     if not torch.cuda.is_available():
         raise RuntimeError("TESSA_V2_PREFLIGHT_CUDA_REQUIRED")
     device = torch.device("cuda")
@@ -92,13 +94,11 @@ def preflight(args: argparse.Namespace) -> dict[str, Any]:
     rows = list(manifest.get("subjects") or ())
     if len(rows) != 8:
         raise ValueError("TESSA_V2_PREFLIGHT_CORPUS_SUBJECT_COUNT")
-    # Use the longest available first-subject window: real 4608-context workload.
     row = rows[0]
     subject = load_subject(corpus_root / str(row["file"]), str(row["sha256"]))
-    window_count = int(subject["topology_input_ids"].shape[0])
-    active = (subject["topology_input_ids"] != 1031).sum(dim=1)
+    active = subject["topology_input_ids"].ne(config.PAD).sum(dim=1)
     window_index = int(torch.argmax(active).item())
-    if int(active[window_index].item()) <= 4096:
+    if int(active[window_index].item()) <= config.local_attention_window:
         raise RuntimeError("TESSA_V2_PREFLIGHT_GLOBAL_HISTORY_WINDOW_NOT_EXERCISED")
 
     torch.manual_seed(int(prereg["optimizer"]["seed"]))
@@ -115,10 +115,7 @@ def preflight(args: argparse.Namespace) -> dict[str, Any]:
         eps=float(prereg["optimizer"]["epsilon"]),
         weight_decay=float(prereg["optimizer"]["weight_decay"]),
     )
-    scene, xyz, normal, h, mechanical, inputs, labels, offsets = batch_from_subject(
-        subject, window_index, device
-    )
-    weights = TESSAObjectiveWeightsV2()
+    scene, xyz, normal, h, mechanical, inputs, labels, offsets = batch_from_subject(subject, window_index, device)
 
     started = time.perf_counter()
     with torch.autocast(device_type="cuda", dtype=torch.bfloat16):
@@ -131,7 +128,7 @@ def preflight(args: argparse.Namespace) -> dict[str, Any]:
             input_ids=inputs,
             labels=labels,
             sequence_position_offset=offsets,
-            objective_weights=weights,
+            objective_weights=TESSAObjectiveWeightsV2(),
         )
         loss = output.loss
     if loss is None or not bool(torch.isfinite(loss.detach()).item()):
@@ -141,8 +138,7 @@ def preflight(args: argparse.Namespace) -> dict[str, Any]:
     if not bool(torch.isfinite(torch.as_tensor(grad_norm)).item()):
         raise RuntimeError("TESSA_V2_PREFLIGHT_NONFINITE_GRADIENT")
 
-    # Adam state is materialized to measure realistic persistent training memory,
-    # but no optimizer.step() occurs and no parameter is changed.
+    # Materialize realistic Adam state without calling optimizer.step().
     for parameter in trainable:
         if parameter.grad is None:
             continue
@@ -190,15 +186,16 @@ def preflight(args: argparse.Namespace) -> dict[str, Any]:
         "free_disk_bytes": int(disk.free),
         "forward_backward_and_adam_state_seconds": float(elapsed),
         "optimizer_steps_executed": 0,
-        "parameters_updated": false if False else False,
+        "parameters_updated": False,
         "scientific_quality_evaluated": False,
         "scientific_pass_claimed": False,
         "training_authorized": not blockers,
         "blockers": blockers,
-        "next_action": "RUN_LOCKED_TESSA_V2_TRAINER" if not blockers else "RESOLVE_ENGINEERING_BLOCKERS",
+        "next_action": "RUN_PRETRAINING_READINESS_COURT" if not blockers else "RESOLVE_ENGINEERING_BLOCKERS",
     }
-    path = out_dir / "TESSA_V2_A100_PREFLIGHT.json"
-    path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (out_dir / "TESSA_V2_A100_PREFLIGHT.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return result
 
 

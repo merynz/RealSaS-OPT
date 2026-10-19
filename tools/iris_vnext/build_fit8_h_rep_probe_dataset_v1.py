@@ -11,7 +11,6 @@ are never re-described as exact SDF/occupancy truth.
 """
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -21,7 +20,7 @@ import torch
 from scipy.spatial import cKDTree
 
 from models.iris.vnext.cohort_v1 import SUBJECT_IDS
-from tools.iris_vnext.materialize_fit8_direct_surface_v1 import load_json, sha256_file
+from tools.iris_vnext.h_rep_probe_authority_v1 import load_json, sha256_file
 
 SCHEMA = "RealSaS.HRepP0ProbeDataset.v1"
 SUBJECT_SCHEMA = "RealSaS.HRepP0ProbeSubject.v1"

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 """Resolution-aware surface rescue decoder over exact sealed V8 local evidence H.
 
-SURF-A1 never rewrites V8 scene_core.  At zero step and native R24 it reproduces
-V8 field, extraction deformation and FlexiCubes raw parameters exactly.  At other
+SURF-A1 never rewrites V8 scene_core. At zero step and native R24 it reproduces
+V8 field, extraction deformation and FlexiCubes raw parameters exactly. At other
 resolutions the inherited deformation is expressed in cell units so the absolute
 motion scales with the current lattice rather than reusing V8's absolute 0.03
 normalized-coordinate bound.
@@ -154,6 +154,7 @@ class FrozenHSurfaceRescueV1(nn.Module):
         point_features: torch.Tensor,
         cubes: torch.Tensor,
         inherited_v8_raw_parameters: torch.Tensor,
+        cube_chunk: int = 2048,
     ) -> dict[str, torch.Tensor]:
         self._require_frozen("V8_CUBE_PARAMETERS", inherited_v8_raw_parameters)
         if cubes.ndim != 2 or cubes.shape[-1] != 8:
@@ -162,8 +163,16 @@ class FrozenHSurfaceRescueV1(nn.Module):
             raise ValueError("SURF_A1_POINT_FEATURE_SHAPE_INVALID")
         if inherited_v8_raw_parameters.shape != (point_features.shape[0], cubes.shape[0], 21):
             raise ValueError("SURF_A1_INHERITED_CUBE_PARAMETER_SHAPE_INVALID")
-        corner = point_features[:, cubes].flatten(-2)
-        residual = self.cube_residual(corner)
+        if int(cube_chunk) <= 0:
+            raise ValueError("SURF_A1_CUBE_CHUNK_INVALID")
+        residual_rows = []
+        for start in range(0, int(cubes.shape[0]), int(cube_chunk)):
+            cube = cubes[start : start + int(cube_chunk)]
+            corner = point_features[:, cube].flatten(-2)
+            residual_rows.append(self.cube_residual(corner))
+        residual = torch.cat(residual_rows, dim=1)
+        if residual.shape != inherited_v8_raw_parameters.shape:
+            raise RuntimeError("SURF_A1_CUBE_RESIDUAL_SHAPE_DRIFT")
         return {
             "raw_parameters": inherited_v8_raw_parameters + residual,
             "cube_parameter_residual": residual,

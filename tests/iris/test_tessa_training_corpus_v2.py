@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import torch
 
-from models.tessa.v1.tokenization_v1 import TESSATokenizerV1
 from models.tessa.v2.config_v2 import TESSAStructuralizerConfigV2
 from models.tessa.v2.training_corpus_v2 import (
     TESSATrainingWindowPolicyV2,

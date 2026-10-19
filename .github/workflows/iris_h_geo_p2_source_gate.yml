@@ -2,9 +2,14 @@ name: iris-h-geo-p2-source-gate
 on:
   pull_request:
     paths:
+      - 'CURRENT_STATE.md'
+      - 'CURRENT_PLAN.md'
+      - 'AGENTS.md'
+      - 'canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json'
       - 'canonical/H_GEO_P2_INPUT_BINDING_V1.json'
       - 'canonical/H_GEO_P2_PREREGISTRATION_V1.json'
       - 'docs/research/IRIS_H_GEO_P1_RESULT_20261020.json'
+      - 'docs/research/IRIS_H_GEO_P2_DECISION_LEDGER_20261020.md'
       - 'tools/iris_vnext/h_geo_p2_runtime_v1.py'
       - 'tools/iris_vnext/preflight_h_geo_p2_a100_v1.py'
       - 'tools/iris_vnext/train_fit8_h_geo_p2_v1.py'
@@ -53,6 +58,7 @@ jobs:
           from pathlib import Path
           p=json.loads(Path('canonical/H_GEO_P2_PREREGISTRATION_V1.json').read_text())
           b=json.loads(Path('canonical/H_GEO_P2_INPUT_BINDING_V1.json').read_text())
+          l=json.loads(Path('canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json').read_text())
           assert p['architecture']['architecture_expansion_allowed'] is False
           assert p['architecture']['p1_checkpoint_initialization_allowed'] is False
           assert p['architecture']['trainable_existing_modules']==['scene_core.scene','scene_core.field']
@@ -61,5 +67,6 @@ jobs:
           assert p['runtime_admission']['scene_and_field_gradient_connectivity_required_before_optimizer'] is True
           assert p['interpretation']['pass_authorizes_tessa'] is False
           assert p['interpretation']['pass_authorizes_surf_a2'] is False
+          assert l['active_experiment']=='H-GEO-P2-SCENE-FIELD'
           print('PASS_H_GEO_P2_SOURCE_ONLY__A100_RUN_STILL_REQUIRED')
           PY

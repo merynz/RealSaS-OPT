@@ -21,7 +21,12 @@ from models.iris.vnext.h_rep_probe_v1 import (
     build_probe_input_v1,
     h_rep_probe_objective_v1,
 )
-from tools.iris_vnext.h_rep_probe_authority_v1 import git_head, load_json, sha256_file
+from tools.iris_vnext.h_rep_probe_authority_v1 import (
+    load_json,
+    require_a100_runtime_v1,
+    require_exact_clean_source_v1,
+    sha256_file,
+)
 from tools.iris_vnext.h_rep_probe_runtime_v1 import (
     cache_frozen_v8_probe_features_v1,
     load_h_rep_binding_v1,
@@ -58,8 +63,7 @@ def _lr(step: int) -> float:
 def train(args: argparse.Namespace) -> dict[str, Any]:
     repo = Path(args.repo_root).resolve()
     source_sha = str(args.expected_source_sha).lower()
-    if git_head(repo) != source_sha:
-        raise RuntimeError("H_REP_P0_SOURCE_SHA_DRIFT")
+    require_exact_clean_source_v1(repo, source_sha)
 
     binding_path = Path(args.binding).resolve()
     prereg_path = Path(args.preregistration).resolve()
@@ -70,6 +74,15 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("H_REP_P0_PREREG_SCHEMA_INVALID")
     if prereg.get("input_binding") != "canonical/H_REP_P0_INPUT_BINDING_V1.json":
         raise ValueError("H_REP_P0_PREREG_BINDING_PATH_DRIFT")
+    runtime = prereg.get("runtime_admission") or {}
+    if runtime.get("accelerator") != "NVIDIA_A100_CLASS":
+        raise ValueError("H_REP_P0_ACCELERATOR_PREREG_DRIFT")
+    minimum_memory_gib = float(runtime.get("minimum_cuda_memory_gib", -1))
+    if minimum_memory_gib != 39.0:
+        raise ValueError("H_REP_P0_MEMORY_PREREG_DRIFT")
+    if runtime.get("optimizer_step_allowed_before_all_authority_gates") is not False:
+        raise ValueError("H_REP_P0_OPTIMIZER_ADMISSION_PREREG_DRIFT")
+    gpu = require_a100_runtime_v1(minimum_memory_gib)
 
     binding_sha = sha256_file(binding_path)
     prereg_sha = sha256_file(prereg_path)
@@ -79,8 +92,6 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("H_REP_P0_TRAIN_DATASET_BINDING_SHA_DRIFT")
 
     device = torch.device("cuda")
-    if not torch.cuda.is_available():
-        raise RuntimeError("H_REP_P0_CUDA_REQUIRED")
     torch.manual_seed(26101990)
     torch.cuda.manual_seed_all(26101990)
 
@@ -107,6 +118,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         )
         for arm in PROBE_ARMS_V1
     }
+    print("H_REP_P0_A100_AUTHORITY", json.dumps(gpu, sort_keys=True), flush=True)
     print("H_REP_P0_EQUAL_CAPACITY", json.dumps(parameter_counts, sort_keys=True), flush=True)
 
     output = Path(args.output_dir).resolve()
@@ -232,6 +244,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         "schema": SCHEMA,
         "status": "COMPLETED_H_REP_P0_EQUAL_CAPACITY_PROBES__AWAITING_INDEPENDENT_COURT",
         **authority,
+        "gpu": gpu,
         "optimizer_steps_per_arm": TOTAL_STEPS,
         "arms": list(PROBE_ARMS_V1),
         "parameter_counts": parameter_counts,

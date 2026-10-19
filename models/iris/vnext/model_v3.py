@@ -12,7 +12,7 @@ from .scene_core_v1 import IRISVNextSceneCoreV1
 class IRISVNextEvidenceModelV3(nn.Module):
     """IRIS continuous-scene/evidence model with topology factored out.
 
-    TESSA is intentionally *not* a child head of this model.  A single IRIS
+    TESSA is intentionally *not* a child head of this model. A single IRIS
     checkpoint can therefore be evaluated through either direct surface->Compiler
     or TESSA structuralization->Compiler without changing the scene model.
     """
@@ -32,6 +32,12 @@ class IRISVNextEvidenceModelV3(nn.Module):
         relation_config.validate()
         self.config = config
         self.scene_core = IRISVNextSceneCoreV1(config)
+        # Historical V1 contains an uncertainty row for checkpoint compatibility,
+        # but V8 supplied no calibration objective for it. V3 neither exposes nor
+        # optimizes those parameters. A future calibrated uncertainty head must be
+        # introduced as a new typed objective, not silently revive these weights.
+        for parameter in self.scene_core.field.uncertainty_head.parameters():
+            parameter.requires_grad_(False)
         self.mechanical_demand = MechanicalDemandHeadV3(config)
         self.appearance = AppearanceEvidenceHeadV3(config)
         self.relations = GraphicsRelationHeadV3(config, relation_config)
@@ -50,10 +56,8 @@ class IRISVNextEvidenceModelV3(nn.Module):
         points_normalized: torch.Tensor,
     ) -> dict[str, torch.Tensor]:
         local = self.scene_core.query(scene_planes, points_normalized)
-        # Historical scene_core still owns a log_uncertainty row, but it did not
-        # have a calibration objective in V8.  V3 deliberately does not expose
-        # that scalar as model evidence.  The source module remains untouched for
-        # provenance and old-checkpoint compatibility.
+        # Historical scene_core still computes log_uncertainty for exact source
+        # compatibility. V3 deliberately removes it from the public evidence API.
         return {
             "H": local["H"],
             "field": local["field"],
@@ -96,10 +100,10 @@ class IRISVNextEvidenceModelV3(nn.Module):
         )
 
     def parameter_groups(self) -> dict[str, tuple[nn.Parameter, ...]]:
-        scene = tuple(self.scene_core.parameters())
-        mechanical = tuple(self.mechanical_demand.parameters())
-        appearance = tuple(self.appearance.parameters())
-        relation = tuple(self.relations.parameters())
+        scene = tuple(p for p in self.scene_core.parameters() if p.requires_grad)
+        mechanical = tuple(p for p in self.mechanical_demand.parameters() if p.requires_grad)
+        appearance = tuple(p for p in self.appearance.parameters() if p.requires_grad)
+        relation = tuple(p for p in self.relations.parameters() if p.requires_grad)
         groups = {
             "scene_core": scene,
             "mechanical": mechanical,

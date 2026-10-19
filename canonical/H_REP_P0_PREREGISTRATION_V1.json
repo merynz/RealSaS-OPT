@@ -1,0 +1,76 @@
+{
+  "schema": "RealSaS.HRepP0Preregistration.v1",
+  "experiment_id": "H-REP-P0",
+  "date_utc": "2026-10-19",
+  "question": "IS_LOCAL_SURFACE_GEOMETRY_DECODABLE_FROM_SEALED_V8_H_OR_RAW_FIELD_WITHOUT_MESH_EXTRACTION",
+  "scope": "FIT8_REPRESENTATION_DIAGNOSTIC__NOT_PRODUCT_SURFACE__NOT_UNSEEN_GENERALIZATION__NOT_TESSA_AUTHORIZATION",
+  "input_binding": "canonical/H_REP_P0_INPUT_BINDING_V1.json",
+  "frozen_authority": {
+    "v8_scene_core_trainable": false,
+    "v8_checkpoint_exact": true,
+    "appearance_relation_mechanical_structure_heads_trainable": false,
+    "surf_a1_decoder_used": false,
+    "flexicubes_used": false,
+    "tessa_used": false
+  },
+  "probe_arms": {
+    "H_XYZ": "SEALED_LOCAL_H_PLUS_QUERY_XYZ",
+    "RAW_FIELD_XYZ": "SEALED_V8_RAW_FIELD_PLUS_QUERY_XYZ",
+    "XYZ_ONLY": "QUERY_XYZ_NEGATIVE_CONTROL",
+    "SHUFFLED_H_XYZ": "WITHIN_SUBJECT_FIXED_PERMUTED_H_PLUS_QUERY_XYZ_LOCAL_ALIGNMENT_CONTROL"
+  },
+  "shared_probe_architecture": {
+    "width": 256,
+    "residual_blocks": 2,
+    "subject_id_input": false,
+    "subject_specific_parameters": false,
+    "heads": ["POINT_CLOUD_DISTANCE", "OFFSET_TO_REFERENCE_POINT", "NORMAL_UP_TO_SIGN", "NEAR_SURFACE_LOGIT"]
+  },
+  "probe_truth": {
+    "source": "SEALED_V4_TEACHER_SURFACE_POINTS_IRIS_PLUS_MECHANICAL_POINTS_NORMALS",
+    "distance_semantics": "POINT_CLOUD_PROXY__NOT_EXACT_SDF",
+    "near_threshold_iris": 0.03,
+    "normal_valid_distance_iris": 0.08,
+    "offset_valid_distance_iris": 0.12,
+    "teacher_truth_in_probe_input": false,
+    "heldout_queries_generated_with_independent_seed": true
+  },
+  "training": {
+    "optimizer": "AdamW",
+    "steps_per_arm": 1200,
+    "batch_size": 2048,
+    "peak_learning_rate": 0.0002,
+    "minimum_learning_rate": 0.00002,
+    "warmup_steps": 60,
+    "gradient_clip_norm": 1.0,
+    "checkpoint_interval": 200,
+    "same_subject_schedule_for_all_arms": true,
+    "equal_capacity_predictors": true
+  },
+  "heldout_court": {
+    "maximum_h_mean_distance_mae_iris": 0.025,
+    "maximum_h_subject_endpoint_p95_iris": 0.075,
+    "minimum_h_subject_normal_alignment": 0.70,
+    "minimum_h_subject_near_balanced_accuracy": 0.80,
+    "minimum_h_distance_mae_reduction_vs_xyz": 0.20,
+    "minimum_h_distance_mae_reduction_vs_shuffled": 0.15,
+    "minimum_h_near_ba_gain_vs_xyz": 0.08,
+    "minimum_h_near_ba_gain_vs_shuffled": 0.05,
+    "maximum_raw_mean_distance_mae_iris": 0.025,
+    "maximum_raw_subject_endpoint_p95_iris": 0.075,
+    "minimum_raw_subject_normal_alignment": 0.70,
+    "minimum_raw_subject_near_balanced_accuracy": 0.80,
+    "minimum_raw_distance_mae_reduction_vs_xyz": 0.20,
+    "minimum_raw_near_ba_gain_vs_xyz": 0.08,
+    "thresholds_may_change_after_results": false
+  },
+  "interpretation": {
+    "carrier_local_geometry_decodable_if": "H_XYZ_PASSES_ABSOLUTE_AND_LOCAL_ALIGNMENT_GATES_OR_RAW_FIELD_XYZ_PASSES_ABSOLUTE_AND_XYZ_CONTROL_GATES",
+    "pass_next_action": "DESIGN_EXTRACTION_TRANSITION_ALTERNATIVE__DO_NOT_RETRAIN_H_YET__DO_NOT_TRAIN_TESSA",
+    "fail_next_action": "PREREGISTER_CARRIER_REPRESENTATION_RETRAINING_EXPERIMENT__DO_NOT_TRAIN_TESSA",
+    "pass_authorizes_surf_a2": false,
+    "pass_authorizes_tessa": false,
+    "fail_authorizes_carrier_retraining": false,
+    "unseen_generalization_claimed": false
+  }
+}

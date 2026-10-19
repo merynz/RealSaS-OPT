@@ -1,0 +1,59 @@
+{
+  "schema": "RealSaS.HRepP0InputBinding.v1",
+  "experiment_id": "H-REP-P0",
+  "purpose": "DEDICATED_POST_SURF_A1_SEALED_V8_H_REPRESENTATION_DIAGNOSTIC",
+  "source_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
+  "v8": {
+    "source_commit_sha": "5083c9915533ec8ec6530c7d229c635887abfea7",
+    "global_step": 12000,
+    "binding_sha256": "735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2",
+    "checkpoint": {
+      "file": "step_00012000_ac23a9ea448e465cb668773a131981be.pt",
+      "file_id": "1xttwuxgC8y9EVmf7xxMEN4yj84yhm4zH",
+      "sha256": "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5",
+      "mydrive_relative_path": "RealSaS_Fit8_A100_SMOKE_V2_fafe3284_af6a53ad/v8_m1_sealed_5083c991/checkpoints/step_00012000_ac23a9ea448e465cb668773a131981be.pt"
+    }
+  },
+  "prepared": {
+    "source_commit_sha": "7029ee3f48787aa9f7e27eecef89155eb9368a96",
+    "mydrive_relative_path": "RealSaS_Fit8_IRIS_vNext_candidates/7029ee3f48787aa9f7e27eecef89155eb9368a96/prepared",
+    "manifest": {
+      "file": "COHORT_MANIFEST.json",
+      "file_id": "18YLO2fY88ZvZDkjWH383rmsht3wZV1bh",
+      "sha256": "6561bf2087f4fac3699c673b5c93fb3d8dbc2d1ff90a5065d976cae70688b4d8",
+      "schema": "RealSaS.IRISVNextFit8Manifest.v4"
+    }
+  },
+  "trigger_evidence": {
+    "surf_a1_preflight": {
+      "file_id": "12rEV36p_qTdzIkbmlszrTNouuj862aOr",
+      "sha256": "0fd889134164ee0cb80bf05d3409967ce5a37ff2f9f2c38b41a7218c2392ce75",
+      "status": "PASS_SURF_A1_A100_PREFLIGHT__TRAINING_AUTHORIZED"
+    },
+    "surf_a1_training_result": {
+      "file_id": "1fI6CXDFgmvTTZARo3aAjQm0ubfsVORVm",
+      "sha256": "9d5ac2f01b5e84d8a9c91e93008dfd2a50a7a8908b0626950e4d11a43d918123",
+      "optimizer_steps_executed": 2400
+    },
+    "surf_a1_independent_court": {
+      "file_id": "1eptd5tfwI74FHvaUkD--Rias0DOgMLCa",
+      "sha256": "a8c4070a126edaddd602853c62b3e2b58335ef2fb62750c52f088ef8e15e631e",
+      "status": "SCIENTIFIC_FAIL_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE",
+      "next_action": "OPEN_DEDICATED_H_REPRESENTATION_INVESTIGATION__DO_NOT_TRAIN_TESSA"
+    }
+  },
+  "truth_authority": {
+    "surface_points": "SEALED_V4_TEACHER_SURFACE_POINTS_IRIS",
+    "mechanical_points_normals": "SEALED_V4_MECHANICAL_POINTS_AND_NORMALS",
+    "distance_target": "NEAREST_POINT_DISTANCE_TO_SEALED_POINT_SET__PROXY_NOT_EXACT_SDF",
+    "teacher_truth_allowed_in_probe_input": false
+  },
+  "transport_policy": {
+    "colab_drive_mount_only": true,
+    "single_drive_consent": true,
+    "drive_tree_scan_forbidden": true,
+    "second_google_oauth_forbidden": true,
+    "mounted_path_is_not_authority": true,
+    "sha256_is_authority": true
+  }
+}

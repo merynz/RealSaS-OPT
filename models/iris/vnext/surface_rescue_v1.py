@@ -72,7 +72,6 @@ class FrozenHSurfaceRescueV1(nn.Module):
         super().__init__()
         config.validate()
         self.config = config
-        # H + XYZ + raw field + inherited delta in native cell units + log2 resolution ratio.
         input_dim = config.local_feature_dim + 3 + 1 + 3 + 1
         self.input_norm = nn.LayerNorm(input_dim)
         self.input_projection = nn.Linear(input_dim, config.point_width)
@@ -120,7 +119,7 @@ class FrozenHSurfaceRescueV1(nn.Module):
 
         native_step = iris_cell_step_v1(self.config.native_resolution)
         current_step = iris_cell_step_v1(int(resolution))
-        base_cells = v8_extraction_delta / native_step
+        base_cells = v8_extraction_delta.float() / native_step
         maximum = float(self.config.maximum_absolute_cell_offset)
         if float(base_cells.detach().abs().max().item()) >= maximum:
             raise ValueError("SURF_A1_INHERITED_DELTA_EXCEEDS_CELL_BOUND")
@@ -132,16 +131,18 @@ class FrozenHSurfaceRescueV1(nn.Module):
             z = block(z)
         z = self.final_norm(z)
 
-        field_residual = torch.tanh(self.field_residual(z).squeeze(-1)) * float(self.config.maximum_absolute_field_residual)
-        # atanh parameterization preserves the inherited native offset at zero residual
-        # while guaranteeing the trained total remains strictly inside +/- max cells.
-        base_unit = base_cells / maximum
-        base_logits = torch.atanh(base_unit)
-        delta_cells = torch.tanh(base_logits + self.delta_residual_logits(z)) * maximum
-        deformed_xyz = xyz_iris + delta_cells * current_step
+        field_residual = torch.tanh(self.field_residual(z).squeeze(-1).float()) * float(self.config.maximum_absolute_field_residual)
+        # Exact identity at zero residual, with a per-coordinate remaining-margin
+        # bound. This is stronger than an atanh/tanh round-trip: the inherited V8
+        # offset is copied bit-for-bit before any learned correction is added.
+        delta_logits = self.delta_residual_logits(z).float()
+        remaining_margin = (maximum - base_cells.abs()).clamp_min(0.0)
+        delta_adjustment = torch.tanh(delta_logits) * remaining_margin
+        delta_cells = base_cells + delta_adjustment
+        deformed_xyz = xyz_iris.float() + delta_cells * current_step
         return {
             "point_features": z,
-            "field": raw_v8_field + field_residual,
+            "field": raw_v8_field.float() + field_residual,
             "field_residual": field_residual,
             "delta_cells": delta_cells,
             "deformed_xyz_iris": deformed_xyz,
@@ -169,12 +170,12 @@ class FrozenHSurfaceRescueV1(nn.Module):
         for start in range(0, int(cubes.shape[0]), int(cube_chunk)):
             cube = cubes[start : start + int(cube_chunk)]
             corner = point_features[:, cube].flatten(-2)
-            residual_rows.append(self.cube_residual(corner))
+            residual_rows.append(self.cube_residual(corner).float())
         residual = torch.cat(residual_rows, dim=1)
         if residual.shape != inherited_v8_raw_parameters.shape:
             raise RuntimeError("SURF_A1_CUBE_RESIDUAL_SHAPE_DRIFT")
         return {
-            "raw_parameters": inherited_v8_raw_parameters + residual,
+            "raw_parameters": inherited_v8_raw_parameters.float() + residual,
             "cube_parameter_residual": residual,
         }
 

@@ -82,9 +82,10 @@ def test_h_rep_preregistration_keeps_representation_question_narrow():
     assert prereg["interpretation"]["fail_authorizes_carrier_retraining"] is False
 
 
-def test_h_rep_source_does_not_import_mesh_extraction_or_tessa():
+def test_h_rep_dependency_graph_is_extractor_free():
     paths = [
         "models/iris/vnext/h_rep_probe_v1.py",
+        "tools/iris_vnext/h_rep_probe_authority_v1.py",
         "tools/iris_vnext/build_fit8_h_rep_probe_dataset_v1.py",
         "tools/iris_vnext/h_rep_probe_runtime_v1.py",
         "tools/iris_vnext/train_fit8_h_rep_probe_v1.py",
@@ -92,6 +93,10 @@ def test_h_rep_source_does_not_import_mesh_extraction_or_tessa():
     ]
     text = "\n".join((ROOT / path).read_text(encoding="utf-8") for path in paths)
     forbidden_import_tokens = (
+        "materialize_fit8_direct_surface_v1",
+        "surface_rescue_training_v1",
+        "SparseRegularTetra",
+        "models.iris.vnext.sparse_surface",
         "PinnedFlexiCubesV1",
         "FrozenHSurfaceRescueV1",
         "models.tessa",

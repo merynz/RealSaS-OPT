@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Shared runtime helpers for H-REP-P0 training and independent court."""
+"""Shared extractor-free runtime helpers for H-REP-P0 training and court."""
 
 from pathlib import Path
 from typing import Any
@@ -9,11 +9,11 @@ import numpy as np
 import torch
 
 from models.iris.vnext.cohort_v1 import SUBJECT_IDS
-from models.iris.vnext.surface_rescue_training_v1 import module_state_sha256_v1
-from tools.iris_vnext.materialize_fit8_direct_surface_v1 import (
+from tools.iris_vnext.h_rep_probe_authority_v1 import (
     load_exact_v8_model,
     load_json,
     load_subject_source,
+    module_state_sha256_v1,
     sha256_file,
 )
 

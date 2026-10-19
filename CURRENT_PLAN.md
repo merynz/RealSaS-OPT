@@ -1,15 +1,16 @@
 # RealSaS-OPT — Current Plan
 
-**Date:** 2026-10-19  
-**Status:** **POST-V8 SURFACE PROGRAM — SURF-A1 CLOSED FAIL; H-REP-P0 ACTIVE**  
+**Date:** 2026-10-20  
+**Status:** **POST-V8 SURFACE PROGRAM — SURF-A1 CLOSED FAIL; H-REP-P0 SOURCE GREEN; A100 RUN NEXT**  
 **Active PR source:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
-**Staging source:** `research/iris-vnext-hybrid-tessa-v2-20261019-hrep-p0`  
 **Review vehicle:** draft PR #122  
 **Production authority:** `main` until reviewed merge  
 **Active lane:** `SURFACE_TESSA`  
 **Active experiment:** `H-REP-P0`  
+**Frozen H-REP-P0 execution source:** `479e8e53cf0d7df234a3e64b824bb704b861bf19`  
+**Runtime worker:** `NB-r1` — generated, not yet run  
 **Parked lane:** `RELATION_V10`  
-**Optimizer policy:** **Only H-REP-P0 low-capacity probes may optimize after exact source/input/A100 admission. V8 H stays sealed. No SURF-A2, TESSA, Relation V10 or carrier-retraining optimizer step is authorized.**
+**Optimizer policy:** **Only H-REP-P0 low-capacity probes may optimize after the notebook's exact runtime/input/A100 admission passes. V8 H stays sealed. No SURF-A2, TESSA, Relation V10 or carrier-retraining optimizer step is authorized.**
 
 ## 0. Program objective
 
@@ -113,7 +114,34 @@ H-REP-P0 FAIL
 
 Neither branch authorizes TESSA or SURF-A2 directly.
 
-## 4. H-REP-P0 controls
+## 4. Frozen source authority
+
+The exact scientific execution source is frozen at:
+
+`479e8e53cf0d7df234a3e64b824bb704b861bf19`
+
+PR #124 closed by fast-forward to that exact SHA after all required source gates were green:
+
+- `iris-h-rep-p0-source-gate` PASS;
+- `model-mainline-source-gate` PASS;
+- `iris-tessa-v2-structuralization-source-gate` PASS;
+- `iris-v2-source-contract` PASS;
+- `architecture-freeze-source-gate` PASS.
+
+Post-freeze documentation commits do not redefine this scientific source.
+
+The frozen runtime additionally enforces:
+
+- exact clean source checkout;
+- exact A100-class GPU;
+- at least `39 GiB` CUDA memory;
+- exact V8/prepared/binding/prereg authority chain;
+- no optimizer step before those gates;
+- exact per-global-step deterministic minibatch schedule for resume equivalence.
+
+Sampler authority: `RealSaS.HRepP0StepSeededSampler.v1`.
+
+## 5. H-REP-P0 controls
 
 Four probes are trained with **identical architecture and exact equal parameter count**. Every arm receives the same `384 evidence + 3 XYZ = 387` dimensional envelope.
 
@@ -143,7 +171,7 @@ Probe architecture:
 - near-surface binary head;
 - identical parameter count for all four arms.
 
-## 5. H-REP-P0 truth
+## 6. H-REP-P0 truth
 
 Use only exact sealed V4 geometry already admitted for independent surface courts:
 
@@ -164,7 +192,7 @@ Important claim boundary:
 
 Teacher data supplies targets only. It never enters the probe input or V8 forward.
 
-## 6. Fixed training protocol
+## 7. Fixed training protocol
 
 Per arm:
 
@@ -177,14 +205,15 @@ Per arm:
 - cosine to `2e-5`;
 - gradient clip `1.0`;
 - checkpoint every `200` steps;
-- deterministic subject round-robin and RNG;
+- deterministic subject round-robin;
+- deterministic batch indices derived from absolute global step + subject index;
 - resumable exact hash-bound checkpoint.
 
-All arms see the same subject schedule and batch indices at each step.
+All arms see the same subject schedule and exact batch indices at each global step. Resume cannot restart or shift the minibatch RNG stream.
 
 V8 model remains entirely frozen and its full scene-core hash is checked before/after feature caching.
 
-## 7. Independent held-out court
+## 8. Independent held-out court
 
 Preregistered before runtime.
 
@@ -213,47 +242,27 @@ The carrier-local-geometry result is positive if **H_XYZ passes both its absolut
 
 Thresholds may not change after results.
 
-## 8. Source authority / fail-closed requirements
+## 9. Notebook contract / next execution
 
-Before optimization:
+Runtime worker `NB-r1` is generated against frozen SHA `479e8e53...` and is the next program boundary. It is not scientific evidence until executed.
 
-1. exact reviewed source SHA and clean checkout;
-2. exact `canonical/H_REP_P0_INPUT_BINDING_V1.json` hash;
-3. exact `canonical/H_REP_P0_PREREGISTRATION_V1.json` hash;
-4. exact sealed V8 checkpoint and binding;
-5. exact V4 prepared manifest and shard hashes;
-6. deterministic probe-dataset receipt hash-bound to the current input binding;
-7. frozen scene-core hash established;
-8. all four arms have exact equal parameter count;
-9. A100-class GPU resource gate;
-10. optimizer steps executed = 0 before authorization.
-
-Resume requires exact source + binding + prereg + dataset receipt + V8 scene hash + parameter counts.
-
-The independent court rechecks the same chain and refuses a training result/checkpoint from another authority tuple.
-
-## 9. Notebook contract
-
-Generate a notebook only after the exact source gate is green.
-
-Operator UX must be the successful V8 pattern:
+Operator UX:
 
 ```text
 Open → Run all → one Drive approval → autonomous execution
 ```
 
-Use physically separated cells/phases, not a single giant worker cell. At minimum:
+Physical phases:
 
-1. Drive mount + immutable authority constants;
-2. exact runtime/A100 gate;
-3. exact source checkout + clean-tree gate;
-4. exact direct-path hydration/hash verification;
-5. deterministic probe dataset build/receipt;
-6. frozen V8 feature-cache/admission checks;
-7. four-arm trainer setup;
-8. 1200-step probe training;
-9. independent held-out court;
-10. final typed receipt summary.
+1. one Drive mount + immutable constants;
+2. exact detached source checkout + clean-tree gate;
+3. dependency/precompile + exact A100 admission;
+4. direct-path exact input hydration with zero Drive discovery;
+5. deterministic point-proxy dataset build/restore;
+6. zero-step scientific admission with frozen V8 scene-core hash and equal-capacity check;
+7. four-arm exact-resume training;
+8. independent held-out court;
+9. typed completion receipt.
 
 Forbidden:
 
@@ -261,9 +270,8 @@ Forbidden:
 - interactive rclone/gcloud;
 - full Drive scan, `os.walk`, `rglob` discovery for known inputs;
 - hidden fallback;
-- manual cell sequencing.
-
-Known exact mounted scientific roots must be bound directly before notebook generation.
+- manual cell sequencing;
+- FlexiCubes/PyTorch3D/TESSA/Compiler rescue inside H-REP-P0.
 
 ## 10. SURF-A2 and TESSA remain blocked
 
@@ -278,12 +286,12 @@ Do not context-switch back to relation training while H-REP-P0 is unresolved. Pr
 ## 12. Immediate execution order
 
 ```text
-P0. seal SURF-A1 result in state/ledger                       [IN PROGRESS]
-P1. implement H-REP-P0 source + prereg + controls             [IMPLEMENTED ON STAGING BRANCH]
-P2. source contract / CI green                                [NEXT]
-P3. freeze exact green SHA
-P4. generate V8-style multi-cell single-consent zero-scan A100 notebook
-P5. build deterministic train/holdout point-proxy dataset
+P0. seal SURF-A1 result in state/ledger                       [DONE]
+P1. implement H-REP-P0 source + prereg + controls             [DONE]
+P2. source contract / CI green                                [DONE]
+P3. freeze exact green SHA 479e8e53...                        [DONE]
+P4. generate V8-style multi-cell single-consent zero-scan A100 notebook NB-r1 [DONE]
+P5. execute NB-r1 and build deterministic train/holdout point-proxy dataset [NEXT]
 P6. cache/verify frozen V8 H + raw field
 P7. train four exact equal-capacity arms, 1200 steps each
 P8. independent held-out court

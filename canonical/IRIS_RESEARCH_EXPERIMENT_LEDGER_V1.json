@@ -4,7 +4,6 @@
   "purpose": "SINGLE_MACHINE_READABLE_CONTINUATION_AUTHORITY_FOR_POST_V8_IRIS_TESSA_RESEARCH",
   "production_authority": "main",
   "review_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
-  "source_staging_branch": "research/iris-vnext-hybrid-tessa-v2-20261019-hrep-p0",
   "review_vehicle": "PR_122",
   "authority_law": {
     "repository_source_is_scientific_result": false,
@@ -119,8 +118,17 @@
     {
       "id": "H-REP-P0",
       "kind": "SEALED_V8_LOCAL_GEOMETRY_REPRESENTATION_DIAGNOSTIC",
-      "status": "SOURCE_AND_PREREG_IMPLEMENTED__SOURCE_GATE_PENDING",
-      "source_sha": "TO_BE_FROZEN_AFTER_FINAL_GREEN_SOURCE_GATE",
+      "status": "SOURCE_GREEN__A100_RUN_PENDING",
+      "frozen_execution_source_sha": "479e8e53cf0d7df234a3e64b824bb704b861bf19",
+      "source_gate": {
+        "vehicle": "PR_124",
+        "iris_h_rep_p0_source_gate_run_id": 39328166614,
+        "model_mainline_source_gate_run_id": 39328166550,
+        "iris_tessa_v2_structuralization_source_gate_run_id": 39328166521,
+        "iris_v2_source_contract_run_id": 39328166542,
+        "architecture_freeze_source_gate_run_id": 39328166544,
+        "all_required_source_gates_green": true
+      },
       "question": "IS_LOCAL_SURFACE_GEOMETRY_DECODABLE_FROM_SEALED_V8_H_OR_RAW_FIELD_WITHOUT_MESH_EXTRACTION",
       "probe_arms": [
         "H_XYZ",
@@ -129,12 +137,17 @@
         "SHUFFLED_H_XYZ"
       ],
       "same_parameter_count_all_arms": true,
+      "exact_resume_sampler": "RealSaS.HRepP0StepSeededSampler.v1",
       "scene_core_trainable": false,
       "teacher_truth_in_probe_input": false,
       "mesh_extraction_invoked": false,
       "tessa_invoked": false,
       "input_binding": "canonical/H_REP_P0_INPUT_BINDING_V1.json",
       "preregistration": "canonical/H_REP_P0_PREREGISTRATION_V1.json",
+      "notebook_revision": "NB-r1",
+      "notebook_scientific_authority": false,
+      "a100_run_started": false,
+      "scientific_result_available": false,
       "pass_next_gate": "DESIGN_EXTRACTION_TRANSITION_ALTERNATIVE__DO_NOT_RETRAIN_H_YET",
       "fail_next_gate": "PREREGISTER_CARRIER_REPRESENTATION_RETRAINING_EXPERIMENT",
       "surf_a2_authorized": false,

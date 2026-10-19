@@ -4,12 +4,12 @@ from __future__ import annotations
 """Measurement-only forensic audit for the failed V8 raw-field sparse A-arm.
 
 This tool consumes the preserved T512 coarse-field memmap from the staged
-materializer.  It does not load IRIS, does not query CUDA, does not change the
+materializer. It does not load IRIS, does not query CUDA, does not change the
 sparse decoder policy, and cannot turn a failed materialization into a PASS.
 
 The historical sparse selector uses a field-magnitude band expressed in spatial
-units.  That is safe for a distance-like field only when field variation is
-compatible with spatial grid steps.  This audit therefore records sign-crossing
+units. That is safe for a distance-like field only when field variation is
+compatible with spatial grid steps. This audit therefore records sign-crossing
 support, refinement-boundary structure and finite-difference roughness indicators.
 The indicators are diagnostics, not an Eikonal/Lipschitz proof.
 """
@@ -74,30 +74,49 @@ def _cell_corner_extrema(field: np.ndarray, *, slab: int = 8):
     )
 
 
-def _edge_roughness(field: np.ndarray, spatial_step: float) -> dict[str, Any]:
+def _edge_roughness(
+    field: np.ndarray,
+    spatial_step: float,
+    *,
+    slab: int = 8,
+) -> dict[str, Any]:
+    """Stream grid-edge diagnostics without allocating a full 513^3 delta array."""
+    if int(slab) <= 0:
+        raise ValueError("RAW_FIELD_AUDIT_EDGE_SLAB_INVALID")
     thresholds = (1.0, 2.0, 4.0, 8.0)
     total_edges = 0
     sign_flip_edges = 0
     exceed = {factor: 0 for factor in thresholds}
     maximum_ratio = 0.0
     mean_abs_accum = 0.0
-    for axis in range(3):
-        left = [slice(None)] * 3
-        right = [slice(None)] * 3
-        left[axis] = slice(0, -1)
-        right[axis] = slice(1, None)
-        a = np.asarray(field[tuple(left)], dtype=np.float32)
-        b = np.asarray(field[tuple(right)], dtype=np.float32)
-        delta = np.abs(b - a)
+    n = int(field.shape[0])
+    if field.shape != (n, n, n) or n < 2:
+        raise ValueError("RAW_FIELD_AUDIT_FIELD_SHAPE_INVALID")
+
+    def consume(a: np.ndarray, b: np.ndarray) -> None:
+        nonlocal total_edges, sign_flip_edges, maximum_ratio, mean_abs_accum
+        aa = np.asarray(a, dtype=np.float32)
+        bb = np.asarray(b, dtype=np.float32)
+        delta = np.abs(bb - aa)
         ratio = delta / float(spatial_step)
         count = int(delta.size)
         total_edges += count
-        sign_flip_edges += int(np.count_nonzero((a < 0.0) != (b < 0.0)))
+        sign_flip_edges += int(np.count_nonzero((aa < 0.0) != (bb < 0.0)))
         mean_abs_accum += float(np.sum(delta, dtype=np.float64))
         if count:
             maximum_ratio = max(maximum_ratio, float(np.max(ratio)))
         for factor in thresholds:
             exceed[factor] += int(np.count_nonzero(ratio > factor))
+
+    base = n - 1
+    for x0 in range(0, base, int(slab)):
+        x1 = min(base, x0 + int(slab))
+        consume(field[x0:x1, :, :], field[x0 + 1:x1 + 1, :, :])
+    for x0 in range(0, n, int(slab)):
+        x1 = min(n, x0 + int(slab))
+        consume(field[x0:x1, :-1, :], field[x0:x1, 1:, :])
+        consume(field[x0:x1, :, :-1], field[x0:x1, :, 1:])
+
     return {
         "total_grid_edges": int(total_edges),
         "sign_flip_edge_count": int(sign_flip_edges),
@@ -110,6 +129,14 @@ def _edge_roughness(field: np.ndarray, spatial_step: float) -> dict[str, Any]:
         },
         "interpretation": "DISTANCE_LIKE_COMPATIBILITY_INDICATORS_ONLY__NOT_A_LIPSCHITZ_PROOF",
     }
+
+
+def _finite_memmap(field: np.ndarray, *, slab: int = 8) -> bool:
+    for x0 in range(0, int(field.shape[0]), int(slab)):
+        x1 = min(int(field.shape[0]), x0 + int(slab))
+        if not bool(np.isfinite(field[x0:x1]).all()):
+            return False
+    return True
 
 
 def audit(*, failure_receipt: Path, output: Path) -> dict[str, Any]:
@@ -137,14 +164,18 @@ def audit(*, failure_receipt: Path, output: Path) -> dict[str, Any]:
         dtype=np.float32,
         shape=(policy.base_cells + 1,) * 3,
     )
-    if not np.isfinite(coarse).all():
+    if not _finite_memmap(coarse, slab=policy.refine_slab_cells):
         raise ValueError("RAW_FIELD_AUDIT_COARSE_NONFINITE")
 
     refined = select_refined_cells_v5(coarse, policy=policy)
     boundary = boundary_parent_cells_v5(refined, policy=policy)
-    sign_cells, band_only_cells = _cell_corner_extrema(coarse, slab=policy.refine_slab_cells)
+    sign_cells, band_only_cells = _cell_corner_extrema(
+        coarse,
+        slab=policy.refine_slab_cells,
+    )
 
     base = int(policy.base_cells)
+
     def keys(cells: np.ndarray) -> np.ndarray:
         if len(cells) == 0:
             return np.empty(0, dtype=np.int64)
@@ -160,12 +191,16 @@ def audit(*, failure_receipt: Path, output: Path) -> dict[str, Any]:
     ):
         raise RuntimeError("RAW_FIELD_AUDIT_SIGN_CELL_NOT_REFINED")
     sign_boundary_count = int(boundary[sign_pos].sum()) if len(sign_pos) else 0
-    domain_boundary_sign = int(
-        np.count_nonzero(
-            (sign_cells == 0).any(axis=1)
-            | (sign_cells == (base - 1)).any(axis=1)
+    domain_boundary_sign = (
+        int(
+            np.count_nonzero(
+                (sign_cells == 0).any(axis=1)
+                | (sign_cells == (base - 1)).any(axis=1)
+            )
         )
-    ) if len(sign_cells) else 0
+        if len(sign_cells)
+        else 0
+    )
 
     total_cells = base ** 3
     result = {
@@ -197,7 +232,11 @@ def audit(*, failure_receipt: Path, output: Path) -> dict[str, Any]:
             "sign_crossing_boundary_parent_fraction": float(sign_boundary_count / len(sign_cells)) if len(sign_cells) else 0.0,
             "domain_boundary_sign_crossing_cell_count": domain_boundary_sign,
         },
-        "roughness": _edge_roughness(coarse, policy.base_step),
+        "roughness": _edge_roughness(
+            coarse,
+            policy.base_step,
+            slab=policy.refine_slab_cells,
+        ),
         "authority": {
             "input": "PRESERVED_FAILED_RAW_V8_FIELD_T512_MEMMAP",
             "teacher_truth_used": False,
@@ -218,7 +257,10 @@ def audit(*, failure_receipt: Path, output: Path) -> dict[str, Any]:
     }
     output = output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+    output.write_text(
+        json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
     return result
 
 
@@ -227,7 +269,10 @@ def main() -> int:
     p.add_argument("--failure-receipt", required=True)
     p.add_argument("--output", required=True)
     args = p.parse_args()
-    result = audit(failure_receipt=Path(args.failure_receipt), output=Path(args.output))
+    result = audit(
+        failure_receipt=Path(args.failure_receipt),
+        output=Path(args.output),
+    )
     print(json.dumps(result, sort_keys=True, allow_nan=False))
     return 0
 

@@ -1,0 +1,121 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABPreregistration.v1",
+  "date_utc": "2026-10-20",
+  "status": "DRAFT_SOURCE_CONTRACT__SCIENTIFIC_EXECUTION_NOT_AUTHORIZED",
+  "experiment_id": "STRUCTURAL-EVIDENCE-A-B",
+  "research_question": "Does role-free graphics/presentation evidence improve learned topology structuralization and downstream motion-presentation behavior beyond the same scene+surface+mechanics evidence alone?",
+  "hypothesis": "Persistent drawable structure is constrained by geometry, appearance/source support, visibility, occlusion and deformation rather than requiring named semantic taxonomy as structural authority.",
+  "source_sha": null,
+  "source_sha_must_be_frozen_before_execution": true,
+  "optimizer_or_notebook_authorized": false,
+  "immutable_authority": {
+    "iris_v8_source": "5083c9915533ec8ec6530c7d229c635887abfea7",
+    "iris_v8_step": 12000,
+    "iris_v8_checkpoint_sha256": "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5",
+    "iris_v8_binding_sha256": "735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2"
+  },
+  "common_controls": {
+    "same_iris_authority": true,
+    "same_subjects": ["Snake", "Bat", "T-Rex", "Horse", "Spider", "GreenBlob", "Shark", "George"],
+    "same_cameras": true,
+    "same_topology_teacher_corpus": true,
+    "same_topology_tokenizer_and_grammar": true,
+    "same_tessa_v3_decoder_width_depth_vocab": true,
+    "same_total_conditioning_token_budget": 1024,
+    "same_compiler_qualification": true,
+    "teacher_topology_in_inference": false,
+    "named_semantic_taxonomy_in_inference": false,
+    "subject_specific_trainable_parameters": false
+  },
+  "arm_a": {
+    "id": "A_NULL_PRESENTATION",
+    "model": "TESSAStructuralizerV3",
+    "conditioning": ["SHARED_SCENE_MEMORY", "SURFACE_MECHANICS_MEMORY", "NULL_PRESENTATION_MEMORY"],
+    "presentation_source": "null_presentation_evidence_v1",
+    "purpose": "Matched-capacity control. Presentation branch and parameters exist but receive no presentation information."
+  },
+  "arm_b": {
+    "id": "B_ROLE_FREE_PRESENTATION",
+    "model": "TESSAStructuralizerV3",
+    "conditioning": ["SHARED_SCENE_MEMORY", "SURFACE_MECHANICS_MEMORY", "ROLE_FREE_PRESENTATION_MEMORY"],
+    "presentation_families": [
+      "SOURCE_RGBA_SUPPORT_WHERE_OBSERVED",
+      "ALPHA_AND_APPEARANCE_BOUNDARY_WITH_VIEW_CONTEXT",
+      "PAIR_FRONT_ORDER_WITH_VIEW_CONTEXT",
+      "PAIR_OCCLUSION_WHERE_AUTHORITATIVE",
+      "COMPLETE_RAY_STACK_GLOBAL_VISIBILITY",
+      "DEFORMATION_COHERENCE_WHERE_AUTHORITATIVE",
+      "ATTACHMENT_PERSISTENCE_WHERE_AUTHORITATIVE",
+      "EXPLICIT_VALIDITY_AND_ABSTAIN"
+    ]
+  },
+  "forbidden_shortcuts": [
+    "NAMED_SEMANTIC_CLASS_AS_STRUCTURAL_AUTHORITY",
+    "MATERIAL_ID_AS_DRAWABLE_OWNER_TRUTH",
+    "PAIRWISE_VISIBILITY_AS_GLOBAL_VISIBILITY",
+    "INCOMPLETE_RAY_STACK_AS_VALID_VISIBILITY_TRUTH",
+    "TEACHER_TOPOLOGY_IN_INFERENCE_FORWARD",
+    "TEACHER_RIG_OR_SKIN_IN_INFERENCE_FORWARD",
+    "DIFFERENT_DECODER_CAPACITY_BETWEEN_ARMS",
+    "POST_RESULT_THRESHOLD_RELAXATION"
+  ],
+  "training_protocol_to_lock_before_execution": {
+    "same_initialization_between_arms": true,
+    "same_optimizer_and_schedule": true,
+    "same_update_budget": true,
+    "same_batch_and_sampling_policy": true,
+    "same_random_seed_set": true,
+    "seed_count": null,
+    "optimizer_spec": null,
+    "update_budget": null,
+    "note": "Numeric training settings must be locked in a final preregistration revision before a notebook or optimizer step is authorized."
+  },
+  "independent_court_families": {
+    "topology": [
+      "GRAMMAR_EOS_VALIDITY",
+      "COMPONENT_COUNT",
+      "BOUNDARY_LOOPS_AND_OPEN_CHAINS",
+      "NON_MANIFOLD_EDGES",
+      "DEGENERATE_FACES"
+    ],
+    "surface_support": [
+      "SOURCE_SURFACE_FIDELITY",
+      "SUPPORT_BINDING",
+      "MASK_DEPTH_NORMAL_FIDELITY_WHERE_AVAILABLE"
+    ],
+    "presentation": [
+      "GLOBAL_VISIBILITY_CORRECTNESS",
+      "LOCAL_PARTIAL_ORDER_CORRECTNESS",
+      "POSE_DEPENDENT_ORDER_FLIP_CORRECTNESS",
+      "FRAGMENT_IDENTITY_STABILITY",
+      "SOURCE_ART_SUPPORT_PRESERVATION"
+    ],
+    "motion": [
+      "OWNER_FRAGMENT_STABILITY_OVER_MOTION",
+      "GAP_TEAR_RATE",
+      "ATTACHMENT_PERSISTENCE_WHERE_AUTHORITATIVE",
+      "G3_DYNAMIC_QUALIFICATION"
+    ]
+  },
+  "decision_rule": {
+    "status": "METRIC_DEFINITIONS_LOCKED__NUMERIC_THRESHOLDS_PENDING_FINAL_PREREG",
+    "required_direction": "B_MUST_IMPROVE_PRESENTATION_AND_MOTION_WITHOUT_BREAKING_TOPOLOGY_SURFACE_OR_COMPILER_QUALIFICATION",
+    "no_regression_families": ["TOPOLOGY", "SURFACE_SUPPORT", "STATIC_COMPILER_QUALIFICATION"],
+    "primary_improvement_families": ["PRESENTATION", "MOTION"],
+    "numeric_thresholds": null,
+    "thresholds_must_be_locked_before_execution": true
+  },
+  "fit8_claim_scope": {
+    "shared_system_contract_qualification": true,
+    "unseen_generalization_proof": false,
+    "morphology_breakdown_required": true
+  },
+  "next_before_scientific_execution": [
+    "FINAL_SOURCE_CI_GREEN",
+    "FREEZE_EXACT_SOURCE_SHA",
+    "MATERIALIZE_OR_BIND_PRESENTATION_EVIDENCE_INPUT_AUTHORITY",
+    "LOCK_TRAINING_PROTOCOL_AND_NUMERIC_COURT_THRESHOLDS",
+    "BUILD_FAIL_CLOSED_RUN_ALL_NOTEBOOK",
+    "USER_HANDOFF_AND_EXPLICIT_RUN"
+  ]
+}

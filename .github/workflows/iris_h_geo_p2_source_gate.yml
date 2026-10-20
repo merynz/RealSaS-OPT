@@ -76,9 +76,13 @@ jobs:
           assert p['independent_court']['scientific_entrypoint']=='tools.iris_vnext.audit_fit8_h_geo_p2_seeded_v1'
           assert p['interpretation']['pass_authorizes_tessa'] is False
           assert p['interpretation']['pass_authorizes_surf_a2'] is False
-          p2=next(e for e in l['experiments'] if e['id']=='H-GEO-P2-SCENE-FIELD')
+          rows={e['id']:e for e in l['experiments']}
+          p2=rows['H-GEO-P2-SCENE-FIELD']
           assert p2['status']=='SCIENTIFIC_FAIL'
           assert p2['scientific_pass_claimed'] is False
-          assert l['active_experiment'] in ('H-GEO-P2-SCENE-FIELD','H-GEO-P3-EXPLICIT-HIRES-CARRIER')
+          assert l['active_experiment'] in ('H-GEO-P2-SCENE-FIELD','H-GEO-P3-EXPLICIT-HIRES-CARRIER','H-GEO-P3-EFREQ')
+          if l['active_experiment']=='H-GEO-P3-EFREQ':
+              assert rows['H-GEO-P3-EXPLICIT-HIRES-CARRIER']['status']=='SCIENTIFIC_FAIL'
+              assert rows['H-GEO-P3-EFREQ']['status']=='SOURCE_PREPARATION'
           print('PASS_H_GEO_P2_HISTORICAL_SOURCE_AUTHORITY')
           PY

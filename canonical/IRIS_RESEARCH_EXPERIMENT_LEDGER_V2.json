@@ -1,0 +1,116 @@
+{
+  "schema": "RealSaS.IRISResearchExperimentLedger.v2",
+  "date_utc": "2026-10-20",
+  "purpose": "SINGLE_MACHINE_READABLE_CONTINUATION_AUTHORITY_FOR_SHARED_STRUCTURAL_EVIDENCE_PROGRAM",
+  "supersedes": "canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json",
+  "production_authority": "main",
+  "long_term_research_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
+  "authority_law": {
+    "repository_source_is_scientific_result": false,
+    "drive_path_is_scientific_authority": false,
+    "artifact_hash_plus_typed_receipt_required": true,
+    "compiler_mints_canonical_M_only": true,
+    "teacher_truth_allowed_in_inference_forward": false,
+    "fit8_is_unseen_generalization": false,
+    "named_semantic_taxonomy_is_structural_authority": false,
+    "unknown_and_abstain_are_first_class": true
+  },
+  "immutable_model_authority": {
+    "model": "IRIS_V8",
+    "source_commit": "5083c9915533ec8ec6530c7d229c635887abfea7",
+    "global_step": 12000,
+    "checkpoint_sha256": "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5",
+    "binding_sha256": "735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2",
+    "scene_core_policy": "SEALED_AFTER_M1"
+  },
+  "sealed_geometry_lineage": {
+    "SURF-A0-RAWFIELD": "FALSIFIED",
+    "SURF-C0-NATIVE-R24": "MEASURED_DIAGNOSTIC",
+    "SURF-A1-FROZEN-H": "SCIENTIFIC_FAIL",
+    "H-REP-P0": "SCIENTIFIC_FAIL_WITH_STRONG_LOCAL_GEOMETRY_SIGNAL",
+    "H-GEO-P1": "SCIENTIFIC_FAIL_WITH_MATERIAL_RESCUE",
+    "H-GEO-P2-SCENE-FIELD": "SCIENTIFIC_FAIL_3_OF_4_ABSOLUTE_GEOMETRY_GATES_SHARED_H_RETENTION_FAIL",
+    "H-GEO-P3-EXPLICIT-HIRES-CARRIER": "SCIENTIFIC_FAIL_3_OF_4_ABSOLUTE_GEOMETRY_GATES_SHARED_V8_PRESERVED",
+    "H-GEO-P3-EFREQ": "COMPLETED_UNRESOLVED",
+    "H-GEO-P3-SCALE-XFER": "COMPLETED_MIXED"
+  },
+  "scale_xfer_authority": {
+    "result": "docs/research/IRIS_H_GEO_P3_SCALE_XFER_RESULT_20261020.json",
+    "execution_source_sha": "ec10334a4bd03db6efe3c30d655668e0e31d8660",
+    "source_gate_pr": 130,
+    "audit_sha256": "17a50b91cba1c2408916433174c8f528ba76c5e5bf8e84cce6a7e3675a5c8468",
+    "query_csv_sha256": "86912cad74776a4d31e2f2e18b1d35de594030b1e3f6cc5ca26a63aa460053c",
+    "input_efreq_query_csv_sha256": "41bf4f6bf1d90fa639e01fc799c032fb276ef51dd833fed1891ce4ce7c87a16d",
+    "classification": "MIXED",
+    "signals": {
+      "target_multisurface": true,
+      "view_input_resolution": true,
+      "carrier_transfer": true
+    },
+    "optimizer_steps_executed": 0,
+    "probe_optimizer_steps_executed": 0,
+    "p4_training_authorized": false,
+    "surf_a2_authorized": false,
+    "tessa_training_authorized": false
+  },
+  "active_lane": "SHARED_STRUCTURAL_EVIDENCE",
+  "active_workstream": "STRUCTURAL_EVIDENCE_V3_SOURCE_PREP",
+  "active_plan": "docs/research/IRIS_SHARED_STRUCTURAL_EVIDENCE_PLAN_20261020.md",
+  "active_source_only_tasks": [
+    "RELATION_TRUTH_V3_AND_ALL_HIT_RAY_VISIBILITY_READINESS",
+    "ROLE_FREE_PRESENTATION_EVIDENCE_TYPED_API",
+    "TESSA_PRESENTATION_MEMORY_SOURCE_DESIGN",
+    "COMPILER_PRESENTATION_CONSUMPTION_REGRESSION_COVERAGE",
+    "STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_DRAFT"
+  ],
+  "blocked_or_not_authorized": {
+    "H_GEO_P4_TRAINING": true,
+    "SURF_A2_SCIENTIFIC_RUN": true,
+    "TESSA_V2_OR_V3_TRAINING": true,
+    "RELATION_MODEL_TRAINING": true,
+    "STRUCTURAL_EVIDENCE_AB_SCIENTIFIC_COURT": true,
+    "NEW_NOTEBOOK_EXECUTION": true
+  },
+  "geometry_provider_policy": {
+    "interface": "QUALIFIED_SURFACE_PROVIDER",
+    "p4_is_automatic_next_step": false,
+    "current_p3_endpoint_diagnostic_is_universal_product_gate": false,
+    "future_provider_may_be_realsas_or_preregistered_specialist": true
+  },
+  "tessa_policy": {
+    "role": "OPTIONAL_LEARNED_STRUCTURALIZATION_AND_TOPOLOGY_PROPOSAL",
+    "compiler_is_final_authority": true,
+    "teacher_topology_allowed_in_inference": false,
+    "current_v2_inputs": [
+      "SHARED_SCENE_MEMORY",
+      "SURFACE_AND_MECHANICS_MEMORY"
+    ],
+    "planned_source_extension": "TYPED_PRESENTATION_MEMORY_WITH_BOUNDARY_PAIR_AND_RAY_STACK_EVIDENCE"
+  },
+  "next_scientific_gate": {
+    "id": "STRUCTURAL-EVIDENCE-A-B",
+    "status": "NOT_PREREGISTERED_NOT_AUTHORIZED",
+    "arm_a": "SCENE_PLUS_SURFACE_PLUS_MECHANICS_TO_TESSA",
+    "arm_b": "SAME_PLUS_ROLE_FREE_PRESENTATION_EVIDENCE_TO_TESSA",
+    "execution_requires_user_handoff": true
+  },
+  "assistant_continuation_policy": {
+    "continue_source_only_without_user_interruption": true,
+    "stop_before_new_notebook": true,
+    "stop_before_scientific_diagnostic_or_court": true,
+    "stop_before_optimizer_or_training": true,
+    "report_exact_execution_request_at_boundary": true
+  },
+  "fit8_program_role": {
+    "system_contract_qualification": true,
+    "unseen_generalization_claimed": false
+  },
+  "naming_policy": {
+    "model_versions": "IRIS-V8_IRIS-V9-R_IRIS-V10-R",
+    "surface_experiments": "SURF-A0_SURF-C0_SURF-A1_SURF-A2",
+    "representation_experiments": "H-REP-P0_H-GEO-P1_H-GEO-P2_H-GEO-P3_H-GEO-P3-EFREQ_H-GEO-P3-SCALE-XFER",
+    "structural_evidence_experiments": "STRUCTURAL-EVIDENCE-A-B",
+    "tessa_experiments": "TESSA-V2-B1_TESSA-PRESENTATION-MEMORY",
+    "notebook_revisions": "NB-rN__NEVER_REUSE_MODEL_VNUMBERS"
+  }
+}

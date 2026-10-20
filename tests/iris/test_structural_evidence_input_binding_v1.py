@@ -1,4 +1,3 @@
-import copy
 import hashlib
 import json
 import tempfile
@@ -52,6 +51,7 @@ class StructuralEvidenceInputBindingV1Tests(unittest.TestCase):
     def test_ready_binding_requires_exact_git_sha(self):
         value = self._binding()
         value["status"] = "READY_FOR_ZERO_OPTIMIZER_MATERIALIZATION__NOT_SCIENTIFIC_PASS"
+        value["implementation_source_sha"] = None
         with self.assertRaisesRegex(ValueError, "SOURCE_SHA_MISSING"):
             validate_binding(value)
         value["implementation_source_sha"] = "a" * 40

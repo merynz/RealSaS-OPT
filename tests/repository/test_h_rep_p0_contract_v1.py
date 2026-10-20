@@ -19,18 +19,23 @@ def test_surf_a1_and_h_rep_history_remain_sealed_after_h_geo_progression():
     assert result["decision"]["surf_a2_authorized"] is False
     assert result["decision"]["tessa_authorized"] is False
     rows={row["id"]:row for row in ledger["experiments"]}
-    assert ledger["active_experiment"] == "H-GEO-P2-SCENE-FIELD"
+    assert ledger["active_experiment"] in ("H-GEO-P2-SCENE-FIELD", "H-GEO-P3-EXPLICIT-HIRES-CARRIER")
     hrep=rows["H-REP-P0"]
     assert hrep["status"] == "SCIENTIFIC_FAIL"
     assert hrep["frozen_execution_source_sha"] == FROZEN_H_REP_SOURCE
     assert hrep["scientific_result_available"] is True
     assert hrep["tessa_authorized"] is False
     assert rows["H-GEO-P1"]["status"] == "SCIENTIFIC_FAIL"
-    assert rows["H-GEO-P2-SCENE-FIELD"]["status"] == "SOURCE_PREPARATION"
+    p2=rows["H-GEO-P2-SCENE-FIELD"]
+    assert p2["status"] in ("SOURCE_PREPARATION", "SCIENTIFIC_FAIL")
+    if ledger["active_experiment"] == "H-GEO-P3-EXPLICIT-HIRES-CARRIER":
+        assert p2["status"] == "SCIENTIFIC_FAIL"
+        assert rows["H-GEO-P3-EXPLICIT-HIRES-CARRIER"]["status"] == "SOURCE_PREPARATION"
     assert rows["SURF-A2-HIRES"]["status"].startswith("BLOCKED_")
     assert rows["TESSA-V2-B1"]["status"] == "BLOCKED_ON_SURF_A2_READINESS"
-    assert "H-GEO-P1" in state and "H-GEO-P2-SCENE-FIELD" in state
-    assert "H-GEO-P2-SCENE-FIELD" in plan
+    assert "H-GEO-P1" in state and "H-GEO-P2" in state
+    assert ledger["active_experiment"] in state
+    assert ledger["active_experiment"] in plan
 
 def test_h_rep_binding_is_exactly_triggered_by_a1_evidence():
     binding = _json("canonical/H_REP_P0_INPUT_BINDING_V1.json")

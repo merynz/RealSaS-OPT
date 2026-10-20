@@ -4,7 +4,7 @@
   "purpose": "SINGLE_MACHINE_READABLE_CONTINUATION_AUTHORITY_FOR_POST_V8_IRIS_TESSA_RESEARCH",
   "production_authority": "main",
   "review_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
-  "review_vehicle": "PR_129",
+  "review_vehicle": "PR_130",
   "authority_law": {
     "repository_source_is_scientific_result": false,
     "drive_path_is_scientific_authority": false,
@@ -14,7 +14,7 @@
     "fit8_is_unseen_generalization": false
   },
   "active_lane": "SURFACE_TESSA",
-  "active_experiment": "H-GEO-P3-EFREQ",
+  "active_experiment": "H-GEO-P3-SCALE-XFER",
   "parked_lanes": ["RELATION_V10"],
   "immutable_model_authority": {
     "model": "IRIS_V8",
@@ -59,14 +59,7 @@
       "tessa_invoked": false,
       "independent_court": {
         "sha256": "a8c4070a126edaddd602853c62b3e2b58335ef2fb62750c52f088ef8e15e631e",
-        "status": "SCIENTIFIC_FAIL_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE",
-        "global_measurements": {
-          "mean_subject_mask_iou": 0.7795254327050275,
-          "maximum_mask_gap_px": 258.6600085053737,
-          "mean_symmetric_chamfer_distance_iris": 0.043048756610927164,
-          "maximum_subject_teacher_to_candidate_p95_distance_iris": 0.11117027121264922,
-          "minimum_subject_mean_absolute_normal_alignment": 0.5782190561294556
-        }
+        "status": "SCIENTIFIC_FAIL_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE"
       },
       "scientific_pass_claimed": false,
       "next_gate": "H-REP-P0"
@@ -78,12 +71,6 @@
       "frozen_execution_source_sha": "479e8e53cf0d7df234a3e64b824bb704b861bf19",
       "scientific_result_available": true,
       "result": "H_LOCAL_ALIGNMENT_STRONGLY_PRESENT_BUT_ABSOLUTE_METRIC_GEOMETRY_GATES_NOT_EARNED",
-      "aggregate": {
-        "h_mean_distance_mae_iris": 0.04528,
-        "h_mean_near_balanced_accuracy": 0.7684,
-        "shuffled_h_mean_distance_mae_iris": 0.13005,
-        "xyz_mean_distance_mae_iris": 0.12911
-      },
       "teacher_truth_in_probe_input": false,
       "mesh_extraction_invoked": false,
       "tessa_invoked": false,
@@ -100,15 +87,7 @@
       "training_checkpoint_sha256": "2f73a783391a16f09d12e50f240c0fbaaae40f0e044d1546bf12590eba0c5e5d",
       "independent_court_sha256": "975c8ab13a178d17eca1557bd3670fbae752fe33a508c8c207812b0a5f23a620",
       "optimizer_steps_executed": 3600,
-      "aggregate": {
-        "p1_mean_distance_mae_iris": 0.03320289263501763,
-        "p1_maximum_subject_endpoint_p95_iris": 0.10369804501533508,
-        "p1_minimum_subject_normal_alignment": 0.6691970825195312,
-        "p1_minimum_subject_near_balanced_accuracy": 0.747372955083847
-      },
       "absolute_gates_passed": false,
-      "vs_v8_distance_near_normal_improved": true,
-      "vs_v8_endpoint_improvement_gate_passed": false,
       "scientific_pass_claimed": false,
       "tessa_authorized": false,
       "next_gate": "H-GEO-P2-SCENE-FIELD"
@@ -125,13 +104,6 @@
       "optimizer_steps_executed": 4800,
       "architecture_expansion": false,
       "trainable_existing_modules": ["scene_core.scene", "scene_core.field"],
-      "aggregate": {
-        "p2_mean_distance_mae_iris": 0.017430711537599564,
-        "p2_maximum_subject_endpoint_p95_iris": 0.08587463945150375,
-        "p2_minimum_subject_normal_alignment": 0.7452142238616943,
-        "p2_minimum_subject_near_balanced_accuracy": 0.9032334089279175,
-        "p2_minimum_subject_h_cosine_vs_v8": 0.5657004117965698
-      },
       "absolute_distance_normal_near_passed": true,
       "absolute_endpoint_passed": false,
       "vs_p1_all_four_passed": true,
@@ -156,13 +128,6 @@
       "p1_dataset_reused_byte_exact": true,
       "p2_checkpoint_initialization_allowed": false,
       "p2_checkpoint_comparison_only": true,
-      "aggregate": {
-        "p3_mean_distance_mae_iris": 0.016778570832684636,
-        "p3_maximum_subject_endpoint_p95_iris": 0.08786389231681824,
-        "p3_minimum_subject_normal_alignment": 0.76790452003479,
-        "p3_minimum_subject_near_balanced_accuracy": 0.9152351021766663,
-        "maximum_shared_anchor_h_abs_difference": 0.0
-      },
       "absolute_distance_normal_near_passed": true,
       "absolute_endpoint_passed": false,
       "vs_p2_endpoint_passed": false,
@@ -175,17 +140,34 @@
     {
       "id": "H-GEO-P3-EFREQ",
       "kind": "ZERO_OPTIMIZER_ENDPOINT_FREQUENCY_TARGET_AND_VIEW_EVIDENCE_DIAGNOSTIC",
+      "status": "COMPLETED_UNRESOLVED",
+      "execution_source_sha": "e3b46f3bc98cad0c48f37854de64de996192f667",
+      "result_authority": "docs/research/IRIS_H_GEO_P3_EFREQ_RESULT_20261020.json",
+      "audit_sha256": "ab4ca656442de0addb9468c6dcd7bf3e1e23b5a874fb4e5b675f2079720f2d04",
+      "query_csv_sha256": "41bf4f6bf1d90fa639e01fc799c032fb276ef51dd833fed1891ce4ce7c87a16d",
+      "optimizer_steps_executed": 0,
+      "probe_optimizer_steps_executed": 0,
+      "classification": "UNRESOLVED",
+      "scientific_result_available": true,
+      "surf_a2_authorized": false,
+      "tessa_authorized": false,
+      "next_gate": "H-GEO-P3-SCALE-XFER"
+    },
+    {
+      "id": "H-GEO-P3-SCALE-XFER",
+      "kind": "ZERO_OPTIMIZER_VIEW_TOKEN_TARGET_AND_CARRIER_STAGE_TRANSFER_LOCALIZATION",
       "status": "SOURCE_PREPARATION",
-      "question": "WHY_DO_P3_ENDPOINT_TAIL_ERRORS_PERSIST_AFTER_DISTANCE_NORMAL_NEAR_QUALIFICATION_AND_EXACT_SHARED_V8_PRESERVATION",
-      "input_binding": "canonical/H_GEO_P3_EFREQ_INPUT_BINDING_V1.json",
-      "preregistration": "canonical/H_GEO_P3_EFREQ_PREREGISTRATION_V1.json",
-      "source_gate_vehicle": "PR_129",
+      "question": "WHERE_DO_ENDPOINT_RELEVANT_FINE_SPATIAL_DISTINCTIONS_FIRST_BECOME_INADEQUATE_OR_AMBIGUOUS",
+      "input_binding": "canonical/H_GEO_P3_SCALE_XFER_INPUT_BINDING_V1.json",
+      "preregistration": "canonical/H_GEO_P3_SCALE_XFER_PREREGISTRATION_V1.json",
+      "source_gate_vehicle": "PR_130",
       "optimizer_steps_authorized": 0,
       "probe_optimizer_steps_authorized": 0,
       "checkpoint_write_allowed": false,
-      "teacher_mesh_target_analysis_only": true,
-      "classification_space": ["TARGET_AMBIGUITY_DOMINANT","VIEW_EVIDENCE_DOMINANT","CARRIER_BANDWIDTH_DOMINANT","MIXED","UNRESOLVED"],
+      "efreq_query_membership_reused_byte_exact": true,
+      "classification_space": ["TARGET_MULTISURFACE_LIMITED","VIEW_INPUT_RESOLUTION_LIMITED","CARRIER_TRANSFER_LIMITED","MIXED","UNRESOLVED"],
       "scientific_result_available": false,
+      "p4_training_authorized": false,
       "surf_a2_authorized": false,
       "tessa_authorized": false,
       "next_gate": "CLASSIFICATION_SELECTED_FUTURE_PREREGISTRATION_ONLY"
@@ -193,8 +175,8 @@
     {
       "id": "SURF-A2-HIRES",
       "kind": "QUALIFIED_HIGH_RESOLUTION_DIRECT_A_ARM",
-      "status": "BLOCKED_ON_ENDPOINT_FREQUENCY_DIAGNOSIS_AND_NEXT_GEOMETRY_DECISION",
-      "next_gate": "H-GEO-P3-EFREQ_RESULT"
+      "status": "BLOCKED_ON_SCALE_TRANSFER_DIAGNOSIS_AND_NEXT_GEOMETRY_DECISION",
+      "next_gate": "H-GEO-P3-SCALE-XFER_RESULT"
     },
     {
       "id": "TESSA-V2-B1",
@@ -216,7 +198,7 @@
   "naming_policy": {
     "model_versions": "IRIS-V8_IRIS-V9-R_IRIS-V10-R",
     "surface_experiments": "SURF-A0_SURF-C0_SURF-A1_SURF-A2",
-    "representation_experiments": "H-REP-P0_H-GEO-P1_H-GEO-P2_H-GEO-P3_H-GEO-P3-EFREQ",
+    "representation_experiments": "H-REP-P0_H-GEO-P1_H-GEO-P2_H-GEO-P3_H-GEO-P3-EFREQ_H-GEO-P3-SCALE-XFER",
     "tessa_experiments": "TESSA-V2-B1",
     "notebook_revisions": "NB-rN__NEVER_REUSE_MODEL_VNUMBERS"
   }

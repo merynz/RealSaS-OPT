@@ -2,12 +2,14 @@ import unittest
 
 import torch
 
+from models.iris.vnext.presentation_evidence_v1 import PRESENTATION_FEATURE_NAMES_V1
 from models.tessa.v3 import TESSAStructuralizerConfigV3, TESSAStructuralizerV3
 
 
 class TESSAStructuralizerV3Tests(unittest.TestCase):
     def setUp(self):
         torch.manual_seed(31)
+        self.presentation_dim = len(PRESENTATION_FEATURE_NAMES_V1)
         self.cfg = TESSAStructuralizerConfigV3(
             d_model=64,
             n_heads=8,
@@ -26,7 +28,7 @@ class TESSAStructuralizerV3Tests(unittest.TestCase):
         self.model = TESSAStructuralizerV3(
             scene_input_dim=12,
             surface_input_dim=20,
-            presentation_input_dim=27,
+            presentation_input_dim=self.presentation_dim,
             config=self.cfg,
         )
 
@@ -40,7 +42,7 @@ class TESSAStructuralizerV3Tests(unittest.TestCase):
         memory = self.model.encode_memory(
             scene_source=torch.randn(2, 5, 12),
             surface_source=torch.randn(2, 6, 20),
-            presentation_source=torch.randn(2, 3, 27),
+            presentation_source=torch.randn(2, 3, self.presentation_dim),
             presentation_valid_mask=torch.tensor([[True, True, False], [True, True, True]]),
         )
         self.assertEqual(memory.shape, (2, 10, 64))
@@ -48,8 +50,8 @@ class TESSAStructuralizerV3Tests(unittest.TestCase):
     def test_null_and_informative_presentation_use_same_architecture_shape(self):
         scene = torch.randn(1, 5, 12)
         surface = torch.randn(1, 6, 20)
-        null = torch.zeros(1, 1, 27)
-        info = torch.randn(1, 4, 27)
+        null = torch.zeros(1, 1, self.presentation_dim)
+        info = torch.randn(1, 4, self.presentation_dim)
         a = self.model.encode_memory(
             scene_source=scene,
             surface_source=surface,
@@ -71,7 +73,7 @@ class TESSAStructuralizerV3Tests(unittest.TestCase):
         out = self.model(
             scene_source=torch.randn(1, 3, 12),
             surface_source=torch.randn(1, 4, 20),
-            presentation_source=torch.zeros(1, 1, 27),
+            presentation_source=torch.zeros(1, 1, self.presentation_dim),
             presentation_valid_mask=torch.ones(1, 1, dtype=torch.bool),
             input_ids=input_ids,
             labels=labels,

@@ -1,12 +1,12 @@
 {
   "schema": "RealSaS.StructuralEvidenceInputBinding.v2",
   "date_utc": "2026-10-21",
-  "status": "SOURCE_FREEZE_PENDING__NO_EXECUTION_AUTHORITY",
+  "status": "READY_FOR_ZERO_OPTIMIZER_MATERIALIZATION__NOT_SCIENTIFIC_PASS",
   "experiment_id": "STRUCTURAL-EVIDENCE-INPUT-AUTHORITY-V2",
   "scientific_execution_authorized": false,
   "optimizer_or_training_authorized": false,
   "notebook_execution_authorized": false,
-  "implementation_source_sha": null,
+  "implementation_source_sha": "7ae9b4886ec15725fcd95b7cfaeeb7aeab02b050",
   "implementation_source_parent_sha": "be7e44b05368abd29d4350bc6a966528a5530eca",
   "producer": {
     "path": "tools/iris_vnext/build_fit8_relation_all_hit_evidence_v2.py",

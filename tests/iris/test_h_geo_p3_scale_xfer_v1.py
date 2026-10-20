@@ -88,10 +88,10 @@ def test_classifier_can_isolate_each_family_and_mixed():
     sig, cls, nxt = classify_scale_transfer_v1(pooled, _prereg())
     assert cls == "VIEW_INPUT_RESOLUTION_LIMITED" and sig["view_input_resolution"] and nxt == "VIEW"
 
-    pooled = {"tail": _group(
-        median_stage_delta_P3_H_GEO_eps_0.00781250=0.7,
-        median_stage_delta_P3_REFINED128_SAMPLED_PLANES_eps_0.00781250=1.05,
-    ), "control": control}
+    pooled = {"tail": _group(**{
+        "median_stage_delta_P3_H_GEO_eps_0.00781250": 0.7,
+        "median_stage_delta_P3_REFINED128_SAMPLED_PLANES_eps_0.00781250": 1.05,
+    }), "control": control}
     sig, cls, nxt = classify_scale_transfer_v1(pooled, _prereg())
     assert cls == "CARRIER_TRANSFER_LIMITED" and sig["carrier_transfer"] and nxt == "CARRIER"
 

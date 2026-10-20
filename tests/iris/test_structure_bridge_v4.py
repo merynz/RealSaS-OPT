@@ -48,6 +48,15 @@ class IRISVNextStructuralizationBridgeV4Tests(unittest.TestCase):
         }
         self.input_ids = torch.tensor([[self.tessa.BOS, self.tessa.COMPONENT_BEGIN, self.tessa.CHART_BEGIN, self.tessa.FACE_BREAK]])
 
+    @staticmethod
+    def camera(count: int):
+        value = torch.zeros(1, count, 13)
+        value[..., 3] = 1.0
+        value[..., 7] = 1.0
+        value[..., 11] = 1.0
+        value[..., 12] = 1.0
+        return value
+
     def test_null_control_and_evidence_arm_have_same_conditioning_shape(self):
         null_out = self.bridge(
             scene_planes=self.scene,
@@ -63,6 +72,8 @@ class IRISVNextStructuralizationBridgeV4Tests(unittest.TestCase):
             xyz=p_xyz,
             kind_id=torch.full((1, 3), PRESENTATION_KIND_RAY_HIT, dtype=torch.long),
             token_valid_mask=torch.ones(1, 3, dtype=torch.bool),
+            camera_features=self.camera(3),
+            camera_valid=torch.ones(1, 3, dtype=torch.bool),
             global_visibility=visibility,
             global_visibility_valid=torch.ones(1, 3, dtype=torch.bool),
         )

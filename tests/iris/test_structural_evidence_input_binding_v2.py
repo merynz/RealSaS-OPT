@@ -8,13 +8,14 @@ ROOT=Path(__file__).resolve().parents[2]
 
 
 class StructuralEvidenceInputBindingV2Tests(unittest.TestCase):
-    def test_pending_binding_is_fail_closed_and_valid(self):
+    def test_frozen_binding_is_fail_closed_and_valid(self):
         value=json.loads((ROOT/"canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V2.json").read_text())
         validate_binding(value)
-        self.assertEqual(value["status"],"SOURCE_FREEZE_PENDING__NO_EXECUTION_AUTHORITY")
-        self.assertIsNone(value["implementation_source_sha"])
+        self.assertEqual(value["status"],"READY_FOR_ZERO_OPTIMIZER_MATERIALIZATION__NOT_SCIENTIFIC_PASS")
+        self.assertEqual(value["implementation_source_sha"],"7ae9b4886ec15725fcd95b7cfaeeb7aeab02b050")
         self.assertFalse(value["scientific_execution_authorized"])
         self.assertFalse(value["optimizer_or_training_authorized"])
+        self.assertFalse(value["notebook_execution_authorized"])
 
     def _arrays(self):
         # One ray, tied minima faces 10/11 and deeper face 12; all unordered pairs, both orientations.

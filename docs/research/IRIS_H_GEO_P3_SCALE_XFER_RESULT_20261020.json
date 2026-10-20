@@ -1,0 +1,63 @@
+{
+  "schema": "RealSaS.IRISHGeoP3ScaleXferResult.v1",
+  "date_utc": "2026-10-20",
+  "status": "COMPLETED_H_GEO_P3_SCALE_TRANSFER_AUDIT",
+  "classification": "MIXED",
+  "execution_source_sha": "ec10334a4bd03db6efe3c30d655668e0e31d8660",
+  "source_gate_pr": 130,
+  "source_gate_pr_merged": true,
+  "audit_sha256": "17a50b91cba1c2408916433174c8f528ba76c5e5bf8e84cce6a7e3675a5c8468",
+  "query_csv_sha256": "86912cad74776a4d31e2f2e18b1d35de594030b1e3f6cc5ca26a63aa460053c",
+  "input_efreq_query_csv_sha256": "41bf4f6bf1d90fa639e01fc799c032fb276ef51dd833fed1891ce4ce7c87a16d",
+  "query_row_count": 4299,
+  "query_subjects": [
+    "Snake",
+    "Bat",
+    "T-Rex",
+    "Horse",
+    "Spider",
+    "GreenBlob",
+    "Shark",
+    "George"
+  ],
+  "optimizer_steps_executed": 0,
+  "probe_optimizer_steps_executed": 0,
+  "checkpoint_written": false,
+  "teacher_truth_in_inference_forward": false,
+  "tessa_invoked": false,
+  "signals": {
+    "target_multisurface": true,
+    "view_input_resolution": true,
+    "carrier_transfer": true
+  },
+  "locked_signal_support": {
+    "target_multisurface": {
+      "tail_fraction_second_sheet_within_1_128": 0.47688,
+      "control_fraction_second_sheet_within_1_128": 0.31082,
+      "note": "The target signal passed via the preregistered within-1/128 fraction condition; the tail median competing margin itself did not pass the <=1/128 condition."
+    },
+    "view_input_resolution": {
+      "tail_distinct_token_view_count_median": 6.0,
+      "control_distinct_token_view_count_median": 8.0,
+      "tail_max_token_cosine_distance_median": 0.1156761,
+      "control_max_token_cosine_distance_median": 0.1668445,
+      "tail_to_control_max_token_contrast_ratio": 0.6933,
+      "note": "This is evidence about frozen 37x37 token spatial separability, not a claim of true visibility/occlusion."
+    },
+    "carrier_transfer": {
+      "primary_scale_iris": 0.0078125,
+      "tail_final_h_geo_to_p2_response_ratio": 0.828341,
+      "note": "Finite-difference response attenuation is a representation-responsiveness diagnostic, not an information-theoretic loss percentage."
+    }
+  },
+  "scientific_scope": {
+    "shared_scene_hypothesis_falsified": false,
+    "p3_geometry_carrier_sufficient": false,
+    "p4_training_authorized": false,
+    "surf_a2_authorized": false,
+    "tessa_training_authorized": false
+  },
+  "sealed_runtime_next_action": "PREREGISTER_MINIMAL_JOINT_P4_FROM_IDENTIFIED_FAILURE_STAGES__DO_NOT_TRAIN_YET",
+  "program_interpretation": "The MIXED result localizes multiple endpoint-precision limitations in the current geometry lineage. It does not require that the broader IRIS shared-scene / TESSA structuralization program spend the next step on P4. P4 remains separately gated. Source-only work on role-free structural evidence and presentation-conditioned topology may proceed without claiming a geometry pass.",
+  "next_program_gate": "STRUCTURAL_EVIDENCE_V3_SOURCE_READINESS"
+}

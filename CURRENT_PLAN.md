@@ -1,14 +1,14 @@
 # RealSaS-OPT — Current Plan
 
 **Date:** 2026-10-20  
-**Status:** **H-GEO-P1 CLOSED SCIENTIFIC FAIL; H-GEO-P2-SCENE-FIELD ACTIVE**  
+**Status:** **H-GEO-P2 CLOSED SCIENTIFIC FAIL; H-GEO-P3-EXPLICIT-HIRES-CARRIER ACTIVE**  
 **Production authority:** `main`  
 **Research review branch:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
-**Source-gate vehicle:** draft PR #126  
+**Source-gate vehicle:** draft PR #128  
 **Active lane:** `SURFACE_TESSA`  
-**Active experiment:** `H-GEO-P2-SCENE-FIELD`  
+**Active experiment:** `H-GEO-P3-EXPLICIT-HIRES-CARRIER`  
 **Parked lane:** `RELATION_V10`  
-**Optimizer policy:** only P2 may optimize after exact source/input/A100/gradient-connectivity admission. No SURF-A2 or TESSA optimizer step is authorized.
+**Optimizer policy:** only P3 may optimize after exact source/input/A100/gradient-connectivity/shared-V8-preservation admission. No SURF-A2 or TESSA optimizer step is authorized.
 
 ## Objective
 
@@ -17,7 +17,8 @@ Build the IRIS→TESSA boundary honestly:
 ```text
 8 views
   ↓
-IRIS continuous evidence / metric geometry
+shared IRIS scene/evidence
+  + dedicated metric geometry evidence if required
   ↓
 qualified high-fidelity direct surface
   ↓
@@ -36,77 +37,79 @@ IRIS must establish correct/high-fidelity shape before TESSA is evaluated. TESSA
 - `SURF-C0-NATIVE-R24`: measurement-only native V8 surface debt.
 - `SURF-A1-FROZEN-H`: scientific FAIL after substantial extraction rescue.
 - `H-REP-P0`: scientific FAIL absolute, but strong local geometry information demonstrated in sealed V8 H.
-- `H-GEO-P1`: scientific FAIL absolute; exact-triangle field-only training materially beat V8 on distance, near-surface classification and normals, but endpoint improvement and all absolute qualification gates remained insufficient.
+- `H-GEO-P1`: exact-triangle field-only retraining materially improved V8 but failed locked metric quality.
+- `H-GEO-P2`: exact-triangle scene+field retraining completed 4800 steps. It passed absolute distance, normal and near gates plus every vs-P1 improvement gate, but failed endpoint p95 and shared-H retention. Authority: `docs/research/IRIS_H_GEO_P2_RESULT_20261020.json`.
 
-P1 therefore showed that geometry supervision works, but because upstream `scene_core.scene` was frozen it did not justify architecture expansion by itself.
+P2 therefore establishes two things simultaneously: existing scene+field has substantial metric-geometry capacity, and forcing the remaining high-frequency endpoint precision into shared H creates measurable retention tension. The preregistered next action is an explicit geometry-carrier branch study.
 
-## Active workstream — H-GEO-P2-SCENE-FIELD
+## Active workstream — H-GEO-P3-EXPLICIT-HIRES-CARRIER
 
-P2 is an **existing-architecture control**, not the explicit geometry branch.
+P3 is an **architecture study**, not a product-model promotion.
 
 Fixed controls:
 
-- initialize from exact immutable V8, not P1;
-- reuse exact P1 triangle-dataset bytes, no rebuild or resampling;
-- no architecture expansion;
-- train only existing `scene_core.scene + scene_core.field` plus the training-only metric head;
-- freeze view bank, cube extraction, mechanics, appearance, relations and structure;
+- exact immutable V8 remains the shared model;
+- shared V8 is frozen byte-exact and absent from the optimizer;
+- the dedicated geometry branch initializes by copying V8 scene and field weights, never from P2;
+- P2 checkpoint is comparison-only in the final court;
+- exact P1 authored-triangle dataset bytes are reused, with no rebuild/resampling;
+- geometry branch gets a zero-residual 64→128 triplane refiner and a zero-initialized continuous XYZ Fourier residual;
 - no subject-specific trainable parameters;
 - no TESSA;
 - teacher mesh is target-only.
 
-Runtime admission must prove both scene and field receive finite non-zero gradients before optimizer step 1. Live scene planes are recomputed inside each training step so upstream geometry gradients cannot be accidentally detached.
+At step 0 the new high-resolution path must be an exact bilinear upsample plus zero residual, and the XYZ residual must be exactly zero. Preflight must prove finite non-zero gradients reach geometry scene, geometry field, refiner and position projection while shared V8 receives none.
 
-Training is preregistered for 4800 steps with separate lower scene LR and field LR, absolute-step seeded resume semantics and frozen-module hash non-regression.
+Training budget is 4800 steps, matching P2. Scene LR remains lower than field/new-module LR. Resume is absolute-step seeded and hash-bound.
 
 ## Independent court
 
 Fresh equal-capacity probes compare:
 
 ```text
+P3_GEO_XYZ
 P2_H_XYZ
-P1_H_XYZ
 V8_H_XYZ
 XYZ_ONLY
-P2_SHUFFLED_H_XYZ
+P3_SHUFFLED_GEO_XYZ
 ```
 
-Absolute gates stay unchanged from P1:
+Absolute gates remain the same locked quality bar:
 
 - mean distance MAE `<=0.025` IRIS;
 - worst endpoint p95 `<=0.075` IRIS;
 - worst normal alignment `>=0.70`;
 - worst near balanced accuracy `>=0.80`.
 
-P2 must also beat P1 by preregistered margins and retain local-alignment plus bounded V8 representation drift. Thresholds may not change after results.
+P3 must also reduce endpoint p95 by at least 10% versus fresh-court P2, hold P2-level distance/normal/near within preregistered non-regression margins, beat XYZ/shuffled local controls, and prove exact shared-V8 state + anchor-H preservation.
 
 ## Decision boundary
 
 ```text
-P2 PASS
-→ existing IRIS architecture has sufficient metric-geometry capacity
-→ design a new high-resolution direct-surface experiment
+P3 PASS
+→ explicit geometry carrier earns metric-geometry qualification
+→ design a new high-resolution direct-surface experiment from H_geo
 → DO NOT train TESSA yet
 
-P2 FAIL
-→ field-only + scene+field controls both miss qualification
-→ preregister an explicit geometry-carrier branch experiment
-→ DO NOT train TESSA
+P3 FAIL
+→ audit endpoint-frequency / scale ceiling in explicit carrier
+→ do not relax thresholds
+→ do not use TESSA as rescue
 ```
 
-Neither branch directly authorizes SURF-A2.
+Neither outcome directly authorizes SURF-A2.
 
 ## Execution order
 
-1. Seal H-GEO-P1 evidence in repo. **DONE**
-2. P2 input binding + preregistration. **DONE**
-3. P2 runtime/preflight/trainer/court source. **DONE**
-4. Dedicated + broad source CI. **ACTIVE**
-5. Freeze exact final green source SHA. **NEXT**
+1. Seal H-GEO-P2 evidence in repo. **DONE**
+2. P3 input binding + preregistration. **DONE**
+3. P3 architecture/runtime/preflight/trainer/court source. **DONE**
+4. Dedicated + broad source CI. **ACTIVE — PR #128**
+5. Freeze exact final green P3 source SHA. **NEXT**
 6. Fast-forward active research branch to that exact SHA.
 7. Generate V8-style A100 Run-All notebook pinned to that SHA.
-8. Run P2 and inspect only the independent court.
-9. Advance to direct-surface design or explicit-geometry-branch preregistration strictly from that result.
+8. Run P3 and inspect only the independent court.
+9. Advance to direct-surface design or endpoint-frequency audit strictly from that result.
 
 ## Notebook contract
 

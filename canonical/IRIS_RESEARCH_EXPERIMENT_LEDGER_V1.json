@@ -4,7 +4,7 @@
   "purpose": "SINGLE_MACHINE_READABLE_CONTINUATION_AUTHORITY_FOR_POST_V8_IRIS_TESSA_RESEARCH",
   "production_authority": "main",
   "review_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
-  "review_vehicle": "PR_128",
+  "review_vehicle": "PR_129",
   "authority_law": {
     "repository_source_is_scientific_result": false,
     "drive_path_is_scientific_authority": false,
@@ -14,7 +14,7 @@
     "fit8_is_unseen_generalization": false
   },
   "active_lane": "SURFACE_TESSA",
-  "active_experiment": "H-GEO-P3-EXPLICIT-HIRES-CARRIER",
+  "active_experiment": "H-GEO-P3-EFREQ",
   "parked_lanes": ["RELATION_V10"],
   "immutable_model_authority": {
     "model": "IRIS_V8",
@@ -144,29 +144,57 @@
     {
       "id": "H-GEO-P3-EXPLICIT-HIRES-CARRIER",
       "kind": "DEDICATED_HIGH_RESOLUTION_GEOMETRY_CARRIER_ARCHITECTURE_STUDY",
-      "status": "SOURCE_PREPARATION",
-      "question": "CAN_DEDICATED_HIRES_GEOMETRY_EVIDENCE_CLOSE_ENDPOINT_PRECISION_WHILE_SHARED_V8_H_REMAINS_EXACT",
-      "base_initialization": "EXACT_V8_SHARED_MODEL_PLUS_V8_WEIGHT_COPY_TO_GEOMETRY_BRANCH",
+      "status": "SCIENTIFIC_FAIL",
+      "execution_source_sha": "e3c48678f3f563bb60624278e206f4ba8f71c272",
+      "result_authority": "docs/research/IRIS_H_GEO_P3_RESULT_20261020.json",
+      "dataset_receipt_sha256": "6c27974a03e9f202adeda1b25f642d95006dcca7cbbf0ceb660484ea91c78dc5",
+      "training_checkpoint_sha256": "95af736e1e9163cad9d568ea9c67770fe2fbf3391bbdb72d8c03c472b5b5d74b",
+      "independent_court_sha256": "a92b622127102e2896c9894148ce9ceb6ef53c8857b1ee1061467f6338085c48",
+      "optimizer_steps_executed": 4800,
       "architecture_expansion": true,
       "shared_v8_frozen_byte_exact": true,
       "p1_dataset_reused_byte_exact": true,
       "p2_checkpoint_initialization_allowed": false,
       "p2_checkpoint_comparison_only": true,
-      "input_binding": "canonical/H_GEO_P3_INPUT_BINDING_V1.json",
-      "preregistration": "canonical/H_GEO_P3_PREREGISTRATION_V1.json",
-      "source_gate_vehicle": "PR_128",
-      "a100_run_started": false,
+      "aggregate": {
+        "p3_mean_distance_mae_iris": 0.016778570832684636,
+        "p3_maximum_subject_endpoint_p95_iris": 0.08786389231681824,
+        "p3_minimum_subject_normal_alignment": 0.76790452003479,
+        "p3_minimum_subject_near_balanced_accuracy": 0.9152351021766663,
+        "maximum_shared_anchor_h_abs_difference": 0.0
+      },
+      "absolute_distance_normal_near_passed": true,
+      "absolute_endpoint_passed": false,
+      "vs_p2_endpoint_passed": false,
+      "shared_v8_preservation_passed": true,
+      "scientific_result_available": true,
+      "surf_a2_authorized": false,
+      "tessa_authorized": false,
+      "next_gate": "H-GEO-P3-EFREQ"
+    },
+    {
+      "id": "H-GEO-P3-EFREQ",
+      "kind": "ZERO_OPTIMIZER_ENDPOINT_FREQUENCY_TARGET_AND_VIEW_EVIDENCE_DIAGNOSTIC",
+      "status": "SOURCE_PREPARATION",
+      "question": "WHY_DO_P3_ENDPOINT_TAIL_ERRORS_PERSIST_AFTER_DISTANCE_NORMAL_NEAR_QUALIFICATION_AND_EXACT_SHARED_V8_PRESERVATION",
+      "input_binding": "canonical/H_GEO_P3_EFREQ_INPUT_BINDING_V1.json",
+      "preregistration": "canonical/H_GEO_P3_EFREQ_PREREGISTRATION_V1.json",
+      "source_gate_vehicle": "PR_129",
+      "optimizer_steps_authorized": 0,
+      "probe_optimizer_steps_authorized": 0,
+      "checkpoint_write_allowed": false,
+      "teacher_mesh_target_analysis_only": true,
+      "classification_space": ["TARGET_AMBIGUITY_DOMINANT","VIEW_EVIDENCE_DOMINANT","CARRIER_BANDWIDTH_DOMINANT","MIXED","UNRESOLVED"],
       "scientific_result_available": false,
       "surf_a2_authorized": false,
       "tessa_authorized": false,
-      "pass_next_gate": "DESIGN_HIGH_RES_DIRECT_SURFACE_EXPERIMENT_FROM_EXPLICIT_GEOMETRY_CARRIER",
-      "fail_next_gate": "AUDIT_EXPLICIT_GEOMETRY_CARRIER_ENDPOINT_FREQUENCY_CEILING"
+      "next_gate": "CLASSIFICATION_SELECTED_FUTURE_PREREGISTRATION_ONLY"
     },
     {
       "id": "SURF-A2-HIRES",
       "kind": "QUALIFIED_HIGH_RESOLUTION_DIRECT_A_ARM",
-      "status": "BLOCKED_ON_H_GEO_P3_AND_DIRECT_SURFACE_DECISION",
-      "next_gate": "H-GEO-P3-EXPLICIT-HIRES-CARRIER_RESULT"
+      "status": "BLOCKED_ON_ENDPOINT_FREQUENCY_DIAGNOSIS_AND_NEXT_GEOMETRY_DECISION",
+      "next_gate": "H-GEO-P3-EFREQ_RESULT"
     },
     {
       "id": "TESSA-V2-B1",
@@ -188,7 +216,7 @@
   "naming_policy": {
     "model_versions": "IRIS-V8_IRIS-V9-R_IRIS-V10-R",
     "surface_experiments": "SURF-A0_SURF-C0_SURF-A1_SURF-A2",
-    "representation_experiments": "H-REP-P0_H-GEO-P1_H-GEO-P2_H-GEO-P3",
+    "representation_experiments": "H-REP-P0_H-GEO-P1_H-GEO-P2_H-GEO-P3_H-GEO-P3-EFREQ",
     "tessa_experiments": "TESSA-V2-B1",
     "notebook_revisions": "NB-rN__NEVER_REUSE_MODEL_VNUMBERS"
   }

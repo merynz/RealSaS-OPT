@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
+import torch
 from models.iris.vnext.contracts_v1 import IRISVNextConfigV1
 from models.iris.vnext.model_v1 import IRISVNextV1
+from models.iris.vnext.metric_geometry_v1 import IRISMetricGeometryAuxHeadV1, metric_geometry_objective_v1
 from tools.iris_vnext.h_geo_p2_runtime_v1 import set_h_geo_p2_trainable_v1
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -71,3 +73,27 @@ def test_p2_runtime_does_not_create_live_sources_inside_inference_mode():
     assert "source=load_subject_source(shard,ex[\"sha256\"],device)" in text
     assert "with torch.inference_mode():\n                planes=model.encode_scene" in text
     assert "with torch.inference_mode():\n        for subject in SUBJECT_IDS" not in text
+
+def test_p2_preflight_uses_weighted_component_objective_not_missing_total_key():
+    text=(ROOT/"tools/iris_vnext/preflight_h_geo_p2_a100_v1.py").read_text()
+    assert 'losses["total"]' not in text
+    assert 'weights=prereg["training"]["loss_weights"]' in text
+    assert 'geometry_loss=' in text
+    assert 'geometry_loss.backward()' in text
+
+    p=j("canonical/H_GEO_P2_PREREGISTRATION_V1.json")
+    w=p["training"]["loss_weights"]
+    h=torch.randn(16,384,requires_grad=True)
+    head=IRISMetricGeometryAuxHeadV1()
+    pred=head(h)
+    distance=torch.rand(16)*0.08
+    offset=torch.randn(16,3)*0.02
+    normal=torch.nn.functional.normalize(torch.randn(16,3),dim=-1)
+    valid=torch.ones(16,dtype=torch.bool)
+    near=distance<=float(p["truth"]["near_threshold_iris"])
+    losses=metric_geometry_objective_v1(pred,distance_iris=distance,offset_to_surface_iris=offset,normal_unit=normal,normal_valid=valid,near_label=near,offset_valid_distance_iris=float(p["truth"]["offset_valid_distance_iris"]))
+    assert set(losses)=={"distance","offset","normal","near"}
+    geometry_loss=float(w["distance"])*losses["distance"]+float(w["offset"])*losses["offset"]+float(w["normal"])*losses["normal"]+float(w["near"])*losses["near"]
+    assert torch.isfinite(geometry_loss)
+    geometry_loss.backward()
+    assert h.grad is not None and torch.isfinite(h.grad).all() and float(h.grad.abs().sum())>0

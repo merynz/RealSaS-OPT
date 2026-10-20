@@ -1,132 +1,163 @@
 # RealSaS-OPT — Current Plan
 
 **Date:** 2026-10-20  
-**Status:** **H-GEO-P3 CLOSED SCIENTIFIC FAIL; H-GEO-P3-EFREQ SEALED UNRESOLVED; H-GEO-P3-SCALE-XFER ZERO-OPTIMIZER STAGE LOCALIZATION ACTIVE**  
+**Status:** **SCALE-XFER SEALED MIXED; SHARED STRUCTURAL EVIDENCE SOURCE PROGRAM ACTIVE**  
 **Production authority:** `main`  
-**Research review branch:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
-**Source-gate vehicle:** draft PR #130  
-**Active lane:** `SURFACE_TESSA`  
-**Active experiment:** `H-GEO-P3-SCALE-XFER`  
-**Parked lane:** `RELATION_V10`  
-**Optimizer policy:** **no optimizer run is authorized.** No P4, SURF-A2 or TESSA optimizer step is authorized until SCALE-XFER localizes the first evidence-loss/ambiguity stage and a new experiment is separately preregistered.
+**Long-term research branch:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
+**Active lane:** `SHARED_STRUCTURAL_EVIDENCE`  
+**Active workstream:** `STRUCTURAL_EVIDENCE_V3_SOURCE_PREP`  
+**Execution policy:** **source-only continuation.** No notebook, scientific diagnostic/court, optimizer or training run is authorized until a separately preregistered scientific gate is ready and handed to the user.
 
 ## Objective
 
-Build the IRIS→TESSA boundary honestly:
+Build the generic RealSaS structural bridge honestly:
 
 ```text
 8 views
   ↓
-shared IRIS scene/evidence
-  + dedicated metric geometry evidence if required
+IRIS shared structural scene
   ↓
-qualified high-fidelity direct surface
+geometry + graphics + mechanics evidence
+  + qualified metric surface provider
   ↓
-OPTIONAL TESSA structuralization
+role-free topology / structuralization
   ↓
 Compiler
   ↓
-ONE canonical animation-ready M
+ONE persistent animation-ready canonical asset
+  ↓
+3D mechanics → source-preserved editable 2D presentation
 ```
 
-IRIS must establish correct/high-fidelity shape before TESSA is evaluated. TESSA may improve topology/structure; it may not hide IRIS geometry debt.
+Named semantic taxonomy is not the structural authority. The program must learn/derive persistent structure from geometry, appearance/source support, deformation, attachment, visibility and ordering evidence.
 
-## Closed evidence
+## Sealed prerequisite evidence
 
-- `SURF-A0-RAWFIELD`: falsified.
-- `SURF-C0-NATIVE-R24`: native V8 surface debt measured.
-- `SURF-A1-FROZEN-H`: scientific FAIL after substantial extraction rescue.
-- `H-REP-P0`: absolute FAIL with strong local geometry information in sealed V8 H.
-- `H-GEO-P1`: field-only exact-triangle retraining materially improved V8 but failed locked metric quality.
-- `H-GEO-P2`: scene+field retraining passed distance/normal/near and all vs-P1 gates, but endpoint p95 and shared-H retention failed.
-- `H-GEO-P3`: dedicated geometry carrier passed distance/normal/near and exact shared-V8 preservation, but endpoint p95 failed and worsened versus P2.
-- `H-GEO-P3-EFREQ`: zero-optimizer audit completed `UNRESOLVED`. No locked single dominance condition passed; nevertheless P3 was smoother than P2 at fine scale, endpoint tails had smaller projected footprints, and non-adjacent surface competition increased.
+### Shared-scene / modularity
 
-EFREQ authority: `docs/research/IRIS_H_GEO_P3_EFREQ_RESULT_20261020.json`.
+- V5/V6 showed that unconstrained downstream rewriting of the shared carrier can destroy geometry even when loss-retention is attempted.
+- V8 sealed the scene core after M1 and preserved geometry exactly while downstream appearance/relation/topology heads learned from the frozen shared carrier.
+- Therefore useful cross-modal evidence exists in the shared representation, but full joint geometry+graphics shared-scene training is not yet scientifically established.
 
-## Active workstream — H-GEO-P3-SCALE-XFER
+### Relation / presentation
 
-This experiment executes **zero optimizer/probe steps** and writes no checkpoint.
+- historical V8 relation truth contained proxy/misaligned targets and cannot be treated as an order/visibility solution;
+- corrected direction separates pairwise front/order from global ray-stack visibility;
+- unknown/ABSTAIN is required when source authority is absent;
+- Compiler/runtime already has concrete consumption paths for graphics fragments/order/visibility, but generic learned correctness is not yet proven.
 
-### Fixed query court
+### TESSA
 
-Reuse `H_GEO_P3_EFREQ_QUERY_TABLE.csv` byte-for-byte. Tail/control membership, distance matching and endpoint ranking may not be recomputed.
+- TESSA V2 is an optional learned structuralization layer, not a second geometry-repair model;
+- it already consumes separately typed shared-scene and surface/mechanics memory;
+- it uses adjacency-aware autoregressive topology serialization;
+- Compiler remains the only authority that may mint canonical M;
+- current TESSA V2 does not yet consume explicit presentation evidence as a typed memory stream.
 
-### Factor A — actual frozen view-token separability
+### Geometry
 
-For each exact query:
+`H-GEO-P3-SCALE-XFER` completed `MIXED` under exact zero-optimizer authority:
 
-- take exact nearest authored-surface point;
-- find closest non-adjacent competing authored-surface point;
-- project both through the exact eight normalized cameras;
-- bilinearly sample the existing `37×37×384` frozen DINO token grid with `align_corners=False` semantics;
-- measure same-token-cell fraction, distinct-token view count, token cosine distance and projected separation in token-cell units.
+- target multi-surface signal: true;
+- frozen view-input spatial-resolution signal: true;
+- carrier-transfer signal: true;
+- no P4 / SURF-A2 / TESSA authorization.
 
-This tests spatial evidence resolution directly rather than relying only on triangle-footprint proxies. It is still not a claim of true occlusion visibility.
+Authority: `docs/research/IRIS_H_GEO_P3_SCALE_XFER_RESULT_20261020.json`.
 
-### Factor B — exact multi-surface target structure
+The geometry program is therefore retained behind `QUALIFIED_SURFACE_PROVIDER`; P4 is not an automatic immediate step.
 
-From authored teacher triangles measure:
+## Active workstream — STRUCTURAL_EVIDENCE_V3_SOURCE_PREP
 
-- nearest-vs-competing distance margin;
-- competing surface normal angle up to sign;
-- whether another non-adjacent surface lies within `1/256`, `1/128` or `1/64` IRIS of the exact nearest distance.
+### Phase S1 — authority/truth cleanup
 
-### Factor C — stage-by-stage carrier transfer
+Source-only:
 
-Apply deterministic ± perturbations at:
+1. verify current Relation V3 pair and ray-stack APIs against the corrected authority model;
+2. require complete all-hit ray ordering for global visibility evidence;
+3. preserve camera conditioning for camera-dependent targets;
+4. preserve validity masks / ABSTAIN for unsupported contact, owner, attachment or drawable claims;
+5. prevent material IDs or named semantics from silently becoming owner authority.
 
-`1/1024, 1/512, 1/256, 1/128, 1/64, 1/32` IRIS.
+### Phase S2 — typed presentation evidence
 
-Measure per-subject channel-whitened RMS response at:
+Define a stable model/compiler contract for:
 
-1. P2 H baseline;
-2. P3 sampled 64² base planes;
-3. P3 sampled bilinear 128² planes;
-4. P3 sampled learned-refined 128² planes;
-5. P3 geometry-field H;
-6. P3 continuous-position residual;
-7. P3 final H_geo.
+- source RGBA/material support;
+- alpha and appearance boundary evidence;
+- pairwise front/order and occlusion evidence;
+- global ray-stack visibility evidence;
+- deformation/attachment persistence where authoritative;
+- provenance/validity for every field.
 
-The purpose is to find the **first** stage where a distinction present upstream becomes inadequate downstream.
+### Phase S3 — TESSA presentation memory source implementation
 
-## Locked decision boundary
+Keep existing topology grammar/tokenizer for the first controlled test.
 
-SCALE-XFER outputs exactly one of:
+Add a typed presentation-memory path alongside current scene and surface/mechanics memory:
 
 ```text
-TARGET_MULTISURFACE_LIMITED
-VIEW_INPUT_RESOLUTION_LIMITED
-CARRIER_TRANSFER_LIMITED
-MIXED
-UNRESOLVED
+scene memory ───────────────┐
+surface/mechanics memory ──┼─→ topology decoder
+presentation memory ───────┘
 ```
 
-That classification selects a **future preregistration family only**:
+Presentation memory may contain role-free boundary / pair / ray-stack evidence only. No named semantic taxonomy or teacher topology enters inference conditioning.
 
-- target → multi-surface / multi-hypothesis geometry target P4;
-- view input → multiscale / higher-spatial-resolution view-evidence P4;
-- carrier → evidence-preserving geometry-carrier P4;
-- mixed → minimal joint P4 containing only identified failing stages;
-- unresolved → expand zero-optimizer localization.
+### Phase S4 — Compiler regression coverage
 
-No result directly authorizes SURF-A2 or TESSA.
+Prove source-level behavioral use for the outputs that matter to motion presentation:
+
+- persistent fragment/support identity;
+- visibility inclusion/exclusion;
+- local/partial order graph;
+- pose-dependent order flips;
+- source-art support mapping;
+- attachment transport where authoritative.
+
+Passing source tests is not a scientific PASS.
+
+### Phase S5 — draft the scientific A/B preregistration
+
+Draft only; do not execute until user handoff.
+
+```text
+A — CURRENT STRUCTURALIZER
+scene + surface + mechanics → TESSA
+
+B — STRUCTURAL-EVIDENCE HYPOTHESIS
+same inputs
++ role-free presentation evidence → TESSA
+```
+
+The eventual court must use matched authority and evaluate topology validity plus downstream motion-presentation behavior, including visibility/order, owner/fragment stability, gap/tear and source-art preservation.
 
 ## Execution order
 
-1. Seal H-GEO-P3 evidence. **DONE**
-2. Run EFREQ zero-optimizer audit. **DONE — UNRESOLVED**
-3. Seal EFREQ audit + exact query CSV hashes. **DONE**
-4. SCALE-XFER exact input binding + preregistration. **DONE**
-5. SCALE-XFER pure helpers + runtime audit source. **DONE**
-6. Dedicated + broad source CI. **ACTIVE — PR #130**
-7. Freeze exact final green SCALE-XFER source SHA. **NEXT**
-8. Fast-forward active research branch to that exact SHA.
-9. Generate V8-style A100 Run-All SCALE-XFER notebook pinned to that SHA.
-10. Run audit: optimizer/probe optimizer must remain exactly zero.
-11. Read stage-localized classification + query table.
-12. Preregister exactly one minimal P4 family; training remains separately gated.
+1. Seal SCALE-XFER result and authority sync. **ACTIVE SOURCE WORK**
+2. Advance machine-readable research ledger to V2. **ACTIVE SOURCE WORK**
+3. Audit Relation Truth V3 / ray-stack source readiness.
+4. Define typed presentation-evidence contract.
+5. Implement TESSA presentation-memory source path.
+6. Add/repair dedicated regression/source CI.
+7. Draft `STRUCTURAL-EVIDENCE-A-B` preregistration and readiness receipt.
+8. **STOP AND HAND OFF TO USER** before notebook / scientific diagnostic / court / accelerator / optimizer execution.
+9. Only after an authorized A/B result: decide whether to test protected joint geometry+graphics shared-scene training.
 
-## Notebook contract
+## Geometry side policy
 
-Physical phase cells, exactly one Drive mount, no Drive-tree discovery, no second OAuth, exact direct paths/hashes, source precompile + CLI smoke, exact A100 gate, visible logs, fail closed, zero optimizer/probe steps, no checkpoint writes.
+Do not blindly resume P4 from the sealed runtime's `MIXED → minimal joint P4` suggestion. That suggestion remains a valid geometry-family interpretation, but the program-level next step is structural-evidence source readiness.
+
+A future geometry experiment must be separately justified and preregistered. The current endpoint metric must not be treated as a universal product gate unless its necessity for final surface / animation behavior is established.
+
+## Non-negotiable laws
+
+- one canonical animation-ready asset;
+- no hidden second deformable visual mesh;
+- teacher topology/rig/skin never enters inference conditioning;
+- no fabricated truth;
+- semantics may annotate but do not own structure;
+- Compiler alone mints canonical M;
+- green CI is source evidence, not scientific PASS;
+- no threshold changes after observing a scientific result;
+- stop before scientific execution and tell the user exactly what must be run.

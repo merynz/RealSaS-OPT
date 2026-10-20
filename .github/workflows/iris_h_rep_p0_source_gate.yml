@@ -113,6 +113,11 @@ jobs:
           assert hrep['frozen_execution_source_sha'] == '479e8e53cf0d7df234a3e64b824bb704b861bf19'
           assert hrep['scientific_result_available'] is True
           assert hrep['tessa_authorized'] is False
-          assert l['active_experiment'] == 'H-GEO-P2-SCENE-FIELD'
-          print('PASS_H_REP_P0_SEALED_HISTORY__CURRENT_PROGRAM_H_GEO_P2')
+          assert rows['H-GEO-P1']['status'] == 'SCIENTIFIC_FAIL'
+          assert rows['H-GEO-P2-SCENE-FIELD']['status'] in ('SOURCE_PREPARATION','SCIENTIFIC_FAIL')
+          assert l['active_experiment'] in ('H-GEO-P2-SCENE-FIELD','H-GEO-P3-EXPLICIT-HIRES-CARRIER')
+          if l['active_experiment'] == 'H-GEO-P3-EXPLICIT-HIRES-CARRIER':
+              assert rows['H-GEO-P2-SCENE-FIELD']['status'] == 'SCIENTIFIC_FAIL'
+              assert rows['H-GEO-P3-EXPLICIT-HIRES-CARRIER']['status'] == 'SOURCE_PREPARATION'
+          print('PASS_H_REP_P0_SEALED_HISTORY__LATER_H_GEO_PROGRESSION_ALLOWED')
           PY

@@ -1,0 +1,101 @@
+{
+  "schema": "RealSaS.HGeoP3EFreqPreregistration.v1",
+  "experiment_id": "H-GEO-P3-EFREQ",
+  "date_utc": "2026-10-20",
+  "question": "WHY_DO_P3_ENDPOINT_TAIL_ERRORS_PERSIST_AFTER_DISTANCE_NORMAL_NEAR_QUALIFICATION_AND_EXACT_SHARED_V8_PRESERVATION",
+  "scope": "ZERO_OPTIMIZER_ENDPOINT_TAIL_DIAGNOSTIC__NOT_MODEL_TRAINING__NOT_SURF_A2__NOT_TESSA_AUTHORIZATION",
+  "input_binding": "canonical/H_GEO_P3_EFREQ_INPUT_BINDING_V1.json",
+  "optimizer_policy": {
+    "carrier_optimizer_steps": 0,
+    "probe_optimizer_steps": 0,
+    "any_parameter_mutation_forbidden": true,
+    "checkpoint_write_forbidden": true,
+    "teacher_truth_in_inference_forward": false,
+    "tessa_invoked": false
+  },
+  "query_selection": {
+    "split": "holdout",
+    "offset_valid_maximum_distance_iris": 0.12,
+    "tail_definition": "TOP_10_PERCENT_P3_TRAINING_AUX_ENDPOINT_ERROR_WITHIN_EACH_SUBJECT",
+    "tail_maximum_queries_per_subject": 384,
+    "control_definition": "DETERMINISTIC_DISTANCE_STRATIFIED_MEDIAN_ENDPOINT_ERROR_MATCH",
+    "distance_bins_iris": [0.0,0.01,0.02,0.04,0.08,0.1200001],
+    "training_aux_is_only_tail_selector_not_qualification_authority": true
+  },
+  "perturbation_audit": {
+    "epsilon_scales_iris": [0.00390625,0.0078125,0.015625],
+    "direction": "DETERMINISTIC_QUERY_INDEX_AND_SUBJECT_HASHED_UNIT_DIRECTION",
+    "symmetric_plus_minus": true,
+    "measures": [
+      "CLOSEST_FACE_FLIP_RATE",
+      "TARGET_OFFSET_DIRECTION_CHANGE_DEGREES",
+      "TARGET_CLOSEST_POINT_DISPLACEMENT_PER_EPSILON",
+      "P2_WHITENED_H_FINITE_DIFFERENCE_RMS",
+      "P3_WHITENED_HGEO_FINITE_DIFFERENCE_RMS"
+    ]
+  },
+  "target_ambiguity_audit": {
+    "exclude_one_ring_adjacent_triangles": true,
+    "measures": [
+      "NONADJACENT_SURFACE_GAP_IRIS",
+      "NEAREST_FACE_FLIP_RATE_UNDER_PERTURBATION",
+      "OFFSET_DIRECTION_CHANGE_UNDER_PERTURBATION"
+    ],
+    "ambiguity_signal_rule": "TAIL_MEDIAN_NONADJACENT_GAP_LE_0_5X_CONTROL_AND_TAIL_FACE_FLIP_AT_EPS_1_OVER_128_GE_1_5X_CONTROL"
+  },
+  "view_evidence_audit": {
+    "camera_semantics": "IRIS_NORMALIZED_ORTHOGRAPHIC_CAMERA_FROM_13D_PREPARED_FEATURES",
+    "true_occlusion_claimed": false,
+    "measures": [
+      "IN_FRAME_VIEW_COUNT",
+      "INFORMATIVE_VIEW_COUNT_ABS_NORMAL_DOT_FORWARD_GE_0_25",
+      "MAXIMUM_PROJECTED_NEAREST_TRIANGLE_AREA_PX2",
+      "MEDIAN_PROJECTED_NEAREST_TRIANGLE_AREA_PX2",
+      "MAXIMUM_PROJECTED_NEAREST_TRIANGLE_EDGE_PX"
+    ],
+    "view_evidence_signal_rule": "TAIL_MEDIAN_MAX_PROJECTED_TRIANGLE_AREA_LE_0_5X_CONTROL_OR_TAIL_MEDIAN_INFORMATIVE_VIEW_COUNT_LE_CONTROL_MINUS_1"
+  },
+  "carrier_frequency_audit": {
+    "compare": ["P3_HGEO","P2_H"],
+    "feature_scale": "PER_SUBJECT_HOLDOUT_PER_CHANNEL_STD_WITH_MINIMUM_1E_6",
+    "p3_internal_measures": [
+      "REFINER_RESIDUAL_RMS_OVER_BILINEAR_BASE",
+      "REFINER_RESIDUAL_HIGH_BAND_POWER_FRACTION",
+      "POSITION_RESIDUAL_RMS",
+      "TAIL_VS_CONTROL_HGEO_FINITE_DIFFERENCE_RMS"
+    ],
+    "carrier_bandwidth_signal_rule": "AT_EPS_1_OVER_128_TAIL_TARGET_OFFSET_VARIATION_GE_1_5X_CONTROL_AND_P3_HGEO_FINITE_DIFFERENCE_RMS_LE_1_10X_P2_H_FINITE_DIFFERENCE_RMS"
+  },
+  "decision_rules": {
+    "TARGET_AMBIGUITY_DOMINANT": "target_ambiguity_signal_true_and_view_evidence_signal_false",
+    "VIEW_EVIDENCE_DOMINANT": "view_evidence_signal_true_and_target_ambiguity_signal_false",
+    "CARRIER_BANDWIDTH_DOMINANT": "carrier_bandwidth_signal_true_and_target_ambiguity_signal_false",
+    "MIXED": "two_or_more_primary_signals_true",
+    "UNRESOLVED": "no_primary_signal_true",
+    "thresholds_may_change_after_results": false
+  },
+  "interpretation": {
+    "TARGET_AMBIGUITY_DOMINANT_next": "DESIGN_VECTOR_FIELD_OR_MULTI_HYPOTHESIS_CLOSEST_SURFACE_TARGET_STUDY__NO_TRAINING_UNTIL_PREREGISTERED",
+    "VIEW_EVIDENCE_DOMINANT_next": "DESIGN_MULTI_SCALE_VIEW_EVIDENCE_GEOMETRY_CARRIER_STUDY__NO_TRAINING_UNTIL_PREREGISTERED",
+    "CARRIER_BANDWIDTH_DOMINANT_next": "DESIGN_TRUE_HIGH_FREQUENCY_GEOMETRY_CARRIER_STUDY__NO_TRAINING_UNTIL_PREREGISTERED",
+    "MIXED_next": "PREREGISTER_FACTORIAL_P4_ABLATION_FROM_IDENTIFIED_SIGNALS__DO_NOT_TRAIN_TESSA",
+    "UNRESOLVED_next": "EXPAND_ZERO_OPTIMIZER_ENDPOINT_DIAGNOSTIC_ONLY",
+    "any_result_authorizes_surf_a2": false,
+    "any_result_authorizes_tessa": false
+  },
+  "runtime_admission": {
+    "accelerator": "NVIDIA_A100_CLASS",
+    "minimum_cuda_memory_gib": 39,
+    "exact_execution_source_sha_required": true,
+    "clean_source_checkout_required": true,
+    "exact_p3_checkpoint_required": true,
+    "exact_p2_checkpoint_required": true,
+    "exact_v8_checkpoint_required": true,
+    "exact_p1_dataset_bytes_required": true,
+    "exact_authored_teacher_meshes_required": true,
+    "single_drive_mount_consent_required": true,
+    "drive_tree_discovery_allowed": false,
+    "additional_google_oauth_allowed": false,
+    "hidden_fallback_allowed": false
+  }
+}

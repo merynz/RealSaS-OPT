@@ -8,10 +8,14 @@ class TESSAStructuralizerConfigV3:
     """Matched-capacity tri-stream structuralization configuration.
 
     V3 exists to test whether role-free presentation evidence helps topology
-    reconstruction.  It intentionally preserves the V2 decoder width/depth,
-    coordinate vocabulary and total 1024 conditioning-token budget.  The budget
-    is redistributed across scene, surface/mechanics and presentation streams so
-    a later A/B cannot win merely by receiving more conditioning tokens.
+    reconstruction.  The reference configuration preserves the V2 decoder
+    width/depth, coordinate vocabulary and total 1024 conditioning-token budget.
+    The budget is redistributed across scene, surface/mechanics and presentation
+    streams so a later A/B cannot win merely by receiving more memory tokens.
+
+    `conditioning_token_budget` is explicit so tiny source tests can use a
+    smaller but still exactly matched budget.  Scientific preregistration must
+    lock the reference value before any optimizer run.
 
     This is source architecture only.  It does not authorize training.
     """
@@ -29,6 +33,7 @@ class TESSAStructuralizerConfigV3:
     scene_memory_tokens: int = 384
     surface_memory_tokens: int = 384
     presentation_memory_tokens: int = 256
+    conditioning_token_budget: int = 1024
     memory_source_width: int = 512
     memory_refinement_layers: int = 4
 
@@ -100,6 +105,7 @@ class TESSAStructuralizerConfigV3:
             self.scene_memory_tokens,
             self.surface_memory_tokens,
             self.presentation_memory_tokens,
+            self.conditioning_token_budget,
             self.memory_source_width,
             self.local_attention_window,
             self.query_chunk_size,
@@ -118,5 +124,5 @@ class TESSAStructuralizerConfigV3:
             raise ValueError("TESSA_V3_LOCAL_WINDOW_SMALLER_THAN_QUERY_CHUNK")
         if self.special_token_count != 8:
             raise ValueError("TESSA_V3_V1_GRAMMAR_COMPATIBILITY_DRIFT")
-        if self.total_conditioning_tokens != 1024:
+        if self.total_conditioning_tokens != self.conditioning_token_budget:
             raise ValueError("TESSA_V3_MATCHED_MEMORY_BUDGET_DRIFT")

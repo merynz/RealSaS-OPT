@@ -3,12 +3,14 @@
 **Date:** 2026-10-20  
 **Production authority:** `main` until reviewed merge  
 **Long-term research branch:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
+**Long-term research head after structural-evidence materialization authority:** `f0c5a17fc235ef91e5c9e6a41b4b2efeac44c120`  
 **SCALE-XFER source:** `ec10334a4bd03db6efe3c30d655668e0e31d8660`  
 **SCALE-XFER source gate:** PR #130 — **MERGED**  
 **Structural-evidence source bridge:** PR #132 — **MERGED**  
+**Structural-evidence materialization authority:** PR #133 — **MERGED**  
 **Active research lane:** `SHARED_STRUCTURAL_EVIDENCE`  
-**Active workstream:** `STRUCTURAL_EVIDENCE_INPUT_AUTHORITY_MATERIALIZATION_PREP`  
-**Scientific execution policy:** **NO NEW NOTEBOOK / DIAGNOSTIC / COURT / OPTIMIZER RUN IS AUTHORIZED.** Source-only readiness work may proceed until the evidence-materialization handoff.
+**Active workstream:** `STRUCTURAL_EVIDENCE_INPUT_MATERIALIZATION_HANDOFF`  
+**Execution policy:** **SOURCE PREPARATION IS COMPLETE. STOP BEFORE THE NEXT NOTEBOOK.** No scientific diagnostic/court, optimizer, backward step, Relation/TESSA training, or scientific PASS/FAIL run is authorized.
 
 Machine-readable continuation authority: `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V3.json`.
 
@@ -104,9 +106,11 @@ PR #132 merged the source-only `STRUCTURAL_EVIDENCE_V3` bridge. The repository n
 
 No scientific result is claimed by source existence.
 
-## Current source-only boundary — evidence input authority
+## Evidence materialization authority — complete source preparation
 
-The next required object is **not a trained model**. It is a hashed, source-defensible evidence corpus that the future A/B can consume.
+PR #133 merged the fail-closed source authority for the next zero-optimizer evidence materialization. Its scientific implementation is frozen at:
+
+`e9f8e42445f0edca28a869a9164e54892095d9d4`
 
 `canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V1.json` binds:
 
@@ -120,25 +124,28 @@ The next required object is **not a trained model**. It is a hashed, source-defe
 - separate current-view RGBA/alpha boundary authority;
 - no material-ID owner labels, named-semantic structural authority, or teacher topology/rig in inference.
 
-The all-hit evidence artifact has **not** yet been materialized. There is currently no admitted `ALL_HIT_RELATION_EVIDENCE_V1_MANIFEST.json` in Drive. Source readiness must not be mistaken for artifact existence.
+The associated source gate was green before merge, including the structuralization source contract, historical geometry/source contracts, mainline model gate, completion audit and architecture-freeze gate.
 
-The admission validator `tools/iris_vnext/validate_structural_evidence_input_binding_v1.py` can validate the static binding in CI and, after a future zero-optimizer materialization, fail closed on manifest policy, subject/hash drift, authority drift and tampering.
+**The all-hit evidence artifact still does not exist.** There is no admitted `ALL_HIT_RELATION_EVIDENCE_V1_MANIFEST.json` in Drive. Source readiness must not be mistaken for artifact existence.
 
-## Next execution boundary — user handoff required
+The admission validator `tools/iris_vnext/validate_structural_evidence_input_binding_v1.py` validates the static binding and, after materialization, fails closed on manifest policy, subject/hash drift, authority drift and tampering.
 
-After this source gate is green and the exact implementation source is frozen, the next operation requires a **new run-all notebook** because it must hydrate sealed Drive bytes and materialize the all-hit/presentation evidence corpus.
+## Immediate next execution boundary — user handoff required now
 
-That future notebook is limited to:
+The next operation is `STRUCTURAL-EVIDENCE-INPUT-MATERIALIZATION-V1` and requires a **new run-all notebook** because it must hydrate sealed Drive bytes and materialize the all-hit/presentation evidence corpus.
+
+That notebook is limited to:
 
 1. exact input hydration + SHA verification;
 2. zero-optimizer all-hit evidence materialization for Fit8;
 3. `ALL_HIT_RELATION_EVIDENCE_V1_MANIFEST.json` emission;
-4. per-subject artifact hashing;
-5. fail-closed admission validation + receipt persistence.
+4. eight per-subject artifact hashes;
+5. fail-closed admission validation;
+6. typed receipt persistence.
 
-It must perform **zero optimizer/backward steps**, no Relation/TESSA training, no scientific A/B court, and no PASS claim about the research hypothesis.
+It must perform **0 optimizer steps and 0 backward steps**, no Relation/TESSA training, no scientific A/B court, and no PASS/FAIL claim about the research hypothesis.
 
-Only after the admitted evidence corpus exists may the program lock the A/B optimizer/seed/update budget and numeric court thresholds, then separately hand off a scientific training notebook.
+Only after an admitted evidence corpus exists may the program return to source-only work, bind the presentation-evidence input, lock the A/B seed/optimizer/update budget and numeric court thresholds, and build a separate scientific training notebook.
 
 ## Current non-authorizations
 
@@ -148,6 +155,6 @@ Only after the admitted evidence corpus exists may the program lock the A/B opti
 - no Relation model training;
 - no Structural-Evidence A/B court execution;
 - no scientific diagnostic execution;
-- no new notebook execution until explicit user handoff.
+- no notebook execution without explicit user handoff.
 
-Source implementation, tests, CI, input-authority binding and preregistration drafting are allowed.
+The current source-preparation task is complete. The correct continuation is the materialization-notebook handoff, not additional silent source work.

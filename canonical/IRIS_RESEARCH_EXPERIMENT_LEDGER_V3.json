@@ -70,7 +70,7 @@
   "input_authority": {
     "binding": "canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V1.json",
     "validator": "tools/iris_vnext/validate_structural_evidence_input_binding_v1.py",
-    "implementation_source_sha": "2e1bf6090a6c854273a4418247bf306cb7ef158a",
+    "implementation_source_sha": "e9f8e42445f0edca28a869a9164e54892095d9d4",
     "source_gate_pr": 133,
     "status": "READY_FOR_ZERO_OPTIMIZER_MATERIALIZATION__USER_HANDOFF_REQUIRED",
     "all_hit_manifest_materialized": false,

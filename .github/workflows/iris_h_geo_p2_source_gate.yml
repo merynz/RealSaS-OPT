@@ -13,7 +13,9 @@ on:
       - 'tools/iris_vnext/h_geo_p2_runtime_v1.py'
       - 'tools/iris_vnext/preflight_h_geo_p2_a100_v1.py'
       - 'tools/iris_vnext/train_fit8_h_geo_p2_v1.py'
+      - 'tools/iris_vnext/train_fit8_h_geo_p2_seeded_v1.py'
       - 'tools/iris_vnext/audit_fit8_h_geo_p2_v1.py'
+      - 'tools/iris_vnext/audit_fit8_h_geo_p2_seeded_v1.py'
       - 'tests/repository/test_h_geo_p2_contract_v1.py'
       - '.github/workflows/iris_h_geo_p2_source_gate.yml'
 concurrency:
@@ -42,7 +44,9 @@ jobs:
             tools/iris_vnext/h_geo_p2_runtime_v1.py \
             tools/iris_vnext/preflight_h_geo_p2_a100_v1.py \
             tools/iris_vnext/train_fit8_h_geo_p2_v1.py \
+            tools/iris_vnext/train_fit8_h_geo_p2_seeded_v1.py \
             tools/iris_vnext/audit_fit8_h_geo_p2_v1.py \
+            tools/iris_vnext/audit_fit8_h_geo_p2_seeded_v1.py \
             tests/repository/test_h_geo_p2_contract_v1.py
       - name: Run H-GEO-P2 repository courts
         env:
@@ -65,6 +69,10 @@ jobs:
           assert b['exact_triangle_dataset']['reuse_bytes_exactly'] is True
           assert b['exact_triangle_dataset']['rebuild_or_resample_allowed'] is False
           assert p['runtime_admission']['scene_and_field_gradient_connectivity_required_before_optimizer'] is True
+          assert p['training']['initialization_seed']==27060001
+          assert p['training']['scientific_entrypoint']=='tools.iris_vnext.train_fit8_h_geo_p2_seeded_v1'
+          assert p['independent_court']['probe_initialization_seed']==27079991
+          assert p['independent_court']['scientific_entrypoint']=='tools.iris_vnext.audit_fit8_h_geo_p2_seeded_v1'
           assert p['interpretation']['pass_authorizes_tessa'] is False
           assert p['interpretation']['pass_authorizes_surf_a2'] is False
           assert l['active_experiment']=='H-GEO-P2-SCENE-FIELD'

@@ -10,7 +10,7 @@ class SurfA1RepositoryContractTests(unittest.TestCase):
     def test_experiment_ledger_preserves_a1_result_and_current_program(self):
         ledger = json.loads((ROOT / "canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json").read_text())
         self.assertEqual(ledger["active_lane"], "SURFACE_TESSA")
-        self.assertEqual(ledger["active_experiment"], "H-GEO-P2-SCENE-FIELD")
+        self.assertIn(ledger["active_experiment"], ("H-GEO-P2-SCENE-FIELD", "H-GEO-P3-EXPLICIT-HIRES-CARRIER"))
         self.assertIn("RELATION_V10", ledger["parked_lanes"])
         rows = {row["id"]: row for row in ledger["experiments"]}
         self.assertEqual(rows["SURF-A0-RAWFIELD"]["status"], "FALSIFIED")
@@ -20,7 +20,11 @@ class SurfA1RepositoryContractTests(unittest.TestCase):
         self.assertFalse(rows["SURF-A1-FROZEN-H"]["scientific_pass_claimed"])
         self.assertEqual(rows["SURF-A1-FROZEN-H"]["independent_court"]["status"], "SCIENTIFIC_FAIL_SURF_A1_FROZEN_H_REPRESENTATION_RESCUE")
         self.assertEqual(rows["H-GEO-P1"]["status"], "SCIENTIFIC_FAIL")
-        self.assertEqual(rows["H-GEO-P2-SCENE-FIELD"]["status"], "SOURCE_PREPARATION")
+        p2 = rows["H-GEO-P2-SCENE-FIELD"]
+        self.assertIn(p2["status"], ("SOURCE_PREPARATION", "SCIENTIFIC_FAIL"))
+        if ledger["active_experiment"] == "H-GEO-P3-EXPLICIT-HIRES-CARRIER":
+            self.assertEqual(p2["status"], "SCIENTIFIC_FAIL")
+            self.assertEqual(rows["H-GEO-P3-EXPLICIT-HIRES-CARRIER"]["status"], "SOURCE_PREPARATION")
         self.assertTrue(rows["SURF-A2-HIRES"]["status"].startswith("BLOCKED_"))
         self.assertEqual(rows["TESSA-V2-B1"]["status"], "BLOCKED_ON_SURF_A2_READINESS")
 

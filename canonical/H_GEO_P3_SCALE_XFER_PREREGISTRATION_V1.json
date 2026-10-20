@@ -1,0 +1,101 @@
+{
+  "schema": "RealSaS.HGeoP3ScaleTransferPreregistration.v1",
+  "experiment_id": "H-GEO-P3-SCALE-XFER",
+  "date_utc": "2026-10-20",
+  "scientific_question": "AT_WHICH_STAGE_DO_ENDPOINT_RELEVANT_FINE_SPATIAL_DISTINCTIONS_FIRST_BECOME_INADEQUATE_OR_AMBIGUOUS",
+  "optimizer_policy": {
+    "carrier_optimizer_steps_authorized": 0,
+    "probe_optimizer_steps_authorized": 0,
+    "checkpoint_write_allowed": false,
+    "architecture_mutation_allowed": false,
+    "threshold_relaxation_after_runtime_forbidden": true
+  },
+  "query_authority": {
+    "reuse_efreq_query_csv_byte_exact": true,
+    "tail_and_control_membership_may_not_be_reselected": true,
+    "maximum_rows_per_group_per_subject": 320,
+    "distance_match_may_not_be_recomputed": true
+  },
+  "spatial_scales_iris": [0.0009765625, 0.001953125, 0.00390625, 0.0078125, 0.015625, 0.03125],
+  "primary_scale_iris": 0.0078125,
+  "stage_order": [
+    "P2_H_BASELINE",
+    "P3_BASE64_SAMPLED_PLANES",
+    "P3_BILINEAR128_SAMPLED_PLANES",
+    "P3_REFINED128_SAMPLED_PLANES",
+    "P3_GEOMETRY_FIELD_H",
+    "P3_POSITION_RESIDUAL",
+    "P3_H_GEO"
+  ],
+  "view_evidence_analysis": {
+    "token_grid_size": 37,
+    "image_token_dim": 384,
+    "sample_mode": "BILINEAR_ALIGN_CORNERS_FALSE_AT_PROJECTED_NORMALIZED_XY",
+    "pair": "EXACT_NEAREST_SURFACE_POINT_VS_CLOSEST_NONADJACENT_COMPETING_SURFACE_POINT",
+    "measurements": [
+      "BOTH_IN_FRAME_VIEW_COUNT",
+      "DISTINCT_TOKEN_CELL_VIEW_COUNT",
+      "SAME_TOKEN_CELL_FRACTION",
+      "MEDIAN_TOKEN_COSINE_DISTANCE",
+      "MAXIMUM_TOKEN_COSINE_DISTANCE",
+      "MEDIAN_PROJECTED_SEPARATION_IN_TOKEN_CELLS"
+    ]
+  },
+  "target_multisurface_analysis": {
+    "nonadjacent_k": 4,
+    "measurements": [
+      "COMPETING_SURFACE_DISTANCE_MARGIN_IRIS",
+      "COMPETING_NORMAL_ANGLE_DEG",
+      "SHEETS_WITHIN_MARGIN_1_OVER_256",
+      "SHEETS_WITHIN_MARGIN_1_OVER_128",
+      "SHEETS_WITHIN_MARGIN_1_OVER_64"
+    ]
+  },
+  "representation_transfer_analysis": {
+    "delta_metric": "PER_SUBJECT_CHANNEL_WHITENED_RMS_FINITE_DIFFERENCE_AVERAGED_OVER_PLUS_MINUS_PERTURBATION",
+    "whitening_floor": 1e-6,
+    "primary_scale": "1_OVER_128",
+    "report_tail_and_distance_matched_control_separately": true
+  },
+  "locked_signals": {
+    "target_multisurface": {
+      "pooled_tail_median_competing_margin_iris_lte": 0.0078125,
+      "or_pooled_tail_fraction_with_second_sheet_within_1_over_128_gte": 0.25
+    },
+    "view_input_resolution": {
+      "pooled_tail_median_same_token_cell_fraction_gte": 0.5,
+      "or_pooled_tail_distinct_token_view_count_lte_control_minus": 1.0,
+      "or_pooled_tail_max_token_cosine_distance_lte_control_ratio": 0.70
+    },
+    "carrier_transfer": {
+      "p3_h_geo_to_p2_h_tail_delta_ratio_at_1_over_128_lte": 0.85,
+      "and_refined128_to_bilinear128_tail_delta_ratio_at_1_over_128_lte": 1.10
+    }
+  },
+  "classification_space": [
+    "TARGET_MULTISURFACE_LIMITED",
+    "VIEW_INPUT_RESOLUTION_LIMITED",
+    "CARRIER_TRANSFER_LIMITED",
+    "MIXED",
+    "UNRESOLVED"
+  ],
+  "interpretation": {
+    "TARGET_MULTISURFACE_LIMITED_next": "PREREGISTER_MULTI_SURFACE_OR_MULTI_HYPOTHESIS_GEOMETRY_TARGET_P4__DO_NOT_TRAIN_YET",
+    "VIEW_INPUT_RESOLUTION_LIMITED_next": "PREREGISTER_MULTISCALE_HIGHER_SPATIAL_RESOLUTION_VIEW_EVIDENCE_P4__DO_NOT_TRAIN_YET",
+    "CARRIER_TRANSFER_LIMITED_next": "PREREGISTER_EVIDENCE_PRESERVING_GEOMETRY_CARRIER_P4__DO_NOT_TRAIN_YET",
+    "MIXED_next": "PREREGISTER_MINIMAL_JOINT_P4_FROM_IDENTIFIED_FAILURE_STAGES__DO_NOT_TRAIN_YET",
+    "UNRESOLVED_next": "EXPAND_ZERO_OPTIMIZER_STAGE_LOCALIZATION_ONLY"
+  },
+  "runtime_admission": {
+    "required_accelerator": "NVIDIA_A100",
+    "minimum_cuda_memory_gib": 39.0,
+    "single_drive_consent": true,
+    "drive_scan_forbidden": true
+  },
+  "authorization": {
+    "scientific_pass_can_be_minted": false,
+    "surf_a2_authorized": false,
+    "tessa_authorized": false,
+    "p4_training_authorized": false
+  }
+}

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import numpy as np
+import torch
 
+from tools.iris_vnext.h_geo_p3_efreq_v1 import NormalizedCameraV1
 from tools.iris_vnext.h_geo_p3_scale_xfer_v1 import (
     SCALE_XFER_EPS_IRIS,
     classify_scale_transfer_v1,
     deterministic_unit_direction_v2,
     nearest_nonadjacent_candidates_v1,
+    paired_surface_token_stats_v1,
 )
 
 
@@ -76,6 +79,30 @@ def test_nonadjacent_candidate_excludes_vertex_adjacent_face():
     out = nearest_nonadjacent_candidates_v1(np.asarray([0.2,0.2,0.1]), 0.1, 0, tri, normals, adjacency, k=2)
     assert out and out[0]["face_index"] == 1
     assert out[0]["margin_over_nearest_iris"] > 2.0
+
+
+def test_frozen_token_pair_sampling_executes_with_expected_geometry():
+    torch.manual_seed(7)
+    tokens = torch.randn(1, 8, 1369, 384)
+    camera = NormalizedCameraV1(
+        origin_iris=np.asarray([0.0, 0.0, 2.0], dtype=np.float64),
+        right=np.asarray([1.0, 0.0, 0.0], dtype=np.float64),
+        up=np.asarray([0.0, 1.0, 0.0], dtype=np.float64),
+        forward=np.asarray([0.0, 0.0, -1.0], dtype=np.float64),
+        half_extent_iris=1.0,
+    )
+    stats = paired_surface_token_stats_v1(
+        tokens,
+        [camera] * 8,
+        np.asarray([0.0, 0.0, 0.0], dtype=np.float64),
+        np.asarray([0.01, 0.0, 0.0], dtype=np.float64),
+    )
+    assert stats["both_in_frame_view_count"] == 8.0
+    assert stats["same_token_cell_fraction"] == 1.0
+    assert stats["distinct_token_cell_view_count"] == 0.0
+    assert np.isfinite(stats["median_token_cosine_distance"])
+    assert np.isfinite(stats["maximum_token_cosine_distance"])
+    assert stats["median_projected_separation_token_cells"] > 0.0
 
 
 def test_classifier_can_isolate_each_family_and_mixed():

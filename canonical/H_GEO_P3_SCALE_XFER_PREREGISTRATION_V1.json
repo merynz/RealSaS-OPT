@@ -13,7 +13,7 @@
   "query_authority": {
     "reuse_efreq_query_csv_byte_exact": true,
     "tail_and_control_membership_may_not_be_reselected": true,
-    "maximum_rows_per_group_per_subject": 320,
+    "maximum_rows_per_group_per_subject": 384,
     "distance_match_may_not_be_recomputed": true
   },
   "spatial_scales_iris": [0.0009765625, 0.001953125, 0.00390625, 0.0078125, 0.015625, 0.03125],

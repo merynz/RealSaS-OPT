@@ -43,9 +43,15 @@ Historical provenance only:
 
 Active lane: `SHARED_STRUCTURAL_EVIDENCE`.
 
-Active workstream: `STRUCTURAL_EVIDENCE_INPUT_AUTHORITY_MATERIALIZATION_PREP`.
+Active workstream: `STRUCTURAL_EVIDENCE_INPUT_MATERIALIZATION_HANDOFF`.
 
-PR #132 completed the source-only V3 bridge. Do **not** redo the old source-prep list. Current source already contains:
+PR #132 completed the source-only V3 structural bridge. PR #133 completed and merged the fail-closed evidence-materialization source authority. Exact scientific implementation source for the materialization producer/admission contract is:
+
+`e9f8e42445f0edca28a869a9164e54892095d9d4`
+
+The all-hit evidence artifact is **not materialized or admitted yet**. Do not infer artifact existence from source readiness.
+
+Current source already contains:
 
 - Relation/Graphics Truth V3 separation of pairwise front/order from global visibility;
 - complete ordered all-hit ray-stack visibility source authority with ABSTAIN for incomplete authority;
@@ -53,19 +59,27 @@ PR #132 completed the source-only V3 bridge. Do **not** redo the old source-prep
 - TESSA V3 matched-capacity scene + surface/mechanics + presentation memory;
 - structuralization bridge V4;
 - Compiler presentation regressions;
-- draft `STRUCTURAL-EVIDENCE-A-B` preregistration.
+- draft `STRUCTURAL-EVIDENCE-A-B` preregistration;
+- exact evidence input binding and fail-closed post-materialization validator.
 
-If the user says only `continue / devam et`, continue **source-only** work only until the materialization gate is fully source-ready:
+### Hard stop
 
-1. validate/freeze `canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V1.json`;
-2. keep exact Stage01 / legacy Fit8 / authored-teacher / prepared receipt hashes bound;
-3. keep `tools/iris_vnext/validate_structural_evidence_input_binding_v1.py` fail-closed;
-4. keep state/plan/ledger consistent with the fact that the all-hit evidence artifact is **not materialized yet**;
-5. once CI is green and exact implementation source is frozen, **STOP AND HAND OFF TO THE USER**.
+If the user says only `continue / devam et`, **do not continue silent source work past this point**. Source preparation is complete. Report that the notebook boundary has been reached.
 
-The next execution is a new **zero-optimizer evidence-materialization notebook**. Do not execute or silently replace it with a local/CI run. It may only hydrate exact sealed inputs, verify hashes, build the all-hit Fit8 evidence, emit/hash the manifest and subject artifacts, run admission validation, and persist the typed receipt.
+The immediate next execution is `STRUCTURAL-EVIDENCE-INPUT-MATERIALIZATION-V1`, a new **zero-optimizer evidence-materialization run-all notebook**. It requires explicit user handoff before execution.
 
-**Stop and hand off before any new notebook, scientific diagnostic/court execution, accelerator run, optimizer/backward step or training run.** State the exact requested execution and its locked interpretation boundary.
+That notebook may only:
+
+1. hydrate exact sealed Stage01 / legacy Fit8 / authored-teacher inputs;
+2. verify every bound SHA256 before use;
+3. build complete all-hit Fit8 relation/presentation evidence using the frozen producer;
+4. emit eight hash-bound per-subject `.npz` files plus `ALL_HIT_RELATION_EVIDENCE_V1_MANIFEST.json`;
+5. run fail-closed materialization admission;
+6. persist the typed admission receipt.
+
+It must execute `0` optimizer steps and `0` backward steps. It must not run Relation/TESSA training, a scientific diagnostic/court, P4/SURF-A2, or any scientific PASS/FAIL classification.
+
+A later scientific A/B notebook requires a separate handoff after the evidence corpus is admitted and the seed/optimizer/update budget and numeric thresholds are locked before observing training results.
 
 Do not automatically resume H-GEO-P4 from the SCALE-XFER `MIXED` result.
 
@@ -84,9 +98,7 @@ Green CI is not scientific PASS. Evidence materialization is not scientific PASS
 
 Compiler alone may mint canonical M. Teacher topology/rig/skin may create offline training/evaluation truth but may never enter inference conditioning.
 
-Named semantic classes are not structural authority. Material IDs are not drawable-owner truth. Unknown / ABSTAIN is first-class when source-defensible truth is absent.
-
-Pairwise front/order is not global visibility.
+Named semantic classes are not structural authority. Material IDs are not drawable-owner truth. Unknown / ABSTAIN is first-class when source-defensible truth is absent. Pairwise front/order is not global visibility.
 
 ## Immutable V8
 
@@ -144,20 +156,11 @@ Do not silently make the current auxiliary endpoint metric a universal product r
 
 TESSA is optional structuralization / learned retopology, not a second surface reconstructor and not a geometry-repair escape hatch.
 
-Current V3 source consumes separately typed:
-- shared-scene memory;
-- surface/mechanics memory;
-- presentation memory.
+Current V3 source consumes separately typed shared-scene memory, surface/mechanics memory and presentation memory. The reference V3 architecture preserves the V2 decoder width/depth/vocabulary and total `1024` conditioning-token budget, so the null-presentation A arm and role-free-presentation B arm use matched model capacity.
 
-The reference V3 architecture preserves the V2 decoder width/depth/vocabulary and total `1024` conditioning-token budget. The null-presentation A arm and role-free-presentation B arm therefore use matched model capacity.
-
-This is source architecture only. No TESSA V3 training has occurred and no training is currently authorized.
-
-Compiler remains final product authority.
+This is source architecture only. No TESSA V3 training has occurred and no training is currently authorized. Compiler remains final product authority.
 
 ## Relation / visibility law
-
-Pairwise front/order is not global visibility.
 
 - pair evidence: camera-conditioned pairwise front/order and positive same-ray occlusion support;
 - ray-stack/view evidence: complete ordered hits + rank-zero global visibility;
@@ -185,24 +188,6 @@ ONE canonical animation-ready M
 ```
 
 No second deformable visual mesh.
-
-## Notebook / scientific execution contract
-
-The immediate next notebook, once explicitly handed to the user, is **materialization only**, not a scientific court:
-
-```text
-Open notebook
-→ Run all
-→ approve Drive once
-→ hydrate exact sealed bytes
-→ verify exact hashes
-→ build all-hit evidence with zero optimizer/backward steps
-→ persist per-subject artifacts + manifest + admission receipt
-```
-
-No full-Drive discovery, second OAuth, hidden fallback, source drift, training, court, or post-result threshold relaxation.
-
-A later scientific A/B notebook requires a separate handoff after the evidence corpus is admitted and numeric protocol/thresholds are locked.
 
 ## Fit8 / truth / claim law
 

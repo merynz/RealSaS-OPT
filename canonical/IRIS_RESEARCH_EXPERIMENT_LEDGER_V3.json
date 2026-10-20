@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.IRISResearchExperimentLedger.v3",
   "date_utc": "2026-10-20",
-  "purpose": "SINGLE_MACHINE_READABLE_CONTINUATION_AUTHORITY_FOR_STRUCTURAL_EVIDENCE_MATERIALIZATION_BOUNDARY",
+  "purpose": "SINGLE_MACHINE_READABLE_CONTINUATION_AUTHORITY_FOR_STRUCTURAL_EVIDENCE_MATERIALIZATION_HANDOFF",
   "supersedes": "canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V2.json",
   "production_authority": "main",
   "long_term_research_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
@@ -72,10 +72,29 @@
     "validator": "tools/iris_vnext/validate_structural_evidence_input_binding_v1.py",
     "implementation_source_sha": "e9f8e42445f0edca28a869a9164e54892095d9d4",
     "source_gate_pr": 133,
+    "source_gate_merged": true,
+    "merged_long_term_head_after_source_gate": "f0c5a17fc235ef91e5c9e6a41b4b2efeac44c120",
+    "authority_sync_pr": 134,
     "status": "READY_FOR_ZERO_OPTIMIZER_MATERIALIZATION__USER_HANDOFF_REQUIRED",
     "all_hit_manifest_materialized": false,
     "all_hit_manifest_admitted": false,
     "scientific_result_claimed": false
+  },
+  "source_gate_evidence": {
+    "frozen_pr_head": "9c0046a9bb7df6e11572dba611213e2a21d1db33",
+    "all_required_workflows_completed_success": true,
+    "required_workflows": [
+      "completion-audit-contract",
+      "iris-tessa-v2-structuralization-source-gate",
+      "iris-v2-source-contract",
+      "iris-h-rep-p0-source-gate",
+      "iris-h-geo-p2-source-gate",
+      "iris-h-geo-p3-efreq-source-gate",
+      "iris-h-geo-p3-source-gate",
+      "model-mainline-source-gate",
+      "architecture-freeze-source-gate"
+    ],
+    "scientific_pass_claimed_from_ci": false
   },
   "completed_source_only_tasks": [
     "RELATION_TRUTH_V3_PAIR_FRONT_GLOBAL_VISIBILITY_SEPARATION",
@@ -86,7 +105,8 @@
     "COMPILER_PRESENTATION_CONSUMPTION_REGRESSION_COVERAGE",
     "STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_DRAFT",
     "STRUCTURAL_EVIDENCE_MATERIALIZATION_BINDING_AND_VALIDATOR",
-    "STRUCTURAL_EVIDENCE_MATERIALIZATION_SOURCE_FREEZE"
+    "STRUCTURAL_EVIDENCE_MATERIALIZATION_SOURCE_FREEZE",
+    "STRUCTURAL_EVIDENCE_SOURCE_GATE_MERGE"
   ],
   "blocked_or_not_authorized": {
     "H_GEO_P4_TRAINING": true,
@@ -108,6 +128,7 @@
     "type": "ZERO_OPTIMIZER_ARTIFACT_MATERIALIZATION",
     "requires_new_run_all_notebook": true,
     "requires_user_handoff_before_execution": true,
+    "source_preparation_complete": true,
     "allowed_operations": [
       "HYDRATE_EXACT_SEALED_INPUTS",
       "VERIFY_INPUT_SHA256",
@@ -121,6 +142,7 @@
       "BACKWARD",
       "RELATION_TRAINING",
       "TESSA_TRAINING",
+      "SCIENTIFIC_DIAGNOSTIC",
       "SCIENTIFIC_AB_COURT",
       "SCIENTIFIC_PASS_CLAIM",
       "THRESHOLD_RELAXATION"
@@ -136,7 +158,8 @@
     "training_still_requires_separate_user_handoff": true
   },
   "assistant_continuation_policy": {
-    "continue_source_only_without_user_interruption": true,
+    "continue_source_only_without_user_interruption": false,
+    "source_only_autonomous_phase_complete": true,
     "stop_before_new_notebook_execution": true,
     "stop_before_scientific_diagnostic_or_court": true,
     "stop_before_optimizer_or_training": true,

@@ -37,8 +37,12 @@ def test_p2_trainable_census_is_scene_plus_field_body_only():
     assert all(n.startswith(("scene_core.scene.","scene_core.field.input_norm.","scene_core.field.input_projection.","scene_core.field.blocks.","scene_core.field.feature_projection.","scene_core.field.final_norm.")) for n in names)
     assert not any("cube_extraction" in n or "view_bank" in n for n in names)
 
-def test_p2_preregistered_court_does_not_authorize_tessa_or_surf_a2():
+def test_p2_preregistered_court_and_determinism():
     p=j("canonical/H_GEO_P2_PREREGISTRATION_V1.json"); c=p["independent_court"]
+    assert p["training"]["initialization_seed"]==27060001
+    assert p["training"]["scientific_entrypoint"]=="tools.iris_vnext.train_fit8_h_geo_p2_seeded_v1"
+    assert c["probe_initialization_seed"]==27079991
+    assert c["scientific_entrypoint"]=="tools.iris_vnext.audit_fit8_h_geo_p2_seeded_v1"
     assert c["maximum_p2_mean_distance_mae_iris"]==0.025
     assert c["maximum_p2_subject_endpoint_p95_iris"]==0.075
     assert c["minimum_p2_subject_normal_alignment"]==0.70
@@ -49,6 +53,10 @@ def test_p2_preregistered_court_does_not_authorize_tessa_or_surf_a2():
     assert p["interpretation"]["pass_authorizes_surf_a2"] is False
     assert p["interpretation"]["pass_authorizes_tessa"] is False
     assert p["interpretation"]["fail_authorizes_unpreregistered_explicit_geometry_training"] is False
+    train_seed=(ROOT/"tools/iris_vnext/train_fit8_h_geo_p2_seeded_v1.py").read_text()
+    court_seed=(ROOT/"tools/iris_vnext/audit_fit8_h_geo_p2_seeded_v1.py").read_text()
+    assert "INITIALIZATION_SEED = 27060001" in train_seed
+    assert "PROBE_INITIALIZATION_SEED = 27079991" in court_seed
 
 def test_p2_training_forward_recomputes_scene_planes_and_has_no_p1_init_input():
     text=(ROOT/"tools/iris_vnext/train_fit8_h_geo_p2_v1.py").read_text()
@@ -57,3 +65,9 @@ def test_p2_training_forward_recomputes_scene_planes_and_has_no_p1_init_input():
     assert 'torch.load(Path(args.p1_checkpoint)' not in text
     assert 'model.scene_core.scene.load_state_dict(ck["scene_state"]' in text
     assert '"p1_checkpoint_used_for_initialization":False' in text
+
+def test_p2_runtime_does_not_create_live_sources_inside_inference_mode():
+    text=(ROOT/"tools/iris_vnext/h_geo_p2_runtime_v1.py").read_text()
+    assert "source=load_subject_source(shard,ex[\"sha256\"],device)" in text
+    assert "with torch.inference_mode():\n                planes=model.encode_scene" in text
+    assert "with torch.inference_mode():\n        for subject in SUBJECT_IDS" not in text

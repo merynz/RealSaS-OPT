@@ -1,10 +1,10 @@
 # IRIS Shared Structural Evidence Plan — 2026-10-20
 
-Status: **ACTIVE SOURCE-ONLY CONTINUATION / NO SCIENTIFIC RUN AUTHORIZED**
+Status: **SOURCE BRIDGE COMPLETE / EVIDENCE MATERIALIZATION HANDOFF NEXT / NO SCIENTIFIC RUN AUTHORIZED**
 
 Long-term research branch: `research/iris-vnext-hybrid-tessa-v2-20261019`
 
-This plan is the active continuation after the sealed `H-GEO-P3-SCALE-XFER` result. It does not replace the IRIS→TESSA V2 architectural split; it makes explicit the role-free geometry+graphics+mechanics hypothesis that the current source only partially implements.
+This plan is the active continuation after the sealed `H-GEO-P3-SCALE-XFER` result. It makes explicit the role-free geometry+graphics+mechanics hypothesis and the controlled path by which that hypothesis may eventually be tested.
 
 ## 1. Research thesis
 
@@ -40,29 +40,56 @@ The scientifically relevant question is not "what semantic class is this region?
 
 Semantics may later be auxiliary metadata. They are not canonical structural authority.
 
-## 2. What is already implemented / supported
+## 2. Implemented source boundary
 
 ### 2.1 Shared-scene evidence
 
-IRIS V8 provides a sealed shared scene carrier. Post-M1 appearance, relation and topology heads can learn from that frozen carrier without rewriting geometry. This supports the existence of useful cross-modal evidence in H, but it is not a proof of jointly trained geometry+graphics scene learning.
+IRIS V8 provides a sealed shared scene carrier. Post-M1 appearance, relation and topology heads can learn from that frozen carrier without rewriting geometry. This supports the existence of useful cross-modal evidence in H, but it is not proof of jointly trained geometry+graphics scene learning.
 
-### 2.2 Role-free graphics/runtime path
+### 2.2 Corrected relation / visibility abstraction
 
-The repository already contains role-free relation/appearance evidence and Compiler/runtime consumption paths for fragment clustering, order edges and visibility behavior. Historical relation truth was partly proxy/misaligned; therefore relation-quality claims must use corrected authority only.
+Historical V8 relation truth was partly proxy/misaligned and is not scientific authority for order/visibility quality.
 
-### 2.3 Relation abstraction correction
+The current V3 source explicitly separates:
 
-Pairwise front/order and global visibility are different problems. The current direction keeps:
+- pairwise front/order: depth ordering between two same-view surface samples;
+- positive occlusion support: same-ray overlap where source-defensible;
+- global visibility: rank-zero membership in a **complete ordered ray stack**;
+- incomplete global-visibility authority: ABSTAIN / validity false.
 
-- geometry-explicit, camera-conditioned pair evidence for front/occlusion/boundary;
-- complete ray-stack/view evidence for global visibility;
-- ABSTAIN/validity when source authority is absent.
+Pairwise front is never promoted into global visibility. Material IDs and named semantic labels never become drawable-owner truth.
 
-### 2.4 TESSA structuralization
+### 2.3 Typed role-free presentation evidence
 
-TESSA V2 already implements a separately typed scene-memory + surface/mechanics-memory autoregressive topology structuralizer with adjacency-aware topology serialization. It is proposal-only; Compiler alone may mint canonical M.
+`RoleFreePresentationEvidenceV1` carries source/boundary/pair/ray-stack/deformation/attachment/support values with explicit validity. View-dependent fields remain camera-conditioned. Unsupported evidence is zeroed and invalid rather than guessed.
 
-Current TESSA V2 does **not** yet receive explicit appearance boundary, alpha boundary, front/occlusion or ray-stack visibility evidence as a typed structural input.
+### 2.4 TESSA V3 structuralization source
+
+PR #132 added a matched-capacity tri-stream source architecture:
+
+```text
+SCENE MEMORY
+shared IRIS context
+
+SURFACE / MECHANICS MEMORY
+XYZ + normal + H + deformation evidence
+
+PRESENTATION MEMORY
+appearance/source boundaries
+pair front/occlusion evidence
+complete ray-stack visibility evidence
+validity masks
+        ↓
+TESSA topology proposal decoder
+```
+
+Reference memory budget is `384 scene + 384 surface/mechanics + 256 presentation = 1024` tokens. The null-presentation control uses the same V3 decoder architecture and total memory budget. Tokenizer/grammar, coordinate vocabulary and reference decoder width/depth remain compatible with the V2 control family.
+
+TESSA is proposal-only. Compiler alone may mint canonical M. No TESSA V3 optimizer/training run has occurred.
+
+### 2.5 Compiler source coverage
+
+Compiler/runtime source regressions exercise presentation consumption boundaries. Green source tests are not a scientific PASS.
 
 ## 3. Geometry boundary after SCALE-XFER
 
@@ -80,119 +107,114 @@ The provider may later be a RealSaS P4 lineage or another preregistered geometry
 
 The endpoint diagnostic remains evidence about the current metric carrier lineage. It must not silently become a universal product requirement without proving that it is necessary for qualified final-surface / animation behavior.
 
-## 4. Active source-only workstream — STRUCTURAL_EVIDENCE_V3
+## 4. Current gate — evidence authority before training
 
-No optimizer, notebook scientific run, diagnostic run or scientific court is authorized by this section.
+The V3 source bridge exists, but arm B of the future A/B still requires an actual sealed evidence corpus. Source code that *can* derive truth is not the same thing as a hash-bound artifact that a scientific run may consume.
 
-### 4.1 Truth/readiness
+Authority:
 
-Complete and audit source-defensible structural evidence:
+- `canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V1.json`
+- `tools/iris_vnext/build_fit8_relation_all_hit_evidence_v1.py`
+- `tools/iris_vnext/validate_structural_evidence_input_binding_v1.py`
 
-- per-surface geometry: XYZ, normal, local H, mechanics;
-- appearance/source support: RGBA/material support, alpha/appearance boundaries;
-- pair relations: front/order, occlusion, structural-continuation/attachment only when authoritative;
-- ray-stack evidence: complete ordered hits + global visibility;
-- motion evidence: deformation coherence, attachment persistence, bend/stretch/contact validity where authoritative;
-- explicit validity/ABSTAIN for unavailable truth.
+The binding fixes:
 
-No owner/drawable label may be fabricated from material IDs or semantic names.
+- exact Stage01 bytes/bootstrap;
+- exact legacy Fit8 shard hashes and normalization authority;
+- exact authored-teacher batch and per-subject teacher/receipt hashes;
+- exact sealed prepared Fit8 receipt/manifest;
+- `8192` candidate rays/view and grid `32` producer policy;
+- pairwise-front/global-visibility semantic separation;
+- positive-only same-ray occlusion support;
+- separate current-view RGBA/alpha boundary authority;
+- no semantic/material owner shortcut;
+- no teacher topology/rig/skin in inference.
 
-### 4.2 Presentation-conditioned TESSA source design
+Target output:
 
-Extend the structuralizer source contract without changing canonical authority:
+- one `ALL_HIT_RELATION_EVIDENCE_V1_MANIFEST.json`;
+- eight per-subject `.all_hit_relation_evidence_v1.npz` files;
+- exact hashes and source bindings;
+- admission receipt declaring evidence-only status.
+
+At the time of this plan update, no such manifest has been admitted from Drive. Materialization has not occurred.
+
+## 5. Next execution — zero-optimizer materialization, not a scientific experiment
+
+Once source CI is green and the implementation source is frozen, stop and hand off to the user before execution.
+
+The run-all notebook may only:
+
+1. hydrate exact sealed Stage01, legacy Fit8 and authored-teacher inputs;
+2. verify every bound SHA before use;
+3. derive complete ordered all-hit stacks and pair rows for Fit8;
+4. write the eight evidence files and manifest;
+5. run fail-closed materialization admission;
+6. persist exact hashes / typed receipt.
+
+It must execute:
+
+- `0` optimizer steps;
+- `0` backward steps;
+- no Relation training;
+- no TESSA training;
+- no scientific A/B court;
+- no research-hypothesis PASS/FAIL classification.
+
+Materialization only establishes that a source-defensible B-arm input corpus exists.
+
+## 6. Future scientific experiment — still not authorized
+
+After the evidence corpus is admitted, complete the preregistration before any training:
 
 ```text
-SCENE MEMORY
-shared IRIS context
-
-SURFACE / MECHANICS MEMORY
-XYZ + normal + H + deformation evidence
-
-PRESENTATION MEMORY
-appearance/source boundaries
-pair front/occlusion evidence
-ray-stack visibility evidence
-validity masks
+A — MATCHED NULL-PRESENTATION CONTROL
+same scene + same surface + same mechanics
++ null presentation memory
         ↓
-TESSA topology proposal decoder
-```
-
-The first implementation must preserve the existing tokenizer/grammar and as much decoder capacity as possible so the later experiment isolates the value of presentation evidence rather than confounding it with a new topology language.
-
-### 4.3 Compiler contract
-
-TESSA proposes persistent structural topology. IRIS provides evidence. Compiler remains responsible for qualification and product authority.
-
-For pose `t` and camera `v`, Compiler/runtime must be able to derive or consume:
-
-- persistent fragment/owner support;
-- visible fragment set;
-- partial/local draw-order graph;
-- attachment anchors;
-- source-art sample/support mapping;
-- pose-dependent order flips without changing canonical structural identity.
-
-## 5. Next scientific experiment — not yet authorized
-
-After source/readiness gates are green, preregister one controlled A/B experiment:
-
-```text
-A — CURRENT STRUCTURALIZER
-scene + surface + mechanics
-        ↓
-TESSA
+TESSA V3
 
 B — REALSAS STRUCTURAL-EVIDENCE HYPOTHESIS
-same scene + same surface + same mechanics
-+ role-free appearance/boundary evidence
-+ pair front/occlusion evidence
-+ complete ray-stack visibility evidence
+same architecture / capacity / subjects / cameras / teachers
++ role-free presentation evidence
         ↓
-TESSA
+TESSA V3
 ```
 
-Controls:
+Before execution lock:
 
-- same sealed IRIS authority unless the preregistration explicitly says otherwise;
-- same subjects / cameras / teacher corpus;
-- same topology tokenizer/grammar;
-- matched decoder capacity where practical;
-- teacher topology never enters inference conditioning;
-- no named semantic taxonomy in B;
-- identical Compiler qualification.
+- seed set;
+- optimizer and schedule;
+- update budget;
+- checkpoint-selection rule;
+- exact topology/surface/presentation/motion court metrics;
+- numeric thresholds and paired decision rule.
+
+No threshold may be relaxed after results are observed.
 
 Primary downstream measurements must include topology validity, structural/source fidelity, fragment stability, global visibility correctness, local/order correctness, pose-dependent order flips, motion owner stability, gap/tear behavior and source-art preservation.
 
-A semantic-control arm may be added later; it is not required for the first A/B.
+Teacher topology never enters inference conditioning. Named semantics are not a B-arm input.
 
-## 6. Scientific execution boundary
+## 7. Scientific execution boundary
 
-The assistant may continue source-only work autonomously under this plan:
+The assistant may continue source-only work autonomously under this plan, but must stop and hand off before:
 
-1. authority/doc synchronization;
-2. truth/readiness source audits;
-3. typed evidence APIs;
-4. TESSA presentation-memory source implementation;
-5. regression/source tests and CI repairs;
-6. preregistration drafting.
+- any new notebook execution;
+- any scientific diagnostic/court execution;
+- any accelerator scientific experiment;
+- any optimizer/backward/training step;
+- any new scientific threshold evaluation on fresh outputs.
 
-Stop and hand off to the user before any step that requires:
+The immediate handoff is the zero-optimizer evidence-materialization notebook. A later optimizer/training A/B requires a second, separate handoff.
 
-- a new notebook to be run;
-- a scientific diagnostic/court execution;
-- an A100/accelerator experiment;
-- optimizer/backward/training steps;
-- new scientific threshold evaluation on run outputs.
-
-No such execution is authorized implicitly by `continue`.
-
-## 7. Decision logic after the future A/B
+## 8. Decision logic after the future A/B
 
 If B materially and preregisteredly beats A, the next research question is whether geometry+graphics supervision can enrich the shared scene without geometry forgetting. Only then consider a protected joint-training experiment.
 
 If B does not beat A, do not assume more joint training will fix it; first localize whether the presentation evidence, truth, structuralizer consumption or Compiler contract failed.
 
-## 8. Product invariant
+## 9. Product invariant
 
 There is one canonical animation-ready asset. There is no independent deformable visual mesh used to hide mechanical/structural debt.
 

@@ -1,0 +1,149 @@
+{
+  "schema": "RealSaS.IRISResearchExperimentLedger.v3",
+  "date_utc": "2026-10-20",
+  "purpose": "SINGLE_MACHINE_READABLE_CONTINUATION_AUTHORITY_FOR_STRUCTURAL_EVIDENCE_MATERIALIZATION_BOUNDARY",
+  "supersedes": "canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V2.json",
+  "production_authority": "main",
+  "long_term_research_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
+  "authority_law": {
+    "repository_source_is_scientific_result": false,
+    "drive_path_is_scientific_authority": false,
+    "artifact_hash_plus_typed_receipt_required": true,
+    "compiler_mints_canonical_M_only": true,
+    "teacher_truth_allowed_in_inference_forward": false,
+    "fit8_is_unseen_generalization": false,
+    "named_semantic_taxonomy_is_structural_authority": false,
+    "material_id_is_drawable_owner_truth": false,
+    "unknown_and_abstain_are_first_class": true,
+    "pairwise_front_is_global_visibility": false
+  },
+  "immutable_model_authority": {
+    "model": "IRIS_V8",
+    "source_commit": "5083c9915533ec8ec6530c7d229c635887abfea7",
+    "global_step": 12000,
+    "checkpoint_sha256": "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5",
+    "binding_sha256": "735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2",
+    "scene_core_policy": "SEALED_AFTER_M1"
+  },
+  "sealed_geometry_lineage": {
+    "SURF-A0-RAWFIELD": "FALSIFIED",
+    "SURF-C0-NATIVE-R24": "MEASURED_DIAGNOSTIC",
+    "SURF-A1-FROZEN-H": "SCIENTIFIC_FAIL",
+    "H-REP-P0": "SCIENTIFIC_FAIL_WITH_STRONG_LOCAL_GEOMETRY_SIGNAL",
+    "H-GEO-P1": "SCIENTIFIC_FAIL_WITH_MATERIAL_RESCUE",
+    "H-GEO-P2-SCENE-FIELD": "SCIENTIFIC_FAIL_3_OF_4_ABSOLUTE_GEOMETRY_GATES_SHARED_H_RETENTION_FAIL",
+    "H-GEO-P3-EXPLICIT-HIRES-CARRIER": "SCIENTIFIC_FAIL_3_OF_4_ABSOLUTE_GEOMETRY_GATES_SHARED_V8_PRESERVED",
+    "H-GEO-P3-EFREQ": "COMPLETED_UNRESOLVED",
+    "H-GEO-P3-SCALE-XFER": "COMPLETED_MIXED"
+  },
+  "scale_xfer_authority": {
+    "result": "docs/research/IRIS_H_GEO_P3_SCALE_XFER_RESULT_20261020.json",
+    "execution_source_sha": "ec10334a4bd03db6efe3c30d655668e0e31d8660",
+    "source_gate_pr": 130,
+    "classification": "MIXED",
+    "signals": {
+      "target_multisurface": true,
+      "view_input_resolution": true,
+      "carrier_transfer": true
+    },
+    "optimizer_steps_executed": 0,
+    "probe_optimizer_steps_executed": 0,
+    "p4_training_authorized": false,
+    "surf_a2_authorized": false,
+    "tessa_training_authorized": false
+  },
+  "structural_evidence_source_bridge": {
+    "source_gate_pr": 132,
+    "merged": true,
+    "merged_long_term_head_after_pr": "997247a58d50ca1a76986701d5aecb2566716560",
+    "graphics_truth_v3": "IMPLEMENTED_SOURCE_ONLY",
+    "all_hit_relation_evidence_producer": "IMPLEMENTED_SOURCE_ONLY__NOT_YET_MATERIALIZED",
+    "role_free_presentation_evidence_v1": "IMPLEMENTED_SOURCE_ONLY",
+    "tessa_v3_presentation_memory": "IMPLEMENTED_SOURCE_ONLY__NOT_TRAINED",
+    "matched_conditioning_token_budget": 1024,
+    "structuralization_bridge_v4": "IMPLEMENTED_SOURCE_ONLY",
+    "ab_preregistration": "DRAFT_NOT_AUTHORIZED"
+  },
+  "active_lane": "SHARED_STRUCTURAL_EVIDENCE",
+  "active_workstream": "STRUCTURAL_EVIDENCE_INPUT_MATERIALIZATION_HANDOFF",
+  "active_plan": "docs/research/IRIS_SHARED_STRUCTURAL_EVIDENCE_PLAN_20261020.md",
+  "input_authority": {
+    "binding": "canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V1.json",
+    "validator": "tools/iris_vnext/validate_structural_evidence_input_binding_v1.py",
+    "implementation_source_sha": "e9f8e42445f0edca28a869a9164e54892095d9d4",
+    "source_gate_pr": 133,
+    "status": "READY_FOR_ZERO_OPTIMIZER_MATERIALIZATION__USER_HANDOFF_REQUIRED",
+    "all_hit_manifest_materialized": false,
+    "all_hit_manifest_admitted": false,
+    "scientific_result_claimed": false
+  },
+  "completed_source_only_tasks": [
+    "RELATION_TRUTH_V3_PAIR_FRONT_GLOBAL_VISIBILITY_SEPARATION",
+    "COMPLETE_RAY_STACK_VISIBILITY_SOURCE_CONTRACT",
+    "ROLE_FREE_PRESENTATION_EVIDENCE_TYPED_API",
+    "TESSA_V3_PRESENTATION_MEMORY_SOURCE_DESIGN",
+    "MATCHED_CAPACITY_NULL_PRESENTATION_CONTROL",
+    "COMPILER_PRESENTATION_CONSUMPTION_REGRESSION_COVERAGE",
+    "STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_DRAFT",
+    "STRUCTURAL_EVIDENCE_MATERIALIZATION_BINDING_AND_VALIDATOR",
+    "STRUCTURAL_EVIDENCE_MATERIALIZATION_SOURCE_FREEZE"
+  ],
+  "blocked_or_not_authorized": {
+    "H_GEO_P4_TRAINING": true,
+    "SURF_A2_SCIENTIFIC_RUN": true,
+    "TESSA_V2_OR_V3_TRAINING": true,
+    "RELATION_MODEL_TRAINING": true,
+    "STRUCTURAL_EVIDENCE_AB_SCIENTIFIC_COURT": true,
+    "SCIENTIFIC_DIAGNOSTIC_EXECUTION": true,
+    "NEW_NOTEBOOK_EXECUTION_WITHOUT_USER_HANDOFF": true
+  },
+  "geometry_provider_policy": {
+    "interface": "QUALIFIED_SURFACE_PROVIDER",
+    "p4_is_automatic_next_step": false,
+    "current_p3_endpoint_diagnostic_is_universal_product_gate": false,
+    "future_provider_may_be_realsas_or_preregistered_specialist": true
+  },
+  "next_execution_boundary": {
+    "id": "STRUCTURAL-EVIDENCE-INPUT-MATERIALIZATION-V1",
+    "type": "ZERO_OPTIMIZER_ARTIFACT_MATERIALIZATION",
+    "requires_new_run_all_notebook": true,
+    "requires_user_handoff_before_execution": true,
+    "allowed_operations": [
+      "HYDRATE_EXACT_SEALED_INPUTS",
+      "VERIFY_INPUT_SHA256",
+      "BUILD_FIT8_COMPLETE_ALL_HIT_RELATION_EVIDENCE",
+      "EMIT_HASHED_MANIFEST_AND_PER_SUBJECT_ARTIFACTS",
+      "RUN_FAIL_CLOSED_MATERIALIZATION_ADMISSION",
+      "PERSIST_TYPED_RECEIPT"
+    ],
+    "forbidden_operations": [
+      "OPTIMIZER_STEP",
+      "BACKWARD",
+      "RELATION_TRAINING",
+      "TESSA_TRAINING",
+      "SCIENTIFIC_AB_COURT",
+      "SCIENTIFIC_PASS_CLAIM",
+      "THRESHOLD_RELAXATION"
+    ]
+  },
+  "after_materialization_if_admitted": {
+    "next_source_only_tasks": [
+      "BIND_PRESENTATION_EVIDENCE_INPUT_AUTHORITY",
+      "LOCK_AB_SEED_OPTIMIZER_SCHEDULE_AND_UPDATE_BUDGET",
+      "LOCK_NUMERIC_COURT_THRESHOLDS_BEFORE_RESULTS",
+      "BUILD_FAIL_CLOSED_STRUCTURAL_EVIDENCE_AB_NOTEBOOK"
+    ],
+    "training_still_requires_separate_user_handoff": true
+  },
+  "assistant_continuation_policy": {
+    "continue_source_only_without_user_interruption": true,
+    "stop_before_new_notebook_execution": true,
+    "stop_before_scientific_diagnostic_or_court": true,
+    "stop_before_optimizer_or_training": true,
+    "report_exact_execution_request_at_boundary": true
+  },
+  "fit8_program_role": {
+    "system_contract_qualification": true,
+    "unseen_generalization_claimed": false
+  }
+}

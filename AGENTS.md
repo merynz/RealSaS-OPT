@@ -8,18 +8,21 @@ Repository state outranks conversational memory. Read current authority before h
 
 1. `CURRENT_STATE.md`
 2. `CURRENT_PLAN.md`
-3. `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V2.json`
-4. `docs/research/IRIS_SHARED_STRUCTURAL_EVIDENCE_PLAN_20261020.md`
-5. `docs/research/IRIS_H_GEO_P3_SCALE_XFER_RESULT_20261020.json`
-6. `docs/research/IRIS_TESSA_V2_STRUCTURALIZATION_PLAN_20261019.md`
-7. `docs/research/IRIS_TESSA_V2_DECISION_LEDGER_20261019.md`
-8. `docs/research/IRIS_H_GEO_P3_EFREQ_RESULT_20261020.json`
-9. `docs/research/IRIS_H_GEO_P2_RESULT_20261020.json`
-10. `docs/research/IRIS_H_GEO_P1_RESULT_20261020.json`
-11. `SYSTEM_INDEX.md`
-12. `docs/platform/EXECUTION_LANES.md`
+3. `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V3.json`
+4. `canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V1.json`
+5. `canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V1.json`
+6. `docs/research/IRIS_SHARED_STRUCTURAL_EVIDENCE_PLAN_20261020.md`
+7. `docs/research/IRIS_H_GEO_P3_SCALE_XFER_RESULT_20261020.json`
+8. `docs/research/IRIS_TESSA_V2_STRUCTURALIZATION_PLAN_20261019.md`
+9. `docs/research/IRIS_TESSA_V2_DECISION_LEDGER_20261019.md`
+10. `docs/research/IRIS_H_GEO_P3_EFREQ_RESULT_20261020.json`
+11. `docs/research/IRIS_H_GEO_P2_RESULT_20261020.json`
+12. `docs/research/IRIS_H_GEO_P1_RESULT_20261020.json`
+13. `SYSTEM_INDEX.md`
+14. `docs/platform/EXECUTION_LANES.md`
 
 Historical continuation authority only:
+- `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V2.json`
 - `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json`
 
 ### Continuity pointers
@@ -40,17 +43,29 @@ Historical provenance only:
 
 Active lane: `SHARED_STRUCTURAL_EVIDENCE`.
 
-Active workstream: `STRUCTURAL_EVIDENCE_V3_SOURCE_PREP`.
+Active workstream: `STRUCTURAL_EVIDENCE_INPUT_AUTHORITY_MATERIALIZATION_PREP`.
 
-If the user says only `continue / devam et`, continue **source-only** work in this order:
+PR #132 completed the source-only V3 bridge. Do **not** redo the old source-prep list. Current source already contains:
 
-1. Relation Truth V3 / complete all-hit ray-stack visibility readiness;
-2. typed role-free presentation-evidence APIs and validity/ABSTAIN rules;
-3. TESSA presentation-memory source implementation while preserving current tokenizer/grammar for the first controlled test;
-4. Compiler behavioral regression coverage for fragments/order/visibility/source support;
-5. draft the `STRUCTURAL-EVIDENCE-A-B` preregistration/readiness receipt.
+- Relation/Graphics Truth V3 separation of pairwise front/order from global visibility;
+- complete ordered all-hit ray-stack visibility source authority with ABSTAIN for incomplete authority;
+- `RoleFreePresentationEvidenceV1` with explicit validity;
+- TESSA V3 matched-capacity scene + surface/mechanics + presentation memory;
+- structuralization bridge V4;
+- Compiler presentation regressions;
+- draft `STRUCTURAL-EVIDENCE-A-B` preregistration.
 
-**Stop and hand off to the user before any new notebook, scientific diagnostic/court execution, accelerator run, optimizer/backward step or training run.** State the exact requested execution and its locked interpretation boundary.
+If the user says only `continue / devam et`, continue **source-only** work only until the materialization gate is fully source-ready:
+
+1. validate/freeze `canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V1.json`;
+2. keep exact Stage01 / legacy Fit8 / authored-teacher / prepared receipt hashes bound;
+3. keep `tools/iris_vnext/validate_structural_evidence_input_binding_v1.py` fail-closed;
+4. keep state/plan/ledger consistent with the fact that the all-hit evidence artifact is **not materialized yet**;
+5. once CI is green and exact implementation source is frozen, **STOP AND HAND OFF TO THE USER**.
+
+The next execution is a new **zero-optimizer evidence-materialization notebook**. Do not execute or silently replace it with a local/CI run. It may only hydrate exact sealed inputs, verify hashes, build the all-hit Fit8 evidence, emit/hash the manifest and subject artifacts, run admission validation, and persist the typed receipt.
+
+**Stop and hand off before any new notebook, scientific diagnostic/court execution, accelerator run, optimizer/backward step or training run.** State the exact requested execution and its locked interpretation boundary.
 
 Do not automatically resume H-GEO-P4 from the SCALE-XFER `MIXED` result.
 
@@ -65,11 +80,13 @@ ProductRevision   = durable production truth
 Workflow Engine   = durable execution state
 ```
 
-Green CI is not scientific PASS. Drive paths are transport, not authority. Scientific claims require exact hashes and typed receipts/courts bound to exact source and preregistration.
+Green CI is not scientific PASS. Evidence materialization is not scientific PASS. Drive paths are transport, not authority. Scientific claims require exact hashes and typed receipts/courts bound to exact source and preregistration.
 
 Compiler alone may mint canonical M. Teacher topology/rig/skin may create offline training/evaluation truth but may never enter inference conditioning.
 
-Named semantic classes are not structural authority. Unknown / ABSTAIN is first-class when source-defensible truth is absent.
+Named semantic classes are not structural authority. Material IDs are not drawable-owner truth. Unknown / ABSTAIN is first-class when source-defensible truth is absent.
+
+Pairwise front/order is not global visibility.
 
 ## Immutable V8
 
@@ -127,11 +144,14 @@ Do not silently make the current auxiliary endpoint metric a universal product r
 
 TESSA is optional structuralization / learned retopology, not a second surface reconstructor and not a geometry-repair escape hatch.
 
-Current V2 source consumes separately typed:
+Current V3 source consumes separately typed:
 - shared-scene memory;
-- surface/mechanics memory.
+- surface/mechanics memory;
+- presentation memory.
 
-Current source does not yet consume explicit role-free presentation evidence as a typed memory stream. The source-only continuation may add a presentation-memory path containing source/boundary, pair front/occlusion and complete ray-stack visibility evidence with validity masks.
+The reference V3 architecture preserves the V2 decoder width/depth/vocabulary and total `1024` conditioning-token budget. The null-presentation A arm and role-free-presentation B arm therefore use matched model capacity.
+
+This is source architecture only. No TESSA V3 training has occurred and no training is currently authorized.
 
 Compiler remains final product authority.
 
@@ -139,8 +159,10 @@ Compiler remains final product authority.
 
 Pairwise front/order is not global visibility.
 
-- pair head: geometry-explicit + camera-conditioned front/occlusion/boundary evidence;
-- ray-stack/view head: complete ordered hits + global visibility;
+- pair evidence: camera-conditioned pairwise front/order and positive same-ray occlusion support;
+- ray-stack/view evidence: complete ordered hits + rank-zero global visibility;
+- incomplete global visibility authority: ABSTAIN / validity false;
+- projected alpha/appearance boundaries remain separate current-view source authority;
 - unsupported owner/attachment/contact claims: ABSTAIN / validity false;
 - never fabricate drawable identity from material IDs, semantics or missing contact truth.
 
@@ -166,19 +188,21 @@ No second deformable visual mesh.
 
 ## Notebook / scientific execution contract
 
-When the next scientific gate is reached, hand off before execution. A future notebook must still obey:
+The immediate next notebook, once explicitly handed to the user, is **materialization only**, not a scientific court:
 
 ```text
 Open notebook
 → Run all
 → approve Drive once
-→ exact-hash execution
-→ visible separated phases
-→ preregistered thresholds
-→ independent court
+→ hydrate exact sealed bytes
+→ verify exact hashes
+→ build all-hit evidence with zero optimizer/backward steps
+→ persist per-subject artifacts + manifest + admission receipt
 ```
 
-No full-Drive discovery, second OAuth, hidden fallback, source drift or post-result threshold relaxation.
+No full-Drive discovery, second OAuth, hidden fallback, source drift, training, court, or post-result threshold relaxation.
+
+A later scientific A/B notebook requires a separate handoff after the evidence corpus is admitted and numeric protocol/thresholds are locked.
 
 ## Fit8 / truth / claim law
 
@@ -186,4 +210,4 @@ Fit8 is shared-system contract qualification, not unseen-generalization proof. U
 
 ## Source-work exit rule
 
-Every source change must leave exact source, owner, rationale, evidence, proved/not-proved scope, replaced/falsified authority, and next action. Update `CURRENT_STATE.md`, `CURRENT_PLAN.md`, `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V2.json` and the active decision/plan document when interpretation changes.
+Every source change must leave exact source, owner, rationale, evidence, proved/not-proved scope, replaced/falsified authority, and next action. Update `CURRENT_STATE.md`, `CURRENT_PLAN.md`, `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V3.json` and the active decision/plan document when interpretation changes.

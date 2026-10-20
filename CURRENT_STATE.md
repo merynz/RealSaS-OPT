@@ -5,13 +5,16 @@
 **Long-term research branch:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
 **SCALE-XFER source:** `ec10334a4bd03db6efe3c30d655668e0e31d8660`  
 **SCALE-XFER source gate:** PR #130 — **MERGED**  
+**Structural-evidence source bridge:** PR #132 — **MERGED**  
 **Active research lane:** `SHARED_STRUCTURAL_EVIDENCE`  
-**Active workstream:** `STRUCTURAL_EVIDENCE_V3_SOURCE_PREP`  
-**Scientific execution policy:** **NO NEW NOTEBOOK / DIAGNOSTIC / COURT / OPTIMIZER RUN IS AUTHORIZED.** Source-only readiness work may proceed until the next scientific execution boundary.
+**Active workstream:** `STRUCTURAL_EVIDENCE_INPUT_AUTHORITY_MATERIALIZATION_PREP`  
+**Scientific execution policy:** **NO NEW NOTEBOOK / DIAGNOSTIC / COURT / OPTIMIZER RUN IS AUTHORIZED.** Source-only readiness work may proceed until the evidence-materialization handoff.
 
-Machine-readable continuation authority: `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V2.json`.
+Machine-readable continuation authority: `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V3.json`.
 
 Active research plan: `docs/research/IRIS_SHARED_STRUCTURAL_EVIDENCE_PLAN_20261020.md`.
+
+Materialization binding: `canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V1.json`.
 
 ## Product invariant
 
@@ -76,7 +79,7 @@ Interpretation: the current P3 endpoint-precision lineage is limited by multiple
 
 ## Geometry provider boundary
 
-Geometry remains required, but the program now treats it behind a typed interface:
+Geometry remains required, but the program treats it behind a typed interface:
 
 ```text
 QUALIFIED_SURFACE_PROVIDER
@@ -86,50 +89,56 @@ XYZ / normals / local scene evidence / mechanics
 
 A future provider may be a RealSaS P4 lineage or another separately preregistered specialist. `MIXED` does not automatically authorize either. Endpoint precision remains a diagnostic of the current carrier lineage; it is not silently promoted into a universal product requirement without a necessity result.
 
-## Active source-only work — STRUCTURAL_EVIDENCE_V3
+## Structural-evidence source bridge — complete
 
-The repository already has:
+PR #132 merged the source-only `STRUCTURAL_EVIDENCE_V3` bridge. The repository now has:
 
-- sealed shared IRIS scene evidence;
-- role-free relation/appearance APIs;
-- geometry-explicit pair relation direction;
-- separate ray-stack visibility abstraction;
-- TESSA V2 dual typed scene/surface structural memory;
-- adjacency-aware topology serialization;
-- Compiler/runtime consumption of graphics order/visibility evidence.
+- Graphics Truth V3 with pairwise front/order separated from global visibility;
+- complete ordered ray-stack visibility truth with incomplete-stack ABSTAIN semantics;
+- role-free typed presentation evidence with explicit validity;
+- TESSA V3 tri-stream scene + surface/mechanics + presentation memory;
+- matched `1024` total conditioning-token budget for null-control and presentation-evidence arms;
+- V2-compatible topology tokenizer/grammar and decoder width/depth/vocabulary;
+- structuralization bridge V4 and Compiler presentation regressions;
+- draft `STRUCTURAL-EVIDENCE-A-B` preregistration.
 
-The missing bridge is explicit graphics/presentation evidence entering topology structuralization.
+No scientific result is claimed by source existence.
 
-Source-only continuation:
+## Current source-only boundary — evidence input authority
 
-1. harden Relation Truth V3 / all-hit ray-stack authority;
-2. preserve pairwise front/order vs global visibility separation;
-3. keep unknown/ABSTAIN first-class and forbid fabricated owner/drawable labels;
-4. define typed presentation evidence API;
-5. extend TESSA source contract with presentation memory while retaining Compiler authority;
-6. strengthen Compiler presentation-consumption regressions;
-7. draft the controlled `STRUCTURAL-EVIDENCE-A-B` preregistration.
+The next required object is **not a trained model**. It is a hashed, source-defensible evidence corpus that the future A/B can consume.
 
-## Next scientific gate — not authorized yet
+`canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V1.json` binds:
 
-Future controlled A/B:
+- exact Stage01 bundle and bootstrap authority;
+- exact legacy Fit8 normalization/shard hashes;
+- exact authored-teacher batch and per-subject teacher/receipt hashes;
+- exact sealed prepared Fit8 receipt/manifest;
+- all-hit producer policy (`8192` candidate rays/view, grid `32`);
+- pairwise front/order versus complete-stack global-visibility semantics;
+- positive-only same-ray occlusion support;
+- separate current-view RGBA/alpha boundary authority;
+- no material-ID owner labels, named-semantic structural authority, or teacher topology/rig in inference.
 
-```text
-A: scene + surface + mechanics
-        ↓
-      TESSA
+The all-hit evidence artifact has **not** yet been materialized. There is currently no admitted `ALL_HIT_RELATION_EVIDENCE_V1_MANIFEST.json` in Drive. Source readiness must not be mistaken for artifact existence.
 
-B: same evidence
-   + appearance/boundary
-   + pair front/occlusion
-   + complete ray-stack visibility
-        ↓
-      TESSA
-```
+The admission validator `tools/iris_vnext/validate_structural_evidence_input_binding_v1.py` can validate the static binding in CI and, after a future zero-optimizer materialization, fail closed on manifest policy, subject/hash drift, authority drift and tampering.
 
-The first A/B must keep tokenizer/grammar, data authority, cameras and Compiler qualification matched closely enough to isolate the value of role-free presentation evidence.
+## Next execution boundary — user handoff required
 
-Before any notebook, diagnostic/court execution, accelerator run or optimizer/training step, hand off to the user with the exact requested run and locked interpretation boundary.
+After this source gate is green and the exact implementation source is frozen, the next operation requires a **new run-all notebook** because it must hydrate sealed Drive bytes and materialize the all-hit/presentation evidence corpus.
+
+That future notebook is limited to:
+
+1. exact input hydration + SHA verification;
+2. zero-optimizer all-hit evidence materialization for Fit8;
+3. `ALL_HIT_RELATION_EVIDENCE_V1_MANIFEST.json` emission;
+4. per-subject artifact hashing;
+5. fail-closed admission validation + receipt persistence.
+
+It must perform **zero optimizer/backward steps**, no Relation/TESSA training, no scientific A/B court, and no PASS claim about the research hypothesis.
+
+Only after the admitted evidence corpus exists may the program lock the A/B optimizer/seed/update budget and numeric court thresholds, then separately hand off a scientific training notebook.
 
 ## Current non-authorizations
 
@@ -138,6 +147,7 @@ Before any notebook, diagnostic/court execution, accelerator run or optimizer/tr
 - no TESSA V2/V3 training;
 - no Relation model training;
 - no Structural-Evidence A/B court execution;
-- no new notebook execution.
+- no scientific diagnostic execution;
+- no new notebook execution until explicit user handoff.
 
-Source implementation, tests, CI and preregistration drafting are allowed.
+Source implementation, tests, CI, input-authority binding and preregistration drafting are allowed.

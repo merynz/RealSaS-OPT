@@ -4,10 +4,14 @@ on:
   pull_request:
     paths:
       - models/tessa/v2/**
+      - models/tessa/v3/**
       - models/iris/vnext/heads_v3.py
       - models/iris/vnext/evidence_heads_v3.py
       - models/iris/vnext/training_v3.py
+      - models/iris/vnext/graphics_truth_v3.py
+      - models/iris/vnext/presentation_evidence_v1.py
       - models/iris/vnext/structure_v3.py
+      - models/iris/vnext/structure_v4.py
       - models/iris/vnext/structure_global_v3.py
       - models/iris/vnext/model_v3.py
       - models/iris/vnext/stack_v3.py
@@ -17,7 +21,11 @@ on:
       - canonical/TESSA_V2_FIT8_PREREGISTRATION_V1.json
       - tests/iris/test_tessa_*.py
       - tests/iris/test_relation_head_v3.py
+      - tests/iris/test_relation_all_hit_evidence_v1.py
+      - tests/iris/test_graphics_truth_v3.py
+      - tests/iris/test_presentation_evidence_v1.py
       - tests/iris/test_structure_bridge_v3.py
+      - tests/iris/test_structure_bridge_v4.py
       - tests/iris/test_evidence_model_v3.py
       - tests/iris/test_sparse_surface_v3.py
       - tests/iris/test_direct_surface_*.py
@@ -70,7 +78,7 @@ jobs:
           print("IRIS_TESSA_V2_ENV_PASS", pytest.__version__, torch.__version__)
           PY
 
-      - name: Compile V2 structuralization and execution sources
+      - name: Compile V2/V3 structuralization and execution sources
         shell: bash
         run: |
           set -euo pipefail
@@ -86,10 +94,15 @@ jobs:
             models/tessa/v2/model_v2.py \
             models/tessa/v2/global_attention_v2.py \
             models/tessa/v2/model_global_v2.py \
+            models/tessa/v3/config_v3.py \
+            models/tessa/v3/model_v3.py \
             models/iris/vnext/heads_v3.py \
             models/iris/vnext/evidence_heads_v3.py \
             models/iris/vnext/training_v3.py \
+            models/iris/vnext/graphics_truth_v3.py \
+            models/iris/vnext/presentation_evidence_v1.py \
             models/iris/vnext/structure_v3.py \
+            models/iris/vnext/structure_v4.py \
             models/iris/vnext/structure_global_v3.py \
             models/iris/vnext/model_v3.py \
             models/iris/vnext/stack_v3.py \
@@ -104,12 +117,13 @@ jobs:
             tools/iris_vnext/audit_fit8_direct_surface_geometry_v1.py \
             tools/iris_vnext/audit_fit8_direct_surface_silhouette_v1.py \
             tools/iris_vnext/build_fit8_tessa_v2_corpus_v1.py \
+            tools/iris_vnext/build_fit8_relation_all_hit_evidence_v1.py \
             tools/iris_vnext/preflight_tessa_v2_a100_v1.py \
             tools/iris_vnext/qualify_tessa_v2_pretraining_admission_v1.py \
             tools/iris_vnext/train_fit8_tessa_v2_locked_v1.py \
             tools/iris_vnext/evaluate_fit8_tessa_v2_free_running_v1.py \
             tools/iris_vnext/court_fit8_tessa_v2_partial_ab_v1.py
-          echo "IRIS_TESSA_V2_COMPILE_PASS"
+          echo "IRIS_TESSA_V2_V3_COMPILE_PASS"
 
       - name: Verify reference-capacity and authority boundary
         shell: bash
@@ -119,6 +133,7 @@ jobs:
           import json
           from pathlib import Path
           from models.tessa.v2 import TESSAStructuralizerConfigV2
+          from models.tessa.v3 import TESSAStructuralizerConfigV3
           from models.tessa.v2.experiment_v2 import validate_preregistration_v1
           from models.iris.vnext.heads_v3 import GraphicsRelationHeadV3
           from models.iris.vnext.model_v3 import IRISVNextEvidenceModelV3
@@ -130,6 +145,10 @@ jobs:
           assert (cfg.d_model, cfg.n_heads, cfg.decoder_layers) == (1024, 16, 24)
           assert cfg.total_conditioning_tokens == 1024
           assert cfg.coordinate_bins == 1024
+          cfg3 = TESSAStructuralizerConfigV3(); cfg3.validate()
+          assert (cfg3.d_model, cfg3.n_heads, cfg3.decoder_layers) == (1024, 16, 24)
+          assert cfg3.total_conditioning_tokens == cfg.total_conditioning_tokens == 1024
+          assert cfg3.coordinate_bins == cfg.coordinate_bins == 1024
           assert GraphicsRelationHeadV3.neural_confidence_output is False
           assert GraphicsRelationHeadV3.pairwise_visibility_output is False
           assert IRISVNextEvidenceModelV3.topology_decoder_embedded is False
@@ -139,7 +158,7 @@ jobs:
           assert_full_sparse_policy(SparseRegularTetraPolicyV5())
           validate_binding(json.loads(Path("canonical/VNEXT_DIRECT_SURFACE_INPUT_BINDING_V1.json").read_text()))
           validate_preregistration_v1(json.loads(Path("canonical/TESSA_V2_FIT8_PREREGISTRATION_V1.json").read_text()))
-          print("IRIS_TESSA_V2_REFERENCE_CAPACITY_PASS")
+          print("IRIS_TESSA_V2_V3_REFERENCE_CAPACITY_PASS")
           PY
 
       - name: Run V2/V3 architecture and execution-contract tests
@@ -156,7 +175,12 @@ jobs:
             tests/iris/test_tessa_v2_experiment_contract.py \
             tests/iris/test_tessa_structuralization_ab_v2.py \
             tests/iris/test_relation_head_v3.py \
+            tests/iris/test_relation_all_hit_evidence_v1.py \
+            tests/iris/test_graphics_truth_v3.py \
+            tests/iris/test_presentation_evidence_v1.py \
+            tests/iris/test_tessa_structuralizer_v3.py \
             tests/iris/test_structure_bridge_v3.py \
+            tests/iris/test_structure_bridge_v4.py \
             tests/iris/test_evidence_model_v3.py \
             tests/iris/test_sparse_surface_v3.py \
             tests/iris/test_direct_surface_materialization_v1.py \
@@ -166,7 +190,7 @@ jobs:
             tests/iris/test_direct_surface_geometry_court_v1.py \
             tests/iris/test_direct_surface_silhouette_v1.py \
             tests/iris/test_v8_surface_control_v1.py
-          echo "IRIS_TESSA_V2_ARCHITECTURE_TEST_PASS"
+          echo "IRIS_TESSA_V2_V3_ARCHITECTURE_TEST_PASS"
 
       - name: Run historical relation and TESSA regressions
         shell: bash

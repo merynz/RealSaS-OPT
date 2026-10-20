@@ -84,7 +84,7 @@ jobs:
           python -m pytest -q -s \
             tests/iris/test_h_rep_probe_v1.py \
             tests/repository/test_h_rep_p0_contract_v1.py
-      - name: Verify source-only authority boundary
+      - name: Verify sealed H-REP-P0 authority after later geometry experiments
         run: |
           python - <<'PY'
           import json
@@ -107,6 +107,12 @@ jobs:
           assert p['interpretation']['pass_authorizes_tessa'] is False
           assert p['interpretation']['pass_authorizes_surf_a2'] is False
           assert p['interpretation']['fail_authorizes_carrier_retraining'] is False
-          assert l['active_experiment'] == 'H-REP-P0'
-          print('PASS_H_REP_P0_SOURCE_ONLY__A100_PROBE_RUN_STILL_REQUIRED')
+          rows = {row['id']: row for row in l['experiments']}
+          hrep = rows['H-REP-P0']
+          assert hrep['status'] == 'SCIENTIFIC_FAIL'
+          assert hrep['frozen_execution_source_sha'] == '479e8e53cf0d7df234a3e64b824bb704b861bf19'
+          assert hrep['scientific_result_available'] is True
+          assert hrep['tessa_authorized'] is False
+          assert l['active_experiment'] == 'H-GEO-P2-SCENE-FIELD'
+          print('PASS_H_REP_P0_SEALED_HISTORY__CURRENT_PROGRAM_H_GEO_P2')
           PY

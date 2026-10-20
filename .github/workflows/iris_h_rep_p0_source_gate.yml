@@ -115,12 +115,19 @@ jobs:
           assert hrep['tessa_authorized'] is False
           assert rows['H-GEO-P1']['status'] == 'SCIENTIFIC_FAIL'
           assert rows['H-GEO-P2-SCENE-FIELD']['status'] == 'SCIENTIFIC_FAIL'
-          assert l['active_experiment'] in ('H-GEO-P2-SCENE-FIELD','H-GEO-P3-EXPLICIT-HIRES-CARRIER','H-GEO-P3-EFREQ')
+          assert l['active_experiment'] in ('H-GEO-P2-SCENE-FIELD','H-GEO-P3-EXPLICIT-HIRES-CARRIER','H-GEO-P3-EFREQ','H-GEO-P3-SCALE-XFER')
           if l['active_experiment'] == 'H-GEO-P3-EXPLICIT-HIRES-CARRIER':
               assert rows['H-GEO-P3-EXPLICIT-HIRES-CARRIER']['status'] == 'SOURCE_PREPARATION'
           if l['active_experiment'] == 'H-GEO-P3-EFREQ':
               assert rows['H-GEO-P3-EXPLICIT-HIRES-CARRIER']['status'] == 'SCIENTIFIC_FAIL'
               assert rows['H-GEO-P3-EFREQ']['status'] == 'SOURCE_PREPARATION'
               assert rows['H-GEO-P3-EFREQ']['optimizer_steps_authorized'] == 0
+          if l['active_experiment'] == 'H-GEO-P3-SCALE-XFER':
+              assert rows['H-GEO-P3-EXPLICIT-HIRES-CARRIER']['status'] == 'SCIENTIFIC_FAIL'
+              assert rows['H-GEO-P3-EFREQ']['status'] == 'COMPLETED_UNRESOLVED'
+              assert rows['H-GEO-P3-EFREQ']['optimizer_steps_executed'] == 0
+              assert rows['H-GEO-P3-SCALE-XFER']['status'] == 'SOURCE_PREPARATION'
+              assert rows['H-GEO-P3-SCALE-XFER']['optimizer_steps_authorized'] == 0
+              assert rows['H-GEO-P3-SCALE-XFER']['p4_training_authorized'] is False
           print('PASS_H_REP_P0_SEALED_HISTORY__LATER_H_GEO_PROGRESSION_ALLOWED')
           PY

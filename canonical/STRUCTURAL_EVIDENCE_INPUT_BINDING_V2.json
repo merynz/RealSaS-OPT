@@ -1,0 +1,104 @@
+{
+  "schema": "RealSaS.StructuralEvidenceInputBinding.v2",
+  "date_utc": "2026-10-21",
+  "status": "SOURCE_FREEZE_PENDING__NO_EXECUTION_AUTHORITY",
+  "experiment_id": "STRUCTURAL-EVIDENCE-INPUT-AUTHORITY-V2",
+  "scientific_execution_authorized": false,
+  "optimizer_or_training_authorized": false,
+  "notebook_execution_authorized": false,
+  "implementation_source_sha": null,
+  "implementation_source_parent_sha": "be7e44b05368abd29d4350bc6a966528a5530eca",
+  "producer": {
+    "path": "tools/iris_vnext/build_fit8_relation_all_hit_evidence_v2.py",
+    "candidate_rays_per_view": 8192,
+    "grid_size": 32,
+    "output_manifest": "ALL_HIT_RELATION_EVIDENCE_V2_MANIFEST.json"
+  },
+  "source_inputs": {
+    "stage01": {
+      "file": "FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip",
+      "file_id": "1PcxT2rfb9jCHfP75gaqMAo90OU7JRypH",
+      "sha256": "9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936",
+      "bootstrap_sha256": "cf79623854a91bc5cb9c9e768dac75ce8779b8d5ff5550c49dcff48c90d4d92e"
+    },
+    "legacy_fit8": {
+      "binding_path": "canonical/VNEXT_FIT8_INPUT_BINDING_V1.json",
+      "binding_sha256": "f9d2fbf354090d28b68bccf801ab8371a098d42a2b99964caec029f51dad3ab6",
+      "cohort_manifest_sha256": "088283fbca5ac6c95dc8d9fedadaafbf9bf82603cc6bee28948af995945e5053",
+      "subjects": [
+        {"legacy_subject_id":"fit8_snake_v1","sha256":"fbc4d8f51cd77bd48d979bbc4faccf22b441fe18d1c7db0855b0752f65de738b","shard_file":"fit8_snake_v1.pt","subject_id":"Snake"},
+        {"legacy_subject_id":"fit8_bat_v1","sha256":"2997b59a9bdc4e4f82609ee6738636341702a4d62fadc2be4aaca7dd89460b6a","shard_file":"fit8_bat_v1.pt","subject_id":"Bat"},
+        {"legacy_subject_id":"fit8_trex_v1","sha256":"0901431908fa2f3694efc93baffa9a6ef5da0d9cb141b6e1003dd53fbbfff6d8","shard_file":"fit8_trex_v1.pt","subject_id":"T-Rex"},
+        {"legacy_subject_id":"fit8_horse_v1","sha256":"3a1e7ef895d753048f5a82d9f0bfce9815845d4f60788a4f2fc7d08d9b08fee8","shard_file":"fit8_horse_v1.pt","subject_id":"Horse"},
+        {"legacy_subject_id":"fit8_spider_v1","sha256":"6d6e05890c95c36743a8b2286c2b132e60de164e09b1de28c1ee2146b5387d70","shard_file":"fit8_spider_v1.pt","subject_id":"Spider"},
+        {"legacy_subject_id":"fit8_greenblob_v1","sha256":"03ff4acbc22e753f900081f8a9c0ce36dcfd247711aa7811fefe3ed976742f0d","shard_file":"fit8_greenblob_v1.pt","subject_id":"GreenBlob"},
+        {"legacy_subject_id":"fit8_shark_v1","sha256":"06f2316b0379aa16a0d06c70e304a1c4626bfeaa1c01aef14f74452bccc94480","shard_file":"fit8_shark_v1.pt","subject_id":"Shark"},
+        {"legacy_subject_id":"fit8_george_v1","sha256":"9683b2d87b16de727179c90d130f0d42c0b485fcfa82fc885502b0d63dbec46b","shard_file":"fit8_george_v1.pt","subject_id":"George"}
+      ]
+    },
+    "authored_teachers": {
+      "folder_id": "1v2FRC9nRRQxvrAHXMHXYhpXm8MZFHjPL",
+      "batch_receipt_file": "TEACHER_BATCH_RECEIPT.json",
+      "batch_receipt_file_id": "1RLfXAQwPgA0xIleZBxEPbthUOpw54t9C",
+      "batch_receipt_sha256": "37b203f9c16e1a5dddbab1709ebb3806e486d66d1ed5b48a42817bc0044a7843",
+      "subjects": [
+        {"legacy_subject_id":"fit8_snake_v1","receipt_sha256":"897389c1657fe59cc830bcae31bd84672e093d0ba07bbe8048271fa97f50a7d7","sampled_frame_count":64,"subject_id":"Snake","teacher_sha256":"9cf4fef3873bfd551beb5a2c2ca48ff691d6fbd60d320397044c2128c2da3798"},
+        {"legacy_subject_id":"fit8_bat_v1","receipt_sha256":"61af5ef30e4bac80336cb7188eeca2ed38ef9809c7fcf8734d13439836ba6978","sampled_frame_count":64,"subject_id":"Bat","teacher_sha256":"dfb5f81f34d353a751bfb678e895c14e08b061f7517ce31b2be9b2706a3bb930"},
+        {"legacy_subject_id":"fit8_trex_v1","receipt_sha256":"c3ad6dc200b87236ee9732a59b7a94785d9d76f79c7791d2a06e89982414a483","sampled_frame_count":96,"subject_id":"T-Rex","teacher_sha256":"3997476dbac532026984039d2e12d683036d37039fdabe0017f69518b8de52fa"},
+        {"legacy_subject_id":"fit8_horse_v1","receipt_sha256":"540f583c6c0df678647cc7c148ceb6c25adcc877e171117de1d91c46a7427dd0","sampled_frame_count":208,"subject_id":"Horse","teacher_sha256":"600899aba1cef4af7433b2ae750a47238c5f84c7231a68a294457bfd98033613"},
+        {"legacy_subject_id":"fit8_spider_v1","receipt_sha256":"8a0615345c6380ccd2a4c90ba2752fac3458e508256edf962f4fa9f3a6f9b3b3","sampled_frame_count":80,"subject_id":"Spider","teacher_sha256":"f146109f1e4e264cc647db9a7b8fd47b5f91862f75c508b1634a373480074a54"},
+        {"legacy_subject_id":"fit8_greenblob_v1","receipt_sha256":"10f7654dff798cbe3aa092a0fe2a6b23b550ee29f76076ab46094cb2278d5a4d","sampled_frame_count":118,"subject_id":"GreenBlob","teacher_sha256":"9567f1f0f20c1892e179abfab7e8aae117245e9501dd4592290830128c54ca0a"},
+        {"legacy_subject_id":"fit8_shark_v1","receipt_sha256":"a9137d44545c6b06dd47ad7fa3a9f6baee5bbe98b262eefd551d93400f9329df","sampled_frame_count":16,"subject_id":"Shark","teacher_sha256":"65eddea1bd430a58c002c4890b3bb6a21826ff4276e7b4eb243902c3bf44e43e"},
+        {"legacy_subject_id":"fit8_george_v1","receipt_sha256":"6f9e45aed906ac22c267c05aa84530493a964483970d2eebcea2a956c2c5f513","sampled_frame_count":310,"subject_id":"George","teacher_sha256":"04380b00fed04226afb9f6a1466e549ecbb24a875a4641720ce70c1b208c7458"}
+      ]
+    },
+    "prepared_fit8_receipt": {
+      "folder_id": "1KF8SztfN_NrfjbgLvQZ5BqSRczS5dwv4",
+      "preparation_receipt_file_id": "1I2OkL7ENV2SkP02FBXrA2bHIn_LMk8dP",
+      "preparation_receipt_sha256": "b3d8e72f980bdb194319e6c128257a20b2d46a71c7b86d1e2ed9ea6d1e16c93f",
+      "cohort_manifest_file_id": "18YLO2fY88ZvZDkjWH383rmsht3wZV1bh",
+      "cohort_manifest_sha256": "6561bf2087f4fac3699c673b5c93fb3d8dbc2d1ff90a5065d976cae70688b4d8"
+    }
+  },
+  "authority_law": {
+    "front": "PAIRWISE_STRICT_DEPTH_ORDER__EQUAL_DEPTH_WITHIN_EPS_ABSTAIN",
+    "global_visibility": "UNIQUE_RANK_ZERO_ONLY__TIED_MINIMA_ABSTAIN__DEEPER_HITS_VALID_INVISIBLE",
+    "incomplete_stack_visibility_policy": "ABSTAIN",
+    "occlusion": "POSITIVE_SAME_RAY_OVERLAP_SUPPORT_ONLY__NO_FABRICATED_NEGATIVES",
+    "projected_boundary": "SEPARATE_CURRENT_VIEW_RGBA_ALPHA_AUTHORITY",
+    "pair_point_coordinate_domain": "EXACT_LEGACY_IRIS_NORMALIZED_SOURCE_WORLD",
+    "tessa_coordinate_conversion": "MULTIPLY_IRIS_XYZ_BY_0.5_BEFORE_TESSA_MEMORY",
+    "material_id_as_owner_truth": false,
+    "named_semantic_taxonomy_as_structural_authority": false,
+    "teacher_topology_or_rig_in_inference_forward": false
+  },
+  "supersedes_v1": {
+    "drive_folder_id": "1gnwkziRAmaiwMp8F6nSASRU9XTpG5OBN",
+    "manifest_file_id": "1ceMgXIfBKUzgrW4nfaInP2JyIxbCgDob",
+    "manifest_sha256": "6e5774b2032b064c2727690d873bd122392769e934120603367807232ded0aa4",
+    "receipt_file_id": "1T7H8Tuuq4qOLiiMbNg_Y9Md0wSvmXDHe",
+    "receipt_sha256": "ce79ecb529fde23d8c864c25bb27279eadc82e8257b0066a7a2a3c0613d0a29",
+    "equal_depth_base_pairs": 25,
+    "equal_depth_oriented_rows": 50,
+    "frontmost_tied_base_pairs": 7,
+    "deeper_tied_base_pairs": 18,
+    "subject": "Bat",
+    "scientific_input_authorized": false,
+    "reason": "V1_SERIALIZATION_RANK_FABRICATED_FRONT_AND_FRONTMOST_VISIBILITY_ON_DISTINCT_COMPONENT_EQUAL_DEPTH_TIES"
+  },
+  "required_output": {
+    "manifest_schema": "RealSaS.IRISVNextFit8AllHitRelationEvidenceManifest.v2",
+    "manifest_status": "MATERIALIZED__TIE_SAFE_EVIDENCE_ONLY__NO_TRAINING_AUTHORIZATION",
+    "subject_order": ["Snake","Bat","T-Rex","Horse","Spider","GreenBlob","Shark","George"],
+    "subject_count": 8,
+    "per_subject_file_suffix": ".all_hit_relation_evidence_v2.npz",
+    "required_manifest_flags": {"training_authorized":false,"scientific_fit_started":false,"teacher_inputs_in_inference_forward":false}
+  },
+  "post_materialization_gate": {
+    "materialization_is_scientific_pass": false,
+    "scientific_court_authorized": false,
+    "relation_training_authorized": false,
+    "tessa_training_authorized": false,
+    "next_action": "VERIFY_TIE_SAFE_HASHED_EVIDENCE_MANIFEST_AND_BIND_PRESENTATION_INPUTS__THEN_LOCK_AB_TRAINING_AND_COURT"
+  }
+}

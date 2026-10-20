@@ -1,14 +1,14 @@
 # RealSaS-OPT — Current Plan
 
 **Date:** 2026-10-20  
-**Status:** **H-GEO-P3 CLOSED SCIENTIFIC FAIL; H-GEO-P3-EFREQ ZERO-OPTIMIZER DIAGNOSTIC ACTIVE**  
+**Status:** **H-GEO-P3 CLOSED SCIENTIFIC FAIL; H-GEO-P3-EFREQ SEALED UNRESOLVED; H-GEO-P3-SCALE-XFER ZERO-OPTIMIZER STAGE LOCALIZATION ACTIVE**  
 **Production authority:** `main`  
 **Research review branch:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
-**Source-gate vehicle:** draft PR #129  
+**Source-gate vehicle:** draft PR #130  
 **Active lane:** `SURFACE_TESSA`  
-**Active experiment:** `H-GEO-P3-EFREQ`  
+**Active experiment:** `H-GEO-P3-SCALE-XFER`  
 **Parked lane:** `RELATION_V10`  
-**Optimizer policy:** **no optimizer run is authorized.** No P4, SURF-A2 or TESSA optimizer step is authorized until the zero-optimizer endpoint audit selects the next preregistration family.
+**Optimizer policy:** **no optimizer run is authorized.** No P4, SURF-A2 or TESSA optimizer step is authorized until SCALE-XFER localizes the first evidence-loss/ambiguity stage and a new experiment is separately preregistered.
 
 ## Objective
 
@@ -29,105 +29,104 @@ Compiler
 ONE canonical animation-ready M
 ```
 
-IRIS must establish correct/high-fidelity shape before TESSA is evaluated. TESSA may improve topology/structure; it may not be used as a second reconstructor to hide IRIS geometry debt.
+IRIS must establish correct/high-fidelity shape before TESSA is evaluated. TESSA may improve topology/structure; it may not hide IRIS geometry debt.
 
 ## Closed evidence
 
-- `SURF-A0-RAWFIELD`: falsified historical raw-field transition.
-- `SURF-C0-NATIVE-R24`: measurement-only native V8 surface debt.
+- `SURF-A0-RAWFIELD`: falsified.
+- `SURF-C0-NATIVE-R24`: native V8 surface debt measured.
 - `SURF-A1-FROZEN-H`: scientific FAIL after substantial extraction rescue.
-- `H-REP-P0`: absolute FAIL, strong local geometry information in sealed V8 H.
+- `H-REP-P0`: absolute FAIL with strong local geometry information in sealed V8 H.
 - `H-GEO-P1`: field-only exact-triangle retraining materially improved V8 but failed locked metric quality.
-- `H-GEO-P2`: scene+field retraining passed absolute distance/normal/near and all vs-P1 improvement gates, but failed endpoint p95 and shared-H retention.
-- `H-GEO-P3`: dedicated 128² geometry carrier passed absolute distance/normal/near, local alignment and exact shared-V8 preservation, but failed endpoint p95 and endpoint improvement versus P2. Authority: `docs/research/IRIS_H_GEO_P3_RESULT_20261020.json`.
+- `H-GEO-P2`: scene+field retraining passed distance/normal/near and all vs-P1 gates, but endpoint p95 and shared-H retention failed.
+- `H-GEO-P3`: dedicated geometry carrier passed distance/normal/near and exact shared-V8 preservation, but endpoint p95 failed and worsened versus P2.
+- `H-GEO-P3-EFREQ`: zero-optimizer audit completed `UNRESOLVED`. No locked single dominance condition passed; nevertheless P3 was smoother than P2 at fine scale, endpoint tails had smaller projected footprints, and non-adjacent surface competition increased.
 
-P3 therefore removes the shared-H retention confound but does **not** solve endpoint-tail precision. The same four difficult morphologies remain in the endpoint-fail set, while scalar distance, near-surface evidence and normals are strong. The next question is diagnostic, not another architecture guess.
+EFREQ authority: `docs/research/IRIS_H_GEO_P3_EFREQ_RESULT_20261020.json`.
 
-## Active workstream — H-GEO-P3-EFREQ
+## Active workstream — H-GEO-P3-SCALE-XFER
 
-This experiment executes **zero optimizer steps** and writes no checkpoint.
+This experiment executes **zero optimizer/probe steps** and writes no checkpoint.
 
-### Factor A — target ambiguity / discontinuity
+### Fixed query court
 
-On exact authored teacher triangles:
+Reuse `H_GEO_P3_EFREQ_QUERY_TABLE.csv` byte-for-byte. Tail/control membership, distance matching and endpoint ranking may not be recomputed.
 
-- non-adjacent surface gap at the closest point;
-- nearest-face/non-adjacent-face flips under deterministic `±epsilon` perturbations;
-- closest-point and offset-vector directional change.
+### Factor A — actual frozen view-token separability
 
-This tests whether the nearest-point vector target itself changes discontinuously around thin sheets, competing surfaces or medial regions.
+For each exact query:
 
-### Factor B — frozen view-evidence resolution
+- take exact nearest authored-surface point;
+- find closest non-adjacent competing authored-surface point;
+- project both through the exact eight normalized cameras;
+- bilinearly sample the existing `37×37×384` frozen DINO token grid with `align_corners=False` semantics;
+- measure same-token-cell fraction, distinct-token view count, token cosine distance and projected separation in token-cell units.
 
-Reconstruct the normalized orthographic cameras from the exact prepared 13-D camera features and measure for each nearest triangle:
+This tests spatial evidence resolution directly rather than relying only on triangle-footprint proxies. It is still not a claim of true occlusion visibility.
 
-- in-frame view count;
-- informative view count with `|normal·forward| >= 0.25`;
-- maximum/median projected triangle area in source pixels;
-- maximum projected triangle edge length.
+### Factor B — exact multi-surface target structure
 
-These are geometric coverage/footprint proxies only. They do not claim true occlusion visibility.
+From authored teacher triangles measure:
 
-### Factor C — carrier spatial bandwidth
+- nearest-vs-competing distance margin;
+- competing surface normal angle up to sign;
+- whether another non-adjacent surface lies within `1/256`, `1/128` or `1/64` IRIS of the exact nearest distance.
 
-At `epsilon = 1/256, 1/128, 1/64` IRIS:
+### Factor C — stage-by-stage carrier transfer
 
-- exact target-vector variation;
-- P2-H whitened finite-difference response;
-- P3-H_geo whitened finite-difference response.
+Apply deterministic ± perturbations at:
 
-P3 internals are also audited:
+`1/1024, 1/512, 1/256, 1/128, 1/64, 1/32` IRIS.
 
-- 128² refiner residual RMS relative to bilinear base;
-- refiner residual high-band FFT power fraction;
-- learned continuous-position residual RMS.
+Measure per-subject channel-whitened RMS response at:
 
-### Query court
+1. P2 H baseline;
+2. P3 sampled 64² base planes;
+3. P3 sampled bilinear 128² planes;
+4. P3 sampled learned-refined 128² planes;
+5. P3 geometry-field H;
+6. P3 continuous-position residual;
+7. P3 final H_geo.
 
-The P3 checkpoint training aux head is used **only** to rank each subject's endpoint tail. It has no qualification authority.
-
-- exact P1 holdout query bytes;
-- distance `<=0.12` IRIS;
-- top 10% P3-aux endpoint-error tail, max 384/subject;
-- deterministic distance-stratified median-error controls;
-- exact teacher mesh normalization replay required;
-- no model or probe training.
+The purpose is to find the **first** stage where a distinction present upstream becomes inadequate downstream.
 
 ## Locked decision boundary
 
-The audit outputs exactly one of:
+SCALE-XFER outputs exactly one of:
 
 ```text
-TARGET_AMBIGUITY_DOMINANT
-VIEW_EVIDENCE_DOMINANT
-CARRIER_BANDWIDTH_DOMINANT
+TARGET_MULTISURFACE_LIMITED
+VIEW_INPUT_RESOLUTION_LIMITED
+CARRIER_TRANSFER_LIMITED
 MIXED
 UNRESOLVED
 ```
 
 That classification selects a **future preregistration family only**:
 
-- target ambiguity → vector-field / multi-hypothesis target study;
-- view evidence → true multi-scale view-evidence geometry study;
-- carrier bandwidth → true high-frequency geometry-carrier study;
-- mixed → preregister a factorial P4 ablation;
-- unresolved → expand zero-optimizer diagnostics.
+- target → multi-surface / multi-hypothesis geometry target P4;
+- view input → multiscale / higher-spatial-resolution view-evidence P4;
+- carrier → evidence-preserving geometry-carrier P4;
+- mixed → minimal joint P4 containing only identified failing stages;
+- unresolved → expand zero-optimizer localization.
 
 No result directly authorizes SURF-A2 or TESSA.
 
 ## Execution order
 
-1. Seal H-GEO-P3 evidence in repo. **DONE**
-2. EFREQ exact input binding + preregistration. **DONE**
-3. EFREQ pure analysis helpers + audit source. **DONE**
-4. Dedicated + broad source CI. **ACTIVE — PR #129**
-5. Freeze exact final green EFREQ source SHA. **NEXT**
-6. Fast-forward active research branch to that exact SHA.
-7. Generate V8-style A100 Run-All EFREQ notebook pinned to that SHA.
-8. Run audit: optimizer steps must remain exactly zero.
-9. Read `H_GEO_P3_EFREQ_AUDIT.json` and query table.
-10. Preregister one next geometry study family from the locked classification.
+1. Seal H-GEO-P3 evidence. **DONE**
+2. Run EFREQ zero-optimizer audit. **DONE — UNRESOLVED**
+3. Seal EFREQ audit + exact query CSV hashes. **DONE**
+4. SCALE-XFER exact input binding + preregistration. **DONE**
+5. SCALE-XFER pure helpers + runtime audit source. **DONE**
+6. Dedicated + broad source CI. **ACTIVE — PR #130**
+7. Freeze exact final green SCALE-XFER source SHA. **NEXT**
+8. Fast-forward active research branch to that exact SHA.
+9. Generate V8-style A100 Run-All SCALE-XFER notebook pinned to that SHA.
+10. Run audit: optimizer/probe optimizer must remain exactly zero.
+11. Read stage-localized classification + query table.
+12. Preregister exactly one minimal P4 family; training remains separately gated.
 
 ## Notebook contract
 
-Physical phase cells, exactly one Drive mount, no Drive-tree discovery, no second OAuth, exact direct paths/hashes, source precompile + CLI smoke, exact A100 gate, visible logs, fail closed, zero optimizer steps, no checkpoint writes.
+Physical phase cells, exactly one Drive mount, no Drive-tree discovery, no second OAuth, exact direct paths/hashes, source precompile + CLI smoke, exact A100 gate, visible logs, fail closed, zero optimizer/probe steps, no checkpoint writes.

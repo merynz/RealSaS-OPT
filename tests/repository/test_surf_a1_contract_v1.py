@@ -10,7 +10,7 @@ class SurfA1RepositoryContractTests(unittest.TestCase):
     def test_experiment_ledger_preserves_a1_result_and_current_program(self):
         ledger = json.loads((ROOT / "canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json").read_text())
         self.assertEqual(ledger["active_lane"], "SURFACE_TESSA")
-        self.assertIn(ledger["active_experiment"], ("H-GEO-P2-SCENE-FIELD", "H-GEO-P3-EXPLICIT-HIRES-CARRIER"))
+        self.assertIn(ledger["active_experiment"], ("H-GEO-P2-SCENE-FIELD", "H-GEO-P3-EXPLICIT-HIRES-CARRIER", "H-GEO-P3-EFREQ"))
         self.assertIn("RELATION_V10", ledger["parked_lanes"])
         rows = {row["id"]: row for row in ledger["experiments"]}
         self.assertEqual(rows["SURF-A0-RAWFIELD"]["status"], "FALSIFIED")
@@ -22,9 +22,15 @@ class SurfA1RepositoryContractTests(unittest.TestCase):
         self.assertEqual(rows["H-GEO-P1"]["status"], "SCIENTIFIC_FAIL")
         p2 = rows["H-GEO-P2-SCENE-FIELD"]
         self.assertIn(p2["status"], ("SOURCE_PREPARATION", "SCIENTIFIC_FAIL"))
-        if ledger["active_experiment"] == "H-GEO-P3-EXPLICIT-HIRES-CARRIER":
+        if ledger["active_experiment"] in ("H-GEO-P3-EXPLICIT-HIRES-CARRIER", "H-GEO-P3-EFREQ"):
             self.assertEqual(p2["status"], "SCIENTIFIC_FAIL")
+        if ledger["active_experiment"] == "H-GEO-P3-EXPLICIT-HIRES-CARRIER":
             self.assertEqual(rows["H-GEO-P3-EXPLICIT-HIRES-CARRIER"]["status"], "SOURCE_PREPARATION")
+        if ledger["active_experiment"] == "H-GEO-P3-EFREQ":
+            self.assertEqual(rows["H-GEO-P3-EXPLICIT-HIRES-CARRIER"]["status"], "SCIENTIFIC_FAIL")
+            self.assertEqual(rows["H-GEO-P3-EFREQ"]["status"], "SOURCE_PREPARATION")
+            self.assertEqual(rows["H-GEO-P3-EFREQ"]["optimizer_steps_authorized"], 0)
+            self.assertEqual(rows["H-GEO-P3-EFREQ"]["probe_optimizer_steps_authorized"], 0)
         self.assertTrue(rows["SURF-A2-HIRES"]["status"].startswith("BLOCKED_"))
         self.assertEqual(rows["TESSA-V2-B1"]["status"], "BLOCKED_ON_SURF_A2_READINESS")
 

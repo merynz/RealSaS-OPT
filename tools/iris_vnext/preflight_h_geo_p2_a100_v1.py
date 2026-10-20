@@ -19,7 +19,13 @@ def preflight(args):
     scene_params,field_params,names=set_h_geo_p2_trainable_v1(model); aux=create_aux_head_v1(device)
     runtime=build_subject_runtime_v1(model=model,prepared_root=Path(args.prepared_root),prepared_manifest=Path(args.prepared_manifest),dataset_root=Path(args.dataset_root),dataset_receipt=dr,binding=binding,split="train",device=device,feature_chunk=256,cache_v8_baseline=False)
     item=runtime["Snake"]; a=item["arrays"]; idx=torch.arange(0,min(64,len(a["xyz_iris"]))); xyz=a["xyz_iris"][idx].to(device); src=item["source"]
-    model.zero_grad(set_to_none=True); aux.zero_grad(set_to_none=True); planes=model.encode_scene(src["image_tokens"],src["token_xy"],src["camera_features"]); local=model.scene_core.query(planes,xyz[None]); pred=aux(local["H"].squeeze(0)); losses=metric_geometry_objective_v1(pred,distance_iris=a["distance_iris"][idx].to(device),offset_to_surface_iris=a["offset_to_surface_iris"][idx].to(device),normal_unit=a["normal_unit"][idx].to(device),normal_valid=a["normal_valid"][idx].to(device).bool(),near_label=a["near_label"][idx].to(device).bool(),offset_valid_distance_iris=float(prereg["truth"]["offset_valid_distance_iris"])); losses["total"].backward()
+    model.zero_grad(set_to_none=True); aux.zero_grad(set_to_none=True)
+    planes=model.encode_scene(src["image_tokens"],src["token_xy"],src["camera_features"]); local=model.scene_core.query(planes,xyz[None]); pred=aux(local["H"].squeeze(0))
+    losses=metric_geometry_objective_v1(pred,distance_iris=a["distance_iris"][idx].to(device),offset_to_surface_iris=a["offset_to_surface_iris"][idx].to(device),normal_unit=a["normal_unit"][idx].to(device),normal_valid=a["normal_valid"][idx].to(device).bool(),near_label=a["near_label"][idx].to(device).bool(),offset_valid_distance_iris=float(prereg["truth"]["offset_valid_distance_iris"]))
+    weights=prereg["training"]["loss_weights"]
+    geometry_loss=float(weights["distance"])*losses["distance"]+float(weights["offset"])*losses["offset"]+float(weights["normal"])*losses["normal"]+float(weights["near"])*losses["near"]
+    if not bool(torch.isfinite(geometry_loss).item()): raise RuntimeError("H_GEO_P2_PREFLIGHT_NONFINITE_GEOMETRY_LOSS")
+    geometry_loss.backward()
     scene_grad=any(p.grad is not None and bool(torch.isfinite(p.grad).all()) and float(p.grad.abs().sum())>0 for p in scene_params); field_grad=any(p.grad is not None and bool(torch.isfinite(p.grad).all()) and float(p.grad.abs().sum())>0 for p in field_params)
     if not scene_grad or not field_grad: raise RuntimeError("H_GEO_P2_GRADIENT_CONNECTIVITY_FAIL")
     model.zero_grad(set_to_none=True); aux.zero_grad(set_to_none=True)

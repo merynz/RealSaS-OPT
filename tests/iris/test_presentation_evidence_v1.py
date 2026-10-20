@@ -12,6 +12,15 @@ from models.iris.vnext.presentation_evidence_v1 import (
 
 
 class PresentationEvidenceV1Tests(unittest.TestCase):
+    @staticmethod
+    def camera(count=2):
+        value = torch.zeros(1, count, 13)
+        value[..., 3] = 1.0
+        value[..., 7] = 1.0
+        value[..., 11] = 1.0
+        value[..., 12] = 1.0
+        return value
+
     def test_invalid_scalar_is_zeroed_not_interpreted_as_negative_truth(self):
         xyz = torch.zeros(1, 2, 3)
         kind = torch.tensor([[PRESENTATION_KIND_PAIR, PRESENTATION_KIND_RAY_HIT]])
@@ -20,6 +29,10 @@ class PresentationEvidenceV1Tests(unittest.TestCase):
         front_valid = torch.tensor([[True, False]])
         evidence = build_role_free_presentation_evidence_v1(
             xyz=xyz,
+            paired_xyz=torch.zeros_like(xyz),
+            paired_xyz_valid=torch.tensor([[True, False]]),
+            camera_features=self.camera(),
+            camera_valid=torch.tensor([[True, False]]),
             kind_id=kind,
             token_valid_mask=token_valid,
             front_probability=front,
@@ -55,6 +68,34 @@ class PresentationEvidenceV1Tests(unittest.TestCase):
                 kind_id=torch.zeros(1, 1, dtype=torch.long),
                 token_valid_mask=torch.ones(1, 1, dtype=torch.bool),
                 global_visibility=torch.ones(1, 1),
+            )
+
+    def test_pair_requires_second_anchor(self):
+        with self.assertRaisesRegex(ValueError, "PAIR_REQUIRES_SECOND_ANCHOR"):
+            build_role_free_presentation_evidence_v1(
+                xyz=torch.zeros(1, 1, 3),
+                kind_id=torch.full((1, 1), PRESENTATION_KIND_PAIR, dtype=torch.long),
+                token_valid_mask=torch.ones(1, 1, dtype=torch.bool),
+            )
+
+    def test_view_dependent_evidence_requires_camera(self):
+        with self.assertRaisesRegex(ValueError, "VIEW_EVIDENCE_REQUIRES_CAMERA"):
+            build_role_free_presentation_evidence_v1(
+                xyz=torch.zeros(1, 1, 3),
+                kind_id=torch.full((1, 1), PRESENTATION_KIND_RAY_HIT, dtype=torch.long),
+                token_valid_mask=torch.ones(1, 1, dtype=torch.bool),
+                global_visibility=torch.ones(1, 1),
+                global_visibility_valid=torch.ones(1, 1, dtype=torch.bool),
+            )
+
+    def test_probability_outside_unit_interval_fails_closed(self):
+        with self.assertRaisesRegex(ValueError, "PROBABILITY_RANGE_INVALID"):
+            build_role_free_presentation_evidence_v1(
+                xyz=torch.zeros(1, 1, 3),
+                kind_id=torch.zeros(1, 1, dtype=torch.long),
+                token_valid_mask=torch.ones(1, 1, dtype=torch.bool),
+                source_support=torch.tensor([[1.2]]),
+                source_support_valid=torch.ones(1, 1, dtype=torch.bool),
             )
 
 

@@ -19,7 +19,8 @@ def test_surf_a1_and_h_rep_history_remain_sealed_after_h_geo_progression():
     assert result["decision"]["surf_a2_authorized"] is False
     assert result["decision"]["tessa_authorized"] is False
     rows={row["id"]:row for row in ledger["experiments"]}
-    assert ledger["active_experiment"] in ("H-GEO-P2-SCENE-FIELD", "H-GEO-P3-EXPLICIT-HIRES-CARRIER", "H-GEO-P3-EFREQ")
+    allowed=("H-GEO-P2-SCENE-FIELD", "H-GEO-P3-EXPLICIT-HIRES-CARRIER", "H-GEO-P3-EFREQ", "H-GEO-P3-SCALE-XFER")
+    assert ledger["active_experiment"] in allowed
     hrep=rows["H-REP-P0"]
     assert hrep["status"] == "SCIENTIFIC_FAIL"
     assert hrep["frozen_execution_source_sha"] == FROZEN_H_REP_SOURCE
@@ -28,7 +29,7 @@ def test_surf_a1_and_h_rep_history_remain_sealed_after_h_geo_progression():
     assert rows["H-GEO-P1"]["status"] == "SCIENTIFIC_FAIL"
     p2=rows["H-GEO-P2-SCENE-FIELD"]
     assert p2["status"] in ("SOURCE_PREPARATION", "SCIENTIFIC_FAIL")
-    if ledger["active_experiment"] in ("H-GEO-P3-EXPLICIT-HIRES-CARRIER", "H-GEO-P3-EFREQ"):
+    if ledger["active_experiment"] in ("H-GEO-P3-EXPLICIT-HIRES-CARRIER", "H-GEO-P3-EFREQ", "H-GEO-P3-SCALE-XFER"):
         assert p2["status"] == "SCIENTIFIC_FAIL"
     if ledger["active_experiment"] == "H-GEO-P3-EXPLICIT-HIRES-CARRIER":
         assert rows["H-GEO-P3-EXPLICIT-HIRES-CARRIER"]["status"] == "SOURCE_PREPARATION"
@@ -37,6 +38,16 @@ def test_surf_a1_and_h_rep_history_remain_sealed_after_h_geo_progression():
         assert rows["H-GEO-P3-EFREQ"]["status"] == "SOURCE_PREPARATION"
         assert rows["H-GEO-P3-EFREQ"]["optimizer_steps_authorized"] == 0
         assert rows["H-GEO-P3-EFREQ"]["probe_optimizer_steps_authorized"] == 0
+    if ledger["active_experiment"] == "H-GEO-P3-SCALE-XFER":
+        assert rows["H-GEO-P3-EXPLICIT-HIRES-CARRIER"]["status"] == "SCIENTIFIC_FAIL"
+        assert rows["H-GEO-P3-EFREQ"]["status"] == "COMPLETED_UNRESOLVED"
+        assert rows["H-GEO-P3-EFREQ"]["optimizer_steps_executed"] == 0
+        assert rows["H-GEO-P3-EFREQ"]["probe_optimizer_steps_executed"] == 0
+        sx=rows["H-GEO-P3-SCALE-XFER"]
+        assert sx["status"] == "SOURCE_PREPARATION"
+        assert sx["optimizer_steps_authorized"] == 0
+        assert sx["probe_optimizer_steps_authorized"] == 0
+        assert sx["p4_training_authorized"] is False
     assert rows["SURF-A2-HIRES"]["status"].startswith("BLOCKED_")
     assert rows["TESSA-V2-B1"]["status"] == "BLOCKED_ON_SURF_A2_READINESS"
     assert "H-GEO-P1" in state and "H-GEO-P2" in state

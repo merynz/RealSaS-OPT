@@ -1,0 +1,66 @@
+name: iris-structural-evidence-v2-source-gate
+
+on:
+  pull_request:
+    paths:
+      - 'models/iris/vnext/relation_truth_v3_adapter_v1.py'
+      - 'tools/iris_vnext/build_fit8_relation_all_hit_evidence_v2.py'
+      - 'tools/iris_vnext/validate_structural_evidence_input_binding_v2.py'
+      - 'canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V2.json'
+      - 'canonical/STRUCTURAL_EVIDENCE_V1_POSTRUN_AUDIT_20261021.json'
+      - 'tests/iris/test_relation_all_hit_evidence_v2.py'
+      - 'tests/iris/test_relation_truth_v3_adapter_v1.py'
+      - 'tests/iris/test_structural_evidence_input_binding_v2.py'
+      - '.github/workflows/iris_structural_evidence_v2_source_gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
+      - name: Install source-test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Compile V2 authority sources
+        run: |
+          python -m py_compile \
+            models/iris/vnext/relation_truth_v3_adapter_v1.py \
+            tools/iris_vnext/build_fit8_relation_all_hit_evidence_v2.py \
+            tools/iris_vnext/validate_structural_evidence_input_binding_v2.py
+      - name: Validate pending fail-closed binding
+        run: |
+          python -m tools.iris_vnext.validate_structural_evidence_input_binding_v2 \
+            --binding canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V2.json
+      - name: Run tie-safe focused regression suite
+        run: |
+          python -m pytest -q \
+            tests/iris/test_relation_all_hit_evidence_v2.py \
+            tests/iris/test_relation_truth_v3_adapter_v1.py \
+            tests/iris/test_structural_evidence_input_binding_v2.py \
+            tests/iris/test_presentation_evidence_v1.py \
+            tests/iris/test_structure_bridge_v4.py
+      - name: Prohibit training operations in materializer
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text=Path('tools/iris_vnext/build_fit8_relation_all_hit_evidence_v2.py').read_text()
+          for token in ('optimizer.step(', '.backward(', 'loss.backward('):
+              assert token not in text, token
+          print('ZERO_OPTIMIZER_SOURCE_GUARD_PASS')
+          PY

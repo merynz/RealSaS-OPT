@@ -1,0 +1,41 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABFreeRunningEvaluatorAmendment.v1",
+  "status": "LOCKED_POSTTRAINING_EVALUATOR_HARDENING__NO_SCIENTIFIC_RESULT_YET",
+  "experiment_id": "STRUCTURAL-EVIDENCE-A-B-V2-H1-NATIVE-CARRIER-AMENDMENT-V1",
+  "training_execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+  "evaluator_implementation_source_sha": "1eb368139b6df8fd48bbd8db9c0526927ffedd06",
+  "legacy_evaluator": "tools/iris_vnext/evaluate_structural_evidence_ab_free_running_v1.py",
+  "failclosed_evaluator": "tools/iris_vnext/evaluate_structural_evidence_ab_free_running_v2.py",
+  "observed_incident": {
+    "legacy_evaluator_return_code": 1,
+    "repeat_count": 2,
+    "scientific_result_produced": false,
+    "court_reached": false,
+    "training_repeated_or_changed": false
+  },
+  "source_audit": {
+    "reachable_legacy_dead_end": "EXPECT_COMPONENT_OR_EOS may admit COMPONENT_BEGIN after max_faces is already reached; the next EXPECT_FACE_OR_CHART_END state can have no legal token",
+    "legacy_behavior": "TESSA_V2_GENERATION_NO_ALLOWED_TOKEN raises RuntimeError and aborts the whole evaluator",
+    "v2_behavior": "record incomplete candidate with stop_reason GRAMMAR_DEAD_END__NO_ALLOWED_TOKEN and continue all subjects/arms",
+    "dead_end_is_success": false,
+    "unexpected_exception_policy": "FATAL_INFRASTRUCTURE_ERROR"
+  },
+  "scientific_contract_changes": {
+    "model_weights": false,
+    "conditioning": false,
+    "grammar_allowed_tokens": false,
+    "decoder_logits": false,
+    "sampling": false,
+    "seed": false,
+    "training_schedule": false,
+    "thresholds": false,
+    "courts": false,
+    "carrier": false
+  },
+  "authority": {
+    "training_checkpoint_source_remains": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+    "scientific_pass_claimed": false,
+    "canonical_m_authorized": false,
+    "product_promotion_authorized": false
+  }
+}

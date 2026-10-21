@@ -29,6 +29,8 @@ class IRISVNextEvidenceModelV3(nn.Module):
     Role-free presentation evidence is produced only from observation-time IRIS
     specialist predictions plus optional source observations. Materialized V2
     truth may supervise/evaluate those heads offline but is not an inference input.
+    Predicted families are fail-closed until an explicit qualification mask is
+    supplied by the artifact-bound execution layer.
     """
 
     architecture_id = "RealSaS.IRIS.VNextEvidenceModel.v3"
@@ -56,10 +58,6 @@ class IRISVNextEvidenceModelV3(nn.Module):
         relation_config.validate()
         self.config = config
         self.scene_core = IRISVNextSceneCoreV1(config)
-        # Historical V1 contains an uncertainty row for checkpoint compatibility,
-        # but V8 supplied no calibration objective for it. V3 neither exposes nor
-        # optimizes those parameters. A future calibrated uncertainty head must be
-        # introduced as a new typed objective, not silently revive these weights.
         for parameter in self.scene_core.field.uncertainty_head.parameters():
             parameter.requires_grad_(False)
         self.mechanical_demand = MechanicalDemandHeadV3(config)
@@ -88,8 +86,6 @@ class IRISVNextEvidenceModelV3(nn.Module):
         points_normalized: torch.Tensor,
     ) -> dict[str, torch.Tensor]:
         local = self.scene_core.query(scene_planes, points_normalized)
-        # Historical scene_core still computes log_uncertainty for exact source
-        # compatibility. V3 deliberately removes it from the public evidence API.
         return {
             "H": local["H"],
             "field": local["field"],
@@ -102,10 +98,7 @@ class IRISVNextEvidenceModelV3(nn.Module):
         points_normalized: torch.Tensor,
     ) -> dict[str, torch.Tensor | dict[str, torch.Tensor]]:
         local = self.query_local(scene_planes, points_normalized)
-        return {
-            **local,
-            "mechanical_demand": self.mechanical_demand(local["H"]),
-        }
+        return {**local, "mechanical_demand": self.mechanical_demand(local["H"])}
 
     def query_appearance(
         self,
@@ -155,6 +148,7 @@ class IRISVNextEvidenceModelV3(nn.Module):
         xyz: torch.Tensor,
         camera_features: torch.Tensor,
         token_valid_mask: torch.Tensor,
+        boundary_valid_mask: torch.Tensor | None = None,
         source_rgba: torch.Tensor | None = None,
         source_rgba_valid: torch.Tensor | None = None,
         source_support: torch.Tensor | None = None,
@@ -167,6 +161,7 @@ class IRISVNextEvidenceModelV3(nn.Module):
             camera_features=camera_features,
             token_valid_mask=token_valid_mask,
             appearance=appearance,
+            boundary_valid_mask=boundary_valid_mask,
             source_rgba=source_rgba,
             source_rgba_valid=source_rgba_valid,
             source_support=source_support,
@@ -181,6 +176,9 @@ class IRISVNextEvidenceModelV3(nn.Module):
         xyz_b: torch.Tensor,
         camera_features: torch.Tensor,
         token_valid_mask: torch.Tensor,
+        front_valid_mask: torch.Tensor | None = None,
+        occlusion_valid_mask: torch.Tensor | None = None,
+        boundary_valid_mask: torch.Tensor | None = None,
     ):
         h_a = self.query_local(scene_planes, xyz_a)["H"]
         h_b = self.query_local(scene_planes, xyz_b)["H"]
@@ -197,6 +195,9 @@ class IRISVNextEvidenceModelV3(nn.Module):
             camera_features=camera_features,
             token_valid_mask=token_valid_mask,
             relations=relations,
+            front_valid_mask=front_valid_mask,
+            occlusion_valid_mask=occlusion_valid_mask,
+            boundary_valid_mask=boundary_valid_mask,
         )
 
     def predict_ray_presentation(
@@ -207,6 +208,7 @@ class IRISVNextEvidenceModelV3(nn.Module):
         hit_depth: torch.Tensor,
         camera_features: torch.Tensor,
         hit_valid_mask: torch.Tensor,
+        global_visibility_valid_mask: torch.Tensor | None = None,
     ):
         hit_h = self.query_local(scene_planes, hit_xyz)["H"]
         visibility = self.query_ray_visibility(
@@ -221,6 +223,7 @@ class IRISVNextEvidenceModelV3(nn.Module):
             camera_features=camera_features,
             hit_valid_mask=hit_valid_mask,
             global_visibility_probability=visibility,
+            global_visibility_valid_mask=global_visibility_valid_mask,
         )
 
     def parameter_groups(self) -> dict[str, tuple[nn.Parameter, ...]]:

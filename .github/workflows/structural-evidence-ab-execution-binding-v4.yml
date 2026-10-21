@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -31,6 +33,7 @@ jobs:
         run: python -m pytest -q -s tests/iris/test_structural_evidence_ab_execution_binding_v4.py
       - name: Replay locked blobs at immutable execution source
         run: |
+          git cat-file -e 66b1fb0cccc6145057aa325cc7aac877239b297c^{commit}
           test "$(git rev-parse 66b1fb0cccc6145057aa325cc7aac877239b297c:canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json)" = "10706b00fe7a201ef006e67c545c3a26ca85703f"
           test "$(git rev-parse 66b1fb0cccc6145057aa325cc7aac877239b297c:canonical/STRUCTURAL_EVIDENCE_AB_COURT_METRIC_DEFINITIONS_V1.json)" = "6f4e33da465edda45eaacdbcbeced487ae5d26a8"
           test "$(git rev-parse 66b1fb0cccc6145057aa325cc7aac877239b297c:canonical/STRUCTURAL_EVIDENCE_INPUT_ADMISSION_V2.json)" = "e9383617f74497f7e56aaa772394090786c28955"

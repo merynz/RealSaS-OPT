@@ -1,0 +1,37 @@
+name: structural-evidence-ab-execution-binding-v4
+
+on:
+  pull_request:
+    paths:
+      - 'canonical/STRUCTURAL_EVIDENCE_AB_EXECUTION_BINDING_V4.json'
+      - 'tests/iris/test_structural_evidence_ab_execution_binding_v4.py'
+      - '.github/workflows/structural-evidence-ab-execution-binding-v4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  execution-binding-v4:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install focused dependency
+        run: python -m pip install --no-input --progress-bar off pytest==8.4.1
+      - name: Validate JSON and compile binding test
+        run: |
+          python -m json.tool canonical/STRUCTURAL_EVIDENCE_AB_EXECUTION_BINDING_V4.json >/dev/null
+          python -m py_compile tests/iris/test_structural_evidence_ab_execution_binding_v4.py
+      - name: Run execution-binding v4 tests
+        env:
+          PYTHONPATH: .
+        run: python -m pytest -q -s tests/iris/test_structural_evidence_ab_execution_binding_v4.py
+      - name: Replay locked blobs at immutable execution source
+        run: |
+          test "$(git rev-parse 66b1fb0cccc6145057aa325cc7aac877239b297c:canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json)" = "10706b00fe7a201ef006e67c545c3a26ca85703f"
+          test "$(git rev-parse 66b1fb0cccc6145057aa325cc7aac877239b297c:canonical/STRUCTURAL_EVIDENCE_AB_COURT_METRIC_DEFINITIONS_V1.json)" = "6f4e33da465edda45eaacdbcbeced487ae5d26a8"
+          test "$(git rev-parse 66b1fb0cccc6145057aa325cc7aac877239b297c:canonical/STRUCTURAL_EVIDENCE_INPUT_ADMISSION_V2.json)" = "e9383617f74497f7e56aaa772394090786c28955"
+          test "$(git rev-parse 66b1fb0cccc6145057aa325cc7aac877239b297c:canonical/VNEXT_DIRECT_SURFACE_INPUT_BINDING_V2.json)" = "2a3d252f27e08a24a506552447a5d44614f8e698"

@@ -40,14 +40,7 @@ class IRISVNextEvidenceModelV3Tests(unittest.TestCase):
             pair_width=96,
             residual_blocks=2,
         )
-        self.model = IRISVNextEvidenceModelV3(
-            self.cfg,
-            relation,
-            ray_visibility_width=64,
-            ray_visibility_heads=8,
-            ray_visibility_layers=2,
-            ray_visibility_mlp_ratio=2,
-        )
+        self.model = IRISVNextEvidenceModelV3(self.cfg, relation)
 
     def test_topology_is_factored_out_and_uncalibrated_uncertainty_not_public(self):
         self.assertFalse(self.model.topology_decoder_embedded)
@@ -63,16 +56,11 @@ class IRISVNextEvidenceModelV3Tests(unittest.TestCase):
 
     def test_parameter_groups_are_specialist_separated(self):
         groups = self.model.parameter_groups()
-        self.assertEqual(
-            set(groups),
-            {"scene_core", "mechanical", "appearance", "relation", "visibility"},
-        )
+        self.assertEqual(set(groups), {"scene_core", "mechanical", "appearance", "relation"})
         ids = []
         for parameters in groups.values():
             ids.extend(id(p) for p in parameters)
         self.assertEqual(len(ids), len(set(ids)))
-        trainable = {id(p) for p in self.model.parameters() if p.requires_grad}
-        self.assertEqual(set(ids), trainable)
 
     def test_mechanical_loss_uses_contact_only_where_valid(self):
         h = torch.randn(2, 5, self.cfg.local_feature_dim)

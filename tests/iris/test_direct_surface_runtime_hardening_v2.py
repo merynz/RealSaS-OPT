@@ -16,6 +16,7 @@ SOURCE_SHA = "a" * 40
 MANIFEST_SHA = "b" * 64
 SHARD_SHA = "c" * 64
 CHECKPOINT_SHA = "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5"
+CANDIDATE_SHA = "f" * 64
 
 
 class DirectSurfaceRuntimeHardeningV2Tests(unittest.TestCase):
@@ -32,13 +33,19 @@ class DirectSurfaceRuntimeHardeningV2Tests(unittest.TestCase):
     def _write_valid_subject(self, root: Path):
         stage = root / "DIRECT_IRIS_SURFACE.stage12.npz"
         stage.write_bytes(b"stage12")
+        stage_sha = sha256_file(stage)
         direct = {
             "schema": "RealSaS.DirectIRISSurfaceReceipt.v1",
             "subject_id": "Snake",
             "source_commit": SOURCE_SHA,
+            "checkpoint_sha256": CHECKPOINT_SHA,
+            "candidate_binding_hash": CANDIDATE_SHA,
+            "stage12_npz_sha256": stage_sha,
             "decoder_id": DECODER_ID,
             "base_cells": 512,
             "fine_cells": 1024,
+            "teacher_truth_used": False,
+            "compiler_qualified": False,
         }
         direct_path = root / "DIRECT_IRIS_SURFACE_RECEIPT.json"
         direct_path.write_text(json.dumps(direct), encoding="utf-8")
@@ -53,8 +60,8 @@ class DirectSurfaceRuntimeHardeningV2Tests(unittest.TestCase):
             "v8_checkpoint_sha256": CHECKPOINT_SHA,
             "scene_binding_sha256": "d" * 64,
             "scene_planes_sha256": "e" * 64,
-            "candidate_binding_hash": "f" * 64,
-            "stage12_npz_sha256": sha256_file(stage),
+            "candidate_binding_hash": CANDIDATE_SHA,
+            "stage12_npz_sha256": stage_sha,
             "receipt_sha256": sha256_file(direct_path),
             "vertex_count": 10,
             "face_count": 12,
@@ -86,7 +93,6 @@ class DirectSurfaceRuntimeHardeningV2Tests(unittest.TestCase):
             self.assertIsNotNone(row)
             self.assertEqual(row["decoder_id"], DECODER_ID)
 
-            # Any source-lineage drift forbids reuse.
             self.assertIsNone(_valid_completed_subject(
                 root,
                 subject_id="Snake",
@@ -104,6 +110,27 @@ class DirectSurfaceRuntimeHardeningV2Tests(unittest.TestCase):
             value = json.loads(path.read_text(encoding="utf-8"))
             value["fine_cells"] = 512
             path.write_text(json.dumps(value), encoding="utf-8")
+            self.assertIsNone(_valid_completed_subject(
+                root,
+                subject_id="Snake",
+                expected_source_sha=SOURCE_SHA,
+                prepared_manifest_sha=MANIFEST_SHA,
+                prepared_shard_sha=SHARD_SHA,
+                v8_checkpoint_sha=CHECKPOINT_SHA,
+            ))
+
+    def test_completed_subject_reuse_rejects_inner_receipt_candidate_drift(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self._write_valid_subject(root)
+            direct_path = root / "DIRECT_IRIS_SURFACE_RECEIPT.json"
+            direct = json.loads(direct_path.read_text(encoding="utf-8"))
+            direct["candidate_binding_hash"] = "1" * 64
+            direct_path.write_text(json.dumps(direct), encoding="utf-8")
+            execution_path = root / "DIRECT_IRIS_SURFACE_SUBJECT_EXECUTION_V2.json"
+            execution = json.loads(execution_path.read_text(encoding="utf-8"))
+            execution["receipt_sha256"] = sha256_file(direct_path)
+            execution_path.write_text(json.dumps(execution), encoding="utf-8")
             self.assertIsNone(_valid_completed_subject(
                 root,
                 subject_id="Snake",

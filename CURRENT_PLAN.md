@@ -8,6 +8,10 @@
 **Active workstream:** `STRUCTURAL_EVIDENCE_AB_NOTEBOOK_BUILD_AND_HANDOFF`  
 **Execution policy:** continue source/artifact assembly only until the notebook is complete. **Stop before notebook execution, optimizer steps or scientific court execution.**
 
+## Historical research continuity retained
+
+The current Structural-Evidence workstream supersedes the next-work boundary only. The historical V1 geometry ledger remains sealed with active experiment pointer `H-GEO-P3-SCALE-XFER`; that experiment is completed `MIXED`, executes zero optimizer/probe-optimizer steps, does not authorize H-GEO-P4, and is not reopened by this plan. Earlier sealed `SURF-A1`, `H-REP-P0`, `H-GEO-P1`, `H-GEO-P2-SCENE-FIELD`, `H-GEO-P3-EXPLICIT-HIRES-CARRIER`, and `H-GEO-P3-EFREQ` results remain historical scientific authority.
+
 ## Objective
 
 Test the actual shared-scene structural hypothesis without semantic shortcuts:

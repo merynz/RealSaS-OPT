@@ -38,6 +38,20 @@ ONE canonical animation-ready M / graphics structure
 
 There is no independent deformable visual mesh. Compiler alone may mint canonical M. Named semantic classes and material IDs are not structural/drawable-owner authority.
 
+## Sealed geometry lineage retained
+
+The Structural-Evidence workstream supersedes the **next-work boundary**, not historical scientific results. The earlier geometry sequence remains sealed and queryable:
+
+- `SURF-A1` — scientific fail under frozen-H representation rescue; no automatic SURF-A2 authorization;
+- `H-REP-P0` — scientific fail with strong local geometry signal;
+- `H-GEO-P1` — material geometry rescue, scientific fail;
+- `H-GEO-P2` — scene+field retraining, scientific fail after partial absolute-gate improvement;
+- `H-GEO-P3` — explicit high-resolution geometry carrier, scientific fail while preserving shared V8;
+- `H-GEO-P3-EFREQ` — completed `UNRESOLVED`, zero optimizer/probe optimizer steps;
+- `H-GEO-P3-SCALE-XFER` — completed `MIXED`, zero optimizer/probe optimizer steps.
+
+These results are not reopened or overwritten by the current A/B work. In particular, SCALE-XFER does not automatically authorize H-GEO-P4, and the current endpoint diagnostic is not silently promoted to a universal product gate.
+
 ## Current sealed research chain
 
 ### 1. V2 tie-safe evidence — ADMITTED

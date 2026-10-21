@@ -12,6 +12,7 @@ on:
       - 'tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v1.py'
       - 'tools/iris_vnext/preflight_structural_evidence_ab_a100_v1.py'
       - 'tools/iris_vnext/evaluate_structural_evidence_ab_free_running_v1.py'
+      - 'tools/iris_vnext/court_structural_evidence_ab_topology_surface_v1.py'
       - 'tests/iris/test_structural_evidence_ab_execution_v1.py'
       - '.github/workflows/structural_evidence_ab_execution_v1.yml'
 
@@ -43,6 +44,7 @@ jobs:
             tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v1.py \
             tools/iris_vnext/preflight_structural_evidence_ab_a100_v1.py \
             tools/iris_vnext/evaluate_structural_evidence_ab_free_running_v1.py \
+            tools/iris_vnext/court_structural_evidence_ab_topology_surface_v1.py \
             tests/iris/test_structural_evidence_ab_execution_v1.py
       - name: Verify A/B execution source contract
         env:
@@ -59,6 +61,7 @@ jobs:
       - name: Execution lane
         run: |
           echo 'source_execution_adapter=present'
+          echo 'topology_surface_court=present'
           echo 'a100_preflight_optimizer_steps=0'
           echo 'scientific_training_executed=false'
           echo 'exact_execution_merge_binding=pending_post_merge'

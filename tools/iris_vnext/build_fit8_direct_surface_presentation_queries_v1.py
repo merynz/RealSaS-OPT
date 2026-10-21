@@ -10,8 +10,8 @@ Inputs are deliberately limited to:
 
 There is no teacher-mesh, teacher-topology, rig/skin, material-owner, or V2
 all-hit truth input. The output contains only model-surface ray geometry and
-source-observed RGBA/boundary/support. Learned front/visibility specialists are
-applied later from a separately qualified checkpoint.
+source-observed RGBA/boundary/support. Pair front and global visibility are
+computed later deterministically from these complete model-surface ray stacks.
 
 This tool performs zero optimizer/backward steps and cannot claim scientific PASS.
 """
@@ -70,6 +70,14 @@ def _git_head(repo_root: Path) -> str:
     return subprocess.check_output(
         ["git", "-C", str(repo_root), "rev-parse", "HEAD"], text=True
     ).strip().lower()
+
+
+def _depth_tie_epsilon(vertices: np.ndarray) -> float:
+    value = np.asarray(vertices, dtype=np.float64)
+    if value.ndim != 2 or value.shape[1] != 3 or not len(value) or not np.isfinite(value).all():
+        raise ValueError("DIRECT_PRESENTATION_SURFACE_VERTICES_INVALID")
+    scale = max(1.0, float(np.max(value) - np.min(value)), float(np.max(np.abs(value))))
+    return float(scale * 1.0e-10)
 
 
 def _sample_pixels(mask_bytes: bytes, resolution: int, *, source_id: str, view_index: int, budget: int) -> np.ndarray:
@@ -240,6 +248,7 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
             if vertices.ndim != 2 or vertices.shape[1] != 3 or faces.ndim != 2 or faces.shape[1] != 3:
                 raise ValueError("DIRECT_PRESENTATION_SURFACE_SHAPE_INVALID:" + subject_id)
             components = _face_edge_components(faces)
+            depth_tie_epsilon = _depth_tie_epsilon(vertices)
 
             view_files: list[dict[str, Any]] = []
             for camera in cameras.get("cameras") or ():
@@ -278,6 +287,7 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
                     subject_id=np.asarray(subject_id),
                     legacy_subject_id=np.asarray(legacy_id),
                     view_index=np.asarray(view_index, dtype=np.int16),
+                    direct_surface_depth_tie_epsilon=np.asarray(depth_tie_epsilon, dtype=np.float64),
                     camera_features=np.asarray(camera_feature, dtype=np.float32),
                     pixels_xy=pixels.astype(np.int32),
                     source_rgba=source_rgba.astype(np.float32),
@@ -286,7 +296,7 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
                     source_support=np.ones(len(pixels), dtype=np.float32),
                     stack_offsets=np.asarray(all_hits["offsets"], dtype=np.int64),
                     stack_face=np.asarray(all_hits["face"], dtype=np.int64),
-                    stack_depth=np.asarray(all_hits["depth"], dtype=np.float32),
+                    stack_depth=np.asarray(all_hits["depth"], dtype=np.float64),
                     stack_point_iris=np.asarray(all_hits["point"], dtype=np.float32),
                     stack_count=stack_count,
                     **pairs,
@@ -312,6 +322,7 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
                     "legacy_subject_id": legacy_id,
                     "direct_surface_sha256": receipt["stage12_npz_sha256"],
                     "direct_surface_candidate_binding_hash": receipt["candidate_binding_hash"],
+                    "direct_surface_depth_tie_epsilon": depth_tie_epsilon,
                     "camera_bundle_sha256": _sha_bytes(camera_bytes),
                     "views": view_files,
                 }
@@ -333,6 +344,7 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
             "source_observations": "ADMITTED_STAGE01_RGBA_MASK_CAMERA",
             "pair_geometry": "ALL_UNORDERED_DIRECT_SURFACE_HIT_PAIRS_BOTH_ORIENTATIONS",
             "complete_stack_geometry": True,
+            "depth_tie_epsilon": "MAX_1_OR_SURFACE_SCALE_TIMES_1E_MINUS_10",
             "tessa_coordinate_conversion": "MULTIPLY_IRIS_XYZ_BY_0.5_AT_MEMORY_BUILD",
         },
         "teacher_mesh_input": False,
@@ -343,7 +355,7 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
         "backward_steps_executed": 0,
         "training_authorized": False,
         "scientific_pass_claimed": False,
-        "next_action": "APPLY_SEPARATELY_QUALIFIED_FRONT_AND_GLOBAL_VISIBILITY_SPECIALISTS",
+        "next_action": "DETERMINISTICALLY_TYPE_DIRECT_SURFACE_PRESENTATION_MEMORY",
     }
     manifest["value_sha256"] = _value_sha(manifest)
     manifest_path = output / "DIRECT_IRIS_PRESENTATION_QUERIES_V1_MANIFEST.json"

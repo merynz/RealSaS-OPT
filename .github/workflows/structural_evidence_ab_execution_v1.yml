@@ -11,6 +11,7 @@ on:
       - 'tools/iris_vnext/build_fit8_direct_surface_presentation_queries_v1.py'
       - 'tools/iris_vnext/build_fit8_direct_presentation_memory_v1.py'
       - 'tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v1.py'
+      - 'tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v2.py'
       - 'tools/iris_vnext/preflight_structural_evidence_ab_a100_v1.py'
       - 'tools/iris_vnext/evaluate_structural_evidence_ab_free_running_v1.py'
       - 'tools/iris_vnext/court_structural_evidence_ab_topology_surface_v1.py'
@@ -45,6 +46,7 @@ jobs:
         run: |
           python -m py_compile \
             tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v1.py \
+            tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v2.py \
             tools/iris_vnext/preflight_structural_evidence_ab_a100_v1.py \
             tools/iris_vnext/evaluate_structural_evidence_ab_free_running_v1.py \
             tools/iris_vnext/court_structural_evidence_ab_topology_surface_v1.py \
@@ -66,6 +68,7 @@ jobs:
       - name: Execution lane
         run: |
           echo 'source_execution_adapter=present'
+          echo 'resumable_training_adapter=present'
           echo 'topology_surface_court=present'
           echo 'static_presentation_court=present'
           echo 'dynamic_motion_court=present'

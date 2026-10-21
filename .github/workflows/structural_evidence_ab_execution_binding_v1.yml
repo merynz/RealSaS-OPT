@@ -1,0 +1,46 @@
+name: structural-evidence-ab-execution-binding-v1
+
+on:
+  pull_request:
+    paths:
+      - 'canonical/STRUCTURAL_EVIDENCE_AB_EXECUTION_BINDING_V1.json'
+      - 'canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V4.json'
+      - 'CURRENT_STATE.md'
+      - 'CURRENT_PLAN.md'
+      - 'AGENTS.md'
+      - 'tests/iris/test_structural_evidence_ab_execution_binding_v1.py'
+      - '.github/workflows/structural_evidence_ab_execution_binding_v1.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  binding:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile binding test
+        run: python -m py_compile tests/iris/test_structural_evidence_ab_execution_binding_v1.py
+      - name: Verify exact post-merge execution binding
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: '0'
+        run: python -m unittest -v tests.iris.test_structural_evidence_ab_execution_binding_v1
+      - name: Execution boundary
+        run: |
+          echo 'scientific_training_executed=false'
+          echo 'optimizer_steps_executed=0'
+          echo 'notebook_build_authorized=true'
+          echo 'notebook_execution_authorized=false'
+          echo 'user_handoff_required=true'

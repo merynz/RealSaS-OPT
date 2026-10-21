@@ -1,0 +1,76 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABCourtMetricDefinitions.v1",
+  "date_utc": "2026-10-21",
+  "status": "FROZEN_BEFORE_AB_OPTIMIZER_EXECUTION",
+  "experiment_id": "STRUCTURAL-EVIDENCE-A-B-V2",
+  "preregistration": "canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json",
+  "authority_boundary": {
+    "definitions_locked_before_results": true,
+    "numeric_decision_thresholds_owned_by_preregistration_v2": true,
+    "teacher_or_all_hit_truth_allowed_as_inference_conditioning": false,
+    "teacher_motion_allowed_as_independent_evaluation_field": true,
+    "court_may_mint_canonical_m": false,
+    "court_may_claim_unseen_generalization": false
+  },
+  "topology_surface": {
+    "producer": "tools/iris_vnext/court_structural_evidence_ab_topology_surface_v1.py",
+    "comparison": "B_VS_A_UNDER_IDENTICAL_FREE_RUNNING_PROTOCOL_PLUS_QUALIFIED_DIRECT_SURFACE_REFERENCE",
+    "metrics": {
+      "GRAMMAR_EOS_VALIDITY": "strict free-running sequence must complete with EOS and valid grammar",
+      "COMPONENT_COUNT": "decoded geometric connected-component count",
+      "BOUNDARY_LOOPS_AND_OPEN_CHAINS": "open boundary chains from decoded candidate faces",
+      "NON_MANIFOLD_EDGES": "candidate topology non-manifold edge count",
+      "DEGENERATE_FACES": "candidate zero-area/degenerate face count",
+      "SOURCE_SURFACE_FIDELITY": "bidirectional candidate-vs-prepared-source surface p95 and max distance",
+      "SOURCE_MASK_FIDELITY": "same-camera source silhouette IoU using retained Fit8 court rasterizer",
+      "FACE_ECONOMY": "face reduction relative to the qualified direct surface"
+    }
+  },
+  "presentation_static": {
+    "producer": "tools/iris_vnext/court_structural_evidence_ab_static_presentation_v1.py",
+    "evaluation_truth": "ADMITTED_V2_TIE_SAFE_ALL_HIT_EVIDENCE__EVALUATION_ONLY",
+    "ray_identity": "EXACT_DETERMINISTIC_SOURCE_FOREGROUND_RAYS_SHARED_WITH_V2_EVIDENCE",
+    "metrics": {
+      "GLOBAL_VISIBILITY_ACCURACY": "valid V2 teacher hit slots whose nearest same-ray candidate hit has matching tie-safe visible/invisible state; missing/abstaining candidate hit is incorrect",
+      "LOCAL_PARTIAL_ORDER_ACCURACY": "valid V2 unordered base pairs whose two teacher surface points map to distinct same-ray candidate hits with matching strict depth order; candidate depth ties or missing hits are incorrect",
+      "FRAGMENT_IDENTITY_STABILITY": "for each anonymous teacher face across authoritative view observations, modal candidate connected-component matches divided by all authoritative observations, including missing observations in the denominator",
+      "SOURCE_ART_SUPPORT_PRESERVATION": "fraction of deterministic source-foreground evaluation rays with at least one candidate-surface hit"
+    }
+  },
+  "presentation_dynamic": {
+    "producer": "tools/iris_vnext/court_structural_evidence_ab_dynamic_motion_v1.py",
+    "ray_grid": {
+      "grid_size": 32,
+      "rays_per_view": 1024,
+      "sampling": "DETERMINISTIC_UNIFORM_PIXEL_CENTER_GRID"
+    },
+    "metric": {
+      "POSE_DEPENDENT_ORDER_FLIP_ACCURACY": "on rays where the authored teacher frontmost anonymous owner changes between rest and a sampled authored pose, candidate is correct only if its rest and posed frontmost owner identities both match the corresponding teacher owners"
+    }
+  },
+  "motion": {
+    "producer": "tools/iris_vnext/court_structural_evidence_ab_dynamic_motion_v1.py",
+    "deformation_binding": {
+      "rule": "EXACT_CLOSEST_POINT_BARYCENTRIC_ON_AUTHORED_TEACHER_REST_SURFACE",
+      "same_field_for_arms": true,
+      "teacher_motion_role": "INDEPENDENT_EVALUATION_ONLY",
+      "teacher_rig_skin_motion_used_in_inference_forward": false,
+      "binding_is_product_skin_authority": false
+    },
+    "metrics": {
+      "OWNER_FRAGMENT_STABILITY_OVER_MOTION": "for every visible authored anonymous owner observation over all sampled poses/views, count candidate front hits that preserve that owner and the owner's modal persistent candidate connected-component; score is modal-consistent observations divided by all authoritative owner observations",
+      "GAP_TEAR_RATE": "candidate face-frame fraction violating the frozen G3 numerical dynamic envelope: nonfinite metrics, area ratio below 0.05, area ratio above 20, or condition number above 16",
+      "ATTACHMENT_PERSISTENCE_WHERE_AUTHORITATIVE": "ABSTAIN when the authored teacher export does not provide explicit contact/attachment relation authority; abstention cannot be converted to a negative or positive label",
+      "G3_DYNAMIC_QUALIFICATION": "all sampled authored-motion frames satisfy the same frozen G3 numerical area/condition bounds; frame-pass fraction is retained for no-regression comparison"
+    },
+    "g3_numeric_policy": "canonical/QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json"
+  },
+  "aggregation": {
+    "presentation_macro": "unweighted mean of the five preregistered presentation metric subject-macros, with only authoritative valid rows contributing inside each metric",
+    "motion_owner_macro": "unweighted mean across Fit8 subjects",
+    "motion_gap_tear_macro": "unweighted mean of subject face-frame violation rates",
+    "morphology_breakdown_required": true,
+    "scientific_fail_is_valid_experiment_completion": true,
+    "post_result_definition_or_threshold_relaxation_allowed": false
+  }
+}

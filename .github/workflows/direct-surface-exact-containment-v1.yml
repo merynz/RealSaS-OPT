@@ -7,7 +7,9 @@ on:
       - 'tools/iris_vnext/materialize_fit8_direct_surface_subject_v3.py'
       - 'tools/iris_vnext/materialize_fit8_direct_surface_resumable_v3.py'
       - 'canonical/VNEXT_DIRECT_SURFACE_INPUT_BINDING_V2.json'
+      - 'canonical/VNEXT_DIRECT_SURFACE_EXACT_CONTAINMENT_FAILURE_20261021.json'
       - 'tests/iris/test_vnext_direct_surface_exact_containment_v1.py'
+      - 'tests/iris/test_vnext_direct_surface_exact_containment_observation_v1.py'
       - '.github/workflows/direct-surface-exact-containment-v1.yml'
   workflow_dispatch:
 
@@ -27,12 +29,17 @@ jobs:
       - name: Validate JSON and compile correction source
         run: |
           python -m json.tool canonical/VNEXT_DIRECT_SURFACE_INPUT_BINDING_V2.json >/dev/null
+          python -m json.tool canonical/VNEXT_DIRECT_SURFACE_EXACT_CONTAINMENT_FAILURE_20261021.json >/dev/null
           python -m py_compile \
             models/iris/vnext/sparse_surface_v4.py \
             tools/iris_vnext/materialize_fit8_direct_surface_subject_v3.py \
             tools/iris_vnext/materialize_fit8_direct_surface_resumable_v3.py \
-            tests/iris/test_vnext_direct_surface_exact_containment_v1.py
+            tests/iris/test_vnext_direct_surface_exact_containment_v1.py \
+            tests/iris/test_vnext_direct_surface_exact_containment_observation_v1.py
       - name: Run exact-containment contract tests
         env:
           PYTHONPATH: .
-        run: python -m pytest -q -s tests/iris/test_vnext_direct_surface_exact_containment_v1.py
+        run: |
+          python -m pytest -q -s \
+            tests/iris/test_vnext_direct_surface_exact_containment_v1.py \
+            tests/iris/test_vnext_direct_surface_exact_containment_observation_v1.py

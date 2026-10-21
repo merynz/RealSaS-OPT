@@ -85,6 +85,7 @@ def test_isolated_worker_and_parent_are_bound_to_corrected_decoder():
     for source in (child, parent):
         assert "optimizer.step" not in source
         assert "loss.backward" not in source
+        assert '"scientific_pass_claimed": True' not in source
 
 
 def test_failed_snake_proxy_observation_is_not_promoted_to_scientific_fail():
@@ -94,4 +95,5 @@ def test_failed_snake_proxy_observation_is_not_promoted_to_scientific_fail():
     parent = Path("tools/iris_vnext/materialize_fit8_direct_surface_resumable_v3.py").read_text(encoding="utf-8")
     assert "SPARSE_SHELL_TRUNCATES_ZERO_SURFACE" not in bridge
     assert "SPARSE_SHELL_TRUNCATES_ZERO_SURFACE" not in parent
-    assert "scientific_pass_claimed" not in parent or "scientific_pass_claimed" in parent
+    assert "SPARSE_SHELL_ACTUAL_ZERO_SURFACE_ESCAPE" not in bridge
+    assert "scientific_ab_pass_claimed" not in bridge

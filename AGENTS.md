@@ -19,8 +19,21 @@ Repository authority outranks conversational memory and historical notes.
 11. `SYSTEM_INDEX.md`
 12. `docs/platform/EXECUTION_LANES.md`
 
-Historical continuation authority only:
+### Canonical current continuity pointers
 
+These remain current platform/research continuity authorities and must be named before their historical predecessors:
+
+- `canonical/EXPERIMENT_REGISTRY_V3.json`
+- `canonical/SCIENTIFIC_JOURNAL_V2_20260909.jsonl`
+- `canonical/ACTIVE_RUN_V2.json`
+- `canonical/MAINLINE_EXECUTION_PLAN_V2.json`
+- `canonical/REALSAS_CANONICAL_ARCHITECTURE_V2_20260920.json`
+- `canonical/COMPLETE_APPEARANCE_AUTHORITY_V1_20260920.json`
+
+Historical continuity/provenance only:
+
+- `canonical/EXPERIMENT_REGISTRY_V2.json`
+- `canonical/SCIENTIFIC_JOURNAL_V1.jsonl`
 - `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V3.json`
 - `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V2.json`
 - `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json`

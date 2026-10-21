@@ -6,7 +6,7 @@
   "parent_preregistration": "canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json",
   "preoptimizer_amendment": "canonical/STRUCTURAL_EVIDENCE_AB_NATIVE_V8_MATCHED_CARRIER_AMENDMENT_V1.json",
   "implementation_source": {
-    "commit_sha": "597c54cbf37e2394c60464fd5395c9b765b6d628",
+    "commit_sha": "849656a344808a8fbade4b78e1b9cfc556fff839",
     "policy": "NOTEBOOK_AUTHORITY_HEAD_MUST_BE_THIS_BINDING_COMMIT_OR_DESCENDANT_WITH_NO_H1_SOURCE_DRIFT"
   },
   "carrier_contract": {
@@ -14,6 +14,7 @@
     "carrier_authority": "INFERENCE_ADMISSIBLE_FIXED_SURFACE_CARRIER",
     "native_materializer": "tools/iris_vnext/materialize_fit8_v8_native_flexicubes_v1.py",
     "compatibility_adapter": "tools/iris_vnext/materialize_fit8_native_v8_matched_carrier_v1.py",
+    "corpus_manifest_normalizer": "tools/iris_vnext/normalize_native_carrier_tessa_corpus_manifest_v1.py",
     "native_resolution": 24,
     "same_carrier_for_a_and_b": true,
     "raw_field_sparse_t512_t1024_required": false,
@@ -49,6 +50,7 @@
     "requires_exact_drive_hash_verification": true,
     "requires_pinned_flexicubes_commit": "4cc7d6c3d0cee83c011ce36721b81adff0dd7db6",
     "requires_native_carrier_array_identity_receipts": true,
+    "requires_corpus_surface_provenance_normalization": true,
     "requires_both_locked_arms": true,
     "requires_all_locked_courts": true,
     "requires_zero_optimizer_preflight_before_training": true,

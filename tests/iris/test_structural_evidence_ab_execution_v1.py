@@ -50,10 +50,14 @@ class StructuralEvidenceABExecutionV1Tests(unittest.TestCase):
         self.assertNotIn('--teacher-topology', source)
 
     def test_execution_sources_are_fail_closed_and_do_not_claim_scientific_pass(self):
-        for path in (TRAINER, PREFLIGHT, FREE_RUN, TOPOLOGY_COURT):
+        ordinary = (TRAINER, PREFLIGHT, FREE_RUN)
+        for path in ordinary:
             source = path.read_text(encoding="utf-8")
-            self.assertIn('scientific_pass', source, path.name)
+            self.assertIn('scientific_pass_claimed', source, path.name)
             self.assertNotIn('"scientific_pass_claimed": True', source, path.name)
+        court_source = TOPOLOGY_COURT.read_text(encoding="utf-8")
+        self.assertIn('"scientific_ab_pass_claimed": False', court_source)
+        self.assertNotIn('"scientific_ab_pass_claimed": True', court_source)
         preflight = PREFLIGHT.read_text(encoding="utf-8")
         self.assertIn('optimizer_steps_executed": 0', preflight)
         self.assertNotIn('\n    optimizer.step(', preflight)

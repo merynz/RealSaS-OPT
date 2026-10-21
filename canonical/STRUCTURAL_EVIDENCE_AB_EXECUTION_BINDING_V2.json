@@ -1,0 +1,109 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABExecutionBinding.v2",
+  "date_utc": "2026-10-21",
+  "status": "BOUND_SOURCE_READY_FOR_FAIL_CLOSED_NOTEBOOK_EXECUTION__USER_HANDOFF_REQUIRED",
+  "experiment_id": "STRUCTURAL-EVIDENCE-A-B-V2",
+  "scope": "FIT8_SHARED_SYSTEM_CONTRACT_QUALIFICATION__NOT_UNSEEN_GENERALIZATION__NOT_PRODUCT_PROMOTION",
+  "long_term_research_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
+  "supersedes": {
+    "binding_path": "canonical/STRUCTURAL_EVIDENCE_AB_EXECUTION_BINDING_V1.json",
+    "execution_source_sha": "ebfe80fc9d0c43cc8075d3d38bdbc9231357b969",
+    "reason": "DIRECT_PRESENTATION_MEMORY_MANIFEST_PRODUCER_AND_TRAINER_FIREWALL_KEY_NAMES_DID_NOT_SHARE_ONE_MANIFEST_CONTRACT"
+  },
+  "execution_source": {
+    "pull_request": 141,
+    "pr_head_sha": "f1483e3caa99f71f0eae4fe04a312e303658f2ee",
+    "merge_sha": "68689f1ae6617482da850a684e8709ab58715214",
+    "merge_title": "IRIS: normalize direct presentation manifest firewall contract",
+    "source_mutation_after_merge_for_scientific_execution_allowed": false
+  },
+  "compatibility_closure": {
+    "adapter_path": "tools/iris_vnext/normalize_direct_presentation_manifest_contract_v1.py",
+    "test_path": "tests/iris/test_direct_presentation_manifest_contract_v1.py",
+    "producer_manifest_source_flags": [
+      "teacher_geometry_input",
+      "teacher_topology_input",
+      "materialized_v2_truth_input"
+    ],
+    "trainer_manifest_conditioning_flags": [
+      "teacher_geometry_in_conditioning",
+      "teacher_topology_in_conditioning",
+      "materialized_v2_truth_in_conditioning"
+    ],
+    "normalization_rule": "REQUIRE_SOURCE_FLAGS_FALSE__MATERIALIZE_EQUIVALENT_CONDITIONING_ALIASES_FALSE",
+    "presentation_subject_payloads_read_by_adapter": false,
+    "presentation_subject_payloads_mutated_by_adapter": false,
+    "evidence_tensor_values_mutated": false,
+    "model_architecture_mutated": false,
+    "optimizer_or_schedule_mutated": false,
+    "court_thresholds_mutated": false
+  },
+  "locked_authority": {
+    "preregistration_path": "canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json",
+    "preregistration_git_blob_sha": "10706b00fe7a201ef006e67c545c3a26ca85703f",
+    "court_metric_definitions_path": "canonical/STRUCTURAL_EVIDENCE_AB_COURT_METRIC_DEFINITIONS_V1.json",
+    "court_metric_definitions_git_blob_sha": "6f4e33da465edda45eaacdbcbeced487ae5d26a8",
+    "evidence_admission_path": "canonical/STRUCTURAL_EVIDENCE_INPUT_ADMISSION_V2.json",
+    "evidence_admission_git_blob_sha": "e9383617f74497f7e56aaa772394090786c28955",
+    "admitted_v2_manifest_sha256": "9accf4d2ca85e90e23a3c7ed2a490329676582c5e6759b5d4a1df84df998bb1f",
+    "admitted_v2_receipt_sha256": "8323945b0b4f8d54dec44458d1e8b5d40e51a8e38ace13bb04b0e4533099fc01",
+    "admitted_v2_oriented_pair_rows": 3499296
+  },
+  "execution_program": {
+    "direct_presentation_manifest_adapter": "tools/iris_vnext/normalize_direct_presentation_manifest_contract_v1.py",
+    "trainer": "tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v2.py",
+    "engineering_preflight": "tools/iris_vnext/preflight_structural_evidence_ab_a100_v1.py",
+    "free_running_evaluator": "tools/iris_vnext/evaluate_structural_evidence_ab_free_running_v1.py",
+    "topology_surface_court": "tools/iris_vnext/court_structural_evidence_ab_topology_surface_v1.py",
+    "static_presentation_court": "tools/iris_vnext/court_structural_evidence_ab_static_presentation_v1.py",
+    "dynamic_motion_and_final_decision_court": "tools/iris_vnext/court_structural_evidence_ab_dynamic_motion_v1.py",
+    "arm_order": ["A_NULL_PRESENTATION", "B_ROLE_FREE_PRESENTATION"],
+    "optimizer_steps_per_arm": 2400,
+    "seed_set": [26091991],
+    "final_step_free_running_required": true,
+    "sampling": false
+  },
+  "conditioning_authority": {
+    "b_arm_inference_presentation_source": "INFERENCE_ADMISSIBLE_DIRECT_PRESENTATION_MEMORY_ONLY",
+    "teacher_all_hit_truth_as_inference_conditioning": false,
+    "teacher_geometry_as_inference_conditioning": false,
+    "teacher_topology_as_inference_conditioning": false,
+    "teacher_rig_or_skin_as_inference_conditioning": false,
+    "teacher_authored_motion_role": "INDEPENDENT_EVALUATION_DEFORMATION_FIELD_ONLY",
+    "named_semantic_taxonomy_as_structural_authority": false,
+    "material_id_as_drawable_owner_truth": false
+  },
+  "source_ci": {
+    "head_sha": "f1483e3caa99f71f0eae4fe04a312e303658f2ee",
+    "all_triggered_workflows_completed_success": true,
+    "workflows": [
+      {"name": "structural-evidence-ab-presentation-manifest-contract-v1", "run_id": 39642294154, "run_number": 1, "conclusion": "success"},
+      {"name": "iris-tessa-v2-structuralization-source-gate", "run_id": 39642294031, "run_number": 237, "conclusion": "success"},
+      {"name": "iris-v2-source-contract", "run_id": 39642293691, "run_number": 608, "conclusion": "success"},
+      {"name": "model-mainline-source-gate", "run_id": 39642293743, "run_number": 1593, "conclusion": "success"},
+      {"name": "architecture-freeze-source-gate", "run_id": 39642293879, "run_number": 651, "conclusion": "success"}
+    ],
+    "optimizer_steps_executed_by_ci": 0,
+    "scientific_training_executed_by_ci": false
+  },
+  "notebook_contract": {
+    "execution_authorized_after_user_handoff": true,
+    "requires_physical_a100": true,
+    "requires_checkout_execution_merge_sha": "68689f1ae6617482da850a684e8709ab58715214",
+    "requires_exact_hash_hydration": true,
+    "requires_manifest_contract_normalization_before_ab_preflight": true,
+    "requires_zero_optimizer_preflight_before_training": true,
+    "requires_both_locked_arms": true,
+    "requires_final_free_running_evaluation": true,
+    "requires_all_three_independent_courts": true,
+    "scientific_fail_is_valid_experiment_completion": true,
+    "post_result_threshold_relaxation_allowed": false
+  },
+  "execution_facts_at_binding_time": {
+    "scientific_training_executed": false,
+    "optimizer_steps_executed": 0,
+    "scientific_ab_court_executed": false,
+    "scientific_pass_or_fail_observed": false
+  },
+  "next_boundary": "RUN_FAIL_CLOSED_A100_NOTEBOOK__OBSERVE_LOCKED_AB_RESULT"
+}

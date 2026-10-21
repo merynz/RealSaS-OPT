@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from tools.iris_vnext.build_fit8_direct_surface_presentation_queries_v1 import parser as direct_query_parser
+
 
 ROOT = Path(__file__).resolve().parents[2]
 PREREG = ROOT / "canonical" / "STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json"
@@ -78,6 +80,13 @@ def test_live_source_contract_still_encodes_true_a_and_b_paths() -> None:
     assert "MODEL_PRODUCED_SURFACE_ONLY" in presentation
     assert "teacher_geometry_allowed" in presentation and "False" in presentation
     assert "teacher_topology_allowed" in presentation and "False" in presentation
-    assert "teacher_dir" not in direct_queries
-    assert "teacher_mesh" not in direct_queries
-    assert "teacher_topology" not in direct_queries
+
+    parser_dests = {action.dest for action in direct_query_parser()._actions}
+    assert "teacher_dir" not in parser_dests
+    assert "teacher_mesh" not in parser_dests
+    assert "teacher_topology" not in parser_dests
+
+    # Recording forbidden inputs as explicit false-valued provenance is required,
+    # and must not be confused with accepting those inputs at the CLI boundary.
+    assert '"teacher_mesh_input": False' in direct_queries
+    assert '"teacher_topology_input": False' in direct_queries

@@ -63,6 +63,10 @@ class PredictedPresentationV1Tests(unittest.TestCase):
         return value
 
     def test_provenance_forbids_teacher_and_materialized_truth_in_forward(self):
+        self.assertEqual(
+            PREDICTED_PRESENTATION_PROVENANCE_V1["prediction_validity"],
+            "EXPLICIT_FAIL_CLOSED_QUALIFICATION_MASKS",
+        )
         self.assertFalse(
             PREDICTED_PRESENTATION_PROVENANCE_V1[
                 "materialized_v2_truth_in_inference_forward"
@@ -94,7 +98,7 @@ class PredictedPresentationV1Tests(unittest.TestCase):
         for forbidden in ("teacher", "manifest", "payload", "semantic", "rig", "skin"):
             self.assertNotIn(forbidden, signatures)
 
-    def test_pair_and_ray_predictions_form_typed_tessa_memory(self):
+    def test_predictions_are_abstain_until_explicitly_qualified(self):
         xyz_a = torch.tensor([[[0.0, 0.0, 0.0], [0.1, 0.0, 0.1]]])
         xyz_b = torch.tensor([[[0.0, 0.0, 0.2], [0.1, 0.0, 0.3]]])
         pair_camera = self.camera()[:, None, :].expand(-1, 2, -1)
@@ -105,6 +109,28 @@ class PredictedPresentationV1Tests(unittest.TestCase):
             xyz_b=xyz_b,
             camera_features=pair_camera,
             token_valid_mask=valid,
+        )
+        for name in (
+            "front_valid",
+            "occlusion_valid",
+            "alpha_boundary_valid",
+            "appearance_boundary_valid",
+        ):
+            index = PRESENTATION_FEATURE_NAMES_V1.index(name)
+            self.assertTrue(bool((pair.values[..., index] == 0.0).all()))
+
+    def test_tie_safe_front_and_complete_stack_visibility_can_be_qualified(self):
+        xyz_a = torch.tensor([[[0.0, 0.0, 0.0], [0.1, 0.0, 0.1]]])
+        xyz_b = torch.tensor([[[0.0, 0.0, 0.2], [0.1, 0.0, 0.3]]])
+        pair_camera = self.camera()[:, None, :].expand(-1, 2, -1)
+        valid = torch.ones(1, 2, dtype=torch.bool)
+        pair = self.model.predict_pair_presentation(
+            scene_planes=self.scene,
+            xyz_a=xyz_a,
+            xyz_b=xyz_b,
+            camera_features=pair_camera,
+            token_valid_mask=valid,
+            front_valid_mask=valid,
         )
 
         hit_xyz = torch.tensor(
@@ -118,13 +144,16 @@ class PredictedPresentationV1Tests(unittest.TestCase):
             hit_depth=hit_depth,
             camera_features=self.camera(),
             hit_valid_mask=hit_valid,
+            global_visibility_valid_mask=hit_valid,
         )
 
         evidence = concat_role_free_presentation_evidence_v1(pair, ray)
         self.assertEqual(evidence.values.shape[1], 5)
         front_valid = PRESENTATION_FEATURE_NAMES_V1.index("front_valid")
+        occlusion_valid = PRESENTATION_FEATURE_NAMES_V1.index("occlusion_valid")
         global_valid = PRESENTATION_FEATURE_NAMES_V1.index("global_visibility_valid")
         self.assertTrue(bool((pair.values[..., front_valid] == 1.0).all()))
+        self.assertTrue(bool((pair.values[..., occlusion_valid] == 0.0).all()))
         self.assertTrue(bool((ray.values[..., global_valid] == 1.0).all()))
         self.assertTrue(bool(evidence.valid_mask.all()))
 
@@ -144,8 +173,10 @@ class PredictedPresentationV1Tests(unittest.TestCase):
         )
         source_r = PRESENTATION_FEATURE_NAMES_V1.index("source_r")
         source_rgba_valid = PRESENTATION_FEATURE_NAMES_V1.index("source_rgba_valid")
+        boundary_valid = PRESENTATION_FEATURE_NAMES_V1.index("alpha_boundary_valid")
         self.assertTrue(torch.allclose(surface.values[..., source_r], source_rgba[..., 0]))
         self.assertTrue(bool((surface.values[..., source_rgba_valid] == 1.0).all()))
+        self.assertTrue(bool((surface.values[..., boundary_valid] == 0.0).all()))
 
 
 if __name__ == "__main__":

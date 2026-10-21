@@ -1,0 +1,87 @@
+name: structural-evidence-ab-execution-self-hosted-v1
+
+on:
+  pull_request:
+    paths:
+      - 'canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json'
+      - 'canonical/STRUCTURAL_EVIDENCE_AB_COURT_METRIC_DEFINITIONS_V1.json'
+      - 'models/iris/vnext/presentation_evidence_v1.py'
+      - 'models/iris/vnext/structure_v4.py'
+      - 'models/tessa/v3/**'
+      - 'tools/iris_vnext/build_fit8_direct_surface_presentation_queries_v1.py'
+      - 'tools/iris_vnext/build_fit8_direct_presentation_memory_v1.py'
+      - 'tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v1.py'
+      - 'tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v2.py'
+      - 'tools/iris_vnext/preflight_structural_evidence_ab_a100_v1.py'
+      - 'tools/iris_vnext/evaluate_structural_evidence_ab_free_running_v1.py'
+      - 'tools/iris_vnext/court_structural_evidence_ab_topology_surface_v1.py'
+      - 'tools/iris_vnext/court_structural_evidence_ab_static_presentation_v1.py'
+      - 'tools/iris_vnext/court_structural_evidence_ab_dynamic_motion_v1.py'
+      - 'tests/iris/test_structural_evidence_ab_execution_v1.py'
+      - '.github/workflows/structural_evidence_ab_execution_*.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  source-witness:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      PLATFORM_PYTHON: /home/monster/realsas_platform/current/bin/realsas-python
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - name: Require platform Python
+        run: |
+          set -euo pipefail
+          test -x "$PLATFORM_PYTHON"
+          "$PLATFORM_PYTHON" - <<'PY'
+          import numpy, scipy, torch
+          print('torch', torch.__version__, 'cuda', torch.cuda.is_available())
+          PY
+      - name: Compile execution sources
+        run: |
+          set -euo pipefail
+          "$PLATFORM_PYTHON" -m py_compile \
+            tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v1.py \
+            tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v2.py \
+            tools/iris_vnext/preflight_structural_evidence_ab_a100_v1.py \
+            tools/iris_vnext/evaluate_structural_evidence_ab_free_running_v1.py \
+            tools/iris_vnext/court_structural_evidence_ab_topology_surface_v1.py \
+            tools/iris_vnext/court_structural_evidence_ab_static_presentation_v1.py \
+            tools/iris_vnext/court_structural_evidence_ab_dynamic_motion_v1.py \
+            tests/iris/test_structural_evidence_ab_execution_v1.py
+      - name: Run execution source contract tests
+        run: |
+          set -euo pipefail
+          "$PLATFORM_PYTHON" -m pytest -q -s \
+            tests/iris/test_structural_evidence_ab_execution_v1.py \
+            tests/iris/test_direct_presentation_memory_v1.py \
+            tests/iris/test_tessa_structuralizer_v3.py
+      - name: Witness receipt
+        run: |
+          set -euo pipefail
+          "$PLATFORM_PYTHON" - <<'PY'
+          import json, os, subprocess
+          receipt = {
+              'schema': 'RealSaS.StructuralEvidenceABSelfHostedSourceWitness.v1',
+              'status': 'PASS__SOURCE_ONLY__NO_SCIENTIFIC_EXECUTION',
+              'head_sha': subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(),
+              'optimizer_steps_executed': 0,
+              'scientific_training_executed': False,
+          }
+          print(json.dumps(receipt, sort_keys=True))
+          PY

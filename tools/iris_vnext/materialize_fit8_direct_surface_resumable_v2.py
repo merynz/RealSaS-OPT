@@ -121,13 +121,22 @@ def _valid_completed_subject(
         return None
     if int(row.get("optimizer_steps_executed", -1)) != 0 or int(row.get("backward_steps_executed", -1)) != 0:
         return None
-    if sha256_file(stage_path) != row.get("stage12_npz_sha256"):
+    stage_sha = sha256_file(stage_path)
+    if stage_sha != row.get("stage12_npz_sha256"):
         return None
     if sha256_file(direct_path) != row.get("receipt_sha256"):
         return None
-    if direct.get("source_commit") != expected_source_sha or direct.get("decoder_id") != DECODER_ID:
+    if direct.get("source_commit") != expected_source_sha or direct.get("subject_id") != subject_id:
+        return None
+    if direct.get("checkpoint_sha256") != v8_checkpoint_sha or direct.get("decoder_id") != DECODER_ID:
+        return None
+    if direct.get("stage12_npz_sha256") != stage_sha:
+        return None
+    if direct.get("candidate_binding_hash") != row.get("candidate_binding_hash"):
         return None
     if int(direct.get("base_cells", -1)) != 512 or int(direct.get("fine_cells", -1)) != 1024:
+        return None
+    if direct.get("teacher_truth_used") is not False or direct.get("compiler_qualified") is not False:
         return None
     return row
 
@@ -263,7 +272,6 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
         if row is None:
             raise RuntimeError("DIRECT_SURFACE_V2_SUBJECT_CHILD_EXITED_ZERO_WITHOUT_VALID_RECEIPT:" + subject_id)
         completed.append(row)
-        # A previous failure receipt is stale only after a new subject PASS.
         (output_root / "DIRECT_IRIS_SURFACE_PARENT_FAILURE_V2.json").unlink(missing_ok=True)
 
     if tuple(row["subject_id"] for row in completed) != SUBJECT_IDS:

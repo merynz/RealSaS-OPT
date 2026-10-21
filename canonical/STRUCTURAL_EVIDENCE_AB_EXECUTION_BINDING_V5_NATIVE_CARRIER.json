@@ -1,12 +1,12 @@
 {
   "schema": "RealSaS.StructuralEvidenceABExecutionBinding.v5NativeCarrier",
   "date_utc": "2026-10-21",
-  "status": "BOUND__NATIVE_V8_MATCHED_CARRIER__PREOPTIMIZER",
+  "status": "BOUND__NATIVE_V8_MATCHED_CARRIER__PREOPTIMIZER__GEOMETRY_COURT_COMPAT_FIXED",
   "branch": "research/structural-evidence-ab-native-carrier-20261021",
   "parent_preregistration": "canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json",
   "preoptimizer_amendment": "canonical/STRUCTURAL_EVIDENCE_AB_NATIVE_V8_MATCHED_CARRIER_AMENDMENT_V1.json",
   "implementation_source": {
-    "commit_sha": "849656a344808a8fbade4b78e1b9cfc556fff839",
+    "commit_sha": "d9f909ef00f41366eca69e849a18b983caecd2e7",
     "policy": "NOTEBOOK_AUTHORITY_HEAD_MUST_BE_THIS_BINDING_COMMIT_OR_DESCENDANT_WITH_NO_H1_SOURCE_DRIFT"
   },
   "carrier_contract": {
@@ -14,6 +14,7 @@
     "carrier_authority": "INFERENCE_ADMISSIBLE_FIXED_SURFACE_CARRIER",
     "native_materializer": "tools/iris_vnext/materialize_fit8_v8_native_flexicubes_v1.py",
     "compatibility_adapter": "tools/iris_vnext/materialize_fit8_native_v8_matched_carrier_v1.py",
+    "geometry_measurement_court": "tools/iris_vnext/audit_fit8_native_matched_carrier_geometry_v1.py",
     "corpus_manifest_normalizer": "tools/iris_vnext/normalize_native_carrier_tessa_corpus_manifest_v1.py",
     "native_resolution": 24,
     "same_carrier_for_a_and_b": true,
@@ -45,11 +46,26 @@
     "must_not_be_reinterpreted_as_h1_result": true,
     "must_not_be_deleted_or_bypassed": true
   },
+  "v6_preoptimizer_incident": {
+    "execution_source_sha": "99a6689640e23d9ffb322bedd03c149c5d0ba323",
+    "native_materialization_passed": true,
+    "native_subject_count": 8,
+    "lossless_compatibility_projection_passed": true,
+    "failed_module": "tools.iris_vnext.audit_fit8_direct_surface_geometry_v1",
+    "failure_class": "LEGACY_CONSUMER_STATUS_STRING_MISMATCH",
+    "legacy_required_status": "MATERIALIZED_MODEL_SURFACES__COMPILER_COURT_PENDING",
+    "actual_fixed_carrier_status": "FIXED_NATIVE_V8_R24_CARRIER_PROJECTED_FOR_MATCHED_H1_AB__NO_AUTHORITY_UPGRADE",
+    "optimizer_steps_before_failure": 0,
+    "scientific_result_produced": false,
+    "carrier_geometry_failure_observed": false,
+    "fix": "USE_EXPLICIT_FIXED_NATIVE_CARRIER_GEOMETRY_MEASUREMENT_COURT_WITH_IDENTICAL_MEASUREMENT_KERNELS"
+  },
   "notebook_contract": {
     "requires_physical_a100": true,
     "requires_exact_drive_hash_verification": true,
     "requires_pinned_flexicubes_commit": "4cc7d6c3d0cee83c011ce36721b81adff0dd7db6",
     "requires_native_carrier_array_identity_receipts": true,
+    "requires_explicit_native_carrier_geometry_court": true,
     "requires_corpus_surface_provenance_normalization": true,
     "requires_both_locked_arms": true,
     "requires_all_locked_courts": true,

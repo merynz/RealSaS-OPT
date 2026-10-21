@@ -1,0 +1,34 @@
+{
+  "schema": "RealSaS.IRISVNextDirectSurfaceExactContainmentFailureObservation.v1",
+  "date_utc": "2026-10-21",
+  "status": "OBSERVED_PRE_OPTIMIZER_LEGACY_PROXY_FAILURE__NOT_SCIENTIFIC_FAIL",
+  "execution_source_sha": "39476c024b09fa61bc5bc3e0404123204afeed50",
+  "subject_id": "Snake",
+  "stage": "DECODE_T512_T1024_STARTED",
+  "worker_return_code": 3,
+  "worker_signal": null,
+  "exception_type": "SparseSurfaceTruncationError",
+  "exception_message": "SPARSE_SHELL_TRUNCATES_ZERO_SURFACE:62735467 boundary crossing tetrahedra",
+  "optimizer_steps_executed": 0,
+  "backward_steps_executed": 0,
+  "scientific_ab_court_executed": false,
+  "scientific_pass_or_fail_observed": false,
+  "diagnosis": {
+    "legacy_gate": "boundary_crossing_tets != 0",
+    "canonical_closure": "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json",
+    "closure_status": "CLOSED__NO_ACTUAL_OMITTED_FACE_ESCAPE_IN_ANY_FROZEN_STATE__CONSERVATIVE_DECODER_GATE_FALSIFIED_AS_TRUNCATION_PROXY",
+    "reason_not_scientific_fail": "THE_THROWN_GATE_IS_A_PREVIOUSLY_FALSIFIED_TRUNCATION_PROXY_AND_DID_NOT_EXECUTE_THE_REQUIRED_ACTUAL_SHELL_CONTAINMENT_PROOF"
+  },
+  "required_correction": {
+    "decoder_id": "RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT.ExactShellContainment.v5_1",
+    "containment_gate": "EXACT_REFINED_CARRIER_BOUNDARY_FACE_ZERO_CONTACT_V1",
+    "legacy_boundary_crossing_tets_role": "TELEMETRY_ONLY",
+    "forbid_blind_proxy_disable": true,
+    "model_parameter_bytes_changed": false,
+    "field_semantics_changed": false,
+    "coordinate_semantics_changed": false,
+    "optimizer_or_schedule_changed": false,
+    "court_thresholds_changed": false
+  },
+  "next_boundary": "RUN_CORRECTED_EXACT_CONTAINMENT_SOURCE_ON_PHYSICAL_A100_BEFORE_ANY_STRUCTURAL_EVIDENCE_AB_OPTIMIZER_STEP"
+}

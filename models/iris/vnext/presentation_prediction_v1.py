@@ -2,13 +2,15 @@ from __future__ import annotations
 
 """Observation-time role-free presentation prediction bridge.
 
-This module converts only IRIS predictions plus optional source observations into
-``RoleFreePresentationEvidenceV1``. Materialized V2 teacher/all-hit payloads,
-teacher topology, rig/skin truth and named semantic taxonomies are deliberately
-absent from every forward signature.
+Only IRIS predictions plus optional source observations enter these builders.
+Materialized V2 teacher/all-hit payloads, teacher topology, rig/skin truth and
+named semantic taxonomies are deliberately absent from every inference signature.
 
-The materialized V2 corpus is eligible to supervise/evaluate the specialist
-heads offline; it is never an inference input.
+Prediction validity is fail-closed: a neural value is not evidence merely because
+a head emitted it. Callers must explicitly provide a qualification mask for every
+predicted family. The first Structural Evidence A/B may therefore qualify tie-safe
+front and complete-stack visibility while leaving positive-only occlusion and
+unqualified boundary/static families at ABSTAIN.
 """
 
 from typing import Mapping
@@ -27,6 +29,7 @@ from .presentation_evidence_v1 import (
 PREDICTED_PRESENTATION_PROVENANCE_V1 = {
     "schema": "RealSaS.PredictedRoleFreePresentationProvenance.v1",
     "inference_source": "OBSERVATION_TIME_IRIS_PREDICTIONS_AND_SOURCE_OBSERVATIONS_ONLY",
+    "prediction_validity": "EXPLICIT_FAIL_CLOSED_QUALIFICATION_MASKS",
     "materialized_v2_truth_in_inference_forward": False,
     "teacher_topology_in_inference_forward": False,
     "teacher_rig_or_skin_in_inference_forward": False,
@@ -41,6 +44,19 @@ def _safe_xyz(xyz: torch.Tensor, valid_mask: torch.Tensor, *, name: str) -> torc
         raise ValueError(f"IRIS_PREDICTED_PRESENTATION_V1_{name}_MASK_SHAPE_INVALID")
     valid = valid_mask.bool()
     return torch.where(valid[..., None], xyz, torch.zeros_like(xyz))
+
+
+def _qualified_mask(
+    mask: torch.Tensor | None,
+    *,
+    token_valid_mask: torch.Tensor,
+    name: str,
+) -> torch.Tensor:
+    if mask is None:
+        return torch.zeros_like(token_valid_mask, dtype=torch.bool)
+    if mask.shape != token_valid_mask.shape:
+        raise ValueError(f"IRIS_PREDICTED_PRESENTATION_V1_{name}_VALIDITY_SHAPE_INVALID")
+    return mask.bool() & token_valid_mask.bool()
 
 
 def _expand_camera(
@@ -85,24 +101,27 @@ def surface_presentation_from_predictions_v1(
     camera_features: torch.Tensor,
     token_valid_mask: torch.Tensor,
     appearance: Mapping[str, torch.Tensor],
+    boundary_valid_mask: torch.Tensor | None = None,
     source_rgba: torch.Tensor | None = None,
     source_rgba_valid: torch.Tensor | None = None,
     source_support: torch.Tensor | None = None,
     source_support_valid: torch.Tensor | None = None,
 ) -> RoleFreePresentationEvidenceV1:
-    """Type per-surface appearance/boundary predictions plus source observations."""
+    """Type per-surface predictions and observations with explicit qualification."""
 
-    required = (
-        "alpha_boundary_probability",
-        "appearance_boundary_probability",
-    )
+    required = ("alpha_boundary_probability", "appearance_boundary_probability")
     missing = [name for name in required if name not in appearance]
     if missing:
         raise ValueError(
             "IRIS_PREDICTED_PRESENTATION_V1_APPEARANCE_MISSING:" + ",".join(missing)
         )
     safe_xyz = _safe_xyz(xyz, token_valid_mask, name="SURFACE")
-    valid = token_valid_mask.bool()
+    token_valid = token_valid_mask.bool()
+    boundary_valid = _qualified_mask(
+        boundary_valid_mask,
+        token_valid_mask=token_valid,
+        name="SURFACE_BOUNDARY",
+    )
     camera = _expand_camera(
         camera_features,
         token_count=xyz.shape[1],
@@ -112,20 +131,17 @@ def surface_presentation_from_predictions_v1(
     return build_role_free_presentation_evidence_v1(
         xyz=safe_xyz,
         kind_id=torch.full(
-            xyz.shape[:2],
-            PRESENTATION_KIND_SURFACE,
-            dtype=torch.long,
-            device=xyz.device,
+            xyz.shape[:2], PRESENTATION_KIND_SURFACE, dtype=torch.long, device=xyz.device
         ),
-        token_valid_mask=valid,
+        token_valid_mask=token_valid,
         camera_features=camera,
-        camera_valid=valid,
+        camera_valid=token_valid,
         source_rgba=source_rgba,
         source_rgba_valid=source_rgba_valid,
         alpha_boundary=appearance["alpha_boundary_probability"],
-        alpha_boundary_valid=valid,
+        alpha_boundary_valid=boundary_valid,
         appearance_boundary=appearance["appearance_boundary_probability"],
-        appearance_boundary_valid=valid,
+        appearance_boundary_valid=boundary_valid,
         source_support=source_support,
         source_support_valid=source_support_valid,
     )
@@ -138,10 +154,15 @@ def pair_presentation_from_predictions_v1(
     camera_features: torch.Tensor,
     token_valid_mask: torch.Tensor,
     relations: Mapping[str, torch.Tensor],
+    front_valid_mask: torch.Tensor | None = None,
+    occlusion_valid_mask: torch.Tensor | None = None,
+    boundary_valid_mask: torch.Tensor | None = None,
 ) -> RoleFreePresentationEvidenceV1:
-    """Type pairwise front/occlusion/boundary predictions.
+    """Type pair predictions without upgrading unsupported families to authority.
 
-    Pairwise outputs never acquire global-visibility authority here.
+    Pairwise outputs never acquire global-visibility authority here. In the first
+    V2-tie-safe specialist qualification, front may become valid; positive-only
+    occlusion and projected boundaries remain ABSTAIN unless separately qualified.
     """
 
     required = (
@@ -159,30 +180,36 @@ def pair_presentation_from_predictions_v1(
         raise ValueError("IRIS_PREDICTED_PRESENTATION_V1_PAIR_XYZ_SHAPE_MISMATCH")
     safe_a = _safe_xyz(xyz_a, token_valid_mask, name="PAIR_A")
     safe_b = _safe_xyz(xyz_b, token_valid_mask, name="PAIR_B")
-    valid = token_valid_mask.bool()
+    token_valid = token_valid_mask.bool()
     if camera_features.shape != xyz_a.shape[:2] + (13,):
         raise ValueError("IRIS_PREDICTED_PRESENTATION_V1_PAIR_CAMERA_SHAPE_INVALID")
+    front_valid = _qualified_mask(
+        front_valid_mask, token_valid_mask=token_valid, name="PAIR_FRONT"
+    )
+    occlusion_valid = _qualified_mask(
+        occlusion_valid_mask, token_valid_mask=token_valid, name="PAIR_OCCLUSION"
+    )
+    boundary_valid = _qualified_mask(
+        boundary_valid_mask, token_valid_mask=token_valid, name="PAIR_BOUNDARY"
+    )
     return build_role_free_presentation_evidence_v1(
         xyz=safe_a,
         paired_xyz=safe_b,
-        paired_xyz_valid=valid,
+        paired_xyz_valid=token_valid,
         kind_id=torch.full(
-            xyz_a.shape[:2],
-            PRESENTATION_KIND_PAIR,
-            dtype=torch.long,
-            device=xyz_a.device,
+            xyz_a.shape[:2], PRESENTATION_KIND_PAIR, dtype=torch.long, device=xyz_a.device
         ),
-        token_valid_mask=valid,
+        token_valid_mask=token_valid,
         camera_features=camera_features,
-        camera_valid=valid,
+        camera_valid=token_valid,
         alpha_boundary=relations["projected_alpha_boundary_probability"],
-        alpha_boundary_valid=valid,
+        alpha_boundary_valid=boundary_valid,
         appearance_boundary=relations["projected_appearance_boundary_probability"],
-        appearance_boundary_valid=valid,
+        appearance_boundary_valid=boundary_valid,
         front_probability=relations["front_probability"],
-        front_valid=valid,
+        front_valid=front_valid,
         occlusion_probability=relations["occlusion_probability"],
-        occlusion_valid=valid,
+        occlusion_valid=occlusion_valid,
     )
 
 
@@ -192,15 +219,19 @@ def ray_hit_presentation_from_predictions_v1(
     camera_features: torch.Tensor,
     hit_valid_mask: torch.Tensor,
     global_visibility_probability: torch.Tensor,
+    global_visibility_valid_mask: torch.Tensor | None = None,
 ) -> RoleFreePresentationEvidenceV1:
-    """Type global visibility predicted from a complete ordered ray stack."""
+    """Type complete-stack global visibility with explicit qualification."""
 
     if global_visibility_probability.shape != hit_xyz.shape[:2]:
-        raise ValueError(
-            "IRIS_PREDICTED_PRESENTATION_V1_RAY_VISIBILITY_SHAPE_INVALID"
-        )
+        raise ValueError("IRIS_PREDICTED_PRESENTATION_V1_RAY_VISIBILITY_SHAPE_INVALID")
     safe_xyz = _safe_xyz(hit_xyz, hit_valid_mask, name="RAY")
-    valid = hit_valid_mask.bool()
+    hit_valid = hit_valid_mask.bool()
+    visibility_valid = _qualified_mask(
+        global_visibility_valid_mask,
+        token_valid_mask=hit_valid,
+        name="RAY_VISIBILITY",
+    )
     camera = _expand_camera(
         camera_features,
         token_count=hit_xyz.shape[1],
@@ -210,14 +241,11 @@ def ray_hit_presentation_from_predictions_v1(
     return build_role_free_presentation_evidence_v1(
         xyz=safe_xyz,
         kind_id=torch.full(
-            hit_xyz.shape[:2],
-            PRESENTATION_KIND_RAY_HIT,
-            dtype=torch.long,
-            device=hit_xyz.device,
+            hit_xyz.shape[:2], PRESENTATION_KIND_RAY_HIT, dtype=torch.long, device=hit_xyz.device
         ),
-        token_valid_mask=valid,
+        token_valid_mask=hit_valid,
         camera_features=camera,
-        camera_valid=valid,
+        camera_valid=hit_valid,
         global_visibility=global_visibility_probability,
-        global_visibility_valid=valid,
+        global_visibility_valid=visibility_valid,
     )

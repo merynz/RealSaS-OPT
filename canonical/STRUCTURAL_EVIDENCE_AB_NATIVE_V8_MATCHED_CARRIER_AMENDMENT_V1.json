@@ -1,0 +1,91 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABNativeV8MatchedCarrierAmendment.v1",
+  "date_utc": "2026-10-21",
+  "status": "LOCKED_PREOPTIMIZER_AMENDMENT__NO_AB_OPTIMIZER_STEP_EXECUTED",
+  "experiment_id": "STRUCTURAL-EVIDENCE-A-B-V2-H1-NATIVE-CARRIER-AMENDMENT-V1",
+  "parent_preregistration": "canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json",
+  "research_question_unchanged": true,
+  "reason": {
+    "failed_precondition_lane": "EXACT_V8_RAW_SCALAR_FIELD__T512_TO_SPARSE_T1024__EXACT_SHELL_CONTAINMENT",
+    "observed_source_sha": "66b1fb0cccc6145057aa325cc7aac877239b297c",
+    "observed_subject": "Snake",
+    "observed_exception": "SPARSE_SHELL_ACTUAL_ZERO_SURFACE_ESCAPE:omitted_faces=0:domain_faces=634",
+    "failure_stage": "DECODE_T512_T1024_STARTED",
+    "optimizer_steps_executed_before_failure": 0,
+    "interpretation": "H1_PRESENTATION_AB_NOT_YET_TESTED__RAW_SPARSE_SURFACE_CARRIER_PRECONDITION_FAILED",
+    "legacy_boundary_proxy_bypass_authorized": false,
+    "exact_containment_failure_ignore_authorized": false
+  },
+  "replacement_carrier": {
+    "carrier_id": "RealSaS.FixedSurfaceCarrier.ExactV8NativeFlexiCubesR24.v1",
+    "authority": "INFERENCE_ADMISSIBLE_FIXED_SURFACE_CARRIER",
+    "producer": "tools/iris_vnext/materialize_fit8_v8_native_flexicubes_v1.py",
+    "compatibility_adapter": "tools/iris_vnext/materialize_fit8_native_v8_matched_carrier_v1.py",
+    "native_resolution": 24,
+    "surface_semantics": "EXACT_V8_TRAINED_FLEXICUBES_PATH_AT_NATIVE_R24",
+    "same_carrier_bytes_for_both_arms": true,
+    "geometry_mutation_in_adapter": false,
+    "topology_mutation_in_adapter": false,
+    "normal_value_mutation_in_adapter": false,
+    "raw_field_sparse_t512_t1024_invoked": false,
+    "teacher_geometry_allowed_in_carrier_inference": false,
+    "teacher_topology_allowed_in_carrier_inference": false,
+    "tessa_invoked_during_carrier_materialization": false,
+    "optimizer_steps_during_carrier_materialization": 0,
+    "compiler_qualified": false,
+    "high_resolution_capability_claimed": false,
+    "product_surface_claimed": false,
+    "native_surface_quality_claimed": false,
+    "role_in_h1": "MATCHED_NUISANCE_CARRIER_ONLY"
+  },
+  "native_control_context": {
+    "prior_control_source_sha": "ccb71011f41b041bc5c137544bc1b97ca394ea9c",
+    "eight_of_eight_native_meshes_materialized": true,
+    "measurement_only": true,
+    "preregistered_native_surface_pass_threshold_present": false,
+    "diagnostic_surface_debt_known": true,
+    "surface_debt_does_not_upgrade_or_disqualify_carrier_for_matched_h1": true
+  },
+  "frozen_parent_controls": {
+    "arm_order": ["A_NULL_PRESENTATION", "B_ROLE_FREE_PRESENTATION"],
+    "seed_set": [26091991],
+    "optimizer_steps_per_arm": 2400,
+    "same_tessa_v3_parameterization": true,
+    "same_initialization_between_arms": true,
+    "same_optimizer_and_schedule": true,
+    "same_update_budget": true,
+    "same_batch_and_sampling_policy": true,
+    "same_checkpoint_schedule": true,
+    "same_topology_teacher_corpus": true,
+    "same_independent_court_thresholds": true,
+    "teacher_topology_in_inference": false,
+    "teacher_rig_skin_in_inference": false,
+    "materialized_v2_truth_in_inference": false,
+    "only_arm_difference_remains_presentation_memory": true
+  },
+  "compatibility_projection_contract": {
+    "purpose": "ALLOW_EXISTING_PRESENTATION_CORPUS_AND_COURT_CONSUMERS_TO_READ_THE_FIXED_NATIVE_CARRIER_WITHOUT_CHANGING_H1_MODEL_OR_COURT_CODE",
+    "legacy_stage12_filename_retained": true,
+    "legacy_direct_batch_schema_retained_for_consumer_compatibility": true,
+    "semantic_authority_source": "NATIVE_V8_WITNESS_RECEIPTS_AND_ARRAY_HASHES",
+    "legacy_schema_does_not_confer_t512_t1024_authority": true,
+    "implicit_normals_slot_source": "NATIVE_WITNESS_VERTEX_NORMALS__RENAME_ONLY",
+    "array_identity_must_be_verified_after_projection": true
+  },
+  "forbidden_shortcuts": [
+    "IGNORE_EXACT_DOMAIN_BOUNDARY_ZERO_CONTACT",
+    "DISABLE_EXACT_CONTAINMENT_TO_RECOVER_RAW_SPARSE_CARRIER",
+    "CAP_OR_CLAMP_RAW_FIELD_TO_FORCE_CONTAINMENT",
+    "CALL_NATIVE_R24_HIGH_RESOLUTION_OR_PRODUCT_QUALIFIED",
+    "USE_DIFFERENT_SURFACE_CARRIER_BETWEEN_A_AND_B",
+    "TEACHER_GEOMETRY_OR_TOPOLOGY_AS_CARRIER_INFERENCE_INPUT",
+    "CHANGE_PARENT_AB_OPTIMIZER_SCHEDULE_OR_THRESHOLDS",
+    "POST_RESULT_THRESHOLD_RELAXATION"
+  ],
+  "implementation": {
+    "branch": "research/structural-evidence-ab-native-carrier-20261021",
+    "adapter_added_at_or_before_sha": "f5ed82cee58fd7084e163038f0dfd023164e0d13",
+    "exact_execution_sha": null,
+    "exact_execution_sha_policy": "BOUND_IN_SEPARATE_EXECUTION_BINDING_AFTER_THIS_AMENDMENT_COMMIT__SELF_REFERENCE_FORBIDDEN"
+  }
+}

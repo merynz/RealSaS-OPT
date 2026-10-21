@@ -19,6 +19,7 @@ TRAINER = ROOT / "tools" / "iris_vnext" / "train_fit8_tessa_v3_structural_eviden
 PREFLIGHT = ROOT / "tools" / "iris_vnext" / "preflight_structural_evidence_ab_a100_v1.py"
 FREE_RUN = ROOT / "tools" / "iris_vnext" / "evaluate_structural_evidence_ab_free_running_v1.py"
 TOPOLOGY_COURT = ROOT / "tools" / "iris_vnext" / "court_structural_evidence_ab_topology_surface_v1.py"
+PRESENTATION_COURT = ROOT / "tools" / "iris_vnext" / "court_structural_evidence_ab_static_presentation_v1.py"
 
 
 class StructuralEvidenceABExecutionV1Tests(unittest.TestCase):
@@ -55,9 +56,10 @@ class StructuralEvidenceABExecutionV1Tests(unittest.TestCase):
             source = path.read_text(encoding="utf-8")
             self.assertIn('scientific_pass_claimed', source, path.name)
             self.assertNotIn('"scientific_pass_claimed": True', source, path.name)
-        court_source = TOPOLOGY_COURT.read_text(encoding="utf-8")
-        self.assertIn('"scientific_ab_pass_claimed": False', court_source)
-        self.assertNotIn('"scientific_ab_pass_claimed": True', court_source)
+        for path in (TOPOLOGY_COURT, PRESENTATION_COURT):
+            source = path.read_text(encoding="utf-8")
+            self.assertIn('"scientific_ab_pass_claimed": False', source, path.name)
+            self.assertNotIn('"scientific_ab_pass_claimed": True', source, path.name)
         preflight = PREFLIGHT.read_text(encoding="utf-8")
         self.assertIn('optimizer_steps_executed": 0', preflight)
         self.assertNotIn('\n    optimizer.step(', preflight)
@@ -74,6 +76,20 @@ class StructuralEvidenceABExecutionV1Tests(unittest.TestCase):
         self.assertIn('topology_surface_no_regression_pass', source)
         self.assertIn('presentation_primary_court_complete', source)
         self.assertIn('motion_primary_court_complete', source)
+        self.assertIn('"scientific_ab_pass_claimed": False', source)
+
+    def test_static_presentation_court_is_evaluation_only_and_leaves_pose_flip_pending(self):
+        source = PRESENTATION_COURT.read_text(encoding="utf-8")
+        for metric in (
+            "GLOBAL_VISIBILITY_ACCURACY",
+            "LOCAL_PARTIAL_ORDER_ACCURACY",
+            "FRAGMENT_IDENTITY_STABILITY",
+            "SOURCE_ART_SUPPORT_PRESERVATION",
+        ):
+            self.assertIn(metric, source)
+        self.assertIn('POSE_DEPENDENT_ORDER_FLIP_ACCURACY', source)
+        self.assertIn('"v2_all_hit_truth_used_as_inference_conditioning": False', source)
+        self.assertIn('"presentation_primary_final_pass_claimed": False', source)
         self.assertIn('"scientific_ab_pass_claimed": False', source)
 
 

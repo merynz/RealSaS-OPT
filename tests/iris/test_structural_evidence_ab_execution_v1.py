@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PREREG = ROOT / "canonical" / "STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json"
 METRICS = ROOT / "canonical" / "STRUCTURAL_EVIDENCE_AB_COURT_METRIC_DEFINITIONS_V1.json"
 TRAINER = ROOT / "tools" / "iris_vnext" / "train_fit8_tessa_v3_structural_evidence_ab_v1.py"
+RESUMABLE_TRAINER = ROOT / "tools" / "iris_vnext" / "train_fit8_tessa_v3_structural_evidence_ab_v2.py"
 PREFLIGHT = ROOT / "tools" / "iris_vnext" / "preflight_structural_evidence_ab_a100_v1.py"
 FREE_RUN = ROOT / "tools" / "iris_vnext" / "evaluate_structural_evidence_ab_free_running_v1.py"
 TOPOLOGY_COURT = ROOT / "tools" / "iris_vnext" / "court_structural_evidence_ab_topology_surface_v1.py"
@@ -53,7 +54,7 @@ class StructuralEvidenceABExecutionV1Tests(unittest.TestCase):
         self.assertNotIn('--teacher-topology', source)
 
     def test_execution_sources_are_fail_closed_before_result_courts(self):
-        ordinary = (TRAINER, PREFLIGHT, FREE_RUN)
+        ordinary = (TRAINER, RESUMABLE_TRAINER, PREFLIGHT, FREE_RUN)
         for path in ordinary:
             source = path.read_text(encoding="utf-8")
             self.assertIn('scientific_pass_claimed', source, path.name)
@@ -66,6 +67,17 @@ class StructuralEvidenceABExecutionV1Tests(unittest.TestCase):
         self.assertIn('optimizer_steps_executed": 0', preflight)
         self.assertNotIn('\n    optimizer.step(', preflight)
         self.assertNotIn('\n        optimizer.step(', preflight)
+
+    def test_resumable_trainer_restores_exact_model_optimizer_rng_lineage(self):
+        source = RESUMABLE_TRAINER.read_text(encoding="utf-8")
+        self.assertIn('_restore_rng', source)
+        self.assertIn('optimizer.load_state_dict', source)
+        self.assertIn('model.load_state_dict', source)
+        self.assertIn('initial_state_sha256', source)
+        self.assertIn('RESUME_LINEAGE_DRIFT', source)
+        self.assertIn('DETERMINISTIC_CHECKPOINT_RESUME_WITH_EXACT_RNG_MODEL_OPTIMIZER_LINEAGE', source)
+        self.assertNotIn('--all-hit', source)
+        self.assertNotIn('--teacher-topology', source)
 
     def test_free_running_uses_both_arms_and_no_sampling(self):
         source = FREE_RUN.read_text(encoding="utf-8")
@@ -111,7 +123,7 @@ class StructuralEvidenceABExecutionV1Tests(unittest.TestCase):
         definitions = json.loads(METRICS.read_text(encoding="utf-8"))
         self.assertEqual(definitions["status"], "FROZEN_BEFORE_AB_OPTIMIZER_EXECUTION")
         self.assertIs(definitions["authority_boundary"]["teacher_or_all_hit_truth_allowed_as_inference_conditioning"], False)
-        self.assertIs(definitions["authority_boundary"]["post_result_definition_or_threshold_relaxation_allowed"] if "post_result_definition_or_threshold_relaxation_allowed" in definitions["authority_boundary"] else definitions["aggregation"]["post_result_definition_or_threshold_relaxation_allowed"], False)
+        self.assertIs(definitions["aggregation"]["post_result_definition_or_threshold_relaxation_allowed"], False)
         self.assertEqual(definitions["presentation_dynamic"]["ray_grid"]["grid_size"], 32)
 
 

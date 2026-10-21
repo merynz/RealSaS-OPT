@@ -1,0 +1,31 @@
+name: structural-evidence-ab-execution-binding-v3
+
+on:
+  pull_request:
+    paths:
+      - 'canonical/STRUCTURAL_EVIDENCE_AB_EXECUTION_BINDING_V3.json'
+      - 'tests/iris/test_structural_evidence_ab_execution_binding_v3.py'
+      - '.github/workflows/structural-evidence-ab-execution-binding-v3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  execution-binding-v3:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install focused test dependency
+        run: python -m pip install --no-input --progress-bar off pytest==8.4.1
+      - name: Validate JSON and compile binding test
+        run: |
+          python -m json.tool canonical/STRUCTURAL_EVIDENCE_AB_EXECUTION_BINDING_V3.json >/dev/null
+          python -m py_compile tests/iris/test_structural_evidence_ab_execution_binding_v3.py
+      - name: Run execution binding v3 test
+        env:
+          PYTHONPATH: .
+        run: python -m pytest -q -s tests/iris/test_structural_evidence_ab_execution_binding_v3.py

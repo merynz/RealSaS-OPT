@@ -15,11 +15,13 @@ from tools.iris_vnext.train_fit8_tessa_v3_structural_evidence_ab_v1 import (
 
 ROOT = Path(__file__).resolve().parents[2]
 PREREG = ROOT / "canonical" / "STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json"
+METRICS = ROOT / "canonical" / "STRUCTURAL_EVIDENCE_AB_COURT_METRIC_DEFINITIONS_V1.json"
 TRAINER = ROOT / "tools" / "iris_vnext" / "train_fit8_tessa_v3_structural_evidence_ab_v1.py"
 PREFLIGHT = ROOT / "tools" / "iris_vnext" / "preflight_structural_evidence_ab_a100_v1.py"
 FREE_RUN = ROOT / "tools" / "iris_vnext" / "evaluate_structural_evidence_ab_free_running_v1.py"
 TOPOLOGY_COURT = ROOT / "tools" / "iris_vnext" / "court_structural_evidence_ab_topology_surface_v1.py"
 PRESENTATION_COURT = ROOT / "tools" / "iris_vnext" / "court_structural_evidence_ab_static_presentation_v1.py"
+DYNAMIC_COURT = ROOT / "tools" / "iris_vnext" / "court_structural_evidence_ab_dynamic_motion_v1.py"
 
 
 class StructuralEvidenceABExecutionV1Tests(unittest.TestCase):
@@ -50,7 +52,7 @@ class StructuralEvidenceABExecutionV1Tests(unittest.TestCase):
         self.assertNotIn('--teacher-mesh', source)
         self.assertNotIn('--teacher-topology', source)
 
-    def test_execution_sources_are_fail_closed_and_do_not_claim_scientific_pass(self):
+    def test_execution_sources_are_fail_closed_before_result_courts(self):
         ordinary = (TRAINER, PREFLIGHT, FREE_RUN)
         for path in ordinary:
             source = path.read_text(encoding="utf-8")
@@ -91,6 +93,26 @@ class StructuralEvidenceABExecutionV1Tests(unittest.TestCase):
         self.assertIn('"v2_all_hit_truth_used_as_inference_conditioning": False', source)
         self.assertIn('"presentation_primary_final_pass_claimed": False', source)
         self.assertIn('"scientific_ab_pass_claimed": False', source)
+
+    def test_dynamic_court_is_teacher_evaluation_only_and_uses_frozen_g3_bounds(self):
+        source = DYNAMIC_COURT.read_text(encoding="utf-8")
+        for metric in (
+            "POSE_DEPENDENT_ORDER_FLIP_ACCURACY",
+            "OWNER_FRAGMENT_STABILITY_OVER_MOTION",
+            "GAP_TEAR_RATE",
+            "ATTACHMENT_PERSISTENCE_WHERE_AUTHORITATIVE",
+            "G3_DYNAMIC_QUALIFICATION",
+        ):
+            self.assertIn(metric, source)
+        self.assertIn('teacher_rig_skin_motion_used_in_inference_forward', source)
+        self.assertIn('INDEPENDENT_EVALUATION_DEFORMATION_FIELD_ONLY', source)
+        self.assertIn('QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json', source)
+        self.assertIn('canonical_m_authorized', source)
+        definitions = json.loads(METRICS.read_text(encoding="utf-8"))
+        self.assertEqual(definitions["status"], "FROZEN_BEFORE_AB_OPTIMIZER_EXECUTION")
+        self.assertIs(definitions["authority_boundary"]["teacher_or_all_hit_truth_allowed_as_inference_conditioning"], False)
+        self.assertIs(definitions["authority_boundary"]["post_result_definition_or_threshold_relaxation_allowed"] if "post_result_definition_or_threshold_relaxation_allowed" in definitions["authority_boundary"] else definitions["aggregation"]["post_result_definition_or_threshold_relaxation_allowed"], False)
+        self.assertEqual(definitions["presentation_dynamic"]["ray_grid"]["grid_size"], 32)
 
 
 if __name__ == "__main__":

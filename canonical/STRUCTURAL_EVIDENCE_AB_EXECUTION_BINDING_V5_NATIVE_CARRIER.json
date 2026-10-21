@@ -1,0 +1,66 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABExecutionBinding.v5NativeCarrier",
+  "date_utc": "2026-10-21",
+  "status": "BOUND__NATIVE_V8_MATCHED_CARRIER__PREOPTIMIZER",
+  "branch": "research/structural-evidence-ab-native-carrier-20261021",
+  "parent_preregistration": "canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json",
+  "preoptimizer_amendment": "canonical/STRUCTURAL_EVIDENCE_AB_NATIVE_V8_MATCHED_CARRIER_AMENDMENT_V1.json",
+  "implementation_source": {
+    "commit_sha": "597c54cbf37e2394c60464fd5395c9b765b6d628",
+    "policy": "NOTEBOOK_AUTHORITY_HEAD_MUST_BE_THIS_BINDING_COMMIT_OR_DESCENDANT_WITH_NO_H1_SOURCE_DRIFT"
+  },
+  "carrier_contract": {
+    "carrier_id": "RealSaS.FixedSurfaceCarrier.ExactV8NativeFlexiCubesR24.v1",
+    "carrier_authority": "INFERENCE_ADMISSIBLE_FIXED_SURFACE_CARRIER",
+    "native_materializer": "tools/iris_vnext/materialize_fit8_v8_native_flexicubes_v1.py",
+    "compatibility_adapter": "tools/iris_vnext/materialize_fit8_native_v8_matched_carrier_v1.py",
+    "native_resolution": 24,
+    "same_carrier_for_a_and_b": true,
+    "raw_field_sparse_t512_t1024_required": false,
+    "raw_field_sparse_t512_t1024_invoked": false,
+    "geometry_mutation_allowed": false,
+    "topology_mutation_allowed": false,
+    "high_resolution_capability_claimed": false,
+    "product_surface_claimed": false,
+    "compiler_qualified": false
+  },
+  "frozen_ab_contract": {
+    "arm_order": ["A_NULL_PRESENTATION", "B_ROLE_FREE_PRESENTATION"],
+    "seed": 26091991,
+    "optimizer_steps_per_arm": 2400,
+    "matched_tessa_capacity": true,
+    "matched_initialization": true,
+    "matched_optimizer_schedule": true,
+    "matched_sampling": true,
+    "matched_checkpoint_schedule": true,
+    "court_thresholds_unchanged_from_parent_preregistration": true,
+    "only_arm_difference": "NULL_PRESENTATION_MEMORY_VS_INFERENCE_ADMISSIBLE_ROLE_FREE_PRESENTATION_MEMORY"
+  },
+  "failure_preservation": {
+    "v5_execution_source_sha": "66b1fb0cccc6145057aa325cc7aac877239b297c",
+    "subject": "Snake",
+    "exception": "SPARSE_SHELL_ACTUAL_ZERO_SURFACE_ESCAPE:omitted_faces=0:domain_faces=634",
+    "optimizer_steps_before_failure": 0,
+    "must_not_be_reinterpreted_as_h1_result": true,
+    "must_not_be_deleted_or_bypassed": true
+  },
+  "notebook_contract": {
+    "requires_physical_a100": true,
+    "requires_exact_drive_hash_verification": true,
+    "requires_pinned_flexicubes_commit": "4cc7d6c3d0cee83c011ce36721b81adff0dd7db6",
+    "requires_native_carrier_array_identity_receipts": true,
+    "requires_both_locked_arms": true,
+    "requires_all_locked_courts": true,
+    "requires_zero_optimizer_preflight_before_training": true,
+    "requires_raw_sparse_lane_disabled": true,
+    "requires_no_teacher_conditioning": true,
+    "requires_no_surface_authority_upgrade": true
+  },
+  "execution_authorization": {
+    "notebook_build_authorized": true,
+    "optimizer_execution_authorized_after_all_preflights_pass": true,
+    "post_result_threshold_relaxation_allowed": false,
+    "unseen_generalization_claimed": false,
+    "canonical_m_authorized": false
+  }
+}

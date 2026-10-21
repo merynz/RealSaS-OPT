@@ -1,0 +1,64 @@
+name: structural-evidence-ab-execution-v1
+
+on:
+  pull_request:
+    paths:
+      - 'canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json'
+      - 'models/iris/vnext/presentation_evidence_v1.py'
+      - 'models/iris/vnext/structure_v4.py'
+      - 'models/tessa/v3/**'
+      - 'tools/iris_vnext/build_fit8_direct_surface_presentation_queries_v1.py'
+      - 'tools/iris_vnext/build_fit8_direct_presentation_memory_v1.py'
+      - 'tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v1.py'
+      - 'tools/iris_vnext/preflight_structural_evidence_ab_a100_v1.py'
+      - 'tools/iris_vnext/evaluate_structural_evidence_ab_free_running_v1.py'
+      - 'tests/iris/test_structural_evidence_ab_execution_v1.py'
+      - '.github/workflows/structural_evidence_ab_execution_v1.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  structural-evidence-ab-execution-v1:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
+      - name: Install pinned source-test dependencies
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Compile execution sources
+        run: |
+          python -m py_compile \
+            tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v1.py \
+            tools/iris_vnext/preflight_structural_evidence_ab_a100_v1.py \
+            tools/iris_vnext/evaluate_structural_evidence_ab_free_running_v1.py \
+            tests/iris/test_structural_evidence_ab_execution_v1.py
+      - name: Verify A/B execution source contract
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: '0'
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+        run: |
+          python -m pytest -q -s \
+            tests/iris/test_structural_evidence_ab_execution_v1.py \
+            tests/iris/test_direct_presentation_memory_v1.py \
+            tests/iris/test_tessa_structuralizer_v3.py
+      - name: Execution lane
+        run: |
+          echo 'source_execution_adapter=present'
+          echo 'a100_preflight_optimizer_steps=0'
+          echo 'scientific_training_executed=false'
+          echo 'exact_execution_merge_binding=pending_post_merge'

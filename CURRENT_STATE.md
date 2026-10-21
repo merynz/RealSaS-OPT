@@ -1,22 +1,20 @@
 # RealSaS-OPT — Current State
 
-**Date:** 2026-10-20  
+**Date:** 2026-10-21  
 **Production authority:** `main` until reviewed merge  
 **Long-term research branch:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
-**Long-term research head after structural-evidence materialization authority:** `f0c5a17fc235ef91e5c9e6a41b4b2efeac44c120`  
-**SCALE-XFER source:** `ec10334a4bd03db6efe3c30d655668e0e31d8660`  
-**SCALE-XFER source gate:** PR #130 — **MERGED**  
-**Structural-evidence source bridge:** PR #132 — **MERGED**  
-**Structural-evidence materialization authority:** PR #133 — **MERGED**  
-**Active research lane:** `SHARED_STRUCTURAL_EVIDENCE`  
-**Active workstream:** `STRUCTURAL_EVIDENCE_INPUT_MATERIALIZATION_HANDOFF`  
-**Execution policy:** **SOURCE PREPARATION IS COMPLETE. STOP BEFORE THE NEXT NOTEBOOK.** No scientific diagnostic/court, optimizer, backward step, Relation/TESSA training, or scientific PASS/FAIL run is authorized.
+**Current long-term source before this authority-sync PR:** `ebfe80fc9d0c43cc8075d3d38bdbc9231357b969`  
+**Active lane:** `SHARED_STRUCTURAL_EVIDENCE`  
+**Active workstream:** `STRUCTURAL_EVIDENCE_AB_NOTEBOOK_BUILD_AND_HANDOFF`  
+**Execution policy:** source design, evidence admission, preregistration, trainer/preflight/free-running and independent court source are closed. **Build the fail-closed notebook, then stop for explicit user handoff before any optimizer/scientific execution.**
 
-Machine-readable continuation authority: `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V3.json`.
+Machine-readable continuation authority: `canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V4.json`.
 
-Active research plan: `docs/research/IRIS_SHARED_STRUCTURAL_EVIDENCE_PLAN_20261020.md`.
+Exact execution binding: `canonical/STRUCTURAL_EVIDENCE_AB_EXECUTION_BINDING_V1.json`.
 
-Materialization binding: `canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V1.json`.
+Locked preregistration: `canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json`.
+
+Frozen court definitions: `canonical/STRUCTURAL_EVIDENCE_AB_COURT_METRIC_DEFINITIONS_V1.json`.
 
 ## Product invariant
 
@@ -38,123 +36,153 @@ ONE canonical animation-ready M / graphics structure
 3D mechanics → source-preserved editable 2D presentation
 ```
 
-There is no independent deformable visual mesh. Compiler alone mints canonical M. Named semantic classes may be auxiliary metadata; they are not structural authority.
+There is no independent deformable visual mesh. Compiler alone may mint canonical M. Named semantic classes and material IDs are not structural/drawable-owner authority.
 
-## Immutable V8 authority
+## Sealed geometry lineage retained
 
-- source `5083c9915533ec8ec6530c7d229c635887abfea7`;
-- step `12000`;
-- checkpoint SHA256 `0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5`;
-- binding SHA256 `735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2`;
-- shared scene core sealed after M1.
+The Structural-Evidence workstream supersedes the **next-work boundary**, not historical scientific results. The earlier geometry sequence remains sealed and queryable:
 
-## Closed geometry evidence
+- `SURF-A1` — scientific fail under frozen-H representation rescue; no automatic SURF-A2 authorization;
+- `H-REP-P0` — scientific fail with strong local geometry signal;
+- `H-GEO-P1` — material geometry rescue, scientific fail;
+- `H-GEO-P2` — scene+field retraining, scientific fail after partial absolute-gate improvement;
+- `H-GEO-P3` — explicit high-resolution geometry carrier, scientific fail while preserving shared V8;
+- `H-GEO-P3-EFREQ` — completed `UNRESOLVED`, zero optimizer/probe optimizer steps;
+- `H-GEO-P3-SCALE-XFER` — completed `MIXED`, zero optimizer/probe optimizer steps.
 
-- `SURF-A0`: historical raw-field transition falsified.
-- `SURF-C0`: native V8 extraction debt measured.
-- `SURF-A1`: extraction rescue improved quality but failed locked high-fidelity gates.
-- `H-REP-P0`: sealed V8 H contains strong local geometry signal but fails absolute metric fidelity.
-- `H-GEO-P1`: exact-triangle field-only retraining materially improved H but remained below absolute gates.
-- `H-GEO-P2`: scene+field retraining passed distance/normal/near and all vs-P1 gates, but endpoint and shared-H retention failed.
-- `H-GEO-P3`: dedicated geometry carrier preserved V8 exactly and passed distance/normal/near, but endpoint p95 failed and worsened versus P2.
-- `H-GEO-P3-EFREQ`: sealed `UNRESOLVED`, zero optimizer/probe steps.
-- `H-GEO-P3-SCALE-XFER`: sealed `MIXED`, zero optimizer/probe steps.
+These results are not reopened or overwritten by the current A/B work. In particular, SCALE-XFER does not automatically authorize H-GEO-P4, and the current endpoint diagnostic is not silently promoted to a universal product gate.
 
-### H-GEO-P3-SCALE-XFER — sealed `MIXED`
+## Current sealed research chain
 
-Authority: `docs/research/IRIS_H_GEO_P3_SCALE_XFER_RESULT_20261020.json`.
+### 1. V2 tie-safe evidence — ADMITTED
 
-- execution source `ec10334a4bd03db6efe3c30d655668e0e31d8660`;
-- PR #130 merged at the exact source SHA;
-- audit SHA256 `17a50b91cba1c2408916433174c8f528ba76c5e5bf8e84cce6a7e3675a5c8468`;
-- query CSV SHA256 `86912cad74776a4d31e2f2e18b1d35de594030b1e3f6cc5ca26a63aa460053c`;
-- exact EFREQ input query SHA256 `41bf4f6bf1d90fa639e01fc799c032fb276ef51dd833fed1891ce4ce7c87a16d`;
-- optimizer / probe optimizer steps `0 / 0`;
-- `target_multisurface = true`;
-- `view_input_resolution = true`;
-- `carrier_transfer = true`;
-- no checkpoint written;
-- no TESSA invocation;
-- no P4, SURF-A2 or TESSA training authorization.
+Authority: `canonical/STRUCTURAL_EVIDENCE_INPUT_ADMISSION_V2.json`.
 
-Interpretation: the current P3 endpoint-precision lineage is limited by multiple factors. This result does **not** falsify the shared-scene hypothesis and does **not** force P4 to be the immediate program step.
+- status: `ADMITTED_TIE_SAFE_HASHED_EVIDENCE_ONLY__NO_SCIENTIFIC_PASS`;
+- exact evidence authority head: `7e7b4311910aa4379ef2a0e4c1a00f8e7e39af7a`;
+- materializer source: `7ae9b4886ec15725fcd95b7cfaeeb7aeab02b050`;
+- Fit8 subjects: `8`;
+- oriented pair rows: `3,499,296`;
+- manifest SHA256: `9accf4d2ca85e90e23a3c7ed2a490329676582c5e6759b5d4a1df84df998bb1f`;
+- receipt SHA256: `8323945b0b4f8d54dec44458d1e8b5d40e51a8e38ace13bb04b0e4533099fc01`;
+- Drive round-trip verified;
+- optimizer/backward `0 / 0`;
+- no scientific A/B result.
 
-## Geometry provider boundary
+Tie-safe law:
 
-Geometry remains required, but the program treats it behind a typed interface:
+- pair front: strict depth order; equal depth within epsilon = ABSTAIN;
+- global visibility: unique minimum visible; tied minima ABSTAIN; deeper hits valid-invisible;
+- V2/teacher truth is supervision/evaluation authority only, never B-arm inference conditioning.
+
+### 2. Inference-safe role-free presentation path — MERGED
+
+PR #137 merged at:
+
+`b0a2ae68a7ef8652f0e319495def0304c1faa03e`
+
+The observation-time presentation producer and TESSA presentation-memory bridge use model-produced surface anchors plus admitted source observations. Teacher geometry/topology and material/named-semantic owner shortcuts are forbidden.
+
+### 3. Structural-Evidence A/B preregistration V2 — LOCKED
+
+PR #138 merged at:
+
+`d9e7178a597e986cef2067e5d45210f5bafdfd52`
+
+Locked experiment:
 
 ```text
-QUALIFIED_SURFACE_PROVIDER
-        ↓
-XYZ / normals / local scene evidence / mechanics
+A — A_NULL_PRESENTATION
+scene + surface/mechanics + matched null presentation memory
+
+B — B_ROLE_FREE_PRESENTATION
+same architecture/capacity/data/update budget
++ inference-admissible role-free presentation memory
 ```
 
-A future provider may be a RealSaS P4 lineage or another separately preregistered specialist. `MIXED` does not automatically authorize either. Endpoint precision remains a diagnostic of the current carrier lineage; it is not silently promoted into a universal product requirement without a necessity result.
+Shared protocol:
 
-## Structural-evidence source bridge — complete
+- architecture `RealSaS.TESSA.Structuralizer.v3` through bridge V4;
+- `d_model=1024`, `24` decoder layers, total conditioning tokens `1024`;
+- seed `[26091991]`;
+- AdamW `1e-4`, betas `0.9/0.95`, weight decay `0.01`, clip `1.0`;
+- `2400` optimizer steps per arm;
+- identical initialization, schedule, subject/window policy and checkpoint schedule;
+- final-step free-running evaluation; no sampling;
+- thresholds locked before results; no post-result relaxation.
 
-PR #132 merged the source-only `STRUCTURAL_EVIDENCE_V3` bridge. The repository now has:
+### 4. A/B execution source + independent courts — MERGED AND GREEN
 
-- Graphics Truth V3 with pairwise front/order separated from global visibility;
-- complete ordered ray-stack visibility truth with incomplete-stack ABSTAIN semantics;
-- role-free typed presentation evidence with explicit validity;
-- TESSA V3 tri-stream scene + surface/mechanics + presentation memory;
-- matched `1024` total conditioning-token budget for null-control and presentation-evidence arms;
-- V2-compatible topology tokenizer/grammar and decoder width/depth/vocabulary;
-- structuralization bridge V4 and Compiler presentation regressions;
-- draft `STRUCTURAL-EVIDENCE-A-B` preregistration.
+PR #139 merged at exact execution source:
 
-No scientific result is claimed by source existence.
+`ebfe80fc9d0c43cc8075d3d38bdbc9231357b969`
 
-## Evidence materialization authority — complete source preparation
+Source now includes:
 
-PR #133 merged the fail-closed source authority for the next zero-optimizer evidence materialization. Its scientific implementation is frozen at:
+- resumable matched-capacity TESSA V3 A/B trainer;
+- full-reference physical-A100 preflight with real forward/backward and **0 optimizer steps**;
+- strict final-step free-running evaluator for both arms;
+- topology/surface no-regression court;
+- static presentation court for global visibility, local partial order, fragment identity and source-art support;
+- dynamic authored-motion court for pose-dependent order flips, owner-fragment stability, gap/tear and G3 no-regression;
+- final locked scientific decision inside the dynamic court;
+- hosted and self-hosted source gates.
 
-`e9f8e42445f0edca28a869a9164e54892095d9d4`
+All six required PR-head workflows completed `success`, including the dedicated hosted execution gate and the self-hosted source witness. The self-hosted witness uses an isolated pinned source-test Python; it does not mutate the platform CPU adapter runtime and executes `0` optimizer steps.
 
-`canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V1.json` binds:
+No scientific training/court has run.
 
-- exact Stage01 bundle and bootstrap authority;
-- exact legacy Fit8 normalization/shard hashes;
-- exact authored-teacher batch and per-subject teacher/receipt hashes;
-- exact sealed prepared Fit8 receipt/manifest;
-- all-hit producer policy (`8192` candidate rays/view, grid `32`);
-- pairwise front/order versus complete-stack global-visibility semantics;
-- positive-only same-ray occlusion support;
-- separate current-view RGBA/alpha boundary authority;
-- no material-ID owner labels, named-semantic structural authority, or teacher topology/rig in inference.
+## Independent motion-evaluation boundary
 
-The associated source gate was green before merge, including the structuralization source contract, historical geometry/source contracts, mainline model gate, completion audit and architecture-freeze gate.
+Fit8 does **not** silently assume an AXIS/MIRA product fit. The isolated TESSA A/B court uses the existing authored-teacher rest/posed geometry only as an independent evaluation deformation field, applied identically to A and B through exact closest-point barycentric binding.
 
-**The all-hit evidence artifact still does not exist.** There is no admitted `ALL_HIT_RELATION_EVIDENCE_V1_MANIFEST.json` in Drive. Source readiness must not be mistaken for artifact existence.
+This is evaluator authority only:
 
-The admission validator `tools/iris_vnext/validate_structural_evidence_input_binding_v1.py` validates the static binding and, after materialization, fails closed on manifest policy, subject/hash drift, authority drift and tampering.
+- teacher rig/skin/motion never enters either arm's inference forward or training conditioning;
+- the court cannot mint canonical M/G/W;
+- product AXIS/MIRA promotion remains a later, separate system stage.
 
-## Immediate next execution boundary — user handoff required now
+Dynamic numerical bounds reuse the frozen subject-free product policy: area ratio `[0.05, 20]`, condition number `<=16`.
 
-The next operation is `STRUCTURAL-EVIDENCE-INPUT-MATERIALIZATION-V1` and requires a **new run-all notebook** because it must hydrate sealed Drive bytes and materialize the all-hit/presentation evidence corpus.
+## Immediate next boundary — notebook build, then user handoff
 
-That notebook is limited to:
+The next artifact is one fail-closed physical-A100 run-all notebook for:
 
-1. exact input hydration + SHA verification;
-2. zero-optimizer all-hit evidence materialization for Fit8;
-3. `ALL_HIT_RELATION_EVIDENCE_V1_MANIFEST.json` emission;
-4. eight per-subject artifact hashes;
-5. fail-closed admission validation;
-6. typed receipt persistence.
+`STRUCTURAL-EVIDENCE-A-B-V2-A100-RUN-ALL`
 
-It must perform **0 optimizer steps and 0 backward steps**, no Relation/TESSA training, no scientific A/B court, and no PASS/FAIL claim about the research hypothesis.
+Notebook build is authorized. **Notebook execution is not.**
 
-Only after an admitted evidence corpus exists may the program return to source-only work, bind the presentation-evidence input, lock the A/B seed/optimizer/update budget and numeric court thresholds, and build a separate scientific training notebook.
+Required order:
 
-## Current non-authorizations
+1. hydrate exact admitted V2 evidence, prepared Fit8 inputs, direct presentation memory and authored teacher evaluation artifacts;
+2. verify every bound SHA before use;
+3. checkout exact execution source `ebfe80fc9d0c43cc8075d3d38bdbc9231357b969`;
+4. require physical A100 and run zero-optimizer engineering preflight;
+5. train A for exactly `2400` steps;
+6. train B for exactly `2400` steps;
+7. run strict final-step free-running evaluation for both arms;
+8. run topology/surface court;
+9. run static presentation court;
+10. run dynamic authored-motion + final decision court;
+11. persist checkpoints, receipts, court JSONs and hashes.
 
-- no H-GEO-P4 training;
-- no SURF-A2 scientific run;
-- no TESSA V2/V3 training;
-- no Relation model training;
-- no Structural-Evidence A/B court execution;
-- no scientific diagnostic execution;
-- no notebook execution without explicit user handoff.
+A locked scientific **FAIL is a valid completed experiment**. The notebook must not convert FAIL into an exception that invites threshold/capacity changes; infrastructure/integrity failures must fail closed separately.
 
-The current source-preparation task is complete. The correct continuation is the materialization-notebook handoff, not additional silent source work.
+## Hard non-authorizations
+
+Until explicit user handoff for the notebook:
+
+- no A/B optimizer step;
+- no scientific court execution;
+- no result observation;
+- no reduced-capacity fallback;
+- no threshold relaxation;
+- no teacher/all-hit truth as inference conditioning;
+- no H-GEO-P4 or SURF-A2 automatic detour;
+- no claim of unseen generalization or product promotion.
+
+## Immutable older authorities retained
+
+IRIS V8 remains immutable at source `5083c9915533ec8ec6530c7d229c635887abfea7`, step `12000`, checkpoint SHA256 `0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5`, binding SHA256 `735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2`.
+
+`H-GEO-P3-SCALE-XFER` remains sealed `MIXED`; it does not automatically authorize P4 and does not falsify the shared-scene hypothesis.

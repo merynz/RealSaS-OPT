@@ -1,0 +1,137 @@
+{
+  "schema": "RealSaS.IRISResearchExperimentLedger.v4",
+  "date_utc": "2026-10-21",
+  "purpose": "SINGLE_MACHINE_READABLE_CONTINUATION_AUTHORITY_FOR_STRUCTURAL_EVIDENCE_AB_NOTEBOOK_HANDOFF",
+  "supersedes": "canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V3.json",
+  "production_authority": "main",
+  "long_term_research_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
+  "active_lane": "SHARED_STRUCTURAL_EVIDENCE",
+  "active_workstream": "STRUCTURAL_EVIDENCE_AB_NOTEBOOK_BUILD_AND_HANDOFF",
+  "authority_law": {
+    "repository_source_is_scientific_result": false,
+    "drive_path_is_scientific_authority": false,
+    "artifact_hash_plus_typed_receipt_required": true,
+    "compiler_mints_canonical_M_only": true,
+    "teacher_truth_allowed_in_inference_forward": false,
+    "fit8_is_unseen_generalization": false,
+    "named_semantic_taxonomy_is_structural_authority": false,
+    "material_id_is_drawable_owner_truth": false,
+    "unknown_and_abstain_are_first_class": true,
+    "pairwise_front_is_global_visibility": false
+  },
+  "immutable_model_authority": {
+    "model": "IRIS_V8",
+    "source_commit": "5083c9915533ec8ec6530c7d229c635887abfea7",
+    "global_step": 12000,
+    "checkpoint_sha256": "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5",
+    "binding_sha256": "735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2",
+    "scene_core_policy": "SEALED_AFTER_M1"
+  },
+  "structural_evidence_input_authority": {
+    "admission": "canonical/STRUCTURAL_EVIDENCE_INPUT_ADMISSION_V2.json",
+    "status": "ADMITTED_TIE_SAFE_HASHED_EVIDENCE_ONLY__NO_SCIENTIFIC_PASS",
+    "authority_head_sha": "7e7b4311910aa4379ef2a0e4c1a00f8e7e39af7a",
+    "materializer_source_sha": "7ae9b4886ec15725fcd95b7cfaeeb7aeab02b050",
+    "manifest_sha256": "9accf4d2ca85e90e23a3c7ed2a490329676582c5e6759b5d4a1df84df998bb1f",
+    "receipt_sha256": "8323945b0b4f8d54dec44458d1e8b5d40e51a8e38ace13bb04b0e4533099fc01",
+    "subject_count": 8,
+    "oriented_pair_rows": 3499296,
+    "drive_roundtrip_verified": true,
+    "optimizer_steps_executed": 0,
+    "scientific_result_claimed": false
+  },
+  "presentation_inference_binding": {
+    "source_pr": 137,
+    "merge_sha": "b0a2ae68a7ef8652f0e319495def0304c1faa03e",
+    "status": "IMPLEMENTED_AND_MERGED",
+    "anchor_authority": "MODEL_PRODUCED_SURFACE_ONLY",
+    "teacher_or_all_hit_truth_as_inference_conditioning": false
+  },
+  "ab_preregistration": {
+    "path": "canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json",
+    "source_pr": 138,
+    "merge_sha": "d9e7178a597e986cef2067e5d45210f5bafdfd52",
+    "status": "LOCKED_PREOPTIMIZER_SOURCE_CONTRACT__USER_HANDOFF_REQUIRED",
+    "arms": ["A_NULL_PRESENTATION", "B_ROLE_FREE_PRESENTATION"],
+    "seed_set": [26091991],
+    "optimizer_steps_per_arm": 2400,
+    "matched_capacity": true,
+    "thresholds_locked_before_results": true
+  },
+  "ab_execution_source": {
+    "source_pr": 139,
+    "pr_head_sha": "a36b4e5135b5dd742be27f97388e17a0e0a17ca1",
+    "merge_sha": "ebfe80fc9d0c43cc8075d3d38bdbc9231357b969",
+    "execution_binding": "canonical/STRUCTURAL_EVIDENCE_AB_EXECUTION_BINDING_V1.json",
+    "metric_definitions": "canonical/STRUCTURAL_EVIDENCE_AB_COURT_METRIC_DEFINITIONS_V1.json",
+    "trainer": "tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v2.py",
+    "preflight": "tools/iris_vnext/preflight_structural_evidence_ab_a100_v1.py",
+    "free_running": "tools/iris_vnext/evaluate_structural_evidence_ab_free_running_v1.py",
+    "topology_surface_court": "tools/iris_vnext/court_structural_evidence_ab_topology_surface_v1.py",
+    "static_presentation_court": "tools/iris_vnext/court_structural_evidence_ab_static_presentation_v1.py",
+    "dynamic_motion_final_court": "tools/iris_vnext/court_structural_evidence_ab_dynamic_motion_v1.py",
+    "all_required_source_ci_green": true,
+    "scientific_training_executed": false,
+    "scientific_ab_court_executed": false
+  },
+  "scientific_question": "Does inference-admissible role-free presentation evidence improve learned topology structuralization and downstream presentation/motion behavior beyond the same scene+surface+mechanics evidence alone?",
+  "scientific_scope": "FIT8_SHARED_SYSTEM_CONTRACT_QUALIFICATION__NOT_UNSEEN_GENERALIZATION__NOT_PRODUCT_PROMOTION",
+  "completed_work": [
+    "V2_TIE_SAFE_EVIDENCE_MATERIALIZED_AND_ADMITTED",
+    "INFERENCE_SAFE_ROLE_FREE_PRESENTATION_PRODUCER_AND_MEMORY_BINDING_MERGED",
+    "MATCHED_CAPACITY_AB_PREREGISTRATION_LOCKED_BEFORE_RESULTS",
+    "A100_ZERO_OPTIMIZER_PREFLIGHT_SOURCE_MERGED",
+    "MATCHED_AB_TRAINER_AND_RESUME_SOURCE_MERGED",
+    "STRICT_FINAL_STEP_FREE_RUNNING_SOURCE_MERGED",
+    "TOPOLOGY_SURFACE_STATIC_PRESENTATION_DYNAMIC_MOTION_COURTS_MERGED",
+    "FINAL_DYNAMIC_COURT_OWNS_LOCKED_SCIENTIFIC_DECISION",
+    "HOSTED_AND_SELF_HOSTED_SOURCE_GATES_GREEN",
+    "EXACT_EXECUTION_MERGE_SHA_BOUND_POST_MERGE"
+  ],
+  "blocked_or_not_authorized": {
+    "H_GEO_P4_TRAINING": true,
+    "SURF_A2_SCIENTIFIC_RUN": true,
+    "RELATION_MODEL_TRAINING": true,
+    "STRUCTURAL_EVIDENCE_AB_NOTEBOOK_EXECUTION": true,
+    "STRUCTURAL_EVIDENCE_AB_OPTIMIZER_EXECUTION": true,
+    "STRUCTURAL_EVIDENCE_AB_COURT_EXECUTION": true,
+    "NEW_SCIENTIFIC_RESULT_BEFORE_USER_HANDOFF": true
+  },
+  "next_execution_boundary": {
+    "id": "STRUCTURAL-EVIDENCE-A-B-V2-A100-RUN-ALL",
+    "type": "PREREGISTERED_MATCHED_CAPACITY_AB_TRAINING_AND_INDEPENDENT_COURT",
+    "source_sha": "ebfe80fc9d0c43cc8075d3d38bdbc9231357b969",
+    "requires_new_run_all_notebook": true,
+    "notebook_build_authorized": true,
+    "notebook_execution_authorized": false,
+    "requires_user_handoff_before_execution": true,
+    "requires_physical_a100": true,
+    "required_sequence": [
+      "HYDRATE_AND_VERIFY_EXACT_BOUND_INPUTS",
+      "RUN_ZERO_OPTIMIZER_A100_PREFLIGHT",
+      "TRAIN_A_NULL_PRESENTATION_2400_STEPS",
+      "TRAIN_B_ROLE_FREE_PRESENTATION_2400_STEPS",
+      "RUN_STRICT_FINAL_STEP_FREE_RUNNING_BOTH_ARMS",
+      "RUN_TOPOLOGY_SURFACE_NO_REGRESSION_COURT",
+      "RUN_STATIC_PRESENTATION_COURT",
+      "RUN_DYNAMIC_AUTHORED_MOTION_AND_FINAL_DECISION_COURT",
+      "PERSIST_HASHED_RECEIPTS_AND_ARTIFACTS"
+    ],
+    "forbidden_shortcuts": [
+      "TEACHER_OR_V2_ALL_HIT_TRUTH_AS_INFERENCE_CONDITIONING",
+      "TEACHER_TOPOLOGY_RIG_OR_SKIN_IN_INFERENCE_FORWARD",
+      "NAMED_SEMANTIC_OR_MATERIAL_OWNER_AUTHORITY",
+      "DIFFERENT_MODEL_CAPACITY_OR_UPDATE_BUDGET_BETWEEN_ARMS",
+      "REDUCED_CAPACITY_FALLBACK",
+      "POST_RESULT_THRESHOLD_RELAXATION",
+      "TEACHER_FORCED_CHECKPOINT_SELECTION",
+      "SCIENTIFIC_PASS_FROM_CI_OR_PREFLIGHT"
+    ]
+  },
+  "assistant_continuation_policy": {
+    "continue_source_only_until_notebook_is_built": true,
+    "stop_before_notebook_execution": true,
+    "stop_before_optimizer_or_scientific_court_execution": true,
+    "report_notebook_handoff_boundary_explicitly": true
+  }
+}

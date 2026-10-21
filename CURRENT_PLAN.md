@@ -1,309 +1,222 @@
 # RealSaS-OPT — Current Plan
 
-**Date:** 2026-10-19  
-**Status:** POST-V9 RELATION EVIDENCE QUALIFICATION / V10 TRAINING BLOCKED  
-**Active source line:** `research/iris-vnext-post-v8-quality-plan-20261018`  
-**Production authority:** `main` until reviewed merge  
-**Last completed scientific attempt:** V9 focused relation `ATTEMPT_001` at source `7029ee3f48787aa9f7e27eecef89155eb9368a96`  
-**Next optimizer policy:** **NO V10 OPTIMIZER STEP** until richer teacher evidence, Truth V3 support, preregistration, materialization and readiness are all sealed.
+**Date:** 2026-10-21  
+**Status:** **V2 TIE-SAFE EVIDENCE ADMITTED; INFERENCE-SAFE PRESENTATION MERGED; A/B PREREG LOCKED; EXECUTION SOURCE + COURTS MERGED; BUILD RUN-ALL NOTEBOOK THEN HAND OFF**  
+**Production authority:** `main`  
+**Long-term research branch:** `research/iris-vnext-hybrid-tessa-v2-20261019`  
+**Active lane:** `SHARED_STRUCTURAL_EVIDENCE`  
+**Active workstream:** `STRUCTURAL_EVIDENCE_AB_NOTEBOOK_BUILD_AND_HANDOFF`  
+**Execution policy:** continue source/artifact assembly only until the notebook is complete. **Stop before notebook execution, optimizer steps or scientific court execution.**
 
-## 0. Non-negotiable rules
+## Historical research continuity retained
 
-### One canonical carrier
+The current Structural-Evidence workstream supersedes the next-work boundary only. The historical V1 geometry ledger remains sealed with active experiment pointer `H-GEO-P3-SCALE-XFER`; that experiment is completed `MIXED`, executes zero optimizer/probe-optimizer steps, does not authorize H-GEO-P4, and is not reopened by this plan. Earlier sealed `SURF-A1`, `H-REP-P0`, `H-GEO-P1`, `H-GEO-P2-SCENE-FIELD`, `H-GEO-P3-EXPLICIT-HIRES-CARRIER`, and `H-GEO-P3-EFREQ` results remain historical scientific authority.
 
-```text
-K x candidate M*
-        ↓
-static admission + candidate mechanics
-        ↓
-deterministic selection
-        ↓
-ONE canonical M/G/W_M
-        ↓
-Graphics + Motion + Runtime
-```
+## Objective
 
-A second deformable visual mesh remains forbidden.
-
-### Post-M1 carrier seal
+Test the actual shared-scene structural hypothesis without semantic shortcuts:
 
 ```text
-Geometry + Mechanics -> shared H -> M1 seal -> A/R/T/J specialist learning
+8 views
+  ↓
+IRIS shared structural scene
+  + qualified metric surface evidence
+  ↓
+geometry + graphics + mechanics evidence
+  ↓
+role-free topology structuralization
+  ↓
+Compiler qualification
+  ↓
+ONE persistent animation-ready canonical structure
+  ↓
+3D mechanics → source-preserved editable 2D presentation
 ```
 
-`scene_core` remains sealed unless a separate preregistered falsification court authorizes reopening it.
+The immediate question is narrower and preregistered:
 
-### Truth / conditioning
+> Does inference-admissible role-free presentation evidence improve learned topology structuralization and downstream presentation/motion behavior beyond the same scene+surface+mechanics evidence alone?
 
-- unknown is first-class;
-- unidentifiable owner/amodal/presentation targets abstain;
-- view-conditioned truth requires matching prediction conditioning;
-- authored-motion evidence is **not** promoted to supervision unless the prediction path has sufficient conditioning or an identifiability court proves it is decodable without added pose state;
-- Compiler/runtime may consume admissible evidence but may not manufacture missing truth.
+This experiment is Fit8 shared-system contract qualification. It is **not** unseen-generalization evidence and does not itself authorize product M.
 
-## 1. V9 completed result — scoped scientific PASS only
+## Closed prerequisites
 
-V9 focused relation attempt completed at:
+### P1 — tie-safe V2 evidence — CLOSED
+
+`canonical/STRUCTURAL_EVIDENCE_INPUT_ADMISSION_V2.json`
+
+- 8 Fit8 subjects;
+- 3,499,296 oriented pair rows;
+- unique-min global visibility, tied minima ABSTAIN;
+- pairwise equal-depth ties ABSTAIN;
+- Drive round-trip verified;
+- 0 optimizer / 0 backward;
+- manifest SHA256 `9accf4d2ca85e90e23a3c7ed2a490329676582c5e6759b5d4a1df84df998bb1f`.
+
+### P2 — inference-safe role-free presentation producer — CLOSED
+
+PR #137 merge `b0a2ae68a7ef8652f0e319495def0304c1faa03e`.
+
+B-arm presentation evidence comes from model-produced surface anchors plus admitted source observations. V2 all-hit truth is never direct inference conditioning.
+
+### P3 — A/B preregistration — LOCKED
+
+PR #138 merge `d9e7178a597e986cef2067e5d45210f5bafdfd52`.
+
+`canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json`
+
+A and B are matched in architecture, capacity, initialization, data authority, seed, optimizer, schedule, update budget and checkpoint policy. Only the presentation evidence value differs.
+
+### P4 — execution source and courts — CLOSED
+
+PR #139 merge / exact execution source:
+
+`ebfe80fc9d0c43cc8075d3d38bdbc9231357b969`
+
+All required source workflows were green before merge.
+
+Execution components:
+
+- `train_fit8_tessa_v3_structural_evidence_ab_v2.py` — exact A/B trainer + resume lineage;
+- `preflight_structural_evidence_ab_a100_v1.py` — real forward/backward, 0 optimizer;
+- `evaluate_structural_evidence_ab_free_running_v1.py` — strict final-step free-running both arms;
+- `court_structural_evidence_ab_topology_surface_v1.py`;
+- `court_structural_evidence_ab_static_presentation_v1.py`;
+- `court_structural_evidence_ab_dynamic_motion_v1.py` — dynamic metrics + final locked A/B decision.
+
+Metric definitions are frozen in:
+
+`canonical/STRUCTURAL_EVIDENCE_AB_COURT_METRIC_DEFINITIONS_V1.json`.
+
+Post-merge source binding is:
+
+`canonical/STRUCTURAL_EVIDENCE_AB_EXECUTION_BINDING_V1.json`.
+
+## Locked experiment
+
+### Arm A — control
 
 ```text
-source:
-  7029ee3f48787aa9f7e27eecef89155eb9368a96
-attempt:
-  ATTEMPT_001
-optimizer steps:
-  1600
-run state:
-  SCHEDULE_STOP_REACHED
-formal court:
-  SCIENTIFIC_PASS
+A_NULL_PRESENTATION
+scene memory + surface/mechanics memory + matched null presentation memory
+→ TESSA V3
 ```
 
-Exact result record:
-
-`docs/research/IRIS_V9_FOCUSED_RELATION_RESULT_20261019.json`
-
-Earned V9 claims:
-
-- cleaned camera-conditioned projected alpha boundary is decodable from sealed V8 H;
-- projected alpha held-out court passed:
-  - global balanced accuracy `0.7599126696586609`;
-  - global balanced BCE `0.5106152445077896`;
-  - minimum per-view aggregate balanced accuracy `0.7362911105155945`;
-- projected appearance boundary held-out court passed:
-  - global balanced accuracy `0.8208722770214081`;
-  - global balanced BCE `0.42430220544338226`;
-  - minimum per-view aggregate balanced accuracy `0.7912296056747437`;
-- frozen parameter domains remained exact;
-- static same/cut/attachment abstention was preserved.
-
-V9 does **not** prove full relation quality:
-
-- front held-out balanced accuracy `0.5587652325630188`;
-- visibility A `0.5658917725086212`;
-- visibility B `0.5533536672592163`;
-- some individual views remain at or below chance;
-- positive-only occlusion support regressed from step-0 accuracy `1.0` to final `0.4809832274913788` and was not protected by the V9 court;
-- no binary occlusion discrimination is proven;
-- no global IRIS Fit8 PASS or TESSA topology PASS is claimed.
-
-Classification:
-
-`V9 = SCOPED CLEAN-TRUTH BOUNDARY EXPERIMENT__NOT FINAL RELATION EXPERIMENT`
-
-## 2. Post-V8 sequencing correction
-
-The original Post-V8 plan ordered:
+### Arm B — hypothesis
 
 ```text
-A carrier seal
-→ B truth cleanup / abstention
-→ C richer source-defensible teacher evidence salvage
-→ D focused specialist optimization
+B_ROLE_FREE_PRESENTATION
+same scene memory + same surface/mechanics memory
++ inference-admissible role-free presentation memory
+→ same TESSA V3
 ```
 
-V9 substantially completed B before optimization, but C was only source-audited, not fully consumed/materialized as relation evidence before training.
+### Training contract
 
-That sequencing miss is now explicit. V10 training is blocked until Workstream C is materially closed for the relation scope.
+- seed: `26091991`;
+- AdamW: lr `1e-4`, betas `(0.9,0.95)`, eps `1e-8`, wd `0.01`;
+- clip norm `1.0`;
+- BF16 autocast, FP32 parameters/optimizer state;
+- exactly `2400` optimizer steps per arm;
+- warmup `120`, then cosine to `1e-5`;
+- checkpoint every `200` steps;
+- Fit8 round-robin, `300` optimizer steps per subject;
+- deterministic cyclic windows;
+- no teacher-forced checkpoint selection;
+- final-step checkpoint is evaluated;
+- no free-running sampling.
 
-## 3. Workstream C — relation evidence qualification in progress
+## Locked court
 
-### 3.1 Authored-motion relation conditioning court
+### Gate 1 — topology/surface no regression
 
-Source:
+B must satisfy the locked face-economy, surface-distance, silhouette, manifold, degeneracy, boundary-chain, component-count and EOS requirements.
 
-`tools/iris_vnext/audit_authored_motion_relation_conditioning_v1.py`
+### Gate 2 — presentation primary
 
-Purpose:
+Five preregistered metrics:
 
-- compare rest vs authored poses under identical admitted Stage01 cameras;
-- measure same-pair order flips, pair-membership drift, two-hit support loss/gain;
-- prove whether motion-derived relation labels are identifiable by the current relation path before admitting them as supervision.
+1. `GLOBAL_VISIBILITY_ACCURACY`
+2. `LOCAL_PARTIAL_ORDER_ACCURACY`
+3. `POSE_DEPENDENT_ORDER_FLIP_ACCURACY`
+4. `FRAGMENT_IDENTITY_STABILITY`
+5. `SOURCE_ART_SUPPORT_PRESERVATION`
 
-Current prediction-path fact:
+B requires macro absolute gain `>= 0.01` and no subject regression beyond `0.03`.
 
-`GraphicsRelationHeadV2` receives sealed-H point features + camera features, but no explicit pose/motion state.
+### Gate 3 — motion primary
 
-Therefore authored-motion evidence is currently:
+- `OWNER_FRAGMENT_STABILITY_OVER_MOTION`: absolute gain `>=0.01`;
+- `GAP_TEAR_RATE`: relative reduction `>=0.10`;
+- `G3_DYNAMIC_QUALIFICATION`: must not regress;
+- attachment persistence: ABSTAIN where explicit attachment authority is absent.
 
-`COURT_ONLY__NO_TRAINING_AUTHORIZATION`
+Teacher-authored motion is evaluation-only. It is applied identically to A/B candidate surfaces by exact closest-point barycentric binding; teacher rig/skin/motion never enters training or inference conditioning.
 
-No motion label becomes V10 target merely because it is measurable.
-
-### 3.2 Complete static all-hit relation evidence
-
-Source:
-
-`tools/iris_vnext/build_fit8_relation_all_hit_evidence_v1.py`
-
-This corrects a structural limitation of Truth V2.
-
-Truth V2 used only first/second same-ray hits and therefore enforced:
+### Final rule
 
 ```text
-visibility_a = front
-visibility_b = 1 - front
+B PASS = topology/surface gate PASS
+         AND presentation primary PASS
+         AND motion primary PASS
 ```
 
-That equivalence is not valid for a complete stack. For ray stack `A,B,C`, pair `B,C` has:
+A locked FAIL is a valid experiment outcome. No metric/threshold/capacity changes are allowed after results are observed.
 
-```text
-front(B,C) = B
-visibility(B) = 0
-visibility(C) = 0
-```
+## Immediate implementation plan
 
-The all-hit evidence producer therefore emits:
+### N1 — exact execution authority — COMPLETE IN THIS SOURCE WORKSTREAM
 
-- complete deterministic ordered ray stacks;
-- every unordered stack pair in both orientations;
-- pairwise `front` from depth order;
-- global visibility from rank-zero only;
-- positive same-ray occlusion support only;
-- no fabricated occlusion negatives;
-- no hidden-pair RGB/alpha boundary labels;
-- no new same/cut/attachment authority.
+- bind PR #139 merge SHA;
+- bind prereg + metric-definition identities;
+- record all green source CI;
+- advance `CURRENT_STATE`, `CURRENT_PLAN`, `AGENTS` and machine-readable ledger.
 
-Pair coordinates are bound to the exact legacy IRIS `center_xyz` and `normalization_half_extent` used by frozen H.
+### N2 — build one fail-closed A100 run-all notebook — NEXT
 
-### 3.3 Exact evidence materialization lane
+The notebook must be orchestration only; scientific logic remains in repo source.
 
-Workflow:
+Required cells/stages:
 
-`.github/workflows/iris_vnext_relation_evidence_self_hosted_v1.yml`
+1. mount/authenticate Drive and establish one output root;
+2. clone repository and checkout exact execution SHA `ebfe80fc9d0c43cc8075d3d38bdbc9231357b969`;
+3. verify preregistration and execution-binding identities;
+4. hydrate exact Stage01/prepared/direct-surface/V2-evidence/direct-presentation/authored-teacher artifacts and verify SHA256;
+5. require a physical NVIDIA A100; no reduced-capacity fallback;
+6. run zero-optimizer preflight;
+7. run Arm A exactly 2400 steps, with atomic resumability and hash-bound receipts;
+8. run Arm B exactly 2400 steps under identical protocol;
+9. run strict final-step free-running for both arms;
+10. run topology/surface court;
+11. run static presentation court;
+12. run dynamic authored-motion court, which produces the final locked A/B result;
+13. persist checkpoints, telemetry, receipts, courts and a final run manifest back to Drive;
+14. print the exact output folder and final receipt hashes.
 
-Policy:
+Infrastructure/integrity failures must stop the notebook. A valid scientific FAIL must be persisted as a completed result, not treated as an infrastructure exception.
 
-- self-hosted read-only input lane;
-- exact Stage01 bytes;
-- exact legacy shard bytes;
-- exact sealed V9 teacher bytes verified against V9 round-trip receipt;
-- no optimizer/trainer;
-- no Drive mutation;
-- Actions artifact output only;
-- `training_authorized=false`.
+### N3 — STOP AND HAND OFF
 
-Current materialization run:
+Once the notebook is built and audited, tell the user the notebook boundary has been reached. Do **not** run it automatically.
 
-`39173687686`
+## Forbidden shortcuts
 
-Do not design V10 truth thresholds from provisional local probes. Use the exact Actions artifact from this lane.
+- V2 all-hit / teacher truth as B inference conditioning;
+- teacher topology, rig or skin in inference forward;
+- named semantics or material IDs as structural/owner authority;
+- incomplete ray stack treated as global-visibility truth;
+- different capacity, initialization, schedule or update budget between arms;
+- reduced-capacity fallback;
+- teacher-forced checkpoint selection;
+- result-driven threshold relaxation;
+- scientific PASS from CI/preflight;
+- automatic H-GEO-P4 or SURF-A2 diversion.
 
-## 4. V9 trainer efficiency debt — separate from model capacity
+## After the experiment
 
-V8 used the larger active training/optimizer GPU footprint. V9 was a much narrower relation specialist.
+Only the locked result decides the next research move.
 
-Nevertheless V9 ran around `~1.0 s/step`, versus historical V8 relation-stage median around `~0.204 s/step`.
+- If B passes: presentation evidence has causal support as a useful structural prior; next work can integrate the finding into the broader generic IRIS/TESSA path and then separately close Compiler/product mechanics.
+- If B fails: inspect the preregistered per-metric/per-morphology evidence without relaxing the court; localize whether the failure is presentation evidence quality, topology consumption, geometry provider limitations or downstream mechanics.
 
-This is **not evidence of a larger V9 model or a need for more capacity**. The dominant implementation debt is the full frozen-domain SHA court executing inside every optimizer step.
-
-Required future behavior:
-
-```text
-full frozen hash court:
-  step 0
-  checkpoint boundaries
-  final court
-
-NOT:
-  every optimizer step
-```
-
-Optimizer parameter whitelisting and `requires_grad=False` remain active continuously.
-
-## 5. V10 Truth V3 admission — blocked on measured evidence
-
-Do not implement a V10 trainer first.
-
-After the exact Workstream C artifact completes, quantify globally + per subject + per view:
-
-- all-hit stack depth distribution;
-- 2+ and 3+ hit-ray support;
-- complete oriented-pair count;
-- front positive/negative support;
-- visibility A/B positive/negative support;
-- rows where pairwise front and global visibility are decoupled;
-- authored-motion same-pair order flip rate;
-- authored-motion pair-membership drift;
-- authored-motion overlap-support loss/gain;
-- occlusion positive-support preservation requirements.
-
-Then define Relation Truth V3.
-
-Expected constraints, subject to the measured court:
-
-- `front`: deterministic full-stack pairwise order;
-- `visibility_a/b`: deterministic global stack visibility, independent of pairwise front;
-- projected alpha/appearance boundary: preserve V9 current-view RGBA authority only where applicable;
-- hidden deep pairs: no invented RGB/alpha boundary label;
-- occlusion: positive same-ray support remains measurement/support unless defensible negative authority is established;
-- static same/cut/attachment: abstain absent independent authority.
-
-## 6. V10 model/init decision
-
-Do **not** increase model capacity by default.
-
-`GraphicsRelationHeadV2` already exposes separate front and visibility outputs; the immediate limitation was corpus truth, not necessarily head expressivity.
-
-V9 final relation checkpoint is retained as a candidate initialization:
-
-```text
-file:
-  step_00001600_45e3995f70a9489882650312acfdd147.pt
-sha256:
-  393b113f0ca3b7a2c23da61022692d15bd0ca8d37167426f546266702df5da05
-```
-
-It may be used only after a V10 preregistration explicitly authorizes:
-
-- exact V8 + HeadV2 bootstrap lineage;
-- exact V9 relation-state load;
-- zero-step reproduction of V9 boundary gains;
-- frozen-domain non-regression;
-- new Truth V3 support/court binding.
-
-If zero-step V9-state migration does not reproduce the V9 boundary court, fail closed and do not train.
-
-## 7. V10 training prerequisites
-
-Before optimizer step 1, all must exist and PASS:
-
-1. exact richer relation evidence artifact + batch receipt;
-2. Truth V3 producer + manifest with explicit authority/provenance/validity;
-3. split-support / class-balance / abstention audit;
-4. authored-motion conditioning disposition;
-5. exact V9-state-or-neutral initialization receipt;
-6. preregistered held-out gates;
-7. projected-boundary non-regression gates;
-8. ordering/visibility absolute gates, not merely weak step-0 non-regression;
-9. occlusion positive-support preservation gate;
-10. frozen-domain hash policy moved out of the per-step hot path;
-11. exact candidate byte round-trip/materialization seal;
-12. readiness status explicitly authorizing the fixed V10 experiment.
-
-No thresholds may be relaxed after observing held-out results.
-
-## 8. Later work remains unchanged
-
-After the relation evidence/truth program:
-
-- independent TESSA topology court;
-- Compiler/runtime attachment/support-band behavioral closure;
-- Fit8 E2E generic integration analogous to Knight;
-- only then unseen evaluation;
-- capacity/LoRA/high-resolution extraction only if a clean-target court demonstrates a real capacity/resolution bottleneck.
-
-## Execution order from current state
-
-```text
-A. finish exact Workstream C materialization run
-B. inspect evidence artifact and seal support findings
-C. define Relation Truth V3 from measured authority only
-D. build V10 support / split / abstention courts
-E. qualify V9-final relation-state initialization vs neutral alternative
-F. lock V10 preregistration and absolute relation courts
-G. materialize exact V10 candidate + byte round-trip
-H. readiness PASS at optimizer step 0
-I. deliver V8-style A100 Run-All notebook
-J. run fixed V10 schedule
-K. inspect Drive artifacts directly; no manual output handoff
-```
+Neither outcome alone proves unseen generalization.

@@ -1,0 +1,53 @@
+{
+  "schema": "RealSaS.StructuralEvidenceInputAdmission.v2",
+  "date_utc": "2026-10-21",
+  "status": "ADMITTED_TIE_SAFE_HASHED_EVIDENCE_ONLY__NO_SCIENTIFIC_PASS",
+  "scientific_execution_authorized": false,
+  "training_authorized": false,
+  "drive_roundtrip_verified": true,
+  "authority_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
+  "authority_head_sha": "7e7b4311910aa4379ef2a0e4c1a00f8e7e39af7a",
+  "materializer_implementation_source_sha": "7ae9b4886ec15725fcd95b7cfaeeb7aeab02b050",
+  "input_binding_path": "canonical/STRUCTURAL_EVIDENCE_INPUT_BINDING_V2.json",
+  "drive": {
+    "folder_name": "RealSaS_STRUCTURAL_EVIDENCE_INPUT_MATERIALIZATION_V2_7e7b4311910a_20261021T001610Z",
+    "folder_id": "1AixPXpOQoYG7gKvVgaibUl3PDH8XDJVE",
+    "manifest": {
+      "file": "ALL_HIT_RELATION_EVIDENCE_V2_MANIFEST.json",
+      "file_id": "1zMRQGDYKkeXxTyLai6hxNmPZ6S2lQgoz",
+      "sha256": "9accf4d2ca85e90e23a3c7ed2a490329676582c5e6759b5d4a1df84df998bb1f",
+      "bytes": 60255,
+      "status": "MATERIALIZED__TIE_SAFE_EVIDENCE_ONLY__NO_TRAINING_AUTHORIZATION"
+    },
+    "receipt": {
+      "file": "STRUCTURAL_EVIDENCE_MATERIALIZATION_RECEIPT_V2.json",
+      "file_id": "1u9VPCDtwksmvO1E4JC4T38-7uM711f2z",
+      "sha256": "8323945b0b4f8d54dec44458d1e8b5d40e51a8e38ace13bb04b0e4533099fc01",
+      "bytes": 5782,
+      "status": "ADMITTED_TIE_SAFE_HASHED_EVIDENCE_ONLY__NO_SCIENTIFIC_PASS"
+    }
+  },
+  "payload_totals": {
+    "subject_count": 8,
+    "oriented_pair_rows": 3499296
+  },
+  "execution_facts": {
+    "optimizer_steps": 0,
+    "backward_steps": 0,
+    "relation_training_executed": false,
+    "scientific_court_executed": false,
+    "scientific_pass_claimed": false
+  },
+  "authority_law": {
+    "front": "PAIRWISE_STRICT_DEPTH_ORDER__EQUAL_DEPTH_WITHIN_EPS_ABSTAIN",
+    "global_visibility": "UNIQUE_MINIMUM_VISIBLE__TIED_MINIMA_ABSTAIN__DEEPER_HITS_VALID_INVISIBLE",
+    "teacher_topology_or_rig_in_inference_forward": false,
+    "named_semantic_taxonomy_as_structural_authority": false,
+    "material_id_as_owner_truth": false
+  },
+  "forensic_supersession": {
+    "failed_transport_folder_id": "1QJKfjeLzLNfm2llLPoXx_oecf7aPKK7b",
+    "failed_transport_folder_name": "RealSaS_STRUCTURAL_EVIDENCE_INPUT_MATERIALIZATION_V2_7e7b4311910a_20261021T000159Z",
+    "scientific_input_authorized": false
+  }
+}

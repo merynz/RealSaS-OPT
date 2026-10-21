@@ -1,0 +1,63 @@
+{
+  "schema": "RealSaS.StructuralEvidenceV1PostRunAudit.v1",
+  "date_utc": "2026-10-21",
+  "authority_head_sha": "be7e44b05368abd29d4350bc6a966528a5530eca",
+  "scope": "POSTRUN_PAYLOAD_AUDIT__NOT_SCIENTIFIC_HYPOTHESIS_COURT",
+  "v1_artifact": {
+    "drive_folder_id": "1gnwkziRAmaiwMp8F6nSASRU9XTpG5OBN",
+    "manifest_file_id": "1ceMgXIfBKUzgrW4nfaInP2JyIxbCgDob",
+    "manifest_sha256": "6e5774b2032b064c2727690d873bd122392769e934120603367807232ded0aa4",
+    "receipt_file_id": "1T7H8Tuuq4qOLiiMbNg_Y9Md0wSvmXDHe",
+    "receipt_sha256": "ce79ecb529fde23d8c864c25bb27279eadc82e8257b0066a7a2a3c0613d0a29",
+    "drive_roundtrip_verified": true,
+    "optimizer_steps": 0,
+    "backward_steps": 0
+  },
+  "aggregate": {
+    "sampled_rays": 484139,
+    "foreground_hit_rays": 477090,
+    "surface_hits": 1194462,
+    "two_or_more_hit_rays": 474686,
+    "three_or_more_hit_rays": 83453,
+    "base_pairs": 558951,
+    "oriented_pair_rows": 1117902,
+    "front_visibility_decoupled_rows": 167116,
+    "front_visibility_decoupled_fraction": 0.149487,
+    "maximum_stack_depth": 33
+  },
+  "subject_stats": [
+    {"subject_id":"Snake","sampled_rays":64531,"foreground_hit_rays":64116,"surface_hits":128998,"three_or_more_hit_rays":685,"base_pairs":65464,"oriented_pair_rows":130928,"front_visibility_decoupled_rows":1296,"maximum_stack_depth":8},
+    {"subject_id":"Bat","sampled_rays":60385,"foreground_hit_rays":60096,"surface_hits":179231,"three_or_more_hit_rays":22674,"base_pairs":116564,"oriented_pair_rows":233128,"front_visibility_decoupled_rows":52936,"maximum_stack_depth":15},
+    {"subject_id":"T-Rex","sampled_rays":63605,"foreground_hit_rays":63118,"surface_hits":128637,"three_or_more_hit_rays":2575,"base_pairs":67587,"oriented_pair_rows":135174,"front_visibility_decoupled_rows":4918,"maximum_stack_depth":10},
+    {"subject_id":"Horse","sampled_rays":64027,"foreground_hit_rays":63528,"surface_hits":155725,"three_or_more_hit_rays":13428,"base_pairs":86687,"oriented_pair_rows":173374,"front_visibility_decoupled_rows":26318,"maximum_stack_depth":14},
+    {"subject_id":"Spider","sampled_rays":65079,"foreground_hit_rays":64183,"surface_hits":158099,"three_or_more_hit_rays":13161,"base_pairs":89290,"oriented_pair_rows":178580,"front_visibility_decoupled_rows":27730,"maximum_stack_depth":14},
+    {"subject_id":"GreenBlob","sampled_rays":61573,"foreground_hit_rays":61076,"surface_hits":157073,"three_or_more_hit_rays":15069,"base_pairs":93406,"oriented_pair_rows":186812,"front_visibility_decoupled_rows":32842,"maximum_stack_depth":13},
+    {"subject_id":"Shark","sampled_rays":42878,"foreground_hit_rays":42557,"surface_hits":85562,"three_or_more_hit_rays":74,"base_pairs":43119,"oriented_pair_rows":86238,"front_visibility_decoupled_rows":148,"maximum_stack_depth":4},
+    {"subject_id":"George","sampled_rays":62061,"foreground_hit_rays":56216,"surface_hits":201137,"three_or_more_hit_rays":15787,"base_pairs":96834,"oriented_pair_rows":193668,"front_visibility_decoupled_rows":20928,"maximum_stack_depth":33}
+  ],
+  "integrity_checks": {
+    "manifest_and_artifact_hashes": "PASS",
+    "csr_offsets_and_depth_order": "PASS",
+    "pair_to_ray_stack_mapping": "PASS",
+    "positive_only_occlusion_support": "PASS",
+    "orientation_symmetry": "PASS",
+    "finite_payloads": "PASS",
+    "manifest_telemetry_reconciliation": "PASS"
+  },
+  "blocking_bug": {
+    "class": "DISTINCT_COMPONENT_EQUAL_DEPTH_SERIALIZATION_TIE",
+    "subject_id": "Bat",
+    "equal_depth_base_pairs": 25,
+    "equal_depth_oriented_rows": 50,
+    "frontmost_tied_base_pairs": 7,
+    "deeper_tied_base_pairs": 18,
+    "root_cause": "V1_SORTS_EQUAL_DEPTH_DISTINCT_COMPONENT_HITS_BY_FACE_ID_THEN_PROMOTES_SERIALIZATION_RANK_TO_FRONT_AND_RANK_ZERO_TO_VISIBILITY",
+    "required_semantics": "EQUAL_DEPTH_FRONT_ABSTAIN__TIED_MINIMUM_VISIBILITY_ABSTAIN__DEEPER_HITS_VALID_INVISIBLE"
+  },
+  "decision": "V1_BYTE_VALID__POSTRUN_PAYLOAD_AUDIT_REJECTED_FOR_SCIENTIFIC_INPUT",
+  "scientific_input_authorized": false,
+  "relation_training_authorized": false,
+  "tessa_training_authorized": false,
+  "scientific_court_authorized": false,
+  "next_action": "V2_TIE_SAFE_REMATERIALIZATION_REQUIRED"
+}

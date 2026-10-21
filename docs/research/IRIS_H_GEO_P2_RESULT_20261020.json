@@ -1,0 +1,72 @@
+{
+  "schema": "RealSaS.HGeoP2ScientificResult.v1",
+  "experiment_id": "H-GEO-P2-SCENE-FIELD",
+  "execution_source_sha": "3a572989ab379975ed7cda5f0dd8b6f33de246b3",
+  "status": "SCIENTIFIC_FAIL_H_GEO_P2_EXISTING_ARCHITECTURE_METRIC_GEOMETRY",
+  "apparatus_valid": true,
+  "binding_sha256": "0c149995ddef00d27adcb4740e0a225f229fd7868d099ae31a3da4e990d0e022",
+  "preregistration_sha256": "486bbbeb1ebb8306d8d2ea5ba8fc96991a138ce86d52546aff6d6d18b501d4f2",
+  "dataset_receipt_sha256": "6c27974a03e9f202adeda1b25f642d95006dcca7cbbf0ceb660484ea91c78dc5",
+  "preflight_receipt_sha256": "67bd7639ff7c4eaa43d29508981f353ff299629c00b836f173894c46268c6c4e",
+  "training_result_sha256": "2517a2115a2aa29a3dfa110cd72e38343bd354dc477cd4dfbe0eede73c83e9c5",
+  "training_checkpoint_sha256": "0bdcd24af776e322bfbb1a004d6034167770b7950ecccb9b04d6d689597854ee",
+  "independent_court_sha256": "6715d47134b118c3719ab2c86afbb57d7c75456360ca086c4c6cdf781b792b33",
+  "training": {
+    "optimizer_steps": 4800,
+    "p1_checkpoint_used_for_initialization": false,
+    "scene_trainable_parameter_count": 27260512,
+    "field_trainable_parameter_count": 1891008,
+    "teacher_truth_in_inference_forward": false,
+    "tessa_invoked": false
+  },
+  "independent_court": {
+    "aggregate": {
+      "p2_mean_distance_mae_iris": 0.017430711537599564,
+      "p2_maximum_subject_endpoint_p95_iris": 0.08587463945150375,
+      "p2_minimum_subject_normal_alignment": 0.7452142238616943,
+      "p2_minimum_subject_near_balanced_accuracy": 0.9032334089279175,
+      "p2_mean_near_balanced_accuracy": 0.9611026607453823,
+      "p1_mean_distance_mae_iris": 0.036935198586434126,
+      "v8_mean_distance_mae_iris": 0.04958385322242975
+    },
+    "gates": {
+      "absolute": {
+        "mean_distance_mae": true,
+        "max_endpoint_p95": false,
+        "min_normal": true,
+        "min_near_ba": true
+      },
+      "vs_p1": {
+        "distance": true,
+        "endpoint": true,
+        "normal": true,
+        "near": true
+      },
+      "local_alignment": {
+        "distance_xyz": true,
+        "distance_shuffled": true,
+        "near_xyz": true,
+        "near_shuffled": true
+      },
+      "retention": {
+        "h_cosine": false,
+        "raw_field": true
+      }
+    },
+    "retention": {
+      "minimum_subject_mean_h_cosine_similarity": 0.5657004117965698,
+      "maximum_subject_raw_field_mae_iris": 0.054086148738861084,
+      "worst_h_cosine_subject": "GreenBlob"
+    }
+  },
+  "interpretation": {
+    "existing_scene_plus_field_training_materially_improves_metric_geometry": true,
+    "existing_shared_h_meets_all_metric_geometry_gates": false,
+    "endpoint_precision_gate_is_remaining_absolute_geometry_failure": true,
+    "shared_h_retention_gate_is_also_failed": true,
+    "explicit_geometry_carrier_preregistration_justified": true,
+    "surf_a2_authorized": false,
+    "tessa_authorized": false,
+    "next_action": "PREREGISTER_EXPLICIT_GEOMETRY_CARRIER_BRANCH_EXPERIMENT__DO_NOT_TRAIN_TESSA"
+  }
+}

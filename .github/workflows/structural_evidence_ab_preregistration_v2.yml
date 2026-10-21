@@ -1,0 +1,66 @@
+name: structural-evidence-ab-preregistration-v2
+
+on:
+  pull_request:
+    paths:
+      - 'canonical/STRUCTURAL_EVIDENCE_INPUT_ADMISSION_V2.json'
+      - 'canonical/STRUCTURAL_EVIDENCE_AB_PREREGISTRATION_V2.json'
+      - 'models/iris/vnext/presentation_evidence_v1.py'
+      - 'models/iris/vnext/presentation_observations_v1.py'
+      - 'models/iris/vnext/structure_v4.py'
+      - 'models/tessa/v3/**'
+      - 'tools/iris_vnext/build_fit8_direct_surface_presentation_queries_v1.py'
+      - 'tools/iris_vnext/build_fit8_direct_presentation_memory_v1.py'
+      - 'tests/iris/test_structural_evidence_ab_preregistration_v2.py'
+      - '.github/workflows/structural_evidence_ab_preregistration_v2.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  structural-evidence-ab-preregistration-v2:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
+      - name: Install pinned source-test dependencies
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Compile A/B source boundary
+        run: |
+          python -m py_compile \
+            models/iris/vnext/presentation_evidence_v1.py \
+            models/iris/vnext/presentation_observations_v1.py \
+            models/iris/vnext/structure_v4.py \
+            models/tessa/v3/config_v3.py \
+            models/tessa/v3/model_v3.py \
+            tools/iris_vnext/build_fit8_direct_surface_presentation_queries_v1.py \
+            tools/iris_vnext/build_fit8_direct_presentation_memory_v1.py \
+            tests/iris/test_structural_evidence_ab_preregistration_v2.py
+      - name: Verify locked preregistration and inference firewall
+        env:
+          PYTHONPATH: .
+          PYTHONHASHSEED: '0'
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+        run: |
+          python -m pytest -q -s \
+            tests/iris/test_structural_evidence_ab_preregistration_v2.py \
+            tests/iris/test_direct_presentation_memory_v1.py \
+            tests/iris/test_tessa_structuralizer_v3.py
+      - name: Execution lane
+        run: |
+          echo 'source_contract=locked_preoptimizer'
+          echo 'notebook_execution_authorized=false'
+          echo 'optimizer_execution_authorized=false'

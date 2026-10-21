@@ -1,0 +1,88 @@
+{
+  "schema": "RealSaS.HGeoP3EFreqInputBinding.v1",
+  "experiment_id": "H-GEO-P3-EFREQ",
+  "date_utc": "2026-10-20",
+  "purpose": "DIAGNOSE_P3_ENDPOINT_TAIL_FREQUENCY_VIEW_EVIDENCE_AND_TARGET_AMBIGUITY_WITH_ZERO_OPTIMIZER_STEPS",
+  "trigger_result": {
+    "result_authority": "docs/research/IRIS_H_GEO_P3_RESULT_20261020.json",
+    "p3_execution_source_sha": "e3c48678f3f563bb60624278e206f4ba8f71c272",
+    "p3_status": "SCIENTIFIC_FAIL_H_GEO_P3_EXPLICIT_HIRES_CARRIER",
+    "p3_training_checkpoint_sha256": "95af736e1e9163cad9d568ea9c67770fe2fbf3391bbdb72d8c03c472b5b5d74b",
+    "p3_training_result_sha256": "88f461ae02a0fdb743385a6550e0ed536197e7cbf172eed168eaba73d83219fd",
+    "p3_independent_court_sha256": "a92b622127102e2896c9894148ce9ceb6ef53c8857b1ee1061467f6338085c48",
+    "p3_maximum_subject_endpoint_p95_iris": 0.08786389231681824,
+    "p3_endpoint_gate": 0.075,
+    "p3_endpoint_fail_subjects": ["Snake", "Horse", "Spider", "GreenBlob"]
+  },
+  "p3": {
+    "checkpoint": {
+      "filename": "checkpoint_latest.pt",
+      "sha256": "95af736e1e9163cad9d568ea9c67770fe2fbf3391bbdb72d8c03c472b5b5d74b",
+      "drive_file_id": "1r48PmxUJb2eSFMsNFpkYpcNCSKH-AXR4",
+      "mounted_path": "/content/drive/MyDrive/RealSaS_IRIS_H_GEO_P3_20261020/e3c48678f3f5/H_GEO_P3/checkpoints/checkpoint_latest.pt"
+    },
+    "training_result": {
+      "sha256": "88f461ae02a0fdb743385a6550e0ed536197e7cbf172eed168eaba73d83219fd",
+      "drive_file_id": "1ZDwXA3o1WCCEE7ZmffVL0u0EbHgL4eeg",
+      "mounted_path": "/content/drive/MyDrive/RealSaS_IRIS_H_GEO_P3_20261020/e3c48678f3f5/H_GEO_P3/training/H_GEO_P3_TRAINING_RESULT.json"
+    },
+    "independent_court": {
+      "sha256": "a92b622127102e2896c9894148ce9ceb6ef53c8857b1ee1061467f6338085c48",
+      "drive_file_id": "1baQKMwIWIyX3p64_a-y6y7soAVWxnxQM",
+      "mounted_path": "/content/drive/MyDrive/RealSaS_IRIS_H_GEO_P3_20261020/e3c48678f3f5/H_GEO_P3/court/H_GEO_P3_INDEPENDENT_COURT.json"
+    }
+  },
+  "p2_comparison": {
+    "checkpoint": {
+      "sha256": "0bdcd24af776e322bfbb1a004d6034167770b7950ecccb9b04d6d689597854ee",
+      "drive_file_id": "13LV1IGIq59976acs4_kEhlDns_YTkfvH",
+      "mounted_path": "/content/drive/MyDrive/RealSaS_IRIS_H_GEO_P2_20261020/3a572989ab37/H_GEO_P2/checkpoints/checkpoint_latest.pt"
+    }
+  },
+  "v8": {
+    "checkpoint": {
+      "sha256": "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5",
+      "drive_file_id": "1xttwuxgC8y9EVmf7xxMEN4yj84yhm4zH",
+      "mounted_path": "/content/drive/MyDrive/RealSaS_Fit8_A100_SMOKE_V2_fafe3284_af6a53ad/v8_m1_sealed_5083c991/checkpoints/step_00012000_ac23a9ea448e465cb668773a131981be.pt"
+    }
+  },
+  "prepared": {
+    "mounted_root": "/content/drive/MyDrive/RealSaS_Fit8_IRIS_vNext_candidates/7029ee3f48787aa9f7e27eecef89155eb9368a96/prepared",
+    "manifest": {"filename":"COHORT_MANIFEST.json","sha256":"6561bf2087f4fac3699c673b5c93fb3d8dbc2d1ff90a5065d976cae70688b4d8","drive_file_id":"18YLO2fY88ZvZDkjWH383rmsht3wZV1bh"},
+    "subjects": [
+      {"subject_id":"Snake","file":"snake.vnext.pt","sha256":"0d9a5806e5a8e37fb0df47464d674f43f4f0a83f5f1175d702ab237580de6490"},
+      {"subject_id":"Bat","file":"bat.vnext.pt","sha256":"8692f562b324f074d2f6628689816664f6f89bcfd911cdbf32ba0dc17de3c4ad"},
+      {"subject_id":"T-Rex","file":"trex.vnext.pt","sha256":"852d18310f186cc7394c421c1739cf6e6e4c27d5435d10818d8b814d4c525e19"},
+      {"subject_id":"Horse","file":"horse.vnext.pt","sha256":"cbd72727547a55f2769004921e36e93758eeb9895d07567e51d52892581fd09b"},
+      {"subject_id":"Spider","file":"spider.vnext.pt","sha256":"50d7076897e58da56d0606eac7b1e548b56675e0aacde1e27ecf351b60faa003"},
+      {"subject_id":"GreenBlob","file":"greenblob.vnext.pt","sha256":"fad57433ed3554bd2724a130e4f09285b641f3ef7a2208bb6d3282b518d349d0"},
+      {"subject_id":"Shark","file":"shark.vnext.pt","sha256":"d588defba88e0c6560b950bb538fa9cdc92287d69361332507f28f936a262387"},
+      {"subject_id":"George","file":"george.vnext.pt","sha256":"d632ed045380037b78cd7ff87fee9ac1a89617e1af8e874eb68444412ef70455"}
+    ]
+  },
+  "exact_triangle_dataset": {
+    "mounted_root": "/content/drive/MyDrive/RealSaS_IRIS_H_GEO_P1_20261020/4a4236db120f/H_GEO_P1/dataset",
+    "receipt": {"filename":"H_GEO_P1_DATASET_RECEIPT.json","sha256":"6c27974a03e9f202adeda1b25f642d95006dcca7cbbf0ceb660484ea91c78dc5","drive_file_id":"1M6WAEV24ousqXjgVhfIxGF9kZLahesUh"},
+    "reuse_bytes_exactly": true
+  },
+  "teachers": {
+    "mounted_root": "/content/drive/MyDrive/RealSaS_Fit8_IRIS_vNext_candidates/7029ee3f48787aa9f7e27eecef89155eb9368a96/teachers",
+    "batch_receipt": {"filename":"TEACHER_BATCH_RECEIPT.json","sha256":"37b203f9c16e1a5dddbab1709ebb3806e486d66d1ed5b48a42817bc0044a7843","drive_file_id":"1RLfXAQwPgA0xIleZBxEPbthUOpw54t9C"},
+    "subjects": [
+      {"subject_id":"Snake","file":"fit8_snake_v1.teacher.npz","sha256":"9cf4fef3873bfd551beb5a2c2ca48ff691d6fbd60d320397044c2128c2da3798"},
+      {"subject_id":"Bat","file":"fit8_bat_v1.teacher.npz","sha256":"dfb5f81f34d353a751bfb678e895c14e08b061f7517ce31b2be9b2706a3bb930"},
+      {"subject_id":"T-Rex","file":"fit8_trex_v1.teacher.npz","sha256":"3997476dbac532026984039d2e12d683036d37039fdabe0017f69518b8de52fa"},
+      {"subject_id":"Horse","file":"fit8_horse_v1.teacher.npz","sha256":"600899aba1cef4af7433b2ae750a47238c5f84c7231a68a294457bfd98033613"},
+      {"subject_id":"Spider","file":"fit8_spider_v1.teacher.npz","sha256":"f146109f1e4e264cc647db9a7b8fd47b5f91862f75c508b1634a373480074a54"},
+      {"subject_id":"GreenBlob","file":"fit8_greenblob_v1.teacher.npz","sha256":"9567f1f0f20c1892e179abfab7e8aae117245e9501dd4592290830128c54ca0a"},
+      {"subject_id":"Shark","file":"fit8_shark_v1.teacher.npz","sha256":"65eddea1bd430a58c002c4890b3bb6a21826ff4276e7b4eb243902c3bf44e43e"},
+      {"subject_id":"George","file":"fit8_george_v1.teacher.npz","sha256":"04380b00fed04226afb9f6a1466e549ecbb24a875a4641720ce70c1b208c7458"}
+    ]
+  },
+  "transport_policy": {
+    "single_drive_consent": true,
+    "drive_tree_scan_forbidden": true,
+    "second_google_oauth_forbidden": true,
+    "sha256_is_authority": true
+  }
+}

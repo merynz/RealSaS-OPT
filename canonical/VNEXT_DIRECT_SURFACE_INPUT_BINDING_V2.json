@@ -1,0 +1,77 @@
+{
+  "schema": "RealSaS.IRISVNextDirectSurfaceInputBinding.v1",
+  "binding_revision": 2,
+  "status": "EXACT_INPUT_BYTES_UNCHANGED__SURFACE_GATE_CORRECTED_TO_EXACT_CONTAINMENT",
+  "purpose": "TESSA_FREE_EXACT_V8_FIT8_T512_T1024_SURFACE_BASELINE",
+  "supersedes": {
+    "path": "canonical/VNEXT_DIRECT_SURFACE_INPUT_BINDING_V1.json",
+    "reason": "V1_BOUND_FALSIFIED_BOUNDARY_CROSSING_PROXY_AS_TRUNCATION_GATE"
+  },
+  "canonical_shell_gate_closure": "canonical/IRIS_V5_EXTERIOR_DECODER_SHELL_COMPAT_CLOSURE_20260924.json",
+  "training_allowed": false,
+  "external_storage_write_allowed": false,
+  "scientific_pass_claimed": false,
+  "stage01": {
+    "file": "FIT8_PLATFORM_STAGE01_INPUT_BUNDLE_20261013.zip",
+    "file_id": "1PcxT2rfb9jCHfP75gaqMAo90OU7JRypH",
+    "sha256": "9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936",
+    "scope": "EXACT_ADMITTED_8_VIEW_SOURCE_MASKS_CAMERAS_AND_RAW_ASSETS"
+  },
+  "prepared": {
+    "source_commit_sha": "7029ee3f48787aa9f7e27eecef89155eb9368a96",
+    "folder_id": "1KF8SztfN_NrfjbgLvQZ5BqSRczS5dwv4",
+    "manifest": {
+      "file": "COHORT_MANIFEST.json",
+      "file_id": "18YLO2fY88ZvZDkjWH383rmsht3wZV1bh",
+      "sha256": "6561bf2087f4fac3699c673b5c93fb3d8dbc2d1ff90a5065d976cae70688b4d8",
+      "schema": "RealSaS.IRISVNextFit8Manifest.v4"
+    },
+    "preparation_receipt": {
+      "file": "PREPARATION_RECEIPT.json",
+      "file_id": "1I2OkL7ENV2SkP02FBXrA2bHIn_LMk8dP",
+      "sha256": "b3d8e72f980bdb194319e6c128257a20b2d46a71c7b86d1e2ed9ea6d1e16c93f",
+      "schema": "RealSaS.IRISVNextFit8PreparationReceipt.v2"
+    },
+    "subjects": [
+      {"subject_id":"Snake","file":"snake.vnext.pt","file_id":"1Y97Z4XTiw-qGAMrAHRaG1XrS3qbc2sc-","sha256":"0d9a5806e5a8e37fb0df47464d674f43f4f0a83f5f1175d702ab237580de6490"},
+      {"subject_id":"Bat","file":"bat.vnext.pt","file_id":"1vFZaxbCTX6OI_S7mqnb_JRKiw3uKWN7e","sha256":"8692f562b324f074d2f6628689816664f6f89bcfd911cdbf32ba0dc17de3c4ad"},
+      {"subject_id":"T-Rex","file":"trex.vnext.pt","file_id":"1KytkNX7tIGhdfN5pOrCIym-XhKoKrBoX","sha256":"852d18310f186cc7394c421c1739cf6e6e4c27d5435d10818d8b814d4c525e19"},
+      {"subject_id":"Horse","file":"horse.vnext.pt","file_id":"1tLJToFIdkOqkeA-yfQQ7Klbi5e5OwEXS","sha256":"cbd72727547a55f2769004921e36e93758eeb9895d07567e51d52892581fd09b"},
+      {"subject_id":"Spider","file":"spider.vnext.pt","file_id":"1NKbjTRa4d4xeEwbVDJRIxptBzlMv2c23","sha256":"50d7076897e58da56d0606eac7b1e548b56675e0aacde1e27ecf351b60faa003"},
+      {"subject_id":"GreenBlob","file":"greenblob.vnext.pt","file_id":"1xVRMF0TZk-rEgZ17Ha69eGng8zxVeqQa","sha256":"fad57433ed3554bd2724a130e4f09285b641f3ef7a2208bb6d3282b518d349d0"},
+      {"subject_id":"Shark","file":"shark.vnext.pt","file_id":"1A67u0fP7HMjd6BR2aXTAoEpaS8Cqkb_y","sha256":"d588defba88e0c6560b950bb538fa9cdc92287d69361332507f28f936a262387"},
+      {"subject_id":"George","file":"george.vnext.pt","file_id":"1oMEp1SRNwsttxypq7HUG1mC3xC1NPZAS","sha256":"d632ed045380037b78cd7ff87fee9ac1a89617e1af8e874eb68444412ef70455"}
+    ]
+  },
+  "v8": {
+    "source_commit_sha": "5083c9915533ec8ec6530c7d229c635887abfea7",
+    "global_step": 12000,
+    "binding_sha256": "735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2",
+    "checkpoint": {
+      "file": "step_00012000_ac23a9ea448e465cb668773a131981be.pt",
+      "file_id": "1xttwuxgC8y9EVmf7xxMEN4yj84yhm4zH",
+      "sha256": "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5"
+    }
+  },
+  "surface_policy": {
+    "decoder_id": "RealSaS.ZeroSurfaceDecoder.SparseRegularT512T1024IndexedMT.ExactShellContainment.v5_1",
+    "base_cells": 512,
+    "fine_cells": 1024,
+    "coordinate_transform": "IDENTITY_NORMALIZED_MINUS1_PLUS1",
+    "field_scalar_transform": "IDENTITY_LEARNED_FIELD",
+    "numeric_policy": "FP32_NO_AUTOCAST",
+    "exact_shell_containment_required": true,
+    "containment_gate": "EXACT_REFINED_CARRIER_BOUNDARY_FACE_ZERO_CONTACT_V1",
+    "legacy_boundary_crossing_tets_role": "TELEMETRY_ONLY",
+    "legacy_boundary_crossing_tets_is_truncation_gate": false,
+    "geometry_extraction_after_containment": "INDEXED_MARCHING_TETRAHEDRA__UNCHANGED",
+    "tessa_invoked": false
+  },
+  "authority": {
+    "stage01_bytes": "READ_ONLY_EXACT_ADMITTED_SOURCE_OBSERVATION_AUTHORITY",
+    "prepared_bytes": "READ_ONLY_REUSE_OF_SEALED_V9_PREPARATION",
+    "v8_scene_core": "EXACT_COMPLETED_V8__SEALED",
+    "surface_candidate": "EVIDENCE_ONLY__EXACT_CONTAINMENT_REQUIRED__COMPILER_COURT_REQUIRED",
+    "training": "FORBIDDEN_BY_THIS_BINDING"
+  }
+}

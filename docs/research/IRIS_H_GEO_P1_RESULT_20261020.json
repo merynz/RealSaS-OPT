@@ -1,0 +1,68 @@
+{
+  "schema": "RealSaS.HGeoP1SealedResult.v1",
+  "experiment_id": "H-GEO-P1",
+  "date_utc": "2026-10-20",
+  "execution_source_sha": "4a4236db120ffec32dc33d278341e21f58d93529",
+  "status": "SCIENTIFIC_FAIL_H_GEO_P1_METRIC_CARRIER_RESCUE",
+  "scientific_pass_claimed": false,
+  "apparatus_valid": true,
+  "dataset": {
+    "receipt_sha256": "6c27974a03e9f202adeda1b25f642d95006dcca7cbbf0ceb660484ea91c78dc5",
+    "truth_semantics": "EXACT_CLOSEST_POINT_TO_AUTHORED_REST_TRIANGLES__UNSIGNED_DISTANCE__NO_SDF_SIGN_CLAIM",
+    "maximum_normalization_replay_error_iris": 3.033220208337184e-08,
+    "subject_count": 8
+  },
+  "preflight": {
+    "receipt_sha256": "c7e05b87e8f68de5b73a5b7a270589c9b4797f5e3ca03075b84680fa763778eb",
+    "status": "PASS_H_GEO_P1_A100_PREFLIGHT__CARRIER_TRAINING_AUTHORIZED",
+    "optimizer_steps_executed": 0,
+    "existing_trainable_parameter_count": 1891008,
+    "training_aux_parameter_count": 101384
+  },
+  "training": {
+    "result_sha256": "b89cf72cd8b510d5be242c2d3a76cab07c7d4b74b0263daa1d51136e4a1ca4fb",
+    "optimizer_steps": 3600,
+    "checkpoint_sha256": "2f73a783391a16f09d12e50f240c0fbaaae40f0e044d1546bf12590eba0c5e5d",
+    "final_field_state_sha256": "8fc359847da401a0c782f38ea30c6ba536428b7829cbe927fe726eaad751091f",
+    "teacher_truth_in_inference_forward": false,
+    "tessa_invoked": false
+  },
+  "independent_court": {
+    "court_sha256": "975c8ab13a178d17eca1557bd3670fbae752fe33a508c8c207812b0a5f23a620",
+    "aggregate": {
+      "P1_H_XYZ": {
+        "mean_distance_mae_iris": 0.03320289263501763,
+        "maximum_subject_endpoint_error_p95_iris": 0.10369804501533508,
+        "minimum_subject_normal_absolute_dot_mean": 0.6691970825195312,
+        "minimum_subject_near_balanced_accuracy": 0.747372955083847,
+        "mean_near_balanced_accuracy": 0.875740822404623
+      },
+      "V8_H_XYZ": {
+        "mean_distance_mae_iris": 0.050303446128964424,
+        "maximum_subject_endpoint_error_p95_iris": 0.11347044259309769,
+        "minimum_subject_normal_absolute_dot_mean": 0.6007195711135864,
+        "minimum_subject_near_balanced_accuracy": 0.6902481913566589,
+        "mean_near_balanced_accuracy": 0.7727816179394722
+      }
+    },
+    "gates": {
+      "absolute": {"mean_distance_mae": false, "max_endpoint_p95": false, "min_normal": false, "min_near_ba": false},
+      "vs_v8": {"distance": true, "endpoint": false, "normal": true, "near": true},
+      "local_alignment": {"distance_xyz": true, "distance_shuffled": true, "near_xyz": true, "near_shuffled": true},
+      "retention": {"h_cosine": true, "raw_field": true}
+    },
+    "retention_global": {
+      "minimum_subject_mean_h_cosine_similarity": 0.7806624174118042,
+      "maximum_subject_raw_field_mae_iris": 0.03808889165520668
+    }
+  },
+  "interpretation": {
+    "what_it_proves": "EXACT_TRIANGLE_SUPERVISION_CAN_SUBSTANTIALLY_IMPROVE_V8_LOCAL_H_WITHOUT_ARCHITECTURE_EXPANSION",
+    "what_it_does_not_prove": "FIELD_ONLY_RETRAINING_DOES_NOT_REACH_PREREGISTERED_ABSOLUTE_METRIC_GEOMETRY_QUALITY_AND_DOES_NOT_ESTABLISH_WHOLE_ARCHITECTURE_INSUFFICIENCY",
+    "main_remaining_question": "IS_THE_P1_CEILING_CAUSED_BY_FROZEN_UPSTREAM_SCENE_TRIPLANE_ENCODING_OR_BY_ARCHITECTURE_CAPACITY",
+    "next_experiment": "H-GEO-P2-SCENE-FIELD",
+    "surf_a2_authorized": false,
+    "tessa_authorized": false,
+    "unpreregistered_explicit_geometry_branch_training_authorized": false
+  }
+}

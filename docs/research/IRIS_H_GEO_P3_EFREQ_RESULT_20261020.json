@@ -1,0 +1,30 @@
+{
+  "schema": "RealSaS.HGeoP3EFreqSealedResult.v1",
+  "date_utc": "2026-10-20",
+  "experiment_id": "H-GEO-P3-EFREQ",
+  "execution_source_sha": "e3b46f3bc98cad0c48f37854de64de996192f667",
+  "status": "COMPLETED_H_GEO_P3_ENDPOINT_FREQUENCY_AUDIT",
+  "classification": "UNRESOLVED",
+  "audit_sha256": "ab4ca656442de0addb9468c6dcd7bf3e1e23b5a874fb4e5b675f2079720f2d04",
+  "query_csv_sha256": "41bf4f6bf1d90fa639e01fc799c032fb276ef51dd833fed1891ce4ce7c87a16d",
+  "notebook_completion_sha256": "d36836ddb5d0270b4c951fb613c1445c5c84da80c1dc283c6ecd17389d9db85d",
+  "optimizer_steps_executed": 0,
+  "probe_optimizer_steps_executed": 0,
+  "signals": {
+    "carrier_bandwidth": false,
+    "target_ambiguity": false,
+    "view_evidence": false
+  },
+  "measured_observations": {
+    "tail_to_control_projected_triangle_area_ratio": 0.543858,
+    "tail_to_control_nonadjacent_surface_gap_ratio": 0.528794,
+    "tail_to_control_nonadjacent_face_flip_rate_at_1_over_128": 1.924012,
+    "p3_to_p2_tail_whitened_h_delta_ratio_at_1_over_128": 0.752803,
+    "refiner_highband_power_fraction_range": [0.01139830332249403, 0.027701059356331825]
+  },
+  "interpretation": "NO_LOCKED_DOMINANCE_CONDITION_PASSED__P3_IS_SMOOTHER_THAN_P2_AT_FINE_SCALE_AND_TAILS_SHOW_SMALLER_PROJECTED_FOOTPRINTS_PLUS_MORE_SURFACE_COMPETITION__STAGE_LOCALIZATION_REQUIRED_BEFORE_P4",
+  "next_action": "H-GEO-P3-SCALE-XFER_ZERO_OPTIMIZER_STAGE_LOCALIZATION",
+  "scientific_pass_claimed": false,
+  "surf_a2_authorized": false,
+  "tessa_authorized": false
+}

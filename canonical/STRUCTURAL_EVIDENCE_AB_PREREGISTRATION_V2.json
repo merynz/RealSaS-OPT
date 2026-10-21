@@ -1,0 +1,169 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABPreregistration.v2",
+  "date_utc": "2026-10-21",
+  "status": "LOCKED_PREOPTIMIZER_SOURCE_CONTRACT__USER_HANDOFF_REQUIRED",
+  "experiment_id": "STRUCTURAL-EVIDENCE-A-B-V2",
+  "scope": "FIT8_SHARED_SYSTEM_CONTRACT_QUALIFICATION__NOT_UNSEEN_GENERALIZATION__NOT_PRODUCT_PROMOTION",
+  "research_question": "Does inference-admissible role-free presentation evidence improve learned topology structuralization and downstream presentation/motion behavior beyond the same scene+surface+mechanics evidence alone?",
+  "implementation_authority": {
+    "presentation_binding_merge_sha": "b0a2ae68a7ef8652f0e319495def0304c1faa03e",
+    "evidence_materializer_source_sha": "7ae9b4886ec15725fcd95b7cfaeeb7aeab02b050",
+    "evidence_authority_head_sha": "7e7b4311910aa4379ef2a0e4c1a00f8e7e39af7a",
+    "active_long_term_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
+    "exact_execution_merge_sha": null,
+    "exact_execution_merge_sha_policy": "MUST_BE_BOUND_IN_SEPARATE_EXECUTION_BINDING_AFTER_THIS_PR_MERGES__SELF_REFERENCE_FORBIDDEN"
+  },
+  "evidence_input_authority": {
+    "admission_path": "canonical/STRUCTURAL_EVIDENCE_INPUT_ADMISSION_V2.json",
+    "drive_folder_id": "1AixPXpOQoYG7gKvVgaibUl3PDH8XDJVE",
+    "manifest_file_id": "1zMRQGDYKkeXxTyLai6hxNmPZ6S2lQgoz",
+    "manifest_sha256": "9accf4d2ca85e90e23a3c7ed2a490329676582c5e6759b5d4a1df84df998bb1f",
+    "receipt_file_id": "1u9VPCDtwksmvO1E4JC4T38-7uM711f2z",
+    "receipt_sha256": "8323945b0b4f8d54dec44458d1e8b5d40e51a8e38ace13bb04b0e4533099fc01",
+    "subject_count": 8,
+    "oriented_pair_rows": 3499296,
+    "teacher_all_hit_evidence_allowed_as_inference_conditioning": false,
+    "teacher_all_hit_evidence_role": "SUPERVISION_AND_INDEPENDENT_EVALUATION_AUTHORITY_ONLY"
+  },
+  "common_controls": {
+    "subjects": ["Snake", "Bat", "T-Rex", "Horse", "Spider", "GreenBlob", "Shark", "George"],
+    "same_iris_authority": true,
+    "same_cameras": true,
+    "same_topology_teacher_corpus": true,
+    "same_topology_tokenizer_and_grammar": true,
+    "same_tessa_v3_parameterization": true,
+    "same_initialization_between_arms": true,
+    "same_optimizer_and_schedule": true,
+    "same_update_budget": true,
+    "same_batch_and_sampling_policy": true,
+    "same_checkpoint_schedule": true,
+    "same_compiler_qualification": true,
+    "subject_specific_trainable_parameters": false,
+    "teacher_topology_in_inference": false,
+    "named_semantic_taxonomy_in_inference": false
+  },
+  "architecture": {
+    "architecture_id": "RealSaS.TESSA.Structuralizer.v3",
+    "bridge_id": "RealSaS.IRIS.TESSAStructuralizationBridge.v4",
+    "d_model": 1024,
+    "n_heads": 16,
+    "decoder_layers": 24,
+    "feedforward_dim": 4096,
+    "coordinate_bins": 1024,
+    "scene_memory_tokens": 384,
+    "surface_memory_tokens": 384,
+    "presentation_memory_tokens": 256,
+    "total_conditioning_tokens": 1024,
+    "dropout": 0.0,
+    "gradient_checkpointing": true,
+    "reduced_capacity_fallback_allowed": false
+  },
+  "arm_a": {
+    "id": "A_NULL_PRESENTATION",
+    "conditioning": ["SHARED_SCENE_MEMORY", "SURFACE_MECHANICS_MEMORY", "NULL_PRESENTATION_MEMORY"],
+    "presentation_source": "null_presentation_evidence_v1",
+    "matched_capacity_control": true
+  },
+  "arm_b": {
+    "id": "B_ROLE_FREE_PRESENTATION",
+    "conditioning": ["SHARED_SCENE_MEMORY", "SURFACE_MECHANICS_MEMORY", "INFERENCE_ADMISSIBLE_ROLE_FREE_PRESENTATION_MEMORY"],
+    "producer_paths": [
+      "models/iris/vnext/presentation_observations_v1.py",
+      "tools/iris_vnext/build_fit8_direct_surface_presentation_queries_v1.py",
+      "tools/iris_vnext/build_fit8_direct_presentation_memory_v1.py"
+    ],
+    "anchor_authority": "MODEL_PRODUCED_SURFACE_ONLY",
+    "rgba_authority": "ADMITTED_SOURCE_VIEW",
+    "boundary_authority": "DETERMINISTIC_SOURCE_RGBA_DERIVATION",
+    "pair_front_authority": "DIRECT_SURFACE_DEPTH__TIE_SAFE_ABSTAIN",
+    "global_visibility_authority": "COMPLETE_DIRECT_SURFACE_RAY_STACK__TIE_SAFE_ABSTAIN",
+    "unsupported_fields_policy": "VALIDITY_FALSE__ABSTAIN",
+    "teacher_geometry_allowed": false,
+    "teacher_topology_allowed": false,
+    "named_semantic_taxonomy_allowed": false
+  },
+  "training_protocol": {
+    "seed_set": [26091991],
+    "seed_count": 1,
+    "optimizer": {
+      "name": "AdamW",
+      "learning_rate": 0.0001,
+      "betas": [0.9, 0.95],
+      "epsilon": 1e-8,
+      "weight_decay": 0.01,
+      "gradient_clip_norm": 1.0
+    },
+    "precision": "BF16_AUTOCAST__FP32_PARAMETERS_AND_OPTIMIZER_STATE",
+    "optimizer_steps_per_arm": 2400,
+    "warmup_steps": 120,
+    "minimum_learning_rate": 0.00001,
+    "schedule": "LINEAR_WARMUP_THEN_COSINE",
+    "checkpoint_interval_steps": 200,
+    "telemetry_interval_steps": 10,
+    "subject_schedule": "ROUND_ROBIN_8_SUBJECTS__300_OPTIMIZER_STEPS_EACH",
+    "window_schedule": "DETERMINISTIC_CYCLIC_PER_SUBJECT",
+    "gradient_accumulation_steps": 1,
+    "teacher_forced_checkpoint_selection_forbidden": true,
+    "final_step_checkpoint_evaluated": true,
+    "free_running_sampling": false,
+    "grammar_mask_required": true,
+    "eos_required": true
+  },
+  "independent_court": {
+    "topology_surface_no_regression": {
+      "minimum_face_reduction_fraction_vs_qualified_surface": 0.25,
+      "maximum_relative_surface_p95_increase": 0.05,
+      "maximum_relative_surface_max_increase": 0.05,
+      "maximum_mask_iou_drop": 0.01,
+      "maximum_new_nonmanifold_edges": 0,
+      "maximum_new_zero_area_faces": 0,
+      "maximum_new_open_boundary_chains": 0,
+      "same_geometric_component_count_required": true,
+      "all_subjects_complete_eos_required": true
+    },
+    "presentation_primary": {
+      "metrics": ["GLOBAL_VISIBILITY_ACCURACY", "LOCAL_PARTIAL_ORDER_ACCURACY", "POSE_DEPENDENT_ORDER_FLIP_ACCURACY", "FRAGMENT_IDENTITY_STABILITY", "SOURCE_ART_SUPPORT_PRESERVATION"],
+      "minimum_macro_absolute_gain_for_b": 0.01,
+      "maximum_single_subject_absolute_regression": 0.03,
+      "all_metrics_use_only_authoritative_valid_rows": true
+    },
+    "motion_primary": {
+      "metrics": ["OWNER_FRAGMENT_STABILITY_OVER_MOTION", "GAP_TEAR_RATE", "ATTACHMENT_PERSISTENCE_WHERE_AUTHORITATIVE", "G3_DYNAMIC_QUALIFICATION"],
+      "minimum_owner_fragment_stability_absolute_gain_for_b": 0.01,
+      "minimum_gap_tear_rate_relative_reduction_for_b": 0.10,
+      "maximum_single_subject_owner_stability_regression": 0.03,
+      "g3_dynamic_qualification_must_not_regress": true
+    }
+  },
+  "decision_rule": {
+    "required": "B_MUST_PASS_TOPOLOGY_SURFACE_NO_REGRESSION_AND_IMPROVE_BOTH_PRESENTATION_AND_MOTION_PRIMARY_FAMILIES",
+    "presentation_macro_gain_minimum": 0.01,
+    "motion_owner_gain_minimum": 0.01,
+    "motion_gap_tear_relative_reduction_minimum": 0.10,
+    "post_result_threshold_relaxation_allowed": false,
+    "morphology_breakdown_required": true,
+    "unseen_generalization_claimed": false,
+    "canonical_m_authorized_by_this_experiment": false
+  },
+  "execution_authorization": {
+    "source_contract_locked": true,
+    "notebook_build_authorized": true,
+    "notebook_execution_authorized": false,
+    "optimizer_execution_authorized": false,
+    "requires_final_source_ci_green": true,
+    "requires_exact_execution_merge_sha_binding": true,
+    "requires_fail_closed_preflight": true,
+    "requires_user_handoff_before_execution": true
+  },
+  "forbidden_shortcuts": [
+    "TEACHER_OR_ALL_HIT_V2_TRUTH_AS_B_ARM_INFERENCE_CONDITIONING",
+    "NAMED_SEMANTIC_CLASS_AS_STRUCTURAL_AUTHORITY",
+    "MATERIAL_ID_AS_DRAWABLE_OWNER_TRUTH",
+    "PAIRWISE_VISIBILITY_AS_GLOBAL_VISIBILITY",
+    "INCOMPLETE_RAY_STACK_AS_VALID_VISIBILITY_TRUTH",
+    "TEACHER_TOPOLOGY_IN_INFERENCE_FORWARD",
+    "TEACHER_RIG_OR_SKIN_IN_INFERENCE_FORWARD",
+    "DIFFERENT_DECODER_CAPACITY_BETWEEN_ARMS",
+    "POST_RESULT_THRESHOLD_RELAXATION"
+  ]
+}

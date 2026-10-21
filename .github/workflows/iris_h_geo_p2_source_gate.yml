@@ -1,0 +1,95 @@
+name: iris-h-geo-p2-source-gate
+on:
+  pull_request:
+    paths:
+      - 'CURRENT_STATE.md'
+      - 'CURRENT_PLAN.md'
+      - 'AGENTS.md'
+      - 'canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json'
+      - 'canonical/H_GEO_P2_INPUT_BINDING_V1.json'
+      - 'canonical/H_GEO_P2_PREREGISTRATION_V1.json'
+      - 'docs/research/IRIS_H_GEO_P1_RESULT_20261020.json'
+      - 'docs/research/IRIS_H_GEO_P2_RESULT_20261020.json'
+      - 'docs/research/IRIS_H_GEO_P2_DECISION_LEDGER_20261020.md'
+      - 'tools/iris_vnext/h_geo_p2_runtime_v1.py'
+      - 'tools/iris_vnext/preflight_h_geo_p2_a100_v1.py'
+      - 'tools/iris_vnext/train_fit8_h_geo_p2_v1.py'
+      - 'tools/iris_vnext/train_fit8_h_geo_p2_seeded_v1.py'
+      - 'tools/iris_vnext/audit_fit8_h_geo_p2_v1.py'
+      - 'tools/iris_vnext/audit_fit8_h_geo_p2_seeded_v1.py'
+      - 'tests/repository/test_h_geo_p2_contract_v1.py'
+      - '.github/workflows/iris_h_geo_p2_source_gate.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  h-geo-p2-source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
+      - name: Install source-test dependencies
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Compile H-GEO-P2 source
+        run: |
+          python -m py_compile \
+            tools/iris_vnext/h_geo_p2_runtime_v1.py \
+            tools/iris_vnext/preflight_h_geo_p2_a100_v1.py \
+            tools/iris_vnext/train_fit8_h_geo_p2_v1.py \
+            tools/iris_vnext/train_fit8_h_geo_p2_seeded_v1.py \
+            tools/iris_vnext/audit_fit8_h_geo_p2_v1.py \
+            tools/iris_vnext/audit_fit8_h_geo_p2_seeded_v1.py \
+            tests/repository/test_h_geo_p2_contract_v1.py
+      - name: Run H-GEO-P2 repository courts
+        env:
+          PYTHONPATH: .
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          OPENBLAS_NUM_THREADS: '1'
+        run: python -m pytest -q -s tests/repository/test_h_geo_p2_contract_v1.py
+      - name: Verify decision boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('canonical/H_GEO_P2_PREREGISTRATION_V1.json').read_text())
+          b=json.loads(Path('canonical/H_GEO_P2_INPUT_BINDING_V1.json').read_text())
+          l=json.loads(Path('canonical/IRIS_RESEARCH_EXPERIMENT_LEDGER_V1.json').read_text())
+          assert p['architecture']['architecture_expansion_allowed'] is False
+          assert p['architecture']['p1_checkpoint_initialization_allowed'] is False
+          assert p['architecture']['trainable_existing_modules']==['scene_core.scene','scene_core.field']
+          assert b['exact_triangle_dataset']['reuse_bytes_exactly'] is True
+          assert b['exact_triangle_dataset']['rebuild_or_resample_allowed'] is False
+          assert p['runtime_admission']['scene_and_field_gradient_connectivity_required_before_optimizer'] is True
+          assert p['training']['initialization_seed']==27060001
+          assert p['training']['scientific_entrypoint']=='tools.iris_vnext.train_fit8_h_geo_p2_seeded_v1'
+          assert p['independent_court']['probe_initialization_seed']==27079991
+          assert p['independent_court']['scientific_entrypoint']=='tools.iris_vnext.audit_fit8_h_geo_p2_seeded_v1'
+          assert p['interpretation']['pass_authorizes_tessa'] is False
+          assert p['interpretation']['pass_authorizes_surf_a2'] is False
+          rows={e['id']:e for e in l['experiments']}
+          p2=rows['H-GEO-P2-SCENE-FIELD']
+          assert p2['status']=='SCIENTIFIC_FAIL'
+          assert p2['scientific_pass_claimed'] is False
+          assert l['active_experiment'] in ('H-GEO-P2-SCENE-FIELD','H-GEO-P3-EXPLICIT-HIRES-CARRIER','H-GEO-P3-EFREQ','H-GEO-P3-SCALE-XFER')
+          if l['active_experiment']=='H-GEO-P3-EFREQ':
+              assert rows['H-GEO-P3-EXPLICIT-HIRES-CARRIER']['status']=='SCIENTIFIC_FAIL'
+              assert rows['H-GEO-P3-EFREQ']['status']=='SOURCE_PREPARATION'
+          if l['active_experiment']=='H-GEO-P3-SCALE-XFER':
+              assert rows['H-GEO-P3-EXPLICIT-HIRES-CARRIER']['status']=='SCIENTIFIC_FAIL'
+              assert rows['H-GEO-P3-EFREQ']['status']=='COMPLETED_UNRESOLVED'
+              assert rows['H-GEO-P3-EFREQ']['optimizer_steps_executed']==0
+              assert rows['H-GEO-P3-SCALE-XFER']['status']=='SOURCE_PREPARATION'
+              assert rows['H-GEO-P3-SCALE-XFER']['optimizer_steps_authorized']==0
+              assert rows['H-GEO-P3-SCALE-XFER']['p4_training_authorized'] is False
+          print('PASS_H_GEO_P2_HISTORICAL_SOURCE_AUTHORITY')
+          PY

@@ -1,0 +1,47 @@
+{
+  "schema": "RealSaS.HGeoP3ScaleTransferInputBinding.v1",
+  "experiment_id": "H-GEO-P3-SCALE-XFER",
+  "date_utc": "2026-10-20",
+  "purpose": "LOCALIZE_WHERE_ENDPOINT_RELEVANT_SPATIAL_INFORMATION_IS_LOST_FROM_FROZEN_VIEW_TOKENS_THROUGH_P3_GEOMETRY_CARRIER_WITH_ZERO_OPTIMIZER_STEPS",
+  "trigger_result": {
+    "result_authority": "docs/research/IRIS_H_GEO_P3_EFREQ_RESULT_20261020.json",
+    "efreq_execution_source_sha": "e3b46f3bc98cad0c48f37854de64de996192f667",
+    "efreq_status": "COMPLETED_H_GEO_P3_ENDPOINT_FREQUENCY_AUDIT",
+    "efreq_classification": "UNRESOLVED",
+    "efreq_audit_sha256": "ab4ca656442de0addb9468c6dcd7bf3e1e23b5a874fb4e5b675f2079720f2d04",
+    "efreq_query_csv_sha256": "41bf4f6bf1d90fa639e01fc799c032fb276ef51dd833fed1891ce4ce7c87a16d"
+  },
+  "parent_input_binding": "canonical/H_GEO_P3_EFREQ_INPUT_BINDING_V1.json",
+  "efreq_outputs": {
+    "audit": {
+      "filename": "H_GEO_P3_EFREQ_AUDIT.json",
+      "sha256": "ab4ca656442de0addb9468c6dcd7bf3e1e23b5a874fb4e5b675f2079720f2d04",
+      "drive_file_id": "1eeJ_f4MB5fSspSJF4DmKCdwjG-DOeYqf"
+    },
+    "query_csv": {
+      "filename": "H_GEO_P3_EFREQ_QUERY_TABLE.csv",
+      "sha256": "41bf4f6bf1d90fa639e01fc799c032fb276ef51dd833fed1891ce4ce7c87a16d",
+      "drive_file_id": "1iSI7j6QvX2_d30WTYcIypAXQieG1EW1v"
+    },
+    "completion": {
+      "filename": "NOTEBOOK_COMPLETION.json",
+      "sha256": "d36836ddb5d0270b4c951fb613c1445c5c84da80c1dc283c6ecd17389d9db85d",
+      "drive_file_id": "1FrZsrjmcDCOatK2o4h6RyfwQxZj4IO7i"
+    }
+  },
+  "authority_reuse": {
+    "p3_checkpoint_sha256": "95af736e1e9163cad9d568ea9c67770fe2fbf3391bbdb72d8c03c472b5b5d74b",
+    "p2_checkpoint_sha256": "0bdcd24af776e322bfbb1a004d6034167770b7950ecccb9b04d6d689597854ee",
+    "v8_checkpoint_sha256": "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5",
+    "p1_dataset_receipt_sha256": "6c27974a03e9f202adeda1b25f642d95006dcca7cbbf0ceb660484ea91c78dc5",
+    "prepared_manifest_sha256": "6561bf2087f4fac3699c673b5c93fb3d8dbc2d1ff90a5065d976cae70688b4d8",
+    "teacher_batch_receipt_sha256": "37b203f9c16e1a5dddbab1709ebb3806e486d66d1ed5b48a42817bc0044a7843"
+  },
+  "transport_policy": {
+    "single_drive_consent": true,
+    "drive_tree_scan_forbidden": true,
+    "second_google_oauth_forbidden": true,
+    "sha256_is_authority": true,
+    "checkpoint_write_allowed": false
+  }
+}

@@ -49,7 +49,7 @@ jobs:
           set -euo pipefail
           test -x "$PLATFORM_PYTHON"
           "$PLATFORM_PYTHON" - <<'PY'
-          import numpy, scipy, torch
+          import numpy, torch
           print('torch', torch.__version__, 'cuda', torch.cuda.is_available())
           PY
       - name: Compile execution sources
@@ -75,7 +75,7 @@ jobs:
         run: |
           set -euo pipefail
           "$PLATFORM_PYTHON" - <<'PY'
-          import json, os, subprocess
+          import json, subprocess
           receipt = {
               'schema': 'RealSaS.StructuralEvidenceABSelfHostedSourceWitness.v1',
               'status': 'PASS__SOURCE_ONLY__NO_SCIENTIFIC_EXECUTION',

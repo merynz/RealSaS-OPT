@@ -1,0 +1,6 @@
+{
+  "resample_seeds": [1701, 1702, 1703, 1704],
+  "subjects": ["Spider", "T-Rex", "Horse", "GreenBlob"],
+  "purpose": "counterfactual fixed-budget presentation-memory sampling stability",
+  "training": false
+}

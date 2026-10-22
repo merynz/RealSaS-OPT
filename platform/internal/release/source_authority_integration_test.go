@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"os"
 	"testing"
 
@@ -65,6 +66,9 @@ func TestEngineReleaseCanonicalSourceAuthorityIsExactAndLegacyCannotRun(t *testi
 	if !boundAgain.Reused {
 		t.Fatal("exact canonical source binding must be idempotent")
 	}
+	if _, err := BindCanonicalMain(ctx, pool, releaseID, otherMainSHA, "ci-drift"); !errors.Is(err, ErrSourceAuthorityDrift) {
+		t.Fatalf("same EngineRelease must reject a second canonical code SHA, got %v", err)
+	}
 	if err := RequireCanonicalMain(ctx, pool, releaseID, mainSHA); err != nil {
 		t.Fatalf("canonical source rejected: %v", err)
 	}
@@ -84,7 +88,7 @@ func TestEngineReleaseCanonicalSourceAuthorityIsExactAndLegacyCannotRun(t *testi
 		t.Fatal(err)
 	}
 	if len(bindings) != 2 {
-		t.Fatalf("expected canonical + legacy provenance bindings, got %d", len(bindings))
+		t.Fatalf("expected one canonical + one legacy provenance binding, got %d", len(bindings))
 	}
 
 	var modelChannelsAfter int

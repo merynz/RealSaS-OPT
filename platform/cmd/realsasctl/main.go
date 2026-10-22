@@ -18,14 +18,31 @@ import (
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("command required: stages, subject, artifact-put, artifact-import, input-seal, attempt, campaign, release, agent-context, agent-enter, agent-exit, research-start, research-run, campaign-start, campaign-run, product-compile, product-render")
+		return fmt.Errorf("command required: stages, status, experiments, experiment, experiment-create, experiment-transition, experiment-link, models, model, model-channels, model-release, model-evaluate, model-promote, subject, artifact-put, artifact-import, input-seal, attempt, campaign, release, agent-context, agent-enter, agent-exit, research-start, research-run, campaign-start, campaign-run, product-compile, product-render")
 	}
-	routes := map[string]string{"subject": "/v1/subjects", "artifact-import": "/v1/artifacts/import", "input-seal": "/v1/subject-inputs", "release": "/v1/releases", "research-start": "/v1/research/attempts", "research-run": "/v1/research/compile", "campaign-start": "/v1/research/campaigns", "campaign-run": "/v1/research/campaigns/run", "product-compile": "/v1/product/compile", "product-render": "/v1/product/render"}
+	routes := map[string]string{
+		"subject":               "/v1/subjects",
+		"artifact-import":       "/v1/artifacts/import",
+		"input-seal":            "/v1/subject-inputs",
+		"release":               "/v1/releases",
+		"research-start":        "/v1/research/attempts",
+		"research-run":          "/v1/research/compile",
+		"campaign-start":        "/v1/research/campaigns",
+		"campaign-run":          "/v1/research/campaigns/run",
+		"product-compile":       "/v1/product/compile",
+		"product-render":        "/v1/product/render",
+		"experiment-create":     "/v1/experiments",
+		"experiment-transition": "/v1/experiments/transition",
+		"experiment-link":       "/v1/experiments/link",
+		"model-release":         "/v1/model-releases",
+		"model-evaluate":        "/v1/model-releases/evaluations",
+		"model-promote":         "/v1/model-releases/promote",
+	}
 	routes["agent-enter"], routes["agent-exit"] = "/v1/agents/enter", "/v1/agents/exit"
 	flags := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	endpoint := flags.String("api", "http://127.0.0.1:8080", "operator API")
 	requestFile := flags.String("request", "-", "JSON request file, or - for stdin")
-	id := flags.String("id", "", "attempt or campaign UUID")
+	id := flags.String("id", "", "attempt, campaign, experiment or model release UUID")
 	repo := flags.String("repo", ".", "canonical source checkout for execution commands")
 	file := flags.String("file", "", "exact artifact bytes to upload")
 	sha := flags.String("sha256", "", "expected artifact content SHA256")
@@ -63,22 +80,26 @@ func run(args []string) error {
 			return fmt.Errorf("ARTIFACT_UPLOAD_HASH_MISMATCH")
 		}
 	}
-	if args[0] == "stages" {
-		method = http.MethodGet
-		path = "/v1/stages"
-		ok = true
-	}
-	if args[0] == "attempt" {
-		method = http.MethodGet
-		path = "/v1/attempts/" + *id
-		ok = *id != ""
-	}
-	if args[0] == "campaign" {
-		method = http.MethodGet
-		path = "/v1/research/campaigns/" + *id
-		ok = *id != ""
-	}
-	if args[0] == "agent-context" {
+	switch args[0] {
+	case "stages":
+		method, path, ok = http.MethodGet, "/v1/stages", true
+	case "status":
+		method, path, ok = http.MethodGet, "/v1/ops/status", true
+	case "experiments":
+		method, path, ok = http.MethodGet, "/v1/experiments", true
+	case "experiment":
+		method, path, ok = http.MethodGet, "/v1/experiments/"+*id, *id != ""
+	case "models":
+		method, path, ok = http.MethodGet, "/v1/model-releases", true
+	case "model":
+		method, path, ok = http.MethodGet, "/v1/model-releases/"+*id, *id != ""
+	case "model-channels":
+		method, path, ok = http.MethodGet, "/v1/model-channels", true
+	case "attempt":
+		method, path, ok = http.MethodGet, "/v1/attempts/"+*id, *id != ""
+	case "campaign":
+		method, path, ok = http.MethodGet, "/v1/research/campaigns/"+*id, *id != ""
+	case "agent-context":
 		method, path, ok = http.MethodGet, "/v1/agents/context/"+*id, *id != ""
 	}
 	if !ok {

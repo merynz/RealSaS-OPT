@@ -2,15 +2,16 @@ package main
 
 import (
 	"context"
-	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
-	"github.com/merynz/RealSaS-OPT/platform/internal/httpapi"
-	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
-	"github.com/merynz/RealSaS-OPT/platform/internal/stagegraph"
 	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
+	"github.com/merynz/RealSaS-OPT/platform/internal/httpapi"
+	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
+	"github.com/merynz/RealSaS-OPT/platform/internal/stagegraph"
 )
 
 var sourceCodeSHA string
@@ -50,7 +51,7 @@ func main() {
 		slog.Error("artifact store", "error", err)
 		os.Exit(1)
 	}
-	handler := (httpapi.API{Pool: pool, Graph: graph, Store: store, CodeSHA: sourceCodeSHA}).Handler()
+	handler := (httpapi.API{Pool: pool, Graph: graph, Store: store, CodeSHA: sourceCodeSHA}).HandlerWithOperational()
 	server := &http.Server{
 		Addr:              "127.0.0.1:8080",
 		Handler:           handler,

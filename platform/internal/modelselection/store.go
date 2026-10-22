@@ -2,8 +2,6 @@ package modelselection
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"sort"
 
 	"github.com/google/uuid"
@@ -30,86 +28,8 @@ type Selection struct {
 	ArtifactSizeBytes       int64     `json:"-"`
 }
 
-func ResolveForEngineReleaseTx(ctx context.Context, tx pgx.Tx, engineReleaseID uuid.UUID) ([]Selection, error) {
-	rows, err := tx.Query(ctx, `
-		SELECT family,architecture_id,channel
-		FROM engine_release_model_requirements
-		WHERE release_id=$1
-		ORDER BY family
-	`, engineReleaseID)
-	if err != nil {
-		return nil, err
-	}
-	type requirement struct{ family, architecture, channel string }
-	var requirements []requirement
-	for rows.Next() {
-		var r requirement
-		if err := rows.Scan(&r.family, &r.architecture, &r.channel); err != nil {
-			rows.Close()
-			return nil, err
-		}
-		requirements = append(requirements, r)
-	}
-	if err := rows.Err(); err != nil {
-		rows.Close()
-		return nil, err
-	}
-	rows.Close()
-
-	selections := make([]Selection, 0, len(requirements))
-	for _, requirement := range requirements {
-		var selected Selection
-		var lifecycle string
-		selected.Family = requirement.family
-		selected.Channel = requirement.channel
-		err := tx.QueryRow(ctx, `
-			SELECT mc.model_release_id,mc.lock_version,
-			       mr.architecture_id,mr.engine_release_id,mr.source_code_sha,mr.lifecycle_state,
-			       mr.checkpoint_artifact_id,a.content_sha256,
-			       t.name,t.schema_version,a.semantic_sha256,a.storage_key,a.size_bytes
-			FROM model_channels mc
-			JOIN model_releases mr ON mr.id=mc.model_release_id
-			JOIN artifacts a ON a.id=mr.checkpoint_artifact_id
-			JOIN artifact_types t ON t.id=a.artifact_type_id
-			WHERE mc.family=$1 AND mc.channel=$2
-			FOR SHARE OF mc,mr,a
-		`, requirement.family, requirement.channel).Scan(
-			&selected.ModelReleaseID, &selected.ChannelLockVersion,
-			&selected.ArchitectureID, &selected.ModelEngineReleaseID, &selected.SourceCodeSHA, &lifecycle,
-			&selected.CheckpointArtifactID, &selected.CheckpointContentSHA256,
-			&selected.ArtifactType, &selected.ArtifactSchemaVersion, &selected.ArtifactSemanticSHA256,
-			&selected.ArtifactStorageKey, &selected.ArtifactSizeBytes,
-		)
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, fmt.Errorf("MODEL_SELECTION_CHANNEL_MISSING:%s:%s", requirement.family, requirement.channel)
-		}
-		if err != nil {
-			return nil, err
-		}
-		if selected.ArchitectureID != requirement.architecture {
-			return nil, fmt.Errorf("MODEL_SELECTION_ARCHITECTURE_MISMATCH:%s:%s!=%s", requirement.family, selected.ArchitectureID, requirement.architecture)
-		}
-		if requirement.channel == "PRODUCTION" && lifecycle != "PRODUCTION" {
-			return nil, fmt.Errorf("MODEL_SELECTION_NOT_PRODUCTION:%s:%s", requirement.family, lifecycle)
-		}
-		selections = append(selections, selected)
-	}
-	return selections, nil
-}
-
-func BindAttemptTx(ctx context.Context, tx pgx.Tx, attemptID uuid.UUID, selections []Selection) error {
-	for _, selected := range selections {
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO attempt_model_releases
-			  (attempt_id,family,model_release_id,selected_channel,selected_channel_lock_version)
-			VALUES ($1,$2,$3,$4,$5)
-		`, attemptID, selected.Family, selected.ModelReleaseID, selected.Channel, selected.ChannelLockVersion); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
+// CopyAttemptToProductRevisionTx preserves the immutable model snapshot already
+// selected when the compile Attempt was accepted. It never resolves a channel.
 func CopyAttemptToProductRevisionTx(ctx context.Context, tx pgx.Tx, attemptID, productRevisionID uuid.UUID) error {
 	_, err := tx.Exec(ctx, `
 		INSERT INTO product_revision_model_releases(product_revision_id,family,model_release_id)
@@ -121,6 +41,8 @@ func CopyAttemptToProductRevisionTx(ctx context.Context, tx pgx.Tx, attemptID, p
 	return err
 }
 
+// LoadAttempt reads only the immutable model snapshot bound at compile
+// acceptance. No execution path is allowed to resolve a floating model channel.
 func LoadAttempt(ctx context.Context, pool *pgxpool.Pool, attemptID uuid.UUID) ([]Selection, error) {
 	rows, err := pool.Query(ctx, `
 		SELECT amr.family,amr.model_release_id,amr.selected_channel,amr.selected_channel_lock_version,

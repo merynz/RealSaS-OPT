@@ -7,6 +7,7 @@ on:
       - 'tools/platform_operational_migrate_v1.py'
       - 'tests/tools/test_platform_operational_migrate_v1.py'
       - '.github/workflows/p1_operational_migration_v1.yml'
+      - '.github/workflows/p1_operational_migration_apply.yml'
   workflow_dispatch:
 
 permissions:

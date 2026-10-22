@@ -220,12 +220,12 @@ func Register(ctx context.Context, pool *pgxpool.Pool, raw RegisterRequest) (Rec
 			return err
 		}
 		audit, _ := json.Marshal(map[string]any{
-			"model_release_id":             id.String(),
-			"family":                       req.Family,
-			"name":                         req.Name,
-			"checkpoint_artifact_id":       req.CheckpointArtifactID.String(),
-			"checkpoint_content_sha256":    req.CheckpointContentSHA256,
-			"initial_state":                req.InitialState,
+			"model_release_id":              id.String(),
+			"family":                        req.Family,
+			"name":                          req.Name,
+			"checkpoint_artifact_id":        req.CheckpointArtifactID.String(),
+			"checkpoint_content_sha256":     req.CheckpointContentSHA256,
+			"initial_state":                 req.InitialState,
 			"qualification_claimed_at_seal": false,
 		})
 		_, err = tx.Exec(ctx, "INSERT INTO audit_events(actor,action,artifact_id,payload) VALUES ($1,'MODEL_RELEASE_REGISTERED',$2,$3)", req.CreatedBy, req.CheckpointArtifactID, audit)

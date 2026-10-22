@@ -29,6 +29,15 @@ func TestEngineReleaseCanonicalSourceAuthorityIsExactAndLegacyCannotRun(t *testi
 	}
 	defer pool.Close()
 
+	var modelChannelsBefore int
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM model_channels").Scan(&modelChannelsBefore); err != nil {
+		t.Fatal(err)
+	}
+	var productPromotionsBefore int
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM promotions").Scan(&productPromotionsBefore); err != nil {
+		t.Fatal(err)
+	}
+
 	releaseID := uuid.New()
 	suffix := uuid.NewString()
 	if _, err := pool.Exec(ctx, `
@@ -78,15 +87,21 @@ func TestEngineReleaseCanonicalSourceAuthorityIsExactAndLegacyCannotRun(t *testi
 		t.Fatalf("expected canonical + legacy provenance bindings, got %d", len(bindings))
 	}
 
-	var modelChannelCount int
-	if err := pool.QueryRow(ctx, "SELECT count(*) FROM model_channels").Scan(&modelChannelCount); err != nil {
+	var modelChannelsAfter int
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM model_channels").Scan(&modelChannelsAfter); err != nil {
 		t.Fatal(err)
 	}
-	var productPromotionCount int
-	if err := pool.QueryRow(ctx, "SELECT count(*) FROM promotions").Scan(&productPromotionCount); err != nil {
+	var productPromotionsAfter int
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM promotions").Scan(&productPromotionsAfter); err != nil {
 		t.Fatal(err)
 	}
-	if modelChannelCount != 0 || productPromotionCount != 0 {
-		t.Fatalf("source authority must not mint product authority: model_channels=%d promotions=%d", modelChannelCount, productPromotionCount)
+	if modelChannelsAfter != modelChannelsBefore || productPromotionsAfter != productPromotionsBefore {
+		t.Fatalf(
+			"source authority must not mint product authority: model_channels %d->%d promotions %d->%d",
+			modelChannelsBefore,
+			modelChannelsAfter,
+			productPromotionsBefore,
+			productPromotionsAfter,
+		)
 	}
 }

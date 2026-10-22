@@ -34,7 +34,7 @@ type SourceBinding struct {
 
 var (
 	ErrCanonicalSourceRequired = errors.New("ENGINE_RELEASE_CANONICAL_MAIN_SOURCE_REQUIRED")
-	ErrSourceAuthorityDrift     = errors.New("ENGINE_RELEASE_SOURCE_AUTHORITY_DRIFT")
+	ErrSourceAuthorityDrift    = errors.New("ENGINE_RELEASE_SOURCE_AUTHORITY_DRIFT")
 )
 
 func validateGitSHA(value string) error {

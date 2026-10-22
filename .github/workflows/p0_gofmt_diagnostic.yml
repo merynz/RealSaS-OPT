@@ -8,19 +8,39 @@ on:
       - '.github/workflows/p0_gofmt_diagnostic.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: review/operational-spine-p0-20261022
       - uses: actions/setup-go@v5
         with:
           go-version: '1.27.1'
           cache: false
-      - name: Report files requiring gofmt
+      - name: Apply gofmt to P0 files
         working-directory: platform
         run: |
-          files="$(gofmt -l .)"
-          printf 'GOFMT_REQUIRED_BEGIN\n%s\nGOFMT_REQUIRED_END\n' "$files"
+          gofmt -w \
+            cmd/realsasctl/main.go \
+            internal/modelrelease/store.go \
+            internal/operational/status.go \
+            internal/operational/status_integration_test.go
+          test -z "$(gofmt -l .)"
+      - name: Push formatting commit when needed
+        run: |
+          if git diff --quiet; then
+            echo 'GOFMT_ALREADY_CLEAN'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add platform/cmd/realsasctl/main.go \
+                  platform/internal/modelrelease/store.go \
+                  platform/internal/operational/status.go \
+                  platform/internal/operational/status_integration_test.go
+          git commit -m 'style: gofmt P0 operational spine'
+          git push origin HEAD:review/operational-spine-p0-20261022

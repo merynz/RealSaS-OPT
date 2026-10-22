@@ -145,6 +145,9 @@ func Start(ctx context.Context, pool *pgxpool.Pool, apiGraph *stagegraph.Graph, 
 	if err != nil {
 		return Status{}, err
 	}
+	if err := release.RequireCanonicalMain(ctx, pool, req.CandidateEngineReleaseID, deployedCodeSHA); err != nil {
+		return Status{}, err
+	}
 	candidateGraph, _, err := release.LoadGraph(ctx, pool, req.CandidateEngineReleaseID)
 	if err != nil {
 		return Status{}, err
@@ -202,6 +205,7 @@ func Start(ctx context.Context, pool *pgxpool.Pool, apiGraph *stagegraph.Graph, 
 			BaselineEngineReleaseID:  req.BaselineEngineReleaseID,
 			CandidateEngineReleaseID: req.CandidateEngineReleaseID,
 			CreatedBy:                req.CreatedBy,
+			DeployedCodeSHA:          deployedCodeSHA,
 		})
 		if err != nil {
 			_, _ = pool.Exec(ctx, "UPDATE research_campaigns SET state='START_FAILED' WHERE id=$1", campaignID)

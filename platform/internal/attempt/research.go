@@ -30,6 +30,7 @@ type ResearchRequest struct {
 	ParentAttemptID          *uuid.UUID            `json:"parent_attempt_id"`
 	Intervention             *release.Intervention `json:"intervention,omitempty"`
 	CreatedBy                string                `json:"created_by"`
+	DeployedCodeSHA          string                `json:"-"`
 }
 
 type ResearchStart struct {
@@ -53,6 +54,9 @@ func StartResearch(
 	}
 	if req.CreatedBy == "" {
 		return ResearchStart{}, errors.New("created_by is required")
+	}
+	if err := release.RequireCanonicalMain(ctx, pool, req.CandidateEngineReleaseID, req.DeployedCodeSHA); err != nil {
+		return ResearchStart{}, err
 	}
 
 	baselineInfo, err := release.LoadInfo(ctx, pool, req.BaselineEngineReleaseID)
@@ -112,6 +116,7 @@ func StartResearch(
 		"baseline_release_sha256":     baselineInfo.ReleaseSHA256,
 		"candidate_engine_release_id": req.CandidateEngineReleaseID.String(),
 		"candidate_release_sha256":    candidateInfo.ReleaseSHA256,
+		"canonical_code_sha":          req.DeployedCodeSHA,
 		"direct_changed_stage_ids":    directIDs,
 		"invalidated_stage_ids":       impact.InvalidatedStageIDs,
 	}
@@ -211,9 +216,9 @@ func StartResearch(
 
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO attempts
-			  (id,subject_id,engine_release_id,parent_attempt_id,kind,spec_sha256,created_by,final_state)
-			VALUES ($1,$2,$3,$4,'research',$5,$6,'OPEN')
-		`, attemptID, req.SubjectID, req.CandidateEngineReleaseID, req.ParentAttemptID, specSHA, req.CreatedBy); err != nil {
+			  (id,subject_id,engine_release_id,parent_attempt_id,kind,spec_sha256,created_by,final_state,canonical_code_sha)
+			VALUES ($1,$2,$3,$4,'research',$5,$6,'OPEN',$7)
+		`, attemptID, req.SubjectID, req.CandidateEngineReleaseID, req.ParentAttemptID, specSHA, req.CreatedBy, req.DeployedCodeSHA); err != nil {
 			return err
 		}
 
@@ -221,6 +226,7 @@ func StartResearch(
 			"schema":                      "RealSaS.CodeChangeImpact.v1",
 			"baseline_engine_release_id":  req.BaselineEngineReleaseID.String(),
 			"candidate_engine_release_id": req.CandidateEngineReleaseID.String(),
+			"canonical_code_sha":          req.DeployedCodeSHA,
 			"direct_changes":              impact.DirectChanges,
 			"direct_changed_stage_ids":    directIDs,
 			"invalidated_stage_ids":       impact.InvalidatedStageIDs,

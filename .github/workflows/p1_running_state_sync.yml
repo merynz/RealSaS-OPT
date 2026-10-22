@@ -1,0 +1,84 @@
+name: p1-running-state-sync
+
+on:
+  pull_request:
+    paths:
+      - 'canonical/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json'
+      - 'tools/platform_operational_migrate_v1.py'
+      - '.github/workflows/p1_running_state_sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: review/operational-spine-p1-migration-20261022
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Patch importer to historical-training-aware RUNNING migration
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('tools/platform_operational_migrate_v1.py')
+          s=p.read_text()
+          s=s.replace('import hashlib\n', '')
+
+          old='''    if experiment.get("initial_state") != "PREREGISTERED":\n        raise MigrationError("MIGRATION_LEGACY_ACTIVE_EXPERIMENT_MUST_ENTER_PREREGISTERED")\n    metadata = experiment.get("metadata")\n    if not isinstance(metadata, dict):\n        raise MigrationError("MIGRATION_EXPERIMENT_METADATA_REQUIRED")\n    if metadata.get("scientific_training_executed_at_migration") is not False:\n        raise MigrationError("MIGRATION_CANNOT_IMPORT_EXECUTED_TRAINING")\n    if metadata.get("optimizer_steps_executed_at_migration") != 0:\n        raise MigrationError("MIGRATION_OPTIMIZER_STEPS_MUST_BE_ZERO")\n    if metadata.get("scientific_pass_or_fail_observed_at_migration") is not False:\n        raise MigrationError("MIGRATION_CANNOT_INVENT_SCIENTIFIC_RESULT")\n'''
+          new='''    target_state = experiment.get("initial_state")\n    if target_state not in {"PREREGISTERED", "RUNNING"}:\n        raise MigrationError("MIGRATION_LEGACY_ACTIVE_EXPERIMENT_STATE_INVALID")\n    metadata = experiment.get("metadata")\n    if not isinstance(metadata, dict):\n        raise MigrationError("MIGRATION_EXPERIMENT_METADATA_REQUIRED")\n    training_executed = metadata.get("scientific_training_executed_at_migration")\n    if not isinstance(training_executed, bool):\n        raise MigrationError("MIGRATION_TRAINING_HISTORY_BOOLEAN_REQUIRED")\n    if target_state == "PREREGISTERED" and training_executed:\n        raise MigrationError("MIGRATION_PREREGISTERED_CANNOT_HAVE_EXECUTED_TRAINING")\n    if target_state == "RUNNING":\n        if not training_executed:\n            raise MigrationError("MIGRATION_RUNNING_REQUIRES_EXECUTED_TRAINING_HISTORY")\n        if not isinstance(metadata.get("training_execution_state"), str) or not metadata["training_execution_state"].strip():\n            raise MigrationError("MIGRATION_RUNNING_TRAINING_EXECUTION_STATE_REQUIRED")\n    if metadata.get("scientific_causal_result_observed_at_migration") is not False:\n        raise MigrationError("MIGRATION_CANNOT_IMPORT_FINAL_CAUSAL_RESULT")\n    if metadata.get("scientific_free_running_result_observed_at_migration") is not False:\n        raise MigrationError("MIGRATION_CANNOT_IMPORT_FINAL_FREE_RUNNING_RESULT")\n'''
+          if old not in s:
+              raise SystemExit('legacy experiment validation seam missing')
+          s=s.replace(old,new,1)
+
+          old='''        "execute_optimizer",\n        "execute_scientific_courts",\n'''
+          new='''        "execute_optimizer",\n        "repeat_training",\n        "mutate_frozen_checkpoints",\n        "execute_scientific_courts",\n'''
+          if old not in s:
+              raise SystemExit('scientific invariant seam missing')
+          s=s.replace(old,new,1)
+
+          start=s.index('def _ensure_experiment(api: API, descriptor: dict[str, Any])')
+          end=s.index('\n\ndef _ensure_links', start)
+          replacement='''def _ensure_experiment(api: API, descriptor: dict[str, Any]) -> tuple[dict[str, Any], bool]:\n    spec = descriptor["experiment"]\n    target_state = spec["initial_state"]\n    existing = _existing_experiment(api, spec["slug"])\n    reused = existing is not None\n    if existing is not None:\n        if not _experiment_equivalent(existing, spec):\n            raise MigrationError("MIGRATION_EXISTING_EXPERIMENT_SPEC_DRIFT")\n        experiment = existing\n    else:\n        create_spec = dict(spec)\n        create_spec["initial_state"] = "PREREGISTERED"\n        created = api.post("/v1/experiments", create_spec)\n        if not isinstance(created, dict) or not isinstance(created.get("experiment"), dict):\n            raise MigrationError("MIGRATION_EXPERIMENT_CREATE_RESPONSE_INVALID")\n        experiment = created["experiment"]\n        reused = bool(created.get("reused", False))\n    current_state = experiment.get("lifecycle_state")\n    if target_state == "RUNNING" and current_state == "PREREGISTERED":\n        transitioned = api.post(\n            "/v1/experiments/transition",\n            {\n                "experiment_id": experiment.get("id"),\n                "to_state": "RUNNING",\n                "actor": "p1-operational-migration",\n            },\n        )\n        if not isinstance(transitioned, dict) or transitioned.get("lifecycle_state") != "RUNNING":\n            raise MigrationError("MIGRATION_EXPERIMENT_RUNNING_TRANSITION_FAILED")\n        experiment = transitioned\n    elif current_state != target_state:\n        raise MigrationError(f"MIGRATION_EXISTING_EXPERIMENT_STATE_DRIFT:{current_state}->{target_state}")\n    return experiment, reused\n'''
+          s=s[:start]+replacement+s[end:]
+
+          old='''                "checkpoint_artifact_id": binding["checkpoint_artifact_id"],\n                "engine_release_id": binding["engine_release_id"],\n                "source_code_sha": legacy["source_code_sha"],\n'''
+          new='''                "checkpoint_artifact_id": binding["checkpoint_artifact_id"],\n                "checkpoint_content_sha256": legacy["checkpoint_sha256"],\n                "engine_release_id": binding["engine_release_id"],\n                "source_code_sha": legacy["source_code_sha"],\n'''
+          if old not in s:
+              raise SystemExit('existing model identity seam missing')
+          s=s.replace(old,new,1)
+
+          old='''                "checkpoint_artifact_id": binding["checkpoint_artifact_id"],\n                "engine_release_id": binding["engine_release_id"],\n                "originating_experiment_id": experiment_id,\n                "source_code_sha": legacy["source_code_sha"],\n                "initial_state": "RESEARCH_QUALIFIED",\n'''
+          new='''                "checkpoint_artifact_id": binding["checkpoint_artifact_id"],\n                "checkpoint_content_sha256": legacy["checkpoint_sha256"],\n                "engine_release_id": binding["engine_release_id"],\n                "originating_experiment_id": experiment_id,\n                "source_code_sha": legacy["source_code_sha"],\n                "initial_state": "DRAFT",\n'''
+          if old not in s:
+              raise SystemExit('model create seam missing')
+          s=s.replace(old,new,1)
+
+          old='''            "action": "ENSURE_PREREGISTERED",\n            "slug": descriptor["experiment"]["slug"],\n'''
+          new='''            "action": "ENSURE_" + descriptor["experiment"]["initial_state"],\n            "slug": descriptor["experiment"]["slug"],\n            "historical_training_executed": descriptor["experiment"]["metadata"]["scientific_training_executed_at_migration"],\n'''
+          if old not in s:
+              raise SystemExit('plan experiment seam missing')
+          s=s.replace(old,new,1)
+
+          old='''        "scientific_execution_performed": false,\n        "operational_status_verified": true,\n'''
+          new='''        "scientific_execution_performed": false,\n        "historical_training_executed_at_migration": descriptor["experiment"]["metadata"]["scientific_training_executed_at_migration"],\n        "operational_status_verified": true,\n'''
+          if old not in s:
+              raise SystemExit('receipt seam missing')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+          python -m py_compile tools/platform_operational_migrate_v1.py
+      - name: Push importer state-sync commit
+        run: |
+          if git diff --quiet; then
+            echo 'P1_IMPORTER_ALREADY_RUNNING_AWARE'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/platform_operational_migrate_v1.py
+          git commit -m 'ops: import post-training Structural Evidence as RUNNING'
+          git push origin HEAD:review/operational-spine-p1-migration-20261022

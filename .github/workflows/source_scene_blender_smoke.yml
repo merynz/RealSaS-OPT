@@ -1,0 +1,44 @@
+name: source-scene-blender-smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/observation/blender_controlled_8view_v2.py'
+      - 'tools/observation/source_scene_contract_v2.py'
+      - 'tests/fixtures/source_scene_v2/**'
+      - 'tests/repository/test_source_scene_contract_v2.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/observation/blender_controlled_8view_v2.py'
+      - 'tools/observation/source_scene_contract_v2.py'
+      - 'tests/fixtures/source_scene_v2/**'
+      - 'tests/repository/test_source_scene_contract_v2.py'
+  workflow_dispatch:
+
+concurrency:
+  group: source-scene-blender-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  blender-source-scene-smoke:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONPATH: .:/usr/lib/python3/dist-packages
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender source-scene dependencies
+        run: |
+          sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 update -qq
+          sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 install -y --no-install-recommends blender python3-numpy
+      - name: Synthetic source-scene and alpha smoke
+        run: blender --background --factory-startup --threads 2 --python-exit-code 1 --python tests/fixtures/source_scene_v2/blender_smoke.py
+      - name: Source-scene smoke summary
+        run: |
+          echo 'SOURCE_SCENE_BLENDER_SMOKE_PASS'
+          echo "commit=$GITHUB_SHA"
+          echo 'scope=source_scene_and_alpha_engineering_only'
+          echo 'training_or_product_authority=false'

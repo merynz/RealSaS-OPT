@@ -64,40 +64,6 @@ CREATE INDEX ix_model_releases_family_state_created
     ON model_releases(family, lifecycle_state, created_at DESC);
 CREATE INDEX ix_model_releases_checkpoint ON model_releases(checkpoint_artifact_id);
 
--- Channel selection and release maturity are separate concerns. Once a model has
--- earned a maturity level, selecting it for a lower channel must not downgrade
--- that earned state. Terminal states remain terminal and are already rejected by
--- the Go promotion path.
-CREATE FUNCTION preserve_model_release_maturity() RETURNS trigger AS $$
-DECLARE
-    old_rank integer;
-    new_rank integer;
-BEGIN
-    old_rank := CASE OLD.lifecycle_state
-        WHEN 'DRAFT' THEN 0
-        WHEN 'RESEARCH_QUALIFIED' THEN 1
-        WHEN 'PRODUCT_CANDIDATE' THEN 2
-        WHEN 'PRODUCTION' THEN 3
-        ELSE 100
-    END;
-    new_rank := CASE NEW.lifecycle_state
-        WHEN 'DRAFT' THEN 0
-        WHEN 'RESEARCH_QUALIFIED' THEN 1
-        WHEN 'PRODUCT_CANDIDATE' THEN 2
-        WHEN 'PRODUCTION' THEN 3
-        ELSE 100
-    END;
-    IF old_rank <= 3 AND new_rank <= 3 AND new_rank < old_rank THEN
-        NEW.lifecycle_state := OLD.lifecycle_state;
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_model_release_maturity_monotonic
-BEFORE UPDATE OF lifecycle_state ON model_releases
-FOR EACH ROW EXECUTE FUNCTION preserve_model_release_maturity();
-
 CREATE TABLE model_release_evaluations (
     model_release_id uuid NOT NULL REFERENCES model_releases(id) ON DELETE RESTRICT,
     scope varchar(100) NOT NULL,
@@ -126,8 +92,6 @@ CREATE TABLE model_channels (
 
 DROP TABLE model_channels;
 DROP TABLE model_release_evaluations;
-DROP TRIGGER trg_model_release_maturity_monotonic ON model_releases;
-DROP FUNCTION preserve_model_release_maturity();
 DROP TABLE model_releases;
 DROP INDEX ix_research_campaigns_experiment_created;
 ALTER TABLE research_campaigns DROP COLUMN experiment_id;

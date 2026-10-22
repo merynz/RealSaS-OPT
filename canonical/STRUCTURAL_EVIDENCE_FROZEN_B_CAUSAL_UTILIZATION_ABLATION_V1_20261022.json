@@ -1,0 +1,63 @@
+{
+  "schema": "RealSaS.StructuralEvidenceFrozenBCausalUtilizationAblation.v1",
+  "status": "LOCKED_POST_HOC_FROZEN_MODEL_UTILIZATION_DIAGNOSTIC__NOT_QUALIFICATION",
+  "date": "2026-10-22",
+  "question": "Does the sealed B checkpoint materially use the semantic content of role-free presentation evidence, and which current evidence families contribute to positive or negative transfer across FIT8?",
+  "parent_autopsy_result_sha256": "e15957ed5f57394c018c84971f146b970c8b85f9f91b93a5a9ca3bae8f59c17b",
+  "parent_census_result_sha256": "01836f85f17bc7308e35c9ed08acc523904ec1cfbcc51b0caf33e6c7cb9d4df8",
+  "subjects": ["Snake", "Bat", "T-Rex", "Horse", "Spider", "GreenBlob", "Shark", "George"],
+  "frozen_inputs": {
+    "training_execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+    "arm_b_checkpoint_sha256": "e57fc117162101fbd4e0db211bd501e7338eeda1e91df575bfa7016629a2238d",
+    "presentation_memory_manifest_sha256": "21434efbfd409504d11bd883f35041089dbe7329e829c37446eb21c59b19b9f6"
+  },
+  "evaluation": {
+    "teacher_forced_all_topology_windows": true,
+    "optimizer_steps": 0,
+    "sampling": false,
+    "primary_metric": "TOTAL_OBJECTIVE",
+    "correct_b_parent_reproduction_absolute_tolerance": 0.000001
+  },
+  "interventions": {
+    "B_CORRECT": "Unmodified sealed B presentation payload.",
+    "B_VALUE_ZERO_KEEP_VALID": "Zero semantic value channels while preserving their validity bits, token count, top-level mask, kind, structural anchors, and camera. This intentionally creates typed zero-valued evidence rather than abstention.",
+    "B_SEMANTICS_ABSTAIN": "Zero each semantic value together with its paired validity bit while preserving token count, top-level mask, kind, xyz_a/xyz_b, xyz_b_valid, camera, and camera_valid. This leaves presentation-token geometry/layout but removes admitted semantic evidence.",
+    "B_SEMANTICS_SHUFFLED_WITHIN_KIND": "Deterministically permute semantic value+validity bundles among tokens of the same kind while structural anchors, camera, kind, token count, and top-level mask remain fixed. The permutation is seeded per subject and is required to change at least one semantic-bearing token when possible.",
+    "B_MINUS_FRONT": "Set front_probability and front_valid to zero only.",
+    "B_MINUS_VISIBILITY": "Set global_visibility and global_visibility_valid to zero only.",
+    "B_MINUS_BOUNDARY": "Set alpha_boundary/alpha_boundary_valid and appearance_boundary/appearance_boundary_valid to zero.",
+    "B_MINUS_RGBA_SUPPORT": "Set source_rgba/source_rgba_valid and source_support/source_support_valid to zero."
+  },
+  "semantic_channel_pairs": [
+    ["source_r", "source_rgba_valid"],
+    ["source_g", "source_rgba_valid"],
+    ["source_b", "source_rgba_valid"],
+    ["source_a", "source_rgba_valid"],
+    ["alpha_boundary", "alpha_boundary_valid"],
+    ["appearance_boundary", "appearance_boundary_valid"],
+    ["front_probability", "front_valid"],
+    ["occlusion_probability", "occlusion_valid"],
+    ["global_visibility", "global_visibility_valid"],
+    ["deformation_coherence", "deformation_coherence_valid"],
+    ["attachment_persistence", "attachment_persistence_valid"],
+    ["source_support", "source_support_valid"]
+  ],
+  "shuffle_seed": 26092201,
+  "interpretation": {
+    "content_materially_used": "B_SEMANTICS_ABSTAIN and/or B_SEMANTICS_SHUFFLED_WITHIN_KIND materially erase correct-B gains on the B-winning subjects, showing frozen-model dependence on evidence content/alignment rather than presentation-branch presence alone.",
+    "content_utilization_weak": "Semantic abstention and shuffling preserve nearly all correct-B gains, suggesting the current benefit is dominated by presentation-token geometry/layout, branch conditioning, or training/regularization effects rather than semantic evidence content.",
+    "channel_attribution": "Single-family ablations are interpreted only as frozen-model behavioral dependence; interactions between channels are allowed and additive importance is not assumed.",
+    "negative_transfer": "Horse/GreenBlob rescue under an ablation identifies a candidate harmful evidence family or interaction but does not establish corpus-level causality."
+  },
+  "explicit_limits": {
+    "post_hoc": true,
+    "retraining": false,
+    "optimizer_steps": 0,
+    "checkpoint_updates": false,
+    "qualification_pass_claimed": false,
+    "unseen_generalization_claimed": false,
+    "shared_scene_hypothesis_proven": false,
+    "world_causal_attribution_claimed": false,
+    "parent_directional_result_mutated": false
+  }
+}

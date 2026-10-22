@@ -1,98 +1,13 @@
 {
   "schema": "RealSaS.LegacyResearchBranchDrain.v1",
-  "status": "FROZEN_DRAIN_IN_PROGRESS",
+  "status": "SUPERSEDED_BY_LEGACY_RESEARCH_BRANCH_DRAIN_AUDIT_V2",
   "created_at": "2026-10-22T19:35:00+03:00",
-  "reason": "Retire branch-owned research continuation after P0/P1 Operational Spine closure and prevent recurrence of main/research source drift.",
-  "canonical_main_at_audit": "8942de7aa73d2fc787cc0df3278ef4dfe7785987",
-  "legacy_continuation": {
-    "branch": "research/structural-evidence-ab-free-run-failclosed-20261022",
-    "frozen_head": "2f6ba5491c54546e1001bd041dc88a0118a95687",
-    "archive_ref": "archive/structural-evidence-ab-frozen-2f6ba549",
-    "merge_base_with_main_at_audit": "1e9ee2fb6b9d2221c5489a562181f4a40f364a39",
-    "ahead_by_at_audit": 654,
-    "behind_by_at_audit": 68,
-    "authority_after_p1": "FROZEN_PROVENANCE_ONLY",
-    "whole_branch_merge_to_main": false,
-    "rebase_as_active_continuation": false,
-    "new_development_commits_allowed": false,
-    "new_scientific_execution_authority_allowed": false
-  },
-  "active_experiment_exception": {
-    "experiment_slug": "structural-evidence-a-b-v2",
-    "platform_lifecycle": "RUNNING",
-    "rule": "The already-trained frozen A/B checkpoints and locked free-running causal court may finish against the exact frozen lineage. This exception cannot create a new EngineRelease, Attempt, Campaign, checkpoint mutation, optimizer step, architecture revision, or product promotion off-main.",
-    "next_boundary": "RUN_LOCKED_FAIL_CLOSED_FREE_RUNNING_A_B_EVALUATOR_ON_FROZEN_CHECKPOINTS__OBSERVE_CAUSAL_COURT"
-  },
-  "drain_slices": [
-    {
-      "id": "DRAIN-IRIS-VNEXT-GENERIC",
-      "destination": "main",
-      "mode": "REVIEWED_MAIN_BASED_PRS",
-      "scope": [
-        "models/iris/vnext generic reusable model/representation code",
-        "generic IRIS VNext tests required for future development",
-        "generic dataset/build utilities only when still required"
-      ],
-      "exclude": [
-        "experiment result ledgers",
-        "branch-specific execution bindings",
-        "branch-owned workflow authority",
-        "historical CURRENT_STATE/CURRENT_PLAN replacements"
-      ]
-    },
-    {
-      "id": "DRAIN-TESSA-STRUCTURALIZER-GENERIC",
-      "destination": "main",
-      "mode": "REVIEWED_MAIN_BASED_PRS",
-      "scope": [
-        "models/tessa/v2 and v3 generic structuralizer implementation still required by current architecture",
-        "generic topology generation/court primitives",
-        "corresponding reusable tests"
-      ],
-      "exclude": [
-        "scientific result claims",
-        "A/B mutable continuation state",
-        "legacy workflow orchestration"
-      ]
-    },
-    {
-      "id": "DRAIN-GRAPHICS-GENERIC",
-      "destination": "main",
-      "mode": "REVIEWED_MAIN_BASED_PRS",
-      "scope": [
-        "generic compiler graphics carrier/runtime contracts",
-        "generic runtime graphics consumers",
-        "behavioral-consumption tests that remain architecturally valid"
-      ],
-      "exclude": [
-        "legacy CAA assumptions that are not part of current Graphics architecture",
-        "branch-specific demo receipts"
-      ]
-    },
-    {
-      "id": "DRAIN-EVALUATOR-FUTURE-USE",
-      "destination": "main_if_still_needed_after_current_court",
-      "mode": "PORT_FROM_FROZEN_SHA__DO_NOT_CONTINUE_BRANCH",
-      "scope": [
-        "free-running evaluator optimizations with reference parity proof",
-        "fail-closed grammar/decode utilities that remain reusable"
-      ],
-      "rule": "The current causal court may consume the frozen implementation. Any subsequent evaluator change starts from main and becomes a new EngineRelease/Attempt, never a commit on the frozen research branch."
-    }
-  ],
-  "never_wholesale_promote": [
-    "canonical historical experiment JSON as mutable state",
-    "research-branch push workflows",
-    "dated decision ledgers as current authority",
-    "CURRENT_STATE.md or CURRENT_PLAN.md from the legacy branch",
-    "branch-specific notebook ownership",
-    "old source gates whose only purpose was branch continuation"
-  ],
-  "closure_conditions": [
-    "Platform rejects new research execution whose EngineRelease lacks exact CANONICAL_MAIN binding to deployed code SHA",
-    "all future reusable IRIS/TESSA/Graphics source required for development exists on main",
-    "the active Structural-Evidence causal court is either completed or explicitly aborted without mutating frozen checkpoints",
-    "no active Experiment/Attempt/Campaign identifies the legacy research branch as continuation authority",
-    "legacy branch and archive ref remain provenance only"
-  ]
+  "superseded_at": "2026-10-22T19:59:00+03:00",
+  "superseded_by": "canonical/LEGACY_RESEARCH_BRANCH_DRAIN_AUDIT_V2.json",
+  "reason": "The original slice-level drain plan was too coarse and became stale after four additional post-archive directional-evaluator commits advanced the legacy branch. Audit v2 requires per-path disposition, dependency/test/consumer closure, and an explicit source-vs-product promotion boundary before PR #153 may merge.",
+  "original_archive_sha": "2f6ba5491c54546e1001bd041dc88a0118a95687",
+  "legacy_branch_head_observed_after_supersession": "ba36fe9986fa2dbd9909f2e6caf8f814079d4231",
+  "whole_branch_merge_allowed": false,
+  "active_rebase_continuation_allowed": false,
+  "current_ab_may_finish_without_mutation": true
 }

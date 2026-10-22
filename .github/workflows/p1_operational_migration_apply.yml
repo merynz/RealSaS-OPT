@@ -49,7 +49,8 @@ jobs:
           from pathlib import Path
           marker=json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
           expected=os.environ['EXPECTED_SHA']
-          assert marker.get('state') == 'READY', marker
+          # platform_deploy.py seals a successful service switch as SERVICES_ACTIVE.
+          assert marker.get('state') == 'SERVICES_ACTIVE', marker
           assert marker.get('code_sha') == expected, (marker.get('code_sha'), expected)
           current=Path('/home/monster/realsas_platform/current')
           assert current.exists()

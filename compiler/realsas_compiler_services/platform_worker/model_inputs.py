@@ -59,14 +59,23 @@ def _behavior_identity_payload(model: dict[str, Any]) -> dict[str, str]:
 
 
 def behavior_identity_sha256(model: dict[str, Any]) -> str:
-    """Mirror platform/internal/modelselection BehaviorIdentitySHA256 exactly.
+    """Mirror platform/internal/semantic CanonicalJSON exactly for this payload.
 
-    Go's semantic.CanonicalJSON uses json.Encoder and therefore hashes a final
-    newline. The payload contains only strings, so this encoding is intentionally
-    straightforward and cross-language testable.
+    Go marshals the struct, decodes it to a generic map, then json.Encoder emits
+    map keys lexicographically and appends a final newline. The payload contains
+    only strings, so sort_keys=True + compact separators + newline is the exact
+    cross-language encoding contract.
     """
     payload = _behavior_identity_payload(model)
-    raw = json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n"
+    raw = (
+        json.dumps(
+            payload,
+            sort_keys=True,
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+        + "\n"
+    )
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 

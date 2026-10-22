@@ -27,6 +27,9 @@ jobs:
             echo 'GOFMT_DRIFT_BEGIN'
             printf '%s\n' "$dirty"
             echo 'GOFMT_DRIFT_END'
+            echo 'GOFMT_DIFF_BEGIN'
+            gofmt -d platform/internal/release/source_authority.go || true
+            echo 'GOFMT_DIFF_END'
             exit 1
           fi
           echo 'GOFMT_CLEAN'

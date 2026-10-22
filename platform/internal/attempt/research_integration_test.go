@@ -76,11 +76,16 @@ func TestResearchAttemptCapturesExactStage35Impact(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	canonicalCodeSHA := "0123456789abcdef0123456789abcdef01234567"
+	if _, err := release.BindCanonicalMain(ctx, pool, candidate.ReleaseID, canonicalCodeSHA, "ci"); err != nil {
+		t.Fatal(err)
+	}
 	started, err := StartResearch(ctx, pool, g, ResearchRequest{
 		SubjectID:                subjectID,
 		BaselineEngineReleaseID:  baseline.ReleaseID,
 		CandidateEngineReleaseID: candidate.ReleaseID,
 		CreatedBy:                "ci",
+		DeployedCodeSHA:          canonicalCodeSHA,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -113,6 +118,13 @@ found:
 	if releaseID != candidate.ReleaseID {
 		t.Fatalf("attempt release=%s candidate=%s", releaseID, candidate.ReleaseID)
 	}
+	var storedCodeSHA string
+	if err := pool.QueryRow(ctx, "SELECT canonical_code_sha FROM attempts WHERE id=$1", started.AttemptID).Scan(&storedCodeSHA); err != nil {
+		t.Fatal(err)
+	}
+	if storedCodeSHA != canonicalCodeSHA {
+		t.Fatalf("attempt code sha=%s want=%s", storedCodeSHA, canonicalCodeSHA)
+	}
 
 	var payload []byte
 	if err := pool.QueryRow(ctx, `
@@ -129,6 +141,9 @@ found:
 	direct, ok := event["direct_changed_stage_ids"].([]any)
 	if !ok || len(direct) != 1 || direct[0] != "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED" {
 		t.Fatalf("event direct changes=%v", event["direct_changed_stage_ids"])
+	}
+	if event["canonical_code_sha"] != canonicalCodeSHA {
+		t.Fatalf("event code sha=%v want=%s", event["canonical_code_sha"], canonicalCodeSHA)
 	}
 }
 

@@ -1,0 +1,1 @@
+Context: the current B arm selected 5/8 FIT8 subjects but hurt Horse and GreenBlob and tied George. This experiment asks whether raw relation opportunity, fixed-budget compression, abstention/validity, and sampler choice explain that heterogeneity.

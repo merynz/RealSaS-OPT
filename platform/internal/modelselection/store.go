@@ -59,25 +59,26 @@ func ResolveForEngineReleaseTx(ctx context.Context, tx pgx.Tx, engineReleaseID u
 	selections := make([]Selection, 0, len(requirements))
 	for _, requirement := range requirements {
 		var selected Selection
-		var lifecycle, artifactContentSHA string
+		var lifecycle string
 		selected.Family = requirement.family
 		selected.Channel = requirement.channel
 		err := tx.QueryRow(ctx, `
 			SELECT mc.model_release_id,mc.lock_version,
 			       mr.architecture_id,mr.engine_release_id,mr.source_code_sha,mr.lifecycle_state,
-			       mr.checkpoint_artifact_id,mr.checkpoint_content_sha256,
-			       t.name,t.schema_version,a.semantic_sha256,a.storage_key,a.content_sha256,a.size_bytes
+			       mr.checkpoint_artifact_id,a.content_sha256,
+			       t.name,t.schema_version,a.semantic_sha256,a.storage_key,a.size_bytes
 			FROM model_channels mc
 			JOIN model_releases mr ON mr.id=mc.model_release_id
 			JOIN artifacts a ON a.id=mr.checkpoint_artifact_id
 			JOIN artifact_types t ON t.id=a.artifact_type_id
 			WHERE mc.family=$1 AND mc.channel=$2
+			FOR SHARE OF mc,mr,a
 		`, requirement.family, requirement.channel).Scan(
 			&selected.ModelReleaseID, &selected.ChannelLockVersion,
 			&selected.ArchitectureID, &selected.ModelEngineReleaseID, &selected.SourceCodeSHA, &lifecycle,
 			&selected.CheckpointArtifactID, &selected.CheckpointContentSHA256,
 			&selected.ArtifactType, &selected.ArtifactSchemaVersion, &selected.ArtifactSemanticSHA256,
-			&selected.ArtifactStorageKey, &artifactContentSHA, &selected.ArtifactSizeBytes,
+			&selected.ArtifactStorageKey, &selected.ArtifactSizeBytes,
 		)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("MODEL_SELECTION_CHANNEL_MISSING:%s:%s", requirement.family, requirement.channel)
@@ -87,9 +88,6 @@ func ResolveForEngineReleaseTx(ctx context.Context, tx pgx.Tx, engineReleaseID u
 		}
 		if selected.ArchitectureID != requirement.architecture {
 			return nil, fmt.Errorf("MODEL_SELECTION_ARCHITECTURE_MISMATCH:%s:%s!=%s", requirement.family, selected.ArchitectureID, requirement.architecture)
-		}
-		if selected.CheckpointContentSHA256 != artifactContentSHA {
-			return nil, fmt.Errorf("MODEL_SELECTION_CHECKPOINT_CONTENT_DRIFT:%s", requirement.family)
 		}
 		if requirement.channel == "PRODUCTION" && lifecycle != "PRODUCTION" {
 			return nil, fmt.Errorf("MODEL_SELECTION_NOT_PRODUCTION:%s:%s", requirement.family, lifecycle)
@@ -127,7 +125,7 @@ func LoadAttempt(ctx context.Context, pool *pgxpool.Pool, attemptID uuid.UUID) (
 	rows, err := pool.Query(ctx, `
 		SELECT amr.family,amr.model_release_id,amr.selected_channel,amr.selected_channel_lock_version,
 		       mr.architecture_id,mr.engine_release_id,mr.source_code_sha,
-		       mr.checkpoint_artifact_id,mr.checkpoint_content_sha256,
+		       mr.checkpoint_artifact_id,a.content_sha256,
 		       t.name,t.schema_version,a.semantic_sha256,a.storage_key,a.size_bytes
 		FROM attempt_model_releases amr
 		JOIN model_releases mr ON mr.id=amr.model_release_id

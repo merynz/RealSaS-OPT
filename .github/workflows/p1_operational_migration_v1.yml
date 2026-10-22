@@ -13,9 +13,13 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: p1-operational-migration-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   contract:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,18 +29,21 @@ jobs:
           python-version: '3.12'
       - name: Install focused dependency
         run: python -m pip install --no-input --progress-bar off pytest==8.4.1
-      - name: Fetch exact frozen legacy research ref
+      - name: Fetch exact current legacy research authority
         run: |
           git fetch --no-tags origin \
-            research/iris-vnext-hybrid-tessa-v2-20261019:refs/heads/research/iris-vnext-hybrid-tessa-v2-20261019
-          test "$(git rev-parse research/iris-vnext-hybrid-tessa-v2-20261019)" = \
-            "4cd38d828e37407c50034ec7abba26a1b61878ea"
-      - name: Validate source and descriptor
+            research/structural-evidence-ab-free-run-failclosed-20261022:refs/heads/research/structural-evidence-ab-free-run-failclosed-20261022
+          test "$(git rev-parse research/structural-evidence-ab-free-run-failclosed-20261022)" = \
+            "2f6ba5491c54546e1001bd041dc88a0118a95687"
+      - name: Validate source, descriptor, policy and importer contracts
         run: |
           python -m py_compile tools/platform_operational_migrate_v1.py
           python -m json.tool canonical/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json >/dev/null
-          python -m pytest -q tests/tools/test_platform_operational_migrate_v1.py
-      - name: Prove dry-run against immutable Git authority
+          python -m pytest -q \
+            tests/tools/test_platform_operational_migrate_v1.py \
+            tests/repository/test_platform_deployment.py \
+            tests/repository/test_self_hosted_execution_policy.py
+      - name: Prove dry-run against immutable current Git authority
         run: |
           python tools/platform_operational_migrate_v1.py \
             --descriptor canonical/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json \
@@ -46,7 +53,11 @@ jobs:
           import json
           p=json.load(open('/tmp/p1-plan.json'))
           assert p['mode']=='DRY_RUN'
-          assert p['experiment']['action']=='ENSURE_PREREGISTERED'
+          assert p['experiment']=={
+              'slug':'structural-evidence-a-b-v2',
+              'action':'ENSURE_RUNNING',
+              'historical_training_executed':True,
+          }
           assert p['models']==[{
               'family':'IRIS',
               'checkpoint_sha256':'0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5',
@@ -54,7 +65,8 @@ jobs:
           }]
           assert p['promotion']=='FORBIDDEN'
           assert p['scientific_execution']=='FORBIDDEN'
-          assert p['git_provenance']['legacy_branch_head_sha']=='4cd38d828e37407c50034ec7abba26a1b61878ea'
-          assert p['git_provenance']['execution_binding_git_blob_sha']=='f06fae5e2c18216a36257a8bc9cc2d5916d3caef'
-          print('P1_OPERATIONAL_MIGRATION_DRY_RUN_PASS')
+          assert p['branch_mutation']=='FORBIDDEN'
+          assert p['git_provenance']['legacy_branch_head_sha']=='2f6ba5491c54546e1001bd041dc88a0118a95687'
+          assert p['git_provenance']['execution_binding_git_blob_sha']=='05764b7925087e8b9800e5ba5feb04f515422507'
+          print('P1_OPERATIONAL_MIGRATION_CURRENT_RUNNING_DRY_RUN_PASS')
           PY

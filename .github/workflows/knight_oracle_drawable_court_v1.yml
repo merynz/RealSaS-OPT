@@ -57,14 +57,29 @@ jobs:
           root=Path(os.environ['RUN_ROOT'])
           seal=json.loads((root/'IMMUTABLE_STAGE23_SEAL.json').read_text())
           asset=json.loads((root/'artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/complete_appearance_asset.json').read_text())
-          assert prereg['status']=='PREREGISTERED_BEFORE_EXECUTION'
-          assert prereg['source_run_id']==seal['run_id']==os.environ['RUN_ID']
-          assert prereg['product_authority'] is False
-          assert seal['status']=='SEALED_IMMUTABLE_STAGE23'
-          assert seal['overwrite_forbidden'] is True
-          assert seal['source_owned_visual_mesh_mode'] is False
-          assert asset['schema']=='RealSaS.CompleteAppearanceAssetIR.v2'
-          assert asset['asset_hash']==seal['stage23_asset_hash']
+          diag={
+              'prereg_status':prereg.get('status'),
+              'prereg_source_run_id':prereg.get('source_run_id'),
+              'env_run_id':os.environ['RUN_ID'],
+              'seal_run_id':seal.get('run_id'),
+              'seal_status':seal.get('status'),
+              'seal_overwrite_forbidden':seal.get('overwrite_forbidden'),
+              'seal_source_owned_visual_mesh_mode':seal.get('source_owned_visual_mesh_mode'),
+              'seal_parent_run_id':seal.get('parent_run_id'),
+              'seal_stage23_asset_hash':seal.get('stage23_asset_hash'),
+              'asset_schema':asset.get('schema'),
+              'asset_hash':asset.get('asset_hash'),
+              'asset_source_owned_visual_mesh_mode':(asset.get('metadata') or {}).get('source_owned_visual_mesh_mode'),
+          }
+          print('KNIGHT_ORACLE_DRAWABLE_EXACT_DIAGNOSTIC='+json.dumps(diag,sort_keys=True))
+          if prereg.get('status')!='PREREGISTERED_BEFORE_EXECUTION': raise RuntimeError('DRAWABLE_EXACT_PREREG_STATUS')
+          if prereg.get('source_run_id')!=seal.get('run_id') or seal.get('run_id')!=os.environ['RUN_ID']: raise RuntimeError('DRAWABLE_EXACT_RUN_BINDING')
+          if prereg.get('product_authority') is not False: raise RuntimeError('DRAWABLE_EXACT_PRODUCT_AUTHORITY')
+          if seal.get('status')!='SEALED_IMMUTABLE_STAGE23': raise RuntimeError('DRAWABLE_EXACT_SEAL_STATUS')
+          if seal.get('overwrite_forbidden') is not True: raise RuntimeError('DRAWABLE_EXACT_OVERWRITE_POLICY')
+          if seal.get('source_owned_visual_mesh_mode') is not False: raise RuntimeError('DRAWABLE_EXACT_VISUAL_MODE')
+          if asset.get('schema')!='RealSaS.CompleteAppearanceAssetIR.v2': raise RuntimeError('DRAWABLE_EXACT_STAGE23_SCHEMA')
+          if asset.get('asset_hash')!=seal.get('stage23_asset_hash'): raise RuntimeError('DRAWABLE_EXACT_STAGE23_HASH')
           print('KNIGHT_ORACLE_DRAWABLE_EXACT_STAGE23_PASS', asset['asset_hash'], seal['parent_run_id'])
           PY
 

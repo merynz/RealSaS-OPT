@@ -79,6 +79,15 @@ type ArtifactRef struct {
 	SizeBytes      int64  `json:"size_bytes"`
 }
 
+type ModelReleaseRef struct {
+	Family               string      `json:"family"`
+	ModelReleaseID       string      `json:"model_release_id"`
+	ArchitectureID       string      `json:"architecture_id"`
+	ModelEngineReleaseID string      `json:"model_engine_release_id"`
+	SourceCodeSHA        string      `json:"source_code_sha"`
+	Checkpoint           ArtifactRef `json:"checkpoint"`
+}
+
 type PrepareCapabilityExecutionRequest struct {
 	CommandID       string         `json:"command_id"`
 	AttemptID       string         `json:"attempt_id"`
@@ -196,6 +205,7 @@ type EngineStageRequest struct {
 	PolicySHA256           string              `json:"policy_sha256"`
 	InputStages            []StageInput        `json:"input_stages"`
 	SourceInputs           []ArtifactRef       `json:"source_inputs"`
+	ModelReleases          []ModelReleaseRef   `json:"model_releases,omitempty"`
 	ExecutionID            string              `json:"execution_id"`
 	CommandID              string              `json:"command_id"`
 	AttemptID              string              `json:"attempt_id"`

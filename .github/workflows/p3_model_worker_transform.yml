@@ -1,0 +1,124 @@
+name: p3-model-worker-transform
+
+on:
+  push:
+    branches:
+      - product/inference-model-materialization-v1-20261023
+
+permissions:
+  contents: write
+
+jobs:
+  transform:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: platform/go.mod
+          cache-dependency-path: platform/go.sum
+      - name: Wire model materialization and engine fingerprint
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+
+          worker = Path('compiler/realsas_compiler_services/platform_worker/worker.py')
+          text = worker.read_text()
+          old_import = 'from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, verify_execution_version, released_execution_plan, verify_source_inputs\n'
+          new_import = 'from compiler.realsas_compiler_services.platform_worker.model_inputs import materialize_model_releases\n' + old_import
+          if old_import not in text or 'platform_worker.model_inputs import materialize_model_releases' in text:
+              raise SystemExit('P3_WORKER_IMPORT_ANCHOR_INVALID')
+          text = text.replace(old_import, new_import, 1)
+          old_call = '    external = verify_source_inputs(manifest=manifest, inputs=request.get("source_inputs") or (), read_object=_read_cas_object)\n'
+          new_call = old_call + '    materialize_model_releases(\n        manifest=manifest,\n        models=request.get("model_releases") or (),\n        read_object=_read_cas_object,\n    )\n'
+          if old_call not in text or '    materialize_model_releases(\n' in text:
+              raise SystemExit('P3_WORKER_MODEL_CALL_ANCHOR_INVALID')
+          worker.write_text(text.replace(old_call, new_call, 1))
+
+          mainline = Path('compiler/realsas_compiler_services/orchestrator/mainline.py')
+          text = mainline.read_text()
+          start = text.index('def _fingerprint(\n')
+          end = text.index('\n\ndef dependency_failure_ids', start)
+          original = text[start:end]
+          if 'RealSaS.StageInputFingerprint.v2' not in original or '_platform_model_snapshot_sha256' in original:
+              raise SystemExit('P3_ENGINE_FINGERPRINT_ANCHOR_INVALID')
+          replacement = textwrap.dedent('''\
+          def _fingerprint(
+              plan: dict,
+              ledger: dict,
+              manifest: dict,
+              stage: dict,
+              implementation_hash: str,
+          ) -> tuple[str, str]:
+              by_id = _ledger_map(ledger)
+              dependency_outputs: list[dict[str, Any]] = []
+              for dependency in stage.get("depends_on", ()):
+                  for output in by_id[str(dependency)].get("outputs", ()):
+                      digest = str(output.get("sha256", "") or "")
+                      if not digest:
+                          continue
+                      dependency_outputs.append(
+                          {
+                              "dependency_stage_id": str(dependency),
+                              "sha256": digest,
+                              "bytes": int(output.get("bytes", -1)),
+                              "schema": str(output.get("schema", "") or ""),
+                              "authority_class": str(
+                                  output.get("authority_class", "") or ""
+                              ),
+                          }
+                      )
+              policy_hash = content_sha256(stage["policy"])
+              payload = {
+                  "schema": "RealSaS.StageInputFingerprint.v2",
+                  "run_id": ledger["run_id"],
+                  "stage_id": stage["id"],
+                  "manifest_subset": _manifest_subset(manifest, stage),
+                  "dependency_output_identities": dependency_outputs,
+                  "policy_hash": policy_hash,
+                  "implementation_hash": implementation_hash,
+                  "pipeline_plan_sha256": ledger["pipeline_plan_sha256"],
+              }
+              model_snapshot_sha = str(
+                  manifest.get("_platform_model_snapshot_sha256") or ""
+              )
+              if model_snapshot_sha:
+                  if len(model_snapshot_sha) != 64 or any(
+                      ch not in "0123456789abcdef" for ch in model_snapshot_sha
+                  ):
+                      raise RuntimeError("MODEL_SNAPSHOT_SHA_INVALID")
+                  payload["schema"] = "RealSaS.StageInputFingerprint.v3"
+                  payload["model_snapshot_sha256"] = model_snapshot_sha
+              fingerprint = content_sha256(payload)
+              return fingerprint, policy_hash
+          ''')
+          mainline.write_text(text[:start] + replacement + text[end:])
+          PY
+      - name: Targeted authority proofs
+        run: |
+          python -m pip install --no-input --progress-bar off pytest
+          python -m pytest -q tests/compiler/test_platform_model_materialization_v1.py
+          python -m py_compile \
+            compiler/realsas_compiler_services/platform_worker/model_inputs.py \
+            compiler/realsas_compiler_services/platform_worker/worker.py \
+            compiler/realsas_compiler_services/orchestrator/mainline.py
+          cd platform
+          test -z "$(gofmt -l internal/modelselection/resolver.go internal/modelselection/resolver_test.go internal/resolver/compile.go internal/resolver/model_snapshot_test.go internal/control/activities.go)"
+          go test ./internal/modelselection ./internal/resolver ./internal/control
+      - name: Commit source and remove transient workflow
+        run: |
+          git rm .github/workflows/p3_model_worker_transform.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            compiler/realsas_compiler_services/platform_worker/worker.py \
+            compiler/realsas_compiler_services/orchestrator/mainline.py
+          git commit -m 'P3: materialize exact model snapshots before engine execution'
+          git push origin HEAD:${GITHUB_REF_NAME}

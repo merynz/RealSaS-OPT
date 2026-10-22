@@ -79,6 +79,10 @@ func TestCampaignCreatesFullDAGAttemptsAndNeverMintsFit8Pass(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	canonicalCodeSHA := "0123456789abcdef0123456789abcdef01234567"
+	if _, err := release.BindCanonicalMain(ctx, pool, candidate.ReleaseID, canonicalCodeSHA, "ci"); err != nil {
+		t.Fatal(err)
+	}
 
 	subjects := []uuid.UUID{uuid.New(), uuid.New(), uuid.New()}
 	for i, id := range subjects {
@@ -86,7 +90,7 @@ func TestCampaignCreatesFullDAGAttemptsAndNeverMintsFit8Pass(t *testing.T) {
 			t.Fatal(i, err)
 		}
 	}
-	status, err := Start(ctx, pool, g, "0123456789abcdef0123456789abcdef01234567", StartRequest{
+	status, err := Start(ctx, pool, g, canonicalCodeSHA, StartRequest{
 		Name:                     "fit8-platform-test",
 		BaselineEngineReleaseID:  baseline.ReleaseID,
 		CandidateEngineReleaseID: candidate.ReleaseID,
@@ -96,6 +100,9 @@ func TestCampaignCreatesFullDAGAttemptsAndNeverMintsFit8Pass(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatal(err)
+	}
+	if status.CanonicalCodeSHA != canonicalCodeSHA {
+		t.Fatalf("campaign code sha=%s want=%s", status.CanonicalCodeSHA, canonicalCodeSHA)
 	}
 	if status.TargetStageID != "46_PRODUCT_CLOSURE_SEAL" {
 		t.Fatalf("target=%s", status.TargetStageID)
@@ -109,6 +116,13 @@ func TestCampaignCreatesFullDAGAttemptsAndNeverMintsFit8Pass(t *testing.T) {
 	for _, m := range status.Members {
 		if m.FinalState != "OPEN" {
 			t.Fatalf("member %s state=%s", m.SubjectID, m.FinalState)
+		}
+		var memberCodeSHA string
+		if err := pool.QueryRow(ctx, "SELECT canonical_code_sha FROM attempts WHERE id=$1", m.AttemptID).Scan(&memberCodeSHA); err != nil {
+			t.Fatal(err)
+		}
+		if memberCodeSHA != canonicalCodeSHA {
+			t.Fatalf("member %s code sha=%s want=%s", m.SubjectID, memberCodeSHA, canonicalCodeSHA)
 		}
 		if _, err := pool.Exec(ctx, "UPDATE attempts SET final_state='COMPLETED' WHERE id=$1", m.AttemptID); err != nil {
 			t.Fatal(err)

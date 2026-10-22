@@ -1,0 +1,52 @@
+name: legacy-research-drain-audit-v1
+
+on:
+  pull_request:
+    paths:
+      - "tools/audit_legacy_research_drain_v1.py"
+      - "canonical/LEGACY_RESEARCH_BRANCH_DRAIN_AUDIT_V2.json"
+      - "canonical/LEGACY_RESEARCH_BRANCH_DRAIN_V1.json"
+      - ".github/workflows/legacy_research_drain_audit_v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: legacy-research-drain-audit-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout candidate source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch immutable audit endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin refs/heads/main:refs/remotes/origin/audit-main
+          git fetch --no-tags origin refs/heads/research/structural-evidence-ab-free-run-failclosed-20261022:refs/remotes/origin/audit-legacy
+          test "$(git rev-parse refs/remotes/origin/audit-main)" = "8942de7aa73d2fc787cc0df3278ef4dfe7785987"
+          test "$(git rev-parse refs/remotes/origin/audit-legacy)" = "ba36fe9986fa2dbd9909f2e6caf8f814079d4231"
+
+      - name: Classifier self-test
+        run: python3 tools/audit_legacy_research_drain_v1.py --self-test
+
+      - name: Build exact path inventory
+        run: |
+          python3 tools/audit_legacy_research_drain_v1.py \
+            --base 8942de7aa73d2fc787cc0df3278ef4dfe7785987 \
+            --head ba36fe9986fa2dbd9909f2e6caf8f814079d4231 \
+            --out legacy-research-drain-path-inventory-v1.json
+
+      - name: Upload audit inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-research-drain-path-inventory-v1
+          path: legacy-research-drain-path-inventory-v1.json
+          if-no-files-found: error

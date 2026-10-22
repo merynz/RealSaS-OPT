@@ -1,0 +1,83 @@
+{
+  "schema": "RealSaS.StructuralEvidenceFIT8CorpusEvidenceAutopsy.v1",
+  "status": "LOCKED_POST_HOC_MECHANISM_DIAGNOSTIC__NOT_QUALIFICATION",
+  "date": "2026-10-22",
+  "parent_directional_result": "STRUCTURAL-EVIDENCE-A-B-FIT8-TEACHER-CENSUS-V1",
+  "question": "Is the morphology-dependent A/B effect explained in part by subject/view differences in raw presentation-evidence opportunity, qualification/abstention, fixed-budget compression, or sampling instability rather than by the shared-scene hypothesis alone?",
+  "subjects": ["Snake", "Bat", "T-Rex", "Horse", "Spider", "GreenBlob", "Shark", "George"],
+  "frozen_inputs": {
+    "training_execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+    "arm_a_checkpoint_sha256": "8f1c51209ad3f94bd03e24b0df9fc7f3e0dc08ccc0e853306fb49da5bc6e924f",
+    "arm_b_checkpoint_sha256": "e57fc117162101fbd4e0db211bd501e7338eeda1e91df575bfa7016629a2238d",
+    "query_manifest_sha256": "9bc67c6457918e43d88a2ff1158d0e8102875c9a3cf8db24788ac457237c6695",
+    "presentation_memory_manifest_sha256": "21434efbfd409504d11bd883f35041089dbe7329e829c37446eb21c59b19b9f6"
+  },
+  "phase_1_descriptive_autopsy": {
+    "unit": "subject_x_view",
+    "measure": [
+      "sampled_source_foreground_rays",
+      "direct_surface_hit_rays",
+      "multi_hit_rays",
+      "total_direct_surface_hits",
+      "oriented_pair_rows",
+      "pair_sampling_fraction",
+      "ray_hit_sampling_fraction",
+      "surface_sampling_fraction_or_proxy",
+      "hit_ray_fraction",
+      "mean_hits_per_hit_ray",
+      "mean_oriented_pairs_per_multi_hit_ray",
+      "view_to_view_cv_for_each_metric"
+    ],
+    "memory_measure": [
+      "token_count",
+      "kind_counts",
+      "front_valid_fraction",
+      "global_visibility_valid_fraction",
+      "source_rgba_valid_fraction",
+      "alpha_boundary_valid_fraction",
+      "appearance_boundary_valid_fraction",
+      "source_support_valid_fraction",
+      "occlusion_valid_fraction",
+      "deformation_coherence_valid_fraction",
+      "attachment_persistence_valid_fraction"
+    ],
+    "effect_target": "b_relative_total_objective_improvement_vs_a from sealed FIT8 teacher census",
+    "correlation": ["pearson", "spearman"],
+    "small_n_policy": "REPORT_EFFECT_SIZES_AND_RANKS_ONLY__NO_SIGNIFICANCE_CLAIM"
+  },
+  "phase_2_sampling_stability": {
+    "purpose": "Determine whether the B effect is stable to deterministic resampling of the same raw presentation-query pool.",
+    "primary_subjects": ["Spider", "Horse", "GreenBlob", "T-Rex"],
+    "reason": "Cover two strong B winners, two A winners/negative-transfer cases, and contrasting raw relation densities.",
+    "seeds": [1701, 1702, 1703, 1704],
+    "memory_budget": {
+      "maximum_tokens_per_subject": 8192,
+      "pair_tokens_per_view": 384,
+      "ray_hit_tokens_per_view": 384,
+      "surface_tokens_per_view": 256
+    },
+    "decoder_evaluation": "teacher_forced_all_topology_windows_with_frozen_B_checkpoint",
+    "stability_outputs": [
+      "per_seed_total_objective",
+      "relative_change_vs_original_B_memory",
+      "range",
+      "standard_deviation",
+      "sign_stability_against_A"
+    ],
+    "interpretation": {
+      "stable_positive": "All or nearly all resamples preserve B-over-A sign and similar effect magnitude.",
+      "sampling_sensitive": "Sign flips or effect magnitude varies materially across valid resamples.",
+      "stable_negative": "Negative-transfer subjects remain negative across resamples; investigate extractor/evidence quality or utilization rather than random sampler noise."
+    }
+  },
+  "explicit_limits": {
+    "post_hoc": true,
+    "retraining": false,
+    "optimizer_steps": 0,
+    "checkpoint_updates": false,
+    "qualification_pass_claimed": false,
+    "unseen_generalization_claimed": false,
+    "shared_scene_hypothesis_proven": false,
+    "causal_attribution_claimed": false
+  }
+}

@@ -18,9 +18,8 @@ DOCUMENTED_REUSABLE_ROOTS = (
     # Current role-free relation/visibility truth semantics used by the post-V8 program.
     "models/iris/vnext/graphics_truth_v3.py",
     "models/iris/vnext/relation_truth_v3_adapter_v1.py",
-    # Current post-M1 training/qualification policy sources recorded by the architecture index.
+    # Current source-quality/support policy that does not re-own topology.
     "models/iris/vnext/quality_policy_v1.py",
-    "models/iris/vnext/optimization_v2.py",
     "models/iris/vnext/relation_support_v2.py",
     # Current TESSA V3 proposal decoder plus fail-closed exact generation path.
     "models/tessa/v3/model_v3.py",
@@ -33,6 +32,7 @@ DOCUMENTED_REUSABLE_ROOTS = (
 )
 
 EXPLICITLY_NOT_ROOTS = {
+    "models/iris/vnext/optimization_v2.py": "future-focused V2 optimizer is statically typed to topology-owning IRISVNextV1 and includes a structure optimizer group; it predates topology-factored IRISVNextEvidenceModelV3 and therefore cannot define the recovered V3 optimizer contract",
     "models/iris/vnext/stack_v3.py": "optional TESSA-V2 global-history composition predates current V4/TESSA-V3 structural-evidence bridge; inspect as supersession candidate instead of assuming latest/current",
     "models/iris/vnext/structure_global_v3.py": "belongs to the older TESSA-V2 global-history composition/preflight path",
 }
@@ -77,7 +77,7 @@ def main() -> int:
         "basis": [
             "2026-10-19 topology-factored IRIS V3 evidence-model commits",
             "2026-10-20 shared Structural-Evidence plan with TESSA V3 and role-free presentation memory",
-            "legacy SYSTEM_INDEX documented post-M1 policy and Graphics V1 behavioral runtime path"
+            "legacy SYSTEM_INDEX documented Graphics V1 behavioral runtime and current evidence-truth rules"
         ],
         "documented_reusable_roots": list(DOCUMENTED_REUSABLE_ROOTS),
         "explicitly_not_roots": EXPLICITLY_NOT_ROOTS,

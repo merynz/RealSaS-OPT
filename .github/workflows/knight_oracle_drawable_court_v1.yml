@@ -1,0 +1,100 @@
+name: knight-oracle-drawable-court-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/knight-oracle-drawable-court-20261023
+    paths:
+      - 'tools/demo/knight_oracle_drawable_court_v1.py'
+      - '.github/workflows/knight_oracle_drawable_court_v1.yml'
+      - 'canonical/KNIGHT_ORACLE_DRAWABLE_COURT_PREREG_V1_20261023.json'
+
+concurrency:
+  group: knight-oracle-drawable-court-v1
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  oracle:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
+      OUT_DIR: canonical/knight_oracle_drawable_court_v1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Verify preregistration and immutable source
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/demo/knight_oracle_drawable_court_v1.py
+          test -f canonical/KNIGHT_ORACLE_DRAWABLE_COURT_PREREG_V1_20261023.json
+          test -f "$AUTHORITY_ROOT/runs/$RUN_ID/IMMUTABLE_STAGE23_SEAL.json"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('canonical/KNIGHT_ORACLE_DRAWABLE_COURT_PREREG_V1_20261023.json')
+          x=json.loads(p.read_text())
+          assert x['status']=='PREREGISTERED_BEFORE_EXECUTION'
+          assert x['source_run_id']=='SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671'
+          assert x['product_authority'] is False
+          print('KNIGHT_ORACLE_DRAWABLE_PREREG_PASS')
+          PY
+
+      - name: Run oracle drawable court
+        run: |
+          set -euo pipefail
+          rm -rf "$OUT_DIR"
+          PYTHONPATH=. python tools/demo/knight_oracle_drawable_court_v1.py \
+            --authority-root "$AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --out-dir "$OUT_DIR" | tee /tmp/knight_oracle_drawable_court_v1.txt
+          cp /tmp/knight_oracle_drawable_court_v1.txt "$OUT_DIR/AUDIT_STDOUT.txt"
+          test -f "$OUT_DIR/REPORT.json"
+          test -f "$OUT_DIR/DRAWABLE_PARTITION.json"
+          test -f "$OUT_DIR/KNIGHT_IDLE_ORACLE_DRAWABLE_COURT_V1.gif"
+          test -f "$OUT_DIR/KNIGHT_RUN_ORACLE_DRAWABLE_COURT_V1.gif"
+          test -f "$OUT_DIR/KNIGHT_SLASH_ORACLE_DRAWABLE_COURT_V1.gif"
+
+      - name: Upload oracle evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-oracle-drawable-court-v1
+          path: |
+            canonical/knight_oracle_drawable_court_v1/*.json
+            canonical/knight_oracle_drawable_court_v1/*.txt
+            canonical/knight_oracle_drawable_court_v1/*.png
+            canonical/knight_oracle_drawable_court_v1/*.gif
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Seal oracle evidence on research branch
+        run: |
+          set -euo pipefail
+          git config user.name realsas-self-hosted-runner
+          git config user.email runner@realsas.local
+          git add "$OUT_DIR"
+          if git diff --cached --quiet; then
+            echo 'KNIGHT_ORACLE_DRAWABLE_EVIDENCE_UNCHANGED'
+            exit 0
+          fi
+          git commit -m 'research: seal Knight oracle drawable court evidence'
+          git fetch origin research/knight-oracle-drawable-court-20261023
+          git rebase origin/research/knight-oracle-drawable-court-20261023
+          git push origin HEAD:research/knight-oracle-drawable-court-20261023

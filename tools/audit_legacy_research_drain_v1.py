@@ -57,6 +57,14 @@ EXACT: dict[str, tuple[str, str]] = {
     "tests/iris/test_tessa_incremental_generation_v2.py": (A, "protects active incremental decode semantics"),
     "tests/iris/test_tessa_structuralizer_v2.py": (A, "protects active V2 decoder reused by V3"),
     "tests/iris/test_tessa_structuralizer_v3.py": (A, "protects active V3 structuralizer"),
+    "tools/notebooks/build_iris_vnext_fit8_a100_preflight_v1.py": (
+        D,
+        "pre-training A100 preflight-only notebook handoff from 2026-10-16; current A/B is post-training with frozen checkpoints and later execution contracts",
+    ),
+    "tools/verify_native_runtime_source_seal_v2.py": (
+        A,
+        "generic append-only native runtime source-lineage verifier; validates runtime/realsas_cpp seal closure without minting authority",
+    ),
 }
 
 
@@ -226,6 +234,8 @@ def self_test() -> None:
         "tests/iris/test_structural_evidence_ab_execution_v1.py": B,
         "tools/iris_vnext/evaluate_structural_evidence_ab_directional_screen_v1.py": B,
         "tools/iris_vnext/audit_fit8_h_geo_p1_v1.py": H,
+        "tools/notebooks/build_iris_vnext_fit8_a100_preflight_v1.py": D,
+        "tools/verify_native_runtime_source_seal_v2.py": A,
     }
     for path, expected in cases.items():
         actual, _ = classify(path)

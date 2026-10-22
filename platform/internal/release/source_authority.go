@@ -124,6 +124,11 @@ func bindSource(
 // BindCanonicalMain records that this exact EngineRelease is executable from
 // the exact main SHA currently deployed by Platform. The API is the only normal
 // caller: clients do not get to self-assert CANONICAL_MAIN provenance.
+//
+// Source authority is deliberately independent from product authority. A release
+// becoming executable from canonical main does not select a ModelRelease channel,
+// qualify an artifact, promote a ProductRevision, or otherwise change shipping
+// behavior. Those transitions remain explicit operations in their own domains.
 func BindCanonicalMain(
 	ctx context.Context,
 	pool *pgxpool.Pool,

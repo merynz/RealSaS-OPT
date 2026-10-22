@@ -5,12 +5,15 @@ from __future__ import annotations
 
 V2 is an execution-hardening evaluator over the frozen H1 training result. It does
 not change model weights, conditioning, grammar, decoding logits, sampling,
-thresholds, or courts. The only semantic fix is that a grammar state with no
+thresholds, or courts. The only semantic fixes are: (1) a grammar state with no
 legal continuation is recorded as an incomplete free-running candidate instead
-of crashing the entire evaluator. Unexpected exceptions remain fatal.
+of crashing the entire evaluator, and (2) final training checkpoints are mmap-
+loaded for evaluation so unused optimizer tensors do not create a large host-RAM
+peak. Unexpected exceptions remain fatal.
 """
 
 import argparse
+import gc
 import json
 from pathlib import Path
 from typing import Any
@@ -52,6 +55,10 @@ from tools.iris_vnext.train_fit8_tessa_v3_structural_evidence_ab_v1 import (
 SCHEMA = "RealSaS.StructuralEvidenceABFreeRunningEvaluation.v2FailClosed"
 ARM_SCHEMA = "RealSaS.StructuralEvidenceABArmFreeRunningEvaluation.v2FailClosed"
 NO_ALLOWED_STOP = "GRAMMAR_DEAD_END__NO_ALLOWED_TOKEN"
+
+
+def _phase(message: str) -> None:
+    print("FREE_RUN PHASE " + message, flush=True)
 
 
 @torch.no_grad()
@@ -146,6 +153,7 @@ def _evaluate_arm(
     device: torch.device,
     training_source_sha: str,
 ) -> dict[str, Any]:
+    _phase(f"arm={arm_id} stage=receipt_validation_begin")
     arm_training_root = training_root / arm_id
     receipt_path = arm_training_root / "TRAINING_RECEIPT.json"
     receipt = load_json(receipt_path)
@@ -163,21 +171,42 @@ def _evaluate_arm(
     for key, expected in exact.items():
         if receipt.get(key) != expected:
             raise ValueError("STRUCTURAL_EVIDENCE_AB_FREE_RUN_LINEAGE_DRIFT:" + arm_id + ":" + key)
+    _phase(f"arm={arm_id} stage=receipt_validation_pass")
 
     checkpoint_path = arm_training_root / str(receipt["final_checkpoint"])
     if not checkpoint_path.is_file():
         raise FileNotFoundError("STRUCTURAL_EVIDENCE_AB_FREE_RUN_CHECKPOINT_MISSING:" + arm_id)
+    _phase(f"arm={arm_id} stage=checkpoint_sha_begin bytes={checkpoint_path.stat().st_size}")
     if sha256_file(checkpoint_path) != receipt.get("final_checkpoint_sha256"):
         raise ValueError("STRUCTURAL_EVIDENCE_AB_FREE_RUN_CHECKPOINT_SHA_DRIFT:" + arm_id)
-    checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+    _phase(f"arm={arm_id} stage=checkpoint_sha_pass")
+
+    # Evaluation needs only model tensors. mmap=True keeps the multi-GB optimizer
+    # state lazy instead of eagerly materializing it into host RAM.
+    _phase(f"arm={arm_id} stage=checkpoint_mmap_load_begin")
+    checkpoint = torch.load(
+        checkpoint_path,
+        map_location="cpu",
+        weights_only=False,
+        mmap=True,
+    )
+    _phase(f"arm={arm_id} stage=checkpoint_mmap_load_pass")
     if checkpoint.get("schema") != CHECKPOINT_SCHEMA or checkpoint.get("arm_id") != arm_id:
         raise ValueError("STRUCTURAL_EVIDENCE_AB_FREE_RUN_CHECKPOINT_SCHEMA_INVALID:" + arm_id)
     if checkpoint.get("execution_source_sha") != training_source_sha:
         raise ValueError("STRUCTURAL_EVIDENCE_AB_FREE_RUN_CHECKPOINT_TRAINING_SOURCE_DRIFT:" + arm_id)
 
+    _phase(f"arm={arm_id} stage=model_construct_begin")
     bridge = IRISVNextStructuralizationBridgeV4().to(device=device, dtype=torch.float32)
+    _phase(f"arm={arm_id} stage=model_construct_pass")
+    _phase(f"arm={arm_id} stage=model_state_load_begin")
     bridge.load_state_dict(checkpoint["model"], strict=True)
     bridge.eval()
+    _phase(f"arm={arm_id} stage=model_state_load_pass")
+    del checkpoint
+    gc.collect()
+    _phase(f"arm={arm_id} stage=checkpoint_container_released")
+
     policy = TESSAGenerationPolicyV2(maximum_new_tokens=131072, sampling=False, temperature=1.0, top_k=0)
     codec = _codec_config(bridge.tessa_config)
     rows = list(corpus.get("subjects") or ())
@@ -269,6 +298,7 @@ def _evaluate_arm(
     }
     _atomic_json(arm_output / "FREE_RUNNING_RECEIPT.json", arm_receipt)
     del bridge
+    gc.collect()
     torch.cuda.empty_cache()
     return arm_receipt
 
@@ -277,6 +307,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     repo_root = Path(args.repo_root).resolve()
     evaluator_source = str(args.expected_evaluator_sha).strip().lower()
     training_source = str(args.training_source_sha).strip().lower()
+    _phase("stage=evaluator_preflight_begin")
     if git_head(repo_root) != evaluator_source:
         raise RuntimeError("STRUCTURAL_EVIDENCE_AB_FREE_RUN_EVALUATOR_CHECKOUT_SHA_DRIFT")
     if not torch.cuda.is_available():
@@ -318,6 +349,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("STRUCTURAL_EVIDENCE_AB_FREE_RUN_COMBINED_TRAINING_INVALID")
     if combined_training.get("execution_source_sha") != training_source:
         raise ValueError("STRUCTURAL_EVIDENCE_AB_FREE_RUN_COMBINED_TRAINING_SOURCE_DRIFT")
+    _phase("stage=evaluator_preflight_pass")
 
     output_root = Path(args.output_root).resolve()
     if output_root.exists() and any(output_root.iterdir()):

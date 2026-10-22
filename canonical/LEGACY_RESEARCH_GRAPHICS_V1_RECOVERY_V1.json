@@ -24,8 +24,16 @@
     {"path":"runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp","blob_sha":"6d450ad07cebb84215904c477d4f88ea38b1a253","role":"NATIVE_PARSER_ORDER_VISIBILITY_CONTRACT"},
     {"path":"tests/compiler/test_vnext_single_carrier_graphics_v1.py","blob_sha":"8242b8668da3f9810113fbd263bceecf235b263c","role":"SINGLE_CANONICAL_M_COMPILER_RUNTIME_CONTRACT"},
     {"path":"tests/compiler/test_vnext_graphics_native_e2e.py","blob_sha":"0c26c995d9fbe1c83cbcd1e25f5119c10ae291e5","role":"BEHAVIORAL_NATIVE_RASTER_WITNESS"},
-    {"path":"canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V19_20261016.json","blob_sha":"69e0933a335def682cdd18bd51eee1a94ca0e832","role":"APPEND_ONLY_RUNTIME_SOURCE_LINEAGE"},
-    {"path":"tools/verify_native_runtime_source_seal_v2.py","blob_sha":"a92b3bdeff38d607b2983e5a7e4e08832fc41e7f","role":"FAIL_CLOSED_RUNTIME_SUBTREE_SEAL_VERIFIER"}
+    {"path":"canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V19_20261016.json","blob_sha":"69e0933a335def682cdd18bd51eee1a94ca0e832","role":"APPEND_ONLY_RUNTIME_SOURCE_LINEAGE"}
+  ],
+  "forward_patches": [
+    {
+      "path": "tools/verify_native_runtime_source_seal_v2.py",
+      "main_parent_blob_sha": "7f46cab630f0bacb5976d87db4d4ba477c56810a",
+      "recovery_blob_sha": "be0a873507ac0b8b141cd878f9291bd20f8fdcb1",
+      "change": "preserve the newer main verifier and append only COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V19_20261016.json to EXTENSION_PATHS",
+      "legacy_verifier_blob_not_used": "a92b3bdeff38d607b2983e5a7e4e08832fc41e7f"
+    }
   ],
   "runtime_lineage": {
     "prior_extension": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V18_20261011.json",

@@ -37,6 +37,7 @@ type RegisterRequest struct {
 	Name                     string         `json:"name"`
 	ArchitectureID           string         `json:"architecture_id"`
 	CheckpointArtifactID     uuid.UUID      `json:"checkpoint_artifact_id"`
+	CheckpointContentSHA256  string         `json:"checkpoint_content_sha256"`
 	EngineReleaseID          uuid.UUID      `json:"engine_release_id"`
 	OriginatingExperimentID  *uuid.UUID     `json:"originating_experiment_id,omitempty"`
 	OriginatingAttemptID     *uuid.UUID     `json:"originating_attempt_id,omitempty"`
@@ -82,6 +83,7 @@ type Record struct {
 	Name                     string         `json:"name"`
 	ArchitectureID           string         `json:"architecture_id"`
 	CheckpointArtifactID     uuid.UUID      `json:"checkpoint_artifact_id"`
+	CheckpointContentSHA256  string         `json:"checkpoint_content_sha256"`
 	EngineReleaseID          uuid.UUID      `json:"engine_release_id"`
 	OriginatingExperimentID  *uuid.UUID     `json:"originating_experiment_id,omitempty"`
 	OriginatingAttemptID     *uuid.UUID     `json:"originating_attempt_id,omitempty"`
@@ -105,12 +107,12 @@ type ChannelRecord struct {
 
 var ErrNotFound = errors.New("model release not found")
 
-func validateSHA40(value string) error {
-	if len(value) != 40 {
-		return errors.New("source_code_sha must be 40 lowercase hex characters")
+func validateHex(value string, length int, name string) error {
+	if len(value) != length {
+		return fmt.Errorf("%s must be %d lowercase hex characters", name, length)
 	}
 	if strings.ToLower(value) != value {
-		return errors.New("source_code_sha must be lowercase hex")
+		return fmt.Errorf("%s must be lowercase hex", name)
 	}
 	_, err := hex.DecodeString(value)
 	return err
@@ -120,6 +122,7 @@ func normalizeRegister(req RegisterRequest) (RegisterRequest, error) {
 	req.Family = strings.TrimSpace(req.Family)
 	req.Name = strings.TrimSpace(req.Name)
 	req.ArchitectureID = strings.TrimSpace(req.ArchitectureID)
+	req.CheckpointContentSHA256 = strings.TrimSpace(req.CheckpointContentSHA256)
 	req.SourceCodeSHA = strings.TrimSpace(req.SourceCodeSHA)
 	req.CreatedBy = strings.TrimSpace(req.CreatedBy)
 	if req.Metadata == nil {
@@ -134,11 +137,14 @@ func normalizeRegister(req RegisterRequest) (RegisterRequest, error) {
 	if req.CheckpointArtifactID == uuid.Nil || req.EngineReleaseID == uuid.Nil {
 		return RegisterRequest{}, errors.New("checkpoint_artifact_id and engine_release_id are required")
 	}
-	if err := validateSHA40(req.SourceCodeSHA); err != nil {
+	if err := validateHex(req.CheckpointContentSHA256, 64, "checkpoint_content_sha256"); err != nil {
 		return RegisterRequest{}, err
 	}
-	if req.InitialState != StateDraft && req.InitialState != StateResearchQualified {
-		return RegisterRequest{}, errors.New("model release initial_state must be DRAFT or RESEARCH_QUALIFIED")
+	if err := validateHex(req.SourceCodeSHA, 40, "source_code_sha"); err != nil {
+		return RegisterRequest{}, err
+	}
+	if req.InitialState != StateDraft {
+		return RegisterRequest{}, errors.New("model release registration must start DRAFT; qualification requires evaluated promotion")
 	}
 	return req, nil
 }
@@ -155,8 +161,12 @@ func Register(ctx context.Context, pool *pgxpool.Pool, raw RegisterRequest) (Rec
 	id := uuid.New()
 	err = persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
 		var artifact uuid.UUID
-		if err := tx.QueryRow(ctx, "SELECT id FROM artifacts WHERE id=$1 FOR SHARE", req.CheckpointArtifactID).Scan(&artifact); err != nil {
+		var artifactContentSHA string
+		if err := tx.QueryRow(ctx, "SELECT id,content_sha256 FROM artifacts WHERE id=$1 FOR SHARE", req.CheckpointArtifactID).Scan(&artifact, &artifactContentSHA); err != nil {
 			return fmt.Errorf("checkpoint artifact: %w", err)
+		}
+		if artifactContentSHA != req.CheckpointContentSHA256 {
+			return errors.New("MODEL_RELEASE_CHECKPOINT_CONTENT_SHA_MISMATCH")
 		}
 		var release uuid.UUID
 		if err := tx.QueryRow(ctx, "SELECT id FROM engine_releases WHERE id=$1 FOR SHARE", req.EngineReleaseID).Scan(&release); err != nil {
@@ -209,7 +219,15 @@ func Register(ctx context.Context, pool *pgxpool.Pool, raw RegisterRequest) (Rec
 			req.SupersedesModelReleaseID, metadata, req.CreatedBy); err != nil {
 			return err
 		}
-		audit, _ := json.Marshal(map[string]any{"model_release_id": id.String(), "family": req.Family, "name": req.Name, "checkpoint_artifact_id": req.CheckpointArtifactID.String()})
+		audit, _ := json.Marshal(map[string]any{
+			"model_release_id":             id.String(),
+			"family":                       req.Family,
+			"name":                         req.Name,
+			"checkpoint_artifact_id":       req.CheckpointArtifactID.String(),
+			"checkpoint_content_sha256":    req.CheckpointContentSHA256,
+			"initial_state":                req.InitialState,
+			"qualification_claimed_at_seal": false,
+		})
 		_, err = tx.Exec(ctx, "INSERT INTO audit_events(actor,action,artifact_id,payload) VALUES ($1,'MODEL_RELEASE_REGISTERED',$2,$3)", req.CreatedBy, req.CheckpointArtifactID, audit)
 		return err
 	})
@@ -314,8 +332,8 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromoteRequest) (Chann
 	if err != nil {
 		return ChannelRecord{}, err
 	}
-	if req.Channel != ChannelResearch && len(req.RequiredEvaluationScopes) == 0 {
-		return ChannelRecord{}, errors.New("candidate/production promotion requires explicit evaluation scopes")
+	if len(req.RequiredEvaluationScopes) == 0 {
+		return ChannelRecord{}, errors.New("model channel promotion requires explicit evaluation scopes")
 	}
 	var out ChannelRecord
 	err = persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
@@ -389,8 +407,8 @@ func scanRecord(row pgx.Row) (Record, error) {
 	var state string
 	var metadata []byte
 	if err := row.Scan(&out.ID, &out.Family, &out.Name, &out.ArchitectureID, &out.CheckpointArtifactID,
-		&out.EngineReleaseID, &out.OriginatingExperimentID, &out.OriginatingAttemptID, &out.SourceCodeSHA,
-		&state, &out.SupersedesModelReleaseID, &metadata, &out.CreatedBy, &out.CreatedAt, &out.SealedAt); err != nil {
+		&out.CheckpointContentSHA256, &out.EngineReleaseID, &out.OriginatingExperimentID, &out.OriginatingAttemptID,
+		&out.SourceCodeSHA, &state, &out.SupersedesModelReleaseID, &metadata, &out.CreatedBy, &out.CreatedAt, &out.SealedAt); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Record{}, ErrNotFound
 		}
@@ -429,10 +447,12 @@ func loadEvaluations(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) ([]E
 
 func Get(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (Record, error) {
 	out, err := scanRecord(pool.QueryRow(ctx, `
-		SELECT id,family,name,architecture_id,checkpoint_artifact_id,engine_release_id,
-		       originating_experiment_id,originating_attempt_id,source_code_sha,lifecycle_state,
-		       supersedes_model_release_id,metadata,created_by,created_at,sealed_at
-		FROM model_releases WHERE id=$1
+		SELECT mr.id,mr.family,mr.name,mr.architecture_id,mr.checkpoint_artifact_id,a.content_sha256,
+		       mr.engine_release_id,mr.originating_experiment_id,mr.originating_attempt_id,mr.source_code_sha,
+		       mr.lifecycle_state,mr.supersedes_model_release_id,mr.metadata,mr.created_by,mr.created_at,mr.sealed_at
+		FROM model_releases mr
+		JOIN artifacts a ON a.id=mr.checkpoint_artifact_id
+		WHERE mr.id=$1
 	`, id))
 	if err != nil {
 		return Record{}, err
@@ -443,10 +463,12 @@ func Get(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (Record, error) 
 
 func List(ctx context.Context, pool *pgxpool.Pool) ([]Record, error) {
 	rows, err := pool.Query(ctx, `
-		SELECT id,family,name,architecture_id,checkpoint_artifact_id,engine_release_id,
-		       originating_experiment_id,originating_attempt_id,source_code_sha,lifecycle_state,
-		       supersedes_model_release_id,metadata,created_by,created_at,sealed_at
-		FROM model_releases ORDER BY family,created_at DESC,id
+		SELECT mr.id,mr.family,mr.name,mr.architecture_id,mr.checkpoint_artifact_id,a.content_sha256,
+		       mr.engine_release_id,mr.originating_experiment_id,mr.originating_attempt_id,mr.source_code_sha,
+		       mr.lifecycle_state,mr.supersedes_model_release_id,mr.metadata,mr.created_by,mr.created_at,mr.sealed_at
+		FROM model_releases mr
+		JOIN artifacts a ON a.id=mr.checkpoint_artifact_id
+		ORDER BY mr.family,mr.created_at DESC,mr.id
 	`)
 	if err != nil {
 		return nil, err

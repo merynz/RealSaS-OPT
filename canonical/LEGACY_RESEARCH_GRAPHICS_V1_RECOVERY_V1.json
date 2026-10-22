@@ -1,0 +1,61 @@
+{
+  "schema": "RealSaS.LegacyResearchGraphicsV1Recovery.v1",
+  "generated_date": "2026-10-22",
+  "canonical_main_parent_sha": "2719b65d9d95e60d9dbdc0095377cbd6330a6131",
+  "legacy_source_donor_sha": "ba36fe9986fa2dbd9909f2e6caf8f814079d4231",
+  "legacy_source_donor_archive": "archive/structural-evidence-ab-frozen-ba36fe99",
+  "recovery_scope": "GRAPHICS_V1_BEHAVIORALLY_EFFECTIVE_CLOSURE_ONLY",
+  "authority": {
+    "compiler_canonical_m_authority_changed": false,
+    "single_canonical_mesh_required": true,
+    "independent_visual_mesh_authorized": false,
+    "graphics_v1_current_source_recovered": true,
+    "graphics_v2_current_product_authority": false,
+    "model_release_promotion": false,
+    "product_revision_promotion": false,
+    "scientific_pass_claimed": false
+  },
+  "exact_donor_blobs": [
+    {"path":"compiler/realsas_compiler_core/graphics_v1.py","blob_sha":"b31d32a57e18fe171297ec88b9b4a7d28efa1dfb","role":"COMPILE_ROLE_FREE_GRAPHICS_RELATIONS_ON_CANONICAL_M"},
+    {"path":"compiler/realsas_compiler_core/graphics_runtime_v1.py","blob_sha":"11e4c7aabe0ecf33ce9036a7bf4824d9013892a3","role":"MATERIALIZE_RUNTIME_GRAPHICS_CONTENT"},
+    {"path":"compiler/realsas_compiler_core/runtime_graphics_binary_v1.py","blob_sha":"687c523e025b7c57ce191b6b572b7a9e6f7e687e","role":"SERIALIZE_GRAPHICS_BIN_AND_AUTHORIZE_RUNTIME_CONSUMPTION"},
+    {"path":"runtime/realsas_cpp/src/graphics_v1.hpp","blob_sha":"46ccc6eda9f4416b794d0035a5619b262898866a","role":"NATIVE_PARSE_VISIBILITY_ORDER_ATTACHMENT_CONTENT"},
+    {"path":"runtime/realsas_cpp/src/runtime_v2_graphics_reference.cpp","blob_sha":"d3d85d2479fef23030e8ebb3000ce9e7aa6b82e5","role":"NATIVE_PIXEL_RASTER_CONSUMER"},
+    {"path":"runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp","blob_sha":"6d450ad07cebb84215904c477d4f88ea38b1a253","role":"NATIVE_PARSER_ORDER_VISIBILITY_CONTRACT"},
+    {"path":"tests/compiler/test_vnext_single_carrier_graphics_v1.py","blob_sha":"8242b8668da3f9810113fbd263bceecf235b263c","role":"SINGLE_CANONICAL_M_COMPILER_RUNTIME_CONTRACT"},
+    {"path":"tests/compiler/test_vnext_graphics_native_e2e.py","blob_sha":"0c26c995d9fbe1c83cbcd1e25f5119c10ae291e5","role":"BEHAVIORAL_NATIVE_RASTER_WITNESS"},
+    {"path":"canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V19_20261016.json","blob_sha":"69e0933a335def682cdd18bd51eee1a94ca0e832","role":"APPEND_ONLY_RUNTIME_SOURCE_LINEAGE"},
+    {"path":"tools/verify_native_runtime_source_seal_v2.py","blob_sha":"a92b3bdeff38d607b2983e5a7e4e08832fc41e7f","role":"FAIL_CLOSED_RUNTIME_SUBTREE_SEAL_VERIFIER"}
+  ],
+  "runtime_lineage": {
+    "prior_extension": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V18_20261011.json",
+    "prior_extension_blob_sha": "3042abfbb8c0fbe029527f148aeffd775b7c0500",
+    "recovered_extension": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V19_20261016.json",
+    "resulting_runtime_blob_count": 29,
+    "unsealed_runtime_blob_count": 0
+  },
+  "behavioral_chain": [
+    "GraphicsEvidenceV1",
+    "CompiledGraphicsV1",
+    "RuntimeGraphicsV1",
+    "graphics.bin",
+    "native graphics_v1 parser",
+    "face visibility + explicit partial order",
+    "pixel layer ordering",
+    "native RGBA raster"
+  ],
+  "behavioral_proof": {
+    "native_e2e_requirement": "changing Graphics visibility content changes real RGBA output while mesh/material/motion remain fixed",
+    "hash_only_binding_forbidden": true,
+    "triangle_array_order_is_presentation_authority": false,
+    "source_pixels_win_where_observed": true
+  },
+  "explicit_non_goals": [
+    "recover Graphics V2 product authority",
+    "mint a second visual mesh",
+    "change canonical mechanical topology",
+    "promote a ModelRelease",
+    "promote a ProductRevision",
+    "claim scientific qualification"
+  ]
+}

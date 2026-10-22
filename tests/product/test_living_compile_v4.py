@@ -57,7 +57,20 @@ class LivingCompileV4Tests(unittest.TestCase):
         self.assertTrue(Path(out['path']).is_file())
     def test_static_shell_present(self):
         app=LivingCompileApplication.default(); data,ctype=app.static_bytes('/')
-        self.assertIn(b'Living Compile',data)
+        self.assertIn(b'RealSaS Studio',data)
+        self.assertIn(b'data-stage="graphics"',data)
         self.assertEqual(ctype,'text/html')
+    def test_product_capabilities_are_simple_and_compile_is_fail_closed(self):
+        app=LivingCompileApplication.default()
+        status,payload,ctype=app.dispatch('GET','/api/project')
+        self.assertEqual(status,200)
+        self.assertEqual(ctype,'application/json')
+        self.assertFalse(payload['compile_available'])
+        self.assertEqual(payload['stages'],['INPUT','SHAPE','MESH','RIG','SKIN','GRAPHICS','ANIMATION','PROOF'])
+        self.assertEqual(payload['latency_targets']['preview_seconds_max'],30)
+        self.assertEqual(payload['latency_targets']['market_bar_full_compile_seconds_max'],180)
+        self.assertEqual(payload['latency_targets']['canonical_goal_full_compile_seconds_max'],60)
+        with self.assertRaisesRegex(Exception,'production inference graph'):
+            app.dispatch('POST','/api/compile/start',{})
 
 if __name__=='__main__': unittest.main()

@@ -67,7 +67,9 @@ class LivingCompileV4Tests(unittest.TestCase):
         self.assertEqual(ctype,'application/json')
         self.assertFalse(payload['compile_available'])
         self.assertEqual(payload['stages'],['INPUT','SHAPE','MESH','RIG','SKIN','GRAPHICS','ANIMATION','PROOF'])
-        self.assertEqual(payload['latency_targets']['full_compile_seconds_target'],[120,180])
+        self.assertEqual(payload['latency_targets']['preview_seconds_max'],30)
+        self.assertEqual(payload['latency_targets']['market_bar_full_compile_seconds_max'],180)
+        self.assertEqual(payload['latency_targets']['canonical_goal_full_compile_seconds_max'],60)
         with self.assertRaisesRegex(Exception,'production inference graph'):
             app.dispatch('POST','/api/compile/start',{})
 

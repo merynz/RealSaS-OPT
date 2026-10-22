@@ -931,18 +931,27 @@ def _fingerprint(
                 }
             )
     policy_hash = content_sha256(stage["policy"])
-    fingerprint = content_sha256(
-        {
-            "schema": "RealSaS.StageInputFingerprint.v2",
-            "run_id": ledger["run_id"],
-            "stage_id": stage["id"],
-            "manifest_subset": _manifest_subset(manifest, stage),
-            "dependency_output_identities": dependency_outputs,
-            "policy_hash": policy_hash,
-            "implementation_hash": implementation_hash,
-            "pipeline_plan_sha256": ledger["pipeline_plan_sha256"],
-        }
+    payload = {
+        "schema": "RealSaS.StageInputFingerprint.v2",
+        "run_id": ledger["run_id"],
+        "stage_id": stage["id"],
+        "manifest_subset": _manifest_subset(manifest, stage),
+        "dependency_output_identities": dependency_outputs,
+        "policy_hash": policy_hash,
+        "implementation_hash": implementation_hash,
+        "pipeline_plan_sha256": ledger["pipeline_plan_sha256"],
+    }
+    model_snapshot_sha = str(
+        manifest.get("_platform_model_snapshot_sha256") or ""
     )
+    if model_snapshot_sha:
+        if len(model_snapshot_sha) != 64 or any(
+            ch not in "0123456789abcdef" for ch in model_snapshot_sha
+        ):
+            raise RuntimeError("MODEL_SNAPSHOT_SHA_INVALID")
+        payload["schema"] = "RealSaS.StageInputFingerprint.v3"
+        payload["model_snapshot_sha256"] = model_snapshot_sha
+    fingerprint = content_sha256(payload)
     return fingerprint, policy_hash
 
 

@@ -9,20 +9,38 @@ from .model_v2 import TESSAStructuralizerV2, WindowedCausalSelfAttentionV2
 
 
 @dataclass
+class _ProjectedCrossMemoryV2:
+    key: torch.Tensor
+    value: torch.Tensor
+
+
+@dataclass
 class _WindowedLayerCacheV2:
     stable_k: torch.Tensor | None = None
     stable_v: torch.Tensor | None = None
     stable_start: int = 0
+    cross_memory: _ProjectedCrossMemoryV2 | None = None
 
 
 @dataclass
 class TESSAWindowedIncrementalStateV2:
     """Exact cached state for the shipped windowed TESSA decoder.
 
-    Completed execution chunks are prefix-stable and cached. The current partial
-    chunk is recomputed on every step because the reference WindowedCausalSelfAttentionV2
-    anchors its key window to that chunk's current end. This preserves exact
-    parity with model.decode_tokens(...) while avoiding full-prefix recomputation.
+    There are two exact execution regimes:
+
+    1. PRE_WINDOW token-fast path. While total consumed tokens are <= the local
+       attention window, future tokens are causally masked and no prior token can
+       change. Each token is therefore immediately stable and can use ordinary
+       per-token KV caching.
+
+    2. POST_WINDOW chunk-exact path. Once the prefix exceeds the local window,
+       WindowedCausalSelfAttentionV2 anchors key_start to the *current chunk end*.
+       Growing a partial chunk can therefore change earlier hidden states inside
+       that same chunk. Completed chunks remain stable, but the active partial
+       chunk must be recomputed exactly on every token.
+
+    Cross-attention memory is immutable during generation. Its K/V projections
+    are cached once per decoder layer and reused in both regimes.
     """
 
     layers: list[_WindowedLayerCacheV2]
@@ -36,6 +54,117 @@ class TESSAWindowedIncrementalStateV2:
             stable_token_count=0,
             current_token_ids=[],
         )
+
+
+def _split_mha_projection(mha, *, query: torch.Tensor | None = None, memory: torch.Tensor | None = None):
+    """Project nn.MultiheadAttention tensors using its packed Q/K/V weights."""
+
+    if mha.in_proj_weight is None:
+        raise TypeError("TESSA_V2_WINDOWED_INCREMENTAL_REQUIRES_PACKED_MHA_PROJECTION")
+    embed = int(mha.embed_dim)
+    wq, wk, wv = mha.in_proj_weight.split(embed, dim=0)
+    if mha.in_proj_bias is None:
+        bq = bk = bv = None
+    else:
+        bq, bk, bv = mha.in_proj_bias.split(embed, dim=0)
+    q = F.linear(query, wq, bq) if query is not None else None
+    k = F.linear(memory, wk, bk) if memory is not None else None
+    v = F.linear(memory, wv, bv) if memory is not None else None
+    return q, k, v
+
+
+def _reshape_heads(x: torch.Tensor, *, n_heads: int) -> torch.Tensor:
+    if x.ndim != 3:
+        raise ValueError("TESSA_V2_WINDOWED_INCREMENTAL_HEAD_RESHAPE_INVALID")
+    b, length, dim = x.shape
+    if dim % n_heads:
+        raise ValueError("TESSA_V2_WINDOWED_INCREMENTAL_HEAD_DIM_INVALID")
+    return x.view(b, length, n_heads, dim // n_heads).transpose(1, 2)
+
+
+def _cross_attention_cached(block, q_input: torch.Tensor, *, cache: _WindowedLayerCacheV2, memory: torch.Tensor) -> torch.Tensor:
+    mha = block.cross
+    if cache.cross_memory is None:
+        _, k, v = _split_mha_projection(mha, memory=memory)
+        assert k is not None and v is not None
+        cache.cross_memory = _ProjectedCrossMemoryV2(
+            key=_reshape_heads(k, n_heads=int(mha.num_heads)).detach(),
+            value=_reshape_heads(v, n_heads=int(mha.num_heads)).detach(),
+        )
+    q, _, _ = _split_mha_projection(mha, query=q_input)
+    assert q is not None
+    qh = _reshape_heads(q, n_heads=int(mha.num_heads))
+    y = F.scaled_dot_product_attention(
+        qh,
+        cache.cross_memory.key,
+        cache.cross_memory.value,
+        attn_mask=None,
+        dropout_p=0.0,
+        is_causal=False,
+    )
+    y = y.transpose(1, 2).contiguous().view(q_input.shape[0], q_input.shape[1], int(mha.embed_dim))
+    return mha.out_proj(y)
+
+
+def _append_stable_kv(cache: _WindowedLayerCacheV2, k: torch.Tensor, v: torch.Tensor, *, new_stable_count: int, window: int) -> None:
+    if cache.stable_k is None:
+        combined_k = k
+        combined_v = v
+        combined_start = new_stable_count - k.shape[2]
+    else:
+        combined_k = torch.cat((cache.stable_k, k), dim=2)
+        combined_v = torch.cat((cache.stable_v, v), dim=2)
+        combined_start = cache.stable_start
+    desired_start = max(0, new_stable_count - window)
+    trim = desired_start - combined_start
+    if trim < 0 or trim > combined_k.shape[2]:
+        raise AssertionError("TESSA_V2_WINDOWED_INCREMENTAL_STABLE_APPEND_TRIM_INVALID")
+    cache.stable_k = combined_k[:, :, trim:].detach()
+    cache.stable_v = combined_v[:, :, trim:].detach()
+    cache.stable_start = desired_start
+
+
+def _token_fast_self_attention(
+    attention: WindowedCausalSelfAttentionV2,
+    x: torch.Tensor,
+    *,
+    cache: _WindowedLayerCacheV2,
+    absolute_position: int,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    if x.ndim != 3 or x.shape[:2] != (1, 1):
+        raise ValueError("TESSA_V2_WINDOWED_INCREMENTAL_FAST_TOKEN_SHAPE_INVALID")
+    qkv = attention.qkv(x).view(
+        1, 1, 3, attention.config.n_heads, attention.head_dim
+    )
+    q, current_k, current_v = qkv.unbind(dim=2)
+    q = q.transpose(1, 2)
+    current_k = current_k.transpose(1, 2)
+    current_v = current_v.transpose(1, 2)
+
+    key_start = max(0, absolute_position + 1 - int(attention.config.local_attention_window))
+    previous_k = previous_v = None
+    if absolute_position > key_start:
+        if cache.stable_k is None or cache.stable_v is None:
+            raise AssertionError("TESSA_V2_WINDOWED_INCREMENTAL_FAST_CACHE_MISSING")
+        if cache.stable_start > key_start:
+            raise AssertionError("TESSA_V2_WINDOWED_INCREMENTAL_FAST_CACHE_UNDERFLOW")
+        offset = key_start - cache.stable_start
+        count = absolute_position - key_start
+        previous_k = cache.stable_k[:, :, offset : offset + count]
+        previous_v = cache.stable_v[:, :, offset : offset + count]
+        if previous_k.shape[2] != count or previous_v.shape[2] != count:
+            raise AssertionError("TESSA_V2_WINDOWED_INCREMENTAL_FAST_CACHE_LENGTH_DRIFT")
+
+    if previous_k is None:
+        key = current_k
+        value = current_v
+    else:
+        key = torch.cat((previous_k, current_k), dim=2)
+        value = torch.cat((previous_v, current_v), dim=2)
+
+    y = F.scaled_dot_product_attention(q, key, value, attn_mask=None, dropout_p=0.0, is_causal=False)
+    y = y.transpose(1, 2).contiguous().view(1, 1, attention.config.d_model)
+    return attention.out(y), current_k, current_v
 
 
 def _current_chunk_attention(
@@ -170,12 +299,50 @@ def incremental_decode_step_windowed_v2(
         if not isinstance(block.self_attn, WindowedCausalSelfAttentionV2):
             raise TypeError("TESSA_V2_WINDOWED_INCREMENTAL_REQUIRES_WINDOWED_MODEL")
 
-    state.current_token_ids.append(int(token_ids[0]))
+    window = int(model.config.local_attention_window)
     chunk = int(model.config.query_chunk_size)
+    consumed = state.stable_token_count + len(state.current_token_ids)
+
+    # Exact token-fast regime. Before the local window is exceeded, adding a
+    # future token cannot change any previous token because causal masking is the
+    # only active restriction. Every token is therefore immediately stable.
+    if consumed < window and not state.current_token_ids:
+        absolute_position = state.stable_token_count
+        pos = torch.tensor([absolute_position % window], dtype=torch.long, device=token_ids.device)
+        x = model.token_embedding(token_ids[None, :]) + model.position_embedding(pos)[None]
+        layer_kv: list[tuple[torch.Tensor, torch.Tensor]] = []
+        for layer_index, block in enumerate(model.decoder):
+            normed = block.norm1(x)
+            self_update, current_k, current_v = _token_fast_self_attention(
+                block.self_attn,
+                normed,
+                cache=state.layers[layer_index],
+                absolute_position=absolute_position,
+            )
+            layer_kv.append((current_k, current_v))
+            x = x + self_update
+            q = block.norm2(x)
+            x = x + _cross_attention_cached(
+                block,
+                q,
+                cache=state.layers[layer_index],
+                memory=memory,
+            )
+            x = x + block.mlp(block.norm3(x))
+        logits = model.lm_head(model.final_norm(x))[:, -1, :]
+        new_count = state.stable_token_count + 1
+        for cache, (k, v) in zip(state.layers, layer_kv, strict=True):
+            _append_stable_kv(cache, k, v, new_stable_count=new_count, window=window)
+        state.stable_token_count = new_count
+        return logits
+
+    # Once the local window is exceeded, exact shipped semantics require active
+    # partial-chunk recomputation because key_start depends on current chunk end.
+    if state.stable_token_count % chunk:
+        raise AssertionError("TESSA_V2_WINDOWED_INCREMENTAL_POST_WINDOW_ALIGNMENT_DRIFT")
+    state.current_token_ids.append(int(token_ids[0]))
     if len(state.current_token_ids) > chunk:
         raise AssertionError("TESSA_V2_WINDOWED_INCREMENTAL_CHUNK_OVERFLOW")
-    if state.stable_token_count % chunk:
-        raise AssertionError("TESSA_V2_WINDOWED_INCREMENTAL_STABLE_COUNT_NOT_CHUNK_ALIGNED")
 
     current_ids = torch.tensor(
         state.current_token_ids,
@@ -190,7 +357,7 @@ def incremental_decode_step_windowed_v2(
             device=token_ids.device,
             dtype=torch.long,
         )
-        % int(model.config.local_attention_window)
+        % window
     )
     x = model.token_embedding(current_ids) + model.position_embedding(absolute_positions)[None]
 
@@ -206,8 +373,12 @@ def incremental_decode_step_windowed_v2(
         layer_current_kv.append((current_k, current_v))
         x = x + self_update
         q = block.norm2(x)
-        cross, _ = block.cross(q, memory, memory, need_weights=False)
-        x = x + cross
+        x = x + _cross_attention_cached(
+            block,
+            q,
+            cache=state.layers[layer_index],
+            memory=memory,
+        )
         x = x + block.mlp(block.norm3(x))
 
     logits = model.lm_head(model.final_norm(x))[:, -1, :]
@@ -229,7 +400,7 @@ def assert_windowed_incremental_reference_parity_v2(
     atol: float = 2.0e-5,
     rtol: float = 2.0e-5,
 ) -> dict[str, float | int | str]:
-    """Tiny deterministic proof against model.decode_tokens across chunk/window boundaries."""
+    """Deterministic proof against model.decode_tokens across chunk/window boundaries."""
 
     from .config_v2 import TESSAStructuralizerConfigV2
 
@@ -258,11 +429,12 @@ def assert_windowed_incremental_reference_parity_v2(
     ).to(device)
     model.eval()
     memory = torch.randn(1, cfg.total_conditioning_tokens, cfg.d_model, device=device)
-    tokens = torch.randint(0, cfg.vocab_size, (13,), device=device)
+    tokens = torch.randint(0, cfg.vocab_size, (17,), device=device)
     state = TESSAWindowedIncrementalStateV2.for_model(model)
 
     max_abs = 0.0
     max_rel = 0.0
+    checked_prefixes: list[int] = []
     for index in range(tokens.numel()):
         inc = incremental_decode_step_windowed_v2(
             model,
@@ -278,17 +450,24 @@ def assert_windowed_incremental_reference_parity_v2(
         max_abs = max(max_abs, float(diff.max().item()))
         denom = ref.abs().clamp_min(1.0e-8)
         max_rel = max(max_rel, float((diff / denom).max().item()))
+        checked_prefixes.append(index + 1)
         if not torch.allclose(inc, ref, atol=atol, rtol=rtol):
             raise AssertionError(
                 "TESSA_V2_WINDOWED_INCREMENTAL_REFERENCE_PARITY_FAIL:"
                 f"prefix={index + 1}:max_abs={max_abs:.9g}:max_rel={max_rel:.9g}"
             )
 
+    # 17 prefixes exercise: token-fast regime 1..8, first post-window chunk
+    # prefixes 9..12, a completed post-window chunk boundary at 12, and another
+    # partial chunk 13..17. In production this corresponds exactly to proving
+    # the semantics around 4095/4096/4097 and subsequent 256-token boundaries.
     return {
         "status": "PASS__WINDOWED_INCREMENTAL_REFERENCE_PARITY",
         "prefix_count": int(tokens.numel()),
         "query_chunk_size": int(cfg.query_chunk_size),
         "local_attention_window": int(cfg.local_attention_window),
+        "token_fast_prefixes": int(cfg.local_attention_window),
+        "post_window_prefixes": int(tokens.numel() - cfg.local_attention_window),
         "max_abs_error": max_abs,
         "max_relative_error": max_rel,
     }

@@ -1,0 +1,1 @@
+Implementation proceeds from raw query payloads and frozen B evaluation; no new scientific assumption is introduced.

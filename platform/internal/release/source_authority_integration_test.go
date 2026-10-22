@@ -77,4 +77,16 @@ func TestEngineReleaseCanonicalSourceAuthorityIsExactAndLegacyCannotRun(t *testi
 	if len(bindings) != 2 {
 		t.Fatalf("expected canonical + legacy provenance bindings, got %d", len(bindings))
 	}
+
+	var modelChannelCount int
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM model_channels").Scan(&modelChannelCount); err != nil {
+		t.Fatal(err)
+	}
+	var productPromotionCount int
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM promotions").Scan(&productPromotionCount); err != nil {
+		t.Fatal(err)
+	}
+	if modelChannelCount != 0 || productPromotionCount != 0 {
+		t.Fatalf("source authority must not mint product authority: model_channels=%d promotions=%d", modelChannelCount, productPromotionCount)
+	}
 }

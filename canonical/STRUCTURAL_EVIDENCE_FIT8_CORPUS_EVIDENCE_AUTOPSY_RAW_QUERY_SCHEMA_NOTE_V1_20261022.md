@@ -1,0 +1,1 @@
+Raw query payload inspection confirms per-view files carry sampled source foreground rays, source RGBA/boundaries/support, complete ray-stack offsets/faces/depths/points, and all oriented pair rows with stable base-pair IDs. Therefore counterfactual fixed-budget resampling can be performed without regenerating IRIS surfaces or retraining any model.

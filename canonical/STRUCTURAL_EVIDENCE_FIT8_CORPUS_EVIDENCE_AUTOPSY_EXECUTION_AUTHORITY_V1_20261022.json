@@ -1,0 +1,18 @@
+{
+  "schema": "RealSaS.StructuralEvidenceFIT8CorpusEvidenceAutopsyExecutionAuthority.v1",
+  "status": "SEALED_FOR_EXECUTION",
+  "branch": "research/fit8-corpus-evidence-autopsy-20261022",
+  "training_execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+  "parent_teacher_census_authority_sha": "ff7be648b9dce421936e2ce6662dc09a1e9ab6e3",
+  "parent_census_result_sha256": "01836f85f17bc7308e35c9ed08acc523904ec1cfbcc51b0caf33e6c7cb9d4df8",
+  "evaluator_implementation_commit": "0fb71f26eacac91db45b23f30e0d3f692e6df701",
+  "evaluator_blob_sha": "ca39b814627c2c8bc838c9ed1f8753d2f1f0418c",
+  "query_manifest_sha256": "9bc67c6457918e43d88a2ff1158d0e8102875c9a3cf8db24788ac457237c6695",
+  "presentation_memory_manifest_sha256": "21434efbfd409504d11bd883f35041089dbe7329e829c37446eb21c59b19b9f6",
+  "arm_b_checkpoint_sha256": "e57fc117162101fbd4e0db211bd501e7338eeda1e91df575bfa7016629a2238d",
+  "optimizer_steps_executed": 0,
+  "parameters_updated": false,
+  "qualification_pass_claimed": false,
+  "unseen_generalization_claimed": false,
+  "original_memory_tensor_reproduction_required_before_resampling": true
+}

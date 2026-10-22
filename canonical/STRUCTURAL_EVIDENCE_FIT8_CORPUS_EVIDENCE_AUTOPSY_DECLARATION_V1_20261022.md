@@ -1,0 +1,1 @@
+The autopsy is designed to falsify the assumption that the current fixed-budget presentation memory is an adequate neutral proxy for the broader shared-scene hypothesis. It may reveal corpus/extractor/sampler artifacts without changing the already sealed directional selection.

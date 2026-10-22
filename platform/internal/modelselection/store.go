@@ -59,7 +59,7 @@ func ResolveForEngineReleaseTx(ctx context.Context, tx pgx.Tx, engineReleaseID u
 	selections := make([]Selection, 0, len(requirements))
 	for _, requirement := range requirements {
 		var selected Selection
-		var lifecycle string
+		var lifecycle, artifactContentSHA string
 		selected.Family = requirement.family
 		selected.Channel = requirement.channel
 		err := tx.QueryRow(ctx, `
@@ -77,7 +77,7 @@ func ResolveForEngineReleaseTx(ctx context.Context, tx pgx.Tx, engineReleaseID u
 			&selected.ArchitectureID, &selected.ModelEngineReleaseID, &selected.SourceCodeSHA, &lifecycle,
 			&selected.CheckpointArtifactID, &selected.CheckpointContentSHA256,
 			&selected.ArtifactType, &selected.ArtifactSchemaVersion, &selected.ArtifactSemanticSHA256,
-			&selected.ArtifactStorageKey, &selected.CheckpointContentSHA256, &selected.ArtifactSizeBytes,
+			&selected.ArtifactStorageKey, &artifactContentSHA, &selected.ArtifactSizeBytes,
 		)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("MODEL_SELECTION_CHANNEL_MISSING:%s:%s", requirement.family, requirement.channel)
@@ -87,6 +87,9 @@ func ResolveForEngineReleaseTx(ctx context.Context, tx pgx.Tx, engineReleaseID u
 		}
 		if selected.ArchitectureID != requirement.architecture {
 			return nil, fmt.Errorf("MODEL_SELECTION_ARCHITECTURE_MISMATCH:%s:%s!=%s", requirement.family, selected.ArchitectureID, requirement.architecture)
+		}
+		if selected.CheckpointContentSHA256 != artifactContentSHA {
+			return nil, fmt.Errorf("MODEL_SELECTION_CHECKPOINT_CONTENT_DRIFT:%s", requirement.family)
 		}
 		if requirement.channel == "PRODUCTION" && lifecycle != "PRODUCTION" {
 			return nil, fmt.Errorf("MODEL_SELECTION_NOT_PRODUCTION:%s:%s", requirement.family, lifecycle)
@@ -169,9 +172,9 @@ func IdentityRows(selections []Selection) []map[string]any {
 			"checkpoint_artifact_id":    selected.CheckpointArtifactID.String(),
 			"checkpoint_content_sha256": selected.CheckpointContentSHA256,
 			"model_engine_release_id":   selected.ModelEngineReleaseID.String(),
-			"source_code_sha":            selected.SourceCodeSHA,
-			"selected_channel":           selected.Channel,
-			"channel_lock_version":       selected.ChannelLockVersion,
+			"source_code_sha":           selected.SourceCodeSHA,
+			"selected_channel":          selected.Channel,
+			"channel_lock_version":      selected.ChannelLockVersion,
 		})
 	}
 	return out

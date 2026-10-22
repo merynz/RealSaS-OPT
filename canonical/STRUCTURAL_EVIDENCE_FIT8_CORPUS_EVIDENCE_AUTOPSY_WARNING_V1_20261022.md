@@ -1,0 +1,1 @@
+Warning: subject-level correlations in this experiment use n=8 and are descriptive only. No p-value, significance threshold, or causal conclusion is authorized.

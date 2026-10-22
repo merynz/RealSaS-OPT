@@ -9,7 +9,9 @@ from models.iris.v2.dinov2_foundation_v2 import (
     DINO_PATCH_GRID_HW,
     DINO_S_EMBED_DIM,
     DINOv2FoundationAuthorityV2,
+    DINOv2LoadedAuthorityV2,
     extract_dinov2_s_patch_map_v2,
+    verify_dinov2_authority_files_v2,
 )
 
 
@@ -167,15 +169,38 @@ def camera_features_v1(
     return value.unsqueeze(0).expand(int(batch_size), -1, -1).clone()
 
 
+def assert_loaded_dino_frontend_v1(
+    dino_model: torch.nn.Module,
+    loaded_authority: DINOv2LoadedAuthorityV2,
+) -> str:
+    """Re-verify the pinned DINO files before accepting a frontend as authority."""
+
+    if not isinstance(loaded_authority, DINOv2LoadedAuthorityV2):
+        raise RuntimeError("IRIS_VNEXT_DINO_LOADED_AUTHORITY_REQUIRED")
+    expected = verify_dinov2_authority_files_v2(
+        loaded_authority.source_dir,
+        loaded_authority.weight_path,
+    )
+    if loaded_authority != expected:
+        raise RuntimeError("IRIS_VNEXT_DINO_LOADED_AUTHORITY_DRIFT")
+    if dino_model.training:
+        raise RuntimeError("IRIS_VNEXT_DINO_MODEL_MUST_BE_EVAL")
+    if any(parameter.requires_grad for parameter in dino_model.parameters()):
+        raise RuntimeError("IRIS_VNEXT_DINO_MODEL_MUST_BE_FROZEN")
+    return expected.authority.authority_hash
+
+
 @torch.no_grad()
 def build_scene_inputs_from_rgba_v1(
     *,
     dino_model: torch.nn.Module,
+    loaded_authority: DINOv2LoadedAuthorityV2,
     native_rgba: torch.Tensor,
     camera_bundle: Mapping[str, Any],
 ) -> IRISVNextSceneInputsV1:
-    """Run the pinned DINO frontend and reproduce the IRIS training input frame."""
+    """Run the verified pinned DINO frontend and reproduce the training input frame."""
 
+    authority_hash = assert_loaded_dino_frontend_v1(dino_model, loaded_authority)
     rgb = rgba_to_white_composited_rgb_v1(native_rgba)
     patch_map = extract_dinov2_s_patch_map_v2(dino_model, rgb)
     image_tokens = dino_patch_map_to_tokens_v1(patch_map)
@@ -186,7 +211,7 @@ def build_scene_inputs_from_rgba_v1(
         camera_features=camera_features_v1(
             camera_bundle, batch_size=batch, device=image_tokens.device
         ),
-        foundation_authority_sha256=DINOv2FoundationAuthorityV2().authority_hash,
+        foundation_authority_sha256=authority_hash,
     )
     value.validate()
     return value

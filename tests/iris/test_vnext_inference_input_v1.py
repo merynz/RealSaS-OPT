@@ -5,7 +5,11 @@ from pathlib import Path
 import pytest
 import torch
 
-from models.iris.v2.dinov2_foundation_v2 import DINOv2FoundationAuthorityV2
+from models.iris.v2.dinov2_foundation_v2 import (
+    DINOv2FoundationAuthorityV2,
+    DINOv2LoadedAuthorityV2,
+)
+from models.iris.vnext import inference_input_v1 as bridge
 from models.iris.vnext.inference_input_v1 import (
     PATCH_TOKEN_COUNT_V1,
     camera_features_v1,
@@ -32,6 +36,18 @@ def _camera_bundle():
         "common_half_extent": 2.0,
         "cameras": rows,
     }
+
+
+def _loaded_authority() -> DINOv2LoadedAuthorityV2:
+    authority = DINOv2FoundationAuthorityV2()
+    return DINOv2LoadedAuthorityV2(
+        authority=authority,
+        source_dir="/verified/dinov2",
+        weight_path="/verified/dinov2_vits14.pth",
+        source_head=authority.source_revision,
+        weight_sha256=authority.weight_sha256,
+        feature_contract_hash=authority.feature_contract().contract_hash,
+    )
 
 
 def test_token_xy_matches_fit8_patch_center_contract():
@@ -84,15 +100,31 @@ def test_rgba_white_composite_matches_admitted_preparation_rounding():
     assert rgb[0, 0, :, 0, 0].tolist() == [10, 20, 30]
     assert rgb[0, 0, :, 0, 1].tolist() == [255, 255, 255]
     expected = torch.round(
-        (torch.tensor([0.0, 100.0, 200.0]) / 255.0) * (128.0 / 255.0)
-        + (1.0 - 128.0 / 255.0)
-    )
-    # The implementation rounds after multiplying the composed [0,1] RGB by 255.
-    expected = torch.round(
-        ((torch.tensor([0.0, 100.0, 200.0]) / 255.0) * (128.0 / 255.0)
-         + (1.0 - 128.0 / 255.0)) * 255.0
+        (
+            (torch.tensor([0.0, 100.0, 200.0]) / 255.0) * (128.0 / 255.0)
+            + (1.0 - 128.0 / 255.0)
+        )
+        * 255.0
     ).to(torch.uint8)
     assert torch.equal(rgb[0, 0, :, 0, 2], expected)
+
+
+def test_verified_dino_frontend_is_required_and_must_remain_frozen(monkeypatch):
+    seal = _loaded_authority()
+    monkeypatch.setattr(
+        bridge,
+        "verify_dinov2_authority_files_v2",
+        lambda source_dir, weight_path: seal,
+    )
+    model = torch.nn.Linear(1, 1).eval()
+    for parameter in model.parameters():
+        parameter.requires_grad_(False)
+
+    assert bridge.assert_loaded_dino_frontend_v1(model, seal) == seal.authority.authority_hash
+
+    model.train()
+    with pytest.raises(RuntimeError, match="IRIS_VNEXT_DINO_MODEL_MUST_BE_EVAL"):
+        bridge.assert_loaded_dino_frontend_v1(model, seal)
 
 
 def test_input_bridge_is_frozen_foundation_only_not_training_authority():

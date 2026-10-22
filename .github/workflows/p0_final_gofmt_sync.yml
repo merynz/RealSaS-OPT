@@ -1,0 +1,39 @@
+name: p0-final-gofmt-sync
+
+on:
+  pull_request:
+    paths:
+      - 'platform/internal/modelrelease/store.go'
+      - 'platform/internal/operational/status_integration_test.go'
+      - '.github/workflows/p0_final_gofmt_sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: review/operational-spine-p0-20261022
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache: false
+      - name: Apply exact gofmt
+        working-directory: platform
+        run: |
+          gofmt -w internal/modelrelease/store.go internal/operational/status_integration_test.go
+          test -z "$(gofmt -l .)"
+      - name: Push formatting commit
+        run: |
+          if git diff --quiet; then
+            echo 'P0_GO_FORMAT_ALREADY_CLEAN'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add platform/internal/modelrelease/store.go platform/internal/operational/status_integration_test.go
+          git commit -m 'style: gofmt final P0 model release hardening'
+          git push origin HEAD:review/operational-spine-p0-20261022

@@ -111,12 +111,30 @@ func TestProductAttemptSnapshotsExactProductionModelAndRejectsInvalidSelection(t
 		t.Fatal(err)
 	}
 
+	// Lifecycle/maturity is intentionally mutable, but the exact identity behind
+	// a selected ModelRelease is not. A running Attempt must survive a later
+	// lifecycle change without changing its model/checkpoint identity.
+	if _, err := pool.Exec(ctx, `
+		UPDATE model_releases SET lifecycle_state='SUPERSEDED' WHERE id=$1
+	`, modelA); err != nil {
+		t.Fatalf("lifecycle promotion axis was accidentally frozen: %v", err)
+	}
+	_, err = pool.Exec(ctx, `
+		UPDATE model_releases SET architecture_id='mutated-identity' WHERE id=$1
+	`, modelA)
+	if err == nil || !strings.Contains(err.Error(), "MODEL_RELEASE_IDENTITY_IMMUTABLE") {
+		t.Fatalf("ModelRelease identity mutation was admitted: %v", err)
+	}
+
 	snapA, err := LoadAttempt(ctx, pool, attemptA)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(snapA) != 1 || snapA[0].ModelReleaseID != modelA || snapA[0].CheckpointArtifactID != artifactA || snapA[0].CheckpointContentSHA256 != contentA {
-		t.Fatalf("attempt snapshot drifted after channel movement: %+v", snapA)
+		t.Fatalf("attempt snapshot drifted after channel/lifecycle movement: %+v", snapA)
+	}
+	if snapA[0].ArchitectureID != architecture {
+		t.Fatalf("attempt model identity mutated after acceptance: %+v", snapA[0])
 	}
 	if snapA[0].ChannelLockVersion != 0 {
 		t.Fatalf("attempt did not preserve accepted channel lock version: %+v", snapA[0])

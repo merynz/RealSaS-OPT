@@ -68,8 +68,23 @@ func bindSource(
 	out := SourceBinding{ReleaseID: releaseID, CodeSHA: codeSHA, Authority: authority, BoundBy: actor}
 	err := persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
 		var release uuid.UUID
-		if err := tx.QueryRow(ctx, "SELECT id FROM engine_releases WHERE id=$1 FOR SHARE", releaseID).Scan(&release); err != nil {
+		if err := tx.QueryRow(ctx, "SELECT id FROM engine_releases WHERE id=$1 FOR UPDATE", releaseID).Scan(&release); err != nil {
 			return fmt.Errorf("engine release: %w", err)
+		}
+
+		if authority == SourceAuthorityCanonicalMain {
+			var canonicalCodeSHA string
+			err := tx.QueryRow(ctx, `
+				SELECT code_sha
+				FROM engine_release_source_bindings
+				WHERE release_id=$1 AND authority='CANONICAL_MAIN'
+			`, releaseID).Scan(&canonicalCodeSHA)
+			switch {
+			case err == nil && canonicalCodeSHA != codeSHA:
+				return ErrSourceAuthorityDrift
+			case err != nil && !errors.Is(err, pgx.ErrNoRows):
+				return err
+			}
 		}
 
 		var existingAuthority string
@@ -122,13 +137,16 @@ func bindSource(
 }
 
 // BindCanonicalMain records that this exact EngineRelease is executable from
-// the exact main SHA currently deployed by Platform. The API is the only normal
-// caller: clients do not get to self-assert CANONICAL_MAIN provenance.
+// exactly one main SHA. EngineRelease manifests do not include Git code SHA, so
+// the first canonical binding completes executable source identity. Rebinding the
+// same release to a different main SHA is source-authority drift and fails closed.
 //
-// Source authority is deliberately independent from product authority. A release
-// becoming executable from canonical main does not select a ModelRelease channel,
-// qualify an artifact, promote a ProductRevision, or otherwise change shipping
-// behavior. Those transitions remain explicit operations in their own domains.
+// The API is the only normal caller: clients do not get to self-assert
+// CANONICAL_MAIN provenance. Source authority is deliberately independent from
+// product authority. A release becoming executable from canonical main does not
+// select a ModelRelease channel, qualify an artifact, promote a ProductRevision,
+// or otherwise change shipping behavior. Those transitions remain explicit
+// operations in their own domains.
 func BindCanonicalMain(
 	ctx context.Context,
 	pool *pgxpool.Pool,

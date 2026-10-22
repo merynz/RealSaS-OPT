@@ -1,0 +1,88 @@
+name: graphics-v1-behavioral-closure-v1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'compiler/realsas_compiler_core/graphics_v1.py'
+      - 'compiler/realsas_compiler_core/graphics_runtime_v1.py'
+      - 'compiler/realsas_compiler_core/runtime_graphics_binary_v1.py'
+      - 'runtime/realsas_cpp/src/graphics_v1.hpp'
+      - 'runtime/realsas_cpp/src/runtime_v2_graphics_reference.cpp'
+      - 'runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp'
+      - 'tests/compiler/test_vnext_single_carrier_graphics_v1.py'
+      - 'tests/compiler/test_vnext_graphics_native_e2e.py'
+      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V19_20261016.json'
+      - 'canonical/LEGACY_RESEARCH_GRAPHICS_V1_RECOVERY_V1.json'
+      - 'tools/verify_native_runtime_source_seal_v2.py'
+      - '.github/workflows/graphics_v1_behavioral_closure_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: graphics-v1-behavioral-closure-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  behavioral-closure:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      REALSAS_GRAPHICS_V1_PLAYER: /tmp/realsas_runtime_v2_graphics_reference
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/mainline-ci.txt
+      - name: Install pinned Python dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libpng-dev zlib1g-dev
+      - name: Compile recovered Graphics source
+        run: |
+          python -m py_compile \
+            compiler/realsas_compiler_core/graphics_v1.py \
+            compiler/realsas_compiler_core/graphics_runtime_v1.py \
+            compiler/realsas_compiler_core/runtime_graphics_binary_v1.py
+      - name: Verify append-only native runtime source seal
+        run: python tools/verify_native_runtime_source_seal_v2.py
+      - name: Native Graphics parser and ordering contract
+        run: |
+          g++ -std=c++17 -O2 -Wall -Wextra -pedantic \
+            runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp \
+            -o /tmp/graphics_v1_contract_test
+          /tmp/graphics_v1_contract_test
+      - name: Build Graphics-authorized native reference player
+        run: |
+          g++ -std=c++17 -O2 -Wall -Wextra -pedantic \
+            runtime/realsas_cpp/src/runtime_v2_graphics_reference.cpp \
+            -lpng -lz \
+            -o "$REALSAS_GRAPHICS_V1_PLAYER"
+          sha256sum "$REALSAS_GRAPHICS_V1_PLAYER"
+      - name: Compiler Graphics single-carrier contract
+        run: python -m pytest -q tests/compiler/test_vnext_single_carrier_graphics_v1.py
+      - name: Prove graphics.bin changes real native raster behavior
+        run: python -m pytest -q tests/compiler/test_vnext_graphics_native_e2e.py
+      - name: Behavioral closure summary
+        run: |
+          echo 'GRAPHICS_V1_BEHAVIORAL_CLOSURE_PASS'
+          echo 'defined=true'
+          echo 'serialized=true'
+          echo 'native_consumed=true'
+          echo 'behaviorally_effective=true'
+          echo 'single_canonical_m=true'
+          echo 'independent_visual_mesh=false'
+          echo 'graphics_v2_product_authority=false'
+          echo 'product_promotion=false'

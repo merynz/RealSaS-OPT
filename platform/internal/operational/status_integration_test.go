@@ -54,12 +54,12 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 	}
 
 	created, err := experiment.Create(ctx, pool, experiment.CreateRequest{
-		Slug: "structural-evidence-" + suffix,
-		Name: "Structural Evidence A/B",
+		Slug:             "structural-evidence-" + suffix,
+		Name:             "Structural Evidence A/B",
 		ResearchQuestion: "Does role-free presentation evidence improve structuralization?",
-		Hypothesis: "Shared-scene presentation evidence improves topology and presentation behavior.",
-		InitialState: experiment.StatePreregistered,
-		CreatedBy: "ci",
+		Hypothesis:       "Shared-scene presentation evidence improves topology and presentation behavior.",
+		InitialState:     experiment.StatePreregistered,
+		CreatedBy:        "ci",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -77,36 +77,36 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 	}
 
 	registered, err := modelrelease.Register(ctx, pool, modelrelease.RegisterRequest{
-		Family: "IRIS",
-		Name: "iris-ops-" + suffix,
-		ArchitectureID: "RealSaS.IRIS.Test.v1",
-		CheckpointArtifactID: artifactID,
-		EngineReleaseID: releaseID,
+		Family:                  "IRIS",
+		Name:                    "iris-ops-" + suffix,
+		ArchitectureID:          "RealSaS.IRIS.Test.v1",
+		CheckpointArtifactID:    artifactID,
+		EngineReleaseID:         releaseID,
 		OriginatingExperimentID: &created.Experiment.ID,
-		OriginatingAttemptID: &attemptID,
-		SourceCodeSHA: repeated("a", 40),
-		InitialState: modelrelease.StateResearchQualified,
-		CreatedBy: "ci",
+		OriginatingAttemptID:    &attemptID,
+		SourceCodeSHA:           repeated("a", 40),
+		InitialState:            modelrelease.StateResearchQualified,
+		CreatedBy:               "ci",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if _, err := modelrelease.SetEvaluation(ctx, pool, modelrelease.EvaluationRequest{
-		ModelReleaseID: registered.ID,
-		Scope: "FIT8",
-		Result: "PASS",
+		ModelReleaseID:     registered.ID,
+		Scope:              "FIT8",
+		Result:             "PASS",
 		EvidenceArtifactID: &artifactID,
-		ExperimentID: &created.Experiment.ID,
-		Actor: "ci",
+		ExperimentID:       &created.Experiment.ID,
+		Actor:              "ci",
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := modelrelease.Promote(ctx, pool, modelrelease.PromoteRequest{
-		Family: "IRIS",
-		Channel: modelrelease.ChannelCandidate,
-		ModelReleaseID: registered.ID,
+		Family:                   "IRIS",
+		Channel:                  modelrelease.ChannelCandidate,
+		ModelReleaseID:           registered.ID,
 		RequiredEvaluationScopes: []string{"FIT8"},
-		Actor: "ci",
+		Actor:                    "ci",
 	}); err != nil {
 		t.Fatal(err)
 	}

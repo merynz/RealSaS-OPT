@@ -45,13 +45,13 @@ type CurrentProduct struct {
 }
 
 type Snapshot struct {
-	Schema            string               `json:"schema"`
-	GeneratedAt       time.Time            `json:"generated_at"`
-	ActiveExperiments []experiment.Record  `json:"active_experiments"`
-	OpenAttempts      []AttemptStatus      `json:"open_attempts"`
-	ActiveCampaigns   []CampaignStatus     `json:"active_campaigns"`
-	CurrentModels     []CurrentModel       `json:"current_models"`
-	CurrentProducts   []CurrentProduct     `json:"current_products"`
+	Schema            string              `json:"schema"`
+	GeneratedAt       time.Time           `json:"generated_at"`
+	ActiveExperiments []experiment.Record `json:"active_experiments"`
+	OpenAttempts      []AttemptStatus     `json:"open_attempts"`
+	ActiveCampaigns   []CampaignStatus    `json:"active_campaigns"`
+	CurrentModels     []CurrentModel      `json:"current_models"`
+	CurrentProducts   []CurrentProduct    `json:"current_products"`
 }
 
 func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {

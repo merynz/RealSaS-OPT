@@ -33,28 +33,28 @@ const (
 )
 
 type RegisterRequest struct {
-	Family                     string         `json:"family"`
-	Name                       string         `json:"name"`
-	ArchitectureID             string         `json:"architecture_id"`
-	CheckpointArtifactID       uuid.UUID      `json:"checkpoint_artifact_id"`
-	EngineReleaseID            uuid.UUID      `json:"engine_release_id"`
-	OriginatingExperimentID    *uuid.UUID     `json:"originating_experiment_id,omitempty"`
-	OriginatingAttemptID       *uuid.UUID     `json:"originating_attempt_id,omitempty"`
-	SourceCodeSHA              string         `json:"source_code_sha"`
-	InitialState               State          `json:"initial_state"`
-	SupersedesModelReleaseID   *uuid.UUID     `json:"supersedes_model_release_id,omitempty"`
-	Metadata                   map[string]any `json:"metadata,omitempty"`
-	CreatedBy                  string         `json:"created_by"`
+	Family                   string         `json:"family"`
+	Name                     string         `json:"name"`
+	ArchitectureID           string         `json:"architecture_id"`
+	CheckpointArtifactID     uuid.UUID      `json:"checkpoint_artifact_id"`
+	EngineReleaseID          uuid.UUID      `json:"engine_release_id"`
+	OriginatingExperimentID  *uuid.UUID     `json:"originating_experiment_id,omitempty"`
+	OriginatingAttemptID     *uuid.UUID     `json:"originating_attempt_id,omitempty"`
+	SourceCodeSHA            string         `json:"source_code_sha"`
+	InitialState             State          `json:"initial_state"`
+	SupersedesModelReleaseID *uuid.UUID     `json:"supersedes_model_release_id,omitempty"`
+	Metadata                 map[string]any `json:"metadata,omitempty"`
+	CreatedBy                string         `json:"created_by"`
 }
 
 type EvaluationRequest struct {
-	ModelReleaseID    uuid.UUID      `json:"model_release_id"`
-	Scope             string         `json:"scope"`
-	Result            string         `json:"result"`
-	EvidenceArtifactID *uuid.UUID    `json:"evidence_artifact_id,omitempty"`
-	ExperimentID      *uuid.UUID     `json:"experiment_id,omitempty"`
-	Details           map[string]any `json:"details,omitempty"`
-	Actor             string         `json:"actor"`
+	ModelReleaseID     uuid.UUID      `json:"model_release_id"`
+	Scope              string         `json:"scope"`
+	Result             string         `json:"result"`
+	EvidenceArtifactID *uuid.UUID     `json:"evidence_artifact_id,omitempty"`
+	ExperimentID       *uuid.UUID     `json:"experiment_id,omitempty"`
+	Details            map[string]any `json:"details,omitempty"`
+	Actor              string         `json:"actor"`
 }
 
 type PromoteRequest struct {

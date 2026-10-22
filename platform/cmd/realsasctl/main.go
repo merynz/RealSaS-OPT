@@ -29,14 +29,14 @@ func run(args []string) error {
 		"research-run":          "/v1/research/compile",
 		"campaign-start":        "/v1/research/campaigns",
 		"campaign-run":          "/v1/research/campaigns/run",
-		"product-compile":        "/v1/product/compile",
-		"product-render":         "/v1/product/render",
-		"experiment-create":      "/v1/experiments",
-		"experiment-transition":  "/v1/experiments/transition",
-		"experiment-link":        "/v1/experiments/link",
-		"model-release":          "/v1/model-releases",
-		"model-evaluate":         "/v1/model-releases/evaluations",
-		"model-promote":          "/v1/model-releases/promote",
+		"product-compile":       "/v1/product/compile",
+		"product-render":        "/v1/product/render",
+		"experiment-create":     "/v1/experiments",
+		"experiment-transition": "/v1/experiments/transition",
+		"experiment-link":       "/v1/experiments/link",
+		"model-release":         "/v1/model-releases",
+		"model-evaluate":        "/v1/model-releases/evaluations",
+		"model-promote":         "/v1/model-releases/promote",
 	}
 	routes["agent-enter"], routes["agent-exit"] = "/v1/agents/enter", "/v1/agents/exit"
 	flags := flag.NewFlagSet(args[0], flag.ContinueOnError)

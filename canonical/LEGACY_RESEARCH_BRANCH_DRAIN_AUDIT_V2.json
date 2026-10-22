@@ -2,6 +2,7 @@
   "schema": "RealSaS.LegacyResearchBranchDrainAudit.v2",
   "status": "AUDIT_IN_PROGRESS__PR153_MUST_NOT_MERGE_YET",
   "created_at": "2026-10-22T19:58:00+03:00",
+  "updated_at": "2026-10-22T20:13:00+03:00",
   "purpose": "Drain reusable implementation out of the legacy research continuation without wholesale merge, while separating canonical source authority from product promotion authority.",
   "authority_model": {
     "git_main": "CANONICAL_EXECUTABLE_SOURCE_TRUTH",
@@ -68,6 +69,109 @@
     ],
     "finding": "THE_DRAIN_IS_A_REAL_IMPLEMENTATION_MIGRATION_NOT_A_DOCUMENT_CLEANUP"
   },
+  "dependency_findings": {
+    "tessa_v3": {
+      "status": "PARTIAL_CLOSURE_RESOLVED",
+      "entrypoint": "models/tessa/v3/model_v3.py",
+      "direct_dependencies": [
+        "models/tessa/v3/config_v3.py",
+        "models/tessa/v2/model_v2.py",
+        "models/tessa/v2/objective_v2.py"
+      ],
+      "v2_decoder_dependencies": [
+        "models/tessa/v2/config_v2.py",
+        "models/tessa/v2/objective_v2.py"
+      ],
+      "finding": "TESSA_V3_IS_NOT_A_STANDALONE_THREE_FILE_RECOVERY; IT REUSES THE_V2_DECODER_OBJECTIVE_STACK"
+    },
+    "iris_tessa_bridge_v4": {
+      "status": "PARTIAL_CLOSURE_RESOLVED",
+      "entrypoint": "models/iris/vnext/structure_v4.py",
+      "direct_dependencies": [
+        "models/iris/vnext/contracts_v1.py",
+        "models/iris/vnext/presentation_evidence_v1.py",
+        "models/iris/vnext/structure_v3.py",
+        "models/tessa/v2/__init__.py",
+        "models/tessa/v3/__init__.py",
+        "models/tessa/v3/config_v3.py",
+        "models/tessa/v3/model_v3.py"
+      ],
+      "structure_v3_dependency": "TESSA_V2_SCENE_AND_SURFACE_BRIDGE",
+      "finding": "IRIS_VNEXT_RECOVERY_MUST_FOLLOW_THE_ACTIVE_BRIDGE_IMPORT_GRAPH_INSTEAD_OF_COPYING_MODELS_IRIS_VNEXT_WHOLESALE"
+    },
+    "current_ab_training_entrypoint": {
+      "path": "tools/iris_vnext/train_fit8_tessa_v3_structural_evidence_ab_v1.py",
+      "classification": "B_CURRENT_EXPERIMENT_EXECUTION_ONLY_WITH_REUSABLE_DEPENDENCIES",
+      "imports_of_interest": [
+        "models/iris/vnext/cohort_v1.py::SUBJECT_IDS",
+        "models/iris/vnext/presentation_evidence_v1.py",
+        "models/iris/vnext/structure_v4.py",
+        "models/tessa/v2/experiment_v2.py::sha256_file",
+        "models/tessa/v2/objective_v2.py",
+        "tools/iris_vnext/materialize_fit8_direct_surface_v1.py::git_head",
+        "tools/iris_vnext/preflight_tessa_v2_a100_v1.py"
+      ],
+      "finding": "A_B_TRAINER_IS_NOT_ITSELF_A_GENERIC_PRODUCT_MODULE; GENERIC MODEL_AND_EVIDENCE_PRIMITIVES_MUST_BE_SEPARATED_FROM_EXPERIMENT_ORCHESTRATION"
+    },
+    "current_directional_evaluator": {
+      "path": "tools/iris_vnext/evaluate_structural_evidence_ab_directional_screen_v1.py",
+      "classification": "B_CURRENT_EXPERIMENT_EXECUTION_ONLY",
+      "finding": "POST_TRAINING_SCREEN_REUSES_ACTIVE_IRIS_V4_TESSA_V2_V3_AND_FAIL_CLOSED_WINDOWED_GENERATION_PRIMITIVES_BUT_IS_NOT_PRODUCT_AUTHORITY"
+    }
+  },
+  "graphics_consumption_finding": {
+    "graphics_v2_compiler": "compiler/realsas_compiler_core/graphics_v2.py",
+    "graphics_v2_status": "G_PRODUCT_RELEVANT_CANDIDATE",
+    "current_behavioral_runtime_contract": "ROLE_FREE_CANONICAL_M_GRAPHICS_V1",
+    "current_runtime_builder": "compiler/realsas_compiler_core/graphics_runtime_v1.py",
+    "current_package_encoder": "compiler/realsas_compiler_core/runtime_graphics_binary_v1.py",
+    "native_behavioral_test": "tests/compiler/test_vnext_graphics_native_e2e.py",
+    "native_behavioral_test_consumes": "RuntimeGraphicsV1_AND_graphics.bin",
+    "v2_to_runtime_v1_adapter_proven": false,
+    "v2_native_behavioral_consumption_proven": false,
+    "decision": "DO_NOT_RECOVER_GRAPHICS_V2_AS_CURRENT_PRODUCT_AUTHORITY_UNTIL_V2_TO_RUNTIME_BEHAVIORAL_CLOSURE_EXISTS",
+    "v1_runtime_candidate": "A_REUSABLE_CURRENT_IMPLEMENTATION_PENDING_MAIN_DEPENDENCY_REBASE"
+  },
+  "path_family_inventory": [
+    {
+      "pattern": ".github/workflows/*research*|*iris_vnext*|*structural_evidence*",
+      "default_class": "F_OBSOLETE_BRANCH_WORKFLOW",
+      "exceptions": "A workflow may be reclassified A only if it is a generic main-based source/test gate with no branch continuation authority."
+    },
+    {
+      "pattern": "CURRENT_STATE.md|CURRENT_PLAN.md|AGENTS.md|branch-current ledgers",
+      "default_class": "E_BRANCH_OWNED_OPERATIONAL_STATE"
+    },
+    {
+      "pattern": "canonical/*PREREGISTRATION*|*EXECUTION_BINDING*|*AMENDMENT*|*RESULT*|*LEDGER*",
+      "default_class": "C_HISTORICAL_SCIENTIFIC_PROVENANCE",
+      "exceptions": "A machine contract still consumed by reusable code must be inspected before archive-only classification."
+    },
+    {
+      "pattern": "docs/research/*",
+      "default_class": "C_HISTORICAL_SCIENTIFIC_PROVENANCE"
+    },
+    {
+      "pattern": "models/iris/vnext/*|models/tessa/v2/*|models/tessa/v3/*",
+      "default_class": "H_UNRESOLVED_DEPENDENCY",
+      "rule": "Resolve from active import graph; later split into A reusable current, B experiment-only, or D superseded."
+    },
+    {
+      "pattern": "compiler/realsas_compiler_core/graphics*|runtime/realsas_cpp/*graphics*|tests/compiler/*graphics*",
+      "default_class": "G_PRODUCT_RELEVANT_CANDIDATE",
+      "rule": "Require behavioral-consumption closure and distinguish V1 runtime from V2 compiler evidence."
+    },
+    {
+      "pattern": "tools/iris_vnext/*",
+      "default_class": "H_UNRESOLVED_DEPENDENCY",
+      "rule": "Separate generic builders/auditors from experiment orchestration and superseded preparation paths by imports and current consumers."
+    },
+    {
+      "pattern": "tests/iris/*|tests/repository/*",
+      "default_class": "H_UNRESOLVED_DEPENDENCY",
+      "rule": "Move only tests that protect A/G recovered source; preserve branch/result-specific tests as C/B provenance."
+    }
+  ],
   "classification_taxonomy": {
     "A_REUSABLE_CURRENT_IMPLEMENTATION": "Generic implementation required by future research or product development; candidate for reviewed main-based recovery PR.",
     "B_CURRENT_EXPERIMENT_EXECUTION_ONLY": "Needed to reproduce/finish the current frozen experiment but not automatically reusable product/research source.",
@@ -87,6 +191,7 @@
     {
       "id": "AUDIT-2-DEPENDENCY-CLOSURE",
       "complete": false,
+      "progress": "TESSA_V3_AND_IRIS_BRIDGE_V4_PARTIAL_CLOSURE_RESOLVED",
       "exit": "Every A/G candidate has import/call dependency closure and no hidden dependency on E/F state authority."
     },
     {
@@ -97,11 +202,13 @@
     {
       "id": "AUDIT-4-CONSUMPTION-CLOSURE",
       "complete": false,
+      "progress": "GRAPHICS_V1_NATIVE_BEHAVIORAL_CONSUMER_FOUND__GRAPHICS_V2_NOT_YET_CLOSED",
       "exit": "Shipping-relevant fields identify DEFINED->PRODUCED->QUALIFIED->SERIALIZED->CONSUMED->BEHAVIORALLY_EFFECTIVE lineage or are explicitly marked research-only."
     },
     {
       "id": "AUDIT-5-PROMOTION-BOUNDARY",
       "complete": false,
+      "progress": "SOURCE_AUTHORITY_CONTRACT_DOCUMENTED_AND_INTEGRATION_ASSERTION_ADDED__FULL_PRODUCT_GRAPH_BINDING_STILL_OPEN",
       "exit": "Main source recovery is proven not to mutate ProductRevision or PRODUCTION model selection without separate explicit qualification/promotion."
     }
   ],
@@ -120,9 +227,9 @@
     },
     {
       "id": "GRAPHICS-CURRENT-CLOSURE",
-      "classification": "H_UNRESOLVED_DEPENDENCY",
+      "classification": "G_PRODUCT_RELEVANT_CANDIDATE",
       "roots": ["compiler/realsas_compiler_core/graphics_*", "compiler/realsas_compiler_core/runtime_graphics_*", "runtime/realsas_cpp/*graphics*", "tests/compiler/*graphics*"],
-      "rule": "Audit against current M+Graphics/CAA product path and behavioral consumers before recovery; do not revive superseded CAA assumptions by filename similarity."
+      "rule": "Recover V1 runtime only after dependency/test closure. Hold Graphics V2 until its evidence/compiler output has a behaviorally-effective runtime consumer."
     },
     {
       "id": "CURRENT-A-B-EVALUATOR",

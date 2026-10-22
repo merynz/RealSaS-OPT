@@ -1,0 +1,47 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABFreeRunningEvaluatorAmendment.v3",
+  "status": "LOCKED_EXECUTION_BACKEND_CORRECTION__NO_SCIENTIFIC_CONTRACT_CHANGE",
+  "training_execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+  "parent_evaluator_head": "c13a7e4e931789e6352b4e332384910589c51c28",
+  "windowed_incremental_helper_source_sha": "b10e50d30492f2a3b96a1ec5372e00980a57a64b",
+  "windowed_evaluator_wrapper_source_sha": "54083b6fcb4eaf89c5a34575def40254c1fedf61",
+  "incident": {
+    "error": "TESSA_V2_INCREMENTAL_REQUIRES_GLOBAL_HISTORY_MODEL",
+    "observed_stage": "A_NULL_PRESENTATION/Snake before first generated token",
+    "root_cause": "frozen TESSA V3 inherits WindowedCausalSelfAttentionV2 while prior evaluator invoked HierarchicalCausalSelfAttentionV2-only incremental backend",
+    "scientific_subject_result_produced": false,
+    "a_arm_scientifically_evaluated": false,
+    "b_arm_scientifically_evaluated": false
+  },
+  "correction": {
+    "backend": "EXACT_WINDOWED_INCREMENTAL_WITH_CURRENT_CHUNK_RECOMPUTATION",
+    "completed_chunks_cached": true,
+    "current_partial_chunk_recomputed": true,
+    "reference_authority": "TESSAStructuralizerV2.decode_tokens",
+    "pre_fit8_reference_parity_required": true,
+    "parity_crosses_query_chunk_boundary": true,
+    "parity_crosses_local_window_boundary": true,
+    "grammar_dead_end_remains_fail_closed": true,
+    "checkpoint_load_uses_mmap": true
+  },
+  "scientific_contract_changes": {
+    "model_weights": false,
+    "conditioning": false,
+    "tokenizer_or_grammar": false,
+    "allowed_token_mask": false,
+    "decoding_logits": false,
+    "greedy_selection": false,
+    "sampling": false,
+    "seed": false,
+    "training": false,
+    "thresholds": false,
+    "carrier": false,
+    "courts": false
+  },
+  "authority": {
+    "training_checkpoint_source_remains": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+    "dead_end_is_success": false,
+    "canonical_m_authorized": false,
+    "product_promotion_authorized": false
+  }
+}

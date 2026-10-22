@@ -50,6 +50,8 @@ func TestDurableEntryResumeExitRejectStaleContextAndScopeDrift(t *testing.T) {
 		{Ordinal: 2, StageID: "UNSEEN_EVALUATION", ImplementationSHA256: sha, PolicySHA256: sha, SemanticParameters: map[string]any{}},
 	}}, "ci")
 	must(err)
+	_, err = release.BindCanonicalMain(ctx, pool, r.ReleaseID, code, "ci")
+	must(err)
 	var typeID uuid.UUID
 	must(pool.QueryRow(ctx, `INSERT INTO artifact_types(id,name,schema_version,domain) VALUES ($1,'AgentSessionFixture','v1','test') ON CONFLICT(name,schema_version) DO UPDATE SET name=excluded.name RETURNING id`, uuid.New()).Scan(&typeID))
 	artifact := uuid.New()
@@ -62,7 +64,7 @@ func TestDurableEntryResumeExitRejectStaleContextAndScopeDrift(t *testing.T) {
 	newAttempt := func(parent *uuid.UUID) uuid.UUID {
 		t.Helper()
 		id := uuid.New()
-		_, err := pool.Exec(ctx, `INSERT INTO attempts(id,subject_id,engine_release_id,parent_attempt_id,kind,spec_sha256,created_by,final_state) VALUES ($1,$2,$3,$4,'research',$5,'ci','OPEN')`, id, subject, r.ReleaseID, parent, sha)
+		_, err := pool.Exec(ctx, `INSERT INTO attempts(id,subject_id,engine_release_id,parent_attempt_id,kind,spec_sha256,created_by,final_state,canonical_code_sha) VALUES ($1,$2,$3,$4,'research',$5,'ci','OPEN',$6)`, id, subject, r.ReleaseID, parent, sha, code)
 		must(err)
 		return id
 	}
@@ -148,6 +150,6 @@ func TestDurableEntryResumeExitRejectStaleContextAndScopeDrift(t *testing.T) {
 	state, err := Context(ctx, pool, subject, code)
 	must(err)
 	if state["active_session"].(*Scope).SessionID != childTicket.Scope.SessionID || state["last_handoff"].(map[string]any)["handoff_sha256"] != handoff["handoff_sha256"] {
-		t.Fatal("context lost durable continuation")
+		t.Fatal("context did not reconstruct authoritative active/handoff")
 	}
 }

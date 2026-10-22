@@ -32,6 +32,7 @@ ALTER TABLE attempts ADD COLUMN canonical_code_sha char(40);
 ALTER TABLE attempts ADD CONSTRAINT attempts_canonical_code_sha_shape
     CHECK (canonical_code_sha IS NULL OR canonical_code_sha ~ '^[0-9a-f]{40}$');
 
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION enforce_research_attempt_canonical_source()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -58,12 +59,14 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+-- +goose StatementEnd
 
 CREATE TRIGGER trg_research_attempt_canonical_source
 BEFORE INSERT ON attempts
 FOR EACH ROW
 EXECUTE FUNCTION enforce_research_attempt_canonical_source();
 
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION enforce_research_campaign_canonical_source()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -82,6 +85,7 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+-- +goose StatementEnd
 
 CREATE TRIGGER trg_research_campaign_canonical_source
 BEFORE INSERT ON research_campaigns

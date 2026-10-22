@@ -4,15 +4,61 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/merynz/RealSaS-OPT/platform/internal/attempt"
 	"github.com/merynz/RealSaS-OPT/platform/internal/experiment"
 	"github.com/merynz/RealSaS-OPT/platform/internal/modelrelease"
 	"github.com/merynz/RealSaS-OPT/platform/internal/operational"
+	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 )
 
 // HandlerWithOperational layers P0 operational-truth routes over the existing
 // API without weakening or duplicating the scientific execution handlers.
 func (a API) HandlerWithOperational() http.Handler {
 	mux := http.NewServeMux()
+
+	// EngineRelease source authority is minted only by the deployed Platform.
+	// Clients can describe a release, but cannot self-assert that branch code is main.
+	mux.HandleFunc("POST /v1/releases", func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			Manifest  release.Manifest `json:"manifest"`
+			CreatedBy string           `json:"created_by"`
+		}
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := release.Seal(r.Context(), a.Pool, a.Graph, req.Manifest, req.CreatedBy)
+		if err != nil {
+			result(w, out, err)
+			return
+		}
+		if _, err := release.BindCanonicalMain(r.Context(), a.Pool, out.ReleaseID, a.CodeSHA, req.CreatedBy); err != nil {
+			result(w, out, err)
+			return
+		}
+		result(w, out, nil)
+	})
+	mux.HandleFunc("GET /v1/releases/{id}/sources", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("id"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid release id"})
+			return
+		}
+		out, err := release.SourceBindings(r.Context(), a.Pool, id)
+		if err != nil {
+			result(w, nil, err)
+			return
+		}
+		respond(w, 200, out)
+	})
+	mux.HandleFunc("POST /v1/research/attempts", func(w http.ResponseWriter, r *http.Request) {
+		var req attempt.ResearchRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		req.DeployedCodeSHA = a.CodeSHA
+		out, err := attempt.StartResearch(r.Context(), a.Pool, a.Graph, req)
+		result(w, out, err)
+	})
 
 	mux.HandleFunc("POST /v1/experiments", func(w http.ResponseWriter, r *http.Request) {
 		var req experiment.CreateRequest

@@ -11,6 +11,7 @@ import (
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/orchestration"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
+	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 )
 
 func TestExternalEvidenceWaitIsResumableAndDoesNotMintFailure(t *testing.T) {
@@ -32,6 +33,7 @@ func TestExternalEvidenceWaitIsResumableAndDoesNotMintFailure(t *testing.T) {
 	attemptID := uuid.New()
 	executionID := uuid.New()
 	stageID := "10_IRIS_FIT"
+	canonicalCodeSHA := strings.Repeat("b", 40)
 	releaseHex := strings.ReplaceAll(subjectID.String(), "-", "")
 	releaseSHA := releaseHex + releaseHex
 	specHex := strings.ReplaceAll(attemptID.String(), "-", "")
@@ -44,6 +46,9 @@ func TestExternalEvidenceWaitIsResumableAndDoesNotMintFailure(t *testing.T) {
 		INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at)
 		VALUES ($1,$2,$3,'RESEARCH','ci',now())
 	`, releaseID, "external-wait-release-"+subjectID.String(), releaseSHA); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := release.BindCanonicalMain(ctx, pool, releaseID, canonicalCodeSHA, "ci"); err != nil {
 		t.Fatal(err)
 	}
 	graphSHA, err := g.SHA256()
@@ -59,9 +64,9 @@ func TestExternalEvidenceWaitIsResumableAndDoesNotMintFailure(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, `
-		INSERT INTO attempts(id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state)
-		VALUES ($1,$2,$3,'research',$4,'ci','OPEN')
-	`, attemptID, subjectID, releaseID, specSHA); err != nil {
+		INSERT INTO attempts(id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state,canonical_code_sha)
+		VALUES ($1,$2,$3,'research',$4,'ci','OPEN',$5)
+	`, attemptID, subjectID, releaseID, specSHA, canonicalCodeSHA); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, `

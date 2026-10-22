@@ -124,9 +124,13 @@ func TestCompileCommandIsTransactionalAndIdempotent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	canonicalCodeSHA := "0123456789abcdef0123456789abcdef01234567"
+	if _, err := release.BindCanonicalMain(ctx, pool, researchRelease.ReleaseID, canonicalCodeSHA, "ci"); err != nil {
+		t.Fatal(err)
+	}
 	started, err := attempt.StartResearch(ctx, pool, g, attempt.ResearchRequest{
 		SubjectID: subjectID, BaselineEngineReleaseID: sealedRelease.ReleaseID,
-		CandidateEngineReleaseID: researchRelease.ReleaseID, CreatedBy: "ci"})
+		CandidateEngineReleaseID: researchRelease.ReleaseID, CreatedBy: "ci", DeployedCodeSHA: canonicalCodeSHA})
 	if err != nil {
 		t.Fatal(err)
 	}

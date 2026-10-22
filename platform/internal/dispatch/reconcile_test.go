@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
+	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 )
 
 type describeWitness struct {
@@ -62,16 +64,24 @@ func TestReconciliationRequiresTemporalTerminalWitnessAndPreservesEvidence(t *te
 		t.Fatal(err)
 	}
 	defer pool.Close()
-	subjectID, attemptID, commandID := uuid.New(), uuid.New(), uuid.New()
+	subjectID, attemptID, commandID, releaseID := uuid.New(), uuid.New(), uuid.New(), uuid.New()
+	canonicalCodeSHA := strings.Repeat("b", 40)
 	if _, err := pool.Exec(ctx, "INSERT INTO subjects(id,slug,display_name) VALUES ($1,$2,'Reconciliation test')", subjectID, subjectID.String()); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := pool.Exec(ctx, "INSERT INTO attempts(id,subject_id,kind,spec_sha256,created_by) VALUES ($1,$2,'research',$3,'ci')", attemptID, subjectID, hex64()); err != nil {
+	if _, err := pool.Exec(ctx, `INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at)
+		VALUES ($1,$2,$3,'RESEARCH','ci',now())`, releaseID, "reconcile-"+releaseID.String(), hex64()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := release.BindCanonicalMain(ctx, pool, releaseID, canonicalCodeSHA, "ci"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, "INSERT INTO attempts(id,subject_id,engine_release_id,kind,spec_sha256,created_by,canonical_code_sha) VALUES ($1,$2,$3,'research',$4,'ci',$5)", attemptID, subjectID, releaseID, hex64(), canonicalCodeSHA); err != nil {
 		t.Fatal(err)
 	}
 	payload, _ := json.Marshal(map[string]any{
 		"command_id": commandID.String(), "attempt_id": attemptID.String(), "subject_id": subjectID.String(),
-		"engine_release_id": uuid.NewString(), "subject_input_id": uuid.NewString(), "target_stage_id": "02_SOURCE_LICENSE_PROVENANCE",
+		"engine_release_id": releaseID.String(), "subject_input_id": uuid.NewString(), "target_stage_id": "02_SOURCE_LICENSE_PROVENANCE",
 	})
 	if _, err := pool.Exec(ctx, "INSERT INTO commands(id,command_type,subject_id,idempotency_key,payload) VALUES ($1,'COMPILE_SUBJECT',$2,$3,$4)", commandID, subjectID, commandID.String(), payload); err != nil {
 		t.Fatal(err)

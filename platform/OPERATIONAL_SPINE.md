@@ -8,7 +8,7 @@ The Platform must answer current operational truth without Git-history, branch, 
 
 | State | Owner | Meaning |
 |---|---|---|
-| Source | Git `main` | Canonical shipped source code only. Git is not an experiment database. |
+| Source | Git `main` | Canonical executable source code. Git is not an experiment database and source presence is not product selection. |
 | Executable snapshot | `EngineRelease` | Immutable code/config/DAG identity selected for execution. |
 | Scientific intent | `Experiment` | Research question, hypothesis, preregistered intent and lifecycle. |
 | Execution | `Attempt` | One actual subject-bound execution. |
@@ -19,6 +19,8 @@ The Platform must answer current operational truth without Git-history, branch, 
 | Scientific/product meaning | Compiler + Proof/Qualification | Validation, courts, scientific claims and product-pass authority. |
 
 `Experiment` does not replace `Attempt`. `ModelRelease` does not replace an Artifact, EngineRelease, Proof, or Qualification. These records make intent and deployable identity queryable while preserving the existing scientific authority chain.
+
+A source change landing on `main` is **not** a product promotion. Canonical-main source authority only means that Platform may seal and execute that exact reviewed source. Shipping behavior changes only through the existing explicit model/artifact qualification and product-promotion authorities. In particular, sealing or binding an `EngineRelease` must not implicitly mutate a model channel, mint qualification, promote a `ProductRevision`, or change the current product pointer.
 
 ## Experiment lifecycle
 
@@ -79,6 +81,16 @@ This is a read model only. It creates no scientific or product authority.
 ## Research execution rule
 
 Normal research code lands through short reviewed PRs onto `main`. An Experiment/Attempt/EngineRelease owns continuation state. Long-lived research branches, notebooks and mutable canonical JSON files must not become alternate continuation authorities.
+
+`main` may therefore contain research-capable implementation that the current product does not consume. Research source admission and product promotion are deliberately separate transitions:
+
+```text
+reviewed source -> main -> EngineRelease -> Experiment/Attempt
+                                      \
+                                       +-> qualification -> ModelRelease/ProductRevision promotion -> shipping product
+```
+
+The left-hand source transition may occur without the right-hand product transition. The reverse is forbidden: a ProductRevision or PRODUCTION model selection must never depend on source that lacks its required canonical source/provenance identity and qualification closure.
 
 GPU notebooks and accelerator jobs are compute workers. They may return checkpoint/metric/receipt bytes; imported bytes remain non-authoritative until existing consumers validate and reseal them.
 

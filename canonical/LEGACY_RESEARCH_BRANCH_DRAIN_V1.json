@@ -1,0 +1,13 @@
+{
+  "schema": "RealSaS.LegacyResearchBranchDrain.v1",
+  "status": "SUPERSEDED_BY_LEGACY_RESEARCH_BRANCH_DRAIN_AUDIT_V2",
+  "created_at": "2026-10-22T19:35:00+03:00",
+  "superseded_at": "2026-10-22T19:59:00+03:00",
+  "superseded_by": "canonical/LEGACY_RESEARCH_BRANCH_DRAIN_AUDIT_V2.json",
+  "reason": "The original slice-level drain plan was too coarse and became stale after four additional post-archive directional-evaluator commits advanced the legacy branch. Audit v2 requires per-path disposition, dependency/test/consumer closure, and an explicit source-vs-product promotion boundary before PR #153 may merge.",
+  "original_archive_sha": "2f6ba5491c54546e1001bd041dc88a0118a95687",
+  "legacy_branch_head_observed_after_supersession": "ba36fe9986fa2dbd9909f2e6caf8f814079d4231",
+  "whole_branch_merge_allowed": false,
+  "active_rebase_continuation_allowed": false,
+  "current_ab_may_finish_without_mutation": true
+}

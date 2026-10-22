@@ -1,0 +1,121 @@
+package release
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"os"
+	"testing"
+
+	"github.com/google/uuid"
+
+	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
+)
+
+func sourceAuthorityHash(prefix, suffix string) string {
+	sum := sha256.Sum256([]byte(prefix + ":" + suffix))
+	return hex.EncodeToString(sum[:])
+}
+
+func TestEngineReleaseCanonicalSourceAuthorityIsExactAndLegacyCannotRun(t *testing.T) {
+	dsn := os.Getenv("REALSAS_DATABASE_URL")
+	if dsn == "" {
+		t.Skip("REALSAS_DATABASE_URL not set")
+	}
+	ctx := context.Background()
+	pool, err := persistence.Open(ctx, dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Close()
+
+	var modelChannelsBefore int
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM model_channels").Scan(&modelChannelsBefore); err != nil {
+		t.Fatal(err)
+	}
+	var productPromotionsBefore int
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM promotions").Scan(&productPromotionsBefore); err != nil {
+		t.Fatal(err)
+	}
+
+	releaseID := uuid.New()
+	suffix := uuid.NewString()
+	if _, err := pool.Exec(ctx, `
+		INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at)
+		VALUES ($1,$2,$3,'RESEARCH','ci',now())
+	`, releaseID, "source-authority-"+suffix, sourceAuthorityHash("release", suffix)); err != nil {
+		t.Fatal(err)
+	}
+
+	mainSHA := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	otherMainSHA := "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+	legacySHA := "cccccccccccccccccccccccccccccccccccccccc"
+
+	bound, err := BindCanonicalMain(ctx, pool, releaseID, mainSHA, "ci")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bound.Authority != SourceAuthorityCanonicalMain || bound.CodeSHA != mainSHA || bound.Reused {
+		t.Fatalf("unexpected first canonical binding: %+v", bound)
+	}
+	boundAgain, err := BindCanonicalMain(ctx, pool, releaseID, mainSHA, "ci-2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !boundAgain.Reused {
+		t.Fatal("exact canonical source binding must be idempotent")
+	}
+	if err := RequireCanonicalMain(ctx, pool, releaseID, mainSHA); err != nil {
+		t.Fatalf("canonical source rejected: %v", err)
+	}
+	if err := RequireCanonicalMain(ctx, pool, releaseID, otherMainSHA); err == nil {
+		t.Fatal("unbound deployed main SHA must not inherit source authority")
+	}
+
+	// A semantic EngineRelease may remain valid across a later reviewed main
+	// revision when its release manifest is unchanged. That deployment must be
+	// explicitly server-bound before an execution can use its exact code SHA.
+	secondBinding, err := BindCanonicalMain(ctx, pool, releaseID, otherMainSHA, "ci-later-main")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if secondBinding.Reused || secondBinding.CodeSHA != otherMainSHA {
+		t.Fatalf("unexpected later canonical deployment binding: %+v", secondBinding)
+	}
+	if err := RequireCanonicalMain(ctx, pool, releaseID, otherMainSHA); err != nil {
+		t.Fatalf("explicit later canonical binding rejected: %v", err)
+	}
+
+	if _, err := BindLegacyFrozen(ctx, pool, releaseID, legacySHA, "migration"); err != nil {
+		t.Fatal(err)
+	}
+	if err := RequireCanonicalMain(ctx, pool, releaseID, legacySHA); err == nil {
+		t.Fatal("LEGACY_FROZEN source must never satisfy canonical execution authority")
+	}
+
+	bindings, err := SourceBindings(ctx, pool, releaseID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(bindings) != 3 {
+		t.Fatalf("expected two canonical deployment bindings + one legacy provenance binding, got %d", len(bindings))
+	}
+
+	var modelChannelsAfter int
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM model_channels").Scan(&modelChannelsAfter); err != nil {
+		t.Fatal(err)
+	}
+	var productPromotionsAfter int
+	if err := pool.QueryRow(ctx, "SELECT count(*) FROM promotions").Scan(&productPromotionsAfter); err != nil {
+		t.Fatal(err)
+	}
+	if modelChannelsAfter != modelChannelsBefore || productPromotionsAfter != productPromotionsBefore {
+		t.Fatalf(
+			"source authority must not mint product authority: model_channels %d->%d promotions %d->%d",
+			modelChannelsBefore,
+			modelChannelsAfter,
+			productPromotionsBefore,
+			productPromotionsAfter,
+		)
+	}
+}

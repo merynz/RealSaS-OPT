@@ -1,0 +1,8 @@
+{
+  "result_file": "FIT8_CORPUS_EVIDENCE_AUTOPSY_RESULT.json",
+  "receipt_file": "FIT8_CORPUS_EVIDENCE_AUTOPSY_RECEIPT.json",
+  "phase1_csv": "FIT8_CORPUS_EVIDENCE_AUTOPSY_SUBJECT_VIEW.csv",
+  "phase2_csv": "FIT8_CORPUS_EVIDENCE_AUTOPSY_RESAMPLING.csv",
+  "plots_required": false,
+  "training": false
+}

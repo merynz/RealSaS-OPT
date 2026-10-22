@@ -1,0 +1,77 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABFit8TeacherCensus.v1",
+  "date_utc": "2026-10-22",
+  "status": "LOCKED_DIRECTIONAL_CENSUS__NOT_QUALIFICATION",
+  "experiment_id": "STRUCTURAL-EVIDENCE-A-B-FIT8-TEACHER-CENSUS-V1",
+  "parent_experiment": "STRUCTURAL-EVIDENCE-A-B-V2",
+  "research_question": "Using the already sealed final A/B checkpoints, which arm shows the more consistent learned structuralization direction across the full FIT8 morphology set?",
+  "reason_for_new_experiment": {
+    "full_fit8_free_running_qualification_was_too_expensive_for_direction_selection": true,
+    "two_subject_32k_directional_screen_result": "INCONCLUSIVE",
+    "two_subject_screen_showed_metric_disagreement": true,
+    "goal_is_direction_selection_not_qualification": true,
+    "training_will_not_be_repeated": true
+  },
+  "subjects": ["Snake", "Bat", "T-Rex", "Horse", "Spider", "GreenBlob", "Shark", "George"],
+  "arms": ["A_NULL_PRESENTATION", "B_ROLE_FREE_PRESENTATION"],
+  "sealed_checkpoint_sha256": {
+    "A_NULL_PRESENTATION": "8f1c51209ad3f94bd03e24b0df9fc7f3e0dc08ccc0e853306fb49da5bc6e924f",
+    "B_ROLE_FREE_PRESENTATION": "e57fc117162101fbd4e0db211bd501e7338eeda1e91df575bfa7016629a2238d"
+  },
+  "training_execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+  "teacher_forced_census": {
+    "evaluate_all_topology_windows_per_subject": true,
+    "sampling_of_windows_allowed": false,
+    "primary_metric": "TOTAL_OBJECTIVE",
+    "diagnostic_metrics": [
+      "TOKEN_CROSS_ENTROPY",
+      "COORDINATE_EXPECTED_ABS_ERROR_BINS",
+      "COORDINATE_METRIC",
+      "STRUCTURAL_SPECIAL_TOKEN_CE"
+    ],
+    "subject_vote_relative_margin": 0.01,
+    "subject_vote_rule": "LOWER_TOTAL_OBJECTIVE_WINS_IF_RELATIVE_IMPROVEMENT_AT_LEAST_1_PERCENT_ELSE_TIE"
+  },
+  "census_selection_rule": {
+    "minimum_subject_wins": 5,
+    "minimum_macro_relative_total_objective_improvement": 0.01,
+    "direct_selection_requires_both_conditions": true,
+    "ties_do_not_count_as_wins": true,
+    "diagnostic_metrics_cannot_override_primary_vote": true
+  },
+  "horse_tiebreak": {
+    "run_only_if_census_does_not_directly_select_an_arm": true,
+    "subject": "Horse",
+    "maximum_new_tokens": 16384,
+    "greedy": true,
+    "sampling": false,
+    "grammar_mask_required": true,
+    "bounded_horizon_is_not_eos_failure": true,
+    "selection_authority": "STRUCTURAL_VALIDITY_ONLY",
+    "valid_eos_beats_hard_invalid": true,
+    "non_hard_invalid_beats_hard_invalid": true,
+    "both_non_hard_invalid_without_validity_separation": "NO_TIEBREAK",
+    "both_hard_invalid": "NO_TIEBREAK",
+    "log_probability_cannot_select_winner": true,
+    "face_count_cannot_select_winner": true,
+    "component_count_cannot_select_winner": true
+  },
+  "final_statuses": ["SELECT_A", "SELECT_B", "INCONCLUSIVE"],
+  "interpretation": {
+    "directional_only": true,
+    "qualification_pass_claimed": false,
+    "unseen_generalization_claimed": false,
+    "canonical_m_authorized": false,
+    "product_promotion_authorized": false,
+    "teacher_forced_census_is_not_free_running_qualification": true
+  },
+  "forbidden_changes": [
+    "RETRAIN_A_OR_B",
+    "CHANGE_MODEL_WEIGHTS",
+    "CHANGE_CONDITIONING",
+    "CHANGE_TOKENIZER_OR_GRAMMAR",
+    "CHANGE_TRAINING_OBJECTIVE",
+    "POST_RESULT_THRESHOLD_RELAXATION",
+    "USE_DIAGNOSTIC_METRICS_TO_OVERRIDE_TOTAL_OBJECTIVE_SUBJECT_VOTES"
+  ]
+}

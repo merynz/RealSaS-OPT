@@ -1,3 +1,5 @@
+-- +goose Up
+
 -- Canonical source authority for executable EngineReleases.
 --
 -- New research execution is legal only when the candidate EngineRelease has an
@@ -89,3 +91,16 @@ CREATE TRIGGER trg_research_campaign_canonical_source
 BEFORE INSERT ON research_campaigns
 FOR EACH ROW
 EXECUTE FUNCTION enforce_research_campaign_canonical_source();
+
+-- +goose Down
+
+DROP TRIGGER trg_research_campaign_canonical_source ON research_campaigns;
+DROP FUNCTION enforce_research_campaign_canonical_source();
+
+DROP TRIGGER trg_research_attempt_canonical_source ON attempts;
+DROP FUNCTION enforce_research_attempt_canonical_source();
+
+ALTER TABLE attempts DROP CONSTRAINT attempts_canonical_code_sha_shape;
+ALTER TABLE attempts DROP COLUMN canonical_code_sha;
+
+DROP TABLE engine_release_source_bindings;

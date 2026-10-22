@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"os"
 	"testing"
 
@@ -66,14 +65,25 @@ func TestEngineReleaseCanonicalSourceAuthorityIsExactAndLegacyCannotRun(t *testi
 	if !boundAgain.Reused {
 		t.Fatal("exact canonical source binding must be idempotent")
 	}
-	if _, err := BindCanonicalMain(ctx, pool, releaseID, otherMainSHA, "ci-drift"); !errors.Is(err, ErrSourceAuthorityDrift) {
-		t.Fatalf("same EngineRelease must reject a second canonical code SHA, got %v", err)
-	}
 	if err := RequireCanonicalMain(ctx, pool, releaseID, mainSHA); err != nil {
 		t.Fatalf("canonical source rejected: %v", err)
 	}
 	if err := RequireCanonicalMain(ctx, pool, releaseID, otherMainSHA); err == nil {
-		t.Fatal("different deployed main SHA must not inherit source authority")
+		t.Fatal("unbound deployed main SHA must not inherit source authority")
+	}
+
+	// A semantic EngineRelease may remain valid across a later reviewed main
+	// revision when its release manifest is unchanged. That deployment must be
+	// explicitly server-bound before an execution can use its exact code SHA.
+	secondBinding, err := BindCanonicalMain(ctx, pool, releaseID, otherMainSHA, "ci-later-main")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if secondBinding.Reused || secondBinding.CodeSHA != otherMainSHA {
+		t.Fatalf("unexpected later canonical deployment binding: %+v", secondBinding)
+	}
+	if err := RequireCanonicalMain(ctx, pool, releaseID, otherMainSHA); err != nil {
+		t.Fatalf("explicit later canonical binding rejected: %v", err)
 	}
 
 	if _, err := BindLegacyFrozen(ctx, pool, releaseID, legacySHA, "migration"); err != nil {
@@ -87,8 +97,8 @@ func TestEngineReleaseCanonicalSourceAuthorityIsExactAndLegacyCannotRun(t *testi
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(bindings) != 2 {
-		t.Fatalf("expected one canonical + one legacy provenance binding, got %d", len(bindings))
+	if len(bindings) != 3 {
+		t.Fatalf("expected two canonical deployment bindings + one legacy provenance binding, got %d", len(bindings))
 	}
 
 	var modelChannelsAfter int

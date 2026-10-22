@@ -309,6 +309,21 @@ func SetEvaluation(ctx context.Context, pool *pgxpool.Pool, req EvaluationReques
 	return Get(ctx, pool, req.ModelReleaseID)
 }
 
+func maturityRank(state State) (int, error) {
+	switch state {
+	case StateDraft:
+		return 0, nil
+	case StateResearchQualified:
+		return 1, nil
+	case StateProductCandidate:
+		return 2, nil
+	case StateProduction:
+		return 3, nil
+	default:
+		return -1, fmt.Errorf("model release state is not a promotable maturity: %s", state)
+	}
+}
+
 func targetState(channel Channel) (State, error) {
 	switch channel {
 	case ChannelResearch:
@@ -348,8 +363,21 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromoteRequest) (Chann
 		if family != req.Family {
 			return errors.New("MODEL_CHANNEL_FAMILY_MISMATCH")
 		}
-		if State(currentState) == StateRejected || State(currentState) == StateSuperseded {
+		currentLifecycle := State(currentState)
+		if currentLifecycle == StateRejected || currentLifecycle == StateSuperseded {
 			return errors.New("MODEL_RELEASE_NOT_PROMOTABLE")
+		}
+		currentRank, rankErr := maturityRank(currentLifecycle)
+		if rankErr != nil {
+			return rankErr
+		}
+		targetRank, rankErr := maturityRank(state)
+		if rankErr != nil {
+			return rankErr
+		}
+		nextLifecycle := currentLifecycle
+		if targetRank > currentRank {
+			nextLifecycle = state
 		}
 		for _, scope := range req.RequiredEvaluationScopes {
 			scope = strings.TrimSpace(scope)
@@ -389,7 +417,7 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromoteRequest) (Chann
 				return err
 			}
 		}
-		if _, err := tx.Exec(ctx, "UPDATE model_releases SET lifecycle_state=$2 WHERE id=$1", req.ModelReleaseID, string(state)); err != nil {
+		if _, err := tx.Exec(ctx, "UPDATE model_releases SET lifecycle_state=$2 WHERE id=$1", req.ModelReleaseID, string(nextLifecycle)); err != nil {
 			return err
 		}
 		audit, _ := json.Marshal(map[string]any{"family": req.Family, "channel": req.Channel, "model_release_id": req.ModelReleaseID.String(), "required_evaluation_scopes": req.RequiredEvaluationScopes})

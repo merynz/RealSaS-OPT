@@ -127,11 +127,12 @@ def test_verified_dino_frontend_is_required_and_must_remain_frozen(monkeypatch):
         bridge.assert_loaded_dino_frontend_v1(model, seal)
 
 
-def test_input_bridge_is_frozen_foundation_only_not_training_authority():
+def test_input_bridge_imports_frozen_foundation_not_training_authority():
     authority = DINOv2FoundationAuthorityV2()
     authority.validate()
     source = Path("models/iris/vnext/inference_input_v1.py").read_text(encoding="utf-8")
     assert "models.iris.v2.dinov2_foundation_v2" in source
-    assert "training" not in source
+    assert "models.iris.vnext.training" not in source
+    assert "models.iris.vnext.cohort" not in source
     assert "optimizer" not in source
     assert "load_state_dict" not in source

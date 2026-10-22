@@ -213,12 +213,24 @@ func (a Activities) FinalizeCompile(ctx context.Context, payload map[string]any)
 		if !required["stage:46_PRODUCT_CLOSURE_SEAL"] || !required[productMotionRole] || !required[productRuntimeRole] {
 			return errors.New("PRODUCT_REVISION_REQUIRED_BINDINGS_MISSING")
 		}
+
+		modelRows, err := productModelIdentityTx(ctx, tx, attemptID)
+		if err != nil {
+			return err
+		}
+		manifestSchema := "RealSaS.ProductRevisionManifest.v1"
+		if len(modelRows) > 0 {
+			manifestSchema = "RealSaS.ProductRevisionManifest.v2"
+		}
 		manifest := map[string]any{
-			"schema":                  "RealSaS.ProductRevisionManifest.v1",
+			"schema":                  manifestSchema,
 			"subject_id":              subjectID.String(),
 			"engine_release_id":       releaseID.String(),
 			"product_contract_sha256": contract.ContractSHA256,
 			"bindings":                bindings,
+		}
+		if len(modelRows) > 0 {
+			manifest["model_releases"] = modelRows
 		}
 		manifestSHA, err := semantic.JSONSHA256(manifest)
 		if err != nil {
@@ -230,6 +242,11 @@ func (a Activities) FinalizeCompile(ctx context.Context, payload map[string]any)
 			WHERE subject_id=$1 AND manifest_sha256=$2
 		`, subjectID, manifestSHA).Scan(&revisionID)
 		if err == nil {
+			if len(modelRows) > 0 {
+				if err := verifyProductRevisionModelsTx(ctx, tx, attemptID, revisionID); err != nil {
+					return err
+				}
+			}
 			if _, err := tx.Exec(ctx, "UPDATE attempts SET final_state='QUALIFIED' WHERE id=$1", attemptID); err != nil {
 				return err
 			}
@@ -266,6 +283,11 @@ func (a Activities) FinalizeCompile(ctx context.Context, payload map[string]any)
 				return err
 			}
 		}
+		if len(modelRows) > 0 {
+			if err := bindProductRevisionModelsTx(ctx, tx, attemptID, revisionID); err != nil {
+				return err
+			}
+		}
 		if _, err := tx.Exec(ctx, "UPDATE attempts SET final_state='QUALIFIED' WHERE id=$1", attemptID); err != nil {
 			return err
 		}
@@ -274,6 +296,7 @@ func (a Activities) FinalizeCompile(ctx context.Context, payload map[string]any)
 			"manifest_sha256":     manifestSHA,
 			"motion_artifact_id":  motionID.String(),
 			"runtime_artifact_id": runtimeID.String(),
+			"model_release_count": len(modelRows),
 		})
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO attempt_events(attempt_id,event_type,payload)

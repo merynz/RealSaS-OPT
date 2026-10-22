@@ -1,0 +1,33 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABFit8TeacherCensusExecutionBinding.v1",
+  "status": "SEALED_DIRECTIONAL_CENSUS_EXECUTION_BINDING",
+  "training_execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+  "census_preregistration_commit": "d699ecc875f46d1661343d4c7e145ff8d36ad510",
+  "census_rationale_commit": "a5f7e03d74055f54cd543da46ef1fd08dfef6285",
+  "census_evaluator_implementation_commit": "37edd3790b54eb6da883eeba9b3d52afdcb200bd",
+  "parent_directional_screen_authority_head": "ba36fe9986fa2dbd9909f2e6caf8f814079d4231",
+  "sealed_checkpoint_sha256": {
+    "A_NULL_PRESENTATION": "8f1c51209ad3f94bd03e24b0df9fc7f3e0dc08ccc0e853306fb49da5bc6e924f",
+    "B_ROLE_FREE_PRESENTATION": "e57fc117162101fbd4e0db211bd501e7338eeda1e91df575bfa7016629a2238d"
+  },
+  "scientific_contract_changes": {
+    "model_weights": false,
+    "conditioning": false,
+    "tokenizer_or_grammar": false,
+    "training_objective": false,
+    "training": false,
+    "optimizer": false,
+    "teacher_corpus": false,
+    "presentation_evidence": false
+  },
+  "new_measurement_scope": {
+    "full_fit8_teacher_forced_all_windows": true,
+    "horse_bounded_free_run_only_if_census_inconclusive": true,
+    "directional_only_not_qualification": true
+  },
+  "optimizer_steps_executed": 0,
+  "parameters_updated": false,
+  "qualification_pass_claimed": false,
+  "canonical_m_authorized": false,
+  "product_promotion_authorized": false
+}

@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "tools/audit_legacy_research_drain_v1.py"
+      - "tools/audit_legacy_python_dependency_closure_v1.py"
       - "canonical/LEGACY_RESEARCH_BRANCH_DRAIN_AUDIT_V2.json"
       - "canonical/LEGACY_RESEARCH_BRANCH_DRAIN_V1.json"
       - ".github/workflows/legacy_research_drain_audit_v1.yml"
@@ -37,6 +38,9 @@ jobs:
       - name: Classifier self-test
         run: python3 tools/audit_legacy_research_drain_v1.py --self-test
 
+      - name: Dependency resolver self-test
+        run: python3 tools/audit_legacy_python_dependency_closure_v1.py --self-test
+
       - name: Build exact path inventory
         run: |
           python3 tools/audit_legacy_research_drain_v1.py \
@@ -44,9 +48,18 @@ jobs:
             --head ba36fe9986fa2dbd9909f2e6caf8f814079d4231 \
             --out legacy-research-drain-path-inventory-v1.json
 
-      - name: Upload audit inventory
+      - name: Build active Python dependency closure
+        run: |
+          python3 tools/audit_legacy_python_dependency_closure_v1.py \
+            --ref ba36fe9986fa2dbd9909f2e6caf8f814079d4231 \
+            --inventory legacy-research-drain-path-inventory-v1.json \
+            --out legacy-python-dependency-closure-v1.json
+
+      - name: Upload drain audit artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: legacy-research-drain-path-inventory-v1
-          path: legacy-research-drain-path-inventory-v1.json
+          name: legacy-research-drain-audit-v1
+          path: |
+            legacy-research-drain-path-inventory-v1.json
+            legacy-python-dependency-closure-v1.json
           if-no-files-found: error

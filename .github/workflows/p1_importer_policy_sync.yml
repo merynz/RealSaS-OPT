@@ -1,0 +1,58 @@
+name: p1-importer-policy-sync
+
+on:
+  pull_request:
+    paths:
+      - 'tools/platform_operational_migrate_v1.py'
+      - 'tests/tools/test_platform_operational_migrate_v1.py'
+      - '.github/workflows/p1_importer_policy_sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: review/operational-spine-p1-migration-20261022
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply exact P0 ModelRelease policy to importer
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('tools/platform_operational_migrate_v1.py')
+          s=p.read_text()
+          s=s.replace('import hashlib\n', '')
+          old='''                "checkpoint_artifact_id": binding["checkpoint_artifact_id"],\n                "engine_release_id": binding["engine_release_id"],'''
+          new='''                "checkpoint_artifact_id": binding["checkpoint_artifact_id"],\n                "checkpoint_content_sha256": legacy["checkpoint_sha256"],\n                "engine_release_id": binding["engine_release_id"],'''
+          if old not in s:
+              raise SystemExit('expected model request seam missing')
+          s=s.replace(old,new,1)
+          old='''                "initial_state": "RESEARCH_QUALIFIED",'''
+          if old not in s:
+              raise SystemExit('legacy qualified import seam missing')
+          s=s.replace(old,'''                "initial_state": "DRAFT",''',1)
+          old='''                "source_code_sha": legacy["source_code_sha"],\n            }'''
+          new='''                "source_code_sha": legacy["source_code_sha"],\n                "checkpoint_content_sha256": legacy["checkpoint_sha256"],\n            }'''
+          if old not in s:
+              raise SystemExit('existing model equivalence seam missing')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+          python -m py_compile tools/platform_operational_migrate_v1.py
+          python -m pytest -q tests/tools/test_platform_operational_migrate_v1.py
+      - name: Push policy-sync commit
+        run: |
+          if git diff --quiet; then
+            echo 'P1_IMPORTER_ALREADY_SYNCED'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/platform_operational_migrate_v1.py
+          git commit -m 'ops: enforce DRAFT exact-checkpoint P1 model import'
+          git push origin HEAD:review/operational-spine-p1-migration-20261022

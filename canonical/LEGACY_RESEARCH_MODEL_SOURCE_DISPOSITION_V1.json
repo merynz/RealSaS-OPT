@@ -16,10 +16,8 @@
     "exact_legacy_generic_tests": [
       {"blob_sha":"0a73bf4dbe7ebb63d6947a4fd72a184e9de05739","path":"tests/iris/test_boundary_causality_v1.py"},
       {"blob_sha":"88ad576f506e44004553c7ac19acce1e56d1133f","path":"tests/iris/test_evidence_model_v3.py"},
-      {"blob_sha":"ce0f3a3e0ae716d6fda604522b759ee0b338fc30","path":"tests/iris/test_graphics_truth_v2.py"},
       {"blob_sha":"05604fd8c605946dce776b85423367ee250d4fc9","path":"tests/iris/test_graphics_truth_v3.py"},
       {"blob_sha":"90d4869f722ff255a363d038bd15cfdb3530bbc1","path":"tests/iris/test_presentation_evidence_v1.py"},
-      {"blob_sha":"337610583e87ae98bfb0db1812de55f94fdcf5dc","path":"tests/iris/test_quality_policy_v1.py"},
       {"blob_sha":"c8b2ab579063652a9d7eb6268d182a0cd62ab97f","path":"tests/iris/test_relation_head_v3.py"},
       {"blob_sha":"0529fbcf2b9dc7b3a67886a8142d53aa8f80bc0b","path":"tests/iris/test_relation_support_v2.py"},
       {"blob_sha":"e0cf45f7c0fd76841d65da9950dfb01eb46a494c","path":"tests/iris/test_relation_truth_v3_adapter_v1.py"},
@@ -57,20 +55,25 @@
       {"blob_sha":"0e46724c819acdad72f224bc90503c8c6eb1a2f9","path":"models/tessa/v3/config_v3.py"},
       {"blob_sha":"c622237f62b352536d9902bf89bf15fe535e7def","path":"models/tessa/v3/model_v3.py"}
     ],
-    "excluded_false_positive_test": {
-      "path": "tests/iris/test_tessa_incremental_generation_v2.py",
-      "reason": "imports historical global_attention_v2/model_global_v2 and does not test current windowed_incremental_generation_v2"
-    },
+    "excluded_false_positive_tests": [
+      {"legacy_blob_sha":"bab52fe981bfcfea624aa67dc2e208911c6a348a","path":"tests/iris/test_tessa_incremental_generation_v2.py","reason":"imports historical global_attention_v2/model_global_v2 and does not test current windowed_incremental_generation_v2"},
+      {"legacy_blob_sha":"ce0f3a3e0ae716d6fda604522b759ee0b338fc30","path":"tests/iris/test_graphics_truth_v2.py","reason":"mixes the current Graphics Truth V2 schema with historical training_v2 relation-loss behavior; recovery replaces it with a truth-only current contract test"},
+      {"legacy_blob_sha":"337610583e87ae98bfb0db1812de55f94fdcf5dc","path":"tests/iris/test_quality_policy_v1.py","reason":"imports cohort_v8 training execution authority; recovery replaces it with a standalone current quality-policy contract test"}
+    ],
     "excluded_package_pollution": [
       "models/tessa/v2/ab_court_v2.py",
       "models/tessa/v2/global_attention_v2.py",
       "models/tessa/v2/model_global_v2.py"
     ],
     "fresh_package_boundaries": [
-      "models/iris/vnext/__init__.py",
-      "models/tessa/v2/__init__.py"
+      {"blob_sha":"b30ef8b4df5449d21fc9cf9275e37580807fedbc","path":"models/iris/vnext/__init__.py"},
+      {"blob_sha":"94c862f9ae717d559a4e77601a01b124c24f1524","path":"models/tessa/v2/__init__.py"}
     ],
-    "fresh_tests": ["tests/iris/test_tessa_windowed_incremental_generation_v2.py"],
+    "fresh_tests": [
+      {"blob_sha":"81e12cf5f113796cb17449b413b8d1e68cdbfefe","path":"tests/iris/test_graphics_truth_v2.py"},
+      {"blob_sha":"a3801da02fbaa4013f23cbed089896f9207d733f","path":"tests/iris/test_quality_policy_v1.py"},
+      {"blob_sha":"16db1ef92a2f72756472319ad6e39de4e02f68a0","path":"tests/iris/test_tessa_windowed_incremental_generation_v2.py"}
+    ],
     "product_promotion": false,
     "required_real_dependency": "models/tessa/v2/court_v2.py"
   },

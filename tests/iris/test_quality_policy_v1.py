@@ -1,6 +1,5 @@
 import unittest
 
-from models.iris.vnext.cohort_v8 import vnext_fit8_policy_v5
 from models.iris.vnext.quality_policy_v1 import (
     CarrierSealPolicyV1,
     DOWNSTREAM_SPECIALIST_STAGES,
@@ -10,11 +9,21 @@ from models.iris.vnext.quality_policy_v1 import (
 )
 
 
-class QualityPolicyV1Tests(unittest.TestCase):
+class QualityPolicyV1CurrentContractTests(unittest.TestCase):
+    def test_canonical_downstream_stage_ids_are_explicit(self):
+        self.assertEqual(
+            DOWNSTREAM_SPECIALIST_STAGES,
+            (
+                "A1_APPEARANCE_EVIDENCE",
+                "R1_ROLE_FREE_RELATIONS",
+                "T1_MECHANICAL_STRUCTURE",
+                "J1_JOINT_FINETUNE",
+            ),
+        )
+
     def test_scene_core_is_sealed_downstream_without_court(self):
-        policy = CarrierSealPolicyV1()
         with self.assertRaisesRegex(RuntimeError, "REQUIRES_EXPLICIT_COURT"):
-            policy.assert_downstream_parameter_allowed(
+            CarrierSealPolicyV1().assert_downstream_parameter_allowed(
                 stage_name="A1_APPEARANCE_EVIDENCE",
                 parameter_name="scene_core.field.weight",
             )
@@ -25,7 +34,7 @@ class QualityPolicyV1Tests(unittest.TestCase):
             parameter_name="relations.front.weight",
         )
 
-    def test_explicit_reopening_court_is_required_and_sufficient_at_contract_level(self):
+    def test_explicit_reopening_court_is_sufficient_at_contract_level(self):
         CarrierSealPolicyV1().assert_downstream_parameter_allowed(
             stage_name="T1_MECHANICAL_STRUCTURE",
             parameter_name="scene_core.field.weight",
@@ -39,51 +48,30 @@ class QualityPolicyV1Tests(unittest.TestCase):
                 scene_lr_scale=0.0,
             )
 
-    def test_v8_policy_uses_exact_canonical_downstream_ids_and_zero_scene_lr(self):
-        policy = vnext_fit8_policy_v5()
-        downstream = tuple(stage for stage in policy.stages if stage.stage_id in DOWNSTREAM_SPECIALIST_STAGES)
-        self.assertEqual(tuple(stage.stage_id for stage in downstream), DOWNSTREAM_SPECIALIST_STAGES)
-        seal = CarrierSealPolicyV1()
-        for stage in downstream:
-            seal.assert_stage_definition(
-                stage_name=stage.stage_id,
-                scene_lr_scale=stage.scene_lr_scale,
-            )
-            self.assertEqual(stage.scene_lr_scale, 0.0)
-
-    def test_optimizer_group_guard_rejects_nonzero_scene_lr(self):
+    def test_optimizer_guard_rejects_nonzero_scene_lr(self):
         with self.assertRaisesRegex(RuntimeError, "OPTIMIZER_LR_NONZERO_WITHOUT_COURT"):
             CarrierSealPolicyV1().assert_optimizer_configuration(
                 stage_name="J1_JOINT_FINETUNE",
-                group_lrs={"scene_core": 1.0e-6, "evidence_heads": 5.0e-5, "structure": 2.5e-5},
+                group_lrs={"scene_core": 1.0e-6, "evidence_heads": 5.0e-5},
             )
 
-    def test_optimizer_group_guard_accepts_zero_scene_lr(self):
+    def test_optimizer_guard_accepts_zero_scene_lr(self):
         CarrierSealPolicyV1().assert_optimizer_configuration(
             stage_name="A1_APPEARANCE_EVIDENCE",
-            group_lrs={"scene_core": 0.0, "evidence_heads": 1.0e-4, "structure": 0.0},
+            group_lrs={"scene_core": 0.0, "evidence_heads": 1.0e-4},
         )
 
     def test_historical_reference_never_declares_court_pass(self):
         self.assertEqual(
-            historical_reference_status(
-                value_p95=0.04,
-                comparable_normalized_residual=True,
-            ),
+            historical_reference_status(value_p95=0.04, comparable_normalized_residual=True),
             QualityStatus.ELIGIBLE_FOR_COURT,
         )
         self.assertEqual(
-            historical_reference_status(
-                value_p95=0.12,
-                comparable_normalized_residual=True,
-            ),
+            historical_reference_status(value_p95=0.12, comparable_normalized_residual=True),
             QualityStatus.OPTIMIZATION_DEBT,
         )
         self.assertEqual(
-            historical_reference_status(
-                value_p95=0.001,
-                comparable_normalized_residual=False,
-            ),
+            historical_reference_status(value_p95=0.001, comparable_normalized_residual=False),
             QualityStatus.MEASUREMENT_ONLY,
         )
 
@@ -98,25 +86,23 @@ class QualityPolicyV1Tests(unittest.TestCase):
         self.assertEqual(court.status(0.049), QualityStatus.COURT_PASS)
         self.assertEqual(court.status(0.051), QualityStatus.OPTIMIZATION_DEBT)
 
-    def test_missing_threshold_cannot_pass(self):
-        court = MetricCourtV1(
+    def test_unsealed_or_proxy_metrics_cannot_pass(self):
+        unsealed = MetricCourtV1(
             metric_name="unsealed_metric",
             threshold=None,
             threshold_preregistered=False,
             target_authoritative=True,
             heldout=True,
         )
-        self.assertEqual(court.status(0.0), QualityStatus.ELIGIBLE_FOR_COURT)
-
-    def test_non_authoritative_target_is_measurement_only(self):
-        court = MetricCourtV1(
+        proxy = MetricCourtV1(
             metric_name="proxy_owner",
             threshold=0.01,
             threshold_preregistered=True,
             target_authoritative=False,
             heldout=True,
         )
-        self.assertEqual(court.status(0.0), QualityStatus.MEASUREMENT_ONLY)
+        self.assertEqual(unsealed.status(0.0), QualityStatus.ELIGIBLE_FOR_COURT)
+        self.assertEqual(proxy.status(0.0), QualityStatus.MEASUREMENT_ONLY)
 
 
 if __name__ == "__main__":

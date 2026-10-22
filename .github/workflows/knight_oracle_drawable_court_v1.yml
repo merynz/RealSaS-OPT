@@ -7,6 +7,7 @@ on:
       - research/knight-oracle-drawable-court-20261023
     paths:
       - 'tools/demo/knight_oracle_drawable_court_v1.py'
+      - 'tools/demo/knight_oracle_drawable_court_exact_v1.py'
       - '.github/workflows/knight_oracle_drawable_court_v1.yml'
       - 'canonical/KNIGHT_ORACLE_DRAWABLE_COURT_PREREG_V1_20261023.json'
 
@@ -23,8 +24,7 @@ jobs:
     timeout-minutes: 45
     env:
       AUTHORITY_ROOT: /home/monster/realsas_authority
-      OLD_RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
-      RUN_ID: SUBJECT2_KNIGHT_ORACLE_DRAWABLE_RECOVERED_V1_20261023
+      RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
       OUT_DIR: canonical/knight_oracle_drawable_court_v1
 
     steps:
@@ -41,58 +41,42 @@ jobs:
           set -euo pipefail
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
 
-      - name: Verify preregistration and historical immutable seal
+      - name: Verify preregistration and exact immutable source
         run: |
           set -euo pipefail
-          python -m py_compile tools/demo/knight_oracle_drawable_court_v1.py
+          python -m py_compile \
+            tools/demo/knight_oracle_drawable_court_v1.py \
+            tools/demo/knight_oracle_drawable_court_exact_v1.py
           test -f canonical/KNIGHT_ORACLE_DRAWABLE_COURT_PREREG_V1_20261023.json
-          test -f "$AUTHORITY_ROOT/runs/$OLD_RUN_ID/IMMUTABLE_STAGE23_SEAL.json"
-          OLD_RUN="$AUTHORITY_ROOT/runs/$OLD_RUN_ID" python - <<'PY'
+          test -f "$AUTHORITY_ROOT/runs/$RUN_ID/IMMUTABLE_STAGE23_SEAL.json"
+          test -f "$AUTHORITY_ROOT/runs/$RUN_ID/artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/complete_appearance_asset.json"
+          RUN_ROOT="$AUTHORITY_ROOT/runs/$RUN_ID" python - <<'PY'
           import json, os
           from pathlib import Path
-          p=Path('canonical/KNIGHT_ORACLE_DRAWABLE_COURT_PREREG_V1_20261023.json')
-          x=json.loads(p.read_text())
-          assert x['status']=='PREREGISTERED_BEFORE_EXECUTION'
-          assert x['source_run_id']=='SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671'
-          assert x['product_authority'] is False
-          seal=json.loads((Path(os.environ['OLD_RUN'])/'IMMUTABLE_STAGE23_SEAL.json').read_text())
+          prereg=json.loads(Path('canonical/KNIGHT_ORACLE_DRAWABLE_COURT_PREREG_V1_20261023.json').read_text())
+          root=Path(os.environ['RUN_ROOT'])
+          seal=json.loads((root/'IMMUTABLE_STAGE23_SEAL.json').read_text())
+          asset=json.loads((root/'artifacts/23_COMPLETE_APPEARANCE_ASSET_BAKED/complete_appearance_asset.json').read_text())
+          assert prereg['status']=='PREREGISTERED_BEFORE_EXECUTION'
+          assert prereg['source_run_id']==seal['run_id']==os.environ['RUN_ID']
+          assert prereg['product_authority'] is False
           assert seal['status']=='SEALED_IMMUTABLE_STAGE23'
-          assert seal['run_id']==x['source_run_id']
-          Path('/tmp/knight_oracle_parent_run_id.txt').write_text(str(seal['parent_run_id']))
-          Path('/tmp/knight_oracle_expected_stage23.txt').write_text(str(seal['stage23_asset_hash']))
-          print('KNIGHT_ORACLE_DRAWABLE_PREREG_AND_OLD_SEAL_PASS')
+          assert seal['overwrite_forbidden'] is True
+          assert seal['source_owned_visual_mesh_mode'] is False
+          assert asset['schema']=='RealSaS.CompleteAppearanceAssetIR.v2'
+          assert asset['asset_hash']==seal['stage23_asset_hash']
+          print('KNIGHT_ORACLE_DRAWABLE_EXACT_STAGE23_PASS', asset['asset_hash'], seal['parent_run_id'])
           PY
 
-      - name: Deterministically recover immutable Stage23 from sealed parent
-        run: |
-          set -euo pipefail
-          parent="$(cat /tmp/knight_oracle_parent_run_id.txt)"
-          rm -rf "$AUTHORITY_ROOT/runs/$RUN_ID"
-          PYTHONPATH=. python tools/demo/build_knight_corrected_mechanical_caa_stage23_immutable_v1.py \
-            --authority-root "$AUTHORITY_ROOT" \
-            --parent-run-id "$parent" \
-            --child-run-id "$RUN_ID" | tee /tmp/knight_oracle_recover_stage23.txt
-          EXPECTED="$(cat /tmp/knight_oracle_expected_stage23.txt)" RECOVERED="$AUTHORITY_ROOT/runs/$RUN_ID/IMMUTABLE_STAGE23_SEAL.json" python - <<'PY'
-          import json, os
-          from pathlib import Path
-          seal=json.loads(Path(os.environ['RECOVERED']).read_text())
-          actual=str(seal['stage23_asset_hash'])
-          expected=str(os.environ['EXPECTED'])
-          if actual != expected:
-              raise RuntimeError(f'DRAWABLE_ORACLE_RECOVERED_STAGE23_HASH_DRIFT:{actual}:{expected}')
-          print('KNIGHT_ORACLE_DRAWABLE_RECOVERED_STAGE23_EXACT_PASS', actual)
-          PY
-
-      - name: Run oracle drawable court
+      - name: Run exact historical oracle drawable court
         run: |
           set -euo pipefail
           rm -rf "$OUT_DIR"
-          PYTHONPATH=. python tools/demo/knight_oracle_drawable_court_v1.py \
+          PYTHONPATH=. python tools/demo/knight_oracle_drawable_court_exact_v1.py \
             --authority-root "$AUTHORITY_ROOT" \
             --run-id "$RUN_ID" \
             --out-dir "$OUT_DIR" | tee /tmp/knight_oracle_drawable_court_v1.txt
           cp /tmp/knight_oracle_drawable_court_v1.txt "$OUT_DIR/AUDIT_STDOUT.txt"
-          cp /tmp/knight_oracle_recover_stage23.txt "$OUT_DIR/RECOVERY_STDOUT.txt"
           test -f "$OUT_DIR/REPORT.json"
           test -f "$OUT_DIR/DRAWABLE_PARTITION.json"
           test -f "$OUT_DIR/KNIGHT_IDLE_ORACLE_DRAWABLE_COURT_V1.gif"

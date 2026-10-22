@@ -1,0 +1,1 @@
+Scope: FIT8 only; frozen A/B checkpoints; raw direct-surface presentation queries; materialized presentation memories; teacher-forced evaluation; no unseen subjects and no training. This experiment diagnoses corpus/extractor/sampler confounds before any next training budget.

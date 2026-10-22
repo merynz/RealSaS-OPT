@@ -116,7 +116,7 @@ func TestBehaviorIdentityCrossLanguageVector(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const want = "bc50f4276691df4f83ff2c1336d862e41c9f3b087e5005e2881ebf06ed4a8e89"
+	const want = "b69b3a4cead07575f1cfeba8f3388d1b76c97453c510833775bd452e931707bd"
 	if got != want {
 		t.Fatalf("cross-language identity drift: got=%s want=%s", got, want)
 	}

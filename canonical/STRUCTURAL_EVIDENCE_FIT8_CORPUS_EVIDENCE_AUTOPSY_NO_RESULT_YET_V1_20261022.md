@@ -1,0 +1,1 @@
+No autopsy scientific result exists until the executable notebook produces the typed result artifact. Design records alone are not evidence.

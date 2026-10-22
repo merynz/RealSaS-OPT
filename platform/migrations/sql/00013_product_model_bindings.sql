@@ -31,6 +31,41 @@ CREATE TABLE product_revision_model_releases (
 CREATE INDEX ix_product_revision_model_releases_release
     ON product_revision_model_releases(model_release_id);
 
+-- ModelRelease is the exact model identity. Maturity/lifecycle may advance, but
+-- the identity behind an already selected release may never be rewritten.
+-- +goose StatementBegin
+CREATE OR REPLACE FUNCTION realsas_enforce_model_release_identity_immutable()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NEW.id IS DISTINCT FROM OLD.id
+       OR NEW.family IS DISTINCT FROM OLD.family
+       OR NEW.name IS DISTINCT FROM OLD.name
+       OR NEW.architecture_id IS DISTINCT FROM OLD.architecture_id
+       OR NEW.checkpoint_artifact_id IS DISTINCT FROM OLD.checkpoint_artifact_id
+       OR NEW.engine_release_id IS DISTINCT FROM OLD.engine_release_id
+       OR NEW.originating_experiment_id IS DISTINCT FROM OLD.originating_experiment_id
+       OR NEW.originating_attempt_id IS DISTINCT FROM OLD.originating_attempt_id
+       OR NEW.source_code_sha IS DISTINCT FROM OLD.source_code_sha
+       OR NEW.supersedes_model_release_id IS DISTINCT FROM OLD.supersedes_model_release_id
+       OR NEW.metadata IS DISTINCT FROM OLD.metadata
+       OR NEW.created_by IS DISTINCT FROM OLD.created_by
+       OR NEW.created_at IS DISTINCT FROM OLD.created_at
+       OR NEW.sealed_at IS DISTINCT FROM OLD.sealed_at
+    THEN
+        RAISE EXCEPTION 'MODEL_RELEASE_IDENTITY_IMMUTABLE';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+-- +goose StatementEnd
+
+CREATE TRIGGER trg_model_release_identity_immutable
+BEFORE UPDATE ON model_releases
+FOR EACH ROW
+EXECUTE FUNCTION realsas_enforce_model_release_identity_immutable();
+
 -- Snapshot required model channels in the exact transaction that creates the
 -- product compile Attempt. Locking the selected channel row prevents a channel
 -- promotion from racing the snapshot.
@@ -102,6 +137,8 @@ EXECUTE FUNCTION realsas_snapshot_product_attempt_models();
 
 DROP TRIGGER trg_snapshot_product_attempt_models ON attempts;
 DROP FUNCTION realsas_snapshot_product_attempt_models();
+DROP TRIGGER trg_model_release_identity_immutable ON model_releases;
+DROP FUNCTION realsas_enforce_model_release_identity_immutable();
 DROP INDEX ix_product_revision_model_releases_release;
 DROP TABLE product_revision_model_releases;
 DROP INDEX ix_attempt_model_releases_release;

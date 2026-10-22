@@ -202,9 +202,9 @@ func Transition(ctx context.Context, pool *pgxpool.Pool, req TransitionRequest) 
 			return fmt.Errorf("EXPERIMENT_STATE_TRANSITION_FORBIDDEN:%s->%s", from, req.ToState)
 		}
 		_, err := tx.Exec(ctx, `
-			UPDATE experiments SET lifecycle_state=$2,
-			preregistered_at=CASE WHEN $2='PREREGISTERED' AND preregistered_at IS NULL THEN now() ELSE preregistered_at END,
-			completed_at=CASE WHEN $2 IN ('COMPLETED','ABORTED','SUPERSEDED') THEN now() ELSE completed_at END
+			UPDATE experiments SET lifecycle_state=$2::varchar,
+			preregistered_at=CASE WHEN $2::varchar='PREREGISTERED' AND preregistered_at IS NULL THEN now() ELSE preregistered_at END,
+			completed_at=CASE WHEN $2::varchar IN ('COMPLETED','ABORTED','SUPERSEDED') THEN now() ELSE completed_at END
 			WHERE id=$1
 		`, req.ExperimentID, string(req.ToState))
 		if err != nil {

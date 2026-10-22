@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import sys
 import threading
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -17,6 +18,7 @@ SPEC = importlib.util.spec_from_file_location(
 )
 assert SPEC and SPEC.loader
 migration = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = migration
 SPEC.loader.exec_module(migration)
 
 
@@ -220,7 +222,7 @@ def test_apply_creates_experiment_but_not_model_without_identity_binding():
     assert result["scientific_execution_performed"] is False
 
 
-def test_apply_with_exact_binding_creates_unpromoted_model_release():
+def test_apply_with_exact_binding_creates_draft_unpromoted_model_release():
     value = migration.validate_descriptor(descriptor())
     binding_doc = {
         "schema": migration.BINDINGS_SCHEMA,
@@ -247,4 +249,6 @@ def test_apply_with_exact_binding_creates_unpromoted_model_release():
     assert len(state.models) == 1
     assert state.models[0]["family"] == "IRIS"
     assert state.models[0]["originating_experiment_id"] == state.experiment_id
+    assert state.models[0]["checkpoint_content_sha256"] == "5" * 64
+    assert state.models[0]["lifecycle_state"] == "DRAFT"
     assert result["promotion_performed"] is False

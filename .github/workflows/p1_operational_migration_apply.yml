@@ -23,6 +23,8 @@ jobs:
     env:
       PLATFORM_ROOT: /home/monster/realsas_platform
       DESCRIPTOR: canonical/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json
+      LEGACY_BRANCH: research/structural-evidence-ab-free-run-failclosed-20261022
+      LEGACY_HEAD: 2f6ba5491c54546e1001bd041dc88a0118a95687
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,16 +56,37 @@ jobs:
           print('P1_DEPLOYMENT_IDENTITY_PASS', expected)
           PY
 
-      - name: Fetch frozen legacy authority
+      - name: Fetch exact current Structural-Evidence authority
         shell: bash
         run: |
           set -euo pipefail
           git fetch --no-tags origin \
-            research/iris-vnext-hybrid-tessa-v2-20261019:refs/heads/research/iris-vnext-hybrid-tessa-v2-20261019
-          test "$(git rev-parse research/iris-vnext-hybrid-tessa-v2-20261019)" = \
-            "4cd38d828e37407c50034ec7abba26a1b61878ea"
+            "$LEGACY_BRANCH:refs/heads/$LEGACY_BRANCH"
+          test "$(git rev-parse "$LEGACY_BRANCH")" = "$LEGACY_HEAD"
 
-      - name: Apply idempotent Experiment migration
+      - name: Prove migration plan before mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" \
+            tools/platform_operational_migrate_v1.py \
+            --descriptor "$DESCRIPTOR" \
+            --repo "$PWD" \
+            --out "$RUNNER_TEMP/p1-plan.json"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - "$RUNNER_TEMP/p1-plan.json" <<'PY'
+          import json, sys
+          plan=json.load(open(sys.argv[1]))
+          assert plan['experiment']['action'] == 'ENSURE_RUNNING', plan
+          assert plan['experiment']['historical_training_executed'] is True, plan
+          assert plan['scientific_execution'] == 'FORBIDDEN', plan
+          assert plan['promotion'] == 'FORBIDDEN', plan
+          assert plan['branch_mutation'] == 'FORBIDDEN', plan
+          assert plan['git_provenance']['legacy_branch_head_sha'] == '2f6ba5491c54546e1001bd041dc88a0118a95687', plan
+          assert plan['git_provenance']['execution_binding_git_blob_sha'] == '05764b7925087e8b9800e5ba5feb04f515422507', plan
+          print('P1_PREAPPLY_PLAN_PASS')
+          PY
+
+      - name: Apply idempotent RUNNING Experiment migration
         shell: bash
         run: |
           set -euo pipefail
@@ -78,7 +101,7 @@ jobs:
             --out "$RECEIPT"
           cp "$RECEIPT" "$RUNNER_TEMP/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json"
 
-      - name: Verify operational truth and no invented model authority
+      - name: Verify operational truth and no invented authority
         shell: bash
         run: |
           set -euo pipefail
@@ -86,20 +109,30 @@ jobs:
           "$PLATFORM_ROOT/current/bin/realsas-python" - "$RECEIPT" <<'PY'
           import json, sys, urllib.request
           receipt=json.load(open(sys.argv[1]))
-          assert receipt['mode'] == 'APPLY'
-          assert receipt['promotion_performed'] is False
-          assert receipt['scientific_execution_performed'] is False
-          assert receipt['model_releases'] == []
+          assert receipt['mode'] == 'APPLY', receipt
+          assert receipt['promotion_performed'] is False, receipt
+          assert receipt['scientific_execution_performed'] is False, receipt
+          assert receipt['historical_training_executed_at_migration'] is True, receipt
+          assert receipt['model_releases'] == [], receipt
           assert receipt['blocked_models'] == [{
               'family':'IRIS',
               'checkpoint_sha256':'0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5',
               'reason':'BLOCKED_IDENTITY_RESOLUTION',
-          }]
+          }], receipt
           status=json.load(urllib.request.urlopen('http://127.0.0.1:8080/v1/ops/status', timeout=10))
           matches=[x for x in status['active_experiments'] if x['slug']=='structural-evidence-a-b-v2']
           assert len(matches)==1, matches
-          assert matches[0]['lifecycle_state']=='PREREGISTERED'
-          print('P1_OPERATIONAL_STATE_LIVE_PASS', matches[0]['id'])
+          exp=matches[0]
+          assert exp['lifecycle_state']=='RUNNING', exp
+          md=exp['metadata']
+          assert md['scientific_training_executed_at_migration'] is True, md
+          assert md['training_execution_state']=='COMPLETED_FROZEN_ARM_CHECKPOINTS', md
+          assert md['training_execution_source_sha']=='eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d', md
+          assert md['scientific_free_running_result_observed_at_migration'] is False, md
+          assert md['scientific_causal_result_observed_at_migration'] is False, md
+          assert md['canonical_m_authorized'] is False, md
+          assert md['product_promotion_authorized'] is False, md
+          print('P1_OPERATIONAL_RUNNING_STATE_LIVE_PASS', exp['id'])
           PY
 
       - uses: actions/upload-artifact@v4

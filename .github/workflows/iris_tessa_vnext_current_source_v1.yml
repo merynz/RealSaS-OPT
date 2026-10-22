@@ -23,6 +23,7 @@ on:
       - 'tests/iris/test_tessa_structuralizer_v2.py'
       - 'tests/iris/test_tessa_structuralizer_v3.py'
       - 'tests/iris/test_tessa_windowed_incremental_generation_v2.py'
+      - 'tests/iris/test_vnext_inference_input_v1.py'
       - '.github/workflows/iris_tessa_vnext_current_source_v1.yml'
   workflow_dispatch:
 
@@ -80,7 +81,8 @@ jobs:
             tests/iris/test_tessa_generation_v2.py \
             tests/iris/test_tessa_structuralizer_v2.py \
             tests/iris/test_tessa_structuralizer_v3.py \
-            tests/iris/test_tessa_windowed_incremental_generation_v2.py
+            tests/iris/test_tessa_windowed_incremental_generation_v2.py \
+            tests/iris/test_vnext_inference_input_v1.py
       - name: Recovery authority summary
         run: |
           echo 'IRIS_TESSA_VNEXT_CURRENT_SOURCE_PASS'

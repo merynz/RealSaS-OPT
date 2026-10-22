@@ -13,6 +13,7 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/experiment"
 	"github.com/merynz/RealSaS-OPT/platform/internal/modelrelease"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
+	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 )
 
 func repeated(ch string, n int) string {
@@ -42,12 +43,16 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 	artifactTypeID := uuid.New()
 	artifactID := uuid.New()
 	attemptID := uuid.New()
+	canonicalCodeSHA := repeated("a", 40)
 	checkpointContentSHA := uniqueHash("content", suffix)
 	if _, err := pool.Exec(ctx, "INSERT INTO subjects(id,slug,display_name) VALUES ($1,$2,$3)", subjectID, "ops-"+suffix, "Operational spine test"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, `INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at)
 		VALUES ($1,$2,$3,'RESEARCH','ci',now())`, releaseID, "ops-release-"+suffix, uniqueHash("release", suffix)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := release.BindCanonicalMain(ctx, pool, releaseID, canonicalCodeSHA, "ci"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, "INSERT INTO artifact_types(id,name,schema_version,domain) VALUES ($1,$2,'v1','model')", artifactTypeID, "ops-checkpoint-"+suffix); err != nil {
@@ -77,8 +82,8 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, `INSERT INTO attempts
-		(id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state)
-		VALUES ($1,$2,$3,'research',$4,'ci','OPEN')`, attemptID, subjectID, releaseID, uniqueHash("attempt", suffix)); err != nil {
+		(id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state,canonical_code_sha)
+		VALUES ($1,$2,$3,'research',$4,'ci','OPEN',$5)`, attemptID, subjectID, releaseID, uniqueHash("attempt", suffix), canonicalCodeSHA); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := experiment.Link(ctx, pool, experiment.LinkRequest{ExperimentID: created.Experiment.ID, TargetKind: "ATTEMPT", TargetID: attemptID, Actor: "ci"}); err != nil {
@@ -94,7 +99,7 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 		EngineReleaseID:         releaseID,
 		OriginatingExperimentID: &created.Experiment.ID,
 		OriginatingAttemptID:    &attemptID,
-		SourceCodeSHA:           repeated("a", 40),
+		SourceCodeSHA:           canonicalCodeSHA,
 		InitialState:            modelrelease.StateDraft,
 		CreatedBy:               "ci",
 	})

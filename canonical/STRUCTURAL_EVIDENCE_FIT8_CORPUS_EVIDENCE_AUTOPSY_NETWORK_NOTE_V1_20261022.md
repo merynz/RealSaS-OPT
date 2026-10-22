@@ -1,0 +1,1 @@
+Implementation is connector-driven; local container has no direct GitHub network access. This does not affect the Colab execution contract.

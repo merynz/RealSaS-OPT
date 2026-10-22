@@ -1,0 +1,30 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABFreeRunningEvaluatorAmendment.v2",
+  "status": "LOCKED_EXECUTION_HARDENING__NO_SCIENTIFIC_CONTRACT_CHANGE",
+  "training_execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+  "evaluator_implementation_source_sha": "af5a042396441cf17ab0f6f14b24b58bdf4825da",
+  "changes": {
+    "typed_grammar_dead_end_instead_of_process_crash": true,
+    "checkpoint_load_uses_mmap": true,
+    "unused_optimizer_state_eager_materialization_avoided": true,
+    "phase_markers_added": true
+  },
+  "scientific_contract_changes": {
+    "model_weights": false,
+    "conditioning": false,
+    "grammar_allowed_tokens": false,
+    "decoding_logits": false,
+    "sampling": false,
+    "seed": false,
+    "thresholds": false,
+    "carrier": false,
+    "optimizer": false,
+    "courts": false
+  },
+  "authority": {
+    "training_checkpoint_source_remains": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+    "dead_end_is_success": false,
+    "canonical_m_authorized": false,
+    "product_promotion_authorized": false
+  }
+}

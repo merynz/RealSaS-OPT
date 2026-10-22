@@ -198,9 +198,17 @@ def _view_memory_rows(
     return rows
 
 
+def _load_query_view(path: Path, expected_sha: str) -> dict[str, np.ndarray]:
+    if sha256_file(path) != expected_sha:
+        raise ValueError("FIT8_AUTOPSY_QUERY_VIEW_SHA_DRIFT:" + path.name)
+    with np.load(path, allow_pickle=False) as npz:
+        return {name: np.asarray(npz[name]) for name in npz.files}
+
+
 def _phase1(
     *,
     query_manifest: dict[str, Any],
+    query_root: Path,
     memory_manifest: dict[str, Any],
     memory_root: Path,
     census: dict[str, Any],
@@ -234,6 +242,47 @@ def _phase1(
             pair_tokens = int(mv["pair_token_count"])
             ray_tokens = int(mv["ray_hit_token_count"])
             surface_tokens = int(mv["surface_token_count"])
+
+            data = _load_query_view(query_root / str(view["file"]), str(view["sha256"]))
+            epsilon = float(qrow["direct_surface_depth_tie_epsilon"])
+            offsets = np.asarray(data["stack_offsets"], dtype=np.int64)
+            depth = np.asarray(data["stack_depth"], dtype=np.float64)
+            base = np.asarray(data["pair_base_pair_id"], dtype=np.int64)
+            pair_ray = np.asarray(data["pair_ray_index"], dtype=np.int64)
+            rank_a = np.asarray(data["pair_rank_a"], dtype=np.int64)
+            rank_b = np.asarray(data["pair_rank_b"], dtype=np.int64)
+            if len(base):
+                da = depth[offsets[pair_ray] + rank_a]
+                db = depth[offsets[pair_ray] + rank_b]
+                pair_front_valid = np.abs(da - db) > epsilon
+                qualified_pair_rows = int(np.count_nonzero(pair_front_valid))
+                all_groups = np.unique(base)
+                qualified_groups = np.unique(base[pair_front_valid])
+            else:
+                qualified_pair_rows = 0
+                all_groups = np.zeros(0, dtype=np.int64)
+                qualified_groups = np.zeros(0, dtype=np.int64)
+
+            unique_front_rays = 0
+            tied_minimum_rays = 0
+            visibility_valid_hits = 0
+            nonempty_rays = 0
+            for ray_idx in range(len(offsets) - 1):
+                start, end = int(offsets[ray_idx]), int(offsets[ray_idx + 1])
+                if end <= start:
+                    continue
+                nonempty_rays += 1
+                minima = np.abs(depth[start:end] - depth[start]) <= epsilon
+                tied = int(np.count_nonzero(minima))
+                if tied == 1:
+                    unique_front_rays += 1
+                    visibility_valid_hits += end - start
+                else:
+                    tied_minimum_rays += 1
+                    visibility_valid_hits += (end - start) - tied
+
+            raw_alpha = np.asarray(data["source_alpha_boundary"], dtype=np.float32).reshape(-1)
+            raw_appearance = np.asarray(data["source_appearance_boundary"], dtype=np.float32).reshape(-1)
             row = {
                 "subject_id": subject_id,
                 "view_index": vi,
@@ -245,9 +294,23 @@ def _phase1(
                 "multi_hit_rays": multi,
                 "total_direct_surface_hits": hits,
                 "oriented_pair_rows": pairs,
+                "qualified_oriented_pair_rows": qualified_pair_rows,
+                "pair_front_qualified_fraction_raw": qualified_pair_rows / max(pairs, 1),
+                "pair_front_tie_abstain_fraction_raw": 1.0 - qualified_pair_rows / max(pairs, 1),
+                "qualified_base_pair_groups": int(len(qualified_groups)),
+                "all_base_pair_groups": int(len(all_groups)),
+                "pair_group_qualified_fraction_raw": len(qualified_groups) / max(len(all_groups), 1),
+                "unique_front_rays": unique_front_rays,
+                "surface_unique_front_fraction_raw": unique_front_rays / max(nonempty_rays, 1),
+                "tied_minimum_ray_fraction_raw": tied_minimum_rays / max(nonempty_rays, 1),
+                "global_visibility_valid_hit_fraction_raw": visibility_valid_hits / max(hits, 1),
+                "raw_alpha_boundary_positive_fraction": float(np.mean(raw_alpha > 0.5)) if len(raw_alpha) else 0.0,
+                "raw_appearance_boundary_positive_fraction": float(np.mean(raw_appearance > 0.5)) if len(raw_appearance) else 0.0,
                 "pair_sampling_fraction": pair_tokens / max(pairs, 1),
+                "pair_sampling_fraction_qualified": pair_tokens / max(qualified_pair_rows, 1),
                 "ray_hit_sampling_fraction": ray_tokens / max(hits, 1),
                 "surface_sampling_fraction_proxy": surface_tokens / max(hit_rays, 1),
+                "surface_sampling_fraction_qualified": surface_tokens / max(unique_front_rays, 1),
                 "hit_ray_fraction": hit_rays / max(fg, 1),
                 "mean_hits_per_hit_ray": hits / max(hit_rays, 1),
                 "mean_oriented_pairs_per_multi_hit_ray": pairs / max(multi, 1),
@@ -262,9 +325,21 @@ def _phase1(
             "multi_hit_rays",
             "total_direct_surface_hits",
             "oriented_pair_rows",
+            "qualified_oriented_pair_rows",
+            "pair_front_qualified_fraction_raw",
+            "pair_front_tie_abstain_fraction_raw",
+            "pair_group_qualified_fraction_raw",
+            "unique_front_rays",
+            "surface_unique_front_fraction_raw",
+            "tied_minimum_ray_fraction_raw",
+            "global_visibility_valid_hit_fraction_raw",
+            "raw_alpha_boundary_positive_fraction",
+            "raw_appearance_boundary_positive_fraction",
             "pair_sampling_fraction",
+            "pair_sampling_fraction_qualified",
             "ray_hit_sampling_fraction",
             "surface_sampling_fraction_proxy",
+            "surface_sampling_fraction_qualified",
             "hit_ray_fraction",
             "mean_hits_per_hit_ray",
             "mean_oriented_pairs_per_multi_hit_ray",
@@ -301,9 +376,20 @@ def _phase1(
     ]
     correlation_metrics = [
         "oriented_pair_rows_mean",
+        "qualified_oriented_pair_rows_mean",
+        "pair_front_qualified_fraction_raw_mean",
+        "pair_front_tie_abstain_fraction_raw_mean",
+        "pair_group_qualified_fraction_raw_mean",
+        "surface_unique_front_fraction_raw_mean",
+        "tied_minimum_ray_fraction_raw_mean",
+        "global_visibility_valid_hit_fraction_raw_mean",
+        "raw_alpha_boundary_positive_fraction_mean",
+        "raw_appearance_boundary_positive_fraction_mean",
         "pair_sampling_fraction_mean",
+        "pair_sampling_fraction_qualified_mean",
         "ray_hit_sampling_fraction_mean",
         "surface_sampling_fraction_proxy_mean",
+        "surface_sampling_fraction_qualified_mean",
         "hit_ray_fraction_mean",
         "mean_hits_per_hit_ray_mean",
         "mean_oriented_pairs_per_multi_hit_ray_mean",
@@ -345,13 +431,6 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         writer.writerows(rows)
-
-
-def _load_query_view(path: Path, expected_sha: str) -> dict[str, np.ndarray]:
-    if sha256_file(path) != expected_sha:
-        raise ValueError("FIT8_AUTOPSY_QUERY_VIEW_SHA_DRIFT:" + path.name)
-    with np.load(path, allow_pickle=False) as npz:
-        return {name: np.asarray(npz[name]) for name in npz.files}
 
 
 def _payload_from_queries(
@@ -647,6 +726,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     _phase("stage=phase1_begin")
     per_view, subject_summary, correlations = _phase1(
         query_manifest=query_manifest,
+        query_root=query_root,
         memory_manifest=memory_manifest,
         memory_root=memory_root,
         census=census,

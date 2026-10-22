@@ -1,0 +1,86 @@
+{
+  "schema": "RealSaS.OperationalResearchStateMigration.v1",
+  "migration_id": "P1-IRIS-TESSA-STRUCTURAL-EVIDENCE-20261022",
+  "status": "READY_FOR_PLATFORM_EXPERIMENT_IMPORT__MODEL_RELEASE_IDENTITY_RESOLUTION_PENDING",
+  "purpose": "Move the active Structural-Evidence A/B continuation out of long-lived Git-branch authority and into P0 Platform Experiment state without changing any scientific value.",
+  "source_authority": {
+    "legacy_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
+    "legacy_branch_head_sha": "4cd38d828e37407c50034ec7abba26a1b61878ea",
+    "execution_binding_path": "canonical/STRUCTURAL_EVIDENCE_AB_EXECUTION_BINDING_V4.json",
+    "execution_binding_git_blob_sha": "f06fae5e2c18216a36257a8bc9cc2d5916d3caef",
+    "scientific_execution_source_sha": "66b1fb0cccc6145057aa325cc7aac877239b297c",
+    "scientific_execution_source_mutation_allowed": false
+  },
+  "experiment": {
+    "slug": "structural-evidence-a-b-v2",
+    "name": "Structural Evidence A/B V2",
+    "research_question": "Does inference-admissible role-free graphics/presentation evidence improve learned topology structuralization and downstream motion-presentation behavior beyond the same scene and surface/mechanics evidence alone?",
+    "hypothesis": "Persistent drawable structure is constrained by shared-scene geometry, source appearance support, visibility, occlusion and deformation evidence without requiring named semantic taxonomy as structural authority.",
+    "initial_state": "PREREGISTERED",
+    "created_by": "p1-operational-migration",
+    "metadata": {
+      "legacy_experiment_id": "STRUCTURAL-EVIDENCE-A-B-V2",
+      "scope": "FIT8_SHARED_SYSTEM_CONTRACT_QUALIFICATION__NOT_UNSEEN_GENERALIZATION__NOT_PRODUCT_PROMOTION",
+      "legacy_branch": "research/iris-vnext-hybrid-tessa-v2-20261019",
+      "legacy_branch_head_sha": "4cd38d828e37407c50034ec7abba26a1b61878ea",
+      "execution_binding_path": "canonical/STRUCTURAL_EVIDENCE_AB_EXECUTION_BINDING_V4.json",
+      "execution_binding_git_blob_sha": "f06fae5e2c18216a36257a8bc9cc2d5916d3caef",
+      "execution_source_sha": "66b1fb0cccc6145057aa325cc7aac877239b297c",
+      "arm_a": "A_NULL_PRESENTATION",
+      "arm_b": "B_ROLE_FREE_PRESENTATION",
+      "optimizer_steps_per_arm": 2400,
+      "seed_set": [26091991],
+      "final_step_free_running_required": true,
+      "scientific_training_executed_at_migration": false,
+      "optimizer_steps_executed_at_migration": 0,
+      "scientific_ab_court_executed_at_migration": false,
+      "scientific_pass_or_fail_observed_at_migration": false,
+      "next_boundary": "RUN_FAIL_CLOSED_A100_NOTEBOOK__DIRECT_SURFACE_EXACT_CONTAINMENT__THEN_OBSERVE_LOCKED_AB_RESULT"
+    }
+  },
+  "links": {
+    "attempt_ids": [],
+    "campaign_ids": [],
+    "rule": "EMPTY_IS_VALID_FOR_LEGACY_BRANCH_STATE__NEVER_INVENT_OR_SYNTHESIZE_PLATFORM_EXECUTION_IDS"
+  },
+  "legacy_models": [
+    {
+      "family": "IRIS",
+      "legacy_name": "iris-v8",
+      "architecture_note": "Immutable V8 shared-scene authority consumed by the Structural-Evidence A/B program.",
+      "source_code_sha": "5083c9915533ec8ec6530c7d229c635887abfea7",
+      "checkpoint_step": 12000,
+      "checkpoint_sha256": "0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5",
+      "binding_sha256": "735b37f450e947eaad5928f39fca2fb92c61b4642f71044d5b19da5877a53ec2",
+      "platform_checkpoint_artifact_id": null,
+      "platform_engine_release_id": null,
+      "migration_state": "BLOCKED_IDENTITY_RESOLUTION",
+      "rule": "DO_NOT_CREATE_MODEL_RELEASE_UNTIL_EXACT_EXISTING_ARTIFACT_AND_ENGINE_RELEASE_IDENTITIES_ARE_RESOLVED"
+    }
+  ],
+  "scientific_invariants": {
+    "change_thresholds": false,
+    "change_architecture": false,
+    "change_optimizer": false,
+    "change_schedule": false,
+    "execute_optimizer": false,
+    "execute_scientific_courts": false,
+    "claim_pass_or_fail": false,
+    "claim_unseen_generalization": false,
+    "claim_product_promotion": false,
+    "teacher_truth_as_inference_conditioning": false,
+    "named_semantic_taxonomy_as_structural_authority": false,
+    "material_id_as_drawable_owner_truth": false
+  },
+  "branch_retirement": {
+    "may_retire_after": [
+      "P0_OPERATIONAL_SPINE_MERGED_AND_DEPLOYED",
+      "EXPERIMENT_IMPORT_VERIFIED_IN_PLATFORM_STATUS",
+      "ACTIVE_EXECUTION_SOURCE_NEEDED_FOR_NOTEBOOK_AVAILABLE_FROM_IMMUTABLE_SHA",
+      "GENERIC_RESEARCH_SOURCE_REQUIRED_FOR_FUTURE_DEVELOPMENT_PROMOTED_TO_MAIN_BY_REVIEWED_SLICES"
+    ],
+    "wholesale_merge_legacy_branch_to_main": false,
+    "delete_legacy_branch_history": false,
+    "legacy_branch_after_retirement": "FROZEN_PROVENANCE_ONLY"
+  }
+}

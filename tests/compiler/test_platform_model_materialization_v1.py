@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from compiler.realsas_compiler_services.orchestrator import mainline
 from compiler.realsas_compiler_services.platform_worker.model_inputs import (
     behavior_identity_sha256,
     materialize_model_releases,
@@ -143,3 +144,27 @@ def test_empty_model_snapshot_preserves_legacy_manifest_shape(tmp_path, monkeypa
     assert materialize_model_releases(manifest=manifest, models=[], read_object=lambda _: b"") == []
     assert "_platform_model_releases" not in manifest
     assert "_platform_model_snapshot_sha256" not in manifest
+
+
+def _fingerprint(manifest):
+    stage = {"id": "MODEL_STAGE", "depends_on": [], "manifest_keys": [], "policy": {"cacheable": True}}
+    ledger = {
+        "run_id": "MODEL_FINGERPRINT_RUN",
+        "pipeline_plan_sha256": "d" * 64,
+        "stages": [{"id": "MODEL_STAGE", "outputs": []}],
+    }
+    return mainline._fingerprint({}, ledger, manifest, stage, "e" * 64)[0]
+
+
+def test_model_snapshot_changes_engine_stage_fingerprint_without_changing_legacy_fingerprint():
+    legacy = _fingerprint({})
+    assert _fingerprint({"_platform_model_releases": ["non-semantic-local-state"]}) == legacy
+
+    model_a = _fingerprint({"_platform_model_snapshot_sha256": "1" * 64})
+    model_b = _fingerprint({"_platform_model_snapshot_sha256": "2" * 64})
+    assert model_a != legacy
+    assert model_b != legacy
+    assert model_a != model_b
+
+    with pytest.raises(RuntimeError, match="MODEL_SNAPSHOT_SHA_INVALID"):
+        _fingerprint({"_platform_model_snapshot_sha256": "not-a-sha"})

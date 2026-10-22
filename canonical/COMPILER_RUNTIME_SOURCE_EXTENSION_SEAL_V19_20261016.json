@@ -1,0 +1,48 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v19",
+  "sealed_on": "2026-10-16",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V18_20261011.json",
+    "git_blob_sha1": "3042abfbb8c0fbe029527f148aeffd775b7c0500",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "VNEXT_ROLE_FREE_GRAPHICS_NATIVE_CONSUMER_AND_NATIVE_CONTRACT_TEST__APPEND_ONLY_REVIEW_LINE",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "scientific_pass_claimed": false,
+    "native_graphics_behavior_e2e_passed": true,
+    "single_canonical_mesh_consumer_required": true,
+    "runtime_role": "subordinate_deployment_consumer",
+    "subtree_closure": "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+  },
+  "replacements": [],
+  "additions": [
+    {
+      "path": "runtime/realsas_cpp/src/graphics_v1.hpp",
+      "size_bytes": 9333,
+      "git_blob_sha1": "46ccc6eda9f4416b794d0035a5619b262898866a",
+      "reason": "Parse and behaviorally consume role-free Graphics ownership, visibility, explicit precedence and attachment content on the sole canonical M carrier."
+    },
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v2_graphics_reference.cpp",
+      "size_bytes": 10584,
+      "git_blob_sha1": "d3d85d2479fef23030e8ebb3000ce9e7aa6b82e5",
+      "reason": "Append-only Graphics-authorized native reference player; legacy single-M/CAA consumer remains historical regression and is not mutated."
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp",
+      "size_bytes": 1996,
+      "git_blob_sha1": "6d450ad07cebb84215904c477d4f88ea38b1a253",
+      "reason": "Native parser/order/visibility contract witness for the vNext Graphics consumer."
+    }
+  ],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 29,
+    "replacement_count": 0,
+    "addition_count": 3,
+    "resulting_sealed_blob_count": 29,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

@@ -5,7 +5,9 @@ on:
     paths:
       - "tools/audit_legacy_research_drain_v1.py"
       - "tools/audit_legacy_python_dependency_closure_v1.py"
+      - "tools/audit_legacy_python_dependency_closure_v2.py"
       - "canonical/LEGACY_RESEARCH_BRANCH_DRAIN_AUDIT_V2.json"
+      - "canonical/LEGACY_RESEARCH_BRANCH_DRAIN_AUDIT_V3.json"
       - "canonical/LEGACY_RESEARCH_BRANCH_DRAIN_V1.json"
       - ".github/workflows/legacy_research_drain_audit_v1.yml"
   workflow_dispatch:
@@ -39,7 +41,9 @@ jobs:
         run: python3 tools/audit_legacy_research_drain_v1.py --self-test
 
       - name: Dependency resolver self-test
-        run: python3 tools/audit_legacy_python_dependency_closure_v1.py --self-test
+        run: |
+          python3 tools/audit_legacy_python_dependency_closure_v1.py --self-test
+          python3 tools/audit_legacy_python_dependency_closure_v2.py --self-test
 
       - name: Build exact path inventory
         run: |
@@ -48,12 +52,19 @@ jobs:
             --head ba36fe9986fa2dbd9909f2e6caf8f814079d4231 \
             --out legacy-research-drain-path-inventory-v1.json
 
-      - name: Build active Python dependency closure
+      - name: Build frozen A/B versus baseline reusable dependency closure
         run: |
           python3 tools/audit_legacy_python_dependency_closure_v1.py \
             --ref ba36fe9986fa2dbd9909f2e6caf8f814079d4231 \
             --inventory legacy-research-drain-path-inventory-v1.json \
             --out legacy-python-dependency-closure-v1.json
+
+      - name: Build documented vNext reusable architecture dependency closure
+        run: |
+          python3 tools/audit_legacy_python_dependency_closure_v2.py \
+            --ref ba36fe9986fa2dbd9909f2e6caf8f814079d4231 \
+            --inventory legacy-research-drain-path-inventory-v1.json \
+            --out legacy-python-dependency-closure-v2.json
 
       - name: Upload drain audit artifacts
         uses: actions/upload-artifact@v4
@@ -62,4 +73,5 @@ jobs:
           path: |
             legacy-research-drain-path-inventory-v1.json
             legacy-python-dependency-closure-v1.json
+            legacy-python-dependency-closure-v2.json
           if-no-files-found: error

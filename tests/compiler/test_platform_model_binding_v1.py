@@ -5,12 +5,14 @@ from pathlib import Path
 
 import pytest
 
-from compiler.realsas_compiler_services.platform_worker import model_binding
+from compiler.realsas_compiler_services.platform_worker import model_binding, model_inputs
 
 
 FAMILY = "IRIS"
 ARCHITECTURE = "RealSaS.IRIS.VNextEvidenceModel.v3"
 MODEL_RELEASE_ID = "11111111-1111-4111-8111-111111111111"
+ENGINE_RELEASE_ID = "22222222-2222-4222-8222-222222222222"
+ARTIFACT_ID = "33333333-3333-4333-8333-333333333333"
 
 
 def _manifest(root: Path, payload: bytes = b"checkpoint") -> dict:
@@ -19,30 +21,53 @@ def _manifest(root: Path, payload: bytes = b"checkpoint") -> dict:
     path = root / "runs" / run_id / "models" / FAMILY / MODEL_RELEASE_ID / f"{checkpoint_sha}.checkpoint"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(payload)
+
+    identity_shape = {
+        "family": FAMILY,
+        "model_release_id": MODEL_RELEASE_ID,
+        "architecture_id": ARCHITECTURE,
+        "model_engine_release_id": ENGINE_RELEASE_ID,
+        "source_code_sha": "a" * 40,
+        "checkpoint": {
+            "id": ARTIFACT_ID,
+            "content_sha256": checkpoint_sha,
+        },
+    }
+    behavior_sha = model_inputs.behavior_identity_sha256(identity_shape)
+    row = {
+        "schema": "RealSaS.ModelReleaseBehaviorIdentity.v1",
+        "family": FAMILY,
+        "model_release_id": MODEL_RELEASE_ID,
+        "architecture_id": ARCHITECTURE,
+        "model_engine_release_id": ENGINE_RELEASE_ID,
+        "source_code_sha": "a" * 40,
+        "checkpoint_artifact_id": ARTIFACT_ID,
+        "checkpoint_content_sha256": checkpoint_sha,
+        "behavior_identity_sha256": behavior_sha,
+        "checkpoint": {
+            "artifact_type": "RealSaS.ModelCheckpoint",
+            "schema_version": "v1",
+            "semantic_sha256": "d" * 64,
+            "content_sha256": checkpoint_sha,
+            "size_bytes": len(payload),
+            "path": str(path.resolve()),
+        },
+    }
+    snapshot_sha = model_binding.mainline.content_sha256(
+        {
+            "schema": "RealSaS.ModelReleaseSnapshot.v1",
+            "models": [
+                {
+                    "family": FAMILY,
+                    "behavior_identity_sha256": behavior_sha,
+                }
+            ],
+        }
+    )
     return {
         "run_id": run_id,
-        "_platform_model_snapshot_sha256": "c" * 64,
-        "_platform_model_releases": [
-            {
-                "schema": "RealSaS.ModelReleaseBehaviorIdentity.v1",
-                "family": FAMILY,
-                "model_release_id": MODEL_RELEASE_ID,
-                "architecture_id": ARCHITECTURE,
-                "model_engine_release_id": "22222222-2222-4222-8222-222222222222",
-                "source_code_sha": "a" * 40,
-                "checkpoint_artifact_id": "33333333-3333-4333-8333-333333333333",
-                "checkpoint_content_sha256": checkpoint_sha,
-                "behavior_identity_sha256": "b" * 64,
-                "checkpoint": {
-                    "artifact_type": "RealSaS.ModelCheckpoint",
-                    "schema_version": "v1",
-                    "semantic_sha256": "d" * 64,
-                    "content_sha256": checkpoint_sha,
-                    "size_bytes": len(payload),
-                    "path": str(path.resolve()),
-                },
-            }
-        ],
+        "_platform_model_snapshot_sha256": snapshot_sha,
+        "_platform_model_releases": [row],
     }
 
 
@@ -57,7 +82,7 @@ def test_resolves_only_exact_materialized_attempt_model(monkeypatch, tmp_path):
     assert ref.family == FAMILY
     assert ref.architecture_id == ARCHITECTURE
     assert ref.model_release_id == MODEL_RELEASE_ID
-    assert ref.behavior_identity_sha256 == "b" * 64
+    assert ref.behavior_identity_sha256 == manifest["_platform_model_releases"][0]["behavior_identity_sha256"]
     assert ref.checkpoint_path.is_file()
     assert ref.checkpoint_content_sha256 == hashlib.sha256(b"checkpoint").hexdigest()
 
@@ -80,6 +105,28 @@ def test_duplicate_family_is_ambiguous_even_if_rows_are_otherwise_identical(monk
     manifest = _manifest(root)
     manifest["_platform_model_releases"].append(dict(manifest["_platform_model_releases"][0]))
     with pytest.raises(RuntimeError, match="ENGINE_MODEL_BINDING_FAMILY_AMBIGUOUS"):
+        model_binding.require_materialized_model_release(
+            manifest, family=FAMILY, architecture_id=ARCHITECTURE
+        )
+
+
+def test_behavior_identity_is_rederived_not_trusted(monkeypatch, tmp_path):
+    root = tmp_path / "authority"
+    monkeypatch.setattr(model_binding.mainline, "authority_root", lambda: root)
+    manifest = _manifest(root)
+    manifest["_platform_model_releases"][0]["source_code_sha"] = "e" * 40
+    with pytest.raises(RuntimeError, match="ENGINE_MODEL_BINDING_BEHAVIOR_IDENTITY_DRIFT"):
+        model_binding.require_materialized_model_release(
+            manifest, family=FAMILY, architecture_id=ARCHITECTURE
+        )
+
+
+def test_whole_model_snapshot_hash_is_rederived(monkeypatch, tmp_path):
+    root = tmp_path / "authority"
+    monkeypatch.setattr(model_binding.mainline, "authority_root", lambda: root)
+    manifest = _manifest(root)
+    manifest["_platform_model_snapshot_sha256"] = "f" * 64
+    with pytest.raises(RuntimeError, match="ENGINE_MODEL_BINDING_SNAPSHOT_DRIFT"):
         model_binding.require_materialized_model_release(
             manifest, family=FAMILY, architecture_id=ARCHITECTURE
         )

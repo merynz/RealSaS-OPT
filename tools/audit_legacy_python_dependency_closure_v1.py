@@ -76,13 +76,10 @@ def _show(repo: Path, ref: str, path: str) -> str:
 def _relative_target(current_module: str, current_path: str, level: int, module: str | None) -> str:
     package = current_module if current_path.endswith("/__init__.py") else current_module.rpartition(".")[0]
     parts = package.split(".") if package else []
-    if level <= 0:
-        base = []
-    else:
-        up = level - 1
-        if up > len(parts):
-            return ""
-        base = parts[: len(parts) - up]
+    up = max(level - 1, 0)
+    if up > len(parts):
+        return ""
+    base = parts[: len(parts) - up]
     if module:
         base.extend(module.split("."))
     return ".".join(part for part in base if part)
@@ -115,15 +112,11 @@ def _resolve_imports(
                 if not add_module(alias.name):
                     unresolved.add(alias.name)
         elif isinstance(node, ast.ImportFrom):
-            if node.level:
-                base = _relative_target(
-                    current_module,
-                    current_path,
-                    node.level,
-                    node.module,
-                )
-            else:
-                base = node.module or ""
+            base = (
+                _relative_target(current_module, current_path, node.level, node.module)
+                if node.level
+                else (node.module or "")
+            )
             base_is_internal = add_module(base)
             matched_alias = False
             for alias in node.names:
@@ -138,16 +131,31 @@ def _resolve_imports(
     return internal, unresolved
 
 
-def _graph(repo: Path, ref: str) -> tuple[dict[str, set[str]], dict[str, set[str]]]:
-    paths = _tree_paths(repo, ref)
-    module_to_path, path_to_module = _path_index(paths)
+def _reachable_closure(
+    repo: Path,
+    ref: str,
+    module_to_path: dict[str, str],
+    path_to_module: dict[str, str],
+    roots: Iterable[str],
+) -> tuple[set[str], dict[str, set[str]], dict[str, set[str]]]:
+    roots = tuple(roots)
+    missing_roots = [root for root in roots if root not in path_to_module]
+    if missing_roots:
+        raise RuntimeError("DEPENDENCY_AUDIT_ROOT_MISSING:" + ",".join(missing_roots))
+
+    seen: set[str] = set()
     graph: dict[str, set[str]] = {}
     unresolved: dict[str, set[str]] = {}
-    for path in paths:
+    queue = deque(roots)
+    while queue:
+        path = queue.popleft()
+        if path in seen:
+            continue
+        seen.add(path)
         try:
             tree = ast.parse(_show(repo, ref, path), filename=path)
         except SyntaxError as exc:
-            raise RuntimeError(f"syntax error while auditing {path}: {exc}") from exc
+            raise RuntimeError(f"syntax error in active dependency closure {path}: {exc}") from exc
         deps, missing = _resolve_imports(
             tree=tree,
             current_module=path_to_module[path],
@@ -157,24 +165,10 @@ def _graph(repo: Path, ref: str) -> tuple[dict[str, set[str]], dict[str, set[str
         graph[path] = deps
         if missing:
             unresolved[path] = missing
-    return graph, unresolved
-
-
-def _closure(graph: dict[str, set[str]], roots: Iterable[str]) -> set[str]:
-    missing_roots = [root for root in roots if root not in graph]
-    if missing_roots:
-        raise RuntimeError("DEPENDENCY_AUDIT_ROOT_MISSING:" + ",".join(missing_roots))
-    seen: set[str] = set()
-    queue = deque(roots)
-    while queue:
-        path = queue.popleft()
-        if path in seen:
-            continue
-        seen.add(path)
-        for dep in sorted(graph.get(path, ())):
+        for dep in sorted(deps):
             if dep not in seen:
                 queue.append(dep)
-    return seen
+    return seen, graph, unresolved
 
 
 def _load_inventory(path: Path) -> dict:
@@ -187,9 +181,14 @@ def _load_inventory(path: Path) -> dict:
 
 
 def build(repo: Path, ref: str, inventory: dict) -> dict[str, object]:
-    graph, unresolved = _graph(repo, ref)
-    reusable = _closure(graph, REUSABLE_ROOTS)
-    experiment = _closure(graph, EXPERIMENT_ROOTS)
+    paths = _tree_paths(repo, ref)
+    module_to_path, path_to_module = _path_index(paths)
+    reusable, reusable_graph, reusable_unresolved = _reachable_closure(
+        repo, ref, module_to_path, path_to_module, REUSABLE_ROOTS
+    )
+    experiment, experiment_graph, experiment_unresolved = _reachable_closure(
+        repo, ref, module_to_path, path_to_module, EXPERIMENT_ROOTS
+    )
     experiment_only = experiment - reusable
 
     changed = {str(row["path"]): row for row in inventory["entries"]}
@@ -203,14 +202,15 @@ def build(repo: Path, ref: str, inventory: dict) -> dict[str, object]:
     h_experiment_only = sorted(h_paths & experiment_only)
     h_unreached = sorted(h_paths - reusable - experiment_only)
 
-    changed_reusable = sorted(set(changed) & reusable)
-    changed_experiment_only = sorted(set(changed) & experiment_only)
+    unresolved: dict[str, set[str]] = {}
+    for source in (reusable_unresolved, experiment_unresolved):
+        for path, names in source.items():
+            unresolved.setdefault(path, set()).update(names)
 
-    internal_unresolved_imports = {
-        path: sorted(names)
-        for path, names in unresolved.items()
-        if path in reusable or path in experiment
-    }
+    active_graph: dict[str, set[str]] = {}
+    for source in (reusable_graph, experiment_graph):
+        for path, deps in source.items():
+            active_graph.setdefault(path, set()).update(deps)
 
     return {
         "schema": SCHEMA,
@@ -221,8 +221,8 @@ def build(repo: Path, ref: str, inventory: dict) -> dict[str, object]:
         "reusable_closure_path_count": len(reusable),
         "experiment_closure_path_count": len(experiment),
         "experiment_only_path_count": len(experiment_only),
-        "changed_paths_in_reusable_closure": changed_reusable,
-        "changed_paths_in_experiment_only_closure": changed_experiment_only,
+        "changed_paths_in_reusable_closure": sorted(set(changed) & reusable),
+        "changed_paths_in_experiment_only_closure": sorted(set(changed) & experiment_only),
         "h_reachable_from_reusable_roots": h_reusable,
         "h_reachable_only_from_experiment_roots": h_experiment_only,
         "h_not_reached_by_active_python_roots": h_unreached,
@@ -232,8 +232,13 @@ def build(repo: Path, ref: str, inventory: dict) -> dict[str, object]:
             "unreached": len(h_unreached),
             "total": len(h_paths),
         },
-        "unresolved_import_names_in_active_closures": internal_unresolved_imports,
-        "note": "Unresolved import names include external/stdlib packages and are telemetry; classification decisions apply only to repository paths resolved by the graph.",
+        "active_internal_import_edges": {
+            path: sorted(deps) for path, deps in sorted(active_graph.items())
+        },
+        "unresolved_import_names_in_active_closures": {
+            path: sorted(names) for path, names in sorted(unresolved.items())
+        },
+        "note": "Only Python files reachable from the declared active roots are parsed. Historical or unrelated syntax-broken files outside those closures cannot block this audit. Unresolved names are external/stdlib telemetry unless separately proven repository-local.",
     }
 
 

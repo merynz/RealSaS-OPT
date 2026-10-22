@@ -1,0 +1,1 @@
+Implementation reuses the sealed teacher-census forward path and frozen checkpoint loader; only the presentation-memory sample is counterfactually varied.

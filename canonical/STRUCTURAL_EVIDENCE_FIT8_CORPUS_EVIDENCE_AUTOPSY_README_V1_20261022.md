@@ -1,0 +1,1 @@
+This directory-level experiment record is governed by `STRUCTURAL_EVIDENCE_FIT8_CORPUS_EVIDENCE_AUTOPSY_V1_20261022.json`. See the rationale and execution binding files with the same experiment stem. The experiment is post-hoc, zero-training, and diagnostic only.

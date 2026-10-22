@@ -1,0 +1,56 @@
+{
+  "schema": "RealSaS.KnightOracleDrawableCourtPrereg.v1",
+  "date": "2026-10-23",
+  "status": "PREREGISTERED_BEFORE_EXECUTION",
+  "research_only": true,
+  "product_authority": false,
+  "question": "Holding the accepted Knight mechanical carrier, skeleton, skin, motion, cameras and CAA appearance fixed, does replacing monolithic mechanical-surface presentation with explicit complete drawable layers remove the dominant remaining presentation failures?",
+  "source_run_id": "SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671",
+  "held_fixed": [
+    "Stage18 canonical mechanical mesh candidate",
+    "Stage28 qualified skeleton",
+    "Stage32 qualified skin / weights",
+    "Stage05 qualified cameras",
+    "Stage23 immutable mechanical CAA appearance",
+    "demo_idle_v1 motion",
+    "demo_run_v1 motion",
+    "demo_slash_v1 motion",
+    "four sample times per clip",
+    "views 0 and 2"
+  ],
+  "intervention": {
+    "partition_source": "PRIVILEGED_TEACHER_MECHANICAL_JOINT_MAPPING__NOT_INFERENCE_ADMISSIBLE",
+    "partition_rule": "Aggregate target skin weights through the sealed Knight target-to-source skeleton mapping; assign each mechanical face to the source joint with maximum mean aggregated weight; if more than 30 non-empty groups exist, merge the smallest groups upward through the source-joint parent tree until at most 30 remain.",
+    "complete_drawable_rule": "Render each face group independently with the same posed M/G/W and same immutable CAA texture, thereby exposing drawable pixels that would otherwise be hidden by other groups.",
+    "static_order_rule": "Derive one back-to-front drawable order per view from rest-pose mechanical depth pair evidence and keep it fixed for every animation frame.",
+    "dynamic_oracle_order_rule": "Derive back-to-front drawable order per frame from privileged posed mechanical depth pair evidence.",
+    "variants": [
+      "BASELINE_MECHANICAL_CAA",
+      "STATIC_COMPLETE_DRAWABLE_STACK",
+      "DYNAMIC_ORDER_COMPLETE_DRAWABLE_STACK"
+    ]
+  },
+  "metrics": [
+    "foreground_alpha_pixels",
+    "enclosed_transparent_hole_pixels",
+    "enclosed_transparent_hole_component_count",
+    "foreground_connected_component_count",
+    "pixel_difference_vs_baseline",
+    "drawable_count",
+    "drawable_face_counts",
+    "per-frame drawable order"
+  ],
+  "interpretation": {
+    "positive": "A visible and measurable reduction of the known Knight presentation defects under either drawable variant supports missing drawable representation / overlap arbitration as a causal presentation bottleneck.",
+    "static_only_or_static_matches_dynamic": "A fixed drawable stack is sufficient for the tested frames.",
+    "dynamic_beats_static": "Pose-dependent draw-order arbitration is additionally required.",
+    "negative": "This mechanics-derived drawable oracle is insufficient. This does NOT falsify artist-authored drawable partitioning because the partition is mechanical rather than artist-authored; it instead points to drawable partition quality, deformation-domain binding, appearance completion, or carrier geometry as remaining causes."
+  },
+  "forbidden_claims": [
+    "generic drawable recovery solved",
+    "IRIS/TESSA qualified",
+    "artist-intent layer identity recovered",
+    "product presentation qualified",
+    "unseen generalization demonstrated"
+  ]
+}

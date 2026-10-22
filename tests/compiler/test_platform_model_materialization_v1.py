@@ -168,3 +168,20 @@ def test_model_snapshot_changes_engine_stage_fingerprint_without_changing_legacy
 
     with pytest.raises(RuntimeError, match="MODEL_SNAPSHOT_SHA_INVALID"):
         _fingerprint({"_platform_model_snapshot_sha256": "not-a-sha"})
+
+
+def test_worker_materializes_model_snapshot_before_stage_hydration():
+    worker = (
+        Path(__file__).resolve().parents[2]
+        / "compiler"
+        / "realsas_compiler_services"
+        / "platform_worker"
+        / "worker.py"
+    ).read_text(encoding="utf-8")
+    import_index = worker.index(
+        "from compiler.realsas_compiler_services.platform_worker.model_inputs import materialize_model_releases"
+    )
+    call_index = worker.index("    materialize_model_releases(\n")
+    hydrate_index = worker.index("    hydrate_stage_inputs(", call_index)
+    run_index = worker.index("    mainline._run_stage(", hydrate_index)
+    assert import_index < call_index < hydrate_index < run_index

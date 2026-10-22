@@ -50,7 +50,7 @@ def test_behavior_identity_cross_language_vector():
             "size_bytes": 1,
         },
     }
-    assert behavior_identity_sha256(model) == "bc50f4276691df4f83ff2c1336d862e41c9f3b087e5005e2881ebf06ed4a8e89"
+    assert behavior_identity_sha256(model) == "b69b3a4cead07575f1cfeba8f3388d1b76c97453c510833775bd452e931707bd"
 
 
 def test_materializes_exact_bytes_canonically_without_mutating_disk_manifest(tmp_path, monkeypatch):

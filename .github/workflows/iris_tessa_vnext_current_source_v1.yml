@@ -1,0 +1,90 @@
+name: iris-tessa-vnext-current-source-v1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'models/iris/vnext/**'
+      - 'models/tessa/v2/**'
+      - 'models/tessa/v3/**'
+      - 'tests/iris/test_boundary_causality_v1.py'
+      - 'tests/iris/test_evidence_model_v3.py'
+      - 'tests/iris/test_graphics_truth_v2.py'
+      - 'tests/iris/test_graphics_truth_v3.py'
+      - 'tests/iris/test_presentation_evidence_v1.py'
+      - 'tests/iris/test_quality_policy_v1.py'
+      - 'tests/iris/test_relation_head_v3.py'
+      - 'tests/iris/test_relation_support_v2.py'
+      - 'tests/iris/test_relation_truth_v3_adapter_v1.py'
+      - 'tests/iris/test_structure_bridge_v3.py'
+      - 'tests/iris/test_structure_bridge_v4.py'
+      - 'tests/iris/test_tessa_decoded_court_v2.py'
+      - 'tests/iris/test_tessa_generation_v2.py'
+      - 'tests/iris/test_tessa_structuralizer_v2.py'
+      - 'tests/iris/test_tessa_structuralizer_v3.py'
+      - 'tests/iris/test_tessa_windowed_incremental_generation_v2.py'
+      - '.github/workflows/iris_tessa_vnext_current_source_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: iris-tessa-vnext-current-source-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  current-source-contract:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
+      - name: Install pinned current-source test dependencies
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Compile recovered current source
+        run: python -m compileall -q models/iris/vnext models/tessa/v2 models/tessa/v3
+      - name: Current IRIS-TESSA reusable contracts
+        run: |
+          python -m pytest -q \
+            tests/iris/test_boundary_causality_v1.py \
+            tests/iris/test_evidence_model_v3.py \
+            tests/iris/test_graphics_truth_v2.py \
+            tests/iris/test_graphics_truth_v3.py \
+            tests/iris/test_presentation_evidence_v1.py \
+            tests/iris/test_quality_policy_v1.py \
+            tests/iris/test_relation_head_v3.py \
+            tests/iris/test_relation_support_v2.py \
+            tests/iris/test_relation_truth_v3_adapter_v1.py \
+            tests/iris/test_structure_bridge_v3.py \
+            tests/iris/test_structure_bridge_v4.py \
+            tests/iris/test_tessa_decoded_court_v2.py \
+            tests/iris/test_tessa_generation_v2.py \
+            tests/iris/test_tessa_structuralizer_v2.py \
+            tests/iris/test_tessa_structuralizer_v3.py \
+            tests/iris/test_tessa_windowed_incremental_generation_v2.py
+      - name: Recovery authority summary
+        run: |
+          echo 'IRIS_TESSA_VNEXT_CURRENT_SOURCE_PASS'
+          echo 'source_base=canonical_main'
+          echo 'legacy_branch_execution_authority=false'
+          echo 'compiler_canonical_m_authority_unchanged=true'
+          echo 'product_promotion=false'

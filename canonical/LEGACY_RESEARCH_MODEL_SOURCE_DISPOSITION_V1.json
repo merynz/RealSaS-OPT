@@ -1,0 +1,114 @@
+{
+  "candidate_policy": {
+    "C_HISTORICAL_SCIENTIFIC_PROVENANCE": "keep in immutable legacy/archive provenance; do not recover as current executable source",
+    "D_SUPERSEDED_IMPLEMENTATION": "do not recover; replacement/current source must be explicit",
+    "G_PRODUCT_RELEVANT_CANDIDATE": "preserve as explicit candidate/provenance only; requires a future Experiment/Attempt plus consumer/qualification closure before authority"
+  },
+  "canonical_main_parent_sha": "fab23fa977534d86151fa8896f78d573c3d209ac",
+  "counts": {
+    "C_HISTORICAL_SCIENTIFIC_PROVENANCE": 16,
+    "D_SUPERSEDED_IMPLEMENTATION": 5,
+    "G_PRODUCT_RELEVANT_CANDIDATE": 2
+  },
+  "current_recovery": {
+    "branch": "recovery/iris-tessa-current-source-20261022",
+    "compiler_canonical_m_authority_changed": false,
+    "exact_legacy_generic_tests": [
+      {"blob_sha":"0a73bf4dbe7ebb63d6947a4fd72a184e9de05739","path":"tests/iris/test_boundary_causality_v1.py"},
+      {"blob_sha":"88ad576f506e44004553c7ac19acce1e56d1133f","path":"tests/iris/test_evidence_model_v3.py"},
+      {"blob_sha":"05604fd8c605946dce776b85423367ee250d4fc9","path":"tests/iris/test_graphics_truth_v3.py"},
+      {"blob_sha":"90d4869f722ff255a363d038bd15cfdb3530bbc1","path":"tests/iris/test_presentation_evidence_v1.py"},
+      {"blob_sha":"c8b2ab579063652a9d7eb6268d182a0cd62ab97f","path":"tests/iris/test_relation_head_v3.py"},
+      {"blob_sha":"0529fbcf2b9dc7b3a67886a8142d53aa8f80bc0b","path":"tests/iris/test_relation_support_v2.py"},
+      {"blob_sha":"e0cf45f7c0fd76841d65da9950dfb01eb46a494c","path":"tests/iris/test_relation_truth_v3_adapter_v1.py"},
+      {"blob_sha":"f991ee3751611a0e38bce13668b5be74ae8a536d","path":"tests/iris/test_structure_bridge_v3.py"},
+      {"blob_sha":"0a88c60539fe118860c2dd8b1998e3c7fc1026aa","path":"tests/iris/test_structure_bridge_v4.py"},
+      {"blob_sha":"97d31c92689fefaeaa6a66be0dd17ee35c36f86c","path":"tests/iris/test_tessa_decoded_court_v2.py"},
+      {"blob_sha":"0b343427b150d402a1626042b3e854c1aaf56f52","path":"tests/iris/test_tessa_generation_v2.py"},
+      {"blob_sha":"ae620f8db2b337f9f3debbe5359794bee11181e4","path":"tests/iris/test_tessa_structuralizer_v2.py"},
+      {"blob_sha":"f6a0a8f248a17fedf8d1a676fc7d74754cf5c362","path":"tests/iris/test_tessa_structuralizer_v3.py"}
+    ],
+    "exact_legacy_source_blob_paths": [
+      {"blob_sha":"44dde89a8cd6bf10a49eba6f58d4ed364ef26c65","path":"models/iris/vnext/boundary_causality_v1.py"},
+      {"blob_sha":"a422b901ad4c43b589bf0ce7f2746b3eebfe9306","path":"models/iris/vnext/contracts_v1.py"},
+      {"blob_sha":"f55f5327ffd256f8db04caa8aa5e4ac7b4f715ae","path":"models/iris/vnext/evidence_heads_v3.py"},
+      {"blob_sha":"e18b2e9c5dc9955d219d590bc5277d17f1a49e18","path":"models/iris/vnext/flexicubes_v1.py"},
+      {"blob_sha":"909d40886277de39d5ceaca63123ab0f23d4dfe6","path":"models/iris/vnext/graphics_truth_v2.py"},
+      {"blob_sha":"854336e1362fa4faa368f32a5e66a98b2e54afad","path":"models/iris/vnext/graphics_truth_v3.py"},
+      {"blob_sha":"22b27cdf794764a196a02fdcd2315157872db76f","path":"models/iris/vnext/heads_v3.py"},
+      {"blob_sha":"2ae0ef4f3f3bd775e685b6ef858667861bb186d7","path":"models/iris/vnext/model_v3.py"},
+      {"blob_sha":"d27628e2746fbfafcb881b49ebc19a5931e1f3dd","path":"models/iris/vnext/presentation_evidence_v1.py"},
+      {"blob_sha":"3693a9a3ef666db43f5f0390c89225150884cab6","path":"models/iris/vnext/quality_policy_v1.py"},
+      {"blob_sha":"45a7f5da99dbed2cbfe9cf63f3ee66a25ca089f5","path":"models/iris/vnext/relation_support_v2.py"},
+      {"blob_sha":"c4e8b4b3f5422368f33dc4ec1428a8c288a9bfab","path":"models/iris/vnext/relation_truth_v3_adapter_v1.py"},
+      {"blob_sha":"f7b2b9bf0cc1b0d7386eb034636d0305849a9561","path":"models/iris/vnext/scene_core_v1.py"},
+      {"blob_sha":"79976f72710f05af9a235cf0ead00b165387c310","path":"models/iris/vnext/structure_v3.py"},
+      {"blob_sha":"2cf2e55fe752515247192d25bdbc9f513f9be613","path":"models/iris/vnext/structure_v4.py"},
+      {"blob_sha":"4170e3ce3fd319640e6a20836aadd3905462dde8","path":"models/iris/vnext/training_v3.py"},
+      {"blob_sha":"518520c524ac218defd41d96e3a2870d064f7613","path":"models/tessa/v2/config_v2.py"},
+      {"blob_sha":"a27a1a24382ba7998470717b1e5534c9e4803777","path":"models/tessa/v2/court_v2.py"},
+      {"blob_sha":"e55bd9f53391bae96d78c380627f801b96ca333f","path":"models/tessa/v2/generation_v2.py"},
+      {"blob_sha":"5966ec8e8f532869fffa825f9e5421d3716ac0dc","path":"models/tessa/v2/model_v2.py"},
+      {"blob_sha":"9ff7649e822d8e80450b39d1aa2b77970c87bbf9","path":"models/tessa/v2/objective_v2.py"},
+      {"blob_sha":"5041cdf423cd21a204de851845fbf32b90ab017f","path":"models/tessa/v2/windowed_incremental_generation_v2.py"},
+      {"blob_sha":"7b893559f7071e9d03055abc1bfbda4be066c257","path":"models/tessa/v3/__init__.py"},
+      {"blob_sha":"0e46724c819acdad72f224bc90503c8c6eb1a2f9","path":"models/tessa/v3/config_v3.py"},
+      {"blob_sha":"c622237f62b352536d9902bf89bf15fe535e7def","path":"models/tessa/v3/model_v3.py"}
+    ],
+    "excluded_false_positive_tests": [
+      {"legacy_blob_sha":"bab52fe981bfcfea624aa67dc2e208911c6a348a","path":"tests/iris/test_tessa_incremental_generation_v2.py","reason":"imports historical global_attention_v2/model_global_v2 and does not test current windowed_incremental_generation_v2"},
+      {"legacy_blob_sha":"ce0f3a3e0ae716d6fda604522b759ee0b338fc30","path":"tests/iris/test_graphics_truth_v2.py","reason":"mixes the current Graphics Truth V2 schema with historical training_v2 relation-loss behavior; recovery replaces it with a truth-only current contract test"},
+      {"legacy_blob_sha":"337610583e87ae98bfb0db1812de55f94fdcf5dc","path":"tests/iris/test_quality_policy_v1.py","reason":"imports cohort_v8 training execution authority; recovery replaces it with a standalone current quality-policy contract test"}
+    ],
+    "excluded_package_pollution": [
+      "models/tessa/v2/ab_court_v2.py",
+      "models/tessa/v2/global_attention_v2.py",
+      "models/tessa/v2/model_global_v2.py"
+    ],
+    "fresh_package_boundaries": [
+      {"blob_sha":"b30ef8b4df5449d21fc9cf9275e37580807fedbc","path":"models/iris/vnext/__init__.py"},
+      {"blob_sha":"94c862f9ae717d559a4e77601a01b124c24f1524","path":"models/tessa/v2/__init__.py"}
+    ],
+    "fresh_tests": [
+      {"blob_sha":"81e12cf5f113796cb17449b413b8d1e68cdbfefe","path":"tests/iris/test_graphics_truth_v2.py"},
+      {"blob_sha":"a3801da02fbaa4013f23cbed089896f9207d733f","path":"tests/iris/test_quality_policy_v1.py"},
+      {"blob_sha":"16db1ef92a2f72756472319ad6e39de4e02f68a0","path":"tests/iris/test_tessa_windowed_incremental_generation_v2.py"}
+    ],
+    "product_promotion": false,
+    "required_real_dependency": "models/tessa/v2/court_v2.py"
+  },
+  "generated_date": "2026-10-22",
+  "legacy_provenance_ref": "archive/structural-evidence-ab-frozen-ba36fe99",
+  "legacy_provenance_sha": "ba36fe9986fa2dbd9909f2e6caf8f814079d4231",
+  "model_source_dispositions": [
+    {"disposition":"D_SUPERSEDED_IMPLEMENTATION","legacy_blob_sha":"40f866094dbf294b27037a0ca55db9f7edf5b442","path":"models/iris/vnext/__init__.py","rationale":"stale eager package surface exports IRISVNextV1 and teacher truth; recovery uses a no-eager-import package boundary"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"6a723ce4c18c0f816563571d6780607f01d3df90","path":"models/iris/vnext/cohort_v2.py","rationale":"training/execution cohort implementation; not reachable from documented current reusable roots"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"9106fd655fc3a59f5a256d672218f2e8c4a4c061","path":"models/iris/vnext/cohort_v3.py","rationale":"training/execution cohort implementation; not reachable from documented current reusable roots"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"05eab5d36d207bfe6108c7ed2a0e35067436ad02","path":"models/iris/vnext/cohort_v4.py","rationale":"training/execution cohort implementation; not reachable from documented current reusable roots"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"34a10cd7ad51d5cf2140a76d92dfae4f4becefac","path":"models/iris/vnext/cohort_v5.py","rationale":"training/execution cohort implementation; not reachable from documented current reusable roots"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"51724302b73989611014330edbe2f63b1b643ccd","path":"models/iris/vnext/cohort_v6.py","rationale":"training/execution cohort implementation; not reachable from documented current reusable roots"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"ee3bfb6e21b0ee729d41d3b6def044fb31d73861","path":"models/iris/vnext/cohort_v7.py","rationale":"training/execution cohort implementation; not reachable from documented current reusable roots"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"1a0e49f208d50ad7b02a9c40c67e52ccb738ed48","path":"models/iris/vnext/cohort_v8.py","rationale":"frozen/training-era cohort implementation; current A/B may retain it as provenance but it is not current reusable source authority"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"4c3bcf12047d3accc3e4d6041ce70af3e239e0ce","path":"models/iris/vnext/cohort_v9_balanced_fp32.py","rationale":"A100 training execution authority with supervision policy; not inference/current-source authority"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"ad4fc692320244779204986e8b72ab7bf2eb6056","path":"models/iris/vnext/cohort_v9_fp32.py","rationale":"FP32 training execution authority; not inference/current-source authority"},
+    {"disposition":"G_PRODUCT_RELEVANT_CANDIDATE","legacy_blob_sha":"fb1707158ba5ab8e4fd7869b1e608fac273df7f2","path":"models/iris/vnext/explicit_geometry_carrier_v1.py","rationale":"recent explicit high-resolution geometry carrier candidate; not reached by current roots and has no current product consumer/qualification"},
+    {"disposition":"D_SUPERSEDED_IMPLEMENTATION","legacy_blob_sha":"f8af8439f4169a47e83c425da410c8292f724997","path":"models/iris/vnext/graphics_truth_v1.py","rationale":"superseded by validity-aware Graphics Truth V2/V3; V2 explicitly identifies V1-era supervision as historical"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"fbefaf480bffe6bf532baa700c29441c6511266a","path":"models/iris/vnext/h_rep_probe_v1.py","rationale":"representation diagnostic explicitly product_authority=false and compiler_qualified=false"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"62a995fb270a84de377e067227c0285bf371d275","path":"models/iris/vnext/metric_geometry_v1.py","rationale":"training-only metric-geometry evidence helper; not reached by current reusable roots"},
+    {"disposition":"D_SUPERSEDED_IMPLEMENTATION","legacy_blob_sha":"b1f9e5ec7e204fa2dbd1b07604cb5e4cf5c07745","path":"models/iris/vnext/optimization_v2.py","rationale":"optimizer policy is coupled to IRISVNextV1/topology structure grouping and predates topology-factored model_v3"},
+    {"disposition":"G_PRODUCT_RELEVANT_CANDIDATE","legacy_blob_sha":"f07540d637ffed38622842f78763887b673fd1f1","path":"models/iris/vnext/presentation_observations_v1.py","rationale":"teacher-free source-observed presentation evidence added for model-surface anchors; semantically relevant to current hypothesis but not yet consumed by current roots"},
+    {"disposition":"D_SUPERSEDED_IMPLEMENTATION","legacy_blob_sha":"5a42abf94fa51d1cdfb2747af7487d839b56e89d","path":"models/iris/vnext/sparse_surface_v4.py","rationale":"historical direct-surface bridge with no compiler qualification/scientific PASS; current recovery uses documented V3 evidence/FlexiCubes path instead"},
+    {"disposition":"D_SUPERSEDED_IMPLEMENTATION","legacy_blob_sha":"a2faf90936db84fcdeac4a3359211a16f7481103","path":"models/iris/vnext/stack_v3.py","rationale":"older TESSA-V2 composition path; current structuralization root is V4/TESSA-V3"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"96b0c3d870338bec4251275543521037992047de","path":"models/iris/vnext/surface_rescue_raster_v1.py","rationale":"surface-rescue experiment/materialization helper; not reached by current reusable roots"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"506b5113836a641b5499dbaebcedff0ba580e8e3","path":"models/iris/vnext/surface_rescue_training_v1.py","rationale":"surface-rescue training experiment; not reached by current reusable roots"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"55af4af6736736e2a9fe21ff5688947705069e5b","path":"models/iris/vnext/surface_rescue_v1.py","rationale":"surface-rescue experiment implementation; not reached by current reusable roots"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"bc11ee7187fa47b88ed25527ce943426fc1c5ad8","path":"models/iris/vnext/teacher_truth_v1.py","rationale":"explicit training-only mechanical truth builder; not inference/product authority"},
+    {"disposition":"C_HISTORICAL_SCIENTIFIC_PROVENANCE","legacy_blob_sha":"f7e29ac1bc50e3970efa12458a1d5fffbb8a3b4e","path":"models/iris/vnext/topology_teacher_v1.py","rationale":"explicit training-only authored topology canonicalization; not inference/product authority"}
+  ],
+  "schema": "RealSaS.LegacyResearchModelSourceDisposition.v1",
+  "scope": {
+    "input": "23 model-source paths previously classified H_UNRESOLVED_DEPENDENCY and not reachable from active reusable/A-B Python roots",
+    "model_source_path_count": 23,
+    "non_model_unreached_h_paths_remain_for_separate_tool_test_history_disposition": 147
+  }
+}

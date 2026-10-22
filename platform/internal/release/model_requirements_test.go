@@ -12,7 +12,7 @@ func modelRequirementGraph(t *testing.T) *stagegraph.Graph {
 	t.Helper()
 	raw, err := json.Marshal(stagegraph.Snapshot{
 		StageCount: 1,
-		Stages: []stagegraph.Stage{{Ordinal: 1, ID: "PRODUCT", Adapter: "product.py"}},
+		Stages:     []stagegraph.Stage{{Ordinal: 1, ID: "PRODUCT", Adapter: "product.py"}},
 	})
 	if err != nil {
 		t.Fatal(err)

@@ -1,0 +1,123 @@
+{
+  "schema": "RealSaS.LegacyResearchBranchDrainAudit.v4",
+  "status": "PATH_INVENTORY_CLOSED__ARCHITECTURE_ROOT_AUDIT_CLOSED__RECOVERY_PENDING",
+  "created_at": "2026-10-22T20:31:00+03:00",
+  "supersedes": "canonical/LEGACY_RESEARCH_BRANCH_DRAIN_AUDIT_V3.json",
+  "base": {
+    "canonical_main_sha": "8942de7aa73d2fc787cc0df3278ef4dfe7785987",
+    "legacy_head_sha": "ba36fe9986fa2dbd9909f2e6caf8f814079d4231",
+    "merge_base_sha": "1e9ee2fb6b9d2221c5489a562181f4a40f364a39",
+    "ahead_by": 658,
+    "behind_by": 68,
+    "changed_path_count": 361
+  },
+  "machine_evidence": {
+    "workflow_run_id": 39822825768,
+    "artifact_id": 12445336863,
+    "artifact_zip_sha256": "659d5ca4914ed2ccfdf65129f31438f28b786f35e353c38c95b4ab8de3026657",
+    "path_inventory_complete": true,
+    "unclassified_paths": 0
+  },
+  "authority_invariants": {
+    "source_on_main_is_not_product_promotion": true,
+    "research_continuation_owner": "Platform Experiment/Attempt",
+    "learned_component_selection_owner": "ModelRelease channel",
+    "shipping_product_owner": "ProductRevision",
+    "legacy_branch_is_future_execution_authority": false,
+    "whole_branch_merge_allowed": false,
+    "running_ab_may_finish_against_exact_frozen_lineage": true,
+    "running_ab_may_mutate_checkpoint_or_optimizer_state": false
+  },
+  "path_classification_counts": {
+    "A_REUSABLE_CURRENT_IMPLEMENTATION": 28,
+    "B_CURRENT_EXPERIMENT_EXECUTION_ONLY": 17,
+    "C_HISTORICAL_SCIENTIFIC_PROVENANCE": 76,
+    "D_SUPERSEDED_IMPLEMENTATION": 1,
+    "E_BRANCH_OWNED_OPERATIONAL_STATE": 5,
+    "F_OBSOLETE_BRANCH_WORKFLOW": 26,
+    "G_PRODUCT_RELEVANT_CANDIDATE": 3,
+    "H_UNRESOLVED_DEPENDENCY": 205
+  },
+  "architecture_root_audit": {
+    "documented_reusable_closure_paths": 59,
+    "current_ab_closure_paths": 53,
+    "h_reachable_from_documented_reusable_roots": 17,
+    "h_reachable_only_from_current_ab_roots": 18,
+    "h_unreached_by_either_root_set": 170,
+    "true_reusable_h_dependencies": [
+      "models/iris/vnext/boundary_causality_v1.py",
+      "models/iris/vnext/evidence_heads_v3.py",
+      "models/iris/vnext/flexicubes_v1.py",
+      "models/iris/vnext/graphics_truth_v2.py",
+      "models/iris/vnext/graphics_truth_v3.py",
+      "models/iris/vnext/heads_v3.py",
+      "models/iris/vnext/model_v3.py",
+      "models/iris/vnext/quality_policy_v1.py",
+      "models/iris/vnext/relation_support_v2.py",
+      "models/iris/vnext/relation_truth_v3_adapter_v1.py",
+      "models/iris/vnext/scene_core_v1.py",
+      "models/iris/vnext/training_v3.py"
+    ],
+    "package_surface_pollution_not_recovery_authority": [
+      "models/tessa/v2/__init__.py",
+      "models/tessa/v2/ab_court_v2.py",
+      "models/tessa/v2/court_v2.py",
+      "models/tessa/v2/global_attention_v2.py",
+      "models/tessa/v2/model_global_v2.py"
+    ],
+    "package_surface_decision": "RECOVER_TESSA_V2_WITH_A_SLIM_PACKAGE_SURFACE_AND_DIRECT_SUBMODULE_IMPORTS; DO_NOT_COPY_LEGACY_INIT_EAGER_IMPORTS",
+    "experiment_only_interpretation": "The 18 H paths reachable only from current A/B roots are frozen experiment/materialization/training dependencies until independently justified as reusable. Current A/B reproducibility does not itself promote them into main product/research authority.",
+    "unreached_interpretation": "Unreached does not mean dead. The 170 paths require supersession/provenance/generic-utility review, but they are not prerequisites for the first current-architecture recovery slice."
+  },
+  "explicit_supersession_findings": {
+    "models/iris/vnext/optimization_v2.py": "NOT_A_CURRENT_V3_ROOT: statically typed to topology-owning IRISVNextV1 and includes structure in optimizer groups; predates topology-factored IRISVNextEvidenceModelV3",
+    "models/iris/vnext/stack_v3.py": "NOT_A_CURRENT_V4_ROOT: optional TESSA-V2 global-history composition predates current presentation-conditioned V4/TESSA-V3 bridge",
+    "models/iris/vnext/structure_global_v3.py": "OLDER_TESSA_V2_GLOBAL_HISTORY_PATH: current structural-evidence bridge is V4/TESSA-V3"
+  },
+  "graphics_finding": {
+    "graphics_v1_runtime": "A_REUSABLE_CURRENT_IMPLEMENTATION",
+    "graphics_v2_compiler": "G_PRODUCT_RELEVANT_CANDIDATE",
+    "graphics_v1_behaviorally_effective_native_test": "tests/compiler/test_vnext_graphics_native_e2e.py",
+    "graphics_v2_behaviorally_effective_native_consumer_proven": false,
+    "decision": "RECOVER_V1_RUNTIME_CLOSURE; HOLD_V2_PRODUCT_AUTHORITY_UNTIL_V2_TO_NATIVE_RUNTIME_BEHAVIORAL_CLOSURE"
+  },
+  "first_recovery_slices": [
+    {
+      "id": "RECOVERY-IRIS-TESSA-CURRENT-ARCHITECTURE",
+      "base": "main",
+      "source": "ba36fe9986fa2dbd9909f2e6caf8f814079d4231",
+      "mode": "REVIEWED_PATH_LEVEL_PORT_WITH_SLIM_TESSA_PACKAGE_SURFACE",
+      "product_promotion": false
+    },
+    {
+      "id": "RECOVERY-GRAPHICS-V1-RUNTIME",
+      "base": "main",
+      "source": "ba36fe9986fa2dbd9909f2e6caf8f814079d4231",
+      "mode": "REVIEWED_BEHAVIORAL_RUNTIME_CLOSURE",
+      "product_promotion": false
+    },
+    {
+      "id": "REVIEW-UNREACHED-LEGACY-170",
+      "mode": "SUPERSESSION_PROVENANCE_AND_GENERIC_UTILITY_REVIEW",
+      "may_block_guardrail_merge": false,
+      "may_block_final_branch_retirement": true
+    }
+  ],
+  "guardrail_vs_drain": {
+    "guardrail_may_merge_before_full_drain": true,
+    "guardrail_reason": "New drift must be prevented immediately; requiring all historical drain work first would preserve the failure mode while cleanup proceeds.",
+    "guardrail_merge_requires": [
+      "platform-go-contract-v1 PASS",
+      "current-mainline-ci PASS",
+      "canonical architecture and deployment checks PASS",
+      "source authority does not mint ModelRelease/ProductRevision promotion",
+      "current A/B lineage and checkpoint bytes untouched"
+    ],
+    "drain_closure_requires": [
+      "current architecture recovery PRs merged from main-based branches",
+      "generic test closure for recovered source",
+      "remaining 170 unreached paths dispositioned for final retirement",
+      "no active Platform execution depends on legacy branch continuation authority"
+    ]
+  }
+}

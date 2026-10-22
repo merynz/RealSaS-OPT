@@ -3,54 +3,78 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>RealSaS — Living Compile</title>
+  <title>RealSaS Studio</title>
   <link rel="stylesheet" href="/static/css/living_compile.css">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="mark">RS</span><div><strong>RealSaS</strong><small>Living Compile · V4</small></div></div>
-    <div class="bundle-open"><input id="bundlePath" placeholder="C:\\...\\e2e_output"><button id="openBundle">OPEN BUNDLE</button></div>
-    <div class="authority"><span id="proofBadge" class="badge">NO BUNDLE</span><span id="stateHash" class="mono"></span></div>
+    <div class="brand"><span class="mark">RS</span><div><strong>RealSaS</strong><small>Studio · Character Compiler</small></div></div>
+    <div class="bundle-open">
+      <input id="bundlePath" placeholder="Open an existing compiled character bundle">
+      <button id="openBundle">OPEN</button>
+      <button id="compileCharacter" class="primary" disabled>COMPILE</button>
+    </div>
+    <div class="authority"><span id="proofBadge" class="badge">NO CHARACTER</span><span id="stateHash" class="mono"></span></div>
   </header>
 
-  <nav class="modebar">
+  <nav id="productFlow" class="product-flow" aria-label="Product workflow">
+    <button class="stage active" data-stage="input"><span>01</span>INPUT</button>
+    <button class="stage" data-stage="shape"><span>02</span>SHAPE</button>
+    <button class="stage" data-stage="mesh"><span>03</span>MESH</button>
+    <button class="stage" data-stage="rig"><span>04</span>RIG</button>
+    <button class="stage" data-stage="skin"><span>05</span>SKIN</button>
+    <button class="stage" data-stage="graphics"><span>06</span>GRAPHICS</button>
+    <button class="stage" data-stage="animation"><span>07</span>ANIMATION</button>
+    <button class="stage" data-stage="proof"><span>08</span>PROOF</button>
+  </nav>
+
+  <section class="compile-strip">
+    <div class="compile-state"><span class="status-dot"></span><strong id="compileState">READY FOR EXISTING CHARACTER</strong><span id="compileDetail">Full compile service is not bound yet.</span></div>
+    <div class="compile-meter"><div id="compileProgress" class="compile-progress"></div></div>
+    <div class="budget"><span>PERFORMANCE</span><strong>&lt;30s preview</strong><strong>≤3 min market bar</strong><strong>≤60s goal</strong></div>
+  </section>
+
+  <nav class="modebar" aria-label="Editing tools">
+    <span class="tool-label">EDIT</span>
     <button class="mode active" data-mode="rig">RIG</button>
     <button class="mode" data-mode="mesh">MESH</button>
-    <button class="mode" data-mode="weights">WEIGHTS</button>
-    <button class="mode" data-mode="bindings">BINDINGS</button>
+    <button class="mode" data-mode="weights">SKIN</button>
+    <button class="mode" data-mode="bindings">ATTACH</button>
     <button class="mode" data-mode="topology">TOPOLOGY</button>
     <button class="mode" data-mode="ik">IK</button>
     <button class="mode" data-mode="animation">ANIMATION</button>
     <span class="separator"></span>
-    <button id="saveLayer">SAVE USER LAYER</button>
-    <button id="exportRuntime">EXPORT</button>
+    <span id="activeProductStage" class="active-stage">INPUT</span>
+    <button id="saveLayer">SAVE EDITS</button>
+    <button id="exportRuntime" class="primary">EXPORT</button>
   </nav>
 
   <main class="workspace">
     <aside class="left panel">
-      <div class="panel-title">CHARACTER / VIEW</div>
+      <div class="panel-title">DIRECTION</div>
       <div id="views" class="view-grid"></div>
-      <div class="panel-title">SCENE</div>
+      <div class="panel-title">CHARACTER</div>
       <div id="sceneTree" class="tree"></div>
-      <div class="panel-title">AUTHORITY</div>
-      <div id="authorityText" class="authority-copy">Open a proof-gated V4 bundle.</div>
+      <div class="panel-title">PROOF</div>
+      <div id="authorityText" class="authority-copy">Open a proof-gated compiled character.</div>
     </aside>
 
     <section class="center panel viewport-panel">
       <div class="viewport-toolbar">
         <span id="viewLabel">VIEW —</span>
-        <label><input id="showImage" type="checkbox" checked> IMAGE</label>
+        <label><input id="showImage" type="checkbox" checked> ART</label>
         <label><input id="showMesh" type="checkbox" checked> MESH</label>
         <label><input id="showRig" type="checkbox" checked> RIG</label>
-        <label><input id="showWeights" type="checkbox"> WEIGHTS</label>
+        <label><input id="showWeights" type="checkbox"> SKIN</label>
         <button id="fitView">FIT</button>
       </div>
       <canvas id="viewport" width="1100" height="820"></canvas>
-      <div id="hint" class="hint">Open a bundle.</div>
+      <div id="hint" class="hint">Open a compiled character or start from Input.</div>
     </section>
 
     <aside class="right panel inspector">
       <div class="panel-title">INSPECTOR</div>
+      <div id="productStageNote" class="stage-note">Input accepts the source character. Existing compiled bundles can already be inspected and edited.</div>
       <div id="inspectorBody"></div>
     </aside>
   </main>
@@ -72,5 +96,6 @@
 
   <div id="toast" class="toast"></div>
   <script type="module" src="/static/js/app.js"></script>
+  <script type="module" src="/static/js/product_shell.js"></script>
 </body>
 </html>

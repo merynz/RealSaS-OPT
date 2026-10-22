@@ -70,17 +70,35 @@ class LivingCompileApplication:
                 raise LivingCompileError("proof-gated native .rss package is not present in this output root")
             return 200, {"schema_version": "RealSaS.LivingCompileExportRef.v1", "package_path": str(native), "authority": "EXISTING_PROOF_GATED_NATIVE_RUNTIME"}, "application/json"
         if method == "GET" and parsed.path == "/api/project":
-            return 200, {"schema_version": "RealSaS.LivingCompileProject.v1", "mode": "OPEN_V4_BUNDLE"}, "application/json"
+            return 200, {
+                "schema_version": "RealSaS.ProductStudioCapabilities.v1",
+                "product_name": "RealSaS Studio",
+                "mode": "OPEN_EXISTING_COMPILED_CHARACTER",
+                "compile_available": False,
+                "compile_blocker": "PRODUCTREVISION_MODELRELEASE_INFERENCE_BINDING_OPEN",
+                "stages": ["INPUT", "SHAPE", "MESH", "RIG", "SKIN", "GRAPHICS", "ANIMATION", "PROOF"],
+                "latency_targets": {
+                    "preview_seconds_max": 30,
+                    "market_bar_full_compile_seconds_max": 180,
+                    "canonical_goal_full_compile_seconds_max": 60,
+                },
+                "authority": {
+                    "existing_bundle_inspection": True,
+                    "user_edits_require_requalification": True,
+                    "runtime_preview_requires_proof_pass": True,
+                    "compile_from_ui": False,
+                },
+            }, "application/json"
         if method == "POST" and parsed.path in {"/api/input/upload", "/api/project", "/api/compile/start", "/api/compile"}:
-            raise LivingCompileError("compile-from-UI is not yet bound to the current scientific optimizer; open the current V4 E2E output bundle instead")
+            raise LivingCompileError("compile-from-UI is not yet bound to the production inference graph; open an existing compiled character instead")
         if method == "GET" and parsed.path == "/api/compile/status":
-            raise LivingCompileError("no UI-owned compile job exists; current optimizer remains externally orchestrated")
+            raise LivingCompileError("no UI-owned compile job exists; production inference orchestration is not bound yet")
         raise LivingCompileError(f"unsupported route: {method} {parsed.path}")
 
 
 def make_handler(app: LivingCompileApplication):
     class Handler(BaseHTTPRequestHandler):
-        server_version = "RealSaSLivingCompile/4"
+        server_version = "RealSaSStudio/1"
 
         def _handle(self) -> None:
             try:
@@ -107,15 +125,15 @@ def make_handler(app: LivingCompileApplication):
         do_POST = _handle
 
         def log_message(self, fmt: str, *args: Any) -> None:
-            print(f"[living-compile] {self.address_string()} - {fmt % args}")
+            print(f"[realsas-studio] {self.address_string()} - {fmt % args}")
 
     return Handler
 
 
 def serve(host: str = "127.0.0.1", port: int = 8765) -> None:
     app = LivingCompileApplication.default(); server = ThreadingHTTPServer((host, int(port)), make_handler(app))
-    print(f"RealSaS Living Compile V4: http://{host}:{port}")
-    print("Open a current V4 E2E output root from Character input -> Existing canonical bundle.")
+    print(f"RealSaS Studio: http://{host}:{port}")
+    print("Open an existing compiled character bundle. Full compile remains fail-closed until production inference binding is complete.")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -125,7 +143,7 @@ def serve(host: str = "127.0.0.1", port: int = 8765) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="RealSaS Living Compile V4 product/editor shell")
+    parser = argparse.ArgumentParser(description="RealSaS Studio product/editor shell")
     parser.add_argument("--host", default="127.0.0.1"); parser.add_argument("--port", type=int, default=8765)
     args = parser.parse_args(argv); serve(args.host, args.port); return 0
 

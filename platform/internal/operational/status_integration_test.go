@@ -42,6 +42,7 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 	artifactTypeID := uuid.New()
 	artifactID := uuid.New()
 	attemptID := uuid.New()
+	checkpointContentSHA := uniqueHash("content", suffix)
 	if _, err := pool.Exec(ctx, "INSERT INTO subjects(id,slug,display_name) VALUES ($1,$2,$3)", subjectID, "ops-"+suffix, "Operational spine test"); err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +57,7 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 		(id,artifact_type_id,semantic_sha256,content_sha256,storage_key,size_bytes,producer_contract,
 		 implementation_sha256,policy_sha256,semantic_parameters,verified_at)
 		VALUES ($1,$2,$3,$4,$5,1,'ci',$6,$7,'{}',now())`, artifactID, artifactTypeID,
-		uniqueHash("semantic", suffix), uniqueHash("content", suffix), "ops/"+suffix,
+		uniqueHash("semantic", suffix), checkpointContentSHA, "ops/"+suffix,
 		uniqueHash("implementation", suffix), uniqueHash("policy", suffix)); err != nil {
 		t.Fatal(err)
 	}
@@ -89,15 +90,19 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 		Name:                    "iris-ops-" + suffix,
 		ArchitectureID:          "RealSaS.IRIS.Test.v1",
 		CheckpointArtifactID:    artifactID,
+		CheckpointContentSHA256: checkpointContentSHA,
 		EngineReleaseID:         releaseID,
 		OriginatingExperimentID: &created.Experiment.ID,
 		OriginatingAttemptID:    &attemptID,
 		SourceCodeSHA:           repeated("a", 40),
-		InitialState:            modelrelease.StateResearchQualified,
+		InitialState:            modelrelease.StateDraft,
 		CreatedBy:               "ci",
 	})
 	if err != nil {
 		t.Fatal(err)
+	}
+	if registered.CheckpointContentSHA256 != checkpointContentSHA {
+		t.Fatal("registered model release lost exact checkpoint content identity")
 	}
 	if _, err := modelrelease.SetEvaluation(ctx, pool, modelrelease.EvaluationRequest{
 		ModelReleaseID:     registered.ID,
@@ -149,5 +154,31 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 	}
 	if !foundModel {
 		t.Fatal("candidate model missing from operational status")
+	}
+
+	if _, err := modelrelease.Promote(ctx, pool, modelrelease.PromoteRequest{
+		Family:                   "IRIS",
+		Channel:                  modelrelease.ChannelProduction,
+		ModelReleaseID:           registered.ID,
+		RequiredEvaluationScopes: []string{"FIT8"},
+		Actor:                    "ci",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := modelrelease.Promote(ctx, pool, modelrelease.PromoteRequest{
+		Family:                   "IRIS",
+		Channel:                  modelrelease.ChannelResearch,
+		ModelReleaseID:           registered.ID,
+		RequiredEvaluationScopes: []string{"FIT8"},
+		Actor:                    "ci",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	mature, err := modelrelease.Get(ctx, pool, registered.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mature.LifecycleState != modelrelease.StateProduction {
+		t.Fatalf("model release maturity regressed after lower channel selection: %s", mature.LifecycleState)
 	}
 }

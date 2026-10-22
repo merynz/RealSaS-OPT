@@ -1,0 +1,26 @@
+name: p0-gofmt-diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'platform/**'
+      - '.github/workflows/p0_gofmt_diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache: false
+      - name: Report files requiring gofmt
+        working-directory: platform
+        run: |
+          files="$(gofmt -l .)"
+          printf 'GOFMT_REQUIRED_BEGIN\n%s\nGOFMT_REQUIRED_END\n' "$files"

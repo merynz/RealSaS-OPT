@@ -21,6 +21,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from compiler.realsas_compiler_services.orchestrator import mainline
+from compiler.realsas_compiler_services.platform_worker.model_inputs import materialize_model_releases
 from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, verify_execution_version, released_execution_plan, verify_source_inputs
 
 ENGINE_TASK_QUEUE = "realsas-engine-v1"
@@ -165,6 +166,11 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
     manifest = mainline.load_json(manifest_path)
     verify_execution_version(plan, request, manifest)
     external = verify_source_inputs(manifest=manifest, inputs=request.get("source_inputs") or (), read_object=_read_cas_object)
+    materialize_model_releases(
+        manifest=manifest,
+        models=request.get("model_releases") or (),
+        read_object=_read_cas_object,
+    )
     semantic_parameters = dict(request.get("semantic_parameters") or {})
     required_external = tuple(map(str, semantic_parameters.get("external_evidence_roles") or ()))
     optional_external = tuple(map(str, semantic_parameters.get("optional_external_evidence_roles") or ()))

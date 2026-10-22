@@ -95,7 +95,11 @@ func (a Activities) ResolveCompilePlan(ctx context.Context, in orchestration.Com
 	if err != nil {
 		return orchestration.ResolvedCompilePlan{}, err
 	}
-	plan, err := resolver.ResolveWithExternal(
+	modelInputs, err := modelselection.ResolverInputs(ctx, a.Pool, attemptID)
+	if err != nil {
+		return orchestration.ResolvedCompilePlan{}, err
+	}
+	plan, err := resolver.ResolveWithExternalAndModels(
 		ctx,
 		a.Graph,
 		registry.QualifiedCatalog{Pool: a.Pool, AllowDemo: mode == "RESEARCH"},
@@ -103,6 +107,7 @@ func (a Activities) ResolveCompilePlan(ctx context.Context, in orchestration.Com
 		loaded.RootInputs,
 		versions,
 		externalInputs,
+		modelInputs,
 	)
 	if err != nil {
 		return orchestration.ResolvedCompilePlan{}, err

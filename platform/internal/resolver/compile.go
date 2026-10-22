@@ -3,6 +3,8 @@ package resolver
 import (
 	"context"
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/google/uuid"
 
@@ -68,7 +70,7 @@ func Resolve(
 	rootInputs []domain.ArtifactInputIdentity,
 	versions map[string]release.StageVersion,
 ) (Plan, error) {
-	return ResolveWithExternal(ctx, g, catalog, targetStageID, rootInputs, versions, nil)
+	return ResolveWithExternalAndModels(ctx, g, catalog, targetStageID, rootInputs, versions, nil, nil)
 }
 
 // ResolveWithExternal adds immutable, stage-scoped raw external evidence to the
@@ -84,8 +86,48 @@ func ResolveWithExternal(
 	versions map[string]release.StageVersion,
 	external map[string][]domain.ArtifactInputIdentity,
 ) (Plan, error) {
+	return ResolveWithExternalAndModels(ctx, g, catalog, targetStageID, rootInputs, versions, external, nil)
+}
+
+func normalizeModelInputs(models []domain.ArtifactInputIdentity) ([]domain.ArtifactInputIdentity, error) {
+	ordered := append([]domain.ArtifactInputIdentity(nil), models...)
+	sort.Slice(ordered, func(i, j int) bool { return ordered[i].Role < ordered[j].Role })
+	prior := ""
+	for index := range ordered {
+		row := &ordered[index]
+		if !strings.HasPrefix(row.Role, "model:") || strings.TrimPrefix(row.Role, "model:") == "" || row.ArtifactType == "" || row.SemanticSHA256 == "" {
+			return nil, fmt.Errorf("model semantic input identity incomplete: %s", row.Role)
+		}
+		if index > 0 && row.Role == prior {
+			return nil, fmt.Errorf("duplicate model semantic input: %s", row.Role)
+		}
+		row.Ordinal = index
+		prior = row.Role
+	}
+	return ordered, nil
+}
+
+// ResolveWithExternalAndModels binds the immutable model snapshot selected at
+// compile acceptance into stage semantic identity. For the current fit-era DAG
+// every stage is conservatively model-bound. A future inference-only release may
+// narrow this to explicitly declared model-consuming stages without changing the
+// exact ModelRelease identity contract.
+func ResolveWithExternalAndModels(
+	ctx context.Context,
+	g *stagegraph.Graph,
+	catalog Catalog,
+	targetStageID string,
+	rootInputs []domain.ArtifactInputIdentity,
+	versions map[string]release.StageVersion,
+	external map[string][]domain.ArtifactInputIdentity,
+	models []domain.ArtifactInputIdentity,
+) (Plan, error) {
 	if len(rootInputs) == 0 {
 		return Plan{}, fmt.Errorf("compile resolver requires immutable subject root inputs")
+	}
+	modelInputs, err := normalizeModelInputs(models)
+	if err != nil {
+		return Plan{}, err
 	}
 	required, err := g.AncestorsIncluding(targetStageID)
 	if err != nil {
@@ -111,7 +153,7 @@ func ResolveWithExternal(
 			return Plan{}, fmt.Errorf("released stage graph identity drift: %s", stageID)
 		}
 
-		inputs := make([]domain.ArtifactInputIdentity, 0, len(rootInputs)+len(stage.DependsOn)+len(external[stageID]))
+		inputs := make([]domain.ArtifactInputIdentity, 0, len(rootInputs)+len(stage.DependsOn)+len(external[stageID])+len(modelInputs))
 		for _, item := range rootInputs {
 			if !stage.ConsumesInput(item.Role) {
 				continue
@@ -129,6 +171,14 @@ func ResolveWithExternal(
 			}
 			inputs = append(inputs, domain.ArtifactInputIdentity{
 				Role:           "external:" + item.Role,
+				Ordinal:        len(inputs),
+				ArtifactType:   item.ArtifactType,
+				SemanticSHA256: item.SemanticSHA256,
+			})
+		}
+		for _, item := range modelInputs {
+			inputs = append(inputs, domain.ArtifactInputIdentity{
+				Role:           item.Role,
 				Ordinal:        len(inputs),
 				ArtifactType:   item.ArtifactType,
 				SemanticSHA256: item.SemanticSHA256,

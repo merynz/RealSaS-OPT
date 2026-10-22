@@ -155,4 +155,30 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 	if !foundModel {
 		t.Fatal("candidate model missing from operational status")
 	}
+
+	if _, err := modelrelease.Promote(ctx, pool, modelrelease.PromoteRequest{
+		Family:                   "IRIS",
+		Channel:                  modelrelease.ChannelProduction,
+		ModelReleaseID:           registered.ID,
+		RequiredEvaluationScopes: []string{"FIT8"},
+		Actor:                    "ci",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := modelrelease.Promote(ctx, pool, modelrelease.PromoteRequest{
+		Family:                   "IRIS",
+		Channel:                  modelrelease.ChannelResearch,
+		ModelReleaseID:           registered.ID,
+		RequiredEvaluationScopes: []string{"FIT8"},
+		Actor:                    "ci",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	mature, err := modelrelease.Get(ctx, pool, registered.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mature.LifecycleState != modelrelease.StateProduction {
+		t.Fatalf("model release maturity regressed after lower channel selection: %s", mature.LifecycleState)
+	}
 }

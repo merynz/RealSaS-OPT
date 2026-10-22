@@ -110,10 +110,11 @@ def test_checkpoint_path_cannot_escape_run_local_model_root(monkeypatch, tmp_pat
         )
 
 
-def test_binding_source_has_no_live_channel_or_latest_lookup():
+def test_binding_source_consumes_attempt_snapshot_not_live_channel_registry():
     source = Path(
         "compiler/realsas_compiler_services/platform_worker/model_binding.py"
     ).read_text(encoding="utf-8")
-    assert "model_channels" not in source
-    assert "latest" not in source.lower()
     assert "_platform_model_releases" in source
+    assert "model_channels" not in source
+    assert "GetModelChannel" not in source
+    assert "ResolveProduction" not in source

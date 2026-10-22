@@ -77,7 +77,11 @@ class LivingCompileApplication:
                 "compile_available": False,
                 "compile_blocker": "PRODUCTREVISION_MODELRELEASE_INFERENCE_BINDING_OPEN",
                 "stages": ["INPUT", "SHAPE", "MESH", "RIG", "SKIN", "GRAPHICS", "ANIMATION", "PROOF"],
-                "latency_targets": {"preview_seconds_max": 30, "full_compile_seconds_target": [120, 180]},
+                "latency_targets": {
+                    "preview_seconds_max": 30,
+                    "market_bar_full_compile_seconds_max": 180,
+                    "canonical_goal_full_compile_seconds_max": 60,
+                },
                 "authority": {
                     "existing_bundle_inspection": True,
                     "user_edits_require_requalification": True,

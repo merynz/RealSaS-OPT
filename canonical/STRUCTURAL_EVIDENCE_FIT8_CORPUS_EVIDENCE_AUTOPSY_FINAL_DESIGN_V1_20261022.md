@@ -1,0 +1,1 @@
+Design frozen. Implement exactly from the JSON preregistration and execution binding. No additional metrics may change the phase-2 sign-stability interpretation after observing resampled results.

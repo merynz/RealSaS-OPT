@@ -1,0 +1,102 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABDirectionalScreen.v1",
+  "date_utc": "2026-10-22",
+  "status": "LOCKED_DIRECTIONAL_SELECTION_SCREEN__NOT_QUALIFICATION",
+  "experiment_id": "STRUCTURAL-EVIDENCE-A-B-DIRECTIONAL-SCREEN-V1",
+  "parent_experiment": "STRUCTURAL-EVIDENCE-A-B-V2",
+  "training_execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+  "purpose": "Choose whether the next research direction should retain null-presentation conditioning (A) or role-free presentation conditioning (B) using already sealed final checkpoints. This screen is a directional engineering/research decision only; it cannot claim FIT8 qualification, unseen generalization, product promotion, or canonical-M authority.",
+  "reason_for_new_screen": {
+    "full_fit8_eos_evaluation_was_overpowered_for_direction_selection": true,
+    "training_is_already_complete_and_will_not_be_repeated": true,
+    "observed_v9_6_snake": "A_NULL_PRESENTATION reached the 131072 operational token ceiling at 26008 faces without EOS; this is operational truncation, not a valid scientific EOS failure.",
+    "observed_v9_6_bat": "A_NULL_PRESENTATION produced EOS but codec decoding raised TESSA_DECODE_DUPLICATE_FACE; this is a structural-invalid candidate and should be recorded, not crash the harness.",
+    "design_conclusion": "The immediate decision is A versus B direction, not full qualification. A bounded paired screen on two informative subjects can answer that decision at far lower wall-clock cost while preserving the exact sealed models and inference semantics."
+  },
+  "subject_selection": {
+    "primary_subjects": ["George", "Bat"],
+    "George_reason": "Deliberately difficult FIT8 case chosen to test whether the added evidence helps under structural complexity.",
+    "Bat_reason": "Morphologically distinct case with an already observed A-arm duplicate-face EOS failure; selection is diagnostic and therefore explicitly post-diagnostic, not confirmatory.",
+    "selection_is_post_diagnostic": true,
+    "generalization_claim_forbidden": true
+  },
+  "arms": {
+    "A_NULL_PRESENTATION": "sealed final A checkpoint; shared scene + surface/mechanics + null presentation memory",
+    "B_ROLE_FREE_PRESENTATION": "sealed final B checkpoint; shared scene + surface/mechanics + inference-admissible role-free presentation memory"
+  },
+  "matched_controls": {
+    "same_final_training_step": true,
+    "same_tessa_v3_capacity": true,
+    "same_initialization_family": true,
+    "same_training_protocol_already_completed": true,
+    "same_topology_tokenizer_and_grammar": true,
+    "same_greedy_decoding": true,
+    "same_seed_policy": true,
+    "same_surface_carrier": true,
+    "same_subject_inputs": true,
+    "teacher_topology_in_inference": false,
+    "only_arm_difference_remains_presentation_conditioning": true
+  },
+  "measurements": {
+    "teacher_forced_probe": {
+      "enabled": true,
+      "window_policy": "UP_TO_8_EVENLY_SPACED_EXISTING_TOPOLOGY_WINDOWS_PER_SUBJECT",
+      "purpose": "Cheap deterministic fit signal; never sufficient by itself because teacher forcing can hide autoregressive instability.",
+      "metrics": [
+        "TOTAL_OBJECTIVE",
+        "TOKEN_CROSS_ENTROPY",
+        "COORDINATE_METRIC",
+        "COORDINATE_EXPECTED_ABS_ERROR_BINS",
+        "STRUCTURAL_SPECIAL_TOKEN_CE"
+      ]
+    },
+    "bounded_free_running_probe": {
+      "enabled": true,
+      "primary_horizon_new_tokens": 16384,
+      "extension_horizon_new_tokens": 32768,
+      "extension_only_if_primary_inconclusive": true,
+      "sampling": false,
+      "grammar_mask_required": true,
+      "reference_parity_required": true,
+      "horizon_reached_is_failure": false,
+      "horizon_reached_label": "BOUNDED_HORIZON_REACHED__NOT_EOS_FAILURE",
+      "typed_hard_invalid_states": [
+        "GRAMMAR_DEAD_END__NO_ALLOWED_TOKEN",
+        "EOS_CODEC_INVALID",
+        "EOS_TOPOLOGY_COURT_INVALID"
+      ],
+      "metrics": [
+        "STOP_REASON",
+        "EOS_COMPLETED",
+        "CODEC_VALID_IF_EOS",
+        "TOPOLOGY_COURT_IF_EOS",
+        "FACE_COUNT_AT_HORIZON",
+        "COMPONENT_COUNT_AT_HORIZON",
+        "RESTART_COUNT_AT_HORIZON",
+        "TOKENS_PER_FACE",
+        "MEAN_SELECTED_TOKEN_LOG_PROBABILITY"
+      ]
+    }
+  },
+  "directional_decision_rule": {
+    "hard_invalid_precedence": "For a subject, if exactly one arm enters a typed hard-invalid state and the other does not, the non-invalid arm wins that subject regardless of teacher-forced objective.",
+    "teacher_forced_subject_vote_if_validity_tied": {
+      "minimum_relative_total_objective_improvement": 0.01,
+      "maximum_relative_regression_on_coordinate_abs_error_bins": 0.03,
+      "maximum_relative_regression_on_structural_special_token_ce": 0.03,
+      "rule": "An arm wins the subject if TOTAL_OBJECTIVE is at least 1% lower and neither coordinate absolute-bin error nor structural-special-token CE regresses by more than 3%. Otherwise subject vote is TIE."
+    },
+    "primary_16k_decision": "If George and Bat both vote for the same arm, select that arm. If one votes for an arm and the other is TIE, select that arm only if its two-subject macro TOTAL_OBJECTIVE is at least 1% lower and it has no additional hard-invalid state. Otherwise run the 32K extension.",
+    "32k_extension_decision": "Re-run the same two sealed-arm/subject pairs at 32768 tokens only when 16K is inconclusive. Apply the same hard-invalid precedence; teacher-forced metrics remain identical. If still split or tied, result is INCONCLUSIVE rather than inventing a winner.",
+    "post_result_threshold_changes_forbidden": true
+  },
+  "interpretation": {
+    "SELECT_A": "Do not invest the next architecture iteration in the current role-free presentation-conditioning formulation; retain/null-baseline direction pending redesign.",
+    "SELECT_B": "Continue the role-free/shared-presentation-evidence direction into the next architecture iteration; full qualification remains future work.",
+    "INCONCLUSIVE": "Do not claim either arm is better from this screen; redesign measurement or add an independently preregistered tie-break experiment.",
+    "qualification_pass_claimed": false,
+    "unseen_generalization_claimed": false,
+    "canonical_m_authorized": false,
+    "product_promotion_authorized": false
+  }
+}

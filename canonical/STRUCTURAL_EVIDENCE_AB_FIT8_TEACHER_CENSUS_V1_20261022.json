@@ -54,7 +54,11 @@
     "both_hard_invalid": "NO_TIEBREAK",
     "log_probability_cannot_select_winner": true,
     "face_count_cannot_select_winner": true,
-    "component_count_cannot_select_winner": true
+    "component_count_cannot_select_winner": true,
+    "final_selection_requires_horse_winner_not_to_oppose_census_plurality": true,
+    "final_selection_forbidden_if_opposite_arm_has_macro_improvement_at_least": 0.01,
+    "if_horse_structural_validity_does_not_separate": "INCONCLUSIVE",
+    "if_horse_winner_opposes_census_plurality": "INCONCLUSIVE"
   },
   "final_statuses": ["SELECT_A", "SELECT_B", "INCONCLUSIVE"],
   "interpretation": {

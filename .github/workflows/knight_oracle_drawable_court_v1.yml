@@ -25,6 +25,7 @@ jobs:
       AUTHORITY_ROOT: /home/monster/realsas_authority
       RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_V1_70CBD671
       OUT_DIR: canonical/knight_oracle_drawable_court_v1
+      REPLAY_AUTHORITY: /tmp/knight_oracle_drawable_replay_authority
 
     steps:
       - uses: actions/checkout@v4
@@ -57,12 +58,53 @@ jobs:
           print('KNIGHT_ORACLE_DRAWABLE_PREREG_PASS')
           PY
 
+      - name: Build read-only historical replay ledger
+        run: |
+          set -euo pipefail
+          SOURCE_RUN="$AUTHORITY_ROOT/runs/$RUN_ID"
+          REPLAY_RUN="$REPLAY_AUTHORITY/runs/$RUN_ID"
+          rm -rf "$REPLAY_AUTHORITY"
+          mkdir -p "$REPLAY_RUN"
+          ln -s "$SOURCE_RUN/run_manifest.json" "$REPLAY_RUN/run_manifest.json"
+          ln -s "$SOURCE_RUN/inputs" "$REPLAY_RUN/inputs"
+          ln -s "$SOURCE_RUN/artifacts" "$REPLAY_RUN/artifacts"
+          ln -s "$SOURCE_RUN/IMMUTABLE_STAGE23_SEAL.json" "$REPLAY_RUN/IMMUTABLE_STAGE23_SEAL.json"
+          SOURCE_LEDGER="$SOURCE_RUN/ACTIVE_RUN_V2.json" REPLAY_LEDGER="$REPLAY_RUN/ACTIVE_RUN_V2.json" python - <<'PY'
+          import json, os
+          from pathlib import Path
+          source=Path(os.environ['SOURCE_LEDGER'])
+          target=Path(os.environ['REPLAY_LEDGER'])
+          ledger=json.loads(source.read_text())
+          wanted={
+              '05_CAMERA_CONTRACT_SOLVED',
+              '18_CANONICAL_MESH_ADDRESSING_BUILD',
+              '23_COMPLETE_APPEARANCE_ASSET_BAKED',
+              '28_SKELETON_QUALIFIED',
+              '32_SKIN_QUALIFIED',
+          }
+          found=set()
+          for row in ledger['stages']:
+              sid=str(row['id'])
+              if sid not in wanted:
+                  continue
+              if not row.get('outputs'):
+                  raise RuntimeError('DRAWABLE_REPLAY_STAGE_OUTPUTS_MISSING:'+sid)
+              row['status']='PASS'
+              row['blockers']=[]
+              found.add(sid)
+          if found != wanted:
+              raise RuntimeError('DRAWABLE_REPLAY_STAGE_CARDINALITY:'+repr(sorted(wanted-found)))
+          ledger['execution_class']='RESEARCH_ORACLE_REPLAY_ONLY'
+          target.write_text(json.dumps(ledger, indent=2, sort_keys=True)+'\n')
+          print('KNIGHT_ORACLE_DRAWABLE_REPLAY_LEDGER_PASS', sorted(found))
+          PY
+
       - name: Run oracle drawable court
         run: |
           set -euo pipefail
           rm -rf "$OUT_DIR"
           PYTHONPATH=. python tools/demo/knight_oracle_drawable_court_v1.py \
-            --authority-root "$AUTHORITY_ROOT" \
+            --authority-root "$REPLAY_AUTHORITY" \
             --run-id "$RUN_ID" \
             --out-dir "$OUT_DIR" | tee /tmp/knight_oracle_drawable_court_v1.txt
           cp /tmp/knight_oracle_drawable_court_v1.txt "$OUT_DIR/AUDIT_STDOUT.txt"

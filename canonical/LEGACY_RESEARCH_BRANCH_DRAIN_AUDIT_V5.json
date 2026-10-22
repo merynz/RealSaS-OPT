@@ -1,0 +1,69 @@
+{
+  "schema": "RealSaS.LegacyResearchBranchDrainAudit.v5",
+  "status": "CURRENT_ARCHITECTURE_DEPENDENCY_BOUNDARY_CORRECTED__RECOVERY_PENDING",
+  "created_at": "2026-10-22T20:36:00+03:00",
+  "supersedes": "canonical/LEGACY_RESEARCH_BRANCH_DRAIN_AUDIT_V4.json",
+  "immutable_audit": {
+    "main_sha": "8942de7aa73d2fc787cc0df3278ef4dfe7785987",
+    "legacy_sha": "ba36fe9986fa2dbd9909f2e6caf8f814079d4231",
+    "workflow_run_id": 39822825768,
+    "artifact_id": 12445336863,
+    "artifact_sha256": "659d5ca4914ed2ccfdf65129f31438f28b786f35e353c38c95b4ab8de3026657",
+    "changed_paths": 361,
+    "unclassified_paths": 0
+  },
+  "documented_reusable_dependency_audit": {
+    "reusable_closure_paths": 59,
+    "current_ab_closure_paths": 53,
+    "h_reusable": 17,
+    "h_current_ab_only": 18,
+    "h_unreached": 170,
+    "true_reusable_iris_h": [
+      "models/iris/vnext/boundary_causality_v1.py",
+      "models/iris/vnext/evidence_heads_v3.py",
+      "models/iris/vnext/flexicubes_v1.py",
+      "models/iris/vnext/graphics_truth_v2.py",
+      "models/iris/vnext/graphics_truth_v3.py",
+      "models/iris/vnext/heads_v3.py",
+      "models/iris/vnext/model_v3.py",
+      "models/iris/vnext/quality_policy_v1.py",
+      "models/iris/vnext/relation_support_v2.py",
+      "models/iris/vnext/relation_truth_v3_adapter_v1.py",
+      "models/iris/vnext/scene_core_v1.py",
+      "models/iris/vnext/training_v3.py"
+    ],
+    "tessa_v2_package_boundary": {
+      "legacy_init": "models/tessa/v2/__init__.py",
+      "legacy_init_must_not_be_copied_verbatim": true,
+      "direct_reusable_dependency": "models/tessa/v2/court_v2.py",
+      "reason": "generation_v2 directly imports TESSADecodedTopologyCourtV2 and evaluate_decoded_topology_v2; court_v2 is not package-init pollution",
+      "package_init_only_pollution_for_current_reusable_roots": [
+        "models/tessa/v2/ab_court_v2.py",
+        "models/tessa/v2/global_attention_v2.py",
+        "models/tessa/v2/model_global_v2.py"
+      ],
+      "recovery_rule": "Replace broad package imports in IRIS structure_v3/v4 with direct imports from config_v2/model_v2/objective_v2 and expose only the minimal stable TESSA V2 package surface required by recovered code."
+    }
+  },
+  "explicit_non_roots": {
+    "models/iris/vnext/optimization_v2.py": "topology-owning IRISVNextV1 optimizer policy; incompatible with topology-factored IRISVNextEvidenceModelV3 as canonical recovered optimizer",
+    "models/iris/vnext/stack_v3.py": "optional TESSA-V2 global-history composition predating V4/TESSA-V3 structural-evidence bridge",
+    "models/iris/vnext/structure_global_v3.py": "older global-history bridge used by frozen/legacy experimental path"
+  },
+  "graphics_boundary": {
+    "recover_now": "Graphics V1 runtime behavioral closure",
+    "hold": "Graphics V2 product authority",
+    "hold_reason": "V2 compiler/evidence contract has no proven behaviorally-effective native runtime consumer yet"
+  },
+  "promotion_boundary": {
+    "source_recovery_changes_product": false,
+    "model_release_promotion_required_for_learned_component_shipping": true,
+    "product_revision_promotion_required_for_shipping_product_change": true
+  },
+  "running_ab": {
+    "may_finish": true,
+    "branch_or_checkpoint_mutation_by_drain": false,
+    "optimizer_or_training_reentry": false,
+    "product_promotion": false
+  }
+}

@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import Any
 
 from compiler.realsas_compiler_services.orchestrator import mainline
+from compiler.realsas_compiler_services.platform_worker.model_inputs import (
+    behavior_identity_sha256,
+)
 
 
 @dataclass(frozen=True)
@@ -25,6 +28,75 @@ def _lower_sha256(value: Any, code: str) -> str:
     return raw
 
 
+def _rederive_materialized_snapshot(manifest: dict[str, Any]) -> list[dict[str, Any]]:
+    rows = manifest.get("_platform_model_releases")
+    if not isinstance(rows, list) or not rows:
+        raise RuntimeError("ENGINE_MODEL_BINDING_SNAPSHOT_REQUIRED")
+
+    normalized: list[tuple[str, dict[str, Any], str]] = []
+    seen: set[str] = set()
+    for raw_row in rows:
+        if not isinstance(raw_row, dict):
+            raise RuntimeError("ENGINE_MODEL_BINDING_ROW_INVALID")
+        row = dict(raw_row)
+        family = str(row.get("family") or "")
+        if not family:
+            raise RuntimeError("ENGINE_MODEL_BINDING_FAMILY_INVALID")
+        if family in seen:
+            raise RuntimeError("ENGINE_MODEL_BINDING_FAMILY_AMBIGUOUS:" + family)
+        seen.add(family)
+
+        checkpoint = row.get("checkpoint")
+        if not isinstance(checkpoint, dict):
+            raise RuntimeError("ENGINE_MODEL_BINDING_CHECKPOINT_REQUIRED:" + family)
+        top_checkpoint_sha = _lower_sha256(
+            row.get("checkpoint_content_sha256"),
+            "ENGINE_MODEL_BINDING_CHECKPOINT_SHA_INVALID",
+        )
+        nested_checkpoint_sha = _lower_sha256(
+            checkpoint.get("content_sha256"),
+            "ENGINE_MODEL_BINDING_CHECKPOINT_SHA_INVALID",
+        )
+        if nested_checkpoint_sha != top_checkpoint_sha:
+            raise RuntimeError("ENGINE_MODEL_BINDING_CHECKPOINT_IDENTITY_DRIFT:" + family)
+
+        original_identity_shape = {
+            "family": family,
+            "model_release_id": row.get("model_release_id"),
+            "architecture_id": row.get("architecture_id"),
+            "model_engine_release_id": row.get("model_engine_release_id"),
+            "source_code_sha": row.get("source_code_sha"),
+            "checkpoint": {
+                "id": row.get("checkpoint_artifact_id"),
+                "content_sha256": top_checkpoint_sha,
+            },
+        }
+        expected_behavior_sha = behavior_identity_sha256(original_identity_shape)
+        declared_behavior_sha = _lower_sha256(
+            row.get("behavior_identity_sha256"),
+            "ENGINE_MODEL_BINDING_BEHAVIOR_SHA_INVALID",
+        )
+        if declared_behavior_sha != expected_behavior_sha:
+            raise RuntimeError("ENGINE_MODEL_BINDING_BEHAVIOR_IDENTITY_DRIFT:" + family)
+        normalized.append((family, row, expected_behavior_sha))
+
+    normalized.sort(key=lambda item: item[0])
+    snapshot_rows = [
+        {"family": family, "behavior_identity_sha256": behavior_sha}
+        for family, _row, behavior_sha in normalized
+    ]
+    expected_snapshot_sha = mainline.content_sha256(
+        {"schema": "RealSaS.ModelReleaseSnapshot.v1", "models": snapshot_rows}
+    )
+    declared_snapshot_sha = _lower_sha256(
+        manifest.get("_platform_model_snapshot_sha256"),
+        "ENGINE_MODEL_BINDING_SNAPSHOT_SHA_INVALID",
+    )
+    if declared_snapshot_sha != expected_snapshot_sha:
+        raise RuntimeError("ENGINE_MODEL_BINDING_SNAPSHOT_DRIFT")
+    return [row for _family, row, _behavior_sha in normalized]
+
+
 def require_materialized_model_release(
     manifest: dict[str, Any],
     *,
@@ -34,8 +106,9 @@ def require_materialized_model_release(
     """Resolve one already-materialized immutable Attempt model, fail closed.
 
     This function never reads a model channel, registry alias, branch, or `latest`
-    pointer.  Its only authority is the in-memory snapshot written by
-    `materialize_model_releases` for the accepted Attempt.
+    pointer. Its only authority is the in-memory snapshot written by
+    `materialize_model_releases` for the accepted Attempt. The behavior identity
+    and whole snapshot hash are rederived before any checkpoint path is trusted.
     """
 
     family = str(family)
@@ -45,10 +118,8 @@ def require_materialized_model_release(
     if not architecture_id or architecture_id != architecture_id.strip():
         raise RuntimeError("ENGINE_MODEL_BINDING_ARCHITECTURE_INVALID")
 
-    rows = manifest.get("_platform_model_releases")
-    if not isinstance(rows, list):
-        raise RuntimeError("ENGINE_MODEL_BINDING_SNAPSHOT_REQUIRED")
-    matching = [row for row in rows if isinstance(row, dict) and str(row.get("family")) == family]
+    rows = _rederive_materialized_snapshot(manifest)
+    matching = [row for row in rows if str(row.get("family")) == family]
     if not matching:
         raise RuntimeError("ENGINE_MODEL_BINDING_FAMILY_MISSING:" + family)
     if len(matching) != 1:

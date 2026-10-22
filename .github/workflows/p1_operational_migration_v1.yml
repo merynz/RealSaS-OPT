@@ -39,7 +39,10 @@ jobs:
         run: |
           python -m py_compile tools/platform_operational_migrate_v1.py
           python -m json.tool canonical/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json >/dev/null
-          python -m pytest -q tests/tools/test_platform_operational_migrate_v1.py
+          python -m pytest -q \
+            tests/tools/test_platform_operational_migrate_v1.py \
+            tests/repository/test_platform_deployment.py \
+            tests/repository/test_self_hosted_execution_policy.py
       - name: Prove dry-run against immutable Git authority
         run: |
           python tools/platform_operational_migrate_v1.py \

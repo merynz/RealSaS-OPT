@@ -1,0 +1,12 @@
+{
+  "schema": "RealSaS.StructuralEvidenceFrozenBCausalUtilizationNotebookBinding.v1",
+  "status": "LOCKED_NOTEBOOK_BINDING",
+  "date": "2026-10-22",
+  "authority_head": "2629b619585433e45200a9f1562ea3ada6e615b2",
+  "training_execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+  "parent_census_result_sha256": "01836f85f17bc7308e35c9ed08acc523904ec1cfbcc51b0caf33e6c7cb9d4df8",
+  "parent_autopsy_result_sha256": "e15957ed5f57394c018c84971f146b970c8b85f9f91b93a5a9ca3bae8f59c17b",
+  "optimizer_steps_executed": 0,
+  "qualification_pass_claimed": false,
+  "unseen_generalization_claimed": false
+}

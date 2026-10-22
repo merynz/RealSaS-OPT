@@ -2,6 +2,8 @@ package operational
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"os"
 	"strings"
 	"testing"
@@ -15,6 +17,11 @@ import (
 
 func repeated(ch string, n int) string {
 	return strings.Repeat(ch, n)
+}
+
+func uniqueHash(prefix, suffix string) string {
+	sum := sha256.Sum256([]byte(prefix + ":" + suffix))
+	return hex.EncodeToString(sum[:])
 }
 
 func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
@@ -39,7 +46,7 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, `INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at)
-		VALUES ($1,$2,$3,'RESEARCH','ci',now())`, releaseID, "ops-release-"+suffix, repeated("1", 64)); err != nil {
+		VALUES ($1,$2,$3,'RESEARCH','ci',now())`, releaseID, "ops-release-"+suffix, uniqueHash("release", suffix)); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, "INSERT INTO artifact_types(id,name,schema_version,domain) VALUES ($1,$2,'v1','model')", artifactTypeID, "ops-checkpoint-"+suffix); err != nil {
@@ -49,7 +56,8 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 		(id,artifact_type_id,semantic_sha256,content_sha256,storage_key,size_bytes,producer_contract,
 		 implementation_sha256,policy_sha256,semantic_parameters,verified_at)
 		VALUES ($1,$2,$3,$4,$5,1,'ci',$6,$7,'{}',now())`, artifactID, artifactTypeID,
-		repeated("2", 64), repeated("3", 64), "ops/"+suffix, repeated("4", 64), repeated("5", 64)); err != nil {
+		uniqueHash("semantic", suffix), uniqueHash("content", suffix), "ops/"+suffix,
+		uniqueHash("implementation", suffix), uniqueHash("policy", suffix)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -69,7 +77,7 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 	}
 	if _, err := pool.Exec(ctx, `INSERT INTO attempts
 		(id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state)
-		VALUES ($1,$2,$3,'research',$4,'ci','OPEN')`, attemptID, subjectID, releaseID, repeated("6", 64)); err != nil {
+		VALUES ($1,$2,$3,'research',$4,'ci','OPEN')`, attemptID, subjectID, releaseID, uniqueHash("attempt", suffix)); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := experiment.Link(ctx, pool, experiment.LinkRequest{ExperimentID: created.Experiment.ID, TargetKind: "ATTEMPT", TargetID: attemptID, Actor: "ci"}); err != nil {

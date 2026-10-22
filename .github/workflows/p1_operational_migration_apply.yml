@@ -1,0 +1,111 @@
+name: p1-operational-migration-apply
+
+on:
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p1-operational-migration-main
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      DESCRIPTOR: canonical/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Resolve and verify exact deployed main
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            EXPECTED_SHA="${{ github.event.workflow_run.head_sha }}"
+          else
+            EXPECTED_SHA="$(git rev-parse HEAD)"
+          fi
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          test -x "$PLATFORM_ROOT/current/bin/realsas-python"
+          test -f "$PLATFORM_ROOT/deployment.json"
+          EXPECTED_SHA="$EXPECTED_SHA" "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          marker=json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
+          expected=os.environ['EXPECTED_SHA']
+          assert marker.get('state') == 'READY', marker
+          assert marker.get('code_sha') == expected, (marker.get('code_sha'), expected)
+          current=Path('/home/monster/realsas_platform/current')
+          assert current.exists()
+          print('P1_DEPLOYMENT_IDENTITY_PASS', expected)
+          PY
+
+      - name: Fetch frozen legacy authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin \
+            research/iris-vnext-hybrid-tessa-v2-20261019:refs/heads/research/iris-vnext-hybrid-tessa-v2-20261019
+          test "$(git rev-parse research/iris-vnext-hybrid-tessa-v2-20261019)" = \
+            "4cd38d828e37407c50034ec7abba26a1b61878ea"
+
+      - name: Apply idempotent Experiment migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PLATFORM_ROOT/operational_migrations"
+          RECEIPT="$PLATFORM_ROOT/operational_migrations/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json"
+          "$PLATFORM_ROOT/current/bin/realsas-python" \
+            tools/platform_operational_migrate_v1.py \
+            --descriptor "$DESCRIPTOR" \
+            --repo "$PWD" \
+            --api http://127.0.0.1:8080 \
+            --apply \
+            --out "$RECEIPT"
+          cp "$RECEIPT" "$RUNNER_TEMP/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json"
+
+      - name: Verify operational truth and no invented model authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          RECEIPT="$PLATFORM_ROOT/operational_migrations/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - "$RECEIPT" <<'PY'
+          import json, sys, urllib.request
+          receipt=json.load(open(sys.argv[1]))
+          assert receipt['mode'] == 'APPLY'
+          assert receipt['promotion_performed'] is False
+          assert receipt['scientific_execution_performed'] is False
+          assert receipt['model_releases'] == []
+          assert receipt['blocked_models'] == [{
+              'family':'IRIS',
+              'checkpoint_sha256':'0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5',
+              'reason':'BLOCKED_IDENTITY_RESOLUTION',
+          }]
+          status=json.load(urllib.request.urlopen('http://127.0.0.1:8080/v1/ops/status', timeout=10))
+          matches=[x for x in status['active_experiments'] if x['slug']=='structural-evidence-a-b-v2']
+          assert len(matches)==1, matches
+          assert matches[0]['lifecycle_state']=='PREREGISTERED'
+          print('P1_OPERATIONAL_STATE_LIVE_PASS', matches[0]['id'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-operational-migration-receipt-${{ github.run_id }}
+          path: ${{ runner.temp }}/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json
+          if-no-files-found: warn
+          retention-days: 30

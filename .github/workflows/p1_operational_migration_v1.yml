@@ -1,0 +1,60 @@
+name: p1-operational-migration-v1
+
+on:
+  pull_request:
+    paths:
+      - 'canonical/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json'
+      - 'tools/platform_operational_migrate_v1.py'
+      - 'tests/tools/test_platform_operational_migrate_v1.py'
+      - '.github/workflows/p1_operational_migration_v1.yml'
+      - '.github/workflows/p1_operational_migration_apply.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install focused dependency
+        run: python -m pip install --no-input --progress-bar off pytest==8.4.1
+      - name: Fetch exact frozen legacy research ref
+        run: |
+          git fetch --no-tags origin \
+            research/iris-vnext-hybrid-tessa-v2-20261019:refs/heads/research/iris-vnext-hybrid-tessa-v2-20261019
+          test "$(git rev-parse research/iris-vnext-hybrid-tessa-v2-20261019)" = \
+            "4cd38d828e37407c50034ec7abba26a1b61878ea"
+      - name: Validate source and descriptor
+        run: |
+          python -m py_compile tools/platform_operational_migrate_v1.py
+          python -m json.tool canonical/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json >/dev/null
+          python -m pytest -q tests/tools/test_platform_operational_migrate_v1.py
+      - name: Prove dry-run against immutable Git authority
+        run: |
+          python tools/platform_operational_migrate_v1.py \
+            --descriptor canonical/P1_IRIS_TESSA_OPERATIONAL_MIGRATION_V1.json \
+            --repo . \
+            --out /tmp/p1-plan.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/p1-plan.json'))
+          assert p['mode']=='DRY_RUN'
+          assert p['experiment']['action']=='ENSURE_PREREGISTERED'
+          assert p['models']==[{
+              'family':'IRIS',
+              'checkpoint_sha256':'0be15df5614a05343cf3850aff747ba4d31f00a322f058819cb5a54d5a5d2fc5',
+              'action':'BLOCKED_IDENTITY_RESOLUTION',
+          }]
+          assert p['promotion']=='FORBIDDEN'
+          assert p['scientific_execution']=='FORBIDDEN'
+          assert p['git_provenance']['legacy_branch_head_sha']=='4cd38d828e37407c50034ec7abba26a1b61878ea'
+          assert p['git_provenance']['execution_binding_git_blob_sha']=='f06fae5e2c18216a36257a8bc9cc2d5916d3caef'
+          print('P1_OPERATIONAL_MIGRATION_DRY_RUN_PASS')
+          PY

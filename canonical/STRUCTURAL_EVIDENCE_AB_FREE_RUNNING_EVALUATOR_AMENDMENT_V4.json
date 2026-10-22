@@ -1,0 +1,55 @@
+{
+  "schema": "RealSaS.StructuralEvidenceABFreeRunningEvaluatorAmendment.v4",
+  "status": "LOCKED_EXECUTION_OPTIMIZATION__REFERENCE_PARITY_REQUIRED__NO_SCIENTIFIC_CONTRACT_CHANGE",
+  "training_execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+  "parent_evaluator_authority_head": "10f247f6701e8d1a201aabc0a91812bfa13921c3",
+  "optimized_windowed_helper_commit": "81d6601ca1c82f46310cb266bc3b45884d2a66e4",
+  "optimized_evaluator_wrapper_commit": "53768215ea46ddd2946a3aa044748b62d9133bf3",
+  "incident": {
+    "previous_run_reached": "A_NULL_PRESENTATION/Snake generation only",
+    "free_run_done_subject_receipt_produced": false,
+    "a_arm_scientifically_evaluated": false,
+    "b_arm_scientifically_evaluated": false,
+    "scientific_ab_result_produced": false,
+    "interruption_before_subject_completion_is_scientifically_discardable": true
+  },
+  "execution_optimizations": {
+    "pre_window_token_level_self_attention_kv_cache": true,
+    "pre_window_token_fast_path_limit": "local_attention_window",
+    "cross_attention_memory_kv_cached_once_per_layer": true,
+    "post_window_active_partial_chunk_recompute_preserved": true,
+    "checkpoint_mmap_load_preserved": true,
+    "heartbeat_interval_tokens": 256,
+    "fail_closed_grammar_dead_end_preserved": true
+  },
+  "reference_parity": {
+    "required_before_fit8": true,
+    "reference_authority": "TESSAStructuralizerV2.decode_tokens",
+    "tests_pre_window_token_fast_regime": true,
+    "tests_first_post_window_transition": true,
+    "tests_post_window_chunk_boundary": true,
+    "tests_second_post_window_partial_chunk": true,
+    "production_correspondence": "tiny window=8/chunk=4 proof maps to production window=4096/chunk=256 semantics"
+  },
+  "scientific_contract_changes": {
+    "model_weights": false,
+    "conditioning": false,
+    "tokenizer_or_grammar": false,
+    "allowed_token_mask": false,
+    "decoding_logits": false,
+    "greedy_selection": false,
+    "sampling": false,
+    "seed": false,
+    "training": false,
+    "optimizer": false,
+    "thresholds": false,
+    "carrier": false,
+    "courts": false
+  },
+  "authority": {
+    "training_checkpoint_source_remains": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+    "dead_end_is_success": false,
+    "canonical_m_authorized": false,
+    "product_promotion_authorized": false
+  }
+}

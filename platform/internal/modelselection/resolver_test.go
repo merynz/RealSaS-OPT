@@ -101,3 +101,23 @@ func TestResolverInputsRejectDuplicateOrUnsafeFamilies(t *testing.T) {
 		t.Fatalf("unsafe family admitted: %v", err)
 	}
 }
+
+func TestBehaviorIdentityCrossLanguageVector(t *testing.T) {
+	selected := Selection{
+		Family:                  "IRIS",
+		ModelReleaseID:          uuid.MustParse("11111111-1111-1111-1111-111111111111"),
+		ArchitectureID:          "RealSaS.IRIS.Test.v1",
+		ModelEngineReleaseID:    uuid.MustParse("22222222-2222-2222-2222-222222222222"),
+		SourceCodeSHA:           strings.Repeat("a", 40),
+		CheckpointArtifactID:    uuid.MustParse("33333333-3333-3333-3333-333333333333"),
+		CheckpointContentSHA256: strings.Repeat("b", 64),
+	}
+	got, err := BehaviorIdentitySHA256(selected)
+	if err != nil {
+		t.Fatal(err)
+	}
+	const want = "bc50f4276691df4f83ff2c1336d862e41c9f3b087e5005e2881ebf06ed4a8e89"
+	if got != want {
+		t.Fatalf("cross-language identity drift: got=%s want=%s", got, want)
+	}
+}

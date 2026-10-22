@@ -4,6 +4,10 @@
 Dry-run is the default. `--apply` is required for Platform mutation. This tool
 never trains, runs courts, promotes a model, creates ProductRevision state, or
 mutates/deletes the legacy branch.
+
+A legacy experiment may already have completed training. In that case the
+historical state is imported as RUNNING while the importer itself still performs
+zero optimizer steps and zero scientific court execution.
 """
 
 from __future__ import annotations
@@ -58,6 +62,9 @@ def require_uuid(value: Any, name: str) -> str:
 def validate_descriptor(value: dict[str, Any]) -> dict[str, Any]:
     if value.get("schema") != SCHEMA:
         raise MigrationError("MIGRATION_SCHEMA_INVALID")
+    if not isinstance(value.get("migration_id"), str) or not value["migration_id"].strip():
+        raise MigrationError("MIGRATION_ID_REQUIRED")
+
     source = value.get("source_authority")
     experiment = value.get("experiment")
     links = value.get("links")
@@ -84,17 +91,28 @@ def validate_descriptor(value: dict[str, Any]) -> dict[str, Any]:
     for key in ("slug", "name", "research_question", "hypothesis", "created_by"):
         if not isinstance(experiment.get(key), str) or not experiment[key].strip():
             raise MigrationError(f"MIGRATION_EXPERIMENT_{key.upper()}_REQUIRED")
-    if experiment.get("initial_state") != "PREREGISTERED":
-        raise MigrationError("MIGRATION_ACTIVE_LEGACY_EXPERIMENT_MUST_ENTER_PREREGISTERED")
+    target_state = experiment.get("initial_state")
+    if target_state not in {"PREREGISTERED", "RUNNING"}:
+        raise MigrationError("MIGRATION_ACTIVE_LEGACY_EXPERIMENT_STATE_INVALID")
+
     metadata = experiment.get("metadata")
     if not isinstance(metadata, dict):
         raise MigrationError("MIGRATION_EXPERIMENT_METADATA_REQUIRED")
-    if metadata.get("optimizer_steps_executed_at_migration") != 0:
-        raise MigrationError("MIGRATION_OPTIMIZER_STEPS_MUST_BE_ZERO")
-    if metadata.get("scientific_training_executed_at_migration") is not False:
-        raise MigrationError("MIGRATION_TRAINING_MUST_BE_UNEXECUTED")
-    if metadata.get("scientific_pass_or_fail_observed_at_migration") is not False:
-        raise MigrationError("MIGRATION_RESULT_MUST_BE_UNOBSERVED")
+    training_executed = metadata.get("scientific_training_executed_at_migration")
+    if not isinstance(training_executed, bool):
+        raise MigrationError("MIGRATION_TRAINING_HISTORY_BOOLEAN_REQUIRED")
+    if target_state == "PREREGISTERED" and training_executed:
+        raise MigrationError("MIGRATION_PREREGISTERED_CANNOT_HAVE_EXECUTED_TRAINING")
+    if target_state == "RUNNING":
+        if not training_executed:
+            raise MigrationError("MIGRATION_RUNNING_REQUIRES_EXECUTED_TRAINING_HISTORY")
+        training_state = metadata.get("training_execution_state")
+        if not isinstance(training_state, str) or not training_state.strip():
+            raise MigrationError("MIGRATION_RUNNING_TRAINING_EXECUTION_STATE_REQUIRED")
+    if metadata.get("scientific_free_running_result_observed_at_migration") is not False:
+        raise MigrationError("MIGRATION_CANNOT_IMPORT_FINAL_FREE_RUNNING_RESULT")
+    if metadata.get("scientific_causal_result_observed_at_migration") is not False:
+        raise MigrationError("MIGRATION_CANNOT_IMPORT_FINAL_CAUSAL_RESULT")
 
     for key in ("attempt_ids", "campaign_ids"):
         ids = links.get(key)
@@ -120,9 +138,17 @@ def validate_descriptor(value: dict[str, Any]) -> dict[str, Any]:
             raise MigrationError("MIGRATION_MODEL_MUST_START_BLOCKED")
 
     forbidden = (
-        "change_thresholds", "change_architecture", "change_optimizer", "change_schedule",
-        "execute_optimizer", "execute_scientific_courts", "claim_pass_or_fail",
-        "claim_unseen_generalization", "claim_product_promotion",
+        "change_thresholds",
+        "change_architecture",
+        "change_optimizer",
+        "change_schedule",
+        "execute_optimizer",
+        "repeat_training",
+        "mutate_frozen_checkpoints",
+        "execute_scientific_courts",
+        "claim_pass_or_fail",
+        "claim_unseen_generalization",
+        "claim_product_promotion",
         "teacher_truth_as_inference_conditioning",
         "named_semantic_taxonomy_as_structural_authority",
         "material_id_as_drawable_owner_truth",
@@ -165,7 +191,12 @@ def validate_bindings(value: dict[str, Any] | None, descriptor: dict[str, Any]) 
 
 
 def git(repo: Path, *args: str) -> str:
-    proc = subprocess.run(["git", "-C", str(repo), *args], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.run(
+        ["git", "-C", str(repo), *args],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
     if proc.returncode:
         raise MigrationError(f"MIGRATION_GIT_FAILED:{' '.join(args)}:{proc.stderr.strip()}")
     return proc.stdout.strip()
@@ -223,35 +254,66 @@ def ensure_experiment(api: API, spec: dict[str, Any]) -> dict[str, Any]:
     matches = [x for x in records if isinstance(x, dict) and x.get("slug") == spec["slug"]]
     if len(matches) > 1:
         raise MigrationError("MIGRATION_EXPERIMENT_NOT_UNIQUE")
+
+    target_state = spec["initial_state"]
     if matches:
-        existing = matches[0]
+        experiment = matches[0]
         for key in ("slug", "name", "research_question", "hypothesis"):
-            if existing.get(key) != spec.get(key):
+            if experiment.get(key) != spec.get(key):
                 raise MigrationError("MIGRATION_EXISTING_EXPERIMENT_SPEC_DRIFT")
-        return existing
-    created = api.post("/v1/experiments", spec)
-    if not isinstance(created, dict) or not isinstance(created.get("experiment"), dict):
-        raise MigrationError("MIGRATION_EXPERIMENT_CREATE_RESPONSE_INVALID")
-    return created["experiment"]
+        if experiment.get("metadata") != spec.get("metadata"):
+            raise MigrationError("MIGRATION_EXISTING_EXPERIMENT_METADATA_DRIFT")
+    else:
+        create_spec = dict(spec)
+        create_spec["initial_state"] = "PREREGISTERED"
+        created = api.post("/v1/experiments", create_spec)
+        if not isinstance(created, dict) or not isinstance(created.get("experiment"), dict):
+            raise MigrationError("MIGRATION_EXPERIMENT_CREATE_RESPONSE_INVALID")
+        experiment = created["experiment"]
+
+    current_state = experiment.get("lifecycle_state")
+    if target_state == "RUNNING" and current_state == "PREREGISTERED":
+        transitioned = api.post(
+            "/v1/experiments/transition",
+            {
+                "experiment_id": experiment.get("id"),
+                "to_state": "RUNNING",
+                "actor": "p1-operational-migration",
+            },
+        )
+        if not isinstance(transitioned, dict) or transitioned.get("lifecycle_state") != "RUNNING":
+            raise MigrationError("MIGRATION_EXPERIMENT_RUNNING_TRANSITION_FAILED")
+        experiment = transitioned
+    elif current_state != target_state:
+        raise MigrationError(f"MIGRATION_EXISTING_EXPERIMENT_STATE_DRIFT:{current_state}->{target_state}")
+    return experiment
 
 
 def ensure_links(api: API, descriptor: dict[str, Any], experiment_id: str) -> list[dict[str, Any]]:
     receipts: list[dict[str, Any]] = []
     for kind, key in (("ATTEMPT", "attempt_ids"), ("CAMPAIGN", "campaign_ids")):
         for target in descriptor["links"][key]:
-            result = api.post("/v1/experiments/link", {
-                "experiment_id": experiment_id,
-                "target_kind": kind,
-                "target_id": target,
-                "actor": "p1-operational-migration",
-            })
+            result = api.post(
+                "/v1/experiments/link",
+                {
+                    "experiment_id": experiment_id,
+                    "target_kind": kind,
+                    "target_id": target,
+                    "actor": "p1-operational-migration",
+                },
+            )
             if not isinstance(result, dict):
                 raise MigrationError("MIGRATION_LINK_RESPONSE_INVALID")
             receipts.append(result)
     return receipts
 
 
-def ensure_models(api: API, descriptor: dict[str, Any], experiment_id: str, bindings: dict[str, dict[str, str]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def ensure_models(
+    api: API,
+    descriptor: dict[str, Any],
+    experiment_id: str,
+    bindings: dict[str, dict[str, str]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     records = api.get("/v1/model-releases")
     if not isinstance(records, list):
         raise MigrationError("MIGRATION_MODEL_LIST_INVALID")
@@ -261,9 +323,21 @@ def ensure_models(api: API, descriptor: dict[str, Any], experiment_id: str, bind
         family = legacy["family"]
         binding = bindings.get(family)
         if binding is None:
-            blocked.append({"family": family, "checkpoint_sha256": legacy["checkpoint_sha256"], "reason": "BLOCKED_IDENTITY_RESOLUTION"})
+            blocked.append(
+                {
+                    "family": family,
+                    "checkpoint_sha256": legacy["checkpoint_sha256"],
+                    "reason": "BLOCKED_IDENTITY_RESOLUTION",
+                }
+            )
             continue
-        matches = [x for x in records if isinstance(x, dict) and x.get("family") == family and x.get("name") == binding["release_name"]]
+        matches = [
+            x
+            for x in records
+            if isinstance(x, dict)
+            and x.get("family") == family
+            and x.get("name") == binding["release_name"]
+        ]
         if len(matches) > 1:
             raise MigrationError(f"MIGRATION_EXISTING_MODEL_NOT_UNIQUE:{family}")
         if matches:
@@ -279,25 +353,28 @@ def ensure_models(api: API, descriptor: dict[str, Any], experiment_id: str, bind
                 raise MigrationError(f"MIGRATION_EXISTING_MODEL_SPEC_DRIFT:{family}")
             migrated.append(existing)
             continue
-        created = api.post("/v1/model-releases", {
-            "family": family,
-            "name": binding["release_name"],
-            "architecture_id": binding["architecture_id"],
-            "checkpoint_artifact_id": binding["checkpoint_artifact_id"],
-            "checkpoint_content_sha256": legacy["checkpoint_sha256"],
-            "engine_release_id": binding["engine_release_id"],
-            "originating_experiment_id": experiment_id,
-            "source_code_sha": legacy["source_code_sha"],
-            "initial_state": "DRAFT",
-            "metadata": {
-                "migration_id": descriptor["migration_id"],
-                "legacy_name": legacy["legacy_name"],
-                "legacy_checkpoint_step": legacy["checkpoint_step"],
-                "legacy_binding_sha256": legacy["binding_sha256"],
-                "promotion_performed_by_migration": False,
+        created = api.post(
+            "/v1/model-releases",
+            {
+                "family": family,
+                "name": binding["release_name"],
+                "architecture_id": binding["architecture_id"],
+                "checkpoint_artifact_id": binding["checkpoint_artifact_id"],
+                "checkpoint_content_sha256": legacy["checkpoint_sha256"],
+                "engine_release_id": binding["engine_release_id"],
+                "originating_experiment_id": experiment_id,
+                "source_code_sha": legacy["source_code_sha"],
+                "initial_state": "DRAFT",
+                "metadata": {
+                    "migration_id": descriptor["migration_id"],
+                    "legacy_name": legacy["legacy_name"],
+                    "legacy_checkpoint_step": legacy["checkpoint_step"],
+                    "legacy_binding_sha256": legacy["binding_sha256"],
+                    "promotion_performed_by_migration": False,
+                },
+                "created_by": "p1-operational-migration",
             },
-            "created_by": "p1-operational-migration",
-        })
+        )
         if not isinstance(created, dict) or created.get("lifecycle_state") != "DRAFT":
             raise MigrationError(f"MIGRATION_MODEL_CREATE_RESPONSE_INVALID:{family}")
         migrated.append(created)
@@ -305,16 +382,23 @@ def ensure_models(api: API, descriptor: dict[str, Any], experiment_id: str, bind
 
 
 def dry_plan(descriptor: dict[str, Any], bindings: dict[str, dict[str, str]]) -> dict[str, Any]:
+    experiment = descriptor["experiment"]
     return {
         "schema": "RealSaS.OperationalResearchStateMigrationPlan.v1",
         "migration_id": descriptor["migration_id"],
         "mode": "DRY_RUN",
-        "experiment": {"slug": descriptor["experiment"]["slug"], "action": "ENSURE_PREREGISTERED"},
+        "experiment": {
+            "slug": experiment["slug"],
+            "action": "ENSURE_" + experiment["initial_state"],
+            "historical_training_executed": experiment["metadata"]["scientific_training_executed_at_migration"],
+        },
         "models": [
             {
                 "family": model["family"],
                 "checkpoint_sha256": model["checkpoint_sha256"],
-                "action": "ENSURE_DRAFT_MODEL_RELEASE" if model["family"] in bindings else "BLOCKED_IDENTITY_RESOLUTION",
+                "action": "ENSURE_DRAFT_MODEL_RELEASE"
+                if model["family"] in bindings
+                else "BLOCKED_IDENTITY_RESOLUTION",
             }
             for model in descriptor["legacy_models"]
         ],
@@ -332,7 +416,10 @@ def apply(api: API, descriptor: dict[str, Any], bindings: dict[str, dict[str, st
     status = api.get("/v1/ops/status")
     if not isinstance(status, dict) or status.get("schema") != "RealSaS.OperationalStatus.v1":
         raise MigrationError("MIGRATION_OPERATIONAL_STATUS_INVALID")
-    if not any(isinstance(x, dict) and x.get("id") == experiment_id for x in status.get("active_experiments", [])):
+    if not any(
+        isinstance(x, dict) and x.get("id") == experiment_id
+        for x in status.get("active_experiments", [])
+    ):
         raise MigrationError("MIGRATION_EXPERIMENT_NOT_VISIBLE_IN_STATUS")
     return {
         "schema": "RealSaS.OperationalResearchStateMigrationReceipt.v1",
@@ -343,6 +430,9 @@ def apply(api: API, descriptor: dict[str, Any], bindings: dict[str, dict[str, st
         "blocked_models": blocked,
         "promotion_performed": False,
         "scientific_execution_performed": False,
+        "historical_training_executed_at_migration": descriptor["experiment"]["metadata"][
+            "scientific_training_executed_at_migration"
+        ],
         "operational_status_verified": True,
     }
 

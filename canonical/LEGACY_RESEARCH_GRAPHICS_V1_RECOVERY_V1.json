@@ -22,8 +22,6 @@
     {"path":"runtime/realsas_cpp/src/graphics_v1.hpp","blob_sha":"46ccc6eda9f4416b794d0035a5619b262898866a","role":"NATIVE_PARSE_VISIBILITY_ORDER_ATTACHMENT_CONTENT"},
     {"path":"runtime/realsas_cpp/src/runtime_v2_graphics_reference.cpp","blob_sha":"d3d85d2479fef23030e8ebb3000ce9e7aa6b82e5","role":"NATIVE_PIXEL_RASTER_CONSUMER"},
     {"path":"runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp","blob_sha":"6d450ad07cebb84215904c477d4f88ea38b1a253","role":"NATIVE_PARSER_ORDER_VISIBILITY_CONTRACT"},
-    {"path":"tests/compiler/test_vnext_single_carrier_graphics_v1.py","blob_sha":"8242b8668da3f9810113fbd263bceecf235b263c","role":"SINGLE_CANONICAL_M_COMPILER_RUNTIME_CONTRACT"},
-    {"path":"tests/compiler/test_vnext_graphics_native_e2e.py","blob_sha":"0c26c995d9fbe1c83cbcd1e25f5119c10ae291e5","role":"BEHAVIORAL_NATIVE_RASTER_WITNESS"},
     {"path":"canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V19_20261016.json","blob_sha":"69e0933a335def682cdd18bd51eee1a94ca0e832","role":"APPEND_ONLY_RUNTIME_SOURCE_LINEAGE"}
   ],
   "forward_patches": [
@@ -33,6 +31,20 @@
       "recovery_blob_sha": "be0a873507ac0b8b141cd878f9291bd20f8fdcb1",
       "change": "preserve the newer main verifier and append only COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V19_20261016.json to EXTENSION_PATHS",
       "legacy_verifier_blob_not_used": "a92b3bdeff38d607b2983e5a7e4e08832fc41e7f"
+    },
+    {
+      "path": "tests/compiler/test_vnext_single_carrier_graphics_v1.py",
+      "legacy_donor_blob_not_used": "8242b8668da3f9810113fbd263bceecf235b263c",
+      "recovery_blob_sha": "c6dabbef23bc75b5ca36558d9171c901c8ca94a4",
+      "change": "replace historical mechanical_candidate_v1-dependent donor test with a narrow current-contract Graphics V1 witness proving role-free materialized runtime content and rejection of a second independent visual mesh",
+      "reason": "mechanical_candidate_v1 is historical source outside the audited current recovery scope and must not be recovered merely to satisfy donor test history"
+    },
+    {
+      "path": "tests/compiler/test_vnext_graphics_native_e2e.py",
+      "legacy_donor_blob_not_used": "0c26c995d9fbe1c83cbcd1e25f5119c10ae291e5",
+      "recovery_blob_sha": "64f4ab5dda4033cb1cdc5cadc00731b4e4c1b528",
+      "change": "forward-adapt package construction to current RuntimeProjectionV2IR plus build_rss_vnext_graphics_entries_v1/build_rss_v2_entries integrity path while preserving the visible-versus-hidden real native RGBA behavioral assertion",
+      "reason": "the legacy hand-built RSS package predates the current runtime package integrity and transport contract"
     }
   ],
   "runtime_lineage": {
@@ -60,6 +72,7 @@
   },
   "explicit_non_goals": [
     "recover Graphics V2 product authority",
+    "recover historical mechanical_candidate_v1 source",
     "mint a second visual mesh",
     "change canonical mechanical topology",
     "promote a ModelRelease",

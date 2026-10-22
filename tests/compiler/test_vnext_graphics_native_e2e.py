@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from collections import OrderedDict
 from dataclasses import replace
+import hashlib
 import os
 from pathlib import Path
 import subprocess
-from types import SimpleNamespace
 
 import numpy as np
+from PIL import Image
 import pytest
 
 from compiler.realsas_compiler_core.graphics_runtime_v1 import (
@@ -15,23 +15,27 @@ from compiler.realsas_compiler_core.graphics_runtime_v1 import (
     RuntimeGraphicsViewV1,
     runtime_graphics_hash_v1,
 )
-from compiler.realsas_compiler_core.runtime_graphics_binary_v1 import encode_runtime_graphics_v1
-from compiler.realsas_compiler_core.runtime_package_v2 import (
-    _camera_payload,
-    _clip_payload,
-    _mesh_payload,
-    write_rss_v2,
+from compiler.realsas_compiler_core.runtime_authority_v2 import (
+    RuntimeClipV2IR,
+    RuntimeProjectionV2IR,
+    RuntimeViewV2IR,
+    runtime_projection_hash,
+    validate_runtime_projection,
 )
-from compiler.realsas_compiler_core.single_m_caa_v1 import (
-    MATERIAL_CONTRACT,
-    load_material_bundle,
-    native_material_payload,
-    write_material_bundle,
+from compiler.realsas_compiler_core.runtime_graphics_binary_v1 import (
+    build_rss_vnext_graphics_entries_v1,
 )
+from compiler.realsas_compiler_core.runtime_package_v2 import write_rss_v2
+from compiler.realsas_compiler_core.single_m_caa_v1 import write_material_bundle
 from tools.demo.render_knight_m_caa_v1 import load_inputs
 
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "tests/fixtures/single_m_caa_knight_v1/baseline.json"
+MESH_BINDING = "graphics-e2e-mesh"
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _runtime_graphics(face_count: int, *, visible: bool) -> RuntimeGraphicsV1:
@@ -47,7 +51,7 @@ def _runtime_graphics(face_count: int, *, visible: bool) -> RuntimeGraphicsV1:
         for view in range(8)
     )
     value = RuntimeGraphicsV1(
-        canonical_mesh_binding_hash="graphics-e2e-mesh",
+        canonical_mesh_binding_hash=MESH_BINDING,
         compiled_graphics_binding_hash="graphics-e2e-compiled",
         face_fragment_index=tuple(range(face_count)),
         fragment_ids=fragment_ids,
@@ -75,69 +79,81 @@ def _write_package(root: Path, *, visible: bool) -> tuple[Path, str]:
         caa_arrays=caa,
         input_identities={"fixture": "single_m_caa_knight_v1"},
     )
-    material = load_material_bundle(
-        material_ref["path"],
-        expected_sha256=material_ref["sha256"],
-        rest=arrays["rest"],
-        faces=arrays["faces"],
-    )
-    views = [
-        SimpleNamespace(view_index=v, camera={**vars(c), "resolution": 256})
-        for v, c in enumerate(material["cameras"])
-    ]
-    graphics = _runtime_graphics(len(arrays["faces"]), visible=visible)
-    graphics_payload = encode_runtime_graphics_v1(graphics)
 
-    entries: OrderedDict[str, bytes] = OrderedDict()
-    entries["mesh.bin"] = _mesh_payload(
-        {
-            "vertices": arrays["rest"],
-            "faces": arrays["faces"],
-            "face_uv": np.zeros((len(arrays["faces"]), 3, 2)),
-        }
+    projection_npz = root / ("projection-visible.npz" if visible else "projection-hidden.npz")
+    np.savez_compressed(
+        projection_npz,
+        vertices=np.asarray(arrays["rest"]),
+        faces=np.asarray(arrays["faces"]),
+        face_uv=np.zeros((len(arrays["faces"]), 3, 2), dtype=np.float64),
+        clip_0_times=np.asarray(arrays["times"], dtype=np.float64),
+        clip_0_positions=np.asarray(arrays["poses"], dtype=np.float64),
     )
-    entries["cameras.bin"] = _camera_payload(SimpleNamespace(views=views))
-    entries["run.bin"] = _clip_payload(arrays["times"], arrays["poses"])
-    entries["material.bin.z"] = native_material_payload(
-        material_ref["path"],
-        expected_sha256=material_ref["sha256"],
-        rest=arrays["rest"],
-        faces=arrays["faces"],
+
+    runtime_views = []
+    for view_index, (image, camera) in enumerate(zip(source, cameras)):
+        texture_path = root / f"{'visible' if visible else 'hidden'}-V{view_index}.png"
+        Image.fromarray(np.asarray(image, dtype=np.uint8), mode="RGBA").save(texture_path)
+        camera_payload = dict(vars(camera))
+        camera_payload["resolution"] = 256
+        runtime_views.append(
+            RuntimeViewV2IR(
+                view_index=view_index,
+                view_id=f"V{view_index}",
+                camera=camera_payload,
+                texture_path=str(texture_path),
+                texture_sha256=_sha256(texture_path),
+            )
+        )
+
+    height, width = np.asarray(source[0]).shape[:2]
+    provenance = np.zeros((8, height, width), dtype=np.uint8)
+    source_view = np.empty((8, height, width), dtype=np.int16)
+    for view_index in range(8):
+        source_view[view_index].fill(view_index)
+    provenance_npz = root / ("provenance-visible.npz" if visible else "provenance-hidden.npz")
+    np.savez_compressed(
+        provenance_npz,
+        provenance=provenance,
+        source_view=source_view,
     )
-    entries["graphics.bin"] = graphics_payload
-    manifest = {
-        "schema": "RealSaS.RuntimePackage.v2",
-        "mesh_hash": graphics.canonical_mesh_binding_hash,
-        "presentation_geometry_mode": MATERIAL_CONTRACT,
-        "playback_sampling_contract": "SEALED_FRAME_INDEX_ONLY",
-        "view_selection_contract": "SEALED_DISCRETE_DIRECTION_INDEX_ONLY",
-        "cross_direction_blending_authorized": "0",
-        "host_interpolation_authorized": "0",
-        "presentation_state_execution_authorized": "1",
-        "clipping_authorized": "0",
-        "tint_order_visibility_authorized": "1",
-        "texture_sampling_contract": "SOURCE_WINS_BILINEAR_SRGB__CAA_FALLBACK_LINEAR_PM",
-        "pixel_coverage_contract": "SINGLE_HALF_INTEGER_TOP_LEFT_APPROVED_BASELINE",
-        "pixel_coverage_sample_count": "1",
-        "composition_contract": "STRAIGHT_SRGB_FRONT_TO_BACK",
-        "depth_equivalence_epsilon_camera_z": "1e-9",
-        "mip_generation_authorized": "0",
-        "clip_count": "1",
-        "clip.0.id": "run",
-        "clip.0.entry": "run.bin",
-        "single_m_caa_material_entry": "material.bin.z",
-        "graphics_state_execution_authorized": "1",
-        "graphics_state_contract": "ROLE_FREE_CANONICAL_M_GRAPHICS_V1",
-        "graphics_entry": "graphics.bin",
-        "graphics_binding_hash": graphics.runtime_graphics_hash,
-        "graphics_face_ownership_required": "1",
-        "graphics_partial_order_required": "1",
-        "triangle_array_order_as_presentation_authority": "0",
-        "independent_visual_mesh_authorized": "0",
-    }
-    entries["manifest.txt"] = (
-        "\n".join(f"{key}={value}" for key, value in manifest.items()) + "\n"
-    ).encode("utf-8")
+
+    duration = (
+        float(arrays["times"][-1] - arrays["times"][0])
+        if len(arrays["times"]) > 1
+        else 0.0
+    )
+    projection = RuntimeProjectionV2IR(
+        complete_puppet_binding_hash="graphics-e2e-puppet",
+        mechanical_state_binding_hash="graphics-e2e-mechanics",
+        mesh_binding_hash=MESH_BINDING,
+        dynamic_motion_binding_hash="graphics-e2e-motion",
+        appearance_asset_binding_hash="graphics-e2e-appearance",
+        appearance_qualification_binding_hash="graphics-e2e-appearance-qualification",
+        camera_set_binding_hash="graphics-e2e-cameras",
+        visibility_contract_hash="graphics-e2e-visibility",
+        projection_npz_path=str(projection_npz),
+        projection_npz_sha256=_sha256(projection_npz),
+        provenance_npz_path=str(provenance_npz),
+        provenance_npz_sha256=_sha256(provenance_npz),
+        views=tuple(runtime_views),
+        clips=(
+            RuntimeClipV2IR(
+                clip_id="run",
+                duration_seconds=duration,
+                loop=True,
+                frame_count=len(arrays["poses"]),
+                array_prefix="clip_0",
+            ),
+        ),
+        projection_hash="",
+        metadata={"single_m_caa_material": material_ref},
+    )
+    projection = replace(projection, projection_hash=runtime_projection_hash(projection))
+    validate_runtime_projection(projection)
+
+    graphics = _runtime_graphics(len(arrays["faces"]), visible=visible)
+    entries = build_rss_vnext_graphics_entries_v1(projection, graphics)
     path = root / ("visible.rss" if visible else "hidden.rss")
     write_rss_v2(path, entries)
     return path, graphics.runtime_graphics_hash
@@ -154,11 +170,10 @@ def test_graphics_bin_changes_real_native_raster_behavior(tmp_path: Path) -> Non
     assert visible_binding != hidden_binding
 
     outputs = []
-    cases = (
+    for label, package, binding in (
         ("visible", visible_package, visible_binding),
         ("hidden", hidden_package, hidden_binding),
-    )
-    for label, package, binding in cases:
+    ):
         rgba = tmp_path / f"{label}.rgba"
         proc = subprocess.run(
             [
@@ -181,8 +196,9 @@ def test_graphics_bin_changes_real_native_raster_behavior(tmp_path: Path) -> Non
         assert proc.returncode == 0, proc.stderr
         assert "renderer=REALSAS_VNEXT_SINGLE_M_GRAPHICS" in proc.stdout
         assert f"graphics_binding={binding}" in proc.stdout
-        data = np.frombuffer(rgba.read_bytes(), dtype=np.uint8).reshape(256, 256, 4)
-        outputs.append(data)
+        outputs.append(
+            np.frombuffer(rgba.read_bytes(), dtype=np.uint8).reshape(256, 256, 4)
+        )
 
     visible, hidden = outputs
     assert np.count_nonzero(visible[..., 3]) > 0

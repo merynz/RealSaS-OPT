@@ -8,10 +8,10 @@
 -- LEGACY_FROZEN provenance, but that authority can never satisfy a new
 -- research Attempt/Campaign execution gate.
 --
--- EngineRelease manifests do not contain Git code SHA. Therefore an
--- EngineRelease may have at most one CANONICAL_MAIN code binding: that binding
--- completes its executable source identity. Multiple LEGACY_FROZEN provenance
--- bindings remain legal.
+-- EngineRelease identity is the semantic release manifest. The same release may
+-- remain valid across multiple reviewed main revisions when its stage/policy/DAG
+-- manifest is unchanged. Each execution still records one exact canonical code
+-- SHA, so provenance is exact without forcing meaningless release reseals.
 
 CREATE TABLE engine_release_source_bindings (
     release_id uuid NOT NULL REFERENCES engine_releases(id) ON DELETE RESTRICT,
@@ -25,10 +25,6 @@ CREATE TABLE engine_release_source_bindings (
 
 CREATE INDEX idx_engine_release_source_bindings_code_sha
     ON engine_release_source_bindings(code_sha, authority);
-
-CREATE UNIQUE INDEX uq_engine_release_single_canonical_main
-    ON engine_release_source_bindings(release_id)
-    WHERE authority='CANONICAL_MAIN';
 
 -- Historical Attempts remain readable. New research Attempts must carry the
 -- deployed canonical code identity that admitted their EngineRelease.

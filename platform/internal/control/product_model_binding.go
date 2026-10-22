@@ -18,6 +18,24 @@ func productModelIdentityTx(ctx context.Context, tx pgx.Tx, attemptID uuid.UUID)
 	return modelselection.IdentityRows(selected), nil
 }
 
+func productRevisionManifest(subjectID, releaseID, contractSHA string, bindings []revisionBinding, modelRows []map[string]any) map[string]any {
+	schema := "RealSaS.ProductRevisionManifest.v1"
+	if len(modelRows) > 0 {
+		schema = "RealSaS.ProductRevisionManifest.v2"
+	}
+	manifest := map[string]any{
+		"schema":                  schema,
+		"subject_id":              subjectID,
+		"engine_release_id":       releaseID,
+		"product_contract_sha256": contractSHA,
+		"bindings":                bindings,
+	}
+	if len(modelRows) > 0 {
+		manifest["model_releases"] = modelRows
+	}
+	return manifest
+}
+
 func bindProductRevisionModelsTx(ctx context.Context, tx pgx.Tx, attemptID, revisionID uuid.UUID) error {
 	return modelselection.CopyAttemptToProductRevisionTx(ctx, tx, attemptID, revisionID)
 }

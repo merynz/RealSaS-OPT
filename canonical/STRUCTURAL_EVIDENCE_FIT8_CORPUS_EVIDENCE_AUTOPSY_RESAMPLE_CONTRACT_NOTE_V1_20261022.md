@@ -1,0 +1,1 @@
+Counterfactual memories must preserve token budget, role-free evidence semantics, pair orientation pairing, and whole-stack ray-hit policy. Only deterministic sample choice may differ.

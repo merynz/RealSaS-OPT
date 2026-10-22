@@ -1,0 +1,15 @@
+{
+  "schema": "RealSaS.StructuralEvidenceFrozenBCausalUtilizationExecutionAuthority.v1",
+  "status": "SEALED_FOR_EXECUTION",
+  "date": "2026-10-22",
+  "training_execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+  "parent_census_result_sha256": "01836f85f17bc7308e35c9ed08acc523904ec1cfbcc51b0caf33e6c7cb9d4df8",
+  "parent_autopsy_result_sha256": "e15957ed5f57394c018c84971f146b970c8b85f9f91b93a5a9ca3bae8f59c17b",
+  "arm_b_checkpoint_sha256": "e57fc117162101fbd4e0db211bd501e7338eeda1e91df575bfa7016629a2238d",
+  "utilization_preregistration_commit": "148ed02b3ca26f229b8e9bfb31f499af87cc57ea",
+  "utilization_evaluator_implementation_commit": "3606bdd2a8e87a6f2214a8e008c79c3172f14219",
+  "optimizer_steps_executed": 0,
+  "parameters_updated": false,
+  "correct_b_parent_reproduction_required": true,
+  "nonsemantic_tensor_invariance_required": true
+}

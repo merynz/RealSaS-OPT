@@ -54,7 +54,7 @@ def test_shape_executor_materializes_attempt_models_and_seals_proposal(monkeypat
     )
 
     def read_object(ref):
-        assert ref is shape_ref
+        assert ref == shape_ref
         return b"input"
 
     def put_bytes(payload):

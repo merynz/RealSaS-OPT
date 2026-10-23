@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import io
 import json
+import os
+from pathlib import Path
+import subprocess
 import sys
 from types import SimpleNamespace
 
@@ -9,6 +12,9 @@ import numpy as np
 import pytest
 
 from compiler.realsas_compiler_services.platform_worker import shape_capability_v2 as shape_v2
+
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def _v1_payload() -> bytes:
@@ -61,9 +67,30 @@ def _decoded():
 
 
 def test_shape_v2_module_is_importable_without_torch():
-    assert "torch" not in sys.modules
-    assert shape_v2.SHAPE_PROPOSAL_SCHEMA_V2 == "RealSaS.ShapeProposal.v2"
-    assert "torch" not in sys.modules
+    script = r'''
+import builtins
+
+original = builtins.__import__
+def guarded(name, globals=None, locals=None, fromlist=(), level=0):
+    if name == "torch" or name.startswith("torch."):
+        raise RuntimeError("TORCH_IMPORT_FORBIDDEN_DURING_SHAPE_V2_MODULE_IMPORT")
+    return original(name, globals, locals, fromlist, level)
+
+builtins.__import__ = guarded
+from compiler.realsas_compiler_services.platform_worker import shape_capability_v2
+assert shape_capability_v2.SHAPE_PROPOSAL_SCHEMA_V2 == "RealSaS.ShapeProposal.v2"
+'''
+    env = dict(os.environ)
+    env["PYTHONPATH"] = str(ROOT) + os.pathsep + env.get("PYTHONPATH", "")
+    completed = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr + completed.stdout
 
 
 def test_shape_v2_serializes_scene_frame_topology_without_mesh_authority(monkeypatch):

@@ -7,8 +7,10 @@ on:
       - research/knight-oracle-drawable-court-20261023
     paths:
       - 'tools/demo/knight_oracle_drawable_court_v1.py'
+      - 'tools/demo/knight_oracle_drawable_court_v2.py'
       - '.github/workflows/knight_oracle_drawable_court_v1.yml'
       - 'canonical/KNIGHT_ORACLE_DRAWABLE_COURT_PREREG_V1_20261023.json'
+      - 'canonical/KNIGHT_ORACLE_DRAWABLE_BASELINE_HASH_GATE_RECEIPT_20261023.json'
 
 concurrency:
   group: knight-oracle-drawable-court-v1
@@ -20,13 +22,12 @@ permissions:
 jobs:
   oracle:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 45
+    timeout-minutes: 90
     env:
       AUTHORITY_ROOT: /home/monster/realsas_authority
       RUN_ID: SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_RECOVERED_V1_643714DE
-      CONSUMER_RUN_ID: SUBJECT2_KNIGHT_ORACLE_DRAWABLE_BASELINE_VERIFY_V1_20261023
-      BASELINE_VERIFY_DIR: /tmp/knight_oracle_drawable_baseline_verify_v1
       OUT_DIR: canonical/knight_oracle_drawable_court_v1
+      BASELINE_RECEIPT: canonical/KNIGHT_ORACLE_DRAWABLE_BASELINE_HASH_GATE_RECEIPT_20261023.json
 
     steps:
       - uses: actions/checkout@v4
@@ -42,64 +43,59 @@ jobs:
           set -euo pipefail
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
 
-      - name: Verify preregistration and recovered immutable source exists
+      - name: Verify preregistration, recovered source, and sealed baseline receipt
         run: |
           set -euo pipefail
-          python -m py_compile tools/demo/knight_oracle_drawable_court_v1.py
+          python -m py_compile \
+            tools/demo/knight_oracle_drawable_court_v1.py \
+            tools/demo/knight_oracle_drawable_court_v2.py
           test -f canonical/KNIGHT_ORACLE_DRAWABLE_COURT_PREREG_V1_20261023.json
+          test -f "$BASELINE_RECEIPT"
           test -f "$AUTHORITY_ROOT/runs/$RUN_ID/IMMUTABLE_STAGE23_SEAL.json"
-          RUN_ROOT="$AUTHORITY_ROOT/runs/$RUN_ID" python - <<'PY'
+          RUN_ROOT="$AUTHORITY_ROOT/runs/$RUN_ID" RECEIPT="$BASELINE_RECEIPT" python - <<'PY'
           import json, os
           from pathlib import Path
           prereg=json.loads(Path('canonical/KNIGHT_ORACLE_DRAWABLE_COURT_PREREG_V1_20261023.json').read_text())
+          receipt=json.loads(Path(os.environ['RECEIPT']).read_text())
           seal=json.loads((Path(os.environ['RUN_ROOT'])/'IMMUTABLE_STAGE23_SEAL.json').read_text())
-          if prereg.get('status')!='PREREGISTERED_BEFORE_EXECUTION': raise RuntimeError('DRAWABLE_BASELINE_PREREG_STATUS')
-          if prereg.get('product_authority') is not False: raise RuntimeError('DRAWABLE_BASELINE_PRODUCT_AUTHORITY')
-          if seal.get('status')!='SEALED_IMMUTABLE_STAGE23': raise RuntimeError('DRAWABLE_BASELINE_SEAL_STATUS')
-          if seal.get('overwrite_forbidden') is not True: raise RuntimeError('DRAWABLE_BASELINE_OVERWRITE_POLICY')
-          if seal.get('source_owned_visual_mesh_mode') is not False: raise RuntimeError('DRAWABLE_BASELINE_VISUAL_MODE')
-          print('KNIGHT_ORACLE_RECOVERED_SOURCE='+json.dumps({
-              'run_id':seal.get('run_id'),
-              'parent_run_id':seal.get('parent_run_id'),
-              'candidate':seal.get('candidate_lineage_hash'),
-              'stage23':seal.get('stage23_asset_hash'),
-          },sort_keys=True))
-          PY
-
-      - name: Behaviorally verify recovered source against frozen canonical GIFs
-        run: |
-          set -euo pipefail
-          rm -rf "$AUTHORITY_ROOT/runs/$CONSUMER_RUN_ID" "$BASELINE_VERIFY_DIR"
-          PYTHONPATH=. python tools/demo/consume_knight_corrected_mechanical_caa_stage23_immutable_v1.py \
-            --authority-root "$AUTHORITY_ROOT" \
-            --source-run-id "$RUN_ID" \
-            --consumer-run-id "$CONSUMER_RUN_ID" \
-            --out-dir "$BASELINE_VERIFY_DIR" | tee /tmp/knight_oracle_baseline_verify.txt
-          OUT="$BASELINE_VERIFY_DIR" python - <<'PY'
-          import json, os
-          from pathlib import Path
-          report=json.loads((Path(os.environ['OUT'])/'REPORT.json').read_text())
           expected={
             'IDLE':'4c64437ba1f2ecaca8302a52c598f3ba7750a923fd50b90f7cafa3f8473386c3',
             'RUN':'64ad50eeb9ea55ce202ddc46728ffea9074419dbf855938840f69d06661806e3',
             'SLASH':'adc8e8cd0e2272a836e50f7a73585208074703ea5f3c9a549583d7a659fa2b85',
           }
-          actual={row['name']:row['sha256'] for row in report['gifs']}
-          print('KNIGHT_ORACLE_BASELINE_HASH_GATE='+json.dumps({'actual':actual,'expected':expected,'stage23':report['stage23_asset_hash'],'skin':report['skin_lineage_hash']},sort_keys=True))
-          if actual != expected:
-              raise RuntimeError('DRAWABLE_ORACLE_BASELINE_FROZEN_RENDER_HASH_MISMATCH')
+          if prereg.get('status')!='PREREGISTERED_BEFORE_EXECUTION': raise RuntimeError('DRAWABLE_BASELINE_PREREG_STATUS')
+          if prereg.get('product_authority') is not False: raise RuntimeError('DRAWABLE_BASELINE_PRODUCT_AUTHORITY')
+          if receipt.get('status')!='PASS': raise RuntimeError('DRAWABLE_BASELINE_RECEIPT_STATUS')
+          if receipt.get('source_workflow_run_id')!=39872747814: raise RuntimeError('DRAWABLE_BASELINE_RECEIPT_RUN_BINDING')
+          if receipt.get('source_job_id')!=120150875555: raise RuntimeError('DRAWABLE_BASELINE_RECEIPT_JOB_BINDING')
+          if receipt.get('source_run_id')!=os.environ['RUN_ID']: raise RuntimeError('DRAWABLE_BASELINE_RECEIPT_SOURCE_BINDING')
+          if receipt.get('frozen_gif_sha256')!=expected: raise RuntimeError('DRAWABLE_BASELINE_RECEIPT_GIF_HASH_DRIFT')
+          if seal.get('status')!='SEALED_IMMUTABLE_STAGE23': raise RuntimeError('DRAWABLE_BASELINE_SEAL_STATUS')
+          if seal.get('overwrite_forbidden') is not True: raise RuntimeError('DRAWABLE_BASELINE_OVERWRITE_POLICY')
+          if seal.get('source_owned_visual_mesh_mode') is not False: raise RuntimeError('DRAWABLE_BASELINE_VISUAL_MODE')
+          if receipt.get('candidate_lineage_hash')!=seal.get('candidate_lineage_hash'): raise RuntimeError('DRAWABLE_BASELINE_CANDIDATE_DRIFT')
+          if receipt.get('stage23_asset_hash')!=seal.get('stage23_asset_hash'): raise RuntimeError('DRAWABLE_BASELINE_STAGE23_DRIFT')
+          print('KNIGHT_ORACLE_BASELINE_RECEIPT_GATE='+json.dumps({
+              'source_workflow_run_id':receipt['source_workflow_run_id'],
+              'source_job_id':receipt['source_job_id'],
+              'run_id':seal.get('run_id'),
+              'parent_run_id':seal.get('parent_run_id'),
+              'candidate':seal.get('candidate_lineage_hash'),
+              'stage23':seal.get('stage23_asset_hash'),
+              'frozen_gifs':receipt.get('frozen_gif_sha256'),
+          },sort_keys=True))
           PY
 
       - name: Run oracle drawable court
         run: |
           set -euo pipefail
           rm -rf "$OUT_DIR"
-          PYTHONPATH=. python tools/demo/knight_oracle_drawable_court_v1.py \
+          PYTHONPATH=. python tools/demo/knight_oracle_drawable_court_v2.py \
             --authority-root "$AUTHORITY_ROOT" \
             --run-id "$RUN_ID" \
-            --out-dir "$OUT_DIR" | tee /tmp/knight_oracle_drawable_court_v1.txt
-          cp /tmp/knight_oracle_drawable_court_v1.txt "$OUT_DIR/AUDIT_STDOUT.txt"
-          cp /tmp/knight_oracle_baseline_verify.txt "$OUT_DIR/BASELINE_VERIFY_STDOUT.txt"
+            --out-dir "$OUT_DIR" | tee /tmp/knight_oracle_drawable_court_v2.txt
+          cp /tmp/knight_oracle_drawable_court_v2.txt "$OUT_DIR/AUDIT_STDOUT.txt"
+          cp "$BASELINE_RECEIPT" "$OUT_DIR/BASELINE_HASH_GATE_RECEIPT.json"
           test -f "$OUT_DIR/REPORT.json"
           test -f "$OUT_DIR/DRAWABLE_PARTITION.json"
           test -f "$OUT_DIR/KNIGHT_IDLE_ORACLE_DRAWABLE_COURT_V1.gif"

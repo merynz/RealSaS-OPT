@@ -40,9 +40,13 @@ func BuildEngineReleaseRegistry(ctx context.Context, graph *stagegraph.Graph) (*
 	if err != nil {
 		return nil, err
 	}
-	// product.* capability IDs are stable semantic roles. Fail release sealing
-	// closed if role identity, implementation class, or role wiring drifts.
+	// product.* capability IDs are stable semantic roles. Release sealing is also
+	// the architecture gate for responsibility ownership, authority duplication,
+	// canonical transform paths and lossy evidence boundaries.
 	if _, err := ProductRoleGraph(registry); err != nil {
+		return nil, err
+	}
+	if _, err := ResponsibilityTerrain(registry); err != nil {
 		return nil, err
 	}
 	return registry, nil

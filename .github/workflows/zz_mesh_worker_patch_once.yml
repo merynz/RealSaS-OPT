@@ -1,0 +1,39 @@
+name: mesh-worker-patch-once
+on:
+  push:
+    branches: [product/mesh-capability-v1-20261023-canonical-main]
+    paths: [.github/workflows/zz_mesh_worker_patch_once.yml]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: product/mesh-capability-v1-20261023-canonical-main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Patch capability dispatch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('compiler/realsas_compiler_services/platform_worker/worker.py')
+          s = p.read_text()
+          old_import = 'from compiler.realsas_compiler_services.platform_worker.shape_executor_v1 import execute_shape_capability_v1\n'
+          if old_import not in s:
+              raise SystemExit('shape v1 top-level import not found')
+          s = s.replace(old_import, '', 1)
+          old = '''    if (\n        str(request.get("kind") or "") == "MODULE"\n        and metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v1"\n    ):\n        def run_shape(value):\n            return execute_shape_capability_v1(\n                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes\n            )\n        return await _with_heartbeat(run_shape, request)\n\n'''
+          new = '''    if (\n        str(request.get("kind") or "") == "MODULE"\n        and metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v2"\n    ):\n        from compiler.realsas_compiler_services.platform_worker.shape_executor_v2 import (\n            execute_shape_capability_v2,\n        )\n\n        def run_shape(value):\n            return execute_shape_capability_v2(\n                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes\n            )\n        return await _with_heartbeat(run_shape, request)\n\n    if (\n        str(request.get("kind") or "") == "MODULE"\n        and metadata.get("executor_contract") == "RealSaS.ProductMeshCompile.v1"\n    ):\n        from compiler.realsas_compiler_services.platform_worker.mesh_executor_v1 import (\n            execute_mesh_capability_v1,\n        )\n\n        def run_mesh(value):\n            return execute_mesh_capability_v1(\n                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes\n            )\n        return await _with_heartbeat(run_mesh, request)\n\n'''
+          if old not in s:
+              raise SystemExit('shape v1 dispatch block not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+          rm .github/workflows/zz_mesh_worker_patch_once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add compiler/realsas_compiler_services/platform_worker/worker.py .github/workflows/zz_mesh_worker_patch_once.yml
+          git commit -m 'P3: dispatch Shape v2 and Mesh lazily from generic worker'
+          git push

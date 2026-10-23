@@ -66,12 +66,13 @@ func TestBuildEngineReleaseRegistryIncludesStagesAndProductModules(t *testing.T)
 		ProductShapeCapabilityID,
 		ProductMeshCapabilityID,
 		ProductRigCapabilityID,
+		ProductSkinCapabilityID,
 	} {
 		if _, ok := registry.Get(id); !ok {
 			t.Fatalf("release registry missing %s", id)
 		}
 	}
-	resolved, err := registry.Resolve(ProductRigCapabilityID)
+	resolved, err := registry.Resolve(ProductSkinCapabilityID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,19 +91,20 @@ func TestBuildEngineReleaseRegistryIncludesStagesAndProductModules(t *testing.T)
 		StageCapabilityID("17_MECHANICAL_PARTITION_QUALIFIED"),
 		ProductMeshCapabilityID,
 		ProductRigCapabilityID,
+		ProductSkinCapabilityID,
 	} {
 		if !seen[id] {
-			t.Fatalf("rig resolution missing %s: %+v", id, resolved)
+			t.Fatalf("skin resolution missing %s: %+v", id, resolved)
 		}
 	}
-	if resolved[len(resolved)-1].ID != ProductRigCapabilityID {
-		t.Fatalf("rig must resolve after all dependencies: %+v", resolved)
+	if resolved[len(resolved)-1].ID != ProductSkinCapabilityID {
+		t.Fatalf("skin must resolve after all dependencies: %+v", resolved)
 	}
 }
 
 func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	providers := ProductProviders()
-	if len(providers) != 4 {
+	if len(providers) != 5 {
 		t.Fatalf("product provider count=%d", len(providers))
 	}
 	registry := productProvidersTestRegistry(t)
@@ -146,6 +148,24 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	if rig.Metadata["frame_observability_claimed"] != false {
 		t.Fatalf("rig prematurely claims post-bind observability: %+v", rig.Metadata)
 	}
+	skin, ok := registry.Get(ProductSkinCapabilityID)
+	if !ok {
+		t.Fatal("product.skin missing")
+	}
+	if len(skin.Dependencies) != 3 || skin.Dependencies[0] != ProductMeshCapabilityID || skin.Dependencies[1] != ProductRigCapabilityID || skin.Dependencies[2] != StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED") {
+		t.Fatalf("skin descriptor=%+v", skin)
+	}
+	for _, dependency := range skin.Dependencies {
+		if strings.Contains(dependency, "ARACHNE_FIT") || strings.Contains(dependency, "MIRA_FIT") {
+			t.Fatalf("fit/training dependency leaked into product.skin: %s", dependency)
+		}
+	}
+	if skin.Metadata["feature_evidence_is_canonical_parent"] != false || skin.Metadata["post_bind_frame_observability_claimed"] != false {
+		t.Fatalf("skin authority boundary drift: %+v", skin.Metadata)
+	}
+	if skin.Metadata["generalization_claimed"] != false {
+		t.Fatalf("FIT1 MIRA incorrectly claims generalization: %+v", skin.Metadata)
+	}
 }
 
 func TestModuleVersionPolicyAndParametersAreRederivedFromDescriptor(t *testing.T) {
@@ -155,6 +175,7 @@ func TestModuleVersionPolicyAndParametersAreRederivedFromDescriptor(t *testing.T
 		ProductShapeCapabilityID,
 		ProductMeshCapabilityID,
 		ProductRigCapabilityID,
+		ProductSkinCapabilityID,
 	} {
 		descriptor, ok := registry.Get(capabilityID)
 		if !ok {

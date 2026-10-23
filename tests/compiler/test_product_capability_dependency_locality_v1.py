@@ -46,10 +46,12 @@ def guarded(name, globals=None, locals=None, fromlist=(), level=0):
 
 builtins.__import__ = guarded
 from compiler.realsas_compiler_services.platform_worker import worker
-from compiler.realsas_compiler_services.platform_worker import rig_executor_v1
+from compiler.realsas_compiler_services.platform_worker import rig_executor_v1, skin_executor_v1
 assert worker.EXECUTE_CAPABILITY_ACTIVITY == "engine.execute_capability.v1"
 assert rig_executor_v1.RIG_EXECUTOR_CONTRACT_V1 == "RealSaS.ProductRigInference.v1"
+assert skin_executor_v1.SKIN_EXECUTOR_CONTRACT_V1 == "RealSaS.ProductSkinInference.v1"
 assert not any(name == "models.axis" or name.startswith("models.axis.") for name in sys.modules)
+assert not any(name == "models.mira" or name.startswith("models.mira.") for name in sys.modules)
 assert "torch" not in sys.modules
 rows = worker._typed_stage_capability_outputs([
     {"artifact_type":"RealSaS.EngineOutput", "schema_version":"v1", "payload_schema":"RealSaS.NormalizationDomainIR.v1"},

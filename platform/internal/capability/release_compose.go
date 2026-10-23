@@ -23,6 +23,7 @@ func ProductProviders() []Provider {
 		ProductShapeProvider{},
 		ProductMeshProvider{},
 		ProductRigProvider{},
+		ProductSkinProvider{},
 	}
 }
 

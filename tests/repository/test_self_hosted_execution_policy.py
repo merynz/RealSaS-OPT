@@ -4,6 +4,13 @@ import re
 
 
 ROOT = Path(__file__).resolve().parents[2]
+# Most host-independent CI follows the moving GitHub-hosted alias. A narrow
+# allowlist exists for workflows whose reproducibility depends on an explicit
+# hosted image after a proven runner-image regression. Expanding this set is a
+# governance change, not an arbitrary workflow-local choice.
+EXPLICIT_HOSTED_RUNNER_PINS = {
+    "ubuntu-24.04",
+}
 HOSTED_FIRST = {
     "current_mainline_self_hosted_ci.yml",
     "model_mainline_source_gate.yml",
@@ -53,16 +60,31 @@ def _is_explicit_self_hosted(value: str) -> bool:
     return value.startswith("[") and value.endswith("]") and "self-hosted" in value
 
 
+def _is_approved_hosted_runner(value: str) -> bool:
+    return value == "ubuntu-latest" or value in EXPLICIT_HOSTED_RUNNER_PINS
+
+
 def test_workflow_runner_kinds_are_explicit():
     checked = 0
     for path in (ROOT / ".github/workflows").glob("*.yml"):
         text = path.read_text(encoding="utf-8")
         for value in _runner_values(text):
             checked += 1
-            assert value == "ubuntu-latest" or _is_explicit_self_hosted(value), (
+            assert _is_approved_hosted_runner(value) or _is_explicit_self_hosted(value), (
                 f"Implicit or unsupported runner expression: {path.name}: {value}"
             )
     assert checked > 0
+
+
+def test_explicit_hosted_runner_pins_are_deliberate_and_used():
+    observed = {
+        value
+        for path in (ROOT / ".github/workflows").glob("*.yml")
+        for value in _runner_values(path.read_text(encoding="utf-8"))
+    }
+    assert EXPLICIT_HOSTED_RUNNER_PINS
+    assert EXPLICIT_HOSTED_RUNNER_PINS <= observed
+    assert all(re.fullmatch(r"ubuntu-\d{2}\.\d{2}", value) for value in EXPLICIT_HOSTED_RUNNER_PINS)
 
 
 def test_host_independent_current_workflows_are_hosted_and_public_only():

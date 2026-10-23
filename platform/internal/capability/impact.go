@@ -19,12 +19,12 @@ type DirectCapabilityChange struct {
 }
 
 type CapabilityImpact struct {
-	DirectChanges                []DirectCapabilityChange `json:"direct_changes"`
-	InvalidatedCapabilityIDs     []string                 `json:"invalidated_capability_ids"`
-	UnchangedCapabilityIDs       []string                 `json:"unchanged_capability_ids"`
-	RemovedCapabilityIDs         []string                 `json:"removed_capability_ids"`
-	ChangedProductRoleIDs        []ProductRoleID          `json:"changed_product_role_ids"`
-	InvalidatedProductRoleIDs    []ProductRoleID          `json:"invalidated_product_role_ids"`
+	DirectChanges             []DirectCapabilityChange `json:"direct_changes"`
+	InvalidatedCapabilityIDs  []string                 `json:"invalidated_capability_ids"`
+	UnchangedCapabilityIDs    []string                 `json:"unchanged_capability_ids"`
+	RemovedCapabilityIDs      []string                 `json:"removed_capability_ids"`
+	ChangedProductRoleIDs     []ProductRoleID          `json:"changed_product_role_ids"`
+	InvalidatedProductRoleIDs []ProductRoleID          `json:"invalidated_product_role_ids"`
 }
 
 func descriptorSHA256(value Descriptor) (string, error) {
@@ -124,9 +124,9 @@ func CompareReleaseSnapshots(oldSnapshot, newSnapshot ReleaseSnapshot) (Capabili
 			return CapabilityImpact{}, fmt.Errorf("missing baseline capability version %s", id)
 		}
 		change := DirectCapabilityChange{
-			CapabilityID: id,
+			CapabilityID:  id,
 			ProductRoleID: productRoleForDescriptor(descriptor),
-			Added: !existed,
+			Added:         !existed,
 		}
 		if existed {
 			oldSHA, err := descriptorSHA256(oldDescriptor)
@@ -193,6 +193,7 @@ func CompareReleaseSnapshots(oldSnapshot, newSnapshot ReleaseSnapshot) (Capabili
 				invalidatedRoles[role] = struct{}{}
 			}
 		}
+	}
 	var unchanged []string
 	for _, descriptor := range newSnapshot.Registry.Descriptors() {
 		if _, changed := invalidSet[descriptor.ID]; !changed {

@@ -36,7 +36,16 @@ func BuildEngineReleaseRegistry(ctx context.Context, graph *stagegraph.Graph) (*
 	}
 	providers := []Provider{CompilePlanProvider{Graph: graph, Architecture: owners}}
 	providers = append(providers, ProductProviders()...)
-	return Build(ctx, providers...)
+	registry, err := Build(ctx, providers...)
+	if err != nil {
+		return nil, err
+	}
+	// product.* capability IDs are stable semantic roles. Fail release sealing
+	// closed if role identity, implementation class, or role wiring drifts.
+	if _, err := ProductRoleGraph(registry); err != nil {
+		return nil, err
+	}
+	return registry, nil
 }
 
 func modulePolicySHA256(descriptor Descriptor) (string, error) {

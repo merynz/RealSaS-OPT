@@ -287,6 +287,20 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
     metadata = dict(request.get("capability_metadata") or {})
     if (
         str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductInputInference.v1"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.input_executor_v1 import (
+            execute_input_capability_v1,
+        )
+
+        def run_input(value):
+            return execute_input_capability_v1(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
+            )
+        return await _with_heartbeat(run_input, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
         and metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v1"
     ):
         def run_shape(value):

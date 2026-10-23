@@ -87,7 +87,8 @@ RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    IF NEW.engine_release_id IS DISTINCT FROM OLD.engine_release_id
+    IF NEW.created_from_attempt_id IS DISTINCT FROM OLD.created_from_attempt_id
+       OR NEW.engine_release_id IS DISTINCT FROM OLD.engine_release_id
        OR NEW.capability_set_sha256 IS DISTINCT FROM OLD.capability_set_sha256 THEN
         RAISE EXCEPTION 'PRODUCT_REVISION_RELEASE_WIRING_IMMUTABLE';
     END IF;
@@ -97,7 +98,7 @@ $$;
 -- +goose StatementEnd
 
 CREATE TRIGGER trg_product_revision_release_wiring_immutable
-BEFORE UPDATE OF engine_release_id, capability_set_sha256 ON product_revisions
+BEFORE UPDATE OF created_from_attempt_id, engine_release_id, capability_set_sha256 ON product_revisions
 FOR EACH ROW
 EXECUTE FUNCTION forbid_product_revision_release_wiring_mutation_v1();
 

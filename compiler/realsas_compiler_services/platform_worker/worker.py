@@ -22,7 +22,6 @@ if str(REPO_ROOT) not in sys.path:
 
 from compiler.realsas_compiler_services.orchestrator import mainline
 from compiler.realsas_compiler_services.platform_worker.model_inputs import materialize_model_releases
-from compiler.realsas_compiler_services.platform_worker.shape_executor_v1 import execute_shape_capability_v1
 from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, verify_execution_version, released_execution_plan, verify_source_inputs
 
 ENGINE_TASK_QUEUE = "realsas-engine-v1"
@@ -301,13 +300,31 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
 
     if (
         str(request.get("kind") or "") == "MODULE"
-        and metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v1"
+        and metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v2"
     ):
+        from compiler.realsas_compiler_services.platform_worker.shape_executor_v2 import (
+            execute_shape_capability_v2,
+        )
+
         def run_shape(value):
-            return execute_shape_capability_v1(
+            return execute_shape_capability_v2(
                 value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
             )
         return await _with_heartbeat(run_shape, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductMeshCompile.v1"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.mesh_executor_v1 import (
+            execute_mesh_capability_v1,
+        )
+
+        def run_mesh(value):
+            return execute_mesh_capability_v1(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
+            )
+        return await _with_heartbeat(run_mesh, request)
 
     if str(request.get("kind") or "") != "STAGE":
         return {

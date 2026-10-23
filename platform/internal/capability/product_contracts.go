@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/semantic"
 )
@@ -67,10 +68,13 @@ func validateProductDescriptorContracts(registry *Registry) error {
 	}
 	seen := map[string]struct{}{}
 	for _, descriptor := range registry.Descriptors() {
-		if _, ok := contracts.Capabilities[descriptor.ID]; !ok {
+		contract, ok := contracts.Capabilities[descriptor.ID]
+		if !ok {
+			if strings.HasPrefix(descriptor.ID, "product.") {
+				return fmt.Errorf("PRODUCT_CAPABILITY_CONTRACT_UNDECLARED_PROVIDER:%s", descriptor.ID)
+			}
 			continue
 		}
-		contract := contracts.Capabilities[descriptor.ID]
 		if descriptor.Kind != KindModule {
 			return fmt.Errorf("PRODUCT_CAPABILITY_CONTRACT_KIND_DRIFT:%s", descriptor.ID)
 		}

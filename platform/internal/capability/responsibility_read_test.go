@@ -21,11 +21,11 @@ func TestResponsibilityReadProjectionDeclaresCurrentTerrain(t *testing.T) {
 
 func TestResponsibilityReadProjectionKeepsLegacySnapshotInspectable(t *testing.T) {
 	registry, err := NewRegistry([]Descriptor{{
-		ID: ProductShapeCapabilityID,
-		Kind: KindModule,
-		OwnerModuleID: "legacy.shape",
+		ID:               ProductShapeCapabilityID,
+		Kind:             KindModule,
+		OwnerModuleID:    "legacy.shape",
 		ExecutorActivity: "engine.execute_capability.v1",
-		AllowedModes: []Mode{ModeDeveloper},
+		AllowedModes:     []Mode{ModeDeveloper},
 		Metadata: map[string]any{
 			"product_role_id":      string(ProductRoleShape),
 			"implementation_class": string(ImplementationModel),

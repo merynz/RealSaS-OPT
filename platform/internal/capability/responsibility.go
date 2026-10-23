@@ -12,21 +12,21 @@ import (
 var productResponsibilityLedgerJSON []byte
 
 type ResponsibilityDefinition struct {
-	ID                    string        `json:"id"`
-	RoleID                ProductRoleID `json:"role_id"`
-	RequiredWhenRolePresent bool        `json:"required_when_role_present"`
-	AuthorityKind         string        `json:"authority_kind"`
-	Exclusive             bool          `json:"exclusive"`
-	CanonicalTransformID  string        `json:"canonical_transform_id"`
-	DataReduction         string        `json:"data_reduction"`
-	SourceTruthRetained   bool          `json:"source_truth_retained"`
+	ID                      string        `json:"id"`
+	RoleID                  ProductRoleID `json:"role_id"`
+	RequiredWhenRolePresent bool          `json:"required_when_role_present"`
+	AuthorityKind           string        `json:"authority_kind"`
+	Exclusive               bool          `json:"exclusive"`
+	CanonicalTransformID    string        `json:"canonical_transform_id"`
+	DataReduction           string        `json:"data_reduction"`
+	SourceTruthRetained     bool          `json:"source_truth_retained"`
 }
 
 type responsibilityRules struct {
 	ExclusiveResponsibilityMayHaveOneActiveOwner bool `json:"exclusive_responsibility_may_have_one_active_owner"`
 	LossyTransformMayNotReplaceSourceTruth       bool `json:"lossy_transform_may_not_replace_source_truth"`
-	SourceTruthMustRemainAddressable              bool `json:"source_truth_must_remain_addressable_after_evidence_lowering"`
-	LegacyStagesAreInternalImplementation         bool `json:"legacy_stages_are_internal_implementation_not_product_role_authority"`
+	SourceTruthMustRemainAddressable             bool `json:"source_truth_must_remain_addressable_after_evidence_lowering"`
+	LegacyStagesAreInternalImplementation        bool `json:"legacy_stages_are_internal_implementation_not_product_role_authority"`
 }
 
 type ResponsibilityLedger struct {
@@ -36,16 +36,16 @@ type ResponsibilityLedger struct {
 }
 
 type ResponsibilityTerrainNode struct {
-	ResponsibilityID      string              `json:"responsibility_id"`
-	RoleID                ProductRoleID       `json:"role_id"`
-	CapabilityID          string              `json:"capability_id"`
-	ImplementationClass   ImplementationClass `json:"implementation_class"`
-	OwnerModuleID         string              `json:"owner_module_id"`
-	AuthorityKind         string              `json:"authority_kind"`
-	Exclusive             bool                `json:"exclusive"`
-	CanonicalTransformID  string              `json:"canonical_transform_id"`
-	DataReduction         string              `json:"data_reduction"`
-	SourceTruthRetained   bool                `json:"source_truth_retained"`
+	ResponsibilityID     string              `json:"responsibility_id"`
+	RoleID               ProductRoleID       `json:"role_id"`
+	CapabilityID         string              `json:"capability_id"`
+	ImplementationClass  ImplementationClass `json:"implementation_class"`
+	OwnerModuleID        string              `json:"owner_module_id"`
+	AuthorityKind        string              `json:"authority_kind"`
+	Exclusive            bool                `json:"exclusive"`
+	CanonicalTransformID string              `json:"canonical_transform_id"`
+	DataReduction        string              `json:"data_reduction"`
+	SourceTruthRetained  bool                `json:"source_truth_retained"`
 }
 
 func loadResponsibilityLedger() (ResponsibilityLedger, error) {
@@ -185,16 +185,16 @@ func ResponsibilityTerrain(registry *Registry) ([]ResponsibilityTerrainNode, err
 				return nil, fmt.Errorf("RESPONSIBILITY_PRODUCT_PASS_OWNER_NOT_AUTHORIZED:%s", descriptor.ID)
 			}
 			terrain = append(terrain, ResponsibilityTerrainNode{
-				ResponsibilityID: id,
-				RoleID: role,
-				CapabilityID: descriptor.ID,
-				ImplementationClass: implementation,
-				OwnerModuleID: descriptor.OwnerModuleID,
-				AuthorityKind: definition.AuthorityKind,
-				Exclusive: definition.Exclusive,
+				ResponsibilityID:     id,
+				RoleID:               role,
+				CapabilityID:         descriptor.ID,
+				ImplementationClass:  implementation,
+				OwnerModuleID:        descriptor.OwnerModuleID,
+				AuthorityKind:        definition.AuthorityKind,
+				Exclusive:            definition.Exclusive,
 				CanonicalTransformID: definition.CanonicalTransformID,
-				DataReduction: definition.DataReduction,
-				SourceTruthRetained: definition.SourceTruthRetained,
+				DataReduction:        definition.DataReduction,
+				SourceTruthRetained:  definition.SourceTruthRetained,
 			})
 		}
 	}

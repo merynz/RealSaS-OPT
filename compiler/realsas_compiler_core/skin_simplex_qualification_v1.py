@@ -41,13 +41,14 @@ def qualify_influence_simplex_v1(
     negative_tolerance: float,
     max_influences: int | None = None,
     error_prefix: str = "SKIN",
+    domain_label: str = "VERTEX",
 ) -> InfluenceSimplexQualificationV1:
     domain_ids = tuple(map(str, ordered_domain_ids))
-    if not domain_ids or len(set(domain_ids)) != len(domain_ids):
-        raise QualificationError(f"{error_prefix}_EMPTY_OR_DUPLICATE_DOMAIN")
     joint_ids = {str(value) for value in allowed_joint_ids}
-    if not joint_ids:
-        raise QualificationError(f"{error_prefix}_EMPTY_JOINT_DOMAIN")
+    if not domain_ids or not joint_ids:
+        raise QualificationError(f"{error_prefix}_EMPTY_BINDING_DOMAIN")
+    if len(set(domain_ids)) != len(domain_ids):
+        raise QualificationError(f"{error_prefix}_DUPLICATE_{domain_label}")
     if max_simplex_repair_l1 < 0.0 or max_total_correction_l1 < 0.0 or negative_tolerance < 0.0:
         raise QualificationError(f"{error_prefix}_QUALIFICATION_BUDGET_INVALID")
     if max_influences is not None and int(max_influences) <= 0:
@@ -60,11 +61,11 @@ def qualify_influence_simplex_v1(
         joint_id = str(raw_joint_id)
         weight = float(raw_weight)
         if domain_id not in domain_set:
-            raise QualificationError(f"{error_prefix}_UNKNOWN_DOMAIN_ID")
+            raise QualificationError(f"{error_prefix}_UNKNOWN_{domain_label}")
         if joint_id not in joint_ids:
             raise QualificationError(f"{error_prefix}_UNKNOWN_JOINT")
         if joint_id in grouped[domain_id]:
-            raise QualificationError(f"{error_prefix}_DUPLICATE_DOMAIN_JOINT")
+            raise QualificationError(f"{error_prefix}_DUPLICATE_{domain_label}_JOINT")
         if not math.isfinite(weight) or weight < -float(negative_tolerance):
             raise QualificationError(f"{error_prefix}_WEIGHT_INVALID")
         grouped[domain_id][joint_id] = max(0.0, weight)
@@ -76,7 +77,7 @@ def qualify_influence_simplex_v1(
     for domain_id in domain_ids:
         values = grouped[domain_id]
         if not values:
-            raise QualificationError(f"{error_prefix}_DOMAIN_UNCOVERED")
+            raise QualificationError(f"{error_prefix}_{domain_label}_UNCOVERED")
         ordered = sorted(values.items())
         raw_sum = sum(weight for _, weight in ordered)
         if not math.isfinite(raw_sum) or raw_sum <= 0.0:

@@ -48,6 +48,13 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"material_support_version":  "v1",
 			"output_artifact_type":      "RealSaS.CanonicalSkinIR",
 			"output_schema_version":     "v1",
+			"decode_chunk":              512,
+			"carrier_skin_qualification": map[string]any{
+				"max_simplex_repair_l1":    1.0e-5,
+				"max_total_correction_l1":  1.0e-4,
+				"negative_tolerance":       1.0e-8,
+				"max_influences":           41,
+			},
 			"required_models": []any{
 				map[string]any{
 					"family":          "MIRA",

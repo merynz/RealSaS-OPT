@@ -43,20 +43,38 @@ jobs:
           command -v rclone >/dev/null
           rclone listremotes | grep -Fx "${RCLONE_REMOTE}:"
 
-      - name: Fetch exact sealed historical components
+      - name: Resolve exact sealed historical components
         run: |
           set -euo pipefail
           ROOT="$AUTHORITY_ROOT/model_runtime_recovery/mira_v55"
           INPUT="$ROOT/input"
           mkdir -p "$INPUT"
-          rclone copyto \
+
+          ensure_exact() {
+            local remote="$1"
+            local target="$2"
+            local expected="$3"
+            if [ -f "$target" ]; then
+              actual="$(sha256sum "$target" | awk '{print $1}')"
+              if [ "$actual" = "$expected" ]; then
+                echo "MIRA_RUNTIME_INPUT_CACHE_HIT:$target:$actual"
+                return 0
+              fi
+              echo "MIRA_RUNTIME_INPUT_CACHE_DRIFT:$target:$actual!=$expected"
+              rm -f "$target"
+            fi
+            rclone copyto "$remote" "$target"
+            test "$(sha256sum "$target" | awk '{print $1}')" = "$expected"
+          }
+
+          ensure_exact \
             "${RCLONE_REMOTE}:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_OUTPUT/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" \
-            "$INPUT/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt"
-          rclone copyto \
+            "$INPUT/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" \
+            "$BASE_SHA256"
+          ensure_exact \
             "${RCLONE_REMOTE}:RealSaS_KNIGHT_MIRA_M_V5_5_AXIS541_FROZEN_CARRIER_OUTPUT/MIRA_M/MIRA_M_DIRECT_COMPOSITE_V55.pt" \
-            "$INPUT/MIRA_M_DIRECT_COMPOSITE_V55.pt"
-          test "$(sha256sum "$INPUT/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" | awk '{print $1}')" = "$BASE_SHA256"
-          test "$(sha256sum "$INPUT/MIRA_M_DIRECT_COMPOSITE_V55.pt" | awk '{print $1}')" = "$COMPOSITE_SHA256"
+            "$INPUT/MIRA_M_DIRECT_COMPOSITE_V55.pt" \
+            "$COMPOSITE_SHA256"
 
       - name: Build self-contained MIRA runtime package
         run: |

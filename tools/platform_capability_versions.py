@@ -2,14 +2,12 @@ from __future__ import annotations
 
 """Deterministic source-owned version identities for non-stage product capabilities.
 
-Compiler stage capability versions come from EngineRelease stage bindings. This
-module versions only first-class product modules which sit outside the legacy
-stage DAG. Implementation identity is an AST-derived local Python import closure
-plus the generic worker dispatch file; policy and parameters mirror the exact
-semantic Go capability descriptors and are independently re-derived by Platform
-when a release is sealed.
+Compiler stage capability versions come from EngineRelease stage bindings. Product
+module policy/metadata are loaded from the same versioned JSON contract embedded
+and validated by the Go Platform, eliminating a second semantic authority.
 """
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -17,77 +15,32 @@ from compiler.realsas_compiler_services.orchestrator import mainline
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKER_PATH = ROOT / "compiler/realsas_compiler_services/platform_worker/worker.py"
+CONTRACT_PATH = (
+    ROOT
+    / "platform/internal/capability/contracts/product_capabilities_v1.json"
+)
 
-CAPABILITY_SPECS: dict[str, dict[str, Any]] = {
-    "product.input": {
-        "entry_module": "compiler.realsas_compiler_services.platform_worker.input_executor_v1",
-        "policy": {
-            "allowed_modes": ["DEVELOPER"],
-            "product_pass_authority": False,
-        },
-        "parameters": {
-            "product_role_id": "input",
-            "implementation_class": "HYBRID",
-            "interface_contract": "RealSaS.ProductInputInference.v1",
-            "executor_contract": "RealSaS.ProductInputInference.v1",
-            "input_artifact_type": "RealSaS.SourceObservation",
-            "input_schema_version": "v1",
-            "output_artifact_type": "RealSaS.ShapeInput",
-            "output_schema_version": "v1",
-            "platform_view_count_invariant": False,
-            "source_truth_copied_into_output": False,
-            "scientific_contract_is_replaceable": True,
-            "implementation_owner_may_change": True,
-            "stable_product_role_survives_rewiring": True,
-        },
-    },
-    "product.shape": {
-        "entry_module": "compiler.realsas_compiler_services.platform_worker.shape_executor_v2",
-        "policy": {
-            "allowed_modes": ["DEVELOPER"],
-            "product_pass_authority": False,
-            "dependencies": ["product.input"],
-        },
-        "parameters": {
-            "product_role_id": "shape",
-            "implementation_class": "MODEL",
-            "interface_contract": "RealSaS.ProductShapeInference.v2",
-            "executor_contract": "RealSaS.ProductShapeInference.v2",
-            "input_artifact_type": "RealSaS.ShapeInput",
-            "input_schema_version": "v1",
-            "output_artifact_type": "RealSaS.ShapeProposal",
-            "output_schema_version": "v2",
-            "decoded_topology_is_proposal_evidence": True,
-            "canonical_mesh_authority": False,
-            "implementation_owner_may_change": True,
-            "stable_product_role_survives_rewiring": True,
-        },
-    },
-    "product.mesh": {
-        "entry_module": "compiler.realsas_compiler_services.platform_worker.mesh_executor_v1",
-        "policy": {
-            "allowed_modes": ["DEVELOPER"],
-            "product_pass_authority": False,
-            "dependencies": ["product.shape"],
-        },
-        "parameters": {
-            "product_role_id": "mesh",
-            "implementation_class": "COMPILER",
-            "interface_contract": "RealSaS.ProductMeshCompile.v1",
-            "executor_contract": "RealSaS.ProductMeshCompile.v1",
-            "source_artifact_type": "RealSaS.SourceObservation",
-            "source_schema_version": "v1",
-            "shape_artifact_type": "RealSaS.ShapeProposal",
-            "shape_schema_version": "v2",
-            "output_artifact_type": "RealSaS.CanonicalMesh",
-            "output_schema_version": "v1",
-            "source_fidelity_policy": "Stage13-P999",
-            "dynamic_qualification_required_at_birth": False,
-            "implementation_owner_may_change": True,
-            "stable_product_role_survives_rewiring": True,
-        },
-    },
-}
+
+def capability_specs() -> dict[str, dict[str, Any]]:
+    value = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
+    if value.get("schema") != "RealSaS.ProductCapabilityContracts.v1":
+        raise RuntimeError("PRODUCT_CAPABILITY_CONTRACT_SCHEMA_DRIFT")
+    capabilities = value.get("capabilities")
+    if not isinstance(capabilities, dict) or not capabilities:
+        raise RuntimeError("PRODUCT_CAPABILITY_CONTRACT_EMPTY")
+    for capability_id, spec in capabilities.items():
+        if (
+            not isinstance(capability_id, str)
+            or not capability_id.startswith("product.")
+            or not isinstance(spec, dict)
+            or not str(spec.get("entry_module") or "")
+            or not isinstance(spec.get("policy"), dict)
+            or not isinstance(spec.get("metadata"), dict)
+        ):
+            raise RuntimeError(
+                "PRODUCT_CAPABILITY_CONTRACT_INVALID:" + str(capability_id)
+            )
+    return capabilities
 
 
 def _implementation_sha256(capability_id: str, entry_module: str) -> str:
@@ -111,12 +64,12 @@ def _implementation_sha256(capability_id: str, entry_module: str) -> str:
 
 def capability_versions() -> dict[str, dict[str, str]]:
     out: dict[str, dict[str, str]] = {}
-    for capability_id, spec in sorted(CAPABILITY_SPECS.items()):
+    for capability_id, spec in sorted(capability_specs().items()):
         out[capability_id] = {
             "implementation_sha256": _implementation_sha256(
                 capability_id, str(spec["entry_module"])
             ),
             "policy_sha256": mainline.content_sha256(spec["policy"]),
-            "parameters_sha256": mainline.content_sha256(spec["parameters"]),
+            "parameters_sha256": mainline.content_sha256(spec["metadata"]),
         }
     return out

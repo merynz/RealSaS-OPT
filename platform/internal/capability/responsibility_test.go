@@ -32,17 +32,21 @@ func TestResponsibilityTerrainProjectsActiveInputAndShape(t *testing.T) {
 }
 
 func TestResponsibilityTerrainRejectsMissingRequiredResponsibility(t *testing.T) {
-	rows, err := ProductShapeProvider{}.Capabilities(context.Background())
+	inputRows, err := ProductInputProvider{}.Capabilities(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	shapeRows, err := ProductShapeProvider{}.Capabilities(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 	metadata := map[string]any{}
-	for key, value := range rows[0].Metadata {
+	for key, value := range shapeRows[0].Metadata {
 		metadata[key] = value
 	}
 	metadata["responsibility_ids"] = []string{"shape.topology_proposal"}
-	rows[0].Metadata = metadata
-	registry, err := NewRegistry(rows)
+	shapeRows[0].Metadata = metadata
+	registry, err := NewRegistry(append(inputRows, shapeRows...))
 	if err != nil {
 		t.Fatal(err)
 	}

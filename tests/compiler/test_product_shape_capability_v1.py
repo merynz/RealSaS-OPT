@@ -144,7 +144,14 @@ def test_shape_composes_existing_inference_primitives_without_minting_mesh(monke
         assert "surface_xyz_tessa" in bundle.files
         assert "surface_h" in bundle.files
         assert "contact_persistence_valid" in bundle.files
-        assert all("face" not in name.lower() and "temporary" not in name.lower() for name in bundle.files)
+        forbidden_mesh_payloads = {
+            "faces",
+            "face_indices",
+            "triangles",
+            "temporary_iris_mesh",
+            "temporary_iris_faces",
+        }
+        assert forbidden_mesh_payloads.isdisjoint(bundle.files)
 
 
 def test_shape_fails_closed_on_incomplete_topology(monkeypatch):

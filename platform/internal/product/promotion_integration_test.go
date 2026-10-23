@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -34,6 +35,8 @@ func TestAtomicPromotion(t *testing.T) {
 	subjectID := uuid.New()
 	attemptID := uuid.New()
 	revisionID := uuid.New()
+	releaseID := uuid.New()
+	capabilitySetSHA := uuidHex64(uuid.New())
 	artifactTypeID := uuid.New()
 	contract, err := SealContract(ctx, pool, Contract{
 		Name:    "rss-default",
@@ -60,9 +63,15 @@ func TestAtomicPromotion(t *testing.T) {
 	); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at,capability_set_sha256)
+		VALUES ($1,$2,$3,'PRODUCT','ci',now(),$4)
+	`, releaseID, "promotion-release-"+releaseID.String(), uuidHex64(releaseID), capabilitySetSHA); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := tx.Exec(ctx,
-		"INSERT INTO attempts(id,subject_id,kind,spec_sha256,created_by,final_state) VALUES ($1,$2,'compile_candidate',$3,'ci','QUALIFIED')",
-		attemptID, subjectID, repeatHex("a"),
+		"INSERT INTO attempts(id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state) VALUES ($1,$2,$3,'compile_candidate',$4,'ci','QUALIFIED')",
+		attemptID, subjectID, releaseID, repeatHex("a"),
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -77,6 +86,17 @@ func TestAtomicPromotion(t *testing.T) {
 		revisionID, subjectID, repeatHex("d"), attemptID, contract.ID,
 	); err != nil {
 		t.Fatal(err)
+	}
+	var boundRelease uuid.UUID
+	var boundCapability string
+	if err := tx.QueryRow(ctx,
+		"SELECT engine_release_id,capability_set_sha256 FROM product_revisions WHERE id=$1",
+		revisionID,
+	).Scan(&boundRelease, &boundCapability); err != nil {
+		t.Fatal(err)
+	}
+	if boundRelease != releaseID || boundCapability != capabilitySetSHA {
+		t.Fatalf("release wiring drift: release=%s capability=%s", boundRelease, boundCapability)
 	}
 
 	for i, role := range []string{"geometry", "runtime_compatibility", "skin"} {
@@ -166,6 +186,11 @@ func repeatHex(ch string) string {
 		out += ch
 	}
 	return out[:64]
+}
+
+func uuidHex64(id uuid.UUID) string {
+	value := strings.ReplaceAll(id.String(), "-", "")
+	return value + value
 }
 
 func hex64(v int) string {

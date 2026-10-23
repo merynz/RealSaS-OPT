@@ -176,6 +176,7 @@ func TestRenderCommandsShareExactSemanticRenderRequest(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer pool.Close()
+	g := commandGraph(t)
 
 	subjectID := uuid.New()
 	attemptID := uuid.New()
@@ -185,7 +186,18 @@ func TestRenderCommandsShareExactSemanticRenderRequest(t *testing.T) {
 	if _, err := pool.Exec(ctx, "INSERT INTO subjects(id,slug,display_name) VALUES ($1,$2,$3)", subjectID, "render-"+subjectID.String(), "Render Command"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := pool.Exec(ctx, "INSERT INTO attempts(id,subject_id,kind,spec_sha256,created_by,final_state) VALUES ($1,$2,'compile_candidate',$3,'ci','QUALIFIED')", attemptID, subjectID, repeatCommandHex("7")); err != nil {
+	sealedRelease, err := release.Seal(ctx, pool, g, commandReleaseManifest(g, "render-command-"+subjectID.String()), "ci")
+	if err != nil {
+		t.Fatal(err)
+	}
+	capabilitySetSHA := repeatCommandHex("e")
+	if _, err := pool.Exec(ctx,
+		"UPDATE engine_releases SET capability_set_sha256=$2 WHERE id=$1",
+		sealedRelease.ReleaseID, capabilitySetSHA,
+	); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, "INSERT INTO attempts(id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state) VALUES ($1,$2,$3,'compile_candidate',$4,'ci','QUALIFIED')", attemptID, subjectID, sealedRelease.ReleaseID, repeatCommandHex("7")); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, "INSERT INTO artifact_types(id,name,schema_version,domain) VALUES ($1,$2,'v1','motion')", typeID, "RealSaS.Motion."+subjectID.String()); err != nil {
@@ -203,6 +215,17 @@ func TestRenderCommandsShareExactSemanticRenderRequest(t *testing.T) {
 		VALUES ($1,$2,1,$3,$4,now())
 	`, revisionID, subjectID, repeatCommandHex("c"), attemptID); err != nil {
 		t.Fatal(err)
+	}
+	var boundRelease uuid.UUID
+	var boundCapability string
+	if err := pool.QueryRow(ctx,
+		"SELECT engine_release_id,capability_set_sha256 FROM product_revisions WHERE id=$1",
+		revisionID,
+	).Scan(&boundRelease, &boundCapability); err != nil {
+		t.Fatal(err)
+	}
+	if boundRelease != sealedRelease.ReleaseID || boundCapability != capabilitySetSHA {
+		t.Fatalf("release wiring drift: release=%s capability=%s", boundRelease, boundCapability)
 	}
 
 	base := RenderRequest{

@@ -24,11 +24,16 @@ func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) 
 		ProductPassAuthority: false,
 		Aliases:              []string{"Shape", "IRIS", "TESSA"},
 		Metadata: map[string]any{
-			"executor_contract":     ProductShapeContractV1,
-			"input_artifact_type":   "RealSaS.ShapeInput",
-			"input_schema_version":  "v1",
-			"output_artifact_type":  "RealSaS.ShapeProposal",
-			"output_schema_version": "v1",
+			"product_role_id":                       string(ProductRoleShape),
+			"implementation_class":                  string(ImplementationModel),
+			"interface_contract":                    ProductShapeContractV1,
+			"executor_contract":                     ProductShapeContractV1,
+			"input_artifact_type":                   "RealSaS.ShapeInput",
+			"input_schema_version":                  "v1",
+			"output_artifact_type":                  "RealSaS.ShapeProposal",
+			"output_schema_version":                 "v1",
+			"implementation_owner_may_change":       true,
+			"stable_product_role_survives_rewiring": true,
 		},
 	}}, nil
 }

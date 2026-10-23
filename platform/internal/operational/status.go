@@ -12,13 +12,16 @@ import (
 )
 
 type AttemptStatus struct {
-	ID              uuid.UUID  `json:"id"`
-	SubjectID       uuid.UUID  `json:"subject_id"`
-	ExperimentID    *uuid.UUID `json:"experiment_id,omitempty"`
-	EngineReleaseID *uuid.UUID `json:"engine_release_id,omitempty"`
-	Kind            string     `json:"kind"`
-	FinalState      string     `json:"final_state"`
-	CreatedAt       time.Time  `json:"created_at"`
+	ID                   uuid.UUID  `json:"id"`
+	SubjectID            uuid.UUID  `json:"subject_id"`
+	ExperimentID         *uuid.UUID `json:"experiment_id,omitempty"`
+	EngineReleaseID      *uuid.UUID `json:"engine_release_id,omitempty"`
+	EngineReleasePurpose *string    `json:"engine_release_purpose,omitempty"`
+	EngineReleaseSHA256  *string    `json:"engine_release_sha256,omitempty"`
+	CapabilitySetSHA256  *string    `json:"capability_set_sha256,omitempty"`
+	Kind                 string     `json:"kind"`
+	FinalState           string     `json:"final_state"`
+	CreatedAt            time.Time  `json:"created_at"`
 }
 
 type CampaignStatus struct {
@@ -36,12 +39,15 @@ type CurrentModel struct {
 }
 
 type CurrentProduct struct {
-	SubjectID         uuid.UUID `json:"subject_id"`
-	SubjectSlug       string    `json:"subject_slug"`
-	ProductRevisionID uuid.UUID `json:"product_revision_id"`
-	RevisionNumber    int64     `json:"revision_number"`
-	ManifestSHA256    string    `json:"manifest_sha256"`
-	UpdatedAt         time.Time `json:"updated_at"`
+	SubjectID           uuid.UUID  `json:"subject_id"`
+	SubjectSlug         string     `json:"subject_slug"`
+	ProductRevisionID   uuid.UUID  `json:"product_revision_id"`
+	RevisionNumber      int64      `json:"revision_number"`
+	ManifestSHA256      string     `json:"manifest_sha256"`
+	EngineReleaseID     *uuid.UUID `json:"engine_release_id,omitempty"`
+	EngineReleaseSHA256 *string    `json:"engine_release_sha256,omitempty"`
+	CapabilitySetSHA256 *string    `json:"capability_set_sha256,omitempty"`
+	UpdatedAt           time.Time  `json:"updated_at"`
 }
 
 type Snapshot struct {
@@ -55,7 +61,7 @@ type Snapshot struct {
 }
 
 func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {
-	out := Snapshot{Schema: "RealSaS.OperationalStatus.v1", GeneratedAt: time.Now().UTC()}
+	out := Snapshot{Schema: "RealSaS.OperationalStatus.v2", GeneratedAt: time.Now().UTC()}
 
 	experiments, err := experiment.List(ctx, pool)
 	if err != nil {
@@ -68,15 +74,31 @@ func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {
 	}
 
 	attemptRows, err := pool.Query(ctx, `
-		SELECT id,subject_id,experiment_id,engine_release_id,kind,final_state,created_at
-		FROM attempts WHERE final_state='OPEN' ORDER BY created_at,id
+		SELECT a.id,a.subject_id,a.experiment_id,a.engine_release_id,
+		       er.purpose,er.release_sha256,er.capability_set_sha256,
+		       a.kind,a.final_state,a.created_at
+		FROM attempts a
+		LEFT JOIN engine_releases er ON er.id=a.engine_release_id
+		WHERE a.final_state='OPEN'
+		ORDER BY a.created_at,a.id
 	`)
 	if err != nil {
 		return Snapshot{}, err
 	}
 	for attemptRows.Next() {
 		var record AttemptStatus
-		if err := attemptRows.Scan(&record.ID, &record.SubjectID, &record.ExperimentID, &record.EngineReleaseID, &record.Kind, &record.FinalState, &record.CreatedAt); err != nil {
+		if err := attemptRows.Scan(
+			&record.ID,
+			&record.SubjectID,
+			&record.ExperimentID,
+			&record.EngineReleaseID,
+			&record.EngineReleasePurpose,
+			&record.EngineReleaseSHA256,
+			&record.CapabilitySetSHA256,
+			&record.Kind,
+			&record.FinalState,
+			&record.CreatedAt,
+		); err != nil {
 			attemptRows.Close()
 			return Snapshot{}, err
 		}
@@ -122,10 +144,12 @@ func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {
 	}
 
 	productRows, err := pool.Query(ctx, `
-		SELECT c.subject_id,s.slug,c.product_revision_id,r.revision_number,r.manifest_sha256,c.updated_at
+		SELECT c.subject_id,s.slug,c.product_revision_id,r.revision_number,r.manifest_sha256,
+		       r.engine_release_id,er.release_sha256,r.capability_set_sha256,c.updated_at
 		FROM subject_current_revision c
 		JOIN subjects s ON s.id=c.subject_id
 		JOIN product_revisions r ON r.id=c.product_revision_id
+		LEFT JOIN engine_releases er ON er.id=r.engine_release_id
 		ORDER BY s.slug,c.subject_id
 	`)
 	if err != nil {
@@ -133,7 +157,17 @@ func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {
 	}
 	for productRows.Next() {
 		var record CurrentProduct
-		if err := productRows.Scan(&record.SubjectID, &record.SubjectSlug, &record.ProductRevisionID, &record.RevisionNumber, &record.ManifestSHA256, &record.UpdatedAt); err != nil {
+		if err := productRows.Scan(
+			&record.SubjectID,
+			&record.SubjectSlug,
+			&record.ProductRevisionID,
+			&record.RevisionNumber,
+			&record.ManifestSHA256,
+			&record.EngineReleaseID,
+			&record.EngineReleaseSHA256,
+			&record.CapabilitySetSHA256,
+			&record.UpdatedAt,
+		); err != nil {
 			productRows.Close()
 			return Snapshot{}, err
 		}

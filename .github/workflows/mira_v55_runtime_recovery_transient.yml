@@ -35,13 +35,31 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            requirements/mainline-ci.txt
+            requirements/torch-cpu.txt
+
+      - name: Install pinned runtime-recovery dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+
       - name: Require exact PR head and authority tools
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
-          test -x "$PLATFORM_ROOT/current/bin/realsas-python"
           command -v rclone >/dev/null
           rclone listremotes | grep -Fx "${RCLONE_REMOTE}:"
+          python - <<'PY'
+          import torch
+          assert torch.__version__ == '2.8.0+cpu', torch.__version__
+          assert not torch.cuda.is_available()
+          PY
 
       - name: Resolve exact sealed historical components
         run: |
@@ -83,7 +101,7 @@ jobs:
           INPUT="$ROOT/input"
           OUTPUT="$ROOT/runtime"
           mkdir -p "$OUTPUT"
-          "$PLATFORM_ROOT/current/bin/realsas-python" tools/build_mira_v55_runtime_checkpoint_v1.py \
+          python tools/build_mira_v55_runtime_checkpoint_v1.py \
             --base-v6-checkpoint "$INPUT/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" \
             --v55-composite "$INPUT/MIRA_M_DIRECT_COMPOSITE_V55.pt" \
             --out "$OUTPUT/MIRA_RUNTIME_CHECKPOINT_V1.pt" \
@@ -95,7 +113,7 @@ jobs:
           ROOT="$AUTHORITY_ROOT/model_runtime_recovery/mira_v55/runtime"
           EXPECTED_HEAD="${{ github.event.pull_request.head.sha }}"
           export ROOT EXPECTED_HEAD
-          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          python - <<'PY'
           import hashlib, json, os
           from pathlib import Path
           from models.mira.runtime_checkpoint_v1 import load_mira_runtime_model_v1

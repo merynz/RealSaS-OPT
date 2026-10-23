@@ -50,10 +50,10 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"output_schema_version":     "v1",
 			"decode_chunk":              512,
 			"carrier_skin_qualification": map[string]any{
-				"max_simplex_repair_l1":    1.0e-5,
-				"max_total_correction_l1":  1.0e-4,
-				"negative_tolerance":       1.0e-8,
-				"max_influences":           41,
+				"max_simplex_repair_l1":   1.0e-5,
+				"max_total_correction_l1": 1.0e-4,
+				"negative_tolerance":      1.0e-8,
+				"max_influences":          41,
 			},
 			"required_models": []any{
 				map[string]any{
@@ -66,8 +66,8 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"mesh_and_rig_are_canonical_parents":   true,
 			"feature_evidence_is_canonical_parent": false,
 			"material_support_is_canonical_parent": false,
-			"activation_state":                      "BLOCKED",
-			"activation_blocker":                    "SEALED_CURRENT_MIRA_MODELRELEASE_RUNTIME_PACKAGE_MISSING",
+			"activation_state":                     "BLOCKED",
+			"activation_blocker":                   "SEALED_CURRENT_MIRA_MODELRELEASE_RUNTIME_PACKAGE_MISSING",
 
 			// Historical scientific truth, intentionally not upgraded to current
 			// Platform/product authority merely by source recovery.

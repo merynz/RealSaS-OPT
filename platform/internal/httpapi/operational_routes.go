@@ -225,6 +225,27 @@ func (a API) HandlerWithOperational() http.Handler {
 		}
 		respond(w, 200, out)
 	})
+
+	mux.HandleFunc("POST /v1/ops/legacy-witnesses", func(w http.ResponseWriter, r *http.Request) {
+		var req operational.LegacyWitnessRegisterRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := operational.RegisterLegacyWitness(r.Context(), a.Pool, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/ops/baselines/{subject}", func(w http.ResponseWriter, r *http.Request) {
+		out, err := operational.ResolveBaseline(r.Context(), a.Pool, r.PathValue("subject"))
+		if err == operational.ErrBaselineNotFound {
+			respond(w, 404, map[string]string{"error": err.Error()})
+			return
+		}
+		if err != nil {
+			result(w, nil, err)
+			return
+		}
+		respond(w, 200, out)
+	})
 	mux.HandleFunc("GET /v1/ops/status", func(w http.ResponseWriter, r *http.Request) {
 		out, err := operational.Status(r.Context(), a.Pool)
 		if err != nil {

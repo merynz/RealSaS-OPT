@@ -38,16 +38,36 @@ type CurrentModel struct {
 	Release modelrelease.Record        `json:"release"`
 }
 
+type ProductModelBinding struct {
+	Family                  string             `json:"family"`
+	ModelReleaseID          uuid.UUID          `json:"model_release_id"`
+	ArchitectureID          string             `json:"architecture_id"`
+	CheckpointArtifactID    uuid.UUID          `json:"checkpoint_artifact_id"`
+	CheckpointContentSHA256 string             `json:"checkpoint_content_sha256"`
+	LifecycleState          modelrelease.State `json:"lifecycle_state"`
+}
+
+type ProductArtifactBinding struct {
+	Role           string    `json:"role"`
+	ArtifactID     uuid.UUID `json:"artifact_id"`
+	ArtifactType   string    `json:"artifact_type"`
+	SchemaVersion  string    `json:"schema_version"`
+	SemanticSHA256 string    `json:"semantic_sha256"`
+	ContentSHA256  string    `json:"content_sha256"`
+}
+
 type CurrentProduct struct {
-	SubjectID           uuid.UUID  `json:"subject_id"`
-	SubjectSlug         string     `json:"subject_slug"`
-	ProductRevisionID   uuid.UUID  `json:"product_revision_id"`
-	RevisionNumber      int64      `json:"revision_number"`
-	ManifestSHA256      string     `json:"manifest_sha256"`
-	EngineReleaseID     *uuid.UUID `json:"engine_release_id,omitempty"`
-	EngineReleaseSHA256 *string    `json:"engine_release_sha256,omitempty"`
-	CapabilitySetSHA256 *string    `json:"capability_set_sha256,omitempty"`
-	UpdatedAt           time.Time  `json:"updated_at"`
+	SubjectID           uuid.UUID                `json:"subject_id"`
+	SubjectSlug         string                   `json:"subject_slug"`
+	ProductRevisionID   uuid.UUID                `json:"product_revision_id"`
+	RevisionNumber      int64                    `json:"revision_number"`
+	ManifestSHA256      string                   `json:"manifest_sha256"`
+	EngineReleaseID     *uuid.UUID               `json:"engine_release_id,omitempty"`
+	EngineReleaseSHA256 *string                  `json:"engine_release_sha256,omitempty"`
+	CapabilitySetSHA256 *string                  `json:"capability_set_sha256,omitempty"`
+	Models              []ProductModelBinding    `json:"models"`
+	Artifacts           []ProductArtifactBinding `json:"artifacts"`
+	UpdatedAt           time.Time                `json:"updated_at"`
 }
 
 type Snapshot struct {
@@ -61,7 +81,7 @@ type Snapshot struct {
 }
 
 func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {
-	out := Snapshot{Schema: "RealSaS.OperationalStatus.v2", GeneratedAt: time.Now().UTC()}
+	out := Snapshot{Schema: "RealSaS.OperationalStatus.v3", GeneratedAt: time.Now().UTC()}
 
 	experiments, err := experiment.List(ctx, pool)
 	if err != nil {
@@ -143,40 +163,11 @@ func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {
 		out.CurrentModels = append(out.CurrentModels, CurrentModel{Channel: channel, Release: release})
 	}
 
-	productRows, err := pool.Query(ctx, `
-		SELECT c.subject_id,s.slug,c.product_revision_id,r.revision_number,r.manifest_sha256,
-		       r.engine_release_id,er.release_sha256,r.capability_set_sha256,c.updated_at
-		FROM subject_current_revision c
-		JOIN subjects s ON s.id=c.subject_id
-		JOIN product_revisions r ON r.id=c.product_revision_id
-		LEFT JOIN engine_releases er ON er.id=r.engine_release_id
-		ORDER BY s.slug,c.subject_id
-	`)
+	products, err := loadCurrentProducts(ctx, pool, nil)
 	if err != nil {
 		return Snapshot{}, err
 	}
-	for productRows.Next() {
-		var record CurrentProduct
-		if err := productRows.Scan(
-			&record.SubjectID,
-			&record.SubjectSlug,
-			&record.ProductRevisionID,
-			&record.RevisionNumber,
-			&record.ManifestSHA256,
-			&record.EngineReleaseID,
-			&record.EngineReleaseSHA256,
-			&record.CapabilitySetSHA256,
-			&record.UpdatedAt,
-		); err != nil {
-			productRows.Close()
-			return Snapshot{}, err
-		}
-		out.CurrentProducts = append(out.CurrentProducts, record)
-	}
-	productRows.Close()
-	if err := productRows.Err(); err != nil {
-		return Snapshot{}, err
-	}
+	out.CurrentProducts = products
 
 	if out.ActiveExperiments == nil {
 		out.ActiveExperiments = []experiment.Record{}

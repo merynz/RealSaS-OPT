@@ -8,7 +8,9 @@ bound at compile time, never duplicated into the release identity.
 V2 requests also carry version identities for first-class product capabilities
 which live outside the legacy Compiler stage DAG. Platform derives stage
 capability versions from the sealed stage bindings and seals both views under
-the same immutable EngineRelease ID.
+the same immutable EngineRelease ID. Learned ModelRelease requirements are
+also derived from the same product-role/responsibility contracts; they are not
+maintained as a parallel hand-authored list.
 """
 from __future__ import annotations
 
@@ -24,7 +26,10 @@ from compiler.realsas_compiler_services.platform_worker.stage_inputs import (
     released_execution_plan,
     subject_agnostic_release_parameters,
 )
-from tools.platform_capability_versions import capability_versions
+from tools.platform_capability_versions import (
+    capability_versions,
+    product_model_requirements,
+)
 from tools.realsas_architecture import lightweight_implementation_closure
 
 
@@ -50,6 +55,11 @@ def snapshot(plan, manifest=None, *, name, purpose, created_by, stage_parameters
     unknown = sorted(set(overrides) - known)
     if unknown:
         raise RuntimeError("RELEASE_STAGE_PARAMETERS_UNKNOWN_STAGE:" + ",".join(unknown))
+    model_channel = "PRODUCTION" if require_product else "RESEARCH"
+    model_requirements = [
+        {**row, "channel": model_channel}
+        for row in product_model_requirements()
+    ]
     request = {
         "created_by": created_by,
         "capability_versions": capability_versions(),
@@ -90,6 +100,7 @@ def snapshot(plan, manifest=None, *, name, purpose, created_by, stage_parameters
             "contract_version": "RealSaS.EngineReleaseManifest.v2",
             "name": name,
             "purpose": purpose,
+            "model_requirements": model_requirements,
             "stages": [
                 {
                     "ordinal": stage["ordinal"],
@@ -152,7 +163,8 @@ def main():
     args.out.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     print(
         f"EngineRelease request: {args.out}; {len(value['manifest']['stages'])} stages; "
-        f"{len(value['capability_versions'])} product capabilities; no execution"
+        f"{len(value['capability_versions'])} product capabilities; "
+        f"{len(value['manifest']['model_requirements'])} learned model requirements; no execution"
     )
 
 

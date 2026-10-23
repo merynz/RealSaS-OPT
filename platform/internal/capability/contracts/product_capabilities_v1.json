@@ -39,6 +39,16 @@
         "input_schema_version": "v1",
         "output_artifact_type": "RealSaS.ShapeProposal",
         "output_schema_version": "v1",
+        "required_models": [
+          {
+            "family": "IRIS",
+            "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"
+          },
+          {
+            "family": "TESSA",
+            "architecture_id": "RealSaS.TESSA.Structuralizer.v3"
+          }
+        ],
         "implementation_owner_may_change": true,
         "stable_product_role_survives_rewiring": true
       }

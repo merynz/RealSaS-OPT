@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 from compiler.realsas_compiler_services.orchestrator import mainline
-from tools.platform_capability_versions import capability_specs, capability_versions
+from tools.platform_capability_versions import (
+    capability_specs,
+    capability_versions,
+    product_model_requirements,
+)
 from tools.platform_release_snapshot import snapshot
 
 
@@ -20,6 +24,26 @@ def test_product_capability_versions_are_complete_and_semantic():
     assert specs["product.shape"]["parameters"]["responsibility_ids"] == [
         "shape.shared_scene_evidence",
         "shape.topology_proposal",
+    ]
+    assert specs["product.shape"]["parameters"]["required_models"] == [
+        {
+            "family": "IRIS",
+            "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3",
+        },
+        {
+            "family": "TESSA",
+            "architecture_id": "RealSaS.TESSA.Structuralizer.v3",
+        },
+    ]
+    assert product_model_requirements() == [
+        {
+            "family": "IRIS",
+            "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3",
+        },
+        {
+            "family": "TESSA",
+            "architecture_id": "RealSaS.TESSA.Structuralizer.v3",
+        },
     ]
     for capability_id, version in versions.items():
         assert set(version) == {
@@ -40,7 +64,7 @@ def test_product_capability_versions_are_complete_and_semantic():
     )
 
 
-def test_release_snapshot_v2_carries_non_stage_capability_versions():
+def test_release_snapshot_v2_carries_capability_and_model_requirements():
     plan = mainline.load_json(mainline.PLAN_PATH)
     request = snapshot(
         plan,
@@ -51,4 +75,16 @@ def test_release_snapshot_v2_carries_non_stage_capability_versions():
     )
     assert request["manifest"]["contract_version"] == "RealSaS.EngineReleaseManifest.v2"
     assert request["capability_versions"] == capability_versions()
+    assert request["manifest"]["model_requirements"] == [
+        {
+            "family": "IRIS",
+            "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3",
+            "channel": "RESEARCH",
+        },
+        {
+            "family": "TESSA",
+            "architecture_id": "RealSaS.TESSA.Structuralizer.v3",
+            "channel": "RESEARCH",
+        },
+    ]
     assert "subject_id" not in str(request)

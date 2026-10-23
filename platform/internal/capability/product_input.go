@@ -13,6 +13,10 @@ const (
 type ProductInputProvider struct{}
 
 func (ProductInputProvider) Capabilities(context.Context) ([]Descriptor, error) {
+	responsibilities, err := responsibilityIDsForRole(ProductRoleInput)
+	if err != nil {
+		return nil, err
+	}
 	return []Descriptor{{
 		ID:                   ProductInputCapabilityID,
 		Kind:                 KindModule,
@@ -35,6 +39,7 @@ func (ProductInputProvider) Capabilities(context.Context) ([]Descriptor, error) 
 			"scientific_contract_is_replaceable":    true,
 			"implementation_owner_may_change":       true,
 			"stable_product_role_survives_rewiring": true,
+			"responsibility_ids":                    responsibilities,
 		},
 	}}, nil
 }

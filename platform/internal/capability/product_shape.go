@@ -14,6 +14,10 @@ const (
 type ProductShapeProvider struct{}
 
 func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) {
+	responsibilities, err := responsibilityIDsForRole(ProductRoleShape)
+	if err != nil {
+		return nil, err
+	}
 	return []Descriptor{{
 		ID:                   ProductShapeCapabilityID,
 		Kind:                 KindModule,
@@ -34,6 +38,7 @@ func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) 
 			"output_schema_version":                 "v1",
 			"implementation_owner_may_change":       true,
 			"stable_product_role_survives_rewiring": true,
+			"responsibility_ids":                    responsibilities,
 		},
 	}}, nil
 }

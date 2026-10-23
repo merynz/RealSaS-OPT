@@ -1,0 +1,47 @@
+{
+  "schema": "RealSaS.ProductCapabilitySemantics.v1",
+  "capabilities": {
+    "product.input": {
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.input_executor_v1",
+      "policy": {
+        "allowed_modes": ["DEVELOPER"],
+        "product_pass_authority": false
+      },
+      "metadata": {
+        "product_role_id": "input",
+        "implementation_class": "HYBRID",
+        "interface_contract": "RealSaS.ProductInputInference.v1",
+        "executor_contract": "RealSaS.ProductInputInference.v1",
+        "input_artifact_type": "RealSaS.SourceObservation",
+        "input_schema_version": "v1",
+        "output_artifact_type": "RealSaS.ShapeInput",
+        "output_schema_version": "v1",
+        "platform_view_count_invariant": false,
+        "source_truth_copied_into_output": false,
+        "scientific_contract_is_replaceable": true,
+        "implementation_owner_may_change": true,
+        "stable_product_role_survives_rewiring": true
+      }
+    },
+    "product.shape": {
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.shape_executor_v1",
+      "policy": {
+        "allowed_modes": ["DEVELOPER"],
+        "product_pass_authority": false,
+        "dependencies": ["product.input"]
+      },
+      "metadata": {
+        "product_role_id": "shape",
+        "implementation_class": "MODEL",
+        "interface_contract": "RealSaS.ProductShapeInference.v1",
+        "executor_contract": "RealSaS.ProductShapeInference.v1",
+        "input_artifact_type": "RealSaS.ShapeInput",
+        "input_schema_version": "v1",
+        "output_artifact_type": "RealSaS.ShapeProposal",
+        "output_schema_version": "v1",
+        "implementation_owner_may_change": true,
+        "stable_product_role_survives_rewiring": true
+      }
+    }
+  }
+}

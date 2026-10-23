@@ -1,0 +1,122 @@
+name: mira-v55-runtime-recovery-transient
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'models/mira/**'
+      - 'tools/build_mira_v55_runtime_checkpoint_v1.py'
+      - 'canonical/MIRA_V55_RUNTIME_RECOVERY_V1.json'
+      - '.github/workflows/mira_v55_runtime_recovery_transient.yml'
+
+concurrency:
+  group: mira-v55-runtime-recovery-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    if: github.event.pull_request.head.ref == 'product/skin-mira-runtime-v1-20261024'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RCLONE_REMOTE: ${{ vars.REALSAS_RCLONE_DRIVE_REMOTE || 'gdrive' }}
+      BASE_SHA256: bfd2bd24f55bdce2dc36b0ae6a7afe01b8381c680de545c66a11a3d707fe73ed
+      COMPOSITE_SHA256: 490cd7791c94c0e15e3fa6479a6701bd7bec21e03dff76b69ada638d5bf30a40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Require exact PR head and authority tools
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          test -x "$PLATFORM_ROOT/current/bin/realsas-python"
+          command -v rclone >/dev/null
+          rclone listremotes | grep -Fx "${RCLONE_REMOTE}:"
+
+      - name: Fetch exact sealed historical components
+        run: |
+          set -euo pipefail
+          ROOT="$AUTHORITY_ROOT/model_runtime_recovery/mira_v55"
+          INPUT="$ROOT/input"
+          mkdir -p "$INPUT"
+          rclone copyto \
+            "${RCLONE_REMOTE}:RealSaS_SUBJECT2_KNIGHT_DEMO_V2_20260924/ARACHNE_STAGE31_V6_DEMO_OUTPUT/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" \
+            "$INPUT/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt"
+          rclone copyto \
+            "${RCLONE_REMOTE}:RealSaS_KNIGHT_MIRA_M_V5_5_AXIS541_FROZEN_CARRIER_OUTPUT/MIRA_M/MIRA_M_DIRECT_COMPOSITE_V55.pt" \
+            "$INPUT/MIRA_M_DIRECT_COMPOSITE_V55.pt"
+          test "$(sha256sum "$INPUT/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" | awk '{print $1}')" = "$BASE_SHA256"
+          test "$(sha256sum "$INPUT/MIRA_M_DIRECT_COMPOSITE_V55.pt" | awk '{print $1}')" = "$COMPOSITE_SHA256"
+
+      - name: Build self-contained MIRA runtime package
+        run: |
+          set -euo pipefail
+          ROOT="$AUTHORITY_ROOT/model_runtime_recovery/mira_v55"
+          INPUT="$ROOT/input"
+          OUTPUT="$ROOT/runtime"
+          mkdir -p "$OUTPUT"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/build_mira_v55_runtime_checkpoint_v1.py \
+            --base-v6-checkpoint "$INPUT/ARACHNE_KNIGHT_V6_MODEL_FINAL_FP32.pt" \
+            --v55-composite "$INPUT/MIRA_M_DIRECT_COMPOSITE_V55.pt" \
+            --out "$OUTPUT/MIRA_RUNTIME_CHECKPOINT_V1.pt" \
+            --receipt "$OUTPUT/MIRA_RUNTIME_CHECKPOINT_V1_RECEIPT.json"
+
+      - name: Load exact runtime package and seal recovery receipt
+        run: |
+          set -euo pipefail
+          ROOT="$AUTHORITY_ROOT/model_runtime_recovery/mira_v55/runtime"
+          EXPECTED_HEAD="${{ github.event.pull_request.head.sha }}"
+          export ROOT EXPECTED_HEAD
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from models.mira.runtime_checkpoint_v1 import load_mira_runtime_model_v1
+
+          root=Path(os.environ['ROOT'])
+          package=root/'MIRA_RUNTIME_CHECKPOINT_V1.pt'
+          base_receipt=json.loads((root/'MIRA_RUNTIME_CHECKPOINT_V1_RECEIPT.json').read_text())
+          backbone,decoder,payload=load_mira_runtime_model_v1(package,device='cpu')
+          assert payload['schema']=='RealSaS.MIRA.RuntimeCheckpoint.v1'
+          assert payload['architecture_id']=='RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5'
+          assert sum(p.numel() for p in backbone.parameters())==138_053_153
+          assert sum(p.numel() for p in decoder.parameters())==1_619_491
+          digest=hashlib.sha256(package.read_bytes()).hexdigest()
+          assert digest==base_receipt['content_sha256']
+          receipt={
+            'schema':'RealSaS.MIRAV55RuntimeRecoveryExecution.v1',
+            'status':'PASS_SELF_CONTAINED_RUNTIME_PACKAGE',
+            'source_head_sha':os.environ['EXPECTED_HEAD'],
+            'runtime_checkpoint_path':str(package),
+            'runtime_checkpoint_sha256':digest,
+            'runtime_checkpoint_size_bytes':package.stat().st_size,
+            'base_v6_checkpoint_sha256':payload['source_components']['base_v6_checkpoint_sha256'],
+            'v55_composite_sha256':payload['source_components']['v55_composite_sha256'],
+            'backbone_parameter_count':sum(p.numel() for p in backbone.parameters()),
+            'decoder_parameter_count':sum(p.numel() for p in decoder.parameters()),
+            'fit_executed':False,
+            'training_executed':False,
+            'modelrelease_registered':False,
+            'product_skin_activated':False,
+            'scientific_pass_minted':False,
+          }
+          (root/'MIRA_RUNTIME_RECOVERY_EXECUTION_V1.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
+          print('MIRA_RUNTIME_RECOVERY='+json.dumps(receipt,sort_keys=True),flush=True)
+          PY
+
+      - name: Preserve small recovery receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mira-v55-runtime-recovery-${{ github.run_id }}
+          path: |
+            /home/monster/realsas_authority/model_runtime_recovery/mira_v55/runtime/MIRA_RUNTIME_CHECKPOINT_V1_RECEIPT.json
+            /home/monster/realsas_authority/model_runtime_recovery/mira_v55/runtime/MIRA_RUNTIME_RECOVERY_EXECUTION_V1.json
+          if-no-files-found: error
+          retention-days: 30

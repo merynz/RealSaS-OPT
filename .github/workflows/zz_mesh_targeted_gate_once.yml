@@ -1,0 +1,52 @@
+name: mesh-targeted-gate-once
+on:
+  push:
+    branches: [product/mesh-capability-v1-20261023-canonical-main]
+    paths: [.github/workflows/zz_mesh_targeted_gate_once.yml]
+permissions:
+  contents: write
+jobs:
+  targeted:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: product/mesh-capability-v1-20261023-canonical-main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: platform/go.mod
+      - name: Install canonical CPU test profile
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements/mainline-ci.txt
+          python -m pip install -r requirements/torch-cpu.txt
+      - name: Python syntax and targeted product gates
+        run: |
+          python -m py_compile \
+            compiler/realsas_compiler_core/canonical_mesh_ir_v1.py \
+            compiler/realsas_compiler_services/platform_worker/shape_capability_v2.py \
+            compiler/realsas_compiler_services/platform_worker/shape_executor_v2.py \
+            compiler/realsas_compiler_services/platform_worker/mesh_capability_v1.py \
+            compiler/realsas_compiler_services/platform_worker/mesh_executor_v1.py \
+            tools/platform_capability_versions.py
+          pytest -q \
+            tests/compiler/test_product_input_capability_v1.py \
+            tests/compiler/test_product_shape_capability_v1.py \
+            tests/compiler/test_product_shape_executor_v1.py \
+            tests/compiler/test_product_shape_capability_v2.py \
+            tests/compiler/test_product_mesh_capability_v1.py \
+            tests/compiler/test_platform_capability_versions_v1.py
+      - name: Go product capability gates
+        working-directory: platform
+        run: go test ./internal/capability
+      - name: Remove transient workflow after success
+        run: |
+          rm .github/workflows/zz_mesh_targeted_gate_once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/zz_mesh_targeted_gate_once.yml
+          git commit -m 'CI: remove transient Mesh targeted gate'
+          git push

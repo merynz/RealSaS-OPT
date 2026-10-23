@@ -81,5 +81,6 @@ func TestResponsibilityLedgerForbidsLossyTruthReplacement(t *testing.T) {
 			if !row.SourceTruthRetained {
 				t.Fatalf("lossy responsibility replaces source truth: %s", row.ID)
 			}
+		}
 	}
 }

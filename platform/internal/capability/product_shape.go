@@ -7,10 +7,10 @@ const (
 	ProductShapeContractV1   = "RealSaS.ProductShapeInference.v1"
 )
 
-// ProductShapeProvider exposes the first inference-only product capability.
-// It is deliberately developer-only and cannot mint ProductRevision authority.
-// A future complete product graph may depend on this capability, but only the
-// final Proof terminal is allowed to own product-pass authority.
+// ProductShapeProvider exposes inference-only learned Shape evidence.
+// Input lowering is an explicit dependency so source-view/frontend research can
+// evolve without being hidden inside Shape. Shape still cannot mint Mesh or
+// ProductRevision authority.
 type ProductShapeProvider struct{}
 
 func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) {
@@ -19,6 +19,7 @@ func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) 
 		Kind:                 KindModule,
 		OwnerModuleID:        "product.shape",
 		ExecutorActivity:     "engine.execute_capability.v1",
+		Dependencies:         []string{ProductInputCapabilityID},
 		AllowedModes:         []Mode{ModeDeveloper},
 		ProductPassAuthority: false,
 		Aliases:              []string{"Shape", "IRIS", "TESSA"},

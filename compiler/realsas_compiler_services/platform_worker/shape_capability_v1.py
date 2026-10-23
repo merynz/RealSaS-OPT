@@ -14,6 +14,11 @@ from compiler.realsas_compiler_services.platform_worker.iris_inference_v1 import
     encode_scene_v1,
     load_iris_vnext_inference_v1,
 )
+from compiler.realsas_compiler_services.platform_worker.scene_input_contract_v1 import (
+    SHAPE_INPUT_ARTIFACT_TYPE_V1,
+    decode_shape_input_v1,
+    encode_shape_input_v1,
+)
 from compiler.realsas_compiler_services.platform_worker.tessa_inference_v1 import (
     TESSAInferencePolicyV1,
     build_inputs_from_iris_v1,
@@ -25,7 +30,6 @@ from models.iris.vnext.surface_v1 import IRISSurfaceEvidenceV1, extract_surface_
 
 
 SHAPE_EXECUTOR_CONTRACT_V1 = "RealSaS.ProductShapeInference.v1"
-SHAPE_INPUT_ARTIFACT_TYPE_V1 = "RealSaS.ShapeInput"
 SHAPE_OUTPUT_ARTIFACT_TYPE_V1 = "RealSaS.ShapeProposal"
 SHAPE_OUTPUT_AUTHORITY_V1 = "LEARNED_SHAPE_PROPOSAL_ONLY"
 
@@ -40,53 +44,6 @@ class ShapeInferenceResultV1:
 def _tensor_numpy(value: torch.Tensor, dtype: np.dtype | None = None) -> np.ndarray:
     out = value.detach().cpu().contiguous().numpy()
     return out if dtype is None else out.astype(dtype, copy=False)
-
-
-def encode_shape_input_v1(inputs: IRISVNextSceneInputsV1) -> bytes:
-    """Portable, pickle-free transport for the output of the future Input capability."""
-    inputs.validate()
-    stream = io.BytesIO()
-    np.savez_compressed(
-        stream,
-        schema=np.asarray(["RealSaS.ShapeInput.v1"]),
-        foundation_authority_sha256=np.asarray([inputs.foundation_authority_sha256]),
-        image_tokens=_tensor_numpy(inputs.image_tokens, np.float32),
-        token_xy=_tensor_numpy(inputs.token_xy, np.float32),
-        camera_features=_tensor_numpy(inputs.camera_features, np.float32),
-    )
-    return stream.getvalue()
-
-
-def decode_shape_input_v1(payload: bytes) -> IRISVNextSceneInputsV1:
-    if not isinstance(payload, (bytes, bytearray, memoryview)) or not payload:
-        raise RuntimeError("SHAPE_INPUT_BYTES_REQUIRED")
-    try:
-        with np.load(io.BytesIO(bytes(payload)), allow_pickle=False) as bundle:
-            required = {
-                "schema",
-                "foundation_authority_sha256",
-                "image_tokens",
-                "token_xy",
-                "camera_features",
-            }
-            if set(bundle.files) != required:
-                raise RuntimeError("SHAPE_INPUT_FIELDS_DRIFT")
-            schema = str(bundle["schema"].reshape(-1)[0])
-            if schema != "RealSaS.ShapeInput.v1":
-                raise RuntimeError("SHAPE_INPUT_SCHEMA_DRIFT")
-            authority = str(bundle["foundation_authority_sha256"].reshape(-1)[0])
-            value = IRISVNextSceneInputsV1(
-                image_tokens=torch.from_numpy(np.asarray(bundle["image_tokens"], dtype=np.float32).copy()),
-                token_xy=torch.from_numpy(np.asarray(bundle["token_xy"], dtype=np.float32).copy()),
-                camera_features=torch.from_numpy(np.asarray(bundle["camera_features"], dtype=np.float32).copy()),
-                foundation_authority_sha256=authority,
-            )
-    except RuntimeError:
-        raise
-    except Exception as exc:
-        raise RuntimeError("SHAPE_INPUT_DECODE_FAILED") from exc
-    value.validate()
-    return value
 
 
 def _proposal_metadata(*, iris_binding: Any, tessa_binding: Any, proposal: Any) -> dict[str, Any]:

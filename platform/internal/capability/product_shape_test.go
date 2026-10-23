@@ -7,7 +7,7 @@ import (
 )
 
 func TestProductShapeCapabilityIsDeveloperOnlyAndCannotPromote(t *testing.T) {
-	registry, err := Build(context.Background(), ProductShapeProvider{})
+	registry, err := Build(context.Background(), ProductInputProvider{}, ProductShapeProvider{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -17,6 +17,9 @@ func TestProductShapeCapabilityIsDeveloperOnlyAndCannotPromote(t *testing.T) {
 	}
 	if descriptor.Kind != KindModule || descriptor.OwnerModuleID != "product.shape" {
 		t.Fatalf("descriptor=%+v", descriptor)
+	}
+	if len(descriptor.Dependencies) != 1 || descriptor.Dependencies[0] != ProductInputCapabilityID {
+		t.Fatalf("dependencies=%v", descriptor.Dependencies)
 	}
 	if descriptor.ProductPassAuthority {
 		t.Fatal("Shape may not claim product-pass authority")

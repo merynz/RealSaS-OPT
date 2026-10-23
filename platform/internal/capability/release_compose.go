@@ -42,7 +42,8 @@ func BuildEngineReleaseRegistry(ctx context.Context, graph *stagegraph.Graph) (*
 	}
 	// product.* capability IDs are stable semantic roles. Release sealing is also
 	// the architecture gate for shared capability semantics, responsibility
-	// ownership, authority duplication, transform paths and lossy boundaries.
+	// ownership, learned-model requirements, authority duplication, transform
+	// paths and lossy boundaries.
 	if _, err := ProductRoleGraph(registry); err != nil {
 		return nil, err
 	}
@@ -50,6 +51,9 @@ func BuildEngineReleaseRegistry(ctx context.Context, graph *stagegraph.Graph) (*
 		return nil, err
 	}
 	if _, err := ResponsibilityTerrain(registry); err != nil {
+		return nil, err
+	}
+	if _, err := ProductModelRequirements(registry); err != nil {
 		return nil, err
 	}
 	return registry, nil
@@ -86,9 +90,10 @@ func validateModuleVersionIdentity(descriptor Descriptor, version VersionIdentit
 // capabilities require an implementation identity from release tooling; policy
 // and parameter hashes are independently rederived from the Go descriptor.
 //
-// This keeps EngineRelease DAG truth and capability-set truth separate but
-// jointly immutable: either may be inspected independently, while developer
-// capability execution fails closed if the capability snapshot is absent.
+// This keeps EngineRelease DAG truth, learned ModelRelease requirements and
+// capability-set truth separate but jointly immutable. A release cannot claim a
+// product role whose learned responsibilities are absent or architecture-drifted
+// in EngineRelease model requirements.
 func SealEngineReleaseSnapshot(
 	ctx context.Context,
 	pool *pgxpool.Pool,
@@ -106,6 +111,13 @@ func SealEngineReleaseSnapshot(
 	registry, err := BuildEngineReleaseRegistry(ctx, graph)
 	if err != nil {
 		return "", err
+	}
+	purpose, modelRequirements, err := release.LoadModelRequirements(ctx, pool, releaseID)
+	if err != nil {
+		return "", err
+	}
+	if err := validateEngineReleaseModelRequirements(registry, purpose, modelRequirements); err != nil {
+		return "", fmt.Errorf("CAPABILITY_MODEL_REQUIREMENT_INVALID:%w", err)
 	}
 	stageVersions, err := release.LoadVersions(ctx, pool, releaseID, false)
 	if err != nil {

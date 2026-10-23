@@ -35,23 +35,27 @@ func TestBuildEngineReleaseRegistryIncludesStagesAndProductModules(t *testing.T)
 		StageCapabilityID("B"),
 		ProductInputCapabilityID,
 		ProductShapeCapabilityID,
+		ProductMeshCapabilityID,
 	} {
 		if _, ok := registry.Get(id); !ok {
 			t.Fatalf("release registry missing %s", id)
 		}
 	}
-	resolved, err := registry.Resolve(ProductShapeCapabilityID)
+	resolved, err := registry.Resolve(ProductMeshCapabilityID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(resolved) != 2 || resolved[0].ID != ProductInputCapabilityID || resolved[1].ID != ProductShapeCapabilityID {
-		t.Fatalf("shape product dependency resolution=%+v", resolved)
+	if len(resolved) != 3 ||
+		resolved[0].ID != ProductInputCapabilityID ||
+		resolved[1].ID != ProductShapeCapabilityID ||
+		resolved[2].ID != ProductMeshCapabilityID {
+		t.Fatalf("mesh product dependency resolution=%+v", resolved)
 	}
 }
 
 func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	providers := ProductProviders()
-	if len(providers) != 2 {
+	if len(providers) != 3 {
 		t.Fatalf("product provider count=%d", len(providers))
 	}
 	registry, err := Build(context.Background(), providers...)
@@ -65,14 +69,27 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	if !ok || len(shape.Dependencies) != 1 || shape.Dependencies[0] != ProductInputCapabilityID {
 		t.Fatalf("shape descriptor=%+v", shape)
 	}
+	mesh, ok := registry.Get(ProductMeshCapabilityID)
+	if !ok || len(mesh.Dependencies) != 1 || mesh.Dependencies[0] != ProductShapeCapabilityID {
+		t.Fatalf("mesh descriptor=%+v", mesh)
+	}
 }
 
 func TestModuleVersionPolicyAndParametersAreRederivedFromDescriptor(t *testing.T) {
-	registry, err := Build(context.Background(), ProductInputProvider{}, ProductShapeProvider{})
+	registry, err := Build(
+		context.Background(),
+		ProductInputProvider{},
+		ProductShapeProvider{},
+		ProductMeshProvider{},
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, capabilityID := range []string{ProductInputCapabilityID, ProductShapeCapabilityID} {
+	for _, capabilityID := range []string{
+		ProductInputCapabilityID,
+		ProductShapeCapabilityID,
+		ProductMeshCapabilityID,
+	} {
 		descriptor, ok := registry.Get(capabilityID)
 		if !ok {
 			t.Fatal(capabilityID)

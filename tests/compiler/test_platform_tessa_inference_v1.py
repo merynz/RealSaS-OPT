@@ -18,6 +18,7 @@ from compiler.realsas_compiler_services.platform_worker.tessa_inference_v1 impor
 from models.iris.vnext.contracts_v1 import IRISVNextConfigV1
 from models.iris.vnext.heads_v3 import GraphicsRelationHeadV3Config
 from models.iris.vnext.model_v3 import IRISVNextEvidenceModelV3
+from models.iris.vnext.presentation_evidence_v1 import PRESENTATION_FEATURE_NAMES_V1
 from models.iris.vnext.structure_v4 import IRISVNextStructuralizationBridgeV4
 from models.iris.vnext.surface_v1 import IRISSurfaceEvidenceV1
 from models.tessa.v3.checkpoint_v1 import write_checkpoint_v1
@@ -95,7 +96,7 @@ def _tessa(seed: int, iris: IRISVNextEvidenceModelV3) -> TESSAStructuralizerV3:
     model = TESSAStructuralizerV3(
         scene_input_dim=iris.config.plane_channels + 5,
         surface_input_dim=3 + 3 + iris.config.local_feature_dim + 6 + 2,
-        presentation_input_dim=47,
+        presentation_input_dim=len(PRESENTATION_FEATURE_NAMES_V1),
         config=_config(),
     )
     model.eval()
@@ -195,6 +196,7 @@ def test_attempt_bound_tessa_checkpoint_encodes_current_iris_evidence(monkeypatc
     second = encode_tessa_memory_v1(binding, inputs)
 
     assert tuple(first.shape) == (1, 5, 32)
+    assert inputs.presentation_source.shape[-1] == len(PRESENTATION_FEATURE_NAMES_V1)
     assert torch.equal(first, second)
     assert binding.model.training is False
     assert not any(parameter.requires_grad for parameter in binding.model.parameters())
@@ -278,4 +280,3 @@ def test_tessa_inference_path_has_no_training_or_live_channel_dependency():
     assert "incremental_decode_step_windowed_v2" in source
     assert "generate_tessa_candidate_v2" not in source
     assert "require_materialized_model_release" in source
-

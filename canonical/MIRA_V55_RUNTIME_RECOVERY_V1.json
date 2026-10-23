@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.MIRAV55RuntimeRecovery.v1",
-  "status": "SOURCE_AND_FORWARD_PARITY_VERIFIED__RUNTIME_PACKAGE_PENDING",
+  "status": "PASS_SELF_CONTAINED_RUNTIME_PACKAGE__MODELRELEASE_PENDING",
   "authority": "MIGRATION_AND_RUNTIME_RECOVERY_EVIDENCE_ONLY__NO_NEW_SCIENTIFIC_PASS",
   "historical_mira_source_commit": "247ff75efce51ad1cb08932d4f1fc66e3b484e82",
   "historical_components": {
@@ -34,6 +34,22 @@
     "torch_equal_logits": true,
     "torch_equal_weights": true
   },
+  "runtime_package": {
+    "schema": "RealSaS.MIRA.RuntimeCheckpoint.v1",
+    "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
+    "content_sha256": "b5ad2d56a9006058cba30c0b123d4e111f3eea3b78ed42f3542cbd095983139a",
+    "size_bytes": 558840979,
+    "authority_host_path": "/home/monster/realsas_authority/model_runtime_recovery/mira_v55/runtime/MIRA_RUNTIME_CHECKPOINT_V1.pt",
+    "recovery_execution_source_head_sha": "821538333b8b4bd93410d873e17881dde081279a",
+    "backbone_parameter_count": 138053153,
+    "decoder_parameter_count": 1619491,
+    "self_contained_load_verified": true,
+    "fit_executed": false,
+    "training_executed": false,
+    "scientific_pass_minted": false,
+    "modelrelease_registered": false,
+    "product_skin_activated": false
+  },
   "runtime_semantics": {
     "output_domain": "MECHANICAL_CARRIER_M",
     "gsa_role": "EVIDENCE_SUBSTRATE_ONLY",
@@ -42,5 +58,5 @@
     "canonical_skin_authority": "COMPILER_ONLY",
     "fit_allowed_during_product_execution": false
   },
-  "activation_blocker": "SELF_CONTAINED_MIRA_RUNTIME_ARTIFACT_NOT_YET_SEALED_AS_MODELRELEASE"
+  "activation_blocker": "CURRENT_MIRA_MODELRELEASE_NOT_REGISTERED"
 }

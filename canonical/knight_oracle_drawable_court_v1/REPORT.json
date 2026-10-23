@@ -1,0 +1,4128 @@
+{
+  "appearance_asset_hash": "a0c4fabaa8c672cb16eb27b0e488bae7c251dc8b16cd4c5e20d01488a7a18a38",
+  "appearance_asset_mutated": false,
+  "artist_authored_partition_claimed": false,
+  "baseline_gate_reused_from_sealed_receipt": true,
+  "candidate_lineage_hash": "cb83b1e188770a2a8d748e5f89bd4a41ac3a4ee10c250b95c764ccde35c8fa96",
+  "clips": [
+    {
+      "clip_id": "demo_idle_v1",
+      "clip_name": "IDLE",
+      "duration_seconds": 3.3333333333333335,
+      "frame0_path": "canonical/knight_oracle_drawable_court_v1/KNIGHT_IDLE_ORACLE_DRAWABLE_COURT_FRAME0_V1.png",
+      "frame0_sha256": "2647c245e14223bd8629d5c066d9a0208cb619bb31d60ffdc0c8dd696fd4b48d",
+      "frames": [
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 1,
+            "enclosed_transparent_hole_pixels": 6,
+            "foreground_alpha_pixels": 160277,
+            "foreground_connected_component_count": 2
+          },
+          "clip_id": "demo_idle_v1",
+          "clip_name": "IDLE",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 1,
+            "enclosed_transparent_hole_pixels": 6,
+            "foreground_alpha_pixels": 160277,
+            "foreground_connected_component_count": 2
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 47838,
+            "losses": {
+              "Body": 306,
+              "Foot.L": 409,
+              "Foot.R": 0,
+              "Hips": 17682,
+              "LowerArm.L": 440,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 3524,
+              "LowerLeg.R": 3309,
+              "MiddleHand.L": 705,
+              "MiddleHand.R": 1229,
+              "Neck": 1582,
+              "Palm.L": 115,
+              "Thumb.L": 9,
+              "Torso": 15206,
+              "UpperArm.L": 617,
+              "UpperArm.R": 210,
+              "UpperLeg.L": 1320,
+              "UpperLeg.R": 1175
+            },
+            "order_back_to_front": [
+              "Torso",
+              "Hips",
+              "LowerLeg.L",
+              "LowerLeg.R",
+              "UpperLeg.L",
+              "UpperLeg.R",
+              "UpperArm.L",
+              "LowerArm.L",
+              "UpperArm.R",
+              "Thumb.L",
+              "LowerArm.R",
+              "Palm.L",
+              "Body",
+              "Foot.L",
+              "Foot.R",
+              "Neck",
+              "MiddleHand.R",
+              "MiddleHand.L"
+            ],
+            "score": {
+              "Body": 823,
+              "Foot.L": 2189,
+              "Foot.R": 3111,
+              "Hips": -9263,
+              "LowerArm.L": -233,
+              "LowerArm.R": 0,
+              "LowerLeg.L": -3383,
+              "LowerLeg.R": -3199,
+              "MiddleHand.L": 11923,
+              "MiddleHand.R": 11834,
+              "Neck": 4493,
+              "Palm.L": 46,
+              "Thumb.L": -9,
+              "Torso": -15206,
+              "UpperArm.L": -617,
+              "UpperArm.R": -210,
+              "UpperLeg.L": -1224,
+              "UpperLeg.R": -1075
+            },
+            "wins": {
+              "Body": 1129,
+              "Foot.L": 2598,
+              "Foot.R": 3111,
+              "Hips": 8419,
+              "LowerArm.L": 207,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 141,
+              "LowerLeg.R": 110,
+              "MiddleHand.L": 12628,
+              "MiddleHand.R": 13063,
+              "Neck": 6075,
+              "Palm.L": 161,
+              "Thumb.L": 0,
+              "Torso": 0,
+              "UpperArm.L": 0,
+              "UpperArm.R": 0,
+              "UpperLeg.L": 96,
+              "UpperLeg.R": 100
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 12313,
+            "max_abs_rgba_delta": 187,
+            "mean_abs_rgba_delta": 0.07495450973510742
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 0,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 1,
+            "enclosed_transparent_hole_pixels": 6,
+            "foreground_alpha_pixels": 160277,
+            "foreground_connected_component_count": 2
+          },
+          "static_order_back_to_front": [
+            "Torso",
+            "LowerLeg.R",
+            "LowerLeg.L",
+            "Palm.L",
+            "LowerArm.L",
+            "Thumb.L",
+            "LowerArm.R",
+            "UpperLeg.R",
+            "UpperArm.L",
+            "UpperLeg.L",
+            "UpperArm.R",
+            "Body",
+            "MiddleHand.R",
+            "Foot.L",
+            "Foot.R",
+            "Neck",
+            "MiddleHand.L",
+            "Hips"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 31582,
+            "max_abs_rgba_delta": 187,
+            "mean_abs_rgba_delta": 0.7775919437408447
+          },
+          "time_seconds": 0.0,
+          "view_index": 0
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 192,
+            "enclosed_transparent_hole_pixels": 1682,
+            "foreground_alpha_pixels": 279208,
+            "foreground_connected_component_count": 12
+          },
+          "clip_id": "demo_idle_v1",
+          "clip_name": "IDLE",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 192,
+            "enclosed_transparent_hole_pixels": 1682,
+            "foreground_alpha_pixels": 279208,
+            "foreground_connected_component_count": 12
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 39678,
+            "losses": {
+              "Body": 8,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 17065,
+              "LowerArm.L": 176,
+              "LowerArm.R": 13,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 3,
+              "MiddleHand.L": 889,
+              "MiddleHand.R": 278,
+              "Neck": 3850,
+              "Palm.L": 0,
+              "Thumb.L": 190,
+              "Torso": 11568,
+              "UpperArm.L": 4838,
+              "UpperArm.R": 94,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 706
+            },
+            "order_back_to_front": [
+              "Hips",
+              "Torso",
+              "UpperArm.L",
+              "MiddleHand.L",
+              "UpperLeg.R",
+              "Neck",
+              "Thumb.L",
+              "LowerArm.L",
+              "LowerArm.R",
+              "Body",
+              "LowerLeg.R",
+              "Foot.L",
+              "Foot.R",
+              "LowerLeg.L",
+              "Palm.L",
+              "UpperLeg.L",
+              "UpperArm.R",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": -8,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": -17065,
+              "LowerArm.L": -176,
+              "LowerArm.R": -13,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": -3,
+              "MiddleHand.L": -853,
+              "MiddleHand.R": 32339,
+              "Neck": -511,
+              "Palm.L": 0,
+              "Thumb.L": -190,
+              "Torso": -11327,
+              "UpperArm.L": -4838,
+              "UpperArm.R": 3351,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": -706
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 0,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 36,
+              "MiddleHand.R": 32617,
+              "Neck": 3339,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 241,
+              "UpperArm.L": 0,
+              "UpperArm.R": 3445,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 47051,
+            "max_abs_rgba_delta": 202,
+            "mean_abs_rgba_delta": 0.14115118980407715
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 0,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 192,
+            "enclosed_transparent_hole_pixels": 1682,
+            "foreground_alpha_pixels": 279208,
+            "foreground_connected_component_count": 12
+          },
+          "static_order_back_to_front": [
+            "MiddleHand.L",
+            "UpperArm.L",
+            "Neck",
+            "LowerLeg.L",
+            "Torso",
+            "Palm.L",
+            "UpperLeg.L",
+            "LowerArm.L",
+            "LowerArm.R",
+            "Foot.L",
+            "Body",
+            "Foot.R",
+            "Thumb.L",
+            "Hips",
+            "UpperArm.R",
+            "UpperLeg.R",
+            "LowerLeg.R",
+            "MiddleHand.R"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 43353,
+            "max_abs_rgba_delta": 202,
+            "mean_abs_rgba_delta": 0.1379096508026123
+          },
+          "time_seconds": 0.0,
+          "view_index": 2
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 2,
+            "enclosed_transparent_hole_pixels": 2,
+            "foreground_alpha_pixels": 158419,
+            "foreground_connected_component_count": 2
+          },
+          "clip_id": "demo_idle_v1",
+          "clip_name": "IDLE",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 2,
+            "enclosed_transparent_hole_pixels": 2,
+            "foreground_alpha_pixels": 158419,
+            "foreground_connected_component_count": 2
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 48478,
+            "losses": {
+              "Body": 376,
+              "Foot.L": 566,
+              "Foot.R": 0,
+              "Hips": 18658,
+              "LowerArm.L": 494,
+              "LowerArm.R": 5,
+              "LowerLeg.L": 3321,
+              "LowerLeg.R": 3544,
+              "MiddleHand.L": 646,
+              "MiddleHand.R": 1282,
+              "Neck": 1563,
+              "Palm.L": 139,
+              "Thumb.L": 1,
+              "Torso": 14143,
+              "UpperArm.L": 592,
+              "UpperArm.R": 149,
+              "UpperLeg.L": 1312,
+              "UpperLeg.R": 1687
+            },
+            "order_back_to_front": [
+              "Torso",
+              "Hips",
+              "LowerLeg.R",
+              "LowerLeg.L",
+              "UpperLeg.R",
+              "UpperLeg.L",
+              "UpperArm.L",
+              "LowerArm.L",
+              "UpperArm.R",
+              "Palm.L",
+              "LowerArm.R",
+              "Thumb.L",
+              "Body",
+              "Foot.L",
+              "Foot.R",
+              "Neck",
+              "MiddleHand.L",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": 819,
+              "Foot.L": 1873,
+              "Foot.R": 3146,
+              "Hips": -11194,
+              "LowerArm.L": -303,
+              "LowerArm.R": -5,
+              "LowerLeg.L": -3194,
+              "LowerLeg.R": -3456,
+              "MiddleHand.L": 11965,
+              "MiddleHand.R": 13519,
+              "Neck": 4603,
+              "Palm.L": -8,
+              "Thumb.L": -1,
+              "Torso": -14143,
+              "UpperArm.L": -592,
+              "UpperArm.R": -149,
+              "UpperLeg.L": -1216,
+              "UpperLeg.R": -1664
+            },
+            "wins": {
+              "Body": 1195,
+              "Foot.L": 2439,
+              "Foot.R": 3146,
+              "Hips": 7464,
+              "LowerArm.L": 191,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 127,
+              "LowerLeg.R": 88,
+              "MiddleHand.L": 12611,
+              "MiddleHand.R": 14801,
+              "Neck": 6166,
+              "Palm.L": 131,
+              "Thumb.L": 0,
+              "Torso": 0,
+              "UpperArm.L": 0,
+              "UpperArm.R": 0,
+              "UpperLeg.L": 96,
+              "UpperLeg.R": 23
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 12418,
+            "max_abs_rgba_delta": 184,
+            "mean_abs_rgba_delta": 0.07861328125
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 1,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 2,
+            "enclosed_transparent_hole_pixels": 2,
+            "foreground_alpha_pixels": 158419,
+            "foreground_connected_component_count": 2
+          },
+          "static_order_back_to_front": [
+            "Torso",
+            "LowerLeg.R",
+            "LowerLeg.L",
+            "Palm.L",
+            "LowerArm.L",
+            "Thumb.L",
+            "LowerArm.R",
+            "UpperLeg.R",
+            "UpperArm.L",
+            "UpperLeg.L",
+            "UpperArm.R",
+            "Body",
+            "MiddleHand.R",
+            "Foot.L",
+            "Foot.R",
+            "Neck",
+            "MiddleHand.L",
+            "Hips"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 32335,
+            "max_abs_rgba_delta": 184,
+            "mean_abs_rgba_delta": 0.7855255603790283
+          },
+          "time_seconds": 0.8333333333333334,
+          "view_index": 0
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 183,
+            "enclosed_transparent_hole_pixels": 1652,
+            "foreground_alpha_pixels": 280508,
+            "foreground_connected_component_count": 10
+          },
+          "clip_id": "demo_idle_v1",
+          "clip_name": "IDLE",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 182,
+            "enclosed_transparent_hole_pixels": 1651,
+            "foreground_alpha_pixels": 280509,
+            "foreground_connected_component_count": 10
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 41573,
+            "losses": {
+              "Body": 71,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 18023,
+              "LowerArm.L": 154,
+              "LowerArm.R": 15,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 539,
+              "MiddleHand.L": 726,
+              "MiddleHand.R": 550,
+              "Neck": 3775,
+              "Palm.L": 0,
+              "Thumb.L": 80,
+              "Torso": 11764,
+              "UpperArm.L": 4643,
+              "UpperArm.R": 77,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 1156
+            },
+            "order_back_to_front": [
+              "Hips",
+              "Torso",
+              "UpperArm.L",
+              "UpperLeg.R",
+              "MiddleHand.L",
+              "LowerLeg.R",
+              "Neck",
+              "LowerArm.L",
+              "Thumb.L",
+              "Body",
+              "LowerArm.R",
+              "Foot.L",
+              "Foot.R",
+              "LowerLeg.L",
+              "Palm.L",
+              "UpperLeg.L",
+              "UpperArm.R",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": -71,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": -17920,
+              "LowerArm.L": -154,
+              "LowerArm.R": -15,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": -539,
+              "MiddleHand.L": -672,
+              "MiddleHand.R": 33387,
+              "Neck": -236,
+              "Palm.L": 0,
+              "Thumb.L": -80,
+              "Torso": -11373,
+              "UpperArm.L": -4643,
+              "UpperArm.R": 3472,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": -1156
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 103,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 54,
+              "MiddleHand.R": 33937,
+              "Neck": 3539,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 391,
+              "UpperArm.L": 0,
+              "UpperArm.R": 3549,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 48416,
+            "max_abs_rgba_delta": 255,
+            "mean_abs_rgba_delta": 0.14747357368469238
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 1,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 182,
+            "enclosed_transparent_hole_pixels": 1651,
+            "foreground_alpha_pixels": 280509,
+            "foreground_connected_component_count": 10
+          },
+          "static_order_back_to_front": [
+            "MiddleHand.L",
+            "UpperArm.L",
+            "Neck",
+            "LowerLeg.L",
+            "Torso",
+            "Palm.L",
+            "UpperLeg.L",
+            "LowerArm.L",
+            "LowerArm.R",
+            "Foot.L",
+            "Body",
+            "Foot.R",
+            "Thumb.L",
+            "Hips",
+            "UpperArm.R",
+            "UpperLeg.R",
+            "LowerLeg.R",
+            "MiddleHand.R"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 44885,
+            "max_abs_rgba_delta": 255,
+            "mean_abs_rgba_delta": 0.14792442321777344
+          },
+          "time_seconds": 0.8333333333333334,
+          "view_index": 2
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 4,
+            "enclosed_transparent_hole_pixels": 44,
+            "foreground_alpha_pixels": 155900,
+            "foreground_connected_component_count": 1
+          },
+          "clip_id": "demo_idle_v1",
+          "clip_name": "IDLE",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 4,
+            "enclosed_transparent_hole_pixels": 44,
+            "foreground_alpha_pixels": 155900,
+            "foreground_connected_component_count": 1
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 50143,
+            "losses": {
+              "Body": 463,
+              "Foot.L": 544,
+              "Foot.R": 0,
+              "Hips": 19649,
+              "LowerArm.L": 501,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 3372,
+              "LowerLeg.R": 4179,
+              "MiddleHand.L": 615,
+              "MiddleHand.R": 1058,
+              "Neck": 1841,
+              "Palm.L": 105,
+              "Thumb.L": 0,
+              "Torso": 13775,
+              "UpperArm.L": 575,
+              "UpperArm.R": 141,
+              "UpperLeg.L": 1313,
+              "UpperLeg.R": 2012
+            },
+            "order_back_to_front": [
+              "Torso",
+              "Hips",
+              "LowerLeg.R",
+              "LowerLeg.L",
+              "UpperLeg.R",
+              "UpperLeg.L",
+              "UpperArm.L",
+              "LowerArm.L",
+              "UpperArm.R",
+              "LowerArm.R",
+              "Thumb.L",
+              "Palm.L",
+              "Body",
+              "Foot.L",
+              "Foot.R",
+              "Neck",
+              "MiddleHand.L",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": 561,
+              "Foot.L": 1897,
+              "Foot.R": 3100,
+              "Hips": -12467,
+              "LowerArm.L": -324,
+              "LowerArm.R": 0,
+              "LowerLeg.L": -3239,
+              "LowerLeg.R": -4079,
+              "MiddleHand.L": 12296,
+              "MiddleHand.R": 15920,
+              "Neck": 3990,
+              "Palm.L": 48,
+              "Thumb.L": 0,
+              "Torso": -13775,
+              "UpperArm.L": -575,
+              "UpperArm.R": -141,
+              "UpperLeg.L": -1214,
+              "UpperLeg.R": -1998
+            },
+            "wins": {
+              "Body": 1024,
+              "Foot.L": 2441,
+              "Foot.R": 3100,
+              "Hips": 7182,
+              "LowerArm.L": 177,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 133,
+              "LowerLeg.R": 100,
+              "MiddleHand.L": 12911,
+              "MiddleHand.R": 16978,
+              "Neck": 5831,
+              "Palm.L": 153,
+              "Thumb.L": 0,
+              "Torso": 0,
+              "UpperArm.L": 0,
+              "UpperArm.R": 0,
+              "UpperLeg.L": 99,
+              "UpperLeg.R": 14
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 12511,
+            "max_abs_rgba_delta": 163,
+            "mean_abs_rgba_delta": 0.07623791694641113
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 2,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 4,
+            "enclosed_transparent_hole_pixels": 44,
+            "foreground_alpha_pixels": 155900,
+            "foreground_connected_component_count": 1
+          },
+          "static_order_back_to_front": [
+            "Torso",
+            "LowerLeg.R",
+            "LowerLeg.L",
+            "Palm.L",
+            "LowerArm.L",
+            "Thumb.L",
+            "LowerArm.R",
+            "UpperLeg.R",
+            "UpperArm.L",
+            "UpperLeg.L",
+            "UpperArm.R",
+            "Body",
+            "MiddleHand.R",
+            "Foot.L",
+            "Foot.R",
+            "Neck",
+            "MiddleHand.L",
+            "Hips"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 33576,
+            "max_abs_rgba_delta": 163,
+            "mean_abs_rgba_delta": 0.815565824508667
+          },
+          "time_seconds": 1.6666666666666667,
+          "view_index": 0
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 185,
+            "enclosed_transparent_hole_pixels": 1701,
+            "foreground_alpha_pixels": 281490,
+            "foreground_connected_component_count": 17
+          },
+          "clip_id": "demo_idle_v1",
+          "clip_name": "IDLE",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 183,
+            "enclosed_transparent_hole_pixels": 1699,
+            "foreground_alpha_pixels": 281492,
+            "foreground_connected_component_count": 17
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 43226,
+            "losses": {
+              "Body": 114,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 16215,
+              "LowerArm.L": 155,
+              "LowerArm.R": 14,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 1494,
+              "MiddleHand.L": 638,
+              "MiddleHand.R": 4335,
+              "Neck": 3676,
+              "Palm.L": 0,
+              "Thumb.L": 26,
+              "Torso": 10583,
+              "UpperArm.L": 4526,
+              "UpperArm.R": 43,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 1407
+            },
+            "order_back_to_front": [
+              "Hips",
+              "Torso",
+              "UpperArm.L",
+              "LowerLeg.R",
+              "UpperLeg.R",
+              "MiddleHand.L",
+              "LowerArm.L",
+              "Body",
+              "Thumb.L",
+              "LowerArm.R",
+              "Foot.L",
+              "Foot.R",
+              "LowerLeg.L",
+              "Palm.L",
+              "UpperLeg.L",
+              "Neck",
+              "UpperArm.R",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": -114,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": -13702,
+              "LowerArm.L": -155,
+              "LowerArm.R": -14,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": -1494,
+              "MiddleHand.L": -586,
+              "MiddleHand.R": 27128,
+              "Neck": 107,
+              "Palm.L": 0,
+              "Thumb.L": -26,
+              "Torso": -8816,
+              "UpperArm.L": -4526,
+              "UpperArm.R": 3605,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": -1407
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 2513,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 52,
+              "MiddleHand.R": 31463,
+              "Neck": 3783,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 1767,
+              "UpperArm.L": 0,
+              "UpperArm.R": 3648,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 49874,
+            "max_abs_rgba_delta": 255,
+            "mean_abs_rgba_delta": 0.1658494472503662
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 2,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 183,
+            "enclosed_transparent_hole_pixels": 1699,
+            "foreground_alpha_pixels": 281492,
+            "foreground_connected_component_count": 17
+          },
+          "static_order_back_to_front": [
+            "MiddleHand.L",
+            "UpperArm.L",
+            "Neck",
+            "LowerLeg.L",
+            "Torso",
+            "Palm.L",
+            "UpperLeg.L",
+            "LowerArm.L",
+            "LowerArm.R",
+            "Foot.L",
+            "Body",
+            "Foot.R",
+            "Thumb.L",
+            "Hips",
+            "UpperArm.R",
+            "UpperLeg.R",
+            "LowerLeg.R",
+            "MiddleHand.R"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 47994,
+            "max_abs_rgba_delta": 255,
+            "mean_abs_rgba_delta": 0.17479848861694336
+          },
+          "time_seconds": 1.6666666666666667,
+          "view_index": 2
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 2,
+            "enclosed_transparent_hole_pixels": 2,
+            "foreground_alpha_pixels": 158419,
+            "foreground_connected_component_count": 2
+          },
+          "clip_id": "demo_idle_v1",
+          "clip_name": "IDLE",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 2,
+            "enclosed_transparent_hole_pixels": 2,
+            "foreground_alpha_pixels": 158419,
+            "foreground_connected_component_count": 2
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 48478,
+            "losses": {
+              "Body": 376,
+              "Foot.L": 566,
+              "Foot.R": 0,
+              "Hips": 18658,
+              "LowerArm.L": 494,
+              "LowerArm.R": 5,
+              "LowerLeg.L": 3321,
+              "LowerLeg.R": 3544,
+              "MiddleHand.L": 646,
+              "MiddleHand.R": 1282,
+              "Neck": 1563,
+              "Palm.L": 139,
+              "Thumb.L": 1,
+              "Torso": 14143,
+              "UpperArm.L": 592,
+              "UpperArm.R": 149,
+              "UpperLeg.L": 1312,
+              "UpperLeg.R": 1687
+            },
+            "order_back_to_front": [
+              "Torso",
+              "Hips",
+              "LowerLeg.R",
+              "LowerLeg.L",
+              "UpperLeg.R",
+              "UpperLeg.L",
+              "UpperArm.L",
+              "LowerArm.L",
+              "UpperArm.R",
+              "Palm.L",
+              "LowerArm.R",
+              "Thumb.L",
+              "Body",
+              "Foot.L",
+              "Foot.R",
+              "Neck",
+              "MiddleHand.L",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": 819,
+              "Foot.L": 1873,
+              "Foot.R": 3146,
+              "Hips": -11194,
+              "LowerArm.L": -303,
+              "LowerArm.R": -5,
+              "LowerLeg.L": -3194,
+              "LowerLeg.R": -3456,
+              "MiddleHand.L": 11965,
+              "MiddleHand.R": 13519,
+              "Neck": 4603,
+              "Palm.L": -8,
+              "Thumb.L": -1,
+              "Torso": -14143,
+              "UpperArm.L": -592,
+              "UpperArm.R": -149,
+              "UpperLeg.L": -1216,
+              "UpperLeg.R": -1664
+            },
+            "wins": {
+              "Body": 1195,
+              "Foot.L": 2439,
+              "Foot.R": 3146,
+              "Hips": 7464,
+              "LowerArm.L": 191,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 127,
+              "LowerLeg.R": 88,
+              "MiddleHand.L": 12611,
+              "MiddleHand.R": 14801,
+              "Neck": 6166,
+              "Palm.L": 131,
+              "Thumb.L": 0,
+              "Torso": 0,
+              "UpperArm.L": 0,
+              "UpperArm.R": 0,
+              "UpperLeg.L": 96,
+              "UpperLeg.R": 23
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 12419,
+            "max_abs_rgba_delta": 184,
+            "mean_abs_rgba_delta": 0.07861638069152832
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 3,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 2,
+            "enclosed_transparent_hole_pixels": 2,
+            "foreground_alpha_pixels": 158419,
+            "foreground_connected_component_count": 2
+          },
+          "static_order_back_to_front": [
+            "Torso",
+            "LowerLeg.R",
+            "LowerLeg.L",
+            "Palm.L",
+            "LowerArm.L",
+            "Thumb.L",
+            "LowerArm.R",
+            "UpperLeg.R",
+            "UpperArm.L",
+            "UpperLeg.L",
+            "UpperArm.R",
+            "Body",
+            "MiddleHand.R",
+            "Foot.L",
+            "Foot.R",
+            "Neck",
+            "MiddleHand.L",
+            "Hips"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 32341,
+            "max_abs_rgba_delta": 184,
+            "mean_abs_rgba_delta": 0.7855262756347656
+          },
+          "time_seconds": 2.5,
+          "view_index": 0
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 183,
+            "enclosed_transparent_hole_pixels": 1652,
+            "foreground_alpha_pixels": 280508,
+            "foreground_connected_component_count": 10
+          },
+          "clip_id": "demo_idle_v1",
+          "clip_name": "IDLE",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 182,
+            "enclosed_transparent_hole_pixels": 1651,
+            "foreground_alpha_pixels": 280509,
+            "foreground_connected_component_count": 10
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 41573,
+            "losses": {
+              "Body": 71,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 18023,
+              "LowerArm.L": 154,
+              "LowerArm.R": 15,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 539,
+              "MiddleHand.L": 726,
+              "MiddleHand.R": 550,
+              "Neck": 3775,
+              "Palm.L": 0,
+              "Thumb.L": 80,
+              "Torso": 11764,
+              "UpperArm.L": 4643,
+              "UpperArm.R": 77,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 1156
+            },
+            "order_back_to_front": [
+              "Hips",
+              "Torso",
+              "UpperArm.L",
+              "UpperLeg.R",
+              "MiddleHand.L",
+              "LowerLeg.R",
+              "Neck",
+              "LowerArm.L",
+              "Thumb.L",
+              "Body",
+              "LowerArm.R",
+              "Foot.L",
+              "Foot.R",
+              "LowerLeg.L",
+              "Palm.L",
+              "UpperLeg.L",
+              "UpperArm.R",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": -71,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": -17920,
+              "LowerArm.L": -154,
+              "LowerArm.R": -15,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": -539,
+              "MiddleHand.L": -672,
+              "MiddleHand.R": 33387,
+              "Neck": -236,
+              "Palm.L": 0,
+              "Thumb.L": -80,
+              "Torso": -11373,
+              "UpperArm.L": -4643,
+              "UpperArm.R": 3472,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": -1156
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 103,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 54,
+              "MiddleHand.R": 33937,
+              "Neck": 3539,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 391,
+              "UpperArm.L": 0,
+              "UpperArm.R": 3549,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 48419,
+            "max_abs_rgba_delta": 255,
+            "mean_abs_rgba_delta": 0.1474764347076416
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 3,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 182,
+            "enclosed_transparent_hole_pixels": 1651,
+            "foreground_alpha_pixels": 280509,
+            "foreground_connected_component_count": 10
+          },
+          "static_order_back_to_front": [
+            "MiddleHand.L",
+            "UpperArm.L",
+            "Neck",
+            "LowerLeg.L",
+            "Torso",
+            "Palm.L",
+            "UpperLeg.L",
+            "LowerArm.L",
+            "LowerArm.R",
+            "Foot.L",
+            "Body",
+            "Foot.R",
+            "Thumb.L",
+            "Hips",
+            "UpperArm.R",
+            "UpperLeg.R",
+            "LowerLeg.R",
+            "MiddleHand.R"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 44881,
+            "max_abs_rgba_delta": 255,
+            "mean_abs_rgba_delta": 0.14792895317077637
+          },
+          "time_seconds": 2.5,
+          "view_index": 2
+        }
+      ],
+      "gif_path": "canonical/knight_oracle_drawable_court_v1/KNIGHT_IDLE_ORACLE_DRAWABLE_COURT_V1.gif",
+      "gif_sha256": "32340f8ab6bd4748cc30170f332f7c5e8fe307dc9f1cdb2e46796139b4a590fc",
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ]
+    },
+    {
+      "clip_id": "demo_run_v1",
+      "clip_name": "RUN",
+      "duration_seconds": 0.8333333333333334,
+      "frame0_path": "canonical/knight_oracle_drawable_court_v1/KNIGHT_RUN_ORACLE_DRAWABLE_COURT_FRAME0_V1.png",
+      "frame0_sha256": "b2886366894b3b66e194c6542f0be25c4222f5b42a50ee608d6f68be66a6c38e",
+      "frames": [
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 25,
+            "enclosed_transparent_hole_pixels": 83,
+            "foreground_alpha_pixels": 244471,
+            "foreground_connected_component_count": 2
+          },
+          "clip_id": "demo_run_v1",
+          "clip_name": "RUN",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 25,
+            "enclosed_transparent_hole_pixels": 83,
+            "foreground_alpha_pixels": 244471,
+            "foreground_connected_component_count": 2
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 30873,
+            "losses": {
+              "Body": 159,
+              "Foot.L": 0,
+              "Foot.R": 794,
+              "Hips": 3482,
+              "LowerArm.L": 4567,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 496,
+              "LowerLeg.R": 595,
+              "MiddleHand.L": 8035,
+              "MiddleHand.R": 980,
+              "Neck": 1161,
+              "Palm.L": 242,
+              "Thumb.L": 626,
+              "Torso": 7776,
+              "UpperArm.L": 1272,
+              "UpperArm.R": 436,
+              "UpperLeg.L": 205,
+              "UpperLeg.R": 47
+            },
+            "order_back_to_front": [
+              "Torso",
+              "MiddleHand.L",
+              "LowerArm.L",
+              "Hips",
+              "UpperArm.L",
+              "Foot.R",
+              "Thumb.L",
+              "LowerLeg.R",
+              "UpperArm.R",
+              "Palm.L",
+              "UpperLeg.L",
+              "Body",
+              "UpperLeg.R",
+              "Foot.L",
+              "LowerArm.R",
+              "LowerLeg.L",
+              "MiddleHand.R",
+              "Neck"
+            ],
+            "score": {
+              "Body": -159,
+              "Foot.L": 0,
+              "Foot.R": -794,
+              "Hips": -3482,
+              "LowerArm.L": -4567,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 3115,
+              "LowerLeg.R": -595,
+              "MiddleHand.L": -5920,
+              "MiddleHand.R": 8119,
+              "Neck": 14887,
+              "Palm.L": -242,
+              "Thumb.L": -626,
+              "Torso": -7776,
+              "UpperArm.L": -1272,
+              "UpperArm.R": -436,
+              "UpperLeg.L": -205,
+              "UpperLeg.R": -47
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 0,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 3611,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 2115,
+              "MiddleHand.R": 9099,
+              "Neck": 16048,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 0,
+              "UpperArm.L": 0,
+              "UpperArm.R": 0,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 23602,
+            "max_abs_rgba_delta": 181,
+            "mean_abs_rgba_delta": 0.22565674781799316
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 0,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 25,
+            "enclosed_transparent_hole_pixels": 83,
+            "foreground_alpha_pixels": 244471,
+            "foreground_connected_component_count": 2
+          },
+          "static_order_back_to_front": [
+            "Torso",
+            "LowerLeg.R",
+            "LowerLeg.L",
+            "Palm.L",
+            "LowerArm.L",
+            "Thumb.L",
+            "LowerArm.R",
+            "UpperLeg.R",
+            "UpperArm.L",
+            "UpperLeg.L",
+            "UpperArm.R",
+            "Body",
+            "MiddleHand.R",
+            "Foot.L",
+            "Foot.R",
+            "Neck",
+            "MiddleHand.L",
+            "Hips"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 71799,
+            "max_abs_rgba_delta": 183,
+            "mean_abs_rgba_delta": 1.4935190677642822
+          },
+          "time_seconds": 0.0,
+          "view_index": 0
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 211,
+            "enclosed_transparent_hole_pixels": 561,
+            "foreground_alpha_pixels": 326684,
+            "foreground_connected_component_count": 10
+          },
+          "clip_id": "demo_run_v1",
+          "clip_name": "RUN",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 211,
+            "enclosed_transparent_hole_pixels": 561,
+            "foreground_alpha_pixels": 326684,
+            "foreground_connected_component_count": 10
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 42300,
+            "losses": {
+              "Body": 96,
+              "Foot.L": 0,
+              "Foot.R": 88,
+              "Hips": 13397,
+              "LowerArm.L": 6657,
+              "LowerArm.R": 883,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 774,
+              "MiddleHand.L": 3259,
+              "MiddleHand.R": 2400,
+              "Neck": 2398,
+              "Palm.L": 3040,
+              "Thumb.L": 1120,
+              "Torso": 5569,
+              "UpperArm.L": 2033,
+              "UpperArm.R": 426,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 160
+            },
+            "order_back_to_front": [
+              "Hips",
+              "LowerArm.L",
+              "Palm.L",
+              "UpperArm.L",
+              "Thumb.L",
+              "Torso",
+              "LowerArm.R",
+              "UpperLeg.R",
+              "LowerLeg.R",
+              "Body",
+              "Foot.R",
+              "Foot.L",
+              "LowerLeg.L",
+              "UpperLeg.L",
+              "MiddleHand.L",
+              "UpperArm.R",
+              "Neck",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": -96,
+              "Foot.L": 0,
+              "Foot.R": -68,
+              "Hips": -13397,
+              "LowerArm.L": -5987,
+              "LowerArm.R": -883,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": -102,
+              "MiddleHand.L": 1365,
+              "MiddleHand.R": 14636,
+              "Neck": 6899,
+              "Palm.L": -2706,
+              "Thumb.L": -1120,
+              "Torso": -999,
+              "UpperArm.L": -2033,
+              "UpperArm.R": 4651,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": -160
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 20,
+              "Hips": 0,
+              "LowerArm.L": 670,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 672,
+              "MiddleHand.L": 4624,
+              "MiddleHand.R": 17036,
+              "Neck": 9297,
+              "Palm.L": 334,
+              "Thumb.L": 0,
+              "Torso": 4570,
+              "UpperArm.L": 0,
+              "UpperArm.R": 5077,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 45921,
+            "max_abs_rgba_delta": 190,
+            "mean_abs_rgba_delta": 0.6146173477172852
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 0,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 211,
+            "enclosed_transparent_hole_pixels": 561,
+            "foreground_alpha_pixels": 326684,
+            "foreground_connected_component_count": 10
+          },
+          "static_order_back_to_front": [
+            "MiddleHand.L",
+            "UpperArm.L",
+            "Neck",
+            "LowerLeg.L",
+            "Torso",
+            "Palm.L",
+            "UpperLeg.L",
+            "LowerArm.L",
+            "LowerArm.R",
+            "Foot.L",
+            "Body",
+            "Foot.R",
+            "Thumb.L",
+            "Hips",
+            "UpperArm.R",
+            "UpperLeg.R",
+            "LowerLeg.R",
+            "MiddleHand.R"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 42572,
+            "max_abs_rgba_delta": 190,
+            "mean_abs_rgba_delta": 0.3989396095275879
+          },
+          "time_seconds": 0.0,
+          "view_index": 2
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 3,
+            "enclosed_transparent_hole_pixels": 4,
+            "foreground_alpha_pixels": 320064,
+            "foreground_connected_component_count": 1
+          },
+          "clip_id": "demo_run_v1",
+          "clip_name": "RUN",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 3,
+            "enclosed_transparent_hole_pixels": 4,
+            "foreground_alpha_pixels": 320064,
+            "foreground_connected_component_count": 1
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 39554,
+            "losses": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 1448,
+              "LowerArm.L": 5394,
+              "LowerArm.R": 774,
+              "LowerLeg.L": 1682,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 13593,
+              "MiddleHand.R": 5582,
+              "Neck": 1723,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 7409,
+              "UpperArm.L": 611,
+              "UpperArm.R": 1338,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            },
+            "order_back_to_front": [
+              "Torso",
+              "MiddleHand.L",
+              "LowerArm.L",
+              "MiddleHand.R",
+              "Hips",
+              "UpperArm.R",
+              "LowerArm.R",
+              "UpperArm.L",
+              "Body",
+              "Foot.L",
+              "Foot.R",
+              "LowerLeg.R",
+              "Palm.L",
+              "Thumb.L",
+              "UpperLeg.L",
+              "UpperLeg.R",
+              "LowerLeg.L",
+              "Neck"
+            ],
+            "score": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": -1448,
+              "LowerArm.L": -5394,
+              "LowerArm.R": -774,
+              "LowerLeg.L": 754,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": -7230,
+              "MiddleHand.R": -2214,
+              "Neck": 25663,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": -7408,
+              "UpperArm.L": -611,
+              "UpperArm.R": -1338,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 0,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 2436,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 6363,
+              "MiddleHand.R": 3368,
+              "Neck": 27386,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 1,
+              "UpperArm.L": 0,
+              "UpperArm.R": 0,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 39435,
+            "max_abs_rgba_delta": 129,
+            "mean_abs_rgba_delta": 0.605731725692749
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 1,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 3,
+            "enclosed_transparent_hole_pixels": 4,
+            "foreground_alpha_pixels": 320064,
+            "foreground_connected_component_count": 1
+          },
+          "static_order_back_to_front": [
+            "Torso",
+            "LowerLeg.R",
+            "LowerLeg.L",
+            "Palm.L",
+            "LowerArm.L",
+            "Thumb.L",
+            "LowerArm.R",
+            "UpperLeg.R",
+            "UpperArm.L",
+            "UpperLeg.L",
+            "UpperArm.R",
+            "Body",
+            "MiddleHand.R",
+            "Foot.L",
+            "Foot.R",
+            "Neck",
+            "MiddleHand.L",
+            "Hips"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 71559,
+            "max_abs_rgba_delta": 132,
+            "mean_abs_rgba_delta": 1.2310504913330078
+          },
+          "time_seconds": 0.20833333333333334,
+          "view_index": 0
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 163,
+            "enclosed_transparent_hole_pixels": 475,
+            "foreground_alpha_pixels": 303894,
+            "foreground_connected_component_count": 6
+          },
+          "clip_id": "demo_run_v1",
+          "clip_name": "RUN",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 163,
+            "enclosed_transparent_hole_pixels": 475,
+            "foreground_alpha_pixels": 303894,
+            "foreground_connected_component_count": 6
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 34081,
+            "losses": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 524,
+              "Hips": 5933,
+              "LowerArm.L": 4330,
+              "LowerArm.R": 257,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 2363,
+              "MiddleHand.L": 6624,
+              "MiddleHand.R": 2089,
+              "Neck": 1281,
+              "Palm.L": 83,
+              "Thumb.L": 557,
+              "Torso": 7799,
+              "UpperArm.L": 1087,
+              "UpperArm.R": 679,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 475
+            },
+            "order_back_to_front": [
+              "Torso",
+              "MiddleHand.L",
+              "Hips",
+              "LowerArm.L",
+              "LowerLeg.R",
+              "UpperArm.L",
+              "Thumb.L",
+              "Foot.R",
+              "UpperLeg.R",
+              "LowerArm.R",
+              "Palm.L",
+              "Body",
+              "Foot.L",
+              "LowerLeg.L",
+              "UpperLeg.L",
+              "UpperArm.R",
+              "Neck",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": -524,
+              "Hips": -5933,
+              "LowerArm.L": -4330,
+              "LowerArm.R": -257,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": -2358,
+              "MiddleHand.L": -6110,
+              "MiddleHand.R": 19909,
+              "Neck": 7784,
+              "Palm.L": -56,
+              "Thumb.L": -557,
+              "Torso": -7468,
+              "UpperArm.L": -1087,
+              "UpperArm.R": 1462,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": -475
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 0,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 5,
+              "MiddleHand.L": 514,
+              "MiddleHand.R": 21998,
+              "Neck": 9065,
+              "Palm.L": 27,
+              "Thumb.L": 0,
+              "Torso": 331,
+              "UpperArm.L": 0,
+              "UpperArm.R": 2141,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 35502,
+            "max_abs_rgba_delta": 215,
+            "mean_abs_rgba_delta": 0.2540736198425293
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 1,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 163,
+            "enclosed_transparent_hole_pixels": 475,
+            "foreground_alpha_pixels": 303894,
+            "foreground_connected_component_count": 6
+          },
+          "static_order_back_to_front": [
+            "MiddleHand.L",
+            "UpperArm.L",
+            "Neck",
+            "LowerLeg.L",
+            "Torso",
+            "Palm.L",
+            "UpperLeg.L",
+            "LowerArm.L",
+            "LowerArm.R",
+            "Foot.L",
+            "Body",
+            "Foot.R",
+            "Thumb.L",
+            "Hips",
+            "UpperArm.R",
+            "UpperLeg.R",
+            "LowerLeg.R",
+            "MiddleHand.R"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 36860,
+            "max_abs_rgba_delta": 215,
+            "mean_abs_rgba_delta": 0.2664608955383301
+          },
+          "time_seconds": 0.20833333333333334,
+          "view_index": 2
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 11,
+            "enclosed_transparent_hole_pixels": 29,
+            "foreground_alpha_pixels": 213022,
+            "foreground_connected_component_count": 3
+          },
+          "clip_id": "demo_run_v1",
+          "clip_name": "RUN",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 11,
+            "enclosed_transparent_hole_pixels": 29,
+            "foreground_alpha_pixels": 213022,
+            "foreground_connected_component_count": 3
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 46108,
+            "losses": {
+              "Body": 46,
+              "Foot.L": 159,
+              "Foot.R": 0,
+              "Hips": 742,
+              "LowerArm.L": 598,
+              "LowerArm.R": 3327,
+              "LowerLeg.L": 67,
+              "LowerLeg.R": 637,
+              "MiddleHand.L": 2785,
+              "MiddleHand.R": 21631,
+              "Neck": 1349,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 9015,
+              "UpperArm.L": 2852,
+              "UpperArm.R": 2416,
+              "UpperLeg.L": 484,
+              "UpperLeg.R": 0
+            },
+            "order_back_to_front": [
+              "MiddleHand.R",
+              "Torso",
+              "LowerArm.R",
+              "UpperArm.L",
+              "UpperArm.R",
+              "LowerArm.L",
+              "UpperLeg.L",
+              "Foot.R",
+              "Palm.L",
+              "Thumb.L",
+              "UpperLeg.R",
+              "Body",
+              "Hips",
+              "LowerLeg.L",
+              "MiddleHand.L",
+              "LowerLeg.R",
+              "Foot.L",
+              "Neck"
+            ],
+            "score": {
+              "Body": 53,
+              "Foot.L": 1034,
+              "Foot.R": 0,
+              "Hips": 416,
+              "LowerArm.L": -582,
+              "LowerArm.R": -3327,
+              "LowerLeg.L": 442,
+              "LowerLeg.R": 736,
+              "MiddleHand.L": 540,
+              "MiddleHand.R": -20471,
+              "Neck": 35399,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": -8902,
+              "UpperArm.L": -2852,
+              "UpperArm.R": -2416,
+              "UpperLeg.L": -70,
+              "UpperLeg.R": 0
+            },
+            "wins": {
+              "Body": 99,
+              "Foot.L": 1193,
+              "Foot.R": 0,
+              "Hips": 1158,
+              "LowerArm.L": 16,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 509,
+              "LowerLeg.R": 1373,
+              "MiddleHand.L": 3325,
+              "MiddleHand.R": 1160,
+              "Neck": 36748,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 113,
+              "UpperArm.L": 0,
+              "UpperArm.R": 0,
+              "UpperLeg.L": 414,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 25799,
+            "max_abs_rgba_delta": 168,
+            "mean_abs_rgba_delta": 0.3020670413970947
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 2,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 11,
+            "enclosed_transparent_hole_pixels": 29,
+            "foreground_alpha_pixels": 213022,
+            "foreground_connected_component_count": 3
+          },
+          "static_order_back_to_front": [
+            "Torso",
+            "LowerLeg.R",
+            "LowerLeg.L",
+            "Palm.L",
+            "LowerArm.L",
+            "Thumb.L",
+            "LowerArm.R",
+            "UpperLeg.R",
+            "UpperArm.L",
+            "UpperLeg.L",
+            "UpperArm.R",
+            "Body",
+            "MiddleHand.R",
+            "Foot.L",
+            "Foot.R",
+            "Neck",
+            "MiddleHand.L",
+            "Hips"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 46813,
+            "max_abs_rgba_delta": 168,
+            "mean_abs_rgba_delta": 0.8824527263641357
+          },
+          "time_seconds": 0.4166666666666667,
+          "view_index": 0
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 101,
+            "enclosed_transparent_hole_pixels": 247,
+            "foreground_alpha_pixels": 295296,
+            "foreground_connected_component_count": 6
+          },
+          "clip_id": "demo_run_v1",
+          "clip_name": "RUN",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 101,
+            "enclosed_transparent_hole_pixels": 247,
+            "foreground_alpha_pixels": 295296,
+            "foreground_connected_component_count": 6
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 29343,
+            "losses": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 1014,
+              "LowerArm.L": 1327,
+              "LowerArm.R": 195,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 589,
+              "MiddleHand.L": 2796,
+              "MiddleHand.R": 5180,
+              "Neck": 8571,
+              "Palm.L": 0,
+              "Thumb.L": 1886,
+              "Torso": 2713,
+              "UpperArm.L": 3042,
+              "UpperArm.R": 2030,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            },
+            "order_back_to_front": [
+              "UpperArm.L",
+              "Torso",
+              "UpperArm.R",
+              "Thumb.L",
+              "LowerArm.L",
+              "Hips",
+              "LowerArm.R",
+              "MiddleHand.L",
+              "Body",
+              "Foot.L",
+              "Foot.R",
+              "LowerLeg.L",
+              "Palm.L",
+              "UpperLeg.L",
+              "UpperLeg.R",
+              "Neck",
+              "LowerLeg.R",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": -1014,
+              "LowerArm.L": -1327,
+              "LowerArm.R": -195,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 1152,
+              "MiddleHand.L": -133,
+              "MiddleHand.R": 10749,
+              "Neck": 393,
+              "Palm.L": 0,
+              "Thumb.L": -1886,
+              "Torso": -2698,
+              "UpperArm.L": -3042,
+              "UpperArm.R": -1999,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 0,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 1741,
+              "MiddleHand.L": 2663,
+              "MiddleHand.R": 15929,
+              "Neck": 8964,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 15,
+              "UpperArm.L": 0,
+              "UpperArm.R": 31,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 35337,
+            "max_abs_rgba_delta": 246,
+            "mean_abs_rgba_delta": 0.14347219467163086
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 2,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 101,
+            "enclosed_transparent_hole_pixels": 247,
+            "foreground_alpha_pixels": 295296,
+            "foreground_connected_component_count": 6
+          },
+          "static_order_back_to_front": [
+            "MiddleHand.L",
+            "UpperArm.L",
+            "Neck",
+            "LowerLeg.L",
+            "Torso",
+            "Palm.L",
+            "UpperLeg.L",
+            "LowerArm.L",
+            "LowerArm.R",
+            "Foot.L",
+            "Body",
+            "Foot.R",
+            "Thumb.L",
+            "Hips",
+            "UpperArm.R",
+            "UpperLeg.R",
+            "LowerLeg.R",
+            "MiddleHand.R"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 43213,
+            "max_abs_rgba_delta": 246,
+            "mean_abs_rgba_delta": 0.2433164119720459
+          },
+          "time_seconds": 0.4166666666666667,
+          "view_index": 2
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 14,
+            "enclosed_transparent_hole_pixels": 32,
+            "foreground_alpha_pixels": 276115,
+            "foreground_connected_component_count": 1
+          },
+          "clip_id": "demo_run_v1",
+          "clip_name": "RUN",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 14,
+            "enclosed_transparent_hole_pixels": 32,
+            "foreground_alpha_pixels": 276115,
+            "foreground_connected_component_count": 1
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 44678,
+            "losses": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 1007,
+              "LowerArm.L": 566,
+              "LowerArm.R": 3516,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 3847,
+              "MiddleHand.R": 22936,
+              "Neck": 1660,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 8659,
+              "UpperArm.L": 1112,
+              "UpperArm.R": 1375,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            },
+            "order_back_to_front": [
+              "MiddleHand.R",
+              "Torso",
+              "LowerArm.R",
+              "UpperArm.R",
+              "UpperArm.L",
+              "Hips",
+              "LowerArm.L",
+              "MiddleHand.L",
+              "Body",
+              "Foot.L",
+              "Foot.R",
+              "LowerLeg.L",
+              "LowerLeg.R",
+              "Palm.L",
+              "Thumb.L",
+              "UpperLeg.L",
+              "UpperLeg.R",
+              "Neck"
+            ],
+            "score": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": -1007,
+              "LowerArm.L": -566,
+              "LowerArm.R": -3516,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": -103,
+              "MiddleHand.R": -20529,
+              "Neck": 36867,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": -8659,
+              "UpperArm.L": -1112,
+              "UpperArm.R": -1375,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 0,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 3744,
+              "MiddleHand.R": 2407,
+              "Neck": 38527,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 0,
+              "UpperArm.L": 0,
+              "UpperArm.R": 0,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 40613,
+            "max_abs_rgba_delta": 171,
+            "mean_abs_rgba_delta": 0.7781965732574463
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 3,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 14,
+            "enclosed_transparent_hole_pixels": 32,
+            "foreground_alpha_pixels": 276115,
+            "foreground_connected_component_count": 1
+          },
+          "static_order_back_to_front": [
+            "Torso",
+            "LowerLeg.R",
+            "LowerLeg.L",
+            "Palm.L",
+            "LowerArm.L",
+            "Thumb.L",
+            "LowerArm.R",
+            "UpperLeg.R",
+            "UpperArm.L",
+            "UpperLeg.L",
+            "UpperArm.R",
+            "Body",
+            "MiddleHand.R",
+            "Foot.L",
+            "Foot.R",
+            "Neck",
+            "MiddleHand.L",
+            "Hips"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 54011,
+            "max_abs_rgba_delta": 171,
+            "mean_abs_rgba_delta": 0.9830422401428223
+          },
+          "time_seconds": 0.625,
+          "view_index": 0
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 137,
+            "enclosed_transparent_hole_pixels": 539,
+            "foreground_alpha_pixels": 306877,
+            "foreground_connected_component_count": 8
+          },
+          "clip_id": "demo_run_v1",
+          "clip_name": "RUN",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 137,
+            "enclosed_transparent_hole_pixels": 539,
+            "foreground_alpha_pixels": 306877,
+            "foreground_connected_component_count": 8
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 27286,
+            "losses": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 1470,
+              "LowerArm.L": 222,
+              "LowerArm.R": 348,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 3509,
+              "MiddleHand.R": 6398,
+              "Neck": 6566,
+              "Palm.L": 0,
+              "Thumb.L": 1046,
+              "Torso": 4681,
+              "UpperArm.L": 1334,
+              "UpperArm.R": 1712,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            },
+            "order_back_to_front": [
+              "Torso",
+              "MiddleHand.L",
+              "UpperArm.R",
+              "Hips",
+              "UpperArm.L",
+              "Thumb.L",
+              "LowerArm.R",
+              "LowerArm.L",
+              "Body",
+              "Foot.L",
+              "Foot.R",
+              "LowerLeg.L",
+              "LowerLeg.R",
+              "Palm.L",
+              "UpperLeg.L",
+              "UpperLeg.R",
+              "Neck",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": -1470,
+              "LowerArm.L": -222,
+              "LowerArm.R": -348,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": -2372,
+              "MiddleHand.R": 10733,
+              "Neck": 2451,
+              "Palm.L": 0,
+              "Thumb.L": -1046,
+              "Torso": -4680,
+              "UpperArm.L": -1334,
+              "UpperArm.R": -1712,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 0,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 1137,
+              "MiddleHand.R": 17131,
+              "Neck": 9017,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 1,
+              "UpperArm.L": 0,
+              "UpperArm.R": 0,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 37491,
+            "max_abs_rgba_delta": 189,
+            "mean_abs_rgba_delta": 0.20757055282592773
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 3,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 137,
+            "enclosed_transparent_hole_pixels": 539,
+            "foreground_alpha_pixels": 306877,
+            "foreground_connected_component_count": 8
+          },
+          "static_order_back_to_front": [
+            "MiddleHand.L",
+            "UpperArm.L",
+            "Neck",
+            "LowerLeg.L",
+            "Torso",
+            "Palm.L",
+            "UpperLeg.L",
+            "LowerArm.L",
+            "LowerArm.R",
+            "Foot.L",
+            "Body",
+            "Foot.R",
+            "Thumb.L",
+            "Hips",
+            "UpperArm.R",
+            "UpperLeg.R",
+            "LowerLeg.R",
+            "MiddleHand.R"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 39117,
+            "max_abs_rgba_delta": 189,
+            "mean_abs_rgba_delta": 0.22625970840454102
+          },
+          "time_seconds": 0.625,
+          "view_index": 2
+        }
+      ],
+      "gif_path": "canonical/knight_oracle_drawable_court_v1/KNIGHT_RUN_ORACLE_DRAWABLE_COURT_V1.gif",
+      "gif_sha256": "1052e7074e3a3837b82e0631778256c16ec970d81cb97fc83618aed8cf2cb489",
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ]
+    },
+    {
+      "clip_id": "demo_slash_v1",
+      "clip_name": "SLASH",
+      "duration_seconds": 0.8333333333333334,
+      "frame0_path": "canonical/knight_oracle_drawable_court_v1/KNIGHT_SLASH_ORACLE_DRAWABLE_COURT_FRAME0_V1.png",
+      "frame0_sha256": "7237e8ba19ca27dae848e044eb55125536916e58b746498d4ba86833bd4b05f5",
+      "frames": [
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 3,
+            "enclosed_transparent_hole_pixels": 5,
+            "foreground_alpha_pixels": 333071,
+            "foreground_connected_component_count": 1
+          },
+          "clip_id": "demo_slash_v1",
+          "clip_name": "SLASH",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 3,
+            "enclosed_transparent_hole_pixels": 5,
+            "foreground_alpha_pixels": 333071,
+            "foreground_connected_component_count": 1
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 46626,
+            "losses": {
+              "Body": 254,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 1385,
+              "LowerArm.L": 4626,
+              "LowerArm.R": 2428,
+              "LowerLeg.L": 1033,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 12487,
+              "MiddleHand.R": 13337,
+              "Neck": 1242,
+              "Palm.L": 242,
+              "Thumb.L": 0,
+              "Torso": 4918,
+              "UpperArm.L": 1548,
+              "UpperArm.R": 2664,
+              "UpperLeg.L": 462,
+              "UpperLeg.R": 0
+            },
+            "order_back_to_front": [
+              "MiddleHand.L",
+              "MiddleHand.R",
+              "Torso",
+              "LowerArm.L",
+              "UpperArm.R",
+              "LowerArm.R",
+              "UpperArm.L",
+              "Hips",
+              "UpperLeg.L",
+              "Body",
+              "Palm.L",
+              "Foot.L",
+              "Foot.R",
+              "LowerLeg.R",
+              "Thumb.L",
+              "UpperLeg.R",
+              "LowerLeg.L",
+              "Neck"
+            ],
+            "score": {
+              "Body": -254,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": -1385,
+              "LowerArm.L": -4626,
+              "LowerArm.R": -2428,
+              "LowerLeg.L": 3151,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": -9558,
+              "MiddleHand.R": -8404,
+              "Neck": 33208,
+              "Palm.L": -242,
+              "Thumb.L": 0,
+              "Torso": -4918,
+              "UpperArm.L": -1548,
+              "UpperArm.R": -2537,
+              "UpperLeg.L": -459,
+              "UpperLeg.R": 0
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 0,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 4184,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 2929,
+              "MiddleHand.R": 4933,
+              "Neck": 34450,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 0,
+              "UpperArm.L": 0,
+              "UpperArm.R": 127,
+              "UpperLeg.L": 3,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 41084,
+            "max_abs_rgba_delta": 135,
+            "mean_abs_rgba_delta": 0.6050732135772705
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 0,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 3,
+            "enclosed_transparent_hole_pixels": 5,
+            "foreground_alpha_pixels": 333071,
+            "foreground_connected_component_count": 1
+          },
+          "static_order_back_to_front": [
+            "Torso",
+            "LowerLeg.R",
+            "LowerLeg.L",
+            "Palm.L",
+            "LowerArm.L",
+            "Thumb.L",
+            "LowerArm.R",
+            "UpperLeg.R",
+            "UpperArm.L",
+            "UpperLeg.L",
+            "UpperArm.R",
+            "Body",
+            "MiddleHand.R",
+            "Foot.L",
+            "Foot.R",
+            "Neck",
+            "MiddleHand.L",
+            "Hips"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 81602,
+            "max_abs_rgba_delta": 183,
+            "mean_abs_rgba_delta": 1.3959991931915283
+          },
+          "time_seconds": 0.0,
+          "view_index": 0
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 86,
+            "enclosed_transparent_hole_pixels": 238,
+            "foreground_alpha_pixels": 267772,
+            "foreground_connected_component_count": 9
+          },
+          "clip_id": "demo_slash_v1",
+          "clip_name": "SLASH",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 86,
+            "enclosed_transparent_hole_pixels": 238,
+            "foreground_alpha_pixels": 267772,
+            "foreground_connected_component_count": 9
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 22216,
+            "losses": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 2119,
+              "LowerArm.L": 0,
+              "LowerArm.R": 604,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 1488,
+              "MiddleHand.R": 940,
+              "Neck": 8920,
+              "Palm.L": 0,
+              "Thumb.L": 2587,
+              "Torso": 4729,
+              "UpperArm.L": 0,
+              "UpperArm.R": 829,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            },
+            "order_back_to_front": [
+              "Neck",
+              "Torso",
+              "Thumb.L",
+              "Hips",
+              "MiddleHand.L",
+              "UpperArm.R",
+              "LowerArm.R",
+              "Body",
+              "Foot.L",
+              "Foot.R",
+              "LowerArm.L",
+              "LowerLeg.L",
+              "LowerLeg.R",
+              "Palm.L",
+              "UpperArm.L",
+              "UpperLeg.L",
+              "UpperLeg.R",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": -2119,
+              "LowerArm.L": 0,
+              "LowerArm.R": -604,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": -1428,
+              "MiddleHand.R": 19119,
+              "Neck": -6989,
+              "Palm.L": 0,
+              "Thumb.L": -2587,
+              "Torso": -4729,
+              "UpperArm.L": 0,
+              "UpperArm.R": -663,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 0,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 60,
+              "MiddleHand.R": 20059,
+              "Neck": 1931,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 0,
+              "UpperArm.L": 0,
+              "UpperArm.R": 166,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 39094,
+            "max_abs_rgba_delta": 184,
+            "mean_abs_rgba_delta": 0.22246408462524414
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 0,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 86,
+            "enclosed_transparent_hole_pixels": 238,
+            "foreground_alpha_pixels": 267772,
+            "foreground_connected_component_count": 9
+          },
+          "static_order_back_to_front": [
+            "MiddleHand.L",
+            "UpperArm.L",
+            "Neck",
+            "LowerLeg.L",
+            "Torso",
+            "Palm.L",
+            "UpperLeg.L",
+            "LowerArm.L",
+            "LowerArm.R",
+            "Foot.L",
+            "Body",
+            "Foot.R",
+            "Thumb.L",
+            "Hips",
+            "UpperArm.R",
+            "UpperLeg.R",
+            "LowerLeg.R",
+            "MiddleHand.R"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 37142,
+            "max_abs_rgba_delta": 184,
+            "mean_abs_rgba_delta": 0.17654752731323242
+          },
+          "time_seconds": 0.0,
+          "view_index": 2
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 22,
+            "enclosed_transparent_hole_pixels": 69,
+            "foreground_alpha_pixels": 296132,
+            "foreground_connected_component_count": 2
+          },
+          "clip_id": "demo_slash_v1",
+          "clip_name": "SLASH",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 22,
+            "enclosed_transparent_hole_pixels": 69,
+            "foreground_alpha_pixels": 296132,
+            "foreground_connected_component_count": 2
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 59815,
+            "losses": {
+              "Body": 388,
+              "Foot.L": 500,
+              "Foot.R": 5,
+              "Hips": 4853,
+              "LowerArm.L": 3375,
+              "LowerArm.R": 3476,
+              "LowerLeg.L": 558,
+              "LowerLeg.R": 2408,
+              "MiddleHand.L": 13365,
+              "MiddleHand.R": 23851,
+              "Neck": 1222,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 3418,
+              "UpperArm.L": 418,
+              "UpperArm.R": 1470,
+              "UpperLeg.L": 198,
+              "UpperLeg.R": 310
+            },
+            "order_back_to_front": [
+              "MiddleHand.R",
+              "MiddleHand.L",
+              "LowerArm.R",
+              "LowerArm.L",
+              "Torso",
+              "LowerLeg.R",
+              "UpperArm.R",
+              "UpperArm.L",
+              "Foot.L",
+              "UpperLeg.R",
+              "UpperLeg.L",
+              "Palm.L",
+              "Thumb.L",
+              "Body",
+              "Foot.R",
+              "LowerLeg.L",
+              "Hips",
+              "Neck"
+            ],
+            "score": {
+              "Body": 1733,
+              "Foot.L": -167,
+              "Foot.R": 3007,
+              "Hips": 4665,
+              "LowerArm.L": -3336,
+              "LowerArm.R": -3476,
+              "LowerLeg.L": 3036,
+              "LowerLeg.R": -2007,
+              "MiddleHand.L": -9686,
+              "MiddleHand.R": -21981,
+              "Neck": 33541,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": -3278,
+              "UpperArm.L": -418,
+              "UpperArm.R": -1470,
+              "UpperLeg.L": -58,
+              "UpperLeg.R": -105
+            },
+            "wins": {
+              "Body": 2121,
+              "Foot.L": 333,
+              "Foot.R": 3012,
+              "Hips": 9518,
+              "LowerArm.L": 39,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 3594,
+              "LowerLeg.R": 401,
+              "MiddleHand.L": 3679,
+              "MiddleHand.R": 1870,
+              "Neck": 34763,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 140,
+              "UpperArm.L": 0,
+              "UpperArm.R": 0,
+              "UpperLeg.L": 140,
+              "UpperLeg.R": 205
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 29366,
+            "max_abs_rgba_delta": 184,
+            "mean_abs_rgba_delta": 0.3786776065826416
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 1,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 22,
+            "enclosed_transparent_hole_pixels": 69,
+            "foreground_alpha_pixels": 296132,
+            "foreground_connected_component_count": 2
+          },
+          "static_order_back_to_front": [
+            "Torso",
+            "LowerLeg.R",
+            "LowerLeg.L",
+            "Palm.L",
+            "LowerArm.L",
+            "Thumb.L",
+            "LowerArm.R",
+            "UpperLeg.R",
+            "UpperArm.L",
+            "UpperLeg.L",
+            "UpperArm.R",
+            "Body",
+            "MiddleHand.R",
+            "Foot.L",
+            "Foot.R",
+            "Neck",
+            "MiddleHand.L",
+            "Hips"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 57403,
+            "max_abs_rgba_delta": 184,
+            "mean_abs_rgba_delta": 1.102034091949463
+          },
+          "time_seconds": 0.2777777777777778,
+          "view_index": 0
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 24,
+            "enclosed_transparent_hole_pixels": 27,
+            "foreground_alpha_pixels": 272797,
+            "foreground_connected_component_count": 1
+          },
+          "clip_id": "demo_slash_v1",
+          "clip_name": "SLASH",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 24,
+            "enclosed_transparent_hole_pixels": 27,
+            "foreground_alpha_pixels": 272797,
+            "foreground_connected_component_count": 1
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 39694,
+            "losses": {
+              "Body": 60,
+              "Foot.L": 749,
+              "Foot.R": 410,
+              "Hips": 2777,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 228,
+              "LowerLeg.R": 70,
+              "MiddleHand.L": 14373,
+              "MiddleHand.R": 13355,
+              "Neck": 3848,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 2693,
+              "UpperArm.L": 0,
+              "UpperArm.R": 927,
+              "UpperLeg.L": 104,
+              "UpperLeg.R": 100
+            },
+            "order_back_to_front": [
+              "MiddleHand.L",
+              "MiddleHand.R",
+              "UpperArm.R",
+              "Foot.L",
+              "Torso",
+              "Foot.R",
+              "LowerLeg.L",
+              "UpperLeg.L",
+              "LowerArm.L",
+              "LowerArm.R",
+              "Palm.L",
+              "Thumb.L",
+              "UpperArm.L",
+              "Body",
+              "UpperLeg.R",
+              "LowerLeg.R",
+              "Neck",
+              "Hips"
+            ],
+            "score": {
+              "Body": 113,
+              "Foot.L": -749,
+              "Foot.R": -239,
+              "Hips": 10163,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": -228,
+              "LowerLeg.R": 1587,
+              "MiddleHand.L": -11331,
+              "MiddleHand.R": -4111,
+              "Neck": 5059,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": -609,
+              "UpperArm.L": 0,
+              "UpperArm.R": -784,
+              "UpperLeg.L": -104,
+              "UpperLeg.R": 1233
+            },
+            "wins": {
+              "Body": 173,
+              "Foot.L": 0,
+              "Foot.R": 171,
+              "Hips": 12940,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 1657,
+              "MiddleHand.L": 3042,
+              "MiddleHand.R": 9244,
+              "Neck": 8907,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 2084,
+              "UpperArm.L": 0,
+              "UpperArm.R": 143,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 1333
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 41790,
+            "max_abs_rgba_delta": 143,
+            "mean_abs_rgba_delta": 0.5907711982727051
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 1,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 24,
+            "enclosed_transparent_hole_pixels": 27,
+            "foreground_alpha_pixels": 272797,
+            "foreground_connected_component_count": 1
+          },
+          "static_order_back_to_front": [
+            "MiddleHand.L",
+            "UpperArm.L",
+            "Neck",
+            "LowerLeg.L",
+            "Torso",
+            "Palm.L",
+            "UpperLeg.L",
+            "LowerArm.L",
+            "LowerArm.R",
+            "Foot.L",
+            "Body",
+            "Foot.R",
+            "Thumb.L",
+            "Hips",
+            "UpperArm.R",
+            "UpperLeg.R",
+            "LowerLeg.R",
+            "MiddleHand.R"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 40186,
+            "max_abs_rgba_delta": 143,
+            "mean_abs_rgba_delta": 0.4069943428039551
+          },
+          "time_seconds": 0.2777777777777778,
+          "view_index": 2
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 41,
+            "enclosed_transparent_hole_pixels": 101,
+            "foreground_alpha_pixels": 238683,
+            "foreground_connected_component_count": 3
+          },
+          "clip_id": "demo_slash_v1",
+          "clip_name": "SLASH",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 41,
+            "enclosed_transparent_hole_pixels": 101,
+            "foreground_alpha_pixels": 238683,
+            "foreground_connected_component_count": 3
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 30950,
+            "losses": {
+              "Body": 876,
+              "Foot.L": 26,
+              "Foot.R": 856,
+              "Hips": 4618,
+              "LowerArm.L": 924,
+              "LowerArm.R": 1494,
+              "LowerLeg.L": 192,
+              "LowerLeg.R": 383,
+              "MiddleHand.L": 3280,
+              "MiddleHand.R": 2817,
+              "Neck": 209,
+              "Palm.L": 1107,
+              "Thumb.L": 263,
+              "Torso": 9676,
+              "UpperArm.L": 0,
+              "UpperArm.R": 1472,
+              "UpperLeg.L": 485,
+              "UpperLeg.R": 2272
+            },
+            "order_back_to_front": [
+              "Torso",
+              "UpperLeg.R",
+              "MiddleHand.R",
+              "LowerArm.L",
+              "Body",
+              "LowerArm.R",
+              "UpperArm.R",
+              "Foot.R",
+              "UpperLeg.L",
+              "Thumb.L",
+              "UpperArm.L",
+              "Palm.L",
+              "LowerLeg.L",
+              "Foot.L",
+              "LowerLeg.R",
+              "MiddleHand.L",
+              "Neck",
+              "Hips"
+            ],
+            "score": {
+              "Body": -874,
+              "Foot.L": 1350,
+              "Foot.R": -191,
+              "Hips": 4863,
+              "LowerArm.L": -924,
+              "LowerArm.R": -868,
+              "LowerLeg.L": 463,
+              "LowerLeg.R": 3228,
+              "MiddleHand.L": 3553,
+              "MiddleHand.R": -2162,
+              "Neck": 4407,
+              "Palm.L": 12,
+              "Thumb.L": -113,
+              "Torso": -9669,
+              "UpperArm.L": 0,
+              "UpperArm.R": -697,
+              "UpperLeg.L": -158,
+              "UpperLeg.R": -2220
+            },
+            "wins": {
+              "Body": 2,
+              "Foot.L": 1376,
+              "Foot.R": 665,
+              "Hips": 9481,
+              "LowerArm.L": 0,
+              "LowerArm.R": 626,
+              "LowerLeg.L": 655,
+              "LowerLeg.R": 3611,
+              "MiddleHand.L": 6833,
+              "MiddleHand.R": 655,
+              "Neck": 4616,
+              "Palm.L": 1119,
+              "Thumb.L": 150,
+              "Torso": 7,
+              "UpperArm.L": 0,
+              "UpperArm.R": 775,
+              "UpperLeg.L": 327,
+              "UpperLeg.R": 52
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 52323,
+            "max_abs_rgba_delta": 152,
+            "mean_abs_rgba_delta": 0.8510212898254395
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 2,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 41,
+            "enclosed_transparent_hole_pixels": 101,
+            "foreground_alpha_pixels": 238683,
+            "foreground_connected_component_count": 3
+          },
+          "static_order_back_to_front": [
+            "Torso",
+            "LowerLeg.R",
+            "LowerLeg.L",
+            "Palm.L",
+            "LowerArm.L",
+            "Thumb.L",
+            "LowerArm.R",
+            "UpperLeg.R",
+            "UpperArm.L",
+            "UpperLeg.L",
+            "UpperArm.R",
+            "Body",
+            "MiddleHand.R",
+            "Foot.L",
+            "Foot.R",
+            "Neck",
+            "MiddleHand.L",
+            "Hips"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 44370,
+            "max_abs_rgba_delta": 152,
+            "mean_abs_rgba_delta": 0.7425196170806885
+          },
+          "time_seconds": 0.5555555555555556,
+          "view_index": 0
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 86,
+            "enclosed_transparent_hole_pixels": 337,
+            "foreground_alpha_pixels": 250815,
+            "foreground_connected_component_count": 6
+          },
+          "clip_id": "demo_slash_v1",
+          "clip_name": "SLASH",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 86,
+            "enclosed_transparent_hole_pixels": 337,
+            "foreground_alpha_pixels": 250815,
+            "foreground_connected_component_count": 6
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 17778,
+            "losses": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 1115,
+              "LowerArm.L": 279,
+              "LowerArm.R": 523,
+              "LowerLeg.L": 18,
+              "LowerLeg.R": 59,
+              "MiddleHand.L": 2362,
+              "MiddleHand.R": 493,
+              "Neck": 171,
+              "Palm.L": 0,
+              "Thumb.L": 1322,
+              "Torso": 10643,
+              "UpperArm.L": 413,
+              "UpperArm.R": 377,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 3
+            },
+            "order_back_to_front": [
+              "Torso",
+              "MiddleHand.L",
+              "Thumb.L",
+              "Hips",
+              "LowerArm.R",
+              "UpperArm.L",
+              "LowerArm.L",
+              "LowerLeg.R",
+              "LowerLeg.L",
+              "Body",
+              "Foot.R",
+              "Palm.L",
+              "UpperLeg.L",
+              "Foot.L",
+              "UpperLeg.R",
+              "UpperArm.R",
+              "Neck",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": 0,
+              "Foot.L": 1,
+              "Foot.R": 0,
+              "Hips": -1115,
+              "LowerArm.L": -279,
+              "LowerArm.R": -523,
+              "LowerLeg.L": -17,
+              "LowerLeg.R": -56,
+              "MiddleHand.L": -2321,
+              "MiddleHand.R": 12160,
+              "Neck": 3137,
+              "Palm.L": 0,
+              "Thumb.L": -1322,
+              "Torso": -10626,
+              "UpperArm.L": -413,
+              "UpperArm.R": 1318,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 56
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 1,
+              "Foot.R": 0,
+              "Hips": 0,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 1,
+              "LowerLeg.R": 3,
+              "MiddleHand.L": 41,
+              "MiddleHand.R": 12653,
+              "Neck": 3308,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 17,
+              "UpperArm.L": 0,
+              "UpperArm.R": 1695,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 59
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 31520,
+            "max_abs_rgba_delta": 190,
+            "mean_abs_rgba_delta": 0.08095216751098633
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 2,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 86,
+            "enclosed_transparent_hole_pixels": 337,
+            "foreground_alpha_pixels": 250815,
+            "foreground_connected_component_count": 6
+          },
+          "static_order_back_to_front": [
+            "MiddleHand.L",
+            "UpperArm.L",
+            "Neck",
+            "LowerLeg.L",
+            "Torso",
+            "Palm.L",
+            "UpperLeg.L",
+            "LowerArm.L",
+            "LowerArm.R",
+            "Foot.L",
+            "Body",
+            "Foot.R",
+            "Thumb.L",
+            "Hips",
+            "UpperArm.R",
+            "UpperLeg.R",
+            "LowerLeg.R",
+            "MiddleHand.R"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 31267,
+            "max_abs_rgba_delta": 190,
+            "mean_abs_rgba_delta": 0.10674929618835449
+          },
+          "time_seconds": 0.5555555555555556,
+          "view_index": 2
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 3,
+            "enclosed_transparent_hole_pixels": 5,
+            "foreground_alpha_pixels": 333071,
+            "foreground_connected_component_count": 1
+          },
+          "clip_id": "demo_slash_v1",
+          "clip_name": "SLASH",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 3,
+            "enclosed_transparent_hole_pixels": 5,
+            "foreground_alpha_pixels": 333071,
+            "foreground_connected_component_count": 1
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 46626,
+            "losses": {
+              "Body": 254,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 1385,
+              "LowerArm.L": 4626,
+              "LowerArm.R": 2428,
+              "LowerLeg.L": 1033,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 12487,
+              "MiddleHand.R": 13337,
+              "Neck": 1242,
+              "Palm.L": 242,
+              "Thumb.L": 0,
+              "Torso": 4918,
+              "UpperArm.L": 1548,
+              "UpperArm.R": 2664,
+              "UpperLeg.L": 462,
+              "UpperLeg.R": 0
+            },
+            "order_back_to_front": [
+              "MiddleHand.L",
+              "MiddleHand.R",
+              "Torso",
+              "LowerArm.L",
+              "UpperArm.R",
+              "LowerArm.R",
+              "UpperArm.L",
+              "Hips",
+              "UpperLeg.L",
+              "Body",
+              "Palm.L",
+              "Foot.L",
+              "Foot.R",
+              "LowerLeg.R",
+              "Thumb.L",
+              "UpperLeg.R",
+              "LowerLeg.L",
+              "Neck"
+            ],
+            "score": {
+              "Body": -254,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": -1385,
+              "LowerArm.L": -4626,
+              "LowerArm.R": -2428,
+              "LowerLeg.L": 3151,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": -9558,
+              "MiddleHand.R": -8404,
+              "Neck": 33208,
+              "Palm.L": -242,
+              "Thumb.L": 0,
+              "Torso": -4918,
+              "UpperArm.L": -1548,
+              "UpperArm.R": -2537,
+              "UpperLeg.L": -459,
+              "UpperLeg.R": 0
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 0,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 4184,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 2929,
+              "MiddleHand.R": 4933,
+              "Neck": 34450,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 0,
+              "UpperArm.L": 0,
+              "UpperArm.R": 127,
+              "UpperLeg.L": 3,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 41084,
+            "max_abs_rgba_delta": 135,
+            "mean_abs_rgba_delta": 0.6050732135772705
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 3,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 3,
+            "enclosed_transparent_hole_pixels": 5,
+            "foreground_alpha_pixels": 333071,
+            "foreground_connected_component_count": 1
+          },
+          "static_order_back_to_front": [
+            "Torso",
+            "LowerLeg.R",
+            "LowerLeg.L",
+            "Palm.L",
+            "LowerArm.L",
+            "Thumb.L",
+            "LowerArm.R",
+            "UpperLeg.R",
+            "UpperArm.L",
+            "UpperLeg.L",
+            "UpperArm.R",
+            "Body",
+            "MiddleHand.R",
+            "Foot.L",
+            "Foot.R",
+            "Neck",
+            "MiddleHand.L",
+            "Hips"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 81602,
+            "max_abs_rgba_delta": 183,
+            "mean_abs_rgba_delta": 1.3959991931915283
+          },
+          "time_seconds": 0.8333333333333334,
+          "view_index": 0
+        },
+        {
+          "baseline": {
+            "enclosed_transparent_hole_component_count": 86,
+            "enclosed_transparent_hole_pixels": 238,
+            "foreground_alpha_pixels": 267772,
+            "foreground_connected_component_count": 9
+          },
+          "clip_id": "demo_slash_v1",
+          "clip_name": "SLASH",
+          "dynamic_drawable": {
+            "enclosed_transparent_hole_component_count": 86,
+            "enclosed_transparent_hole_pixels": 238,
+            "foreground_alpha_pixels": 267772,
+            "foreground_connected_component_count": 9
+          },
+          "dynamic_order": {
+            "cross_drawable_depth_pair_pixels": 22216,
+            "losses": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 2119,
+              "LowerArm.L": 0,
+              "LowerArm.R": 604,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 1488,
+              "MiddleHand.R": 940,
+              "Neck": 8920,
+              "Palm.L": 0,
+              "Thumb.L": 2587,
+              "Torso": 4729,
+              "UpperArm.L": 0,
+              "UpperArm.R": 829,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            },
+            "order_back_to_front": [
+              "Neck",
+              "Torso",
+              "Thumb.L",
+              "Hips",
+              "MiddleHand.L",
+              "UpperArm.R",
+              "LowerArm.R",
+              "Body",
+              "Foot.L",
+              "Foot.R",
+              "LowerArm.L",
+              "LowerLeg.L",
+              "LowerLeg.R",
+              "Palm.L",
+              "UpperArm.L",
+              "UpperLeg.L",
+              "UpperLeg.R",
+              "MiddleHand.R"
+            ],
+            "score": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": -2119,
+              "LowerArm.L": 0,
+              "LowerArm.R": -604,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": -1428,
+              "MiddleHand.R": 19119,
+              "Neck": -6989,
+              "Palm.L": 0,
+              "Thumb.L": -2587,
+              "Torso": -4729,
+              "UpperArm.L": 0,
+              "UpperArm.R": -663,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            },
+            "wins": {
+              "Body": 0,
+              "Foot.L": 0,
+              "Foot.R": 0,
+              "Hips": 0,
+              "LowerArm.L": 0,
+              "LowerArm.R": 0,
+              "LowerLeg.L": 0,
+              "LowerLeg.R": 0,
+              "MiddleHand.L": 60,
+              "MiddleHand.R": 20059,
+              "Neck": 1931,
+              "Palm.L": 0,
+              "Thumb.L": 0,
+              "Torso": 0,
+              "UpperArm.L": 0,
+              "UpperArm.R": 166,
+              "UpperLeg.L": 0,
+              "UpperLeg.R": 0
+            }
+          },
+          "dynamic_vs_baseline": {
+            "changed_pixel_count": 39094,
+            "max_abs_rgba_delta": 184,
+            "mean_abs_rgba_delta": 0.22246408462524414
+          },
+          "frame_hash": "9b83e07ed9fb56429892dc43f5877eee04ccdbacaa15887ccf7fe93fb41b29eb",
+          "frame_index": 3,
+          "static_drawable": {
+            "enclosed_transparent_hole_component_count": 86,
+            "enclosed_transparent_hole_pixels": 238,
+            "foreground_alpha_pixels": 267772,
+            "foreground_connected_component_count": 9
+          },
+          "static_order_back_to_front": [
+            "MiddleHand.L",
+            "UpperArm.L",
+            "Neck",
+            "LowerLeg.L",
+            "Torso",
+            "Palm.L",
+            "UpperLeg.L",
+            "LowerArm.L",
+            "LowerArm.R",
+            "Foot.L",
+            "Body",
+            "Foot.R",
+            "Thumb.L",
+            "Hips",
+            "UpperArm.R",
+            "UpperLeg.R",
+            "LowerLeg.R",
+            "MiddleHand.R"
+          ],
+          "static_vs_baseline": {
+            "changed_pixel_count": 37142,
+            "max_abs_rgba_delta": 184,
+            "mean_abs_rgba_delta": 0.17654752731323242
+          },
+          "time_seconds": 0.8333333333333334,
+          "view_index": 2
+        }
+      ],
+      "gif_path": "canonical/knight_oracle_drawable_court_v1/KNIGHT_SLASH_ORACLE_DRAWABLE_COURT_V1.gif",
+      "gif_sha256": "9412651df905cbd75202b9bda643cfd53c47cd8fa3baa819be58e9ced075a39f",
+      "mapping": [
+        {
+          "cost": 0.6116771317630436,
+          "next_cost": 0.7054434059820822,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:7e87e97fc9fe89cbd718"
+        },
+        {
+          "cost": 0.37324048737202953,
+          "next_cost": 0.5047419906119381,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ab16ff2ffc7408c862ae"
+        },
+        {
+          "cost": 0.2054681713865518,
+          "next_cost": 0.2925199639891659,
+          "source_joint_id": "Fingers.R",
+          "target_joint_id": "J:c9cdb266f7c167a620a9"
+        },
+        {
+          "cost": 0.17678234026097459,
+          "next_cost": 0.4085321751602823,
+          "source_joint_id": "LowerArm.R",
+          "target_joint_id": "J:932628adf7f0d5936426"
+        },
+        {
+          "cost": 0.2029030249075255,
+          "next_cost": 0.28310195332574495,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:4c9f9eace712daf31538"
+        },
+        {
+          "cost": 0.48247436163504,
+          "next_cost": 0.6238222174056915,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:f5cf9181e27d0f791f7d"
+        },
+        {
+          "cost": 0.19833878296620702,
+          "next_cost": 0.2583591034997136,
+          "source_joint_id": "Thumb.R",
+          "target_joint_id": "J:75a17a4287b28cd7f57f"
+        },
+        {
+          "cost": 0.1507628779714688,
+          "next_cost": 0.49685610634347954,
+          "source_joint_id": "UpperLeg.R",
+          "target_joint_id": "J:f50f39d42ef3820824ef"
+        },
+        {
+          "cost": 0.15738848284903773,
+          "next_cost": 0.2182245988227146,
+          "source_joint_id": "MiddleHand.L",
+          "target_joint_id": "J:8455bf4c0a38867b7d9b"
+        },
+        {
+          "cost": 0.12566026834671604,
+          "next_cost": 0.15653416095612008,
+          "source_joint_id": "Thumb.L",
+          "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+        },
+        {
+          "cost": 0.12744628795827562,
+          "next_cost": 0.17729832396772957,
+          "source_joint_id": "Palm.L",
+          "target_joint_id": "J:33c7075f501c9af4cd0d"
+        },
+        {
+          "cost": 0.21451150060948782,
+          "next_cost": 0.3102178824405303,
+          "source_joint_id": "Neck",
+          "target_joint_id": "J:1008208d141ae248de43"
+        },
+        {
+          "cost": 0.22331652895761903,
+          "next_cost": 0.341721580563024,
+          "source_joint_id": "Fingers.L",
+          "target_joint_id": "J:136e20712bbd1481596e"
+        },
+        {
+          "cost": 0.1753136842084541,
+          "next_cost": 0.2033041789185967,
+          "source_joint_id": "MiddleHand.R",
+          "target_joint_id": "J:e5441b559f1c34b41aa2"
+        },
+        {
+          "cost": 0.1542952449768342,
+          "next_cost": 0.521825399970232,
+          "source_joint_id": "UpperLeg.L",
+          "target_joint_id": "J:063ee183f601e19a8ca9"
+        },
+        {
+          "cost": 0.24521820132730113,
+          "next_cost": 0.5053838222620202,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:73295dbdbb50d303e597"
+        },
+        {
+          "cost": 0.18366720483839166,
+          "next_cost": 0.2331092975233877,
+          "source_joint_id": "UpperArm.R",
+          "target_joint_id": "J:42d181ebf3515959283a"
+        },
+        {
+          "cost": 0.5902787916544152,
+          "next_cost": 0.6714047201184266,
+          "source_joint_id": "Foot.R",
+          "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+        },
+        {
+          "cost": 0.338657132190124,
+          "next_cost": 0.5510856632138917,
+          "source_joint_id": "Head",
+          "target_joint_id": "J:eafe286e7d84499e5257"
+        },
+        {
+          "cost": 0.1615942399702586,
+          "next_cost": 0.45709510248575125,
+          "source_joint_id": "LowerArm.L",
+          "target_joint_id": "J:7cf59fbe52c53280546a"
+        },
+        {
+          "cost": 0.37056767662637935,
+          "next_cost": 0.4647284720520398,
+          "source_joint_id": "LowerLeg.L",
+          "target_joint_id": "J:cf05f36e919ff69a9d8e"
+        },
+        {
+          "cost": 0.40659342489016087,
+          "next_cost": 0.6154678629286205,
+          "source_joint_id": "Foot.L",
+          "target_joint_id": "J:362735eeec6ee5a3d46f"
+        },
+        {
+          "cost": 0.5383114087285982,
+          "next_cost": 0.693192900090975,
+          "source_joint_id": "Body",
+          "target_joint_id": "J:237d229c33bc9eb9bf91"
+        },
+        {
+          "cost": 0.1952579664472978,
+          "next_cost": 0.25572078846434404,
+          "source_joint_id": "UpperArm.L",
+          "target_joint_id": "J:a80d2c086e86a4cc08b5"
+        },
+        {
+          "cost": 0.2208842181998788,
+          "next_cost": 0.6520160579394874,
+          "source_joint_id": "Torso",
+          "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+        },
+        {
+          "cost": 0.2598771637136827,
+          "next_cost": 0.4990601726171502,
+          "source_joint_id": "LowerLeg.R",
+          "target_joint_id": "J:ee24577789f0235b8186"
+        },
+        {
+          "cost": 0.16516790065247416,
+          "next_cost": 0.3150452870805952,
+          "source_joint_id": "Hips",
+          "target_joint_id": "J:b9e5c0d23f688f672060"
+        }
+      ]
+    }
+  ],
+  "complete_layer_kind": "INDEPENDENT_PER_DRAWABLE_RENDER_FROM_SAME_POSED_MECHANICAL_CARRIER_AND_IMMUTABLE_CAA",
+  "drawables": [
+    "Body",
+    "Foot.L",
+    "Foot.R",
+    "Hips",
+    "LowerArm.L",
+    "LowerArm.R",
+    "LowerLeg.L",
+    "LowerLeg.R",
+    "MiddleHand.L",
+    "MiddleHand.R",
+    "Neck",
+    "Palm.L",
+    "Thumb.L",
+    "Torso",
+    "UpperArm.L",
+    "UpperArm.R",
+    "UpperLeg.L",
+    "UpperLeg.R"
+  ],
+  "evaluator_revision": "KNIGHT_ORACLE_DRAWABLE_COURT_V3_LINEAR_PM_PARALLEL",
+  "immutable_stage23_seal_sha256": "585ef417a1e31e32db493102973db24fd2860ac8eadd3cd4aa0659edea7befee",
+  "layer_compositor": "CAA_LINEAR_LIGHT_PREMULTIPLIED_OVER",
+  "limitations": [
+    "Drawable partition is privileged mechanics-derived, not artist-authored graphics truth.",
+    "Complete layers are an optimistic oracle generated by independently rendering each mechanical drawable; they are not learned IRIS/TESSA outputs.",
+    "Static order is one global order per view; dynamic order is privileged per-frame mechanical-depth evidence.",
+    "A negative result cannot falsify a Bunraku/Live2D-style artist-authored partition because the partition basis differs.",
+    "This court does not qualify grip/contact correctness or product presentation authority."
+  ],
+  "mechanics_mutated": false,
+  "motion_mutated": false,
+  "partition": {
+    "drawable_face_counts": {
+      "Body": 236,
+      "Foot.L": 268,
+      "Foot.R": 204,
+      "Hips": 2089,
+      "LowerArm.L": 465,
+      "LowerArm.R": 151,
+      "LowerLeg.L": 598,
+      "LowerLeg.R": 514,
+      "MiddleHand.L": 5176,
+      "MiddleHand.R": 6487,
+      "Neck": 7773,
+      "Palm.L": 353,
+      "Thumb.L": 109,
+      "Torso": 3052,
+      "UpperArm.L": 220,
+      "UpperArm.R": 154,
+      "UpperLeg.L": 258,
+      "UpperLeg.R": 224
+    },
+    "final_drawable_count": 18,
+    "initial_source_group_count": 23,
+    "merge_log": [],
+    "target_to_source_mapping": [
+      {
+        "cost": 0.6116771317630436,
+        "next_cost": 0.7054434059820822,
+        "source_joint_id": "Foot.L",
+        "target_joint_id": "J:7e87e97fc9fe89cbd718"
+      },
+      {
+        "cost": 0.37324048737202953,
+        "next_cost": 0.5047419906119381,
+        "source_joint_id": "LowerLeg.R",
+        "target_joint_id": "J:ab16ff2ffc7408c862ae"
+      },
+      {
+        "cost": 0.2054681713865518,
+        "next_cost": 0.2925199639891659,
+        "source_joint_id": "Fingers.R",
+        "target_joint_id": "J:c9cdb266f7c167a620a9"
+      },
+      {
+        "cost": 0.17678234026097459,
+        "next_cost": 0.4085321751602823,
+        "source_joint_id": "LowerArm.R",
+        "target_joint_id": "J:932628adf7f0d5936426"
+      },
+      {
+        "cost": 0.2029030249075255,
+        "next_cost": 0.28310195332574495,
+        "source_joint_id": "Thumb.L",
+        "target_joint_id": "J:4c9f9eace712daf31538"
+      },
+      {
+        "cost": 0.48247436163504,
+        "next_cost": 0.6238222174056915,
+        "source_joint_id": "Foot.R",
+        "target_joint_id": "J:f5cf9181e27d0f791f7d"
+      },
+      {
+        "cost": 0.19833878296620702,
+        "next_cost": 0.2583591034997136,
+        "source_joint_id": "Thumb.R",
+        "target_joint_id": "J:75a17a4287b28cd7f57f"
+      },
+      {
+        "cost": 0.1507628779714688,
+        "next_cost": 0.49685610634347954,
+        "source_joint_id": "UpperLeg.R",
+        "target_joint_id": "J:f50f39d42ef3820824ef"
+      },
+      {
+        "cost": 0.15738848284903773,
+        "next_cost": 0.2182245988227146,
+        "source_joint_id": "MiddleHand.L",
+        "target_joint_id": "J:8455bf4c0a38867b7d9b"
+      },
+      {
+        "cost": 0.12566026834671604,
+        "next_cost": 0.15653416095612008,
+        "source_joint_id": "Thumb.L",
+        "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+      },
+      {
+        "cost": 0.12744628795827562,
+        "next_cost": 0.17729832396772957,
+        "source_joint_id": "Palm.L",
+        "target_joint_id": "J:33c7075f501c9af4cd0d"
+      },
+      {
+        "cost": 0.21451150060948782,
+        "next_cost": 0.3102178824405303,
+        "source_joint_id": "Neck",
+        "target_joint_id": "J:1008208d141ae248de43"
+      },
+      {
+        "cost": 0.22331652895761903,
+        "next_cost": 0.341721580563024,
+        "source_joint_id": "Fingers.L",
+        "target_joint_id": "J:136e20712bbd1481596e"
+      },
+      {
+        "cost": 0.1753136842084541,
+        "next_cost": 0.2033041789185967,
+        "source_joint_id": "MiddleHand.R",
+        "target_joint_id": "J:e5441b559f1c34b41aa2"
+      },
+      {
+        "cost": 0.1542952449768342,
+        "next_cost": 0.521825399970232,
+        "source_joint_id": "UpperLeg.L",
+        "target_joint_id": "J:063ee183f601e19a8ca9"
+      },
+      {
+        "cost": 0.24521820132730113,
+        "next_cost": 0.5053838222620202,
+        "source_joint_id": "LowerLeg.L",
+        "target_joint_id": "J:73295dbdbb50d303e597"
+      },
+      {
+        "cost": 0.18366720483839166,
+        "next_cost": 0.2331092975233877,
+        "source_joint_id": "UpperArm.R",
+        "target_joint_id": "J:42d181ebf3515959283a"
+      },
+      {
+        "cost": 0.5902787916544152,
+        "next_cost": 0.6714047201184266,
+        "source_joint_id": "Foot.R",
+        "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+      },
+      {
+        "cost": 0.338657132190124,
+        "next_cost": 0.5510856632138917,
+        "source_joint_id": "Head",
+        "target_joint_id": "J:eafe286e7d84499e5257"
+      },
+      {
+        "cost": 0.1615942399702586,
+        "next_cost": 0.45709510248575125,
+        "source_joint_id": "LowerArm.L",
+        "target_joint_id": "J:7cf59fbe52c53280546a"
+      },
+      {
+        "cost": 0.37056767662637935,
+        "next_cost": 0.4647284720520398,
+        "source_joint_id": "LowerLeg.L",
+        "target_joint_id": "J:cf05f36e919ff69a9d8e"
+      },
+      {
+        "cost": 0.40659342489016087,
+        "next_cost": 0.6154678629286205,
+        "source_joint_id": "Foot.L",
+        "target_joint_id": "J:362735eeec6ee5a3d46f"
+      },
+      {
+        "cost": 0.5383114087285982,
+        "next_cost": 0.693192900090975,
+        "source_joint_id": "Body",
+        "target_joint_id": "J:237d229c33bc9eb9bf91"
+      },
+      {
+        "cost": 0.1952579664472978,
+        "next_cost": 0.25572078846434404,
+        "source_joint_id": "UpperArm.L",
+        "target_joint_id": "J:a80d2c086e86a4cc08b5"
+      },
+      {
+        "cost": 0.2208842181998788,
+        "next_cost": 0.6520160579394874,
+        "source_joint_id": "Torso",
+        "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+      },
+      {
+        "cost": 0.2598771637136827,
+        "next_cost": 0.4990601726171502,
+        "source_joint_id": "LowerLeg.R",
+        "target_joint_id": "J:ee24577789f0235b8186"
+      },
+      {
+        "cost": 0.16516790065247416,
+        "next_cost": 0.3150452870805952,
+        "source_joint_id": "Hips",
+        "target_joint_id": "J:b9e5c0d23f688f672060"
+      }
+    ]
+  },
+  "partition_inference_admissible": false,
+  "run_id": "SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_RECOVERED_V1_643714DE",
+  "schema": "RealSaS.KnightOracleDrawableCourt.v1",
+  "scientific_design_changed_from_prereg_v1": false,
+  "skin_lineage_hash": "4332af4e7ce3bbb1c35d4c6de6014477374a172112c2caf60918aaabdb0060bb",
+  "skin_mutated": false,
+  "status": "MEASURED_RESEARCH_ORACLE_ONLY",
+  "subset_render_execution": {
+    "max_workers": 4,
+    "mode": "PARALLEL_INDEPENDENT_DRAWABLE_BATCH",
+    "parallel_batches": 24,
+    "parallel_subset_renders": 432
+  },
+  "summary": {
+    "automatic_scientific_verdict": "VISUAL_REVIEW_REQUIRED__METRICS_DESCRIPTIVE_ONLY",
+    "frame_view_sample_count": 24,
+    "hole_pixel_change_fraction_vs_baseline": {
+      "dynamic": -0.00041105744527788416,
+      "static": -0.00041105744527788416
+    },
+    "mean_enclosed_hole_pixels": {
+      "baseline": 405.4583333333333,
+      "dynamic_drawable": 405.2916666666667,
+      "static_drawable": 405.2916666666667
+    },
+    "mean_foreground_alpha_pixels": {
+      "baseline": 262552.7083333333,
+      "dynamic_drawable": 262552.875,
+      "static_drawable": 262552.875
+    },
+    "mean_foreground_components": {
+      "baseline": 5.208333333333333,
+      "dynamic_drawable": 5.208333333333333,
+      "static_drawable": 5.208333333333333
+    }
+  }
+}

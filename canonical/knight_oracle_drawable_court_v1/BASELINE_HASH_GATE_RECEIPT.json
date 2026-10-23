@@ -1,0 +1,19 @@
+{
+  "schema": "RealSaS.KnightOracleDrawableBaselineHashGateReceipt.v1",
+  "status": "PASS",
+  "research_only": true,
+  "source_workflow_run_id": 39872747814,
+  "source_job_id": 120150875555,
+  "source_run_id": "SUBJECT2_KNIGHT_CORRECTED_MECHANICAL_CAA_HARMONIC_FIRST_IMMUTABLE_RECOVERED_V1_643714DE",
+  "candidate_lineage_hash": "cb83b1e188770a2a8d748e5f89bd4a41ac3a4ee10c250b95c764ccde35c8fa96",
+  "skin_lineage_hash": "4332af4e7ce3bbb1c35d4c6de6014477374a172112c2caf60918aaabdb0060bb",
+  "stage23_asset_hash": "a0c4fabaa8c672cb16eb27b0e488bae7c251dc8b16cd4c5e20d01488a7a18a38",
+  "frozen_gif_sha256": {
+    "IDLE": "4c64437ba1f2ecaca8302a52c598f3ba7750a923fd50b90f7cafa3f8473386c3",
+    "RUN": "64ad50eeb9ea55ce202ddc46728ffea9074419dbf855938840f69d06661806e3",
+    "SLASH": "adc8e8cd0e2272a836e50f7a73585208074703ea5f3c9a549583d7a659fa2b85"
+  },
+  "evidence": "GitHub Actions run 39872747814 behaviorally replayed the recovered immutable Knight source and exactly matched all three preregistered frozen GIF SHA256 values before the drawable court began.",
+  "court_outcome": "NOT_MEASURED_IN_SOURCE_RUN__DRAWABLE_STEP_CANCELLED_BY_JOB_TIMEOUT",
+  "product_authority": false
+}

@@ -1,0 +1,380 @@
+{
+  "authority": "RESEARCH_ORACLE_ONLY",
+  "drawable_face_counts": {
+    "Body": 236,
+    "Foot.L": 268,
+    "Foot.R": 204,
+    "Hips": 2089,
+    "LowerArm.L": 465,
+    "LowerArm.R": 151,
+    "LowerLeg.L": 598,
+    "LowerLeg.R": 514,
+    "MiddleHand.L": 5176,
+    "MiddleHand.R": 6487,
+    "Neck": 7773,
+    "Palm.L": 353,
+    "Thumb.L": 109,
+    "Torso": 3052,
+    "UpperArm.L": 220,
+    "UpperArm.R": 154,
+    "UpperLeg.L": 258,
+    "UpperLeg.R": 224
+  },
+  "drawables": [
+    "Body",
+    "Foot.L",
+    "Foot.R",
+    "Hips",
+    "LowerArm.L",
+    "LowerArm.R",
+    "LowerLeg.L",
+    "LowerLeg.R",
+    "MiddleHand.L",
+    "MiddleHand.R",
+    "Neck",
+    "Palm.L",
+    "Thumb.L",
+    "Torso",
+    "UpperArm.L",
+    "UpperArm.R",
+    "UpperLeg.L",
+    "UpperLeg.R"
+  ],
+  "final_drawable_count": 18,
+  "inference_admissible": false,
+  "initial_source_group_count": 23,
+  "merge_log": [],
+  "schema": "RealSaS.KnightTeacherMechanicalDrawablePartition.v1",
+  "static_order_evidence": {
+    "0": {
+      "cross_drawable_depth_pair_pixels": 51784,
+      "losses": {
+        "Body": 122,
+        "Foot.L": 28,
+        "Foot.R": 0,
+        "Hips": 1363,
+        "LowerArm.L": 393,
+        "LowerArm.R": 45,
+        "LowerLeg.L": 3109,
+        "LowerLeg.R": 3187,
+        "MiddleHand.L": 1,
+        "MiddleHand.R": 913,
+        "Neck": 232,
+        "Palm.L": 558,
+        "Thumb.L": 178,
+        "Torso": 40950,
+        "UpperArm.L": 101,
+        "UpperArm.R": 3,
+        "UpperLeg.L": 254,
+        "UpperLeg.R": 347
+      },
+      "order_back_to_front": [
+        "Torso",
+        "LowerLeg.R",
+        "LowerLeg.L",
+        "Palm.L",
+        "LowerArm.L",
+        "Thumb.L",
+        "LowerArm.R",
+        "UpperLeg.R",
+        "UpperArm.L",
+        "UpperLeg.L",
+        "UpperArm.R",
+        "Body",
+        "MiddleHand.R",
+        "Foot.L",
+        "Foot.R",
+        "Neck",
+        "MiddleHand.L",
+        "Hips"
+      ],
+      "score": {
+        "Body": 1170,
+        "Foot.L": 3033,
+        "Foot.R": 3106,
+        "Hips": 24701,
+        "LowerArm.L": -388,
+        "LowerArm.R": -45,
+        "LowerLeg.L": -2914,
+        "LowerLeg.R": -3051,
+        "MiddleHand.L": 7204,
+        "MiddleHand.R": 1568,
+        "Neck": 6962,
+        "Palm.L": -555,
+        "Thumb.L": -178,
+        "Torso": -40950,
+        "UpperArm.L": 64,
+        "UpperArm.R": 179,
+        "UpperLeg.L": 132,
+        "UpperLeg.R": -38
+      },
+      "wins": {
+        "Body": 1292,
+        "Foot.L": 3061,
+        "Foot.R": 3106,
+        "Hips": 26064,
+        "LowerArm.L": 5,
+        "LowerArm.R": 0,
+        "LowerLeg.L": 195,
+        "LowerLeg.R": 136,
+        "MiddleHand.L": 7205,
+        "MiddleHand.R": 2481,
+        "Neck": 7194,
+        "Palm.L": 3,
+        "Thumb.L": 0,
+        "Torso": 0,
+        "UpperArm.L": 165,
+        "UpperArm.R": 182,
+        "UpperLeg.L": 386,
+        "UpperLeg.R": 309
+      }
+    },
+    "2": {
+      "cross_drawable_depth_pair_pixels": 28897,
+      "losses": {
+        "Body": 35,
+        "Foot.L": 88,
+        "Foot.R": 78,
+        "Hips": 90,
+        "LowerArm.L": 516,
+        "LowerArm.R": 458,
+        "LowerLeg.L": 2193,
+        "LowerLeg.R": 37,
+        "MiddleHand.L": 16343,
+        "MiddleHand.R": 8,
+        "Neck": 2205,
+        "Palm.L": 1507,
+        "Thumb.L": 9,
+        "Torso": 1685,
+        "UpperArm.L": 2220,
+        "UpperArm.R": 5,
+        "UpperLeg.L": 1413,
+        "UpperLeg.R": 7
+      },
+      "order_back_to_front": [
+        "MiddleHand.L",
+        "UpperArm.L",
+        "Neck",
+        "LowerLeg.L",
+        "Torso",
+        "Palm.L",
+        "UpperLeg.L",
+        "LowerArm.L",
+        "LowerArm.R",
+        "Foot.L",
+        "Body",
+        "Foot.R",
+        "Thumb.L",
+        "Hips",
+        "UpperArm.R",
+        "UpperLeg.R",
+        "LowerLeg.R",
+        "MiddleHand.R"
+      ],
+      "score": {
+        "Body": 3,
+        "Foot.L": -88,
+        "Foot.R": 36,
+        "Hips": 279,
+        "LowerArm.L": -516,
+        "LowerArm.R": -458,
+        "LowerLeg.L": -2193,
+        "LowerLeg.R": 2210,
+        "MiddleHand.L": -16342,
+        "MiddleHand.R": 23616,
+        "Neck": -2205,
+        "Palm.L": -1507,
+        "Thumb.L": 183,
+        "Torso": -1647,
+        "UpperArm.L": -2220,
+        "UpperArm.R": 856,
+        "UpperLeg.L": -1413,
+        "UpperLeg.R": 1406
+      },
+      "wins": {
+        "Body": 38,
+        "Foot.L": 0,
+        "Foot.R": 114,
+        "Hips": 369,
+        "LowerArm.L": 0,
+        "LowerArm.R": 0,
+        "LowerLeg.L": 0,
+        "LowerLeg.R": 2247,
+        "MiddleHand.L": 1,
+        "MiddleHand.R": 23624,
+        "Neck": 0,
+        "Palm.L": 0,
+        "Thumb.L": 192,
+        "Torso": 38,
+        "UpperArm.L": 0,
+        "UpperArm.R": 861,
+        "UpperLeg.L": 0,
+        "UpperLeg.R": 1413
+      }
+    }
+  },
+  "target_to_source_mapping": [
+    {
+      "cost": 0.6116771317630436,
+      "next_cost": 0.7054434059820822,
+      "source_joint_id": "Foot.L",
+      "target_joint_id": "J:7e87e97fc9fe89cbd718"
+    },
+    {
+      "cost": 0.37324048737202953,
+      "next_cost": 0.5047419906119381,
+      "source_joint_id": "LowerLeg.R",
+      "target_joint_id": "J:ab16ff2ffc7408c862ae"
+    },
+    {
+      "cost": 0.2054681713865518,
+      "next_cost": 0.2925199639891659,
+      "source_joint_id": "Fingers.R",
+      "target_joint_id": "J:c9cdb266f7c167a620a9"
+    },
+    {
+      "cost": 0.17678234026097459,
+      "next_cost": 0.4085321751602823,
+      "source_joint_id": "LowerArm.R",
+      "target_joint_id": "J:932628adf7f0d5936426"
+    },
+    {
+      "cost": 0.2029030249075255,
+      "next_cost": 0.28310195332574495,
+      "source_joint_id": "Thumb.L",
+      "target_joint_id": "J:4c9f9eace712daf31538"
+    },
+    {
+      "cost": 0.48247436163504,
+      "next_cost": 0.6238222174056915,
+      "source_joint_id": "Foot.R",
+      "target_joint_id": "J:f5cf9181e27d0f791f7d"
+    },
+    {
+      "cost": 0.19833878296620702,
+      "next_cost": 0.2583591034997136,
+      "source_joint_id": "Thumb.R",
+      "target_joint_id": "J:75a17a4287b28cd7f57f"
+    },
+    {
+      "cost": 0.1507628779714688,
+      "next_cost": 0.49685610634347954,
+      "source_joint_id": "UpperLeg.R",
+      "target_joint_id": "J:f50f39d42ef3820824ef"
+    },
+    {
+      "cost": 0.15738848284903773,
+      "next_cost": 0.2182245988227146,
+      "source_joint_id": "MiddleHand.L",
+      "target_joint_id": "J:8455bf4c0a38867b7d9b"
+    },
+    {
+      "cost": 0.12566026834671604,
+      "next_cost": 0.15653416095612008,
+      "source_joint_id": "Thumb.L",
+      "target_joint_id": "J:5428a88dad4d4d8d5c4d"
+    },
+    {
+      "cost": 0.12744628795827562,
+      "next_cost": 0.17729832396772957,
+      "source_joint_id": "Palm.L",
+      "target_joint_id": "J:33c7075f501c9af4cd0d"
+    },
+    {
+      "cost": 0.21451150060948782,
+      "next_cost": 0.3102178824405303,
+      "source_joint_id": "Neck",
+      "target_joint_id": "J:1008208d141ae248de43"
+    },
+    {
+      "cost": 0.22331652895761903,
+      "next_cost": 0.341721580563024,
+      "source_joint_id": "Fingers.L",
+      "target_joint_id": "J:136e20712bbd1481596e"
+    },
+    {
+      "cost": 0.1753136842084541,
+      "next_cost": 0.2033041789185967,
+      "source_joint_id": "MiddleHand.R",
+      "target_joint_id": "J:e5441b559f1c34b41aa2"
+    },
+    {
+      "cost": 0.1542952449768342,
+      "next_cost": 0.521825399970232,
+      "source_joint_id": "UpperLeg.L",
+      "target_joint_id": "J:063ee183f601e19a8ca9"
+    },
+    {
+      "cost": 0.24521820132730113,
+      "next_cost": 0.5053838222620202,
+      "source_joint_id": "LowerLeg.L",
+      "target_joint_id": "J:73295dbdbb50d303e597"
+    },
+    {
+      "cost": 0.18366720483839166,
+      "next_cost": 0.2331092975233877,
+      "source_joint_id": "UpperArm.R",
+      "target_joint_id": "J:42d181ebf3515959283a"
+    },
+    {
+      "cost": 0.5902787916544152,
+      "next_cost": 0.6714047201184266,
+      "source_joint_id": "Foot.R",
+      "target_joint_id": "J:7d9e31e2d0bd48f88ecb"
+    },
+    {
+      "cost": 0.338657132190124,
+      "next_cost": 0.5510856632138917,
+      "source_joint_id": "Head",
+      "target_joint_id": "J:eafe286e7d84499e5257"
+    },
+    {
+      "cost": 0.1615942399702586,
+      "next_cost": 0.45709510248575125,
+      "source_joint_id": "LowerArm.L",
+      "target_joint_id": "J:7cf59fbe52c53280546a"
+    },
+    {
+      "cost": 0.37056767662637935,
+      "next_cost": 0.4647284720520398,
+      "source_joint_id": "LowerLeg.L",
+      "target_joint_id": "J:cf05f36e919ff69a9d8e"
+    },
+    {
+      "cost": 0.40659342489016087,
+      "next_cost": 0.6154678629286205,
+      "source_joint_id": "Foot.L",
+      "target_joint_id": "J:362735eeec6ee5a3d46f"
+    },
+    {
+      "cost": 0.5383114087285982,
+      "next_cost": 0.693192900090975,
+      "source_joint_id": "Body",
+      "target_joint_id": "J:237d229c33bc9eb9bf91"
+    },
+    {
+      "cost": 0.1952579664472978,
+      "next_cost": 0.25572078846434404,
+      "source_joint_id": "UpperArm.L",
+      "target_joint_id": "J:a80d2c086e86a4cc08b5"
+    },
+    {
+      "cost": 0.2208842181998788,
+      "next_cost": 0.6520160579394874,
+      "source_joint_id": "Torso",
+      "target_joint_id": "J:2ff965d6dbe4efc2d5d4"
+    },
+    {
+      "cost": 0.2598771637136827,
+      "next_cost": 0.4990601726171502,
+      "source_joint_id": "LowerLeg.R",
+      "target_joint_id": "J:ee24577789f0235b8186"
+    },
+    {
+      "cost": 0.16516790065247416,
+      "next_cost": 0.3150452870805952,
+      "source_joint_id": "Hips",
+      "target_joint_id": "J:b9e5c0d23f688f672060"
+    }
+  ]
+}

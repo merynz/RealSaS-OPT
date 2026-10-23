@@ -1,0 +1,39 @@
+name: responsibility-go-diagnostic-once
+on:
+  push:
+    branches: [platform/responsibility-ledger-v1-20261023]
+    paths: [.github/workflows/zz_responsibility_go_diag_once.yml]
+permissions:
+  contents: write
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: platform/responsibility-ledger-v1-20261023
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: platform/go.mod
+      - name: Capture Go output
+        working-directory: platform
+        run: |
+          set +e
+          go test -v ./internal/capability ./internal/httpapi > ../responsibility-go-test.txt 2>&1
+          echo $? > ../responsibility-go-exit.txt
+          cat ../responsibility-go-test.txt
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: responsibility-go-diagnostic
+          path: |
+            responsibility-go-test.txt
+            responsibility-go-exit.txt
+      - name: Remove transient diagnostic workflow
+        run: |
+          rm .github/workflows/zz_responsibility_go_diag_once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/zz_responsibility_go_diag_once.yml
+          git commit -m 'CI: remove responsibility Go diagnostic'
+          git push

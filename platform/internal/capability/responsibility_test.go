@@ -2,6 +2,7 @@ package capability
 
 import (
 	"context"
+	"reflect"
 	"testing"
 )
 
@@ -28,6 +29,54 @@ func TestResponsibilityTerrainProjectsActiveInputAndShape(t *testing.T) {
 	shape := byID["shape.topology_proposal"]
 	if shape.RoleID != ProductRoleShape || shape.AuthorityKind != "PROPOSAL" || shape.ImplementationClass != ImplementationModel {
 		t.Fatalf("shape terrain=%+v", shape)
+	}
+	if shape.ResponsibilityOwnerClass != ImplementationModel || shape.OwnerComponent != "TESSA" || shape.ModelFamily != "TESSA" {
+		t.Fatalf("shape model terrain=%+v", shape)
+	}
+	iris := byID["shape.shared_scene_evidence"]
+	if iris.OwnerComponent != "IRIS" || iris.ModelFamily != "IRIS" {
+		t.Fatalf("iris terrain=%+v", iris)
+	}
+}
+
+func TestRequiredModelFamiliesAreDerivedFromActiveTerrain(t *testing.T) {
+	registry, err := Build(context.Background(), ProductInputProvider{}, ProductShapeProvider{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	families, err := RequiredModelFamilies(registry)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{"IRIS", "TESSA"}; !reflect.DeepEqual(families, want) {
+		t.Fatalf("families=%v want=%v", families, want)
+	}
+}
+
+func TestResponsibilityLedgerSeparatesAxisMiraProposalsFromCompilerAuthority(t *testing.T) {
+	ledger, err := loadResponsibilityLedger()
+	if err != nil {
+		t.Fatal(err)
+	}
+	byID := map[string]ResponsibilityDefinition{}
+	for _, row := range ledger.Responsibilities {
+		byID[row.ID] = row
+	}
+	axis := byID["rig.structure_proposal"]
+	if axis.ExecutionOwnerClass != ImplementationModel || axis.OwnerComponent != "AXIS" || axis.ModelFamily != "AXIS" || axis.AuthorityKind != "PROPOSAL" {
+		t.Fatalf("axis responsibility=%+v", axis)
+	}
+	rigMint := byID["rig.canonical_identity_mint"]
+	if rigMint.ExecutionOwnerClass != ImplementationCompiler || rigMint.OwnerComponent != "COMPILER" || rigMint.AuthorityKind != "CANONICAL_AUTHORITY" {
+		t.Fatalf("rig mint responsibility=%+v", rigMint)
+	}
+	mira := byID["skin.influence_proposal"]
+	if mira.ExecutionOwnerClass != ImplementationModel || mira.OwnerComponent != "MIRA" || mira.ModelFamily != "MIRA" || mira.AuthorityKind != "PROPOSAL" {
+		t.Fatalf("mira responsibility=%+v", mira)
+	}
+	skinMint := byID["skin.canonical_influence_mint"]
+	if skinMint.ExecutionOwnerClass != ImplementationCompiler || skinMint.OwnerComponent != "COMPILER" || skinMint.AuthorityKind != "CANONICAL_AUTHORITY" {
+		t.Fatalf("skin mint responsibility=%+v", skinMint)
 	}
 }
 

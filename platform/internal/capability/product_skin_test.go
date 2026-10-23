@@ -35,11 +35,29 @@ func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
 	if got := d.Metadata["activation_state"]; got != "BLOCKED" {
 		t.Fatalf("activation_state = %v", got)
 	}
-	if got := d.Metadata["activation_blocker"]; got != "CHECKPOINT_BACKED_MIRA_RUNTIME_MISSING" {
+	if got := d.Metadata["activation_blocker"]; got != "SEALED_CURRENT_MIRA_MODELRELEASE_RUNTIME_PACKAGE_MISSING" {
 		t.Fatalf("activation_blocker = %v", got)
 	}
-	if got := d.Metadata["historical_carrier_witness_is_model"]; got != false {
-		t.Fatalf("historical carrier witness model claim = %v", got)
+	if got := d.Metadata["historical_checkpoint_backed_mira_v55_exists"]; got != true {
+		t.Fatalf("historical MIRA checkpoint claim = %v", got)
+	}
+	if got := d.Metadata["historical_mira_v55_learned_directly_on_exact_m"]; got != true {
+		t.Fatalf("historical direct-on-M learned claim = %v", got)
+	}
+	if got := d.Metadata["historical_mira_v55_terminal_pass"]; got != true {
+		t.Fatalf("historical MIRA terminal pass = %v", got)
+	}
+	if got := d.Metadata["historical_mira_v55_product_authority"]; got != false {
+		t.Fatalf("historical MIRA product authority = %v", got)
+	}
+	if got := d.Metadata["historical_mira_v55_generalization_claimed"]; got != false {
+		t.Fatalf("historical MIRA generalization claim = %v", got)
+	}
+	if got := d.Metadata["current_repo_mira_v55_runtime_provider_present"]; got != false {
+		t.Fatalf("current MIRA runtime provider claim = %v", got)
+	}
+	if got := d.Metadata["current_platform_mira_modelrelease_bound"]; got != false {
+		t.Fatalf("current MIRA ModelRelease claim = %v", got)
 	}
 	if got := d.Metadata["post_hoc_surface_skin_transfer_allowed"]; got != false {
 		t.Fatalf("post-hoc skin transfer policy = %v", got)

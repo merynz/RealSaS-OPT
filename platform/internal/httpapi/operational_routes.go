@@ -69,18 +69,19 @@ func (a API) HandlerWithOperational() http.Handler {
 			result(w, nil, err)
 			return
 		}
-		roles, err := capability.ProductRoleGraph(snapshot.Registry)
+		roles, projectionStatus, err := capability.ProductRoleReadProjection(snapshot.Registry)
 		if err != nil {
 			result(w, nil, err)
 			return
 		}
 		respond(w, 200, map[string]any{
-			"schema":                "RealSaS.ReleaseCapabilityGraph.v1",
-			"engine_release_id":     snapshot.ReleaseID.String(),
-			"capability_set_sha256": snapshot.CapabilitySetSHA256,
-			"capabilities":          snapshot.Registry.Descriptors(),
-			"versions":              snapshot.Versions,
-			"product_roles":         roles,
+			"schema":                         "RealSaS.ReleaseCapabilityGraph.v1",
+			"engine_release_id":              snapshot.ReleaseID.String(),
+			"capability_set_sha256":          snapshot.CapabilitySetSHA256,
+			"capabilities":                   snapshot.Registry.Descriptors(),
+			"versions":                       snapshot.Versions,
+			"product_roles":                  roles,
+			"product_role_projection_status": projectionStatus,
 		})
 	})
 	mux.HandleFunc("POST /v1/research/attempts", func(w http.ResponseWriter, r *http.Request) {

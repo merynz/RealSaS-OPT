@@ -1,0 +1,139 @@
+name: p3-shape-capability-transform
+
+on:
+  push:
+    branches:
+      - product/shape-capability-v1-20261023
+
+permissions:
+  contents: write
+
+jobs:
+  transform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: platform/go.mod
+          cache-dependency-path: platform/go.sum
+
+      - name: Wire exact models and Shape dispatch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          contracts = Path('platform/internal/orchestration/contracts.go')
+          text = contracts.read_text()
+          anchor = '\tInputArtifacts            []ArtifactRef        `json:"input_artifacts"`\n'
+          addition = anchor + '\tModelReleases             []ModelReleaseRef   `json:"model_releases,omitempty"`\n'
+          if 'json:"model_releases,omitempty"' not in text[text.index('type EngineCapabilityRequest struct {'):text.index('type EngineCapabilityFailure struct {')]:
+              if anchor not in text:
+                  raise SystemExit('P3_CAPABILITY_MODEL_CONTRACT_ANCHOR_MISSING')
+              text = text.replace(anchor, addition, 1)
+          contracts.write_text(text)
+
+          control = Path('platform/internal/control/capability.go')
+          text = control.read_text()
+          import_anchor = '\t"github.com/merynz/RealSaS-OPT/platform/internal/registry"\n'
+          import_add = '\t"github.com/merynz/RealSaS-OPT/platform/internal/modelselection"\n' + import_anchor
+          if 'platform/internal/modelselection' not in text:
+              if import_anchor not in text:
+                  raise SystemExit('P3_CAPABILITY_MODEL_IMPORT_ANCHOR_MISSING')
+              text = text.replace(import_anchor, import_add, 1)
+          # Use modelselection.EngineRefs directly so the immutable source is explicit in the execution seam.
+          input_anchor = '''\trefs, err := bindExecutionInputs(ctx, tx, executionID, inputIDs)\n\tif err != nil {\n\t\treturn orchestration.EngineCapabilityRequest{}, err\n\t}\n'''
+          model_add = input_anchor + '''\tselectedModels, err := modelselection.LoadAttemptTx(ctx, tx, attemptID)\n\tif err != nil {\n\t\treturn orchestration.EngineCapabilityRequest{}, err\n\t}\n\tmodelRefs := modelselection.EngineRefs(selectedModels)\n'''
+          if 'modelRefs := modelselection.EngineRefs(selectedModels)' not in text:
+              if input_anchor not in text:
+                  raise SystemExit('P3_CAPABILITY_MODEL_LOAD_ANCHOR_MISSING')
+              text = text.replace(input_anchor, model_add, 1)
+          return_anchor = '\t\tInputArtifacts:            refs,\n'
+          return_add = return_anchor + '\t\tModelReleases:             modelRefs,\n'
+          if '\t\tModelReleases:             modelRefs,\n' not in text:
+              if return_anchor not in text:
+                  raise SystemExit('P3_CAPABILITY_MODEL_RETURN_ANCHOR_MISSING')
+              text = text.replace(return_anchor, return_add, 1)
+          control.write_text(text)
+
+          worker = Path('compiler/realsas_compiler_services/platform_worker/worker.py')
+          text = worker.read_text()
+          import_anchor = 'from compiler.realsas_compiler_services.platform_worker.model_inputs import materialize_model_releases\n'
+          # worker currently imports materialization through model_inputs on main; tolerate older import layout.
+          if import_anchor not in text:
+              stage_anchor = 'from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, verify_execution_version, released_execution_plan, verify_source_inputs\n'
+              if stage_anchor not in text:
+                  raise SystemExit('P3_SHAPE_WORKER_IMPORT_ANCHOR_MISSING')
+              shape_import = 'from compiler.realsas_compiler_services.platform_worker.shape_executor_v1 import execute_shape_capability_v1\n'
+              text = text.replace(stage_anchor, shape_import + stage_anchor, 1)
+          else:
+              shape_import = 'from compiler.realsas_compiler_services.platform_worker.shape_executor_v1 import execute_shape_capability_v1\n'
+              if shape_import not in text:
+                  text = text.replace(import_anchor, import_anchor + shape_import, 1)
+          if shape_import not in text:
+              # Covers current main where model_inputs import may not be direct.
+              stage_anchor = 'from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, verify_execution_version, released_execution_plan, verify_source_inputs\n'
+              if stage_anchor not in text:
+                  raise SystemExit('P3_SHAPE_WORKER_IMPORT_ANCHOR_MISSING')
+              text = text.replace(stage_anchor, shape_import + stage_anchor, 1)
+
+          cap_anchor = '@activity.defn(name=EXECUTE_CAPABILITY_ACTIVITY)\nasync def execute_capability(request: dict[str, Any]) -> dict[str, Any]:\n'
+          cap_add = cap_anchor + '''    metadata = dict(request.get("capability_metadata") or {})\n    if (\n        str(request.get("kind") or "") == "MODULE"\n        and metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v1"\n    ):\n        def run_shape(value):\n            return execute_shape_capability_v1(\n                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes\n            )\n        return await _with_heartbeat(run_shape, request)\n\n'''
+          if 'metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v1"' not in text:
+              if cap_anchor not in text:
+                  raise SystemExit('P3_SHAPE_CAPABILITY_DISPATCH_ANCHOR_MISSING')
+              text = text.replace(cap_anchor, cap_add, 1)
+          stage_request_anchor = '        "source_inputs": [root_ref(ref) for ref in request.get("input_artifacts", ()) if not str(ref.get("role", "")).startswith("stage:")],\n'
+          stage_request_add = stage_request_anchor + '        "model_releases": request.get("model_releases") or [],\n'
+          if '"model_releases": request.get("model_releases") or []' not in text:
+              if stage_request_anchor not in text:
+                  raise SystemExit('P3_CAPABILITY_STAGE_MODEL_FORWARD_ANCHOR_MISSING')
+              text = text.replace(stage_request_anchor, stage_request_add, 1)
+          worker.write_text(text)
+          PY
+
+      - name: Targeted Shape authority proofs
+        run: |
+          python -m pip install --no-input --progress-bar off pytest numpy
+          python -m pytest -q \
+            tests/compiler/test_product_shape_capability_v1.py \
+            tests/compiler/test_product_shape_executor_v1.py \
+            tests/compiler/test_platform_model_materialization_v1.py
+          python -m py_compile \
+            compiler/realsas_compiler_services/platform_worker/shape_capability_v1.py \
+            compiler/realsas_compiler_services/platform_worker/shape_executor_v1.py \
+            compiler/realsas_compiler_services/platform_worker/worker.py
+          cd platform
+          gofmt -w internal/orchestration/contracts.go internal/control/capability.go internal/control/capability_models.go internal/capability/product_shape.go internal/capability/product_shape_test.go
+          test -z "$(gofmt -l internal/orchestration/contracts.go internal/control/capability.go internal/control/capability_models.go internal/capability/product_shape.go internal/capability/product_shape_test.go)"
+          go test ./internal/capability ./internal/control ./internal/orchestration
+
+      - name: Commit verified source and remove transient workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          rm .github/workflows/p3_shape_capability_transform.yml
+          git add \
+            platform/internal/orchestration/contracts.go \
+            platform/internal/control/capability.go \
+            platform/internal/control/capability_models.go \
+            platform/internal/capability/product_shape.go \
+            platform/internal/capability/product_shape_test.go \
+            compiler/realsas_compiler_services/platform_worker/worker.py \
+            compiler/realsas_compiler_services/platform_worker/shape_capability_v1.py \
+            compiler/realsas_compiler_services/platform_worker/shape_executor_v1.py \
+            tests/compiler/test_product_shape_capability_v1.py \
+            tests/compiler/test_product_shape_executor_v1.py \
+            .github/workflows/p3_shape_capability_transform.yml
+          if git diff --cached --quiet; then
+            echo 'No verified source changes to commit'
+            exit 0
+          fi
+          git commit -m 'P3: bind Shape capability to exact product inference models'
+          git push origin HEAD:product/shape-capability-v1-20261023

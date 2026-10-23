@@ -35,6 +35,9 @@ func (ProductInputProvider) Capabilities(context.Context) ([]Descriptor, error) 
 			"scientific_contract_is_replaceable":    true,
 			"implementation_owner_may_change":       true,
 			"stable_product_role_survives_rewiring": true,
+			"responsibility_ids": []string{
+				"input.model_observation_lowering",
+			},
 		},
 	}}, nil
 }

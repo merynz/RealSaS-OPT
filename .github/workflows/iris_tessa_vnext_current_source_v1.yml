@@ -20,6 +20,7 @@ on:
       - 'tests/iris/test_relation_truth_v3_adapter_v1.py'
       - 'tests/iris/test_structure_bridge_v3.py'
       - 'tests/iris/test_structure_bridge_v4.py'
+      - 'tests/iris/test_surface_v1.py'
       - 'tests/iris/test_tessa_decoded_court_v2.py'
       - 'tests/iris/test_tessa_generation_v2.py'
       - 'tests/iris/test_tessa_structuralizer_v2.py'
@@ -83,6 +84,7 @@ jobs:
             tests/iris/test_relation_truth_v3_adapter_v1.py \
             tests/iris/test_structure_bridge_v3.py \
             tests/iris/test_structure_bridge_v4.py \
+            tests/iris/test_surface_v1.py \
             tests/iris/test_tessa_decoded_court_v2.py \
             tests/iris/test_tessa_generation_v2.py \
             tests/iris/test_tessa_structuralizer_v2.py \

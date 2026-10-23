@@ -33,7 +33,11 @@ concurrency:
 jobs:
   production-policy-bank:
     if: github.event.repository.private == false
-    runs-on: ubuntu-latest
+    # ubuntu-latest rolled to 26.04 on 2026-10-23 with a preinstalled
+    # packages.microsoft.com source returning 403 during apt-get update.
+    # This bank only needs stable libpng/zlib native build dependencies; pin the
+    # runner image instead of weakening or bypassing the production-policy proof.
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
       PYTHONPATH: .

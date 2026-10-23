@@ -12,14 +12,17 @@ import (
 var productResponsibilityLedgerJSON []byte
 
 type ResponsibilityDefinition struct {
-	ID                      string        `json:"id"`
-	RoleID                  ProductRoleID `json:"role_id"`
-	RequiredWhenRolePresent bool          `json:"required_when_role_present"`
-	AuthorityKind           string        `json:"authority_kind"`
-	Exclusive               bool          `json:"exclusive"`
-	CanonicalTransformID    string        `json:"canonical_transform_id"`
-	DataReduction           string        `json:"data_reduction"`
-	SourceTruthRetained     bool          `json:"source_truth_retained"`
+	ID                      string              `json:"id"`
+	RoleID                  ProductRoleID       `json:"role_id"`
+	RequiredWhenRolePresent bool                `json:"required_when_role_present"`
+	AuthorityKind           string              `json:"authority_kind"`
+	Exclusive               bool                `json:"exclusive"`
+	ExecutionOwnerClass     ImplementationClass `json:"execution_owner_class"`
+	OwnerComponent          string              `json:"owner_component"`
+	ModelFamily             string              `json:"model_family,omitempty"`
+	CanonicalTransformID    string              `json:"canonical_transform_id"`
+	DataReduction           string              `json:"data_reduction"`
+	SourceTruthRetained     bool                `json:"source_truth_retained"`
 }
 
 type responsibilityRules struct {
@@ -36,16 +39,19 @@ type ResponsibilityLedger struct {
 }
 
 type ResponsibilityTerrainNode struct {
-	ResponsibilityID     string              `json:"responsibility_id"`
-	RoleID               ProductRoleID       `json:"role_id"`
-	CapabilityID         string              `json:"capability_id"`
-	ImplementationClass  ImplementationClass `json:"implementation_class"`
-	OwnerModuleID        string              `json:"owner_module_id"`
-	AuthorityKind        string              `json:"authority_kind"`
-	Exclusive            bool                `json:"exclusive"`
-	CanonicalTransformID string              `json:"canonical_transform_id"`
-	DataReduction        string              `json:"data_reduction"`
-	SourceTruthRetained  bool                `json:"source_truth_retained"`
+	ResponsibilityID              string              `json:"responsibility_id"`
+	RoleID                        ProductRoleID       `json:"role_id"`
+	CapabilityID                  string              `json:"capability_id"`
+	ImplementationClass           ImplementationClass `json:"implementation_class"`
+	ResponsibilityOwnerClass      ImplementationClass `json:"responsibility_owner_class"`
+	OwnerComponent                string              `json:"owner_component"`
+	ModelFamily                   string              `json:"model_family,omitempty"`
+	OwnerModuleID                 string              `json:"owner_module_id"`
+	AuthorityKind                 string              `json:"authority_kind"`
+	Exclusive                     bool                `json:"exclusive"`
+	CanonicalTransformID          string              `json:"canonical_transform_id"`
+	DataReduction                 string              `json:"data_reduction"`
+	SourceTruthRetained           bool                `json:"source_truth_retained"`
 }
 
 func loadResponsibilityLedger() (ResponsibilityLedger, error) {
@@ -67,6 +73,21 @@ func loadResponsibilityLedger() (ResponsibilityLedger, error) {
 	for _, row := range value.Responsibilities {
 		if strings.TrimSpace(row.ID) == "" || !validProductRoleID(row.RoleID) {
 			return ResponsibilityLedger{}, fmt.Errorf("RESPONSIBILITY_LEDGER_ENTRY_INVALID:%s", row.ID)
+		}
+		if strings.TrimSpace(row.AuthorityKind) == "" {
+			return ResponsibilityLedger{}, fmt.Errorf("RESPONSIBILITY_LEDGER_AUTHORITY_MISSING:%s", row.ID)
+		}
+		if !validImplementationClass(row.ExecutionOwnerClass) {
+			return ResponsibilityLedger{}, fmt.Errorf("RESPONSIBILITY_LEDGER_OWNER_CLASS_INVALID:%s:%s", row.ID, row.ExecutionOwnerClass)
+		}
+		if strings.TrimSpace(row.OwnerComponent) == "" {
+			return ResponsibilityLedger{}, fmt.Errorf("RESPONSIBILITY_LEDGER_OWNER_COMPONENT_MISSING:%s", row.ID)
+		}
+		if row.ExecutionOwnerClass == ImplementationModel && strings.TrimSpace(row.ModelFamily) == "" {
+			return ResponsibilityLedger{}, fmt.Errorf("RESPONSIBILITY_LEDGER_MODEL_FAMILY_MISSING:%s", row.ID)
+		}
+		if strings.TrimSpace(row.ModelFamily) != "" && row.ExecutionOwnerClass != ImplementationModel && row.ExecutionOwnerClass != ImplementationHybrid {
+			return ResponsibilityLedger{}, fmt.Errorf("RESPONSIBILITY_LEDGER_MODEL_FAMILY_OWNER_CLASS:%s:%s", row.ID, row.ExecutionOwnerClass)
 		}
 		if _, exists := seenIDs[row.ID]; exists {
 			return ResponsibilityLedger{}, fmt.Errorf("RESPONSIBILITY_LEDGER_DUPLICATE_ID:%s", row.ID)
@@ -124,10 +145,11 @@ func metadataStringList(metadata map[string]any, key string) ([]string, error) {
 }
 
 // ResponsibilityTerrain projects the active product graph into the operational
-// terrain map: stable responsibility, current implementation owner, authority
-// kind, canonical transform path and data-reduction risk. Release sealing calls
-// this fail-closed so accidental duplicate authority or lossy truth replacement
-// cannot become a canonical product graph.
+// terrain map: stable responsibility, current capability implementation,
+// responsibility-level execution owner, authority kind, canonical transform
+// path and data-reduction risk. Release sealing calls this fail-closed so
+// accidental duplicate authority or lossy truth replacement cannot become a
+// canonical product graph.
 func ResponsibilityTerrain(registry *Registry) ([]ResponsibilityTerrainNode, error) {
 	if registry == nil {
 		return nil, fmt.Errorf("responsibility terrain requires capability registry")
@@ -185,16 +207,19 @@ func ResponsibilityTerrain(registry *Registry) ([]ResponsibilityTerrainNode, err
 				return nil, fmt.Errorf("RESPONSIBILITY_PRODUCT_PASS_OWNER_NOT_AUTHORIZED:%s", descriptor.ID)
 			}
 			terrain = append(terrain, ResponsibilityTerrainNode{
-				ResponsibilityID:     id,
-				RoleID:               role,
-				CapabilityID:         descriptor.ID,
-				ImplementationClass:  implementation,
-				OwnerModuleID:        descriptor.OwnerModuleID,
-				AuthorityKind:        definition.AuthorityKind,
-				Exclusive:            definition.Exclusive,
-				CanonicalTransformID: definition.CanonicalTransformID,
-				DataReduction:        definition.DataReduction,
-				SourceTruthRetained:  definition.SourceTruthRetained,
+				ResponsibilityID:         id,
+				RoleID:                   role,
+				CapabilityID:             descriptor.ID,
+				ImplementationClass:      implementation,
+				ResponsibilityOwnerClass: definition.ExecutionOwnerClass,
+				OwnerComponent:           definition.OwnerComponent,
+				ModelFamily:              strings.TrimSpace(definition.ModelFamily),
+				OwnerModuleID:            descriptor.OwnerModuleID,
+				AuthorityKind:            definition.AuthorityKind,
+				Exclusive:                definition.Exclusive,
+				CanonicalTransformID:     definition.CanonicalTransformID,
+				DataReduction:            definition.DataReduction,
+				SourceTruthRetained:      definition.SourceTruthRetained,
 			})
 		}
 	}
@@ -212,4 +237,28 @@ func ResponsibilityTerrain(registry *Registry) ([]ResponsibilityTerrainNode, err
 		return terrain[i].ResponsibilityID < terrain[j].ResponsibilityID
 	})
 	return terrain, nil
+}
+
+// RequiredModelFamilies derives learned runtime dependencies from the active
+// responsibility terrain rather than from ad-hoc worker knowledge. A model
+// family appears here only when an active product responsibility is explicitly
+// owned by that learned family.
+func RequiredModelFamilies(registry *Registry) ([]string, error) {
+	terrain, err := ResponsibilityTerrain(registry)
+	if err != nil {
+		return nil, err
+	}
+	seen := map[string]struct{}{}
+	for _, row := range terrain {
+		family := strings.TrimSpace(row.ModelFamily)
+		if family != "" {
+			seen[family] = struct{}{}
+		}
+	}
+	out := make([]string, 0, len(seen))
+	for family := range seen {
+		out = append(out, family)
+	}
+	sort.Strings(out)
+	return out, nil
 }

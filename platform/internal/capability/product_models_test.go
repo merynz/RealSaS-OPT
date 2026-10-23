@@ -39,6 +39,13 @@ func TestEngineReleaseModelRequirementsRejectArchitectureAndChannelDrift(t *test
 	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, valid); err != nil {
 		t.Fatal(err)
 	}
+	research := []release.ModelRequirement{
+		{Family: "IRIS", ArchitectureID: "RealSaS.IRIS.VNextEvidenceModel.v3", Channel: "RESEARCH"},
+		{Family: "TESSA", ArchitectureID: "RealSaS.TESSA.Structuralizer.v3", Channel: "CANDIDATE"},
+	}
+	if err := validateEngineReleaseModelRequirements(registry, release.PurposeResearch, research); err != nil {
+		t.Fatal(err)
+	}
 	wrongArchitecture := append([]release.ModelRequirement(nil), valid...)
 	wrongArchitecture[1].ArchitectureID = "wrong"
 	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, wrongArchitecture); err == nil {

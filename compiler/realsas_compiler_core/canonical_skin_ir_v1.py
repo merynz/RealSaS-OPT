@@ -4,8 +4,8 @@ from __future__ import annotations
 
 MIRA or another learned provider proposes influences on the exact mechanical
 carrier. The Compiler binds those proposal rows to CanonicalMesh vertex IDs and
-CanonicalRig joint IDs, qualifies legality/simplex correction within frozen
-budgets, and only then mints CanonicalSkinIR.
+CanonicalRig joint IDs, then uses the shared Skin numeric court before minting
+CanonicalSkinIR.
 
 Legacy carrier/candidate IDs and learned-family names are evidence provenance,
 not stable Skin identity.
@@ -19,6 +19,7 @@ from .canonical_mesh_ir_v1 import CanonicalMeshIR, canonical_mesh_lineage_hash_v
 from .canonical_rig_ir_v1 import CanonicalRigIR, canonical_rig_lineage_hash_v1
 from .carrier_skin_v1 import CarrierSkinProposalIR
 from .hashing import content_sha256
+from .skin_simplex_qualification_v1 import qualify_influence_simplex_v1
 from .types import QualificationError
 
 Json = dict[str, Any]
@@ -171,82 +172,57 @@ def qualify_canonical_skin_v1(
     if len(by_source_candidate) != len(mesh.vertices) or not by_source_candidate:
         raise QualificationError("CANONICAL_SKIN_EMPTY_MESH_DOMAIN")
 
-    joint_ids = {str(joint.canonical_joint_id) for joint in rig.joints}
-    if not joint_ids:
-        raise QualificationError("CANONICAL_SKIN_EMPTY_RIG_DOMAIN")
-
-    grouped: dict[str, dict[str, float]] = {
-        canonical_id: {} for canonical_id in by_source_candidate.values()
-    }
+    mapped_influences: list[tuple[str, str, float]] = []
     for influence in proposal.influences:
         source_vid = str(influence.carrier_vertex_id)
         if source_vid not in by_source_candidate:
             raise QualificationError("CANONICAL_SKIN_UNKNOWN_CARRIER_VERTEX")
-        canonical_vid = by_source_candidate[source_vid]
-        joint_id = str(influence.canonical_joint_id)
-        if joint_id not in joint_ids:
-            raise QualificationError("CANONICAL_SKIN_UNKNOWN_JOINT")
-        if joint_id in grouped[canonical_vid]:
-            raise QualificationError("CANONICAL_SKIN_DUPLICATE_VERTEX_JOINT")
-        weight = float(influence.weight)
-        if not math.isfinite(weight) or weight < -float(negative_tolerance):
-            raise QualificationError("CANONICAL_SKIN_WEIGHT_INVALID")
-        grouped[canonical_vid][joint_id] = max(0.0, weight)
-
-    ordered_vertices = tuple(vertex.canonical_mesh_vertex_id for vertex in mesh.vertices)
-    rows: list[CanonicalSkinRowIR] = []
-    total_correction = 0.0
-    max_row_correction = 0.0
-    max_residual = 0.0
-    for canonical_vid in ordered_vertices:
-        values = grouped[canonical_vid]
-        if not values:
-            raise QualificationError("CANONICAL_SKIN_VERTEX_UNCOVERED")
-        ordered = sorted(values.items())
-        raw_sum = sum(weight for _, weight in ordered)
-        if not math.isfinite(raw_sum) or raw_sum <= 0.0:
-            raise QualificationError("CANONICAL_SKIN_ROW_ZERO")
-        residual = abs(raw_sum - 1.0)
-        normalized = [(joint_id, weight / raw_sum) for joint_id, weight in ordered]
-        correction = sum(
-            abs(after - before)
-            for (_, before), (_, after) in zip(ordered, normalized)
-        )
-        if correction > float(max_simplex_repair_l1) + 1e-15:
-            raise QualificationError("CANONICAL_SKIN_ROW_REPAIR_BUDGET_EXCEEDED")
-        if max_influences is not None:
-            positive = sum(weight > 0.0 for _, weight in normalized)
-            if positive > int(max_influences):
-                raise QualificationError("CANONICAL_SKIN_MAX_INFLUENCES_EXCEEDED")
-        total_correction += correction
-        max_row_correction = max(max_row_correction, correction)
-        max_residual = max(max_residual, residual)
-        rows.append(
-            CanonicalSkinRowIR(
-                canonical_mesh_vertex_id=canonical_vid,
-                influences=tuple((joint_id, float(weight)) for joint_id, weight in normalized),
-                simplex_residual_before=float(residual),
-                correction_l1=float(correction),
+        mapped_influences.append(
+            (
+                by_source_candidate[source_vid],
+                str(influence.canonical_joint_id),
+                float(influence.weight),
             )
         )
-    if total_correction > float(max_total_correction_l1) + 1e-15:
-        raise QualificationError("CANONICAL_SKIN_TOTAL_REPAIR_BUDGET_EXCEEDED")
+
+    joint_ids = {str(joint.canonical_joint_id) for joint in rig.joints}
+    ordered_vertices = tuple(vertex.canonical_mesh_vertex_id for vertex in mesh.vertices)
+    numeric = qualify_influence_simplex_v1(
+        ordered_domain_ids=ordered_vertices,
+        allowed_joint_ids=joint_ids,
+        influences=mapped_influences,
+        max_simplex_repair_l1=float(max_simplex_repair_l1),
+        max_total_correction_l1=float(max_total_correction_l1),
+        negative_tolerance=float(negative_tolerance),
+        max_influences=max_influences,
+        error_prefix="CANONICAL_SKIN",
+        domain_label="VERTEX",
+    )
+    rows = tuple(
+        CanonicalSkinRowIR(
+            canonical_mesh_vertex_id=row.domain_id,
+            influences=row.influences,
+            simplex_residual_before=row.simplex_residual_before,
+            correction_l1=row.correction_l1,
+        )
+        for row in numeric.rows
+    )
 
     report = {
         "status": "PASS_CANONICAL_SKIN_QUALIFIED",
         "canonical_mesh_vertex_count": len(ordered_vertices),
         "canonical_rig_joint_count": len(joint_ids),
         "prediction_carrier_coverage": 1.0,
-        "simplex_max_abs_residual_before": float(max_residual),
-        "max_row_correction_l1": float(max_row_correction),
-        "total_correction_l1": float(total_correction),
+        "simplex_max_abs_residual_before": numeric.max_simplex_residual_before,
+        "max_row_correction_l1": numeric.max_row_correction_l1,
+        "total_correction_l1": numeric.total_correction_l1,
         "max_influences": max_influences,
         "semantic_skin_transfer_performed": False,
         "gsa_skin_field_authority_minted": False,
         "source_skin_runtime_authority": False,
     }
     value = CanonicalSkinQualificationIR(
-        rows=tuple(rows),
+        rows=rows,
         mesh_lineage_hash=mesh.mesh_lineage_hash,
         rig_lineage_hash=rig.rig_lineage_hash,
         carrier_evidence_hash=mesh.carrier_evidence_hash,

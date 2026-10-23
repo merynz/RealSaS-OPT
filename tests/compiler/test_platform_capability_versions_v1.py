@@ -16,7 +16,7 @@ def _is_sha256(value: str) -> bool:
 def test_product_capability_versions_are_complete_and_semantic():
     specs = capability_specs()
     versions = capability_versions()
-    assert set(versions) == {"product.input", "product.shape"}
+    assert set(versions) == {"product.input", "product.shape", "product.mesh"}
     assert set(specs) == set(versions)
     assert specs["product.input"]["parameters"]["responsibility_ids"] == [
         "input.model_observation_lowering"
@@ -24,6 +24,11 @@ def test_product_capability_versions_are_complete_and_semantic():
     assert specs["product.shape"]["parameters"]["responsibility_ids"] == [
         "shape.shared_scene_evidence",
         "shape.topology_proposal",
+    ]
+    assert specs["product.mesh"]["parameters"]["responsibility_ids"] == [
+        "mesh.canonical_identity_mint",
+        "mesh.source_fidelity_qualification",
+        "mesh.static_topology_qualification",
     ]
     assert specs["product.shape"]["parameters"]["required_models"] == [
         {
@@ -35,6 +40,7 @@ def test_product_capability_versions_are_complete_and_semantic():
             "architecture_id": "RealSaS.TESSA.Structuralizer.v3",
         },
     ]
+    assert specs["product.mesh"]["parameters"]["required_models"] == []
     assert product_model_requirements() == [
         {
             "family": "IRIS",
@@ -58,10 +64,13 @@ def test_product_capability_versions_are_complete_and_semantic():
         assert version["parameters_sha256"] == mainline.content_sha256(
             specs[capability_id]["parameters"]
         )
-    assert (
-        versions["product.input"]["implementation_sha256"]
-        != versions["product.shape"]["implementation_sha256"]
-    )
+    assert len(
+        {
+            versions["product.input"]["implementation_sha256"],
+            versions["product.shape"]["implementation_sha256"],
+            versions["product.mesh"]["implementation_sha256"],
+        }
+    ) == 3
 
 
 def test_release_snapshot_v2_carries_capability_and_model_requirements():

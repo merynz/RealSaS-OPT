@@ -1,8 +1,15 @@
 from __future__ import annotations
 
-"""Subject-free Stage18 construction for the TESSA learned carrier arm."""
+"""Typed TESSA proposal -> static Compiler candidate construction.
 
-from typing import Any, Callable
+The reusable core contains the scientific/authority work. The historical
+Stage18 entry point is now only a file/config adapter around that core, so the
+product Mesh capability can consume CAS-backed typed evidence without cloning
+repair/support logic or fabricating a legacy run filesystem.
+"""
+
+from dataclasses import dataclass
+from typing import Any, Callable, Mapping
 
 import numpy as np
 
@@ -18,79 +25,89 @@ from .types import QualificationError
 Json = dict[str, Any]
 
 
-def build_tessa_stage18_candidate_v1(
-    *,
-    mesh_cfg: Json,
-    surface,
-    partition,
-    carrier_policy,
-    mesh_policy,
-    artifact_root,
-    load_file_ref: Callable[..., dict],
-    write_ir: Callable[..., dict],
-    relation_quality_report: Callable[[Any, Any], dict],
-) -> dict:
-    """Build and Compiler-repair exact TESSA Stage18 evidence.
+@dataclass(frozen=True)
+class TESSAStaticCandidateBundleV1:
+    learned_candidate: Any
+    repaired_candidate: Any
+    mesh_policy: Any
+    material_support_field: Any
+    bridge_evidence: Any
+    repair_evidence: Any
+    reference_binding: Any
+    producer_policy_hash: str
+    pre_repair_quality: Json
+    post_repair_quality: Json
+    diagnostics: Json
 
-    The decoded TESSA proposal is an immutable learned geometry reference, not the
-    final carrier. Compiler applies the already-canonical static quality repair
-    operators before Stage19 freezes the exact mechanical carrier. GSA support is
-    retained as material/mechanical support only; it never defines learned XYZ.
-    """
-    allowed = {"backend", "proposal", "support_binding", "static_repair"}
-    unknown = set(mesh_cfg) - allowed
+
+def _support_options(config: Mapping[str, Any] | None) -> tuple[int, int, float]:
+    value = dict(config or {})
+    allowed = {"max_support_nodes", "max_graph_hops", "inverse_distance_power"}
+    unknown = set(value) - allowed
     if unknown:
         raise QualificationError(
-            "TESSA_STAGE18_MESH_CONFIG_KEYS_UNSUPPORTED:"
+            "TESSA_STAGE18_SUPPORT_CONFIG_KEYS_UNSUPPORTED:"
             + ",".join(sorted(map(str, unknown)))
         )
-    if str(mesh_cfg.get("backend") or "") != "TESSA_PROPOSAL_V1":
-        raise QualificationError("TESSA_STAGE18_BACKEND_INVALID")
+    max_support_nodes = int(value.get("max_support_nodes", 4))
+    max_graph_hops = int(value.get("max_graph_hops", 2))
+    inverse_distance_power = float(value.get("inverse_distance_power", 2.0))
+    if max_support_nodes < 1 or max_graph_hops < 0 or not np.isfinite(inverse_distance_power) or inverse_distance_power <= 0.0:
+        raise QualificationError("TESSA_STAGE18_SUPPORT_CONFIG_INVALID")
+    return max_support_nodes, max_graph_hops, inverse_distance_power
 
-    proposal_ref = dict(mesh_cfg.get("proposal") or {})
-    if not proposal_ref:
-        raise QualificationError("TESSA_STAGE18_PROPOSAL_REF_MISSING")
-    proposal_payload = load_file_ref(
-        proposal_ref,
-        expected_schema="RealSaS.TESSAMeshProposal.v1",
-    )
-    proposal = tessa_mesh_proposal_from_dict_v1(proposal_payload)
-    if proposal.source_geometry_lineage_hash != surface.geometry_lineage_hash:
-        raise QualificationError("TESSA_STAGE18_PROPOSAL_SURFACE_LINEAGE_MISMATCH")
 
-    support_cfg = dict(mesh_cfg.get("support_binding") or {})
-    allowed_support = {
-        "max_support_nodes",
-        "max_graph_hops",
-        "inverse_distance_power",
-    }
-    unknown_support = set(support_cfg) - allowed_support
-    if unknown_support:
-        raise QualificationError(
-            "TESSA_STAGE18_SUPPORT_CONFIG_KEYS_UNSUPPORTED:"
-            + ",".join(sorted(map(str, unknown_support)))
-        )
-    max_support_nodes = int(support_cfg.get("max_support_nodes", 4))
-    max_graph_hops = int(support_cfg.get("max_graph_hops", 2))
-    inverse_distance_power = float(support_cfg.get("inverse_distance_power", 2.0))
-
-    repair_cfg = dict(mesh_cfg.get("static_repair") or {})
-    allowed_repair = {
+def _repair_options(config: Mapping[str, Any] | None) -> tuple[int, int, int, int]:
+    value = dict(config or {})
+    allowed = {
         "collapse_batch_size",
         "collapse_limit",
         "relaxation_batch_size",
         "relaxation_limit",
     }
-    unknown_repair = set(repair_cfg) - allowed_repair
-    if unknown_repair:
+    unknown = set(value) - allowed
+    if unknown:
         raise QualificationError(
             "TESSA_STAGE18_STATIC_REPAIR_CONFIG_KEYS_UNSUPPORTED:"
-            + ",".join(sorted(map(str, unknown_repair)))
+            + ",".join(sorted(map(str, unknown)))
         )
-    collapse_batch_size = int(repair_cfg.get("collapse_batch_size", 32))
-    collapse_limit = int(repair_cfg.get("collapse_limit", 256))
-    relaxation_batch_size = int(repair_cfg.get("relaxation_batch_size", 32))
-    relaxation_limit = int(repair_cfg.get("relaxation_limit", 512))
+    options = (
+        int(value.get("collapse_batch_size", 32)),
+        int(value.get("collapse_limit", 256)),
+        int(value.get("relaxation_batch_size", 32)),
+        int(value.get("relaxation_limit", 512)),
+    )
+    if options[0] < 1 or options[1] < 0 or options[2] < 1 or options[3] < 0:
+        raise QualificationError("TESSA_STAGE18_STATIC_REPAIR_CONFIG_INVALID")
+    return options
+
+
+def build_tessa_static_candidate_from_proposal_v1(
+    *,
+    proposal,
+    proposal_evidence_sha256: str,
+    surface,
+    partition,
+    carrier_policy,
+    mesh_policy,
+    support_config: Mapping[str, Any] | None = None,
+    static_repair_config: Mapping[str, Any] | None = None,
+    relation_quality_report: Callable[[Any, Any], dict],
+) -> TESSAStaticCandidateBundleV1:
+    """Run the one canonical TESSA->static-candidate Compiler transaction."""
+    proposal_evidence_sha256 = str(proposal_evidence_sha256 or "")
+    if len(proposal_evidence_sha256) != 64:
+        raise QualificationError("TESSA_STAGE18_PROPOSAL_EVIDENCE_SHA_INVALID")
+    if proposal.source_geometry_lineage_hash != surface.geometry_lineage_hash:
+        raise QualificationError("TESSA_STAGE18_PROPOSAL_SURFACE_LINEAGE_MISMATCH")
+
+    max_support_nodes, max_graph_hops, inverse_distance_power = _support_options(support_config)
+    (
+        collapse_batch_size,
+        collapse_limit,
+        relaxation_batch_size,
+        relaxation_limit,
+    ) = _repair_options(static_repair_config)
 
     component_labels = sorted({str(vertex.component_id) for vertex in proposal.vertices})
     if not component_labels or any(not label for label in component_labels):
@@ -122,36 +139,40 @@ def build_tessa_stage18_candidate_v1(
         "TESSA_TOPOLOGICAL_BOUNDARY_ONLY__"
         "GSA_MATERIAL_SUPPORT_NOT_GEOMETRY_AUTHORITY"
     )
-    producer_policy_hash = content_sha256({
-        "schema": "RealSaS.TESSAStage18ProducerPolicy.v3",
-        "backend": "TESSA_PROPOSAL_V1",
-        "proposal_sha256": str(proposal_ref.get("sha256") or ""),
-        "proposal_geometry_lineage_hash": str(proposal.source_geometry_lineage_hash),
-        "topology_sequence_hash": str(proposal.topology_sequence_hash),
-        "support_binding": {
-            "max_support_nodes": max_support_nodes,
-            "max_graph_hops": max_graph_hops,
-            "inverse_distance_power": inverse_distance_power,
-        },
-        "static_repair": {
-            "operator_sequence": [
-                "FIXED_VERTEX_MONOTONE_EDGE_FLIP_V1",
-                "ENDPOINT_HALFEDGE_COLLAPSE_LINK_CONDITION_V1",
-                "PROJECTED_LOCAL_RELAXATION_V1",
-            ],
-            "collapse_batch_size": collapse_batch_size,
-            "collapse_limit": collapse_limit,
-            "relaxation_batch_size": relaxation_batch_size,
-            "relaxation_limit": relaxation_limit,
-            "geometry_boundary_policy": geometry_boundary_policy,
-            "topological_boundary_protection": "OWNED_BY_RELAXATION_OPERATOR",
-            "gsa_material_boundary_ids_used_to_freeze_xyz": False,
-            "threshold_relaxation": False,
-        },
-        "mesh_policy_hash": mesh_policy.qualification_policy_lineage_hash,
-        "material_support_is_geometry_authority": False,
-        "stage19_exact_candidate_remeasurement_required": True,
-    })
+    # Preserve the historical v3 producer-policy payload exactly. Product-facing
+    # names may evolve; sealed replay identity may not.
+    producer_policy_hash = content_sha256(
+        {
+            "schema": "RealSaS.TESSAStage18ProducerPolicy.v3",
+            "backend": "TESSA_PROPOSAL_V1",
+            "proposal_sha256": proposal_evidence_sha256,
+            "proposal_geometry_lineage_hash": str(proposal.source_geometry_lineage_hash),
+            "topology_sequence_hash": str(proposal.topology_sequence_hash),
+            "support_binding": {
+                "max_support_nodes": max_support_nodes,
+                "max_graph_hops": max_graph_hops,
+                "inverse_distance_power": inverse_distance_power,
+            },
+            "static_repair": {
+                "operator_sequence": [
+                    "FIXED_VERTEX_MONOTONE_EDGE_FLIP_V1",
+                    "ENDPOINT_HALFEDGE_COLLAPSE_LINK_CONDITION_V1",
+                    "PROJECTED_LOCAL_RELAXATION_V1",
+                ],
+                "collapse_batch_size": collapse_batch_size,
+                "collapse_limit": collapse_limit,
+                "relaxation_batch_size": relaxation_batch_size,
+                "relaxation_limit": relaxation_limit,
+                "geometry_boundary_policy": geometry_boundary_policy,
+                "topological_boundary_protection": "OWNED_BY_RELAXATION_OPERATOR",
+                "gsa_material_boundary_ids_used_to_freeze_xyz": False,
+                "threshold_relaxation": False,
+            },
+            "mesh_policy_hash": mesh_policy.qualification_policy_lineage_hash,
+            "material_support_is_geometry_authority": False,
+            "stage19_exact_candidate_remeasurement_required": True,
+        }
+    )
     learned_candidate, bridge_evidence = build_tessa_candidate_bridge_v1(
         proposal=proposal,
         support_field=support_field,
@@ -185,72 +206,139 @@ def build_tessa_stage18_candidate_v1(
         "geometry_boundary_policy": geometry_boundary_policy,
         "pre_repair": pre_repair_quality,
     }
+    diagnostics = {
+        "backend": "TESSA_PROPOSAL_V1",
+        "effective_backend": "TESSA_PROPOSAL_V1__COMPILER_STATIC_REPAIR_V1",
+        "learned_candidate_lineage_hash": learned_candidate.candidate_lineage_hash,
+        "candidate_lineage_hash": repaired_candidate.candidate_lineage_hash,
+        "proposal_geometry_hash": bridge_evidence.proposal_geometry_hash,
+        "topology_sequence_hash": proposal.topology_sequence_hash,
+        "material_support_field_hash": support_field.field_lineage_hash,
+        "candidate_bridge_evidence_hash": bridge_evidence.evidence_hash,
+        "static_repair_evidence_hash": repair_evidence.evidence_hash,
+        "reference_binding_hash": reference_binding.binding_hash,
+        "decoded_component_count": len(component_labels),
+        "mechanical_component_count": len(partition.components),
+        "input_vertex_count": len(learned_candidate.vertices),
+        "input_face_count": len(learned_candidate.faces),
+        "vertex_count": len(repaired_candidate.vertices),
+        "face_count": len(repaired_candidate.faces),
+        "mesh_policy_hash": mesh_policy.qualification_policy_lineage_hash,
+        "static_preflight": quality,
+        "stage19_remeasurement_required": True,
+        "static_exact_candidate_remeasurement_required": True,
+        "material_support_is_geometry_authority": False,
+        "geometry_boundary_policy": geometry_boundary_policy,
+        "gsa_material_boundary_ids_used_to_freeze_xyz": False,
+        "learned_xyz_preserved_exactly": False,
+        "learned_proposal_is_immutable_reference": True,
+        "compiler_static_repair_applied": True,
+        "teacher_vertex_index_used": False,
+        "teacher_geometry_used_to_repair": False,
+        "threshold_relaxation_performed": False,
+        "product_authority_claimed": False,
+        "motion_capability_claimed": False,
+    }
+    return TESSAStaticCandidateBundleV1(
+        learned_candidate=learned_candidate,
+        repaired_candidate=repaired_candidate,
+        mesh_policy=mesh_policy,
+        material_support_field=support_field,
+        bridge_evidence=bridge_evidence,
+        repair_evidence=repair_evidence,
+        reference_binding=reference_binding,
+        producer_policy_hash=producer_policy_hash,
+        pre_repair_quality=pre_repair_quality,
+        post_repair_quality=post_repair_quality,
+        diagnostics=diagnostics,
+    )
+
+
+def build_tessa_stage18_candidate_v1(
+    *,
+    mesh_cfg: Json,
+    surface,
+    partition,
+    carrier_policy,
+    mesh_policy,
+    artifact_root,
+    load_file_ref: Callable[..., dict],
+    write_ir: Callable[..., dict],
+    relation_quality_report: Callable[[Any, Any], dict],
+) -> dict:
+    """Historical Stage18 file/config adapter over the reusable typed core."""
+    allowed = {"backend", "proposal", "support_binding", "static_repair"}
+    unknown = set(mesh_cfg) - allowed
+    if unknown:
+        raise QualificationError(
+            "TESSA_STAGE18_MESH_CONFIG_KEYS_UNSUPPORTED:"
+            + ",".join(sorted(map(str, unknown)))
+        )
+    if str(mesh_cfg.get("backend") or "") != "TESSA_PROPOSAL_V1":
+        raise QualificationError("TESSA_STAGE18_BACKEND_INVALID")
+
+    proposal_ref = dict(mesh_cfg.get("proposal") or {})
+    if not proposal_ref:
+        raise QualificationError("TESSA_STAGE18_PROPOSAL_REF_MISSING")
+    proposal_sha = str(proposal_ref.get("sha256") or "")
+    proposal_payload = load_file_ref(
+        proposal_ref,
+        expected_schema="RealSaS.TESSAMeshProposal.v1",
+    )
+    proposal = tessa_mesh_proposal_from_dict_v1(proposal_payload)
+    bundle = build_tessa_static_candidate_from_proposal_v1(
+        proposal=proposal,
+        proposal_evidence_sha256=proposal_sha,
+        surface=surface,
+        partition=partition,
+        carrier_policy=carrier_policy,
+        mesh_policy=mesh_policy,
+        support_config=dict(mesh_cfg.get("support_binding") or {}),
+        static_repair_config=dict(mesh_cfg.get("static_repair") or {}),
+        relation_quality_report=relation_quality_report,
+    )
 
     outputs = [
         write_ir(
             artifact_root / "canonical_mesh_candidate.json",
-            repaired_candidate,
+            bundle.repaired_candidate,
             authority_class="TESSA_COMPILER_REPAIRED_MESH_CANDIDATE",
         ),
         write_ir(
             artifact_root / "mesh_qualification_policy.json",
-            mesh_policy,
+            bundle.mesh_policy,
             authority_class="FROZEN_MESH_QUALIFICATION_POLICY",
         ),
         write_ir(
             artifact_root / "tessa_material_support_field.json",
-            support_field,
+            bundle.material_support_field,
             authority_class="TESSA_MATERIAL_SUPPORT_PROPOSAL",
         ),
         write_ir(
             artifact_root / "tessa_candidate_bridge_evidence.json",
-            bridge_evidence,
+            bundle.bridge_evidence,
             authority_class="TESSA_CANDIDATE_BRIDGE_EVIDENCE",
         ),
         write_ir(
             artifact_root / "tessa_static_repair_evidence.json",
-            repair_evidence,
+            bundle.repair_evidence,
             authority_class="COMPILER_STATIC_REPAIR_EVIDENCE",
         ),
         write_ir(
             artifact_root / "tessa_reference_binding.json",
-            reference_binding,
+            bundle.reference_binding,
             authority_class="TESSA_IMMUTABLE_REFERENCE_BINDING",
         ),
     ]
     return {
         "status": "PASS",
         "outputs": outputs,
-        "diagnostics": {
-            "backend": "TESSA_PROPOSAL_V1",
-            "effective_backend": "TESSA_PROPOSAL_V1__COMPILER_STATIC_REPAIR_V1",
-            "learned_candidate_lineage_hash": learned_candidate.candidate_lineage_hash,
-            "candidate_lineage_hash": repaired_candidate.candidate_lineage_hash,
-            "proposal_geometry_hash": bridge_evidence.proposal_geometry_hash,
-            "topology_sequence_hash": proposal.topology_sequence_hash,
-            "material_support_field_hash": support_field.field_lineage_hash,
-            "candidate_bridge_evidence_hash": bridge_evidence.evidence_hash,
-            "static_repair_evidence_hash": repair_evidence.evidence_hash,
-            "reference_binding_hash": reference_binding.binding_hash,
-            "decoded_component_count": len(component_labels),
-            "mechanical_component_count": len(partition.components),
-            "input_vertex_count": len(learned_candidate.vertices),
-            "input_face_count": len(learned_candidate.faces),
-            "vertex_count": len(repaired_candidate.vertices),
-            "face_count": len(repaired_candidate.faces),
-            "mesh_policy_hash": mesh_policy.qualification_policy_lineage_hash,
-            "static_preflight": quality,
-            "stage19_remeasurement_required": True,
-            "material_support_is_geometry_authority": False,
-            "geometry_boundary_policy": geometry_boundary_policy,
-            "gsa_material_boundary_ids_used_to_freeze_xyz": False,
-            "learned_xyz_preserved_exactly": False,
-            "learned_proposal_is_immutable_reference": True,
-            "compiler_static_repair_applied": True,
-            "teacher_vertex_index_used": False,
-            "teacher_geometry_used_to_repair": False,
-            "threshold_relaxation_performed": False,
-            "product_authority_claimed": False,
-            "motion_capability_claimed": False,
-        },
+        "diagnostics": dict(bundle.diagnostics),
     }
+
+
+__all__ = [
+    "TESSAStaticCandidateBundleV1",
+    "build_tessa_stage18_candidate_v1",
+    "build_tessa_static_candidate_from_proposal_v1",
+]

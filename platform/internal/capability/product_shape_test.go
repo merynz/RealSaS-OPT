@@ -27,8 +27,14 @@ func TestProductShapeCapabilityIsDeveloperOnlyAndCannotPromote(t *testing.T) {
 	if len(descriptor.AllowedModes) != 1 || descriptor.AllowedModes[0] != ModeDeveloper {
 		t.Fatalf("allowed modes=%v", descriptor.AllowedModes)
 	}
-	if descriptor.Metadata["executor_contract"] != ProductShapeContractV1 {
+	if descriptor.Metadata["executor_contract"] != ProductShapeContractV2 {
 		t.Fatalf("metadata=%v", descriptor.Metadata)
+	}
+	if descriptor.Metadata["output_schema_version"] != "v2" {
+		t.Fatalf("Shape v2 output schema missing: %v", descriptor.Metadata)
+	}
+	if descriptor.Metadata["maximum_new_tokens"] != 131072 {
+		t.Fatalf("Shape generation policy is not release-bound: %v", descriptor.Metadata)
 	}
 
 	if _, err := (Goal{

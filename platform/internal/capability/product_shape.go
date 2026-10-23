@@ -4,13 +4,13 @@ import "context"
 
 const (
 	ProductShapeCapabilityID = "product.shape"
-	ProductShapeContractV1   = "RealSaS.ProductShapeInference.v1"
+	ProductShapeContractV2   = "RealSaS.ProductShapeInference.v2"
 )
 
 // ProductShapeProvider exposes inference-only learned Shape evidence.
 // Input lowering is an explicit dependency so source-view/frontend research can
-// evolve without being hidden inside Shape. Shape still cannot mint Mesh or
-// ProductRevision authority.
+// evolve without being hidden inside Shape. Shape v2 serializes deterministic
+// decoded topology evidence but still cannot mint Mesh or ProductRevision authority.
 type ProductShapeProvider struct{}
 
 func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) {
@@ -30,12 +30,13 @@ func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) 
 		Metadata: map[string]any{
 			"product_role_id":       string(ProductRoleShape),
 			"implementation_class":  string(ImplementationModel),
-			"interface_contract":    ProductShapeContractV1,
-			"executor_contract":     ProductShapeContractV1,
+			"interface_contract":    ProductShapeContractV2,
+			"executor_contract":     ProductShapeContractV2,
 			"input_artifact_type":   "RealSaS.ShapeInput",
 			"input_schema_version":  "v1",
 			"output_artifact_type":  "RealSaS.ShapeProposal",
-			"output_schema_version": "v1",
+			"output_schema_version": "v2",
+			"maximum_new_tokens":    131072,
 			"required_models": []any{
 				map[string]any{"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"},
 				map[string]any{"family": "TESSA", "architecture_id": "RealSaS.TESSA.Structuralizer.v3"},

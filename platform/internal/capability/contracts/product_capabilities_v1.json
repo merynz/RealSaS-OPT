@@ -24,7 +24,7 @@
       }
     },
     "product.shape": {
-      "entry_module": "compiler.realsas_compiler_services.platform_worker.shape_executor_v1",
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.shape_executor_v2",
       "policy": {
         "allowed_modes": ["DEVELOPER"],
         "product_pass_authority": false,
@@ -33,12 +33,13 @@
       "metadata": {
         "product_role_id": "shape",
         "implementation_class": "MODEL",
-        "interface_contract": "RealSaS.ProductShapeInference.v1",
-        "executor_contract": "RealSaS.ProductShapeInference.v1",
+        "interface_contract": "RealSaS.ProductShapeInference.v2",
+        "executor_contract": "RealSaS.ProductShapeInference.v2",
         "input_artifact_type": "RealSaS.ShapeInput",
         "input_schema_version": "v1",
         "output_artifact_type": "RealSaS.ShapeProposal",
-        "output_schema_version": "v1",
+        "output_schema_version": "v2",
+        "maximum_new_tokens": 131072,
         "required_models": [
           {
             "family": "IRIS",
@@ -49,6 +50,53 @@
             "architecture_id": "RealSaS.TESSA.Structuralizer.v3"
           }
         ],
+        "implementation_owner_may_change": true,
+        "stable_product_role_survives_rewiring": true
+      }
+    },
+    "product.mesh": {
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.mesh_executor_v1",
+      "policy": {
+        "allowed_modes": ["DEVELOPER"],
+        "product_pass_authority": false,
+        "dependencies": [
+          "product.shape",
+          "compiler.stage/05_CAMERA_CONTRACT_SOLVED",
+          "compiler.stage/07_OBSERVATION_CONTRACT_QUALIFIED",
+          "compiler.stage/08_NORMALIZATION_DOMAIN_QUALIFIED",
+          "compiler.stage/13_GEOMETRY_SUBSTRATE_QUALIFIED",
+          "compiler.stage/15_RIGGING_SURFACE_QUALIFIED",
+          "compiler.stage/17_MECHANICAL_PARTITION_QUALIFIED"
+        ]
+      },
+      "metadata": {
+        "product_role_id": "mesh",
+        "implementation_class": "COMPILER",
+        "interface_contract": "RealSaS.ProductMeshCompile.v1",
+        "executor_contract": "RealSaS.ProductMeshCompile.v1",
+        "input_shape_artifact_type": "RealSaS.ShapeProposal",
+        "input_shape_schema_version": "v2",
+        "input_source_artifact_type": "RealSaS.SourceObservation",
+        "input_source_schema_version": "v1",
+        "output_artifact_type": "RealSaS.CanonicalMeshIR",
+        "output_schema_version": "v1",
+        "mesh_policy_document_sha256": "66791e0e309209d28d16e56a550846de6f2edd87347806139e137e6f12d07c01",
+        "support_binding": {
+          "max_support_nodes": 4,
+          "max_graph_hops": 2,
+          "inverse_distance_power": 2.0
+        },
+        "static_repair": {
+          "collapse_batch_size": 32,
+          "collapse_limit": 256,
+          "relaxation_batch_size": 32,
+          "relaxation_limit": 512
+        },
+        "required_models": [],
+        "presentation_direction_dependency": false,
+        "graphics_authority_claimed": false,
+        "rig_authority_claimed": false,
+        "skin_authority_claimed": false,
         "implementation_owner_may_change": true,
         "stable_product_role_survives_rewiring": true
       }

@@ -8,8 +8,6 @@ schemas may replace it without changing Platform/CAS/Attempt authority machinery
 """
 
 from dataclasses import dataclass
-import io
-import json
 from time import perf_counter
 from typing import Any, Mapping
 
@@ -19,6 +17,11 @@ import torch
 from compiler.realsas_compiler_services.platform_worker.scene_input_contract_v1 import (
     SHAPE_INPUT_ARTIFACT_TYPE_V1,
     encode_shape_input_v1,
+)
+from compiler.realsas_compiler_services.platform_worker.source_observation_contract_v1 import (
+    SOURCE_OBSERVATION_SCHEMA_V1,
+    decode_source_observation_arrays_v1,
+    encode_source_observation_arrays_v1,
 )
 from models.iris.v2.dinov2_foundation_v2 import (
     DINOv2FoundationAuthorityV2,
@@ -33,7 +36,6 @@ from models.iris.vnext.inference_input_v1 import (
 
 INPUT_EXECUTOR_CONTRACT_V1 = "RealSaS.ProductInputInference.v1"
 SOURCE_OBSERVATION_ARTIFACT_TYPE_V1 = "RealSaS.SourceObservation"
-SOURCE_OBSERVATION_SCHEMA_V1 = "RealSaS.SourceObservation.v1"
 INPUT_OUTPUT_AUTHORITY_V1 = "VERIFIED_SOURCE_DERIVED_SHAPE_INPUT"
 
 
@@ -70,39 +72,16 @@ def encode_source_observation_v1(
         rgba = rgba.unsqueeze(0)
     source = SourceObservationV1(native_rgba=rgba, camera_bundle=dict(camera_bundle))
     source.validate()
-    stream = io.BytesIO()
-    np.savez_compressed(
-        stream,
-        schema=np.asarray([SOURCE_OBSERVATION_SCHEMA_V1]),
-        rgba=rgba.numpy(),
-        camera_json=np.asarray(
-            [json.dumps(source.camera_bundle, sort_keys=True, separators=(",", ":"))]
-        ),
+    return encode_source_observation_arrays_v1(
+        native_rgba=rgba.numpy(), camera_bundle=source.camera_bundle
     )
-    return stream.getvalue()
 
 
 def decode_source_observation_v1(payload: bytes) -> SourceObservationV1:
-    if not isinstance(payload, (bytes, bytearray, memoryview)) or not payload:
-        raise RuntimeError("PRODUCT_INPUT_V1_SOURCE_BYTES_REQUIRED")
-    try:
-        with np.load(io.BytesIO(bytes(payload)), allow_pickle=False) as bundle:
-            if set(bundle.files) != {"schema", "rgba", "camera_json"}:
-                raise RuntimeError("PRODUCT_INPUT_V1_SOURCE_FIELDS_DRIFT")
-            schema = str(bundle["schema"].reshape(-1)[0])
-            if schema != SOURCE_OBSERVATION_SCHEMA_V1:
-                raise RuntimeError("PRODUCT_INPUT_V1_SOURCE_SCHEMA_DRIFT")
-            rgba_np = np.asarray(bundle["rgba"])
-            if rgba_np.dtype != np.uint8:
-                raise RuntimeError("PRODUCT_INPUT_V1_SOURCE_RGBA_DTYPE_DRIFT")
-            camera = json.loads(str(bundle["camera_json"].reshape(-1)[0]))
-    except RuntimeError:
-        raise
-    except Exception as exc:
-        raise RuntimeError("PRODUCT_INPUT_V1_SOURCE_DECODE_FAILED") from exc
+    arrays = decode_source_observation_arrays_v1(payload)
     source = SourceObservationV1(
-        native_rgba=torch.from_numpy(rgba_np.copy()),
-        camera_bundle=dict(camera),
+        native_rgba=torch.from_numpy(arrays.native_rgba.copy()),
+        camera_bundle=dict(arrays.camera_bundle),
     )
     source.validate()
     return source

@@ -1,0 +1,39 @@
+name: product-role-gofmt-once
+
+on:
+  push:
+    branches:
+      - platform/product-role-graph-v1-20261023
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: platform/product-role-graph-v1-20261023
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+      - name: Apply canonical Go formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          mapfile -t files < <(git diff --name-only origin/main...HEAD -- '*.go')
+          if [ "${#files[@]}" -gt 0 ]; then
+            gofmt -w "${files[@]}"
+          fi
+          rm -f .github/workflows/zz_product_role_gofmt_once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'CI: gofmt product-role platform slice'
+          git push origin HEAD:platform/product-role-graph-v1-20261023

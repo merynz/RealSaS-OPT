@@ -100,6 +100,50 @@
         "implementation_owner_may_change": true,
         "stable_product_role_survives_rewiring": true
       }
+    },
+    "product.rig": {
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.rig_executor_v1",
+      "policy": {
+        "allowed_modes": ["DEVELOPER"],
+        "product_pass_authority": false,
+        "dependencies": [
+          "product.mesh",
+          "compiler.stage/15_RIGGING_SURFACE_QUALIFIED"
+        ]
+      },
+      "metadata": {
+        "product_role_id": "rig",
+        "implementation_class": "HYBRID",
+        "interface_contract": "RealSaS.ProductRigCompile.v1",
+        "executor_contract": "RealSaS.ProductRigCompile.v1",
+        "canonical_parent_role": "mesh",
+        "input_mesh_artifact_type": "RealSaS.CanonicalMeshIR",
+        "input_mesh_schema_version": "v1",
+        "input_surface_artifact_type": "RealSaS.RiggingSurfaceIR",
+        "input_surface_schema_version": "v1",
+        "axis_input_adapter_contract": "RealSaS.GeppettoRiggingSurfaceTensorization.v1",
+        "axis_input_adapter_is_canonical_authority": false,
+        "axis_input_adapter_replaceable": true,
+        "surface_dependency_is_compatibility_evidence_only": true,
+        "output_artifact_type": "RealSaS.QualifiedSkeletonIR",
+        "output_schema_version": "v1",
+        "output_authority_class": "COMPILER_CANONICAL_RIG",
+        "axis_checkpoint_schema": "RealSaS.AXISBFSDiscreteXYZV541.DeployableCheckpoint.v1",
+        "maximum_joint_steps": 256,
+        "compiler_parent_reselection_allowed": false,
+        "proposal_authority_artifact_emitted": false,
+        "canonical_mesh_mutation_allowed": false,
+        "post_bind_frame_observability_claimed": false,
+        "frame_observability_deferred_to_mechanics": true,
+        "required_models": [
+          {
+            "family": "AXIS",
+            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1"
+          }
+        ],
+        "implementation_owner_may_change": true,
+        "stable_product_role_survives_rewiring": true
+      }
     }
   }
 }

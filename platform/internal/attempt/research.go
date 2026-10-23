@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/merynz/RealSaS-OPT/platform/internal/capability"
 	"github.com/merynz/RealSaS-OPT/platform/internal/input"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
@@ -38,6 +39,7 @@ type ResearchStart struct {
 	BaselineEngineReleaseID  uuid.UUID
 	CandidateEngineReleaseID uuid.UUID
 	Impact                   release.Impact
+	CapabilityImpact         *capability.CapabilityImpact
 }
 
 func StartResearch(
@@ -90,6 +92,15 @@ func StartResearch(
 	if err != nil {
 		return ResearchStart{}, err
 	}
+	capabilityImpact, err := resolveResearchCapabilityImpact(
+		ctx,
+		pool,
+		req.BaselineEngineReleaseID,
+		req.CandidateEngineReleaseID,
+	)
+	if err != nil {
+		return ResearchStart{}, err
+	}
 
 	var inputChangedStageIDs []string
 	if req.Intervention != nil {
@@ -119,6 +130,11 @@ func StartResearch(
 		"canonical_code_sha":          req.DeployedCodeSHA,
 		"direct_changed_stage_ids":    directIDs,
 		"invalidated_stage_ids":       impact.InvalidatedStageIDs,
+	}
+	if capabilityImpact != nil {
+		spec["capability_impact"] = capabilityImpact
+		spec["changed_product_role_ids"] = capabilityImpact.ChangedProductRoleIDs
+		spec["invalidated_product_role_ids"] = capabilityImpact.InvalidatedProductRoleIDs
 	}
 	if req.ParentAttemptID != nil {
 		spec["parent_attempt_id"] = req.ParentAttemptID.String()
@@ -222,8 +238,12 @@ func StartResearch(
 			return err
 		}
 
-		payload, err := json.Marshal(map[string]any{
-			"schema":                      "RealSaS.CodeChangeImpact.v1",
+		impactSchema := "RealSaS.CodeChangeImpact.v1"
+		if capabilityImpact != nil {
+			impactSchema = "RealSaS.CodeChangeImpact.v2"
+		}
+		payloadMap := map[string]any{
+			"schema":                      impactSchema,
 			"baseline_engine_release_id":  req.BaselineEngineReleaseID.String(),
 			"candidate_engine_release_id": req.CandidateEngineReleaseID.String(),
 			"canonical_code_sha":          req.DeployedCodeSHA,
@@ -234,7 +254,13 @@ func StartResearch(
 			"removed_stage_ids":           impact.RemovedStageIDs,
 			"intervention":                frozen,
 			"input_changed_stage_ids":     inputChangedStageIDs,
-		})
+		}
+		if capabilityImpact != nil {
+			payloadMap["capability_impact"] = capabilityImpact
+			payloadMap["changed_product_role_ids"] = capabilityImpact.ChangedProductRoleIDs
+			payloadMap["invalidated_product_role_ids"] = capabilityImpact.InvalidatedProductRoleIDs
+		}
+		payload, err := json.Marshal(payloadMap)
 		if err != nil {
 			return err
 		}
@@ -245,13 +271,19 @@ func StartResearch(
 			return err
 		}
 
-		audit, _ := json.Marshal(map[string]any{
+		auditPayload := map[string]any{
 			"attempt_id":                  attemptID.String(),
 			"baseline_engine_release_id":  req.BaselineEngineReleaseID.String(),
 			"candidate_engine_release_id": req.CandidateEngineReleaseID.String(),
 			"direct_changed_stage_ids":    directIDs,
 			"invalidated_stage_count":     len(impact.InvalidatedStageIDs),
-		})
+		}
+		if capabilityImpact != nil {
+			auditPayload["changed_product_role_ids"] = capabilityImpact.ChangedProductRoleIDs
+			auditPayload["invalidated_product_role_ids"] = capabilityImpact.InvalidatedProductRoleIDs
+			auditPayload["invalidated_capability_count"] = len(capabilityImpact.InvalidatedCapabilityIDs)
+		}
+		audit, _ := json.Marshal(auditPayload)
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO audit_events(actor,action,subject_id,attempt_id,payload)
 			VALUES ($1,'RESEARCH_ATTEMPT_STARTED',$2,$3,$4)
@@ -268,5 +300,6 @@ func StartResearch(
 		BaselineEngineReleaseID:  req.BaselineEngineReleaseID,
 		CandidateEngineReleaseID: req.CandidateEngineReleaseID,
 		Impact:                   impact,
+		CapabilityImpact:         capabilityImpact,
 	}, nil
 }

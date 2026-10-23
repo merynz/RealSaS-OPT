@@ -7,11 +7,11 @@ carrier M. GSA/RiggingSurfaceIR remains evidence only; there is no semantic
 surface-skin authority and no post-hoc skin transport in this path.
 """
 
-from dataclasses import asdict, dataclass, field, replace
-import math
+from dataclasses import asdict, dataclass, field
 from typing import Any, Mapping
 
 from .hashing import content_sha256
+from .skin_simplex_qualification_v1 import qualify_influence_simplex_v1
 from .types import QualificationError
 
 Json = dict[str, Any]
@@ -164,61 +164,34 @@ def qualify_carrier_skin_v1(
         raise QualificationError("CARRIER_SKIN_MESH_MUTATION_INVALIDATION_REQUIRED")
 
     vertex_ids = tuple(map(str, carrier.ordered_vertex_ids))
-    vertex_set = set(vertex_ids)
     joint_ids = {str(j.canonical_joint_id) for j in skeleton.joints}
-    if not vertex_ids or not joint_ids:
-        raise QualificationError("CARRIER_SKIN_EMPTY_BINDING_DOMAIN")
-
-    grouped: dict[str, dict[str, float]] = {vid: {} for vid in vertex_ids}
-    for influence in proposal.influences:
-        vid = str(influence.carrier_vertex_id)
-        jid = str(influence.canonical_joint_id)
-        weight = float(influence.weight)
-        if vid not in vertex_set:
-            raise QualificationError("CARRIER_SKIN_UNKNOWN_VERTEX")
-        if jid not in joint_ids:
-            raise QualificationError("CARRIER_SKIN_UNKNOWN_JOINT")
-        if jid in grouped[vid]:
-            raise QualificationError("CARRIER_SKIN_DUPLICATE_VERTEX_JOINT")
-        if not math.isfinite(weight) or weight < -float(negative_tolerance):
-            raise QualificationError("CARRIER_SKIN_WEIGHT_INVALID")
-        grouped[vid][jid] = max(0.0, weight)
-
-    rows: list[QualifiedCarrierSkinRow] = []
-    total_correction = 0.0
-    max_row_correction = 0.0
-    for vid in vertex_ids:
-        values = grouped[vid]
-        if not values:
-            raise QualificationError("CARRIER_SKIN_VERTEX_UNCOVERED")
-        ordered = sorted(values.items())
-        raw_sum = sum(weight for _, weight in ordered)
-        if not math.isfinite(raw_sum) or raw_sum <= 0.0:
-            raise QualificationError("CARRIER_SKIN_ROW_ZERO")
-        residual = abs(raw_sum - 1.0)
-        normalized = [(jid, weight / raw_sum) for jid, weight in ordered]
-        correction = sum(
-            abs(after - before)
-            for (_, before), (_, after) in zip(ordered, normalized)
-        )
-        if correction > float(max_simplex_repair_l1) + 1e-15:
-            raise QualificationError("CARRIER_SKIN_ROW_REPAIR_BUDGET_EXCEEDED")
-        if max_influences is not None:
-            positive = sum(weight > 0.0 for _, weight in normalized)
-            if positive > int(max_influences):
-                raise QualificationError("CARRIER_SKIN_MAX_INFLUENCES_EXCEEDED")
-        total_correction += correction
-        max_row_correction = max(max_row_correction, correction)
-        rows.append(
-            QualifiedCarrierSkinRow(
-                carrier_vertex_id=vid,
-                influences=tuple((jid, float(weight)) for jid, weight in normalized),
-                simplex_residual_before=float(residual),
-                correction_l1=float(correction),
+    numeric = qualify_influence_simplex_v1(
+        ordered_domain_ids=vertex_ids,
+        allowed_joint_ids=joint_ids,
+        influences=(
+            (
+                str(influence.carrier_vertex_id),
+                str(influence.canonical_joint_id),
+                float(influence.weight),
             )
+            for influence in proposal.influences
+        ),
+        max_simplex_repair_l1=float(max_simplex_repair_l1),
+        max_total_correction_l1=float(max_total_correction_l1),
+        negative_tolerance=float(negative_tolerance),
+        max_influences=max_influences,
+        error_prefix="CARRIER_SKIN",
+        domain_label="VERTEX",
+    )
+    rows = tuple(
+        QualifiedCarrierSkinRow(
+            carrier_vertex_id=row.domain_id,
+            influences=row.influences,
+            simplex_residual_before=row.simplex_residual_before,
+            correction_l1=row.correction_l1,
         )
-    if total_correction > float(max_total_correction_l1) + 1e-15:
-        raise QualificationError("CARRIER_SKIN_TOTAL_REPAIR_BUDGET_EXCEEDED")
+        for row in numeric.rows
+    )
 
     report = {
         "status": "PASS_DIRECT_CARRIER_SKIN",
@@ -229,11 +202,9 @@ def qualify_carrier_skin_v1(
         "product_skin_evidence_complete": True,
         "semantic_skin_transfer_performed": False,
         "gsa_skin_field_authority_minted": False,
-        "simplex_max_abs_residual_before": max(
-            (row.simplex_residual_before for row in rows), default=0.0
-        ),
-        "max_row_correction_l1": max_row_correction,
-        "total_correction_l1": total_correction,
+        "simplex_max_abs_residual_before": numeric.max_simplex_residual_before,
+        "max_row_correction_l1": numeric.max_row_correction_l1,
+        "total_correction_l1": numeric.total_correction_l1,
         "max_influences": max_influences,
     }
     metadata = {
@@ -252,7 +223,7 @@ def qualify_carrier_skin_v1(
         "metadata": metadata,
     }
     return QualifiedCarrierSkinIR(
-        rows=tuple(rows),
+        rows=rows,
         carrier_evidence_hash=carrier.carrier_evidence_hash,
         carrier_topology_hash=carrier.topology_hash,
         carrier_geometry_hash=carrier.geometry_hash,

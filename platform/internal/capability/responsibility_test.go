@@ -53,6 +53,32 @@ func TestRequiredModelFamiliesAreDerivedFromActiveTerrain(t *testing.T) {
 	}
 }
 
+func TestRequiredModelFamiliesIncludeAxisWhenRigIsActive(t *testing.T) {
+	registry := productProvidersTestRegistry(t)
+	families, err := RequiredModelFamilies(registry)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{"AXIS", "IRIS", "TESSA"}; !reflect.DeepEqual(families, want) {
+		t.Fatalf("families=%v want=%v", families, want)
+	}
+	terrain, err := ResponsibilityTerrain(registry)
+	if err != nil {
+		t.Fatal(err)
+	}
+	byID := map[string]ResponsibilityTerrainNode{}
+	for _, row := range terrain {
+		byID[row.ResponsibilityID] = row
+	}
+	axis := byID["rig.structure_proposal"]
+	if axis.RoleID != ProductRoleRig || axis.ModelFamily != "AXIS" || axis.AuthorityKind != "PROPOSAL" {
+		t.Fatalf("axis terrain=%+v", axis)
+	}
+	if _, ok := byID["rig.frame_observability_qualification"]; ok {
+		t.Fatal("post-bind frame observability still appears as a Rig responsibility")
+	}
+}
+
 func TestResponsibilityLedgerSeparatesAxisMiraProposalsFromCompilerAuthority(t *testing.T) {
 	ledger, err := loadResponsibilityLedger()
 	if err != nil {
@@ -69,6 +95,13 @@ func TestResponsibilityLedgerSeparatesAxisMiraProposalsFromCompilerAuthority(t *
 	rigMint := byID["rig.canonical_identity_mint"]
 	if rigMint.ExecutionOwnerClass != ImplementationCompiler || rigMint.OwnerComponent != "COMPILER" || rigMint.AuthorityKind != "CANONICAL_AUTHORITY" {
 		t.Fatalf("rig mint responsibility=%+v", rigMint)
+	}
+	if _, ok := byID["rig.frame_observability_qualification"]; ok {
+		t.Fatal("legacy Rig frame observability responsibility still exists")
+	}
+	postBind := byID["mechanics.post_bind_frame_observability_qualification"]
+	if postBind.RoleID != ProductRoleMechanics || postBind.ExecutionOwnerClass != ImplementationCompiler || postBind.AuthorityKind != "QUALIFICATION" {
+		t.Fatalf("post-bind observability responsibility=%+v", postBind)
 	}
 	mira := byID["skin.influence_proposal"]
 	if mira.ExecutionOwnerClass != ImplementationModel || mira.OwnerComponent != "MIRA" || mira.ModelFamily != "MIRA" || mira.AuthorityKind != "PROPOSAL" {

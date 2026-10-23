@@ -107,18 +107,6 @@
       "source_truth_retained": true
     },
     {
-      "id": "rig.frame_observability_qualification",
-      "role_id": "rig",
-      "required_when_role_present": true,
-      "authority_kind": "QUALIFICATION",
-      "exclusive": true,
-      "execution_owner_class": "COMPILER",
-      "owner_component": "COMPILER",
-      "canonical_transform_id": "rig_frame_observability_qualification",
-      "data_reduction": "NONE",
-      "source_truth_retained": true
-    },
-    {
       "id": "rig.canonical_identity_mint",
       "role_id": "rig",
       "required_when_role_present": true,
@@ -177,6 +165,18 @@
       "owner_component": "COMPILER",
       "canonical_transform_id": "skin_canonical_influence_mint",
       "data_reduction": "LOSSLESS",
+      "source_truth_retained": true
+    },
+    {
+      "id": "mechanics.post_bind_frame_observability_qualification",
+      "role_id": "mechanics",
+      "required_when_role_present": true,
+      "authority_kind": "QUALIFICATION",
+      "exclusive": true,
+      "execution_owner_class": "COMPILER",
+      "owner_component": "COMPILER",
+      "canonical_transform_id": "mechanics_post_bind_frame_observability_qualification",
+      "data_reduction": "NONE",
       "source_truth_retained": true
     },
     {

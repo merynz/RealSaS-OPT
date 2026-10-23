@@ -12,11 +12,13 @@ const (
 // the intended influence-proposal owner, while the Compiler owns legality,
 // carrier binding and canonical Skin minting.
 //
-// Current repository evidence does not contain a checkpoint-backed MIRA V5.5
-// runtime producer. The historical carrier-native V5.5 witness is an input-
-// implementation promotion, not a learned-model promotion. Therefore this
-// provider MUST NOT be added to ProductProviders until a sealed MIRA ModelRelease
-// can satisfy this contract.
+// Historical FIT1 evidence contains a real checkpoint-backed MIRA-M V5.5 run:
+// it learned W_M directly on the exact frozen carrier M, reached TERMINAL_PASS,
+// and sealed a RealSaS.MIRAMDirectComposite.v5_5 checkpoint. That historical
+// scientific witness is not currently packaged/imported as a Platform
+// ModelRelease/runtime provider in this repository. Therefore this provider MUST
+// NOT enter ProductProviders until the sealed MIRA runtime is recovered/package-
+// qualified and bound through the normal ModelRelease path.
 type ProductSkinProvider struct{}
 
 func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
@@ -53,10 +55,21 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 					"architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
 				},
 			},
-			"activation_state":                       "BLOCKED",
-			"activation_blocker":                     "CHECKPOINT_BACKED_MIRA_RUNTIME_MISSING",
-			"historical_carrier_witness_is_model":    false,
-			"historical_promotion_kind":              "CARRIER_NATIVE_INPUT_IMPLEMENTATION_PROMOTION",
+			"activation_state":  "BLOCKED",
+			"activation_blocker": "SEALED_CURRENT_MIRA_MODELRELEASE_RUNTIME_PACKAGE_MISSING",
+
+			// Historical scientific truth, intentionally not upgraded to current
+			// Platform/product authority.
+			"historical_checkpoint_backed_mira_v55_exists": true,
+			"historical_mira_v55_learned_directly_on_exact_m": true,
+			"historical_mira_v55_terminal_pass": true,
+			"historical_mira_v55_composite_schema": "RealSaS.MIRAMDirectComposite.v5_5",
+			"historical_mira_v55_result_schema": "RealSaS.MIRAMDirectResult.v5_5",
+			"historical_mira_v55_product_authority": false,
+			"historical_mira_v55_generalization_claimed": false,
+			"current_repo_mira_v55_runtime_provider_present": false,
+			"current_platform_mira_modelrelease_bound": false,
+
 			"canonical_parents":                      []any{"CANONICAL_MESH", "CANONICAL_RIG"},
 			"post_hoc_surface_skin_transfer_allowed": false,
 			"hidden_repair_allowed":                  false,

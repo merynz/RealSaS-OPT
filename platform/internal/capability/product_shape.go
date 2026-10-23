@@ -4,7 +4,7 @@ import "context"
 
 const (
 	ProductShapeCapabilityID = "product.shape"
-	ProductShapeContractV1   = "RealSaS.ProductShapeInference.v1"
+	ProductShapeContractV2   = "RealSaS.ProductShapeInference.v2"
 )
 
 // ProductShapeProvider exposes inference-only learned Shape evidence.
@@ -26,12 +26,14 @@ func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) 
 		Metadata: map[string]any{
 			"product_role_id":                       string(ProductRoleShape),
 			"implementation_class":                  string(ImplementationModel),
-			"interface_contract":                    ProductShapeContractV1,
-			"executor_contract":                     ProductShapeContractV1,
+			"interface_contract":                    ProductShapeContractV2,
+			"executor_contract":                     ProductShapeContractV2,
 			"input_artifact_type":                   "RealSaS.ShapeInput",
 			"input_schema_version":                  "v1",
 			"output_artifact_type":                  "RealSaS.ShapeProposal",
-			"output_schema_version":                 "v1",
+			"output_schema_version":                 "v2",
+			"decoded_topology_is_proposal_evidence": true,
+			"canonical_mesh_authority":              false,
 			"implementation_owner_may_change":       true,
 			"stable_product_role_survives_rewiring": true,
 		},

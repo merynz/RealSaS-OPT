@@ -84,6 +84,38 @@ func (a API) HandlerWithOperational() http.Handler {
 			"product_role_projection_status": projectionStatus,
 		})
 	})
+	mux.HandleFunc("GET /v1/releases/{id}/terrain", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("id"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid release id"})
+			return
+		}
+		snapshot, err := capability.LoadReleaseSnapshot(r.Context(), a.Pool, id)
+		if err != nil {
+			result(w, nil, err)
+			return
+		}
+		roles, roleStatus, err := capability.ProductRoleReadProjection(snapshot.Registry)
+		if err != nil {
+			result(w, nil, err)
+			return
+		}
+		terrain, responsibilityStatus, err := capability.ResponsibilityReadProjection(snapshot.Registry)
+		if err != nil {
+			result(w, nil, err)
+			return
+		}
+		respond(w, 200, map[string]any{
+			"schema":                           "RealSaS.ReleaseTerrainMap.v1",
+			"engine_release_id":                snapshot.ReleaseID.String(),
+			"capability_set_sha256":            snapshot.CapabilitySetSHA256,
+			"product_roles":                    roles,
+			"product_role_projection_status":   roleStatus,
+			"responsibilities":                 terrain,
+			"responsibility_projection_status": responsibilityStatus,
+		})
+	})
+
 	mux.HandleFunc("POST /v1/research/attempts", func(w http.ResponseWriter, r *http.Request) {
 		var req attempt.ResearchRequest
 		if !decode(w, r, &req) {

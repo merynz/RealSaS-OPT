@@ -38,16 +38,26 @@ type CurrentModel struct {
 	Release modelrelease.Record        `json:"release"`
 }
 
+type ProductModelBinding struct {
+	Family                  string             `json:"family"`
+	ModelReleaseID          uuid.UUID          `json:"model_release_id"`
+	ArchitectureID          string             `json:"architecture_id"`
+	CheckpointArtifactID    uuid.UUID          `json:"checkpoint_artifact_id"`
+	CheckpointContentSHA256 string             `json:"checkpoint_content_sha256"`
+	LifecycleState          modelrelease.State `json:"lifecycle_state"`
+}
+
 type CurrentProduct struct {
-	SubjectID           uuid.UUID  `json:"subject_id"`
-	SubjectSlug         string     `json:"subject_slug"`
-	ProductRevisionID   uuid.UUID  `json:"product_revision_id"`
-	RevisionNumber      int64      `json:"revision_number"`
-	ManifestSHA256      string     `json:"manifest_sha256"`
-	EngineReleaseID     *uuid.UUID `json:"engine_release_id,omitempty"`
-	EngineReleaseSHA256 *string    `json:"engine_release_sha256,omitempty"`
-	CapabilitySetSHA256 *string    `json:"capability_set_sha256,omitempty"`
-	UpdatedAt           time.Time  `json:"updated_at"`
+	SubjectID           uuid.UUID             `json:"subject_id"`
+	SubjectSlug         string                `json:"subject_slug"`
+	ProductRevisionID   uuid.UUID             `json:"product_revision_id"`
+	RevisionNumber      int64                 `json:"revision_number"`
+	ManifestSHA256      string                `json:"manifest_sha256"`
+	EngineReleaseID     *uuid.UUID            `json:"engine_release_id,omitempty"`
+	EngineReleaseSHA256 *string               `json:"engine_release_sha256,omitempty"`
+	CapabilitySetSHA256 *string               `json:"capability_set_sha256,omitempty"`
+	Models              []ProductModelBinding `json:"models"`
+	UpdatedAt           time.Time             `json:"updated_at"`
 }
 
 type Snapshot struct {
@@ -61,7 +71,7 @@ type Snapshot struct {
 }
 
 func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {
-	out := Snapshot{Schema: "RealSaS.OperationalStatus.v2", GeneratedAt: time.Now().UTC()}
+	out := Snapshot{Schema: "RealSaS.OperationalStatus.v3", GeneratedAt: time.Now().UTC()}
 
 	experiments, err := experiment.List(ctx, pool)
 	if err != nil {
@@ -155,6 +165,7 @@ func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {
 	if err != nil {
 		return Snapshot{}, err
 	}
+	productIndex := map[uuid.UUID]int{}
 	for productRows.Next() {
 		var record CurrentProduct
 		if err := productRows.Scan(
@@ -171,10 +182,51 @@ func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {
 			productRows.Close()
 			return Snapshot{}, err
 		}
+		record.Models = []ProductModelBinding{}
+		productIndex[record.ProductRevisionID] = len(out.CurrentProducts)
 		out.CurrentProducts = append(out.CurrentProducts, record)
 	}
 	productRows.Close()
 	if err := productRows.Err(); err != nil {
+		return Snapshot{}, err
+	}
+
+	modelRows, err := pool.Query(ctx, `
+		SELECT prm.product_revision_id,prm.family,prm.model_release_id,
+		       mr.architecture_id,mr.checkpoint_artifact_id,a.content_sha256,mr.lifecycle_state
+		FROM product_revision_model_releases prm
+		JOIN subject_current_revision c ON c.product_revision_id=prm.product_revision_id
+		JOIN model_releases mr ON mr.id=prm.model_release_id
+		JOIN artifacts a ON a.id=mr.checkpoint_artifact_id
+		ORDER BY prm.product_revision_id,prm.family
+	`)
+	if err != nil {
+		return Snapshot{}, err
+	}
+	for modelRows.Next() {
+		var revisionID uuid.UUID
+		var binding ProductModelBinding
+		if err := modelRows.Scan(
+			&revisionID,
+			&binding.Family,
+			&binding.ModelReleaseID,
+			&binding.ArchitectureID,
+			&binding.CheckpointArtifactID,
+			&binding.CheckpointContentSHA256,
+			&binding.LifecycleState,
+		); err != nil {
+			modelRows.Close()
+			return Snapshot{}, err
+		}
+		index, ok := productIndex[revisionID]
+		if !ok {
+			modelRows.Close()
+			return Snapshot{}, fmt.Errorf("CURRENT_PRODUCT_MODEL_BINDING_WITHOUT_CURRENT_REVISION:%s", revisionID)
+		}
+		out.CurrentProducts[index].Models = append(out.CurrentProducts[index].Models, binding)
+	}
+	modelRows.Close()
+	if err := modelRows.Err(); err != nil {
 		return Snapshot{}, err
 	}
 

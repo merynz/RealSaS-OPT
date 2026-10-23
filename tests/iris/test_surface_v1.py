@@ -160,7 +160,7 @@ def test_surface_evidence_is_directly_consumable_by_current_tessa_bridge():
         d_model=16,
         n_heads=4,
         decoder_layers=1,
-        coordinate_bins=32,
+        coordinate_bins=128,
         scene_memory_tokens=2,
         surface_memory_tokens=2,
         presentation_memory_tokens=2,

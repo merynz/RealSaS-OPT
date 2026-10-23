@@ -99,12 +99,17 @@ def capability_specs() -> dict[str, dict[str, Any]]:
 
 def product_model_requirements() -> list[dict[str, str]]:
     required_by_role = _required_model_families_by_role()
+    capabilities = _capability_semantics()
+    active_roles: set[str] = set()
     global_architecture: dict[str, str] = {}
-    for capability_id, raw in sorted(_capability_semantics().items()):
+    for capability_id, raw in sorted(capabilities.items()):
         metadata = raw.get("metadata")
         if not isinstance(metadata, dict):
             raise RuntimeError("PRODUCT_CAPABILITY_METADATA_INVALID:" + capability_id)
         role_id = str(metadata.get("product_role_id") or "").strip()
+        if not role_id:
+            raise RuntimeError("PRODUCT_CAPABILITY_ROLE_MISSING:" + capability_id)
+        active_roles.add(role_id)
         declared_rows = metadata.get("required_models") or []
         if not isinstance(declared_rows, list):
             raise RuntimeError("PRODUCT_MODEL_REQUIREMENTS_TYPE:" + capability_id)
@@ -145,7 +150,11 @@ def product_model_requirements() -> list[dict[str, str]]:
                 + "!="
                 + ",".join(sorted(expected))
             )
-    expected_global = set().union(*required_by_role.values()) if required_by_role else set()
+    expected_global = (
+        set().union(*(required_by_role.get(role, set()) for role in active_roles))
+        if active_roles
+        else set()
+    )
     if set(global_architecture) != expected_global:
         raise RuntimeError("PRODUCT_MODEL_REQUIREMENT_GLOBAL_DRIFT")
     return [

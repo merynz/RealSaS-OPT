@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	ProductRoleProjectionDeclared       = "DECLARED"
+	ProductRoleProjectionDeclared         = "DECLARED"
 	ProductRoleProjectionLegacyUndeclared = "LEGACY_UNDECLARED"
 )
 

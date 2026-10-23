@@ -67,10 +67,10 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"feature_evidence_is_canonical_parent": false,
 			"material_support_is_canonical_parent": false,
 			"activation_state":                     "BLOCKED",
-			"activation_blocker":                   "SEALED_CURRENT_MIRA_MODELRELEASE_RUNTIME_PACKAGE_MISSING",
+			"activation_blocker":                   "CURRENT_MIRA_MODELRELEASE_NOT_REGISTERED",
 
 			// Historical scientific truth, intentionally not upgraded to current
-			// Platform/product authority merely by source recovery.
+			// Platform/product authority merely by source/runtime recovery.
 			"historical_checkpoint_backed_mira_v55_exists":    true,
 			"historical_mira_v55_learned_directly_on_exact_m": true,
 			"historical_mira_v55_terminal_pass":               true,
@@ -79,6 +79,7 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"historical_mira_v55_product_authority":           false,
 			"historical_mira_v55_generalization_claimed":      false,
 			"current_repo_mira_v55_runtime_source_recovered":  true,
+			"current_mira_v55_runtime_package_recovered":      true,
 			"current_platform_mira_modelrelease_bound":        false,
 			"canonical_parents":                               []any{"CANONICAL_MESH", "CANONICAL_RIG"},
 			"post_hoc_surface_skin_transfer_allowed":          false,

@@ -5,19 +5,47 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any, Callable
 
-import torch
-
 from compiler.realsas_compiler_services.platform_worker.model_inputs import (
     materialize_model_releases,
 )
-from compiler.realsas_compiler_services.platform_worker.shape_capability_v1 import (
-    SHAPE_EXECUTOR_CONTRACT_V1,
-    SHAPE_INPUT_ARTIFACT_TYPE_V1,
-    SHAPE_OUTPUT_ARTIFACT_TYPE_V1,
-    decode_shape_input_v1,
-    run_shape_inference_v1,
-)
-from models.iris.vnext.flexicubes_v1 import PinnedFlexiCubesV1, flexicubes_root_from_environment_v1
+
+
+# Keep the generic Platform worker importable without heavyweight learned-model
+# dependencies. Shape owns Torch / IRIS / TESSA / FlexiCubes and loads them only
+# when this capability actually executes.
+SHAPE_EXECUTOR_CONTRACT_V1 = "RealSaS.ProductShapeInference.v1"
+SHAPE_INPUT_ARTIFACT_TYPE_V1 = "RealSaS.ShapeInput"
+SHAPE_OUTPUT_ARTIFACT_TYPE_V1 = "RealSaS.ShapeProposal"
+
+
+def decode_shape_input_v1(payload: bytes):
+    from compiler.realsas_compiler_services.platform_worker.shape_capability_v1 import (
+        decode_shape_input_v1 as implementation,
+    )
+
+    return implementation(payload)
+
+
+def run_shape_inference_v1(*args, **kwargs):
+    from compiler.realsas_compiler_services.platform_worker.shape_capability_v1 import (
+        run_shape_inference_v1 as implementation,
+    )
+
+    return implementation(*args, **kwargs)
+
+
+def flexicubes_root_from_environment_v1() -> Path:
+    from models.iris.vnext.flexicubes_v1 import (
+        flexicubes_root_from_environment_v1 as implementation,
+    )
+
+    return implementation()
+
+
+def PinnedFlexiCubesV1(root: Path | str, *, device: Any):
+    from models.iris.vnext.flexicubes_v1 import PinnedFlexiCubesV1 as implementation
+
+    return implementation(root, device=device)
 
 
 def _one_shape_input(request: dict[str, Any]) -> dict[str, Any]:
@@ -32,7 +60,9 @@ def _one_shape_input(request: dict[str, Any]) -> dict[str, Any]:
     return matches[0]
 
 
-def _device_from_environment() -> torch.device:
+def _device_from_environment():
+    import torch
+
     raw = os.environ.get("REALSAS_INFERENCE_DEVICE", "cpu").strip() or "cpu"
     device = torch.device(raw)
     if device.type == "cuda" and not torch.cuda.is_available():

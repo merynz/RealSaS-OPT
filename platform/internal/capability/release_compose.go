@@ -42,26 +42,19 @@ func BuildEngineReleaseRegistry(ctx context.Context, graph *stagegraph.Graph) (*
 		return nil, err
 	}
 	// product.* capability IDs are stable semantic roles. Fail release sealing
-	// closed if role identity, implementation class, or role wiring drifts.
+	// closed if role identity, implementation class, wiring or the shared
+	// cross-language release contract drifts.
 	if _, err := ProductRoleGraph(registry); err != nil {
+		return nil, err
+	}
+	if err := validateProductDescriptorContracts(registry); err != nil {
 		return nil, err
 	}
 	return registry, nil
 }
 
 func modulePolicySHA256(descriptor Descriptor) (string, error) {
-	modes := make([]string, 0, len(descriptor.AllowedModes))
-	for _, mode := range descriptor.AllowedModes {
-		modes = append(modes, string(mode))
-	}
-	payload := map[string]any{
-		"allowed_modes":          modes,
-		"product_pass_authority": descriptor.ProductPassAuthority,
-	}
-	if len(descriptor.Dependencies) > 0 {
-		payload["dependencies"] = append([]string(nil), descriptor.Dependencies...)
-	}
-	return semantic.JSONSHA256(payload)
+	return semantic.JSONSHA256(descriptorPolicyDocument(descriptor))
 }
 
 func validateModuleVersionIdentity(descriptor Descriptor, version VersionIdentity) error {

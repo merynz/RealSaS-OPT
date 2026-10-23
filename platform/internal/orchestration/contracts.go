@@ -117,6 +117,7 @@ type EngineCapabilityRequest struct {
 	CapabilityMetadata        map[string]any       `json:"capability_metadata,omitempty"`
 	GoalParameters            map[string]any       `json:"goal_parameters"`
 	InputArtifacts            []ArtifactRef        `json:"input_artifacts"`
+	ModelReleases             []ModelReleaseRef    `json:"model_releases,omitempty"`
 }
 
 type EngineCapabilityFailure struct {

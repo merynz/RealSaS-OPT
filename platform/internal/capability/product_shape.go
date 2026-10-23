@@ -15,13 +15,13 @@ type ProductShapeProvider struct{}
 
 func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) {
 	return []Descriptor{{
-		ID:               ProductShapeCapabilityID,
-		Kind:             KindModule,
-		OwnerModuleID:    "product.shape",
-		ExecutorActivity: "engine.execute_capability.v1",
-		AllowedModes:     []Mode{ModeDeveloper},
+		ID:                   ProductShapeCapabilityID,
+		Kind:                 KindModule,
+		OwnerModuleID:        "product.shape",
+		ExecutorActivity:     "engine.execute_capability.v1",
+		AllowedModes:         []Mode{ModeDeveloper},
 		ProductPassAuthority: false,
-		Aliases:          []string{"Shape", "IRIS", "TESSA"},
+		Aliases:              []string{"Shape", "IRIS", "TESSA"},
 		Metadata: map[string]any{
 			"executor_contract":     ProductShapeContractV1,
 			"input_artifact_type":   "RealSaS.ShapeInput",

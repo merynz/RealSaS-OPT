@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/capability"
+	"github.com/merynz/RealSaS-OPT/platform/internal/modelselection"
 	"github.com/merynz/RealSaS-OPT/platform/internal/orchestration"
 	"github.com/merynz/RealSaS-OPT/platform/internal/registry"
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
@@ -225,6 +226,11 @@ func (a Activities) PrepareCapabilityExecution(ctx context.Context, req orchestr
 	if err != nil {
 		return orchestration.EngineCapabilityRequest{}, err
 	}
+	selectedModels, err := modelselection.LoadAttemptTx(ctx, tx, attemptID)
+	if err != nil {
+		return orchestration.EngineCapabilityRequest{}, err
+	}
+	modelRefs := modelselection.EngineRefs(selectedModels)
 	if tag.RowsAffected() == 1 {
 		payload, _ := json.Marshal(map[string]any{
 			"execution_id":         executionID.String(),
@@ -262,6 +268,7 @@ func (a Activities) PrepareCapabilityExecution(ctx context.Context, req orchestr
 		CapabilityMetadata:        descriptor.Metadata,
 		GoalParameters:            req.GoalParameters,
 		InputArtifacts:            refs,
+		ModelReleases:             modelRefs,
 	}, nil
 }
 

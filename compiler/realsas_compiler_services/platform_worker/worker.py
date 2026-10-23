@@ -22,6 +22,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from compiler.realsas_compiler_services.orchestrator import mainline
 from compiler.realsas_compiler_services.platform_worker.model_inputs import materialize_model_releases
+from compiler.realsas_compiler_services.platform_worker.shape_executor_v1 import execute_shape_capability_v1
 from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, verify_execution_version, released_execution_plan, verify_source_inputs
 
 ENGINE_TASK_QUEUE = "realsas-engine-v1"
@@ -283,6 +284,17 @@ async def _with_heartbeat(function, request):
 
 @activity.defn(name=EXECUTE_CAPABILITY_ACTIVITY)
 async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
+    metadata = dict(request.get("capability_metadata") or {})
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v1"
+    ):
+        def run_shape(value):
+            return execute_shape_capability_v1(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
+            )
+        return await _with_heartbeat(run_shape, request)
+
     if str(request.get("kind") or "") != "STAGE":
         return {
             "capability_id": str(request.get("capability_id") or ""),
@@ -329,6 +341,7 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
         "semantic_parameters": request.get("stage_semantic_parameters") or {},
         "input_stages": [{"stage_id": ref["role"][6:], "artifact": ref} for ref in request.get("input_artifacts", ()) if str(ref.get("role", "")).startswith("stage:")],
         "source_inputs": [root_ref(ref) for ref in request.get("input_artifacts", ()) if not str(ref.get("role", "")).startswith("stage:")],
+        "model_releases": request.get("model_releases") or [],
     }
     stage_result = await _with_heartbeat(_execute_stage_core, stage_request)
     failure = stage_result.get("failure")

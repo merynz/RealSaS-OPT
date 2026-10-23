@@ -48,17 +48,27 @@ type ProductModelBinding struct {
 	LifecycleState          modelrelease.State `json:"lifecycle_state"`
 }
 
+type ProductArtifactBinding struct {
+	Role           string    `json:"role"`
+	ArtifactID     uuid.UUID `json:"artifact_id"`
+	ArtifactType   string    `json:"artifact_type"`
+	SchemaVersion  string    `json:"schema_version"`
+	SemanticSHA256 string    `json:"semantic_sha256"`
+	ContentSHA256  string    `json:"content_sha256"`
+}
+
 type CurrentProduct struct {
-	SubjectID           uuid.UUID             `json:"subject_id"`
-	SubjectSlug         string                `json:"subject_slug"`
-	ProductRevisionID   uuid.UUID             `json:"product_revision_id"`
-	RevisionNumber      int64                 `json:"revision_number"`
-	ManifestSHA256      string                `json:"manifest_sha256"`
-	EngineReleaseID     *uuid.UUID            `json:"engine_release_id,omitempty"`
-	EngineReleaseSHA256 *string               `json:"engine_release_sha256,omitempty"`
-	CapabilitySetSHA256 *string               `json:"capability_set_sha256,omitempty"`
-	Models              []ProductModelBinding `json:"models"`
-	UpdatedAt           time.Time             `json:"updated_at"`
+	SubjectID           uuid.UUID                `json:"subject_id"`
+	SubjectSlug         string                   `json:"subject_slug"`
+	ProductRevisionID   uuid.UUID                `json:"product_revision_id"`
+	RevisionNumber      int64                    `json:"revision_number"`
+	ManifestSHA256      string                   `json:"manifest_sha256"`
+	EngineReleaseID     *uuid.UUID               `json:"engine_release_id,omitempty"`
+	EngineReleaseSHA256 *string                  `json:"engine_release_sha256,omitempty"`
+	CapabilitySetSHA256 *string                  `json:"capability_set_sha256,omitempty"`
+	Models              []ProductModelBinding    `json:"models"`
+	Artifacts           []ProductArtifactBinding `json:"artifacts"`
+	UpdatedAt           time.Time                `json:"updated_at"`
 }
 
 type Snapshot struct {
@@ -184,6 +194,7 @@ func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {
 			return Snapshot{}, err
 		}
 		record.Models = []ProductModelBinding{}
+		record.Artifacts = []ProductArtifactBinding{}
 		productIndex[record.ProductRevisionID] = len(out.CurrentProducts)
 		out.CurrentProducts = append(out.CurrentProducts, record)
 	}
@@ -228,6 +239,45 @@ func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {
 	}
 	modelRows.Close()
 	if err := modelRows.Err(); err != nil {
+		return Snapshot{}, err
+	}
+
+	artifactRows, err := pool.Query(ctx, `
+		SELECT pra.product_revision_id,pra.role,a.id,t.name,t.schema_version,
+		       a.semantic_sha256,a.content_sha256
+		FROM product_revision_artifacts pra
+		JOIN subject_current_revision c ON c.product_revision_id=pra.product_revision_id
+		JOIN artifacts a ON a.id=pra.artifact_id
+		JOIN artifact_types t ON t.id=a.artifact_type_id
+		ORDER BY pra.product_revision_id,pra.role
+	`)
+	if err != nil {
+		return Snapshot{}, err
+	}
+	for artifactRows.Next() {
+		var revisionID uuid.UUID
+		var binding ProductArtifactBinding
+		if err := artifactRows.Scan(
+			&revisionID,
+			&binding.Role,
+			&binding.ArtifactID,
+			&binding.ArtifactType,
+			&binding.SchemaVersion,
+			&binding.SemanticSHA256,
+			&binding.ContentSHA256,
+		); err != nil {
+			artifactRows.Close()
+			return Snapshot{}, err
+		}
+		index, ok := productIndex[revisionID]
+		if !ok {
+			artifactRows.Close()
+			return Snapshot{}, fmt.Errorf("CURRENT_PRODUCT_ARTIFACT_BINDING_WITHOUT_CURRENT_REVISION:%s", revisionID)
+		}
+		out.CurrentProducts[index].Artifacts = append(out.CurrentProducts[index].Artifacts, binding)
+	}
+	artifactRows.Close()
+	if err := artifactRows.Err(); err != nil {
 		return Snapshot{}, err
 	}
 

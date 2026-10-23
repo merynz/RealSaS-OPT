@@ -8,6 +8,7 @@ on:
     paths:
       - 'tools/demo/knight_oracle_drawable_court_v1.py'
       - 'tools/demo/knight_oracle_drawable_court_v2.py'
+      - 'tools/demo/knight_oracle_drawable_court_v3.py'
       - '.github/workflows/knight_oracle_drawable_court_v1.yml'
       - 'canonical/KNIGHT_ORACLE_DRAWABLE_COURT_PREREG_V1_20261023.json'
       - 'canonical/KNIGHT_ORACLE_DRAWABLE_BASELINE_HASH_GATE_RECEIPT_20261023.json'
@@ -48,7 +49,7 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             tools/demo/knight_oracle_drawable_court_v1.py \
-            tools/demo/knight_oracle_drawable_court_v2.py
+            tools/demo/knight_oracle_drawable_court_v3.py
           test -f canonical/KNIGHT_ORACLE_DRAWABLE_COURT_PREREG_V1_20261023.json
           test -f "$BASELINE_RECEIPT"
           test -f "$AUTHORITY_ROOT/runs/$RUN_ID/IMMUTABLE_STAGE23_SEAL.json"
@@ -90,11 +91,11 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf "$OUT_DIR"
-          PYTHONPATH=. python tools/demo/knight_oracle_drawable_court_v2.py \
+          PYTHONPATH=. python tools/demo/knight_oracle_drawable_court_v3.py \
             --authority-root "$AUTHORITY_ROOT" \
             --run-id "$RUN_ID" \
-            --out-dir "$OUT_DIR" | tee /tmp/knight_oracle_drawable_court_v2.txt
-          cp /tmp/knight_oracle_drawable_court_v2.txt "$OUT_DIR/AUDIT_STDOUT.txt"
+            --out-dir "$OUT_DIR" | tee /tmp/knight_oracle_drawable_court_v3.txt
+          cp /tmp/knight_oracle_drawable_court_v3.txt "$OUT_DIR/AUDIT_STDOUT.txt"
           cp "$BASELINE_RECEIPT" "$OUT_DIR/BASELINE_HASH_GATE_RECEIPT.json"
           test -f "$OUT_DIR/REPORT.json"
           test -f "$OUT_DIR/DRAWABLE_PARTITION.json"

@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/merynz/RealSaS-OPT/platform/internal/attempt"
+	"github.com/merynz/RealSaS-OPT/platform/internal/capability"
 	"github.com/merynz/RealSaS-OPT/platform/internal/experiment"
 	"github.com/merynz/RealSaS-OPT/platform/internal/modelrelease"
 	"github.com/merynz/RealSaS-OPT/platform/internal/operational"
@@ -20,8 +21,9 @@ func (a API) HandlerWithOperational() http.Handler {
 	// Clients can describe a release, but cannot self-assert that branch code is main.
 	mux.HandleFunc("POST /v1/releases", func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
-			Manifest  release.Manifest `json:"manifest"`
-			CreatedBy string           `json:"created_by"`
+			Manifest           release.Manifest                      `json:"manifest"`
+			CapabilityVersions map[string]capability.VersionIdentity `json:"capability_versions"`
+			CreatedBy          string                                `json:"created_by"`
 		}
 		if !decode(w, r, &req) {
 			return
@@ -30,6 +32,12 @@ func (a API) HandlerWithOperational() http.Handler {
 		if err != nil {
 			result(w, out, err)
 			return
+		}
+		if req.Manifest.ContractVersion == "RealSaS.EngineReleaseManifest.v2" {
+			if _, err := capability.SealEngineReleaseSnapshot(r.Context(), a.Pool, out.ReleaseID, req.CapabilityVersions, req.CreatedBy); err != nil {
+				result(w, out, err)
+				return
+			}
 		}
 		if _, err := release.BindCanonicalMain(r.Context(), a.Pool, out.ReleaseID, a.CodeSHA, req.CreatedBy); err != nil {
 			result(w, out, err)

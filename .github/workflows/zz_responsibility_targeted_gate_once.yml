@@ -1,4 +1,5 @@
 name: responsibility-terrain-targeted-gate-once
+# retry after isolating the responsibility fixture from dependency validation
 on:
   push:
     branches: [platform/responsibility-ledger-v1-20261023]

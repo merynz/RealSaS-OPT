@@ -26,12 +26,12 @@ const (
 var ErrBaselineNotFound = errors.New("subject baseline not found")
 
 type LegacyWitnessRegisterRequest struct {
-	SubjectID        uuid.UUID      `json:"subject_id"`
+	SubjectID         uuid.UUID      `json:"subject_id"`
 	WitnessArtifactID uuid.UUID      `json:"witness_artifact_id"`
-	SourceRef        string         `json:"source_ref"`
-	SourceSHA256     string         `json:"source_sha256"`
-	Metadata         map[string]any `json:"metadata,omitempty"`
-	CreatedBy        string         `json:"created_by"`
+	SourceRef         string         `json:"source_ref"`
+	SourceSHA256      string         `json:"source_sha256"`
+	Metadata          map[string]any `json:"metadata,omitempty"`
+	CreatedBy         string         `json:"created_by"`
 }
 
 type LegacyWitnessRecord struct {
@@ -141,11 +141,11 @@ func RegisterLegacyWitness(ctx context.Context, pool *pgxpool.Pool, raw LegacyWi
 			return err
 		}
 		audit, _ := json.Marshal(map[string]any{
-			"legacy_witness_id": id.String(),
+			"legacy_witness_id":   id.String(),
 			"witness_artifact_id": req.WitnessArtifactID.String(),
-			"source_ref": req.SourceRef,
-			"source_sha256": req.SourceSHA256,
-			"authority_class": "ENGINEERING_REGRESSION_WITNESS__NOT_PRODUCT_AUTHORITY",
+			"source_ref":          req.SourceRef,
+			"source_sha256":       req.SourceSHA256,
+			"authority_class":     "ENGINEERING_REGRESSION_WITNESS__NOT_PRODUCT_AUTHORITY",
 		})
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO audit_events(actor,action,subject_id,artifact_id,payload)

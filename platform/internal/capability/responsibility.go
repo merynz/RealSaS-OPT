@@ -39,19 +39,19 @@ type ResponsibilityLedger struct {
 }
 
 type ResponsibilityTerrainNode struct {
-	ResponsibilityID              string              `json:"responsibility_id"`
-	RoleID                        ProductRoleID       `json:"role_id"`
-	CapabilityID                  string              `json:"capability_id"`
-	ImplementationClass           ImplementationClass `json:"implementation_class"`
-	ResponsibilityOwnerClass      ImplementationClass `json:"responsibility_owner_class"`
-	OwnerComponent                string              `json:"owner_component"`
-	ModelFamily                   string              `json:"model_family,omitempty"`
-	OwnerModuleID                 string              `json:"owner_module_id"`
-	AuthorityKind                 string              `json:"authority_kind"`
-	Exclusive                     bool                `json:"exclusive"`
-	CanonicalTransformID          string              `json:"canonical_transform_id"`
-	DataReduction                 string              `json:"data_reduction"`
-	SourceTruthRetained           bool                `json:"source_truth_retained"`
+	ResponsibilityID         string              `json:"responsibility_id"`
+	RoleID                   ProductRoleID       `json:"role_id"`
+	CapabilityID             string              `json:"capability_id"`
+	ImplementationClass      ImplementationClass `json:"implementation_class"`
+	ResponsibilityOwnerClass ImplementationClass `json:"responsibility_owner_class"`
+	OwnerComponent           string              `json:"owner_component"`
+	ModelFamily              string              `json:"model_family,omitempty"`
+	OwnerModuleID            string              `json:"owner_module_id"`
+	AuthorityKind            string              `json:"authority_kind"`
+	Exclusive                bool                `json:"exclusive"`
+	CanonicalTransformID     string              `json:"canonical_transform_id"`
+	DataReduction            string              `json:"data_reduction"`
+	SourceTruthRetained      bool                `json:"source_truth_retained"`
 }
 
 func loadResponsibilityLedger() (ResponsibilityLedger, error) {

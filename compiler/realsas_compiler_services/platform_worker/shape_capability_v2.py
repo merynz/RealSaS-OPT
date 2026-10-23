@@ -29,6 +29,7 @@ from compiler.realsas_compiler_services.platform_worker.tessa_inference_v1 impor
 )
 from models.iris.vnext.inference_input_v1 import IRISVNextSceneInputsV1
 from models.iris.vnext.surface_v1 import extract_surface_evidence_v1
+from models.tessa.v1.model_v1 import TESSAConfigV1
 from models.tessa.v1.sequence_codec_v1 import decode_tessa_asset_sequence_v1
 
 
@@ -60,6 +61,24 @@ class DecodedShapeProposalV2:
     surface_h: np.ndarray
     mechanical: dict[str, np.ndarray]
     contact_persistence_valid: np.ndarray
+
+
+def _codec_config_v1(config: Any) -> TESSAConfigV1:
+    config.validate()
+    return TESSAConfigV1(
+        d_model=int(config.d_model),
+        n_heads=int(config.n_heads),
+        surface_layers=0,
+        decoder_layers=int(config.decoder_layers),
+        mlp_ratio=int(config.mlp_ratio),
+        dropout=float(config.dropout),
+        coordinate_bins=int(config.coordinate_bins),
+        surface_latent_count=int(config.total_conditioning_tokens),
+        local_attention_window=int(config.local_attention_window),
+        query_chunk_size=int(config.query_chunk_size),
+        max_faces=int(config.max_faces),
+        max_vertices=int(config.max_vertices),
+    )
 
 
 def _tensor_numpy(value: torch.Tensor, dtype: np.dtype | None = None) -> np.ndarray:
@@ -355,7 +374,7 @@ def run_shape_inference_v2(
         raise RuntimeError("SHAPE_V2_TOPOLOGY_PROPOSAL_INVALID")
     decoded = decode_tessa_asset_sequence_v1(
         proposal.token_ids,
-        cfg=tessa_binding.model.config,
+        cfg=_codec_config_v1(tessa_binding.model.config),
     )
     payload = encode_shape_proposal_v2(
         iris_binding=iris_binding,

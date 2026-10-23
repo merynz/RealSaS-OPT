@@ -126,6 +126,30 @@ def _stage_result_outputs(row: dict[str, Any], *, run_id: str, stage_id: str) ->
     return output_rows
 
 
+def _typed_stage_capability_outputs(outputs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Project stage payload schemas into typed capability artifacts.
+
+    Direct compile/replay keeps RealSaS.EngineOutput/v1. Only the capability DAG
+    receives the typed projection, so downstream product roles can select exact
+    IR contracts without file paths, ordinals, or hidden run-ledger lookups.
+    """
+    typed: list[dict[str, Any]] = []
+    for raw in outputs:
+        row = dict(raw)
+        schema = str(row.get("payload_schema") or "")
+        head, separator, version = schema.rpartition(".")
+        if (
+            separator
+            and head.startswith("RealSaS.")
+            and version.startswith("v")
+            and version[1:].isdigit()
+        ):
+            row["artifact_type"] = head
+            row["schema_version"] = version
+        typed.append(row)
+    return typed
+
+
 def _external_wait_result(stage_id: str, required: tuple[str, ...], available: set[str]) -> dict[str, Any]:
     missing = [role for role in required if role not in available]
     diagnostics = {
@@ -282,6 +306,27 @@ async def _with_heartbeat(function, request):
     return await task
 
 
+def _resolve_stage_capability_binding(request: dict[str, Any]) -> tuple[str, str]:
+    metadata = dict(request.get("capability_metadata") or {})
+    params = dict(request.get("goal_parameters") or {})
+    stage_id = str(metadata.get("stage_id") or "")
+    raw_bridge = params.get("compiler_bridge")
+    bridge = dict(raw_bridge) if isinstance(raw_bridge, dict) else {}
+    legacy_run_id = str(params.get("compiler_run_id") or "")
+    bridge_run_id = str(bridge.get("compiler_run_id") or "")
+    if bridge:
+        if str(bridge.get("schema") or "") != "RealSaS.CapabilityCompilerBridge.v1":
+            raise RuntimeError("STAGE_CAPABILITY_BRIDGE_SCHEMA_DRIFT")
+        if legacy_run_id and legacy_run_id != bridge_run_id:
+            raise RuntimeError("STAGE_CAPABILITY_RUN_BINDING_DRIFT")
+        if str(bridge.get("pipeline_plan_sha256") or "") != str(request.get("pipeline_plan_sha256") or ""):
+            raise RuntimeError("STAGE_CAPABILITY_PLAN_BINDING_DRIFT")
+    run_id = bridge_run_id or legacy_run_id
+    if not stage_id or not run_id:
+        raise RuntimeError("STAGE_CAPABILITY_RUN_BINDING_REQUIRED")
+    return stage_id, run_id
+
+
 @activity.defn(name=EXECUTE_CAPABILITY_ACTIVITY)
 async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
     metadata = dict(request.get("capability_metadata") or {})
@@ -303,11 +348,39 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
         str(request.get("kind") or "") == "MODULE"
         and metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v1"
     ):
-        def run_shape(value):
+        def run_shape_v1(value):
             return execute_shape_capability_v1(
                 value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
             )
-        return await _with_heartbeat(run_shape, request)
+        return await _with_heartbeat(run_shape_v1, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v2"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.shape_executor_v2 import (
+            execute_shape_capability_v2,
+        )
+
+        def run_shape_v2(value):
+            return execute_shape_capability_v2(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
+            )
+        return await _with_heartbeat(run_shape_v2, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductMeshCompile.v1"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.mesh_executor_v1 import (
+            execute_mesh_capability_v1,
+        )
+
+        def run_mesh(value):
+            return execute_mesh_capability_v1(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
+            )
+        return await _with_heartbeat(run_mesh, request)
 
     if str(request.get("kind") or "") != "STAGE":
         return {
@@ -321,20 +394,18 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
                 "diagnostics": {"kind": request.get("kind")},
             },
         }
-    metadata = dict(request.get("capability_metadata") or {})
-    params = dict(request.get("goal_parameters") or {})
-    stage_id = str(metadata.get("stage_id") or "")
-    run_id = str(params.get("compiler_run_id") or "")
-    if not stage_id or not run_id:
+    try:
+        stage_id, run_id = _resolve_stage_capability_binding(request)
+    except RuntimeError as exc:
         return {
             "capability_id": str(request.get("capability_id") or ""),
             "status": "FAIL",
             "outputs": [],
             "failure": {
-                "code": "STAGE_CAPABILITY_RUN_BINDING_REQUIRED",
+                "code": str(exc),
                 "class": "CAPABILITY",
                 "reported_owner_module_id": str(request.get("owner_module_id") or ""),
-                "diagnostics": {"stage_id": stage_id, "compiler_run_id": run_id},
+                "diagnostics": {"stage_id": str(metadata.get("stage_id") or "")},
             },
         }
     def root_ref(ref):
@@ -369,8 +440,14 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
     return {
         "capability_id": str(request["capability_id"]),
         "status": "PASS" if stage_result["status"] in mainline.PASS_STATUSES else "FAIL",
-        "outputs": stage_result.get("outputs") or [],
-        "diagnostics": {"compiler_run_id": run_id, "stage_id": stage_id, "stage_status": stage_result["status"]},
+        "outputs": _typed_stage_capability_outputs(stage_result.get("outputs") or []),
+        "diagnostics": {
+            "compiler_run_id": run_id,
+            "stage_id": stage_id,
+            "stage_status": stage_result["status"],
+            "stage_diagnostics_hash": str(stage_result.get("diagnostics_hash") or ""),
+            "typed_capability_artifact_projection": True,
+        },
         "failure": failure,
     }
 

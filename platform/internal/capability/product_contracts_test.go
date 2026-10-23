@@ -1,25 +1,16 @@
 package capability
 
-import (
-	"context"
-	"testing"
-)
+import "testing"
 
 func TestProductProvidersMatchSharedSemanticContract(t *testing.T) {
-	registry, err := Build(context.Background(), ProductProviders()...)
-	if err != nil {
-		t.Fatal(err)
-	}
+	registry := productProvidersTestRegistry(t)
 	if err := validateProductDescriptorSemantics(registry); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestSharedSemanticContractRejectsMetadataDrift(t *testing.T) {
-	registry, err := Build(context.Background(), ProductProviders()...)
-	if err != nil {
-		t.Fatal(err)
-	}
+	registry := productProvidersTestRegistry(t)
 	rows := registry.Descriptors()
 	for i := range rows {
 		if rows[i].ID != ProductShapeCapabilityID {
@@ -42,10 +33,7 @@ func TestSharedSemanticContractRejectsMetadataDrift(t *testing.T) {
 }
 
 func TestSharedSemanticContractIgnoresResponsibilityIDsBecauseLedgerOwnsThem(t *testing.T) {
-	registry, err := Build(context.Background(), ProductProviders()...)
-	if err != nil {
-		t.Fatal(err)
-	}
+	registry := productProvidersTestRegistry(t)
 	rows := registry.Descriptors()
 	for i := range rows {
 		if rows[i].ID != ProductShapeCapabilityID {

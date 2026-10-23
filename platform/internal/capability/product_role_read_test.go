@@ -7,7 +7,7 @@ func TestProductRoleReadProjectionKeepsLegacySnapshotsInspectable(t *testing.T) 
 		ID: "product.shape", Kind: KindModule,
 		OwnerModuleID: "legacy.shape", ExecutorActivity: "engine.execute_capability.v1",
 		AllowedModes: []Mode{ModeDeveloper},
-		Metadata: map[string]any{"executor_contract": "RealSaS.ProductShapeInference.v1"},
+		Metadata:     map[string]any{"executor_contract": "RealSaS.ProductShapeInference.v1"},
 	}})
 	if err != nil {
 		t.Fatal(err)

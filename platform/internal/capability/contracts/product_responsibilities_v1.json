@@ -1,0 +1,131 @@
+{
+  "schema": "RealSaS.ProductResponsibilityLedger.v1",
+  "rules": {
+    "exclusive_responsibility_may_have_one_active_owner": true,
+    "lossy_transform_may_not_replace_source_truth": true,
+    "source_truth_must_remain_addressable_after_evidence_lowering": true,
+    "legacy_stages_are_internal_implementation_not_product_role_authority": true
+  },
+  "responsibilities": [
+    {
+      "id": "input.model_observation_lowering",
+      "role_id": "input",
+      "required_when_role_present": true,
+      "authority_kind": "DERIVED_EVIDENCE",
+      "exclusive": true,
+      "canonical_transform_id": "source_observation_to_model_observation",
+      "data_reduction": "BOUNDED_LOSSY",
+      "source_truth_retained": true
+    },
+    {
+      "id": "shape.shared_scene_evidence",
+      "role_id": "shape",
+      "required_when_role_present": true,
+      "authority_kind": "LEARNED_EVIDENCE",
+      "exclusive": true,
+      "canonical_transform_id": "shared_scene_encode",
+      "data_reduction": "BOUNDED_LOSSY",
+      "source_truth_retained": true
+    },
+    {
+      "id": "shape.topology_proposal",
+      "role_id": "shape",
+      "required_when_role_present": true,
+      "authority_kind": "PROPOSAL",
+      "exclusive": true,
+      "canonical_transform_id": "topology_proposal_decode",
+      "data_reduction": "GENERATIVE_PROPOSAL",
+      "source_truth_retained": true
+    },
+    {
+      "id": "mesh.static_topology_qualification",
+      "role_id": "mesh",
+      "required_when_role_present": true,
+      "authority_kind": "QUALIFICATION",
+      "exclusive": true,
+      "canonical_transform_id": "mesh_static_topology_qualification",
+      "data_reduction": "NONE",
+      "source_truth_retained": true
+    },
+    {
+      "id": "mesh.source_fidelity_qualification",
+      "role_id": "mesh",
+      "required_when_role_present": true,
+      "authority_kind": "QUALIFICATION",
+      "exclusive": true,
+      "canonical_transform_id": "mesh_source_fidelity_qualification",
+      "data_reduction": "NONE",
+      "source_truth_retained": true
+    },
+    {
+      "id": "mesh.canonical_identity_mint",
+      "role_id": "mesh",
+      "required_when_role_present": true,
+      "authority_kind": "CANONICAL_AUTHORITY",
+      "exclusive": true,
+      "canonical_transform_id": "mesh_canonical_identity_mint",
+      "data_reduction": "LOSSLESS",
+      "source_truth_retained": true
+    },
+    {
+      "id": "rig.structure_solution",
+      "role_id": "rig",
+      "required_when_role_present": true,
+      "authority_kind": "ROLE_OUTPUT",
+      "exclusive": true,
+      "canonical_transform_id": "rig_structure_solution",
+      "data_reduction": "NONE",
+      "source_truth_retained": true
+    },
+    {
+      "id": "skin.influence_solution",
+      "role_id": "skin",
+      "required_when_role_present": true,
+      "authority_kind": "ROLE_OUTPUT",
+      "exclusive": true,
+      "canonical_transform_id": "skin_influence_solution",
+      "data_reduction": "NONE",
+      "source_truth_retained": true
+    },
+    {
+      "id": "mechanics.contact_deformation_relations",
+      "role_id": "mechanics",
+      "required_when_role_present": true,
+      "authority_kind": "ROLE_OUTPUT",
+      "exclusive": true,
+      "canonical_transform_id": "mechanics_relation_solution",
+      "data_reduction": "NONE",
+      "source_truth_retained": true
+    },
+    {
+      "id": "graphics.presentation_relations",
+      "role_id": "graphics",
+      "required_when_role_present": true,
+      "authority_kind": "ROLE_OUTPUT",
+      "exclusive": true,
+      "canonical_transform_id": "graphics_relation_solution",
+      "data_reduction": "NONE",
+      "source_truth_retained": true
+    },
+    {
+      "id": "motion.motion_solution",
+      "role_id": "motion",
+      "required_when_role_present": true,
+      "authority_kind": "ROLE_OUTPUT",
+      "exclusive": true,
+      "canonical_transform_id": "motion_solution",
+      "data_reduction": "NONE",
+      "source_truth_retained": true
+    },
+    {
+      "id": "proof.product_pass_decision",
+      "role_id": "proof",
+      "required_when_role_present": true,
+      "authority_kind": "PRODUCT_PASS_AUTHORITY",
+      "exclusive": true,
+      "canonical_transform_id": "proof_product_pass_decision",
+      "data_reduction": "NONE",
+      "source_truth_retained": true
+    }
+  ]
+}

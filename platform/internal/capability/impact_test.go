@@ -14,10 +14,10 @@ func testVersion(ch string) VersionIdentity {
 func roleDescriptor(id string, role ProductRoleID, implementation ImplementationClass, dependencies ...string) Descriptor {
 	return Descriptor{
 		ID: id, Kind: KindModule,
-		OwnerModuleID: "owner." + string(role),
+		OwnerModuleID:    "owner." + string(role),
 		ExecutorActivity: "engine.execute_capability.v1",
-		Dependencies: append([]string(nil), dependencies...),
-		AllowedModes: []Mode{ModeDeveloper},
+		Dependencies:     append([]string(nil), dependencies...),
+		AllowedModes:     []Mode{ModeDeveloper},
 		Metadata: map[string]any{
 			"product_role_id":      string(role),
 			"implementation_class": string(implementation),

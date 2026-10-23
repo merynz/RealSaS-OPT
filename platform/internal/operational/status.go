@@ -12,16 +12,16 @@ import (
 )
 
 type AttemptStatus struct {
-	ID                      uuid.UUID  `json:"id"`
-	SubjectID               uuid.UUID  `json:"subject_id"`
-	ExperimentID            *uuid.UUID `json:"experiment_id,omitempty"`
-	EngineReleaseID         *uuid.UUID `json:"engine_release_id,omitempty"`
-	EngineReleasePurpose    *string    `json:"engine_release_purpose,omitempty"`
-	EngineReleaseSHA256     *string    `json:"engine_release_sha256,omitempty"`
-	CapabilitySetSHA256     *string    `json:"capability_set_sha256,omitempty"`
-	Kind                    string     `json:"kind"`
-	FinalState              string     `json:"final_state"`
-	CreatedAt               time.Time  `json:"created_at"`
+	ID                   uuid.UUID  `json:"id"`
+	SubjectID            uuid.UUID  `json:"subject_id"`
+	ExperimentID         *uuid.UUID `json:"experiment_id,omitempty"`
+	EngineReleaseID      *uuid.UUID `json:"engine_release_id,omitempty"`
+	EngineReleasePurpose *string    `json:"engine_release_purpose,omitempty"`
+	EngineReleaseSHA256  *string    `json:"engine_release_sha256,omitempty"`
+	CapabilitySetSHA256  *string    `json:"capability_set_sha256,omitempty"`
+	Kind                 string     `json:"kind"`
+	FinalState           string     `json:"final_state"`
+	CreatedAt            time.Time  `json:"created_at"`
 }
 
 type CampaignStatus struct {
@@ -39,15 +39,15 @@ type CurrentModel struct {
 }
 
 type CurrentProduct struct {
-	SubjectID               uuid.UUID  `json:"subject_id"`
-	SubjectSlug             string     `json:"subject_slug"`
-	ProductRevisionID       uuid.UUID  `json:"product_revision_id"`
-	RevisionNumber          int64      `json:"revision_number"`
-	ManifestSHA256          string     `json:"manifest_sha256"`
-	EngineReleaseID         *uuid.UUID `json:"engine_release_id,omitempty"`
-	EngineReleaseSHA256     *string    `json:"engine_release_sha256,omitempty"`
-	CapabilitySetSHA256     *string    `json:"capability_set_sha256,omitempty"`
-	UpdatedAt               time.Time  `json:"updated_at"`
+	SubjectID           uuid.UUID  `json:"subject_id"`
+	SubjectSlug         string     `json:"subject_slug"`
+	ProductRevisionID   uuid.UUID  `json:"product_revision_id"`
+	RevisionNumber      int64      `json:"revision_number"`
+	ManifestSHA256      string     `json:"manifest_sha256"`
+	EngineReleaseID     *uuid.UUID `json:"engine_release_id,omitempty"`
+	EngineReleaseSHA256 *string    `json:"engine_release_sha256,omitempty"`
+	CapabilitySetSHA256 *string    `json:"capability_set_sha256,omitempty"`
+	UpdatedAt           time.Time  `json:"updated_at"`
 }
 
 type Snapshot struct {

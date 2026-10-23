@@ -107,14 +107,14 @@
       "source_truth_retained": true
     },
     {
-      "id": "rig.frame_observability_qualification",
+      "id": "rig.frame_evidence_admission",
       "role_id": "rig",
       "required_when_role_present": true,
       "authority_kind": "QUALIFICATION",
       "exclusive": true,
       "execution_owner_class": "COMPILER",
       "owner_component": "COMPILER",
-      "canonical_transform_id": "rig_frame_observability_qualification",
+      "canonical_transform_id": "rig_prebind_frame_evidence_admission",
       "data_reduction": "NONE",
       "source_truth_retained": true
     },
@@ -188,6 +188,18 @@
       "execution_owner_class": "COMPILER",
       "owner_component": "COMPILER",
       "canonical_transform_id": "mechanics_deformation_domain_qualification",
+      "data_reduction": "NONE",
+      "source_truth_retained": true
+    },
+    {
+      "id": "mechanics.frame_observability_qualification",
+      "role_id": "mechanics",
+      "required_when_role_present": true,
+      "authority_kind": "QUALIFICATION",
+      "exclusive": true,
+      "execution_owner_class": "COMPILER",
+      "owner_component": "COMPILER",
+      "canonical_transform_id": "mechanics_postbind_frame_observability_qualification",
       "data_reduction": "NONE",
       "source_truth_retained": true
     },

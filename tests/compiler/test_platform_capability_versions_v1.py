@@ -16,7 +16,12 @@ def _is_sha256(value: str) -> bool:
 def test_product_capability_versions_are_complete_and_semantic():
     specs = capability_specs()
     versions = capability_versions()
-    assert set(versions) == {"product.input", "product.shape", "product.mesh"}
+    assert set(versions) == {
+        "product.input",
+        "product.shape",
+        "product.mesh",
+        "product.rig",
+    }
     assert set(specs) == set(versions)
     assert specs["product.input"]["parameters"]["responsibility_ids"] == [
         "input.model_observation_lowering"
@@ -30,6 +35,12 @@ def test_product_capability_versions_are_complete_and_semantic():
         "mesh.source_fidelity_qualification",
         "mesh.static_topology_qualification",
     ]
+    assert specs["product.rig"]["parameters"]["responsibility_ids"] == [
+        "rig.canonical_identity_mint",
+        "rig.structure_proposal",
+        "rig.structure_qualification",
+    ]
+    assert "rig.frame_observability_qualification" not in str(specs["product.rig"])
     assert specs["product.shape"]["parameters"]["required_models"] == [
         {
             "family": "IRIS",
@@ -41,7 +52,17 @@ def test_product_capability_versions_are_complete_and_semantic():
         },
     ]
     assert specs["product.mesh"]["parameters"]["required_models"] == []
+    assert specs["product.rig"]["parameters"]["required_models"] == [
+        {
+            "family": "AXIS",
+            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
+        }
+    ]
     assert product_model_requirements() == [
+        {
+            "family": "AXIS",
+            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
+        },
         {
             "family": "IRIS",
             "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3",
@@ -69,8 +90,9 @@ def test_product_capability_versions_are_complete_and_semantic():
             versions["product.input"]["implementation_sha256"],
             versions["product.shape"]["implementation_sha256"],
             versions["product.mesh"]["implementation_sha256"],
+            versions["product.rig"]["implementation_sha256"],
         }
-    ) == 3
+    ) == 4
 
 
 def test_release_snapshot_v2_carries_capability_and_model_requirements():
@@ -85,6 +107,11 @@ def test_release_snapshot_v2_carries_capability_and_model_requirements():
     assert request["manifest"]["contract_version"] == "RealSaS.EngineReleaseManifest.v2"
     assert request["capability_versions"] == capability_versions()
     assert request["manifest"]["model_requirements"] == [
+        {
+            "family": "AXIS",
+            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
+            "channel": "RESEARCH",
+        },
         {
             "family": "IRIS",
             "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3",

@@ -65,12 +65,13 @@ func TestBuildEngineReleaseRegistryIncludesStagesAndProductModules(t *testing.T)
 		ProductInputCapabilityID,
 		ProductShapeCapabilityID,
 		ProductMeshCapabilityID,
+		ProductRigCapabilityID,
 	} {
 		if _, ok := registry.Get(id); !ok {
 			t.Fatalf("release registry missing %s", id)
 		}
 	}
-	resolved, err := registry.Resolve(ProductMeshCapabilityID)
+	resolved, err := registry.Resolve(ProductRigCapabilityID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,19 +89,20 @@ func TestBuildEngineReleaseRegistryIncludesStagesAndProductModules(t *testing.T)
 		StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED"),
 		StageCapabilityID("17_MECHANICAL_PARTITION_QUALIFIED"),
 		ProductMeshCapabilityID,
+		ProductRigCapabilityID,
 	} {
 		if !seen[id] {
-			t.Fatalf("mesh resolution missing %s: %+v", id, resolved)
+			t.Fatalf("rig resolution missing %s: %+v", id, resolved)
 		}
 	}
-	if resolved[len(resolved)-1].ID != ProductMeshCapabilityID {
-		t.Fatalf("mesh must resolve after all dependencies: %+v", resolved)
+	if resolved[len(resolved)-1].ID != ProductRigCapabilityID {
+		t.Fatalf("rig must resolve after all dependencies: %+v", resolved)
 	}
 }
 
 func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	providers := ProductProviders()
-	if len(providers) != 3 {
+	if len(providers) != 4 {
 		t.Fatalf("product provider count=%d", len(providers))
 	}
 	registry := productProvidersTestRegistry(t)
@@ -123,6 +125,27 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 			t.Fatal("presentation direction leaked into Mesh birth dependency")
 		}
 	}
+	rig, ok := registry.Get(ProductRigCapabilityID)
+	if !ok {
+		t.Fatal("product.rig missing")
+	}
+	if len(rig.Dependencies) != 2 || rig.Dependencies[0] != ProductMeshCapabilityID || rig.Dependencies[1] != StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED") {
+		t.Fatalf("rig descriptor=%+v", rig)
+	}
+	for _, dependency := range rig.Dependencies {
+		if strings.Contains(dependency, "GEPPETTO_FIT") || strings.Contains(dependency, "AXIS_FIT") {
+			t.Fatalf("fit/training dependency leaked into product.rig: %s", dependency)
+		}
+	}
+	if rig.Metadata["mesh_is_canonical_parent"] != true {
+		t.Fatalf("rig mesh parent metadata=%+v", rig.Metadata)
+	}
+	if rig.Metadata["feature_evidence_is_canonical_parent"] != false {
+		t.Fatalf("rig feature evidence became canonical parent: %+v", rig.Metadata)
+	}
+	if rig.Metadata["frame_observability_claimed"] != false {
+		t.Fatalf("rig prematurely claims post-bind observability: %+v", rig.Metadata)
+	}
 }
 
 func TestModuleVersionPolicyAndParametersAreRederivedFromDescriptor(t *testing.T) {
@@ -131,6 +154,7 @@ func TestModuleVersionPolicyAndParametersAreRederivedFromDescriptor(t *testing.T
 		ProductInputCapabilityID,
 		ProductShapeCapabilityID,
 		ProductMeshCapabilityID,
+		ProductRigCapabilityID,
 	} {
 		descriptor, ok := registry.Get(capabilityID)
 		if !ok {

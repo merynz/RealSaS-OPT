@@ -1,3 +1,5 @@
+-- +goose Up
+
 -- ProductRevision must identify the exact immutable execution wiring that
 -- produced it. Historical revisions remain replayable even if they predate a
 -- capability snapshot; every revision inserted after this migration is bound
@@ -37,6 +39,7 @@ CREATE INDEX ix_product_revisions_capability_set
     ON product_revisions(capability_set_sha256)
     WHERE capability_set_sha256 IS NOT NULL;
 
+-- +goose StatementBegin
 CREATE FUNCTION bind_product_revision_release_wiring_v1()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -71,12 +74,14 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+-- +goose StatementEnd
 
 CREATE TRIGGER trg_product_revision_bind_release_wiring
 BEFORE INSERT ON product_revisions
 FOR EACH ROW
 EXECUTE FUNCTION bind_product_revision_release_wiring_v1();
 
+-- +goose StatementBegin
 CREATE FUNCTION forbid_product_revision_release_wiring_mutation_v1()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -89,8 +94,21 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+-- +goose StatementEnd
 
 CREATE TRIGGER trg_product_revision_release_wiring_immutable
 BEFORE UPDATE OF engine_release_id, capability_set_sha256 ON product_revisions
 FOR EACH ROW
 EXECUTE FUNCTION forbid_product_revision_release_wiring_mutation_v1();
+
+-- +goose Down
+
+DROP TRIGGER trg_product_revision_release_wiring_immutable ON product_revisions;
+DROP FUNCTION forbid_product_revision_release_wiring_mutation_v1();
+DROP TRIGGER trg_product_revision_bind_release_wiring ON product_revisions;
+DROP FUNCTION bind_product_revision_release_wiring_v1();
+DROP INDEX ix_product_revisions_capability_set;
+DROP INDEX ix_product_revisions_engine_release;
+ALTER TABLE product_revisions DROP CONSTRAINT ck_product_revision_release_wiring_pair;
+ALTER TABLE product_revisions DROP COLUMN capability_set_sha256;
+ALTER TABLE product_revisions DROP COLUMN engine_release_id;

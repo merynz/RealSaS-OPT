@@ -34,6 +34,10 @@ func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) 
 			"output_schema_version":                 "v1",
 			"implementation_owner_may_change":       true,
 			"stable_product_role_survives_rewiring": true,
+			"responsibility_ids": []string{
+				"shape.shared_scene_evidence",
+				"shape.topology_proposal",
+			},
 		},
 	}}, nil
 }

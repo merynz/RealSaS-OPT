@@ -2,7 +2,6 @@ package operational
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -164,122 +163,11 @@ func Status(ctx context.Context, pool *pgxpool.Pool) (Snapshot, error) {
 		out.CurrentModels = append(out.CurrentModels, CurrentModel{Channel: channel, Release: release})
 	}
 
-	productRows, err := pool.Query(ctx, `
-		SELECT c.subject_id,s.slug,c.product_revision_id,r.revision_number,r.manifest_sha256,
-		       r.engine_release_id,er.release_sha256,r.capability_set_sha256,c.updated_at
-		FROM subject_current_revision c
-		JOIN subjects s ON s.id=c.subject_id
-		JOIN product_revisions r ON r.id=c.product_revision_id
-		LEFT JOIN engine_releases er ON er.id=r.engine_release_id
-		ORDER BY s.slug,c.subject_id
-	`)
+	products, err := loadCurrentProducts(ctx, pool, nil)
 	if err != nil {
 		return Snapshot{}, err
 	}
-	productIndex := map[uuid.UUID]int{}
-	for productRows.Next() {
-		var record CurrentProduct
-		if err := productRows.Scan(
-			&record.SubjectID,
-			&record.SubjectSlug,
-			&record.ProductRevisionID,
-			&record.RevisionNumber,
-			&record.ManifestSHA256,
-			&record.EngineReleaseID,
-			&record.EngineReleaseSHA256,
-			&record.CapabilitySetSHA256,
-			&record.UpdatedAt,
-		); err != nil {
-			productRows.Close()
-			return Snapshot{}, err
-		}
-		record.Models = []ProductModelBinding{}
-		record.Artifacts = []ProductArtifactBinding{}
-		productIndex[record.ProductRevisionID] = len(out.CurrentProducts)
-		out.CurrentProducts = append(out.CurrentProducts, record)
-	}
-	productRows.Close()
-	if err := productRows.Err(); err != nil {
-		return Snapshot{}, err
-	}
-
-	modelRows, err := pool.Query(ctx, `
-		SELECT prm.product_revision_id,prm.family,prm.model_release_id,
-		       mr.architecture_id,mr.checkpoint_artifact_id,a.content_sha256,mr.lifecycle_state
-		FROM product_revision_model_releases prm
-		JOIN subject_current_revision c ON c.product_revision_id=prm.product_revision_id
-		JOIN model_releases mr ON mr.id=prm.model_release_id
-		JOIN artifacts a ON a.id=mr.checkpoint_artifact_id
-		ORDER BY prm.product_revision_id,prm.family
-	`)
-	if err != nil {
-		return Snapshot{}, err
-	}
-	for modelRows.Next() {
-		var revisionID uuid.UUID
-		var binding ProductModelBinding
-		if err := modelRows.Scan(
-			&revisionID,
-			&binding.Family,
-			&binding.ModelReleaseID,
-			&binding.ArchitectureID,
-			&binding.CheckpointArtifactID,
-			&binding.CheckpointContentSHA256,
-			&binding.LifecycleState,
-		); err != nil {
-			modelRows.Close()
-			return Snapshot{}, err
-		}
-		index, ok := productIndex[revisionID]
-		if !ok {
-			modelRows.Close()
-			return Snapshot{}, fmt.Errorf("CURRENT_PRODUCT_MODEL_BINDING_WITHOUT_CURRENT_REVISION:%s", revisionID)
-		}
-		out.CurrentProducts[index].Models = append(out.CurrentProducts[index].Models, binding)
-	}
-	modelRows.Close()
-	if err := modelRows.Err(); err != nil {
-		return Snapshot{}, err
-	}
-
-	artifactRows, err := pool.Query(ctx, `
-		SELECT pra.product_revision_id,pra.role,a.id,t.name,t.schema_version,
-		       a.semantic_sha256,a.content_sha256
-		FROM product_revision_artifacts pra
-		JOIN subject_current_revision c ON c.product_revision_id=pra.product_revision_id
-		JOIN artifacts a ON a.id=pra.artifact_id
-		JOIN artifact_types t ON t.id=a.artifact_type_id
-		ORDER BY pra.product_revision_id,pra.role
-	`)
-	if err != nil {
-		return Snapshot{}, err
-	}
-	for artifactRows.Next() {
-		var revisionID uuid.UUID
-		var binding ProductArtifactBinding
-		if err := artifactRows.Scan(
-			&revisionID,
-			&binding.Role,
-			&binding.ArtifactID,
-			&binding.ArtifactType,
-			&binding.SchemaVersion,
-			&binding.SemanticSHA256,
-			&binding.ContentSHA256,
-		); err != nil {
-			artifactRows.Close()
-			return Snapshot{}, err
-		}
-		index, ok := productIndex[revisionID]
-		if !ok {
-			artifactRows.Close()
-			return Snapshot{}, fmt.Errorf("CURRENT_PRODUCT_ARTIFACT_BINDING_WITHOUT_CURRENT_REVISION:%s", revisionID)
-		}
-		out.CurrentProducts[index].Artifacts = append(out.CurrentProducts[index].Artifacts, binding)
-	}
-	artifactRows.Close()
-	if err := artifactRows.Err(); err != nil {
-		return Snapshot{}, err
-	}
+	out.CurrentProducts = products
 
 	if out.ActiveExperiments == nil {
 		out.ActiveExperiments = []experiment.Record{}

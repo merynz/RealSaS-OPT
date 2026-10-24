@@ -1,6 +1,7 @@
 {
   "schema": "RealSaS.KnightCurrentSubjectInputResealTrigger.v1",
   "operation": "RESEAL_CURRENT_KNIGHT_PRODUCT_RIG_SUBJECT_INPUT",
+  "revision": 3,
   "enabled": true,
   "subject_slug": "knight",
   "identity_inventory": "canonical/PRODUCT_NEAREST_KNIGHT_WITNESS_V1.json",

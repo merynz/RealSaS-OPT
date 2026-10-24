@@ -8,9 +8,9 @@ bound at compile time, never duplicated into the release identity.
 V2 requests also carry version identities for first-class product capabilities
 which live outside the legacy Compiler stage DAG. Platform derives stage
 capability versions from the sealed stage bindings and seals both views under
-the same immutable EngineRelease ID. Learned ModelRelease requirements are
-also derived from the same product-role/responsibility contracts; they are not
-maintained as a parallel hand-authored list.
+the same immutable EngineRelease ID. Product capability admission is projected
+from the exact released DAG using the shared product semantic contract; learned
+ModelRelease requirements are then limited to those admitted roles.
 """
 from __future__ import annotations
 
@@ -27,6 +27,7 @@ from compiler.realsas_compiler_services.platform_worker.stage_inputs import (
     subject_agnostic_release_parameters,
 )
 from tools.platform_capability_versions import (
+    capability_specs,
     capability_versions,
     product_model_requirements,
 )
@@ -44,6 +45,104 @@ def _stage_parameter_overrides(payload):
     return stages
 
 
+def _admitted_product_capability_ids(plan) -> tuple[str, ...]:
+    specs = capability_specs()
+    stage_capabilities = {
+        "compiler.stage/" + str(stage["id"])
+        for stage in plan.get("stages", [])
+    }
+    memo: dict[str, bool] = {}
+    visiting: set[str] = set()
+
+    def unavailable(capability_id: str) -> bool:
+        if capability_id in memo:
+            return memo[capability_id]
+        if capability_id in visiting:
+            raise RuntimeError("PRODUCT_CAPABILITY_DEPENDENCY_CYCLE:" + capability_id)
+        if capability_id not in specs:
+            raise RuntimeError("PRODUCT_CAPABILITY_DEPENDENCY_UNKNOWN:" + capability_id)
+        visiting.add(capability_id)
+        try:
+            policy = specs[capability_id]["policy"]
+            dependencies = policy.get("dependencies") or []
+            if not isinstance(dependencies, list):
+                raise RuntimeError("PRODUCT_CAPABILITY_DEPENDENCIES_TYPE:" + capability_id)
+            for dependency in dependencies:
+                dependency = str(dependency)
+                if dependency in stage_capabilities:
+                    continue
+                if dependency.startswith("compiler.stage/"):
+                    memo[capability_id] = True
+                    return True
+                if dependency.startswith("product."):
+                    if dependency not in specs:
+                        raise RuntimeError(
+                            "PRODUCT_CAPABILITY_DEPENDENCY_UNKNOWN:"
+                            + capability_id
+                            + ":"
+                            + dependency
+                        )
+                    if unavailable(dependency):
+                        memo[capability_id] = True
+                        return True
+                    continue
+                raise RuntimeError(
+                    "PRODUCT_CAPABILITY_DEPENDENCY_UNKNOWN:"
+                    + capability_id
+                    + ":"
+                    + dependency
+                )
+            memo[capability_id] = False
+            return False
+        finally:
+            visiting.discard(capability_id)
+
+    return tuple(
+        capability_id
+        for capability_id in sorted(specs)
+        if not unavailable(capability_id)
+    )
+
+
+def _release_capability_versions(admitted_ids: tuple[str, ...]):
+    all_versions = capability_versions()
+    admitted = set(admitted_ids)
+    unknown = sorted(admitted - set(all_versions))
+    if unknown:
+        raise RuntimeError("RELEASE_PRODUCT_CAPABILITY_VERSION_UNKNOWN:" + ",".join(unknown))
+    return {
+        capability_id: all_versions[capability_id]
+        for capability_id in sorted(admitted)
+    }
+
+
+def _release_model_requirements(admitted_ids: tuple[str, ...]):
+    # product_model_requirements() validates the complete source catalog against
+    # the responsibility ledger. Release projection then selects only families
+    # actually required by admitted product roles.
+    global_rows = {
+        str(row["family"]): dict(row)
+        for row in product_model_requirements()
+    }
+    specs = capability_specs()
+    active_families: set[str] = set()
+    for capability_id in admitted_ids:
+        required_models = specs[capability_id]["parameters"].get("required_models") or []
+        if not isinstance(required_models, list):
+            raise RuntimeError("PRODUCT_MODEL_REQUIREMENTS_TYPE:" + capability_id)
+        for row in required_models:
+            family = str(row.get("family") or "").strip()
+            if not family or family not in global_rows:
+                raise RuntimeError(
+                    "RELEASE_PRODUCT_MODEL_REQUIREMENT_UNKNOWN:"
+                    + capability_id
+                    + ":"
+                    + family
+                )
+            active_families.add(family)
+    return [global_rows[family] for family in sorted(active_families)]
+
+
 def snapshot(plan, manifest=None, *, name, purpose, created_by, stage_parameters=None):
     del manifest  # Legacy call compatibility; subject values are intentionally not release authority.
     require_product = purpose == "PRODUCT"
@@ -55,14 +154,15 @@ def snapshot(plan, manifest=None, *, name, purpose, created_by, stage_parameters
     unknown = sorted(set(overrides) - known)
     if unknown:
         raise RuntimeError("RELEASE_STAGE_PARAMETERS_UNKNOWN_STAGE:" + ",".join(unknown))
+    admitted_capabilities = _admitted_product_capability_ids(plan)
     model_channel = "PRODUCTION" if require_product else "RESEARCH"
     model_requirements = [
         {**row, "channel": model_channel}
-        for row in product_model_requirements()
+        for row in _release_model_requirements(admitted_capabilities)
     ]
     request = {
         "created_by": created_by,
-        "capability_versions": capability_versions(),
+        "capability_versions": _release_capability_versions(admitted_capabilities),
         "manifest": {
             "pipeline_plan_sha256": mainline.validate_plan(
                 plan, require_product_pass_authority=require_product

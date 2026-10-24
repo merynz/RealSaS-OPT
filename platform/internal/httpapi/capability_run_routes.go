@@ -22,7 +22,7 @@ type capabilityRunRequest struct {
 	SubjectID        *uuid.UUID                       `json:"subject_id,omitempty"`
 	Targets          []string                         `json:"targets"`
 	InputArtifactIDs []uuid.UUID                      `json:"input_artifact_ids,omitempty"`
-	Parameters       map[string]any                    `json:"parameters,omitempty"`
+	Parameters       map[string]any                   `json:"parameters,omitempty"`
 	CompilerBridge   *capabilityCompilerBridgeRequest `json:"compiler_bridge,omitempty"`
 	IdempotencyKey   string                           `json:"idempotency_key"`
 	RequestedBy      string                           `json:"requested_by"`

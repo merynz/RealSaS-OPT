@@ -14,7 +14,7 @@ func (a API) HandlerWithSubjectIdentityRead() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /v1/subjects/by-slug/{slug}", func(w http.ResponseWriter, r *http.Request) {
 		out, err := input.LookupSubjectBySlug(r.Context(), a.Pool, r.PathValue("slug"))
-		if errors.Is(err, input.ErrSubjectNotFound) {
+		if errors.Is(err, input.ErrSubjectIdentityNotFound) {
 			respond(w, http.StatusNotFound, map[string]string{"error": err.Error()})
 			return
 		}

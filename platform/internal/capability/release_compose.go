@@ -179,43 +179,21 @@ func modulePolicySHA256(descriptor Descriptor) (string, error) {
 	return semantic.JSONSHA256(descriptorPolicyDocument(descriptor))
 }
 
-func validateModuleVersionIdentity(descriptor Descriptor, version VersionIdentity) error {
-	if err := version.Validate(); err != nil {
-		return err
-	}
-	expectedPolicy, err := modulePolicySHA256(descriptor)
-	if err != nil {
-		return err
-	}
-	if version.PolicySHA256 != expectedPolicy {
-		return fmt.Errorf("CAPABILITY_MODULE_POLICY_VERSION_DRIFT:%s", descriptor.ID)
-	}
-	expectedParameters, err := semantic.JSONSHA256(descriptor.Metadata)
-	if err != nil {
-		return err
-	}
-	if version.ParametersSHA256 != expectedParameters {
-		return fmt.Errorf("CAPABILITY_MODULE_PARAMETERS_VERSION_DRIFT:%s", descriptor.ID)
-	}
-	return nil
-}
-
 // SealEngineReleaseSnapshot seals exactly one capability-set identity for an
 // existing immutable EngineRelease. Stage capability versions are derived from
-// the already-sealed EngineRelease stage bindings. Only non-stage product
-// capabilities admitted by the exact release graph require an implementation
-// identity from release tooling; policy and parameter hashes are independently
-// rederived from the Go descriptor.
+// the already-sealed EngineRelease stage bindings. For admitted non-stage
+// product capabilities, callers provide only implementation closure identities;
+// Platform mints policy and parameter hashes from its exact admitted descriptor.
 //
 // This keeps EngineRelease DAG truth, learned ModelRelease requirements and
 // capability-set truth separate but jointly immutable. A release cannot claim a
-// product role whose Compiler prerequisites are absent, nor one whose learned
-// responsibilities are absent or architecture-drifted in model requirements.
+// product role whose Compiler prerequisites are absent, nor can a caller mint a
+// second semantic identity for Platform-owned capability policy or parameters.
 func SealEngineReleaseSnapshot(
 	ctx context.Context,
 	pool *pgxpool.Pool,
 	releaseID uuid.UUID,
-	moduleVersions map[string]VersionIdentity,
+	moduleImplementations map[string]ModuleImplementationIdentity,
 	createdBy string,
 ) (string, error) {
 	if pool == nil || releaseID == uuid.Nil || createdBy == "" {
@@ -258,24 +236,28 @@ func SealEngineReleaseSnapshot(
 			}
 		} else {
 			requiredModules[descriptor.ID] = struct{}{}
-			var ok bool
-			version, ok = moduleVersions[descriptor.ID]
+			implementation, ok := moduleImplementations[descriptor.ID]
 			if !ok {
-				return "", fmt.Errorf("CAPABILITY_MODULE_VERSION_MISSING:%s", descriptor.ID)
+				return "", fmt.Errorf("CAPABILITY_MODULE_IMPLEMENTATION_MISSING:%s", descriptor.ID)
 			}
-			if err := validateModuleVersionIdentity(descriptor, version); err != nil {
-				return "", fmt.Errorf("CAPABILITY_MODULE_VERSION_INVALID:%s:%w", descriptor.ID, err)
+			version, err = mintModuleVersionIdentity(descriptor, implementation)
+			if err != nil {
+				return "", fmt.Errorf("CAPABILITY_MODULE_IMPLEMENTATION_INVALID:%s:%w", descriptor.ID, err)
 			}
 		}
 		bindings = append(bindings, ReleaseBinding{Descriptor: descriptor, Version: version})
 	}
-	for capabilityID := range moduleVersions {
+	for capabilityID := range moduleImplementations {
 		if _, ok := requiredModules[capabilityID]; !ok {
-			return "", fmt.Errorf("CAPABILITY_MODULE_VERSION_UNKNOWN:%s", capabilityID)
+			return "", fmt.Errorf("CAPABILITY_MODULE_IMPLEMENTATION_UNKNOWN:%s", capabilityID)
 		}
 	}
-	if len(moduleVersions) != len(requiredModules) {
-		return "", fmt.Errorf("CAPABILITY_MODULE_VERSION_CARDINALITY_DRIFT:%d!=%d", len(moduleVersions), len(requiredModules))
+	if len(moduleImplementations) != len(requiredModules) {
+		return "", fmt.Errorf(
+			"CAPABILITY_MODULE_IMPLEMENTATION_CARDINALITY_DRIFT:%d!=%d",
+			len(moduleImplementations),
+			len(requiredModules),
+		)
 	}
 	return SealReleaseSnapshot(ctx, pool, releaseID, bindings, createdBy)
 }

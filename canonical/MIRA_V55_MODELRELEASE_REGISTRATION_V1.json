@@ -1,0 +1,119 @@
+{
+  "schema": "RealSaS.MIRAV55ModelReleaseRegistration.v1",
+  "status": "READY_FOR_OPERATOR_REGISTRATION",
+  "authority": "OPERATIONAL_MODEL_IDENTITY_AND_RESEARCH_CHANNEL_POLICY_ONLY",
+  "model": {
+    "family": "MIRA",
+    "name": "mira-v55-direct-carrier-axis541-recovered-v1",
+    "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
+    "initial_state": "DRAFT"
+  },
+  "checkpoint": {
+    "artifact_type": "RealSaS.MIRARuntimeCheckpoint",
+    "schema_version": "v1",
+    "content_sha256": "b5ad2d56a9006058cba30c0b123d4e111f3eea3b78ed42f3542cbd095983139a",
+    "size_bytes": 558840979,
+    "source_uri": "realsas-authority://model_runtime_recovery/mira_v55/runtime/MIRA_RUNTIME_CHECKPOINT_V1.pt"
+  },
+  "recovery_evidence": {
+    "repo_path": "canonical/MIRA_V55_RUNTIME_RECOVERY_V1.json",
+    "artifact_type": "RealSaS.MIRAV55RuntimeRecovery",
+    "schema_version": "v1",
+    "source_uri": "realsas-canonical://MIRA_V55_RUNTIME_RECOVERY_V1.json"
+  },
+  "compute_contract": {
+    "id": "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF",
+    "cuda_required": true,
+    "cuda_bf16_required": true,
+    "tf32_allowed": false,
+    "cross_device_parity_proven": false
+  },
+  "historical_scope": {
+    "subject": "KNIGHT",
+    "terminal_pass_observed": true,
+    "product_authority": false,
+    "generalization_claimed": false,
+    "current_platform_product_skin_smoke_observed": false
+  },
+  "evaluations": [
+    {
+      "scope": "HISTORICAL_READOUT_BITWISE_PARITY",
+      "result": "PASS",
+      "evidence": "RECOVERY_EVIDENCE",
+      "details": {
+        "max_abs_logit_delta": 0.0,
+        "max_abs_weight_delta": 0.0,
+        "torch_equal_logits": true,
+        "torch_equal_weights": true,
+        "scientific_generalization_claimed": false
+      }
+    },
+    {
+      "scope": "RUNTIME_PACKAGE_SELF_CONTAINED_LOAD",
+      "result": "PASS",
+      "evidence": "RECOVERY_EVIDENCE",
+      "details": {
+        "runtime_checkpoint_schema": "RealSaS.MIRA.RuntimeCheckpoint.v1",
+        "self_contained_load_verified": true,
+        "fit_executed": false,
+        "training_executed": false,
+        "scientific_pass_minted": false
+      }
+    },
+    {
+      "scope": "HISTORICAL_KNIGHT_TERMINAL_PASS",
+      "result": "PASS",
+      "evidence": "RECOVERY_EVIDENCE",
+      "details": {
+        "subject": "KNIGHT",
+        "historical_only": true,
+        "product_authority": false,
+        "generalization_claimed": false
+      }
+    },
+    {
+      "scope": "CURRENT_PLATFORM_SKIN_EXECUTOR_SMOKE",
+      "result": "NOT_RUN",
+      "evidence": null,
+      "details": {
+        "required_before_product_skin_activation": true,
+        "required_compute_contract": "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF"
+      }
+    },
+    {
+      "scope": "UNSEEN_SUBJECT_GENERALIZATION",
+      "result": "NOT_RUN",
+      "evidence": null,
+      "details": {
+        "required_before_candidate_or_production_promotion": true
+      }
+    }
+  ],
+  "promotion": {
+    "maximum_allowed_channel": "RESEARCH",
+    "target_lifecycle_state": "RESEARCH_QUALIFIED",
+    "required_pass_scopes": [
+      "HISTORICAL_READOUT_BITWISE_PARITY",
+      "RUNTIME_PACKAGE_SELF_CONTAINED_LOAD",
+      "HISTORICAL_KNIGHT_TERMINAL_PASS"
+    ],
+    "candidate_promotion_allowed": false,
+    "production_promotion_allowed": false,
+    "replace_existing_research_channel_requires_explicit_operator_flag": true
+  },
+  "activation": {
+    "product_skin_activation_performed_by_registration": false,
+    "current_platform_skin_smoke_required_before_activation": true,
+    "separate_engine_release_required_for_activation": true
+  },
+  "forbidden_claims": {
+    "new_scientific_pass": false,
+    "unseen_generalization": false,
+    "product_candidate": false,
+    "production_ready": false,
+    "product_revision_pass": false,
+    "source_skin_runtime_authority": false,
+    "gsa_skin_field_authority": false,
+    "semantic_skin_transfer": false
+  }
+}

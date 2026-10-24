@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
+
+import pytest
 
 from tools import platform_foundation_cache_v1 as cache
 
@@ -23,6 +24,15 @@ def test_runtime_foundation_paths_are_deployment_root_relative(tmp_path):
     assert paths["dino_source"] == (tmp_path / "platform/foundations/dinov2/source").resolve()
     assert paths["dino_weight"] == (tmp_path / "platform/foundations/dinov2/dinov2_vits14_pretrain.pth").resolve()
     assert paths["flexicubes_source"] == (tmp_path / "platform/foundations/flexicubes/source").resolve()
+
+
+def test_cache_mutation_scope_accepts_only_strict_foundation_children(tmp_path):
+    foundation = (tmp_path / "platform/foundations").resolve()
+    child = foundation / "dinov2/source"
+    assert cache._managed_cache_path(child, foundation) == child
+    for unsafe in (foundation, tmp_path / "platform", tmp_path / "outside"):
+        with pytest.raises(RuntimeError, match="FOUNDATION_CACHE_MUTATION_SCOPE_INVALID"):
+            cache._managed_cache_path(unsafe, foundation)
 
 
 def test_exact_weight_verification_rejects_same_size_wrong_bytes(tmp_path):

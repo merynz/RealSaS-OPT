@@ -54,11 +54,34 @@ func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
 	if got := d.Metadata["tf32_allowed"]; got != false {
 		t.Fatalf("MIRA TF32 policy = %v", got)
 	}
-	if got := d.Metadata["activation_state"]; got != "BLOCKED" {
-		t.Fatalf("activation_state = %v", got)
+	if got := d.Metadata["model_release_admission_owner"]; got != "PLATFORM_MODEL_REQUIREMENTS" {
+		t.Fatalf("model release admission owner = %v", got)
 	}
-	if got := d.Metadata["activation_blocker"]; got != "CURRENT_MIRA_MODELRELEASE_NOT_REGISTERED" {
-		t.Fatalf("activation_blocker = %v", got)
+	if got := d.Metadata["operational_model_state_embedded_in_source"]; got != false {
+		t.Fatalf("operational model state source policy = %v", got)
+	}
+	wantResearch := []any{"RESEARCH", "CANDIDATE"}
+	gotResearch, ok := d.Metadata["research_execution_model_channels"].([]any)
+	if !ok || len(gotResearch) != len(wantResearch) {
+		t.Fatalf("research model channels = %#v", d.Metadata["research_execution_model_channels"])
+	}
+	for i := range wantResearch {
+		if gotResearch[i] != wantResearch[i] {
+			t.Fatalf("research model channels = %#v", gotResearch)
+		}
+	}
+	gotProduct, ok := d.Metadata["product_execution_model_channels"].([]any)
+	if !ok || len(gotProduct) != 1 || gotProduct[0] != "PRODUCTION" {
+		t.Fatalf("product model channels = %#v", d.Metadata["product_execution_model_channels"])
+	}
+	for _, forbidden := range []string{
+		"activation_state",
+		"activation_blocker",
+		"current_platform_mira_modelrelease_bound",
+	} {
+		if _, exists := d.Metadata[forbidden]; exists {
+			t.Fatalf("operational Platform state leaked into Skin source metadata: %s", forbidden)
+		}
 	}
 	if got := d.Metadata["historical_checkpoint_backed_mira_v55_exists"]; got != true {
 		t.Fatalf("historical MIRA checkpoint claim = %v", got)
@@ -84,15 +107,12 @@ func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
 	if got := d.Metadata["current_mira_v55_runtime_package_recovered"]; got != true {
 		t.Fatalf("current MIRA runtime package recovery claim = %v", got)
 	}
-	if got := d.Metadata["current_platform_mira_modelrelease_bound"]; got != false {
-		t.Fatalf("current MIRA ModelRelease claim = %v", got)
-	}
 	if got := d.Metadata["post_hoc_surface_skin_transfer_allowed"]; got != false {
 		t.Fatalf("post-hoc skin transfer policy = %v", got)
 	}
 }
 
-func TestBlockedSkinIsNotAnActiveProductProvider(t *testing.T) {
+func TestSkinIsNotAnActiveProductProviderBeforeQualifiedChannelAdmission(t *testing.T) {
 	for _, provider := range ProductProviders() {
 		descriptors, err := provider.Capabilities(context.Background())
 		if err != nil {
@@ -100,8 +120,8 @@ func TestBlockedSkinIsNotAnActiveProductProvider(t *testing.T) {
 		}
 		for _, descriptor := range descriptors {
 			if descriptor.ID == ProductSkinCapabilityID {
-				t.Fatal("blocked product.skin must not enter active EngineRelease capability graph")
+				t.Fatal("product.skin must not enter active EngineRelease graph before qualified ModelRelease channel admission")
 			}
-		}
 	}
+}
 }

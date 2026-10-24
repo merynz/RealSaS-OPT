@@ -4,5 +4,5 @@
   "enabled": true,
   "apply": false,
   "authority": "OPERATOR_TRIGGER_ONLY__NO_MODEL_QUALIFICATION__NO_PRODUCT_SKIN_ACTIVATION",
-  "notes": "First activation is a mutation-free authority-host dry-run. Apply requires a separate reviewed trigger change."
+  "notes": "Re-arm the mutation-free authority-host dry-run after exact EngineRelease product-capability admission closure. Apply still requires a separate reviewed trigger change."
 }

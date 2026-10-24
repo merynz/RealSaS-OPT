@@ -69,16 +69,13 @@ func descriptorSemanticMetadata(descriptor Descriptor) map[string]any {
 	return value
 }
 
-func validateProductDescriptorSemantics(registry *Registry) error {
-	if registry == nil {
-		return fmt.Errorf("product descriptor semantics registry required")
-	}
+func validateProductDescriptorRows(descriptors []Descriptor, requireFullCatalog bool) error {
 	semantics, err := loadProductCapabilitySemantics()
 	if err != nil {
 		return err
 	}
 	seen := map[string]struct{}{}
-	for _, descriptor := range registry.Descriptors() {
+	for _, descriptor := range descriptors {
 		row, declared := semantics.Capabilities[descriptor.ID]
 		if !declared {
 			if strings.HasPrefix(descriptor.ID, "product.") {
@@ -88,6 +85,9 @@ func validateProductDescriptorSemantics(registry *Registry) error {
 		}
 		if descriptor.Kind != KindModule {
 			return fmt.Errorf("PRODUCT_CAPABILITY_SEMANTICS_KIND_DRIFT:%s", descriptor.ID)
+		}
+		if _, duplicate := seen[descriptor.ID]; duplicate {
+			return fmt.Errorf("PRODUCT_CAPABILITY_SEMANTICS_DUPLICATE_PROVIDER:%s", descriptor.ID)
 		}
 		descriptorPolicySHA, err := semantic.JSONSHA256(descriptorPolicyDocument(descriptor))
 		if err != nil {
@@ -113,7 +113,7 @@ func validateProductDescriptorSemantics(registry *Registry) error {
 		}
 		seen[descriptor.ID] = struct{}{}
 	}
-	if len(seen) != len(semantics.Capabilities) {
+	if requireFullCatalog && len(seen) != len(semantics.Capabilities) {
 		missing := make([]string, 0)
 		for id := range semantics.Capabilities {
 			if _, ok := seen[id]; !ok {
@@ -124,4 +124,22 @@ func validateProductDescriptorSemantics(registry *Registry) error {
 		return fmt.Errorf("PRODUCT_CAPABILITY_SEMANTICS_PROVIDER_MISSING:%v", missing)
 	}
 	return nil
+}
+
+// validateProductDescriptorSemantics protects the source-level product catalog:
+// every declared product role must have exactly one provider and must match the
+// shared semantic contract. Exact EngineReleases may later admit only a subset
+// whose dependencies are executable in that release graph.
+func validateProductDescriptorSemantics(registry *Registry) error {
+	if registry == nil {
+		return fmt.Errorf("product descriptor semantics registry required")
+	}
+	return validateProductDescriptorRows(registry.Descriptors(), true)
+}
+
+func validateReleaseProductDescriptorSemantics(registry *Registry) error {
+	if registry == nil {
+		return fmt.Errorf("release product descriptor semantics registry required")
+	}
+	return validateProductDescriptorRows(registry.Descriptors(), false)
 }

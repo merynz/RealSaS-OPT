@@ -2,9 +2,11 @@ package httpapi
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,6 +22,8 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 	"github.com/merynz/RealSaS-OPT/platform/internal/stagegraph"
 )
+
+const maxArtifactReadBytes int64 = 64 << 20
 
 // Local operator API. Commands use the transactional outbox; handlers never
 // call a compiler script or rewrite a product revision themselves.
@@ -70,6 +74,39 @@ func (a API) Handler() http.Handler {
 		out, err := input.EnsureSubject(r.Context(), a.Pool, req)
 		result(w, out, err)
 	})
+	mux.HandleFunc("GET /v1/subjects/{id}/artifacts", func(w http.ResponseWriter, r *http.Request) {
+		subjectID, err := uuid.Parse(r.PathValue("id"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid subject id"})
+			return
+		}
+		limit := 200
+		if raw := r.URL.Query().Get("limit"); raw != "" {
+			value, err := strconv.Atoi(raw)
+			if err != nil || value <= 0 || value > 500 {
+				respond(w, 400, map[string]string{"error": "artifact list limit must be between 1 and 500"})
+				return
+			}
+			limit = value
+		}
+		out, err := registry.ListSubjectArtifacts(
+			r.Context(),
+			a.Pool,
+			subjectID,
+			r.URL.Query().Get("artifact_type"),
+			r.URL.Query().Get("schema_version"),
+			limit,
+		)
+		if errors.Is(err, registry.ErrSubjectNotFound) {
+			respond(w, 404, map[string]string{"error": err.Error()})
+			return
+		}
+		if err != nil {
+			result(w, nil, err)
+			return
+		}
+		respond(w, 200, out)
+	})
 	mux.HandleFunc("PUT /v1/artifacts/bytes", func(w http.ResponseWriter, r *http.Request) {
 		sha := r.URL.Query().Get("sha256")
 		if err := artifactstore.ValidateSHA256(sha); err != nil {
@@ -90,6 +127,67 @@ func (a API) Handler() http.Handler {
 		}
 		out, err := a.Store.PutStream(r.Context(), r.Body, sha, r.ContentLength)
 		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/artifacts/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("id"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid artifact id"})
+			return
+		}
+		out, err := registry.GetArtifact(r.Context(), a.Pool, id)
+		if errors.Is(err, registry.ErrArtifactNotFound) {
+			respond(w, 404, map[string]string{"error": err.Error()})
+			return
+		}
+		if err != nil {
+			result(w, nil, err)
+			return
+		}
+		respond(w, 200, out)
+	})
+	mux.HandleFunc("GET /v1/artifacts/{id}/bytes", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("id"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid artifact id"})
+			return
+		}
+		record, err := registry.GetArtifact(r.Context(), a.Pool, id)
+		if errors.Is(err, registry.ErrArtifactNotFound) {
+			respond(w, 404, map[string]string{"error": err.Error()})
+			return
+		}
+		if err != nil {
+			result(w, nil, err)
+			return
+		}
+		if record.SizeBytes > maxArtifactReadBytes {
+			respond(w, http.StatusRequestEntityTooLarge, map[string]string{"error": "ARTIFACT_READ_SIZE_LIMIT_EXCEEDED"})
+			return
+		}
+		if a.Store == nil {
+			respond(w, 503, map[string]string{"error": "artifact store is required"})
+			return
+		}
+		object := artifactstore.Object{ContentSHA256: record.ContentSHA256, StorageKey: record.StorageKey, SizeBytes: record.SizeBytes}
+		if err := a.Store.Verify(r.Context(), object); err != nil {
+			respond(w, 409, map[string]string{"error": "ARTIFACT_READ_VERIFY_FAILED:" + err.Error()})
+			return
+		}
+		data, err := a.Store.GetBytes(r.Context(), record.StorageKey)
+		if err != nil {
+			respond(w, 409, map[string]string{"error": "ARTIFACT_READ_FAILED:" + err.Error()})
+			return
+		}
+		if int64(len(data)) != record.SizeBytes || artifactstore.HashBytes(data) != record.ContentSHA256 {
+			respond(w, 409, map[string]string{"error": "ARTIFACT_READ_POST_VERIFY_DRIFT"})
+			return
+		}
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.Header().Set("Content-Length", strconv.FormatInt(record.SizeBytes, 10))
+		w.Header().Set("X-Content-SHA256", record.ContentSHA256)
+		w.Header().Set("Cache-Control", "no-store")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
 	})
 	mux.HandleFunc("POST /v1/artifacts/import", func(w http.ResponseWriter, r *http.Request) {
 		var req registry.ImportRequest

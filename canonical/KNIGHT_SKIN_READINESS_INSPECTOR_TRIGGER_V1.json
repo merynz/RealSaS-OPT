@@ -1,0 +1,7 @@
+{
+  "schema": "RealSaS.KnightSkinReadinessInspectorTrigger.v1",
+  "operation": "KNIGHT_SKIN_READINESS_INSPECT",
+  "enabled": true,
+  "authority": "READ_ONLY_DIAGNOSTIC__NO_QUALIFICATION_NO_MODEL_PROMOTION_NO_PRODUCT_SKIN_ACTIVATION",
+  "notes": "Run once after this exact main is successfully deployed. Inspect Platform-owned typed artifact lineage and exact MIRA operational state only; do not import, infer, qualify, promote, or activate Skin."
+}

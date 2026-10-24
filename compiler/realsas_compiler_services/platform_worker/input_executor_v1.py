@@ -8,6 +8,7 @@ replaceable scientific implementation.
 """
 
 import os
+from pathlib import Path
 from time import perf_counter
 from typing import Any, Callable
 
@@ -64,6 +65,15 @@ def _device_from_environment():
     return device
 
 
+def _dino_paths_from_deployment_root() -> tuple[Path, Path]:
+    raw = os.environ.get("REALSAS_DEPLOY_ROOT", "").strip()
+    if not raw:
+        raise RuntimeError("PRODUCT_INPUT_V1_DEPLOY_ROOT_REQUIRED")
+    root = Path(raw).expanduser().resolve()
+    foundation = root / "foundations" / "dinov2"
+    return foundation / "source", foundation / "dinov2_vits14_pretrain.pth"
+
+
 def execute_input_capability_v1(
     request: dict[str, Any],
     *,
@@ -82,8 +92,7 @@ def execute_input_capability_v1(
     source_ref = _one_source_input(request)
     source = decode_source_observation_v1(read_object(source_ref))
     device = _device_from_environment()
-    dino_source = os.environ.get("REALSAS_DINOV2_SOURCE_DIR", "").strip()
-    dino_weights = os.environ.get("REALSAS_DINOV2_WEIGHT_PATH", "").strip()
+    dino_source, dino_weights = _dino_paths_from_deployment_root()
 
     load_started = perf_counter()
     dino_model, loaded_authority = load_product_dino_v1(

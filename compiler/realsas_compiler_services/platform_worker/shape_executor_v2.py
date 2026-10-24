@@ -41,6 +41,13 @@ def _device_from_environment():
     return device
 
 
+def _flexicubes_root_from_deployment() -> Path:
+    raw = os.environ.get("REALSAS_DEPLOY_ROOT", "").strip()
+    if not raw:
+        raise RuntimeError("SHAPE_V2_DEPLOY_ROOT_REQUIRED")
+    return Path(raw).expanduser().resolve() / "foundations" / "flexicubes" / "source"
+
+
 def execute_shape_capability_v2(
     request: dict[str, Any],
     *,
@@ -58,7 +65,7 @@ def execute_shape_capability_v2(
 
     from compiler.realsas_compiler_services.platform_worker.scene_input_contract_v1 import decode_shape_input_v1
     from compiler.realsas_compiler_services.platform_worker.shape_capability_v2 import run_shape_inference_v2
-    from models.iris.vnext.flexicubes_v1 import PinnedFlexiCubesV1, flexicubes_root_from_environment_v1
+    from models.iris.vnext.flexicubes_v1 import PinnedFlexiCubesV1
 
     manifest: dict[str, Any] = {"run_id": "capability-" + execution_id}
     materialize_started = perf_counter()
@@ -75,7 +82,7 @@ def execute_shape_capability_v2(
     source_ref = _one_shape_input(request)
     inputs = decode_shape_input_v1(read_object(source_ref))
     device = _device_from_environment()
-    root: Path = flexicubes_root_from_environment_v1()
+    root = _flexicubes_root_from_deployment()
     extractor = PinnedFlexiCubesV1(root, device=device)
     maximum_new_tokens = int(metadata.get("maximum_new_tokens") or 131072)
     result = run_shape_inference_v2(

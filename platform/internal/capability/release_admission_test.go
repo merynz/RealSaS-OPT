@@ -3,8 +3,10 @@ package capability
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
+	"github.com/merynz/RealSaS-OPT/platform/internal/semantic"
 	"github.com/merynz/RealSaS-OPT/platform/internal/stagegraph"
 )
 
@@ -61,5 +63,55 @@ func TestPartialEngineReleaseAdmitsOnlyExecutableProductRoles(t *testing.T) {
 	}
 	if families["AXIS"] {
 		t.Fatalf("partial release required AXIS without admitted Rig: %+v", modelRequirements)
+	}
+}
+
+func TestModuleVersionIdentityIsMintedFromPlatformDescriptor(t *testing.T) {
+	rows, err := (ProductInputProvider{}).Capabilities(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 1 {
+		t.Fatalf("input provider descriptor count=%d", len(rows))
+	}
+	descriptor := rows[0]
+	implementation := ModuleImplementationIdentity{
+		ImplementationSHA256: strings.Repeat("a", 64),
+	}
+	version, err := mintModuleVersionIdentity(descriptor, implementation)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedPolicy, err := modulePolicySHA256(descriptor)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedParameters, err := semantic.JSONSHA256(descriptor.Metadata)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if version.ImplementationSHA256 != implementation.ImplementationSHA256 {
+		t.Fatalf("implementation identity drift=%s", version.ImplementationSHA256)
+	}
+	if version.PolicySHA256 != expectedPolicy {
+		t.Fatalf("policy identity not minted from descriptor=%s!=%s", version.PolicySHA256, expectedPolicy)
+	}
+	if version.ParametersSHA256 != expectedParameters {
+		t.Fatalf("parameter identity not minted from descriptor=%s!=%s", version.ParametersSHA256, expectedParameters)
+	}
+	if err := version.Validate(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestModuleImplementationIdentityRejectsCallerSemanticHashesByConstruction(t *testing.T) {
+	identity := ModuleImplementationIdentity{ImplementationSHA256: strings.Repeat("b", 64)}
+	if err := identity.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := json.Marshal(identity); err != nil {
+		t.Fatal(err)
+	} else if raw, _ := json.Marshal(identity); strings.Contains(string(raw), "policy_sha256") || strings.Contains(string(raw), "parameters_sha256") {
+		t.Fatalf("implementation request leaked Platform-owned semantic identity: %s", raw)
 	}
 }

@@ -1,0 +1,7 @@
+{
+  "schema": "RealSaS.CampaignStatusRequest.v1",
+  "campaign_id": "cf0ac8b2-e111-4e87-b048-515fa9f0f0da",
+  "expected_canonical_code_sha": "b09ffbc8c3d2500393c190dd2e2a955dd81f92eb",
+  "include_attempts": true,
+  "nonce": "FIT8_STAGE01_STATUS_20261014T1206Z"
+}

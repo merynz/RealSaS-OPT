@@ -138,3 +138,128 @@ jobs:
           echo 'source_scene_blender_smoke=SEPARATE_PATH_SCOPED_GATE'
           echo 'local_wsl_reserved_for=product_native_witness_or_requested_inference'
           echo 'witness_execution=BLOCKED_UNTIL_V2_READINESS_SEAL'
+
+  campaign-observer:
+    if: github.event_name == 'pull_request'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      REQUEST_PATH: canonical/CAMPAIGN_STATUS_REQUEST_V1.json
+      OUTPUT_PATH: /home/monster/realsas_authority/campaign_observer/${{ github.run_id }}/CAMPAIGN_STATUS.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Observe campaign and attempts read-only
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUTPUT_PATH")"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          req = json.loads(Path(os.environ['REQUEST_PATH']).read_text(encoding='utf-8'))
+          assert req.get('schema') == 'RealSaS.CampaignStatusRequest.v1', 'CAMPAIGN_OBSERVER_REQUEST_SCHEMA'
+          campaign_id = str(req.get('campaign_id') or '').strip()
+          expected_sha = str(req.get('expected_canonical_code_sha') or '').strip()
+          assert campaign_id, 'CAMPAIGN_OBSERVER_ID_REQUIRED'
+          assert len(expected_sha) == 40, 'CAMPAIGN_OBSERVER_CODE_SHA_REQUIRED'
+
+          deployment = json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text(encoding='utf-8'))
+          assert deployment.get('code_sha') == expected_sha, 'CAMPAIGN_OBSERVER_DEPLOYED_CODE_DRIFT'
+
+          def get(path):
+              with urllib.request.urlopen('http://127.0.0.1:8080' + path, timeout=30) as response:
+                  return json.loads(response.read())
+
+          def sha256_file(path: Path) -> str:
+              h = hashlib.sha256()
+              with path.open('rb') as handle:
+                  for chunk in iter(lambda: handle.read(1024 * 1024), b''):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          campaign = get('/v1/research/campaigns/' + campaign_id)
+          assert campaign.get('canonical_code_sha') == expected_sha, 'CAMPAIGN_OBSERVER_CAMPAIGN_CODE_DRIFT'
+          attempts = []
+          if bool(req.get('include_attempts')):
+              for member in campaign.get('members') or []:
+                  attempt_id = str(member.get('attempt_id') or '').strip()
+                  assert attempt_id, 'CAMPAIGN_OBSERVER_ATTEMPT_ID_REQUIRED'
+                  attempts.append({'member': member, 'attempt': get('/v1/attempts/' + attempt_id)})
+
+          authority_root = Path(os.environ['AUTHORITY_ROOT'])
+          failed_member_diagnostics = []
+          for row in attempts:
+              member = dict(row.get('member') or {})
+              if str(member.get('final_state') or '') != 'FAILED':
+                  continue
+              subject_id = str(member.get('subject_id') or '').strip()
+              assert subject_id, 'CAMPAIGN_OBSERVER_FAILED_SUBJECT_ID_REQUIRED'
+              run_root = authority_root / 'runs' / f'CAMPAIGN_{campaign_id}_{subject_id}'
+              diagnostic = {
+                  'subject_id': subject_id,
+                  'attempt_id': str(member.get('attempt_id') or ''),
+                  'run_root': str(run_root),
+                  'run_root_exists': run_root.is_dir(),
+              }
+
+              manifest_path = run_root / 'run_manifest.json'
+              if manifest_path.is_file():
+                  manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+                  diagnostic['run_manifest_sha256'] = sha256_file(manifest_path)
+                  diagnostic['execution_class'] = manifest.get('execution_class')
+                  diagnostic['iris_fit_manifest'] = manifest.get('iris_fit')
+
+              ledger_path = run_root / 'ACTIVE_RUN_V2.json'
+              if ledger_path.is_file():
+                  ledger = json.loads(ledger_path.read_text(encoding='utf-8'))
+                  diagnostic['run_ledger_sha256'] = sha256_file(ledger_path)
+                  diagnostic['ledger_status'] = ledger.get('status')
+                  diagnostic['ledger_execution_class'] = ledger.get('execution_class')
+                  stage09 = [entry for entry in ledger.get('stages') or [] if entry.get('id') == '09_IRIS_FIT_PREREGISTERED']
+                  diagnostic['stage09_ledger'] = stage09[0] if len(stage09) == 1 else stage09
+
+              stage_root = run_root / 'artifacts' / '09_IRIS_FIT_PREREGISTERED'
+              stage_files = []
+              if stage_root.is_dir():
+                  for path in sorted(p for p in stage_root.rglob('*') if p.is_file()):
+                      stat = path.stat()
+                      item = {
+                          'path': str(path.relative_to(run_root)),
+                          'size_bytes': int(stat.st_size),
+                          'sha256': sha256_file(path),
+                      }
+                      if path.suffix.lower() == '.json' and stat.st_size <= 2 * 1024 * 1024:
+                          try:
+                              item['json'] = json.loads(path.read_text(encoding='utf-8'))
+                          except Exception as error:
+                              item['json_parse_error'] = type(error).__name__
+                      stage_files.append(item)
+              diagnostic['stage09_files'] = stage_files
+              failed_member_diagnostics.append(diagnostic)
+
+          out = {
+              'schema': 'RealSaS.CampaignStatusObservation.v1',
+              'read_only': True,
+              'request': req,
+              'deployment_code_sha': deployment.get('code_sha'),
+              'campaign': campaign,
+              'attempts': attempts,
+              'failed_member_diagnostics': failed_member_diagnostics,
+          }
+          Path(os.environ['OUTPUT_PATH']).write_text(json.dumps(out, sort_keys=True, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(out, sort_keys=True))
+          PY
+
+      - name: Preserve campaign status observation
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-campaign-observer-${{ github.run_id }}
+          path: ${{ env.OUTPUT_PATH }}
+          if-no-files-found: error
+          retention-days: 7

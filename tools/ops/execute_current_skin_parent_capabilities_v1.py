@@ -4,14 +4,14 @@ from __future__ import annotations
 """Execute the current generic Mesh/Rig capability closure for one subject.
 
 The operation is deliberately limited to a DEVELOPER_RUN / PromotionNever goal.
-It reconstructs a fresh implementation-audit run manifest from the newest exact
-SubjectInput that satisfies the current product.rig Compiler read set,
-materializes SourceObservation.v1 from the already hash-bound source truth,
-imports that payload as EXTERNAL_INPUT, creates an exact current RESEARCH
-EngineRelease, and targets product.rig through the Platform capability DAG.
+When an exact SubjectInput ID is supplied, that immutable snapshot is consumed
+directly and its absent declared manifest keys remain absent. The legacy manual
+mode retains newest-complete selection for backward operational use.
 
-It never runs MIRA, mints CanonicalSkinIR, promotes a model, activates product.skin,
-or mints a ProductRevision/genericity claim.
+The selected exact source truth is materialized as SourceObservation.v1, an exact
+current RESEARCH EngineRelease is created, and product.rig is targeted through
+the Platform capability DAG. This operation never runs MIRA, mints CanonicalSkinIR,
+promotes a model, activates product.skin, or mints a ProductRevision/genericity claim.
 """
 
 import argparse
@@ -25,6 +25,7 @@ from typing import Any
 from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+import uuid
 
 from compiler.realsas_compiler_services.orchestrator import mainline
 from compiler.realsas_compiler_services.platform_worker.source_observation_materializer_v1 import (
@@ -170,11 +171,81 @@ def _subject_input_candidates(api_root: str, subject_id: str) -> list[dict[str, 
     return sorted(grouped.values(), key=lambda row: str(row["observed_at"]), reverse=True)
 
 
+def _decode_manifest_sections(
+    api_root: str,
+    loaded: dict[str, Any],
+    declared_manifest_keys: set[str],
+    *,
+    reject_undeclared: bool,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[str]]:
+    roots = list(loaded.get("root_inputs") or [])
+    ids = list(loaded.get("artifact_ids") or [])
+    if len(roots) != len(ids) or not roots:
+        raise RuntimeError("SKIN_PARENT_SUBJECT_INPUT_ROOT_BINDINGS_INVALID")
+    sections: dict[str, Any] = {}
+    binding_receipt: list[dict[str, Any]] = []
+    for root, artifact_id in zip(roots, ids):
+        role = str(root.get("role") or "")
+        if not role.startswith("subject:manifest:"):
+            continue
+        key = role[len("subject:manifest:"):]
+        if reject_undeclared and key not in declared_manifest_keys:
+            raise RuntimeError("SKIN_PARENT_SUBJECT_INPUT_UNDECLARED_MANIFEST_SECTION:" + key)
+        metadata = _api(api_root, "GET", f"/v1/artifacts/{artifact_id}")
+        if metadata.get("artifact_type") != "RealSaS.RunManifestSection" or metadata.get("schema_version") != "v1":
+            raise RuntimeError("SKIN_PARENT_MANIFEST_SECTION_TYPE_DRIFT:" + role)
+        raw = _artifact_bytes(api_root, str(artifact_id), metadata)
+        try:
+            section = json.loads(raw.decode("utf-8"))
+        except Exception as exc:
+            raise RuntimeError("SKIN_PARENT_MANIFEST_SECTION_JSON_INVALID:" + role) from exc
+        if key in sections:
+            raise RuntimeError("SKIN_PARENT_MANIFEST_SECTION_DUPLICATE:" + key)
+        sections[key] = section
+        binding_receipt.append({
+            "role": role,
+            "artifact_id": str(artifact_id),
+            "semantic_sha256": str(metadata["semantic_sha256"]),
+            "content_sha256": str(metadata["content_sha256"]),
+        })
+    if not sections:
+        raise RuntimeError("SKIN_PARENT_SUBJECT_INPUT_MANIFEST_SECTIONS_REQUIRED")
+    absent = sorted(declared_manifest_keys - set(sections))
+    return sections, binding_receipt, absent
+
+
+def _load_subject_input_by_id(
+    api_root: str,
+    subject_id: str,
+    subject_input_id: str,
+    declared_manifest_keys: set[str],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    loaded = _api(api_root, "GET", f"/v1/subjects/{subject_id}/inputs/{subject_input_id}")
+    actual_id = str(loaded.get("subject_input_id") or "")
+    if actual_id != subject_input_id:
+        raise RuntimeError("SKIN_PARENT_EXACT_SUBJECT_INPUT_ID_DRIFT")
+    sections, bindings, absent = _decode_manifest_sections(
+        api_root,
+        loaded,
+        declared_manifest_keys,
+        reject_undeclared=True,
+    )
+    return loaded, {
+        "sections": sections,
+        "bindings": bindings,
+        "selection_diagnostics": [],
+        "observed_at": str(loaded.get("observed_at") or ""),
+        "selection_mode": "EXACT_PIN",
+        "declared_manifest_keys_absent_from_subject_input": absent,
+    }
+
+
 def _load_subject_input(
     api_root: str,
     subject_id: str,
     required_manifest_keys: set[str],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Legacy/manual fallback: select newest snapshot with the complete read set."""
     diagnostics: list[dict[str, Any]] = []
     for candidate in _subject_input_candidates(api_root, subject_id):
         input_id = str(candidate["subject_input_id"])
@@ -194,36 +265,21 @@ def _load_subject_input(
                 "missing_roles": missing,
             })
             continue
-        sections: dict[str, Any] = {}
-        binding_receipt = []
-        for root, artifact_id in zip(roots, ids):
-            role = str(root.get("role") or "")
-            if not role.startswith("subject:manifest:"):
-                continue
-            key = role[len("subject:manifest:"):]
-            metadata = _api(api_root, "GET", f"/v1/artifacts/{artifact_id}")
-            if metadata.get("artifact_type") != "RealSaS.RunManifestSection" or metadata.get("schema_version") != "v1":
-                raise RuntimeError("SKIN_PARENT_MANIFEST_SECTION_TYPE_DRIFT:" + role)
-            raw = _artifact_bytes(api_root, str(artifact_id), metadata)
-            try:
-                section = json.loads(raw.decode("utf-8"))
-            except Exception as exc:
-                raise RuntimeError("SKIN_PARENT_MANIFEST_SECTION_JSON_INVALID:" + role) from exc
-            sections[key] = section
-            binding_receipt.append({
-                "role": role,
-                "artifact_id": str(artifact_id),
-                "semantic_sha256": str(metadata["semantic_sha256"]),
-                "content_sha256": str(metadata["content_sha256"]),
-            })
-        missing_sections = sorted(required_manifest_keys - set(sections))
-        if missing_sections:
-            raise RuntimeError("SKIN_PARENT_REQUIRED_SECTION_DECODE_MISSING:" + ",".join(missing_sections))
+        sections, bindings, absent = _decode_manifest_sections(
+            api_root,
+            loaded,
+            required_manifest_keys,
+            reject_undeclared=False,
+        )
+        if absent:
+            raise RuntimeError("SKIN_PARENT_REQUIRED_SECTION_DECODE_MISSING:" + ",".join(absent))
         return loaded, {
             "sections": sections,
-            "bindings": binding_receipt,
+            "bindings": bindings,
             "selection_diagnostics": diagnostics,
             "observed_at": candidate["observed_at"],
+            "selection_mode": "LATEST_COMPLETE_READ_SET",
+            "declared_manifest_keys_absent_from_subject_input": [],
         }
     raise RuntimeError("SKIN_PARENT_NO_CURRENT_SUBJECT_INPUT_SATISFIES_PRODUCT_RIG_READ_SET")
 
@@ -305,7 +361,7 @@ def _attempt_parent_artifacts(api_root: str, subject_id: str, attempt_id: str) -
 def execute(args: argparse.Namespace) -> dict[str, Any]:
     plan = mainline.load_json(mainline.PLAN_PATH)
     plan_sha = mainline.validate_plan(plan)
-    _stage_closure, required_manifest_keys = _product_rig_stage_closure(plan)
+    _stage_closure, declared_manifest_keys = _product_rig_stage_closure(plan)
 
     subject = _api(args.api_root, "GET", f"/v1/subjects/by-slug/{args.subject_slug}")
     if subject.get("schema") != "RealSaS.SubjectIdentity.v1":
@@ -314,7 +370,19 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
     if not subject_id:
         raise RuntimeError("SKIN_PARENT_SUBJECT_ID_REQUIRED")
 
-    subject_input, source = _load_subject_input(args.api_root, subject_id, required_manifest_keys)
+    if args.subject_input_id:
+        subject_input, source = _load_subject_input_by_id(
+            args.api_root,
+            subject_id,
+            args.subject_input_id,
+            declared_manifest_keys,
+        )
+    else:
+        subject_input, source = _load_subject_input(
+            args.api_root,
+            subject_id,
+            declared_manifest_keys,
+        )
     subject_input_id = str(subject_input["subject_input_id"])
     manifest_sha = str(subject_input["manifest_sha256"])
     sections = dict(source["sections"])
@@ -397,7 +465,11 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
             "subject_input_id": subject_input_id,
             "manifest_sha256": manifest_sha,
             "observed_at": source["observed_at"],
-            "required_manifest_keys": sorted(required_manifest_keys),
+            "selection_mode": source["selection_mode"],
+            "declared_manifest_keys": sorted(declared_manifest_keys),
+            "bound_manifest_keys": sorted(sections),
+            "declared_manifest_keys_absent_from_subject_input": source["declared_manifest_keys_absent_from_subject_input"],
+            "absent_sections_fabricated": False,
             "bindings": source["bindings"],
             "selection_diagnostics": source["selection_diagnostics"],
         },
@@ -434,6 +506,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--api-root", default="http://127.0.0.1:8080")
     parser.add_argument("--subject-slug", required=True)
+    parser.add_argument("--subject-input-id", default="")
     parser.add_argument("--expected-main-sha", required=True)
     parser.add_argument("--compiler-run-id", required=True)
     parser.add_argument("--actor", default="current-skin-parent-executor-v1")
@@ -445,6 +518,11 @@ def main() -> None:
         raise RuntimeError("SKIN_PARENT_EXPECTED_MAIN_SHA_INVALID")
     if not args.compiler_run_id or any(ch not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-" for ch in args.compiler_run_id):
         raise RuntimeError("SKIN_PARENT_COMPILER_RUN_ID_INVALID")
+    if args.subject_input_id:
+        try:
+            args.subject_input_id = str(uuid.UUID(args.subject_input_id))
+        except ValueError as exc:
+            raise RuntimeError("SKIN_PARENT_SUBJECT_INPUT_ID_INVALID") from exc
 
     try:
         receipt = execute(args)
@@ -454,6 +532,7 @@ def main() -> None:
             "status": "FAIL_CURRENT_TYPED_SKIN_PARENT_EXECUTION",
             "source_code_sha": args.expected_main_sha,
             "subject_slug": args.subject_slug,
+            "requested_subject_input_id": args.subject_input_id,
             "compiler_run_id": args.compiler_run_id,
             "error_type": type(exc).__name__,
             "error": str(exc),

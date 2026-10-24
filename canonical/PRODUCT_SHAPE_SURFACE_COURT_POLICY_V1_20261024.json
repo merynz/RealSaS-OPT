@@ -1,0 +1,46 @@
+{
+  "schema": "RealSaS.ProductShapeSurfaceCourtPolicy.v1",
+  "status": "FROZEN_BEFORE_CURRENT_KNIGHT_PRODUCT_SURFACE_RESULT",
+  "date": "2026-10-24",
+  "authority": "NORMATIVE_PRODUCT_SHAPE_TO_SURFACE_COMPILER_COURT__NOT_TUNED_FROM_CURRENT_KNIGHT_RESULT",
+  "source_fidelity_policy": {
+    "path": "canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json",
+    "sha256": "94d479de27dd99722fde4dd239401ba6ccbfb221"
+  },
+  "surface_adequacy_policy": {
+    "path": "canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V3_20260929.json",
+    "sha256": "64b6f1885ca8c5766054cbdbf81d8c3a03a0138b"
+  },
+  "frame_contract": {
+    "shape_evidence_frame": "RealSaS.TESSA.SequenceNormalizedFrame.v1",
+    "tessa_to_normalization_half_extent_scale": 2.0,
+    "compiler_world_frame_owner": true
+  },
+  "normal_orientation": {
+    "operator_id": "RealSaS.Compiler.ShapeTopologyAreaNormalWithIRISHint.v1",
+    "topology_neighborhood_authority": "DECODED_TESSA_FACE_INCIDENCE_ONLY",
+    "orientation_hint_source": "IRIS_SURFACE_WITNESS_NORMALS",
+    "orientation_hint_role": "SIGN_ONLY_NOT_NEIGHBORHOOD_AUTHORITY",
+    "nearest_hint_p95_distance_norm_max": 0.03,
+    "nearest_hint_max_distance_norm_max": 0.08,
+    "cross_sheet_euclidean_normal_borrowing_forbidden": true
+  },
+  "surface_profile": {
+    "profile_id": "PRODUCT_SHAPE_TOPOLOGY_SURFACE_V1",
+    "relation_kind": "SHAPE_TOPOLOGY_NEIGHBOR",
+    "observed_flag": "OBSERVED_PRODUCT_SURFACE_EVIDENCE",
+    "completed_flag": "MODEL_COMPLETED_PRODUCT_SURFACE_EVIDENCE",
+    "builder_id": "RealSaS.Compiler.ShapeTopologySurfaceCourt.v1"
+  },
+  "invariants": [
+    "SHAPE_PROPOSAL_REMAINS_LEARNED_EVIDENCE_ONLY",
+    "DECODED_TESSA_TOPOLOGY_IS_NOT_CANONICAL_MESH_AUTHORITY",
+    "IRIS_NORMALS_ORIENT_SIGN_ONLY_AND_NEVER_DEFINE_TOPOLOGY_NEIGHBORHOODS",
+    "TOPOLOGY_LOCAL_NORMALS_PRESERVE_STAGE14_CROSS_SHEET_SAFETY_RULE",
+    "STAGE13_SOURCE_FIDELITY_THRESHOLDS_ARE_REUSED_WITHOUT_RELAXATION",
+    "STAGE14_SURFACE_ADEQUACY_THRESHOLDS_ARE_REUSED_WITHOUT_RELAXATION",
+    "NO_FIT_OR_CHECKPOINT_MUTATION_DURING_PRODUCT_EXECUTION",
+    "COMPILER_MINTS_CANONICAL_MESH_ONLY_AFTER_STATIC_SOURCE_FIDELITY_QUALIFICATION"
+  ],
+  "claim_boundary": "This policy binds current ShapeProposal evidence to a Compiler-owned RiggingSurface evidence profile and static Mesh court. It does not claim Knight PASS, genericity, Rig PASS, Skin PASS, LOFO, unseen generalization, or ProductRevision PASS."
+}

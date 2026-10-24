@@ -2,12 +2,13 @@ from __future__ import annotations
 
 """CAS-native executor for the stable product.mesh role.
 
-The executor consumes only typed capability artifacts. Shape supplies normalized
-learned topology evidence; Compiler-owned normalization/surface/partition courts
-bind that proposal into world space, repair it under the frozen release policy,
-replay static source-fidelity qualification, then mint one immutable
-CanonicalMeshIR. No legacy run path, moving alias, or second TESSA inference is
-permitted here.
+Current product execution consumes registered-model ShapeProposal evidence once,
+then runs Compiler-owned courts in this module. It must not re-enter the legacy
+IRIS fit/checkpoint/zero-surface stage chain. Shape supplies learned surface and
+topology evidence; Compiler binds that evidence to the exact camera/normalization
+contract, derives a qualified RiggingSurface evidence profile, derives the
+structural partition/carrier policy, repairs and qualifies the static candidate
+under frozen policies, then mints one immutable CanonicalMeshIR.
 """
 
 import hashlib
@@ -19,6 +20,15 @@ from typing import Any, Callable
 MESH_EXECUTOR_CONTRACT_V1 = "RealSaS.ProductMeshCompile.v1"
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _MESH_POLICY_PATH = _REPO_ROOT / "canonical" / "QUALIFIED_MESH_PRODUCT_POLICY_V2_20260919.json"
+_SURFACE_COURT_POLICY_PATH = (
+    _REPO_ROOT / "canonical" / "PRODUCT_SHAPE_SURFACE_COURT_POLICY_V1_20261024.json"
+)
+_SOURCE_FIDELITY_POLICY_PATH = (
+    _REPO_ROOT / "canonical" / "STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json"
+)
+_SURFACE_ADEQUACY_POLICY_PATH = (
+    _REPO_ROOT / "canonical" / "STAGE14_SUBSTRATE_ADEQUACY_POLICY_V3_20260929.json"
+)
 
 
 def _one(
@@ -78,6 +88,28 @@ def _seal(
     }
 
 
+def _load_bound_json_policy(
+    path: Path,
+    *,
+    expected_sha256: str,
+    expected_schema: str,
+    error_prefix: str,
+) -> tuple[dict[str, Any], str]:
+    if len(expected_sha256) != 64 or not path.is_file():
+        raise RuntimeError(error_prefix + "_BINDING_REQUIRED")
+    raw = path.read_bytes()
+    actual = hashlib.sha256(raw).hexdigest()
+    if actual != expected_sha256:
+        raise RuntimeError(error_prefix + "_SOURCE_DRIFT")
+    try:
+        payload = json.loads(raw)
+    except Exception as exc:
+        raise RuntimeError(error_prefix + "_JSON_INVALID") from exc
+    if not isinstance(payload, dict) or payload.get("schema") != expected_schema:
+        raise RuntimeError(error_prefix + "_SCHEMA_DRIFT")
+    return payload, actual
+
+
 def execute_mesh_capability_v1(
     request: dict[str, Any],
     *,
@@ -91,23 +123,36 @@ def execute_mesh_capability_v1(
         raise RuntimeError("MESH_CAPABILITY_KIND_DRIFT")
     if request.get("model_releases"):
         raise RuntimeError("MESH_LEARNED_MODEL_RELEASE_FORBIDDEN")
+    if metadata.get("fit_allowed_during_product_execution") is not False:
+        raise RuntimeError("MESH_PRODUCT_FIT_POLICY_DRIFT")
+    if metadata.get("legacy_ir_fit_stage_dependency") is not False:
+        raise RuntimeError("MESH_LEGACY_IR_FIT_DEPENDENCY_FORBIDDEN")
 
-    # Imports stay local so generic worker discovery does not pull model/science
+    # Imports stay local so generic worker discovery does not pull science/model
     # dependencies unless product.mesh actually executes.
     from compiler.realsas_compiler_core.artifact_codec_v2 import (
-        component_carrier_policy_from_dict,
-        mechanical_partition_from_dict,
         qualified_camera_set_from_dict,
         qualified_observation_set_from_dict,
-        rigging_surface_from_dict,
     )
     from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import mint_canonical_mesh_v1
-    from compiler.realsas_compiler_core.geometry_substrate_v2 import geometry_substrate_from_dict
+    from compiler.realsas_compiler_core.mechanical_partition_v1 import build_structural_partition
     from compiler.realsas_compiler_core.mesh.product_policy_v1 import load_mesh_policy_document
     from compiler.realsas_compiler_core.preproduct_authority_v1 import normalization_domain_from_dict
+    from compiler.realsas_compiler_core.product_authority_v1 import (
+        ComponentCarrierDecisionIR,
+        build_component_carrier_policy,
+        validate_component_carrier_policy,
+        validate_mechanical_partition,
+    )
+    from compiler.realsas_compiler_core.product_surface_court_v1 import (
+        build_product_shape_surface_v1,
+    )
     from compiler.realsas_compiler_core.shape_mesh_bridge_v1 import bind_shape_proposal_to_tessa_v1
     from compiler.realsas_compiler_core.static_mesh_qualification_v1 import relation_parent_quality_report_v1
-    from compiler.realsas_compiler_core.static_mesh_qualification_v2 import qualify_static_mesh_v2
+    from compiler.realsas_compiler_core.static_mesh_qualification_v2 import (
+        build_source_fidelity_policy_binding_v1,
+        qualify_static_mesh_v2,
+    )
     from compiler.realsas_compiler_core.surface_addressing_v1 import build_surface_addressing
     from compiler.realsas_compiler_core.tessa_stage18_v1 import build_tessa_static_candidate_from_proposal_v1
     from compiler.realsas_compiler_services.platform_worker.shape_capability_v2 import decode_shape_proposal_v2
@@ -116,15 +161,25 @@ def execute_mesh_capability_v1(
         derive_foreground_masks_v1,
     )
 
+    # Current stable boundary: only Shape + source/camera/observation/normalization
+    # enter Mesh. Geometry/surface/partition are born here from current evidence;
+    # legacy Stage13/15/17 artifacts are deliberately not accepted.
     shape_ref = _one(request, "RealSaS.ShapeProposal", "v2")
     source_ref = _one(request, "RealSaS.SourceObservation", "v1")
     camera_ref = _one(request, "RealSaS.QualifiedCameraSetIR", "v1")
     observation_ref = _one(request, "RealSaS.QualifiedObservationSetIR", "v1")
     normalization_ref = _one(request, "RealSaS.NormalizationDomainIR", "v1")
-    geometry_ref = _one(request, "RealSaS.GeometrySubstrateQualificationIR", "v2")
-    surface_ref = _one(request, "RealSaS.RiggingSurfaceIR", "v1")
-    partition_ref = _one(request, "RealSaS.MechanicalPartitionIR", "v1")
-    carrier_policy_ref = _one(request, "RealSaS.ComponentCarrierPolicyIR", "v1")
+
+    forbidden_legacy_types = {
+        "RealSaS.GeometrySubstrateQualificationIR",
+        "RealSaS.MechanicalPartitionIR",
+        "RealSaS.ComponentCarrierPolicyIR",
+    }
+    if any(
+        str(ref.get("artifact_type") or "") in forbidden_legacy_types
+        for ref in request.get("input_artifacts") or ()
+    ):
+        raise RuntimeError("MESH_LEGACY_PRECOMPUTED_COURT_INPUT_FORBIDDEN")
 
     shape = decode_shape_proposal_v2(read_object(shape_ref))
     source = decode_source_observation_arrays_v1(read_object(source_ref))
@@ -135,21 +190,11 @@ def execute_mesh_capability_v1(
     normalization = normalization_domain_from_dict(
         _json_payload(read_object, normalization_ref)
     )
-    geometry = geometry_substrate_from_dict(_json_payload(read_object, geometry_ref))
-    surface = rigging_surface_from_dict(_json_payload(read_object, surface_ref))
-    partition = mechanical_partition_from_dict(_json_payload(read_object, partition_ref))
-    carrier_policy = component_carrier_policy_from_dict(
-        _json_payload(read_object, carrier_policy_ref)
-    )
 
     if normalization.camera_set_binding_hash != cameras.camera_set_hash:
         raise RuntimeError("MESH_NORMALIZATION_CAMERA_BINDING_DRIFT")
     if normalization.observation_set_binding_hash != observation.observation_set_hash:
         raise RuntimeError("MESH_NORMALIZATION_OBSERVATION_BINDING_DRIFT")
-    if geometry.camera_set_binding_hash != cameras.camera_set_hash:
-        raise RuntimeError("MESH_GEOMETRY_CAMERA_BINDING_DRIFT")
-    if geometry.observation_set_binding_hash != observation.observation_set_hash:
-        raise RuntimeError("MESH_GEOMETRY_OBSERVATION_BINDING_DRIFT")
 
     expected_mask_sha = {
         int(view.view_index): str(view.foreground_mask_sha256)
@@ -159,17 +204,88 @@ def execute_mesh_capability_v1(
         source, expected_sha256_by_view=expected_mask_sha
     )
 
-    expected_policy_sha = str(metadata.get("mesh_policy_document_sha256") or "")
-    if len(expected_policy_sha) != 64 or not _MESH_POLICY_PATH.is_file():
-        raise RuntimeError("MESH_RELEASE_POLICY_BINDING_REQUIRED")
-    actual_policy_sha = hashlib.sha256(_MESH_POLICY_PATH.read_bytes()).hexdigest()
-    if actual_policy_sha != expected_policy_sha:
+    expected_mesh_policy_sha = str(metadata.get("mesh_policy_document_sha256") or "")
+    mesh_policy_raw = _MESH_POLICY_PATH.read_bytes() if _MESH_POLICY_PATH.is_file() else b""
+    if (
+        len(expected_mesh_policy_sha) != 64
+        or not mesh_policy_raw
+        or hashlib.sha256(mesh_policy_raw).hexdigest() != expected_mesh_policy_sha
+    ):
         raise RuntimeError("MESH_RELEASE_POLICY_SOURCE_DRIFT")
     mesh_policy = load_mesh_policy_document(_MESH_POLICY_PATH)
 
+    surface_policy, surface_policy_sha = _load_bound_json_policy(
+        _SURFACE_COURT_POLICY_PATH,
+        expected_sha256=str(metadata.get("shape_surface_court_policy_sha256") or ""),
+        expected_schema="RealSaS.ProductShapeSurfaceCourtPolicy.v1",
+        error_prefix="MESH_SURFACE_COURT_POLICY",
+    )
+    source_fidelity_policy, source_fidelity_sha = _load_bound_json_policy(
+        _SOURCE_FIDELITY_POLICY_PATH,
+        expected_sha256=str(metadata.get("source_fidelity_policy_sha256") or ""),
+        expected_schema="RealSaS.Stage13RestReprojectionPolicy.v2",
+        error_prefix="MESH_SOURCE_FIDELITY_POLICY",
+    )
+    adequacy_policy, adequacy_sha = _load_bound_json_policy(
+        _SURFACE_ADEQUACY_POLICY_PATH,
+        expected_sha256=str(metadata.get("surface_adequacy_policy_sha256") or ""),
+        expected_schema="RealSaS.Stage14SubstrateAdequacyPolicy.v3",
+        error_prefix="MESH_SURFACE_ADEQUACY_POLICY",
+    )
+    if (
+        dict(surface_policy.get("source_fidelity_policy") or {}).get("sha256")
+        != source_fidelity_sha
+        or dict(surface_policy.get("surface_adequacy_policy") or {}).get("sha256")
+        != adequacy_sha
+    ):
+        raise RuntimeError("MESH_SURFACE_COURT_CHILD_POLICY_BINDING_DRIFT")
+
+    shape_content_sha = str(shape_ref.get("content_sha256") or "")
+    surface_result = build_product_shape_surface_v1(
+        shape=shape,
+        shape_content_sha256=shape_content_sha,
+        cameras=cameras,
+        normalization=normalization,
+        policy=surface_policy,
+        policy_sha256=surface_policy_sha,
+        source_fidelity_document=source_fidelity_policy,
+        source_fidelity_sha256=source_fidelity_sha,
+        adequacy_document=adequacy_policy,
+        adequacy_sha256=adequacy_sha,
+    )
+    surface = surface_result.surface
+
+    partition = build_structural_partition(surface, boundary_overrides=())
+    decisions = tuple(
+        ComponentCarrierDecisionIR(
+            component.component_id,
+            "MESH",
+            ("AUTOMATIC_CONSERVATIVE_MESH_CARRIER_V1",),
+            metadata={
+                "automatic": True,
+                "semantic_recognition_used": False,
+                "planar_optimization_deferred": True,
+            },
+        )
+        for component in partition.components
+    )
+    carrier_policy = build_component_carrier_policy(
+        partition=partition,
+        decisions=decisions,
+        metadata={
+            "default_carrier": "MESH",
+            "automatic": True,
+            "manual_carrier_authoring_used": False,
+            "clip_is_presentation_only": True,
+            "product_mesh_inline_court": True,
+        },
+    )
+    validate_mechanical_partition(partition, surface)
+    validate_component_carrier_policy(carrier_policy, partition)
+
     proposal, frame_binding = bind_shape_proposal_to_tessa_v1(
         shape=shape,
-        shape_proposal_content_sha256=str(shape_ref.get("content_sha256") or ""),
+        shape_proposal_content_sha256=shape_content_sha,
         normalization=normalization,
         surface=surface,
     )
@@ -177,7 +293,7 @@ def execute_mesh_capability_v1(
     repair_config = dict(metadata.get("static_repair") or {})
     candidate_bundle = build_tessa_static_candidate_from_proposal_v1(
         proposal=proposal,
-        proposal_evidence_sha256=str(shape_ref.get("content_sha256") or ""),
+        proposal_evidence_sha256=shape_content_sha,
         surface=surface,
         partition=partition,
         carrier_policy=carrier_policy,
@@ -188,10 +304,17 @@ def execute_mesh_capability_v1(
     )
     candidate = candidate_bundle.repaired_candidate
     addressing = build_surface_addressing(candidate)
+
+    source_fidelity_binding = build_source_fidelity_policy_binding_v1(
+        cameras=cameras,
+        observation=observation,
+        policy_document=source_fidelity_policy,
+        policy_document_sha256=source_fidelity_sha,
+    )
     static_result = qualify_static_mesh_v2(
         candidate=candidate,
         surface_addressing=addressing,
-        geometry=geometry,
+        source_fidelity_binding=source_fidelity_binding,
         mesh_policy=mesh_policy,
         partition=partition,
         cameras=cameras,
@@ -203,7 +326,10 @@ def execute_mesh_capability_v1(
             "capability_id": str(request.get("capability_id") or ""),
             "status": "FAIL",
             "outputs": [],
-            "diagnostics": dict(static_result.diagnostics),
+            "diagnostics": {
+                "surface_qualification": dict(surface_result.qualification),
+                **dict(static_result.diagnostics),
+            },
             "failure": {
                 "code": str(
                     static_result.blockers[0]
@@ -219,7 +345,10 @@ def execute_mesh_capability_v1(
         raise RuntimeError("MESH_STATIC_PASS_WITHOUT_AUTHORITY")
 
     proposal_refs = (
-        str(shape_ref.get("content_sha256") or ""),
+        shape_content_sha,
+        surface.geometry_lineage_hash,
+        str(surface_result.qualification["qualification_hash"]),
+        source_fidelity_binding.binding_hash,
         frame_binding.binding_hash,
         candidate_bundle.material_support_field.field_lineage_hash,
         candidate_bundle.bridge_evidence.evidence_hash,
@@ -232,6 +361,8 @@ def execute_mesh_capability_v1(
         carrier_evidence=static_result.carrier_evidence,
         proposal_evidence_refs=proposal_refs,
     )
+    if mesh.source_evidence_binding_hash != surface.geometry_lineage_hash:
+        raise RuntimeError("MESH_PRODUCT_SURFACE_LINEAGE_BINDING_DRIFT")
 
     outputs = [
         _seal(
@@ -240,6 +371,46 @@ def execute_mesh_capability_v1(
             artifact_type="RealSaS.CanonicalMeshIR",
             schema_version="v1",
             authority_class="COMPILER_CANONICAL_MESH",
+            put_bytes=put_bytes,
+        ),
+        _seal(
+            surface,
+            role="rigging_surface",
+            artifact_type="RealSaS.RiggingSurfaceIR",
+            schema_version="v1",
+            authority_class="COMPILER_QUALIFIED_PRODUCT_SURFACE_EVIDENCE",
+            put_bytes=put_bytes,
+        ),
+        _seal(
+            surface_result.qualification,
+            role="product_surface_qualification",
+            artifact_type="RealSaS.ProductShapeSurfaceQualification",
+            schema_version="v1",
+            authority_class="COMPILER_PRODUCT_SURFACE_QUALIFICATION",
+            put_bytes=put_bytes,
+        ),
+        _seal(
+            partition,
+            role="mechanical_partition",
+            artifact_type="RealSaS.MechanicalPartitionIR",
+            schema_version="v1",
+            authority_class="QUALIFIED_MECHANICAL_PARTITION",
+            put_bytes=put_bytes,
+        ),
+        _seal(
+            carrier_policy,
+            role="component_carrier_policy",
+            artifact_type="RealSaS.ComponentCarrierPolicyIR",
+            schema_version="v1",
+            authority_class="QUALIFIED_COMPONENT_CARRIER_POLICY",
+            put_bytes=put_bytes,
+        ),
+        _seal(
+            source_fidelity_binding,
+            role="source_fidelity_policy_binding",
+            artifact_type="RealSaS.SourceFidelityPolicyBindingIR",
+            schema_version="v1",
+            authority_class="FROZEN_SOURCE_FIDELITY_POLICY_BINDING",
             put_bytes=put_bytes,
         ),
         _seal(
@@ -308,17 +479,27 @@ def execute_mesh_capability_v1(
         ),
     ]
     diagnostics = {
-        "schema": "RealSaS.ProductMeshCompileDiagnostics.v1",
+        "schema": "RealSaS.ProductMeshCompileDiagnostics.v2",
         "mesh_lineage_hash": mesh.mesh_lineage_hash,
         "candidate_lineage_hash": candidate.candidate_lineage_hash,
         "static_qualification_hash": static_result.qualification.qualification_hash,
         "carrier_evidence_hash": static_result.carrier_evidence.carrier_evidence_hash,
+        "surface_geometry_lineage_hash": surface.geometry_lineage_hash,
+        "surface_qualification_hash": surface_result.qualification["qualification_hash"],
+        "source_fidelity_binding_hash": source_fidelity_binding.binding_hash,
         "frame_binding_hash": frame_binding.binding_hash,
-        "shape_proposal_content_sha256": str(shape_ref.get("content_sha256") or ""),
-        "mesh_policy_document_sha256": actual_policy_sha,
+        "shape_proposal_content_sha256": shape_content_sha,
+        "mesh_policy_document_sha256": expected_mesh_policy_sha,
+        "shape_surface_court_policy_sha256": surface_policy_sha,
+        "source_fidelity_policy_sha256": source_fidelity_sha,
+        "surface_adequacy_policy_sha256": adequacy_sha,
         "vertex_count": len(mesh.vertices),
         "face_count": len(mesh.faces),
         "second_tessa_inference_performed": False,
+        "legacy_iris_fit_stage_executed": False,
+        "legacy_geometry_substrate_fabricated": False,
+        "legacy_stage15_surface_consumed": False,
+        "legacy_stage17_partition_consumed": False,
         "presentation_direction_dependency": False,
         "graphics_authority_claimed": False,
         "rig_authority_claimed": False,

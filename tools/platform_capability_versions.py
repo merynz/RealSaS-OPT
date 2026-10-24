@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-"""Deterministic source-owned version identities for non-stage product capabilities.
+"""Deterministic source-owned implementation identities for product capabilities.
 
-Compiler stage capability versions come from EngineRelease stage bindings. The
-product capability semantic contract is shared with the Go Platform; the
-responsibility ledger is a second orthogonal contract for architecture terrain.
-Together they define the exact metadata and learned-model requirements sealed
-into a release snapshot.
+Compiler stage capability versions come from EngineRelease stage bindings. For
+non-stage product roles, source tooling owns only the executable implementation
+closure identity. The Go Platform owns the exact admitted capability descriptor
+and mints policy/parameter identities from that descriptor when sealing the
+EngineRelease snapshot. This avoids duplicate semantic-hash authority across
+Python and Go while preserving full version identities in the sealed snapshot.
 """
 
 import json
@@ -180,14 +181,12 @@ def _implementation_sha256(capability_id: str, entry_module: str) -> str:
     )
 
 
-def capability_versions() -> dict[str, dict[str, str]]:
+def capability_implementations() -> dict[str, dict[str, str]]:
     out: dict[str, dict[str, str]] = {}
     for capability_id, spec in sorted(capability_specs().items()):
         out[capability_id] = {
             "implementation_sha256": _implementation_sha256(
                 capability_id, str(spec["entry_module"])
-            ),
-            "policy_sha256": mainline.content_sha256(spec["policy"]),
-            "parameters_sha256": mainline.content_sha256(spec["parameters"]),
+            )
         }
     return out

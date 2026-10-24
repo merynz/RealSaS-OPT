@@ -33,7 +33,7 @@ func hashFile(path string) (string, error) {
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("command required: stages, status, experiments, experiment, experiment-create, experiment-transition, experiment-link, models, model, model-channels, model-release, model-evaluate, model-promote, subject, artifact-put, artifact-import, input-seal, attempt, campaign, release, agent-context, agent-enter, agent-exit, research-start, research-run, campaign-start, campaign-run, product-compile, product-render")
+		return fmt.Errorf("command required: stages, status, experiments, experiment, experiment-create, experiment-transition, experiment-link, models, model, model-channels, model-release, model-evaluate, model-promote, subject, artifact-put, artifact-import, input-seal, attempt, campaign, release, agent-context, agent-enter, agent-exit, research-start, research-run, capability-run, campaign-start, campaign-run, product-compile, product-render")
 	}
 	routes := map[string]string{
 		"subject":               "/v1/subjects",
@@ -42,6 +42,7 @@ func run(args []string) error {
 		"release":               "/v1/releases",
 		"research-start":        "/v1/research/attempts",
 		"research-run":          "/v1/research/compile",
+		"capability-run":        "/v1/capabilities/run",
 		"campaign-start":        "/v1/research/campaigns",
 		"campaign-run":          "/v1/research/campaigns/run",
 		"product-compile":       "/v1/product/compile",
@@ -136,7 +137,7 @@ func run(args []string) error {
 		}
 	}
 	switch args[0] {
-	case "agent-enter", "release", "research-start", "research-run", "campaign-start", "campaign-run", "product-compile", "product-render":
+	case "agent-enter", "release", "research-start", "research-run", "capability-run", "campaign-start", "campaign-run", "product-compile", "product-render":
 		codeSHA, err := agentsession.CanonicalCheckout(context.Background(), *repo)
 		if err != nil {
 			return err

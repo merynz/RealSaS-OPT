@@ -1,0 +1,7 @@
+# Pinned CUDA learned-inference runtime for the self-hosted developer Platform.
+# This is execution infrastructure, not a scientific training-environment claim.
+# Turing/Ampere+ compatibility remains capability-specific; MIRA BF16 admission
+# is checked separately from generic Shape/Rig runtime availability.
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.8.0+cu128
+torchvision==0.23.0+cu128

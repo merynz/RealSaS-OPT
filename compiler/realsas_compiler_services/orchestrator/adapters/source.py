@@ -71,7 +71,7 @@ def seal_source_bytes(ctx:dict)->dict:
             return {"status":"FAIL","blockers":[f"SOURCE_KIND_INVALID:{role}:{kind}"],"diagnostics":{}}
         if kind=="PRIMARY": primary_rows.append((role,path))
         if kind=="DEPENDENCY": declared_dependency_paths.add(path)
-        sealed.append({"role":role,"path":str(path),"sha256":digest,"size_bytes":size,**({"source_kind":kind} if kind else {})})
+        sealed.append({"role":role,"sha256":digest,"size_bytes":size,**({"source_kind":kind} if kind else {})})
 
     closure_profile=""
     primary_role=""
@@ -94,7 +94,11 @@ def seal_source_bytes(ctx:dict)->dict:
         else:
             dependency_count=len(declared_dependency_paths)
 
-    payload={"schema":"RealSaS.SourceByteSeal.v1","run_id":ctx["run_id"],"subject_id":manifest.get("subject_id",""),"files":sorted(sealed,key=lambda x:x["role"]),"filename_is_not_authority":True,
+    # Source seal bytes are a reusable statement about exact source content, not
+    # an execution record. Run/subject identities and absolute host paths remain
+    # in the run manifest / ledger; putting them here makes identical source truth
+    # produce different CAS bytes across exact re-executions.
+    payload={"schema":"RealSaS.SourceByteSeal.v1","files":sorted(sealed,key=lambda x:x["role"]),"filename_is_not_authority":True,
              "source_closure_profile":closure_profile,"primary_source_role":primary_role,"resolved_dependency_count":dependency_count}
     out=ctx["run_root"]/"artifacts"/"01_SOURCE_BYTES_SEALED"/"source_byte_seal.json"
     return {"status":"PASS","outputs":[_write(out,payload)],"diagnostics":{"file_count":len(sealed),"source_closure_profile":closure_profile or "LEGACY","resolved_dependency_count":dependency_count}}
@@ -126,7 +130,9 @@ def seal_source_license_provenance(ctx:dict)->dict:
                 return {"status":"FAIL","blockers":[f"SOURCE_LICENSE_STAGE1_ROLE_MISSING:{legalcode_role}"],"diagnostics":{}}
             exact["license_legalcode"]={"role":legalcode_role,"sha256":roles[legalcode_role]["sha256"],"size_bytes":roles[legalcode_role]["size_bytes"]}
 
-    payload={"schema":"RealSaS.SourceLicenseSeal.v1","run_id":ctx["run_id"],"subject_id":manifest.get("subject_id",""),"source_pack":info["source_pack"],"license_name":info["license_name"],"license_ref":info["license_ref"],"source_url_or_locator":info.get("source_url_or_locator",""),"notes":info.get("notes",""),
+    # License provenance is also source truth. Execution identity is carried by
+    # Platform lineage and must not perturb reusable provenance bytes.
+    payload={"schema":"RealSaS.SourceLicenseSeal.v1","source_pack":info["source_pack"],"license_name":info["license_name"],"license_ref":info["license_ref"],"source_url_or_locator":info.get("source_url_or_locator",""),"notes":info.get("notes",""),
              "provenance_profile":profile,"exact_byte_bindings":exact}
     out=ctx["run_root"]/"artifacts"/"02_SOURCE_LICENSE_PROVENANCE"/"source_license_seal.json"
     return {"status":"PASS","outputs":[_write(out,payload)],"diagnostics":{"provenance_complete":True,"provenance_profile":profile or "LEGACY","exact_byte_binding_count":len(exact)}}

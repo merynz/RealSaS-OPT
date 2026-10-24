@@ -5,10 +5,9 @@ from __future__ import annotations
 
 This operation does not execute models or Compiler stages. The Platform subject
 identity and legacy evidence run are bound by an explicit canonical witness
-inventory; the operation then selects only the run-manifest sections required by
-the current product.rig capability closure, imports those exact JSON values as
-immutable RunManifestSection artifacts, and seals them through the existing
-Platform SubjectInput API.
+inventory. Only declared product.rig manifest sections that actually exist in
+the witness run are transported; absent declared keys remain absent and are
+reported explicitly rather than being fabricated as defaults.
 """
 
 import argparse
@@ -93,11 +92,20 @@ def _load_seed_manifest(source_run_id: str) -> tuple[Path, dict[str, Any], bytes
     return path, manifest, raw
 
 
-def _required_sections(manifest: dict[str, Any], required_manifest_keys: set[str]) -> dict[str, Any]:
-    missing = sorted(required_manifest_keys - set(manifest))
-    if missing:
-        raise RuntimeError("CURRENT_SUBJECT_INPUT_SEED_MISSING_READ_SET:" + ",".join(missing))
-    return {key: manifest[key] for key in sorted(required_manifest_keys)}
+def _read_set_sections(
+    manifest: dict[str, Any],
+    declared_manifest_keys: set[str],
+) -> tuple[dict[str, Any], list[str]]:
+    """Return exact present read-set values and preserve absence as absence."""
+    sections = {
+        key: manifest[key]
+        for key in sorted(declared_manifest_keys)
+        if key in manifest
+    }
+    absent = sorted(declared_manifest_keys - set(sections))
+    if not sections:
+        raise RuntimeError("CURRENT_SUBJECT_INPUT_SEED_NO_DECLARED_READ_SET_SECTIONS")
+    return sections, absent
 
 
 def _put_import_section(
@@ -126,7 +134,7 @@ def _put_import_section(
 def materialize(args: argparse.Namespace) -> dict[str, Any]:
     plan = mainline.load_json(mainline.PLAN_PATH)
     plan_sha = mainline.validate_plan(plan)
-    _stage_closure, required_manifest_keys = _product_rig_stage_closure(plan)
+    _stage_closure, declared_manifest_keys = _product_rig_stage_closure(plan)
 
     subject = _api(args.api_root, "GET", f"/v1/subjects/by-slug/{args.subject_slug}")
     if subject.get("schema") != "RealSaS.SubjectIdentity.v1":
@@ -152,7 +160,10 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
     if not evidence_subject:
         raise RuntimeError("CURRENT_SUBJECT_INPUT_EVIDENCE_SUBJECT_ID_REQUIRED")
 
-    sections = _required_sections(seed_manifest, required_manifest_keys)
+    sections, absent_manifest_keys = _read_set_sections(
+        seed_manifest,
+        declared_manifest_keys,
+    )
     bindings = []
     section_receipts = []
     for key, value in sections.items():
@@ -187,10 +198,14 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
         f"/v1/subjects/{subject_id}/inputs/{subject_input_id}",
     )
     roots = list(loaded.get("root_inputs") or [])
-    roles = {str(row.get("role") or "") for row in roots}
-    expected_roles = {"subject:manifest:" + key for key in required_manifest_keys}
-    if not expected_roles.issubset(roles):
-        raise RuntimeError("CURRENT_SUBJECT_INPUT_POST_SEAL_READ_SET_MISSING")
+    manifest_roles = {
+        str(row.get("role") or "")
+        for row in roots
+        if str(row.get("role") or "").startswith("subject:manifest:")
+    }
+    expected_roles = {"subject:manifest:" + key for key in sections}
+    if manifest_roles != expected_roles:
+        raise RuntimeError("CURRENT_SUBJECT_INPUT_POST_SEAL_BINDING_SET_DRIFT")
 
     return {
         "schema": "RealSaS.CurrentSubjectInputMaterialization.v1",
@@ -215,7 +230,10 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
             "run_manifest_path": str(seed_path),
             "run_manifest_sha256": _sha256(seed_raw),
         },
-        "required_manifest_keys": sorted(required_manifest_keys),
+        "declared_manifest_keys": sorted(declared_manifest_keys),
+        "bound_manifest_keys": sorted(sections),
+        "declared_manifest_keys_absent_from_seed": absent_manifest_keys,
+        "absent_sections_fabricated": False,
         "sections": section_receipts,
         "subject_input_id": subject_input_id,
         "manifest_sha256": manifest_sha,

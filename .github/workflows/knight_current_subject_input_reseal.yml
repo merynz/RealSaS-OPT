@@ -72,6 +72,7 @@ jobs:
           assert trigger.get('qualification_authorized') is False, 'KNIGHT_CURRENT_INPUT_RESEAL_QUALIFICATION_AUTHORITY'
           assert trigger.get('product_authority_authorized') is False, 'KNIGHT_CURRENT_INPUT_RESEAL_PRODUCT_AUTHORITY'
           assert trigger.get('genericity_claim_authorized') is False, 'KNIGHT_CURRENT_INPUT_RESEAL_GENERICITY_AUTHORITY'
+          assert trigger.get('subject_input_binding_policy') == 'EXACT_PRESENT_READ_SET_INTERSECTION__NO_ABSENT_SECTION_FABRICATION__DOWNSTREAM_EXACT_PIN', 'KNIGHT_CURRENT_INPUT_RESEAL_BINDING_POLICY'
           subject_slug = str(trigger.get('subject_slug') or '')
           identity_inventory = str(trigger.get('identity_inventory') or '')
           manifest_source = str(trigger.get('manifest_source') or '')
@@ -139,7 +140,7 @@ jobs:
           assert Path(deployment['authority_root']).resolve() == Path(os.environ['AUTHORITY_ROOT']).resolve(), 'KNIGHT_CURRENT_INPUT_RESEAL_AUTHORITY_ROOT_DRIFT'
           PY
 
-      - name: Seal current product.rig SubjectInput from witness-bound authority run
+      - name: Seal exact present product.rig SubjectInput sections from witness-bound authority run
         run: |
           set -euo pipefail
           mkdir -p "$OUTPUT_ROOT"
@@ -158,6 +159,7 @@ jobs:
           "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
           import json
           import os
+          import uuid
           from pathlib import Path
 
           receipt = json.loads((Path(os.environ['OUTPUT_ROOT']) / 'SUBJECT_INPUT.json').read_text(encoding='utf-8'))
@@ -169,6 +171,11 @@ jobs:
           assert receipt['identity_binding']['inventory_ref'] == os.environ['IDENTITY_INVENTORY'], 'KNIGHT_CURRENT_INPUT_RESEAL_INVENTORY_DRIFT'
           assert receipt['identity_binding']['manifest_source'] == os.environ['MANIFEST_SOURCE'], 'KNIGHT_CURRENT_INPUT_RESEAL_MANIFEST_SOURCE_DRIFT'
           assert receipt['source_run']['run_id'] == receipt['identity_binding']['resolved_source_run_id'], 'KNIGHT_CURRENT_INPUT_RESEAL_RUN_BINDING_DRIFT'
+          assert set(receipt['bound_manifest_keys']).issubset(set(receipt['declared_manifest_keys'])), 'KNIGHT_CURRENT_INPUT_RESEAL_BOUND_KEY_SCOPE_DRIFT'
+          assert set(receipt['bound_manifest_keys']).isdisjoint(set(receipt['declared_manifest_keys_absent_from_seed'])), 'KNIGHT_CURRENT_INPUT_RESEAL_PRESENT_ABSENT_OVERLAP'
+          assert set(receipt['bound_manifest_keys']) | set(receipt['declared_manifest_keys_absent_from_seed']) == set(receipt['declared_manifest_keys']), 'KNIGHT_CURRENT_INPUT_RESEAL_READ_SET_PARTITION_DRIFT'
+          assert receipt['absent_sections_fabricated'] is False, 'KNIGHT_CURRENT_INPUT_RESEAL_ABSENT_SECTION_FABRICATION'
+          uuid.UUID(receipt['subject_input_id'])
           for key in (
               'model_inference_executed',
               'compiler_stage_executed',
@@ -188,16 +195,28 @@ jobs:
           retention-days: 30
           compression-level: 0
 
-      - name: Dispatch current Skin parent execution on the same canonical main
+      - name: Dispatch current Skin parent execution with exact SubjectInput pin
         env:
           REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
           test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          PAYLOAD=$("$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          receipt = json.loads((Path(os.environ['OUTPUT_ROOT']) / 'SUBJECT_INPUT.json').read_text(encoding='utf-8'))
+          print(json.dumps({
+              'ref': 'main',
+              'inputs': {'subject_input_id': receipt['subject_input_id']},
+          }, separators=(',', ':')))
+          PY
+          )
           curl --fail-with-body --silent --show-error \
             -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/$REPOSITORY/actions/workflows/$DOWNSTREAM_WORKFLOW/dispatches" \
-            -d '{"ref":"main"}'
+            -d "$PAYLOAD"

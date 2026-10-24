@@ -1,12 +1,13 @@
 {
   "schema": "RealSaS.KnightCurrentSkinParentExecutionTrigger.v1",
   "operation": "EXECUTE_CURRENT_KNIGHT_SKIN_PARENTS",
-  "enabled": true,
+  "enabled": false,
   "subject_slug": "knight",
   "target_capability": "product.rig",
   "execution_class": "IMPLEMENTATION_AUDIT",
   "promotion_policy": "NEVER",
   "mira_execution_authorized": false,
   "product_skin_activation_authorized": false,
-  "genericity_claim_authorized": false
+  "genericity_claim_authorized": false,
+  "status": "DIRECT_AUTO_TRIGGER_CONSUMED__MANUAL_DISPATCH_AFTER_CURRENT_SUBJECT_INPUT_RESEAL"
 }

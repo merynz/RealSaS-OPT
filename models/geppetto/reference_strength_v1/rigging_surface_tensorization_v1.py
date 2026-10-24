@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-"""Lossless fieldwise tensorization of RiggingSurfaceIR for Geppetto.
+"""Lossless fieldwise tensorization of RiggingSurfaceIR for Geppetto/AXIS.
 
-This adapter intentionally does *not* collapse the substrate to the legacy 24D
-summary. Shipping-available evidence stays factorized:
-P, robust N, per-view support, per-view raster bindings, validity flags and the
-exact GSA local-relation graph.
+Shipping-available evidence stays factorized: P, robust N, per-view support,
+per-view raster bindings, validity flags and the exact local-relation graph.
 
-Provenance and operator metadata are retained in the certificate/hash but are
-not learner features. Teacher/oracle contamination causes fail-close.
+The sealed AXIS V5.4.1 numerical feature contract predates the current product
+Shape->Surface bridge. Product surfaces therefore receive their own explicit
+semantic profile while producing the same numerical tensor fields. Relation
+names and validity-vocabulary strings remain certificate/provenance data; they
+are not learned feature dimensions.
 """
 
 from dataclasses import dataclass
@@ -24,6 +25,12 @@ from compiler.realsas_compiler_core.types import RiggingSurfaceIR
 SCHEMA = "RealSaS.GeppettoRiggingSurfaceTensorization.v1"
 NORMALIZATION_POLICY = "BBOX_CENTER_MAX_SPAN_V1"
 EXPECTED_SCENE_FIRST_RELATION_KIND = "SIGNED_ZERO_SURFACE_TOPOLOGY_NEIGHBOR"
+PRODUCT_SURFACE_PROFILE = "PRODUCT_SHAPE_TOPOLOGY_SURFACE_V1"
+EXPECTED_PRODUCT_RELATION_KIND = "SHAPE_TOPOLOGY_NEIGHBOR"
+LEGACY_OBSERVED_FLAG = "OBSERVED_SIGNED_ZERO_SURFACE"
+LEGACY_COMPLETED_FLAG = "MODEL_COMPLETED_SIGNED_ZERO_SURFACE"
+PRODUCT_OBSERVED_FLAG = "OBSERVED_PRODUCT_SURFACE_EVIDENCE"
+PRODUCT_COMPLETED_FLAG = "MODEL_COMPLETED_PRODUCT_SURFACE_EVIDENCE"
 
 
 def _json_norm(v):
@@ -92,6 +99,27 @@ def _normalise_raster_xy(surface: RiggingSurfaceIR, xy) -> np.ndarray:
     raise ValueError(f"unsupported raster coordinate system:{mode!r}")
 
 
+def _surface_profile_contract(surface: RiggingSurfaceIR, *, require_scene_first: bool) -> tuple[str, str, str, str]:
+    profile = str(surface.metadata.get("surface_evidence_profile") or "")
+    if profile == PRODUCT_SURFACE_PROFILE:
+        if surface.metadata.get("scene_first_signed_geometry") is not False:
+            raise ValueError("product surface must not claim scene-first signed geometry")
+        if surface.metadata.get("signed_zero_surface_claimed") is not False:
+            raise ValueError("product surface must not claim signed-zero authority")
+        if str(surface.metadata.get("topology_neighborhood_authority") or "") != "DECODED_TESSA_FACE_INCIDENCE_ONLY":
+            raise ValueError("product surface topology authority drift")
+        if str(surface.metadata.get("normal_orientation_hint_role") or "") != "SIGN_ONLY_NOT_NEIGHBORHOOD_AUTHORITY":
+            raise ValueError("product surface normal-hint role drift")
+        return profile, EXPECTED_PRODUCT_RELATION_KIND, PRODUCT_OBSERVED_FLAG, PRODUCT_COMPLETED_FLAG
+
+    if require_scene_first:
+        if not bool(surface.metadata.get("scene_first_signed_geometry", False)):
+            raise ValueError("surface is neither product profile nor declared scene-first signed geometry")
+        return "SCENE_FIRST_SIGNED_ZERO_V1", EXPECTED_SCENE_FIRST_RELATION_KIND, LEGACY_OBSERVED_FLAG, LEGACY_COMPLETED_FLAG
+
+    return "UNRESTRICTED", "", LEGACY_OBSERVED_FLAG, LEGACY_COMPLETED_FLAG
+
+
 @dataclass(frozen=True)
 class RiggingSurfaceTensorV1:
     surface_ids: tuple[str, ...]
@@ -145,6 +173,9 @@ def tensorize_rigging_surface_v1(
     if _contains_teacher_truth(surface.metadata):
         raise ValueError("teacher truth contamination in surface metadata")
 
+    profile, expected_relation_kind, observed_flag, completed_flag = _surface_profile_contract(
+        surface, require_scene_first=require_scene_first
+    )
     nodes = tuple(sorted(surface.surface_nodes, key=lambda n: str(n.surface_id)))
     ids = tuple(str(n.surface_id) for n in nodes)
     if any(not x for x in ids) or len(ids) != len(set(ids)):
@@ -197,23 +228,23 @@ def tensorize_rigging_surface_v1(
             raster[i, v] = _normalise_raster_xy(surface, xy)
             raster_valid[i, v] = True
         if require_scene_first and set(views) != seen_bind:
-            raise ValueError(f"scene-first node missing raster binding for supported view:{n.surface_id}")
+            raise ValueError(f"surface node missing raster binding for supported view:{n.surface_id}")
 
         flags = set(map(str, n.validity_flags))
-        observed[i] = "OBSERVED_SIGNED_ZERO_SURFACE" in flags
-        completed[i] = "MODEL_COMPLETED_SIGNED_ZERO_SURFACE" in flags
+        observed[i] = observed_flag in flags
+        completed[i] = completed_flag in flags
         if observed[i] and completed[i]:
             raise ValueError(f"node cannot be both observed and completed:{n.surface_id}")
         if require_scene_first and not (observed[i] or completed[i]):
-            raise ValueError(f"scene-first node missing observed/completed validity:{n.surface_id}")
+            raise ValueError(f"surface node missing observed/completed validity:{n.surface_id}")
         if require_scene_first and observed[i] != bool(support[i].any()):
-            raise ValueError(f"scene-first observed/support mismatch:{n.surface_id}")
+            raise ValueError(f"observed/support mismatch:{n.surface_id}")
         for flag in flags:
             vbits[i, vindex[flag]] = True
 
     relations = tuple(surface.local_relations)
     if require_scene_first and not relations:
-        raise ValueError("scene-first surface must contain local relations")
+        raise ValueError("surface must contain local relations")
     relation_kinds = tuple(sorted({str(r.relation_kind) for r in relations}))
     kind_index = {x: i for i, x in enumerate(relation_kinds)}
     edges = []
@@ -240,8 +271,8 @@ def tensorize_rigging_surface_v1(
             raise ValueError(f"duplicate undirected relation pair:{rid}")
         seen_pairs.add(pair)
         kind = str(rel.relation_kind)
-        if require_scene_first and kind != EXPECTED_SCENE_FIRST_RELATION_KIND:
-            raise ValueError(f"unexpected scene-first relation kind:{kind}")
+        if require_scene_first and kind != expected_relation_kind:
+            raise ValueError(f"unexpected {profile} relation kind:{kind}")
         score = float(rel.score)
         if not math.isfinite(score):
             raise ValueError(f"non-finite relation score:{rid}")
@@ -272,13 +303,12 @@ def tensorize_rigging_surface_v1(
         np.add.at(degree, edge_index[:, 1], 1)
 
     op_hash = str(surface.metadata.get("Nd_operator_sha256", ""))
-    if require_scene_first and not op_hash:
-        raise ValueError("scene-first surface missing Nd_operator_sha256")
-    if require_scene_first and not bool(surface.metadata.get("scene_first_signed_geometry", False)):
-        raise ValueError("surface is not declared scene-first signed geometry")
+    if require_scene_first and len(op_hash) != 64:
+        raise ValueError("surface missing valid Nd_operator_sha256")
 
     certificate_payload = {
         "schema": SCHEMA,
+        "surface_evidence_profile": profile,
         "source_surface_hash": str(surface.geometry_lineage_hash),
         "builder_id": str(surface.builder_id),
         "surface_schema_version": str(surface.schema_version),
@@ -362,6 +392,7 @@ def tensorize_rigging_surface_v1(
 __all__ = [
     "SCHEMA",
     "NORMALIZATION_POLICY",
+    "PRODUCT_SURFACE_PROFILE",
     "RiggingSurfaceTensorV1",
     "tensorize_rigging_surface_v1",
 ]

@@ -1,4 +1,5 @@
 # Local developer services, not a frozen model training environment.
 -r mainline-ci.txt
 -r platform-worker.txt
+-r torch-cuda.txt
 pgserver==0.1.4

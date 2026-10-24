@@ -79,8 +79,11 @@ def _read_candidates(roots: list[dict[str, str]]) -> tuple[dict[str, list[dict[s
     scanned = 0
 
     for root_row in roots:
-        root = Path(root_row["path"])
-        for path in sorted(root.rglob("*.json")):
+        root = Path(root_row["path"]).resolve()
+        for discovered in sorted(root.rglob("*.json")):
+            path = discovered.resolve()
+            if not path.is_relative_to(root):
+                raise RuntimeError(f"KNIGHT_PARENT_HOST_INVENTORY_PATH_ESCAPE:{discovered}")
             if not path.is_file():
                 continue
             scanned += 1

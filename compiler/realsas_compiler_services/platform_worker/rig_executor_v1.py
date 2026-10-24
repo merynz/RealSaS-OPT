@@ -6,6 +6,10 @@ The current implementation is hybrid: AXIS V5.4.1 proposes one hard causal
 parent tree and deterministic discrete XYZ geometry; the Compiler validates that
 required tree without parent reselection and mints CanonicalRigIR bound to the
 exact CanonicalMesh parent. RiggingSurface is current feature evidence only.
+
+AXIS/Geppetto model source is immutable. Current product-surface semantics are
+adapted only through a transient numeric-compatibility view before invoking the
+frozen tensorizer; that view is never persisted and never becomes authority.
 """
 
 import json
@@ -101,12 +105,20 @@ def execute_rig_capability_v1(
         raise RuntimeError("RIG_EXECUTOR_CONTRACT_DRIFT")
     if str(request.get("kind") or "") != "MODULE":
         raise RuntimeError("RIG_CAPABILITY_KIND_DRIFT")
+    if metadata.get("feature_evidence_source") != "PRODUCT_MESH_OUTPUT":
+        raise RuntimeError("RIG_FEATURE_EVIDENCE_SOURCE_POLICY_DRIFT")
+    if metadata.get("legacy_stage15_dependency") is not False:
+        raise RuntimeError("RIG_LEGACY_STAGE15_DEPENDENCY_FORBIDDEN")
     execution_id = str(request.get("execution_id") or "")
     if not execution_id:
         raise RuntimeError("RIG_EXECUTION_ID_REQUIRED")
 
     # Heavy AXIS/Torch dependencies remain local to actual Rig execution.
     from compiler.realsas_compiler_core.artifact_codec_v2 import rigging_surface_from_dict
+    from compiler.realsas_compiler_core.axis_surface_compat_v1 import (
+        assert_axis_tensor_numeric_binding_v1,
+        axis_numeric_compatibility_surface_v1,
+    )
     from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import canonical_mesh_from_dict_v1
     from compiler.realsas_compiler_core.canonical_rig_ir_v1 import mint_canonical_rig_v1
     from compiler.realsas_compiler_core.required_tree_v1 import qualify_required_skeleton_tree_v1
@@ -145,7 +157,21 @@ def execute_rig_capability_v1(
     model, runtime_checkpoint = load_axis_runtime_model_v1(
         str(checkpoint.get("path") or ""), device=device
     )
-    tensor = tensorize_rigging_surface_v1(surface, require_scene_first=True)
+
+    # Preserve the sealed learner source exactly. The transient view adds only
+    # the historical observed/completed mask aliases expected by the frozen
+    # tensorizer; graph geometry, normals, raster support, node IDs and the
+    # source-surface lineage hash remain identical to current product evidence.
+    compatibility_surface = axis_numeric_compatibility_surface_v1(surface)
+    tensor = tensorize_rigging_surface_v1(
+        compatibility_surface,
+        require_scene_first=False,
+    )
+    assert_axis_tensor_numeric_binding_v1(
+        product_surface=surface,
+        compatibility_surface=compatibility_surface,
+        tensor=tensor,
+    )
     if tensor.source_surface_hash != surface.geometry_lineage_hash:
         raise RuntimeError("RIG_AXIS_FEATURE_TENSOR_BINDING_DRIFT")
     max_steps = int(metadata.get("resource_step_limit_max") or 256)
@@ -216,6 +242,11 @@ def execute_rig_capability_v1(
         "axis_model_release_id": str(model_release.get("model_release_id") or ""),
         "axis_checkpoint_content_sha256": str(checkpoint.get("content_sha256") or ""),
         "axis_runtime_checkpoint_schema": str(runtime_checkpoint.get("schema") or ""),
+        "axis_frozen_tensorizer_source_preserved": True,
+        "axis_numeric_compatibility_view_used": True,
+        "axis_numeric_compatibility_view_persisted": False,
+        "axis_tensor_certificate_hash": tensor.certificate_hash,
+        "axis_tensorization_hash": tensor.tensorization_hash,
         "model_materialization_seconds": float(materialize_seconds),
         "inference_seconds": float(inference_seconds),
         "inference_device": str(device),

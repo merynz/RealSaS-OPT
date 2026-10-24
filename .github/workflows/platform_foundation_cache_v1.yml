@@ -1,0 +1,116 @@
+name: platform-foundation-cache-v1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
+
+concurrency:
+  group: platform-foundation-cache-v1
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.resolve.outputs.should_run }}
+      expected_sha: ${{ steps.resolve.outputs.expected_sha }}
+    steps:
+      - name: Resolve exact deployed main
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          DISPATCH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import os
+          event = os.environ['EVENT_NAME']
+          if event == 'workflow_run':
+              expected = os.environ.get('WORKFLOW_RUN_HEAD_SHA', '').strip().lower()
+              should = (
+                  os.environ.get('WORKFLOW_RUN_CONCLUSION') == 'success'
+                  and os.environ.get('WORKFLOW_RUN_HEAD_BRANCH') == 'main'
+              )
+          else:
+              expected = os.environ['DISPATCH_SHA'].strip().lower()
+              should = True
+          assert len(expected) == 40 and all(ch in '0123456789abcdef' for ch in expected), 'FOUNDATION_CACHE_MAIN_SHA_INVALID'
+          print(f"should_run={'true' if should else 'false'}")
+          print(f"expected_sha={expected}")
+          PY
+
+  provision:
+    needs: activation
+    if: needs.activation.outputs.should_run == 'true'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+
+      - name: Require exact deployed canonical main
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          deployment = json.loads((Path(os.environ['PLATFORM_ROOT']) / 'deployment.json').read_text(encoding='utf-8'))
+          assert deployment['schema'] == 'RealSaS.DeveloperDeployment.v1', 'FOUNDATION_CACHE_DEPLOYMENT_SCHEMA'
+          assert deployment['code_sha'] == os.environ['EXPECTED_SHA'], 'FOUNDATION_CACHE_DEPLOYED_MAIN_DRIFT'
+          PY
+
+      - name: Provision exact third-party runtime caches
+        run: |
+          set -euo pipefail
+          python tools/platform_foundation_cache_v1.py --root "$PLATFORM_ROOT"
+
+      - name: Verify caches through product scientific loaders
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from models.iris.v2.dinov2_foundation_v2 import verify_dinov2_authority_files_v2
+          from models.iris.vnext.flexicubes_v1 import verify_pinned_flexicubes_root_v1
+
+          root = Path(os.environ['PLATFORM_ROOT']).resolve()
+          receipt_path = root / 'foundations/FOUNDATION_CACHE_RECEIPT.json'
+          receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
+          assert receipt['schema'] == 'RealSaS.PlatformFoundationCacheReceipt.v1', 'FOUNDATION_CACHE_RECEIPT_SCHEMA'
+          assert receipt['authority_class'] == 'OPERATIONAL_CACHE_LOCATOR_ONLY', 'FOUNDATION_CACHE_AUTHORITY_CLASS'
+          assert receipt['scientific_authority_minted'] is False, 'FOUNDATION_CACHE_MUST_NOT_MINT_AUTHORITY'
+          dino = verify_dinov2_authority_files_v2(
+              root / 'foundations/dinov2/source',
+              root / 'foundations/dinov2/dinov2_vits14_pretrain.pth',
+          )
+          flex = verify_pinned_flexicubes_root_v1(root / 'foundations/flexicubes/source')
+          assert dino.source_head == receipt['dinov2']['source_revision'], 'FOUNDATION_CACHE_DINO_REVISION_DRIFT'
+          assert dino.weight_sha256 == receipt['dinov2']['weight_sha256'], 'FOUNDATION_CACHE_DINO_WEIGHT_DRIFT'
+          assert flex['commit'] == receipt['flexicubes']['source_revision'], 'FOUNDATION_CACHE_FLEXICUBES_REVISION_DRIFT'
+          print('FOUNDATION_CACHE_EXACT_VERIFICATION_PASS')
+          PY
+
+      - name: Preserve operational foundation cache receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-foundation-cache-v1-${{ github.run_id }}
+          path: /home/monster/realsas_platform/foundations/FOUNDATION_CACHE_RECEIPT.json
+          if-no-files-found: error
+          retention-days: 30

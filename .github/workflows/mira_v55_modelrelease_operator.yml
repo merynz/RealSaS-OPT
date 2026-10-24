@@ -1,0 +1,202 @@
+name: mira-v55-modelrelease-operator
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Register exact recovered MIRA runtime as a DRAFT ModelRelease
+        required: true
+        type: boolean
+        default: false
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
+
+concurrency:
+  group: mira-v55-modelrelease-operator
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.resolve.outputs.should_run }}
+      apply: ${{ steps.resolve.outputs.apply }}
+      expected_sha: ${{ steps.resolve.outputs.expected_sha }}
+    steps:
+      - name: Resolve selected canonical SHA
+        id: sha
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          DISPATCH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = 'workflow_run' ]; then
+            echo "expected_sha=$WORKFLOW_RUN_HEAD_SHA" >> "$GITHUB_OUTPUT"
+          else
+            echo "expected_sha=$DISPATCH_SHA" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.sha.outputs.expected_sha }}
+          fetch-depth: 2
+
+      - name: Resolve typed MIRA ModelRelease operator request
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EXPECTED_SHA: ${{ steps.sha.outputs.expected_sha }}
+          DISPATCH_APPLY: ${{ inputs.apply }}
+          WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          TRIGGER_PATH: canonical/MIRA_V55_MODELRELEASE_OPERATOR_TRIGGER_V1.json
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          event = os.environ['EVENT_NAME']
+          expected_sha = os.environ['EXPECTED_SHA'].strip().lower()
+          should_run = False
+          apply = False
+
+          if event == 'workflow_dispatch':
+              should_run = True
+              apply = os.environ.get('DISPATCH_APPLY', '').strip().lower() == 'true'
+          elif event == 'workflow_run':
+              if (os.environ.get('WORKFLOW_RUN_CONCLUSION') == 'success' and
+                      os.environ.get('WORKFLOW_RUN_HEAD_BRANCH') == 'main'):
+                  changed = subprocess.check_output(
+                      ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD^1', 'HEAD'],
+                      text=True,
+                  ).splitlines()
+                  trigger_path = Path(os.environ['TRIGGER_PATH'])
+                  if str(trigger_path) in changed:
+                      trigger = json.loads(trigger_path.read_text(encoding='utf-8'))
+                      assert trigger.get('schema') == 'RealSaS.MIRAV55ModelReleaseOperatorTrigger.v1', 'MIRA_MODELRELEASE_TRIGGER_SCHEMA'
+                      assert trigger.get('operation') == 'MIRA_V55_DRAFT_MODELRELEASE_REGISTER', 'MIRA_MODELRELEASE_TRIGGER_OPERATION'
+                      assert isinstance(trigger.get('enabled'), bool), 'MIRA_MODELRELEASE_TRIGGER_ENABLED_BOOL'
+                      assert isinstance(trigger.get('apply'), bool), 'MIRA_MODELRELEASE_TRIGGER_APPLY_BOOL'
+                      should_run = bool(trigger['enabled'])
+                      apply = bool(trigger['apply'])
+
+          print(f"should_run={'true' if should_run else 'false'}")
+          print(f"apply={'true' if apply else 'false'}")
+          print(f'expected_sha={expected_sha}')
+          PY
+
+  operator:
+    needs: activation
+    if: needs.activation.outputs.should_run == 'true'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      API_ROOT: http://127.0.0.1:8080
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+      APPLY: ${{ needs.activation.outputs.apply }}
+      OUTPUT_PATH: /home/monster/realsas_authority/modelrelease_operator/actions/${{ github.run_id }}-${{ github.run_attempt }}/OPERATOR_RESULT.json
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+
+      - name: Require exact deployed canonical main
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          deployment = json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
+          assert deployment['schema'] == 'RealSaS.DeveloperDeployment.v1', 'MIRA_MODELRELEASE_DEPLOYMENT_SCHEMA'
+          assert deployment['code_sha'] == os.environ['EXPECTED_SHA'], 'MIRA_MODELRELEASE_DEPLOYED_MAIN_DRIFT'
+          PY
+
+      - name: Require healthy loopback Platform API
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 10 "$API_ROOT/v1/ops/status" >/dev/null
+
+      - name: Execute exact MIRA V5.5 ModelRelease operator
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUTPUT_PATH")"
+          args=(
+            "$GITHUB_WORKSPACE/tools/mira_v55_modelrelease_operator_v1.py"
+            --repo "$GITHUB_WORKSPACE"
+            --platform-root "$PLATFORM_ROOT"
+            --authority-root "$AUTHORITY_ROOT"
+            --api-root "$API_ROOT"
+            --source-code-sha "$EXPECTED_SHA"
+            --actor mira-v55-modelrelease-operator
+            --out "$OUTPUT_PATH"
+          )
+          if [ "$APPLY" = 'true' ]; then
+            args+=(--apply)
+          fi
+          "$PLATFORM_ROOT/current/bin/realsas-python" "${args[@]}"
+
+      - name: Verify operator receipt and authority boundaries
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          receipt = json.loads(Path(os.environ['OUTPUT_PATH']).read_text(encoding='utf-8'))
+          assert receipt['schema'] == 'RealSaS.MIRAV55ModelReleaseOperatorReceipt.v1', 'MIRA_MODELRELEASE_OPERATOR_RECEIPT_SCHEMA'
+          assert receipt['operation'] == 'MIRA_V55_DRAFT_MODELRELEASE_REGISTER', 'MIRA_MODELRELEASE_OPERATOR_RECEIPT_OPERATION'
+          assert receipt['source_code_sha'] == os.environ['EXPECTED_SHA'], 'MIRA_MODELRELEASE_OPERATOR_RECEIPT_SOURCE_DRIFT'
+          assert receipt['deployment_code_sha'] == os.environ['EXPECTED_SHA'], 'MIRA_MODELRELEASE_OPERATOR_RECEIPT_DEPLOYMENT_DRIFT'
+          assert receipt['runtime_content_sha256'] == 'b5ad2d56a9006058cba30c0b123d4e111f3eea3b78ed42f3542cbd095983139a', 'MIRA_MODELRELEASE_OPERATOR_RUNTIME_SHA_DRIFT'
+          assert receipt['runtime_size_bytes'] == 558840979, 'MIRA_MODELRELEASE_OPERATOR_RUNTIME_SIZE_DRIFT'
+          assert receipt['promotion_performed'] is False, 'MIRA_MODELRELEASE_OPERATOR_PROMOTED_MODEL'
+          assert receipt['promotion_policy_created'] is False, 'MIRA_MODELRELEASE_OPERATOR_CREATED_POLICY'
+          assert receipt['product_skin_activated'] is False, 'MIRA_MODELRELEASE_OPERATOR_ACTIVATED_SKIN'
+          assert receipt['new_scientific_pass_minted'] is False, 'MIRA_MODELRELEASE_OPERATOR_MINTED_SCIENTIFIC_PASS'
+
+          apply = os.environ['APPLY'] == 'true'
+          assert receipt['apply'] is apply, 'MIRA_MODELRELEASE_OPERATOR_APPLY_DRIFT'
+          if not apply:
+              assert receipt['status'] == 'DRY_RUN_VALIDATED', 'MIRA_MODELRELEASE_OPERATOR_DRY_RUN_STATUS'
+              assert receipt['platform_mutation_performed'] is False, 'MIRA_MODELRELEASE_OPERATOR_DRY_RUN_MUTATED_PLATFORM'
+              assert 'model_release_id' not in receipt, 'MIRA_MODELRELEASE_OPERATOR_DRY_RUN_MODELRELEASE_PRESENT'
+          else:
+              assert receipt['status'] == 'DRAFT_MODELRELEASE_REGISTERED', 'MIRA_MODELRELEASE_OPERATOR_APPLY_STATUS'
+              assert receipt['platform_mutation_performed'] is True, 'MIRA_MODELRELEASE_OPERATOR_APPLY_DID_NOT_MUTATE'
+              assert receipt['lifecycle_state'] == 'DRAFT', 'MIRA_MODELRELEASE_OPERATOR_LIFECYCLE_DRIFT'
+              for key in ('engine_release_id','model_release_id','runtime_artifact_id','recovery_evidence_artifact_id'):
+                  assert receipt.get(key), f'MIRA_MODELRELEASE_OPERATOR_ID_MISSING:{key}'
+              evaluations = {row['scope']: row['result'] for row in receipt['evaluations']}
+              assert evaluations['RUNTIME_PACKAGE_IDENTITY_V1'] == 'PASS'
+              assert evaluations['HISTORICAL_READOUT_PARITY_V55'] == 'PASS'
+              assert evaluations['HISTORICAL_COMPUTE_CONTRACT_V1'] == 'PASS'
+              assert evaluations['FIT8'] == 'NOT_RUN'
+              assert evaluations['LOFO'] == 'NOT_RUN'
+              assert evaluations['UNSEEN_GENERALIZATION'] == 'NOT_RUN'
+          PY
+
+      - name: Preserve exact operator receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mira-v55-modelrelease-operator-${{ github.run_id }}
+          path: ${{ env.OUTPUT_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

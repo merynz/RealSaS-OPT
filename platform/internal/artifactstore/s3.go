@@ -3,11 +3,14 @@ package artifactstore
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -43,15 +46,103 @@ func NewS3(cfg S3Config) (*S3, error) {
 	return &S3{client: client, bucket: cfg.Bucket, prefix: strings.Trim(cfg.Prefix, "/")}, nil
 }
 
-func (s *S3) PutBytes(ctx context.Context, data []byte) (Object, error) {
-	digest := HashBytes(data)
-	key, err := CASKey(digest, s.prefix)
+func s3NotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	resp := minio.ToErrorResponse(err)
+	return resp.StatusCode == 404 || resp.Code == "NoSuchKey" || resp.Code == "NoSuchObject" || resp.Code == "NotFound"
+}
+
+type hashCountingReader struct {
+	r io.Reader
+	h interface{ Write([]byte) (int, error) }
+	n int64
+}
+
+func (r *hashCountingReader) Read(p []byte) (int, error) {
+	n, err := r.r.Read(p)
+	if n > 0 {
+		_, _ = r.h.Write(p[:n])
+		r.n += int64(n)
+	}
+	return n, err
+}
+
+func (s *S3) PutStream(ctx context.Context, src io.Reader, expectedSHA string, expectedSize int64) (Object, error) {
+	if err := ValidateObjectIdentity(expectedSHA, expectedSize); err != nil {
+		return Object{}, err
+	}
+	key, err := CASKey(expectedSHA, s.prefix)
 	if err != nil {
 		return Object{}, err
 	}
-	expected := Object{ContentSHA256: digest, StorageKey: key, SizeBytes: int64(len(data))}
+	expected := Object{ContentSHA256: expectedSHA, StorageKey: key, SizeBytes: expectedSize}
 	info, statErr := s.client.StatObject(ctx, s.bucket, key, minio.StatObjectOptions{})
 	if statErr == nil {
+		if info.Size != expected.SizeBytes {
+			return Object{}, errors.New("S3_CAS_EXISTING_SIZE_MISMATCH")
+		}
+		if err := copyVerifiedStream(ctx, io.Discard, src, expectedSHA, expectedSize); err != nil {
+			return Object{}, err
+		}
+		if err := s.Verify(ctx, expected); err != nil {
+			return Object{}, fmt.Errorf("S3_CAS_EXISTING_CONTENT_HASH_MISMATCH: %w", err)
+		}
+		return expected, nil
+	}
+	if !s3NotFound(statErr) {
+		return Object{}, statErr
+	}
+
+	tempKey := strings.Trim(s.prefix+"/tmp/realsas-upload/"+uuid.NewString(), "/")
+	defer func() {
+		_ = s.client.RemoveObject(context.Background(), s.bucket, tempKey, minio.RemoveObjectOptions{})
+	}()
+
+	h := sha256.New()
+	limited := &io.LimitedReader{R: &contextReader{ctx: ctx, r: src}, N: expectedSize}
+	counted := &hashCountingReader{r: limited, h: h}
+	_, err = s.client.PutObject(
+		ctx,
+		s.bucket,
+		tempKey,
+		counted,
+		expectedSize,
+		minio.PutObjectOptions{
+			ContentType: "application/octet-stream",
+			UserMetadata: map[string]string{
+				"realsas-sha256": expectedSHA,
+				"realsas-size":   fmt.Sprintf("%d", expectedSize),
+			},
+		},
+	)
+	if err != nil {
+		return Object{}, err
+	}
+	if counted.n != expectedSize || limited.N != 0 {
+		return Object{}, fmt.Errorf("artifact size mismatch: got %d want %d", counted.n, expectedSize)
+	}
+	if got := hex.EncodeToString(h.Sum(nil)); got != expectedSHA {
+		return Object{}, fmt.Errorf("artifact content hash mismatch: got %s want %s", got, expectedSHA)
+	}
+	one := make([]byte, 1)
+	n, extraErr := (&contextReader{ctx: ctx, r: src}).Read(one)
+	if n != 0 {
+		return Object{}, fmt.Errorf("artifact size mismatch: got more than %d bytes", expectedSize)
+	}
+	if extraErr != nil && !errors.Is(extraErr, io.EOF) {
+		return Object{}, extraErr
+	}
+	tempInfo, err := s.client.StatObject(ctx, s.bucket, tempKey, minio.StatObjectOptions{})
+	if err != nil {
+		return Object{}, err
+	}
+	if tempInfo.Size != expectedSize {
+		return Object{}, fmt.Errorf("S3_TEMP_OBJECT_SIZE_MISMATCH:%d!=%d", tempInfo.Size, expectedSize)
+	}
+
+	if info, statErr = s.client.StatObject(ctx, s.bucket, key, minio.StatObjectOptions{}); statErr == nil {
 		if info.Size != expected.SizeBytes {
 			return Object{}, errors.New("S3_CAS_EXISTING_SIZE_MISMATCH")
 		}
@@ -59,21 +150,14 @@ func (s *S3) PutBytes(ctx context.Context, data []byte) (Object, error) {
 			return Object{}, fmt.Errorf("S3_CAS_EXISTING_CONTENT_HASH_MISMATCH: %w", err)
 		}
 		return expected, nil
-	}
-	resp := minio.ToErrorResponse(statErr)
-	if resp.StatusCode != 404 && resp.Code != "NoSuchKey" && resp.Code != "NoSuchObject" && resp.Code != "NotFound" {
+	} else if !s3NotFound(statErr) {
 		return Object{}, statErr
 	}
-	_, err = s.client.PutObject(
+
+	_, err = s.client.CopyObject(
 		ctx,
-		s.bucket,
-		key,
-		bytes.NewReader(data),
-		int64(len(data)),
-		minio.PutObjectOptions{
-			ContentType:  "application/octet-stream",
-			UserMetadata: map[string]string{"realsas-sha256": digest},
-		},
+		minio.CopyDestOptions{Bucket: s.bucket, Object: key},
+		minio.CopySrcOptions{Bucket: s.bucket, Object: tempKey},
 	)
 	if err != nil {
 		return Object{}, err
@@ -82,6 +166,11 @@ func (s *S3) PutBytes(ctx context.Context, data []byte) (Object, error) {
 		return Object{}, fmt.Errorf("S3_CAS_POST_WRITE_VERIFICATION_FAILED: %w", err)
 	}
 	return expected, nil
+}
+
+func (s *S3) PutBytes(ctx context.Context, data []byte) (Object, error) {
+	digest := HashBytes(data)
+	return s.PutStream(ctx, bytes.NewReader(data), digest, int64(len(data)))
 }
 
 func (s *S3) GetBytes(ctx context.Context, storageKey string) ([]byte, error) {
@@ -94,6 +183,9 @@ func (s *S3) GetBytes(ctx context.Context, storageKey string) ([]byte, error) {
 }
 
 func (s *S3) Verify(ctx context.Context, expected Object) error {
+	if err := ValidateObjectIdentity(expected.ContentSHA256, expected.SizeBytes); err != nil {
+		return err
+	}
 	info, err := s.client.StatObject(ctx, s.bucket, expected.StorageKey, minio.StatObjectOptions{})
 	if err != nil {
 		return err
@@ -106,5 +198,5 @@ func (s *S3) Verify(ctx context.Context, expected Object) error {
 		return err
 	}
 	defer obj.Close()
-	return verifyReader(obj, expected.ContentSHA256, expected.SizeBytes)
+	return verifyReader(ctx, obj, expected.ContentSHA256, expected.SizeBytes)
 }

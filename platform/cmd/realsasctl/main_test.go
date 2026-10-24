@@ -25,6 +25,9 @@ func TestArtifactPutOnlySendsExactBytes(t *testing.T) {
 		if err != nil || string(body) != string(data) || r.Method != "PUT" || r.URL.Path != "/v1/artifacts/bytes" || r.URL.Query().Get("sha256") != sha || r.Header.Get("Content-Type") != "application/octet-stream" {
 			t.Errorf("upload identity drift: %s %s %v", r.Method, r.URL, err)
 		}
+		if r.ContentLength != int64(len(data)) {
+			t.Errorf("content length = %d want %d", r.ContentLength, len(data))
+		}
 		w.WriteHeader(202)
 	}))
 	defer server.Close()
@@ -42,5 +45,12 @@ func TestArtifactPutOnlySendsExactBytes(t *testing.T) {
 	}
 	if calls != 1 {
 		t.Fatalf("calls=%d", calls)
+	}
+}
+
+func TestArtifactPutCapAdmitsRecoveredMIRARuntime(t *testing.T) {
+	const miraRuntimeBytes int64 = 558840979
+	if artifactstore.MaxArtifactObjectBytes < miraRuntimeBytes {
+		t.Fatalf("artifact-put cap %d blocks recovered MIRA runtime %d", artifactstore.MaxArtifactObjectBytes, miraRuntimeBytes)
 	}
 }

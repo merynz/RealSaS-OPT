@@ -61,6 +61,31 @@ func TestArtifactUploadRejectsDriftAndImportCannotSupplyQualification(t *testing
 	}
 }
 
+func TestArtifactUploadRequiresBoundedDeclaredLength(t *testing.T) {
+	store, err := artifactstore.NewLocal(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	handler := (API{Store: store}).Handler()
+	sha := artifactstore.HashBytes(nil)
+
+	missingLength := httptest.NewRequest("PUT", "/v1/artifacts/bytes?sha256="+sha, strings.NewReader(""))
+	missingLength.ContentLength = -1
+	missingResponse := httptest.NewRecorder()
+	handler.ServeHTTP(missingResponse, missingLength)
+	if missingResponse.Code != 411 || !strings.Contains(missingResponse.Body.String(), "CONTENT_LENGTH_REQUIRED") {
+		t.Fatalf("missing length: %d %s", missingResponse.Code, missingResponse.Body.String())
+	}
+
+	oversized := httptest.NewRequest("PUT", "/v1/artifacts/bytes?sha256="+sha, strings.NewReader(""))
+	oversized.ContentLength = artifactstore.MaxArtifactObjectBytes + 1
+	oversizedResponse := httptest.NewRecorder()
+	handler.ServeHTTP(oversizedResponse, oversized)
+	if oversizedResponse.Code != 413 || !strings.Contains(oversizedResponse.Body.String(), "SIZE_LIMIT_EXCEEDED") {
+		t.Fatalf("oversized: %d %s", oversizedResponse.Code, oversizedResponse.Body.String())
+	}
+}
+
 func TestRequestsRejectUnknownFieldsAndTrailingJSON(t *testing.T) {
 	for _, body := range []string{`{"unknown":true}`, `{} {}`} {
 		response := httptest.NewRecorder()

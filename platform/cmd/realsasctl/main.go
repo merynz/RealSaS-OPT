@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -15,6 +17,19 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/agentsession"
 	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 )
+
+func hashFile(path string) (string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(h.Sum(nil)), nil
+}
 
 func run(args []string) error {
 	if len(args) == 0 {
@@ -52,6 +67,8 @@ func run(args []string) error {
 	method := http.MethodPost
 	path, ok := routes[args[0]]
 	var body []byte
+	var artifactPath string
+	var artifactSize int64
 	if args[0] == "artifact-put" {
 		if *file == "" || len(*sha) != 64 {
 			return fmt.Errorf("artifact-put requires --file and --sha256")
@@ -63,22 +80,24 @@ func run(args []string) error {
 		if err != nil {
 			return err
 		}
-		if !info.Mode().IsRegular() || info.Size() > 256<<20 {
-			return fmt.Errorf("artifact upload requires a regular file of at most 256 MiB")
+		if !info.Mode().IsRegular() {
+			return fmt.Errorf("artifact upload requires a regular file")
+		}
+		if err := artifactstore.ValidateObjectIdentity(*sha, info.Size()); err != nil {
+			return err
+		}
+		actualSHA, err := hashFile(*file)
+		if err != nil {
+			return err
+		}
+		if actualSHA != *sha {
+			return fmt.Errorf("ARTIFACT_UPLOAD_HASH_MISMATCH")
 		}
 		method = http.MethodPut
 		path = "/v1/artifacts/bytes?sha256=" + *sha
 		ok = true
-		body, err = os.ReadFile(*file)
-		if err != nil {
-			return err
-		}
-		if len(body) > 256<<20 {
-			return fmt.Errorf("artifact upload exceeds 256 MiB")
-		}
-		if artifactstore.HashBytes(body) != *sha {
-			return fmt.Errorf("ARTIFACT_UPLOAD_HASH_MISMATCH")
-		}
+		artifactPath = *file
+		artifactSize = info.Size()
 	}
 	switch args[0] {
 	case "stages":
@@ -137,15 +156,32 @@ func run(args []string) error {
 			}
 		}
 	}
-	req, err := http.NewRequest(method, strings.TrimRight(*endpoint, "/")+path, bytes.NewReader(body))
+
+	var requestBody io.Reader = bytes.NewReader(body)
+	var uploadFile *os.File
+	if artifactPath != "" {
+		var err error
+		uploadFile, err = os.Open(artifactPath)
+		if err != nil {
+			return err
+		}
+		defer uploadFile.Close()
+		requestBody = uploadFile
+	}
+	req, err := http.NewRequest(method, strings.TrimRight(*endpoint, "/")+path, requestBody)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	if method == http.MethodPut {
 		req.Header.Set("Content-Type", "application/octet-stream")
+		req.ContentLength = artifactSize
 	}
-	response, err := (&http.Client{Timeout: 30 * time.Second}).Do(req)
+	clientTimeout := 30 * time.Second
+	if args[0] == "artifact-put" {
+		clientTimeout = 30 * time.Minute
+	}
+	response, err := (&http.Client{Timeout: clientTimeout}).Do(req)
 	if err != nil {
 		return err
 	}

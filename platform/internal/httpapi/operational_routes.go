@@ -21,9 +21,9 @@ func (a API) HandlerWithOperational() http.Handler {
 	// Clients can describe a release, but cannot self-assert that branch code is main.
 	mux.HandleFunc("POST /v1/releases", func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
-			Manifest                  release.Manifest                                  `json:"manifest"`
+			Manifest                  release.Manifest                                   `json:"manifest"`
 			CapabilityImplementations map[string]capability.ModuleImplementationIdentity `json:"capability_implementations"`
-			CreatedBy                 string                                            `json:"created_by"`
+			CreatedBy                 string                                             `json:"created_by"`
 		}
 		if !decode(w, r, &req) {
 			return

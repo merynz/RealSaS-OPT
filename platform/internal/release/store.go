@@ -39,13 +39,14 @@ type ModelRequirement struct {
 }
 
 type Manifest struct {
-	ContractVersion    string               `json:"contract_version"`
-	Name               string               `json:"name"`
-	Purpose            Purpose              `json:"purpose"`
-	Stages             []StageBinding       `json:"stages"`
-	DAG                *stagegraph.Snapshot `json:"dag,omitempty"`
-	PipelinePlanSHA256 string               `json:"pipeline_plan_sha256,omitempty"`
-	ModelRequirements  []ModelRequirement   `json:"model_requirements,omitempty"`
+	ContractVersion                  string               `json:"contract_version"`
+	Name                             string               `json:"name"`
+	Purpose                          Purpose              `json:"purpose"`
+	Stages                           []StageBinding       `json:"stages"`
+	DAG                              *stagegraph.Snapshot `json:"dag,omitempty"`
+	PipelinePlanSHA256               string               `json:"pipeline_plan_sha256,omitempty"`
+	ModelRequirements                []ModelRequirement   `json:"model_requirements,omitempty"`
+	CapabilityImplementationsSHA256  string               `json:"capability_implementations_sha256,omitempty"`
 }
 
 type Sealed struct {
@@ -95,6 +96,13 @@ func (m Manifest) Validate(g *stagegraph.Graph) error {
 	}
 	if m.Purpose != PurposeProduct && m.Purpose != PurposeResearch {
 		return errors.New("engine release purpose must be PRODUCT or RESEARCH")
+	}
+	if m.ContractVersion == "RealSaS.EngineReleaseManifest.v2" {
+		if err := semantic.ValidateSHA256(m.CapabilityImplementationsSHA256); err != nil {
+			return fmt.Errorf("capability implementations sha: %w", err)
+		}
+	} else if m.CapabilityImplementationsSHA256 != "" {
+		return errors.New("capability implementation binding requires EngineReleaseManifest.v2")
 	}
 	seenModelFamilies := map[string]struct{}{}
 	for _, requirement := range m.ModelRequirements {
@@ -245,7 +253,7 @@ func Seal(
 				VALUES ($1,$2,$3,$4,$5,$6)
 			`, id, stage.StageID, stage.Ordinal, stage.ImplementationSHA256, stage.PolicySHA256, params); err != nil {
 				return err
-			}
+		}
 		}
 		for _, requirement := range manifest.ModelRequirements {
 			if _, err := tx.Exec(ctx, `
@@ -275,11 +283,12 @@ func Seal(
 		}
 
 		audit, _ := json.Marshal(map[string]any{
-			"engine_release_id":       id.String(),
-			"release_sha256":          releaseSHA,
-			"purpose":                 string(manifest.Purpose),
-			"stage_count":             len(manifest.Stages),
-			"model_requirement_count": len(manifest.ModelRequirements),
+			"engine_release_id":                   id.String(),
+			"release_sha256":                      releaseSHA,
+			"purpose":                             string(manifest.Purpose),
+			"stage_count":                         len(manifest.Stages),
+			"model_requirement_count":             len(manifest.ModelRequirements),
+			"capability_implementations_sha256":   manifest.CapabilityImplementationsSHA256,
 		})
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO audit_events(actor,action,payload)

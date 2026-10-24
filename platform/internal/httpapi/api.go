@@ -80,16 +80,15 @@ func (a API) Handler() http.Handler {
 			respond(w, 503, map[string]string{"error": "artifact store is required"})
 			return
 		}
-		data, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 256<<20))
-		if err != nil {
-			respond(w, 413, map[string]string{"error": err.Error()})
+		if r.ContentLength < 0 {
+			respond(w, http.StatusLengthRequired, map[string]string{"error": "ARTIFACT_UPLOAD_CONTENT_LENGTH_REQUIRED"})
 			return
 		}
-		if artifactstore.HashBytes(data) != sha {
-			respond(w, 409, map[string]string{"error": "ARTIFACT_UPLOAD_HASH_MISMATCH"})
+		if r.ContentLength > artifactstore.MaxArtifactObjectBytes {
+			respond(w, http.StatusRequestEntityTooLarge, map[string]string{"error": "ARTIFACT_UPLOAD_SIZE_LIMIT_EXCEEDED"})
 			return
 		}
-		out, err := a.Store.PutBytes(r.Context(), data)
+		out, err := a.Store.PutStream(r.Context(), r.Body, sha, r.ContentLength)
 		result(w, out, err)
 	})
 	mux.HandleFunc("POST /v1/artifacts/import", func(w http.ResponseWriter, r *http.Request) {

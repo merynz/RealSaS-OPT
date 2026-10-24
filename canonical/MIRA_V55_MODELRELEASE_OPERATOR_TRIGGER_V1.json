@@ -2,7 +2,7 @@
   "schema": "RealSaS.MIRAV55ModelReleaseOperatorTrigger.v1",
   "operation": "MIRA_V55_DRAFT_MODELRELEASE_REGISTER",
   "enabled": true,
-  "apply": false,
+  "apply": true,
   "authority": "OPERATOR_TRIGGER_ONLY__NO_MODEL_QUALIFICATION__NO_PRODUCT_SKIN_ACTIVATION",
-  "notes": "Re-arm the mutation-free authority-host dry-run after exact-main physical deployment and API-to-Engine reuse proof passed on 8d242b3ba3d3b83807a7f267530f60df73c1c48e. Apply still requires a separate reviewed trigger change."
+  "notes": "Register the exact recovered MIRA V5.5 runtime as a content-addressed DRAFT ModelRelease after mutation-free operator dry-run 40091478378 validated on canonical main 94247b4eceda0f1e7f3519c973ea757d097d1024. This action must not promote any model, create promotion policy, activate product.skin, or mint new scientific evidence. FIT8, LOFO, and UNSEEN_GENERALIZATION remain NOT_RUN."
 }

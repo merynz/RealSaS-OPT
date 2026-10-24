@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/experiment"
 	"github.com/merynz/RealSaS-OPT/platform/internal/modelrelease"
@@ -23,6 +24,25 @@ func repeated(ch string, n int) string {
 func uniqueHash(prefix, suffix string) string {
 	sum := sha256.Sum256([]byte(prefix + ":" + suffix))
 	return hex.EncodeToString(sum[:])
+}
+
+func bindTestPromotionPolicy(t *testing.T, ctx context.Context, pool *pgxpool.Pool, family, architecture string, channel modelrelease.Channel, scope, suffix string) {
+	t.Helper()
+	policyID := uuid.New()
+	if _, err := pool.Exec(ctx, `
+		INSERT INTO model_promotion_policies
+		(id,family,architecture_id,channel,policy_version,required_evaluation_scopes,policy_sha256,sealed_by)
+		VALUES ($1,$2,$3,$4,1,$5,$6,'ci')
+	`, policyID, family, architecture, string(channel), []string{scope}, uniqueHash("promotion-policy:"+string(channel), suffix)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, `
+		INSERT INTO model_promotion_policy_bindings
+		(family,architecture_id,channel,policy_id,bound_by)
+		VALUES ($1,$2,$3,$4,'ci')
+	`, family, architecture, string(channel), policyID); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
@@ -119,12 +139,18 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+	for _, channel := range []modelrelease.Channel{
+		modelrelease.ChannelResearch,
+		modelrelease.ChannelCandidate,
+		modelrelease.ChannelProduction,
+	} {
+		bindTestPromotionPolicy(t, ctx, pool, "IRIS", "RealSaS.IRIS.Test.v1", channel, "FIT8", suffix)
+	}
 	if _, err := modelrelease.Promote(ctx, pool, modelrelease.PromoteRequest{
-		Family:                   "IRIS",
-		Channel:                  modelrelease.ChannelCandidate,
-		ModelReleaseID:           registered.ID,
-		RequiredEvaluationScopes: []string{"FIT8"},
-		Actor:                    "ci",
+		Family:         "IRIS",
+		Channel:        modelrelease.ChannelCandidate,
+		ModelReleaseID: registered.ID,
+		Actor:          "ci",
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -162,20 +188,18 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 	}
 
 	if _, err := modelrelease.Promote(ctx, pool, modelrelease.PromoteRequest{
-		Family:                   "IRIS",
-		Channel:                  modelrelease.ChannelProduction,
-		ModelReleaseID:           registered.ID,
-		RequiredEvaluationScopes: []string{"FIT8"},
-		Actor:                    "ci",
+		Family:         "IRIS",
+		Channel:        modelrelease.ChannelProduction,
+		ModelReleaseID: registered.ID,
+		Actor:          "ci",
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := modelrelease.Promote(ctx, pool, modelrelease.PromoteRequest{
-		Family:                   "IRIS",
-		Channel:                  modelrelease.ChannelResearch,
-		ModelReleaseID:           registered.ID,
-		RequiredEvaluationScopes: []string{"FIT8"},
-		Actor:                    "ci",
+		Family:         "IRIS",
+		Channel:        modelrelease.ChannelResearch,
+		ModelReleaseID: registered.ID,
+		Actor:          "ci",
 	}); err != nil {
 		t.Fatal(err)
 	}

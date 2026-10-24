@@ -83,11 +83,33 @@ func TestProductAttemptSnapshotsExactProductionModelAndRejectsInvalidSelection(t
 			productReleaseID, sourceCodeSHA); err != nil {
 			t.Fatal(err)
 		}
+		if _, err := pool.Exec(ctx, `
+			INSERT INTO model_release_evaluations(
+				model_release_id,scope,result,evidence_artifact_id,details,observed_at,updated_at
+			) VALUES ($1,'P3_MODEL_SELECTION_FIXTURE','PASS',$2,'{}'::jsonb,now(),now())
+		`, modelID, artifactID); err != nil {
+			t.Fatal(err)
+		}
 		return modelID, artifactID, contentSHA
 	}
 
 	modelA, artifactA, contentA := createModel("a")
 	modelB, _, _ := createModel("b")
+	policyID := uuid.New()
+	if _, err := pool.Exec(ctx, `
+		INSERT INTO model_promotion_policies(
+			id,family,architecture_id,channel,policy_version,required_evaluation_scopes,policy_sha256,sealed_by
+		) VALUES ($1,$2,$3,'PRODUCTION',1,$4,$5,'ci')
+	`, policyID, family, architecture, []string{"P3_MODEL_SELECTION_FIXTURE"}, selectionHash("promotion-policy:"+suffix)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, `
+		INSERT INTO model_promotion_policy_bindings(
+			family,architecture_id,channel,policy_id,bound_by
+		) VALUES ($1,$2,'PRODUCTION',$3,'ci')
+	`, family, architecture, policyID); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := pool.Exec(ctx, `
 		INSERT INTO model_channels(family,channel,model_release_id,lock_version)
 		VALUES ($1,'PRODUCTION',$2,0)

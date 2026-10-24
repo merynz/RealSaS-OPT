@@ -49,7 +49,11 @@ def test_foundation_gate_runs_after_deploy_and_dispatches_reseal():
     root = Path(__file__).resolve().parents[2]
     text = (root / ".github/workflows/platform_foundation_cache_v1.yml").read_text(encoding="utf-8")
     assert "workflows: [platform-developer-deployment]" in text
-    assert "tools/platform_foundation_cache_v1.py --root \"$PLATFORM_ROOT\"" in text
+    assert (
+        '"$PLATFORM_ROOT/current/bin/realsas-python" tools/platform_foundation_cache_v1.py '
+        '--root "$PLATFORM_ROOT"'
+    ) in text
+    assert "\n          python tools/platform_foundation_cache_v1.py --root" not in text
     assert "verify_dinov2_authority_files_v2" in text
     assert "verify_pinned_flexicubes_root_v1" in text
     assert "actions: write" in text

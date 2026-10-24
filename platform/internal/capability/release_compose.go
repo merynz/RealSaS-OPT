@@ -3,6 +3,7 @@ package capability
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -13,7 +14,7 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/stagegraph"
 )
 
-// ProductProviders is the single release-time list of first-class product
+// ProductProviders is the single source-level catalog of first-class product
 // capabilities which are not already represented by Compiler stage nodes.
 // New replaceable product boundaries (Mesh, Rig, Skin, ...) join here instead
 // of inventing a second registry or a parallel operational graph.
@@ -26,8 +27,114 @@ func ProductProviders() []Provider {
 	}
 }
 
+func productProviderCatalog(ctx context.Context) ([]Descriptor, error) {
+	var rows []Descriptor
+	seen := map[string]struct{}{}
+	for _, provider := range ProductProviders() {
+		if provider == nil {
+			return nil, fmt.Errorf("nil product capability provider")
+		}
+		descriptors, err := provider.Capabilities(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, descriptor := range descriptors {
+			if err := descriptor.Validate(); err != nil {
+				return nil, err
+			}
+			if !strings.HasPrefix(descriptor.ID, "product.") {
+				return nil, fmt.Errorf("PRODUCT_PROVIDER_NON_PRODUCT_CAPABILITY:%s", descriptor.ID)
+			}
+			if _, duplicate := seen[descriptor.ID]; duplicate {
+				return nil, fmt.Errorf("duplicate capability id %s", descriptor.ID)
+			}
+			seen[descriptor.ID] = struct{}{}
+			rows = append(rows, descriptor)
+		}
+	}
+	// Catalog integrity is source-level authority and must remain complete even
+	// when one exact EngineRelease can execute only a prefix/subset of the roles.
+	if err := validateProductDescriptorRows(rows, true); err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
+func admittedProductDescriptors(ctx context.Context, stageRows []Descriptor) ([]Descriptor, error) {
+	catalog, err := productProviderCatalog(ctx)
+	if err != nil {
+		return nil, err
+	}
+	availableStages := map[string]struct{}{}
+	for _, descriptor := range stageRows {
+		availableStages[descriptor.ID] = struct{}{}
+	}
+	byID := map[string]Descriptor{}
+	for _, descriptor := range catalog {
+		byID[descriptor.ID] = descriptor
+	}
+
+	memo := map[string]bool{}
+	visiting := map[string]bool{}
+	var unavailable func(string) (bool, error)
+	unavailable = func(id string) (bool, error) {
+		if value, ok := memo[id]; ok {
+			return value, nil
+		}
+		if visiting[id] {
+			return false, fmt.Errorf("PRODUCT_CAPABILITY_DEPENDENCY_CYCLE:%s", id)
+		}
+		descriptor, ok := byID[id]
+		if !ok {
+			return false, fmt.Errorf("PRODUCT_CAPABILITY_DEPENDENCY_UNKNOWN:%s", id)
+		}
+		visiting[id] = true
+		defer delete(visiting, id)
+		for _, dependency := range descriptor.Dependencies {
+			if _, ok := availableStages[dependency]; ok {
+				continue
+			}
+			if strings.HasPrefix(dependency, "compiler.stage/") {
+				memo[id] = true
+				return true, nil
+			}
+			if strings.HasPrefix(dependency, "product.") {
+				if _, declared := byID[dependency]; !declared {
+					return false, fmt.Errorf("PRODUCT_CAPABILITY_DEPENDENCY_UNKNOWN:%s:%s", id, dependency)
+				}
+				blocked, err := unavailable(dependency)
+				if err != nil {
+					return false, err
+				}
+				if blocked {
+					memo[id] = true
+					return true, nil
+				}
+				continue
+			}
+			return false, fmt.Errorf("PRODUCT_CAPABILITY_DEPENDENCY_UNKNOWN:%s:%s", id, dependency)
+		}
+		memo[id] = false
+		return false, nil
+	}
+
+	admitted := make([]Descriptor, 0, len(catalog))
+	for _, descriptor := range catalog {
+		blocked, err := unavailable(descriptor.ID)
+		if err != nil {
+			return nil, err
+		}
+		if !blocked {
+			admitted = append(admitted, descriptor)
+		}
+	}
+	return admitted, nil
+}
+
 // BuildEngineReleaseRegistry composes the immutable release capability graph
-// from the exact released Compiler DAG plus source-owned product capabilities.
+// from the exact released Compiler DAG plus only the source-owned product roles
+// whose declared dependencies are executable in that exact DAG. The source
+// catalog remains complete; admission is a release projection, not role deletion.
 func BuildEngineReleaseRegistry(ctx context.Context, graph *stagegraph.Graph) (*Registry, error) {
 	if graph == nil {
 		return nil, fmt.Errorf("release capability registry requires stage graph")
@@ -36,20 +143,27 @@ func BuildEngineReleaseRegistry(ctx context.Context, graph *stagegraph.Graph) (*
 	if err != nil {
 		return nil, err
 	}
-	providers := []Provider{CompilePlanProvider{Graph: graph, Architecture: owners}}
-	providers = append(providers, ProductProviders()...)
-	registry, err := Build(ctx, providers...)
+	stageRows, err := (CompilePlanProvider{Graph: graph, Architecture: owners}).Capabilities(ctx)
+	if err != nil {
+		return nil, err
+	}
+	productRows, err := admittedProductDescriptors(ctx, stageRows)
+	if err != nil {
+		return nil, err
+	}
+	rows := append(append([]Descriptor(nil), stageRows...), productRows...)
+	registry, err := NewRegistry(rows)
 	if err != nil {
 		return nil, err
 	}
 	// product.* capability IDs are stable semantic roles. Release sealing is also
-	// the architecture gate for shared capability semantics, responsibility
-	// ownership, learned-model requirements, authority duplication, transform
-	// paths and lossy boundaries.
+	// the architecture gate for the admitted role subset: shared semantics,
+	// responsibility ownership, learned-model requirements, authority duplication,
+	// transform paths and lossy boundaries remain fail-closed.
 	if _, err := ProductRoleGraph(registry); err != nil {
 		return nil, err
 	}
-	if err := validateProductDescriptorSemantics(registry); err != nil {
+	if err := validateReleaseProductDescriptorSemantics(registry); err != nil {
 		return nil, err
 	}
 	if _, err := ResponsibilityTerrain(registry); err != nil {
@@ -89,13 +203,14 @@ func validateModuleVersionIdentity(descriptor Descriptor, version VersionIdentit
 // SealEngineReleaseSnapshot seals exactly one capability-set identity for an
 // existing immutable EngineRelease. Stage capability versions are derived from
 // the already-sealed EngineRelease stage bindings. Only non-stage product
-// capabilities require an implementation identity from release tooling; policy
-// and parameter hashes are independently rederived from the Go descriptor.
+// capabilities admitted by the exact release graph require an implementation
+// identity from release tooling; policy and parameter hashes are independently
+// rederived from the Go descriptor.
 //
 // This keeps EngineRelease DAG truth, learned ModelRelease requirements and
 // capability-set truth separate but jointly immutable. A release cannot claim a
-// product role whose learned responsibilities are absent or architecture-drifted
-// in EngineRelease model requirements.
+// product role whose Compiler prerequisites are absent, nor one whose learned
+// responsibilities are absent or architecture-drifted in model requirements.
 func SealEngineReleaseSnapshot(
 	ctx context.Context,
 	pool *pgxpool.Pool,

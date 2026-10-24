@@ -24,6 +24,7 @@ on:
       - 'tests/repository/test_platform_ci_bootstrap.py'
       - 'tests/repository/test_platform_ci_database.py'
       - 'tests/repository/test_knight_skin_readiness_inspector_v1.py'
+      - 'tests/repository/test_knight_skin_readiness_subject_identity_v1.py'
       - 'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json'
       - 'canonical/PLATFORM_THROUGHPUT_HYDRATION_GC_PREREG_20261008.json'
       - 'canonical/KNIGHT_SKIN_READINESS_INSPECTOR_TRIGGER_V1.json'
@@ -57,6 +58,7 @@ on:
       - 'tests/repository/test_platform_ci_bootstrap.py'
       - 'tests/repository/test_platform_ci_database.py'
       - 'tests/repository/test_knight_skin_readiness_inspector_v1.py'
+      - 'tests/repository/test_knight_skin_readiness_subject_identity_v1.py'
       - 'canonical/PLATFORM_KNIGHT_INPUT_INVENTORY_V1.json'
       - 'canonical/PLATFORM_THROUGHPUT_HYDRATION_GC_PREREG_20261008.json'
       - 'canonical/KNIGHT_SKIN_READINESS_INSPECTOR_TRIGGER_V1.json'
@@ -182,7 +184,8 @@ jobs:
             tests/repository/test_platform_ci_database.py \
             tests/repository/test_architecture_map.py \
             tests/repository/test_self_hosted_execution_policy.py \
-            tests/repository/test_knight_skin_readiness_inspector_v1.py
+            tests/repository/test_knight_skin_readiness_inspector_v1.py \
+            tests/repository/test_knight_skin_readiness_subject_identity_v1.py
       - name: Current continuation contracts
         run: |
           cd ..

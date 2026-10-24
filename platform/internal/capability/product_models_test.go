@@ -49,6 +49,34 @@ func TestProductModelRequirementsIncludeAxisForActiveRig(t *testing.T) {
 	}
 }
 
+func TestTargetScopedProductModelRequirementsFollowResolvedClosure(t *testing.T) {
+	registry := productProvidersTestRegistry(t)
+
+	meshClosure, err := registry.Resolve("product.mesh")
+	if err != nil {
+		t.Fatal(err)
+	}
+	meshRows, err := ProductModelRequirementsForDescriptors(registry, meshClosure)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(meshRows) != 2 || meshRows[0].Family != "IRIS" || meshRows[1].Family != "TESSA" {
+		t.Fatalf("mesh model closure=%+v", meshRows)
+	}
+
+	rigClosure, err := registry.Resolve("product.rig")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rigRows, err := ProductModelRequirementsForDescriptors(registry, rigClosure)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rigRows) != 3 || rigRows[0].Family != "AXIS" || rigRows[1].Family != "IRIS" || rigRows[2].Family != "TESSA" {
+		t.Fatalf("rig model closure=%+v", rigRows)
+	}
+}
+
 func TestActiveRigEngineReleaseRequiresAxis(t *testing.T) {
 	registry := productProvidersTestRegistry(t)
 	valid := []release.ModelRequirement{

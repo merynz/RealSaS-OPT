@@ -7,11 +7,11 @@ import pytest
 
 from tools.ops.materialize_current_subject_input_v1 import (
     _load_witness_binding,
-    _required_sections,
+    _read_set_sections,
 )
 
 
-def test_required_sections_selects_only_current_read_set() -> None:
+def test_read_set_sections_selects_only_present_declared_sections() -> None:
     manifest = {
         "run_id": "SEED",
         "source_files": {"rows": []},
@@ -19,14 +19,20 @@ def test_required_sections_selects_only_current_read_set() -> None:
         "normalization": {"center_xyz": [0, 0, 0]},
         "unrelated": {"must_not_be_bound": True},
     }
-    selected = _required_sections(manifest, {"observation", "source_files", "normalization"})
+    selected, absent = _read_set_sections(
+        manifest,
+        {"observation", "source_files", "normalization", "carrier_policy", "components"},
+    )
     assert list(selected) == ["normalization", "observation", "source_files"]
+    assert absent == ["carrier_policy", "components"]
     assert "unrelated" not in selected
+    assert "carrier_policy" not in selected
+    assert "components" not in selected
 
 
-def test_required_sections_fails_closed_on_missing_current_read_set() -> None:
-    with pytest.raises(RuntimeError, match="CURRENT_SUBJECT_INPUT_SEED_MISSING_READ_SET:normalization"):
-        _required_sections({"observation": {}}, {"observation", "normalization"})
+def test_read_set_sections_fails_if_seed_has_no_declared_sections() -> None:
+    with pytest.raises(RuntimeError, match="CURRENT_SUBJECT_INPUT_SEED_NO_DECLARED_READ_SET_SECTIONS"):
+        _read_set_sections({"unrelated": {}}, {"observation", "normalization"})
 
 
 def test_witness_binding_separates_platform_subject_from_legacy_evidence_id(tmp_path: Path) -> None:

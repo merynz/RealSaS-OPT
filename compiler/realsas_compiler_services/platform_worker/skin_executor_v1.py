@@ -20,6 +20,7 @@ from compiler.realsas_compiler_services.platform_worker.model_inputs import (
 
 SKIN_EXECUTOR_CONTRACT_V1 = "RealSaS.ProductSkinInference.v1"
 MIRA_V55_ARCHITECTURE_ID = "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5"
+MIRA_V55_COMPUTE_CONTRACT = "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF"
 
 
 def _one(
@@ -58,13 +59,37 @@ def _json_bytes(value: Any) -> bytes:
     ).encode("utf-8")
 
 
-def _device_from_environment():
+def _device_from_environment(metadata: dict[str, Any]):
+    """Enforce the exact compute profile used by the sealed V5.5 witness.
+
+    Cross-device equivalence has not been established for this historical model.
+    Until such a court exists, CPU/FP32 execution is a different behavior and is
+    therefore rejected rather than silently treated as the same ModelRelease.
+    """
+
     import torch
 
-    raw = os.environ.get("REALSAS_INFERENCE_DEVICE", "cpu").strip() or "cpu"
+    if str(metadata.get("inference_compute_contract") or "") != MIRA_V55_COMPUTE_CONTRACT:
+        raise RuntimeError("SKIN_MIRA_COMPUTE_CONTRACT_DRIFT")
+    if metadata.get("cuda_required") is not True:
+        raise RuntimeError("SKIN_MIRA_CUDA_POLICY_DRIFT")
+    if metadata.get("cuda_bf16_required") is not True:
+        raise RuntimeError("SKIN_MIRA_BF16_POLICY_DRIFT")
+    if metadata.get("tf32_allowed") is not False:
+        raise RuntimeError("SKIN_MIRA_TF32_POLICY_DRIFT")
+
+    raw = os.environ.get("REALSAS_INFERENCE_DEVICE", "").strip()
+    if not raw:
+        raise RuntimeError("SKIN_MIRA_INFERENCE_DEVICE_REQUIRED")
     device = torch.device(raw)
-    if device.type == "cuda" and not torch.cuda.is_available():
-        raise RuntimeError("SKIN_CUDA_REQUESTED_BUT_UNAVAILABLE")
+    if device.type != "cuda":
+        raise RuntimeError("SKIN_MIRA_CUDA_REQUIRED")
+    if not torch.cuda.is_available():
+        raise RuntimeError("SKIN_MIRA_CUDA_REQUESTED_BUT_UNAVAILABLE")
+    if not torch.cuda.is_bf16_supported():
+        raise RuntimeError("SKIN_MIRA_CUDA_BF16_REQUIRED")
+    torch.backends.cuda.matmul.allow_tf32 = False
+    torch.backends.cudnn.allow_tf32 = False
     return device
 
 
@@ -180,7 +205,7 @@ def execute_skin_capability_v1(
     decode_chunk = int(metadata.get("decode_chunk") or 512)
     if decode_chunk < 1:
         raise RuntimeError("SKIN_MIRA_DECODE_CHUNK_INVALID")
-    device = _device_from_environment()
+    device = _device_from_environment(metadata)
     load_started = perf_counter()
     backbone, decoder, runtime_checkpoint = load_mira_runtime_model_v1(
         str(checkpoint.get("path") or ""), device=device
@@ -270,6 +295,9 @@ def execute_skin_capability_v1(
         "mira_model_release_id": str(model_release.get("model_release_id") or ""),
         "mira_checkpoint_content_sha256": str(checkpoint.get("content_sha256") or ""),
         "mira_runtime_checkpoint_schema": str(runtime_checkpoint.get("schema") or ""),
+        "inference_compute_contract": MIRA_V55_COMPUTE_CONTRACT,
+        "cuda_bf16_required": True,
+        "tf32_allowed": False,
         "model_materialization_seconds": float(materialize_seconds),
         "model_load_seconds": float(model_load_seconds),
         "inference_seconds": float(inference_seconds),

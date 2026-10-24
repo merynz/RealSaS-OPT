@@ -66,6 +66,10 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"mesh_and_rig_are_canonical_parents":   true,
 			"feature_evidence_is_canonical_parent": false,
 			"material_support_is_canonical_parent": false,
+			"inference_compute_contract":            "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF",
+			"cuda_required":                         true,
+			"cuda_bf16_required":                    true,
+			"tf32_allowed":                          false,
 			"activation_state":                     "BLOCKED",
 			"activation_blocker":                   "CURRENT_MIRA_MODELRELEASE_NOT_REGISTERED",
 
@@ -78,6 +82,7 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"historical_mira_v55_result_schema":               "RealSaS.MIRAMDirectResult.v5_5",
 			"historical_mira_v55_product_authority":           false,
 			"historical_mira_v55_generalization_claimed":      false,
+			"historical_mira_v55_compute_profile_preserved":   true,
 			"current_repo_mira_v55_runtime_source_recovered":  true,
 			"current_mira_v55_runtime_package_recovered":      true,
 			"current_platform_mira_modelrelease_bound":        false,

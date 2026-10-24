@@ -16,8 +16,6 @@
         "input_schema_version": "v1",
         "output_artifact_type": "RealSaS.ShapeInput",
         "output_schema_version": "v1",
-        "foundation_binding_policy": "IMPLEMENTATION_PINNED__DEPLOY_ROOT_CACHE_LOCATOR__CONSUMPTION_REVERIFIED",
-        "ambient_foundation_path_override_allowed": false,
         "platform_view_count_invariant": false,
         "source_truth_copied_into_output": false,
         "scientific_contract_is_replaceable": true,
@@ -42,8 +40,6 @@
         "output_artifact_type": "RealSaS.ShapeProposal",
         "output_schema_version": "v2",
         "maximum_new_tokens": 131072,
-        "third_party_operator_binding_policy": "IMPLEMENTATION_PINNED__DEPLOY_ROOT_CACHE_LOCATOR__CONSUMPTION_REVERIFIED",
-        "ambient_operator_path_override_allowed": false,
         "required_models": [
           {
             "family": "IRIS",

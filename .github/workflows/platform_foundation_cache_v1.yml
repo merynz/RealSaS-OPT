@@ -112,7 +112,7 @@ jobs:
       - name: Provision exact third-party runtime caches
         run: |
           set -euo pipefail
-          python tools/platform_foundation_cache_v1.py --root "$PLATFORM_ROOT"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/platform_foundation_cache_v1.py --root "$PLATFORM_ROOT"
 
       - name: Verify caches through product scientific loaders
         run: |

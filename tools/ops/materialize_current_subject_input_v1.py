@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-"""Seal one exact current SubjectInput from an existing authority run manifest.
+"""Seal one exact current SubjectInput from a witness-bound authority run.
 
-This operation does not execute models or compiler stages. It selects only the
-run-manifest sections required by the current product.rig capability closure,
-imports those exact JSON values as immutable RunManifestSection artifacts, and
-seals them through the existing Platform SubjectInput API.
+This operation does not execute models or Compiler stages. The Platform subject
+identity and legacy evidence run are bound by an explicit canonical witness
+inventory; the operation then selects only the run-manifest sections required by
+the current product.rig capability closure, imports those exact JSON values as
+immutable RunManifestSection artifacts, and seals them through the existing
+Platform SubjectInput API.
 """
 
 import argparse
@@ -23,9 +25,58 @@ from tools.ops.execute_current_skin_parent_capabilities_v1 import (
     _product_rig_stage_closure,
 )
 
+ROOT = Path(__file__).resolve().parents[2]
+
 
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def _nested(value: dict[str, Any], dotted: str) -> Any:
+    current: Any = value
+    for key in dotted.split("."):
+        if not isinstance(current, dict) or key not in current:
+            raise RuntimeError("CURRENT_SUBJECT_INPUT_WITNESS_POINTER_INVALID:" + dotted)
+        current = current[key]
+    return current
+
+
+def _load_witness_binding(
+    repo_root: Path,
+    inventory_ref: str,
+    manifest_source: str,
+    subject_slug: str,
+) -> tuple[Path, dict[str, Any], bytes, str]:
+    root = repo_root.resolve()
+    path = (root / inventory_ref).resolve()
+    try:
+        path.relative_to(root)
+    except ValueError as exc:
+        raise RuntimeError("CURRENT_SUBJECT_INPUT_WITNESS_PATH_ESCAPE") from exc
+    if not path.is_file():
+        raise RuntimeError("CURRENT_SUBJECT_INPUT_WITNESS_MISSING:" + str(path))
+    raw = path.read_bytes()
+    try:
+        witness = json.loads(raw.decode("utf-8"))
+    except Exception as exc:
+        raise RuntimeError("CURRENT_SUBJECT_INPUT_WITNESS_JSON_INVALID") from exc
+    if not isinstance(witness, dict):
+        raise RuntimeError("CURRENT_SUBJECT_INPUT_WITNESS_OBJECT_REQUIRED")
+    witness_subject = str(witness.get("subject_key") or "")
+    if witness_subject != subject_slug:
+        raise RuntimeError(
+            "CURRENT_SUBJECT_INPUT_WITNESS_SUBJECT_MISMATCH:"
+            + witness_subject
+            + ":"
+            + subject_slug
+        )
+    source_run_id = str(_nested(witness, manifest_source) or "")
+    if not source_run_id or any(
+        ch not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-"
+        for ch in source_run_id
+    ):
+        raise RuntimeError("CURRENT_SUBJECT_INPUT_WITNESS_RUN_ID_INVALID")
+    return path, witness, raw, source_run_id
 
 
 def _load_seed_manifest(source_run_id: str) -> tuple[Path, dict[str, Any], bytes]:
@@ -84,20 +135,22 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
     if not subject_id:
         raise RuntimeError("CURRENT_SUBJECT_INPUT_SUBJECT_ID_REQUIRED")
 
-    seed_path, seed_manifest, seed_raw = _load_seed_manifest(args.source_run_id)
+    witness_path, witness, witness_raw, source_run_id = _load_witness_binding(
+        ROOT,
+        args.identity_inventory,
+        args.manifest_source,
+        args.subject_slug,
+    )
+    seed_path, seed_manifest, seed_raw = _load_seed_manifest(source_run_id)
+
     source_audit = seed_manifest.get("source_audit")
     evidence_subject = ""
     if isinstance(source_audit, dict):
         evidence_subject = str(source_audit.get("subject_key") or "")
     if not evidence_subject:
         evidence_subject = str(seed_manifest.get("subject_id") or "")
-    if evidence_subject != args.subject_slug:
-        raise RuntimeError(
-            "CURRENT_SUBJECT_INPUT_SEED_SUBJECT_MISMATCH:"
-            + evidence_subject
-            + ":"
-            + args.subject_slug
-        )
+    if not evidence_subject:
+        raise RuntimeError("CURRENT_SUBJECT_INPUT_EVIDENCE_SUBJECT_ID_REQUIRED")
 
     sections = _required_sections(seed_manifest, required_manifest_keys)
     bindings = []
@@ -105,7 +158,7 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
     for key, value in sections.items():
         imported = _put_import_section(
             args.api_root,
-            source_run_id=args.source_run_id,
+            source_run_id=source_run_id,
             key=key,
             value=value,
             actor=args.actor,
@@ -147,10 +200,18 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
         "subject": {
             "slug": args.subject_slug,
             "platform_subject_id": subject_id,
+            "witness_subject_key": str(witness["subject_key"]),
             "evidence_subject_id": evidence_subject,
         },
+        "identity_binding": {
+            "inventory_ref": args.identity_inventory,
+            "inventory_path": str(witness_path),
+            "inventory_sha256": _sha256(witness_raw),
+            "manifest_source": args.manifest_source,
+            "resolved_source_run_id": source_run_id,
+        },
         "source_run": {
-            "run_id": args.source_run_id,
+            "run_id": source_run_id,
             "run_manifest_path": str(seed_path),
             "run_manifest_sha256": _sha256(seed_raw),
         },
@@ -171,7 +232,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--api-root", default="http://127.0.0.1:8080")
     parser.add_argument("--subject-slug", required=True)
-    parser.add_argument("--source-run-id", required=True)
+    parser.add_argument("--identity-inventory", required=True)
+    parser.add_argument("--manifest-source", required=True)
     parser.add_argument("--expected-main-sha", required=True)
     parser.add_argument("--actor", default="current-subject-input-materializer-v1")
     parser.add_argument("--out", type=Path, required=True)
@@ -179,11 +241,8 @@ def main() -> None:
 
     if len(args.expected_main_sha) != 40 or any(ch not in "0123456789abcdef" for ch in args.expected_main_sha):
         raise RuntimeError("CURRENT_SUBJECT_INPUT_EXPECTED_MAIN_SHA_INVALID")
-    if not args.source_run_id or any(
-        ch not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-"
-        for ch in args.source_run_id
-    ):
-        raise RuntimeError("CURRENT_SUBJECT_INPUT_SOURCE_RUN_ID_INVALID")
+    if not args.identity_inventory or not args.manifest_source:
+        raise RuntimeError("CURRENT_SUBJECT_INPUT_WITNESS_BINDING_REQUIRED")
 
     try:
         receipt = materialize(args)
@@ -193,7 +252,8 @@ def main() -> None:
             "status": "FAIL_CURRENT_SUBJECT_INPUT_MATERIALIZATION",
             "source_code_sha": args.expected_main_sha,
             "subject_slug": args.subject_slug,
-            "source_run_id": args.source_run_id,
+            "identity_inventory": args.identity_inventory,
+            "manifest_source": args.manifest_source,
             "error_type": type(exc).__name__,
             "error": str(exc),
             "model_inference_executed": False,

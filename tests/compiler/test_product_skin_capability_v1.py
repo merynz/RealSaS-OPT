@@ -4,10 +4,28 @@ import hashlib
 import json
 from types import SimpleNamespace
 
+import pytest
+
 from compiler.realsas_compiler_services.platform_worker import skin_executor_v1 as skin_executor
 
 MIRA_ARCH = "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5"
 SURFACE_HASH = "1" * 64
+
+
+def _compute_metadata() -> dict:
+    return {
+        "inference_compute_contract": "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF",
+        "cuda_required": True,
+        "cuda_bf16_required": True,
+        "tf32_allowed": False,
+    }
+
+
+def test_skin_executor_rejects_cpu_for_historical_compute_contract(monkeypatch):
+    pytest.importorskip("torch")
+    monkeypatch.setenv("REALSAS_INFERENCE_DEVICE", "cpu")
+    with pytest.raises(RuntimeError, match="SKIN_MIRA_CUDA_REQUIRED"):
+        skin_executor._device_from_environment(_compute_metadata())
 
 
 def test_product_skin_executor_keeps_mira_proposal_and_compiler_authority(monkeypatch):
@@ -118,7 +136,7 @@ def test_product_skin_executor_keeps_mira_proposal_and_compiler_authority(monkey
     monkeypatch.setattr(carrier_native, "proposal_from_dense_wm_v55", build_proposal)
     monkeypatch.setattr(carrier_skin, "qualify_carrier_skin_v1", qualify)
     monkeypatch.setattr(skin_ir, "mint_canonical_skin_v1", mint)
-    monkeypatch.setattr(skin_executor, "_device_from_environment", lambda: "cpu")
+    monkeypatch.setattr(skin_executor, "_device_from_environment", lambda _metadata: "cuda")
     monkeypatch.setattr(
         skin_executor,
         "materialize_model_releases",
@@ -162,6 +180,7 @@ def test_product_skin_executor_keeps_mira_proposal_and_compiler_authority(monkey
         "capability_metadata": {
             "executor_contract": "RealSaS.ProductSkinInference.v1",
             "decode_chunk": 512,
+            **_compute_metadata(),
             "carrier_skin_qualification": {
                 "max_simplex_repair_l1": 1e-5,
                 "max_total_correction_l1": 1e-4,
@@ -210,6 +229,9 @@ def test_product_skin_executor_keeps_mira_proposal_and_compiler_authority(monkey
         "max_influences": 41,
     }
     diagnostics = result["diagnostics"]
+    assert diagnostics["inference_compute_contract"] == "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF"
+    assert diagnostics["cuda_bf16_required"] is True
+    assert diagnostics["tf32_allowed"] is False
     assert diagnostics["fit_performed"] is False
     assert diagnostics["teacher_authority_used"] is False
     assert diagnostics["source_skin_runtime_authority"] is False

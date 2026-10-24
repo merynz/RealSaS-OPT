@@ -1,6 +1,7 @@
 package artifactstore
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -12,6 +13,8 @@ import (
 	"strings"
 )
 
+const MaxArtifactObjectBytes int64 = 8 << 30
+
 type Object struct {
 	ContentSHA256 string `json:"content_sha256"`
 	StorageKey    string `json:"storage_key"`
@@ -19,6 +22,7 @@ type Object struct {
 }
 
 type Store interface {
+	PutStream(context.Context, io.Reader, string, int64) (Object, error)
 	PutBytes(context.Context, []byte) (Object, error)
 	GetBytes(context.Context, string) ([]byte, error)
 	Verify(context.Context, Object) error
@@ -31,6 +35,19 @@ func ValidateSHA256(value string) error {
 	raw, err := hex.DecodeString(value)
 	if err != nil || len(raw) != sha256.Size || hex.EncodeToString(raw) != value {
 		return errors.New("invalid lowercase sha256")
+	}
+	return nil
+}
+
+func ValidateObjectIdentity(contentSHA256 string, sizeBytes int64) error {
+	if err := ValidateSHA256(contentSHA256); err != nil {
+		return err
+	}
+	if sizeBytes < 0 {
+		return errors.New("artifact size must be non-negative")
+	}
+	if sizeBytes > MaxArtifactObjectBytes {
+		return fmt.Errorf("artifact size exceeds %d bytes", MaxArtifactObjectBytes)
 	}
 	return nil
 }
@@ -52,12 +69,27 @@ func HashBytes(data []byte) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func verifyReader(r io.Reader, expectedSHA string, expectedSize int64) error {
-	if err := ValidateSHA256(expectedSHA); err != nil {
+type contextReader struct {
+	ctx context.Context
+	r   io.Reader
+}
+
+func (r *contextReader) Read(p []byte) (int, error) {
+	select {
+	case <-r.ctx.Done():
+		return 0, r.ctx.Err()
+	default:
+		return r.r.Read(p)
+	}
+}
+
+func copyVerifiedStream(ctx context.Context, dst io.Writer, src io.Reader, expectedSHA string, expectedSize int64) error {
+	if err := ValidateObjectIdentity(expectedSHA, expectedSize); err != nil {
 		return err
 	}
 	h := sha256.New()
-	n, err := io.Copy(h, r)
+	limited := &io.LimitedReader{R: &contextReader{ctx: ctx, r: src}, N: expectedSize + 1}
+	n, err := io.Copy(io.MultiWriter(dst, h), limited)
 	if err != nil {
 		return err
 	}
@@ -68,6 +100,10 @@ func verifyReader(r io.Reader, expectedSHA string, expectedSize int64) error {
 		return fmt.Errorf("artifact content hash mismatch: got %s want %s", got, expectedSHA)
 	}
 	return nil
+}
+
+func verifyReader(ctx context.Context, r io.Reader, expectedSHA string, expectedSize int64) error {
+	return copyVerifiedStream(ctx, io.Discard, r, expectedSHA, expectedSize)
 }
 
 type Local struct {
@@ -101,9 +137,11 @@ func (s *Local) pathForKey(key string) (string, error) {
 	return target, nil
 }
 
-func (s *Local) PutBytes(_ context.Context, data []byte) (Object, error) {
-	digest := HashBytes(data)
-	key, err := CASKey(digest, "")
+func (s *Local) PutStream(ctx context.Context, src io.Reader, expectedSHA string, expectedSize int64) (Object, error) {
+	if err := ValidateObjectIdentity(expectedSHA, expectedSize); err != nil {
+		return Object{}, err
+	}
+	key, err := CASKey(expectedSHA, "")
 	if err != nil {
 		return Object{}, err
 	}
@@ -111,42 +149,58 @@ func (s *Local) PutBytes(_ context.Context, data []byte) (Object, error) {
 	if err != nil {
 		return Object{}, err
 	}
+	expected := Object{ContentSHA256: expectedSHA, StorageKey: key, SizeBytes: expectedSize}
+	if _, err := os.Stat(path); err == nil {
+		if err := copyVerifiedStream(ctx, io.Discard, src, expectedSHA, expectedSize); err != nil {
+			return Object{}, err
+		}
+		if err := s.Verify(ctx, expected); err != nil {
+			return Object{}, fmt.Errorf("CAS_HASH_COLLISION_OR_CORRUPTION: %w", err)
+		}
+		return expected, nil
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return Object{}, err
+	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return Object{}, err
 	}
-	if existing, err := os.ReadFile(path); err == nil {
-		if HashBytes(existing) != digest || len(existing) != len(data) {
-			return Object{}, errors.New("CAS_HASH_COLLISION_OR_CORRUPTION")
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".realsas-cas-stream-*")
+	if err != nil {
+		return Object{}, err
+	}
+	tmpName := tmp.Name()
+	defer os.Remove(tmpName)
+	if err := copyVerifiedStream(ctx, tmp, src, expectedSHA, expectedSize); err != nil {
+		_ = tmp.Close()
+		return Object{}, err
+	}
+	if err := tmp.Sync(); err != nil {
+		_ = tmp.Close()
+		return Object{}, err
+	}
+	if err := tmp.Close(); err != nil {
+		return Object{}, err
+	}
+	if _, err := os.Stat(path); err == nil {
+		if err := s.Verify(ctx, expected); err != nil {
+			return Object{}, fmt.Errorf("CAS_HASH_COLLISION_OR_CORRUPTION: %w", err)
 		}
+		return expected, nil
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return Object{}, err
-	} else {
-		tmp, err := os.CreateTemp(filepath.Dir(path), ".realsas-cas-*")
-		if err != nil {
-			return Object{}, err
-		}
-		tmpName := tmp.Name()
-		defer os.Remove(tmpName)
-		if _, err := tmp.Write(data); err != nil {
-			tmp.Close()
-			return Object{}, err
-		}
-		if err := tmp.Sync(); err != nil {
-			tmp.Close()
-			return Object{}, err
-		}
-		if err := tmp.Close(); err != nil {
-			return Object{}, err
-		}
-		if err := os.Rename(tmpName, path); err != nil {
-			return Object{}, err
-		}
 	}
-	obj := Object{ContentSHA256: digest, StorageKey: key, SizeBytes: int64(len(data))}
-	if err := s.Verify(context.Background(), obj); err != nil {
+	if err := os.Rename(tmpName, path); err != nil {
+		return Object{}, err
+	}
+	if err := s.Verify(ctx, expected); err != nil {
 		return Object{}, fmt.Errorf("CAS_POST_WRITE_VERIFICATION_FAILED: %w", err)
 	}
-	return obj, nil
+	return expected, nil
+}
+
+func (s *Local) PutBytes(ctx context.Context, data []byte) (Object, error) {
+	digest := HashBytes(data)
+	return s.PutStream(ctx, bytes.NewReader(data), digest, int64(len(data)))
 }
 
 func (s *Local) GetBytes(_ context.Context, storageKey string) ([]byte, error) {
@@ -157,7 +211,10 @@ func (s *Local) GetBytes(_ context.Context, storageKey string) ([]byte, error) {
 	return os.ReadFile(path)
 }
 
-func (s *Local) Verify(_ context.Context, obj Object) error {
+func (s *Local) Verify(ctx context.Context, obj Object) error {
+	if err := ValidateObjectIdentity(obj.ContentSHA256, obj.SizeBytes); err != nil {
+		return err
+	}
 	path, err := s.pathForKey(obj.StorageKey)
 	if err != nil {
 		return err
@@ -167,5 +224,5 @@ func (s *Local) Verify(_ context.Context, obj Object) error {
 		return err
 	}
 	defer f.Close()
-	return verifyReader(f, obj.ContentSHA256, obj.SizeBytes)
+	return verifyReader(ctx, f, obj.ContentSHA256, obj.SizeBytes)
 }

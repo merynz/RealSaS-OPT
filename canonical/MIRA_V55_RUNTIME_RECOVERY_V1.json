@@ -34,6 +34,18 @@
     "torch_equal_logits": true,
     "torch_equal_weights": true
   },
+  "historical_compute_contract": {
+    "contract_id": "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF",
+    "backbone_device": "CUDA",
+    "backbone_parameter_dtype": "FP32",
+    "backbone_autocast_dtype": "BF16",
+    "readout_dtype": "FP32",
+    "cuda_matmul_tf32": false,
+    "cudnn_tf32": false,
+    "cross_device_parity_proven": false,
+    "cpu_fp32_product_execution_admitted": false,
+    "product_executor_fail_closed_on_profile_drift": true
+  },
   "runtime_package": {
     "schema": "RealSaS.MIRA.RuntimeCheckpoint.v1",
     "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",

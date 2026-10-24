@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
+	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 )
 
 func TestBaselineResolverPrefersPromotedProductOverLegacyWitness(t *testing.T) {
@@ -79,10 +80,14 @@ func TestBaselineResolverPrefersPromotedProductOverLegacyWitness(t *testing.T) {
 
 	releaseID := uuid.New()
 	capabilitySetSHA := uniqueHash("capability-set", suffix)
+	sourceCodeSHA := repeated("a", 40)
 	if _, err := pool.Exec(ctx, `
 		INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at,capability_set_sha256)
 		VALUES ($1,$2,$3,'PRODUCT','ci',now(),$4)
 	`, releaseID, "baseline-product-"+suffix, uniqueHash("product-release", suffix), capabilitySetSHA); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := release.BindCanonicalMain(ctx, pool, releaseID, sourceCodeSHA, "ci"); err != nil {
 		t.Fatal(err)
 	}
 	attemptID := uuid.New()
@@ -120,7 +125,7 @@ func TestBaselineResolverPrefersPromotedProductOverLegacyWitness(t *testing.T) {
 		INSERT INTO model_releases
 		(id,family,name,architecture_id,checkpoint_artifact_id,engine_release_id,source_code_sha,lifecycle_state,metadata,created_by)
 		VALUES ($1,'AXIS',$2,'RealSaS.AXIS.Test.v1',$3,$4,$5,'PRODUCTION','{}','ci')
-	`, modelReleaseID, "axis-baseline-"+suffix, checkpointArtifactID, releaseID, repeated("a", 40)); err != nil {
+	`, modelReleaseID, "axis-baseline-"+suffix, checkpointArtifactID, releaseID, sourceCodeSHA); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, `

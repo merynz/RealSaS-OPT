@@ -14,6 +14,7 @@ import hashlib
 import json
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -29,10 +30,14 @@ REQUIRED = (
 
 def _get_json(api_root: str, path: str) -> Any:
     request = Request(api_root.rstrip("/") + path, method="GET")
-    with urlopen(request, timeout=30) as response:
-        if response.status != 200:
-            raise RuntimeError(f"SKIN_READINESS_HTTP_STATUS:{path}:{response.status}")
-        return json.load(response)
+    try:
+        with urlopen(request, timeout=30) as response:
+            if response.status != 200:
+                raise RuntimeError(f"SKIN_READINESS_HTTP_STATUS:{path}:{response.status}")
+            return json.load(response)
+    except HTTPError as exc:
+        detail = exc.read().decode("utf-8", "replace")
+        raise RuntimeError(f"SKIN_READINESS_HTTP_{exc.code}:{path}:{detail}") from exc
 
 
 def _get_bytes(api_root: str, artifact_id: str, expected_sha: str, expected_size: int) -> bytes:
@@ -269,12 +274,12 @@ def _mira_state(api_root: str) -> dict[str, Any]:
 
 
 def inspect(api_root: str, expected_main_sha: str) -> dict[str, Any]:
-    baseline = _get_json(api_root, "/v1/ops/baselines/knight")
-    if baseline.get("schema") != "RealSaS.SubjectBaseline.v1":
-        raise RuntimeError("SKIN_READINESS_BASELINE_SCHEMA_DRIFT")
-    subject_id = str(baseline.get("subject_id") or "")
-    if not subject_id:
-        raise RuntimeError("SKIN_READINESS_KNIGHT_SUBJECT_MISSING")
+    subject = _get_json(api_root, "/v1/subjects/by-slug/knight")
+    if subject.get("schema") != "RealSaS.SubjectIdentity.v1":
+        raise RuntimeError("SKIN_READINESS_SUBJECT_IDENTITY_SCHEMA_DRIFT")
+    subject_id = str(subject.get("subject_id") or "")
+    if not subject_id or str(subject.get("slug") or "") != "knight":
+        raise RuntimeError("SKIN_READINESS_KNIGHT_SUBJECT_IDENTITY_DRIFT")
 
     valid, artifact_diagnostics = _load_valid_candidates(api_root, subject_id)
     bundle = _select_bundle(valid)
@@ -298,8 +303,9 @@ def inspect(api_root: str, expected_main_sha: str) -> dict[str, Any]:
         "source_code_sha": expected_main_sha,
         "subject": {
             "id": subject_id,
-            "slug": str(baseline.get("subject_slug") or ""),
-            "baseline_kind": str(baseline.get("kind") or ""),
+            "slug": str(subject.get("slug") or ""),
+            "display_name": str(subject.get("display_name") or ""),
+            "identity_source": "PLATFORM_SUBJECT_IDENTITY_READ_V1",
         },
         "required_artifacts": [
             {"role": role, "artifact_type": artifact_type, "schema_version": schema}
@@ -327,22 +333,47 @@ def inspect(api_root: str, expected_main_sha: str) -> dict[str, Any]:
     }
 
 
+def _failure_report(expected_main_sha: str, exc: Exception) -> dict[str, Any]:
+    return {
+        "schema": "RealSaS.KnightSkinReadinessInspectionFailure.v1",
+        "status": "FAILED_INSPECTION",
+        "source_code_sha": expected_main_sha,
+        "error_type": type(exc).__name__,
+        "error": str(exc),
+        "scientific_pass_minted": False,
+        "qualification_minted": False,
+        "model_inference_executed": False,
+        "platform_mutation_performed": False,
+        "model_promotion_performed": False,
+        "product_skin_activated": False,
+        "product_revision_minted": False,
+        "genericity_claimed": False,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--api-root", default="http://127.0.0.1:8080")
     parser.add_argument("--expected-main-sha", required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    report = inspect(args.api_root, args.expected_main_sha.strip().lower())
+    expected_main_sha = args.expected_main_sha.strip().lower()
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({
-        "status": report["status"],
-        "typed_bundle_ready": report["decision"]["typed_bundle_ready"],
-        "runtime_identity_ready": report["decision"]["runtime_identity_ready"],
-        "research_execution_admitted": report["decision"]["research_execution_admitted"],
-        "next_action": report["decision"]["next_action"],
-    }, sort_keys=True), flush=True)
+    try:
+        report = inspect(args.api_root, expected_main_sha)
+        args.out.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps({
+            "status": report["status"],
+            "typed_bundle_ready": report["decision"]["typed_bundle_ready"],
+            "runtime_identity_ready": report["decision"]["runtime_identity_ready"],
+            "research_execution_admitted": report["decision"]["research_execution_admitted"],
+            "next_action": report["decision"]["next_action"],
+        }, sort_keys=True), flush=True)
+    except Exception as exc:
+        failure = _failure_report(expected_main_sha, exc)
+        args.out.write_text(json.dumps(failure, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps({"status": "FAILED_INSPECTION", "error": str(exc)}, sort_keys=True), flush=True)
+        raise
 
 
 if __name__ == "__main__":

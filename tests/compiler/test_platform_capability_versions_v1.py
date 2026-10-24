@@ -121,6 +121,10 @@ def test_release_snapshot_v2_carries_implementation_and_model_requirements():
     )
     assert request["manifest"]["contract_version"] == "RealSaS.EngineReleaseManifest.v2"
     assert request["capability_implementations"] == capability_implementations()
+    assert request["manifest"]["capability_implementations"] == {
+        capability_id: row["implementation_sha256"]
+        for capability_id, row in request["capability_implementations"].items()
+    }
     assert "capability_versions" not in request
     for row in request["capability_implementations"].values():
         assert set(row) == {"implementation_sha256"}

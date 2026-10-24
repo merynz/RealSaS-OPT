@@ -70,8 +70,15 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"cuda_required":                        true,
 			"cuda_bf16_required":                   true,
 			"tf32_allowed":                         false,
-			"activation_state":                     "BLOCKED",
-			"activation_blocker":                   "CURRENT_MIRA_MODELRELEASE_NOT_REGISTERED",
+
+			// Model registration, qualification and channel selection are live
+			// Platform state. Source describes only the static admission contract;
+			// it must never mirror whether a particular ModelRelease happens to be
+			// registered, promoted or currently bound.
+			"model_release_admission_owner":             "PLATFORM_MODEL_REQUIREMENTS",
+			"research_execution_model_channels":         []any{"RESEARCH", "CANDIDATE"},
+			"product_execution_model_channels":          []any{"PRODUCTION"},
+			"operational_model_state_embedded_in_source": false,
 
 			// Historical scientific truth, intentionally not upgraded to current
 			// Platform/product authority merely by source/runtime recovery.
@@ -85,7 +92,6 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"historical_mira_v55_compute_profile_preserved":   true,
 			"current_repo_mira_v55_runtime_source_recovered":  true,
 			"current_mira_v55_runtime_package_recovered":      true,
-			"current_platform_mira_modelrelease_bound":        false,
 			"canonical_parents":                               []any{"CANONICAL_MESH", "CANONICAL_RIG"},
 			"post_hoc_surface_skin_transfer_allowed":          false,
 			"hidden_repair_allowed":                           false,

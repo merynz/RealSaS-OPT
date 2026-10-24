@@ -74,8 +74,8 @@ BEGIN
             RAISE EXCEPTION 'MODEL_PROMOTION_POLICY_SCOPE_INVALID';
         END IF;
     END LOOP;
-    SELECT count(DISTINCT value) INTO distinct_count
-    FROM unnest(NEW.required_evaluation_scopes) AS value;
+    SELECT count(DISTINCT scope.value) INTO distinct_count
+    FROM unnest(NEW.required_evaluation_scopes) AS scope(value);
     IF distinct_count <> cardinality(NEW.required_evaluation_scopes) THEN
         RAISE EXCEPTION 'MODEL_PROMOTION_POLICY_SCOPE_DUPLICATE';
     END IF;

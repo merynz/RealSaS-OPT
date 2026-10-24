@@ -19,9 +19,6 @@ func meshReleaseTestGraph(t *testing.T) *stagegraph.Graph {
 		{"05_CAMERA_CONTRACT_SOLVED", "observation"},
 		{"07_OBSERVATION_CONTRACT_QUALIFIED", "observation"},
 		{"08_NORMALIZATION_DOMAIN_QUALIFIED", "geometry"},
-		{"13_GEOMETRY_SUBSTRATE_QUALIFIED", "geometry"},
-		{"15_RIGGING_SURFACE_QUALIFIED", "rig"},
-		{"17_MECHANICAL_PARTITION_QUALIFIED", "components"},
 	}
 	stages := make([]stagegraph.Stage, 0, len(ids))
 	for index, row := range ids {
@@ -49,7 +46,7 @@ func meshReleaseTestGraph(t *testing.T) *stagegraph.Graph {
 	return graph
 }
 
-func TestBuildEngineReleaseRegistryIncludesStagesAndProductModules(t *testing.T) {
+func TestBuildEngineReleaseRegistryIncludesCurrentProductClosure(t *testing.T) {
 	graph := meshReleaseTestGraph(t)
 	registry, err := BuildEngineReleaseRegistry(context.Background(), graph)
 	if err != nil {
@@ -59,9 +56,6 @@ func TestBuildEngineReleaseRegistryIncludesStagesAndProductModules(t *testing.T)
 		StageCapabilityID("05_CAMERA_CONTRACT_SOLVED"),
 		StageCapabilityID("07_OBSERVATION_CONTRACT_QUALIFIED"),
 		StageCapabilityID("08_NORMALIZATION_DOMAIN_QUALIFIED"),
-		StageCapabilityID("13_GEOMETRY_SUBSTRATE_QUALIFIED"),
-		StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED"),
-		StageCapabilityID("17_MECHANICAL_PARTITION_QUALIFIED"),
 		ProductInputCapabilityID,
 		ProductShapeCapabilityID,
 		ProductMeshCapabilityID,
@@ -85,14 +79,25 @@ func TestBuildEngineReleaseRegistryIncludesStagesAndProductModules(t *testing.T)
 		StageCapabilityID("05_CAMERA_CONTRACT_SOLVED"),
 		StageCapabilityID("07_OBSERVATION_CONTRACT_QUALIFIED"),
 		StageCapabilityID("08_NORMALIZATION_DOMAIN_QUALIFIED"),
-		StageCapabilityID("13_GEOMETRY_SUBSTRATE_QUALIFIED"),
-		StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED"),
-		StageCapabilityID("17_MECHANICAL_PARTITION_QUALIFIED"),
 		ProductMeshCapabilityID,
 		ProductRigCapabilityID,
 	} {
 		if !seen[id] {
 			t.Fatalf("rig resolution missing %s: %+v", id, resolved)
+		}
+	}
+	for _, forbidden := range []string{
+		"09_IRIS_FIT_PREREGISTERED",
+		"10_IRIS_FIT",
+		"11_IRIS_CHECKPOINT_SEALED",
+		"12_ZERO_SURFACE_DECODED",
+		"13_GEOMETRY_SUBSTRATE_QUALIFIED",
+		"14_GSA_BUILD",
+		"15_RIGGING_SURFACE_QUALIFIED",
+		"17_MECHANICAL_PARTITION_QUALIFIED",
+	} {
+		if seen[StageCapabilityID(forbidden)] {
+			t.Fatalf("legacy fit-era stage leaked into product.rig closure: %s", forbidden)
 		}
 	}
 	if resolved[len(resolved)-1].ID != ProductRigCapabilityID {
@@ -117,25 +122,46 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	if !ok {
 		t.Fatal("product.mesh missing")
 	}
-	if len(mesh.Dependencies) != 7 || mesh.Dependencies[0] != ProductShapeCapabilityID {
+	wantMeshDeps := []string{
+		ProductShapeCapabilityID,
+		StageCapabilityID("05_CAMERA_CONTRACT_SOLVED"),
+		StageCapabilityID("07_OBSERVATION_CONTRACT_QUALIFIED"),
+		StageCapabilityID("08_NORMALIZATION_DOMAIN_QUALIFIED"),
+	}
+	if len(mesh.Dependencies) != len(wantMeshDeps) {
 		t.Fatalf("mesh descriptor=%+v", mesh)
+	}
+	for index, want := range wantMeshDeps {
+		if mesh.Dependencies[index] != want {
+			t.Fatalf("mesh dependency[%d]=%s want=%s", index, mesh.Dependencies[index], want)
+		}
 	}
 	for _, dependency := range mesh.Dependencies {
 		if dependency == StageCapabilityID("16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED") {
 			t.Fatal("presentation direction leaked into Mesh birth dependency")
 		}
+		for _, forbidden := range []string{"IRIS_FIT", "CHECKPOINT_SEALED", "ZERO_SURFACE", "GEOMETRY_SUBSTRATE", "RIGGING_SURFACE", "MECHANICAL_PARTITION"} {
+			if strings.Contains(dependency, forbidden) {
+				t.Fatalf("legacy derived-stage dependency leaked into product.mesh: %s", dependency)
+			}
+		}
 	}
+	if mesh.Metadata["fit_allowed_during_product_execution"] != false || mesh.Metadata["legacy_ir_fit_stage_dependency"] != false {
+		t.Fatalf("mesh fit policy drift=%+v", mesh.Metadata)
+	}
+	if mesh.Metadata["surface_born_inside_mesh_court"] != true || mesh.Metadata["surface_is_canonical_mesh_authority"] != false {
+		t.Fatalf("mesh surface boundary drift=%+v", mesh.Metadata)
+	}
+
 	rig, ok := registry.Get(ProductRigCapabilityID)
 	if !ok {
 		t.Fatal("product.rig missing")
 	}
-	if len(rig.Dependencies) != 2 || rig.Dependencies[0] != ProductMeshCapabilityID || rig.Dependencies[1] != StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED") {
+	if len(rig.Dependencies) != 1 || rig.Dependencies[0] != ProductMeshCapabilityID {
 		t.Fatalf("rig descriptor=%+v", rig)
 	}
-	for _, dependency := range rig.Dependencies {
-		if strings.Contains(dependency, "GEPPETTO_FIT") || strings.Contains(dependency, "AXIS_FIT") {
-			t.Fatalf("fit/training dependency leaked into product.rig: %s", dependency)
-		}
+	if rig.Metadata["feature_evidence_source"] != "PRODUCT_MESH_OUTPUT" || rig.Metadata["legacy_stage15_dependency"] != false {
+		t.Fatalf("rig feature evidence source drift=%+v", rig.Metadata)
 	}
 	if rig.Metadata["mesh_is_canonical_parent"] != true {
 		t.Fatalf("rig mesh parent metadata=%+v", rig.Metadata)

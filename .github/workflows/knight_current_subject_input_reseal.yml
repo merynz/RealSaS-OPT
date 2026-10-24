@@ -21,7 +21,8 @@ jobs:
       should_run: ${{ steps.resolve.outputs.should_run }}
       expected_sha: ${{ steps.resolve.outputs.expected_sha }}
       subject_slug: ${{ steps.resolve.outputs.subject_slug }}
-      source_run_id: ${{ steps.resolve.outputs.source_run_id }}
+      identity_inventory: ${{ steps.resolve.outputs.identity_inventory }}
+      manifest_source: ${{ steps.resolve.outputs.manifest_source }}
       downstream_workflow: ${{ steps.resolve.outputs.downstream_workflow }}
     steps:
       - name: Resolve selected canonical SHA
@@ -72,9 +73,18 @@ jobs:
           assert trigger.get('product_authority_authorized') is False, 'KNIGHT_CURRENT_INPUT_RESEAL_PRODUCT_AUTHORITY'
           assert trigger.get('genericity_claim_authorized') is False, 'KNIGHT_CURRENT_INPUT_RESEAL_GENERICITY_AUTHORITY'
           subject_slug = str(trigger.get('subject_slug') or '')
-          source_run_id = str(trigger.get('source_run_id') or '')
+          identity_inventory = str(trigger.get('identity_inventory') or '')
+          manifest_source = str(trigger.get('manifest_source') or '')
           downstream = str(trigger.get('downstream_workflow') or '')
-          assert subject_slug and source_run_id and downstream, 'KNIGHT_CURRENT_INPUT_RESEAL_BINDING_REQUIRED'
+          assert subject_slug and identity_inventory and manifest_source and downstream, 'KNIGHT_CURRENT_INPUT_RESEAL_BINDING_REQUIRED'
+          inventory_path = Path(identity_inventory).resolve()
+          witness = json.loads(inventory_path.read_text(encoding='utf-8'))
+          assert witness.get('subject_key') == subject_slug, 'KNIGHT_CURRENT_INPUT_RESEAL_WITNESS_SUBJECT_DRIFT'
+          current = witness
+          for key in manifest_source.split('.'):
+              assert isinstance(current, dict) and key in current, 'KNIGHT_CURRENT_INPUT_RESEAL_WITNESS_POINTER_INVALID'
+              current = current[key]
+          assert isinstance(current, str) and current, 'KNIGHT_CURRENT_INPUT_RESEAL_WITNESS_RUN_REQUIRED'
           if event == 'workflow_run':
               if (os.environ.get('WORKFLOW_RUN_CONCLUSION') == 'success' and
                       os.environ.get('WORKFLOW_RUN_HEAD_BRANCH') == 'main'):
@@ -86,7 +96,8 @@ jobs:
           print(f"should_run={'true' if should_run else 'false'}")
           print(f"expected_sha={os.environ['EXPECTED_SHA'].strip().lower()}")
           print(f"subject_slug={subject_slug}")
-          print(f"source_run_id={source_run_id}")
+          print(f"identity_inventory={identity_inventory}")
+          print(f"manifest_source={manifest_source}")
           print(f"downstream_workflow={downstream}")
           PY
 
@@ -100,7 +111,8 @@ jobs:
       AUTHORITY_ROOT: /home/monster/realsas_authority
       EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
       SUBJECT_SLUG: ${{ needs.activation.outputs.subject_slug }}
-      SOURCE_RUN_ID: ${{ needs.activation.outputs.source_run_id }}
+      IDENTITY_INVENTORY: ${{ needs.activation.outputs.identity_inventory }}
+      MANIFEST_SOURCE: ${{ needs.activation.outputs.manifest_source }}
       DOWNSTREAM_WORKFLOW: ${{ needs.activation.outputs.downstream_workflow }}
       OUTPUT_ROOT: /home/monster/realsas_authority/skin_readiness/current_subject_input_reseal/${{ github.run_id }}-${{ github.run_attempt }}
       PYTHONPATH: ${{ github.workspace }}
@@ -127,7 +139,7 @@ jobs:
           assert Path(deployment['authority_root']).resolve() == Path(os.environ['AUTHORITY_ROOT']).resolve(), 'KNIGHT_CURRENT_INPUT_RESEAL_AUTHORITY_ROOT_DRIFT'
           PY
 
-      - name: Seal current product.rig SubjectInput from canonical authority run
+      - name: Seal current product.rig SubjectInput from witness-bound authority run
         run: |
           set -euo pipefail
           mkdir -p "$OUTPUT_ROOT"
@@ -135,7 +147,8 @@ jobs:
             "$GITHUB_WORKSPACE/tools/ops/materialize_current_subject_input_v1.py" \
             --api-root http://127.0.0.1:8080 \
             --subject-slug "$SUBJECT_SLUG" \
-            --source-run-id "$SOURCE_RUN_ID" \
+            --identity-inventory "$IDENTITY_INVENTORY" \
+            --manifest-source "$MANIFEST_SOURCE" \
             --expected-main-sha "$EXPECTED_SHA" \
             --out "$OUTPUT_ROOT/SUBJECT_INPUT.json"
 
@@ -152,7 +165,10 @@ jobs:
           assert receipt['status'] == 'PASS_CURRENT_SUBJECT_INPUT_SEALED', 'KNIGHT_CURRENT_INPUT_RESEAL_STATUS'
           assert receipt['source_code_sha'] == os.environ['EXPECTED_SHA'], 'KNIGHT_CURRENT_INPUT_RESEAL_SHA_DRIFT'
           assert receipt['subject']['slug'] == os.environ['SUBJECT_SLUG'], 'KNIGHT_CURRENT_INPUT_RESEAL_SUBJECT_DRIFT'
-          assert receipt['source_run']['run_id'] == os.environ['SOURCE_RUN_ID'], 'KNIGHT_CURRENT_INPUT_RESEAL_SOURCE_RUN_DRIFT'
+          assert receipt['subject']['witness_subject_key'] == os.environ['SUBJECT_SLUG'], 'KNIGHT_CURRENT_INPUT_RESEAL_WITNESS_SUBJECT_DRIFT'
+          assert receipt['identity_binding']['inventory_ref'] == os.environ['IDENTITY_INVENTORY'], 'KNIGHT_CURRENT_INPUT_RESEAL_INVENTORY_DRIFT'
+          assert receipt['identity_binding']['manifest_source'] == os.environ['MANIFEST_SOURCE'], 'KNIGHT_CURRENT_INPUT_RESEAL_MANIFEST_SOURCE_DRIFT'
+          assert receipt['source_run']['run_id'] == receipt['identity_binding']['resolved_source_run_id'], 'KNIGHT_CURRENT_INPUT_RESEAL_RUN_BINDING_DRIFT'
           for key in (
               'model_inference_executed',
               'compiler_stage_executed',

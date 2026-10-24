@@ -76,10 +76,11 @@ def test_source_is_read_only_bounded_and_current_root_scoped():
     assert "MAX_JSON_FILES" in text
     assert "MAX_JSON_BYTES" in text
     assert 'rglob("*.json")' in text
-    assert "artifact_import_performed\": False" in text
-    assert "model_inference_executed\": False" in text
-    assert "compiler_capability_executed\": False" in text
-    assert "qualification_minted\": False" in text
+    assert '"artifact_import_performed": False' in text
+    assert '"model_inference_executed": False' in text
+    assert '"compiler_capability_executed": False' in text
+    assert '"qualification_minted": False' in text
+    assert "KNIGHT_PARENT_HOST_INVENTORY_PATH_ESCAPE" in text
     assert "/v1/artifacts/import" not in text
     assert "subprocess" not in text
 

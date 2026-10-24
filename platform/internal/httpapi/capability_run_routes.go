@@ -1,11 +1,13 @@
 package httpapi
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/command"
+	subjectinput "github.com/merynz/RealSaS-OPT/platform/internal/input"
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 )
 
@@ -36,6 +38,35 @@ type capabilityRunRequest struct {
 // branch-only release cannot be used to schedule current Engine work.
 func (a API) HandlerWithCapabilityRun() http.Handler {
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /v1/subjects/{subject}/inputs/{input}", func(w http.ResponseWriter, r *http.Request) {
+		subjectID, err := uuid.Parse(r.PathValue("subject"))
+		if err != nil {
+			respond(w, http.StatusBadRequest, map[string]string{"error": "invalid subject id"})
+			return
+		}
+		inputID, err := uuid.Parse(r.PathValue("input"))
+		if err != nil {
+			respond(w, http.StatusBadRequest, map[string]string{"error": "invalid subject input id"})
+			return
+		}
+		loaded, err := subjectinput.Load(r.Context(), a.Pool, inputID, subjectID)
+		if errors.Is(err, subjectinput.ErrEmpty) {
+			respond(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+			return
+		}
+		if err != nil {
+			result(w, nil, err)
+			return
+		}
+		respond(w, http.StatusOK, map[string]any{
+			"schema":           "RealSaS.SubjectInputRead.v1",
+			"subject_input_id": loaded.SubjectInputID,
+			"subject_id":       loaded.SubjectID,
+			"manifest_sha256":  loaded.ManifestSHA256,
+			"root_inputs":      loaded.RootInputs,
+			"artifact_ids":     loaded.ArtifactIDs,
+		})
+	})
 	mux.HandleFunc("POST /v1/capabilities/run", func(w http.ResponseWriter, r *http.Request) {
 		var req capabilityRunRequest
 		if !decode(w, r, &req) {

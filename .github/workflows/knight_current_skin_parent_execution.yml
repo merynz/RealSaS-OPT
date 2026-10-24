@@ -2,6 +2,11 @@ name: knight-current-skin-parent-execution
 
 on:
   workflow_dispatch:
+    inputs:
+      subject_input_id:
+        description: Exact sealed Platform SubjectInput UUID to consume
+        required: false
+        type: string
   workflow_run:
     workflows: [platform-developer-deployment]
     types: [completed]
@@ -20,6 +25,7 @@ jobs:
       should_run: ${{ steps.resolve.outputs.should_run }}
       expected_sha: ${{ steps.resolve.outputs.expected_sha }}
       subject_slug: ${{ steps.resolve.outputs.subject_slug }}
+      subject_input_id: ${{ steps.resolve.outputs.subject_input_id }}
     steps:
       - name: Resolve selected canonical SHA
         id: sha
@@ -45,6 +51,7 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           EXPECTED_SHA: ${{ steps.sha.outputs.expected_sha }}
+          DISPATCH_SUBJECT_INPUT_ID: ${{ github.event.inputs.subject_input_id }}
           WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
           TRIGGER_PATH: canonical/KNIGHT_CURRENT_SKIN_PARENT_EXECUTION_TRIGGER_V1.json
@@ -54,11 +61,15 @@ jobs:
           import json
           import os
           import subprocess
+          import uuid
           from pathlib import Path
 
           event = os.environ['EVENT_NAME']
           should_run = event == 'workflow_dispatch'
           subject_slug = 'knight'
+          subject_input_id = str(os.environ.get('DISPATCH_SUBJECT_INPUT_ID') or '').strip()
+          if subject_input_id:
+              subject_input_id = str(uuid.UUID(subject_input_id))
           trigger_path = Path(os.environ['TRIGGER_PATH'])
           if trigger_path.is_file():
               trigger = json.loads(trigger_path.read_text(encoding='utf-8'))
@@ -83,6 +94,7 @@ jobs:
           print(f"should_run={'true' if should_run else 'false'}")
           print(f"expected_sha={os.environ['EXPECTED_SHA'].strip().lower()}")
           print(f"subject_slug={subject_slug}")
+          print(f"subject_input_id={subject_input_id}")
           PY
 
   execute:
@@ -95,6 +107,7 @@ jobs:
       AUTHORITY_ROOT: /home/monster/realsas_authority
       EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
       SUBJECT_SLUG: ${{ needs.activation.outputs.subject_slug }}
+      SUBJECT_INPUT_ID: ${{ needs.activation.outputs.subject_input_id }}
       COMPILER_RUN_ID: KNIGHT_CURRENT_SKIN_PARENTS_${{ github.run_id }}_${{ github.run_attempt }}
       OUTPUT_ROOT: /home/monster/realsas_authority/skin_readiness/current_parent_execution/${{ github.run_id }}-${{ github.run_attempt }}
       PYTHONPATH: ${{ github.workspace }}
@@ -124,13 +137,19 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$OUTPUT_ROOT"
+          args=(
+            --api-root http://127.0.0.1:8080
+            --subject-slug "$SUBJECT_SLUG"
+            --expected-main-sha "$EXPECTED_SHA"
+            --compiler-run-id "$COMPILER_RUN_ID"
+            --out "$OUTPUT_ROOT/EXECUTION.json"
+          )
+          if [ -n "$SUBJECT_INPUT_ID" ]; then
+            args+=(--subject-input-id "$SUBJECT_INPUT_ID")
+          fi
           "$PLATFORM_ROOT/current/bin/realsas-python" \
             "$GITHUB_WORKSPACE/tools/ops/execute_current_skin_parent_capabilities_v1.py" \
-            --api-root http://127.0.0.1:8080 \
-            --subject-slug "$SUBJECT_SLUG" \
-            --expected-main-sha "$EXPECTED_SHA" \
-            --compiler-run-id "$COMPILER_RUN_ID" \
-            --out "$OUTPUT_ROOT/EXECUTION.json"
+            "${args[@]}"
 
       - name: Verify current typed parent execution receipt
         if: always()
@@ -160,6 +179,11 @@ jobs:
           assert receipt['attempt_state'] == 'COMPLETED', 'KNIGHT_CURRENT_PARENT_ATTEMPT_STATE'
           assert receipt['promotion_policy'] == 'NEVER', 'KNIGHT_CURRENT_PARENT_PROMOTION_POLICY'
           assert set(receipt['typed_parents']) == {'mesh', 'rig', 'surface', 'support'}, 'KNIGHT_CURRENT_PARENT_TYPED_SET'
+          requested = str(os.environ.get('SUBJECT_INPUT_ID') or '')
+          if requested:
+              assert receipt['subject_input']['selection_mode'] == 'EXACT_PIN', 'KNIGHT_CURRENT_PARENT_INPUT_NOT_EXACT_PIN'
+              assert receipt['subject_input']['subject_input_id'] == requested, 'KNIGHT_CURRENT_PARENT_INPUT_PIN_DRIFT'
+          assert receipt['subject_input']['absent_sections_fabricated'] is False, 'KNIGHT_CURRENT_PARENT_ABSENT_SECTION_FABRICATION'
           PY
 
       - name: Re-run Skin readiness against fresh Platform artifacts

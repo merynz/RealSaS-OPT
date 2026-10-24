@@ -25,6 +25,27 @@ func uniqueHash(prefix, suffix string) string {
 	return hex.EncodeToString(sum[:])
 }
 
+func bindTestPromotionPolicy(t *testing.T, ctx context.Context, pool interface {
+	Exec(context.Context, string, ...any) (interface{ RowsAffected() int64 }, error)
+}, family, architecture string, channel modelrelease.Channel, scope, suffix string) {
+	t.Helper()
+	policyID := uuid.New()
+	if _, err := pool.Exec(ctx, `
+		INSERT INTO model_promotion_policies
+		(id,family,architecture_id,channel,policy_version,required_evaluation_scopes,policy_sha256,sealed_by)
+		VALUES ($1,$2,$3,$4,1,$5,$6,'ci')
+	`, policyID, family, architecture, string(channel), []string{scope}, uniqueHash("promotion-policy:"+string(channel), suffix)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, `
+		INSERT INTO model_promotion_policy_bindings
+		(family,architecture_id,channel,policy_id,bound_by)
+		VALUES ($1,$2,$3,$4,'ci')
+	`, family, architecture, string(channel), policyID); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 	dsn := os.Getenv("REALSAS_DATABASE_URL")
 	if dsn == "" {
@@ -118,6 +139,13 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 		Actor:              "ci",
 	}); err != nil {
 		t.Fatal(err)
+	}
+	for _, channel := range []modelrelease.Channel{
+		modelrelease.ChannelResearch,
+		modelrelease.ChannelCandidate,
+		modelrelease.ChannelProduction,
+	} {
+		bindTestPromotionPolicy(t, ctx, pool, "IRIS", "RealSaS.IRIS.Test.v1", channel, "FIT8", suffix)
 	}
 	if _, err := modelrelease.Promote(ctx, pool, modelrelease.PromoteRequest{
 		Family:                   "IRIS",

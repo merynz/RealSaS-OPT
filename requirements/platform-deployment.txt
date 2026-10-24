@@ -1,5 +1,7 @@
 # Local developer services, not a frozen model training environment.
+# Generic Shape/Rig execution uses the existing CPU profile. CUDA/BF16
+# capability admission (including MIRA) belongs to its own execution lane.
 -r mainline-ci.txt
 -r platform-worker.txt
--r torch-cuda.txt
+-r torch-cpu.txt
 pgserver==0.1.4

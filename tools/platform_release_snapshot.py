@@ -5,12 +5,11 @@ EngineRelease owns executable code/policy/DAG and stage-level execution
 contracts. Subject-specific manifest values belong to SubjectInput/CAS and are
 bound at compile time, never duplicated into the release identity.
 
-V2 requests also carry version identities for first-class product capabilities
-which live outside the legacy Compiler stage DAG. Platform derives stage
-capability versions from the sealed stage bindings and seals both views under
-the same immutable EngineRelease ID. Product capability admission is projected
-from the exact released DAG using the shared product semantic contract; learned
-ModelRelease requirements are then limited to those admitted roles.
+V2 requests carry source-owned implementation identities only for first-class
+product capabilities outside the legacy Compiler stage DAG. Platform projects
+the exact admitted capability set from the released DAG, mints policy/parameter
+identities from its exact descriptors, and seals the complete capability version
+snapshot. Learned ModelRelease requirements are limited to admitted roles.
 """
 from __future__ import annotations
 
@@ -27,8 +26,8 @@ from compiler.realsas_compiler_services.platform_worker.stage_inputs import (
     subject_agnostic_release_parameters,
 )
 from tools.platform_capability_versions import (
+    capability_implementations,
     capability_specs,
-    capability_versions,
     product_model_requirements,
 )
 from tools.realsas_architecture import lightweight_implementation_closure
@@ -104,14 +103,16 @@ def _admitted_product_capability_ids(plan) -> tuple[str, ...]:
     )
 
 
-def _release_capability_versions(admitted_ids: tuple[str, ...]):
-    all_versions = capability_versions()
+def _release_capability_implementations(admitted_ids: tuple[str, ...]):
+    all_implementations = capability_implementations()
     admitted = set(admitted_ids)
-    unknown = sorted(admitted - set(all_versions))
+    unknown = sorted(admitted - set(all_implementations))
     if unknown:
-        raise RuntimeError("RELEASE_PRODUCT_CAPABILITY_VERSION_UNKNOWN:" + ",".join(unknown))
+        raise RuntimeError(
+            "RELEASE_PRODUCT_CAPABILITY_IMPLEMENTATION_UNKNOWN:" + ",".join(unknown)
+        )
     return {
-        capability_id: all_versions[capability_id]
+        capability_id: all_implementations[capability_id]
         for capability_id in sorted(admitted)
     }
 
@@ -162,7 +163,9 @@ def snapshot(plan, manifest=None, *, name, purpose, created_by, stage_parameters
     ]
     request = {
         "created_by": created_by,
-        "capability_versions": _release_capability_versions(admitted_capabilities),
+        "capability_implementations": _release_capability_implementations(
+            admitted_capabilities
+        ),
         "manifest": {
             "pipeline_plan_sha256": mainline.validate_plan(
                 plan, require_product_pass_authority=require_product
@@ -263,7 +266,7 @@ def main():
     args.out.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     print(
         f"EngineRelease request: {args.out}; {len(value['manifest']['stages'])} stages; "
-        f"{len(value['capability_versions'])} product capabilities; "
+        f"{len(value['capability_implementations'])} product capabilities; "
         f"{len(value['manifest']['model_requirements'])} learned model requirements; no execution"
     )
 

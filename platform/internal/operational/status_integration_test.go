@@ -147,11 +147,10 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 		bindTestPromotionPolicy(t, ctx, pool, "IRIS", "RealSaS.IRIS.Test.v1", channel, "FIT8", suffix)
 	}
 	if _, err := modelrelease.Promote(ctx, pool, modelrelease.PromoteRequest{
-		Family:                   "IRIS",
-		Channel:                  modelrelease.ChannelCandidate,
-		ModelReleaseID:           registered.ID,
-		RequiredEvaluationScopes: []string{"FIT8"},
-		Actor:                    "ci",
+		Family:         "IRIS",
+		Channel:        modelrelease.ChannelCandidate,
+		ModelReleaseID: registered.ID,
+		Actor:          "ci",
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -189,20 +188,18 @@ func TestOperationalSpineMakesExperimentAndCurrentModelQueryable(t *testing.T) {
 	}
 
 	if _, err := modelrelease.Promote(ctx, pool, modelrelease.PromoteRequest{
-		Family:                   "IRIS",
-		Channel:                  modelrelease.ChannelProduction,
-		ModelReleaseID:           registered.ID,
-		RequiredEvaluationScopes: []string{"FIT8"},
-		Actor:                    "ci",
+		Family:         "IRIS",
+		Channel:        modelrelease.ChannelProduction,
+		ModelReleaseID: registered.ID,
+		Actor:          "ci",
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := modelrelease.Promote(ctx, pool, modelrelease.PromoteRequest{
-		Family:                   "IRIS",
-		Channel:                  modelrelease.ChannelResearch,
-		ModelReleaseID:           registered.ID,
-		RequiredEvaluationScopes: []string{"FIT8"},
-		Actor:                    "ci",
+		Family:         "IRIS",
+		Channel:        modelrelease.ChannelResearch,
+		ModelReleaseID: registered.ID,
+		Actor:          "ci",
 	}); err != nil {
 		t.Fatal(err)
 	}

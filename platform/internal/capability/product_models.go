@@ -119,6 +119,44 @@ func ProductModelRequirements(registry *Registry) ([]ProductModelRequirement, er
 	return out, nil
 }
 
+// ProductModelRequirementsForDescriptors projects the globally validated model
+// contract onto one exact resolved capability closure. It never invents a
+// second model map: descriptor metadata and responsibility terrain remain the
+// source of truth, while unrelated product families are deliberately omitted.
+func ProductModelRequirementsForDescriptors(registry *Registry, descriptors []Descriptor) ([]ProductModelRequirement, error) {
+	all, err := ProductModelRequirements(registry)
+	if err != nil {
+		return nil, err
+	}
+	canonical := make(map[string]ProductModelRequirement, len(all))
+	for _, row := range all {
+		canonical[row.Family] = row
+	}
+	selected := map[string]ProductModelRequirement{}
+	for _, descriptor := range descriptors {
+		declared, err := descriptorRequiredModels(descriptor)
+		if err != nil {
+			return nil, err
+		}
+		for _, row := range declared {
+			want, ok := canonical[row.Family]
+			if !ok {
+				return nil, fmt.Errorf("PRODUCT_MODEL_REQUIREMENT_NOT_GLOBALLY_VALIDATED:%s:%s", descriptor.ID, row.Family)
+			}
+			if want.ArchitectureID != row.ArchitectureID {
+				return nil, fmt.Errorf("PRODUCT_MODEL_ARCHITECTURE_DRIFT:%s:%s!=%s", row.Family, want.ArchitectureID, row.ArchitectureID)
+			}
+			selected[row.Family] = want
+		}
+	}
+	out := make([]ProductModelRequirement, 0, len(selected))
+	for _, row := range selected {
+		out = append(out, row)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Family < out[j].Family })
+	return out, nil
+}
+
 func validateEngineReleaseModelRequirements(registry *Registry, purpose release.Purpose, actual []release.ModelRequirement) error {
 	expected, err := ProductModelRequirements(registry)
 	if err != nil {

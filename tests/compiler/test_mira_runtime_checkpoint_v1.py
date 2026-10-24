@@ -38,7 +38,10 @@ def test_mira_v55_promoted_readout_has_sealed_parameter_contract():
     assert weights.shape == (5, 3)
     assert torch.isfinite(weights).all()
     assert torch.all(weights >= 0)
-    assert torch.allclose(weights.sum(dim=-1), torch.ones(5), atol=1e-7, rtol=0)
+    # This is a float32 numerical smoke invariant for a randomly initialized
+    # decoder, not a scientific qualification budget. Keep it tight but avoid
+    # coupling the test to sub-ULP differences between supported Torch builds.
+    assert torch.allclose(weights.sum(dim=-1), torch.ones(5), atol=1e-6, rtol=0)
     assert weights[0, 1].item() == 0.0
 
 

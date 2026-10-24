@@ -407,7 +407,10 @@ func (a Activities) PrepareCapabilityExecution(ctx context.Context, req orchestr
 	if err != nil {
 		return orchestration.EngineCapabilityRequest{}, err
 	}
-	modelRefs := modelselection.EngineRefs(selectedModels)
+	modelRefs, err := capabilityModelRefs(descriptor, selectedModels)
+	if err != nil {
+		return orchestration.EngineCapabilityRequest{}, err
+	}
 	if tag.RowsAffected() == 1 {
 		payload, _ := json.Marshal(map[string]any{
 			"execution_id":          executionID.String(),

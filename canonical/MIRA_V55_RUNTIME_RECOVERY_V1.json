@@ -1,0 +1,74 @@
+{
+  "schema": "RealSaS.MIRAV55RuntimeRecovery.v1",
+  "status": "PASS_SELF_CONTAINED_RUNTIME_PACKAGE__MODELRELEASE_PENDING",
+  "authority": "MIGRATION_AND_RUNTIME_RECOVERY_EVIDENCE_ONLY__NO_NEW_SCIENTIFIC_PASS",
+  "historical_mira_source_commit": "247ff75efce51ad1cb08932d4f1fc66e3b484e82",
+  "historical_components": {
+    "base_v6_checkpoint_sha256": "bfd2bd24f55bdce2dc36b0ae6a7afe01b8381c680de545c66a11a3d707fe73ed",
+    "v55_composite_sha256": "490cd7791c94c0e15e3fa6479a6701bd7bec21e03dff76b69ada638d5bf30a40",
+    "v6_runner_sha256": "39ff4f7a2051f0d9c1251a5999f472b9926e83deacbedcedc8e92eea424dce01",
+    "composite_schema": "RealSaS.MIRAMDirectComposite.v5_5",
+    "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
+    "backbone_parameter_count": 138053153,
+    "decoder_parameter_count": 1619491,
+    "decoder_state_key_count": 34
+  },
+  "source_closure_blob_identity": {
+    "models/arachne/v4/arachne_candidate_v4.py": "8ae3a27cd2bed0a6ff4f5671dcf676572c005517",
+    "models/arachne/v3/conditioning_v3.py": "8916db43ca3d33787745aaa62fbd85047f918799",
+    "models/arachne/v2/arachne_geometry_v2.py": "0a39450b69de48da3b7748cb08972d0b69ff9700",
+    "models/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py": "647fdcb98c305c3f7d3afd05dd61449999721034"
+  },
+  "source_closure_identity_check": {
+    "historical_commit_vs_p6_main": "BYTE_IDENTICAL_FOR_LISTED_FILES",
+    "p6_main_sha": "4f030b9c8d8090aad4e765b29400344943ae2c03"
+  },
+  "promoted_readout_parity": {
+    "historical_class": "ArachneV6RawReadout",
+    "promoted_class": "MIRADirectCarrierReadoutV55",
+    "sealed_v55_decoder_loaded_strict": true,
+    "state_dict_key_sets_equal": true,
+    "synthetic_forward_seed": 123,
+    "max_abs_logit_delta": 0.0,
+    "max_abs_weight_delta": 0.0,
+    "torch_equal_logits": true,
+    "torch_equal_weights": true
+  },
+  "historical_compute_contract": {
+    "contract_id": "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF",
+    "backbone_device": "CUDA",
+    "backbone_parameter_dtype": "FP32",
+    "backbone_autocast_dtype": "BF16",
+    "readout_dtype": "FP32",
+    "cuda_matmul_tf32": false,
+    "cudnn_tf32": false,
+    "cross_device_parity_proven": false,
+    "cpu_fp32_product_execution_admitted": false,
+    "product_executor_fail_closed_on_profile_drift": true
+  },
+  "runtime_package": {
+    "schema": "RealSaS.MIRA.RuntimeCheckpoint.v1",
+    "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
+    "content_sha256": "b5ad2d56a9006058cba30c0b123d4e111f3eea3b78ed42f3542cbd095983139a",
+    "size_bytes": 558840979,
+    "authority_host_path": "/home/monster/realsas_authority/model_runtime_recovery/mira_v55/runtime/MIRA_RUNTIME_CHECKPOINT_V1.pt",
+    "recovery_execution_source_head_sha": "821538333b8b4bd93410d873e17881dde081279a",
+    "backbone_parameter_count": 138053153,
+    "decoder_parameter_count": 1619491,
+    "self_contained_load_verified": true,
+    "fit_executed": false,
+    "training_executed": false,
+    "scientific_pass_minted": false,
+    "modelrelease_registered": false,
+    "product_skin_activated": false
+  },
+  "runtime_semantics": {
+    "output_domain": "MECHANICAL_CARRIER_M",
+    "gsa_role": "EVIDENCE_SUBSTRATE_ONLY",
+    "semantic_skin_transfer_performed": false,
+    "source_skin_runtime_authority": false,
+    "canonical_skin_authority": "COMPILER_ONLY",
+    "fit_allowed_during_product_execution": false
+  },
+  "activation_blocker": "CURRENT_MIRA_MODELRELEASE_NOT_REGISTERED"
+}

@@ -8,17 +8,11 @@ const (
 )
 
 // ProductSkinProvider defines the stable Skin product boundary without making it
-// an active release provider yet. The canonical parents are Mesh + Rig. MIRA is
-// the intended influence-proposal owner, while the Compiler owns legality,
-// carrier binding and canonical Skin minting.
-//
-// Historical FIT1 evidence contains a real checkpoint-backed MIRA-M V5.5 run:
-// it learned W_M directly on the exact frozen carrier M, reached TERMINAL_PASS,
-// and sealed a RealSaS.MIRAMDirectComposite.v5_5 checkpoint. That historical
-// scientific witness is not currently packaged/imported as a Platform
-// ModelRelease/runtime provider in this repository. Therefore this provider MUST
-// NOT enter ProductProviders until the sealed MIRA runtime is recovered/package-
-// qualified and bound through the normal ModelRelease path.
+// an active release provider yet. Canonical parents are Mesh + Rig. Current MIRA
+// V5.5 additionally consumes RiggingSurface and TESSA material-support evidence;
+// neither is a canonical Skin parent and both remain replaceable feature inputs.
+// MIRA proposes carrier-native influences; Compiler qualifies exact bindings and
+// simplex legality, then mints CanonicalSkinIR.
 type ProductSkinProvider struct{}
 
 func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
@@ -34,6 +28,7 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 		Dependencies: []string{
 			ProductMeshCapabilityID,
 			ProductRigCapabilityID,
+			StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED"),
 		},
 		AllowedModes:         []Mode{ModeDeveloper},
 		ProductPassAuthority: false,
@@ -47,19 +42,39 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"input_mesh_schema_version": "v1",
 			"input_rig_artifact_type":   "RealSaS.CanonicalRigIR",
 			"input_rig_schema_version":  "v1",
+			"feature_evidence_type":     "RealSaS.RiggingSurfaceIR",
+			"feature_evidence_version":  "v1",
+			"material_support_type":     "RealSaS.TESSAMaterialSupportFieldIR",
+			"material_support_version":  "v1",
 			"output_artifact_type":      "RealSaS.CanonicalSkinIR",
 			"output_schema_version":     "v1",
+			"decode_chunk":              512,
+			"carrier_skin_qualification": map[string]any{
+				"max_simplex_repair_l1":   1.0e-5,
+				"max_total_correction_l1": 1.0e-4,
+				"negative_tolerance":      1.0e-8,
+				"max_influences":          41,
+			},
 			"required_models": []any{
 				map[string]any{
 					"family":          "MIRA",
 					"architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
 				},
 			},
-			"activation_state":   "BLOCKED",
-			"activation_blocker": "SEALED_CURRENT_MIRA_MODELRELEASE_RUNTIME_PACKAGE_MISSING",
+			"model_checkpoint_artifact_type":       "RealSaS.MIRARuntimeCheckpoint",
+			"model_checkpoint_schema_version":      "v1",
+			"mesh_and_rig_are_canonical_parents":   true,
+			"feature_evidence_is_canonical_parent": false,
+			"material_support_is_canonical_parent": false,
+			"inference_compute_contract":           "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF",
+			"cuda_required":                        true,
+			"cuda_bf16_required":                   true,
+			"tf32_allowed":                         false,
+			"activation_state":                     "BLOCKED",
+			"activation_blocker":                   "CURRENT_MIRA_MODELRELEASE_NOT_REGISTERED",
 
 			// Historical scientific truth, intentionally not upgraded to current
-			// Platform/product authority.
+			// Platform/product authority merely by source/runtime recovery.
 			"historical_checkpoint_backed_mira_v55_exists":    true,
 			"historical_mira_v55_learned_directly_on_exact_m": true,
 			"historical_mira_v55_terminal_pass":               true,
@@ -67,7 +82,9 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"historical_mira_v55_result_schema":               "RealSaS.MIRAMDirectResult.v5_5",
 			"historical_mira_v55_product_authority":           false,
 			"historical_mira_v55_generalization_claimed":      false,
-			"current_repo_mira_v55_runtime_provider_present":  false,
+			"historical_mira_v55_compute_profile_preserved":   true,
+			"current_repo_mira_v55_runtime_source_recovered":  true,
+			"current_mira_v55_runtime_package_recovered":      true,
 			"current_platform_mira_modelrelease_bound":        false,
 			"canonical_parents":                               []any{"CANONICAL_MESH", "CANONICAL_RIG"},
 			"post_hoc_surface_skin_transfer_allowed":          false,

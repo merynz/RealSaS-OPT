@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 	"github.com/merynz/RealSaS-OPT/platform/internal/semantic"
 )
 
@@ -65,6 +67,7 @@ func SealReleaseSnapshot(
 	}
 	seen := map[string]struct{}{}
 	normalized := append([]ReleaseBinding(nil), bindings...)
+	productImplementations := map[string]string{}
 	for i := range normalized {
 		if err := normalized[i].Descriptor.Validate(); err != nil {
 			return "", err
@@ -76,6 +79,16 @@ func SealReleaseSnapshot(
 			return "", fmt.Errorf("duplicate capability binding %s", normalized[i].Descriptor.ID)
 		}
 		seen[normalized[i].Descriptor.ID] = struct{}{}
+		if normalized[i].Descriptor.Kind != KindStage && strings.HasPrefix(normalized[i].Descriptor.ID, "product.") {
+			productImplementations[normalized[i].Descriptor.ID] = normalized[i].Version.ImplementationSHA256
+		}
+	}
+	if len(productImplementations) != 0 {
+		if err := release.VerifyCapabilityImplementationBinding(
+			ctx, pool, releaseID, productImplementations,
+		); err != nil {
+			return "", fmt.Errorf("CAPABILITY_IMPLEMENTATION_RELEASE_IDENTITY_DRIFT:%w", err)
+		}
 	}
 	sort.Slice(normalized, func(i, j int) bool {
 		return normalized[i].Descriptor.ID < normalized[j].Descriptor.ID

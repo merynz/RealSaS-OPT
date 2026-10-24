@@ -6,10 +6,11 @@ contracts. Subject-specific manifest values belong to SubjectInput/CAS and are
 bound at compile time, never duplicated into the release identity.
 
 V2 requests carry source-owned implementation identities only for first-class
-product capabilities outside the legacy Compiler stage DAG. Platform projects
-the exact admitted capability set from the released DAG, mints policy/parameter
-identities from its exact descriptors, and seals the complete capability version
-snapshot. Learned ModelRelease requirements are limited to admitted roles.
+product capabilities outside the legacy Compiler stage DAG. The same source-
+owned implementation map is bound into the EngineRelease manifest identity and
+is reverified server-side when the Platform seals the capability snapshot.
+Platform still mints policy/parameter identities from its exact descriptors.
+Learned ModelRelease requirements are limited to admitted roles.
 """
 from __future__ import annotations
 
@@ -156,6 +157,11 @@ def snapshot(plan, manifest=None, *, name, purpose, created_by, stage_parameters
     if unknown:
         raise RuntimeError("RELEASE_STAGE_PARAMETERS_UNKNOWN_STAGE:" + ",".join(unknown))
     admitted_capabilities = _admitted_product_capability_ids(plan)
+    capability_impls = _release_capability_implementations(admitted_capabilities)
+    manifest_capability_impls = {
+        capability_id: str(row["implementation_sha256"])
+        for capability_id, row in sorted(capability_impls.items())
+    }
     model_channel = "PRODUCTION" if require_product else "RESEARCH"
     model_requirements = [
         {**row, "channel": model_channel}
@@ -163,9 +169,7 @@ def snapshot(plan, manifest=None, *, name, purpose, created_by, stage_parameters
     ]
     request = {
         "created_by": created_by,
-        "capability_implementations": _release_capability_implementations(
-            admitted_capabilities
-        ),
+        "capability_implementations": capability_impls,
         "manifest": {
             "pipeline_plan_sha256": mainline.validate_plan(
                 plan, require_product_pass_authority=require_product
@@ -204,6 +208,7 @@ def snapshot(plan, manifest=None, *, name, purpose, created_by, stage_parameters
             "name": name,
             "purpose": purpose,
             "model_requirements": model_requirements,
+            "capability_implementations": manifest_capability_impls,
             "stages": [
                 {
                     "ordinal": stage["ordinal"],

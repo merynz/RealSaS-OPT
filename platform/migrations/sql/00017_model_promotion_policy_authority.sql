@@ -56,7 +56,7 @@ FOR EACH ROW
 EXECUTE FUNCTION enforce_model_promotion_policy_immutable();
 
 -- Validate policy shape once at seal time so promotion does not interpret
--- duplicate or blank scope names differently across callers.
+-- duplicate or blank scope names differently across policy versions.
 -- +goose StatementBegin
 CREATE OR REPLACE FUNCTION validate_model_promotion_policy_scopes()
 RETURNS trigger
@@ -89,9 +89,9 @@ BEFORE INSERT ON model_promotion_policies
 FOR EACH ROW
 EXECUTE FUNCTION validate_model_promotion_policy_scopes();
 
--- This trigger is the final authority boundary. Even if an API/client supplies
--- a weaker list of evaluation scopes, the model channel cannot be inserted or
--- repointed unless every scope selected by Platform policy is PASS.
+-- This trigger is the final authority boundary. Callers provide no promotion
+-- scope list. Every channel insert/repoint must satisfy all scopes selected by
+-- the currently bound Platform policy, including direct SQL mutations.
 -- +goose StatementBegin
 CREATE OR REPLACE FUNCTION enforce_model_channel_promotion_policy()
 RETURNS trigger

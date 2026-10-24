@@ -1,0 +1,187 @@
+name: knight-current-subject-input-reseal
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
+
+concurrency:
+  group: knight-current-subject-input-reseal
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.resolve.outputs.should_run }}
+      expected_sha: ${{ steps.resolve.outputs.expected_sha }}
+      subject_slug: ${{ steps.resolve.outputs.subject_slug }}
+      source_run_id: ${{ steps.resolve.outputs.source_run_id }}
+      downstream_workflow: ${{ steps.resolve.outputs.downstream_workflow }}
+    steps:
+      - name: Resolve selected canonical SHA
+        id: sha
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          DISPATCH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = 'workflow_run' ]; then
+            echo "expected_sha=$WORKFLOW_RUN_HEAD_SHA" >> "$GITHUB_OUTPUT"
+          else
+            echo "expected_sha=$DISPATCH_SHA" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.sha.outputs.expected_sha }}
+          fetch-depth: 2
+
+      - name: Resolve current SubjectInput reseal request
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EXPECTED_SHA: ${{ steps.sha.outputs.expected_sha }}
+          WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          TRIGGER_PATH: canonical/KNIGHT_CURRENT_SUBJECT_INPUT_RESEAL_TRIGGER_V1.json
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          event = os.environ['EVENT_NAME']
+          should_run = event == 'workflow_dispatch'
+          trigger_path = Path(os.environ['TRIGGER_PATH'])
+          trigger = json.loads(trigger_path.read_text(encoding='utf-8'))
+          assert trigger.get('schema') == 'RealSaS.KnightCurrentSubjectInputResealTrigger.v1', 'KNIGHT_CURRENT_INPUT_RESEAL_TRIGGER_SCHEMA'
+          assert trigger.get('operation') == 'RESEAL_CURRENT_KNIGHT_PRODUCT_RIG_SUBJECT_INPUT', 'KNIGHT_CURRENT_INPUT_RESEAL_TRIGGER_OPERATION'
+          assert trigger.get('target_capability') == 'product.rig', 'KNIGHT_CURRENT_INPUT_RESEAL_TRIGGER_TARGET'
+          assert trigger.get('model_inference_authorized') is False, 'KNIGHT_CURRENT_INPUT_RESEAL_MODEL_AUTHORITY'
+          assert trigger.get('compiler_stage_execution_authorized') is False, 'KNIGHT_CURRENT_INPUT_RESEAL_COMPILER_AUTHORITY'
+          assert trigger.get('qualification_authorized') is False, 'KNIGHT_CURRENT_INPUT_RESEAL_QUALIFICATION_AUTHORITY'
+          assert trigger.get('product_authority_authorized') is False, 'KNIGHT_CURRENT_INPUT_RESEAL_PRODUCT_AUTHORITY'
+          assert trigger.get('genericity_claim_authorized') is False, 'KNIGHT_CURRENT_INPUT_RESEAL_GENERICITY_AUTHORITY'
+          subject_slug = str(trigger.get('subject_slug') or '')
+          source_run_id = str(trigger.get('source_run_id') or '')
+          downstream = str(trigger.get('downstream_workflow') or '')
+          assert subject_slug and source_run_id and downstream, 'KNIGHT_CURRENT_INPUT_RESEAL_BINDING_REQUIRED'
+          if event == 'workflow_run':
+              if (os.environ.get('WORKFLOW_RUN_CONCLUSION') == 'success' and
+                      os.environ.get('WORKFLOW_RUN_HEAD_BRANCH') == 'main'):
+                  changed = subprocess.check_output(
+                      ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD^1', 'HEAD'],
+                      text=True,
+                  ).splitlines()
+                  should_run = str(trigger_path) in changed and bool(trigger.get('enabled'))
+          print(f"should_run={'true' if should_run else 'false'}")
+          print(f"expected_sha={os.environ['EXPECTED_SHA'].strip().lower()}")
+          print(f"subject_slug={subject_slug}")
+          print(f"source_run_id={source_run_id}")
+          print(f"downstream_workflow={downstream}")
+          PY
+
+  reseal:
+    needs: activation
+    if: needs.activation.outputs.should_run == 'true'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+      SUBJECT_SLUG: ${{ needs.activation.outputs.subject_slug }}
+      SOURCE_RUN_ID: ${{ needs.activation.outputs.source_run_id }}
+      DOWNSTREAM_WORKFLOW: ${{ needs.activation.outputs.downstream_workflow }}
+      OUTPUT_ROOT: /home/monster/realsas_authority/skin_readiness/current_subject_input_reseal/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+      REALSAS_AUTHORITY_ROOT: /home/monster/realsas_authority
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+
+      - name: Require exact deployed canonical main
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          deployment = json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
+          assert deployment['schema'] == 'RealSaS.DeveloperDeployment.v1', 'KNIGHT_CURRENT_INPUT_RESEAL_DEPLOYMENT_SCHEMA'
+          assert deployment['code_sha'] == os.environ['EXPECTED_SHA'], 'KNIGHT_CURRENT_INPUT_RESEAL_DEPLOYED_MAIN_DRIFT'
+          assert Path(deployment['authority_root']).resolve() == Path(os.environ['AUTHORITY_ROOT']).resolve(), 'KNIGHT_CURRENT_INPUT_RESEAL_AUTHORITY_ROOT_DRIFT'
+          PY
+
+      - name: Seal current product.rig SubjectInput from canonical authority run
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUTPUT_ROOT"
+          "$PLATFORM_ROOT/current/bin/realsas-python" \
+            "$GITHUB_WORKSPACE/tools/ops/materialize_current_subject_input_v1.py" \
+            --api-root http://127.0.0.1:8080 \
+            --subject-slug "$SUBJECT_SLUG" \
+            --source-run-id "$SOURCE_RUN_ID" \
+            --expected-main-sha "$EXPECTED_SHA" \
+            --out "$OUTPUT_ROOT/SUBJECT_INPUT.json"
+
+      - name: Verify current SubjectInput receipt
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          receipt = json.loads((Path(os.environ['OUTPUT_ROOT']) / 'SUBJECT_INPUT.json').read_text(encoding='utf-8'))
+          assert receipt['schema'] == 'RealSaS.CurrentSubjectInputMaterialization.v1', 'KNIGHT_CURRENT_INPUT_RESEAL_RECEIPT_SCHEMA'
+          assert receipt['status'] == 'PASS_CURRENT_SUBJECT_INPUT_SEALED', 'KNIGHT_CURRENT_INPUT_RESEAL_STATUS'
+          assert receipt['source_code_sha'] == os.environ['EXPECTED_SHA'], 'KNIGHT_CURRENT_INPUT_RESEAL_SHA_DRIFT'
+          assert receipt['subject']['slug'] == os.environ['SUBJECT_SLUG'], 'KNIGHT_CURRENT_INPUT_RESEAL_SUBJECT_DRIFT'
+          assert receipt['source_run']['run_id'] == os.environ['SOURCE_RUN_ID'], 'KNIGHT_CURRENT_INPUT_RESEAL_SOURCE_RUN_DRIFT'
+          for key in (
+              'model_inference_executed',
+              'compiler_stage_executed',
+              'qualification_minted',
+              'product_authority_minted',
+              'genericity_claimed',
+          ):
+              assert receipt[key] is False, f'KNIGHT_CURRENT_INPUT_RESEAL_AUTHORITY_VIOLATION:{key}'
+          PY
+
+      - name: Preserve SubjectInput reseal receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: knight-current-subject-input-reseal-${{ github.run_id }}
+          path: ${{ env.OUTPUT_ROOT }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Dispatch current Skin parent execution on the same canonical main
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$REPOSITORY/actions/workflows/$DOWNSTREAM_WORKFLOW/dispatches" \
+            -d '{"ref":"main"}'

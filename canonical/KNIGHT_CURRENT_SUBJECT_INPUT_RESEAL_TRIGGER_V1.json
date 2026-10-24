@@ -1,0 +1,14 @@
+{
+  "schema": "RealSaS.KnightCurrentSubjectInputResealTrigger.v1",
+  "operation": "RESEAL_CURRENT_KNIGHT_PRODUCT_RIG_SUBJECT_INPUT",
+  "enabled": true,
+  "subject_slug": "knight",
+  "source_run_id": "KNIGHT_LATEST_CURRENT_CAA_VISUAL_20261010",
+  "target_capability": "product.rig",
+  "downstream_workflow": "knight_current_skin_parent_execution.yml",
+  "model_inference_authorized": false,
+  "compiler_stage_execution_authorized": false,
+  "qualification_authorized": false,
+  "product_authority_authorized": false,
+  "genericity_claim_authorized": false
+}

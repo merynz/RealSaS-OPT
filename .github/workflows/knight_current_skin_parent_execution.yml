@@ -151,6 +151,17 @@ jobs:
             "$GITHUB_WORKSPACE/tools/ops/execute_current_skin_parent_capabilities_v1.py" \
             "${args[@]}"
 
+      - name: Capture managed Platform diagnostics on parent failure
+        if: failure()
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUTPUT_ROOT"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY' > "$OUTPUT_ROOT/PLATFORM_DIAGNOSTICS.txt" 2>&1 || true
+          from tools.platform_deploy import startup_diagnostics
+          startup_diagnostics()
+          PY
+          cat "$OUTPUT_ROOT/PLATFORM_DIAGNOSTICS.txt"
+
       - name: Verify current typed parent execution receipt
         if: always()
         run: |

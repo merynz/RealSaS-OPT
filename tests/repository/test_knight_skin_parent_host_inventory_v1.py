@@ -8,6 +8,7 @@ import tools.ops.inspect_knight_skin_parent_host_inventory_v1 as inventory
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "tools/ops/inspect_knight_skin_parent_host_inventory_v1.py"
 WORKFLOW = ROOT / ".github/workflows/knight_skin_parent_host_inventory.yml"
+PARENT_EXECUTION_WORKFLOW = ROOT / ".github/workflows/knight_current_skin_parent_execution.yml"
 TRIGGER = ROOT / "canonical/KNIGHT_SKIN_PARENT_HOST_INVENTORY_TRIGGER_V1.json"
 
 
@@ -94,6 +95,20 @@ def test_workflow_is_physical_read_only_post_deploy_probe():
     assert "artifact_import_performed" in text
     assert "product_skin_activated" in text
     assert "git ls-remote origin refs/heads/main" in text
+
+
+def test_parent_execution_failure_diagnostics_are_managed_and_credential_free():
+    text = PARENT_EXECUTION_WORKFLOW.read_text(encoding="utf-8")
+    assert "Capture managed Platform diagnostics on parent failure" in text
+    assert "if: failure()" in text
+    assert "from tools.platform_deploy import startup_diagnostics" in text
+    assert "PLATFORM_DIAGNOSTICS.txt" in text
+    assert "printenv" not in text
+    assert "env |" not in text
+    assert "systemctl --user show-environment" not in text
+    assert text.index("Execute current Mesh and Rig responsibility closure") < text.index(
+        "Capture managed Platform diagnostics on parent failure"
+    ) < text.index("Verify current typed parent execution receipt")
 
 
 def test_trigger_is_explicit_read_only_diagnostic():

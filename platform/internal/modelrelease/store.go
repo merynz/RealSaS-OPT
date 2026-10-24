@@ -59,12 +59,11 @@ type EvaluationRequest struct {
 }
 
 type PromoteRequest struct {
-	Family                   string    `json:"family"`
-	Channel                  Channel   `json:"channel"`
-	ModelReleaseID           uuid.UUID `json:"model_release_id"`
-	RequiredEvaluationScopes []string  `json:"required_evaluation_scopes,omitempty"`
-	ExpectedLockVersion      *int64    `json:"expected_lock_version,omitempty"`
-	Actor                    string    `json:"actor"`
+	Family              string    `json:"family"`
+	Channel             Channel   `json:"channel"`
+	ModelReleaseID      uuid.UUID `json:"model_release_id"`
+	ExpectedLockVersion *int64    `json:"expected_lock_version,omitempty"`
+	Actor               string    `json:"actor"`
 }
 
 type Evaluation struct {
@@ -347,14 +346,12 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromoteRequest) (Chann
 	if err != nil {
 		return ChannelRecord{}, err
 	}
-	if len(req.RequiredEvaluationScopes) == 0 {
-		return ChannelRecord{}, errors.New("model channel promotion requires explicit evaluation scopes")
-	}
 	var out ChannelRecord
 	err = persistence.WithSerializableRetry(ctx, pool, 5, func(tx pgx.Tx) error {
 		var family string
+		var architectureID string
 		var currentState string
-		if err := tx.QueryRow(ctx, "SELECT family,lifecycle_state FROM model_releases WHERE id=$1 FOR UPDATE", req.ModelReleaseID).Scan(&family, &currentState); err != nil {
+		if err := tx.QueryRow(ctx, "SELECT family,architecture_id,lifecycle_state FROM model_releases WHERE id=$1 FOR UPDATE", req.ModelReleaseID).Scan(&family, &architectureID, &currentState); err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return ErrNotFound
 			}
@@ -363,6 +360,27 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromoteRequest) (Chann
 		if family != req.Family {
 			return errors.New("MODEL_CHANNEL_FAMILY_MISMATCH")
 		}
+
+		var policyID uuid.UUID
+		var policySHA string
+		var policyVersion int64
+		var policyScopes []string
+		var policyBindingLockVersion int64
+		if err := tx.QueryRow(ctx, `
+			SELECT p.id,p.policy_sha256,p.policy_version,p.required_evaluation_scopes,b.lock_version
+			FROM model_promotion_policy_bindings b
+			JOIN model_promotion_policies p ON p.id=b.policy_id
+			WHERE b.family=$1 AND b.architecture_id=$2 AND b.channel=$3
+			FOR SHARE OF b,p
+		`, req.Family, architectureID, string(req.Channel)).Scan(
+			&policyID, &policySHA, &policyVersion, &policyScopes, &policyBindingLockVersion,
+		); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return fmt.Errorf("MODEL_PROMOTION_POLICY_MISSING:%s:%s:%s", req.Family, architectureID, req.Channel)
+			}
+			return err
+		}
+
 		currentLifecycle := State(currentState)
 		if currentLifecycle == StateRejected || currentLifecycle == StateSuperseded {
 			return errors.New("MODEL_RELEASE_NOT_PROMOTABLE")
@@ -379,19 +397,7 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromoteRequest) (Chann
 		if targetRank > currentRank {
 			nextLifecycle = state
 		}
-		for _, scope := range req.RequiredEvaluationScopes {
-			scope = strings.TrimSpace(scope)
-			if scope == "" {
-				return errors.New("empty required evaluation scope")
-			}
-			var result string
-			if err := tx.QueryRow(ctx, "SELECT result FROM model_release_evaluations WHERE model_release_id=$1 AND scope=$2", req.ModelReleaseID, scope).Scan(&result); err != nil {
-				return fmt.Errorf("MODEL_PROMOTION_EVALUATION_MISSING:%s", scope)
-			}
-			if result != "PASS" {
-				return fmt.Errorf("MODEL_PROMOTION_EVALUATION_NOT_PASS:%s:%s", scope, result)
-			}
-		}
+
 		var existingID uuid.UUID
 		var lockVersion int64
 		err := tx.QueryRow(ctx, "SELECT model_release_id,lock_version FROM model_channels WHERE family=$1 AND channel=$2 FOR UPDATE", req.Family, string(req.Channel)).Scan(&existingID, &lockVersion)
@@ -420,7 +426,16 @@ func Promote(ctx context.Context, pool *pgxpool.Pool, req PromoteRequest) (Chann
 		if _, err := tx.Exec(ctx, "UPDATE model_releases SET lifecycle_state=$2 WHERE id=$1", req.ModelReleaseID, string(nextLifecycle)); err != nil {
 			return err
 		}
-		audit, _ := json.Marshal(map[string]any{"family": req.Family, "channel": req.Channel, "model_release_id": req.ModelReleaseID.String(), "required_evaluation_scopes": req.RequiredEvaluationScopes})
+		audit, _ := json.Marshal(map[string]any{
+			"family":                                req.Family,
+			"channel":                               req.Channel,
+			"model_release_id":                      req.ModelReleaseID.String(),
+			"promotion_policy_id":                   policyID.String(),
+			"promotion_policy_sha256":               policySHA,
+			"promotion_policy_version":              policyVersion,
+			"promotion_policy_required_scopes":      policyScopes,
+			"promotion_policy_binding_lock_version": policyBindingLockVersion,
+		})
 		if _, err := tx.Exec(ctx, "INSERT INTO audit_events(actor,action,payload) VALUES ($1,'MODEL_CHANNEL_PROMOTED',$2)", req.Actor, audit); err != nil {
 			return err
 		}

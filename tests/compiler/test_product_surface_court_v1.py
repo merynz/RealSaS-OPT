@@ -8,6 +8,12 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
+from compiler.realsas_compiler_core.axis_surface_compat_v1 import (
+    LEGACY_COMPLETED_ALIAS,
+    LEGACY_OBSERVED_ALIAS,
+    assert_axis_tensor_numeric_binding_v1,
+    axis_numeric_compatibility_surface_v1,
+)
 from compiler.realsas_compiler_core.product_surface_court_v1 import (
     PRODUCT_SURFACE_BUILDER_V1,
     PRODUCT_SURFACE_COMPLETED_V1,
@@ -118,8 +124,8 @@ def test_product_surface_policy_binds_exact_frozen_bytes() -> None:
     assert policy["normal_orientation"]["operator_reuse_scope"] == "NUMERICAL_TOPOLOGY_AREA_NORMAL_ONLY__NO_SIGNED_ZERO_AUTHORITY"
 
 
-def test_product_surface_reprofile_removes_signed_zero_semantics_and_tensorizes_for_axis() -> None:
-    surface = _reprofile_surface(
+def _product_surface() -> RiggingSurfaceIR:
+    return _reprofile_surface(
         _intermediate_surface(),
         shape_content_sha256="1" * 64,
         decoded_topology_sha256="2" * 64,
@@ -130,6 +136,10 @@ def test_product_surface_reprofile_removes_signed_zero_semantics_and_tensorizes_
         hint_diagnostics={"hint_role": "ORIENTATION_SIGN_ONLY"},
         adequacy_summary={"status": "PASS"},
     )
+
+
+def test_product_surface_reprofile_removes_signed_zero_semantics() -> None:
+    surface = _product_surface()
     assert surface.builder_id == PRODUCT_SURFACE_BUILDER_V1
     assert surface.metadata["surface_evidence_profile"] == PRODUCT_SURFACE_PROFILE_V1
     assert surface.metadata["scene_first_signed_geometry"] is False
@@ -138,12 +148,36 @@ def test_product_surface_reprofile_removes_signed_zero_semantics_and_tensorizes_
     flags = {flag for node in surface.surface_nodes for flag in node.validity_flags}
     assert PRODUCT_SURFACE_OBSERVED_V1 in flags
     assert PRODUCT_SURFACE_COMPLETED_V1 in flags
-    assert "OBSERVED_SIGNED_ZERO_SURFACE" not in flags
-    assert "MODEL_COMPLETED_SIGNED_ZERO_SURFACE" not in flags
+    assert LEGACY_OBSERVED_ALIAS not in flags
+    assert LEGACY_COMPLETED_ALIAS not in flags
     serialized = json.dumps(surface.to_dict(), sort_keys=True)
     assert "SIGNED_ZERO_SURFACE_TOPOLOGY_NEIGHBOR" not in serialized
 
-    tensor = tensorize_rigging_surface_v1(surface, require_scene_first=True)
+
+def test_axis_compatibility_view_preserves_product_authority_and_frozen_tensorizer_source() -> None:
+    surface = _product_surface()
+    compatibility = axis_numeric_compatibility_surface_v1(surface)
+    assert compatibility.geometry_lineage_hash == surface.geometry_lineage_hash
+    assert compatibility.metadata["surface_evidence_profile"] == PRODUCT_SURFACE_PROFILE_V1
+    assert compatibility.metadata["scene_first_signed_geometry"] is False
+    assert compatibility.metadata["signed_zero_surface_claimed"] is False
+    assert compatibility.metadata["axis_numeric_compatibility_view"] is True
+    assert compatibility.metadata["axis_numeric_compatibility_view_persisted"] is False
+    assert {relation.relation_kind for relation in compatibility.local_relations} == {PRODUCT_SURFACE_RELATION_V1}
+
+    product_flags = {flag for node in surface.surface_nodes for flag in node.validity_flags}
+    compat_flags = {flag for node in compatibility.surface_nodes for flag in node.validity_flags}
+    assert LEGACY_OBSERVED_ALIAS not in product_flags
+    assert LEGACY_COMPLETED_ALIAS not in product_flags
+    assert LEGACY_OBSERVED_ALIAS in compat_flags
+    assert LEGACY_COMPLETED_ALIAS in compat_flags
+
+    tensor = tensorize_rigging_surface_v1(compatibility, require_scene_first=False)
+    assert_axis_tensor_numeric_binding_v1(
+        product_surface=surface,
+        compatibility_surface=compatibility,
+        tensor=tensor,
+    )
     assert tensor.node_count == 3
     assert tensor.edge_count == 3
     assert int(tensor.observed.sum()) == 2

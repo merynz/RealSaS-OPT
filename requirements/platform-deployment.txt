@@ -1,5 +1,7 @@
 # Local developer services, not a frozen model training environment.
+# Persistent parent execution admits CPU for IRIS/TESSA/AXIS. MIRA retains its
+# separate capability-specific CUDA+BF16 compute contract.
 -r mainline-ci.txt
 -r platform-worker.txt
--r torch-cuda.txt
+-r torch-cpu.txt
 pgserver==0.1.4

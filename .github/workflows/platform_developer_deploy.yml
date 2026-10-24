@@ -17,6 +17,7 @@ on:
       - 'requirements/platform-deployment.txt'
       - 'requirements/mainline-ci.txt'
       - 'requirements/platform-worker.txt'
+      - 'requirements/torch-cpu.txt'
       - 'requirements/torch-cuda.txt'
       - 'tests/repository/test_platform_deployment.py'
       - 'tests/repository/test_platform_wheelhouse_v1.py'
@@ -95,7 +96,7 @@ jobs:
               'requirements/platform-deployment.txt',
               'requirements/mainline-ci.txt',
               'requirements/platform-worker.txt',
-              'requirements/torch-cuda.txt',
+              'requirements/torch-cpu.txt',
           )
           digest = hashlib.sha256()
           for raw in paths:
@@ -107,7 +108,14 @@ jobs:
           print(digest.hexdigest())
           PY
           )"
-          wheelhouse="/home/monster/realsas_platform/wheelhouse/$key"
+          wheelhouse_root=/home/monster/realsas_platform/wheelhouse
+          mkdir -p "$wheelhouse_root"
+          find "$wheelhouse_root" -mindepth 1 -maxdepth 1 -type d ! -name "$key" -print -exec rm -rf -- {} +
+          available="$(df -PB1 "$wheelhouse_root" | awk 'NR==2 {print $4}')"
+          if [ "$available" -lt 2147483648 ]; then
+            python -m pip cache purge || true
+          fi
+          wheelhouse="$wheelhouse_root/$key"
           mkdir -p "$wheelhouse"
           python -m pip download --no-input --progress-bar off \
             --dest "$wheelhouse" \
@@ -209,7 +217,7 @@ jobs:
               'requirements/platform-deployment.txt',
               'requirements/mainline-ci.txt',
               'requirements/platform-worker.txt',
-              'requirements/torch-cuda.txt',
+              'requirements/torch-cpu.txt',
           )
           digest = hashlib.sha256()
           for raw in paths:
@@ -221,7 +229,14 @@ jobs:
           print(digest.hexdigest())
           PY
           )"
-          wheelhouse="/home/monster/realsas_platform/wheelhouse/$key"
+          wheelhouse_root=/home/monster/realsas_platform/wheelhouse
+          mkdir -p "$wheelhouse_root"
+          find "$wheelhouse_root" -mindepth 1 -maxdepth 1 -type d ! -name "$key" -print -exec rm -rf -- {} +
+          available="$(df -PB1 "$wheelhouse_root" | awk 'NR==2 {print $4}')"
+          if [ "$available" -lt 2147483648 ]; then
+            python -m pip cache purge || true
+          fi
+          wheelhouse="$wheelhouse_root/$key"
           mkdir -p "$wheelhouse"
           python -m pip download --no-input --progress-bar off \
             --dest "$wheelhouse" \

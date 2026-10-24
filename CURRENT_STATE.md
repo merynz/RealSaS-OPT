@@ -61,6 +61,8 @@ Operational model/channel state must be read from Platform (`/v1/ops/status`, mo
 
 The responsibility map supersedes stage-centric navigation; it does **not** erase the still-valid V2 implementation continuity records. `canonical/V2_IMPLEMENTATION_READINESS.json` and the existing **43-stage** dependency DAG remain machine-readable implementation/provenance anchors wherever legacy executors and receipts still reference them. They are not a competing architecture authority and must not override current responsibility ownership.
 
+The registered governance gate id **`PLATFORM_EXECUTION_LANES`** remains the active control-plane execution-lane continuity gate on `main`. It records the boundary between modular research execution and product execution; it does not create a second scientific architecture or restore stage-centric ownership.
+
 The established product-quality separations also remain explicit: **Geometry**, **Mechanics**, and **Appearance** are distinct concerns. **SurfaceAddressing** remains the stable canonical-M address boundary used to bind downstream evidence without changing Mesh authority. **Complete Appearance Authority** (CAA) remains the source-preserving Appearance authority downstream of canonical M. These continuity anchors are preserved while the higher-level operational map moves to responsibilities/capabilities.
 
 ## 3. Current responsibility status

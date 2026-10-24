@@ -51,7 +51,7 @@ func main() {
 		slog.Error("artifact store", "error", err)
 		os.Exit(1)
 	}
-	handler := (httpapi.API{Pool: pool, Graph: graph, Store: store, CodeSHA: sourceCodeSHA}).HandlerWithOperational()
+	handler := (httpapi.API{Pool: pool, Graph: graph, Store: store, CodeSHA: sourceCodeSHA}).HandlerWithSubjectIdentityRead()
 	server := &http.Server{
 		Addr:              "127.0.0.1:8080",
 		Handler:           handler,

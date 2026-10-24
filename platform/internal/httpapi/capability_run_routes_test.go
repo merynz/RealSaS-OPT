@@ -22,6 +22,14 @@ func TestCapabilityRunRejectsIncompleteRequestBeforeDatabaseAccess(t *testing.T)
 	}
 }
 
+func TestSubjectInputReadRejectsInvalidIdentityBeforeDatabaseAccess(t *testing.T) {
+	response := httptest.NewRecorder()
+	(API{}).HandlerWithCapabilityRun().ServeHTTP(response, httptest.NewRequest("GET", "/v1/subjects/not-a-uuid/inputs/not-an-input", nil))
+	if response.Code != 400 || !strings.Contains(response.Body.String(), "invalid subject id") {
+		t.Fatalf("%d %s", response.Code, response.Body.String())
+	}
+}
+
 func TestCapabilityRunHandlerPreservesExistingReadRoutes(t *testing.T) {
 	response := httptest.NewRecorder()
 	(API{}).HandlerWithCapabilityRun().ServeHTTP(response, httptest.NewRequest("GET", "/health/live", nil))

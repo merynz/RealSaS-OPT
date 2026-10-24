@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 	"github.com/merynz/RealSaS-OPT/platform/internal/semantic"
 )
 
@@ -65,6 +66,7 @@ func SealReleaseSnapshot(
 	}
 	seen := map[string]struct{}{}
 	normalized := append([]ReleaseBinding(nil), bindings...)
+	moduleImplementations := map[string]string{}
 	for i := range normalized {
 		if err := normalized[i].Descriptor.Validate(); err != nil {
 			return "", err
@@ -76,6 +78,17 @@ func SealReleaseSnapshot(
 			return "", fmt.Errorf("duplicate capability binding %s", normalized[i].Descriptor.ID)
 		}
 		seen[normalized[i].Descriptor.ID] = struct{}{}
+		if normalized[i].Descriptor.Kind != KindStage {
+			moduleImplementations[normalized[i].Descriptor.ID] = normalized[i].Version.ImplementationSHA256
+		}
+	}
+	if len(moduleImplementations) == 0 {
+		return "", errors.New("engine release product implementation binding is required")
+	}
+	if err := release.VerifyCapabilityImplementationBinding(
+		ctx, pool, releaseID, moduleImplementations,
+	); err != nil {
+		return "", fmt.Errorf("CAPABILITY_IMPLEMENTATION_RELEASE_IDENTITY_DRIFT:%w", err)
 	}
 	sort.Slice(normalized, func(i, j int) bool {
 		return normalized[i].Descriptor.ID < normalized[j].Descriptor.ID

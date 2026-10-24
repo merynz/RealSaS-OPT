@@ -75,9 +75,9 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			// Platform state. Source describes only the static admission contract;
 			// it must never mirror whether a particular ModelRelease happens to be
 			// registered, promoted or currently bound.
-			"model_release_admission_owner":             "PLATFORM_MODEL_REQUIREMENTS",
-			"research_execution_model_channels":         []any{"RESEARCH", "CANDIDATE"},
-			"product_execution_model_channels":          []any{"PRODUCTION"},
+			"model_release_admission_owner":              "PLATFORM_MODEL_REQUIREMENTS",
+			"research_execution_model_channels":          []any{"RESEARCH", "CANDIDATE"},
+			"product_execution_model_channels":           []any{"PRODUCTION"},
 			"operational_model_state_embedded_in_source": false,
 
 			// Historical scientific truth, intentionally not upgraded to current

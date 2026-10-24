@@ -5,11 +5,11 @@
   "authority": "NORMATIVE_PRODUCT_SHAPE_TO_SURFACE_COMPILER_COURT__NOT_TUNED_FROM_CURRENT_KNIGHT_RESULT",
   "source_fidelity_policy": {
     "path": "canonical/STAGE13_REST_REPROJECTION_POLICY_V2_20260919.json",
-    "sha256": "94d479de27dd99722fde4dd239401ba6ccbfb221"
+    "sha256": "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214"
   },
   "surface_adequacy_policy": {
     "path": "canonical/STAGE14_SUBSTRATE_ADEQUACY_POLICY_V3_20260929.json",
-    "sha256": "64b6f1885ca8c5766054cbdbf81d8c3a03a0138b"
+    "sha256": "bc98d3aa3cd419ca9ae43010e890fc554ab62e57268933afc630aae20c38139b"
   },
   "frame_contract": {
     "shape_evidence_frame": "RealSaS.TESSA.SequenceNormalizedFrame.v1",
@@ -17,7 +17,8 @@
     "compiler_world_frame_owner": true
   },
   "normal_orientation": {
-    "operator_id": "RealSaS.Compiler.ShapeTopologyAreaNormalWithIRISHint.v1",
+    "operator_id": "RealSaS.GSA.ZeroSurfaceTopologyAreaNormal.v2",
+    "operator_reuse_scope": "NUMERICAL_TOPOLOGY_AREA_NORMAL_ONLY__NO_SIGNED_ZERO_AUTHORITY",
     "topology_neighborhood_authority": "DECODED_TESSA_FACE_INCIDENCE_ONLY",
     "orientation_hint_source": "IRIS_SURFACE_WITNESS_NORMALS",
     "orientation_hint_role": "SIGN_ONLY_NOT_NEIGHBORHOOD_AUTHORITY",

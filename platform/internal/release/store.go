@@ -262,14 +262,14 @@ func Seal(
 			params, err := json.Marshal(stage.SemanticParameters)
 			if err != nil {
 				return err
-		}
+			}
 			if _, err := tx.Exec(ctx, `
 				INSERT INTO engine_release_stages
 				  (release_id,stage_id,ordinal,implementation_sha256,policy_sha256,semantic_parameters)
 				VALUES ($1,$2,$3,$4,$5,$6)
 			`, id, stage.StageID, stage.Ordinal, stage.ImplementationSHA256, stage.PolicySHA256, params); err != nil {
 				return err
-		}
+			}
 		}
 		for _, requirement := range manifest.ModelRequirements {
 			if _, err := tx.Exec(ctx, `
@@ -329,7 +329,7 @@ func LoadInfo(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (Info, erro
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Info{}, ErrReleaseNotFound
 		}
-		return out, err
+		return Info{}, err
 	}
 	out.Purpose = Purpose(purpose)
 	return out, nil

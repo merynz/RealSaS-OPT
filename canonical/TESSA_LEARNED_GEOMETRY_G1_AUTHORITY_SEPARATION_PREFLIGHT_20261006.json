@@ -1,0 +1,49 @@
+{
+  "schema": "RealSaS.TESSALearnedGeometryG1AuthoritySeparationPreflight.v1",
+  "date": "2026-10-06",
+  "status": "PASS__PREFLIGHT_AUTHORITY_SEPARATION_OBSERVED",
+  "product_authority": false,
+  "court_status": "PREFLIGHT_ONLY__REPO_COURT_SCRIPT_ADDED_FOR_REPRODUCTION",
+  "method": {
+    "normalization": "world = vertices_normalized * (2 * Stage08 half_extent) + Stage08 center_xyz",
+    "mechanical_partition": "build_structural_partition(surface) with no subject-specific overrides",
+    "support_builder": "TESSAMaterialSupportFieldV1 defaults: component-safe decoded-component assignment, graph-local <=4 support nodes, <=2 graph hops, inverse-distance power 2",
+    "support_lift": "sum_i coefficient_i * RiggingSurfaceIR.P_i",
+    "exact_position_tolerance": 1e-9,
+    "interpretation": "Diagnostic separation measurement only. Non-zero distance is not a TESSA geometry failure and does not relax G1."
+  },
+  "input_sha256": {
+    "TESSA_T1B_DECODED_MESH.npz": "b7ccb058ef23f8c54d053e64580150dffffeb6a76a126ecaf48b265dd093f390",
+    "qualified_rigging_surface.json": "7b71969e12316503dd1cd540b3fa2a17e5cbc96a9b04c03aed88d69077f79182",
+    "normalization_domain.json": "01b63a57390de9a5d2c731d9644e65ff779980caa066c19204db3b4a3e0c634b"
+  },
+  "measurements": {
+    "tessa_vertex_count": 3665,
+    "tessa_face_count": 6952,
+    "decoded_component_count": 39,
+    "default_structural_partition_component_count": 6,
+    "support_simplex_max_abs_residual": 3.3306690738754696e-16,
+    "cross_component_support_row_count": 0,
+    "exact_position_equality_count": 0,
+    "non_exact_position_count": 3665,
+    "learned_P_to_current_support_lift_distance": {
+      "min": 0.0006929423139817923,
+      "p50": 0.05343829195857912,
+      "p90": 0.15151975022895608,
+      "p95": 0.18338764666975224,
+      "p99": 0.2913541001361069,
+      "max": 0.387618236062725,
+      "mean": 0.0699361495188386
+    }
+  },
+  "conclusion": {
+    "current_tessa_material_support_is_valid_continuous_field_lineage": true,
+    "current_tessa_material_support_reconstructs_learned_geometry": false,
+    "legacy_no_refinement_G1_can_be_used_for_tessa_learned_P": false,
+    "g1_threshold_relaxation_recommended": false,
+    "fabricated_geometric_support_recommended": false,
+    "required_geometry_authority": "STAGE19_ACTUAL_CANDIDATE_SOURCE_FIDELITY_PLUS_STATIC_QUALITY",
+    "required_support_authority": "COMPONENT_SAFE_GSA_FIELD_LINEAGE",
+    "next_step": "Run the repository court script on the same exact artifacts, then implement a typed learned-geometry admission path that hash-binds Stage19 qualification without changing deterministic geometry G1 semantics."
+  }
+}

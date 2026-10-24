@@ -12,6 +12,8 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
 )
 
+var ErrSubjectNotFound = errors.New("subject not found")
+
 type SubjectRequest struct {
 	Slug        string `json:"slug"`
 	DisplayName string `json:"display_name"`
@@ -21,6 +23,33 @@ type SubjectRequest struct {
 type Subject struct {
 	SubjectID uuid.UUID `json:"subject_id"`
 	Reused    bool      `json:"reused"`
+}
+
+type SubjectIdentity struct {
+	Schema      string    `json:"schema"`
+	SubjectID   uuid.UUID `json:"subject_id"`
+	Slug        string    `json:"slug"`
+	DisplayName string    `json:"display_name"`
+}
+
+func LookupSubjectBySlug(ctx context.Context, pool *pgxpool.Pool, slug string) (SubjectIdentity, error) {
+	slug = strings.TrimSpace(slug)
+	if slug == "" {
+		return SubjectIdentity{}, ErrSubjectNotFound
+	}
+	var out SubjectIdentity
+	if err := pool.QueryRow(ctx, `
+		SELECT id,slug,display_name
+		FROM subjects
+		WHERE slug=$1 AND archived_at IS NULL
+	`, slug).Scan(&out.SubjectID, &out.Slug, &out.DisplayName); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return SubjectIdentity{}, ErrSubjectNotFound
+		}
+		return SubjectIdentity{}, err
+	}
+	out.Schema = "RealSaS.SubjectIdentity.v1"
+	return out, nil
 }
 
 func EnsureSubject(ctx context.Context, pool *pgxpool.Pool, req SubjectRequest) (Subject, error) {

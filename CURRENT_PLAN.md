@@ -1,399 +1,398 @@
 # RealSaS-OPT — Current Plan
 
-**Date:** 2026-10-16
-**Status:** USER-AUTHORIZED NARROW ARCHITECTURE SIMPLIFICATION BEFORE FIT8
-**Canonical code line:** `main` only
-**Deferred:** broad Unified-IRIS / StdGEN++ architecture intervention and semantic teacher-corpus program
-
-This plan intentionally narrows the intervention. RealSaS already produced a working Knight animated demo. The current objective is not to redesign the whole system. It is to remove one demonstrated information bottleneck between IRIS and TESSA while preserving the proven Compiler→M→AXIS→MIRA→CAA/runtime architecture.
+**Date:** 2026-10-24  
+**Status:** ACTIVE RESPONSIBILITY-CLOSURE PROGRAM  
+**Canonical code line:** `main` only  
+**Primary objective:** close Skin → Mechanics → Graphics → Motion → Proof without reopening solved boundaries or creating duplicate authority.  
+**Research objective:** make every new hypothesis testable through Platform Experiments/Attempts with exact reuse, lineage and independent qualification.
 
 ---
 
 ## 0. Executive decision
 
-The active product/research line returns to:
+The current product architecture is governed by responsibilities, not by a numbered-stage mental model:
 
 ```text
-8-view input
-   ↓
-IRIS signed scene representation
-   ↓
-TESSA topology proposal role
-   ↓
-Compiler → canonical M
-   ↓
-AXIS → G
-   ↓
-MIRA → W_M on exact M
-   ↓
-Compiler proof / CAA / presentation / runtime
+Input → Shape → Mesh → Rig → Skin → Mechanics → Graphics → Motion → Proof → ProductRevision
 ```
 
-The only architecture change authorized before Fit8 is:
+Legacy stage IDs remain valid implementation lineage where existing executors/receipts still use them, but new work should be described first by responsibility, typed contract, authority and dependency.
 
-> **TESSA must stop relearning the scene from a 17-D GSA summary. Its topology decoder should consume rich IRIS scene evidence directly.**
+The Compiler participates only where canonical/discrete authority is required. It must not become a duplicate perception model, a hidden repair bucket, or a second owner of work already performed elsewhere.
 
-Everything else is held fixed unless this change exposes a concrete blocker.
+The next product blocker is **fresh current Skin closure**. Mechanics follows Skin. Graphics follows the mechanical baseline. The shared-scene Graphics Truth Foundry program is preserved, but it is not allowed to bypass Skin/Mechanics closure.
 
 ---
 
-## 1. Confirmed bottleneck
+## 1. Non-negotiable architecture rules
 
-Current path:
-
-```text
-IRIS image tokens
-  ↓
-IRIS scene triplane
-  ↓
-SDF
-  ↓
-tetra zero surface
-  ↓
-GSA / RiggingSurface
-  ↓
-17-D node rows
-  ↓
-TESSA SurfaceEncoder (17 → 768, learned scene reconstruction)
-  ↓
-TESSA topology token decoder
-```
-
-The 17-D conditioning contains only:
-
-```text
-XYZ(3)
-normal XYZ + valid(4)
-8 view-support bits
-graph degree(1)
-persistence(1)
-```
-
-IRIS already contains a much richer spatial representation: in the current Knight/Fit8 configuration, `scene_planes` are `3 × 64 × 64 × 64` and are the same representation from which the continuous signed field is queried.
-
-The information loss is therefore real and local: rich IRIS scene evidence is discarded and TESSA then trains a second surface encoder to infer a new latent from 17 numbers per GSA node.
+1. **One authority per truth.** Do not encode the same live state in Git source and Platform state.
+2. **Learned output is evidence/proposal unless explicitly promoted by a court.** IRIS/TESSA/AXIS/MIRA do not self-mint canonical product authority.
+3. **Compiler authority is bounded.** Compiler validates/binds/resolves/mints where required; it does not duplicate perception or invent missing evidence.
+4. **No subject-specific production tricks.** Shared rules/parameters must remain generic; diagnostic subject differences belong in evidence and Experiments.
+5. **Unknown is not false.** N/A/UNKNOWN/invalid evidence remains explicit abstention.
+6. **Reuse is exact, not approximate.** An artifact is reused only when governing code/model/policy/input lineage satisfies the exact consumer contract.
+7. **Merge, model promotion and product activation are separate transitions.** None implies another.
+8. **FIT8 is not unseen proof.** If a parameter/hypothesis was selected by observing FIT8, independent LOFO/unseen evidence remains required for generalization claims.
+9. **Source art wins for appearance.** Learned completion/support may assist but does not silently replace authored visual truth.
+10. **No new stage chain.** New subsystems appear as responsibilities/capabilities and typed contracts.
 
 ---
 
-## 2. Target simplification
+## 2. P0 — Governance and operational hygiene
 
-### 2.1 Preserve IRIS geometry core
+### 2.1 Current-state authority
 
-Do not rewrite `SceneFirstSignedGeometryV4` merely to implement this intervention.
+`CURRENT_STATE.md` and this file must reflect the active program. Historical plans remain useful evidence but must not steer `continue / devam et` back into retired work.
 
-Preserve:
+### 2.2 Main-branch enforcement
 
-- image/camera token fusion;
-- current scene triplane;
-- current continuous signed field;
-- current Fit8 IRIS training objective and checkpoint semantics;
-- deterministic tetra decoding/courts.
-
-This is important because the stopped Fit8 IRIS checkpoint may remain resumable under the exact binding guards.
-
-### 2.2 Turn TESSA into a topology head over IRIS scene memory
-
-New learned path:
+Repository observation on 2026-10-24:
 
 ```text
-IRIS scene_planes [B,3,64,64,64]
-          ↓
-IRIS→topology memory adapter
-          ↓
-fixed bounded topology memory [B,K,768]
-          ↓
-existing TESSA topology token decoder role
-          ↓
-TESSAMeshProposal / M*
+main branch protection = OFF
+repository rulesets     = NONE
 ```
 
-Recommended first adapter:
+Required administrative remediation:
 
-1. flatten the three high-resolution IRIS planes into spatial tokens;
-2. add explicit plane identity + normalized 2-D coordinate encoding;
-3. project the source tokens to a compact key/value width;
-4. use a fixed set of learned topology-memory queries (`K`, initially the existing 384-memory scale) to cross-attend once to the rich scene tokens;
-5. allow at most a small bounded latent-refinement stack;
-6. feed the resulting memory directly to the existing autoregressive topology decoder.
+- PR-only main changes;
+- required CI/status checks;
+- no force-push/delete;
+- explicit minimal bypass/emergency policy;
+- keep exact-head merge leases in automated merges.
 
-The adapter is an **information bridge/aggregator**, not a second scene model.
+Until GitHub protection/ruleset is enabled, treat this as an open governance/security gap. A source-side test cannot prevent a privileged direct push after the fact.
 
-### 2.3 Retire the canonical 17-D topology input
+### 2.3 Operational truth ownership
 
-For the new Fit8 topology path:
-
-- `build_tessa_conditioning_v1()` is not the scene representation;
-- `TESSASurfaceEncoderV1(17-D GSA)` is not the canonical topology encoder;
-- GSA may still provide Compiler/mechanics evidence and diagnostics;
-- the old TESSA path stays available for exact historical reproduction and A/B comparison.
-
-### 2.4 Logical fusion, controlled training
-
-IRIS and the TESSA topology role may be packaged under one wrapper/model boundary because they share the same scene representation.
-
-However, the first Fit8 training intervention must remain causally controlled:
-
-```text
-phase A: IRIS geometry
-  - resume the existing Fit8 checkpoint only if exact binding passes
-  - otherwise restart the same frozen geometry recipe
-
-phase B: topology head
-  - load the sealed IRIS scene model
-  - freeze IRIS initially
-  - train one shared topology adapter + decoder across all 8 subjects
-
-phase C: optional joint fine-tune
-  - DEFERRED unless separately preregistered and justified by evidence
-```
-
-Thus the architecture can be one model at inference while the first scientific experiment still isolates the new topology intervention.
+Live model/channel/product state is Platform-owned. Source capability descriptors contain static requirements and policies only.
 
 ---
 
-## 3. Compiler repositioning
+## 3. P1 — Fresh Skin closure
 
-The Compiler must be repositioned **logically**, not discarded.
+### 3.1 Current MIRA state
 
-The key rule:
+MIRA V5.5 exact runtime has been recovered and registered as a Platform **DRAFT ModelRelease**. Recovery evidence proves runtime identity/parity/compute behavior only.
 
-> **Compiler courts no longer sit between IRIS scene understanding and TESSA scene understanding, because there is no second scene-understanding model. They still sit between learned proposal and canonical product authority.**
+Do not promote from DRAFT solely because historical Knight/FIT1 evidence exists.
 
-### 3.1 Pre-model authority retained
+Current execution must establish that the exact registered runtime still participates correctly in the present typed product boundary.
 
-Keep:
+### 3.2 Read-only Skin readiness inspection
 
-- source/camera admission;
-- Stage08 canonical normalization;
-- exact source provenance.
+Before executing or importing anything:
 
-### 3.2 Learned proposal produced early, held non-authoritative
+1. verify exact deployed main and Platform health;
+2. inspect Platform model-release/channel operational state;
+3. inspect the explicit authority-host Knight roots;
+4. identify whether exact current typed prerequisites exist:
+   - `CanonicalMeshIR.v1`;
+   - `CanonicalRigIR.v1`;
+   - required `RiggingSurfaceIR`/carrier evidence;
+   - `TESSAMaterialSupportFieldIR` or exact declared equivalent;
+5. validate hashes/bindings/authority metadata;
+6. report READY / MISSING / STALE / INCOMPATIBLE per prerequisite;
+7. mint **no** qualification, inference result, promotion or product state.
 
-One IRIS/topology inference may produce:
+Do not reinterpret legacy NPZ/JSON files as current canonical typed parents merely because the underlying numbers look compatible.
 
-```text
-signed field evidence
-scene planes
-learned topology proposal M*
-```
+### 3.3 Produce missing current parents only through their owners
 
-`M*` is sealed as immutable learned evidence only. It has **no product authority** at this point.
+If exact typed Mesh/Rig parents are absent:
 
-### 3.3 Independent Compiler geometry court remains
+- run/reuse the current Mesh responsibility to obtain `CanonicalMeshIR`;
+- run/reuse the current Rig responsibility to obtain `CanonicalRigIR`;
+- preserve exact evidence and authority bindings;
+- do not create a bespoke Knight conversion path.
 
-From the signed field, independently execute the existing path:
+### 3.4 Execute MIRA under current model identity
 
-```text
-Stage12 deterministic tetra zero surface
-→ Stage13 geometry substrate qualification
-→ Stage14 GSA build
-→ Stage15 qualified RiggingSurface
-→ Stage17 qualified mechanical/component partition
-```
-
-These stages no longer compress the neural scene for topology prediction. Their jobs are:
-
-- independent geometry witness;
-- source/field lineage;
-- qualified surface domain;
-- structural/component evidence;
-- later material/mechanical support binding;
-- independent cross-check against learned `M*`.
-
-### 3.4 Stage18 remains the meeting point
-
-At Stage18 consume both:
+With exact parents available:
 
 ```text
-learned M*
-+
-qualified Stage12–17 evidence
+CanonicalMesh
++ CanonicalRig
++ qualified carrier/surface evidence
++ exact MIRA ModelRelease
+        ↓
+MIRA runtime inference
+        ↓
+W_M proposal/evidence
 ```
 
-Preserve/adapt the existing responsibilities:
+Execution must obey the recovered compute contract. CPU/cross-device equivalence must not be assumed.
 
-- immutable proposal reference;
-- bind proposal vertices to qualified support evidence;
-- keep material/mechanical support separate from geometry authority;
-- run generic static quality repair;
-- record proposal→repaired reference lineage;
-- require independent source/geometry checks;
-- mint no product authority.
+### 3.5 Compiler Skin qualification
 
-`TESSAMaterialSupportFieldIR` remains valid here as a **post-proposal support binding**. It must not be used as the neural topology input.
-
-### 3.5 Stage19 remains canonical M authority
-
-Stage19 remeasures the exact repaired candidate and seals canonical `M` only if the frozen policy passes.
-
-Downstream remains unchanged:
+Compiler consumes the exact MIRA proposal and exact typed parents, enforces simplex/binding/coverage/repair budgets and either:
 
 ```text
-Stage19 M
-  ↓
-AXIS G
-  ↓
-MIRA W_M on exact M
-  ↓
-Compiler exact M/G/W proof
-  ↓
-CAA / presentation / motion / runtime
+PASS → CanonicalSkinIR.v1
+FAIL → typed failure evidence; no authority minted
 ```
 
-No AXIS, MIRA or skin-basis redesign is part of this intervention.
+No hidden fitting, semantic transfer, GSA ownership or silent post-hoc correction is allowed.
+
+### 3.6 Current evaluation and RESEARCH promotion
+
+A fresh successful Skin execution may support a new current-execution evaluation scope. Promotion to `RESEARCH` must remain Platform-owned and policy-reviewed.
+
+Do **not** require FIT8/LOFO/unseen merely to create a research execution channel if the research policy does not claim generic/product qualification. Conversely, do not let a RESEARCH promotion masquerade as genericity or production qualification.
+
+### 3.7 Activate Skin only after legitimate admission
+
+`product.skin` may enter the admitted capability graph only when its model requirement can resolve an allowed MIRA channel according to the exact execution purpose:
+
+- research: `RESEARCH` or `CANDIDATE` as allowed by policy;
+- product: `PRODUCTION`.
+
+Source must not hard-code a particular current release ID.
 
 ---
 
-## 4. Why this is preferable to the broad Unified-IRIS redesign now
+## 4. P2 — Mechanics closure
 
-This change:
-
-- fixes a demonstrated information bottleneck;
-- reuses the IRIS representation that already trained on Knight/Fit8;
-- reuses the TESSA topology grammar/decoder work;
-- preserves deterministic tetra/GSA/Compiler courts;
-- preserves canonical M and downstream AXIS/MIRA contracts;
-- does not require a new semantic ontology;
-- does not require an appearance teacher corpus;
-- does not require one-image synthesis now;
-- does not reopen CAA/presentation architecture;
-- is directly testable against the old 17-D TESSA path.
-
-The broad research remains deferred, not rejected.
-
----
-
-## 5. Required implementation
-
-### 5.1 New model pieces
-
-Add a checkpoint-safe module outside the existing IRIS core source, tentatively:
-
-```text
-models/iris/topology/scene_memory_v1.py
-models/iris/topology/head_v1.py
-```
+Mechanics starts only after exact Mesh/Rig/Skin closure.
 
 Responsibilities:
 
-- consume existing IRIS `scene_planes`;
-- deterministic plane/coordinate tokenization;
-- bounded learned memory aggregation;
-- reuse TESSA token decoder blocks/grammar;
-- emit the existing `TESSAMeshProposalV1` contract where practical.
+- post-bind frame/deformation observability;
+- dynamic deformation-domain coherence;
+- stretch/area/conditioning validity;
+- contact/mechanical constraints where product semantics require them;
+- motion-probe consumption and qualification;
+- typed mechanical failure signatures.
 
-Prefer refactoring decoder-only TESSA code into a reusable class rather than copying decoder logic.
+Mechanics must not own:
 
-### 5.2 Backward compatibility
+- draw order;
+- visibility/occlusion policy;
+- appearance/material truth;
+- graphics semantic grouping;
+- motion clip selection.
 
-Do not delete:
+Exit criterion:
 
-- `models/tessa/v1/conditioning_v1.py`;
-- `TESSASurfaceEncoderV1`;
-- old historical checkpoint loaders;
-- legacy TESSA proposal schemas.
-
-Mark them compatibility/reproduction paths once the new route is qualified.
-
-### 5.3 New tests
-
-At minimum prove:
-
-1. topology memory shape is bounded and independent of raw scene token count;
-2. plane permutation/coordinate semantics are explicit and deterministic;
-3. changing rich IRIS scene features changes topology memory even if legacy 17-D GSA rows are held constant;
-4. the new topology head does not require teacher geometry during inference;
-5. the emitted learned proposal still carries non-authoritative provenance;
-6. Stage18/19 still fail closed when proposal/support/lineage mismatches occur;
-7. legacy Knight downstream M→AXIS→MIRA contracts remain untouched.
-
-### 5.4 A/B scientific test
-
-Use the same Fit8 cohort and teacher geometry.
-
-Compare:
-
-```text
-A: legacy GSA 17-D → TESSA surface encoder → decoder
-B: IRIS scene planes → topology memory adapter → same decoder role
-```
-
-Primary topology/mechanical measurements should include:
-
-- teacher/source topology reconstruction where defined;
-- static mesh qualification failures;
-- repair magnitude/count;
-- source silhouette fidelity;
-- non-manifold/sliver/flip/self-intersection metrics;
-- final canonical-M dynamic consequences under the same AXIS/MIRA protocol.
-
-Do not declare success merely from lower topology token loss.
+> the exact canonical Mesh/Rig/Skin puppet is mechanically/deformably admissible under the declared probe policy.
 
 ---
 
-## 6. Fit8 restart policy
+## 5. P3 — Graphics baseline closure
 
-Fit8 subject identities remain unchanged:
+Before new graphics training, close the product contracts that already exist architecturally.
+
+### 5.1 Required contract work
+
+- one product-facing presentation-evidence assembly path;
+- explicit pre-M endpoint references and post-M canonical address binding;
+- validity/authority/provenance semantics aligned between IRIS evidence and Compiler Graphics;
+- pair order/occlusion separated from global ray visibility;
+- classification of each evidence family as learned, deterministic query-time or post-M Compiler-derived;
+- source-preserving CAA/material addressing retained.
+
+### 5.2 Shared-scene graphics hypothesis
+
+Research hypothesis:
+
+> geometry, mechanics, graphics and topology evidence queried from a shared scene representation may provide a more generic basis for presentation relations than a fixed semantic segmentation/part taxonomy.
+
+This is a falsifiable research hypothesis, not a product assumption.
+
+### 5.3 Graphics Truth Foundry / Truth139
+
+After baseline contract closure, activate the derived-truth program as its own responsibility/capability family:
 
 ```text
-Snake
-Bat
-T-Rex
-Horse
-Spider
-GreenBlob
-Shark
-George
+Authored full-truth assets
+        ↓
+Source census / dedup lineage
+        ↓
+TeacherSceneIR adapters
+        ↓
+exact 8-view + ID + ray-stack renders
+        ↓
+bounded interventions
+        ↓
+causal source-space + visible response
+        ↓
+truth qualification courts
+        ↓
+qualified role-free graphics truth
 ```
 
-Rules remain:
+Do not manually paint semantic masks. Do not train heuristic pseudo-labels merely to fill losses.
 
-- one shared parameter set per learned model/head across all subjects;
-- no subject-specific production branches;
-- same Compiler contracts;
-- Knight remains separate regression;
-- Fit8 is architecture closure, not unseen-generalization proof.
+### 5.4 Graphics experiment order
 
-The stopped IRIS checkpoint around global step 4400 may be reused only if existing atomic resume/binding checks pass exactly. The implementation should deliberately avoid changing the existing IRIS source hash before this compatibility decision is made.
+```text
+Experiment 0: Truth Foundry qualification
+Experiment 1: IRIS role-free evidence learning
+Experiment 2: TESSA presentation A/B
+Experiment 3: Compiler Graphics product court
+Experiment 4: genericity / holdouts / articulated-machine falsification
+```
 
-If the checkpoint cannot resume under exact binding, restart the same IRIS recipe rather than weakening the guard.
+Compiler product court should compare student-evidence products with teacher-evidence products, not only model-level AUROC/loss.
 
 ---
 
-## 7. Explicitly deferred research
+## 6. P4 — Motion and final Proof
 
-Preserve for later, but do not activate now:
+### Motion
 
-- PR #113 broad Unified-IRIS core contracts;
-- PR #114 semantic partition census;
-- generic semantic/owner teacher corpus;
-- one-image canonical-view synthesis;
-- appearance/RGBA head;
-- semantic/ownership head;
-- FlexiCubes-like extraction head;
-- StdGEN-class full-capacity replacement;
-- broad topology/appearance/semantics multi-task training;
-- joint IRIS/AXIS/MIRA mechanics model;
-- presentation-system redesign.
+Consume valid Mesh/Rig/Skin/Mechanics and motion source. Own:
 
-Revisit only after Fit8 or when a measured failure specifically demands one of them.
+- clip application/retargeting;
+- motion intent;
+- declared secondary motion;
+- runtime pose generation.
+
+Motion may not repair Skin or decide Graphics order.
+
+### Proof
+
+Aggregate fail-closed product evidence:
+
+- mechanical/deformation validity;
+- contact/attachment residuals;
+- graphics coverage/order/visibility/occlusion;
+- source-preserving appearance;
+- motion/runtime behavior.
+
+Only after this closure may a `ProductRevision` be promoted.
 
 ---
 
-## 8. Immediate order of operations
+## 7. P5 — Genericity sequence
+
+Once the end-to-end responsibility chain is operational:
+
+### Knight
+
+Regression witness only. Used to protect known working behavior and exact lineage.
+
+### FIT8
+
+Shared-architecture closure over diverse known subjects with one shared system. No subject-specific code.
+
+If FIT8 is used to choose a hyperparameter/policy, record that selection lineage explicitly.
+
+### LOFO
+
+Family/subject holdout evidence designed to reduce selection leakage.
+
+### Unseen
+
+Independent generalization evidence. This is the appropriate place for stronger genericity claims.
+
+### Later falsification cohorts
+
+Articulated machines (for example tank/excavator-like structures) are high-value because humanoid/character semantic shortcuts should fail there.
+
+---
+
+## 8. Research workflow for ordinary hypothesis/parameter changes
+
+A small parameter experiment must be cheap operationally and rigorous scientifically.
+
+Example: AXIS rig capacity `N`.
 
 ```text
-1. freeze broad research state (done)
-2. implement scene-plane topology memory adapter without changing existing IRIS core checkpoint semantics
-3. refactor/reuse TESSA decoder-only role
-4. wire non-authoritative proposal artifact into existing Stage18 consumer
-5. run focused model + Compiler regression tests
-6. inspect self-hosted/CI result
-7. verify stopped Fit8 IRIS checkpoint exact-resume compatibility
-8. resume or exact-recipe restart IRIS Fit8
-9. train shared topology head
-10. qualify M for all eight
-11. proceed to AXIS then MIRA
+Experiment: AXIS_RIG_CAPACITY_SEARCH
+
+Attempt N=36 → exact reused upstream artifacts → affected execution/proof → evidence
+Attempt N=64 → exact reused upstream artifacts → affected execution/proof → evidence
+Attempt N=k  → ...
 ```
 
-When there is ambiguity, choose the option that changes fewer proven downstream contracts.
+Each Attempt is immutable. The Platform records exact code/model/data/policy identity and failure signature.
+
+If no fixed `N` can satisfy observed subjects, the conclusion may be that the fixed-capacity assumption is falsified. Do not endlessly increase a constant when the actual architecture assumption is failing.
+
+A new adaptive policy becomes a new hypothesis/Experiment and must apply the same generic rule to every subject; subject-name conditionals are forbidden.
+
+### Dependency/reuse rule
+
+The canonical responsibility/capability graph is the only invalidation map. Do not maintain a second hand-written experiment dependency graph.
+
+A changed responsibility invalidates only its affected outputs and transitive downstream consumers. Exact compatible upstream artifacts are reused.
+
+### Cheap falsification ladder
+
+```text
+contract/unit/synthetic
+        ↓
+Knight regression
+        ↓
+1–2 diagnostic subjects
+        ↓
+FIT8
+        ↓
+LOFO
+        ↓
+unseen
+```
+
+Do not pay for the most expensive run when a cheaper court can already falsify the hypothesis.
+
+---
+
+## 9. Promotion boundaries
+
+Keep these separate:
+
+```text
+source PR merge
+model registration
+model evaluation
+model channel promotion
+capability admission
+ProductRevision promotion
+scientific genericity claim
+```
+
+Every transition needs its own authority and evidence. A later transition may depend on an earlier one, but must never be inferred from it automatically.
+
+---
+
+## 10. Explicit non-goals for the current critical path
+
+Do not:
+
+- revive a hidden persistent identity/owner system as a prerequisite;
+- create a second visual mesh competing with canonical Mesh;
+- let IRIS output canonical Mesh;
+- let TESSA become canonical topology authority;
+- let MIRA mint canonical Skin;
+- turn Compiler into a perception network;
+- introduce named body-part taxonomies as product truth;
+- use subject-specific fixes to make FIT8 pass;
+- weaken exact lineage guards to resume old checkpoints/artifacts;
+- treat historical evidence as fresh current execution;
+- activate Graphics Truth Foundry work before current Skin/Mechanics closure unless a measured blocker explicitly requires it.
+
+---
+
+## 11. Immediate order of operations
+
+```text
+1. merge the refreshed current-state/current-plan governance record
+2. record and remediate main branch protection/ruleset gap at GitHub admin level
+3. implement and run read-only Knight Skin readiness inspection
+4. close exact current Mesh/Rig prerequisite lineage
+5. execute exact MIRA V5.5 current Skin attempt
+6. run Compiler Skin qualification and persist typed proof/failure receipt
+7. create current-execution model evaluation and reviewed RESEARCH promotion if justified
+8. admit/activate Skin for research only when the model requirement resolves legitimately
+9. close Mechanics
+10. close Graphics baseline contracts
+11. run Graphics Truth Foundry + shared-scene experiments
+12. close Motion and Proof/ProductRevision
+13. run FIT8 → LOFO → unseen evidence sequence
+```
+
+When ambiguous, prefer the option that preserves one authority, exact lineage, minimal invalidation and fewer hidden branches.
+
+When the user says only **`continue / devam et`**, execute the first unresolved item in this order. Do not resume the retired 2026-10-16 plan by default.

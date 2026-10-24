@@ -76,6 +76,14 @@ def runtime_foundation_paths(root: str | Path) -> dict[str, Path]:
     }
 
 
+def _managed_cache_path(path: Path, cache_root: Path) -> Path:
+    cache_root = cache_root.expanduser().resolve()
+    path = path.expanduser().resolve()
+    if cache_root in (Path("/"), Path.home(), ROOT) or path == cache_root or cache_root not in path.parents:
+        raise RuntimeError("FOUNDATION_CACHE_MUTATION_SCOPE_INVALID")
+    return path
+
+
 def _git(root: Path, *args: str) -> str:
     return subprocess.check_output(
         ["git", "-C", str(root), *args], text=True, stderr=subprocess.STDOUT
@@ -86,8 +94,8 @@ def _normalized_git_url(value: str) -> str:
     return value.strip().removesuffix("/").removesuffix(".git")
 
 
-def _exact_git_checkout(destination: Path, repository_url: str, revision: str) -> None:
-    destination = destination.resolve()
+def _exact_git_checkout(destination: Path, repository_url: str, revision: str, *, cache_root: Path) -> None:
+    destination = _managed_cache_path(destination, cache_root)
     if destination.exists():
         valid = False
         try:
@@ -184,7 +192,10 @@ def provision(root: str | Path) -> dict[str, object]:
     flex = contracts["flexicubes"]
 
     dino_repo = f"https://github.com/{dino['DINO_REPOSITORY']}.git"
-    _exact_git_checkout(paths["dino_source"], dino_repo, str(dino["DINO_SOURCE_REVISION"]))
+    _exact_git_checkout(
+        paths["dino_source"], dino_repo, str(dino["DINO_SOURCE_REVISION"]),
+        cache_root=foundation_root,
+    )
     _download_exact_weight(
         paths["dino_weight"],
         expected_sha256=str(dino["DINO_S_WEIGHT_SHA256"]),
@@ -194,6 +205,7 @@ def provision(root: str | Path) -> dict[str, object]:
         paths["flexicubes_source"],
         str(flex["FLEXICUBES_REPOSITORY"]),
         str(flex["FLEXICUBES_COMMIT"]),
+        cache_root=foundation_root,
     )
 
     receipt = {

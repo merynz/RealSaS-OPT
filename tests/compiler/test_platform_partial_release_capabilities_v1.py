@@ -4,7 +4,14 @@ from tools.platform_release_snapshot import snapshot
 
 def _assert_smoke_release_projection(plan, name):
     request = snapshot(plan, name=name, purpose="RESEARCH", created_by="ci")
-    assert set(request["capability_versions"]) == {"product.input", "product.shape"}
+    assert set(request["capability_implementations"]) == {
+        "product.input",
+        "product.shape",
+    }
+    assert all(
+        set(row) == {"implementation_sha256"}
+        for row in request["capability_implementations"].values()
+    )
     requirements = request["manifest"]["model_requirements"]
     assert [row["family"] for row in requirements] == ["IRIS", "TESSA"]
     assert all(row["channel"] == "RESEARCH" for row in requirements)

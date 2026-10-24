@@ -148,7 +148,7 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	}
 }
 
-func TestModuleVersionPolicyAndParametersAreRederivedFromDescriptor(t *testing.T) {
+func TestModuleVersionPolicyAndParametersAreMintedFromDescriptor(t *testing.T) {
 	registry := productProvidersTestRegistry(t)
 	for _, capabilityID := range []string{
 		ProductInputCapabilityID,
@@ -160,6 +160,13 @@ func TestModuleVersionPolicyAndParametersAreRederivedFromDescriptor(t *testing.T
 		if !ok {
 			t.Fatal(capabilityID)
 		}
+		implementation := ModuleImplementationIdentity{
+			ImplementationSHA256: strings.Repeat("a", 64),
+		}
+		version, err := mintModuleVersionIdentity(descriptor, implementation)
+		if err != nil {
+			t.Fatalf("%s mint failed: %v", capabilityID, err)
+		}
 		policySHA, err := modulePolicySHA256(descriptor)
 		if err != nil {
 			t.Fatal(err)
@@ -168,23 +175,14 @@ func TestModuleVersionPolicyAndParametersAreRederivedFromDescriptor(t *testing.T
 		if err != nil {
 			t.Fatal(err)
 		}
-		valid := VersionIdentity{
-			ImplementationSHA256: strings.Repeat("a", 64),
-			PolicySHA256:         policySHA,
-			ParametersSHA256:     parametersSHA,
+		if version.ImplementationSHA256 != implementation.ImplementationSHA256 {
+			t.Fatalf("%s implementation identity drift", capabilityID)
 		}
-		if err := validateModuleVersionIdentity(descriptor, valid); err != nil {
-			t.Fatalf("valid %s version rejected: %v", capabilityID, err)
+		if version.PolicySHA256 != policySHA {
+			t.Fatalf("%s policy identity not minted from descriptor", capabilityID)
 		}
-		badPolicy := valid
-		badPolicy.PolicySHA256 = strings.Repeat("b", 64)
-		if err := validateModuleVersionIdentity(descriptor, badPolicy); err == nil {
-			t.Fatalf("%s policy drift accepted", capabilityID)
-		}
-		badParameters := valid
-		badParameters.ParametersSHA256 = strings.Repeat("c", 64)
-		if err := validateModuleVersionIdentity(descriptor, badParameters); err == nil {
-			t.Fatalf("%s parameter drift accepted", capabilityID)
+		if version.ParametersSHA256 != parametersSHA {
+			t.Fatalf("%s parameter identity not minted from descriptor", capabilityID)
 		}
 	}
 }

@@ -67,7 +67,10 @@ DECLARE
     distinct_count bigint;
 BEGIN
     FOREACH scope_name IN ARRAY NEW.required_evaluation_scopes LOOP
-        IF btrim(scope_name) = '' OR scope_name IS DISTINCT FROM btrim(scope_name) THEN
+        IF scope_name IS NULL
+           OR btrim(scope_name) = ''
+           OR scope_name IS DISTINCT FROM btrim(scope_name)
+        THEN
             RAISE EXCEPTION 'MODEL_PROMOTION_POLICY_SCOPE_INVALID';
         END IF;
     END LOOP;
@@ -95,17 +98,22 @@ RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 DECLARE
+    release_family varchar(80);
     release_architecture varchar(300);
     required_scopes text[];
     scope_name text;
     evaluation_result varchar(20);
 BEGIN
-    SELECT architecture_id INTO release_architecture
+    SELECT family, architecture_id INTO release_family, release_architecture
     FROM model_releases
     WHERE id = NEW.model_release_id;
 
     IF NOT FOUND THEN
         RAISE EXCEPTION 'MODEL_PROMOTION_RELEASE_NOT_FOUND';
+    END IF;
+    IF release_family <> NEW.family THEN
+        RAISE EXCEPTION 'MODEL_PROMOTION_POLICY_FAMILY_MISMATCH:%:%',
+            NEW.family, release_family;
     END IF;
 
     SELECT p.required_evaluation_scopes INTO required_scopes
@@ -141,7 +149,7 @@ $$;
 -- +goose StatementEnd
 
 CREATE TRIGGER trg_enforce_model_channel_promotion_policy
-BEFORE INSERT OR UPDATE OF model_release_id ON model_channels
+BEFORE INSERT OR UPDATE ON model_channels
 FOR EACH ROW
 EXECUTE FUNCTION enforce_model_channel_promotion_policy();
 

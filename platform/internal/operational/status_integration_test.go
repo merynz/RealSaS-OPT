@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/experiment"
 	"github.com/merynz/RealSaS-OPT/platform/internal/modelrelease"
@@ -25,9 +26,7 @@ func uniqueHash(prefix, suffix string) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func bindTestPromotionPolicy(t *testing.T, ctx context.Context, pool interface {
-	Exec(context.Context, string, ...any) (interface{ RowsAffected() int64 }, error)
-}, family, architecture string, channel modelrelease.Channel, scope, suffix string) {
+func bindTestPromotionPolicy(t *testing.T, ctx context.Context, pool *pgxpool.Pool, family, architecture string, channel modelrelease.Channel, scope, suffix string) {
 	t.Helper()
 	policyID := uuid.New()
 	if _, err := pool.Exec(ctx, `

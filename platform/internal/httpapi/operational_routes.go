@@ -21,9 +21,9 @@ func (a API) HandlerWithOperational() http.Handler {
 	// Clients can describe a release, but cannot self-assert that branch code is main.
 	mux.HandleFunc("POST /v1/releases", func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
-			Manifest           release.Manifest                      `json:"manifest"`
-			CapabilityVersions map[string]capability.VersionIdentity `json:"capability_versions"`
-			CreatedBy          string                                `json:"created_by"`
+			Manifest                  release.Manifest                                  `json:"manifest"`
+			CapabilityImplementations map[string]capability.ModuleImplementationIdentity `json:"capability_implementations"`
+			CreatedBy                 string                                            `json:"created_by"`
 		}
 		if !decode(w, r, &req) {
 			return
@@ -34,7 +34,7 @@ func (a API) HandlerWithOperational() http.Handler {
 			return
 		}
 		if req.Manifest.ContractVersion == "RealSaS.EngineReleaseManifest.v2" {
-			if _, err := capability.SealEngineReleaseSnapshot(r.Context(), a.Pool, out.ReleaseID, req.CapabilityVersions, req.CreatedBy); err != nil {
+			if _, err := capability.SealEngineReleaseSnapshot(r.Context(), a.Pool, out.ReleaseID, req.CapabilityImplementations, req.CreatedBy); err != nil {
 				result(w, out, err)
 				return
 			}

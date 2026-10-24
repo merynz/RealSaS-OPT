@@ -122,6 +122,6 @@ func TestSkinIsNotAnActiveProductProviderBeforeQualifiedChannelAdmission(t *test
 			if descriptor.ID == ProductSkinCapabilityID {
 				t.Fatal("product.skin must not enter active EngineRelease graph before qualified ModelRelease channel admission")
 			}
+		}
 	}
-}
 }

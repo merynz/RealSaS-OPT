@@ -8,6 +8,7 @@
   "target_capability": "product.rig",
   "downstream_workflow": "knight_current_skin_parent_execution.yml",
   "subject_input_binding_policy": "EXACT_PRESENT_READ_SET_INTERSECTION__NO_ABSENT_SECTION_FABRICATION__DOWNSTREAM_EXACT_PIN",
+  "compiler_execution_identity_policy": "IMPLEMENTATION_AUDIT_USES_SUBJECT_FREE_RUN_IDENTITY__PLATFORM_AND_EVIDENCE_SUBJECT_IDENTITIES_REMAIN_EXACT",
   "model_inference_authorized": false,
   "compiler_stage_execution_authorized": false,
   "qualification_authorized": false,

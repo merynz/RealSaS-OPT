@@ -41,6 +41,7 @@ REQUIRED_PARENT_TYPES = {
     "support": ("RealSaS.TESSAMaterialSupportFieldIR", "v1"),
 }
 TERMINAL = {"COMPLETED", "FAILED", "PASS", "FAIL", "ABSTAIN", "CANCELED", "CANCELLED", "ABORTED"}
+COMPILER_AUDIT_SUBJECT_ID = "SUBJECT_FREE_CURRENT_SKIN_PARENT_CAPABILITY_AUDIT"
 
 
 def _json_bytes(value: Any) -> bytes:
@@ -358,6 +359,26 @@ def _attempt_parent_artifacts(api_root: str, subject_id: str, attempt_id: str) -
     return selected
 
 
+def _compiler_audit_manifest(
+    compiler_run_id: str,
+    sections: dict[str, Any],
+    *,
+    fallback_evidence_subject: str,
+) -> tuple[str, dict[str, Any]]:
+    evidence_subject = str(
+        (sections.get("source_audit") or {}).get("subject_key")
+        or fallback_evidence_subject
+    )
+    if not evidence_subject:
+        raise RuntimeError("SKIN_PARENT_EVIDENCE_SUBJECT_REQUIRED")
+    return evidence_subject, {
+        "run_id": compiler_run_id,
+        "subject_id": COMPILER_AUDIT_SUBJECT_ID,
+        "execution_class": "IMPLEMENTATION_AUDIT",
+        **sections,
+    }
+
+
 def execute(args: argparse.Namespace) -> dict[str, Any]:
     plan = mainline.load_json(mainline.PLAN_PATH)
     plan_sha = mainline.validate_plan(plan)
@@ -386,13 +407,11 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
     subject_input_id = str(subject_input["subject_input_id"])
     manifest_sha = str(subject_input["manifest_sha256"])
     sections = dict(source["sections"])
-    evidence_subject = str((sections.get("source_audit") or {}).get("subject_key") or args.subject_slug)
-    manifest = {
-        "run_id": args.compiler_run_id,
-        "subject_id": evidence_subject,
-        "execution_class": "IMPLEMENTATION_AUDIT",
-        **sections,
-    }
+    evidence_subject, manifest = _compiler_audit_manifest(
+        args.compiler_run_id,
+        sections,
+        fallback_evidence_subject=args.subject_slug,
+    )
     manifest_path = mainline.run_manifest_path(args.compiler_run_id)
     expected_manifest_raw = _json_bytes(manifest)
     if manifest_path.exists():
@@ -480,6 +499,7 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
             "run_ledger_path": str(ledger_path),
             "pipeline_plan_sha256": plan_sha,
             "execution_class": "IMPLEMENTATION_AUDIT",
+            "subject_id": COMPILER_AUDIT_SUBJECT_ID,
         },
         "source_observation": {
             "artifact_id": source_observation_id,

@@ -92,3 +92,31 @@ def test_exact_subject_input_pin_rejects_undeclared_manifest_section(monkeypatch
             INPUT_ID,
             {"observation"},
         )
+
+
+def test_compiler_audit_manifest_separates_execution_identity_from_evidence_subject() -> None:
+    evidence_subject, manifest = subject._compiler_audit_manifest(
+        "CURRENT_PARENT_RUN",
+        {
+            "source_audit": {"subject_key": "SUBJECT2_KNIGHT"},
+            "observation": {"camera_bundle": {}},
+        },
+        fallback_evidence_subject="knight",
+    )
+
+    assert evidence_subject == "SUBJECT2_KNIGHT"
+    assert manifest["subject_id"] == subject.COMPILER_AUDIT_SUBJECT_ID
+    assert manifest["subject_id"].startswith("SUBJECT_FREE_")
+    assert manifest["execution_class"] == "IMPLEMENTATION_AUDIT"
+    assert manifest["source_audit"]["subject_key"] == "SUBJECT2_KNIGHT"
+
+
+def test_compiler_audit_manifest_uses_fallback_only_for_evidence_identity() -> None:
+    evidence_subject, manifest = subject._compiler_audit_manifest(
+        "CURRENT_PARENT_RUN",
+        {"observation": {"camera_bundle": {}}},
+        fallback_evidence_subject="knight",
+    )
+
+    assert evidence_subject == "knight"
+    assert manifest["subject_id"] == subject.COMPILER_AUDIT_SUBJECT_ID

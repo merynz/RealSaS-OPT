@@ -21,8 +21,8 @@ func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
 		t.Fatal("Skin must not own ProductRevision PASS authority")
 	}
 	wantDeps := map[string]bool{
-		ProductMeshCapabilityID:                         true,
-		ProductRigCapabilityID:                          true,
+		ProductMeshCapabilityID:                            true,
+		ProductRigCapabilityID:                             true,
 		StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED"): true,
 	}
 	if len(d.Dependencies) != len(wantDeps) {
@@ -41,6 +41,18 @@ func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
 	}
 	if got := d.Metadata["material_support_is_canonical_parent"]; got != false {
 		t.Fatalf("material-support canonical parent claim = %v", got)
+	}
+	if got := d.Metadata["inference_compute_contract"]; got != "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF" {
+		t.Fatalf("MIRA compute contract = %v", got)
+	}
+	if got := d.Metadata["cuda_required"]; got != true {
+		t.Fatalf("MIRA CUDA requirement = %v", got)
+	}
+	if got := d.Metadata["cuda_bf16_required"]; got != true {
+		t.Fatalf("MIRA BF16 requirement = %v", got)
+	}
+	if got := d.Metadata["tf32_allowed"]; got != false {
+		t.Fatalf("MIRA TF32 policy = %v", got)
 	}
 	if got := d.Metadata["activation_state"]; got != "BLOCKED" {
 		t.Fatalf("activation_state = %v", got)
@@ -62,6 +74,9 @@ func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
 	}
 	if got := d.Metadata["historical_mira_v55_generalization_claimed"]; got != false {
 		t.Fatalf("historical MIRA generalization claim = %v", got)
+	}
+	if got := d.Metadata["historical_mira_v55_compute_profile_preserved"]; got != true {
+		t.Fatalf("historical MIRA compute-profile claim = %v", got)
 	}
 	if got := d.Metadata["current_repo_mira_v55_runtime_source_recovered"]; got != true {
 		t.Fatalf("current MIRA runtime source recovery claim = %v", got)

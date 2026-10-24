@@ -51,8 +51,33 @@ def test_product_capability_implementations_are_complete_and_semantic():
             "architecture_id": "RealSaS.TESSA.Structuralizer.v3",
         },
     ]
-    assert specs["product.mesh"]["parameters"]["required_models"] == []
-    assert specs["product.rig"]["parameters"]["required_models"] == [
+    mesh = specs["product.mesh"]
+    assert mesh["policy"]["dependencies"] == [
+        "product.shape",
+        "compiler.stage/05_CAMERA_CONTRACT_SOLVED",
+        "compiler.stage/07_OBSERVATION_CONTRACT_QUALIFIED",
+        "compiler.stage/08_NORMALIZATION_DOMAIN_QUALIFIED",
+    ]
+    assert mesh["parameters"]["required_models"] == []
+    assert mesh["parameters"]["fit_allowed_during_product_execution"] is False
+    assert mesh["parameters"]["legacy_ir_fit_stage_dependency"] is False
+    assert mesh["parameters"]["surface_born_inside_mesh_court"] is True
+    assert mesh["parameters"]["surface_is_canonical_mesh_authority"] is False
+    assert mesh["parameters"]["shape_surface_court_policy_sha256"] == (
+        "e182023bd59d079ecb747d0812af4e83de7415593c4bca54c753d0f7abfa6f51"
+    )
+    assert mesh["parameters"]["source_fidelity_policy_sha256"] == (
+        "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214"
+    )
+    assert mesh["parameters"]["surface_adequacy_policy_sha256"] == (
+        "bc98d3aa3cd419ca9ae43010e890fc554ab62e57268933afc630aae20c38139b"
+    )
+
+    rig = specs["product.rig"]
+    assert rig["policy"]["dependencies"] == ["product.mesh"]
+    assert rig["parameters"]["feature_evidence_source"] == "PRODUCT_MESH_OUTPUT"
+    assert rig["parameters"]["legacy_stage15_dependency"] is False
+    assert rig["parameters"]["required_models"] == [
         {
             "family": "AXIS",
             "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",

@@ -36,7 +36,12 @@ def test_product_rig_executor_preserves_axis_proposal_and_compiler_authority(mon
         carrier_geometry_hash="5" * 64,
     )
     surface = SimpleNamespace(geometry_lineage_hash=SURFACE_HASH)
-    tensor = SimpleNamespace(source_surface_hash=SURFACE_HASH, node_count=7)
+    tensor = SimpleNamespace(
+        source_surface_hash=SURFACE_HASH,
+        node_count=7,
+        certificate_hash="8" * 64,
+        tensorization_hash="9" * 64,
+    )
     proposal = _proposal()
     fake_model = SimpleNamespace(
         propose=lambda *_args, **_kwargs: proposal,
@@ -60,6 +65,7 @@ def test_product_rig_executor_preserves_axis_proposal_and_compiler_authority(mon
     )
 
     import compiler.realsas_compiler_core.artifact_codec_v2 as codec
+    import compiler.realsas_compiler_core.axis_surface_compat_v1 as axis_compat
     import compiler.realsas_compiler_core.canonical_mesh_ir_v1 as mesh_ir
     import compiler.realsas_compiler_core.canonical_rig_ir_v1 as rig_ir
     import compiler.realsas_compiler_core.required_tree_v1 as required_tree
@@ -69,6 +75,8 @@ def test_product_rig_executor_preserves_axis_proposal_and_compiler_authority(mon
     monkeypatch.setattr(codec, "rigging_surface_from_dict", lambda _payload: surface)
     monkeypatch.setattr(mesh_ir, "canonical_mesh_from_dict_v1", lambda _payload: mesh)
     monkeypatch.setattr(runtime_checkpoint, "load_axis_runtime_model_v1", lambda *_args, **_kwargs: (fake_model, {"schema": "RealSaS.AXIS.RuntimeCheckpoint.v1"}))
+    monkeypatch.setattr(axis_compat, "axis_numeric_compatibility_surface_v1", lambda actual_surface: actual_surface)
+    monkeypatch.setattr(axis_compat, "assert_axis_tensor_numeric_binding_v1", lambda **_kwargs: None)
     monkeypatch.setattr(tensorization, "tensorize_rigging_surface_v1", lambda *_args, **_kwargs: tensor)
     seen = {}
 
@@ -128,6 +136,8 @@ def test_product_rig_executor_preserves_axis_proposal_and_compiler_authority(mon
         "capability_metadata": {
             "executor_contract": "RealSaS.ProductRigInference.v1",
             "resource_step_limit_max": 256,
+            "feature_evidence_source": "PRODUCT_MESH_OUTPUT",
+            "legacy_stage15_dependency": False,
         },
         "input_artifacts": [
             {
@@ -174,4 +184,7 @@ def test_product_rig_executor_preserves_axis_proposal_and_compiler_authority(mon
     assert diagnostics["feature_evidence_is_canonical_parent"] is False
     assert diagnostics["canonical_parent"] == "CANONICAL_MESH"
     assert diagnostics["parent_reselection_performed"] is False
+    assert diagnostics["axis_frozen_tensorizer_source_preserved"] is True
+    assert diagnostics["axis_numeric_compatibility_view_used"] is True
+    assert diagnostics["axis_numeric_compatibility_view_persisted"] is False
     assert diagnostics["product_revision_pass_claimed"] is False

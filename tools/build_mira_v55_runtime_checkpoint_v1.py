@@ -3,7 +3,9 @@ from __future__ import annotations
 """Build the canonical self-contained MIRA V5.5 runtime checkpoint.
 
 This is packaging only. It does not train, fit, evaluate, promote a ModelRelease,
-or mint Product/Skin authority.
+or mint Product/Skin authority. The canonical recovery tool is deliberately
+pinned to the exact sealed V6 + V5.5 component identities; alternate component
+pairs require a different/versioned packaging contract rather than CLI overrides.
 """
 
 import argparse
@@ -23,22 +25,14 @@ def main() -> int:
     parser.add_argument("--v55-composite", required=True)
     parser.add_argument("--out", required=True)
     parser.add_argument("--receipt", required=True)
-    parser.add_argument(
-        "--expected-base-v6-sha256",
-        default=MIRA_V55_CANONICAL_BASE_V6_SHA256,
-    )
-    parser.add_argument(
-        "--expected-v55-composite-sha256",
-        default=MIRA_V55_CANONICAL_COMPOSITE_SHA256,
-    )
     args = parser.parse_args()
 
     receipt = save_mira_runtime_checkpoint_v1(
         output_path=args.out,
         base_v6_checkpoint_path=args.base_v6_checkpoint,
         v55_composite_path=args.v55_composite,
-        expected_base_v6_sha256=args.expected_base_v6_sha256,
-        expected_v55_composite_sha256=args.expected_v55_composite_sha256,
+        expected_base_v6_sha256=MIRA_V55_CANONICAL_BASE_V6_SHA256,
+        expected_v55_composite_sha256=MIRA_V55_CANONICAL_COMPOSITE_SHA256,
     )
     receipt_path = Path(args.receipt).resolve()
     receipt_path.parent.mkdir(parents=True, exist_ok=True)

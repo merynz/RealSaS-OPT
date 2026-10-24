@@ -63,7 +63,9 @@ The responsibility map supersedes stage-centric navigation; it does **not** eras
 
 The registered governance gate id **`PLATFORM_EXECUTION_LANES`** remains the active control-plane execution-lane continuity gate on `main`. It records the boundary between modular research execution and product execution; it does not create a second scientific architecture or restore stage-centric ownership.
 
-The established product-quality separations also remain explicit: **Geometry**, **Mechanics**, and **Appearance** are distinct concerns. **SurfaceAddressing** remains the stable canonical-M address boundary used to bind downstream evidence without changing Mesh authority. **Complete Appearance Authority** (CAA) remains the source-preserving Appearance authority downstream of canonical M. These continuity anchors are preserved while the higher-level operational map moves to responsibilities/capabilities.
+The historical governance context token **`CARRIER_NATIVE_FIT1_SCOPED_PASS__PLATFORM_LANES_IMPLEMENTED`** remains a rehydration/continuity anchor for the proven V2 control plane. It records prior closure context only; it does not promote MIRA, activate Skin, prove genericity, or override the current responsibility work order.
+
+The established product-quality separations also remain explicit: **Geometry**, **Mechanics**, and **Appearance** are distinct concerns. **`QualifiedMeshIR`** remains the preserved typed static-qualified mesh authority entering the historical canonical-carrier boundary; the current product Mesh responsibility mints `CanonicalMeshIR.v1` under the present contract. **SurfaceAddressing** remains the stable canonical-M address boundary used to bind downstream evidence without changing Mesh authority. **Complete Appearance Authority** (CAA) remains the source-preserving Appearance authority downstream of canonical M. These continuity anchors are preserved while the higher-level operational map moves to responsibilities/capabilities.
 
 ## 3. Current responsibility status
 

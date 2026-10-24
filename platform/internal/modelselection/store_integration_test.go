@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
+	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 )
 
 func selectionHash(value string) string {
@@ -36,6 +37,7 @@ func TestProductAttemptSnapshotsExactProductionModelAndRejectsInvalidSelection(t
 	productReleaseID := uuid.New()
 	subjectID := uuid.New()
 	artifactTypeID := uuid.New()
+	sourceCodeSHA := strings.Repeat("c", 40)
 
 	if _, err := pool.Exec(ctx, `
 		INSERT INTO subjects(id,slug,display_name) VALUES ($1,$2,$3)
@@ -46,6 +48,9 @@ func TestProductAttemptSnapshotsExactProductionModelAndRejectsInvalidSelection(t
 		INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at)
 		VALUES ($1,$2,$3,'PRODUCT','ci',now())
 	`, productReleaseID, "p3-product-"+suffix, selectionHash("product-release:"+suffix)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := release.BindCanonicalMain(ctx, pool, productReleaseID, sourceCodeSHA, "ci"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, `
@@ -75,7 +80,7 @@ func TestProductAttemptSnapshotsExactProductionModelAndRejectsInvalidSelection(t
 				source_code_sha,lifecycle_state,metadata,created_by
 			) VALUES ($1,$2,$3,$4,$5,$6,$7,'PRODUCTION','{}'::jsonb,'ci')
 		`, modelID, family, "p3-model-"+label+"-"+suffix, architecture, artifactID,
-			productReleaseID, strings.Repeat("c", 40)); err != nil {
+			productReleaseID, sourceCodeSHA); err != nil {
 			t.Fatal(err)
 		}
 		return modelID, artifactID, contentSHA

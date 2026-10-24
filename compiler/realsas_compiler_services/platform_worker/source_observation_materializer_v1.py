@@ -113,7 +113,8 @@ def materialize_source_observation_from_manifest_v1(
             raise RuntimeError(f"SOURCE_OBSERVATION_MATERIALIZE_RGBA_SHAPE_INVALID:{view_index}")
 
         raw_mask = mask_path.read_bytes()
-        if len(raw_mask) != 1024 * 1024 or any(value not in (0, 1) for value in raw_mask):
+        mask_array = np.frombuffer(raw_mask, dtype=np.uint8)
+        if mask_array.size != 1024 * 1024 or not bool(np.logical_or(mask_array == 0, mask_array == 1).all()):
             raise RuntimeError(f"SOURCE_OBSERVATION_MATERIALIZE_MASK_INVALID:{view_index}")
         if hashlib.sha256(raw_mask).hexdigest() != mask_digest:
             raise RuntimeError(f"SOURCE_OBSERVATION_MATERIALIZE_MASK_DRIFT:{view_index}")

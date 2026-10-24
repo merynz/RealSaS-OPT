@@ -63,10 +63,7 @@
           "product.shape",
           "compiler.stage/05_CAMERA_CONTRACT_SOLVED",
           "compiler.stage/07_OBSERVATION_CONTRACT_QUALIFIED",
-          "compiler.stage/08_NORMALIZATION_DOMAIN_QUALIFIED",
-          "compiler.stage/13_GEOMETRY_SUBSTRATE_QUALIFIED",
-          "compiler.stage/15_RIGGING_SURFACE_QUALIFIED",
-          "compiler.stage/17_MECHANICAL_PARTITION_QUALIFIED"
+          "compiler.stage/08_NORMALIZATION_DOMAIN_QUALIFIED"
         ]
       },
       "metadata": {
@@ -80,7 +77,12 @@
         "input_source_schema_version": "v1",
         "output_artifact_type": "RealSaS.CanonicalMeshIR",
         "output_schema_version": "v1",
+        "surface_artifact_type": "RealSaS.RiggingSurfaceIR",
+        "surface_schema_version": "v1",
         "mesh_policy_document_sha256": "66791e0e309209d28d16e56a550846de6f2edd87347806139e137e6f12d07c01",
+        "shape_surface_court_policy_sha256": "e182023bd59d079ecb747d0812af4e83de7415593c4bca54c753d0f7abfa6f51",
+        "source_fidelity_policy_sha256": "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214",
+        "surface_adequacy_policy_sha256": "bc98d3aa3cd419ca9ae43010e890fc554ab62e57268933afc630aae20c38139b",
         "support_binding": {
           "max_support_nodes": 4,
           "max_graph_hops": 2,
@@ -93,6 +95,10 @@
           "relaxation_limit": 512
         },
         "required_models": [],
+        "fit_allowed_during_product_execution": false,
+        "legacy_ir_fit_stage_dependency": false,
+        "surface_born_inside_mesh_court": true,
+        "surface_is_canonical_mesh_authority": false,
         "presentation_direction_dependency": false,
         "graphics_authority_claimed": false,
         "rig_authority_claimed": false,
@@ -107,8 +113,7 @@
         "allowed_modes": ["DEVELOPER"],
         "product_pass_authority": false,
         "dependencies": [
-          "product.mesh",
-          "compiler.stage/15_RIGGING_SURFACE_QUALIFIED"
+          "product.mesh"
         ]
       },
       "metadata": {
@@ -120,6 +125,7 @@
         "input_mesh_schema_version": "v1",
         "feature_evidence_type": "RealSaS.RiggingSurfaceIR",
         "feature_evidence_version": "v1",
+        "feature_evidence_source": "PRODUCT_MESH_OUTPUT",
         "output_artifact_type": "RealSaS.CanonicalRigIR",
         "output_schema_version": "v1",
         "resource_step_limit_max": 256,
@@ -133,6 +139,7 @@
         "model_checkpoint_schema_version": "v1",
         "mesh_is_canonical_parent": true,
         "feature_evidence_is_canonical_parent": false,
+        "legacy_stage15_dependency": false,
         "canonical_root_semantics": "NON_EMPTY_DEFORM_ROOT_SET",
         "current_axis_root_semantics": "SINGLE_HARD_CAUSAL_TREE_IMPLEMENTATION_DETAIL",
         "hard_parent_authority_preserved": true,

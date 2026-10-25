@@ -3,7 +3,7 @@
   "operation": "AXIS_V541_RESEARCH_MODELRELEASE_PROMOTE",
   "enabled": true,
   "apply": true,
-  "revision": 1,
+  "revision": 2,
   "target_channel": "RESEARCH",
   "candidate_promotion_authorized": false,
   "production_promotion_authorized": false,

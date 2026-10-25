@@ -51,11 +51,16 @@ jobs:
             --resolution 64 \
             --out "$RUNNER_TEMP/triplane_coordinate_convention_report.json"
           cat "$RUNNER_TEMP/triplane_coordinate_convention_report.json"
-      - name: Measure triplane spatial DOF structure
+      - name: Measure triplane spatial support structure V1
         run: |
           python3 experiments/iris_tessa_v3_apparatus_audit_20261025/triplane_spatial_dof_probe_v1.py \
-            --out "$RUNNER_TEMP/triplane_spatial_dof_report.json"
-          cat "$RUNNER_TEMP/triplane_spatial_dof_report.json"
+            --out "$RUNNER_TEMP/triplane_spatial_dof_v1_report.json"
+          cat "$RUNNER_TEMP/triplane_spatial_dof_v1_report.json"
+      - name: Seal rank-aware triplane spatial DOF V2
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/triplane_spatial_dof_probe_v2.py \
+            --out "$RUNNER_TEMP/triplane_spatial_dof_v2_report.json"
+          cat "$RUNNER_TEMP/triplane_spatial_dof_v2_report.json"
       - name: Measure TESSA scale and token budget
         run: |
           python3 experiments/iris_tessa_v3_apparatus_audit_20261025/tessa_scale_budget_probe_v1.py \
@@ -89,7 +94,8 @@ jobs:
             ${{ runner.temp }}/surface_witness_coverage_report.json
             ${{ runner.temp }}/occlusion_truth_balance_report.json
             ${{ runner.temp }}/triplane_coordinate_convention_report.json
-            ${{ runner.temp }}/triplane_spatial_dof_report.json
+            ${{ runner.temp }}/triplane_spatial_dof_v1_report.json
+            ${{ runner.temp }}/triplane_spatial_dof_v2_report.json
             ${{ runner.temp }}/tessa_scale_budget_report.json
             ${{ runner.temp }}/relation_algebra_report.json
             ${{ runner.temp }}/v3_training_route_report.json

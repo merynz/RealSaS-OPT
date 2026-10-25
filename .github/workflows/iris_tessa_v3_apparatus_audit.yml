@@ -1,0 +1,32 @@
+name: iris-tessa-v3-apparatus-audit
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/**'
+      - 'models/iris/vnext/**'
+      - 'models/tessa/v2/**'
+      - 'models/tessa/v3/**'
+      - '.github/workflows/iris_tessa_v3_apparatus_audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Seal current V3 source contract
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/static_contract_audit_v1.py \
+            --expected-parent-sha d97d0c51240905c07cc788a6be80b69f95aebb3e \
+            --out "$RUNNER_TEMP/static_contract_report.json"
+          cat "$RUNNER_TEMP/static_contract_report.json"
+      - name: Preserve static contract report
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-tessa-v3-static-contract-report
+          path: ${{ runner.temp }}/static_contract_report.json
+          if-no-files-found: error

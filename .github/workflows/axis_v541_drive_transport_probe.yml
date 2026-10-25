@@ -1,0 +1,58 @@
+name: axis-v541-drive-transport-probe
+
+on:
+  push:
+    branches:
+      - probe/axis-v541-drive-transport-v1
+    paths:
+      - '.github/workflows/axis_v541_drive_transport_probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Probe unauthenticated exact-hash Drive transport
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+
+          probe_one() {
+            local name="$1"
+            local id="$2"
+            local expected="$3"
+            local out="$tmp/$name"
+            local url="https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t"
+            echo "PROBE_BEGIN:$name"
+            if ! curl --fail --location --silent --show-error --connect-timeout 15 --max-time 180 "$url" -o "$out"; then
+              echo "PROBE_TRANSPORT_UNAVAILABLE:$name"
+              return 0
+            fi
+            local size actual
+            size="$(stat -c '%s' "$out")"
+            actual="$(sha256sum "$out" | awk '{print $1}')"
+            if [ "$actual" = "$expected" ]; then
+              echo "PROBE_EXACT_HASH_PASS:$name:$size:$actual"
+            else
+              echo "PROBE_HASH_MISMATCH:$name:$size:$actual"
+            fi
+          }
+
+          probe_one \
+            AXIS41_TREE_GRAMMAR_PROGRESS_V53.pt \
+            1zHq_FYywjXAnIH9y70iNwH0EzIctmahG \
+            5f527a51c676bf9ef2d82691f305c139b365e921867623b7338e0848c7dea55a
+
+          probe_one \
+            AXIS41_DISCRETE_XYZ_FROZEN_CAUSAL_COMPOSITE_V541.pt \
+            14LMI0f7sj93bNctjAJ0Ui_-X-RcJQ8XW \
+            4d484c325c3ae2a9a91df422a820cc5ccdf01c804adef4259ff5398cf30e12fb
+
+          echo 'PROBE_READ_ONLY_COMPLETE'

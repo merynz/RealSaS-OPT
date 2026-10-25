@@ -1,189 +1,281 @@
-# IRIS/TESSA V3 Apparatus Audit — Open Questions
+# IRIS/TESSA V3 Apparatus Audit — Decision Ledger
 
-**Status:** active; no training authorized.
+**Status:** active; no Truth139/FIT8 training authorized.
 
-This file separates proven apparatus facts from unresolved research questions. A source-level limitation is not promoted into a scientific conclusion without the appropriate probe.
+This ledger separates four states:
 
-## Closed / proof-level findings
+1. `PROVEN_REPAIR_REQUIRED` — source/mathematics makes the current contract invalid or insufficient; no learned A/B is needed to justify repair.
+2. `MECHANISM_ESTABLISHED` / `TREATMENT_SELECTED_TINY` — a preregistered bounded court isolated the mechanism; real-data/reference-scale confirmation may still be required.
+3. `OPEN_RESEARCH_QUESTION` — a matched court is still needed.
+4. `DEFER_UNTIL_TRUTH` — the question cannot be answered honestly before causal truth batches exist.
 
-### A1 — RGBA/source-support identifiability
+No result in this file grants product authority or genericity claims.
 
-**Status:** `PROVEN_BOUNDARY`.
+---
 
-Current Shape scene construction white-composites authored RGBA to RGB before frozen DINO-S. Distinct authored RGBA observations with different alpha can therefore map to identical RGB before the learned shared scene. The executable witness is in `rgba_identifiability_probe_v1.py`.
+## Closed / treatment-selected findings
 
-Consequence: alpha/source-support distinctions are not identifiable from current H alone for those observation equivalence classes.
+### A1 — alpha/source-support information loss
 
-This does **not** decide whether alpha should be learned by the shared scene or supplied as deterministic presentation authority. That scientific scope decision remains open.
+**Status:** `PROVEN_REPAIR_REQUIRED`.
 
-### E1 — current surface-witness sampler has no component guarantee
+Current inference accepts authored RGBA, then white-composites it to RGB before frozen DINOv2-S/14. Distinct authored alpha/RGBA states can therefore become exactly the same scene observation before Z is constructed. The executable witness is `rgba_identifiability_probe_v1.py`.
 
-**Status:** `PROVEN_BOUNDARY`.
+This is stronger than an appearance-only limitation: a white opaque foreground locus and transparent white background can collapse to the same white RGB observation, so silhouette/geometry support can also be unidentifiable from the current RGB-only shared scene.
 
-`deterministic_surface_witness_v1` samples evenly in extracted vertex-array index, not by component, area, boundary cause, thinness, curvature, attachment/contact stratum or visibility stratum. `surface_witness_coverage_probe_v1.py` proves that a non-empty contiguous vertex subset can receive zero witnesses.
+Required consequence before architecture freeze: alpha/support information must be preserved either in the shared perception input or through an equally authoritative deterministic route wherever geometry/graphics depend on it. The exact alpha feature contract remains an open treatment question; discarding alpha is no longer eligible.
 
-This is a guarantee failure, not a claim that current FIT8 subjects actually lose components.
+### A2 — DINO feature access
 
-### D1 — current V3 occlusion truth has no negative supervision
+**Status:** `TREATMENT_SELECTED_TINY`.
 
-**Status:** `PROVEN_CURRENT_TRUTH_LIMIT`.
+Exact frozen DINOv2-S/14 feature-access court found materially more local information at earlier transformer depth than in current final-only `x_norm_patchtokens`:
 
-Outside tests, the current `GraphicsPairTruthRowV3` producer is `relation_truth_v3_adapter_v1.py`. Its valid occlusion support is positive-only and it rejects values other than 1.0, while `training_v3.py` uses validity-masked BCE for relation targets.
+- L2 local recovery = 1.0 on 2/4/8/12 native-pixel strata;
+- current final contract ≈0.832–0.895;
+- L2 mean gain ≈+0.131.
 
-Consequence: current occlusion BCE cannot teach calibrated non-occluding negatives. Truth Foundry must supply qualified negative support and N/A/abstention semantics before occlusion learning is scientifically meaningful.
+The matched dual-level court then held token count and trainable image-adapter parameters exactly constant (197,120) and established:
 
-### G1 — TESSA reference local-window semantics measured
+- `CURRENT_FINAL_512`: mean local 0.864626, min 0.816327;
+- `DUAL_L2_FINAL_MATCHED_512`: mean/min local 1.0/1.0;
+- dual final-feature cosine mean/min 0.997598/0.996222.
+
+Result records:
+
+- `DINOV2_FEATURE_ACCESS_RESULT_V1.md`
+- `DINOV2_DUAL_LEVEL_VIEW_TOKEN_RESULT_V1.md`
+
+Selected direction: preserve the frozen DINOv2-S/14 foundation and expose aligned early-local + final-semantic patch information at the same 37x37 token lattice. Immediate DINOv3 adoption is not authorized by current evidence.
+
+The exact production fusion form remains open; a by-construction final residual plus projected early-detail variant is still eligible.
+
+### A3 — post-foundation 32->64 subcell routing
+
+**Status:** `MECHANISM_ESTABLISHED`.
+
+The preregistered post-foundation subcell-routing court established that a current-like learned query -> stride-2 carrier route can preserve distinct subcell states when those states are already present in source tokens. Therefore the 32-query -> 64-carrier mechanism is not currently the first suspect for the observed local-detail risk.
+
+This does not prove unlimited spatial capacity; extraction and full triplane/Q capacity remain separate questions.
+
+### B1 — source self-attention placement
+
+**Status:** `MECHANISM_ESTABLISHED`.
+
+`IRIS_CROSS_VIEW_FUSION_RESULT_V1.md` established five-seed perfect correspondence for both:
+
+- current query-mediated multi-view fusion; and
+- source-self-attention-first treatment.
+
+Random-label firewall stayed at chance. Early source self-attention supplied no measurable gain on the controlled correspondence task.
+
+Selected direction: retain query-mediated fusion as the low-compute baseline. Do not add O(source-token²) source self-attention without a harder court that specifically falsifies current placement.
+
+Camera/backprojection feature geometry remains open and is not covered by this court.
+
+### B2 — TESSA endpoint addressability
+
+**Status:** `TREATMENT_SELECTED_TINY`.
+
+Independent compression did not establish exact relation-endpoint access. Generic joint compression improved a broader lookup court but remained seed-sensitive. The stricter endpoint-binding court then isolated the mechanism:
+
+- current late/unbound mean = 0.503223;
+- generic joint/unbound mean = 0.507373;
+- endpoint-bound late = 1.0 in all five seeds;
+- random-label firewall = 0.506396;
+- deterministic binder trainable parameters = 0.
+
+Result: `TESSA_ENDPOINT_BINDING_RESULT_V1.md`.
+
+Selected direction for endpoint relations:
+
+1. preserve typed endpoint refs;
+2. convert endpoint coordinates between declared domains explicitly;
+3. query `Q(Z,x)` at each endpoint;
+4. bind admissible endpoint-local H/mechanics/evidence before presentation compression;
+5. let TESSA structuralize the already-addressable relation rather than rediscover the join.
+
+Generic early/joint fusion is not currently justified as the endpoint solution.
+
+### D1 — current occlusion pair truth
+
+**Status:** `PROVEN_REPAIR_REQUIRED`.
+
+Outside tests, the current V3 pair-truth producer supplies valid occlusion support only for positive same-ray cases. `training_v3.py` then uses validity-masked BCE.
+
+Consequence: calibrated non-occluding negatives are not learnable from the current producer. Truth Foundry must provide qualified positive / negative / N-A / abstention support before a pair occlusion objective is meaningful.
+
+### D2 — current ray-visibility truth ontology
+
+**Status:** `PROVEN_REPAIR_REQUIRED`.
+
+`RayStackVisibilityTruthV1.from_complete_depth_order()` encodes the first hit as 1 and all later hits as 0. This is an opaque first-hit ontology and is not sufficient for alpha compositing.
+
+Truth Foundry must preserve complete-stack quantities such as incoming transmittance and per-hit compositing contribution before any model-specific target is derived. A canonical useful form is based on
+
+`w_k = alpha_k * product_{j<k}(1-alpha_j)`.
+
+Whether runtime visibility is learned evidence, deterministic renderer/compiler authority, or hybrid remains open; the current binary truth is not eligible as the final causal graphics truth.
+
+### D3 — mechanical tangent identifiability
+
+**Status:** `PROVEN_REPAIR_REQUIRED`.
+
+Current `mechanical_demand_loss_v3` uses one mechanical validity mask for stretch, tangent, bend and rigidity. Principal tangent direction is mathematically undefined as stretch becomes isotropic (`major ~= minor`).
+
+Required repair: tangent supervision needs its own validity/anisotropy gate or an equivalent continuous weighting rule. Arbitrary teacher orientation in isotropic regions must not become a target.
+
+### E1 — surface-witness sampler
+
+**Status:** `PROVEN_REPAIR_REQUIRED`.
+
+`deterministic_surface_witness_v1` samples evenly in extracted vertex-array index. It is not geometry-order invariant and has no component/area/thin-support/curvature/boundary guarantee.
+
+Historical Horse R48 forensic check (8,008 vertices / 15,608 faces) had 159 extracted connected components; the current 1,024 index sampler missed 42 components, representing about 1.07% of total extracted area. Many are likely extraction pepper/noise, so a naive one-witness-per-component rule is also rejected.
+
+Selected next court: current index sampler versus deterministic geometry-native sampling, with vertex-permutation invariance, geometric coverage radius and qualified thin/low-area support coverage as primary metrics. Do not spend quota on arbitrary extraction fragments merely because they are separate components.
+
+### G1 — TESSA local-window semantics
 
 **Status:** `SEMANTICS_MEASURED__ADEQUACY_OPEN`.
 
-Post-window self-attention is chunk-end anchored. With window=4096 and query_chunk=256, a full post-window chunk gives direct one-layer history from 3841 tokens at the first query through 4096 at the last. Incremental generation intentionally reproduces this reference behavior, so this is not classified as an implementation bug.
+With `local_attention_window=4096` and `query_chunk_size=256`, current chunk-end-anchored attention supplies approximately 3,841 direct historical tokens to the first token of a full post-window chunk and 4,096 to the last. Incremental inference intentionally reproduces the same semantics.
 
-Adequacy remains open until real teacher topology sequence/dependency-span distributions are measured.
+This is not classified as a learned failure. Exact per-query 4096 semantics can be repaired deterministically if desired; usefulness of >4096 dependencies remains a corpus question.
+
+### H1 — TESSA/IRIS coordinate-domain coherence
+
+**Status:** `PROVEN_REPAIR_REQUIRED`.
+
+Current contracts mix coordinate systems inside one TESSA conditioning memory:
+
+- IRIS field/query geometry uses approximately `[-1,1]`;
+- extracted surface evidence is converted to TESSA `[-0.5,0.5]`;
+- presentation endpoint evidence enforces `[-0.5,0.5]`;
+- TESSA output tokenization uses `[-0.5,0.5]`;
+- Bridge scene-position features currently use `linspace(-1,1,N)`.
+
+Therefore the same physical locus can be represented at a 2x numerical scale difference between scene and surface/presentation streams.
+
+There is also a cell-center convention mismatch: H samples the 64 carrier with `align_corners=False`, whose natural IRIS centers are `((i+0.5)*2/64 - 1)`, whereas Bridge scene positions use endpoint linspace.
+
+Required deterministic repair before endpoint binding/reference experiments:
+
+- typed coordinate domains;
+- fine scene position in TESSA units: `0.5 * ((i+0.5)*2/N - 1)`;
+- endpoint query conversion `x_iris = 2*x_tessa` before `Q(Z,x)`;
+- coarse scene-query position convention aligned with the 2x carrier/cell-center geometry.
+
+Do not ask TESSA to learn a unit conversion or half-cell offset from data.
+
+---
 
 ## High-priority open questions
 
-### A2 — foundation feature access
+### A4 — alpha feature contract
 
-Current V3 uses frozen DINO-S final normalized patch tokens only (`x_norm_patchtokens`) after whole-canvas 1024 -> 518 bicubic/antialiased RGB preprocessing. Grid is 37x37, patch size 14. No earlier-layer or multiscale DINO features enter the current scene contract.
+**Status:** `OPEN_RESEARCH_QUESTION`.
 
-Questions:
+Alpha must no longer be discarded, but the representation should not inflate token count unnecessarily. DINO input resolution is exactly `518 = 37 * 14`, so each existing DINO patch token aligns with a 14x14 alpha patch (196 observed alpha samples).
 
-1. Are causal graphics/mechanics distinctions below this feature scale still recoverable through the shared scene apparatus?
-2. Which failures are due to foundation access versus the later triplane/field route?
-3. Does an RGBA/native residual path become necessary only for alpha/support, or also for thin local geometry?
+Candidate matched treatment: frozen dual-level DINO RGB token plus a patch-aligned alpha residual projection, preserving the 37x37 token lattice and splitting the existing 512-D scene-token budget among final semantics, early detail and alpha evidence.
 
-Next probe: controlled spatial-frequency/thin-structure accessibility, with treatment variables changed one at a time.
+Do not reduce alpha to patch mean without a court: distinct subpatch silhouettes can share the same mean.
 
-### A3 — shared-scene spatial capacity
+### A5 — camera/backprojection feature geometry
 
-Reference V3 uses 32x32 learned queries per plane, then one stride-2 transpose convolution to a 64x64 triplane. H is sampled from this triplane and passed through the local field network.
+**Status:** `OPEN_RESEARCH_QUESTION`.
 
-This is not automatically a 64x64 hard semantic-resolution limit because channels and the nonlinear local field can encode subcell variation. Therefore no failure is claimed from the number alone.
+Current ViewBank learns separate camera and token-XY embeddings and adds them to the image token. Query-mediated cross-view fusion is established, but the court did not test whether the model should have to rediscover orthographic backprojection.
 
-Next probe must distinguish:
+For a pixel `(u,v)` and camera basis, the ray/basepoint contains multiplicative geometry such as `origin + u*h*right + v*h*up`.
 
-- information already lost before scene construction;
-- information present in DINO tokens but inaccessible after scene-query compression;
-- information present in triplanes but not expressible by the local H/field decoder.
+Next court: matched current factorized camera+XY treatment versus deterministic orthographic ray/basepoint features, without changing source-token count or scene-query capacity.
 
-### B1 — IRIS cross-view fusion placement
+### A6 — shared scene / Q oracle capacity
 
-Current per-view tokens receive image projection + camera projection + XY projection, then all views are flattened. Learned scene queries attend to the combined memory. There is no source-token cross-view self-attention before scene-query compression.
+**Status:** `OPEN_RESEARCH_QUESTION`.
 
-Open question: is query-mediated fusion sufficient for ambiguous correspondence, symmetry, hidden-surface and interleaving cases?
+`LocalEvidenceFieldV1` receives triplane samples but does not receive query xyz explicitly. The current design may be sufficient because location is carried by the sampled scene field, but the representation substrate itself has not yet been isolated from the image frontend.
 
-Preferred first test: a tiny controlled correspondence task that isolates placement without changing representation width. Only if that is inconclusive should a reference-scale learned ablation be considered.
+Next court should bypass the image encoder with oracle analytic scene fields and compare current triplane+Q against justified alternatives such as Q+explicit coordinates and/or multiresolution carrier under matched capacity. This is the cleanest way to test the mathematical substrate independently of perception.
 
-### B2 — TESSA cross-stream fusion placement
+### C1 — causal relation head algebra / geometry
 
-Current raw sources are approximately:
+**Status:** `OPEN_UNTIL_TRUTH_SCHEMA_STABILIZES`.
 
-- scene: 3 x 64 x 64 = 12,288 tokens -> 384 memory tokens;
-- surface/mechanics: 1,024 witnesses -> 384 memory tokens;
-- presentation: variable token count -> 256 memory tokens.
+Current static head receives only H_a/H_b, while view head also receives deterministic pair/camera geometry. Current heads also mix different algebraic families in common sigmoid vectors.
 
-Each stream is independently projected, Perceiver-style cross-attended into learned queries, and self-refined before the streams are concatenated. Scene/surface/presentation memory tokens do not directly cross-attend to one another before this compression; topology decoder state integrates the concatenated memories later.
+Future truth families should determine architecture by algebra:
 
-Open question: does exact presentation-endpoint <-> surface-locus addressability survive independent compression strongly enough for topology structuralization?
+- symmetric support/coherence;
+- directed attachment/dependency;
+- complementary/tie-aware front order;
+- symmetric projected boundary relation;
+- ray-global compositing/visibility.
 
-Preferred sequence:
+Do not add absolute geometry indiscriminately or keep one generic output head merely for convenience. Once causal quantities are fixed, run matched geometry/algebra courts.
 
-1. deterministic/addressability inspection;
-2. tiny matched-capacity synthetic lookup/structural task on CPU;
-3. only if needed, preregister reference-capacity late-vs-mid/early fusion A/B. Reference TESSA may require A100; user must be informed before execution.
+### C2 — presentation schema V2
 
-### C1 — static causal relation geometry
+**Status:** `OPEN_UNTIL_TRUTH_SCHEMA_STABILIZES`.
 
-Current static relation head receives H_a and H_b only. View-conditioned relations additionally receive explicit point-pair geometry and camera features.
+`RoleFreePresentationEvidenceV1` currently represents many optional families as scalar [0,1] values. Causal deformation response, directed dependency and compositing truth may require richer continuous/vector or family-specific parameterizations.
 
-H can in principle encode absolute geometry, so lack of explicit pair geometry is not an identifiability proof by itself.
+Truth Foundry must keep privileged raw response richer than the model-facing presentation view. Do not force canonical causal truth into the current scalar-probability schema.
 
-Open question: for causal static targets such as rigid-transform support, deformation coherence and directed dependency, is forcing geometry to be reconstructed implicitly from H an avoidable optimization/sample-complexity bottleneck?
+### E2 — extraction topology observability / resolution
 
-Next probe: matched synthetic relation task with and without explicit relative geometry, holding pair-network capacity fixed.
+**Status:** `OPEN_RESEARCH_QUESTION`.
 
-### C2 — complete-ray visibility wiring
+Current product Shape uses extraction resolution 24. The pinned grid spans IRIS `[-1,1]`, giving spacing `2/24 = 0.083333` in IRIS units (`0.041667` in TESSA units). Field signs are evaluated on this base grid before extraction deformation parameters, so topology with no mixed-sign cube cannot be recovered downstream by FlexiCubes beta/alpha/gamma.
 
-`RayStackVisibilityHeadV3` exists, but current `IRISVNextEvidenceModelV3` does not instantiate it. Current product Shape also does not assemble non-null presentation evidence.
+This makes resolution a surface-evidence observability parameter, not merely output mesh density.
 
-Need to decide before training whether global visibility is:
-
-- learned complete-stack evidence;
-- deterministic renderer/compiler authority;
-- or a hybrid with explicitly separated authorities.
-
-Do not train a head merely because a class exists.
-
-### D2 — causal truth representation and objective geometry
-
-Truth Foundry must preserve privileged response before producing model-specific targets.
-
-Minimum candidate canonical response families:
-
-- appearance response;
-- rigid-transform response;
-- deformation trajectory/kernel;
-- directed intervention dependency;
-- separation witness;
-- front/depth relation;
-- occlusion/compositing contribution;
-- complete-stack visibility contribution.
-
-Do not collapse them into one binary identity target.
-
-For each family, decide separately whether the student objective should be calibrated probability/BCE, continuous regression, directional loss, ranking/contrastive loss, trajectory/kernel matching or another geometry. Any thresholded quotient should be derived only after coverage/calibration courts justify it.
-
-### E2 — extraction resolution and product path
-
-Reference config uses extraction resolution 24 and 1,024 witnesses. Current Shape worker uses the same `extraction_training_resolution` value during product inference; no separate coarse-to-fine inference policy is active in that path today.
-
-Open question: what structural scale is representable/recoverable at resolution 24 for diverse morphology?
-
-Need measurement on controlled synthetic geometry before changing the value.
+Next court: analytic shapes/gaps/thin supports over 24/32/48/64, followed by a real normalized morphology-scale census. Use silhouette/local-thickness/gap statistics, not authored triangle edge length, as the real target scale.
 
 ### E3 — relation/ray sampling
 
-Causal relation and visibility supervision will be highly imbalanced if pairs/rays are sampled naively.
+**Status:** `OPEN_UNTIL_TRUTH_BUILDER_CONTRACT`.
 
-Preregister coverage strata before Truth Foundry optimizer step 0, including at least:
-
-- positive/negative/N/A;
-- adjacency/non-adjacency;
-- thin/low-area supports;
-- boundaries by cause;
-- attachment/contact;
-- overlap/non-overlap;
-- grazing-angle;
-- alpha/compositing complexity;
-- morphology/family.
+Preregister coverage strata before Truth Foundry optimizer step 0, including positive/negative/N-A, adjacency, thin/low-area support, causal boundary family, attachment/contact, overlap, grazing angle, alpha/compositing complexity and morphology/family.
 
 ### F1 — shared-trunk optimization interference
 
-Once multiple truth families exist, measure gradient norms and pairwise cosine statistics on the shared scene trunk. Do not interpret poor learning as a representation failure if objectives systematically cancel one another.
+**Status:** `DEFER_UNTIL_TRUTH`.
 
-Any adaptive weighting/gradient surgery must be a separately preregistered treatment, not an outcome-dependent repair.
+Once real truth families exist, measure shared-scene gradient norms and pairwise cosine statistics. Do not diagnose representation failure if objectives systematically cancel one another.
 
-### G2 — real topology sequence distribution
+Any adaptive weighting, PCGrad-style treatment or other gradient surgery must be separately preregistered after a conflict is measured.
 
-Teacher serialization preserves one global asset sequence and uses truncated training windows without arbitrary chart cuts. Need corpus-level statistics before changing TESSA attention:
+### G2 — real topology dependency span
 
-- token length distribution;
-- face/component/restart counts;
-- dependency spans for component/chart closure and long-range repeated structure;
-- fraction of scored tokens whose useful dependency exceeds 3841/4096 direct one-layer history;
-- distribution relative to the 4096 position period.
+**Status:** `OPEN_CPU_CENSUS`.
 
-This census is CPU/data work if the teacher mesh corpus is locally available; no A100 is required.
+Historical FIT8 teacher-forced sequences are below the current 131,072 product decode cap (largest known George sequence ≈53,516 valid tokens), so raw decode budget is not presently the first blocker.
+
+Remaining question: what useful dependency spans actually exceed the current 3,841–4,096 direct one-layer history? Measure component/chart closure and long-range repeated-structure dependencies before increasing the attention window.
+
+### R1 — V3 training apparatus / geometry teacher
+
+**Status:** `OPEN_RESEARCH_CONTRACT`.
+
+V3 defines heads/objectives/checkpoint/inference surfaces but there is no current non-test end-to-end V3 optimizer orchestration that trains the full hypothesis. This is useful for the audit: the architecture can still be changed before outcome-driven patching.
+
+Before real training, explicitly choose geometry teacher/objective. Do not silently inherit legacy silhouette-derived geometry if authored Truth Foundry geometry can provide a more appropriate full-scene supervision court.
+
+---
 
 ## GPU boundary
 
-No current probe in this file requires A100.
+No currently authorized court in this ledger requires A100.
 
-Likely GPU-requiring experiments, if earlier probes justify them:
+Potential GPU-requiring stages only after CPU/proof closure:
 
-1. reference-scale IRIS representation/access ablation;
-2. reference TESSA V3 late-vs-mid/early fusion matched-capacity A/B;
-3. multi-objective shared-H gradient/interference measurement at realistic batch/scene scale;
-4. later causal-truth IRIS training and TESSA presentation A/B.
+1. reference-scale IRIS dual-level+alpha/camera treatment validation;
+2. oracle/shared-scene capacity treatment if tiny courts remain ambiguous;
+3. reference TESSA with bound causal presentation evidence;
+4. realistic multi-objective gradient/interference measurement;
+5. later Truth139/FIT8 learning.
 
-Before any such external notebook/A100 execution, create a separate preregistration with exact treatment, control, data, seed, optimizer, budget and stopping rules and inform the user.
+Before external notebook/A100 execution, create a separate preregistration with treatment/control/data/seeds/optimizer/budget/stopping rules and inform the user.

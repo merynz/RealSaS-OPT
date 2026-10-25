@@ -34,6 +34,11 @@ jobs:
           python3 experiments/iris_tessa_v3_apparatus_audit_20261025/tessa_window_semantics_probe_v1.py \
             --out "$RUNNER_TEMP/tessa_window_semantics_report.json"
           cat "$RUNNER_TEMP/tessa_window_semantics_report.json"
+      - name: Prove surface witness coverage boundary
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/surface_witness_coverage_probe_v1.py \
+            --out "$RUNNER_TEMP/surface_witness_coverage_report.json"
+          cat "$RUNNER_TEMP/surface_witness_coverage_report.json"
       - name: Preserve apparatus reports
         uses: actions/upload-artifact@v4
         with:
@@ -42,4 +47,5 @@ jobs:
             ${{ runner.temp }}/static_contract_report.json
             ${{ runner.temp }}/rgba_identifiability_report.json
             ${{ runner.temp }}/tessa_window_semantics_report.json
+            ${{ runner.temp }}/surface_witness_coverage_report.json
           if-no-files-found: error

@@ -24,9 +24,16 @@ jobs:
             --expected-parent-sha d97d0c51240905c07cc788a6be80b69f95aebb3e \
             --out "$RUNNER_TEMP/static_contract_report.json"
           cat "$RUNNER_TEMP/static_contract_report.json"
-      - name: Preserve static contract report
+      - name: Prove RGBA frontend identifiability boundary
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/rgba_identifiability_probe_v1.py \
+            --out "$RUNNER_TEMP/rgba_identifiability_report.json"
+          cat "$RUNNER_TEMP/rgba_identifiability_report.json"
+      - name: Preserve apparatus reports
         uses: actions/upload-artifact@v4
         with:
-          name: iris-tessa-v3-static-contract-report
-          path: ${{ runner.temp }}/static_contract_report.json
+          name: iris-tessa-v3-apparatus-reports
+          path: |
+            ${{ runner.temp }}/static_contract_report.json
+            ${{ runner.temp }}/rgba_identifiability_report.json
           if-no-files-found: error

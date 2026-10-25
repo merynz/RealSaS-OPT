@@ -1,0 +1,36 @@
+name: iris-relation-algebra-v1-stage
+
+on:
+  push:
+    branches:
+      - research/iris-tessa-v3-apparatus-audit-stage2
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/RELATION_ALGEBRA_PREREG_V1.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/relation_algebra_probe_v1.py'
+      - 'models/iris/vnext/heads_v3.py'
+      - '.github/workflows/iris_relation_algebra_v1_stage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  relation-algebra-v1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Execute static algebra court
+        run: |
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/relation_algebra_probe_v1.py \
+            --out "$RUNNER_TEMP/relation_algebra_v1_report.json"
+          cat "$RUNNER_TEMP/relation_algebra_v1_report.json"
+      - name: Preserve report
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-relation-algebra-v1-report
+          path: ${{ runner.temp }}/relation_algebra_v1_report.json
+          if-no-files-found: error

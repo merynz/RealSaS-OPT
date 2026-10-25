@@ -56,7 +56,12 @@ class TwoHopReader(nn.Module):
 class LateModel(nn.Module):
     def __init__(self, c: TESSAStructuralizerConfigV3, presentation_dim: int):
         super().__init__(); self.c = c
-        self.mem = TESSATriStreamMemoryV3(3, 3, presentation_dim, c)
+        self.mem = TESSATriStreamMemoryV3(
+            scene_input_dim=3,
+            surface_input_dim=3,
+            presentation_input_dim=presentation_dim,
+            config=c,
+        )
         self.reader = TwoHopReader(c.d_model, c.n_heads)
 
     def forward(self, scene, surface, presentation):
@@ -90,7 +95,12 @@ class JointMemory(nn.Module):
 class JointModel(nn.Module):
     def __init__(self, c):
         super().__init__(); self.c=c
-        self.scene = _TypedMemoryStreamV2(3, c.scene_memory_tokens, 0, c)
+        self.scene = _TypedMemoryStreamV2(
+            input_dim=3,
+            token_count=c.scene_memory_tokens,
+            type_index=0,
+            config=c,
+        )
         self.joint = JointMemory(c); self.norm=nn.LayerNorm(c.d_model); self.reader=TwoHopReader(c.d_model,c.n_heads)
     def forward(self, scene, surface, presentation):
         m=self.norm(torch.cat((self.scene(scene), self.joint(surface,presentation)),1))

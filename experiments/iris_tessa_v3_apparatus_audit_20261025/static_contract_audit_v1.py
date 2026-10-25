@@ -1,56 +1,35 @@
 #!/usr/bin/env python3
-"""Static, zero-training audit of the current IRIS/TESSA V3 research apparatus.
+"""Dependency-free static audit of the current IRIS/TESSA V3 apparatus.
 
-This executable seals source-level facts needed before causal Truth Foundry or
-FIT8 learning experiments are allowed.  It does not instantiate the large
-models, run inference, train, promote a ModelRelease, or mutate product state.
+Only Python stdlib source/AST inspection is used. The audit intentionally does
+not import torch or any RealSaS model module, instantiate a model, run inference,
+train, promote a ModelRelease, or mutate product state.
 """
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
-import inspect
 import json
 from pathlib import Path
 from typing import Any
 
-from models.iris.vnext.contracts_v1 import IRISVNextConfigV1
-from models.iris.vnext.heads_v3 import GraphicsRelationHeadV3
-from models.iris.vnext.inference_input_v1 import (
-    CAMERA_FEATURE_DIM_V1,
-    PATCH_GRID_V1,
-    PATCH_TOKEN_COUNT_V1,
-    VIEW_COUNT_V1,
-    build_scene_inputs_from_rgba_v1,
-    rgba_to_white_composited_rgb_v1,
-)
-from models.iris.vnext.model_v3 import IRISVNextEvidenceModelV3
-from models.iris.vnext.scene_core_v1 import (
-    IRISVNextSceneCoreV1,
-    SharedSceneTriplaneVNextV1,
-)
-from models.iris.vnext.structure_v4 import IRISVNextStructuralizationBridgeV4
-from models.tessa.v2.model_v2 import _TypedMemoryStreamV2, WindowedCausalSelfAttentionV2
-from models.tessa.v3.config_v3 import TESSAStructuralizerConfigV3
-from models.tessa.v3.model_v3 import TESSATriStreamMemoryV3
-
-
 AUDIT_SCHEMA = "RealSaS.IRISTESSAV3ApparatusStaticContractAudit.v1"
 AUDIT_STATUS = "STATIC_FACTS_SEALED__READINESS_NOT_DECIDED"
 
-_SOURCE_PATHS = (
-    "models/iris/vnext/inference_input_v1.py",
-    "models/iris/vnext/contracts_v1.py",
-    "models/iris/vnext/scene_core_v1.py",
-    "models/iris/vnext/model_v3.py",
-    "models/iris/vnext/heads_v3.py",
-    "models/iris/vnext/presentation_evidence_v1.py",
-    "models/iris/vnext/structure_v4.py",
-    "models/tessa/v2/model_v2.py",
-    "models/tessa/v2/objective_v2.py",
-    "models/tessa/v3/config_v3.py",
-    "models/tessa/v3/model_v3.py",
-)
+SOURCE_PATHS = {
+    "input": "models/iris/vnext/inference_input_v1.py",
+    "iris_config": "models/iris/vnext/contracts_v1.py",
+    "scene": "models/iris/vnext/scene_core_v1.py",
+    "iris_model": "models/iris/vnext/model_v3.py",
+    "relations": "models/iris/vnext/heads_v3.py",
+    "presentation": "models/iris/vnext/presentation_evidence_v1.py",
+    "bridge": "models/iris/vnext/structure_v4.py",
+    "tessa_v2": "models/tessa/v2/model_v2.py",
+    "tessa_objective": "models/tessa/v2/objective_v2.py",
+    "tessa_config": "models/tessa/v3/config_v3.py",
+    "tessa_model": "models/tessa/v3/model_v3.py",
+}
 
 
 def _sha256(path: Path) -> str:
@@ -61,8 +40,18 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def _source(obj: Any) -> str:
-    return inspect.getsource(obj)
+def _read(repo_root: Path, rel: str) -> str:
+    path = repo_root / rel
+    if not path.is_file():
+        raise RuntimeError("IRIS_TESSA_V3_STATIC_AUDIT_SOURCE_MISSING:" + rel)
+    return path.read_text(encoding="utf-8")
+
+
+def _tree(text: str, label: str) -> ast.Module:
+    try:
+        return ast.parse(text)
+    except SyntaxError as exc:
+        raise RuntimeError("IRIS_TESSA_V3_STATIC_AUDIT_PARSE_FAILED:" + label) from exc
 
 
 def _require(condition: bool, label: str) -> None:
@@ -70,95 +59,178 @@ def _require(condition: bool, label: str) -> None:
         raise RuntimeError("IRIS_TESSA_V3_STATIC_AUDIT_DRIFT:" + label)
 
 
+def _literal(node: ast.AST, label: str) -> Any:
+    try:
+        return ast.literal_eval(node)
+    except Exception as exc:
+        raise RuntimeError("IRIS_TESSA_V3_STATIC_AUDIT_NONLITERAL:" + label) from exc
+
+
+def _module_assignment(tree: ast.Module, name: str) -> Any:
+    for node in tree.body:
+        if isinstance(node, ast.Assign):
+            if any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+                return _literal(node.value, name)
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id == name:
+            if node.value is None:
+                break
+            return _literal(node.value, name)
+    raise RuntimeError("IRIS_TESSA_V3_STATIC_AUDIT_ASSIGNMENT_MISSING:" + name)
+
+
+def _class_node(tree: ast.Module, class_name: str) -> ast.ClassDef:
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and node.name == class_name:
+            return node
+    raise RuntimeError("IRIS_TESSA_V3_STATIC_AUDIT_CLASS_MISSING:" + class_name)
+
+
+def _class_default(tree: ast.Module, class_name: str, field_name: str) -> Any:
+    cls = _class_node(tree, class_name)
+    for node in cls.body:
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id == field_name:
+            if node.value is None:
+                break
+            return _literal(node.value, f"{class_name}.{field_name}")
+    raise RuntimeError("IRIS_TESSA_V3_STATIC_AUDIT_FIELD_MISSING:" + class_name + "." + field_name)
+
+
+def _class_assignment(tree: ast.Module, class_name: str, name: str) -> Any:
+    cls = _class_node(tree, class_name)
+    for node in cls.body:
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+            return _literal(node.value, f"{class_name}.{name}")
+    raise RuntimeError("IRIS_TESSA_V3_STATIC_AUDIT_CLASS_ASSIGNMENT_MISSING:" + class_name + "." + name)
+
+
+def _function_node(tree: ast.Module, function_name: str, *, class_name: str | None = None) -> ast.FunctionDef:
+    body: list[ast.stmt]
+    if class_name is None:
+        body = tree.body
+    else:
+        body = _class_node(tree, class_name).body
+    for node in body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == function_name:
+            return node  # type: ignore[return-value]
+    label = f"{class_name + '.' if class_name else ''}{function_name}"
+    raise RuntimeError("IRIS_TESSA_V3_STATIC_AUDIT_FUNCTION_MISSING:" + label)
+
+
+def _node_source(text: str, node: ast.AST) -> str:
+    lines = text.splitlines()
+    start = int(getattr(node, "lineno")) - 1
+    end = int(getattr(node, "end_lineno"))
+    return "\n".join(lines[start:end])
+
+
 def audit(repo_root: Path, expected_parent_sha: str) -> dict[str, Any]:
-    cfg = IRISVNextConfigV1()
-    tcfg = TESSAStructuralizerConfigV3()
-    cfg.validate()
-    tcfg.validate()
+    texts = {key: _read(repo_root, rel) for key, rel in SOURCE_PATHS.items()}
+    trees = {key: _tree(text, key) for key, text in texts.items()}
 
-    rgba_source = _source(rgba_to_white_composited_rgb_v1)
-    frontend_source = _source(build_scene_inputs_from_rgba_v1)
-    scene_source = _source(SharedSceneTriplaneVNextV1)
-    scene_core_source = _source(IRISVNextSceneCoreV1)
-    model_source = _source(IRISVNextEvidenceModelV3)
-    relation_source = _source(GraphicsRelationHeadV3)
-    static_relation_source = _source(GraphicsRelationHeadV3.static_relations)
-    view_relation_source = _source(GraphicsRelationHeadV3.view_relations)
-    bridge_source = _source(IRISVNextStructuralizationBridgeV4)
-    typed_stream_source = _source(_TypedMemoryStreamV2)
-    tri_stream_source = _source(TESSATriStreamMemoryV3)
-    window_source = _source(WindowedCausalSelfAttentionV2)
+    view_count = int(_module_assignment(trees["input"], "VIEW_COUNT_V1"))
+    patch_grid = int(_module_assignment(trees["input"], "PATCH_GRID_V1"))
+    camera_dim = int(_module_assignment(trees["input"], "CAMERA_FEATURE_DIM_V1"))
+    _require("PATCH_TOKEN_COUNT_V1 = PATCH_GRID_V1 * PATCH_GRID_V1" in texts["input"], "PATCH_TOKEN_DERIVATION")
+    patch_tokens = patch_grid * patch_grid
 
-    # These are source-contract invariants, not scientific conclusions.
-    _require(VIEW_COUNT_V1 == 8, "VIEW_COUNT")
-    _require(PATCH_GRID_V1 == 37, "PATCH_GRID")
-    _require(PATCH_TOKEN_COUNT_V1 == PATCH_GRID_V1 * PATCH_GRID_V1, "PATCH_TOKEN_COUNT")
-    _require(CAMERA_FEATURE_DIM_V1 == 13, "CAMERA_FEATURE_DIM")
-    _require("rgb = rgba[:, :, :3] * alpha + (1.0 - alpha)" in rgba_source, "RGBA_WHITE_COMPOSITE")
-    _require("extract_dinov2_s_patch_map_v2(dino_model, rgb)" in frontend_source, "DINO_RGB_FRONTEND")
-    _require("nn.TransformerDecoder" in scene_source, "SCENE_QUERY_DECODER")
-    _require("memory).reshape(b, 3 * p * p" not in scene_source, "SOURCE_TOKEN_SELF_ATTENTION_UNEXPECTED")
-    _require("self.upsample = nn.ConvTranspose2d" in scene_source, "TRIPLANE_UPSAMPLE")
-    _require("stride=2" in scene_source, "TRIPLANE_UPSAMPLE_STRIDE")
-    _require("FROZEN_DINOV2_S_IMAGE_TOKENS_PLUS_CAMERAS" in scene_core_source, "SCENE_INPUT_SEMANTICS")
+    iris_fields = {
+        name: int(_class_default(trees["iris_config"], "IRISVNextConfigV1", name))
+        for name in (
+            "scene_dim",
+            "plane_size",
+            "plane_channels",
+            "local_feature_dim",
+            "extraction_training_resolution",
+            "surface_witness_count",
+        )
+    }
+    tessa_fields = {
+        name: int(_class_default(trees["tessa_config"], "TESSAStructuralizerConfigV3", name))
+        for name in (
+            "d_model",
+            "n_heads",
+            "decoder_layers",
+            "scene_memory_tokens",
+            "surface_memory_tokens",
+            "presentation_memory_tokens",
+            "conditioning_token_budget",
+            "local_attention_window",
+            "query_chunk_size",
+            "max_faces",
+            "max_vertices",
+        )
+    }
+    static_outputs = tuple(_class_assignment(trees["relations"], "GraphicsRelationHeadV3", "STATIC_OUTPUTS"))
+    view_outputs = tuple(_class_assignment(trees["relations"], "GraphicsRelationHeadV3", "VIEW_OUTPUTS"))
 
-    _require("self.mechanical_demand" in model_source, "MECHANICAL_HEAD")
-    _require("self.appearance" in model_source, "APPEARANCE_HEAD")
-    _require("self.relations" in model_source, "RELATION_HEAD")
-    _require("RayStackVisibilityHeadV3" not in model_source, "RAY_HEAD_NOT_INSTANTIATED")
+    rgba_fn = _node_source(texts["input"], _function_node(trees["input"], "rgba_to_white_composited_rgb_v1"))
+    frontend_fn = _node_source(texts["input"], _function_node(trees["input"], "build_scene_inputs_from_rgba_v1"))
+    scene_init = _node_source(texts["scene"], _function_node(trees["scene"], "__init__", class_name="SharedSceneTriplaneVNextV1"))
+    scene_forward = _node_source(texts["scene"], _function_node(trees["scene"], "forward", class_name="SharedSceneTriplaneVNextV1"))
+    model_init = _node_source(texts["iris_model"], _function_node(trees["iris_model"], "__init__", class_name="IRISVNextEvidenceModelV3"))
+    static_fn = _node_source(texts["relations"], _function_node(trees["relations"], "static_relations", class_name="GraphicsRelationHeadV3"))
+    view_fn = _node_source(texts["relations"], _function_node(trees["relations"], "view_relations", class_name="GraphicsRelationHeadV3"))
+    typed_forward = _node_source(texts["tessa_v2"], _function_node(trees["tessa_v2"], "forward", class_name="_TypedMemoryStreamV2"))
+    tri_forward = _node_source(texts["tessa_model"], _function_node(trees["tessa_model"], "forward", class_name="TESSATriStreamMemoryV3"))
+    window_forward = _node_source(texts["tessa_v2"], _function_node(trees["tessa_v2"], "forward", class_name="WindowedCausalSelfAttentionV2"))
 
-    _require("feature_a" in static_relation_source and "feature_b" in static_relation_source, "STATIC_H_PAIR")
-    _require("point_a" not in static_relation_source and "point_b" not in static_relation_source, "STATIC_NO_POINT_GEOMETRY")
-    _require("camera_features" not in static_relation_source, "STATIC_NO_CAMERA")
-    _require("relation_camera_geometry_v3" in view_relation_source, "VIEW_EXPLICIT_PAIR_GEOMETRY")
-    _require("camera_features" in view_relation_source, "VIEW_CAMERA_ACCESS")
+    _require(view_count == 8, "VIEW_COUNT")
+    _require(patch_grid == 37, "PATCH_GRID")
+    _require(camera_dim == 13, "CAMERA_FEATURE_DIM")
+    _require("rgba[:, :, :3] * alpha + (1.0 - alpha)" in rgba_fn, "RGBA_WHITE_COMPOSITE")
+    _require("extract_dinov2_s_patch_map_v2(dino_model, rgb)" in frontend_fn, "DINO_RGB_FRONTEND")
+    _require("nn.TransformerDecoder" in scene_init, "SCENE_QUERY_DECODER")
+    _require("nn.ConvTranspose2d" in scene_init and "stride=2" in scene_init, "TRIPLANE_UPSAMPLE_X2")
+    _require("self.decoder(q, memory)" in scene_forward, "SCENE_QUERIES_ATTEND_MEMORY")
+    _require("self.mechanical_demand" in model_init, "MECHANICAL_HEAD")
+    _require("self.appearance" in model_init, "APPEARANCE_HEAD")
+    _require("self.relations" in model_init, "RELATION_HEAD")
+    _require("RayStackVisibilityHeadV3" not in model_init, "RAY_HEAD_NOT_INSTANTIATED")
+    _require("point_a" not in static_fn and "point_b" not in static_fn and "camera_features" not in static_fn, "STATIC_NO_EXPLICIT_GEOMETRY")
+    _require("relation_camera_geometry_v3" in view_fn and "camera_features" in view_fn, "VIEW_EXPLICIT_GEOMETRY")
+    _require("self.cross(" in typed_forward, "TYPED_STREAM_CROSS_ATTENTION")
+    _require("self.refinement(memory)" in typed_forward, "TYPED_STREAM_REFINEMENT")
+    _require("self.scene(" in tri_forward and "self.surface(" in tri_forward and "self.presentation(" in tri_forward, "TESSA_THREE_STREAMS")
+    _require("torch.cat((scene, surface, presentation), dim=1)" in tri_forward, "TESSA_LATE_CONCAT")
+    _require("local_attention_window" in window_forward, "TESSA_LOCAL_WINDOW")
 
-    _require("presentation" in bridge_source, "BRIDGE_PRESENTATION_STREAM")
-    _require("nn.MultiheadAttention" in typed_stream_source, "TYPED_STREAM_CROSS_ATTENTION")
-    _require("TransformerEncoder" in typed_stream_source, "TYPED_STREAM_REFINEMENT")
-    _require("self.scene(" in tri_stream_source, "TESSA_SCENE_STREAM")
-    _require("self.surface(" in tri_stream_source, "TESSA_SURFACE_STREAM")
-    _require("self.presentation(" in tri_stream_source, "TESSA_PRESENTATION_STREAM")
-    _require("torch.cat((scene, surface, presentation), dim=1)" in tri_stream_source, "TESSA_LATE_CONCAT")
-    _require("local_attention_window" in window_source, "TESSA_LOCAL_WINDOW")
+    total_conditioning = (
+        tessa_fields["scene_memory_tokens"]
+        + tessa_fields["surface_memory_tokens"]
+        + tessa_fields["presentation_memory_tokens"]
+    )
+    _require(total_conditioning == tessa_fields["conditioning_token_budget"], "TESSA_MATCHED_TOKEN_BUDGET")
 
-    source_hashes = {}
-    for rel in _SOURCE_PATHS:
-        path = repo_root / rel
-        if not path.is_file():
-            raise RuntimeError("IRIS_TESSA_V3_STATIC_AUDIT_SOURCE_MISSING:" + rel)
-        source_hashes[rel] = _sha256(path)
-
-    plane_output_resolution = int(cfg.plane_size) * 2
-    conditioning_tokens = {
-        "scene": int(tcfg.scene_memory_tokens),
-        "surface_mechanics": int(tcfg.surface_memory_tokens),
-        "presentation": int(tcfg.presentation_memory_tokens),
-        "total": int(tcfg.total_conditioning_tokens),
+    plane_output_resolution = iris_fields["plane_size"] * 2
+    source_hashes = {
+        rel: _sha256(repo_root / rel)
+        for rel in SOURCE_PATHS.values()
     }
 
     facts = {
         "observation": {
-            "view_count": VIEW_COUNT_V1,
+            "view_count": view_count,
             "native_rgba_resolution": [1024, 1024],
             "foundation_frontend": "WHITE_COMPOSITED_RGB_TO_FROZEN_DINOV2_S",
             "alpha_independent_foundation_channel": False,
-            "dino_patch_grid": [PATCH_GRID_V1, PATCH_GRID_V1],
-            "dino_tokens_per_view": PATCH_TOKEN_COUNT_V1,
-            "camera_feature_dim": CAMERA_FEATURE_DIM_V1,
+            "dino_patch_grid": [patch_grid, patch_grid],
+            "dino_tokens_per_view": patch_tokens,
+            "camera_feature_dim": camera_dim,
         },
         "iris_scene": {
-            "scene_dim": int(cfg.scene_dim),
-            "plane_query_resolution": [int(cfg.plane_size), int(cfg.plane_size)],
-            "plane_channels": int(cfg.plane_channels),
+            "scene_dim": iris_fields["scene_dim"],
+            "plane_query_resolution": [iris_fields["plane_size"], iris_fields["plane_size"]],
+            "plane_channels": iris_fields["plane_channels"],
             "triplane_output_resolution": [plane_output_resolution, plane_output_resolution],
-            "local_h_dim": int(cfg.local_feature_dim),
+            "local_h_dim": iris_fields["local_feature_dim"],
+            "extraction_training_resolution": iris_fields["extraction_training_resolution"],
+            "surface_witness_count": iris_fields["surface_witness_count"],
             "source_token_cross_view_self_attention_before_scene_queries": False,
             "multi_view_interaction_route": "LEARNED_SCENE_QUERIES_ATTEND_FLATTENED_ALL_VIEW_MEMORY",
         },
         "iris_relations": {
-            "static_outputs": list(GraphicsRelationHeadV3.STATIC_OUTPUTS),
-            "view_outputs": list(GraphicsRelationHeadV3.VIEW_OUTPUTS),
+            "static_outputs": list(static_outputs),
+            "view_outputs": list(view_outputs),
             "static_pair_inputs": ["H_a", "H_b"],
             "static_explicit_point_geometry": False,
             "static_explicit_camera_geometry": False,
@@ -167,16 +239,21 @@ def audit(repo_root: Path, expected_parent_sha: str) -> dict[str, Any]:
             "ray_stack_visibility_head_instantiated_by_main_v3": False,
         },
         "tessa": {
-            "d_model": int(tcfg.d_model),
-            "heads": int(tcfg.n_heads),
-            "decoder_layers": int(tcfg.decoder_layers),
-            "conditioning_tokens": conditioning_tokens,
+            "d_model": tessa_fields["d_model"],
+            "heads": tessa_fields["n_heads"],
+            "decoder_layers": tessa_fields["decoder_layers"],
+            "conditioning_tokens": {
+                "scene": tessa_fields["scene_memory_tokens"],
+                "surface_mechanics": tessa_fields["surface_memory_tokens"],
+                "presentation": tessa_fields["presentation_memory_tokens"],
+                "total": total_conditioning,
+            },
             "stream_compression": "INDEPENDENT_TYPED_PERCEIVER_STYLE_BEFORE_CONCAT",
             "cross_stream_interaction_before_independent_compression": False,
-            "local_attention_window": int(tcfg.local_attention_window),
-            "query_chunk_size": int(tcfg.query_chunk_size),
-            "max_faces": int(tcfg.max_faces),
-            "max_vertices": int(tcfg.max_vertices),
+            "local_attention_window": tessa_fields["local_attention_window"],
+            "query_chunk_size": tessa_fields["query_chunk_size"],
+            "max_faces": tessa_fields["max_faces"],
+            "max_vertices": tessa_fields["max_vertices"],
         },
     }
 
@@ -190,8 +267,8 @@ def audit(repo_root: Path, expected_parent_sha: str) -> dict[str, Any]:
         {
             "id": "A3_SPATIAL_ACCESS",
             "class": "REPRESENTATION_RESOLUTION",
-            "fact": f"foundation grid={PATCH_GRID_V1}x{PATCH_GRID_V1}; triplane={plane_output_resolution}x{plane_output_resolution}",
-            "required_probe": "controlled thin/separated/interleaving structure accessibility at H(x)",
+            "fact": f"foundation grid={patch_grid}x{patch_grid}; triplane={plane_output_resolution}x{plane_output_resolution}; extraction_train={iris_fields['extraction_training_resolution']}; surface_witness_count={iris_fields['surface_witness_count']}",
+            "required_probe": "controlled thin/separated/interleaving structure accessibility at H(x), stratified below and above source-token scale",
         },
         {
             "id": "B1_IRIS_FUSION_PLACEMENT",
@@ -220,8 +297,8 @@ def audit(repo_root: Path, expected_parent_sha: str) -> dict[str, Any]:
         {
             "id": "G2_SEQUENCE_WINDOW",
             "class": "SEQUENCE_MEMORY",
-            "fact": f"local causal window={tcfg.local_attention_window}, max_faces={tcfg.max_faces}",
-            "required_probe": "measure real teacher topology token-length distribution and long-range dependency strata",
+            "fact": f"local causal window={tessa_fields['local_attention_window']}, max_faces={tessa_fields['max_faces']}",
+            "required_probe": "measure real teacher topology token-length distribution and long-range dependency strata before architectural interpretation",
         },
     ]
 

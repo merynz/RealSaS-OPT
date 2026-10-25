@@ -29,6 +29,11 @@ jobs:
           python3 experiments/iris_tessa_v3_apparatus_audit_20261025/rgba_identifiability_probe_v1.py \
             --out "$RUNNER_TEMP/rgba_identifiability_report.json"
           cat "$RUNNER_TEMP/rgba_identifiability_report.json"
+      - name: Prove alpha-aware ray visibility boundary
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/ray_visibility_alpha_identifiability_probe_v1.py \
+            --out "$RUNNER_TEMP/ray_visibility_alpha_identifiability_report.json"
+          cat "$RUNNER_TEMP/ray_visibility_alpha_identifiability_report.json"
       - name: Measure TESSA window semantics
         run: |
           python3 experiments/iris_tessa_v3_apparatus_audit_20261025/tessa_window_semantics_probe_v1.py \
@@ -90,6 +95,7 @@ jobs:
           path: |
             ${{ runner.temp }}/static_contract_report.json
             ${{ runner.temp }}/rgba_identifiability_report.json
+            ${{ runner.temp }}/ray_visibility_alpha_identifiability_report.json
             ${{ runner.temp }}/tessa_window_semantics_report.json
             ${{ runner.temp }}/surface_witness_coverage_report.json
             ${{ runner.temp }}/occlusion_truth_balance_report.json

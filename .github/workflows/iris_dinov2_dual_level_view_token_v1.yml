@@ -1,0 +1,66 @@
+name: iris-dinov2-dual-level-view-token-v1
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/DINOV2_DUAL_LEVEL_VIEW_TOKEN_PREREG_V1.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/dinov2_dual_level_view_token_probe_v1.py'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/dinov2_feature_access_probe_v1.py'
+      - 'models/iris/v2/dinov2_foundation_v2.py'
+      - 'requirements/torch-cpu.txt'
+      - '.github/workflows/iris_dinov2_dual_level_view_token_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  matched-dual-level-v1:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      DINO_SOURCE_REVISION: 7764ea0f912e53c92e82eb78a2a1631e92725fc8
+      DINO_WEIGHT_SHA256: b938bf1bc15cd2ec0feacfe3a1bb553fe8ea9ca46a7e1d8d00217f29aef60cd9
+      DINO_WEIGHT_SIZE: '88283115'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/torch-cpu.txt
+      - name: Install pinned CPU torch profile
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Fetch exact DINOv2 source and weights
+        run: |
+          git clone -q https://github.com/facebookresearch/dinov2.git "$RUNNER_TEMP/dinov2"
+          git -C "$RUNNER_TEMP/dinov2" checkout -q "$DINO_SOURCE_REVISION"
+          test "$(git -C "$RUNNER_TEMP/dinov2" rev-parse HEAD)" = "$DINO_SOURCE_REVISION"
+          curl --fail --location --retry 4 --silent --show-error \
+            https://dl.fbaipublicfiles.com/dinov2/dinov2_vits14/dinov2_vits14_pretrain.pth \
+            --output "$RUNNER_TEMP/dinov2_vits14_pretrain.pth"
+          test "$(stat -c%s "$RUNNER_TEMP/dinov2_vits14_pretrain.pth")" = "$DINO_WEIGHT_SIZE"
+          echo "$DINO_WEIGHT_SHA256  $RUNNER_TEMP/dinov2_vits14_pretrain.pth" | sha256sum -c -
+      - name: Execute sealed matched dual-level court
+        run: |
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/dinov2_dual_level_view_token_probe_v1.py \
+            --dinov2-source "$RUNNER_TEMP/dinov2" \
+            --dinov2-weights "$RUNNER_TEMP/dinov2_vits14_pretrain.pth" \
+            --out "$RUNNER_TEMP/dinov2_dual_level_view_token_v1_report.json"
+          cat "$RUNNER_TEMP/dinov2_dual_level_view_token_v1_report.json"
+      - name: Preserve dual-level report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-dinov2-dual-level-view-token-v1-report
+          path: ${{ runner.temp }}/dinov2_dual_level_view_token_v1_report.json
+          if-no-files-found: warn

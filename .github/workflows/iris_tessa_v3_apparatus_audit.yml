@@ -29,6 +29,11 @@ jobs:
           python3 experiments/iris_tessa_v3_apparatus_audit_20261025/rgba_identifiability_probe_v1.py \
             --out "$RUNNER_TEMP/rgba_identifiability_report.json"
           cat "$RUNNER_TEMP/rgba_identifiability_report.json"
+      - name: Measure TESSA window semantics
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/tessa_window_semantics_probe_v1.py \
+            --out "$RUNNER_TEMP/tessa_window_semantics_report.json"
+          cat "$RUNNER_TEMP/tessa_window_semantics_report.json"
       - name: Preserve apparatus reports
         uses: actions/upload-artifact@v4
         with:
@@ -36,4 +41,5 @@ jobs:
           path: |
             ${{ runner.temp }}/static_contract_report.json
             ${{ runner.temp }}/rgba_identifiability_report.json
+            ${{ runner.temp }}/tessa_window_semantics_report.json
           if-no-files-found: error

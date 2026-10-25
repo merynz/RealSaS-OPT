@@ -2,6 +2,7 @@
   "schema": "RealSaS.KnightSkinReadinessInspectorTrigger.v1",
   "operation": "KNIGHT_SKIN_READINESS_INSPECT",
   "enabled": true,
+  "request_revision": 1,
   "authority": "READ_ONLY_DIAGNOSTIC__NO_QUALIFICATION_NO_MODEL_PROMOTION_NO_PRODUCT_SKIN_ACTIVATION",
   "notes": "Re-run after the read-only Platform subject identity lookup is deployed. Inspect Platform-owned typed artifact lineage and exact MIRA operational state only; do not require ProductRevision or legacy-witness baseline authority, and do not import, infer, qualify, promote, or activate Skin."
 }

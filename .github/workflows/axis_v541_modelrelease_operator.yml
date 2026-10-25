@@ -1,0 +1,218 @@
+name: axis-v541-modelrelease-operator
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Package/register/evaluate and RESEARCH-promote exact AXIS V5.4.1
+        required: true
+        type: boolean
+        default: false
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
+
+concurrency:
+  group: axis-v541-modelrelease-operator
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.resolve.outputs.should_run }}
+      apply: ${{ steps.resolve.outputs.apply }}
+      expected_sha: ${{ steps.resolve.outputs.expected_sha }}
+    steps:
+      - name: Resolve selected canonical SHA
+        id: sha
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          DISPATCH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = 'workflow_run' ]; then
+            echo "expected_sha=$WORKFLOW_RUN_HEAD_SHA" >> "$GITHUB_OUTPUT"
+          else
+            echo "expected_sha=$DISPATCH_SHA" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.sha.outputs.expected_sha }}
+          fetch-depth: 2
+
+      - name: Resolve typed AXIS V5.4.1 operator request
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EXPECTED_SHA: ${{ steps.sha.outputs.expected_sha }}
+          DISPATCH_APPLY: ${{ inputs.apply }}
+          WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          TRIGGER_PATH: canonical/AXIS_V541_MODELRELEASE_OPERATOR_TRIGGER_V1.json
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, subprocess
+          from pathlib import Path
+          event=os.environ['EVENT_NAME']
+          should_run=False
+          apply=False
+          if event == 'workflow_dispatch':
+              should_run=True
+              apply=os.environ.get('DISPATCH_APPLY','').lower() == 'true'
+          elif event == 'workflow_run':
+              if (os.environ.get('WORKFLOW_RUN_CONCLUSION') == 'success' and
+                      os.environ.get('WORKFLOW_RUN_HEAD_BRANCH') == 'main'):
+                  changed=subprocess.check_output(
+                      ['git','diff-tree','--no-commit-id','--name-only','-r','HEAD^1','HEAD'],
+                      text=True,
+                  ).splitlines()
+                  trigger_path=Path(os.environ['TRIGGER_PATH'])
+                  if str(trigger_path) in changed:
+                      trigger=json.loads(trigger_path.read_text(encoding='utf-8'))
+                      assert trigger.get('schema') == 'RealSaS.AXISV541ModelReleaseOperatorTrigger.v1'
+                      assert trigger.get('operation') == 'AXIS_V541_RESEARCH_MODELRELEASE_PROMOTE'
+                      assert isinstance(trigger.get('enabled'), bool)
+                      assert isinstance(trigger.get('apply'), bool)
+                      assert trigger.get('target_channel') == 'RESEARCH'
+                      assert trigger.get('candidate_promotion_authorized') is False
+                      assert trigger.get('production_promotion_authorized') is False
+                      assert trigger.get('genericity_claim_authorized') is False
+                      should_run=bool(trigger['enabled'])
+                      apply=bool(trigger['apply'])
+          print(f"should_run={'true' if should_run else 'false'}")
+          print(f"apply={'true' if apply else 'false'}")
+          print(f"expected_sha={os.environ['EXPECTED_SHA'].strip().lower()}")
+          PY
+
+  operator:
+    needs: activation
+    if: needs.activation.outputs.should_run == 'true'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      API_ROOT: http://127.0.0.1:8080
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+      APPLY: ${{ needs.activation.outputs.apply }}
+      OUTPUT_PATH: /home/monster/realsas_authority/modelrelease_operator/axis_v541/${{ github.run_id }}-${{ github.run_attempt }}/OPERATOR_RESULT.json
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+
+      - name: Require exact deployed canonical main
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          d=json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
+          assert d['schema'] == 'RealSaS.DeveloperDeployment.v1'
+          assert d['code_sha'] == os.environ['EXPECTED_SHA']
+          PY
+
+      - name: Require healthy loopback Platform API
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os, urllib.request
+          with urllib.request.urlopen(os.environ['API_ROOT'].rstrip('/') + '/v1/ops/status', timeout=10) as r:
+              assert r.status == 200
+              json.load(r)
+          PY
+
+      - name: Execute exact AXIS V5.4.1 operator
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUTPUT_PATH")"
+          args=(
+            "$GITHUB_WORKSPACE/tools/axis_v541_modelrelease_operator_v1.py"
+            --repo "$GITHUB_WORKSPACE"
+            --platform-root "$PLATFORM_ROOT"
+            --authority-root "$AUTHORITY_ROOT"
+            --api-root "$API_ROOT"
+            --source-code-sha "$EXPECTED_SHA"
+            --actor axis-v541-modelrelease-operator
+            --out "$OUTPUT_PATH"
+          )
+          if [ "$APPLY" = 'true' ]; then args+=(--apply); fi
+          "$PLATFORM_ROOT/current/bin/realsas-python" "${args[@]}"
+
+      - name: Verify typed operator receipt and claim boundary
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          r=json.loads(Path(os.environ['OUTPUT_PATH']).read_text())
+          assert r['schema'] == 'RealSaS.AXISV541ModelReleaseOperatorReceipt.v1'
+          assert r['operation'] == 'AXIS_V541_RESEARCH_MODELRELEASE_PROMOTE'
+          assert r['source_code_sha'] == os.environ['EXPECTED_SHA']
+          assert r['deployment_code_sha'] == os.environ['EXPECTED_SHA']
+          assert r['architecture_id'] == 'RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1'
+          assert re.fullmatch(r'[0-9a-f]{64}', r['runtime_content_sha256'])
+          assert r['runtime_size_bytes'] > 0
+          assert r['promotion_policy_id'] == '9389310f-9555-5a42-ba35-a98f531ca725'
+          assert r['promotion_policy_sha256'] == 'e715f018de5c03f5561989829f70a0cff8eeff0a692b2c73fc67de7300e7cfb9'
+          assert r['promotion_channel'] == 'RESEARCH'
+          assert r['new_scientific_pass_minted'] is False
+          assert r['fit8_qualified'] is False
+          assert r['lofo_qualified'] is False
+          assert r['unseen_generalization_qualified'] is False
+          assert r['product_rig_authority_claimed'] is False
+          assert r['compiler_remains_canonical_rig_authority'] is True
+          apply=os.environ['APPLY'] == 'true'
+          assert r['apply'] is apply
+          if not apply:
+              assert r['status'] == 'DRY_RUN_VALIDATED'
+              assert r['platform_mutation_performed'] is False
+          else:
+              assert r['status'] == 'RESEARCH_MODELRELEASE_SELECTED'
+              assert r['platform_mutation_performed'] is True
+              assert r['lifecycle_state'] == 'RESEARCH_QUALIFIED'
+              assert r['channel']['family'] == 'AXIS'
+              assert r['channel']['channel'] == 'RESEARCH'
+              assert r['channel']['model_release_id'] == r['model_release_id']
+              ev={row['scope']: row['result'] for row in r['evaluations']}
+              for scope in ('RUNTIME_PACKAGE_IDENTITY_V1','RUNTIME_SELF_CONTAINED_LOAD_V1','HISTORICAL_FIT1_TERMINAL_V541','AXIS_RUNTIME_AUTHORITY_CONTRACT_V1'):
+                  assert ev[scope] == 'PASS', scope
+              for scope in ('FIT8','LOFO','UNSEEN_GENERALIZATION'):
+                  assert ev[scope] == 'NOT_RUN', scope
+          PY
+
+      - name: Preserve exact AXIS operator receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axis-v541-modelrelease-operator-${{ github.run_id }}
+          path: ${{ env.OUTPUT_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Dispatch fresh Knight reseal after successful RESEARCH selection
+        if: success() && env.APPLY == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/knight_current_subject_input_reseal.yml/dispatches" \
+            -d '{"ref":"main"}'

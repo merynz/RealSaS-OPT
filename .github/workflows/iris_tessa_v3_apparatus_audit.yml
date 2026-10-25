@@ -39,6 +39,12 @@ jobs:
           python3 experiments/iris_tessa_v3_apparatus_audit_20261025/surface_witness_coverage_probe_v1.py \
             --out "$RUNNER_TEMP/surface_witness_coverage_report.json"
           cat "$RUNNER_TEMP/surface_witness_coverage_report.json"
+      - name: Audit current V3 occlusion truth balance
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/occlusion_truth_balance_probe_v1.py \
+            --repo-root . \
+            --out "$RUNNER_TEMP/occlusion_truth_balance_report.json"
+          cat "$RUNNER_TEMP/occlusion_truth_balance_report.json"
       - name: Preserve apparatus reports
         uses: actions/upload-artifact@v4
         with:
@@ -48,4 +54,5 @@ jobs:
             ${{ runner.temp }}/rgba_identifiability_report.json
             ${{ runner.temp }}/tessa_window_semantics_report.json
             ${{ runner.temp }}/surface_witness_coverage_report.json
+            ${{ runner.temp }}/occlusion_truth_balance_report.json
           if-no-files-found: error

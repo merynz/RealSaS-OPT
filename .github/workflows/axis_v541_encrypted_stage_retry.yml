@@ -1,0 +1,120 @@
+name: axis-v541-encrypted-stage-retry
+
+on:
+  push:
+    branches:
+      - probe/axis-v541-drive-transport-v1
+    paths:
+      - '.github/workflows/axis_v541_encrypted_stage_retry.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  stage-sources:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PLATFORM_PY: /home/monster/realsas_platform/current/bin/realsas-python
+      KEY_DIR: /home/monster/realsas_authority/transport_keys/axis_v541_v1
+      SOURCE_DIR: /home/monster/realsas_authority/model_runtime_recovery/axis_v541/sources
+      BASE_SOURCE: /home/monster/realsas_authority/runs/SUBJECT2_KNIGHT_DEMO_V2_20260924/imports/geppetto_stage27_mechanically_meaningful_v2/GEPPETTO_KNIGHT_CHECKPOINT.pt
+      BASE_SHA256: 1c124f876858f6f5b5fd0d4639fc7f2b596a25e962d19de8799ecd64ae59b08f
+      V53_SHA256: 5f527a51c676bf9ef2d82691f305c139b365e921867623b7338e0848c7dea55a
+      V541_SHA256: 4d484c325c3ae2a9a91df422a820cc5ccdf01c804adef4259ff5398cf30e12fb
+      TRANSPORT_PUBLIC_KEY_SHA256: 66437a791026ba5bb8abf1dd69453c7a078070a79aa9827de31fdd1305628cfa
+      V53_URL_CIPHERTEXT_B64: jFXTRoEagPaTECbPAKvpfRgEnI74T90TcI+2APYUTneGSJ3rdNKkyUj+3nBHJk+/X84JSn93y9ox9tE8XPHu7i74oKq69C142u5fNd6GPFc1jf90me7bH/mXNivVLT9vVAXk57YIVkFBLV3WcxleIhU+iugQmx8xub2/OvvopMS0Bx+WZnph+0msOWT6v5BIgSZTonC5BLXyT39N85SG+TpqVjMDZP3zhz4e74+AgorfBeug+RIZrFA1Qcav7Odxx6/j9ICWQSGd4L2DUV8DPXsPgXuu1bFBUNmlbeFz5S2qarY8SNfwV+yckOkY2Bw0+S28b8J+NhZ6JdfIYYBJ2FrMLCzBvlGMVQc/QB5tjVJn2PwPSzRPXuoAWd/bEEfdvIdIyIZEevQvXZwV5ZI6n6odsZkAWCsrSA2SS5BuzIFrSHqANjRQJdtkc67hBpsinL6VWf2TEqTdCj1bchjL5Lu9bi2MT8K5eVwhDB4OBMm5EJCb5E7f5OEj4MQzej9EF0urubYO6bIzFY4fLLzCaCycnpsZhsyOgGqkU0vOe5/jTK4Y8736rH/ycIgL0powiOHMVVQPKZyH/i4baMXRRIEfcsrasHDfVkmz+SaNG7ZqWkv4RjlhkM64AJJURe7/DXBTy8zvFNjk5p7oRYDg/3AKPQNWF3qre2SXaCRQM1k=
+      V541_URL_CIPHERTEXT_B64: UhDOW/zZVS1cw4NYseUxQ/lCdlX1k0D9SRB+5OPNzOetb0QnRnSgZYmvrWIjbS82NdeyH4wQFRNaEplj0xgPAbCbV+NbEaMpzY7/5VSoogb5XNAW74sNCKsZxJGUi8brBrG9JdFV2O0hZk0TfOc9BOhKkq9ee0ViiF9la5uGtsptLpbVWlqzXqz0bsxQ3lU3I4YBih+K7+qTAeGeSONc1sGhm4Lr7LWvQNtNlYFoUsc/xXQDKmSHOT2pGcB09qZWJ9DIM4cv4ZwinAbUmypSPoIsvHIoklTtDnwj9CTn2qg4b8S5mmglbzn+J3QSzaExz/rR0KgRxr5vrp7886svGc4lgS5SS/2cte4703pRWqiP2ZXxT2odt0Iz7DhsO+BcuMN4rY0hRjMdP0K8uPki7SZgFC7kGE5LOwQ8N1mkWCW9LpM+S2J8HIEwXEpgFW7ey9Rr1mBfrUFQXc3xSM9+6T0x5OeHCWQ0/GdM9zP3mlGhAd7SnOsX+ZGcjpLv8wCdGrORzV+LYCerldSvAUWFs7ZQm8YGNQFaYwHD/4sMbJceXsui5fBNoqyy05oBi+Me3o2VlQwyCtIGtAzNdEDpZV60tQa5Icd6RHkbvi98tDW1Pztn4DXL+fDuG2EXsGZeWcUJcF31NoNb8NsHHv7an1xNXm9KcF4w3Ddgp3rkPx0=
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage exact source bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -x "$PLATFORM_PY"
+          private="$KEY_DIR/private.pem"
+          public="$KEY_DIR/public.pem"
+          test -s "$private"
+          actual_key="$(openssl pkey -pubin -in "$public" -outform DER 2>/dev/null | sha256sum | awk '{print $1}')"
+          test "$actual_key" = "$TRANSPORT_PUBLIC_KEY_SHA256"
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          mkdir -p "$SOURCE_DIR"
+
+          verify_sha() {
+            local path="$1" expected="$2"
+            test "$(sha256sum "$path" | awk '{print $1}')" = "$expected"
+          }
+
+          stage_payload() {
+            local name="$1" expected="$2" cipher="$3"
+            local url_file="$tmp/$name.url" payload="$tmp/$name"
+            printf '%s' "$cipher" | base64 -d | \
+              openssl pkeyutl -decrypt -inkey "$private" \
+                -pkeyopt rsa_padding_mode:oaep \
+                -pkeyopt rsa_oaep_md:sha256 \
+                -pkeyopt rsa_mgf1_md:sha256 > "$url_file"
+            "$PLATFORM_PY" - "$url_file" <<'PY'
+          import sys
+          from pathlib import Path
+          from urllib.parse import urlparse
+          u = Path(sys.argv[1]).read_text(encoding='utf-8')
+          p = urlparse(u)
+          assert p.scheme == 'https'
+          assert p.hostname and p.hostname.endswith('.oaiusercontent.com')
+          assert len(u) < 1024
+          PY
+            url="$(cat "$url_file")"
+            curl --fail --location --silent --show-error --connect-timeout 15 --max-time 240 "$url" -o "$payload"
+            verify_sha "$payload" "$expected"
+            dest="$SOURCE_DIR/$name"
+            if [ -e "$dest" ]; then
+              verify_sha "$dest" "$expected"
+            else
+              install -m 0444 "$payload" "$dest"
+            fi
+            verify_sha "$dest" "$expected"
+            echo "SOURCE_STAGE_EXACT_PASS:$name:$expected"
+          }
+
+          verify_sha "$BASE_SOURCE" "$BASE_SHA256"
+          base_dest="$SOURCE_DIR/GEPPETTO_KNIGHT_CHECKPOINT.pt"
+          if [ ! -e "$base_dest" ]; then install -m 0444 "$BASE_SOURCE" "$base_dest"; fi
+          verify_sha "$base_dest" "$BASE_SHA256"
+          echo "SOURCE_STAGE_EXACT_PASS:GEPPETTO_KNIGHT_CHECKPOINT.pt:$BASE_SHA256"
+
+          stage_payload AXIS41_TREE_GRAMMAR_PROGRESS_V53.pt "$V53_SHA256" "$V53_URL_CIPHERTEXT_B64"
+          stage_payload AXIS41_DISCRETE_XYZ_FROZEN_CAUSAL_COMPOSITE_V541.pt "$V541_SHA256" "$V541_URL_CIPHERTEXT_B64"
+
+          "$PLATFORM_PY" - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path(os.environ['SOURCE_DIR'])
+          expected = {
+              'GEPPETTO_KNIGHT_CHECKPOINT.pt': os.environ['BASE_SHA256'],
+              'AXIS41_TREE_GRAMMAR_PROGRESS_V53.pt': os.environ['V53_SHA256'],
+              'AXIS41_DISCRETE_XYZ_FROZEN_CAUSAL_COMPOSITE_V541.pt': os.environ['V541_SHA256'],
+          }
+          files=[]
+          for name,want in expected.items():
+              p=root/name; h=hashlib.sha256(p.read_bytes()).hexdigest(); assert h==want
+              files.append({'name':name,'sha256':h,'size_bytes':p.stat().st_size})
+          receipt={
+            'schema':'RealSaS.AXISV541SourceTransportReceipt.v1',
+            'status':'EXACT_SOURCE_BYTES_STAGED',
+            'transport_public_key_sha256':os.environ['TRANSPORT_PUBLIC_KEY_SHA256'],
+            'source_files':files,
+            'plaintext_url_persisted':False,
+            'training_executed':False,
+            'runtime_packaging_executed':False,
+            'artifact_import_performed':False,
+            'modelrelease_registered':False,
+            'model_promotion_performed':False,
+            'model_inference_executed':False,
+            'scientific_pass_minted':False,
+            'product_authority_minted':False,
+          }
+          (root/'SOURCE_TRANSPORT_RECEIPT.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(receipt,sort_keys=True))
+          PY

@@ -1,0 +1,12 @@
+{
+  "schema": "RealSaS.AXISV541SourceInventoryTrigger.v1",
+  "operation": "AXIS_V541_SOURCE_INVENTORY",
+  "enabled": true,
+  "revision": 1,
+  "authority": "READ_ONLY_HOST_INVENTORY__NO_MODEL_OR_PRODUCT_MUTATION",
+  "expected_components": {
+    "base_checkpoint_sha256": "1c124f876858f6f5b5fd0d4639fc7f2b596a25e962d19de8799ecd64ae59b08f",
+    "v53_progress_sha256": "5f527a51c676bf9ef2d82691f305c139b365e921867623b7338e0848c7dea55a",
+    "v541_composite_sha256": "4d484c325c3ae2a9a91df422a820cc5ccdf01c804adef4259ff5398cf30e12fb"
+  }
+}

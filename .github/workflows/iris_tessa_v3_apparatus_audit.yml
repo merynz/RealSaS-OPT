@@ -51,6 +51,11 @@ jobs:
             --resolution 64 \
             --out "$RUNNER_TEMP/triplane_coordinate_convention_report.json"
           cat "$RUNNER_TEMP/triplane_coordinate_convention_report.json"
+      - name: Measure TESSA scale and token budget
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/tessa_scale_budget_probe_v1.py \
+            --out "$RUNNER_TEMP/tessa_scale_budget_report.json"
+          cat "$RUNNER_TEMP/tessa_scale_budget_report.json"
       - name: Preserve apparatus reports
         uses: actions/upload-artifact@v4
         with:
@@ -62,4 +67,5 @@ jobs:
             ${{ runner.temp }}/surface_witness_coverage_report.json
             ${{ runner.temp }}/occlusion_truth_balance_report.json
             ${{ runner.temp }}/triplane_coordinate_convention_report.json
+            ${{ runner.temp }}/tessa_scale_budget_report.json
           if-no-files-found: error

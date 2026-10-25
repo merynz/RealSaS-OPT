@@ -1,0 +1,17 @@
+{
+  "schema": "RealSaS.AXISV541ModelReleaseOperatorTrigger.v1",
+  "operation": "AXIS_V541_RESEARCH_MODELRELEASE_PROMOTE",
+  "enabled": true,
+  "apply": true,
+  "revision": 1,
+  "target_channel": "RESEARCH",
+  "candidate_promotion_authorized": false,
+  "production_promotion_authorized": false,
+  "genericity_claim_authorized": false,
+  "new_scientific_pass_authorized": false,
+  "product_rig_authority_authorized": false,
+  "compiler_remains_canonical_rig_authority": true,
+  "historical_claim_scope": "FIT1_V5_4_1_TERMINAL_ONLY",
+  "required_policy_id": "9389310f-9555-5a42-ba35-a98f531ca725",
+  "required_policy_sha256": "e715f018de5c03f5561989829f70a0cff8eeff0a692b2c73fc67de7300e7cfb9"
+}

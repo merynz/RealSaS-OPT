@@ -73,6 +73,11 @@ jobs:
             --repo-root . \
             --out "$RUNNER_TEMP/v3_training_route_report.json"
           cat "$RUNNER_TEMP/v3_training_route_report.json"
+      - name: Inventory reference compute geometry
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/reference_compute_inventory_v1.py \
+            --out "$RUNNER_TEMP/reference_compute_inventory.json"
+          cat "$RUNNER_TEMP/reference_compute_inventory.json"
       - name: Preserve apparatus reports
         uses: actions/upload-artifact@v4
         with:
@@ -88,4 +93,5 @@ jobs:
             ${{ runner.temp }}/tessa_scale_budget_report.json
             ${{ runner.temp }}/relation_algebra_report.json
             ${{ runner.temp }}/v3_training_route_report.json
+            ${{ runner.temp }}/reference_compute_inventory.json
           if-no-files-found: error

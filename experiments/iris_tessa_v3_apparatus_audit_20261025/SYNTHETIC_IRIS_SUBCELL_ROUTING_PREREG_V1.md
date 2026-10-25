@@ -16,7 +16,7 @@ The current scene uses a 32x32 learned query grid followed by `ConvTranspose2d(k
 
 ## Synthetic sample
 
-Use an 8x8 source-token grid. Each source token carries:
+Use a **4x4** source-token grid. Each source token carries:
 
 `[x, y, b00, b01, b10, b11]`
 
@@ -24,19 +24,21 @@ where the four `b` values are independent fair bits in `{-1,+1}` and correspond 
 
 - source-token order is randomly permuted every batch;
 - source XY remains attached to each token;
-- target is the resulting 16x16 binary field;
+- target is the resulting **8x8** binary field;
 - independent random bits deliberately remove smoothness/interpolation shortcuts.
+
+The 4x4/8x8 scaling is a bounded hosted-CPU mechanism analogue of the reference 32x32/64x64 route. It is not a claim of reference-scale equivalence.
 
 ## Arm A — CURRENT_LIKE_QUERY_UPSAMPLE
 
 Tiny current-like mechanism:
 
 - source projection to `d_model=64` using content+XY;
-- learned 8x8 scene queries plus coordinate MLP;
+- learned 4x4 scene queries plus coordinate MLP;
 - 2-layer TransformerDecoder, 4 heads, GELU, norm-first;
-- reshape to 8x8;
+- reshape to 4x4;
 - `ConvTranspose2d(64,1,kernel=2,stride=2)`;
-- 16x16 logits trained directly with BCE.
+- 8x8 logits trained directly with BCE.
 
 There is no source-source self-attention before scene queries, matching the relevant placement property of current V3.
 
@@ -46,7 +48,7 @@ No scene-query compression. A shared MLP reads each raw source token and emits f
 
 ## Arm C — RANDOM_LABEL_FIREWALL
 
-Use Arm A inputs unchanged but replace the 16x16 target with independent fair random labels absent from the inputs.
+Use Arm A inputs unchanged but replace the 8x8 target with independent fair random labels absent from the inputs.
 
 ## Seeds
 
@@ -64,7 +66,7 @@ Exactly `731, 947, 1217, 1597, 2017`.
 
 ## Metrics
 
-- bit accuracy over all 16x16 outputs;
+- bit accuracy over all 8x8 outputs;
 - BCE;
 - per-seed and aggregate mean/min/std;
 - parameter count.

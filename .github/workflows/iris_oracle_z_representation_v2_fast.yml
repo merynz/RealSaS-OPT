@@ -1,0 +1,52 @@
+name: iris-oracle-z-representation-v2-fast
+
+on:
+  push:
+    branches:
+      - research/iris-tessa-v3-apparatus-audit-v1
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_V2_FAST_EXECUTION_AMENDMENT_V1.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/oracle_z_representation_probe_v2.py'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/oracle_z_representation_probe_v2_github.py'
+      - '.github/workflows/iris_oracle_z_representation_v2_fast.yml'
+      - 'requirements/torch-cpu.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  oracle-z-v2-scientific:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/torch-cpu.txt
+      - name: Install pinned CPU torch profile
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Execute sealed Oracle-Z V2 scientific court
+        run: |
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/oracle_z_representation_probe_v2_github.py \
+            --out "$RUNNER_TEMP/oracle_z_representation_v2_report.json"
+          cat "$RUNNER_TEMP/oracle_z_representation_v2_report.json"
+      - name: Preserve Oracle-Z V2 report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracle-z-representation-v2-report
+          path: ${{ runner.temp }}/oracle_z_representation_v2_report.json
+          if-no-files-found: error

@@ -1,0 +1,52 @@
+name: oracle-z-v2-platform
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: oracle-z-v2-platform-canonical-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  platform-attempt:
+    # Actions is only the compute/operator surface. Experiment/Attempt/CAS is authority.
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Require exact deployed live canonical main
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
+          import json, os
+          from pathlib import Path
+          deployment = json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
+          assert deployment['code_sha'] == os.environ['EXPECTED_SHA'], 'DEPLOYED_MAIN_DRIFT'
+          PY
+      - name: Verify Oracle-Z Platform contract
+        run: |
+          /home/monster/realsas_platform/current/bin/realsas-python -m pytest -q tests/compiler/test_oracle_z_platform_v2.py
+      - name: Execute or resume the same Platform Attempt
+        run: |
+          set -euo pipefail
+          /home/monster/realsas_platform/current/bin/realsas-python \
+            tools/platform_oracle_z_v2.py \
+            --root /home/monster/realsas_platform \
+            --timeout 9000
+      - name: Preserve operator checkpoint mirror
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracle-z-v2-platform-operator-mirror
+          path: /home/monster/realsas_platform/research-results/iris-tessa-v3-oracle-z-representation-v2
+          if-no-files-found: warn
+          retention-days: 30

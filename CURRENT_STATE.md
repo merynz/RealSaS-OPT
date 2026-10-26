@@ -1,3 +1,14 @@
+> **A100 delivery continuation — 2026-10-26:** The user explicitly selected
+> continuing through the optimized FIT8 notebook. Candidate observation-to-Dense3D
+> and V3.1 TESSA source, chunk-independent rolling attention/incremental KV,
+> semantic-update packing, exact durable resume and heartbeat primitives are now
+> implemented. They remain source foundations: real truth qualification, target
+> parameterization, full trainer/consumer integration and Platform execution seal
+> are open. Read [the delivery work order](docs/research/truth_foundry/A100_DELIVERY_WORK_ORDER_V1.md).
+> A read-only exact-byte teacher recovery/Platform inspection is requested after
+> deployment. Independent Compiler work may continue while future training runs.
+> No notebook readiness, scientific PASS or product activation is claimed.
+
 > **Truth Foundry handoff — 2026-10-26:** The V1 geometric/mechanical response
 > design and same-eight FIT8 research arms are now defined in
 > [Truth Foundry V1](docs/research/truth_foundry/TRUTH_FOUNDRY_V1.md) and

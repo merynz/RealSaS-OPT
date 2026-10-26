@@ -1,0 +1,59 @@
+name: v31-training-source
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'models/iris/v31/**'
+      - 'models/tessa/v31/**'
+      - 'models/training_runtime/**'
+      - 'tests/training_runtime/**'
+      - 'tools/ops/inspect_truth_inputs_v1.py'
+      - '.github/workflows/v31_training_source.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'models/iris/v31/**'
+      - 'models/tessa/v31/**'
+      - 'models/training_runtime/**'
+      - 'tests/training_runtime/**'
+      - 'tools/ops/inspect_truth_inputs_v1.py'
+      - '.github/workflows/v31_training_source.yml'
+permissions:
+  contents: read
+concurrency:
+  group: v31-training-source-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-courts:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache-dependency-path: platform/go.sum
+      - run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt -r requirements/torch-cpu.txt
+      - name: Models, rolling attention, packing, resume and telemetry
+        run: python -m unittest discover -s tests/training_runtime -v
+      - name: Existing Truth Foundry source regressions
+        run: python -m unittest discover -s tests/truth_foundry -v
+      - name: Inspect source dependencies
+        run: |
+          mkdir -p source-inspection
+          python tools/realsas_architecture.py --json-out source-inspection/map.json map
+          python tools/realsas_architecture.py --json-out source-inspection/impact.json impact --path models/iris/v31 --path models/tessa/v31 --path models/training_runtime --path tools/ops/inspect_truth_inputs_v1.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v31-source-inspection-${{ github.sha }}
+          path: source-inspection/
+          retention-days: 14

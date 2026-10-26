@@ -1,0 +1,59 @@
+{
+  "schema": "RealSaS.TruthInputInspectionRequest.v1",
+  "enabled": true,
+  "read_only": true,
+  "search_roots": [
+    {
+      "root": "authority",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers"
+    },
+    {
+      "root": "platform",
+      "relative": "artifacts/cas"
+    }
+  ],
+  "max_search_seconds": 60,
+  "max_directories": 100000,
+  "artifacts": [
+    {
+      "file_name": "fit8_snake_v1.teacher.npz",
+      "sha256": "9cf4fef3873bfd551beb5a2c2ca48ff691d6fbd60d320397044c2128c2da3798",
+      "size_bytes": 596281
+    },
+    {
+      "file_name": "fit8_bat_v1.teacher.npz",
+      "sha256": "dfb5f81f34d353a751bfb678e895c14e08b061f7517ce31b2be9b2706a3bb930",
+      "size_bytes": 312718
+    },
+    {
+      "file_name": "fit8_trex_v1.teacher.npz",
+      "sha256": "3997476dbac532026984039d2e12d683036d37039fdabe0017f69518b8de52fa",
+      "size_bytes": 1091930
+    },
+    {
+      "file_name": "fit8_horse_v1.teacher.npz",
+      "sha256": "600899aba1cef4af7433b2ae750a47238c5f84c7231a68a294457bfd98033613",
+      "size_bytes": 3615450
+    },
+    {
+      "file_name": "fit8_spider_v1.teacher.npz",
+      "sha256": "f146109f1e4e264cc647db9a7b8fd47b5f91862f75c508b1634a373480074a54",
+      "size_bytes": 1428167
+    },
+    {
+      "file_name": "fit8_greenblob_v1.teacher.npz",
+      "sha256": "9567f1f0f20c1892e179abfab7e8aae117245e9501dd4592290830128c54ca0a",
+      "size_bytes": 1041331
+    },
+    {
+      "file_name": "fit8_shark_v1.teacher.npz",
+      "sha256": "65eddea1bd430a58c002c4890b3bb6a21826ff4276e7b4eb243902c3bf44e43e",
+      "size_bytes": 67842
+    },
+    {
+      "file_name": "fit8_george_v1.teacher.npz",
+      "sha256": "04380b00fed04226afb9f6a1466e549ecbb24a875a4641720ce70c1b208c7458",
+      "size_bytes": 16760353
+    }
+  ]
+}

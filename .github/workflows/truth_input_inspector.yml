@@ -1,0 +1,71 @@
+name: truth-input-inspector
+on:
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: truth-input-inspector
+  cancel-in-progress: false
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.resolve.outputs.should_run }}
+      expected_sha: ${{ steps.resolve.outputs.expected_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
+      - id: resolve
+        env:
+          EVENT: ${{ github.event_name }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, subprocess
+          from pathlib import Path
+          sha=subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip()
+          changed=subprocess.check_output(['git','diff-tree','--no-commit-id','--name-only','-r','HEAD^1','HEAD'], text=True).splitlines()
+          request='canonical/TRUTH_INPUT_INSPECTION_REQUEST_V1.json'
+          enabled=json.loads(Path(request).read_text()).get('enabled') is True
+          selected=os.environ['EVENT']=='workflow_dispatch' or (os.environ['CONCLUSION']=='success' and os.environ['HEAD_BRANCH']=='main' and request in changed)
+          print(f"should_run={'true' if enabled and selected else 'false'}")
+          print(f'expected_sha={sha}')
+          PY
+  inspect:
+    needs: activation
+    if: needs.activation.outputs.should_run == 'true'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      OUTPUT: /home/monster/realsas_authority/truth_input_inspection/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+      - name: Require exact canonical main
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+      - name: Recover only exact requested bytes and inspect Platform read-only
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/ops/inspect_truth_inputs_v1.py \
+            --request canonical/TRUTH_INPUT_INSPECTION_REQUEST_V1.json \
+            --platform-root "$PLATFORM_ROOT" --authority-root "$AUTHORITY_ROOT" \
+            --expected-main-sha "$EXPECTED_SHA" --output "$OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: truth-input-inspection-${{ github.run_id }}
+          path: ${{ env.OUTPUT }}/
+          if-no-files-found: error
+          retention-days: 14

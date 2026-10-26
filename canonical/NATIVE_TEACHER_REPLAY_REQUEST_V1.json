@@ -1,0 +1,176 @@
+{
+  "schema": "RealSaS.NativeTeacherReplayRequest.v1",
+  "enabled": true,
+  "lane": "SEALED_EVIDENCE_REPRODUCIBILITY_ONLY",
+  "training_allowed": false,
+  "new_interventions_allowed": false,
+  "blender_version": "Blender 4.5.14 LTS",
+  "maximum_seconds_per_subject": 600,
+  "source_closure_sha256": {
+    "tools/iris_vnext/blender_authored_teacher_export_v1.py": "cafeee8de94524b58cf1345bf990c1afffb418ba039326e41f47481ddd02bfbf",
+    "tools/iris_vnext/blender_authored_teacher_export_v2.py": "8cb821c3d1439cb9a602fcb1c405f5a3cdf91ac6efb4deab0199a6d3eb5eedf2",
+    "tools/iris_vnext/blender_authored_teacher_export_v3.py": "c8335f06f1e32a18c1ace510d280aa8274bca3920976c80b06a1cfac66b1a140"
+  },
+  "subjects": [
+    {
+      "subject_id": "fit8_snake_v1",
+      "source": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/raw/quaternius/quaternius-easy-enemy/FBX/Snake.fbx",
+        "sha256": "553092a2e1c68ab4e49ce5c139942228a77a911b25c78635aca7901db0a8d53d"
+      },
+      "observation_admission": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/observations/fit8_snake_v1/IRIS_OBSERVATION_ADMISSION.json",
+        "sha256": "b98bb8a093b8493f4a404a7f7f26bce81493ee530b3d4189cb0dd553aacbc7bf"
+      },
+      "expected_teacher": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_snake_v1.teacher.npz",
+        "sha256": "9cf4fef3873bfd551beb5a2c2ca48ff691d6fbd60d320397044c2128c2da3798"
+      },
+      "expected_receipt": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_snake_v1.teacher.npz.json",
+        "sha256": "c7d40d69512ebcc594be0dc50fb7bf466444d49391056538471202fd39083476"
+      },
+      "max_frames_per_clip": 16
+    },
+    {
+      "subject_id": "fit8_bat_v1",
+      "source": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/raw/quaternius/quaternius-cute-animated-monsters/glTF/Bat.gltf",
+        "sha256": "47574f68f8c9e1c953a09f79e4b5f5fb1c07e240130d208fbd63bd91d0ecb63c"
+      },
+      "observation_admission": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/observations/fit8_bat_v1/IRIS_OBSERVATION_ADMISSION.json",
+        "sha256": "4aedc1448ea2730eb7cdccbf4a0473bca8ac0e1a51b5d35b525c61970606e0da"
+      },
+      "expected_teacher": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_bat_v1.teacher.npz",
+        "sha256": "dfb5f81f34d353a751bfb678e895c14e08b061f7517ce31b2be9b2706a3bb930"
+      },
+      "expected_receipt": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_bat_v1.teacher.npz.json",
+        "sha256": "0efd057880ef455a76c56473dcc74c768f5062d8acf0ad7b1b3867fb10d6f1be"
+      },
+      "max_frames_per_clip": 16
+    },
+    {
+      "subject_id": "fit8_trex_v1",
+      "source": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/raw/quaternius/quaternius-animated-dinosaurs/FBX/Trex.fbx",
+        "sha256": "db4ae6f657f32ce2253851c3eeca70602be2572b7f5e7fdda3c4c6e7132dea8c"
+      },
+      "observation_admission": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/observations/fit8_trex_v1/IRIS_OBSERVATION_ADMISSION.json",
+        "sha256": "7f038efa8938384edbc922432aafe743321b46cb33da4e75697a6876dab27532"
+      },
+      "expected_teacher": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_trex_v1.teacher.npz",
+        "sha256": "3997476dbac532026984039d2e12d683036d37039fdabe0017f69518b8de52fa"
+      },
+      "expected_receipt": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_trex_v1.teacher.npz.json",
+        "sha256": "ef285f0b2f49119dc7946d15dbe6eb96749d491a9bd7204f41bf26ef379e3d0a"
+      },
+      "max_frames_per_clip": 16
+    },
+    {
+      "subject_id": "fit8_horse_v1",
+      "source": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/raw/quaternius/quaternius-ultimate-animated-animals/glTF/Horse.gltf",
+        "sha256": "3deb61550dff1d2786d04b6e8559d63ad3907d6ab606ba28ce0af074ed96341b"
+      },
+      "observation_admission": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/observations/fit8_horse_v1/IRIS_OBSERVATION_ADMISSION.json",
+        "sha256": "6b3c18ffb4efe3dcdfd694c9dea532b05b305451658e04690ea99ec72d4faab7"
+      },
+      "expected_teacher": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_horse_v1.teacher.npz",
+        "sha256": "600899aba1cef4af7433b2ae750a47238c5f84c7231a68a294457bfd98033613"
+      },
+      "expected_receipt": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_horse_v1.teacher.npz.json",
+        "sha256": "479a735e876e1bcff5f9c166a7cc94d386721e1b4e54a77279ae5852c59b159e"
+      },
+      "max_frames_per_clip": 16
+    },
+    {
+      "subject_id": "fit8_spider_v1",
+      "source": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/raw/quaternius/quaternius-easy-enemy/FBX/Spider.fbx",
+        "sha256": "01e2289dcc20cb1636b8339be79b9981990bc7e3bb6bda066aa7824caab33946"
+      },
+      "observation_admission": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/observations/fit8_spider_v1/IRIS_OBSERVATION_ADMISSION.json",
+        "sha256": "c91036926ff4de79c35b86c6a60bbe6c827fdd550d3039676a04d6fc8728a854"
+      },
+      "expected_teacher": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_spider_v1.teacher.npz",
+        "sha256": "f146109f1e4e264cc647db9a7b8fd47b5f91862f75c508b1634a373480074a54"
+      },
+      "expected_receipt": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_spider_v1.teacher.npz.json",
+        "sha256": "584388602480b8dccafdfa39aa266400064d92334c2af7ae37b03789a3af7f3f"
+      },
+      "max_frames_per_clip": 16
+    },
+    {
+      "subject_id": "fit8_greenblob_v1",
+      "source": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/raw/quaternius/quaternius-ultimate-monsters/Blob/glTF/GreenBlob.gltf",
+        "sha256": "e2d2049ebe8d243bd0f60a3f48a7e174444f641ebc40cbea2f6c23cb97a82519"
+      },
+      "observation_admission": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/observations/fit8_greenblob_v1/IRIS_OBSERVATION_ADMISSION.json",
+        "sha256": "446dc26827cad612d6c67432868070084cbc94828bfed080a8d8533e5704df11"
+      },
+      "expected_teacher": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_greenblob_v1.teacher.npz",
+        "sha256": "9567f1f0f20c1892e179abfab7e8aae117245e9501dd4592290830128c54ca0a"
+      },
+      "expected_receipt": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_greenblob_v1.teacher.npz.json",
+        "sha256": "1d2fd5e2c0022cc077d9c74b040f4eff24647fc4c8a8092bb192610fc43ee3a7"
+      },
+      "max_frames_per_clip": 16
+    },
+    {
+      "subject_id": "fit8_shark_v1",
+      "source": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/raw/quaternius/quaternius-animated-fish/FBX/Shark.fbx",
+        "sha256": "fee1cfe578643cefb06457332b5d323f4883eba2515eb255ae0f2abb497a75c9"
+      },
+      "observation_admission": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/observations/fit8_shark_v1/IRIS_OBSERVATION_ADMISSION.json",
+        "sha256": "9e828604ca26b2eecee4f0ed62a3a255cd462f27620e07ccd37b363bc6eecea3"
+      },
+      "expected_teacher": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_shark_v1.teacher.npz",
+        "sha256": "65eddea1bd430a58c002c4890b3bb6a21826ff4276e7b4eb243902c3bf44e43e"
+      },
+      "expected_receipt": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_shark_v1.teacher.npz.json",
+        "sha256": "ef8f3ee361ece4094ec02796a26c6c1459e6fbd97c9fbf01b8471ab6774a6da5"
+      },
+      "max_frames_per_clip": 16
+    },
+    {
+      "subject_id": "fit8_george_v1",
+      "source": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/raw/quaternius/quaternius-animated-mech/Textured/glTF/George.gltf",
+        "sha256": "eccc45d82701f32d67b4480346757b1656c649d9d40e4a1484f57d660596285e"
+      },
+      "observation_admission": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/stage01/observations/fit8_george_v1/IRIS_OBSERVATION_ADMISSION.json",
+        "sha256": "a1db5b171722a9154ab0d447c666028e8fa50085d9e2d804bcdb9ffe96fcf664"
+      },
+      "expected_teacher": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_george_v1.teacher.npz",
+        "sha256": "04380b00fed04226afb9f6a1466e549ecbb24a875a4641720ce70c1b208c7458"
+      },
+      "expected_receipt": {
+        "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_george_v1.teacher.npz.json",
+        "sha256": "c602aa1efb915dc9cf86be3388a0357be2e9a4926bf84a82b4fa0ea5214ac705"
+      },
+      "max_frames_per_clip": 16
+    }
+  ]
+}

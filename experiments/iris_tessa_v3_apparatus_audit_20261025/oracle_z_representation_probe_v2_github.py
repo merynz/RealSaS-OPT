@@ -5,6 +5,7 @@ import argparse
 import importlib.util
 import json
 import os
+import sys
 from pathlib import Path
 
 CORE_PATH = Path(__file__).with_name("oracle_z_representation_probe_v2.py")
@@ -15,6 +16,11 @@ def _load_core():
     if spec is None or spec.loader is None:
         raise RuntimeError("ORACLE_Z_V2_CORE_IMPORT_FAILED")
     module = importlib.util.module_from_spec(spec)
+    # dataclasses resolves postponed annotations through sys.modules while the
+    # module body is executing. Register the dynamically loaded module before
+    # exec_module; this is wrapper plumbing only and does not alter the sealed
+    # scientific core or any court constant.
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 

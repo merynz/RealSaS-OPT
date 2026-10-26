@@ -1,0 +1,38 @@
+name: iris-extraction-xyz-fps-interaction-v1
+
+on:
+  push:
+    branches:
+      - research/iris-tessa-v3-apparatus-audit-v1
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/EXTRACTION_XYZ_FPS_INTERACTION_PREREG_V1.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/extraction_xyz_fps_interaction_probe_v1.py'
+      - '.github/workflows/iris_extraction_xyz_fps_interaction_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extraction-xyz-fps-interaction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Execute sealed interaction court
+        run: |
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/extraction_xyz_fps_interaction_probe_v1.py \
+            --out "$RUNNER_TEMP/extraction_xyz_fps_interaction_v1_report.json"
+          cat "$RUNNER_TEMP/extraction_xyz_fps_interaction_v1_report.json"
+      - name: Preserve report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-extraction-xyz-fps-interaction-v1-report
+          path: ${{ runner.temp }}/extraction_xyz_fps_interaction_v1_report.json
+          if-no-files-found: error

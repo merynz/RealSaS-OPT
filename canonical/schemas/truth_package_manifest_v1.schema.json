@@ -1,0 +1,417 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "subject_key",
+    "source_sha256",
+    "topology_sha256",
+    "teacher_scene_sha256",
+    "intervention_spec_sha256",
+    "observation_bundle_sha256",
+    "producer_source_commit",
+    "coordinate_contract",
+    "families",
+    "payloads",
+    "authority"
+  ],
+  "properties": {
+    "schema": {
+      "const": "RealSaS.TruthPackageManifest.v1"
+    },
+    "subject_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "topology_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "teacher_scene_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "intervention_spec_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "observation_bundle_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "producer_source_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "coordinate_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "frame",
+        "length_unit",
+        "seconds_per_time_unit",
+        "normalization_sha256"
+      ],
+      "properties": {
+        "frame": {
+          "const": "SOURCE_NORMALIZED"
+        },
+        "length_unit": {
+          "enum": [
+            "METRE",
+            "SOURCE_UNIT"
+          ]
+        },
+        "seconds_per_time_unit": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "normalization_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "families": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "family",
+          "measurement_status",
+          "observability",
+          "witness_sha256",
+          "validity_array",
+          "reason",
+          "payload_arrays"
+        ],
+        "properties": {
+          "family": {
+            "enum": [
+              "SURFACE_TRAJECTORY",
+              "SURFACE_METRIC_STRAIN",
+              "RELATIVE_AFFINE_TRANSPORT",
+              "ORIENTED_GAP_AND_VELOCITY",
+              "ADMISSIBLE_MOTION_SUBSPACE",
+              "PHYSICAL_IMPULSE_RESPONSE",
+              "RAY_COMPOSITING",
+              "RASTER_EDIT_RESPONSE",
+              "BOUNDARY_RESPONSE",
+              "TEMPORAL_RESPONSE"
+            ]
+          },
+          "measurement_status": {
+            "enum": [
+              "MEASURED",
+              "UNAVAILABLE",
+              "UNSUPPORTED"
+            ]
+          },
+          "observability": {
+            "enum": [
+              "OBSERVATION_CONDITIONED",
+              "MECHANISM_CONDITIONAL",
+              "PRIVILEGED_ONLY",
+              "AMBIGUOUS",
+              "UNKNOWN"
+            ]
+          },
+          "witness_sha256": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "validity_array": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "payload_arrays": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "measurement_status": {
+                  "const": "MEASURED"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "validity_array": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "payload_arrays": {
+                  "minItems": 1
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "validity_array": {
+                  "type": "null"
+                },
+                "payload_arrays": {
+                  "maxItems": 0
+                },
+                "observability": {
+                  "enum": [
+                    "UNKNOWN",
+                    "PRIVILEGED_ONLY"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "observability": {
+                  "enum": [
+                    "OBSERVATION_CONDITIONED",
+                    "MECHANISM_CONDITIONAL"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "witness_sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "family"
+            ],
+            "properties": {
+              "family": {
+                "const": "SURFACE_TRAJECTORY"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "family"
+            ],
+            "properties": {
+              "family": {
+                "const": "SURFACE_METRIC_STRAIN"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "family"
+            ],
+            "properties": {
+              "family": {
+                "const": "RELATIVE_AFFINE_TRANSPORT"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "family"
+            ],
+            "properties": {
+              "family": {
+                "const": "ORIENTED_GAP_AND_VELOCITY"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "family"
+            ],
+            "properties": {
+              "family": {
+                "const": "ADMISSIBLE_MOTION_SUBSPACE"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "family"
+            ],
+            "properties": {
+              "family": {
+                "const": "PHYSICAL_IMPULSE_RESPONSE"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "family"
+            ],
+            "properties": {
+              "family": {
+                "const": "RAY_COMPOSITING"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "family"
+            ],
+            "properties": {
+              "family": {
+                "const": "RASTER_EDIT_RESPONSE"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "family"
+            ],
+            "properties": {
+              "family": {
+                "const": "BOUNDARY_RESPONSE"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "family"
+            ],
+            "properties": {
+              "family": {
+                "const": "TEMPORAL_RESPONSE"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    },
+    "payloads": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256",
+          "dtype",
+          "shape"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^arrays/[a-z][a-z0-9_]*\\.npy$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "dtype": {
+            "type": "string",
+            "pattern": "^[<|][biuf][1248]$"
+          },
+          "shape": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "authority": {
+      "const": "UNQUALIFIED_DERIVED_MEASUREMENTS"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:realsas:truth-package-manifest:v1",
+  "description": "Local staging envelope. Cross-reference, family array shape, teacher equivalence, observability and Registry qualification checks are additional mandatory courts."
+}

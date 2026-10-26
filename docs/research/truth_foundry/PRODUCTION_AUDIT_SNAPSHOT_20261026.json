@@ -1,0 +1,31 @@
+{
+  "schema": "RealSaS.TruthFoundryProductionAuditSnapshot.v1",
+  "source_snapshot_sha": "311ade52c6c118d3d1d88076507fc6b7fc0d3b1f",
+  "workflow_run": 40352421537,
+  "job_id": 121675884503,
+  "artifact_id": 12663594482,
+  "receipt": {
+    "canonical_skin_minted": false,
+    "compiler_run_id": "KNIGHT_CURRENT_SKIN_PARENTS_40352421537_1",
+    "error": "SKIN_PARENT_PLATFORM_API_409:/v1/capabilities/run:{\"error\":\"ERROR: MODEL_SELECTION_CHANNEL_MISSING:IRIS:RESEARCH (SQLSTATE P0001)\"}\n",
+    "error_type": "RuntimeError",
+    "genericity_claimed": false,
+    "mira_inference_executed": false,
+    "model_promotion_performed": false,
+    "product_revision_minted": false,
+    "product_skin_activated": false,
+    "requested_subject_input_id": "15949483-9674-4d6a-8938-68d22272e103",
+    "schema": "RealSaS.CurrentSkinParentCapabilityExecutionFailure.v1",
+    "source_code_sha": "311ade52c6c118d3d1d88076507fc6b7fc0d3b1f",
+    "status": "FAIL_CURRENT_TYPED_SKIN_PARENT_EXECUTION",
+    "subject_slug": "knight"
+  },
+  "readiness_workflow": {
+    "run": 40352246444,
+    "activation": "SUCCESS",
+    "inspector": "SKIPPED",
+    "artifact_produced": false
+  },
+  "interpretation": "This run reached the Platform API on the self-hosted runner, then failed because IRIS RESEARCH model selection was missing. It is not evidence of a Go language or GitHub execution ceiling. Do not bypass release/channel admission.",
+  "live_refresh": "REQUESTED_AFTER_NEXT_EXACT_MAIN_DEPLOYMENT"
+}

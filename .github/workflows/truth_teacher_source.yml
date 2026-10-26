@@ -1,0 +1,38 @@
+name: truth-teacher-source
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/truth_foundry/**'
+      - 'tools/platform_cohort_bootstrap_v1.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/truth_foundry_v1.py'
+      - 'canonical/TRUTH_CALIBRATION*'
+      - 'canonical/TEACHER_KINEMATIC*'
+      - 'canonical/FIT8_TRUTH_CALIBRATION*'
+      - 'tests/truth_foundry/**'
+      - 'tests/fixtures/source_scene_v2/blender_teacher_scene_smoke.py'
+      - '.github/workflows/truth_teacher_source.yml'
+permissions:
+  contents: read
+concurrency:
+  group: truth-teacher-source-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-synthetic-witness:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run exact Blender on a synthetic fixture only
+        run: |
+          "$HOME/.cache/realsas/blender/blender-4.5.14-linux-x64/blender" -b --factory-startup \
+            --python tests/fixtures/source_scene_v2/blender_teacher_scene_smoke.py -- \
+            --output "$RUNNER_TEMP/teacher-source-witness-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: teacher-source-synthetic-witness-${{ github.sha }}
+          path: ${{ runner.temp }}/teacher-source-witness-${{ github.run_id }}-${{ github.run_attempt }}/SMOKE_REPORT.json
+          if-no-files-found: warn
+          retention-days: 14

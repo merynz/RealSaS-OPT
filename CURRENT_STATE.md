@@ -1,3 +1,13 @@
+> **Source response calibration — 2026-10-27:** All eight historical native
+> teachers now have exact-array and exact-NPZ replay proof (run 40405919318).
+> The new isolated kinematic/UV/material-input producer and same-cohort Platform
+> calibration path are implemented for source validation; real calibration
+> artifacts must still be read back. A required external seal holds the learned
+> boundary; no old/new training is launched by calibration. Read
+> [the calibration scope](docs/research/truth_foundry/SOURCE_RESPONSE_CALIBRATION_V1.md).
+> Renderer truth, qualification, final targets/trainer binding and notebook remain
+> open. Do not relabel native replay or source CI as causal truth admission.
+
 > **A100 delivery continuation — 2026-10-26:** The user explicitly selected
 > continuing through the optimized FIT8 notebook. Candidate observation-to-Dense3D
 > and V3.1 TESSA source, chunk-independent rolling attention/incremental KV,

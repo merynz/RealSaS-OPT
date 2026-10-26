@@ -1,0 +1,10 @@
+{
+  "schema": "RealSaS.StageReleaseParameters.v1",
+  "stages": {
+    "09_IRIS_FIT_PREREGISTERED": {
+      "external_evidence_roles": [
+        "qualified_truth_and_v31_training_seal"
+      ]
+    }
+  }
+}

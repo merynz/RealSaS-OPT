@@ -1,0 +1,57 @@
+{
+  "schema": "RealSaS.Fit8PlatformCampaign.v1",
+  "date": "2026-10-13",
+  "purpose": "SAME_FIT8_SOURCE_RESPONSE_APPARATUS_CALIBRATION__FULL_RELEASED_TARGET_REMAINS_PRODUCT_CLOSURE",
+  "canonical_branch": "main",
+  "execution_lane": "PLATFORM_RESEARCH_CAMPAIGN",
+  "compiler_plan": "canonical/TRUTH_CALIBRATION_EXECUTION_PLAN_V1.json",
+  "required_stage_count": 44,
+  "required_entry_stage_id": "01_SOURCE_BYTES_SEALED",
+  "required_target_stage_id": "46_PRODUCT_CLOSURE_SEAL",
+  "cohort_subject_keys": [
+    "fit8_snake_v1",
+    "fit8_bat_v1",
+    "fit8_trex_v1",
+    "fit8_horse_v1",
+    "fit8_spider_v1",
+    "fit8_greenblob_v1",
+    "fit8_shark_v1",
+    "fit8_george_v1"
+  ],
+  "regression_subject_keys": [
+    "knight"
+  ],
+  "rules": {
+    "every_cohort_subject_enters_at_source_contract": true,
+    "camera_scene_pose_observation_and_normalization_must_be_qualified_per_subject": true,
+    "same_released_43_stage_dag_for_all_members": true,
+    "same_stage_contracts_and_courts_for_all_members": true,
+    "subject_specific_production_code_forbidden": true,
+    "silent_easier_subject_replacement_forbidden": true,
+    "failed_subject_must_remain_visible": true,
+    "generic_fix_must_preserve_other_cohort_members": true,
+    "knight_regression_must_be_preserved": true,
+    "external_gpu_compute_is_transport_not_scientific_authority": true,
+    "imported_fit_receipt_cannot_mint_qualification": true,
+    "training_loss_cannot_mint_fit8_pass": true,
+    "regression_excluded_from_new_truth_corpus_explicitly": true
+  },
+  "shared_model_program": {
+    "public_order": [
+      "IRIS",
+      "TESSA",
+      "AXIS",
+      "MIRA"
+    ],
+    "cohort_parameterization": "ONE_SHARED_PARAMETER_SET_PER_MODEL_ACROSS_ALL_EIGHT_FIT8_SUBJECTS",
+    "knight_role": "SEPARATE_FIXED_REGRESSION_WITNESS__NOT_A_FIT8_TRAINING_SUBJECT",
+    "model_generalization_claimed": false
+  },
+  "closure_policy": {
+    "fit8_scientific_pass_claimed_by_campaign_coordinator": false,
+    "campaign_full_closure_requires_all_eight_cohort_attempts_completed": true,
+    "campaign_full_closure_requires_knight_regression_completed": true,
+    "per_subject_fail_closed_stage_results_remain_authoritative": true,
+    "coordinator_role": "DURABLE_GROUPING_SCHEDULING_AND_ROLLUP_ONLY"
+  }
+}

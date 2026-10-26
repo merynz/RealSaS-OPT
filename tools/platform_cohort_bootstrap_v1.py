@@ -381,6 +381,12 @@ def main(args):
     require(int(plan["stage_count"]) == int(campaign_contract["required_stage_count"]),
             "COHORT_BOOTSTRAP_PLAN_STAGE_COUNT_DRIFT")
     actor = str(descriptor.get("actor") or ACTOR_DEFAULT)
+    overlay = descriptor.get("additional_manifest_sections") or {}
+    regression_overlay = descriptor.get("regression_additional_manifest_sections") or {}
+    allowed_overlay_keys = set(plan_manifest_keys(plan))
+    for value in (overlay, regression_overlay):
+        require(isinstance(value, dict) and set(value).issubset(allowed_overlay_keys),
+                "COHORT_ADDITIONAL_MANIFEST_READ_SET_UNDECLARED")
     hydration_root = (args.platform_root / "hydration" / "cohorts").resolve()
 
     bundle_hydrated = hydrate_row(
@@ -423,6 +429,8 @@ def main(args):
         sections = make_cohort_manifest_sections(
             subject, bundle_root, index, shared_path, str(shared_ref["sha256"]),
             policy_path, sha256_file(policy_path), prereg_path, prereg_sha, license_defaults)
+        require(not set(overlay).intersection(sections), "COHORT_ADDITIONAL_MANIFEST_SHADOWS_EXISTING_INPUT")
+        sections.update(overlay)
         platform_id = ensure_subject(args.api, key, str(subject["display_name"]), actor)
         input_id = seal_sections(args.api, platform_id, sections, actor,
                                  f"urn:realsas:cohort-bootstrap:{descriptor['campaign_name']}:{key}")
@@ -437,6 +445,9 @@ def main(args):
         cfg = witness_cfgs[key]
         manifest, evidence_key = clone_regression_manifest(repo, args.authority_root, cfg)
         sections = {name: manifest[name] for name in allowed_keys if name in manifest}
+        require(not set(regression_overlay).intersection(sections), "COHORT_REGRESSION_OVERLAY_SHADOWS_EXISTING_INPUT")
+        sections.update(regression_overlay)
+        manifest.update(regression_overlay)
         require(sections, "COHORT_REGRESSION_MANIFEST_SECTIONS_EMPTY:" + key)
         platform_id = ensure_subject(args.api, key, str(cfg.get("display_name") or key), actor)
         input_id = seal_sections(args.api, platform_id, sections, actor,
@@ -454,6 +465,11 @@ def main(args):
             }
         },
     }
+    for stage_id, parameters in (descriptor.get("additional_stage_parameters") or {}).items():
+        require(stage_id in {s["id"] for s in plan["stages"]}, "COHORT_EXTRA_STAGE_PARAMETER_UNKNOWN_STAGE")
+        require(stage_id not in stage_params["stages"], "COHORT_EXTRA_STAGE_PARAMETER_SHADOWS_EXISTING_CONTRACT")
+        require(isinstance(parameters, dict), "COHORT_EXTRA_STAGE_PARAMETERS_OBJECT_REQUIRED")
+        stage_params["stages"][stage_id] = parameters
     release_request = snapshot(
         plan, name=descriptor["campaign_name"] + "__RESEARCH_RELEASE", purpose="RESEARCH",
         created_by=actor, stage_parameters=stage_params)

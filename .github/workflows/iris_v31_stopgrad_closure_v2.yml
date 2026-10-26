@@ -1,0 +1,106 @@
+name: iris-v31-stopgrad-closure-v2
+
+on:
+  push:
+    branches:
+      - research/iris-tessa-v3-apparatus-audit-v1
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/continuous_joint_system_probe_v2.py'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/observation_endpoint_interaction_probe_v2.py'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/CONTINUOUS_JOINT_SYSTEM_PREREG_V2.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/OBSERVATION_ENDPOINT_INTERACTION_PREREG_V2.md'
+      - '.github/workflows/iris_v31_stopgrad_closure_v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONPATH: .
+  PYTHONHASHSEED: '0'
+  OMP_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+
+jobs:
+  continuous-joint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/torch-cpu.txt
+      - run: python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Verify relation-only gradient boundaries
+        run: python experiments/iris_tessa_v3_apparatus_audit_20261025/stopgrad_boundary_check_v2.py
+      - name: Run unchanged full joint apparatus with selected ownership
+        run: |
+          python -u experiments/iris_tessa_v3_apparatus_audit_20261025/continuous_joint_system_probe_v2.py \
+            --selection experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_FINAL_CARRIER_SELECTION_V6.json \
+            --out "$RUNNER_TEMP/continuous_joint_system_v2_report.json"
+          cat "$RUNNER_TEMP/continuous_joint_system_v2_report.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iris-continuous-joint-system-v2-report
+          path: ${{ runner.temp }}/continuous_joint_system_v2_report.json
+          if-no-files-found: error
+          retention-days: 30
+
+  endpoint-seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [731, 947, 1217, 1597, 2017]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/torch-cpu.txt
+      - run: python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Execute all five original arms for exact fixed seed
+        run: |
+          python -u experiments/iris_tessa_v3_apparatus_audit_20261025/observation_endpoint_interaction_probe_v2.py \
+            --seed ${{ matrix.seed }} --out "$RUNNER_TEMP/endpoint_seed_${{ matrix.seed }}.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: endpoint-v2-seed-${{ matrix.seed }}
+          path: ${{ runner.temp }}/endpoint_seed_${{ matrix.seed }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  endpoint-verdict:
+    needs: endpoint-seed
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/torch-cpu.txt
+      - run: python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: endpoint-v2-seed-*
+          path: ${{ runner.temp }}/endpoint-shards
+      - name: Require complete immutable seed/arm matrix and evaluate original gates
+        run: |
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/observation_endpoint_interaction_probe_v2.py \
+            --aggregate "$RUNNER_TEMP/endpoint-shards" \
+            --out "$RUNNER_TEMP/observation_endpoint_interaction_v2_report.json"
+          cat "$RUNNER_TEMP/observation_endpoint_interaction_v2_report.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-observation-endpoint-interaction-v2-report
+          path: ${{ runner.temp }}/observation_endpoint_interaction_v2_report.json
+          if-no-files-found: error
+          retention-days: 30

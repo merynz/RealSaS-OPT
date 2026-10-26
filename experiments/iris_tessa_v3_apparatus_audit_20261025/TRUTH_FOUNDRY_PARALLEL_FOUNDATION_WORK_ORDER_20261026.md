@@ -73,3 +73,35 @@ principles remain applicable.
 No full-corpus rebuild, raw mutation, new subject selection, per-subject model,
 hidden ownership taxonomy, training run or product/model promotion is implied.
 This work order creates no fabricated Experiment/Attempt/Artifact identity.
+
+## Resolved historical FIT8 producers (existing data, no new cohort)
+
+The actual training-execution lineage is
+eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d. Read source there before attempting
+to reuse or port generic builders; the current main source does not contain
+these producer files. Preserve that provenance and admit needed generic source
+through reviewed main before new Platform execution.
+
+| Existing producer at that exact SHA | Actual output schema/file | Extension owner |
+|---|---|---|
+| tools/iris_vnext/build_fit8_vnext_shards_v2.py | IRISVNextFit8ShardMetadata.v2; IRISVNextFit8Manifest.v4 / COHORT_MANIFEST.json | Preserve teacher/observation shard parents and add new derived-truth bindings |
+| tools/iris_vnext/build_fit8_relation_all_hit_evidence_v2.py | IRISVNextFit8AllHitRelationEvidenceManifest.v2 / ALL_HIT_RELATION_EVIDENCE_V2_MANIFEST.json | Existing complete CSR/depth/tie evidence; add alpha/compositing and qualified negative domain |
+| tools/iris_vnext/build_fit8_surface_raster_truth_v1.py | SURF_A1_RASTER_TRUTH_BATCH_RECEIPT.json and per-subject surf_a1_raster_truth.npz | Reuse exact source/raster response parents where compatible |
+| tools/iris_vnext/build_fit8_direct_presentation_memory_v1.py | DirectIRISPresentationMemoryManifest.v1 / DIRECT_IRIS_PRESENTATION_MEMORY_V1_MANIFEST.json | Preserve source support/front; replace ABSTAIN only with measured causal/ray truth |
+| tools/iris_vnext/build_fit8_boundary_causality_v1.py | IRISVNextFit8BoundaryCausalityManifest.v1 / BOUNDARY_CAUSALITY_V1_MANIFEST.json | Preserve boundary cause provenance; do not merge source/alpha/occlusion causes |
+
+The existing all-hit producer explicitly records
+POSITIVE_SUPPORT_ONLY__SAME_RAY_PAIR__NO_BINARY_NEGATIVE_AUTHORITY for occlusion
+and UNIQUE_MINIMUM_VISIBLE__TIED_MINIMA_ABSTAIN__DEEPER_VALID_INVISIBLE
+for visibility. These are declared scope limits, not missing code discoveries.
+
+The actual historical FIT8_CORPUS_EVIDENCE_AUTOPSY_RESULT.json was read from
+Drive file 1KBYqMfAqBiudXRWi-Kmt2aWd1HL0wrYB. Byte SHA256:
+e15957ed5f57394c018c84971f146b970c8b85f9f91b93a5a9ca3bae8f59c17b.
+It confirms the existing presentation/query manifest hashes and no optimizer,
+backward or parameter mutation in that diagnostic. It is not a new truth PASS.
+
+Next execution should resolve these exact manifests to current Artifact/CAS
+parents, inventory eight per-subject field/validity maps, and regenerate only
+the missing or incompatible derived families. A schema update alone does not
+mean all eight concrete data packages were regenerated.

@@ -1,6 +1,18 @@
 # V3.1 closure operations — 2026-10-26
 
-## Scope and current checkpoint
+## Final closure update
+
+Run 40343827460 completed successfully. Actual scientific reports are CLOSED:
+joint V2 12/12 gates, endpoint V2 5/5 gates. Architecture blueprint is frozen;
+read IRIS_TESSA_V3_1_ARCHITECTURE_FREEZE.md and ledger V8 for CURRENT state.
+The in-flight checkpoint below is retained only as execution history.
+
+The source review also found nine automatic PR research workflows without the
+required concurrency cancellation rule. They now cancel superseded PR heads;
+scientific push/dispatch executions are not cancelled by that PR-only rule.
+This fixes avoidable duplicate stale-check work, not conversation transport.
+
+## Scope and previous in-flight checkpoint
 
 Active research source: research/iris-tessa-v3-apparatus-audit-v1.
 Canonical product source remains main at 6eb2af176c06494c9251d9ffe68ba43dfb02219d.

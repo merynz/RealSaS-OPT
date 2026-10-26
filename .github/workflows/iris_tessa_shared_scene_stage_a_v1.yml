@@ -1,0 +1,44 @@
+name: iris-tessa-shared-scene-stage-a-v1
+
+on:
+  push:
+    branches:
+      - research/iris-tessa-v3-apparatus-audit-v1
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/SHARED_SCENE_PREMISE_PREREG_V1.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/SHARED_SCENE_STAGE_A_EXECUTION_PREREG_V1.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/shared_scene_stage_a_probe_v1.py'
+      - '.github/workflows/iris_tessa_shared_scene_stage_a_v1.yml'
+      - 'requirements/torch-cpu.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  shared-scene-stage-a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/torch-cpu.txt
+      - run: python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Execute sealed Stage A court
+        run: |
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/shared_scene_stage_a_probe_v1.py --out "$RUNNER_TEMP/shared_scene_stage_a_v1_report.json"
+          cat "$RUNNER_TEMP/shared_scene_stage_a_v1_report.json"
+      - name: Preserve report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared-scene-stage-a-v1-report
+          path: ${{ runner.temp }}/shared_scene_stage_a_v1_report.json
+          if-no-files-found: error

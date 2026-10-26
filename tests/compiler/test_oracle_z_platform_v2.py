@@ -5,6 +5,7 @@ import pytest
 
 from compiler.realsas_compiler_services.orchestrator.adapters.oracle_z_external_v2 import consume_oracle_z_report
 from tools.platform_oracle_z_v2 import STAGE_ID, oracle_plan, stage_parameters
+from tools.platform_release_snapshot import snapshot
 
 
 def _ctx(tmp_path: Path, *, experiment="exp-1", code_sha="a" * 40):
@@ -69,3 +70,20 @@ def test_oracle_z_plan_is_one_research_only_external_stage():
     assert stage["manifest_keys"] == ["oracle_z_spec"]
     params = stage_parameters()
     assert params["stages"][STAGE_ID]["external_evidence_roles"] == ["oracle_z_report"]
+
+
+def test_oracle_z_research_release_is_reconstructable_and_external_role_is_release_owned():
+    plan = oracle_plan()
+    released = snapshot(
+        plan,
+        None,
+        name="ORACLE_Z_REPRESENTATION_V2_TEST",
+        purpose="RESEARCH",
+        created_by="test",
+        stage_parameters=stage_parameters(),
+    )
+    assert released["manifest"]["dag"]["stage_count"] == 1
+    row = released["manifest"]["stages"][0]
+    assert row["stage_id"] == STAGE_ID
+    assert row["semantic_parameters"]["external_evidence_roles"] == ["oracle_z_report"]
+    assert released["manifest"]["dag"]["stages"][0]["policy"]["product_pass_authority"] is False

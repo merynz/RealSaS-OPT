@@ -40,7 +40,7 @@ jobs:
     needs: activation
     if: needs.activation.outputs.should_run == 'true'
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 20
+    timeout-minutes: 35
     env:
       EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
       PLATFORM_ROOT: /home/monster/realsas_platform
@@ -59,6 +59,11 @@ jobs:
             --request canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V1.json --repo "$GITHUB_WORKSPACE" \
             --platform-root "$PLATFORM_ROOT" --authority-root "$AUTHORITY_ROOT" --expected-main-sha "$EXPECTED_SHA" \
             --output "$OUTPUT" --rclone-remote "$RCLONE_REMOTE" --submit
+      - name: Observe original Attempts and export only Registry-bound CAS evidence
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/observe_calibration_v1.py \
+            --preparation "$OUTPUT/PREPARATION.json" --artifact-root "$PLATFORM_ROOT/artifacts" \
+            --output "$OUTPUT/evidence" --maximum-seconds 900
       - uses: actions/upload-artifact@v4
         if: always()
         with:

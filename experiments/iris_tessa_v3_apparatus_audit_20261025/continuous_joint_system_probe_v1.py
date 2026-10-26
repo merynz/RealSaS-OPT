@@ -15,61 +15,35 @@ import torch.nn.functional as F
 SCHEMA = "RealSaS.ContinuousJointSystemCourt.v1"
 LR = 3.0e-3
 STEPS = 6000
+BATCH = 32
+TRAIN_POOL = 4096
+EVAL_POINTS = 2048
 WIDTH = 192
 DEPTH = 3
 FOURIER_BANDS = 4
-BATCH = 32
-PAIRS = 12
-EVAL_PAIRS = 256
+ADAPTER_BOTTLENECK = 64
+RELATION_HIDDEN = 128
+ARM_SEEDS = {
+    "GM_SINGLE_ORACLE": 720101,
+    "GP_SINGLE_ORACLE": 720211,
+    "S2_JOINT_BOUND": 720307,
+    "FULL_SHARED_JOINT_BOUND": 720401,
+    "S2_JOINT_UNBOUND": 720503,
+    "S2_JOINT_BOUND_RANDOM_RELATION": 720601,
+}
 
-BASE = runpy.run_path(str(Path(__file__).with_name("oracle_z_surface_calibration_probe_v3.py")))
-SEEDS = tuple(BASE["SEEDS"])
-FACTORS = (4.0, 2.0, 1.0)
-H_REF = float(BASE["H_REF"])
-make_scene = BASE["make_scene"]
-bank_base = BASE["bank"]
-gen = BASE["gen"]
-seed_all = BASE["seed_all"]
-
-
-def scenes():
-    out = []
-    for seed in SEEDS:
-        for j, factor in enumerate(FACTORS):
-            r = factor * H_REF
-            out.append(make_scene(seed * 10000 + 100 + j, seed, "SURFACE_STRUCTURED", r))
-            out.append(make_scene(seed * 10000 + 200 + j, seed, "THIN_SURFACE", r))
-    return out
-
-
-def support_weights(scene: dict, p: torch.Tensor) -> torch.Tensor:
-    q = (p[:, None, :] - scene["centers"][None]) / scene["scales"][None]
-    d = torch.linalg.vector_norm(q, dim=-1) - 1.0
-    return torch.exp(-12.0 * d.square())
-
-
-def gp_coefficients(scene: dict) -> torch.Tensor:
-    g = gen(int(scene["seed"]) * 97 + 440011)
-    return torch.empty(4, 4).uniform_(-0.9, 0.9, generator=g)
-
-
-def gp_targets(scene: dict, p: torch.Tensor) -> torch.Tensor:
-    w = support_weights(scene, p)
-    coeff = gp_coefficients(scene)
-    return torch.einsum("nk,kc->nc", w, coeff) / 4.0
-
-
-def build_bank() -> dict:
-    B = bank_base(scenes())
-    gp_y = []
-    gp_ey = []
-    for scene, p, ep in zip(B["scenes"], B["p"], B["ep"]):
-        gp_y.append(gp_targets(scene, p))
-        gp_ey.append(gp_targets(scene, ep))
-    B["gp_y"] = torch.stack(gp_y)
-    B["gp_ey"] = torch.stack(gp_ey)
-    B["gp_scale"] = B["gp_y"].std(1).clamp_min(0.05)
-    return B
+HERE = Path(__file__).resolve().parent
+V5 = runpy.run_path(str(HERE / "oracle_z_matched_carrier_probe_v5.py"))
+V3 = V5["BASE"]
+SEEDS = tuple(V5["SEEDS"])
+H_REF = float(V5["H_REF"])
+seed_all = V5["seed_all"]
+gen = V5["gen"]
+scenes_for = V5["scenes_for"]
+sample = V3["sample"]
+gm_targets = V3["targets"]
+sample_triplane = V5["sample_triplane"]
+sample_dense = V5["sample_dense"]
 
 
 def fourier_xyz(x: torch.Tensor) -> torch.Tensor:
@@ -80,234 +54,386 @@ def fourier_xyz(x: torch.Tensor) -> torch.Tensor:
     return torch.cat(feats, dim=-1)
 
 
-def sample_triplane(planes: torch.Tensor, p: torch.Tensor) -> torch.Tensor:
-    x, y, z = p.unbind(-1)
-    grids = (torch.stack((x, y), -1), torch.stack((x, z), -1), torch.stack((y, z), -1))
+def load_selection(selection_path: Path) -> dict:
+    if not selection_path.exists():
+        raise RuntimeError("ORACLE_Z_FINAL_CARRIER_SELECTION_V6_MISSING")
+    row = json.loads(selection_path.read_text())
+    if row.get("schema") != "RealSaS.OracleZFinalCarrierSelection.v6":
+        raise RuntimeError("ORACLE_Z_FINAL_CARRIER_SELECTION_V6_SCHEMA_INVALID")
+    if row.get("status") != "FINAL_PRETRUTH_CARRIER_SELECTION_V6":
+        raise RuntimeError("ORACLE_Z_FINAL_CARRIER_SELECTION_V6_STATUS_INVALID")
+    selected = row.get("selected_carrier")
+    if selected not in {"DENSE3D", "TRIPLANE"}:
+        raise RuntimeError("ORACLE_Z_FINAL_CARRIER_SELECTION_V6_VALUE_INVALID")
+    gates = row.get("evidence", {}).get("gates", {})
+    if not gates or not all(bool(v) for v in gates.values()):
+        raise RuntimeError("ORACLE_Z_FINAL_CARRIER_SELECTION_V6_GATES_INVALID")
+    if not bool(row.get("authority", {}).get("continuous_joint_system_dependency_authorized")):
+        raise RuntimeError("ORACLE_Z_FINAL_CARRIER_SELECTION_V6_AUTHORITY_INVALID")
+    return row
+
+
+def valid_scenes() -> list[dict]:
     out = []
-    for i, grid in enumerate(grids):
-        v = F.grid_sample(planes[:, i], grid.unsqueeze(2), mode="bilinear", padding_mode="border", align_corners=False).squeeze(-1).transpose(1, 2)
-        out.append(v)
-    return torch.cat(out, dim=-1)
+    for scene in scenes_for(SEEDS):
+        factor = round(float(scene["radius"]) / H_REF, 6)
+        if factor in (1.0, 2.0, 4.0):
+            out.append(scene)
+    if len(out) != len(SEEDS) * 3 * 2:
+        raise RuntimeError("CONTINUOUS_JOINT_SCENE_BANK_INVALID")
+    return out
 
 
-def sample_dense(grid: torch.Tensor, p: torch.Tensor) -> torch.Tensor:
-    v = F.grid_sample(grid, p.unsqueeze(2).unsqueeze(2), mode="bilinear", padding_mode="border", align_corners=False).squeeze(-1).squeeze(-1).transpose(1, 2)
-    return v.repeat_interleave(3, dim=-1)
+def gp_coefficients(scene: dict) -> torch.Tensor:
+    g = gen(13_900_000 + int(scene["seed"]) * 37 + int(scene["rep"]) * 101)
+    return torch.empty(4, 4).uniform_(-0.85, 0.85, generator=g)
 
 
-class SharedFeatureQ(nn.Module):
-    def __init__(self):
+def gp_targets(scene: dict, p: torch.Tensor, coeff: torch.Tensor) -> torch.Tensor:
+    q = (p[:, None, :] - scene["centers"][None]) / scene["scales"][None]
+    d = torch.linalg.vector_norm(q, dim=-1) - 1.0
+    w = torch.exp(-12.0 * d.square())
+    return torch.einsum("nk,kc->nc", w, coeff) / 4.0
+
+
+def build_bank() -> dict:
+    scenes = valid_scenes()
+    ps, gm_y, gp_y, eps, gm_ey, gp_ey, masks = [], [], [], [], [], [], []
+    for i, scene in enumerate(scenes):
+        coeff = gp_coefficients(scene)
+        p = sample(scene, TRAIN_POOL, gen(7_300_000 + int(scene["seed"]) * 13 + i))
+        ep = sample(scene, EVAL_POINTS, gen(9_300_000 + int(scene["seed"]) * 17 + i))
+        gy = gm_targets(scene, p)
+        py = gp_targets(scene, p, coeff)
+        gey = gm_targets(scene, ep)
+        pey = gp_targets(scene, ep, coeff)
+        ps.append(p); gm_y.append(gy); gp_y.append(py)
+        eps.append(ep); gm_ey.append(gey); gp_ey.append(pey)
+        masks.append(gey[:, 0] >= 0.05)
+    P = torch.stack(ps); GMY = torch.stack(gm_y); GPY = torch.stack(gp_y)
+    EP = torch.stack(eps); GMEY = torch.stack(gm_ey); GPEY = torch.stack(gp_ey)
+    return {
+        "scenes": scenes,
+        "p": P,
+        "gm_y": GMY,
+        "gp_y": GPY,
+        "gm_scale": GMY.std(1).clamp_min(0.05),
+        "gp_scale": GPY.std(1).clamp_min(0.05),
+        "ep": EP,
+        "gm_ey": GMEY,
+        "gp_ey": GPEY,
+        "mask": torch.stack(masks),
+    }
+
+
+def gather_points(x: torch.Tensor, idx: torch.Tensor) -> torch.Tensor:
+    return torch.gather(x, 1, idx[..., None].expand(-1, -1, x.shape[-1]))
+
+
+def training_pair(B: dict, g: torch.Generator) -> dict:
+    S, N, _ = B["p"].shape
+    ia = torch.randint(0, N, (S, BATCH), generator=g)
+    offset = torch.randint(1, N, (S, BATCH), generator=g)
+    ib = (ia + offset) % N
+    a = gather_points(B["p"], ia)
+    b = gather_points(B["p"], ib)
+    gm_a = gather_points(B["gm_y"], ia)
+    gp_a = gather_points(B["gp_y"], ia)
+    gp_b = gather_points(B["gp_y"], ib)
+    relation = (gp_a[..., 1] > gp_b[..., 1]).float()
+    random_relation = torch.randint(0, 2, relation.shape, generator=g).float()
+    return {"a": a, "b": b, "gm_a": gm_a, "gp_a": gp_a, "relation": relation, "random_relation": random_relation}
+
+
+class SharedCarrierQuery(nn.Module):
+    def __init__(self, carrier_type: str, scene_count: int):
         super().__init__()
+        self.carrier_type = carrier_type
+        S = int(scene_count)
+        if carrier_type == "DENSE3D":
+            self.carrier = nn.Parameter(torch.randn(S, 16, 12, 12, 12) * 0.02)
+        elif carrier_type == "TRIPLANE":
+            self.carrier = nn.Parameter(torch.randn(S, 3, 16, 24, 24) * 0.02)
+        else:
+            raise ValueError(carrier_type)
         inp = 48 + 3 * (1 + 2 * FOURIER_BANDS)
         layers = []
         for i in range(DEPTH):
             layers.extend((nn.Linear(inp if i == 0 else WIDTH, WIDTH), nn.SiLU()))
-        self.net = nn.Sequential(*layers)
-
-    def forward(self, carrier_features: torch.Tensor, p: torch.Tensor) -> torch.Tensor:
-        return self.net(torch.cat((carrier_features, fourier_xyz(p)), dim=-1))
-
-
-class PrivateAdapter(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.norm = nn.LayerNorm(WIDTH)
-        self.fc1 = nn.Linear(WIDTH, WIDTH)
-        self.fc2 = nn.Linear(WIDTH, WIDTH)
-        self.scale = 1.0 / math.sqrt(2.0)
-
-    def forward(self, x):
-        return (x + self.fc2(F.silu(self.fc1(self.norm(x))))) * self.scale
-
-
-class JointModel(nn.Module):
-    def __init__(self, carrier_kind: str, scene_count: int, *, private: bool, bound: bool):
-        super().__init__()
-        self.carrier_kind = carrier_kind
-        self.bound = bool(bound)
-        S = int(scene_count)
-        if carrier_kind == "TRIPLANE":
-            self.carrier = nn.Parameter(torch.randn(S, 3, 16, 24, 24) * 0.02)
-        elif carrier_kind == "DENSE3D":
-            self.carrier = nn.Parameter(torch.randn(S, 16, 12, 12, 12) * 0.02)
-        else:
-            raise ValueError(f"UNKNOWN_CARRIER:{carrier_kind}")
-        self.q = SharedFeatureQ()
-        self.gm_adapter = PrivateAdapter() if private else nn.Identity()
-        self.gp_adapter = PrivateAdapter() if private else nn.Identity()
-        self.gm_head = nn.Linear(WIDTH, 4)
-        self.gp_head = nn.Linear(WIDTH, 4)
-        self.relation = nn.Sequential(nn.Linear(4 * WIDTH, 2 * WIDTH), nn.SiLU(), nn.Linear(2 * WIDTH, 1))
+        self.query = nn.Sequential(*layers)
 
     def carrier_features(self, p: torch.Tensor, carrier: torch.Tensor | None = None) -> torch.Tensor:
         c = self.carrier if carrier is None else carrier
-        return sample_triplane(c, p) if self.carrier_kind == "TRIPLANE" else sample_dense(c, p)
+        if self.carrier_type == "DENSE3D":
+            return sample_dense(c, p)
+        return sample_triplane(c, p)
 
-    def features(self, p: torch.Tensor, carrier: torch.Tensor | None = None):
-        h0 = self.q(self.carrier_features(p, carrier), p)
-        return h0, self.gm_adapter(h0), self.gp_adapter(h0)
+    def encode(self, p: torch.Tensor, carrier: torch.Tensor | None = None) -> torch.Tensor:
+        return self.query(torch.cat((self.carrier_features(p, carrier), fourier_xyz(p)), dim=-1))
 
-    def local(self, p: torch.Tensor, carrier: torch.Tensor | None = None):
-        h0, gm, gp = self.features(p, carrier)
-        return h0, gm, gp, self.gm_head(gm), self.gp_head(gp)
-
-    def relation_logits(self, gp: torch.Tensor, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
-        S, _, D = gp.shape
-        ga = torch.gather(gp, 1, a[..., None].expand(-1, -1, D))
-        gb = torch.gather(gp, 1, b[..., None].expand(-1, -1, D))
-        if not self.bound:
-            mean = gp.mean(1, keepdim=True).expand(-1, a.shape[1], -1)
-            ga = mean; gb = mean
-        return self.relation(torch.cat((ga, gb, ga - gb, ga * gb), dim=-1)).squeeze(-1)
+    def global_features(self, carrier: torch.Tensor | None = None) -> torch.Tensor:
+        c = self.carrier if carrier is None else carrier
+        if self.carrier_type == "DENSE3D":
+            return c.mean(dim=(-1, -2, -3)).repeat_interleave(3, dim=-1)
+        return c.mean(dim=(-1, -2)).reshape(c.shape[0], -1)
 
 
-def nparams(m: nn.Module) -> int:
-    return sum(p.numel() for p in m.parameters() if p.requires_grad)
+class ResidualAdapter(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.down = nn.Linear(WIDTH, ADAPTER_BOTTLENECK)
+        self.up = nn.Linear(ADAPTER_BOTTLENECK, WIDTH)
+
+    def forward(self, h: torch.Tensor) -> torch.Tensor:
+        return h + self.up(F.silu(self.down(h)))
 
 
-def training_batch(B: dict, g: torch.Generator):
-    S, N, _ = B["p"].shape
-    idx = torch.randint(0, N, (S, BATCH), generator=g)
-    def gather(x):
-        return torch.gather(x, 1, idx[..., None].expand(-1, -1, x.shape[-1]))
-    p = gather(B["p"]); gm = gather(B["y"]); gp = gather(B["gp_y"])
-    a = torch.randint(0, BATCH, (S, PAIRS), generator=g)
-    b = torch.randint(0, BATCH - 1, (S, PAIRS), generator=g); b = b + (b >= a).long()
-    bi = torch.arange(S)[:, None]
-    rel = (gp[bi, a, 1] > gp[bi, b, 1]).float()
-    return p, gm, gp, a, b, rel
+class RelationHead(nn.Module):
+    def __init__(self, inp: int):
+        super().__init__()
+        self.net = nn.Sequential(nn.Linear(inp, RELATION_HIDDEN), nn.SiLU(), nn.Linear(RELATION_HIDDEN, 1))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.net(x).squeeze(-1)
 
 
-def train_arm(carrier: str, B: dict, arm: str, seed: int):
-    private = arm not in ("FULL_SHARED_JOINT_BOUND",)
-    bound = arm not in ("S2_JOINT_UNBOUND",)
-    model = JointModel(carrier, len(B["scenes"]), private=private, bound=bound)
+class CourtModel(nn.Module):
+    def __init__(self, arm: str, carrier_type: str, scene_count: int):
+        super().__init__()
+        self.arm = arm
+        self.base = SharedCarrierQuery(carrier_type, scene_count)
+        self.has_gm = arm != "GP_SINGLE_ORACLE"
+        self.has_gp = arm != "GM_SINGLE_ORACLE"
+        self.full_shared = arm == "FULL_SHARED_JOINT_BOUND"
+        self.unbound = arm == "S2_JOINT_UNBOUND"
+        self.has_relation = arm not in {"GM_SINGLE_ORACLE", "GP_SINGLE_ORACLE"}
+        if self.has_gm and not self.full_shared:
+            self.gm_adapter = ResidualAdapter()
+        if self.has_gp and not self.full_shared:
+            self.gp_adapter = ResidualAdapter()
+        if self.has_gm:
+            self.gm_head = nn.Linear(WIDTH, 4)
+        if self.has_gp:
+            self.gp_head = nn.Linear(WIDTH, 4)
+        if self.has_relation:
+            if self.unbound:
+                self.global_gp = nn.Sequential(nn.Linear(48, WIDTH), nn.SiLU())
+                self.relation = RelationHead(WIDTH)
+            else:
+                self.relation = RelationHead(WIDTH * 2)
+
+    def private_states(self, h: torch.Tensor) -> tuple[torch.Tensor | None, torch.Tensor | None]:
+        gm_h = None; gp_h = None
+        if self.has_gm:
+            gm_h = h if self.full_shared else self.gm_adapter(h)
+        if self.has_gp:
+            gp_h = h if self.full_shared else self.gp_adapter(h)
+        return gm_h, gp_h
+
+    def local(self, p: torch.Tensor, carrier: torch.Tensor | None = None) -> dict:
+        h = self.base.encode(p, carrier)
+        gm_h, gp_h = self.private_states(h)
+        out = {}
+        if gm_h is not None: out["gm"] = self.gm_head(gm_h)
+        if gp_h is not None: out["gp"] = self.gp_head(gp_h)
+        return out
+
+    def pair(self, a: torch.Tensor, b: torch.Tensor, carrier: torch.Tensor | None = None) -> dict:
+        ha = self.base.encode(a, carrier)
+        gm_a, gp_a = self.private_states(ha)
+        out = {}
+        if gm_a is not None: out["gm"] = self.gm_head(gm_a)
+        if gp_a is not None: out["gp"] = self.gp_head(gp_a)
+        if self.has_relation:
+            if self.unbound:
+                global_h = self.global_gp(self.base.global_features(carrier))
+                logits = self.relation(global_h)[:, None].expand(-1, a.shape[1])
+            else:
+                hb = self.base.encode(b, carrier)
+                _, gp_b = self.private_states(hb)
+                if gp_a is None or gp_b is None:
+                    raise RuntimeError("BOUND_RELATION_REQUIRES_GP_STATE")
+                logits = self.relation(torch.cat((gp_a, gp_b), dim=-1))
+            out["relation_logits"] = logits
+        return out
+
+
+def nparams(module: nn.Module) -> int:
+    return sum(p.numel() for p in module.parameters() if p.requires_grad)
+
+
+def train_arm(arm: str, carrier_type: str, B: dict) -> CourtModel:
+    seed = ARM_SEEDS[arm]
+    seed_all(seed)
+    model = CourtModel(arm, carrier_type, len(B["scenes"]))
     optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=0.0)
     g = gen(seed * 7919 + 17)
-    gm_scale = B["scale"][:, None]
+    gm_scale = B["gm_scale"][:, None]
     gp_scale = B["gp_scale"][:, None]
-    mode = "joint"
-    if arm == "GM_SINGLE_ORACLE": mode = "gm"
-    elif arm == "GP_SINGLE_ORACLE": mode = "gp"
-    random_relation = arm == "S2_JOINT_BOUND_RANDOM_RELATION"
+    model.train()
     for _ in range(STEPS):
-        p, gm_t, gp_t, a, b, rel_t = training_batch(B, g)
-        _, gm_h, gp_h, gm_p, gp_p = model.local(p)
+        batch = training_pair(B, g)
+        out = model.pair(batch["a"], batch["b"])
         losses = []
-        if mode in ("joint", "gm"):
-            losses.append((((gm_p - gm_t) / gm_scale) ** 2).mean())
-        if mode in ("joint", "gp"):
-            losses.append((((gp_p - gp_t) / gp_scale) ** 2).mean())
-        if mode == "joint":
-            logits = model.relation_logits(gp_h, a, b)
-            if random_relation:
-                rel_t = torch.randint(0, 2, rel_t.shape, generator=g).float()
-            losses.append(F.binary_cross_entropy_with_logits(logits, rel_t))
+        if "gm" in out:
+            losses.append((((out["gm"] - batch["gm_a"]) / gm_scale) ** 2).mean())
+        if "gp" in out:
+            losses.append((((out["gp"] - batch["gp_a"]) / gp_scale) ** 2).mean())
+        if "relation_logits" in out:
+            label = batch["random_relation"] if arm == "S2_JOINT_BOUND_RANDOM_RELATION" else batch["relation"]
+            losses.append(F.binary_cross_entropy_with_logits(out["relation_logits"], label))
         loss = sum(losses)
         optimizer.zero_grad(set_to_none=True); loss.backward(); optimizer.step()
     return model
 
 
-def nrmse(pred, truth, scale):
+def nrmse(pred: torch.Tensor, truth: torch.Tensor, scale: torch.Tensor) -> torch.Tensor:
     return (torch.sqrt(((pred - truth) ** 2).mean(1)) / scale).mean(-1)
 
 
-def evaluate(model: JointModel, B: dict, *, random_relation: bool = False, shuffled_carrier: bool = False):
-    model.eval(); carrier = torch.roll(model.carrier, 1, 0) if shuffled_carrier else None
+def balanced_random_eval_labels(scene_count: int, n: int) -> torch.Tensor:
+    rows = []
+    for s in range(scene_count):
+        base = torch.cat((torch.zeros(n // 2), torch.ones(n - n // 2)))
+        perm = torch.randperm(n, generator=gen(24_100_000 + s * 313))
+        rows.append(base[perm])
+    return torch.stack(rows)
+
+
+def summarize(model: CourtModel, B: dict, *, carrier: torch.Tensor | None = None) -> dict:
+    model.eval(); out = {}
     with torch.no_grad():
-        _, gm_h, gp_h, gm_p, gp_p = model.local(B["ep"], carrier)
-        gm_vals = nrmse(gm_p, B["ey"], B["scale"])
-        gp_vals = nrmse(gp_p, B["gp_ey"], B["gp_scale"])
-        S, N, _ = B["ep"].shape
-        rg = gen(990123 if not random_relation else 990987)
-        a = torch.randint(0, N, (S, EVAL_PAIRS), generator=rg)
-        b = torch.randint(0, N - 1, (S, EVAL_PAIRS), generator=rg); b = b + (b >= a).long()
-        bi = torch.arange(S)[:, None]
-        truth = (B["gp_ey"][bi, a, 1] > B["gp_ey"][bi, b, 1]).float()
-        if random_relation:
-            truth = torch.randint(0, 2, truth.shape, generator=rg).float()
-        logits = model.relation_logits(gp_h, a, b)
-        acc = float(((logits >= 0) == (truth >= 0.5)).float().mean())
-        pos = float(truth.mean())
-    return {
-        "gm_mean_nrmse": float(gm_vals.mean()),
-        "gm_worst_nrmse": float(gm_vals.max()),
-        "gp_mean_nrmse": float(gp_vals.mean()),
-        "gp_worst_nrmse": float(gp_vals.max()),
-        "relation_accuracy": acc,
-        "relation_positive_fraction": pos,
-    }
+        local = model.local(B["ep"], carrier)
+        local_errors = []
+        if "gm" in local:
+            gm_scene = nrmse(local["gm"], B["gm_ey"], B["gm_scale"])
+            gm_local = []
+            for i in range(len(B["scenes"])):
+                mask = B["mask"][i]
+                if int(mask.sum()) >= 16:
+                    gm_local.append(float(nrmse(local["gm"][i][mask][None], B["gm_ey"][i][mask][None], B["gm_scale"][i][None])[0]))
+            out["gm_overall_mean_nrmse"] = float(gm_scene.mean())
+            out["gm_surface_local_mean_nrmse"] = sum(gm_local) / len(gm_local)
+            local_errors.extend(gm_local)
+        if "gp" in local:
+            gp_scene = nrmse(local["gp"], B["gp_ey"], B["gp_scale"])
+            gp_local = []
+            for i in range(len(B["scenes"])):
+                mask = B["mask"][i]
+                if int(mask.sum()) >= 16:
+                    gp_local.append(float(nrmse(local["gp"][i][mask][None], B["gp_ey"][i][mask][None], B["gp_scale"][i][None])[0]))
+            out["gp_overall_mean_nrmse"] = float(gp_scene.mean())
+            out["gp_surface_local_mean_nrmse"] = sum(gp_local) / len(gp_local)
+            local_errors.extend(gp_local)
+        if local_errors:
+            out["mean_surface_local_nrmse"] = sum(local_errors) / len(local_errors)
+        if model.has_relation:
+            a = B["ep"]
+            b = torch.roll(B["ep"], shifts=EVAL_POINTS // 2, dims=1)
+            gp_a = B["gp_ey"]
+            gp_b = torch.roll(B["gp_ey"], shifts=EVAL_POINTS // 2, dims=1)
+            target = (gp_a[..., 1] > gp_b[..., 1]).float()
+            logits = model.pair(a, b, carrier)["relation_logits"]
+            if model.arm == "S2_JOINT_BOUND_RANDOM_RELATION":
+                target = balanced_random_eval_labels(len(B["scenes"]), EVAL_POINTS)
+            pred = (logits >= 0.0).float()
+            out["relation_accuracy"] = float((pred == target).float().mean())
+            out["relation_target_positive_fraction"] = float(target.mean())
+    return out
 
 
 def run(selection_path: Path) -> dict:
     torch.set_num_threads(1)
-    selection = json.loads(selection_path.read_text())
-    carrier = selection.get("selected_carrier")
-    if carrier not in ("TRIPLANE", "DENSE3D"):
-        return {"schema": SCHEMA, "status": "CONTINUOUS_JOINT_SYSTEM_BLOCKED__CARRIER_UNRESOLVED", "selection": selection}
+    selection = load_selection(selection_path)
+    carrier_type = selection["selected_carrier"]
     B = build_bank()
     arms = (
         "GM_SINGLE_ORACLE", "GP_SINGLE_ORACLE", "S2_JOINT_BOUND",
         "FULL_SHARED_JOINT_BOUND", "S2_JOINT_UNBOUND", "S2_JOINT_BOUND_RANDOM_RELATION",
     )
-    results = {}; models = {}
-    for i, arm in enumerate(arms):
-        seed_all(720000 + i * 101)
-        model = train_arm(carrier, B, arm, 720000 + i * 101)
+    models = {}; summaries = {}; parameter_counts = {}
+    for arm in arms:
+        model = train_arm(arm, carrier_type, B)
         models[arm] = model
-        results[arm] = {
-            "parameter_count": nparams(model),
-            "metrics": evaluate(model, B, random_relation=(arm == "S2_JOINT_BOUND_RANDOM_RELATION")),
-        }
+        summaries[arm] = summarize(model, B)
+        parameter_counts[arm] = nparams(model)
 
-    selected = results["S2_JOINT_BOUND"]["metrics"]
-    gm_single = results["GM_SINGLE_ORACLE"]["metrics"]
-    gp_single = results["GP_SINGLE_ORACLE"]["metrics"]
-    full = results["FULL_SHARED_JOINT_BOUND"]["metrics"]
-    unbound = results["S2_JOINT_UNBOUND"]["metrics"]
-    firewall = results["S2_JOINT_BOUND_RANDOM_RELATION"]["metrics"]
+    s2 = summaries["S2_JOINT_BOUND"]
+    gm_single = summaries["GM_SINGLE_ORACLE"]["gm_overall_mean_nrmse"]
+    gp_single = summaries["GP_SINGLE_ORACLE"]["gp_overall_mean_nrmse"]
+    gm_transfer = s2["gm_overall_mean_nrmse"] / max(gm_single, 1.0e-12) - 1.0
+    gp_transfer = s2["gp_overall_mean_nrmse"] / max(gp_single, 1.0e-12) - 1.0
+    unbound = summaries["S2_JOINT_UNBOUND"]
+    full = summaries["FULL_SHARED_JOINT_BOUND"]
+    random_control = summaries["S2_JOINT_BOUND_RANDOM_RELATION"]
 
-    gm_interference = selected["gm_mean_nrmse"] / max(gm_single["gm_mean_nrmse"], 1e-12) - 1.0
-    gp_interference = selected["gp_mean_nrmse"] / max(gp_single["gp_mean_nrmse"], 1e-12) - 1.0
-    shuffled = evaluate(models["S2_JOINT_BOUND"], B, shuffled_carrier=True)
-    ordinary_local = 0.5 * (selected["gm_mean_nrmse"] + selected["gp_mean_nrmse"])
-    shuffled_local = 0.5 * (shuffled["gm_mean_nrmse"] + shuffled["gp_mean_nrmse"])
-    shuffle_gain = shuffled_local / max(ordinary_local, 1e-12) - 1.0
+    rolled_carrier = torch.roll(models["S2_JOINT_BOUND"].base.carrier.detach(), shifts=1, dims=0)
+    rolled = summarize(models["S2_JOINT_BOUND"], B, carrier=rolled_carrier)
+    rolling_increase = rolled["mean_surface_local_nrmse"] / max(s2["mean_surface_local_nrmse"], 1.0e-12) - 1.0
 
-    selected_ok = selected["gm_mean_nrmse"] <= 0.15 and selected["gp_mean_nrmse"] <= 0.15 and selected["relation_accuracy"] >= 0.95 and 0.35 <= selected["relation_positive_fraction"] <= 0.65
-    interference_ok = gm_interference <= 0.15 and gp_interference <= 0.15
-    unbound_ok = unbound["relation_accuracy"] <= 0.60 and unbound["gm_mean_nrmse"] <= selected["gm_mean_nrmse"] * 1.15 and unbound["gp_mean_nrmse"] <= selected["gp_mean_nrmse"] * 1.15
-    firewall_ok = 0.48 <= firewall["relation_accuracy"] <= 0.52
-    shuffle_ok = shuffle_gain >= 0.25
-    full_not_better_both = not (full["gm_mean_nrmse"] <= selected["gm_mean_nrmse"] * 0.90 and full["gp_mean_nrmse"] <= selected["gp_mean_nrmse"] * 0.90)
-
+    full_shared_catastrophic_contradiction = (
+        full["gm_overall_mean_nrmse"] <= 0.90 * s2["gm_overall_mean_nrmse"]
+        and full["gp_overall_mean_nrmse"] <= 0.90 * s2["gp_overall_mean_nrmse"]
+    )
     gates = {
-        "selected_joint": selected_ok,
-        "joint_negative_transfer_le_15pct": interference_ok,
-        "endpoint_binding_owner": unbound_ok,
-        "random_relation_firewall": firewall_ok,
-        "scene_carrier_shuffle_dependence": shuffle_ok,
-        "full_shared_not_10pct_better_on_both": full_not_better_both,
+        "s2_gm_nrmse_le_0p15": s2["gm_overall_mean_nrmse"] <= 0.15,
+        "s2_gp_nrmse_le_0p15": s2["gp_overall_mean_nrmse"] <= 0.15,
+        "s2_relation_accuracy_ge_0p95": s2["relation_accuracy"] >= 0.95,
+        "relation_positive_fraction_in_range": 0.35 <= s2["relation_target_positive_fraction"] <= 0.65,
+        "gm_negative_transfer_le_15pct": gm_transfer <= 0.15,
+        "gp_negative_transfer_le_15pct": gp_transfer <= 0.15,
+        "unbound_relation_accuracy_le_0p60": unbound["relation_accuracy"] <= 0.60,
+        "unbound_gm_local_within_15pct": unbound["gm_surface_local_mean_nrmse"] <= 1.15 * s2["gm_surface_local_mean_nrmse"],
+        "unbound_gp_local_within_15pct": unbound["gp_surface_local_mean_nrmse"] <= 1.15 * s2["gp_surface_local_mean_nrmse"],
+        "random_relation_firewall_in_0p48_0p52": 0.48 <= random_control["relation_accuracy"] <= 0.52,
+        "rolling_carrier_local_error_increase_ge_25pct": rolling_increase >= 0.25,
+        "full_shared_no_catastrophic_10pct_both_advantage": not full_shared_catastrophic_contradiction,
     }
-    status = "CONTINUOUS_JOINT_SYSTEM_CLOSED_TINY_V1" if all(gates.values()) else "CONTINUOUS_JOINT_SYSTEM_NOT_CLOSED_TINY_V1"
+    closed = all(gates.values())
+    status = "CONTINUOUS_JOINT_SYSTEM_CLOSED_TINY_V1" if closed else "CONTINUOUS_JOINT_SYSTEM_OPEN_TINY_V1"
     return {
         "schema": SCHEMA,
         "status": status,
-        "selected_carrier": carrier,
-        "configuration": {"lr": LR, "steps": STEPS, "width": WIDTH, "depth": DEPTH, "fourier_bands": FOURIER_BANDS, "factors": list(FACTORS), "seeds": list(SEEDS)},
-        "results": results,
-        "interference": {"gm_relative": gm_interference, "gp_relative": gp_interference},
-        "selected_carrier_shuffled_metrics": shuffled,
-        "selected_carrier_shuffle_relative_local_error_increase": shuffle_gain,
+        "dependency": selection,
+        "configuration": {
+            "seeds": list(SEEDS), "factors": [4.0, 2.0, 1.0],
+            "families": ["SURFACE_STRUCTURED", "THIN_SURFACE"],
+            "scene_count": len(B["scenes"]), "carrier_type": carrier_type,
+            "query": {"width": WIDTH, "depth": DEPTH, "fourier_bands": FOURIER_BANDS},
+            "adapter_bottleneck": ADAPTER_BOTTLENECK, "relation_hidden": RELATION_HIDDEN,
+            "lr": LR, "steps_per_arm": STEPS, "batch": BATCH,
+            "train_pool": TRAIN_POOL, "eval_points": EVAL_POINTS,
+            "arm_seeds": ARM_SEEDS,
+            "loss_policy": "equal_unweighted_sum_of_normalized_local_task_losses_and_relation_bce",
+        },
+        "parameter_counts": parameter_counts,
+        "summaries": summaries,
+        "negative_transfer": {"gm": gm_transfer, "gp": gp_transfer},
+        "rolling_carrier": {
+            "ordinary_mean_surface_local_nrmse": s2["mean_surface_local_nrmse"],
+            "rolled_mean_surface_local_nrmse": rolled["mean_surface_local_nrmse"],
+            "relative_error_increase": rolling_increase,
+        },
+        "full_shared_catastrophic_contradiction": full_shared_catastrophic_contradiction,
         "gates": gates,
-        "authority": {"product_authority_changed": False, "truth_builder_training_authorized": False, "fit8_training_authorized": False},
+        "authority": {
+            "v3_1_architecture_freeze_authorized": closed,
+            "product_authority_changed": False,
+            "truth_builder_training_authorized": False,
+            "fit8_training_authorized": False,
+        },
     }
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(); p.add_argument("--selection", type=Path, required=True); p.add_argument("--out", type=Path, required=True); a = p.parse_args()
-    r = run(a.selection); a.out.parent.mkdir(parents=True, exist_ok=True); a.out.write_text(json.dumps(r, indent=2, sort_keys=True) + "\n")
-    print(json.dumps({"status": r["status"], "selected_carrier": r.get("selected_carrier"), "gates": r.get("gates"), "interference": r.get("interference"), "out": str(a.out)}, sort_keys=True))
+    p = argparse.ArgumentParser()
+    p.add_argument("--selection", type=Path, required=True)
+    p.add_argument("--out", type=Path, required=True)
+    args = p.parse_args()
+    result = run(args.selection)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    print(json.dumps({"status": result["status"], "carrier_type": result["configuration"]["carrier_type"], "gates": result["gates"], "negative_transfer": result["negative_transfer"], "rolling_carrier": result["rolling_carrier"], "out": str(args.out)}, sort_keys=True))
 
 
 if __name__ == "__main__":

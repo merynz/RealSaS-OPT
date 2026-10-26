@@ -1,0 +1,210 @@
+{
+  "adapter_overhead_fraction": {
+    "CURRENT_FULL_GRAD": 0.0,
+    "PRIVATE_REL_ADAPTER_FULL_GRAD": 0.006030855126963046,
+    "PRIVATE_REL_ADAPTER_STOPGRAD": 0.006030855126963046,
+    "STOPGRAD_RELATION": 0.0
+  },
+  "authority": {
+    "continuous_joint_v2_authorized": true,
+    "fit8_training_authorized": false,
+    "gradient_ownership_treatment_selected": true,
+    "product_authority_changed": false,
+    "selected_treatment": "STOPGRAD_RELATION",
+    "truth_builder_training_authorized": false,
+    "v3_1_architecture_freeze_authorized": false
+  },
+  "configuration": {
+    "batch": 32,
+    "carrier_type": "DENSE3D",
+    "eval_points": 2048,
+    "firewall_seed": 730601,
+    "lora_alpha": 16.0,
+    "loss_policy": "unchanged_equal_unweighted_normalized_gm_gp_plus_relation_bce",
+    "lr": 0.003,
+    "rank": 16,
+    "scientific_arms": [
+      "CURRENT_FULL_GRAD",
+      "STOPGRAD_RELATION",
+      "PRIVATE_REL_ADAPTER_FULL_GRAD",
+      "PRIVATE_REL_ADAPTER_STOPGRAD"
+    ],
+    "shared_scientific_arm_seed": 730307,
+    "steps_per_arm": 6000,
+    "train_pool": 4096
+  },
+  "dependency": {
+    "authority": {
+      "continuous_joint_system_dependency_authorized": true,
+      "fit8_training_authorized": false,
+      "product_authority_changed": false,
+      "truth_builder_training_authorized": false
+    },
+    "evidence": {
+      "gates": {
+        "dense_lower_all_optimizer_seeds": true,
+        "dense_no_group_worse_gt_10pct": true,
+        "dense_support_count_not_worse_each_seed": true,
+        "mean_dense_relative_gain_ge_5pct": true
+      },
+      "mean_dense_relative_gain": 0.054209877942017815,
+      "paired_dense_relative_gains": [
+        0.03489277146525836,
+        0.059437728751246185,
+        0.06829913360954891
+      ]
+    },
+    "schema": "RealSaS.OracleZFinalCarrierSelection.v6",
+    "selected_carrier": "DENSE3D",
+    "source": {
+      "artifact_digest": "sha256:40898f6c4bb148c718923c06f3bd254c2e1aae7798edb4fde011d14e46c5d7bd",
+      "artifact_id": 12649861178,
+      "artifact_name": "iris-oracle-z-carrier-robustness-v6-report",
+      "court_schema": "RealSaS.OracleZCarrierRobustnessCourt.v6",
+      "court_status": "DENSE3D_SELECTED_PRETRUTH_V6",
+      "head_sha": "8ecf8a92ab8709b1c94f09a47df84537b6abece4",
+      "workflow_run_id": 40321605659
+    },
+    "status": "FINAL_PRETRUTH_CARRIER_SELECTION_V6"
+  },
+  "interpretation": "OPTIMIZATION_COUPLING",
+  "parameter_counts": {
+    "CURRENT_FULL_GRAD": 1018761,
+    "GM_SINGLE_ORACLE": 943748,
+    "GP_SINGLE_ORACLE": 943748,
+    "PRIVATE_REL_ADAPTER_FULL_GRAD": 1024905,
+    "PRIVATE_REL_ADAPTER_STOPGRAD": 1024905,
+    "STOPGRAD_RELATION": 1018761
+  },
+  "provisional_selected_arm": "STOPGRAD_RELATION",
+  "random_firewall_summary": {
+    "gm_overall_mean_nrmse": 0.12371543049812317,
+    "gm_surface_local_mean_nrmse": 0.15973778938253722,
+    "gp_overall_mean_nrmse": 0.1252160668373108,
+    "gp_surface_local_mean_nrmse": 0.16224775612354278,
+    "mean_surface_local_nrmse": 0.16099277275304,
+    "relation_accuracy": 0.5037434697151184,
+    "relation_target_positive_fraction": 0.5
+  },
+  "schema": "RealSaS.GradientOwnershipCourt.v1",
+  "scientific_results": {
+    "CURRENT_FULL_GRAD": {
+      "adapter_overhead_le_5pct": true,
+      "adapter_parameter_overhead_fraction": 0.0,
+      "gm_overall_mean_nrmse": 0.1595821976661682,
+      "gm_surface_local_mean_nrmse": 0.20484248101711272,
+      "gp_overall_mean_nrmse": 0.1639270931482315,
+      "gp_surface_local_mean_nrmse": 0.21172286917765934,
+      "joint_gates": {
+        "gm_negative_transfer_le_15pct": false,
+        "gm_nrmse_le_0p15": false,
+        "gp_negative_transfer_le_15pct": false,
+        "gp_nrmse_le_0p15": false,
+        "relation_accuracy_ge_0p95": true,
+        "relation_positive_fraction_in_range": true
+      },
+      "joint_valid": false,
+      "mean_surface_local_nrmse": 0.20828267509738604,
+      "negative_transfer": {
+        "gm": 0.36292689141075374,
+        "gp": 0.22050353354832297
+      },
+      "relation_accuracy": 0.9863443970680237,
+      "relation_target_positive_fraction": 0.5
+    },
+    "PRIVATE_REL_ADAPTER_FULL_GRAD": {
+      "adapter_overhead_le_5pct": true,
+      "adapter_parameter_overhead_fraction": 0.006030855126963046,
+      "gm_overall_mean_nrmse": 0.1596340537071228,
+      "gm_surface_local_mean_nrmse": 0.20551964690287908,
+      "gp_overall_mean_nrmse": 0.16209246218204498,
+      "gp_surface_local_mean_nrmse": 0.2109526996811231,
+      "joint_gates": {
+        "gm_negative_transfer_le_15pct": false,
+        "gm_nrmse_le_0p15": false,
+        "gp_negative_transfer_le_15pct": false,
+        "gp_nrmse_le_0p15": false,
+        "relation_accuracy_ge_0p95": true,
+        "relation_positive_fraction_in_range": true
+      },
+      "joint_valid": false,
+      "mean_surface_local_nrmse": 0.2082361732920011,
+      "negative_transfer": {
+        "gm": 0.36336977284573013,
+        "gp": 0.20684396371160862
+      },
+      "relation_accuracy": 0.9861816167831421,
+      "relation_target_positive_fraction": 0.5
+    },
+    "PRIVATE_REL_ADAPTER_STOPGRAD": {
+      "adapter_overhead_le_5pct": true,
+      "adapter_parameter_overhead_fraction": 0.006030855126963046,
+      "gm_overall_mean_nrmse": 0.12461435049772263,
+      "gm_surface_local_mean_nrmse": 0.15858752330144246,
+      "gp_overall_mean_nrmse": 0.12774218618869781,
+      "gp_surface_local_mean_nrmse": 0.16392883360385896,
+      "joint_gates": {
+        "gm_negative_transfer_le_15pct": true,
+        "gm_nrmse_le_0p15": true,
+        "gp_negative_transfer_le_15pct": true,
+        "gp_nrmse_le_0p15": true,
+        "relation_accuracy_ge_0p95": true,
+        "relation_positive_fraction_in_range": true
+      },
+      "joint_valid": true,
+      "mean_surface_local_nrmse": 0.1612581784526507,
+      "negative_transfer": {
+        "gm": 0.0642806768730051,
+        "gp": -0.04890773921360503
+      },
+      "relation_accuracy": 0.986376941204071,
+      "relation_target_positive_fraction": 0.5
+    },
+    "STOPGRAD_RELATION": {
+      "adapter_overhead_le_5pct": true,
+      "adapter_parameter_overhead_fraction": 0.0,
+      "gm_overall_mean_nrmse": 0.12461435049772263,
+      "gm_surface_local_mean_nrmse": 0.15858752330144246,
+      "gp_overall_mean_nrmse": 0.12774218618869781,
+      "gp_surface_local_mean_nrmse": 0.16392883360385896,
+      "joint_gates": {
+        "gm_negative_transfer_le_15pct": true,
+        "gm_nrmse_le_0p15": true,
+        "gp_negative_transfer_le_15pct": true,
+        "gp_nrmse_le_0p15": true,
+        "relation_accuracy_ge_0p95": true,
+        "relation_positive_fraction_in_range": true
+      },
+      "joint_valid": true,
+      "mean_surface_local_nrmse": 0.1612581784526507,
+      "negative_transfer": {
+        "gm": 0.0642806768730051,
+        "gp": -0.04890773921360503
+      },
+      "relation_accuracy": 0.9855794310569763,
+      "relation_target_positive_fraction": 0.5
+    }
+  },
+  "selected_arm_controls": {
+    "ordinary_mean_surface_local_nrmse": 0.1612581784526507,
+    "random_relation_firewall_accuracy": 0.5037434697151184,
+    "random_relation_firewall_in_0p48_0p52": true,
+    "rolled_mean_surface_local_nrmse": 1.6526793201764425,
+    "rolling_carrier_error_increase_ge_25pct": true,
+    "rolling_carrier_relative_error_increase": 9.248654276233866,
+    "selected_adapter_overhead_le_5pct": true
+  },
+  "single_family_references": {
+    "GM_SINGLE_ORACLE": {
+      "gm_overall_mean_nrmse": 0.11708786338567734,
+      "gm_surface_local_mean_nrmse": 0.14892513230443,
+      "mean_surface_local_nrmse": 0.14892513230443
+    },
+    "GP_SINGLE_ORACLE": {
+      "gp_overall_mean_nrmse": 0.1343110352754593,
+      "gp_surface_local_mean_nrmse": 0.16616766899824142,
+      "mean_surface_local_nrmse": 0.16616766899824142
+    }
+  },
+  "status": "GRADIENT_OWNERSHIP_CLOSED_TINY_V1"
+}

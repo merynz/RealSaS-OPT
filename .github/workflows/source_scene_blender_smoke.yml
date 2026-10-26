@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - '.github/workflows/source_scene_blender_smoke.yml'
       - 'tools/observation/blender_controlled_8view_v2.py'
       - 'tools/observation/source_scene_contract_v2.py'
       - 'tests/fixtures/source_scene_v2/**'
@@ -11,6 +12,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - '.github/workflows/source_scene_blender_smoke.yml'
       - 'tools/observation/blender_controlled_8view_v2.py'
       - 'tools/observation/source_scene_contract_v2.py'
       - 'tests/fixtures/source_scene_v2/**'
@@ -24,18 +26,36 @@ concurrency:
 jobs:
   blender-source-scene-smoke:
     if: github.event.repository.private == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
-      PYTHONPATH: .:/usr/lib/python3/dist-packages
+      PYTHONPATH: .
     steps:
       - uses: actions/checkout@v4
-      - name: Install Blender source-scene dependencies
+      - name: Install headless runtime dependencies
         run: |
           sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 update -qq
-          sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 install -y --no-install-recommends blender python3-numpy
+          sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 install -y --no-install-recommends libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 libgl1
+      - name: Restore pinned observation Blender archive
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/blender-4.0.2-linux-x64.tar.xz
+          key: observation-blender-4.0.2-linux-x64-5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a
+      - name: Verify and unpack observation Blender 4.0.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/blender-4.0.2-linux-x64.tar.xz"
+          if [ ! -f "$archive" ]; then
+            curl --fail --location --retry 3 --retry-delay 2 'https://download.blender.org/release/Blender4.0/blender-4.0.2-linux-x64.tar.xz' --output "$archive"
+          fi
+          echo "5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a  $archive" | sha256sum --check -
+          tar -xJf "$archive" -C "$RUNNER_TEMP"
+          exe="$RUNNER_TEMP/blender-4.0.2-linux-x64/blender"
+          test "$("$exe" --version | head -n 1)" = 'Blender 4.0.2'
+          echo "BLENDER_EXE=$exe" >> "$GITHUB_ENV"
       - name: Synthetic source-scene and alpha smoke
-        run: blender --background --factory-startup --threads 2 --python-exit-code 1 --python tests/fixtures/source_scene_v2/blender_smoke.py
+        run: '"$BLENDER_EXE" --background --factory-startup --threads 2 --python-exit-code 1 --python tests/fixtures/source_scene_v2/blender_smoke.py'
       - name: Source-scene smoke summary
         run: |
           echo 'SOURCE_SCENE_BLENDER_SMOKE_PASS'

@@ -8,6 +8,9 @@ on:
       - 'tools/truth_foundry/**'
       - 'tests/truth_foundry/**'
       - 'canonical/TRUTH_FOUNDRY*'
+      - 'canonical/TRUTH_CALIBRATION*'
+      - 'canonical/TEACHER_KINEMATIC*'
+      - 'canonical/FIT8_TRUTH_CALIBRATION*'
       - 'canonical/schemas/truth_package_manifest_v1.schema.json'
       - '.github/workflows/truth_foundry_v1.yml'
   push:
@@ -17,6 +20,9 @@ on:
       - 'tools/truth_foundry/**'
       - 'tests/truth_foundry/**'
       - 'canonical/TRUTH_FOUNDRY*'
+      - 'canonical/TRUTH_CALIBRATION*'
+      - 'canonical/TEACHER_KINEMATIC*'
+      - 'canonical/FIT8_TRUTH_CALIBRATION*'
       - 'canonical/schemas/truth_package_manifest_v1.schema.json'
       - '.github/workflows/truth_foundry_v1.yml'
 
@@ -49,6 +55,10 @@ jobs:
         run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
       - name: Behavioral measurements and package courts
         run: python -m unittest discover -s tests/truth_foundry -v
+      - name: Verify the shipped Engine can reconstruct the additive research release
+        run: |
+          mkdir -p truth-source-inspection
+          python tools/platform_release_snapshot.py --plan canonical/TRUTH_CALIBRATION_EXECUTION_PLAN_V1.json --stage-parameters canonical/TRUTH_CALIBRATION_STAGE_PARAMETERS_V1.json --name truth-calibration-source-dry-run --purpose RESEARCH --created-by source-ci --out truth-source-inspection/calibration_release.json
       - name: Inspect source architecture impact without model execution
         run: |
           mkdir -p truth-source-inspection

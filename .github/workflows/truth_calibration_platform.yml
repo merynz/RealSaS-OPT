@@ -1,0 +1,73 @@
+name: truth-calibration-platform
+on:
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: truth-calibration-platform
+  cancel-in-progress: false
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.resolve.outputs.should_run }}
+      expected_sha: ${{ steps.resolve.outputs.expected_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
+      - id: resolve
+        env:
+          EVENT: ${{ github.event_name }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os,subprocess
+          from pathlib import Path
+          sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          changed=subprocess.check_output(['git','diff-tree','--no-commit-id','--name-only','-r','HEAD^1','HEAD'],text=True).splitlines()
+          request='canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V1.json'
+          enabled=json.loads(Path(request).read_text()).get('enabled') is True
+          selected=os.environ['EVENT']=='workflow_dispatch' or (os.environ['CONCLUSION']=='success' and os.environ['HEAD_BRANCH']=='main' and request in changed)
+          print(f"should_run={'true' if enabled and selected else 'false'}");print(f'expected_sha={sha}')
+          PY
+  coordinate:
+    needs: activation
+    if: needs.activation.outputs.should_run == 'true'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 35
+    env:
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      OUTPUT: /home/monster/realsas_authority/truth_calibration_preparation/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      RCLONE_REMOTE: ${{ vars.REALSAS_RCLONE_DRIVE_REMOTE || 'gdrive' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+      - name: Prepare and submit only through Platform campaign API
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/platform_calibration_operator_v1.py \
+            --request canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V1.json --repo "$GITHUB_WORKSPACE" \
+            --platform-root "$PLATFORM_ROOT" --authority-root "$AUTHORITY_ROOT" --expected-main-sha "$EXPECTED_SHA" \
+            --output "$OUTPUT" --rclone-remote "$RCLONE_REMOTE" --submit
+      - name: Observe original Attempts and export only Registry-bound CAS evidence
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/observe_calibration_v1.py \
+            --preparation "$OUTPUT/PREPARATION.json" --artifact-root "$PLATFORM_ROOT/artifacts" \
+            --output "$OUTPUT/evidence" --maximum-seconds 900
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: truth-calibration-preparation-${{ github.run_id }}
+          path: ${{ env.OUTPUT }}/
+          if-no-files-found: warn
+          retention-days: 14

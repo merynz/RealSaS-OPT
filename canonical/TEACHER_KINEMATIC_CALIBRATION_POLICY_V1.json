@@ -1,0 +1,32 @@
+{
+  "schema": "RealSaS.TeacherKinematicCalibrationPolicy.v1",
+  "scope": "APPARATUS_CALIBRATION__NOT_FINAL_STUDENT_TARGET_OR_PHYSICAL_TRUTH",
+  "angle_amplitudes_radians": [
+    0.002,
+    0.01,
+    0.05
+  ],
+  "amplitude_rationale": "Predeclared finite-difference calibration ladder spans floating-point and nonlinear response regimes; no amplitude is selected by this producer.",
+  "root_translation_source_units": [
+    0.173,
+    -0.211,
+    0.097
+  ],
+  "root_control_rationale": "Common translation gauge control; it is not a physical impulse or supervision target.",
+  "native_control_capability": "POSE_BONE_LOCAL_ROTATION_ONLY__OTHER_MECHANISMS_EXPLICITLY_UNSUPPORTED",
+  "all_native_pose_bone_xyz_controls": true,
+  "signs": [
+    -1,
+    1
+  ],
+  "baseline": "REST_TO_POSE_IDENTITY_REPORTED_SEPARATELY",
+  "reset": "CLEAR_ACTIONS_NLA_RESTORE_OBJECT_BASIS_IDENTITY_BONE_BASIS_AND_SHAPE_VALUES",
+  "sham": "BEFORE_AND_AFTER_ALL_ACTIONS",
+  "source_topology": "EXACT_FROZEN_REST_POLYGON_SIGNATURE_EACH_EVALUATION",
+  "action_measure": "UNSEALED__RAW_RESPONSES_ONLY__NO_IMPLICIT_UNIFORM_DOFS",
+  "student_input_allowed": false,
+  "physics_inferred": false,
+  "renderer_qualified": false,
+  "training_allowed": false,
+  "qualification_minted": false
+}

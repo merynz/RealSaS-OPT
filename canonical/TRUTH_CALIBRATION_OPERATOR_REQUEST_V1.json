@@ -1,0 +1,64 @@
+{
+  "schema": "RealSaS.TeacherCalibrationOperatorRequest.v1",
+  "enabled": true,
+  "training_allowed": false,
+  "new_calibration_actions_allowed": true,
+  "input_descriptor_repo_path": "canonical/FIT8_PLATFORM_BOOTSTRAP_V1.json",
+  "campaign_contract_repo_path": "canonical/FIT8_TRUTH_CALIBRATION_CAMPAIGN_V1.json",
+  "campaign_name": "FIT8_TRUTH_SOURCE_CALIBRATION_V1",
+  "experiment_slug": "truth-source-kinematic-calibration-v1",
+  "experiment_name": "Truth Foundry same-eight source kinematic calibration V1",
+  "research_question": "Can the source evaluator preserve sealed native geometry while producing repeatable isolated local kinematic and sampler inputs under explicit reset and common-root controls?",
+  "hypothesis": "A source-bound evaluated geometry response can be measured independently of named semantic taxonomy; native controls remain privileged and measurement availability does not establish student observability or physical constraints.",
+  "policy_repo_path": "canonical/TEACHER_KINEMATIC_CALIBRATION_POLICY_V1.json",
+  "source_equivalence_report": {
+    "relative": "sealed_teacher_replay/40405919318-1/REPLAY_REPORT.json",
+    "sha256": "a8f8d4c92f7ae28e428930b9588454dd298454b919b22269e1ad7b78539518ce"
+  },
+  "evaluator_executable": "/home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender",
+  "evaluator_version": "Blender 4.5.14 LTS",
+  "maximum_seconds_per_subject": 600,
+  "native_baselines": [
+    {
+      "subject_key": "fit8_snake_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_snake_v1.teacher.npz",
+      "sha256": "9cf4fef3873bfd551beb5a2c2ca48ff691d6fbd60d320397044c2128c2da3798"
+    },
+    {
+      "subject_key": "fit8_bat_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_bat_v1.teacher.npz",
+      "sha256": "dfb5f81f34d353a751bfb678e895c14e08b061f7517ce31b2be9b2706a3bb930"
+    },
+    {
+      "subject_key": "fit8_trex_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_trex_v1.teacher.npz",
+      "sha256": "3997476dbac532026984039d2e12d683036d37039fdabe0017f69518b8de52fa"
+    },
+    {
+      "subject_key": "fit8_horse_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_horse_v1.teacher.npz",
+      "sha256": "600899aba1cef4af7433b2ae750a47238c5f84c7231a68a294457bfd98033613"
+    },
+    {
+      "subject_key": "fit8_spider_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_spider_v1.teacher.npz",
+      "sha256": "f146109f1e4e264cc647db9a7b8fd47b5f91862f75c508b1634a373480074a54"
+    },
+    {
+      "subject_key": "fit8_greenblob_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_greenblob_v1.teacher.npz",
+      "sha256": "9567f1f0f20c1892e179abfab7e8aae117245e9501dd4592290830128c54ca0a"
+    },
+    {
+      "subject_key": "fit8_shark_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_shark_v1.teacher.npz",
+      "sha256": "65eddea1bd430a58c002c4890b3bb6a21826ff4276e7b4eb243902c3bf44e43e"
+    },
+    {
+      "subject_key": "fit8_george_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_george_v1.teacher.npz",
+      "sha256": "04380b00fed04226afb9f6a1466e549ecbb24a875a4641720ce70c1b208c7458"
+    }
+  ],
+  "stage_parameters_repo_path": "canonical/TRUTH_CALIBRATION_STAGE_PARAMETERS_V1.json"
+}

@@ -1,5 +1,6 @@
 name: iris-dinov2-alpha-residual-v1-stage
 
+# Active fast-probe dispatch: 2026-10-26 after closing the wholesale audit PR.
 on:
   push:
     branches:

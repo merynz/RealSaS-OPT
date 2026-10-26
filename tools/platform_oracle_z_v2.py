@@ -26,7 +26,7 @@ from tools.platform_release_snapshot import snapshot
 
 ACTOR = "alfred-oracle-z-v2"
 SLUG = "iris-tessa-v3-oracle-z-representation-v2"
-STAGE_ID = "R01_ORACLE_Z_REPRESENTATION_V2"
+STAGE_ID = "91_ORACLE_Z_REPRESENTATION_V2"
 PROBE = ROOT / "experiments/iris_tessa_v3_apparatus_audit_20261025/oracle_z_representation_probe_v2.py"
 PREREG = ROOT / "experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_REPRESENTATION_PREREG_V2.md"
 EXPERIMENT_REQUEST = ROOT / "experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_REPRESENTATION_EXPERIMENT_V2.json"

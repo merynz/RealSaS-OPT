@@ -1,0 +1,40 @@
+{
+  "slug": "iris-tessa-v3-oracle-z-representation-v2",
+  "name": "IRIS/TESSA V3 Oracle-Z Representation Court V2",
+  "research_question": "When perception is bypassed and scene state is optimized directly, which part of the current Z -> Q(Z,x) design limits continuous surface evidence: carrier representation, shared query capacity, optimization, or target spatial frequency?",
+  "hypothesis": "A triplane carrier is not an obvious blocker for RealSaS surface-structured evidence if a calibrated per-scene upper-bound decoder can fit the relevant surface truth, a shared Q retains a bounded generalization gap, and the same court demonstrably distinguishes a dense 3-D carrier on an easier genuinely volumetric control.",
+  "initial_state": "PREREGISTERED",
+  "metadata": {
+    "schema": "RealSaS.OracleZRepresentationExperiment.v2",
+    "preregistration_path": "experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_REPRESENTATION_PREREG_V2.md",
+    "probe_path": "experiments/iris_tessa_v3_apparatus_audit_20261025/oracle_z_representation_probe_v2.py",
+    "supersedes_apparatus_record": "ORACLE_Z_REPRESENTATION_RESULT_V1.md",
+    "authority": "RESEARCH_ONLY",
+    "execution_authority": "PLATFORM_EXPERIMENT_ATTEMPT_ARTIFACT_REGISTRY",
+    "product_authority_changed": false,
+    "truth139_training_authorized": false,
+    "fit8_training_authorized": false,
+    "model_promotion_authorized": false,
+    "families": [
+      "SURFACE_STRUCTURED",
+      "THIN_SURFACE",
+      "VOLUMETRIC_3WAY"
+    ],
+    "arms": [
+      "TRIPLANE",
+      "TRIPLANE_XYZ",
+      "MULTIRES_TRIPLANE",
+      "DENSE3D"
+    ],
+    "court_decomposition": [
+      "OPTIMIZER_CALIBRATION",
+      "PER_SCENE_UPPER_BOUND",
+      "SHARED_Q_BURDEN",
+      "RANDOM_TARGET_FIREWALL"
+    ],
+    "canonical_run_requires_main": true,
+    "platform_context_required_by_probe": true,
+    "github_actions_scientific_authority": false
+  },
+  "created_by": "alfred"
+}

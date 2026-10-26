@@ -1,3 +1,11 @@
+> **A100 delivery continuation — 2026-10-26:** Continue through the optimized
+> notebook under the explicit user request. Preserve the same FIT8 and pre-Truth
+> baseline. Read [the executable-source and delivery work order](docs/research/truth_foundry/A100_DELIVERY_WORK_ORDER_V1.md).
+> Recover/verify the eight exact teacher payloads, close real truth producers and
+> qualification, integrate actual target/head/trainer/Compiler bindings, seal the
+> Platform external worker and benchmark full A100 cost before calling it ready.
+> Source unit courts do not authorize a shortened recipe or synthetic corpus.
+
 > **Truth Foundry handoff — 2026-10-26:** The V1 geometric/mechanical response
 > design and same-eight FIT8 research arms are now defined in
 > [Truth Foundry V1](docs/research/truth_foundry/TRUTH_FOUNDRY_V1.md) and

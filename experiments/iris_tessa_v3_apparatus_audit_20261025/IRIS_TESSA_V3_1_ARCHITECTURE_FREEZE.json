@@ -1,0 +1,81 @@
+{
+  "schema": "RealSaS.IRISTESSAPreTruthArchitectureFreeze.v3.1",
+  "date": "2026-10-26",
+  "status": "FROZEN_PRETRUTH_ARCHITECTURE_BASELINE_V3_1",
+  "scope": "ARCHITECTURE_BLUEPRINT_ONLY",
+  "scientific_source_sha": "4740665bf8b07aa06f9c90f416effe9e9997803a",
+  "workflow_run_id": 40343827460,
+  "evidence": [
+    {
+      "file": "12649971130_dinov2_v31_fusion_form_v1_report.json",
+      "sha256": "24fda3e41856a82d65f71f7dafcdbbb5ac92aa730831a37f6cc6a28aa2d495cc",
+      "schema": "RealSaS.DINOv2V31FusionFormCourt.v1",
+      "status": "DIRECT_FINAL_384_L2_64_ALPHA64_SELECTED_TINY_V1",
+      "path": "evidence/12649971130_dinov2_v31_fusion_form_v1_report.json"
+    },
+    {
+      "file": "12650701732_observation_endpoint_interaction_v1_report.json",
+      "sha256": "9d4a2c0dc0c506511ac4a20d8a6277503f05d2b5f49b5264980dce8fb5b29bcd",
+      "schema": "RealSaS.ObservationEndpointInteractionCourt.v1",
+      "status": "OBSERVATION_ENDPOINT_INTERACTION_NOT_CLOSED_TINY_V1",
+      "path": "evidence/12650701732_observation_endpoint_interaction_v1_report.json"
+    },
+    {
+      "file": "12656684424_gradient_ownership_report_v1.json",
+      "sha256": "62525cb23e4234e6874b1fac3ec6a1cdd14940243627bcfea4296c63147a1620",
+      "schema": "RealSaS.GradientOwnershipCourt.v1",
+      "status": "GRADIENT_OWNERSHIP_CLOSED_TINY_V1",
+      "path": "evidence/12656684424_gradient_ownership_report_v1.json"
+    },
+    {
+      "file": "12661560499_observation_endpoint_interaction_v2_report.json",
+      "sha256": "57b2378b15d7d2c47be8ebe2e3620b172a0a6024aac87c34b7fc87c2209bb86b",
+      "schema": "RealSaS.ObservationEndpointInteractionCourt.v2",
+      "status": "OBSERVATION_ENDPOINT_INTERACTION_COMPATIBLE_TINY_V2",
+      "path": "evidence/12661560499_observation_endpoint_interaction_v2_report.json"
+    },
+    {
+      "file": "joint_v2_continuous_joint_system_v2_report.json",
+      "sha256": "4c3085176a1fa8ce8fd03a89613cc4617592bd08bcd709518305f7f205202b9b",
+      "schema": "RealSaS.ContinuousJointSystemCourt.v2",
+      "status": "CONTINUOUS_JOINT_SYSTEM_CLOSED_TINY_V2",
+      "path": "evidence/joint_v2_continuous_joint_system_v2_report.json"
+    }
+  ],
+  "prerequisites": {
+    "continuous_joint_v2_closed": true,
+    "observation_endpoint_v2_compatible": true,
+    "dinov2_fusion_v1_selected": true,
+    "gradient_ownership_v1_selected": true
+  },
+  "selection": {
+    "foundation": "DINOv2-S/14",
+    "fusion": "DIRECT_FINAL_384_L2_64_ALPHA64",
+    "carrier": "DENSE3D",
+    "query": "Q192_D3_FOURIER4",
+    "sharing": "S2_SHARED_TRUNK_PRIVATE",
+    "relation_gradient": "STOPGRAD_RELATION",
+    "relation_lora_selected": false,
+    "endpoint_binding": "PRECOMPRESSION_TYPED_LOCAL",
+    "witness": "OBSERVABILITY_GATED_BOUNDED_RESOLUTION_ESCALATION_THEN_XYZ_FPS",
+    "tessa_local_attention_window": 4096
+  },
+  "next_scope": {
+    "cohort": "EXISTING_FIT8",
+    "selection": "canonical/FIT8_DIVERSITY_SELECTION_V1.json",
+    "knight": "SEPARATE_REGRESSION",
+    "first_action": "INVENTORY_AND_VERSION_EXISTING_TRUTH_EXTENSION",
+    "execution_owner": "PLATFORM_EXPERIMENT_ATTEMPT_ARTIFACT_CAS"
+  },
+  "claims": {
+    "architecture_baseline_frozen": true,
+    "real_model_implementation_complete": false,
+    "trained_weights_frozen": false,
+    "truth_builder_qualified": false,
+    "fit8_pass": false,
+    "lofo_unseen_pass": false,
+    "shared_scene_hypothesis_proven": false,
+    "model_promotion": false,
+    "product_authority_changed": false
+  }
+}

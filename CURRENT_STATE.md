@@ -1,3 +1,14 @@
+> **Active research handoff — 2026-10-26:** IRIS/TESSA V3.1 is frozen as a
+> **pre-Truth architecture baseline**, after actual joint V2, endpoint V2 and
+> DINO fusion report closure. Read
+> [the freeze record](experiments/iris_tessa_v3_apparatus_audit_20261025/IRIS_TESSA_V3_1_ARCHITECTURE_FREEZE.md)
+> and [current research state](experiments/iris_tessa_v3_apparatus_audit_20261025/CURRENT_RESEARCH_STATE.md).
+> User-selected next research work is an additive extension of the **existing
+> FIT8 truth packages**, retaining the same eight subjects; Knight is separate
+> regression. Real-data/training state remains Platform-owned. This source
+> record changes no ModelRelease, product activation or qualification. The
+> product-state snapshot below remains scoped historical/current product context.
+
 # RealSaS-OPT — Current State
 
 **Date:** 2026-10-24  

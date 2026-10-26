@@ -1,0 +1,167 @@
+{
+  "authority": {
+    "continuous_joint_dependency_closed": true,
+    "fit8_training_authorized": false,
+    "product_authority_changed": false,
+    "truth_builder_training_authorized": false,
+    "v3_1_architecture_freeze_authorized": false
+  },
+  "configuration": {
+    "adapter_bottleneck": 64,
+    "arm_seeds": {
+      "FULL_SHARED_JOINT_BOUND": 720401,
+      "GM_SINGLE_ORACLE": 720101,
+      "GP_SINGLE_ORACLE": 720211,
+      "S2_JOINT_BOUND": 720307,
+      "S2_JOINT_BOUND_RANDOM_RELATION": 720601,
+      "S2_JOINT_UNBOUND": 720503
+    },
+    "batch": 32,
+    "carrier_type": "DENSE3D",
+    "eval_points": 2048,
+    "factors": [
+      4.0,
+      2.0,
+      1.0
+    ],
+    "families": [
+      "SURFACE_STRUCTURED",
+      "THIN_SURFACE"
+    ],
+    "loss_policy": "equal_unweighted_sum_of_normalized_local_task_losses_and_relation_bce",
+    "lr": 0.003,
+    "query": {
+      "depth": 3,
+      "fourier_bands": 4,
+      "width": 192
+    },
+    "relation_gradient_ownership": "STOPGRAD_RELATION",
+    "relation_hidden": 128,
+    "scene_count": 30,
+    "seeds": [
+      731,
+      947,
+      1217,
+      1601,
+      1999
+    ],
+    "steps_per_arm": 6000,
+    "train_pool": 4096
+  },
+  "dependency": {
+    "authority": {
+      "continuous_joint_system_dependency_authorized": true,
+      "fit8_training_authorized": false,
+      "product_authority_changed": false,
+      "truth_builder_training_authorized": false
+    },
+    "evidence": {
+      "gates": {
+        "dense_lower_all_optimizer_seeds": true,
+        "dense_no_group_worse_gt_10pct": true,
+        "dense_support_count_not_worse_each_seed": true,
+        "mean_dense_relative_gain_ge_5pct": true
+      },
+      "mean_dense_relative_gain": 0.054209877942017815,
+      "paired_dense_relative_gains": [
+        0.03489277146525836,
+        0.059437728751246185,
+        0.06829913360954891
+      ]
+    },
+    "schema": "RealSaS.OracleZFinalCarrierSelection.v6",
+    "selected_carrier": "DENSE3D",
+    "source": {
+      "artifact_digest": "sha256:40898f6c4bb148c718923c06f3bd254c2e1aae7798edb4fde011d14e46c5d7bd",
+      "artifact_id": 12649861178,
+      "artifact_name": "iris-oracle-z-carrier-robustness-v6-report",
+      "court_schema": "RealSaS.OracleZCarrierRobustnessCourt.v6",
+      "court_status": "DENSE3D_SELECTED_PRETRUTH_V6",
+      "head_sha": "8ecf8a92ab8709b1c94f09a47df84537b6abece4",
+      "workflow_run_id": 40321605659
+    },
+    "status": "FINAL_PRETRUTH_CARRIER_SELECTION_V6"
+  },
+  "full_shared_catastrophic_contradiction": false,
+  "gates": {
+    "full_shared_no_catastrophic_10pct_both_advantage": true,
+    "gm_negative_transfer_le_15pct": true,
+    "gp_negative_transfer_le_15pct": true,
+    "random_relation_firewall_in_0p48_0p52": true,
+    "relation_positive_fraction_in_range": true,
+    "rolling_carrier_local_error_increase_ge_25pct": true,
+    "s2_gm_nrmse_le_0p15": true,
+    "s2_gp_nrmse_le_0p15": true,
+    "s2_relation_accuracy_ge_0p95": true,
+    "unbound_gm_local_within_15pct": true,
+    "unbound_gp_local_within_15pct": true,
+    "unbound_relation_accuracy_le_0p60": true
+  },
+  "negative_transfer": {
+    "gm": 0.07702529012074688,
+    "gp": -0.05586511108219139
+  },
+  "parameter_counts": {
+    "FULL_SHARED_JOINT_BOUND": 969097,
+    "GM_SINGLE_ORACLE": 943748,
+    "GP_SINGLE_ORACLE": 943748,
+    "S2_JOINT_BOUND": 1018761,
+    "S2_JOINT_BOUND_RANDOM_RELATION": 1018761,
+    "S2_JOINT_UNBOUND": 1003593
+  },
+  "rolling_carrier": {
+    "ordinary_mean_surface_local_nrmse": 0.1628226970632871,
+    "relative_error_increase": 9.163834177624421,
+    "rolled_mean_surface_local_nrmse": 1.6549028933048249
+  },
+  "schema": "RealSaS.ContinuousJointSystemCourt.v2",
+  "status": "CONTINUOUS_JOINT_SYSTEM_CLOSED_TINY_V2",
+  "summaries": {
+    "FULL_SHARED_JOINT_BOUND": {
+      "gm_overall_mean_nrmse": 0.1276499181985855,
+      "gm_surface_local_mean_nrmse": 0.16412447343269984,
+      "gp_overall_mean_nrmse": 0.12669415771961212,
+      "gp_surface_local_mean_nrmse": 0.1629059448838234,
+      "mean_surface_local_nrmse": 0.16351520915826162,
+      "relation_accuracy": 0.98486328125,
+      "relation_target_positive_fraction": 0.5
+    },
+    "GM_SINGLE_ORACLE": {
+      "gm_overall_mean_nrmse": 0.11708786338567734,
+      "gm_surface_local_mean_nrmse": 0.14892513230443,
+      "mean_surface_local_nrmse": 0.14892513230443
+    },
+    "GP_SINGLE_ORACLE": {
+      "gp_overall_mean_nrmse": 0.1343110352754593,
+      "gp_surface_local_mean_nrmse": 0.16616766899824142,
+      "mean_surface_local_nrmse": 0.16616766899824142
+    },
+    "S2_JOINT_BOUND": {
+      "gm_overall_mean_nrmse": 0.12610659003257751,
+      "gm_surface_local_mean_nrmse": 0.16287940740585327,
+      "gp_overall_mean_nrmse": 0.12680773437023163,
+      "gp_surface_local_mean_nrmse": 0.16276598672072093,
+      "mean_surface_local_nrmse": 0.1628226970632871,
+      "relation_accuracy": 0.9851725101470947,
+      "relation_target_positive_fraction": 0.5
+    },
+    "S2_JOINT_BOUND_RANDOM_RELATION": {
+      "gm_overall_mean_nrmse": 0.1256769895553589,
+      "gm_surface_local_mean_nrmse": 0.1597896325091521,
+      "gp_overall_mean_nrmse": 0.12165716290473938,
+      "gp_surface_local_mean_nrmse": 0.1576314873993397,
+      "mean_surface_local_nrmse": 0.15871055995424588,
+      "relation_accuracy": 0.49848634004592896,
+      "relation_target_positive_fraction": 0.5
+    },
+    "S2_JOINT_UNBOUND": {
+      "gm_overall_mean_nrmse": 0.12629355490207672,
+      "gm_surface_local_mean_nrmse": 0.16214020798603693,
+      "gp_overall_mean_nrmse": 0.1296154409646988,
+      "gp_surface_local_mean_nrmse": 0.16461334625879923,
+      "mean_surface_local_nrmse": 0.16337677712241808,
+      "relation_accuracy": 0.5,
+      "relation_target_positive_fraction": 0.5
+    }
+  }
+}

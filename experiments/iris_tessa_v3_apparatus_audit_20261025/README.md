@@ -1,3 +1,5 @@
+> Current working authority: [V3.1 pre-Truth freeze](IRIS_TESSA_V3_1_ARCHITECTURE_FREEZE.md), [ledger V8](RESEARCH_DECISION_LEDGER_V8.md) and [continuation](CURRENT_RESEARCH_STATE.md). The original preregistration below is historical apparatus context.
+
 # RealSaS — IRIS/TESSA V3 Research Apparatus Audit
 
 **Date:** 2026-10-25  

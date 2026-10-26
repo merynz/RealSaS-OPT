@@ -5,6 +5,8 @@ import hashlib
 import json
 from pathlib import Path
 
+STAGE_ID = "91_ORACLE_Z_REPRESENTATION_V2"
+
 
 def _write_json(path: Path, value: dict) -> dict:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -60,7 +62,7 @@ def consume_oracle_z_report(ctx: dict) -> dict:
 
     # The external binding itself is Attempt-scoped by Platform. This adapter
     # deliberately does not reinterpret report.status as a scientific PASS.
-    root = ctx["run_root"] / "artifacts" / "R01_ORACLE_Z_REPRESENTATION_V2"
+    root = ctx["run_root"] / "artifacts" / STAGE_ID
     exact = root / "oracle_z_report.json"
     exact.parent.mkdir(parents=True, exist_ok=True)
     exact.write_bytes(data)

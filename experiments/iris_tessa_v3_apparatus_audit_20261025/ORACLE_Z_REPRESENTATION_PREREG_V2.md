@@ -72,10 +72,12 @@ Truth families:
 - `THIN_SURFACE`: the same family with controlled minimum thickness;
 - `VOLUMETRIC_3WAY`: smooth genuine xyz interaction.
 
-Difficulty ladder is defined relative to carrier cell scale rather than one arbitrary target:
+Difficulty is fixed in one shared truth domain for all arms. Define the reference spacing from the current/base triplane carrier as `h_ref = 2/24` in normalized IRIS coordinates. Every arm sees the **same** target at each ladder point:
 
-- surface/thin ladder: minimum radius approximately `4h`, `2h`, `1h`, `0.5h` where `h` is the corresponding fine carrier cell spacing in normalized IRIS coordinates;
+- surface/thin ladder: minimum radius approximately `4h_ref`, `2h_ref`, `1h_ref`, `0.5h_ref`;
 - volumetric ladder: maximum integer spatial frequency `1`, `2`, `4`, `6` cycles over the normalized domain.
+
+No arm-specific rescaling of truth is allowed.
 
 Held-out continuous query points are never optimized directly.
 

@@ -50,6 +50,41 @@ It also reads Platform capability/experiment/channel state. It never executes a
 teacher, creates an Attempt, imports data or mints qualification. Its source CI
 proves recovery behavior only. Read the actual host artifact after deployment.
 
+Readback at main 52afcd336bdf25f8734adbc0e9183d87ac081648 recovered **all eight**
+exact NPZs, including George, in run 40403783565 (artifact 12690026377; archive
+SHA256 1ad0176606682de326d17e5ce5a84ca85b1ee2c2e403fcff423faa4c690e44da).
+The independent native-byte audit then verified 8/8 receipt/source/admission,
+NPZ hash, array layout and clip/frame bindings. It explicitly reports no isolated
+intervention, source-clock qualification, source appearance sampler, complete
+ray truth or physical solver. Native clip positions cannot be relabeled as those.
+The exact historical V1/V2/V3 export transport has been restored byte-for-byte
+from eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d. A sealed-array replay on the
+existing Blender 4.5.14 evaluator is requested; read the actual report, never infer
+equivalence from a workflow's success state. This replay adds no interventions.
+
+The fresh read-only Platform snapshot had the existing FIT8 campaign
+cf0ac8b2-e111-4e87-b048-515fa9f0f0da and 43-stage graph; only AXIS had a RESEARCH
+channel. This is a dated observation, not live source authority. A V3.1 Truth
+Foundry execution/release cannot be assumed to exist from the older campaign.
+
+The frozen-feature cache now binds observations, camera, alpha resampling,
+foundation source/weights and numerical environment. It stores FP32 FINAL and
+zero-based-block-2 normalized tokens plus raw alpha patches. Trainable fusion,
+carrier and endpoint values are excluded. Cache identity/byte validation and
+layer/view-chunk tests are source courts, not a DINO real-corpus speed claim.
+
+The additive Graphics V2 consumer requires Registry-qualified exact record hashes
+and canonical-M address witnesses; free confidence/validity flags cannot admit a
+modified record. It retains rear transparent contribution, preserves crossing
+orders without deleting cycle edges, abstains on unknown alpha/order, and keeps
+unobserved visibility unknown. It does not replace the active Graphics provider,
+partition the mesh or mint a ProductRevision. Native pixels/integration remain open.
+
+Architecture impact inspection leaves these new modules unclassified because
+the released product adapters do not import them. Explicit import/source review
+confirms they are currently candidate/test/operator entrypoints. This is an
+integration gap, never proof of zero future consumers or reuse eligibility.
+
 ## Before a training notebook may be delivered as ready
 
 1. Read back all eight real teacher payloads; verify each source/admission,

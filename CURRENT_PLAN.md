@@ -1,3 +1,19 @@
+> **Truth Foundry handoff — 2026-10-26:** The V1 geometric/mechanical response
+> design and same-eight FIT8 research arms are now defined in
+> [Truth Foundry V1](docs/research/truth_foundry/TRUTH_FOUNDRY_V1.md) and
+> [the execution plan](docs/research/truth_foundry/FIT8_V1_EXECUTION_PLAN.md).
+> Primary truth is measured source-space response and compositing; attachment,
+> grip and support remain Compiler consumer interpretations. Independent numeric
+> kernels/local package tools are implemented; **real teacher adapters, real truth
+> qualification, real V3.1 model integration and the executable training seal remain
+> pending**. Reuse the existing eight source lineages; do not reopen the 139 census.
+> Next: Platform-bound teacher equivalence, intervention/renderer adapters and
+> source truth qualification. The existing read-only Skin inspector is requested
+> again after exact-main deployment; read its receipt for live model/parent state.
+> Production still requires exact Skin parents/model admission and actual
+> Mechanics/Graphics/Motion/Proof consumer closure; IRIS/TESSA is not the only
+> proven blocker. No scientific PASS, model promotion or product activation here.
+
 > **Active research handoff — 2026-10-26:** IRIS/TESSA V3.1 is frozen as a
 > **pre-Truth architecture baseline**, after actual joint V2, endpoint V2 and
 > DINO fusion report closure. Read

@@ -1,0 +1,46 @@
+{
+  "historical_evidence_authority": {
+    "attachment_persistence": "ABSTAIN",
+    "deformation_coherence": "ABSTAIN",
+    "global_visibility": "DETERMINISTIC_COMPLETE_DIRECT_SURFACE_STACK__TIED_MINIMA_ABSTAIN",
+    "occlusion": "ABSTAIN",
+    "pair_front": "DETERMINISTIC_DIRECT_SURFACE_DEPTH_ORDER__TIES_ABSTAIN",
+    "surface_rgba_boundary": "ADMITTED_SOURCE_OBSERVATION_ON_UNIQUE_DIRECT_SURFACE_FRONT_HIT"
+  },
+  "manifests": [
+    {
+      "execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+      "name": "DIRECT_IRIS_PRESENTATION_MEMORY_V1_MANIFEST.json",
+      "schema": "RealSaS.DirectIRISPresentationMemoryManifest.v1",
+      "sha256": "21434efbfd409504d11bd883f35041089dbe7329e829c37446eb21c59b19b9f6"
+    },
+    {
+      "execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+      "name": "DIRECT_IRIS_PRESENTATION_QUERIES_V1_MANIFEST.json",
+      "schema": "RealSaS.DirectIRISPresentationQueriesManifest.v1",
+      "sha256": "9bc67c6457918e43d88a2ff1158d0e8102875c9a3cf8db24788ac457237c6695"
+    },
+    {
+      "execution_source_sha": "eb11004e4d8c7fba6f6ba95fa8eacaa0c24fcb3d",
+      "name": "TESSA_V2_CORPUS_MANIFEST.json",
+      "schema": "RealSaS.Fit8TESSAV2TrainingCorpus.v1",
+      "sha256": "0800e42fbc479320c4f8880db4e4b74bf4756eb72380b4f597b35102e44d5663"
+    }
+  ],
+  "next_action": "REUSE_SOURCE_LINEAGE__BUILD_VERSIONED_TEACHER_MEASUREMENTS_THROUGH_PLATFORM",
+  "schema": "RealSaS.ExistingFIT8ManifestAudit.v1",
+  "status": "PINNED_MANIFEST_IDENTITIES_VERIFIED__PAYLOADS_NOT_VERIFIED",
+  "subjects": [
+    "Snake",
+    "Bat",
+    "T-Rex",
+    "Horse",
+    "Spider",
+    "GreenBlob",
+    "Shark",
+    "George"
+  ],
+  "teacher_causal_truth_qualified": false,
+  "tensor_payload_bytes_verified": false,
+  "training_executed": false
+}

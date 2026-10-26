@@ -1,0 +1,93 @@
+{
+  "schema": "RealSaS.TruthFoundryFIT8Preregistration.v1",
+  "status": "DESIGN_LOCKED__EXECUTION_BLOCKED_ON_TRUTH_QUALIFICATION_AND_MODEL_INTEGRATION",
+  "subjects": [
+    "Snake",
+    "Bat",
+    "T-Rex",
+    "Horse",
+    "Spider",
+    "GreenBlob",
+    "Shark",
+    "George"
+  ],
+  "regression_subject": "Knight",
+  "raw_corpus_seal_sha256": "2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab",
+  "selection_ref": "canonical/FIT8_DIVERSITY_SELECTION_V1.json",
+  "campaign_ref": "canonical/FIT8_PLATFORM_CAMPAIGN_V1.json",
+  "contract_ref": "canonical/TRUTH_FOUNDRY_V1_CONTRACT.json",
+  "common_weights": true,
+  "per_subject_production_rules_allowed": false,
+  "frozen_architecture": {
+    "dino_token": "DIRECT_FINAL_384_L2_64_ALPHA64",
+    "token_width": 512,
+    "carrier_class": "DENSE3D_PRE_TRUTH",
+    "query_width": 192,
+    "decoder_layers": 3,
+    "activation": "SILU",
+    "xyz_fourier_bands": 4,
+    "head_ownership": "SHARED_QUERY_WITH_PROTECTED_GM_GP_PRIVATE_CAPACITY",
+    "relation_gradients": "STOPGRAD_GP_ENDPOINTS",
+    "relation_lora": "NOT_SELECTED",
+    "binding": "TYPED_ENDPOINTS_BEFORE_PRESENTATION_COMPRESSION",
+    "extraction": "OBSERVABILITY_GATED_BOUNDED_ESCALATION_THEN_XYZ_FPS",
+    "tessa_local_window": 4096,
+    "production_carrier_resolution": "UNSEALED__TINY_ORACLE_NOT_PRODUCTION_SIZE"
+  },
+  "arms": [
+    {
+      "id": "TEACHER_ORACLE_CONSUMER",
+      "purpose": "CAN_COMPILER_CONSUME_QUALIFIED_MEASUREMENTS_ON_FIXED_ADMITTED_PARENTS",
+      "training_arm": false
+    },
+    {
+      "id": "PREDICTED_EVIDENCE",
+      "purpose": "COMMON_V31_IRIS_TO_TESSA_WITH_QUALIFIED_TRUTH",
+      "training_arm": true
+    },
+    {
+      "id": "NULL_PRESENTATION_MATCHED",
+      "purpose": "MATCHED_TESSA_CONTROL_WITH_NULL_EVIDENCE",
+      "training_arm": true
+    },
+    {
+      "id": "SHUFFLED_EVIDENCE_DIAGNOSTIC",
+      "purpose": "FAMILY_AND_ENDPOINT_CORRUPTION_MUST_BREAK_THE_EXPECTED_DEPENDENCE",
+      "training_arm": false
+    }
+  ],
+  "tessa_control": {
+    "matched_parameter_and_conditioning_budget": true,
+    "research_presentation_token_budget": 1024,
+    "student_input": "ADMITTED_STATIC_OBSERVATIONS_AND_CAMERAS_ONLY",
+    "forbidden": [
+      "TEACHER_TOPOLOGY",
+      "SOURCE_OWNER_BONE_CONTROL_MATERIAL_IDS",
+      "TEACHER_SECOND_POSE",
+      "TEACHER_MEASUREMENTS_AS_STUDENT_INPUT"
+    ],
+    "upper_bound_teacher_evidence": "EXPLICIT_SEPARATE_DIAGNOSTIC_NEVER_MODEL_FIT_SCORE"
+  },
+  "evaluation": {
+    "report_by_subject_family_validity_and_mechanism": true,
+    "fit8_success_is_unseen_success": false,
+    "knight": "FIXED_BASELINE_REGRESSION__NOT_NINTH_FIT_SUBJECT",
+    "future_unseen": "LINEAGE_SAFE_LOFO_AND_HELDOUT_MECHANISM_OR_CATEGORY_REQUIRED",
+    "consumer_failures": "SEPARATE_TEACHER_ORACLE_FROM_PREDICTOR_ERRORS",
+    "source_wins_appearance": true
+  },
+  "execution_seal_required": [
+    "EXACT_ENGINE_RELEASE_AND_DEPLOYED_MAIN",
+    "PLATFORM_CAMPAIGN_EXPERIMENT_ATTEMPTS_AND_HANDOFF",
+    "EIGHT_QUALIFIED_SOURCE_OBSERVATION_PARENTS",
+    "EIGHT_QUALIFIED_TRUTH_PACKAGE_AND_REPORT_HASHES",
+    "REAL_MODEL_IMPLEMENTATION_AND_INITIALIZATION_HASHES",
+    "EXACT_OPTIMIZER_SAMPLING_LOSS_AND_COMPUTE_BUDGET",
+    "EXACT_SEEDS_STOPPING_RULES_AND_HELDOUT_SPLITS",
+    "NUMERIC_FAMILY_AND_CONSUMER_ACCEPTANCE_THRESHOLDS",
+    "EXACT_EVALUATION_POLICY_AND_BASELINE_ARTIFACT_HASHES"
+  ],
+  "execution_authorized_by_this_json": false,
+  "training_executed": false,
+  "qualification_claimed": false
+}

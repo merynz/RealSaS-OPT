@@ -1,0 +1,409 @@
+{
+  "schema": "RealSaS.TruthFoundryDesignContract.v1",
+  "status": "DESIGN_LOCKED__REAL_PRODUCERS_AND_QUALIFICATION_PENDING",
+  "source_baseline": "311ade52c6c118d3d1d88076507fc6b7fc0d3b1f",
+  "architecture_baseline": "IRIS_TESSA_V3_1_PRE_TRUTH",
+  "primary_truth": "GEOMETRIC_MECHANICAL_APPEARANCE_RESPONSE_UNDER_EXPLICIT_INTERVENTION",
+  "semantic_consumer_labels_are_primary_truth": false,
+  "source_topology_is_canonical_mesh": false,
+  "units_policy": "EXPLICIT_SOURCE_FRAME_LENGTH_TIME_ACTION_AND_CHANNEL_METRIC",
+  "default_observability": "PRIVILEGED_ONLY",
+  "records": {
+    "TeacherSceneIRV1": {
+      "required": [
+        "schema",
+        "subject_key",
+        "source_sha256",
+        "topology_sha256",
+        "observation_bundle_sha256",
+        "normalization_sha256",
+        "geometry_payloads",
+        "appearance_payloads",
+        "evaluator_source_commit",
+        "evaluator_config_sha256",
+        "native_clip_refs",
+        "privileged_control_refs",
+        "constraint_capabilities",
+        "coordinate_contract",
+        "source_equivalence_report_sha256"
+      ],
+      "invariant": "EXACT_SOURCE_TOPOLOGY_AND_EVALUATOR__NO_STUDENT_OWNER_IDS"
+    },
+    "InterventionSpecV1": {
+      "required": [
+        "schema",
+        "teacher_scene_sha256",
+        "action_law_kind",
+        "action_measure",
+        "action_metric",
+        "baseline_state_sha256",
+        "actions",
+        "sham_actions",
+        "root_controls",
+        "timestamps_seconds",
+        "reset_and_solver_policy",
+        "sampling_policy_sha256",
+        "conditioning_domain_sha256"
+      ],
+      "action_required": [
+        "opaque_privileged_handle",
+        "kind",
+        "units",
+        "amplitude",
+        "sign",
+        "weight_or_covariance_ref",
+        "authored_capability",
+        "baseline_pair_ref"
+      ],
+      "invariant": "NO_COVARIANCE_OR_ACTION_COUNT_REPARAMETERIZATION_WITHOUT_TRANSPORTED_MEASURE"
+    },
+    "CausalResponseBatchV1": {
+      "required": [
+        "schema",
+        "teacher_scene_sha256",
+        "intervention_spec_sha256",
+        "source_loci",
+        "family_measurements",
+        "validity_masks",
+        "observability_witnesses",
+        "coordinate_contract",
+        "producer_commit"
+      ],
+      "invariant": "MEASUREMENT_AVAILABILITY_IS_NOT_STUDENT_OBSERVABILITY"
+    },
+    "RayCompositingTruthV1": {
+      "required": [
+        "schema",
+        "teacher_scene_sha256",
+        "intervention_spec_sha256",
+        "camera_bundle_sha256",
+        "raster_policy_sha256",
+        "ray_offsets",
+        "source_hit_refs",
+        "depth",
+        "tie_group",
+        "effective_alpha",
+        "opacity_coverage_separation_status",
+        "linear_rgb",
+        "transmittance",
+        "contribution",
+        "complete_stack_mask",
+        "validity_masks",
+        "blend_law",
+        "source_artistic_order_status",
+        "removal_response_refs"
+      ],
+      "invariant": "COMPLETE_STACK_AND_EXPLICIT_BLEND__PAIR_ORDER_NOT_GLOBAL_VISIBILITY"
+    },
+    "TruthQualificationReportV1": {
+      "required": [
+        "schema",
+        "package_manifest_sha256",
+        "attempt_id",
+        "engine_release_id",
+        "source_equivalence",
+        "response_replay",
+        "observability",
+        "leakage",
+        "coverage_by_family_and_stratum",
+        "consumer_oracle_results",
+        "failed_requirements",
+        "registry_admission"
+      ],
+      "invariant": "ONLY_PLATFORM_COMPILER_QUALIFICATION_MAY_ADMIT"
+    },
+    "TruthPackageManifestV1": {
+      "wire_schema": "canonical/schemas/truth_package_manifest_v1.schema.json",
+      "invariant": "MANIFEST_HASH_PLUS_EVERY_PAYLOAD_HASH__WRITER_NEVER_MINTS_QUALIFICATION"
+    }
+  },
+  "array_layouts": {
+    "SURFACE_TRAJECTORY": {
+      "position": [
+        "L",
+        "C",
+        "T",
+        3
+      ],
+      "displacement": [
+        "L",
+        "C",
+        "T",
+        3
+      ],
+      "interval_velocity": [
+        "L",
+        "C",
+        "T-1",
+        3
+      ],
+      "validity": [
+        "L",
+        "C",
+        "T"
+      ]
+    },
+    "SURFACE_METRIC_STRAIN": {
+      "green_strain": [
+        "F",
+        "C",
+        "T",
+        2,
+        2
+      ],
+      "area_ratio": [
+        "F",
+        "C",
+        "T"
+      ],
+      "orientation": [
+        "F",
+        "C",
+        "T",
+        3
+      ],
+      "validity": [
+        "F",
+        "C",
+        "T"
+      ],
+      "curvature": "OPTIONAL_QUALIFIED_NEIGHBOR_PATCH_WITH_OWN_MASK"
+    },
+    "RELATIVE_AFFINE_TRANSPORT": {
+      "pair_source_locus_indices": [
+        "P",
+        2
+      ],
+      "relative_affine": [
+        "P",
+        "C",
+        "T",
+        4,
+        4
+      ],
+      "validity": [
+        "P",
+        "C",
+        "T"
+      ],
+      "frame_construction": "EXPLICIT_CONTENT_ADDRESSED_POLICY"
+    },
+    "ORIENTED_GAP_AND_VELOCITY": {
+      "gap": [
+        "P",
+        "C",
+        "T"
+      ],
+      "normal_a": [
+        "P",
+        "C",
+        "T",
+        3
+      ],
+      "relative_velocity": [
+        "P",
+        "C",
+        "T",
+        3
+      ],
+      "normal_speed": [
+        "P",
+        "C",
+        "T"
+      ],
+      "tangent_slip": [
+        "P",
+        "C",
+        "T",
+        3
+      ],
+      "validity": [
+        "P",
+        "C",
+        "T"
+      ],
+      "domain": "EXPLICIT_COMPARABLE_GEOMETRIC_PAIRS__NORMAL_GAP_NOT_UNIVERSAL_SDF"
+    },
+    "ADMISSIBLE_MOTION_SUBSPACE": {
+      "constraint_residual": [
+        "P",
+        "C",
+        "T",
+        "D"
+      ],
+      "singular_values": [
+        "P",
+        "T",
+        "K"
+      ],
+      "nullspace_ref": "ARRAY_DESCRIPTOR",
+      "excitation_witness": "REQUIRED",
+      "validity": [
+        "P",
+        "T"
+      ],
+      "rank_policy": "UNIT_METRIC_AND_THRESHOLD_MUST_BE_SEALED"
+    },
+    "PHYSICAL_IMPULSE_RESPONSE": {
+      "position_response": [
+        "L",
+        "C",
+        "T",
+        3
+      ],
+      "force_response": [
+        "L",
+        "C",
+        "T",
+        3
+      ],
+      "solver_parameter_ref": "REQUIRED",
+      "initial_state_ref": "REQUIRED",
+      "validity": [
+        "L",
+        "C",
+        "T"
+      ]
+    },
+    "RAY_COMPOSITING": {
+      "ray_offsets": [
+        "R+1"
+      ],
+      "hit_depth": [
+        "H"
+      ],
+      "hit_alpha": [
+        "H"
+      ],
+      "hit_linear_rgb": [
+        "H",
+        3
+      ],
+      "incoming_transmittance": [
+        "H"
+      ],
+      "contribution": [
+        "H"
+      ],
+      "tie_group": [
+        "H"
+      ],
+      "complete_ray": [
+        "R"
+      ],
+      "hit_validity": [
+        "H"
+      ],
+      "composite_validity": [
+        "R"
+      ],
+      "alpha_validity": [
+        "R"
+      ]
+    },
+    "RASTER_EDIT_RESPONSE": {
+      "edit_support_ref": "SOURCE_SPACE_AND_SOURCE_APPEARANCE_BOUND",
+      "pixel_delta": [
+        "E",
+        "V",
+        "Y",
+        "X",
+        4
+      ],
+      "validity": [
+        "E",
+        "V",
+        "Y",
+        "X"
+      ],
+      "renderer_policy_ref": "REQUIRED"
+    },
+    "BOUNDARY_RESPONSE": {
+      "pair_indices": [
+        "B",
+        2
+      ],
+      "differential_jump": [
+        "B",
+        "C",
+        "T",
+        "D"
+      ],
+      "appearance_jump": [
+        "B",
+        "C",
+        "T",
+        "A"
+      ],
+      "ray_response_ref": "OPTIONAL_MEASURED_CHILD",
+      "validity": [
+        "B",
+        "C",
+        "T"
+      ]
+    },
+    "TEMPORAL_RESPONSE": {
+      "response": [
+        "L",
+        "C",
+        "T",
+        "D"
+      ],
+      "timestamps_seconds": [
+        "T"
+      ],
+      "interval_validity": [
+        "L",
+        "C",
+        "T-1"
+      ],
+      "dynamic_authority": "AUTHORED_STATEFUL_SOLVER_OR_MEASURED_RESPONSE__NO_INFERRED_PHYSICS"
+    }
+  },
+  "construction_order": [
+    "SOURCE_ADMISSION",
+    "TEACHER_EQUIVALENCE",
+    "INTERVENTION_AND_EVAL_POLICY_SEAL",
+    "SOURCE_RESPONSE_AND_RAY_MEASUREMENT",
+    "QUALIFICATION_AND_OBSERVABILITY",
+    "IMMUTABLE_DERIVED_PACKAGE",
+    "REGISTRY_IMPORT",
+    "TEACHER_ORACLE_CONSUMER_COURT",
+    "FIT8_EXECUTION_BINDING_SEAL"
+  ],
+  "mandatory_courts": [
+    "SOURCE_IDENTITY_TOPOLOGY_CAMERA_SKIN_EQUIVALENCE",
+    "ROOT_FRAME_GAUGE",
+    "UNITS_AMPLITUDES_AND_ACTION_LAW",
+    "SHAM_COMMON_ROOT_AND_ISOLATED_INTERVENTION",
+    "DEGENERATE_GEOMETRY_AND_FRAME_ABSTENTION",
+    "COMPLETE_ALPHA_RAY_TIES_AND_UNSUPPORTED_BLEND",
+    "SAME_COLOUR_REMOVAL_COUNTEREXAMPLE",
+    "STUDENT_OBSERVABILITY_AND_HIDDEN_MECHANISM_AMBIGUITY",
+    "NO_TEACHER_ID_TOPOLOGY_OR_FUTURE_STATE_INPUT_LEAKAGE",
+    "SOURCE_PAYLOAD_BYTE_REPLAY",
+    "PER_FAMILY_AND_MECHANISM_COVERAGE",
+    "FIXED_PARENT_TEACHER_ORACLE_THEN_PREDICTED_CONSUMER"
+  ],
+  "execution_owner": "PLATFORM_EXPERIMENT_ATTEMPT_ARTIFACT_CAS",
+  "source_ci_is_scientific_authority": false,
+  "implemented_now": [
+    "AFFINE_RELATIVE_FRAME",
+    "SURFACE_METRIC_STRAIN",
+    "ORIENTED_POINT_PAIR_GAP",
+    "INTERVAL_VELOCITY",
+    "WEIGHTED_RESPONSE_GRAM",
+    "COMPLETE_SOURCE_OVER_RAY_AND_REMOVAL",
+    "LOCAL_MANIFEST_VALIDATION_AND_IMMUTABLE_STAGING",
+    "PINNED_EXISTING_FIT8_MANIFEST_AUDIT"
+  ],
+  "not_implemented": [
+    "REAL_SOURCE_TEACHER_ADAPTERS",
+    "REAL_INTERVENTION_SCHEDULER",
+    "RENDERER_TRUTH_ADAPTER",
+    "ALL_FAMILY_ARRAY_QUALIFIER",
+    "PLATFORM_TRUTH_STAGE_AND_CAS_ADMISSION",
+    "REAL_MODEL_V31_OBSERVATION_DENSE3D_INTEGRATION",
+    "NEW_FIT8_TRAINING"
+  ]
+}

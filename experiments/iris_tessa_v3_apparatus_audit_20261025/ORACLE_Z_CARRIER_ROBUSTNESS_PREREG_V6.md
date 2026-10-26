@@ -62,3 +62,7 @@ The output becomes the carrier dependency for the continuous joint-system court.
 ## Non-claims
 
 This is still synthetic pre-Truth representation evidence. Authored causal truth can reopen the carrier later, but FIT8 must not silently change it without a new court.
+
+## Execution amendment
+
+The workflow/probe files were authored after the preregistration file. This no-science-change amendment exists only to trigger the already-sealed workflow on the research branch; all scientific constants and gates above are unchanged.

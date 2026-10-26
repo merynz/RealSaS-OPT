@@ -1,6 +1,14 @@
 name: oracle-z-v2-platform
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/platform_oracle_z_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/oracle_z_external_v2.py'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_REPRESENTATION_PREREG_V2.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/oracle_z_representation_probe_v2.py'
+      - '.github/workflows/oracle_z_v2_platform.yml'
   workflow_dispatch:
 
 concurrency:
@@ -13,25 +21,36 @@ permissions:
 jobs:
   platform-attempt:
     # Actions is only the compute/operator surface. Experiment/Attempt/CAS is authority.
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-      - name: Require exact deployed live canonical main
+      - name: Wait for exact deployed live canonical main
         env:
           EXPECTED_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
-          /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
-          import json, os
+          for i in $(seq 1 120); do
+            if /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
+          import json, os, sys
           from pathlib import Path
-          deployment = json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
-          assert deployment['code_sha'] == os.environ['EXPECTED_SHA'], 'DEPLOYED_MAIN_DRIFT'
+          try:
+              deployment = json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
+          except Exception:
+              sys.exit(1)
+          sys.exit(0 if deployment.get('code_sha') == os.environ['EXPECTED_SHA'] else 1)
           PY
+            then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'DEPLOYED_MAIN_DRIFT' >&2
+          exit 1
       - name: Verify Oracle-Z Platform contract
         run: |
           /home/monster/realsas_platform/current/bin/realsas-python -m pytest -q tests/compiler/test_oracle_z_platform_v2.py

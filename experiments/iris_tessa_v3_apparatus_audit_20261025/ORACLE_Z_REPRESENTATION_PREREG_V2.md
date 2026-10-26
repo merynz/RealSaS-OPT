@@ -96,14 +96,34 @@ A carrier is not blamed for a failure that appears only after replacing per-scen
 
 ### Court D — negative-control firewall
 
-Train on dynamically resampled coordinate-independent random targets under the same optimizer. Held-out performance must remain near chance/high error. A suspiciously low error invalidates the court.
+Train on coordinate-independent random targets under the same optimizer. Train and evaluation random labels are independent. Held-out performance must remain near chance/high error. A suspiciously low error invalidates the court.
 
 ## Seeds and data isolation
 
 - comparison seeds: `731`, `947`, `1217`, `1601`, `1999`;
+- calibration seeds: `101`, `211`, `307`;
 - calibration scenes/seeds are disjoint from comparison scenes/seeds;
 - exact scene definitions are generated deterministically from sealed numeric seeds;
 - no FIT8, Knight, Truth139 or authored semantic IDs are used.
+
+## Fixed implementation budget
+
+The scientific probe implementation is `oracle_z_representation_probe_v2.py` and its scientific constants are part of this preregistration:
+
+- carrier scalars per scene: `27648` for every arm;
+- base triplane: `3 x 16 x 24 x 24`;
+- multires triplane: `3 x 16 x 12 x 12 + 3 x 12 x 24 x 24`;
+- dense control: `16 x 12 x 12 x 12`;
+- comparison optimization steps: `1600`;
+- training pool per scene: `4096` continuous loci;
+- held-out evaluation loci per scene: `2048`;
+- batch per scene: `32`;
+- loss: per-scene/per-channel standard-deviation-normalized MSE with scale floor `0.10`;
+- query hidden widths are chosen so the shared-Q arms remain approximately parameter matched: `TRIPLANE=96`, `TRIPLANE_XYZ=95`, `MULTIRES_TRIPLANE=83`, `DENSE3D=109`.
+
+Engineering smoke mode is explicitly non-scientific and may use reduced pools/steps only to prove code shape, gradients and serialization. It cannot create a scientific result record.
+
+Scientific mode must fail closed unless the Platform adapter supplies non-empty `REALSAS_EXPERIMENT_ID`, `REALSAS_ATTEMPT_ID`, `REALSAS_ENGINE_RELEASE_ID`, and `REALSAS_CANONICAL_CODE_SHA`.
 
 ## Interpretation rules
 

@@ -30,6 +30,12 @@ def main(folder):
     bpy.ops.mesh.primitive_cube_add(size=1);mesh=bpy.context.object
     group=mesh.vertex_groups.new(name=bone);group.add(list(range(len(mesh.data.vertices))),1.,'REPLACE')
     modifier=mesh.modifiers.new('fixture_rig','ARMATURE');modifier.object=armature
+    material=bpy.data.materials.new('fixture_material');material.use_nodes=True;mesh.data.materials.append(material)
+    image=bpy.data.images.new('fixture_image',width=2,height=2,alpha=True)
+    image.pixels.foreach_set(np.array([.2,.4,.6,1.]*4,dtype=np.float32))
+    texture=material.node_tree.nodes.new('ShaderNodeTexImage');texture.image=image
+    shader=next(n for n in material.node_tree.nodes if n.type=='BSDF_PRINCIPLED')
+    material.node_tree.links.new(texture.outputs['Color'],shader.inputs['Base Color'])
     source=folder/'fixture.glb';bpy.ops.export_scene.gltf(filepath=str(source),export_format='GLB',export_animations=False)
     snapshots=[]
     for _ in range(2):
@@ -57,12 +63,18 @@ def main(folder):
     assert scene['calibration']['sham_repeat_max_abs']==0
     assert scene['calibration']['source_rest_to_pose_identity_max_abs']<1e-6
     assert scene['calibration']['common_root_translation_max_abs']<1e-6
+    appearance=json.loads((out/'appearance.json').read_text())
+    assert appearance['images'] and appearance['qualified_sampler'] is False
+    with np.load(out/'image_pixels.npz',allow_pickle=False) as pixels:
+        for image in appearance['images']:
+            assert pixels[image['array']].size==np.prod(image['size'])*image['buffer_channels']
     with np.load(out/'geometry_and_response.npz',allow_pickle=False) as arrays:
         assert arrays['isolated_position'].shape[0]==6
         assert np.array_equal(arrays['sham_before'],arrays['sham_after'])
         assert np.any(np.abs(arrays['isolated_position']-arrays['pose_identity_baseline'])>1e-4)
         frame=np.asarray(scene['calibration']['native_control_frames_privileged'][0]['rest_matrix_world'])
         original=arrays['pose_identity_baseline']
+        assert arrays['source_weight_bone_indices_privileged'].max()<len(scene['calibration']['native_control_frames_privileged'])
         for index,action in enumerate(scene['calibration']['actions']):
             axis=scene['privileged_control_refs'][action['control_index_privileged']]['axis_in_native_rest_frame']
             from mathutils import Matrix

@@ -70,14 +70,21 @@ def _appearance_and_uv(meshes,rest):
                         elif value is not None:
                             try:defaults[socket.identifier]=list(value)
                             except TypeError:pass
-                    nodes.append({'name':node.name,'type':node.bl_idname,'inputs':defaults,
+                    properties={name:getattr(node,name) for name in ('interpolation','extension','projection','blend_type',
+                                'operation','use_clamp','data_type','uv_map','attribute_name','vector_type')
+                                if hasattr(node,name) and isinstance(getattr(node,name),(str,float,int,bool))}
+                    nodes.append({'name':node.name,'type':node.bl_idname,'inputs':defaults,'properties':properties,
                                   'image':node.image.name if hasattr(node,'image') and node.image else None})
                     if hasattr(node,'image') and node.image:
                         image=node.image
                         if image.name not in images:
                             count=len(image.pixels);pixels=np.empty(count,dtype=np.float32);image.pixels.foreach_get(pixels)
-                            images[image.name]={'pixels':pixels,'size':list(image.size),'channels':int(image.channels),
-                                               'colour_space':image.colorspace_settings.name,'alpha_mode':image.alpha_mode}
+                            width,height=map(int,image.size)
+                            if width<=0 or height<=0 or count%(width*height):raise ValueError('TEACHER_SCENE_IMAGE_BUFFER_LAYOUT')
+                            images[image.name]={'pixels':pixels,'size':[width,height],'buffer_channels':count//(width*height),
+                                               'source_file_channels':int(image.channels),'buffer_is_float':bool(image.is_float),
+                                               'colour_space':image.colorspace_settings.name,'alpha_mode':image.alpha_mode,
+                                               'value_domain':'BLENDER_IMAGE_BUFFER__SOURCE_RENDERER_QUALIFICATION_REQUIRED'}
                 row['node_graph']={'nodes':nodes,'links':[{'from_node':l.from_node.name,'from_socket':l.from_socket.identifier,
                          'to_node':l.to_node.name,'to_socket':l.to_socket.identifier} for l in material.node_tree.links]}
             materials.append(row)
@@ -192,7 +199,7 @@ def build(job,output):
             'face_material_privileged':rest['face_material'],'triangle_uv':uv,'triangle_uv_valid':uv_valid,
             'pose_identity_baseline':baseline,'sham_before':sham,'sham_after':sham_after,
             'isolated_position':np.asarray(responses,dtype=np.float64),'root_control_position':root_response,
-            'source_weight_offsets':np.asarray(w_offsets,np.int64),'source_weight_control_indices':np.asarray(w_indices,np.int64),
+            'source_weight_offsets':np.asarray(w_offsets,np.int64),'source_weight_bone_indices_privileged':np.asarray(w_indices,np.int64),
             'source_weight_values':np.asarray(w_values,np.float64),'source_weight_coverage':np.asarray(weight_coverage,bool)}
     if len(w_offsets)!=len(rest['vertices'])+1:raise ValueError('TEACHER_SCENE_SOURCE_WEIGHT_VERTEX_CORRESPONDENCE_UNSUPPORTED')
     np.savez_compressed(output/'geometry_and_response.npz',**arrays)

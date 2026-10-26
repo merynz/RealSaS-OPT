@@ -7,6 +7,7 @@
   "metadata": {
     "schema": "RealSaS.OracleZRepresentationExperiment.v2",
     "preregistration_path": "experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_REPRESENTATION_PREREG_V2.md",
+    "probe_path": "experiments/iris_tessa_v3_apparatus_audit_20261025/oracle_z_representation_probe_v2.py",
     "supersedes_apparatus_record": "ORACLE_Z_REPRESENTATION_RESULT_V1.md",
     "authority": "RESEARCH_ONLY",
     "execution_authority": "PLATFORM_EXPERIMENT_ATTEMPT_ARTIFACT_REGISTRY",
@@ -32,6 +33,7 @@
       "RANDOM_TARGET_FIREWALL"
     ],
     "canonical_run_requires_main": true,
+    "platform_context_required_by_probe": true,
     "github_actions_scientific_authority": false
   },
   "created_by": "alfred"

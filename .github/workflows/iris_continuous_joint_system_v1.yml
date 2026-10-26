@@ -5,7 +5,10 @@ on:
     branches:
       - research/iris-tessa-v3-apparatus-audit-v1
     paths:
-      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_MATCHED_CARRIER_SELECTION_V5.json'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/CONTINUOUS_JOINT_SYSTEM_PREREG_V1.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_FINAL_CARRIER_SELECTION_V6.json'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/continuous_joint_system_probe_v1.py'
+      - '.github/workflows/iris_continuous_joint_system_v1.yml'
   workflow_dispatch:
 
 permissions:
@@ -33,7 +36,7 @@ jobs:
       - name: Execute sealed continuous joint-system court
         run: |
           python experiments/iris_tessa_v3_apparatus_audit_20261025/continuous_joint_system_probe_v1.py \
-            --selection experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_MATCHED_CARRIER_SELECTION_V5.json \
+            --selection experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_FINAL_CARRIER_SELECTION_V6.json \
             --out "$RUNNER_TEMP/continuous_joint_system_v1_report.json"
           cat "$RUNNER_TEMP/continuous_joint_system_v1_report.json"
       - name: Preserve report

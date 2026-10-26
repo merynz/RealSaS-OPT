@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - research/iris-tessa-v3-apparatus-audit-stage2
+      - research/iris-tessa-v3-apparatus-audit-v1
     paths:
       - 'experiments/iris_tessa_v3_apparatus_audit_20261025/DINOV2_ALPHA_RESIDUAL_PREREG_V1.md'
       - 'experiments/iris_tessa_v3_apparatus_audit_20261025/dinov2_alpha_residual_probe_v1.py'

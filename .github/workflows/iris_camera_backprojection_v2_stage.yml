@@ -1,0 +1,43 @@
+name: iris-camera-backprojection-v2-stage
+
+on:
+  push:
+    branches:
+      - research/iris-tessa-v3-apparatus-audit-v1
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/IRIS_CAMERA_BACKPROJECTION_PREREG_V2.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/iris_camera_backprojection_probe_v2.py'
+      - '.github/workflows/iris_camera_backprojection_v2_stage.yml'
+      - 'requirements/torch-cpu.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  camera-backprojection-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/torch-cpu.txt
+      - run: python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Execute sealed camera V2 court
+        run: |
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/iris_camera_backprojection_probe_v2.py --out "$RUNNER_TEMP/iris_camera_backprojection_v2_report.json"
+          cat "$RUNNER_TEMP/iris_camera_backprojection_v2_report.json"
+      - name: Preserve report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-camera-backprojection-v2-report
+          path: ${{ runner.temp }}/iris_camera_backprojection_v2_report.json
+          if-no-files-found: error

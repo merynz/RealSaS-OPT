@@ -1,0 +1,369 @@
+{
+  "adapter_parameter_counts": {
+    "DIRECT_FINAL_384_L2_64_ALPHA64": 37248,
+    "LEARNED_CONCAT_320_128_64": 185088
+  },
+  "authority": {
+    "source_head": "7764ea0f912e53c92e82eb78a2a1631e92725fc8",
+    "weight_sha256": "b938bf1bc15cd2ec0feacfe3a1bb553fe8ea9ca46a7e1d8d00217f29aef60cd9"
+  },
+  "claims": {
+    "dinov3_adoption_authorized": false,
+    "fit8_training_authorized": false,
+    "product_authority_changed": false,
+    "truth_builder_training_authorized": false
+  },
+  "execution": {
+    "device": "cpu",
+    "lr": 0.001,
+    "steps": 1200
+  },
+  "gates": {
+    "concat_reference_valid": true,
+    "direct_final_valid": true
+  },
+  "identity_error": 0.0,
+  "results": [
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9982404708862305,
+      "local_accuracy": 1.0,
+      "seed": 731,
+      "width": 2
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.997800886631012,
+      "local_accuracy": 1.0,
+      "seed": 731,
+      "width": 4
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9972594380378723,
+      "local_accuracy": 1.0,
+      "seed": 731,
+      "width": 8
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9959856867790222,
+      "local_accuracy": 1.0,
+      "seed": 731,
+      "width": 12
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9982502460479736,
+      "local_accuracy": 1.0,
+      "seed": 731,
+      "width": 2
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9978411197662354,
+      "local_accuracy": 1.0,
+      "seed": 731,
+      "width": 4
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9972805976867676,
+      "local_accuracy": 1.0,
+      "seed": 731,
+      "width": 8
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9960474371910095,
+      "local_accuracy": 1.0,
+      "seed": 731,
+      "width": 12
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9982925653457642,
+      "local_accuracy": 1.0,
+      "seed": 947,
+      "width": 2
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9978577494621277,
+      "local_accuracy": 1.0,
+      "seed": 947,
+      "width": 4
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.997339129447937,
+      "local_accuracy": 1.0,
+      "seed": 947,
+      "width": 8
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9960973858833313,
+      "local_accuracy": 1.0,
+      "seed": 947,
+      "width": 12
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9983019232749939,
+      "local_accuracy": 1.0,
+      "seed": 947,
+      "width": 2
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9978647232055664,
+      "local_accuracy": 1.0,
+      "seed": 947,
+      "width": 4
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9972926378250122,
+      "local_accuracy": 1.0,
+      "seed": 947,
+      "width": 8
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9960861802101135,
+      "local_accuracy": 1.0,
+      "seed": 947,
+      "width": 12
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.998296856880188,
+      "local_accuracy": 1.0,
+      "seed": 1217,
+      "width": 2
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9978840351104736,
+      "local_accuracy": 1.0,
+      "seed": 1217,
+      "width": 4
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.997397780418396,
+      "local_accuracy": 1.0,
+      "seed": 1217,
+      "width": 8
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9961491823196411,
+      "local_accuracy": 1.0,
+      "seed": 1217,
+      "width": 12
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9982573986053467,
+      "local_accuracy": 1.0,
+      "seed": 1217,
+      "width": 2
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.997857928276062,
+      "local_accuracy": 1.0,
+      "seed": 1217,
+      "width": 4
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9973138570785522,
+      "local_accuracy": 1.0,
+      "seed": 1217,
+      "width": 8
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.996076226234436,
+      "local_accuracy": 1.0,
+      "seed": 1217,
+      "width": 12
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9982990026473999,
+      "local_accuracy": 1.0,
+      "seed": 1597,
+      "width": 2
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9978599548339844,
+      "local_accuracy": 1.0,
+      "seed": 1597,
+      "width": 4
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9973428845405579,
+      "local_accuracy": 1.0,
+      "seed": 1597,
+      "width": 8
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9961310029029846,
+      "local_accuracy": 1.0,
+      "seed": 1597,
+      "width": 12
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9983091950416565,
+      "local_accuracy": 1.0,
+      "seed": 1597,
+      "width": 2
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9978592991828918,
+      "local_accuracy": 1.0,
+      "seed": 1597,
+      "width": 4
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9973637461662292,
+      "local_accuracy": 1.0,
+      "seed": 1597,
+      "width": 8
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9961298704147339,
+      "local_accuracy": 1.0,
+      "seed": 1597,
+      "width": 12
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.998323917388916,
+      "local_accuracy": 1.0,
+      "seed": 2017,
+      "width": 2
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9979273080825806,
+      "local_accuracy": 1.0,
+      "seed": 2017,
+      "width": 4
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9974009990692139,
+      "local_accuracy": 1.0,
+      "seed": 2017,
+      "width": 8
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "LEARNED_CONCAT_320_128_64",
+      "final_cosine": 0.9962327480316162,
+      "local_accuracy": 1.0,
+      "seed": 2017,
+      "width": 12
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9983275532722473,
+      "local_accuracy": 1.0,
+      "seed": 2017,
+      "width": 2
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9979298710823059,
+      "local_accuracy": 1.0,
+      "seed": 2017,
+      "width": 4
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9974005222320557,
+      "local_accuracy": 1.0,
+      "seed": 2017,
+      "width": 8
+    },
+    {
+      "alpha_accuracy": 1.0,
+      "arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+      "final_cosine": 0.9962469339370728,
+      "local_accuracy": 1.0,
+      "seed": 2017,
+      "width": 12
+    }
+  ],
+  "schema": "RealSaS.DINOv2V31FusionFormCourt.v1",
+  "selected_arm": "DIRECT_FINAL_384_L2_64_ALPHA64",
+  "status": "DIRECT_FINAL_384_L2_64_ALPHA64_SELECTED_TINY_V1",
+  "summary": {
+    "DIRECT_FINAL_384_L2_64_ALPHA64": {
+      "mean_alpha": 1.0,
+      "mean_final_cosine": 0.9974018633365631,
+      "mean_local": 1.0,
+      "min_alpha": 1.0,
+      "min_final_cosine": 0.9960474371910095,
+      "min_local": 1.0
+    },
+    "LEARNED_CONCAT_320_128_64": {
+      "mean_alpha": 1.0,
+      "mean_final_cosine": 0.9974059492349625,
+      "mean_local": 1.0,
+      "min_alpha": 1.0,
+      "min_final_cosine": 0.9959856867790222,
+      "min_local": 1.0
+    }
+  }
+}

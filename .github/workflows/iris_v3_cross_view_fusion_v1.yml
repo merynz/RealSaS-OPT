@@ -1,0 +1,52 @@
+name: iris-v3-cross-view-fusion-v1
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/SYNTHETIC_IRIS_CROSS_VIEW_FUSION_PREREG_V1.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/iris_cross_view_fusion_probe_v1.py'
+      - 'requirements/torch-cpu.txt'
+      - '.github/workflows/iris_v3_cross_view_fusion_v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  cross-view-fusion-v1:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/torch-cpu.txt
+      - name: Install pinned CPU torch profile
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: '1'
+          PIP_DEFAULT_TIMEOUT: '60'
+        run: python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Execute sealed cross-view fusion court
+        run: |
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/iris_cross_view_fusion_probe_v1.py \
+            --out "$RUNNER_TEMP/iris_cross_view_fusion_v1_report.json"
+          cat "$RUNNER_TEMP/iris_cross_view_fusion_v1_report.json"
+      - name: Preserve cross-view fusion report
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-v3-cross-view-fusion-v1-report
+          path: ${{ runner.temp }}/iris_cross_view_fusion_v1_report.json
+          if-no-files-found: error

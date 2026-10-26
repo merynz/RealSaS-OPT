@@ -1,0 +1,47 @@
+name: iris-oracle-z-matched-carrier-v5
+
+on:
+  push:
+    branches:
+      - research/iris-tessa-v3-apparatus-audit-v1
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_MATCHED_CARRIER_PREREG_V5.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/oracle_z_matched_carrier_probe_v5.py'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/oracle_z_surface_calibration_probe_v3.py'
+      - '.github/workflows/iris_oracle_z_matched_carrier_v5.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  oracle-z-matched-carrier-v5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/torch-cpu.txt
+      - name: Install pinned CPU torch profile
+        run: python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Execute sealed matched carrier court
+        run: |
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/oracle_z_matched_carrier_probe_v5.py \
+            --out "$RUNNER_TEMP/oracle_z_matched_carrier_v5_report.json"
+          cat "$RUNNER_TEMP/oracle_z_matched_carrier_v5_report.json"
+      - name: Preserve report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-oracle-z-matched-carrier-v5-report
+          path: ${{ runner.temp }}/oracle_z_matched_carrier_v5_report.json
+          if-no-files-found: error

@@ -1,0 +1,53 @@
+name: iris-gradient-ownership-v1
+
+on:
+  push:
+    branches:
+      - research/iris-tessa-v3-apparatus-audit-v1
+    paths:
+      - experiments/iris_tessa_v3_apparatus_audit_20261025/GRADIENT_OWNERSHIP_PREREG_V1.md
+      - experiments/iris_tessa_v3_apparatus_audit_20261025/gradient_ownership_probe_v1.py
+      - experiments/iris_tessa_v3_apparatus_audit_20261025/continuous_joint_system_probe_v1.py
+      - experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_FINAL_CARRIER_SELECTION_V6.json
+      - .github/workflows/iris_gradient_ownership_v1.yml
+      - requirements/torch-cpu.txt
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gradient-ownership-scientific:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Checkout exact probe SHA
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install pinned CPU torch
+        run: python -m pip install -r requirements/torch-cpu.txt
+
+      - name: Static compile check
+        run: python -m py_compile experiments/iris_tessa_v3_apparatus_audit_20261025/gradient_ownership_probe_v1.py
+
+      - name: Execute sealed gradient ownership court
+        run: |
+          mkdir -p artifacts/gradient_ownership_v1
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/gradient_ownership_probe_v1.py \
+            --selection experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_FINAL_CARRIER_SELECTION_V6.json \
+            --out artifacts/gradient_ownership_v1/gradient_ownership_report_v1.json
+
+      - name: Upload exact scientific report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-gradient-ownership-v1-report
+          path: artifacts/gradient_ownership_v1/gradient_ownership_report_v1.json
+          if-no-files-found: error
+          retention-days: 30

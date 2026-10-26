@@ -1,0 +1,44 @@
+name: iris-oracle-z-representation-v1-stage
+
+on:
+  push:
+    branches:
+      - research/iris-tessa-v3-apparatus-audit-stage2
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/ORACLE_Z_REPRESENTATION_PREREG_V1.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/oracle_z_representation_probe_v1.py'
+      - '.github/workflows/iris_oracle_z_representation_v1_stage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  oracle-z-representation-v1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/torch-cpu.txt
+      - name: Install pinned CPU torch profile
+        run: python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Execute sealed oracle-Z court
+        run: |
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/oracle_z_representation_probe_v1.py \
+            --out "$RUNNER_TEMP/oracle_z_representation_v1_report.json"
+          cat "$RUNNER_TEMP/oracle_z_representation_v1_report.json"
+      - name: Preserve report
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-oracle-z-representation-v1-report
+          path: ${{ runner.temp }}/oracle_z_representation_v1_report.json
+          if-no-files-found: error

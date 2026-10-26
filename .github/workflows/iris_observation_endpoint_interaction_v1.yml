@@ -1,0 +1,46 @@
+name: iris-observation-endpoint-interaction-v1
+
+on:
+  push:
+    branches:
+      - research/iris-tessa-v3-apparatus-audit-v1
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/OBSERVATION_ENDPOINT_INTERACTION_PREREG_V1.md'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/observation_endpoint_interaction_probe_v1.py'
+      - '.github/workflows/iris_observation_endpoint_interaction_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  observation-endpoint-interaction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONPATH: .
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements/torch-cpu.txt
+      - name: Install pinned CPU torch profile
+        run: python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Execute sealed interaction court
+        run: |
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/observation_endpoint_interaction_probe_v1.py \
+            --out "$RUNNER_TEMP/observation_endpoint_interaction_v1_report.json"
+          cat "$RUNNER_TEMP/observation_endpoint_interaction_v1_report.json"
+      - name: Preserve report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-observation-endpoint-interaction-v1-report
+          path: ${{ runner.temp }}/observation_endpoint_interaction_v1_report.json
+          if-no-files-found: error

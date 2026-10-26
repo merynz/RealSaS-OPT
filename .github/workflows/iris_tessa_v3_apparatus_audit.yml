@@ -1,0 +1,113 @@
+name: iris-tessa-v3-apparatus-audit
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/**'
+      - 'models/iris/vnext/**'
+      - 'models/tessa/v2/**'
+      - 'models/tessa/v3/**'
+      - '.github/workflows/iris_tessa_v3_apparatus_audit.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  static-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Seal current V3 source contract
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/static_contract_audit_v1.py \
+            --expected-parent-sha d97d0c51240905c07cc788a6be80b69f95aebb3e \
+            --out "$RUNNER_TEMP/static_contract_report.json"
+          cat "$RUNNER_TEMP/static_contract_report.json"
+      - name: Prove RGBA frontend identifiability boundary
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/rgba_identifiability_probe_v1.py \
+            --out "$RUNNER_TEMP/rgba_identifiability_report.json"
+          cat "$RUNNER_TEMP/rgba_identifiability_report.json"
+      - name: Prove alpha-aware ray visibility boundary
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/ray_visibility_alpha_identifiability_probe_v1.py \
+            --out "$RUNNER_TEMP/ray_visibility_alpha_identifiability_report.json"
+          cat "$RUNNER_TEMP/ray_visibility_alpha_identifiability_report.json"
+      - name: Measure TESSA window semantics
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/tessa_window_semantics_probe_v1.py \
+            --out "$RUNNER_TEMP/tessa_window_semantics_report.json"
+          cat "$RUNNER_TEMP/tessa_window_semantics_report.json"
+      - name: Prove surface witness coverage boundary
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/surface_witness_coverage_probe_v1.py \
+            --out "$RUNNER_TEMP/surface_witness_coverage_report.json"
+          cat "$RUNNER_TEMP/surface_witness_coverage_report.json"
+      - name: Audit current V3 occlusion truth balance
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/occlusion_truth_balance_probe_v1.py \
+            --repo-root . \
+            --out "$RUNNER_TEMP/occlusion_truth_balance_report.json"
+          cat "$RUNNER_TEMP/occlusion_truth_balance_report.json"
+      - name: Measure triplane coordinate convention
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/triplane_coordinate_convention_probe_v1.py \
+            --resolution 64 \
+            --out "$RUNNER_TEMP/triplane_coordinate_convention_report.json"
+          cat "$RUNNER_TEMP/triplane_coordinate_convention_report.json"
+      - name: Measure triplane spatial support structure V1
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/triplane_spatial_dof_probe_v1.py \
+            --out "$RUNNER_TEMP/triplane_spatial_dof_v1_report.json"
+          cat "$RUNNER_TEMP/triplane_spatial_dof_v1_report.json"
+      - name: Seal rank-aware triplane spatial DOF V2
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/triplane_spatial_dof_probe_v2.py \
+            --out "$RUNNER_TEMP/triplane_spatial_dof_v2_report.json"
+          cat "$RUNNER_TEMP/triplane_spatial_dof_v2_report.json"
+      - name: Measure TESSA scale and token budget
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/tessa_scale_budget_probe_v1.py \
+            --out "$RUNNER_TEMP/tessa_scale_budget_report.json"
+          cat "$RUNNER_TEMP/tessa_scale_budget_report.json"
+      - name: Audit relation algebra constraints
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/relation_algebra_probe_v1.py \
+            --repo-root . \
+            --out "$RUNNER_TEMP/relation_algebra_report.json"
+          cat "$RUNNER_TEMP/relation_algebra_report.json"
+      - name: Audit current V3 training route
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/v3_training_route_probe_v1.py \
+            --repo-root . \
+            --out "$RUNNER_TEMP/v3_training_route_report.json"
+          cat "$RUNNER_TEMP/v3_training_route_report.json"
+      - name: Inventory reference compute geometry
+        run: |
+          python3 experiments/iris_tessa_v3_apparatus_audit_20261025/reference_compute_inventory_v1.py \
+            --out "$RUNNER_TEMP/reference_compute_inventory.json"
+          cat "$RUNNER_TEMP/reference_compute_inventory.json"
+      - name: Preserve apparatus reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: iris-tessa-v3-apparatus-reports
+          path: |
+            ${{ runner.temp }}/static_contract_report.json
+            ${{ runner.temp }}/rgba_identifiability_report.json
+            ${{ runner.temp }}/ray_visibility_alpha_identifiability_report.json
+            ${{ runner.temp }}/tessa_window_semantics_report.json
+            ${{ runner.temp }}/surface_witness_coverage_report.json
+            ${{ runner.temp }}/occlusion_truth_balance_report.json
+            ${{ runner.temp }}/triplane_coordinate_convention_report.json
+            ${{ runner.temp }}/triplane_spatial_dof_v1_report.json
+            ${{ runner.temp }}/triplane_spatial_dof_v2_report.json
+            ${{ runner.temp }}/tessa_scale_budget_report.json
+            ${{ runner.temp }}/relation_algebra_report.json
+            ${{ runner.temp }}/v3_training_route_report.json
+            ${{ runner.temp }}/reference_compute_inventory.json
+          if-no-files-found: error

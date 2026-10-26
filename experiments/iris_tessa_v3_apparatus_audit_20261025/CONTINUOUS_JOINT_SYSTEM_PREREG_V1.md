@@ -1,15 +1,19 @@
 # Continuous Joint System Court V1 — preregistration
 
-**Status:** SEALED BEFORE CARRIER OUTCOME  
+**Status:** SEALED BEFORE JOINT OUTCOME  
 **Authority:** final bounded pre-V3.1 interaction/falsification court only.
+
+## Dependency amendment (pre-outcome)
+
+V5 produced a valid but threshold-sensitive **provisional** carrier decision, so a sealed V6 optimization-robustness court was added before any joint-system execution. The joint court therefore consumes the final V6 pre-Truth carrier selection rather than the provisional V5 choice. No joint-system scientific constants or gates below changed.
 
 ## Trigger / frozen dependency
 
 This court MUST NOT choose its own carrier. It consumes exactly:
 
-`ORACLE_Z_MATCHED_CARRIER_SELECTION_V5.json`
+`ORACLE_Z_FINAL_CARRIER_SELECTION_V6.json`
 
-produced after the sealed V5 carrier court. If V5 is inconclusive, this court returns blocked and V3.1 cannot freeze.
+produced after the sealed V6 carrier robustness court. If V6 does not produce a valid final pre-Truth carrier selection, this court returns blocked and V3.1 cannot freeze.
 
 The query class is already frozen by V4: `Q192_D3_FOURIER4`.
 

@@ -1,6 +1,7 @@
 {
   "schema": "RealSaS.TeacherCalibrationReadbackRequest.v1",
   "enabled": true,
+  "readback_revision": 2,
   "preparation_relative_path": "truth_calibration_preparation/40414940754-1/PREPARATION.json",
   "preparation_sha256": "3bee7e9e47f3970b09f48de8ca27c442691fddb782da74e79d6abecc554715ab",
   "campaign_id": "d713b26b-5bbf-4d55-b6b8-9e10b9a81029",

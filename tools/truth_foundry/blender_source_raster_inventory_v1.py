@@ -4,8 +4,8 @@ from __future__ import annotations
 """Read-only inventory of one packed source evaluator scene.
 
 This probe runs *inside* the exact packed ``source_scene.blend`` produced by the
-Truth Foundry teacher scene.  It does not render, rewrite nodes, infer a sampler,
-or mint qualification.  The only goal is to expose the real material/render
+Truth Foundry teacher scene. It does not render, rewrite nodes, infer a sampler,
+or mint qualification. The only goal is to expose the real material/render
 surface that a later measured raster adapter must support or explicitly reject.
 """
 
@@ -55,6 +55,23 @@ def _socket_value(socket):
         return str(value)
 
 
+def _socket_row(socket) -> dict:
+    links = []
+    if socket is not None:
+        for link in socket.links:
+            links.append({
+                "from_node": link.from_node.name,
+                "from_type": link.from_node.bl_idname,
+                "from_socket": link.from_socket.identifier,
+            })
+    return {
+        "present": socket is not None,
+        "linked": bool(links),
+        "default": _socket_value(socket) if socket is not None else None,
+        "links": links,
+    }
+
+
 def _material_row(material) -> dict:
     row = {
         "name": material.name,
@@ -66,6 +83,7 @@ def _material_row(material) -> dict:
         "node_types": [],
         "surface_output_count": 0,
         "surface_output_links": [],
+        "principled": [],
         "image_textures": [],
     }
     if not material.use_nodes or material.node_tree is None:
@@ -83,6 +101,13 @@ def _material_row(material) -> dict:
                         "from_type": link.from_node.bl_idname,
                         "from_socket": link.from_socket.identifier,
                     })
+        if node.type == "BSDF_PRINCIPLED":
+            row["principled"].append({
+                "node": node.name,
+                "base_color": _socket_row(node.inputs.get("Base Color")),
+                "alpha": _socket_row(node.inputs.get("Alpha")),
+                "normal": _socket_row(node.inputs.get("Normal")),
+            })
         if node.type == "TEX_IMAGE" and getattr(node, "image", None) is not None:
             image = node.image
             row["image_textures"].append({

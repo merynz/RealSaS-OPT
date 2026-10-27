@@ -1,0 +1,22 @@
+{
+  "schema": "RealSaS.CompletedMeasurementCampaignRetirementRequest.v1",
+  "enabled": true,
+  "campaign_id": "ee6e4e66-a7c8-42f3-ac53-87a96c9a2393",
+  "expected_engine_release_id": "5f415bbe-3ad1-48bf-a8dc-a19945d2740c",
+  "expected_source_code_sha": "c65038087412d451e41c8b3466fdec3fd9b9cbc3",
+  "preparation_relative_path": "truth_calibration_preparation/40480940440-1/PREPARATION.json",
+  "preparation_sha256": "060e19bd46766ed65e7a3bfc31ba193210dfb508a93cc2abcb6b1843eb356f42",
+  "observation_relative_path": "truth_calibration_preparation/40480940440-1/evidence/OBSERVATION.json",
+  "observation_sha256": "1140f581679c2115098c848ed72594b68d46aad889db84aea2608f747f5b9575",
+  "measurement_stage_id": "47_SOURCE_RESPONSE_CALIBRATION",
+  "expected_wait_stage_id": "09_IRIS_FIT_PREREGISTERED",
+  "expected_full_target_stage_id": "46_PRODUCT_CLOSURE_SEAL",
+  "expected_member_count": 9,
+  "actor": "truth-calibration-measurement-retirement-operator",
+  "reason": "The exact repair campaign committed and exported Stage47 source-response measurements for all eight FIT8 subjects plus Knight regression, with zero observation errors and no qualification or training. Its historical campaign target was full Product Closure, so every workflow now waits at the intentionally unsupplied Stage09 learned-evidence boundary. Retire only those exact idle full-target workflows while preserving the immutable Stage47 PASS artifacts; do not claim full closure.",
+  "terminate_waiting_workflows_allowed": true,
+  "new_measurements_allowed": false,
+  "training_allowed": false,
+  "truth_qualification_allowed": false,
+  "product_pass_allowed": false
+}

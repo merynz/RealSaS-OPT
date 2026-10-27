@@ -103,6 +103,7 @@ def _bind_actions(expected_actions: tuple[str, ...], actual: dict[str, object], 
         if teacher_name in actual:
             blender_name = teacher_name
             kind = "EXACT_ACTION_NAME"
+            detail = "NONE"
         else:
             candidates: dict[str, str] = {}
             for name in actual:
@@ -122,7 +123,8 @@ def _bind_actions(expected_actions: tuple[str, ...], actual: dict[str, object], 
                     + ":actual="
                     + imported_inventory
                 )
-            blender_name, kind = next(iter(candidates.items()))
+            blender_name, detail = next(iter(candidates.items()))
+            kind = "SEALED_RECEIPT_ARMATURE_PREFIX_NORMALIZATION"
         if blender_name in used_actual:
             raise RuntimeError("TEMPORAL_TIMEBASE_ACTION_IDENTITY_COLLISION:" + blender_name)
         used_actual.add(blender_name)
@@ -131,6 +133,7 @@ def _bind_actions(expected_actions: tuple[str, ...], actual: dict[str, object], 
             "blender_action_name": blender_name,
             "sealed_receipt_armature": armature,
             "identity_binding": kind,
+            "identity_binding_detail": detail,
         }
     return bound
 

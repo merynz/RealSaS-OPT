@@ -1,0 +1,77 @@
+name: truth-calibration-readback
+on:
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: truth-calibration-readback
+  cancel-in-progress: false
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    outputs:
+      selected: ${{ steps.select.outputs.selected }}
+      expected_sha: ${{ steps.select.outputs.expected_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
+      - id: select
+        env:
+          EVENT: ${{ github.event_name }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os,subprocess
+          from pathlib import Path
+          name='canonical/TRUTH_CALIBRATION_READBACK_REQUEST_V1.json'
+          changed=subprocess.check_output(['git','diff-tree','--no-commit-id','--name-only','-r','HEAD^1','HEAD'],text=True).splitlines()
+          enabled=json.loads(Path(name).read_text()).get('enabled') is True
+          selected=os.environ['EVENT']=='workflow_dispatch' or (os.environ['CONCLUSION']=='success' and os.environ['BRANCH']=='main' and name in changed)
+          print(f"selected={'true' if enabled and selected else 'false'}")
+          print('expected_sha='+subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip())
+          PY
+  read:
+    needs: select
+    if: needs.select.outputs.selected == 'true'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      EXPECTED_SHA: ${{ needs.select.outputs.expected_sha }}
+      OUTPUT: /home/monster/realsas_authority/truth_calibration_readback/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+      - name: Read the original campaign without submitting any execution
+        run: |
+          /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
+          import json,os
+          from pathlib import Path
+          from tools.truth_foundry.audit_native_teacher_bytes_v1 import sha256,_bound_path
+          from tools.truth_foundry.observe_calibration_v1 import observe
+          request=json.loads(Path('canonical/TRUTH_CALIBRATION_READBACK_REQUEST_V1.json').read_text())
+          assert request['schema']=='RealSaS.TeacherCalibrationReadbackRequest.v1'
+          assert request['execution_allowed'] is False and request['training_allowed'] is False
+          preparation=_bound_path(Path('/home/monster/realsas_authority'),request['preparation_relative_path'])
+          assert sha256(preparation)==request['preparation_sha256'],'READBACK_PREPARATION_BYTES_DRIFT'
+          value=json.loads(preparation.read_text());assert value['campaign_id']==request['campaign_id']
+          result=observe(value,api_root='http://127.0.0.1:8080',artifact_root='/home/monster/realsas_platform/artifacts',
+                         output=os.environ['OUTPUT'],maximum_seconds=0)
+          print(json.dumps({'campaign_id':result['campaign_id'],'diagnostic_members':len(result['bound_run_diagnostics']),
+                           'execution_resubmitted':result['execution_resubmitted'],'training_submitted':False}),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: truth-calibration-readback-${{ github.run_id }}
+          path: ${{ env.OUTPUT }}/
+          if-no-files-found: warn
+          retention-days: 14

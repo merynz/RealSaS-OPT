@@ -1,3 +1,16 @@
+> **Calibration readback — 2026-10-27:** PR223 merged as
+> `9bc200b5ec530d269792b01839d0c410ea0460e5`; all 13 source checks passed and
+> exact-main developer deployment succeeded. Actual campaign
+> `d713b26b-5bbf-4d55-b6b8-9e10b9a81029`, Experiment
+> `e0aa1792-64e7-48b0-8f95-fd2f44e4cbe5`, EngineRelease
+> `abf94e64-8b0b-4fb8-bf59-a5e87430d796`: the first observer snapshot reports
+> all eight cohort Attempts passed Stage08 then failed Stage47. The separate
+> regression reached the explicit Stage09 external-evidence wait. Readback run
+> 40414940754 / artifact 12696105110 preserves those exact Attempts, not successful
+> causal truth. Detailed bound Engine ledgers/Blender logs are requested by the
+> read-only readback descriptor; diagnose before any declared repair execution.
+> The original failed history must remain intact. Notebook delivery remains open.
+
 > **Source response calibration — 2026-10-27:** All eight historical native
 > teachers now have exact-array and exact-NPZ replay proof (run 40405919318).
 > The new isolated kinematic/UV/material-input producer and same-cohort Platform

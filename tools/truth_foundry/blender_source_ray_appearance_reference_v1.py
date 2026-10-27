@@ -4,13 +4,19 @@ from __future__ import annotations
 """Independent source-observation material reference for measured ray Appearance.
 
 This process starts from the exact raw source, uses the admitted bind-rest import
-and unlit-preserve-alpha material policy, then renders the *same teacher triangle,
-UV and micro-camera footprint* as a packed measured-ray candidate.  Using the
-teacher triangle geometry on both sides intentionally removes observation-rest vs
-packed-rest geometry drift from this court: the measured variable is the source
-material/texture evaluator only.
+and the exact sealed unlit-preserve-alpha material consequence, then renders the
+*same teacher triangle, UV and micro-camera footprint* as a packed measured-ray
+candidate. Using the teacher triangle geometry on both sides intentionally removes
+observation-rest vs packed-rest geometry drift from this court: the measured
+variable is the source material/texture evaluator only.
 
-The reference is scoped to the admitted unlit source-observation policy.  It does
+The source observation candidate is the authority for the material transform.
+The current importer is not allowed to re-infer opacity policy from its current
+blend/render mode. Instead the sealed transform is replayed fail-closed against
+the re-imported upstream graph/defaults, using the same adapter already courted
+by the source-appearance policy-transport lane.
+
+The reference is scoped to the admitted unlit source-observation policy. It does
 not claim native-lit parity, general sampler qualification, student supervision,
 training authority or product activation.
 """
@@ -18,7 +24,6 @@ training authority or product activation.
 import argparse
 import hashlib
 import json
-import math
 from pathlib import Path
 import sys
 
@@ -31,6 +36,7 @@ if str(ROOT) not in sys.path:
 
 from tools.observation import blender_controlled_8view_v2 as controlled
 from tools.observation import blender_controlled_8view_v1 as orbit
+from tools.truth_foundry import blender_source_appearance_policy_replay_v1 as appearance_replay
 from tools.truth_foundry import blender_source_ray_appearance_measure_v1 as measured
 
 SCHEMA = "RealSaS.SourceRayAppearanceReference.v1"
@@ -133,6 +139,8 @@ def _compare_transform_receipts(sealed: list[dict], actual: list[dict]) -> None:
     by_name = {str(row.get("material") or ""): row for row in actual}
     if len(by_name) != len(actual) or "" in by_name:
         raise RuntimeError("SOURCE_RAY_REFERENCE_TRANSFORM_DUPLICATE")
+    if {str(row.get("material") or "") for row in sealed} != set(by_name):
+        raise RuntimeError("SOURCE_RAY_REFERENCE_TRANSFORM_MATERIAL_SET_DRIFT")
     for row in sealed:
         name = str(row.get("material") or "")
         got = by_name.get(name)
@@ -141,6 +149,8 @@ def _compare_transform_receipts(sealed: list[dict], actual: list[dict]) -> None:
         if row.get("operation") == "BSDF_LIGHT_RESPONSE_TO_EMISSION__ALPHA_GRAPH_RETAINED":
             if got.get("alpha_policy") != row.get("alpha_policy"):
                 raise RuntimeError("SOURCE_RAY_REFERENCE_ALPHA_POLICY_DRIFT:" + name)
+            if got.get("replayed") is not True:
+                raise RuntimeError("SOURCE_RAY_REFERENCE_TRANSFORM_NOT_REPLAYED:" + name)
 
 
 def main() -> None:
@@ -173,15 +183,19 @@ def main() -> None:
     if set(cameras) != set(range(8)):
         raise RuntimeError("SOURCE_RAY_REFERENCE_CAMERA_SET")
 
-    # Exact observation-lane import. The helper performs a factory reset.
+    # Exact observation-lane import. The helper performs a factory reset. The
+    # current importer is only a carrier for the sealed observation transform;
+    # it is not allowed to mint a replacement opacity policy.
     work = a.output.parent / (a.output.stem + ".source_import")
     work.mkdir(parents=True, exist_ok=True)
     import_receipt = controlled.import_rest(source, work)
     meshes, _points, _by_object = orbit.full_subject()
-    actual_transform = controlled.preserve_alpha_unlit(meshes)
-    _compare_transform_receipts(list(candidate.get("material_transform") or ()), actual_transform)
+    source_material_map = appearance_replay._materials_from_render_meshes(meshes)
+    sealed_transform = list(candidate.get("material_transform") or ())
+    actual_transform = appearance_replay._replay_transform(source_material_map, sealed_transform)
+    _compare_transform_receipts(sealed_transform, actual_transform)
 
-    source_materials = {m.name: m for m in bpy.data.materials if m is not None}
+    source_materials = dict(source_material_map)
     needed_names = set()
     hit_requests = []
     for ray in packed.get("rays") or ():
@@ -294,6 +308,7 @@ def main() -> None:
         "packed_measurement_sha256": _sha(a.packed_measurement),
         "source_import": import_receipt,
         "source_material_transform": actual_transform,
+        "material_policy_source": "SEALED_SOURCE_REST_RENDER_CANDIDATE__NO_CURRENT_IMPORT_BLEND_MODE_INFERENCE",
         "rgb_carrier_calibration": carrier,
         "equivalence_scope": "ADMITTED_UNLIT_SOURCE_OBSERVATION_MATERIAL_POLICY__SAME_TEACHER_TRIANGLE_UV_AND_MICRO_CAMERA",
         "geometry_lane_equivalence_required": False,

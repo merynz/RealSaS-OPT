@@ -3,7 +3,7 @@ from __future__ import annotations
 
 """Diagnostic wrapper for the source-ray appearance reference producer.
 
-The wrapped producer remains the authority under test.  This file only writes a
+The wrapped producer remains the authority under test. This file only writes a
 small durable failure receipt when Blender exits before the normal reference
 receipt exists, so a self-hosted court can be diagnosed without relying on the
 GitHub log redirect endpoint.
@@ -14,7 +14,9 @@ from pathlib import Path
 import sys
 import traceback
 
-from tools.truth_foundry import blender_source_ray_appearance_reference_v1 as reference
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 
 def _output_from_argv() -> Path | None:
@@ -33,6 +35,8 @@ def _output_from_argv() -> Path | None:
 def main() -> None:
     output = _output_from_argv()
     try:
+        from tools.truth_foundry import blender_source_ray_appearance_reference_v1 as reference
+
         reference.main()
     except BaseException as exc:
         if output is not None:

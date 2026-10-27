@@ -1,6 +1,7 @@
 {
   "schema": "RealSaS.FailedCalibrationDrainRequest.v1",
   "enabled": true,
+  "dispatch_revision": 2,
   "campaign_id": "d713b26b-5bbf-4d55-b6b8-9e10b9a81029",
   "attempt_id": "0468756f-e26c-47d9-a6b8-01197aa2b249",
   "preparation_relative_path": "truth_calibration_preparation/40414940754-1/PREPARATION.json",

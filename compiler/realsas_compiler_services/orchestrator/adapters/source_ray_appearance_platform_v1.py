@@ -9,9 +9,9 @@ measured, source-equivalent sparse appearance domain as immutable typed Platform
 artifacts. Canonical-M address binding remains a distinct downstream consumer
 court.
 
-External import alone is never qualification. This adapter revalidates the
-court, its exact subject measurement payloads and their deterministic hashes;
-only the resulting stage outputs may be registered by Platform execution.
+External import alone is never qualification. The aggregate court raw SHA is
+source-pinned; its packed-A/B parent hashes then authenticate every raw subject
+measurement receipt carried by the bundle.
 """
 
 import hashlib
@@ -31,14 +31,19 @@ FAMILY = "RAY_COMPOSITING"
 PASS_COURT = "PASS_SOURCE_RAY_APPEARANCE_LOCAL_QUALIFICATION_CANDIDATE"
 PASS_MEASUREMENT = "PASS_MEASURED_SOURCE_RAY_APPEARANCE_CANDIDATE"
 PASS_FACTORIZATION = "PASS_MEASURED_RAY_APPEARANCE_FACTORIZATION"
+SOURCE_WORKFLOW_RUN_ID = 40544781242
+SOURCE_ARTIFACT_ID = 12751917983
+SOURCE_ARTIFACT_NAME = "source-ray-appearance-source-equivalence-fit8-v1-40544781242"
+SOURCE_ARTIFACT_DIGEST = "sha256:a63940ef7bb9064f42941f595089b85bb120a7f53a271b7392b0db3c2dbe01dc"
+SOURCE_COURT_RAW_SHA256 = "f62412457156a7e36f351fd3d89d9ad042bf80213b4749329a7cfa6ee0cf912a"
 
 
-def _canonical_bytes(value: Any) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+def _sha(raw: bytes) -> str:
+    return hashlib.sha256(raw).hexdigest()
 
 
 def _canonical_hash(value: Any) -> str:
-    return hashlib.sha256(_canonical_bytes(value)).hexdigest()
+    return _sha(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8"))
 
 
 def _require_hash(value: Any, code: str) -> str:
@@ -48,10 +53,34 @@ def _require_hash(value: Any, code: str) -> str:
     return text
 
 
+def _parse_raw_json(text: Any, expected_sha: str, code: str) -> dict[str, Any]:
+    if not isinstance(text, str):
+        raise QualificationError(code + "_TEXT_REQUIRED")
+    raw = text.encode("utf-8")
+    if _sha(raw) != expected_sha:
+        raise QualificationError(code + "_HASH_DRIFT")
+    try:
+        value = json.loads(text)
+    except Exception as exc:
+        raise QualificationError(code + "_JSON_INVALID") from exc
+    if not isinstance(value, dict):
+        raise QualificationError(code + "_OBJECT_REQUIRED")
+    return value
+
+
 def _load_bundle(ctx: dict[str, Any]) -> dict[str, Any]:
     bundle = ctx["run_manifest"].get("source_ray_appearance_court_bundle")
     if not isinstance(bundle, dict) or bundle.get("schema") != BUNDLE_SCHEMA:
         raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_BUNDLE_REQUIRED")
+    source = bundle.get("source_artifact")
+    expected_source = {
+        "workflow_run_id": SOURCE_WORKFLOW_RUN_ID,
+        "artifact_id": SOURCE_ARTIFACT_ID,
+        "artifact_name": SOURCE_ARTIFACT_NAME,
+        "artifact_digest": SOURCE_ARTIFACT_DIGEST,
+    }
+    if source != expected_source:
+        raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_SOURCE_ARTIFACT_DRIFT")
     if bundle.get("registry_qualification_minted") is not False:
         raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_EXTERNAL_PREQUALIFICATION_FORBIDDEN")
     if bundle.get("canonical_mesh_binding_minted") is not False:
@@ -61,7 +90,7 @@ def _load_bundle(ctx: dict[str, Any]) -> dict[str, Any]:
     return bundle
 
 
-def _validate_measurement(subject_id: str, payload: dict[str, Any], expected_sha: str) -> tuple[int, int]:
+def _validate_measurement(subject_id: str, payload: dict[str, Any]) -> tuple[int, int]:
     if payload.get("schema") != MEASUREMENT_SCHEMA:
         raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_SCHEMA")
     if str(payload.get("subject_id") or "") != subject_id:
@@ -72,8 +101,6 @@ def _validate_measurement(subject_id: str, payload: dict[str, Any], expected_sha
         raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_PREMATURE_QUALIFICATION")
     if payload.get("training_allowed") is not False or payload.get("product_pass_claimed") is not False:
         raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_AUTHORITY_ESCALATION")
-    if _canonical_hash(payload) != expected_sha:
-        raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_HASH_DRIFT")
 
     rays = payload.get("rays")
     if not isinstance(rays, list) or not rays:
@@ -117,12 +144,15 @@ def _expected_measurement_parents(court: dict[str, Any]) -> dict[str, str]:
 
 
 def _validate_bundle(bundle: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str, Any]], tuple[str, ...], int, int]:
-    court = bundle.get("court")
-    if not isinstance(court, dict) or court.get("schema") != COURT_SCHEMA:
+    court_binding = bundle.get("court")
+    if not isinstance(court_binding, dict):
+        raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_COURT_BINDING_REQUIRED")
+    court_sha = _require_hash(court_binding.get("sha256"), "SOURCE_RAY_APPEARANCE_PLATFORM_COURT_HASH_REQUIRED")
+    if court_sha != SOURCE_COURT_RAW_SHA256:
+        raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_COURT_PIN_DRIFT")
+    court = _parse_raw_json(court_binding.get("json_text"), court_sha, "SOURCE_RAY_APPEARANCE_PLATFORM_COURT")
+    if court.get("schema") != COURT_SCHEMA:
         raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_COURT_SCHEMA")
-    court_sha = _require_hash(bundle.get("court_sha256"), "SOURCE_RAY_APPEARANCE_PLATFORM_COURT_HASH_REQUIRED")
-    if _canonical_hash(court) != court_sha:
-        raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_COURT_HASH_DRIFT")
     if str(court.get("court_status") or "") != PASS_COURT:
         raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_COURT_NOT_PASS")
 
@@ -157,16 +187,14 @@ def _validate_bundle(bundle: dict[str, Any]) -> tuple[dict[str, Any], list[dict[
         if subject_id not in expected_parents or subject_id in seen_subjects:
             raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_SUBJECT_DRIFT")
         seen_subjects.add(subject_id)
-        payload = row.get("payload")
-        if not isinstance(payload, dict):
-            raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_PAYLOAD_REQUIRED")
         sha = _require_hash(row.get("sha256"), "SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_HASH_REQUIRED")
         if sha != expected_parents[subject_id]:
             raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_PARENT_HASH_DRIFT")
-        rays, hits = _validate_measurement(subject_id, payload, sha)
+        payload = _parse_raw_json(row.get("json_text"), sha, "SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT")
+        rays, hits = _validate_measurement(subject_id, payload)
         ray_count += rays
         hit_count += hits
-        measurement_rows.append({"subject_id": subject_id, "sha256": sha, "payload": payload})
+        measurement_rows.append({"subject_id": subject_id, "sha256": sha, "json_text": str(row["json_text"])})
 
     if seen_subjects != set(expected_parents):
         raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_COHORT_INCOMPLETE")
@@ -200,7 +228,10 @@ def admit_source_ray_appearance_v1(ctx: dict[str, Any]) -> dict[str, Any]:
             "hit_count": hit_count,
             "coverage_scope": str((court.get("policy") or {}).get("coverage_scope") or ""),
         },
-        "court_sha256": str(bundle["court_sha256"]),
+        "source_workflow_run_id": SOURCE_WORKFLOW_RUN_ID,
+        "source_artifact_id": SOURCE_ARTIFACT_ID,
+        "source_artifact_digest": SOURCE_ARTIFACT_DIGEST,
+        "court_sha256": SOURCE_COURT_RAW_SHA256,
         "court_witness_sha256": str(court["witness_sha256"]),
         "measurement_set_sha256": measurement_set_sha256,
         "source_equivalent": True,
@@ -218,7 +249,7 @@ def admit_source_ray_appearance_v1(ctx: dict[str, Any]) -> dict[str, Any]:
         "schema": EVIDENCE_SCHEMA,
         "family": FAMILY,
         "scope": dict(qualification["scope"]),
-        "court_sha256": str(bundle["court_sha256"]),
+        "court_sha256": SOURCE_COURT_RAW_SHA256,
         "measurement_set_sha256": measurement_set_sha256,
         "measurements": measurements,
         "global_sampler_qualified": False,

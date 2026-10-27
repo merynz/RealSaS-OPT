@@ -103,13 +103,20 @@ jobs:
                   '--subject-id',sid,'--candidate',str(candidate),'--camera-bundle',str(camera),
                   '--expected-blend-sha256',refs['source_scene.blend']['sha256'],'--output-dir',str(replay_dir),
               ],check=True)
-              subprocess.run([
+              equivalence_receipt=subject_root/'SOURCE_APPEARANCE_REPLAY_EQUIVALENCE_V1.json'
+              audit_result=subprocess.run([
                   os.environ['PLATFORM_ROOT']+'/current/bin/realsas-python','tools/truth_foundry/audit_source_appearance_replay_v1.py',
                   '--admission',str(admission),'--candidate',str(candidate),'--camera-bundle',str(camera),
                   '--imported-geometry',str(imported_json),'--replay-dir',str(replay_dir),
-                  '--output',str(subject_root/'SOURCE_APPEARANCE_REPLAY_EQUIVALENCE_V1.json'),
-              ],check=True)
-              print(f'[SOURCE_APPEARANCE_REPLAY_DONE] {sid} seconds={time.monotonic()-started:.2f}',flush=True)
+                  '--output',str(equivalence_receipt),
+              ],check=False)
+              if not equivalence_receipt.is_file():
+                  raise RuntimeError(f'SOURCE_APPEARANCE_REPLAY_AUDIT_RECEIPT_MISSING:{sid}:rc={audit_result.returncode}')
+              audit=json.loads(equivalence_receipt.read_text())
+              audit_pass=audit.get('court_status')=='PASS_SOURCE_APPEARANCE_MASK_EQUIVALENCE' and audit.get('source_opacity_policy_replay_equivalent') is True
+              if audit_result.returncode not in (0,1) or (audit_result.returncode==0)!=audit_pass:
+                  raise RuntimeError(f'SOURCE_APPEARANCE_REPLAY_AUDIT_EXIT_STATUS_MISMATCH:{sid}:rc={audit_result.returncode}:pass={audit_pass}')
+              print(f'[SOURCE_APPEARANCE_REPLAY_DONE] {sid} court={audit.get("court_status")} seconds={time.monotonic()-started:.2f}',flush=True)
           PY
 
       - name: Aggregate source appearance replay equivalence without qualification

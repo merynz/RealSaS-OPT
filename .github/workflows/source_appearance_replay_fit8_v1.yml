@@ -49,7 +49,7 @@ jobs:
           print('SOURCE_APPEARANCE_REPLAY_INPUT_ROOTS=PASS')
           PY
 
-      - name: Replay sealed admitted appearance policy on exact packed evaluators
+      - name: Replay sealed admitted appearance policy and direct geometry court
         run: |
           set -euo pipefail
           mkdir -p "$COURT_ROOT/subjects"
@@ -70,11 +70,13 @@ jobs:
               teacher[sid]=(p,value)
           if len(teacher)!=8: raise RuntimeError(f'SOURCE_APPEARANCE_REPLAY_TEACHER_COUNT:{len(teacher)}')
           for i,subject in enumerate(request['subjects'],1):
-              sid=str(subject['subject_id']); admission=(authority/subject['observation_admission']['relative']).resolve()
+              sid=str(subject['subject_id']); source=(authority/subject['source']['relative']).resolve();admission=(authority/subject['observation_admission']['relative']).resolve()
+              if not source.is_file() or sha(source)!=subject['source']['sha256']:
+                  raise RuntimeError('SOURCE_APPEARANCE_REPLAY_SOURCE_DRIFT:'+sid)
               if not admission.is_file() or sha(admission)!=subject['observation_admission']['sha256']:
                   raise RuntimeError('SOURCE_APPEARANCE_REPLAY_ADMISSION_DRIFT:'+sid)
               folder=admission.parent;candidate=folder/'SOURCE_REST_RENDER_CANDIDATE.json';camera=folder/'camera_bundle.json'
-              admitted=json.loads(admission.read_text());candidate_value=json.loads(candidate.read_text())
+              admitted=json.loads(admission.read_text())
               if sha(candidate)!=admitted['candidate_sha256'] or sha(camera)!=admitted['camera_sha256']:
                   raise RuntimeError('SOURCE_APPEARANCE_REPLAY_OBSERVATION_LINEAGE:'+sid)
               scene_path,scene=teacher[sid]
@@ -82,8 +84,19 @@ jobs:
               blend=Path(refs['source_scene.blend']['path']).resolve()
               if not blend.is_file() or sha(blend)!=refs['source_scene.blend']['sha256']:
                   raise RuntimeError('SOURCE_APPEARANCE_REPLAY_BLEND_DRIFT:'+sid)
-              subject_root=court/sid;replay_dir=subject_root/'replay';subject_root.mkdir(parents=True,exist_ok=False)
-              started=time.monotonic();print(f'[SOURCE_APPEARANCE_REPLAY] {i}/8 {sid}',flush=True)
+              subject_root=court/sid;reference_root=subject_root/'observation_import';replay_dir=subject_root/'replay';subject_root.mkdir(parents=True,exist_ok=False)
+              imported_json=reference_root/'imported.json';started=time.monotonic();print(f'[SOURCE_APPEARANCE_REPLAY] {i}/8 {sid}',flush=True)
+
+              # Re-materialize exactly the observation lane's rest-import geometry.
+              # This is the geometry used by the admitted renderer, independently
+              # source-checked by the existing IRIS observation admission.
+              subprocess.run([
+                  blender,'-b','--factory-startup','--python-exit-code','2',
+                  '--python','tools/observation/blender_source_parity_export_v1.py','--',
+                  str(source),str(imported_json),
+              ],check=True)
+              if not imported_json.is_file(): raise RuntimeError('SOURCE_APPEARANCE_REPLAY_IMPORTED_GEOMETRY_MISSING:'+sid)
+
               subprocess.run([
                   blender,'-b',str(blend),'--python-exit-code','2',
                   '--python','tools/truth_foundry/blender_source_appearance_policy_replay_v1.py','--',
@@ -93,7 +106,8 @@ jobs:
               subprocess.run([
                   os.environ['PLATFORM_ROOT']+'/current/bin/realsas-python','tools/truth_foundry/audit_source_appearance_replay_v1.py',
                   '--admission',str(admission),'--candidate',str(candidate),'--camera-bundle',str(camera),
-                  '--replay-dir',str(replay_dir),'--output',str(subject_root/'SOURCE_APPEARANCE_REPLAY_EQUIVALENCE_V1.json'),
+                  '--imported-geometry',str(imported_json),'--replay-dir',str(replay_dir),
+                  '--output',str(subject_root/'SOURCE_APPEARANCE_REPLAY_EQUIVALENCE_V1.json'),
               ],check=True)
               print(f'[SOURCE_APPEARANCE_REPLAY_DONE] {sid} seconds={time.monotonic()-started:.2f}',flush=True)
           PY
@@ -111,6 +125,7 @@ jobs:
           if not all(r.get('court_status')=='PASS_SOURCE_APPEARANCE_MASK_EQUIVALENCE' and r.get('source_opacity_policy_replay_equivalent') is True for r in rows):
               raise SystemExit('SOURCE_APPEARANCE_REPLAY_SUBJECT_FAIL')
           for r in rows:
+              if r.get('triangle_upper_bound_is_authority') is not False: raise SystemExit('SOURCE_APPEARANCE_REPLAY_PROXY_BOUND_REGAINED_AUTHORITY')
               for key in ('source_lit_appearance_parity_claimed','rgb_equivalence_claimed','effective_alpha_value_equivalence_claimed','sampler_qualified','qualification_minted','student_target_allowed','training_allowed'):
                   if r.get(key) is not False: raise SystemExit('SOURCE_APPEARANCE_REPLAY_AUTHORITY_LEAK:'+key)
           result={
@@ -118,8 +133,12 @@ jobs:
               'exact_mask_equal_view_count':sum(int(r['exact_mask_equal_view_count']) for r in rows),
               'xor_pixel_count_total':sum(int(r['xor_pixel_count_total']) for r in rows),
               'maximum_replay_to_admitted_hausdorff_px':max(float(r['maximum_replay_to_admitted_hausdorff_px']) for r in rows),
-              'maximum_geometry_gap_upper_bound_px':max(float(r['maximum_geometry_gap_upper_bound_px']) for r in rows),
-              'sealed_maximum_mask_gap_px':2.0,'source_opacity_policy_replay_equivalent':True,
+              'maximum_admitted_to_observation_import_geometry_hausdorff_px':max(float(r['maximum_admitted_to_observation_import_geometry_hausdorff_px']) for r in rows),
+              'maximum_direct_replay_to_observation_import_geometry_hausdorff_px':max(float(r['maximum_direct_replay_to_observation_import_geometry_hausdorff_px']) for r in rows),
+              'maximum_diagnostic_triangle_upper_bound_px':max(float(r['maximum_diagnostic_triangle_upper_bound_px']) for r in rows),
+              'sealed_maximum_mask_gap_px':2.0,
+              'authority_metric':'DIRECT_REPLAY_TO_OBSERVATION_IMPORT_GEOMETRY__ORIGINAL_PROJECT_MASK_AND_SYMMETRIC_EDT',
+              'triangle_upper_bound_is_authority':False,'source_opacity_policy_replay_equivalent':True,
               'motion_geometry_teacher_authority_mutated':False,'source_lit_appearance_parity_claimed':False,
               'rgb_equivalence_claimed':False,'effective_alpha_value_equivalence_claimed':False,
               'sampler_qualified':False,'qualification_minted':False,'student_target_allowed':False,'training_allowed':False,

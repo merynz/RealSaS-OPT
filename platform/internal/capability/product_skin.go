@@ -7,12 +7,14 @@ const (
 	ProductSkinContractV1   = "RealSaS.ProductSkinInference.v1"
 )
 
-// ProductSkinProvider defines the stable Skin product boundary without making it
-// an active release provider yet. Canonical parents are Mesh + Rig. Current MIRA
-// V5.5 additionally consumes RiggingSurface and TESSA material-support evidence;
-// neither is a canonical Skin parent and both remain replaceable feature inputs.
-// MIRA proposes carrier-native influences; Compiler qualifies exact bindings and
-// simplex legality, then mints CanonicalSkinIR.
+// ProductSkinProvider defines the stable Skin product boundary as a first-class
+// release capability. Catalog admission is not model activation: exact execution
+// remains fail-closed on the selected MIRA ModelRelease channel and compute
+// contract. Canonical parents are Mesh + Rig. RiggingSurface and TESSA material-
+// support evidence are replaceable feature artifacts emitted by product.mesh,
+// not canonical Skin parents and not legacy stage dependencies. MIRA proposes
+// carrier-native influences; Compiler qualifies exact bindings and simplex
+// legality, then mints CanonicalSkinIR.
 type ProductSkinProvider struct{}
 
 func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
@@ -28,7 +30,6 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 		Dependencies: []string{
 			ProductMeshCapabilityID,
 			ProductRigCapabilityID,
-			StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED"),
 		},
 		AllowedModes:         []Mode{ModeDeveloper},
 		ProductPassAuthority: false,
@@ -44,8 +45,11 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"input_rig_schema_version":  "v1",
 			"feature_evidence_type":     "RealSaS.RiggingSurfaceIR",
 			"feature_evidence_version":  "v1",
+			"feature_evidence_source":   "PRODUCT_MESH_OUTPUT",
 			"material_support_type":     "RealSaS.TESSAMaterialSupportFieldIR",
 			"material_support_version":  "v1",
+			"material_support_source":   "PRODUCT_MESH_OUTPUT",
+			"legacy_stage15_dependency": false,
 			"output_artifact_type":      "RealSaS.CanonicalSkinIR",
 			"output_schema_version":     "v1",
 			"decode_chunk":              512,

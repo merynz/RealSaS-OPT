@@ -17,6 +17,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import re
 
 import numpy as np
 
@@ -42,6 +43,13 @@ def _bound(root: Path, ref: dict, code: str) -> Path:
     return path
 
 
+def _version_triplet(label: str) -> tuple[int, int, int]:
+    match = re.search(r"(?<!\d)(\d+)\.(\d+)\.(\d+)(?!\d)", str(label))
+    if match is None:
+        raise RuntimeError("TEMPORAL_TIMEBASE_BLENDER_VERSION_UNPARSEABLE:" + str(label))
+    return tuple(int(value) for value in match.groups())
+
+
 def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
     request = json.loads(request_path.read_text(encoding="utf-8"))
     if request.get("schema") != "RealSaS.NativeTeacherReplayRequest.v1":
@@ -51,6 +59,8 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
     subjects = tuple(request.get("subjects") or ())
     if len(subjects) != 8:
         raise RuntimeError("TEMPORAL_INVENTORY_EXPECTED_FIT8")
+    requested_blender_version = str(request.get("blender_version") or "")
+    requested_blender_triplet = _version_triplet(requested_blender_version)
 
     rows = []
     total_samples = 0
@@ -85,7 +95,8 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
             raise RuntimeError("TEMPORAL_TIMEBASE_PROBE_ADMISSION_DRIFT:" + subject_id)
         if probe.get("teacher_receipt_sha256") != subject["expected_receipt"]["sha256"]:
             raise RuntimeError("TEMPORAL_TIMEBASE_PROBE_RECEIPT_DRIFT:" + subject_id)
-        if probe.get("blender_version") != request.get("blender_version"):
+        probe_blender_version = str(probe.get("blender_version") or "")
+        if _version_triplet(probe_blender_version) != requested_blender_triplet:
             raise RuntimeError("TEMPORAL_TIMEBASE_BLENDER_VERSION_DRIFT:" + subject_id)
         if receipt.get("source", {}).get("sha256") != subject["source"]["sha256"]:
             raise RuntimeError("TEMPORAL_TEACHER_SOURCE_DRIFT:" + subject_id)
@@ -209,6 +220,9 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
                 "source_sha256": subject["source"]["sha256"],
                 "teacher_sha256": subject["expected_teacher"]["sha256"],
                 "teacher_receipt_sha256": subject["expected_receipt"]["sha256"],
+                "blender_version_request_label": requested_blender_version,
+                "blender_version_probe_label": probe_blender_version,
+                "blender_version_triplet": list(requested_blender_triplet),
                 "frames_per_second": fps,
                 "render_fps": fps_integer,
                 "render_fps_base": fps_base,
@@ -224,7 +238,8 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
     return {
         "schema": SCHEMA,
         "request_sha256": _sha256(request_path),
-        "blender_version": request["blender_version"],
+        "blender_version_request_label": requested_blender_version,
+        "blender_version_triplet": list(requested_blender_triplet),
         "subject_count": len(rows),
         "action_count": total_actions,
         "normalized_action_identity_count": total_normalized_action_identities,

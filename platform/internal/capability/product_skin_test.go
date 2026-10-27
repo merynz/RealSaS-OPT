@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
+func TestProductSkinDescriptorIsTruthful(t *testing.T) {
 	descriptors, err := (ProductSkinProvider{}).Capabilities(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -21,8 +21,8 @@ func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
 		t.Fatal("Skin must not own ProductRevision PASS authority")
 	}
 	wantDeps := map[string]bool{
-		ProductMeshCapabilityID:                           true,
-		ProductRigCapabilityID:                            true,
+		ProductMeshCapabilityID:                            true,
+		ProductRigCapabilityID:                             true,
 		StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED"): true,
 	}
 	if len(d.Dependencies) != len(wantDeps) {
@@ -112,16 +112,24 @@ func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
 	}
 }
 
-func TestSkinIsNotAnActiveProductProviderBeforeQualifiedChannelAdmission(t *testing.T) {
+func TestSkinIsFirstClassProductProviderIndependentOfLiveChannelState(t *testing.T) {
+	found := false
 	for _, provider := range ProductProviders() {
 		descriptors, err := provider.Capabilities(context.Background())
 		if err != nil {
 			t.Fatal(err)
 		}
 		for _, descriptor := range descriptors {
-			if descriptor.ID == ProductSkinCapabilityID {
-				t.Fatal("product.skin must not enter active EngineRelease graph before qualified ModelRelease channel admission")
+			if descriptor.ID != ProductSkinCapabilityID {
+				continue
+			}
+			found = true
+			if descriptor.Metadata["operational_model_state_embedded_in_source"] != false {
+				t.Fatal("product.skin catalog admission must not encode live ModelRelease/channel state")
 			}
 		}
+	}
+	if !found {
+		t.Fatal("product.skin missing from first-class product provider catalog")
 	}
 }

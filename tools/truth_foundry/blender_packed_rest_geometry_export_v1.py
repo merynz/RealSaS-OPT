@@ -3,9 +3,11 @@ from __future__ import annotations
 
 """Export evaluated geometry from an exact packed Truth Foundry source scene.
 
-Diagnostic only.  This script does not alter materials, choose appearance
-semantics, qualify geometry, or mint source equivalence.  It exists to separate
-packed-evaluator geometry drift from appearance-policy replay drift.
+Diagnostic only.  The mesh selection deliberately reuses the native teacher
+exporter's renderable-source selection so armature custom-shape helper meshes do
+not re-enter a geometry comparison that the sealed teacher never contained.
+This script does not alter materials, choose appearance semantics, qualify
+geometry, or mint source equivalence.
 """
 
 import argparse
@@ -20,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.observation import blender_controlled_8view_v1 as orbit
+from tools.iris_vnext import blender_authored_teacher_export_v1 as source_transport
 
 SCHEMA = "RealSaS.PackedRestGeometryDiagnostic.v1"
 
@@ -48,7 +50,7 @@ def main() -> None:
     if not blend.is_file() or _sha(blend) != a.expected_blend_sha256:
         raise RuntimeError("PACKED_REST_GEOMETRY_BLEND_HASH_DRIFT")
 
-    meshes, _points, _by_object = orbit.full_subject()
+    meshes = source_transport._mesh_objects()
     deps = bpy.context.evaluated_depsgraph_get()
     vertices: list[list[float]] = []
     faces: list[list[int]] = []
@@ -78,6 +80,7 @@ def main() -> None:
         "packed_source_scene_blend_sha256": a.expected_blend_sha256,
         "blender_version": str(bpy.app.version_string),
         "coordinate_frame": "PACKED_SOURCE_SCENE_WORLD",
+        "mesh_selection": "NATIVE_TEACHER_RENDERABLE_SOURCE_MESHES__CUSTOM_SHAPE_HELPERS_EXCLUDED",
         "vertices": vertices,
         "faces": faces,
         "objects": objects,
@@ -93,6 +96,7 @@ def main() -> None:
         "vertex_count": len(vertices),
         "triangle_count": len(faces),
         "object_count": len(objects),
+        "mesh_selection": receipt["mesh_selection"],
         "authority": receipt["authority"],
     }, sort_keys=True), flush=True)
 

@@ -5,9 +5,10 @@ from __future__ import annotations
 
 This probe imports the exact admitted source under the same Blender 4.5 native
 FBX/glTF semantics used by the vNext teacher lane, then binds importer-local
-action names back to the exact sealed teacher action identity. FBX may normalize
-action names during import, so any normalization is accepted only when it is
-uniquely witnessed by the sealed teacher receipt's `(action, armature)` rows.
+action names back to the exact sealed teacher action identity. FBX importer
+revisions may add or remove exactly one armature-name prefix; either direction
+is accepted only when it is uniquely witnessed by the sealed teacher receipt's
+`(action, armature)` rows.
 
 The probe does not sample vertices, render, submit training, or mint Truth
 Foundry qualification.
@@ -83,31 +84,35 @@ def _sealed_action_armature(receipt: dict, action: str) -> str:
 
 
 def _bind_actions(expected_actions: tuple[str, ...], actual: dict[str, object], receipt: dict):
-    """Return exact teacher-identity -> Blender action binding.
+    """Return exact teacher-identity -> current Blender action binding.
 
-    Exact name identity wins. The only accepted normalization in this revision
-    is the concrete armature-prefix removal witnessed by the sealed receipt:
+    Exact name identity wins. Otherwise the sole accepted adapter drift is one
+    exact sealed-armature prefix in either direction:
 
-        `<sealed armature>|<Blender action name>` == `<teacher action identity>`
+      armature + "|" + current_name == teacher_identity
+      current_name == armature + "|" + teacher_identity
 
-    No fuzzy matching, semantic aliases, or action ordering is used. Ambiguous
-    or missing bindings fail closed and include the imported inventory so the
-    adapter mismatch can be repaired from evidence instead of guesswork.
+    This covers concrete FBX importer naming drift while forbidding suffix/fuzzy
+    matching, semantic aliases and order-based pairing. Any ambiguity fails.
     """
     bound = {}
     used_actual = set()
     imported_inventory = ",".join(sorted(actual))
     for teacher_name in expected_actions:
+        armature = _sealed_action_armature(receipt, teacher_name)
         if teacher_name in actual:
             blender_name = teacher_name
-            armature = _sealed_action_armature(receipt, teacher_name)
             kind = "EXACT_ACTION_NAME"
         else:
-            armature = _sealed_action_armature(receipt, teacher_name)
-            candidates = [
-                name for name in actual
-                if f"{armature}|{name}" == teacher_name
-            ]
+            candidates: dict[str, str] = {}
+            for name in actual:
+                if f"{armature}|{name}" == teacher_name:
+                    candidates[name] = "CURRENT_IMPORT_REMOVED_ONE_SEALED_ARMATURE_PREFIX"
+                if name == f"{armature}|{teacher_name}":
+                    previous = candidates.get(name)
+                    if previous is not None and previous != "CURRENT_IMPORT_ADDED_ONE_SEALED_ARMATURE_PREFIX":
+                        raise RuntimeError("TEMPORAL_TIMEBASE_ACTION_IDENTITY_RULE_AMBIGUOUS:" + teacher_name)
+                    candidates[name] = "CURRENT_IMPORT_ADDED_ONE_SEALED_ARMATURE_PREFIX"
             if len(candidates) != 1:
                 raise RuntimeError(
                     "TEMPORAL_TIMEBASE_ACTION_IDENTITY_UNBOUND:"
@@ -117,8 +122,7 @@ def _bind_actions(expected_actions: tuple[str, ...], actual: dict[str, object], 
                     + ":actual="
                     + imported_inventory
                 )
-            blender_name = candidates[0]
-            kind = "SEALED_RECEIPT_ARMATURE_PREFIX_NORMALIZATION"
+            blender_name, kind = next(iter(candidates.items()))
         if blender_name in used_actual:
             raise RuntimeError("TEMPORAL_TIMEBASE_ACTION_IDENTITY_COLLISION:" + blender_name)
         used_actual.add(blender_name)
@@ -217,9 +221,7 @@ def main() -> None:
     }
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    normalized = sum(
-        row["identity_binding"] != "EXACT_ACTION_NAME" for row in action_rows
-    )
+    normalized = sum(row["identity_binding"] != "EXACT_ACTION_NAME" for row in action_rows)
     print(
         "TEMPORAL_TIMEBASE_PROBE_PASS",
         args.subject_id,

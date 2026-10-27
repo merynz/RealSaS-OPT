@@ -17,13 +17,16 @@ import (
 // ProductProviders is the single source-level catalog of first-class product
 // capabilities which are not already represented by Compiler stage nodes.
 // New replaceable product boundaries (Mesh, Rig, Skin, ...) join here instead
-// of inventing a second registry or a parallel operational graph.
+// of inventing a second registry or a parallel operational graph. Catalog
+// presence does not imply that a learned ModelRelease channel is admitted;
+// execution remains target-scoped and fail-closed on live Platform selection.
 func ProductProviders() []Provider {
 	return []Provider{
 		ProductInputProvider{},
 		ProductShapeProvider{},
 		ProductMeshProvider{},
 		ProductRigProvider{},
+		ProductSkinProvider{},
 	}
 }
 

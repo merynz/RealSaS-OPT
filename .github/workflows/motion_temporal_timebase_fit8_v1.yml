@@ -1,0 +1,104 @@
+name: motion-temporal-timebase-fit8-v1
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/truth_foundry/blender_native_timebase_probe_v1.py'
+      - 'tools/truth_foundry/audit_native_temporal_timebase_v1.py'
+      - '.github/workflows/motion_temporal_timebase_fit8_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: motion-temporal-timebase-fit8-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  authority-court:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      BLENDER: /home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
+      OUTPUT: /home/monster/realsas_authority/motion_temporal_timebase_fit8_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact sealed inputs before importing anything
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for block in iter(lambda:f.read(8*1024*1024),b''):h.update(block)
+              return h.hexdigest()
+
+          root=Path(os.environ['AUTHORITY_ROOT'])
+          request=json.loads(Path('canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json').read_text())
+          assert request['schema']=='RealSaS.NativeTeacherReplayRequest.v1'
+          assert request['training_allowed'] is False
+          assert request['new_interventions_allowed'] is False
+          assert len(request['subjects'])==8
+          for subject in request['subjects']:
+              for key in ('source','observation_admission','expected_teacher','expected_receipt'):
+                  ref=subject[key];path=root/ref['relative']
+                  if not path.is_file():raise SystemExit(f"TEMPORAL_INPUT_MISSING:{subject['subject_id']}:{key}")
+                  if sha(path)!=ref['sha256']:raise SystemExit(f"TEMPORAL_INPUT_HASH_DRIFT:{subject['subject_id']}:{key}")
+          print('TEMPORAL_SEALED_INPUTS=PASS subjects=8')
+          PY
+
+      - name: Probe native animation timebase only
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUTPUT/probes"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+
+          root=Path(os.environ['AUTHORITY_ROOT'])
+          out=Path(os.environ['OUTPUT'])/'probes'
+          blender=os.environ['BLENDER']
+          request=json.loads(Path('canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json').read_text())
+          for index,subject in enumerate(request['subjects'],1):
+              sid=subject['subject_id']
+              print(f'[TEMPORAL_TIMEBASE] {index}/{len(request["subjects"])} {sid}',flush=True)
+              cmd=[
+                  blender,'-b','--factory-startup',
+                  '--python','tools/truth_foundry/blender_native_timebase_probe_v1.py','--',
+                  '--source',str(root/subject['source']['relative']),
+                  '--expected-source-sha256',subject['source']['sha256'],
+                  '--subject-id',sid,
+                  '--observation-admission',str(root/subject['observation_admission']['relative']),
+                  '--output',str(out/f'{sid}.timebase.json'),
+              ]
+              subprocess.run(cmd,check=True)
+          PY
+
+      - name: Bind sealed posed samples to exact timestamps
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/audit_native_temporal_timebase_v1.py \
+            --request canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json \
+            --authority-root "$AUTHORITY_ROOT" \
+            --probe-dir "$OUTPUT/probes" \
+            --output "$OUTPUT/MOTION_TEMPORAL_TIMEBASE_INVENTORY_V1.json"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: motion-temporal-timebase-fit8-v1-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/MOTION_TEMPORAL_TIMEBASE_INVENTORY_V1.json
+            ${{ env.OUTPUT }}/probes/*.timebase.json
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

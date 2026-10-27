@@ -1,0 +1,58 @@
+name: source-observation-opacity-authority-fit8-v1
+on:
+  pull_request:
+    paths:
+      - 'tools/truth_foundry/audit_source_observation_authority_v1.py'
+      - '.github/workflows/source_observation_opacity_authority_fit8_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: source-observation-opacity-authority-fit8-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  authority-court:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      COURT_ROOT: /home/monster/realsas_authority/source_observation_opacity_authority_fit8_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Inventory exact admitted source observation authority
+        run: |
+          set -euo pipefail
+          mkdir -p "$COURT_ROOT"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/audit_source_observation_authority_v1.py \
+            --request canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json \
+            --authority-root "$AUTHORITY_ROOT" \
+            --output "$COURT_ROOT/SOURCE_OBSERVATION_OPACITY_AUTHORITY_FIT8_V1.json"
+      - name: Verify inventory remains read-only and unqualified
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ['COURT_ROOT'])/'SOURCE_OBSERVATION_OPACITY_AUTHORITY_FIT8_V1.json'
+          value=json.loads(p.read_text())
+          if value.get('subject_count')!=8: raise SystemExit('SOURCE_OBSERVATION_AUTHORITY_SUBJECT_COUNT')
+          for key in ('qualification_minted','opacity_policy_selected','sampler_qualified','student_target_allowed','training_allowed'):
+              if value.get(key) is not False: raise SystemExit('SOURCE_OBSERVATION_AUTHORITY_LEAK:'+key)
+          if value.get('court_status')!='PASS_READ_ONLY_SOURCE_OBSERVATION_AUTHORITY_INVENTORY':
+              raise SystemExit('SOURCE_OBSERVATION_AUTHORITY_STATUS')
+          print('SOURCE_OBSERVATION_OPACITY_AUTHORITY_BOUNDARY=PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: source-observation-opacity-authority-fit8-v1-${{ github.run_id }}
+          path: ${{ env.COURT_ROOT }}/SOURCE_OBSERVATION_OPACITY_AUTHORITY_FIT8_V1.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30

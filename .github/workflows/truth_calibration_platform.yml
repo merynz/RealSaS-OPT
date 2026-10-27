@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.resolve.outputs.should_run }}
+      decision: ${{ steps.resolve.outputs.decision }}
+      reason: ${{ steps.resolve.outputs.reason }}
       expected_sha: ${{ steps.resolve.outputs.expected_sha }}
     steps:
       - uses: actions/checkout@v4
@@ -27,18 +29,80 @@ jobs:
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           python - <<'PY' >> "$GITHUB_OUTPUT"
-          import json,os,subprocess
+          import json, os, subprocess
           from pathlib import Path
-          sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
-          changed=subprocess.check_output(['git','diff-tree','--no-commit-id','--name-only','-r','HEAD^1','HEAD'],text=True).splitlines()
-          request='canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V1.json'
-          enabled=json.loads(Path(request).read_text()).get('enabled') is True
-          selected=os.environ['EVENT']=='workflow_dispatch' or (os.environ['CONCLUSION']=='success' and os.environ['HEAD_BRANCH']=='main' and request in changed)
-          print(f"should_run={'true' if enabled and selected else 'false'}");print(f'expected_sha={sha}')
+
+          sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          changed = subprocess.check_output(
+              ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD^1', 'HEAD'],
+              text=True,
+          ).splitlines()
+          request = 'canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V1.json'
+          enabled = json.loads(Path(request).read_text()).get('enabled') is True
+
+          # Every main deployment completion triggers this workflow. Ordinary
+          # commits are expected no-ops; publish that explicitly instead of
+          # presenting the physical-runner job as an unexplained SKIPPED check.
+          if not enabled:
+              decision, reason = 'NOOP', 'request_disabled'
+          elif os.environ['EVENT'] == 'workflow_dispatch':
+              decision, reason = 'RUN', 'manual_dispatch'
+          elif os.environ['CONCLUSION'] != 'success':
+              decision, reason = 'NOOP', 'deployment_not_successful'
+          elif os.environ['HEAD_BRANCH'] != 'main':
+              decision, reason = 'NOOP', 'non_main_deployment'
+          elif request not in changed:
+              decision, reason = 'NOOP', 'operator_request_not_changed'
+          else:
+              decision, reason = 'RUN', 'operator_request_changed_on_successful_main_deployment'
+
+          print(f"should_run={'true' if decision == 'RUN' else 'false'}")
+          print(f'decision={decision}')
+          print(f'reason={reason}')
+          print(f'expected_sha={sha}')
           PY
-  coordinate:
+
+  decision_receipt:
     needs: activation
-    if: needs.activation.outputs.should_run == 'true'
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      ACTIVATION_RESULT: ${{ needs.activation.result }}
+      DECISION: ${{ needs.activation.outputs.decision }}
+      REASON: ${{ needs.activation.outputs.reason }}
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+    steps:
+      - name: Validate and publish calibration decision
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          activation_result = os.environ.get('ACTIVATION_RESULT', '')
+          decision = os.environ.get('DECISION', '')
+          reason = os.environ.get('REASON', '')
+          expected_sha = os.environ.get('EXPECTED_SHA', '')
+          if activation_result != 'success':
+              raise SystemExit(f'CALIBRATION_SELECTOR_NOT_SUCCESS:{activation_result or "missing"}')
+          if decision not in {'RUN', 'NOOP'}:
+              raise SystemExit(f'CALIBRATION_SELECTOR_INVALID_DECISION:{decision or "missing"}')
+          if not reason:
+              raise SystemExit('CALIBRATION_SELECTOR_MISSING_REASON')
+          if len(expected_sha) != 40:
+              raise SystemExit('CALIBRATION_SELECTOR_INVALID_EXPECTED_SHA')
+          Path(os.environ['GITHUB_STEP_SUMMARY']).write_text(
+              '# Truth calibration platform decision\n\n'
+              f'- decision: `{decision}`\n'
+              f'- reason: `{reason}`\n'
+              f'- expected SHA: `{expected_sha}`\n',
+              encoding='utf-8',
+          )
+          print(f'CALIBRATION_DECISION={decision} reason={reason} expected_sha={expected_sha}')
+          PY
+
+  coordinate:
+    needs: [activation, decision_receipt]
+    if: needs.activation.outputs.decision == 'RUN'
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 35
     env:
@@ -71,3 +135,50 @@ jobs:
           path: ${{ env.OUTPUT }}/
           if-no-files-found: warn
           retention-days: 14
+
+  finalize:
+    needs: [activation, decision_receipt, coordinate]
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      ACTIVATION_RESULT: ${{ needs.activation.result }}
+      RECEIPT_RESULT: ${{ needs.decision_receipt.result }}
+      COORDINATE_RESULT: ${{ needs.coordinate.result }}
+      DECISION: ${{ needs.activation.outputs.decision }}
+      REASON: ${{ needs.activation.outputs.reason }}
+    steps:
+      - name: Require expected RUN/NOOP outcome
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          activation_result = os.environ.get('ACTIVATION_RESULT', '')
+          receipt_result = os.environ.get('RECEIPT_RESULT', '')
+          coordinate_result = os.environ.get('COORDINATE_RESULT', '')
+          decision = os.environ.get('DECISION', '')
+          reason = os.environ.get('REASON', '')
+
+          if activation_result != 'success':
+              raise SystemExit(f'CALIBRATION_ACTIVATION_FAILED:{activation_result or "missing"}')
+          if receipt_result != 'success':
+              raise SystemExit(f'CALIBRATION_DECISION_RECEIPT_FAILED:{receipt_result or "missing"}')
+          if decision == 'RUN':
+              if coordinate_result != 'success':
+                  raise SystemExit(f'CALIBRATION_EXPECTED_RUN_NOT_SUCCESS:{coordinate_result or "missing"}')
+          elif decision == 'NOOP':
+              if coordinate_result != 'skipped':
+                  raise SystemExit(f'CALIBRATION_EXPECTED_NOOP_NOT_SKIPPED:{coordinate_result or "missing"}')
+          else:
+              raise SystemExit(f'CALIBRATION_UNKNOWN_DECISION:{decision or "missing"}')
+
+          Path(os.environ['GITHUB_STEP_SUMMARY']).write_text(
+              '# Truth calibration platform outcome\n\n'
+              f'- decision: `{decision}`\n'
+              f'- reason: `{reason}`\n'
+              f'- coordinate job result: `{coordinate_result}`\n'
+              '- outcome: `PASS`\n',
+              encoding='utf-8',
+          )
+          print(f'CALIBRATION_OUTCOME=PASS decision={decision} reason={reason} coordinate_result={coordinate_result}')
+          PY

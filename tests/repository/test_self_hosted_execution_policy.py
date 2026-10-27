@@ -161,3 +161,30 @@ def test_authored_oracle_research_is_explicit_and_canonical_main_only():
     assert "EXPECTED_SHA: ${{ github.sha }}" in text
     assert "github.event.workflow_run" not in text
     assert "cancel-in-progress: false" in text
+
+
+def test_truth_calibration_readback_decision_is_auditable_and_fail_closed():
+    text = (ROOT / ".github/workflows/truth_calibration_readback.yml").read_text()
+    assert "decision: ${{ steps.select.outputs.decision }}" in text
+    assert "reason: ${{ steps.select.outputs.reason }}" in text
+    assert "decision, reason = 'NOOP', 'request_not_changed'" in text
+    assert "decision_receipt:" in text
+    assert "if: needs.select.outputs.decision == 'RUN'" in text
+    assert "finalize:" in text
+    assert "if: always()" in text
+    assert "READBACK_SELECTOR_INVALID_DECISION" in text
+    assert "READBACK_EXPECTED_RUN_NOT_SUCCESS" in text
+    assert "READBACK_EXPECTED_NOOP_NOT_SKIPPED" in text
+
+
+def test_truth_calibration_platform_decision_is_auditable_and_fail_closed():
+    text = (ROOT / ".github/workflows/truth_calibration_platform.yml").read_text()
+    assert "decision: ${{ steps.resolve.outputs.decision }}" in text
+    assert "reason: ${{ steps.resolve.outputs.reason }}" in text
+    assert "decision, reason = 'NOOP', 'operator_request_not_changed'" in text
+    assert "decision_receipt:" in text
+    assert "if: needs.activation.outputs.decision == 'RUN'" in text
+    assert "finalize:" in text
+    assert "CALIBRATION_SELECTOR_INVALID_DECISION" in text
+    assert "CALIBRATION_EXPECTED_RUN_NOT_SUCCESS" in text
+    assert "CALIBRATION_EXPECTED_NOOP_NOT_SKIPPED" in text

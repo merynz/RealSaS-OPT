@@ -1,0 +1,113 @@
+name: motion-temporal-response-candidate-fit8-v1
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'models/iris/truth/temporal_response_v1.py'
+      - 'tools/truth_foundry/build_native_temporal_response_candidates_v1.py'
+      - 'tools/truth_foundry/audit_native_temporal_response_candidates_v1.py'
+      - 'tests/truth_foundry/test_temporal_response_v1.py'
+      - '.github/workflows/motion_temporal_response_candidate_fit8_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: motion-temporal-response-candidate-fit8-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  authority-court:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      TIMEBASE_INVENTORY: /home/monster/realsas_authority/motion_temporal_timebase_fit8_v1/40507621098-1/MOTION_TEMPORAL_TIMEBASE_INVENTORY_V1.json
+      TIMEBASE_SHA256: 5e18a0d5d31987c31bcc06598dc3250c2043c64ffd3da0e88fd1b1bfea6e33fd
+      OUTPUT: /home/monster/realsas_authority/motion_temporal_response_candidate_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact timebase inventory and sealed request
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          timebase=Path(os.environ['TIMEBASE_INVENTORY'])
+          if not timebase.is_file():raise SystemExit('TEMPORAL_RESPONSE_TIMEBASE_MISSING')
+          digest=hashlib.sha256(timebase.read_bytes()).hexdigest()
+          if digest!=os.environ['TIMEBASE_SHA256']:raise SystemExit('TEMPORAL_RESPONSE_TIMEBASE_HASH_DRIFT')
+          value=json.loads(timebase.read_text())
+          if value.get('court_status')!='PASS_EXACT_TIMEBASE_BOUND':raise SystemExit('TEMPORAL_RESPONSE_TIMEBASE_NOT_PASSED')
+          if value.get('subject_count')!=8 or value.get('action_count')!=62 or value.get('posed_sample_count')!=956:
+              raise SystemExit('TEMPORAL_RESPONSE_TIMEBASE_COUNT_DRIFT')
+          if value.get('qualification_minted') is not False or value.get('training_allowed') is not False:
+              raise SystemExit('TEMPORAL_RESPONSE_TIMEBASE_AUTHORITY_DRIFT')
+          request=json.loads(Path('canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json').read_text())
+          if request.get('training_allowed') is not False or request.get('new_interventions_allowed') is not False:
+              raise SystemExit('TEMPORAL_RESPONSE_REQUEST_AUTHORITY_DRIFT')
+          print('TEMPORAL_RESPONSE_SEALED_INPUTS=PASS')
+          PY
+
+      - name: Run temporal-response kernel regressions
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" -m pytest -q tests/truth_foundry/test_temporal_response_v1.py
+
+      - name: Build 62 unqualified authored temporal-response candidates
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/build_native_temporal_response_candidates_v1.py \
+            --request canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json \
+            --authority-root "$AUTHORITY_ROOT" \
+            --timebase-inventory "$TIMEBASE_INVENTORY" \
+            --expected-timebase-sha256 "$TIMEBASE_SHA256" \
+            --output "$OUTPUT"
+
+      - name: Replay every candidate against sealed teacher bytes
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/audit_native_temporal_response_candidates_v1.py \
+            --candidate-root "$OUTPUT" \
+            --request canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json \
+            --authority-root "$AUTHORITY_ROOT" \
+            --timebase-inventory "$TIMEBASE_INVENTORY" \
+            --expected-timebase-sha256 "$TIMEBASE_SHA256" \
+            --output "$OUTPUT/TEMPORAL_RESPONSE_CANDIDATE_COURT_V1.json"
+
+      - name: Verify authority stays unqualified after successful replay
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ['OUTPUT'])
+          manifest=json.loads((root/'TEMPORAL_RESPONSE_CANDIDATE_MANIFEST_V1.json').read_text())
+          court=json.loads((root/'TEMPORAL_RESPONSE_CANDIDATE_COURT_V1.json').read_text())
+          if court.get('court_status')!='PASS_EXACT_TEMPORAL_RESPONSE_REPLAY':raise SystemExit('TEMPORAL_RESPONSE_COURT_NOT_PASSED')
+          if court.get('subject_count')!=8 or court.get('action_count')!=62 or court.get('posed_sample_count')!=956:
+              raise SystemExit('TEMPORAL_RESPONSE_COURT_COUNT_DRIFT')
+          if court.get('max_response_abs_replay_error')!=0.0:raise SystemExit('TEMPORAL_RESPONSE_REPLAY_NOT_EXACT')
+          for value in (manifest,court):
+              for key in ('physical_dof_authority','physical_impulse_authority','secondary_motion_physics_authority','qualification_minted','student_target_allowed','compiler_consequence_allowed','training_allowed'):
+                  if value.get(key) is not False:raise SystemExit('TEMPORAL_RESPONSE_AUTHORITY_LEAK:'+key)
+          print('TEMPORAL_RESPONSE_CANDIDATE_AUTHORITY=PASS_UNQUALIFIED')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: motion-temporal-response-candidate-fit8-v1-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/TEMPORAL_RESPONSE_CANDIDATE_MANIFEST_V1.json
+            ${{ env.OUTPUT }}/TEMPORAL_RESPONSE_CANDIDATE_COURT_V1.json
+            ${{ env.OUTPUT }}/*/SUBJECT_TEMPORAL_RESPONSE_MANIFEST_V1.json
+            ${{ env.OUTPUT }}/*/action_*.json
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

@@ -150,6 +150,78 @@
         "implementation_owner_may_change": true,
         "stable_product_role_survives_rewiring": true
       }
+    },
+    "product.skin": {
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.skin_executor_v1",
+      "policy": {
+        "allowed_modes": ["DEVELOPER"],
+        "product_pass_authority": false,
+        "dependencies": [
+          "product.mesh",
+          "product.rig"
+        ]
+      },
+      "metadata": {
+        "product_role_id": "skin",
+        "implementation_class": "HYBRID",
+        "interface_contract": "RealSaS.ProductSkinInference.v1",
+        "executor_contract": "RealSaS.ProductSkinInference.v1",
+        "input_mesh_artifact_type": "RealSaS.CanonicalMeshIR",
+        "input_mesh_schema_version": "v1",
+        "input_rig_artifact_type": "RealSaS.CanonicalRigIR",
+        "input_rig_schema_version": "v1",
+        "feature_evidence_type": "RealSaS.RiggingSurfaceIR",
+        "feature_evidence_version": "v1",
+        "feature_evidence_source": "PRODUCT_MESH_OUTPUT",
+        "material_support_type": "RealSaS.TESSAMaterialSupportFieldIR",
+        "material_support_version": "v1",
+        "material_support_source": "PRODUCT_MESH_OUTPUT",
+        "legacy_stage15_dependency": false,
+        "output_artifact_type": "RealSaS.CanonicalSkinIR",
+        "output_schema_version": "v1",
+        "decode_chunk": 512,
+        "carrier_skin_qualification": {
+          "max_simplex_repair_l1": 0.00001,
+          "max_total_correction_l1": 0.0001,
+          "negative_tolerance": 0.00000001,
+          "max_influences": 41
+        },
+        "required_models": [
+          {
+            "family": "MIRA",
+            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5"
+          }
+        ],
+        "model_checkpoint_artifact_type": "RealSaS.MIRARuntimeCheckpoint",
+        "model_checkpoint_schema_version": "v1",
+        "mesh_and_rig_are_canonical_parents": true,
+        "feature_evidence_is_canonical_parent": false,
+        "material_support_is_canonical_parent": false,
+        "inference_compute_contract": "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF",
+        "cuda_required": true,
+        "cuda_bf16_required": true,
+        "tf32_allowed": false,
+        "model_release_admission_owner": "PLATFORM_MODEL_REQUIREMENTS",
+        "research_execution_model_channels": ["RESEARCH", "CANDIDATE"],
+        "product_execution_model_channels": ["PRODUCTION"],
+        "operational_model_state_embedded_in_source": false,
+        "historical_checkpoint_backed_mira_v55_exists": true,
+        "historical_mira_v55_learned_directly_on_exact_m": true,
+        "historical_mira_v55_terminal_pass": true,
+        "historical_mira_v55_composite_schema": "RealSaS.MIRAMDirectComposite.v5_5",
+        "historical_mira_v55_result_schema": "RealSaS.MIRAMDirectResult.v5_5",
+        "historical_mira_v55_product_authority": false,
+        "historical_mira_v55_generalization_claimed": false,
+        "historical_mira_v55_compute_profile_preserved": true,
+        "current_repo_mira_v55_runtime_source_recovered": true,
+        "current_mira_v55_runtime_package_recovered": true,
+        "canonical_parents": ["CANONICAL_MESH", "CANONICAL_RIG"],
+        "post_hoc_surface_skin_transfer_allowed": false,
+        "hidden_repair_allowed": false,
+        "fit_allowed_during_product_execution": false,
+        "implementation_owner_may_change": true,
+        "stable_product_role_survives_rewiring": true
+      }
     }
   }
 }

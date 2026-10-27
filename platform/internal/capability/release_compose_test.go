@@ -19,6 +19,7 @@ func meshReleaseTestGraph(t *testing.T) *stagegraph.Graph {
 		{"05_CAMERA_CONTRACT_SOLVED", "observation"},
 		{"07_OBSERVATION_CONTRACT_QUALIFIED", "observation"},
 		{"08_NORMALIZATION_DOMAIN_QUALIFIED", "geometry"},
+		{"15_RIGGING_SURFACE_QUALIFIED", "geometry"},
 	}
 	stages := make([]stagegraph.Stage, 0, len(ids))
 	for index, row := range ids {
@@ -56,10 +57,12 @@ func TestBuildEngineReleaseRegistryIncludesCurrentProductClosure(t *testing.T) {
 		StageCapabilityID("05_CAMERA_CONTRACT_SOLVED"),
 		StageCapabilityID("07_OBSERVATION_CONTRACT_QUALIFIED"),
 		StageCapabilityID("08_NORMALIZATION_DOMAIN_QUALIFIED"),
+		StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED"),
 		ProductInputCapabilityID,
 		ProductShapeCapabilityID,
 		ProductMeshCapabilityID,
 		ProductRigCapabilityID,
+		ProductSkinCapabilityID,
 	} {
 		if _, ok := registry.Get(id); !ok {
 			t.Fatalf("release registry missing %s", id)
@@ -103,11 +106,33 @@ func TestBuildEngineReleaseRegistryIncludesCurrentProductClosure(t *testing.T) {
 	if resolved[len(resolved)-1].ID != ProductRigCapabilityID {
 		t.Fatalf("rig must resolve after all dependencies: %+v", resolved)
 	}
+
+	skinResolved, err := registry.Resolve(ProductSkinCapabilityID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	skinSeen := map[string]bool{}
+	for _, descriptor := range skinResolved {
+		skinSeen[descriptor.ID] = true
+	}
+	for _, id := range []string{
+		ProductMeshCapabilityID,
+		ProductRigCapabilityID,
+		StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED"),
+		ProductSkinCapabilityID,
+	} {
+		if !skinSeen[id] {
+			t.Fatalf("skin resolution missing %s: %+v", id, skinResolved)
+		}
+	}
+	if skinResolved[len(skinResolved)-1].ID != ProductSkinCapabilityID {
+		t.Fatalf("skin must resolve after all dependencies: %+v", skinResolved)
+	}
 }
 
 func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	providers := ProductProviders()
-	if len(providers) != 4 {
+	if len(providers) != 5 {
 		t.Fatalf("product provider count=%d", len(providers))
 	}
 	registry := productProvidersTestRegistry(t)
@@ -172,6 +197,17 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	if rig.Metadata["frame_observability_claimed"] != false {
 		t.Fatalf("rig prematurely claims post-bind observability: %+v", rig.Metadata)
 	}
+
+	skin, ok := registry.Get(ProductSkinCapabilityID)
+	if !ok {
+		t.Fatal("product.skin missing")
+	}
+	if skin.Metadata["mesh_and_rig_are_canonical_parents"] != true {
+		t.Fatalf("skin canonical parent metadata=%+v", skin.Metadata)
+	}
+	if skin.Metadata["operational_model_state_embedded_in_source"] != false {
+		t.Fatalf("skin source metadata leaked live model state=%+v", skin.Metadata)
+	}
 }
 
 func TestModuleVersionPolicyAndParametersAreMintedFromDescriptor(t *testing.T) {
@@ -181,6 +217,7 @@ func TestModuleVersionPolicyAndParametersAreMintedFromDescriptor(t *testing.T) {
 		ProductShapeCapabilityID,
 		ProductMeshCapabilityID,
 		ProductRigCapabilityID,
+		ProductSkinCapabilityID,
 	} {
 		descriptor, ok := registry.Get(capabilityID)
 		if !ok {

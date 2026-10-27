@@ -2,7 +2,7 @@
   "schema": "RealSaS.KnightSkinReadinessInspectorTrigger.v1",
   "operation": "KNIGHT_SKIN_READINESS_INSPECT",
   "enabled": true,
-  "request_revision": 2,
+  "request_revision": 3,
   "authority": "READ_ONLY_DIAGNOSTIC__NO_QUALIFICATION_NO_MODEL_PROMOTION_NO_PRODUCT_SKIN_ACTIVATION",
-  "notes": "Read-only refresh after Truth Foundry V1 source deployment: verify exact current Knight typed Skin parents and MIRA model/channel state. Preserve exact-main deployment guard. No import, inference, qualification, promotion, activation or ProductRevision creation."
+  "notes": "Read-only refresh after modern product.skin Mesh+Rig parent closure deployment: verify exact current Knight typed Skin parents and MIRA model/channel state on exact main. Preserve exact-main deployment guard. No import, inference, qualification, promotion, activation or ProductRevision creation."
 }

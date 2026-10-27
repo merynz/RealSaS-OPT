@@ -1,0 +1,53 @@
+name: read-only-model-inventory-v1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/ops/inspect_model_inventory_v1.py'
+      - '.github/workflows/read_only_model_inventory_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: read-only-model-inventory-v1
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 5
+    env:
+      OUTPUT: ${{ runner.temp }}/realsas-model-inventory-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Require exact current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"
+
+      - name: Inspect live model releases and channels read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUTPUT"
+          python3 tools/ops/inspect_model_inventory_v1.py \
+            --expected-main-sha "$GITHUB_SHA" \
+            --out "$OUTPUT/model_inventory.json"
+
+      - name: Preserve read-only inventory receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: read-only-model-inventory-${{ github.run_id }}
+          path: ${{ env.OUTPUT }}/
+          if-no-files-found: error
+          retention-days: 14

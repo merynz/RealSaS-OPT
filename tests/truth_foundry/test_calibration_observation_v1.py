@@ -4,11 +4,29 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from tools.truth_foundry.observe_calibration_v1 import STAGE, export_member, observe
+from tools.truth_foundry.observe_calibration_v1 import STAGE, export_member, export_diagnostics, observe
 from tools.truth_foundry.audit_native_teacher_bytes_v1 import sha256
 
 
 class CalibrationObservationTests(unittest.TestCase):
+    def test_failed_measurement_preserves_exact_run_ledger_and_blender_log(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);run=root/'run';stage=run/'artifacts'/STAGE;stage.mkdir(parents=True)
+            ledger=run/'ACTIVE_RUN_V2.json';ledger.write_text('{"status":"FAIL"}')
+            manifest=run/'run_manifest.json';manifest.write_text('{}')
+            (stage/'bound-job.blender.log').write_text('Traceback: measured producer error')
+            bootstrap=root/'BOOTSTRAP.json';bootstrap.write_text(json.dumps({'run_bindings':[{
+                'subject_id':'subject','run_ledger_path':str(ledger),'run_manifest_path':str(manifest)}]}))
+            prep={'bootstrap_receipt':{'path':str(bootstrap),'sha256':sha256(bootstrap)},
+                  'members':[{'subject_id':'subject','attempt_id':'attempt','role':'COHORT'}]}
+            result=export_diagnostics(prep,root/'export')
+            self.assertEqual(len(result[0]['files']),3)
+            self.assertEqual((root/'export/attempt/diagnostics/bound-job.blender.log').read_text(),
+                             'Traceback: measured producer error')
+            bootstrap.write_text('{}')
+            with self.assertRaisesRegex(ValueError,'BOOTSTRAP_BYTES_DRIFT'):
+                export_diagnostics(prep,root/'export')
+
     def fixture(self,root):
         member={'subject_id':'subject','attempt_id':'original-attempt','role':'COHORT'}
         payload=root/'payload';payload.write_bytes(b'raw measured array bytes')

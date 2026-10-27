@@ -39,6 +39,36 @@ def verified_cas(root,ref):
     return path
 
 
+def export_diagnostics(preparation,output):
+    """Read exact bootstrap-bound ledgers and bounded Stage47 logs, no execution."""
+    ref=preparation.get('bootstrap_receipt')
+    if ref is None:return []
+    bootstrap=Path(ref['path']).resolve()
+    require(bootstrap.is_file() and sha256(bootstrap)==ref['sha256'],'TRUTH_OBSERVE_BOOTSTRAP_BYTES_DRIFT')
+    bindings=json.loads(bootstrap.read_text())['run_bindings']
+    members={r['subject_id']:r for r in preparation['members']}
+    require({r['subject_id'] for r in bindings}==set(members),'TRUTH_OBSERVE_BOOTSTRAP_SUBJECT_DRIFT')
+    results=[]
+    for binding in bindings:
+        member=members[binding['subject_id']];ledger=Path(binding['run_ledger_path']).resolve()
+        target=Path(output)/member['attempt_id']/'diagnostics';target.mkdir(parents=True,exist_ok=True)
+        row={'attempt_id':member['attempt_id'],'files':[],'missing':[]}
+        sources=[ledger,Path(binding['run_manifest_path']).resolve()]
+        stage=ledger.parent/'artifacts'/STAGE
+        if stage.is_dir():
+            candidates=sorted(p for p in stage.iterdir() if p.name.endswith(('.blender.log','.job.json')))
+            require(len(candidates)<=32,'TRUTH_OBSERVE_DIAGNOSTIC_FILE_COUNT_EXCEEDED')
+            sources.extend(candidates)
+        for source in sources:
+            if not source.is_file():row['missing'].append(str(source));continue
+            require(source.stat().st_size<=8*1024*1024,'TRUTH_OBSERVE_DIAGNOSTIC_FILE_TOO_LARGE')
+            destination=target/source.name
+            shutil.copyfile(source,destination)
+            row['files'].append({'path':str(destination),'sha256':sha256(destination),'size_bytes':destination.stat().st_size})
+        results.append(row)
+    return results
+
+
 def export_member(member, *, api_root, artifact_root, output):
     # Select the exact attempt binding, never a latest-subject artifact alias.
     records=api(api_root,'GET',f"/v1/subjects/{member['subject_id']}/artifacts?artifact_type=RealSaS.StageResultManifest&schema_version=v1&limit=500")
@@ -98,9 +128,11 @@ def observe(preparation, *, api_root, artifact_root, output, maximum_seconds=900
         complete=len(exports)==len(initial)
         elapsed=time.monotonic()-started
         stop=complete or bool(errors) or any(s['state'] in TERMINAL for s in states) or elapsed>=maximum_seconds
+        diagnostics=export_diagnostics(preparation,output) if stop else []
         result={'schema':'RealSaS.TeacherCalibrationObservation.v1','campaign_id':preparation['campaign_id'],
                 'experiment_id':preparation['experiment_id'],'source_code_sha':preparation['source_code_sha'],
                 'campaign':campaign,'attempts':states,'exports':list(exports.values()),'errors':errors,
+                'bound_run_diagnostics':diagnostics,
                 'all_measurements_committed_and_exported':complete,'observation_elapsed_seconds':elapsed,
                 'observation_timed_out':not complete and not errors and elapsed>=maximum_seconds,
                 'execution_resubmitted':False,'training_submitted':False,'truth_qualification_inferred':False}
@@ -114,7 +146,8 @@ if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     for name in ('preparation','artifact-root','output'):p.add_argument('--'+name,required=True)
     p.add_argument('--api-root',default='http://127.0.0.1:8080');p.add_argument('--maximum-seconds',type=float,default=900)
+    p.add_argument('--read-only-result',action='store_true',help='Return observation even when the original measurement failed')
     a=p.parse_args();result=observe(json.loads(Path(a.preparation).read_text()),api_root=a.api_root,
         artifact_root=a.artifact_root,output=a.output,maximum_seconds=a.maximum_seconds)
-    if not result['all_measurements_committed_and_exported']:
+    if not result['all_measurements_committed_and_exported'] and not a.read_only_result:
         raise SystemExit('TRUTH_CALIBRATION_NOT_YET_EXPORTED__ORIGINAL_PLATFORM_CAMPAIGN_PRESERVED')

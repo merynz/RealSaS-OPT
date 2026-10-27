@@ -53,13 +53,13 @@ func TestRequiredModelFamiliesAreDerivedFromActiveTerrain(t *testing.T) {
 	}
 }
 
-func TestRequiredModelFamiliesIncludeAxisWhenRigIsActive(t *testing.T) {
+func TestRequiredModelFamiliesIncludeAxisAndMiraForFullCatalog(t *testing.T) {
 	registry := productProvidersTestRegistry(t)
 	families, err := RequiredModelFamilies(registry)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := []string{"AXIS", "IRIS", "TESSA"}; !reflect.DeepEqual(families, want) {
+	if want := []string{"AXIS", "IRIS", "MIRA", "TESSA"}; !reflect.DeepEqual(families, want) {
 		t.Fatalf("families=%v want=%v", families, want)
 	}
 	terrain, err := ResponsibilityTerrain(registry)
@@ -73,6 +73,10 @@ func TestRequiredModelFamiliesIncludeAxisWhenRigIsActive(t *testing.T) {
 	axis := byID["rig.structure_proposal"]
 	if axis.RoleID != ProductRoleRig || axis.ModelFamily != "AXIS" || axis.AuthorityKind != "PROPOSAL" {
 		t.Fatalf("axis terrain=%+v", axis)
+	}
+	mira := byID["skin.influence_proposal"]
+	if mira.RoleID != ProductRoleSkin || mira.ModelFamily != "MIRA" || mira.AuthorityKind != "PROPOSAL" {
+		t.Fatalf("mira terrain=%+v", mira)
 	}
 	if _, ok := byID["rig.frame_observability_qualification"]; ok {
 		t.Fatal("post-bind frame observability still appears as a Rig responsibility")

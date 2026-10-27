@@ -1,0 +1,126 @@
+name: appearance-renderer-inventory-fit8-v1
+on:
+  pull_request:
+    paths:
+      - 'tools/truth_foundry/blender_source_raster_inventory_v1.py'
+      - '.github/workflows/appearance_renderer_inventory_fit8_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: appearance-renderer-inventory-fit8-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  authority-court:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      BLENDER: /home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
+      CALIBRATION_ROOT: /home/monster/realsas_authority/truth_calibration_preparation/40480940440-1
+      CALIBRATION_PREPARATION_SHA256: 060e19bd46766ed65e7a3bfc31ba193210dfb508a93cc2abcb6b1843eb356f42
+      COURT_ROOT: /home/monster/realsas_authority/appearance_renderer_inventory_fit8_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify repaired calibration authority boundary
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['CALIBRATION_ROOT'])
+          preparation=root/'PREPARATION.json'; observation=root/'evidence'/'OBSERVATION.json'
+          if not preparation.is_file() or not observation.is_file(): raise SystemExit('APPEARANCE_INVENTORY_AUTHORITY_INPUT_MISSING')
+          if hashlib.sha256(preparation.read_bytes()).hexdigest()!=os.environ['CALIBRATION_PREPARATION_SHA256']:
+              raise SystemExit('APPEARANCE_INVENTORY_PREPARATION_HASH_DRIFT')
+          obs=json.loads(observation.read_text())
+          if obs.get('all_measurements_committed_and_exported') is not True: raise SystemExit('APPEARANCE_INVENTORY_CALIBRATION_NOT_CLOSED')
+          if obs.get('training_submitted') is not False or obs.get('truth_qualification_inferred') is not False:
+              raise SystemExit('APPEARANCE_INVENTORY_AUTHORITY_DRIFT')
+          scenes=sorted(root.rglob('TEACHER_SCENE.json'))
+          if len(scenes)!=8: raise SystemExit(f'APPEARANCE_INVENTORY_EXPECTED_FIT8:{len(scenes)}')
+          print('APPEARANCE_INVENTORY_INPUTS=PASS subjects=8')
+          PY
+
+      - name: Inspect exact packed source evaluator scenes without rendering
+        run: |
+          set -euo pipefail
+          mkdir -p "$COURT_ROOT/subjects"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os,subprocess
+          from pathlib import Path
+          root=Path(os.environ['CALIBRATION_ROOT']); out=Path(os.environ['COURT_ROOT'])/'subjects'
+          blender=os.environ['BLENDER']
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for block in iter(lambda:f.read(8*1024*1024),b''): h.update(block)
+              return h.hexdigest()
+          for i,scene_path in enumerate(sorted(root.rglob('TEACHER_SCENE.json')),1):
+              scene=json.loads(scene_path.read_text()); sid=str(scene['subject_key'])
+              refs={Path(str(r['path'])).name:r for r in scene.get('appearance_payloads') or ()}
+              if set(refs)!={'appearance.json','image_pixels.npz','source_scene.blend'}:
+                  raise RuntimeError('APPEARANCE_INVENTORY_PAYLOAD_SET:'+sid)
+              appearance=Path(refs['appearance.json']['path']).resolve(); blend=Path(refs['source_scene.blend']['path']).resolve()
+              for name,path in [('appearance',appearance),('blend',blend)]:
+                  if not path.is_file() or sha(path)!=refs[path.name]['sha256']:
+                      raise RuntimeError('APPEARANCE_INVENTORY_PAYLOAD_DRIFT:'+sid+':'+name)
+              target=out/f'{sid}.renderer.json'
+              print(f'[APPEARANCE_INVENTORY] {i}/8 {sid}',flush=True)
+              subprocess.run([
+                  blender,'-b',str(blend),'--python-exit-code','2',
+                  '--python','tools/truth_foundry/blender_source_raster_inventory_v1.py','--',
+                  '--subject-id',sid,'--teacher-scene',str(scene_path),'--appearance',str(appearance),
+                  '--expected-blend-sha256',refs['source_scene.blend']['sha256'],'--output',str(target),
+              ],check=True)
+              if not target.is_file(): raise RuntimeError('APPEARANCE_INVENTORY_RECEIPT_MISSING:'+sid)
+          PY
+
+      - name: Aggregate capability inventory and preserve unqualified boundary
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json,os
+          from collections import Counter
+          from pathlib import Path
+          root=Path(os.environ['COURT_ROOT']); rows=[json.loads(p.read_text()) for p in sorted((root/'subjects').glob('*.renderer.json'))]
+          if len(rows)!=8: raise SystemExit('APPEARANCE_INVENTORY_SUBJECT_COUNT')
+          for row in rows:
+              for key in ('render_executed','material_graph_mutated','qualification_minted','student_target_allowed','training_allowed'):
+                  if row.get(key) is not False: raise SystemExit('APPEARANCE_INVENTORY_AUTHORITY_LEAK:'+key)
+          node=Counter(t for row in rows for t in row['material_node_types'])
+          methods=Counter(m for row in rows for m in row['surface_render_methods'])
+          spaces=Counter(img['colour_space'] for row in rows for img in row['images'])
+          alpha=Counter(img['alpha_mode'] for row in rows for img in row['images'])
+          result={
+              'schema':'RealSaS.SourceRasterRendererInventoryCourt.v1','subject_count':8,
+              'material_count':sum(r['material_count'] for r in rows),'image_count':sum(r['image_count'] for r in rows),
+              'node_type_subject_occurrences':dict(sorted(node.items())),
+              'surface_render_method_subject_occurrences':dict(sorted(methods.items())),
+              'image_colour_space_occurrences':dict(sorted(spaces.items())),
+              'image_alpha_mode_occurrences':dict(sorted(alpha.items())),
+              'render_executed':False,'sampler_qualified':False,'qualification_minted':False,
+              'student_target_allowed':False,'training_allowed':False,
+              'court_status':'PASS_RENDERER_CAPABILITY_INVENTORY_ONLY','subjects':rows,
+          }
+          (root/'APPEARANCE_RENDERER_INVENTORY_FIT8_V1.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          print(json.dumps({k:v for k,v in result.items() if k!='subjects'},sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: appearance-renderer-inventory-fit8-v1-${{ github.run_id }}
+          path: |
+            ${{ env.COURT_ROOT }}/APPEARANCE_RENDERER_INVENTORY_FIT8_V1.json
+            ${{ env.COURT_ROOT }}/subjects/*.renderer.json
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

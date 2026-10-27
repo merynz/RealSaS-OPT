@@ -60,18 +60,20 @@ func TestBuildEngineReleaseRegistryIncludesCurrentProductClosure(t *testing.T) {
 		ProductShapeCapabilityID,
 		ProductMeshCapabilityID,
 		ProductRigCapabilityID,
+		ProductSkinCapabilityID,
 	} {
 		if _, ok := registry.Get(id); !ok {
 			t.Fatalf("release registry missing %s", id)
 		}
 	}
-	resolved, err := registry.Resolve(ProductRigCapabilityID)
+
+	rigResolved, err := registry.Resolve(ProductRigCapabilityID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	seen := map[string]bool{}
-	for _, descriptor := range resolved {
-		seen[descriptor.ID] = true
+	rigSeen := map[string]bool{}
+	for _, descriptor := range rigResolved {
+		rigSeen[descriptor.ID] = true
 	}
 	for _, id := range []string{
 		ProductInputCapabilityID,
@@ -82,8 +84,34 @@ func TestBuildEngineReleaseRegistryIncludesCurrentProductClosure(t *testing.T) {
 		ProductMeshCapabilityID,
 		ProductRigCapabilityID,
 	} {
-		if !seen[id] {
-			t.Fatalf("rig resolution missing %s: %+v", id, resolved)
+		if !rigSeen[id] {
+			t.Fatalf("rig resolution missing %s: %+v", id, rigResolved)
+		}
+	}
+	if rigSeen[ProductSkinCapabilityID] {
+		t.Fatal("target-scoped Rig closure must not include downstream Skin")
+	}
+
+	skinResolved, err := registry.Resolve(ProductSkinCapabilityID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	skinSeen := map[string]bool{}
+	for _, descriptor := range skinResolved {
+		skinSeen[descriptor.ID] = true
+	}
+	for _, id := range []string{
+		ProductInputCapabilityID,
+		ProductShapeCapabilityID,
+		StageCapabilityID("05_CAMERA_CONTRACT_SOLVED"),
+		StageCapabilityID("07_OBSERVATION_CONTRACT_QUALIFIED"),
+		StageCapabilityID("08_NORMALIZATION_DOMAIN_QUALIFIED"),
+		ProductMeshCapabilityID,
+		ProductRigCapabilityID,
+		ProductSkinCapabilityID,
+	} {
+		if !skinSeen[id] {
+			t.Fatalf("skin resolution missing %s: %+v", id, skinResolved)
 		}
 	}
 	for _, forbidden := range []string{
@@ -96,18 +124,18 @@ func TestBuildEngineReleaseRegistryIncludesCurrentProductClosure(t *testing.T) {
 		"15_RIGGING_SURFACE_QUALIFIED",
 		"17_MECHANICAL_PARTITION_QUALIFIED",
 	} {
-		if seen[StageCapabilityID(forbidden)] {
-			t.Fatalf("legacy fit-era stage leaked into product.rig closure: %s", forbidden)
+		if skinSeen[StageCapabilityID(forbidden)] {
+			t.Fatalf("legacy fit-era stage leaked into product.skin closure: %s", forbidden)
 		}
 	}
-	if resolved[len(resolved)-1].ID != ProductRigCapabilityID {
-		t.Fatalf("rig must resolve after all dependencies: %+v", resolved)
+	if skinResolved[len(skinResolved)-1].ID != ProductSkinCapabilityID {
+		t.Fatalf("skin must resolve after all dependencies: %+v", skinResolved)
 	}
 }
 
 func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	providers := ProductProviders()
-	if len(providers) != 4 {
+	if len(providers) != 5 {
 		t.Fatalf("product provider count=%d", len(providers))
 	}
 	registry := productProvidersTestRegistry(t)
@@ -144,7 +172,7 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 			if strings.Contains(dependency, forbidden) {
 				t.Fatalf("legacy derived-stage dependency leaked into product.mesh: %s", dependency)
 			}
-		}
+	}
 	}
 	if mesh.Metadata["fit_allowed_during_product_execution"] != false || mesh.Metadata["legacy_ir_fit_stage_dependency"] != false {
 		t.Fatalf("mesh fit policy drift=%+v", mesh.Metadata)
@@ -172,6 +200,26 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	if rig.Metadata["frame_observability_claimed"] != false {
 		t.Fatalf("rig prematurely claims post-bind observability: %+v", rig.Metadata)
 	}
+
+	skin, ok := registry.Get(ProductSkinCapabilityID)
+	if !ok {
+		t.Fatal("product.skin missing")
+	}
+	if len(skin.Dependencies) != 2 || skin.Dependencies[0] != ProductMeshCapabilityID || skin.Dependencies[1] != ProductRigCapabilityID {
+		t.Fatalf("skin descriptor=%+v", skin)
+	}
+	if skin.Metadata["feature_evidence_source"] != "PRODUCT_MESH_OUTPUT" || skin.Metadata["material_support_source"] != "PRODUCT_MESH_OUTPUT" {
+		t.Fatalf("skin Mesh evidence sources drift=%+v", skin.Metadata)
+	}
+	if skin.Metadata["legacy_stage15_dependency"] != false {
+		t.Fatalf("skin legacy Stage15 dependency drift=%+v", skin.Metadata)
+	}
+	if skin.Metadata["mesh_and_rig_are_canonical_parents"] != true {
+		t.Fatalf("skin canonical parent metadata=%+v", skin.Metadata)
+	}
+	if skin.Metadata["feature_evidence_is_canonical_parent"] != false || skin.Metadata["material_support_is_canonical_parent"] != false {
+		t.Fatalf("skin feature evidence became canonical parent: %+v", skin.Metadata)
+	}
 }
 
 func TestModuleVersionPolicyAndParametersAreMintedFromDescriptor(t *testing.T) {
@@ -181,6 +229,7 @@ func TestModuleVersionPolicyAndParametersAreMintedFromDescriptor(t *testing.T) {
 		ProductShapeCapabilityID,
 		ProductMeshCapabilityID,
 		ProductRigCapabilityID,
+		ProductSkinCapabilityID,
 	} {
 		descriptor, ok := registry.Get(capabilityID)
 		if !ok {

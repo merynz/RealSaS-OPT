@@ -7,12 +7,14 @@ const (
 	ProductSkinContractV1   = "RealSaS.ProductSkinInference.v1"
 )
 
-// ProductSkinProvider defines the stable Skin product boundary without making it
-// an active release provider yet. Canonical parents are Mesh + Rig. Current MIRA
-// V5.5 additionally consumes RiggingSurface and TESSA material-support evidence;
-// neither is a canonical Skin parent and both remain replaceable feature inputs.
-// MIRA proposes carrier-native influences; Compiler qualifies exact bindings and
-// simplex legality, then mints CanonicalSkinIR.
+// ProductSkinProvider defines the stable first-class Skin product boundary.
+// Catalog/release admission describes executable contract availability; live
+// ModelRelease/channel readiness remains Platform state and is enforced when a
+// target closure actually consumes MIRA. Canonical parents are Mesh + Rig.
+// Current MIRA V5.5 additionally consumes RiggingSurface and TESSA
+// material-support evidence; neither is a canonical Skin parent and both remain
+// replaceable feature inputs. MIRA proposes carrier-native influences; Compiler
+// qualifies exact bindings and simplex legality, then mints CanonicalSkinIR.
 type ProductSkinProvider struct{}
 
 func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {

@@ -70,17 +70,23 @@ jobs:
           request=json.loads(Path('canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json').read_text())
           for index,subject in enumerate(request['subjects'],1):
               sid=subject['subject_id']
+              target=out/f'{sid}.timebase.json'
+              if target.exists():target.unlink()
               print(f'[TEMPORAL_TIMEBASE] {index}/{len(request["subjects"])} {sid}',flush=True)
               cmd=[
-                  blender,'-b','--factory-startup',
+                  blender,'-b','--factory-startup','--python-exit-code','2',
                   '--python','tools/truth_foundry/blender_native_timebase_probe_v1.py','--',
                   '--source',str(root/subject['source']['relative']),
                   '--expected-source-sha256',subject['source']['sha256'],
                   '--subject-id',sid,
                   '--observation-admission',str(root/subject['observation_admission']['relative']),
-                  '--output',str(out/f'{sid}.timebase.json'),
+                  '--teacher-receipt',str(root/subject['expected_receipt']['relative']),
+                  '--expected-teacher-receipt-sha256',subject['expected_receipt']['sha256'],
+                  '--output',str(target),
               ]
               subprocess.run(cmd,check=True)
+              if not target.is_file():
+                  raise RuntimeError('TEMPORAL_TIMEBASE_PROBE_NO_RECEIPT:'+sid)
           PY
 
       - name: Bind sealed posed samples to exact timestamps

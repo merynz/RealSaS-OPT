@@ -31,6 +31,7 @@ func TestResolvedProductModelRequirementsFollowResolvedClosure(t *testing.T) {
 	shape := providerDescriptor(t, ProductShapeProvider{})
 	mesh := providerDescriptor(t, ProductMeshProvider{})
 	rig := providerDescriptor(t, ProductRigProvider{})
+	skin := providerDescriptor(t, ProductSkinProvider{})
 
 	rows, err := ResolvedProductModelRequirements([]Descriptor{input})
 	if err != nil {
@@ -54,5 +55,13 @@ func TestResolvedProductModelRequirementsFollowResolvedClosure(t *testing.T) {
 	}
 	if got, want := requirementFamilies(rows), []string{"AXIS", "IRIS", "TESSA"}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("rig requirements=%v want=%v", got, want)
+	}
+
+	rows, err = ResolvedProductModelRequirements([]Descriptor{input, shape, mesh, rig, skin})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := requirementFamilies(rows), []string{"AXIS", "IRIS", "MIRA", "TESSA"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("skin requirements=%v want=%v", got, want)
 	}
 }

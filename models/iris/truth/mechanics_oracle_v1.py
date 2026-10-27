@@ -113,8 +113,13 @@ def _validate_geometry(rest_vertices, faces, query: SurfacePairQueryV1):
     return rest, tri.astype(np.int64, copy=False)
 
 
-def _surface_rigid_frames(positions: np.ndarray, face: np.ndarray, *, degeneracy_tolerance: float):
+def _surface_rigid_frames(positions: np.ndarray, face: np.ndarray, *, area_tolerance: float):
     """Return [sample,4,4] centroid+tangent frames and a validity mask.
+
+    ``area_tolerance`` is in doubled-area source units, matching
+    ``triangle_metric_strain``. Edge validity therefore uses its square root;
+    the tangent-basis orthogonality check is dimensionless. This avoids mixing
+    length and area thresholds.
 
     The orthonormal frame is used only for relative rigid transport. Metric
     deformation is measured independently by ``triangle_metric_strain`` so this
@@ -126,7 +131,8 @@ def _surface_rigid_frames(positions: np.ndarray, face: np.ndarray, *, degeneracy
     normal = np.cross(edge, p[:, 2] - p[:, 0])
     edge_norm = np.linalg.norm(edge, axis=1)
     normal_norm = np.linalg.norm(normal, axis=1)
-    valid = (edge_norm > degeneracy_tolerance) & (normal_norm > degeneracy_tolerance)
+    edge_tolerance = float(np.sqrt(area_tolerance))
+    valid = (edge_norm > edge_tolerance) & (normal_norm > area_tolerance)
 
     frames = np.full((len(p), 4, 4), np.nan, dtype=np.float64)
     frames[:, 3, 3] = 1.0
@@ -139,7 +145,7 @@ def _surface_rigid_frames(positions: np.ndarray, face: np.ndarray, *, degeneracy
     z[valid] = normal[valid] / normal_norm[valid, None]
     y = np.cross(z, x)
     y_norm = np.linalg.norm(y, axis=1)
-    valid &= np.isfinite(y_norm) & (y_norm > degeneracy_tolerance)
+    valid &= np.isfinite(y_norm) & (y_norm > 1.0e-12)
     y[valid] /= y_norm[valid, None]
     # Re-orthogonalize x after y normalization; orientation is deterministic
     # from the authored face winding and first edge.
@@ -208,8 +214,8 @@ def _measure_split(
     # Baseline is prepended only to construct the reference frame. It is not an
     # intervention and is never averaged into a statistic.
     samples = np.concatenate((rest[None, ...], pos), axis=0)
-    frame_a, valid_a = _surface_rigid_frames(samples, faces[query.face_a], degeneracy_tolerance=degeneracy_tolerance)
-    frame_b, valid_b = _surface_rigid_frames(samples, faces[query.face_b], degeneracy_tolerance=degeneracy_tolerance)
+    frame_a, valid_a = _surface_rigid_frames(samples, faces[query.face_a], area_tolerance=degeneracy_tolerance)
+    frame_b, valid_b = _surface_rigid_frames(samples, faces[query.face_b], area_tolerance=degeneracy_tolerance)
     frame_valid = valid_a & valid_b
     if not frame_valid[0] or not np.all(frame_valid[1:]):
         return RelativeTransportSplitEvidenceV1(
@@ -281,6 +287,9 @@ def measure_relative_transport_v1(
     policy: RelativeTransportPolicyV1 | None = None,
 ) -> RelativeTransportEvidenceV1:
     """Measure finite-intervention relative transport with a held-out court.
+
+    ``degeneracy_tolerance`` is an explicit positive doubled-area tolerance in
+    source units, matching ``triangle_metric_strain``.
 
     No action weights, control names, bone ids, source weights or owner labels are
     accepted by this API. Privileged metadata may be used by an outer audit to

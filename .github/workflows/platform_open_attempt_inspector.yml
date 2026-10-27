@@ -44,11 +44,25 @@ jobs:
             "SELECT json_build_object(
                'attempt_id', a.id,
                'subject_id', a.subject_id,
+               'subject_slug', s.slug,
+               'subject_display_name', s.display_name,
                'kind', a.kind,
                'engine_release_id', a.engine_release_id,
                'parent_attempt_id', a.parent_attempt_id,
                'created_by', a.created_by,
                'created_at', a.created_at,
+               'campaign', CASE WHEN rcm.attempt_id IS NULL THEN NULL ELSE json_build_object(
+                 'campaign_id', rc.id,
+                 'campaign_name', rc.name,
+                 'member_role', rcm.member_role,
+                 'ordinal', rcm.ordinal,
+                 'target_stage_id', rc.target_stage_id,
+                 'candidate_engine_release_id', rc.candidate_engine_release_id,
+                 'canonical_code_sha', rc.canonical_code_sha,
+                 'state', rc.state,
+                 'created_by', rc.created_by,
+                 'created_at', rc.created_at
+               ) END,
                'latest_event', (
                  SELECT json_build_object(
                    'type', e.event_type,
@@ -62,6 +76,9 @@ jobs:
                )
              )::text
              FROM attempts a
+             JOIN subjects s ON s.id = a.subject_id
+             LEFT JOIN research_campaign_members rcm ON rcm.attempt_id = a.id
+             LEFT JOIN research_campaigns rc ON rc.id = rcm.campaign_id
              WHERE a.final_state = 'OPEN'
              ORDER BY a.created_at, a.id" > "$output"
           count="$(grep -cve '^$' "$output" || true)"
@@ -78,7 +95,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           mkdir -p "$RUNNER_TEMP/open-attempt-inspector"
           cp "$output" "$RUNNER_TEMP/open-attempt-inspector/OPEN_ATTEMPTS.jsonl"
-          printf '{"schema":"RealSaS.OpenAttemptInspection.v1","canonical_main_sha":"%s","open_attempt_count":%s,"read_only":true}\n' \
+          printf '{"schema":"RealSaS.OpenAttemptInspection.v2","canonical_main_sha":"%s","open_attempt_count":%s,"read_only":true,"campaign_lineage_included":true}\n' \
             "$GITHUB_SHA" "$count" > "$RUNNER_TEMP/open-attempt-inspector/INSPECTION.json"
 
       - name: Preserve read-only inspection

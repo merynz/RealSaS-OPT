@@ -95,8 +95,10 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert skin["policy"]["dependencies"] == [
         "product.mesh",
         "product.rig",
-        "compiler.stage/15_RIGGING_SURFACE_QUALIFIED",
     ]
+    assert skin["parameters"]["feature_evidence_source"] == "PRODUCT_MESH_OUTPUT"
+    assert skin["parameters"]["material_support_source"] == "PRODUCT_MESH_OUTPUT"
+    assert skin["parameters"]["legacy_stage15_dependency"] is False
     assert skin["parameters"]["required_models"] == [
         {
             "family": "MIRA",

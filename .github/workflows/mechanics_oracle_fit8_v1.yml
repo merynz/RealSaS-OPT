@@ -3,8 +3,10 @@ on:
   pull_request:
     paths:
       - 'models/iris/truth/mechanics_oracle_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_attachment_evidence_gate_v1.py'
       - 'tools/truth_foundry/audit_mechanics_oracle_v1.py'
       - 'tests/truth_foundry/test_mechanics_oracle_v1.py'
+      - 'tests/truth_foundry/test_mechanics_attachment_evidence_gate_v1.py'
       - '.github/workflows/mechanics_oracle_fit8_v1.yml'
   workflow_dispatch:
 permissions:
@@ -69,9 +71,11 @@ jobs:
                       archive.write(path, path.relative_to(source).as_posix())
           print(f'MECHANICS_ORACLE_EPHEMERAL_ARCHIVE={target}')
           PY
-      - name: Run synthetic mechanics regressions
+      - name: Run Mechanics evidence and fixed-consumer regressions
         run: |
-          /home/monster/realsas_platform/current/bin/realsas-python -m pytest -q tests/truth_foundry/test_mechanics_oracle_v1.py
+          /home/monster/realsas_platform/current/bin/realsas-python -m pytest -q \
+            tests/truth_foundry/test_mechanics_oracle_v1.py \
+            tests/truth_foundry/test_mechanics_attachment_evidence_gate_v1.py
       - name: Run repaired FIT8 teacher-oracle court
         run: |
           /home/monster/realsas_platform/current/bin/realsas-python tools/truth_foundry/audit_mechanics_oracle_v1.py \

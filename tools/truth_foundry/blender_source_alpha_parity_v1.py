@@ -51,21 +51,46 @@ def _sha(path: Path) -> str:
     return h.hexdigest()
 
 
-def _render_alpha(camera, center, half: float, resolution: int) -> list[np.ndarray]:
+def _render_alpha(camera, center, half: float, resolution: int, scratch: Path, tag: str) -> list[np.ndarray]:
+    """Render through a materialized float EXR, not Blender's volatile Render Result.
+
+    The existing controlled renderer also materializes then reloads its raster.
+    Here we use 32-bit RGBA OpenEXR so the preregistered 1e-6 alpha tolerance is
+    not weakened by 8-bit PNG quantization.
+    """
+    scene = bpy.context.scene
+    scene.render.image_settings.file_format = "OPEN_EXR"
+    scene.render.image_settings.color_mode = "RGBA"
+    scene.render.image_settings.color_depth = "32"
+    scene.render.image_settings.exr_codec = "ZIP"
     distance = max(4.0 * half, 1.0)
     rows = []
-    for _index, yaw in enumerate(orbit.VIEW_YAW_DEG):
+    scratch.mkdir(parents=True, exist_ok=True)
+    for index, yaw in enumerate(orbit.VIEW_YAW_DEG):
         radial, forward, _right, _up = orbit.basis(yaw)
         camera.location = center + radial * distance
         camera.rotation_euler = forward.to_track_quat("-Z", "Y").to_euler()
         bpy.context.view_layer.update()
-        bpy.ops.render.render(write_still=False)
-        rendered = bpy.data.images.get("Render Result")
-        if rendered is None or tuple(rendered.size) != (resolution, resolution):
-            raise RuntimeError("SOURCE_ALPHA_PARITY_RENDER_RESULT_LAYOUT")
-        pixels = np.empty(resolution * resolution * 4, dtype=np.float32)
-        rendered.pixels.foreach_get(pixels)
-        alpha = pixels.reshape(resolution, resolution, 4)[:, :, 3].astype(np.float64, copy=True)
+        raster = scratch / f"{tag}_V{index}.exr"
+        if raster.exists():
+            raster.unlink()
+        scene.render.filepath = str(raster)
+        bpy.ops.render.render(write_still=True)
+        if not raster.is_file() or raster.stat().st_size <= 0:
+            raise RuntimeError("SOURCE_ALPHA_PARITY_EXR_MISSING")
+        rendered = bpy.data.images.load(str(raster), check_existing=False)
+        try:
+            actual_size = tuple(map(int, rendered.size))
+            if actual_size != (resolution, resolution):
+                raise RuntimeError(
+                    f"SOURCE_ALPHA_PARITY_EXR_LAYOUT:{actual_size[0]}x{actual_size[1]}"
+                )
+            pixels = np.empty(resolution * resolution * 4, dtype=np.float32)
+            rendered.pixels.foreach_get(pixels)
+            alpha = pixels.reshape(resolution, resolution, 4)[:, :, 3].astype(np.float64, copy=True)
+        finally:
+            bpy.data.images.remove(rendered)
+            raster.unlink(missing_ok=True)
         if not np.isfinite(alpha).all() or np.any((alpha < 0) | (alpha > 1)):
             raise RuntimeError("SOURCE_ALPHA_PARITY_RENDER_ALPHA_INVALID")
         rows.append(alpha)
@@ -99,9 +124,14 @@ def main() -> None:
     bpy.context.scene.collection.objects.link(camera)
     bpy.context.scene.camera = camera
 
-    native = _render_alpha(camera, center, half, a.resolution)
+    scratch = a.output.parent / (a.output.stem + ".scratch")
+    native = _render_alpha(camera, center, half, a.resolution, scratch, "native")
     transform_receipts = controlled.preserve_alpha_unlit(meshes)
-    transformed = _render_alpha(camera, center, half, a.resolution)
+    transformed = _render_alpha(camera, center, half, a.resolution, scratch, "unlit")
+    try:
+        scratch.rmdir()
+    except OSError:
+        pass
 
     views = []
     all_valid = True
@@ -128,6 +158,7 @@ def main() -> None:
             "film_transparent": True, "view_transform": "Standard", "look": "None",
             "exposure": 0.0, "gamma": 1.0, "resolution": a.resolution,
             "view_count": 8, "frame_scale": a.frame_scale,
+            "measurement_carrier": "OPEN_EXR_RGBA_FLOAT32_RELOAD",
         },
         "alpha_tolerance": float(a.tolerance),
         "material_transform_receipts": transform_receipts,

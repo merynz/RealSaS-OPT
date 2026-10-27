@@ -1,0 +1,89 @@
+name: mechanics-oracle-fit8-v1
+on:
+  pull_request:
+    paths:
+      - 'models/iris/truth/mechanics_oracle_v1.py'
+      - 'tools/truth_foundry/audit_mechanics_oracle_v1.py'
+      - 'tests/truth_foundry/test_mechanics_oracle_v1.py'
+      - '.github/workflows/mechanics_oracle_fit8_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mechanics-oracle-fit8-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  authority-court:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      AUTHORITY_PREPARATION: /home/monster/realsas_authority/truth_calibration_preparation/40480940440-1
+      COURT_ROOT: /home/monster/realsas_authority/mechanics_oracle_fit8_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Require repaired calibration authority bytes
+        run: |
+          /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ['AUTHORITY_PREPARATION'])
+          preparation = root / 'PREPARATION.json'
+          observation = root / 'evidence' / 'OBSERVATION.json'
+          if not preparation.is_file() or not observation.is_file():
+              raise SystemExit('MECHANICS_ORACLE_AUTHORITY_INPUT_MISSING')
+          digest = hashlib.sha256(preparation.read_bytes()).hexdigest()
+          if digest != '060e19bd46766ed65e7a3bfc31ba193210dfb508a93cc2abcb6b1843eb356f42':
+              raise SystemExit('MECHANICS_ORACLE_PREPARATION_BYTES_DRIFT')
+          value = json.loads(preparation.read_text())
+          if value.get('campaign_id') != 'ee6e4e66-a7c8-42f3-ac53-87a96c9a2393':
+              raise SystemExit('MECHANICS_ORACLE_CAMPAIGN_DRIFT')
+          obs = json.loads(observation.read_text())
+          if obs.get('all_measurements_committed_and_exported') is not True:
+              raise SystemExit('MECHANICS_ORACLE_MEASUREMENTS_NOT_CLOSED')
+          if obs.get('training_submitted') is not False or obs.get('truth_qualification_inferred') is not False:
+              raise SystemExit('MECHANICS_ORACLE_AUTHORITY_BOUNDARY_VIOLATION')
+          print('MECHANICS_ORACLE_AUTHORITY_INPUT=PASS')
+          PY
+      - name: Build ephemeral read-only court archive
+        run: |
+          mkdir -p "$COURT_ROOT"
+          /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
+          import os
+          from pathlib import Path
+          import zipfile
+
+          source = Path(os.environ['AUTHORITY_PREPARATION'])
+          target = Path(os.environ['COURT_ROOT']) / 'repaired_calibration.zip'
+          with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_STORED) as archive:
+              for path in sorted(source.rglob('*')):
+                  if path.is_file():
+                      archive.write(path, path.relative_to(source).as_posix())
+          print(f'MECHANICS_ORACLE_EPHEMERAL_ARCHIVE={target}')
+          PY
+      - name: Run synthetic mechanics regressions
+        run: |
+          /home/monster/realsas_platform/current/bin/realsas-python -m pytest -q tests/truth_foundry/test_mechanics_oracle_v1.py
+      - name: Run repaired FIT8 teacher-oracle court
+        run: |
+          /home/monster/realsas_platform/current/bin/realsas-python tools/truth_foundry/audit_mechanics_oracle_v1.py \
+            --artifact-zip "$COURT_ROOT/repaired_calibration.zip" \
+            --output "$COURT_ROOT/MECHANICS_ORACLE_COURT_V1.json"
+      - name: Remove ephemeral calibration archive
+        if: always()
+        run: rm -f "$COURT_ROOT/repaired_calibration.zip"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mechanics-oracle-fit8-v1-${{ github.run_id }}
+          path: ${{ env.COURT_ROOT }}/MECHANICS_ORACLE_COURT_V1.json
+          if-no-files-found: error
+          retention-days: 30

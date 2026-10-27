@@ -12,9 +12,10 @@ const (
 // ModelRelease/channel readiness remains Platform state and is enforced when a
 // target closure actually consumes MIRA. Canonical parents are Mesh + Rig.
 // Current MIRA V5.5 additionally consumes RiggingSurface and TESSA
-// material-support evidence; neither is a canonical Skin parent and both remain
-// replaceable feature inputs. MIRA proposes carrier-native influences; Compiler
-// qualifies exact bindings and simplex legality, then mints CanonicalSkinIR.
+// material-support evidence emitted by product.mesh; neither is a canonical Skin
+// parent and neither is a legacy stage dependency. MIRA proposes carrier-native
+// influences; Compiler qualifies exact bindings and simplex legality, then mints
+// CanonicalSkinIR.
 type ProductSkinProvider struct{}
 
 func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
@@ -30,7 +31,6 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 		Dependencies: []string{
 			ProductMeshCapabilityID,
 			ProductRigCapabilityID,
-			StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED"),
 		},
 		AllowedModes:         []Mode{ModeDeveloper},
 		ProductPassAuthority: false,
@@ -46,8 +46,11 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"input_rig_schema_version":  "v1",
 			"feature_evidence_type":     "RealSaS.RiggingSurfaceIR",
 			"feature_evidence_version":  "v1",
+			"feature_evidence_source":   "PRODUCT_MESH_OUTPUT",
 			"material_support_type":     "RealSaS.TESSAMaterialSupportFieldIR",
 			"material_support_version":  "v1",
+			"material_support_source":   "PRODUCT_MESH_OUTPUT",
+			"legacy_stage15_dependency": false,
 			"output_artifact_type":      "RealSaS.CanonicalSkinIR",
 			"output_schema_version":     "v1",
 			"decode_chunk":              512,

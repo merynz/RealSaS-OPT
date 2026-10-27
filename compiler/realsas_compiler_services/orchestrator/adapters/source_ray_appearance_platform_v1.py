@@ -2,14 +2,14 @@ from __future__ import annotations
 
 """Platform admission adapter for sparse source-ray appearance measurements.
 
-The input is the exact #243 source-equivalence court bundle.  The adapter does
+The input is the exact #243 source-equivalence court bundle. The adapter does
 not bind teacher face indices to CanonicalMeshIR and therefore does not mint a
-``RayStackEvidenceV2`` admission map.  Its sole job is to reseal the already
+``RayStackEvidenceV2`` admission map. Its sole job is to reseal the already
 measured, source-equivalent sparse appearance domain as immutable typed Platform
-artifacts.  Canonical-M address binding remains a distinct downstream consumer
+artifacts. Canonical-M address binding remains a distinct downstream consumer
 court.
 
-External import alone is never qualification.  This adapter revalidates the
+External import alone is never qualification. This adapter revalidates the
 court, its exact subject measurement payloads and their deterministic hashes;
 only the resulting stage outputs may be registered by Platform execution.
 """
@@ -52,6 +52,12 @@ def _load_bundle(ctx: dict[str, Any]) -> dict[str, Any]:
     bundle = ctx["run_manifest"].get("source_ray_appearance_court_bundle")
     if not isinstance(bundle, dict) or bundle.get("schema") != BUNDLE_SCHEMA:
         raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_BUNDLE_REQUIRED")
+    if bundle.get("registry_qualification_minted") is not False:
+        raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_EXTERNAL_PREQUALIFICATION_FORBIDDEN")
+    if bundle.get("canonical_mesh_binding_minted") is not False:
+        raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_EXTERNAL_MESH_BINDING_FORBIDDEN")
+    if bundle.get("training_authorized") is not False or bundle.get("product_authority_changed") is not False:
+        raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_EXTERNAL_AUTHORITY_ESCALATION")
     return bundle
 
 
@@ -88,6 +94,28 @@ def _validate_measurement(subject_id: str, payload: dict[str, Any], expected_sha
     return len(rays), hit_count
 
 
+def _expected_measurement_parents(court: dict[str, Any]) -> dict[str, str]:
+    rows = court.get("subjects")
+    if not isinstance(rows, list) or not rows:
+        raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_COURT_SUBJECTS_REQUIRED")
+    expected: dict[str, str] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_COURT_SUBJECT_INVALID")
+        subject_id = str(row.get("subject_id") or "")
+        parents = row.get("parents")
+        if not subject_id or subject_id in expected or not isinstance(parents, dict):
+            raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_COURT_SUBJECT_INVALID")
+        packed_a = _require_hash(parents.get("packed_a_sha256"), "SOURCE_RAY_APPEARANCE_PLATFORM_PACKED_PARENT_REQUIRED")
+        packed_b = _require_hash(parents.get("packed_b_sha256"), "SOURCE_RAY_APPEARANCE_PLATFORM_PACKED_PARENT_REQUIRED")
+        if packed_a != packed_b or row.get("packed_replay_core_exact") is not True:
+            raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_PACKED_REPLAY_NOT_EXACT")
+        if row.get("source_equivalent_on_declared_hits") is not True or row.get("source_reference_replay_core_exact") is not True:
+            raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_SUBJECT_NOT_SOURCE_EQUIVALENT")
+        expected[subject_id] = packed_a
+    return expected
+
+
 def _validate_bundle(bundle: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str, Any]], tuple[str, ...], int, int]:
     court = bundle.get("court")
     if not isinstance(court, dict) or court.get("schema") != COURT_SCHEMA:
@@ -115,6 +143,7 @@ def _validate_bundle(bundle: dict[str, Any]) -> tuple[dict[str, Any], list[dict[
     if court.get("training_allowed") is not False or court.get("product_pass_claimed") is not False:
         raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_AUTHORITY_ESCALATION")
 
+    expected_parents = _expected_measurement_parents(court)
     measurements = bundle.get("measurements")
     if not isinstance(measurements, list) or not measurements:
         raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENTS_REQUIRED")
@@ -125,18 +154,22 @@ def _validate_bundle(bundle: dict[str, Any]) -> tuple[dict[str, Any], list[dict[
         if not isinstance(row, dict):
             raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_BINDING_INVALID")
         subject_id = str(row.get("subject_id") or "")
-        if not subject_id or subject_id in seen_subjects:
-            raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_SUBJECT_DUPLICATE")
+        if subject_id not in expected_parents or subject_id in seen_subjects:
+            raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_SUBJECT_DRIFT")
         seen_subjects.add(subject_id)
         payload = row.get("payload")
         if not isinstance(payload, dict):
             raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_PAYLOAD_REQUIRED")
         sha = _require_hash(row.get("sha256"), "SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_HASH_REQUIRED")
+        if sha != expected_parents[subject_id]:
+            raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_PARENT_HASH_DRIFT")
         rays, hits = _validate_measurement(subject_id, payload, sha)
         ray_count += rays
         hit_count += hits
         measurement_rows.append({"subject_id": subject_id, "sha256": sha, "payload": payload})
 
+    if seen_subjects != set(expected_parents):
+        raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_MEASUREMENT_COHORT_INCOMPLETE")
     if len(seen_subjects) != int(court.get("subject_count", -1)) or ray_count != int(court.get("ray_count", -1)) or hit_count != int(court.get("hit_count", -1)):
         raise QualificationError("SOURCE_RAY_APPEARANCE_PLATFORM_COHORT_COUNT_DRIFT")
     if hit_count != int(candidate.get("valid_count", -1)) or hit_count != int(candidate.get("total_count", -1)):

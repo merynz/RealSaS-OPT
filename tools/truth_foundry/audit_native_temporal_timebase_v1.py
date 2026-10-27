@@ -4,9 +4,12 @@ from __future__ import annotations
 """Bind sealed vNext posed samples to exact native animation timebase metadata.
 
 The court reuses immutable authored-teacher NPZ/receipts and a metadata-only
-Blender timebase probe.  It verifies byte lineage and determines whether every
+Blender timebase probe. It verifies byte lineage and determines whether every
 existing posed sample can be assigned an explicit action-local timestamp without
-re-evaluating geometry.  It does not mint Truth qualification or training data.
+re-evaluating geometry. FBX importer action-name normalization is accepted only
+when the probe binds it through the exact sealed `(action, armature)` receipt.
+
+This court does not mint Truth qualification or training data.
 """
 
 import argparse
@@ -52,9 +55,10 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
     rows = []
     total_samples = 0
     total_actions = 0
+    total_normalized_action_identities = 0
     for subject in subjects:
         subject_id = str(subject["subject_id"])
-        source = _bound(authority_root, subject["source"], "TEMPORAL_SOURCE_" + subject_id)
+        _source = _bound(authority_root, subject["source"], "TEMPORAL_SOURCE_" + subject_id)
         admission = _bound(authority_root, subject["observation_admission"], "TEMPORAL_ADMISSION_" + subject_id)
         teacher = _bound(authority_root, subject["expected_teacher"], "TEMPORAL_TEACHER_" + subject_id)
         receipt_path = _bound(authority_root, subject["expected_receipt"], "TEMPORAL_RECEIPT_" + subject_id)
@@ -79,6 +83,8 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
             raise RuntimeError("TEMPORAL_TIMEBASE_PROBE_SOURCE_DRIFT:" + subject_id)
         if probe.get("observation_admission_sha256") != subject["observation_admission"]["sha256"]:
             raise RuntimeError("TEMPORAL_TIMEBASE_PROBE_ADMISSION_DRIFT:" + subject_id)
+        if probe.get("teacher_receipt_sha256") != subject["expected_receipt"]["sha256"]:
+            raise RuntimeError("TEMPORAL_TIMEBASE_PROBE_RECEIPT_DRIFT:" + subject_id)
         if probe.get("blender_version") != request.get("blender_version"):
             raise RuntimeError("TEMPORAL_TIMEBASE_BLENDER_VERSION_DRIFT:" + subject_id)
         if receipt.get("source", {}).get("sha256") != subject["source"]["sha256"]:
@@ -93,8 +99,8 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
             raise RuntimeError("TEMPORAL_NATIVE_ACTIONS_EMPTY:" + subject_id)
         if tuple(map(str, receipt.get("native_motion_inventory_exported") or ())) != expected_actions:
             raise RuntimeError("TEMPORAL_TEACHER_ACTION_INVENTORY_DRIFT:" + subject_id)
-        if tuple(map(str, probe.get("native_motion_inventory_observed") or ())) != expected_actions:
-            raise RuntimeError("TEMPORAL_PROBE_ACTION_INVENTORY_DRIFT:" + subject_id)
+        if tuple(map(str, probe.get("native_motion_inventory_teacher_identity") or ())) != expected_actions:
+            raise RuntimeError("TEMPORAL_PROBE_TEACHER_ACTION_INVENTORY_DRIFT:" + subject_id)
 
         timebase = dict(probe.get("scene_timebase") or {})
         fps = float(timebase.get("frames_per_second", float("nan")))
@@ -105,9 +111,22 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
         if not math.isclose(fps, fps_integer / fps_base, rel_tol=0.0, abs_tol=1e-12):
             raise RuntimeError("TEMPORAL_TIMEBASE_RATIO_DRIFT:" + subject_id)
 
-        action_time = {str(row["action"]): row for row in probe.get("actions") or ()}
-        if set(action_time) != set(expected_actions):
+        action_rows_from_probe = tuple(probe.get("actions") or ())
+        action_time = {str(row["teacher_action_identity"]): row for row in action_rows_from_probe}
+        if set(action_time) != set(expected_actions) or len(action_time) != len(action_rows_from_probe):
             raise RuntimeError("TEMPORAL_TIMEBASE_ACTION_ROWS_DRIFT:" + subject_id)
+        normalized_count = 0
+        for teacher_action, metadata in action_time.items():
+            kind = str(metadata.get("identity_binding") or "")
+            if kind not in {"EXACT_ACTION_NAME", "SEALED_RECEIPT_ARMATURE_PREFIX_NORMALIZATION"}:
+                raise RuntimeError("TEMPORAL_ACTION_IDENTITY_BINDING_UNSUPPORTED:" + subject_id + ":" + teacher_action)
+            if kind != "EXACT_ACTION_NAME":
+                normalized_count += 1
+            if not str(metadata.get("blender_action_name") or ""):
+                raise RuntimeError("TEMPORAL_BLENDER_ACTION_NAME_MISSING:" + subject_id + ":" + teacher_action)
+            if not str(metadata.get("sealed_receipt_armature") or ""):
+                raise RuntimeError("TEMPORAL_SEALED_ARMATURE_MISSING:" + subject_id + ":" + teacher_action)
+        total_normalized_action_identities += normalized_count
 
         frame_rows = tuple(receipt.get("sampled_frames") or ())
         with np.load(teacher, allow_pickle=False) as payload:
@@ -137,6 +156,9 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
                 raise RuntimeError("TEMPORAL_SAMPLE_ACTION_UNKNOWN:" + subject_id)
             frame = int(frame_row["frame"])
             metadata = action_time[action]
+            receipt_armature = str(frame_row.get("armature") or "")
+            if receipt_armature != str(metadata["sealed_receipt_armature"]):
+                raise RuntimeError("TEMPORAL_SAMPLE_ARMATURE_BINDING_DRIFT:" + subject_id + ":" + action)
             origin = int(metadata["teacher_time_origin_frame"])
             first = int(metadata["teacher_first_frame"])
             last = int(metadata["teacher_last_frame"])
@@ -151,7 +173,9 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
                 {
                     "sample_index": sample_index,
                     "action": action,
-                    "armature": str(frame_row.get("armature") or ""),
+                    "blender_action_name": str(metadata["blender_action_name"]),
+                    "action_identity_binding": str(metadata["identity_binding"]),
+                    "armature": receipt_armature,
                     "frame": frame,
                     "time_seconds": timestamp,
                 }
@@ -169,6 +193,8 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
             action_rows.append(
                 {
                     "action": action,
+                    "blender_action_name": str(action_time[action]["blender_action_name"]),
+                    "identity_binding": str(action_time[action]["identity_binding"]),
                     "sample_count": len(times),
                     "start_seconds": times[0],
                     "end_seconds": times[-1],
@@ -188,6 +214,7 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
                 "render_fps_base": fps_base,
                 "sample_count": sample_count,
                 "action_count": len(expected_actions),
+                "normalized_action_identity_count": normalized_count,
                 "actions": action_rows,
                 "samples": samples,
                 "temporal_binding_feasible_without_geometry_resampling": True,
@@ -200,6 +227,7 @@ def audit(request_path: Path, authority_root: Path, probe_dir: Path) -> dict:
         "blender_version": request["blender_version"],
         "subject_count": len(rows),
         "action_count": total_actions,
+        "normalized_action_identity_count": total_normalized_action_identities,
         "posed_sample_count": total_samples,
         "time_formula": "(frame-teacher_time_origin_frame)/frames_per_second",
         "time_unit": "SECOND",

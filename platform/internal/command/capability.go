@@ -118,6 +118,10 @@ func SubmitCapabilityRun(
 			requiresCompilerBridge = true
 		}
 	}
+	targetModelRequirements, err := capability.ResolvedProductModelRequirements(resolved)
+	if err != nil {
+		return CapabilityReceipt{}, err
+	}
 
 	bridgeManifestSHA := ""
 	if requiresCompilerBridge {
@@ -177,15 +181,16 @@ func SubmitCapabilityRun(
 	}
 
 	spec := map[string]any{
-		"schema":                "RealSaS.DeveloperCapabilityRunSpec.v1",
-		"engine_release_id":     req.EngineReleaseID.String(),
-		"engine_release_sha256": releaseSHA,
-		"capability_set_sha256": snapshot.CapabilitySetSHA256,
-		"targets":               req.Targets,
-		"resolved_capabilities": resolvedIDs,
-		"input_artifacts":       artifactRows,
-		"parameters":            normalizedParameters,
-		"promotion_policy":      string(capability.PromotionNever),
+		"schema":                    "RealSaS.DeveloperCapabilityRunSpec.v1",
+		"engine_release_id":         req.EngineReleaseID.String(),
+		"engine_release_sha256":     releaseSHA,
+		"capability_set_sha256":     snapshot.CapabilitySetSHA256,
+		"targets":                   req.Targets,
+		"resolved_capabilities":     resolvedIDs,
+		"target_model_requirements": targetModelRequirements,
+		"input_artifacts":           artifactRows,
+		"parameters":                normalizedParameters,
+		"promotion_policy":          string(capability.PromotionNever),
 	}
 	if req.SubjectID != nil {
 		spec["subject_id"] = req.SubjectID.String()
@@ -254,6 +259,11 @@ func SubmitCapabilityRun(
 		`, attemptID, req.SubjectID, req.EngineReleaseID, specSHA, req.RequestedBy); err != nil {
 			return err
 		}
+		if err := snapshotDeveloperTargetModels(
+			ctx, tx, attemptID, req.EngineReleaseID, targetModelRequirements,
+		); err != nil {
+			return err
+		}
 		if requiresCompilerBridge {
 			if _, err := tx.Exec(ctx, `
 				INSERT INTO compiler_run_bindings(
@@ -316,12 +326,13 @@ func SubmitCapabilityRun(
 			return err
 		}
 		auditBody, _ := json.Marshal(map[string]any{
-			"command_id":            commandID.String(),
-			"execution_goal_id":     goalID.String(),
-			"targets":               req.Targets,
-			"resolved_capabilities": resolvedIDs,
-			"promotion_policy":      "NEVER",
-			"compiler_bridge_used":  requiresCompilerBridge,
+			"command_id":                commandID.String(),
+			"execution_goal_id":         goalID.String(),
+			"targets":                   req.Targets,
+			"resolved_capabilities":     resolvedIDs,
+			"target_model_requirements": targetModelRequirements,
+			"promotion_policy":          "NEVER",
+			"compiler_bridge_used":      requiresCompilerBridge,
 		})
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO audit_events(actor,action,subject_id,attempt_id,payload)

@@ -1,3 +1,12 @@
+> **Read-only diagnosis remains available during a blocked upgrade — 2026-10-27:**
+> PR224 merged as `6448f2c48a5a4fe0df80e0c5560284e655ce972c`. Its deployment
+> run 40475763050 stopped at `OPEN_ATTEMPTS_REQUIRE_OPERATOR_DRAIN_BEFORE_UPGRADE`;
+> the older services remain active. The calibration regression Attempt is still
+> waiting for external evidence. Do not disable this guard or cancel unrelated
+> work. The hash-pinned, GET-only diagnostic readback may use the existing API
+> after either successful or failed deployment; it must not be gated by an upgrade
+> that it is needed to diagnose. The original failed calibration is not retried.
+
 > **Calibration readback — 2026-10-27:** PR223 merged as
 > `9bc200b5ec530d269792b01839d0c410ea0460e5`; all 13 source checks passed and
 > exact-main developer deployment succeeded. Actual campaign

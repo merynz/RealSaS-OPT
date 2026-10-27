@@ -32,7 +32,9 @@ jobs:
           name='canonical/TRUTH_CALIBRATION_READBACK_REQUEST_V1.json'
           changed=subprocess.check_output(['git','diff-tree','--no-commit-id','--name-only','-r','HEAD^1','HEAD'],text=True).splitlines()
           enabled=json.loads(Path(name).read_text()).get('enabled') is True
-          selected=os.environ['EVENT']=='workflow_dispatch' or (os.environ['CONCLUSION']=='success' and os.environ['BRANCH']=='main' and name in changed)
+          # Failed/blocked deployment must remain inspectable. This job uses
+          # only GETs and pinned files; it never submits Engine execution.
+          selected=os.environ['EVENT']=='workflow_dispatch' or (os.environ['CONCLUSION'] in {'success','failure'} and os.environ['BRANCH']=='main' and name in changed)
           print(f"selected={'true' if enabled and selected else 'false'}")
           print('expected_sha='+subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip())
           PY

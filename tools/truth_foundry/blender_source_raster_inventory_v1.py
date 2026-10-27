@@ -78,6 +78,7 @@ def _material_row(material) -> dict:
         "use_nodes": bool(material.use_nodes),
         "diffuse_rgba": [float(v) for v in material.diffuse_color],
         "surface_render_method": str(getattr(material, "surface_render_method", "UNKNOWN")),
+        "legacy_blend_method": str(getattr(material, "blend_method", "UNAVAILABLE")),
         "use_transparency_overlap": bool(getattr(material, "use_transparency_overlap", False)),
         "show_transparent_back": bool(getattr(material, "show_transparent_back", False)),
         "node_types": [],
@@ -149,6 +150,7 @@ def main() -> None:
     materials = [_material_row(m) for m in sorted((m for m in bpy.data.materials if m), key=lambda m: m.name)]
     node_types = sorted({t for row in materials for t in row["node_types"]})
     render_methods = sorted({row["surface_render_method"] for row in materials})
+    legacy_blend_methods = sorted({row["legacy_blend_method"] for row in materials})
     images = sorted({
         (img["image_name"], img["colour_space"], img["alpha_mode"], tuple(img["size"]))
         for row in materials for img in row["image_textures"]
@@ -174,6 +176,7 @@ def main() -> None:
         "material_count": len(materials),
         "material_node_types": node_types,
         "surface_render_methods": render_methods,
+        "legacy_blend_methods": legacy_blend_methods,
         "image_count": len(images),
         "images": [
             {"image_name": n, "colour_space": c, "alpha_mode": am, "size": list(size)}

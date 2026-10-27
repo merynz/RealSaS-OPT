@@ -3,7 +3,6 @@ on:
   pull_request:
     paths:
       - 'tools/truth_foundry/blender_source_ray_appearance_reference_v1.py'
-      - 'tools/truth_foundry/blender_source_ray_appearance_reference_probe_v1.py'
       - 'tools/truth_foundry/audit_source_ray_appearance_source_equivalence_v1.py'
       - '.github/workflows/source_ray_appearance_source_equivalence_fit8_v1.yml'
   workflow_dispatch:
@@ -106,7 +105,7 @@ jobs:
                   output=out/f'SOURCE_REFERENCE_{label}.json'
                   subprocess.run([
                       blender,'-b','--factory-startup','--python-exit-code','2',
-                      '--python','tools/truth_foundry/blender_source_ray_appearance_reference_probe_v1.py','--',
+                      '--python','tools/truth_foundry/blender_source_ray_appearance_reference_v1.py','--',
                       '--source',str(source),'--expected-source-sha256',subject['source']['sha256'],'--subject-id',sid,
                       '--candidate',str(candidate),'--camera-bundle',str(camera),'--appearance',str(appearance),
                       '--geometry-npz',str(geometry),'--packed-measurement',str(packed_outputs[0]),'--output',str(output),
@@ -132,7 +131,6 @@ jobs:
             ${{ env.COURT_ROOT }}/subjects/*/PACKED_B.json
             ${{ env.COURT_ROOT }}/subjects/*/SOURCE_REFERENCE_A.json
             ${{ env.COURT_ROOT }}/subjects/*/SOURCE_REFERENCE_B.json
-            ${{ env.COURT_ROOT }}/subjects/*/SOURCE_REFERENCE_*_FAILURE.json
           if-no-files-found: warn
           compression-level: 0
           retention-days: 30

@@ -95,7 +95,8 @@ jobs:
             tests/repository/test_mainline_v2_dag_scheduler.py \
             tests/repository/test_witness_orchestration_v2.py \
             tests/repository/test_v9_pretraining_artifact_operator_v1.py \
-            tests/repository/test_knight_skin_parent_host_inventory_v1.py
+            tests/repository/test_knight_skin_parent_host_inventory_v1.py \
+            tests/repository/test_platform_subject_artifact_inventory_v1.py
       - name: Validate V2 DAG structure and implementation closure
         run: |
           python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan

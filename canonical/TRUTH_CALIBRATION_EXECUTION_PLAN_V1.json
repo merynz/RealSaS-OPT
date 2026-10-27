@@ -196,6 +196,8 @@
       "title": "Source geometric response calibration (unqualified teacher measurements)",
       "group": "source",
       "depends_on": [
+        "01_SOURCE_BYTES_SEALED",
+        "03_SOURCE_MECHANICAL_AUDIT",
         "08_NORMALIZATION_DOMAIN_QUALIFIED"
       ],
       "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.truth_foundry_v1:measure_teacher_scene_stage",

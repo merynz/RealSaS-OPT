@@ -475,9 +475,13 @@ def main(args):
         created_by=actor, stage_parameters=stage_params)
     release = api(args.api, "POST", "/v1/releases", release_request)
     release_id = release["ReleaseID"]
+    repair_members = descriptor.get("repair_expected_campaign_members")
+    if repair_members is not None:
+        actual = {(r["platform_subject_id"], role) for rows, role in ((cohort_state,"COHORT"),(regression_state,"REGRESSION")) for r in rows}
+        require(actual == {(r["subject_id"],r["role"]) for r in repair_members}, "COHORT_REPAIR_MEMBER_SCOPE_DRIFT")
     campaign = api(args.api, "POST", "/v1/research/campaigns", {
         "name": descriptor["campaign_name"],
-        "baseline_engine_release_id": release_id,
+        "baseline_engine_release_id": descriptor.get("baseline_engine_release_id") or release_id,
         "candidate_engine_release_id": release_id,
         "cohort_subject_ids": [row["platform_subject_id"] for row in cohort_state],
         "regression_subject_ids": [row["platform_subject_id"] for row in regression_state],

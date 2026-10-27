@@ -24,7 +24,6 @@
   "rules": {
     "every_cohort_subject_enters_at_source_contract": true,
     "camera_scene_pose_observation_and_normalization_must_be_qualified_per_subject": true,
-    "same_released_43_stage_dag_for_all_members": true,
     "same_stage_contracts_and_courts_for_all_members": true,
     "subject_specific_production_code_forbidden": true,
     "silent_easier_subject_replacement_forbidden": true,
@@ -34,7 +33,8 @@
     "external_gpu_compute_is_transport_not_scientific_authority": true,
     "imported_fit_receipt_cannot_mint_qualification": true,
     "training_loss_cannot_mint_fit8_pass": true,
-    "regression_excluded_from_new_truth_corpus_explicitly": true
+    "regression_excluded_from_new_truth_corpus_explicitly": true,
+    "same_released_dag_for_all_members": true
   },
   "shared_model_program": {
     "public_order": [

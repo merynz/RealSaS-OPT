@@ -27,6 +27,8 @@ class CalibrationPlatformTests(unittest.TestCase):
         self.assertLess(order.index('47_SOURCE_RESPONSE_CALIBRATION'),order.index('09_IRIS_FIT_PREREGISTERED'))
         self.assertEqual(order[-1],'46_PRODUCT_CLOSURE_SEAL')
         self.assertFalse(nodes['47_SOURCE_RESPONSE_CALIBRATION']['policy']['product_pass_authority'])
+        self.assertEqual(set(nodes['47_SOURCE_RESPONSE_CALIBRATION']['depends_on']),{
+            '01_SOURCE_BYTES_SEALED','03_SOURCE_MECHANICAL_AUDIT','08_NORMALIZATION_DOMAIN_QUALIFIED'})
         reconstructed=released_execution_plan(base,{'schema':'RealSaS.StageGraph.v1','stage_count':len(plan['stages']),
                                                     'stages':plan['stages']},mode='RESEARCH')
         self.assertEqual(validate_plan(reconstructed),validate_plan(plan))
@@ -71,11 +73,14 @@ class CalibrationPlatformTests(unittest.TestCase):
                 'policy_repo_path':'policy.json','input_descriptor_repo_path':'descriptor.json',
                 'stage_parameters_repo_path':'parameters.json',
                 'campaign_contract_repo_path':'campaign.json','campaign_name':'fixture_campaign','experiment_slug':'fixture-exp',
-                'experiment_name':'fixture','research_question':'fixture question','hypothesis':'fixture hypothesis'}
-            calls=[];state=['READY'];captured=[]
+                'experiment_name':'fixture','research_question':'fixture question','hypothesis':'fixture hypothesis',
+                'repair_of_campaign_id':'prior','baseline_engine_release_id':'prior-release'}
+            calls=[];state=['READY'];prior_state=['FAILED'];captured=[]
             def fake_api(api,method,route,payload=None):
                 calls.append((method,route,payload))
                 if route=='/v1/experiments':return {'experiment':{'id':'exp','lifecycle_state':'PREREGISTERED'}}
+                if route=='/v1/research/campaigns/prior':return {'candidate_engine_release_id':'prior-release',
+                    'members':[{'subject_id':str(i),'role':'COHORT','final_state':prior_state[0]} for i in range(3)]}
                 if route=='/v1/research/campaigns/campaign':return {'state':state[0],'members':[{'attempt_id':f'attempt-{i}'} for i in range(3)]}
                 if route=='/v1/research/campaigns/run':state[0]='RUNNING';return {'state':'RUNNING'}
                 return {}
@@ -93,10 +98,17 @@ class CalibrationPlatformTests(unittest.TestCase):
                     output=root/'out',api_root='fixture',rclone_remote='fixture',submit=True)
                 b=prepare(request,repo=repo,platform_root=platform,authority_root=authority,expected_sha=code,
                     output=root/'out',api_root='fixture',rclone_remote='fixture',submit=True)
+                prior_state[0]='OPEN'
+                with self.assertRaisesRegex(ValueError,'PRIOR_CAMPAIGN_NOT_DRAINED'):
+                    prepare(request,repo=repo,platform_root=platform,authority_root=authority,expected_sha=code,
+                        output=root/'out',api_root='fixture',rclone_remote='fixture',submit=True)
             submissions=[i for i,c in enumerate(calls) if c[1]=='/v1/research/campaigns/run']
             self.assertEqual(len(submissions),1)
             self.assertEqual(len([c for c in calls[:submissions[0]] if c[1]=='/v1/experiments/link']),4)
             self.assertFalse(a['training_submitted']);self.assertTrue(b['measurement_submitted'])
+            self.assertEqual(a['repair_of_campaign_id'],'prior')
+            self.assertEqual(captured[0]['baseline_engine_release_id'],'prior-release')
+            self.assertEqual(len(captured[0]['repair_expected_campaign_members']),3)
             fence=captured[0]['additional_stage_parameters']['09_IRIS_FIT_PREREGISTERED']['external_evidence_roles']
             self.assertEqual(fence,['qualified_truth_and_v31_training_seal'])
             cfg=captured[0]['additional_manifest_sections']['truth_foundry']

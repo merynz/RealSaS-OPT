@@ -63,7 +63,7 @@ def measure_teacher_scene_stage(ctx):
     job={'schema':'RealSaS.TeacherSceneCalibrationJob.v1','subject_key':key,'source':source_ref,
          'observation_admission':audit['iris_observation_admission'],'source_scene_snapshot':audit['source_scene_snapshot'],
          'native_teacher':baseline['native_teacher'],'source_equivalence_report':cfg['source_equivalence_report'],
-         'observation_bundle_sha256':normalization['observation_set_hash'],'policy':cfg['policy'],
+         'observation_bundle_sha256':normalization['observation_set_binding_hash'],'policy':cfg['policy'],
          'normalization_sha256':normalization['normalization_hash'],
          'producer_source_commit':cfg['producer_source_commit'],'evaluator_binary_sha256':cfg['evaluator_binary']['sha256'],
          'training_allowed':False}

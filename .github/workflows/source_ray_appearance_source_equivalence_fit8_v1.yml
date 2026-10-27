@@ -1,0 +1,136 @@
+name: source-ray-appearance-source-equivalence-fit8-v1
+on:
+  pull_request:
+    paths:
+      - 'tools/truth_foundry/blender_source_ray_appearance_reference_v1.py'
+      - 'tools/truth_foundry/audit_source_ray_appearance_source_equivalence_v1.py'
+      - '.github/workflows/source_ray_appearance_source_equivalence_fit8_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: source-ray-appearance-source-equivalence-fit8-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  source-equivalence-court:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      CALIBRATION_ROOT: /home/monster/realsas_authority/truth_calibration_preparation/40480940440-1
+      CALIBRATION_PREPARATION_SHA256: 060e19bd46766ed65e7a3bfc31ba193210dfb508a93cc2abcb6b1843eb356f42
+      BLENDER: /home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
+      COURT_ROOT: /home/monster/realsas_authority/source_ray_appearance_source_equivalence_fit8_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify sealed parents
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          cal=Path(os.environ['CALIBRATION_ROOT']);prep=cal/'PREPARATION.json';obs=cal/'evidence'/'OBSERVATION.json'
+          if not prep.is_file() or hashlib.sha256(prep.read_bytes()).hexdigest()!=os.environ['CALIBRATION_PREPARATION_SHA256']:
+              raise SystemExit('SOURCE_RAY_EQUIVALENCE_CALIBRATION_ROOT_DRIFT')
+          o=json.loads(obs.read_text())
+          if o.get('all_measurements_committed_and_exported') is not True or o.get('training_submitted') is not False or o.get('truth_qualification_inferred') is not False:
+              raise SystemExit('SOURCE_RAY_EQUIVALENCE_CALIBRATION_AUTHORITY')
+          request=json.loads(Path('canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json').read_text())
+          if request.get('schema')!='RealSaS.NativeTeacherReplayRequest.v1' or len(request.get('subjects') or ())!=8:
+              raise SystemExit('SOURCE_RAY_EQUIVALENCE_REQUEST_DRIFT')
+          print('SOURCE_RAY_EQUIVALENCE_INPUT_ROOTS=PASS')
+          PY
+
+      - name: Measure packed replay determinism and independent source-observation material reference
+        run: |
+          set -euo pipefail
+          mkdir -p "$COURT_ROOT/subjects"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os,subprocess,time
+          from pathlib import Path
+          authority=Path(os.environ['AUTHORITY_ROOT']);cal=Path(os.environ['CALIBRATION_ROOT']);court=Path(os.environ['COURT_ROOT'])/'subjects';blender=os.environ['BLENDER']
+          request=json.loads(Path('canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json').read_text())
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for block in iter(lambda:f.read(8*1024*1024),b''):h.update(block)
+              return h.hexdigest()
+          teacher={}
+          for p in sorted(cal.rglob('TEACHER_SCENE.json')):
+              value=json.loads(p.read_text());sid=str(value.get('subject_key') or '')
+              if sid in teacher:raise RuntimeError('SOURCE_RAY_EQUIVALENCE_DUPLICATE_TEACHER:'+sid)
+              teacher[sid]=(p,value)
+          if len(teacher)!=8:raise RuntimeError(f'SOURCE_RAY_EQUIVALENCE_TEACHER_COUNT:{len(teacher)}')
+          for index,subject in enumerate(request['subjects'],1):
+              sid=str(subject['subject_id']);source=(authority/subject['source']['relative']).resolve();admission=(authority/subject['observation_admission']['relative']).resolve()
+              if not source.is_file() or sha(source)!=subject['source']['sha256']:
+                  raise RuntimeError('SOURCE_RAY_EQUIVALENCE_SOURCE_DRIFT:'+sid)
+              if not admission.is_file() or sha(admission)!=subject['observation_admission']['sha256']:
+                  raise RuntimeError('SOURCE_RAY_EQUIVALENCE_ADMISSION_DRIFT:'+sid)
+              admitted=json.loads(admission.read_text());folder=admission.parent;candidate=folder/'SOURCE_REST_RENDER_CANDIDATE.json';camera=folder/'camera_bundle.json'
+              if sha(candidate)!=admitted['candidate_sha256'] or sha(camera)!=admitted['camera_sha256']:
+                  raise RuntimeError('SOURCE_RAY_EQUIVALENCE_OBSERVATION_LINEAGE:'+sid)
+              teacher_path,scene=teacher[sid]
+              geometry_refs={Path(str(r['path'])).name:r for r in scene.get('geometry_payloads') or ()}
+              appearance_refs={Path(str(r['path'])).name:r for r in scene.get('appearance_payloads') or ()}
+              geometry=Path(geometry_refs['geometry_and_response.npz']['path']).resolve();appearance=Path(appearance_refs['appearance.json']['path']).resolve();blend=Path(appearance_refs['source_scene.blend']['path']).resolve()
+              for path,ref in ((geometry,geometry_refs['geometry_and_response.npz']),(appearance,appearance_refs['appearance.json']),(blend,appearance_refs['source_scene.blend'])):
+                  if not path.is_file() or sha(path)!=ref['sha256']:raise RuntimeError('SOURCE_RAY_EQUIVALENCE_TEACHER_PAYLOAD_DRIFT:'+sid+':'+path.name)
+              out=court/sid;out.mkdir(parents=True,exist_ok=False);started=time.monotonic();print(f'[SOURCE_RAY_EQUIVALENCE] {index}/8 {sid}',flush=True)
+
+              packed_outputs=[]
+              for label in ('A','B'):
+                  output=out/f'PACKED_{label}.json';packed_outputs.append(output)
+                  subprocess.run([
+                      blender,'-b',str(blend),'--python-exit-code','2',
+                      '--python','tools/truth_foundry/blender_source_ray_appearance_measure_v1.py','--',
+                      '--subject-id',sid,'--teacher-scene',str(teacher_path),'--geometry-npz',str(geometry),
+                      '--candidate',str(candidate),'--camera-bundle',str(camera),
+                      '--expected-blend-sha256',appearance_refs['source_scene.blend']['sha256'],
+                      '--output',str(output),'--maximum-rays','2','--maximum-hits','2',
+                      '--cycles-samples','256','--large-footprint-fraction','0.0625','--small-footprint-fraction','0.03125',
+                      '--convergence-tolerance','0.005','--representation-tolerance','0.005','--measurement-tolerance','0.0075',
+                  ],check=True)
+                  if not output.is_file():raise RuntimeError('SOURCE_RAY_EQUIVALENCE_PACKED_RECEIPT_MISSING:'+sid+':'+label)
+
+              for label in ('A','B'):
+                  output=out/f'SOURCE_REFERENCE_{label}.json'
+                  subprocess.run([
+                      blender,'-b','--factory-startup','--python-exit-code','2',
+                      '--python','tools/truth_foundry/blender_source_ray_appearance_reference_v1.py','--',
+                      '--source',str(source),'--expected-source-sha256',subject['source']['sha256'],'--subject-id',sid,
+                      '--candidate',str(candidate),'--camera-bundle',str(camera),'--appearance',str(appearance),
+                      '--geometry-npz',str(geometry),'--packed-measurement',str(packed_outputs[0]),'--output',str(output),
+                  ],check=True)
+                  if not output.is_file():raise RuntimeError('SOURCE_RAY_EQUIVALENCE_SOURCE_RECEIPT_MISSING:'+sid+':'+label)
+              print(f'[SOURCE_RAY_EQUIVALENCE_DONE] {sid} seconds={time.monotonic()-started:.2f}',flush=True)
+          PY
+
+      - name: Audit sparse source equivalence and local oracle qualification candidate
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/audit_source_ray_appearance_source_equivalence_v1.py \
+            --subjects-root "$COURT_ROOT/subjects" \
+            --output "$COURT_ROOT/SOURCE_RAY_APPEARANCE_SOURCE_EQUIVALENCE_FIT8_V1.json"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: source-ray-appearance-source-equivalence-fit8-v1-${{ github.run_id }}
+          path: |
+            ${{ env.COURT_ROOT }}/SOURCE_RAY_APPEARANCE_SOURCE_EQUIVALENCE_FIT8_V1.json
+            ${{ env.COURT_ROOT }}/subjects/*/PACKED_A.json
+            ${{ env.COURT_ROOT }}/subjects/*/PACKED_B.json
+            ${{ env.COURT_ROOT }}/subjects/*/SOURCE_REFERENCE_A.json
+            ${{ env.COURT_ROOT }}/subjects/*/SOURCE_REFERENCE_B.json
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

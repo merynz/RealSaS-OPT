@@ -5,9 +5,9 @@ from __future__ import annotations
 
 This probe imports the exact admitted source under the same Blender 4.5 native
 FBX/glTF semantics used by the vNext teacher lane, then binds importer-local
-action names back to the exact sealed teacher action identity.  FBX may strip an
-`Armature|` prefix during import, so that normalization is accepted only when it
-is uniquely witnessed by the sealed teacher receipt's `(action, armature)` rows.
+action names back to the exact sealed teacher action identity. FBX may normalize
+action names during import, so any normalization is accepted only when it is
+uniquely witnessed by the sealed teacher receipt's `(action, armature)` rows.
 
 The probe does not sample vertices, render, submit training, or mint Truth
 Foundry qualification.
@@ -85,16 +85,18 @@ def _sealed_action_armature(receipt: dict, action: str) -> str:
 def _bind_actions(expected_actions: tuple[str, ...], actual: dict[str, object], receipt: dict):
     """Return exact teacher-identity -> Blender action binding.
 
-    Exact name identity wins.  The only accepted normalization is the concrete
-    FBX importer transformation witnessed by the sealed receipt:
+    Exact name identity wins. The only accepted normalization in this revision
+    is the concrete armature-prefix removal witnessed by the sealed receipt:
 
         `<sealed armature>|<Blender action name>` == `<teacher action identity>`
 
-    No suffix similarity, fuzzy matching, semantic aliases, or action ordering is
-    used.  Ambiguous/missing bindings fail closed.
+    No fuzzy matching, semantic aliases, or action ordering is used. Ambiguous
+    or missing bindings fail closed and include the imported inventory so the
+    adapter mismatch can be repaired from evidence instead of guesswork.
     """
     bound = {}
     used_actual = set()
+    imported_inventory = ",".join(sorted(actual))
     for teacher_name in expected_actions:
         if teacher_name in actual:
             blender_name = teacher_name
@@ -112,6 +114,8 @@ def _bind_actions(expected_actions: tuple[str, ...], actual: dict[str, object], 
                     + teacher_name
                     + ":candidates="
                     + ",".join(sorted(candidates))
+                    + ":actual="
+                    + imported_inventory
                 )
             blender_name = candidates[0]
             kind = "SEALED_RECEIPT_ARMATURE_PREFIX_NORMALIZATION"

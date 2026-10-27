@@ -13,6 +13,7 @@ import argparse
 from dataclasses import asdict
 import hashlib
 import json
+import math
 from pathlib import Path
 import sys
 
@@ -49,6 +50,24 @@ def _sha(path: Path) -> str:
         for block in iter(lambda: f.read(8 * 1024 * 1024), b""):
             h.update(block)
     return h.hexdigest()
+
+
+def _json_finite(value):
+    """Preserve non-finite diagnostics as JSON null, never as invalid JSON.
+
+    ``ABSTAIN_EMPTY_FOREGROUND`` intentionally reports infinite internal error
+    sentinels because no comparison exists.  The receipt must survive that
+    fail-closed result so the court can distinguish abstention from alpha drift.
+    """
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    if isinstance(value, dict):
+        return {k: _json_finite(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_json_finite(v) for v in value]
+    if isinstance(value, tuple):
+        return [_json_finite(v) for v in value]
+    return value
 
 
 def _render_alpha(camera, center, half: float, resolution: int, scratch: Path, tag: str) -> list[np.ndarray]:
@@ -136,15 +155,25 @@ def main() -> None:
     views = []
     all_valid = True
     total_union = 0
-    max_error = 0.0
+    finite_errors: list[float] = []
     total_mismatch = 0
+    status_counts: dict[str, int] = {}
     for index, (label, left, right) in enumerate(zip(orbit.VIEW_ORDER, native, transformed)):
         measurement = measure_alpha_transport_parity_v1(left, right, tolerance=a.tolerance)
         all_valid = all_valid and measurement.valid
         total_union += measurement.union_foreground_sample_count
-        max_error = max(max_error, measurement.maximum_absolute_error)
+        if math.isfinite(measurement.maximum_absolute_error):
+            finite_errors.append(float(measurement.maximum_absolute_error))
         total_mismatch += measurement.mismatch_count
-        views.append({"view_index": index, "direction_label": label, **asdict(measurement)})
+        status_counts[measurement.status] = status_counts.get(measurement.status, 0) + 1
+        views.append(_json_finite({"view_index": index, "direction_label": label, **asdict(measurement)}))
+
+    if all_valid:
+        court_status = "PASS_ALPHA_TRANSPORT_PARITY"
+    elif total_mismatch > 0:
+        court_status = "FAIL_ALPHA_TRANSPORT_DRIFT"
+    else:
+        court_status = "ABSTAIN_ALPHA_TRANSPORT_SUPPORT"
 
     payload = {
         "schema": SCHEMA,
@@ -163,8 +192,9 @@ def main() -> None:
         "alpha_tolerance": float(a.tolerance),
         "material_transform_receipts": transform_receipts,
         "union_foreground_sample_count": total_union,
-        "maximum_absolute_alpha_error": max_error,
+        "maximum_absolute_alpha_error": max(finite_errors) if finite_errors else None,
         "mismatch_count": total_mismatch,
+        "status_counts": dict(sorted(status_counts.items())),
         "all_views_pass": bool(all_valid),
         "views": views,
         "rgb_parity_claimed": False,
@@ -173,13 +203,13 @@ def main() -> None:
         "qualification_minted": False,
         "student_target_allowed": False,
         "training_allowed": False,
-        "court_status": "PASS_ALPHA_TRANSPORT_PARITY" if all_valid else "FAIL_ALPHA_TRANSPORT_DRIFT",
+        "court_status": court_status,
     }
     a.output.parent.mkdir(parents=True, exist_ok=True)
     a.output.write_text(json.dumps(payload, sort_keys=True, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in payload.items() if k not in {"views", "material_transform_receipts"}}, sort_keys=True))
     if not all_valid:
-        raise RuntimeError("SOURCE_ALPHA_PARITY_COURT_FAILED")
+        raise RuntimeError("SOURCE_ALPHA_PARITY_COURT_FAILED:" + court_status)
 
 
 if __name__ == "__main__":

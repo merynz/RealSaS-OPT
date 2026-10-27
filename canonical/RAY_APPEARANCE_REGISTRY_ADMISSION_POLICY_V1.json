@@ -1,0 +1,30 @@
+{
+  "schema": "RealSaS.RayAppearanceRegistryAdmissionPolicy.v1",
+  "capability_id": "proof.ray_compositing.sparse_source_appearance.v1",
+  "executor_contract": "RealSaS.RayCompositingSparseAdmission.v1",
+  "family": "RAY_COMPOSITING",
+  "input_artifact_type": "RealSaS.SourceRayAppearanceCourtBundle",
+  "input_schema_version": "v1",
+  "embedded_court_schema": "RealSaS.SourceRayAppearanceSourceEquivalenceCourt.v1",
+  "required_court_status": "PASS_SOURCE_RAY_APPEARANCE_LOCAL_QUALIFICATION_CANDIDATE",
+  "required_embedded_policy_sha256": "3367d948215402ae6d294d899f6ddade4132a52c181c0ad5671a1504099f1fe5",
+  "coverage_scope": "SEALED_FIT8_8_SUBJECT__16_GEOMETRY_ONLY_RAYS__32_HITS_ONLY",
+  "equivalence_scope": "ADMITTED_UNLIT_SOURCE_OBSERVATION_MATERIAL_POLICY__SAME_TEACHER_TRIANGLE_UV_AND_MICRO_CAMERA",
+  "subject_count": 8,
+  "ray_count": 16,
+  "hit_count": 32,
+  "output_artifact_type": "RealSaS.QualifiedSparseRayAppearanceEvidence",
+  "output_schema_version": "v1",
+  "output_authority_class": "QUALIFIED_SPARSE_RAY_COMPOSITING_ORACLE_EVIDENCE",
+  "capability_parameters": {
+    "archive_contract": "CANONICAL_JSON_COURT_BUNDLE_V1",
+    "embedded_reaudit_required": true,
+    "measured_ray_factorization_replay_required": true,
+    "source_equivalence_replay_required": true,
+    "canonical_mesh_binding_claimed": false,
+    "global_sampler_qualification_claimed": false,
+    "student_supervision_allowed": false,
+    "training_allowed": false,
+    "product_pass_authority": false
+  }
+}

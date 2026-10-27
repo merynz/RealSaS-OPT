@@ -192,8 +192,12 @@ def _render_masks(bundle: dict, output: Path) -> list[dict]:
             raise RuntimeError("SOURCE_APPEARANCE_REPLAY_CAMERA_ORDER")
         origin = Vector(tuple(map(float, row["origin"])))
         forward = Vector(tuple(map(float, row["forward"])))
-        if abs(forward.length - 1.0) > 1.0e-8:
-            raise RuntimeError("SOURCE_APPEARANCE_REPLAY_CAMERA_FORWARD_UNIT")
+        if not all(math.isfinite(float(v)) for v in (*origin, *forward)) or forward.length == 0.0:
+            raise RuntimeError("SOURCE_APPEARANCE_REPLAY_CAMERA_NONFINITE_OR_ZERO_FORWARD")
+        # Reproduce the admitted renderer exactly: the sealed camera bundle is
+        # already hash-bound by admission, and the original renderer consumed
+        # the stored forward vector directly through ``to_track_quat``.  Do not
+        # add a new unit-length tolerance that was not part of that authority.
         camera.location = origin
         camera.rotation_euler = forward.to_track_quat("-Z", "Y").to_euler()
         data.ortho_scale = 2.0 * float(row["half_extent"])

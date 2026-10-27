@@ -12,6 +12,10 @@ from compiler.realsas_compiler_core.graphics_evidence_v2 import (
     RayHitEvidenceV2,
     RayStackEvidenceV2,
 )
+from compiler.realsas_compiler_core.graphics_local_support_v2 import (
+    bind_compiled_ray_support_v2,
+    make_exact_raster_support_v2,
+)
 from compiler.realsas_compiler_core.graphics_v2 import compile_ray_graphics_v2
 from models.iris.truth.graphics_oracle_v1 import (
     OrthographicCameraV1,
@@ -118,8 +122,18 @@ def _knight_oracle_rows():
     qualification_hash = _sha("TEACHER_ORACLE_COURT_ONLY__NOT_REGISTRY_QUALIFICATION")
     skin_hash = _sha("KNIGHT_ORACLE_FIXED_SKIN_PARENT")
     source_graphics_hash = _sha("KNIGHT_SINGLE_M_CAA_SOURCE_GRAPHICS")
+    camera_set_hash = _sha({
+        "fixture": baseline["parent_witness_sha256"],
+        "cameras": [dict(vars(camera)) for camera in cameras],
+    })
+    sampling_hash = _sha({
+        "kind": "HALF_INTEGER_ORTHOGRAPHIC_PIXEL_RAY",
+        "candidate_policy": "FACE_CENTROID_GEOMETRY_ONLY_MAX128",
+        "tie_epsilon": tie_epsilon,
+    })
 
     rows = []
+    exact_support_coordinates = {}
     address_witnesses = set()
     per_view = {}
     for camera in cameras:
@@ -159,20 +173,22 @@ def _knight_oracle_rows():
                         None,
                     )
                 )
-            rows.append(
-                RayStackEvidenceV2(
-                    scope_hash=_sha({"fixture": baseline["parent_witness_sha256"], "view": stack.view_index}),
-                    ray_key=f"V{stack.view_index}:{pixel_x}:{pixel_y}",
-                    view_index=stack.view_index,
-                    hits=tuple(hit_rows),
-                    complete=True,
-                    blend_law="SOURCE_OVER",
-                    tie_epsilon=tie_epsilon,
-                    evidence_artifact_hash=artifact_hash,
-                    qualification_hash=qualification_hash,
-                    measurement_valid=True,
-                    source_artistic_order_status="NO_AUTHORED_ORDER__DEPTH_QUALIFIED",
-                )
+            row = RayStackEvidenceV2(
+                scope_hash=_sha({"fixture": baseline["parent_witness_sha256"], "view": stack.view_index}),
+                ray_key=f"diagnostic-only:V{stack.view_index}:{pixel_x}:{pixel_y}",
+                view_index=stack.view_index,
+                hits=tuple(hit_rows),
+                complete=True,
+                blend_law="SOURCE_OVER",
+                tie_epsilon=tie_epsilon,
+                evidence_artifact_hash=artifact_hash,
+                qualification_hash=qualification_hash,
+                measurement_valid=True,
+                source_artistic_order_status="NO_AUTHORED_ORDER__DEPTH_QUALIFIED",
+            )
+            rows.append(row)
+            exact_support_coordinates[row.record_hash()] = (
+                int(stack.view_index), int(pixel_x), int(pixel_y), int(camera.resolution)
             )
             kept += 1
         per_view[int(camera.view_index)] = kept
@@ -193,12 +209,15 @@ def _knight_oracle_rows():
         frozenset(address_witnesses),
         admitted,
         per_view,
+        camera_set_hash,
+        sampling_hash,
+        exact_support_coordinates,
     )
 
 
-def test_knight_canonical_m_oracle_produces_consumable_local_order_without_fake_appearance_truth():
+def _compiled_knight():
     (
-        _rest,
+        rest,
         faces,
         mesh_hash,
         skin_hash,
@@ -207,13 +226,10 @@ def test_knight_canonical_m_oracle_produces_consumable_local_order_without_fake_
         address_witnesses,
         admitted,
         per_view,
+        camera_set_hash,
+        sampling_hash,
+        exact_support_coordinates,
     ) = _knight_oracle_rows()
-
-    assert rows
-    # The court must exercise every product view, not only one favorable angle.
-    assert set(per_view) == set(range(8))
-    assert all(count > 0 for count in per_view.values())
-
     compiled = compile_ray_graphics_v2(
         canonical_mesh_binding_hash=mesh_hash,
         canonical_mesh_skin_binding_hash=skin_hash,
@@ -223,34 +239,29 @@ def test_knight_canonical_m_oracle_produces_consumable_local_order_without_fake_
         address_witnesses=address_witnesses,
         admitted_artifacts=admitted,
     )
+    return (
+        rest, faces, compiled, per_view, camera_set_hash, sampling_hash,
+        exact_support_coordinates,
+    )
 
+
+def test_knight_canonical_m_oracle_produces_consumable_local_order_without_fake_appearance_truth():
+    _rest, _faces, compiled, per_view, _camera_set_hash, _sampling_hash, _coords = _compiled_knight()
+
+    assert compiled.rays
+    assert set(per_view) == set(range(8))
+    assert all(count > 0 for count in per_view.values())
     constraint_count = sum(len(ray["order_constraints"]) for ray in compiled.rays)
     assert constraint_count > 0
     assert len(compiled.scopes) == 8
     assert all(ray["compositing"]["reason"] == "UNKNOWN_ALPHA" for ray in compiled.rays)
     assert all(ray["compositing"]["alpha_valid"] is False for ray in compiled.rays)
     assert all(ray["compositing"]["composite_valid"] is False for ray in compiled.rays)
-    # Depth evidence is still behaviorally consumed: every non-tied pair on a
-    # measured ray becomes a local front/back constraint, while appearance truth
-    # remains explicitly unknown.
     assert any(ray["order_constraints"] for ray in compiled.rays)
 
 
 def test_knight_local_order_is_not_silently_promoted_to_one_global_layer_order():
-    *_, rows, address_witnesses, admitted, per_view = _knight_oracle_rows()
-    # Re-read immutable fixture geometry for the fixed consumer invocation.
-    _baseline, arrays, _source, _cameras, _caa = load_inputs(KNIGHT_BASELINE)
-    faces = np.asarray(arrays["faces"], dtype=np.int64)
-    mesh_hash = rows[0].hits[0].address.mesh_hash
-    compiled = compile_ray_graphics_v2(
-        canonical_mesh_binding_hash=mesh_hash,
-        canonical_mesh_skin_binding_hash=_sha("KNIGHT_ORACLE_FIXED_SKIN_PARENT"),
-        source_graphics_binding_hash=_sha("KNIGHT_SINGLE_M_CAA_SOURCE_GRAPHICS"),
-        face_count=len(faces),
-        evidence=rows,
-        address_witnesses=address_witnesses,
-        admitted_artifacts=admitted,
-    )
+    _rest, _faces, compiled, per_view, _camera_set_hash, _sampling_hash, _coords = _compiled_knight()
     assert set(per_view) == set(range(8))
     assert all(scope["edges_removed"] == 0 for scope in compiled.scopes)
     assert all(scope["unobserved_visibility"] == "UNKNOWN" for scope in compiled.scopes)
@@ -258,3 +269,88 @@ def test_knight_local_order_is_not_silently_promoted_to_one_global_layer_order()
         scope["order_status"] in {"SCOPED_PARTIAL_ORDER", "LOCAL_INTERLEAVING_REQUIRED"}
         for scope in compiled.scopes
     )
+
+
+def test_knight_oracle_rays_bind_to_explicit_exact_support_without_ray_key_authority():
+    (
+        _rest,
+        _faces,
+        compiled,
+        per_view,
+        camera_set_hash,
+        sampling_hash,
+        exact_support_coordinates,
+    ) = _compiled_knight()
+    supports = []
+    for ray in compiled.rays:
+        record_hash = ray["record_hash"]
+        view, pixel_x, pixel_y, resolution = exact_support_coordinates[record_hash]
+        supports.append(
+            make_exact_raster_support_v2(
+                record_hash=record_hash,
+                camera_set_binding_hash=camera_set_hash,
+                sampling_contract_hash=sampling_hash,
+                view_index=view,
+                pixel_x=pixel_x,
+                pixel_y=pixel_y,
+                resolution=resolution,
+                metadata={"fixture": "single_m_caa_knight_v1"},
+            )
+        )
+
+    bound = bind_compiled_ray_support_v2(
+        compiled=compiled,
+        supports=supports,
+        camera_set_binding_hash=camera_set_hash,
+        sampling_contract_hash=sampling_hash,
+    )
+    assert bound.observed_sample_count == len(compiled.rays)
+    assert bound.consequence_sample_count > 0
+    assert bound.rules
+    assert {rule.view_index for rule in bound.rules} == {
+        ray["view_index"] for ray in compiled.rays if ray["order_constraints"]
+    }
+    assert set(per_view) == set(range(8))
+    assert bound.coverage_policy == "EXACT_SAMPLES_ONLY__NO_EXTRAPOLATION"
+    assert bound.interpolation_authorized is False
+    assert bound.unobserved_support_status == "UNKNOWN"
+    assert bound.product_activation_allowed is False
+    assert bound.metadata["ray_key_parsing_as_authority_forbidden"] is True
+
+
+def test_missing_exact_support_fails_closed_instead_of_extrapolating_neighbor_rule():
+    (
+        _rest,
+        _faces,
+        compiled,
+        _per_view,
+        camera_set_hash,
+        sampling_hash,
+        exact_support_coordinates,
+    ) = _compiled_knight()
+    supports = []
+    for ray in compiled.rays[:-1]:
+        record_hash = ray["record_hash"]
+        view, pixel_x, pixel_y, resolution = exact_support_coordinates[record_hash]
+        supports.append(
+            make_exact_raster_support_v2(
+                record_hash=record_hash,
+                camera_set_binding_hash=camera_set_hash,
+                sampling_contract_hash=sampling_hash,
+                view_index=view,
+                pixel_x=pixel_x,
+                pixel_y=pixel_y,
+                resolution=resolution,
+            )
+        )
+    try:
+        bind_compiled_ray_support_v2(
+            compiled=compiled,
+            supports=supports,
+            camera_set_binding_hash=camera_set_hash,
+            sampling_contract_hash=sampling_hash,
+        )
+    except Exception as exc:
+        assert "GRAPHICS_V2_EXECUTABLE_SUPPORT_REQUIRED" in str(exc)
+    else:
+        raise AssertionError("missing exact support must fail closed")

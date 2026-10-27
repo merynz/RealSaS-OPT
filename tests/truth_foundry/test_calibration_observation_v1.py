@@ -15,12 +15,13 @@ class CalibrationObservationTests(unittest.TestCase):
             ledger=run/'ACTIVE_RUN_V2.json';ledger.write_text('{"status":"FAIL"}')
             manifest=run/'run_manifest.json';manifest.write_text('{}')
             (stage/'bound-job.blender.log').write_text('Traceback: measured producer error')
+            (stage/'failure_diagnostics.json').write_text('{"exception_type":"FixtureFailure"}')
             bootstrap=root/'BOOTSTRAP.json';bootstrap.write_text(json.dumps({'run_bindings':[{
                 'subject_id':'subject','run_ledger_path':str(ledger),'run_manifest_path':str(manifest)}]}))
             prep={'bootstrap_receipt':{'path':str(bootstrap),'sha256':sha256(bootstrap)},
                   'members':[{'subject_id':'subject','attempt_id':'attempt','role':'COHORT'}]}
             result=export_diagnostics(prep,root/'export')
-            self.assertEqual(len(result[0]['files']),3)
+            self.assertEqual(len(result[0]['files']),4)
             self.assertEqual((root/'export/attempt/diagnostics/bound-job.blender.log').read_text(),
                              'Traceback: measured producer error')
             bootstrap.write_text('{}')

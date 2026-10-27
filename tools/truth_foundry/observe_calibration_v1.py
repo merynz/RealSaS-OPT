@@ -55,6 +55,7 @@ def export_diagnostics(preparation,output):
         row={'attempt_id':member['attempt_id'],'files':[],'missing':[]}
         sources=[ledger,Path(binding['run_manifest_path']).resolve()]
         stage=ledger.parent/'artifacts'/STAGE
+        sources.append(stage/'failure_diagnostics.json')
         if stage.is_dir():
             candidates=sorted(p for p in stage.iterdir() if p.name.endswith(('.blender.log','.job.json')))
             require(len(candidates)<=32,'TRUTH_OBSERVE_DIAGNOSTIC_FILE_COUNT_EXCEEDED')

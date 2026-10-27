@@ -1,0 +1,142 @@
+name: source-appearance-replay-fit8-v1
+on:
+  pull_request:
+    paths:
+      - 'tools/truth_foundry/blender_source_appearance_policy_replay_v1.py'
+      - 'tools/truth_foundry/audit_source_appearance_replay_v1.py'
+      - '.github/workflows/source_appearance_replay_fit8_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: source-appearance-replay-fit8-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  authority-court:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      CALIBRATION_ROOT: /home/monster/realsas_authority/truth_calibration_preparation/40480940440-1
+      CALIBRATION_PREPARATION_SHA256: 060e19bd46766ed65e7a3bfc31ba193210dfb508a93cc2abcb6b1843eb356f42
+      BLENDER: /home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
+      COURT_ROOT: /home/monster/realsas_authority/source_appearance_replay_fit8_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify sealed observation and calibration roots
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          cal=Path(os.environ['CALIBRATION_ROOT']); prep=cal/'PREPARATION.json'; obs=cal/'evidence'/'OBSERVATION.json'
+          if not prep.is_file() or hashlib.sha256(prep.read_bytes()).hexdigest()!=os.environ['CALIBRATION_PREPARATION_SHA256']:
+              raise SystemExit('SOURCE_APPEARANCE_REPLAY_CALIBRATION_ROOT_DRIFT')
+          o=json.loads(obs.read_text())
+          if o.get('all_measurements_committed_and_exported') is not True or o.get('training_submitted') is not False or o.get('truth_qualification_inferred') is not False:
+              raise SystemExit('SOURCE_APPEARANCE_REPLAY_CALIBRATION_AUTHORITY')
+          request=json.loads(Path('canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json').read_text())
+          if request.get('schema')!='RealSaS.NativeTeacherReplayRequest.v1' or len(request.get('subjects') or ())!=8:
+              raise SystemExit('SOURCE_APPEARANCE_REPLAY_REQUEST_DRIFT')
+          print('SOURCE_APPEARANCE_REPLAY_INPUT_ROOTS=PASS')
+          PY
+
+      - name: Replay sealed admitted appearance policy on exact packed evaluators
+        run: |
+          set -euo pipefail
+          mkdir -p "$COURT_ROOT/subjects"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os,subprocess,time
+          from pathlib import Path
+          authority=Path(os.environ['AUTHORITY_ROOT']);cal=Path(os.environ['CALIBRATION_ROOT']);court=Path(os.environ['COURT_ROOT'])/'subjects';blender=os.environ['BLENDER']
+          request=json.loads(Path('canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json').read_text())
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for block in iter(lambda:f.read(8*1024*1024),b''): h.update(block)
+              return h.hexdigest()
+          teacher={}
+          for p in sorted(cal.rglob('TEACHER_SCENE.json')):
+              value=json.loads(p.read_text());sid=str(value.get('subject_key') or '')
+              if sid in teacher: raise RuntimeError('SOURCE_APPEARANCE_REPLAY_DUPLICATE_TEACHER:'+sid)
+              teacher[sid]=(p,value)
+          if len(teacher)!=8: raise RuntimeError(f'SOURCE_APPEARANCE_REPLAY_TEACHER_COUNT:{len(teacher)}')
+          for i,subject in enumerate(request['subjects'],1):
+              sid=str(subject['subject_id']); admission=(authority/subject['observation_admission']['relative']).resolve()
+              if not admission.is_file() or sha(admission)!=subject['observation_admission']['sha256']:
+                  raise RuntimeError('SOURCE_APPEARANCE_REPLAY_ADMISSION_DRIFT:'+sid)
+              folder=admission.parent;candidate=folder/'SOURCE_REST_RENDER_CANDIDATE.json';camera=folder/'camera_bundle.json'
+              admitted=json.loads(admission.read_text());candidate_value=json.loads(candidate.read_text())
+              if sha(candidate)!=admitted['candidate_sha256'] or sha(camera)!=admitted['camera_sha256']:
+                  raise RuntimeError('SOURCE_APPEARANCE_REPLAY_OBSERVATION_LINEAGE:'+sid)
+              scene_path,scene=teacher[sid]
+              refs={Path(str(r['path'])).name:r for r in scene.get('appearance_payloads') or ()}
+              blend=Path(refs['source_scene.blend']['path']).resolve()
+              if not blend.is_file() or sha(blend)!=refs['source_scene.blend']['sha256']:
+                  raise RuntimeError('SOURCE_APPEARANCE_REPLAY_BLEND_DRIFT:'+sid)
+              subject_root=court/sid;replay_dir=subject_root/'replay';subject_root.mkdir(parents=True,exist_ok=False)
+              started=time.monotonic();print(f'[SOURCE_APPEARANCE_REPLAY] {i}/8 {sid}',flush=True)
+              subprocess.run([
+                  blender,'-b',str(blend),'--python-exit-code','2',
+                  '--python','tools/truth_foundry/blender_source_appearance_policy_replay_v1.py','--',
+                  '--subject-id',sid,'--candidate',str(candidate),'--camera-bundle',str(camera),
+                  '--expected-blend-sha256',refs['source_scene.blend']['sha256'],'--output-dir',str(replay_dir),
+              ],check=True)
+              subprocess.run([
+                  os.environ['PLATFORM_ROOT']+'/current/bin/realsas-python','tools/truth_foundry/audit_source_appearance_replay_v1.py',
+                  '--admission',str(admission),'--candidate',str(candidate),'--camera-bundle',str(camera),
+                  '--replay-dir',str(replay_dir),'--output',str(subject_root/'SOURCE_APPEARANCE_REPLAY_EQUIVALENCE_V1.json'),
+              ],check=True)
+              print(f'[SOURCE_APPEARANCE_REPLAY_DONE] {sid} seconds={time.monotonic()-started:.2f}',flush=True)
+          PY
+
+      - name: Aggregate source appearance replay equivalence without qualification
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ['COURT_ROOT']);rows=[]
+          for p in sorted((root/'subjects').glob('*/SOURCE_APPEARANCE_REPLAY_EQUIVALENCE_V1.json')):
+              rows.append(json.loads(p.read_text()))
+          if len(rows)!=8: raise SystemExit(f'SOURCE_APPEARANCE_REPLAY_SUBJECT_COUNT:{len(rows)}')
+          if not all(r.get('court_status')=='PASS_SOURCE_APPEARANCE_MASK_EQUIVALENCE' and r.get('source_opacity_policy_replay_equivalent') is True for r in rows):
+              raise SystemExit('SOURCE_APPEARANCE_REPLAY_SUBJECT_FAIL')
+          for r in rows:
+              for key in ('source_lit_appearance_parity_claimed','rgb_equivalence_claimed','effective_alpha_value_equivalence_claimed','sampler_qualified','qualification_minted','student_target_allowed','training_allowed'):
+                  if r.get(key) is not False: raise SystemExit('SOURCE_APPEARANCE_REPLAY_AUTHORITY_LEAK:'+key)
+          result={
+              'schema':'RealSaS.SourceAppearanceReplayFit8Court.v1','subject_count':8,'view_count':64,
+              'exact_mask_equal_view_count':sum(int(r['exact_mask_equal_view_count']) for r in rows),
+              'xor_pixel_count_total':sum(int(r['xor_pixel_count_total']) for r in rows),
+              'maximum_replay_to_admitted_hausdorff_px':max(float(r['maximum_replay_to_admitted_hausdorff_px']) for r in rows),
+              'maximum_geometry_gap_upper_bound_px':max(float(r['maximum_geometry_gap_upper_bound_px']) for r in rows),
+              'sealed_maximum_mask_gap_px':2.0,'source_opacity_policy_replay_equivalent':True,
+              'motion_geometry_teacher_authority_mutated':False,'source_lit_appearance_parity_claimed':False,
+              'rgb_equivalence_claimed':False,'effective_alpha_value_equivalence_claimed':False,
+              'sampler_qualified':False,'qualification_minted':False,'student_target_allowed':False,'training_allowed':False,
+              'court_status':'PASS_FIT8_SOURCE_APPEARANCE_MASK_EQUIVALENCE','subjects':rows,
+          }
+          (root/'SOURCE_APPEARANCE_REPLAY_FIT8_V1.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          print(json.dumps({k:v for k,v in result.items() if k!='subjects'},sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: source-appearance-replay-fit8-v1-${{ github.run_id }}
+          path: |
+            ${{ env.COURT_ROOT }}/SOURCE_APPEARANCE_REPLAY_FIT8_V1.json
+            ${{ env.COURT_ROOT }}/subjects/*/SOURCE_APPEARANCE_REPLAY_EQUIVALENCE_V1.json
+            ${{ env.COURT_ROOT }}/subjects/*/replay/SOURCE_APPEARANCE_POLICY_REPLAY_V1.json
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

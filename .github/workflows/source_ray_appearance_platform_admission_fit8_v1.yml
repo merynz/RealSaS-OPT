@@ -1,0 +1,138 @@
+name: source-ray-appearance-platform-admission-fit8-v1
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/source_ray_appearance_platform_v1.py'
+      - 'tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py'
+      - 'tools/platform_source_ray_appearance_admission_v1.py'
+      - 'tests/truth_foundry/test_source_ray_appearance_platform_admission_v1.py'
+      - 'tests/truth_foundry/test_source_ray_appearance_platform_bundle_v1.py'
+      - 'tests/truth_foundry/test_source_ray_appearance_platform_plan_v1.py'
+      - '.github/workflows/source_ray_appearance_platform_admission_fit8_v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/source_ray_appearance_platform_v1.py'
+      - 'tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py'
+      - 'tools/platform_source_ray_appearance_admission_v1.py'
+      - 'tests/truth_foundry/test_source_ray_appearance_platform_admission_v1.py'
+      - 'tests/truth_foundry/test_source_ray_appearance_platform_bundle_v1.py'
+      - 'tests/truth_foundry/test_source_ray_appearance_platform_plan_v1.py'
+      - '.github/workflows/source_ray_appearance_platform_admission_fit8_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: source-ray-appearance-platform-admission-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  source-contract:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install source-court dependencies
+        run: python -m pip install --disable-pip-version-check pytest numpy
+      - name: Run admission source courts
+        run: |
+          set -euo pipefail
+          python -m pytest -q \
+            tests/truth_foundry/test_source_ray_appearance_platform_admission_v1.py \
+            tests/truth_foundry/test_source_ray_appearance_platform_bundle_v1.py \
+            tests/truth_foundry/test_source_ray_appearance_platform_plan_v1.py
+          python -m py_compile \
+            compiler/realsas_compiler_services/orchestrator/adapters/source_ray_appearance_platform_v1.py \
+            tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py \
+            tools/platform_source_ray_appearance_admission_v1.py
+
+  platform-registry-admission:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: source-contract
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      COURT_RUN_ID: '40544781242'
+      COURT_ARTIFACT_ID: '12751917983'
+      COURT_ARTIFACT_NAME: source-ray-appearance-source-equivalence-fit8-v1-40544781242
+      COURT_ARTIFACT_DIGEST: sha256:a63940ef7bb9064f42941f595089b85bb120a7f53a271b7392b0db3c2dbe01dc
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Wait for exact deployed canonical main
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          for i in $(seq 1 120); do
+            if /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          deployment = json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
+          sys.exit(0 if deployment.get('code_sha') == os.environ['EXPECTED_SHA'] else 1)
+          PY
+            then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'SOURCE_RAY_APPEARANCE_DEPLOYED_MAIN_DRIFT' >&2
+          exit 1
+      - name: Fetch pinned #243 court artifact
+        run: |
+          set -euo pipefail
+          actual="$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${COURT_ARTIFACT_ID}" --jq .digest)"
+          test "$actual" = "$COURT_ARTIFACT_DIGEST"
+          work="$RUNNER_TEMP/source-ray-appearance-243"
+          rm -rf "$work"
+          mkdir -p "$work"
+          gh run download "$COURT_RUN_ID" -n "$COURT_ARTIFACT_NAME" --dir "$work"
+          test -f "$work/SOURCE_RAY_APPEARANCE_SOURCE_EQUIVALENCE_FIT8_V1.json"
+          test "$(find "$work/subjects" -mindepth 2 -maxdepth 2 -name PACKED_A.json | wc -l)" -eq 8
+      - name: Build exact unqualified Platform input bundle
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/source-ray-appearance-243"
+          bundle="$RUNNER_TEMP/source-ray-appearance-platform-bundle.json"
+          args=()
+          while IFS= read -r path; do
+            args+=(--measurement "$path")
+          done < <(find "$work/subjects" -mindepth 2 -maxdepth 2 -name PACKED_A.json | sort)
+          /home/monster/realsas_platform/current/bin/realsas-python \
+            tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py \
+            --court "$work/SOURCE_RAY_APPEARANCE_SOURCE_EQUIVALENCE_FIT8_V1.json" \
+            "${args[@]}" \
+            --out "$bundle"
+      - name: Execute real Platform CAS and Registry admission
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$PLATFORM_ROOT/research-results/source-ray-appearance-platform-admission-v1"
+          /home/monster/realsas_platform/current/bin/realsas-python \
+            tools/platform_source_ray_appearance_admission_v1.py \
+            --root "$PLATFORM_ROOT" \
+            --bundle "$RUNNER_TEMP/source-ray-appearance-platform-bundle.json" \
+            --expected-main-sha "$EXPECTED_SHA" \
+            --out "$PLATFORM_ROOT/research-results/source-ray-appearance-platform-admission-v1/receipt.json"
+      - name: Preserve admission receipt mirror
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-ray-appearance-platform-admission-fit8-v1-${{ github.run_id }}
+          path: /home/monster/realsas_platform/research-results/source-ray-appearance-platform-admission-v1/receipt.json
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,204 @@
+name: source-appearance-replay-fit8-v1
+on:
+  pull_request:
+    paths:
+      - 'tools/truth_foundry/blender_source_appearance_policy_replay_v1.py'
+      - 'tools/truth_foundry/audit_source_appearance_replay_v1.py'
+      - 'tools/truth_foundry/blender_packed_rest_geometry_export_v1.py'
+      - 'tools/truth_foundry/audit_source_appearance_geometry_lane_v1.py'
+      - '.github/workflows/source_appearance_replay_fit8_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: source-appearance-replay-fit8-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  authority-court:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      CALIBRATION_ROOT: /home/monster/realsas_authority/truth_calibration_preparation/40480940440-1
+      CALIBRATION_PREPARATION_SHA256: 060e19bd46766ed65e7a3bfc31ba193210dfb508a93cc2abcb6b1843eb356f42
+      BLENDER: /home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
+      COURT_ROOT: /home/monster/realsas_authority/source_appearance_replay_fit8_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify sealed observation and calibration roots
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          cal=Path(os.environ['CALIBRATION_ROOT']); prep=cal/'PREPARATION.json'; obs=cal/'evidence'/'OBSERVATION.json'
+          if not prep.is_file() or hashlib.sha256(prep.read_bytes()).hexdigest()!=os.environ['CALIBRATION_PREPARATION_SHA256']:
+              raise SystemExit('SOURCE_APPEARANCE_REPLAY_CALIBRATION_ROOT_DRIFT')
+          o=json.loads(obs.read_text())
+          if o.get('all_measurements_committed_and_exported') is not True or o.get('training_submitted') is not False or o.get('truth_qualification_inferred') is not False:
+              raise SystemExit('SOURCE_APPEARANCE_REPLAY_CALIBRATION_AUTHORITY')
+          request=json.loads(Path('canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json').read_text())
+          if request.get('schema')!='RealSaS.NativeTeacherReplayRequest.v1' or len(request.get('subjects') or ())!=8:
+              raise SystemExit('SOURCE_APPEARANCE_REPLAY_REQUEST_DRIFT')
+          print('SOURCE_APPEARANCE_REPLAY_INPUT_ROOTS=PASS')
+          PY
+
+      - name: Replay sealed admitted appearance policy and packed-surface transport court
+        run: |
+          set -euo pipefail
+          mkdir -p "$COURT_ROOT/subjects"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os,subprocess,time
+          from pathlib import Path
+          authority=Path(os.environ['AUTHORITY_ROOT']);cal=Path(os.environ['CALIBRATION_ROOT']);court=Path(os.environ['COURT_ROOT'])/'subjects';blender=os.environ['BLENDER']
+          request=json.loads(Path('canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json').read_text())
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for block in iter(lambda:f.read(8*1024*1024),b''): h.update(block)
+              return h.hexdigest()
+          teacher={}
+          for p in sorted(cal.rglob('TEACHER_SCENE.json')):
+              value=json.loads(p.read_text());sid=str(value.get('subject_key') or '')
+              if sid in teacher: raise RuntimeError('SOURCE_APPEARANCE_REPLAY_DUPLICATE_TEACHER:'+sid)
+              teacher[sid]=(p,value)
+          if len(teacher)!=8: raise RuntimeError(f'SOURCE_APPEARANCE_REPLAY_TEACHER_COUNT:{len(teacher)}')
+          for i,subject in enumerate(request['subjects'],1):
+              sid=str(subject['subject_id']); source=(authority/subject['source']['relative']).resolve();admission=(authority/subject['observation_admission']['relative']).resolve()
+              if not source.is_file() or sha(source)!=subject['source']['sha256']:
+                  raise RuntimeError('SOURCE_APPEARANCE_REPLAY_SOURCE_DRIFT:'+sid)
+              if not admission.is_file() or sha(admission)!=subject['observation_admission']['sha256']:
+                  raise RuntimeError('SOURCE_APPEARANCE_REPLAY_ADMISSION_DRIFT:'+sid)
+              folder=admission.parent;candidate=folder/'SOURCE_REST_RENDER_CANDIDATE.json';camera=folder/'camera_bundle.json'
+              admitted=json.loads(admission.read_text())
+              if sha(candidate)!=admitted['candidate_sha256'] or sha(camera)!=admitted['camera_sha256']:
+                  raise RuntimeError('SOURCE_APPEARANCE_REPLAY_OBSERVATION_LINEAGE:'+sid)
+              scene_path,scene=teacher[sid]
+              refs={Path(str(r['path'])).name:r for r in scene.get('appearance_payloads') or ()}
+              blend=Path(refs['source_scene.blend']['path']).resolve()
+              if not blend.is_file() or sha(blend)!=refs['source_scene.blend']['sha256']:
+                  raise RuntimeError('SOURCE_APPEARANCE_REPLAY_BLEND_DRIFT:'+sid)
+              subject_root=court/sid;reference_root=subject_root/'observation_import';replay_dir=subject_root/'replay';subject_root.mkdir(parents=True,exist_ok=False)
+              imported_json=reference_root/'imported.json';packed_json=subject_root/'packed_geometry.json';started=time.monotonic();print(f'[SOURCE_APPEARANCE_REPLAY] {i}/8 {sid}',flush=True)
+
+              # Re-materialize the sealed observation import only to retain the
+              # independently admitted source lane and measure any geometry-lane
+              # difference.  Cross-lane geometry equivalence is not an appearance
+              # policy-transport requirement.
+              subprocess.run([
+                  blender,'-b','--factory-startup','--python-exit-code','2',
+                  '--python','tools/observation/blender_source_parity_export_v1.py','--',
+                  str(source),str(imported_json),
+              ],check=True)
+              if not imported_json.is_file(): raise RuntimeError('SOURCE_APPEARANCE_REPLAY_IMPORTED_GEOMETRY_MISSING:'+sid)
+
+              # Export the exact teacher mesh set from the packed evaluator.  The
+              # native teacher selector excludes armature custom-shape helpers.
+              subprocess.run([
+                  blender,'-b',str(blend),'--python-exit-code','2',
+                  '--python','tools/truth_foundry/blender_packed_rest_geometry_export_v1.py','--',
+                  '--subject-id',sid,'--expected-blend-sha256',refs['source_scene.blend']['sha256'],
+                  '--output',str(packed_json),
+              ],check=True)
+              if not packed_json.is_file(): raise RuntimeError('SOURCE_APPEARANCE_REPLAY_PACKED_GEOMETRY_MISSING:'+sid)
+
+              subprocess.run([
+                  blender,'-b',str(blend),'--python-exit-code','2',
+                  '--python','tools/truth_foundry/blender_source_appearance_policy_replay_v1.py','--',
+                  '--subject-id',sid,'--candidate',str(candidate),'--camera-bundle',str(camera),
+                  '--expected-blend-sha256',refs['source_scene.blend']['sha256'],'--output-dir',str(replay_dir),
+              ],check=True)
+
+              transport_receipt=subject_root/'SOURCE_APPEARANCE_POLICY_TRANSPORT_V1.json'
+              audit_result=subprocess.run([
+                  os.environ['PLATFORM_ROOT']+'/current/bin/realsas-python','tools/truth_foundry/audit_source_appearance_replay_v1.py',
+                  '--admission',str(admission),'--candidate',str(candidate),'--camera-bundle',str(camera),
+                  '--imported-geometry',str(imported_json),'--packed-geometry',str(packed_json),
+                  '--replay-dir',str(replay_dir),'--output',str(transport_receipt),
+              ],check=False)
+              if not transport_receipt.is_file():
+                  raise RuntimeError(f'SOURCE_APPEARANCE_REPLAY_AUDIT_RECEIPT_MISSING:{sid}:rc={audit_result.returncode}')
+              audit=json.loads(transport_receipt.read_text())
+              audit_pass=audit.get('court_status')=='PASS_SOURCE_APPEARANCE_POLICY_TRANSPORT' and audit.get('source_opacity_policy_transport_equivalent') is True
+              if audit_result.returncode not in (0,1) or (audit_result.returncode==0)!=audit_pass:
+                  raise RuntimeError(f'SOURCE_APPEARANCE_REPLAY_AUDIT_EXIT_STATUS_MISMATCH:{sid}:rc={audit_result.returncode}:pass={audit_pass}')
+
+              lane_receipt=subject_root/'SOURCE_APPEARANCE_GEOMETRY_LANE_DIAGNOSTIC_V1.json'
+              subprocess.run([
+                  os.environ['PLATFORM_ROOT']+'/current/bin/realsas-python','tools/truth_foundry/audit_source_appearance_geometry_lane_v1.py',
+                  '--subject-id',sid,'--camera-bundle',str(camera),'--imported-geometry',str(imported_json),
+                  '--packed-geometry',str(packed_json),'--replay-dir',str(replay_dir),'--output',str(lane_receipt),
+              ],check=True)
+              if not lane_receipt.is_file(): raise RuntimeError('SOURCE_APPEARANCE_REPLAY_GEOMETRY_LANE_RECEIPT_MISSING:'+sid)
+              lane=json.loads(lane_receipt.read_text())
+              print(f'[SOURCE_APPEARANCE_REPLAY_DONE] {sid} court={audit.get("court_status")} replay_packed={audit.get("maximum_replay_to_packed_teacher_geometry_hausdorff_px")} packed_observation={lane.get("maximum_packed_to_observation_import_geometry_hausdorff_px")} seconds={time.monotonic()-started:.2f}',flush=True)
+          PY
+
+      - name: Aggregate source appearance policy transport without qualification
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ['COURT_ROOT']);rows=[];lanes=[]
+          for p in sorted((root/'subjects').glob('*/SOURCE_APPEARANCE_POLICY_TRANSPORT_V1.json')):
+              rows.append(json.loads(p.read_text()))
+          for p in sorted((root/'subjects').glob('*/SOURCE_APPEARANCE_GEOMETRY_LANE_DIAGNOSTIC_V1.json')):
+              lanes.append(json.loads(p.read_text()))
+          if len(rows)!=8: raise SystemExit(f'SOURCE_APPEARANCE_REPLAY_SUBJECT_COUNT:{len(rows)}')
+          if len(lanes)!=8: raise SystemExit(f'SOURCE_APPEARANCE_GEOMETRY_LANE_SUBJECT_COUNT:{len(lanes)}')
+          if {r['subject_id'] for r in rows}!={r['subject_id'] for r in lanes}:
+              raise SystemExit('SOURCE_APPEARANCE_GEOMETRY_LANE_SUBJECT_SET_DRIFT')
+          if not all(r.get('court_status')=='PASS_SOURCE_APPEARANCE_POLICY_TRANSPORT' and r.get('source_opacity_policy_transport_equivalent') is True for r in rows):
+              raise SystemExit('SOURCE_APPEARANCE_POLICY_TRANSPORT_SUBJECT_FAIL')
+          for r in rows:
+              if r.get('triangle_upper_bound_is_authority') is not False: raise SystemExit('SOURCE_APPEARANCE_REPLAY_PROXY_BOUND_REGAINED_AUTHORITY')
+              if r.get('geometry_lane_equivalence_required_for_policy_transport') is not False: raise SystemExit('SOURCE_APPEARANCE_GEOMETRY_LANE_REGAINED_APPEARANCE_AUTHORITY')
+              if r.get('packed_geometry_source_observation_equivalence_claimed') is not False: raise SystemExit('SOURCE_APPEARANCE_PACKED_GEOMETRY_EQUIVALENCE_LEAK')
+              for key in ('source_lit_appearance_parity_claimed','rgb_equivalence_claimed','effective_alpha_value_equivalence_claimed','sampler_qualified','qualification_minted','student_target_allowed','training_allowed'):
+                  if r.get(key) is not False: raise SystemExit('SOURCE_APPEARANCE_REPLAY_AUTHORITY_LEAK:'+key)
+          lane_mismatches=sorted(r['subject_id'] for r in lanes if r.get('diagnostic_packed_matches_observation_import_geometry_within_sealed_gap') is not True)
+          result={
+              'schema':'RealSaS.SourceAppearancePolicyTransportFit8Court.v1','subject_count':8,'view_count':64,
+              'exact_mask_equal_view_count':sum(int(r['exact_mask_equal_view_count']) for r in rows),
+              'xor_pixel_count_total':sum(int(r['xor_pixel_count_total']) for r in rows),
+              'maximum_replay_to_admitted_hausdorff_px':max(float(r['maximum_replay_to_admitted_hausdorff_px']) for r in rows),
+              'maximum_replay_to_packed_teacher_geometry_hausdorff_px':max(float(r['maximum_replay_to_packed_teacher_geometry_hausdorff_px']) for r in rows),
+              'maximum_packed_to_observation_import_geometry_hausdorff_px':max(float(r['maximum_packed_to_observation_import_geometry_hausdorff_px']) for r in rows),
+              'maximum_admitted_to_observation_import_geometry_hausdorff_px':max(float(r['maximum_admitted_to_observation_import_geometry_hausdorff_px']) for r in rows),
+              'maximum_direct_replay_to_observation_import_geometry_hausdorff_px':max(float(r['maximum_direct_replay_to_observation_import_geometry_hausdorff_px']) for r in rows),
+              'sealed_maximum_mask_gap_px':2.0,
+              'authority_metric':'PAIRED_SUPPORT_PRESERVATION__ADMITTED_SOURCE_MASK_TO_RAW_GEOMETRY__REPLAY_MASK_TO_PACKED_TEACHER_GEOMETRY',
+              'geometry_lane_mismatch_subjects':lane_mismatches,
+              'geometry_lane_equivalence_required_for_policy_transport':False,
+              'packed_geometry_source_observation_equivalence_claimed':False,
+              'triangle_upper_bound_is_authority':False,'source_opacity_policy_transport_equivalent':True,
+              'motion_geometry_teacher_authority_mutated':False,'source_lit_appearance_parity_claimed':False,
+              'rgb_equivalence_claimed':False,'effective_alpha_value_equivalence_claimed':False,
+              'sampler_qualified':False,'qualification_minted':False,'student_target_allowed':False,'training_allowed':False,
+              'court_status':'PASS_FIT8_SOURCE_APPEARANCE_POLICY_TRANSPORT','subjects':rows,'geometry_lane_diagnostics':lanes,
+          }
+          (root/'SOURCE_APPEARANCE_POLICY_TRANSPORT_FIT8_V1.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          print(json.dumps({k:v for k,v in result.items() if k not in {'subjects','geometry_lane_diagnostics'}},sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: source-appearance-replay-fit8-v1-${{ github.run_id }}
+          path: |
+            ${{ env.COURT_ROOT }}/SOURCE_APPEARANCE_POLICY_TRANSPORT_FIT8_V1.json
+            ${{ env.COURT_ROOT }}/subjects/*/SOURCE_APPEARANCE_POLICY_TRANSPORT_V1.json
+            ${{ env.COURT_ROOT }}/subjects/*/SOURCE_APPEARANCE_GEOMETRY_LANE_DIAGNOSTIC_V1.json
+            ${{ env.COURT_ROOT }}/subjects/*/replay/SOURCE_APPEARANCE_POLICY_REPLAY_V1.json
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

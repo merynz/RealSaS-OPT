@@ -1,0 +1,91 @@
+name: self-hosted-runner-health
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/self_hosted_runner_health.yml'
+      - 'canonical/SELF_HOSTED_RUNNER_HEALTH_TRIGGER_V1.json'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/self_hosted_runner_health.yml'
+      - 'canonical/SELF_HOSTED_RUNNER_HEALTH_TRIGGER_V1.json'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TARGET_RUNNER: realsas-wsl-1660ti
+      OUTPUT_PATH: /tmp/REALSAS_SELF_HOSTED_RUNNER_HEALTH.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read repository runner state from GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/actions/runners?per_page=100" > /tmp/realsas-runners.json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          raw = json.loads(Path('/tmp/realsas-runners.json').read_text(encoding='utf-8'))
+          runners = list(raw.get('runners') or [])
+          target_name = os.environ['TARGET_RUNNER']
+          matches = [row for row in runners if str(row.get('name') or '') == target_name]
+
+          if len(matches) == 1:
+              row = matches[0]
+              labels = sorted(str(item.get('name') or '') for item in (row.get('labels') or []))
+              required = {'self-hosted', 'Linux', 'X64', 'realsas'}
+              missing = sorted(required.difference(labels))
+              status = 'ONLINE' if row.get('status') == 'online' else 'OFFLINE'
+              payload = {
+                  'schema': 'RealSaS.SelfHostedRunnerHealth.v1',
+                  'status': status,
+                  'runner': {
+                      'id': row.get('id'),
+                      'name': target_name,
+                      'github_status': row.get('status'),
+                      'busy': bool(row.get('busy')),
+                      'labels': labels,
+                      'missing_required_labels': missing,
+                  },
+                  'runner_count_visible': len(runners),
+                  'github_api_read_succeeded': True,
+                  'repository_mutation_performed': False,
+              }
+          else:
+              payload = {
+                  'schema': 'RealSaS.SelfHostedRunnerHealth.v1',
+                  'status': 'MISSING_OR_AMBIGUOUS',
+                  'target_runner': target_name,
+                  'matching_runner_count': len(matches),
+                  'runner_count_visible': len(runners),
+                  'github_api_read_succeeded': True,
+                  'repository_mutation_performed': False,
+              }
+
+          out = Path(os.environ['OUTPUT_PATH'])
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          PY
+
+      - name: Preserve GitHub-side runner health receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: self-hosted-runner-health-${{ github.run_id }}
+          path: ${{ env.OUTPUT_PATH }}
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 0

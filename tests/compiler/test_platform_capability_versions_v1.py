@@ -21,6 +21,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
         "product.shape",
         "product.mesh",
         "product.rig",
+        "product.skin",
     }
     assert set(specs) == set(implementations)
     assert specs["product.input"]["parameters"]["responsibility_ids"] == [
@@ -39,6 +40,12 @@ def test_product_capability_implementations_are_complete_and_semantic():
         "rig.canonical_identity_mint",
         "rig.structure_proposal",
         "rig.structure_qualification",
+    ]
+    assert specs["product.skin"]["parameters"]["responsibility_ids"] == [
+        "skin.canonical_influence_mint",
+        "skin.carrier_binding_qualification",
+        "skin.influence_legality_qualification",
+        "skin.influence_proposal",
     ]
     assert "rig.frame_observability_qualification" not in str(specs["product.rig"])
     assert specs["product.shape"]["parameters"]["required_models"] == [
@@ -83,6 +90,24 @@ def test_product_capability_implementations_are_complete_and_semantic():
             "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
         }
     ]
+
+    skin = specs["product.skin"]
+    assert skin["policy"]["dependencies"] == [
+        "product.mesh",
+        "product.rig",
+        "compiler.stage/15_RIGGING_SURFACE_QUALIFIED",
+    ]
+    assert skin["parameters"]["required_models"] == [
+        {
+            "family": "MIRA",
+            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
+        }
+    ]
+    assert skin["parameters"]["mesh_and_rig_are_canonical_parents"] is True
+    assert skin["parameters"]["feature_evidence_is_canonical_parent"] is False
+    assert skin["parameters"]["material_support_is_canonical_parent"] is False
+    assert skin["parameters"]["operational_model_state_embedded_in_source"] is False
+
     assert product_model_requirements() == [
         {
             "family": "AXIS",
@@ -91,6 +116,10 @@ def test_product_capability_implementations_are_complete_and_semantic():
         {
             "family": "IRIS",
             "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3",
+        },
+        {
+            "family": "MIRA",
+            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
         },
         {
             "family": "TESSA",
@@ -106,8 +135,9 @@ def test_product_capability_implementations_are_complete_and_semantic():
             implementations["product.shape"]["implementation_sha256"],
             implementations["product.mesh"]["implementation_sha256"],
             implementations["product.rig"]["implementation_sha256"],
+            implementations["product.skin"]["implementation_sha256"],
         }
-    ) == 4
+    ) == 5
 
 
 def test_release_snapshot_v2_carries_implementation_and_model_requirements():
@@ -139,6 +169,11 @@ def test_release_snapshot_v2_carries_implementation_and_model_requirements():
         {
             "family": "IRIS",
             "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3",
+            "channel": "RESEARCH",
+        },
+        {
+            "family": "MIRA",
+            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
             "channel": "RESEARCH",
         },
         {

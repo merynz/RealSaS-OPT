@@ -27,14 +27,14 @@ func TestProductModelRequirementsFollowActiveTerrain(t *testing.T) {
 	}
 }
 
-func TestProductModelRequirementsIncludeAxisForActiveRig(t *testing.T) {
+func TestProductModelRequirementsIncludeAxisAndMiraForFullCatalog(t *testing.T) {
 	registry := productProvidersTestRegistry(t)
 	rows, err := ProductModelRequirements(registry)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(rows) != 3 {
-		t.Fatalf("requirements=%d want=3", len(rows))
+	if len(rows) != 4 {
+		t.Fatalf("requirements=%d want=4", len(rows))
 	}
 	byFamily := map[string]ProductModelRequirement{}
 	for _, row := range rows {
@@ -44,29 +44,43 @@ func TestProductModelRequirementsIncludeAxisForActiveRig(t *testing.T) {
 	if axis.ArchitectureID != "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1" || axis.RoleID != ProductRoleRig {
 		t.Fatalf("axis requirement=%+v", axis)
 	}
+	mira := byFamily["MIRA"]
+	if mira.ArchitectureID != "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5" || mira.RoleID != ProductRoleSkin {
+		t.Fatalf("mira requirement=%+v", mira)
+	}
 	if byFamily["IRIS"].RoleID != ProductRoleShape || byFamily["TESSA"].RoleID != ProductRoleShape {
 		t.Fatalf("shape requirements=%+v", byFamily)
 	}
 }
 
-func TestActiveRigEngineReleaseRequiresAxis(t *testing.T) {
+func TestFullProductCatalogEngineReleaseRequiresAxisAndMira(t *testing.T) {
 	registry := productProvidersTestRegistry(t)
 	valid := []release.ModelRequirement{
 		{Family: "AXIS", ArchitectureID: "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1", Channel: "PRODUCTION"},
 		{Family: "IRIS", ArchitectureID: "RealSaS.IRIS.VNextEvidenceModel.v3", Channel: "PRODUCTION"},
+		{Family: "MIRA", ArchitectureID: "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5", Channel: "PRODUCTION"},
 		{Family: "TESSA", ArchitectureID: "RealSaS.TESSA.Structuralizer.v3", Channel: "PRODUCTION"},
 	}
 	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, valid); err != nil {
 		t.Fatalf("full product model set rejected: %v", err)
 	}
-	missingAxis := append([]release.ModelRequirement(nil), valid[1:]...)
+	missingAxis := []release.ModelRequirement{valid[1], valid[2], valid[3]}
 	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, missingAxis); err == nil {
-		t.Fatal("active product.rig accepted an EngineRelease without AXIS")
+		t.Fatal("full product catalog accepted an EngineRelease without AXIS")
+	}
+	missingMira := []release.ModelRequirement{valid[0], valid[1], valid[3]}
+	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, missingMira); err == nil {
+		t.Fatal("full product catalog accepted an EngineRelease without MIRA")
 	}
 	wrongAxis := append([]release.ModelRequirement(nil), valid...)
 	wrongAxis[0].ArchitectureID = "wrong"
 	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, wrongAxis); err == nil {
 		t.Fatal("active product.rig accepted AXIS architecture drift")
+	}
+	wrongMira := append([]release.ModelRequirement(nil), valid...)
+	wrongMira[2].ArchitectureID = "wrong"
+	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, wrongMira); err == nil {
+		t.Fatal("active product.skin accepted MIRA architecture drift")
 	}
 }
 

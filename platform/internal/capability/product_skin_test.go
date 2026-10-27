@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
+func TestProductSkinDescriptorUsesModernParentClosure(t *testing.T) {
 	descriptors, err := (ProductSkinProvider{}).Capabilities(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -20,10 +20,12 @@ func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
 	if d.ProductPassAuthority {
 		t.Fatal("Skin must not own ProductRevision PASS authority")
 	}
+	if len(d.AllowedModes) != 1 || d.AllowedModes[0] != ModeDeveloper {
+		t.Fatalf("Skin execution modes = %v", d.AllowedModes)
+	}
 	wantDeps := map[string]bool{
-		ProductMeshCapabilityID:                           true,
-		ProductRigCapabilityID:                            true,
-		StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED"): true,
+		ProductMeshCapabilityID: true,
+		ProductRigCapabilityID:  true,
 	}
 	if len(d.Dependencies) != len(wantDeps) {
 		t.Fatalf("skin dependencies = %v", d.Dependencies)
@@ -32,9 +34,21 @@ func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
 		if !wantDeps[dep] {
 			t.Fatalf("unexpected Skin dependency %q", dep)
 		}
+		if dep == StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED") {
+			t.Fatal("legacy Stage15 leaked into Skin parent closure")
+		}
 	}
 	if got := d.Metadata["mesh_and_rig_are_canonical_parents"]; got != true {
 		t.Fatalf("Mesh/Rig canonical parent contract = %v", got)
+	}
+	if got := d.Metadata["feature_evidence_source"]; got != "PRODUCT_MESH_OUTPUT" {
+		t.Fatalf("RiggingSurface source = %v", got)
+	}
+	if got := d.Metadata["material_support_source"]; got != "PRODUCT_MESH_OUTPUT" {
+		t.Fatalf("material-support source = %v", got)
+	}
+	if got := d.Metadata["legacy_stage15_dependency"]; got != false {
+		t.Fatalf("legacy Stage15 dependency = %v", got)
 	}
 	if got := d.Metadata["feature_evidence_is_canonical_parent"]; got != false {
 		t.Fatalf("RiggingSurface canonical parent claim = %v", got)
@@ -112,16 +126,24 @@ func TestProductSkinDescriptorIsTruthfulButInactive(t *testing.T) {
 	}
 }
 
-func TestSkinIsNotAnActiveProductProviderBeforeQualifiedChannelAdmission(t *testing.T) {
+func TestSkinIsCataloguedWithoutEmbeddingLiveActivationState(t *testing.T) {
+	found := false
 	for _, provider := range ProductProviders() {
 		descriptors, err := provider.Capabilities(context.Background())
 		if err != nil {
 			t.Fatal(err)
 		}
 		for _, descriptor := range descriptors {
-			if descriptor.ID == ProductSkinCapabilityID {
-				t.Fatal("product.skin must not enter active EngineRelease graph before qualified ModelRelease channel admission")
+			if descriptor.ID != ProductSkinCapabilityID {
+				continue
+			}
+			found = true
+			if descriptor.Metadata["model_release_admission_owner"] != "PLATFORM_MODEL_REQUIREMENTS" {
+				t.Fatalf("Skin admission escaped Platform model selection: %+v", descriptor.Metadata)
 			}
 		}
+	}
+	if !found {
+		t.Fatal("product.skin missing from first-class product catalog")
 	}
 }

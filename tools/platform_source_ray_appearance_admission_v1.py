@@ -16,10 +16,15 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import time
 import urllib.error
 import urllib.request
 from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from compiler.realsas_compiler_services.orchestrator import mainline
 from tools.platform_release_snapshot import snapshot
@@ -118,10 +123,10 @@ def _verify_checkout(root: Path, expected_sha: str) -> dict[str, Any]:
     deployment = json.loads((root / "deployment.json").read_text(encoding="utf-8"))
     if str(deployment.get("code_sha") or "") != expected_sha:
         raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_DEPLOYED_MAIN_DRIFT")
-    checkout = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    checkout = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     if checkout != expected_sha:
         raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_CHECKOUT_DRIFT")
-    dirty = subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=all"], text=True)
+    dirty = subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=all"], cwd=ROOT, text=True)
     if dirty:
         raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_SOURCE_OVERLAY_FORBIDDEN")
     os.environ["REALSAS_AUTHORITY_ROOT"] = str(deployment["authority_root"])

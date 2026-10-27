@@ -6,7 +6,9 @@ from __future__ import annotations
 This diagnostic projects both the packed Truth Foundry rest geometry and the
 observation lane's independently materialized rest geometry through the exact
 sealed camera bundle, then compares both masks with the replayed alpha mask.
-It mints no qualification and is not itself a PASS/FAIL authority court.
+It also measures symmetric 3D nearest-neighbour drift in the shared source-world
+coordinate frame.  It mints no qualification and is not itself a PASS/FAIL
+authority court.
 """
 
 import argparse
@@ -16,6 +18,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy.ndimage import distance_transform_edt
+from scipy.spatial import cKDTree
 
 from tools.corpus.iris_observation_admission_v1 import project_mask
 
@@ -68,6 +71,14 @@ def _gap(a: np.ndarray, b: np.ndarray) -> float:
     return float(max(distance_transform_edt(~b)[a].max(), distance_transform_edt(~a)[b].max()))
 
 
+def _relative_vertex_drift(a: np.ndarray, b: np.ndarray) -> tuple[float, float]:
+    diagonal = float(np.linalg.norm(np.ptp(a, axis=0)))
+    if not np.isfinite(diagonal) or diagonal <= 0:
+        raise RuntimeError("SOURCE_APPEARANCE_GEOMETRY_LANE_ZERO_DIAGONAL")
+    maximum = float(max(cKDTree(a).query(b)[0].max(), cKDTree(b).query(a)[0].max()))
+    return maximum, maximum / diagonal
+
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--subject-id", required=True)
@@ -92,6 +103,10 @@ def main() -> None:
 
     imported_vertices, imported_faces = _geometry(imported_value, "OBSERVATION_IMPORT")
     packed_vertices, packed_faces = _geometry(packed_value, "PACKED")
+    vertex_drift_source_units, relative_vertex_drift = _relative_vertex_drift(imported_vertices, packed_vertices)
+    same_index_max_abs = None
+    if imported_vertices.shape == packed_vertices.shape:
+        same_index_max_abs = float(np.max(np.abs(imported_vertices - packed_vertices)))
     cameras = tuple(cameras_value.get("cameras") or ())
     if len(cameras) != 8 or {int(row.get("view_index", -1)) for row in cameras} != set(range(8)):
         raise RuntimeError("SOURCE_APPEARANCE_GEOMETRY_LANE_VIEW_SET")
@@ -137,6 +152,9 @@ def main() -> None:
         "packed_triangle_count": len(packed_faces),
         "vertex_count_equal": len(imported_vertices) == len(packed_vertices),
         "triangle_count_equal": len(imported_faces) == len(packed_faces),
+        "symmetric_nearest_vertex_drift_source_units": vertex_drift_source_units,
+        "symmetric_nearest_vertex_drift_relative_to_observation_bbox_diagonal": relative_vertex_drift,
+        "same_index_vertex_max_abs_source_units": same_index_max_abs,
         "maximum_replay_to_packed_geometry_hausdorff_px": max_replay_packed,
         "maximum_packed_to_observation_import_geometry_hausdorff_px": max_packed_imported,
         "maximum_replay_to_observation_import_geometry_hausdorff_px": max_replay_imported,

@@ -83,3 +83,32 @@ No A100 speed measurement or ready notebook is claimed by this source change.
 The Blender API references for the independently written adapter are
 [pose-bone local/final matrices](https://docs.blender.org/api/4.5/bpy.types.PoseBone.html)
 and [evaluated dependency-graph meshes](https://docs.blender.org/api/4.5/bpy.types.Depsgraph.html).
+# First real campaign: adapter repair, not a response result
+
+The first campaign `d713b26b-5bbf-4d55-b6b8-9e10b9a81029` passed Stage08
+on all eight, then failed before Blender on the same wrong normalization field:
+`observation_set_hash` instead of the actual `observation_set_binding_hash`.
+Readback run 40477560825 / artifact 12720313840 preserves all eight bound Engine
+failure records. No real isolated measurement or morphology conclusion came from
+that run. The original direct-producer synthetic fixture had missed this bridge;
+it now constructs the real NormalizationDomainIR and invokes the actual adapter,
+which launches the pinned Blender child and validates the returned bindings.
+
+The repair also declares Source01 and Source03 as direct Stage47 parents alongside
+Normalization08; reading an undeclared transitive parent is not a portable replay
+contract. The repaired campaign retains the same eight plus separate regression,
+enters Stage01 and still targets Stage46. All model, Compiler and runtime courts
+remain part of eventual FIT8 closure, not only training metrics.
+
+The original separate regression is idle at the explicit Stage09 external-evidence
+barrier. The declared operator drain may close only that hash-pinned Attempt after
+all original cohort Attempts failed. It checks exact campaign/release/command/run,
+the expected wait, and absence of active Temporal activities. Temporal records the
+exact run termination; the existing Go reconciler performs the Attempt transition
+from terminal workflow proof. It never writes SQL state, fabricates external
+evidence, cancels unrelated work or disables the upgrade guard. Its operational
+FAILED disposition is not a negative model/scientific finding. Receipts and all
+old artifacts remain intact. Repair preparation verifies prior terminal states,
+same member identities/roles and the original EngineRelease baseline before it
+submits a fresh declared campaign. The original experiment remains linked to both
+histories; no timed-out run is silently resubmitted.

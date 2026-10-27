@@ -1,3 +1,25 @@
+> **Actual calibration failure diagnosed — 2026-10-27:** PR225 merged as
+> `0b5c650c070e27b03ffd2c90cd7fc560459e6f6d`. Readback run 40477560825,
+> artifact 12720313840 (archive SHA256
+> `f322366772997fd4b54a1c2e589aedadf1c38fb2d1c6b3c1d5e2f9efc244efbf`),
+> recovered every bound failure record: all eight failed on
+> `KeyError: observation_set_hash` before Blender. NormalizationDomainIR actually
+> exposes `observation_set_binding_hash`. This is an adapter/schema defect, not
+> a morphology, model or teacher-response result. The repair uses that real wire
+> field and declares direct Source01/Source03/Normalization08 parents. The native
+> synthetic court now traverses the actual Compiler wire/adapter/Blender boundary.
+> The declared idle-regression drain preserves all original history and lets
+> the existing Go owner reconcile Temporal terminal proof; it cannot terminate
+> active computation, other stages or unrelated Attempts. The requested repair
+> campaign has the same roster, the old EngineRelease as explicit baseline and
+> requires the old campaign drained before any submission. Read its actual
+> receipt; source tests do not prove real calibration or notebook readiness.
+>
+> FIT8's goal remains the whole common source-to-Compiler-to-runtime/proof chain
+> on all eight morphologies, with shared learned parameters and common rules.
+> A Knight pass or eight training fits cannot substitute for that closure;
+> unseen generalization remains a separate court.
+
 > **Read-only diagnosis remains available during a blocked upgrade — 2026-10-27:**
 > PR224 merged as `6448f2c48a5a4fe0df80e0c5560284e655ce972c`. Its deployment
 > run 40475763050 stopped at `OPEN_ATTEMPTS_REQUIRE_OPERATOR_DRAIN_BEFORE_UPGRADE`;

@@ -1,0 +1,14 @@
+{
+  "schema": "RealSaS.FailedCalibrationDrainRequest.v1",
+  "enabled": true,
+  "campaign_id": "d713b26b-5bbf-4d55-b6b8-9e10b9a81029",
+  "attempt_id": "0468756f-e26c-47d9-a6b8-01197aa2b249",
+  "preparation_relative_path": "truth_calibration_preparation/40414940754-1/PREPARATION.json",
+  "preparation_sha256": "3bee7e9e47f3970b09f48de8ca27c442691fddb782da74e79d6abecc554715ab",
+  "expected_wait_stage_id": "09_IRIS_FIT_PREREGISTERED",
+  "actor": "truth-calibration-repair-operator",
+  "reason": "All cohort measurements failed before Blender on the common observation binding field; close only the idle separate regression so the generic apparatus repair can be deployed. Preserve all old evidence.",
+  "terminate_idle_regression_allowed": true,
+  "new_measurements_allowed": false,
+  "training_allowed": false
+}

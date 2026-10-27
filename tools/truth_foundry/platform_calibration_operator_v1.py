@@ -39,6 +39,14 @@ def prepare(request, *, repo, platform_root, authority_root, expected_sha, outpu
     _require(json.loads((platform/'deployment.json').read_text())['code_sha']==expected_sha,'TRUTH_OPERATOR_DEPLOYED_MAIN_DRIFT')
     _require(subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip()==expected_sha,'TRUTH_OPERATOR_CHECKOUT_DRIFT')
     _require(subprocess.check_output(['git','-C',str(repo),'ls-remote','origin','refs/heads/main'],text=True).split()[0]==expected_sha,'TRUTH_OPERATOR_REMOTE_MAIN_DRIFT')
+    prior=None
+    if request.get('repair_of_campaign_id'):
+        prior=bootstrap.api(api_root,'GET','/v1/research/campaigns/'+request['repair_of_campaign_id'])
+        _require(prior['candidate_engine_release_id']==request['baseline_engine_release_id'],
+                 'TRUTH_OPERATOR_REPAIR_BASELINE_DRIFT')
+        _require(prior['members'] and all(r['final_state'] in {'FAILED','COMPLETED'} for r in prior['members'])
+                 and any(r['role']=='COHORT' and r['final_state']=='FAILED' for r in prior['members']),
+                 'TRUTH_OPERATOR_PRIOR_CAMPAIGN_NOT_DRAINED')
     # A recovered cohort is input, not a mutable cache alias. Verify every byte
     # before creating new scientific execution state.
     baseline_rows=[]
@@ -69,6 +77,9 @@ def prepare(request, *, repo, platform_root, authority_root, expected_sha, outpu
     descriptor=json.loads(_bound_path(repo,request['input_descriptor_repo_path']).read_text())
     descriptor['campaign_contract']=request['campaign_contract_repo_path'];descriptor['campaign_name']=request['campaign_name']
     descriptor['actor']='truth-foundry-calibration-coordinator'
+    if prior is not None:
+        descriptor['baseline_engine_release_id']=request['baseline_engine_release_id']
+        descriptor['repair_expected_campaign_members']=[{'subject_id':r['subject_id'],'role':r['role']} for r in prior['members']]
     descriptor['additional_manifest_sections']={'truth_foundry':cfg}
     stage_parameters=json.loads(_bound_path(repo,request['stage_parameters_repo_path']).read_text())
     _require(stage_parameters.get('schema')=='RealSaS.StageReleaseParameters.v1','TRUTH_OPERATOR_STAGE_PARAMETER_SCHEMA')
@@ -104,6 +115,10 @@ def prepare(request, *, repo, platform_root, authority_root, expected_sha, outpu
             'members':status['members'],'training_submitted':False,'truth_qualification_minted':False,
             'measurement_submitted':False,'campaign_full_closure_claimed':False}
     result_path=output/'PREPARATION.json';result_path.write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+    if prior is not None:
+        result['repair_of_campaign_id']=request['repair_of_campaign_id']
+        result['baseline_engine_release_id']=request['baseline_engine_release_id']
+        result_path.write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
     if submit:
         _require(experiment['lifecycle_state'] in {'PREREGISTERED','RUNNING'},'TRUTH_OPERATOR_EXPERIMENT_NOT_RUNNABLE')
         if experiment['lifecycle_state']=='PREREGISTERED':

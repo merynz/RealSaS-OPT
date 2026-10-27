@@ -1,0 +1,150 @@
+name: appearance-alpha-parity-fit8-v1
+on:
+  pull_request:
+    paths:
+      - 'models/iris/truth/source_alpha_parity_v1.py'
+      - 'tools/truth_foundry/blender_source_alpha_parity_v1.py'
+      - 'tests/truth_foundry/test_source_alpha_parity_v1.py'
+      - '.github/workflows/appearance_alpha_parity_fit8_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: appearance-alpha-parity-fit8-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  authority-court:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      BLENDER: /home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
+      CALIBRATION_ROOT: /home/monster/realsas_authority/truth_calibration_preparation/40480940440-1
+      CALIBRATION_PREPARATION_SHA256: 060e19bd46766ed65e7a3bfc31ba193210dfb508a93cc2abcb6b1843eb356f42
+      COURT_ROOT: /home/monster/realsas_authority/appearance_alpha_parity_fit8_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify repaired calibration authority bytes
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['CALIBRATION_ROOT']); prep=root/'PREPARATION.json'; obs=root/'evidence'/'OBSERVATION.json'
+          if not prep.is_file() or not obs.is_file(): raise SystemExit('SOURCE_ALPHA_PARITY_INPUT_MISSING')
+          if hashlib.sha256(prep.read_bytes()).hexdigest()!=os.environ['CALIBRATION_PREPARATION_SHA256']:
+              raise SystemExit('SOURCE_ALPHA_PARITY_PREPARATION_HASH_DRIFT')
+          value=json.loads(obs.read_text())
+          if value.get('all_measurements_committed_and_exported') is not True: raise SystemExit('SOURCE_ALPHA_PARITY_CALIBRATION_NOT_CLOSED')
+          if value.get('training_submitted') is not False or value.get('truth_qualification_inferred') is not False:
+              raise SystemExit('SOURCE_ALPHA_PARITY_AUTHORITY_DRIFT')
+          scenes=sorted(root.rglob('TEACHER_SCENE.json'))
+          if len(scenes)!=8: raise SystemExit(f'SOURCE_ALPHA_PARITY_EXPECTED_FIT8:{len(scenes)}')
+          print('SOURCE_ALPHA_PARITY_INPUTS=PASS subjects=8')
+          PY
+
+      - name: Run alpha parity kernel regressions
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" -m pytest -q tests/truth_foundry/test_source_alpha_parity_v1.py
+
+      - name: Render native and unlit alpha on all exact packed FIT8 scenes
+        run: |
+          set -euo pipefail
+          mkdir -p "$COURT_ROOT/subjects"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os,subprocess,time
+          from pathlib import Path
+          root=Path(os.environ['CALIBRATION_ROOT']); out=Path(os.environ['COURT_ROOT'])/'subjects'; blender=os.environ['BLENDER']
+          accepted_scientific_nonpass={'FAIL_ALPHA_TRANSPORT_DRIFT','ABSTAIN_ALPHA_TRANSPORT_SUPPORT'}
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for block in iter(lambda:f.read(8*1024*1024),b''): h.update(block)
+              return h.hexdigest()
+          scenes=sorted(root.rglob('TEACHER_SCENE.json'))
+          for i,scene_path in enumerate(scenes,1):
+              scene=json.loads(scene_path.read_text()); sid=str(scene['subject_key'])
+              refs={Path(str(r['path'])).name:r for r in scene.get('appearance_payloads') or ()}
+              blend=Path(refs['source_scene.blend']['path']).resolve()
+              if not blend.is_file() or sha(blend)!=refs['source_scene.blend']['sha256']:
+                  raise RuntimeError('SOURCE_ALPHA_PARITY_BLEND_DRIFT:'+sid)
+              target=out/f'{sid}.alpha_parity.json'; started=time.monotonic()
+              if target.exists(): target.unlink()
+              print(f'[SOURCE_ALPHA_PARITY] {i}/8 {sid}',flush=True)
+              proc=subprocess.run([
+                  blender,'-b',str(blend),'--python-exit-code','2',
+                  '--python','tools/truth_foundry/blender_source_alpha_parity_v1.py','--',
+                  '--subject-id',sid,'--teacher-scene',str(scene_path),
+                  '--expected-blend-sha256',refs['source_scene.blend']['sha256'],
+                  '--resolution','96','--frame-scale','1.12','--tolerance','1e-6','--output',str(target),
+              ],check=False)
+              if not target.is_file():
+                  raise RuntimeError('SOURCE_ALPHA_PARITY_RECEIPT_MISSING:'+sid+f':returncode={proc.returncode}')
+              receipt=json.loads(target.read_text())
+              status=str(receipt.get('court_status') or '')
+              if proc.returncode != 0 and status not in accepted_scientific_nonpass:
+                  raise RuntimeError('SOURCE_ALPHA_PARITY_OPERATIONAL_FAILURE:'+sid+':'+status+f':returncode={proc.returncode}')
+              if proc.returncode == 0 and status != 'PASS_ALPHA_TRANSPORT_PARITY':
+                  raise RuntimeError('SOURCE_ALPHA_PARITY_NONPASS_EXITED_ZERO:'+sid+':'+status)
+              print(f'[SOURCE_ALPHA_PARITY_DONE] {sid} status={status} returncode={proc.returncode} seconds={time.monotonic()-started:.2f}',flush=True)
+          PY
+
+      - name: Aggregate complete parity boundary without authority inflation
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json,os
+          from collections import Counter
+          from pathlib import Path
+          root=Path(os.environ['COURT_ROOT']); rows=[json.loads(p.read_text()) for p in sorted((root/'subjects').glob('*.alpha_parity.json'))]
+          if len(rows)!=8: raise SystemExit('SOURCE_ALPHA_PARITY_SUBJECT_COUNT')
+          allowed={'PASS_ALPHA_TRANSPORT_PARITY','FAIL_ALPHA_TRANSPORT_DRIFT','ABSTAIN_ALPHA_TRANSPORT_SUPPORT'}
+          for row in rows:
+              if row.get('court_status') not in allowed: raise SystemExit('SOURCE_ALPHA_PARITY_STATUS_INVALID')
+              for key in ('rgb_parity_claimed','source_lighting_parity_claimed','sampler_qualified','qualification_minted','student_target_allowed','training_allowed'):
+                  if row.get(key) is not False: raise SystemExit('SOURCE_ALPHA_PARITY_AUTHORITY_LEAK:'+key)
+          subject_status=Counter(str(r['court_status']) for r in rows)
+          view_status=Counter()
+          for row in rows:
+              view_status.update({str(k):int(v) for k,v in (row.get('status_counts') or {}).items()})
+          mismatch_count=sum(int(r['mismatch_count']) for r in rows)
+          finite_max=[float(r['maximum_absolute_alpha_error']) for r in rows if r.get('maximum_absolute_alpha_error') is not None]
+          full=subject_status==Counter({'PASS_ALPHA_TRANSPORT_PARITY':8})
+          support_complete=view_status.get('ABSTAIN_EMPTY_FOREGROUND',0)==0
+          drift_free=mismatch_count==0
+          result={
+              'schema':'RealSaS.SourceAlphaParityFit8Court.v1','subject_count':8,'view_count':64,
+              'union_foreground_sample_count':sum(int(r['union_foreground_sample_count']) for r in rows),
+              'maximum_absolute_alpha_error_on_measured_support':max(finite_max) if finite_max else None,
+              'mismatch_count':mismatch_count,'alpha_tolerance':1e-6,
+              'subject_status_counts':dict(sorted(subject_status.items())),
+              'view_status_counts':dict(sorted(view_status.items())),
+              'full_fit8_alpha_parity_established':full,
+              'source_alpha_support_complete':support_complete,
+              'drift_free_on_measured_support':drift_free,
+              'rgb_parity_claimed':False,'source_lighting_parity_claimed':False,'sampler_qualified':False,
+              'qualification_minted':False,'student_target_allowed':False,'training_allowed':False,
+              'court_status':('PASS_FULL_FIT8_ALPHA_TRANSPORT_PARITY' if full else 'PASS_BOUNDARY_MEASURED__FULL_PARITY_NOT_ESTABLISHED'),
+              'subjects':rows,
+          }
+          (root/'APPEARANCE_ALPHA_PARITY_FIT8_V1.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          print(json.dumps({k:v for k,v in result.items() if k!='subjects'},sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: appearance-alpha-parity-fit8-v1-${{ github.run_id }}
+          path: |
+            ${{ env.COURT_ROOT }}/APPEARANCE_ALPHA_PARITY_FIT8_V1.json
+            ${{ env.COURT_ROOT }}/subjects/*.alpha_parity.json
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

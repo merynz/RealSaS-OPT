@@ -18,6 +18,16 @@ import math
 import numpy as np
 
 
+# Frozen product camera bundles are authored by Blender/mathutils and serialized
+# through ordinary JSON floats.  Those basis vectors can carry float32-scale
+# residuals even though the actual camera is orthonormal.  This is a transport
+# admission tolerance only: accepted vectors are NOT normalized or repaired.
+# A real basis drift remains an error rather than becoming a silently modified
+# camera.  The bound is ~O(10) float32 eps and is intentionally far below any
+# pixel/raster or geometric tolerance used by the Graphics courts.
+CAMERA_BASIS_TRANSPORT_ABS_TOLERANCE = 2.0e-6
+
+
 @dataclass(frozen=True)
 class OrthographicCameraV1:
     origin: tuple[float, float, float]
@@ -54,8 +64,28 @@ def _finite_xyz(value, code: str) -> np.ndarray:
     return out
 
 
+def camera_basis_transport_residual(value: Mapping[str, object] | object) -> float:
+    """Maximum unit/orthogonality residual of the serialized camera basis."""
+    def get(name: str):
+        if isinstance(value, Mapping):
+            return value[name]
+        return getattr(value, name)
+
+    forward = _finite_xyz(get("forward"), "GRAPHICS_ORACLE_CAMERA_FORWARD")
+    right = _finite_xyz(get("right"), "GRAPHICS_ORACLE_CAMERA_RIGHT")
+    screen_up = _finite_xyz(get("screen_up"), "GRAPHICS_ORACLE_CAMERA_UP")
+    return float(max(
+        abs(float(np.linalg.norm(forward)) - 1.0),
+        abs(float(np.linalg.norm(right)) - 1.0),
+        abs(float(np.linalg.norm(screen_up)) - 1.0),
+        abs(float(np.dot(forward, right))),
+        abs(float(np.dot(forward, screen_up))),
+        abs(float(np.dot(right, screen_up))),
+    ))
+
+
 def camera_from_mapping(value: Mapping[str, object] | object) -> OrthographicCameraV1:
-    """Normalize the frozen product camera payload without depending on its class."""
+    """Transport a frozen product camera payload without normalizing its basis."""
     def get(name: str):
         if isinstance(value, Mapping):
             return value[name]
@@ -70,14 +100,7 @@ def camera_from_mapping(value: Mapping[str, object] | object) -> OrthographicCam
     view_index = int(get("view_index"))
     if not math.isfinite(half_extent) or half_extent <= 0 or resolution <= 0 or view_index < 0:
         raise ValueError("GRAPHICS_ORACLE_CAMERA_SCALAR_CONTRACT")
-    if not (
-        np.isclose(np.linalg.norm(forward), 1.0, atol=1e-8, rtol=0)
-        and np.isclose(np.linalg.norm(right), 1.0, atol=1e-8, rtol=0)
-        and np.isclose(np.linalg.norm(screen_up), 1.0, atol=1e-8, rtol=0)
-        and abs(float(np.dot(forward, right))) <= 1e-8
-        and abs(float(np.dot(forward, screen_up))) <= 1e-8
-        and abs(float(np.dot(right, screen_up))) <= 1e-8
-    ):
+    if camera_basis_transport_residual(value) > CAMERA_BASIS_TRANSPORT_ABS_TOLERANCE:
         raise ValueError("GRAPHICS_ORACLE_CAMERA_ORTHONORMAL_REQUIRED")
     return OrthographicCameraV1(
         origin=tuple(map(float, origin)),

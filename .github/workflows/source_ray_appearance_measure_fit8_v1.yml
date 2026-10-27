@@ -1,0 +1,146 @@
+name: source-ray-appearance-measure-fit8-v1
+on:
+  pull_request:
+    paths:
+      - 'models/iris/truth/ray_appearance_measurement_v1.py'
+      - 'tools/truth_foundry/blender_source_ray_appearance_measure_v1.py'
+      - '.github/workflows/source_ray_appearance_measure_fit8_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: source-ray-appearance-measure-fit8-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  measured-ray-court:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      CALIBRATION_ROOT: /home/monster/realsas_authority/truth_calibration_preparation/40480940440-1
+      CALIBRATION_PREPARATION_SHA256: 060e19bd46766ed65e7a3bfc31ba193210dfb508a93cc2abcb6b1843eb356f42
+      BLENDER: /home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
+      COURT_ROOT: /home/monster/realsas_authority/source_ray_appearance_measure_fit8_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify sealed teacher and source-observation roots
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          cal=Path(os.environ['CALIBRATION_ROOT']);prep=cal/'PREPARATION.json';obs=cal/'evidence'/'OBSERVATION.json'
+          if not prep.is_file() or hashlib.sha256(prep.read_bytes()).hexdigest()!=os.environ['CALIBRATION_PREPARATION_SHA256']:
+              raise SystemExit('SOURCE_RAY_APPEARANCE_CALIBRATION_ROOT_DRIFT')
+          o=json.loads(obs.read_text())
+          if o.get('all_measurements_committed_and_exported') is not True or o.get('training_submitted') is not False or o.get('truth_qualification_inferred') is not False:
+              raise SystemExit('SOURCE_RAY_APPEARANCE_CALIBRATION_AUTHORITY')
+          request=json.loads(Path('canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json').read_text())
+          if request.get('schema')!='RealSaS.NativeTeacherReplayRequest.v1' or len(request.get('subjects') or ())!=8:
+              raise SystemExit('SOURCE_RAY_APPEARANCE_REQUEST_DRIFT')
+          print('SOURCE_RAY_APPEARANCE_INPUT_ROOTS=PASS')
+          PY
+
+      - name: Measure deterministic canonical rays by renderer interventions
+        run: |
+          set -euo pipefail
+          mkdir -p "$COURT_ROOT/subjects"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os,subprocess,time
+          from pathlib import Path
+          authority=Path(os.environ['AUTHORITY_ROOT']);cal=Path(os.environ['CALIBRATION_ROOT']);court=Path(os.environ['COURT_ROOT'])/'subjects';blender=os.environ['BLENDER']
+          request=json.loads(Path('canonical/NATIVE_TEACHER_REPLAY_REQUEST_V1.json').read_text())
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for block in iter(lambda:f.read(8*1024*1024),b''):h.update(block)
+              return h.hexdigest()
+          teacher={}
+          for p in sorted(cal.rglob('TEACHER_SCENE.json')):
+              value=json.loads(p.read_text());sid=str(value.get('subject_key') or '')
+              if sid in teacher:raise RuntimeError('SOURCE_RAY_APPEARANCE_DUPLICATE_TEACHER:'+sid)
+              teacher[sid]=(p,value)
+          if len(teacher)!=8:raise RuntimeError(f'SOURCE_RAY_APPEARANCE_TEACHER_COUNT:{len(teacher)}')
+          for index,subject in enumerate(request['subjects'],1):
+              sid=str(subject['subject_id']);admission=(authority/subject['observation_admission']['relative']).resolve()
+              if not admission.is_file() or sha(admission)!=subject['observation_admission']['sha256']:
+                  raise RuntimeError('SOURCE_RAY_APPEARANCE_ADMISSION_DRIFT:'+sid)
+              admitted=json.loads(admission.read_text());folder=admission.parent;candidate=folder/'SOURCE_REST_RENDER_CANDIDATE.json';camera=folder/'camera_bundle.json'
+              if sha(candidate)!=admitted['candidate_sha256'] or sha(camera)!=admitted['camera_sha256']:
+                  raise RuntimeError('SOURCE_RAY_APPEARANCE_OBSERVATION_LINEAGE:'+sid)
+              teacher_path,scene=teacher[sid]
+              geometry_refs={Path(str(r['path'])).name:r for r in scene.get('geometry_payloads') or ()}
+              appearance_refs={Path(str(r['path'])).name:r for r in scene.get('appearance_payloads') or ()}
+              geometry=Path(geometry_refs['geometry_and_response.npz']['path']).resolve();blend=Path(appearance_refs['source_scene.blend']['path']).resolve()
+              if not geometry.is_file() or sha(geometry)!=geometry_refs['geometry_and_response.npz']['sha256']:
+                  raise RuntimeError('SOURCE_RAY_APPEARANCE_GEOMETRY_DRIFT:'+sid)
+              if not blend.is_file() or sha(blend)!=appearance_refs['source_scene.blend']['sha256']:
+                  raise RuntimeError('SOURCE_RAY_APPEARANCE_BLEND_DRIFT:'+sid)
+              output=court/sid/'SOURCE_RAY_APPEARANCE_MEASUREMENT_V1.json';output.parent.mkdir(parents=True,exist_ok=False)
+              started=time.monotonic();print(f'[SOURCE_RAY_APPEARANCE] {index}/8 {sid}',flush=True)
+              subprocess.run([
+                  blender,'-b',str(blend),'--python-exit-code','2',
+                  '--python','tools/truth_foundry/blender_source_ray_appearance_measure_v1.py','--',
+                  '--subject-id',sid,'--teacher-scene',str(teacher_path),'--geometry-npz',str(geometry),
+                  '--candidate',str(candidate),'--camera-bundle',str(camera),
+                  '--expected-blend-sha256',appearance_refs['source_scene.blend']['sha256'],
+                  '--output',str(output),'--maximum-rays','2','--maximum-hits','2',
+                  '--cycles-samples','256','--large-footprint-fraction','0.0625','--small-footprint-fraction','0.03125',
+                  '--convergence-tolerance','0.005','--representation-tolerance','0.005','--measurement-tolerance','0.0075',
+              ],check=True)
+              result=json.loads(output.read_text())
+              print(f'[SOURCE_RAY_APPEARANCE_DONE] {sid} status={result.get("court_status")} pass={result.get("pass_ray_count")} fail={result.get("fail_ray_count")} abstain={result.get("abstain_ray_count")} seconds={time.monotonic()-started:.2f}',flush=True)
+          PY
+
+      - name: Aggregate measured source-ray candidate coverage
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ['COURT_ROOT']);rows=[]
+          for p in sorted((root/'subjects').glob('*/SOURCE_RAY_APPEARANCE_MEASUREMENT_V1.json')):rows.append(json.loads(p.read_text()))
+          if len(rows)!=8:raise SystemExit(f'SOURCE_RAY_APPEARANCE_SUBJECT_COUNT:{len(rows)}')
+          for row in rows:
+              if row.get('fail_ray_count')!=0:raise SystemExit('SOURCE_RAY_APPEARANCE_FACTOR_REPLAY_FAIL:'+row['subject_id'])
+              if int(row.get('pass_ray_count',0))<1:raise SystemExit('SOURCE_RAY_APPEARANCE_NO_PASS_RAY:'+row['subject_id'])
+              if row.get('material_node_values_used_as_per_hit_truth') is not False:raise SystemExit('SOURCE_RAY_APPEARANCE_NODE_TRUTH_LEAK')
+              for key in ('qualified_sampler','qualification_minted','student_target_allowed','training_allowed','product_pass_claimed'):
+                  if row.get(key) is not False:raise SystemExit('SOURCE_RAY_APPEARANCE_AUTHORITY_LEAK:'+key)
+          result={
+              'schema':'RealSaS.SourceRayAppearanceFit8Court.v1',
+              'subject_count':8,
+              'selected_ray_count':sum(int(r['selected_ray_count']) for r in rows),
+              'pass_ray_count':sum(int(r['pass_ray_count']) for r in rows),
+              'fail_ray_count':sum(int(r['fail_ray_count']) for r in rows),
+              'abstain_ray_count':sum(int(r['abstain_ray_count']) for r in rows),
+              'maximum_reconstructed_full_to_original_error':max(float(r['maximum_reconstructed_full_to_original_error']) for r in rows),
+              'maximum_footprint_convergence_delta':max(float(r['maximum_footprint_convergence_delta']) for r in rows),
+              'candidate_selection_uses_appearance_outcome':False,
+              'material_node_values_used_as_per_hit_truth':False,
+              'qualified_sampler':False,'qualification_minted':False,'student_target_allowed':False,'training_allowed':False,'product_pass_claimed':False,
+              'court_status':'PASS_FIT8_MEASURED_SOURCE_RAY_APPEARANCE_CANDIDATE',
+              'subjects':rows,
+          }
+          (root/'SOURCE_RAY_APPEARANCE_FIT8_V1.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          print(json.dumps({k:v for k,v in result.items() if k!='subjects'},sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: source-ray-appearance-fit8-v1-${{ github.run_id }}
+          path: |
+            ${{ env.COURT_ROOT }}/SOURCE_RAY_APPEARANCE_FIT8_V1.json
+            ${{ env.COURT_ROOT }}/subjects/*/SOURCE_RAY_APPEARANCE_MEASUREMENT_V1.json
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

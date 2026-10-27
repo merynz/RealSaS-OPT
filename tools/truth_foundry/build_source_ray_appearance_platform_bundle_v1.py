@@ -3,10 +3,10 @@ from __future__ import annotations
 
 """Build the exact #243 court bundle consumed by Platform appearance admission.
 
-Input is the aggregate source-equivalence court plus one deterministic packed
-measurement receipt per admitted FIT8 subject. The builder checks that each
-receipt's canonical JSON hash is exactly the packed-A/B parent hash sealed by the
-court. It performs no qualification itself.
+Raw JSON bytes are preserved deliberately. The aggregate court raw SHA is pinned
+in source; its per-subject packed-A/B parent SHA values then anchor every sparse
+measurement receipt. This builder transports those exact bytes into one manifest
+section and does not mint qualification.
 """
 
 import argparse
@@ -19,28 +19,36 @@ BUNDLE_SCHEMA = "RealSaS.SourceRayAppearanceCourtBundle.v1"
 COURT_SCHEMA = "RealSaS.SourceRayAppearanceSourceEquivalenceCourt.v1"
 MEASUREMENT_SCHEMA = "RealSaS.SourceRayAppearanceMeasurementCandidate.v1"
 PASS_COURT = "PASS_SOURCE_RAY_APPEARANCE_LOCAL_QUALIFICATION_CANDIDATE"
+SOURCE_WORKFLOW_RUN_ID = 40544781242
+SOURCE_ARTIFACT_ID = 12751917983
+SOURCE_ARTIFACT_NAME = "source-ray-appearance-source-equivalence-fit8-v1-40544781242"
+SOURCE_ARTIFACT_DIGEST = "sha256:a63940ef7bb9064f42941f595089b85bb120a7f53a271b7392b0db3c2dbe01dc"
+SOURCE_COURT_RAW_SHA256 = "f62412457156a7e36f351fd3d89d9ad042bf80213b4749329a7cfa6ee0cf912a"
 
 
-def _load(path: Path) -> dict[str, Any]:
-    value = json.loads(path.read_text(encoding="utf-8"))
+def _sha(raw: bytes) -> str:
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _decode(raw: bytes, code: str) -> dict[str, Any]:
+    try:
+        value = json.loads(raw.decode("utf-8"))
+    except Exception as exc:
+        raise RuntimeError(code + "_JSON_INVALID") from exc
     if not isinstance(value, dict):
-        raise RuntimeError("SOURCE_RAY_APPEARANCE_BUNDLE_JSON_OBJECT_REQUIRED")
+        raise RuntimeError(code + "_JSON_OBJECT_REQUIRED")
     return value
 
 
-def _canonical_bytes(value: Any) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
-
-
-def _digest(value: Any) -> str:
-    return hashlib.sha256(_canonical_bytes(value)).hexdigest()
-
-
-def build(court: dict[str, Any], measurements: list[dict[str, Any]]) -> dict[str, Any]:
+def build(court_raw: bytes, measurement_raws: list[bytes]) -> dict[str, Any]:
+    if _sha(court_raw) != SOURCE_COURT_RAW_SHA256:
+        raise RuntimeError("SOURCE_RAY_APPEARANCE_BUNDLE_COURT_RAW_HASH_DRIFT")
+    court = _decode(court_raw, "SOURCE_RAY_APPEARANCE_BUNDLE_COURT")
     if court.get("schema") != COURT_SCHEMA:
         raise RuntimeError("SOURCE_RAY_APPEARANCE_BUNDLE_COURT_SCHEMA_DRIFT")
     if str(court.get("court_status") or "") != PASS_COURT:
         raise RuntimeError("SOURCE_RAY_APPEARANCE_BUNDLE_COURT_NOT_PASS")
+
     subject_rows = court.get("subjects")
     if not isinstance(subject_rows, list) or not subject_rows:
         raise RuntimeError("SOURCE_RAY_APPEARANCE_BUNDLE_COURT_SUBJECTS_REQUIRED")
@@ -61,20 +69,21 @@ def build(court: dict[str, Any], measurements: list[dict[str, Any]]) -> dict[str
     bound = []
     seen: set[str] = set()
     rays = hits = 0
-    for payload in measurements:
+    for raw in measurement_raws:
+        payload = _decode(raw, "SOURCE_RAY_APPEARANCE_BUNDLE_MEASUREMENT")
         if payload.get("schema") != MEASUREMENT_SCHEMA:
             raise RuntimeError("SOURCE_RAY_APPEARANCE_BUNDLE_MEASUREMENT_SCHEMA_DRIFT")
         subject_id = str(payload.get("subject_id") or "")
         if subject_id not in expected or subject_id in seen:
             raise RuntimeError("SOURCE_RAY_APPEARANCE_BUNDLE_MEASUREMENT_SUBJECT_DRIFT")
-        digest = _digest(payload)
+        digest = _sha(raw)
         if digest != expected[subject_id]:
             raise RuntimeError("SOURCE_RAY_APPEARANCE_BUNDLE_MEASUREMENT_PARENT_HASH_DRIFT:" + subject_id)
         seen.add(subject_id)
         ray_rows = payload.get("rays") or []
         rays += len(ray_rows)
         hits += sum(len(ray.get("canonical_hits") or []) for ray in ray_rows if isinstance(ray, dict))
-        bound.append({"subject_id": subject_id, "sha256": digest, "payload": payload})
+        bound.append({"subject_id": subject_id, "sha256": digest, "json_text": raw.decode("utf-8")})
     if seen != set(expected):
         raise RuntimeError("SOURCE_RAY_APPEARANCE_BUNDLE_MEASUREMENT_COHORT_INCOMPLETE")
     if rays != int(court.get("ray_count", -1)) or hits != int(court.get("hit_count", -1)):
@@ -83,8 +92,13 @@ def build(court: dict[str, Any], measurements: list[dict[str, Any]]) -> dict[str
     bound.sort(key=lambda row: row["subject_id"])
     return {
         "schema": BUNDLE_SCHEMA,
-        "court": court,
-        "court_sha256": _digest(court),
+        "source_artifact": {
+            "workflow_run_id": SOURCE_WORKFLOW_RUN_ID,
+            "artifact_id": SOURCE_ARTIFACT_ID,
+            "artifact_name": SOURCE_ARTIFACT_NAME,
+            "artifact_digest": SOURCE_ARTIFACT_DIGEST,
+        },
+        "court": {"sha256": SOURCE_COURT_RAW_SHA256, "json_text": court_raw.decode("utf-8")},
         "measurements": bound,
         "transport_authority": "EXTERNAL_UNQUALIFIED_INPUT_ONLY",
         "registry_qualification_minted": False,
@@ -100,15 +114,14 @@ def main() -> None:
     parser.add_argument("--measurement", type=Path, action="append", required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    value = build(_load(args.court), [_load(path) for path in args.measurement])
+    value = build(args.court.read_bytes(), [path.read_bytes() for path in args.measurement])
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({
         "schema": value["schema"],
         "subject_count": len(value["measurements"]),
-        "ray_count": value["court"]["ray_count"],
-        "hit_count": value["court"]["hit_count"],
-        "court_sha256": value["court_sha256"],
+        "court_sha256": value["court"]["sha256"],
+        "source_artifact_digest": value["source_artifact"]["artifact_digest"],
         "registry_qualification_minted": False,
         "canonical_mesh_binding_minted": False,
     }, sort_keys=True))

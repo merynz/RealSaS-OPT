@@ -21,8 +21,8 @@ func TestProductSkinDescriptorIsTruthful(t *testing.T) {
 		t.Fatal("Skin must not own ProductRevision PASS authority")
 	}
 	wantDeps := map[string]bool{
-		ProductMeshCapabilityID:                            true,
-		ProductRigCapabilityID:                             true,
+		ProductMeshCapabilityID:                           true,
+		ProductRigCapabilityID:                            true,
 		StageCapabilityID("15_RIGGING_SURFACE_QUALIFIED"): true,
 	}
 	if len(d.Dependencies) != len(wantDeps) {

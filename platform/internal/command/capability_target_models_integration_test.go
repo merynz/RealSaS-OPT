@@ -2,6 +2,7 @@ package command
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"strings"
 	"testing"
@@ -10,7 +11,34 @@ import (
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/capability"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
+	"github.com/merynz/RealSaS-OPT/platform/internal/release"
+	"github.com/merynz/RealSaS-OPT/platform/internal/stagegraph"
 )
+
+func targetScopedResearchGraph(t *testing.T) *stagegraph.Graph {
+	t.Helper()
+	snapshot := stagegraph.Snapshot{
+		Schema:     "RealSaS.StageGraph.v1",
+		StageCount: 1,
+		Stages: []stagegraph.Stage{{
+			Ordinal: 1,
+			ID:      "01_TARGET_SCOPED_MODEL_FIXTURE",
+			Title:   "Target-scoped model fixture",
+			Group:   "platform",
+			Adapter: "fixture:noop",
+			Policy:  stagegraph.Policy{FailClosed: true},
+		}},
+	}
+	raw, err := json.Marshal(snapshot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	graph, err := stagegraph.ParsePlan(raw, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return graph
+}
 
 func TestDeveloperCapabilityRunSnapshotsOnlyResolvedTargetModels(t *testing.T) {
 	dsn := os.Getenv("REALSAS_DATABASE_URL")
@@ -24,14 +52,6 @@ func TestDeveloperCapabilityRunSnapshotsOnlyResolvedTargetModels(t *testing.T) {
 	}
 	defer pool.Close()
 
-	releaseID := uuid.New()
-	if _, err := pool.Exec(ctx, `
-		INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at)
-		VALUES ($1,$2,$3,'RESEARCH','ci',now())
-	`, releaseID, "target-models-"+releaseID.String(), hex64("1")); err != nil {
-		t.Fatal(err)
-	}
-
 	inputRows, err := (capability.ProductInputProvider{}).Capabilities(ctx)
 	if err != nil || len(inputRows) != 1 {
 		t.Fatalf("input provider rows=%d err=%v", len(inputRows), err)
@@ -40,32 +60,45 @@ func TestDeveloperCapabilityRunSnapshotsOnlyResolvedTargetModels(t *testing.T) {
 	if err != nil || len(shapeRows) != 1 {
 		t.Fatalf("shape provider rows=%d err=%v", len(shapeRows), err)
 	}
+	inputImpl := hex64("2")
+	shapeImpl := hex64("5")
+	graph := targetScopedResearchGraph(t)
+	graphSnapshot := graph.Snapshot()
+	sealed, err := release.Seal(ctx, pool, graph, release.Manifest{
+		ContractVersion: "RealSaS.EngineReleaseManifest.v2",
+		Name:            "target-models-" + uuid.NewString(),
+		Purpose:         release.PurposeResearch,
+		Stages: []release.StageBinding{{
+			Ordinal: 1, StageID: "01_TARGET_SCOPED_MODEL_FIXTURE",
+			ImplementationSHA256: hex64("a"), PolicySHA256: hex64("b"),
+			SemanticParameters: map[string]any{},
+		}},
+		DAG: &graphSnapshot,
+		ModelRequirements: []release.ModelRequirement{
+			{Family: "AXIS", ArchitectureID: "unused-axis-architecture", Channel: "RESEARCH"},
+			{Family: "IRIS", ArchitectureID: "RealSaS.IRIS.VNextEvidenceModel.v3", Channel: "RESEARCH"},
+			{Family: "TESSA", ArchitectureID: "RealSaS.TESSA.Structuralizer.v3", Channel: "RESEARCH"},
+		},
+		CapabilityImplementations: map[string]string{
+			capability.ProductInputCapabilityID: inputImpl,
+			capability.ProductShapeCapabilityID: shapeImpl,
+		},
+	}, "ci")
+	if err != nil {
+		t.Fatal(err)
+	}
+	releaseID := sealed.ReleaseID
+
 	bindings := []capability.ReleaseBinding{
 		{Descriptor: inputRows[0], Version: capability.VersionIdentity{
-			ImplementationSHA256: hex64("2"), PolicySHA256: hex64("3"), ParametersSHA256: hex64("4"),
+			ImplementationSHA256: inputImpl, PolicySHA256: hex64("3"), ParametersSHA256: hex64("4"),
 		}},
 		{Descriptor: shapeRows[0], Version: capability.VersionIdentity{
-			ImplementationSHA256: hex64("5"), PolicySHA256: hex64("6"), ParametersSHA256: hex64("7"),
+			ImplementationSHA256: shapeImpl, PolicySHA256: hex64("6"), ParametersSHA256: hex64("7"),
 		}},
 	}
 	if _, err := capability.SealReleaseSnapshot(ctx, pool, releaseID, bindings, "ci"); err != nil {
 		t.Fatal(err)
-	}
-
-	for _, row := range []struct {
-		family string
-		arch   string
-	}{
-		{"AXIS", "unused-axis-architecture"},
-		{"IRIS", "RealSaS.IRIS.VNextEvidenceModel.v3"},
-		{"TESSA", "RealSaS.TESSA.Structuralizer.v3"},
-	} {
-		if _, err := pool.Exec(ctx, `
-			INSERT INTO engine_release_model_requirements(release_id,family,architecture_id,channel)
-			VALUES ($1,$2,$3,'RESEARCH')
-		`, releaseID, row.family, row.arch); err != nil {
-			t.Fatal(err)
-		}
 	}
 
 	inputReceipt, err := SubmitCapabilityRun(ctx, pool, CapabilityRunRequest{
@@ -97,16 +130,4 @@ func TestDeveloperCapabilityRunSnapshotsOnlyResolvedTargetModels(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "MODEL_SELECTION_CHANNEL_MISSING:IRIS:RESEARCH") {
 		t.Fatalf("shape target did not fail closed on its required IRIS channel: %v", err)
 	}
-
-	// Clean up so migration-down reversibility can restore historical constraints.
-	_, _ = pool.Exec(ctx, "DELETE FROM audit_events WHERE attempt_id=$1", inputReceipt.AttemptID)
-	_, _ = pool.Exec(ctx, "DELETE FROM outbox_events WHERE aggregate_id=$1", inputReceipt.CommandID)
-	_, _ = pool.Exec(ctx, "DELETE FROM commands WHERE id=$1", inputReceipt.CommandID)
-	_, _ = pool.Exec(ctx, "DELETE FROM execution_goal_inputs WHERE execution_goal_id=$1", inputReceipt.ExecutionGoalID)
-	_, _ = pool.Exec(ctx, "DELETE FROM execution_goals WHERE id=$1", inputReceipt.ExecutionGoalID)
-	_, _ = pool.Exec(ctx, "DELETE FROM attempt_model_releases WHERE attempt_id=$1", inputReceipt.AttemptID)
-	_, _ = pool.Exec(ctx, "DELETE FROM attempts WHERE id=$1", inputReceipt.AttemptID)
-	_, _ = pool.Exec(ctx, "DELETE FROM engine_release_model_requirements WHERE release_id=$1", releaseID)
-	_, _ = pool.Exec(ctx, "DELETE FROM engine_release_capabilities WHERE release_id=$1", releaseID)
-	_, _ = pool.Exec(ctx, "DELETE FROM engine_releases WHERE id=$1", releaseID)
 }

@@ -13,9 +13,10 @@
   "hypothesis": "Pose-conditioned all-hit order, measured source-over contribution/removal response, and control-balanced surface response can replace humanoid part taxonomies while retaining the evidence needed by Compiler for aware-M presentation decisions.",
   "presentation_truth": {
     "mode": "OBSERVATION_REST_PRESENTATION_RESPONSE_TRUTH_V1",
-    "maximum_seconds_per_subject": 1800,
-    "measured_rays_per_subject": 8,
-    "maximum_hits_per_ray": 4,
+    "maximum_seconds_per_subject": 2400,
+    "measured_rays_per_subject": 32,
+    "minimum_pass_rays_per_subject": 16,
+    "maximum_hits_per_ray": 6,
     "cycles_samples": 256,
     "large_footprint_fraction": 0.0625,
     "small_footprint_fraction": 0.03125,

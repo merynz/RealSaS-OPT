@@ -129,7 +129,11 @@ def test_v31_projection_learns_attenuation_not_semantic_owner_or_order():
     )
     assert targets.mechanical_target.shape == (2, 2)
     assert targets.appearance_rgba.shape == (2, 4)
+    # Two translucent contributors make each standalone colour underdetermined
+    # from the observed composite; both teacher-factorized RGBA rows stay masked.
+    assert targets.appearance_valid.tolist() == [False, False]
     assert targets.pair_target.shape == (2, 1)
+    assert targets.pair_valid.tolist() == [True, True]
     np.testing.assert_allclose(targets.pair_target[:, 0], [0.5, 0.0])
     assert PAIR_CHANNELS_V31_PRESENTATION == ("occlusion_attenuation_logit",)
 

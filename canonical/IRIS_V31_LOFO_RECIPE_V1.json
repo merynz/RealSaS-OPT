@@ -72,7 +72,7 @@
     "pair_queries_per_subject_step": 128,
     "presentation_train_fraction": 0.8,
     "presentation_partition": "STATELESS_SHA256_SUBJECT_FAMILY_ROW_SEED__FIXED_VALIDATION_ROWS",
-    "training_rows_sample_without_replacement_per_update": true,
+    "training_sampler": "V1_STATELESS_WITH_REPLACEMENT__UNCHANGED",
     "seed": 26102831,
     "field_huber_beta": 0.01,
     "field_clamp": 0.25

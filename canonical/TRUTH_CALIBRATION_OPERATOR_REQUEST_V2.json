@@ -5,10 +5,10 @@
   "new_calibration_actions_allowed": true,
   "input_descriptor_repo_path": "canonical/FIT8_PLATFORM_BOOTSTRAP_V1.json",
   "campaign_contract_repo_path": "canonical/FIT8_TRUTH_CALIBRATION_CAMPAIGN_V2.json",
-  "campaign_name": "FIT8_OBSERVATION_REST_CALIBRATION_V2_REPAIR_1",
-  "repair_of_campaign_id": "9b75bb5b-1090-4881-b946-c65f7f66cda3",
-  "baseline_engine_release_id": "220fac61-a078-4648-ab78-92eb4d2fc0d8",
-  "repair_reason": "The first V2 attempt used native-teacher Blender 4.5.14 instead of observation version 4.0.2. Use the pinned official 4.0.2 Linux runtime, preserving the distinct historical observation-producer binary identity. Every subject must replay its complete admitted import bytes exactly before teacher measurement. Preserve all original partial results and failures.",
+  "campaign_name": "FIT8_OBSERVATION_REST_CALIBRATION_V2_NUMERIC_RUNTIME_REPAIR_2",
+  "repair_of_campaign_id": "6b8975af-d389-4584-ba7c-1387cf048c88",
+  "baseline_engine_release_id": "5ca98ab8-6856-407c-a90e-0f4b2a93224f",
+  "repair_reason": "Controlled sealed replay isolates glibc: the same binary/source/CPU produces the admitted T-Rex hash with 2.39 and the failed native hash with 2.43. Pin a separate derivative executable, loader, libc and libm, and require full admitted import-byte replay before measurement. Preserve both failed campaigns and every partial measurement.",
   "experiment_slug": "truth-observation-bind-rest-calibration-v2",
   "experiment_name": "Observation-aligned same-eight source calibration V2",
   "research_question": "Does the teacher exactly replay the admitted observation import geometry and source scene frames before measuring repeatable isolated response?",
@@ -18,7 +18,7 @@
     "relative": "sealed_teacher_replay/40405919318-1/REPLAY_REPORT.json",
     "sha256": "a8f8d4c92f7ae28e428930b9588454dd298454b919b22269e1ad7b78539518ce"
   },
-  "evaluator_executable": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/blender",
+  "evaluator_executable": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/blender-glibc239",
   "evaluator_version": "Blender 4.0.2",
   "maximum_seconds_per_subject": 600,
   "native_baselines": [
@@ -65,10 +65,30 @@
   ],
   "stage_parameters_repo_path": "canonical/TRUTH_CALIBRATION_STAGE_PARAMETERS_V2.json",
   "native_baseline_authority_for_this_rest": false,
-  "expected_evaluator_binary_sha256": "6fe78c9e0a1cca51a598eb37c3288b975357efbe86dcee18d5e6fdecaaf1847e",
+  "expected_evaluator_binary_sha256": "c47c0b83d061621014c8312abd99db5c1ef057bcf5516faf4bb8d92b3ef6de60",
   "observation_runtime_replacement": {
     "rule": "EXACT_ADMITTED_IMPORT_BYTES_REQUIRED",
     "observation_producer_binary_sha256": "aab13f2e20400a7bc161813151acfe4586889aa964624f7a0bcfdfc066f9749d",
-    "evaluator_binary_sha256": "6fe78c9e0a1cca51a598eb37c3288b975357efbe86dcee18d5e6fdecaaf1847e"
+    "evaluator_binary_sha256": "c47c0b83d061621014c8312abd99db5c1ef057bcf5516faf4bb8d92b3ef6de60"
+  },
+  "evaluator_runtime": {
+    "schema": "RealSaS.PinnedObservationNumericRuntime.v1",
+    "package_sha256": "cb11743530ba3ee0f943f4124b13dac50363a36842d682be65cd2beb5073c33e",
+    "original_blender_binary_sha256": "6fe78c9e0a1cca51a598eb37c3288b975357efbe86dcee18d5e6fdecaaf1847e",
+    "library_directory": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/glibc-2.39/usr/lib/x86_64-linux-gnu",
+    "files": {
+      "loader": {
+        "path": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/ld-linux-x86-64.so.2",
+        "sha256": "6222a16be7f2d458d6870efe6e715fc0c8d45766fb79cf7dcc3125538d703e28"
+      },
+      "libc": {
+        "path": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/glibc-2.39/usr/lib/x86_64-linux-gnu/libc.so.6",
+        "sha256": "511f825ee075610ac9c0f7f91e2c13de2000d0f7b859f6461137e809a0a009d0"
+      },
+      "libm": {
+        "path": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/glibc-2.39/usr/lib/x86_64-linux-gnu/libm.so.6",
+        "sha256": "f06f2ce1f1833df5f41cf13b6447ff07bea993ad9b27297d3428c2f70ab3f0e7"
+      }
+    }
   }
 }

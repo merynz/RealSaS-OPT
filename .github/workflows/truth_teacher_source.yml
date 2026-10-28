@@ -53,3 +53,41 @@ jobs:
           path: ${{ runner.temp }}/observation-runtime-${{ github.run_id }}.json
           if-no-files-found: warn
           retention-days: 14
+      - name: Reproduce the sealed admitted imports with the pinned numeric runtime
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python=/home/monster/realsas_platform/current/bin/realsas-python
+          "$python" -m tools.observation.install_pinned_evaluator_runtime_v1 \
+            --request canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V2.json
+          "$python" - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          from tools.observation.pinned_evaluator_runtime_v1 import launch_options
+          request=json.loads(Path('canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V2.json').read_text())
+          executable=request['evaluator_executable']
+          subprocess.run([executable,'-b','--factory-startup','--python-exit-code','2','--python',
+              str(Path('tests/fixtures/source_scene_v2/blender_teacher_observation_rest_smoke.py').resolve()),'--',
+              '--output',str(Path(os.environ['RUNNER_TEMP'])/('teacher-pinned-'+os.environ['GITHUB_RUN_ID'])),
+              '--pinned-numeric-runtime'],check=True,**launch_options(executable,request['evaluator_runtime']))
+          PY
+          "$python" -m tools.truth_foundry.replay_admitted_imports_v1 \
+            --request canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V2.json \
+            --readback canonical/TRUTH_CALIBRATION_READBACK_REQUEST_V1.json \
+            --repo "$GITHUB_WORKSPACE" --authority /home/monster/realsas_authority \
+            --artifact-root /home/monster/realsas_platform/artifacts \
+            --output "$RUNNER_TEMP/sealed-import-replay-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sealed-admitted-import-replay-${{ github.sha }}
+          path: ${{ runner.temp }}/sealed-import-replay-${{ github.run_id }}-${{ github.run_attempt }}/
+          if-no-files-found: warn
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pinned-numeric-teacher-synthetic-${{ github.sha }}
+          path: ${{ runner.temp }}/teacher-pinned-${{ github.run_id }}/SMOKE_REPORT.json
+          if-no-files-found: warn
+          retention-days: 14

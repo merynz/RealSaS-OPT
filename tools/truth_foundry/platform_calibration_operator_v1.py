@@ -16,6 +16,7 @@ from types import SimpleNamespace
 
 from tools import platform_cohort_bootstrap_v1 as bootstrap
 from tools.truth_foundry.audit_native_teacher_bytes_v1 import sha256, _bound_path
+from tools.observation.pinned_evaluator_runtime_v1 import launch_options
 
 
 def _require(value,code):
@@ -67,7 +68,8 @@ def prepare(request, *, repo, platform_root, authority_root, expected_sha, outpu
              'TRUTH_OPERATOR_NATIVE_REPLAY_NOT_EQUIVALENT')
     _require({r['subject_id'] for r in report['subjects']}=={r['subject_key'] for r in baseline_rows},'TRUTH_OPERATOR_BASELINE_COHORT_DRIFT')
     executable=Path(request['evaluator_executable']).expanduser().resolve()
-    version=subprocess.check_output([str(executable),'--version'],text=True).splitlines()[0]
+    version=subprocess.check_output([str(executable),'--version'],text=True,
+        **launch_options(executable,request.get('evaluator_runtime'))).splitlines()[0]
     _require(version==request['evaluator_version'],'TRUTH_OPERATOR_EVALUATOR_VERSION_DRIFT')
     binary_sha=sha256(executable)
     if revision==2:
@@ -87,6 +89,8 @@ def prepare(request, *, repo, platform_root, authority_root, expected_sha, outpu
         cfg['native_baseline_role']='HISTORICAL_PROVENANCE_ONLY__NOT_REST_OR_TEMPORAL_AUTHORITY'
         if request.get('observation_runtime_replacement') is not None:
             cfg['observation_runtime_replacement']=request['observation_runtime_replacement']
+        if request.get('evaluator_runtime') is not None:
+            cfg['evaluator_runtime']=request['evaluator_runtime']
     descriptor=json.loads(_bound_path(repo,request['input_descriptor_repo_path']).read_text())
     descriptor['campaign_contract']=request['campaign_contract_repo_path'];descriptor['campaign_name']=request['campaign_name']
     descriptor['actor']='truth-foundry-calibration-coordinator'

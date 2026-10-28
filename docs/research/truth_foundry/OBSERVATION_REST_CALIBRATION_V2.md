@@ -135,3 +135,48 @@ exports as a complete audit. It does not select a finite-difference amplitude,
 action law, student observability or native temporal compatibility. The V1
 numeric audit remains available for its original schema. Downloaded exports can
 be inspected with `--artifact-root`, resolving payloads by actual content hash.
+
+## Controlled cause and pinned numeric-runtime repair
+
+The source-free native inventory (CI run `40734053731`, artifact `12836766090`)
+reports the same official Blender executable with **glibc 2.43** on Intel
+ i7-9750H; the local replay uses **glibc 2.39** on AMD EPYC. Native libm SHA256 is
+`1c488db6f4fe8cecb72456bc018de000b7a9b539c2994864b0416b5e8371b3d8`;
+local libm SHA256 is
+`f06f2ce1f1833df5f41cf13b6447ff07bea993ad9b27297d3428c2f70ab3f0e7`.
+
+A controlled reproducibility replay held CPU, source bytes, Blender code,
+importer and export program fixed. With glibc 2.39, every one of the eight
+imports reproduced its admitted SHA. With glibc 2.43 (whose libm bytes match the
+native inventory), every one reproduced the native worker SHA, including all
+four failures and T-Rex's changed diagonal. This isolates the numeric runtime
+change within this sealed replay scope. It does not qualify a new teacher.
+
+The repair pins Ubuntu package `libc6_2.39-0ubuntu8.6_amd64.deb` from the official
+2025-10-01 Ubuntu snapshot, archive SHA256
+`cb11743530ba3ee0f943f4124b13dac50363a36842d682be65cd2beb5073c33e`.
+It creates a **separate** `blender-glibc239` executable from original Blender
+SHA256 `6fe78...`, changing only its ELF interpreter string to the relative
+pinned loader. The exact derivative SHA256 is
+`c47c0b83d061621014c8312abd99db5c1ef057bcf5516faf4bb8d92b3ef6de60`.
+The launcher verifies executable, loader, libc and libm bytes before execution,
+sets the required working directory and explicit library path, and retains
+original observation-producer identity separately. System libraries and the
+original Blender executable are not changed. The producer checks the actual
+loaded numeric libraries and records its runtime fingerprint in TeacherSceneIR.
+Other runtime libraries are not claimed globally portable; the complete admitted
+import-byte gate still tests this source-specific rest bridge.
+
+Before any new measurement, native source CI verifies the old Preparation and
+bootstrap hashes, reads the exact SubjectInput section bindings through the
+read-only Registry API/CAS, and reproduces the existing admitted import bytes
+for the full cohort. This is reproducibility of already sealed evidence, not a
+new teacher, Attempt, qualification or training. The pinned synthetic witness
+also traverses the real adapter/producer and runtime-fingerprint check.
+
+The declared second repair uses campaign `6b8975af-d389-4584-ba7c-1387cf048c88`
+and release `5ca98ab8-6856-407c-a90e-0f4b2a93224f` as its terminal failed
+baseline. It retains the same eight members and separate regression and the
+finite component target. Read its actual new PREPARATION/OBSERVATION and numeric
+audit before claiming a complete cohort. No student or native temporal
+qualification follows from installing this runtime or passing CI.

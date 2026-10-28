@@ -19,6 +19,7 @@ import blender_teacher_scene_smoke as legacy
 from tools.observation import blender_controlled_8view_v2 as observation
 from tools.observation.source_scene_contract_v2 import _json_and_chunks
 from tools.observation.evaluator_runtime_fingerprint_v1 import fingerprint
+from tools.observation.pinned_evaluator_runtime_v1 import runtime_manifest
 from tools.iris_vnext import blender_authored_teacher_export_v1 as animated
 from tools.iris_vnext import blender_authored_teacher_export_v3 as geometry
 from tools.truth_foundry.blender_teacher_scene_v1 import sha256
@@ -62,7 +63,7 @@ def animated_default_source(base, target):
     target.write_text(json.dumps(doc))
 
 
-def main(folder):
+def main(folder, pinned_numeric_runtime=False):
     folder = Path(folder).resolve()
     folder.mkdir(parents=True, exist_ok=False)
     legacy.main(folder / 'legacy')
@@ -110,6 +111,7 @@ def main(folder):
                 'observation_runtime_replacement': {'rule': 'EXACT_ADMITTED_IMPORT_BYTES_REQUIRED',
                     'observation_producer_binary_sha256': 'a' * 64, 'evaluator_binary_sha256': sha256(binary)},
                 'evaluator_binary': ref(binary), 'evaluator_version': 'Blender ' + bpy.app.version_string,
+                'evaluator_runtime': runtime_manifest(binary) if pinned_numeric_runtime else None,
                 'maximum_seconds_per_subject': 90, 'producer_source_commit': '3' * 40},
             'source_files': [{'path': str(source), 'expected_sha256': sha256(source), 'source_kind': 'PRIMARY'}],
             'source_audit': {'profile': 'SOURCE_SCENE_BIND_V2', 'matrix_tolerance': 1e-6,
@@ -120,6 +122,8 @@ def main(folder):
     assert scene['observation_runtime_binding']['binary_identity_equal'] is False
     assert scene['observation_runtime_binding']['status'] == 'PASS_EXACT_ADMITTED_IMPORT_BYTES'
     assert scene['observation_runtime_binding']['evaluator_binary_sha256'] == sha256(binary)
+    if pinned_numeric_runtime:
+        assert scene['evaluator_runtime_fingerprint']['libc'] == ['glibc', '2.39']
     assert scene['native_clip_refs'] == [] and scene['native_temporal_rest_compatible'] is False
     assert scene['observation_bundle_sha256'] == norm.observation_set_binding_hash
     assert scene['normalization_sha256'] == norm.normalization_hash
@@ -142,5 +146,6 @@ def main(folder):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', required=True)
+    parser.add_argument('--pinned-numeric-runtime', action='store_true')
     args = parser.parse_args(sys.argv[sys.argv.index('--') + 1:])
-    main(args.output)
+    main(args.output, args.pinned_numeric_runtime)

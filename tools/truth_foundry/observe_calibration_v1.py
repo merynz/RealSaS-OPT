@@ -104,7 +104,7 @@ def export_member(member, *, api_root, artifact_root, output):
 
 
 def observe(preparation, *, api_root, artifact_root, output, maximum_seconds=900, interval_seconds=30):
-    require(preparation['schema']=='RealSaS.TeacherCalibrationCampaignPreparation.v1','TRUTH_OBSERVE_PREPARATION_SCHEMA')
+    require(preparation['schema'] in {'RealSaS.TeacherCalibrationCampaignPreparation.v1','RealSaS.TeacherCalibrationCampaignPreparation.v2'},'TRUTH_OBSERVE_PREPARATION_SCHEMA')
     require(0<interval_seconds<=60 and maximum_seconds>=0,'TRUTH_OBSERVE_POLL_BOUNDS')
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
     initial={r['attempt_id']:r for r in preparation['members']};exports={};started=time.monotonic()
@@ -128,14 +128,19 @@ def observe(preparation, *, api_root, artifact_root, output, maximum_seconds=900
                     errors.append({'attempt_id':member['attempt_id'],'error':str(error)})
         complete=len(exports)==len(initial)
         elapsed=time.monotonic()-started
-        stop=complete or bool(errors) or any(s['state'] in TERMINAL for s in states) or elapsed>=maximum_seconds
+        bounded=preparation.get('target_stage_id')==STAGE
+        goal_complete=campaign.get('goal_complete') is True
+        failed=any(s['state'] in TERMINAL-{'COMPLETED','PASS'} for s in states)
+        complete_goal=complete and (not bounded or goal_complete)
+        stop=complete_goal or bool(errors) or failed or elapsed>=maximum_seconds
         diagnostics=export_diagnostics(preparation,output) if stop else []
         result={'schema':'RealSaS.TeacherCalibrationObservation.v1','campaign_id':preparation['campaign_id'],
                 'experiment_id':preparation['experiment_id'],'source_code_sha':preparation['source_code_sha'],
                 'campaign':campaign,'attempts':states,'exports':list(exports.values()),'errors':errors,
                 'bound_run_diagnostics':diagnostics,
                 'all_measurements_committed_and_exported':complete,'observation_elapsed_seconds':elapsed,
-                'observation_timed_out':not complete and not errors and elapsed>=maximum_seconds,
+                'measurement_target_goal_complete':goal_complete if bounded else None,
+                'observation_timed_out':not complete_goal and not errors and elapsed>=maximum_seconds,
                 'execution_resubmitted':False,'training_submitted':False,'truth_qualification_inferred':False}
         write_json(output/'OBSERVATION.json',result)
         print(f'[TRUTH_OBSERVE] committed={len(exports)}/{len(initial)} elapsed_s={elapsed:.1f} errors={len(errors)}',flush=True)
@@ -147,8 +152,10 @@ if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     for name in ('preparation','artifact-root','output'):p.add_argument('--'+name,required=True)
     p.add_argument('--api-root',default='http://127.0.0.1:8080');p.add_argument('--maximum-seconds',type=float,default=900)
+    p.add_argument('--interval-seconds',type=float,default=30)
     p.add_argument('--read-only-result',action='store_true',help='Return observation even when the original measurement failed')
     a=p.parse_args();result=observe(json.loads(Path(a.preparation).read_text()),api_root=a.api_root,
-        artifact_root=a.artifact_root,output=a.output,maximum_seconds=a.maximum_seconds)
-    if not result['all_measurements_committed_and_exported'] and not a.read_only_result:
+        artifact_root=a.artifact_root,output=a.output,maximum_seconds=a.maximum_seconds,interval_seconds=a.interval_seconds)
+    incomplete=not result['all_measurements_committed_and_exported'] or (result.get('measurement_target_goal_complete') is False)
+    if incomplete and not a.read_only_result:
         raise SystemExit('TRUTH_CALIBRATION_NOT_YET_EXPORTED__ORIGINAL_PLATFORM_CAMPAIGN_PRESERVED')

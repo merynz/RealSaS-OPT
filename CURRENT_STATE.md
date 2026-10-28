@@ -1,3 +1,11 @@
+> **Observation-rest continuation — 2026-10-28:** Sparse Appearance admission
+> completed through real Platform Attempt/Registry readback (run 40676103301).
+> Continue with [observation-rest calibration V2](docs/research/truth_foundry/OBSERVATION_REST_CALIBRATION_V2.md):
+> the same eight subjects plus separate regression, exact admitted import replay,
+> and a finite nine-node Platform research release. Preserve V1 measurements and
+> native clips; V2 does not assume their temporal compatibility or grant training.
+> Read actual new PREPARATION/OBSERVATION before claiming cohort completion.
+>
 > **User-selected continuation — 2026-10-28:** Complete the existing Truth
 > Foundry -> IRIS/TESSA V3.1 **LOFO notebook** -> matching checkpoint/Shape
 > integration. FIT8 is the system-development cohort; the first new model

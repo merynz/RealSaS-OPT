@@ -32,10 +32,15 @@ def immutable_json(root,name,value):
 
 
 def prepare(request, *, repo, platform_root, authority_root, expected_sha, output, api_root, rclone_remote, submit):
-    _require(request.get('schema')=='RealSaS.TeacherCalibrationOperatorRequest.v1'
+    revision={'RealSaS.TeacherCalibrationOperatorRequest.v1':1,'RealSaS.TeacherCalibrationOperatorRequest.v2':2}.get(request.get('schema'))
+    _require(revision is not None
              and request.get('training_allowed') is False and request.get('new_calibration_actions_allowed') is True,
              'TRUTH_OPERATOR_SCOPE_REQUIRED')
     repo,platform,authority,output=map(lambda p:Path(p).resolve(),(repo,platform_root,authority_root,output))
+    if revision==2:
+        contract=json.loads(_bound_path(repo,request['campaign_contract_repo_path']).read_text())
+        _require(contract['required_target_stage_id']=='47_SOURCE_RESPONSE_CALIBRATION'
+                 and request.get('native_baseline_authority_for_this_rest') is False,'TRUTH_OPERATOR_V2_FINITE_REST_SCOPE_REQUIRED')
     _require(json.loads((platform/'deployment.json').read_text())['code_sha']==expected_sha,'TRUTH_OPERATOR_DEPLOYED_MAIN_DRIFT')
     _require(subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip()==expected_sha,'TRUTH_OPERATOR_CHECKOUT_DRIFT')
     _require(subprocess.check_output(['git','-C',str(repo),'ls-remote','origin','refs/heads/main'],text=True).split()[0]==expected_sha,'TRUTH_OPERATOR_REMOTE_MAIN_DRIFT')
@@ -66,14 +71,17 @@ def prepare(request, *, repo, platform_root, authority_root, expected_sha, outpu
     _require(version==request['evaluator_version'],'TRUTH_OPERATOR_EVALUATOR_VERSION_DRIFT')
     binary_sha=sha256(executable)
     policy_path=_bound_path(repo,request['policy_repo_path']);policy=json.loads(policy_path.read_text())
-    _require(policy['schema']=='RealSaS.TeacherKinematicCalibrationPolicy.v1','TRUTH_OPERATOR_POLICY_SCHEMA')
+    _require(policy['schema']==f'RealSaS.TeacherKinematicCalibrationPolicy.v{revision}','TRUTH_OPERATOR_POLICY_SCHEMA')
     durable=authority/'truth_foundry_inputs'
     policy_ref=immutable_json(durable,'POLICY.json',policy)
     baseline_ref=immutable_json(durable,'NATIVE_BASELINES.json',{'schema':'RealSaS.NativeTeacherBaselineBindings.v1','subjects':baseline_rows})
-    cfg={'mode':'SOURCE_KINEMATIC_CALIBRATION_ONLY','policy':policy_ref,'native_baselines':baseline_ref,
+    cfg={'mode':'SOURCE_KINEMATIC_CALIBRATION_ONLY' if revision==1 else 'OBSERVATION_BIND_REST_KINEMATIC_CALIBRATION_ONLY',
+         'policy':policy_ref,'native_baselines':baseline_ref,
          'source_equivalence_report':{'path':str(equivalence_path),'sha256':request['source_equivalence_report']['sha256']},
          'evaluator_binary':{'path':str(executable),'sha256':binary_sha},'evaluator_version':version,
          'maximum_seconds_per_subject':request['maximum_seconds_per_subject'],'producer_source_commit':expected_sha}
+    if revision==2:
+        cfg['native_baseline_role']='HISTORICAL_PROVENANCE_ONLY__NOT_REST_OR_TEMPORAL_AUTHORITY'
     descriptor=json.loads(_bound_path(repo,request['input_descriptor_repo_path']).read_text())
     descriptor['campaign_contract']=request['campaign_contract_repo_path'];descriptor['campaign_name']=request['campaign_name']
     descriptor['actor']='truth-foundry-calibration-coordinator'
@@ -94,6 +102,7 @@ def prepare(request, *, repo, platform_root, authority_root, expected_sha, outpu
         'created_by':descriptor['actor'],'metadata':{'scope':'SOURCE_KINEMATIC_AND_SAMPLER_INPUT_CALIBRATION_ONLY',
              'policy_sha256':policy_ref['sha256'],'native_baseline_index_sha256':baseline_ref['sha256'],
              'source_equivalence_report_sha256':request['source_equivalence_report']['sha256'],
+             'producer_revision':revision,'native_baseline_authority_for_this_rest':revision==1,
              'training_allowed':False,'new_truth_qualification_from_stage_success':False}}
     experiment=bootstrap.api(api_root,'POST','/v1/experiments',experiment_request)['experiment']
     # Keep noisy bootstrap detail in its exact log; the coordinator reports only
@@ -103,17 +112,24 @@ def prepare(request, *, repo, platform_root, authority_root, expected_sha, outpu
             authority_root=authority,api=api_root,rclone_remote=rclone_remote,out=bootstrap_path,no_submit=True))
     prepared=json.loads(bootstrap_path.read_text());campaign_id=prepared['campaign_id']
     status=bootstrap.api(api_root,'GET','/v1/research/campaigns/'+campaign_id)
+    if revision==2:
+        _require(status.get('target_stage_id')=='47_SOURCE_RESPONSE_CALIBRATION'
+                 and status.get('execution_scope')=='SOURCE_ENTRY_TO_RESEARCH_COMPONENT','TRUTH_OPERATOR_V2_PLATFORM_TARGET_DRIFT')
     bootstrap.api(api_root,'POST','/v1/experiments/link',{'experiment_id':experiment['id'],'target_kind':'CAMPAIGN',
                     'target_id':campaign_id,'actor':descriptor['actor']})
     for member in status['members']:
         bootstrap.api(api_root,'POST','/v1/experiments/link',{'experiment_id':experiment['id'],'target_kind':'ATTEMPT',
                       'target_id':member['attempt_id'],'actor':descriptor['actor']})
-    result={'schema':'RealSaS.TeacherCalibrationCampaignPreparation.v1','source_code_sha':expected_sha,
+    result={'schema':f'RealSaS.TeacherCalibrationCampaignPreparation.v{revision}','source_code_sha':expected_sha,
             'experiment_id':experiment['id'],'campaign_id':campaign_id,'engine_release_id':prepared['release_id'],
             'evaluator_binary_sha256':binary_sha,'policy':policy_ref,'baseline_index':baseline_ref,
             'bootstrap_receipt':{'path':str(bootstrap_path),'sha256':sha256(bootstrap_path)},
             'members':status['members'],'training_submitted':False,'truth_qualification_minted':False,
             'measurement_submitted':False,'campaign_full_closure_claimed':False}
+    if revision==2:
+        result['target_stage_id']=status['target_stage_id']
+        result['producer_revision']=2
+        result['native_baseline_authority_for_this_rest']=False
     result_path=output/'PREPARATION.json';result_path.write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
     if prior is not None:
         result['repair_of_campaign_id']=request['repair_of_campaign_id']

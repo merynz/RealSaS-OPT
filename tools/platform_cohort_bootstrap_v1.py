@@ -371,6 +371,23 @@ def preregistration_spec(descriptor: dict, policy: dict, policy_path: Path, repo
     }
 
 
+def release_stage_parameters(descriptor, plan):
+    """Only released model nodes receive external-worker role requirements."""
+    stage_params = {"schema": "RealSaS.StageReleaseParameters.v1", "stages": {}}
+    fit = descriptor["shared_iris"]
+    if fit["stage_id"] in {stage["id"] for stage in plan["stages"]}:
+        stage_params["stages"][fit["stage_id"]] = {
+            "external_evidence_roles": list(fit["required_external_roles"]),
+            "optional_external_evidence_roles": list(fit["optional_external_roles"]),
+        }
+    for stage_id, parameters in (descriptor.get("additional_stage_parameters") or {}).items():
+        require(stage_id in {s["id"] for s in plan["stages"]}, "COHORT_EXTRA_STAGE_PARAMETER_UNKNOWN_STAGE")
+        require(stage_id not in stage_params["stages"], "COHORT_EXTRA_STAGE_PARAMETER_SHADOWS_EXISTING_CONTRACT")
+        require(isinstance(parameters, dict), "COHORT_EXTRA_STAGE_PARAMETERS_OBJECT_REQUIRED")
+        stage_params["stages"][stage_id] = parameters
+    return stage_params
+
+
 def main(args):
     repo = args.repo.resolve()
     descriptor_path = args.descriptor.resolve()
@@ -458,20 +475,7 @@ def main(args):
                                  "platform_subject_id": platform_id, "subject_input_id": input_id,
                                  "template_manifest": manifest, "sections": sections})
 
-    stage_params = {
-        "schema": "RealSaS.StageReleaseParameters.v1",
-        "stages": {
-            str(descriptor["shared_iris"]["stage_id"]): {
-                "external_evidence_roles": list(descriptor["shared_iris"]["required_external_roles"]),
-                "optional_external_evidence_roles": list(descriptor["shared_iris"]["optional_external_roles"]),
-            }
-        },
-    }
-    for stage_id, parameters in (descriptor.get("additional_stage_parameters") or {}).items():
-        require(stage_id in {s["id"] for s in plan["stages"]}, "COHORT_EXTRA_STAGE_PARAMETER_UNKNOWN_STAGE")
-        require(stage_id not in stage_params["stages"], "COHORT_EXTRA_STAGE_PARAMETER_SHADOWS_EXISTING_CONTRACT")
-        require(isinstance(parameters, dict), "COHORT_EXTRA_STAGE_PARAMETERS_OBJECT_REQUIRED")
-        stage_params["stages"][stage_id] = parameters
+    stage_params = release_stage_parameters(descriptor, plan)
     release_request = snapshot(
         plan, name=descriptor["campaign_name"] + "__RESEARCH_RELEASE", purpose="RESEARCH",
         created_by=actor, stage_parameters=stage_params)

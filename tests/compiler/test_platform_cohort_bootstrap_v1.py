@@ -9,6 +9,7 @@ from tools.platform_cohort_bootstrap_v1 import (
     derive_observation_binding,
     safe_extract_verified,
     verify_descriptor,
+    release_stage_parameters,
 )
 
 
@@ -81,3 +82,15 @@ def test_observation_binding_matches_canonical_hash_shape():
         "views": proof["views"],
     }, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     assert derive_observation_binding(proof, "d" * 64) == expected
+
+
+def test_component_release_does_not_acquire_absent_training_node_requirements():
+    descriptor = {"shared_iris": {"stage_id": "FIT", "required_external_roles": ["checkpoint"],
+                                  "optional_external_roles": ["receipt"]}}
+    plan = {"stages": [{"id": "SOURCE"}, {"id": "MEASUREMENT"}]}
+    assert release_stage_parameters(descriptor, plan)["stages"] == {}
+    plan["stages"].append({"id": "FIT"})
+    assert release_stage_parameters(descriptor, plan)["stages"]["FIT"]["external_evidence_roles"] == ["checkpoint"]
+    descriptor["additional_stage_parameters"] = {"UNKNOWN": {}}
+    with pytest.raises(RuntimeError, match="UNKNOWN_STAGE"):
+        release_stage_parameters(descriptor, plan)

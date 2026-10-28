@@ -48,7 +48,7 @@ def patch_interpreter(raw):
 
 def runtime_manifest(executable):
     root = Path(executable).resolve().parent
-    libraries = root / 'glibc-2.39/usr/lib/x86_64-linux-gnu'
+    libraries = root / 'lib'
     paths = {'loader': root / 'ld-linux-x86-64.so.2', 'libc': libraries / 'libc.so.6', 'libm': libraries / 'libm.so.6'}
     return {'schema': 'RealSaS.PinnedObservationNumericRuntime.v1', 'package_sha256': PACKAGE_SHA,
         'original_blender_binary_sha256': ORIGINAL_BINARY_SHA,
@@ -66,9 +66,11 @@ def launch_options(executable, runtime=None):
         if sha(ref['path']) != ref['sha256']:
             raise ValueError('PINNED_RUNTIME_LIBRARY_BYTES_DRIFT')
     env = dict(os.environ)
-    for key in ('LD_PRELOAD', 'LD_AUDIT'):
+    for key in ('LD_PRELOAD', 'LD_AUDIT', 'LD_LIBRARY_PATH'):
         env.pop(key, None)
-    env.update(LD_LIBRARY_PATH=runtime['library_directory'] + ':' + str(executable.parent / 'lib'), LC_ALL='C')
+    # Blender's sealed $ORIGIN/lib RPATH resolves these private libraries.
+    # Do not propagate an old libc through LD_LIBRARY_PATH to system children.
+    env['LC_ALL'] = 'C'
     # The relative PT_INTERP is part of the derivative's sealed bytes. Linux
     # resolves it from cwd; all source/program/output arguments are absolute.
     return {'cwd': executable.parent, 'env': env}

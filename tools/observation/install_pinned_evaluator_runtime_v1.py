@@ -30,30 +30,50 @@ def download(url, path, expected):
 
 def install(executable):
     executable = Path(executable).resolve()
-    if executable.name != 'blender-glibc239':
+    if executable.name != 'blender-glibc239' or executable.parent.name != 'numeric-runtime-239':
         raise ValueError('PINNED_RUNTIME_SEPARATE_EXECUTABLE_REQUIRED')
     root = executable.parent
-    root.parent.mkdir(parents=True, exist_ok=True)
-    original = root / 'blender'
+    original_root = root.parent
+    original_root.parent.mkdir(parents=True, exist_ok=True)
+    original = original_root / 'blender'
     if not original.is_file():
-        archive = root.parent / 'blender-4.0.2-linux-x64.tar.xz'
+        archive = original_root.parent / 'blender-4.0.2-linux-x64.tar.xz'
         download('https://download.blender.org/release/Blender4.0/blender-4.0.2-linux-x64.tar.xz', archive,
                  '5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a')
         with tarfile.open(archive) as source:
-            if not all(Path(row.name).parts[0] == root.name for row in source.getmembers()):
+            if not all(Path(row.name).parts[0] == original_root.name for row in source.getmembers()):
                 raise ValueError('PINNED_RUNTIME_ARCHIVE_ROOT_DRIFT')
-            source.extractall(root.parent, filter='data')
+            source.extractall(original_root.parent, filter='data')
     if sha(original) != ORIGINAL_BINARY_SHA:
         raise ValueError('PINNED_RUNTIME_ORIGINAL_BINARY_DRIFT')
+    root.mkdir(parents=True, exist_ok=True)
+    resources = root / '4.0'
+    if not resources.exists():
+        resources.symlink_to(original_root / '4.0', target_is_directory=True)
+    libraries = root / 'lib'; libraries.mkdir(exist_ok=True)
+    for source in (original_root / 'lib').iterdir():
+        destination = libraries / source.name
+        if not destination.exists():
+            destination.symlink_to(source, target_is_directory=source.is_dir())
     package = root / 'libc6_2.39-0ubuntu8.6_amd64.deb'
     download(PACKAGE_URL, package, PACKAGE_SHA)
     manifest = runtime_manifest(executable)
-    libraries = Path(manifest['library_directory'])
-    if not libraries.is_dir():
+    package_libraries = root / 'glibc-2.39/usr/lib/x86_64-linux-gnu'
+    if not package_libraries.is_dir():
         subprocess.run(['dpkg-deb', '-x', str(package), str(root / 'glibc-2.39')], check=True)
+    for source in package_libraries.iterdir():
+        if not source.is_file():
+            continue
+        destination = libraries / source.name
+        if destination.is_symlink():
+            destination.unlink()
+        if not destination.exists():
+            shutil.copyfile(source, destination)
+        if sha(destination) != sha(source):
+            raise ValueError('PINNED_RUNTIME_PRIVATE_LIBRARY_DRIFT')
     loader = Path(manifest['files']['loader']['path'])
     if not loader.exists():
-        shutil.copyfile(libraries / 'ld-linux-x86-64.so.2', loader)
+        shutil.copyfile(package_libraries / 'ld-linux-x86-64.so.2', loader)
         loader.chmod(0o755)
     if sha(loader) != LIBRARY_SHA['loader']:
         raise ValueError('PINNED_RUNTIME_LOADER_BYTES_DRIFT')

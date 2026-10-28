@@ -160,7 +160,7 @@ SHA256 `6fe78...`, changing only its ELF interpreter string to the relative
 pinned loader. The exact derivative SHA256 is
 `c47c0b83d061621014c8312abd99db5c1ef057bcf5516faf4bb8d92b3ef6de60`.
 The launcher verifies executable, loader, libc and libm bytes before execution,
-sets the required working directory and explicit library path, and retains
+sets the required working directory and uses a private $ORIGIN/lib directory, and retains
 original observation-producer identity separately. System libraries and the
 original Blender executable are not changed. The producer checks the actual
 loaded numeric libraries and records its runtime fingerprint in TeacherSceneIR.
@@ -180,3 +180,8 @@ baseline. It retains the same eight members and separate regression and the
 finite component target. Read its actual new PREPARATION/OBSERVATION and numeric
 audit before claiming a complete cohort. No student or native temporal
 qualification follows from installing this runtime or passing CI.
+
+The numeric runtime has its own installation subdirectory. Blender's existing
+RPATH finds private library copies there; inherited LD_LIBRARY_PATH is removed
+for the evaluator. This keeps its older libc out of system child processes.
+The original Blender resources/libraries are referenced without modifying them.

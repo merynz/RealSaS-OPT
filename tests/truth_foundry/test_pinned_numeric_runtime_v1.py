@@ -9,7 +9,7 @@ from tools.observation import pinned_evaluator_runtime_v1 as runtime
 def test_launch_pins_working_directory_and_library_bytes_before_execution(tmp_path):
     executable = tmp_path / 'blender-glibc239'
     executable.write_bytes(b'synthetic evaluator')
-    libraries = tmp_path / 'glibc-2.39/usr/lib/x86_64-linux-gnu'
+    libraries = tmp_path / 'lib'
     libraries.mkdir(parents=True)
     files = {'loader': tmp_path / 'ld-linux-x86-64.so.2',
              'libc': libraries / 'libc.so.6', 'libm': libraries / 'libm.so.6'}
@@ -21,7 +21,7 @@ def test_launch_pins_working_directory_and_library_bytes_before_execution(tmp_pa
         manifest = runtime.runtime_manifest(executable)
         options = runtime.launch_options(executable, manifest)
         assert options['cwd'] == executable.parent
-        assert options['env']['LD_LIBRARY_PATH'] == str(libraries) + ':' + str(tmp_path / 'lib')
+        assert 'LD_LIBRARY_PATH' not in options['env']
         assert options['env']['LC_ALL'] == 'C' and 'LD_PRELOAD' not in options['env']
         with pytest.raises(ValueError, match='MANIFEST_OR_BINARY_DRIFT'):
             runtime.launch_options(executable, {**manifest, 'package_sha256': '0' * 64})

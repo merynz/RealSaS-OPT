@@ -57,3 +57,15 @@ def test_workflow_preserves_deployment_and_per_run_receipt_boundaries():
     assert "${{ github.run_id }}-${{ github.run_attempt }}/receipt.json" in text
     assert "if-no-files-found: error" in text
     assert "for i in $(seq 1 120)" not in text
+
+
+@pytest.mark.parametrize("recovery", [
+    {"attempt_id": "invalid", "source_code_sha": "a" * 40},
+    {"attempt_id": "783674b2-8283-498d-ad76-9ed1f09dc330", "source_code_sha": "invalid"},
+    {"attempt_id": "783674b2-8283-498d-ad76-9ed1f09dc330", "source_code_sha": "a" * 40, "extra": True},
+])
+def test_recovery_scope_must_be_explicit_and_well_formed(recovery):
+    request = json.loads((ROOT / REQUEST_PATH).read_text())
+    request["finalize_existing"] = recovery
+    with pytest.raises(ValueError, match="RECOVERY"):
+        select_admission(request, event="workflow_run", branch="main", conclusion="success", changed_paths=[REQUEST_PATH])

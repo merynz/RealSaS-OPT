@@ -20,6 +20,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+import uuid
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +29,7 @@ if str(ROOT) not in sys.path:
 
 from compiler.realsas_compiler_services.orchestrator import mainline
 from tools.platform_release_snapshot import snapshot
+from tools.platform_deployment_smoke import registry_read
 
 ACTOR = "source-ray-appearance-platform-admission-v1"
 STAGE_ID = "91_SOURCE_RAY_APPEARANCE_PLATFORM_ADMISSION"
@@ -182,11 +184,105 @@ def _verify_registry_artifact(api_root: str, row: dict[str, Any], expected_schem
     return {"registry": metadata, "payload": payload}
 
 
+def _existing_context(root: Path, attempt_id: str) -> dict[str, Any]:
+    """Read original IDs from Go-owned records; never submit another command."""
+    attempt_id = str(uuid.UUID(attempt_id))
+    sql = """
+        SELECT json_build_object(
+          'attempt_id',a.id,'subject_id',a.subject_id,'engine_release_id',a.engine_release_id,
+          'execution_goal_id',g.id,'promotion_policy',g.promotion_policy,
+          'resolved_capability_ids',g.resolved_capability_ids,
+          'subject_input_id',g.parameters->'compiler_bridge'->>'subject_input_id',
+          'bundle_artifact_id',sia.artifact_id,
+          'run_id',b.compiler_run_id,'run_manifest_path',b.run_manifest_path)
+        FROM attempts a JOIN execution_goals g ON g.attempt_id=a.id
+        JOIN compiler_run_bindings b ON b.attempt_id=a.id
+        JOIN subject_input_artifacts sia
+          ON sia.subject_input_id=(g.parameters->'compiler_bridge'->>'subject_input_id')::uuid
+          AND sia.role='manifest:source_ray_appearance_court_bundle'
+        WHERE a.id='%s'
+    """ % attempt_id
+    rows = registry_read(root, sql).splitlines()
+    if len(rows) != 1:
+        raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_EXISTING_CONTEXT_CARDINALITY")
+    context = json.loads(rows[0])
+    if (context.get("attempt_id") != attempt_id or context.get("promotion_policy") != "NEVER"
+            or context.get("resolved_capability_ids") != [CAPABILITY_ID]):
+        raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_EXISTING_SCOPE_DRIFT")
+    return context
+
+
+def _finish(args: argparse.Namespace, context: dict[str, Any], raw: bytes,
+            source_sha: str, *, recovered: bool) -> dict[str, Any]:
+    attempt_id = context["attempt_id"]
+    terminal = _wait(args.api_root, attempt_id, args.timeout)
+    # Developer capability goals finalize to PASS; research compile uses COMPLETED.
+    if str(terminal.get("state") or "") != "PASS":
+        raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_ATTEMPT_FAILED:" + json.dumps(terminal, sort_keys=True))
+    completed = [e["payload"] for e in terminal.get("events", []) if e.get("type") == "CAPABILITY_GOAL_COMPLETED"]
+    if (terminal.get("attempt_id") != attempt_id or len(completed) != 1
+            or completed[0].get("execution_goal_id") != context["execution_goal_id"]
+            or completed[0].get("promotion_policy") != "NEVER"
+            or completed[0].get("resolved_capability_ids") != [CAPABILITY_ID]):
+        raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_TERMINAL_SCOPE_DRIFT")
+    bundle_id = context["bundle_artifact_id"]
+    metadata = _api(args.api_root, "GET", f"/v1/artifacts/{bundle_id}")
+    if _artifact_bytes(args.api_root, bundle_id, metadata) != raw:
+        raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_EXISTING_BUNDLE_DRIFT")
+
+    outputs = _attempt_outputs(args.api_root, context["subject_id"], attempt_id)
+    qualification = _verify_registry_artifact(args.api_root, outputs[QUALIFICATION_TYPE], "RealSaS.SourceRayAppearanceQualification.v1")
+    evidence = _verify_registry_artifact(args.api_root, outputs[EVIDENCE_TYPE], "RealSaS.SourceRayAppearanceEvidence.v1")
+    for result in (qualification, evidence):
+        if not any(i.get("role") == "subject:manifest:" + MANIFEST_KEY and i.get("artifact_id") == bundle_id
+                   for i in result["registry"].get("inputs", [])):
+            raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_EXACT_INPUT_LINEAGE_MISSING")
+    if qualification["payload"]["measurement_set_sha256"] != evidence["payload"]["measurement_set_sha256"]:
+        raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_OUTPUT_SET_DRIFT")
+
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    mainline.atomic_json(args.out.with_name("registry-readback.json"), {
+        "attempt": terminal, "qualification": qualification, "evidence": evidence,
+        "source_code_sha": source_sha, "readback_source_code_sha": args.expected_main_sha,
+    })
+    return {
+        "schema": "RealSaS.SourceRayAppearancePlatformAdmissionReceipt.v1",
+        "status": "PASS_PLATFORM_REGISTRY_ADMISSION",
+        "source_code_sha": source_sha,
+        "readback_source_code_sha": args.expected_main_sha,
+        "recovered_existing_attempt": recovered,
+        "terminal_state": terminal["state"],
+        "bundle_sha256": _sha(raw),
+        **{key: context[key] for key in ("subject_id", "subject_input_id", "bundle_artifact_id", "engine_release_id", "attempt_id", "execution_goal_id")},
+        "capability_id": CAPABILITY_ID,
+        "qualification_artifact_id": str(outputs[QUALIFICATION_TYPE]["artifact_id"]),
+        "evidence_artifact_id": str(outputs[EVIDENCE_TYPE]["artifact_id"]),
+        "measurement_set_sha256": qualification["payload"]["measurement_set_sha256"],
+        "canonical_mesh_binding_minted": False,
+        "training_authorized": False,
+        "model_promotion_performed": False,
+        "product_revision_minted": False,
+        "genericity_claimed": False,
+    }
+
+
 def execute(args: argparse.Namespace) -> dict[str, Any]:
     _verify_checkout(args.root, args.expected_main_sha)
     bundle = json.loads(args.bundle.read_text(encoding="utf-8"))
     raw = _json_bytes(bundle)
     bundle_sha = _sha(raw)
+    existing = getattr(args, "finalize_existing_attempt_id", None)
+    if existing:
+        context = _existing_context(args.root, existing)
+        source_sha = args.admission_source_sha
+        run_id = "SOURCE_RAY_APPEARANCE_ADMISSION_" + source_sha[:12].upper() + "_" + bundle_sha[:12].upper()
+        manifest_path = mainline.run_manifest_path(run_id)
+        expected_manifest = {"run_id": run_id, "subject_id": context["subject_id"],
+                             "execution_class": "WITNESS", MANIFEST_KEY: bundle}
+        if (context["run_id"] != run_id or Path(context["run_manifest_path"]) != manifest_path
+                or manifest_path.read_bytes() != _json_bytes(expected_manifest)):
+            raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_EXISTING_MANIFEST_DRIFT")
+        return _finish(args, context, raw, source_sha, recovered=True)
 
     subject = _api(args.api_root, "POST", "/v1/subjects", {
         "slug": "source-ray-appearance-fit8-v1",
@@ -241,37 +337,20 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
     })
     attempt_id = str(_field(capability, "AttemptID", "attempt_id"))
     goal_id = str(_field(capability, "ExecutionGoalID", "execution_goal_id"))
-    terminal = _wait(args.api_root, attempt_id, args.timeout)
-    if str(terminal.get("state") or "") != "COMPLETED":
-        raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_ATTEMPT_FAILED:" + json.dumps(terminal, sort_keys=True))
-
-    outputs = _attempt_outputs(args.api_root, subject_id, attempt_id)
-    qualification = _verify_registry_artifact(args.api_root, outputs[QUALIFICATION_TYPE], "RealSaS.SourceRayAppearanceQualification.v1")
-    evidence = _verify_registry_artifact(args.api_root, outputs[EVIDENCE_TYPE], "RealSaS.SourceRayAppearanceEvidence.v1")
-    if qualification["payload"]["measurement_set_sha256"] != evidence["payload"]["measurement_set_sha256"]:
-        raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_OUTPUT_SET_DRIFT")
-
-    return {
-        "schema": "RealSaS.SourceRayAppearancePlatformAdmissionReceipt.v1",
-        "status": "PASS_PLATFORM_REGISTRY_ADMISSION",
-        "source_code_sha": args.expected_main_sha,
-        "bundle_sha256": bundle_sha,
+    context = {
         "subject_id": subject_id,
         "subject_input_id": subject_input_id,
         "bundle_artifact_id": bundle_artifact_id,
         "engine_release_id": release_id,
         "attempt_id": attempt_id,
         "execution_goal_id": goal_id,
-        "capability_id": CAPABILITY_ID,
-        "qualification_artifact_id": str(outputs[QUALIFICATION_TYPE]["artifact_id"]),
-        "evidence_artifact_id": str(outputs[EVIDENCE_TYPE]["artifact_id"]),
-        "measurement_set_sha256": qualification["payload"]["measurement_set_sha256"],
-        "canonical_mesh_binding_minted": False,
-        "training_authorized": False,
-        "model_promotion_performed": False,
-        "product_revision_minted": False,
-        "genericity_claimed": False,
+        "run_id": run_id,
+        "source_code_sha": args.expected_main_sha,
+        "bundle_sha256": bundle_sha,
     }
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    mainline.atomic_json(args.out.with_name("api-checkpoint.json"), context)
+    return _finish(args, context, raw, args.expected_main_sha, recovered=False)
 
 
 def main() -> None:
@@ -280,11 +359,17 @@ def main() -> None:
     parser.add_argument("--api-root", default="http://127.0.0.1:8080")
     parser.add_argument("--bundle", type=Path, required=True)
     parser.add_argument("--expected-main-sha", required=True)
+    parser.add_argument("--finalize-existing-attempt-id")
+    parser.add_argument("--admission-source-sha")
     parser.add_argument("--timeout", type=float, default=3600)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if len(args.expected_main_sha) != 40 or any(ch not in "0123456789abcdef" for ch in args.expected_main_sha):
         raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_EXPECTED_MAIN_SHA_INVALID")
+    if bool(args.finalize_existing_attempt_id) != bool(args.admission_source_sha):
+        raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_RECOVERY_PAIR_REQUIRED")
+    if args.admission_source_sha and (len(args.admission_source_sha) != 40 or any(ch not in "0123456789abcdef" for ch in args.admission_source_sha)):
+        raise RuntimeError("SOURCE_RAY_APPEARANCE_PLATFORM_RECOVERY_SOURCE_SHA_INVALID")
     receipt = execute(args)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")

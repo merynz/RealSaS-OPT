@@ -2,8 +2,12 @@
   "schema": "RealSaS.SourceRayAppearanceAdmissionRequest.v1",
   "operation": "ADMIT_SEALED_SPARSE_SOURCE_RAY_APPEARANCE",
   "enabled": true,
-  "request_revision": 2,
-  "reason": "Retry the existing sealed sparse appearance admission after exact-main deployment with a verified archive transport that does not require host-installed gh.",
+  "request_revision": 3,
+  "reason": "Read back the original successful capability Attempt; its operator mistook terminal PASS for failure. Do not submit another Attempt.",
+  "finalize_existing": {
+    "attempt_id": "783674b2-8283-498d-ad76-9ed1f09dc330",
+    "source_code_sha": "8cf5ad252037c96a2c6a7fee9015be0bb6957f19"
+  },
   "claims": {
     "training_authorized": false,
     "model_promotion_authorized": false,

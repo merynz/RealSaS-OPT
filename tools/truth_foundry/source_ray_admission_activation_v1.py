@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import uuid
 
 
 REQUEST_PATH = "canonical/SOURCE_RAY_APPEARANCE_ADMISSION_REQUEST_V1.json"
@@ -26,6 +27,16 @@ def select_admission(request, *, event, branch, conclusion, changed_paths):
         raise ValueError("SOURCE_RAY_ADMISSION_REQUEST_REVISION")
     if any(request.get("claims", {}).get(key) is not False for key in NEGATIVE_CLAIMS):
         raise ValueError("SOURCE_RAY_ADMISSION_REQUEST_AUTHORITY_ESCALATION")
+    recovery = request.get("finalize_existing")
+    if recovery is not None:
+        if (not isinstance(recovery, dict) or set(recovery) != {"attempt_id", "source_code_sha"}
+                or not re.fullmatch(r"[0-9a-f]{40}", str(recovery.get("source_code_sha") or ""))):
+            raise ValueError("SOURCE_RAY_ADMISSION_RECOVERY_CONTRACT")
+        try:
+            if str(uuid.UUID(recovery["attempt_id"])) != recovery["attempt_id"]:
+                raise ValueError("noncanonical UUID")
+        except (ValueError, TypeError, AttributeError) as exc:
+            raise ValueError("SOURCE_RAY_ADMISSION_RECOVERY_ATTEMPT_ID") from exc
     if event not in {"workflow_run", "workflow_dispatch"}:
         return "NOOP", "source_ci_only"
     if branch != "main":
@@ -65,10 +76,14 @@ def main():
         "decision": decision, "reason": reason, "source_code_sha": expected,
         "request_revision": request["request_revision"],
         "request_path": REQUEST_PATH, "claims": request["claims"],
+        "finalize_existing": request.get("finalize_existing"),
     }
     Path("source-ray-admission-decision.json").write_text(json.dumps(receipt, indent=2) + "\n")
     with Path(os.environ["GITHUB_OUTPUT"]).open("a") as output:
         output.write(f"decision={decision}\nreason={reason}\nexpected_sha={expected}\n")
+        recovery = request.get("finalize_existing") or {}
+        output.write("existing_attempt_id=" + recovery.get("attempt_id", "") + "\n")
+        output.write("admission_source_sha=" + recovery.get("source_code_sha", "") + "\n")
     print(json.dumps(receipt, sort_keys=True))
 
 

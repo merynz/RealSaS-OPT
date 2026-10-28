@@ -11,6 +11,7 @@ bytes rather than a rewritten compatibility document.
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import sys
 
@@ -22,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from models.iris.truth.presentation_pass_domain_v1 import admit_presentation_pass_domain_v1
 from tools.truth_foundry import blender_source_ray_appearance_measure_v1 as measured
 
 
@@ -45,9 +47,50 @@ def _load_with_v2_teacher(path):
     return value
 
 
+def _argument_path(flag: str) -> Path:
+    try:
+        index = sys.argv.index(flag)
+        value = sys.argv[index + 1]
+    except (ValueError, IndexError) as exc:
+        raise RuntimeError("PRESENTATION_RAY_ARGUMENT_MISSING:" + flag) from exc
+    return Path(value).resolve()
+
+
+def _admit_preregistered_pass_domain_after_raw_failures() -> dict:
+    output = _argument_path("--output")
+    # Platform layout is <run_root>/artifacts/48_PRESENTATION_RESPONSE_TRUTH/PACKED_X.json.
+    # Fail closed outside that exact Attempt-bound layout rather than consulting
+    # a mutable repository-global policy file.
+    try:
+        run_root = output.parents[2]
+    except IndexError as exc:
+        raise RuntimeError("PRESENTATION_RAY_RUN_ROOT_UNRESOLVED") from exc
+    manifest_path = run_root / "run_manifest.json"
+    if not output.is_file() or not manifest_path.is_file():
+        raise RuntimeError("PRESENTATION_RAY_PASS_DOMAIN_EVIDENCE_MISSING")
+    candidate = json.loads(output.read_text())
+    run_manifest = json.loads(manifest_path.read_text())
+    try:
+        receipt = admit_presentation_pass_domain_v1(candidate, run_manifest)
+    except ValueError as exc:
+        raise RuntimeError(str(exc)) from exc
+    print(json.dumps(receipt, sort_keys=True), flush=True)
+    return receipt
+
+
 def main() -> None:
     measured._load = _load_with_v2_teacher
-    measured.main()
+    try:
+        measured.main()
+    except RuntimeError as exc:
+        # The sealed historical court writes the complete raw candidate before
+        # raising when any individual ray fails scalar factorization.  Stage48
+        # preregistered a subject-level minimum PASS-ray domain, so preserve the
+        # failed rays as evidence and return success only when the exact Attempt
+        # manifest's minimum is independently satisfied.
+        if str(exc) != "SOURCE_RAY_APPEARANCE_INTERVENTION_REPLAY_FAILED":
+            raise
+        _admit_preregistered_pass_domain_after_raw_failures()
 
 
 if __name__ == "__main__":

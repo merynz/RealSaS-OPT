@@ -86,11 +86,11 @@ def _packed():
     }
 
 
-def _normalization():
+def _normalization(scale=1.0):
     return {
         "schema": "RealSaS.NormalizationDomainIR.v1",
-        "center_xyz": [0.0, 0.0, 0.5],
-        "half_extent": 2.0,
+        "center_xyz": [0.0, 0.0, 0.5 * scale],
+        "half_extent": 2.0 * scale,
     }
 
 
@@ -132,6 +132,36 @@ def test_v31_projection_learns_attenuation_not_semantic_owner_or_order():
     assert targets.pair_target.shape == (2, 1)
     np.testing.assert_allclose(targets.pair_target[:, 0], [0.5, 0.0])
     assert PAIR_CHANNELS_V31_PRESENTATION == ("occlusion_attenuation_logit",)
+
+
+def test_v31_mechanical_targets_are_invariant_to_uniform_source_scale():
+    vertices, faces = _mesh()
+    response = build_surface_response_arrays_v1(vertices, faces, _isolated(vertices), _actions())
+    base = build_presentation_targets_v1(
+        rest_vertices=vertices,
+        faces=faces,
+        normalization=_normalization(1.0),
+        presentation_arrays=response,
+        packed_measurement=_packed(),
+    )
+
+    scale = 3.0
+    scaled_vertices = vertices * scale
+    scaled_response = build_surface_response_arrays_v1(
+        scaled_vertices,
+        faces,
+        _isolated(vertices) * scale,
+        _actions(),
+    )
+    scaled = build_presentation_targets_v1(
+        rest_vertices=scaled_vertices,
+        faces=faces,
+        normalization=_normalization(scale),
+        presentation_arrays=scaled_response,
+        packed_measurement=_packed(),
+    )
+    np.testing.assert_allclose(scaled.mechanical_xyz, base.mechanical_xyz, atol=1e-6, rtol=0)
+    np.testing.assert_allclose(scaled.mechanical_target, base.mechanical_target, atol=1e-6, rtol=0)
 
 
 def test_v31_losses_are_finite_and_backpropagate_only_declared_quantities():

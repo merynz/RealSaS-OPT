@@ -1,3 +1,12 @@
+> **Current work order — 2026-10-28:** Follow
+> [Truth -> LOFO notebook -> Shape integration](docs/research/truth_foundry/DELIVERY_CONTINUATION_20261028.md).
+> Reuse the same eight sources and preserved measurements. Close the outstanding
+> real truth admission/coverage/observability and executable V3.1 training gates;
+> the first new model training uses LOFO, not the older all-eight fit-first
+> bootstrap. Knight is separate regression. The source work requests only the
+> existing sparse appearance admission after successful exact-main deployment;
+> it authorizes no training or model/product promotion.
+>
 > **A100 delivery continuation — 2026-10-26:** Continue through the optimized
 > notebook under the explicit user request. Preserve the same FIT8 and pre-Truth
 > baseline. Read [the executable-source and delivery work order](docs/research/truth_foundry/A100_DELIVERY_WORK_ORDER_V1.md).

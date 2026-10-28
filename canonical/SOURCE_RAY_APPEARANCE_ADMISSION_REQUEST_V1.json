@@ -1,0 +1,13 @@
+{
+  "schema": "RealSaS.SourceRayAppearanceAdmissionRequest.v1",
+  "operation": "ADMIT_SEALED_SPARSE_SOURCE_RAY_APPEARANCE",
+  "enabled": true,
+  "request_revision": 1,
+  "reason": "Execute the existing hash-pinned source-ray appearance admission after successful exact-main deployment; preserve the measured sparse oracle scope.",
+  "claims": {
+    "training_authorized": false,
+    "model_promotion_authorized": false,
+    "product_revision_authorized": false,
+    "canonical_mesh_binding_authorized": false
+  }
+}

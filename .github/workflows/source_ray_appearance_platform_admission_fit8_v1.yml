@@ -3,6 +3,9 @@ name: source-ray-appearance-platform-admission-fit8-v1
 on:
   pull_request:
     paths:
+      - 'canonical/SOURCE_RAY_APPEARANCE_ADMISSION_REQUEST_V1.json'
+      - 'tools/truth_foundry/source_ray_admission_activation_v1.py'
+      - 'tests/truth_foundry/test_source_ray_admission_activation_v1.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/source_ray_appearance_platform_v1.py'
       - 'tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py'
       - 'tools/platform_source_ray_appearance_admission_v1.py'
@@ -13,6 +16,9 @@ on:
   push:
     branches: [main]
     paths:
+      - 'canonical/SOURCE_RAY_APPEARANCE_ADMISSION_REQUEST_V1.json'
+      - 'tools/truth_foundry/source_ray_admission_activation_v1.py'
+      - 'tests/truth_foundry/test_source_ray_admission_activation_v1.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/source_ray_appearance_platform_v1.py'
       - 'tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py'
       - 'tools/platform_source_ray_appearance_admission_v1.py'
@@ -21,6 +27,9 @@ on:
       - 'tests/truth_foundry/test_source_ray_appearance_platform_plan_v1.py'
       - '.github/workflows/source_ray_appearance_platform_admission_fit8_v1.yml'
   workflow_dispatch:
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
 
 permissions:
   contents: read
@@ -35,8 +44,16 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      decision: ${{ steps.resolve.outputs.decision }}
+      expected_sha: ${{ steps.resolve.outputs.expected_sha }}
+    env:
+      PYTHONPATH: .
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -48,20 +65,38 @@ jobs:
           python -m pytest -q \
             tests/truth_foundry/test_source_ray_appearance_platform_admission_v1.py \
             tests/truth_foundry/test_source_ray_appearance_platform_bundle_v1.py \
-            tests/truth_foundry/test_source_ray_appearance_platform_plan_v1.py
+            tests/truth_foundry/test_source_ray_appearance_platform_plan_v1.py \
+            tests/truth_foundry/test_source_ray_admission_activation_v1.py
           python -m py_compile \
             compiler/realsas_compiler_services/orchestrator/adapters/source_ray_appearance_platform_v1.py \
             tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py \
             tools/platform_source_ray_appearance_admission_v1.py
 
+      - name: Resolve explicit admission request
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SOURCE_BRANCH: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
+          DEPLOYMENT_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: python tools/truth_foundry/source_ray_admission_activation_v1.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: source-ray-admission-decision-${{ github.run_id }}
+          path: source-ray-admission-decision.json
+          if-no-files-found: error
+          retention-days: 30
+
   platform-registry-admission:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: needs.source-contract.outputs.decision == 'RUN'
     needs: source-contract
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 60
     env:
       GH_TOKEN: ${{ github.token }}
       PLATFORM_ROOT: /home/monster/realsas_platform
+      EXPECTED_SHA: ${{ needs.source-contract.outputs.expected_sha }}
+      RECEIPT_PATH: /home/monster/realsas_platform/research-results/source-ray-appearance-platform-admission-v1/${{ github.run_id }}-${{ github.run_attempt }}/receipt.json
       COURT_RUN_ID: '40544781242'
       COURT_ARTIFACT_ID: '12751917983'
       COURT_ARTIFACT_NAME: source-ray-appearance-source-equivalence-fit8-v1-40544781242
@@ -69,28 +104,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
-      - name: Wait for exact deployed canonical main
-        env:
-          EXPECTED_SHA: ${{ github.sha }}
+          ref: ${{ env.EXPECTED_SHA }}
+      - name: Require exact deployed canonical main
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
           test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
-          for i in $(seq 1 120); do
-            if /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
-          import json, os, sys
+          /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
+          import json, os
           from pathlib import Path
           deployment = json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
-          sys.exit(0 if deployment.get('code_sha') == os.environ['EXPECTED_SHA'] else 1)
+          assert deployment.get('state') == 'SERVICES_ACTIVE', 'SOURCE_RAY_APPEARANCE_DEPLOYMENT_NOT_ACTIVE'
+          assert deployment.get('code_sha') == os.environ['EXPECTED_SHA'], 'SOURCE_RAY_APPEARANCE_DEPLOYED_MAIN_DRIFT'
           PY
-            then
-              exit 0
-            fi
-            sleep 5
-          done
-          echo 'SOURCE_RAY_APPEARANCE_DEPLOYED_MAIN_DRIFT' >&2
-          exit 1
       - name: Fetch pinned #243 court artifact
         run: |
           set -euo pipefail
@@ -117,22 +143,41 @@ jobs:
             "${args[@]}" \
             --out "$bundle"
       - name: Execute real Platform CAS and Registry admission
-        env:
-          EXPECTED_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          mkdir -p "$PLATFORM_ROOT/research-results/source-ray-appearance-platform-admission-v1"
+          mkdir -p "$(dirname "$RECEIPT_PATH")"
           /home/monster/realsas_platform/current/bin/realsas-python \
             tools/platform_source_ray_appearance_admission_v1.py \
             --root "$PLATFORM_ROOT" \
             --bundle "$RUNNER_TEMP/source-ray-appearance-platform-bundle.json" \
             --expected-main-sha "$EXPECTED_SHA" \
-            --out "$PLATFORM_ROOT/research-results/source-ray-appearance-platform-admission-v1/receipt.json"
+            --out "$RECEIPT_PATH"
       - name: Preserve admission receipt mirror
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: source-ray-appearance-platform-admission-fit8-v1-${{ github.run_id }}
-          path: /home/monster/realsas_platform/research-results/source-ray-appearance-platform-admission-v1/receipt.json
-          if-no-files-found: warn
+          path: ${{ env.RECEIPT_PATH }}
+          if-no-files-found: error
           retention-days: 30
+
+  finalize:
+    needs: [source-contract, platform-registry-admission]
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    env:
+      SOURCE_RESULT: ${{ needs.source-contract.result }}
+      DECISION: ${{ needs.source-contract.outputs.decision }}
+      ADMISSION_RESULT: ${{ needs.platform-registry-admission.result }}
+    steps:
+      - name: Require the selected admission outcome
+        run: |
+          python - <<'PY'
+          import os
+          assert os.environ['SOURCE_RESULT'] == 'success', 'SOURCE_RAY_ADMISSION_SOURCE_FAILED'
+          decision = os.environ['DECISION']
+          assert decision in {'RUN', 'NOOP'}, 'SOURCE_RAY_ADMISSION_DECISION_INVALID'
+          expected = 'success' if decision == 'RUN' else 'skipped'
+          assert os.environ['ADMISSION_RESULT'] == expected, 'SOURCE_RAY_ADMISSION_EXPECTED_OUTCOME_MISSING'
+          print('SOURCE_RAY_ADMISSION_OUTCOME_PASS', decision, expected)
+          PY

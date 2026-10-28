@@ -18,7 +18,7 @@ import time
 import numpy as np
 import torch
 
-from models.iris.v31.lofo_trainer_v1 import IrisV31LofoTrainer, run_fold
+from models.iris.v31.lofo_trainer_v2 import IrisV31LofoTrainerV2, run_fold_v2
 from models.training_runtime.durable_state_v1 import file_sha256
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -58,13 +58,8 @@ def _worst(rows: list[dict], getter) -> float | None:
 
 
 def _install_gate_telemetry(output: Path) -> None:
-    """Wrap train-only validation with read-only scientific telemetry.
-
-    Numeric V3.1 presentation PASS thresholds are intentionally not invented here.
-    Geometry fields follow the historical Direct-F* selector axes: lower sign
-    disagreement, MAE, near-zero MAE, p95 absolute residual and RMSE are better.
-    """
-    original = IrisV31LofoTrainer._train_validation
+    """Wrap fixed train-subject validation with read-only scientific telemetry."""
+    original = IrisV31LofoTrainerV2._train_validation
 
     def wrapped(self):
         validation = original(self)
@@ -84,6 +79,7 @@ def _install_gate_telemetry(output: Path) -> None:
             "fold_id": self.fold["fold_id"],
             "step": int(validation["step"]),
             "stage": self._stage(max(0, self.step - 1))["id"],
+            "validation_rows_fixed_across_checkpoints": True,
             "worst_selector_subject": worst_row["subject_id"],
             "worst_subject_score": float(validation["worst_subject_score"]),
             "mean_subject_score": float(validation["mean_subject_score"]),
@@ -119,12 +115,12 @@ def _install_gate_telemetry(output: Path) -> None:
             f"p95_abs={_fmt(geometry_p95)} near0_mae={_fmt(geometry_near)} "
             f"mech_nll={_fmt(mechanics)} rgba_l1={_fmt(rgba)} occ_bce={_fmt(occlusion)} "
             f"lr={lr:.3e} peak_vram_gib={peak_gib:.2f} "
-            "presentation_threshold=UNSET",
+            "validation=fixed presentation_threshold=UNSET",
             flush=True,
         )
         return validation
 
-    IrisV31LofoTrainer._train_validation = wrapped
+    IrisV31LofoTrainerV2._train_validation = wrapped
 
 
 def _print_heldout_gate(result: dict) -> None:
@@ -160,11 +156,14 @@ def main(args=None):
     folds = [row for row in manifest.get("folds") or () if row.get("fold_id") == parsed.fold_id]
     if len(folds) != 1:
         raise SystemExit("IRIS_V31_LOFO_WORKER_FOLD_BINDING")
+    if recipe.get("trainer_revision") != "IRIS_V31_LOFO_TRAINER_V2_FIXED_VALIDATION":
+        raise SystemExit("IRIS_V31_LOFO_WORKER_TRAINER_REVISION")
     fold = folds[0]
     source_files = [
         ROOT / "models/iris/v31/model_v31.py",
         ROOT / "models/iris/v31/presentation_objective_v1.py",
         ROOT / "models/iris/v31/lofo_trainer_v1.py",
+        ROOT / "models/iris/v31/lofo_trainer_v2.py",
         Path(__file__).resolve(),
     ]
     source_hashes = {str(path.relative_to(ROOT)): file_sha256(path) for path in source_files}
@@ -179,7 +178,7 @@ def main(args=None):
     preregistration_binding_hash = _canonical_hash(binding)
     _install_gate_telemetry(output)
     started = time.monotonic()
-    result = run_fold(
+    result = run_fold_v2(
         input_manifest_path=input_path,
         recipe_path=recipe_path,
         fold_id=parsed.fold_id,
@@ -198,12 +197,13 @@ def main(args=None):
         "status": "PASS",
         "executor_kind": "EXTERNAL_GPU_JOB_V1",
         "architecture_id": ARCHITECTURE_ID,
+        "trainer_revision": recipe["trainer_revision"],
         "fold_id": parsed.fold_id,
         "train_subjects": fold["train_subjects"],
         "heldout_subject": fold["heldout_subject"],
         "preregistration_binding_hash": preregistration_binding_hash,
         "model_source_sha256": source_hashes["models/iris/v31/model_v31.py"],
-        "runtime_source_sha256": source_hashes["models/iris/v31/lofo_trainer_v1.py"],
+        "runtime_source_sha256": source_hashes["models/iris/v31/lofo_trainer_v2.py"],
         "upstream_bindings": {
             "lofo_input_manifest": file_sha256(input_path),
             "lofo_recipe": file_sha256(recipe_path),
@@ -213,6 +213,7 @@ def main(args=None):
         "teacher_inference_inputs_used": False,
         "heldout_used_for_gradient": False,
         "heldout_used_for_checkpoint_selection": False,
+        "validation_rows_fixed_across_checkpoints": True,
         "semantic_part_taxonomy_used": False,
         "fit8_pass_claimed": False,
         "product_pass_claimed": False,

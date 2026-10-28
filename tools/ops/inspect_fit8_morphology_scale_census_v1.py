@@ -2,10 +2,11 @@
 """Read-only real FIT8 morphology-scale census for V3.1 extraction policy.
 
 Consumes only hash-bound admitted 8-view source masks and camera bundles already
-present on the authority host. It measures projected foreground run widths and
-internal silhouette gaps in normalized TESSA units, then reports how those real
-scales compare with the already-established analytic 24/32/48/64 observability
-table. It deliberately does not select a production extraction resolution.
+present on the authority host. It measures Euclidean local silhouette thickness
+and internal projected gaps in normalized TESSA units, then reports how those
+real scales compare with the already-established analytic 24/32/48/64
+observability table. It deliberately does not select a production extraction
+resolution.
 """
 from __future__ import annotations
 
@@ -17,6 +18,7 @@ from pathlib import Path
 import runpy
 
 import numpy as np
+from scipy.ndimage import distance_transform_edt, maximum_filter
 
 
 SCHEMA = "RealSaS.FIT8RealMorphologyScaleCensus.v1"
@@ -59,21 +61,38 @@ def _runs_1d(values: np.ndarray, *, foreground: bool, internal_only: bool) -> li
     return [int(b - a) for a, b in zip(edges[0::2], edges[1::2]) if b > a]
 
 
-def mask_run_lengths(mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def mask_internal_gap_runs(mask: np.ndarray) -> np.ndarray:
+    """Projected open/closed internal gaps along image X/Y, excluding exterior runs."""
+
     value = np.asarray(mask, dtype=bool)
     if value.ndim != 2 or min(value.shape) <= 0 or not bool(value.any()):
         raise ValueError("FIT8_MORPHOLOGY_MASK_INVALID")
-    foreground: list[int] = []
     gaps: list[int] = []
     for row in value:
-        foreground.extend(_runs_1d(row, foreground=True, internal_only=False))
         gaps.extend(_runs_1d(row, foreground=False, internal_only=True))
     for column in value.T:
-        foreground.extend(_runs_1d(column, foreground=True, internal_only=False))
         gaps.extend(_runs_1d(column, foreground=False, internal_only=True))
-    if not foreground:
-        raise RuntimeError("FIT8_MORPHOLOGY_FOREGROUND_RUNS_EMPTY")
-    return np.asarray(foreground, dtype=np.int64), np.asarray(gaps, dtype=np.int64)
+    return np.asarray(gaps, dtype=np.int64)
+
+
+def mask_local_thickness_px(mask: np.ndarray) -> np.ndarray:
+    """Deterministic local maximal-inscribed-disk diameters in raster pixels.
+
+    Raw row/column foreground chords are not used as thickness because diagonal
+    silhouette tips create orientation-dependent one-pixel runs. Euclidean EDT
+    local maxima provide a geometry-native projected local-thickness census.
+    """
+
+    value = np.asarray(mask, dtype=bool)
+    if value.ndim != 2 or min(value.shape) <= 0 or not bool(value.any()):
+        raise ValueError("FIT8_MORPHOLOGY_MASK_INVALID")
+    distance = distance_transform_edt(value).astype(np.float64, copy=False)
+    local_maximum = maximum_filter(distance, size=3, mode="constant", cval=0.0)
+    ridge = value & (distance > 0.0) & (distance == local_maximum)
+    diameters = 2.0 * distance[ridge]
+    if not len(diameters) or not np.isfinite(diameters).all() or (diameters <= 0).any():
+        raise RuntimeError("FIT8_MORPHOLOGY_LOCAL_THICKNESS_EMPTY_OR_INVALID")
+    return np.asarray(diameters, dtype=np.float64)
 
 
 def nearest_rank_quantiles(values: np.ndarray) -> dict[str, float | None]:
@@ -140,7 +159,7 @@ def run(authority_root: Path, expected_main_sha: str, repo_root: Path) -> dict:
     if len(subjects) != EXPECTED_SUBJECT_COUNT:
         raise RuntimeError("FIT8_MORPHOLOGY_SUBJECT_COUNT_DRIFT")
 
-    all_foreground: list[np.ndarray] = []
+    all_thickness: list[np.ndarray] = []
     all_gaps: list[np.ndarray] = []
     subject_rows = []
     total_views = 0
@@ -167,7 +186,7 @@ def run(authority_root: Path, expected_main_sha: str, repo_root: Path) -> dict:
         if len(cameras) != EXPECTED_VIEW_COUNT or len(proof_views) != EXPECTED_VIEW_COUNT:
             raise RuntimeError(f"FIT8_MORPHOLOGY_VIEW_COUNT_DRIFT:{subject_id}")
 
-        subject_foreground: list[np.ndarray] = []
+        subject_thickness: list[np.ndarray] = []
         subject_gaps: list[np.ndarray] = []
         views = []
         for index, camera in enumerate(cameras):
@@ -181,14 +200,15 @@ def run(authority_root: Path, expected_main_sha: str, repo_root: Path) -> dict:
             if len(raw) != EXPECTED_RESOLUTION * EXPECTED_RESOLUTION:
                 raise RuntimeError(f"FIT8_MORPHOLOGY_MASK_SIZE_DRIFT:{subject_id}:{index}")
             mask = np.frombuffer(raw, dtype=np.uint8).reshape(EXPECTED_RESOLUTION, EXPECTED_RESOLUTION) > 0
-            foreground_px, gap_px = mask_run_lengths(mask)
+            thickness_px = mask_local_thickness_px(mask)
+            gap_px = mask_internal_gap_runs(mask)
             scale = tessa_units_per_pixel(camera["half_extent"], common_half, EXPECTED_RESOLUTION)
-            foreground = foreground_px.astype(np.float64) * scale
+            thickness = thickness_px * scale
             gaps = gap_px.astype(np.float64) * scale
-            subject_foreground.append(foreground)
+            subject_thickness.append(thickness)
             if len(gaps):
                 subject_gaps.append(gaps)
-            all_foreground.append(foreground)
+            all_thickness.append(thickness)
             if len(gaps):
                 all_gaps.append(gaps)
             views.append({
@@ -196,30 +216,30 @@ def run(authority_root: Path, expected_main_sha: str, repo_root: Path) -> dict:
                 "mask_sha256": receipt["mask_sha256"],
                 "tessa_units_per_pixel": scale,
                 "mask_area_fraction": float(mask.mean()),
-                "foreground_run_count": int(len(foreground)),
+                "local_thickness_sample_count": int(len(thickness)),
                 "internal_gap_run_count": int(len(gaps)),
-                "foreground_run_tessa": nearest_rank_quantiles(foreground),
+                "local_thickness_tessa": nearest_rank_quantiles(thickness),
                 "internal_gap_tessa": nearest_rank_quantiles(gaps),
             })
             total_views += 1
 
-        subject_fg = np.concatenate(subject_foreground)
+        subject_thick = np.concatenate(subject_thickness)
         subject_gap = np.concatenate(subject_gaps) if subject_gaps else np.asarray([], dtype=np.float64)
         subject_rows.append({
             "subject_id": subject_id,
             "observation_admission_sha256": admission_ref["sha256"],
             "camera_bundle_sha256": proof["camera_sha256"],
             "view_count": len(views),
-            "foreground_run_tessa": nearest_rank_quantiles(subject_fg),
+            "local_thickness_tessa": nearest_rank_quantiles(subject_thick),
             "internal_gap_tessa": nearest_rank_quantiles(subject_gap),
-            "foreground_run_count": int(len(subject_fg)),
+            "local_thickness_sample_count": int(len(subject_thick)),
             "internal_gap_run_count": int(len(subject_gap)),
             "views": views,
         })
 
-    foreground = np.concatenate(all_foreground) if all_foreground else np.asarray([], dtype=np.float64)
+    thickness = np.concatenate(all_thickness) if all_thickness else np.asarray([], dtype=np.float64)
     gaps = np.concatenate(all_gaps) if all_gaps else np.asarray([], dtype=np.float64)
-    if total_views != EXPECTED_SUBJECT_COUNT * EXPECTED_VIEW_COUNT or not len(foreground):
+    if total_views != EXPECTED_SUBJECT_COUNT * EXPECTED_VIEW_COUNT or not len(thickness):
         raise RuntimeError("FIT8_MORPHOLOGY_CENSUS_INCOMPLETE")
 
     analytic = _analytic_observability(repo_root)
@@ -230,8 +250,8 @@ def run(authority_root: Path, expected_main_sha: str, repo_root: Path) -> dict:
         gap = table["parallel_sheet_gap"]
         comparison[str(resolution)] = {
             "grid_spacing_tessa": float(cylinder["grid_spacing_tessa"]),
-            "foreground_vs_cylinder_p95_observable_fraction": _fraction_at_least(foreground, cylinder["p95_tessa"]),
-            "foreground_vs_cylinder_analytic_guaranteed_fraction": _fraction_at_least(foreground, cylinder["analytic_guaranteed_tessa"]),
+            "local_thickness_vs_cylinder_p95_observable_fraction": _fraction_at_least(thickness, cylinder["p95_tessa"]),
+            "local_thickness_vs_cylinder_analytic_guaranteed_fraction": _fraction_at_least(thickness, cylinder["analytic_guaranteed_tessa"]),
             "internal_gap_vs_parallel_sheet_p95_observable_fraction": _fraction_at_least(gaps, gap["p95_tessa"]),
             "internal_gap_vs_parallel_sheet_analytic_guaranteed_fraction": _fraction_at_least(gaps, gap["analytic_guaranteed_tessa"]),
             "cylinder_p95_threshold_tessa": float(cylinder["p95_tessa"]),
@@ -250,16 +270,17 @@ def run(authority_root: Path, expected_main_sha: str, repo_root: Path) -> dict:
         "view_count": total_views,
         "measurement_semantics": {
             "source": "HASH_BOUND_ADMITTED_BINARY_SILHOUETTE_MASKS",
-            "foreground_scale": "ROW_AND_COLUMN_FOREGROUND_RUN_WIDTH",
+            "local_thickness": "EUCLIDEAN_EDT_LOCAL_MAXIMAL_INSCRIBED_DISK_DIAMETER",
             "gap_scale": "ROW_AND_COLUMN_INTERNAL_BACKGROUND_RUN_WIDTH_BETWEEN_FOREGROUND",
             "normalization": "TESSA_UNITS_FROM_EXACT_ORTHOGRAPHIC_CAMERA_HALF_EXTENT",
             "authored_triangle_edge_length_used": False,
+            "raw_foreground_chord_used_as_thickness": False,
             "three_dimensional_thickness_claimed": False,
         },
         "aggregate": {
-            "foreground_run_count": int(len(foreground)),
+            "local_thickness_sample_count": int(len(thickness)),
             "internal_gap_run_count": int(len(gaps)),
-            "foreground_run_tessa": nearest_rank_quantiles(foreground),
+            "local_thickness_tessa": nearest_rank_quantiles(thickness),
             "internal_gap_tessa": nearest_rank_quantiles(gaps),
         },
         "analytic_observability_schema": analytic["schema"],

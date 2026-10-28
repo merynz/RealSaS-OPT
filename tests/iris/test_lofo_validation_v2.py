@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import numpy as np
 
 from models.iris.v31.lofo_trainer_v1 import _indices
-from models.iris.v31.lofo_trainer_v2 import IrisV31LofoTrainerV2
+from models.iris.v31.lofo_trainer_v2 import IrisV31LofoTrainerV2, pair_group_partition_v2
 
 
 def _trainer():
@@ -70,3 +70,17 @@ def test_v2_heldout_all_rows_ignores_train_validation_partition():
         all_rows=True,
     )
     np.testing.assert_array_equal(actual, np.arange(12))
+
+
+def test_v2_pair_partition_keeps_both_directions_of_each_relation_together():
+    valid = np.arange(12, dtype=np.int64)
+    train, validation = pair_group_partition_v2(
+        "fit8_snake_v1", valid, 26102831, 0.8
+    )
+    assert len(train) and len(validation)
+    assert not set(train.tolist()).intersection(validation.tolist())
+    assert set(train.tolist()) | set(validation.tolist()) == set(valid.tolist())
+    train_set, validation_set = set(train.tolist()), set(validation.tolist())
+    for group in range(6):
+        pair = {2 * group, 2 * group + 1}
+        assert pair <= train_set or pair <= validation_set

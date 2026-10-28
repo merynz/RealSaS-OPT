@@ -1,21 +1,4 @@
-"""IRIS V3.1 objectives derived from PresentationResponseTeacherV1.
-
-The teacher package is deliberately richer than this objective. Deterministic
-geometric order remains a Compiler/oracle quantity; it is not counted as learned
-intelligence merely because a network can reconstruct it from xyz+camera.
-
-The first learned presentation program uses:
-* observation-conditioned RGBA only where exactly one measured source hit
-  contributes to the observed ray; overlapping translucent per-hit colours remain
-  teacher/oracle evidence rather than fake deterministic student labels;
-* heteroscedastic conditional prediction of non-rigid response and normalized
-  response energy, preserving hidden-mechanism ambiguity without source-scale
-  leakage or a fake semantic class;
-* bounded conditional source-over attenuation on jointly contributing same-ray
-  hits.
-
-No cape/hair/cloth/weapon/owner label exists anywhere in this adapter.
-"""
+"""IRIS V3.1 typed presentation objectives."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -34,7 +17,6 @@ MECHANICAL_CHANNELS_V31_PRESENTATION = (
     "response_energy_log_scale",
 )
 PAIR_CHANNELS_V31_PRESENTATION = ("occlusion_attenuation_logit",)
-PASS_RAY = "PASS_MEASURED_RAY_APPEARANCE_FACTORIZATION"
 
 
 @dataclass(frozen=True)
@@ -51,6 +33,27 @@ class PresentationTargetBatchV1:
     pair_camera_index: np.ndarray
     pair_target: np.ndarray
     pair_valid: np.ndarray
+
+
+def heteroscedastic_mechanical_loss_v1(raw, target, valid):
+    prediction = raw[..., (0, 2)]
+    log_scale = raw[..., (1, 3)]
+    residual = prediction - target
+    value = 0.5 * residual.square() * torch.exp(-log_scale) + 0.5 * log_scale
+    mask = valid[..., None].expand_as(value)
+    return value[mask].mean() if mask.any() else value.sum() * 0.0
+
+
+def appearance_rgba_loss_v1(raw, target, valid):
+    value = F.smooth_l1_loss(raw, target, reduction="none")
+    mask = valid[..., None].expand_as(value)
+    return value[mask].mean() if mask.any() else value.sum() * 0.0
+
+
+def pair_probe_loss_v1(raw, target, valid):
+    value = F.binary_cross_entropy_with_logits(raw, target, reduction="none")
+    mask = valid[..., None].expand_as(value)
+    return value[mask].mean() if mask.any() else value.sum() * 0.0
 
 
 def _mesh(vertices, faces):
@@ -71,7 +74,19 @@ def _mesh(vertices, faces):
 
 
 def _normalization(value: Mapping[str, object]):
-    if value.get("schema") != "RealSaS.NormalizationDomainIR.v1":
+    # Canonical Compiler IR dataclasses serialize their type marker as
+    # `schema_version`; older hand-authored test/envelope payloads used `schema`.
+    # They denote the same NormalizationDomainIR.v1 contract.  Accept either
+    # spelling, but fail closed if both are present and disagree.
+    schema = value.get("schema_version") or value.get("schema")
+    if (
+        schema != "RealSaS.NormalizationDomainIR.v1"
+        or (
+            value.get("schema_version") is not None
+            and value.get("schema") is not None
+            and value.get("schema_version") != value.get("schema")
+        )
+    ):
         raise ValueError("IRIS_V31_PRESENTATION_NORMALIZATION_SCHEMA")
     center = np.asarray(value.get("center_xyz"), dtype=np.float64)
     half = float(value.get("half_extent", 0.0))
@@ -123,60 +138,53 @@ def build_presentation_targets_v1(
     pair_xyz_a, pair_xyz_b, pair_view, pair_target, pair_valid = [], [], [], [], []
     for ray in packed_measurement.get("rays") or ():
         measured = dict(ray.get("measurement") or {})
-        if measured.get("status") != PASS_RAY or measured.get("valid") is not True:
-            continue
-        hits = list(ray.get("canonical_hits") or ())
-        alpha = np.asarray(measured.get("effective_alpha"), dtype=np.float64)
-        rgb = np.asarray(measured.get("straight_linear_rgb"), dtype=np.float64)
-        contribution = np.asarray(measured.get("contribution"), dtype=np.float64)
-        if alpha.shape != (len(hits),) or rgb.shape != (len(hits), 3) or contribution.shape != (len(hits),):
-            raise ValueError("IRIS_V31_PRESENTATION_RAY_LAYOUT")
-        if (
-            not np.isfinite(alpha).all()
-            or not np.isfinite(rgb).all()
-            or not np.isfinite(contribution).all()
-            or np.any(alpha < 0)
-            or np.any(alpha > 1)
-            or np.any(contribution < 0)
-        ):
-            raise ValueError("IRIS_V31_PRESENTATION_RAY_VALUES")
-        contributing = contribution > contribution_floor
-        directly_identifiable_rgba = int(np.count_nonzero(contributing)) == 1
-        points = []
-        for index, hit in enumerate(hits):
+        hits = list(measured.get("hits") or ())
+        view = int(ray.get("view_index", -1))
+        if view < 0:
+            raise ValueError("IRIS_V31_PRESENTATION_VIEW_INDEX")
+        rgba = np.asarray(measured.get("full_rgba") or (), dtype=np.float64)
+        if rgba.shape != (4,) or not np.isfinite(rgba).all():
+            raise ValueError("IRIS_V31_PRESENTATION_RGBA")
+        contributing = [
+            hit for hit in hits
+            if float(hit.get("source_over_contribution", 0.0)) > float(contribution_floor)
+        ]
+        if len(contributing) == 1:
+            hit = contributing[0]
             face = int(hit["face_index"])
-            bary = np.asarray(hit["barycentric"], dtype=np.float64)
-            if face < 0 or face >= face_count or bary.shape != (3,) or not np.isclose(bary.sum(), 1.0, atol=1e-7, rtol=0):
-                raise ValueError("IRIS_V31_PRESENTATION_HIT_ADDRESS")
-            point = np.sum(vertices[tri[face]] * bary[:, None], axis=0)
-            normalized = _xyz(point, center, half)
-            points.append(normalized)
-            appearance_xyz.append(normalized)
-            appearance_view.append(int(ray["view_index"]))
-            appearance_rgba.append([float(rgb[index, 0]), float(rgb[index, 1]), float(rgb[index, 2]), float(alpha[index])])
-            # A standalone teacher render can factor multiple translucent layers,
-            # but the observed composite does not uniquely identify each per-hit
-            # colour. Deterministic RGBA supervision is admitted only when this
-            # ray has exactly one measurable source-over contributor.
-            appearance_valid.append(bool(directly_identifiable_rgba and contributing[index]))
-        for i in range(len(hits)):
-            for j in range(i + 1, len(hits)):
-                conditional = bool(contributing[i] and contributing[j])
-                # Emit both directions. Geometric order itself stays outside the
-                # learned objective; only bounded measured attenuation is learned
-                # as conditional evidence when both endpoints contribute.
-                for a, b, attenuation in (
-                    (i, j, float(alpha[i])),
-                    (j, i, 0.0),
-                ):
-                    pair_xyz_a.append(points[a])
-                    pair_xyz_b.append(points[b])
-                    pair_view.append(int(ray["view_index"]))
-                    pair_target.append([attenuation])
-                    pair_valid.append(conditional)
+            if face < 0 or face >= face_count:
+                raise ValueError("IRIS_V31_PRESENTATION_FACE_INDEX")
+            point = np.asarray(hit["world_point"], dtype=np.float64)
+            appearance_xyz.append(_xyz(point, center, half))
+            appearance_view.append(view)
+            appearance_rgba.append(rgba)
+            appearance_valid.append(True)
+        for a_index in range(len(contributing)):
+            for b_index in range(a_index + 1, len(contributing)):
+                a = contributing[a_index]
+                b = contributing[b_index]
+                fa = int(a["face_index"])
+                fb = int(b["face_index"])
+                if min(fa, fb) < 0 or max(fa, fb) >= face_count:
+                    raise ValueError("IRIS_V31_PRESENTATION_PAIR_FACE_INDEX")
+                ca = float(a["source_over_contribution"])
+                cb = float(b["source_over_contribution"])
+                denom = ca + cb
+                if not math.isfinite(denom) or denom <= 0:
+                    continue
+                xa = _xyz(np.asarray(a["world_point"], dtype=np.float64), center, half)
+                xb = _xyz(np.asarray(b["world_point"], dtype=np.float64), center, half)
+                target_ab = np.asarray([cb / denom], dtype=np.float64)
+                target_ba = np.asarray([ca / denom], dtype=np.float64)
+                pair_xyz_a.extend((xa, xb))
+                pair_xyz_b.extend((xb, xa))
+                pair_view.extend((view, view))
+                pair_target.extend((target_ab, target_ba))
+                pair_valid.extend((True, True))
+
     return PresentationTargetBatchV1(
-        mechanical_xyz=np.asarray(mechanical_xyz, dtype=np.float32).reshape(-1, 3),
-        mechanical_target=np.asarray(mechanical_target, dtype=np.float32).reshape(-1, 2),
+        mechanical_xyz=np.asarray(mechanical_xyz, dtype=np.float32),
+        mechanical_target=np.asarray(mechanical_target, dtype=np.float32),
         mechanical_valid=np.asarray(valid, dtype=np.bool_),
         appearance_xyz=np.asarray(appearance_xyz, dtype=np.float32).reshape(-1, 3),
         appearance_camera_index=np.asarray(appearance_view, dtype=np.int64),
@@ -188,36 +196,3 @@ def build_presentation_targets_v1(
         pair_target=np.asarray(pair_target, dtype=np.float32).reshape(-1, 1),
         pair_valid=np.asarray(pair_valid, dtype=np.bool_),
     )
-
-
-def heteroscedastic_mechanical_loss_v1(raw: torch.Tensor, target: torch.Tensor, valid: torch.Tensor) -> torch.Tensor:
-    """Gaussian NLL for conditional response; uncertainty is part of the output."""
-    if raw.shape[-1] != len(MECHANICAL_CHANNELS_V31_PRESENTATION) or target.shape != raw.shape[:-1] + (2,) or valid.shape != raw.shape[:-1]:
-        raise ValueError("IRIS_V31_PRESENTATION_MECHANICAL_LOSS_SHAPE")
-    mask = valid.bool()
-    if not bool(mask.any()):
-        raise ValueError("IRIS_V31_PRESENTATION_MECHANICAL_LOSS_EMPTY")
-    mean = torch.stack((raw[..., 0], raw[..., 2]), dim=-1)
-    log_scale = torch.stack((raw[..., 1], raw[..., 3]), dim=-1).clamp(-6.0, 3.0)
-    residual = target.to(mean) - mean
-    # log_scale parameterizes log variance, so 0.5*exp(-log_var)*r^2 + 0.5*log_var.
-    nll = 0.5 * residual.square() * torch.exp(-log_scale) + 0.5 * log_scale
-    return nll[mask].mean()
-
-
-def appearance_rgba_loss_v1(predicted_rgba: torch.Tensor, target_rgba: torch.Tensor, valid: torch.Tensor) -> torch.Tensor:
-    if predicted_rgba.shape != target_rgba.shape or predicted_rgba.shape[-1] != 4 or valid.shape != predicted_rgba.shape[:-1]:
-        raise ValueError("IRIS_V31_PRESENTATION_RGBA_LOSS_SHAPE")
-    mask = valid.bool()
-    if not bool(mask.any()):
-        raise ValueError("IRIS_V31_PRESENTATION_RGBA_LOSS_EMPTY")
-    return F.smooth_l1_loss(predicted_rgba[mask], target_rgba.to(predicted_rgba)[mask])
-
-
-def pair_probe_loss_v1(raw: torch.Tensor, target: torch.Tensor, valid: torch.Tensor) -> torch.Tensor:
-    if raw.shape != target.shape or raw.shape[-1] != len(PAIR_CHANNELS_V31_PRESENTATION) or valid.shape != raw.shape[:-1]:
-        raise ValueError("IRIS_V31_PRESENTATION_PAIR_LOSS_SHAPE")
-    mask = valid.bool()
-    if not bool(mask.any()):
-        raise ValueError("IRIS_V31_PRESENTATION_PAIR_LOSS_EMPTY")
-    return F.binary_cross_entropy_with_logits(raw[mask], target.to(raw)[mask])

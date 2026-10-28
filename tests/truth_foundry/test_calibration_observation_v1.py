@@ -9,6 +9,30 @@ from tools.truth_foundry.audit_native_teacher_bytes_v1 import sha256
 
 
 class CalibrationObservationTests(unittest.TestCase):
+    def test_v2_readback_preserves_failed_import_and_hash_pinned_observation_inputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);run=root/'run';stage=run/'artifacts'/STAGE;stage.mkdir(parents=True)
+            ledger=run/'ACTIVE_RUN_V2.json';ledger.write_text('{}')
+            audit={}
+            for role in ('iris_observation_admission','source_rest_candidate','source_scene_snapshot'):
+                path=root/(role+'.json');path.write_text(json.dumps({'role':role}))
+                audit[role]={'path':str(path),'sha256':sha256(path)}
+            manifest=run/'run_manifest.json';manifest.write_text(json.dumps({'source_audit':audit}))
+            replay=stage/'admitted_observation_import.json';replay.write_text('{"unqualified_replay":true}')
+            bootstrap=root/'bootstrap.json';bootstrap.write_text(json.dumps({'run_bindings':[{
+                'subject_id':'subject','run_ledger_path':str(ledger),'run_manifest_path':str(manifest)}]}))
+            preparation={'schema':'RealSaS.TeacherCalibrationCampaignPreparation.v2',
+                'bootstrap_receipt':{'path':str(bootstrap),'sha256':sha256(bootstrap)},
+                'members':[{'subject_id':'subject','attempt_id':'attempt','role':'COHORT'}]}
+            result=export_diagnostics(preparation,root/'export')
+            files={Path(row['path']).name:row for row in result[0]['files']}
+            self.assertEqual(files['admitted_observation_import.json']['sha256'],sha256(replay))
+            self.assertEqual(len(result[0]['bound_observation_inputs']),3)
+            self.assertEqual(files['source_rest_candidate.json']['sha256'],audit['source_rest_candidate']['sha256'])
+            Path(audit['source_rest_candidate']['path']).write_text('changed')
+            with self.assertRaisesRegex(ValueError,'BOUND_INPUT_BYTES_DRIFT:source_rest_candidate'):
+                export_diagnostics(preparation,root/'export2')
+
     def test_finite_campaign_waits_for_all_members_after_regression_completes(self):
         with tempfile.TemporaryDirectory() as tmp:
             members=[{'subject_id':'cohort','attempt_id':'cohort-attempt','role':'COHORT'},

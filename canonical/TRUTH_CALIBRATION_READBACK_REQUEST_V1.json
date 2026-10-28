@@ -1,10 +1,10 @@
 {
   "schema": "RealSaS.TeacherCalibrationReadbackRequest.v1",
   "enabled": true,
-  "readback_revision": 3,
-  "preparation_relative_path": "truth_calibration_preparation/40480940440-1/PREPARATION.json",
-  "preparation_sha256": "060e19bd46766ed65e7a3bfc31ba193210dfb508a93cc2abcb6b1843eb356f42",
-  "campaign_id": "ee6e4e66-a7c8-42f3-ac53-87a96c9a2393",
+  "readback_revision": 4,
+  "preparation_relative_path": "truth_calibration_preparation/40723125895-1/PREPARATION.json",
+  "preparation_sha256": "ca62c72c2b1f2e9402ed589b0f2ffc4cc23df865c8260e313e9642cc89026bcd",
+  "campaign_id": "9b75bb5b-1090-4881-b946-c65f7f66cda3",
   "execution_allowed": false,
   "training_allowed": false
 }

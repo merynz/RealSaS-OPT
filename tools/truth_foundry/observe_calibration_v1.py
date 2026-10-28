@@ -53,13 +53,29 @@ def export_diagnostics(preparation,output):
         member=members[binding['subject_id']];ledger=Path(binding['run_ledger_path']).resolve()
         target=Path(output)/member['attempt_id']/'diagnostics';target.mkdir(parents=True,exist_ok=True)
         row={'attempt_id':member['attempt_id'],'files':[],'missing':[]}
-        sources=[ledger,Path(binding['run_manifest_path']).resolve()]
+        manifest=Path(binding['run_manifest_path']).resolve()
+        sources=[ledger,manifest]
         stage=ledger.parent/'artifacts'/STAGE
         sources.append(stage/'failure_diagnostics.json')
         if stage.is_dir():
             candidates=sorted(p for p in stage.iterdir() if p.name.endswith(('.blender.log','.job.json')))
             require(len(candidates)<=32,'TRUTH_OBSERVE_DIAGNOSTIC_FILE_COUNT_EXCEEDED')
             sources.extend(candidates)
+        if preparation.get('schema')=='RealSaS.TeacherCalibrationCampaignPreparation.v2':
+            # The replay may have failed its admission hash before a producer
+            # job or Registry output existed. Preserve it as diagnostic bytes,
+            # never relabel it as an admitted import or measurement.
+            sources.append(stage/'admitted_observation_import.json')
+            require(manifest.is_file(),'TRUTH_OBSERVE_V2_BOUND_MANIFEST_MISSING')
+            audit=json.loads(manifest.read_text()).get('source_audit') or {}
+            if member['role']=='COHORT':
+                row['bound_observation_inputs']=[]
+                for role in ('iris_observation_admission','source_rest_candidate','source_scene_snapshot'):
+                    ref=audit[role];source=Path(ref['path']).resolve()
+                    require(source.is_file() and sha256(source)==ref['sha256'],'TRUTH_OBSERVE_BOUND_INPUT_BYTES_DRIFT:'+role)
+                    sources.append(source)
+                    row['bound_observation_inputs'].append({'role':role,'sha256':ref['sha256'],
+                                                           'file_name':source.name})
         for source in sources:
             if not source.is_file():row['missing'].append(str(source));continue
             require(source.stat().st_size<=8*1024*1024,'TRUTH_OBSERVE_DIAGNOSTIC_FILE_TOO_LARGE')

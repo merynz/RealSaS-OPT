@@ -1,15 +1,14 @@
 """IRIS V3.1 objectives derived from PresentationResponseTeacherV1.
 
-The teacher package is deliberately richer than this objective.  Deterministic
+The teacher package is deliberately richer than this objective. Deterministic
 geometric order remains a Compiler/oracle quantity; it is not counted as learned
-intelligence merely because a network can reconstruct it from xyz+camera.  The
-first learned presentation program uses:
+intelligence merely because a network can reconstruct it from xyz+camera.
 
+The first learned presentation program uses:
 * observation-conditioned RGBA at measured source-equivalent hit loci;
 * heteroscedastic conditional prediction of non-rigid response and response
   energy, preserving hidden-mechanism ambiguity rather than forcing a fake class;
-* an optional pair probe for source-over attenuation on *contributing* same-ray
-  hits.  This probe is evaluation/representation evidence, not draw-order authority.
+* source-over attenuation on contributing same-ray hits.
 
 No cape/hair/cloth/weapon/owner label exists anywhere in this adapter.
 """
@@ -30,10 +29,7 @@ MECHANICAL_CHANNELS_V31_PRESENTATION = (
     "response_energy_mean",
     "response_energy_log_scale",
 )
-PAIR_CHANNELS_V31_PRESENTATION = (
-    "front_probe_logit",
-    "occlusion_attenuation_probe_logit",
-)
+PAIR_CHANNELS_V31_PRESENTATION = ("occlusion_attenuation_logit",)
 PASS_RAY = "PASS_MEASURED_RAY_APPEARANCE_FACTORIZATION"
 
 
@@ -142,16 +138,17 @@ def build_presentation_targets_v1(
         for i in range(len(hits)):
             for j in range(i + 1, len(hits)):
                 observable = bool(contribution[i] > contribution_floor and contribution[j] > contribution_floor)
-                # Emit both directions.  Front is a representation probe only;
-                # attenuation is the learned presentation quantity of interest.
-                for a, b, front, attenuation in (
-                    (i, j, 1.0, float(alpha[i])),
-                    (j, i, 0.0, 0.0),
+                # Emit both directions. Geometric order itself stays outside the
+                # learned objective; only the measured source-over attenuation is
+                # projected into a student target.
+                for a, b, attenuation in (
+                    (i, j, float(alpha[i])),
+                    (j, i, 0.0),
                 ):
                     pair_xyz_a.append(points[a])
                     pair_xyz_b.append(points[b])
                     pair_view.append(int(ray["view_index"]))
-                    pair_target.append([front, attenuation])
+                    pair_target.append([attenuation])
                     pair_valid.append(observable)
     return PresentationTargetBatchV1(
         mechanical_xyz=np.asarray(mechanical_xyz, dtype=np.float32).reshape(-1, 3),
@@ -164,7 +161,7 @@ def build_presentation_targets_v1(
         pair_xyz_a=np.asarray(pair_xyz_a, dtype=np.float32).reshape(-1, 3),
         pair_xyz_b=np.asarray(pair_xyz_b, dtype=np.float32).reshape(-1, 3),
         pair_camera_index=np.asarray(pair_view, dtype=np.int64),
-        pair_target=np.asarray(pair_target, dtype=np.float32).reshape(-1, 2),
+        pair_target=np.asarray(pair_target, dtype=np.float32).reshape(-1, 1),
         pair_valid=np.asarray(pair_valid, dtype=np.bool_),
     )
 
@@ -179,7 +176,8 @@ def heteroscedastic_mechanical_loss_v1(raw: torch.Tensor, target: torch.Tensor, 
     mean = torch.stack((raw[..., 0], raw[..., 2]), dim=-1)
     log_scale = torch.stack((raw[..., 1], raw[..., 3]), dim=-1).clamp(-6.0, 3.0)
     residual = target.to(mean) - mean
-    nll = 0.5 * (residual * torch.exp(-log_scale)).square() + log_scale
+    # log_scale parameterizes log variance, so 0.5*exp(-log_var)*r^2 + 0.5*log_var.
+    nll = 0.5 * residual.square() * torch.exp(-log_scale) + 0.5 * log_scale
     return nll[mask].mean()
 
 

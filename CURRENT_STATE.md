@@ -1,3 +1,13 @@
+> **User-selected continuation — 2026-10-28:** Complete the existing Truth
+> Foundry -> IRIS/TESSA V3.1 **LOFO notebook** -> matching checkpoint/Shape
+> integration. FIT8 is the system-development cohort; the first new model
+> training is 7-train/1-held-out LOFO, not an all-eight fit-first campaign.
+> Read [the current delivery continuation](docs/research/truth_foundry/DELIVERY_CONTINUATION_20261028.md)
+> before the older snapshots below. First close the hash-pinned sparse appearance
+> Platform admission after exact-main deployment and inspect its real receipt.
+> #244's original run stopped before admission; new source is not a PASS.
+> No training, ModelRelease promotion or product activation is minted here.
+>
 > **Actual calibration failure diagnosed — 2026-10-27:** PR225 merged as
 > `0b5c650c070e27b03ffd2c90cd7fc560459e6f6d`. Readback run 40477560825,
 > artifact 12720313840 (archive SHA256

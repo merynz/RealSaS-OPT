@@ -42,7 +42,7 @@ jobs:
               find "$stage" -maxdepth 2 -type f \( -name '*.log' -o -name '*.json' -o -name '*.npz' \) -print -exec cp --parents '{}' "$dst/stage48/" \;
             fi
           done
-          python - <<'PY'
+          python3 - <<'PY'
           from pathlib import Path
           import json, os
           out = Path(os.environ['RUNNER_TEMP'])/'stage48-r3-diagnostic'

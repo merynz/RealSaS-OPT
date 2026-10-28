@@ -41,9 +41,10 @@ func (s Stage) ConsumesInput(role string) bool {
 }
 
 type Snapshot struct {
-	Schema     string  `json:"schema,omitempty"`
-	StageCount int     `json:"stage_count"`
-	Stages     []Stage `json:"stages"`
+	Schema       string         `json:"schema,omitempty"`
+	PlanMetadata map[string]any `json:"plan_metadata,omitempty"`
+	StageCount   int            `json:"stage_count"`
+	Stages       []Stage        `json:"stages"`
 }
 
 type Graph struct {
@@ -51,6 +52,18 @@ type Graph struct {
 	byID               map[string]Stage
 	children           map[string][]string
 	productPassStageID string
+	planMetadata       map[string]any
+}
+
+func clonePlanMetadata(in map[string]any) map[string]any {
+	if in == nil {
+		return nil
+	}
+	out := make(map[string]any, len(in))
+	for key, value := range in {
+		out[key] = value
+	}
+	return out
 }
 
 func ParsePlan(data []byte, requireProductPassAuthority bool) (*Graph, error) {
@@ -108,6 +121,7 @@ func ParsePlan(data []byte, requireProductPassAuthority bool) (*Graph, error) {
 		byID:               byID,
 		children:           children,
 		productPassStageID: productPassStageID,
+		planMetadata:       clonePlanMetadata(p.PlanMetadata),
 	}, nil
 }
 
@@ -131,7 +145,12 @@ func (g *Graph) Stages() []Stage {
 func (g *Graph) StageCount() int { return len(g.stages) }
 
 func (g *Graph) Snapshot() Snapshot {
-	return Snapshot{Schema: "RealSaS.StageGraph.v1", StageCount: len(g.stages), Stages: g.Stages()}
+	return Snapshot{
+		Schema:       "RealSaS.StageGraph.v1",
+		PlanMetadata: clonePlanMetadata(g.planMetadata),
+		StageCount:   len(g.stages),
+		Stages:       g.Stages(),
+	}
 }
 
 func (g *Graph) SHA256() (string, error) { return semantic.JSONSHA256(g.Snapshot()) }

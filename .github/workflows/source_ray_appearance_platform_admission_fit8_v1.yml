@@ -7,6 +7,7 @@ on:
       - 'tools/truth_foundry/source_ray_admission_activation_v1.py'
       - 'tools/truth_foundry/download_pinned_appearance_court_v1.js'
       - 'tests/truth_foundry/test_source_ray_court_download_v1.py'
+      - 'tests/truth_foundry/test_source_ray_admission_readback_v1.py'
       - 'tests/truth_foundry/test_source_ray_admission_activation_v1.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/source_ray_appearance_platform_v1.py'
       - 'tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py'
@@ -22,6 +23,7 @@ on:
       - 'tools/truth_foundry/source_ray_admission_activation_v1.py'
       - 'tools/truth_foundry/download_pinned_appearance_court_v1.js'
       - 'tests/truth_foundry/test_source_ray_court_download_v1.py'
+      - 'tests/truth_foundry/test_source_ray_admission_readback_v1.py'
       - 'tests/truth_foundry/test_source_ray_admission_activation_v1.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/source_ray_appearance_platform_v1.py'
       - 'tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py'
@@ -51,6 +53,8 @@ jobs:
     outputs:
       decision: ${{ steps.resolve.outputs.decision }}
       expected_sha: ${{ steps.resolve.outputs.expected_sha }}
+      existing_attempt_id: ${{ steps.resolve.outputs.existing_attempt_id }}
+      admission_source_sha: ${{ steps.resolve.outputs.admission_source_sha }}
     env:
       PYTHONPATH: .
     steps:
@@ -71,7 +75,8 @@ jobs:
             tests/truth_foundry/test_source_ray_appearance_platform_bundle_v1.py \
             tests/truth_foundry/test_source_ray_appearance_platform_plan_v1.py \
             tests/truth_foundry/test_source_ray_admission_activation_v1.py \
-            tests/truth_foundry/test_source_ray_court_download_v1.py
+            tests/truth_foundry/test_source_ray_court_download_v1.py \
+            tests/truth_foundry/test_source_ray_admission_readback_v1.py
           python -m py_compile \
             compiler/realsas_compiler_services/orchestrator/adapters/source_ray_appearance_platform_v1.py \
             tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py \
@@ -100,6 +105,8 @@ jobs:
     env:
       PLATFORM_ROOT: /home/monster/realsas_platform
       EXPECTED_SHA: ${{ needs.source-contract.outputs.expected_sha }}
+      EXISTING_ATTEMPT_ID: ${{ needs.source-contract.outputs.existing_attempt_id }}
+      ADMISSION_SOURCE_SHA: ${{ needs.source-contract.outputs.admission_source_sha }}
       RECEIPT_PATH: /home/monster/realsas_platform/research-results/source-ray-appearance-platform-admission-v1/${{ github.run_id }}-${{ github.run_attempt }}/receipt.json
       COURT_RUN_ID: '40544781242'
       COURT_ARTIFACT_ID: '12751917983'
@@ -165,18 +172,23 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$(dirname "$RECEIPT_PATH")"
+          recovery_args=()
+          if [ -n "$EXISTING_ATTEMPT_ID" ]; then
+            recovery_args+=(--finalize-existing-attempt-id "$EXISTING_ATTEMPT_ID" --admission-source-sha "$ADMISSION_SOURCE_SHA")
+          fi
           /home/monster/realsas_platform/current/bin/realsas-python \
             tools/platform_source_ray_appearance_admission_v1.py \
             --root "$PLATFORM_ROOT" \
             --bundle "$RUNNER_TEMP/source-ray-appearance-platform-bundle.json" \
             --expected-main-sha "$EXPECTED_SHA" \
+            "${recovery_args[@]}" \
             --out "$RECEIPT_PATH"
       - name: Preserve admission receipt mirror
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: source-ray-appearance-platform-admission-fit8-v1-${{ github.run_id }}
-          path: ${{ env.RECEIPT_PATH }}
+          path: /home/monster/realsas_platform/research-results/source-ray-appearance-platform-admission-v1/${{ github.run_id }}-${{ github.run_attempt }}/*.json
           if-no-files-found: error
           retention-days: 30
 

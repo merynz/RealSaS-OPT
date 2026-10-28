@@ -21,6 +21,18 @@ are historical planning, superseded by this continuation.
   leakage/observability admission. It does not qualify a global sampler.
 - The #244 admission run `40558074064` stopped before Platform execution at
   `SOURCE_RAY_APPEARANCE_DEPLOYED_MAIN_DRIFT`; it emitted no admission artifact.
+- After #271 fixed activation ordering, run `40671412900` passed the deployed
+  main check but stopped at missing host `gh`, before any Platform call. #272
+  removed that dependency and verified actual downloaded ZIP bytes.
+- Run `40673780117`, source `8cf5ad252037c96a2c6a7fee9015be0bb6957f19`, executed
+  the actual capability. Go Attempt `783674b2-8283-498d-ad76-9ed1f09dc330`
+  is terminal **PASS**, with goal `af7c097d-8b1d-467e-8e26-3e2a8758da45`
+  completed under promotion policy NEVER. The operator incorrectly expected
+  research-compile state COMPLETED and therefore did not write its receipt.
+  Request revision 3 selects **readback of this existing Attempt**, not another
+  submission. Verify its exact Registry bytes/lineage and preserve the original
+  source SHA separately from the readback SHA. A red Actions wrapper does not
+  reverse Go's stored PASS; that PASS alone is not a completed readback receipt.
 
 The immediate operation is the **existing hash-pinned sparse appearance
 admission**, selected by
@@ -30,6 +42,11 @@ Platform execution, CAS sealing and Registry readback. A request revision
 selects an intentional retry on new main; unrelated deployments are NOOP.
 The result must be read from the current run's receipt and actual Registry
 artifacts. A merged adapter or green source test is not admission.
+
+The readback path performs no execution or authority writes. Future submissions
+checkpoint API-returned IDs before waiting, and all runs export Registry bytes
+and metadata alongside the receipt. Do not remove the explicit existing-Attempt
+binding merely to make a retry create a fresh result.
 
 This operation admits the existing sparse oracle scope only. It performs no new
 teacher measurement, training, model promotion, CanonicalMesh binding or

@@ -134,6 +134,11 @@ def _projection_qualification(manifest: dict, presentation_bundle: dict) -> dict
         rows.append({"subject_id": subject["subject_id"], **census})
 
     _require(len(rows) == 8, "IRIS_V31_PROJECTION_EIGHT_SUBJECTS_REQUIRED")
+    # At least two distinct subjects must carry conditional pair evidence. Then
+    # every 7/1 fold retains at least one pair-evidence training subject even when
+    # one of those two is held out. Never advertise an occlusion objective that is
+    # silently absent from an entire fold.
+    _require(pair_subjects >= 2 and total_pair_valid > 0, "IRIS_V31_PROJECTION_CROSS_FOLD_PAIR_EVIDENCE_INSUFFICIENT")
     qualification = {
         "schema": "RealSaS.IRISV31StudentProjectionQualification.v1",
         "status": "PASS_EXACT_STUDENT_PROJECTION__TRAINING_AUTHORIZED",
@@ -172,6 +177,7 @@ def _projection_qualification(manifest: dict, presentation_bundle: dict) -> dict
         "compiler_oracle_retains_draw_order_authority": True,
         "pair_evidence_subject_count": pair_subjects,
         "pair_evidence_valid_rows": total_pair_valid,
+        "cross_fold_pair_evidence_minimum_subjects": 2,
         "subjects": rows,
         "heldout_selection_blind": True,
         "fit8_pass_claimed": False,

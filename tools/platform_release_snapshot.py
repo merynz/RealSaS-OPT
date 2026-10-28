@@ -172,6 +172,41 @@ def snapshot(plan, manifest=None, *, name, purpose, created_by, stage_parameters
         for key, value in plan.items()
         if key not in {"stage_count", "stages"}
     }
+    dag = {
+        "schema": "RealSaS.StageGraph.v1",
+        "stage_count": len(plan["stages"]),
+        "stages": [
+            {
+                **{
+                    key: stage[key]
+                    for key in (
+                        "ordinal",
+                        "id",
+                        "title",
+                        "group",
+                        "depends_on",
+                        "adapter",
+                        "manifest_keys",
+                    )
+                },
+                "policy": {
+                    key: bool(stage["policy"].get(key, False))
+                    for key in (
+                        "fail_closed",
+                        "cacheable",
+                        "output_hash_required",
+                        "product_pass_authority",
+                    )
+                },
+            }
+            for stage in plan["stages"]
+        ],
+    }
+    # Product releases retain the historical StageGraph bytes and are already
+    # required to equal shipped canonical main. Research releases may carry a
+    # different top-level plan contract and therefore must seal that metadata.
+    if not require_product:
+        dag["plan_metadata"] = plan_metadata
     request = {
         "created_by": created_by,
         "capability_implementations": capability_impls,
@@ -179,37 +214,7 @@ def snapshot(plan, manifest=None, *, name, purpose, created_by, stage_parameters
             "pipeline_plan_sha256": mainline.validate_plan(
                 plan, require_product_pass_authority=require_product
             ),
-            "dag": {
-                "schema": "RealSaS.StageGraph.v1",
-                "plan_metadata": plan_metadata,
-                "stage_count": len(plan["stages"]),
-                "stages": [
-                    {
-                        **{
-                            key: stage[key]
-                            for key in (
-                                "ordinal",
-                                "id",
-                                "title",
-                                "group",
-                                "depends_on",
-                                "adapter",
-                                "manifest_keys",
-                            )
-                        },
-                        "policy": {
-                            key: bool(stage["policy"].get(key, False))
-                            for key in (
-                                "fail_closed",
-                                "cacheable",
-                                "output_hash_required",
-                                "product_pass_authority",
-                            )
-                        },
-                    }
-                    for stage in plan["stages"]
-                ],
-            },
+            "dag": dag,
             "contract_version": "RealSaS.EngineReleaseManifest.v2",
             "name": name,
             "purpose": purpose,

@@ -1,0 +1,16 @@
+{
+  "schema": "RealSaS.V31ExtractionResolutionSelectionTrigger.v1",
+  "operation": "EXECUTE_SEALED_V31_EXTRACTION_RESOLUTION_SELECTION",
+  "enabled": true,
+  "request_revision": 1,
+  "preregistration": "canonical/V31_EXTRACTION_RESOLUTION_SELECTION_PREREG_V1.json",
+  "authority_root": "/home/monster/realsas_authority",
+  "claims": {
+    "training_authorized": false,
+    "model_release_authorized": false,
+    "product_shape_activation_authorized": false,
+    "product_revision_authorized": false,
+    "fit8_pass_claimed": false,
+    "genericity_claimed": false
+  }
+}

@@ -54,3 +54,5 @@ jobs:
           path: ${{ runner.temp }}/stage48-r6-v3-bundle/
           if-no-files-found: error
           retention-days: 7
+
+# rerun after canonical schema_version compatibility fix

@@ -167,6 +167,11 @@ def snapshot(plan, manifest=None, *, name, purpose, created_by, stage_parameters
         {**row, "channel": model_channel}
         for row in _release_model_requirements(admitted_capabilities)
     ]
+    plan_metadata = {
+        key: value
+        for key, value in plan.items()
+        if key not in {"stage_count", "stages"}
+    }
     request = {
         "created_by": created_by,
         "capability_implementations": capability_impls,
@@ -176,6 +181,7 @@ def snapshot(plan, manifest=None, *, name, purpose, created_by, stage_parameters
             ),
             "dag": {
                 "schema": "RealSaS.StageGraph.v1",
+                "plan_metadata": plan_metadata,
                 "stage_count": len(plan["stages"]),
                 "stages": [
                     {

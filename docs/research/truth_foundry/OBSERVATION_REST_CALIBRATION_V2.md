@@ -40,3 +40,22 @@ as baseline, verifies its terminal states and same member roster, and registers 
 separate Experiment before submission. It never rewrites the old Attempt history.
 Inspect the current PREPARATION/OBSERVATION and Registry outputs before claiming a
 real-data result. Source tests are not eight-subject measurement completion.
+
+## First real execution and bound diagnostic readback
+
+Run `40723125895` on main `a18969ff4b77fe46d1dabc3aedd13aa9a220bda6`
+created campaign `9b75bb5b-1090-4881-b946-c65f7f66cda3`, EngineRelease
+`220fac61-a078-4648-ab78-92eb4d2fc0d8`, Experiment
+`98b27c3e-9382-4470-a364-b49dc32a4715`. Snake, Bat, GreenBlob and Shark
+completed calibration, as did the separate regression exclusion. T-Rex, Horse,
+Spider and George reported `TRUTH_REST_V2_ADMITTED_IMPORT_BYTES_DRIFT` before
+teacher measurement. Whole-import JSON drift does not alone identify a vertex,
+weight/metadata, ordering or Blender-version difference.
+
+Artifact `12830553113` (ZIP SHA256
+`63fa55020b20a3673d68206101bb1730ebaad87880372eff0ebe9f33eb9aa155`)
+preserves that first snapshot. The readback request pins its original PREPARATION
+bytes and campaign, and exports the failed replay plus hash-verified bound
+admission/candidate/snapshot files. It submits no new execution. Diagnose these
+bytes and observe original terminal states before any declared repair; do not
+drop the admission check or blindly resubmit the campaign.

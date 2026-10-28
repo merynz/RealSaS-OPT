@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -15,7 +16,8 @@ def test_cohort_operator_uses_generic_executor_and_self_hosted_canonical_main():
     text = workflow_text()
     assert "workflow_dispatch:" in text
     assert "workflow_run:" in text
-    assert "workflows: [platform-developer-deployment]" in text
+    triggers = yaml.load(text, Loader=yaml.BaseLoader)["on"]["workflow_run"]["workflows"]
+    assert "platform-developer-deployment" in triggers
     assert "runs-on: [self-hosted, linux, x64, realsas]" in text
     assert "deployment['code_sha'] == os.environ['EXPECTED_SHA']" in text
     assert "tools/platform_cohort_bootstrap_v1.py" in text

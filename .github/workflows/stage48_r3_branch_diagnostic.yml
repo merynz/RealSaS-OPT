@@ -1,0 +1,63 @@
+name: stage48-r3-branch-diagnostic
+
+on:
+  push:
+    branches: [v31-lofo-preflight-fixes]
+    paths:
+      - '.github/workflows/stage48_r3_branch_diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      CAMPAIGN_ID: 28ba8411-278b-4187-9a02-9f6b28dd06b8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect exact r3 run diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/stage48-r3-diagnostic"
+          rm -rf "$OUT"
+          mkdir -p "$OUT"
+          shopt -s nullglob
+          roots=("$AUTHORITY_ROOT"/runs/CAMPAIGN_${CAMPAIGN_ID}_*)
+          test ${#roots[@]} -eq 9
+          for root in "${roots[@]}"; do
+            name="$(basename "$root")"
+            dst="$OUT/$name"
+            mkdir -p "$dst"
+            for f in "$root/ACTIVE_RUN_V2.json" "$root/run_manifest.json"; do
+              if test -f "$f"; then cp "$f" "$dst/"; fi
+            done
+            stage="$root/artifacts/48_PRESENTATION_RESPONSE_TRUTH"
+            if test -d "$stage"; then
+              mkdir -p "$dst/stage48"
+              find "$stage" -maxdepth 2 -type f \( -name '*.log' -o -name '*.json' -o -name '*.npz' \) -print -exec cp --parents '{}' "$dst/stage48/" \;
+            fi
+          done
+          python - <<'PY'
+          from pathlib import Path
+          import json, os
+          out = Path(os.environ['RUNNER_TEMP'])/'stage48-r3-diagnostic'
+          rows=[]
+          for root in sorted(out.glob('CAMPAIGN_*')):
+              ledger=root/'ACTIVE_RUN_V2.json'
+              data=json.loads(ledger.read_text()) if ledger.exists() else {}
+              logs=list(root.rglob('*.log'))
+              rows.append({'run':root.name,'ledger_status':data.get('status'),'stage48_logs':[str(p.relative_to(root)) for p in logs]})
+          (out/'INDEX.json').write_text(json.dumps(rows,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(rows,indent=2,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stage48-r3-diagnostic-${{ github.run_id }}
+          path: ${{ runner.temp }}/stage48-r3-diagnostic/
+          if-no-files-found: error
+          retention-days: 7

@@ -198,9 +198,15 @@ def main() -> None:
     source_materials = dict(source_material_map)
     needed_names = set()
     hit_requests = []
+    admitted_ray_count = 0
     for ray in packed.get("rays") or ():
-        if ray.get("measurement", {}).get("status") != "PASS_MEASURED_RAY_APPEARANCE_FACTORIZATION":
-            raise RuntimeError("SOURCE_RAY_REFERENCE_NONPASS_PACKED_RAY")
+        measurement = dict(ray.get("measurement") or {})
+        if (
+            measurement.get("status") != "PASS_MEASURED_RAY_APPEARANCE_FACTORIZATION"
+            or measurement.get("valid") is not True
+        ):
+            continue
+        admitted_ray_count += 1
         for hit_index, hit in enumerate(ray.get("canonical_hits") or ()):
             face_index = int(hit["face_index"])
             if not 0 <= face_index < len(faces):
@@ -211,6 +217,8 @@ def main() -> None:
                 raise RuntimeError("SOURCE_RAY_REFERENCE_MATERIAL_KEY_MISSING")
             needed_names.add(material_name)
             hit_requests.append((ray, hit_index, face_index, material_name))
+    if admitted_ray_count <= 0 or not hit_requests:
+        raise RuntimeError("SOURCE_RAY_REFERENCE_EMPTY_PASS_DOMAIN")
     missing = sorted(name for name in needed_names if name not in source_materials)
     if missing:
         raise RuntimeError("SOURCE_RAY_REFERENCE_SOURCE_MATERIAL_MISSING:" + repr(missing))
@@ -313,6 +321,7 @@ def main() -> None:
         "equivalence_scope": "ADMITTED_UNLIT_SOURCE_OBSERVATION_MATERIAL_POLICY__SAME_TEACHER_TRIANGLE_UV_AND_MICRO_CAMERA",
         "geometry_lane_equivalence_required": False,
         "native_lit_parity_claimed": False,
+        "admitted_pass_ray_count": admitted_ray_count,
         "hit_count": len(rows),
         "hits": rows,
         "qualified_sampler": False,

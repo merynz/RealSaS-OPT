@@ -1,0 +1,218 @@
+name: presentation-truth-platform
+on:
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: presentation-truth-platform
+  cancel-in-progress: false
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    outputs:
+      decision: ${{ steps.resolve.outputs.decision }}
+      reason: ${{ steps.resolve.outputs.reason }}
+      expected_sha: ${{ steps.resolve.outputs.expected_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
+      - id: resolve
+        env:
+          EVENT: ${{ github.event_name }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, subprocess
+          from pathlib import Path
+
+          sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          changed = subprocess.check_output(
+              ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD^1', 'HEAD'],
+              text=True,
+          ).splitlines()
+          request = 'canonical/PRESENTATION_TRUTH_OPERATOR_REQUEST_V1.json'
+          enabled = json.loads(Path(request).read_text()).get('enabled') is True
+          if not enabled:
+              decision, reason = 'NOOP', 'request_disabled'
+          elif os.environ['EVENT'] == 'workflow_dispatch':
+              decision, reason = 'RUN', 'manual_dispatch'
+          elif os.environ['CONCLUSION'] != 'success':
+              decision, reason = 'NOOP', 'deployment_not_successful'
+          elif os.environ['HEAD_BRANCH'] != 'main':
+              decision, reason = 'NOOP', 'non_main_deployment'
+          elif request not in changed:
+              decision, reason = 'NOOP', 'operator_request_not_changed'
+          else:
+              decision, reason = 'RUN', 'operator_request_changed_on_successful_main_deployment'
+          print(f'decision={decision}')
+          print(f'reason={reason}')
+          print(f'expected_sha={sha}')
+          PY
+
+  decision_receipt:
+    needs: activation
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      ACTIVATION_RESULT: ${{ needs.activation.result }}
+      DECISION: ${{ needs.activation.outputs.decision }}
+      REASON: ${{ needs.activation.outputs.reason }}
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+    steps:
+      - name: Validate and publish presentation-truth decision
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          if os.environ.get('ACTIVATION_RESULT') != 'success':
+              raise SystemExit('PRESENTATION_TRUTH_SELECTOR_FAILED')
+          decision = os.environ.get('DECISION', '')
+          reason = os.environ.get('REASON', '')
+          sha = os.environ.get('EXPECTED_SHA', '')
+          if decision not in {'RUN', 'NOOP'} or not reason or len(sha) != 40:
+              raise SystemExit('PRESENTATION_TRUTH_SELECTOR_INVALID')
+          Path(os.environ['GITHUB_STEP_SUMMARY']).write_text(
+              '# Presentation truth platform decision\n\n'
+              f'- decision: `{decision}`\n- reason: `{reason}`\n- expected SHA: `{sha}`\n',
+              encoding='utf-8',
+          )
+          print(f'PRESENTATION_TRUTH_DECISION={decision} reason={reason} expected_sha={sha}')
+          PY
+
+  coordinate:
+    needs: [activation, decision_receipt]
+    if: needs.activation.outputs.decision == 'RUN'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 75
+    env:
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      OUTPUT: /home/monster/realsas_authority/presentation_truth_preparation/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      RCLONE_REMOTE: ${{ vars.REALSAS_RCLONE_DRIVE_REMOTE || 'gdrive' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+      - name: Restore pinned evaluator numeric runtime
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" -m tools.observation.install_pinned_evaluator_runtime_v1 \
+            --request canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V2.json
+      - name: Submit exact FIT8 presentation truth campaign
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/platform_presentation_truth_operator_v1.py \
+            --request canonical/PRESENTATION_TRUTH_OPERATOR_REQUEST_V1.json \
+            --repo "$GITHUB_WORKSPACE" --platform-root "$PLATFORM_ROOT" \
+            --authority-root "$AUTHORITY_ROOT" --expected-main-sha "$EXPECTED_SHA" \
+            --output "$OUTPUT" --rclone-remote "$RCLONE_REMOTE" --submit
+      - name: Observe original Attempts and export exact Stage48 CAS evidence
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/observe_presentation_truth_v1.py \
+            --preparation "$OUTPUT/PREPARATION.json" --artifact-root "$PLATFORM_ROOT/artifacts" \
+            --output "$OUTPUT/evidence" --maximum-seconds 3000 --interval-seconds 10
+      - name: Build immutable FIT8 presentation truth bundle and V3.1 targets
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/build_fit8_presentation_truth_bundle_v2.py \
+            --observation "$OUTPUT/evidence/OBSERVATION.json" \
+            --artifact-root "$PLATFORM_ROOT/artifacts" --repo-root "$GITHUB_WORKSPACE" \
+            --output "$OUTPUT/bundle"
+      - name: Export exact bundle to Drive with round-trip SHA verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          export OUTPUT EXPECTED_SHA RCLONE_REMOTE
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib, json, os, zipfile
+          from pathlib import Path
+          root = Path(os.environ['OUTPUT']) / 'bundle'
+          manifest = root / 'FIT8_PRESENTATION_TRUTH_BUNDLE_V1.json'
+          if not manifest.is_file():
+              raise SystemExit('PRESENTATION_TRUTH_BUNDLE_MANIFEST_MISSING')
+          def sha(path):
+              h=hashlib.sha256()
+              with Path(path).open('rb') as f:
+                  for chunk in iter(lambda:f.read(8<<20), b''):
+                      h.update(chunk)
+              return h.hexdigest()
+          receipt = {
+              'schema': 'RealSaS.PresentationTruthDriveExportReceipt.v1',
+              'source_code_sha': os.environ['EXPECTED_SHA'],
+              'bundle_manifest_sha256': sha(manifest),
+              'semantic_part_taxonomy_used': False,
+              'training_launched': False,
+          }
+          (root/'DRIVE_EXPORT_RECEIPT.json').write_text(json.dumps(receipt,sort_keys=True,indent=2)+'\n')
+          archive = Path(os.environ['OUTPUT']) / f"PRESENTATION_TRUTH_STAGE48_{os.environ['EXPECTED_SHA'][:12]}.zip"
+          with zipfile.ZipFile(archive,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+              for path in sorted(root.rglob('*')):
+                  if not path.is_file():
+                      continue
+                  info=zipfile.ZipInfo(path.relative_to(root).as_posix(),(2026,10,28,0,0,0))
+                  info.compress_type=zipfile.ZIP_DEFLATED
+                  info.external_attr=0o100644 << 16
+                  z.writestr(info,path.read_bytes())
+          print(json.dumps({'archive':str(archive),'sha256':sha(archive),'bytes':archive.stat().st_size},sort_keys=True))
+          PY
+          archive="$OUTPUT/PRESENTATION_TRUTH_STAGE48_${EXPECTED_SHA:0:12}.zip"
+          archive_sha="$(sha256sum "$archive" | awk '{print $1}')"
+          remote="${RCLONE_REMOTE}:RealSaS_Fit8_IRIS_Inputs_20261013/$(basename "$archive")"
+          rclone copyto "$archive" "$remote" --checksum
+          roundtrip="$OUTPUT/roundtrip.zip"
+          rclone copyto "$remote" "$roundtrip" --checksum
+          test "$(sha256sum "$roundtrip" | awk '{print $1}')" = "$archive_sha"
+          printf '%s  %s\n' "$archive_sha" "$(basename "$archive")" > "$OUTPUT/PRESENTATION_TRUTH_STAGE48.sha256"
+          rclone copyto "$OUTPUT/PRESENTATION_TRUTH_STAGE48.sha256" \
+            "${RCLONE_REMOTE}:RealSaS_Fit8_IRIS_Inputs_20261013/PRESENTATION_TRUTH_STAGE48_${EXPECTED_SHA:0:12}.sha256" --checksum
+          echo "PRESENTATION_TRUTH_DRIVE_EXPORT=PASS remote=$remote sha256=$archive_sha"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: presentation-truth-preparation-${{ github.run_id }}
+          path: ${{ env.OUTPUT }}/
+          if-no-files-found: warn
+          retention-days: 14
+
+  finalize:
+    needs: [activation, decision_receipt, coordinate]
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      ACTIVATION_RESULT: ${{ needs.activation.result }}
+      RECEIPT_RESULT: ${{ needs.decision_receipt.result }}
+      COORDINATE_RESULT: ${{ needs.coordinate.result }}
+      DECISION: ${{ needs.activation.outputs.decision }}
+      REASON: ${{ needs.activation.outputs.reason }}
+    steps:
+      - name: Require expected RUN/NOOP outcome
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          activation = os.environ.get('ACTIVATION_RESULT', '')
+          receipt = os.environ.get('RECEIPT_RESULT', '')
+          coordinate = os.environ.get('COORDINATE_RESULT', '')
+          decision = os.environ.get('DECISION', '')
+          reason = os.environ.get('REASON', '')
+          if activation != 'success' or receipt != 'success':
+              raise SystemExit('PRESENTATION_TRUTH_CONTROL_PLANE_FAILED')
+          if decision == 'RUN' and coordinate != 'success':
+              raise SystemExit(f'PRESENTATION_TRUTH_EXPECTED_RUN_NOT_SUCCESS:{coordinate or "missing"}')
+          if decision == 'NOOP' and coordinate != 'skipped':
+              raise SystemExit(f'PRESENTATION_TRUTH_EXPECTED_NOOP_NOT_SKIPPED:{coordinate or "missing"}')
+          if decision not in {'RUN','NOOP'}:
+              raise SystemExit('PRESENTATION_TRUTH_UNKNOWN_DECISION')
+          Path(os.environ['GITHUB_STEP_SUMMARY']).write_text(
+              '# Presentation truth platform outcome\n\n'
+              f'- decision: `{decision}`\n- reason: `{reason}`\n- coordinate: `{coordinate}`\n- outcome: `PASS`\n',
+              encoding='utf-8',
+          )
+          print(f'PRESENTATION_TRUTH_OUTCOME=PASS decision={decision} reason={reason} coordinate={coordinate}')
+          PY

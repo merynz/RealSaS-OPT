@@ -1,0 +1,33 @@
+{
+  "schema": "RealSaS.PresentationTruthOperatorRequest.v1",
+  "enabled": true,
+  "training_allowed": false,
+  "base_calibration_request_repo_path": "canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V2.json",
+  "input_descriptor_repo_path": "canonical/FIT8_PLATFORM_BOOTSTRAP_V1.json",
+  "campaign_contract_repo_path": "canonical/FIT8_PRESENTATION_TRUTH_CAMPAIGN_V1.json",
+  "stage_parameters_repo_path": "canonical/TRUTH_CALIBRATION_STAGE_PARAMETERS_V2.json",
+  "campaign_name": "FIT8_PRESENTATION_RESPONSE_TRUTH_V1",
+  "experiment_slug": "fit8-presentation-response-truth-v1",
+  "experiment_name": "FIT8 generic presentation and response truth V1",
+  "research_question": "Can exact observation-rest authored sources yield source-equivalent, semantics-free typed presentation and non-rigid response evidence suitable for IRIS/TESSA V3.1 target binding?",
+  "hypothesis": "Pose-conditioned all-hit order, measured source-over contribution/removal response, and control-balanced surface response can replace humanoid part taxonomies while retaining the evidence needed by Compiler for aware-M presentation decisions.",
+  "presentation_truth": {
+    "mode": "OBSERVATION_REST_PRESENTATION_RESPONSE_TRUTH_V1",
+    "maximum_seconds_per_subject": 2400,
+    "measured_rays_per_subject": 32,
+    "minimum_pass_rays_per_subject": 16,
+    "maximum_hits_per_ray": 6,
+    "cycles_samples": 256,
+    "large_footprint_fraction": 0.0625,
+    "small_footprint_fraction": 0.03125,
+    "convergence_tolerance": 0.005,
+    "representation_tolerance": 0.005,
+    "measurement_tolerance": 0.0075,
+    "source_equivalence_tolerance": 0.005,
+    "pose_conditioned_action_budget": 16,
+    "geometric_rays_per_view": 32,
+    "student_observable_contribution_floor": 0.000001,
+    "action_measure": "CONTROL_BALANCED__EQUAL_MASS_PER_CONTROL_THEN_PER_SEALED_SIGN_AMPLITUDE_ROW",
+    "semantic_part_taxonomy": "FORBIDDEN"
+  }
+}

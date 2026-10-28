@@ -1,0 +1,125 @@
+{
+  "schema": "RealSaS.IRISV31LofoRecipe.v1",
+  "date": "2026-10-28",
+  "scope": "FIRST_REAL_V31_FIT8_LOFO__RESEARCH_CAPACITY__NOT_PRODUCTION_CAPACITY_SELECTION",
+  "architecture_id": "RealSaS.IRIS.DenseObservationEvidence.v3_1",
+  "trainer_revision": "IRIS_V31_LOFO_TRAINER_V2_FIXED_VALIDATION",
+  "evaluation_partition": "LOFO_7_TRAIN_1_HELD_OUT",
+  "subject_count": 8,
+  "train_subjects_per_fold": 7,
+  "fold_count": 8,
+  "knight_role": "SEPARATE_REGRESSION_ONLY__NEVER_TRAINING_OR_CHECKPOINT_SELECTION",
+  "model_config": {
+    "carrier_resolution": 24,
+    "carrier_channels": 32,
+    "mechanical_channels": [
+      "nonrigid_response_mean",
+      "nonrigid_response_log_scale",
+      "response_energy_mean",
+      "response_energy_log_scale"
+    ],
+    "pair_channels": ["occlusion_attenuation_logit"],
+    "query_width": 192,
+    "query_layers": 3,
+    "fourier_bands": 4,
+    "private_bottleneck": 64,
+    "lift_chunk": 4096,
+    "delta_bound": 0.03
+  },
+  "capacity_policy": {
+    "status": "PREREGISTERED_RESEARCH_EXECUTION_POINT",
+    "selection_basis": "CONSERVATIVE_A100_EXECUTION_POINT__NO_FIT8_OUTCOME_SELECTION",
+    "production_grid_claimed": false,
+    "future_capacity_change_requires_new_recipe": true
+  },
+  "truth_authorities": {
+    "geometry": "EXACT_EXISTING_IMAGE_DERIVED_FSTAR_COHORT_MANIFEST",
+    "presentation": "EXACT_STAGE48_FIT8_PRESENTATION_TRUTH_BUNDLE",
+    "geometric_draw_order": "COMPILER_ORACLE_ONLY__NOT_LEARNED_OBJECTIVE",
+    "physical_stiffness_or_impulse": "ABSTAIN",
+    "semantic_part_class": "FORBIDDEN"
+  },
+  "optimizer": {
+    "kind": "ADAMW",
+    "learning_rate": 0.00008,
+    "minimum_learning_rate": 0.000004,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 1.0,
+    "float32_matmul_precision": "highest",
+    "tf32": false,
+    "cudnn_deterministic": true,
+    "bf16_autocast": true
+  },
+  "schedule": [
+    {
+      "id": "GEOMETRY_WARMUP",
+      "steps": 1000,
+      "families": ["FSTAR_GEOMETRY"],
+      "loss_weights": {"geometry": 1.0, "mechanics": 0.0, "appearance": 0.0, "occlusion_attenuation": 0.0}
+    },
+    {
+      "id": "AWARE_SCENE_JOINT",
+      "steps": 5000,
+      "families": ["FSTAR_GEOMETRY", "CONDITIONAL_NONRIGID_RESPONSE", "SOURCE_EQUIVALENT_RGBA", "OCCLUSION_ATTENUATION"],
+      "loss_weights": {"geometry": 1.0, "mechanics": 0.25, "appearance": 0.25, "occlusion_attenuation": 0.1}
+    }
+  ],
+  "sampling": {
+    "geometry_queries_per_subject_step": 8192,
+    "geometry_mix": {"replay": 0.5, "near": 0.25, "straddle": 0.25},
+    "mechanical_queries_per_subject_step": 1024,
+    "appearance_queries_per_subject_step": 128,
+    "pair_queries_per_subject_step": 128,
+    "presentation_train_fraction": 0.8,
+    "presentation_partition": "STATELESS_SHA256_SUBJECT_FAMILY_ROW_SEED__FIXED_VALIDATION_ROWS",
+    "training_sampler": "V1_STATELESS_WITH_REPLACEMENT__UNCHANGED",
+    "seed": 26102831,
+    "field_huber_beta": 0.01,
+    "field_clamp": 0.25
+  },
+  "optimizer_update_semantics": "ONE_GLOBAL_UPDATE_EQUALS_EQUAL_WEIGHT_GRADIENT_ACCUMULATION_OVER_ALL_SEVEN_TRAIN_SUBJECTS",
+  "physical_packing_semantics": "ONE_SUBJECT_PER_PHYSICAL_MICROBATCH__NO_CHANGE_TO_SCIENTIFIC_UPDATE",
+  "evaluation": {
+    "interval_steps": 200,
+    "geometry_validation_points_per_train_subject": 8192,
+    "presentation_validation_uses_fixed_preregistered_validation_rows": true,
+    "presentation_validation_resampled_across_checkpoints": false,
+    "checkpoint_selector": "MINIMIZE_WORST_TRAIN_SUBJECT_WEIGHTED_VALIDATION_THEN_MEAN_THEN_EARLIER_STEP",
+    "heldout_subject_visible_during_training": false,
+    "heldout_subject_visible_during_checkpoint_selection": false,
+    "heldout_open_rule": "ONLY_AFTER_SELECTED_CHECKPOINT_HASH_IS_FROZEN",
+    "heldout_metrics": [
+      "FSTAR_SIGN_ERROR",
+      "FSTAR_MAE",
+      "FSTAR_NEAR_ZERO_MAE",
+      "FSTAR_P95_ABS",
+      "CONDITIONAL_MECHANICS_NLL",
+      "RGBA_SMOOTHL1",
+      "OCCLUSION_ATTENUATION_BCE"
+    ],
+    "gate_telemetry": {
+      "geometry_axes": ["FSTAR_SIGN_ERROR", "FSTAR_MAE", "FSTAR_NEAR_ZERO_MAE", "FSTAR_P95_ABS"],
+      "presentation_axes": ["CONDITIONAL_MECHANICS_NLL", "RGBA_SMOOTHL1", "OCCLUSION_ATTENUATION_BCE"],
+      "direction": "LOWER_IS_BETTER",
+      "numeric_v31_geometry_pass_threshold": null,
+      "numeric_v31_presentation_pass_threshold": null,
+      "threshold_policy": "DO_NOT_INVENT__SCIENTIFIC_QUALIFICATION_SEPARATE"
+    },
+    "front_order_metric_role": "COMPILER_ORACLE_REFERENCE_ONLY"
+  },
+  "checkpoint": {
+    "interval_steps": 200,
+    "durable_resume_required": true,
+    "resume_restores_optimizer_scheduler_and_step": true,
+    "selected_inference_checkpoint_schema": "RealSaS.IRISDenseObservationEvidenceCheckpoint.v3_1"
+  },
+  "claims": {
+    "fit8_pass_from_training_loss": false,
+    "product_pass": false,
+    "genericity": false,
+    "unseen": false,
+    "production_capacity_selected": false,
+    "teacher_inputs_in_forward": false,
+    "semantic_taxonomy_used": false
+  }
+}

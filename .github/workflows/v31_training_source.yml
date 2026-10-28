@@ -12,6 +12,7 @@ on:
       - 'tests/iris/test_v31_inference_checkpoint_contracts_v1.py'
       - 'tests/compiler/test_platform_v31_inference_plumbing_v1.py'
       - 'tests/training_runtime/**'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/v31_alpha_resampling_policy_probe_v1.py'
       - 'tools/ops/inspect_truth_inputs_v1.py'
       - 'compiler/realsas_compiler_core/graphics_evidence_v2.py'
       - 'compiler/realsas_compiler_core/graphics_v2.py'
@@ -29,6 +30,7 @@ on:
       - 'tests/iris/test_v31_inference_checkpoint_contracts_v1.py'
       - 'tests/compiler/test_platform_v31_inference_plumbing_v1.py'
       - 'tests/training_runtime/**'
+      - 'experiments/iris_tessa_v3_apparatus_audit_20261025/v31_alpha_resampling_policy_probe_v1.py'
       - 'tools/ops/inspect_truth_inputs_v1.py'
       - 'compiler/realsas_compiler_core/graphics_evidence_v2.py'
       - 'compiler/realsas_compiler_core/graphics_v2.py'
@@ -65,6 +67,10 @@ jobs:
           python -m pytest -q
           tests/iris/test_v31_inference_checkpoint_contracts_v1.py
           tests/compiler/test_platform_v31_inference_plumbing_v1.py
+      - name: V3.1 alpha resampling bounded court
+        run: |
+          mkdir -p v31-courts
+          python experiments/iris_tessa_v3_apparatus_audit_20261025/v31_alpha_resampling_policy_probe_v1.py --out v31-courts/V31_ALPHA_RESAMPLING_POLICY_COURT_V1.json
       - name: Existing Truth Foundry source regressions
         run: python -m unittest discover -s tests/truth_foundry -v
       - name: Scoped ray evidence consumer
@@ -73,10 +79,12 @@ jobs:
         run: |
           mkdir -p source-inspection
           python tools/realsas_architecture.py --json-out source-inspection/map.json map
-          python tools/realsas_architecture.py --json-out source-inspection/impact.json impact --path models/iris/v31/model_v31.py --path models/iris/v31/frozen_features_v31.py --path models/iris/v31/checkpoint_v1.py --path models/tessa/v31/model_v31.py --path models/tessa/v31/attention_v31.py --path models/tessa/v31/checkpoint_v1.py --path models/training_runtime/durable_state_v1.py --path compiler/realsas_compiler_services/platform_worker/iris_v31_inference_v1.py --path compiler/realsas_compiler_services/platform_worker/tessa_v31_inference_v1.py --path compiler/realsas_compiler_services/platform_worker/scene_input_contract_v31.py --path tools/ops/inspect_truth_inputs_v1.py --path compiler/realsas_compiler_core/graphics_v2.py
+          python tools/realsas_architecture.py --json-out source-inspection/impact.json impact --path models/iris/v31/model_v31.py --path models/iris/v31/frozen_features_v31.py --path models/iris/v31/checkpoint_v1.py --path models/tessa/v31/model_v31.py --path models/tessa/v31/attention_v31.py --path models/tessa/v31/checkpoint_v1.py --path models/training_runtime/durable_state_v1.py --path compiler/realsas_compiler_services/platform_worker/iris_v31_inference_v1.py --path compiler/realsas_compiler_services/platform_worker/tessa_v31_inference_v1.py --path compiler/realsas_compiler_services/platform_worker/scene_input_contract_v31.py --path experiments/iris_tessa_v3_apparatus_audit_20261025/v31_alpha_resampling_policy_probe_v1.py --path tools/ops/inspect_truth_inputs_v1.py --path compiler/realsas_compiler_core/graphics_v2.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: v31-source-inspection-${{ github.sha }}
-          path: source-inspection/
+          path: |
+            source-inspection/
+            v31-courts/
           retention-days: 14

@@ -1,0 +1,125 @@
+name: v31-extraction-resolution-selection
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
+
+concurrency:
+  group: v31-extraction-resolution-selection
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.resolve.outputs.should_run }}
+      expected_sha: ${{ steps.resolve.outputs.expected_sha }}
+    steps:
+      - name: Resolve selected canonical SHA
+        id: sha
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          DISPATCH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = workflow_run ]; then echo "expected_sha=$WORKFLOW_RUN_HEAD_SHA" >> "$GITHUB_OUTPUT"; else echo "expected_sha=$DISPATCH_SHA" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.sha.outputs.expected_sha }}
+          fetch-depth: 2
+      - name: Resolve sealed selection request
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EXPECTED_SHA: ${{ steps.sha.outputs.expected_sha }}
+          WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          TRIGGER_PATH: canonical/V31_EXTRACTION_RESOLUTION_SELECTION_TRIGGER_V1.json
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, subprocess
+          from pathlib import Path
+          event=os.environ['EVENT_NAME']; expected=os.environ['EXPECTED_SHA'].strip().lower(); should=event=='workflow_dispatch'
+          if event=='workflow_run' and os.environ.get('WORKFLOW_RUN_CONCLUSION')=='success' and os.environ.get('WORKFLOW_RUN_HEAD_BRANCH')=='main':
+              changed=subprocess.check_output(['git','diff-tree','--no-commit-id','--name-only','-r','HEAD^1','HEAD'],text=True).splitlines()
+              path=Path(os.environ['TRIGGER_PATH'])
+              if str(path) in changed:
+                  trigger=json.loads(path.read_text())
+                  assert trigger.get('schema')=='RealSaS.V31ExtractionResolutionSelectionTrigger.v1','V31_SELECTION_TRIGGER_SCHEMA'
+                  assert trigger.get('operation')=='EXECUTE_SEALED_V31_EXTRACTION_RESOLUTION_SELECTION','V31_SELECTION_TRIGGER_OPERATION'
+                  assert isinstance(trigger.get('enabled'),bool),'V31_SELECTION_TRIGGER_ENABLED'
+                  should=bool(trigger['enabled'])
+          print(f"should_run={'true' if should else 'false'}")
+          print(f'expected_sha={expected}')
+          PY
+
+  select:
+    needs: activation
+    if: needs.activation.outputs.should_run == 'true'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+      OUTPUT_PATH: /home/monster/realsas_authority/research/extraction_resolution_selection/${{ github.run_id }}-${{ github.run_attempt }}/RESULT.json
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+      - name: Require exact deployed canonical main
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          d=json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
+          assert d['schema']=='RealSaS.DeveloperDeployment.v1','V31_SELECTION_DEPLOYMENT_SCHEMA'
+          assert d['code_sha']==os.environ['EXPECTED_SHA'],'V31_SELECTION_DEPLOYED_MAIN_DRIFT'
+          PY
+      - name: Execute sealed extraction resolution selection court
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUTPUT_PATH")"
+          "$PLATFORM_ROOT/current/bin/realsas-python" \
+            "$GITHUB_WORKSPACE/experiments/iris_tessa_v3_apparatus_audit_20261025/fit8_extraction_resolution_selection_v1.py" \
+            --authority-root "$AUTHORITY_ROOT" \
+            --expected-main-sha "$EXPECTED_SHA" \
+            --out "$OUTPUT_PATH"
+      - name: Verify result and negative authority claims
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          r=json.loads(Path(os.environ['OUTPUT_PATH']).read_text())
+          assert r['schema']=='RealSaS.V31ExtractionResolutionSelectionCourt.v1','V31_SELECTION_RESULT_SCHEMA'
+          assert r['source_code_sha']==os.environ['EXPECTED_SHA'],'V31_SELECTION_SOURCE_SHA'
+          assert r['status'] in {'V31_BOUNDED_EXTRACTION_RESOLUTION_POLICY_SELECTED_V1','V31_UNIFORM_BOUND_INSUFFICIENT__LOCAL_SPARSE_REFINEMENT_REQUIRED_V1'},'V31_SELECTION_STATUS'
+          assert len(r['subjects'])==8,'V31_SELECTION_SUBJECT_COUNT'
+          for key in ('training_executed','model_release_minted','model_promotion_performed','product_shape_activated','shape_proposal_minted','canonical_mesh_minted','product_revision_minted','fit8_pass_claimed','genericity_claimed'):
+              assert r[key] is False, f'V31_SELECTION_AUTHORITY_VIOLATION:{key}'
+          if r['selection']['uniform_bound_sufficient_for_all_fit8_subjects']:
+              assert r['selection']['selected_uniform_resolution_bound'] in r['candidate_uniform_resolutions'],'V31_SELECTION_BOUND_INVALID'
+          else:
+              assert r['selection']['selected_uniform_resolution_bound'] is None,'V31_SELECTION_CEILING_MUST_FAIL_CLOSED'
+          PY
+      - name: Preserve exact selection result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v31-extraction-resolution-selection-${{ github.run_id }}
+          path: ${{ env.OUTPUT_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

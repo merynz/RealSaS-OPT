@@ -1,0 +1,41 @@
+name: stage48-r6-live-diagnostic
+
+on:
+  push:
+    branches: [stage48-r6-live-diagnostic]
+    paths:
+      - '.github/workflows/stage48_r6_live_diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      PREP_ROOT: /home/monster/realsas_authority/presentation_truth_preparation/40782479846-1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect exact live campaign
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "$PREP_ROOT/PREPARATION.json"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          from tools.platform_cohort_bootstrap_v1 import api
+          prep=json.loads((Path(os.environ['PREP_ROOT'])/'PREPARATION.json').read_text())
+          camp=api('http://127.0.0.1:8080','GET','/v1/research/campaigns/'+prep['campaign_id'])
+          rows=[]
+          for m in camp['members']:
+              a=api('http://127.0.0.1:8080','GET','/v1/attempts/'+m['attempt_id'])
+              run_root=Path(os.environ['AUTHORITY_ROOT'])/'runs'/f"CAMPAIGN_{prep['campaign_id']}_{m['attempt_id']}"
+              stage=run_root/'artifacts'/'48_PRESENTATION_RESPONSE_TRUTH'
+              files=sorted(p.name for p in stage.glob('*')) if stage.is_dir() else []
+              rows.append({'subject_id':m['subject_id'],'role':m['role'],'attempt_id':m['attempt_id'],'state':a['state'],'stage48_files':files})
+          print(json.dumps({'campaign_id':prep['campaign_id'],'experiment_id':prep['experiment_id'],'goal_complete':camp.get('goal_complete'),'members':rows},sort_keys=True,indent=2))
+          PY

@@ -3,6 +3,7 @@
   "date": "2026-10-28",
   "scope": "FIRST_REAL_V31_FIT8_LOFO__RESEARCH_CAPACITY__NOT_PRODUCTION_CAPACITY_SELECTION",
   "architecture_id": "RealSaS.IRIS.DenseObservationEvidence.v3_1",
+  "trainer_revision": "IRIS_V31_LOFO_TRAINER_V2_FIXED_VALIDATION",
   "evaluation_partition": "LOFO_7_TRAIN_1_HELD_OUT",
   "subject_count": 8,
   "train_subjects_per_fold": 7,
@@ -70,7 +71,8 @@
     "appearance_queries_per_subject_step": 128,
     "pair_queries_per_subject_step": 128,
     "presentation_train_fraction": 0.8,
-    "presentation_partition": "STATELESS_SHA256_SUBJECT_FAMILY_ROW_SEED",
+    "presentation_partition": "STATELESS_SHA256_SUBJECT_FAMILY_ROW_SEED__FIXED_VALIDATION_ROWS",
+    "training_rows_sample_without_replacement_per_update": true,
     "seed": 26102831,
     "field_huber_beta": 0.01,
     "field_clamp": 0.25
@@ -80,12 +82,29 @@
   "evaluation": {
     "interval_steps": 200,
     "geometry_validation_points_per_train_subject": 8192,
-    "presentation_validation_uses_only_preregistered_train_partition": true,
+    "presentation_validation_uses_fixed_preregistered_validation_rows": true,
+    "presentation_validation_resampled_across_checkpoints": false,
     "checkpoint_selector": "MINIMIZE_WORST_TRAIN_SUBJECT_WEIGHTED_VALIDATION_THEN_MEAN_THEN_EARLIER_STEP",
     "heldout_subject_visible_during_training": false,
     "heldout_subject_visible_during_checkpoint_selection": false,
     "heldout_open_rule": "ONLY_AFTER_SELECTED_CHECKPOINT_HASH_IS_FROZEN",
-    "heldout_metrics": ["FSTAR_MAE", "FSTAR_SIGN_ERROR", "CONDITIONAL_MECHANICS_NLL", "RGBA_SMOOTHL1", "OCCLUSION_ATTENUATION_BCE"],
+    "heldout_metrics": [
+      "FSTAR_SIGN_ERROR",
+      "FSTAR_MAE",
+      "FSTAR_NEAR_ZERO_MAE",
+      "FSTAR_P95_ABS",
+      "CONDITIONAL_MECHANICS_NLL",
+      "RGBA_SMOOTHL1",
+      "OCCLUSION_ATTENUATION_BCE"
+    ],
+    "gate_telemetry": {
+      "geometry_axes": ["FSTAR_SIGN_ERROR", "FSTAR_MAE", "FSTAR_NEAR_ZERO_MAE", "FSTAR_P95_ABS"],
+      "presentation_axes": ["CONDITIONAL_MECHANICS_NLL", "RGBA_SMOOTHL1", "OCCLUSION_ATTENUATION_BCE"],
+      "direction": "LOWER_IS_BETTER",
+      "numeric_v31_geometry_pass_threshold": null,
+      "numeric_v31_presentation_pass_threshold": null,
+      "threshold_policy": "DO_NOT_INVENT__SCIENTIFIC_QUALIFICATION_SEPARATE"
+    },
     "front_order_metric_role": "COMPILER_ORACLE_REFERENCE_ONLY"
   },
   "checkpoint": {

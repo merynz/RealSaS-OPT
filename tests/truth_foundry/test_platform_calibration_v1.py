@@ -81,7 +81,9 @@ class CalibrationPlatformTests(unittest.TestCase):
                 if route=='/v1/experiments':return {'experiment':{'id':'exp','lifecycle_state':'PREREGISTERED'}}
                 if route=='/v1/research/campaigns/prior':return {'candidate_engine_release_id':'prior-release',
                     'members':[{'subject_id':str(i),'role':'COHORT','final_state':prior_state[0]} for i in range(3)]}
-                if route=='/v1/research/campaigns/campaign':return {'state':state[0],'members':[{'attempt_id':f'attempt-{i}'} for i in range(3)]}
+                if route=='/v1/research/campaigns/campaign':return {'state':state[0],
+                    'target_stage_id':'47_SOURCE_RESPONSE_CALIBRATION','execution_scope':'SOURCE_ENTRY_TO_RESEARCH_COMPONENT',
+                    'members':[{'attempt_id':f'attempt-{i}'} for i in range(3)]}
                 if route=='/v1/research/campaigns/run':state[0]='RUNNING';return {'state':'RUNNING'}
                 return {}
             def fake_bootstrap(args):
@@ -102,6 +104,22 @@ class CalibrationPlatformTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'PRIOR_CAMPAIGN_NOT_DRAINED'):
                     prepare(request,repo=repo,platform_root=platform,authority_root=authority,expected_sha=code,
                         output=root/'out',api_root='fixture',rclone_remote='fixture',submit=True)
+                prior_state[0]='FAILED'
+                request2={**request,'schema':'RealSaS.TeacherCalibrationOperatorRequest.v2','native_baseline_authority_for_this_rest':False}
+                (repo/'campaign.json').write_text(json.dumps({'required_target_stage_id':'47_SOURCE_RESPONSE_CALIBRATION'}))
+                (repo/'policy.json').write_text(json.dumps({'schema':'RealSaS.TeacherKinematicCalibrationPolicy.v2'}))
+                newer=prepare(request2,repo=repo,platform_root=platform,authority_root=authority,expected_sha=code,
+                    output=root/'out-v2',api_root='fixture',rclone_remote='fixture',submit=True)
+                self.assertEqual(newer['schema'],'RealSaS.TeacherCalibrationCampaignPreparation.v2')
+                self.assertEqual(newer['target_stage_id'],'47_SOURCE_RESPONSE_CALIBRATION')
+                self.assertFalse(newer['native_baseline_authority_for_this_rest'])
+                cfg2=captured[-1]['additional_manifest_sections']['truth_foundry']
+                self.assertEqual(cfg2['mode'],'OBSERVATION_BIND_REST_KINEMATIC_CALIBRATION_ONLY')
+                self.assertEqual(cfg2['native_baseline_role'],'HISTORICAL_PROVENANCE_ONLY__NOT_REST_OR_TEMPORAL_AUTHORITY')
+                (repo/'campaign.json').write_text(json.dumps({'required_target_stage_id':'46_PRODUCT_CLOSURE_SEAL'}))
+                with self.assertRaisesRegex(ValueError,'V2_FINITE_REST_SCOPE_REQUIRED'):
+                    prepare(request2,repo=repo,platform_root=platform,authority_root=authority,expected_sha=code,
+                        output=root/'out-bad',api_root='fixture',rclone_remote='fixture',submit=True)
             submissions=[i for i,c in enumerate(calls) if c[1]=='/v1/research/campaigns/run']
             self.assertEqual(len(submissions),1)
             self.assertEqual(len([c for c in calls[:submissions[0]] if c[1]=='/v1/experiments/link']),4)

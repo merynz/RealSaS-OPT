@@ -129,6 +129,17 @@ def build(job,output):
     with np.load(baseline_path,allow_pickle=False) as native:
         for role,key in [('vertices','rest_vertices_source_world'),('faces','faces'),('face_owner','face_owner'),('face_material','face_material')]:
             if not np.array_equal(rest[role],native[key]):raise ValueError('TEACHER_SCENE_SEALED_REST_DRIFT:'+role)
+    measure_imported_scene(job,output,policy,snapshot,meshes,rest,
+        reset_scene=source_transport._neutralize_animation,scene_schema='RealSaS.TeacherSceneIR.v1',
+        native_clip_refs=[job['native_teacher']],equivalence_sha=job['source_equivalence_report']['sha256'])
+
+
+def measure_imported_scene(job,output,policy,snapshot,meshes,rest,*,reset_scene,
+                           scene_schema,native_clip_refs,equivalence_sha,extra=None,exact_identity=False):
+    """Shared isolated-response apparatus; each caller owns its explicit rest contract."""
+    angles=np.asarray(policy['angle_amplitudes_radians'],dtype=np.float64)
+    if angles.ndim!=1 or not len(angles) or not np.isfinite(angles).all() or np.any(angles<=0):
+        raise ValueError('TEACHER_SCENE_EXPLICIT_AMPLITUDES_REQUIRED')
     uv,uv_valid,materials,images=_appearance_and_uv(meshes,rest)
     armatures=tuple(sorted((o for o in bpy.context.scene.objects if o.type=='ARMATURE'),key=lambda x:x.name))
     handles,controls=_control_inventory(armatures,job['source']['sha256'])
@@ -137,7 +148,7 @@ def build(job,output):
     roots=tuple(o for o in bpy.context.scene.objects if o.parent is None)
     shape_values=[(o.data.shape_keys,[key.value for key in o.data.shape_keys.key_blocks]) for o in meshes if o.data.shape_keys]
     def reset():
-        source_transport._neutralize_animation()
+        reset_scene()
         for o in bpy.context.scene.objects:o.matrix_basis=object_basis[o.name].copy()
         for obj in armatures:
             obj.data.pose_position='POSE'
@@ -151,6 +162,8 @@ def build(job,output):
             raise ValueError('TEACHER_SCENE_ACTION_TOPOLOGY_OR_NUMERIC_DRIFT')
         return current['vertices']
     reset();baseline=evaluate();reset();sham=evaluate()
+    if exact_identity and not np.array_equal(rest['vertices'],baseline):
+        raise ValueError('TEACHER_SCENE_OBSERVATION_REST_TO_IDENTITY_DRIFT')
     action_rows=[];responses=[];started=time.monotonic()
     total=len(controls)*len(angles)*2
     for ci,(armature,bone,axis) in enumerate(controls):
@@ -213,30 +226,33 @@ def build(job,output):
     (output/'appearance.json').write_text(json.dumps(appearance,sort_keys=True,indent=2,allow_nan=False)+'\n')
     # The packed source scene allows a renderer adapter to use the same evaluator
     # state instead of guessing a new material or skin implementation.
-    source_transport._neutralize_animation();bpy.ops.file.pack_all()
+    reset_scene();bpy.ops.file.pack_all()
     bpy.ops.wm.save_as_mainfile(filepath=str(output/'source_scene.blend'))
     files={p.name:{'path':str(p),'sha256':sha256(p),'size_bytes':p.stat().st_size} for p in output.iterdir() if p.is_file()}
     files['geometry_and_response.npz']['arrays']={k:{'dtype':v.dtype.str,'shape':list(v.shape)} for k,v in arrays.items()}
-    scene={'schema':'RealSaS.TeacherSceneIR.v1','subject_key':job['subject_key'],'source_sha256':job['source']['sha256'],
+    scene={'schema':scene_schema,'subject_key':job['subject_key'],'source_sha256':job['source']['sha256'],
            'job_sha256':digest(job),'evaluator_binary_sha256':job['evaluator_binary_sha256'],
            'topology_sha256':digest({'faces':rest['faces'].tolist(),'source_sha256':job['source']['sha256']}),
            'observation_bundle_sha256':job['observation_bundle_sha256'],'normalization_sha256':job['normalization_sha256'],
            'geometry_payloads':[files['geometry_and_response.npz']],
            'appearance_payloads':[files['appearance.json'],files['image_pixels.npz'],files['source_scene.blend']],
            'evaluator_source_commit':job['producer_source_commit'],'evaluator_config_sha256':job['policy']['sha256'],
-           'native_clip_refs':[job['native_teacher']],'privileged_control_refs':handles,
+           'native_clip_refs':native_clip_refs,'privileged_control_refs':handles,
            'constraint_capabilities':{'local_native_rotation_parameter':'MEASURED_CANDIDATE','physical_impulse':'UNAVAILABLE',
               'authored_physical_dof_or_joint_limit':'UNKNOWN','source_weight_lbs_equivalence':'NOT_QUALIFIED',
               'source_raster_sampler':'NOT_QUALIFIED','other_control_kinds':'UNSUPPORTED_BY_THIS_ADAPTER'},
            'coordinate_contract':{'frame':'SOURCE_WORLD','length_unit':'SOURCE_UNIT','time_unit':'NO_DYNAMIC_TIME_IN_STATIC_CALIBRATION',
                                   'source_world_to_normalized':snapshot['source_world_to_canonical']},
-           'source_equivalence_report_sha256':job['source_equivalence_report']['sha256'],
+           'source_equivalence_report_sha256':equivalence_sha,
            'calibration':{'actions':action_rows,'native_control_frames_privileged':bone_rows,
                'source_rest_to_pose_identity_max_abs':float(np.max(np.abs(rest['vertices']-baseline))),
                'sham_repeat_max_abs':float(np.max(np.abs(sham_after-sham))),
                'common_root_translation_max_abs':float(np.max(np.abs(root_response-(baseline+translation)))),
                'root_translation_source_units':translation.tolist(),'action_measure':'UNSEALED__NO_IMPLICIT_UNIFORM_LAW'},
            'authority':'UNQUALIFIED_DERIVED_MEASUREMENTS','student_input_allowed':False,'qualification_minted':False}
+    if extra:
+        if set(extra).intersection(scene):raise ValueError('TEACHER_SCENE_EXTRA_SHADOWS_CONTRACT')
+        scene.update(extra)
     (output/'TEACHER_SCENE.json').write_text(json.dumps(scene,sort_keys=True,indent=2,allow_nan=False)+'\n')
     print('[TEACHER_SCENE_WRITTEN]',job['subject_key'],len(action_rows),'actions; qualification pending',flush=True)
 

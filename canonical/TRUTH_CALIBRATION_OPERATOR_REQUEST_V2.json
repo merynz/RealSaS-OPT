@@ -1,0 +1,68 @@
+{
+  "schema": "RealSaS.TeacherCalibrationOperatorRequest.v2",
+  "enabled": true,
+  "training_allowed": false,
+  "new_calibration_actions_allowed": true,
+  "input_descriptor_repo_path": "canonical/FIT8_PLATFORM_BOOTSTRAP_V1.json",
+  "campaign_contract_repo_path": "canonical/FIT8_TRUTH_CALIBRATION_CAMPAIGN_V2.json",
+  "campaign_name": "FIT8_OBSERVATION_REST_CALIBRATION_V2",
+  "repair_of_campaign_id": "ee6e4e66-a7c8-42f3-ac53-87a96c9a2393",
+  "baseline_engine_release_id": "5f415bbe-3ad1-48bf-a8dc-a19945d2740c",
+  "repair_reason": "Preserve V1 measurements. Reproduce the sealed observation import exactly and calibrate a new teacher version in that admitted rest frame; close the finite component target without entering a training wait.",
+  "experiment_slug": "truth-observation-bind-rest-calibration-v2",
+  "experiment_name": "Observation-aligned same-eight source calibration V2",
+  "research_question": "Does the teacher exactly replay the admitted observation import geometry and source scene frames before measuring repeatable isolated response?",
+  "hypothesis": "Using the admitted animation-free bind import removes the cross-lane rest mismatch without subject-specific correction. Native V1 clips remain separate and are not assumed compatible.",
+  "policy_repo_path": "canonical/TEACHER_KINEMATIC_CALIBRATION_POLICY_V2.json",
+  "source_equivalence_report": {
+    "relative": "sealed_teacher_replay/40405919318-1/REPLAY_REPORT.json",
+    "sha256": "a8f8d4c92f7ae28e428930b9588454dd298454b919b22269e1ad7b78539518ce"
+  },
+  "evaluator_executable": "/home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender",
+  "evaluator_version": "Blender 4.5.14 LTS",
+  "maximum_seconds_per_subject": 600,
+  "native_baselines": [
+    {
+      "subject_key": "fit8_snake_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_snake_v1.teacher.npz",
+      "sha256": "9cf4fef3873bfd551beb5a2c2ca48ff691d6fbd60d320397044c2128c2da3798"
+    },
+    {
+      "subject_key": "fit8_bat_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_bat_v1.teacher.npz",
+      "sha256": "dfb5f81f34d353a751bfb678e895c14e08b061f7517ce31b2be9b2706a3bb930"
+    },
+    {
+      "subject_key": "fit8_trex_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_trex_v1.teacher.npz",
+      "sha256": "3997476dbac532026984039d2e12d683036d37039fdabe0017f69518b8de52fa"
+    },
+    {
+      "subject_key": "fit8_horse_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_horse_v1.teacher.npz",
+      "sha256": "600899aba1cef4af7433b2ae750a47238c5f84c7231a68a294457bfd98033613"
+    },
+    {
+      "subject_key": "fit8_spider_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_spider_v1.teacher.npz",
+      "sha256": "f146109f1e4e264cc647db9a7b8fd47b5f91862f75c508b1634a373480074a54"
+    },
+    {
+      "subject_key": "fit8_greenblob_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_greenblob_v1.teacher.npz",
+      "sha256": "9567f1f0f20c1892e179abfab7e8aae117245e9501dd4592290830128c54ca0a"
+    },
+    {
+      "subject_key": "fit8_shark_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_shark_v1.teacher.npz",
+      "sha256": "65eddea1bd430a58c002c4890b3bb6a21826ff4276e7b4eb243902c3bf44e43e"
+    },
+    {
+      "subject_key": "fit8_george_v1",
+      "relative": "runs/FIT8_IRIS_VNEXT_20261016/teachers/fit8_george_v1.teacher.npz",
+      "sha256": "04380b00fed04226afb9f6a1466e549ecbb24a875a4641720ce70c1b208c7458"
+    }
+  ],
+  "stage_parameters_repo_path": "canonical/TRUTH_CALIBRATION_STAGE_PARAMETERS_V2.json",
+  "native_baseline_authority_for_this_rest": false
+}

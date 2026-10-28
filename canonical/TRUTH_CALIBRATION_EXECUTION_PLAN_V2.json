@@ -1,0 +1,239 @@
+{
+  "schema": "RealSaS.MainlineExecutionPlan.v2",
+  "date": "2026-10-11",
+  "canonical_branch": "main",
+  "architecture_scope": "SUBJECT_AGNOSTIC__DAG__SINGLE_M_GEOMETRY_AND_MOTION__SOURCE_WINS_PLUS_CAA__PRESENTATION_GRIP_AND_OVERLAP_OPEN",
+  "subject_specific_code_forbidden": true,
+  "stage_count": 9,
+  "resume_contract": {
+    "rule": "PASS_OR_CACHE_HIT_REUSE_REQUIRES_INPUT_FINGERPRINT_AND_OUTPUT_SHA",
+    "failure_semantics": "PRESERVE_VERIFIED_INDEPENDENT_UPSTREAM_OUTPUTS",
+    "repair_semantics": "STAGE35_GEOMETRY_REPAIR_CREATES_NEW_STAGE18_LINEAGE_NO_IN_PLACE_FROZEN_MESH_MUTATION",
+    "latest_alias_forbidden": true
+  },
+  "appearance_contract": {
+    "backend_axis": [
+      "DETERMINISTIC_V1",
+      "LEARNED_V2",
+      "IM2SURFTEX_RESEARCH_ONLY"
+    ],
+    "first_knight_backend": "DETERMINISTIC_V1",
+    "source_wins": true,
+    "presentation_warp_v1_forbidden": true,
+    "runtime_generation_forbidden": true,
+    "canonical_internal_alpha": "PREMULTIPLIED",
+    "compiled_unobserved_exposure": "FROZEN_BUDGET_GATE",
+    "visual_geometry_authority": "FROZEN_CANONICAL_MECHANICAL_M",
+    "mechanical_mesh_render_authority": true,
+    "visual_deformation_contract": "EXACT_SEALED_M_POSES__NO_VISUAL_REBIND",
+    "appearance_address_contract": "M_FACE_INDEX_AND_BARYCENTRIC_COORDINATES"
+  },
+  "first_knight_v2_contract": {
+    "source_view_count": 8,
+    "output_direction_count": 8,
+    "source_view_cardinality_generalization_deferred_until_first_v2_e2e": true,
+    "controlled_render_ablation_is_optimistic_for_artist_cross_view_inconsistency": true
+  },
+  "stages": [
+    {
+      "ordinal": 1,
+      "id": "01_SOURCE_BYTES_SEALED",
+      "title": "Source bytes sealed",
+      "group": "source",
+      "depends_on": [],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.source:seal_source_bytes",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "source_files"
+      ]
+    },
+    {
+      "ordinal": 2,
+      "id": "02_SOURCE_LICENSE_PROVENANCE",
+      "title": "Source/license provenance sealed",
+      "group": "source",
+      "depends_on": [
+        "01_SOURCE_BYTES_SEALED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.source:seal_source_license_provenance",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "source_license"
+      ]
+    },
+    {
+      "ordinal": 3,
+      "id": "03_SOURCE_MECHANICAL_AUDIT",
+      "title": "Source mechanical audit",
+      "group": "source",
+      "depends_on": [
+        "01_SOURCE_BYTES_SEALED",
+        "02_SOURCE_LICENSE_PROVENANCE"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:audit_source_mechanics_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "source_audit",
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 4,
+      "id": "04_FULL_SUBJECT_ADMISSION",
+      "title": "Full-subject admission",
+      "group": "observation",
+      "depends_on": [
+        "03_SOURCE_MECHANICAL_AUDIT"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:admit_full_subject_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "admission"
+      ]
+    },
+    {
+      "ordinal": 5,
+      "id": "05_CAMERA_CONTRACT_SOLVED",
+      "title": "Common 8-view camera contract",
+      "group": "observation",
+      "depends_on": [],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.observation_v2:qualify_camera_contract_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 6,
+      "id": "06_OBSERVATION_RENDER_8VIEW",
+      "title": "Materialize exact 8 source observations",
+      "group": "observation",
+      "depends_on": [
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:materialize_observation_render_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 7,
+      "id": "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "title": "Observation contract qualification",
+      "group": "observation",
+      "depends_on": [
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED",
+        "06_OBSERVATION_RENDER_8VIEW"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:qualify_observation_contract_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "observation"
+      ]
+    },
+    {
+      "ordinal": 8,
+      "id": "08_NORMALIZATION_DOMAIN_QUALIFIED",
+      "title": "Normalization/field-domain qualification",
+      "group": "geometry",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:qualify_normalization_domain_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "normalization"
+      ]
+    },
+    {
+      "ordinal": 9,
+      "id": "47_SOURCE_RESPONSE_CALIBRATION",
+      "title": "Observation-bind-rest isolated response calibration V2",
+      "group": "source",
+      "depends_on": [
+        "01_SOURCE_BYTES_SEALED",
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED"
+      ],
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.truth_foundry_v2:measure_teacher_scene_stage",
+      "policy": {
+        "fail_closed": true,
+        "cacheable": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "manifest_keys": [
+        "source_files",
+        "source_audit",
+        "truth_foundry"
+      ]
+    }
+  ],
+  "geometry_contract": {
+    "iris_role": "SIGNED_GEOMETRY_AND_SURFACE_EVIDENCE_ONLY",
+    "stage13_role": "GEOMETRY_CARRIER_COMPATIBILITY__NOT_RGB_OR_FINAL_VISUAL_FIDELITY",
+    "silhouette_is_geometry_authority": true,
+    "appearance_may_not_rescue_geometry_failure": true,
+    "producer_gate_feasibility_required": true
+  },
+  "product_quality_axes": {
+    "geometry": "FIRST_CLASS",
+    "mechanics": "FIRST_CLASS",
+    "appearance": "FIRST_CLASS",
+    "rule": "FAIL_ON_ANY_AXIS__NO_SILENT_CROSS_LAYER_COMPENSATION"
+  },
+  "stage_contractions": {
+    "scope": "CURRENT_RELEASE_PLAN_ONLY__HISTORICAL_RELEASES_IMMUTABLE",
+    "folded_into": {
+      "29_GEPPETTO_CHECKPOINT_SEALED": "28_SKELETON_QUALIFIED",
+      "33_ARACHNE_CHECKPOINT_SEALED": "32_SKIN_QUALIFIED",
+      "36_QUALIFIED_MESH_SKIN_TRANSFER": "35_DYNAMIC_MECHANICAL_MESH_QUALIFIED"
+    },
+    "preserved": "Existing qualification gates, checkpoint byte checks and exact M/skin binding; only standalone seal scheduling boundaries are removed."
+  }
+}

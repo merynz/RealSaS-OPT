@@ -9,6 +9,32 @@ from tools.truth_foundry.audit_native_teacher_bytes_v1 import sha256
 
 
 class CalibrationObservationTests(unittest.TestCase):
+    def test_finite_campaign_waits_for_all_members_after_regression_completes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            members=[{'subject_id':'cohort','attempt_id':'cohort-attempt','role':'COHORT'},
+                     {'subject_id':'regression','attempt_id':'regression-attempt','role':'REGRESSION'}]
+            preparation={'schema':'RealSaS.TeacherCalibrationCampaignPreparation.v2','members':members,
+                         'campaign_id':'campaign','experiment_id':'experiment','source_code_sha':'1'*40,'target_stage_id':STAGE}
+            rounds=[0];calls=[]
+            def get(api,method,path):
+                calls.append((method,path));self.assertEqual(method,'GET')
+                if path.startswith('/v1/research/'):
+                    rounds[0]+=1
+                    return {'members':members,'state':'RUNNING','goal_complete':rounds[0]>=2}
+                attempt=path.rsplit('/',1)[1]
+                return {'attempt_id':attempt,'state':'COMPLETED' if attempt=='regression-attempt' or rounds[0]>=2 else 'OPEN','events':[]}
+            def export(member,**kwargs):
+                if member['role']=='COHORT' and rounds[0]<2:return None
+                return {'attempt_id':member['attempt_id'],'measurement_committed':True}
+            with patch('tools.truth_foundry.observe_calibration_v1.api',side_effect=get),\
+                 patch('tools.truth_foundry.observe_calibration_v1.export_member',side_effect=export),\
+                 patch('tools.truth_foundry.observe_calibration_v1.time.sleep'):
+                result=observe(preparation,api_root='fixture',artifact_root=tmp,output=Path(tmp)/'export',maximum_seconds=5,interval_seconds=1)
+            self.assertEqual(rounds[0],2)
+            self.assertTrue(result['all_measurements_committed_and_exported'])
+            self.assertTrue(result['measurement_target_goal_complete'])
+            self.assertFalse(result['execution_resubmitted'])
+
     def test_failed_measurement_preserves_exact_run_ledger_and_blender_log(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);run=root/'run';stage=run/'artifacts'/STAGE;stage.mkdir(parents=True)

@@ -2,7 +2,7 @@
   "schema": "RealSaS.KnightSkinParentHostInventoryTrigger.v1",
   "operation": "KNIGHT_SKIN_PARENT_HOST_INVENTORY",
   "enabled": true,
-  "request_revision": 2,
+  "request_revision": 3,
   "authority": "READ_ONLY_DIAGNOSTIC__NO_IMPORT_NO_EXECUTION_NO_QUALIFICATION_NO_MODEL_PROMOTION_NO_PRODUCT_SKIN_ACTIVATION",
   "notes": "Refresh exact-current sealed Knight parent inventory after the current SubjectInput reseal and live model inventory proved IRIS/TESSA have no admitted release. Inspect only explicit sealed roots referenced by PRODUCT_NEAREST_KNIGHT_WITNESS_V1; accept exact typed candidates only through current decoders and cross-contract bindings. No import, execution, qualification, model promotion, Skin activation, ProductRevision, or genericity claim."
 }

@@ -20,14 +20,14 @@ jobs:
       PYTHONUNBUFFERED: '1'
     steps:
       - uses: actions/checkout@v4
-      - name: Build exact V3 bundle from completed r6 evidence
+      - name: Build exact V4 bundle from completed r6 evidence
         shell: bash
         run: |
           set -euo pipefail
           test -f "$R6_ROOT/evidence/OBSERVATION.json"
-          OUT="$RUNNER_TEMP/stage48-r6-v3-bundle"
+          OUT="$RUNNER_TEMP/stage48-r6-v4-bundle"
           rm -rf "$OUT"
-          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/build_fit8_presentation_truth_bundle_v3.py \
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/build_fit8_presentation_truth_bundle_v4.py \
             --observation "$R6_ROOT/evidence/OBSERVATION.json" \
             --artifact-root "$PLATFORM_ROOT/artifacts" \
             --repo-root "$GITHUB_WORKSPACE" \
@@ -35,9 +35,9 @@ jobs:
           "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
           import json, os
           from pathlib import Path
-          root=Path(os.environ['RUNNER_TEMP'])/'stage48-r6-v3-bundle'
+          root=Path(os.environ['RUNNER_TEMP'])/'stage48-r6-v4-bundle'
           b=json.loads((root/'FIT8_PRESENTATION_TRUTH_BUNDLE_V1.json').read_text())
-          assert b['bundle_builder_revision']=='V2_OBJECTIVE_EXACT_OBSERVABILITY_COUNTS'
+          assert b['bundle_builder_revision']=='V4_OBJECTIVE_EXACT_PAIR_OBSERVABILITY_ADMISSION'
           assert b['subject_binding_revision']=='V3_PLATFORM_UUID_TO_LOGICAL_KEY_FROM_EXACT_STAGE48_PAYLOAD'
           assert len(b['cohort'])==8
           assert {r['subject_id'] for r in b['cohort']}=={
@@ -46,13 +46,16 @@ jobs:
           assert b['regression_subjects']==['knight']
           assert b['regression_bindings'][0]['producer_subject_id']=='SUBJECT2_KNIGHT'
           assert b['aggregate_counts']['observable_appearance_hits']>0
-          print(json.dumps({'status':'PASS_R6_REAL_EVIDENCE_V3_REBIND','cohort':len(b['cohort']),'aggregate_counts':b['aggregate_counts']},sort_keys=True))
+          assert b['pair_student_supervision_authorized'] is False
+          assert b['pair_evidence_subject_count']==0
+          assert b['pair_evidence_valid_rows']==0
+          assert b['objective_projection']['pair_probe']==[]
+          assert b['missing_pair_truth_becomes_negative'] is False
+          print(json.dumps({'status':'PASS_R6_REAL_EVIDENCE_V4_REBIND','cohort':len(b['cohort']),'aggregate_counts':b['aggregate_counts'],'pair_observability':b['pair_observability']},sort_keys=True))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: stage48-r6-v3-bundle-${{ github.run_id }}
-          path: ${{ runner.temp }}/stage48-r6-v3-bundle/
+          name: stage48-r6-v4-bundle-${{ github.run_id }}
+          path: ${{ runner.temp }}/stage48-r6-v4-bundle/
           if-no-files-found: error
           retention-days: 7
-
-# rerun after canonical schema_version compatibility fix

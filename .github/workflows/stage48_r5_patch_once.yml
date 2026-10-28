@@ -1,0 +1,63 @@
+name: stage48-r5-patch-once
+
+on:
+  push:
+    branches: [stage48-pass-domain-replay-fix]
+    paths:
+      - '.github/workflows/stage48_r5_patch_once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stage48-pass-domain-replay-fix
+          fetch-depth: 0
+      - name: Apply exact pass-domain alignment and r5 activation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import json
+
+          source = Path('tools/truth_foundry/blender_source_ray_appearance_reference_v1.py')
+          text = source.read_text()
+          old = '''    for ray in packed.get("rays") or ():\n        if ray.get("measurement", {}).get("status") != "PASS_MEASURED_RAY_APPEARANCE_FACTORIZATION":\n            raise RuntimeError("SOURCE_RAY_REFERENCE_NONPASS_PACKED_RAY")\n        for hit_index, hit in enumerate(ray.get("canonical_hits") or ()):\n'''
+          new = '''    admitted_ray_count = 0\n    for ray in packed.get("rays") or ():\n        measurement = dict(ray.get("measurement") or {})\n        if (\n            measurement.get("status") != "PASS_MEASURED_RAY_APPEARANCE_FACTORIZATION"\n            or measurement.get("valid") is not True\n        ):\n            continue\n        admitted_ray_count += 1\n        for hit_index, hit in enumerate(ray.get("canonical_hits") or ()):\n'''
+          if text.count(old) != 1:
+              raise SystemExit('SOURCE_REFERENCE_LOOP_PATCH_CARDINALITY')
+          text = text.replace(old, new)
+          anchor = '''            needed_names.add(material_name)\n            hit_requests.append((ray, hit_index, face_index, material_name))\n    missing = sorted(name for name in needed_names if name not in source_materials)\n'''
+          replacement = '''            needed_names.add(material_name)\n            hit_requests.append((ray, hit_index, face_index, material_name))\n    if admitted_ray_count <= 0 or not hit_requests:\n        raise RuntimeError("SOURCE_RAY_REFERENCE_EMPTY_PASS_DOMAIN")\n    missing = sorted(name for name in needed_names if name not in source_materials)\n'''
+          if text.count(anchor) != 1:
+              raise SystemExit('SOURCE_REFERENCE_EMPTY_DOMAIN_PATCH_CARDINALITY')
+          text = text.replace(anchor, replacement)
+          payload_anchor = '''        "hit_count": len(rows),\n        "hits": rows,\n'''
+          payload_replacement = '''        "admitted_pass_ray_count": admitted_ray_count,\n        "hit_count": len(rows),\n        "hits": rows,\n'''
+          if text.count(payload_anchor) != 1:
+              raise SystemExit('SOURCE_REFERENCE_PAYLOAD_PATCH_CARDINALITY')
+          text = text.replace(payload_anchor, payload_replacement)
+          source.write_text(text)
+
+          request_path = Path('canonical/PRESENTATION_TRUTH_OPERATOR_REQUEST_V1.json')
+          request = json.loads(request_path.read_text())
+          request['activation_revision'] = 5
+          request['activation_reason'] = 'RETRY_AFTER_SOURCE_REFERENCE_PASS_DOMAIN_ALIGNMENT'
+          request['experiment_slug'] = 'fit8-presentation-response-truth-v1-r5'
+          request_path.write_text(json.dumps(request, sort_keys=False, indent=2) + '\n')
+
+          test_path = Path('tests/iris/test_stage48_source_reference_pass_domain.py')
+          test_path.write_text('''from pathlib import Path\n\n\nROOT = Path(__file__).resolve().parents[2]\nPASS = "PASS_MEASURED_RAY_APPEARANCE_FACTORIZATION"\n\n\ndef test_source_reference_replays_only_admitted_pass_valid_rays():\n    source = (ROOT / "tools/truth_foundry/blender_source_ray_appearance_reference_v1.py").read_text()\n    assert "measurement = dict(ray.get(\\\"measurement\\\") or {})" in source\n    assert f'measurement.get("status") != "{PASS}"' in source\n    assert 'measurement.get("valid") is not True' in source\n    assert 'continue' in source[source.index('measurement = dict(ray.get("measurement") or {})'):source.index('for hit_index, hit in enumerate', source.index('measurement = dict(ray.get("measurement") or {})'))]\n    assert 'SOURCE_RAY_REFERENCE_NONPASS_PACKED_RAY' not in source\n    assert 'SOURCE_RAY_REFERENCE_EMPTY_PASS_DOMAIN' in source\n\n\ndef test_source_reference_pass_domain_matches_subject_qualification_semantics():\n    qualification = (ROOT / "models/iris/truth/presentation_qualification_v1.py").read_text()\n    assert 'measurement.get("status") != PASS or measurement.get("valid") is not True' in qualification\n    assert 'continue' in qualification\n\n\ndef test_stage48_r5_activation_identity_is_immutable_and_distinct():\n    import json\n    request = json.loads((ROOT / "canonical/PRESENTATION_TRUTH_OPERATOR_REQUEST_V1.json").read_text())\n    assert request["activation_revision"] == 5\n    assert request["experiment_slug"] == "fit8-presentation-response-truth-v1-r5"\n''')
+
+          Path('.github/workflows/stage48_r5_patch_once.yml').unlink()
+          PY
+          git config user.name 'RealSaS - OPT'
+          git config user.email '140457344+merynz@users.noreply.github.com'
+          git add tools/truth_foundry/blender_source_ray_appearance_reference_v1.py canonical/PRESENTATION_TRUTH_OPERATOR_REQUEST_V1.json tests/iris/test_stage48_source_reference_pass_domain.py .github/workflows/stage48_r5_patch_once.yml
+          git commit -m 'Align Stage48 source replay with admitted PASS ray domain'
+          git push origin HEAD:stage48-pass-domain-replay-fix

@@ -14,6 +14,7 @@ on:
       - 'tests/iris/test_v31_inference_checkpoint_contracts_v1.py'
       - 'tests/compiler/test_platform_v31_inference_plumbing_v1.py'
       - 'tests/compiler/test_product_input_capability_v31.py'
+      - 'tests/compiler/test_product_input_executor_v31.py'
       - 'tests/training_runtime/**'
       - 'experiments/iris_tessa_v3_apparatus_audit_20261025/v31_alpha_resampling_policy_probe_v1.py'
       - 'tools/ops/inspect_truth_inputs_v1.py'
@@ -35,6 +36,7 @@ on:
       - 'tests/iris/test_v31_inference_checkpoint_contracts_v1.py'
       - 'tests/compiler/test_platform_v31_inference_plumbing_v1.py'
       - 'tests/compiler/test_product_input_capability_v31.py'
+      - 'tests/compiler/test_product_input_executor_v31.py'
       - 'tests/training_runtime/**'
       - 'experiments/iris_tessa_v3_apparatus_audit_20261025/v31_alpha_resampling_policy_probe_v1.py'
       - 'tools/ops/inspect_truth_inputs_v1.py'
@@ -74,6 +76,7 @@ jobs:
           tests/iris/test_v31_inference_checkpoint_contracts_v1.py
           tests/compiler/test_platform_v31_inference_plumbing_v1.py
           tests/compiler/test_product_input_capability_v31.py
+          tests/compiler/test_product_input_executor_v31.py
       - name: V3.1 alpha resampling bounded court
         run: |
           mkdir -p v31-courts

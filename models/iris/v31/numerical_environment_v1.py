@@ -43,13 +43,18 @@ def numerical_environment_v1(device: torch.device | str) -> dict[str, Any]:
     elif device.type != "cpu":
         raise RuntimeError("IRIS_V31_NUMERICAL_ENVIRONMENT_DEVICE_UNSUPPORTED")
 
+    torch_build = str(torch.__config__.show()).encode("utf-8")
     payload = {
         "schema": SCHEMA_V1,
         "python_version": platform.python_version(),
         "python_implementation": platform.python_implementation(),
+        "platform_system": platform.system(),
+        "platform_release": platform.release(),
         "machine": platform.machine(),
+        "processor": platform.processor(),
         "torch_version": str(torch.__version__),
         "torchvision_version": torchvision_version,
+        "torch_build_config_sha256": hashlib.sha256(torch_build).hexdigest(),
         "device_type": device.type,
         "device_index": resolved_index,
         "device_name": device_name,

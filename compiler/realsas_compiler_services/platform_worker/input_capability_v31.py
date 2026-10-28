@@ -32,7 +32,7 @@ from models.iris.vnext.inference_input_v1 import (
 
 
 INPUT_EXECUTOR_CONTRACT_V31 = "RealSaS.ProductInputInference.v3_1"
-INPUT_OUTPUT_AUTHORITY_V31 = "VERIFIED_SOURCE_DERIVED_SHAPE_INPUT_V31"
+INPUT_OUTPUT_AUTHORITY_V31 = "VERIFIED_SOURCE_DERIVED_SHAPE_INPUT"
 
 
 def _lower_sha256(value: str, code: str) -> str:

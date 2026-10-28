@@ -16,6 +16,8 @@ jobs:
     env:
       PLATFORM_ROOT: /home/monster/realsas_platform
       R6_ROOT: /home/monster/realsas_authority/presentation_truth_preparation/40782479846-1
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
     steps:
       - uses: actions/checkout@v4
       - name: Build exact V3 bundle from completed r6 evidence

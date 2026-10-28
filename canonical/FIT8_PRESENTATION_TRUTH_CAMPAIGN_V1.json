@@ -1,0 +1,52 @@
+{
+  "schema": "RealSaS.Fit8PlatformCampaign.v1",
+  "date": "2026-10-28",
+  "purpose": "FINITE_TRUTH_COMPONENT__OBSERVATION_REST_PLUS_GENERIC_PRESENTATION_RESPONSE__NOT_FULL_PRODUCT_CLOSURE",
+  "canonical_branch": "main",
+  "execution_lane": "PLATFORM_RESEARCH_CAMPAIGN",
+  "compiler_plan": "canonical/TRUTH_CALIBRATION_EXECUTION_PLAN_V3.json",
+  "required_stage_count": 10,
+  "required_entry_stage_id": "01_SOURCE_BYTES_SEALED",
+  "required_target_stage_id": "48_PRESENTATION_RESPONSE_TRUTH",
+  "cohort_subject_keys": [
+    "fit8_snake_v1",
+    "fit8_bat_v1",
+    "fit8_trex_v1",
+    "fit8_horse_v1",
+    "fit8_spider_v1",
+    "fit8_greenblob_v1",
+    "fit8_shark_v1",
+    "fit8_george_v1"
+  ],
+  "regression_subject_keys": ["knight"],
+  "rules": {
+    "every_cohort_subject_enters_at_source_contract": true,
+    "same_stage_contracts_and_courts_for_all_members": true,
+    "subject_specific_production_code_forbidden": true,
+    "semantic_part_taxonomy_forbidden": true,
+    "failed_subject_must_remain_visible": true,
+    "knight_regression_must_be_preserved": true,
+    "stage47_calibration_is_immutable_parent": true,
+    "renderer_measurement_requires_exact_source_equivalence_and_replay": true,
+    "missing_or_hidden_student_truth_must_not_become_negative": true,
+    "external_compute_is_transport_not_scientific_authority": true,
+    "training_loss_cannot_mint_fit8_pass": true,
+    "regression_excluded_from_new_truth_corpus_explicitly": true,
+    "same_released_dag_for_all_members": true
+  },
+  "shared_model_program": {
+    "public_order": ["IRIS", "TESSA", "AXIS", "MIRA"],
+    "first_new_model_target": "IRIS_TESSA_V3_1",
+    "evaluation_partition": "LOFO_7_TRAIN_1_HELD_OUT_OVER_EIGHT_DISTINCT_FIT8_SUBJECTS",
+    "cohort_parameterization": "ONE_SHARED_PARAMETER_SET_PER_FOLD",
+    "knight_role": "SEPARATE_FIXED_REGRESSION_WITNESS__NOT_A_FIT8_TRAINING_SUBJECT",
+    "model_generalization_claimed": false
+  },
+  "closure_policy": {
+    "campaign_goal_requires_all_cohort_and_regression_attempts_completed": true,
+    "full_product_closure_claimed": false,
+    "fit8_scientific_pass_claimed_by_campaign_coordinator": false,
+    "student_training_authorized_by_stage48": false,
+    "coordinator_role": "DURABLE_GROUPING_SCHEDULING_AND_ROLLUP_ONLY"
+  }
+}

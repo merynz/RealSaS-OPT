@@ -2,13 +2,25 @@
   "schema": "RealSaS.PlatformSubjectArtifactInventoryTrigger.v1",
   "operation": "PLATFORM_SUBJECT_ARTIFACT_INVENTORY",
   "enabled": true,
-  "request_revision": 1,
+  "request_revision": 2,
   "subject_slug": "knight",
   "queries": [
     {
       "name": "shape_proposal_v2",
       "artifact_type": "RealSaS.ShapeProposal",
       "schema_version": "v2",
+      "limit": 25
+    },
+    {
+      "name": "source_observation_v1",
+      "artifact_type": "RealSaS.SourceObservation",
+      "schema_version": "v1",
+      "limit": 25
+    },
+    {
+      "name": "shape_input_v1",
+      "artifact_type": "RealSaS.ShapeInput",
+      "schema_version": "v1",
       "limit": 25
     }
   ]

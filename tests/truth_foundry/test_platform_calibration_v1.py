@@ -105,7 +105,8 @@ class CalibrationPlatformTests(unittest.TestCase):
                     prepare(request,repo=repo,platform_root=platform,authority_root=authority,expected_sha=code,
                         output=root/'out',api_root='fixture',rclone_remote='fixture',submit=True)
                 prior_state[0]='FAILED'
-                request2={**request,'schema':'RealSaS.TeacherCalibrationOperatorRequest.v2','native_baseline_authority_for_this_rest':False}
+                request2={**request,'schema':'RealSaS.TeacherCalibrationOperatorRequest.v2','native_baseline_authority_for_this_rest':False,
+                          'expected_evaluator_binary_sha256':sha256(executable)}
                 (repo/'campaign.json').write_text(json.dumps({'required_target_stage_id':'47_SOURCE_RESPONSE_CALIBRATION'}))
                 (repo/'policy.json').write_text(json.dumps({'schema':'RealSaS.TeacherKinematicCalibrationPolicy.v2'}))
                 newer=prepare(request2,repo=repo,platform_root=platform,authority_root=authority,expected_sha=code,
@@ -116,6 +117,11 @@ class CalibrationPlatformTests(unittest.TestCase):
                 cfg2=captured[-1]['additional_manifest_sections']['truth_foundry']
                 self.assertEqual(cfg2['mode'],'OBSERVATION_BIND_REST_KINEMATIC_CALIBRATION_ONLY')
                 self.assertEqual(cfg2['native_baseline_role'],'HISTORICAL_PROVENANCE_ONLY__NOT_REST_OR_TEMPORAL_AUTHORITY')
+                posts_before=sum(method=='POST' for method,route,payload in calls)
+                with self.assertRaisesRegex(ValueError,'OBSERVATION_EVALUATOR_BINARY_DRIFT'):
+                    prepare({**request2,'expected_evaluator_binary_sha256':'f'*64},repo=repo,platform_root=platform,
+                        authority_root=authority,expected_sha=code,output=root/'out-bad-binary',api_root='fixture',rclone_remote='fixture',submit=True)
+                self.assertEqual(posts_before,sum(method=='POST' for method,route,payload in calls))
                 (repo/'campaign.json').write_text(json.dumps({'required_target_stage_id':'46_PRODUCT_CLOSURE_SEAL'}))
                 with self.assertRaisesRegex(ValueError,'V2_FINITE_REST_SCOPE_REQUIRED'):
                     prepare(request2,repo=repo,platform_root=platform,authority_root=authority,expected_sha=code,

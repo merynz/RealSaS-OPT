@@ -75,6 +75,7 @@ def main(folder):
     snapshot = write(folder / 'snapshot.json', observation.scene_snapshot(sha256(source), Matrix.Identity(4)))
     candidate = write(folder / 'candidate.json', {'schema': 'RealSaS.Controlled8ViewSourceRestCandidate.v2',
         'subject_id': 'synthetic_default_frame', 'source_sha256': sha256(source), 'import': receipt,
+        'blender_version': bpy.app.version_string, 'blender_binary_sha256': sha256(Path(bpy.app.binary_path)),
         'source_scene_snapshot': {'sha256': snapshot['sha256']}})
     replay = json.loads(imported.read_text())
     admission = write(folder / 'admission.json', {'schema': 'RealSaS.IrisBindObservationAdmission.v1',

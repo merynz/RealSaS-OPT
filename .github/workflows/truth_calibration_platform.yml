@@ -117,7 +117,28 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.EXPECTED_SHA }}
-      - name: Prepare and submit only through Platform campaign API
+      - name: Restore the exact admitted observation Blender binary
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os,tarfile,urllib.request
+          from pathlib import Path
+          request=json.loads(Path('canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V2.json').read_text())
+          executable=Path(request['evaluator_executable'])
+          def sha(path):
+              with path.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
+          if not executable.is_file():
+              archive=Path(os.environ['RUNNER_TEMP'])/'blender-4.0.2-linux-x64.tar.xz'
+              with urllib.request.urlopen('https://download.blender.org/release/Blender4.0/blender-4.0.2-linux-x64.tar.xz',timeout=120) as source,archive.open('wb') as output:
+                  while block:=source.read(1024*1024):output.write(block)
+              assert sha(archive)=='5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a','OBSERVATION_BLENDER_ARCHIVE_DRIFT'
+              executable.parent.parent.mkdir(parents=True,exist_ok=True)
+              with tarfile.open(archive) as source:
+                  assert all(Path(row.name).parts[0]==executable.parent.name for row in source.getmembers())
+                  source.extractall(executable.parent.parent,filter='data')
+          assert sha(executable)==request['expected_evaluator_binary_sha256'],'OBSERVATION_BLENDER_BINARY_DRIFT'
+          print('OBSERVATION_BLENDER_BINARY_VERIFIED',request['expected_evaluator_binary_sha256'])
+          PY
+      - name: Submit the declared calibration through Platform campaign API
         run: |
           "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/platform_calibration_operator_v1.py \
             --request canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V2.json --repo "$GITHUB_WORKSPACE" \

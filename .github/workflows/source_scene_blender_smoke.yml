@@ -56,6 +56,11 @@ jobs:
           echo "BLENDER_EXE=$exe" >> "$GITHUB_ENV"
       - name: Synthetic source-scene and alpha smoke
         run: '"$BLENDER_EXE" --background --factory-startup --threads 2 --python-exit-code 1 --python tests/fixtures/source_scene_v2/blender_smoke.py'
+      - name: Teacher adapter and response apparatus on the admitted observation evaluator
+        run: |
+          "$BLENDER_EXE" --background --factory-startup --threads 2 --python-exit-code 1 \
+            --python tests/fixtures/source_scene_v2/blender_teacher_observation_rest_smoke.py -- \
+            --output "$RUNNER_TEMP/teacher-observation-4.0.2-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
       - name: Source-scene smoke summary
         run: |
           echo 'SOURCE_SCENE_BLENDER_SMOKE_PASS'

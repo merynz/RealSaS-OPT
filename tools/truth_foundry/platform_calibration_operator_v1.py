@@ -70,6 +70,9 @@ def prepare(request, *, repo, platform_root, authority_root, expected_sha, outpu
     version=subprocess.check_output([str(executable),'--version'],text=True).splitlines()[0]
     _require(version==request['evaluator_version'],'TRUTH_OPERATOR_EVALUATOR_VERSION_DRIFT')
     binary_sha=sha256(executable)
+    if revision==2:
+        _require(binary_sha==request.get('expected_evaluator_binary_sha256'),
+                 'TRUTH_OPERATOR_OBSERVATION_EVALUATOR_BINARY_DRIFT')
     policy_path=_bound_path(repo,request['policy_repo_path']);policy=json.loads(policy_path.read_text())
     _require(policy['schema']==f'RealSaS.TeacherKinematicCalibrationPolicy.v{revision}','TRUTH_OPERATOR_POLICY_SCHEMA')
     durable=authority/'truth_foundry_inputs'

@@ -41,6 +41,13 @@ def _run(executable, program, arguments, log_path, maximum_seconds, subject):
     _require(code == 0, 'TRUTH_REST_V2_BLENDER_FAILED__INSPECT_BOUND_LOG:' + str(log_path))
 
 
+def validate_observation_evaluator(candidate, binary_sha, version):
+    _require(candidate.get('blender_binary_sha256') == binary_sha,
+             'TRUTH_REST_V2_OBSERVATION_EVALUATOR_BINARY_DRIFT')
+    _require('Blender ' + str(candidate.get('blender_version')) == version,
+             'TRUTH_REST_V2_OBSERVATION_EVALUATOR_VERSION_DRIFT')
+
+
 def measure_teacher_scene_stage(ctx):
     cfg = dict(ctx['run_manifest'].get('truth_foundry') or {})
     _require(ctx['stage']['policy'].get('product_pass_authority') is False, 'TRUTH_REST_V2_CANNOT_OWN_PRODUCT_PASS')
@@ -68,6 +75,7 @@ def measure_teacher_scene_stage(ctx):
     executable = Path(cfg['evaluator_binary']['path'])
     version = subprocess.check_output([str(executable), '--version'], text=True).splitlines()[0]
     _require(version == cfg['evaluator_version'], 'TRUTH_REST_V2_EVALUATOR_VERSION_DRIFT')
+    validate_observation_evaluator(candidate, cfg['evaluator_binary']['sha256'], version)
     root = ctx['run_root'] / 'artifacts' / ctx['stage']['id']
     root.mkdir(parents=True, exist_ok=True)
     replay = root / 'admitted_observation_import.json'

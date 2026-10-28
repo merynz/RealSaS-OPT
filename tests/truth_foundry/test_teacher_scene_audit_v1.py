@@ -6,6 +6,7 @@ import unittest
 import numpy as np
 
 from tools.truth_foundry.audit_teacher_scene_v1 import inspect
+from tools.truth_foundry.audit_teacher_scene_v2 import inspect as inspect_v2, inspect_export as inspect_export_v2
 from tools.truth_foundry.audit_native_teacher_bytes_v1 import sha256
 
 
@@ -66,3 +67,48 @@ class TeacherSceneAuditTests(unittest.TestCase):
             scene['geometry_payloads'][0].update(sha256=sha256(path),size_bytes=path.stat().st_size)
             with self.assertRaisesRegex(ValueError,'REPORTED_DIAGNOSTICS_DRIFT'):
                 inspect(scene,{sha256(path):path})
+
+    def test_v2_rechecks_actual_import_geometry_and_distinct_runtime_identity(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);scene,available=self.fixture(root)
+            imported=root/'imported.json'
+            imported.write_text(json.dumps({'vertices':[[0.,0.,0.],[1.,0.,0.],[0.,1.,0.]],
+                'faces':[[0,1,2]],'objects':[{'name':'mesh','vertex_count':3}]}))
+            replay_sha=sha256(imported);available[replay_sha]=imported
+            scene.update(schema='RealSaS.TeacherSceneIR.v2',native_clip_refs=[],native_temporal_rest_compatible=False,
+                evaluator_binary_sha256='b'*64,observation_rest_binding={
+                    'schema':'RealSaS.TeacherObservationRestBinding.v2','status':'PASS_EXACT_ADMITTED_IMPORT_GEOMETRY_REPLAY',
+                    'source_sha256':scene['source_sha256'],'imported_geometry_sha256':replay_sha,
+                    'student_supervision_authorized':False,'training_authorized':False,
+                    'native_clip_rest_compatibility_claimed':False,'product_authority_changed':False,
+                    'geometry':{'vertex_count':3,'triangle_count':1,'object_count':1,
+                        'vertices_exact_after_declared_object_order':True,'triangles_exact_after_declared_object_order':True,
+                        'nearest_neighbour_transfer_used':False}},observation_runtime_binding={
+                    'status':'PASS_EXACT_ADMITTED_IMPORT_BYTES','imported_geometry_sha256':replay_sha,
+                    'evaluator_binary_sha256':'b'*64,'observation_producer_binary_sha256':'a'*64,'binary_identity_equal':False})
+            result=inspect_v2(scene,available)
+            self.assertEqual(result['isolated_actions'],6)
+            self.assertFalse(result['truth_qualification_minted'])
+            with self.assertRaisesRegex(ValueError,'AUTHORITY_DRIFT'):inspect(scene,available)
+            bad=deepcopy(scene);bad['observation_runtime_binding']['binary_identity_equal']=True
+            with self.assertRaisesRegex(ValueError,'RUNTIME_BINDING_DRIFT'):inspect_v2(bad,available)
+            bad=deepcopy(scene);bad['native_temporal_rest_compatible']=True
+            with self.assertRaisesRegex(ValueError,'AUTHORITY_DRIFT'):inspect_v2(bad,available)
+            path=next(iter(available.values()))
+            with np.load(path) as archive:arrays={k:archive[k] for k in archive.files}
+            arrays['rest_vertices_source_world']=arrays['rest_vertices_source_world']+.1
+            np.savez_compressed(path,**arrays)
+            scene['geometry_payloads'][0].update(sha256=sha256(path),size_bytes=path.stat().st_size)
+            available[sha256(path)]=path
+            with self.assertRaisesRegex(ValueError,'VERTEX_DRIFT'):inspect_v2(scene,available)
+
+
+    def test_v2_partial_or_mismatched_cohort_export_cannot_claim_complete_audit(self):
+        with self.assertRaisesRegex(ValueError,'COMPLETE_MEASUREMENT_REQUIRED'):
+            inspect_export_v2({'schema':'RealSaS.TeacherCalibrationObservation.v1',
+                'all_measurements_committed_and_exported':False,'measurement_target_goal_complete':False})
+        observation={'schema':'RealSaS.TeacherCalibrationObservation.v1',
+            'all_measurements_committed_and_exported':True,'measurement_target_goal_complete':True,
+            'campaign':{'execution_scope':'SOURCE_ENTRY_TO_RESEARCH_COMPONENT','full_closure_complete':False,
+                'members':[{'attempt_id':'missing','role':'COHORT','final_state':'COMPLETED'}]},'exports':[]}
+        with self.assertRaisesRegex(ValueError,'COHORT_DRIFT'):inspect_export_v2(observation)

@@ -67,3 +67,10 @@ jobs:
           echo "commit=$GITHUB_SHA"
           echo 'scope=source_scene_and_alpha_engineering_only'
           echo 'training_or_product_authority=false'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: observation-evaluator-synthetic-runtime-${{ github.sha }}
+          path: ${{ runner.temp }}/teacher-observation-4.0.2-${{ github.run_id }}-${{ github.run_attempt }}/SMOKE_REPORT.json
+          if-no-files-found: warn
+          retention-days: 14

@@ -86,3 +86,52 @@ evaluator. Four original successful measurements are retained as history, not
 silently reused under a different evaluator identity. Source CI exercises the
 actual adapter/apparatus on both the observation 4.0.2 runtime and the preserved
 native 4.5.14 witness. Real repair results still require Registry readback.
+
+## Actual repair result: same executable does not prove cross-host replay
+
+PR #277 merged as `ed92b3d0f2668ff5994909b2d5a56d923aac64a4` and deployed.
+Run `40731693360` created campaign `6b8975af-d389-4584-ba7c-1387cf048c88`,
+EngineRelease `5ca98ab8-6856-407c-a90e-0f4b2a93224f`, under the existing
+Experiment `98b27c3e-9382-4470-a364-b49dc32a4715`.
+Artifact `12834793997`, ZIP SHA256
+`def3519a9927c02cb7230ec2c376d7fa113b8aee52ba17530af19b0f0d8b72d9`,
+contains PREPARATION SHA256
+`74026d8ddf48e738a6dd3611500d30a1dff5d4ca45e5d9f0ae4285cef803a060`.
+
+Snake, Bat, GreenBlob and Shark completed new measurements; separate Knight
+regression completed. T-Rex, Horse, Spider and George failed
+`TRUTH_REST_V2_ADMITTED_IMPORT_BYTES_DRIFT` before teacher execution.
+All nine Attempts are terminal in this snapshot. No new qualification or training
+was minted. The four measurements are retained; they are not a complete cohort.
+
+Every replay log records Blender 4.0.2 and the worker manifest pins the verified
+`6fe78...` executable. The four failed JSON hashes equal the prior native 4.5.14
+results, while the same 4.0.2 binary locally reproduces every admitted hash.
+Thus the earlier version-only causal explanation was insufficient. Complete
+runtime/library/CPU provenance must be inspected before another intervention.
+Local sealed T-Rex replays with single-thread limits, several OpenBLAS core types
+and disabled NumPy FMA/AVX features still reproduced the admitted bytes; these
+probes do not establish the native host's cause.
+
+| Subject | Maximum absolute vertex delta | Changed triangle rows | Other JSON fields |
+| --- | ---: | ---: | --- |
+| George | 2.384185791015625e-7 | 0 | exact |
+| T-Rex | 1.9073486328125e-6 | 2 | exact |
+| Horse | 2.384185791015625e-7 | 0 | exact |
+| Spider | 4.76837158203125e-7 | 0 | exact |
+
+These are measurements, not accepted error bounds. In particular, a numerical
+coordinate difference can change triangulation; do not replace the exact gate
+with a distance tolerance or a nearest-neighbour transfer. Keep original
+observations and all failed/partial campaigns immutable. The next engineering
+boundary is a common sealed import context, carrying geometry/topology and
+runtime provenance to both observation and teacher. A full runtime pin may
+restore the original replay; otherwise a declared paired observation/teacher
+revision must be measured and admitted rather than rewriting old observations.
+
+`audit_teacher_scene_v2` rechecks actual exported arrays and import JSON, exact
+rest/identity and distinct runtime identities. It rejects incomplete campaign
+exports as a complete audit. It does not select a finite-difference amplitude,
+action law, student observability or native temporal compatibility. The V1
+numeric audit remains available for its original schema. Downloaded exports can
+be inspected with `--artifact-root`, resolving payloads by actual content hash.

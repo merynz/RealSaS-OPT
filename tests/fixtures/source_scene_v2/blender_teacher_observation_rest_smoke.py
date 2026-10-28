@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import blender_teacher_scene_smoke as legacy
 from tools.observation import blender_controlled_8view_v2 as observation
 from tools.observation.source_scene_contract_v2 import _json_and_chunks
+from tools.observation.evaluator_runtime_fingerprint_v1 import fingerprint
 from tools.iris_vnext import blender_authored_teacher_export_v1 as animated
 from tools.iris_vnext import blender_authored_teacher_export_v3 as geometry
 from tools.truth_foundry.blender_teacher_scene_v1 import sha256
@@ -131,6 +132,7 @@ def main(folder):
         assert arrays['isolated_position'].shape[0] == 6
         assert np.any(np.abs(arrays['isolated_position'] - arrays['pose_identity_baseline']) > 1e-4)
     write(folder / 'SMOKE_REPORT.json', {'schema': 'RealSaS.TeacherObservationRestSyntheticWitness.v2',
+        'runtime_fingerprint': fingerprint(),
         'legacy_v1_kernel_witness_preserved': True, 'old_animated_to_observation_rest_max_abs': drift,
         'admitted_import_raw_hash_replayed': True, 'actual_compiler_wire_adapter_and_blender': True,
         'observation_rest_vertices_and_triangles_exact': True, 'real_corpus_qualified': False, 'training_executed': False})

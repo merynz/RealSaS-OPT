@@ -30,6 +30,11 @@ def inspect(scene,available):
     require(scene['schema']=='RealSaS.TeacherSceneIR.v1' and scene['authority']=='UNQUALIFIED_DERIVED_MEASUREMENTS'
             and scene['qualification_minted'] is False and scene['student_input_allowed'] is False,
             'TEACHER_AUDIT_AUTHORITY_DRIFT')
+    return inspect_numeric(scene,available)
+
+
+def inspect_numeric(scene,available):
+    """Shared numeric inspection; callers own their revision's binding checks."""
     require(len(scene['geometry_payloads'])==1,'TEACHER_AUDIT_GEOMETRY_PAYLOAD_COUNT')
     ref=scene['geometry_payloads'][0];path=payload(ref,available)
     with np.load(path,allow_pickle=False) as archive:arrays={k:archive[k] for k in archive.files}

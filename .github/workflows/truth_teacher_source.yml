@@ -38,3 +38,18 @@ jobs:
           path: ${{ runner.temp }}/teacher-source-witness-${{ github.run_id }}-${{ github.run_attempt }}/SMOKE_REPORT.json
           if-no-files-found: warn
           retention-days: 14
+      - name: Inspect the pinned observation runtime without importing a subject
+        run: |
+          exe="$HOME/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/blender"
+          if [ -x "$exe" ]; then
+            "$exe" -b --factory-startup --python-exit-code 2 \
+              --python tools/observation/evaluator_runtime_fingerprint_v1.py -- \
+              --output "$RUNNER_TEMP/observation-runtime-$GITHUB_RUN_ID.json"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-observation-evaluator-runtime-${{ github.sha }}
+          path: ${{ runner.temp }}/observation-runtime-${{ github.run_id }}.json
+          if-no-files-found: warn
+          retention-days: 14

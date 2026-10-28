@@ -6,8 +6,9 @@ intelligence merely because a network can reconstruct it from xyz+camera.
 
 The first learned presentation program uses:
 * observation-conditioned RGBA at measured source-equivalent hit loci;
-* heteroscedastic conditional prediction of non-rigid response and response
-  energy, preserving hidden-mechanism ambiguity rather than forcing a fake class;
+* heteroscedastic conditional prediction of non-rigid response and normalized
+  response energy, preserving hidden-mechanism ambiguity without source-scale
+  leakage or a fake semantic class;
 * source-over attenuation on contributing same-ray hits.
 
 No cape/hair/cloth/weapon/owner label exists anywhere in this adapter.
@@ -99,14 +100,19 @@ def build_presentation_targets_v1(
     face_count = len(tri)
     valid = np.asarray(presentation_arrays["surface_face_valid"], dtype=np.bool_)
     nonrigid = np.asarray(presentation_arrays["surface_nonrigid_response"], dtype=np.float64)
-    energy = np.asarray(presentation_arrays["surface_response_energy"], dtype=np.float64)
-    if valid.shape != (face_count,) or nonrigid.shape != valid.shape or energy.shape != valid.shape:
+    energy_source_units = np.asarray(presentation_arrays["surface_response_energy"], dtype=np.float64)
+    if valid.shape != (face_count,) or nonrigid.shape != valid.shape or energy_source_units.shape != valid.shape:
         raise ValueError("IRIS_V31_PRESENTATION_MECHANICAL_LAYOUT")
-    if not np.isfinite(nonrigid[valid]).all() or not np.isfinite(energy[valid]).all():
+    if not np.isfinite(nonrigid[valid]).all() or not np.isfinite(energy_source_units[valid]).all():
         raise ValueError("IRIS_V31_PRESENTATION_MECHANICAL_NONFINITE")
     centroid = vertices[tri].mean(axis=1)
     mechanical_xyz = _xyz(centroid, center, half)
-    mechanical_target = np.stack((nonrigid, energy), axis=-1)
+    # nonrigid is metric-strain based and therefore dimensionless.  Response
+    # energy is a source-world displacement magnitude; normalize it by the same
+    # admitted half extent used for spatial queries so FIT8 cannot leak authored
+    # asset scale into a purportedly generic mechanics target.
+    energy_normalized = energy_source_units / half
+    mechanical_target = np.stack((nonrigid, energy_normalized), axis=-1)
 
     if packed_measurement.get("schema") != "RealSaS.SourceRayAppearanceMeasurementCandidate.v1":
         raise ValueError("IRIS_V31_PRESENTATION_PACKED_SCHEMA")

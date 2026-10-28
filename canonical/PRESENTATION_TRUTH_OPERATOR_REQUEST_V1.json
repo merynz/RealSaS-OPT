@@ -2,6 +2,8 @@
   "schema": "RealSaS.PresentationTruthOperatorRequest.v1",
   "enabled": true,
   "training_allowed": false,
+  "activation_revision": 2,
+  "activation_reason": "RETRY_AFTER_RESEARCH_ENGINE_RELEASE_PLAN_METADATA_TRANSPORT_HOTFIX",
   "base_calibration_request_repo_path": "canonical/TRUTH_CALIBRATION_OPERATOR_REQUEST_V2.json",
   "input_descriptor_repo_path": "canonical/FIT8_PLATFORM_BOOTSTRAP_V1.json",
   "campaign_contract_repo_path": "canonical/FIT8_PRESENTATION_TRUTH_CAMPAIGN_V1.json",

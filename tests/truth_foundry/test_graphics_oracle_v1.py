@@ -17,6 +17,7 @@ from compiler.realsas_compiler_core.graphics_local_support_v2 import (
     make_exact_raster_support_v2,
 )
 from compiler.realsas_compiler_core.graphics_v2 import compile_ray_graphics_v2
+from compiler.realsas_compiler_core.hashing import content_sha256
 from models.iris.truth.graphics_oracle_v1 import (
     OrthographicCameraV1,
     face_centroid_candidate_pixels_v1,
@@ -316,6 +317,14 @@ def test_knight_oracle_rays_bind_to_explicit_exact_support_without_ray_key_autho
     assert bound.unobserved_support_status == "UNKNOWN"
     assert bound.product_activation_allowed is False
     assert bound.metadata["ray_key_parsing_as_authority_forbidden"] is True
+    # The typed consumer result and portable JSON must retain the same address
+    # and content identity; repairing the Python boundary must not re-key truth.
+    wire = json.loads(json.dumps(bound.to_dict()))
+    binding_hash = wire.pop("support_binding_hash")
+    assert content_sha256(wire) == binding_hash
+    assert {row["record_hash"] for row in wire["rules"]} == {
+        rule.record_hash for rule in bound.rules
+    }
 
 
 def test_missing_exact_support_fails_closed_instead_of_extrapolating_neighbor_rule():

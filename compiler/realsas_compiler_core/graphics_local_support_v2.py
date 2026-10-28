@@ -207,4 +207,10 @@ def bind_compiled_ray_support_v2(
             "ray_key_parsing_as_authority_forbidden": True,
         },
     }
-    return CompiledLocalOrderSupportV2(**payload, support_binding_hash=content_sha256(payload))
+    # Hash the unchanged portable representation, but keep the typed rules at
+    # the Python consumer boundary. Serializing here used to return dictionaries
+    # despite the declared RuntimeLocalOrderRuleV2 contract.
+    return CompiledLocalOrderSupportV2(
+        **{**payload, "rules": tuple(rules)},
+        support_binding_hash=content_sha256(payload),
+    )

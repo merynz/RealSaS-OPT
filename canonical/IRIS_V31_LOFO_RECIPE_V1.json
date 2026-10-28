@@ -1,9 +1,9 @@
 {
   "schema": "RealSaS.IRISV31LofoRecipe.v1",
   "date": "2026-10-28",
-  "scope": "FIRST_REAL_V31_FIT8_LOFO__RESEARCH_CAPACITY__NOT_PRODUCTION_CAPACITY_SELECTION",
+  "scope": "FIRST_REAL_V31_FIT8_LOFO__RESEARCH_CAPACITY__PAIR_FAMILY_EXPLICIT_ABSTAIN__NOT_PRODUCTION_CAPACITY_SELECTION",
   "architecture_id": "RealSaS.IRIS.DenseObservationEvidence.v3_1",
-  "trainer_revision": "IRIS_V31_LOFO_TRAINER_V2_FIXED_VALIDATION",
+  "trainer_revision": "IRIS_V31_LOFO_TRAINER_V3_FIXED_VALIDATION_PAIR_ABSTAIN",
   "evaluation_partition": "LOFO_7_TRAIN_1_HELD_OUT",
   "subject_count": 8,
   "train_subjects_per_fold": 7,
@@ -36,6 +36,7 @@
     "geometry": "EXACT_EXISTING_IMAGE_DERIVED_FSTAR_COHORT_MANIFEST",
     "presentation": "EXACT_STAGE48_FIT8_PRESENTATION_TRUTH_BUNDLE",
     "geometric_draw_order": "COMPILER_ORACLE_ONLY__NOT_LEARNED_OBJECTIVE",
+    "occlusion_attenuation": "ABSTAIN__NO_OBSERVATION_CONDITIONED_PAIR_EVIDENCE_IN_STAGE48_FIT8",
     "physical_stiffness_or_impulse": "ABSTAIN",
     "semantic_part_class": "FORBIDDEN"
   },
@@ -60,8 +61,8 @@
     {
       "id": "AWARE_SCENE_JOINT",
       "steps": 5000,
-      "families": ["FSTAR_GEOMETRY", "CONDITIONAL_NONRIGID_RESPONSE", "SOURCE_EQUIVALENT_RGBA", "OCCLUSION_ATTENUATION"],
-      "loss_weights": {"geometry": 1.0, "mechanics": 0.25, "appearance": 0.25, "occlusion_attenuation": 0.1}
+      "families": ["FSTAR_GEOMETRY", "CONDITIONAL_NONRIGID_RESPONSE", "SOURCE_EQUIVALENT_RGBA"],
+      "loss_weights": {"geometry": 1.0, "mechanics": 0.25, "appearance": 0.25, "occlusion_attenuation": 0.0}
     }
   ],
   "sampling": {
@@ -69,7 +70,7 @@
     "geometry_mix": {"replay": 0.5, "near": 0.25, "straddle": 0.25},
     "mechanical_queries_per_subject_step": 1024,
     "appearance_queries_per_subject_step": 128,
-    "pair_queries_per_subject_step": 128,
+    "pair_queries_per_subject_step": 0,
     "presentation_train_fraction": 0.8,
     "presentation_partition": "STATELESS_SHA256_SUBJECT_FAMILY_ROW_SEED__FIXED_VALIDATION_ROWS",
     "training_sampler": "V1_STATELESS_WITH_REPLACEMENT__UNCHANGED",
@@ -94,18 +95,18 @@
       "FSTAR_NEAR_ZERO_MAE",
       "FSTAR_P95_ABS",
       "CONDITIONAL_MECHANICS_NLL",
-      "RGBA_SMOOTHL1",
-      "OCCLUSION_ATTENUATION_BCE"
+      "RGBA_SMOOTHL1"
     ],
     "gate_telemetry": {
       "geometry_axes": ["FSTAR_SIGN_ERROR", "FSTAR_MAE", "FSTAR_NEAR_ZERO_MAE", "FSTAR_P95_ABS"],
-      "presentation_axes": ["CONDITIONAL_MECHANICS_NLL", "RGBA_SMOOTHL1", "OCCLUSION_ATTENUATION_BCE"],
+      "presentation_axes": ["CONDITIONAL_MECHANICS_NLL", "RGBA_SMOOTHL1"],
       "direction": "LOWER_IS_BETTER",
       "numeric_v31_geometry_pass_threshold": null,
       "numeric_v31_presentation_pass_threshold": null,
       "threshold_policy": "DO_NOT_INVENT__SCIENTIFIC_QUALIFICATION_SEPARATE"
     },
-    "front_order_metric_role": "COMPILER_ORACLE_REFERENCE_ONLY"
+    "front_order_metric_role": "COMPILER_ORACLE_REFERENCE_ONLY",
+    "occlusion_attenuation_metric_role": "ABSTAIN__NO_VALID_STAGE48_PAIR_ROWS"
   },
   "checkpoint": {
     "interval_steps": 200,
@@ -120,6 +121,8 @@
     "unseen": false,
     "production_capacity_selected": false,
     "teacher_inputs_in_forward": false,
-    "semantic_taxonomy_used": false
+    "semantic_taxonomy_used": false,
+    "occlusion_attenuation_head_trained": false,
+    "missing_pair_truth_treated_as_negative": false
   }
 }

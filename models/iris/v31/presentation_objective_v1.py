@@ -71,7 +71,15 @@ def _mesh(vertices, faces):
 
 
 def _normalization(value: Mapping[str, object]):
-    if value.get("schema") != "RealSaS.NormalizationDomainIR.v1":
+    schema = value.get("schema_version") or value.get("schema")
+    if (
+        schema != "RealSaS.NormalizationDomainIR.v1"
+        or (
+            value.get("schema_version") is not None
+            and value.get("schema") is not None
+            and value.get("schema_version") != value.get("schema")
+        )
+    ):
         raise ValueError("IRIS_V31_PRESENTATION_NORMALIZATION_SCHEMA")
     center = np.asarray(value.get("center_xyz"), dtype=np.float64)
     half = float(value.get("half_extent", 0.0))

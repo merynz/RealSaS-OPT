@@ -18,7 +18,7 @@ import time
 import numpy as np
 import torch
 
-from models.iris.v31.lofo_trainer_v2 import IrisV31LofoTrainerV2, run_fold_v2
+from models.iris.v31.lofo_trainer_v3 import IrisV31LofoTrainerV3, TRAINER_REVISION_V3, run_fold_v3
 from models.training_runtime.durable_state_v1 import file_sha256
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -59,7 +59,7 @@ def _worst(rows: list[dict], getter) -> float | None:
 
 def _install_gate_telemetry(output: Path) -> None:
     """Wrap fixed train-subject validation with read-only scientific telemetry."""
-    original = IrisV31LofoTrainerV2._train_validation
+    original = IrisV31LofoTrainerV3._train_validation
 
     def wrapped(self):
         validation = original(self)
@@ -95,6 +95,7 @@ def _install_gate_telemetry(output: Path) -> None:
                 "worst_mechanics_nll": mechanics,
                 "worst_rgba_smoothl1": rgba,
                 "worst_occlusion_bce": occlusion,
+                "occlusion_role": "ABSTAIN_OR_MEASURED_PER_EXACT_PROJECTION_QUALIFICATION",
                 "direction": "LOWER_IS_BETTER",
                 "numeric_v31_pass_threshold": None,
             },
@@ -120,7 +121,7 @@ def _install_gate_telemetry(output: Path) -> None:
         )
         return validation
 
-    IrisV31LofoTrainerV2._train_validation = wrapped
+    IrisV31LofoTrainerV3._train_validation = wrapped
 
 
 def _print_heldout_gate(result: dict) -> None:
@@ -156,7 +157,7 @@ def main(args=None):
     folds = [row for row in manifest.get("folds") or () if row.get("fold_id") == parsed.fold_id]
     if len(folds) != 1:
         raise SystemExit("IRIS_V31_LOFO_WORKER_FOLD_BINDING")
-    if recipe.get("trainer_revision") != "IRIS_V31_LOFO_TRAINER_V2_FIXED_VALIDATION":
+    if recipe.get("trainer_revision") != TRAINER_REVISION_V3:
         raise SystemExit("IRIS_V31_LOFO_WORKER_TRAINER_REVISION")
     fold = folds[0]
     source_files = [
@@ -164,6 +165,7 @@ def main(args=None):
         ROOT / "models/iris/v31/presentation_objective_v1.py",
         ROOT / "models/iris/v31/lofo_trainer_v1.py",
         ROOT / "models/iris/v31/lofo_trainer_v2.py",
+        ROOT / "models/iris/v31/lofo_trainer_v3.py",
         Path(__file__).resolve(),
     ]
     source_hashes = {str(path.relative_to(ROOT)): file_sha256(path) for path in source_files}
@@ -178,7 +180,7 @@ def main(args=None):
     preregistration_binding_hash = _canonical_hash(binding)
     _install_gate_telemetry(output)
     started = time.monotonic()
-    result = run_fold_v2(
+    result = run_fold_v3(
         input_manifest_path=input_path,
         recipe_path=recipe_path,
         fold_id=parsed.fold_id,
@@ -203,7 +205,7 @@ def main(args=None):
         "heldout_subject": fold["heldout_subject"],
         "preregistration_binding_hash": preregistration_binding_hash,
         "model_source_sha256": source_hashes["models/iris/v31/model_v31.py"],
-        "runtime_source_sha256": source_hashes["models/iris/v31/lofo_trainer_v2.py"],
+        "runtime_source_sha256": source_hashes["models/iris/v31/lofo_trainer_v3.py"],
         "upstream_bindings": {
             "lofo_input_manifest": file_sha256(input_path),
             "lofo_recipe": file_sha256(recipe_path),
@@ -215,6 +217,7 @@ def main(args=None):
         "heldout_used_for_checkpoint_selection": False,
         "validation_rows_fixed_across_checkpoints": True,
         "semantic_part_taxonomy_used": False,
+        "pair_training_authorized": bool((manifest.get("student_projection_qualification") or {}).get("pair_training_authorized")),
         "fit8_pass_claimed": False,
         "product_pass_claimed": False,
         "runtime_environment": _runtime(),

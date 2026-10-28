@@ -174,7 +174,6 @@ def prepare(
                         "receipt_sha256": file_sha256(receipt_path),
                         "features_path": str(feature_path),
                         "features_sha256": receipt["sha256"],
-                        "cache_hit": bool(cache_hit),
                     },
                     "camera_features_contract": "LEGACY_FIT8_FACTOR13__SAME_ADMITTED_CAMERA_NORMALIZATION",
                 }

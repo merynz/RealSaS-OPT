@@ -11,6 +11,17 @@ bytes rather than a rewritten compatibility document.
 """
 from __future__ import annotations
 
+from pathlib import Path
+import sys
+
+# Blender executes --python entrypoints with its own embedded Python path.  The
+# released repository root is not implicitly importable there, so this adapter
+# must establish the same standalone bootstrap used by the other Blender truth
+# entrypoints before importing `tools.*`.
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from tools.truth_foundry import blender_source_ray_appearance_measure_v1 as measured
 
 

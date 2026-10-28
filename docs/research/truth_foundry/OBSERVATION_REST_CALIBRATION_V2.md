@@ -59,3 +59,30 @@ bytes and campaign, and exports the failed replay plus hash-verified bound
 admission/candidate/snapshot files. It submits no new execution. Diagnose these
 bytes and observe original terminal states before any declared repair; do not
 drop the admission check or blindly resubmit the campaign.
+
+## Observation evaluator repair
+
+The exact source bundle SHA256
+`9d9c9cbf63c979326cd2f39f5435006b81dddb201028a34ebb4cf10e1b434936`
+shows all eight candidates were produced by Blender 4.0.2, binary SHA256
+`aab13f2e20400a7bc161813151acfe4586889aa964624f7a0bcfdfc066f9749d`.
+The first V2 request had incorrectly retained native-teacher Blender 4.5.14.
+The official 4.0.2 Linux archive is pinned by SHA256
+`5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a`;
+its executable SHA256 is
+`6fe78c9e0a1cca51a598eb37c3288b975357efbe86dcee18d5e6fdecaaf1847e`.
+This is a different binary identity. A local reproducibility replay of only the
+sealed eight observation imports reproduced every admitted JSON SHA exactly;
+it created no new calibration or Platform authority. The repair preregisters
+this explicit producer/worker pair and records both identities in each job and
+TeacherSceneIR. Same version alone is insufficient: every Platform subject must
+still reproduce the entire admitted import JSON byte-for-byte before teacher
+execution. Geometry, frames, baseline identity and sham checks are unchanged.
+
+The repair request names campaign `9b75bb5b-1090-4881-b946-c65f7f66cda3` and
+its release as the explicit failed baseline, verifies all original terminal
+states and member identities, and runs the full same roster under one pinned
+evaluator. Four original successful measurements are retained as history, not
+silently reused under a different evaluator identity. Source CI exercises the
+actual adapter/apparatus on both the observation 4.0.2 runtime and the preserved
+native 4.5.14 witness. Real repair results still require Registry readback.

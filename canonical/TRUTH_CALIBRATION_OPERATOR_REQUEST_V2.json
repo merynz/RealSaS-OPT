@@ -5,10 +5,10 @@
   "new_calibration_actions_allowed": true,
   "input_descriptor_repo_path": "canonical/FIT8_PLATFORM_BOOTSTRAP_V1.json",
   "campaign_contract_repo_path": "canonical/FIT8_TRUTH_CALIBRATION_CAMPAIGN_V2.json",
-  "campaign_name": "FIT8_OBSERVATION_REST_CALIBRATION_V2",
-  "repair_of_campaign_id": "ee6e4e66-a7c8-42f3-ac53-87a96c9a2393",
-  "baseline_engine_release_id": "5f415bbe-3ad1-48bf-a8dc-a19945d2740c",
-  "repair_reason": "Preserve V1 measurements. Reproduce the sealed observation import exactly and calibrate a new teacher version in that admitted rest frame; close the finite component target without entering a training wait.",
+  "campaign_name": "FIT8_OBSERVATION_REST_CALIBRATION_V2_REPAIR_1",
+  "repair_of_campaign_id": "9b75bb5b-1090-4881-b946-c65f7f66cda3",
+  "baseline_engine_release_id": "220fac61-a078-4648-ab78-92eb4d2fc0d8",
+  "repair_reason": "The first V2 attempt used native-teacher Blender 4.5.14 instead of observation version 4.0.2. Use the pinned official 4.0.2 Linux runtime, preserving the distinct historical observation-producer binary identity. Every subject must replay its complete admitted import bytes exactly before teacher measurement. Preserve all original partial results and failures.",
   "experiment_slug": "truth-observation-bind-rest-calibration-v2",
   "experiment_name": "Observation-aligned same-eight source calibration V2",
   "research_question": "Does the teacher exactly replay the admitted observation import geometry and source scene frames before measuring repeatable isolated response?",
@@ -18,8 +18,8 @@
     "relative": "sealed_teacher_replay/40405919318-1/REPLAY_REPORT.json",
     "sha256": "a8f8d4c92f7ae28e428930b9588454dd298454b919b22269e1ad7b78539518ce"
   },
-  "evaluator_executable": "/home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender",
-  "evaluator_version": "Blender 4.5.14 LTS",
+  "evaluator_executable": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/blender",
+  "evaluator_version": "Blender 4.0.2",
   "maximum_seconds_per_subject": 600,
   "native_baselines": [
     {
@@ -64,5 +64,11 @@
     }
   ],
   "stage_parameters_repo_path": "canonical/TRUTH_CALIBRATION_STAGE_PARAMETERS_V2.json",
-  "native_baseline_authority_for_this_rest": false
+  "native_baseline_authority_for_this_rest": false,
+  "expected_evaluator_binary_sha256": "6fe78c9e0a1cca51a598eb37c3288b975357efbe86dcee18d5e6fdecaaf1847e",
+  "observation_runtime_replacement": {
+    "rule": "EXACT_ADMITTED_IMPORT_BYTES_REQUIRED",
+    "observation_producer_binary_sha256": "aab13f2e20400a7bc161813151acfe4586889aa964624f7a0bcfdfc066f9749d",
+    "evaluator_binary_sha256": "6fe78c9e0a1cca51a598eb37c3288b975357efbe86dcee18d5e6fdecaaf1847e"
+  }
 }

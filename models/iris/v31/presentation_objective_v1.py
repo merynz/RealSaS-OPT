@@ -5,12 +5,14 @@ geometric order remains a Compiler/oracle quantity; it is not counted as learned
 intelligence merely because a network can reconstruct it from xyz+camera.
 
 The first learned presentation program uses:
-* observation-conditioned RGBA only at measured source-equivalent contributing
-  hit loci; teacher-visible but student-occluded hit appearance stays masked;
+* observation-conditioned RGBA only where exactly one measured source hit
+  contributes to the observed ray; overlapping translucent per-hit colours remain
+  teacher/oracle evidence rather than fake deterministic student labels;
 * heteroscedastic conditional prediction of non-rigid response and normalized
   response energy, preserving hidden-mechanism ambiguity without source-scale
   leakage or a fake semantic class;
-* source-over attenuation on contributing same-ray hits.
+* bounded conditional source-over attenuation on jointly contributing same-ray
+  hits.
 
 No cape/hair/cloth/weapon/owner label exists anywhere in this adapter.
 """
@@ -138,6 +140,8 @@ def build_presentation_targets_v1(
             or np.any(contribution < 0)
         ):
             raise ValueError("IRIS_V31_PRESENTATION_RAY_VALUES")
+        contributing = contribution > contribution_floor
+        directly_identifiable_rgba = int(np.count_nonzero(contributing)) == 1
         points = []
         for index, hit in enumerate(hits):
             face = int(hit["face_index"])
@@ -150,17 +154,17 @@ def build_presentation_targets_v1(
             appearance_xyz.append(normalized)
             appearance_view.append(int(ray["view_index"]))
             appearance_rgba.append([float(rgb[index, 0]), float(rgb[index, 1]), float(rgb[index, 2]), float(alpha[index])])
-            # The privileged renderer may recover a standalone colour for a hit
-            # that contributes nothing to the observed ray. That is teacher truth
-            # but not deterministic student supervision. Keep the row for lineage
-            # and mask it unless the actual source-over contribution is observed.
-            appearance_valid.append(bool(contribution[index] > contribution_floor))
+            # A standalone teacher render can factor multiple translucent layers,
+            # but the observed composite does not uniquely identify each per-hit
+            # colour. Deterministic RGBA supervision is admitted only when this
+            # ray has exactly one measurable source-over contributor.
+            appearance_valid.append(bool(directly_identifiable_rgba and contributing[index]))
         for i in range(len(hits)):
             for j in range(i + 1, len(hits)):
-                observable = bool(contribution[i] > contribution_floor and contribution[j] > contribution_floor)
+                conditional = bool(contributing[i] and contributing[j])
                 # Emit both directions. Geometric order itself stays outside the
-                # learned objective; only the measured source-over attenuation is
-                # projected into a student target.
+                # learned objective; only bounded measured attenuation is learned
+                # as conditional evidence when both endpoints contribute.
                 for a, b, attenuation in (
                     (i, j, float(alpha[i])),
                     (j, i, 0.0),
@@ -169,7 +173,7 @@ def build_presentation_targets_v1(
                     pair_xyz_b.append(points[b])
                     pair_view.append(int(ray["view_index"]))
                     pair_target.append([attenuation])
-                    pair_valid.append(observable)
+                    pair_valid.append(conditional)
     return PresentationTargetBatchV1(
         mechanical_xyz=np.asarray(mechanical_xyz, dtype=np.float32).reshape(-1, 3),
         mechanical_target=np.asarray(mechanical_target, dtype=np.float32).reshape(-1, 2),

@@ -9,8 +9,11 @@ on:
       - 'compiler/realsas_compiler_services/platform_worker/iris_v31_inference_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/tessa_v31_inference_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/scene_input_contract_v31.py'
+      - 'compiler/realsas_compiler_services/platform_worker/input_capability_v31.py'
+      - 'compiler/realsas_compiler_services/platform_worker/input_executor_v31.py'
       - 'tests/iris/test_v31_inference_checkpoint_contracts_v1.py'
       - 'tests/compiler/test_platform_v31_inference_plumbing_v1.py'
+      - 'tests/compiler/test_product_input_capability_v31.py'
       - 'tests/training_runtime/**'
       - 'experiments/iris_tessa_v3_apparatus_audit_20261025/v31_alpha_resampling_policy_probe_v1.py'
       - 'tools/ops/inspect_truth_inputs_v1.py'
@@ -27,8 +30,11 @@ on:
       - 'compiler/realsas_compiler_services/platform_worker/iris_v31_inference_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/tessa_v31_inference_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/scene_input_contract_v31.py'
+      - 'compiler/realsas_compiler_services/platform_worker/input_capability_v31.py'
+      - 'compiler/realsas_compiler_services/platform_worker/input_executor_v31.py'
       - 'tests/iris/test_v31_inference_checkpoint_contracts_v1.py'
       - 'tests/compiler/test_platform_v31_inference_plumbing_v1.py'
+      - 'tests/compiler/test_product_input_capability_v31.py'
       - 'tests/training_runtime/**'
       - 'experiments/iris_tessa_v3_apparatus_audit_20261025/v31_alpha_resampling_policy_probe_v1.py'
       - 'tools/ops/inspect_truth_inputs_v1.py'
@@ -67,6 +73,7 @@ jobs:
           python -m pytest -q
           tests/iris/test_v31_inference_checkpoint_contracts_v1.py
           tests/compiler/test_platform_v31_inference_plumbing_v1.py
+          tests/compiler/test_product_input_capability_v31.py
       - name: V3.1 alpha resampling bounded court
         run: |
           mkdir -p v31-courts
@@ -79,7 +86,7 @@ jobs:
         run: |
           mkdir -p source-inspection
           python tools/realsas_architecture.py --json-out source-inspection/map.json map
-          python tools/realsas_architecture.py --json-out source-inspection/impact.json impact --path models/iris/v31/model_v31.py --path models/iris/v31/frozen_features_v31.py --path models/iris/v31/checkpoint_v1.py --path models/tessa/v31/model_v31.py --path models/tessa/v31/attention_v31.py --path models/tessa/v31/checkpoint_v1.py --path models/training_runtime/durable_state_v1.py --path compiler/realsas_compiler_services/platform_worker/iris_v31_inference_v1.py --path compiler/realsas_compiler_services/platform_worker/tessa_v31_inference_v1.py --path compiler/realsas_compiler_services/platform_worker/scene_input_contract_v31.py --path experiments/iris_tessa_v3_apparatus_audit_20261025/v31_alpha_resampling_policy_probe_v1.py --path tools/ops/inspect_truth_inputs_v1.py --path compiler/realsas_compiler_core/graphics_v2.py
+          python tools/realsas_architecture.py --json-out source-inspection/impact.json impact --path models/iris/v31/model_v31.py --path models/iris/v31/frozen_features_v31.py --path models/iris/v31/checkpoint_v1.py --path models/iris/v31/alpha_resampling_v1.py --path models/iris/v31/numerical_environment_v1.py --path models/tessa/v31/model_v31.py --path models/tessa/v31/attention_v31.py --path models/tessa/v31/checkpoint_v1.py --path models/training_runtime/durable_state_v1.py --path compiler/realsas_compiler_services/platform_worker/iris_v31_inference_v1.py --path compiler/realsas_compiler_services/platform_worker/tessa_v31_inference_v1.py --path compiler/realsas_compiler_services/platform_worker/scene_input_contract_v31.py --path compiler/realsas_compiler_services/platform_worker/input_capability_v31.py --path compiler/realsas_compiler_services/platform_worker/input_executor_v31.py --path experiments/iris_tessa_v3_apparatus_audit_20261025/v31_alpha_resampling_policy_probe_v1.py --path tools/ops/inspect_truth_inputs_v1.py --path compiler/realsas_compiler_core/graphics_v2.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

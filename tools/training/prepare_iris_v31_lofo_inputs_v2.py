@@ -14,8 +14,10 @@ supervision. This downstream court authorizes only the exact V3.1 projection:
 - appearance: deterministic RGBA only on single-contributor observed rays;
 - pair attenuation: mechanism-conditional bounded sigmoid/BCE evidence.
 
-No semantic part, owner, material, control, bone, attachment or grip identifier is
-permitted in the student target packet or forward-input contract.
+The Stage48 bundle must have been produced by the exact checked-out RealSaS commit
+used for training. No semantic part, owner, material, control, bone, attachment or
+grip identifier is permitted in the student target packet or forward-input
+contract.
 """
 from __future__ import annotations
 
@@ -23,12 +25,14 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 
 import numpy as np
 
 from tools.training.prepare_iris_v31_lofo_inputs_v1 import atomic_json, prepare as prepare_v1
 from models.training_runtime.durable_state_v1 import file_sha256
 
+ROOT = Path(__file__).resolve().parents[2]
 
 TARGET_FIELDS = {
     "mechanical_xyz",
@@ -71,6 +75,19 @@ def _digest(value) -> str:
     ).hexdigest()
 
 
+def _git_head() -> str:
+    try:
+        value = subprocess.check_output(
+            ["git", "-C", str(ROOT), "rev-parse", "HEAD"],
+            text=True,
+            stderr=subprocess.STDOUT,
+        ).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+        raise RuntimeError("IRIS_V31_PROJECTION_EXACT_GIT_CHECKOUT_REQUIRED") from exc
+    _require(len(value) == 40, "IRIS_V31_PROJECTION_GIT_HEAD_INVALID")
+    return value
+
+
 def _target_census(path: Path) -> dict:
     with np.load(path, allow_pickle=False) as z:
         fields = set(z.files)
@@ -110,7 +127,7 @@ def _target_census(path: Path) -> dict:
     }
 
 
-def _projection_qualification(manifest: dict, presentation_bundle: dict) -> dict:
+def _projection_qualification(manifest: dict, presentation_bundle: dict, source_code_sha: str) -> dict:
     _require(manifest.get("teacher_inputs_in_forward") is False, "IRIS_V31_PROJECTION_TEACHER_FORWARD_FORBIDDEN")
     _require(manifest.get("semantic_part_taxonomy_used") is False, "IRIS_V31_PROJECTION_SEMANTIC_TAXONOMY_FORBIDDEN")
     _require(presentation_bundle.get("semantic_part_taxonomy_used") is False, "IRIS_V31_PROJECTION_BUNDLE_SEMANTICS_FORBIDDEN")
@@ -118,6 +135,10 @@ def _projection_qualification(manifest: dict, presentation_bundle: dict) -> dict
     _require(
         presentation_bundle.get("bundle_builder_revision") == "V2_OBJECTIVE_EXACT_OBSERVABILITY_COUNTS",
         "IRIS_V31_PROJECTION_OBJECTIVE_EXACT_BUNDLE_REQUIRED",
+    )
+    _require(
+        presentation_bundle.get("source_code_sha") == source_code_sha,
+        "IRIS_V31_PROJECTION_STAGE48_SOURCE_CODE_DRIFT",
     )
 
     rows = []
@@ -142,6 +163,7 @@ def _projection_qualification(manifest: dict, presentation_bundle: dict) -> dict
     qualification = {
         "schema": "RealSaS.IRISV31StudentProjectionQualification.v1",
         "status": "PASS_EXACT_STUDENT_PROJECTION__TRAINING_AUTHORIZED",
+        "source_code_sha": source_code_sha,
         "forward_input_contract": [
             "FROZEN_DINO_FINAL384",
             "FROZEN_DINO_LAYER2_384",
@@ -189,6 +211,7 @@ def _projection_qualification(manifest: dict, presentation_bundle: dict) -> dict
 
 
 def prepare(**kwargs):
+    source_code_sha = _git_head()
     manifest = prepare_v1(**kwargs)
     for row in manifest.get("subjects") or ():
         cache = row.get("frozen_feature_cache") or {}
@@ -198,7 +221,8 @@ def prepare(**kwargs):
     bundle_path = Path(kwargs["presentation_bundle"]).resolve()
     _require(bundle_path.is_file(), "IRIS_V31_PROJECTION_BUNDLE_MISSING")
     presentation_bundle = json.loads(bundle_path.read_text())
-    qualification = _projection_qualification(manifest, presentation_bundle)
+    qualification = _projection_qualification(manifest, presentation_bundle, source_code_sha)
+    manifest["source_code_sha"] = source_code_sha
     manifest["student_projection_qualification"] = qualification
     manifest["student_training_authorized"] = True
     manifest["training_authority_scope"] = "EXACT_V31_RESEARCH_LOFO_INPUT_PROJECTION_ONLY"
@@ -212,6 +236,7 @@ def prepare(**kwargs):
             {
                 "manifest": str(path),
                 "sha256": file_sha256(path),
+                "source_code_sha": source_code_sha,
                 "cache_hit_in_scientific_identity": False,
                 "student_training_authorized": True,
                 "projection_witness_sha256": qualification["witness_sha256"],

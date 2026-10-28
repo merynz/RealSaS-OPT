@@ -63,6 +63,18 @@ realsasctl campaign --id <CAMPAIGN_UUID>
 
 `campaign-start` derives the product-pass target from the candidate released DAG and rejects a graph whose product target does not transitively close the full released DAG. It creates one ordinary ResearchAttempt per member.
 
+That is the default whole-system path. A finite source-apparatus campaign may
+instead supply `target_stage_id` for an explicitly released research component.
+Every member uses that same immutable target and all released source-entry roots
+must remain in its ancestor closure. The sealed target is part of campaign
+identity; changing it creates a distinct campaign. This supports measurement
+completion without leaving Attempts idle at a later training barrier.
+
+Status reports `execution_scope` and `goal_complete` for that bounded operation.
+`full_closure_complete` is true only for a completed product-closure target;
+component completion cannot issue FIT8 PASS or ProductRevision. The canonical
+FIT8 whole-system descriptor keeps its existing final product target.
+
 `campaign-run` requires one sealed SubjectInput and canonical run-manifest/ledger path for every member. It submits the same final target for every member using deterministic campaign-scoped command identities. The normal single-subject `research-run` path continues to require an agent session; the campaign path is the durable multi-subject coordinator and pins the API's deployed canonical code SHA.
 
 ## Learned-stage handoff

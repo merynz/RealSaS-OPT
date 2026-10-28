@@ -33,15 +33,30 @@ are historical planning, superseded by this continuation.
   submission. Verify its exact Registry bytes/lineage and preserve the original
   source SHA separately from the readback SHA. A red Actions wrapper does not
   reverse Go's stored PASS; that PASS alone is not a completed readback receipt.
+- Readback run `40676103301` on main `94d92c80a42e13beca560afdddeb199410cf7c7f`
+  completed that exact Attempt's Registry verification. Artifact `12810452256`
+  (ZIP SHA256 `8d6bf061f2a2d0c0313ca9efc940d785e207490619e51eb2d8112d7836f34a7c`)
+  contains receipt and Registry payloads/metadata. Qualification
+  `d2495afa-8846-4fce-8bfb-7f72d1fb6200` and evidence
+  `b0347e5f-b0c0-4dbf-a1e1-b644e0704ad5` are verified sparse oracle artifacts;
+  student supervision and training remain unauthorized. Do not repeat admission.
 
-The immediate operation is the **existing hash-pinned sparse appearance
-admission**, selected by
+The preserved sparse appearance admission is selected by
 `canonical/SOURCE_RAY_APPEARANCE_ADMISSION_REQUEST_V1.json` after a successful
 exact-main developer deployment. Its one-stage research release already uses
 Platform execution, CAS sealing and Registry readback. A request revision
 selects an intentional retry on new main; unrelated deployments are NOOP.
 The result must be read from the current run's receipt and actual Registry
 artifacts. A merged adapter or green source test is not admission.
+
+The next source repair is observation-aligned teacher rest. George and GreenBlob
+exposed different animated-import vs observation bind-rest geometry. Preserve V1
+measurements and native replay; a new producer version must use the admitted
+observation rest contract and prove source/import/geometry bindings for all eight.
+Run this finite component under the same Platform campaign coordinator with an
+explicit released target, retaining all source-entry roots and the full roster.
+Close measurement Attempts at their target; do not leave them idle at a later
+training seal. Component `goal_complete` is separate from full product closure.
 
 The readback path performs no execution or authority writes. Future submissions
 checkpoint API-returned IDs before waiting, and all runs export Registry bytes

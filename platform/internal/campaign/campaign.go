@@ -29,6 +29,7 @@ type StartRequest struct {
 	Name                     string      `json:"name"`
 	BaselineEngineReleaseID  uuid.UUID   `json:"baseline_engine_release_id"`
 	CandidateEngineReleaseID uuid.UUID   `json:"candidate_engine_release_id"`
+	TargetStageID            string      `json:"target_stage_id,omitempty"`
 	CohortSubjectIDs         []uuid.UUID `json:"cohort_subject_ids"`
 	RegressionSubjectIDs     []uuid.UUID `json:"regression_subject_ids,omitempty"`
 	CreatedBy                string      `json:"created_by"`
@@ -55,6 +56,8 @@ type Status struct {
 	CohortComplete           bool      `json:"cohort_complete"`
 	RegressionComplete       bool      `json:"regression_complete"`
 	FullClosureComplete      bool      `json:"full_closure_complete"`
+	GoalComplete             bool      `json:"goal_complete"`
+	ExecutionScope           string    `json:"execution_scope"`
 	AnyFailed                bool      `json:"any_failed"`
 	Fit8PassClaimed          bool      `json:"fit8_pass_claimed"`
 	CreatedAt                time.Time `json:"created_at"`
@@ -132,6 +135,41 @@ func orderedMembers(req StartRequest) ([]struct {
 	return rows, nil
 }
 
+// campaignTarget preserves the default whole-product contract while allowing an
+// explicit research component to finish without entering downstream external waits.
+func campaignTarget(graph *stagegraph.Graph, requested string) (string, string, error) {
+	product, hasProduct := graph.ProductPassStageID()
+	target := strings.TrimSpace(requested)
+	if target == "" {
+		if !hasProduct {
+			return "", "", errors.New("RESEARCH_CAMPAIGN_PRODUCT_CLOSURE_STAGE_REQUIRED")
+		}
+		target = product
+	}
+	closure, err := graph.AncestorsIncluding(target)
+	if err != nil {
+		return "", "", err
+	}
+	if hasProduct && target == product {
+		if len(closure) != graph.StageCount() {
+			return "", "", errors.New("RESEARCH_CAMPAIGN_PRODUCT_TARGET_MUST_CLOSE_FULL_DAG")
+		}
+		return target, "FULL_DAG_FROM_SOURCE_ENTRY_TO_PRODUCT_CLOSURE", nil
+	}
+	// A component campaign retains every declared source-entry root. It cannot
+	// silently substitute an easier input lane or start after source qualification.
+	parents := make(map[string]bool, len(closure))
+	for _, id := range closure {
+		parents[id] = true
+	}
+	for _, stage := range graph.Stages() {
+		if len(stage.DependsOn) == 0 && !parents[stage.ID] {
+			return "", "", errors.New("RESEARCH_CAMPAIGN_COMPONENT_SOURCE_ENTRY_MISSING")
+		}
+	}
+	return target, "SOURCE_ENTRY_TO_RESEARCH_COMPONENT", nil
+}
+
 func Start(ctx context.Context, pool *pgxpool.Pool, apiGraph *stagegraph.Graph, deployedCodeSHA string, req StartRequest) (Status, error) {
 	req.Name = strings.TrimSpace(req.Name)
 	req.CreatedBy = strings.TrimSpace(req.CreatedBy)
@@ -152,16 +190,9 @@ func Start(ctx context.Context, pool *pgxpool.Pool, apiGraph *stagegraph.Graph, 
 	if err != nil {
 		return Status{}, err
 	}
-	target, ok := candidateGraph.ProductPassStageID()
-	if !ok {
-		return Status{}, errors.New("RESEARCH_CAMPAIGN_PRODUCT_CLOSURE_STAGE_REQUIRED")
-	}
-	closure, err := candidateGraph.AncestorsIncluding(target)
+	target, scope, err := campaignTarget(candidateGraph, req.TargetStageID)
 	if err != nil {
 		return Status{}, err
-	}
-	if len(closure) != candidateGraph.StageCount() {
-		return Status{}, errors.New("RESEARCH_CAMPAIGN_PRODUCT_TARGET_MUST_CLOSE_FULL_DAG")
 	}
 	specMembers := make([]map[string]any, 0, len(members))
 	for _, row := range members {
@@ -173,7 +204,7 @@ func Start(ctx context.Context, pool *pgxpool.Pool, apiGraph *stagegraph.Graph, 
 		"baseline_engine_release_id":  req.BaselineEngineReleaseID.String(),
 		"candidate_engine_release_id": req.CandidateEngineReleaseID.String(),
 		"target_stage_id":             target,
-		"execution_scope":             "FULL_DAG_FROM_SOURCE_ENTRY_TO_PRODUCT_CLOSURE",
+		"execution_scope":             scope,
 		"canonical_code_sha":          deployedCodeSHA,
 		"members":                     specMembers,
 	}
@@ -236,6 +267,14 @@ func Get(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (Status, error) 
 			&c.CanonicalCodeSHA, &c.State, &c.SpecSHA256, &c.CreatedAt); err != nil {
 		return Status{}, err
 	}
+	graph, _, err := release.LoadGraph(ctx, pool, c.CandidateEngineReleaseID)
+	if err != nil {
+		return Status{}, err
+	}
+	_, scope, err := campaignTarget(graph, c.TargetStageID)
+	if err != nil {
+		return Status{}, err
+	}
 	rows, err := pool.Query(ctx, `SELECT m.subject_id,m.attempt_id,m.member_role,m.ordinal,a.final_state
         FROM research_campaign_members m JOIN attempts a ON a.id=m.attempt_id
         WHERE m.campaign_id=$1 ORDER BY CASE m.member_role WHEN 'COHORT' THEN 0 ELSE 1 END,m.ordinal`, id)
@@ -250,6 +289,7 @@ func Get(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (Status, error) 
 		TargetStageID:            c.TargetStageID, CanonicalCodeSHA: c.CanonicalCodeSHA,
 		State: c.State, SpecSHA256: c.SpecSHA256, CreatedAt: c.CreatedAt,
 		Fit8PassClaimed: false,
+		ExecutionScope:  scope,
 	}
 	cohortTotal, cohortComplete := 0, 0
 	regressionTotal, regressionComplete := 0, 0
@@ -279,7 +319,8 @@ func Get(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (Status, error) 
 	}
 	out.CohortComplete = cohortTotal > 0 && cohortComplete == cohortTotal
 	out.RegressionComplete = regressionComplete == regressionTotal
-	out.FullClosureComplete = out.CohortComplete && out.RegressionComplete && !out.AnyFailed
+	out.GoalComplete = out.CohortComplete && out.RegressionComplete && !out.AnyFailed
+	out.FullClosureComplete = out.GoalComplete && scope == "FULL_DAG_FROM_SOURCE_ENTRY_TO_PRODUCT_CLOSURE"
 	return out, nil
 }
 

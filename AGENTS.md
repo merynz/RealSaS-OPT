@@ -40,6 +40,13 @@ compute worker only; imported receipts/checkpoints remain non-authoritative unti
 the subject-bound Compiler stages validate them. A campaign failure is a signal
 to fix the owning generic module, never permission for a subject-specific branch.
 
+Finite source-apparatus measurement may use the same Platform campaign API with
+an explicit released component target, preserving all source-entry roots, the
+entire cohort and its separate regression. Its `goal_complete` closes only that
+measurement target; `full_closure_complete` remains false. This bounded research
+scope must not enter an unrelated downstream training wait or claim FIT8/product
+closure. The system-development FIT8 campaign still targets product closure.
+
 Targets include model inference and Compiler modules, not only render. Treat
 DAG nodes/edges as versioned release data: add, remove or rewire in a new
 EngineRelease, inspect graph-aware impact, and preserve unrelated artifacts.

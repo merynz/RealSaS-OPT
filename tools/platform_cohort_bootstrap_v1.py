@@ -380,6 +380,8 @@ def main(args):
     plan = load((repo / campaign_contract["compiler_plan"]).resolve())
     require(int(plan["stage_count"]) == int(campaign_contract["required_stage_count"]),
             "COHORT_BOOTSTRAP_PLAN_STAGE_COUNT_DRIFT")
+    require(campaign_contract["required_target_stage_id"] in {stage["id"] for stage in plan["stages"]},
+            "COHORT_BOOTSTRAP_RELEASED_TARGET_REQUIRED")
     actor = str(descriptor.get("actor") or ACTOR_DEFAULT)
     overlay = descriptor.get("additional_manifest_sections") or {}
     regression_overlay = descriptor.get("regression_additional_manifest_sections") or {}
@@ -483,6 +485,7 @@ def main(args):
         "name": descriptor["campaign_name"],
         "baseline_engine_release_id": descriptor.get("baseline_engine_release_id") or release_id,
         "candidate_engine_release_id": release_id,
+        "target_stage_id": campaign_contract["required_target_stage_id"],
         "cohort_subject_ids": [row["platform_subject_id"] for row in cohort_state],
         "regression_subject_ids": [row["platform_subject_id"] for row in regression_state],
         "created_by": actor,
@@ -519,6 +522,7 @@ def main(args):
         "campaign_name": descriptor["campaign_name"],
         "campaign_id": campaign_id,
         "release_id": release_id,
+        "target_stage_id": campaign_contract["required_target_stage_id"],
         "pipeline_plan_sha256": release_request["manifest"]["pipeline_plan_sha256"],
         "cohort_subject_count": len(cohort_state),
         "regression_subject_count": len(regression_state),

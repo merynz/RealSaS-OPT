@@ -132,10 +132,42 @@ func TestCampaignCreatesFullDAGAttemptsAndNeverMintsFit8Pass(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !status.CohortComplete || !status.RegressionComplete || !status.FullClosureComplete {
+	if !status.CohortComplete || !status.RegressionComplete || !status.FullClosureComplete || !status.GoalComplete {
 		t.Fatalf("closure rollup=%+v", status)
 	}
 	if status.Fit8PassClaimed {
 		t.Fatal("campaign must never mint Fit8 scientific PASS")
+	}
+	componentRequest := StartRequest{
+		Name: "finite-source-measurement", BaselineEngineReleaseID: baseline.ReleaseID,
+		CandidateEngineReleaseID: candidate.ReleaseID, TargetStageID: "08_NORMALIZATION_DOMAIN_QUALIFIED",
+		CohortSubjectIDs: subjects[:2], RegressionSubjectIDs: subjects[2:], CreatedBy: "ci",
+	}
+	component, err := Start(ctx, pool, g, canonicalCodeSHA, componentRequest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if component.TargetStageID != componentRequest.TargetStageID || component.ExecutionScope != "SOURCE_ENTRY_TO_RESEARCH_COMPONENT" {
+		t.Fatalf("component scope lost: %+v", component)
+	}
+	for _, member := range component.Members {
+		if _, err := pool.Exec(ctx, "UPDATE attempts SET final_state='COMPLETED' WHERE id=$1", member.AttemptID); err != nil {
+			t.Fatal(err)
+		}
+	}
+	component, err = Get(ctx, pool, component.CampaignID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !component.GoalComplete || component.FullClosureComplete || component.Fit8PassClaimed {
+		t.Fatalf("finite target completion escalated to product closure: %+v", component)
+	}
+	componentRequest.TargetStageID = "46_PRODUCT_CLOSURE_SEAL"
+	whole, err := Start(ctx, pool, g, canonicalCodeSHA, componentRequest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if whole.CampaignID == component.CampaignID {
+		t.Fatal("different immutable target reused component campaign identity")
 	}
 }

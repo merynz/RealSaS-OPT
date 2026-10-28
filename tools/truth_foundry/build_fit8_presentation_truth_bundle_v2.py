@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Objective-exact FIT8 presentation truth bundle V2.
 
-V1 performs the expensive Platform/CAS rebinding and target construction.  This
+V1 performs the expensive Platform/CAS rebinding and target construction. This
 wrapper keeps those bytes, then seals the student-facing manifest against the
-actual target validity masks: privileged-but-occluded appearance rows are not
-counted as student supervision, and geometric front order remains Compiler-only
-rather than being advertised as a learned pair probe.
+actual target validity masks: privileged or overlap-factored appearance rows are
+not counted as deterministic student supervision, and geometric front order
+remains Compiler-only rather than being advertised as a learned pair probe.
 """
 from __future__ import annotations
 
@@ -66,8 +66,8 @@ def build(observation, *, api_root, artifact_root, repo_root, output):
     bundle["bundle_builder_revision"] = "V2_OBJECTIVE_EXACT_OBSERVABILITY_COUNTS"
     bundle["objective_projection"] = {
         "mechanical": ["nonrigid_response_conditional", "normalized_response_energy_conditional"],
-        "appearance": ["source_equivalent_rgba__CONTRIBUTING_HITS_ONLY"],
-        "pair_probe": ["occlusion_attenuation_probe__CONTRIBUTING_SAME_RAY_ONLY"],
+        "appearance": ["source_equivalent_rgba__SINGLE_MEASURABLE_CONTRIBUTOR_RAYS_ONLY"],
+        "pair_probe": ["occlusion_attenuation_probe__JOINTLY_CONTRIBUTING_SAME_RAY_ONLY"],
         "compiler_oracle_only": [
             "pose_conditioned_complete_ray_order",
             "geometric_front_order",
@@ -83,9 +83,13 @@ def build(observation, *, api_root, artifact_root, repo_root, output):
             "physical_impulse",
         ],
     }
-    bundle["appearance_observability"] = "TARGET_VALID_IFF_MEASURED_SOURCE_OVER_CONTRIBUTION_EXCEEDS_SEALED_FLOOR"
-    bundle["pair_observability"] = "TARGET_VALID_IFF_BOTH_SAME_RAY_HITS_MEASURABLY_CONTRIBUTE"
-    bundle["hidden_teacher_appearance_becomes_negative_or_valid"] = False
+    bundle["appearance_observability"] = (
+        "DETERMINISTIC_TARGET_VALID_IFF_EXACTLY_ONE_HIT_EXCEEDS_SEALED_SOURCE_OVER_CONTRIBUTION_FLOOR"
+    )
+    bundle["pair_observability"] = (
+        "MECHANISM_CONDITIONAL_TARGET_VALID_IFF_BOTH_SAME_RAY_ENDPOINTS_MEASURABLY_CONTRIBUTE"
+    )
+    bundle["hidden_or_overlap_factored_teacher_appearance_becomes_negative_or_valid"] = False
     manifest_path = root / "FIT8_PRESENTATION_TRUTH_BUNDLE_V1.json"
     write_json(manifest_path, bundle)
     print(

@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.V31ExtractionResolutionSelectionPrereg.v1",
+  "status": "SEALED_BEFORE_SELECTION_EXECUTION",
+  "scope": "FIT8_REAL_MORPHOLOGY__V31_EXTRACTION_BOUND_SELECTION",
+  "parent_census": {
+    "schema": "RealSaS.FIT8RealMorphologyScaleCensus.v1",
+    "authority_relative_path": "research/morphology_scale_census/40652699134-1/CENSUS.json",
+    "sha256": "4c34dbd6b1118c5d747a8470dcb1e3de604aa5f74adbc5553a133ceb56d297a7",
+    "source_code_sha": "9c7c93b89c54093e1ab7f7c570268cbf9eaadaa3",
+    "status": "FIT8_REAL_MORPHOLOGY_SCALE_CENSUS_COMPLETE_V1"
+  },
+  "source_observation_policy": {
+    "path": "canonical/FIT8_IRIS_OBSERVATION_POLICY_V1.json",
+    "resolution_px": 1024,
+    "source_uncertainty_floor_field": "maximum_mask_gap_px",
+    "source_uncertainty_floor_px": 2.0,
+    "treatment": "SCALES_AT_OR_BELOW_FLOOR_RETAINED_AS_SOURCE_UNRESOLVED_BUT_DO_NOT_FORCE_EXTRACTION_RESOLUTION"
+  },
+  "measurement_binding": {
+    "local_thickness": "EUCLIDEAN_EDT_LOCAL_MAXIMAL_INSCRIBED_DISK_DIAMETER",
+    "internal_gap": "ROW_AND_COLUMN_INTERNAL_BACKGROUND_RUN_WIDTH_BETWEEN_FOREGROUND",
+    "pooling": "PER_SUBJECT__ALL_8_ADMITTED_VIEWS",
+    "resolved_lower_quantile": 0.05,
+    "quantile_rule": "NEAREST_RANK",
+    "authored_triangle_edge_length_used": false,
+    "three_dimensional_thickness_claimed": false
+  },
+  "candidate_uniform_resolutions": [24, 32, 48, 64, 96, 128, 192, 256],
+  "selection_rule": {
+    "policy_form": "OBSERVABILITY_GATED_BOUNDED_RESOLUTION_ESCALATION",
+    "local_thickness_family": "CYLINDER_DIAMETER",
+    "local_thickness_analytic_guaranteed_threshold": "SQRT_2_DIV_RESOLUTION",
+    "internal_gap_family": "PARALLEL_SHEET_GAP",
+    "internal_gap_analytic_guaranteed_threshold": "ONE_DIV_RESOLUTION",
+    "subject_rule": "SELECT_SMALLEST_CANDIDATE_WHERE_BOTH_ANALYTIC_GUARANTEED_THRESHOLDS_ARE_LEQ_RESOLVED_Q05",
+    "cohort_rule": "IF_ALL_SUBJECTS_SELECT_THEN_BOUND_IS_MAX_SUBJECT_SELECTION_ELSE_NO_UNIFORM_BOUND_SELECTED",
+    "uniform_resolution_ceiling": 256,
+    "ceiling_reason": "BOUND_UNIFORM_GRID_ESCALATION_TO_4X_THE_PREVIOUS_64_LINEAR_RESOLUTION_BEFORE_REQUIRING_LOCAL_SPARSE_REFINEMENT",
+    "ceiling_failure_action": "LOCAL_SPARSE_OR_HIERARCHICAL_REFINEMENT_REQUIRED__DO_NOT_SILENTLY_FORCE_256"
+  },
+  "claims": {
+    "training_authorized": false,
+    "model_release_authorized": false,
+    "product_shape_activation_authorized": false,
+    "canonical_mesh_authorized": false,
+    "product_revision_authorized": false,
+    "fit8_pass_claimed": false,
+    "genericity_claimed": false
+  }
+}

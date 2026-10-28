@@ -5,6 +5,8 @@ on:
     paths:
       - 'canonical/SOURCE_RAY_APPEARANCE_ADMISSION_REQUEST_V1.json'
       - 'tools/truth_foundry/source_ray_admission_activation_v1.py'
+      - 'tools/truth_foundry/download_pinned_appearance_court_v1.js'
+      - 'tests/truth_foundry/test_source_ray_court_download_v1.py'
       - 'tests/truth_foundry/test_source_ray_admission_activation_v1.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/source_ray_appearance_platform_v1.py'
       - 'tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py'
@@ -18,6 +20,8 @@ on:
     paths:
       - 'canonical/SOURCE_RAY_APPEARANCE_ADMISSION_REQUEST_V1.json'
       - 'tools/truth_foundry/source_ray_admission_activation_v1.py'
+      - 'tools/truth_foundry/download_pinned_appearance_court_v1.js'
+      - 'tests/truth_foundry/test_source_ray_court_download_v1.py'
       - 'tests/truth_foundry/test_source_ray_admission_activation_v1.py'
       - 'compiler/realsas_compiler_services/orchestrator/adapters/source_ray_appearance_platform_v1.py'
       - 'tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py'
@@ -66,7 +70,8 @@ jobs:
             tests/truth_foundry/test_source_ray_appearance_platform_admission_v1.py \
             tests/truth_foundry/test_source_ray_appearance_platform_bundle_v1.py \
             tests/truth_foundry/test_source_ray_appearance_platform_plan_v1.py \
-            tests/truth_foundry/test_source_ray_admission_activation_v1.py
+            tests/truth_foundry/test_source_ray_admission_activation_v1.py \
+            tests/truth_foundry/test_source_ray_court_download_v1.py
           python -m py_compile \
             compiler/realsas_compiler_services/orchestrator/adapters/source_ray_appearance_platform_v1.py \
             tools/truth_foundry/build_source_ray_appearance_platform_bundle_v1.py \
@@ -93,7 +98,6 @@ jobs:
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 60
     env:
-      GH_TOKEN: ${{ github.token }}
       PLATFORM_ROOT: /home/monster/realsas_platform
       EXPECTED_SHA: ${{ needs.source-contract.outputs.expected_sha }}
       RECEIPT_PATH: /home/monster/realsas_platform/research-results/source-ray-appearance-platform-admission-v1/${{ github.run_id }}-${{ github.run_attempt }}/receipt.json
@@ -117,17 +121,32 @@ jobs:
           assert deployment.get('state') == 'SERVICES_ACTIVE', 'SOURCE_RAY_APPEARANCE_DEPLOYMENT_NOT_ACTIVE'
           assert deployment.get('code_sha') == os.environ['EXPECTED_SHA'], 'SOURCE_RAY_APPEARANCE_DEPLOYED_MAIN_DRIFT'
           PY
-      - name: Fetch pinned #243 court artifact
+      - name: Fetch and verify pinned court archive without host GitHub CLI
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const download = require(process.env.GITHUB_WORKSPACE + '/tools/truth_foundry/download_pinned_appearance_court_v1.js');
+            const result = await download({github, context});
+            core.info('SOURCE_RAY_COURT_ARCHIVE_VERIFIED ' + result.digest + ' bytes=' + result.size_bytes);
+      - name: Extract verified court inputs
         run: |
-          set -euo pipefail
-          actual="$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${COURT_ARTIFACT_ID}" --jq .digest)"
-          test "$actual" = "$COURT_ARTIFACT_DIGEST"
-          work="$RUNNER_TEMP/source-ray-appearance-243"
-          rm -rf "$work"
-          mkdir -p "$work"
-          gh run download "$COURT_RUN_ID" -n "$COURT_ARTIFACT_NAME" --dir "$work"
-          test -f "$work/SOURCE_RAY_APPEARANCE_SOURCE_EQUIVALENCE_FIT8_V1.json"
-          test "$(find "$work/subjects" -mindepth 2 -maxdepth 2 -name PACKED_A.json | wc -l)" -eq 8
+          /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
+          import os, shutil, stat, zipfile
+          from pathlib import Path, PurePosixPath
+          root = Path(os.environ['RUNNER_TEMP'])
+          work = root / 'source-ray-appearance-243'
+          if work.exists():
+              shutil.rmtree(work)
+          with zipfile.ZipFile(root / 'source-ray-appearance-243.zip') as archive:
+              for entry in archive.infolist():
+                  name = PurePosixPath(entry.filename)
+                  if name.is_absolute() or '..' in name.parts or '\\' in entry.filename or stat.S_ISLNK(entry.external_attr >> 16):
+                      raise RuntimeError('SOURCE_RAY_COURT_UNSAFE_ARCHIVE_PATH')
+              archive.extractall(work)
+          assert (work / 'SOURCE_RAY_APPEARANCE_SOURCE_EQUIVALENCE_FIT8_V1.json').is_file()
+          assert len(list((work / 'subjects').glob('*/PACKED_A.json'))) == 8
+          PY
       - name: Build exact unqualified Platform input bundle
         run: |
           set -euo pipefail

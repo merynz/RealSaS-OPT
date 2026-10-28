@@ -1,0 +1,66 @@
+name: stage48-r4-diagnostic
+
+on:
+  push:
+    branches: [stage48-r4-diagnostic]
+    paths:
+      - '.github/workflows/stage48_r4_diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      CAMPAIGN_ID: d58724db-11f2-4af8-9bc1-b6e42516486f
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect exact r4 run diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/stage48-r4-diagnostic"
+          rm -rf "$OUT"
+          mkdir -p "$OUT"
+          shopt -s nullglob
+          roots=("$AUTHORITY_ROOT"/runs/CAMPAIGN_${CAMPAIGN_ID}_*)
+          test ${#roots[@]} -eq 9
+          for root in "${roots[@]}"; do
+            name="$(basename "$root")"
+            dst="$OUT/$name"
+            mkdir -p "$dst"
+            for f in "$root/ACTIVE_RUN_V2.json" "$root/run_manifest.json"; do
+              if test -f "$f"; then cp "$f" "$dst/"; fi
+            done
+            stage="$root/artifacts/48_PRESENTATION_RESPONSE_TRUTH"
+            if test -d "$stage"; then
+              mkdir -p "$dst/stage48"
+              find "$stage" -maxdepth 2 -type f \( -name '*.log' -o -name '*.json' -o -name '*.npz' \) -exec cp --parents '{}' "$dst/stage48/" \;
+            fi
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, os
+          out = Path(os.environ['RUNNER_TEMP'])/'stage48-r4-diagnostic'
+          rows=[]
+          for root in sorted(out.glob('CAMPAIGN_*')):
+              ledger=root/'ACTIVE_RUN_V2.json'
+              data=json.loads(ledger.read_text()) if ledger.exists() else {}
+              failures=[]
+              for p in root.rglob('failure_diagnostics.json'):
+                  try: failures.append(json.loads(p.read_text()))
+                  except Exception as exc: failures.append({'parse_error':str(exc),'path':str(p)})
+              rows.append({'run':root.name,'ledger_status':data.get('status'),'failures':failures,'logs':[str(p.relative_to(root)) for p in root.rglob('*.log')]})
+          (out/'INDEX.json').write_text(json.dumps(rows,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(rows,indent=2,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stage48-r4-diagnostic-${{ github.run_id }}
+          path: ${{ runner.temp }}/stage48-r4-diagnostic/
+          if-no-files-found: error
+          retention-days: 7

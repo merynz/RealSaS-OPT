@@ -5,7 +5,8 @@ geometric order remains a Compiler/oracle quantity; it is not counted as learned
 intelligence merely because a network can reconstruct it from xyz+camera.
 
 The first learned presentation program uses:
-* observation-conditioned RGBA at measured source-equivalent hit loci;
+* observation-conditioned RGBA only at measured source-equivalent contributing
+  hit loci; teacher-visible but student-occluded hit appearance stays masked;
 * heteroscedastic conditional prediction of non-rigid response and normalized
   response energy, preserving hidden-mechanism ambiguity without source-scale
   leakage or a fake semantic class;
@@ -107,7 +108,7 @@ def build_presentation_targets_v1(
         raise ValueError("IRIS_V31_PRESENTATION_MECHANICAL_NONFINITE")
     centroid = vertices[tri].mean(axis=1)
     mechanical_xyz = _xyz(centroid, center, half)
-    # nonrigid is metric-strain based and therefore dimensionless.  Response
+    # nonrigid is metric-strain based and therefore dimensionless. Response
     # energy is a source-world displacement magnitude; normalize it by the same
     # admitted half extent used for spatial queries so FIT8 cannot leak authored
     # asset scale into a purportedly generic mechanics target.
@@ -128,6 +129,15 @@ def build_presentation_targets_v1(
         contribution = np.asarray(measured.get("contribution"), dtype=np.float64)
         if alpha.shape != (len(hits),) or rgb.shape != (len(hits), 3) or contribution.shape != (len(hits),):
             raise ValueError("IRIS_V31_PRESENTATION_RAY_LAYOUT")
+        if (
+            not np.isfinite(alpha).all()
+            or not np.isfinite(rgb).all()
+            or not np.isfinite(contribution).all()
+            or np.any(alpha < 0)
+            or np.any(alpha > 1)
+            or np.any(contribution < 0)
+        ):
+            raise ValueError("IRIS_V31_PRESENTATION_RAY_VALUES")
         points = []
         for index, hit in enumerate(hits):
             face = int(hit["face_index"])
@@ -140,7 +150,11 @@ def build_presentation_targets_v1(
             appearance_xyz.append(normalized)
             appearance_view.append(int(ray["view_index"]))
             appearance_rgba.append([float(rgb[index, 0]), float(rgb[index, 1]), float(rgb[index, 2]), float(alpha[index])])
-            appearance_valid.append(True)
+            # The privileged renderer may recover a standalone colour for a hit
+            # that contributes nothing to the observed ray. That is teacher truth
+            # but not deterministic student supervision. Keep the row for lineage
+            # and mask it unless the actual source-over contribution is observed.
+            appearance_valid.append(bool(contribution[index] > contribution_floor))
         for i in range(len(hits)):
             for j in range(i + 1, len(hits)):
                 observable = bool(contribution[i] > contribution_floor and contribution[j] > contribution_floor)

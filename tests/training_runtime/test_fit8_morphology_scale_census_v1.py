@@ -7,23 +7,33 @@ import numpy as np
 
 from tools.ops.inspect_fit8_morphology_scale_census_v1 import (
     _analytic_observability,
-    mask_run_lengths,
+    mask_internal_gap_runs,
+    mask_local_thickness_px,
     nearest_rank_quantiles,
     tessa_units_per_pixel,
 )
 
 
 class FIT8MorphologyScaleCensusTests(unittest.TestCase):
-    def test_run_measurement_preserves_thin_foreground_and_internal_gap(self):
+    def test_local_thickness_uses_euclidean_inscribed_diameter(self):
         mask = np.zeros((6, 8), dtype=bool)
         mask[1:5, 1:3] = True
         mask[1:5, 5:7] = True
-        foreground, gaps = mask_run_lengths(mask)
-        self.assertGreater(len(foreground), 0)
+        thickness = mask_local_thickness_px(mask)
+        gaps = mask_internal_gap_runs(mask)
+        self.assertGreater(len(thickness), 0)
         self.assertGreater(len(gaps), 0)
-        self.assertEqual(int(foreground.min()), 2)
-        self.assertEqual(int(foreground.max()), 4)
+        self.assertTrue(bool(np.allclose(thickness, 2.0)))
         self.assertTrue(bool(np.all(gaps == 2)))
+
+    def test_local_thickness_is_not_raw_diagonal_chord_width(self):
+        mask = np.zeros((9, 9), dtype=bool)
+        for i in range(2, 7):
+            mask[i, i] = True
+            mask[i, i + 1] = True
+        thickness = mask_local_thickness_px(mask)
+        self.assertTrue(bool(np.isfinite(thickness).all()))
+        self.assertGreaterEqual(float(thickness.min()), 2.0)
 
     def test_tessa_pixel_scale_matches_half_iris_domain(self):
         # Camera spans the common canonical half extent, so IRIS screen width is
@@ -51,8 +61,11 @@ class FIT8MorphologyScaleCensusTests(unittest.TestCase):
         self.assertIn("parallel_sheet_gap", result["table"]["64"])
 
     def test_empty_or_invalid_masks_fail_closed(self):
+        empty = np.zeros((4, 4), dtype=bool)
         with self.assertRaisesRegex(ValueError, "FIT8_MORPHOLOGY_MASK_INVALID"):
-            mask_run_lengths(np.zeros((4, 4), dtype=bool))
+            mask_local_thickness_px(empty)
+        with self.assertRaisesRegex(ValueError, "FIT8_MORPHOLOGY_MASK_INVALID"):
+            mask_internal_gap_runs(empty)
         with self.assertRaisesRegex(ValueError, "FIT8_MORPHOLOGY_CAMERA_SCALE_NONPOSITIVE"):
             tessa_units_per_pixel(0.0, 1.0, 1024)
 

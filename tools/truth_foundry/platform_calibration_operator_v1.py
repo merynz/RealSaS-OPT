@@ -85,6 +85,8 @@ def prepare(request, *, repo, platform_root, authority_root, expected_sha, outpu
          'maximum_seconds_per_subject':request['maximum_seconds_per_subject'],'producer_source_commit':expected_sha}
     if revision==2:
         cfg['native_baseline_role']='HISTORICAL_PROVENANCE_ONLY__NOT_REST_OR_TEMPORAL_AUTHORITY'
+        if request.get('observation_runtime_replacement') is not None:
+            cfg['observation_runtime_replacement']=request['observation_runtime_replacement']
     descriptor=json.loads(_bound_path(repo,request['input_descriptor_repo_path']).read_text())
     descriptor['campaign_contract']=request['campaign_contract_repo_path'];descriptor['campaign_name']=request['campaign_name']
     descriptor['actor']='truth-foundry-calibration-coordinator'

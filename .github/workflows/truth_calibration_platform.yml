@@ -117,7 +117,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.EXPECTED_SHA }}
-      - name: Restore the exact admitted observation Blender binary
+      - name: Restore the pinned observation replay Blender binary
         run: |
           "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
           import hashlib,json,os,tarfile,urllib.request

@@ -75,7 +75,7 @@ def main(folder):
     snapshot = write(folder / 'snapshot.json', observation.scene_snapshot(sha256(source), Matrix.Identity(4)))
     candidate = write(folder / 'candidate.json', {'schema': 'RealSaS.Controlled8ViewSourceRestCandidate.v2',
         'subject_id': 'synthetic_default_frame', 'source_sha256': sha256(source), 'import': receipt,
-        'blender_version': bpy.app.version_string, 'blender_binary_sha256': sha256(Path(bpy.app.binary_path)),
+        'blender_version': bpy.app.version_string, 'blender_binary_sha256': 'a' * 64,
         'source_scene_snapshot': {'sha256': snapshot['sha256']}})
     replay = json.loads(imported.read_text())
     admission = write(folder / 'admission.json', {'schema': 'RealSaS.IrisBindObservationAdmission.v1',
@@ -106,6 +106,8 @@ def main(folder):
         'ledger': {'execution_class': 'WITNESS', 'stages': ledger}, 'run_manifest': {
             'subject_id': 'synthetic_default_frame', 'truth_foundry': {
                 'mode': 'OBSERVATION_BIND_REST_KINEMATIC_CALIBRATION_ONLY', 'policy': policy,
+                'observation_runtime_replacement': {'rule': 'EXACT_ADMITTED_IMPORT_BYTES_REQUIRED',
+                    'observation_producer_binary_sha256': 'a' * 64, 'evaluator_binary_sha256': sha256(binary)},
                 'evaluator_binary': ref(binary), 'evaluator_version': 'Blender ' + bpy.app.version_string,
                 'maximum_seconds_per_subject': 90, 'producer_source_commit': '3' * 40},
             'source_files': [{'path': str(source), 'expected_sha256': sha256(source), 'source_kind': 'PRIMARY'}],
@@ -114,6 +116,9 @@ def main(folder):
     assert result['status'] == 'PASS'
     scene_path = Path(next(row['path'] for row in result['outputs'] if row['schema'] == 'RealSaS.TeacherSceneIR.v2'))
     scene = json.loads(scene_path.read_text())
+    assert scene['observation_runtime_binding']['binary_identity_equal'] is False
+    assert scene['observation_runtime_binding']['status'] == 'PASS_EXACT_ADMITTED_IMPORT_BYTES'
+    assert scene['observation_runtime_binding']['evaluator_binary_sha256'] == sha256(binary)
     assert scene['native_clip_refs'] == [] and scene['native_temporal_rest_compatible'] is False
     assert scene['observation_bundle_sha256'] == norm.observation_set_binding_hash
     assert scene['normalization_sha256'] == norm.normalization_hash

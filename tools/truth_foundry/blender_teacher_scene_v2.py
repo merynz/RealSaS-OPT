@@ -53,7 +53,8 @@ def build(job, output):
             reset_scene=reset_scene, scene_schema='RealSaS.TeacherSceneIR.v2', native_clip_refs=[],
             equivalence_sha=job['observation_import_geometry']['sha256'], exact_identity=True,
             extra={'producer_revision': 2, 'rest_contract': 'EXACT_ADMITTED_OBSERVATION_IMPORT_GEOMETRY',
-                   'observation_rest_binding': proof, 'native_temporal_rest_compatible': False})
+                   'observation_rest_binding': proof, 'native_temporal_rest_compatible': False,
+                   'observation_runtime_binding': job['observation_runtime_binding']})
 
 
 if __name__ == '__main__':

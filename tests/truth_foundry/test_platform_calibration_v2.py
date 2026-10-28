@@ -53,10 +53,23 @@ def test_v2_preserves_the_calibration_ladder_and_root_control():
     assert b['training_allowed'] is False and b['qualification_minted'] is False
 
 
-def test_evaluator_must_be_the_observation_producer_even_when_other_worker_versions_are_valid():
+def test_evaluator_requires_exact_identity_or_declared_replay_pair_and_same_version():
     candidate={'blender_version':'4.0.2','blender_binary_sha256':'a'*64}
     validate_observation_evaluator(candidate,'a'*64,'Blender 4.0.2')
     with pytest.raises(QualificationError,match='OBSERVATION_EVALUATOR_BINARY_DRIFT'):
         validate_observation_evaluator(candidate,'b'*64,'Blender 4.0.2')
     with pytest.raises(QualificationError,match='OBSERVATION_EVALUATOR_VERSION_DRIFT'):
         validate_observation_evaluator(candidate,'a'*64,'Blender 4.5.14 LTS')
+
+    replacement={'rule':'EXACT_ADMITTED_IMPORT_BYTES_REQUIRED',
+                 'observation_producer_binary_sha256':'a'*64,'evaluator_binary_sha256':'b'*64}
+    binding=validate_observation_evaluator(candidate,'b'*64,'Blender 4.0.2',replacement)
+    assert binding['binary_identity_equal'] is False
+    assert 'status' not in binding  # identity validation alone cannot claim replay
+    for bad in ({**replacement,'observation_producer_binary_sha256':'c'*64},
+                {**replacement,'evaluator_binary_sha256':'c'*64},
+                {**replacement,'rule':'VERSION_ONLY'}):
+        with pytest.raises(QualificationError,match='OBSERVATION_EVALUATOR_BINARY_DRIFT'):
+            validate_observation_evaluator(candidate,'b'*64,'Blender 4.0.2',bad)
+    with pytest.raises(QualificationError,match='OBSERVATION_EVALUATOR_VERSION_DRIFT'):
+        validate_observation_evaluator(candidate,'b'*64,'Blender 4.5.14 LTS',replacement)

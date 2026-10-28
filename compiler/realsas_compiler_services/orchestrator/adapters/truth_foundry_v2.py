@@ -41,11 +41,19 @@ def _run(executable, program, arguments, log_path, maximum_seconds, subject):
     _require(code == 0, 'TRUTH_REST_V2_BLENDER_FAILED__INSPECT_BOUND_LOG:' + str(log_path))
 
 
-def validate_observation_evaluator(candidate, binary_sha, version):
-    _require(candidate.get('blender_binary_sha256') == binary_sha,
-             'TRUTH_REST_V2_OBSERVATION_EVALUATOR_BINARY_DRIFT')
+def validate_observation_evaluator(candidate, binary_sha, version, replacement=None):
     _require('Blender ' + str(candidate.get('blender_version')) == version,
              'TRUTH_REST_V2_OBSERVATION_EVALUATOR_VERSION_DRIFT')
+    producer_sha = candidate.get('blender_binary_sha256')
+    _require(isinstance(producer_sha, str) and len(producer_sha) == 64,
+             'TRUTH_REST_V2_OBSERVATION_PRODUCER_IDENTITY_MISSING')
+    if producer_sha != binary_sha:
+        _require(replacement == {'rule': 'EXACT_ADMITTED_IMPORT_BYTES_REQUIRED',
+            'observation_producer_binary_sha256': producer_sha, 'evaluator_binary_sha256': binary_sha},
+            'TRUTH_REST_V2_OBSERVATION_EVALUATOR_BINARY_DRIFT')
+    return {'observation_producer_binary_sha256': producer_sha,
+            'evaluator_binary_sha256': binary_sha, 'version': version,
+            'binary_identity_equal': producer_sha == binary_sha}
 
 
 def measure_teacher_scene_stage(ctx):
@@ -75,7 +83,8 @@ def measure_teacher_scene_stage(ctx):
     executable = Path(cfg['evaluator_binary']['path'])
     version = subprocess.check_output([str(executable), '--version'], text=True).splitlines()[0]
     _require(version == cfg['evaluator_version'], 'TRUTH_REST_V2_EVALUATOR_VERSION_DRIFT')
-    validate_observation_evaluator(candidate, cfg['evaluator_binary']['sha256'], version)
+    runtime_binding = validate_observation_evaluator(candidate, cfg['evaluator_binary']['sha256'], version,
+                                                    cfg.get('observation_runtime_replacement'))
     root = ctx['run_root'] / 'artifacts' / ctx['stage']['id']
     root.mkdir(parents=True, exist_ok=True)
     replay = root / 'admitted_observation_import.json'
@@ -85,6 +94,8 @@ def measure_teacher_scene_stage(ctx):
              [source_ref['path'], replay], root / 'observation.import.blender.log', maximum, ctx['run_manifest']['subject_id'])
     _require(replay.is_file() and sha256_file(replay) == admission['imported_geometry_sha256'],
              'TRUTH_REST_V2_ADMITTED_IMPORT_BYTES_DRIFT')
+    runtime_binding.update({'status': 'PASS_EXACT_ADMITTED_IMPORT_BYTES',
+                            'imported_geometry_sha256': sha256_file(replay)})
     job = {'schema': 'RealSaS.TeacherSceneCalibrationJob.v2', 'subject_key': ctx['run_manifest']['subject_id'],
         'source': source_ref, 'observation_admission': audit['iris_observation_admission'],
         'source_rest_candidate': audit['source_rest_candidate'], 'source_scene_snapshot': audit['source_scene_snapshot'],
@@ -93,7 +104,7 @@ def measure_teacher_scene_stage(ctx):
         'observation_bundle_sha256': normalization['observation_set_binding_hash'],
         'normalization_sha256': normalization['normalization_hash'],
         'evaluator_binary_sha256': cfg['evaluator_binary']['sha256'], 'producer_source_commit': cfg['producer_source_commit'],
-        'training_allowed': False}
+        'observation_runtime_binding': runtime_binding, 'training_allowed': False}
     job_hash = content_sha256(job)
     job_path = root / (job_hash + '.job.json')
     job_path.write_text(json.dumps(job, sort_keys=True, indent=2) + '\n')
@@ -110,6 +121,7 @@ def measure_teacher_scene_stage(ctx):
     binding = scene['observation_rest_binding']
     _require(binding['status'] == 'PASS_EXACT_ADMITTED_IMPORT_GEOMETRY_REPLAY'
              and binding['imported_geometry_sha256'] == sha256_file(replay), 'TRUTH_REST_V2_REST_BINDING_MISSING')
+    _require(scene.get('observation_runtime_binding') == runtime_binding, 'TRUTH_REST_V2_RUNTIME_BINDING_DRIFT')
     outputs = [_artifact(scene_path, 'RealSaS.TeacherSceneIR.v2'), _artifact(replay, 'RealSaS.ImportedObservationGeometryReplay.v1')]
     schemas = {'geometry_and_response.npz': 'RealSaS.TeacherCalibrationArrays.v2',
         'appearance.json': 'RealSaS.SourceAppearanceSamplerInputs.v1', 'image_pixels.npz': 'RealSaS.SourceImagePixels.v1',

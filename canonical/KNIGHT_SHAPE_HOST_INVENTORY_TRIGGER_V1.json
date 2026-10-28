@@ -1,0 +1,8 @@
+{
+  "schema": "RealSaS.KnightShapeHostInventoryTrigger.v1",
+  "operation": "KNIGHT_SHAPE_HOST_INVENTORY",
+  "enabled": true,
+  "request_revision": 1,
+  "authority": "READ_ONLY_DIAGNOSTIC__NO_IMPORT_NO_REPLAY_NO_INFERENCE_NO_QUALIFICATION_NO_MODEL_PROMOTION",
+  "notes": "Search the authority host for genuine historical RealSaS.ShapeProposal.v1/v2 payloads whose own metadata declares LEARNED_SHAPE_PROPOSAL_ONLY. Report exact bytes, model metadata and subject/lineage witnesses only. No legacy reinterpretation, import, deterministic replay, model inference, compiler execution, qualification, promotion, ProductRevision or genericity claim."
+}

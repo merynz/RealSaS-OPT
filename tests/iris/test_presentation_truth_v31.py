@@ -8,8 +8,14 @@ from models.iris.truth.presentation_response_v1 import (
     build_surface_response_arrays_v1,
     control_balanced_action_weights_v1,
 )
-from models.iris.vnext.presentation_truth_v31_adapter_v1 import build_v31_training_targets_v1
-from models.iris.vnext.training_v3 import mechanical_demand_loss_v3
+from models.iris.v31.lofo_trainer_v1 import presentation_partition_v1
+from models.iris.v31.presentation_objective_v1 import (
+    PAIR_CHANNELS_V31_PRESENTATION,
+    appearance_rgba_loss_v1,
+    build_presentation_targets_v1,
+    heteroscedastic_mechanical_loss_v1,
+    pair_probe_loss_v1,
+)
 
 
 def _mesh():
@@ -40,10 +46,8 @@ def _actions():
 
 def _isolated(vertices):
     out = np.repeat(vertices[None, ...], 4, axis=0)
-    # First face remains rigidly translated under control 0.
     out[0, :3, 0] -= 0.1
     out[1, :3, 0] += 0.1
-    # Second face stretches anisotropically under control 1.
     out[2, 5, 0] -= 0.2
     out[2, 6, 0] -= 0.2
     out[3, 5, 0] += 0.2
@@ -82,6 +86,14 @@ def _packed():
     }
 
 
+def _normalization():
+    return {
+        "schema": "RealSaS.NormalizationDomainIR.v1",
+        "center_xyz": [0.0, 0.0, 0.5],
+        "half_extent": 2.0,
+    }
+
+
 def test_control_balanced_measure_is_explicit_and_normalized():
     weights = control_balanced_action_weights_v1(_actions())
     np.testing.assert_allclose(weights, [0.25, 0.25, 0.25, 0.25])
@@ -105,60 +117,46 @@ def test_measured_compositing_produces_complementary_negative():
     assert arrays["composite_pair_student_observable"].tolist() == [True, True]
 
 
-def test_v31_adapter_abstains_semantic_and_unmeasured_mechanical_heads():
+def test_v31_projection_learns_attenuation_not_semantic_owner_or_order():
     vertices, faces = _mesh()
     response = build_surface_response_arrays_v1(vertices, faces, _isolated(vertices), _actions())
-    targets = build_v31_training_targets_v1(
+    targets = build_presentation_targets_v1(
         rest_vertices=vertices,
         faces=faces,
-        normalization={
-            "schema": "RealSaS.NormalizationDomainIR.v1",
-            "center_xyz": [0.0, 0.0, 0.5],
-            "half_extent": 2.0,
-        },
+        normalization=_normalization(),
         presentation_arrays=response,
         packed_measurement=_packed(),
     )
-    assert targets["front_probability_valid"].tolist() == [True, True]
-    assert targets["same_drawable_affinity_valid"].tolist() == [False, False]
-    assert targets["rigidity_valid"].tolist() == [False, False]
-    assert targets["contact_valid"].tolist() == [False, False]
-    np.testing.assert_allclose(targets["ray_hit_visibility_target"], [0.5, 0.5])
+    assert targets.mechanical_target.shape == (2, 2)
+    assert targets.appearance_rgba.shape == (2, 4)
+    assert targets.pair_target.shape == (2, 1)
+    np.testing.assert_allclose(targets.pair_target[:, 0], [0.5, 0.0])
+    assert PAIR_CHANNELS_V31_PRESENTATION == ("occlusion_attenuation_logit",)
 
 
-def test_mechanical_loss_does_not_train_undefined_tangent_or_rigidity():
-    predicted = {
-        "stretch_major": torch.tensor([[1.2, 1.1]], requires_grad=True),
-        "stretch_minor": torch.tensor([[0.9, 1.0]], requires_grad=True),
-        "tangent_direction_2theta": torch.tensor([[[1.0, 0.0], [1.0, 0.0]]], requires_grad=True),
-        "bend_demand": torch.tensor([[0.2, 0.2]], requires_grad=True),
-        "rigidity_probability": torch.tensor([[0.5, 0.5]], requires_grad=True),
-        "contact_persistence_probability": torch.tensor([[0.5, 0.5]], requires_grad=True),
-    }
-    truth = {
-        "stretch_major": torch.tensor([[1.0, 1.0]]),
-        "stretch_minor": torch.tensor([[1.0, 1.0]]),
-        "tangent_direction_2theta": torch.tensor([[[0.0, 1.0], [0.0, 1.0]]]),
-        "bend_demand": torch.zeros(1, 2),
-        "rigidity_probability": torch.zeros(1, 2),
-        "contact_persistence_probability": torch.zeros(1, 2),
-    }
-    no = torch.zeros(1, 2, dtype=torch.bool)
-    yes = torch.ones(1, 2, dtype=torch.bool)
-    loss = mechanical_demand_loss_v3(
-        predicted,
-        truth,
-        mechanical_valid_mask=yes,
-        stretch_valid_mask=yes,
-        tangent_valid_mask=no,
-        bend_valid_mask=no,
-        rigidity_valid_mask=no,
-        contact_valid_mask=no,
-    )
-    assert loss["stretch_supervision_present"].item() == 1.0
-    assert loss["tangent_supervision_present"].item() == 0.0
-    assert loss["rigidity_supervision_present"].item() == 0.0
-    loss["total"].backward()
-    assert predicted["stretch_major"].grad is not None
-    assert predicted["tangent_direction_2theta"].grad is None
-    assert predicted["rigidity_probability"].grad is None
+def test_v31_losses_are_finite_and_backpropagate_only_declared_quantities():
+    raw_mech = torch.tensor([[[0.2, 0.0, 0.1, 0.0]]], requires_grad=True)
+    target_mech = torch.tensor([[[0.3, 0.2]]])
+    mech = heteroscedastic_mechanical_loss_v1(raw_mech, target_mech, torch.ones(1, 1, dtype=torch.bool))
+    assert torch.isfinite(mech)
+    mech.backward()
+    assert raw_mech.grad is not None
+
+    rgba = torch.tensor([[[0.3, 0.4, 0.5, 0.6]]], requires_grad=True)
+    rgba_loss = appearance_rgba_loss_v1(rgba, torch.tensor([[[0.2, 0.4, 0.5, 0.7]]]), torch.ones(1, 1, dtype=torch.bool))
+    rgba_loss.backward()
+    assert rgba.grad is not None
+
+    pair = torch.tensor([[[0.0]]], requires_grad=True)
+    pair_loss = pair_probe_loss_v1(pair, torch.tensor([[[0.5]]]), torch.ones(1, 1, dtype=torch.bool))
+    pair_loss.backward()
+    assert pair.grad is not None
+
+
+def test_presentation_partition_is_deterministic_and_nonempty_when_possible():
+    a = presentation_partition_v1("fit8_snake_v1", "appearance", 20, 26102831, 0.8)
+    b = presentation_partition_v1("fit8_snake_v1", "appearance", 20, 26102831, 0.8)
+    assert np.array_equal(a[0], b[0])
+    assert np.array_equal(a[1], b[1])
+    assert len(a[0]) > 0 and len(a[1]) > 0
+    assert not set(a[0].tolist()).intersection(a[1].tolist())

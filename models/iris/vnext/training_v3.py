@@ -41,14 +41,38 @@ def _masked_mean(raw: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
     return raw[expanded].mean()
 
 
+def _mechanical_mask(
+    reference: torch.Tensor,
+    specific: torch.Tensor | None,
+    fallback: torch.Tensor,
+    code: str,
+) -> torch.Tensor:
+    value = fallback if specific is None else specific.to(device=reference.device, dtype=torch.bool)
+    if value.shape != reference.shape:
+        raise ValueError(code)
+    return value
+
+
 def mechanical_demand_loss_v3(
     predicted: Mapping[str, torch.Tensor],
     truth: Mapping[str, torch.Tensor],
     *,
     mechanical_valid_mask: torch.Tensor | None = None,
+    stretch_valid_mask: torch.Tensor | None = None,
+    tangent_valid_mask: torch.Tensor | None = None,
+    bend_valid_mask: torch.Tensor | None = None,
+    rigidity_valid_mask: torch.Tensor | None = None,
     contact_valid_mask: torch.Tensor | None = None,
 ) -> dict[str, torch.Tensor]:
-    """Objective-complete mechanical loss including authored contact persistence."""
+    """Validity-aware mechanical loss.
+
+    ``mechanical_valid_mask`` remains the backwards-compatible default, but each
+    mechanically distinct target may now provide its own validity.  This is
+    required for principal tangent supervision: tangent direction is undefined
+    when the measured strain is isotropic even though principal stretch remains
+    perfectly valid.  Unsupported families therefore abstain instead of silently
+    becoming zero labels or diluting the objective with zero-valued loss terms.
+    """
 
     missing_pred = [name for name in MECHANICAL_KEYS_V3 if name not in predicted]
     missing_truth = [name for name in MECHANICAL_KEYS_V3 if name not in truth]
@@ -65,6 +89,18 @@ def mechanical_demand_loss_v3(
     )
     if base_mask.shape != reference.shape:
         raise ValueError("IRIS_MECHANICAL_V3_VALID_MASK_SHAPE_INVALID")
+    stretch_mask = _mechanical_mask(
+        reference, stretch_valid_mask, base_mask, "IRIS_MECHANICAL_V3_STRETCH_VALID_MASK_SHAPE_INVALID"
+    )
+    tangent_mask = _mechanical_mask(
+        reference, tangent_valid_mask, base_mask, "IRIS_MECHANICAL_V3_TANGENT_VALID_MASK_SHAPE_INVALID"
+    )
+    bend_mask = _mechanical_mask(
+        reference, bend_valid_mask, base_mask, "IRIS_MECHANICAL_V3_BEND_VALID_MASK_SHAPE_INVALID"
+    )
+    rigidity_mask = _mechanical_mask(
+        reference, rigidity_valid_mask, base_mask, "IRIS_MECHANICAL_V3_RIGIDITY_VALID_MASK_SHAPE_INVALID"
+    )
 
     stretch = (
         _masked_mean(
@@ -73,7 +109,7 @@ def mechanical_demand_loss_v3(
                 truth["stretch_major"].to(predicted["stretch_major"]),
                 reduction="none",
             ),
-            base_mask,
+            stretch_mask,
         )
         + _masked_mean(
             F.smooth_l1_loss(
@@ -81,21 +117,21 @@ def mechanical_demand_loss_v3(
                 truth["stretch_minor"].to(predicted["stretch_minor"]),
                 reduction="none",
             ),
-            base_mask,
+            stretch_mask,
         )
     )
     p_tangent = F.normalize(predicted["tangent_direction_2theta"], dim=-1, eps=1.0e-6)
     t_tangent = F.normalize(
         truth["tangent_direction_2theta"].to(p_tangent), dim=-1, eps=1.0e-6
     )
-    tangent = _masked_mean(1.0 - (p_tangent * t_tangent).sum(dim=-1), base_mask)
+    tangent = _masked_mean(1.0 - (p_tangent * t_tangent).sum(dim=-1), tangent_mask)
     bend = _masked_mean(
         F.smooth_l1_loss(
             predicted["bend_demand"],
             truth["bend_demand"].to(predicted["bend_demand"]),
             reduction="none",
         ),
-        base_mask,
+        bend_mask,
     )
     rigidity = _masked_mean(
         F.binary_cross_entropy(
@@ -103,7 +139,7 @@ def mechanical_demand_loss_v3(
             truth["rigidity_probability"].to(predicted["rigidity_probability"]),
             reduction="none",
         ),
-        base_mask,
+        rigidity_mask,
     )
 
     if contact_valid_mask is None:
@@ -121,9 +157,19 @@ def mechanical_demand_loss_v3(
     )
     contact = _masked_mean(contact_raw, contact_mask)
 
-    terms = [stretch, tangent, bend, rigidity]
+    terms: list[torch.Tensor] = []
+    if bool(stretch_mask.any()):
+        terms.append(stretch)
+    if bool(tangent_mask.any()):
+        terms.append(tangent)
+    if bool(bend_mask.any()):
+        terms.append(bend)
+    if bool(rigidity_mask.any()):
+        terms.append(rigidity)
     if bool(contact_mask.any()):
         terms.append(contact)
+    if not terms:
+        raise ValueError("IRIS_MECHANICAL_V3_ALL_TARGETS_ABSTAINED")
     total = torch.stack(terms).mean()
     return {
         "total": total,
@@ -132,6 +178,10 @@ def mechanical_demand_loss_v3(
         "bend": bend,
         "rigidity": rigidity,
         "contact_persistence": contact,
+        "stretch_supervision_present": total.new_tensor(float(bool(stretch_mask.any()))),
+        "tangent_supervision_present": total.new_tensor(float(bool(tangent_mask.any()))),
+        "bend_supervision_present": total.new_tensor(float(bool(bend_mask.any()))),
+        "rigidity_supervision_present": total.new_tensor(float(bool(rigidity_mask.any()))),
         "contact_supervision_present": total.new_tensor(float(bool(contact_mask.any()))),
     }
 

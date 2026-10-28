@@ -78,7 +78,7 @@ def _verify_release_parameters(stage, parameters, manifest):
 
 
 def released_execution_plan(base_plan, released_graph, *, mode="PRODUCT"):
-    """Reconstruct execution metadata without losing the full Compiler policy."""
+    """Reconstruct exact released execution metadata without losing Compiler policy."""
     if not released_graph:
         raise RuntimeError("ENGINE_RELEASE_GRAPH_REQUIRED")
     if mode not in {"RESEARCH", "PRODUCT"}:
@@ -89,6 +89,21 @@ def released_execution_plan(base_plan, released_graph, *, mode="PRODUCT"):
     stages = graph.get("stages")
     if not isinstance(stages, list) or int(graph.get("stage_count", -1)) != len(stages):
         raise RuntimeError("ENGINE_RELEASE_GRAPH_CARDINALITY_DRIFT")
+    plan_metadata = graph.get("plan_metadata")
+    if plan_metadata is not None:
+        if not isinstance(plan_metadata, dict):
+            raise RuntimeError("ENGINE_RELEASE_PLAN_METADATA_TYPE_DRIFT")
+        forbidden = {"stages", "stage_count"}.intersection(plan_metadata)
+        if forbidden:
+            raise RuntimeError(
+                "ENGINE_RELEASE_PLAN_METADATA_STAGE_OVERRIDE_FORBIDDEN:"
+                + ",".join(sorted(forbidden))
+            )
+        plan = dict(plan_metadata)
+    else:
+        # Backward compatibility for already-sealed releases that predate explicit
+        # plan-level metadata. Their top-level identity is the shipped canonical plan.
+        plan = dict(base_plan)
     base_stages = mainline._stage_map(base_plan)
     reconstructed = []
     seen = set()
@@ -108,7 +123,6 @@ def released_execution_plan(base_plan, released_graph, *, mode="PRODUCT"):
         stage["policy"] = policy
         reconstructed.append(stage)
         seen.add(node["id"])
-    plan = dict(base_plan)
     plan["stage_count"] = len(stages)
     plan["stages"] = reconstructed
     mainline.validate_plan(plan, require_product_pass_authority=mode == "PRODUCT")

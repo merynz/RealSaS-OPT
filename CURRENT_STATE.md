@@ -1,3 +1,13 @@
+> **Pinned numeric-runtime repair — 2026-10-28:** Controlled sealed replay
+> reproduced all eight admitted hashes with glibc 2.39 and all eight native-host
+> hashes with glibc 2.43 on the same CPU and Blender. This isolates a runtime
+> dependency; version/executable pinning alone was insufficient. The next repair
+> declares a separate evaluator derivative plus pinned loader/libc/libm, retaining
+> the original executable and every prior result. Native CI must reproduce all
+> eight existing admitted imports before merging this repair; new teacher results
+> still require deployed-main Platform run/Registry readback. No tolerances change.
+> Read [the numeric runtime binding](docs/research/truth_foundry/OBSERVATION_REST_CALIBRATION_V2.md).
+>
 > **Actual observation-rest repair — 2026-10-28:** #277 merged as
 > `ed92b3d0f2668ff5994909b2d5a56d923aac64a4`; deployment succeeded.
 > Actual run `40731693360`, campaign `6b8975af-d389-4584-ba7c-1387cf048c88`:

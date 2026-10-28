@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import time
 from typing import TYPE_CHECKING
+from tools.observation.pinned_evaluator_runtime_v1 import launch_options
 
 from compiler.realsas_compiler_core.hashing import content_sha256
 from .adapter_io import load_file_ref, sha256_file, stage_output_payload
@@ -16,10 +17,11 @@ if TYPE_CHECKING:
     from tools.truth_foundry.blender_teacher_scene_v2 import build as _producer_program
 
 
-def _run(executable, program, arguments, log_path, maximum_seconds, subject):
+def _run(executable, program, arguments, log_path, maximum_seconds, subject, runtime=None):
     with log_path.open('w') as log:
         process = subprocess.Popen([str(executable), '-b', '--factory-startup', '--python-exit-code', '2',
-            '--python', str(program), '--', *map(str, arguments)], stdout=log, stderr=subprocess.STDOUT)
+            '--python', str(program), '--', *map(str, arguments)], stdout=log, stderr=subprocess.STDOUT,
+            **launch_options(executable, runtime))
         started = time.monotonic()
         try:
             while True:
@@ -81,7 +83,9 @@ def measure_teacher_scene_stage(ctx):
              'TRUTH_REST_V2_OBSERVATION_LINEAGE_DRIFT')
     load_file_ref(cfg['policy'], expected_schema='RealSaS.TeacherKinematicCalibrationPolicy.v2')
     executable = Path(cfg['evaluator_binary']['path'])
-    version = subprocess.check_output([str(executable), '--version'], text=True).splitlines()[0]
+    runtime = cfg.get('evaluator_runtime')
+    version = subprocess.check_output([str(executable), '--version'], text=True,
+                                      **launch_options(executable, runtime)).splitlines()[0]
     _require(version == cfg['evaluator_version'], 'TRUTH_REST_V2_EVALUATOR_VERSION_DRIFT')
     runtime_binding = validate_observation_evaluator(candidate, cfg['evaluator_binary']['sha256'], version,
                                                     cfg.get('observation_runtime_replacement'))
@@ -91,7 +95,7 @@ def measure_teacher_scene_stage(ctx):
     maximum = float(cfg['maximum_seconds_per_subject'])
     if not replay.exists():
         _run(executable, ctx['repo_root'] / 'tools/observation/blender_source_parity_export_v1.py',
-             [source_ref['path'], replay], root / 'observation.import.blender.log', maximum, ctx['run_manifest']['subject_id'])
+             [source_ref['path'], replay], root / 'observation.import.blender.log', maximum, ctx['run_manifest']['subject_id'], runtime)
     _require(replay.is_file() and sha256_file(replay) == admission['imported_geometry_sha256'],
              'TRUTH_REST_V2_ADMITTED_IMPORT_BYTES_DRIFT')
     runtime_binding.update({'status': 'PASS_EXACT_ADMITTED_IMPORT_BYTES',
@@ -104,14 +108,14 @@ def measure_teacher_scene_stage(ctx):
         'observation_bundle_sha256': normalization['observation_set_binding_hash'],
         'normalization_sha256': normalization['normalization_hash'],
         'evaluator_binary_sha256': cfg['evaluator_binary']['sha256'], 'producer_source_commit': cfg['producer_source_commit'],
-        'observation_runtime_binding': runtime_binding, 'training_allowed': False}
+        'observation_runtime_binding': runtime_binding, 'evaluator_runtime': runtime, 'training_allowed': False}
     job_hash = content_sha256(job)
     job_path = root / (job_hash + '.job.json')
     job_path.write_text(json.dumps(job, sort_keys=True, indent=2) + '\n')
     output = root / job_hash
     if not output.exists():
         _run(executable, ctx['repo_root'] / 'tools/truth_foundry/blender_teacher_scene_v2.py',
-             ['--job', job_path, '--output', output], root / (job_hash + '.blender.log'), maximum, job['subject_key'])
+             ['--job', job_path, '--output', output], root / (job_hash + '.blender.log'), maximum, job['subject_key'], runtime)
     scene_path = output / 'TEACHER_SCENE.json'
     _require(scene_path.is_file(), 'TRUTH_REST_V2_UNSEALED_PARTIAL_OUTPUT__EXPLICIT_RECOVERY_REQUIRED')
     scene = json.loads(scene_path.read_text())

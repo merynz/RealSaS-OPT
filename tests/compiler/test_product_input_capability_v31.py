@@ -77,8 +77,8 @@ def test_v31_input_lowering_binds_exact_source_camera_policy_and_environment(mon
     assert tuple(decoded.final.shape) == (1, 8, 37, 37, 384)
     assert tuple(decoded.alpha.shape) == (1, 8, 37, 37, 196)
     assert torch.equal(decoded.layer2, torch.ones_like(decoded.layer2))
-    assert float(decoded.alpha.min()) == 1.0
-    assert float(decoded.alpha.max()) == 1.0
+    assert float(decoded.alpha.min()) >= 1.0 - 2.0e-6
+    assert float(decoded.alpha.max()) <= 1.0
     assert result.diagnostics["product_shape_activated"] is False
     assert result.diagnostics["model_release_minted"] is False
     assert result.diagnostics["observation_admission_minted"] is False

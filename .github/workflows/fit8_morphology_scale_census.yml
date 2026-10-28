@@ -1,0 +1,159 @@
+name: fit8-morphology-scale-census
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
+
+concurrency:
+  group: fit8-morphology-scale-census
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.resolve.outputs.should_run }}
+      expected_sha: ${{ steps.resolve.outputs.expected_sha }}
+    steps:
+      - name: Resolve selected canonical SHA
+        id: sha
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          DISPATCH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = 'workflow_run' ]; then
+            echo "expected_sha=$WORKFLOW_RUN_HEAD_SHA" >> "$GITHUB_OUTPUT"
+          else
+            echo "expected_sha=$DISPATCH_SHA" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.sha.outputs.expected_sha }}
+          fetch-depth: 2
+
+      - name: Resolve morphology census request
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EXPECTED_SHA: ${{ steps.sha.outputs.expected_sha }}
+          WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          TRIGGER_PATH: canonical/FIT8_MORPHOLOGY_SCALE_CENSUS_TRIGGER_V1.json
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          event = os.environ['EVENT_NAME']
+          expected_sha = os.environ['EXPECTED_SHA'].strip().lower()
+          should_run = event == 'workflow_dispatch'
+          if event == 'workflow_run':
+              if (os.environ.get('WORKFLOW_RUN_CONCLUSION') == 'success' and
+                      os.environ.get('WORKFLOW_RUN_HEAD_BRANCH') == 'main'):
+                  changed = subprocess.check_output(
+                      ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD^1', 'HEAD'],
+                      text=True,
+                  ).splitlines()
+                  trigger_path = Path(os.environ['TRIGGER_PATH'])
+                  if str(trigger_path) in changed:
+                      trigger = json.loads(trigger_path.read_text(encoding='utf-8'))
+                      assert trigger.get('schema') == 'RealSaS.FIT8MorphologyScaleCensusTrigger.v1', 'FIT8_MORPHOLOGY_TRIGGER_SCHEMA'
+                      assert trigger.get('operation') == 'FIT8_REAL_MORPHOLOGY_SCALE_CENSUS', 'FIT8_MORPHOLOGY_TRIGGER_OPERATION'
+                      assert isinstance(trigger.get('enabled'), bool), 'FIT8_MORPHOLOGY_TRIGGER_ENABLED_BOOL'
+                      should_run = bool(trigger['enabled'])
+
+          print(f"should_run={'true' if should_run else 'false'}")
+          print(f'expected_sha={expected_sha}')
+          PY
+
+  census:
+    needs: activation
+    if: needs.activation.outputs.should_run == 'true'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+      OUTPUT_PATH: /home/monster/realsas_authority/research/morphology_scale_census/${{ github.run_id }}-${{ github.run_attempt }}/CENSUS.json
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+
+      - name: Require exact deployed canonical main
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$EXPECTED_SHA"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          deployment = json.loads(Path('/home/monster/realsas_platform/deployment.json').read_text())
+          assert deployment['schema'] == 'RealSaS.DeveloperDeployment.v1', 'FIT8_MORPHOLOGY_DEPLOYMENT_SCHEMA'
+          assert deployment['code_sha'] == os.environ['EXPECTED_SHA'], 'FIT8_MORPHOLOGY_DEPLOYED_MAIN_DRIFT'
+          PY
+
+      - name: Execute read-only real morphology scale census
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUTPUT_PATH")"
+          "$PLATFORM_ROOT/current/bin/realsas-python" \
+            "$GITHUB_WORKSPACE/tools/ops/inspect_fit8_morphology_scale_census_v1.py" \
+            --authority-root "$AUTHORITY_ROOT" \
+            --expected-main-sha "$EXPECTED_SHA" \
+            --out "$OUTPUT_PATH"
+
+      - name: Verify census receipt and negative authority claims
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          receipt = json.loads(Path(os.environ['OUTPUT_PATH']).read_text(encoding='utf-8'))
+          assert receipt['schema'] == 'RealSaS.FIT8RealMorphologyScaleCensus.v1', 'FIT8_MORPHOLOGY_RECEIPT_SCHEMA'
+          assert receipt['status'] == 'FIT8_REAL_MORPHOLOGY_SCALE_CENSUS_COMPLETE_V1', 'FIT8_MORPHOLOGY_STATUS'
+          assert receipt['source_code_sha'] == os.environ['EXPECTED_SHA'], 'FIT8_MORPHOLOGY_SOURCE_SHA_DRIFT'
+          assert receipt['subject_count'] == 8, 'FIT8_MORPHOLOGY_SUBJECT_COUNT'
+          assert receipt['view_count'] == 64, 'FIT8_MORPHOLOGY_VIEW_COUNT'
+          assert receipt['selection']['production_resolution_selected'] is False, 'FIT8_MORPHOLOGY_RESOLUTION_SELECTION_FORBIDDEN'
+          for key in (
+              'host_scan_is_execution_authority',
+              'training_executed',
+              'model_release_minted',
+              'model_promotion_performed',
+              'product_shape_activated',
+              'shape_proposal_minted',
+              'canonical_mesh_minted',
+              'product_revision_minted',
+              'fit8_pass_claimed',
+              'genericity_claimed',
+          ):
+              assert receipt[key] is False, f'FIT8_MORPHOLOGY_AUTHORITY_VIOLATION:{key}'
+          PY
+
+      - name: Preserve exact morphology census receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fit8-morphology-scale-census-${{ github.run_id }}
+          path: ${{ env.OUTPUT_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

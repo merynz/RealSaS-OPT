@@ -1,3 +1,16 @@
+> **Actual observation-rest repair — 2026-10-28:** #277 merged as
+> `ed92b3d0f2668ff5994909b2d5a56d923aac64a4`; deployment succeeded.
+> Actual run `40731693360`, campaign `6b8975af-d389-4584-ba7c-1387cf048c88`:
+> four cohort members and separate Knight regression completed; T-Rex, Horse,
+> Spider and George failed the exact import-byte gate. All nine Attempts are
+> terminal. The official 4.0.2 binary hash matched its pin, but the native host
+> did not reproduce all bytes that the same binary reproduced locally.
+> Read [the measured runtime boundary](docs/research/truth_foundry/OBSERVATION_REST_CALIBRATION_V2.md).
+> Do not blindly resubmit, weaken the gate, claim a complete cohort or begin
+> training. Readback revision 5 observes this exact repair. Next inspect complete
+> runtime provenance and establish a common sealed import context for observation
+> and teacher; executable identity alone is insufficient.
+>
 > **Observation-rest continuation — 2026-10-28:** Sparse Appearance admission
 > completed through real Platform Attempt/Registry readback (run 40676103301).
 > Continue with [observation-rest calibration V2](docs/research/truth_foundry/OBSERVATION_REST_CALIBRATION_V2.md):

@@ -49,7 +49,15 @@ selects an intentional retry on new main; unrelated deployments are NOOP.
 The result must be read from the current run's receipt and actual Registry
 artifacts. A merged adapter or green source test is not admission.
 
-The next source repair is observation-aligned teacher rest. George and GreenBlob
+Observation-aligned teacher V2 is now implemented, but its actual full-cohort
+measurement remains blocked. #277's run `40731693360` verifies the official
+4.0.2 executable and still fails exact import replay for four members; all nine
+Attempts are terminal and the other four cohort measurements are preserved.
+Read the [actual rest/runtime boundary](OBSERVATION_REST_CALIBRATION_V2.md).
+The earlier version-only explanation was insufficient. Do not launch another
+repair until the complete runtime/import-context discrepancy is resolved.
+
+The current source boundary is observation-aligned teacher rest. George and GreenBlob
 exposed different animated-import vs observation bind-rest geometry. Preserve V1
 measurements and native replay; a new producer version must use the admitted
 observation rest contract and prove source/import/geometry bindings for all eight.

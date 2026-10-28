@@ -26,6 +26,15 @@ def test_stage48_research_release_roundtrips_exact_plan_level_metadata():
     assert mainline.content_sha256(restored) == request["manifest"]["pipeline_plan_sha256"]
 
 
+def test_product_release_keeps_historical_stage_graph_shape():
+    plan = mainline.load_json(mainline.PLAN_PATH)
+    request = snapshot(plan, name="product-graph-compat", purpose="PRODUCT", created_by="ci")
+    dag = request["manifest"]["dag"]
+    assert "plan_metadata" not in dag
+    restored = released_execution_plan(plan, dag, mode="PRODUCT")
+    assert restored == plan
+
+
 def test_release_plan_metadata_cannot_smuggle_stage_arrays():
     base = mainline.load_json(mainline.PLAN_PATH)
     plan = deepcopy(base)

@@ -1,4 +1,4 @@
-"""IRIS V3.1 LOFO trainer V2: fixed validation court across checkpoints.
+"""IRIS V3.1 LOFO trainer V2: authorized fixed-validation research execution.
 
 V1 correctly separates train and validation presentation rows, but subsamples the
 validation partition with a step-dependent seed. That makes checkpoint scores
@@ -7,6 +7,10 @@ only that court: training sampling is inherited byte-semantically from V1, while
 every preregistered train-subject validation row is evaluated at each checkpoint.
 Held-out remains unopened until selection is frozen and still evaluates all valid
 rows.
+
+V2 also refuses to instantiate unless input preparation has passed the exact
+student-projection observability/leakage court. Stage48 oracle candidacy by itself
+is not training authorization.
 """
 from __future__ import annotations
 
@@ -16,6 +20,37 @@ from .lofo_trainer_v1 import IrisV31LofoTrainer, _indices, _require
 
 
 class IrisV31LofoTrainerV2(IrisV31LofoTrainer):
+    def __init__(self, *, manifest: dict, recipe: dict, fold_id: str, checkpoint_root, output_root, device="cuda"):
+        qualification = dict(manifest.get("student_projection_qualification") or {})
+        _require(manifest.get("student_training_authorized") is True, "IRIS_V31_LOFO_STUDENT_TRAINING_NOT_AUTHORIZED")
+        _require(
+            manifest.get("status") == "LOFO_INPUTS_SEALED__TRAINING_AUTHORIZED_BY_EXACT_PROJECTION_COURT",
+            "IRIS_V31_LOFO_INPUT_AUTHORIZATION_STATUS",
+        )
+        _require(
+            qualification.get("schema") == "RealSaS.IRISV31StudentProjectionQualification.v1"
+            and qualification.get("status") == "PASS_EXACT_STUDENT_PROJECTION__TRAINING_AUTHORIZED"
+            and qualification.get("teacher_inputs_in_forward") is False
+            and qualification.get("privileged_ids_in_target_packet") is False
+            and qualification.get("semantic_part_taxonomy_used") is False
+            and qualification.get("geometric_front_order_student_objective") is False
+            and qualification.get("compiler_oracle_retains_draw_order_authority") is True,
+            "IRIS_V31_LOFO_STUDENT_PROJECTION_QUALIFICATION",
+        )
+        _require(
+            int(qualification.get("pair_evidence_subject_count", 0)) >= 2
+            and int(qualification.get("pair_evidence_valid_rows", 0)) > 0,
+            "IRIS_V31_LOFO_PAIR_EVIDENCE_AUTHORIZATION",
+        )
+        super().__init__(
+            manifest=manifest,
+            recipe=recipe,
+            fold_id=fold_id,
+            checkpoint_root=checkpoint_root,
+            output_root=output_root,
+            device=device,
+        )
+
     def _presentation_ids(
         self,
         subject,

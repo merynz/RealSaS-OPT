@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Compatibility entrypoint for the objective-exact Stage48 FIT8 bundle.
+"""Compatibility entrypoint for the current objective-exact Stage48 FIT8 bundle.
 
-The V3 implementation preserves the V2 student-observability contract while
-correctly separating Platform subject UUIDs from scientific logical subject keys.
-The workflow keeps this V2 filename so existing deployment plumbing does not
-change identity for unrelated steps.
+The workflow keeps this historical V2 filename so deployment plumbing remains
+stable.  The current implementation is V4: V3 provides exact Platform UUID to
+logical FIT8 binding, then V4 admits or explicitly abstains the pair family from
+its measured cross-fold observability census.
 """
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import argparse
 import json
 from pathlib import Path
 
-from tools.truth_foundry.build_fit8_presentation_truth_bundle_v3 import build
+from tools.truth_foundry.build_fit8_presentation_truth_bundle_v4 import build
 
 
 if __name__ == "__main__":

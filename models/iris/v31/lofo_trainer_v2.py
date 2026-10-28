@@ -1,12 +1,11 @@
 """IRIS V3.1 LOFO trainer V2: authorized fixed-validation research execution.
 
-V1 correctly separates train and validation presentation rows, but subsamples the
-validation partition with a step-dependent seed. That makes checkpoint scores
-non-comparable when a validation family has more rows than its budget. V2 changes
-only that court: training sampling is inherited byte-semantically from V1, while
-every preregistered train-subject validation row is evaluated at each checkpoint.
-Held-out remains unopened until selection is frozen and still evaluates all valid
-rows.
+V2 preserves V1 optimizer/training sampling semantics but hardens checkpoint
+selection:
+- every candidate sees the same preregistered train-subject validation rows;
+- A->B and B->A rows for one unordered occlusion pair stay in the same partition,
+  so a mirrored relation cannot leak from train into validation;
+- held-out stays unopened until checkpoint identity is frozen.
 
 V2 also refuses to instantiate unless input preparation has passed the exact
 student-projection observability/leakage court. Stage48 oracle candidacy by itself
@@ -16,7 +15,37 @@ from __future__ import annotations
 
 import numpy as np
 
-from .lofo_trainer_v1 import IrisV31LofoTrainer, _indices, _require
+from .lofo_trainer_v1 import (
+    IrisV31LofoTrainer,
+    _indices,
+    _require,
+    presentation_partition_v1,
+)
+
+
+def pair_group_partition_v2(subject, valid: np.ndarray, seed: int, train_fraction: float):
+    valid = np.asarray(valid, dtype=np.int64)
+    if not len(valid):
+        return valid.copy(), valid.copy()
+    valid_set = set(valid.tolist())
+    groups = np.asarray(sorted({int(index) // 2 for index in valid}), dtype=np.int64)
+    for group in groups:
+        a, b = int(group) * 2, int(group) * 2 + 1
+        _require(a in valid_set and b in valid_set, "IRIS_V31_LOFO_PAIR_DIRECTION_VALIDITY_DRIFT")
+    train_local, val_local = presentation_partition_v1(
+        str(subject), "pair_unordered_group", len(groups), seed, train_fraction
+    )
+
+    def expand(local):
+        if not len(local):
+            return np.empty(0, dtype=np.int64)
+        selected = groups[local]
+        return np.asarray([index for group in selected for index in (2 * int(group), 2 * int(group) + 1)], dtype=np.int64)
+
+    train_rows, val_rows = expand(train_local), expand(val_local)
+    _require(not set(train_rows.tolist()).intersection(val_rows.tolist()), "IRIS_V31_LOFO_PAIR_PARTITION_OVERLAP")
+    _require(set(train_rows.tolist()) | set(val_rows.tolist()) == valid_set, "IRIS_V31_LOFO_PAIR_PARTITION_COVERAGE")
+    return train_rows, val_rows
 
 
 class IrisV31LofoTrainerV2(IrisV31LofoTrainer):
@@ -50,6 +79,15 @@ class IrisV31LofoTrainerV2(IrisV31LofoTrainer):
             output_root=output_root,
             device=device,
         )
+        # V1 row-level partitioning is fine for scalar/face families. Pair rows are
+        # emitted in exact mirrored direction pairs and must be grouped together.
+        fraction = float(recipe["sampling"]["presentation_train_fraction"])
+        partition_seed = int(recipe["sampling"]["seed"])
+        for subject in self.train_subjects.values():
+            valid = np.flatnonzero(np.asarray(subject.presentation["pair_valid"], dtype=np.bool_))
+            subject.partitions["pair"] = pair_group_partition_v2(
+                subject.subject_id, valid, partition_seed, fraction
+            )
 
     def _presentation_ids(
         self,
@@ -84,7 +122,8 @@ class IrisV31LofoTrainerV2(IrisV31LofoTrainer):
             "pair": "pair_queries_per_subject_step",
         }[family]
         budget = int(self.recipe["sampling"][budget_key])
-        # Preserve V1 training sampling exactly; only validation semantics changed.
+        # Preserve V1 stateless with-replacement training sampling after the
+        # preregistered partition itself is fixed.
         return pool[
             _indices(
                 len(pool),

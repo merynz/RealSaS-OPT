@@ -120,7 +120,7 @@ jobs:
             --output "$OUTPUT/evidence" --maximum-seconds 3000 --interval-seconds 10
       - name: Build immutable FIT8 presentation truth bundle and V3.1 targets
         run: |
-          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/build_fit8_presentation_truth_bundle_v1.py \
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/build_fit8_presentation_truth_bundle_v2.py \
             --observation "$OUTPUT/evidence/OBSERVATION.json" \
             --artifact-root "$PLATFORM_ROOT/artifacts" --repo-root "$GITHUB_WORKSPACE" \
             --output "$OUTPUT/bundle"

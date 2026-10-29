@@ -66,7 +66,7 @@ def build_statistics(
         if not path.is_file() or _file_hash(path) != str(ref.get("sha256") or ""):
             raise ValueError("TRUTH139_MECHANICS_STATS_TARGET_DRIFT:" + subject)
         with np.load(path, allow_pickle=False) as z:
-            target = np.asarray(z["mechanical_target"], dtype=np.float64)
+            target = np.asarray(z["mechanical_target"], dtype=np.float32)
             valid = np.asarray(z["mechanical_valid"], dtype=np.bool_)
         if target.ndim != 2 or target.shape[1] != 2 or valid.shape != target.shape[:1]:
             raise ValueError("TRUTH139_MECHANICS_STATS_TARGET_LAYOUT:" + subject)
@@ -77,11 +77,13 @@ def build_statistics(
             raw = target[selected]
             if not np.isfinite(raw).all() or np.any(raw < 0.0):
                 raise ValueError("TRUTH139_MECHANICS_STATS_TARGET_INVALID:" + subject)
-            values.append(np.log1p(raw))
+            # Exact parity with mechanics_target_log1p_v1(torch.float32) followed by
+            # robust_fixed_scale_v4(), which promotes the transformed values to float64 for MAD.
+            values.append(np.log1p(raw).astype(np.float32).astype(np.float64))
     if not values:
         raise ValueError("TRUTH139_MECHANICS_STATS_NO_TRAIN_ROWS")
 
-    transformed = np.concatenate(values, axis=0)
+    transformed = np.concatenate(values, axis=0).astype(np.float64, copy=False)
     median = np.median(transformed, axis=0)
     mad = np.median(np.abs(transformed - median[None, :]), axis=0)
     scale = np.maximum(1.4826 * mad, float(minimum_scale))
@@ -98,6 +100,7 @@ def build_statistics(
         "fixed_scale": [float(x) for x in scale],
         "scale_estimator": "1P4826_MAD_WITH_FLOOR",
         "minimum_scale": float(minimum_scale),
+        "numeric_pipeline": "FLOAT32_LOG1P__FLOAT64_MEDIAN_MAD",
         "contains_train_subject_ids": False,
         "contains_train_row_addresses": False,
         "contains_train_target_samples": False,

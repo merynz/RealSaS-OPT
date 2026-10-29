@@ -38,7 +38,7 @@ jobs:
           assert row['enabled'] is True
           assert row['training_allowed'] is False
           assert row['mutation_allowed'] is False
-          assert int(row.get('locator_revision',0)) >= 4
+          assert int(row.get('locator_revision',0)) >= 5
           PY
 
       - name: Locate exact October-4 seal copies and audit raw-byte coverage
@@ -57,7 +57,7 @@ jobs:
           expected_manifest=os.environ['EXPECTED_MANIFEST_SHA256']
           expected_ledger=os.environ['EXPECTED_LEDGER_SHA256']
           search_roots=[Path('/home/monster/realsas_authority'),Path('/home/monster')]
-          seen=set();matches=[];sealed_manifest=None
+          seen=set();matches=[];sealed_manifest=None;sealed_ledger_rows=None
 
           def sha(path):
               h=hashlib.sha256()
@@ -84,9 +84,11 @@ jobs:
                       if not manifest.is_file() or not ledger.is_file():continue
                       if sha(material)!=expected_root or sha(manifest)!=expected_manifest or sha(ledger)!=expected_ledger:continue
                       manifest_value=json.loads(manifest.read_text(encoding='utf-8-sig'))
-                      if sealed_manifest is None:sealed_manifest=manifest_value
-                      elif sealed_manifest!=manifest_value:raise ValueError('SEALED_MANIFEST_CONTENT_DRIFT')
                       rows=ledger_rows(ledger)
+                      if sealed_manifest is None:
+                          sealed_manifest=manifest_value;sealed_ledger_rows=rows
+                      elif sealed_manifest!=manifest_value or sealed_ledger_rows!=rows:
+                          raise ValueError('SEALED_MANIFEST_OR_LEDGER_CONTENT_DRIFT')
                       gltf_rows=[r for r in rows if r[1].startswith('raw/quaternius/') and r[1].lower().endswith(('.gltf','.glb'))]
                       existing=0;correct=0;wrong=[]
                       for digest,relative in gltf_rows:
@@ -127,9 +129,27 @@ jobs:
                   })
               acquisition.sort(key=lambda x:x['pack_id'])
 
+          pack_summary={}
+          for digest,relative in sealed_ledger_rows or ():
+              parts=relative.split('/')
+              if len(parts)<3 or parts[0]!='raw' or parts[1]!='quaternius':continue
+              pack=parts[2]
+              row=pack_summary.setdefault(pack,{'pack_id':pack,'ledger_file_count':0,'gltf_glb_count':0})
+              row['ledger_file_count']+=1
+              if relative.lower().endswith(('.gltf','.glb')):row['gltf_glb_count']+=1
+          binding_by_id={row['pack_id']:row for row in acquisition}
+          pack_rows=[]
+          for pack,row in sorted(pack_summary.items()):
+              binding=binding_by_id.get(pack) or {}
+              pack_rows.append({**row,
+                  'sealed_manifest_status':str(binding.get('status') or 'MISSING_FROM_MANIFEST'),
+                  'drive_folder_id':str(binding.get('drive_folder_id') or ''),
+                  'has_drive_folder_id':bool(binding.get('drive_folder_id')),
+              })
+
           full=[row for row in matches if row['full_primary_source_coverage']]
           payload={
-              'schema':'RealSaS.Truth139CorpusLocatorReceipt.v3',
+              'schema':'RealSaS.Truth139CorpusLocatorReceipt.v4',
               'run_id':os.environ['GITHUB_RUN_ID'],
               'matches':matches,
               'match_count':len(matches),
@@ -142,12 +162,14 @@ jobs:
                   'quaternius_pack_count':len(acquisition),
                   'quaternius_acquisition_bindings':acquisition,
               },
+              'sealed_ledger_quaternius_pack_summary':pack_rows,
+              'sealed_ledger_quaternius_pack_count':len(pack_rows),
               'training_allowed':False,
               'mutation_performed':False,
               'status':'PASS_EXACT_FULL_RAW_ROOT' if len(full)==1 else ('FAIL_NO_FULL_RAW_ROOT' if not full else 'FAIL_MULTIPLE_FULL_RAW_ROOTS'),
           }
           out=Path(os.environ['OUT']);out.write_text(json.dumps(payload,sort_keys=True,indent=2)+'\n')
-          print(json.dumps({'status':payload['status'],'match_count':len(matches),'full_primary_source_root_count':len(full),'quaternius_pack_count':len(acquisition)},sort_keys=True))
+          print(json.dumps({'status':payload['status'],'match_count':len(matches),'full_primary_source_root_count':len(full),'quaternius_pack_count':len(acquisition),'ledger_pack_count':len(pack_rows),'ledger_gltf_total':sum(r['gltf_glb_count'] for r in pack_rows)},sort_keys=True))
           PY
 
       - name: Preserve locator receipt

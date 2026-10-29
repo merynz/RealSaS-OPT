@@ -8,8 +8,11 @@ and pair validation.  Partial pair evidence remains forbidden.
 """
 from __future__ import annotations
 
+import hashlib
 import numpy as np
+import torch
 
+from .fstar_teacher_v31 import exact_fstar_targets_v31
 from .lofo_trainer_v1 import IrisV31LofoTrainer, _indices, _require, presentation_partition_v1
 from .lofo_trainer_v2 import IrisV31LofoTrainerV2, pair_group_partition_v2
 
@@ -86,6 +89,34 @@ class IrisV31LofoTrainerV3(IrisV31LofoTrainerV2):
             subject.partitions["pair"] = pair_group_partition_v2(
                 subject.subject_id, valid, partition_seed, fraction
             )
+
+    def _geometry_batch(self, subject, step: int):
+        """V1 query sampling with V3.1's isolated exact-F* teacher authority."""
+        total = int(self.recipe["sampling"]["geometry_queries_per_subject_step"])
+        counts = (total // 2, total // 4, total - total // 2 - total // 4)
+        rows = (("replay_points", "replay_targets"), ("near_points", None), ("straddle_points", None))
+        q_parts, t_parts = [], []
+        subject_seed = int(hashlib.sha256(subject.subject_id.encode()).hexdigest()[:8], 16)
+        for offset, ((point_key, target_key), count) in enumerate(zip(rows, counts)):
+            points = subject.geometry[point_key]
+            ids = _indices(
+                len(points),
+                count,
+                self.seed + step * 1009 + offset * 97 + subject_seed,
+            )
+            q = points[torch.from_numpy(ids)].to(self.device).float()
+            q_parts.append(q)
+            if target_key:
+                target = subject.geometry[target_key][torch.from_numpy(ids)].to(self.device).float()
+            else:
+                target_np = exact_fstar_targets_v31(
+                    subject.field_teacher(),
+                    q.detach().cpu().numpy(),
+                    device=self.device.type,
+                )
+                target = torch.from_numpy(target_np).to(self.device).float()
+            t_parts.append(target)
+        return torch.cat(q_parts)[None], torch.cat(t_parts)[None]
 
 
 def run_fold_v3(*, input_manifest_path, recipe_path, fold_id, checkpoint_root, output_root, device="cuda"):

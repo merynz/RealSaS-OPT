@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Truth139StructuralAuditRequest.v2",
   "date": "2026-10-29",
-  "revision": 1,
+  "revision": 2,
   "enabled": true,
   "purpose": "FINISH_EXACT_BYTE_STRUCTURAL_CAPABILITY_AUDIT_AND_MEASURE_TRUE_139_DIVERSITY_WITHOUT_BLOCKING_ON_ARCHIVAL_WEB_PAGE_BYTES",
   "historical_web_snapshot_required_for_structural_pass": false,

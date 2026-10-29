@@ -55,6 +55,7 @@ def test_work_orders_retain_subjects_and_schedule_capabilities_independently():
     assert len(result["subjects"]) == 139
     assert result["policy"]["missing_optional_truth_does_not_delete_subject"] is True
     assert result["policy"]["graphics_does_not_depend_on_response_evidence"] is True
+    assert result["policy"]["source_observation_surface_geometry_does_not_depend_on_response_evidence"] is True
     assert result["policy"]["no_tessa_conditioning_here"] is True
     assert result["policy"]["producer_output_is_not_admitted_without_required_independent_court"] is True
 
@@ -86,8 +87,23 @@ def test_dense_graphics_requires_observation_but_not_response_evidence():
 
     no_response = next(item for item in result["subjects"] if item["subject_id"] == "truth139_011")
     assert no_response["jobs"]["IRIS_RESPONSE_EVIDENCE"]["enabled"] is False
+    assert no_response["jobs"]["SOURCE_IMPORT_AND_8VIEW_OBSERVATION"]["enabled"] is True
     assert no_response["jobs"]["DENSE_GRAPHICS_FRONT_SURFACE"]["enabled"] is True
     assert no_response["jobs"]["VISIBILITY_OCCLUSION_CROSS_VIEW"]["enabled"] is True
+
+
+def test_source_observation_job_binds_common_response_independent_apparatus():
+    result = build(_manifest([_subject(i) for i in range(139)]))
+    apparatus = result["canonical_apparatus"]["SOURCE_IMPORT_AND_8VIEW_OBSERVATION"]
+    assert apparatus["roster_adapter"] == "tools/corpus/build_truth139_graphics_apparatus_manifest_v1.py"
+    assert apparatus["packet_producer"] == "tools/corpus/prepare_iris_observations_v1.py"
+    assert apparatus["blender_surface_exporter"] == "tools/observation/blender_source_parity_export_v1.py"
+    assert apparatus["blender_8view_renderer"] == "tools/observation/blender_controlled_8view_v2.py"
+    assert apparatus["independent_admission_court"] == "tools/corpus/iris_observation_admission_v1.py"
+    assert apparatus["required_observation_status"] == "PASS_IRIS_BIND_OBSERVATIONS"
+    assert apparatus["required_surface_geometry_status"] == "PASS_IMPORTED_REST_SURFACE_GEOMETRY__RAW_PARITY_ADMISSION_SEPARATE"
+    subject = result["subjects"][0]
+    assert subject["jobs"]["SOURCE_IMPORT_AND_8VIEW_OBSERVATION"]["apparatus"] == apparatus
 
 
 def test_graphics_work_orders_bind_canonical_producers_and_independent_courts():

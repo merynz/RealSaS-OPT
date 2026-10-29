@@ -27,6 +27,7 @@ COURT_SCHEMA = "RealSaS.Truth139HistoricalReproductionCourt.v1"
 COURT_STATUS = "PASS_HISTORICAL_139_REPRODUCTION"
 OUTPUT_SCHEMA = "RealSaS.Truth139CorpusManifest.v2"
 EXPECTED_SUBJECT_COUNT = 139
+DENSE_APPEARANCE_CONTRACT = "canonical/TRUTH139_DENSE_APPEARANCE_AUTHORITY_V1.json"
 
 CAPABILITY_NAMES = (
     "OBSERVATION_FSTAR",
@@ -77,12 +78,15 @@ def _materialization_plan(capabilities: dict) -> dict:
     stage47 = bool(capabilities.get("STAGE47_MECHANICS"))
     stage48 = bool(capabilities.get("STAGE48_APPEARANCE_PRESENTATION"))
     tessa = bool(capabilities.get("TESSA_TOPOLOGY_TEACHER"))
+    dense_appearance = observation and stage47
     return {
         "CONTROLLED_8VIEW_OBSERVATION": observation,
         "DINO_AND_IMAGE_DERIVED_FSTAR_SHARDS": observation,
         "MULTIVIEW_NORMAL_DEPTH_TEACHER_TRUTH": observation and normals,
         "STAGE47_SOURCE_RESPONSE_TRUTH": stage47,
-        "STAGE48_APPEARANCE_PRESENTATION_TRUTH": stage48,
+        "DENSE_SURFACE_ADDRESSED_APPEARANCE_GBUFFER": dense_appearance,
+        "STAGE48_APPEARANCE_PRESENTATION_INTERVENTION_WITNESS": stage48,
+        "APPEARANCE_FULL_AUTHORITY_CANDIDATE": dense_appearance and stage48,
         "TESSA_TOPOLOGY_TEACHER_CACHE": tessa,
     }
 
@@ -104,6 +108,7 @@ def build(audit: dict, court: dict) -> dict:
 
     rows = []
     capability_counts = Counter()
+    materialization_counts = Counter()
     development_count = 0
     full_family_clean_count = 0
     pack_counts = Counter()
@@ -123,6 +128,9 @@ def build(audit: dict, court: dict) -> dict:
         full_family_clean_count += int(full_family_clean)
         source = _source_binding(row)
         pack_counts[source["pack_id"]] += 1
+        plan = _materialization_plan(capabilities)
+        for name, enabled in plan.items():
+            materialization_counts[name] += int(bool(enabled))
         rows.append(
             {
                 "ordinal": ordinal,
@@ -138,10 +146,13 @@ def build(audit: dict, court: dict) -> dict:
                 "development_exclusion": development_exclusion,
                 "duplicate_family_development_taint": development_taint,
                 "development_or_regression_tainted": is_development,
-                "materialization_plan": _materialization_plan(capabilities),
+                "materialization_plan": plan,
                 "full_family_raw_capable": full_family,
                 "full_family_clean_experiment_candidate": full_family_clean,
                 "platform_truth_admission": "PENDING",
+                "dense_appearance_authority": "PENDING" if plan["DENSE_SURFACE_ADDRESSED_APPEARANCE_GBUFFER"] else "NOT_RAW_CAPABLE",
+                "stage48_intervention_witness": "PENDING" if plan["STAGE48_APPEARANCE_PRESENTATION_INTERVENTION_WITNESS"] else "NOT_RAW_CAPABLE",
+                "appearance_training_authority": "PENDING" if plan["APPEARANCE_FULL_AUTHORITY_CANDIDATE"] else "NOT_RAW_CAPABLE",
                 "train_membership": "UNASSIGNED",
                 "unseen_membership": "UNASSIGNED",
                 "training_authorized": False,
@@ -166,6 +177,7 @@ def build(audit: dict, court: dict) -> dict:
             "development_or_regression_tainted_subject_count": development_count,
             "clean_full_family_raw_candidate_count": full_family_clean_count,
             "capability_counts": dict(sorted(capability_counts.items())),
+            "materialization_candidate_counts": dict(sorted(materialization_counts.items())),
             "pack_counts": dict(sorted(pack_counts.items())),
         },
         "policy": {
@@ -174,6 +186,9 @@ def build(audit: dict, court: dict) -> dict:
             "development_taint_does_not_delete_corpus_rows": True,
             "missing_optional_truth_family_does_not_delete_corpus_rows": True,
             "heavy_truth_materialization_must_follow_per_subject_capability_plan": True,
+            "dense_appearance_contract": DENSE_APPEARANCE_CONTRACT,
+            "stage48_alone_is_not_dense_appearance_training_authority": True,
+            "appearance_training_requires_dense_gbuffer_and_stage48_witness": True,
             "split_before_platform_truth_admission_forbidden": True,
             "training_before_split_and_unseen_seal_forbidden": True,
             "subject_specific_code_forbidden": True,
@@ -220,6 +235,7 @@ def main() -> None:
                 "subject_count": result["corpus"]["subject_count"],
                 "development_or_regression_tainted_subject_count": result["corpus"]["development_or_regression_tainted_subject_count"],
                 "clean_full_family_raw_candidate_count": result["corpus"]["clean_full_family_raw_candidate_count"],
+                "materialization_candidate_counts": result["corpus"]["materialization_candidate_counts"],
                 "corpus_manifest_identity_sha256": result["corpus_manifest_identity_sha256"],
             },
             sort_keys=True,

@@ -17,6 +17,20 @@ from pathlib import Path
 INPUT_SCHEMA = "RealSaS.Truth139CorpusManifest.v2"
 OUTPUT_SCHEMA = "RealSaS.Truth139MaterializationWorkOrders.v1"
 
+DENSE_GRAPHICS_IMPLEMENTATION = {
+    "producer": "tools/corpus/build_truth139_dense_graphics_gbuffer_v1.py",
+    "producer_pending_status": "PASS_DENSE_GRAPHICS_FRONT_SURFACE__VISIBILITY_OCCLUSION_COURT_PENDING",
+    "independent_court": "tools/corpus/validate_truth139_dense_gbuffer_geometry_v1.py",
+    "required_court_status": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_DENSE_GPU_GBUFFER",
+}
+VISIBILITY_OCCLUSION_IMPLEMENTATION = {
+    "producer": "tools/corpus/build_truth139_visibility_occlusion_teacher_v2.py",
+    "producer_revision": "V2_SILHOUETTE_NEIGHBOR_FIRST",
+    "producer_pending_status": "PASS_VISIBILITY_OCCLUSION_TEACHER__INDEPENDENT_CPU_ORACLE_COURT_PENDING",
+    "independent_court": "tools/corpus/validate_truth139_visibility_occlusion_teacher_v1.py",
+    "required_court_status": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_VISIBILITY_OCCLUSION_TEACHER",
+}
+
 
 def _digest(value: object) -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
@@ -63,13 +77,17 @@ def _jobs(raw: dict) -> dict[str, dict]:
         },
         "DENSE_GRAPHICS_FRONT_SURFACE": {
             "enabled": dense_graphics,
-            "execution": "EXTERNAL_WORKER_GPU",
+            "execution": "EXTERNAL_WORKER_GPU_PLUS_CPU_COURT",
             "depends_on": ["SOURCE_IMPORT_AND_8VIEW_OBSERVATION"],
+            "implementation": dict(DENSE_GRAPHICS_IMPLEMENTATION),
+            "admission_rule": "PRODUCER_OUTPUT_IS_DERIVED_TRUTH_PENDING_UNTIL_INDEPENDENT_COURT_REQUIRED_STATUS_MATCHES",
         },
         "VISIBILITY_OCCLUSION_CROSS_VIEW": {
             "enabled": dense_graphics,
             "execution": "EXTERNAL_WORKER_GPU_PLUS_CPU_COURT",
             "depends_on": ["DENSE_GRAPHICS_FRONT_SURFACE"],
+            "implementation": dict(VISIBILITY_OCCLUSION_IMPLEMENTATION),
+            "admission_rule": "V2_PRODUCER_ONLY__CPU_RAY_ORACLE_COURT_MUST_PASS_BEFORE_DERIVED_TRUTH_ADMISSION",
         },
         "K_HIT_GEOMETRIC_PEEL": {
             "enabled": dense_graphics,
@@ -147,6 +165,10 @@ def build(manifest: dict) -> dict:
         "parent_historical_reproduction": dict(manifest.get("historical_reproduction") or {}),
         "subject_count": len(subjects),
         "job_candidate_counts": dict(sorted(counts.items())),
+        "canonical_implementations": {
+            "DENSE_GRAPHICS_FRONT_SURFACE": dict(DENSE_GRAPHICS_IMPLEMENTATION),
+            "VISIBILITY_OCCLUSION_CROSS_VIEW": dict(VISIBILITY_OCCLUSION_IMPLEMENTATION),
+        },
         "policy": {
             "missing_optional_truth_does_not_delete_subject": True,
             "per_subject_jobs_follow_raw_capabilities": True,
@@ -154,6 +176,8 @@ def build(manifest: dict) -> dict:
             "response_evidence_failure_does_not_block_graphics_or_relations": True,
             "development_taint_does_not_delete_corpus_identity": True,
             "historical_reproduction_finding_does_not_block_safe_materialization": True,
+            "producer_output_is_not_admitted_without_required_independent_court": True,
+            "work_order_implementation_paths_are_canonical_and_machine_readable": True,
             "no_train_unseen_split_here": True,
             "no_model_training_here": True,
             "no_tessa_conditioning_here": True,

@@ -20,7 +20,7 @@ OUTPUT_SCHEMA = "RealSaS.Truth139MaterializationWorkOrders.v1"
 DENSE_GRAPHICS_IMPLEMENTATION = {
     "producer": "tools/corpus/build_truth139_dense_graphics_gbuffer_v1.py",
     "producer_pending_status": "PASS_DENSE_GRAPHICS_FRONT_SURFACE__VISIBILITY_OCCLUSION_COURT_PENDING",
-    "independent_court": "tools/corpus/validate_truth139_dense_gbuffer_geometry_v1.py",
+    "independent_court": "tools/corpus/validate_truth139_dense_graphics_geometry_v1.py",
     "required_court_status": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_DENSE_GPU_GBUFFER",
 }
 VISIBILITY_OCCLUSION_IMPLEMENTATION = {

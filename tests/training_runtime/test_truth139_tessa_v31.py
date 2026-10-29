@@ -81,7 +81,7 @@ def test_canonical_teacher_sequence_roundtrips_through_free_run_mesh_decoder():
     faces = np.asarray([[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]], dtype=np.int64)
     sequence = build_teacher_asset_sequence_v1(vertices, faces, cfg=codec)
     decoded = decode_generated_topology_v1(sequence.token_ids, config=cfg)
-    assert decoded.status == "PASS_GRAMMAR_AND_MESH_DECODE"
+    assert decoded.status == "PASS_CANONICAL_TESSA_SEQUENCE_CODEC"
     assert len(decoded.faces) == len(faces)
     assert decoded.component_count == 1
     assert np.all(decoded.vertices_normalized >= -0.5)

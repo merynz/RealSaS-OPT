@@ -1,0 +1,84 @@
+{
+  "schema": "RealSaS.Truth139GeometryTeacherContract.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__FULL_SOURCE_SURFACE_TEACHER_AND_REBINDING_COURT_REQUIRED",
+  "purpose": "PRESERVE_EXACT_FULL_SOURCE_GEOMETRY_AND_TOPOLOGY_EVIDENCE_IN_ADDITION_TO_IMAGE_DERIVED_FSTAR_WITHOUT_PRETENDING_OPEN_OR_NONMANIFOLD_CHARACTER_MESHES_HAVE_A_GLOBALLY_VALID_SDF",
+  "authority_separation": {
+    "image_derived_fstar": "OBSERVATION_DERIVED_BOUNDED_FIELD_USED_BY_THE_CURRENT_IRIS_V3_1_LANE",
+    "source_surface_teacher": "PRIVILEGED_TRAINING_TARGET_AND_AUDIT_EVIDENCE_FROM_THE_EXACT_SOURCE_MESH",
+    "topology_teacher": "EXACT_SOURCE_TRIANGLE_CONNECTIVITY_AS_GENERIC_CORPUS_TRUTH__MODEL_SPECIFIC_PROJECTION_COMES_LATER",
+    "global_watertight_sdf_claimed": false,
+    "mesh_winding_is_global_inside_outside_authority": false
+  },
+  "required_inputs": [
+    "EXACT_STAGE47_ADMITTED_REST_GEOMETRY",
+    "IMPORTED_SOURCE_SCENE_SNAPSHOT_V2"
+  ],
+  "required_mesh_facts": [
+    "VERTEX_AND_FACE_COUNTS",
+    "SOURCE_AND_CANONICAL_BOUNDS",
+    "NONDEGENERATE_FACE_MASK",
+    "FACE_AREA",
+    "FACE_NORMAL_SOURCE_WORLD",
+    "FACE_NORMAL_CANONICAL",
+    "UNIQUE_EDGE_INDEX",
+    "EDGE_FACE_INCIDENCE_COUNT",
+    "BOUNDARY_EDGE_MASK",
+    "NONMANIFOLD_EDGE_MASK",
+    "CONNECTED_COMPONENT_IDS"
+  ],
+  "required_surface_samples": {
+    "policy": "DETERMINISTIC_COMPONENT_AWARE_AREA_STRATIFIED",
+    "default_maximum_samples": 131072,
+    "required_fields": [
+      "triangle_id",
+      "barycentric",
+      "surface_xyz_source_world",
+      "surface_xyz_canonical",
+      "normal_source_world",
+      "normal_canonical",
+      "face_area_source_world",
+      "component_id"
+    ],
+    "tiny_components_must_not_be_silently_lost": true,
+    "subject_specific_sampling_hacks_forbidden": true
+  },
+  "local_orientation_probes": {
+    "enabled": true,
+    "semantics": "LOCAL_TWO_SIDED_NORMAL_OFFSET_ONLY__NOT_GLOBAL_INSIDE_OUTSIDE_OR_SDF_SIGN",
+    "offsets_relative_to_bbox_diagonal": [0.0005, 0.002, 0.01],
+    "required": [
+      "surface_point",
+      "plus_normal_probe",
+      "minus_normal_probe",
+      "offset_distance"
+    ]
+  },
+  "independent_courts": {
+    "full_source_geometry_rebinding": {
+      "builder": "tools/corpus/validate_truth139_geometry_teacher_v1.py",
+      "required_status": "PASS_GEOMETRY_TEACHER_REBINDS_SOURCE_MESH_AND_TRANSFORM",
+      "recomputes": [
+        "SOURCE_TO_CANONICAL_VERTEX_TRANSFORM",
+        "FACE_AREA_AND_NORMALS",
+        "EDGE_INCIDENCE_BOUNDARY_NONMANIFOLD",
+        "CONNECTED_COMPONENTS",
+        "SURFACE_POINT_FROM_TRIANGLE_AND_BARYCENTRIC",
+        "LOCAL_NORMAL_PROBES"
+      ]
+    },
+    "dense_front_surface_raster": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_DENSE_GPU_GBUFFER",
+    "graphics_cross_view_visibility": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_VISIBILITY_OCCLUSION_TEACHER",
+    "fstar_numpy_torch_parity_required": true,
+    "fstar_certified_exterior_sign_court_required": true
+  },
+  "gates": {
+    "nonfinite_geometry_forbidden": true,
+    "all_faces_degenerate_forbidden": true,
+    "invalid_face_indices_forbidden": true,
+    "global_sdf_labels_from_unqualified_mesh_winding_forbidden": true,
+    "missing_full_surface_teacher_may_not_be_called_dense_geometry_truth": true,
+    "geometry_truth_admission_before_rebinding_court_forbidden": true,
+    "qualification_minted": false
+  }
+}

@@ -1,0 +1,190 @@
+name: truth139-corpus-audit-closure
+
+on:
+  push:
+    branches: [truth139-platform-generalization-v1]
+    paths:
+      - canonical/TRUTH139_CORPUS_AUDIT_REQUEST_V1.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth139-corpus-audit-closure
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 120
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      RCLONE_REMOTE: ${{ vars.REALSAS_RCLONE_DRIVE_REMOTE || 'gdrive' }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate finite audit request
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          from pathlib import Path
+          row=json.loads(Path('canonical/TRUTH139_CORPUS_AUDIT_REQUEST_V1.json').read_text())
+          assert row['schema']=='RealSaS.Truth139CorpusAuditRequest.v1'
+          assert row['enabled'] is True
+          assert int(row['revision']) >= 1
+          assert row['hydrate_exact_audit_closure'] is True
+          assert row['render_allowed'] is False
+          assert row['training_allowed'] is False
+          assert row['split_allowed'] is False
+          assert row['qualification_minted'] is False
+          PY
+          test -n "$RCLONE_REMOTE"
+          rclone listremotes | grep -Fx "${RCLONE_REMOTE}:"
+
+      - name: Create run context and locate exact seal metadata parent
+        id: context
+        run: |
+          set -euo pipefail
+          RUN_ROOT="$AUTHORITY_ROOT/truth139/corpus_audit_runs/${GITHUB_RUN_ID}"
+          CLOSURE_ROOT="$AUTHORITY_ROOT/truth139/exact_audit_closure_v1"
+          mkdir -p "$RUN_ROOT" "$CLOSURE_ROOT"
+          echo "run_root=$RUN_ROOT" >> "$GITHUB_OUTPUT"
+          echo "closure_root=$CLOSURE_ROOT" >> "$GITHUB_OUTPUT"
+          export RUN_ROOT CLOSURE_ROOT
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          from tools.corpus import run_truth139_sealed_raw_audit_v1 as seal
+
+          roots=[]
+          seen=set()
+          for base in (Path('/home/monster/realsas_authority'), Path('/home/monster')):
+              if not base.exists():
+                  continue
+              for material in base.glob('**/manifest/CORPUS_SEAL_MATERIAL.txt'):
+                  root=material.parent.parent.resolve()
+                  if root in seen:
+                      continue
+                  seen.add(root)
+                  try:
+                      seal.verify_seal(root)
+                  except Exception:
+                      continue
+                  roots.append(root)
+          if not roots:
+              raise SystemExit('TRUTH139_EXACT_SEAL_METADATA_ROOT_NOT_FOUND')
+          roots=sorted(roots,key=lambda p:str(p))
+          run_root=Path(os.environ['RUN_ROOT'])
+          context={
+              'schema':'RealSaS.Truth139CorpusAuditRunContext.v1',
+              'github_run_id':os.environ['GITHUB_RUN_ID'],
+              'git_commit_sha':os.environ['GITHUB_SHA'],
+              'exact_seal_copy_count':len(roots),
+              'metadata_root':str(roots[0]),
+              'all_exact_seal_roots':[str(p) for p in roots],
+              'closure_root':os.environ['CLOSURE_ROOT'],
+              'render_performed':False,
+              'training_performed':False,
+              'split_created':False,
+              'qualification_minted':False,
+          }
+          (run_root/'RUN_CONTEXT.json').write_text(json.dumps(context,sort_keys=True,indent=2)+'\n')
+          with (run_root/'METADATA_ROOT.txt').open('w') as f:
+              f.write(str(roots[0])+'\n')
+          print(json.dumps({'exact_seal_copy_count':len(roots),'metadata_root':str(roots[0]),'closure_root':os.environ['CLOSURE_ROOT']},sort_keys=True))
+          PY
+
+      - name: Hydrate exact October-4 Truth139 audit byte closure
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          CLOSURE_ROOT="${{ steps.context.outputs.closure_root }}"
+          METADATA_ROOT="$(cat "$RUN_ROOT/METADATA_ROOT.txt")"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/corpus/hydrate_truth139_audit_closure_v1.py \
+            --metadata-root "$METADATA_ROOT" \
+            --destination "$CLOSURE_ROOT" \
+            --rclone-remote "$RCLONE_REMOTE" \
+            --receipt "$RUN_ROOT/HYDRATION_RECEIPT.json"
+
+      - name: Run sealed raw capability audit V2
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          CLOSURE_ROOT="${{ steps.context.outputs.closure_root }}"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/corpus/run_truth139_sealed_raw_audit_v2.py \
+            --raw-root "$CLOSURE_ROOT" \
+            --fit8-selection canonical/FIT8_DIVERSITY_SELECTION_V1.json \
+            --output "$RUN_ROOT/SEALED_RAW_AUDIT_V2.json"
+
+      - name: Reproduce historical 139 census independently
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/corpus/validate_truth139_historical_reproduction_v1.py \
+            --audit "$RUN_ROOT/SEALED_RAW_AUDIT_V2.json" \
+            --output "$RUN_ROOT/HISTORICAL_REPRODUCTION_COURT.json"
+
+      - name: Build capability-aware 139 corpus manifest
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/corpus/build_truth139_corpus_manifest_v2.py \
+            --sealed-raw-audit-v2 "$RUN_ROOT/SEALED_RAW_AUDIT_V2.json" \
+            --historical-reproduction "$RUN_ROOT/HISTORICAL_REPRODUCTION_COURT.json" \
+            --output "$RUN_ROOT/TRUTH139_CORPUS_MANIFEST_V2.json"
+
+      - name: Seal corpus-audit receipt
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          export RUN_ROOT
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])
+          names=[
+              'RUN_CONTEXT.json','HYDRATION_RECEIPT.json','SEALED_RAW_AUDIT_V2.json',
+              'HISTORICAL_REPRODUCTION_COURT.json','TRUTH139_CORPUS_MANIFEST_V2.json'
+          ]
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for chunk in iter(lambda:f.read(4*1024*1024),b''):
+                      h.update(chunk)
+              return h.hexdigest()
+          docs={name:json.loads((root/name).read_text()) for name in names}
+          manifest=docs['TRUTH139_CORPUS_MANIFEST_V2.json']
+          receipt={
+              'schema':'RealSaS.Truth139CorpusAuditClosureReceipt.v1',
+              'status':'PASS_TRUTH139_RAW_CORPUS_MANIFEST_READY__HEAVY_TRUTH_MATERIALIZATION_PENDING',
+              'github_run_id':os.environ['GITHUB_RUN_ID'],
+              'git_commit_sha':os.environ['GITHUB_SHA'],
+              'artifacts':{name:{'sha256':sha(root/name)} for name in names},
+              'subject_count':manifest['corpus']['subject_count'],
+              'capability_counts':manifest['corpus']['capability_counts'],
+              'development_or_regression_tainted_subject_count':manifest['corpus']['development_or_regression_tainted_subject_count'],
+              'clean_full_family_raw_candidate_count':manifest['corpus']['clean_full_family_raw_candidate_count'],
+              'corpus_manifest_identity_sha256':manifest['corpus_manifest_identity_sha256'],
+              'next_gate':'MATERIALIZE_HEAVY_TRUTH_WITH_RECORDED_EXTERNAL_WORKER_NOTEBOOK',
+              'render_performed':False,
+              'training_performed':False,
+              'split_created':False,
+              'qualification_minted':False,
+          }
+          receipt['receipt_identity_sha256']=hashlib.sha256(json.dumps(receipt,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+          (root/'AUDIT_CLOSURE_RECEIPT.json').write_text(json.dumps(receipt,sort_keys=True,indent=2)+'\n')
+          print(json.dumps({k:receipt[k] for k in ('status','subject_count','development_or_regression_tainted_subject_count','clean_full_family_raw_candidate_count','corpus_manifest_identity_sha256','receipt_identity_sha256')},sort_keys=True))
+          PY
+
+      - name: Preserve finite audit outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: truth139-corpus-audit-closure-${{ github.run_id }}
+          path: ${{ steps.context.outputs.run_root }}
+          if-no-files-found: error
+          retention-days: 30

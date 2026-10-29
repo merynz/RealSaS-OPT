@@ -1,0 +1,168 @@
+{
+  "schema": "RealSaS.Truth139GraphicsLayerDecompositionTeacherContract.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__LAYER_PEEL_AND_ANONYMOUS_COMPONENT_MASK_TRUTH_REQUIRED_BEFORE_LAYER_AWARE_GRAPHICS_TRAINING",
+  "purpose": "TEACH_EDITABLE_LAYER_AND_MASK_STRUCTURE_WITH_DETERMINISTIC_SURFACE_RENDER_ORDER_AND_SOURCE_AUTHORING_EVIDENCE_WITHOUT_A_FIXED_HUMANOID_TAXONOMY",
+  "research_basis": {
+    "BUNRAKU_LESSON": "ORDERED_RGBA_LAYERS_WITH_HIDDEN_REGION_COMPLETION_AND_JOINT_CROSS_LAYER_REASONING_ARE_STRONGER_THAN_A_FLAT_VISIBLE_IMAGE_TARGET",
+    "STDGEN_PLUS_PLUS_LESSON": "PEELING_OR_MASKING_OUTER_STRUCTURE_AND_SUPERVISING_INNER_STRUCTURE_EXPLICITLY_TEACHES_OCCLUDED_CONTENT",
+    "REALSAS_ADAPTATION": "SEPARATE_EXACT_LOCAL_DEPTH_PEEL_TRUTH_FROM_ANONYMOUS_SOURCE_AUTHORED_COMPONENT_PARTITION_EVIDENCE__DO_NOT_IMPORT_HUMANOID_PART_NAMES"
+  },
+  "parent_domain": "IRIS_GRAPHICS",
+  "required_inputs": [
+    "EXACT_ADMITTED_REST_GEOMETRY_AND_FACES",
+    "EXACT_CAMERA_BUNDLE",
+    "DENSE_GRAPHICS_TEACHER",
+    "COMPLETE_CPU_RAY_STACK_OR_BOUNDED_GPU_K_HIT_STACK_WITH_OVERFLOW_TYPED_UNKNOWN"
+  ],
+  "optional_but_high_value_inputs": [
+    "ANONYMOUS_SOURCE_FACE_OWNER_BINDING",
+    "SOURCE_FACE_MATERIAL_BINDING",
+    "EXACT_SOURCE_UV_AND_TEXTURE_BYTES",
+    "QUALIFIED_SOURCE_MATERIAL_EVALUATOR_WITH_ALPHA"
+  ],
+  "teacher_families": {
+    "K_HIT_GEOMETRIC_PEEL_STACK": {
+      "required": true,
+      "per_view_pixel_fields": [
+        "HIT_COUNT_LOWER_BOUND",
+        "STACK_COMPLETE",
+        "DEPTH_TIE",
+        "PER_HIT_TRIANGLE_ID",
+        "PER_HIT_BARYCENTRIC",
+        "PER_HIT_DEPTH"
+      ],
+      "rule": "A_BOUNDED_GPU_STACK_WITH_ALL_K_SLOTS_FILLED_IS_TRUNCATED_OR_UNKNOWN_UNLESS_AN_INDEPENDENT_COMPLETE_ORACLE_PROVES_COMPLETENESS"
+    },
+    "DEPTH_PEEL_MASKS": {
+      "required": true,
+      "definition": "MASK_K_IDENTIFIES_PIXELS_WITH_A_VALID_KTH_ORDERED_SURFACE_HIT",
+      "important_limitation": "K_IS_A_LOCAL_RAY_DEPTH_SLOT_NOT_A_GLOBALLY_COHERENT_DRAWABLE_LAYER_ID",
+      "uses": [
+        "VISIBLE_VS_HIDDEN_SUPPORT",
+        "OUTER_LAYER_REMOVAL_SUPERVISION",
+        "LOCAL_FRONT_BEHIND_RELATIONS"
+      ],
+      "mask_is_semantic_part_label": false
+    },
+    "ANONYMOUS_SOURCE_AUTHORED_COMPONENT_MASKS": {
+      "required_when_face_owner_binding_available": true,
+      "builder": "tools/corpus/build_truth139_source_component_masks_v1.py",
+      "court": "tools/corpus/validate_truth139_source_component_masks_v1.py",
+      "identity_scope": "SUBJECT_LOCAL_PERMUTATION_INVARIANT",
+      "required_per_component_per_view": [
+        "VISIBLE_PIXEL_SUPPORT",
+        "ANY_DEPTH_PIXEL_SUPPORT_WITHIN_MEASURED_K_PREFIX",
+        "HIDDEN_ONLY_PIXEL_SUPPORT_WITHIN_MEASURED_K_PREFIX",
+        "DEPTH_SLOT_OCCUPANCY_COUNTS"
+      ],
+      "truth_claim": "THE_SOURCE_SCENE_AUTHORED_THESE_FACES_UNDER_THE_SAME_ANONYMOUS_COMPONENT_BINDING",
+      "not_claimed": [
+        "THIS_COMPONENT_IS_A_HUMAN_NAMED_PART",
+        "THIS_COMPONENT_ID_IS_STABLE_ACROSS_SUBJECTS",
+        "THIS_SOURCE_COMPONENT_IS_ALWAYS_THE_OPTIMAL_PRODUCT_DRAWABLE_PARTITION"
+      ],
+      "student_policy": "CONSUME_AS_UNORDERED_PARTITION_OR_PAIRWISE_SAME_COMPONENT_SUPERVISION__NEVER_AS_A_CROSS_SUBJECT_CLASS_ID"
+    },
+    "HIDDEN_SURFACE_RGBA": {
+      "required_when_exact_material_evaluator_available": true,
+      "required_fields": [
+        "PER_HIT_STRAIGHT_LINEAR_RGBA",
+        "PER_HIT_RGBA_VALID",
+        "PER_HIT_SOURCE_BINDING_PROVENANCE"
+      ],
+      "rule": "MISSING_OR_AMBIGUOUS_MATERIAL_EVALUATION_IS_ABSTAIN__NEVER_INPAINTED_AND_RELABELED_AS_TEACHER_TRUTH"
+    },
+    "PEELED_COMPOSITES": {
+      "required_when_exact_per_hit_RGBA_available": true,
+      "definition": "COMPOSITE_AFTER_REMOVING_THE_FIRST_N_ORDERED_CONTRIBUTORS",
+      "uses": [
+        "STDGEN_STYLE_OUTER_LAYER_MASKING_SUPERVISION",
+        "HIDDEN_REGION_COMPLETION_TARGETS",
+        "RENDERER_CONSEQUENCE_COURT"
+      ]
+    },
+    "DRAWABLE_AFFINITY_EVIDENCE": {
+      "required": false,
+      "sources": [
+        "SOURCE_AUTHORED_COMPONENT_SAME_DIFFERENT",
+        "EXACT_MESH_CONNECTEDNESS",
+        "MATERIAL_CONTINUITY_AS_PRIVILEGED_EVIDENCE",
+        "CROSS_VIEW_SURFACE_CONTINUATION",
+        "RESPONSE_COHERENCE_OR_DISCONTINUITY"
+      ],
+      "rule": "SOURCE_OWNER_OR_MATERIAL_IDS_MAY_SUPERVISE_ANONYMOUS_AFFINITY_OR_AUDIT_BOUNDARIES_BUT_MAY_NOT_BECOME_PRODUCT_SEMANTIC_CLASS_LABELS"
+    }
+  },
+  "layer_identity_policy": {
+    "global_named_layers_required": false,
+    "local_depth_order_is_truth": true,
+    "source_authored_component_membership_is_subject_local_truth": true,
+    "source_authored_component_is_optimal_product_drawable_authority": false,
+    "same_drawable_affinity_may_be_learned_from_multiple_primitive_evidence_families": true,
+    "fixed_humanoid_layer_order_forbidden": true,
+    "source_object_id_as_cross_subject_class_forbidden": true,
+    "material_id_as_runtime_layer_id_forbidden": true
+  },
+  "future_product_compatibility": {
+    "one_or_two_source_view_product_supported": true,
+    "constructed_internal_views_may_provide_proposals": true,
+    "constructed_internal_views_may_not_mint_source_RGBA_authority": true,
+    "layer_completion_at_inference_may_be_learned": true,
+    "teacher_hidden_RGBA_must_still_come_from_exact_source_evidence_when_called_truth": true
+  },
+  "independent_courts": {
+    "geometric_prefix": {
+      "required": true,
+      "builder": "tools/corpus/validate_truth139_graphics_layer_peel_v1.py",
+      "oracle": "models/iris/truth/graphics_oracle_v1.py::measure_orthographic_ray_stack_v1",
+      "checks": [
+        "GPU_K_HIT_PREFIX_EQUALS_CPU_COMPLETE_RAY_STACK_PREFIX",
+        "DEPTH_ORDER",
+        "TRIANGLE_ID",
+        "BARYCENTRIC",
+        "TIE_AND_OVERFLOW_TYPING"
+      ]
+    },
+    "anonymous_component_masks": {
+      "required_when_face_owner_binding_available": true,
+      "builder": "tools/corpus/validate_truth139_source_component_masks_v1.py",
+      "checks": [
+        "PER_HIT_COMPONENT_ID_EQUALS_FACE_OWNER_BINDING_OF_HIT_TRIANGLE",
+        "VISIBLE_MASK_EQUALS_SLOT_ZERO_COMPONENT_SUPPORT",
+        "ANY_DEPTH_MASK_EQUALS_COMPONENT_SUPPORT_ANYWHERE_IN_MEASURED_K_PREFIX",
+        "HIDDEN_ONLY_MASK_EQUALS_ANY_DEPTH_MINUS_VISIBLE"
+      ]
+    },
+    "renderer_composite": {
+      "required_when_RGBA_is_materialized": true,
+      "checks": [
+        "SOURCE_OVER_COMPOSITION_RECONSTRUCTS_QUALIFIED_SOURCE_RENDER_WITHIN_DECLARED_TOLERANCE",
+        "PEEL_N_COMPOSITE_MATCHES_RENDERER_INTERVENTION_WHEN_AVAILABLE"
+      ]
+    }
+  },
+  "sampling_and_storage": {
+    "dense_K_hit_geometry_preferred_on_external_gpu_worker": true,
+    "default_K": 8,
+    "CPU_complete_oracle_used_for_deterministic_stratified_court_samples": true,
+    "component_masks_store_sparse_pixel_indices": true,
+    "do_not_expand_dense_boolean_masks_when_sparse_representation_is_lossless": true
+  },
+  "training_projection": {
+    "truth139_A_scale_control_consumes_layer_truth": false,
+    "truth_rich_projection_may_consume_depth_masks_anonymous_component_partition_and_exact_hidden_targets": true,
+    "component_ids_must_be_permutation_invariant_or_converted_to_pairwise_affinity": true,
+    "layer_truth_may_supervise_graphics_and_relations": true,
+    "layer_truth_may_condition_TESSA_only_if_preregistered": true,
+    "teacher_source_names_material_names_or_owner_ids_may_not_enter_student_forward": true
+  },
+  "gates": {
+    "semantic_inpainting_may_not_be_called_teacher_truth": true,
+    "bounded_stack_may_not_be_called_complete_without_overflow_proof": true,
+    "RGBA_layer_truth_requires_exact_material_provenance": true,
+    "missing_hidden_RGBA_may_not_be_zero_filled": true,
+    "anonymous_source_component_ids_may_not_be_treated_as_cross_subject_labels": true,
+    "qualification_minted": false
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "schema": "RealSaS.Truth139AxisTeacherContract.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__AXIS_RIG_TEACHER_REQUIRED__TRAINING_NOT_AUTHORIZED",
+  "purpose": "MATERIALIZE_ANONYMOUS_MULTI_SUBJECT_RIG_STRUCTURE_AND_JOINT_GEOMETRY_TRUTH_FOR_AXIS_FROM_THE_SHARED_TRUTH139_SUBSTRATE_WITHOUT_BAKING_SOURCE_BONE_NAMES_OR_CURRENT_FIT1_FREEZE_ASSUMPTIONS_INTO_CORPUS_TRUTH",
+  "model_boundary": {
+    "current_runtime_model": "AXIS_V5_4_1",
+    "current_runtime_authority": "HARD_CAUSAL_PARENT_TREE_PLUS_ORDERED_DISCRETE_XYZ256",
+    "important_training_scope_note": "CURRENT_V5_4_1_CODE_FREEZES_THE_SOLVED_V5_3_CAUSAL_TREE_AND_TRAINS_ONLY_DISCRETE_XYZ_DELTA__TRUTH139_MUST_BE_RICH_ENOUGH_FOR_A_FUTURE_FRESH_MULTI_SUBJECT_TREE_AND_GEOMETRY_TRAINER",
+    "compiler_role": "VALIDATE_AND_MATERIALIZE_AXIS_REQUIRED_TREE__NO_PARENT_RESELECTION_ON_THE_CURRENT_V5_4_1_PATH"
+  },
+  "teacher_source": {
+    "primary": "EXACT_IMPORTED_SOURCE_SKELETON_AND_SKIN_SUPPORT_IN_THE_SAME_REST_FRAME_AS_SHARED_SUBSTRATE",
+    "historical_target_builder_reference": "experiments/geppetto_reference_strength_fullstack_v1/mechanical_core_target_v1.py",
+    "source_names_are_semantic_truth": false,
+    "source_row_indices_are_runtime_identity": false,
+    "source_skin_is_learner_input": false
+  },
+  "required_raw_and_imported_inputs": [
+    "EXACT_SOURCE_SKIN_AND_SKELETON",
+    "INVERSE_BIND_MATRICES",
+    "REST_WORLD_SOURCE_JOINT_TRANSFORMS",
+    "SOURCE_PARENT_GRAPH",
+    "DEFORM_OR_EQUIVALENT_CONTROL_ELIGIBILITY_WHEN_AVAILABLE",
+    "SOURCE_SKIN_WEIGHTS_FOR_SUPPORT_MASS_ONLY",
+    "SOURCE_WORLD_TO_CANONICAL_TRANSFORM",
+    "SHARED_ADMITTED_REST_GEOMETRY_LINEAGE"
+  ],
+  "target_construction": {
+    "selection_rule": "SKIN_SUPPORTED_DEFORM_CONTROLS_PLUS_STRUCTURALLY_REQUIRED_BRIDGES__ASSEMBLY_ONLY_UNSUPPORTED_ROOT_CHAINS_AND_HELPER_ONLY_LEAVES_EXCLUDED_WHEN_DETERMINISTICALLY_IDENTIFIABLE",
+    "required_outputs": [
+      "JOINT_COUNT",
+      "JOINT_POSITIONS_SOURCE_WORLD",
+      "JOINT_POSITIONS_CANONICAL",
+      "PARENT_INDICES",
+      "ROOT_MASK",
+      "PARENT_BEFORE_CHILD_CONTENT_SERIALIZATION",
+      "SOURCE_INDICES_PROVENANCE_ONLY",
+      "SKIN_MASS_DIAGNOSTIC",
+      "REST_FRAME_PER_JOINT_WHEN_EXACTLY_AVAILABLE"
+    ],
+    "anonymous_target": true,
+    "fixed_humanoid_joint_taxonomy": false,
+    "fixed_source_control_count": false,
+    "family_specific_bone_name_rules": false,
+    "single_root_is_not_a_corpus_axiom": true,
+    "rule": "A_SUBJECT_WITH_MULTIPLE_VALID_ROOTS_OR_UNSUPPORTED_CONTROL_STRUCTURE_MUST_BE_TYPED_AS_SUCH_OR_EXCLUDED_BY_A_DECLARED_AXIS_EXPERIMENT_PROJECTION__THE_CORPUS_MAY_NOT_SILENTLY_REPAIR_IT_TO_MATCH_HISTORICAL_KNIGHT"
+  },
+  "coordinate_contract": {
+    "source_world_position_authority": "REST_WORLD_SOURCE_MATRIX_TRANSLATION_OR_EQUIVALENT_EXACT_IMPORTED_LOCUS",
+    "canonical_position": "SOURCE_WORLD_POSITION_TRANSFORMED_BY_THE_SHARED_SUBJECT_SOURCE_WORLD_TO_CANONICAL_MATRIX",
+    "axis_v541_training_projection": "CANONICAL_POSITION_QUANTIZED_TO_NEAREST_OF_256_ORDERED_BINS_ONLY_WHEN_THE_EXPERIMENT_USES_THE_V5_4_1_COORDINATE_OBJECTIVE",
+    "corpus_stores_pre_quantized_continuous_truth": true,
+    "rule": "QUANTIZATION_IS_A_MODEL_PROJECTION_NOT_CORPUS_AUTHORITY"
+  },
+  "integrity_courts": {
+    "required": [
+      "FINITE_HOMOGENEOUS_REST_TRANSFORMS",
+      "ACYCLIC_PARENT_GRAPH",
+      "NO_SELF_PARENT",
+      "JOINT_REFERENCE_RANGE_VALID",
+      "INVERSE_BIND_MATRIX_CARDINALITY_AND_FINITE_CHECK",
+      "SOURCE_SKIN_ROW_NUMERIC_INTEGRITY_BEFORE_USING_SKIN_MASS",
+      "CONTENT_SERIALIZATION_IS_EXACT_PERMUTATION",
+      "SERIALIZED_PARENT_ALWAYS_PRECEDES_CHILD",
+      "SOURCE_WORLD_CANONICAL_ROUNDTRIP_WITHIN_DECLARED_TOLERANCE"
+    ],
+    "source_skin_support_mass_rule": "SKIN_MASS_MAY_SELECT_OR_DIAGNOSE_TEACHER_CONTROLS_BUT_DOES_NOT_BECOME_AXIS_OUTPUT_OR_STUDENT_INPUT",
+    "failed_integrity_is_typed_failure_not_repaired_label": true
+  },
+  "pose_diversity": {
+    "shared_contract": "canonical/TRUTH139_SHARED_TEACHER_SUBSTRATE_V1.json",
+    "optional_for_initial_rest_rig_training": true,
+    "recommended_for_generalization_courts": true,
+    "uses": [
+      "VERIFY_RIG_CONTROLS_TARGET_REAL_DEFORMATION_ACROSS_NATIVE_CLIPS",
+      "MEASURE_POSE_COVERAGE_AND_DEGENERATE_REST_ONLY_BIAS",
+      "BUILD_FUTURE_POSE_CONDITIONED_AXIS_EXPERIMENTS_WITHOUT_REBUILDING_CORPUS"
+    ],
+    "rule": "POSE_TRUTH_DOES_NOT_CHANGE_REST_RIG_PARENT_AUTHORITY"
+  },
+  "training_projection": {
+    "learner_input": "EXPERIMENT_DECLARED_SHARED_SCENE_OR_RIGGING_SURFACE_EVIDENCE_ONLY",
+    "teacher_only_targets": [
+      "JOINT_COUNT",
+      "JOINT_POSITIONS",
+      "ROOT_STRUCTURE",
+      "PARENT_STRUCTURE"
+    ],
+    "teacher_feedback_at_free_running_unseen_evaluation": false,
+    "source_skeleton_or_skin_may_not_enter_forward_as_HIDDEN_PRIVILEGED_INPUT": true
+  },
+  "evaluation": {
+    "required_unseen_metrics": [
+      "COUNT_ACCURACY_OR_CARDINALITY_ERROR",
+      "MATCHED_JOINT_POSITION_MAE_NORMALIZED",
+      "MATCHED_JOINT_POSITION_P95_NORMALIZED",
+      "ROOT_STRUCTURE_ACCURACY",
+      "PARENT_EDGE_ACCURACY",
+      "ILLEGAL_PARENT_COUNT",
+      "UNSUPPORTED_JOINT_COUNT",
+      "COMPILER_QUALIFICATION_RATE"
+    ],
+    "lineage_disjoint_unseen_required": true,
+    "source_names_may_not_be_used_FOR_MATCHING": true
+  },
+  "gates": {
+    "axis_training_from_raw_unchecked_gltf_skeleton_forbidden": true,
+    "axis_truth_with_source_names_as_labels_forbidden": true,
+    "current_v541_coord_only_training_may_not_be_misreported_as_fresh_tree_generalization": true,
+    "teacher_skin_as_axis_forward_input_forbidden_unless_new_experiment_is_preregistered": true,
+    "qualification_minted": false
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "schema": "RealSaS.Truth139DenseAppearanceAuthorityContract.v1",
+  "date": "2026-10-29",
+  "status": "LEGACY_COMPATIBILITY_SUBCONTRACT__SUPERSEDED_AS_PARENT_DOMAIN_BY_TRUTH139_DENSE_GRAPHICS_TEACHER_V1",
+  "purpose": "PRESERVE_THE_HISTORICAL_DENSE_SOURCE_COLOR_AND_FRONT_SURFACE_CONTRACT_FOR_LINEAGE_COMPATIBILITY_WITHOUT_CLAIMING_THAT_APPEARANCE_OR_CAA_IS_THE_GLOBAL_GRAPHICS_AUTHORITY",
+  "canonical_successor": "canonical/TRUTH139_DENSE_GRAPHICS_TEACHER_V1.json",
+  "layer_successor": "canonical/TRUTH139_GRAPHICS_LAYER_DECOMPOSITION_TEACHER_V1.json",
+  "relations_successor": "canonical/TRUTH139_RELATIONS_TEACHER_V1.json",
+  "authority_boundary": {
+    "graphics_is_parent_domain": true,
+    "legacy_caa_is_global_graphics_authority": false,
+    "source_color_authority_is_partial": true,
+    "source_color_authority_requires_actual_source_support": true,
+    "constructed_or_learned_pixels_are_source_authority": false,
+    "missing_or_unobserved_color_is_zero": false,
+    "rule": "OBSERVED_SOURCE_SAMPLE_WINS_ONLY_WHERE_EXACT_SURFACE_ADDRESSING_AND_SOURCE_SUPPORT_ESTABLISH_THAT_THE_REAL_SOURCE_OBSERVATION_MEASURES_THE_SURFACE"
+  },
+  "historical_problem_statement_retained": {
+    "existing_stage48_measured_rays_per_subject_default": 8,
+    "existing_stage48_role": "HIGH_FIDELITY_RENDERER_INTERVENTION_AND_SOURCE_EQUIVALENCE_WITNESS",
+    "existing_stage48_is_sufficient_as_dense_graphics_training_corpus": false,
+    "reason": "EIGHT_EXPENSIVE_MEASURED_RAYS_ARE_AN_ORACLE_WITNESS_NOT_DENSE_COVERAGE"
+  },
+  "compatibility_scope": {
+    "front_surface_gbuffer_builder": "tools/corpus/build_truth139_dense_appearance_gbuffer_v1.py",
+    "front_surface_geometry_court": "tools/corpus/validate_truth139_dense_gbuffer_geometry_v1.py",
+    "historical_schema_and_filename_retained": true,
+    "renaming_existing_artifacts_required": false,
+    "new_training_or_manifest_code_should_reference_this_as_parent_authority": false
+  },
+  "preserved_truth_families": {
+    "VISIBLE_FRONT_SURFACE_GBUFFER": {
+      "required_channels": [
+        "foreground",
+        "source_linear_rgba",
+        "depth",
+        "face_index",
+        "barycentric",
+        "surface_xyz_source_world",
+        "surface_xyz_canonical",
+        "normal_source_world",
+        "normal_canonical"
+      ],
+      "role": "FRONT_SURFACE_AND_SOURCE_COLOR_EVIDENCE_SUBSET_OF_GRAPHICS"
+    },
+    "SOURCE_COLOR_PROVENANCE": {
+      "required_states": [
+        "SOURCE_OBSERVATION_SUPPORTED",
+        "SOURCE_MATERIAL_EXACTLY_EVALUABLE_BUT_UNOBSERVED",
+        "UNOBSERVED_OR_UNRESOLVED"
+      ],
+      "rule": "ONLY_EXACT_SOURCE_EVIDENCE_MAY_MINT_SOURCE_COLOR_TRUTH"
+    },
+    "ALPHA_AND_CONTOUR": {
+      "role": "GRAPHICS_EVIDENCE_NOT_POSTPROCESS_METADATA",
+      "unobserved_surface_is_distinct_from_transparent_source_sample": true
+    }
+  },
+  "moved_to_graphics_parent_contract": [
+    "VISIBILITY",
+    "OCCLUSION",
+    "CROSS_VIEW_SUPPORT",
+    "OBSERVATION_PROVENANCE",
+    "SOURCE_VS_CONSTRUCTED_VIEW_AUTHORITY",
+    "MULTIHIT_GEOMETRIC_EVIDENCE"
+  ],
+  "moved_to_layer_decomposition_contract": [
+    "K_HIT_PEEL_STACK",
+    "PEEL_MASKS",
+    "HIDDEN_SURFACE_RGBA_WHEN_EXACTLY_EVALUABLE",
+    "PEELED_COMPOSITES"
+  ],
+  "role_of_stage48": {
+    "retain_existing_stage48": true,
+    "role": "EXPENSIVE_RENDERER_EQUIVALENCE_AND_INTERVENTION_WITNESS",
+    "is_dense_graphics_coverage": false,
+    "is_global_appearance_authority": false
+  },
+  "forbidden_interpretations": [
+    "CAA_OR_APPEARANCE_IS_THE_PARENT_GRAPHICS_DOMAIN",
+    "ALL_INTERNAL_VIEWS_HAVE_SOURCE_AUTHORITY",
+    "UNOBSERVED_COLOR_IS_ZERO",
+    "AMBIGUOUS_MULTIHIT_RGBA_MAY_BE_IMPUTED_AS_TEACHER_TRUTH",
+    "MATERIAL_OR_OWNER_ID_IS_A_PRODUCT_SEMANTIC_LABEL"
+  ],
+  "gates": {
+    "new_graphics_training_must_use_successor_graphics_contract": true,
+    "stage48_sparse_rows_alone_may_not_authorize_graphics_training": true,
+    "legacy_artifact_may_remain_readable_for_lineage": true,
+    "qualification_minted": false
+  }
+}

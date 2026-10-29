@@ -1,0 +1,173 @@
+{
+  "schema": "RealSaS.Truth139DenseGraphicsTeacherContract.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__MUST_MATERIALIZE_AND_PASS_INDEPENDENT_COURTS_BEFORE_GRAPHICS_TRAINING",
+  "purpose": "BUILD_A_REAL_TEACHER_CORPUS_FOR_GRAPHICS_EVIDENCE_RATHER_THAN_TREATING_RGBA_AS_A_SINGLE_LATENT_PREDICTION_TARGET",
+  "scope": {
+    "graphics_is_the_parent_domain": true,
+    "legacy_caa_is_not_a_global_graphics_authority": true,
+    "source_color_is_one_graphics_evidence_family": true,
+    "graphics_families": [
+      "SURFACE_ADDRESSING",
+      "SOURCE_COLOR_ALPHA",
+      "DEPTH_AND_ORIENTATION",
+      "VISIBILITY",
+      "OCCLUSION",
+      "CROSS_VIEW_SUPPORT",
+      "CONTOUR_AND_EDGE_COVERAGE",
+      "OBSERVATION_PROVENANCE"
+    ]
+  },
+  "observation_provenance": {
+    "allowed": [
+      "SOURCE_OBSERVATION",
+      "CONSTRUCTED_OBSERVATION",
+      "LEARNED_FILL"
+    ],
+    "truth139_controlled_8view_default": "SOURCE_OBSERVATION",
+    "source_observation_is_direct_source_authority": true,
+    "constructed_observation_is_direct_source_authority": false,
+    "learned_fill_is_direct_source_authority": false,
+    "rule": "A_FUTURE_1_OR_2_VIEW_PRODUCT_MAY_CONSTRUCT_INTERNAL_VIEWS_WITHOUT_CHANGING_THE_SCHEMA__CONSTRUCTED_VIEWS_MUST_NEVER_BE_RELABELED_AS_SOURCE_OBSERVATIONS"
+  },
+  "required_inputs_per_subject": [
+    "EXACT_SEALED_PRIMARY_SOURCE_AND_EXTERNAL_DEPENDENCIES",
+    "ADMITTED_8VIEW_1024_RGBA_OBSERVATIONS",
+    "ADMITTED_ALPHA_OR_FOREGROUND_MASKS",
+    "EXACT_CAMERA_PROJECTION_BUNDLE",
+    "IMPORTED_SOURCE_SCENE_SNAPSHOT_V2",
+    "EXACT_STAGE47_ADMITTED_REST_GEOMETRY",
+    "SOURCE_MATERIAL_EVALUATOR_OR_EXACT_BASE_COLOR_ALPHA_BINDING_WHERE_AVAILABLE"
+  ],
+  "dense_front_surface_teacher": {
+    "resolution": 1024,
+    "view_count": 8,
+    "required_per_visible_pixel": [
+      "pixel_linear_index",
+      "triangle_id",
+      "barycentric_uv",
+      "surface_xyz_source_world",
+      "surface_xyz_canonical",
+      "depth_source_camera",
+      "normal_source_world",
+      "normal_canonical",
+      "front_facing_signed_cosine",
+      "view_facing_confidence",
+      "source_rgba_linear",
+      "source_foreground",
+      "direct_source_rgba_valid",
+      "alpha_boundary",
+      "observation_provenance"
+    ],
+    "teacher_only_fields": [
+      "face_owner_privileged",
+      "face_material_privileged",
+      "triangle_uv",
+      "triangle_uv_valid",
+      "source_texture_reference"
+    ],
+    "student_semantic_part_taxonomy": false
+  },
+  "visibility_occlusion_teacher": {
+    "surface_sample_source": "DETERMINISTIC_STRATIFIED_SAMPLES_FROM_DENSE_FRONT_SURFACE_ROWS",
+    "default_samples_per_source_view": 8192,
+    "all_target_views_evaluated": true,
+    "required_per_sample": [
+      "source_view_index",
+      "source_surface_row",
+      "surface_xyz_canonical",
+      "surface_xyz_source_world",
+      "target_visibility_class",
+      "target_projected_pixel_linear_index",
+      "target_front_triangle_id",
+      "target_depth_gap",
+      "target_view_facing_confidence",
+      "target_source_support",
+      "cross_view_same_surface_match"
+    ],
+    "visibility_classes": {
+      "0": "OUTSIDE_VIEW",
+      "1": "VISIBLE_SAME_SURFACE",
+      "2": "OCCLUDED_BY_FRONT_SURFACE",
+      "3": "PROJECTED_TO_BACKGROUND_OR_UNSUPPORTED",
+      "4": "RASTER_GEOMETRY_DISAGREEMENT_OR_AMBIGUOUS"
+    },
+    "occlusion_rule": "A_SURFACE_SAMPLE_IS_OCCLUDED_ONLY_WHEN_IT_IS_IN_FRAME_AND_THE_TARGET_FRONT_SURFACE_IS_STRICTLY_CLOSER_THAN_THE_SAMPLE_BY_THE_DECLARED_DEPTH_EPSILON",
+    "visible_rule": "VISIBLE_REQUIRES_A_NEARBY_TARGET_FRONT_RASTER_SAMPLE_RECONSTRUCTING_THE_SAME_CANONICAL_SURFACE_POINT_WITHIN_THE_DECLARED_SURFACE_TOLERANCE",
+    "no_binary_visibility_from_alpha_only": true,
+    "no_semantic_occluder_label": true,
+    "student_relation_target_may_use_surface_addresses_not_material_or_owner_ids": true
+  },
+  "cross_view_correspondence": {
+    "same_surface_definition": "CANONICAL_SURFACE_POINT_RECONSTRUCTION_WITHIN_DECLARED_TOLERANCE",
+    "required_outputs": [
+      "supporting_view_mask",
+      "support_count",
+      "per_view_visibility_class",
+      "per_view_facing_confidence"
+    ],
+    "rule": "VIEW_IDENTITY_MUST_SURVIVE_IN_TEACHER_TRUTH_EVEN_IF_A_LATER_MODEL_CHOOSES_TO_AGGREGATE_VIEWS"
+  },
+  "contour_alpha_teacher": {
+    "required": [
+      "source_alpha",
+      "foreground",
+      "alpha_boundary",
+      "silhouette_boundary_band",
+      "edge_coverage"
+    ],
+    "rule": "TRANSPARENT_BACKGROUND__PARTIAL_COVERAGE__AND_UNOBSERVED_SURFACE_ARE_DISTINCT_STATES"
+  },
+  "source_appearance_totality": {
+    "direct_observation_rule": "SOURCE_OBSERVATION_COLOR_WINS_ONLY_WHERE_THE_SOURCE_OBSERVATION_ACTUALLY_SUPPORTS_THE_SURFACE_ADDRESS",
+    "unobserved_source_material_rule": "AN_UNOBSERVED_SURFACE_MAY_HAVE_TEACHER_COLOR_ONLY_WHEN_SOURCE_BYTES_AND_THE_QUALIFIED_MATERIAL_EVALUATOR_DETERMINE_IT",
+    "missing_color_is_never_zero_filled": true,
+    "constructed_view_color_is_not_reLABELED_AS_SOURCE": true
+  },
+  "multihit_policy": {
+    "dense_first_hit_is_required": true,
+    "complete_multihit_stacks_for_every_1024_PIXEL_ARE_NOT_CLAIMED": true,
+    "exact_complete_ray_stack_oracle": "models/iris/truth/graphics_oracle_v1.py::measure_orthographic_ray_stack_v1",
+    "exact_multihit_measurements_are_required_for_deterministic_STRATIFIED_ORACLE_SAMPLES": true,
+    "ambiguous_or_depth_tied_rays": "ABSTAIN_OR_TEACHER_ONLY",
+    "bounded_gpu_hit_depth_may_not_be_called_complete_without_an_OVERFLOW_OR_INDEPENDENT_ORACLE_COURT": true
+  },
+  "independent_courts": {
+    "front_surface_geometry": {
+      "builder": "tools/corpus/validate_truth139_dense_gbuffer_geometry_v1.py",
+      "required_status": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_DENSE_GPU_GBUFFER"
+    },
+    "visibility_occlusion": {
+      "builder": "tools/corpus/validate_truth139_visibility_occlusion_teacher_v1.py",
+      "required_status": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_VISIBILITY_OCCLUSION_TEACHER"
+    },
+    "stage48_renderer_intervention": {
+      "required": true,
+      "role": "SOURCE_RENDERER_EQUIVALENCE__ALPHA_FACTORING__AMBIGUOUS_MULTIHIT_WITNESS"
+    }
+  },
+  "sampling_and_storage": {
+    "full_dense_front_surface_gbuffers_preserved": true,
+    "visibility_teacher_is_deterministic_stratified_not_outcome_mined": true,
+    "visibility_teacher_default_samples_per_source_view": 8192,
+    "sampling_seed": "SHA256_SUBJECT_ID_AND_SOURCE_VIEW",
+    "subject_specific_sampling_hacks_forbidden": true,
+    "training_may_project_OR_SUBSAMPLE_AFTER_TEACHER_SEAL": true,
+    "training_projection_may_not_redefine_teacher_truth": true
+  },
+  "future_product_compatibility": {
+    "research_input_today": "8_SOURCE_OBSERVATIONS",
+    "likely_product_input": "1_OR_2_SOURCE_OBSERVATIONS_PLUS_INTERNAL_CONSTRUCTED_VIEWS",
+    "schema_requirement": "REAL_AND_CONSTRUCTED_VIEW_PROVENANCE_MUST_REMAIN_DISTINGUISHABLE_END_TO_END",
+    "reason": "THE_TEACHER_CORPUS_MUST_NOT_ENCODE_THE_FALSE_ASSUMPTION_THAT_ALL_FUTURE_INTERNAL_VIEWS_ARE_USER_SOURCE_AUTHORITY"
+  },
+  "gates": {
+    "graphics_training_before_dense_front_surface_teacher_forbidden": true,
+    "graphics_training_before_visibility_occlusion_teacher_forbidden": true,
+    "graphics_training_before_front_surface_geometry_court_forbidden": true,
+    "graphics_training_before_visibility_occlusion_court_forbidden": true,
+    "graphics_training_from_stage48_sparse_rows_only_forbidden": true,
+    "missing_truth_may_not_be_silently_imputed": true,
+    "qualification_minted": false
+  }
+}

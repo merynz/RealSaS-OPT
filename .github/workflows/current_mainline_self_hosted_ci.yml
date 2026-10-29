@@ -47,9 +47,6 @@ concurrency:
 
 jobs:
   fast-current-mainline:
-    # Standard hosted compute is intentionally enabled only while this repository
-    # is public. If visibility is changed to private during a pause/trip, the job
-    # is skipped rather than consuming private-repository Actions minutes.
     if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -97,6 +94,22 @@ jobs:
             tests/repository/test_v9_pretraining_artifact_operator_v1.py \
             tests/repository/test_knight_skin_parent_host_inventory_v1.py \
             tests/repository/test_platform_subject_artifact_inventory_v1.py
+      - name: Truth139 Graphics CPU contracts
+        run: |
+          python -m pytest -q \
+            tests/corpus/test_truth139_dense_graphics_gbuffer_v1.py \
+            tests/corpus/test_truth139_dense_graphics_geometry_court_v1.py \
+            tests/corpus/test_truth139_visibility_occlusion_teacher_v1.py \
+            tests/corpus/test_truth139_visibility_occlusion_teacher_v2.py \
+            tests/corpus/test_truth139_visibility_occlusion_court_v1.py \
+            tests/corpus/test_truth139_materialization_work_orders_v1.py \
+            tests/corpus/test_truth139_materialization_receipt_v1.py \
+            tests/corpus/test_truth139_graphics_materialization_subject_v1.py \
+            tests/corpus/test_truth139_graphics_materialization_pilot_v1.py \
+            tests/corpus/test_truth139_graphics_apparatus_manifest_v1.py \
+            tests/corpus/test_truth139_response_independent_surface_packet_v1.py \
+            tests/corpus/test_truth139_graphics_materialization_packet_v1.py \
+            tests/corpus/test_truth139_graphics_pilot_raw_packet_v1.py
       - name: Validate V2 DAG structure and implementation closure
         run: |
           python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
@@ -134,6 +147,15 @@ jobs:
           echo 'private_repo_guard=true'
           echo 'pinned_environment=true'
           echo 'repository_governance=true'
+          echo 'truth139_graphics_cpu_contracts=true'
+          echo 'truth139_materialization_bindings=true'
+          echo 'truth139_materialization_receipts=true'
+          echo 'truth139_graphics_subject_worker_plan=true'
+          echo 'truth139_graphics_pilot_selection=true'
+          echo 'truth139_source_apparatus=true'
+          echo 'truth139_response_independent_surface_packet=true'
+          echo 'truth139_graphics_prepared_packet_worker=true'
+          echo 'truth139_graphics_raw_packet=true'
           echo 'v2_dag=true'
           echo 'native_graphics_player_built=true'
           echo 'source_scene_blender_smoke=SEPARATE_PATH_SCOPED_GATE'

@@ -1,0 +1,211 @@
+{
+  "schema": "RealSaS.Truth139CorpusPreparationContract.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__RAW_AUDIT_REQUIRED__TRAINING_NOT_AUTHORIZED",
+  "purpose": "MATERIALIZE_A_REAL_CAPABILITY_AWARE_TEACHER_CORPUS_FOR_IRIS_GEOMETRY_GRAPHICS_RELATIONS_AND_TESSA_TOPOLOGY_BEFORE_ANY_TRUTH139_TRAINING",
+  "current_critical_path": ["IRIS", "TESSA"],
+  "raw_corpus": {
+    "status_document": "canonical/TRUTH_CORPUS_V1_STATUS_20261004.md",
+    "corpus_root_sha256": "2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab",
+    "manifest_sha256": "3799b170d4138dbc0447d2d3456cc9ad5ba7e185fddace6d6ce2de0d0a2adc00",
+    "file_ledger_sha256": "1524edeb99e2383e2d7516bf9680275289976d57efa3fac3a4b01f78426979b4",
+    "historical_gltf_file_count": 395,
+    "historical_rigged_animated_gltf_file_count": 143,
+    "historical_deduplicated_subject_count": 139,
+    "historical_counts_are_targets_for_reproduction_not_permission_to_skip_audit": true
+  },
+  "historical_raw_capability_vocabulary": {
+    "rule": "THE_OCTOBER_4_AUDIT_KEYS_ARE_PRESERVED_FOR_REPRODUCTION_COMPATIBILITY__THEY_ARE_NOT_CANONICAL_MODEL_DOMAIN_NAMES",
+    "STAGE47_MECHANICS": "CURRENT_INTERPRETATION__SOURCE_SCENE_SUPPORT_FOR_IRIS_RESPONSE_EVIDENCE_AND_EXACT_REST_TEACHER_GEOMETRY",
+    "STAGE48_APPEARANCE_PRESENTATION": "CURRENT_INTERPRETATION__EXPENSIVE_RENDERER_INTERVENTION_AND_SOURCE_EQUIVALENCE_WITNESS",
+    "renaming_these_keys_inside_the_sealed_raw_audit": false
+  },
+  "development_exclusion": {
+    "fit8_selection": "canonical/FIT8_DIVERSITY_SELECTION_V1.json",
+    "match_policy": [
+      "EXACT_SOURCE_SHA256",
+      "SAME_CREATOR_PACK_AND_NORMALIZED_ASSET_STEM",
+      "EXACT_RAW_SUBJECT_IDENTITY_SIGNATURE_WHEN_AVAILABLE"
+    ],
+    "knight_regression_inventory": "canonical/PRODUCT_NEAREST_KNIGHT_WITNESS_V1.json",
+    "rule": "DEVELOPMENT_OR_REGRESSION_SUBJECTS_REMAIN_IN_CORPUS_IDENTITY_BUT_MAY_NOT_ENTER_TRUTH139_TRAIN_OR_SEALED_UNSEEN"
+  },
+  "canonical_teacher_families": {
+    "IRIS_GEOMETRY": {
+      "contract": "canonical/TRUTH139_GEOMETRY_TEACHER_V1.json",
+      "required": [
+        "IMAGE_DERIVED_FSTAR",
+        "SURFACE_XYZ",
+        "DEPTH",
+        "SILHOUETTE_BOUNDARY",
+        "TEACHER_ONLY_SURFACE_NORMALS"
+      ]
+    },
+    "IRIS_GRAPHICS": {
+      "contract": "canonical/TRUTH139_DENSE_GRAPHICS_TEACHER_V1.json",
+      "front_surface_builder": "tools/corpus/build_truth139_dense_appearance_gbuffer_v1.py",
+      "graphics_builder": "tools/corpus/build_truth139_dense_graphics_teacher_v1.py",
+      "front_surface_court": "tools/corpus/validate_truth139_dense_gbuffer_geometry_v1.py",
+      "visibility_occlusion_court": "tools/corpus/validate_truth139_visibility_occlusion_teacher_v1.py",
+      "required": [
+        "SOURCE_RGBA_WITH_EXPLICIT_PROVENANCE",
+        "TRIANGLE_BARYCENTRIC_SURFACE_ADDRESS",
+        "SOURCE_AND_CANONICAL_SURFACE_XYZ",
+        "DEPTH_AND_NORMAL",
+        "VISIBILITY_AND_OCCLUSION",
+        "CROSS_VIEW_SAME_SURFACE_SUPPORT",
+        "ALPHA_AND_CONTOUR"
+      ],
+      "graphics_is_parent_domain": true,
+      "source_color_is_global_graphics_authority": false,
+      "legacy_dense_appearance_contract": "COMPATIBILITY_SUBCONTRACT_ONLY__NOT_GLOBAL_GRAPHICS_AUTHORITY",
+      "stage48_sparse_rows_are_dense_graphics_training_truth": false
+    },
+    "GRAPHICS_LAYER_DECOMPOSITION": {
+      "contract": "canonical/TRUTH139_GRAPHICS_LAYER_DECOMPOSITION_TEACHER_V1.json",
+      "builder": "tools/corpus/build_truth139_graphics_layer_peel_v1.py",
+      "court": "tools/corpus/validate_truth139_graphics_layer_peel_v1.py",
+      "required_for_139_a_scale_control": false,
+      "required_for_layer_aware_truth_rich_projection": true,
+      "truth": [
+        "K_HIT_GEOMETRIC_PEEL_STACK",
+        "PEEL_MASKS",
+        "DEPTH_TIE_AND_OVERFLOW_TYPING"
+      ],
+      "hidden_rgba": "ONLY_WHEN_EXACT_SOURCE_MATERIAL_EVALUATOR_DETERMINES_IT__OTHERWISE_ABSTAIN",
+      "semantic_body_part_layers_used": false
+    },
+    "IRIS_RELATIONS": {
+      "contract": "canonical/TRUTH139_RELATIONS_TEACHER_V1.json",
+      "builder": "tools/corpus/build_truth139_relations_teacher_v1.py",
+      "court": "tools/corpus/validate_truth139_relations_teacher_v1.py",
+      "required": [
+        "SAME_CANONICAL_SURFACE_ACROSS_VIEWS",
+        "FRONT_BEHIND_ON_SHARED_CAMERA_RAY",
+        "LOCAL_SURFACE_ADJACENCY"
+      ],
+      "optional_when_exactly_measured": ["RESPONSE_COHERENCE_OR_DISCONTINUITY"],
+      "semantic_part_taxonomy_used": false,
+      "absence_of_measured_relation_is_negative_label": false
+    },
+    "IRIS_RESPONSE_EVIDENCE": {
+      "contract": "canonical/TRUTH139_IRIS_RESPONSE_EVIDENCE_TEACHER_V1.json",
+      "historical_raw_capability_alias": "STAGE47_MECHANICS",
+      "is_axis_rig_truth": false,
+      "is_mira_skin_truth": false
+    },
+    "TESSA_TOPOLOGY": {
+      "requires": ["EXACT_NORMALIZED_REST_VERTICES", "TRIANGLE_FACES", "COMPONENTS", "TOTAL_FACE_COVERAGE"],
+      "teacher_is_target_only": true
+    }
+  },
+  "observation_provenance": {
+    "truth139_controlled_research_views": "SOURCE_OBSERVATION",
+    "future_product_may_use_constructed_views": true,
+    "constructed_view_may_inherit_source_authority": false,
+    "missing_or_inferred_graphics_may_not_be_reLABELED_as_source": true
+  },
+  "fit8_truth_reuse": {
+    "observation_admission": {
+      "builder": "tools/corpus/iris_observation_admission_v1.py",
+      "schema": "RealSaS.IrisBindObservationAdmission.v1"
+    },
+    "geometry_shard": {
+      "builder": "tools/training/prepare_iris_cohort_v1.py",
+      "schema": "RealSaS.SharedIrisCohortShards.v1"
+    },
+    "stage47_historical_outputs_are_response_evidence": ["RealSaS.TeacherCalibrationArrays.v2"],
+    "stage48_renderer_witness_outputs": [
+      "RealSaS.PresentationResponseTruthCandidate.v1",
+      "RealSaS.PresentationResponseArrays.v1",
+      "RealSaS.SourceRayAppearanceMeasurementCandidate.v1"
+    ],
+    "rule": "REUSE_EXACT_MEASUREMENT_AND_BINDING_LOGIC__DO_NOT_REUSE_SPARSE_STAGE48_ONLY_RGBA_AS_A_DENSE_GRAPHICS_CORPUS"
+  },
+  "iris_response_shortcut_court": {
+    "historical_implementation_name_contains_mechanics": true,
+    "semantic_role": "PRIMITIVE_SOURCE_DEFORMATION_RESPONSE_EVIDENCE",
+    "objective": "FIXED_SCALE_STUDENT_T_LOCATION_ONLY__LOG1P__DF3",
+    "train_only_scale": true,
+    "required_unseen_comparators": [
+      "REAL_SCENE_CARRIER",
+      "SHUFFLED_OTHER_UNSEEN_SCENE_CARRIER",
+      "TRAIN_MEDIAN_CONSTANT_PRIOR"
+    ],
+    "required_metrics": [
+      "LOG1P_MAE",
+      "RAW_MAE",
+      "SPEARMAN",
+      "TAIL_RAW_MAE",
+      "FIXED_SCALE_STUDENT_T_NLL"
+    ],
+    "nll_alone_may_not_mint_generalization": true
+  },
+  "platform_apparatus": {
+    "execution_plan": "canonical/TRUTH_CALIBRATION_EXECUTION_PLAN_V3.json",
+    "entry_stage": "01_SOURCE_BYTES_SEALED",
+    "historical_target_stage": "48_PRESENTATION_RESPONSE_TRUTH",
+    "bootstrap_executor": "tools/platform_cohort_bootstrap_v1.py",
+    "campaign_completion_is_not_training_authority": true,
+    "failed_subjects_remain_in_denominator": true,
+    "subject_specific_code_forbidden": true
+  },
+  "execution_boundary": {
+    "self_hosted": [
+      "EXACT_BYTE_HYDRATION_AND_RAW_AUDIT",
+      "HISTORICAL_139_REPRODUCTION",
+      "CAPABILITY_AND_LINEAGE_MANIFESTS",
+      "CPU_INDEPENDENT_COURTS_AND_FINAL_RECEIPTS"
+    ],
+    "external_notebook_or_gpu_worker": [
+      "8X1024_FRONT_SURFACE_RASTER",
+      "DENSE_GRAPHICS_AND_VISIBILITY_OCCLUSION",
+      "K_HIT_LAYER_PEEL",
+      "DINO_FSTAR_SHARDS",
+      "SOURCE_RESPONSE_INTERVENTIONS",
+      "STAGE48_RENDERER_INTERVENTION"
+    ],
+    "platform_remains_authority": true
+  },
+  "ordering": [
+    "RAW_CAPABILITY_AUDIT_AND_HISTORICAL_139_REPRODUCTION",
+    "CAPABILITY_AWARE_CORPUS_MANIFEST",
+    "COMMON_8VIEW_SOURCE_IMPORT_AND_OBSERVATION_ADMISSION",
+    "IMAGE_DERIVED_FSTAR_AND_GEOMETRY_TEACHER",
+    "SOURCE_RESPONSE_EVIDENCE_WHERE_CAPABLE",
+    "DENSE_GRAPHICS_FRONT_SURFACE",
+    "VISIBILITY_OCCLUSION_AND_CROSS_VIEW_SUPPORT",
+    "K_HIT_LAYER_PEEL_GEOMETRY",
+    "PRIMITIVE_RELATIONS_TEACHER",
+    "STAGE48_RENDERER_INTERVENTION_WITNESS_WHERE_CAPABLE",
+    "INDEPENDENT_COURTS_FOR_EACH_DERIVED_FAMILY",
+    "DERIVED_TRUTH_ADMISSION",
+    "LEAKAGE_COMPONENT_LEDGER",
+    "TRAIN_UNSEEN_SPLIT_AND_SEAL",
+    "139_A_UNCHANGED_ARCHITECTURE_SCALE_CONTROL",
+    "139_B_TRUTH_RICH_PROJECTION",
+    "V3_2_ARCHITECTURE_CHANGE_ONLY_IF_JUSTIFIED_BY_RESULTS"
+  ],
+  "gates": {
+    "split_before_raw_audit_forbidden": true,
+    "split_before_derived_truth_admission_forbidden": true,
+    "graphics_training_before_dense_graphics_and_required_courts_forbidden": true,
+    "layer_aware_training_before_layer_peel_and_cpu_prefix_court_forbidden": true,
+    "relations_training_before_relations_teacher_and_rebinding_court_forbidden": true,
+    "graphics_training_from_stage48_sparse_rows_only_forbidden": true,
+    "139_a_consuming_truth_rich_layer_or_relation_targets_forbidden": true,
+    "training_before_unseen_seal_forbidden": true,
+    "missing_truth_family_may_not_be_silently_imputed": true,
+    "partial_subject_may_remain_in_corpus_for_other_courts_but_not_in_an_experiment_requiring_its_missing_family": true
+  },
+  "claims": {
+    "raw_audit_complete": false,
+    "corpus_manifest_sealed": false,
+    "dense_graphics_complete": false,
+    "layer_decomposition_complete": false,
+    "relations_complete": false,
+    "tessa_teacher_complete": false,
+    "split_sealed": false,
+    "training_authorized": false
+  }
+}

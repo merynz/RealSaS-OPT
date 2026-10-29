@@ -1,0 +1,19 @@
+{
+  "schema": "RealSaS.Truth139StructuralAuditRequest.v2",
+  "date": "2026-10-29",
+  "revision": 3,
+  "enabled": true,
+  "purpose": "FINISH_EXACT_BYTE_STRUCTURAL_CAPABILITY_AUDIT_AND_MEASURE_TRUE_139_DIVERSITY_WITHOUT_BLOCKING_ON_ARCHIVAL_WEB_PAGE_BYTES",
+  "historical_web_snapshot_required_for_structural_pass": false,
+  "historical_web_snapshot_binding_must_be_preserved": true,
+  "raw_asset_hash_authority_required": true,
+  "external_dependency_hash_authority_required": true,
+  "build_historical_reproduction_court": true,
+  "build_capability_aware_manifest": true,
+  "build_structural_diversity_census": true,
+  "build_rich_truth_materialization_work_orders": true,
+  "render_allowed": false,
+  "training_allowed": false,
+  "split_allowed": false,
+  "qualification_minted": false
+}

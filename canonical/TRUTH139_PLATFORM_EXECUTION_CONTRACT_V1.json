@@ -1,0 +1,177 @@
+{
+  "schema": "RealSaS.Truth139PlatformExecutionContract.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__NO_PLATFORM_UUIDS_MATERIALIZED",
+  "authority": "PLATFORM",
+  "preregistration": "canonical/TRUTH139_GENERALIZATION_PREREG_V1.json",
+  "corpus_status": "canonical/TRUTH_CORPUS_V1_STATUS_20261004.md",
+  "rules": {
+    "invent_platform_uuids": false,
+    "notebook_owned_lineage": false,
+    "repository_json_mints_scientific_pass": false,
+    "component_completion_mints_product_pass": false,
+    "unseen_failure_may_be_dropped_from_denominator": false,
+    "unseen_membership_may_change_after_training_starts": false,
+    "checkpoint_shopping": false
+  },
+  "phase_order": [
+    "A_CORPUS_LINEAGE_AND_SPLIT_SEAL",
+    "B_TRAIN_PLATFORM_TRUTH_CAMPAIGN",
+    "C_TRAIN_IRIS_EXTERNAL_WORKER",
+    "D_TRAIN_TESSA_CONDITIONING_AND_EXTERNAL_WORKER",
+    "E_UNSEEN_PLATFORM_TRUTH_CAMPAIGN",
+    "F_UNSEEN_IRIS_AND_TESSA_EVALUATION",
+    "G_UNSEEN_PRODUCT_MESH_CONSEQUENCE_CAMPAIGN",
+    "H_FINAL_EXPERIMENT_RECEIPT"
+  ],
+  "phases": {
+    "A_CORPUS_LINEAGE_AND_SPLIT_SEAL": {
+      "input": {
+        "sealed_corpus_bundle": "RealSaS_Truth_Corpus_v1_20261004_2f15bf846944.zip",
+        "corpus_root_sha256": "2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab",
+        "expected_admitted_subject_count": 139
+      },
+      "required_outputs": [
+        "RealSaS.TruthCorpusLineageLedger.v1",
+        "RealSaS.LineageSafeSubjectSplit.v1"
+      ],
+      "split_builder": "tools/training/build_lineage_safe_subject_split_v1.py",
+      "may_use_pack_level_split": false,
+      "must_finish_before_any_optimizer_step": true,
+      "platform_effect": "CREATE_ONE_EXPERIMENT_AND_SEAL_SPLIT_IDENTITY__DO_NOT_INVENT_IDS_IN_REPOSITORY"
+    },
+    "B_TRAIN_PLATFORM_TRUTH_CAMPAIGN": {
+      "membership": "SPLIT.TRAIN_SUBJECTS_ONLY",
+      "compiler_plan": "canonical/TRUTH_CALIBRATION_EXECUTION_PLAN_V3.json",
+      "entry_stage_id": "01_SOURCE_BYTES_SEALED",
+      "target_stage_id": "48_PRESENTATION_RESPONSE_TRUTH",
+      "reference_operator": "tools/truth_foundry/platform_presentation_truth_operator_v1.py",
+      "platform_owned": [
+        "Subjects",
+        "sealed SubjectInputs",
+        "EngineRelease",
+        "Campaign",
+        "ResearchAttempts",
+        "stage scheduling",
+        "artifacts",
+        "PASS_FAIL_ABSTAIN courts"
+      ],
+      "required_handoff": "EXACT_ATTEMPT_BOUND_STAGE48_OUTPUTS_PLUS_OBSERVATION_AND_GEOMETRY_PARENTS",
+      "unseen_members_present": false
+    },
+    "C_TRAIN_IRIS_EXTERNAL_WORKER": {
+      "membership": "SPLIT.TRAIN_SUBJECTS_ONLY",
+      "preparation": [
+        "BUILD_TRUTH139_PREPARED_SUBJECT_INDEX_FROM_PLATFORM_ATTEMPTS",
+        "DERIVE_VISIBLE_SOURCE_NORMAL_TRUTH_FROM_QUALIFIED_FRONT_HITS",
+        "BUILD_PHYSICALLY_SEPARATE_TRAIN_AND_UNSEEN_MANIFESTS",
+        "BUILD_SPLIT_BOUND_IRIS_TRAINING_RECIPE",
+        "BUILD_TRAIN_ONLY_MECHANICS_STATISTICS"
+      ],
+      "worker": "models/iris/v31/truth139_trainer_v1.py",
+      "selection_rule": "FIXED_FINAL_STAGE_ENDPOINT__NO_CHECKPOINT_SHOPPING",
+      "global_optimizer_update_semantics": "MEAN_GRADIENT_OVER_ALL_TRAIN_SUBJECTS_PER_GLOBAL_STEP",
+      "required_outputs": [
+        "RealSaS.IRISV31Truth139TrainingResult.v1",
+        "RealSaS.IRISV31Truth139Checkpoint.v1",
+        "RealSaS.IRISV31Truth139FoundationReceipt.v1",
+        "RealSaS.IRISV31Truth139MechanicsTrainStatistics.v1"
+      ],
+      "import_rule": "IMPORT_EXACT_BYTES_AND_SHA256_INTO_EXPERIMENT_LINEAGE__TRAINING_LOSS_CANNOT_QUALIFY_MODEL",
+      "unseen_mounted": false
+    },
+    "D_TRAIN_TESSA_CONDITIONING_AND_EXTERNAL_WORKER": {
+      "membership": "SPLIT.TRAIN_SUBJECTS_ONLY",
+      "iris_dependency": "EXACT_FINAL_IRIS_CHECKPOINT_HASH_FROM_PHASE_C",
+      "conditioning_builder": "tools/training/materialize_truth139_tessa_conditioning_v1.py --scope TRAIN",
+      "teacher_target_builder": "tools/training/build_truth139_tessa_teacher_mesh_v1.py",
+      "teacher_manifest_builder": "tools/training/build_truth139_tessa_teacher_manifests_v1.py",
+      "recipe_builder": "tools/training/build_truth139_tessa_recipe_v1.py",
+      "worker": "models/tessa/v31/truth139_trainer_v1.py",
+      "architecture_id": "RealSaS.TESSA.DualStreamStructuralizer.v3_1",
+      "attention_semantics": "ROLLING_CAUSAL_SELF_INCLUSIVE_V31",
+      "presentation_stream_present": false,
+      "iris_trainable": false,
+      "conditioning_cache_contains_teacher_topology": false,
+      "selection_rule": "FIXED_FINAL_ENDPOINT__NO_CHECKPOINT_SHOPPING",
+      "required_outputs": [
+        "RealSaS.Truth139TESSATrainingResult.v1",
+        "RealSaS.Truth139TESSACheckpoint.v1"
+      ],
+      "import_rule": "IMPORT_EXACT_BYTES_AND_SHA256_INTO_EXPERIMENT_LINEAGE__TEACHER_FORCED_LOSS_CANNOT_QUALIFY_TOPOLOGY"
+    },
+    "E_UNSEEN_PLATFORM_TRUTH_CAMPAIGN": {
+      "membership": "SEALED_SPLIT.UNSEEN_SUBJECTS_ONLY",
+      "may_start_before_phase_C_AND_D_CHECKPOINT_HASHES_ARE_SEALED": false,
+      "compiler_plan": "canonical/TRUTH_CALIBRATION_EXECUTION_PLAN_V3.json",
+      "entry_stage_id": "01_SOURCE_BYTES_SEALED",
+      "target_stage_id": "48_PRESENTATION_RESPONSE_TRUTH",
+      "reference_operator": "tools/truth_foundry/platform_presentation_truth_operator_v1.py",
+      "optimizer_updates": false,
+      "checkpoint_selection": false,
+      "required_handoff": "EXACT_ATTEMPT_BOUND_STAGE48_OUTPUTS_PLUS_OBSERVATION_AND_GEOMETRY_PARENTS"
+    },
+    "F_UNSEEN_IRIS_AND_TESSA_EVALUATION": {
+      "membership": "SEALED_SPLIT.UNSEEN_SUBJECTS_ONLY",
+      "iris_evaluator": "models/iris/v31/truth139_unseen_evaluator_v1.py",
+      "tessa_conditioning_builder": "tools/training/materialize_truth139_tessa_conditioning_v1.py --scope UNSEEN",
+      "tessa_evaluator": "models/tessa/v31/truth139_unseen_evaluator_v1.py",
+      "iris_checkpoint": "EXACT_PHASE_C_HASH_ONLY",
+      "tessa_checkpoint": "EXACT_PHASE_D_HASH_ONLY",
+      "optimizer_updates": false,
+      "checkpoint_selection": false,
+      "mechanics_shortcut_courts": [
+        "TRAIN_MEDIAN_PRIOR",
+        "CYCLIC_SHUFFLED_UNSEEN_SCENE"
+      ],
+      "tessa_generation": "TEACHER_BLIND_GRAMMAR_CONSTRAINED_FREE_RUNNING",
+      "tessa_decode": "CANONICAL_TESSA_SEQUENCE_CODEC_V1",
+      "generation_failure_counts_as_unseen_failure": true,
+      "required_outputs": [
+        "RealSaS.IRISV31Truth139UnseenEvaluation.v1",
+        "RealSaS.Truth139TESSAUnseenEvaluation.v1",
+        "RealSaS.Truth139TESSAShapeProposalIndex.v1"
+      ]
+    },
+    "G_UNSEEN_PRODUCT_MESH_CONSEQUENCE_CAMPAIGN": {
+      "membership": "ALL_UNSEEN_SUBJECTS_WITH_FREE_RUNNING_SHAPE_PROPOSAL__FAILURES_REMAIN_IN_GLOBAL_DENOMINATOR",
+      "compiler_plan": "canonical/MAINLINE_EXECUTION_PLAN_V2.json",
+      "target_stage_id": "19_STATIC_CANONICAL_MESH_QUALIFIED",
+      "stable_executor": "compiler/realsas_compiler_services/platform_worker/mesh_executor_v1.py",
+      "shape_schema": "RealSaS.ShapeProposal.v2",
+      "shape_scope": "TRUTH139_STATIC_MESH_CONSEQUENCE_ONLY__MECHANICS_ABSTAIN",
+      "mechanics_promotion_allowed": false,
+      "skin_or_motion_promotion_allowed": false,
+      "canonical_mesh_authority_may_be_minted_only_by_compiler_stage19": true,
+      "tessa_generation_success_alone_counts_as_mesh_pass": false
+    },
+    "H_FINAL_EXPERIMENT_RECEIPT": {
+      "denominator": "ALL_SEALED_UNSEEN_SUBJECTS",
+      "must_include": [
+        "IRIS_MULTI_SUBJECT_GEOMETRY_METRICS",
+        "APPEARANCE_METRICS",
+        "MECHANICS_CONDITIONING_GAINS_AND_SHORTCUT_FAILURES",
+        "TESSA_FREE_RUNNING_FAILURES",
+        "STAGE19_PRODUCT_MESH_PASS_FAIL_ABSTAIN_PER_SUBJECT",
+        "EXACT_IRIS_AND_TESSA_CHECKPOINT_HASHES",
+        "EXACT_SPLIT_IDENTITY",
+        "EXACT_ENGINE_RELEASE_IDENTITIES",
+        "PLATFORM_CAMPAIGN_AND_ATTEMPT_IDS"
+      ],
+      "genericity_threshold_preregistered": false,
+      "truth139_pass_may_be_claimed": false,
+      "product_pass_may_be_claimed": false,
+      "decision_role": "DIRECTIONAL_SAMPLE_COMPLEXITY_AND_ARCHITECTURE_SIGNAL_ONLY"
+    }
+  },
+  "claims": {
+    "platform_experiment_created": false,
+    "platform_campaigns_created": false,
+    "corpus_split_sealed": false,
+    "training_started": false,
+    "unseen_opened": false,
+    "stage19_consequence_executed": false,
+    "scientific_result_available": false,
+    "product_pass": false
+  }
+}

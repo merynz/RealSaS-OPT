@@ -1,6 +1,12 @@
-"""Verified observation -> frozen DINO features and image-derived F* shards."""
+"""Verified observation -> frozen DINO features and image-derived F* shards.
+
+Historical FIT8 remains the default call surface.  Truth139 reuses the exact same observation/F*
+construction through a generic roster plus a preparation-only policy; no training policy or split
+authority is created by this module.
+"""
 from __future__ import annotations
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -11,11 +17,16 @@ from PIL import Image
 import torch
 from models.iris.training.cohort_v1 import file_hash, value_hash, atomic_json,validate_knight_recipe,source_identity
 from models.iris.training.apparatus_v1 import query_pools, certified_ray_pools
+from tools.corpus.prepare_iris_observations_v1 import DEFAULT_ROSTER, load_roster
 from tools.training.iris_exterior_audit_v1 import exterior_scan
 from models.iris.v2.dinov2_foundation_v2 import load_exact_dinov2_s_v2, extract_dinov2_s_patch_map_flat_v2
-from models.iris.v5.source_signed_field_v5 import source_signed_distance_fields_v5, source_signed_field_numpy_v5, source_signed_field_torch_v5
+from models.iris.v5.source_signed_field_v5 import source_signed_distance_fields_v5, source_signed_field_torch_v5
 
 ROOT = Path(__file__).resolve().parents[2]
+FIT8_POLICY_PATH = ROOT/"canonical/FIT8_IRIS_SHARED_TRAINING_POLICY_V1.json"
+TRUTH139_PREPARATION_POLICY_PATH = ROOT/"canonical/TRUTH139_IRIS_SHARD_PREPARATION_POLICY_V1.json"
+PREPARATION_POLICY_SCHEMA = "RealSaS.IrisShardPreparationPolicy.v1"
+
 
 def verify_observations(input_root, row):
     folder = Path(input_root)/row["subject_key"]
@@ -57,10 +68,49 @@ def verify_observations(input_root, row):
                                      "camera_sha256":proof["camera_sha256"],
                                      "views":proof["views"]})
 
-def prepare(input_root, output_root, source_dir, weight_path, policy, device="cuda", persist_root=None):
-    validate_knight_recipe(policy,source_identity(ROOT))
+
+def _validate_preparation_policy(policy, roster_schema):
+    schema=str(policy.get("schema") or "")
+    if roster_schema=="RealSaS.FIT8DiversitySelection.v1":
+        if schema!="RealSaS.SharedIrisTrainingPolicy.v1":
+            raise ValueError("PREPARE_FIT8_POLICY_SCHEMA")
+        validate_knight_recipe(policy,source_identity(ROOT))
+        return "LEGACY_ROSTER_ORDINAL_OFFSET_1000000"
+    if roster_schema!="RealSaS.Truth139ApparatusManifest.v1":
+        raise ValueError("PREPARE_ROSTER_SCHEMA_UNSUPPORTED")
+    if schema!=PREPARATION_POLICY_SCHEMA or policy.get("training_authorized") is not False:
+        raise ValueError("PREPARE_TRUTH139_POLICY_SCHEMA_OR_AUTHORITY")
+    if policy.get("per_subject_seed_semantics")!="SHA256_SUBJECT_ID_LOW32_PLUS_BASE_SEED__ROSTER_ORDER_INDEPENDENT":
+        raise ValueError("PREPARE_TRUTH139_SEED_SEMANTICS")
+    source_policy=FIT8_POLICY_PATH
+    if (policy.get("source_fit8_policy_repo_path")!="canonical/FIT8_IRIS_SHARED_TRAINING_POLICY_V1.json"
+            or policy.get("source_fit8_policy_sha256")!=file_hash(source_policy)):
+        raise ValueError("PREPARE_TRUTH139_SOURCE_POLICY_DRIFT")
+    required=(
+        "seed","near_pool_count","heldout_count","near_zero_band","straddle_pool_count",
+        "straddle_delta","straddle_base_band","replay_global_count","replay_near_count",
+        "heldout_near_count","heldout_straddle_count","silhouette_pool_per_stratum",
+        "source_boundary_band_px","source_background_support_px","silhouette_depth_samples",
+        "silhouette_softmin_tau","pool_rejection_max_draw","pool_progress_draw_interval",
+        "silhouette_pool_seed",
+    )
+    if any(name not in policy for name in required):
+        raise ValueError("PREPARE_TRUTH139_POLICY_FIELD_MISSING")
+    return policy["per_subject_seed_semantics"]
+
+
+def _subject_seed(policy,row,index,seed_semantics):
+    if seed_semantics=="LEGACY_ROSTER_ORDINAL_OFFSET_1000000":
+        return int(policy["seed"])+int(index)*1000000, int(policy["silhouette_pool_seed"])+int(index)*1000000
+    token=int(hashlib.sha256(str(row["subject_key"]).encode()).hexdigest()[:8],16)
+    return (int(policy["seed"])+token)%(2**63-1), (int(policy["silhouette_pool_seed"])+token)%(2**63-1)
+
+
+def prepare(input_root, output_root, source_dir, weight_path, policy, device="cuda", persist_root=None,
+            roster_path=DEFAULT_ROSTER):
+    roster_path,roster,roster_sha=load_roster(roster_path)
+    seed_semantics=_validate_preparation_policy(policy,roster["schema"])
     output_root = Path(output_root); output_root.mkdir(parents=True, exist_ok=True)
-    roster = json.loads((ROOT/"canonical/FIT8_DIVERSITY_SELECTION_V1.json").read_text())
     # All proofs are checked before loading the backbone or creating any shards.
     verified = [verify_observations(input_root, row) for row in roster["selected"]]
     model, authority = load_exact_dinov2_s_v2(source_dir, weight_path, device=device)
@@ -70,7 +120,10 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
         print(f"[PREPARE_BEGIN] {index+1}/{len(verified)} {row['subject_key']} verified_observation={binding[:12]}",flush=True)
         name = row["subject_key"]+".pt"
         path = output_root/name
-        identity = value_hash({"observation_binding":binding, "policy":policy,
+        query_seed,ray_seed=_subject_seed(policy,row,index,seed_semantics)
+        identity = value_hash({"observation_binding":binding, "preparation_policy":policy,
+                               "roster_identity_sha256":roster_sha,"subject_id":row["subject_key"],
+                               "query_seed":query_seed,"ray_seed":ray_seed,"seed_semantics":seed_semantics,
                                "foundation":authority.authority.authority_hash,
                                "preparation_source_sha256":file_hash(__file__),
                                "apparatus_source_sha256":file_hash(ROOT/"models/iris/training/apparatus_v1.py"),
@@ -129,9 +182,9 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
                  "camera_forward":torch.from_numpy(np.asarray([r["forward"] for r in rows],np.float32)),
                  "boundary_pixels":boundary_pixels,
                  "camera_half_extent":torch.from_numpy(cam_half),"resolution":1024}
-        shard.update(query_pools(shard,policy,policy["seed"]+index*1000000,device))
+        shard.update(query_pools(shard,policy,query_seed,device))
         print(f"[PREPARE_QUERIES] {row['subject_key']} near={len(shard['near_points'])} straddle={len(shard['straddle_points'])} heldout={len(shard['heldout_points'])} seconds={time.monotonic()-start:.1f}",flush=True)
-        shard.update(certified_ray_pools(shard,policy,policy["silhouette_pool_seed"]+index*1000000,device))
+        shard.update(certified_ray_pools(shard,policy,ray_seed,device))
         print(f"[PREPARE_RAYS] {row['subject_key']} certified_rays={len(shard['ray_xy'])} strata=32 seconds={time.monotonic()-start:.1f}",flush=True)
         print(f"[PREPARE_R512_BEGIN] {row['subject_key']} source-only census",flush=True)
         shard['source_exterior_census']=exterior_scan(shard,resolution=512,device=device)
@@ -147,6 +200,7 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
                 "observation_binding":binding,"preparation_identity":identity,
                 "fstar_cpu_parity_maximum_abs":parity_error,
                 "source_sha256":row["source"]["sha256"],
+                "query_seed":int(query_seed),"ray_seed":int(ray_seed),"seed_semantics":seed_semantics,
                 "foundation_authority_sha256":authority.authority.authority_hash}
         meta["ray_court"]=shard["ray_court"]
         meta['source_exterior_census']=shard['source_exterior_census']
@@ -165,15 +219,19 @@ def prepare(input_root, output_root, source_dir, weight_path, policy, device="cu
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     manifest = {"schema":"RealSaS.SharedIrisCohortShards.v1","subjects":subjects,
-                "teacher_inputs_in_forward":False,"policy_sha256":value_hash(policy),
+                "subject_count":len(subjects),"teacher_inputs_in_forward":False,"policy_sha256":value_hash(policy),
+                "preparation_policy_schema":policy["schema"],"roster_schema":roster["schema"],
+                "roster_identity_sha256":roster_sha,"seed_semantics":seed_semantics,
                 "preparation_source_sha256":file_hash(__file__),
                 "apparatus_source_sha256":file_hash(ROOT/"models/iris/training/apparatus_v1.py"),
                 "observation_scope":"IRIS_BIND_IMAGE_DERIVED_FSTAR",
-                "full_mechanical_truth_admitted":False,"go_qualification_required":True}
+                "full_mechanical_truth_admitted":False,"training_authorized":False,
+                "go_qualification_required":True}
     atomic_json(output_root/"COHORT_MANIFEST.json",manifest)
     if persist_root:
         atomic_json(Path(persist_root)/"COHORT_MANIFEST.json",manifest)
     return manifest
+
 
 def main():
     p=argparse.ArgumentParser()
@@ -182,12 +240,17 @@ def main():
     p.add_argument("--device",default="cuda")
     p.add_argument("--near-pool-count",type=int)
     p.add_argument("--heldout-count",type=int)
+    p.add_argument("--roster",type=Path,default=DEFAULT_ROSTER)
+    p.add_argument("--policy",type=Path)
     args=p.parse_args()
-    policy=json.loads((ROOT/"canonical/FIT8_IRIS_SHARED_TRAINING_POLICY_V1.json").read_text())
+    _,roster,_=load_roster(args.roster)
+    default_policy=TRUTH139_PREPARATION_POLICY_PATH if roster["schema"]=="RealSaS.Truth139ApparatusManifest.v1" else FIT8_POLICY_PATH
+    policy_path=(args.policy or default_policy).resolve()
+    policy=json.loads(policy_path.read_text())
     if args.near_pool_count:
         policy["near_pool_count"]=args.near_pool_count
     if args.heldout_count:
         policy["heldout_count"]=args.heldout_count
-    prepare(args.input_root,args.output_root,args.source_dir,args.weight_path,policy,args.device)
+    prepare(args.input_root,args.output_root,args.source_dir,args.weight_path,policy,args.device,roster_path=args.roster)
 if __name__=="__main__":
     main()

@@ -108,7 +108,9 @@ jobs:
             tests/corpus/test_truth139_materialization_work_orders_v1.py \
             tests/corpus/test_truth139_materialization_receipt_v1.py \
             tests/corpus/test_truth139_graphics_materialization_subject_v1.py \
-            tests/corpus/test_truth139_graphics_materialization_pilot_v1.py
+            tests/corpus/test_truth139_graphics_materialization_pilot_v1.py \
+            tests/corpus/test_truth139_graphics_apparatus_manifest_v1.py \
+            tests/corpus/test_truth139_response_independent_surface_packet_v1.py
       - name: Validate V2 DAG structure and implementation closure
         run: |
           python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
@@ -151,6 +153,8 @@ jobs:
           echo 'truth139_materialization_receipts=true'
           echo 'truth139_graphics_subject_worker_plan=true'
           echo 'truth139_graphics_pilot_selection=true'
+          echo 'truth139_source_apparatus=true'
+          echo 'truth139_response_independent_surface_packet=true'
           echo 'v2_dag=true'
           echo 'native_graphics_player_built=true'
           echo 'source_scene_blender_smoke=SEPARATE_PATH_SCOPED_GATE'

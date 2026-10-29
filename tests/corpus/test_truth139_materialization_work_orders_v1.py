@@ -97,7 +97,7 @@ def test_graphics_work_orders_bind_canonical_producers_and_independent_courts():
     visibility = canonical["VISIBILITY_OCCLUSION_CROSS_VIEW"]
 
     assert dense["producer"] == "tools/corpus/build_truth139_dense_graphics_gbuffer_v1.py"
-    assert dense["independent_court"] == "tools/corpus/validate_truth139_dense_gbuffer_geometry_v1.py"
+    assert dense["independent_court"] == "tools/corpus/validate_truth139_dense_graphics_geometry_v1.py"
     assert dense["required_court_status"] == "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_DENSE_GPU_GBUFFER"
 
     assert visibility["producer"] == "tools/corpus/build_truth139_visibility_occlusion_teacher_v2.py"

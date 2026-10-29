@@ -56,6 +56,7 @@ def test_work_orders_retain_subjects_and_schedule_capabilities_independently():
     assert result["policy"]["missing_optional_truth_does_not_delete_subject"] is True
     assert result["policy"]["graphics_does_not_depend_on_response_evidence"] is True
     assert result["policy"]["no_tessa_conditioning_here"] is True
+    assert result["policy"]["producer_output_is_not_admitted_without_required_independent_court"] is True
 
     partial = next(row for row in result["subjects"] if row["subject_id"] == "truth139_003")
     assert partial["jobs"]["SOURCE_IMPORT_AND_8VIEW_OBSERVATION"]["enabled"] is True
@@ -87,6 +88,26 @@ def test_dense_graphics_requires_observation_but_not_response_evidence():
     assert no_response["jobs"]["IRIS_RESPONSE_EVIDENCE"]["enabled"] is False
     assert no_response["jobs"]["DENSE_GRAPHICS_FRONT_SURFACE"]["enabled"] is True
     assert no_response["jobs"]["VISIBILITY_OCCLUSION_CROSS_VIEW"]["enabled"] is True
+
+
+def test_graphics_work_orders_bind_canonical_producers_and_independent_courts():
+    result = build(_manifest([_subject(i) for i in range(139)]))
+    canonical = result["canonical_implementations"]
+    dense = canonical["DENSE_GRAPHICS_FRONT_SURFACE"]
+    visibility = canonical["VISIBILITY_OCCLUSION_CROSS_VIEW"]
+
+    assert dense["producer"] == "tools/corpus/build_truth139_dense_graphics_gbuffer_v1.py"
+    assert dense["independent_court"] == "tools/corpus/validate_truth139_dense_gbuffer_geometry_v1.py"
+    assert dense["required_court_status"] == "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_DENSE_GPU_GBUFFER"
+
+    assert visibility["producer"] == "tools/corpus/build_truth139_visibility_occlusion_teacher_v2.py"
+    assert visibility["producer_revision"] == "V2_SILHOUETTE_NEIGHBOR_FIRST"
+    assert visibility["independent_court"] == "tools/corpus/validate_truth139_visibility_occlusion_teacher_v1.py"
+    assert visibility["required_court_status"] == "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_VISIBILITY_OCCLUSION_TEACHER"
+
+    subject = result["subjects"][0]
+    assert subject["jobs"]["DENSE_GRAPHICS_FRONT_SURFACE"]["implementation"] == dense
+    assert subject["jobs"]["VISIBILITY_OCCLUSION_CROSS_VIEW"]["implementation"] == visibility
 
 
 def test_historical_reproduction_finding_does_not_block_work_orders():

@@ -17,6 +17,7 @@ from tools.corpus.prepare_iris_observations_v1 import (
 )
 from tools.corpus.run_truth139_graphics_materialization_subject_v1 import (
     REPO_ROOT,
+    _digest,
     build_command_plan,
     execute_plan,
     file_sha256,
@@ -93,6 +94,17 @@ def qualified_request(
     return request
 
 
+def _persist_packet_bound_chain(chain_path: Path, chain: dict, packet_binding: dict) -> dict:
+    chain = dict(chain)
+    chain["prepared_packet"] = dict(packet_binding)
+    chain.pop("chain_identity_sha256", None)
+    chain["chain_identity_sha256"] = _digest(chain)
+    staged = chain_path.with_suffix(chain_path.suffix + ".partial")
+    staged.write_text(json.dumps(chain, sort_keys=True, indent=2, allow_nan=False) + "\n")
+    staged.replace(chain_path)
+    return chain
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--work-orders", required=True, type=Path)
@@ -125,12 +137,13 @@ def main() -> None:
     steps = execute_plan(plan)
     chain_path = args.output_root.resolve() / "GRAPHICS_MATERIALIZATION_CHAIN.json"
     chain = seal_chain(request=request, subject_id=args.subject_id, steps=steps, output=chain_path)
-    chain["prepared_packet"] = request["prepared_packet"]
+    chain = _persist_packet_bound_chain(chain_path, chain, request["prepared_packet"])
     print(json.dumps({
         "status": chain["status"],
         "subject_id": args.subject_id,
         "chain_path": str(chain_path),
         "chain_sha256": file_sha256(chain_path),
+        "chain_identity_sha256": chain["chain_identity_sha256"],
         "prepared_packet_observation_binding_sha256": request["prepared_packet"]["observation_binding_sha256"],
     }, sort_keys=True), flush=True)
 

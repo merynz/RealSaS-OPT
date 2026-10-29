@@ -73,3 +73,22 @@ def test_semantic_family_directories_are_not_stripped_or_overcollapsed():
     subjects, groups = _collapse_historical_presentation_variants([big, blob])
     assert len(subjects) == 2
     assert groups == []
+
+
+def test_exact_geometry_equivalence_alone_does_not_define_historical_subject_identity():
+    first = _row(
+        "raw/quaternius/quaternius-cute-animated-monsters/glTF/Alien.gltf",
+        stem="alien",
+        material="first",
+    )
+    second = _row(
+        "raw/quaternius/quaternius-cute-animated-monsters/glTF/Alien_Tall.gltf",
+        stem="alien_tall",
+        material="second",
+    )
+    # Simulate two distinct authored assets whose geometry scanner happens to assign the same
+    # exact-geometry signature. Historical identity still follows the documented source family.
+    second["subject_identity_signature"] = first["subject_identity_signature"]
+    subjects, groups = _collapse_historical_presentation_variants([first, second])
+    assert len(subjects) == 2
+    assert groups == []

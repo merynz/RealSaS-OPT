@@ -12,6 +12,7 @@ import hashlib
 import json
 import platform
 from pathlib import Path
+import subprocess
 import sys
 from typing import Any
 
@@ -75,6 +76,20 @@ def _require_hex_sha(value: object, code: str, length: int = 64) -> str:
     if len(text) != length or any(ch not in "0123456789abcdefABCDEF" for ch in text):
         raise ValueError(code)
     return text.lower()
+
+
+def checked_out_git_sha(repo_root: Path) -> str:
+    repo_root = Path(repo_root).resolve()
+    try:
+        value = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ValueError("TRUTH139_RECEIPT_GIT_CHECKOUT_REQUIRED") from exc
+    return _require_hex_sha(value, "TRUTH139_RECEIPT_GIT_HEAD_INVALID", length=40)
 
 
 def _load_json(path: Path, code: str) -> dict:
@@ -142,6 +157,7 @@ def seal(
     wall_seconds: float | None = None,
     repo_root: Path = REPO_ROOT,
 ) -> dict:
+    repo_root = Path(repo_root).resolve()
     work_orders_path = Path(work_orders_path).resolve()
     producer_manifest_path = Path(producer_manifest_path).resolve()
     court_result_path = Path(court_result_path).resolve()
@@ -178,6 +194,9 @@ def seal(
         raise ValueError("TRUTH139_RECEIPT_COURT_STATUS")
 
     commit_sha = _require_hex_sha(code_commit_sha, "TRUTH139_RECEIPT_CODE_COMMIT_SHA", length=40)
+    checkout_sha = checked_out_git_sha(repo_root)
+    if commit_sha != checkout_sha:
+        raise ValueError(f"TRUTH139_RECEIPT_CODE_COMMIT_DRIFT:{commit_sha}!={checkout_sha}")
     if not execution_kind:
         raise ValueError("TRUTH139_RECEIPT_EXECUTION_KIND")
     if wall_seconds is not None and (not np.isfinite(wall_seconds) or wall_seconds < 0):
@@ -193,6 +212,7 @@ def seal(
         "job_name": job_name,
         "execution_kind": execution_kind,
         "code_commit_sha": commit_sha,
+        "checked_out_git_sha": checkout_sha,
         "work_order": {
             "path": str(work_orders_path),
             "sha256": file_sha256(work_orders_path),

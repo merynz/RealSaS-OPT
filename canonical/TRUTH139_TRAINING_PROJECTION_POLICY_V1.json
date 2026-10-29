@@ -1,0 +1,60 @@
+{
+  "schema": "RealSaS.Truth139TrainingProjectionPolicy.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__CORPUS_AUTHORITY_MUST_COMPLETE_FIRST__NO_OPTIMIZER_AUTHORIZED",
+  "purpose": "PRESERVE_A_SUBJECT_SCALE_CAUSAL_BASELINE_WHILE_ALSO_TRAINING_THE_UNCHANGED_ARCHITECTURE_FROM_A_SERIOUS_DENSE_APPEARANCE_CORPUS",
+  "parent_authorities": [
+    "RealSaS.Truth139CorpusManifest.v2",
+    "canonical/TRUTH139_DENSE_APPEARANCE_AUTHORITY_V1.json",
+    "SEALED_LEAKAGE_COMPONENT_TRAIN_UNSEEN_SPLIT"
+  ],
+  "shared_across_lanes": {
+    "architecture": "SAME_TRUTH139_DENSE_IRIS_CARRIER_AND_HEADS",
+    "geometry_authority": "DIRECT_FSTAR_PLUS_PREREGISTERED_SIGN_NORMAL_AUXILIARIES",
+    "mechanics_objective": "FIXED_SCALE_TRAIN_ONLY_STUDENT_T_LOCATION_ONLY_WITH_PRIOR_AND_SHUFFLED_UNSEEN_COURTS",
+    "train_unseen_split": "EXACT_SAME_SEALED_COMPONENT_SAFE_SPLIT",
+    "optimizer_schedule": "MUST_BE_IDENTICAL_UNLESS_A_SEPARATE_SCHEDULE_ABLATION_IS_PREREGISTERED",
+    "checkpoint_selection": "TRAIN_TUNE_ONLY__SEALED_UNSEEN_NEVER_SELECTS",
+    "subject_specific_code": false
+  },
+  "lanes": {
+    "HISTORICAL_SPARSE_APPEARANCE_SCALE_CONTROL": {
+      "role": "DIAGNOSTIC_CAUSAL_CONTROL__NOT_PRIMARY_CORPUS_QUALITY_CLAIM",
+      "appearance_projection": "HISTORICAL_STAGE48_DIRECTLY_IDENTIFIABLE_RGBA_ROWS_ONLY",
+      "purpose": "TEST_WHETHER_7_TO_TRUTH139_SUBJECT_SCALE_ALONE_CHANGES_THE_OLD_SPARSE_APPEARANCE_AND_SHARED_SCENE_RESULT",
+      "may_mint_appearance_corpus_qualification": false,
+      "may_mint_product_pass": false
+    },
+    "DENSE_APPEARANCE_PRIMARY": {
+      "role": "PRIMARY_TRUTH139_CORPUS_EXPERIMENT",
+      "appearance_projection": "DENSE_SURFACE_ADDRESSED_RGBA_VISIBILITY_ALPHA_AND_CROSS_VIEW_AUTHORITY_WITH_STAGE48_INTERVENTION_WITNESSES",
+      "requires_independent_gpu_raster_vs_cpu_ray_geometry_court": true,
+      "ambiguous_multihit_rgba_imputation": false,
+      "semantic_part_taxonomy_used": false,
+      "architecture_change_from_historical_lane": false
+    }
+  },
+  "interpretation_matrix": {
+    "HISTORICAL_FAIL__DENSE_PASS": "OLD_APPEARANCE_SUPERVISION_WAS_A_MAJOR_LIMITER__DO_NOT_BLAME_CARRIER_FROM_THE_OLD_SPARSE_RUN",
+    "HISTORICAL_PASS__DENSE_PASS": "SUBJECT_SCALE_WAS_A_MAJOR_LIMITER_AND_DENSE_AUTHORITY_IS_COMPATIBLE",
+    "HISTORICAL_PASS__DENSE_FAIL": "DENSE_PROJECTION_OR_OBJECTIVE_INTEGRATION_IS_SUSPECT__DO_NOT_PROMOTE",
+    "HISTORICAL_FAIL__DENSE_FAIL": "SUBJECT_SCALE_PLUS_DENSE_TRUTH_DID_NOT_RESCUE_THE_CURRENT_CARRIER__CARRIER_OR_CONSTRUCTION_ABLATION_IS_JUSTIFIED"
+  },
+  "mechanics_interpretation": {
+    "nll_only_success_is_insufficient": true,
+    "real_scene_must_be_compared_on_identical_rows_to": [
+      "TRAIN_MEDIAN_CONSTANT_PRIOR",
+      "SHUFFLED_OTHER_UNSEEN_SCENE_CARRIER"
+    ],
+    "report_distribution_sensitive_metrics": [
+      "LOG1P_MAE",
+      "RAW_MAE",
+      "SPEARMAN",
+      "TAIL_RAW_MAE",
+      "FIXED_SCALE_STUDENT_T_NLL"
+    ]
+  },
+  "training_authorized": false,
+  "split_authority_present": false,
+  "qualification_minted": false
+}

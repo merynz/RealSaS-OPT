@@ -5,7 +5,16 @@ from pathlib import Path
 
 import pytest
 
-from tools.corpus.build_truth139_graphics_pilot_raw_packet_v1 import build, sha
+from tools.corpus.build_truth139_graphics_pilot_raw_packet_v1 import (
+    REPO_ROOT,
+    build,
+    checked_out_git_sha,
+    sha,
+)
+
+
+def _head() -> str:
+    return checked_out_git_sha(REPO_ROOT)
 
 
 def _fixture(tmp_path: Path, *, external_dependency: bool = False):
@@ -82,10 +91,13 @@ def test_raw_packet_copies_exact_self_contained_source_and_binds_structural_rece
         apparatus=apparatus,
         closure_receipt=closure,
         output_root=output,
+        code_commit_sha=_head(),
     )
     copied = output / "source_root" / rel
     assert result["status"] == "PASS_TRUTH139_GRAPHICS_PILOT_RAW_BYTES_PACKED__RENDER_AND_TRUTH_NOT_PERFORMED"
     assert result["subject_count"] == 1
+    assert result["code_commit_sha"] == _head()
+    assert len(result["packer_source_sha256"]) == 64
     assert sha(copied) == source_sha
     assert result["structural_closure"]["work_order_file_sha256"] == sha(work)
     assert result["policy"]["render_performed"] is False
@@ -104,6 +116,7 @@ def test_raw_packet_rejects_external_dependency_until_explicit_packer_v2(tmp_pat
             apparatus=apparatus,
             closure_receipt=closure,
             output_root=tmp_path / "out",
+            code_commit_sha=_head(),
         )
 
 
@@ -120,4 +133,22 @@ def test_raw_packet_rejects_structural_work_order_file_drift(tmp_path):
             apparatus=apparatus,
             closure_receipt=closure,
             output_root=tmp_path / "out",
+            code_commit_sha=_head(),
+        )
+
+
+def test_raw_packet_rejects_declared_commit_that_is_not_checked_out(tmp_path):
+    source_root, work, pilot, apparatus, closure, _rel, _sha = _fixture(tmp_path)
+    wrong = "0" * 40
+    if wrong == _head():
+        wrong = "f" * 40
+    with pytest.raises(ValueError, match="RAW_PACKET_CODE_COMMIT_DRIFT"):
+        build(
+            source_root=source_root,
+            work_orders=work,
+            pilot=pilot,
+            apparatus=apparatus,
+            closure_receipt=closure,
+            output_root=tmp_path / "out",
+            code_commit_sha=wrong,
         )

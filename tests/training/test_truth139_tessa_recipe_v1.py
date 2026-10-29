@@ -45,6 +45,8 @@ def test_recipe_derives_epochs_from_largest_teacher_window_set(tmp_path):
         "iris_checkpoint_sha256": "4" * 64,
         "iris_foundation_identity": "5" * 64,
         "teacher_topology_used": False,
+        "scene_source_dim": 163,
+        "surface_source_dim": 906,
         "subjects": conditioning_rows,
     }
     recipe = build_recipe(
@@ -54,11 +56,12 @@ def test_recipe_derives_epochs_from_largest_teacher_window_set(tmp_path):
         coverage_cycles=4,
         minimum_epochs=12,
     )
-    # ceil((9000-1)/2048) = 5 windows, then four full largest-subject cycles.
     assert recipe["teacher_windows"]["maximum_windows_per_subject"] == 5
     assert recipe["teacher_windows"]["epochs"] == 20
     assert recipe["teacher_windows"]["subject_exposure_is_equal"] is True
     assert recipe["architecture_id"] == "RealSaS.TESSA.DualStreamStructuralizer.v3_1"
     assert recipe["attention_semantics"] == "ROLLING_CAUSAL_SELF_INCLUSIVE_V31"
     assert recipe["presentation_stream_present"] is False
+    assert recipe["scene_input_dim"] == 163
+    assert recipe["surface_input_dim"] == 906
     assert recipe["firewall"]["conditioning_cache_contains_teacher_topology"] is False

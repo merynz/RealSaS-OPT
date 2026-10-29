@@ -1,12 +1,14 @@
 {
   "schema": "RealSaS.Truth139CorpusLocatorRequest.v1",
   "date": "2026-10-29",
-  "revision": 2,
+  "revision": 3,
+  "locator_revision": 3,
   "enabled": true,
-  "purpose": "LOCATE_THE_EXACT_OCTOBER4_SEALED_CORPUS_ROOT_FOR_RAW_CAPABILITY_AUDIT",
+  "purpose": "LOCATE_AND_COVERAGE_AUDIT_THE_EXACT_OCTOBER4_SEALED_CORPUS_ROOT_FOR_RAW_CAPABILITY_AUDIT",
   "expected_corpus_root_sha256": "2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab",
   "expected_manifest_sha256": "3799b170d4138dbc0447d2d3456cc9ad5ba7e185fddace6d6ce2de0d0a2adc00",
   "expected_file_ledger_sha256": "1524edeb99e2383e2d7516bf9680275289976d57efa3fac3a4b01f78426979b4",
+  "required_quaternius_gltf_glb_count": 395,
   "training_allowed": false,
   "mutation_allowed": false,
   "qualification_minted": false

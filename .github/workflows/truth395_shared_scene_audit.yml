@@ -1,0 +1,139 @@
+name: truth395-shared-scene-audit
+
+on:
+  push:
+    branches: [truth139-platform-generalization-v1]
+    paths:
+      - canonical/TRUTH395_SHARED_SCENE_AUDIT_REQUEST_V1.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth395-shared-scene-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate request and exact closure
+        id: context
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          from pathlib import Path
+          row=json.loads(Path('canonical/TRUTH395_SHARED_SCENE_AUDIT_REQUEST_V1.json').read_text())
+          assert row['schema']=='RealSaS.Truth395SharedSceneAuditRequest.v1'
+          assert row['enabled'] is True
+          assert row['scan_all_395'] is True
+          assert row['graphics_requires_mechanics'] is False
+          assert row['response_evidence_optional_for_iris_tessa'] is True
+          assert row['render_allowed'] is False
+          assert row['training_allowed'] is False
+          PY
+          RUN_ROOT="$AUTHORITY_ROOT/truth395/shared_scene_audit_runs/${GITHUB_RUN_ID}"
+          CLOSURE_ROOT="$AUTHORITY_ROOT/truth139/exact_audit_closure_v1"
+          mkdir -p "$RUN_ROOT"
+          test -d "$CLOSURE_ROOT/raw/quaternius"
+          test -f "$CLOSURE_ROOT/manifest/MANIFEST.json"
+          echo "run_root=$RUN_ROOT" >> "$GITHUB_OUTPUT"
+          echo "closure_root=$CLOSURE_ROOT" >> "$GITHUB_OUTPUT"
+
+      - name: Audit every sealed GLTF/GLB for shared-scene truth
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          CLOSURE_ROOT="${{ steps.context.outputs.closure_root }}"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/corpus/audit_truth395_shared_scene_capabilities_v1.py \
+            --raw-root "$CLOSURE_ROOT" \
+            --fit8-selection canonical/FIT8_DIVERSITY_SELECTION_V1.json \
+            --output "$RUN_ROOT/TRUTH395_SHARED_SCENE_CAPABILITY_AUDIT_V1.json"
+
+      - name: Build all-usable shared-scene materialization order
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          export RUN_ROOT
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])
+          audit=json.loads((root/'TRUTH395_SHARED_SCENE_CAPABILITY_AUDIT_V1.json').read_text())
+          subjects=audit['subjects']
+          core=[r for r in subjects if r['shared_scene_capabilities']['IRIS_TESSA_SHARED_CORE']]
+          response=[r for r in core if r['shared_scene_capabilities']['DEFORMATION_RESPONSE_EVIDENCE']]
+          static=[r for r in core if not r['shared_scene_capabilities']['DEFORMATION_RESPONSE_EVIDENCE']]
+          order={
+            'schema':'RealSaS.Truth395SharedSceneMaterializationOrder.v1',
+            'date':'2026-10-29',
+            'status':'READY_FOR_RICH_TRUTH_MATERIALIZATION',
+            'source_audit_identity_sha256':audit['audit_identity_sha256'],
+            'policy':{
+              'materialize_all_shared_core_candidates':True,
+              'geometry_graphics_relations_topology_for_static_assets':True,
+              'response_only_when_measured_response_capability_exists':True,
+              'constructed_views_never_source_authority':True,
+              'training_authorized':False,
+            },
+            'counts':{
+              'shared_core_subjects':len(core),
+              'shared_core_with_response_subjects':len(response),
+              'shared_core_without_response_subjects':len(static),
+            },
+            'shared_core_subjects':[{
+              'subject_id':r['subject_id'],
+              'source':r['source'],
+              'capabilities':r['shared_scene_capabilities'],
+            } for r in core],
+          }
+          order['order_identity_sha256']=hashlib.sha256(json.dumps(order,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+          (root/'TRUTH395_SHARED_SCENE_MATERIALIZATION_ORDER_V1.json').write_text(json.dumps(order,sort_keys=True,indent=2)+'\n')
+          print(json.dumps({'counts':order['counts'],'order_identity_sha256':order['order_identity_sha256']},sort_keys=True))
+          PY
+
+      - name: Seal audit receipt
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          export RUN_ROOT
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])
+          audit=json.loads((root/'TRUTH395_SHARED_SCENE_CAPABILITY_AUDIT_V1.json').read_text())
+          order=json.loads((root/'TRUTH395_SHARED_SCENE_MATERIALIZATION_ORDER_V1.json').read_text())
+          receipt={
+            'schema':'RealSaS.Truth395SharedSceneAuditReceipt.v1',
+            'date':'2026-10-29',
+            'status':'PASS_ALL_395_AUDITED__ALL_USABLE_SHARED_SCENE_SUBJECTS_QUEUED',
+            'github_run_id':os.environ['GITHUB_RUN_ID'],
+            'git_commit_sha':os.environ['GITHUB_SHA'],
+            'counts':audit['counts'],
+            'materialization_counts':order['counts'],
+            'next_gate':'RICH_TRUTH_MATERIALIZATION_ON_EXTERNAL_GPU_WORKER',
+            'render_performed':False,
+            'training_performed':False,
+          }
+          receipt['receipt_identity_sha256']=hashlib.sha256(json.dumps(receipt,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+          (root/'TRUTH395_SHARED_SCENE_AUDIT_RECEIPT_V1.json').write_text(json.dumps(receipt,sort_keys=True,indent=2)+'\n')
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+
+      - name: Preserve outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: truth395-shared-scene-audit-${{ github.run_id }}
+          path: ${{ steps.context.outputs.run_root }}
+          if-no-files-found: error
+          retention-days: 30

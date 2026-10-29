@@ -90,13 +90,12 @@ def materialize(
     model = IRISV31Truth139V1(iris_config).to(dev)
     model.load_state_dict(payload["model_state_dict"], strict=True)
     model.eval().requires_grad_(False)
-    source_builder = Truth139TESSASourceBuilderV1(
-        Truth139TESSABridgeConfigV1(
-            scene_channels=iris_config.carrier_channels,
-            iris_query_width=iris_config.query_width,
-            pooled_scene_resolution=12,
-        )
+    bridge_config = Truth139TESSABridgeConfigV1(
+        scene_channels=iris_config.carrier_channels,
+        iris_query_width=iris_config.query_width,
+        pooled_scene_resolution=12,
     )
+    source_builder = Truth139TESSASourceBuilderV1(bridge_config)
     policy.validate()
     output = Path(output_root).resolve()
     cache_root = output / "conditioning"
@@ -147,6 +146,9 @@ def materialize(
         "iris_checkpoint_sha256": training_result["selected_checkpoint_sha256"],
         "iris_foundation_identity": training_result["foundation_identity"],
         "source_builder": "RealSaS.IRISV31.Truth139.TESSASourceBuilder.v1",
+        "source_builder_config": asdict(bridge_config),
+        "scene_source_dim": bridge_config.scene_input_dim,
+        "surface_source_dim": bridge_config.surface_input_dim,
         "conditioning_policy": asdict(policy),
         "subject_count": len(subject_rows),
         "subjects": subject_rows,
@@ -193,6 +195,8 @@ def main() -> None:
         "subject_count": index["subject_count"],
         "index_identity_sha256": index["index_identity_sha256"],
         "iris_checkpoint_sha256": index["iris_checkpoint_sha256"],
+        "scene_source_dim": index["scene_source_dim"],
+        "surface_source_dim": index["surface_source_dim"],
     }, sort_keys=True), flush=True)
 
 

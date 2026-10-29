@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Build capability-aware heavy-materialization work orders for all Truth139 subjects.
+"""Build capability-aware heavy-materialization work orders from the structural corpus manifest.
 
-This consumes the sealed capability-aware corpus manifest, retains every historical subject row,
-and schedules only the truth families each subject can legitimately materialize.  It does not
-split the corpus, admit derived truth, train a model, or delete partially-capable subjects.
+Jobs are capability-local: failure or absence of optional Response Evidence may not suppress
+Graphics, visibility/occlusion, Relations, or TESSA work. Historical-reproduction findings are
+retained in the parent manifest but are not an operational materialization stop after structural
+byte/parse validity has passed.
 """
 from __future__ import annotations
 
@@ -15,7 +16,6 @@ from pathlib import Path
 
 INPUT_SCHEMA = "RealSaS.Truth139CorpusManifest.v2"
 OUTPUT_SCHEMA = "RealSaS.Truth139MaterializationWorkOrders.v1"
-EXPECTED_SUBJECT_COUNT = 139
 
 
 def _digest(value: object) -> str:
@@ -43,7 +43,7 @@ def _jobs(raw: dict) -> dict[str, dict]:
     response = bool(raw.get("STAGE47_MECHANICS"))
     renderer_witness = bool(raw.get("STAGE48_APPEARANCE_PRESENTATION"))
     topology = bool(raw.get("TESSA_TOPOLOGY_TEACHER"))
-    dense_graphics = observation and response
+    dense_graphics = observation
 
     return {
         "SOURCE_IMPORT_AND_8VIEW_OBSERVATION": {
@@ -64,7 +64,7 @@ def _jobs(raw: dict) -> dict[str, dict]:
         "DENSE_GRAPHICS_FRONT_SURFACE": {
             "enabled": dense_graphics,
             "execution": "EXTERNAL_WORKER_GPU",
-            "depends_on": ["SOURCE_IMPORT_AND_8VIEW_OBSERVATION", "IRIS_RESPONSE_EVIDENCE"],
+            "depends_on": ["SOURCE_IMPORT_AND_8VIEW_OBSERVATION"],
         },
         "VISIBILITY_OCCLUSION_CROSS_VIEW": {
             "enabled": dense_graphics,
@@ -96,7 +96,7 @@ def _jobs(raw: dict) -> dict[str, dict]:
         "STAGE48_RENDERER_INTERVENTION_WITNESS": {
             "enabled": renderer_witness,
             "execution": "EXTERNAL_WORKER_CPU_RENDERER_HEAVY",
-            "depends_on": ["SOURCE_IMPORT_AND_8VIEW_OBSERVATION", "IRIS_RESPONSE_EVIDENCE"],
+            "depends_on": ["SOURCE_IMPORT_AND_8VIEW_OBSERVATION"],
         },
         "GENERIC_EXACT_TOPOLOGY_TRUTH": {
             "enabled": topology,
@@ -114,8 +114,8 @@ def build(manifest: dict) -> dict:
     if len(parent_identity) != 64:
         raise ValueError("TRUTH139_WORK_ORDER_PARENT_IDENTITY")
     rows = list(manifest.get("subjects") or ())
-    if len(rows) != EXPECTED_SUBJECT_COUNT:
-        raise ValueError(f"TRUTH139_WORK_ORDER_SUBJECT_COUNT:{len(rows)}")
+    if not rows:
+        raise ValueError("TRUTH139_WORK_ORDER_NO_SUBJECTS")
 
     counts = Counter()
     subjects = []
@@ -144,13 +144,16 @@ def build(manifest: dict) -> dict:
         "date": "2026-10-29",
         "status": "READY_TO_MATERIALIZE_CAPABILITY_AWARE_TRUTH__DERIVED_TRUTH_NOT_ADMITTED",
         "parent_corpus_manifest_identity_sha256": parent_identity,
+        "parent_historical_reproduction": dict(manifest.get("historical_reproduction") or {}),
         "subject_count": len(subjects),
         "job_candidate_counts": dict(sorted(counts.items())),
         "policy": {
-            "all_historical_139_subjects_retained": True,
             "missing_optional_truth_does_not_delete_subject": True,
             "per_subject_jobs_follow_raw_capabilities": True,
+            "graphics_does_not_depend_on_response_evidence": True,
+            "response_evidence_failure_does_not_block_graphics_or_relations": True,
             "development_taint_does_not_delete_corpus_identity": True,
+            "historical_reproduction_finding_does_not_block_safe_materialization": True,
             "no_train_unseen_split_here": True,
             "no_model_training_here": True,
             "no_tessa_conditioning_here": True,

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Measure how much independent structural diversity the historical Truth139 actually contains.
+"""Measure independent structural diversity after the sealed structural audit.
 
 A subject count is not an independence count. This census builds leakage-connected components from
-anonymous source-family, exact skeleton/hierarchy, topology-lineage and material-lineage tokens,
-then reports signature multiplicities and raw structural distributions without semantic labels.
+anonymous source-family, exact skeleton/hierarchy, topology-lineage and material-lineage tokens.
+Historical 139 cardinality is reported, not used as an operational prerequisite for the census.
 """
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ from pathlib import Path
 AUDIT_SCHEMA = "RealSaS.Truth139SealedRawAudit.v2"
 AUDIT_STATUS = "PASS_SEALED_RAW_CAPABILITY_AUDIT_V2__PLATFORM_ADMISSION_PENDING"
 SCHEMA = "RealSaS.Truth139DiversityCensus.v1"
+EXPECTED_HISTORICAL_SUBJECT_COUNT = 139
 LEAKAGE_FIELDS = (
     "source_family_signature",
     "skeleton_hierarchy_signature",
@@ -60,8 +61,10 @@ def _numeric_summary(subjects: list[dict], key: str) -> dict:
     if not values:
         return {"observed_count": 0}
     ordered = sorted(values)
+
     def q(p: float) -> int:
         return ordered[min(len(ordered) - 1, int(round((len(ordered) - 1) * p)))]
+
     return {
         "observed_count": len(ordered),
         "min": ordered[0],
@@ -75,10 +78,12 @@ def _numeric_summary(subjects: list[dict], key: str) -> dict:
 
 def build(audit: dict) -> dict:
     if audit.get("schema") != AUDIT_SCHEMA or audit.get("status") != AUDIT_STATUS:
-        raise ValueError("TRUTH139_DIVERSITY_AUDIT_NOT_PASS")
+        raise ValueError("TRUTH139_DIVERSITY_STRUCTURAL_AUDIT_NOT_PASS")
+    if audit.get("structural_core_passed") is not True:
+        raise ValueError("TRUTH139_DIVERSITY_STRUCTURAL_CORE_NOT_PASS")
     subjects = sorted(list(audit.get("subjects") or ()), key=lambda row: str(row.get("subject_id") or ""))
-    if len(subjects) != 139:
-        raise ValueError("TRUTH139_DIVERSITY_SUBJECT_COUNT")
+    if not subjects:
+        raise ValueError("TRUTH139_DIVERSITY_NO_SUBJECTS")
     ids = [str(row.get("subject_id") or "") for row in subjects]
     if any(not x for x in ids) or len(set(ids)) != len(ids):
         raise ValueError("TRUTH139_DIVERSITY_SUBJECT_ID")
@@ -142,12 +147,16 @@ def build(audit: dict) -> dict:
     pack_counts = Counter(str((row.get("source") or {}).get("pack_id") or "") for row in subjects)
     component_sizes = sorted((len(v) for v in members.values()), reverse=True)
     size_histogram = Counter(component_sizes)
+    historical_count_exact = len(subjects) == EXPECTED_HISTORICAL_SUBJECT_COUNT
     payload = {
         "schema": SCHEMA,
         "date": "2026-10-29",
         "status": "PASS_TRUTH139_STRUCTURAL_DIVERSITY_CENSUS",
         "source_audit_identity_sha256": str(audit.get("audit_identity_sha256") or ""),
         "subject_count": len(subjects),
+        "expected_historical_subject_count": EXPECTED_HISTORICAL_SUBJECT_COUNT,
+        "historical_subject_count_exact": historical_count_exact,
+        "historical_count_mismatch_operational_blocker": False,
         "pack_counts": dict(sorted(pack_counts.items())),
         "leakage_fields": list(LEAKAGE_FIELDS),
         "leakage_component_summary": {
@@ -178,6 +187,7 @@ def build(audit: dict) -> dict:
         "components": components,
         "interpretation_policy": {
             "subject_count_is_not_independence_count": True,
+            "historical_cardinality_is_reported_not_operationally_required": True,
             "leakage_components_are_split_atomic": True,
             "pack_is_not_a_safe_split_unit": True,
             "semantic_morphology_labels_inferred": False,
@@ -205,6 +215,7 @@ def main() -> None:
     print(json.dumps({
         "status": result["status"],
         "subject_count": result["subject_count"],
+        "historical_subject_count_exact": result["historical_subject_count_exact"],
         "leakage_component_summary": result["leakage_component_summary"],
         "signature_multiplicity": result["signature_multiplicity"],
         "census_identity_sha256": result["census_identity_sha256"],

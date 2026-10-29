@@ -11,14 +11,23 @@
     "ram": "HIGH_RAM_RUNTIME_PREFERRED",
     "platform": "COLAB_OR_EQUIVALENT_NOTEBOOK_RUNTIME"
   },
+  "appearance_authority_contract": "canonical/TRUTH139_DENSE_APPEARANCE_AUTHORITY_V1.json",
   "allowed_heavy_jobs": [
     "CONTROLLED_8VIEW_OBSERVATION_RENDER_AND_ADMISSION_CANDIDATES",
+    "DENSE_SURFACE_ADDRESSED_APPEARANCE_GBUFFER_AND_VISIBILITY_AUTHORITY",
     "MULTIVIEW_NORMAL_DEPTH_TEACHER_TRUTH",
     "DINO_AND_IMAGE_DERIVED_FSTAR_SHARD_PREPARATION",
     "STAGE47_SOURCE_RESPONSE_TRUTH_MATERIALIZATION",
-    "STAGE48_APPEARANCE_PRESENTATION_TRUTH_MATERIALIZATION",
+    "STAGE48_APPEARANCE_PRESENTATION_INTERVENTION_WITNESS",
     "TESSA_TEACHER_AND_CONDITIONING_CACHE_MATERIALIZATION"
   ],
+  "appearance_materialization_rule": {
+    "stage48_eight_ray_default_is_not_dense_training_authority": true,
+    "full_8view_dense_gbuffer_preserved": true,
+    "surface_addressed_rgba_and_visibility_required": true,
+    "ambiguous_multihit_per_layer_rgba_not_imputed": true,
+    "semantic_part_taxonomy_used": false
+  },
   "forbidden_authority": [
     "SUBJECT_ADMISSION",
     "TRAIN_UNSEEN_SPLIT_SELECTION",
@@ -32,7 +41,9 @@
     "notebook_sha256": "REQUIRED",
     "git_source_commit_sha": "REQUIRED",
     "raw_audit_identity_sha256": "REQUIRED",
-    "apparatus_manifest_identity_sha256": "REQUIRED",
+    "corpus_manifest_identity_sha256": "REQUIRED",
+    "apparatus_manifest_identity_sha256": "REQUIRED_WHEN_APPARATUS_PROJECTION_EXISTS",
+    "dense_appearance_authority_contract_sha256": "REQUIRED",
     "runtime_fingerprint": "REQUIRED",
     "worker_code_manifest_sha256": "REQUIRED"
   },
@@ -41,7 +52,8 @@
     "notebook_sha256",
     "git_source_commit_sha",
     "raw_audit_identity_sha256",
-    "apparatus_manifest_identity_sha256",
+    "corpus_manifest_identity_sha256",
+    "dense_appearance_authority_contract_sha256",
     "batch_id",
     "subject_ids",
     "input_artifact_hashes",

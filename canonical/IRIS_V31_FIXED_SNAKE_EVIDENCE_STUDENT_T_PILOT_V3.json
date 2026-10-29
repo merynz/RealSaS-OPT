@@ -1,0 +1,160 @@
+{
+  "schema": "RealSaS.IRISV31FixedSnakeEvidenceStudentTPilotRecipe.v3",
+  "date": "2026-10-29",
+  "scope": "FIXED_SNAKE_HELDOUT__IMPORT_SEALED_V2_GEOMETRY_FOUNDATION__FRESH_EVIDENCE_ADAPTERS__STUDENT_T_MECHANICS__NO_LOFO_EXPANSION",
+  "architecture_id": "RealSaS.IRIS.DenseObservationEvidence.v3_1.evidence_adapter_v2",
+  "trainer_revision": "IRIS_V31_FIXED_SNAKE_EVIDENCE_STUDENT_T_PILOT_V3",
+  "pilot": {
+    "fixed_fold_id": "LOFO_00_fit8_snake_v1",
+    "fixed_heldout_subject": "fit8_snake_v1",
+    "train_subject_count": 7,
+    "heldout_visible_during_training": false,
+    "heldout_visible_during_checkpoint_selection": false,
+    "selection_rule": "FIXED_FINAL_EVIDENCE_STEP__NO_CHECKPOINT_SHOPPING",
+    "selected_evidence_step": 5000,
+    "lofo_expansion_authorized": false,
+    "lofo_expansion_requires_separate_review": true
+  },
+  "foundation_import_policy": {
+    "source_experiment": "IRIS_V31_FIXED_SNAKE_EVIDENCE_ADAPTER_PILOT_V2",
+    "source_training_sha": "897fcc2e04232b033c0a61b898aa0729f2fbf35a",
+    "minimum_source_step": 1000,
+    "require_source_stage": "EVIDENCE_ADAPTER_ACQUISITION",
+    "copy_foundation_parameters_only": true,
+    "fresh_evidence_initialization": true,
+    "foundation_identity_must_match_source_payload": true,
+    "foundation_frozen_for_entire_experiment": true
+  },
+  "model_config": {
+    "carrier_resolution": 40,
+    "carrier_channels": 160,
+    "mechanical_channels": [
+      "nonrigid_response_mean",
+      "nonrigid_response_log_scale",
+      "response_energy_mean",
+      "response_energy_log_scale"
+    ],
+    "pair_channels": [
+      "occlusion_attenuation_logit"
+    ],
+    "query_width": 896,
+    "query_layers": 3,
+    "fourier_bands": 4,
+    "private_bottleneck": 320,
+    "evidence_adapter_bottleneck": 320,
+    "lift_chunk": 16384,
+    "delta_bound": 0.03
+  },
+  "capacity_policy": {
+    "status": "UNCHANGED_FROM_PROTECTED_EVIDENCE_ADAPTER_V2",
+    "expected_total_parameters": 9768366,
+    "expected_foundation_parameters": 4564644,
+    "expected_evidence_parameters": 1972745,
+    "carrier_state_values": 10240000,
+    "production_capacity_selected": false,
+    "future_capacity_change_requires_new_recipe": true
+  },
+  "mechanics_target_transform": "LOG1P_NONNEGATIVE_MAGNITUDES",
+  "mechanics_transform_policy": {
+    "invertible": true,
+    "subject_specific_filtering": false,
+    "target_clipping": false,
+    "truth_rows_deleted": false,
+    "formula": "log1p(target)"
+  },
+  "mechanics_objective": {
+    "id": "STUDENT_T_NLL__LOG1P_NONNEGATIVE_MAGNITUDES__FIXED_DF_3",
+    "family": "FIXED_DF_STUDENT_T_NEGATIVE_LOG_LIKELIHOOD",
+    "degrees_of_freedom": 3.0,
+    "finite_variance_required": true,
+    "minimum_log_variance": -6.0,
+    "maximum_log_variance": 3.0,
+    "normalization_constant_included": true,
+    "tail_growth": "LOGARITHMIC_IN_SQUARED_STANDARDIZED_RESIDUAL",
+    "target_clipping": false,
+    "truth_rows_deleted": false,
+    "subject_specific_weights": false
+  },
+  "partition_policy": "UNCHANGED_HASHED_ROW_80_20_V1",
+  "truth_authorities": {
+    "geometry": "EXACT_EXISTING_IMAGE_DERIVED_FSTAR_COHORT_MANIFEST",
+    "presentation": "EXACT_STAGE48_FIT8_PRESENTATION_TRUTH_BUNDLE",
+    "occlusion_attenuation": "ABSTAIN__NO_OBSERVATION_CONDITIONED_PAIR_EVIDENCE_IN_STAGE48_FIT8",
+    "semantic_part_class": "FORBIDDEN"
+  },
+  "schedule": [
+    {
+      "id": "EVIDENCE_STUDENT_T_ACQUISITION",
+      "steps": 5000,
+      "trainable_group": "FRESH_EVIDENCE_ADAPTERS_ONLY",
+      "families": [
+        "CONDITIONAL_NONRIGID_RESPONSE",
+        "SOURCE_EQUIVALENT_RGBA"
+      ],
+      "loss_weights": {
+        "geometry": 0.0,
+        "mechanics": 1.0,
+        "appearance": 1.0,
+        "occlusion_attenuation": 0.0
+      },
+      "optimizer": {
+        "kind": "ADAMW",
+        "learning_rate": 0.00004,
+        "minimum_learning_rate": 0.000002,
+        "weight_decay": 0.0,
+        "gradient_clip_norm": 1.0
+      }
+    }
+  ],
+  "runtime": {
+    "float32_matmul_precision": "highest",
+    "tf32": false,
+    "cudnn_deterministic": true,
+    "bf16_autocast": true
+  },
+  "sampling": {
+    "geometry_queries_per_subject_step": 8192,
+    "geometry_mix": {
+      "replay": 0.5,
+      "near": 0.25,
+      "straddle": 0.25
+    },
+    "mechanical_queries_per_subject_step": 1024,
+    "appearance_queries_per_subject_step": 128,
+    "pair_queries_per_subject_step": 0,
+    "presentation_train_fraction": 0.8,
+    "seed": 26102831,
+    "field_huber_beta": 0.01,
+    "field_clamp": 0.25
+  },
+  "optimizer_update_semantics": "ONE_GLOBAL_UPDATE_EQUALS_EQUAL_WEIGHT_GRADIENT_ACCUMULATION_OVER_ALL_SEVEN_TRAIN_SUBJECTS",
+  "physical_packing_semantics": "ONE_SUBJECT_PER_PHYSICAL_MICROBATCH",
+  "evaluation": {
+    "interval_steps": 200,
+    "geometry_validation_points_per_train_subject": 8192,
+    "presentation_validation_uses_fixed_preregistered_validation_rows": true,
+    "mechanics_partition_audit_uses_train_subjects_only": true,
+    "foundation_retention_checked_every_update": true,
+    "heldout_open_rule": "ONLY_AFTER_FIXED_EVIDENCE_STEP_5000_CHECKPOINT_BYTES_AND_FOUNDATION_IDENTITY_ARE_FROZEN",
+    "numeric_v31_geometry_pass_threshold": null,
+    "numeric_v31_presentation_pass_threshold": null
+  },
+  "checkpoint": {
+    "interval_steps": 200,
+    "durable_resume_required": true,
+    "resume_restores_optimizer_scheduler_and_evidence_step": true,
+    "foundation_source_is_external_immutable_authority": true
+  },
+  "claims": {
+    "fit8_pass_from_pilot": false,
+    "product_pass": false,
+    "genericity": false,
+    "unseen": false,
+    "production_capacity_selected": false,
+    "teacher_inputs_in_forward": false,
+    "semantic_taxonomy_used": false,
+    "occlusion_attenuation_head_trained": false,
+    "shared_foundation_jointly_finetuned_with_evidence": false,
+    "gaussian_mechanics_objective_used": false
+  }
+}

@@ -6,10 +6,10 @@ remain exact-byte authority. Historical source-page snapshots are provenance evi
 rig/material capability bytes. Their binding is preserved and availability is reported explicitly,
 but a missing archived HTML page may not suppress structural truth discovery.
 
-Historical Flat/Textured presentation variants are collapsed by a path-derived family key before the
-historical reproduction court. This is intentionally separate from exact geometry identity: the
-October-4 census explicitly counted those presentation variants as one subject even when their GLTF
-payloads are not byte/geometry identical.
+Historical Flat/Textured presentation variants are collapsed by a path-derived family key directly
+from the 143 rigged/animated source-file rows. This is intentionally separate from exact geometry
+identity: exact-geometry equivalence is useful leakage evidence, but it is not the documented
+October-4 subject identity rule and therefore may not silently reduce the historical 139 cohort.
 """
 from __future__ import annotations
 
@@ -59,9 +59,9 @@ def _historical_variant_key(row: dict) -> str:
     return seal_v1.value_hash({"creator": creator, "pack_id": pack, "path": normalized_tail})
 
 
-def _collapse_historical_presentation_variants(subjects: list[dict]) -> tuple[list[dict], list[dict]]:
+def _collapse_historical_presentation_variants(file_rows: list[dict]) -> tuple[list[dict], list[dict]]:
     grouped: dict[str, list[dict]] = {}
-    for row in subjects:
+    for row in file_rows:
         grouped.setdefault(_historical_variant_key(row), []).append(row)
 
     collapsed: list[dict] = []
@@ -142,6 +142,10 @@ def run(raw_root: Path, fit8_selection: Path) -> dict:
     if base.get("schema") != "RealSaS.Truth139RawCapabilityAudit.v2":
         raise ValueError("TRUTH139_V3_CAPABILITY_AUDIT_SCHEMA")
 
+    historical_file_rows = list(base.get("rigged_animated_file_rows") or ())
+    if len(historical_file_rows) != 143:
+        raise ValueError(f"TRUTH139_V3_HISTORICAL_FILE_ROW_CARDINALITY:{len(historical_file_rows)}")
+
     packs = {
         str(row["id"]): row
         for row in manifest.get("results") or ()
@@ -149,7 +153,7 @@ def run(raw_root: Path, fit8_selection: Path) -> dict:
     }
     enriched = []
     provenance_by_pack: dict[str, dict] = {}
-    for row in base.get("subjects") or ():
+    for row in historical_file_rows:
         value = dict(row)
         source = dict(value["source"])
         relative = str(source["relative_path"])
@@ -211,7 +215,7 @@ def run(raw_root: Path, fit8_selection: Path) -> dict:
     counts = {
         **base_counts,
         "deduplicated_rigged_animated_subjects": len(subjects),
-        "duplicate_files_collapsed": int(base_counts.get("rigged_animated_files", 0)) - len(subjects),
+        "duplicate_files_collapsed": len(historical_file_rows) - len(subjects),
         "development_or_regression_excluded_subjects": sum(bool(row.get("development_exclusion")) for row in subjects),
         "raw_full_family_eligible_subjects_before_development_exclusion": sum(
             bool((row.get("capabilities") or {}).get("FULL_TRUTH139_RAW_ELIGIBLE")) for row in subjects
@@ -237,7 +241,7 @@ def run(raw_root: Path, fit8_selection: Path) -> dict:
         "schema": SCHEMA,
         "date": "2026-10-29",
         "status": PASS if structural_core_passed else "FAIL_STRUCTURAL_ASSET_AUDIT__DO_NOT_BUILD_APPARATUS",
-        "audit_mode": "STRUCTURAL_CAPABILITY_AUTHORITY__ARCHIVAL_WEB_PROVENANCE_AND_HISTORICAL_REPRODUCTION_REPORTED_SEPARATELY",
+        "audit_mode": "STRUCTURAL_CAPABILITY_AUTHORITY__HISTORICAL_SUBJECT_PROJECTION_FROM_143_FILE_ROWS__ARCHIVAL_WEB_PROVENANCE_SEPARATE",
         "structural_core_passed": structural_core_passed,
         "historical_cardinality_reproduced": historical_cardinality_reproduced,
         "historical_reproduction_status": (
@@ -261,7 +265,8 @@ def run(raw_root: Path, fit8_selection: Path) -> dict:
         "v2_repairs": {
             **dict(base["v2_repairs"]),
             "source_family_lineage": "CREATOR_PACK_NORMALIZED_ASSET_STEM__NOT_PACK_LEVEL_SPLIT",
-            "historical_presentation_variant_dedup": "PATH_FAMILY_AFTER_STRIPPING_STYLE_ONLY_FLAT_TEXTURED_SEGMENTS",
+            "historical_presentation_variant_dedup": "143_FILE_ROWS_THEN_PATH_FAMILY_AFTER_STRIPPING_STYLE_ONLY_FLAT_TEXTURED_SEGMENTS",
+            "exact_geometry_identity_is_not_historical_subject_identity": True,
             "historical_cardinality_is_separate_court": True,
             "archival_web_snapshot_bytes_are_nonblocking_provenance": True,
         },

@@ -47,9 +47,6 @@ concurrency:
 
 jobs:
   fast-current-mainline:
-    # Standard hosted compute is intentionally enabled only while this repository
-    # is public. If visibility is changed to private during a pause/trip, the job
-    # is skipped rather than consuming private-repository Actions minutes.
     if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -110,7 +107,8 @@ jobs:
             tests/corpus/test_truth139_graphics_materialization_subject_v1.py \
             tests/corpus/test_truth139_graphics_materialization_pilot_v1.py \
             tests/corpus/test_truth139_graphics_apparatus_manifest_v1.py \
-            tests/corpus/test_truth139_response_independent_surface_packet_v1.py
+            tests/corpus/test_truth139_response_independent_surface_packet_v1.py \
+            tests/corpus/test_truth139_graphics_materialization_packet_v1.py
       - name: Validate V2 DAG structure and implementation closure
         run: |
           python -m compiler.realsas_compiler_services.orchestrator.mainline validate-plan
@@ -155,6 +153,7 @@ jobs:
           echo 'truth139_graphics_pilot_selection=true'
           echo 'truth139_source_apparatus=true'
           echo 'truth139_response_independent_surface_packet=true'
+          echo 'truth139_graphics_prepared_packet_worker=true'
           echo 'v2_dag=true'
           echo 'native_graphics_player_built=true'
           echo 'source_scene_blender_smoke=SEPARATE_PATH_SCOPED_GATE'

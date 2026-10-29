@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-"""Independently validate Truth139 dense appearance raster addresses against the CPU ray oracle.
+"""Validate dense Truth139 appearance raster addresses with an independent CPU ray oracle.
 
-The dense G-buffer is high-volume teacher authority.  A GPU rasterizer bug or camera-convention
-mistake could therefore poison millions of labels while still producing plausible masks.  This
-court samples deterministic interior pixels from every view and re-measures the exact orthographic
-ray against the source rest mesh using the independent NumPy Graphics oracle.
-
-No material, colour, semantic part, owner or source image participates in the geometric verdict.
+A dense GPU G-buffer can poison millions of labels if camera or raster conventions drift.  This
+court deterministically samples interior pixels from every view and re-measures their first surface
+hit using the independent NumPy Graphics oracle.  Material, RGB, semantic labels and owner ids do
+not participate in the verdict.
 """
 from __future__ import annotations
 
@@ -37,17 +35,13 @@ def _bound_path(ref: dict, code: str) -> Path:
     return path
 
 
-def _sample_rows(subject_id: str, view_index: int, pixels: np.ndarray, eligible: np.ndarray, maximum: int) -> np.ndarray:
+def _sample_rows(eligible: np.ndarray, maximum: int) -> np.ndarray:
+    """Evenly cover the sorted pixel rows without outcome-driven mining or O(N) hashing."""
     ids = np.flatnonzero(eligible)
-    if not len(ids):
-        return ids
-    ranked = sorted(
-        ids.tolist(),
-        key=lambda row: hashlib.sha256(
-            f"{subject_id}|{view_index}|{int(pixels[row])}".encode()
-        ).hexdigest(),
-    )
-    return np.asarray(ranked[:maximum], dtype=np.int64)
+    if len(ids) <= maximum:
+        return ids.astype(np.int64, copy=False)
+    positions = np.linspace(0, len(ids) - 1, maximum, dtype=np.int64)
+    return ids[positions].astype(np.int64, copy=False)
 
 
 def validate(
@@ -78,9 +72,10 @@ def validate(
         faces = np.asarray(z["faces"], dtype=np.int64)
     if vertices.ndim != 2 or vertices.shape[1:] != (3,) or faces.ndim != 2 or faces.shape[1:] != (3,):
         raise ValueError("TRUTH139_DENSE_GBUFFER_COURT_GEOMETRY_LAYOUT")
-    cameras_payload = json.loads(camera_path.read_text())
-    cameras = sorted(list(cameras_payload.get("cameras") or ()), key=lambda row: int(row["view_index"]))
-    if len(cameras) != 8:
+
+    camera_payload = json.loads(camera_path.read_text())
+    cameras = sorted(list(camera_payload.get("cameras") or ()), key=lambda row: int(row["view_index"]))
+    if len(cameras) != 8 or [int(row["view_index"]) for row in cameras] != list(range(8)):
         raise ValueError("TRUTH139_DENSE_GBUFFER_COURT_CAMERA_COUNT")
 
     scale = float(np.linalg.norm(vertices.max(axis=0) - vertices.min(axis=0)))
@@ -88,15 +83,16 @@ def validate(
         raise ValueError("TRUTH139_DENSE_GBUFFER_COURT_GEOMETRY_SCALE")
     tie_epsilon = max(scale * 1.0e-7, 1.0e-9)
 
-    rows = []
+    view_rows = []
     total_validated = 0
-    maximum_barycentric_error = 0.0
-    maximum_depth_error = 0.0
-    maximum_surface_error = 0.0
-    for view in list(manifest.get("views") or ()):
+    max_bary = max_depth = max_surface = 0.0
+    views = sorted(list(manifest.get("views") or ()), key=lambda row: int(row["view_index"]))
+    if len(views) != 8:
+        raise ValueError("TRUTH139_DENSE_GBUFFER_COURT_VIEW_COUNT")
+
+    for view in views:
         view_index = int(view["view_index"])
-        camera_row = cameras[view_index]
-        camera = camera_from_mapping(camera_row)
+        camera = camera_from_mapping(cameras[view_index])
         gbuffer = _bound_path(
             {"path": view["gbuffer_path"], "sha256": view["gbuffer_sha256"]},
             "TRUTH139_DENSE_GBUFFER_COURT_VIEW_DRIFT",
@@ -110,16 +106,16 @@ def validate(
             raise ValueError("TRUTH139_DENSE_GBUFFER_COURT_VIEW_LAYOUT")
         weights = np.stack((uv[:, 0], uv[:, 1], 1.0 - uv[:, 0] - uv[:, 1]), axis=1)
         eligible = np.all(weights > float(interior_barycentric_floor), axis=1) & np.isfinite(depth)
-        picked = _sample_rows(subject_id, view_index, pixels, eligible, int(maximum_samples_per_view))
-        if len(picked) < min(int(minimum_validated_per_view), int(np.count_nonzero(eligible))):
-            raise ValueError("TRUTH139_DENSE_GBUFFER_COURT_SAMPLE_SHORTFALL")
+        eligible_count = int(np.count_nonzero(eligible))
+        if eligible_count < minimum_validated_per_view:
+            raise ValueError(
+                f"TRUTH139_DENSE_GBUFFER_COURT_TOO_FEW_INTERIOR_PIXELS:V{view_index}:{eligible_count}<{minimum_validated_per_view}"
+            )
+        picked = _sample_rows(eligible, int(maximum_samples_per_view))
 
         validated = 0
         tie_skipped = 0
-        no_hit = 0
-        view_bary_max = 0.0
-        view_depth_max = 0.0
-        view_surface_max = 0.0
+        view_bary = view_depth = view_surface = 0.0
         depth_tolerance = max(1.0e-6, float(camera.half_extent) * float(depth_relative_tolerance))
         for row_index in picked:
             pixel = int(pixels[row_index])
@@ -138,59 +134,54 @@ def validate(
                 tie_skipped += 1
                 continue
             if not stack.hits:
-                no_hit += 1
-                continue
+                raise ValueError(f"TRUTH139_DENSE_GBUFFER_COURT_GPU_HIT_CPU_MISS:V{view_index}:P{pixel}")
             hit = stack.hits[0]
             if int(hit.face_index) != int(triangle[row_index]):
                 raise ValueError(
                     f"TRUTH139_DENSE_GBUFFER_COURT_FACE_MISMATCH:V{view_index}:P{pixel}:"
                     f"gpu={int(triangle[row_index])}:cpu={int(hit.face_index)}"
                 )
+
             raster_weight = weights[row_index]
             oracle_weight = np.asarray(hit.barycentric, dtype=np.float64)
             bary_error = float(np.max(np.abs(raster_weight - oracle_weight)))
             if bary_error > float(barycentric_abs_tolerance):
-                raise ValueError(
-                    f"TRUTH139_DENSE_GBUFFER_COURT_BARYCENTRIC_MISMATCH:V{view_index}:P{pixel}:{bary_error}"
-                )
+                raise ValueError(f"TRUTH139_DENSE_GBUFFER_COURT_BARYCENTRIC_MISMATCH:V{view_index}:P{pixel}:{bary_error}")
+
             depth_error = abs(float(depth[row_index]) - float(hit.depth))
             if depth_error > depth_tolerance:
-                raise ValueError(
-                    f"TRUTH139_DENSE_GBUFFER_COURT_DEPTH_MISMATCH:V{view_index}:P{pixel}:{depth_error}"
-                )
+                raise ValueError(f"TRUTH139_DENSE_GBUFFER_COURT_DEPTH_MISMATCH:V{view_index}:P{pixel}:{depth_error}")
+
             face = faces[int(hit.face_index)]
             p_raster = np.sum(vertices[face] * raster_weight[:, None], axis=0)
             p_oracle = np.sum(vertices[face] * oracle_weight[:, None], axis=0)
             surface_error = float(np.linalg.norm(p_raster - p_oracle))
             if surface_error > max(scale * 1.0e-5, 1.0e-7):
-                raise ValueError(
-                    f"TRUTH139_DENSE_GBUFFER_COURT_SURFACE_MISMATCH:V{view_index}:P{pixel}:{surface_error}"
-                )
-            validated += 1
-            view_bary_max = max(view_bary_max, bary_error)
-            view_depth_max = max(view_depth_max, depth_error)
-            view_surface_max = max(view_surface_max, surface_error)
+                raise ValueError(f"TRUTH139_DENSE_GBUFFER_COURT_SURFACE_MISMATCH:V{view_index}:P{pixel}:{surface_error}")
 
-        required = min(int(minimum_validated_per_view), len(picked))
-        if validated < required:
+            validated += 1
+            view_bary = max(view_bary, bary_error)
+            view_depth = max(view_depth, depth_error)
+            view_surface = max(view_surface, surface_error)
+
+        if validated < minimum_validated_per_view:
             raise ValueError(
-                f"TRUTH139_DENSE_GBUFFER_COURT_TOO_FEW_INDEPENDENT_WITNESSES:V{view_index}:{validated}<{required}"
+                f"TRUTH139_DENSE_GBUFFER_COURT_TOO_FEW_INDEPENDENT_WITNESSES:V{view_index}:{validated}<{minimum_validated_per_view}"
             )
         total_validated += validated
-        maximum_barycentric_error = max(maximum_barycentric_error, view_bary_max)
-        maximum_depth_error = max(maximum_depth_error, view_depth_max)
-        maximum_surface_error = max(maximum_surface_error, view_surface_max)
-        rows.append(
+        max_bary = max(max_bary, view_bary)
+        max_depth = max(max_depth, view_depth)
+        max_surface = max(max_surface, view_surface)
+        view_rows.append(
             {
                 "view_index": view_index,
-                "eligible_interior_pixel_count": int(np.count_nonzero(eligible)),
+                "eligible_interior_pixel_count": eligible_count,
                 "sampled_pixel_count": int(len(picked)),
                 "validated_pixel_count": int(validated),
                 "depth_tie_skipped": int(tie_skipped),
-                "no_hit_count": int(no_hit),
-                "maximum_barycentric_abs_error": view_bary_max,
-                "maximum_depth_abs_error": view_depth_max,
-                "maximum_surface_l2_error": view_surface_max,
+                "maximum_barycentric_abs_error": view_bary,
+                "maximum_depth_abs_error": view_depth,
+                "maximum_surface_l2_error": view_surface,
                 "depth_abs_tolerance": depth_tolerance,
             }
         )
@@ -202,20 +193,20 @@ def validate(
         "subject_id": subject_id,
         "dense_gbuffer_authority_identity_sha256": str(manifest.get("authority_identity_sha256") or ""),
         "policy": {
-            "selection": "DETERMINISTIC_HASHED_INTERIOR_PIXELS_PER_VIEW",
+            "selection": "DETERMINISTIC_EVEN_COVERAGE_OF_INTERIOR_RASTER_ROWS",
             "maximum_samples_per_view": int(maximum_samples_per_view),
             "minimum_validated_per_view": int(minimum_validated_per_view),
             "interior_barycentric_floor": float(interior_barycentric_floor),
             "barycentric_abs_tolerance": float(barycentric_abs_tolerance),
             "depth_relative_tolerance": float(depth_relative_tolerance),
             "tie_epsilon": tie_epsilon,
-            "material_or_semantic_evidence_used": False,
+            "material_rgb_semantic_or_owner_evidence_used": False,
         },
-        "view_courts": rows,
+        "view_courts": view_rows,
         "total_validated_pixel_count": int(total_validated),
-        "maximum_barycentric_abs_error": maximum_barycentric_error,
-        "maximum_depth_abs_error": maximum_depth_error,
-        "maximum_surface_l2_error": maximum_surface_error,
+        "maximum_barycentric_abs_error": max_bary,
+        "maximum_depth_abs_error": max_depth,
+        "maximum_surface_l2_error": max_surface,
         "training_performed": False,
         "qualification_minted": False,
     }
@@ -230,9 +221,7 @@ def main() -> None:
     parser.add_argument("--maximum-samples-per-view", type=int, default=64)
     parser.add_argument("--minimum-validated-per-view", type=int, default=16)
     args = parser.parse_args()
-    manifest = json.loads(parser.parse_args().dense_gbuffer_manifest.resolve().read_text())
-    # Reparse only once for ordinary CLI callers while keeping argparse's type validation above.
-    args = parser.parse_args()
+    manifest = json.loads(args.dense_gbuffer_manifest.resolve().read_text())
     result = validate(
         manifest,
         maximum_samples_per_view=args.maximum_samples_per_view,
@@ -243,7 +232,18 @@ def main() -> None:
     staged = output.with_suffix(output.suffix + ".partial")
     staged.write_text(json.dumps(result, sort_keys=True, indent=2, allow_nan=False) + "\n")
     staged.replace(output)
-    print(json.dumps({"status": result["status"], "subject_id": result["subject_id"], "total_validated_pixel_count": result["total_validated_pixel_count"], "court_identity_sha256": result["court_identity_sha256"]}, sort_keys=True), flush=True)
+    print(
+        json.dumps(
+            {
+                "status": result["status"],
+                "subject_id": result["subject_id"],
+                "total_validated_pixel_count": result["total_validated_pixel_count"],
+                "court_identity_sha256": result["court_identity_sha256"],
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
 
 
 if __name__ == "__main__":

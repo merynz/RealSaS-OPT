@@ -3,7 +3,7 @@
   "date": "2026-10-29",
   "status": "FROZEN_FOR_TRUTH139_CORPUS_DERIVATION__NOT_TRAINING_POLICY",
   "source_fit8_policy_repo_path": "canonical/FIT8_IRIS_SHARED_TRAINING_POLICY_V1.json",
-  "source_fit8_policy_sha256": "dfb82ea28f7962fdb793ca417b4395fe571829bd",
+  "source_fit8_policy_git_blob_sha1": "dfb82ea28f7962fdb793ca417b4395fe571829bd",
   "seed": 26092357,
   "per_subject_seed_semantics": "SHA256_SUBJECT_ID_LOW32_PLUS_BASE_SEED__ROSTER_ORDER_INDEPENDENT",
   "near_pool_count": 131072,

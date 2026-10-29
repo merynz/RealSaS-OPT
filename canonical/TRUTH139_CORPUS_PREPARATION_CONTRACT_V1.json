@@ -1,0 +1,124 @@
+{
+  "schema": "RealSaS.Truth139CorpusPreparationContract.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__RAW_AUDIT_REQUIRED__TRAINING_NOT_AUTHORIZED",
+  "purpose": "REUSE_THE_EXACT_FIT8_SOURCE_OBSERVATION_AND_STAGE47_48_TRUTH_CONTRACTS_OVER_THE_AUDITED_GLTF_CORPUS_BEFORE_TRUTH139_TRAINING",
+  "raw_corpus": {
+    "status_document": "canonical/TRUTH_CORPUS_V1_STATUS_20261004.md",
+    "corpus_root_sha256": "2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab",
+    "manifest_sha256": "3799b170d4138dbc0447d2d3456cc9ad5ba7e185fddace6d6ce2de0d0a2adc00",
+    "file_ledger_sha256": "1524edeb99e2383e2d7516bf9680275289976d57efa3fac3a4b01f78426979b4",
+    "historical_gltf_file_count": 395,
+    "historical_rigged_animated_gltf_file_count": 143,
+    "historical_deduplicated_subject_count": 139,
+    "historical_counts_are_targets_for_reproduction_not_permission_to_skip_audit": true
+  },
+  "development_exclusion": {
+    "fit8_selection": "canonical/FIT8_DIVERSITY_SELECTION_V1.json",
+    "match_policy": [
+      "EXACT_SOURCE_SHA256",
+      "SAME_CREATOR_PACK_AND_NORMALIZED_ASSET_STEM",
+      "EXACT_RAW_SUBJECT_IDENTITY_SIGNATURE_WHEN_AVAILABLE"
+    ],
+    "knight_regression_inventory": "canonical/PRODUCT_NEAREST_KNIGHT_WITNESS_V1.json",
+    "knight_is_not_assumed_to_exist_IN_THE_139_GLTF_SUBSET": true,
+    "rule": "DEVELOPMENT_OR_REGRESSION_SUBJECTS_MAY_NOT_ENTER_TRUTH139_TRAIN_OR_SEALED_UNSEEN"
+  },
+  "raw_capability_families": {
+    "OBSERVATION_FSTAR": {
+      "requires": ["TRIANGLE_MESH", "FINITE_SOURCE_GEOMETRY", "SOURCE_APPEARANCE_RESOURCES_RESOLVABLE"],
+      "downstream_builder": "tools/training/prepare_iris_cohort_v1.py"
+    },
+    "SURFACE_NORMAL_TRUTH": {
+      "requires": ["TRIANGLE_MESH", "NONDEGENERATE_SURFACE"],
+      "role": "TEACHER_ONLY_GEOMETRIC_AUXILIARY_NOT_FORWARD_INPUT"
+    },
+    "STAGE47_MECHANICS": {
+      "requires": ["SKIN", "SKELETON", "INVERSE_BIND_MATRICES", "JOINTS_AND_WEIGHTS", "ANIMATION_TARGETING_RIG"],
+      "stage": "47_SOURCE_RESPONSE_CALIBRATION"
+    },
+    "STAGE48_APPEARANCE_PRESENTATION": {
+      "requires": ["OBSERVATION_FSTAR", "STAGE47_MECHANICS", "SOURCE_APPEARANCE_RESOURCES_RESOLVABLE"],
+      "stage": "48_PRESENTATION_RESPONSE_TRUTH"
+    },
+    "TESSA_TOPOLOGY_TEACHER": {
+      "requires": ["TRIANGLE_MESH", "TOPOLOGY_SERIALIZABLE_WITHIN_TESSA_POLICY"],
+      "teacher_is_target_only": true
+    }
+  },
+  "fit8_truth_reuse": {
+    "observation_admission": {
+      "builder": "tools/corpus/iris_observation_admission_v1.py",
+      "schema": "RealSaS.IrisBindObservationAdmission.v1",
+      "required_files_per_subject": [
+        "SOURCE_REST_RENDER_CANDIDATE.json",
+        "SOURCE_SCENE_SNAPSHOT.json",
+        "camera_bundle.json",
+        "V0.png", "V0.mask.bin",
+        "V1.png", "V1.mask.bin",
+        "V2.png", "V2.mask.bin",
+        "V3.png", "V3.mask.bin",
+        "V4.png", "V4.mask.bin",
+        "V5.png", "V5.mask.bin",
+        "V6.png", "V6.mask.bin",
+        "V7.png", "V7.mask.bin"
+      ]
+    },
+    "geometry_shard": {
+      "builder": "tools/training/prepare_iris_cohort_v1.py",
+      "schema": "RealSaS.SharedIrisCohortShards.v1",
+      "semantics": "VERIFIED_OBSERVATION_TO_FROZEN_DINO_FEATURES_AND_IMAGE_DERIVED_FSTAR_QUERY_RAY_POOLS"
+    },
+    "stage47_outputs": [
+      "RealSaS.TeacherCalibrationArrays.v2"
+    ],
+    "stage48_outputs": [
+      "RealSaS.PresentationResponseTruthCandidate.v1",
+      "RealSaS.PresentationResponseArrays.v1",
+      "RealSaS.SourceRayAppearanceMeasurementCandidate.v1"
+    ],
+    "v31_projection": {
+      "builder": "tools/truth_foundry/build_fit8_presentation_truth_bundle_v3.py",
+      "historical_bundle_schema": "RealSaS.Fit8PresentationTruthBundle.v1",
+      "truth139_rule": "REUSE_OBJECTIVE_PROJECTION_LOGIC_WITH_GENERIC_CARDINALITY_AND_NO_FIT8_SUBJECT_NAMES"
+    },
+    "v31_input_bridge": {
+      "historical_builder": "tools/training/prepare_iris_v31_lofo_inputs_v1.py",
+      "truth139_rule": "REUSE_OBSERVATION_FEATURE_AND_TARGET_BINDING_LOGIC_WITH_SPLIT_SCOPED_MANIFESTS"
+    }
+  },
+  "platform_apparatus": {
+    "execution_plan": "canonical/TRUTH_CALIBRATION_EXECUTION_PLAN_V3.json",
+    "entry_stage": "01_SOURCE_BYTES_SEALED",
+    "target_stage": "48_PRESENTATION_RESPONSE_TRUTH",
+    "stage_count": 10,
+    "bootstrap_executor": "tools/platform_cohort_bootstrap_v1.py",
+    "campaign_completion_is_not_training_authority": true,
+    "failed_subjects_remain_in_denominator": true,
+    "subject_specific_code_forbidden": true
+  },
+  "ordering": [
+    "RAW_CAPABILITY_AUDIT",
+    "DEVELOPMENT_EXCLUSION",
+    "APPARATUS_MANIFEST",
+    "PLATFORM_IMPORT_RENDER_STAGE47_STAGE48",
+    "DERIVED_TRUTH_ADMISSION_AUDIT",
+    "LEAKAGE_COMPONENT_LEDGER",
+    "TRAIN_UNSEEN_SPLIT_AND_SEAL",
+    "TRAINING"
+  ],
+  "gates": {
+    "split_before_raw_audit_forbidden": true,
+    "split_before_platform_truth_admission_forbidden": true,
+    "training_before_unseen_seal_forbidden": true,
+    "missing_truth_family_may_not_be_silently_imputed": true,
+    "partial_subject_may_remain_in_corpus_for_other_future_courts_but_not_this_full_family_experiment": true
+  },
+  "claims": {
+    "raw_audit_complete": false,
+    "apparatus_manifest_sealed": false,
+    "platform_truth_complete": false,
+    "split_sealed": false,
+    "training_authorized": false
+  }
+}

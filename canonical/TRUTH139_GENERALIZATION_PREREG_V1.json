@@ -40,7 +40,11 @@
   "scientific_interventions": {
     "subject_diversity": {
       "change": "FIT8_7_TRAIN_TO_TRUTH139_COMPONENT_SAFE_TRAIN_COHORT",
-      "primary_question": "DOES_UNSEEN_ERROR_FALL_MATERIALLY_WHEN_INDEPENDENT_SUBJECT_DIVERSITY_INCREASES"
+      "primary_question": "DOES_UNSEEN_ERROR_FALL_MATERIALLY_WHEN_INDEPENDENT_SUBJECT_DIVERSITY_INCREASES",
+      "optimizer_horizon_policy": "PRESERVE_1000_FOUNDATION_PLUS_5000_EVIDENCE_GLOBAL_UPDATES",
+      "global_update_semantics": "MEAN_GRADIENT_OVER_ALL_TRAIN_SUBJECTS_PER_GLOBAL_STEP",
+      "per_subject_exposure_horizon": "1000_FOUNDATION_PLUS_5000_EVIDENCE",
+      "cohort_size_changes_adam_update_count": false
     },
     "dense_scene_carrier": {
       "architecture_id": "RealSaS.IRIS.DenseObservationEvidence.v3_1",
@@ -55,11 +59,13 @@
         "NEAR_ZERO_WRONG_SIGN_STABILIZATION",
         "TEACHER_ONLY_SURFACE_NORMAL_SUPERVISION"
       ],
+      "normal_loss_weight": 0.01,
+      "normal_weight_policy": "AUXILIARY_ORIENTATION_EVIDENCE_MUST_NOT_REPLACE_FSTAR_AUTHORITY",
       "optional_telemetry_not_required_as_student_input": [
         "TEACHER_DEPTH",
         "TEACHER_MASK"
       ],
-      "normal_source": "EXACT_ADMITTED_SOURCE_MESH_RENDERED_IN_QUALIFIED_CAMERAS",
+      "normal_source": "EXACT_ADMITTED_SOURCE_MESH_FRONT_HITS_IN_QUALIFIED_CAMERAS",
       "normal_is_forward_input": false,
       "depth_is_forward_input": false,
       "mask_is_forward_input_beyond_EXISTING_SOURCE_ALPHA": false,
@@ -89,10 +95,14 @@
     },
     "tessa": {
       "decoder_role": "LEARNED_TOPOLOGY_PROPOSAL_ONLY",
+      "structuralizer": "RealSaS.TESSA.Structuralizer.v2",
+      "conditioning": "DUAL_STREAM__DENSE_IRIS_SCENE_PLUS_INFERENCE_AVAILABLE_GEOMETRY_SURFACE_EVIDENCE",
       "compiler_mesh_authority_unchanged": true,
       "scene_memory_source": "DENSE_IRIS_CARRIER",
-      "adapter": "DENSE_SCENE_MEMORY_ADAPTER_V1",
+      "surface_memory_source": "PREDICTED_ZERO_SURFACE_XYZ_PLUS_LEARNED_NORMAL_PLUS_SHARED_H_PLUS_FSTAR_DELTA",
+      "presentation_stream": "ABSTAIN__NOT_FABRICATED_WHILE_STAGE48_PRESENTATION_PAIR_EVIDENCE_IS_INCOMPLETE",
       "legacy_triplane_requirement_for_truth139": false,
+      "iris_frozen_during_tessa_training": true,
       "required_consequence_court": "TESSA_PROPOSAL_TO_COMPILER_M_GEOMETRY_CONSEQUENCE"
     }
   },
@@ -109,6 +119,11 @@
     "train_campaign": {
       "members": "TRAIN_COMPONENTS_ONLY",
       "unseen_subjects_present": false,
+      "stages": [
+        "IRIS_GEOMETRY_FOUNDATION",
+        "IRIS_EVIDENCE_ADAPTER_ACQUISITION",
+        "TESSA_TOPOLOGY_PROPOSAL_TRAINING"
+      ],
       "output": "BYTE_SEALED_SHARED_IRIS_AND_TESSA_CHECKPOINTS_PLUS_RECEIPTS"
     },
     "unseen_eval_campaign": {

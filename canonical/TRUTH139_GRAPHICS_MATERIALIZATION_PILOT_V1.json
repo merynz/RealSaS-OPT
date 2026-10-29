@@ -8,8 +8,8 @@
   },
   "date": "2026-10-29",
   "parent_diversity_census_identity_sha256": "ad7e87fa896a0d8a8636fce922180535fccc9063ab1a2245513faa23eb759c67",
-  "parent_work_order_identity_sha256": "6344802aa6c95e41eea34e157d28adbe2b2d930f34c30c99c24a37724a583f6d",
-  "pilot_identity_sha256": "dbd3e7d0379059952444f81e16e679cf16d58b4c1841e000b6b8a1d86c517acd",
+  "parent_work_order_identity_sha256": "7fd1b6e3ac7d980c469a99de116e9896fd8828b3ce76e56494db83be21d0235e",
+  "pilot_identity_sha256": "4b2926af4ef8804103c25211d2c685964d6b1252f0424f50f96e124717d77fc4",
   "pilot_size": 8,
   "policy": {
     "dense_graphics_and_visibility_required": true,
@@ -49,7 +49,10 @@
     {
       "component_cross_pack": true,
       "component_ordinal": 2,
-      "component_pack_counts": {"quaternius-ultimate-modular-men": 11, "quaternius-ultimate-modular-women": 10},
+      "component_pack_counts": {
+        "quaternius-ultimate-modular-men": 11,
+        "quaternius-ultimate-modular-women": 10
+      },
       "component_size": 21,
       "corpus_relative_path": "raw/quaternius/quaternius-ultimate-modular-women/Individual Characters/glTF/Adventurer.gltf",
       "development_or_regression_tainted": false,
@@ -64,7 +67,10 @@
     {
       "component_cross_pack": true,
       "component_ordinal": 3,
-      "component_pack_counts": {"quaternius-cute-animated-monsters": 11, "quaternius-platformer-kit": 3},
+      "component_pack_counts": {
+        "quaternius-cute-animated-monsters": 11,
+        "quaternius-platformer-kit": 3
+      },
       "component_size": 14,
       "corpus_relative_path": "raw/quaternius/quaternius-cute-animated-monsters/glTF/Bee.gltf",
       "development_or_regression_tainted": false,
@@ -79,7 +85,10 @@
     {
       "component_cross_pack": true,
       "component_ordinal": 4,
-      "component_pack_counts": {"quaternius-animated-mech": 4, "quaternius-ultimate-animated-animals": 8},
+      "component_pack_counts": {
+        "quaternius-animated-mech": 4,
+        "quaternius-ultimate-animated-animals": 8
+      },
       "component_size": 12,
       "corpus_relative_path": "raw/quaternius/quaternius-ultimate-animated-animals/glTF/Deer.gltf",
       "development_or_regression_tainted": false,
@@ -94,7 +103,9 @@
     {
       "component_cross_pack": false,
       "component_ordinal": 5,
-      "component_pack_counts": {"quaternius-rpg-characters": 6},
+      "component_pack_counts": {
+        "quaternius-rpg-characters": 6
+      },
       "component_size": 6,
       "corpus_relative_path": "raw/quaternius/quaternius-rpg-characters/glTF/Rogue.gltf",
       "development_or_regression_tainted": false,
@@ -109,7 +120,10 @@
     {
       "component_cross_pack": true,
       "component_ordinal": 6,
-      "component_pack_counts": {"quaternius-cute-animated-monsters": 5, "quaternius-platformer-kit": 1},
+      "component_pack_counts": {
+        "quaternius-cute-animated-monsters": 5,
+        "quaternius-platformer-kit": 1
+      },
       "component_size": 6,
       "corpus_relative_path": "raw/quaternius/quaternius-cute-animated-monsters/glTF/Deer.gltf",
       "development_or_regression_tainted": false,
@@ -124,7 +138,9 @@
     {
       "component_cross_pack": false,
       "component_ordinal": 7,
-      "component_pack_counts": {"quaternius-ultimate-space-kit": 4},
+      "component_pack_counts": {
+        "quaternius-ultimate-space-kit": 4
+      },
       "component_size": 4,
       "corpus_relative_path": "raw/quaternius/quaternius-ultimate-space-kit/Characters/GLTF/Mech_FinnTheFrog.gltf",
       "development_or_regression_tainted": false,
@@ -139,7 +155,9 @@
     {
       "component_cross_pack": false,
       "component_ordinal": 8,
-      "component_pack_counts": {"quaternius-ultimate-animated-animals": 4},
+      "component_pack_counts": {
+        "quaternius-ultimate-animated-animals": 4
+      },
       "component_size": 4,
       "corpus_relative_path": "raw/quaternius/quaternius-ultimate-animated-animals/glTF/Wolf.gltf",
       "development_or_regression_tainted": false,

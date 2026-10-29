@@ -1,8 +1,9 @@
 """Teacher-blind grammar-constrained free-running topology generation for Truth139.
 
-The grammar is public model syntax, not teacher topology.  It restricts generation to the canonical
-TESSA coordinate/special-token language while leaving all geometry/topology choices to the model.
-Generated sequences are independently decoded and validated before any Compiler consequence court.
+The grammar is public model syntax, not teacher topology. It restricts generation to the canonical
+TESSA coordinate/special-token language while leaving geometry/topology choices to the model.
+Final decoding is delegated to the existing canonical TESSA sequence codec used by ShapeProposal
+v2, so the research evaluator cannot silently diverge from the product mesh boundary.
 """
 from __future__ import annotations
 
@@ -11,7 +12,8 @@ from dataclasses import dataclass
 import numpy as np
 import torch
 
-from models.tessa.v1.tokenization_v1 import dequantize_tessa_xyz_v1
+from models.tessa.v1.model_v1 import TESSAConfigV1
+from models.tessa.v1.sequence_codec_v1 import decode_tessa_asset_sequence_v1
 from models.tessa.v2.config_v2 import TESSAStructuralizerConfigV2
 from .dual_stream_incremental_v31 import DualStreamIncrementalDecoderV31
 from .dual_stream_v31 import TESSADualStreamStructuralizerV31
@@ -22,23 +24,36 @@ class GeneratedTopologyMeshV1:
     token_ids: tuple[int, ...]
     vertices_normalized: np.ndarray
     faces: np.ndarray
+    vertex_component_indices: tuple[int, ...]
+    face_component_indices: tuple[int, ...]
     component_count: int
-    face_break_count: int
+    restart_count: int
     status: str
 
 
+def _codec_config(config: TESSAStructuralizerConfigV2) -> TESSAConfigV1:
+    return TESSAConfigV1(
+        coordinate_bins=config.coordinate_bins,
+        max_faces=config.max_faces,
+        max_vertices=config.max_vertices,
+        local_attention_window=config.local_attention_window,
+        query_chunk_size=config.query_chunk_size,
+        surface_latent_count=config.surface_memory_tokens,
+    )
+
+
 class TESSAGrammarStateV1:
+    """Strict subset of the canonical grammar used by the current one-chart-per-component encoder."""
+
     def __init__(self, config: TESSAStructuralizerConfigV2):
         config.validate()
         self.cfg = config
         self.phase = "EXPECT_COMPONENT_BEGIN"
         self.coordinate_remaining = 0
-        self.coordinate_mode: str | None = None
         self.components = 0
-        self.face_breaks = 0
+        self.restarts = 0
 
     def allowed(self) -> tuple[tuple[int, int] | None, tuple[int, ...]]:
-        """Return optional inclusive coordinate range and allowed special tokens."""
         if self.phase == "EXPECT_COMPONENT_BEGIN":
             return None, (self.cfg.COMPONENT_BEGIN,)
         if self.phase == "EXPECT_CHART_BEGIN":
@@ -73,8 +88,7 @@ class TESSAGrammarStateV1:
         if self.phase == "EXPECT_FACE_BREAK":
             if token != cfg.FACE_BREAK:
                 raise ValueError("TESSA_GENERATION_EXPECT_FACE_BREAK")
-            self.face_breaks += 1
-            self.coordinate_mode = "SEED"
+            self.restarts += 1
             self.coordinate_remaining = 9
             self.phase = "COORDINATES"
             return
@@ -86,17 +100,16 @@ class TESSAGrammarStateV1:
                 raise AssertionError("TESSA_GENERATION_COORDINATE_UNDERFLOW")
             if self.coordinate_remaining == 0:
                 self.phase = "STRIP_OR_END"
-                self.coordinate_mode = None
             return
         if self.phase == "STRIP_OR_END":
             if 0 <= token < cfg.coordinate_bins:
-                self.coordinate_mode = "CONTINUATION"
+                # The first coordinate of a strip continuation has just been consumed; exactly two
+                # more coordinate tokens must follow before another structural decision is legal.
                 self.coordinate_remaining = 2
                 self.phase = "COORDINATES"
                 return
             if token == cfg.FACE_BREAK:
-                self.face_breaks += 1
-                self.coordinate_mode = "SEED"
+                self.restarts += 1
                 self.coordinate_remaining = 9
                 self.phase = "COORDINATES"
                 return
@@ -125,15 +138,15 @@ def _masked_argmax(logits: torch.Tensor, state: TESSAGrammarStateV1) -> int:
     if logits.shape != (1, state.cfg.vocab_size) or not bool(torch.isfinite(logits).all()):
         raise ValueError("TESSA_GENERATION_LOGITS_INVALID")
     coordinate_range, specials = state.allowed()
-    mask = torch.full_like(logits, -float("inf"))
+    masked = torch.full_like(logits, -float("inf"))
     if coordinate_range is not None:
         lo, hi = coordinate_range
-        mask[:, lo : hi + 1] = logits[:, lo : hi + 1]
+        masked[:, lo : hi + 1] = logits[:, lo : hi + 1]
     for token in specials:
-        mask[:, int(token)] = logits[:, int(token)]
-    if not bool(torch.isfinite(mask).any()):
+        masked[:, int(token)] = logits[:, int(token)]
+    if not bool(torch.isfinite(masked).any()):
         raise RuntimeError("TESSA_GENERATION_NO_ALLOWED_TOKEN")
-    return int(torch.argmax(mask, dim=-1).item())
+    return int(torch.argmax(masked, dim=-1).item())
 
 
 def decode_generated_topology_v1(
@@ -142,90 +155,16 @@ def decode_generated_topology_v1(
     config: TESSAStructuralizerConfigV2,
 ) -> GeneratedTopologyMeshV1:
     ids = tuple(map(int, token_ids))
-    if len(ids) < 2 or ids[0] != config.BOS or ids[-1] != config.EOS:
-        raise ValueError("TESSA_GENERATED_SEQUENCE_BOUNDARY_INVALID")
-    state = TESSAGrammarStateV1(config)
-    vertices: list[np.ndarray] = []
-    faces: list[tuple[int, int, int]] = []
-    component_vertex_map: dict[tuple[int, int, int], int] | None = None
-    trailing: tuple[int, int] | None = None
-    coordinate_buffer: list[int] = []
-    coordinate_mode: str | None = None
-
-    def vertex_from_q(q: tuple[int, int, int]) -> int:
-        nonlocal component_vertex_map
-        if component_vertex_map is None:
-            raise AssertionError("TESSA_GENERATED_COMPONENT_MAP_MISSING")
-        if q in component_vertex_map:
-            return component_vertex_map[q]
-        xyz = dequantize_tessa_xyz_v1(np.asarray([q], dtype=np.int64), config.coordinate_bins)[0]
-        index = len(vertices)
-        vertices.append(xyz)
-        component_vertex_map[q] = index
-        if len(vertices) > config.max_vertices:
-            raise ValueError("TESSA_GENERATED_VERTEX_BUDGET_EXCEEDED")
-        return index
-
-    for token in ids[1:]:
-        prior_phase = state.phase
-        if prior_phase == "EXPECT_COMPONENT_BEGIN" or (prior_phase == "NEXT_COMPONENT_OR_EOS" and token == config.COMPONENT_BEGIN):
-            component_vertex_map = {}
-            trailing = None
-        if prior_phase == "EXPECT_FACE_BREAK" or (prior_phase == "STRIP_OR_END" and token == config.FACE_BREAK):
-            coordinate_mode = "SEED"
-            coordinate_buffer = []
-        elif prior_phase == "STRIP_OR_END" and 0 <= token < config.coordinate_bins:
-            coordinate_mode = "CONTINUATION"
-            coordinate_buffer = [token]
-        elif prior_phase == "COORDINATES":
-            coordinate_buffer.append(token)
-
-        state.consume(token)
-
-        if prior_phase == "COORDINATES" and state.phase == "STRIP_OR_END":
-            if coordinate_mode == "SEED":
-                if len(coordinate_buffer) != 9:
-                    raise AssertionError("TESSA_GENERATED_SEED_COORDINATE_COUNT")
-                qrows = [tuple(coordinate_buffer[i : i + 3]) for i in (0, 3, 6)]
-                face = tuple(vertex_from_q(q) for q in qrows)
-                if len(set(face)) != 3:
-                    raise ValueError("TESSA_GENERATED_DEGENERATE_SEED_FACE")
-                faces.append(face)
-                trailing = (face[1], face[2])
-            elif coordinate_mode == "CONTINUATION":
-                if len(coordinate_buffer) != 3 or trailing is None:
-                    raise AssertionError("TESSA_GENERATED_CONTINUATION_STATE")
-                new_vertex = vertex_from_q(tuple(coordinate_buffer))
-                face = (trailing[0], trailing[1], new_vertex)
-                if len(set(face)) != 3:
-                    raise ValueError("TESSA_GENERATED_DEGENERATE_CONTINUATION_FACE")
-                faces.append(face)
-                trailing = (trailing[1], new_vertex)
-            else:
-                raise AssertionError("TESSA_GENERATED_COORDINATE_MODE_MISSING")
-            if len(faces) > config.max_faces:
-                raise ValueError("TESSA_GENERATED_FACE_BUDGET_EXCEEDED")
-            coordinate_buffer = []
-            coordinate_mode = None
-        if prior_phase == "STRIP_OR_END" and token == config.CHART_END:
-            trailing = None
-
-    if state.phase != "DONE" or not faces:
-        raise ValueError("TESSA_GENERATED_SEQUENCE_INCOMPLETE_OR_EMPTY")
-    face_array = np.asarray(faces, dtype=np.int64)
-    keys = [tuple(sorted(map(int, face))) for face in faces]
-    if len(set(keys)) != len(keys):
-        raise ValueError("TESSA_GENERATED_DUPLICATE_FACE")
-    vertex_array = np.asarray(vertices, dtype=np.float32)
-    if vertex_array.ndim != 2 or vertex_array.shape[1] != 3 or not np.isfinite(vertex_array).all():
-        raise ValueError("TESSA_GENERATED_VERTEX_ARRAY_INVALID")
+    decoded = decode_tessa_asset_sequence_v1(ids, cfg=_codec_config(config))
     return GeneratedTopologyMeshV1(
         token_ids=ids,
-        vertices_normalized=vertex_array,
-        faces=face_array,
-        component_count=state.components,
-        face_break_count=state.face_breaks,
-        status="PASS_GRAMMAR_AND_MESH_DECODE",
+        vertices_normalized=np.asarray(decoded.vertices_normalized, dtype=np.float32),
+        faces=np.asarray(decoded.faces, dtype=np.int64),
+        vertex_component_indices=tuple(map(int, decoded.vertex_component_indices)),
+        face_component_indices=tuple(map(int, decoded.face_component_indices)),
+        component_count=int(decoded.component_count),
+        restart_count=int(decoded.restart_count),
+        status="PASS_CANONICAL_TESSA_SEQUENCE_CODEC",
     )
 
 

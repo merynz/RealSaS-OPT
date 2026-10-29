@@ -6,10 +6,16 @@ semantics before any decisive 139 audit is allowed:
 
 * TESSA raw representability is gated on total asset vertices/faces, matching
   the canonical sequence codec scale policy rather than per primitive limits.
-* Flat/Textured (or otherwise exact-identity) duplicate families carry the
-  union of every variant's leakage lineage and development taint.
+* Exact-geometry duplicate families carry the union of every variant's leakage
+  lineage and development taint for capability analysis.
 * The representative source is chosen by truth capability first, then the
   historical textured/non-flat preference, never by filename preference alone.
+
+Important: exact-geometry grouping is NOT the historical October-4 subject
+identity rule. The raw per-file rigged/animated candidate rows are therefore
+retained so a later historical court can project the documented Flat/Textured
+presentation-family collapse directly from the 143 source files instead of
+compounding two different deduplication definitions.
 
 This remains a raw-byte pre-admission audit. Blender import/render, Platform
 admission, split selection, training and qualification are still forbidden.
@@ -193,12 +199,14 @@ def audit(raw_root: Path, *, fit8_selection: Path, expected_corpus_root_sha256: 
         },
         "v2_repairs": {
             "tessa_scale_unit": "TOTAL_ASSET_RAW_PRECHECK",
-            "duplicate_family_lineage": "UNION_ALL_VARIANTS",
-            "duplicate_family_development_taint": "UNION_ALL_VARIANTS",
+            "exact_geometry_duplicate_family_lineage": "UNION_ALL_VARIANTS",
+            "exact_geometry_duplicate_family_development_taint": "UNION_ALL_VARIANTS",
             "representative_selection": "CAPABILITY_FIRST",
+            "historical_projection_substrate": "RIGGED_ANIMATED_FILE_ROWS_BEFORE_EXACT_GEOMETRY_DEDUP",
         },
         "historical_cardinality_reproduced": historical_match,
         "counts": counts,
+        "rigged_animated_file_rows": candidates,
         "duplicate_groups": duplicate_groups,
         "subjects": subjects,
         "file_failures": failures,

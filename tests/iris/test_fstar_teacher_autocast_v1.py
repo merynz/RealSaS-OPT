@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import torch
 
-from models.iris.training.apparatus_v1 import targets
+from models.iris.v31.fstar_teacher_v31 import exact_fstar_targets_v31
 from models.iris.v5.source_signed_field_v5 import source_signed_field_numpy_v5, SourceSignedFieldPolicyV5
 
 
@@ -60,6 +60,6 @@ def test_exact_fstar_teacher_disables_inherited_bf16_autocast_at_r1024_edge():
     # Reproduce the caller condition from IRIS V3.1: the model owns an outer
     # BF16 autocast scope, but exact teacher target generation must remain FP32.
     with torch.autocast(device_type="cpu", dtype=torch.bfloat16, enabled=True):
-        actual = targets(subject, points, device="cpu", torch_authority=True)
+        actual = exact_fstar_targets_v31(subject, points, device="cpu")
 
     np.testing.assert_allclose(actual, expected, rtol=0.0, atol=2e-7)

@@ -29,16 +29,16 @@ def _file_hash(path: Path) -> str:
 
 
 def _row_partition(subject: str, count: int, seed: int, fraction: float) -> np.ndarray:
-    train = []
+    """Exact mechanics-train side of presentation_partition_v1."""
+    train, val = [], []
     for index in range(int(count)):
         token = f"{seed}|{subject}|mechanics|{index}".encode()
         bucket = int.from_bytes(hashlib.sha256(token).digest()[:8], "big") / float(1 << 64)
-        if bucket < float(fraction):
-            train.append(index)
+        (train if bucket < float(fraction) else val).append(index)
+    if count >= 2 and not val:
+        val.append(train.pop())
     if count >= 2 and not train:
-        # Exact parity with presentation_partition_v1: when train is empty it receives the first
-        # validation row after validation construction.  Validation order is ascending index.
-        train.append(0)
+        train.append(val.pop())
     return np.asarray(train, dtype=np.int64)
 
 

@@ -1,6 +1,7 @@
 {
   "schema": "RealSaS.Truth139CorpusLocatorRequest.v1",
   "date": "2026-10-29",
+  "revision": 2,
   "enabled": true,
   "purpose": "LOCATE_THE_EXACT_OCTOBER4_SEALED_CORPUS_ROOT_FOR_RAW_CAPABILITY_AUDIT",
   "expected_corpus_root_sha256": "2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab",

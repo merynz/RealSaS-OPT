@@ -5,19 +5,130 @@ The October-4 corpus manifest/ledger/seal and every GLTF/GLB primary plus local 
 remain exact-byte authority. Historical source-page snapshots are provenance evidence, not geometry/
 rig/material capability bytes. Their binding is preserved and availability is reported explicitly,
 but a missing archived HTML page may not suppress structural truth discovery.
+
+Historical Flat/Textured presentation variants are collapsed by a path-derived family key before the
+historical reproduction court. This is intentionally separate from exact geometry identity: the
+October-4 census explicitly counted those presentation variants as one subject even when their GLTF
+payloads are not byte/geometry identical.
 """
 from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from tools.corpus import run_truth139_sealed_raw_audit_v1 as seal_v1
-from tools.corpus.audit_truth139_gltf_capabilities_v2 import audit as capability_audit_v2
+from tools.corpus.audit_truth139_gltf_capabilities_v2 import (
+    _capability_rank,
+    _group_development_taint,
+    _union_lineage,
+    audit as capability_audit_v2,
+)
 from tools.corpus.run_truth139_sealed_raw_audit_v2 import _source_family_tokens
 
 SCHEMA = "RealSaS.Truth139SealedRawAudit.v2"
 PASS = "PASS_SEALED_RAW_CAPABILITY_AUDIT_V2__PLATFORM_ADMISSION_PENDING"
+PRESENTATION_VARIANT_SEGMENTS = {
+    "flat",
+    "flat colors",
+    "flat colours",
+    "textured",
+}
+
+
+def _historical_variant_key(row: dict) -> str:
+    """Return a source-family key that strips only known presentation-style path segments.
+
+    Category folders such as Big/Blob/Flying remain in the key, so same-named assets in genuinely
+    different families are not collapsed. Only style-only directories used by the historical
+    Flat/Textured duplicate family disappear.
+    """
+    source = dict(row.get("source") or {})
+    relative = PurePosixPath(str(source.get("relative_path") or ""))
+    parts = list(relative.parts)
+    try:
+        q = parts.index("quaternius")
+    except ValueError:
+        q = -1
+    creator = str(source.get("creator") or "").lower()
+    pack = str(source.get("pack_id") or "").lower()
+    tail = parts[q + 2 :] if q >= 0 and q + 2 <= len(parts) else parts
+    normalized_tail = [part.lower() for part in tail if part.lower() not in PRESENTATION_VARIANT_SEGMENTS]
+    if not creator or not pack or not normalized_tail:
+        raise ValueError("TRUTH139_V3_HISTORICAL_VARIANT_KEY_FIELDS_MISSING")
+    return seal_v1.value_hash({"creator": creator, "pack_id": pack, "path": normalized_tail})
+
+
+def _collapse_historical_presentation_variants(subjects: list[dict]) -> tuple[list[dict], list[dict]]:
+    grouped: dict[str, list[dict]] = {}
+    for row in subjects:
+        grouped.setdefault(_historical_variant_key(row), []).append(row)
+
+    collapsed: list[dict] = []
+    groups: list[dict] = []
+    for family_key, family in sorted(grouped.items()):
+        ordered = sorted(family, key=_capability_rank)
+        representative = dict(ordered[0])
+        lineage = _union_lineage(family)
+        taint = _group_development_taint(family)
+        source_rows: list[dict] = []
+        seen_paths: set[str] = set()
+        for member in family:
+            candidates = list(member.get("duplicate_source_files") or ()) or [dict(member.get("source") or {})]
+            for source in candidates:
+                relative = str(source.get("relative_path") or "")
+                if relative and relative not in seen_paths:
+                    source_rows.append(dict(source))
+                    seen_paths.add(relative)
+        source_rows.sort(key=lambda row: str(row.get("relative_path") or ""))
+
+        full = bool((representative.get("capabilities") or {}).get("FULL_TRUTH139_RAW_ELIGIBLE"))
+        blockers = [
+            str(value)
+            for member in family
+            for value in (member.get("raw_eligibility_blockers") or ())
+            if str(value) != "DEVELOPMENT_OR_REGRESSION_EXCLUSION"
+        ]
+        if taint:
+            blockers.append("DUPLICATE_FAMILY_DEVELOPMENT_OR_REGRESSION_EXCLUSION")
+
+        historical_identity = seal_v1.value_hash({"historical_variant_family": family_key})
+        value = {
+            **representative,
+            "subject_id": "truth139_" + historical_identity[:20],
+            "subject_identity_signature": historical_identity,
+            "exact_geometry_identity_signature": str(representative.get("subject_identity_signature") or ""),
+            "historical_variant_family_signature": family_key,
+            "lineage": lineage,
+            "duplicate_source_files": source_rows,
+            "duplicate_source_file_count": len(source_rows),
+            "duplicate_family_development_taint": taint,
+            "development_exclusion": (
+                "DUPLICATE_FAMILY_DEVELOPMENT_TAINT:" + ",".join(taint)
+                if taint
+                else None
+            ),
+            "raw_eligibility_blockers": sorted(set(blockers)),
+            "representative_selection_policy": "MAX_TRUTH_CAPABILITY_THEN_TEXTURED_NONFLAT_THEN_PATH",
+            "raw_eligible_for_truth139": bool(full and not taint),
+            "admitted_for_truth139": False,
+            "training_authorized": False,
+        }
+        collapsed.append(value)
+        if len(source_rows) > 1:
+            groups.append(
+                {
+                    "subject_id": value["subject_id"],
+                    "identity": historical_identity,
+                    "historical_variant_family_signature": family_key,
+                    "representative": str((representative.get("source") or {}).get("relative_path") or ""),
+                    "source_files": [str(row.get("relative_path") or "") for row in source_rows],
+                    "development_taint": taint,
+                    "lineage_union": lineage,
+                    "collapse_reason": "HISTORICAL_PRESENTATION_VARIANT_FAMILY",
+                }
+            )
+    return collapsed, groups
 
 
 def run(raw_root: Path, fit8_selection: Path) -> dict:
@@ -84,24 +195,56 @@ def run(raw_root: Path, fit8_selection: Path) -> dict:
             },
         )
 
-        lineage = dict(value.get("lineage") or {})
-        lineage["source_family_signature"] = _source_family_tokens(value)
-        value["lineage"] = lineage
-        source["source_family_signature"] = list(lineage["source_family_signature"])
         value["source"] = source
         enriched.append(value)
 
-    passed = (
-        base.get("status") == "PASS_RAW_CAPABILITY_AUDIT_V2__PLATFORM_ADMISSION_PENDING"
-        and base.get("historical_cardinality_reproduced") is True
+    subjects, duplicate_groups = _collapse_historical_presentation_variants(enriched)
+    for value in subjects:
+        lineage = dict(value.get("lineage") or {})
+        lineage["source_family_signature"] = _source_family_tokens(value)
+        value["lineage"] = lineage
+        source = dict(value["source"])
+        source["source_family_signature"] = list(lineage["source_family_signature"])
+        value["source"] = source
+
+    base_counts = dict(base["counts"])
+    counts = {
+        **base_counts,
+        "deduplicated_rigged_animated_subjects": len(subjects),
+        "duplicate_files_collapsed": int(base_counts.get("rigged_animated_files", 0)) - len(subjects),
+        "development_or_regression_excluded_subjects": sum(bool(row.get("development_exclusion")) for row in subjects),
+        "raw_full_family_eligible_subjects_before_development_exclusion": sum(
+            bool((row.get("capabilities") or {}).get("FULL_TRUTH139_RAW_ELIGIBLE")) for row in subjects
+        ),
+        "raw_full_family_eligible_subjects_after_development_exclusion": sum(
+            bool(row.get("raw_eligible_for_truth139")) for row in subjects
+        ),
+    }
+    structural_core_passed = bool(
+        counts.get("gltf_glb_files_scanned") == seal_v1.EXPECTED_GLTF_GLBS
+        and counts.get("files_audited") == seal_v1.EXPECTED_GLTF_GLBS
+        and counts.get("file_audit_failures") == 0
+        and counts.get("rigged_animated_files") == 143
     )
+    historical_cardinality_reproduced = bool(
+        counts.get("deduplicated_rigged_animated_subjects") == 139
+        and counts.get("duplicate_files_collapsed") == 4
+    )
+
     provenance_rows = [provenance_by_pack[key] for key in sorted(provenance_by_pack)]
     missing = [row["pack_id"] for row in provenance_rows if not row["historical_snapshot_byte_available"]]
     payload = {
         "schema": SCHEMA,
         "date": "2026-10-29",
-        "status": PASS if passed else "FAIL_OR_INCOMPLETE_SEALED_RAW_AUDIT_V2__DO_NOT_BUILD_APPARATUS",
-        "audit_mode": "STRUCTURAL_CAPABILITY_AUTHORITY__ARCHIVAL_WEB_PROVENANCE_REPORTED_SEPARATELY",
+        "status": PASS if structural_core_passed else "FAIL_STRUCTURAL_ASSET_AUDIT__DO_NOT_BUILD_APPARATUS",
+        "audit_mode": "STRUCTURAL_CAPABILITY_AUTHORITY__ARCHIVAL_WEB_PROVENANCE_AND_HISTORICAL_REPRODUCTION_REPORTED_SEPARATELY",
+        "structural_core_passed": structural_core_passed,
+        "historical_cardinality_reproduced": historical_cardinality_reproduced,
+        "historical_reproduction_status": (
+            "CARDINALITY_REPRODUCED__FULL_COURT_PENDING"
+            if historical_cardinality_reproduced
+            else "CARDINALITY_MISMATCH__NONBLOCKING_STRUCTURAL_FINDING"
+        ),
         "corpus": {
             "root_path": str(raw_root),
             "root_sha256": seal_v1.EXPECTED_ROOT_SHA256,
@@ -114,9 +257,13 @@ def run(raw_root: Path, fit8_selection: Path) -> dict:
         },
         "base_capability_audit_schema": base["schema"],
         "base_capability_audit_identity_sha256": base["audit_identity_sha256"],
+        "base_capability_audit_status": str(base.get("status") or ""),
         "v2_repairs": {
             **dict(base["v2_repairs"]),
             "source_family_lineage": "CREATOR_PACK_NORMALIZED_ASSET_STEM__NOT_PACK_LEVEL_SPLIT",
+            "historical_presentation_variant_dedup": "PATH_FAMILY_AFTER_STRIPPING_STYLE_ONLY_FLAT_TEXTURED_SEGMENTS",
+            "historical_cardinality_is_separate_court": True,
+            "archival_web_snapshot_bytes_are_nonblocking_provenance": True,
         },
         "provenance": {
             "historical_snapshot_binding_preserved": True,
@@ -127,9 +274,9 @@ def run(raw_root: Path, fit8_selection: Path) -> dict:
             "historical_snapshot_byte_missing_pack_ids": missing,
             "packs": provenance_rows,
         },
-        "counts": dict(base["counts"]),
-        "subjects": enriched,
-        "duplicate_groups": list(base.get("duplicate_groups") or ()),
+        "counts": counts,
+        "subjects": subjects,
+        "duplicate_groups": duplicate_groups,
         "file_failures": list(base.get("file_failures") or ()),
         "split_authorized": False,
         "training_authorized": False,
@@ -155,6 +302,7 @@ def main() -> None:
         "output": str(output),
         "status": result["status"],
         "counts": result["counts"],
+        "historical_reproduction_status": result["historical_reproduction_status"],
         "provenance": {k: result["provenance"][k] for k in (
             "historical_snapshot_byte_available_pack_count",
             "historical_snapshot_byte_missing_pack_count",

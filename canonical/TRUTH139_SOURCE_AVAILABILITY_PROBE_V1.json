@@ -1,6 +1,7 @@
 {
   "schema": "RealSaS.Truth139SourceAvailabilityProbeRequest.v1",
   "date": "2026-10-29",
+  "revision": 2,
   "enabled": true,
   "corpus_root_sha256": "2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab",
   "manifest_sha256": "3799b170d4138dbc0447d2d3456cc9ad5ba7e185fddace6d6ce2de0d0a2adc00",

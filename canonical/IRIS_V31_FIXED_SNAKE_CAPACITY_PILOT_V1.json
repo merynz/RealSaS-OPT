@@ -1,0 +1,142 @@
+{
+  "schema": "RealSaS.IRISV31FixedSnakeCapacityPilotRecipe.v1",
+  "date": "2026-10-29",
+  "scope": "FIXED_SNAKE_HELDOUT_A100_CAPACITY_PILOT__NO_LOFO_EXPANSION_AUTHORIZED",
+  "architecture_id": "RealSaS.IRIS.DenseObservationEvidence.v3_1.capacity_pilot_v1",
+  "trainer_revision": "IRIS_V31_FIXED_SNAKE_CAPACITY_PILOT_V1",
+  "pilot": {
+    "fixed_fold_id": "LOFO_00_fit8_snake_v1",
+    "fixed_heldout_subject": "fit8_snake_v1",
+    "train_subject_count": 7,
+    "heldout_visible_during_training": false,
+    "heldout_visible_during_checkpoint_selection": false,
+    "lofo_expansion_authorized": false,
+    "lofo_expansion_requires_separate_review": true
+  },
+  "model_config": {
+    "carrier_resolution": 40,
+    "carrier_channels": 160,
+    "mechanical_channels": [
+      "nonrigid_response_mean",
+      "nonrigid_response_log_scale",
+      "response_energy_mean",
+      "response_energy_log_scale"
+    ],
+    "pair_channels": [
+      "occlusion_attenuation_logit"
+    ],
+    "query_width": 896,
+    "query_layers": 3,
+    "fourier_bands": 4,
+    "private_bottleneck": 320,
+    "lift_chunk": 16384,
+    "delta_bound": 0.03
+  },
+  "capacity_policy": {
+    "status": "PREREGISTERED_A100_FIXED_HELDOUT_PILOT_CAPACITY",
+    "selection_basis": "KNIGHT_ACCEPTED_IRIS_5_094_882_PARAMETER_LOWER_BOUND_PLUS_SHARED_SCENE_COMPUTE_UTILIZATION",
+    "expected_trainable_parameters": 9193710,
+    "expected_active_joint_parameters_pair_abstain": 5962733,
+    "expected_active_geometry_warmup_parameters": 4564644,
+    "carrier_state_values": 10240000,
+    "production_capacity_selected": false,
+    "future_capacity_change_requires_new_recipe": true
+  },
+  "mechanics_target_transform": "LOG1P_NONNEGATIVE_MAGNITUDES",
+  "mechanics_transform_policy": {
+    "reason": "PRESERVE_NONNEGATIVE_MEASURED_TAIL_WITHOUT_RAW_MAGNITUDE_GRADIENT_DOMINANCE",
+    "invertible": true,
+    "subject_specific_filtering": false,
+    "target_clipping": false,
+    "truth_rows_deleted": false,
+    "formula": "log1p(target)"
+  },
+  "truth_authorities": {
+    "geometry": "EXACT_EXISTING_IMAGE_DERIVED_FSTAR_COHORT_MANIFEST",
+    "presentation": "EXACT_STAGE48_FIT8_PRESENTATION_TRUTH_BUNDLE",
+    "occlusion_attenuation": "ABSTAIN__NO_OBSERVATION_CONDITIONED_PAIR_EVIDENCE_IN_STAGE48_FIT8",
+    "semantic_part_class": "FORBIDDEN"
+  },
+  "optimizer": {
+    "kind": "ADAMW",
+    "learning_rate": 0.00008,
+    "minimum_learning_rate": 0.000004,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 1.0,
+    "float32_matmul_precision": "highest",
+    "tf32": false,
+    "cudnn_deterministic": true,
+    "bf16_autocast": true
+  },
+  "schedule": [
+    {
+      "id": "GEOMETRY_WARMUP",
+      "steps": 1000,
+      "families": [
+        "FSTAR_GEOMETRY"
+      ],
+      "loss_weights": {
+        "geometry": 1.0,
+        "mechanics": 0.0,
+        "appearance": 0.0,
+        "occlusion_attenuation": 0.0
+      }
+    },
+    {
+      "id": "AWARE_SCENE_JOINT",
+      "steps": 5000,
+      "families": [
+        "FSTAR_GEOMETRY",
+        "CONDITIONAL_NONRIGID_RESPONSE",
+        "SOURCE_EQUIVALENT_RGBA"
+      ],
+      "loss_weights": {
+        "geometry": 1.0,
+        "mechanics": 0.25,
+        "appearance": 0.25,
+        "occlusion_attenuation": 0.0
+      }
+    }
+  ],
+  "sampling": {
+    "geometry_queries_per_subject_step": 8192,
+    "geometry_mix": {
+      "replay": 0.5,
+      "near": 0.25,
+      "straddle": 0.25
+    },
+    "mechanical_queries_per_subject_step": 1024,
+    "appearance_queries_per_subject_step": 128,
+    "pair_queries_per_subject_step": 0,
+    "presentation_train_fraction": 0.8,
+    "seed": 26102831,
+    "field_huber_beta": 0.01,
+    "field_clamp": 0.25
+  },
+  "optimizer_update_semantics": "ONE_GLOBAL_UPDATE_EQUALS_EQUAL_WEIGHT_GRADIENT_ACCUMULATION_OVER_ALL_SEVEN_TRAIN_SUBJECTS",
+  "physical_packing_semantics": "ONE_SUBJECT_PER_PHYSICAL_MICROBATCH__UNCHANGED_FOR_PILOT",
+  "evaluation": {
+    "interval_steps": 200,
+    "geometry_validation_points_per_train_subject": 8192,
+    "presentation_validation_uses_fixed_preregistered_validation_rows": true,
+    "checkpoint_selector": "MINIMIZE_WORST_TRAIN_SUBJECT_WEIGHTED_VALIDATION_THEN_MEAN_THEN_EARLIER_STEP",
+    "heldout_open_rule": "ONLY_AFTER_SELECTED_CHECKPOINT_HASH_IS_FROZEN",
+    "numeric_v31_geometry_pass_threshold": null,
+    "numeric_v31_presentation_pass_threshold": null
+  },
+  "checkpoint": {
+    "interval_steps": 200,
+    "durable_resume_required": true,
+    "resume_restores_optimizer_scheduler_and_step": true
+  },
+  "claims": {
+    "fit8_pass_from_pilot": false,
+    "product_pass": false,
+    "genericity": false,
+    "unseen": false,
+    "production_capacity_selected": false,
+    "teacher_inputs_in_forward": false,
+    "semantic_taxonomy_used": false,
+    "occlusion_attenuation_head_trained": false
+  }
+}

@@ -27,21 +27,24 @@
     "EXACT_SEALED_PRIMARY_SOURCE_AND_EXTERNAL_DEPENDENCIES",
     "ADMITTED_8VIEW_1024_RGBA_OBSERVATIONS",
     "CAMERA_PROJECTION_BUNDLE",
-    "EXACT_ADMITTED_IMPORT_REST_GEOMETRY",
-    "SOURCE_MATERIAL_EVALUATOR_OR_EQUIVALENT_EXACT_BASE_COLOR_ALPHA_BINDING",
-    "SOURCE_SCENE_SNAPSHOT"
+    "SOURCE_SCENE_SNAPSHOT_WITH_SOURCE_WORLD_TO_CANONICAL_TRANSFORM",
+    "EXACT_STAGE47_ADMITTED_REST_GEOMETRY",
+    "SOURCE_MATERIAL_EVALUATOR_OR_EQUIVALENT_EXACT_BASE_COLOR_ALPHA_BINDING"
   ],
   "required_dense_truth_families": {
     "VISIBLE_PIXEL_GBUFFER": {
       "per_view": 8,
       "resolution": 1024,
-      "required_channels": [
+      "required_channels_stored_or_exactly_reconstructable": [
         "foreground",
         "source_linear_rgba",
         "depth",
-        "normal_world",
+        "normal_source_world",
+        "normal_canonical",
+        "view_facing_confidence",
         "face_index",
         "barycentric",
+        "surface_xyz_source_world",
         "surface_xyz_canonical"
       ],
       "teacher_only_channels_allowed": [
@@ -51,6 +54,18 @@
         "source_texture_reference"
       ],
       "rule": "TEACHER_ONLY_SOURCE_BINDING_IDS_MAY_GROUP_OR_AUDIT_TRUTH_BUT_ARE_NOT_STUDENT_SEMANTIC_TARGETS"
+    },
+    "INDEPENDENT_RASTER_GEOMETRY_COURT": {
+      "builder": "tools/corpus/validate_truth139_dense_gbuffer_geometry_v1.py",
+      "required_status": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_DENSE_GPU_GBUFFER",
+      "minimum_policy": "DETERMINISTIC_INTERIOR_PIXEL_SAMPLES_IN_EVERY_VIEW",
+      "verifies": [
+        "FIRST_HIT_FACE_ID",
+        "BARYCENTRIC_COORDINATES",
+        "CAMERA_DEPTH",
+        "RECONSTRUCTED_SURFACE_POINT"
+      ],
+      "independence": "NUMPY_CPU_RAY_TRIANGLE_INTERSECTION__NO_GPU_RASTERIZER_OR_RGB_MATERIAL_SEMANTICS"
     },
     "SURFACE_VISIBILITY_SUPPORT": {
       "required_fields": [
@@ -93,7 +108,7 @@
         "observed_in_input_views",
         "unobserved_but_source_material_evaluable"
       ],
-      "rule": "WHEN_EXACT_SOURCE_MATERIAL_BYTES_DEFINE_AN_UNOBSERVED_SURFACE_VALUE_IT_IS_TEACHER_TRUTH_NOT_HALLUCINATED_FILL"
+      "rule": "WHEN_EXACT_SOURCE_MATERIAL_BYTES_DEFINE_AN_UNOBSERVED_SURFACE_VALUE_IT_IS_TEACHER_TRUTH__OTHERWISE_IT_REMAINS_EXPLICITLY_UNOBSERVED_AND_IS_NOT_ZERO_FILLED"
     },
     "CONTOUR_AND_ALPHA": {
       "required_fields": [
@@ -125,13 +140,14 @@
     "role": "EXPENSIVE_RENDERER_EQUIVALENCE_AND_INTERVENTION_COURT",
     "dense_authority_replacement": false,
     "dense_authority_complement": true,
-    "rule": "STAGE48_VALIDATES_THE_RENDERER_AND_AMBIGUOUS_MULTIHIT_CASES__DENSE_GBUFFER_AND_SOURCE_MATERIAL_EVALUATION_SUPPLY_COVERAGE"
+    "rule": "STAGE48_VALIDATES_SOURCE_RENDERER_EQUIVALENCE_AND_AMBIGUOUS_MULTIHIT_CASES__DENSE_GBUFFER_SUPPLIES_COVERAGE"
   },
   "training_projection_contract": {
     "architecture_change_required": false,
     "current_appearance_head_may_be_reused": true,
     "current_sparse_stage48_rgba_rows_alone_for_truth139_training": false,
     "dense_surface_addressed_rgba_rows_required": true,
+    "independent_raster_geometry_court_required": true,
     "ambiguous_multihit_per_layer_rgba_may_not_be_imputed": true,
     "teacher_only_binding_ids_may_not_enter_student_forward": true,
     "semantic_part_taxonomy_used": false
@@ -153,8 +169,10 @@
     "batch_receipt_and_exact_output_hashes_required": true
   },
   "gates": {
-    "truth139_appearance_training_before_dense_authority_materialized": false,
-    "truth139_mechanics_or_geometry_training_may_depend_on_this_gate": false,
+    "appearance_training_before_dense_authority_forbidden": true,
+    "appearance_training_before_independent_raster_geometry_court_forbidden": true,
+    "appearance_training_from_stage48_sparse_rows_only_forbidden": true,
+    "mechanics_or_geometry_training_requires_dense_appearance": false,
     "missing_dense_appearance_rows_may_be_silently_zero_filled": false,
     "qualification_minted": false
   }

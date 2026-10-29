@@ -1,14 +1,14 @@
 {
   "schema": "RealSaS.Truth139GeometryTeacherContract.v1",
   "date": "2026-10-29",
-  "status": "PREREGISTERED__FULL_SOURCE_SURFACE_TEACHER_REQUIRED",
+  "status": "PREREGISTERED__FULL_SOURCE_SURFACE_TEACHER_AND_REBINDING_COURT_REQUIRED",
   "purpose": "PRESERVE_EXACT_FULL_SOURCE_GEOMETRY_AND_TOPOLOGY_EVIDENCE_IN_ADDITION_TO_IMAGE_DERIVED_FSTAR_WITHOUT_PRETENDING_OPEN_OR_NONMANIFOLD_CHARACTER_MESHES_HAVE_A_GLOBALLY_VALID_SDF",
   "authority_separation": {
     "image_derived_fstar": "OBSERVATION_DERIVED_BOUNDED_FIELD_USED_BY_THE_CURRENT_IRIS_V3_1_LANE",
     "source_surface_teacher": "PRIVILEGED_TRAINING_TARGET_AND_AUDIT_EVIDENCE_FROM_THE_EXACT_SOURCE_MESH",
-    "topology_teacher": "EXACT_SOURCE_TRIANGLE_CONNECTIVITY_FOR_TESSA_OR_GEOMETRY_AUDIT_ONLY",
+    "topology_teacher": "EXACT_SOURCE_TRIANGLE_CONNECTIVITY_AS_GENERIC_CORPUS_TRUTH__MODEL_SPECIFIC_PROJECTION_COMES_LATER",
     "global_watertight_sdf_claimed": false,
-    "mesh_winding_is_global_inside_outSIDE_AUTHORITY": false
+    "mesh_winding_is_global_inside_outside_authority": false
   },
   "required_inputs": [
     "EXACT_STAGE47_ADMITTED_REST_GEOMETRY",
@@ -54,9 +54,21 @@
       "offset_distance"
     ]
   },
-  "independent_evidence": {
-    "dense_front_surface_raster_court": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_DENSE_GPU_GBUFFER",
-    "graphics_cross_view_visibility_court": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_VISIBILITY_OCCLUSION_TEACHER",
+  "independent_courts": {
+    "full_source_geometry_rebinding": {
+      "builder": "tools/corpus/validate_truth139_geometry_teacher_v1.py",
+      "required_status": "PASS_GEOMETRY_TEACHER_REBINDS_SOURCE_MESH_AND_TRANSFORM",
+      "recomputes": [
+        "SOURCE_TO_CANONICAL_VERTEX_TRANSFORM",
+        "FACE_AREA_AND_NORMALS",
+        "EDGE_INCIDENCE_BOUNDARY_NONMANIFOLD",
+        "CONNECTED_COMPONENTS",
+        "SURFACE_POINT_FROM_TRIANGLE_AND_BARYCENTRIC",
+        "LOCAL_NORMAL_PROBES"
+      ]
+    },
+    "dense_front_surface_raster": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_DENSE_GPU_GBUFFER",
+    "graphics_cross_view_visibility": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_VISIBILITY_OCCLUSION_TEACHER",
     "fstar_numpy_torch_parity_required": true,
     "fstar_certified_exterior_sign_court_required": true
   },
@@ -66,6 +78,7 @@
     "invalid_face_indices_forbidden": true,
     "global_sdf_labels_from_unqualified_mesh_winding_forbidden": true,
     "missing_full_surface_teacher_may_not_be_called_dense_geometry_truth": true,
+    "geometry_truth_admission_before_rebinding_court_forbidden": true,
     "qualification_minted": false
   }
 }

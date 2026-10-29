@@ -1,0 +1,70 @@
+{
+  "schema": "RealSaS.Truth139ExternalWorkerNotebookContract.v1",
+  "date": "2026-10-29",
+  "status": "FROZEN_OPERATIONAL_CONTRACT__NOTEBOOK_BYTES_MATERIALIZE_AFTER_RAW_AUDIT",
+  "purpose": "HEAVY_TRUTH139_CORPUS_MATERIALIZATION_ONLY",
+  "intended_notebook_repo_path": "notebooks/Truth139_Corpus_Preparation_T4_CPU_v1.ipynb",
+  "external_worker_role": "NON_AUTHORITATIVE_COMPUTE_WORKER",
+  "recommended_runtime": {
+    "gpu_class": "NVIDIA_T4_OR_BETTER__A100_NOT_REQUIRED",
+    "cpu": "HIGH_CPU_RUNTIME_PREFERRED_FOR_BLENDER_STAGE47_STAGE48",
+    "ram": "HIGH_RAM_RUNTIME_PREFERRED",
+    "platform": "COLAB_OR_EQUIVALENT_NOTEBOOK_RUNTIME"
+  },
+  "allowed_heavy_jobs": [
+    "CONTROLLED_8VIEW_OBSERVATION_RENDER_AND_ADMISSION_CANDIDATES",
+    "MULTIVIEW_NORMAL_DEPTH_TEACHER_TRUTH",
+    "DINO_AND_IMAGE_DERIVED_FSTAR_SHARD_PREPARATION",
+    "STAGE47_SOURCE_RESPONSE_TRUTH_MATERIALIZATION",
+    "STAGE48_APPEARANCE_PRESENTATION_TRUTH_MATERIALIZATION",
+    "TESSA_TEACHER_AND_CONDITIONING_CACHE_MATERIALIZATION"
+  ],
+  "forbidden_authority": [
+    "SUBJECT_ADMISSION",
+    "TRAIN_UNSEEN_SPLIT_SELECTION",
+    "UNSEEN_SEAL_AUTHORITY",
+    "MODEL_QUALIFICATION",
+    "PRODUCT_PASS",
+    "PLATFORM_LINEAGE_REPLACEMENT"
+  ],
+  "required_notebook_binding_before_first_batch": {
+    "notebook_repo_path": "REQUIRED",
+    "notebook_sha256": "REQUIRED",
+    "git_source_commit_sha": "REQUIRED",
+    "raw_audit_identity_sha256": "REQUIRED",
+    "apparatus_manifest_identity_sha256": "REQUIRED",
+    "runtime_fingerprint": "REQUIRED",
+    "worker_code_manifest_sha256": "REQUIRED"
+  },
+  "required_per_batch_receipt_fields": [
+    "notebook_repo_path",
+    "notebook_sha256",
+    "git_source_commit_sha",
+    "raw_audit_identity_sha256",
+    "apparatus_manifest_identity_sha256",
+    "batch_id",
+    "subject_ids",
+    "input_artifact_hashes",
+    "output_artifact_hashes",
+    "runtime_fingerprint",
+    "started_at_utc",
+    "completed_at_utc",
+    "failed_subjects",
+    "training_performed"
+  ],
+  "batching_policy": {
+    "resumable": true,
+    "subject_outputs_content_addressed": true,
+    "completed_subjects_must_not_be_recomputed_without_explicit_new_revision": true,
+    "failed_subjects_remain_in_denominator_and_failure_ledger": true
+  },
+  "platform_import_policy": {
+    "exact_output_hash_verification_required": true,
+    "batch_receipt_import_required": true,
+    "notebook_receipt_must_be_linked_to_truth139_experiment": true,
+    "external_worker_may_not_mint_qualification": true
+  },
+  "training_allowed": false,
+  "split_authority_present": false,
+  "qualification_minted": false
+}

@@ -1,0 +1,101 @@
+{
+  "schema": "RealSaS.Truth139RelationsTeacherContract.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__PRIMITIVE_RELATION_TRUTH_REQUIRED__TRAINING_NOT_AUTHORIZED",
+  "purpose": "MATERIALIZE_ARCHITECTURE_NEUTRAL_PRIMITIVE_RELATIONS_FROM_THE_SAME_HASH_BOUND_SCENE_TRUTH_USED_BY_IRIS_GEOMETRY_AND_GRAPHICS_WITHOUT_INTRODUCING_SEMANTIC_PART_CLASSES_OR_RIG_SKIN_AUTHORITY",
+  "scope": {
+    "iris_canonical_intent": "GEOMETRY_GRAPHICS_AND_RELATIONS_SHARE_SCENE_EVIDENCE__TESSA_DECODES_TOPOLOGY_FROM_THAT_SCENE",
+    "relations_are_not_axis_rig_truth": true,
+    "relations_are_not_mira_skin_truth": true,
+    "semantic_part_taxonomy_required": false,
+    "hidden_owner_class_required": false,
+    "global_total_draw_order_claimed": false
+  },
+  "required_parent_truth": [
+    "DENSE_GRAPHICS_TEACHER_MANIFEST_WITH_VISIBILITY_OCCLUSION",
+    "EXACT_ADMITTED_REST_GEOMETRY_AND_FACES"
+  ],
+  "optional_parent_truth": [
+    "STAGE47_PRESENTATION_RESPONSE_ARRAYS_WITH_RESPONSE_PAIR_COHERENCE"
+  ],
+  "primitive_relation_families": {
+    "SAME_CANONICAL_SURFACE_ACROSS_VIEWS": {
+      "source": "DENSE_GRAPHICS_CROSS_VIEW_CORRESPONDENCE",
+      "required_fields": [
+        "SOURCE_VIEW_INDEX",
+        "SOURCE_SURFACE_SAMPLE_INDEX",
+        "TARGET_VIEW_INDEX",
+        "TARGET_DENSE_GRAPHICS_ROW",
+        "SOURCE_TRIANGLE_AND_BARYCENTRIC",
+        "TARGET_TRIANGLE_AND_BARYCENTRIC",
+        "CANONICAL_SURFACE_ERROR"
+      ],
+      "rule": "ONLY_MATCHES_WITHIN_THE_DECLARED_GRAPHICS_SURFACE_TOLERANCE_ARE_POSITIVE"
+    },
+    "FRONT_BEHIND_ON_SHARED_CAMERA_RAY": {
+      "source": "DENSE_GRAPHICS_OCCLUSION_TEACHER",
+      "required_fields": [
+        "TARGET_VIEW_INDEX",
+        "BEHIND_SURFACE_SAMPLE_INDEX",
+        "FRONT_TARGET_DENSE_GRAPHICS_ROW",
+        "BEHIND_TRIANGLE_AND_BARYCENTRIC",
+        "FRONT_TRIANGLE_AND_BARYCENTRIC",
+        "POSITIVE_DEPTH_GAP"
+      ],
+      "rule": "RELATION_IS_LOCAL_TO_ONE_MEASURED_CAMERA_RAY__IT_MAY_NOT_BE_PROMOTED_TO_A_GLOBAL_OBJECT_DRAW_ORDER"
+    },
+    "LOCAL_SURFACE_ADJACENCY": {
+      "source": "EXACT_ADMITTED_REST_MESH_TOPOLOGY",
+      "required_fields": [
+        "FACE_A",
+        "FACE_B",
+        "SHARED_EDGE_VERTEX_IDS"
+      ],
+      "rule": "TWO_TRIANGLES_ARE_ADJACENT_ONLY_WHEN_THEY_SHARE_AN_EXACT_UNDIRECTED_MESH_EDGE"
+    },
+    "RESPONSE_COHERENCE_OR_DISCONTINUITY": {
+      "source": "OPTIONAL_STAGE47_MEASURED_RESPONSE_TRUTH",
+      "required_fields": [
+        "FACE_A",
+        "FACE_B",
+        "RESPONSE_COHERENCE",
+        "RESPONSE_JUMP",
+        "TEACHER_VALID"
+      ],
+      "role": "PRIMITIVE_DEFORMATION_RESPONSE_RELATION_ONLY",
+      "is_rig_or_skin_target": false
+    }
+  },
+  "forbidden_shortcuts": [
+    "BODY_PART_NAME_AS_RELATION_TARGET",
+    "MATERIAL_ID_AS_RUNTIME_RELATION_TARGET",
+    "FACE_OWNER_ID_AS_RUNTIME_RELATION_TARGET",
+    "SOURCE_BONE_NAME_AS_RELATION_TARGET",
+    "GLOBAL_TOTAL_DRAW_ORDER_FROM_SPARSE_LOCAL_RAY_ORDER",
+    "ZERO_FILLING_MISSING_RELATIONS",
+    "NEGATIVE_MINING_FROM_UNMEASURED_PAIR_ABSENCE"
+  ],
+  "independent_court": {
+    "builder": "tools/corpus/validate_truth139_relations_teacher_v1.py",
+    "required_status": "PASS_RELATIONS_TEACHER_REBINDS_EXACT_PARENT_TRUTH",
+    "recomputes": [
+      "MESH_EDGE_ADJACENCY_FROM_FACES",
+      "SAME_SURFACE_ROWS_FROM_GRAPHICS_CORRESPONDENCE_AND_DENSE_GRAPHICS_ADDRESSES",
+      "FRONT_BEHIND_ROWS_FROM_OCCLUSION_CLASSES_FRONT_ROWS_AND_DEPTH_GAPS"
+    ],
+    "response_relation_policy": "EXACT_HASH_BOUND_COPY_OF_ALREADY_MEASURED_STAGE47_RESPONSE_ARRAYS__NO_NEW_PHYSICAL_AUTHORITY_MINTED"
+  },
+  "training_projection": {
+    "139_a_scale_control_consumes_relations": false,
+    "truth_rich_projection_may_consume_relations": true,
+    "teacher_truth_is_richer_than_current_v31_pair_budget": true,
+    "pair_subsampling_must_be_declared_after_teacher_seal": true,
+    "absence_of_relation_row_is_not_a_negative_label": true
+  },
+  "gates": {
+    "relations_training_before_teacher_and_court_forbidden": true,
+    "relation_truth_may_not_depend_on_humanoid_semantics": true,
+    "relation_truth_may_not_mint_axis_or_mira_authority": true,
+    "qualification_minted": false
+  }
+}

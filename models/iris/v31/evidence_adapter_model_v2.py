@@ -2,7 +2,7 @@
 
 The geometry foundation and the evidence families share the same observation
 carrier and continuous query state, but they do not share their final private
-adapter path.  This prevents a newly introduced mechanics objective from
+adapter path. This prevents a newly introduced mechanics objective from
 rewriting the geometry-private state merely because both are local fields.
 
 New evidence adapters are zero-initialized residuals: at construction they are
@@ -19,10 +19,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from .model_v31 import (
-    IRISV31,
-    MECHANICAL_CHANNELS_V31_PRESENTATION if False else PrivatePathV31,
-)
+from .model_v31 import IRISV31
 
 
 @dataclass(frozen=True)
@@ -100,7 +97,9 @@ class IRISV31EvidenceAdapterV2(IRISV31):
             padding_mode="zeros",
             align_corners=False,
         ).squeeze(2).squeeze(2).transpose(1, 2)
-        bands = xyz.new_tensor([math.pi * 2**i for i in range(self.config.fourier_bands)])
+        bands = xyz.new_tensor(
+            [math.pi * 2**i for i in range(self.config.fourier_bands)]
+        )
         angle = xyz[..., None] * bands
         fourier = torch.cat(
             (xyz, angle.sin().flatten(-2), angle.cos().flatten(-2)), dim=-1
@@ -131,15 +130,13 @@ class IRISV31EvidenceAdapterV2(IRISV31):
         }
 
     def foundation_named_parameters(self):
-        names = ("fusion", "encoder", "query", "gm", "geometry")
-        for prefix in names:
+        for prefix in ("fusion", "encoder", "query", "gm", "geometry"):
             module = getattr(self, prefix)
             for name, parameter in module.named_parameters():
                 yield f"{prefix}.{name}", parameter
 
     def evidence_named_parameters(self):
-        names = ("mm", "mechanics", "gp", "appearance")
-        for prefix in names:
+        for prefix in ("mm", "mechanics", "gp", "appearance"):
             module = getattr(self, prefix)
             for name, parameter in module.named_parameters():
                 yield f"{prefix}.{name}", parameter

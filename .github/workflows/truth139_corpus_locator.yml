@@ -19,6 +19,7 @@ jobs:
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 10
     env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
       AUTHORITY_ROOT: /home/monster/realsas_authority
       EXPECTED_ROOT_SHA256: 2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab
       EXPECTED_MANIFEST_SHA256: 3799b170d4138dbc0447d2d3456cc9ad5ba7e185fddace6d6ce2de0d0a2adc00
@@ -29,7 +30,7 @@ jobs:
       - name: Validate locator request
         run: |
           set -euo pipefail
-          python - <<'PY'
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
           import json
           from pathlib import Path
           row=json.loads(Path('canonical/TRUTH139_CORPUS_LOCATOR_REQUEST_V1.json').read_text())
@@ -45,8 +46,10 @@ jobs:
           set -euo pipefail
           OUT="$AUTHORITY_ROOT/truth139/corpus_locator/${GITHUB_RUN_ID}/LOCATOR.json"
           mkdir -p "$(dirname "$OUT")"
+          echo "output_path=$OUT" >> "$GITHUB_OUTPUT"
           export OUT
-          python - <<'PY'
+          set +e
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
           import hashlib,json,os
           from pathlib import Path
 
@@ -79,9 +82,11 @@ jobs:
                    'mutation_performed':False,'status':'PASS_EXACT_SINGLE_ROOT' if len(matches)==1 else 'FAIL_ROOT_CARDINALITY'}
           out=Path(os.environ['OUT']);out.write_text(json.dumps(payload,sort_keys=True,indent=2)+'\n')
           print(json.dumps(payload,sort_keys=True))
-          if len(matches)!=1:raise SystemExit(2)
+          raise SystemExit(0 if len(matches)==1 else 2)
           PY
-          echo "output_path=$OUT" >> "$GITHUB_OUTPUT"
+          STATUS=$?
+          set -e
+          exit "$STATUS"
 
       - name: Preserve locator receipt
         if: always()
@@ -89,5 +94,5 @@ jobs:
         with:
           name: truth139-corpus-locator-${{ github.run_id }}
           path: ${{ steps.locate.outputs.output_path }}
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 30

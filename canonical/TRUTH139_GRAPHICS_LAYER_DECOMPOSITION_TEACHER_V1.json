@@ -1,0 +1,133 @@
+{
+  "schema": "RealSaS.Truth139GraphicsLayerDecompositionTeacherContract.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__LAYER_PEEL_TRUTH_REQUIRED_BEFORE_LAYER_AWARE_GRAPHICS_TRAINING",
+  "purpose": "TEACH_EDITABLE_LAYER_AND_MASK_STRUCTURE_WITH_DETERMINISTIC_SURFACE_AND_RENDERER_EVIDENCE_WITHOUT_REQUIRING_A_FIXED_HUMANOID_ORGAN_TAXONOMY",
+  "research_basis": {
+    "BUNRAKU_LESSON": "ORDERED_RGBA_LAYERS_WITH_HIDDEN_REGION_COMPLETION_AND_JOINT_CROSS_LAYER_DEFORMATION_ARE_STRONGER_THAN_A_FLAT_VISIBLE_IMAGE_TARGET",
+    "STDGEN_PLUS_PLUS_LESSON": "PEELING_OR_MASKING_OUTER_STRUCTURE_AND_SUPERVISING_INNER_STRUCTURE_EXPLICITLY_TEACHES_OCCLUDED_CONTENT",
+    "REALSAS_ADAPTATION": "USE_EXACT_SOURCE_GEOMETRY_RENDER_ORDER_MATERIAL_BYTES_AND_MEASURED_RELATIONS_AS_TEACHER_TRUTH__DO_NOT_IMPORT_A_HUMANOID_PART_TAXONOMY"
+  },
+  "parent_domain": "IRIS_GRAPHICS",
+  "required_inputs": [
+    "EXACT_ADMITTED_REST_GEOMETRY_AND_FACES",
+    "EXACT_CAMERA_BUNDLE",
+    "DENSE_GRAPHICS_TEACHER",
+    "COMPLETE_CPU_RAY_STACK_OR_BOUNDED_GPU_K_HIT_STACK_WITH_OVERFLOW_TYPED_UNKNOWN"
+  ],
+  "optional_inputs_for_RGBA_COMPLETION": [
+    "EXACT_SOURCE_UV_AND_MATERIAL_BINDINGS",
+    "EXACT_SOURCE_TEXTURE_BYTES",
+    "QUALIFIED_SOURCE_MATERIAL_EVALUATOR_WITH_ALPHA"
+  ],
+  "teacher_families": {
+    "K_HIT_GEOMETRIC_PEEL_STACK": {
+      "required": true,
+      "per_view_pixel_fields": [
+        "HIT_COUNT_LOWER_BOUND",
+        "STACK_COMPLETE",
+        "DEPTH_TIE",
+        "PER_HIT_TRIANGLE_ID",
+        "PER_HIT_BARYCENTRIC",
+        "PER_HIT_DEPTH"
+      ],
+      "rule": "A_BOUNDED_GPU_STACK_WITH_ALL_K_SLOTS_FILLED_IS_TRUNCATED_OR_UNKNOWN_UNLESS_AN_INDEPENDENT_COMPLETE_ORACLE_PROVES_COMPLETENESS"
+    },
+    "PEEL_MASKS": {
+      "required": true,
+      "definition": "MASK_K_IDENTIFIES_PIXELS_WITH_A_VALID_KTH_ORDERED_SURFACE_HIT",
+      "uses": [
+        "VISIBLE_LAYER_MASK",
+        "HIDDEN_LAYER_SUPPORT_MASK",
+        "OUTER_LAYER_REMOVAL_SUPERVISION",
+        "LOCAL_FRONT_BEHIND_RELATIONS"
+      ],
+      "mask_is_semantic_part_label": false
+    },
+    "HIDDEN_SURFACE_RGBA": {
+      "required_when_exact_material_evaluator_available": true,
+      "required_fields": [
+        "PER_HIT_STRAIGHT_LINEAR_RGBA",
+        "PER_HIT_RGBA_VALID",
+        "PER_HIT_SOURCE_BINDING_PROVENANCE"
+      ],
+      "rule": "MISSING_OR_AMBIGUOUS_MATERIAL_EVALUATION_IS_ABSTAIN__NEVER_INPAINTED_AND_RELABELED_AS_TEACHER_TRUTH"
+    },
+    "PEELED_COMPOSITES": {
+      "required_when_exact_per_hit_RGBA_available": true,
+      "definition": "COMPOSITE_AFTER_REMOVING_THE_FIRST_N_ORDERED_CONTRIBUTORS",
+      "uses": [
+        "STDGEN_STYLE_OUTER_LAYER_MASKING_SUPERVISION",
+        "HIDDEN_REGION_COMPLETION_TARGETS",
+        "RENDERER_CONSEQUENCE_COURT"
+      ]
+    },
+    "DRAWABLE_AFFINITY_PROPOSALS": {
+      "required": false,
+      "teacher_only_sources": [
+        "EXACT_MESH_CONNECTEDNESS",
+        "SOURCE_PRIMITIVE_OR_OBJECT_BINDING",
+        "MATERIAL_CONTINUITY",
+        "CROSS_VIEW_SURFACE_CONTINUATION",
+        "RESPONSE_COHERENCE_OR_DISCONTINUITY"
+      ],
+      "rule": "SOURCE_OBJECT_MATERIAL_OR_OWNER_IDS_MAY_PROPOSE_OR_AUDIT_AFFINITY_BUT_MAY_NOT_BECOME_PRODUCT_SEMANTIC_CLASS_LABELS"
+    }
+  },
+  "layer_identity_policy": {
+    "global_named_layers_required": false,
+    "local_depth_order_is_truth": true,
+    "same_drawable_affinity_may_be_learned_from_primitive_evidence": true,
+    "fixed_humanoid_layer_order_forbidden": true,
+    "source_object_id_as_runtime_layer_id_forbidden": true,
+    "material_id_as_runtime_layer_id_forbidden": true
+  },
+  "future_product_compatibility": {
+    "one_or_two_source_view_product_supported": true,
+    "constructed_internal_views_may_provide_proposals": true,
+    "constructed_internal_views_may_not_mint_source_RGBA_authority": true,
+    "layer_completion_at_inference_may_be_learned": true,
+    "teacher_hidden_RGBA_must_still_come_from_exact_source_evidence_when_called_truth": true
+  },
+  "independent_courts": {
+    "geometric_prefix": {
+      "required": true,
+      "oracle": "models/iris/truth/graphics_oracle_v1.py::measure_orthographic_ray_stack_v1",
+      "checks": [
+        "GPU_K_HIT_PREFIX_EQUALS_CPU_COMPLETE_RAY_STACK_PREFIX",
+        "DEPTH_ORDER",
+        "TRIANGLE_ID",
+        "BARYCENTRIC",
+        "TIE_AND_OVERFLOW_TYPING"
+      ]
+    },
+    "renderer_composite": {
+      "required_when_RGBA_is_materialized": true,
+      "checks": [
+        "SOURCE_OVER_COMPOSITION_RECONSTRUCTS_QUALIFIED_SOURCE_RENDER_WITHIN_DECLARED_TOLERANCE",
+        "PEEL_N_COMPOSITE_MATCHES_RENDERER_INTERVENTION_WHEN_AVAILABLE"
+      ]
+    }
+  },
+  "sampling_and_storage": {
+    "dense_K_hit_geometry_preferred_on_external_gpu_worker": true,
+    "default_K": 8,
+    "CPU_complete_oracle_used_for_deterministic_stratified_court_samples": true,
+    "store_masks_as_bitsets_or_sparse_pixel_indices": true,
+    "do_not_expand_dense_boolean_masks_when_sparse_representation_is_lossless": true
+  },
+  "training_projection": {
+    "truth139_A_scale_control_consumes_layer_truth": false,
+    "truth_rich_projection_may_consume_layer_masks_and_hidden_targets": true,
+    "layer_truth_may_supervise_graphics_and_relations": true,
+    "layer_truth_may_condition_TESSA_only_if_preregistered": true,
+    "teacher_source_object_material_owner_ids_may_not_enter_student_forward": true
+  },
+  "gates": {
+    "semantic_inpainting_may_not_be_called_teacher_truth": true,
+    "bounded_stack_may_not_be_called_complete_without_overflow_proof": true,
+    "RGBA_layer_truth_requires_exact_material_provenance": true,
+    "missing_hidden_RGBA_may_not_be_zero_filled": true,
+    "qualification_minted": false
+  }
+}

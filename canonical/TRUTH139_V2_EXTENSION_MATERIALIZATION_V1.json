@@ -1,0 +1,68 @@
+{
+  "base_requirements": {
+    "dense_graphics_court_status": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_DENSE_GPU_GBUFFER",
+    "graphics_chain_status": "PASS_TRUTH139_GRAPHICS_MATERIALIZATION_CHAIN_EXECUTED__DERIVED_TRUTH_ADMISSION_SEPARATE",
+    "visibility_occlusion_court_status": "PASS_INDEPENDENT_CPU_RAY_ORACLE_AGREES_WITH_VISIBILITY_OCCLUSION_TEACHER"
+  },
+  "date": "2026-10-29",
+  "jobs": {
+    "ANONYMOUS_COMPONENT_MASKS": {
+      "conditional": "REQUIRES_EXACT_FACE_OWNER_BINDING__ABSTAIN_IF_UNAVAILABLE",
+      "court": "tools/corpus/validate_truth139_source_component_masks_v1.py",
+      "court_status": "PASS_SOURCE_COMPONENT_MASKS_REBIND_EXACT_FACE_OWNER_AND_PEEL_TRUTH",
+      "depends_on": [
+        "K_HIT_GEOMETRIC_PEEL"
+      ],
+      "producer": "tools/corpus/build_truth139_source_component_masks_v1.py",
+      "producer_status": "PASS_ANONYMOUS_SOURCE_COMPONENT_MASK_CANDIDATE__INDEPENDENT_REBINDING_COURT_REQUIRED"
+    },
+    "DRAWABLE_AFFINITY_RELATIONS": {
+      "court": "tools/corpus/validate_truth139_drawable_affinity_teacher_v1.py",
+      "court_status": "PASS_DRAWABLE_AFFINITY_REBINDS_EXACT_COMPONENT_AND_PEEL_TRUTH",
+      "depends_on": [
+        "K_HIT_GEOMETRIC_PEEL",
+        "ANONYMOUS_COMPONENT_MASKS"
+      ],
+      "producer": "tools/corpus/build_truth139_drawable_affinity_teacher_v1.py",
+      "producer_status": "PASS_DRAWABLE_AFFINITY_CANDIDATE__INDEPENDENT_REBINDING_COURT_REQUIRED"
+    },
+    "K_HIT_GEOMETRIC_PEEL": {
+      "court": "tools/corpus/validate_truth139_graphics_layer_peel_v2.py",
+      "court_status": "PASS_LAYER_PEEL_V2_GPU_FACE_SELECTION_MATCHES_COMPLETE_CPU_RAY_STACK",
+      "depends_on": [
+        "DENSE_GRAPHICS_FRONT_SURFACE"
+      ],
+      "producer": "tools/corpus/build_truth139_graphics_layer_peel_v2.py",
+      "producer_status": "PASS_K_HIT_GEOMETRIC_LAYER_PEEL_CANDIDATE__CPU_PREFIX_COURT_REQUIRED__RGBA_COMPLETION_SEPARATE"
+    },
+    "PRIMITIVE_RELATIONS": {
+      "court": "tools/corpus/validate_truth139_relations_teacher_v2.py",
+      "court_status": "PASS_RELATIONS_V2_REBINDS_CANONICAL_DENSE_AND_VISIBILITY_PARENT_TRUTH",
+      "depends_on": [
+        "DENSE_GRAPHICS_FRONT_SURFACE",
+        "VISIBILITY_OCCLUSION_CROSS_VIEW"
+      ],
+      "producer": "tools/corpus/build_truth139_relations_teacher_v2.py",
+      "producer_status": "PASS_RELATIONS_TEACHER_CANDIDATE__INDEPENDENT_COURT_REQUIRED"
+    }
+  },
+  "policy": {
+    "base_dense_and_visibility_outputs_reused_byte_exact": true,
+    "cuda_barycentric_truth_authority": false,
+    "cuda_face_selection_allowed": true,
+    "float64_pixel_center_barycentric_reconstruction_required": true,
+    "legacy_dense_graphics_teacher_authority_forbidden": true,
+    "pairwise_drawable_affinity_permutation_invariant": true,
+    "qualification_minted": false,
+    "raw_k_capacity_saturation_preserves_overflow_unknown": true,
+    "response_evidence_optional": true,
+    "semantic_part_taxonomy_used": false,
+    "source_owner_integer_cross_subject_target_forbidden": true,
+    "split_authority_present": false,
+    "training_allowed": false
+  },
+  "purpose": "REUSE_COURT_PASSED_FULL139_DENSE_AND_VISIBILITY_OUTPUTS__ADD_KHIT_COMPONENT_AFFINITY_RELATIONS",
+  "runner": "tools/corpus/run_truth139_v2_extension_subject_v1.py",
+  "schema": "RealSaS.Truth139V2ExtensionMaterializationContract.v1",
+  "status": "FROZEN_EXTENSION_CANDIDATE__BASE_FULL139_COURTS_REQUIRED"
+}

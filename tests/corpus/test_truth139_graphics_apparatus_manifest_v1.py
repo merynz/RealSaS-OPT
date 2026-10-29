@@ -76,6 +76,7 @@ def test_apparatus_bridge_preserves_exact_source_rows_and_no_training_authority(
 def test_apparatus_bridge_rejects_source_drift():
     work = _work()
     pilot = _pilot(work)
-    pilot["selected"][0]["source_sha256"] = "0" * 64
+    assert pilot["selected"][0]["source_sha256"] == "0" * 64
+    pilot["selected"][0]["source_sha256"] = "e" * 64
     with pytest.raises(ValueError, match="SOURCE_DRIFT"):
         build(pilot, work)

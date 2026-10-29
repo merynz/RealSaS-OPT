@@ -6,11 +6,8 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from models.tessa.v2 import (
-    TESSAObjectiveWeightsV2,
-    TESSAStructuralizerConfigV2,
-    TESSAStructuralizerV2,
-)
+from models.tessa.v2 import TESSAObjectiveWeightsV2, TESSAStructuralizerConfigV2
+from models.tessa.v31.dual_stream_v31 import TESSADualStreamStructuralizerV31
 from .truth139_model_v1 import IRISV31Truth139V1
 
 
@@ -106,14 +103,12 @@ class Truth139TESSASourceBuilderV1(nn.Module):
 
 
 class Truth139DenseIRISTESSABridgeV1(nn.Module):
-    """Dense IRIS evidence -> current TESSA V2 dual-stream topology proposal.
+    """Dense IRIS evidence -> dual-stream TESSA with exact V31 rolling attention semantics.
 
-    This bridge deliberately does not invent the V3 presentation stream because the current
-    Truth139/Stage48 input court abstains on incompletely observed pair/presentation families.
-    Scene evidence comes directly from the dense IRIS carrier.  Surface evidence is generated
-    from IRIS-predicted zero-surface witness locations and contains only learned/inference-time
-    quantities: normalized position, learned normal, shared query state H, signed field and bounded
-    local delta.  Teacher topology is used only as the autoregressive training target.
+    The presentation stream is intentionally absent because current Truth139/Stage48 admission
+    abstains on incompletely observed presentation/pair families.  Scene evidence is direct dense
+    IRIS state; surface evidence uses only inference-available predicted geometry evidence.  TESSA
+    remains proposal-only and cannot mint Compiler mesh authority.
     """
 
     architecture_id = "RealSaS.IRISV31.Truth139.TESSABridge.v1"
@@ -128,6 +123,7 @@ class Truth139DenseIRISTESSABridgeV1(nn.Module):
         *,
         bridge_config: Truth139TESSABridgeConfigV1,
         tessa_config: TESSAStructuralizerConfigV2 = TESSAStructuralizerConfigV2(),
+        attention_backend: str = "SDPA",
     ) -> None:
         super().__init__()
         bridge_config.validate()
@@ -135,10 +131,11 @@ class Truth139DenseIRISTESSABridgeV1(nn.Module):
         self.bridge_config = bridge_config
         self.tessa_config = tessa_config
         self.source_builder = Truth139TESSASourceBuilderV1(bridge_config)
-        self.structuralizer = TESSAStructuralizerV2(
+        self.structuralizer = TESSADualStreamStructuralizerV31(
             scene_input_dim=bridge_config.scene_input_dim,
             surface_input_dim=bridge_config.surface_input_dim,
             config=tessa_config,
+            backend=attention_backend,
         )
 
     def scene_source(self, carrier: torch.Tensor) -> torch.Tensor:

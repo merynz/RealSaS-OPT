@@ -95,14 +95,18 @@
     },
     "tessa": {
       "decoder_role": "LEARNED_TOPOLOGY_PROPOSAL_ONLY",
-      "structuralizer": "RealSaS.TESSA.Structuralizer.v2",
+      "structuralizer": "RealSaS.TESSA.DualStreamStructuralizer.v3_1",
+      "memory_semantics": "V2_DUAL_STREAM_TYPED_MEMORY",
+      "attention_semantics": "ROLLING_CAUSAL_SELF_INCLUSIVE_V31",
       "conditioning": "DUAL_STREAM__DENSE_IRIS_SCENE_PLUS_INFERENCE_AVAILABLE_GEOMETRY_SURFACE_EVIDENCE",
       "compiler_mesh_authority_unchanged": true,
       "scene_memory_source": "DENSE_IRIS_CARRIER",
       "surface_memory_source": "PREDICTED_ZERO_SURFACE_XYZ_PLUS_LEARNED_NORMAL_PLUS_SHARED_H_PLUS_FSTAR_DELTA",
-      "presentation_stream": "ABSTAIN__NOT_FABRICATED_WHILE_STAGE48_PRESENTATION_PAIR_EVIDENCE_IS_INCOMPLETE",
+      "presentation_stream": "ABSENT__NOT_FABRICATED_WHILE_STAGE48_PRESENTATION_PAIR_EVIDENCE_IS_INCOMPLETE",
       "legacy_triplane_requirement_for_truth139": false,
       "iris_frozen_during_tessa_training": true,
+      "teacher_topology_target_only": true,
+      "student_conditioning_cache_teacher_topology_used": false,
       "required_consequence_court": "TESSA_PROPOSAL_TO_COMPILER_M_GEOMETRY_CONSEQUENCE"
     }
   },

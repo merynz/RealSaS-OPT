@@ -5,7 +5,13 @@ import json
 import pytest
 
 from tools.corpus.build_truth139_materialization_work_orders_v1 import build
-from tools.corpus.seal_truth139_materialization_receipt_v1 import PASS_STATUS, file_sha256, seal
+from tools.corpus.seal_truth139_materialization_receipt_v1 import (
+    PASS_STATUS,
+    REPO_ROOT,
+    checked_out_git_sha,
+    file_sha256,
+    seal,
+)
 
 
 def _subject() -> dict:
@@ -74,6 +80,10 @@ def _visibility_outputs(tmp_path, *, court_status="PASS_INDEPENDENT_CPU_RAY_ORAC
     return producer_path, court_path
 
 
+def _head() -> str:
+    return checked_out_git_sha(REPO_ROOT)
+
+
 def test_receipt_binds_work_order_source_implementation_outputs_and_court(tmp_path):
     work_path, work = _work_orders(tmp_path)
     producer_path, court_path = _visibility_outputs(tmp_path)
@@ -83,11 +93,12 @@ def test_receipt_binds_work_order_source_implementation_outputs_and_court(tmp_pa
         job_name="VISIBILITY_OCCLUSION_CROSS_VIEW",
         producer_manifest_path=producer_path,
         court_result_path=court_path,
-        code_commit_sha="e" * 40,
+        code_commit_sha=_head(),
         execution_kind="SYNTHETIC_TEST_WORKER",
         wall_seconds=1.25,
     )
     assert result["status"] == PASS_STATUS
+    assert result["code_commit_sha"] == result["checked_out_git_sha"] == _head()
     assert result["work_order"]["work_order_identity_sha256"] == work["work_order_identity_sha256"]
     assert result["subject_source"]["sha256"] == "1" * 64
     assert result["implementation"]["declared"]["producer_revision"] == "V2_SILHOUETTE_NEIGHBOR_FIRST"
@@ -113,7 +124,7 @@ def test_receipt_rejects_nonpassing_independent_court(tmp_path):
             job_name="VISIBILITY_OCCLUSION_CROSS_VIEW",
             producer_manifest_path=producer_path,
             court_result_path=court_path,
-            code_commit_sha="e" * 40,
+            code_commit_sha=_head(),
             execution_kind="SYNTHETIC_TEST_WORKER",
         )
 
@@ -130,6 +141,24 @@ def test_receipt_rejects_work_order_identity_drift(tmp_path):
             job_name="VISIBILITY_OCCLUSION_CROSS_VIEW",
             producer_manifest_path=producer_path,
             court_result_path=court_path,
-            code_commit_sha="e" * 40,
+            code_commit_sha=_head(),
+            execution_kind="SYNTHETIC_TEST_WORKER",
+        )
+
+
+def test_receipt_rejects_declared_commit_that_is_not_checked_out(tmp_path):
+    work_path, _work = _work_orders(tmp_path)
+    producer_path, court_path = _visibility_outputs(tmp_path)
+    wrong = "0" * 40
+    if wrong == _head():
+        wrong = "f" * 40
+    with pytest.raises(ValueError, match="TRUTH139_RECEIPT_CODE_COMMIT_DRIFT"):
+        seal(
+            work_orders_path=work_path,
+            subject_id="truth139_000",
+            job_name="VISIBILITY_OCCLUSION_CROSS_VIEW",
+            producer_manifest_path=producer_path,
+            court_result_path=court_path,
+            code_commit_sha=wrong,
             execution_kind="SYNTHETIC_TEST_WORKER",
         )

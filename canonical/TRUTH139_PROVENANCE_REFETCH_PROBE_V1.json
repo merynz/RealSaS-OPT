@@ -1,6 +1,7 @@
 {
   "schema": "RealSaS.Truth139ProvenanceRefetchProbeRequest.v1",
   "date": "2026-10-29",
+  "revision": 2,
   "enabled": true,
   "scope": "REQUIRED_10_QUATERNIUS_GLTF_PACK_SOURCE_PAGE_SNAPSHOTS",
   "acceptance": "BYTE_SHA256_MUST_EQUAL_OCTOBER4_SEALED_EXPECTED_SHA256",

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 
@@ -29,6 +28,11 @@ def _subject(subject_id: str, *, dev=None, full=True):
             "format": "GLTF",
             "creator": "quaternius",
             "pack_id": "pack",
+            "dependencies": [],
+            "dependency_count": 0,
+            "source_page_snapshot": {"path": "provenance/source_pages/pack.html", "sha256": "c" * 64},
+            "official_url": "https://example.invalid/pack",
+            "drive_folder_id": "drive-folder-id",
         },
         "lineage": {
             "source_sha256": ["s:" + subject_id],
@@ -48,12 +52,16 @@ def _subject(subject_id: str, *, dev=None, full=True):
 
 def _audit(subjects):
     return {
-        "schema": "RealSaS.Truth139RawCapabilityAudit.v1",
-        "status": "PASS_RAW_CAPABILITY_AUDIT__PLATFORM_ADMISSION_PENDING",
-        "historical_cardinality_reproduced": True,
+        "schema": "RealSaS.Truth139SealedRawAudit.v1",
+        "status": "PASS_SEALED_RAW_CAPABILITY_AUDIT__PLATFORM_ADMISSION_PENDING",
         "audit_identity_sha256": "a" * 64,
-        "corpus_root_path": "/sealed/raw",
-        "expected_corpus_root_sha256": "b" * 64,
+        "corpus": {
+            "root_path": "/sealed/raw",
+            "root_sha256": "b" * 64,
+            "manifest_sha256": "d" * 64,
+            "ledger_sha256": "e" * 64,
+            "seal_verified": True,
+        },
         "subjects": subjects,
     }
 
@@ -67,6 +75,7 @@ def test_apparatus_filters_development_and_partial_subjects(tmp_path):
     assert result["schema"] == "RealSaS.Truth139ApparatusManifest.v1"
     assert result["subject_count"] == 1
     assert [row["subject_key"] for row in result["selected"]] == ["alpha"]
+    assert result["selected"][0]["source"]["dependencies"] == []
     assert result["split_created"] is False
     assert result["training_authorized"] is False
 
@@ -79,8 +88,15 @@ def test_apparatus_filters_development_and_partial_subjects(tmp_path):
 
 def test_apparatus_rejects_nonpass_raw_audit():
     value = _audit([_subject("alpha")])
-    value["status"] = "FAIL_OR_INCOMPLETE_RAW_CAPABILITY_AUDIT__DO_NOT_SPLIT_OR_TRAIN"
+    value["status"] = "FAIL_OR_INCOMPLETE_SEALED_RAW_AUDIT__DO_NOT_BUILD_APPARATUS"
     with pytest.raises(ValueError, match="RAW_AUDIT_NOT_PASS"):
+        build(value)
+
+
+def test_apparatus_rejects_unverified_corpus_seal():
+    value = _audit([_subject("alpha")])
+    value["corpus"]["seal_verified"] = False
+    with pytest.raises(ValueError, match="CORPUS_SEAL_NOT_VERIFIED"):
         build(value)
 
 

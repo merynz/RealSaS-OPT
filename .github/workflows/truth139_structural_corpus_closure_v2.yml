@@ -5,6 +5,10 @@ on:
     branches: [truth139-platform-generalization-v1]
     paths:
       - canonical/TRUTH139_STRUCTURAL_AUDIT_REQUEST_V2.json
+  pull_request:
+    branches: [main]
+    paths:
+      - canonical/TRUTH139_STRUCTURAL_AUDIT_REQUEST_V2.json
   workflow_dispatch:
 
 permissions:
@@ -16,6 +20,7 @@ concurrency:
 
 jobs:
   audit:
+    if: github.event_name != 'pull_request' || github.head_ref == 'truth139-platform-generalization-v1'
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 45
     env:
@@ -24,6 +29,8 @@ jobs:
       PYTHONPATH: ${{ github.workspace }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
       - name: Validate request and closure cache
         id: context
@@ -47,6 +54,7 @@ jobs:
           test -f "$CLOSURE_ROOT/manifest/MANIFEST.json"
           echo "run_root=$RUN_ROOT" >> "$GITHUB_OUTPUT"
           echo "closure_root=$CLOSURE_ROOT" >> "$GITHUB_OUTPUT"
+          echo "git_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Blocker regression tests
         run: |
@@ -101,10 +109,12 @@ jobs:
             --output "$RUN_ROOT/TRUTH139_MATERIALIZATION_WORK_ORDERS_V1.json"
 
       - name: Seal receipt
+        env:
+          AUDIT_CODE_SHA: ${{ steps.context.outputs.git_sha }}
         run: |
           set -euo pipefail
           RUN_ROOT="${{ steps.context.outputs.run_root }}"
-          export RUN_ROOT
+          export RUN_ROOT AUDIT_CODE_SHA
           "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
           import hashlib,json,os
           from pathlib import Path
@@ -135,7 +145,7 @@ jobs:
               'date':'2026-10-29',
               'status':'PASS_TRUTH139_STRUCTURAL_CORPUS_CLOSED__RICH_TRUTH_MATERIALIZATION_READY',
               'github_run_id':os.environ['GITHUB_RUN_ID'],
-              'git_commit_sha':os.environ['GITHUB_SHA'],
+              'git_commit_sha':os.environ['AUDIT_CODE_SHA'],
               'blocking_failures':[],
               'nonblocking_findings':nonblocking,
               'artifacts':{name:{'sha256':sha(root/name)} for name in names},

@@ -1,0 +1,161 @@
+{
+  "schema": "RealSaS.Truth139DenseAppearanceAuthorityContract.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__DERIVED_CORPUS_TRUTH_REQUIRED_BEFORE_TRUTH139_APPEARANCE_TRAINING",
+  "purpose": "MAKE_TRUTH139_APPEARANCE_SUPERVISION_COMPARABLY_SERIOUS_TO_MODERN_CHARACTER_CORPORA_WITHOUT_INTRODUCING_A_HUMANOID_SEMANTIC_TAXONOMY",
+  "problem_statement": {
+    "existing_stage48_measured_rays_per_subject_default": 8,
+    "existing_stage48_role": "HIGH_FIDELITY_RENDERER_INTERVENTION_AND_SOURCE_EQUIVALENCE_WITNESS",
+    "existing_stage48_is_sufficient_as_dense_appearance_training_corpus": false,
+    "reason": "EIGHT_EXPENSIVE_MEASURED_RAYS_ARE_A_STRONG_ORACLE_WITNESS_BUT_TOO_SPARSE_TO_TEACH_GENERIC_SURFACE_APPEARANCE_OVER_8X1024_SQUARE_OBSERVATIONS"
+  },
+  "design_principle": {
+    "copy_from_strong_external_corpora": [
+      "DENSE_SUPERVISION",
+      "FACTOR_APPEARANCE_FROM_GEOMETRY_AND_VISIBILITY",
+      "EXPLICIT_OCCLUSION_OR_LAYER_EVIDENCE",
+      "HELDOUT_EVALUATION_OF_THE_SAME_FACTORS"
+    ],
+    "do_not_copy": [
+      "FIXED_HUMANOID_BODY_PART_TAXONOMY",
+      "HIDDEN_OWNER_AS_A_LEARNED_CLASS",
+      "MATERIAL_ID_AS_A_PRODUCT_SEMANTIC_LABEL"
+    ],
+    "canonical_rule": "SOURCE_BYTES_AND_EXACT_IMPORTED_SURFACE_ADDRESSING_OWN_APPEARANCE_TRUTH__SEMANTIC_LABELS_DO_NOT"
+  },
+  "required_inputs_per_subject": [
+    "EXACT_SEALED_PRIMARY_SOURCE_AND_EXTERNAL_DEPENDENCIES",
+    "ADMITTED_8VIEW_1024_RGBA_OBSERVATIONS",
+    "CAMERA_PROJECTION_BUNDLE",
+    "EXACT_ADMITTED_IMPORT_REST_GEOMETRY",
+    "SOURCE_MATERIAL_EVALUATOR_OR_EQUIVALENT_EXACT_BASE_COLOR_ALPHA_BINDING",
+    "SOURCE_SCENE_SNAPSHOT"
+  ],
+  "required_dense_truth_families": {
+    "VISIBLE_PIXEL_GBUFFER": {
+      "per_view": 8,
+      "resolution": 1024,
+      "required_channels": [
+        "foreground",
+        "source_linear_rgba",
+        "depth",
+        "normal_world",
+        "face_index",
+        "barycentric",
+        "surface_xyz_canonical"
+      ],
+      "teacher_only_channels_allowed": [
+        "primitive_index",
+        "material_binding_index",
+        "uv_coordinate",
+        "source_texture_reference"
+      ],
+      "rule": "TEACHER_ONLY_SOURCE_BINDING_IDS_MAY_GROUP_OR_AUDIT_TRUTH_BUT_ARE_NOT_STUDENT_SEMANTIC_TARGETS"
+    },
+    "SURFACE_VISIBILITY_SUPPORT": {
+      "required_fields": [
+        "surface_sample_xyz_canonical",
+        "view_visibility_mask",
+        "view_projected_support_mask",
+        "view_facing_confidence",
+        "observed_source_authority_mask"
+      ],
+      "rule": "DISTINGUISH_NOT_OBSERVED_FROM_OBSERVED_TRANSPARENT_OR_BACKGROUND__DO_NOT_TREAT_ABSENCE_AS_ZERO_COLOR"
+    },
+    "MULTIHIT_RAY_FACTORING": {
+      "required_fields": [
+        "view_index",
+        "pixel_or_ray_address",
+        "ordered_surface_hits",
+        "per_hit_face_index",
+        "per_hit_barycentric",
+        "per_hit_effective_alpha",
+        "per_hit_straight_linear_rgb_when_RENDERER_IDENTIFIABLE",
+        "per_hit_source_over_contribution",
+        "composite_rgba"
+      ],
+      "student_target_policy": "ONLY_DIRECTLY_IDENTIFIABLE_PER_HIT_RGBA_MAY_BE_A_DETERMINISTIC_STUDENT_LABEL__AMBIGUOUS_FACTORIZATION_REMAINS_TEACHER_ORACLE_EVIDENCE"
+    },
+    "CROSS_VIEW_SURFACE_CORRESPONDENCE": {
+      "required_fields": [
+        "surface_address",
+        "supporting_view_indices",
+        "per_view_rgba_measurements",
+        "per_view_visibility",
+        "per_view_facing_confidence"
+      ],
+      "rule": "THE_SAME_CANONICAL_SURFACE_ADDRESS_MUST_BE_TRACEABLE_ACROSS_ALL_SUPPORTING_VIEWS"
+    },
+    "SOURCE_APPEARANCE_TOTALITY": {
+      "required_fields": [
+        "surface_address",
+        "source_color_alpha_evaluable",
+        "observed_in_input_views",
+        "unobserved_but_source_material_evaluable"
+      ],
+      "rule": "WHEN_EXACT_SOURCE_MATERIAL_BYTES_DEFINE_AN_UNOBSERVED_SURFACE_VALUE_IT_IS_TEACHER_TRUTH_NOT_HALLUCINATED_FILL"
+    },
+    "CONTOUR_AND_ALPHA": {
+      "required_fields": [
+        "alpha",
+        "foreground",
+        "silhouette_distance_or_boundary_band",
+        "edge_coverage"
+      ],
+      "rule": "ALPHA_AND_CONTOUR_ARE_PART_OF_APPEARANCE_AUTHORITY_NOT_POSTPROCESS_METADATA"
+    }
+  },
+  "sampling_and_storage": {
+    "full_dense_gbuffer_images_preserved": true,
+    "training_projection_may_be_stratified": true,
+    "minimum_training_strata": [
+      "OPAQUE_SINGLE_HIT_VISIBLE",
+      "ALPHA_BOUNDARY",
+      "GRAZING_ANGLE",
+      "MULTIHIT_OR_OCCLUSION",
+      "CROSS_VIEW_REPEAT_SURFACE",
+      "SOURCE_EVALUABLE_BUT_UNOBSERVED_SURFACE"
+    ],
+    "sampling_must_not_reduce_truth_authority": true,
+    "per_subject_sampling_seed_must_be_subject_identity_derived": true,
+    "subject_specific_sampling_hacks_forbidden": true
+  },
+  "role_of_stage48": {
+    "retain_existing_stage48": true,
+    "role": "EXPENSIVE_RENDERER_EQUIVALENCE_AND_INTERVENTION_COURT",
+    "dense_authority_replacement": false,
+    "dense_authority_complement": true,
+    "rule": "STAGE48_VALIDATES_THE_RENDERER_AND_AMBIGUOUS_MULTIHIT_CASES__DENSE_GBUFFER_AND_SOURCE_MATERIAL_EVALUATION_SUPPLY_COVERAGE"
+  },
+  "training_projection_contract": {
+    "architecture_change_required": false,
+    "current_appearance_head_may_be_reused": true,
+    "current_sparse_stage48_rgba_rows_alone_for_truth139_training": false,
+    "dense_surface_addressed_rgba_rows_required": true,
+    "ambiguous_multihit_per_layer_rgba_may_not_be_imputed": true,
+    "teacher_only_binding_ids_may_not_enter_student_forward": true,
+    "semantic_part_taxonomy_used": false
+  },
+  "evaluation": {
+    "must_report": [
+      "RGBA_ERROR_ON_SINGLE_HIT_VISIBLE",
+      "RGBA_ERROR_ON_ALPHA_BOUNDARY",
+      "CROSS_VIEW_SAME_SURFACE_CONSISTENCY",
+      "VISIBLE_VS_UNOBSERVED_SURFACE_BREAKDOWN",
+      "MULTIHIT_ORACLE_COVERAGE_AND_ABSTENTION_RATE"
+    ],
+    "sealed_unseen_required": true,
+    "train_only_metrics_are_not_generalization_evidence": true
+  },
+  "external_worker": {
+    "expected_execution": "TRUTH139_CORPUS_PREPARATION_NOTEBOOK_OR_EQUIVALENT_EXTERNAL_WORKER",
+    "platform_remains_authority": true,
+    "batch_receipt_and_exact_output_hashes_required": true
+  },
+  "gates": {
+    "truth139_appearance_training_before_dense_authority_materialized": false,
+    "truth139_mechanics_or_geometry_training_may_depend_on_this_gate": false,
+    "missing_dense_appearance_rows_may_be_silently_zero_filled": false,
+    "qualification_minted": false
+  }
+}

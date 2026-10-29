@@ -13,6 +13,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import time
+import numpy as np
 from tools.corpus.iris_observation_admission_v1 import audit_subject, digest
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -21,6 +22,8 @@ ALLOWED_ROSTER_SCHEMAS={
     "RealSaS.FIT8DiversitySelection.v1",
     "RealSaS.Truth139ApparatusManifest.v1",
 }
+SURFACE_GEOMETRY_NAME="REST_SURFACE_GEOMETRY.npz"
+SURFACE_GEOMETRY_MANIFEST_NAME="REST_SURFACE_GEOMETRY_MANIFEST.json"
 
 
 def _value_hash(value):
@@ -45,6 +48,39 @@ def load_roster(path):
             if row.get("import_render_admission")!="PENDING" or row.get("training_authorized") is not False:
                 raise ValueError("PREPARE_TRUTH139_SUBJECT_AUTHORITY_DRIFT:"+str(row.get("subject_key")))
     return path,roster,_value_hash(roster)
+
+
+def verify_surface_geometry_packet(packet,row):
+    packet=Path(packet).resolve()
+    manifest_path=packet/SURFACE_GEOMETRY_MANIFEST_NAME
+    geometry_path=packet/SURFACE_GEOMETRY_NAME
+    if not manifest_path.is_file() or not geometry_path.is_file():
+        raise ValueError("PREPARE_SURFACE_GEOMETRY_PACKET_MISSING:"+str(row.get("subject_key")))
+    manifest=json.loads(manifest_path.read_text())
+    if (manifest.get("schema")!="RealSaS.ResponseIndependentRestSurfaceGeometry.v1"
+            or manifest.get("status")!="PASS_IMPORTED_REST_SURFACE_GEOMETRY__RAW_PARITY_ADMISSION_SEPARATE"
+            or manifest.get("source_sha256")!=row["source"]["sha256"]):
+        raise ValueError("PREPARE_SURFACE_GEOMETRY_MANIFEST_DRIFT:"+str(row.get("subject_key")))
+    if manifest.get("geometry_npz",{}).get("sha256")!=digest(geometry_path):
+        raise ValueError("PREPARE_SURFACE_GEOMETRY_HASH_DRIFT:"+str(row.get("subject_key")))
+    with np.load(geometry_path,allow_pickle=False) as z:
+        required={"rest_vertices_source_world","faces","face_owner_privileged","face_material_privileged",
+                  "triangle_uv","triangle_uv_valid"}
+        if not required.issubset(set(z.files)):
+            raise ValueError("PREPARE_SURFACE_GEOMETRY_FIELDS_MISSING:"+str(row.get("subject_key")))
+        vertices=np.asarray(z["rest_vertices_source_world"]);faces=np.asarray(z["faces"])
+        owners=np.asarray(z["face_owner_privileged"]);materials=np.asarray(z["face_material_privileged"])
+        uv=np.asarray(z["triangle_uv"]);uv_valid=np.asarray(z["triangle_uv_valid"])
+        forbidden={"isolated_position","root_control_position","source_weight_offsets","source_weight_values"}
+        if forbidden.intersection(set(z.files)):
+            raise ValueError("PREPARE_SURFACE_GEOMETRY_RESPONSE_OR_SKIN_LEAK:"+str(row.get("subject_key")))
+    if (vertices.ndim!=2 or vertices.shape[1:]!=(3,) or not len(vertices) or not np.isfinite(vertices).all()
+            or faces.ndim!=2 or faces.shape[1:]!=(3,) or not len(faces)
+            or owners.shape!=(len(faces),) or materials.shape!=(len(faces),)
+            or uv.shape!=(len(faces),3,2) or uv_valid.shape!=(len(faces),)):
+        raise ValueError("PREPARE_SURFACE_GEOMETRY_LAYOUT:"+str(row.get("subject_key")))
+    return {"geometry_sha256":digest(geometry_path),"manifest_sha256":digest(manifest_path),
+            "vertex_count":len(vertices),"triangle_count":len(faces)}
 
 
 def prepare(source_root, output_root, blender, probe, roster_path=DEFAULT_ROSTER):
@@ -73,12 +109,18 @@ def prepare(source_root, output_root, blender, probe, roster_path=DEFAULT_ROSTER
             # Never trust an old success marker without checking every bound byte.
             from tools.training.prepare_iris_cohort_v1 import verify_observations
             verify_observations(packet.parent,row)
-            print(f"[REUSE] {key} exact_input_packet={identity[:12]}",flush=True)
+            surface=verify_surface_geometry_packet(packet,row)
+            print(f"[REUSE] {key} exact_input_packet={identity[:12]} surface={surface['geometry_sha256'][:12]}",flush=True)
         else:
             root.mkdir(parents=True,exist_ok=True)
+            imported_root=root/"imported"/key
+            surface_geometry=imported_root/SURFACE_GEOMETRY_NAME
+            surface_manifest=imported_root/SURFACE_GEOMETRY_MANIFEST_NAME
             for role,extra in [
                 ("import",["--python",str(ROOT/"tools/observation/blender_source_parity_export_v1.py"),"--",
-                            str(source),str(root/"imported"/key/"imported.json")]),
+                            str(source),str(imported_root/"imported.json"),
+                            "--surface-geometry-output",str(surface_geometry),
+                            "--surface-geometry-manifest",str(surface_manifest)]),
                 ("render",["--python",str(ROOT/"tools/observation/blender_controlled_8view_v2.py"),"--",
                             "--source",str(source),"--expected-source-sha256",row["source"]["sha256"],
                             "--subject-id",key,"--out-dir",str(root/"observations"/key)])]:
@@ -93,12 +135,20 @@ def prepare(source_root, output_root, blender, probe, roster_path=DEFAULT_ROSTER
             for path in (root/"observations"/key).iterdir():
                 if path.is_file():
                     shutil.copyfile(path,packet/path.name)
+            for path in (surface_geometry,surface_manifest):
+                if not path.is_file():
+                    raise ValueError("PREPARE_SURFACE_GEOMETRY_PRODUCER_MISSING:"+key+":"+path.name)
+                shutil.copyfile(path,packet/path.name)
             shutil.copyfile(root/"admission"/key/"IRIS_OBSERVATION_ADMISSION.json",done)
+            surface=verify_surface_geometry_packet(packet,row)
         artifacts.append({"subject_id":key,"packet_identity":identity,
                           "proof_sha256":digest(done),"packet_path":str(packet),
-                          "source_sha256":row["source"]["sha256"]})
+                          "source_sha256":row["source"]["sha256"],
+                          "surface_geometry_sha256":surface["geometry_sha256"],
+                          "surface_geometry_manifest_sha256":surface["manifest_sha256"]})
     index={"schema":"RealSaS.PreparedIrisInputPackets.v1","binding":binding,"subjects":artifacts,
            "roster":{"path":str(roster_path),"schema":roster["schema"],"identity_sha256":roster_sha},
+           "surface_geometry_contract":"RESPONSE_INDEPENDENT_REST_GEOMETRY__NO_STAGE47_DEPENDENCY",
            "authority":"PREPARED_EXTERNAL_INPUT_BYTES__NOT_REGISTRY_OR_WORKFLOW_STATE",
            "go_qualification_required":True,"training_authorized":False}
     output_root.mkdir(parents=True,exist_ok=True)

@@ -5,10 +5,12 @@ from tools.corpus.run_truth139_structural_sealed_audit_v3 import (
 
 
 def _row(path: str, *, stem: str, material: str, full: bool = True) -> dict:
+    parts = path.split("/")
+    assert parts[:2] == ["raw", "quaternius"]
     source = {
         "relative_path": path,
         "creator": "quaternius",
-        "pack_id": path.split("/")[3],
+        "pack_id": parts[2],
         "normalized_asset_stem": stem,
     }
     return {

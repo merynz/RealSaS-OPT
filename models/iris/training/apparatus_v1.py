@@ -16,7 +16,14 @@ def targets(subject, points, device="cpu", torch_authority=False):
     policy = SourceSignedFieldPolicyV5(required_resolution=subject["resolution"])
     if str(device).startswith("cuda") or torch_authority:
         kwargs = {k:v.to(device) if isinstance(v,torch.Tensor) else v for k,v in kwargs.items()}
-        with torch.no_grad():
+        # F* is an exact teacher authority, not part of the BF16 model forward.
+        # Callers such as IRIS V3.1 may request targets from inside an outer
+        # autocast scope.  Explicitly disable autocast here so projection,
+        # closed-raster clamping and manual bilinear indices stay FP32.  At
+        # R1024, BF16 cannot represent 1023 exactly and rounds that edge clamp
+        # to 1024, which can otherwise produce a device-side index assert.
+        device_type = torch.device(device).type
+        with torch.no_grad(), torch.autocast(device_type=device_type, enabled=False):
             out = [source_signed_field_torch_v5(torch.from_numpy(q).to(device), policy=policy, **kwargs).cpu().numpy()
                    for q in np.array_split(points,max(1,(len(points)+65535)//65536))]
     else:

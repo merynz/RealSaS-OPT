@@ -17,6 +17,16 @@ from pathlib import Path
 INPUT_SCHEMA = "RealSaS.Truth139CorpusManifest.v2"
 OUTPUT_SCHEMA = "RealSaS.Truth139MaterializationWorkOrders.v1"
 
+SOURCE_OBSERVATION_APPARATUS = {
+    "roster_adapter": "tools/corpus/build_truth139_graphics_apparatus_manifest_v1.py",
+    "packet_producer": "tools/corpus/prepare_iris_observations_v1.py",
+    "blender_surface_exporter": "tools/observation/blender_source_parity_export_v1.py",
+    "blender_8view_renderer": "tools/observation/blender_controlled_8view_v2.py",
+    "independent_admission_court": "tools/corpus/iris_observation_admission_v1.py",
+    "required_observation_status": "PASS_IRIS_BIND_OBSERVATIONS",
+    "required_surface_geometry_status": "PASS_IMPORTED_REST_SURFACE_GEOMETRY__RAW_PARITY_ADMISSION_SEPARATE",
+    "surface_geometry_scope": "RESPONSE_INDEPENDENT_REST_GEOMETRY__NO_STAGE47_DEPENDENCY",
+}
 DENSE_GRAPHICS_IMPLEMENTATION = {
     "producer": "tools/corpus/build_truth139_dense_graphics_gbuffer_v1.py",
     "producer_pending_status": "PASS_DENSE_GRAPHICS_FRONT_SURFACE__VISIBILITY_OCCLUSION_COURT_PENDING",
@@ -62,8 +72,10 @@ def _jobs(raw: dict) -> dict[str, dict]:
     return {
         "SOURCE_IMPORT_AND_8VIEW_OBSERVATION": {
             "enabled": observation,
-            "execution": "EXTERNAL_WORKER",
+            "execution": "EXTERNAL_WORKER_BLENDER_PLUS_CPU_COURT",
             "depends_on": [],
+            "apparatus": dict(SOURCE_OBSERVATION_APPARATUS),
+            "admission_rule": "OBSERVATION_ADMISSION_AND_RESPONSE_INDEPENDENT_REST_GEOMETRY_MUST_BOTH_PASS__NO_STAGE47_DEPENDENCY",
         },
         "GEOMETRY_FSTAR_DEPTH_NORMAL_TRUTH": {
             "enabled": observation and normals,
@@ -165,6 +177,9 @@ def build(manifest: dict) -> dict:
         "parent_historical_reproduction": dict(manifest.get("historical_reproduction") or {}),
         "subject_count": len(subjects),
         "job_candidate_counts": dict(sorted(counts.items())),
+        "canonical_apparatus": {
+            "SOURCE_IMPORT_AND_8VIEW_OBSERVATION": dict(SOURCE_OBSERVATION_APPARATUS),
+        },
         "canonical_implementations": {
             "DENSE_GRAPHICS_FRONT_SURFACE": dict(DENSE_GRAPHICS_IMPLEMENTATION),
             "VISIBILITY_OCCLUSION_CROSS_VIEW": dict(VISIBILITY_OCCLUSION_IMPLEMENTATION),
@@ -173,6 +188,7 @@ def build(manifest: dict) -> dict:
             "missing_optional_truth_does_not_delete_subject": True,
             "per_subject_jobs_follow_raw_capabilities": True,
             "graphics_does_not_depend_on_response_evidence": True,
+            "source_observation_surface_geometry_does_not_depend_on_response_evidence": True,
             "response_evidence_failure_does_not_block_graphics_or_relations": True,
             "development_taint_does_not_delete_corpus_identity": True,
             "historical_reproduction_finding_does_not_block_safe_materialization": True,

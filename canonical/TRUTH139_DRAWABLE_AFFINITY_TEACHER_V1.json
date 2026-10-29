@@ -1,0 +1,66 @@
+{
+  "schema": "RealSaS.Truth139DrawableAffinityTeacherContract.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__PERMUTATION_INVARIANT_DRAWABLE_EVIDENCE_REQUIRED_FOR_LAYER_AWARE_RELATIONS",
+  "purpose": "CONVERT_SUBJECT_LOCAL_SOURCE_AUTHORED_COMPONENT_AND_PEEL_TRUTH_INTO_GENERIC_PAIRWISE_DRAWABLE_EVIDENCE_WITHOUT_EXPOSING_SOURCE_OWNER_IDS_AS_CROSS_SUBJECT_CLASSES",
+  "parents": [
+    "RealSaS.Truth139GraphicsLayerPeelTeacher.v1",
+    "RealSaS.Truth139SourceComponentMasksTeacher.v1",
+    "EXACT_ADMITTED_REST_GEOMETRY"
+  ],
+  "teacher_families": {
+    "ADJACENT_SURFACE_COMPONENT_AFFINITY": {
+      "domain": "EXACT_MESH_EDGE_ADJACENT_FACE_PAIRS",
+      "targets": [
+        "SAME_AUTHORED_COMPONENT",
+        "AUTHORED_COMPONENT_BOUNDARY"
+      ],
+      "rule": "TARGET_IS_BINARY_PAIRWISE_AFFINITY_ONLY__LOCAL_COMPONENT_IDS_ARE_NOT_TARGETS"
+    },
+    "RAY_ORDER_COMPONENT_RELATION": {
+      "domain": "CONSECUTIVE_VALID_HITS_IN_THE_MEASURED_K_HIT_PEEL_PREFIX",
+      "targets": [
+        "FRONT_FACE",
+        "BEHIND_FACE",
+        "POSITIVE_DEPTH_GAP",
+        "SAME_AUTHORED_COMPONENT"
+      ],
+      "rule": "THIS_FACTORS_SELF_OCCLUSION_FROM_INTER_COMPONENT_OCCLUSION_WITHOUT_NAMING_EITHER_COMPONENT"
+    }
+  },
+  "authority_policy": {
+    "source_face_owner_binding_is_teacher_evidence": true,
+    "source_owner_integer_may_enter_student_forward": false,
+    "source_owner_integer_may_be_cross_subject_class": false,
+    "same_component_boolean_is_permutation_invariant": true,
+    "component_boundary_boolean_is_permutation_invariant": true,
+    "source_authored_component_is_optimal_runtime_drawable_authority": false,
+    "semantic_part_taxonomy_used": false
+  },
+  "overflow_policy": {
+    "bounded_k_prefix_is_not_complete_when_all_k_slots_are_filled": true,
+    "unseen_k_plus_one_hit_may_not_be_labeled_negative": true,
+    "relations_inside_the_measured_prefix_remain_valid": true
+  },
+  "independent_court": {
+    "builder": "tools/corpus/validate_truth139_drawable_affinity_teacher_v1.py",
+    "required_status": "PASS_DRAWABLE_AFFINITY_REBINDS_EXACT_COMPONENT_AND_PEEL_TRUTH",
+    "recomputes": [
+      "EDGE_ADJACENCY_FROM_FACES",
+      "PAIRWISE_SAME_COMPONENT_FROM_FACE_OWNER_BINDING",
+      "CONSECUTIVE_RAY_HIT_COMPONENT_RELATIONS_FROM_LAYER_PEEL"
+    ]
+  },
+  "training_projection": {
+    "139_a_scale_control_consumes_this_truth": false,
+    "139_b_truth_rich_may_supervise_relations": true,
+    "tessa_may_receive_only_inference_available_learned_affinity_evidence_not_teacher_owner_ids": true
+  },
+  "gates": {
+    "owner_ids_as_class_labels_forbidden": true,
+    "material_ids_as_drawable_ids_forbidden": true,
+    "missing_or_overflow_unobserved_pair_as_negative_forbidden": true,
+    "training_before_independent_court_forbidden": true,
+    "qualification_minted": false
+  }
+}

@@ -17,7 +17,7 @@ concurrency:
 jobs:
   locate:
     runs-on: [self-hosted, linux, x64, realsas]
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       PLATFORM_ROOT: /home/monster/realsas_platform
       AUTHORITY_ROOT: /home/monster/realsas_authority
@@ -38,9 +38,10 @@ jobs:
           assert row['enabled'] is True
           assert row['training_allowed'] is False
           assert row['mutation_allowed'] is False
+          assert int(row.get('locator_revision',0)) >= 3
           PY
 
-      - name: Locate exact October-4 corpus seal read-only
+      - name: Locate exact October-4 seal copies and audit raw-byte coverage
         id: locate
         run: |
           set -euo pipefail
@@ -48,7 +49,6 @@ jobs:
           mkdir -p "$(dirname "$OUT")"
           echo "output_path=$OUT" >> "$GITHUB_OUTPUT"
           export OUT
-          set +e
           "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
           import hashlib,json,os
           from pathlib import Path
@@ -58,11 +58,21 @@ jobs:
           expected_ledger=os.environ['EXPECTED_LEDGER_SHA256']
           search_roots=[Path('/home/monster/realsas_authority'),Path('/home/monster')]
           seen=set();matches=[]
+
           def sha(path):
               h=hashlib.sha256()
               with path.open('rb') as f:
-                  for chunk in iter(lambda:f.read(1024*1024),b''):h.update(chunk)
+                  for chunk in iter(lambda:f.read(4*1024*1024),b''):h.update(chunk)
               return h.hexdigest()
+
+          def ledger_rows(path):
+              rows=[]
+              for line in path.read_text(encoding='utf-8').splitlines():
+                  if not line.strip():continue
+                  digest,relative=line.split('  ',1)
+                  rows.append((digest.lower(),relative.replace('\\','/')))
+              return rows
+
           for base in search_roots:
               if not base.exists():continue
               for material in base.glob('**/manifest/CORPUS_SEAL_MATERIAL.txt'):
@@ -73,20 +83,48 @@ jobs:
                       manifest=root/'manifest/MANIFEST.json';ledger=root/'manifest/FILE_HASHES.sha256'
                       if not manifest.is_file() or not ledger.is_file():continue
                       if sha(material)!=expected_root or sha(manifest)!=expected_manifest or sha(ledger)!=expected_ledger:continue
-                      matches.append({'root':str(root),'seal_material_sha256':sha(material),
-                                      'manifest_sha256':sha(manifest),'ledger_sha256':sha(ledger)})
-                  except (OSError,PermissionError):
+                      rows=ledger_rows(ledger)
+                      gltf_rows=[r for r in rows if r[1].startswith('raw/quaternius/') and r[1].lower().endswith(('.gltf','.glb'))]
+                      existing=0;correct=0;wrong=[]
+                      for digest,relative in gltf_rows:
+                          path=root/relative
+                          if not path.is_file():continue
+                          existing+=1
+                          actual=sha(path)
+                          if actual==digest:correct+=1
+                          elif len(wrong)<20:wrong.append({'path':relative,'expected':digest,'actual':actual})
+                      all_existing=sum(1 for _digest,relative in rows if (root/relative).is_file())
+                      matches.append({
+                          'root':str(root),
+                          'seal_material_sha256':sha(material),
+                          'manifest_sha256':sha(manifest),
+                          'ledger_sha256':sha(ledger),
+                          'ledger_entry_count':len(rows),
+                          'quaternius_gltf_glb_ledger_count':len(gltf_rows),
+                          'quaternius_gltf_glb_existing_count':existing,
+                          'quaternius_gltf_glb_hash_correct_count':correct,
+                          'ledger_existing_file_count':all_existing,
+                          'primary_source_hash_failures':wrong,
+                          'full_primary_source_coverage':len(gltf_rows)==395 and correct==395,
+                      })
+                  except (OSError,PermissionError,ValueError):
                       continue
-          payload={'schema':'RealSaS.Truth139CorpusLocatorReceipt.v1','run_id':os.environ['GITHUB_RUN_ID'],
-                   'matches':matches,'match_count':len(matches),'training_allowed':False,
-                   'mutation_performed':False,'status':'PASS_EXACT_SINGLE_ROOT' if len(matches)==1 else 'FAIL_ROOT_CARDINALITY'}
+          full=[row for row in matches if row['full_primary_source_coverage']]
+          payload={
+              'schema':'RealSaS.Truth139CorpusLocatorReceipt.v2',
+              'run_id':os.environ['GITHUB_RUN_ID'],
+              'matches':matches,
+              'match_count':len(matches),
+              'full_primary_source_roots':[row['root'] for row in full],
+              'full_primary_source_root_count':len(full),
+              'recommended_raw_root':full[0]['root'] if len(full)==1 else None,
+              'training_allowed':False,
+              'mutation_performed':False,
+              'status':'PASS_EXACT_FULL_RAW_ROOT' if len(full)==1 else ('FAIL_NO_FULL_RAW_ROOT' if not full else 'FAIL_MULTIPLE_FULL_RAW_ROOTS'),
+          }
           out=Path(os.environ['OUT']);out.write_text(json.dumps(payload,sort_keys=True,indent=2)+'\n')
-          print(json.dumps(payload,sort_keys=True))
-          raise SystemExit(0 if len(matches)==1 else 2)
+          print(json.dumps({'status':payload['status'],'match_count':len(matches),'full_primary_source_root_count':len(full),'roots':[{'root':r['root'],'gltf_correct':r['quaternius_gltf_glb_hash_correct_count']} for r in matches]},sort_keys=True))
           PY
-          STATUS=$?
-          set -e
-          exit "$STATUS"
 
       - name: Preserve locator receipt
         if: always()

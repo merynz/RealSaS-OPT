@@ -1,34 +1,74 @@
 {
   "schema": "RealSaS.Truth139ExternalWorkerNotebookContract.v1",
   "date": "2026-10-29",
-  "status": "FROZEN_OPERATIONAL_CONTRACT__NOTEBOOK_BYTES_MATERIALIZE_AFTER_RAW_AUDIT",
-  "purpose": "HEAVY_TRUTH139_CORPUS_MATERIALIZATION_ONLY",
+  "status": "FROZEN_OPERATIONAL_CONTRACT__NOTEBOOK_BYTES_MATERIALIZE_AFTER_RAW_CORPUS_IDENTITY_CLOSURE",
+  "purpose": "HEAVY_TRUTH139_CORPUS_MATERIALIZATION_ONLY__NO_MODEL_TRAINING_OR_TESSA_CONDITIONING",
   "intended_notebook_repo_path": "notebooks/Truth139_Corpus_Preparation_T4_CPU_v1.ipynb",
   "external_worker_role": "NON_AUTHORITATIVE_COMPUTE_WORKER",
   "recommended_runtime": {
     "gpu_class": "NVIDIA_T4_OR_BETTER__A100_NOT_REQUIRED",
-    "cpu": "HIGH_CPU_RUNTIME_PREFERRED_FOR_BLENDER_STAGE47_STAGE48_AND_INDEPENDENT_RAY_COURTS",
+    "cpu": "HIGH_CPU_RUNTIME_PREFERRED_FOR_BLENDER_RESPONSE_RENDERER_AND_INDEPENDENT_RAY_COURTS",
     "ram": "HIGH_RAM_RUNTIME_PREFERRED",
     "platform": "COLAB_OR_EQUIVALENT_NOTEBOOK_RUNTIME"
   },
-  "appearance_authority_contract": "canonical/TRUTH139_DENSE_APPEARANCE_AUTHORITY_V1.json",
-  "allowed_heavy_jobs": [
-    "CONTROLLED_8VIEW_OBSERVATION_RENDER_AND_ADMISSION_CANDIDATES",
-    "DENSE_SURFACE_ADDRESSED_APPEARANCE_GBUFFER_AND_VISIBILITY_AUTHORITY",
-    "INDEPENDENT_CPU_RAY_ORACLE_VALIDATION_OF_DENSE_GBUFFER",
-    "MULTIVIEW_NORMAL_DEPTH_TEACHER_TRUTH",
-    "DINO_AND_IMAGE_DERIVED_FSTAR_SHARD_PREPARATION",
-    "STAGE47_SOURCE_RESPONSE_TRUTH_MATERIALIZATION",
-    "STAGE48_APPEARANCE_PRESENTATION_INTERVENTION_WITNESS",
-    "TESSA_TEACHER_AND_CONDITIONING_CACHE_MATERIALIZATION"
+  "canonical_parent_contracts": [
+    "canonical/TRUTH139_CORPUS_PREPARATION_CONTRACT_V1.json",
+    "canonical/TRUTH139_GEOMETRY_TEACHER_V1.json",
+    "canonical/TRUTH139_DENSE_GRAPHICS_TEACHER_V1.json",
+    "canonical/TRUTH139_GRAPHICS_LAYER_DECOMPOSITION_TEACHER_V1.json",
+    "canonical/TRUTH139_DRAWABLE_AFFINITY_TEACHER_V1.json",
+    "canonical/TRUTH139_RELATIONS_TEACHER_V1.json",
+    "canonical/TRUTH139_IRIS_RESPONSE_EVIDENCE_TEACHER_V1.json"
   ],
-  "appearance_materialization_rule": {
-    "stage48_eight_ray_default_is_not_dense_training_authority": true,
-    "full_8view_dense_gbuffer_preserved": true,
-    "surface_addressed_rgba_and_visibility_required": true,
+  "materialization_work_order": {
+    "builder": "tools/corpus/build_truth139_materialization_work_orders_v1.py",
+    "schema": "RealSaS.Truth139MaterializationWorkOrders.v1",
+    "required_before_first_heavy_batch": true,
+    "all_139_subject_rows_retained": true,
+    "jobs_are_capability_aware": true,
+    "missing_optional_truth_does_not_delete_subject": true
+  },
+  "allowed_heavy_jobs": [
+    "SOURCE_IMPORT_AND_8VIEW_OBSERVATION",
+    "GEOMETRY_FSTAR_DEPTH_NORMAL_TRUTH",
+    "IRIS_RESPONSE_EVIDENCE",
+    "DENSE_GRAPHICS_FRONT_SURFACE",
+    "VISIBILITY_OCCLUSION_CROSS_VIEW",
+    "K_HIT_GEOMETRIC_PEEL",
+    "ANONYMOUS_COMPONENT_MASKS_WHEN_EXACT_FACE_OWNER_BINDING_EXISTS",
+    "DRAWABLE_AFFINITY_RELATIONS",
+    "PRIMITIVE_RELATIONS",
+    "STAGE48_RENDERER_INTERVENTION_WITNESS_WHERE_CAPABLE",
+    "GENERIC_EXACT_TOPOLOGY_TRUTH"
+  ],
+  "explicitly_not_in_this_notebook": [
+    "IRIS_OPTIMIZER_STEPS",
+    "TESSA_CONDITIONING_CACHE_MATERIALIZATION",
+    "TESSA_OPTIMIZER_STEPS",
+    "AXIS_OR_MIRA_MODEL_TRAINING",
+    "TRAIN_UNSEEN_SPLIT_SELECTION",
+    "MODEL_CHECKPOINT_SELECTION",
+    "PRODUCT_QUALIFICATION"
+  ],
+  "graphics_materialization_rule": {
+    "graphics_is_parent_domain": true,
+    "source_rgba_authority_is_partial_and_provenance_scoped": true,
+    "stage48_eight_ray_default_is_not_dense_training_truth": true,
+    "full_8view_dense_front_surface_gbuffer_preserved": true,
+    "surface_addressed_rgba_depth_normal_visibility_occlusion_required": true,
     "independent_cpu_ray_oracle_court_required_per_subject": true,
-    "ambiguous_multihit_per_layer_rgba_not_imputed": true,
+    "k_hit_peel_prefix_requires_independent_cpu_prefix_court": true,
+    "ambiguous_hidden_rgba_not_imputed": true,
+    "constructed_view_may_not_mint_source_authority": true,
     "semantic_part_taxonomy_used": false
+  },
+  "relations_materialization_rule": {
+    "same_surface_cross_view_required_when_parent_graphics_supports_it": true,
+    "front_behind_on_shared_ray_required_when_occlusion_truth_exists": true,
+    "exact_mesh_edge_adjacency_required": true,
+    "drawable_affinity_is_pairwise_and_permutation_invariant": true,
+    "source_owner_integer_may_not_become_cross_subject_target": true,
+    "response_coherence_is_optional_measured_evidence_not_rig_or_skin_authority": true
   },
   "forbidden_authority": [
     "SUBJECT_ADMISSION",
@@ -44,8 +84,7 @@
     "git_source_commit_sha": "REQUIRED",
     "raw_audit_identity_sha256": "REQUIRED",
     "corpus_manifest_identity_sha256": "REQUIRED",
-    "apparatus_manifest_identity_sha256": "REQUIRED_WHEN_APPARATUS_PROJECTION_EXISTS",
-    "dense_appearance_authority_contract_sha256": "REQUIRED",
+    "materialization_work_order_identity_sha256": "REQUIRED",
     "runtime_fingerprint": "REQUIRED",
     "worker_code_manifest_sha256": "REQUIRED"
   },
@@ -55,28 +94,30 @@
     "git_source_commit_sha",
     "raw_audit_identity_sha256",
     "corpus_manifest_identity_sha256",
-    "dense_appearance_authority_contract_sha256",
+    "materialization_work_order_identity_sha256",
     "batch_id",
     "subject_ids",
+    "scheduled_jobs_by_subject",
     "input_artifact_hashes",
     "output_artifact_hashes",
-    "dense_gbuffer_geometry_court_receipts",
+    "independent_court_receipts",
     "runtime_fingerprint",
     "started_at_utc",
     "completed_at_utc",
-    "failed_subjects",
+    "failed_jobs_by_subject",
     "training_performed"
   ],
   "batching_policy": {
     "resumable": true,
     "subject_outputs_content_addressed": true,
-    "completed_subjects_must_not_be_recomputed_without_explicit_new_revision": true,
-    "failed_subjects_remain_in_denominator_and_failure_ledger": true
+    "completed_job_outputs_must_not_be_recomputed_without_explicit_new_revision": true,
+    "failed_jobs_remain_in_denominator_and_failure_ledger": true,
+    "one_failed_optional_family_does_not_delete_valid_other_family_truth": true
   },
   "platform_import_policy": {
     "exact_output_hash_verification_required": true,
     "batch_receipt_import_required": true,
-    "notebook_receipt_must_be_linked_to_truth139_experiment": true,
+    "every_derived_family_requires_its_declared_independent_court_before_admission": true,
     "external_worker_may_not_mint_qualification": true
   },
   "training_allowed": false,

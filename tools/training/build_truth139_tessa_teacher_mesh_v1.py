@@ -100,8 +100,8 @@ def build_teacher_mesh(
         "token_count": int(len(sequence.token_ids)),
         "coordinate_bins": int(tessa_config.coordinate_bins),
         "local_attention_window": int(tessa_config.local_attention_window),
-        "teacher_topology_target_only": true,
-        "student_conditioning_allowed": false,
+        "teacher_topology_target_only": True,
+        "student_conditioning_allowed": False,
         "representability_court": "PASS_FULL_SOURCE_TOPOLOGY_SEQUENCE",
     }
     return arrays, receipt

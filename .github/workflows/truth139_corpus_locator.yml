@@ -1,0 +1,93 @@
+name: truth139-corpus-locator
+
+on:
+  push:
+    branches: [truth139-platform-generalization-v1]
+    paths:
+      - canonical/TRUTH139_CORPUS_LOCATOR_REQUEST_V1.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth139-corpus-locator
+  cancel-in-progress: false
+
+jobs:
+  locate:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      EXPECTED_ROOT_SHA256: 2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab
+      EXPECTED_MANIFEST_SHA256: 3799b170d4138dbc0447d2d3456cc9ad5ba7e185fddace6d6ce2de0d0a2adc00
+      EXPECTED_LEDGER_SHA256: 1524edeb99e2383e2d7516bf9680275289976d57efa3fac3a4b01f78426979b4
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate locator request
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          row=json.loads(Path('canonical/TRUTH139_CORPUS_LOCATOR_REQUEST_V1.json').read_text())
+          assert row['schema']=='RealSaS.Truth139CorpusLocatorRequest.v1'
+          assert row['enabled'] is True
+          assert row['training_allowed'] is False
+          assert row['mutation_allowed'] is False
+          PY
+
+      - name: Locate exact October-4 corpus seal read-only
+        id: locate
+        run: |
+          set -euo pipefail
+          OUT="$AUTHORITY_ROOT/truth139/corpus_locator/${GITHUB_RUN_ID}/LOCATOR.json"
+          mkdir -p "$(dirname "$OUT")"
+          export OUT
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+
+          expected_root=os.environ['EXPECTED_ROOT_SHA256']
+          expected_manifest=os.environ['EXPECTED_MANIFEST_SHA256']
+          expected_ledger=os.environ['EXPECTED_LEDGER_SHA256']
+          search_roots=[Path('/home/monster/realsas_authority'),Path('/home/monster')]
+          seen=set();matches=[]
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for chunk in iter(lambda:f.read(1024*1024),b''):h.update(chunk)
+              return h.hexdigest()
+          for base in search_roots:
+              if not base.exists():continue
+              for material in base.glob('**/manifest/CORPUS_SEAL_MATERIAL.txt'):
+                  try:
+                      root=material.parent.parent.resolve()
+                      if root in seen:continue
+                      seen.add(root)
+                      manifest=root/'manifest/MANIFEST.json';ledger=root/'manifest/FILE_HASHES.sha256'
+                      if not manifest.is_file() or not ledger.is_file():continue
+                      if sha(material)!=expected_root or sha(manifest)!=expected_manifest or sha(ledger)!=expected_ledger:continue
+                      matches.append({'root':str(root),'seal_material_sha256':sha(material),
+                                      'manifest_sha256':sha(manifest),'ledger_sha256':sha(ledger)})
+                  except (OSError,PermissionError):
+                      continue
+          payload={'schema':'RealSaS.Truth139CorpusLocatorReceipt.v1','run_id':os.environ['GITHUB_RUN_ID'],
+                   'matches':matches,'match_count':len(matches),'training_allowed':False,
+                   'mutation_performed':False,'status':'PASS_EXACT_SINGLE_ROOT' if len(matches)==1 else 'FAIL_ROOT_CARDINALITY'}
+          out=Path(os.environ['OUT']);out.write_text(json.dumps(payload,sort_keys=True,indent=2)+'\n')
+          print(json.dumps(payload,sort_keys=True))
+          if len(matches)!=1:raise SystemExit(2)
+          PY
+          echo "output_path=$OUT" >> "$GITHUB_OUTPUT"
+
+      - name: Preserve locator receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: truth139-corpus-locator-${{ github.run_id }}
+          path: ${{ steps.locate.outputs.output_path }}
+          if-no-files-found: warn
+          retention-days: 30

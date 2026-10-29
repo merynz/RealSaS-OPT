@@ -29,16 +29,9 @@ SUBJECT_SCHEMA = "RealSaS.Truth139RawSubjectCapability.v2"
 
 def _total_tessa_raw_precheck(row: dict) -> tuple[bool, dict]:
     cfg = TESSAConfigV1()
-    primitive = list((row.get("raw_structure") or {}).get("triangle_primitives") or ())
-    if primitive:
-        # New V2 rows may expose exact primitive counts directly.
-        total_vertices = sum(int(p.get("position_count", 0)) for p in primitive)
-        total_faces = sum(int(p.get("face_count", 0)) for p in primitive)
-    else:
-        # V1 scanner exposes aggregate counts used to construct this row.
-        structure = row.get("raw_structure") or {}
-        total_vertices = int(structure.get("triangle_position_count_total", 0))
-        total_faces = int(structure.get("triangle_face_count_total", 0))
+    structure = row.get("raw_structure") or {}
+    total_vertices = int(structure.get("triangle_position_count_total", structure.get("vertex_count", 0)))
+    total_faces = int(structure.get("triangle_face_count_total", structure.get("face_count", 0)))
     valid = total_vertices > 0 and total_faces > 0 and total_vertices <= cfg.max_vertices and total_faces <= cfg.max_faces
     return valid, {
         "policy": "TOTAL_ASSET_RAW_PRECHECK__FINAL_CODEC_COURT_AFTER_ADMITTED_IMPORT",
@@ -58,7 +51,6 @@ def _capability_rank(row: dict) -> tuple:
     path = str((row.get("source") or {}).get("relative_path") or "").lower()
     flat_penalty = int("/flat/" in path or "flat" in Path(path).stem.lower())
     textured_penalty = 0 if "textured" in path else 1
-    # sorted ascending: best capability first, then preferred source presentation.
     return (-full, -family_count, flat_penalty, textured_penalty, path)
 
 
@@ -80,17 +72,8 @@ def _group_development_taint(group: list[dict]) -> list[str]:
 def _audit_file_v2(path: Path, raw_root: Path, development_shas: set[str], development_aliases: set[tuple[str, str, str]]) -> dict:
     row = v1._audit_file(path, raw_root, development_shas, development_aliases)
     structure = dict(row.get("raw_structure") or {})
-    # Re-open only structural primitive metadata through the already parsed V1
-    # source contract. This avoids making the V2 corpus layer depend on Blender.
-    gltf = v1.SourceGLTF(path)
-    primitives = v1._primitive_rows(gltf)
-    triangle = [p for p in primitives if int(p.get("mode", -1)) == 4 and "positions" in p and len(p.get("faces", ())) > 0]
-    structure["triangle_primitives"] = [
-        {"position_count": int(p["position_count"]), "face_count": int(len(p["faces"]))}
-        for p in triangle
-    ]
-    structure["triangle_position_count_total"] = sum(p["position_count"] for p in structure["triangle_primitives"])
-    structure["triangle_face_count_total"] = sum(p["face_count"] for p in structure["triangle_primitives"])
+    structure["triangle_position_count_total"] = int(structure.get("vertex_count", 0))
+    structure["triangle_face_count_total"] = int(structure.get("face_count", 0))
     row["raw_structure"] = structure
     tessa_ok, tessa_court = _total_tessa_raw_precheck(row)
     row["capabilities"] = dict(row["capabilities"])
@@ -103,7 +86,7 @@ def _audit_file_v2(path: Path, raw_root: Path, development_shas: set[str], devel
         and tessa_ok
     )
     row["tessa_raw_representability"] = tessa_court
-    blockers = [b for b in list(row.get("raw_eligibility_blockers") or ()) if b != "TESSA_TOPOLOGY_SCALE"]
+    blockers = [b for b in list(row.get("raw_eligibility_blockers") or ()) if b != "TESSA_TOPOLOGY_TEACHER"]
     if not tessa_ok:
         blockers.append("TESSA_TOPOLOGY_TOTAL_ASSET_SCALE")
     row["raw_eligibility_blockers"] = sorted(set(blockers))
@@ -148,6 +131,9 @@ def audit(raw_root: Path, *, fit8_selection: Path, expected_corpus_root_sha256: 
         lineage = _union_lineage(group)
         subject_id = "truth139_" + identity[:20]
         full = bool(representative["capabilities"]["FULL_TRUTH139_RAW_ELIGIBLE"])
+        blockers = [b for b in list(representative.get("raw_eligibility_blockers") or ()) if b != "DEVELOPMENT_OR_REGRESSION_EXCLUSION"]
+        if taint:
+            blockers.append("DUPLICATE_FAMILY_DEVELOPMENT_OR_REGRESSION_EXCLUSION")
         row = {
             **representative,
             "schema": SUBJECT_SCHEMA,
@@ -158,6 +144,7 @@ def audit(raw_root: Path, *, fit8_selection: Path, expected_corpus_root_sha256: 
             "duplicate_source_file_count": len(group),
             "duplicate_family_development_taint": taint,
             "development_exclusion": ("DUPLICATE_FAMILY_DEVELOPMENT_TAINT:" + ",".join(taint)) if taint else None,
+            "raw_eligibility_blockers": sorted(set(blockers)),
             "representative_selection_policy": "MAX_TRUTH_CAPABILITY_THEN_TEXTURED_NONFLAT_THEN_PATH",
             "raw_eligible_for_truth139": bool(full and not taint),
             "admitted_for_truth139": False,

@@ -2,7 +2,7 @@
   "schema": "RealSaS.Truth139CorpusPreparationContract.v1",
   "date": "2026-10-29",
   "status": "PREREGISTERED__RAW_AUDIT_REQUIRED__TRAINING_NOT_AUTHORIZED",
-  "purpose": "REUSE_THE_EXACT_FIT8_SOURCE_OBSERVATION_AND_STAGE47_48_TRUTH_CONTRACTS_OVER_THE_AUDITED_GLTF_CORPUS_BEFORE_TRUTH139_TRAINING",
+  "purpose": "MATERIALIZE_A_CAPABILITY_AWARE_TRUTH139_CORPUS_WITH_DENSE_GEOMETRY_APPEARANCE_AND_MECHANICS_AUTHORITY_BEFORE_ANY_TRUTH139_TRAINING",
   "raw_corpus": {
     "status_document": "canonical/TRUTH_CORPUS_V1_STATUS_20261004.md",
     "corpus_root_sha256": "2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab",
@@ -22,7 +22,7 @@
     ],
     "knight_regression_inventory": "canonical/PRODUCT_NEAREST_KNIGHT_WITNESS_V1.json",
     "knight_is_not_assumed_to_exist_IN_THE_139_GLTF_SUBSET": true,
-    "rule": "DEVELOPMENT_OR_REGRESSION_SUBJECTS_MAY_NOT_ENTER_TRUTH139_TRAIN_OR_SEALED_UNSEEN"
+    "rule": "DEVELOPMENT_OR_REGRESSION_SUBJECTS_REMAIN_IN_CORPUS_IDENTITY_BUT_MAY_NOT_ENTER_TRUTH139_TRAIN_OR_SEALED_UNSEEN"
   },
   "raw_capability_families": {
     "OBSERVATION_FSTAR": {
@@ -39,12 +39,43 @@
     },
     "STAGE48_APPEARANCE_PRESENTATION": {
       "requires": ["OBSERVATION_FSTAR", "STAGE47_MECHANICS", "SOURCE_APPEARANCE_RESOURCES_RESOLVABLE"],
-      "stage": "48_PRESENTATION_RESPONSE_TRUTH"
+      "stage": "48_PRESENTATION_RESPONSE_TRUTH",
+      "role": "EXPENSIVE_SOURCE_EQUIVALENCE_AND_RENDERER_INTERVENTION_WITNESS__NOT_DENSE_APPEARANCE_COVERAGE"
     },
     "TESSA_TOPOLOGY_TEACHER": {
       "requires": ["TRIANGLE_MESH", "TOPOLOGY_SERIALIZABLE_WITHIN_TESSA_POLICY"],
       "teacher_is_target_only": true
     }
+  },
+  "dense_appearance_authority": {
+    "contract": "canonical/TRUTH139_DENSE_APPEARANCE_AUTHORITY_V1.json",
+    "builder": "tools/corpus/build_truth139_dense_appearance_gbuffer_v1.py",
+    "required_for_truth139_appearance_training": true,
+    "stage48_alone_is_sufficient": false,
+    "inputs": [
+      "ADMITTED_8VIEW_RGBA_AND_ALPHA_MASKS",
+      "EXACT_CAMERA_BUNDLE",
+      "EXACT_STAGE47_REST_VERTICES_AND_FACES",
+      "STAGE47_FACE_UV_AND_SOURCE_MATERIAL_BINDING_EVIDENCE"
+    ],
+    "required_dense_outputs": [
+      "PIXEL_TO_TRIANGLE_AND_BARYCENTRIC_SURFACE_ADDRESS",
+      "SOURCE_LINEAR_RGBA",
+      "DEPTH",
+      "GEOMETRIC_NORMAL",
+      "VISIBILITY_AND_SOURCE_SUPPORT",
+      "ALPHA_BOUNDARY_STRATUM",
+      "CROSS_VIEW_SAME_SURFACE_CORRESPONDENCE"
+    ],
+    "renderer": {
+      "dense_rasterizer": "PYTORCH3D_RASTERIZE_MESHES",
+      "pytorch3d_commit": "978cd99221b9e0a6a568f1d427854d73363265cf",
+      "license": "BSD",
+      "stage48_cycles_role": "SOURCE_EQUIVALENCE_AND_AMBIGUOUS_MULTIHIT_INTERVENTION_ONLY"
+    },
+    "semantic_part_taxonomy_used": false,
+    "privileged_material_or_owner_ids_are_student_targets": false,
+    "ambiguous_multihit_per_layer_rgba_may_be_imputed": false
   },
   "fit8_truth_reuse": {
     "observation_admission": {
@@ -78,14 +109,31 @@
       "RealSaS.SourceRayAppearanceMeasurementCandidate.v1"
     ],
     "v31_projection": {
-      "builder": "tools/truth_foundry/build_fit8_presentation_truth_bundle_v3.py",
+      "historical_builder": "tools/truth_foundry/build_fit8_presentation_truth_bundle_v3.py",
       "historical_bundle_schema": "RealSaS.Fit8PresentationTruthBundle.v1",
-      "truth139_rule": "REUSE_OBJECTIVE_PROJECTION_LOGIC_WITH_GENERIC_CARDINALITY_AND_NO_FIT8_SUBJECT_NAMES"
+      "truth139_rule": "REUSE_MECHANICS_AND_STAGE48_INTERVENTION_PROJECTION_LOGIC_BUT_REPLACE_SPARSE_STAGE48_ONLY_RGBA_TRAINING_ROWS_WITH_DENSE_SURFACE_ADDRESSED_APPEARANCE_AUTHORITY"
     },
     "v31_input_bridge": {
       "historical_builder": "tools/training/prepare_iris_v31_lofo_inputs_v1.py",
       "truth139_rule": "REUSE_OBSERVATION_FEATURE_AND_TARGET_BINDING_LOGIC_WITH_SPLIT_SCOPED_MANIFESTS"
     }
+  },
+  "mechanics_shortcut_court": {
+    "objective": "FIXED_SCALE_STUDENT_T_LOCATION_ONLY__LOG1P__DF3",
+    "train_only_scale": true,
+    "required_unseen_comparators": [
+      "REAL_SCENE_CARRIER",
+      "SHUFFLED_OTHER_UNSEEN_SCENE_CARRIER",
+      "TRAIN_MEDIAN_CONSTANT_PRIOR"
+    ],
+    "required_metrics": [
+      "LOG1P_MAE",
+      "RAW_MAE",
+      "SPEARMAN",
+      "TAIL_RAW_MAE",
+      "FIXED_SCALE_STUDENT_T_NLL"
+    ],
+    "nll_alone_may_not_mint_generalization": true
   },
   "platform_apparatus": {
     "execution_plan": "canonical/TRUTH_CALIBRATION_EXECUTION_PLAN_V3.json",
@@ -98,26 +146,34 @@
     "subject_specific_code_forbidden": true
   },
   "ordering": [
-    "RAW_CAPABILITY_AUDIT",
-    "DEVELOPMENT_EXCLUSION",
-    "APPARATUS_MANIFEST",
-    "PLATFORM_IMPORT_RENDER_STAGE47_STAGE48",
-    "DERIVED_TRUTH_ADMISSION_AUDIT",
+    "RAW_CAPABILITY_AUDIT_AND_HISTORICAL_139_REPRODUCTION",
+    "CAPABILITY_AWARE_CORPUS_MANIFEST",
+    "COMMON_8VIEW_SOURCE_IMPORT_AND_OBSERVATION_ADMISSION",
+    "IMAGE_DERIVED_FSTAR_AND_DINO_SHARDS",
+    "STAGE47_SOURCE_RESPONSE_CALIBRATION",
+    "DENSE_SURFACE_ADDRESSED_APPEARANCE_GBUFFER_AND_VISIBILITY",
+    "MULTIVIEW_NORMAL_DEPTH_TEACHER_TRUTH",
+    "STAGE48_SOURCE_EQUIVALENCE_AND_RENDERER_INTERVENTION_WITNESS",
+    "DERIVED_TRUTH_ADMISSION_AUDIT_PER_CAPABILITY_FAMILY",
     "LEAKAGE_COMPONENT_LEDGER",
     "TRAIN_UNSEEN_SPLIT_AND_SEAL",
     "TRAINING"
   ],
   "gates": {
     "split_before_raw_audit_forbidden": true,
-    "split_before_platform_truth_admission_forbidden": true,
+    "split_before_derived_truth_admission_forbidden": true,
+    "appearance_training_before_dense_appearance_authority_forbidden": true,
+    "appearance_training_from_stage48_sparse_rows_only_forbidden": true,
     "training_before_unseen_seal_forbidden": true,
     "missing_truth_family_may_not_be_silently_imputed": true,
-    "partial_subject_may_remain_in_corpus_for_other_future_courts_but_not_this_full_family_experiment": true
+    "partial_subject_may_remain_in_corpus_for_other_future_courts_but_not_in_an_experiment_requiring_its_missing_family": true,
+    "nll_only_mechanics_generalization_claim_forbidden": true
   },
   "claims": {
     "raw_audit_complete": false,
-    "apparatus_manifest_sealed": false,
+    "corpus_manifest_sealed": false,
     "platform_truth_complete": false,
+    "dense_appearance_complete": false,
     "split_sealed": false,
     "training_authorized": false
   }

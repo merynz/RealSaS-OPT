@@ -101,6 +101,7 @@ jobs:
         run: |
           python -m pytest -q \
             tests/corpus/test_truth139_dense_graphics_gbuffer_v1.py \
+            tests/corpus/test_truth139_dense_graphics_geometry_court_v1.py \
             tests/corpus/test_truth139_visibility_occlusion_teacher_v1.py \
             tests/corpus/test_truth139_visibility_occlusion_teacher_v2.py \
             tests/corpus/test_truth139_visibility_occlusion_court_v1.py \

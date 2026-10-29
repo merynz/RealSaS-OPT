@@ -5,12 +5,12 @@ import pytest
 from tools.corpus.build_truth139_corpus_manifest_v2 import build
 
 
-def _subject(index: int, *, dev: bool = False, stage48: bool = True) -> dict:
+def _subject(index: int, *, dev: bool = False, stage47: bool = True, stage48: bool = True) -> dict:
     sid = f"truth139_{index:03d}"
     caps = {
         "OBSERVATION_FSTAR": True,
         "SURFACE_NORMAL_TRUTH": True,
-        "STAGE47_MECHANICS": True,
+        "STAGE47_MECHANICS": stage47,
         "STAGE48_APPEARANCE_PRESENTATION": stage48,
         "TESSA_TOPOLOGY_TEACHER": True,
     }
@@ -36,7 +36,7 @@ def _subject(index: int, *, dev: bool = False, stage48: bool = True) -> dict:
         "duplicate_source_file_count": 1,
         "duplicate_source_files": [],
         "capabilities": {**caps, "FULL_TRUTH139_RAW_ELIGIBLE": all(caps.values())},
-        "raw_eligibility_blockers": [] if stage48 else ["STAGE48_APPEARANCE_PRESENTATION"],
+        "raw_eligibility_blockers": [],
         "development_exclusion": "FIT8" if dev else None,
         "duplicate_family_development_taint": ["FIT8"] if dev else [],
     }
@@ -77,14 +77,30 @@ def test_manifest_retains_all_139_and_tracks_capabilities_and_development_taint(
     assert result["corpus"]["development_or_regression_tainted_subject_count"] == 1
     assert result["corpus"]["capability_counts"]["STAGE48_APPEARANCE_PRESENTATION"] == 138
     assert result["corpus"]["clean_full_family_raw_candidate_count"] == 137
+    assert result["corpus"]["materialization_candidate_counts"]["DENSE_SURFACE_ADDRESSED_APPEARANCE_GBUFFER"] == 139
+    assert result["corpus"]["materialization_candidate_counts"]["APPEARANCE_FULL_AUTHORITY_CANDIDATE"] == 138
     assert len(result["subjects"]) == 139
     dev = next(row for row in result["subjects"] if row["subject_id"] == "truth139_007")
     partial = next(row for row in result["subjects"] if row["subject_id"] == "truth139_011")
     assert dev["development_or_regression_tainted"] is True
     assert dev["full_family_clean_experiment_candidate"] is False
-    assert partial["materialization_plan"]["STAGE48_APPEARANCE_PRESENTATION_TRUTH"] is False
+    assert partial["materialization_plan"]["STAGE48_APPEARANCE_PRESENTATION_INTERVENTION_WITNESS"] is False
+    assert partial["materialization_plan"]["DENSE_SURFACE_ADDRESSED_APPEARANCE_GBUFFER"] is True
+    assert partial["materialization_plan"]["APPEARANCE_FULL_AUTHORITY_CANDIDATE"] is False
+    assert partial["appearance_training_authority"] == "NOT_RAW_CAPABLE"
     assert partial["materialization_plan"]["CONTROLLED_8VIEW_OBSERVATION"] is True
     assert result["training_authorized"] is False
+
+
+def test_dense_appearance_requires_stage47_exact_rest_teacher_geometry():
+    subjects = [_subject(i) for i in range(139)]
+    subjects[3] = _subject(3, stage47=False, stage48=False)
+    audit, court = _parents(subjects)
+    result = build(audit, court)
+    row = next(item for item in result["subjects"] if item["subject_id"] == "truth139_003")
+    assert row["materialization_plan"]["CONTROLLED_8VIEW_OBSERVATION"] is True
+    assert row["materialization_plan"]["DENSE_SURFACE_ADDRESSED_APPEARANCE_GBUFFER"] is False
+    assert row["dense_appearance_authority"] == "NOT_RAW_CAPABLE"
 
 
 def test_manifest_rejects_parent_identity_mismatch():

@@ -1,10 +1,10 @@
 {
   "schema": "RealSaS.Truth139CorpusAuditRequest.v1",
   "date": "2026-10-29",
-  "revision": 1,
+  "revision": 2,
   "enabled": true,
   "purpose": "HYDRATE_EXACT_OCTOBER4_AUDIT_BYTE_CLOSURE__RUN_SEALED_RAW_CAPABILITY_AUDIT_V2__REPRODUCE_HISTORICAL_139__BUILD_CAPABILITY_AWARE_CORPUS_MANIFEST",
-  "expected_corpus_root_sha256": "2f15bf84694417cee3862c39a89e04bfa131f51331d6dd30da4b01f78426979b4",
+  "expected_corpus_root_sha256": "2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab",
   "expected_manifest_sha256": "3799b170d4138dbc0447d2d3456cc9ad5ba7e185fddace6d6ce2de0d0a2adc00",
   "expected_file_ledger_sha256": "1524edeb99e2383e2d7516bf9680275289976d57efa3fac3a4b01f78426979b4",
   "expected_historical_subject_count": 139,
@@ -15,5 +15,6 @@
   "training_allowed": false,
   "split_allowed": false,
   "qualification_minted": false,
+  "supersedes_request_revision": 1,
   "next_authority_after_pass": "TRUTH139_CORPUS_MANIFEST_V2"
 }

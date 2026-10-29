@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
-"""Build the capability-aware Truth139 corpus manifest after exact sealed V2 audit.
+"""Build the capability-aware Truth139 corpus identity manifest after sealed raw audit.
 
-This is the corpus identity layer, not an experiment projection.  All 139 historically
-reproduced rigged+animated subject identities remain present, including development-tainted
-subjects and subjects that lack one or more optional truth families.  The manifest records
-what may be materialized for each subject; later experiment projections decide which rows
-are legal for TRAIN or sealed UNSEEN.
+Historical raw capability names are preserved verbatim because they are part of the October-4
+reproduction vocabulary.  They are NOT the canonical model-domain names.  This manifest projects
+those raw facts into current teacher-materialization capabilities for IRIS Geometry/Graphics/
+Relations and TESSA without allowing the projection to redefine corpus identity.
 
-Required parents:
-* RealSaS.Truth139SealedRawAudit.v2 PASS
-* RealSaS.Truth139HistoricalReproductionCourt.v1 PASS
-
-This tool performs no render, no split, no training, and mints no qualification.
+No render, split, optimizer step, or qualification is performed here.
 """
 from __future__ import annotations
 
@@ -27,9 +22,16 @@ COURT_SCHEMA = "RealSaS.Truth139HistoricalReproductionCourt.v1"
 COURT_STATUS = "PASS_HISTORICAL_139_REPRODUCTION"
 OUTPUT_SCHEMA = "RealSaS.Truth139CorpusManifest.v2"
 EXPECTED_SUBJECT_COUNT = 139
-DENSE_APPEARANCE_CONTRACT = "canonical/TRUTH139_DENSE_APPEARANCE_AUTHORITY_V1.json"
 
-CAPABILITY_NAMES = (
+GRAPHICS_CONTRACT = "canonical/TRUTH139_DENSE_GRAPHICS_TEACHER_V1.json"
+LAYER_CONTRACT = "canonical/TRUTH139_GRAPHICS_LAYER_DECOMPOSITION_TEACHER_V1.json"
+RELATIONS_CONTRACT = "canonical/TRUTH139_RELATIONS_TEACHER_V1.json"
+RESPONSE_CONTRACT = "canonical/TRUTH139_IRIS_RESPONSE_EVIDENCE_TEACHER_V1.json"
+LEGACY_APPEARANCE_CONTRACT = "canonical/TRUTH139_DENSE_APPEARANCE_AUTHORITY_V1.json"
+
+# Compatibility vocabulary owned by the sealed raw audit.  Do not rename these keys in the audit
+# layer merely because the current architecture vocabulary is better.
+RAW_CAPABILITY_NAMES = (
     "OBSERVATION_FSTAR",
     "SURFACE_NORMAL_TRUTH",
     "STAGE47_MECHANICS",
@@ -72,21 +74,28 @@ def _source_binding(row: dict) -> dict:
     }
 
 
-def _materialization_plan(capabilities: dict) -> dict:
-    observation = bool(capabilities.get("OBSERVATION_FSTAR"))
-    normals = bool(capabilities.get("SURFACE_NORMAL_TRUTH"))
-    stage47 = bool(capabilities.get("STAGE47_MECHANICS"))
-    stage48 = bool(capabilities.get("STAGE48_APPEARANCE_PRESENTATION"))
-    tessa = bool(capabilities.get("TESSA_TOPOLOGY_TEACHER"))
-    dense_appearance = observation and stage47
+def _materialization_plan(raw: dict) -> dict[str, bool]:
+    observation = bool(raw.get("OBSERVATION_FSTAR"))
+    normals = bool(raw.get("SURFACE_NORMAL_TRUTH"))
+    # Historical name only.  In the current IRIS/TESSA truth graph this means the source scene has
+    # enough rig/evaluator structure to materialize the exact rest geometry and measured response
+    # apparatus used by the existing Stage47 truth foundry.
+    response_capable = bool(raw.get("STAGE47_MECHANICS"))
+    stage48_witness = bool(raw.get("STAGE48_APPEARANCE_PRESENTATION"))
+    tessa = bool(raw.get("TESSA_TOPOLOGY_TEACHER"))
+
+    dense_graphics = observation and response_capable
     return {
-        "CONTROLLED_8VIEW_OBSERVATION": observation,
+        "CONTROLLED_8VIEW_SOURCE_OBSERVATIONS": observation,
         "DINO_AND_IMAGE_DERIVED_FSTAR_SHARDS": observation,
-        "MULTIVIEW_NORMAL_DEPTH_TEACHER_TRUTH": observation and normals,
-        "STAGE47_SOURCE_RESPONSE_TRUTH": stage47,
-        "DENSE_SURFACE_ADDRESSED_APPEARANCE_GBUFFER": dense_appearance,
-        "STAGE48_APPEARANCE_PRESENTATION_INTERVENTION_WITNESS": stage48,
-        "APPEARANCE_FULL_AUTHORITY_CANDIDATE": dense_appearance and stage48,
+        "IRIS_GEOMETRY_NORMAL_DEPTH_TEACHER": observation and normals,
+        "IRIS_RESPONSE_EVIDENCE": response_capable,
+        "GRAPHICS_FRONT_SURFACE_GBUFFER": dense_graphics,
+        "GRAPHICS_VISIBILITY_OCCLUSION_TEACHER": dense_graphics,
+        "GRAPHICS_LAYER_PEEL_GEOMETRY": dense_graphics,
+        "IRIS_RELATIONS_TEACHER": dense_graphics,
+        "STAGE48_RENDERER_INTERVENTION_WITNESS": stage48_witness,
+        "GRAPHICS_FULL_COURT_CANDIDATE": dense_graphics and stage48_witness,
         "TESSA_TOPOLOGY_TEACHER_CACHE": tessa,
     }
 
@@ -107,30 +116,43 @@ def build(audit: dict, court: dict) -> dict:
         raise ValueError(f"TRUTH139_CORPUS_V2_SUBJECT_COUNT:{len(subjects)}")
 
     rows = []
-    capability_counts = Counter()
+    raw_capability_counts = Counter()
     materialization_counts = Counter()
     development_count = 0
-    full_family_clean_count = 0
+    historical_full_family_clean_count = 0
+    iris_tessa_full_teacher_clean_count = 0
     pack_counts = Counter()
+
     for ordinal, row in enumerate(sorted(subjects, key=lambda item: str(item.get("subject_id") or "")), 1):
         subject_id = str(row.get("subject_id") or "")
         if not subject_id:
             raise ValueError("TRUTH139_CORPUS_V2_SUBJECT_ID_MISSING")
-        capabilities = {name: bool((row.get("capabilities") or {}).get(name)) for name in CAPABILITY_NAMES}
-        for name, enabled in capabilities.items():
-            capability_counts[name] += int(enabled)
+        raw = {name: bool((row.get("capabilities") or {}).get(name)) for name in RAW_CAPABILITY_NAMES}
+        for name, enabled in raw.items():
+            raw_capability_counts[name] += int(enabled)
+
         development_exclusion = row.get("development_exclusion")
         development_taint = list(row.get("duplicate_family_development_taint") or ())
         is_development = bool(development_exclusion or development_taint)
         development_count += int(is_development)
-        full_family = all(capabilities.values())
-        full_family_clean = full_family and not is_development
-        full_family_clean_count += int(full_family_clean)
-        source = _source_binding(row)
-        pack_counts[source["pack_id"]] += 1
-        plan = _materialization_plan(capabilities)
+
+        historical_full = all(raw.values())
+        historical_full_clean = historical_full and not is_development
+        historical_full_family_clean_count += int(historical_full_clean)
+
+        plan = _materialization_plan(raw)
         for name, enabled in plan.items():
             materialization_counts[name] += int(bool(enabled))
+        iris_tessa_full = bool(
+            plan["IRIS_GEOMETRY_NORMAL_DEPTH_TEACHER"]
+            and plan["GRAPHICS_VISIBILITY_OCCLUSION_TEACHER"]
+            and plan["IRIS_RELATIONS_TEACHER"]
+            and plan["TESSA_TOPOLOGY_TEACHER_CACHE"]
+        )
+        iris_tessa_full_clean_count += int(iris_tessa_full and not is_development)
+
+        source = _source_binding(row)
+        pack_counts[source["pack_id"]] += 1
         rows.append(
             {
                 "ordinal": ordinal,
@@ -141,18 +163,22 @@ def build(audit: dict, court: dict) -> dict:
                 "raw_structure": dict(row.get("raw_structure") or {}),
                 "duplicate_source_file_count": int(row.get("duplicate_source_file_count", 1)),
                 "duplicate_source_files": list(row.get("duplicate_source_files") or ()),
-                "raw_capabilities": capabilities,
+                "raw_capabilities": raw,
+                "raw_capability_vocabulary": "HISTORICAL_COMPATIBILITY__NOT_CANONICAL_MODEL_DOMAIN_NAMES",
                 "raw_eligibility_blockers": list(row.get("raw_eligibility_blockers") or ()),
                 "development_exclusion": development_exclusion,
                 "duplicate_family_development_taint": development_taint,
                 "development_or_regression_tainted": is_development,
                 "materialization_plan": plan,
-                "full_family_raw_capable": full_family,
-                "full_family_clean_experiment_candidate": full_family_clean,
+                "historical_full_family_raw_capable": historical_full,
+                "iris_tessa_full_teacher_raw_candidate": iris_tessa_full,
                 "platform_truth_admission": "PENDING",
-                "dense_appearance_authority": "PENDING" if plan["DENSE_SURFACE_ADDRESSED_APPEARANCE_GBUFFER"] else "NOT_RAW_CAPABLE",
-                "stage48_intervention_witness": "PENDING" if plan["STAGE48_APPEARANCE_PRESENTATION_INTERVENTION_WITNESS"] else "NOT_RAW_CAPABLE",
-                "appearance_training_authority": "PENDING" if plan["APPEARANCE_FULL_AUTHORITY_CANDIDATE"] else "NOT_RAW_CAPABLE",
+                "graphics_front_surface_teacher": "PENDING" if plan["GRAPHICS_FRONT_SURFACE_GBUFFER"] else "NOT_RAW_CAPABLE",
+                "graphics_visibility_occlusion_teacher": "PENDING" if plan["GRAPHICS_VISIBILITY_OCCLUSION_TEACHER"] else "NOT_RAW_CAPABLE",
+                "graphics_layer_peel_teacher": "PENDING" if plan["GRAPHICS_LAYER_PEEL_GEOMETRY"] else "NOT_RAW_CAPABLE",
+                "relations_teacher": "PENDING" if plan["IRIS_RELATIONS_TEACHER"] else "NOT_RAW_CAPABLE",
+                "stage48_renderer_intervention_witness": "PENDING" if plan["STAGE48_RENDERER_INTERVENTION_WITNESS"] else "NOT_RAW_CAPABLE",
+                "graphics_full_court": "PENDING" if plan["GRAPHICS_FULL_COURT_CANDIDATE"] else "NOT_RAW_CAPABLE",
                 "train_membership": "UNASSIGNED",
                 "unseen_membership": "UNASSIGNED",
                 "training_authorized": False,
@@ -162,7 +188,7 @@ def build(audit: dict, court: dict) -> dict:
     payload = {
         "schema": OUTPUT_SCHEMA,
         "date": "2026-10-29",
-        "status": "SEALED_RAW_139_REPRODUCED__CAPABILITY_AWARE_MATERIALIZATION_PENDING",
+        "status": "SEALED_RAW_139_REPRODUCED__CAPABILITY_AWARE_TEACHER_MATERIALIZATION_PENDING",
         "parents": {
             "sealed_raw_audit_identity_sha256": str(audit["audit_identity_sha256"]),
             "historical_reproduction_court_identity_sha256": str(court["court_identity_sha256"]),
@@ -175,21 +201,36 @@ def build(audit: dict, court: dict) -> dict:
             "historical_subject_count": EXPECTED_SUBJECT_COUNT,
             "subject_count": len(rows),
             "development_or_regression_tainted_subject_count": development_count,
-            "clean_full_family_raw_candidate_count": full_family_clean_count,
-            "capability_counts": dict(sorted(capability_counts.items())),
+            "historical_clean_full_family_raw_candidate_count": historical_full_family_clean_count,
+            "iris_tessa_clean_full_teacher_raw_candidate_count": iris_tessa_full_clean_count,
+            "raw_capability_counts": dict(sorted(raw_capability_counts.items())),
+            # Compatibility alias retained for older readers. Values are the historical raw keys.
+            "capability_counts": dict(sorted(raw_capability_counts.items())),
             "materialization_candidate_counts": dict(sorted(materialization_counts.items())),
             "pack_counts": dict(sorted(pack_counts.items())),
+        },
+        "teacher_contracts": {
+            "graphics": GRAPHICS_CONTRACT,
+            "graphics_layer_decomposition": LAYER_CONTRACT,
+            "relations": RELATIONS_CONTRACT,
+            "iris_response_evidence": RESPONSE_CONTRACT,
+            "legacy_dense_appearance_contract": LEGACY_APPEARANCE_CONTRACT,
         },
         "policy": {
             "corpus_identity_is_not_experiment_projection": True,
             "all_historical_139_subject_identities_retained": True,
+            "historical_stage47_mechanics_name_is_compatibility_vocabulary_only": True,
+            "historical_stage48_appearance_presentation_name_is_compatibility_vocabulary_only": True,
+            "legacy_dense_appearance_contract_is_not_global_graphics_authority": True,
+            "graphics_is_parent_domain": True,
+            "source_color_authority_is_partial_and_provenance_bound": True,
+            "relations_are_primitive_nonsemantic_truth": True,
+            "layer_masks_are_depth_or_drawable_evidence_not_humanoid_part_labels": True,
             "development_taint_does_not_delete_corpus_rows": True,
             "missing_optional_truth_family_does_not_delete_corpus_rows": True,
             "heavy_truth_materialization_must_follow_per_subject_capability_plan": True,
-            "dense_appearance_contract": DENSE_APPEARANCE_CONTRACT,
-            "stage48_alone_is_not_dense_appearance_training_authority": True,
-            "appearance_training_requires_dense_gbuffer_and_stage48_witness": True,
-            "split_before_platform_truth_admission_forbidden": True,
+            "stage48_alone_is_not_graphics_training_truth": True,
+            "split_before_platform_and_derived_truth_admission_forbidden": True,
             "training_before_split_and_unseen_seal_forbidden": True,
             "subject_specific_code_forbidden": True,
         },
@@ -198,6 +239,14 @@ def build(audit: dict, court: dict) -> dict:
             "intended_notebook_repo_path": "notebooks/Truth139_Corpus_Preparation_T4_CPU_v1.ipynb",
             "authority": "NON_AUTHORITATIVE_COMPUTE_WORKER",
             "platform_remains_lineage_authority": True,
+            "expected_heavy_families": [
+                "8X1024_GRAPHICS_FRONT_SURFACE",
+                "VISIBILITY_OCCLUSION",
+                "K_HIT_LAYER_PEEL",
+                "DINO_FSTAR",
+                "SOURCE_RESPONSE_INTERVENTIONS",
+                "STAGE48_RENDERER_WITNESS"
+            ],
         },
         "subjects": rows,
         "split_created": False,
@@ -227,21 +276,15 @@ def main() -> None:
     result = build(audit, court)
     output = Path(args.output).resolve()
     _write(output, result)
-    print(
-        json.dumps(
-            {
-                "output": str(output),
-                "status": result["status"],
-                "subject_count": result["corpus"]["subject_count"],
-                "development_or_regression_tainted_subject_count": result["corpus"]["development_or_regression_tainted_subject_count"],
-                "clean_full_family_raw_candidate_count": result["corpus"]["clean_full_family_raw_candidate_count"],
-                "materialization_candidate_counts": result["corpus"]["materialization_candidate_counts"],
-                "corpus_manifest_identity_sha256": result["corpus_manifest_identity_sha256"],
-            },
-            sort_keys=True,
-        ),
-        flush=True,
-    )
+    print(json.dumps({
+        "output": str(output),
+        "status": result["status"],
+        "subject_count": result["corpus"]["subject_count"],
+        "development_or_regression_tainted_subject_count": result["corpus"]["development_or_regression_tainted_subject_count"],
+        "iris_tessa_clean_full_teacher_raw_candidate_count": result["corpus"]["iris_tessa_clean_full_teacher_raw_candidate_count"],
+        "materialization_candidate_counts": result["corpus"]["materialization_candidate_counts"],
+        "corpus_manifest_identity_sha256": result["corpus_manifest_identity_sha256"],
+    }, sort_keys=True), flush=True)
 
 
 if __name__ == "__main__":

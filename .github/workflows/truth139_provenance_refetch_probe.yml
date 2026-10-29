@@ -1,0 +1,126 @@
+name: truth139-provenance-refetch-probe
+
+on:
+  push:
+    branches: [truth139-platform-generalization-v1]
+    paths:
+      - canonical/TRUTH139_PROVENANCE_REFETCH_PROBE_V1.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth139-provenance-refetch-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      EXPECTED_ROOT_SHA256: 2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate probe request
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('canonical/TRUTH139_PROVENANCE_REFETCH_PROBE_V1.json').read_text())
+          assert r['schema']=='RealSaS.Truth139ProvenanceRefetchProbeRequest.v1'
+          assert r['enabled'] is True
+          assert r['persist_fetched_bytes'] is False
+          assert r['mutation_allowed'] is False and r['training_allowed'] is False
+          PY
+
+      - name: Hash current official source pages without persisting authority bytes
+        id: probe
+        run: |
+          set -euo pipefail
+          OUT="$AUTHORITY_ROOT/truth139/provenance_refetch_probe/${GITHUB_RUN_ID}/PROBE.json"
+          mkdir -p "$(dirname "$OUT")"
+          echo "output_path=$OUT" >> "$GITHUB_OUTPUT"
+          export OUT
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os,subprocess,tempfile,urllib.request
+          from pathlib import Path
+          from tools.corpus import run_truth139_sealed_raw_audit_v1 as seal
+
+          roots=[]
+          for base in (Path('/home/monster/realsas_authority'),Path('/home/monster')):
+              if not base.exists():continue
+              for p in base.glob('**/manifest/CORPUS_SEAL_MATERIAL.txt'):
+                  root=p.parent.parent.resolve()
+                  if root in roots:continue
+                  try:seal.verify_seal(root)
+                  except Exception:continue
+                  roots.append(root)
+          if not roots:raise SystemExit('NO_EXACT_SEAL_ROOT')
+          manifest=json.loads((roots[0]/'manifest/MANIFEST.json').read_text(encoding='utf-8-sig'))
+          ledger=seal.parse_ledger(roots[0]/'manifest/FILE_HASHES.sha256')
+          gltf_packs={rel.split('/')[2] for rel in ledger if rel.startswith('raw/quaternius/') and rel.lower().endswith(('.gltf','.glb'))}
+          bindings={str(r.get('id')):r for r in manifest.get('results') or () if str(r.get('provider')).lower()=='quaternius'}
+          if len(gltf_packs)!=10:raise SystemExit('REQUIRED_PACK_CARDINALITY_DRIFT')
+
+          def digest(data):return hashlib.sha256(data).hexdigest()
+          def fetch_urllib(url,ua=None):
+              headers={} if ua is None else {'User-Agent':ua}
+              req=urllib.request.Request(url,headers=headers)
+              with urllib.request.urlopen(req,timeout=30) as response:return response.read(),response.geturl(),dict(response.headers)
+          def fetch_curl(url,args):
+              with tempfile.NamedTemporaryFile(delete=False) as tmp:name=tmp.name
+              try:
+                  proc=subprocess.run(['curl','-fsSL',*args,'-o',name,url],text=True,capture_output=True,timeout=45)
+                  data=Path(name).read_bytes() if proc.returncode==0 else b''
+                  return data,proc.returncode,proc.stderr[-1000:]
+              finally:Path(name).unlink(missing_ok=True)
+
+          methods=(
+              ('URLLIB_DEFAULT',lambda u:fetch_urllib(u,None)[0]),
+              ('URLLIB_MOZILLA',lambda u:fetch_urllib(u,'Mozilla/5.0')[0]),
+              ('CURL_DEFAULT',lambda u:fetch_curl(u,[])[0]),
+              ('CURL_COMPRESSED',lambda u:fetch_curl(u,['--compressed'])[0]),
+              ('CURL_MOZILLA',lambda u:fetch_curl(u,['-A','Mozilla/5.0'])[0]),
+          )
+          rows=[]
+          for pack in sorted(gltf_packs):
+              b=bindings[pack];url=str(b.get('official_url') or '');expected=str(b.get('source_snapshot_sha256') or '')
+              rel=str(b.get('source_snapshot') or '')
+              witnesses=[]
+              for root in roots:
+                  p=root/rel
+                  if p.is_file() and seal.sha256(p)==expected:witnesses.append(str(p))
+              method_rows=[]
+              for name,fn in methods:
+                  try:
+                      data=fn(url);actual=digest(data);error=''
+                  except Exception as exc:
+                      actual='';error=f'{type(exc).__name__}:{exc}'
+                  method_rows.append({'method':name,'sha256':actual,'exact_match':actual==expected,'error':error})
+              rows.append({'pack_id':pack,'official_url':url,'expected_sha256':expected,'historical_exact_witness_count':len(witnesses),'methods':method_rows})
+          known=[r for r in rows if r['historical_exact_witness_count']>0]
+          missing=[r for r in rows if r['historical_exact_witness_count']==0]
+          method_names=[m[0] for m in methods]
+          calibration={name:sum(any(x['method']==name and x['exact_match'] for x in r['methods']) for r in known) for name in method_names}
+          recoverable={name:[r['pack_id'] for r in missing if any(x['method']==name and x['exact_match'] for x in r['methods'])] for name in method_names}
+          payload={'schema':'RealSaS.Truth139ProvenanceRefetchProbeReceipt.v1','run_id':os.environ['GITHUB_RUN_ID'],'required_pack_count':len(rows),'known_exact_snapshot_count':len(known),'missing_exact_snapshot_count':len(missing),'calibration_exact_matches_by_method':calibration,'missing_recoverable_by_method':recoverable,'packs':rows,'fetched_bytes_persisted':False,'mutation_performed':False,'training_performed':False}
+          perfect=[name for name,count in calibration.items() if count==len(known)]
+          payload['perfectly_calibrated_methods']=perfect
+          payload['status']='PASS_EXACT_REFETCH_RECOVERY_AVAILABLE' if perfect and any(len(recoverable[name])==len(missing) for name in perfect) else 'NO_COMPLETE_EXACT_REFETCH_RECOVERY'
+          Path(os.environ['OUT']).write_text(json.dumps(payload,sort_keys=True,indent=2)+'\n')
+          print(json.dumps({'status':payload['status'],'known':len(known),'missing':len(missing),'calibration':calibration,'recoverable':recoverable},sort_keys=True))
+          PY
+
+      - name: Preserve probe receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: truth139-provenance-refetch-${{ github.run_id }}
+          path: ${{ steps.probe.outputs.output_path }}
+          if-no-files-found: error
+          retention-days: 30

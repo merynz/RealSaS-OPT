@@ -7,7 +7,7 @@
   "external_worker_role": "NON_AUTHORITATIVE_COMPUTE_WORKER",
   "recommended_runtime": {
     "gpu_class": "NVIDIA_T4_OR_BETTER__A100_NOT_REQUIRED",
-    "cpu": "HIGH_CPU_RUNTIME_PREFERRED_FOR_BLENDER_STAGE47_STAGE48",
+    "cpu": "HIGH_CPU_RUNTIME_PREFERRED_FOR_BLENDER_STAGE47_STAGE48_AND_INDEPENDENT_RAY_COURTS",
     "ram": "HIGH_RAM_RUNTIME_PREFERRED",
     "platform": "COLAB_OR_EQUIVALENT_NOTEBOOK_RUNTIME"
   },
@@ -15,6 +15,7 @@
   "allowed_heavy_jobs": [
     "CONTROLLED_8VIEW_OBSERVATION_RENDER_AND_ADMISSION_CANDIDATES",
     "DENSE_SURFACE_ADDRESSED_APPEARANCE_GBUFFER_AND_VISIBILITY_AUTHORITY",
+    "INDEPENDENT_CPU_RAY_ORACLE_VALIDATION_OF_DENSE_GBUFFER",
     "MULTIVIEW_NORMAL_DEPTH_TEACHER_TRUTH",
     "DINO_AND_IMAGE_DERIVED_FSTAR_SHARD_PREPARATION",
     "STAGE47_SOURCE_RESPONSE_TRUTH_MATERIALIZATION",
@@ -25,6 +26,7 @@
     "stage48_eight_ray_default_is_not_dense_training_authority": true,
     "full_8view_dense_gbuffer_preserved": true,
     "surface_addressed_rgba_and_visibility_required": true,
+    "independent_cpu_ray_oracle_court_required_per_subject": true,
     "ambiguous_multihit_per_layer_rgba_not_imputed": true,
     "semantic_part_taxonomy_used": false
   },
@@ -58,6 +60,7 @@
     "subject_ids",
     "input_artifact_hashes",
     "output_artifact_hashes",
+    "dense_gbuffer_geometry_court_receipts",
     "runtime_fingerprint",
     "started_at_utc",
     "completed_at_utc",

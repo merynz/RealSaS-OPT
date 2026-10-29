@@ -48,6 +48,15 @@ jobs:
           echo "run_root=$RUN_ROOT" >> "$GITHUB_OUTPUT"
           echo "closure_root=$CLOSURE_ROOT" >> "$GITHUB_OUTPUT"
 
+      - name: Blocker regression tests
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" -m pytest -q \
+            tests/corpus/test_truth139_structural_audit_v3.py \
+            tests/corpus/test_truth139_corpus_manifest_v2.py \
+            tests/corpus/test_truth139_diversity_census_v1.py \
+            tests/corpus/test_truth139_materialization_work_orders_v1.py
+
       - name: Structural capability audit
         run: |
           set -euo pipefail
@@ -109,17 +118,29 @@ jobs:
               return h.hexdigest()
           docs={name:json.loads((root/name).read_text()) for name in names}
           audit=docs['SEALED_RAW_STRUCTURAL_AUDIT_V3.json']
+          court=docs['HISTORICAL_REPRODUCTION_COURT.json']
           manifest=docs['TRUTH139_CORPUS_MANIFEST_V2.json']
           census=docs['TRUTH139_DIVERSITY_CENSUS_V1.json']
           work=docs['TRUTH139_MATERIALIZATION_WORK_ORDERS_V1.json']
+          nonblocking=[]
+          missing=list(audit['provenance']['historical_snapshot_byte_missing_pack_ids'])
+          if missing:
+              nonblocking.append({'kind':'HISTORICAL_SOURCE_PAGE_SNAPSHOT_BYTES_UNAVAILABLE','pack_ids':missing})
+          if court.get('status')!='PASS_HISTORICAL_139_REPRODUCTION':
+              nonblocking.append({'kind':'HISTORICAL_REPRODUCTION_COURT_FINDING','findings':list(court.get('findings') or [])})
+          if census.get('historical_subject_count_exact') is False:
+              nonblocking.append({'kind':'HISTORICAL_SUBJECT_CARDINALITY_FINDING','actual_subject_count':census.get('subject_count')})
           receipt={
               'schema':'RealSaS.Truth139StructuralCorpusClosureReceipt.v1',
               'date':'2026-10-29',
               'status':'PASS_TRUTH139_STRUCTURAL_CORPUS_CLOSED__RICH_TRUTH_MATERIALIZATION_READY',
               'github_run_id':os.environ['GITHUB_RUN_ID'],
               'git_commit_sha':os.environ['GITHUB_SHA'],
+              'blocking_failures':[],
+              'nonblocking_findings':nonblocking,
               'artifacts':{name:{'sha256':sha(root/name)} for name in names},
               'subject_count':manifest['corpus']['subject_count'],
+              'historical_reproduction':manifest['historical_reproduction'],
               'raw_capability_counts':manifest['corpus']['raw_capability_counts'],
               'materialization_candidate_counts':manifest['corpus']['materialization_candidate_counts'],
               'provenance_summary':{k:audit['provenance'][k] for k in ('historical_snapshot_byte_available_pack_count','historical_snapshot_byte_missing_pack_count','historical_snapshot_byte_missing_pack_ids')},

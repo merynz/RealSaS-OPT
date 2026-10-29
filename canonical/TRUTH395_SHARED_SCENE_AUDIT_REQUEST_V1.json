@@ -1,0 +1,16 @@
+{
+  "schema": "RealSaS.Truth395SharedSceneAuditRequest.v1",
+  "date": "2026-10-29",
+  "revision": 1,
+  "enabled": true,
+  "purpose": "AUDIT_ALL_395_SEALED_GLTF_GLB_ASSETS_AND_RECOVER_EVERY_USABLE_IRIS_TESSA_SHARED_SCENE_SUBJECT",
+  "scan_all_395": true,
+  "graphics_requires_mechanics": false,
+  "response_evidence_optional_for_iris_tessa": true,
+  "deduplicate_exact_structural_identity_for_independence": true,
+  "retain_duplicate_source_variants_for_graphics_lineage": true,
+  "render_allowed": false,
+  "training_allowed": false,
+  "split_allowed": false,
+  "qualification_minted": false
+}

@@ -1,0 +1,171 @@
+{
+  "schema": "RealSaS.Truth139GeneralizationPreregistration.v1",
+  "date": "2026-10-29",
+  "status": "PREREGISTERED__CORPUS_DERIVATION_AND_PLATFORM_EXECUTION_PENDING",
+  "purpose": "TEST_SUBJECT_DIVERSITY_SCALING_WITH_HIGH_CONFIDENCE_GEOMETRY_AND_MECHANICS_REPAIRS_BEFORE_ANY_CARRIER_PIVOT",
+  "historical_baseline": {
+    "experiment": "IRIS_V31_FIXED_SNAKE_EVIDENCE_STUDENT_T_PILOT_V3",
+    "train_subject_count": 7,
+    "heldout_subject": "fit8_snake_v1",
+    "checkpoint_sha256": "d22fe17a25651f1aff2553f0c73bd5c593ab258b15c773341079f156c9bb86d0",
+    "foundation_identity": "3724c3a78e849995c07b88fd6eaa17182105912772ea627affe4937600d172d8",
+    "role": "HISTORICAL_DIAGNOSTIC_BASELINE__NOT_PARENT_CHECKPOINT_FOR_TRUTH139_TRAINING",
+    "mechanics_result_trusted": false
+  },
+  "corpus_authority": {
+    "status_document": "canonical/TRUTH_CORPUS_V1_STATUS_20261004.md",
+    "sealed_bundle_name": "RealSaS_Truth_Corpus_v1_20261004_2f15bf846944.zip",
+    "corpus_root_sha256": "2f15bf84694417cee3862c39a89e04bfa131f51331d6da5880739d40b7eab5ab",
+    "audited_unique_rigged_animated_gltf_subject_count": 139,
+    "raw_sources_immutable": true,
+    "derived_training_artifacts_must_live_outside_raw_bundle": true,
+    "training_ready_claimed_before_derivation_court": false
+  },
+  "split_policy": {
+    "unit": "LEAKAGE_CONNECTED_COMPONENT",
+    "component_edges": [
+      "EXACT_SOURCE_IDENTITY_OR_SOURCE_SHA",
+      "SKELETON_HIERARCHY_SIGNATURE",
+      "TOPOLOGY_LINEAGE_SIGNATURE",
+      "MATERIAL_LINEAGE_SIGNATURE"
+    ],
+    "pack_level_split_is_sufficient": false,
+    "target_train_fraction": 0.82,
+    "target_unseen_fraction": 0.18,
+    "exact_cardinality_is_component_constrained": true,
+    "unseen_bytes_or_derived_truth_may_be_opened_during_fit": false,
+    "split_manifest_must_be_cryptographically_sealed_before_first_optimizer_step": true,
+    "split_builder": "tools/training/build_lineage_safe_subject_split_v1.py"
+  },
+  "scientific_interventions": {
+    "subject_diversity": {
+      "change": "FIT8_7_TRAIN_TO_TRUTH139_COMPONENT_SAFE_TRAIN_COHORT",
+      "primary_question": "DOES_UNSEEN_ERROR_FALL_MATERIALLY_WHEN_INDEPENDENT_SUBJECT_DIVERSITY_INCREASES"
+    },
+    "dense_scene_carrier": {
+      "architecture_id": "RealSaS.IRIS.DenseObservationEvidence.v3_1",
+      "change": "NONE",
+      "carrier_family": "DENSE_3D",
+      "carrier_pivot_authorized": false
+    },
+    "geometry": {
+      "primary_authority": "DIRECT_FSTAR_REMAINS_PRIMARY_SIGNED_GEOMETRY_AUTHORITY",
+      "fstar_formulation_change": "NONE",
+      "additive_supervision": [
+        "NEAR_ZERO_WRONG_SIGN_STABILIZATION",
+        "TEACHER_ONLY_SURFACE_NORMAL_SUPERVISION"
+      ],
+      "optional_telemetry_not_required_as_student_input": [
+        "TEACHER_DEPTH",
+        "TEACHER_MASK"
+      ],
+      "normal_source": "EXACT_ADMITTED_SOURCE_MESH_RENDERED_IN_QUALIFIED_CAMERAS",
+      "normal_is_forward_input": false,
+      "depth_is_forward_input": false,
+      "mask_is_forward_input_beyond_EXISTING_SOURCE_ALPHA": false,
+      "nerf_or_density_first_curriculum_authorized": false,
+      "triplane_pivot_authorized": false
+    },
+    "appearance": {
+      "change": "NONE",
+      "objective": "EXISTING_OBSERVATION_CONDITIONED_RGBA_OBJECTIVE"
+    },
+    "mechanics": {
+      "old_heteroscedastic_student_t_result_trusted": false,
+      "target_transform": "LOG1P_NONNEGATIVE_MAGNITUDES",
+      "new_objective": "FIXED_SCALE_STUDENT_T_LOCATION_ONLY",
+      "degrees_of_freedom": 3.0,
+      "learned_per_query_variance": false,
+      "scale_estimation": "TRAIN_ONLY_CHANNELWISE_ROBUST_MAD_WITH_SEALED_FLOOR",
+      "required_courts": [
+        "MEAN_LOG1P_MAE_RMSE",
+        "RAW_SPACE_MAE",
+        "SPEARMAN_RANK",
+        "HIGH_RESPONSE_TAIL_MAE",
+        "TRAIN_MARGINAL_PRIOR_BASELINE",
+        "SHUFFLED_SCENE_BASELINE"
+      ],
+      "qualification_requires_scene_conditioning_value": true
+    },
+    "tessa": {
+      "decoder_role": "LEARNED_TOPOLOGY_PROPOSAL_ONLY",
+      "compiler_mesh_authority_unchanged": true,
+      "scene_memory_source": "DENSE_IRIS_CARRIER",
+      "adapter": "DENSE_SCENE_MEMORY_ADAPTER_V1",
+      "legacy_triplane_requirement_for_truth139": false,
+      "required_consequence_court": "TESSA_PROPOSAL_TO_COMPILER_M_GEOMETRY_CONSEQUENCE"
+    }
+  },
+  "geometry_objective": {
+    "form": "L_FSTAR_PLUS_LAMBDA_SIGN_L_NEAR_ZERO_SIGN_PLUS_LAMBDA_NORMAL_L_NORMAL",
+    "primary_fstar_loss": "SMOOTH_L1_HUBER",
+    "near_zero_sign_is_one_sided_wrong_sign_only": true,
+    "normal_loss": "ONE_MINUS_COSINE_ON_VALID_SURFACE_TRUTH",
+    "no_semantic_part_taxonomy": true
+  },
+  "platform_lineage": {
+    "authority": "PLATFORM",
+    "experiment_shape": "ONE_EXPERIMENT__TWO_SEALED_CAMPAIGNS",
+    "train_campaign": {
+      "members": "TRAIN_COMPONENTS_ONLY",
+      "unseen_subjects_present": false,
+      "output": "BYTE_SEALED_SHARED_IRIS_AND_TESSA_CHECKPOINTS_PLUS_RECEIPTS"
+    },
+    "unseen_eval_campaign": {
+      "members": "SEALED_UNSEEN_COMPONENTS_ONLY",
+      "may_start_before_train_checkpoint_sealed": false,
+      "optimizer_updates": false,
+      "checkpoint_selection": false,
+      "input_checkpoint": "EXACT_HASH_FROM_TRAIN_CAMPAIGN"
+    },
+    "component_completion_mints_product_pass": false,
+    "component_completion_mints_genericity_claim": false
+  },
+  "unseen_evaluation_axes": {
+    "iris_geometry": [
+      "FSTAR_MAE",
+      "FSTAR_RMSE",
+      "FSTAR_P95_ABS",
+      "SIGN_DISAGREEMENT",
+      "NEAR_ZERO_MAE",
+      "SURFACE_NORMAL_ANGULAR_ERROR"
+    ],
+    "mechanics": [
+      "LOG1P_MAE",
+      "LOG1P_RMSE",
+      "RAW_MAE",
+      "SPEARMAN",
+      "HIGH_RESPONSE_TAIL_MAE",
+      "GAIN_VS_TRAIN_PRIOR",
+      "GAIN_VS_SHUFFLED_SCENE"
+    ],
+    "appearance": [
+      "RGBA_LOSS"
+    ],
+    "tessa_compiler_consequence": [
+      "TOPOLOGY_VALIDITY",
+      "SURFACE_CORRESPONDENCE",
+      "CONNECTED_COMPONENT_AND_THIN_STRUCTURE_CONTINUITY",
+      "RENDERED_SILHOUETTE",
+      "RENDERED_NORMAL",
+      "FINAL_GEOMETRY_ERROR"
+    ]
+  },
+  "decision_policy": {
+    "truth139_is_expected_to_prove_5000_SUBJECT_SUFFICIENCY": false,
+    "positive_signal_definition": "MATERIAL_MULTI_SUBJECT_UNSEEN_IMPROVEMENT_OVER_7_TO_1_BASELINE_WITH_NO_SHORTCUT_COURT_FAILURE",
+    "if_positive": "PRESERVE_DENSE_CARRIER_AND_SCALE_CORPUS_TOWARD_MULTI_THOUSAND_SUBJECTS",
+    "if_geometry_sign_plateaus": "TEST_FSTAR_TIMING_OR_OCCUPANCY_DENSITY_FIRST_CURRICULUM_BEFORE_CARRIER_PIVOT",
+    "if_dense_carrier_still_FAILS_AFTER_DATA_AND_GEOMETRY_REPAIRS": "THEN_AUTHORIZE_MATCHED_DENSE_VS_TRIPLANE_COURT",
+    "if_mechanics_fails_conditioning_courts": "NO_MECHANICS_GENERALIZATION_CLAIM"
+  },
+  "claims": {
+    "training_started": false,
+    "truth139_pass": false,
+    "generalization": false,
+    "product": false,
+    "dense_carrier_validated": false,
+    "mechanics_validated": false,
+    "tessa_validated": false
+  }
+}

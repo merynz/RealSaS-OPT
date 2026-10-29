@@ -1,9 +1,10 @@
 {
   "schema": "RealSaS.Truth139ProvenanceRefetchProbeRequest.v1",
   "date": "2026-10-29",
-  "revision": 2,
+  "revision": 3,
   "enabled": true,
   "scope": "REQUIRED_10_QUATERNIUS_GLTF_PACK_SOURCE_PAGE_SNAPSHOTS",
+  "reason": "RAW_AUDIT_40866902691_HYDRATED_395_OF_395_PRIMARY_SOURCES_AND_FAILED_CLOSED_ON_MISSING_EXACT_QUATERNIUS_PLATFORMER_KIT_SOURCE_PAGE_SNAPSHOT",
   "acceptance": "BYTE_SHA256_MUST_EQUAL_OCTOBER4_SEALED_EXPECTED_SHA256",
   "known_snapshot_calibration_required": true,
   "persist_fetched_bytes": false,

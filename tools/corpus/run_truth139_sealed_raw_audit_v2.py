@@ -12,6 +12,19 @@ from tools.corpus.audit_truth139_gltf_capabilities_v2 import audit as capability
 SCHEMA = "RealSaS.Truth139SealedRawAudit.v2"
 
 
+def _source_family_tokens(value: dict) -> list[str]:
+    rows = list(value.get("duplicate_source_files") or ()) or [dict(value.get("source") or {})]
+    tokens = set()
+    for source in rows:
+        creator = str(source.get("creator") or "").lower()
+        pack = str(source.get("pack_id") or "").lower()
+        stem = str(source.get("normalized_asset_stem") or "").lower()
+        if not creator or not pack or not stem:
+            raise ValueError("TRUTH139_V2_SOURCE_FAMILY_FIELDS_MISSING")
+        tokens.add("SRCF:" + seal_v1.value_hash({"creator": creator, "pack_id": pack, "normalized_asset_stem": stem}))
+    return sorted(tokens)
+
+
 def run(raw_root: Path, fit8_selection: Path) -> dict:
     raw_root = raw_root.resolve()
     manifest, ledger, _seal = seal_v1.verify_seal(raw_root)
@@ -59,6 +72,10 @@ def run(raw_root: Path, fit8_selection: Path) -> dict:
             or seal_v1.sha256(snapshot_path) != snapshot["sha256"]
         ):
             raise ValueError("TRUTH139_V2_SOURCE_PAGE_SNAPSHOT_DRIFT:" + relative)
+        lineage = dict(value.get("lineage") or {})
+        lineage["source_family_signature"] = _source_family_tokens(value)
+        value["lineage"] = lineage
+        source["source_family_signature"] = list(lineage["source_family_signature"])
         value["source"] = source
         enriched.append(value)
 
@@ -86,7 +103,10 @@ def run(raw_root: Path, fit8_selection: Path) -> dict:
         },
         "base_capability_audit_schema": base["schema"],
         "base_capability_audit_identity_sha256": base["audit_identity_sha256"],
-        "v2_repairs": base["v2_repairs"],
+        "v2_repairs": {
+            **dict(base["v2_repairs"]),
+            "source_family_lineage": "CREATOR_PACK_NORMALIZED_ASSET_STEM__NOT_PACK_LEVEL_SPLIT",
+        },
         "counts": dict(base["counts"]),
         "subjects": enriched,
         "duplicate_groups": list(base.get("duplicate_groups") or ()),

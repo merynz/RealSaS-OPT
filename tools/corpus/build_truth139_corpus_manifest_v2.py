@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Build the capability-aware Truth139 corpus identity manifest after sealed raw audit.
+"""Build the capability-aware Truth139 corpus manifest after sealed structural audit.
 
-Historical raw capability names are preserved verbatim because they are part of the October-4
-reproduction vocabulary.  They are NOT the canonical model-domain names.  This manifest projects
-those raw facts into current teacher-materialization capabilities for IRIS Geometry/Graphics/
-Relations and TESSA without allowing the projection to redefine corpus identity.
-
-No render, split, optimizer step, or qualification is performed here.
+Historical raw capability names remain compatibility vocabulary only. Current teacher projection is
+IRIS Geometry + Graphics + Relations + optional Response Evidence + TESSA topology. In particular,
+Graphics/Relations materialization must not be blocked by absence of Stage47 response evidence.
+Historical-reproduction mismatch is recorded as a court finding rather than used as a global
+operational stop after the structural byte/parse audit has passed.
 """
 from __future__ import annotations
 
@@ -29,8 +28,6 @@ RELATIONS_CONTRACT = "canonical/TRUTH139_RELATIONS_TEACHER_V1.json"
 RESPONSE_CONTRACT = "canonical/TRUTH139_IRIS_RESPONSE_EVIDENCE_TEACHER_V1.json"
 LEGACY_APPEARANCE_CONTRACT = "canonical/TRUTH139_DENSE_APPEARANCE_AUTHORITY_V1.json"
 
-# Compatibility vocabulary owned by the sealed raw audit.  Do not rename these keys in the audit
-# layer merely because the current architecture vocabulary is better.
 RAW_CAPABILITY_NAMES = (
     "OBSERVATION_FSTAR",
     "SURFACE_NORMAL_TRUTH",
@@ -41,9 +38,7 @@ RAW_CAPABILITY_NAMES = (
 
 
 def _digest(value: object) -> str:
-    return hashlib.sha256(
-        json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
-    ).hexdigest()
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
 
 
 def _source_binding(row: dict) -> dict:
@@ -68,6 +63,8 @@ def _source_binding(row: dict) -> dict:
         "dependencies": deps,
         "dependency_count": len(deps),
         "source_page_snapshot": snapshot,
+        "historical_source_page_snapshot_byte_available": bool(source.get("historical_source_page_snapshot_byte_available")),
+        "provenance_status": str(source.get("provenance_status") or ""),
         "official_url": str(source.get("official_url") or ""),
         "drive_folder_id": str(source.get("drive_folder_id") or ""),
         "source_family_signature": list(source.get("source_family_signature") or ()),
@@ -77,14 +74,13 @@ def _source_binding(row: dict) -> dict:
 def _materialization_plan(raw: dict) -> dict[str, bool]:
     observation = bool(raw.get("OBSERVATION_FSTAR"))
     normals = bool(raw.get("SURFACE_NORMAL_TRUTH"))
-    # Historical name only.  In the current IRIS/TESSA truth graph this means the source scene has
-    # enough rig/evaluator structure to materialize the exact rest geometry and measured response
-    # apparatus used by the existing Stage47 truth foundry.
     response_capable = bool(raw.get("STAGE47_MECHANICS"))
     stage48_witness = bool(raw.get("STAGE48_APPEARANCE_PRESENTATION"))
     tessa = bool(raw.get("TESSA_TOPOLOGY_TEACHER"))
 
-    dense_graphics = observation and response_capable
+    # Graphics comes from source scene + observations. Response evidence is an optional parallel
+    # IRIS branch and may never be a prerequisite for source color, depth, visibility or occlusion.
+    dense_graphics = observation
     return {
         "CONTROLLED_8VIEW_SOURCE_OBSERVATIONS": observation,
         "DINO_AND_IMAGE_DERIVED_FSTAR_SHARDS": observation,
@@ -102,9 +98,11 @@ def _materialization_plan(raw: dict) -> dict[str, bool]:
 
 def build(audit: dict, court: dict) -> dict:
     if audit.get("schema") != AUDIT_SCHEMA or audit.get("status") != AUDIT_STATUS:
-        raise ValueError("TRUTH139_CORPUS_V2_AUDIT_NOT_PASS")
-    if court.get("schema") != COURT_SCHEMA or court.get("status") != COURT_STATUS:
-        raise ValueError("TRUTH139_CORPUS_V2_HISTORICAL_REPRODUCTION_NOT_PASS")
+        raise ValueError("TRUTH139_CORPUS_V2_STRUCTURAL_AUDIT_NOT_PASS")
+    if audit.get("structural_core_passed") is not True:
+        raise ValueError("TRUTH139_CORPUS_V2_STRUCTURAL_CORE_NOT_PASS")
+    if court.get("schema") != COURT_SCHEMA:
+        raise ValueError("TRUTH139_CORPUS_V2_HISTORICAL_REPRODUCTION_SCHEMA")
     if str(court.get("source_audit_identity_sha256") or "") != str(audit.get("audit_identity_sha256") or ""):
         raise ValueError("TRUTH139_CORPUS_V2_PARENT_IDENTITY_MISMATCH")
     corpus = dict(audit.get("corpus") or {})
@@ -112,8 +110,10 @@ def build(audit: dict, court: dict) -> dict:
         raise ValueError("TRUTH139_CORPUS_V2_SEAL_NOT_VERIFIED")
 
     subjects = list(audit.get("subjects") or ())
-    if len(subjects) != EXPECTED_SUBJECT_COUNT:
-        raise ValueError(f"TRUTH139_CORPUS_V2_SUBJECT_COUNT:{len(subjects)}")
+    if not subjects:
+        raise ValueError("TRUTH139_CORPUS_V2_NO_SUBJECTS")
+    historical_reproduction_passed = court.get("status") == COURT_STATUS
+    subject_count_matches_historical = len(subjects) == EXPECTED_SUBJECT_COUNT
 
     rows = []
     raw_capability_counts = Counter()
@@ -149,46 +149,61 @@ def build(audit: dict, court: dict) -> dict:
             and plan["IRIS_RELATIONS_TEACHER"]
             and plan["TESSA_TOPOLOGY_TEACHER_CACHE"]
         )
-        iris_tessa_full_clean_count += int(iris_tessa_full and not is_development)
+        iris_tessa_full_teacher_clean_count += int(iris_tessa_full and not is_development)
 
         source = _source_binding(row)
         pack_counts[source["pack_id"]] += 1
-        rows.append(
-            {
-                "ordinal": ordinal,
-                "subject_id": subject_id,
-                "subject_identity_signature": str(row.get("subject_identity_signature") or ""),
-                "source": source,
-                "lineage": dict(row.get("lineage") or {}),
-                "raw_structure": dict(row.get("raw_structure") or {}),
-                "duplicate_source_file_count": int(row.get("duplicate_source_file_count", 1)),
-                "duplicate_source_files": list(row.get("duplicate_source_files") or ()),
-                "raw_capabilities": raw,
-                "raw_capability_vocabulary": "HISTORICAL_COMPATIBILITY__NOT_CANONICAL_MODEL_DOMAIN_NAMES",
-                "raw_eligibility_blockers": list(row.get("raw_eligibility_blockers") or ()),
-                "development_exclusion": development_exclusion,
-                "duplicate_family_development_taint": development_taint,
-                "development_or_regression_tainted": is_development,
-                "materialization_plan": plan,
-                "historical_full_family_raw_capable": historical_full,
-                "iris_tessa_full_teacher_raw_candidate": iris_tessa_full,
-                "platform_truth_admission": "PENDING",
-                "graphics_front_surface_teacher": "PENDING" if plan["GRAPHICS_FRONT_SURFACE_GBUFFER"] else "NOT_RAW_CAPABLE",
-                "graphics_visibility_occlusion_teacher": "PENDING" if plan["GRAPHICS_VISIBILITY_OCCLUSION_TEACHER"] else "NOT_RAW_CAPABLE",
-                "graphics_layer_peel_teacher": "PENDING" if plan["GRAPHICS_LAYER_PEEL_GEOMETRY"] else "NOT_RAW_CAPABLE",
-                "relations_teacher": "PENDING" if plan["IRIS_RELATIONS_TEACHER"] else "NOT_RAW_CAPABLE",
-                "stage48_renderer_intervention_witness": "PENDING" if plan["STAGE48_RENDERER_INTERVENTION_WITNESS"] else "NOT_RAW_CAPABLE",
-                "graphics_full_court": "PENDING" if plan["GRAPHICS_FULL_COURT_CANDIDATE"] else "NOT_RAW_CAPABLE",
-                "train_membership": "UNASSIGNED",
-                "unseen_membership": "UNASSIGNED",
-                "training_authorized": False,
-            }
-        )
+        rows.append({
+            "ordinal": ordinal,
+            "subject_id": subject_id,
+            "subject_identity_signature": str(row.get("subject_identity_signature") or ""),
+            "exact_geometry_identity_signature": str(row.get("exact_geometry_identity_signature") or row.get("subject_identity_signature") or ""),
+            "historical_variant_family_signature": str(row.get("historical_variant_family_signature") or ""),
+            "source": source,
+            "lineage": dict(row.get("lineage") or {}),
+            "raw_structure": dict(row.get("raw_structure") or {}),
+            "duplicate_source_file_count": int(row.get("duplicate_source_file_count", 1)),
+            "duplicate_source_files": list(row.get("duplicate_source_files") or ()),
+            "raw_capabilities": raw,
+            "raw_capability_vocabulary": "HISTORICAL_COMPATIBILITY__NOT_CANONICAL_MODEL_DOMAIN_NAMES",
+            "raw_eligibility_blockers": list(row.get("raw_eligibility_blockers") or ()),
+            "development_exclusion": development_exclusion,
+            "duplicate_family_development_taint": development_taint,
+            "development_or_regression_tainted": is_development,
+            "materialization_plan": plan,
+            "historical_full_family_raw_capable": historical_full,
+            "iris_tessa_full_teacher_raw_candidate": iris_tessa_full,
+            "platform_truth_admission": "PENDING",
+            "graphics_front_surface_teacher": "PENDING" if plan["GRAPHICS_FRONT_SURFACE_GBUFFER"] else "NOT_RAW_CAPABLE",
+            "graphics_visibility_occlusion_teacher": "PENDING" if plan["GRAPHICS_VISIBILITY_OCCLUSION_TEACHER"] else "NOT_RAW_CAPABLE",
+            "graphics_layer_peel_teacher": "PENDING" if plan["GRAPHICS_LAYER_PEEL_GEOMETRY"] else "NOT_RAW_CAPABLE",
+            "relations_teacher": "PENDING" if plan["IRIS_RELATIONS_TEACHER"] else "NOT_RAW_CAPABLE",
+            "iris_response_evidence": "PENDING" if plan["IRIS_RESPONSE_EVIDENCE"] else "NOT_RAW_CAPABLE",
+            "stage48_renderer_intervention_witness": "PENDING" if plan["STAGE48_RENDERER_INTERVENTION_WITNESS"] else "NOT_RAW_CAPABLE",
+            "graphics_full_court": "PENDING" if plan["GRAPHICS_FULL_COURT_CANDIDATE"] else "NOT_RAW_CAPABLE",
+            "train_membership": "UNASSIGNED",
+            "unseen_membership": "UNASSIGNED",
+            "training_authorized": False,
+        })
 
+    status = (
+        "SEALED_RAW_139_REPRODUCED__CAPABILITY_AWARE_TEACHER_MATERIALIZATION_PENDING"
+        if historical_reproduction_passed and subject_count_matches_historical
+        else "SEALED_RAW_STRUCTURAL_PASS__HISTORICAL_REPRODUCTION_FINDING__CAPABILITY_MATERIALIZATION_MAY_CONTINUE"
+    )
     payload = {
         "schema": OUTPUT_SCHEMA,
         "date": "2026-10-29",
-        "status": "SEALED_RAW_139_REPRODUCED__CAPABILITY_AWARE_TEACHER_MATERIALIZATION_PENDING",
+        "status": status,
+        "historical_reproduction": {
+            "passed": historical_reproduction_passed,
+            "court_status": str(court.get("status") or ""),
+            "findings": list(court.get("findings") or ()),
+            "expected_subject_count": EXPECTED_SUBJECT_COUNT,
+            "actual_subject_count": len(rows),
+            "subject_count_exact": subject_count_matches_historical,
+            "operational_blocker": False,
+        },
         "parents": {
             "sealed_raw_audit_identity_sha256": str(audit["audit_identity_sha256"]),
             "historical_reproduction_court_identity_sha256": str(court["court_identity_sha256"]),
@@ -202,9 +217,8 @@ def build(audit: dict, court: dict) -> dict:
             "subject_count": len(rows),
             "development_or_regression_tainted_subject_count": development_count,
             "historical_clean_full_family_raw_candidate_count": historical_full_family_clean_count,
-            "iris_tessa_clean_full_teacher_raw_candidate_count": iris_tessa_full_clean_count,
+            "iris_tessa_clean_full_teacher_raw_candidate_count": iris_tessa_full_teacher_clean_count,
             "raw_capability_counts": dict(sorted(raw_capability_counts.items())),
-            # Compatibility alias retained for older readers. Values are the historical raw keys.
             "capability_counts": dict(sorted(raw_capability_counts.items())),
             "materialization_candidate_counts": dict(sorted(materialization_counts.items())),
             "pack_counts": dict(sorted(pack_counts.items())),
@@ -218,11 +232,13 @@ def build(audit: dict, court: dict) -> dict:
         },
         "policy": {
             "corpus_identity_is_not_experiment_projection": True,
-            "all_historical_139_subject_identities_retained": True,
+            "historical_reproduction_is_independent_nonblocking_court_after_structural_pass": True,
             "historical_stage47_mechanics_name_is_compatibility_vocabulary_only": True,
             "historical_stage48_appearance_presentation_name_is_compatibility_vocabulary_only": True,
             "legacy_dense_appearance_contract_is_not_global_graphics_authority": True,
             "graphics_is_parent_domain": True,
+            "graphics_does_not_depend_on_response_evidence": True,
+            "response_evidence_is_optional_parallel_iris_branch": True,
             "source_color_authority_is_partial_and_provenance_bound": True,
             "relations_are_primitive_nonsemantic_truth": True,
             "layer_masks_are_depth_or_drawable_evidence_not_humanoid_part_labels": True,
@@ -280,6 +296,7 @@ def main() -> None:
         "output": str(output),
         "status": result["status"],
         "subject_count": result["corpus"]["subject_count"],
+        "historical_reproduction": result["historical_reproduction"],
         "development_or_regression_tainted_subject_count": result["corpus"]["development_or_regression_tainted_subject_count"],
         "iris_tessa_clean_full_teacher_raw_candidate_count": result["corpus"]["iris_tessa_clean_full_teacher_raw_candidate_count"],
         "materialization_candidate_counts": result["corpus"]["materialization_candidate_counts"],

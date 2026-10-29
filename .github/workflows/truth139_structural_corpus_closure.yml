@@ -1,0 +1,163 @@
+name: truth139-structural-corpus-closure
+
+on:
+  push:
+    branches: [truth139-platform-generalization-v1]
+    paths:
+      - canonical/TRUTH139_STRUCTURAL_AUDIT_REQUEST_V1.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth139-structural-corpus-closure
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate structural audit request
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json
+          from pathlib import Path
+          row=json.loads(Path('canonical/TRUTH139_STRUCTURAL_AUDIT_REQUEST_V1.json').read_text())
+          assert row['schema']=='RealSaS.Truth139StructuralAuditRequest.v1'
+          assert row['enabled'] is True
+          assert int(row['revision']) >= 1
+          assert row['historical_web_snapshot_required_for_structural_pass'] is False
+          assert row['render_allowed'] is False
+          assert row['training_allowed'] is False
+          assert row['split_allowed'] is False
+          PY
+
+      - name: Create finite run context
+        id: context
+        run: |
+          set -euo pipefail
+          RUN_ROOT="$AUTHORITY_ROOT/truth139/structural_audit_runs/${GITHUB_RUN_ID}"
+          CLOSURE_ROOT="$AUTHORITY_ROOT/truth139/exact_audit_closure_v1"
+          mkdir -p "$RUN_ROOT"
+          test -d "$CLOSURE_ROOT/raw/quaternius"
+          test -f "$CLOSURE_ROOT/manifest/MANIFEST.json"
+          echo "run_root=$RUN_ROOT" >> "$GITHUB_OUTPUT"
+          echo "closure_root=$CLOSURE_ROOT" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$GITHUB_SHA" > "$RUN_ROOT/GIT_COMMIT_SHA.txt"
+
+      - name: Run exact-byte structural capability audit
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          CLOSURE_ROOT="${{ steps.context.outputs.closure_root }}"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/corpus/run_truth139_structural_sealed_audit_v3.py \
+            --raw-root "$CLOSURE_ROOT" \
+            --fit8-selection canonical/FIT8_DIVERSITY_SELECTION_V1.json \
+            --output "$RUN_ROOT/SEALED_RAW_STRUCTURAL_AUDIT_V3.json"
+
+      - name: Reproduce historical 139 census independently
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/corpus/validate_truth139_historical_reproduction_v1.py \
+            --audit "$RUN_ROOT/SEALED_RAW_STRUCTURAL_AUDIT_V3.json" \
+            --output "$RUN_ROOT/HISTORICAL_REPRODUCTION_COURT.json"
+
+      - name: Build capability-aware corpus manifest
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/corpus/build_truth139_corpus_manifest_v2.py \
+            --sealed-raw-audit-v2 "$RUN_ROOT/SEALED_RAW_STRUCTURAL_AUDIT_V3.json" \
+            --historical-reproduction "$RUN_ROOT/HISTORICAL_REPRODUCTION_COURT.json" \
+            --output "$RUN_ROOT/TRUTH139_CORPUS_MANIFEST_V2.json"
+
+      - name: Measure structural diversity and leakage components
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/corpus/build_truth139_diversity_census_v1.py \
+            --audit "$RUN_ROOT/SEALED_RAW_STRUCTURAL_AUDIT_V3.json" \
+            --output "$RUN_ROOT/TRUTH139_DIVERSITY_CENSUS_V1.json"
+
+      - name: Build rich-truth materialization work order
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/corpus/build_truth139_rich_work_order_v1.py \
+            --corpus-manifest "$RUN_ROOT/TRUTH139_CORPUS_MANIFEST_V2.json" \
+            --output "$RUN_ROOT/TRUTH139_RICH_WORK_ORDER_V1.json"
+
+      - name: Seal structural corpus closure receipt
+        run: |
+          set -euo pipefail
+          RUN_ROOT="${{ steps.context.outputs.run_root }}"
+          export RUN_ROOT
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['RUN_ROOT'])
+          names=[
+              'SEALED_RAW_STRUCTURAL_AUDIT_V3.json',
+              'HISTORICAL_REPRODUCTION_COURT.json',
+              'TRUTH139_CORPUS_MANIFEST_V2.json',
+              'TRUTH139_DIVERSITY_CENSUS_V1.json',
+              'TRUTH139_RICH_WORK_ORDER_V1.json',
+          ]
+          def sha(path):
+              h=hashlib.sha256()
+              with path.open('rb') as f:
+                  for chunk in iter(lambda:f.read(4*1024*1024),b''):
+                      h.update(chunk)
+              return h.hexdigest()
+          docs={name:json.loads((root/name).read_text()) for name in names}
+          audit=docs['SEALED_RAW_STRUCTURAL_AUDIT_V3.json']
+          manifest=docs['TRUTH139_CORPUS_MANIFEST_V2.json']
+          census=docs['TRUTH139_DIVERSITY_CENSUS_V1.json']
+          work=docs['TRUTH139_RICH_WORK_ORDER_V1.json']
+          receipt={
+              'schema':'RealSaS.Truth139StructuralCorpusClosureReceipt.v1',
+              'date':'2026-10-29',
+              'status':'PASS_TRUTH139_STRUCTURAL_CORPUS_CLOSED__RICH_TRUTH_MATERIALIZATION_READY',
+              'github_run_id':os.environ['GITHUB_RUN_ID'],
+              'git_commit_sha':os.environ['GITHUB_SHA'],
+              'artifacts':{name:{'sha256':sha(root/name)} for name in names},
+              'subject_count':manifest['corpus']['subject_count'],
+              'raw_capability_counts':manifest['corpus']['raw_capability_counts'],
+              'materialization_candidate_counts':manifest['corpus']['materialization_candidate_counts'],
+              'provenance_summary':{k:audit['provenance'][k] for k in (
+                  'historical_snapshot_byte_available_pack_count',
+                  'historical_snapshot_byte_missing_pack_count',
+                  'historical_snapshot_byte_missing_pack_ids',
+              )},
+              'diversity_summary':census['leakage_component_summary'],
+              'signature_multiplicity':census['signature_multiplicity'],
+              'work_order_counts':work['work_counts'],
+              'next_gate':'RUN_HEAVY_RICH_TRUTH_MATERIALIZATION_NOTEBOOK',
+              'render_performed':False,
+              'training_performed':False,
+              'split_created':False,
+              'qualification_minted':False,
+          }
+          receipt['receipt_identity_sha256']=hashlib.sha256(json.dumps(receipt,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+          (root/'STRUCTURAL_CORPUS_CLOSURE_RECEIPT.json').write_text(json.dumps(receipt,sort_keys=True,indent=2)+'\n')
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+
+      - name: Preserve structural corpus outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: truth139-structural-corpus-closure-${{ github.run_id }}
+          path: ${{ steps.context.outputs.run_root }}
+          if-no-files-found: error
+          retention-days: 30

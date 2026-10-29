@@ -166,6 +166,7 @@ def main(args=None):
         ROOT / "models/iris/v31/lofo_trainer_v1.py",
         ROOT / "models/iris/v31/lofo_trainer_v2.py",
         ROOT / "models/iris/v31/lofo_trainer_v3.py",
+        ROOT / "models/iris/v31/fstar_teacher_v31.py",
         ROOT / "models/iris/training/apparatus_v1.py",
         ROOT / "models/iris/v5/source_signed_field_v5.py",
         Path(__file__).resolve(),
@@ -208,6 +209,7 @@ def main(args=None):
         "preregistration_binding_hash": preregistration_binding_hash,
         "model_source_sha256": source_hashes["models/iris/v31/model_v31.py"],
         "runtime_source_sha256": source_hashes["models/iris/v31/lofo_trainer_v3.py"],
+        "teacher_runtime_source_sha256": source_hashes["models/iris/v31/fstar_teacher_v31.py"],
         "teacher_apparatus_source_sha256": source_hashes["models/iris/training/apparatus_v1.py"],
         "teacher_field_source_sha256": source_hashes["models/iris/v5/source_signed_field_v5.py"],
         "upstream_bindings": {

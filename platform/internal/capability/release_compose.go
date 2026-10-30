@@ -28,6 +28,7 @@ func ProductProviders() []Provider {
 		ProductMechanicsProvider{},
 		ProductGraphicsProvider{},
 		ProductMotionProvider{},
+		ProductProofProvider{},
 	}
 }
 

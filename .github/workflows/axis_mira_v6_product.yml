@@ -1,0 +1,94 @@
+name: axis-mira-v6-product
+
+on:
+  pull_request:
+    paths:
+      - 'models/axis/**'
+      - 'models/mira/**'
+      - 'compiler/realsas_compiler_core/rig_program_ir_v1.py'
+      - 'compiler/realsas_compiler_core/canonical_rig_ir_v2.py'
+      - 'compiler/realsas_compiler_core/skin_token_ir_v1.py'
+      - 'compiler/realsas_compiler_core/canonical_skin_ir_v2.py'
+      - 'tests/models/test_axis_v6_rig_program.py'
+      - 'tests/models/test_mira_v6_skin_fsq_codec.py'
+      - 'tests/compiler/test_control_ready_rig_v2.py'
+      - '.github/workflows/axis_mira_v6_product.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: axis-mira-v6-product-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v6-contract-and-model-courts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install reviewed CPU dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+
+      - name: Compile V6 product sources
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            models/mira/skin_fsq_codec_v6.py \
+            models/axis/rig_program_causal_v6.py \
+            compiler/realsas_compiler_core/rig_program_ir_v1.py \
+            compiler/realsas_compiler_core/canonical_rig_ir_v2.py \
+            compiler/realsas_compiler_core/skin_token_ir_v1.py \
+            compiler/realsas_compiler_core/canonical_skin_ir_v2.py
+
+      - name: Run V6 model and Compiler courts
+        run: |
+          set -euo pipefail
+          pytest -q \
+            tests/models/test_mira_v6_skin_fsq_codec.py \
+            tests/models/test_axis_v6_rig_program.py \
+            tests/compiler/test_control_ready_rig_v2.py
+
+      - name: Smoke coupled AXIS-MIRA tensor contract
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import torch
+          from models.axis.rig_program_causal_v6 import AXISRigProgramCausalV6, AXISV6Config, AXISV6TeacherSequence, DOF_LABELS
+          from models.mira.skin_fsq_codec_v6 import MIRASkinFSQCodecConfig, MIRASkinFSQCodecV6
+
+          mira_cfg = MIRASkinFSQCodecConfig(6, 5, hidden_dim=32, tokens_per_joint=3, levels=(3,3,3))
+          mira = MIRASkinFSQCodecV6(mira_cfg)
+          v = torch.randn(1, 12, 6)
+          j = torch.randn(1, 4, 5)
+          w = torch.softmax(torch.randn(1, 12, 4), dim=-1)
+          skin = mira(w, v, j)
+          assert skin['token_ids'].shape == (1, 4, 3)
+
+          axis_cfg = AXISV6Config(scene_dim=16, hidden_dim=32, layers=1, heads=4, ff_mult=2, max_sequence_length=16, max_pointer_entities=16, skin_vocab_size=mira_cfg.vocab_size)
+          axis = AXISRigProgramCausalV6(axis_cfg)
+          kinds = torch.tensor([[1,2,3,4,5,6,8,9,10]])
+          b,s = kinds.shape
+          teacher = AXISV6TeacherSequence(
+              kind_ids=kinds,
+              coord_indices=torch.full((b,s,3), -1),
+              pointer_a=torch.full((b,s), -1),
+              pointer_b=torch.full((b,s), -1),
+              aux_type_ids=torch.full((b,s), -1),
+              dof_masks=torch.zeros((b,s,len(DOF_LABELS))),
+              skin_token_ids=torch.full((b,s), -1),
+              attention_mask=torch.ones((b,s), dtype=torch.bool),
+          )
+          out = axis(torch.randn(1, 7, 16), teacher)
+          assert out['skin_token_logits'].shape[-1] == mira_cfg.vocab_size
+          print('AXIS_MIRA_V6_PRODUCT_SMOKE_PASS')
+          PY

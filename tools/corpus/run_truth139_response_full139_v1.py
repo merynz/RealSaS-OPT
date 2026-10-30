@@ -108,7 +108,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--work-orders", required=True, type=Path)
     parser.add_argument("--prepared-root", required=True, type=Path)
-    parser.add_argument("--raw-root", required=True, type=Path)
+    parser.add_argument("--raw-root", required=True, type=Path,
+                        help="Truth139 full source cache root; raw bytes are under source_root/<corpus_relative_path>.")
     parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--blender", required=True, type=Path)
     parser.add_argument("--maximum-seconds-per-subject", type=float, default=1800.0)
@@ -118,9 +119,10 @@ def main() -> None:
     work_path = args.work_orders.resolve()
     prepared_root = args.prepared_root.resolve()
     raw_root = args.raw_root.resolve()
+    raw_source_root = (raw_root / "source_root").resolve()
     output_root = args.output_root.resolve()
     blender = args.blender.resolve()
-    if not prepared_root.is_dir() or not raw_root.is_dir() or not blender.is_file():
+    if not prepared_root.is_dir() or not raw_root.is_dir() or not raw_source_root.is_dir() or not blender.is_file():
         raise FileNotFoundError("TRUTH139_RESPONSE_BATCH_REQUIRED_ROOT_MISSING")
     output_root.mkdir(parents=True, exist_ok=True)
 
@@ -156,7 +158,9 @@ def main() -> None:
             raise ValueError("TRUTH139_RESPONSE_JOB_NOT_ENABLED:" + subject_id)
         source_row = dict(row.get("source") or {})
         relative = str(source_row.get("corpus_relative_path") or "")
-        source = (raw_root / relative).resolve()
+        source = (raw_source_root / relative).resolve()
+        if not source.is_relative_to(raw_source_root):
+            raise ValueError("TRUTH139_RESPONSE_RAW_SOURCE_PATH_ESCAPE:" + subject_id)
         if not source.is_file() or sha256(source) != source_row.get("sha256"):
             raise ValueError("TRUTH139_RESPONSE_RAW_SOURCE_DRIFT:" + subject_id)
         packet = packet_root(prepared_root, subject_id)
@@ -225,6 +229,7 @@ def main() -> None:
         "code_commit_sha": code_sha,
         "contract": {"path": str(CONTRACT), "sha256": sha256(CONTRACT)},
         "work_orders": {"path": str(work_path), "sha256": sha256(work_path), "identity_sha256": work.get("work_order_identity_sha256")},
+        "raw_source_cache": {"cache_root": str(raw_root), "source_root": str(raw_source_root)},
         "subject_count": 139,
         "subject_ids": subject_ids,
         "completed_subject_count": len(complete),

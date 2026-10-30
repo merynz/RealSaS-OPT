@@ -9,9 +9,18 @@ on:
       - 'compiler/realsas_compiler_core/canonical_rig_ir_v2.py'
       - 'compiler/realsas_compiler_core/skin_token_ir_v1.py'
       - 'compiler/realsas_compiler_core/canonical_skin_ir_v2.py'
+      - 'compiler/realsas_compiler_services/platform_worker/rig_executor_v2.py'
+      - 'compiler/realsas_compiler_services/platform_worker/skin_executor_v2.py'
+      - 'compiler/realsas_compiler_services/platform_worker/worker.py'
+      - 'platform/internal/capability/product_rig.go'
+      - 'platform/internal/capability/product_skin.go'
+      - 'platform/internal/capability/product_models_test.go'
+      - 'platform/internal/capability/contracts/product_capabilities_v1.json'
       - 'tests/models/test_axis_v6_rig_program.py'
       - 'tests/models/test_mira_v6_skin_fsq_codec.py'
+      - 'tests/models/test_axis_mira_v6_product_runtime.py'
       - 'tests/compiler/test_control_ready_rig_v2.py'
+      - 'tests/repository/test_fit1_mechanical_product_role_alignment_v1.py'
       - '.github/workflows/axis_mira_v6_product.yml'
   workflow_dispatch:
 
@@ -25,13 +34,18 @@ concurrency:
 jobs:
   v6-contract-and-model-courts:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: platform/go.mod
+          cache-dependency-path: platform/go.sum
 
       - name: Install reviewed CPU dependencies
         run: |
@@ -44,51 +58,59 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             models/mira/skin_fsq_codec_v6.py \
-            models/axis/rig_program_causal_v6.py \
+            models/mira/conditioning_v6.py \
+            models/mira/runtime_checkpoint_v2.py \
+            models/axis/scene_conditioning_v6.py \
+            models/axis/rig_program_model_v6.py \
+            models/axis/rig_program_decode_v6.py \
+            models/axis/runtime_checkpoint_v2.py \
             compiler/realsas_compiler_core/rig_program_ir_v1.py \
             compiler/realsas_compiler_core/canonical_rig_ir_v2.py \
             compiler/realsas_compiler_core/skin_token_ir_v1.py \
-            compiler/realsas_compiler_core/canonical_skin_ir_v2.py
+            compiler/realsas_compiler_core/canonical_skin_ir_v2.py \
+            compiler/realsas_compiler_services/platform_worker/rig_executor_v2.py \
+            compiler/realsas_compiler_services/platform_worker/skin_executor_v2.py \
+            compiler/realsas_compiler_services/platform_worker/worker.py
 
-      - name: Run V6 model and Compiler courts
+      - name: Run V6 model Compiler and runtime courts
         run: |
           set -euo pipefail
           pytest -q \
             tests/models/test_mira_v6_skin_fsq_codec.py \
             tests/models/test_axis_v6_rig_program.py \
-            tests/compiler/test_control_ready_rig_v2.py
+            tests/models/test_axis_mira_v6_product_runtime.py \
+            tests/compiler/test_control_ready_rig_v2.py \
+            tests/repository/test_fit1_mechanical_product_role_alignment_v1.py
 
-      - name: Smoke coupled AXIS-MIRA tensor contract
+      - name: Validate Platform product capability catalog
+        working-directory: platform
+        run: |
+          set -euo pipefail
+          go test ./internal/capability
+
+      - name: Smoke coupled shipping-target AXIS-MIRA contract
         run: |
           set -euo pipefail
           python - <<'PY'
           import torch
-          from models.axis.rig_program_causal_v6 import AXISRigProgramCausalV6, AXISV6Config, AXISV6TeacherSequence, DOF_LABELS
+          from models.axis.rig_program_model_v6 import AXISRigProgramConfigV6, AXISRigProgramModelV6, AXISSequenceV6, RigProgramEventV6, RigTokenKindV6
+          from models.axis.scene_conditioning_v6 import AXIS_V6_SURFACE_SCENE_DIM
+          from models.mira.conditioning_v6 import MIRA_V6_VERTEX_FEATURE_DIM, MIRA_V6_JOINT_FEATURE_DIM
           from models.mira.skin_fsq_codec_v6 import MIRASkinFSQCodecConfig, MIRASkinFSQCodecV6
 
-          mira_cfg = MIRASkinFSQCodecConfig(6, 5, hidden_dim=32, tokens_per_joint=3, levels=(3,3,3))
+          mira_cfg = MIRASkinFSQCodecConfig(MIRA_V6_VERTEX_FEATURE_DIM, MIRA_V6_JOINT_FEATURE_DIM, hidden_dim=32, tokens_per_joint=3, levels=(3,3,3))
           mira = MIRASkinFSQCodecV6(mira_cfg)
-          v = torch.randn(1, 12, 6)
-          j = torch.randn(1, 4, 5)
+          v = torch.randn(1, 12, MIRA_V6_VERTEX_FEATURE_DIM)
+          j = torch.randn(1, 4, MIRA_V6_JOINT_FEATURE_DIM)
           w = torch.softmax(torch.randn(1, 12, 4), dim=-1)
-          skin = mira(w, v, j)
-          assert skin['token_ids'].shape == (1, 4, 3)
+          token_ids = mira(w, v, j)['token_ids']
+          assert token_ids.shape == (1, 4, 3)
 
-          axis_cfg = AXISV6Config(scene_dim=16, hidden_dim=32, layers=1, heads=4, ff_mult=2, max_sequence_length=16, max_pointer_entities=16, skin_vocab_size=mira_cfg.vocab_size)
-          axis = AXISRigProgramCausalV6(axis_cfg)
-          kinds = torch.tensor([[1,2,3,4,5,6,8,9,10]])
-          b,s = kinds.shape
-          teacher = AXISV6TeacherSequence(
-              kind_ids=kinds,
-              coord_indices=torch.full((b,s,3), -1),
-              pointer_a=torch.full((b,s), -1),
-              pointer_b=torch.full((b,s), -1),
-              aux_type_ids=torch.full((b,s), -1),
-              dof_masks=torch.zeros((b,s,len(DOF_LABELS))),
-              skin_token_ids=torch.full((b,s), -1),
-              attention_mask=torch.ones((b,s), dtype=torch.bool),
-          )
-          out = axis(torch.randn(1, 7, 16), teacher)
+          axis_cfg = AXISRigProgramConfigV6(scene_dim=AXIS_V6_SURFACE_SCENE_DIM, hidden_dim=32, layers=1, heads=4, ff_mult=2, max_sequence_length=32, max_pointer_entities=16, skin_vocab_size=mira_cfg.vocab_size)
+          axis = AXISRigProgramModelV6(axis_cfg)
+          seq = AXISSequenceV6.from_events([RigProgramEventV6(RigTokenKindV6.BOS)], device=torch.device('cpu'))
+          out = axis(torch.randn(1, 9, AXIS_V6_SURFACE_SCENE_DIM), seq)
           assert out['skin_token_logits'].shape[-1] == mira_cfg.vocab_size
+          assert out['pointer_c_logits'].shape[-1] == axis_cfg.max_pointer_entities + 1
           print('AXIS_MIRA_V6_PRODUCT_SMOKE_PASS')
           PY

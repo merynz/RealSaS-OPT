@@ -1,24 +1,21 @@
 from __future__ import annotations
 
-"""AXIS V6 typed causal decoder for full control-ready rig programs.
+"""Early AXIS V6 typed causal scaffold for control-ready rig programs.
 
-V5.4.1 generated only a deform tree + XYZ. V6 keeps causal, parent-before-child
-structure but expands the learned language to local frames, animator controls,
-kinematic chains, constraints, attachment anchors and MIRA skin tokens.
-
-This module owns model grammar/masking. Compiler does not repair or complete this
-language; it only validates the decoded proposal downstream.
+V5.4.1 generated only a deform tree + XYZ. This scaffold expanded the learned
+language to local frames, animator controls, kinematic chains, constraints,
+attachment anchors and MIRA discrete skin codes. The shipping-target V6 model is
+`rig_program_model_v6.py`; this file remains only for source/regression comparison.
 """
 
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Iterable
 
 import torch
 from torch import Tensor, nn
 
 
-AXIS_V6_ARCHITECTURE_ID = "RealSaS.AXIS.RigProgram.TypedCausal.SharedSkinTokens.v6_0"
+AXIS_V6_ARCHITECTURE_ID = "RealSaS.AXIS.RigProgram.TypedCausal.SharedSkinCodes.v6_0"
 AXIS_V6_COORD_BINS = 256
 
 
@@ -49,27 +46,11 @@ class RigProgramPhase(IntEnum):
 
 
 CONTROL_KINDS = (
-    "GLOBAL",
-    "ROOT",
-    "FK",
-    "IK_EFFECTOR",
-    "IK_POLE",
-    "SPLINE",
-    "AIM_TARGET",
-    "SOCKET_CONTROL",
+    "GLOBAL", "ROOT", "FK", "IK_EFFECTOR", "IK_POLE", "SPLINE", "AIM_TARGET", "SOCKET_CONTROL",
 )
-
 CONSTRAINT_OPERATORS = (
-    "IK",
-    "AIM",
-    "LIMIT_ROTATION",
-    "LIMIT_TRANSLATION",
-    "FOLLOW",
-    "COPY_TRANSFORM",
-    "PATH",
-    "STRETCH",
+    "IK", "AIM", "LIMIT_ROTATION", "LIMIT_TRANSLATION", "FOLLOW", "COPY_TRANSFORM", "PATH", "STRETCH",
 )
-
 DOF_LABELS = ("TX", "TY", "TZ", "RX", "RY", "RZ", "SX", "SY", "SZ")
 
 
@@ -100,12 +81,6 @@ class RigProgramGrammarState:
 
 
 class AXISRigProgramGrammarV6:
-    """Deterministic section grammar used only for generation masking.
-
-    It does not infer missing entities. An early EOS is legal only after skin mode;
-    model/Compiler product courts decide whether a resulting program is sufficient.
-    """
-
     @staticmethod
     def allowed_kinds(state: RigProgramGrammarState) -> tuple[RigEventKind, ...]:
         p = state.phase
@@ -170,17 +145,14 @@ class AXISRigProgramGrammarV6:
     def mask_kind_logits(logits: Tensor, state: RigProgramGrammarState) -> Tensor:
         if logits.shape[-1] != len(RigEventKind):
             raise ValueError("AXIS_V6_KIND_VOCAB_DRIFT")
-        allowed = {int(v) for v in AXISRigProgramGrammarV6.allowed_kinds(state)}
         mask = torch.full_like(logits, float("-inf"))
-        for idx in allowed:
-            mask[..., idx] = 0.0
+        for kind in AXISRigProgramGrammarV6.allowed_kinds(state):
+            mask[..., int(kind)] = 0.0
         return logits + mask
 
 
 @dataclass
 class AXISV6TeacherSequence:
-    """Packed teacher events. Unused fields are -1 and ignored by their losses."""
-
     kind_ids: Tensor
     coord_indices: Tensor
     pointer_a: Tensor
@@ -207,19 +179,12 @@ class AXISV6TeacherSequence:
 
 
 class AXISRigProgramCausalV6(nn.Module):
-    """Typed causal transformer conditioned directly on RealSaS scene evidence.
-
-    One shared hidden state predicts the rig program and MIRA token stream. Heads
-    are typed rather than forcing heterogeneous values into one giant vocabulary.
-    """
-
     architecture_id = AXIS_V6_ARCHITECTURE_ID
 
     def __init__(self, config: AXISV6Config):
         super().__init__()
         self.config = config
         h = config.hidden_dim
-
         self.kind_embedding = nn.Embedding(len(RigEventKind), h)
         self.coord_embedding = nn.Embedding(config.coord_bins + 1, h)
         self.pointer_embedding = nn.Embedding(config.max_pointer_entities + 1, h)
@@ -227,21 +192,14 @@ class AXISRigProgramCausalV6(nn.Module):
         self.skin_embedding = nn.Embedding(config.skin_vocab_size + 1, h)
         self.position_embedding = nn.Embedding(config.max_sequence_length, h)
         self.dof_projection = nn.Linear(len(DOF_LABELS), h, bias=False)
-
         layer = nn.TransformerEncoderLayer(
-            d_model=h,
-            nhead=config.heads,
-            dim_feedforward=h * config.ff_mult,
-            dropout=config.dropout,
-            activation="gelu",
-            batch_first=True,
-            norm_first=True,
+            d_model=h, nhead=config.heads, dim_feedforward=h * config.ff_mult,
+            dropout=config.dropout, activation="gelu", batch_first=True, norm_first=True,
         )
         self.causal = nn.TransformerEncoder(layer, num_layers=config.layers, norm=nn.LayerNorm(h))
         self.scene_projection = nn.Linear(config.scene_dim, h)
         self.scene_cross_attention = nn.MultiheadAttention(h, config.heads, dropout=config.dropout, batch_first=True)
         self.cross_norm = nn.LayerNorm(h)
-
         self.kind_head = nn.Linear(h, len(RigEventKind))
         self.coord_head = nn.Linear(h, 3 * config.coord_bins)
         self.pointer_a_head = nn.Linear(h, config.max_pointer_entities)
@@ -253,7 +211,6 @@ class AXISRigProgramCausalV6(nn.Module):
 
     @staticmethod
     def _shift_for_embedding(values: Tensor, max_value: int) -> Tensor:
-        # -1 means field absent. Shift by one so absent -> 0, valid index 0 -> 1.
         return (values.to(torch.long) + 1).clamp(min=0, max=max_value)
 
     def _teacher_embeddings(self, teacher: AXISV6TeacherSequence) -> Tensor:
@@ -262,7 +219,6 @@ class AXISRigProgramCausalV6(nn.Module):
         b, s = teacher.kind_ids.shape
         pos = torch.arange(s, device=teacher.kind_ids.device)[None].expand(b, -1)
         x = self.kind_embedding(teacher.kind_ids.to(torch.long)) + self.position_embedding(pos)
-
         coords = self._shift_for_embedding(teacher.coord_indices, cfg.coord_bins)
         x = x + self.coord_embedding(coords).sum(dim=2)
         x = x + self.pointer_embedding(self._shift_for_embedding(teacher.pointer_a, cfg.max_pointer_entities))
@@ -278,18 +234,14 @@ class AXISRigProgramCausalV6(nn.Module):
             raise ValueError("AXIS_V6_SCENE_MEMORY_SHAPE_DRIFT")
         if scene_memory.shape[0] != teacher.kind_ids.shape[0]:
             raise ValueError("AXIS_V6_SCENE_BATCH_DRIFT")
-
         x = self._teacher_embeddings(teacher)
         s = x.shape[1]
         causal_mask = torch.full((s, s), float("-inf"), device=x.device, dtype=x.dtype)
         causal_mask = torch.triu(causal_mask, diagonal=1)
-        padding_mask = ~teacher.attention_mask.to(torch.bool)
-        x = self.causal(x, mask=causal_mask, src_key_padding_mask=padding_mask)
-
+        x = self.causal(x, mask=causal_mask, src_key_padding_mask=~teacher.attention_mask.to(torch.bool))
         scene = self.scene_projection(scene_memory)
         cross, _ = self.scene_cross_attention(x, scene, scene, need_weights=False)
         x = self.cross_norm(x + cross)
-
         return {
             "kind_logits": self.kind_head(x),
             "coord_logits": self.coord_head(x).view(*x.shape[:2], 3, self.config.coord_bins),
@@ -304,16 +256,7 @@ class AXISRigProgramCausalV6(nn.Module):
 
 
 __all__ = [
-    "AXISRigProgramCausalV6",
-    "AXISRigProgramGrammarV6",
-    "AXISV6Config",
-    "AXISV6TeacherSequence",
-    "AXIS_V6_ARCHITECTURE_ID",
-    "AXIS_V6_COORD_BINS",
-    "CONSTRAINT_OPERATORS",
-    "CONTROL_KINDS",
-    "DOF_LABELS",
-    "RigEventKind",
-    "RigProgramGrammarState",
-    "RigProgramPhase",
+    "AXISRigProgramCausalV6", "AXISRigProgramGrammarV6", "AXISV6Config", "AXISV6TeacherSequence",
+    "AXIS_V6_ARCHITECTURE_ID", "AXIS_V6_COORD_BINS", "CONSTRAINT_OPERATORS", "CONTROL_KINDS",
+    "DOF_LABELS", "RigEventKind", "RigProgramGrammarState", "RigProgramPhase",
 ]

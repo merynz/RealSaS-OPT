@@ -80,8 +80,6 @@ def _chain_path(start_id: str, end_id: str, parent_by: dict[str, str | None]) ->
     while parent_by.get(cur) is not None:
         cur = str(parent_by[cur])
         if cur in seen:
-            # Preserve a malformed witness that Compiler will reject rather than
-            # attempting alternate-path search.
             return (start_id, end_id)
         seen.add(cur)
         path.append(cur)
@@ -117,10 +115,10 @@ def decode_axis_v6_events(
 
     joints: list[RigProgramJointProposalIR] = []
     frames: list[RigProgramLocalFrameProposalIR] = []
-    controls: list[RigProgramControlProposalIR] = []
     chains: list[RigProgramChainProposalIR] = []
-    constraints: list[RigProgramConstraintProposalIR] = []
     anchors: list[RigProgramAttachmentAnchorProposalIR] = []
+    control_rows: list[dict] = []
+    constraint_rows: list[dict] = []
     skin_codes: list[int] = []
 
     joint_ids: list[str] = []
@@ -160,17 +158,20 @@ def decode_axis_v6_events(
             cid = f"P:C:{len(control_ids):04d}"
             if event.aux_type_id < 0 or event.aux_type_id >= len(CONTROL_KINDS_V6):
                 raise ValueError("AXIS_V6_CONTROL_KIND_INVALID")
-            targets = () if event.pointer_a < 0 else (_at(joint_ids, event.pointer_a, "AXIS_V6_CONTROL_TARGET_POINTER_INVALID"),)
-            parent_control = None if event.pointer_b < 0 else _at(control_ids, event.pointer_b, "AXIS_V6_CONTROL_PARENT_POINTER_INVALID")
-            controls.append(RigProgramControlProposalIR(
-                proposal_control_id=cid,
-                control_kind=CONTROL_KINDS_V6[event.aux_type_id],
-                target_proposal_joint_ids=targets,
-                parent_proposal_control_id=parent_control,
-                rest_P=_world_point(config, event.coord_indices, center=center, scale=scale),
-                metadata={"animator_facing": True},
-            ))
+            parent_control = None if event.pointer_a < 0 else _at(control_ids, event.pointer_a, "AXIS_V6_CONTROL_PARENT_POINTER_INVALID")
+            control_rows.append({
+                "id": cid,
+                "kind": CONTROL_KINDS_V6[event.aux_type_id],
+                "parent": parent_control,
+                "rest_P": _world_point(config, event.coord_indices, center=center, scale=scale),
+                "targets": [],
+            })
             control_ids.append(cid)
+        elif kind == RigTokenKindV6.CONTROL_TARGET:
+            if not control_rows:
+                raise ValueError("AXIS_V6_CONTROL_TARGET_WITHOUT_CONTROL")
+            target = _at(joint_ids, event.pointer_a, "AXIS_V6_CONTROL_TARGET_POINTER_INVALID")
+            control_rows[-1]["targets"].append(target)
         elif kind == RigTokenKindV6.CHAIN:
             kid = f"P:K:{len(chain_ids):04d}"
             start = _at(joint_ids, event.pointer_a, "AXIS_V6_CHAIN_START_POINTER_INVALID")
@@ -183,21 +184,28 @@ def decode_axis_v6_events(
             ))
             chain_ids.append(kid)
         elif kind == RigTokenKindV6.CONSTRAINT:
-            qid = f"P:Q:{len(constraints):04d}"
+            qid = f"P:Q:{len(constraint_rows):04d}"
             if event.aux_type_id < 0 or event.aux_type_id >= len(CONSTRAINT_OPERATORS_V6):
                 raise ValueError("AXIS_V6_CONSTRAINT_OPERATOR_INVALID")
-            inputs = () if event.pointer_a < 0 else (_at(control_ids, event.pointer_a, "AXIS_V6_CONSTRAINT_CONTROL_POINTER_INVALID"),)
-            chain_id = None if event.pointer_b < 0 else _at(chain_ids, event.pointer_b, "AXIS_V6_CONSTRAINT_CHAIN_POINTER_INVALID")
-            outputs = () if event.pointer_c < 0 else (_at(joint_ids, event.pointer_c, "AXIS_V6_CONSTRAINT_OUTPUT_POINTER_INVALID"),)
-            constraints.append(RigProgramConstraintProposalIR(
-                proposal_constraint_id=qid,
-                operator_id=CONSTRAINT_OPERATORS_V6[event.aux_type_id],
-                input_proposal_control_ids=inputs,
-                output_proposal_joint_ids=outputs,
-                proposal_chain_id=chain_id,
-                parameters={f"p{i}": float(v) for i, v in enumerate(event.scalar_params)},
-                metadata={"solver_execution_performed": False},
-            ))
+            chain_id = None if event.pointer_a < 0 else _at(chain_ids, event.pointer_a, "AXIS_V6_CONSTRAINT_CHAIN_POINTER_INVALID")
+            constraint_rows.append({
+                "id": qid,
+                "operator": CONSTRAINT_OPERATORS_V6[event.aux_type_id],
+                "chain": chain_id,
+                "inputs": [],
+                "outputs": [],
+                "parameters": {f"p{i}": float(v) for i, v in enumerate(event.scalar_params)},
+            })
+        elif kind == RigTokenKindV6.CONSTRAINT_INPUT:
+            if not constraint_rows:
+                raise ValueError("AXIS_V6_CONSTRAINT_INPUT_WITHOUT_CONSTRAINT")
+            cid = _at(control_ids, event.pointer_a, "AXIS_V6_CONSTRAINT_CONTROL_POINTER_INVALID")
+            constraint_rows[-1]["inputs"].append(cid)
+        elif kind == RigTokenKindV6.CONSTRAINT_OUTPUT:
+            if not constraint_rows:
+                raise ValueError("AXIS_V6_CONSTRAINT_OUTPUT_WITHOUT_CONSTRAINT")
+            jid = _at(joint_ids, event.pointer_a, "AXIS_V6_CONSTRAINT_OUTPUT_POINTER_INVALID")
+            constraint_rows[-1]["outputs"].append(jid)
         elif kind == RigTokenKindV6.ANCHOR:
             aid = f"P:A:{len(anchors):04d}"
             if event.anchor_parent_kind == 0:
@@ -215,10 +223,10 @@ def decode_axis_v6_events(
                 local_P=_local_vector(config, event.coord_indices, scale=scale),
                 metadata={"mechanical_attachment_anchor": True},
             ))
-        elif kind == RigTokenKindV6.SKIN_TOKEN:
-            if event.skin_token_id < 0 or event.skin_token_id >= codec_binding.codebook_size:
-                raise ValueError("AXIS_V6_SKIN_TOKEN_OUT_OF_CODEC_DOMAIN")
-            skin_codes.append(int(event.skin_token_id))
+        elif kind == RigTokenKindV6.SKIN_CODE:
+            if event.skin_code_id < 0 or event.skin_code_id >= codec_binding.codebook_size:
+                raise ValueError("AXIS_V6_SKIN_CODE_OUT_OF_CODEC_DOMAIN")
+            skin_codes.append(int(event.skin_code_id))
         elif kind in {
             RigTokenKindV6.FRAMES_START, RigTokenKindV6.CONTROLS_START,
             RigTokenKindV6.CHAINS_START, RigTokenKindV6.CONSTRAINTS_START,
@@ -228,12 +236,40 @@ def decode_axis_v6_events(
         else:
             raise ValueError(f"AXIS_V6_UNEXPECTED_EVENT:{kind.name}")
 
+    controls = tuple(
+        RigProgramControlProposalIR(
+            proposal_control_id=row["id"],
+            control_kind=row["kind"],
+            target_proposal_joint_ids=tuple(row["targets"]),
+            parent_proposal_control_id=row["parent"],
+            rest_P=row["rest_P"],
+            metadata={"animator_facing": True, "target_arity": len(row["targets"])},
+        )
+        for row in control_rows
+    )
+    constraints = tuple(
+        RigProgramConstraintProposalIR(
+            proposal_constraint_id=row["id"],
+            operator_id=row["operator"],
+            input_proposal_control_ids=tuple(row["inputs"]),
+            output_proposal_joint_ids=tuple(row["outputs"]),
+            proposal_chain_id=row["chain"],
+            parameters=dict(row["parameters"]),
+            metadata={
+                "solver_execution_performed": False,
+                "input_arity": len(row["inputs"]),
+                "output_arity": len(row["outputs"]),
+            },
+        )
+        for row in constraint_rows
+    )
+
     proposal = seal_rig_program_proposal_v1(RigProgramProposalIR(
         joints=tuple(joints),
         local_frames=tuple(frames),
-        controls=tuple(controls),
+        controls=controls,
         chains=tuple(chains),
-        constraints=tuple(constraints),
+        constraints=constraints,
         attachment_anchors=tuple(anchors),
         mesh_lineage_hash=str(mesh_lineage_hash),
         feature_evidence_binding_hash=str(feature_evidence_binding_hash),
@@ -243,6 +279,8 @@ def decode_axis_v6_events(
             "compiler_parent_reselection_allowed": False,
             "compiler_control_synthesis_allowed": False,
             "compiler_constraint_synthesis_allowed": False,
+            "variable_arity_control_targets": True,
+            "variable_arity_constraint_relations": True,
             "skin_codes_generated_in_same_causal_run": True,
         },
     ))

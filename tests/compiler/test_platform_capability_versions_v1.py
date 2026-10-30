@@ -18,7 +18,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     implementations = capability_implementations()
     assert set(implementations) == {
         "product.input", "product.shape", "product.mesh", "product.rig", "product.skin",
-        "product.mechanics", "product.graphics", "product.motion",
+        "product.mechanics", "product.graphics", "product.motion", "product.proof",
     }
     assert set(specs) == set(implementations)
     assert specs["product.input"]["parameters"]["responsibility_ids"] == ["input.model_observation_lowering"]
@@ -47,6 +47,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
         "motion.motion_solution", "motion.source_motion_admission",
         "motion.target_body_constraint_solution",
     ]
+    assert specs["product.proof"]["parameters"]["responsibility_ids"] == ["proof.product_pass_decision"]
     assert "rig.frame_observability_qualification" not in str(specs["product.rig"])
     assert specs["product.shape"]["parameters"]["required_models"] == [
         {"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"},
@@ -123,6 +124,17 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert motion["parameters"]["direct_joint_track_authority"] is False
     assert motion["parameters"]["constraint_execution_owner"] == "MECHANICS"
 
+    proof = specs["product.proof"]
+    assert proof["policy"]["product_pass_authority"] is True
+    assert proof["policy"]["dependencies"] == [
+        "product.mesh", "product.rig", "product.skin", "product.mechanics",
+        "product.graphics", "product.motion",
+    ]
+    assert proof["parameters"]["executor_contract"] == "RealSaS.ProductProofCompile.v1"
+    assert proof["parameters"]["output_artifact_type"] == "RealSaS.ProductProofBundleIR"
+    assert proof["parameters"]["legacy_puppet_projection_required"] is False
+    assert proof["parameters"]["product_revision_minting_owned_here"] is False
+
     assert product_model_requirements() == [
         {"family": "AXIS", "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0"},
         {"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"},
@@ -132,7 +144,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     for capability_id, implementation in implementations.items():
         assert set(implementation) == {"implementation_sha256"}, capability_id
         assert _is_sha256(implementation["implementation_sha256"]), capability_id
-    assert len({implementations[x]["implementation_sha256"] for x in implementations}) == 8
+    assert len({implementations[x]["implementation_sha256"] for x in implementations}) == 9
 
 
 def test_release_snapshot_v2_carries_implementation_and_model_requirements():

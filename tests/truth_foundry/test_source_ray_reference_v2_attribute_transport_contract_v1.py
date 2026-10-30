@@ -32,3 +32,11 @@ def test_full139_v4_routes_stage48_v2_without_replacing_v3_logic() -> None:
     assert 'text.endswith("tools/corpus/run_truth139_stage48_witness_subject_v1.py")' in text
     assert "run_truth139_stage48_witness_subject_v2.py" in text
     assert "base._ORIGINAL_RUN = _route_stage48_v2" in text
+
+
+def test_release_v5_routes_canary_and_full_run_through_v2_lane() -> None:
+    text = Path("tools/notebooks/truth139_v32_finalize_release_v5.py").read_text()
+    assert 'text.endswith("tools/corpus/run_truth139_stage48_witness_subject_v1.py")' in text
+    assert "run_truth139_stage48_witness_subject_v2.py" in text
+    assert "tools.corpus.run_truth139_v32_finalize_remaining_full139_v4" in text
+    assert '"release_revision"] = 5' in text

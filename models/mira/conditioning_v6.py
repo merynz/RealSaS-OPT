@@ -4,7 +4,7 @@ from __future__ import annotations
 
 No learned geometry encoder lives here. The codec receives exact product geometry,
 local mechanical frames and DOF state; learned skin information is carried only by
-the AXIS-generated discrete skin tokens.
+the AXIS-generated discrete skin codes.
 """
 
 from dataclasses import dataclass
@@ -198,7 +198,7 @@ def carrier_skin_proposal_from_decoded_v6(
             "direct_simplex_readout": True,
             "source_skin_runtime_authority": False,
             "mesh_mutation_invalidates_prediction": True,
-            "decoded_from_axis_generated_discrete_skin_tokens": True,
+            "decoded_from_axis_generated_discrete_skin_codes": True,
         },
     )
 

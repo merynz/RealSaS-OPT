@@ -5,7 +5,7 @@ import hashlib
 import torch
 
 from compiler.realsas_compiler_core.rig_program_ir_v1 import qualify_rig_program_v1
-from compiler.realsas_compiler_core.skin_token_ir_v1 import validate_skin_token_proposal_v1
+from compiler.realsas_compiler_core.skin_code_ir_v1 import validate_skin_code_proposal_v1
 from models.axis.rig_program_decode_v6 import AXISV6CodecBinding, decode_axis_v6_events
 from models.axis.rig_program_model_v6 import (
     AXISRigProgramConfigV6,
@@ -96,12 +96,12 @@ def test_typed_event_decode_preserves_variable_arity_controls_constraints_and_sk
     assert rig.constraints[0].operator_id == "IK"
     assert rig.constraints[0].input_proposal_control_ids == ("P:C:0001", "P:C:0002")
     assert rig.constraints[0].output_proposal_joint_ids == ("P:J:0000",)
-    validate_skin_token_proposal_v1(
+    validate_skin_code_proposal_v1(
         skin,
         expected_proposal_joint_ids=(rig.joints[0].proposal_joint_id,),
         expected_rig_program_proposal_hash=rig.proposal_lineage_hash,
     )
-    assert skin.rows[0].token_ids == (7, 8)
+    assert skin.rows[0].code_ids == (7, 8)
 
 
 def test_runtime_packages_bind_axis_to_exact_mira_codec(tmp_path):
@@ -143,4 +143,4 @@ def test_runtime_packages_bind_axis_to_exact_mira_codec(tmp_path):
     loaded_axis, receipt = load_axis_runtime_model_v2(axis_path, device=torch.device("cpu"))
     assert loaded_axis.config.skin_vocab_size == mira_cfg.vocab_size
     assert receipt["skin_codec_binding"]["checkpoint_sha256"] == mira_sha
-    assert receipt["runtime_rules"]["compiler_token_search_allowed"] is False
+    assert receipt["runtime_rules"]["compiler_code_search_allowed"] is False

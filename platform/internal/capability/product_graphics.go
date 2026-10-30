@@ -31,7 +31,7 @@ func (ProductGraphicsProvider) Capabilities(context.Context) ([]Descriptor, erro
 			ProductSkinCapabilityID,
 			ProductMechanicsCapabilityID,
 		},
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeDeveloper, ModeProduct},
 		ProductPassAuthority: false,
 		Aliases:              []string{"Graphics", "Presentation"},
 		Metadata: map[string]any{

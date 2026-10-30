@@ -152,55 +152,65 @@ def _validate_id_set(values: tuple[str, ...], code: str) -> set[str]:
 
 
 def _validate_parent_forest(joints: tuple[RigProgramJointProposalIR, ...]) -> tuple[str, ...]:
-    ids = _validate_id_set(tuple(j.proposal_joint_id for j in joints), "RIG_PROGRAM_JOINT_ID_INVALID")
+    """Validate the causal deform forest in one linear pass.
+
+    AXIS V6 emits parent-before-child causal serialization. Requiring the declared
+    dense sequence to preserve that ordering makes cycles impossible by
+    construction and avoids an O(n^2) walk from every node back to a root.
+    """
+    ids = _validate_id_set(
+        tuple(j.proposal_joint_id for j in joints),
+        "RIG_PROGRAM_JOINT_ID_INVALID",
+    )
     if not ids:
         raise QualificationError("RIG_PROGRAM_JOINTS_EMPTY")
-    by_id = {j.proposal_joint_id: j for j in joints}
+
+    sequence_by_id: dict[str, int] = {}
     roots: list[str] = []
-    seen_seq: set[int] = set()
-    for joint in joints:
+    for expected_index, joint in enumerate(joints):
         _finite3(joint.P, "RIG_PROGRAM_JOINT_POSITION_INVALID")
-        if joint.sequence_index < 0 or joint.sequence_index in seen_seq:
-            raise QualificationError("RIG_PROGRAM_JOINT_SEQUENCE_INVALID")
-        seen_seq.add(joint.sequence_index)
+        if int(joint.sequence_index) != expected_index:
+            raise QualificationError("RIG_PROGRAM_JOINT_SEQUENCE_NOT_DENSE_CAUSAL")
+        sequence_by_id[joint.proposal_joint_id] = expected_index
         parent = joint.parent_proposal_joint_id
         if parent is None:
             roots.append(joint.proposal_joint_id)
-        elif parent not in ids or parent == joint.proposal_joint_id:
+            continue
+        if parent not in ids or parent == joint.proposal_joint_id:
             raise QualificationError("RIG_PROGRAM_JOINT_PARENT_INVALID")
+        parent_index = sequence_by_id.get(str(parent))
+        if parent_index is None or parent_index >= expected_index:
+            raise QualificationError("RIG_PROGRAM_JOINT_PARENT_NOT_CAUSAL")
+
     if not roots:
         raise QualificationError("RIG_PROGRAM_DEFORM_ROOT_REQUIRED")
-    for jid in ids:
-        walk: set[str] = set()
-        cur = jid
-        while by_id[cur].parent_proposal_joint_id is not None:
-            if cur in walk:
-                raise QualificationError("RIG_PROGRAM_JOINT_CYCLE")
-            walk.add(cur)
-            cur = str(by_id[cur].parent_proposal_joint_id)
     return tuple(sorted(roots))
 
 
-def _validate_control_graph(controls: tuple[RigProgramControlProposalIR, ...], joint_ids: set[str]) -> set[str]:
-    control_ids = _validate_id_set(tuple(c.proposal_control_id for c in controls), "RIG_PROGRAM_CONTROL_ID_INVALID")
-    by_id = {c.proposal_control_id: c for c in controls}
+def _validate_control_graph(
+    controls: tuple[RigProgramControlProposalIR, ...],
+    joint_ids: set[str],
+) -> set[str]:
+    """Validate causal control hierarchy in O(controls + target references)."""
+    control_ids = _validate_id_set(
+        tuple(c.proposal_control_id for c in controls),
+        "RIG_PROGRAM_CONTROL_ID_INVALID",
+    )
+    emitted: set[str] = set()
     for control in controls:
+        cid = str(control.proposal_control_id)
         if not str(control.control_kind).strip():
             raise QualificationError("RIG_PROGRAM_CONTROL_KIND_REQUIRED")
         _finite3(control.rest_P, "RIG_PROGRAM_CONTROL_REST_POSITION_INVALID")
         if any(j not in joint_ids for j in control.target_proposal_joint_ids):
             raise QualificationError("RIG_PROGRAM_CONTROL_TARGET_JOINT_UNKNOWN")
         parent = control.parent_proposal_control_id
-        if parent is not None and (parent not in control_ids or parent == control.proposal_control_id):
-            raise QualificationError("RIG_PROGRAM_CONTROL_PARENT_INVALID")
-    for cid in control_ids:
-        walk: set[str] = set()
-        cur = cid
-        while by_id[cur].parent_proposal_control_id is not None:
-            if cur in walk:
-                raise QualificationError("RIG_PROGRAM_CONTROL_CYCLE")
-            walk.add(cur)
-            cur = str(by_id[cur].parent_proposal_control_id)
+        if parent is not None:
+            if parent not in control_ids or parent == cid:
+                raise QualificationError("RIG_PROGRAM_CONTROL_PARENT_INVALID")
+            if str(parent) not in emitted:
+                raise QualificationError("RIG_PROGRAM_CONTROL_PARENT_NOT_CAUSAL")
+        emitted.add(cid)
     return control_ids
 
 
@@ -209,8 +219,9 @@ def qualify_rig_program_v1(proposal: RigProgramProposalIR) -> QualifiedRigProgra
 
     This court is intentionally permissive about controller/constraint vocabulary:
     product execution support is a downstream capability question. Here we reject
-    malformed references, cycles, degenerate frames and non-contiguous declared
-    kinematic chains only.
+    malformed references, non-causal hierarchy, degenerate frames and
+    non-contiguous declared kinematic chains only. Validation is linear in the
+    declared rig-program size plus explicit relation references.
     """
     if proposal.schema_version != "RealSaS.RigProgramProposalIR.v1":
         raise QualificationError("RIG_PROGRAM_SCHEMA_DRIFT")
@@ -224,13 +235,22 @@ def qualify_rig_program_v1(proposal: RigProgramProposalIR) -> QualifiedRigProgra
 
     roots = _validate_parent_forest(proposal.joints)
     joint_ids = {j.proposal_joint_id for j in proposal.joints}
-    parent_by = {j.proposal_joint_id: j.parent_proposal_joint_id for j in proposal.joints}
+    parent_by = {
+        j.proposal_joint_id: j.parent_proposal_joint_id
+        for j in proposal.joints
+    }
 
-    frame_ids = _validate_id_set(tuple(f.proposal_joint_id for f in proposal.local_frames), "RIG_PROGRAM_FRAME_JOINT_DUPLICATE")
+    frame_ids = _validate_id_set(
+        tuple(f.proposal_joint_id for f in proposal.local_frames),
+        "RIG_PROGRAM_FRAME_JOINT_DUPLICATE",
+    )
     if frame_ids != joint_ids:
         raise QualificationError("RIG_PROGRAM_FRAME_COVERAGE_DRIFT")
     for frame in proposal.local_frames:
-        rows = tuple(_finite3(row, "RIG_PROGRAM_FRAME_NONFINITE") for row in frame.basis)
+        rows = tuple(
+            _finite3(row, "RIG_PROGRAM_FRAME_NONFINITE")
+            for row in frame.basis
+        )
         if len(rows) != 3:
             raise QualificationError("RIG_PROGRAM_FRAME_SHAPE_INVALID")
         a, b, c = rows
@@ -241,33 +261,60 @@ def qualify_rig_program_v1(proposal: RigProgramProposalIR) -> QualifiedRigProgra
         )
         if not math.isfinite(det) or abs(det) <= 1e-8:
             raise QualificationError("RIG_PROGRAM_FRAME_DEGENERATE")
-        if len(frame.dof_labels) != len(set(frame.dof_labels)) or any(not str(x).strip() for x in frame.dof_labels):
+        if (
+            len(frame.dof_labels) != len(set(frame.dof_labels))
+            or any(not str(x).strip() for x in frame.dof_labels)
+        ):
             raise QualificationError("RIG_PROGRAM_DOF_LABEL_INVALID")
 
     control_ids = _validate_control_graph(proposal.controls, joint_ids)
 
-    chain_ids = _validate_id_set(tuple(c.proposal_chain_id for c in proposal.chains), "RIG_PROGRAM_CHAIN_ID_INVALID")
+    chain_ids = _validate_id_set(
+        tuple(c.proposal_chain_id for c in proposal.chains),
+        "RIG_PROGRAM_CHAIN_ID_INVALID",
+    )
     for chain in proposal.chains:
-        if not chain.proposal_joint_ids or len(chain.proposal_joint_ids) != len(set(chain.proposal_joint_ids)):
+        if (
+            not chain.proposal_joint_ids
+            or len(chain.proposal_joint_ids) != len(set(chain.proposal_joint_ids))
+        ):
             raise QualificationError("RIG_PROGRAM_CHAIN_JOINT_SEQUENCE_INVALID")
         if any(j not in joint_ids for j in chain.proposal_joint_ids):
             raise QualificationError("RIG_PROGRAM_CHAIN_JOINT_UNKNOWN")
-        for parent, child in zip(chain.proposal_joint_ids, chain.proposal_joint_ids[1:]):
+        for parent, child in zip(
+            chain.proposal_joint_ids,
+            chain.proposal_joint_ids[1:],
+        ):
             if parent_by.get(child) != parent:
                 raise QualificationError("RIG_PROGRAM_CHAIN_NOT_PARENT_CONTIGUOUS")
 
-    _validate_id_set(tuple(c.proposal_constraint_id for c in proposal.constraints), "RIG_PROGRAM_CONSTRAINT_ID_INVALID")
+    _validate_id_set(
+        tuple(c.proposal_constraint_id for c in proposal.constraints),
+        "RIG_PROGRAM_CONSTRAINT_ID_INVALID",
+    )
     for constraint in proposal.constraints:
         if not str(constraint.operator_id).strip():
             raise QualificationError("RIG_PROGRAM_CONSTRAINT_OPERATOR_REQUIRED")
-        if any(cid not in control_ids for cid in constraint.input_proposal_control_ids):
+        if any(
+            cid not in control_ids
+            for cid in constraint.input_proposal_control_ids
+        ):
             raise QualificationError("RIG_PROGRAM_CONSTRAINT_CONTROL_UNKNOWN")
-        if any(jid not in joint_ids for jid in constraint.output_proposal_joint_ids):
+        if any(
+            jid not in joint_ids
+            for jid in constraint.output_proposal_joint_ids
+        ):
             raise QualificationError("RIG_PROGRAM_CONSTRAINT_JOINT_UNKNOWN")
-        if constraint.proposal_chain_id is not None and constraint.proposal_chain_id not in chain_ids:
+        if (
+            constraint.proposal_chain_id is not None
+            and constraint.proposal_chain_id not in chain_ids
+        ):
             raise QualificationError("RIG_PROGRAM_CONSTRAINT_CHAIN_UNKNOWN")
 
-    _validate_id_set(tuple(a.proposal_anchor_id for a in proposal.attachment_anchors), "RIG_PROGRAM_ANCHOR_ID_INVALID")
+    _validate_id_set(
+        tuple(a.proposal_anchor_id for a in proposal.attachment_anchors),
+        "RIG_PROGRAM_ANCHOR_ID_INVALID",
+    )
     for anchor in proposal.attachment_anchors:
         _finite3(anchor.local_P, "RIG_PROGRAM_ANCHOR_POSITION_INVALID")
         joint_parent = anchor.parent_proposal_joint_id is not None
@@ -292,6 +339,7 @@ def qualify_rig_program_v1(proposal: RigProgramProposalIR) -> QualifiedRigProgra
         "constraint_synthesis_performed": False,
         "frame_repair_performed": False,
         "constraint_solver_executed": False,
+        "qualification_complexity_contract": "LINEAR_IN_DECLARED_RIG_PROGRAM_SIZE",
         "compiler_role": "VALIDATE_AND_MATERIALIZE_ONLY",
     }
     value = QualifiedRigProgramIR(
@@ -304,12 +352,18 @@ def qualify_rig_program_v1(proposal: RigProgramProposalIR) -> QualifiedRigProgra
             "mechanics_execution_required_downstream": True,
         },
     )
-    return replace(value, qualification_hash=qualified_rig_program_hash_v1(value))
+    return replace(
+        value,
+        qualification_hash=qualified_rig_program_hash_v1(value),
+    )
 
 
 def seal_rig_program_proposal_v1(value: RigProgramProposalIR) -> RigProgramProposalIR:
     """Convenience constructor step for model adapters before Compiler qualification."""
-    return replace(value, proposal_lineage_hash=rig_program_proposal_lineage_hash_v1(value))
+    return replace(
+        value,
+        proposal_lineage_hash=rig_program_proposal_lineage_hash_v1(value),
+    )
 
 
 __all__ = [

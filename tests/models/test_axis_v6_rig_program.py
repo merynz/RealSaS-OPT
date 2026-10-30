@@ -26,7 +26,7 @@ def _teacher(cfg: AXISV6Config) -> AXISV6TeacherSequence:
         pointer_b=torch.full((b, s), -1, dtype=torch.long),
         aux_type_ids=torch.full((b, s), -1, dtype=torch.long),
         dof_masks=torch.zeros((b, s, len(DOF_LABELS)), dtype=torch.float32),
-        skin_token_ids=torch.full((b, s), -1, dtype=torch.long),
+        skin_code_ids=torch.full((b, s), -1, dtype=torch.long),
         attention_mask=torch.ones((b, s), dtype=torch.bool),
     )
 
@@ -41,7 +41,7 @@ def test_axis_v6_grammar_requires_typed_section_order():
         RigEventKind.CHAIN,
         RigEventKind.CONSTRAINT,
         RigEventKind.SKIN_SWITCH,
-        RigEventKind.SKIN_TOKEN,
+        RigEventKind.SKIN_CODE,
         RigEventKind.EOS,
     ):
         state = AXISRigProgramGrammarV6.advance(state, kind)
@@ -51,7 +51,7 @@ def test_axis_v6_grammar_requires_typed_section_order():
     assert state.control_count == 1
     assert state.chain_count == 1
     assert state.constraint_count == 1
-    assert state.skin_token_count == 1
+    assert state.skin_code_count == 1
 
 
 def test_axis_v6_grammar_forbids_skipping_from_joint_directly_to_constraint():
@@ -84,7 +84,7 @@ def test_axis_v6_model_predicts_all_typed_heads_from_shared_causal_state():
     assert out["pointer_a_logits"].shape == (1, s, cfg.max_pointer_entities)
     assert out["pointer_b_logits"].shape == (1, s, cfg.max_pointer_entities)
     assert out["dof_logits"].shape == (1, s, len(DOF_LABELS))
-    assert out["skin_token_logits"].shape == (1, s, cfg.skin_vocab_size)
+    assert out["skin_code_logits"].shape == (1, s, cfg.skin_vocab_size)
 
 
 def test_axis_v6_generation_mask_is_model_side_not_compiler_repair():

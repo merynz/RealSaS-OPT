@@ -63,6 +63,7 @@ func TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure(t *testing
 		ProductMechanicsCapabilityID,
 		ProductGraphicsCapabilityID,
 		ProductMotionCapabilityID,
+		ProductProofCapabilityID,
 	} {
 		if _, ok := registry.Get(id); !ok {
 			t.Fatalf("release registry missing %s", id)
@@ -138,11 +139,38 @@ func TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure(t *testing
 	if graphicsResolved[len(graphicsResolved)-1].ID != ProductGraphicsCapabilityID {
 		t.Fatalf("graphics must resolve after its dependencies: %+v", graphicsResolved)
 	}
+
+	proofResolved, err := registry.Resolve(ProductProofCapabilityID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	proofSeen := map[string]bool{}
+	for _, descriptor := range proofResolved {
+		proofSeen[descriptor.ID] = true
+	}
+	for _, id := range []string{
+		ProductInputCapabilityID,
+		ProductShapeCapabilityID,
+		ProductMeshCapabilityID,
+		ProductRigCapabilityID,
+		ProductSkinCapabilityID,
+		ProductMechanicsCapabilityID,
+		ProductGraphicsCapabilityID,
+		ProductMotionCapabilityID,
+		ProductProofCapabilityID,
+	} {
+		if !proofSeen[id] {
+			t.Fatalf("proof closure missing %s: %+v", id, proofResolved)
+		}
+	}
+	if proofResolved[len(proofResolved)-1].ID != ProductProofCapabilityID {
+		t.Fatalf("Proof must resolve after the full product state: %+v", proofResolved)
+	}
 }
 
 func TestProductProvidersAreSingleSourceOfControlReadyProductGraph(t *testing.T) {
 	providers := ProductProviders()
-	if len(providers) != 8 {
+	if len(providers) != 9 {
 		t.Fatalf("product provider count=%d", len(providers))
 	}
 	registry := productProvidersTestRegistry(t)
@@ -234,6 +262,14 @@ func TestProductProvidersAreSingleSourceOfControlReadyProductGraph(t *testing.T)
 		t.Fatalf("motion Compiler overreach policy drift: %+v", motion.Metadata)
 	}
 
+	proof, ok := registry.Get(ProductProofCapabilityID)
+	if !ok {
+		t.Fatal("product.proof missing")
+	}
+	if !proof.ProductPassAuthority || proof.Metadata["product_revision_minting_owned_here"] != false {
+		t.Fatalf("proof terminal authority drift: %+v", proof)
+	}
+
 	mesh, ok := registry.Get(ProductMeshCapabilityID)
 	if !ok {
 		t.Fatal("product.mesh missing")
@@ -258,6 +294,7 @@ func TestModuleVersionPolicyAndParametersAreMintedFromDescriptor(t *testing.T) {
 		ProductMechanicsCapabilityID,
 		ProductGraphicsCapabilityID,
 		ProductMotionCapabilityID,
+		ProductProofCapabilityID,
 	} {
 		descriptor, ok := registry.Get(capabilityID)
 		if !ok {

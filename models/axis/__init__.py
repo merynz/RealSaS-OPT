@@ -5,6 +5,20 @@ from .axis_bfs_discrete_xyz_v541 import (
     AXIS_COORD_BINS,
     AXIS_COORD_ANCHOR_SIGMA,
 )
+from .rig_program_causal_v6 import (
+    AXISRigProgramCausalV6,
+    AXISRigProgramGrammarV6,
+    AXISV6Config,
+    AXISV6TeacherSequence,
+    AXIS_V6_ARCHITECTURE_ID,
+    AXIS_V6_COORD_BINS,
+    CONSTRAINT_OPERATORS,
+    CONTROL_KINDS,
+    DOF_LABELS,
+    RigEventKind,
+    RigProgramGrammarState,
+    RigProgramPhase,
+)
 
 __all__ = [
     "AXISBFSDiscreteXYZV541",
@@ -12,4 +26,16 @@ __all__ = [
     "AXIS_V541_ARCHITECTURE_ID",
     "AXIS_COORD_BINS",
     "AXIS_COORD_ANCHOR_SIGMA",
+    "AXISRigProgramCausalV6",
+    "AXISRigProgramGrammarV6",
+    "AXISV6Config",
+    "AXISV6TeacherSequence",
+    "AXIS_V6_ARCHITECTURE_ID",
+    "AXIS_V6_COORD_BINS",
+    "CONSTRAINT_OPERATORS",
+    "CONTROL_KINDS",
+    "DOF_LABELS",
+    "RigEventKind",
+    "RigProgramGrammarState",
+    "RigProgramPhase",
 ]

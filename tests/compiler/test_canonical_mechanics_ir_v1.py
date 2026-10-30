@@ -17,8 +17,6 @@ from compiler.realsas_compiler_core.canonical_rig_ir_v2 import (
     CanonicalRigControlIRV2,
     CanonicalRigIRV2,
     canonical_rig_lineage_hash_v2,
-    deform_structure_hash_v2,
-    control_program_hash_v2,
 )
 from compiler.realsas_compiler_core.canonical_skin_ir_v2 import (
     CanonicalSkinIRV2,
@@ -35,9 +33,27 @@ def _support(i: int):
 def _mesh():
     value = CanonicalMeshIR(
         vertices=(
-            CanonicalMeshVertexIR("MV:0", _support(0), (0.0, 0.0, 0.0), "body", "CV:0"),
-            CanonicalMeshVertexIR("MV:1", _support(1), (0.0, 1.0, 0.0), "body", "CV:1"),
-            CanonicalMeshVertexIR("MV:2", _support(2), (1.0, 0.0, 0.0), "body", "CV:2"),
+            CanonicalMeshVertexIR(
+                canonical_mesh_vertex_id="MV:0",
+                support_binding=_support(0),
+                component_id="body",
+                P=(0.0, 0.0, 0.0),
+                source_candidate_vertex_id="CV:0",
+            ),
+            CanonicalMeshVertexIR(
+                canonical_mesh_vertex_id="MV:1",
+                support_binding=_support(1),
+                component_id="body",
+                P=(0.0, 1.0, 0.0),
+                source_candidate_vertex_id="CV:1",
+            ),
+            CanonicalMeshVertexIR(
+                canonical_mesh_vertex_id="MV:2",
+                support_binding=_support(2),
+                component_id="body",
+                P=(1.0, 0.0, 0.0),
+                source_candidate_vertex_id="CV:2",
+            ),
         ),
         faces=(("MV:0", "MV:1", "MV:2"),),
         edges=(("MV:0", "MV:1"), ("MV:0", "MV:2"), ("MV:1", "MV:2")),
@@ -62,13 +78,18 @@ def _rig(mesh):
         joints=(CanonicalDeformJointIRV2("J0", (0.0, 0.0, 0.0), None, "PJ0"),),
         local_frames=(CanonicalJointFrameIRV2("J0", I, ("RX", "RY", "RZ")),),
         controls=(CanonicalRigControlIRV2("C0", "ROOT", ("J0",), None, (0.0, 0.0, 0.0), "PC0"),),
-        chains=(), constraints=(), attachment_anchors=(), deform_root_joint_ids=("J0",),
+        chains=(),
+        constraints=(),
+        attachment_anchors=(),
+        deform_root_joint_ids=("J0",),
         mesh_lineage_hash=mesh.mesh_lineage_hash,
         feature_evidence_binding_hash="1" * 64,
         proposal_evidence_hash="a" * 64,
         rig_program_qualification_hash="b" * 64,
-        deform_structure_hash="",
-        control_program_hash="",
+        # This fixture starts at an already-canonical Rig boundary; Rig hash
+        # derivation itself is covered by the CanonicalRigIR.v2 courts.
+        deform_structure_hash="c" * 64,
+        control_program_hash="d" * 64,
         rig_lineage_hash="",
         metadata={
             "authority": "COMPILER_CANONICAL_RIG",
@@ -76,11 +97,6 @@ def _rig(mesh):
             "skin_authority_claimed": False,
             "motion_authority_claimed": False,
         },
-    )
-    value = replace(
-        value,
-        deform_structure_hash=deform_structure_hash_v2(value),
-        control_program_hash=control_program_hash_v2(value),
     )
     return replace(value, rig_lineage_hash=canonical_rig_lineage_hash_v2(value))
 

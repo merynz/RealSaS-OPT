@@ -1,16 +1,25 @@
 #!/usr/bin/env python3
-"""Build AXIS V6 control-ready RigProgram teacher truth from Truth139 source mechanics.
+"""Build AXIS V6 RigProgram teacher truth from Truth139 measured mechanics.
 
-This is a teacher projection, never product Rig authority. Source skeleton/rest frames,
-source skin support, and isolated kinematic responses are measured truth. Animator
-controls, generic chains, and executable IK availability are explicitly derived
-canonical teacher structure. No source bone name, pack label, humanoid taxonomy, or
-Compiler repair becomes a student target.
+Measured truth:
+- source rest joint graph / frames,
+- source skin support,
+- isolated native local-rotation deformation responses,
+- source-world -> canonical transform.
+
+Derived teacher truth:
+- anonymous causal deform serialization,
+- canonical rest frames and behaviorally active rotational DOFs,
+- GLOBAL/ROOT/FK controls,
+- maximal non-branching chains,
+- rest-neutral generic IK effector/pole availability on eligible terminal chains.
+
+The derived control program is NOT claimed to be source-authored. No source bone
+name, pack label, humanoid taxonomy, or Compiler repair enters the student target.
 """
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict
 import hashlib
 import json
 import math
@@ -19,6 +28,9 @@ from typing import Any
 
 import numpy as np
 
+from compiler.realsas_compiler_core.rig_constraint_schema_v1 import (
+    validate_rig_constraint_operator_v1,
+)
 from compiler.realsas_compiler_core.rig_program_ir_v1 import (
     RigProgramChainProposalIR,
     RigProgramConstraintProposalIR,
@@ -66,44 +78,43 @@ def _load(scene_path: Path, geometry_path: Path) -> tuple[dict, dict[str, np.nda
     refs = list(scene.get("geometry_payloads") or ())
     if len(refs) != 1 or str(refs[0].get("sha256") or "") != _sha256(geometry_path):
         raise ValueError("TRUTH139_AXIS_V2_GEOMETRY_BINDING")
+    required = {
+        "rest_vertices_source_world",
+        "source_weight_offsets",
+        "source_weight_bone_indices_privileged",
+        "source_weight_values",
+        "source_weight_coverage",
+        "pose_identity_baseline",
+        "isolated_position",
+    }
     with np.load(geometry_path, allow_pickle=False) as z:
-        required = {
-            "rest_vertices_source_world",
-            "source_weight_offsets",
-            "source_weight_bone_indices_privileged",
-            "source_weight_values",
-            "source_weight_coverage",
-            "pose_identity_baseline",
-            "isolated_position",
-        }
         if not required.issubset(set(z.files)):
             raise ValueError("TRUTH139_AXIS_V2_REQUIRED_ARRAYS_MISSING")
         arrays = {name: np.asarray(z[name]) for name in required}
     return scene, arrays
 
 
-def _frames(scene: dict) -> tuple[list[dict], np.ndarray, np.ndarray, list[np.ndarray]]:
+def _source_graph(scene: dict) -> tuple[list[dict], np.ndarray, np.ndarray, list[np.ndarray]]:
     rows = list((scene.get("calibration") or {}).get("native_control_frames_privileged") or ())
     if not rows:
         raise ValueError("TRUTH139_AXIS_V2_EMPTY_NATIVE_FRAMES")
-    key_to_index: dict[tuple[str, str], int] = {}
+    by_key: dict[tuple[str, str], int] = {}
     world: list[np.ndarray] = []
     for index, row in enumerate(rows):
         key = (str(row.get("armature") or ""), str(row.get("name") or ""))
-        if not key[0] or not key[1] or key in key_to_index:
+        if not key[0] or not key[1] or key in by_key:
             raise ValueError("TRUTH139_AXIS_V2_NATIVE_FRAME_IDENTITY")
-        key_to_index[key] = index
+        by_key[key] = index
         world.append(_matrix(row.get("rest_matrix_world"), "TRUTH139_AXIS_V2_REST_MATRIX"))
     parent = np.full(len(rows), -1, dtype=np.int64)
     position = np.zeros((len(rows), 3), dtype=np.float64)
     for index, row in enumerate(rows):
-        key = (str(row["armature"]), str(row["name"]))
         parent_name = row.get("parent")
         if parent_name not in (None, ""):
-            parent_index = key_to_index.get((key[0], str(parent_name)))
-            if parent_index is None:
+            p = by_key.get((str(row["armature"]), str(parent_name)))
+            if p is None:
                 raise ValueError("TRUTH139_AXIS_V2_NATIVE_PARENT_MISSING")
-            parent[index] = int(parent_index)
+            parent[index] = p
         position[index] = world[index][:3, 3]
     for start in range(len(parent)):
         seen: set[int] = set()
@@ -143,47 +154,43 @@ def _skin_mass(arrays: dict[str, np.ndarray], bone_count: int) -> np.ndarray:
     return mass
 
 
-def _select_supported_with_bridges(parent: np.ndarray, mass: np.ndarray, epsilon: float) -> np.ndarray:
+def _select_deform(parent: np.ndarray, mass: np.ndarray, epsilon: float) -> tuple[np.ndarray, np.ndarray]:
     if not math.isfinite(epsilon) or epsilon < 0.0:
         raise ValueError("TRUTH139_AXIS_V2_SUPPORT_EPSILON_INVALID")
     seeds = set(np.flatnonzero(mass > epsilon).tolist())
     if not seeds:
         raise ValueError("TRUTH139_AXIS_V2_NO_SKIN_SUPPORTED_DEFORM_JOINT")
     selected = set(seeds)
-    for child in sorted(seeds):
-        chain: list[int] = []
-        node = int(parent[child])
+    for seed in sorted(seeds):
+        bridge: list[int] = []
+        node = int(parent[seed])
         while node >= 0:
             if node in seeds:
-                selected.update(chain)
+                selected.update(bridge)
                 break
-            chain.append(node)
+            bridge.append(node)
             node = int(parent[node])
-    return np.asarray(sorted(selected), dtype=np.int64)
-
-
-def _project_parent(parent: np.ndarray, selected: np.ndarray) -> np.ndarray:
-    local = {int(source): index for index, source in enumerate(selected.tolist())}
-    projected = np.full(len(selected), -1, dtype=np.int64)
-    for index, source in enumerate(selected.tolist()):
+    selected_array = np.asarray(sorted(selected), dtype=np.int64)
+    local = {int(source): index for index, source in enumerate(selected_array.tolist())}
+    projected = np.full(len(selected_array), -1, dtype=np.int64)
+    for index, source in enumerate(selected_array.tolist()):
         node = int(parent[source])
         while node >= 0 and node not in local:
             node = int(parent[node])
-        projected[index] = -1 if node < 0 else int(local[node])
-    return projected
+        projected[index] = -1 if node < 0 else local[node]
+    return selected_array, projected
 
 
 def _content_order(positions: np.ndarray, parents: np.ndarray) -> np.ndarray:
-    count = len(positions)
-    children = [[] for _ in range(count)]
+    children = [[] for _ in range(len(parents))]
     roots: list[int] = []
     for index, parent in enumerate(parents.tolist()):
         if parent < 0:
             roots.append(index)
         else:
             children[int(parent)].append(index)
-    state = np.zeros(count, dtype=np.int8)
-    cache: list[Any] = [None] * count
+    state = np.zeros(len(parents), dtype=np.int8)
+    cache: list[Any] = [None] * len(parents)
 
     def signature(node: int):
         if state[node] == 1:
@@ -201,34 +208,34 @@ def _content_order(positions: np.ndarray, parents: np.ndarray) -> np.ndarray:
         signature(root)
     if np.any(state != 2):
         raise ValueError("TRUTH139_AXIS_V2_PROJECTED_NODE_UNREACHABLE")
-    order: list[int] = []
+    out: list[int] = []
 
     def emit(node: int) -> None:
-        order.append(node)
+        out.append(node)
         groups: dict[tuple, list[int]] = {}
         for child in children[node]:
             groups.setdefault(cache[child], []).append(child)
-        for sig in sorted(groups):
-            for child in groups[sig]:
+        for key in sorted(groups):
+            for child in groups[key]:
                 emit(child)
 
     groups: dict[tuple, list[int]] = {}
     for root in roots:
         groups.setdefault(cache[root], []).append(root)
-    for sig in sorted(groups):
-        for root in groups[sig]:
+    for key in sorted(groups):
+        for root in groups[key]:
             emit(root)
-    result = np.asarray(order, dtype=np.int64)
-    if set(result.tolist()) != set(range(count)):
+    result = np.asarray(out, dtype=np.int64)
+    if set(result.tolist()) != set(range(len(parents))):
         raise ValueError("TRUTH139_AXIS_V2_CONTENT_ORDER_NOT_PERMUTATION")
     return result
 
 
 def _polar_rotation(linear: np.ndarray) -> np.ndarray:
-    matrix = np.asarray(linear, dtype=np.float64)
-    if matrix.shape != (3, 3) or not np.isfinite(matrix).all():
+    value = np.asarray(linear, dtype=np.float64)
+    if value.shape != (3, 3) or not np.isfinite(value).all():
         raise ValueError("TRUTH139_AXIS_V2_FRAME_LINEAR_INVALID")
-    u, _, vt = np.linalg.svd(matrix)
+    u, _, vt = np.linalg.svd(value)
     rotation = u @ vt
     if float(np.linalg.det(rotation)) < 0.0:
         u[:, -1] *= -1.0
@@ -240,7 +247,7 @@ def _polar_rotation(linear: np.ndarray) -> np.ndarray:
     return rotation
 
 
-def _control_response_by_source_bone(
+def _behavioral_dof(
     scene: dict,
     arrays: dict[str, np.ndarray],
     frame_rows: list[dict],
@@ -259,33 +266,29 @@ def _control_response_by_source_bone(
         (str(row["armature"]), str(row["name"])): index
         for index, row in enumerate(frame_rows)
     }
-    control_to_bone_axis: dict[int, tuple[int, int]] = {}
+    control_binding: dict[int, tuple[int, int]] = {}
     for control_index, ref in enumerate(refs):
         lookup = dict(ref.get("source_lookup_privileged_only") or {})
-        key = (str(lookup.get("armature") or ""), str(lookup.get("bone") or ""))
-        source_index = frame_by_key.get(key)
+        source_index = frame_by_key.get((str(lookup.get("armature") or ""), str(lookup.get("bone") or "")))
         axis = int(lookup.get("axis", -1))
         if source_index is None or axis not in (0, 1, 2):
             raise ValueError("TRUTH139_AXIS_V2_CONTROL_REF_BINDING")
-        control_to_bone_axis[control_index] = (source_index, axis)
-    response: dict[int, dict[int, float]] = {
-        index: {0: 0.0, 1: 0.0, 2: 0.0} for index in range(len(frame_rows))
-    }
+        control_binding[control_index] = (source_index, axis)
+    response = {index: {0: 0.0, 1: 0.0, 2: 0.0} for index in range(len(frame_rows))}
     for row_index, action in enumerate(actions):
-        control_index = int(action.get("control_index_privileged", -1))
-        bound = control_to_bone_axis.get(control_index)
-        if bound is None:
+        binding = control_binding.get(int(action.get("control_index_privileged", -1)))
+        if binding is None:
             raise ValueError("TRUTH139_AXIS_V2_ACTION_CONTROL_BINDING")
-        source_index, axis = bound
-        delta = isolated[row_index] - baseline
-        magnitude = float(np.max(np.linalg.norm(delta, axis=1))) / diagonal
+        source_index, axis = binding
+        displacement = isolated[row_index] - baseline
+        magnitude = float(np.max(np.linalg.norm(displacement, axis=1))) / diagonal
         response[source_index][axis] = max(response[source_index][axis], magnitude)
     return response
 
 
 def _maximal_chains(parents: np.ndarray) -> list[tuple[int, ...]]:
-    count = len(parents)
-    children: list[list[int]] = [[] for _ in range(count)]
+    """Return maximal parent-contiguous segments between roots/branches/leaves."""
+    children: list[list[int]] = [[] for _ in range(len(parents))]
     roots: list[int] = []
     for index, parent in enumerate(parents.tolist()):
         if parent < 0:
@@ -293,7 +296,9 @@ def _maximal_chains(parents: np.ndarray) -> list[tuple[int, ...]]:
         else:
             children[int(parent)].append(index)
     chains: list[tuple[int, ...]] = []
-    starts = [index for index in range(count) if parents[index] < 0 or len(children[int(parents[index])]) != 1]
+    # A segment begins at every root or branching joint. This is intentionally
+    # based on the node's own out-degree, not its parent's out-degree.
+    starts = sorted(set(roots + [i for i, row in enumerate(children) if len(row) > 1]))
     for start in starts:
         for child in sorted(children[start]):
             path = [start, child]
@@ -302,43 +307,37 @@ def _maximal_chains(parents: np.ndarray) -> list[tuple[int, ...]]:
                 node = children[node][0]
                 path.append(node)
             chains.append(tuple(path))
-    # Degenerate one-root linear trees have a root in starts and are covered above.
     return sorted(set(chains))
 
 
-def _stable_pole_position(points: np.ndarray, root_basis: np.ndarray) -> np.ndarray:
-    root = points[0]
-    end = points[-1]
+def _pole(points: np.ndarray, root_basis: np.ndarray) -> np.ndarray:
+    root, end = points[0], points[-1]
     axis = end - root
     axis_norm = float(np.linalg.norm(axis))
     if axis_norm <= 1e-10:
         raise ValueError("TRUTH139_AXIS_V2_IK_CHAIN_ENDPOINT_DEGENERATE")
     axis = axis / axis_norm
-    midpoint = (root + end) * 0.5
-    best = None
+    best: np.ndarray | None = None
     best_norm = 0.0
     for point in points[1:-1]:
-        rel = point - root
-        radial = rel - axis * float(np.dot(rel, axis))
+        radial = (point - root) - axis * float(np.dot(point - root, axis))
         norm = float(np.linalg.norm(radial))
         if norm > best_norm:
             best, best_norm = radial, norm
     if best is None or best_norm <= 1e-8:
-        for row in root_basis:
-            radial = row - axis * float(np.dot(row, axis))
+        for candidate in root_basis:
+            radial = candidate - axis * float(np.dot(candidate, axis))
             norm = float(np.linalg.norm(radial))
             if norm > best_norm:
                 best, best_norm = radial, norm
     if best is None or best_norm <= 1e-8:
-        candidates = np.eye(3)
-        candidate = min(candidates, key=lambda row: abs(float(np.dot(row, axis))))
+        candidate = min(np.eye(3), key=lambda row: abs(float(np.dot(row, axis))))
         best = candidate - axis * float(np.dot(candidate, axis))
         best_norm = float(np.linalg.norm(best))
     if best_norm <= 1e-10:
         raise ValueError("TRUTH139_AXIS_V2_IK_POLE_DIRECTION_DEGENERATE")
-    direction = best / best_norm
-    segment_length = float(sum(np.linalg.norm(points[i + 1] - points[i]) for i in range(len(points) - 1)))
-    return midpoint + direction * max(segment_length * 0.5, 1e-4)
+    total = float(sum(np.linalg.norm(points[i + 1] - points[i]) for i in range(len(points) - 1)))
+    return (root + end) * 0.5 + best / best_norm * max(0.5 * total, 1e-4)
 
 
 def build(
@@ -355,12 +354,11 @@ def build(
     if not math.isfinite(dof_response_threshold_normalized) or dof_response_threshold_normalized < 0.0:
         raise ValueError("TRUTH139_AXIS_V2_DOF_THRESHOLD_INVALID")
     scene, arrays = _load(scene_path, geometry_path)
-    frame_rows, parent_source, position_source, world_frames = _frames(scene)
+    frame_rows, parent_source, position_source, world_frames = _source_graph(scene)
     skin_mass = _skin_mass(arrays, len(frame_rows))
-    selected = _select_supported_with_bridges(parent_source, skin_mass, float(support_epsilon))
-    projected_parent = _project_parent(parent_source, selected)
+    selected, projected_parent = _select_deform(parent_source, skin_mass, support_epsilon)
     order = _content_order(position_source[selected], projected_parent)
-    selected_ordered = selected[order]
+    selected = selected[order]
     inverse = np.empty(len(order), dtype=np.int64)
     inverse[order] = np.arange(len(order), dtype=np.int64)
     parents = np.asarray([
@@ -374,44 +372,37 @@ def build(
         (scene.get("coordinate_contract") or {}).get("source_world_to_normalized"),
         "TRUTH139_AXIS_V2_SOURCE_TO_CANONICAL",
     )
-    source_positions = position_source[selected_ordered]
+    source_positions = position_source[selected]
     homogeneous = np.concatenate((source_positions, np.ones((len(source_positions), 1))), axis=1)
     canonical_h = (source_to_canonical @ homogeneous.T).T
     if not np.allclose(canonical_h[:, 3], 1.0, atol=1e-8, rtol=0.0):
         raise ValueError("TRUTH139_AXIS_V2_CANONICAL_HOMOGENEOUS")
-    canonical_positions = canonical_h[:, :3]
+    position = canonical_h[:, :3]
+    response = _behavioral_dof(scene, arrays, frame_rows)
 
-    responses = _control_response_by_source_bone(scene, arrays, frame_rows)
-    joint_ids = tuple(f"T:J:{index:04d}" for index in range(len(selected_ordered)))
-    source_to_teacher = {int(source): index for index, source in enumerate(selected_ordered.tolist())}
+    joint_ids = tuple(f"T:J:{index:04d}" for index in range(len(selected)))
     joints: list[RigProgramJointProposalIR] = []
-    local_frames: list[RigProgramLocalFrameProposalIR] = []
+    frames: list[RigProgramLocalFrameProposalIR] = []
     basis_by_joint: dict[int, np.ndarray] = {}
     dof_evidence: list[dict] = []
-    for index, source_index in enumerate(selected_ordered.tolist()):
+    for index, source_index in enumerate(selected.tolist()):
         parent = int(parents[index])
-        jid = joint_ids[index]
-        canonical_linear = source_to_canonical[:3, :3] @ world_frames[source_index][:3, :3]
-        basis = _polar_rotation(canonical_linear)
+        basis = _polar_rotation(source_to_canonical[:3, :3] @ world_frames[source_index][:3, :3])
         basis_by_joint[index] = basis
-        response = responses[source_index]
+        values = response[source_index]
         labels = tuple(
             label for axis, label in enumerate(("RX", "RY", "RZ"))
-            if float(response[axis]) >= dof_response_threshold_normalized
+            if float(values[axis]) >= dof_response_threshold_normalized
         )
         joints.append(RigProgramJointProposalIR(
-            proposal_joint_id=jid,
-            P=tuple(map(float, canonical_positions[index])),
+            proposal_joint_id=joint_ids[index],
+            P=tuple(map(float, position[index])),
             parent_proposal_joint_id=None if parent < 0 else joint_ids[parent],
-            support_evidence_ids=(),
             sequence_index=index,
-            metadata={
-                "truth_authority": "SOURCE_MEASURED_DEFORM_GRAPH_AND_REST_LOCUS",
-                "source_name_exposed": False,
-            },
+            metadata={"truth_authority": "SOURCE_MEASURED_DEFORM_GRAPH_AND_REST_LOCUS"},
         ))
-        local_frames.append(RigProgramLocalFrameProposalIR(
-            proposal_joint_id=jid,
+        frames.append(RigProgramLocalFrameProposalIR(
+            proposal_joint_id=joint_ids[index],
             basis=tuple(tuple(float(v) for v in row) for row in basis),
             dof_labels=labels,
             metadata={
@@ -422,20 +413,16 @@ def build(
         ))
         dof_evidence.append({
             "joint_index": index,
-            "response_over_source_diagonal": [float(response[axis]) for axis in range(3)],
+            "response_over_source_diagonal": [float(values[axis]) for axis in range(3)],
             "active_labels": list(labels),
         })
 
     roots = [index for index, parent in enumerate(parents.tolist()) if parent < 0]
-    global_rest = np.mean(canonical_positions[roots], axis=0) if roots else np.zeros(3, dtype=np.float64)
+    global_rest = np.mean(position[roots], axis=0)
     controls: list[RigProgramControlProposalIR] = [
         RigProgramControlProposalIR(
-            proposal_control_id="T:C:GLOBAL",
-            control_kind="GLOBAL",
-            target_proposal_joint_ids=(),
-            parent_proposal_control_id=None,
-            rest_P=tuple(map(float, global_rest)),
-            metadata={"teacher_authority": DERIVED_AUTHORITY},
+            "T:C:GLOBAL", "GLOBAL", (), None, tuple(map(float, global_rest)),
+            {"teacher_authority": DERIVED_AUTHORITY},
         )
     ]
     joint_control: dict[int, str] = {}
@@ -443,12 +430,12 @@ def build(
         cid = f"T:C:J:{index:04d}"
         joint_control[index] = cid
         controls.append(RigProgramControlProposalIR(
-            proposal_control_id=cid,
-            control_kind="ROOT" if parent < 0 else "FK",
-            target_proposal_joint_ids=(joint_ids[index],),
-            parent_proposal_control_id="T:C:GLOBAL" if parent < 0 else joint_control[int(parent)],
-            rest_P=tuple(map(float, canonical_positions[index])),
-            metadata={"teacher_authority": DERIVED_AUTHORITY},
+            cid,
+            "ROOT" if parent < 0 else "FK",
+            (joint_ids[index],),
+            "T:C:GLOBAL" if parent < 0 else joint_control[int(parent)],
+            tuple(map(float, position[index])),
+            {"teacher_authority": DERIVED_AUTHORITY},
         ))
 
     children: list[list[int]] = [[] for _ in range(len(parents))]
@@ -457,76 +444,66 @@ def build(
             children[int(parent)].append(index)
     chains: list[RigProgramChainProposalIR] = []
     constraints: list[RigProgramConstraintProposalIR] = []
-    derived_chain_rows: list[dict] = []
+    chain_evidence: list[dict] = []
     for chain_index, members in enumerate(_maximal_chains(parents)):
         chain_id = f"T:K:{chain_index:04d}"
-        chain_joint_ids = tuple(joint_ids[index] for index in members)
+        member_ids = tuple(joint_ids[index] for index in members)
         chains.append(RigProgramChainProposalIR(
-            proposal_chain_id=chain_id,
-            proposal_joint_ids=chain_joint_ids,
-            chain_kind="GENERIC_KINEMATIC_CHAIN",
-            metadata={"teacher_authority": DERIVED_AUTHORITY},
+            chain_id, member_ids, "GENERIC_KINEMATIC_CHAIN", {"teacher_authority": DERIVED_AUTHORITY}
         ))
-        points = canonical_positions[np.asarray(members, dtype=np.int64)]
-        lengths = np.linalg.norm(points[1:] - points[:-1], axis=1)
+        points = position[np.asarray(members, dtype=np.int64)]
+        segment_lengths = np.linalg.norm(points[1:] - points[:-1], axis=1)
         terminal = len(children[members[-1]]) == 0
-        ik_eligible = bool(len(members) >= 3 and terminal and np.all(lengths > 1e-8))
-        row = {
+        ik_eligible = bool(len(members) >= 3 and terminal and np.all(segment_lengths > 1e-8))
+        evidence = {
             "chain_index": chain_index,
             "joint_indices": list(map(int, members)),
             "terminal": terminal,
             "ik_eligible": ik_eligible,
         }
         if ik_eligible:
-            effector_id = f"T:C:IK:{chain_index:04d}"
-            pole_id = f"T:C:POLE:{chain_index:04d}"
-            controls.append(RigProgramControlProposalIR(
-                proposal_control_id=effector_id,
-                control_kind="IK_EFFECTOR",
-                target_proposal_joint_ids=(),
-                parent_proposal_control_id="T:C:GLOBAL",
-                rest_P=tuple(map(float, points[-1])),
-                metadata={"teacher_authority": DERIVED_AUTHORITY},
+            effector = f"T:C:IK:{chain_index:04d}"
+            pole = f"T:C:POLE:{chain_index:04d}"
+            controls.extend((
+                RigProgramControlProposalIR(
+                    effector, "IK_EFFECTOR", (), "T:C:GLOBAL", tuple(map(float, points[-1])),
+                    {"teacher_authority": DERIVED_AUTHORITY},
+                ),
+                RigProgramControlProposalIR(
+                    pole, "IK_POLE", (), "T:C:GLOBAL", tuple(map(float, _pole(points, basis_by_joint[members[0]]))),
+                    {"teacher_authority": DERIVED_AUTHORITY},
+                ),
             ))
-            pole = _stable_pole_position(points, basis_by_joint[members[0]])
-            controls.append(RigProgramControlProposalIR(
-                proposal_control_id=pole_id,
-                control_kind="IK_POLE",
-                target_proposal_joint_ids=(),
-                parent_proposal_control_id="T:C:GLOBAL",
-                rest_P=tuple(map(float, pole)),
-                metadata={"teacher_authority": DERIVED_AUTHORITY},
-            ))
-            constraints.append(RigProgramConstraintProposalIR(
-                proposal_constraint_id=f"T:Q:IK:{chain_index:04d}",
+            parameters = {"p0": 1.0, "p1": 1.0, "p2": 1.0, "p3": 0.0}
+            validate_rig_constraint_operator_v1(
                 operator_id="IK",
-                input_proposal_control_ids=(effector_id, pole_id),
-                output_proposal_joint_ids=chain_joint_ids,
-                proposal_chain_id=chain_id,
-                parameters={"p0": 1.0, "p1": 1.0, "p2": 1.0, "p3": 0.0},
-                metadata={
-                    "teacher_authority": DERIVED_AUTHORITY,
-                    "source_authored_constraint_claimed": False,
-                },
+                input_control_count=2,
+                output_joint_count=len(member_ids),
+                has_chain=True,
+                parameters=parameters,
+            )
+            constraints.append(RigProgramConstraintProposalIR(
+                f"T:Q:IK:{chain_index:04d}", "IK", (effector, pole), member_ids, chain_id,
+                parameters,
+                {"teacher_authority": DERIVED_AUTHORITY, "source_authored_constraint_claimed": False},
             ))
-            row["effector_control_id"] = effector_id
-            row["pole_control_id"] = pole_id
-        derived_chain_rows.append(row)
+            evidence.update({"effector_control_id": effector, "pole_control_id": pole})
+        chain_evidence.append(evidence)
 
-    teacher_binding_hash = _digest({
+    binding_hash = _digest({
         "teacher_scene_sha256": _sha256(scene_path),
         "geometry_sha256": _sha256(geometry_path),
         "subject_id": str(scene.get("subject_key") or ""),
     })
     proposal = seal_rig_program_proposal_v1(RigProgramProposalIR(
         joints=tuple(joints),
-        local_frames=tuple(local_frames),
+        local_frames=tuple(frames),
         controls=tuple(controls),
         chains=tuple(chains),
         constraints=tuple(constraints),
         attachment_anchors=(),
-        mesh_lineage_hash=teacher_binding_hash,
-        feature_evidence_binding_hash=teacher_binding_hash,
+        mesh_lineage_hash=binding_hash,
+        feature_evidence_binding_hash=binding_hash,
         model_provenance="TRUTH139_AXIS_RIG_PROGRAM_TEACHER_V2__NO_MODEL_INFERENCE",
         metadata={
             "authority_class": "TEACHER_PROJECTION_ONLY",
@@ -546,7 +523,7 @@ def build(
         "schema": "RealSaS.Truth139AxisRigProgramTeacherEvidence.v2",
         "dof_response_threshold_normalized": float(dof_response_threshold_normalized),
         "dof": dof_evidence,
-        "chains": derived_chain_rows,
+        "chains": chain_evidence,
         "source_names_exported": False,
         "source_joint_indices_exported_as_student_targets": False,
     }

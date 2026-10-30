@@ -2,16 +2,25 @@
 """DriveFS-safe launcher for the scoped Truth139 V2-extension S7 rescue.
 
 The original rescue runner used ``shutil.copy2`` to preserve the failed 129/139
-receipt before mutation.  Google DriveFS in Colab can reject copy-stat metadata
-operations even when a plain byte copy is valid.  This launcher performs the
+receipt before mutation. Google DriveFS in Colab can reject copy-stat metadata
+operations even when a plain byte copy is valid. This launcher performs the
 same provenance guard with an atomic byte-exact copy, then delegates to the
 canonical rescue implementation unchanged.
+
+This file is intentionally executable both as ``python -m tools.corpus...`` and
+as ``python tools/corpus/...py``. The latter is how Colab rescue cells invoke it,
+so the repository root is inserted into ``sys.path`` before package imports.
 """
 from __future__ import annotations
 
 import argparse
 import json
 from pathlib import Path
+import sys
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from tools.corpus.build_truth139_dense_graphics_gbuffer_v1 import sha256
 from tools.corpus.rescue_truth139_v2_extension_s7_v1 import rescue

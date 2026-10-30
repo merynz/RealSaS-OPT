@@ -16,7 +16,7 @@ from torch import Tensor
 import torch.nn.functional as F
 
 from compiler.realsas_compiler_core.rig_program_ir_v1 import RigProgramProposalIR
-from compiler.realsas_compiler_core.skin_token_ir_v1 import SkinTokenProposalIR, validate_skin_token_proposal_v1
+from compiler.realsas_compiler_core.skin_code_ir_v1 import SkinCodeProposalIR, validate_skin_code_proposal_v1
 from models.axis.rig_program_model_v6 import (
     AXISRigProgramConfigV6,
     AXISRigProgramModelV6,
@@ -122,7 +122,7 @@ def _constraint_scalars(parameters: dict) -> tuple[float, ...]:
 
 def serialize_axis_v6_teacher_events(
     proposal: RigProgramProposalIR,
-    code_proposal: SkinTokenProposalIR,
+    code_proposal: SkinCodeProposalIR,
     *,
     config: AXISRigProgramConfigV6,
     normalization_center: Sequence[float],
@@ -148,12 +148,12 @@ def serialize_axis_v6_teacher_events(
         if parent is not None and (str(parent) not in joint_index or joint_index[str(parent)] >= i):
             raise ValueError("AXIS_V6_TEACHER_JOINT_PARENT_NOT_CAUSAL")
 
-    validate_skin_token_proposal_v1(
+    validate_skin_code_proposal_v1(
         code_proposal,
         expected_proposal_joint_ids=joint_ids,
         expected_rig_program_proposal_hash=proposal.proposal_lineage_hash,
     )
-    code_by_joint = {str(row.proposal_joint_id): tuple(map(int, row.token_ids)) for row in code_proposal.rows}
+    code_by_joint = {str(row.proposal_joint_id): tuple(map(int, row.code_ids)) for row in code_proposal.rows}
 
     frame_by = {str(row.proposal_joint_id): row for row in proposal.local_frames}
     if set(frame_by) != set(joint_ids):
@@ -271,7 +271,7 @@ def serialize_axis_v6_teacher_events(
     events.append(RigProgramEventV6(RigTokenKindV6.SKIN_START))
     for jid in joint_ids:
         codes = code_by_joint[jid]
-        if len(codes) != code_proposal.tokens_per_joint:
+        if len(codes) != code_proposal.codes_per_joint:
             raise ValueError("AXIS_V6_TEACHER_SKIN_CODE_CARDINALITY_DRIFT")
         for code in codes:
             if code < 0 or code >= config.skin_vocab_size:

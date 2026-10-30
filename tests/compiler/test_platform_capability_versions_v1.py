@@ -17,139 +17,90 @@ def test_product_capability_implementations_are_complete_and_semantic():
     specs = capability_specs()
     implementations = capability_implementations()
     assert set(implementations) == {
-        "product.input",
-        "product.shape",
-        "product.mesh",
-        "product.rig",
-        "product.skin",
+        "product.input", "product.shape", "product.mesh", "product.rig", "product.skin",
     }
     assert set(specs) == set(implementations)
-    assert specs["product.input"]["parameters"]["responsibility_ids"] == [
-        "input.model_observation_lowering"
-    ]
+    assert specs["product.input"]["parameters"]["responsibility_ids"] == ["input.model_observation_lowering"]
     assert specs["product.shape"]["parameters"]["responsibility_ids"] == [
-        "shape.shared_scene_evidence",
-        "shape.topology_proposal",
+        "shape.shared_scene_evidence", "shape.topology_proposal",
     ]
     assert specs["product.mesh"]["parameters"]["responsibility_ids"] == [
-        "mesh.canonical_identity_mint",
-        "mesh.source_fidelity_qualification",
-        "mesh.static_topology_qualification",
+        "mesh.canonical_identity_mint", "mesh.source_fidelity_qualification", "mesh.static_topology_qualification",
     ]
     assert specs["product.rig"]["parameters"]["responsibility_ids"] == [
-        "rig.canonical_identity_mint",
-        "rig.structure_proposal",
-        "rig.structure_qualification",
+        "rig.canonical_identity_mint", "rig.structure_proposal", "rig.structure_qualification",
     ]
     assert specs["product.skin"]["parameters"]["responsibility_ids"] == [
-        "skin.canonical_influence_mint",
-        "skin.carrier_binding_qualification",
-        "skin.influence_legality_qualification",
-        "skin.influence_proposal",
+        "skin.canonical_influence_mint", "skin.carrier_binding_qualification",
+        "skin.influence_legality_qualification", "skin.influence_proposal",
     ]
     assert "rig.frame_observability_qualification" not in str(specs["product.rig"])
     assert specs["product.shape"]["parameters"]["required_models"] == [
-        {
-            "family": "IRIS",
-            "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3",
-        },
-        {
-            "family": "TESSA",
-            "architecture_id": "RealSaS.TESSA.Structuralizer.v3",
-        },
+        {"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"},
+        {"family": "TESSA", "architecture_id": "RealSaS.TESSA.Structuralizer.v3"},
     ]
+
     mesh = specs["product.mesh"]
     assert mesh["policy"]["dependencies"] == [
-        "product.shape",
-        "compiler.stage/05_CAMERA_CONTRACT_SOLVED",
-        "compiler.stage/07_OBSERVATION_CONTRACT_QUALIFIED",
-        "compiler.stage/08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "product.shape", "compiler.stage/05_CAMERA_CONTRACT_SOLVED",
+        "compiler.stage/07_OBSERVATION_CONTRACT_QUALIFIED", "compiler.stage/08_NORMALIZATION_DOMAIN_QUALIFIED",
     ]
     assert mesh["parameters"]["required_models"] == []
     assert mesh["parameters"]["fit_allowed_during_product_execution"] is False
     assert mesh["parameters"]["legacy_ir_fit_stage_dependency"] is False
     assert mesh["parameters"]["surface_born_inside_mesh_court"] is True
     assert mesh["parameters"]["surface_is_canonical_mesh_authority"] is False
-    assert mesh["parameters"]["shape_surface_court_policy_sha256"] == (
-        "e182023bd59d079ecb747d0812af4e83de7415593c4bca54c753d0f7abfa6f51"
-    )
-    assert mesh["parameters"]["source_fidelity_policy_sha256"] == (
-        "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214"
-    )
-    assert mesh["parameters"]["surface_adequacy_policy_sha256"] == (
-        "bc98d3aa3cd419ca9ae43010e890fc554ab62e57268933afc630aae20c38139b"
-    )
+    assert mesh["parameters"]["shape_surface_court_policy_sha256"] == "e182023bd59d079ecb747d0812af4e83de7415593c4bca54c753d0f7abfa6f51"
+    assert mesh["parameters"]["source_fidelity_policy_sha256"] == "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214"
+    assert mesh["parameters"]["surface_adequacy_policy_sha256"] == "bc98d3aa3cd419ca9ae43010e890fc554ab62e57268933afc630aae20c38139b"
 
     rig = specs["product.rig"]
     assert rig["policy"]["dependencies"] == ["product.mesh"]
+    assert rig["parameters"]["executor_contract"] == "RealSaS.ProductRigInference.v2"
     assert rig["parameters"]["feature_evidence_source"] == "PRODUCT_MESH_OUTPUT"
     assert rig["parameters"]["legacy_stage15_dependency"] is False
+    assert rig["parameters"]["output_schema_version"] == "v2"
+    assert rig["parameters"]["skin_token_output_type"] == "RealSaS.SkinTokenProposalIR"
+    assert rig["parameters"]["compiler_parent_reselection_allowed"] is False
+    assert rig["parameters"]["compiler_control_synthesis_allowed"] is False
+    assert rig["parameters"]["compiler_constraint_synthesis_allowed"] is False
     assert rig["parameters"]["required_models"] == [
-        {
-            "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
-        }
+        {"family": "AXIS", "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0"}
     ]
 
     skin = specs["product.skin"]
-    assert skin["policy"]["dependencies"] == [
-        "product.mesh",
-        "product.rig",
-    ]
-    assert skin["parameters"]["feature_evidence_source"] == "PRODUCT_MESH_OUTPUT"
-    assert skin["parameters"]["material_support_source"] == "PRODUCT_MESH_OUTPUT"
-    assert skin["parameters"]["legacy_stage15_dependency"] is False
+    assert skin["policy"]["dependencies"] == ["product.mesh", "product.rig"]
+    assert skin["parameters"]["executor_contract"] == "RealSaS.ProductSkinInference.v2"
+    assert skin["parameters"]["input_rig_schema_version"] == "v2"
+    assert skin["parameters"]["input_skin_token_artifact_type"] == "RealSaS.SkinTokenProposalIR"
+    assert skin["parameters"]["output_schema_version"] == "v2"
     assert skin["parameters"]["required_models"] == [
-        {
-            "family": "MIRA",
-            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
-        }
+        {"family": "MIRA", "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0"}
     ]
-    assert skin["parameters"]["mesh_and_rig_are_canonical_parents"] is True
-    assert skin["parameters"]["feature_evidence_is_canonical_parent"] is False
-    assert skin["parameters"]["material_support_is_canonical_parent"] is False
-    assert skin["parameters"]["operational_model_state_embedded_in_source"] is False
+    assert skin["parameters"]["canonical_parents"] == ["CANONICAL_MESH", "CANONICAL_RIG_DEFORM_STRUCTURE"]
+    assert skin["parameters"]["full_control_program_is_skin_parent"] is False
+    assert skin["parameters"]["axis_rerun_allowed"] is False
+    assert skin["parameters"]["compiler_token_search_allowed"] is False
+    assert skin["parameters"]["compiler_token_repair_allowed"] is False
+    assert skin["parameters"]["carrier_skin_qualification"]["max_influences"] == 256
 
     assert product_model_requirements() == [
-        {
-            "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
-        },
-        {
-            "family": "IRIS",
-            "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3",
-        },
-        {
-            "family": "MIRA",
-            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
-        },
-        {
-            "family": "TESSA",
-            "architecture_id": "RealSaS.TESSA.Structuralizer.v3",
-        },
+        {"family": "AXIS", "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0"},
+        {"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"},
+        {"family": "MIRA", "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0"},
+        {"family": "TESSA", "architecture_id": "RealSaS.TESSA.Structuralizer.v3"},
     ]
     for capability_id, implementation in implementations.items():
         assert set(implementation) == {"implementation_sha256"}, capability_id
         assert _is_sha256(implementation["implementation_sha256"]), capability_id
-    assert len(
-        {
-            implementations["product.input"]["implementation_sha256"],
-            implementations["product.shape"]["implementation_sha256"],
-            implementations["product.mesh"]["implementation_sha256"],
-            implementations["product.rig"]["implementation_sha256"],
-            implementations["product.skin"]["implementation_sha256"],
-        }
-    ) == 5
+    assert len({implementations[x]["implementation_sha256"] for x in implementations}) == 5
 
 
 def test_release_snapshot_v2_carries_implementation_and_model_requirements():
     plan = mainline.load_json(mainline.PLAN_PATH)
     request = snapshot(
-        plan,
-        {"subject_id": "not-release-authority"},
-        name="capability-release-v2",
-        purpose="RESEARCH",
-        created_by="ci",
+        plan, {"subject_id": "not-release-authority"}, name="capability-release-v2",
+        purpose="RESEARCH", created_by="ci",
     )
     assert request["manifest"]["contract_version"] == "RealSaS.EngineReleaseManifest.v2"
     assert request["capability_implementations"] == capability_implementations()
@@ -160,28 +111,11 @@ def test_release_snapshot_v2_carries_implementation_and_model_requirements():
     assert "capability_versions" not in request
     for row in request["capability_implementations"].values():
         assert set(row) == {"implementation_sha256"}
-        assert "policy_sha256" not in row
-        assert "parameters_sha256" not in row
+        assert "policy_sha256" not in row and "parameters_sha256" not in row
     assert request["manifest"]["model_requirements"] == [
-        {
-            "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
-            "channel": "RESEARCH",
-        },
-        {
-            "family": "IRIS",
-            "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3",
-            "channel": "RESEARCH",
-        },
-        {
-            "family": "MIRA",
-            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
-            "channel": "RESEARCH",
-        },
-        {
-            "family": "TESSA",
-            "architecture_id": "RealSaS.TESSA.Structuralizer.v3",
-            "channel": "RESEARCH",
-        },
+        {"family": "AXIS", "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0", "channel": "RESEARCH"},
+        {"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3", "channel": "RESEARCH"},
+        {"family": "MIRA", "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0", "channel": "RESEARCH"},
+        {"family": "TESSA", "architecture_id": "RealSaS.TESSA.Structuralizer.v3", "channel": "RESEARCH"},
     ]
     assert "subject_id" not in str(request)

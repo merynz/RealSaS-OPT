@@ -438,6 +438,34 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
             )
         return await _with_heartbeat(run_skin_v2, request)
 
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductMechanicsCompile.v1"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.mechanics_executor_v1 import (
+            execute_mechanics_capability_v1,
+        )
+
+        def run_mechanics(value):
+            return execute_mechanics_capability_v1(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
+            )
+        return await _with_heartbeat(run_mechanics, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductMotionCompile.v2"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.motion_executor_v2 import (
+            execute_motion_capability_v2,
+        )
+
+        def run_motion_v2(value):
+            return execute_motion_capability_v2(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
+            )
+        return await _with_heartbeat(run_motion_v2, request)
+
     if str(request.get("kind") or "") != "STAGE":
         return {
             "capability_id": str(request.get("capability_id") or ""),

@@ -1,426 +1,434 @@
-# IRIS/TESSA V3.2 pre-Truth139 architecture freeze
+# IRIS/TESSA V3.2 — frozen pre-Truth139 architecture
 
 Date: 2026-10-30
-Status: FROZEN_PRETRUTH_ARCHITECTURE_CANDIDATE_V3_2
-Scope: architecture/training-boundary freeze for the first Truth139 model run
+Status: `FROZEN_PRETRUTH_ARCHITECTURE_V3_2__TRAINING_BLOCKED_ON_TARGET_READINESS`
+Scope: first Truth139 model architecture and staged training boundary
 
-## Change discipline
+## 0. Change discipline
 
-V3.2 is an amendment to the frozen V3.1 lineage, not a rewrite.
+V3.2 is a delta over the latest qualified V3.1 lineage, not a rewrite.
 
 **Invariant:** every V3.1 responsibility, learned head, evidence family, authority
-boundary and training input remains unchanged unless this document explicitly
-amends it. Later V3.1 corrective evidence (for example the fixed-df Student-t
-response likelihood) is preserved at its latest qualified revision and must not
-silently regress to an older failed formulation.
+boundary and proven correction remains unchanged unless this document explicitly
+changes it. Omission from a diagram is not permission to delete a head.
 
-Removing, renaming, collapsing or demoting an unmentioned head is itself an
-architecture change and is forbidden without an explicit decision.
+V3.1 remains historical rollback/comparison evidence. The first Truth139 model run
+uses one V3.2 candidate; it is not preceded by architecture-selection A/B arms.
 
-V3.1 remains the historical baseline/rollback. The first Truth139 training run
-uses this single V3.2 candidate rather than spending the corpus on architecture
-selection A/B arms.
+## 1. V3.1 -> V3.2: only the explicit changes
 
-## Explicit V3.2 changes only
+1. **3D geometry supervision is upgraded.**
+   - exact source-surface distance/orientation replaces F* as geometry authority;
+   - exact global sign/occupancy is used only where the source component/subject
+     passes a sign-validity court;
+   - oriented surface normals are explicit supervision;
+   - F* is retained only as observation/source-consistency auxiliary.
+2. **Raw/local RGB becomes an observation input.**
+   - V3.1 saw DINO features + raw alpha + cameras, but no direct RGB patch values;
+   - V3.2 fusion is `FINAL384 + L2_64 + ALPHA64 + RGB64`.
+3. **TESSA is geometry-after but not scene-bottlenecked.**
+   - TESSA runs only after a qualified Geometry surface exists;
+   - TESSA simultaneously retains direct bounded access to the same Dense3D `Z`;
+   - a reduced 17-D/GSA handoff cannot replace the shared scene.
+4. **TESSA compactness is subordinate to mechanical validity.**
+   - mechanically suitable compact topology is the teacher/qualification goal;
+   - triangle count cannot rescue a mechanically bad mesh.
+5. **Final product mesh is watertight-required.**
+   - this is an output/Compiler requirement;
+   - it does not authorize pretending every raw corpus mesh has a valid global SDF.
 
-Only these boundaries change:
+Everything else remains the latest V3.1 contract.
 
-1. **Exact 3D geometry authority.** Geometry supervision moves from legacy
-   F*-only signed-field authority to qualified watertight 3D truth: truncated
-   metric signed distance, inside/outside occupancy/sign and oriented normals.
-   Legacy F* remains an auxiliary source-consistency signal.
-2. **Raw/local RGB observation evidence.** V3.1 already consumed DINO final,
-   projected DINO layer-2 and raw alpha, but did not expose raw/local RGB to the
-   learned scene. V3.2 adds patch-aligned RGB evidence to observation fusion.
-   The frozen first implementation form is `FINAL384 + L2_64 + ALPHA64 + RGB64`.
-3. **Geometry-first TESSA dependency without a scene bottleneck.** TESSA retains
-   direct access to the same Dense3D scene memory `Z`, but topology is not
-   semantically independent of geometry. TESSA runs from `Z` plus qualified
-   Geometry-derived surface evidence after the geometry surface is available.
-   A reduced 17-D/GSA handoff cannot replace `Z`.
-4. **Mechanical topology before compactness.** TESSA compactness and TESSA
-   mechanical suitability are distinct objectives. Mechanical admissibility and
-   motion quality precede triangle-count optimization.
+## 2. Product/input boundary
 
-Everything else remains the latest V3.1 contract unless separately amended.
+Eight views remain the current research/training apparatus and high-information
+regression setup. They are not a permanent product UX assumption.
 
-## Product/input boundary
+The downstream architecture must remain compatible with future normalization:
 
-The current eight-view camera/input apparatus is a research and training
-contract, not a permanent product UX assumption.
-
-The learned scene representation and downstream heads must remain compatible
-with future observation normalization that can reduce product input to two views
-and ultimately one view while internally constructing the evidence required by
-the same downstream model family.
+`1-view or 2-view user input -> observation normalization/evidence construction -> same V3.2 downstream family`.
 
 No head may define its semantics as "the user always supplies eight views".
-Eight-view remains the current high-information research apparatus and regression
-reference.
 
-## Observation contract
+## 3. Observation contract
 
-V3.1 foundation evidence is preserved:
+Preserved V3.1 inputs:
 
-- frozen DINOv2-S/14 final patch features (384-D),
-- projected DINO layer-2 patch features (64-D),
+- frozen DINOv2-S/14 final patch features: 384-D,
+- DINO layer-2 projected to 64-D,
 - raw alpha patch evidence projected to 64-D,
-- camera-aware multi-view fusion,
-- typed coordinate conversion.
+- camera-aware multi-view fusion and typed coordinates.
 
-V3.2 adds one explicit observation family:
+New V3.2 input:
 
-- raw/local RGB patches aligned to the DINO S/14 patch grid, projected to 64-D.
+- raw/local RGB patches aligned to the DINO S/14 grid, projected to 64-D.
 
-For a 14x14 RGB patch, the direct local source is 14x14x3 = 588 scalar values
-before the learned RGB projection. The fused per-patch observation token is:
+For each 14x14 RGB patch the direct source contains 588 scalar RGB values before
+projection. The fused patch token is:
 
 `[DINO_FINAL384, DINO_L2_64, RAW_ALPHA64, RAW_RGB64]`
 
-for a total width of 576 before the Dense3D observation projection.
+for width 576 before the Dense3D observation projection.
 
-DINO features remain important semantic/structural evidence, but DINO(RGB) is
-not treated as a substitute for source photometry. Raw RGB is required because
-Graphics is a product head and exact/local color and texture evidence must be
-available to the learned scene rather than reconstructed only from semantic
-features.
+DINO(RGB) is semantic/structural evidence; it is not treated as a substitute for
+source photometry.
 
-## Shared scene and head map
+## 4. Shared scene and responsibility graph
 
-`Z` is the persistent shared Dense3D scene memory. It is the common scene state,
-not a mesh and not a second discrete authority.
+`Z` is persistent Dense3D scene memory. It is shared evidence state, not a mesh
+and not a second discrete authority.
 
 ```text
 RGB(A) observations + cameras
           |
-          +--> DINO final384
-          +--> DINO layer2 -> 64
-          +--> raw alpha -> 64
-          +--> raw/local RGB -> 64
+          +-- DINO final384
+          +-- DINO L2 -> 64
+          +-- raw alpha -> 64
+          +-- raw RGB -> 64
           |
           v
-+-----------------------------------------+
-|              Dense3D Z                  |
-|       persistent shared scene memory    |
-+-----------------------------------------+
-       |          |          |          |
-       |          |          |          |
-       v          v          v          v
-   Geometry    Graphics   Response    Relations
-    decoder     decoder      head        head
-       |          |          |          |
-       |          |          |          |
- TSDF/sign      RGBA/     non-rigid   typed pair/
- occupancy      boundary   response    relation
- normals        graphics   + energy    evidence
- bounded delta             uncertainty   |
-       |          |          |          |
-       v          |          |          |
- qualified 3D    |          |          |
- surface G       |          |          |
-       |          |          |          |
-       +----------+----------+----------+
++--------------------------------------+
+|              Dense3D Z               |
+|       persistent shared scene        |
++--------------------------------------+
+       |          |          |         |
+       v          v          v         v
+   Geometry    Graphics   Response   Relations
+       |          |          |         |
+       |          |          |         |
+ surface field   RGBA/     non-rigid   typed
+ + normals       boundary   response   evidence
+ + validity      graphics   + energy
        |
-       | mandatory: G + direct access to Z
        v
-+-----------------------------------------+
-|              TESSA                      |
-| topology proposal / structuralizer      |
-| reads Z + Geometry surface G + admitted |
-| mechanical/presentation evidence        |
-+-----------------------------------------+
-          |
-          v
-      Compiler
-          |
-          v
-   canonical puppet M
+ qualified Geometry surface/evidence G
+       |
+       | mandatory G + direct Z access
+       v
++--------------------------------------+
+|                TESSA                 |
+| topology proposal / structuralizer   |
+| Z + G + admitted mechanical/present. |
++--------------------------------------+
+       |
+       v
+    Compiler
+       |
+       v
+ canonical watertight-required puppet M
 ```
 
-This diagram is dependency-aware. Geometry, Graphics, Response and Relations are
-continuous evidence consumers of the shared scene. TESSA is downstream of the
-qualified Geometry surface while still retaining direct scene access.
+Graphics, Response and Relations remain first-class responsibilities. They are
+not hidden inside TESSA and are not removed by the geometry-first dependency.
 
-## Geometry -> TESSA dependency
+## 5. Geometry contract
 
-The semantic order is:
+### 5.1 Exact surface authority
 
-`observations -> Z -> Geometry field -> qualified surface G -> TESSA -> Compiler M`
+The raw Truth139 source mesh is exact **surface** evidence even when it is open or
+non-manifold. Therefore V3.2 separates what is always measurable from what needs
+a stronger validity court.
 
-Geometry defines **where the surface is**. TESSA decides **how that surface is
-discretized/connectively represented** for the canonical mesh proposal.
+Always-valid after the existing exact-source geometry rebinding court:
 
-Therefore TESSA must not mint a final topology before a qualified Geometry
-surface exists.
+- exact source surface points / triangle+barycentric addresses,
+- truncated **unsigned** distance to the exact source surface,
+- oriented source-surface normals where orientation is qualified,
+- connected-component and local topology evidence,
+- local two-sided normal-offset probes.
 
-At the same time, the following historical bottleneck is forbidden:
+### 5.2 Global sign/occupancy authority
 
-`Z -> reduced 17-D/GSA node state -> second scene reconstruction -> TESSA`
+Global inside/outside truth is admitted only for a component/subject that passes a
+sign-validity court, at minimum:
 
-TESSA receives both:
+- closed/watertight boundary (`boundary_edge_count == 0`),
+- manifold edge incidence,
+- finite nondegenerate geometry,
+- consistent orientation/winding sufficient for an independent parity/winding
+  court to agree.
 
-1. direct bounded access/query evidence from the same Dense3D `Z`, and
-2. typed Geometry-derived surface evidence `G` (surface xyz, oriented normal,
-   signed/occupancy evidence, local geometry/query evidence and validity).
+For sign-qualified geometry:
 
-The surface stream is an addressable Geometry result, not a replacement for the
-scene stream. Direct `Z` access prevents the IRIS->TESSA handoff from discarding
-scene evidence; Geometry-first ordering prevents topology from becoming detached
-from the actual reconstructed surface.
+- exact inside/outside occupancy is supervised,
+- exact signed truncated distance/TSDF is supervised.
 
-## IRIS Geometry
+For open/non-manifold/sign-ambiguous source geometry:
 
-Exact qualified watertight truth geometry is the supervision authority.
+- global sign/occupancy target is `UNKNOWN/ABSTAIN`,
+- unsigned distance + normals + local surface evidence remain trainable,
+- F* may contribute source consistency but may **not** fabricate a 3D sign label.
 
-Required targets:
+This preserves scientific truth while still training a sign/occupancy head from
+all genuinely qualified subjects/components.
 
-- truncated metric signed distance / TSDF in the qualified 3D domain,
-- exact inside/outside occupancy/sign from qualified watertight 3D truth,
-- oriented surface normals in a qualified near-surface band,
-- the existing bounded local delta where still useful and contract-compatible.
+### 5.3 Geometry outputs/objective
 
-Legacy eight-view F* is retained only as an auxiliary source-consistency signal.
-It cannot override exact 3D sign, occupancy or normal truth.
+Geometry output family:
 
-Initial objective family:
+- truncated surface distance / signed TSDF where sign-valid,
+- occupancy/sign prediction with explicit target validity,
+- oriented normal prediction in the qualified surface band,
+- existing bounded local delta where contract-compatible.
 
-`L_G = L_tsdf + lambda_occ L_occ + lambda_n L_normal + lambda_delta L_delta + lambda_src L_Fstar_aux`
+Objective family:
 
-The TSDF sign and occupancy head are independently measurable so a low scalar
-field MAE cannot hide a sign/topology failure. Normal supervision is explicit;
-it is not inferred only through rendered silhouette quality.
+`L_G = L_surface_distance + lambda_sign L_sign(valid_only) + lambda_occ L_occ(valid_only) + lambda_n L_normal + lambda_delta L_delta + lambda_src L_Fstar_aux`
 
-Gradient-to-normal/eikonal-style regularization is not silently enabled by this
-freeze. It may be added later only as an explicit measured amendment.
+Low field MAE alone cannot hide sign failure; sign/occupancy and normal metrics
+remain separate.
 
-The output remains a watertight-capable 3D mechanical substrate. Presentation
-being 2D does not reduce the geometry contract to 2D.
+Gradient-to-normal/eikonal regularization is **not** silently added by V3.2.
 
-## IRIS Graphics
+### 5.4 Watertight output requirement
 
-`GRAPHICS` is a first-class learned product responsibility.
+The product requirement is stronger than the raw corpus condition:
+
+`Compiler canonical M -> WATERTIGHT_REQUIRED`.
+
+A raw open source mesh does not become fake watertight truth. Instead the learned
+field/TESSA proposal/Compiler closure must produce a qualified watertight final
+mechanical substrate while remaining bounded by exact source-surface, source-view,
+component and mechanical evidence.
+
+Any future learned/deterministic closure teacher is a separate derived truth with
+its own displacement/source-view/component courts; it may not be silently minted
+from raw winding.
+
+## 6. Graphics
+
+`GRAPHICS` is a first-class learned product head.
 
 It is not:
 
-- an auxiliary feature that exists only to help Geometry,
-- an auxiliary feature that exists only to help Relations,
+- auxiliary only to Geometry,
+- auxiliary only to Relations,
 - reducible to visibility/occlusion metadata,
 - synonymous with CAA.
 
-Its primary responsibility is to infer/preserve drawable surface appearance from
-the available observations so the compiled puppet can be rendered correctly
-across view and motion. Raw/local RGB is therefore part of the learned
-observation contract in V3.2.
+Its primary responsibility is drawable surface appearance across view/motion.
+Raw RGB is therefore part of the V3.2 observation contract.
 
-Preserved graphics outputs/responsibilities from the V3.1 lineage include the
-learned RGBA/boundary path and source/raster presentation evidence. Truth139 may
-bind richer typed graphics truth (surface-addressed RGBA, support/provenance,
-visibility/occlusion, K-hit and related evidence) without redefining Graphics as
-an auxiliary head.
+Preserved learned outputs include the V3.1 RGBA/boundary path. Truth139 may bind
+richer typed graphics evidence (surface-addressed RGBA, provenance/support,
+visibility/occlusion, K-hit, drawable affinity) without demoting Graphics to an
+auxiliary head.
 
-Observed source appearance remains provenance-preserving. Learned completion of
-unobserved appearance is a Graphics responsibility and must not be mislabeled as
-directly observed source authority.
+Observed source appearance remains provenance-preserving; learned unobserved fill
+must never be mislabeled as direct source observation.
 
-### Graphics naming boundary
+`CAA` is only a legacy graphics subcomponent/policy name. It is not the top-level
+Graphics architecture name. No silent code rename is performed by this freeze.
 
-`GRAPHICS` is the top-level architecture responsibility.
-
-Historical `CAA`-named code/contracts are legacy graphics subcomponents/policies,
-not the architecture name for Graphics as a whole. This freeze does not silently
-rename or rewrite those implementations; naming migration is a separate change.
-
-## Response / mechanics
-
-The response/mechanics responsibility is preserved, including the correction
-learned from the completed V3.1 Snake evidence run.
-
-The first Truth139 V3.2 run must not silently return to the failed Gaussian
-mechanics likelihood. The preserved response objective is the latest qualified
-fixed-df Student-t treatment over the existing nonnegative/log1p response target
-coordinates, with no subject-specific weighting and no deletion/clipping of
-truth rows.
+## 7. Response / mechanics
 
 Response remains continuous evidence, not a semantic mechanical-class taxonomy.
-Its outputs/evidence may condition TESSA and Compiler qualification, but Response
-does not mint topology or canonical mesh authority.
 
-## Relations
+The latest V3.1 correction is preserved: the first V3.2 run must not return to the
+failed Gaussian mechanics likelihood. Use the latest qualified fixed-scale/fixed-df
+Student-t response treatment on the existing nonnegative/log1p target coordinates,
+with no subject-specific weighting and no deletion/clipping of truth rows.
 
-Existing relation/evidence responsibilities and gradient-ownership rules are
-preserved unless a separate amendment explicitly changes them.
+Response may condition TESSA and Compiler qualification; it does not mint topology
+or canonical mesh authority.
 
-Relations may read useful Graphics/Geometry evidence, but neither Graphics nor
-Geometry exists merely to serve Relations. Relation-private training must not
-silently rewrite protected continuous state through a bypass of the established
-gradient firewall.
+## 8. Relations
 
-Truth139 drawable-affinity / primitive-relation evidence can extend the admitted
-relation targets without introducing global cross-subject semantic owner IDs.
+Existing relation/evidence responsibilities and gradient-ownership/firewall rules
+are preserved.
 
-## TESSA topology
+Truth139 drawable-affinity / primitive-relation evidence may extend the admitted
+relation targets without global cross-subject semantic owner IDs.
 
-TESSA remains proposal-only. Compiler remains the sole canonical mesh authority.
+Graphics/Geometry may help Relations, but neither head exists merely to serve it.
 
-### Mandatory inputs
+## 9. Geometry -> TESSA dependency
 
-TESSA requires:
+Semantic order:
 
-- direct scene/query access to Dense3D `Z`,
-- a qualified Geometry-derived surface `G`,
-- typed validity for surface evidence,
-- admitted mechanical/deformation evidence where available,
-- preserved presentation/graphics evidence where contractually valid.
+`observations -> Z -> Geometry -> qualified G -> TESSA -> Compiler M`.
 
-TESSA cannot use teacher topology at inference.
+Geometry defines the supported 3D surface/evidence domain. TESSA decides how that
+domain should be discretized/connectively represented.
 
-### Static / representation objective
+TESSA must not produce the canonical topology before qualified `G` exists.
 
-- surface fidelity,
-- manifold/topological validity,
-- triangle quality,
-- representation efficiency,
-- compactness / triangle and vertex count.
+At the same time this bottleneck is forbidden:
 
-### Mechanical objective
+`Z -> reduced 17-D/GSA summary -> second scene reconstruction -> TESSA`.
 
-- triangle inversion under deformation,
-- crack/hole exposure under motion,
-- self-intersection / fold-through instability,
-- strain/Jacobian tail instability,
-- motion silhouette drift attributable to connectivity,
-- attachment/deformation stability,
-- local connectivity suitability under admitted rig/skin/motion evidence.
+TESSA receives both:
 
-A low-triangle mesh is not mechanically valid merely because it reconstructs the
-rest surface well.
+1. direct bounded scene/query access to Dense3D `Z`, and
+2. Geometry-derived surface evidence `G` (xyz, normal, distance/sign validity,
+   local query state/evidence and validity).
 
-Selection/qualification order is lexicographic:
+This matches the useful part of the existing Truth139 bridge: scene and surface
+conditioning are detached/frozen before TESSA training, while TESSA sees dense
+scene evidence rather than teacher topology.
 
-1. mechanical admissibility,
-2. motion quality envelope,
-3. static geometry/source fidelity,
-4. compactness / representation cost.
+## 10. TESSA compact + mechanical teacher policy
 
-Triangle count is a late optimization objective/tie-breaker, not a proxy for
-animation suitability.
+The existing TESSA differentiable objective intentionally uses token/coordinate
+teacher forcing and leaves decoded mesh quality to independent courts. V3.2 keeps
+that stable separation; it does **not** introduce an unqualified differentiable
+motion loss through an autoregressive mesh decoder.
 
-## Training order for the first Truth139 run
+Therefore compactness and mechanical suitability are encoded first in the
+**teacher topology construction**, then independently re-checked on free-running
+TESSA output.
 
-The model family is one V3.2 candidate, but training is staged to respect causal
-and semantic dependencies.
+### 10.1 Qualified topology-teacher construction
+
+For each TRAIN subject:
+
+1. start from the exact admitted source rest mesh + rig/skin + admitted motion or
+   deformation-response evidence;
+2. construct a deterministic bounded simplification ladder, including the exact
+   source topology as the no-simplification fallback;
+3. for every candidate, preserve/transfer component, skin/weight and attachment
+   bindings through an explicit typed mapping;
+4. reject candidates that fail static geometry/source courts;
+5. reject candidates that fail required mechanical courts (inversion, cracks,
+   fold-through/self-intersection, strain/Jacobian tails, attachment separation,
+   motion-view silhouette drift where attributable to connectivity);
+6. among mechanically admissible candidates, select the smallest representation
+   that passes all required static and mechanical gates;
+7. if no simplified candidate passes, select the exact source topology fallback.
+
+The selected teacher is therefore **mechanically admissible first, compact
+second**. Triangle count never overrides a failure.
+
+### 10.2 TESSA training and free-running court
+
+TESSA trains with the existing grammar/token/coordinate objective against the
+qualified teacher topology. Teacher topology is target-only and never student
+conditioning.
+
+Free-running generated topology must then pass the same relevant static and
+mechanical qualification family. Teacher-forced token loss alone is never a
+TESSA PASS.
+
+The old `PASS_FULL_SOURCE_TOPOLOGY_SEQUENCE` teacher is acceptable only as the
+fallback member of the ladder; it is not by itself the V3.2 compact teacher policy.
+
+## 11. First Truth139 training chronology
+
+One architecture candidate, staged training:
 
 ### Phase A — IRIS scene/geometry foundation
 
-Train observation fusion, Dense3D scene state, Geometry and the protected
-continuous query paths against exact 3D geometry truth. Existing geometry warmup
-semantics are retained, but the target changes from F*-authority to exact 3D
-TSDF/sign/normal authority with F* auxiliary.
+Train observation fusion, Dense3D `Z`, protected query paths and Geometry against
+surface-distance/normal truth plus validity-masked exact sign/occupancy and F*
+auxiliary.
 
 ### Phase B — IRIS evidence completion
 
-Continue with Graphics, Response and admitted Relations/evidence objectives while
-protecting Geometry from negative transfer according to the established private
-path/gradient-ownership rules. Raw RGB participates from the observation input;
-Graphics is trained as a direct product responsibility.
+Continue with Graphics, Response and admitted Relations while protecting qualified
+Geometry from negative transfer using the established private-path and gradient
+ownership rules. Raw RGB is live in the observation path.
 
-The fixed-df Student-t response likelihood is used; the older exploding Gaussian
-mechanics objective is not restored.
+Use the latest Student-t Response correction; do not restore the old Gaussian.
 
-### Phase C — Geometry surface freeze / qualification
+### Phase C — Geometry qualification/freeze
 
-Before TESSA topology training is enabled, mint a versioned IRIS checkpoint whose
-Geometry surface passes the preregistered exact-3D surface gates required by the
-Truth139 trainer (sign/occupancy, surface displacement, normals, watertightness
-and source consistency where applicable).
-
-This is a training dependency gate, not a separate architecture A/B experiment.
+Before TESSA is enabled, seal an IRIS checkpoint whose Geometry passes the
+required surface, normal, sign-validity-aware, source-view and output-preparation
+courts. This is a dependency gate, not an architecture A/B.
 
 ### Phase D — TESSA structuralization
 
-Train TESSA from the qualified/frozen IRIS scene and Geometry surface. TESSA reads
-both direct `Z` scene evidence and `G` surface evidence; the topology objective is
-not allowed to move the already-qualified Geometry surface through an accidental
-backpropagation path in the first Truth139 run.
+Build/cache detached TESSA conditioning from the frozen IRIS `Z` + Geometry `G`
+plus admitted response/presentation evidence. Train TESSA against the mechanically
+qualified compact teacher topology. TESSA loss must not move the already-qualified
+IRIS Geometry in the first Truth139 run.
 
-TESSA then emits a topology proposal. Compiler qualification/repair remains the
-only path to canonical `M`.
+### Phase E — Compiler consequence qualification
 
-This staged order resolves the apparent contradiction between shared-scene
-sibling access and geometry-first topology semantics.
+Free-running TESSA proposal -> Compiler qualification/repair -> canonical `M`.
+Final `M` must satisfy the watertight-required product mesh contract plus static
+and mechanical consequence courts.
 
-## Preserved responsibilities
+## 12. Current Truth139 V1 execution compatibility audit
 
-Unless explicitly amended above, V3.2 preserves the latest V3.1 lineage for:
+The existing PR #292 V1 implementation is useful scaffolding but is **not** the
+final V3.2 trainer unchanged.
 
-- DINOv2-S/14 foundation identity,
-- camera-aware multi-view fusion and typed coordinate conversion,
-- Dense3D persistent scene carrier and query machinery,
-- protected/private continuous paths,
-- Graphics RGBA/boundary learning,
-- Response/mechanics evidence and its latest qualified Student-t likelihood,
-- Relations/evidence heads and gradient-ownership firewall,
-- source fidelity and raster/presentation evidence,
-- TESSA proposal-only authority,
-- Compiler as sole canonical discrete mesh/rig/skin/graphics authority,
-- fail-closed evidence admission and provenance,
-- Knight as regression lineage rather than Truth139 training authority.
+Reusable concepts:
 
-The new raw RGB path is the only observation-family addition. No unmentioned
-responsibility is removed by omission from a diagram.
+- Dense3D carrier and protected IRIS query/private-path design,
+- staged geometry-foundation then evidence training,
+- Student-t mechanics correction,
+- Truth139 TESSA bridge semantics: direct dense scene source + predicted surface
+  source, detached before TESSA,
+- teacher topology kept physically separate from student conditioning,
+- decoded-mesh courts independent from teacher-forced loss.
 
-## Truth139 requirements before training authorization
+Required V3.2 upgrades before training:
 
-Architecture can be frozen before all target bytes exist, but training must not
-start until the Platform-bound training manifest can bind the required target
-families.
+- feature cache/input must add raw RGB (`final/layer2/alpha/rgb` rather than only
+  `final/layer2/alpha`),
+- current F*-primary `geometry_supervision_v1` must be replaced by V3.2 exact
+  surface + validity-masked sign/occupancy + normals + F*-auxiliary supervision,
+- current IRIS geometry head must expose distance/sign-validity/occupancy/normal
+  outputs required by V3.2,
+- current TESSA surface-source schema must bind the V3.2 Geometry evidence,
+- current exact-full-source topology teacher must become the mechanically
+  qualified simplification-ladder policy above,
+- current Truth139 shape bridge that explicitly `mechanics_abstained=True` is not
+  sufficient for V3.2 mechanical topology qualification,
+- final Compiler consequence court must enforce the new watertight-required output
+  contract.
 
-Required for the V3.2 first run:
+These are implementation/data-readiness tasks under the frozen architecture; they
+are not permission to reopen the architecture choices.
 
-- exact qualified watertight 3D geometry suitable for TSDF/sign/occupancy queries,
+## 13. Truth139 requirements before training authorization
+
+Required target/data families:
+
+- exact source surface geometry + topology facts and validity,
+- distance-to-surface truth,
+- sign/occupancy-validity court and exact sign labels where valid,
 - oriented surface-normal truth,
-- source/local RGB(A) observation evidence and surface graphics truth,
-- existing response/mechanics truth with validity,
-- admitted relation evidence used by the selected trainer,
-- exact topology/mesh truth and the mechanical/deformation evidence required to
-  qualify TESSA proposals,
-- lineage-safe subject/family-disjoint training/validation/unseen split,
-- Knight kept outside Truth139 as an independent regression lineage.
+- source/local RGB(A) observation evidence and graphics truth,
+- response/mechanics truth with validity,
+- admitted relation evidence selected by the trainer,
+- rig/skin/motion/deformation evidence needed for topology-teacher mechanical
+  qualification,
+- mechanically qualified compact TESSA teacher manifests,
+- lineage-safe subject/family-disjoint TRAIN/VAL/UNSEEN split,
+- Knight outside Truth139 as independent regression lineage.
 
-A missing truth family is a data-readiness blocker, not permission to silently
-fall back to the old V3.1 target or remove a V3.2 head.
+A missing truth family is a data-readiness blocker. It does not authorize silent
+fallback to F*-authority, old Gaussian mechanics, source-only full topology as the
+compact target, or removal of a V3.2 head.
 
-## Platform/training authority
+## 14. Platform authority
 
-Once required Truth139 targets are admitted, the first 139-subject training run
-uses this single V3.2 candidate through Platform authority.
+Once the target families and split are sealed, execute one V3.2 candidate through
+Platform:
 
-Platform owns:
+`Experiment -> Attempt -> EngineRelease -> Artifact Registry/CAS`.
 
-- Experiment/Attempt identity,
-- EngineRelease/source binding,
-- immutable Artifact Registry/CAS provenance,
-- training/evaluation telemetry,
-- staged gate state and failure attribution,
-- reproducibility and final evidence binding.
+Platform owns source/data/checkpoint identity, staged gate state, telemetry,
+failure attribution and reproducibility. It is not an arm-selection mechanism for
+this freeze.
 
-Platform is not used here to choose among legacy architecture arms before the
-first 139 training run.
+## 15. Frozen non-claims
 
-V3.1 remains historical comparison/rollback evidence after the fact.
+This freeze does not itself:
 
-## Frozen non-claims
+- create the Truth139 split,
+- admit unfinished target bytes,
+- alter a currently running materialization worker,
+- mint trained weights, ModelRelease or ProductRevision,
+- claim FIT139/LOFO/unseen success,
+- claim every source mesh is watertight,
+- fabricate sign for open/non-manifold truth,
+- allow TESSA to bypass Geometry qualification,
+- rename legacy CAA code in place,
+- erase any unmentioned V3.1 responsibility.
 
-This architecture freeze:
-
-- does not itself create the Truth139 split,
-- does not admit unfinished Truth139 target families,
-- does not alter a running materialization worker,
-- does not mint trained weights, a ModelRelease or ProductRevision,
-- does not claim FIT139/LOFO/unseen success,
-- does not rename legacy CAA implementation code in place,
-- does not allow TESSA to bypass Geometry surface qualification,
-- does not erase any V3.1 responsibility except where explicitly amended above.
-
-When the required Truth139 target families and split are sealed, the next model
-step is one Platform-bound V3.2 training notebook implementing Phases A-D above.
+When the required Truth139 targets and split are sealed, the next model step is a
+single Platform-bound V3.2 training notebook implementing Phases A-E above.

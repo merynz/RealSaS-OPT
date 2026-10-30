@@ -49,11 +49,11 @@ func TestProductSkinDescriptorUsesDeformStructureParentClosure(t *testing.T) {
 	if got := d.Metadata["axis_rerun_allowed"]; got != false {
 		t.Fatalf("AXIS rerun policy = %v", got)
 	}
-	if got := d.Metadata["compiler_token_search_allowed"]; got != false {
-		t.Fatalf("Compiler token search policy = %v", got)
+	if got := d.Metadata["compiler_code_search_allowed"]; got != false {
+		t.Fatalf("Compiler code search policy = %v", got)
 	}
-	if got := d.Metadata["compiler_token_repair_allowed"]; got != false {
-		t.Fatalf("Compiler token repair policy = %v", got)
+	if got := d.Metadata["compiler_code_repair_allowed"]; got != false {
+		t.Fatalf("Compiler code repair policy = %v", got)
 	}
 	if got := d.Metadata["post_hoc_surface_skin_transfer_allowed"]; got != false {
 		t.Fatalf("post-hoc skin transfer policy = %v", got)

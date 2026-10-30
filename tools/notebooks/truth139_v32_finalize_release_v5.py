@@ -105,7 +105,7 @@ class FinalizeReleaseV5(base.FinalizeReleaseV4):
                 self.v2_receipt,
                 "--response-receipt",
                 self.response_receipt,
-                "--response-svd-rescue-receipt",
+                "--response-svd-rescue",
                 self.response_svd_rescue,
                 "--runtime-fingerprint",
                 self.runtime_fingerprint,

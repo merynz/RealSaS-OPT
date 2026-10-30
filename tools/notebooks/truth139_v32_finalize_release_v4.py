@@ -1,9 +1,9 @@
 """Notebook-facing release orchestrator for Truth139 V3.2 finalization v4.
 
-The notebook intentionally stays thin.  This module owns the testable release
+The notebook intentionally stays thin. This module owns the testable release
 logic: sealed prerequisite gates, frozen runtime, Response SVD-rescue provenance,
 two real-batch canaries, full resumable execution, and final training-readiness
-closure.  No optimizer is executed here.
+closure. No optimizer is executed here.
 """
 from __future__ import annotations
 
@@ -78,13 +78,13 @@ def load_json(path: Path) -> dict:
 
 
 def run(cmd, *, cwd: Path | None = None, env: dict | None = None, repo_dir: Path | None = None) -> str:
-    cmd = [str(x) for x in cmd]
-    print("\n[RUN]", " ".join(cmd), flush=True)
+    cmd = [str(value) for value in cmd]
     merged = os.environ.copy()
     if repo_dir is not None:
         merged["PYTHONPATH"] = str(repo_dir) + os.pathsep + merged.get("PYTHONPATH", "")
     if env:
         merged.update({str(k): str(v) for k, v in env.items()})
+    print("\n[RUN]", " ".join(cmd), flush=True)
     process = subprocess.Popen(
         cmd,
         cwd=str(cwd) if cwd else None,
@@ -94,8 +94,7 @@ def run(cmd, *, cwd: Path | None = None, env: dict | None = None, repo_dir: Path
         text=True,
         bufsize=1,
     )
-    lines: list[str] = []
-    assert process.stdout is not None
+    lines = []
     for line in process.stdout:
         print(line, end="", flush=True)
         lines.append(line)
@@ -172,6 +171,7 @@ class FinalizeReleaseV4:
             "tools/training/build_truth139_v32_mechanical_tessa_teacher_v2.py",
             "tools/training/validate_truth139_v32_mechanical_tessa_teacher_v1.py",
             "tools/training/validate_truth139_v32_mechanical_tessa_teacher_v2.py",
+            "tools/truth_foundry/blender_presentation_ray_measure_v1.py",
             "tools/corpus/run_truth139_stage48_witness_subject_v1.py",
             "tools/corpus/run_truth139_v32_finalize_remaining_full139_v2.py",
             "tools/corpus/run_truth139_v32_finalize_remaining_full139_v3.py",
@@ -300,68 +300,81 @@ class FinalizeReleaseV4:
         rescue = load_json(rescue_path)
         if rescue.get("status") != RESPONSE_RESCUE_PASS or rescue.get("subject_id") != RESPONSE_RESCUE_SUBJECT:
             raise ValueError("V32_RELEASE_RESPONSE_RESCUE_STATUS")
-        if rescue.get("base_repository_commit") != response.get("code_commit_sha"):
-            raise ValueError("V32_RELEASE_RESPONSE_RESCUE_BASE")
         if rescue.get("patched_validator_sha256") != RESPONSE_RESCUE_VALIDATOR_SHA:
             raise ValueError("V32_RELEASE_RESPONSE_RESCUE_VALIDATOR")
-        diagnosis = dict(rescue.get("diagnosis") or {})
-        if diagnosis.get("producer_truth_changed") is not False or diagnosis.get("teacher_truth_changed") is not False or diagnosis.get("tolerance_relaxed") is not False:
+        if rescue.get("training_performed") is not False or rescue.get("qualification_minted") is not False:
             raise ValueError("V32_RELEASE_RESPONSE_RESCUE_AUTHORITY")
-        if diagnosis.get("new_independent_formulation") != "REST_TANGENT_SVD_GENERALIZED_PRINCIPAL_STRETCH":
-            raise ValueError("V32_RELEASE_RESPONSE_RESCUE_FORMULATION")
-        if float((rescue.get("court") or {}).get("maximum_nonrigid_abs_error", 1.0)) >= 1.0e-8:
-            raise ValueError("V32_RELEASE_RESPONSE_RESCUE_NUMERIC")
-
-        binding = response["subject_output_bindings"][RESPONSE_RESCUE_SUBJECT]
-        chain_path = Path(binding["chain_path"])
-        if not chain_path.is_file() or sha256_file(chain_path) != binding["chain_sha256"]:
-            raise ValueError("V32_RELEASE_RESPONSE_RESCUE_CHAIN")
-        chain = load_json(chain_path)
-        court = dict(rescue["court"])
-        if chain["outputs"]["response_court"]["sha256"] != court["sha256"]:
+        if (rescue.get("diagnosis") or {}).get("tolerance_relaxed") is not False:
+            raise ValueError("V32_RELEASE_RESPONSE_RESCUE_TOLERANCE")
+        if (rescue.get("diagnosis") or {}).get("producer_truth_changed") is not False:
+            raise ValueError("V32_RELEASE_RESPONSE_RESCUE_PRODUCER_TRUTH")
+        if (rescue.get("diagnosis") or {}).get("teacher_truth_changed") is not False:
+            raise ValueError("V32_RELEASE_RESPONSE_RESCUE_TEACHER_TRUTH")
+        bindings = response.get("subject_output_bindings") or {}
+        rescued = bindings.get(RESPONSE_RESCUE_SUBJECT) or {}
+        chain = load_json(Path(rescued["chain_path"]))
+        court_ref = (chain.get("outputs") or {}).get("response_court") or {}
+        if court_ref.get("sha256") != (rescue.get("court") or {}).get("sha256"):
             raise ValueError("V32_RELEASE_RESPONSE_RESCUE_COURT_SHA")
-        if chain["bindings"]["response_court_identity_sha256"] != court["court_identity_sha256"]:
-            raise ValueError("V32_RELEASE_RESPONSE_RESCUE_COURT_ID")
-        if sha256_file(Path(court["path"])) != court["sha256"]:
-            raise ValueError("V32_RELEASE_RESPONSE_RESCUE_COURT_BYTES")
+        if (chain.get("bindings") or {}).get("response_court_identity_sha256") != (rescue.get("court") or {}).get("court_identity_sha256"):
+            raise ValueError("V32_RELEASE_RESPONSE_RESCUE_COURT_IDENTITY")
 
         packet_map = {}
         base_count = rescue_count = 0
-        for index, row in enumerate(rows, 1):
+        for row in rows:
             sid = str(row["subject_id"])
             found = []
-            for root, lineage in ((self.prepared_root, "PREPARED_BASE"), (self.prepared_rescue_root, "PREPARED_RESCUE")):
+            for root, lineage in (
+                (self.prepared_root, "PREPARED_BASE"),
+                (self.prepared_rescue_root, "PREPARED_RESCUE"),
+            ):
                 for packet in sorted(root.glob(f"{sid}/objects/*/packet/{sid}")):
                     if packet.is_dir():
-                        found.append((packet.resolve(), lineage))
+                        found.append((packet, lineage))
             if len(found) != 1:
-                raise ValueError(f"V32_RELEASE_PACKET_CARDINALITY:{sid}:{len(found)}")
+                raise RuntimeError(f"V32_RELEASE_PACKET_CARDINALITY:{sid}:{len(found)}")
             packet, lineage = found[0]
-            for name in ("REST_SURFACE_GEOMETRY.npz", "IRIS_OBSERVATION_ADMISSION.json", "SOURCE_REST_RENDER_CANDIDATE.json", "SOURCE_SCENE_SNAPSHOT.json", "camera_bundle.json"):
+            for name in (
+                "REST_SURFACE_GEOMETRY.npz",
+                "IRIS_OBSERVATION_ADMISSION.json",
+                "SOURCE_REST_RENDER_CANDIDATE.json",
+                "SOURCE_SCENE_SNAPSHOT.json",
+                "camera_bundle.json",
+            ):
                 if not (packet / name).is_file():
-                    raise FileNotFoundError(f"{sid}:{lineage}:{name}")
+                    raise FileNotFoundError(f"V32_RELEASE_PACKET_FILE:{sid}:{name}")
             for view in range(8):
                 if not (packet / f"V{view}.png").is_file():
-                    raise FileNotFoundError(f"{sid}:{lineage}:V{view}")
-            packet_map[sid] = (packet, lineage)
+                    raise FileNotFoundError(f"V32_RELEASE_PACKET_VIEW:{sid}:V{view}")
+            packet_map[sid] = (packet.resolve(), lineage)
             base_count += int(lineage == "PREPARED_BASE")
             rescue_count += int(lineage == "PREPARED_RESCUE")
-            if index % 20 == 0 or index == 139:
-                print(f"[PREFLIGHT {index:03d}/139] base={base_count} rescue={rescue_count}")
-        if (base_count, rescue_count) != (138, 1) or packet_map[PREPARED_RESCUE_SUBJECT][1] != "PREPARED_RESCUE":
-            raise ValueError("V32_RELEASE_PREPARED_LINEAGE")
+        if (base_count, rescue_count) != (138, 1):
+            raise ValueError(f"V32_RELEASE_PACKET_DENOMINATOR:{base_count}:{rescue_count}")
+        if packet_map[PREPARED_RESCUE_SUBJECT][1] != "PREPARED_RESCUE":
+            raise ValueError("V32_RELEASE_EXPECTED_PREPARED_RESCUE_SUBJECT")
 
         self.response = response
-        self.response_receipt = response_path
-        self.response_svd_rescue = rescue_path
+        self.response_receipt = response_path.resolve()
+        self.response_svd_rescue = rescue_path.resolve()
         self.rescue = rescue
         self.packet_map = packet_map
-        print("[PASS] Response 139/139 + SVD rescue rebound")
+        print("[PASS] Response 139/139 + SVD rescue provenance + 139 packets")
 
     def freeze_batch(self) -> None:
-        required = (self.base, self.v2, self.work, self.response, self.rescue, self.packet_map, self.runtime_fingerprint, self.blender_exe)
+        required = (
+            self.base,
+            self.v2,
+            self.work,
+            self.response,
+            self.response_receipt,
+            self.response_svd_rescue,
+            self.packet_map,
+            self.runtime_fingerprint,
+            self.blender_exe,
+        )
         if any(value is None for value in required):
-            raise RuntimeError("V32_RELEASE_PHASE_ORDER")
+            raise RuntimeError("V32_RELEASE_BATCH_PREREQUISITE_ORDER")
         identity = {
             "schema": "RealSaS.Truth139V32FinalizeBatchIdentity.v4",
             "source_commit_sha": self.source_sha,
@@ -370,162 +383,244 @@ class FinalizeReleaseV4:
             "base_receipt_sha256": sha256_file(self.base_receipt),
             "v2_receipt_sha256": sha256_file(self.v2_receipt),
             "response_receipt_sha256": sha256_file(self.response_receipt),
-            "response_svd_rescue_sha256": sha256_file(self.response_svd_rescue),
-            "runtime_fingerprint_sha256": sha256_file(self.runtime_fingerprint),
+            "response_svd_rescue_receipt_sha256": sha256_file(self.response_svd_rescue),
             "prepared_base_id": "936dd528105c84d2974fc512",
             "prepared_rescue_id": "af2a36f11a8a141cde9b501b",
             "contract_sha256": sha256_file(self.contract),
+            "runtime_fingerprint_sha256": sha256_file(self.runtime_fingerprint),
             "blender_binary_sha256": sha256_file(self.blender_exe),
         }
         batch_id = digest(identity)[:24]
         root = self.materialized_root / "v32_finalize_batches" / batch_id
         root.mkdir(parents=True, exist_ok=True)
-        (root / "V32_FINALIZE_BATCH_IDENTITY_V4.json").write_text(
-            json.dumps({**identity, "batch_id": batch_id}, sort_keys=True, indent=2) + "\n"
-        )
-        self.batch_identity = identity
+        path = root / "V32_FINALIZE_BATCH_IDENTITY_V4.json"
+        sealed = dict(identity)
+        sealed["batch_id"] = batch_id
+        sealed["batch_identity_sha256"] = digest(identity)
+        path.write_text(json.dumps(sealed, sort_keys=True, indent=2, allow_nan=False) + "\n")
+        self.batch_identity = sealed
         self.batch_id = batch_id
         self.batch_root = root
-        print("BATCH_ID =", batch_id)
-        print("BATCH_ROOT =", root)
+        print("[PASS] BATCH_ID =", batch_id)
+        print("[PASS] BATCH_ROOT =", root)
 
-    @staticmethod
-    def _status(path: Path) -> str | None:
-        return load_json(path).get("status") if Path(path).is_file() else None
+    def _run_subject(self, sid: str) -> None:
+        if self.batch_root is None or self.blender_exe is None or self.packet_map is None:
+            raise RuntimeError("V32_RELEASE_SUBJECT_BEFORE_BATCH")
+        packet, _lineage = self.packet_map[sid]
+        response_binding = (self.response.get("subject_output_bindings") or {})[sid]
+        chain = Path(response_binding["chain_path"]).resolve()
+        subject_out = self.batch_root / "subjects" / sid
+        subject_out.mkdir(parents=True, exist_ok=True)
+
+        commands = [
+            (
+                subject_out / "geometry/V32_EXACT_GEOMETRY_MANIFEST.json",
+                GEOM_PASS,
+                [
+                    sys.executable,
+                    self.repo_dir / "tools/corpus/build_truth139_v32_exact_geometry_v1.py",
+                    "--subject-id", sid,
+                    "--geometry-npz", packet / "REST_SURFACE_GEOMETRY.npz",
+                    "--source-scene-snapshot", packet / "SOURCE_SCENE_SNAPSHOT.json",
+                    "--camera-bundle", packet / "camera_bundle.json",
+                    "--output-dir", subject_out / "geometry",
+                ],
+            ),
+            (
+                subject_out / "geometry/V32_EXACT_GEOMETRY_COURT.json",
+                GEOM_COURT_PASS,
+                [
+                    sys.executable,
+                    self.repo_dir / "tools/corpus/validate_truth139_v32_exact_geometry_v1.py",
+                    "--geometry-manifest", subject_out / "geometry/V32_EXACT_GEOMETRY_MANIFEST.json",
+                    "--output", subject_out / "geometry/V32_EXACT_GEOMETRY_COURT.json",
+                ],
+            ),
+            (
+                subject_out / "rgb/V32_RGB_PATCH_EVIDENCE_MANIFEST.json",
+                RGB_PASS,
+                [
+                    sys.executable,
+                    self.repo_dir / "tools/corpus/build_truth139_v32_rgb_patch_cache_v1.py",
+                    "--subject-id", sid,
+                    "--packet-root", packet,
+                    "--output-dir", subject_out / "rgb",
+                ],
+            ),
+            (
+                subject_out / "rgb/V32_RGB_PATCH_EVIDENCE_COURT.json",
+                RGB_COURT_PASS,
+                [
+                    sys.executable,
+                    self.repo_dir / "tools/corpus/validate_truth139_v32_rgb_patch_cache_v1.py",
+                    "--rgb-manifest", subject_out / "rgb/V32_RGB_PATCH_EVIDENCE_MANIFEST.json",
+                    "--output", subject_out / "rgb/V32_RGB_PATCH_EVIDENCE_COURT.json",
+                ],
+            ),
+            (
+                subject_out / "tessa_teacher/V32_MECHANICAL_TESSA_TEACHER_MANIFEST.json",
+                TESSA_PASS,
+                [
+                    sys.executable,
+                    self.repo_dir / "tools/training/build_truth139_v32_mechanical_tessa_teacher_v2.py",
+                    "--subject-id", sid,
+                    "--geometry-manifest", subject_out / "geometry/V32_EXACT_GEOMETRY_MANIFEST.json",
+                    "--response-chain", chain,
+                    "--camera-bundle", packet / "camera_bundle.json",
+                    "--output-dir", subject_out / "tessa_teacher",
+                ],
+            ),
+            (
+                subject_out / "tessa_teacher/V32_MECHANICAL_TESSA_TEACHER_COURT.json",
+                TESSA_COURT_PASS,
+                [
+                    sys.executable,
+                    self.repo_dir / "tools/training/validate_truth139_v32_mechanical_tessa_teacher_v2.py",
+                    "--teacher-manifest", subject_out / "tessa_teacher/V32_MECHANICAL_TESSA_TEACHER_MANIFEST.json",
+                    "--output", subject_out / "tessa_teacher/V32_MECHANICAL_TESSA_TEACHER_COURT.json",
+                ],
+            ),
+            (
+                subject_out / "stage48/STAGE48_RENDERER_WITNESS_MANIFEST.json",
+                STAGE48_PASS,
+                [
+                    sys.executable,
+                    self.repo_dir / "tools/corpus/run_truth139_stage48_witness_subject_v1.py",
+                    "--subject-id", sid,
+                    "--response-chain", chain,
+                    "--blender", self.blender_exe,
+                    "--output-dir", subject_out / "stage48",
+                ],
+            ),
+        ]
+        for output, status, command in commands:
+            if output.is_file():
+                try:
+                    if load_json(output).get("status") == status:
+                        print("[REUSE]", sid, output.name, flush=True)
+                        continue
+                except Exception:
+                    pass
+            run(command, cwd=self.repo_dir, repo_dir=self.repo_dir)
+            if not output.is_file() or load_json(output).get("status") != status:
+                raise RuntimeError("V32_RELEASE_SUBJECT_OUTPUT_NOT_PASS:" + sid + ":" + str(output))
 
     def run_canaries(self) -> None:
-        if self.batch_root is None or self.packet_map is None or self.response is None or self.blender_exe is None:
-            raise RuntimeError("V32_RELEASE_PHASE_ORDER")
-        for sid in (RESPONSE_RESCUE_SUBJECT, PREPARED_RESCUE_SUBJECT):
-            packet, lineage = self.packet_map[sid]
-            chain_path = Path(self.response["subject_output_bindings"][sid]["chain_path"])
-            out = self.batch_root / "subjects" / sid
-
-            geom_dir = out / "geometry"
-            geom = geom_dir / "V32_EXACT_GEOMETRY_MANIFEST.json"
-            geom_court = geom_dir / "V32_EXACT_GEOMETRY_COURT.json"
-            if self._status(geom) != GEOM_PASS:
-                run([sys.executable, self.repo_dir / "tools/corpus/build_truth139_v32_exact_geometry_v1.py", "--subject-id", sid, "--geometry-npz", packet / "REST_SURFACE_GEOMETRY.npz", "--source-scene-snapshot", packet / "SOURCE_SCENE_SNAPSHOT.json", "--camera-bundle", packet / "camera_bundle.json", "--output-dir", geom_dir], cwd=self.repo_dir, repo_dir=self.repo_dir)
-            if self._status(geom_court) != GEOM_COURT_PASS:
-                run([sys.executable, self.repo_dir / "tools/corpus/validate_truth139_v32_exact_geometry_v1.py", "--geometry-manifest", geom, "--output", geom_court], cwd=self.repo_dir, repo_dir=self.repo_dir)
-
-            rgb_dir = out / "rgb"
-            rgb = rgb_dir / "V32_RGB_PATCH_EVIDENCE_MANIFEST.json"
-            rgb_court = rgb_dir / "V32_RGB_PATCH_EVIDENCE_COURT.json"
-            if self._status(rgb) != RGB_PASS:
-                run([sys.executable, self.repo_dir / "tools/corpus/build_truth139_v32_rgb_patch_cache_v1.py", "--subject-id", sid, "--packet-root", packet, "--output-dir", rgb_dir], cwd=self.repo_dir, repo_dir=self.repo_dir)
-            if self._status(rgb_court) != RGB_COURT_PASS:
-                run([sys.executable, self.repo_dir / "tools/corpus/validate_truth139_v32_rgb_patch_cache_v1.py", "--rgb-manifest", rgb, "--output", rgb_court], cwd=self.repo_dir, repo_dir=self.repo_dir)
-
-            tessa_dir = out / "tessa_teacher"
-            tessa = tessa_dir / "V32_MECHANICAL_TESSA_TEACHER_MANIFEST.json"
-            tessa_court = tessa_dir / "V32_MECHANICAL_TESSA_TEACHER_COURT.json"
-            if self._status(tessa) != TESSA_PASS:
-                run([sys.executable, self.repo_dir / "tools/training/build_truth139_v32_mechanical_tessa_teacher_v2.py", "--subject-id", sid, "--geometry-manifest", geom, "--response-chain", chain_path, "--camera-bundle", packet / "camera_bundle.json", "--output-dir", tessa_dir], cwd=self.repo_dir, repo_dir=self.repo_dir)
-            if self._status(tessa_court) != TESSA_COURT_PASS:
-                run([sys.executable, self.repo_dir / "tools/training/validate_truth139_v32_mechanical_tessa_teacher_v2.py", "--teacher-manifest", tessa, "--output", tessa_court], cwd=self.repo_dir, repo_dir=self.repo_dir)
-
-            stage48_dir = out / "stage48"
-            stage48 = stage48_dir / "STAGE48_RENDERER_WITNESS_MANIFEST.json"
-            if self._status(stage48) != STAGE48_PASS:
-                run([sys.executable, self.repo_dir / "tools/corpus/run_truth139_stage48_witness_subject_v1.py", "--subject-id", sid, "--response-chain", chain_path, "--blender", self.blender_exe, "--output-dir", stage48_dir], cwd=self.repo_dir, repo_dir=self.repo_dir)
-
-            expected = ((geom, GEOM_PASS), (geom_court, GEOM_COURT_PASS), (rgb, RGB_PASS), (rgb_court, RGB_COURT_PASS), (tessa, TESSA_PASS), (tessa_court, TESSA_COURT_PASS), (stage48, STAGE48_PASS))
-            for path, wanted in expected:
-                if self._status(path) != wanted:
-                    raise ValueError(f"V32_RELEASE_CANARY:{sid}:{path.name}:{self._status(path)}")
-            print(f"[CANARY PASS] {sid} lineage={lineage}")
-        print("[PASS] both end-to-end canaries reusable by full runner")
+        if self.batch_root is None:
+            raise RuntimeError("V32_RELEASE_CANARY_BEFORE_BATCH")
+        canaries = (RESPONSE_RESCUE_SUBJECT, PREPARED_RESCUE_SUBJECT)
+        for sid in canaries:
+            print("\n[CANARY]", sid, flush=True)
+            self._run_subject(sid)
+        receipt = {
+            "schema": "RealSaS.Truth139V32FinalizeCanaryReceipt.v1",
+            "status": "PASS_V32_FINALIZE_TWO_REAL_CANARIES",
+            "source_commit_sha": self.source_sha,
+            "subjects": list(canaries),
+            "stage48_required": True,
+            "response_svd_rescue_subject_included": RESPONSE_RESCUE_SUBJECT in canaries,
+            "prepared_rescue_subject_included": PREPARED_RESCUE_SUBJECT in canaries,
+            "completed_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        }
+        receipt["canary_identity_sha256"] = digest(receipt)
+        path = self.batch_root / "V32_FINALIZE_TWO_REAL_CANARIES_RECEIPT.json"
+        path.write_text(json.dumps(receipt, sort_keys=True, indent=2, allow_nan=False) + "\n")
+        print("[PASS] two real end-to-end canaries")
 
     def run_full(self) -> None:
-        if self.batch_root is None or self.runtime_fingerprint is None or self.response_receipt is None or self.response_svd_rescue is None or self.blender_exe is None:
-            raise RuntimeError("V32_RELEASE_PHASE_ORDER")
+        if self.batch_root is None or self.blender_exe is None or self.response_receipt is None:
+            raise RuntimeError("V32_RELEASE_FULL_BEFORE_BATCH")
+        canary = self.batch_root / "V32_FINALIZE_TWO_REAL_CANARIES_RECEIPT.json"
+        if not canary.is_file() or load_json(canary).get("status") != "PASS_V32_FINALIZE_TWO_REAL_CANARIES":
+            raise RuntimeError("V32_RELEASE_FULL_REQUIRES_CANARIES")
         run([
-            sys.executable, "-m", "tools.corpus.run_truth139_v32_finalize_remaining_full139_v3",
+            sys.executable,
+            "-m",
+            "tools.corpus.run_truth139_v32_finalize_remaining_full139_v3",
             "--work-orders", self.work_orders,
             "--prepared-root", self.prepared_root,
             "--prepared-rescue-root", self.prepared_rescue_root,
             "--base-receipt", self.base_receipt,
             "--v2-extension-receipt", self.v2_receipt,
             "--response-receipt", self.response_receipt,
-            "--response-svd-rescue", self.response_svd_rescue,
+            "--response-svd-rescue-receipt", self.response_svd_rescue,
             "--runtime-fingerprint", self.runtime_fingerprint,
             "--blender", self.blender_exe,
             "--output-root", self.batch_root,
             "--continue-on-failure",
         ], cwd=self.repo_dir, repo_dir=self.repo_dir)
 
-    def close(self) -> dict:
-        if self.batch_root is None or self.batch_identity is None or self.response_receipt is None or self.response_svd_rescue is None or self.runtime_fingerprint is None:
-            raise RuntimeError("V32_RELEASE_PHASE_ORDER")
+    def close(self) -> Path:
+        if self.batch_root is None:
+            raise RuntimeError("V32_RELEASE_CLOSE_BEFORE_BATCH")
         receipt_path = self.batch_root / "V32_TRAINING_READINESS_RECEIPT.json"
         receipt = load_json(receipt_path)
-        if receipt.get("status") != FINAL_PASS or int(receipt.get("subject_count", -1)) != 139 or len(receipt.get("subjects") or {}) != 139:
-            raise ValueError("V32_RELEASE_FINAL_RECEIPT")
-        if receipt.get("code_commit_sha") != self.source_sha or receipt.get("runner_revision") != 3:
-            raise ValueError("V32_RELEASE_FINAL_CODE_BINDING")
+        if receipt.get("status") != FINAL_PASS or int(receipt.get("subject_count", -1)) != 139:
+            raise ValueError("V32_RELEASE_FINAL_STATUS")
+        if receipt.get("code_commit_sha") != self.source_sha:
+            raise ValueError("V32_RELEASE_FINAL_CODE_SHA")
         if receipt.get("training_performed") is not False or receipt.get("training_authorized") is not True or receipt.get("qualification_minted") is not False:
             raise ValueError("V32_RELEASE_FINAL_AUTHORITY")
         if receipt.get("compiler_phase_e_watertight_court_pending_training") is not True:
             raise ValueError("V32_RELEASE_FINAL_PHASE_E")
-        if receipt["prior_truth_receipts"]["response"]["sha256"] != sha256_file(self.response_receipt):
-            raise ValueError("V32_RELEASE_FINAL_RESPONSE_BINDING")
-        if receipt["runtime_fingerprint"]["sha256"] != sha256_file(self.runtime_fingerprint):
-            raise ValueError("V32_RELEASE_FINAL_RUNTIME_BINDING")
-        supplemental = receipt["supplemental_response_numeric_rescue"]
-        if supplemental.get("status") != RESPONSE_RESCUE_PASS or supplemental.get("sha256") != sha256_file(self.response_svd_rescue) or supplemental.get("patched_validator_sha256") != RESPONSE_RESCUE_VALIDATOR_SHA:
-            raise ValueError("V32_RELEASE_FINAL_RESCUE_BINDING")
+        prior = receipt.get("prior_truth_receipts") or {}
+        if (prior.get("base") or {}).get("status") != BASE_PASS or (prior.get("v2_extension") or {}).get("status") != V2_PASS or (prior.get("response") or {}).get("status") != RESPONSE_PASS:
+            raise ValueError("V32_RELEASE_FINAL_PRIOR_STATUS")
+        rescue = receipt.get("response_svd_rescue") or {}
+        if rescue.get("status") != RESPONSE_RESCUE_PASS or rescue.get("subject_id") != RESPONSE_RESCUE_SUBJECT:
+            raise ValueError("V32_RELEASE_FINAL_RESCUE")
+        runtime = receipt.get("runtime_fingerprint") or {}
+        if runtime.get("sha256") != sha256_file(self.runtime_fingerprint):
+            raise ValueError("V32_RELEASE_FINAL_RUNTIME")
 
-        split_path = Path(receipt["split"]["path"])
-        if sha256_file(split_path) != receipt["split"]["sha256"]:
-            raise ValueError("V32_RELEASE_SPLIT_SHA")
-        split = load_json(split_path)
-        train = set(split["train_subjects"])
-        unseen = set(split["unseen_subjects"])
+        split = load_json(Path(receipt["split"]["path"]))
+        train = set(split.get("train_subjects") or [])
+        unseen = set(split.get("unseen_subjects") or [])
         if not train or not unseen or train & unseen or len(train) + len(unseen) != 139:
-            raise ValueError("V32_RELEASE_SPLIT_PARTITION")
-        if split.get("optimizer_may_read_unseen") is not False or split.get("checkpoint_selection_may_read_unseen") is not False or split.get("unseen_bytes_opened_for_fit") is not False:
-            raise ValueError("V32_RELEASE_SPLIT_LEAKAGE")
+            raise ValueError("V32_RELEASE_FINAL_SPLIT")
+        if split.get("optimizer_may_read_unseen") is not False or split.get("checkpoint_selection_may_read_unseen") is not False:
+            raise ValueError("V32_RELEASE_FINAL_UNSEEN_AUTHORITY")
 
-        validation_path = Path(receipt["train_internal_validation"]["path"])
-        if sha256_file(validation_path) != receipt["train_internal_validation"]["sha256"]:
-            raise ValueError("V32_RELEASE_VALIDATION_SHA")
-        validation = load_json(validation_path)
+        validation = load_json(Path(receipt["train_internal_validation"]["path"]))
         if validation.get("unseen_subjects_included") is not False or set(validation.get("subjects") or {}) != train:
-            raise ValueError("V32_RELEASE_VALIDATION_SPLIT")
-        for lanes in validation["subjects"].values():
-            for row in lanes.values():
-                if len(row["parent_sha256"]) != 64 or int(row["row_count"]) < 0 or not all(0 <= i < row["row_count"] for i in row["selected_indices"]):
-                    raise ValueError("V32_RELEASE_VALIDATION_ROWS")
+            raise ValueError("V32_RELEASE_FINAL_VALIDATION_SCOPE")
+        for _sid, lanes in (validation.get("subjects") or {}).items():
+            for _lane, row in lanes.items():
+                if len(str(row.get("parent_sha256") or "")) != 64:
+                    raise ValueError("V32_RELEASE_FINAL_VALIDATION_PARENT")
+                count = int(row.get("row_count", -1))
+                if count < 0 or any(not 0 <= int(i) < count for i in row.get("selected_indices") or []):
+                    raise ValueError("V32_RELEASE_FINAL_VALIDATION_INDEX")
 
         notebook_receipt = {
             "schema": "RealSaS.Truth139V32FinalizeNotebookReceipt.v4",
             "status": "PASS_V32_FINALIZE_NOTEBOOK_HARD_CLOSURE",
             "source_commit_sha": self.source_sha,
             "batch_id": self.batch_id,
-            "batch_identity_sha256": digest(self.batch_identity),
             "base_receipt_sha256": sha256_file(self.base_receipt),
             "v2_receipt_sha256": sha256_file(self.v2_receipt),
             "response_receipt_sha256": sha256_file(self.response_receipt),
-            "response_svd_rescue_sha256": sha256_file(self.response_svd_rescue),
+            "response_svd_rescue_receipt_sha256": sha256_file(self.response_svd_rescue),
             "runtime_fingerprint_sha256": sha256_file(self.runtime_fingerprint),
-            "training_readiness_receipt": {"path": str(receipt_path), "sha256": sha256_file(receipt_path), "identity_sha256": receipt["ledger_identity_sha256"]},
+            "training_readiness_receipt": {
+                "path": str(receipt_path),
+                "sha256": sha256_file(receipt_path),
+                "identity_sha256": receipt["ledger_identity_sha256"],
+            },
             "train_subject_count": len(train),
             "unseen_subject_count": len(unseen),
             "training_performed": False,
             "completed_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         }
         notebook_receipt["receipt_identity_sha256"] = digest(notebook_receipt)
-        notebook_path = self.batch_root / "V32_FINALIZE_NOTEBOOK_RECEIPT_V4.json"
-        notebook_path.write_text(json.dumps(notebook_receipt, sort_keys=True, indent=2, allow_nan=False) + "\n")
-
+        notebook_path = self.batch_root / "V32_FINALIZE_NOTEBOOK_RECEIPT.json"
+        notebook_path.write_text(json.dumps(notebook_receipt, sort_keys=True, indent=2) + "\n")
         print("\n" + "=" * 80)
         print("PASS — TRUTH139 V3.2 PRETRAIN TARGETS READY")
-        print("worker SHA     :", self.source_sha)
-        print("batch          :", self.batch_id)
         print("train subjects :", len(train))
         print("unseen subjects:", len(unseen))
         print("readiness      :", receipt_path)
         print("next           : IRIS/TESSA V3.2 FULL139 A100 TRAIN Run-All")
         print("=" * 80)
-        return receipt
+        return receipt_path

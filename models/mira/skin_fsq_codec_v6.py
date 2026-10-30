@@ -2,9 +2,10 @@ from __future__ import annotations
 
 """MIRA V6: carrier-native discrete skin-field codec.
 
-This module borrows the representation principle from SkinTokens/TokenRig -- skin
-weights are compressed into discrete latent tokens -- without importing their mesh
-encoder or skeleton authority. RealSaS conditions on its own mesh/carrier features.
+This module borrows the representation principle from modern discrete skin-code
+riggers: skin weights are compressed into discrete latent codes without importing
+their mesh encoder or skeleton authority. RealSaS conditions on its own
+mesh/carrier features.
 
 The codec is deliberately not canonical authority. It produces learned proposal
 latents that decode to dense weights; Compiler qualification remains downstream.
@@ -43,7 +44,7 @@ class MIRASkinFSQCodecConfig:
 
 
 class FiniteScalarQuantizer(nn.Module):
-    """Small dependency-free FSQ-style quantizer with mixed-radix token ids."""
+    """Small dependency-free FSQ-style quantizer with mixed-radix code ids."""
 
     def __init__(self, levels: Sequence[int]):
         super().__init__()
@@ -97,25 +98,13 @@ class FiniteScalarQuantizer(nn.Module):
     def forward(self, z: Tensor) -> tuple[Tensor, Tensor, Tensor]:
         indices = self._quantize_indices(z)
         hard = self.indices_to_codes(indices).to(dtype=z.dtype)
-        # Straight-through estimator: decoder sees quantized values, encoder gets identity gradient.
         quantized = z + (hard - z).detach()
         token_ids = self.indices_to_token_ids(indices)
         return quantized, token_ids, hard
 
 
 class MIRASkinFSQCodecV6(nn.Module):
-    """Encode dense carrier skin into per-joint tokens and decode them back.
-
-    Shapes:
-      vertex_features: [B, N, Fv]
-      joint_features:  [B, J, Fj]
-      weights:         [B, N, J]
-      token_ids:       [B, J, T]
-
-    The decoder always returns a simplex over J by softmax. Compiler still checks
-    exact product legality; this normalization is a model parameterization, not a
-    qualification shortcut.
-    """
+    """Encode dense carrier skin into per-joint codes and decode them back."""
 
     architecture_id = MIRA_V6_CODEC_ID
 
@@ -128,32 +117,18 @@ class MIRASkinFSQCodecV6(nn.Module):
         self.quantizer = FiniteScalarQuantizer(config.levels)
 
         self.vertex_encode = nn.Sequential(
-            nn.Linear(config.vertex_feature_dim + 1, h),
-            nn.GELU(),
-            nn.Linear(h, h),
-            nn.GELU(),
+            nn.Linear(config.vertex_feature_dim + 1, h), nn.GELU(), nn.Linear(h, h), nn.GELU(),
         )
-        self.joint_encode = nn.Sequential(
-            nn.Linear(config.joint_feature_dim, h),
-            nn.GELU(),
-        )
+        self.joint_encode = nn.Sequential(nn.Linear(config.joint_feature_dim, h), nn.GELU())
         self.latent_head = nn.Linear(3 * h, t * d)
 
         self.vertex_decode = nn.Sequential(
-            nn.Linear(config.vertex_feature_dim, h),
-            nn.GELU(),
-            nn.Linear(h, h),
+            nn.Linear(config.vertex_feature_dim, h), nn.GELU(), nn.Linear(h, h),
         )
         self.joint_decode = nn.Sequential(
-            nn.Linear(config.joint_feature_dim, h),
-            nn.GELU(),
-            nn.Linear(h, h),
+            nn.Linear(config.joint_feature_dim, h), nn.GELU(), nn.Linear(h, h),
         )
-        self.code_decode = nn.Sequential(
-            nn.Linear(t * d, h),
-            nn.GELU(),
-            nn.Linear(h, h),
-        )
+        self.code_decode = nn.Sequential(nn.Linear(t * d, h), nn.GELU(), nn.Linear(h, h))
         self.bias_head = nn.Linear(h, 1)
 
     def _check_inputs(self, vertex_features: Tensor, joint_features: Tensor) -> tuple[int, int, int]:
@@ -169,7 +144,7 @@ class MIRASkinFSQCodecV6(nn.Module):
             raise ValueError("MIRA_V6_CODEC_EMPTY_DOMAIN")
         return b, n, j
 
-    def encode_tokens(self, weights: Tensor, vertex_features: Tensor, joint_features: Tensor) -> tuple[Tensor, Tensor, Tensor]:
+    def _encode_latent(self, weights: Tensor, vertex_features: Tensor, joint_features: Tensor) -> Tensor:
         b, n, j = self._check_inputs(vertex_features, joint_features)
         if weights.shape != (b, n, j):
             raise ValueError("MIRA_V6_CODEC_WEIGHT_SHAPE_DRIFT")
@@ -177,9 +152,6 @@ class MIRASkinFSQCodecV6(nn.Module):
             raise ValueError("MIRA_V6_CODEC_WEIGHT_NONFINITE")
         if torch.any(weights < -self.config.eps):
             raise ValueError("MIRA_V6_CODEC_WEIGHT_NEGATIVE")
-
-        # Per-joint field encoding. Pool both mean and max so a sparse influence
-        # does not disappear in a large carrier.
         vf = vertex_features[:, None, :, :].expand(b, j, n, -1)
         wf = weights.transpose(1, 2).unsqueeze(-1)
         encoded = self.vertex_encode(torch.cat([vf, wf], dim=-1))
@@ -187,7 +159,10 @@ class MIRASkinFSQCodecV6(nn.Module):
         max_pool = encoded.amax(dim=2)
         joint_state = self.joint_encode(joint_features)
         latent = self.latent_head(torch.cat([mean_pool, max_pool, joint_state], dim=-1))
-        latent = latent.view(b, j, self.config.tokens_per_joint, self.config.latent_dim)
+        return latent.view(b, j, self.config.tokens_per_joint, self.config.latent_dim)
+
+    def encode_tokens(self, weights: Tensor, vertex_features: Tensor, joint_features: Tensor) -> tuple[Tensor, Tensor, Tensor]:
+        latent = self._encode_latent(weights, vertex_features, joint_features)
         quantized, token_ids, hard_codes = self.quantizer(latent)
         return token_ids, quantized, hard_codes
 
@@ -198,32 +173,31 @@ class MIRASkinFSQCodecV6(nn.Module):
             raise ValueError("MIRA_V6_CODEC_TOKEN_SHAPE_DRIFT")
         codes = self.quantizer.token_ids_to_codes(token_ids).to(dtype=vertex_features.dtype)
         codes = codes.reshape(b, j, self.config.tokens_per_joint * self.config.latent_dim)
-
-        v = self.vertex_decode(vertex_features)  # [B,N,H]
-        q = self.joint_decode(joint_features) + self.code_decode(codes)  # [B,J,H]
+        v = self.vertex_decode(vertex_features)
+        q = self.joint_decode(joint_features) + self.code_decode(codes)
         logits = torch.einsum("bnh,bjh->bnj", v, q) / math.sqrt(float(self.config.hidden_dim))
         logits = logits + self.bias_head(q).transpose(1, 2)
         return torch.softmax(logits, dim=-1)
 
     def forward(self, weights: Tensor, vertex_features: Tensor, joint_features: Tensor) -> dict[str, Tensor]:
-        token_ids, quantized, hard_codes = self.encode_tokens(weights, vertex_features, joint_features)
+        latent = self._encode_latent(weights, vertex_features, joint_features)
+        quantized, token_ids, hard_codes = self.quantizer(latent)
         reconstructed = self.decode_tokens(token_ids, vertex_features, joint_features)
         target = weights / weights.sum(dim=-1, keepdim=True).clamp_min(self.config.eps)
         reconstruction_loss = F.smooth_l1_loss(reconstructed, target)
-        # FSQ has no learned embedding table; this term merely keeps pre-quantized
-        # latents close to their finite scalar cells.
-        commitment_loss = F.mse_loss(quantized, hard_codes.detach())
+        # Unlike MSE(quantized, hard), which is identically zero in the forward
+        # pass under a straight-through estimator, this term acts on the actual
+        # bounded pre-quantization latent and therefore carries encoder gradient.
+        quantization_loss = F.mse_loss(torch.tanh(latent), hard_codes.detach())
         return {
             "token_ids": token_ids,
             "reconstructed_weights": reconstructed,
             "reconstruction_loss": reconstruction_loss,
-            "commitment_loss": commitment_loss,
+            "quantization_loss": quantization_loss,
+            "loss": reconstruction_loss + 0.05 * quantization_loss,
         }
 
 
 __all__ = [
-    "FiniteScalarQuantizer",
-    "MIRASkinFSQCodecConfig",
-    "MIRASkinFSQCodecV6",
-    "MIRA_V6_CODEC_ID",
+    "FiniteScalarQuantizer", "MIRASkinFSQCodecConfig", "MIRASkinFSQCodecV6", "MIRA_V6_CODEC_ID",
 ]

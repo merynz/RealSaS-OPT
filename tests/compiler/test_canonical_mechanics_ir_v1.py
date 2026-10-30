@@ -86,8 +86,6 @@ def _rig(mesh):
         feature_evidence_binding_hash="1" * 64,
         proposal_evidence_hash="a" * 64,
         rig_program_qualification_hash="b" * 64,
-        # This fixture starts at an already-canonical Rig boundary; Rig hash
-        # derivation itself is covered by the CanonicalRigIR.v2 courts.
         deform_structure_hash="c" * 64,
         control_program_hash="d" * 64,
         rig_lineage_hash="",
@@ -114,7 +112,7 @@ def _skin(mesh, rig):
         mesh_carrier_topology_hash=mesh.carrier_topology_hash,
         mesh_carrier_geometry_hash=mesh.carrier_geometry_hash,
         carrier_skin_qualification_hash="f" * 64,
-        skin_token_proposal_hash="1" * 64,
+        skin_code_proposal_hash="1" * 64,
         skin_codec_architecture_id="codec",
         skin_codec_checkpoint_hash="2" * 64,
         skin_lineage_hash="",

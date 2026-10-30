@@ -1,0 +1,106 @@
+{
+  "schema": "RealSaS.Truth139IrisResponseEvidenceTeacherContract.v1",
+  "date": "2026-10-30",
+  "status": "FROZEN__IRIS_RESPONSE_EVIDENCE_ONLY__V32_COMPATIBLE__NOT_AXIS_OR_MIRA_MODEL_TRUTH",
+  "purpose": "QUALIFY_STAGE47_MEASURED_DEFORMATION_RESPONSE_AS_PRIMITIVE_SHARED_SCENE_EVIDENCE_WITHOUT_CONFLATING_IT_WITH_CANONICAL_RIG_OR_SKIN_AUTHORITY",
+  "architecture_parent": {
+    "v32_freeze_commit": "ccb512656ca9f2e108b097d8a31eb2e1e9d0d36d",
+    "dense3d_carrier_changed": false,
+    "graphics_changed_by_this_contract": false,
+    "geometry_changed_by_this_contract": false,
+    "tessa_changed_by_this_contract": false,
+    "response_role": "FIRST_CLASS_CONTINUOUS_MEASURED_SCENE_EVIDENCE",
+    "response_is_semantic_part_class": false
+  },
+  "scope_boundary": {
+    "stage47_response_evidence_role": "PRIVILEGED_MEASURED_SOURCE_DEFORMATION_RESPONSE_FOR_IRIS_SHARED_SCENE_EVIDENCE_AND_DOWNSTREAM_DIAGNOSTICS",
+    "stage47_is_axis_training_truth": false,
+    "stage47_is_mira_training_truth": false,
+    "stage47_is_canonical_rig_or_skin_authority": false,
+    "stage48_renderer_intervention_required_for_this_response_family": false,
+    "stage48_renderer_intervention_remains_separate_truth_lane": true
+  },
+  "primary_measured_evidence": {
+    "source": "STAGE47_SOURCE_RESPONSE_CALIBRATION",
+    "required": [
+      "REST_VERTEX_POSITIONS",
+      "POSE_IDENTITY_BASELINE",
+      "SHAM_REPEAT",
+      "ISOLATED_CONTROL_PLUS_MINUS_RESPONSES_AT_MULTIPLE_AMPLITUDES",
+      "ROOT_TRANSLATION_GAUGE_CONTROL"
+    ],
+    "authority": "MEASURED_SOURCE_EVALUATOR_RESPONSE",
+    "semantic_joint_labels_required": false,
+    "source_weights_required_for_measured_response_authority": false
+  },
+  "derived_surface_evidence": {
+    "producer_function": "models.iris.truth.presentation_response_v1:build_surface_response_arrays_v1",
+    "required_fields": [
+      "surface_face_valid",
+      "surface_stretch_major_mean",
+      "surface_stretch_minor_mean",
+      "surface_area_ratio_mean",
+      "surface_anisotropy_mean",
+      "surface_tangent_direction_2theta",
+      "surface_tangent_valid",
+      "surface_nonrigid_response",
+      "surface_response_energy",
+      "response_pair_face",
+      "response_pair_coherence",
+      "response_pair_jump",
+      "response_pair_valid"
+    ],
+    "action_measure": "CONTROL_BALANCED__EQUAL_MASS_PER_CONTROL_THEN_EQUAL_MASS_WITHIN_CONTROL",
+    "semantic_taxonomy_used": false,
+    "renderer_measurement_used": false,
+    "appearance_measurement_used": false
+  },
+  "numeric_integrity": {
+    "checks": [
+      "REST_IDENTITY_RESET_STABILITY",
+      "SHAM_REPEAT_STABILITY",
+      "CENTRAL_PLUS_MINUS_ACTION_COMPLETENESS",
+      "FINITE_RESPONSE_TENSORS",
+      "RESPONSE_SCALE_RELATIVE_TO_SOURCE_BOUNDS",
+      "PER_CONTROL_SUPPORT_AND_RESPONSE_ENERGY",
+      "ADJACENT_AMPLITUDE_DERIVATIVE_AGREEMENT_DIAGNOSTIC",
+      "INDEPENDENT_SAMPLED_FACE_RESPONSE_RECOMPUTATION"
+    ],
+    "rule": "DIRECTLY_MEASURED_EVALUATOR_RESPONSES_REMAIN_SEPARATE_FROM_ANY RIG_OR_SKIN_LABEL_DERIVED_FROM_SOURCE_METADATA"
+  },
+  "student_objective_boundary": {
+    "truth_values_are_likelihood_agnostic": true,
+    "current_v32_training_recipe": "FIXED_DF_STUDENT_T_LOCATION_OBJECTIVE_ON_LOG1P_NONNEGATIVE_MAGNITUDES",
+    "student_t_df": 3.0,
+    "target_clipping_allowed": false,
+    "gaussian_nll_is_truth_authority": false,
+    "teacher_materialization_may_not_encode_student_likelihood": true
+  },
+  "evaluation": {
+    "iris_response_shortcut_court_required_at_model_evaluation": true,
+    "comparators": [
+      "REAL_SCENE_CARRIER",
+      "SHUFFLED_OTHER_UNSEEN_SCENE_CARRIER",
+      "TRAIN_MEDIAN_CONSTANT_PRIOR"
+    ],
+    "metrics": [
+      "LOG1P_MAE",
+      "RAW_MAE",
+      "RMSE",
+      "SPEARMAN",
+      "TAIL_RAW_MAE",
+      "FIXED_SCALE_STUDENT_T_NLL"
+    ],
+    "nll_alone_may_not_mint_generalization": true
+  },
+  "gates": {
+    "independent_materialization_court_required": true,
+    "calling_stage47_axis_truth_forbidden": true,
+    "calling_stage47_mira_truth_forbidden": true,
+    "calling_source_weights_canonical_skin_truth_from_this_contract_forbidden": true,
+    "stage48_renderer_witness_may_not_be_silently_required_for_response": true,
+    "training_performed": false,
+    "split_created": false,
+    "qualification_minted": false
+  }
+}

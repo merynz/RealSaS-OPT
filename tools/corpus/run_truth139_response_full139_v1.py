@@ -128,7 +128,13 @@ def main() -> None:
     if work.get("schema") != WORK_ORDER_SCHEMA:
         raise ValueError("TRUTH139_RESPONSE_WORK_ORDER_SCHEMA")
     rows = list(work.get("subjects") or ())
-    if len(rows) != 139 or len({str(row.get("subject_key") or "") for row in rows}) != 139:
+    subject_ids_declared = [str(row.get("subject_id") or "") for row in rows]
+    if (
+        int(work.get("subject_count", -1)) != 139
+        or len(rows) != 139
+        or any(not subject_id for subject_id in subject_ids_declared)
+        or len(set(subject_ids_declared)) != 139
+    ):
         raise ValueError("TRUTH139_RESPONSE_WORK_ORDER_DENOMINATOR")
     counts = dict(work.get("job_candidate_counts") or {})
     if int(counts.get("IRIS_RESPONSE_EVIDENCE", -1)) != 139:
@@ -142,7 +148,7 @@ def main() -> None:
     output_bindings = {}
 
     for index, row in enumerate(rows, start=1):
-        subject_id = str(row.get("subject_key") or "")
+        subject_id = str(row.get("subject_id") or "")
         subject_ids.append(subject_id)
         jobs = dict(row.get("jobs") or {})
         response = dict(jobs.get("IRIS_RESPONSE_EVIDENCE") or {})

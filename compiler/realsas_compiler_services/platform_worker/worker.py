@@ -398,6 +398,20 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
 
     if (
         str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductRigInference.v2"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.rig_executor_v2 import (
+            execute_rig_capability_v2,
+        )
+
+        def run_rig_v2(value):
+            return execute_rig_capability_v2(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
+            )
+        return await _with_heartbeat(run_rig_v2, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
         and metadata.get("executor_contract") == "RealSaS.ProductSkinInference.v1"
     ):
         from compiler.realsas_compiler_services.platform_worker.skin_executor_v1 import (
@@ -409,6 +423,20 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
                 value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
             )
         return await _with_heartbeat(run_skin, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductSkinInference.v2"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.skin_executor_v2 import (
+            execute_skin_capability_v2,
+        )
+
+        def run_skin_v2(value):
+            return execute_skin_capability_v2(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
+            )
+        return await _with_heartbeat(run_skin_v2, request)
 
     if str(request.get("kind") or "") != "STAGE":
         return {

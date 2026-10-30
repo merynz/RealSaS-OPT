@@ -61,6 +61,7 @@ func TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure(t *testing
 		ProductRigCapabilityID,
 		ProductSkinCapabilityID,
 		ProductMechanicsCapabilityID,
+		ProductGraphicsCapabilityID,
 		ProductMotionCapabilityID,
 	} {
 		if _, ok := registry.Get(id); !ok {
@@ -89,6 +90,9 @@ func TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure(t *testing
 			t.Fatalf("motion closure missing %s: %+v", id, motionResolved)
 		}
 	}
+	if seen[ProductGraphicsCapabilityID] {
+		t.Fatalf("motion must not depend on graphics; sibling product domains must remain independently schedulable: %+v", motionResolved)
+	}
 	for _, forbidden := range []string{
 		"09_IRIS_FIT_PREREGISTERED",
 		"10_IRIS_FIT",
@@ -106,11 +110,39 @@ func TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure(t *testing
 	if motionResolved[len(motionResolved)-1].ID != ProductMotionCapabilityID {
 		t.Fatalf("motion must resolve after all dependencies: %+v", motionResolved)
 	}
+
+	graphicsResolved, err := registry.Resolve(ProductGraphicsCapabilityID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	graphicsSeen := map[string]bool{}
+	for _, descriptor := range graphicsResolved {
+		graphicsSeen[descriptor.ID] = true
+	}
+	for _, id := range []string{
+		ProductInputCapabilityID,
+		ProductShapeCapabilityID,
+		ProductMeshCapabilityID,
+		ProductRigCapabilityID,
+		ProductSkinCapabilityID,
+		ProductMechanicsCapabilityID,
+		ProductGraphicsCapabilityID,
+	} {
+		if !graphicsSeen[id] {
+			t.Fatalf("graphics closure missing %s: %+v", id, graphicsResolved)
+		}
+	}
+	if graphicsSeen[ProductMotionCapabilityID] {
+		t.Fatalf("graphics must not depend on motion: %+v", graphicsResolved)
+	}
+	if graphicsResolved[len(graphicsResolved)-1].ID != ProductGraphicsCapabilityID {
+		t.Fatalf("graphics must resolve after its dependencies: %+v", graphicsResolved)
+	}
 }
 
 func TestProductProvidersAreSingleSourceOfControlReadyProductGraph(t *testing.T) {
 	providers := ProductProviders()
-	if len(providers) != 7 {
+	if len(providers) != 8 {
 		t.Fatalf("product provider count=%d", len(providers))
 	}
 	registry := productProvidersTestRegistry(t)
@@ -160,6 +192,32 @@ func TestProductProvidersAreSingleSourceOfControlReadyProductGraph(t *testing.T)
 		t.Fatalf("mechanics authority drift: %+v", mechanics.Metadata)
 	}
 
+	graphics, ok := registry.Get(ProductGraphicsCapabilityID)
+	if !ok {
+		t.Fatal("product.graphics missing")
+	}
+	wantGraphics := []string{ProductMeshCapabilityID, ProductSkinCapabilityID, ProductMechanicsCapabilityID}
+	if len(graphics.Dependencies) != len(wantGraphics) {
+		t.Fatalf("graphics dependencies=%v", graphics.Dependencies)
+	}
+	for index, want := range wantGraphics {
+		if graphics.Dependencies[index] != want {
+			t.Fatalf("graphics dependency[%d]=%s want=%s", index, graphics.Dependencies[index], want)
+		}
+	}
+	if graphics.Metadata["graphics_owns_all_visual_presentation"] != true ||
+		graphics.Metadata["caa_is_graphics_appearance_sublayer"] != true ||
+		graphics.Metadata["visibility_occlusion_owner"] != "GRAPHICS" ||
+		graphics.Metadata["draw_order_owner"] != "GRAPHICS" ||
+		graphics.Metadata["fragmentation_owner"] != "GRAPHICS" {
+		t.Fatalf("graphics ownership drift: %+v", graphics.Metadata)
+	}
+	if graphics.Metadata["compiler_perception_synthesis_allowed"] != false ||
+		graphics.Metadata["mechanics_draw_order_authority_allowed"] != false ||
+		graphics.Metadata["motion_draw_order_authority_allowed"] != false {
+		t.Fatalf("graphics authority boundary drift: %+v", graphics.Metadata)
+	}
+
 	motion, ok := registry.Get(ProductMotionCapabilityID)
 	if !ok {
 		t.Fatal("product.motion missing")
@@ -198,6 +256,7 @@ func TestModuleVersionPolicyAndParametersAreMintedFromDescriptor(t *testing.T) {
 		ProductRigCapabilityID,
 		ProductSkinCapabilityID,
 		ProductMechanicsCapabilityID,
+		ProductGraphicsCapabilityID,
 		ProductMotionCapabilityID,
 	} {
 		descriptor, ok := registry.Get(capabilityID)

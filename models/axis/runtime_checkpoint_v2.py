@@ -57,7 +57,7 @@ def build_axis_runtime_checkpoint_v2(
             "compiler_parent_reselection_allowed": False,
             "compiler_control_synthesis_allowed": False,
             "compiler_constraint_synthesis_allowed": False,
-            "compiler_token_search_allowed": False,
+            "compiler_code_search_allowed": False,
             "constraint_solver_execution_owner": "MECHANICS",
         },
         "packaging_authority": "RUNTIME_PACKAGING_ONLY__NO_SCIENTIFIC_PASS",
@@ -104,7 +104,7 @@ def load_axis_runtime_model_v2(path: str | Path, *, device) -> tuple[AXISRigProg
         "compiler_parent_reselection_allowed",
         "compiler_control_synthesis_allowed",
         "compiler_constraint_synthesis_allowed",
-        "compiler_token_search_allowed",
+        "compiler_code_search_allowed",
     ):
         if rules.get(key) is not False:
             raise RuntimeError(f"AXIS_V6_RUNTIME_COMPILER_AUTHORITY_DRIFT:{key}")

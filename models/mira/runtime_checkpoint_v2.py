@@ -51,8 +51,8 @@ def build_mira_runtime_checkpoint_v2(model: MIRASkinFSQCodecV6) -> dict[str, Any
             "codebook_size": int(model.config.vocab_size),
             "tokens_per_joint": int(model.config.tokens_per_joint),
             "dense_skin_authority": False,
-            "compiler_token_search_allowed": False,
-            "compiler_token_repair_allowed": False,
+            "compiler_code_search_allowed": False,
+            "compiler_code_repair_allowed": False,
         },
         "packaging_authority": "RUNTIME_PACKAGING_ONLY__NO_SCIENTIFIC_PASS",
     }
@@ -89,8 +89,8 @@ def load_mira_runtime_model_v2(path: str | Path, *, device) -> tuple[MIRASkinFSQ
         raise RuntimeError("MIRA_V6_RUNTIME_CODEBOOK_DRIFT")
     if int(contract.get("tokens_per_joint") or 0) != config.tokens_per_joint:
         raise RuntimeError("MIRA_V6_RUNTIME_TOKEN_COUNT_DRIFT")
-    if contract.get("compiler_token_search_allowed") is not False or contract.get("compiler_token_repair_allowed") is not False:
-        raise RuntimeError("MIRA_V6_RUNTIME_COMPILER_TOKEN_AUTHORITY_DRIFT")
+    if contract.get("compiler_code_search_allowed") is not False or contract.get("compiler_code_repair_allowed") is not False:
+        raise RuntimeError("MIRA_V6_RUNTIME_COMPILER_CODE_AUTHORITY_DRIFT")
     model = MIRASkinFSQCodecV6(config)
     model.load_state_dict(dict(state), strict=True)
     model.to(device=device)

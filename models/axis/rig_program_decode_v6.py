@@ -22,10 +22,10 @@ from compiler.realsas_compiler_core.rig_program_ir_v1 import (
     RigProgramProposalIR,
     seal_rig_program_proposal_v1,
 )
-from compiler.realsas_compiler_core.skin_token_ir_v1 import (
-    JointSkinTokenRowIR,
-    SkinTokenProposalIR,
-    seal_skin_token_proposal_v1,
+from compiler.realsas_compiler_core.skin_code_ir_v1 import (
+    JointSkinCodeRowIR,
+    SkinCodeProposalIR,
+    seal_skin_code_proposal_v1,
 )
 from models.axis.rig_program_model_v6 import (
     AXISRigProgramConfigV6,
@@ -101,7 +101,7 @@ def decode_axis_v6_events(
     carrier_geometry_hash: str,
     model_provenance: str,
     codec_binding: AXISV6CodecBinding,
-) -> tuple[RigProgramProposalIR, SkinTokenProposalIR]:
+) -> tuple[RigProgramProposalIR, SkinCodeProposalIR]:
     if not events or events[0].kind != RigTokenKindV6.BOS or events[-1].kind != RigTokenKindV6.EOS:
         raise ValueError("AXIS_V6_EVENT_BOUNDARY_INVALID")
     center = tuple(float(v) for v in normalization_center)
@@ -289,14 +289,14 @@ def decode_axis_v6_events(
     if len(skin_codes) != required:
         raise ValueError(f"AXIS_V6_SKIN_CODE_COUNT_DRIFT:{len(skin_codes)}:{required}")
     rows = tuple(
-        JointSkinTokenRowIR(
+        JointSkinCodeRowIR(
             proposal_joint_id=jid,
-            token_ids=tuple(skin_codes[i * codec_binding.tokens_per_joint:(i + 1) * codec_binding.tokens_per_joint]),
+            code_ids=tuple(skin_codes[i * codec_binding.tokens_per_joint:(i + 1) * codec_binding.tokens_per_joint]),
             metadata={"joint_sequence_index": i},
         )
         for i, jid in enumerate(joint_ids)
     )
-    token_proposal = seal_skin_token_proposal_v1(SkinTokenProposalIR(
+    code_proposal = seal_skin_code_proposal_v1(SkinCodeProposalIR(
         rows=rows,
         rig_program_proposal_hash=proposal.proposal_lineage_hash,
         carrier_evidence_hash=str(carrier_evidence_hash),
@@ -305,15 +305,15 @@ def decode_axis_v6_events(
         codec_architecture_id=str(codec_binding.architecture_id),
         codec_checkpoint_hash=str(codec_binding.checkpoint_hash),
         codebook_size=int(codec_binding.codebook_size),
-        tokens_per_joint=int(codec_binding.tokens_per_joint),
+        codes_per_joint=int(codec_binding.tokens_per_joint),
         model_provenance=str(model_provenance),
         metadata={
             "generated_joint_conditionally_in_same_axis_sequence": True,
-            "compiler_token_search_allowed": False,
-            "compiler_token_repair_allowed": False,
+            "compiler_code_search_allowed": False,
+            "compiler_code_repair_allowed": False,
         },
     ))
-    return proposal, token_proposal
+    return proposal, code_proposal
 
 
 __all__ = ["AXISV6CodecBinding", "decode_axis_v6_events"]

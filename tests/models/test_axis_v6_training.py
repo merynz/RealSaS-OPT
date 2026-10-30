@@ -11,10 +11,10 @@ from compiler.realsas_compiler_core.rig_program_ir_v1 import (
     RigProgramProposalIR,
     seal_rig_program_proposal_v1,
 )
-from compiler.realsas_compiler_core.skin_token_ir_v1 import (
-    JointSkinTokenRowIR,
-    SkinTokenProposalIR,
-    seal_skin_token_proposal_v1,
+from compiler.realsas_compiler_core.skin_code_ir_v1 import (
+    JointSkinCodeRowIR,
+    SkinCodeProposalIR,
+    seal_skin_code_proposal_v1,
 )
 from models.axis.rig_program_decode_v6 import AXISV6CodecBinding, decode_axis_v6_events
 from models.axis.rig_program_model_v6 import (
@@ -56,10 +56,10 @@ def _truth():
         feature_evidence_binding_hash="2" * 64,
         model_provenance="truth",
     ))
-    codes = seal_skin_token_proposal_v1(SkinTokenProposalIR(
+    codes = seal_skin_code_proposal_v1(SkinCodeProposalIR(
         rows=(
-            JointSkinTokenRowIR("J0", (1, 2)),
-            JointSkinTokenRowIR("J1", (3, 4)),
+            JointSkinCodeRowIR("J0", (1, 2)),
+            JointSkinCodeRowIR("J1", (3, 4)),
         ),
         rig_program_proposal_hash=proposal.proposal_lineage_hash,
         carrier_evidence_hash="3" * 64,
@@ -68,7 +68,7 @@ def _truth():
         codec_architecture_id="RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0",
         codec_checkpoint_hash="a" * 64,
         codebook_size=27,
-        tokens_per_joint=2,
+        codes_per_joint=2,
         model_provenance="truth",
     ))
     return proposal, codes
@@ -102,7 +102,7 @@ def test_teacher_serialization_is_runtime_language_and_roundtrips_variable_arity
     assert tuple(c.control_kind for c in decoded.controls) == ("ROOT", "IK_EFFECTOR", "IK_POLE")
     assert decoded.constraints[0].input_proposal_control_ids == ("P:C:0001", "P:C:0002")
     assert decoded.constraints[0].output_proposal_joint_ids == ("P:J:0001",)
-    assert tuple(row.token_ids for row in decoded_codes.rows) == ((1, 2), (3, 4))
+    assert tuple(row.code_ids for row in decoded_codes.rows) == ((1, 2), (3, 4))
 
 
 def test_typed_causal_objective_is_finite_and_backpropagates():

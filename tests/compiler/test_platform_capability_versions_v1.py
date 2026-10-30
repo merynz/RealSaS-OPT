@@ -18,6 +18,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     implementations = capability_implementations()
     assert set(implementations) == {
         "product.input", "product.shape", "product.mesh", "product.rig", "product.skin",
+        "product.mechanics", "product.motion",
     }
     assert set(specs) == set(implementations)
     assert specs["product.input"]["parameters"]["responsibility_ids"] == ["input.model_observation_lowering"]
@@ -33,6 +34,14 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert specs["product.skin"]["parameters"]["responsibility_ids"] == [
         "skin.canonical_influence_mint", "skin.carrier_binding_qualification",
         "skin.influence_legality_qualification", "skin.influence_proposal",
+    ]
+    assert specs["product.mechanics"]["parameters"]["responsibility_ids"] == [
+        "mechanics.constraint_solution", "mechanics.deformation_domain_qualification",
+        "mechanics.post_bind_frame_observability_qualification",
+    ]
+    assert specs["product.motion"]["parameters"]["responsibility_ids"] == [
+        "motion.motion_solution", "motion.source_motion_admission",
+        "motion.target_body_constraint_solution",
     ]
     assert "rig.frame_observability_qualification" not in str(specs["product.rig"])
     assert specs["product.shape"]["parameters"]["required_models"] == [
@@ -60,7 +69,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert rig["parameters"]["feature_evidence_source"] == "PRODUCT_MESH_OUTPUT"
     assert rig["parameters"]["legacy_stage15_dependency"] is False
     assert rig["parameters"]["output_schema_version"] == "v2"
-    assert rig["parameters"]["skin_token_output_type"] == "RealSaS.SkinTokenProposalIR"
+    assert rig["parameters"]["skin_code_output_type"] == "RealSaS.SkinCodeProposalIR"
     assert rig["parameters"]["compiler_parent_reselection_allowed"] is False
     assert rig["parameters"]["compiler_control_synthesis_allowed"] is False
     assert rig["parameters"]["compiler_constraint_synthesis_allowed"] is False
@@ -72,7 +81,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert skin["policy"]["dependencies"] == ["product.mesh", "product.rig"]
     assert skin["parameters"]["executor_contract"] == "RealSaS.ProductSkinInference.v2"
     assert skin["parameters"]["input_rig_schema_version"] == "v2"
-    assert skin["parameters"]["input_skin_token_artifact_type"] == "RealSaS.SkinTokenProposalIR"
+    assert skin["parameters"]["input_skin_code_artifact_type"] == "RealSaS.SkinCodeProposalIR"
     assert skin["parameters"]["output_schema_version"] == "v2"
     assert skin["parameters"]["required_models"] == [
         {"family": "MIRA", "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0"}
@@ -80,9 +89,22 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert skin["parameters"]["canonical_parents"] == ["CANONICAL_MESH", "CANONICAL_RIG_DEFORM_STRUCTURE"]
     assert skin["parameters"]["full_control_program_is_skin_parent"] is False
     assert skin["parameters"]["axis_rerun_allowed"] is False
-    assert skin["parameters"]["compiler_token_search_allowed"] is False
-    assert skin["parameters"]["compiler_token_repair_allowed"] is False
+    assert skin["parameters"]["compiler_code_search_allowed"] is False
+    assert skin["parameters"]["compiler_code_repair_allowed"] is False
     assert skin["parameters"]["carrier_skin_qualification"]["max_influences"] == 256
+
+    mechanics = specs["product.mechanics"]
+    assert mechanics["policy"]["dependencies"] == ["product.mesh", "product.rig", "product.skin"]
+    assert mechanics["parameters"]["executor_contract"] == "RealSaS.ProductMechanicsCompile.v1"
+    assert mechanics["parameters"]["runtime_and_compile_solver_shared"] is True
+    assert mechanics["parameters"]["rig_program_mutation_allowed"] is False
+
+    motion = specs["product.motion"]
+    assert motion["policy"]["dependencies"] == ["product.rig", "product.mechanics"]
+    assert motion["parameters"]["executor_contract"] == "RealSaS.ProductMotionCompile.v2"
+    assert motion["parameters"]["editable_motion_space"] == "ANIMATOR_CONTROLS"
+    assert motion["parameters"]["direct_joint_track_authority"] is False
+    assert motion["parameters"]["constraint_execution_owner"] == "MECHANICS"
 
     assert product_model_requirements() == [
         {"family": "AXIS", "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0"},
@@ -93,7 +115,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     for capability_id, implementation in implementations.items():
         assert set(implementation) == {"implementation_sha256"}, capability_id
         assert _is_sha256(implementation["implementation_sha256"]), capability_id
-    assert len({implementations[x]["implementation_sha256"] for x in implementations}) == 5
+    assert len({implementations[x]["implementation_sha256"] for x in implementations}) == 7
 
 
 def test_release_snapshot_v2_carries_implementation_and_model_requirements():

@@ -197,8 +197,11 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	if rig.Metadata["feature_evidence_is_canonical_parent"] != false {
 		t.Fatalf("rig feature evidence became canonical parent: %+v", rig.Metadata)
 	}
-	if rig.Metadata["frame_observability_claimed"] != false {
-		t.Fatalf("rig prematurely claims post-bind observability: %+v", rig.Metadata)
+	if rig.Metadata["frame_observability_claimed"] != false || rig.Metadata["post_bind_frame_observability_required"] != true {
+		t.Fatalf("rig observability boundary drift: %+v", rig.Metadata)
+	}
+	if rig.Metadata["frame_observability_owner"] != "MECHANICS" || rig.Metadata["constraint_execution_owner"] != "MECHANICS" {
+		t.Fatalf("rig did not delegate executable observability to Mechanics: %+v", rig.Metadata)
 	}
 
 	skin, ok := registry.Get(ProductSkinCapabilityID)
@@ -208,17 +211,15 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	if len(skin.Dependencies) != 2 || skin.Dependencies[0] != ProductMeshCapabilityID || skin.Dependencies[1] != ProductRigCapabilityID {
 		t.Fatalf("skin descriptor=%+v", skin)
 	}
-	if skin.Metadata["feature_evidence_source"] != "PRODUCT_MESH_OUTPUT" || skin.Metadata["material_support_source"] != "PRODUCT_MESH_OUTPUT" {
-		t.Fatalf("skin Mesh evidence sources drift=%+v", skin.Metadata)
-	}
-	if skin.Metadata["legacy_stage15_dependency"] != false {
-		t.Fatalf("skin legacy Stage15 dependency drift=%+v", skin.Metadata)
-	}
-	if skin.Metadata["mesh_and_rig_are_canonical_parents"] != true {
+	parents, ok := skin.Metadata["canonical_parents"].([]any)
+	if !ok || len(parents) != 2 || parents[0] != "CANONICAL_MESH" || parents[1] != "CANONICAL_RIG_DEFORM_STRUCTURE" {
 		t.Fatalf("skin canonical parent metadata=%+v", skin.Metadata)
 	}
-	if skin.Metadata["feature_evidence_is_canonical_parent"] != false || skin.Metadata["material_support_is_canonical_parent"] != false {
-		t.Fatalf("skin feature evidence became canonical parent: %+v", skin.Metadata)
+	if skin.Metadata["full_control_program_is_skin_parent"] != false {
+		t.Fatalf("skin incorrectly depends on full control program: %+v", skin.Metadata)
+	}
+	if skin.Metadata["axis_rerun_allowed"] != false || skin.Metadata["compiler_token_repair_allowed"] != false {
+		t.Fatalf("skin v2 execution boundary drift: %+v", skin.Metadata)
 	}
 }
 

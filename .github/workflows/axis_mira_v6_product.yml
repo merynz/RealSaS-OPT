@@ -8,7 +8,7 @@ on:
       - 'compiler/realsas_compiler_core/rig_program_ir_v1.py'
       - 'compiler/realsas_compiler_core/rig_constraint_schema_v1.py'
       - 'compiler/realsas_compiler_core/canonical_rig_ir_v2.py'
-      - 'compiler/realsas_compiler_core/skin_token_ir_v1.py'
+      - 'compiler/realsas_compiler_core/skin_code_ir_v1.py'
       - 'compiler/realsas_compiler_core/canonical_skin_ir_v2.py'
       - 'compiler/realsas_compiler_core/mechanics_control_solver_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/rig_executor_v2.py'
@@ -74,7 +74,7 @@ jobs:
             compiler/realsas_compiler_core/rig_program_ir_v1.py \
             compiler/realsas_compiler_core/rig_constraint_schema_v1.py \
             compiler/realsas_compiler_core/canonical_rig_ir_v2.py \
-            compiler/realsas_compiler_core/skin_token_ir_v1.py \
+            compiler/realsas_compiler_core/skin_code_ir_v1.py \
             compiler/realsas_compiler_core/canonical_skin_ir_v2.py \
             compiler/realsas_compiler_core/mechanics_control_solver_v1.py \
             compiler/realsas_compiler_services/platform_worker/rig_executor_v2.py \

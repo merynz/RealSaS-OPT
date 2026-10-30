@@ -5,7 +5,7 @@
   "scope": "FIRST_TRUTH139_MODEL_ARCHITECTURE_AND_STAGED_TRAINING_BOUNDARY",
   "narrative_contract": {
     "path": "docs/research/IRIS_TESSA_V32_PRETRUTH_ARCHITECTURE_20261030.md",
-    "git_blob_sha1": "3586026100e873c12690149b2c3fb0b47cf818b8"
+    "git_blob_sha1": "76c696ed8ab8fed0a3c607c253da299f56b04bc9"
   },
   "base_lineage": {
     "architecture": "V3.1_LATEST_QUALIFIED_LINEAGE",

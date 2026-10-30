@@ -57,7 +57,10 @@ func TestProductProofIsTerminalProductPassAuthority(t *testing.T) {
 }
 
 func TestProductCompileCanTerminateAtProof(t *testing.T) {
-	registry, err := Build(context.Background(), ProductProviders()...)
+	// Product Mesh intentionally retains three released Compiler-stage parents.
+	// Validate the terminal product goal against the same release projection used
+	// in production rather than against a product-only synthetic registry.
+	registry, err := BuildEngineReleaseRegistry(context.Background(), meshReleaseTestGraph(t))
 	if err != nil {
 		t.Fatal(err)
 	}

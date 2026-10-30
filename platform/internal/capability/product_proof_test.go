@@ -69,10 +69,22 @@ func TestProductCompileCanTerminateAtProof(t *testing.T) {
 	if err != nil {
 		t.Fatalf("product.proof terminal goal rejected: %v", err)
 	}
-	if resolved.ExecutionMode != ModeProduct {
-		t.Fatalf("execution mode=%s want=%s", resolved.ExecutionMode, ModeProduct)
+	if len(resolved) == 0 {
+		t.Fatal("product.proof goal resolved to an empty execution graph")
 	}
-	if len(resolved.Targets) != 1 || resolved.Targets[0] != ProductProofCapabilityID {
-		t.Fatalf("resolved targets=%v", resolved.Targets)
+	if resolved[len(resolved)-1].ID != ProductProofCapabilityID {
+		t.Fatalf("terminal capability=%s want=%s", resolved[len(resolved)-1].ID, ProductProofCapabilityID)
+	}
+	for _, descriptor := range resolved {
+		allowed := false
+		for _, mode := range descriptor.AllowedModes {
+			if mode == ModeProduct {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			t.Fatalf("resolved capability %s is not PRODUCT executable", descriptor.ID)
+		}
 	}
 }

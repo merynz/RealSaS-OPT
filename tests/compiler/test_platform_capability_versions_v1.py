@@ -18,7 +18,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     implementations = capability_implementations()
     assert set(implementations) == {
         "product.input", "product.shape", "product.mesh", "product.rig", "product.skin",
-        "product.mechanics", "product.motion",
+        "product.mechanics", "product.graphics", "product.motion",
     }
     assert set(specs) == set(implementations)
     assert specs["product.input"]["parameters"]["responsibility_ids"] == ["input.model_observation_lowering"]
@@ -38,6 +38,10 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert specs["product.mechanics"]["parameters"]["responsibility_ids"] == [
         "mechanics.constraint_solution", "mechanics.deformation_domain_qualification",
         "mechanics.post_bind_frame_observability_qualification",
+    ]
+    assert specs["product.graphics"]["parameters"]["responsibility_ids"] == [
+        "graphics.appearance_authority_binding", "graphics.presentation_relation_evidence",
+        "graphics.presentation_relation_solution",
     ]
     assert specs["product.motion"]["parameters"]["responsibility_ids"] == [
         "motion.motion_solution", "motion.source_motion_admission",
@@ -99,6 +103,19 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert mechanics["parameters"]["runtime_and_compile_solver_shared"] is True
     assert mechanics["parameters"]["rig_program_mutation_allowed"] is False
 
+    graphics = specs["product.graphics"]
+    assert graphics["policy"]["dependencies"] == ["product.mesh", "product.skin", "product.mechanics"]
+    assert graphics["entry_module"] == "compiler.realsas_compiler_services.platform_worker.graphics_executor_v1"
+    assert graphics["parameters"]["executor_contract"] == "RealSaS.ProductGraphicsCompile.v1"
+    assert graphics["parameters"]["required_models"] == []
+    assert graphics["parameters"]["graphics_owns_all_visual_presentation"] is True
+    assert graphics["parameters"]["caa_is_graphics_appearance_sublayer"] is True
+    assert graphics["parameters"]["visibility_occlusion_owner"] == "GRAPHICS"
+    assert graphics["parameters"]["draw_order_owner"] == "GRAPHICS"
+    assert graphics["parameters"]["compiler_perception_synthesis_allowed"] is False
+    assert graphics["parameters"]["mechanics_draw_order_authority_allowed"] is False
+    assert graphics["parameters"]["motion_draw_order_authority_allowed"] is False
+
     motion = specs["product.motion"]
     assert motion["policy"]["dependencies"] == ["product.rig", "product.mechanics"]
     assert motion["parameters"]["executor_contract"] == "RealSaS.ProductMotionCompile.v2"
@@ -115,7 +132,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     for capability_id, implementation in implementations.items():
         assert set(implementation) == {"implementation_sha256"}, capability_id
         assert _is_sha256(implementation["implementation_sha256"]), capability_id
-    assert len({implementations[x]["implementation_sha256"] for x in implementations}) == 7
+    assert len({implementations[x]["implementation_sha256"] for x in implementations}) == 8
 
 
 def test_release_snapshot_v2_carries_implementation_and_model_requirements():

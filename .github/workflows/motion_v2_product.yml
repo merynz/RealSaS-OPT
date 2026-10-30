@@ -13,6 +13,7 @@ on:
       - 'platform/internal/capability/release_compose.go'
       - 'platform/internal/capability/contracts/product_capabilities_v1.json'
       - 'tests/compiler/test_control_motion_v2.py'
+      - 'tests/compiler/test_control_motion_ik_integration_v1.py'
       - '.github/workflows/motion_v2_product.yml'
   workflow_dispatch:
 
@@ -46,7 +47,9 @@ jobs:
             compiler/realsas_compiler_core/control_motion_runtime_v2.py \
             compiler/realsas_compiler_services/platform_worker/motion_executor_v2.py \
             compiler/realsas_compiler_services/platform_worker/worker.py
-      - name: Run control-space Motion authority courts
+      - name: Run control-space Motion authority and IK integration courts
         run: |
           set -euo pipefail
-          pytest -q tests/compiler/test_control_motion_v2.py
+          pytest -q \
+            tests/compiler/test_control_motion_v2.py \
+            tests/compiler/test_control_motion_ik_integration_v1.py

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import torch
 
-from compiler.realsas_compiler_core.skin_token_ir_v1 import validate_skin_token_proposal_v1
+from compiler.realsas_compiler_core.skin_code_ir_v1 import validate_skin_code_proposal_v1
 from models.mira.skin_fsq_codec_v6 import MIRASkinFSQCodecConfig, MIRASkinFSQCodecV6
 from models.mira.training_v6 import encode_axis_teacher_codes_v6, mira_v6_codec_objective
 
@@ -39,13 +39,13 @@ def test_frozen_mira_codec_exports_exact_axis_teacher_code_contract():
         codec_checkpoint_hash="a" * 64,
         model_provenance="mira-v6-test",
     )
-    validate_skin_token_proposal_v1(
+    validate_skin_code_proposal_v1(
         proposal,
         expected_proposal_joint_ids=("J0", "J1", "J2"),
         expected_rig_program_proposal_hash="1" * 64,
     )
     assert proposal.codec_checkpoint_hash == "a" * 64
-    assert proposal.tokens_per_joint == 2
+    assert proposal.codes_per_joint == 2
     assert len(proposal.rows) == 3
-    assert all(len(row.token_ids) == 2 for row in proposal.rows)
-    assert proposal.metadata["compiler_token_search_allowed"] is False
+    assert all(len(row.code_ids) == 2 for row in proposal.rows)
+    assert proposal.metadata["compiler_code_search_allowed"] is False

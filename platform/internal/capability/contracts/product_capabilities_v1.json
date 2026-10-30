@@ -164,6 +164,35 @@
         "learned_motion_provider_replaceable": true, "fit_allowed_during_product_execution": false,
         "implementation_owner_may_change": true, "stable_product_role_survives_rewiring": true
       }
+    },
+    "product.proof": {
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.proof_executor_v1",
+      "policy": {
+        "allowed_modes": ["DEVELOPER", "PRODUCT"],
+        "product_pass_authority": true,
+        "dependencies": ["product.mesh", "product.rig", "product.skin", "product.mechanics", "product.graphics", "product.motion"]
+      },
+      "metadata": {
+        "product_role_id": "proof", "implementation_class": "COMPILER",
+        "interface_contract": "RealSaS.ProductProofCompile.v1", "executor_contract": "RealSaS.ProductProofCompile.v1",
+        "input_mesh_artifact_type": "RealSaS.CanonicalMeshIR", "input_mesh_schema_version": "v1",
+        "input_rig_artifact_type": "RealSaS.CanonicalRigIR", "input_rig_schema_version": "v2",
+        "input_skin_artifact_type": "RealSaS.CanonicalSkinIR", "input_skin_schema_version": "v2",
+        "input_mechanics_artifact_type": "RealSaS.CanonicalMechanicsIR", "input_mechanics_schema_version": "v1",
+        "input_graphics_artifact_type": "RealSaS.CanonicalGraphicsIR", "input_graphics_schema_version": "v1",
+        "input_motion_artifact_type": "RealSaS.CanonicalMotionIR", "input_motion_schema_version": "v2",
+        "output_artifact_type": "RealSaS.ProductProofBundleIR", "output_schema_version": "v1",
+        "required_models": [],
+        "proof_evaluator": "RealSaS.ModularProductProofEvaluator.v1",
+        "product_state_schema": "RealSaS.ModularProductState.v1",
+        "legacy_puppet_projection_required": false,
+        "learned_inference_allowed": false,
+        "heuristic_fallback_allowed": false,
+        "product_revision_minting_owned_here": false,
+        "post_export_native_interlock_required": true,
+        "implementation_owner_may_change": true,
+        "stable_product_role_survives_rewiring": true
+      }
     }
   }
 }

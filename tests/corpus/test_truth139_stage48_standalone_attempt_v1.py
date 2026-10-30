@@ -52,6 +52,7 @@ def test_stage48_v2_adapter_preserves_source_uv_and_color_attributes() -> None:
     assert 'domain == "CORNER"' in text
     assert 'domain == "POINT"' in text
     assert 'domain == "FACE"' in text
+    assert "if source_attributes:" in text
     assert "evaluated.to_mesh(preserve_all_data_layers=True, depsgraph=depsgraph)" in text
     assert "PRESENTATION_RAY_V2_ACTIVE_UV_REBIND_DRIFT" in text
     assert "PRESENTATION_RAY_V2_FACE_MATERIAL_REBIND_DRIFT" in text

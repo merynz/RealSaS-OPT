@@ -2,8 +2,8 @@ from __future__ import annotations
 
 """CAS-native product.skin V2 executor.
 
-Consumes AXIS-generated SkinTokenProposal + CanonicalRig.v2. It does not rerun
-AXIS and does not search token space. The exact bound MIRA codec decodes tokens to
+Consumes AXIS-generated SkinCodeProposal + CanonicalRig.v2. It does not rerun
+AXIS and does not search code space. The exact bound MIRA codec decodes codes to
 dense carrier weights, then the existing bounded simplex court qualifies them.
 """
 
@@ -77,15 +77,15 @@ def _qualification_policy(metadata: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-def _skin_token_from_dict(payload: dict[str, Any]):
-    from compiler.realsas_compiler_core.skin_token_ir_v1 import JointSkinTokenRowIR, SkinTokenProposalIR
+def _skin_code_from_dict(payload: dict[str, Any]):
+    from compiler.realsas_compiler_core.skin_code_ir_v1 import JointSkinCodeRowIR, SkinCodeProposalIR
     schema = str(payload.get("schema_version") or payload.get("schema") or "")
-    if schema != "RealSaS.SkinTokenProposalIR.v1":
-        raise RuntimeError("SKIN_V2_TOKEN_PROPOSAL_SCHEMA_DRIFT")
-    return SkinTokenProposalIR(
-        rows=tuple(JointSkinTokenRowIR(
+    if schema != "RealSaS.SkinCodeProposalIR.v1":
+        raise RuntimeError("SKIN_V2_CODE_PROPOSAL_SCHEMA_DRIFT")
+    return SkinCodeProposalIR(
+        rows=tuple(JointSkinCodeRowIR(
             proposal_joint_id=str(r["proposal_joint_id"]),
-            token_ids=tuple(map(int, r.get("token_ids") or ())),
+            code_ids=tuple(map(int, r.get("code_ids") or ())),
             metadata=dict(r.get("metadata") or {}),
         ) for r in payload.get("rows") or ()),
         rig_program_proposal_hash=str(payload["rig_program_proposal_hash"]),
@@ -95,7 +95,7 @@ def _skin_token_from_dict(payload: dict[str, Any]):
         codec_architecture_id=str(payload["codec_architecture_id"]),
         codec_checkpoint_hash=str(payload["codec_checkpoint_hash"]),
         codebook_size=int(payload["codebook_size"]),
-        tokens_per_joint=int(payload["tokens_per_joint"]),
+        codes_per_joint=int(payload["codes_per_joint"]),
         model_provenance=str(payload.get("model_provenance") or ""),
         proposal_lineage_hash=str(payload["proposal_lineage_hash"]),
         schema_version=schema,
@@ -115,15 +115,15 @@ def execute_skin_capability_v2(
     execution_id = str(request.get("execution_id") or "")
     if not execution_id:
         raise RuntimeError("SKIN_V2_EXECUTION_ID_REQUIRED")
-    if metadata.get("compiler_token_search_allowed") is not False or metadata.get("compiler_token_repair_allowed") is not False:
-        raise RuntimeError("SKIN_V2_COMPILER_TOKEN_AUTHORITY_DRIFT")
+    if metadata.get("compiler_code_search_allowed") is not False or metadata.get("compiler_code_repair_allowed") is not False:
+        raise RuntimeError("SKIN_V2_COMPILER_CODE_AUTHORITY_DRIFT")
 
     import torch
     from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import canonical_mesh_from_dict_v1
     from compiler.realsas_compiler_core.canonical_rig_ir_v2 import canonical_rig_from_dict_v2
     from compiler.realsas_compiler_core.canonical_skin_ir_v2 import mint_canonical_skin_v2
     from compiler.realsas_compiler_core.carrier_skin_v1 import qualify_carrier_skin_v1
-    from compiler.realsas_compiler_core.skin_token_ir_v1 import validate_skin_token_proposal_v1
+    from compiler.realsas_compiler_core.skin_code_ir_v1 import validate_skin_code_proposal_v1
     from models.mira.conditioning_v6 import (
         MIRA_V6_JOINT_FEATURE_DIM, MIRA_V6_VERTEX_FEATURE_DIM,
         build_mira_conditioning_v6, carrier_skin_proposal_from_decoded_v6,
@@ -132,24 +132,24 @@ def execute_skin_capability_v2(
 
     mesh_ref = _one(request, "RealSaS.CanonicalMeshIR", "v1")
     rig_ref = _one(request, "RealSaS.CanonicalRigIR", "v2")
-    token_ref = _one(request, "RealSaS.SkinTokenProposalIR", "v1")
+    code_ref = _one(request, "RealSaS.SkinCodeProposalIR", "v1")
     mesh = canonical_mesh_from_dict_v1(_json_payload(read_object, mesh_ref))
     rig = canonical_rig_from_dict_v2(_json_payload(read_object, rig_ref))
-    token_proposal = _skin_token_from_dict(_json_payload(read_object, token_ref))
+    code_proposal = _skin_code_from_dict(_json_payload(read_object, code_ref))
     if rig.mesh_lineage_hash != mesh.mesh_lineage_hash:
         raise RuntimeError("SKIN_V2_RIG_MESH_PARENT_DRIFT")
     expected_proposal_ids = tuple(str(j.source_proposal_joint_id) for j in rig.joints)
-    validate_skin_token_proposal_v1(
-        token_proposal,
+    validate_skin_code_proposal_v1(
+        code_proposal,
         expected_proposal_joint_ids=expected_proposal_ids,
         expected_rig_program_proposal_hash=rig.proposal_evidence_hash,
     )
-    if token_proposal.carrier_evidence_hash != mesh.carrier_evidence_hash:
-        raise RuntimeError("SKIN_V2_TOKEN_CARRIER_EVIDENCE_DRIFT")
-    if token_proposal.carrier_topology_hash != mesh.carrier_topology_hash:
-        raise RuntimeError("SKIN_V2_TOKEN_CARRIER_TOPOLOGY_DRIFT")
-    if token_proposal.carrier_geometry_hash != mesh.carrier_geometry_hash:
-        raise RuntimeError("SKIN_V2_TOKEN_CARRIER_GEOMETRY_DRIFT")
+    if code_proposal.carrier_evidence_hash != mesh.carrier_evidence_hash:
+        raise RuntimeError("SKIN_V2_CODE_CARRIER_EVIDENCE_DRIFT")
+    if code_proposal.carrier_topology_hash != mesh.carrier_topology_hash:
+        raise RuntimeError("SKIN_V2_CODE_CARRIER_TOPOLOGY_DRIFT")
+    if code_proposal.carrier_geometry_hash != mesh.carrier_geometry_hash:
+        raise RuntimeError("SKIN_V2_CODE_CARRIER_GEOMETRY_DRIFT")
 
     manifest: dict[str, Any] = {"run_id": "capability-" + execution_id}
     started = perf_counter()
@@ -168,10 +168,10 @@ def execute_skin_capability_v2(
     if str(checkpoint.get("schema_version") or "") != "v2":
         raise RuntimeError("SKIN_V2_MIRA_CHECKPOINT_SCHEMA_DRIFT")
     checkpoint_hash = str(checkpoint.get("content_sha256") or "")
-    if token_proposal.codec_architecture_id != MIRA_V6_ARCHITECTURE_ID:
-        raise RuntimeError("SKIN_V2_TOKEN_CODEC_ARCHITECTURE_DRIFT")
-    if token_proposal.codec_checkpoint_hash != checkpoint_hash:
-        raise RuntimeError("SKIN_V2_TOKEN_CODEC_CHECKPOINT_DRIFT")
+    if code_proposal.codec_architecture_id != MIRA_V6_ARCHITECTURE_ID:
+        raise RuntimeError("SKIN_V2_CODE_CODEC_ARCHITECTURE_DRIFT")
+    if code_proposal.codec_checkpoint_hash != checkpoint_hash:
+        raise RuntimeError("SKIN_V2_CODE_CODEC_CHECKPOINT_DRIFT")
 
     device = _device()
     load_started = perf_counter()
@@ -181,22 +181,22 @@ def execute_skin_capability_v2(
         raise RuntimeError("SKIN_V2_VERTEX_FEATURE_DIM_DRIFT")
     if codec.config.joint_feature_dim != MIRA_V6_JOINT_FEATURE_DIM:
         raise RuntimeError("SKIN_V2_JOINT_FEATURE_DIM_DRIFT")
-    if codec.config.vocab_size != token_proposal.codebook_size:
-        raise RuntimeError("SKIN_V2_TOKEN_CODEBOOK_DRIFT")
-    if codec.config.tokens_per_joint != token_proposal.tokens_per_joint:
-        raise RuntimeError("SKIN_V2_TOKEN_COUNT_DRIFT")
+    if codec.config.vocab_size != code_proposal.codebook_size:
+        raise RuntimeError("SKIN_V2_CODEBOOK_DRIFT")
+    if codec.config.tokens_per_joint != code_proposal.codes_per_joint:
+        raise RuntimeError("SKIN_V2_CODE_COUNT_DRIFT")
 
     conditioning = build_mira_conditioning_v6(mesh, rig, device=device)
-    token_by_proposal = {str(r.proposal_joint_id): tuple(map(int, r.token_ids)) for r in token_proposal.rows}
-    if len(token_by_proposal) != len(token_proposal.rows):
-        raise RuntimeError("SKIN_V2_DUPLICATE_TOKEN_JOINT")
-    token_tensor = torch.tensor(
-        [[token_by_proposal[str(j.source_proposal_joint_id)] for j in rig.joints]],
+    code_by_proposal = {str(r.proposal_joint_id): tuple(map(int, r.code_ids)) for r in code_proposal.rows}
+    if len(code_by_proposal) != len(code_proposal.rows):
+        raise RuntimeError("SKIN_V2_DUPLICATE_CODE_JOINT")
+    code_tensor = torch.tensor(
+        [[code_by_proposal[str(j.source_proposal_joint_id)] for j in rig.joints]],
         device=device, dtype=torch.long,
     )
     inference_started = perf_counter()
     with torch.no_grad():
-        weights = codec.decode_tokens(token_tensor, conditioning.vertex_features, conditioning.joint_features)
+        weights = codec.decode_tokens(code_tensor, conditioning.vertex_features, conditioning.joint_features)
     inference_seconds = perf_counter() - inference_started
 
     provenance = str(release.get("model_release_id") or "") + ":" + checkpoint_hash
@@ -212,7 +212,7 @@ def execute_skin_capability_v2(
     skin = mint_canonical_skin_v2(
         mesh, rig,
         qualified_skin=qualified,
-        skin_token_proposal_hash=token_proposal.proposal_lineage_hash,
+        skin_code_proposal_hash=code_proposal.proposal_lineage_hash,
         skin_codec_architecture_id=MIRA_V6_ARCHITECTURE_ID,
         skin_codec_checkpoint_hash=checkpoint_hash,
     )
@@ -232,7 +232,7 @@ def execute_skin_capability_v2(
         "mesh_lineage_hash": mesh.mesh_lineage_hash,
         "deform_structure_hash": rig.deform_structure_hash,
         "control_program_hash_is_skin_parent": False,
-        "skin_token_proposal_hash": token_proposal.proposal_lineage_hash,
+        "skin_code_proposal_hash": code_proposal.proposal_lineage_hash,
         "mira_architecture_id": MIRA_V6_ARCHITECTURE_ID,
         "mira_model_release_id": str(release.get("model_release_id") or ""),
         "mira_checkpoint_content_sha256": checkpoint_hash,
@@ -244,8 +244,8 @@ def execute_skin_capability_v2(
         "model_load_seconds": float(load_seconds),
         "inference_seconds": float(inference_seconds), "inference_device": str(device),
         "axis_rerun_performed": False,
-        "compiler_token_search_performed": False,
-        "compiler_token_repair_performed": False,
+        "compiler_code_search_performed": False,
+        "compiler_code_repair_performed": False,
         "fit_performed": False, "product_revision_pass_claimed": False,
     }
     return {"capability_id": str(request.get("capability_id") or ""), "status": "PASS",

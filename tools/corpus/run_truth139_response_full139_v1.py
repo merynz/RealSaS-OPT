@@ -3,8 +3,10 @@
 
 This batch runner resolves each prepared source-observation packet, invokes the
 single-subject Stage47 response chain, reuses already court-passed chains, and
-seals a cohort receipt.  It does not run Stage48 renderer interventions, create a
-split, train a model, or mint qualification/product authority.
+seals a cohort receipt. It supports the canonical prepared base root plus the
+separate prepared rescue root without copying rescue bytes into base lineage.
+It does not run Stage48 renderer interventions, create a split, train a model,
+or mint qualification/product authority.
 """
 from __future__ import annotations
 
@@ -56,11 +58,21 @@ def atomic_json(path: Path, value: dict) -> None:
     temp.replace(path)
 
 
-def packet_root(prepared_root: Path, subject_id: str) -> Path:
-    roots = sorted(prepared_root.glob(f"{subject_id}/objects/*/packet/{subject_id}"))
-    if len(roots) != 1 or not roots[0].is_dir():
-        raise RuntimeError("TRUTH139_RESPONSE_PACKET_CARDINALITY:" + subject_id + ":" + str(len(roots)))
-    return roots[0].resolve()
+def packet_root(prepared_root: Path, prepared_rescue_root: Path, subject_id: str) -> tuple[Path, str]:
+    candidates: list[tuple[Path, str]] = []
+    for root, lineage in (
+        (prepared_root, "PREPARED_BASE"),
+        (prepared_rescue_root, "PREPARED_RESCUE"),
+    ):
+        for path in sorted(root.glob(f"{subject_id}/objects/*/packet/{subject_id}")):
+            if path.is_dir():
+                candidates.append((path.resolve(), lineage))
+    if len(candidates) != 1:
+        raise RuntimeError(
+            "TRUTH139_RESPONSE_PACKET_CARDINALITY:"
+            + subject_id + ":" + str(len(candidates))
+        )
+    return candidates[0]
 
 
 def chain_complete(output_root: Path, subject_id: str) -> bool:
@@ -108,6 +120,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--work-orders", required=True, type=Path)
     parser.add_argument("--prepared-root", required=True, type=Path)
+    parser.add_argument("--prepared-rescue-root", required=True, type=Path)
     parser.add_argument("--raw-root", required=True, type=Path,
                         help="Truth139 full source cache root; raw bytes are under source_root/<corpus_relative_path>.")
     parser.add_argument("--output-root", required=True, type=Path)
@@ -118,11 +131,18 @@ def main() -> None:
 
     work_path = args.work_orders.resolve()
     prepared_root = args.prepared_root.resolve()
+    prepared_rescue_root = args.prepared_rescue_root.resolve()
     raw_root = args.raw_root.resolve()
     raw_source_root = (raw_root / "source_root").resolve()
     output_root = args.output_root.resolve()
     blender = args.blender.resolve()
-    if not prepared_root.is_dir() or not raw_root.is_dir() or not raw_source_root.is_dir() or not blender.is_file():
+    if (
+        not prepared_root.is_dir()
+        or not prepared_rescue_root.is_dir()
+        or not raw_root.is_dir()
+        or not raw_source_root.is_dir()
+        or not blender.is_file()
+    ):
         raise FileNotFoundError("TRUTH139_RESPONSE_BATCH_REQUIRED_ROOT_MISSING")
     output_root.mkdir(parents=True, exist_ok=True)
 
@@ -148,6 +168,7 @@ def main() -> None:
     executed, reused = [], []
     subject_ids = []
     output_bindings = {}
+    packet_lineage_by_subject: dict[str, dict] = {}
 
     for index, row in enumerate(rows, start=1):
         subject_id = str(row.get("subject_id") or "")
@@ -163,9 +184,13 @@ def main() -> None:
             raise ValueError("TRUTH139_RESPONSE_RAW_SOURCE_PATH_ESCAPE:" + subject_id)
         if not source.is_file() or sha256(source) != source_row.get("sha256"):
             raise ValueError("TRUTH139_RESPONSE_RAW_SOURCE_DRIFT:" + subject_id)
-        packet = packet_root(prepared_root, subject_id)
+        packet, packet_lineage = packet_root(prepared_root, prepared_rescue_root, subject_id)
+        packet_lineage_by_subject[subject_id] = {
+            "lineage": packet_lineage,
+            "packet_root": str(packet),
+        }
         out = output_root / "subjects" / subject_id
-        print(f"\n[RESPONSE {index:03d}/139] {subject_id}", flush=True)
+        print(f"\n[RESPONSE {index:03d}/139] {subject_id} packet={packet_lineage}", flush=True)
         if chain_complete(output_root / "subjects", subject_id):
             print("[REUSE-RESPONSE]", subject_id, flush=True)
             reused.append(subject_id)
@@ -195,6 +220,7 @@ def main() -> None:
                 "chain_path": str(path),
                 "chain_sha256": sha256(path),
                 "chain_identity_sha256": value.get("chain_identity_sha256"),
+                "prepared_packet_lineage": packet_lineage_by_subject[subject_id],
             }
         progress = {
             "schema": "RealSaS.Truth139IrisResponseEvidenceProgress.v1",
@@ -209,7 +235,6 @@ def main() -> None:
         }
         atomic_json(output_root / "FULL139_IRIS_RESPONSE_EVIDENCE_PROGRESS.json", progress)
 
-    # Re-scan all chains because a prior partial run may have completed entries after a stale progress file.
     output_bindings = {}
     for subject_id in subject_ids:
         if chain_complete(output_root / "subjects", subject_id):
@@ -219,9 +244,14 @@ def main() -> None:
                 "chain_path": str(path),
                 "chain_sha256": sha256(path),
                 "chain_identity_sha256": value.get("chain_identity_sha256"),
+                "prepared_packet_lineage": packet_lineage_by_subject[subject_id],
             }
     complete = [subject_id for subject_id in subject_ids if subject_id in output_bindings]
     status = BATCH_PASS if len(complete) == 139 and not failures else "FULL139_IRIS_RESPONSE_EVIDENCE_COMPLETED_WITH_FAILURES__DERIVED_TRUTH_ADMISSION_SEPARATE"
+    lineage_counts = {
+        "PREPARED_BASE": sum(v["lineage"] == "PREPARED_BASE" for v in packet_lineage_by_subject.values()),
+        "PREPARED_RESCUE": sum(v["lineage"] == "PREPARED_RESCUE" for v in packet_lineage_by_subject.values()),
+    }
     receipt = {
         "schema": "RealSaS.Truth139IrisResponseEvidenceBatchReceipt.v1",
         "status": status,
@@ -230,6 +260,11 @@ def main() -> None:
         "contract": {"path": str(CONTRACT), "sha256": sha256(CONTRACT)},
         "work_orders": {"path": str(work_path), "sha256": sha256(work_path), "identity_sha256": work.get("work_order_identity_sha256")},
         "raw_source_cache": {"cache_root": str(raw_root), "source_root": str(raw_source_root)},
+        "prepared_packet_roots": {
+            "base": str(prepared_root),
+            "rescue": str(prepared_rescue_root),
+            "lineage_counts": lineage_counts,
+        },
         "subject_count": 139,
         "subject_ids": subject_ids,
         "completed_subject_count": len(complete),
@@ -252,6 +287,7 @@ def main() -> None:
         "status": status,
         "completed_subject_count": len(complete),
         "failed_subject_count": len(failures),
+        "prepared_packet_lineage_counts": lineage_counts,
         "receipt_path": str(receipt_path),
         "receipt_sha256": sha256(receipt_path),
         "receipt_identity_sha256": receipt["receipt_identity_sha256"],

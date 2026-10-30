@@ -22,7 +22,7 @@ def test_fsq_mixed_radix_token_roundtrip():
     assert torch.all(codes <= 1.0)
 
 
-def test_mira_v6_codec_emits_per_joint_tokens_and_simplex_reconstruction():
+def test_mira_v6_codec_emits_per_joint_codes_and_simplex_reconstruction():
     torch.manual_seed(7)
     cfg = MIRASkinFSQCodecConfig(
         vertex_feature_dim=6,
@@ -40,27 +40,43 @@ def test_mira_v6_codec_emits_per_joint_tokens_and_simplex_reconstruction():
     weights = torch.softmax(torch.randn(b, n, j), dim=-1)
 
     result = model(weights, vertex, joint)
-    tokens = result["token_ids"]
+    codes = result["token_ids"]
     recon = result["reconstructed_weights"]
 
-    assert tokens.shape == (b, j, cfg.tokens_per_joint)
-    assert int(tokens.min()) >= 0
-    assert int(tokens.max()) < cfg.vocab_size
+    assert codes.shape == (b, j, cfg.tokens_per_joint)
+    assert int(codes.min()) >= 0
+    assert int(codes.max()) < cfg.vocab_size
     assert recon.shape == weights.shape
     assert torch.all(recon >= 0.0)
     assert torch.allclose(recon.sum(dim=-1), torch.ones(b, n), atol=1e-5)
     assert torch.isfinite(result["reconstruction_loss"])
-    assert torch.isfinite(result["commitment_loss"])
+    assert torch.isfinite(result["quantization_loss"])
+    assert torch.isfinite(result["loss"])
 
 
-def test_mira_v6_decode_is_token_conditioned_and_does_not_require_dense_teacher():
+def test_mira_v6_quantization_objective_carries_encoder_gradient():
+    torch.manual_seed(13)
+    cfg = MIRASkinFSQCodecConfig(4, 3, hidden_dim=24, tokens_per_joint=2, levels=(3, 5))
+    model = MIRASkinFSQCodecV6(cfg)
+    vertex = torch.randn(2, 9, 4)
+    joint = torch.randn(2, 3, 3)
+    weights = torch.softmax(torch.randn(2, 9, 3), dim=-1)
+    result = model(weights, vertex, joint)
+    result["loss"].backward()
+    grad = model.latent_head.weight.grad
+    assert grad is not None
+    assert torch.isfinite(grad).all()
+    assert float(grad.abs().sum()) > 0.0
+
+
+def test_mira_v6_decode_is_code_conditioned_and_does_not_require_dense_teacher():
     torch.manual_seed(9)
     cfg = MIRASkinFSQCodecConfig(4, 3, hidden_dim=24, tokens_per_joint=2, levels=(5, 5))
     model = MIRASkinFSQCodecV6(cfg)
     vertex = torch.randn(1, 8, 4)
     joint = torch.randn(1, 3, 3)
-    tokens = torch.zeros(1, 3, 2, dtype=torch.long)
-    decoded = model.decode_tokens(tokens, vertex, joint)
+    codes = torch.zeros(1, 3, 2, dtype=torch.long)
+    decoded = model.decode_tokens(codes, vertex, joint)
     assert decoded.shape == (1, 8, 3)
     assert torch.allclose(decoded.sum(dim=-1), torch.ones(1, 8), atol=1e-5)
 

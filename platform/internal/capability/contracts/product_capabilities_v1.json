@@ -41,14 +41,8 @@
         "output_schema_version": "v2",
         "maximum_new_tokens": 131072,
         "required_models": [
-          {
-            "family": "IRIS",
-            "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"
-          },
-          {
-            "family": "TESSA",
-            "architecture_id": "RealSaS.TESSA.Structuralizer.v3"
-          }
+          {"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"},
+          {"family": "TESSA", "architecture_id": "RealSaS.TESSA.Structuralizer.v3"}
         ],
         "implementation_owner_may_change": true,
         "stable_product_role_survives_rewiring": true
@@ -83,17 +77,8 @@
         "shape_surface_court_policy_sha256": "e182023bd59d079ecb747d0812af4e83de7415593c4bca54c753d0f7abfa6f51",
         "source_fidelity_policy_sha256": "8edf9934f1d14f45dcb719fcf39691d69c5797f7410c958ae3005ef639a3c214",
         "surface_adequacy_policy_sha256": "bc98d3aa3cd419ca9ae43010e890fc554ab62e57268933afc630aae20c38139b",
-        "support_binding": {
-          "max_support_nodes": 4,
-          "max_graph_hops": 2,
-          "inverse_distance_power": 2.0
-        },
-        "static_repair": {
-          "collapse_batch_size": 32,
-          "collapse_limit": 256,
-          "relaxation_batch_size": 32,
-          "relaxation_limit": 512
-        },
+        "support_binding": {"max_support_nodes": 4, "max_graph_hops": 2, "inverse_distance_power": 2.0},
+        "static_repair": {"collapse_batch_size": 32, "collapse_limit": 256, "relaxation_batch_size": 32, "relaxation_limit": 512},
         "required_models": [],
         "fit_allowed_during_product_execution": false,
         "legacy_ir_fit_stage_dependency": false,
@@ -132,10 +117,7 @@
         "skin_token_output_version": "v1",
         "maximum_new_tokens": 4096,
         "required_models": [
-          {
-            "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0"
-          }
+          {"family": "AXIS", "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0"}
         ],
         "model_checkpoint_artifact_type": "RealSaS.AXISRuntimeCheckpoint",
         "model_checkpoint_schema_version": "v2",
@@ -150,6 +132,9 @@
         "compiler_constraint_solver_execution_allowed": false,
         "skin_tokens_generated_in_same_causal_axis_run": true,
         "constraint_execution_owner": "MECHANICS",
+        "frame_observability_claimed": false,
+        "post_bind_frame_observability_required": true,
+        "frame_observability_owner": "MECHANICS",
         "fit_allowed_during_product_execution": false,
         "implementation_owner_may_change": true,
         "stable_product_role_survives_rewiring": true
@@ -182,13 +167,14 @@
           "max_influences": 256
         },
         "required_models": [
-          {
-            "family": "MIRA",
-            "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0"
-          }
+          {"family": "MIRA", "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0"}
         ],
         "model_checkpoint_artifact_type": "RealSaS.MIRARuntimeCheckpoint",
         "model_checkpoint_schema_version": "v2",
+        "model_release_admission_owner": "PLATFORM_MODEL_REQUIREMENTS",
+        "research_execution_model_channels": ["RESEARCH", "CANDIDATE"],
+        "product_execution_model_channels": ["PRODUCTION"],
+        "operational_model_state_embedded_in_source": false,
         "canonical_parents": ["CANONICAL_MESH", "CANONICAL_RIG_DEFORM_STRUCTURE"],
         "full_control_program_is_skin_parent": false,
         "axis_rerun_allowed": false,
@@ -196,6 +182,72 @@
         "compiler_token_repair_allowed": false,
         "semantic_skin_transfer_allowed": false,
         "post_hoc_surface_skin_transfer_allowed": false,
+        "fit_allowed_during_product_execution": false,
+        "implementation_owner_may_change": true,
+        "stable_product_role_survives_rewiring": true
+      }
+    },
+    "product.mechanics": {
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.mechanics_executor_v1",
+      "policy": {
+        "allowed_modes": ["DEVELOPER"],
+        "product_pass_authority": false,
+        "dependencies": ["product.mesh", "product.rig", "product.skin"]
+      },
+      "metadata": {
+        "product_role_id": "mechanics",
+        "implementation_class": "COMPILER",
+        "interface_contract": "RealSaS.ProductMechanicsCompile.v1",
+        "executor_contract": "RealSaS.ProductMechanicsCompile.v1",
+        "input_mesh_artifact_type": "RealSaS.CanonicalMeshIR",
+        "input_mesh_schema_version": "v1",
+        "input_rig_artifact_type": "RealSaS.CanonicalRigIR",
+        "input_rig_schema_version": "v2",
+        "input_skin_artifact_type": "RealSaS.CanonicalSkinIR",
+        "input_skin_schema_version": "v2",
+        "output_artifact_type": "RealSaS.CanonicalMechanicsIR",
+        "output_schema_version": "v1",
+        "required_models": [],
+        "learned_inference_allowed": false,
+        "rig_program_mutation_allowed": false,
+        "skin_mutation_allowed": false,
+        "constraint_execution_owner": "MECHANICS",
+        "runtime_and_compile_solver_shared": true,
+        "rest_qualification": {"max_position_drift": 0.00001, "max_constraint_residual": 0.0001},
+        "implementation_owner_may_change": true,
+        "stable_product_role_survives_rewiring": true
+      }
+    },
+    "product.motion": {
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.motion_executor_v2",
+      "policy": {
+        "allowed_modes": ["DEVELOPER"],
+        "product_pass_authority": false,
+        "dependencies": ["product.rig", "product.mechanics"]
+      },
+      "metadata": {
+        "product_role_id": "motion",
+        "implementation_class": "HYBRID",
+        "interface_contract": "RealSaS.ProductMotionCompile.v2",
+        "executor_contract": "RealSaS.ProductMotionCompile.v2",
+        "input_rig_artifact_type": "RealSaS.CanonicalRigIR",
+        "input_rig_schema_version": "v2",
+        "input_mechanics_artifact_type": "RealSaS.CanonicalMechanicsIR",
+        "input_mechanics_schema_version": "v1",
+        "input_motion_proposal_artifact_type": "RealSaS.ControlMotionClipProposalIR",
+        "input_motion_proposal_schema_version": "v1",
+        "output_artifact_type": "RealSaS.CanonicalMotionIR",
+        "output_schema_version": "v2",
+        "required_models": [],
+        "editable_motion_space": "ANIMATOR_CONTROLS",
+        "direct_joint_track_authority": false,
+        "derived_joint_bakes_allowed": true,
+        "constraint_execution_owner": "MECHANICS",
+        "compiler_control_synthesis_allowed": false,
+        "compiler_retargeting_allowed": false,
+        "compiler_joint_curve_bake_allowed": false,
+        "compiler_constraint_execution_allowed": false,
+        "learned_motion_provider_replaceable": true,
         "fit_allowed_during_product_execution": false,
         "implementation_owner_may_change": true,
         "stable_product_role_survives_rewiring": true

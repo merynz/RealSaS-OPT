@@ -46,8 +46,8 @@ func (ProductRigProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"output_schema_version":        "v2",
 			"rig_program_proposal_type":    "RealSaS.RigProgramProposalIR",
 			"rig_program_proposal_version": "v1",
-			"skin_token_output_type":       "RealSaS.SkinTokenProposalIR",
-			"skin_token_output_version":    "v1",
+			"skin_code_output_type":        "RealSaS.SkinCodeProposalIR",
+			"skin_code_output_version":     "v1",
 			"maximum_new_tokens":           4096,
 			"required_models": []any{
 				map[string]any{
@@ -66,7 +66,7 @@ func (ProductRigProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"compiler_constraint_synthesis_allowed":         false,
 			"compiler_frame_repair_allowed":                 false,
 			"compiler_constraint_solver_execution_allowed":  false,
-			"skin_tokens_generated_in_same_causal_axis_run": true,
+			"skin_codes_generated_in_same_causal_axis_run":  true,
 			"constraint_execution_owner":                    "MECHANICS",
 			"frame_observability_claimed":                   false,
 			"post_bind_frame_observability_required":        true,

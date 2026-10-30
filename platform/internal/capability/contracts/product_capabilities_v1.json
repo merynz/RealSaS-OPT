@@ -3,7 +3,7 @@
   "capabilities": {
     "product.input": {
       "entry_module": "compiler.realsas_compiler_services.platform_worker.input_executor_v1",
-      "policy": {"allowed_modes": ["DEVELOPER"], "product_pass_authority": false},
+      "policy": {"allowed_modes": ["DEVELOPER", "PRODUCT"], "product_pass_authority": false},
       "metadata": {
         "product_role_id": "input", "implementation_class": "HYBRID",
         "interface_contract": "RealSaS.ProductInputInference.v1", "executor_contract": "RealSaS.ProductInputInference.v1",
@@ -16,7 +16,7 @@
     },
     "product.shape": {
       "entry_module": "compiler.realsas_compiler_services.platform_worker.shape_executor_v2",
-      "policy": {"allowed_modes": ["DEVELOPER"], "product_pass_authority": false, "dependencies": ["product.input"]},
+      "policy": {"allowed_modes": ["DEVELOPER", "PRODUCT"], "product_pass_authority": false, "dependencies": ["product.input"]},
       "metadata": {
         "product_role_id": "shape", "implementation_class": "MODEL",
         "interface_contract": "RealSaS.ProductShapeInference.v2", "executor_contract": "RealSaS.ProductShapeInference.v2",
@@ -33,7 +33,7 @@
     "product.mesh": {
       "entry_module": "compiler.realsas_compiler_services.platform_worker.mesh_executor_v1",
       "policy": {
-        "allowed_modes": ["DEVELOPER"], "product_pass_authority": false,
+        "allowed_modes": ["DEVELOPER", "PRODUCT"], "product_pass_authority": false,
         "dependencies": ["product.shape", "compiler.stage/05_CAMERA_CONTRACT_SOLVED", "compiler.stage/07_OBSERVATION_CONTRACT_QUALIFIED", "compiler.stage/08_NORMALIZATION_DOMAIN_QUALIFIED"]
       },
       "metadata": {
@@ -58,7 +58,7 @@
     },
     "product.rig": {
       "entry_module": "compiler.realsas_compiler_services.platform_worker.rig_executor_v2",
-      "policy": {"allowed_modes": ["DEVELOPER"], "product_pass_authority": false, "dependencies": ["product.mesh"]},
+      "policy": {"allowed_modes": ["DEVELOPER", "PRODUCT"], "product_pass_authority": false, "dependencies": ["product.mesh"]},
       "metadata": {
         "product_role_id": "rig", "implementation_class": "HYBRID",
         "interface_contract": "RealSaS.ProductRigInference.v2", "executor_contract": "RealSaS.ProductRigInference.v2",
@@ -82,7 +82,7 @@
     },
     "product.skin": {
       "entry_module": "compiler.realsas_compiler_services.platform_worker.skin_executor_v2",
-      "policy": {"allowed_modes": ["DEVELOPER"], "product_pass_authority": false, "dependencies": ["product.mesh", "product.rig"]},
+      "policy": {"allowed_modes": ["DEVELOPER", "PRODUCT"], "product_pass_authority": false, "dependencies": ["product.mesh", "product.rig"]},
       "metadata": {
         "product_role_id": "skin", "implementation_class": "HYBRID",
         "interface_contract": "RealSaS.ProductSkinInference.v2", "executor_contract": "RealSaS.ProductSkinInference.v2",
@@ -105,7 +105,7 @@
     },
     "product.mechanics": {
       "entry_module": "compiler.realsas_compiler_services.platform_worker.mechanics_executor_v1",
-      "policy": {"allowed_modes": ["DEVELOPER"], "product_pass_authority": false, "dependencies": ["product.mesh", "product.rig", "product.skin"]},
+      "policy": {"allowed_modes": ["DEVELOPER", "PRODUCT"], "product_pass_authority": false, "dependencies": ["product.mesh", "product.rig", "product.skin"]},
       "metadata": {
         "product_role_id": "mechanics", "implementation_class": "COMPILER",
         "interface_contract": "RealSaS.ProductMechanicsCompile.v1", "executor_contract": "RealSaS.ProductMechanicsCompile.v1",
@@ -121,7 +121,7 @@
     },
     "product.graphics": {
       "entry_module": "compiler.realsas_compiler_services.platform_worker.graphics_executor_v1",
-      "policy": {"allowed_modes": ["DEVELOPER"], "product_pass_authority": false, "dependencies": ["product.mesh", "product.skin", "product.mechanics"]},
+      "policy": {"allowed_modes": ["DEVELOPER", "PRODUCT"], "product_pass_authority": false, "dependencies": ["product.mesh", "product.skin", "product.mechanics"]},
       "metadata": {
         "product_role_id": "graphics", "implementation_class": "HYBRID",
         "interface_contract": "RealSaS.ProductGraphicsCompile.v1", "executor_contract": "RealSaS.ProductGraphicsCompile.v1",
@@ -149,7 +149,7 @@
     },
     "product.motion": {
       "entry_module": "compiler.realsas_compiler_services.platform_worker.motion_executor_v2",
-      "policy": {"allowed_modes": ["DEVELOPER"], "product_pass_authority": false, "dependencies": ["product.rig", "product.mechanics"]},
+      "policy": {"allowed_modes": ["DEVELOPER", "PRODUCT"], "product_pass_authority": false, "dependencies": ["product.rig", "product.mechanics"]},
       "metadata": {
         "product_role_id": "motion", "implementation_class": "HYBRID",
         "interface_contract": "RealSaS.ProductMotionCompile.v2", "executor_contract": "RealSaS.ProductMotionCompile.v2",

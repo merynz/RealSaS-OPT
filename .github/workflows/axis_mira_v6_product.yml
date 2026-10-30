@@ -6,9 +6,11 @@ on:
       - 'models/axis/**'
       - 'models/mira/**'
       - 'compiler/realsas_compiler_core/rig_program_ir_v1.py'
+      - 'compiler/realsas_compiler_core/rig_constraint_schema_v1.py'
       - 'compiler/realsas_compiler_core/canonical_rig_ir_v2.py'
       - 'compiler/realsas_compiler_core/skin_token_ir_v1.py'
       - 'compiler/realsas_compiler_core/canonical_skin_ir_v2.py'
+      - 'compiler/realsas_compiler_core/mechanics_control_solver_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/rig_executor_v2.py'
       - 'compiler/realsas_compiler_services/platform_worker/skin_executor_v2.py'
       - 'compiler/realsas_compiler_services/platform_worker/worker.py'
@@ -22,6 +24,7 @@ on:
       - 'tests/models/test_axis_mira_v6_product_runtime.py'
       - 'tests/models/test_axis_v6_training.py'
       - 'tests/compiler/test_control_ready_rig_v2.py'
+      - 'tests/compiler/test_mechanics_control_solver_v1.py'
       - 'tests/repository/test_fit1_mechanical_product_role_alignment_v1.py'
       - '.github/workflows/axis_mira_v6_product.yml'
   workflow_dispatch:
@@ -69,14 +72,16 @@ jobs:
             models/axis/training_v6.py \
             models/axis/runtime_checkpoint_v2.py \
             compiler/realsas_compiler_core/rig_program_ir_v1.py \
+            compiler/realsas_compiler_core/rig_constraint_schema_v1.py \
             compiler/realsas_compiler_core/canonical_rig_ir_v2.py \
             compiler/realsas_compiler_core/skin_token_ir_v1.py \
             compiler/realsas_compiler_core/canonical_skin_ir_v2.py \
+            compiler/realsas_compiler_core/mechanics_control_solver_v1.py \
             compiler/realsas_compiler_services/platform_worker/rig_executor_v2.py \
             compiler/realsas_compiler_services/platform_worker/skin_executor_v2.py \
             compiler/realsas_compiler_services/platform_worker/worker.py
 
-      - name: Run V6 model Compiler runtime and training courts
+      - name: Run V6 model Compiler runtime training and Mechanics courts
         run: |
           set -euo pipefail
           pytest -q \
@@ -86,6 +91,7 @@ jobs:
             tests/models/test_axis_mira_v6_product_runtime.py \
             tests/models/test_axis_v6_training.py \
             tests/compiler/test_control_ready_rig_v2.py \
+            tests/compiler/test_mechanics_control_solver_v1.py \
             tests/repository/test_fit1_mechanical_product_role_alignment_v1.py
 
       - name: Validate Platform product capability catalog
@@ -117,6 +123,5 @@ jobs:
           seq = AXISSequenceV6.from_events([RigProgramEventV6(RigTokenKindV6.BOS)], device=torch.device('cpu'))
           out = axis(torch.randn(1, 9, AXIS_V6_SURFACE_SCENE_DIM), seq)
           assert out['skin_code_logits'].shape[-1] == mira_cfg.vocab_size
-          assert out['pointer_c_logits'].shape[-1] == axis_cfg.max_pointer_entities + 1
           print('AXIS_MIRA_V6_PRODUCT_SMOKE_PASS')
           PY

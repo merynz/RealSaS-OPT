@@ -33,9 +33,27 @@ def _support(i: int):
 def _mesh():
     value = CanonicalMeshIR(
         vertices=(
-            CanonicalMeshVertexIR("MV:0", _support(0), (0.0, 0.0, 0.0), "body", "CV:0"),
-            CanonicalMeshVertexIR("MV:1", _support(1), (0.0, 1.0, 0.0), "body", "CV:1"),
-            CanonicalMeshVertexIR("MV:2", _support(2), (0.0, 2.0, 0.0), "body", "CV:2"),
+            CanonicalMeshVertexIR(
+                canonical_mesh_vertex_id="MV:0",
+                support_binding=_support(0),
+                component_id="body",
+                P=(0.0, 0.0, 0.0),
+                source_candidate_vertex_id="CV:0",
+            ),
+            CanonicalMeshVertexIR(
+                canonical_mesh_vertex_id="MV:1",
+                support_binding=_support(1),
+                component_id="body",
+                P=(0.0, 1.0, 0.0),
+                source_candidate_vertex_id="CV:1",
+            ),
+            CanonicalMeshVertexIR(
+                canonical_mesh_vertex_id="MV:2",
+                support_binding=_support(2),
+                component_id="body",
+                P=(0.0, 2.0, 0.0),
+                source_candidate_vertex_id="CV:2",
+            ),
         ),
         faces=(("MV:0", "MV:1", "MV:2"),),
         edges=(("MV:0", "MV:1"), ("MV:1", "MV:2"), ("MV:0", "MV:2")),

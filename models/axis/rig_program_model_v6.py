@@ -3,17 +3,18 @@ from __future__ import annotations
 """Shipping-target AXIS V6 causal rig-program model.
 
 The model emits a typed mechanical program, not merely a skeleton. Explicit
-section tokens make the language unambiguous while allowing zero-cardinality
-optional sections. MIRA skin tokens share the same causal state.
+section and relation events keep the language generic: controls may target any
+number of joints and constraints may consume/drive any number of controls/joints.
+MIRA discrete skin codes share the same causal state.
 
 Grammar enforcement belongs here at generation time. Compiler never completes,
-reparents, repairs, or searches the generated program.
+reparents, repairs, searches, or executes the generated program.
 """
 
 from dataclasses import dataclass
 from enum import IntEnum
 import math
-from typing import Iterable, Sequence
+from typing import Sequence
 
 import torch
 from torch import Tensor, nn
@@ -54,15 +55,18 @@ class RigTokenKindV6(IntEnum):
     FRAME = 4
     CONTROLS_START = 5
     CONTROL = 6
-    CHAINS_START = 7
-    CHAIN = 8
-    CONSTRAINTS_START = 9
-    CONSTRAINT = 10
-    ANCHORS_START = 11
-    ANCHOR = 12
-    SKIN_START = 13
-    SKIN_TOKEN = 14
-    EOS = 15
+    CONTROL_TARGET = 7
+    CHAINS_START = 8
+    CHAIN = 9
+    CONSTRAINTS_START = 10
+    CONSTRAINT = 11
+    CONSTRAINT_INPUT = 12
+    CONSTRAINT_OUTPUT = 13
+    ANCHORS_START = 14
+    ANCHOR = 15
+    SKIN_START = 16
+    SKIN_CODE = 17
+    EOS = 18
 
 
 class RigSectionV6(IntEnum):
@@ -124,7 +128,7 @@ class RigProgramEventV6:
     dof_mask: tuple[float, ...] = (0.0,) * len(DOF_LABELS_V6)
     frame_6d: tuple[float, ...] = (0.0,) * 6
     scalar_params: tuple[float, ...] = (0.0,) * AXIS_V6_SCALAR_COUNT
-    skin_token_id: int = -1
+    skin_code_id: int = -1
     anchor_parent_kind: int = -1  # 0=joint, 1=control
 
 
@@ -134,10 +138,13 @@ class RigGrammarStateV6:
     joint_count: int = 0
     frame_count: int = 0
     control_count: int = 0
+    control_target_count: int = 0
     chain_count: int = 0
     constraint_count: int = 0
+    constraint_input_count: int = 0
+    constraint_output_count: int = 0
     anchor_count: int = 0
-    skin_token_count: int = 0
+    skin_code_count: int = 0
 
 
 class AXISRigProgramGrammarV6Product:
@@ -147,25 +154,28 @@ class AXISRigProgramGrammarV6Product:
         if s == RigSectionV6.START:
             return (RigTokenKindV6.BOS,)
         if s == RigSectionV6.JOINTS:
-            # At least one deform joint is required.
             return ((RigTokenKindV6.JOINT,) if state.joint_count == 0 else
                     (RigTokenKindV6.JOINT, RigTokenKindV6.FRAMES_START))
         if s == RigSectionV6.FRAMES:
-            # Frame coverage is a Compiler court, not grammar synthesis. The model
-            # may transition early and fail qualification.
             return (RigTokenKindV6.FRAME, RigTokenKindV6.CONTROLS_START)
         if s == RigSectionV6.CONTROLS:
-            return (RigTokenKindV6.CONTROL, RigTokenKindV6.CHAINS_START)
+            kinds = [RigTokenKindV6.CONTROL, RigTokenKindV6.CHAINS_START]
+            if state.control_count > 0:
+                kinds.insert(1, RigTokenKindV6.CONTROL_TARGET)
+            return tuple(kinds)
         if s == RigSectionV6.CHAINS:
             return (RigTokenKindV6.CHAIN, RigTokenKindV6.CONSTRAINTS_START)
         if s == RigSectionV6.CONSTRAINTS:
-            return (RigTokenKindV6.CONSTRAINT, RigTokenKindV6.ANCHORS_START)
+            kinds = [RigTokenKindV6.CONSTRAINT, RigTokenKindV6.ANCHORS_START]
+            if state.constraint_count > 0:
+                kinds[1:1] = [RigTokenKindV6.CONSTRAINT_INPUT, RigTokenKindV6.CONSTRAINT_OUTPUT]
+            return tuple(kinds)
         if s == RigSectionV6.ANCHORS:
             return (RigTokenKindV6.ANCHOR, RigTokenKindV6.SKIN_START)
         if s == RigSectionV6.SKIN:
             required = state.joint_count * int(tokens_per_joint)
-            if state.skin_token_count < required:
-                return (RigTokenKindV6.SKIN_TOKEN,)
+            if state.skin_code_count < required:
+                return (RigTokenKindV6.SKIN_CODE,)
             return (RigTokenKindV6.EOS,)
         return ()
 
@@ -186,6 +196,8 @@ class AXISRigProgramGrammarV6Product:
             d["section"] = RigSectionV6.CONTROLS
         elif kind == RigTokenKindV6.CONTROL:
             d["control_count"] += 1
+        elif kind == RigTokenKindV6.CONTROL_TARGET:
+            d["control_target_count"] += 1
         elif kind == RigTokenKindV6.CHAINS_START:
             d["section"] = RigSectionV6.CHAINS
         elif kind == RigTokenKindV6.CHAIN:
@@ -194,14 +206,18 @@ class AXISRigProgramGrammarV6Product:
             d["section"] = RigSectionV6.CONSTRAINTS
         elif kind == RigTokenKindV6.CONSTRAINT:
             d["constraint_count"] += 1
+        elif kind == RigTokenKindV6.CONSTRAINT_INPUT:
+            d["constraint_input_count"] += 1
+        elif kind == RigTokenKindV6.CONSTRAINT_OUTPUT:
+            d["constraint_output_count"] += 1
         elif kind == RigTokenKindV6.ANCHORS_START:
             d["section"] = RigSectionV6.ANCHORS
         elif kind == RigTokenKindV6.ANCHOR:
             d["anchor_count"] += 1
         elif kind == RigTokenKindV6.SKIN_START:
             d["section"] = RigSectionV6.SKIN
-        elif kind == RigTokenKindV6.SKIN_TOKEN:
-            d["skin_token_count"] += 1
+        elif kind == RigTokenKindV6.SKIN_CODE:
+            d["skin_code_count"] += 1
         elif kind == RigTokenKindV6.EOS:
             d["section"] = RigSectionV6.DONE
         return RigGrammarStateV6(**d)
@@ -227,7 +243,7 @@ class AXISSequenceV6:
     dof_masks: Tensor
     frame_6d: Tensor
     scalar_params: Tensor
-    skin_token_ids: Tensor
+    skin_code_ids: Tensor
     anchor_parent_kind: Tensor
     attention_mask: Tensor
 
@@ -238,7 +254,7 @@ class AXISSequenceV6:
         if s > config.max_sequence_length:
             raise ValueError("AXIS_V6_SEQUENCE_RESOURCE_GUARD")
         for value in (self.pointer_a, self.pointer_b, self.pointer_c, self.aux_type_ids,
-                      self.skin_token_ids, self.anchor_parent_kind, self.attention_mask):
+                      self.skin_code_ids, self.anchor_parent_kind, self.attention_mask):
             if value.shape != (b, s):
                 raise ValueError("AXIS_V6_SEQUENCE_FIELD_SHAPE")
         if self.coord_indices.shape != (b, s, 3):
@@ -266,7 +282,7 @@ class AXISSequenceV6:
             dof_masks=torch.tensor([[e.dof_mask for e in events]], device=device, dtype=torch.float32),
             frame_6d=torch.tensor([[e.frame_6d for e in events]], device=device, dtype=torch.float32),
             scalar_params=torch.tensor([[e.scalar_params for e in events]], device=device, dtype=torch.float32),
-            skin_token_ids=torch.tensor([row("skin_token_id")], device=device, dtype=torch.long),
+            skin_code_ids=torch.tensor([row("skin_code_id")], device=device, dtype=torch.long),
             anchor_parent_kind=torch.tensor([row("anchor_parent_kind")], device=device, dtype=torch.long),
             attention_mask=torch.ones((1, len(events)), device=device, dtype=torch.bool),
         )
@@ -286,7 +302,7 @@ class AXISRigProgramModelV6(nn.Module):
         self.pointer_embedding = nn.Embedding(config.max_pointer_entities + 1, h)
         self.aux_embedding = nn.Embedding(max(len(CONTROL_KINDS_V6), len(CONSTRAINT_OPERATORS_V6)) + 1, h)
         self.skin_embedding = nn.Embedding(config.skin_vocab_size + 1, h)
-        self.anchor_parent_embedding = nn.Embedding(3, h)  # absent/joint/control
+        self.anchor_parent_embedding = nn.Embedding(3, h)
         self.position_embedding = nn.Embedding(config.max_sequence_length, h)
         self.dof_projection = nn.Linear(len(DOF_LABELS_V6), h, bias=False)
         self.frame_projection = nn.Linear(6, h, bias=False)
@@ -303,7 +319,6 @@ class AXISRigProgramModelV6(nn.Module):
 
         self.kind_head = nn.Linear(h, len(RigTokenKindV6))
         self.coord_head = nn.Linear(h, 3 * config.coord_bins)
-        # Pointer vocab reserves 0=NULL, 1..N=entity index 0..N-1.
         self.pointer_a_head = nn.Linear(h, config.max_pointer_entities + 1)
         self.pointer_b_head = nn.Linear(h, config.max_pointer_entities + 1)
         self.pointer_c_head = nn.Linear(h, config.max_pointer_entities + 1)
@@ -312,7 +327,7 @@ class AXISRigProgramModelV6(nn.Module):
         self.dof_head = nn.Linear(h, len(DOF_LABELS_V6))
         self.frame_6d_head = nn.Linear(h, 6)
         self.scalar_head = nn.Linear(h, AXIS_V6_SCALAR_COUNT)
-        self.skin_token_head = nn.Linear(h, config.skin_vocab_size)
+        self.skin_code_head = nn.Linear(h, config.skin_vocab_size)
         self.anchor_parent_head = nn.Linear(h, 2)
 
     @staticmethod
@@ -329,7 +344,7 @@ class AXISRigProgramModelV6(nn.Module):
         for ptr in (seq.pointer_a, seq.pointer_b, seq.pointer_c):
             x = x + self.pointer_embedding(self._shift(ptr, cfg.max_pointer_entities))
         x = x + self.aux_embedding(self._shift(seq.aux_type_ids, self.aux_embedding.num_embeddings - 1))
-        x = x + self.skin_embedding(self._shift(seq.skin_token_ids, cfg.skin_vocab_size))
+        x = x + self.skin_embedding(self._shift(seq.skin_code_ids, cfg.skin_vocab_size))
         x = x + self.anchor_parent_embedding(self._shift(seq.anchor_parent_kind, 2))
         x = x + self.dof_projection(seq.dof_masks.to(dtype=x.dtype))
         x = x + self.frame_projection(seq.frame_6d.to(dtype=x.dtype))
@@ -360,7 +375,7 @@ class AXISRigProgramModelV6(nn.Module):
             "dof_logits": self.dof_head(x),
             "frame_6d": self.frame_6d_head(x),
             "scalar_params": self.scalar_head(x),
-            "skin_token_logits": self.skin_token_head(x),
+            "skin_code_logits": self.skin_code_head(x),
             "anchor_parent_logits": self.anchor_parent_head(x),
             "hidden": x,
         }
@@ -369,11 +384,13 @@ class AXISRigProgramModelV6(nn.Module):
     def _pointer(logits: Tensor, count: int, *, allow_null: bool) -> int:
         if count < 0:
             raise ValueError("AXIS_V6_POINTER_COUNT_INVALID")
-        available = count + 1  # includes NULL at index 0
+        available = count + 1
         if available > logits.shape[-1]:
             raise RuntimeError("AXIS_V6_POINTER_RESOURCE_GUARD")
         values = logits[..., :available].clone()
         if not allow_null:
+            if count < 1:
+                raise RuntimeError("AXIS_V6_REQUIRED_POINTER_EMPTY_DOMAIN")
             values[..., 0] = float("-inf")
         raw = int(torch.argmax(values, dim=-1).item())
         return raw - 1
@@ -411,12 +428,12 @@ class AXISRigProgramModelV6(nn.Module):
             last = {key: value[0, -1] for key, value in out.items() if key != "hidden"}
 
             coord = (-1, -1, -1)
-            pa = pb = pc = aux = skin = anchor_kind = -1
+            pa = pb = pc = aux = code_id = anchor_kind = -1
             dof = (0.0,) * len(DOF_LABELS_V6)
             frame = (0.0,) * 6
             scalars = (0.0,) * AXIS_V6_SCALAR_COUNT
 
-            if kind in (RigTokenKindV6.JOINT, RigTokenKindV6.CONTROL):
+            if kind in (RigTokenKindV6.JOINT, RigTokenKindV6.CONTROL, RigTokenKindV6.ANCHOR):
                 coord = tuple(int(v) for v in torch.argmax(last["coord_logits"], dim=-1).tolist())  # type: ignore[assignment]
             if kind == RigTokenKindV6.JOINT:
                 pa = -1 if state.joint_count == 0 else self._pointer(last["pointer_a_logits"], state.joint_count, allow_null=True)
@@ -426,31 +443,33 @@ class AXISRigProgramModelV6(nn.Module):
                 dof = tuple(float(v) for v in (torch.sigmoid(last["dof_logits"]) >= 0.5).to(torch.float32).tolist())
             elif kind == RigTokenKindV6.CONTROL:
                 aux = int(torch.argmax(last["control_kind_logits"]).item())
-                pa = self._pointer(last["pointer_a_logits"], state.joint_count, allow_null=True)
-                pb = self._pointer(last["pointer_b_logits"], state.control_count, allow_null=True)
+                pa = self._pointer(last["pointer_a_logits"], state.control_count, allow_null=True)
+            elif kind == RigTokenKindV6.CONTROL_TARGET:
+                pa = self._pointer(last["pointer_a_logits"], state.joint_count, allow_null=False)
             elif kind == RigTokenKindV6.CHAIN:
                 pa = self._pointer(last["pointer_a_logits"], state.joint_count, allow_null=False)
                 pb = self._pointer(last["pointer_b_logits"], state.joint_count, allow_null=False)
             elif kind == RigTokenKindV6.CONSTRAINT:
                 aux = int(torch.argmax(last["constraint_operator_logits"]).item())
-                pa = self._pointer(last["pointer_a_logits"], state.control_count, allow_null=True)
-                pb = self._pointer(last["pointer_b_logits"], state.chain_count, allow_null=True)
-                pc = self._pointer(last["pointer_c_logits"], state.joint_count, allow_null=True)
+                pa = self._pointer(last["pointer_a_logits"], state.chain_count, allow_null=True)
                 scalars = tuple(float(v) for v in last["scalar_params"].tolist())
+            elif kind == RigTokenKindV6.CONSTRAINT_INPUT:
+                pa = self._pointer(last["pointer_a_logits"], state.control_count, allow_null=False)
+            elif kind == RigTokenKindV6.CONSTRAINT_OUTPUT:
+                pa = self._pointer(last["pointer_a_logits"], state.joint_count, allow_null=False)
             elif kind == RigTokenKindV6.ANCHOR:
                 anchor_kind = int(torch.argmax(last["anchor_parent_logits"]).item())
                 if anchor_kind == 0:
                     pa = self._pointer(last["pointer_a_logits"], state.joint_count, allow_null=False)
                 else:
                     pb = self._pointer(last["pointer_b_logits"], state.control_count, allow_null=False)
-                coord = tuple(int(v) for v in torch.argmax(last["coord_logits"], dim=-1).tolist())  # type: ignore[assignment]
-            elif kind == RigTokenKindV6.SKIN_TOKEN:
-                skin = int(torch.argmax(last["skin_token_logits"]).item())
+            elif kind == RigTokenKindV6.SKIN_CODE:
+                code_id = int(torch.argmax(last["skin_code_logits"]).item())
 
             event = RigProgramEventV6(
                 kind=kind, coord_indices=coord, pointer_a=pa, pointer_b=pb, pointer_c=pc,
                 aux_type_id=aux, dof_mask=dof, frame_6d=frame, scalar_params=scalars,
-                skin_token_id=skin, anchor_parent_kind=anchor_kind,
+                skin_code_id=code_id, anchor_parent_kind=anchor_kind,
             )
             events.append(event)
             state = AXISRigProgramGrammarV6Product.advance(state, kind, tokens_per_joint=tokens_per_joint)
@@ -460,7 +479,6 @@ class AXISRigProgramModelV6(nn.Module):
 
 
 def rotation_6d_to_basis_v6(value: Sequence[float]) -> tuple[tuple[float, float, float], ...]:
-    """Continuous 6D rotation representation -> right-handed orthonormal basis."""
     if len(value) != 6 or not all(math.isfinite(float(v)) for v in value):
         raise ValueError("AXIS_V6_FRAME6D_INVALID")
     a = torch.tensor(value[:3], dtype=torch.float64)

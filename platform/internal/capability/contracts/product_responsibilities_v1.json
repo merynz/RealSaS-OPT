@@ -206,7 +206,7 @@
     {
       "id": "graphics.presentation_relation_evidence",
       "role_id": "graphics",
-      "required_when_role_present": false,
+      "required_when_role_present": true,
       "authority_kind": "LEARNED_EVIDENCE",
       "exclusive": true,
       "execution_owner_class": "HYBRID",

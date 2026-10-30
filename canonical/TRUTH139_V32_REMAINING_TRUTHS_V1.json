@@ -1,0 +1,59 @@
+{
+  "schema": "RealSaS.Truth139V32RemainingTruthsContract.v1",
+  "date": "2026-10-30",
+  "status": "FROZEN_REMAINING_TRUTH_MATERIALIZATION_CONTRACT__TRAINING_AUTHORITY_SEPARATE",
+  "architecture_freeze": "canonical/IRIS_TESSA_V32_PRETRUTH_ARCHITECTURE_FREEZE.json",
+  "response_prerequisite": {
+    "required_status": "PASS_FULL139_IRIS_RESPONSE_EVIDENCE_COMPLETE__DERIVED_TRUTH_ADMISSION_SEPARATE",
+    "subject_count": 139,
+    "recompute_response_here": false
+  },
+  "lanes": {
+    "STAGE48_RENDERER_INTERVENTION_WITNESS": {
+      "subject_count": 139,
+      "renderer_source_equivalence_required": true,
+      "response_truth_recomputed": false
+    },
+    "V32_EXACT3D_GEOMETRY": {
+      "subject_count": 139,
+      "surface_distance": "EXACT_TRIANGLE_DISTANCE",
+      "surface_normal": "EXACT_SOURCE_ORIENTATION_WITH_VALIDITY",
+      "global_sign": "VALIDITY_MASKED_FAIL_CLOSED",
+      "occupancy": "VALIDITY_MASKED_FAIL_CLOSED",
+      "fstar_authority": "AUXILIARY_SOURCE_CONSISTENCY_ONLY"
+    },
+    "V32_RGB_PATCH_EVIDENCE": {
+      "subject_count": 139,
+      "native_view_count": 8,
+      "native_resolution": 1024,
+      "resize_resolution": 518,
+      "patch_size": 14,
+      "patch_grid": [37, 37],
+      "raw_rgb_scalars_per_patch": 588,
+      "imagenet_normalization_applied": false
+    },
+    "V32_MECHANICAL_TESSA_TEACHER": {
+      "subject_count": 139,
+      "policy": "MECHANICAL_ADMISSIBILITY_BEFORE_COMPACTNESS",
+      "deterministic_bounded_simplification_ladder": true,
+      "exact_source_topology_is_fallback_member": true,
+      "teacher_topology_is_student_conditioning": false,
+      "fail_closed_on_unproven_simplification": true
+    }
+  },
+  "split": {
+    "unit": "LEAKAGE_CONNECTED_COMPONENT",
+    "target_train_fraction": 0.82,
+    "unseen_never_used_for_optimizer": true,
+    "unseen_never_used_for_checkpoint_selection": true,
+    "train_internal_validation_rows_fixed": true,
+    "development_or_regression_tainted_forced_out_of_unseen": true
+  },
+  "authority": {
+    "training_performed": false,
+    "training_authorized_by_materialization_alone": false,
+    "qualification_minted": false,
+    "product_authority_changed": false,
+    "final_compiler_watertight_court_is_training_phase_e": true
+  }
+}

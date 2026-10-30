@@ -1,0 +1,82 @@
+name: knight-control-space-regression-v1
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/canonical_rig_ir_v2.py'
+      - 'compiler/realsas_compiler_core/mechanics_control_solver_v1.py'
+      - 'compiler/realsas_compiler_core/control_motion_ir_v1.py'
+      - 'compiler/realsas_compiler_core/canonical_motion_ir_v2.py'
+      - 'compiler/realsas_compiler_core/control_motion_runtime_v2.py'
+      - 'tools/demo/run_knight_control_space_equivalence_v1.py'
+      - '.github/workflows/knight_control_space_regression_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: knight-control-space-regression-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  knight-control-space-equivalence:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      OUT: /tmp/knight_control_space_equivalence_v1/REPORT.json
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned regression dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile control-space regression sources
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            compiler/realsas_compiler_core/canonical_rig_ir_v2.py \
+            compiler/realsas_compiler_core/mechanics_control_solver_v1.py \
+            tools/demo/run_knight_control_space_equivalence_v1.py
+
+      - name: Reproduce sealed Knight motion through control-space Mechanics
+        run: |
+          set -euo pipefail
+          rm -rf "$(dirname "$OUT")"
+          PYTHONPATH=. python -m tools.demo.run_knight_control_space_equivalence_v1 \
+            --authority-root "$AUTHORITY_ROOT" \
+            --run-id "$RUN_ID" \
+            --out "$OUT"
+          test -s "$OUT"
+
+      - name: Summarize equivalence residuals
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          report = json.loads(Path(os.environ['OUT']).read_text())
+          print('KNIGHT_CONTROL_SPACE_STATUS', report['status'])
+          print('KNIGHT_CONTROL_SPACE_AGGREGATE', json.dumps(report['aggregate'], sort_keys=True))
+          for row in report['clips']:
+              print('KNIGHT_CONTROL_SPACE_CLIP', json.dumps(row, sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-control-space-equivalence-v1
+          path: /tmp/knight_control_space_equivalence_v1/REPORT.json
+          if-no-files-found: warn

@@ -94,7 +94,7 @@ def execute_proof_capability_v1(
     from compiler.realsas_compiler_core.canonical_skin_ir_v2 import (
         canonical_skin_from_dict_v2,
     )
-    from compiler.realsas_compiler_core.modular_product_proof_v1 import (
+    from compiler.realsas_compiler_core.modular_product_proof_eval_v1 import (
         evaluate_modular_product_proof_v1,
     )
 

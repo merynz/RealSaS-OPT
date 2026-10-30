@@ -454,6 +454,20 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
 
     if (
         str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductGraphicsCompile.v1"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.graphics_executor_v1 import (
+            execute_graphics_capability_v1,
+        )
+
+        def run_graphics(value):
+            return execute_graphics_capability_v1(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
+            )
+        return await _with_heartbeat(run_graphics, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
         and metadata.get("executor_contract") == "RealSaS.ProductMotionCompile.v2"
     ):
         from compiler.realsas_compiler_services.platform_worker.motion_executor_v2 import (

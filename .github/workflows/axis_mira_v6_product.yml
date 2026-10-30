@@ -24,6 +24,7 @@ on:
       - 'tests/models/test_axis_mira_v6_product_runtime.py'
       - 'tests/models/test_axis_v6_training.py'
       - 'tests/compiler/test_control_ready_rig_v2.py'
+      - 'tests/compiler/test_rig_program_causal_linear_v1.py'
       - 'tests/compiler/test_mechanics_control_solver_v1.py'
       - 'tests/repository/test_fit1_mechanical_product_role_alignment_v1.py'
       - '.github/workflows/axis_mira_v6_product.yml'
@@ -91,6 +92,7 @@ jobs:
             tests/models/test_axis_mira_v6_product_runtime.py \
             tests/models/test_axis_v6_training.py \
             tests/compiler/test_control_ready_rig_v2.py \
+            tests/compiler/test_rig_program_causal_linear_v1.py \
             tests/compiler/test_mechanics_control_solver_v1.py \
             tests/repository/test_fit1_mechanical_product_role_alignment_v1.py
 

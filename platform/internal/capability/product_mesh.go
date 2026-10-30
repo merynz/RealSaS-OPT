@@ -31,7 +31,7 @@ func (ProductMeshProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			StageCapabilityID("07_OBSERVATION_CONTRACT_QUALIFIED"),
 			StageCapabilityID("08_NORMALIZATION_DOMAIN_QUALIFIED"),
 		},
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeDeveloper, ModeProduct},
 		ProductPassAuthority: false,
 		Aliases:              []string{"Mesh", "Compiler"},
 		Metadata: map[string]any{

@@ -1,0 +1,155 @@
+{
+  "schema": "RealSaS.IRISTESSAPreTruthArchitectureFreeze.v3.2",
+  "date": "2026-10-30",
+  "status": "FROZEN_PRETRUTH_ARCHITECTURE_V3_2__TRAINING_BLOCKED_ON_TARGET_READINESS",
+  "scope": "FIRST_TRUTH139_MODEL_ARCHITECTURE_AND_STAGED_TRAINING_BOUNDARY",
+  "narrative_contract": {
+    "path": "docs/research/IRIS_TESSA_V32_PRETRUTH_ARCHITECTURE_20261030.md",
+    "git_blob_sha1": "3586026100e873c12690149b2c3fb0b47cf818b8"
+  },
+  "base_lineage": {
+    "architecture": "V3.1_LATEST_QUALIFIED_LINEAGE",
+    "historical_freeze_path": "experiments/iris_tessa_v3_apparatus_audit_20261025/IRIS_TESSA_V3_1_ARCHITECTURE_FREEZE.json",
+    "rule": "PRESERVE_EVERY_UNMENTIONED_RESPONSIBILITY_AND_LATEST_QUALIFIED_CORRECTION"
+  },
+  "explicit_changes": {
+    "geometry_supervision": {
+      "surface_authority": "EXACT_SOURCE_SURFACE_DISTANCE_AND_ORIENTATION",
+      "global_sign": "EXACT_ONLY_WHERE_SIGN_VALIDITY_COURT_PASSES__OTHERWISE_ABSTAIN",
+      "occupancy": "EXACT_ONLY_WHERE_SIGN_VALIDITY_COURT_PASSES__OTHERWISE_ABSTAIN",
+      "normal_supervision": "EXPLICIT_ORIENTED_SURFACE_NORMAL",
+      "legacy_fstar": "AUXILIARY_SOURCE_CONSISTENCY_ONLY",
+      "final_product_mesh": "WATERTIGHT_REQUIRED"
+    },
+    "observation_fusion": {
+      "foundation": "DINOv2-S/14",
+      "token": "FINAL384_PLUS_L2_64_PLUS_ALPHA64_PLUS_RGB64",
+      "token_width": 576,
+      "rgb_source": "PATCH_ALIGNED_RAW_LOCAL_RGB_14x14x3_PROJECTED_TO_64",
+      "eight_view_semantics": "CURRENT_RESEARCH_APPARATUS_ONLY__NOT_PRODUCT_INPUT_SEMANTICS"
+    },
+    "tessa_dependency": {
+      "semantic_order": "DENSE3D_Z__THEN_GEOMETRY_G__THEN_TESSA__THEN_COMPILER_M",
+      "mandatory_scene_access": "DIRECT_BOUNDED_DENSE3D_Z",
+      "mandatory_surface_access": "QUALIFIED_GEOMETRY_DERIVED_G",
+      "reduced_17d_gsa_as_scene_replacement": false,
+      "topology_may_backprop_into_qualified_iris_in_first_truth139_run": false
+    },
+    "topology_policy": {
+      "mechanical_admissibility_precedes_compactness": true,
+      "teacher": "MECHANICALLY_QUALIFIED_COMPACT_TOPOLOGY_TEACHER",
+      "teacher_topology_is_student_conditioning": false,
+      "full_source_topology": "FALLBACK_MEMBER_OF_SIMPLIFICATION_LADDER",
+      "free_running_decoded_mesh_court_required": true
+    }
+  },
+  "preserved_responsibilities": {
+    "dense3d_carrier": true,
+    "query_and_private_paths": true,
+    "graphics_first_class_head": true,
+    "graphics_outputs": "V3_1_RGBA_BOUNDARY_PLUS_ADMITTED_TRUTH139_GRAPHICS_EVIDENCE",
+    "response_is_continuous_not_semantic_class": true,
+    "response_objective": "LATEST_QUALIFIED_FIXED_SCALE_STUDENT_T_LOCATION_ONLY_LOG1P_DF3",
+    "relations_and_gradient_firewall": true,
+    "compiler_is_sole_canonical_discrete_authority": true,
+    "fail_closed_provenance": true,
+    "knight_is_independent_regression_lineage": true,
+    "caa_is_top_level_graphics_name": false
+  },
+  "training_chronology": [
+    "PHASE_A_IRIS_SCENE_GEOMETRY_FOUNDATION",
+    "PHASE_B_IRIS_GRAPHICS_RESPONSE_RELATIONS_EVIDENCE",
+    "PHASE_C_GEOMETRY_QUALIFICATION_AND_FREEZE",
+    "PHASE_D_TESSA_FROM_DETACHED_Z_PLUS_G",
+    "PHASE_E_COMPILER_STATIC_MECHANICAL_WATERTIGHT_CONSEQUENCE"
+  ],
+  "split_policy": {
+    "builder": "tools/training/build_lineage_safe_subject_split_v1.py",
+    "subject_split": "LEAKAGE_CONNECTED_COMPONENT_TRAIN_UNSEEN",
+    "default_target_train_fraction": 0.82,
+    "lineage_fields": [
+      "source_sha256",
+      "skeleton_hierarchy_signature",
+      "topology_lineage_signature",
+      "material_lineage_signature"
+    ],
+    "validation": "FIXED_TRAIN_INTERNAL_VALIDATION_ROWS__UNSEEN_NEVER_SELECTS_CHECKPOINT",
+    "pack_level_random_split": false
+  },
+  "geometry_truth_validity": {
+    "raw_source_mesh_assumed_watertight": false,
+    "raw_source_winding_is_global_sign_authority": false,
+    "unsigned_surface_distance_available_after_exact_surface_admission": true,
+    "sign_validity_requires": [
+      "ZERO_BOUNDARY_EDGES_FOR_SIGNED_COMPONENT",
+      "MANIFOLD_EDGE_INCIDENCE",
+      "FINITE_NONDEGENERATE_GEOMETRY",
+      "CONSISTENT_ORIENTATION",
+      "INDEPENDENT_PARITY_OR_WINDING_AGREEMENT"
+    ],
+    "open_or_nonmanifold_sign_target": "ABSTAIN",
+    "fstar_may_fill_missing_global_sign": false
+  },
+  "tessa_teacher_policy": {
+    "source": "EXACT_ADMITTED_REST_MESH_PLUS_RIG_SKIN_AND_ADMITTED_MOTION_OR_DEFORMATION_EVIDENCE",
+    "candidate_family": "DETERMINISTIC_BOUNDED_SIMPLIFICATION_LADDER_PLUS_EXACT_SOURCE_FALLBACK",
+    "typed_binding_transfer_required": true,
+    "static_rejection_required": true,
+    "mechanical_rejection_required": true,
+    "mechanical_courts": [
+      "TRIANGLE_INVERSION",
+      "MOTION_INDUCED_CRACK_OR_UNSUPPORTED_HOLE",
+      "SELF_INTERSECTION_OR_FOLD_THROUGH",
+      "STRAIN_OR_JACOBIAN_TAIL",
+      "ATTACHMENT_SEPARATION",
+      "MOTION_VIEW_SILHOUETTE_DRIFT_ATTRIBUTABLE_TO_CONNECTIVITY"
+    ],
+    "selection": "MINIMUM_REPRESENTATION_COST_AMONG_ALL_STATIC_AND_MECHANICAL_PASS_CANDIDATES",
+    "fallback": "EXACT_SOURCE_TOPOLOGY_IF_NO_SIMPLIFIED_CANDIDATE_PASSES"
+  },
+  "truth139_v1_compatibility_audit": {
+    "reusable": [
+      "DENSE3D_CARRIER_AND_PROTECTED_QUERY_PATHS",
+      "STAGED_IRIS_FOUNDATION_THEN_EVIDENCE_TRAINING",
+      "FIXED_SCALE_STUDENT_T_RESPONSE_CORRECTION",
+      "TESSA_DIRECT_DENSE_SCENE_PLUS_PREDICTED_SURFACE_BRIDGE_CONCEPT",
+      "DETACHED_IRIS_CONDITIONING_FOR_TESSA",
+      "TEACHER_TOPOLOGY_PHYSICALLY_SEPARATE_FROM_STUDENT_CONDITIONING",
+      "FREE_RUNNING_DECODED_MESH_COURT_SEPARATE_FROM_TEACHER_FORCING",
+      "LINEAGE_CONNECTED_COMPONENT_TRAIN_UNSEEN_SPLIT"
+    ],
+    "must_upgrade": [
+      "FEATURE_CACHE_ADD_RAW_RGB",
+      "FSTAR_PRIMARY_GEOMETRY_TO_EXACT_SURFACE_PLUS_VALIDITY_MASKED_SIGN_OCCUPANCY_NORMALS",
+      "IRIS_GEOMETRY_OUTPUT_SCHEMA",
+      "TESSA_SURFACE_SOURCE_SCHEMA_FOR_V3_2_GEOMETRY",
+      "FULL_SOURCE_TOPOLOGY_TEACHER_TO_MECHANICALLY_QUALIFIED_COMPACT_TEACHER",
+      "TESSA_MECHANICS_ABSTAIN_SHAPE_BRIDGE_TO_MECHANICAL_QUALIFICATION",
+      "COMPILER_FINAL_WATERTIGHT_CONSEQUENCE_COURT"
+    ]
+  },
+  "required_truth_before_training": [
+    "EXACT_SOURCE_SURFACE_GEOMETRY_AND_TOPOLOGY_FACTS",
+    "SURFACE_DISTANCE_TRUTH",
+    "GLOBAL_SIGN_OCCUPANCY_VALIDITY_AND_LABELS_WHERE_VALID",
+    "ORIENTED_SURFACE_NORMAL_TRUTH",
+    "SOURCE_LOCAL_RGBA_OBSERVATION_EVIDENCE",
+    "SURFACE_GRAPHICS_TRUTH",
+    "RESPONSE_MECHANICS_TRUTH_AND_VALIDITY",
+    "SELECTED_RELATION_TRUTH",
+    "RIG_SKIN_MOTION_OR_DEFORMATION_EVIDENCE_FOR_TOPOLOGY_QUALIFICATION",
+    "MECHANICALLY_QUALIFIED_COMPACT_TESSA_TEACHER_MANIFESTS",
+    "SEALED_LINEAGE_CONNECTED_COMPONENT_TRAIN_UNSEEN_SPLIT"
+  ],
+  "claims": {
+    "architecture_frozen": true,
+    "implementation_complete": false,
+    "truth_targets_ready": false,
+    "training_authorized": false,
+    "trained_weights_frozen": false,
+    "fit139_pass": false,
+    "lofo_unseen_pass": false,
+    "model_promotion": false,
+    "product_authority_changed": false
+  }
+}

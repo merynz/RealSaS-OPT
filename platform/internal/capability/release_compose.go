@@ -16,8 +16,8 @@ import (
 
 // ProductProviders is the single source-level catalog of first-class product
 // capabilities which are not already represented by Compiler stage nodes.
-// New replaceable product boundaries (Mesh, Rig, Skin, ...) join here instead
-// of inventing a second registry or a parallel operational graph.
+// New replaceable product boundaries join here instead of inventing a second
+// registry or a parallel operational graph.
 func ProductProviders() []Provider {
 	return []Provider{
 		ProductInputProvider{},
@@ -25,6 +25,9 @@ func ProductProviders() []Provider {
 		ProductMeshProvider{},
 		ProductRigProvider{},
 		ProductSkinProvider{},
+		ProductMechanicsProvider{},
+		ProductGraphicsProvider{},
+		ProductMotionProvider{},
 	}
 }
 

@@ -41,11 +41,11 @@ func TestProductModelRequirementsIncludeAxisAndMiraForFullCatalog(t *testing.T) 
 		byFamily[row.Family] = row
 	}
 	axis := byFamily["AXIS"]
-	if axis.ArchitectureID != "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1" || axis.RoleID != ProductRoleRig {
+	if axis.ArchitectureID != "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0" || axis.RoleID != ProductRoleRig {
 		t.Fatalf("axis requirement=%+v", axis)
 	}
 	mira := byFamily["MIRA"]
-	if mira.ArchitectureID != "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5" || mira.RoleID != ProductRoleSkin {
+	if mira.ArchitectureID != "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0" || mira.RoleID != ProductRoleSkin {
 		t.Fatalf("mira requirement=%+v", mira)
 	}
 	if byFamily["IRIS"].RoleID != ProductRoleShape || byFamily["TESSA"].RoleID != ProductRoleShape {
@@ -56,9 +56,9 @@ func TestProductModelRequirementsIncludeAxisAndMiraForFullCatalog(t *testing.T) 
 func TestFullProductCatalogEngineReleaseRequiresAxisAndMira(t *testing.T) {
 	registry := productProvidersTestRegistry(t)
 	valid := []release.ModelRequirement{
-		{Family: "AXIS", ArchitectureID: "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1", Channel: "PRODUCTION"},
+		{Family: "AXIS", ArchitectureID: "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0", Channel: "PRODUCTION"},
 		{Family: "IRIS", ArchitectureID: "RealSaS.IRIS.VNextEvidenceModel.v3", Channel: "PRODUCTION"},
-		{Family: "MIRA", ArchitectureID: "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5", Channel: "PRODUCTION"},
+		{Family: "MIRA", ArchitectureID: "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0", Channel: "PRODUCTION"},
 		{Family: "TESSA", ArchitectureID: "RealSaS.TESSA.Structuralizer.v3", Channel: "PRODUCTION"},
 	}
 	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, valid); err != nil {

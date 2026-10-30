@@ -139,7 +139,7 @@ func TestProductProvidersAreSingleSourceOfControlReadyProductGraph(t *testing.T)
 	}
 	if skin.Metadata["full_control_program_is_skin_parent"] != false ||
 		skin.Metadata["axis_rerun_allowed"] != false ||
-		skin.Metadata["compiler_token_repair_allowed"] != false {
+		skin.Metadata["compiler_code_repair_allowed"] != false {
 		t.Fatalf("skin v2 execution boundary drift: %+v", skin.Metadata)
 	}
 

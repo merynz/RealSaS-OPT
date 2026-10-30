@@ -148,17 +148,19 @@ def _copy_source_color_attributes(source_mesh, target_mesh, source_triangles) ->
             )
 
     # ShaderNodeVertexColor with an empty layer_name resolves through the mesh's
-    # active/render color attribute. Preserve both selectors exactly when present.
-    source_group = source_mesh.color_attributes
-    target_group = target_mesh.color_attributes
-    for property_name in ("active_color_index", "render_color_index"):
-        if hasattr(source_group, property_name):
-            try:
-                setattr(target_group, property_name, int(getattr(source_group, property_name)))
-            except Exception as exc:
-                raise RuntimeError(
-                    "PRESENTATION_RAY_V2_COLOR_SELECTOR_TRANSPORT:" + property_name
-                ) from exc
+    # active/render color attribute. Preserve both selectors only when there are
+    # color attributes to select; an empty source mesh intentionally remains empty.
+    if source_attributes:
+        source_group = source_mesh.color_attributes
+        target_group = target_mesh.color_attributes
+        for property_name in ("active_color_index", "render_color_index"):
+            if hasattr(source_group, property_name):
+                try:
+                    setattr(target_group, property_name, int(getattr(source_group, property_name)))
+                except Exception as exc:
+                    raise RuntimeError(
+                        "PRESENTATION_RAY_V2_COLOR_SELECTOR_TRANSPORT:" + property_name
+                    ) from exc
 
 
 def _build_triangle_soup_with_source_attributes(arrays, owners, transparent):

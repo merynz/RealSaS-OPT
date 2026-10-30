@@ -123,7 +123,7 @@ def _skin(mesh, rig):
         mesh_carrier_topology_hash=mesh.carrier_topology_hash,
         mesh_carrier_geometry_hash=mesh.carrier_geometry_hash,
         carrier_skin_qualification_hash="f" * 64,
-        skin_token_proposal_hash="1" * 64,
+        skin_code_proposal_hash="1" * 64,
         skin_codec_architecture_id="codec",
         skin_codec_checkpoint_hash="2" * 64,
         skin_lineage_hash="3" * 64,

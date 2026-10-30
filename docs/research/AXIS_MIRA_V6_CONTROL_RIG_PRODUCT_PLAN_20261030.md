@@ -13,15 +13,17 @@ MIRA is no longer an independent downstream dense-weight regressor in the new le
 
 Historical AXIS V5.4.1 and MIRA V5.5 are immutable regression baselines.
 
-## 1. SkinTokens code-derived design
+## 1. External reference: SkinTokens / TokenRig
 
-The VAST-AI-Research SkinTokens/TokenRig implementation provides three reusable representation ideas:
+The external VAST-AI-Research SkinTokens/TokenRig work informed three representation principles we evaluate independently:
 
-1. skeleton vocabulary and learned skin-code vocabulary are exposed to one causal transformer;
-2. a grammar/logits processor constrains which token family may be emitted at each point of the sequence;
-3. skin codes are decoded by a frozen FSQ-CVAE back into dense per-vertex influences.
+1. skeleton vocabulary and learned skin-code vocabulary can share one causal sequence model;
+2. a grammar/logits processor can constrain which symbol family may be emitted at each point of that sequence;
+3. discrete skin codes can be decoded by a frozen FSQ-style codec back into dense per-vertex influences.
 
-RealSaS adopts the representation pattern, not TokenRig's product ontology. TokenRig's output remains skeleton + skin. RealSaS extends the learned sequence to:
+**Provenance boundary:** RealSaS does not clone, vendor, import, or expose SkinTokens/TokenRig code as part of this product contract. `SkinTokens` remains the name of the external reference only. The RealSaS-owned product representation is named **SkinCode**, with schema `RealSaS.SkinCodeProposalIR.v1`.
+
+RealSaS adopts only the independently implemented representation pattern, not TokenRig's product ontology. The external system's output remains skeleton + skin. RealSaS extends its own learned sequence to:
 
 `D, F, C, K, A, Z_skin`
 
@@ -32,7 +34,7 @@ where:
 - `C`: animator-facing controls;
 - `K`: chains and constraint-program structure;
 - `A`: attachment/socket anchors;
-- `Z_skin`: discrete MIRA skin codes.
+- `Z_skin`: discrete RealSaS/MIRA SkinCodes.
 
 No named humanoid part taxonomy is required by the product representation.
 
@@ -57,8 +59,8 @@ Compiler may not:
 - synthesize missing controls;
 - choose IK chains on behalf of AXIS;
 - synthesize or rewrite constraints;
-- search SkinTokens;
-- substitute token IDs;
+- search SkinCodes;
+- substitute SkinCode IDs;
 - repair learned local frames into a different rig;
 - infer semantic body-part labels;
 - execute the constraint solver while minting Rig;
@@ -89,7 +91,7 @@ IRIS/TESSA product Mesh + shared evidence
               |
       +-------+---------+
       |                 |
-RigProgramProposal   SkinTokenProposal
+RigProgramProposal   SkinCodeProposal
       |                 |
       v                 |
 Compiler Rig court      |
@@ -123,7 +125,7 @@ The initial grammar is structural rather than semantic:
 <EOS>
 ```
 
-The model/runtime grammar owns token-family ordering and token-domain masking, following the useful TokenRig pattern. Compiler sees typed decoded proposals, not raw autoregressive logits, and does not perform beam-search repair.
+The model/runtime grammar owns symbol-family ordering and code-domain masking. Compiler sees typed decoded proposals, not raw autoregressive logits, and does not perform beam-search repair.
 
 ## 6. Mechanics and Motion consequences
 
@@ -173,7 +175,7 @@ Sequence:
 8. Compiler + Mechanics + Graphics + Motion + Proof consume the exact candidate checkpoint;
 9. only an exact all-required-domain product court may promote the checkpoint toward product admission.
 
-The unseen set is not used for architecture, threshold, token-count, codebook, reward-weight, beam-search or postprocess selection.
+The unseen set is not used for architecture, threshold, code-count, codebook, reward-weight, beam-search or postprocess selection.
 
 ## 9. Product-ready does not mean auto-promoted
 
@@ -183,7 +185,7 @@ A checkpoint produced by this protocol is a **product candidate by construction*
 
 1. v2 Rig/Skin typed contracts and Compiler no-repair courts;
 2. MIRA discrete skin codec + reconstruction/deformation court;
-3. AXIS V6 grammar/tokenizer/shared causal model;
+3. AXIS V6 grammar/shared causal model;
 4. v2 Rig/Skin executors and Platform capability contract versions;
 5. Mechanics control/constraint execution boundary;
 6. control-space Motion IR/runtime;

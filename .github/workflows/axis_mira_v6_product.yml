@@ -103,14 +103,14 @@ jobs:
           v = torch.randn(1, 12, MIRA_V6_VERTEX_FEATURE_DIM)
           j = torch.randn(1, 4, MIRA_V6_JOINT_FEATURE_DIM)
           w = torch.softmax(torch.randn(1, 12, 4), dim=-1)
-          token_ids = mira(w, v, j)['token_ids']
-          assert token_ids.shape == (1, 4, 3)
+          code_ids = mira(w, v, j)['token_ids']
+          assert code_ids.shape == (1, 4, 3)
 
           axis_cfg = AXISRigProgramConfigV6(scene_dim=AXIS_V6_SURFACE_SCENE_DIM, hidden_dim=32, layers=1, heads=4, ff_mult=2, max_sequence_length=32, max_pointer_entities=16, skin_vocab_size=mira_cfg.vocab_size)
           axis = AXISRigProgramModelV6(axis_cfg)
           seq = AXISSequenceV6.from_events([RigProgramEventV6(RigTokenKindV6.BOS)], device=torch.device('cpu'))
           out = axis(torch.randn(1, 9, AXIS_V6_SURFACE_SCENE_DIM), seq)
-          assert out['skin_token_logits'].shape[-1] == mira_cfg.vocab_size
+          assert out['skin_code_logits'].shape[-1] == mira_cfg.vocab_size
           assert out['pointer_c_logits'].shape[-1] == axis_cfg.max_pointer_entities + 1
           print('AXIS_MIRA_V6_PRODUCT_SMOKE_PASS')
           PY

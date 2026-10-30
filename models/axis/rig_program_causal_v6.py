@@ -29,7 +29,7 @@ class RigEventKind(IntEnum):
     CONSTRAINT = 6
     ANCHOR = 7
     SKIN_SWITCH = 8
-    SKIN_TOKEN = 9
+    SKIN_CODE = 9
     EOS = 10
 
 
@@ -77,7 +77,7 @@ class RigProgramGrammarState:
     chain_count: int = 0
     constraint_count: int = 0
     anchor_count: int = 0
-    skin_token_count: int = 0
+    skin_code_count: int = 0
 
 
 class AXISRigProgramGrammarV6:
@@ -99,7 +99,7 @@ class AXISRigProgramGrammarV6:
         if p == RigProgramPhase.ANCHORS:
             return (RigEventKind.ANCHOR, RigEventKind.SKIN_SWITCH)
         if p == RigProgramPhase.SKIN:
-            return (RigEventKind.SKIN_TOKEN, RigEventKind.EOS)
+            return (RigEventKind.SKIN_CODE, RigEventKind.EOS)
         return ()
 
     @staticmethod
@@ -135,8 +135,8 @@ class AXISRigProgramGrammarV6:
             out.anchor_count += 1
         elif kind == RigEventKind.SKIN_SWITCH:
             out.phase = RigProgramPhase.SKIN
-        elif kind == RigEventKind.SKIN_TOKEN:
-            out.skin_token_count += 1
+        elif kind == RigEventKind.SKIN_CODE:
+            out.skin_code_count += 1
         elif kind == RigEventKind.EOS:
             out.phase = RigProgramPhase.DONE
         return out
@@ -159,7 +159,7 @@ class AXISV6TeacherSequence:
     pointer_b: Tensor
     aux_type_ids: Tensor
     dof_masks: Tensor
-    skin_token_ids: Tensor
+    skin_code_ids: Tensor
     attention_mask: Tensor
 
     def validate(self, config: AXISV6Config) -> None:
@@ -169,7 +169,7 @@ class AXISV6TeacherSequence:
         expected2 = (b, s)
         if self.coord_indices.shape != (b, s, 3):
             raise ValueError("AXIS_V6_TEACHER_COORD_SHAPE")
-        for value in (self.pointer_a, self.pointer_b, self.aux_type_ids, self.skin_token_ids, self.attention_mask):
+        for value in (self.pointer_a, self.pointer_b, self.aux_type_ids, self.skin_code_ids, self.attention_mask):
             if value.shape != expected2:
                 raise ValueError("AXIS_V6_TEACHER_FIELD_SHAPE")
         if self.dof_masks.shape != (b, s, len(DOF_LABELS)):
@@ -207,7 +207,7 @@ class AXISRigProgramCausalV6(nn.Module):
         self.control_kind_head = nn.Linear(h, len(CONTROL_KINDS))
         self.constraint_operator_head = nn.Linear(h, len(CONSTRAINT_OPERATORS))
         self.dof_head = nn.Linear(h, len(DOF_LABELS))
-        self.skin_token_head = nn.Linear(h, config.skin_vocab_size)
+        self.skin_code_head = nn.Linear(h, config.skin_vocab_size)
 
     @staticmethod
     def _shift_for_embedding(values: Tensor, max_value: int) -> Tensor:
@@ -225,7 +225,7 @@ class AXISRigProgramCausalV6(nn.Module):
         x = x + self.pointer_embedding(self._shift_for_embedding(teacher.pointer_b, cfg.max_pointer_entities))
         aux_cap = self.aux_embedding.num_embeddings - 1
         x = x + self.aux_embedding(self._shift_for_embedding(teacher.aux_type_ids, aux_cap))
-        x = x + self.skin_embedding(self._shift_for_embedding(teacher.skin_token_ids, cfg.skin_vocab_size))
+        x = x + self.skin_embedding(self._shift_for_embedding(teacher.skin_code_ids, cfg.skin_vocab_size))
         x = x + self.dof_projection(teacher.dof_masks.to(dtype=x.dtype))
         return x
 
@@ -250,7 +250,7 @@ class AXISRigProgramCausalV6(nn.Module):
             "control_kind_logits": self.control_kind_head(x),
             "constraint_operator_logits": self.constraint_operator_head(x),
             "dof_logits": self.dof_head(x),
-            "skin_token_logits": self.skin_token_head(x),
+            "skin_code_logits": self.skin_code_head(x),
             "hidden": x,
         }
 

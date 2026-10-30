@@ -58,7 +58,7 @@ def _color_tuple(item, data_type: str) -> tuple[float, float, float, float]:
 def _build_face_transport(meshes) -> dict[int, dict]:
     geometry = _argument_path("--geometry-npz")
     vertices, faces, face_owner, face_slot, triangle_uv, uv_valid = base._load_geometry(geometry)
-    if len(meshes) != (int(face_owner.max()) + 1 if len(face_owner) else 0):
+    if not meshes or np.any(face_owner < 0) or np.any(face_owner >= len(meshes)):
         raise RuntimeError("SOURCE_RAY_REFERENCE_V2_OWNER_CARDINALITY_DRIFT")
 
     depsgraph = bpy.context.evaluated_depsgraph_get()

@@ -7,13 +7,13 @@
     "rig_schema": "RealSaS.CanonicalRigIR.v2",
     "skin_schema": "RealSaS.CanonicalSkinIR.v2",
     "rig_proposal_schema": "RealSaS.RigProgramProposalIR.v1",
-    "skin_token_proposal_schema": "RealSaS.SkinTokenProposalIR.v1",
+    "skin_code_proposal_schema": "RealSaS.SkinCodeProposalIR.v1",
     "motion_authority_target": "CONTROL_SPACE",
     "compiler_policy": "VALIDATE_BIND_MINT__NO_LEARNED_PROGRAM_COMPLETION"
   },
   "learned_system": {
     "top_level_family": "AXIS",
-    "architecture_intent": "UNIFIED_CAUSAL_RIG_PROGRAM_AND_SKIN_TOKEN_GENERATOR",
+    "architecture_intent": "UNIFIED_CAUSAL_RIG_PROGRAM_AND_SKIN_CODE_GENERATOR",
     "mira_role": "DISCRETE_SKIN_CODEC_SUBMODULE",
     "mira_independent_dense_regressor_is_product_target": false,
     "historical_axis541_is_regression_baseline": true,
@@ -47,8 +47,8 @@
     "PARENT_RESELECTION",
     "CONTROL_SYNTHESIS",
     "CONSTRAINT_SYNTHESIS",
-    "SKIN_TOKEN_SEARCH",
-    "SKIN_TOKEN_SUBSTITUTION",
+    "SKIN_CODE_SEARCH",
+    "SKIN_CODE_SUBSTITUTION",
     "LOCAL_FRAME_REPAIR",
     "SEMANTIC_BODY_PART_INFERENCE",
     "RIG_CONSTRAINT_EXECUTION"

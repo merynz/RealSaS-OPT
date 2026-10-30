@@ -1,0 +1,62 @@
+{
+  "schema": "RealSaS.AxisMiraV6Truth139UnseenPrereg.v1",
+  "status": "PREREGISTERED_BLOCKED_ON_EXACT_TRUTH139_TARGET_AND_SPLIT_SEAL",
+  "created_date": "2026-10-30",
+  "source_branch": "axis-v6-rig-program-product",
+  "product_target": {
+    "rig_schema": "RealSaS.CanonicalRigIR.v2",
+    "skin_schema": "RealSaS.CanonicalSkinIR.v2",
+    "rig_proposal_schema": "RealSaS.RigProgramProposalIR.v1",
+    "skin_token_proposal_schema": "RealSaS.SkinTokenProposalIR.v1",
+    "motion_authority_target": "CONTROL_SPACE",
+    "compiler_policy": "VALIDATE_BIND_MINT__NO_LEARNED_PROGRAM_COMPLETION"
+  },
+  "learned_system": {
+    "top_level_family": "AXIS",
+    "architecture_intent": "UNIFIED_CAUSAL_RIG_PROGRAM_AND_SKIN_TOKEN_GENERATOR",
+    "mira_role": "DISCRETE_SKIN_CODEC_SUBMODULE",
+    "mira_independent_dense_regressor_is_product_target": false,
+    "historical_axis541_is_regression_baseline": true,
+    "historical_mira55_is_regression_baseline": true
+  },
+  "data_protocol": {
+    "corpus": "TRUTH139",
+    "split_authority_required": "LINEAGE_SAFE_LEAKAGE_CONNECTED_COMPONENT_TRAIN_UNSEEN",
+    "train_internal_validation_required": true,
+    "knight_is_training_member": false,
+    "knight_role": "INDEPENDENT_REGRESSION",
+    "fit8_selection_before_unseen_allowed": false,
+    "lofo_selection_before_unseen_allowed": false,
+    "unseen_selection_or_tuning_allowed": false
+  },
+  "required_external_bindings_before_submit": [
+    "TRUTH139_EXACT_TARGET_BUNDLE_RECEIPT",
+    "TRUTH139_TRAIN_UNSEEN_SPLIT_RECEIPT",
+    "TRUTH139_TRAIN_INTERNAL_VALIDATION_RECEIPT",
+    "MIRA_V6_SKIN_CODEC_TRAINING_CONTRACT",
+    "AXIS_V6_CAUSAL_GRAMMAR_CONTRACT",
+    "AXIS_V6_ENGINE_RELEASE"
+  ],
+  "training": {
+    "allowed_now": false,
+    "first_checkpoint_selection_source": "TRAIN_INTERNAL_VALIDATION_ONLY",
+    "unseen_evaluation_count_policy": "ONE_PREREGISTERED_EVALUATION_FAMILY_BEFORE_ANY_UNSEEN_DRIVEN_CHANGE",
+    "checkpoint_intent": "PRODUCT_CANDIDATE_BY_CONTRACT_NOT_AUTO_PROMOTED"
+  },
+  "compiler_non_authorities": [
+    "PARENT_RESELECTION",
+    "CONTROL_SYNTHESIS",
+    "CONSTRAINT_SYNTHESIS",
+    "SKIN_TOKEN_SEARCH",
+    "SKIN_TOKEN_SUBSTITUTION",
+    "LOCAL_FRAME_REPAIR",
+    "SEMANTIC_BODY_PART_INFERENCE",
+    "RIG_CONSTRAINT_EXECUTION"
+  ],
+  "submission": {
+    "platform_campaign_create_allowed_now": false,
+    "platform_attempt_submit_allowed_now": false,
+    "reason": "TRUTH139_V3_2_CURRENT_AUTHORITY_STATES_TRAINING_BLOCKED_ON_TARGET_READINESS_AND_SPLIT_NOT_YET_SEALED",
+    "next_transition": "SEAL_REQUIRED_EXTERNAL_BINDINGS_THEN_CREATE_DISTINCT_PLATFORM_EXPERIMENT_ENGINE_RELEASE_AND_ATTEMPTS"
+  }
+}

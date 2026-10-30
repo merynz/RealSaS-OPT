@@ -121,7 +121,7 @@ def decode_axis_v6_events(
     chains: list[RigProgramChainProposalIR] = []
     constraints: list[RigProgramConstraintProposalIR] = []
     anchors: list[RigProgramAttachmentAnchorProposalIR] = []
-    skin_tokens: list[int] = []
+    skin_codes: list[int] = []
 
     joint_ids: list[str] = []
     control_ids: list[str] = []
@@ -218,7 +218,7 @@ def decode_axis_v6_events(
         elif kind == RigTokenKindV6.SKIN_TOKEN:
             if event.skin_token_id < 0 or event.skin_token_id >= codec_binding.codebook_size:
                 raise ValueError("AXIS_V6_SKIN_TOKEN_OUT_OF_CODEC_DOMAIN")
-            skin_tokens.append(int(event.skin_token_id))
+            skin_codes.append(int(event.skin_token_id))
         elif kind in {
             RigTokenKindV6.FRAMES_START, RigTokenKindV6.CONTROLS_START,
             RigTokenKindV6.CHAINS_START, RigTokenKindV6.CONSTRAINTS_START,
@@ -243,17 +243,17 @@ def decode_axis_v6_events(
             "compiler_parent_reselection_allowed": False,
             "compiler_control_synthesis_allowed": False,
             "compiler_constraint_synthesis_allowed": False,
-            "skin_tokens_generated_in_same_causal_run": True,
+            "skin_codes_generated_in_same_causal_run": True,
         },
     ))
 
     required = len(joint_ids) * codec_binding.tokens_per_joint
-    if len(skin_tokens) != required:
-        raise ValueError(f"AXIS_V6_SKIN_TOKEN_COUNT_DRIFT:{len(skin_tokens)}:{required}")
+    if len(skin_codes) != required:
+        raise ValueError(f"AXIS_V6_SKIN_CODE_COUNT_DRIFT:{len(skin_codes)}:{required}")
     rows = tuple(
         JointSkinTokenRowIR(
             proposal_joint_id=jid,
-            token_ids=tuple(skin_tokens[i * codec_binding.tokens_per_joint:(i + 1) * codec_binding.tokens_per_joint]),
+            token_ids=tuple(skin_codes[i * codec_binding.tokens_per_joint:(i + 1) * codec_binding.tokens_per_joint]),
             metadata={"joint_sequence_index": i},
         )
         for i, jid in enumerate(joint_ids)

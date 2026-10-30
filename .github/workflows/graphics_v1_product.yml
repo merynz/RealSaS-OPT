@@ -59,5 +59,9 @@ jobs:
         working-directory: platform
         run: |
           set -euo pipefail
-          test -z "$(gofmt -l internal/capability/product_graphics.go internal/capability/release_compose.go internal/capability/release_compose_test.go)"
+          unformatted="$(gofmt -l internal/capability/product_graphics.go internal/capability/release_compose.go internal/capability/release_compose_test.go)"
+          if [[ -n "$unformatted" ]]; then
+            printf 'GRAPHICS_GO_FORMAT_DRIFT\n%s\n' "$unformatted"
+            exit 1
+          fi
           go test ./internal/capability -run 'TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure|TestProductProvidersAreSingleSourceOfControlReadyProductGraph|TestModuleVersionPolicyAndParametersAreMintedFromDescriptor'

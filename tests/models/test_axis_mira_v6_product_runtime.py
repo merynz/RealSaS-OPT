@@ -39,15 +39,15 @@ def test_product_grammar_allows_empty_optional_sections_but_exact_skin_cardinali
         RigTokenKindV6.SKIN_START,
     ):
         state = AXISRigProgramGrammarV6Product.advance(state, marker, tokens_per_joint=2)
-    assert AXISRigProgramGrammarV6Product.allowed_kinds(state, tokens_per_joint=2) == (RigTokenKindV6.SKIN_TOKEN,)
-    state = AXISRigProgramGrammarV6Product.advance(state, RigTokenKindV6.SKIN_TOKEN, tokens_per_joint=2)
-    state = AXISRigProgramGrammarV6Product.advance(state, RigTokenKindV6.SKIN_TOKEN, tokens_per_joint=2)
+    assert AXISRigProgramGrammarV6Product.allowed_kinds(state, tokens_per_joint=2) == (RigTokenKindV6.SKIN_CODE,)
+    state = AXISRigProgramGrammarV6Product.advance(state, RigTokenKindV6.SKIN_CODE, tokens_per_joint=2)
+    state = AXISRigProgramGrammarV6Product.advance(state, RigTokenKindV6.SKIN_CODE, tokens_per_joint=2)
     assert AXISRigProgramGrammarV6Product.allowed_kinds(state, tokens_per_joint=2) == (RigTokenKindV6.EOS,)
     state = AXISRigProgramGrammarV6Product.advance(state, RigTokenKindV6.EOS, tokens_per_joint=2)
     assert state.section == RigSectionV6.DONE
 
 
-def test_typed_event_decode_preserves_controls_and_joint_coupled_skin_tokens():
+def test_typed_event_decode_preserves_variable_arity_controls_constraints_and_skin_codes():
     events = (
         RigProgramEventV6(RigTokenKindV6.BOS),
         RigProgramEventV6(RigTokenKindV6.JOINT, coord_indices=(128, 128, 128), pointer_a=-1),
@@ -59,13 +59,22 @@ def test_typed_event_decode_preserves_controls_and_joint_coupled_skin_tokens():
             dof_mask=tuple(1.0 if name in {"RX", "RY", "RZ"} else 0.0 for name in DOF_LABELS_V6),
         ),
         RigProgramEventV6(RigTokenKindV6.CONTROLS_START),
-        RigProgramEventV6(RigTokenKindV6.CONTROL, coord_indices=(128, 128, 128), pointer_a=0, pointer_b=-1, aux_type_id=1),
+        RigProgramEventV6(RigTokenKindV6.CONTROL, coord_indices=(128, 128, 128), pointer_a=-1, aux_type_id=1),
+        RigProgramEventV6(RigTokenKindV6.CONTROL_TARGET, pointer_a=0),
+        RigProgramEventV6(RigTokenKindV6.CONTROL, coord_indices=(128, 128, 128), pointer_a=0, aux_type_id=3),
+        RigProgramEventV6(RigTokenKindV6.CONTROL_TARGET, pointer_a=0),
+        RigProgramEventV6(RigTokenKindV6.CONTROL, coord_indices=(128, 140, 128), pointer_a=0, aux_type_id=4),
         RigProgramEventV6(RigTokenKindV6.CHAINS_START),
+        RigProgramEventV6(RigTokenKindV6.CHAIN, pointer_a=0, pointer_b=0),
         RigProgramEventV6(RigTokenKindV6.CONSTRAINTS_START),
+        RigProgramEventV6(RigTokenKindV6.CONSTRAINT, pointer_a=0, aux_type_id=0),
+        RigProgramEventV6(RigTokenKindV6.CONSTRAINT_INPUT, pointer_a=1),
+        RigProgramEventV6(RigTokenKindV6.CONSTRAINT_INPUT, pointer_a=2),
+        RigProgramEventV6(RigTokenKindV6.CONSTRAINT_OUTPUT, pointer_a=0),
         RigProgramEventV6(RigTokenKindV6.ANCHORS_START),
         RigProgramEventV6(RigTokenKindV6.SKIN_START),
-        RigProgramEventV6(RigTokenKindV6.SKIN_TOKEN, skin_token_id=7),
-        RigProgramEventV6(RigTokenKindV6.SKIN_TOKEN, skin_token_id=8),
+        RigProgramEventV6(RigTokenKindV6.SKIN_CODE, skin_code_id=7),
+        RigProgramEventV6(RigTokenKindV6.SKIN_CODE, skin_code_id=8),
         RigProgramEventV6(RigTokenKindV6.EOS),
     )
     cfg = AXISRigProgramConfigV6(scene_dim=AXIS_V6_SURFACE_SCENE_DIM, hidden_dim=32, layers=1, heads=4, skin_vocab_size=81)
@@ -80,7 +89,13 @@ def test_typed_event_decode_preserves_controls_and_joint_coupled_skin_tokens():
     )
     qualified = qualify_rig_program_v1(rig)
     assert qualified.qualification_report["control_synthesis_performed"] is False
-    assert len(rig.controls) == 1 and rig.controls[0].control_kind == "ROOT"
+    assert len(rig.controls) == 3
+    assert rig.controls[0].control_kind == "ROOT"
+    assert rig.controls[1].control_kind == "IK_EFFECTOR"
+    assert rig.controls[2].control_kind == "IK_POLE"
+    assert rig.constraints[0].operator_id == "IK"
+    assert rig.constraints[0].input_proposal_control_ids == ("P:C:0001", "P:C:0002")
+    assert rig.constraints[0].output_proposal_joint_ids == ("P:J:0000",)
     validate_skin_token_proposal_v1(
         skin,
         expected_proposal_joint_ids=(rig.joints[0].proposal_joint_id,),

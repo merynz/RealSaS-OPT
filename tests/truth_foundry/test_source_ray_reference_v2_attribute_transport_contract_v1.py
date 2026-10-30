@@ -40,3 +40,5 @@ def test_release_v5_routes_canary_and_full_run_through_v2_lane() -> None:
     assert "run_truth139_stage48_witness_subject_v2.py" in text
     assert "tools.corpus.run_truth139_v32_finalize_remaining_full139_v4" in text
     assert '"release_revision"] = 5' in text
+    assert '"--response-svd-rescue"' in text
+    assert '"--response-svd-rescue-receipt"' not in text

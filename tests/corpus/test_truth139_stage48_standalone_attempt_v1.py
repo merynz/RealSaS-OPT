@@ -40,3 +40,19 @@ def test_stage48_standalone_attempt_layout_matches_adapter_parent_rule(tmp_path:
     assert manifest["presentation_truth"] == cfg
     assert manifest["training_allowed"] is False
     assert manifest["product_pass_authority"] is False
+
+
+def test_stage48_v2_adapter_preserves_source_uv_and_color_attributes() -> None:
+    text = Path("tools/truth_foundry/blender_presentation_ray_measure_v1.py").read_text()
+    assert "def _copy_uv_layers(" in text
+    assert "source_mesh.uv_layers.active" in text
+    assert "target_mesh.uv_layers.new" in text
+    assert "def _copy_source_color_attributes(" in text
+    assert "target_mesh.color_attributes.new" in text
+    assert 'domain == "CORNER"' in text
+    assert 'domain == "POINT"' in text
+    assert 'domain == "FACE"' in text
+    assert "evaluated.to_mesh(preserve_all_data_layers=True, depsgraph=depsgraph)" in text
+    assert "PRESENTATION_RAY_V2_ACTIVE_UV_REBIND_DRIFT" in text
+    assert "PRESENTATION_RAY_V2_FACE_MATERIAL_REBIND_DRIFT" in text
+    assert "measured._build_triangle_soup = _build_triangle_soup_with_source_attributes" in text

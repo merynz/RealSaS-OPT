@@ -1,0 +1,110 @@
+{
+  "schema": "RealSaS.Truth139AxisRigProgramTeacherContract.v2",
+  "date": "2026-10-30",
+  "status": "PREREGISTERED__139_SUBJECT_RIG_PROGRAM_TEACHER_REQUIRED__TRAINING_NOT_AUTHORIZED",
+  "purpose": "REBUILD_AXIS_TEACHER_OVER_THE_ADMITTED_TRUTH139_COHORT_FOR_THE_SHIPPING_CONTROL_READY_AXIS_V6_OUTPUT_LANGUAGE__NOT_A_PROJECTION_OF_THE_HISTORICAL_AXIS541_SKELETON_ONLY_TARGET",
+  "shipping_model": {
+    "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0",
+    "output": "RIG_PROGRAM_PLUS_LATER_BOUND_MIRA_SKIN_CODES",
+    "rig_program_components": [
+      "DEFORM_GRAPH",
+      "LOCAL_REST_FRAMES",
+      "BEHAVIORALLY_SUPPORTED_ROTATIONAL_DOF_EVIDENCE",
+      "ANIMATOR_CONTROL_GRAPH",
+      "KINEMATIC_CHAINS",
+      "EXECUTABLE_CONSTRAINT_PROGRAM",
+      "CONSERVATIVE_ATTACHMENT_ANCHOR_CANDIDATES_WHEN_EXACTLY_DERIVABLE"
+    ],
+    "skin_codes_built_in_this_stage": false,
+    "compiler_role": "VALIDATE_AND_MATERIALIZE_ONLY__NO_CONTROL_OR_CONSTRAINT_SYNTHESIS"
+  },
+  "truth139_scope": {
+    "subject_domain": "ADMITTED_LINEAGE_SAFE_TRUTH139_TRAIN_PROJECTION",
+    "teacher_scene_schema": "RealSaS.TeacherSceneIR.v1",
+    "dense_skin_teacher_contract": "canonical/TRUTH139_MIRA_TEACHER_V1.json",
+    "legacy_axis_teacher_contract": "canonical/TRUTH139_AXIS_TEACHER_V1.json",
+    "legacy_axis_teacher_role": "HISTORICAL_COMPARISON_AND_SHARED_SOURCE_MECHANICS_REFERENCE_ONLY__NOT_THE_AXIS_V6_TARGET",
+    "source_names_are_student_truth": false,
+    "source_joint_row_indices_are_runtime_identity": false,
+    "humanoid_taxonomy_allowed": false,
+    "pack_or_subject_specific_control_rules_allowed": false
+  },
+  "authority_partition": {
+    "source_measured_truth": [
+      "REST_DEFORM_JOINT_GRAPH",
+      "REST_WORLD_JOINT_TRANSFORMS",
+      "SOURCE_SKIN_SUPPORT_MASS",
+      "ISOLATED_NATIVE_LOCAL_ROTATION_RESPONSE",
+      "SOURCE_WORLD_TO_CANONICAL_TRANSFORM"
+    ],
+    "derived_canonical_teacher": [
+      "PARENT_BEFORE_CHILD_ANONYMOUS_JOINT_SERIALIZATION",
+      "ORTHONORMAL_CANONICAL_LOCAL_REST_FRAMES",
+      "BEHAVIORALLY_ACTIVE_ROTATIONAL_DOF_MASK",
+      "GLOBAL_ROOT_FK_CONTROL_GRAPH",
+      "MAXIMAL_NON_BRANCHING_KINEMATIC_CHAINS",
+      "REST_NEUTRAL_IK_EFFECTOR_AND_POLE_CONTROLS_ON_ELIGIBLE_TERMINAL_CHAINS",
+      "IK_CONSTRAINT_PROGRAM",
+      "OPTIONAL_EXACT_RIGID_OWNER_ATTACHMENT_ANCHORS"
+    ],
+    "derived_teacher_authority_class": "DERIVED_CANONICAL_CONTROL_PROGRAM__NOT_SOURCE_AUTHORED_CONTROL_RIG",
+    "product_authority_minted": false
+  },
+  "control_program_derivation": {
+    "global_control": "ONE_PARENTLESS_GLOBAL_CONTROL_WITH_NO_DIRECT_DEFORM_TARGET",
+    "root_controls": "ONE_ROOT_CONTROL_PER_DEFORM_ROOT_PARENTED_TO_GLOBAL",
+    "fk_controls": "ONE_FK_CONTROL_PER_NONROOT_DEFORM_JOINT_PARENTED_TO_THE_PARENT_JOINT_CONTROL",
+    "joint_control_rest_position": "EXACT_CANONICAL_REST_JOINT_POSITION",
+    "chain_rule": "MAXIMAL_PARENT_CONTIGUOUS_NON_BRANCHING_SEGMENTS__NO_SEMANTIC_BODY_PART_LABELS",
+    "ik_eligibility": "TERMINAL_CHAIN_WITH_AT_LEAST_THREE_JOINTS_AND_NONDEGENERATE_REST_SEGMENTS",
+    "ik_effector": "AT_EXACT_TERMINAL_REST_JOINT_POSITION_PARENTED_TO_GLOBAL",
+    "ik_pole": "DETERMINISTIC_REST_BEND_PLANE_WITNESS_OR_STABLE_FRAME_ORTHOGONAL_FALLBACK_PARENTED_TO_GLOBAL",
+    "ik_constraint": "WEIGHT_1__POLE_WEIGHT_1__MAX_STRETCH_1__REST_NEUTRAL",
+    "rule": "DERIVATION_MAY_EXPOSE_A_GENERIC_CONTROL_CAPABILITY_BUT_MAY_NOT_CLAIM_THE_SOURCE_FILE_AUTHORED_THAT_CONTROL_RIG"
+  },
+  "dof_derivation": {
+    "source": "ISOLATED_KINEMATIC_PARAMETER_PERTURBATIONS_IN_TEACHER_SCENE",
+    "labels": ["RX", "RY", "RZ"],
+    "active_rule": "AN_AXIS_IS_ACTIVE_ONLY_IF_A_SEALED_PLUS_OR_MINUS_PERTURBATION_PRODUCES_VERTEX_RESPONSE_ABOVE_THE_PREREGISTERED_NORMALIZED_DISPLACEMENT_THRESHOLD",
+    "physical_joint_limit_claimed": false,
+    "inactive_axis_is_phYSICAL_LOCK": false,
+    "interpretation": "OBSERVED_DEFORMATION_CONTROL_EFFECTIVENESS_AT_THE_MEASURED_AMPLITUDES"
+  },
+  "attachment_policy": {
+    "default": "ABSTAIN",
+    "allowed_candidate": "RIGID_GEOMETRY_OWNER_WITH_EXACT_SINGLE_JOINT_UNIT_SKIN_SUPPORT_AND_STABLE_REST_BINDING",
+    "proximity_only_anchor_forbidden": true,
+    "semantic_weapon_or_hand_rule_forbidden": true,
+    "ambiguous_owner": "NO_ANCHOR_TEACHER"
+  },
+  "mira_binding": {
+    "dense_weight_truth": "EXACT_TRUTH139_MIRA_DENSE_W_M",
+    "skin_code_stage": "AFTER_MIRA_V6_CODEC_CHECKPOINT_IS_SEALED",
+    "skin_code_authority": "FROZEN_MIRA_CODEC_ENCODING_OF_DENSE_W_M__NOT_A_SECOND_WEIGHT_TEACHER",
+    "axis_teacher_may_not_choose_or_repair_codes": true,
+    "codec_checkpoint_hash_required": true
+  },
+  "required_courts": [
+    "ALL_139_PROJECTED_SUBJECTS_BUILD_OR_FAIL_WITH_TYPED_REASON",
+    "JOINT_PARENT_GRAPH_CAUSAL_AND_ACYCLIC",
+    "CANONICAL_FRAME_FINITE_ORTHONORMAL_RIGHT_HANDED",
+    "BEHAVIORAL_DOF_RESPONSE_REPRODUCIBLE",
+    "CONTROL_GRAPH_CAUSAL",
+    "CHAIN_PARENT_CONTIGUOUS",
+    "REST_NEUTRAL_CONSTRAINT_RESIDUAL_WITHIN_THRESHOLD",
+    "NO_SOURCE_NAME_OR_PACK_LABEL_IN_STUDENT_TARGET",
+    "RIG_PROGRAM_QUALIFIES_UNCHANGED_THROUGH_PRODUCT_COMPILER_COURT",
+    "MIRA_CODE_BINDING_HASH_MATCH_AFTER_CODEC_SEAL",
+    "CAUSAL_EVENT_SERIALIZATION_ROUNDTRIP"
+  ],
+  "gates": {
+    "training_before_truth139_split_seal_forbidden": true,
+    "teacher_built_only_on_fit8_or_knight_forbidden": true,
+    "source_authored_control_rig_claim_forbidden": true,
+    "compiler_synthesized_controls_used_as_teacher_forbidden": true,
+    "source_bone_names_used_as_semantic_labels_forbidden": true,
+    "manual_humanoid_ik_templates_forbidden": true,
+    "mira_skin_codes_before_codec_seal_forbidden": true,
+    "product_qualification_minted": false
+  }
+}

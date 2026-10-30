@@ -19,6 +19,7 @@ on:
       - 'tests/models/test_axis_v6_rig_program.py'
       - 'tests/models/test_mira_v6_skin_fsq_codec.py'
       - 'tests/models/test_axis_mira_v6_product_runtime.py'
+      - 'tests/models/test_axis_v6_training.py'
       - 'tests/compiler/test_control_ready_rig_v2.py'
       - 'tests/repository/test_fit1_mechanical_product_role_alignment_v1.py'
       - '.github/workflows/axis_mira_v6_product.yml'
@@ -63,6 +64,7 @@ jobs:
             models/axis/scene_conditioning_v6.py \
             models/axis/rig_program_model_v6.py \
             models/axis/rig_program_decode_v6.py \
+            models/axis/training_v6.py \
             models/axis/runtime_checkpoint_v2.py \
             compiler/realsas_compiler_core/rig_program_ir_v1.py \
             compiler/realsas_compiler_core/canonical_rig_ir_v2.py \
@@ -72,13 +74,14 @@ jobs:
             compiler/realsas_compiler_services/platform_worker/skin_executor_v2.py \
             compiler/realsas_compiler_services/platform_worker/worker.py
 
-      - name: Run V6 model Compiler and runtime courts
+      - name: Run V6 model Compiler runtime and training courts
         run: |
           set -euo pipefail
           pytest -q \
             tests/models/test_mira_v6_skin_fsq_codec.py \
             tests/models/test_axis_v6_rig_program.py \
             tests/models/test_axis_mira_v6_product_runtime.py \
+            tests/models/test_axis_v6_training.py \
             tests/compiler/test_control_ready_rig_v2.py \
             tests/repository/test_fit1_mechanical_product_role_alignment_v1.py
 

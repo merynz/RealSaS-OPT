@@ -24,11 +24,11 @@ from compiler.realsas_compiler_core.rig_program_ir_v1 import (
     qualify_rig_program_v1,
     seal_rig_program_proposal_v1,
 )
-from compiler.realsas_compiler_core.skin_token_ir_v1 import (
-    JointSkinTokenRowIR,
-    SkinTokenProposalIR,
-    seal_skin_token_proposal_v1,
-    validate_skin_token_proposal_v1,
+from compiler.realsas_compiler_core.skin_code_ir_v1 import (
+    JointSkinCodeRowIR,
+    SkinCodeProposalIR,
+    seal_skin_code_proposal_v1,
+    validate_skin_code_proposal_v1,
 )
 from compiler.realsas_compiler_core.types import QualificationError, SurfaceSupportBinding
 
@@ -128,11 +128,11 @@ def test_rig_program_v2_rejects_noncontiguous_chain_instead_of_repairing_it():
         qualify_rig_program_v1(bad)
 
 
-def test_skin_tokens_are_bound_to_exact_rig_proposal_and_never_repaired():
+def test_skin_codes_are_bound_to_exact_rig_proposal_and_never_repaired():
     mesh = _mesh()
     p = _proposal(mesh)
-    value = SkinTokenProposalIR(
-        rows=tuple(JointSkinTokenRowIR(j.proposal_joint_id, (1, 3, 7, 2)) for j in p.joints),
+    value = SkinCodeProposalIR(
+        rows=tuple(JointSkinCodeRowIR(j.proposal_joint_id, (1, 3, 7, 2)) for j in p.joints),
         rig_program_proposal_hash=p.proposal_lineage_hash,
         carrier_evidence_hash=mesh.carrier_evidence_hash,
         carrier_topology_hash=mesh.carrier_topology_hash,
@@ -140,21 +140,21 @@ def test_skin_tokens_are_bound_to_exact_rig_proposal_and_never_repaired():
         codec_architecture_id="RealSaS.MIRA.FSQSkinCodec.v6",
         codec_checkpoint_hash="a" * 64,
         codebook_size=16,
-        tokens_per_joint=4,
+        codes_per_joint=4,
         model_provenance="RealSaS.AXIS.RigProgram.TokenCausal.v6",
     )
-    value = seal_skin_token_proposal_v1(value)
-    validate_skin_token_proposal_v1(
+    value = seal_skin_code_proposal_v1(value)
+    validate_skin_code_proposal_v1(
         value,
         expected_proposal_joint_ids=tuple(j.proposal_joint_id for j in p.joints),
         expected_rig_program_proposal_hash=p.proposal_lineage_hash,
     )
 
     bad_rows = list(value.rows)
-    bad_rows[0] = replace(bad_rows[0], token_ids=(1, 3, 99, 2))
-    bad = seal_skin_token_proposal_v1(replace(value, rows=tuple(bad_rows), proposal_lineage_hash=""))
-    with pytest.raises(QualificationError, match="TOKEN_ID_OUT_OF_DOMAIN"):
-        validate_skin_token_proposal_v1(
+    bad_rows[0] = replace(bad_rows[0], code_ids=(1, 3, 99, 2))
+    bad = seal_skin_code_proposal_v1(replace(value, rows=tuple(bad_rows), proposal_lineage_hash=""))
+    with pytest.raises(QualificationError, match="CODE_ID_OUT_OF_DOMAIN"):
+        validate_skin_code_proposal_v1(
             bad,
             expected_proposal_joint_ids=tuple(j.proposal_joint_id for j in p.joints),
             expected_rig_program_proposal_hash=p.proposal_lineage_hash,

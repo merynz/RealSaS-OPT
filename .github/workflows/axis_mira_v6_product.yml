@@ -18,6 +18,7 @@ on:
       - 'platform/internal/capability/contracts/product_capabilities_v1.json'
       - 'tests/models/test_axis_v6_rig_program.py'
       - 'tests/models/test_mira_v6_skin_fsq_codec.py'
+      - 'tests/models/test_mira_v6_training.py'
       - 'tests/models/test_axis_mira_v6_product_runtime.py'
       - 'tests/models/test_axis_v6_training.py'
       - 'tests/compiler/test_control_ready_rig_v2.py'
@@ -60,6 +61,7 @@ jobs:
           python -m py_compile \
             models/mira/skin_fsq_codec_v6.py \
             models/mira/conditioning_v6.py \
+            models/mira/training_v6.py \
             models/mira/runtime_checkpoint_v2.py \
             models/axis/scene_conditioning_v6.py \
             models/axis/rig_program_model_v6.py \
@@ -79,6 +81,7 @@ jobs:
           set -euo pipefail
           pytest -q \
             tests/models/test_mira_v6_skin_fsq_codec.py \
+            tests/models/test_mira_v6_training.py \
             tests/models/test_axis_v6_rig_program.py \
             tests/models/test_axis_mira_v6_product_runtime.py \
             tests/models/test_axis_v6_training.py \

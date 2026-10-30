@@ -4,8 +4,8 @@ from __future__ import annotations
 
 Skin authority binds Mesh + Rig deform-structure identity, not the full animator
 control program. A controller-only edit therefore does not invalidate weights;
-rest/deform structure changes still do. Learned SkinTokens remain proposal evidence
-and are decoded before this Compiler boundary by the admitted MIRA codec.
+rest/deform structure changes still do. Learned RealSaS skin codes remain proposal
+evidence and are decoded before this Compiler boundary by the admitted MIRA codec.
 """
 
 from dataclasses import asdict, dataclass, field, replace
@@ -38,7 +38,7 @@ class CanonicalSkinIRV2:
     mesh_carrier_topology_hash: str
     mesh_carrier_geometry_hash: str
     carrier_skin_qualification_hash: str
-    skin_token_proposal_hash: str
+    skin_code_proposal_hash: str
     skin_codec_architecture_id: str
     skin_codec_checkpoint_hash: str
     skin_lineage_hash: str
@@ -72,7 +72,7 @@ def mint_canonical_skin_v2(
     rig: CanonicalRigIRV2,
     *,
     qualified_skin: QualifiedCarrierSkinIR,
-    skin_token_proposal_hash: str,
+    skin_code_proposal_hash: str,
     skin_codec_architecture_id: str,
     skin_codec_checkpoint_hash: str,
 ) -> CanonicalSkinIRV2:
@@ -102,10 +102,10 @@ def mint_canonical_skin_v2(
     if report.get("status") != "PASS_DIRECT_CARRIER_SKIN":
         raise QualificationError("CANONICAL_SKIN_V2_QUALIFICATION_NOT_PASS")
 
-    token_hash = str(skin_token_proposal_hash).strip()
+    code_hash = str(skin_code_proposal_hash).strip()
     codec_id = str(skin_codec_architecture_id).strip()
     codec_hash = str(skin_codec_checkpoint_hash).strip()
-    if len(token_hash) < 8 or not codec_id or len(codec_hash) < 8:
+    if len(code_hash) < 8 or not codec_id or len(codec_hash) < 8:
         raise QualificationError("CANONICAL_SKIN_V2_CODEC_PROVENANCE_REQUIRED")
 
     mesh_by_source = {str(v.source_candidate_vertex_id): v for v in mesh.vertices}
@@ -147,7 +147,7 @@ def mint_canonical_skin_v2(
         mesh_carrier_topology_hash=mesh.carrier_topology_hash,
         mesh_carrier_geometry_hash=mesh.carrier_geometry_hash,
         carrier_skin_qualification_hash=qualified_hash,
-        skin_token_proposal_hash=token_hash,
+        skin_code_proposal_hash=code_hash,
         skin_codec_architecture_id=codec_id,
         skin_codec_checkpoint_hash=codec_hash,
         skin_lineage_hash="",
@@ -158,8 +158,8 @@ def mint_canonical_skin_v2(
             "control_program_mutation_invalidates_skin": False,
             "deform_structure_mutation_invalidates_skin": True,
             "mesh_mutation_invalidates_skin": True,
-            "skin_token_decode_is_model_owned": True,
-            "compiler_token_search_or_repair_performed": False,
+            "skin_code_decode_is_model_owned": True,
+            "compiler_code_search_or_repair_performed": False,
         },
     )
     return replace(value, skin_lineage_hash=canonical_skin_lineage_hash_v2(value))
@@ -183,7 +183,7 @@ def canonical_skin_from_dict_v2(payload: Mapping[str, Any]) -> CanonicalSkinIRV2
         mesh_carrier_topology_hash=str(payload["mesh_carrier_topology_hash"]),
         mesh_carrier_geometry_hash=str(payload["mesh_carrier_geometry_hash"]),
         carrier_skin_qualification_hash=str(payload["carrier_skin_qualification_hash"]),
-        skin_token_proposal_hash=str(payload["skin_token_proposal_hash"]),
+        skin_code_proposal_hash=str(payload["skin_code_proposal_hash"]),
         skin_codec_architecture_id=str(payload["skin_codec_architecture_id"]),
         skin_codec_checkpoint_hash=str(payload["skin_codec_checkpoint_hash"]),
         skin_lineage_hash=str(payload["skin_lineage_hash"]),

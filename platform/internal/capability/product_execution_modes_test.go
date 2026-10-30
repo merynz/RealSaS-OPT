@@ -5,21 +5,22 @@ import (
 	"testing"
 )
 
-func TestCurrentProductProvidersAllowProductExecutionWithoutClaimingProductPass(t *testing.T) {
+func TestProductProvidersAreProductExecutableAndOnlyProofOwnsProductPass(t *testing.T) {
 	providers := ProductProviders()
-	if len(providers) != 8 {
-		t.Fatalf("product provider count=%d want=8 before Proof joins the catalog", len(providers))
+	if len(providers) != 9 {
+		t.Fatalf("product provider count=%d want=9", len(providers))
 	}
 
 	expected := map[string]bool{
-		ProductInputCapabilityID:     true,
-		ProductShapeCapabilityID:     true,
-		ProductMeshCapabilityID:      true,
-		ProductRigCapabilityID:       true,
-		ProductSkinCapabilityID:      true,
-		ProductMechanicsCapabilityID: true,
-		ProductGraphicsCapabilityID:  true,
-		ProductMotionCapabilityID:    true,
+		ProductInputCapabilityID:     false,
+		ProductShapeCapabilityID:     false,
+		ProductMeshCapabilityID:      false,
+		ProductRigCapabilityID:       false,
+		ProductSkinCapabilityID:      false,
+		ProductMechanicsCapabilityID: false,
+		ProductGraphicsCapabilityID:  false,
+		ProductMotionCapabilityID:    false,
+		ProductProofCapabilityID:     true,
 	}
 	seen := map[string]bool{}
 	for _, provider := range providers {
@@ -31,7 +32,8 @@ func TestCurrentProductProvidersAllowProductExecutionWithoutClaimingProductPass(
 			t.Fatalf("provider emitted %d descriptors want=1", len(descriptors))
 		}
 		descriptor := descriptors[0]
-		if !expected[descriptor.ID] {
+		wantPass, ok := expected[descriptor.ID]
+		if !ok {
 			t.Fatalf("unexpected current product provider %s", descriptor.ID)
 		}
 		modes := map[Mode]bool{}
@@ -41,8 +43,8 @@ func TestCurrentProductProvidersAllowProductExecutionWithoutClaimingProductPass(
 		if !modes[ModeDeveloper] || !modes[ModeProduct] {
 			t.Fatalf("%s modes=%v must allow DEVELOPER and PRODUCT", descriptor.ID, descriptor.AllowedModes)
 		}
-		if descriptor.ProductPassAuthority {
-			t.Fatalf("%s must not mint product-pass authority; Proof owns the terminal decision", descriptor.ID)
+		if descriptor.ProductPassAuthority != wantPass {
+			t.Fatalf("%s product-pass authority=%v want=%v", descriptor.ID, descriptor.ProductPassAuthority, wantPass)
 		}
 		seen[descriptor.ID] = true
 	}

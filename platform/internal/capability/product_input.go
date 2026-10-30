@@ -22,7 +22,7 @@ func (ProductInputProvider) Capabilities(context.Context) ([]Descriptor, error) 
 		Kind:                 KindModule,
 		OwnerModuleID:        "product.input",
 		ExecutorActivity:     "engine.execute_capability.v1",
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeDeveloper, ModeProduct},
 		ProductPassAuthority: false,
 		Aliases:              []string{"Input", "Observation"},
 		Metadata: map[string]any{

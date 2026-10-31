@@ -37,10 +37,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Python product-shell tests
-        run: PYTHONPATH=. python -m unittest -v tests.product.test_living_compile_v4
+      - name: Python product-shell and intake tests
+        run: >-
+          PYTHONPATH=. python -m unittest -v
+          tests.product.test_living_compile_v4
+          tests.product.test_intake_worker
       - name: Python syntax
-        run: python -m py_compile product/living_compile/*.py experiments/single_family_e2e_v1/export_bundle_v1.py
+        run: >-
+          python -m py_compile
+          product/living_compile/*.py
+          product/intake_worker/*.py
+          experiments/single_family_e2e_v1/export_bundle_v1.py
       - name: JavaScript syntax
         shell: bash
         run: |

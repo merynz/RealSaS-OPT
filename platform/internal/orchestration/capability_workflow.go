@@ -8,6 +8,32 @@ import (
 	"go.temporal.io/sdk/workflow"
 )
 
+func requalificationSatisfiedCapabilities(goal ResolvedCapabilityGoal) map[string]bool {
+	out := map[string]bool{}
+	if goal.GoalType != "PRODUCT_REQUALIFICATION" {
+		return out
+	}
+	raw, ok := goal.Parameters["satisfied_capability_ids"]
+	if !ok {
+		return out
+	}
+	switch values := raw.(type) {
+	case []string:
+		for _, value := range values {
+			if value != "" {
+				out[value] = true
+			}
+		}
+	case []any:
+		for _, value := range values {
+			if text, ok := value.(string); ok && text != "" {
+				out[text] = true
+			}
+		}
+	}
+	return out
+}
+
 func CapabilityWorkflow(ctx workflow.Context, input CapabilityWorkflowInput) (CapabilityWorkflowResult, error) {
 	platformCtx := workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
 		TaskQueue:              ControlTaskQueue,
@@ -46,16 +72,29 @@ func CapabilityWorkflow(ctx workflow.Context, input CapabilityWorkflowInput) (Ca
 			nil,
 		)
 	}
-	if goal.PromotionPolicy == "QUALIFIED_PRODUCT_ONLY" && goal.GoalType != "PRODUCT_COMPILE" {
+	if goal.PromotionPolicy == "QUALIFIED_PRODUCT_ONLY" &&
+		goal.GoalType != "PRODUCT_COMPILE" && goal.GoalType != "PRODUCT_REQUALIFICATION" {
 		return CapabilityWorkflowResult{}, temporal.NewNonRetryableApplicationError(
-			"qualified product promotion requires PRODUCT_COMPILE goal",
+			"qualified product promotion requires PRODUCT_COMPILE or PRODUCT_REQUALIFICATION goal",
 			"CapabilityPromotionContractViolation",
+			nil,
+		)
+	}
+
+	satisfied := requalificationSatisfiedCapabilities(goal)
+	if goal.GoalType == "PRODUCT_REQUALIFICATION" && len(satisfied) == 0 {
+		return CapabilityWorkflowResult{}, temporal.NewNonRetryableApplicationError(
+			"product requalification requires qualified base capabilities",
+			"CapabilityRequalificationContractViolation",
 			nil,
 		)
 	}
 
 	completed := make([]CapabilityCommitResult, 0, len(goal.Steps))
 	for _, step := range goal.Steps {
+		if satisfied[step.CapabilityID] {
+			continue
+		}
 		var request EngineCapabilityRequest
 		if err := workflow.ExecuteActivity(platformCtx, PrepareCapabilityExecutionActivityName, PrepareCapabilityExecutionRequest{
 			CommandID:       input.CommandID,

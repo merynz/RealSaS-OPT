@@ -18,6 +18,15 @@ class ProductDeployContractTests(unittest.TestCase):
         self.assertNotIn('"0.0.0.0:${REALSAS_WEB_PORT', compose)
         self.assertNotIn('"0.0.0.0:${REALSAS_OPERATOR_API_PORT', compose)
 
+    def test_public_shell_uses_owner_scoped_entrypoint(self):
+        compose = (DEPLOY / "compose.yaml").read_text(encoding="utf-8")
+        env_example = (DEPLOY / ".env.example").read_text(encoding="utf-8")
+        self.assertIn("product.living_compile.public_server", compose)
+        self.assertNotIn('command: ["python", "-m", "product.living_compile.server"', compose)
+        self.assertIn("REALSAS_PRODUCT_COOKIE_SECURE: ${REALSAS_PRODUCT_COOKIE_SECURE:-0}", compose)
+        self.assertIn("REALSAS_PRODUCT_COOKIE_SECURE=0", env_example)
+        self.assertIn("HttpOnly", (ROOT / "product" / "living_compile" / "public_server.py").read_text(encoding="utf-8"))
+
     def test_compile_is_disabled_by_default_and_learned_execution_is_explicit(self):
         compose = (DEPLOY / "compose.yaml").read_text(encoding="utf-8")
         env_example = (DEPLOY / ".env.example").read_text(encoding="utf-8")

@@ -19,6 +19,8 @@ let viewport = null;
 let overlay = null;
 let saveTimer = null;
 let selectedBindingID = null;
+let previewViewID = null;
+const canonicalMeshesByView = new Map();
 
 function boot() {
   studio = window.RealSaSStudio;
@@ -42,8 +44,18 @@ function currentViewID() {
   return `V${S?.view ?? 0}`;
 }
 
-function meshes() {
-  return (S?.scene?.puppet?.meshes || []).filter((row) => row.view_id === currentViewID());
+function cacheKey(viewID = currentViewID()) {
+  return `${S?.bundle || 'bundle'}:${viewID}`;
+}
+
+function liveViewMeshes(viewID = currentViewID()) {
+  return (S?.scene?.puppet?.meshes || []).filter((row) => row.view_id === viewID);
+}
+
+function canonicalMeshes(viewID = currentViewID()) {
+  const key = cacheKey(viewID);
+  if (!canonicalMeshesByView.has(key)) canonicalMeshesByView.set(key, [...liveViewMeshes(viewID)]);
+  return canonicalMeshesByView.get(key) || [];
 }
 
 function bindings() {
@@ -55,12 +67,51 @@ function controls() {
   return (rig.deform_controls || rig.controls || []).filter((row) => row.view_id === currentViewID());
 }
 
-function canonicalOrder() {
-  return canonicalSlotOrder(meshes());
+function canonicalOrder(viewID = currentViewID()) {
+  return canonicalSlotOrder(canonicalMeshes(viewID));
 }
 
 function presentation() {
   return normalizePresentationOverride(S?.ed?.presentation, canonicalOrder());
+}
+
+function replaceViewMeshes(viewID, rows) {
+  const all = S?.scene?.puppet?.meshes;
+  if (!Array.isArray(all)) return;
+  const next = [];
+  let inserted = false;
+  for (const row of all) {
+    if (row.view_id === viewID) {
+      if (!inserted) {
+        next.push(...rows);
+        inserted = true;
+      }
+    } else {
+      next.push(row);
+    }
+  }
+  if (!inserted) next.push(...rows);
+  S.scene.puppet.meshes = next;
+}
+
+function restorePreview(viewID) {
+  if (!viewID || !S?.scene) return;
+  replaceViewMeshes(viewID, canonicalMeshes(viewID));
+}
+
+function applyPresentationPreview() {
+  const viewID = currentViewID();
+  if (previewViewID && previewViewID !== viewID) restorePreview(previewViewID);
+  const canonicalRows = canonicalMeshes(viewID);
+  const byID = new Map(canonicalRows.map((row) => [row.mesh_id, row]));
+  const state = presentation();
+  const hidden = new Set(state.hidden_mesh_ids);
+  const rows = state.slot_order_back_to_front
+    .filter((meshID) => !hidden.has(meshID))
+    .map((meshID) => byID.get(meshID))
+    .filter(Boolean);
+  replaceViewMeshes(viewID, rows);
+  previewViewID = viewID;
 }
 
 function operate(label, operation) {
@@ -72,6 +123,7 @@ function operate(label, operation) {
   saveTimer = setTimeout(() => {
     if (dirty.status === 'dirty') $('#saveLayer')?.click();
   }, 1200);
+  applyPresentationPreview();
   ensureInspector(true);
   return true;
 }
@@ -93,6 +145,7 @@ function ensureInspector(force = false) {
   if (!S?.scene || S.mode !== 'bindings') return;
   const body = $('#inspectorBody');
   if (!body) return;
+  canonicalMeshes();
   const canonical = canonicalOrder();
   const state = presentation();
   const bindingRows = bindings();
@@ -229,7 +282,13 @@ function drawOverlay() {
 }
 
 function frame() {
-  if (S?.mode === 'bindings') ensureInspector();
+  if (S?.mode === 'bindings') {
+    ensureInspector();
+    applyPresentationPreview();
+  } else if (previewViewID) {
+    restorePreview(previewViewID);
+    previewViewID = null;
+  }
   drawOverlay();
   requestAnimationFrame(frame);
 }

@@ -2,6 +2,7 @@ export function emptyStudioEdits() {
   return {
     rig: [],
     mesh: [],
+    meshTopology: [],
     weights: [],
     bindings: [],
     topology: [],
@@ -21,6 +22,7 @@ export function authoringLayerToEdits(layer) {
   return {
     rig: clone(layer.rig_pose_edits || []),
     mesh: clone(layer.mesh_vertex_edits || []),
+    meshTopology: clone(layer.mesh_topology_edits || []),
     weights: clone(layer.weight_edits || []),
     bindings: clone(layer.binding_edits || []),
     topology: clone(layer.rig_topology_edits || []),
@@ -35,6 +37,7 @@ export function editsToAuthoringRequest(bundle, viewID, edits) {
     view_id: viewID,
     edits: clone(edits.rig || []),
     mesh_vertex_edits: clone(edits.mesh || []),
+    mesh_topology_edits: clone(edits.meshTopology || []),
     weight_edits: clone(edits.weights || []),
     binding_edits: clone(edits.bindings || []),
     rig_topology_edits: clone(edits.topology || []),
@@ -54,7 +57,8 @@ export class StudioDocument {
   }
 
   replace(snapshot) {
-    this.edits = clone(snapshot || emptyStudioEdits());
+    const next = {...emptyStudioEdits(), ...(snapshot || {})};
+    this.edits = clone(next);
     return this.edits;
   }
 

@@ -106,6 +106,12 @@ func Start(
 				return err
 			}
 		}
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO public_product_intake_jobs(session_id,state)
+			VALUES ($1,'QUEUED')
+		`, sessionID); err != nil {
+			return err
+		}
 		viewSlots := make([]string, 0, len(imported))
 		for _, view := range imported {
 			viewSlots = append(viewSlots, view.Slot)
@@ -115,6 +121,7 @@ func Start(
 			"view_slots":                   viewSlots,
 			"release_channel_lock_version": channel.LockVersion,
 			"authority":                    "RAW_EXTERNAL_EVIDENCE_ONLY",
+			"intake_job_state":             "QUEUED",
 		})
 		_, err := tx.Exec(ctx, `
 			INSERT INTO audit_events(actor,action,subject_id,payload)

@@ -3,6 +3,7 @@ package httpapi
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/studio"
 )
@@ -50,6 +51,47 @@ func (a API) HandlerWithStudio() http.Handler {
 			return
 		}
 		respond(w, http.StatusOK, out)
+	})
+
+	mux.HandleFunc("GET /v1/product/studio/projects/{id}/head", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.ProductGatewayToken, "PRODUCT_GATEWAY") {
+			return
+		}
+		out, err := studio.GetHead(r.Context(), a.Pool, r.PathValue("id"))
+		if errors.Is(err, studio.ErrProjectNotFound) {
+			respond(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+			return
+		}
+		if err != nil {
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+			return
+		}
+		respond(w, http.StatusOK, out)
+	})
+
+	mux.HandleFunc("GET /v1/product/studio/projects/{id}/revisions", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.ProductGatewayToken, "PRODUCT_GATEWAY") {
+			return
+		}
+		limit := 50
+		if raw := r.URL.Query().Get("limit"); raw != "" {
+			parsed, err := strconv.Atoi(raw)
+			if err != nil || parsed <= 0 {
+				respond(w, http.StatusBadRequest, map[string]string{"error": "STUDIO_REVISION_LIMIT_INVALID"})
+				return
+			}
+			limit = parsed
+		}
+		out, err := studio.ListRevisions(r.Context(), a.Pool, r.PathValue("id"), limit)
+		if errors.Is(err, studio.ErrProjectNotFound) {
+			respond(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+			return
+		}
+		if err != nil {
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+			return
+		}
+		respond(w, http.StatusOK, map[string]any{"revisions": out})
 	})
 
 	mux.HandleFunc("POST /v1/product/studio/projects/{id}/revisions", func(w http.ResponseWriter, r *http.Request) {

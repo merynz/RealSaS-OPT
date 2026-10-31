@@ -1,0 +1,87 @@
+{
+  "schema": "RealSaS.IrisComponentGeometryConsumerContract.v1",
+  "status": "LOCKED_NO_TRAINING_AUTHORITY_MINTED",
+  "purpose": "Bind IRIS geometry losses to explicit Corpus400 truth fields so masked or unavailable sign truth can never become an implicit dense target.",
+  "accepted_geometry_manifest_schema": "RealSaS.ComponentGeometryAuthority.v1",
+  "required_geometry_court_schema": "RealSaS.ComponentGeometryAuthorityCourt.v1",
+  "required_geometry_court_status": "PASS_COMPONENT_GEOMETRY_AUTHORITY_INDEPENDENT_COURT__FINAL_ADMISSION_SEPARATE",
+  "target_bindings": {
+    "surface_distance": {
+      "source": "distance_sign.unsigned_distance",
+      "query": "distance_sign.query_xyz_canonical",
+      "validity": "distance_sign.unsigned_distance_valid",
+      "dense_unknown_target_allowed": false
+    },
+    "signed_tsdf_when_valid": {
+      "source": "distance_sign.signed_distance_value",
+      "query_index": "distance_sign.signed_query_index",
+      "validity": "COMPACT_ROWS_EXIST_ONLY_WHERE_SIGN_AUTHORITY_EXISTS",
+      "dense_unknown_target_allowed": false
+    },
+    "occupancy_when_valid": {
+      "source": "distance_sign.occupancy_value",
+      "query_index": "distance_sign.signed_query_index",
+      "validity": "COMPACT_ROWS_EXIST_ONLY_WHERE_SIGN_AUTHORITY_EXISTS",
+      "dense_unknown_target_allowed": false
+    },
+    "oriented_normal": {
+      "source": "surface.normal_canonical",
+      "query": "surface.surface_xyz_canonical",
+      "validity": "surface.normal_valid",
+      "dense_unknown_target_allowed": false
+    },
+    "local_oriented_sdf": {
+      "source": "DERIVED_FROM_SURFACE_XYZ_NORMAL_AND_POSITIVE_EPSILON",
+      "semantics": "LOCAL_ORIENTED_SURFACE_COORDINATE__NOT_GLOBAL_OCCUPANCY",
+      "positive_normal_side_value": "+epsilon",
+      "negative_normal_side_value": "-epsilon",
+      "requires_global_sign_authority": false
+    },
+    "surface_bracket_sign": {
+      "source": "SAME_LOCAL_ORIENTED_BRACKETS",
+      "semantics": "NORMAL_SIDE_CLASSIFICATION__NOT_GLOBAL_INSIDE_OUTSIDE",
+      "requires_global_sign_authority": false
+    },
+    "fstar_auxiliary": {
+      "role": "AUXILIARY_ONLY",
+      "may_replace_surface_distance": false,
+      "may_replace_global_sign": false,
+      "may_mint_missing_sign_targets": false
+    }
+  },
+  "recipe_requirements": {
+    "primary_authority_must_include": [
+      "UNSIGNED_DISTANCE",
+      "LOCAL_ORIENTED_SDF",
+      "VALIDITY_MASKED_GLOBAL_SIGN_OCCUPANCY",
+      "ORIENTED_NORMAL"
+    ],
+    "global_sign_policy": "FAIL_CLOSED_EXACT_ONLY_WHERE_VALID",
+    "fstar_role_prefix": "AUXILIARY_SOURCE_CONSISTENCY_ONLY",
+    "geometry_losses_requiring_compact_global_sign": [
+      "signed_tsdf_when_valid",
+      "occupancy_when_valid"
+    ],
+    "geometry_losses_requiring_local_oriented_surface_truth": [
+      "local_oriented_sdf",
+      "local_sdf_magnitude",
+      "local_sign_margin",
+      "normal_direction_slope",
+      "surface_bracket_regression",
+      "surface_bracket_sign"
+    ]
+  },
+  "firewall": {
+    "legacy_dense_signed_distance_input_forbidden": true,
+    "legacy_dense_occupancy_input_forbidden": true,
+    "unknown_sign_as_zero_forbidden": true,
+    "unknown_occupancy_as_false_forbidden": true,
+    "global_sign_loss_on_local_only_brackets_forbidden": true,
+    "optimizer_creation_before_consumer_semantic_receipt_forbidden": true
+  },
+  "authority_boundary": {
+    "this_contract_mints_corpus_admission": false,
+    "this_contract_mints_training_readiness": false,
+    "this_contract_mints_model_qualification": false
+  }
+}

@@ -56,6 +56,9 @@ jobs:
             args+=(--semantic-overrides canonical/POST139_SUBJECT_POLICY_V1.json)
           fi
           python tools/corpus/post139_finalize_inventory_v2.py "${args[@]}"
+          python tools/corpus/post139_render_inventory_report_v1.py \
+            --inventory-dir "$out" \
+            --out "$out/REALSAS_POST139_EXACT_INVENTORY_V2.md"
           cat "$out/POST139_FINAL_INVENTORY_REPORT_V2.json"
           echo "POST139_FINAL_OUT=$out" >> "$GITHUB_ENV"
       - name: Upload V2 global inventory evidence

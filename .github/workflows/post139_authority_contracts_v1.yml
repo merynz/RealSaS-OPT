@@ -1,0 +1,72 @@
+name: post139-authority-contracts-v1
+
+on:
+  push:
+    branches: [main, post139-corpus-audit-v1]
+    paths:
+      - '.github/workflows/post139_authority_contracts_v1.yml'
+      - 'canonical/POST139_SUBJECT_POLICY_V1.json'
+      - 'canonical/POST139_ACQUISITION_PINS_V1.json'
+      - 'tools/corpus/post139_acquire_resilient_v1.py'
+      - 'tools/corpus/post139_rebind_candidate_manifest_v1.py'
+      - 'tools/corpus/post139_compile_inventory_v2.py'
+      - 'tools/corpus/post139_corpus_authority_v1.py'
+      - 'tools/corpus/post139_build_materialization_closure_v1.py'
+      - 'tools/corpus/post139_training_consumer_v1.py'
+      - 'tests/tools/test_post139_acquire_resilient_v1.py'
+      - 'tests/tools/test_post139_compile_inventory_v2.py'
+      - 'tests/tools/test_post139_corpus_authority_v1.py'
+      - 'tests/tools/test_post139_training_consumer_v1.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/post139_authority_contracts_v1.yml'
+      - 'canonical/POST139_SUBJECT_POLICY_V1.json'
+      - 'canonical/POST139_ACQUISITION_PINS_V1.json'
+      - 'tools/corpus/post139_acquire_resilient_v1.py'
+      - 'tools/corpus/post139_rebind_candidate_manifest_v1.py'
+      - 'tools/corpus/post139_compile_inventory_v2.py'
+      - 'tools/corpus/post139_corpus_authority_v1.py'
+      - 'tools/corpus/post139_build_materialization_closure_v1.py'
+      - 'tools/corpus/post139_training_consumer_v1.py'
+      - 'tests/tools/test_post139_acquire_resilient_v1.py'
+      - 'tests/tools/test_post139_compile_inventory_v2.py'
+      - 'tests/tools/test_post139_corpus_authority_v1.py'
+      - 'tests/tools/test_post139_training_consumer_v1.py'
+  workflow_dispatch:
+
+concurrency:
+  group: post139-authority-contracts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install contract dependencies
+        run: python -m pip install --quiet pytest 'gdown==5.2.0'
+      - name: Compile Python tooling
+        run: |
+          python -m py_compile \
+            tools/corpus/post139_acquire_resilient_v1.py \
+            tools/corpus/post139_rebind_candidate_manifest_v1.py \
+            tools/corpus/post139_compile_inventory_v2.py \
+            tools/corpus/post139_corpus_authority_v1.py \
+            tools/corpus/post139_build_materialization_closure_v1.py \
+            tools/corpus/post139_training_consumer_v1.py
+      - name: Run authority contracts
+        run: |
+          python -m pytest -q \
+            tests/tools/test_post139_acquire_resilient_v1.py \
+            tests/tools/test_post139_compile_inventory_v2.py \
+            tests/tools/test_post139_corpus_authority_v1.py \
+            tests/tools/test_post139_training_consumer_v1.py
+      - name: Summary
+        run: echo 'POST139_AUTHORITY_CONTRACTS_PASS'

@@ -64,7 +64,7 @@ func modularProductRevisionContract() product.Contract {
 			"legacy_stage46_required":          false,
 			"legacy_runtime_package_required":  false,
 			"proof_owns_product_pass_decision": true,
-			"finalizer_owns_revision_seal":      true,
+			"finalizer_owns_revision_seal":     true,
 		},
 	}
 }
@@ -245,10 +245,10 @@ func (a Activities) FinalizeCapabilityProduct(ctx context.Context, request map[s
 			"engine_release_id":         releaseID.String(),
 			"execution_goal_id":         goalID.String(),
 			"product_contract_sha256":   sealedContract.ContractSHA256,
-			"product_graph":              "MODULAR_CAPABILITY_V1",
+			"product_graph":             "MODULAR_CAPABILITY_V1",
 			"terminal_proof_capability": capability.ProductProofCapabilityID,
-			"bindings":                   bindings,
-			"model_releases":             modelRows,
+			"bindings":                  bindings,
+			"model_releases":            modelRows,
 		}
 		manifestSHA, err := semantic.JSONSHA256(manifest)
 		if err != nil {
@@ -307,9 +307,9 @@ func (a Activities) FinalizeCapabilityProduct(ctx context.Context, request map[s
 			"product_revision_id": revisionID.String(),
 			"manifest_sha256":     manifestSHA,
 			"execution_goal_id":   goalID.String(),
-			"product_graph":        "MODULAR_CAPABILITY_V1",
-			"proof_capability_id":  capability.ProductProofCapabilityID,
-			"model_release_count":  len(modelRows),
+			"product_graph":       "MODULAR_CAPABILITY_V1",
+			"proof_capability_id": capability.ProductProofCapabilityID,
+			"model_release_count": len(modelRows),
 		})
 		_, err = tx.Exec(ctx, `
 			INSERT INTO attempt_events(attempt_id,event_type,payload)

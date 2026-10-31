@@ -1,12 +1,11 @@
 import {keyID, trackControlID} from './studio_timeline.js';
 
 const $ = (selector) => document.querySelector(selector);
-const clamp = (value, lo, hi) => Math.max(lo, Math.min(hi, value));
 
 function boot() {
   const studio = window.RealSaSStudio;
   const dope = $('#dope');
-  if (!studio?.selection || !studio?.timeline || !dope) {
+  if (!studio?.selection || !studio?.timeline || !studio?.timelineView || !dope) {
     requestAnimationFrame(boot);
     return;
   }
@@ -16,6 +15,7 @@ function boot() {
   const journal = studio.journal;
   const dirty = studio.dirty;
   const timeline = studio.timeline;
+  const timelineView = studio.timelineView;
   let keyDrag = null;
   let saveTimer = null;
 
@@ -73,7 +73,7 @@ function boot() {
     const clip = activeClip();
     if (!clip) return;
     const bounds = dope.getBoundingClientRect();
-    const delta = (event.clientX - keyDrag.startX) / Math.max(1, bounds.width) * clip.duration_seconds;
+    const delta = (event.clientX - keyDrag.startX) / Math.max(1, bounds.width) * timelineView.span();
     if (Math.abs(delta) <= 1e-6) return;
 
     documentModel.replace(keyDrag.before);
@@ -120,7 +120,8 @@ function boot() {
       const controlID = trackControlID(track);
       const ky = 28 + row * rowHeight;
       for (const key of track.keys || []) {
-        const kx = clamp(key.time_seconds / Math.max(1e-6, clip.duration_seconds), 0, 1) * dope.width;
+        if (!timelineView.contains(key.time_seconds)) continue;
+        const kx = timelineView.timeToUnit(key.time_seconds) * dope.width;
         const d = Math.hypot(kx - x, ky - y);
         if (d < distance) {
           distance = d;

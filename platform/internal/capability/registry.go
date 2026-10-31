@@ -128,7 +128,6 @@ func NewRegistry(descriptors []Descriptor) (*Registry, error) {
 			if _, ok := byID[dep]; !ok {
 				return nil, fmt.Errorf("capability %s depends on unknown capability %s", descriptor.ID, dep)
 			}
-		}
 	}
 	ordered, err := topologicalOrder(byID)
 	if err != nil {
@@ -164,6 +163,7 @@ func topologicalOrder(byID map[string]Descriptor) ([]Descriptor, error) {
 				ready = append(ready, child)
 				sort.Strings(ready)
 			}
+		}
 	}
 	if len(out) != len(byID) {
 		var cyclic []string

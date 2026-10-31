@@ -4,7 +4,7 @@ const $ = (selector) => document.querySelector(selector);
 const STAGES = {
   input: {
     mode: null,
-    note: 'Input owns the source character and compile request. Production compile stays fail-closed until exact production model and proof bindings are ready.',
+    note: 'Input belongs to Awaken. Studio opens an already proof-qualified workspace and never starts a source compile from the editor shell.',
   },
   shape: {
     mode: 'mesh',
@@ -54,23 +54,18 @@ function setStage(name) {
   }
 }
 
-function setCompileCapability(project) {
-  const button = $('#compileCharacter');
+function setGatewayCapability(project) {
   const state = $('#compileState');
   const detail = $('#compileDetail');
   const progress = $('#compileProgress');
   const available = Boolean(project?.compile_available);
   const blockers = Array.isArray(project?.compile_blockers) ? project.compile_blockers : [];
-  if (button) {
-    button.disabled = !available;
-    button.title = available ? 'Compile character' : 'Production compile is intentionally fail-closed.';
-  }
-  if (state) state.textContent = available ? 'READY TO COMPILE' : 'PRODUCT SHELL READY';
+  if (state) state.textContent = available ? 'PRODUCT GATEWAY READY' : 'PRODUCT SHELL READY';
   if (detail) detail.textContent = available
-    ? 'Input will run the exact production model releases, canonical product graph and Proof authority.'
+    ? 'Source compile starts in Awaken. This Studio session edits an already materialized proof-qualified character.'
     : blockers.length
-      ? `Waiting on: ${blockers.join(' · ')}`
-      : 'Compile remains fail-closed until production model/proof/revision bindings are complete.';
+      ? `Awaken compile waiting on: ${blockers.join(' · ')}`
+      : 'Awaken compile remains fail-closed until production model/proof/revision bindings are complete.';
   if (progress) progress.style.width = available ? '2%' : '0%';
 }
 
@@ -78,9 +73,9 @@ async function loadProductCapabilities() {
   try {
     const response = await fetch('/api/project');
     const project = await response.json();
-    setCompileCapability(response.ok ? project : null);
+    setGatewayCapability(response.ok ? project : null);
   } catch {
-    setCompileCapability(null);
+    setGatewayCapability(null);
   }
 }
 
@@ -92,7 +87,7 @@ function syncProofState() {
   const text = badge.textContent.trim().toUpperCase();
   if (text.includes('PASS')) {
     state.textContent = 'COMPILED · PROOF PASS';
-    detail.textContent = 'Character is available for inspection, editing, animation preview and export.';
+    detail.textContent = 'Character is available for inspection, editing, animation preview and qualified-base export.';
     $$('.stage').forEach((button) => button.classList.add('available'));
   } else if (text !== 'NO CHARACTER' && text !== 'NO BUNDLE') {
     state.textContent = 'COMPILED · REVIEW PROOF';
@@ -101,27 +96,6 @@ function syncProofState() {
 }
 
 $$('.stage').forEach((button) => button.addEventListener('click', () => setStage(button.dataset.stage)));
-
-$('#compileCharacter')?.addEventListener('click', async () => {
-  const button = $('#compileCharacter');
-  if (button?.disabled) return;
-  const state = $('#compileState');
-  const detail = $('#compileDetail');
-  if (state) state.textContent = 'STARTING COMPILE';
-  if (detail) detail.textContent = 'Submitting production compile request…';
-  try {
-    const response = await fetch('/api/compile/start', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({}),
-    });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload?.message || `HTTP ${response.status}`);
-  } catch (error) {
-    if (state) state.textContent = 'COMPILE UNAVAILABLE';
-    if (detail) detail.textContent = error.message;
-  }
-});
 
 const proofBadge = $('#proofBadge');
 if (proofBadge) new MutationObserver(syncProofState).observe(proofBadge, {childList: true, subtree: true, characterData: true});

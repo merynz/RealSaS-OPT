@@ -109,5 +109,8 @@ def test_render_seam_duplicates_collapse_only_within_same_owner():
         vertices, faces, np.zeros(4, dtype=np.int32)
     )
     assert len(authority.topology_vertices) == 4
-    assert authority.exact_duplicate_collapse_count == 8
+    # Raw vertex 4 is deliberately unreferenced: only referenced transport vertices
+    # participate in the quotient, so 11 referenced - 4 topology = 7 collapses.
+    assert authority.raw_to_topology_vertex[4] == -1
+    assert authority.exact_duplicate_collapse_count == 7
     assert np.count_nonzero(authority.sign_component_valid) == 1

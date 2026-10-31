@@ -49,13 +49,17 @@ class PublicWorkspaceHandoffTests(unittest.TestCase):
             self.assertEqual(content_type, "application/json")
             self.assertEqual(handoff["compile_id"], compile_id)
             self.assertEqual(handoff["authority"], "PROOF_GATED_WORKSPACE_BUNDLE")
-            self.assertTrue(handoff["workspace_url"].startswith("/workspace?bundle="))
+            self.assertTrue(handoff["workspace_url"].startswith("/studio?bundle="))
             self.assertNotIn("engine_release_id", handoff)
             self.assertNotIn("product_revision_id", handoff)
             self.assertNotIn("artifact_id", handoff)
             self.assertTrue((root / handoff["bundle"] / "bundle_manifest.json").is_file())
             self.assertTrue((root / handoff["bundle"] / "proof/product_proof_bundle_ir.json").is_file())
             gateway.assert_called_once()
+
+            studio, studio_type = app.static_bytes("/studio")
+            self.assertIn(b"RealSaS \xc2\xb7 Studio", studio)
+            self.assertEqual(studio_type, "text/html")
 
 
 if __name__ == "__main__":

@@ -71,13 +71,14 @@ func TestStudioDBCourt(t *testing.T) {
 
 	sessionID := uuid.New()
 	compileID := "cmp_" + strings.ReplaceAll(uuid.NewString(), "-", "")
+	ownerKey := strings.Repeat("a", 64)
 	if _, err := pool.Exec(ctx, `
 		INSERT INTO public_product_compile_sessions(
 			id, public_id, subject_id, engine_release_id, release_channel_lock_version,
-			source_observation_artifact_id, attempt_id, product_revision_id,
+			owner_key_sha256, source_observation_artifact_id, attempt_id, product_revision_id,
 			state, current_capability
-		) VALUES ($1,$2,$3,$4,0,$5,$6,$7,'PASS','product.proof')
-	`, sessionID, compileID, subjectID, engineReleaseID, sourceArtifactID, attemptID, productRevisionID); err != nil {
+		) VALUES ($1,$2,$3,$4,0,$5,$6,$7,$8,'PASS','product.proof')
+	`, sessionID, compileID, subjectID, engineReleaseID, ownerKey, sourceArtifactID, attemptID, productRevisionID); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := pool.Exec(ctx, `
@@ -97,6 +98,12 @@ func TestStudioDBCourt(t *testing.T) {
 	}
 	if project.BaseManifestSHA256 != manifestSHA || project.LockVersion != 0 || project.HeadRevisionNumber != 0 {
 		t.Fatalf("unexpected new Studio project state: %+v", project)
+	}
+	if err := RequireProjectOwner(ctx, pool, project.ProjectID, ownerKey); err != nil {
+		t.Fatalf("correct Studio owner rejected: %v", err)
+	}
+	if err := RequireProjectOwner(ctx, pool, project.ProjectID, strings.Repeat("b", 64)); !errors.Is(err, ErrProjectNotFound) {
+		t.Fatalf("cross-owner Studio lookup leaked project existence: %v", err)
 	}
 
 	payload1 := studioDBCourtLayer(t, manifestSHA, "first")
@@ -243,6 +250,16 @@ func TestStudioDBCourt(t *testing.T) {
 		WHERE project_id=(SELECT id FROM studio_projects WHERE public_id=$1)
 	`, project.ProjectID); err == nil || !strings.Contains(err.Error(), "STUDIO_AUTHORING_REVISION_IMMUTABLE") {
 		t.Fatalf("immutable revision trigger did not reject update: %v", err)
+	}
+
+	// Public ownership is also immutable at the database boundary. Account
+	// linking/transfers must be an explicit future contract, never an UPDATE.
+	if _, err := pool.Exec(ctx, `
+		UPDATE public_product_compile_sessions
+		SET owner_key_sha256=$2
+		WHERE public_id=$1
+	`, compileID, strings.Repeat("c", 64)); err == nil || !strings.Contains(err.Error(), "PUBLIC_PRODUCT_COMPILE_SESSION_IDENTITY_IMMUTABLE") {
+		t.Fatalf("compile ownership mutation was not rejected: %v", err)
 	}
 }
 

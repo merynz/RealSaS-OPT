@@ -33,6 +33,7 @@ REQUIRED_ROLES = {
     "motion:canonical",
     "proof:product_pass",
 }
+REQUIRED_SUPPORT_ROLES = {"support:source_observation"}
 REQUIRED_BUNDLE_FILES = {
     "bundle_manifest.json",
     "puppet/canonical_puppet_graph_v3.json",
@@ -233,7 +234,8 @@ def _write_request(
     root: Path,
     compile_id: str,
     lease: dict[str, Any],
-    artifacts: list[dict[str, str]],
+    authority_artifacts: list[dict[str, str]],
+    support_artifacts: list[dict[str, str]],
 ) -> tuple[Path, Path]:
     output = root / "workspace_bundle.zip"
     request = root / "workspace_materialization_request.json"
@@ -242,8 +244,10 @@ def _write_request(
         "compile_id": compile_id,
         "product_revision_id": str(lease.get("product_revision_id") or ""),
         "attempt": int(lease.get("attempt") or 1),
-        "artifacts": artifacts,
+        "artifacts": authority_artifacts,
+        "support_artifacts": support_artifacts,
         "required_roles": sorted(REQUIRED_ROLES),
+        "required_support_roles": sorted(REQUIRED_SUPPORT_ROLES),
         "required_output": {
             "schema": "RealSaS.ProductWorkspaceBundleZip.v1",
             "path": str(output),
@@ -252,6 +256,7 @@ def _write_request(
         "authority": {
             "source_product_revision_is_immutable": True,
             "workspace_is_derived_not_product_authority": True,
+            "support_artifacts_are_non_authoritative": True,
             "proof_must_be_preserved": True,
         },
     }
@@ -270,26 +275,53 @@ def materialize_once(config: Config, client: PlatformClient | None = None) -> bo
     rows = lease.get("artifacts")
     if not compile_id or not lease_token or not isinstance(rows, list):
         raise WorkspaceWorkerError("invalid workspace lease payload")
-    roles = {str(row.get("role") or "") for row in rows if isinstance(row, dict)}
-    if roles != REQUIRED_ROLES:
+
+    authority_rows = [
+        row for row in rows
+        if isinstance(row, dict) and str(row.get("scope") or "").upper() == "AUTHORITY"
+    ]
+    support_rows = [
+        row for row in rows
+        if isinstance(row, dict) and str(row.get("scope") or "").upper() == "SUPPORT"
+    ]
+    authority_roles = {str(row.get("role") or "") for row in authority_rows}
+    support_roles = {str(row.get("role") or "") for row in support_rows}
+    if authority_roles != REQUIRED_ROLES:
         raise WorkspaceWorkerError("WORKSPACE_CANONICAL_ROLE_SET_MISMATCH")
+    if support_roles != REQUIRED_SUPPORT_ROLES:
+        raise WorkspaceWorkerError("WORKSPACE_SUPPORT_ROLE_SET_MISMATCH")
+    if len(authority_rows) != len(REQUIRED_ROLES) or len(support_rows) != len(REQUIRED_SUPPORT_ROLES):
+        raise WorkspaceWorkerError("WORKSPACE_ARTIFACT_ROLE_DUPLICATE")
 
     try:
         with tempfile.TemporaryDirectory(prefix="realsas-workspace-") as temp_dir:
             root = Path(temp_dir)
-            downloaded: list[dict[str, str]] = []
-            for row in rows:
+            downloaded_authority: list[dict[str, str]] = []
+            downloaded_support: list[dict[str, str]] = []
+            for row in [*authority_rows, *support_rows]:
                 role = str(row["role"])
                 body, artifact_type, schema_version = client.download_artifact(compile_id, lease_token, role)
                 path = root / _role_filename(role)
                 path.write_bytes(body)
-                downloaded.append({
+                record = {
                     "role": role,
+                    "scope": str(row.get("scope") or "").upper(),
+                    "artifact_id": str(row.get("artifact_id") or ""),
                     "path": str(path),
                     "artifact_type": artifact_type,
                     "schema_version": schema_version,
-                })
-            request_path, output_path = _write_request(root, compile_id, lease, downloaded)
+                }
+                if record["scope"] == "AUTHORITY":
+                    downloaded_authority.append(record)
+                else:
+                    downloaded_support.append(record)
+            request_path, output_path = _write_request(
+                root,
+                compile_id,
+                lease,
+                downloaded_authority,
+                downloaded_support,
+            )
             command = [*config.materializer_command, "--request", str(request_path)]
             proc = subprocess.run(
                 command,

@@ -18,6 +18,18 @@ import (
 func (a API) HandlerWithProductWorkspace() http.Handler {
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("GET /v1/operator/product/preflight", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
+		out, err := publicproduct.ProductDeploymentPreflightState(r.Context(), a.Pool, a.CodeSHA)
+		if err != nil {
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+			return
+		}
+		respond(w, http.StatusOK, out)
+	})
+
 	mux.HandleFunc("POST /v1/operator/product/compiles/from-source-observation", func(w http.ResponseWriter, r *http.Request) {
 		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
 			return

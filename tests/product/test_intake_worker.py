@@ -115,7 +115,7 @@ class IntakeWorkerTests(unittest.TestCase):
             return subprocess.CompletedProcess(command, 0)
 
         with patch("product.intake_worker.worker.subprocess.run", side_effect=fake_run), patch(
-            "product.intake_worker.worker.decode_source_observation_arrays_v1",
+            "product.intake_worker.worker._validate_source_observation",
             side_effect=ValueError("SOURCE_OBSERVATION_NATIVE_SHAPE_MISMATCH"),
         ):
             did_work = materialize_once(config(max_attempts=3), client)
@@ -134,8 +134,8 @@ class IntakeWorkerTests(unittest.TestCase):
             return subprocess.CompletedProcess(command, 0)
 
         with patch("product.intake_worker.worker.subprocess.run", side_effect=fake_run), patch(
-            "product.intake_worker.worker.decode_source_observation_arrays_v1",
-            return_value={"validated": True},
+            "product.intake_worker.worker._validate_source_observation",
+            return_value=None,
         ):
             did_work = materialize_once(config(max_attempts=3), client)
         self.assertTrue(did_work)

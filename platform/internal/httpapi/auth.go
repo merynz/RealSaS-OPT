@@ -50,14 +50,23 @@ func requireProductOwner(w http.ResponseWriter, r *http.Request) (string, bool) 
 	return owner, true
 }
 
-// withProductOwner is intentionally scoped to the narrow service-token product
-// namespace. Developer/operator routes keep their existing identities. The
-// digest is placed in context so lower product layers can enforce ownership,
-// while compile/project subroutes are pre-authorized before any state is read.
+func isOwnedProductGatewayPath(path string) bool {
+	return path == "/v1/product/compiles" ||
+		strings.HasPrefix(path, "/v1/product/compiles/") ||
+		strings.HasPrefix(path, "/v1/product/studio/")
+}
+
+// withProductOwner is intentionally scoped to the narrow service-token public
+// gateway, not the internal /v1/product/compile and /v1/product/render tools.
+// Service authentication happens before DB ownership checks so unauthenticated
+// callers cannot use owner probes as an existence oracle.
 func (a API) withProductOwner(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !strings.HasPrefix(r.URL.Path, "/v1/product/") {
+		if !isOwnedProductGatewayPath(r.URL.Path) {
 			next.ServeHTTP(w, r)
+			return
+		}
+		if !requireBearer(w, r, a.ProductGatewayToken, "PRODUCT_GATEWAY") {
 			return
 		}
 		owner, ok := requireProductOwner(w, r)

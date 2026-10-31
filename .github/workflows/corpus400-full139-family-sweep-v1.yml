@@ -34,6 +34,7 @@ jobs:
           python -m py_compile \
             tools/corpus/run_full139_truth_family_sweep_v1.py \
             tools/corpus/run_full139_truth_family_sweep_v2.py \
+            tools/corpus/run_full139_truth_family_sweep_v3.py \
             tools/corpus/build_gltf_animation_canonical_replay_v1.py \
             tools/corpus/validate_gltf_animation_canonical_replay_v1.py
 

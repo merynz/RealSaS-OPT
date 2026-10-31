@@ -28,13 +28,13 @@ def source_fixture(root:Path):
 
 def build_stack(root:Path):
     source=source_fixture(root)
-    mech_root=root/"mechanical"; mm=build_mechanical("subject",source,mech_root)
+    mech_root=root/"mechanical"; build_mechanical("subject",source,mech_root)
     mm_path=mech_root/"MECHANICAL_SURFACE_TOPOLOGY_MANIFEST_V1.json"
     mc=validate_mechanical(mm_path); mc_path=mech_root/"MECHANICAL_SURFACE_TOPOLOGY_COURT_V1.json"; mc_path.write_text(json.dumps(mc,sort_keys=True,indent=2)+"\n")
     scene=root/"teacher_scene.json"
     scene.write_text(json.dumps({"schema":"RealSaS.TeacherSceneIR.v2","subject_key":"subject","geometry_payloads":[{"path":str(source),"sha256":sha(source)}],"calibration":{"actions":[{"control_index_privileged":0,"amplitude":1.0,"sign":1},{"control_index_privileged":0,"amplitude":1.0,"sign":-1}]}},sort_keys=True)+"\n")
     response_root=root/"response"; manifest=build_response("subject",mm_path,mc_path,scene,response_root)
-    return manifest,response_root/mm_path.name if False else response_root/"CAUSAL_RESPONSE_AUTHORITY_MANIFEST_V1.json",response_root
+    return manifest,response_root/"CAUSAL_RESPONSE_AUTHORITY_MANIFEST_V1.json",response_root
 
 
 def test_cross_owner_qualified_seam_enters_response_adjacency(tmp_path:Path):
@@ -64,11 +64,10 @@ def test_response_court_rejects_numeric_mutation(tmp_path:Path):
         validate_response(manifest_path)
 
 
-def test_response_source_is_mechanical_source_byte_exact(tmp_path:Path):
+def test_response_stage47_parent_is_hash_bound(tmp_path:Path):
     _,manifest_path,_=build_stack(tmp_path)
     manifest=json.loads(manifest_path.read_text())
-    scene_path=Path(manifest["parents"]["teacher_scene"]["path"])
-    scene=json.loads(scene_path.read_text()); scene["geometry_payloads"][0]["sha256"]="0"*64; scene_path.write_text(json.dumps(scene,sort_keys=True)+"\n")
-    manifest["parents"]["teacher_scene"]["sha256"]=sha(scene_path); manifest_path.write_text(json.dumps(manifest,sort_keys=True,indent=2)+"\n")
+    manifest["parents"]["stage47_geometry_response"]["sha256"]="0"*64
+    manifest_path.write_text(json.dumps(manifest,sort_keys=True,indent=2)+"\n")
     with pytest.raises(ValueError,match="CAUSAL_COURT_STAGE47_DRIFT"):
         validate_response(manifest_path)

@@ -22,7 +22,6 @@ type ProductCapabilityCompileRequest struct {
 	SubjectID        uuid.UUID
 	InputArtifactIDs []uuid.UUID
 	Parameters       map[string]any
-	CompilerBridge   CapabilityCompilerBridge
 	IdempotencyKey   string
 	RequestedBy      string
 }
@@ -37,8 +36,10 @@ type productCapabilityInputIdentity struct {
 // SubmitProductCapabilityCompile creates the shipping capability-graph compile
 // Attempt. The target is intentionally not caller-selectable: product.proof is
 // the only terminal product-pass authority and promotion is always
-// QUALIFIED_PRODUCT_ONLY. The compile_candidate insert snapshots the exact
-// EngineRelease model selections through the existing database trigger.
+// QUALIFIED_PRODUCT_ONLY. Shipping product execution is capability-native and
+// rejects any legacy Compiler-stage dependency. The compile_candidate insert
+// snapshots the exact EngineRelease production model selections through the
+// existing database trigger.
 func SubmitProductCapabilityCompile(
 	ctx context.Context,
 	pool *pgxpool.Pool,
@@ -47,6 +48,9 @@ func SubmitProductCapabilityCompile(
 	if pool == nil || req.EngineReleaseID == uuid.Nil || req.SubjectID == uuid.Nil {
 		return CapabilityReceipt{}, errors.New("pool, engine_release_id and subject_id are required")
 	}
+	if len(req.InputArtifactIDs) == 0 {
+		return CapabilityReceipt{}, errors.New("PRODUCT_CAPABILITY_INPUT_ARTIFACT_REQUIRED")
+	}
 	if req.IdempotencyKey == "" || req.RequestedBy == "" {
 		return CapabilityReceipt{}, errors.New("idempotency_key and requested_by are required")
 	}
@@ -54,13 +58,10 @@ func SubmitProductCapabilityCompile(
 		req.Parameters = map[string]any{}
 	}
 	if _, reserved := req.Parameters["compiler_bridge"]; reserved {
-		return CapabilityReceipt{}, errors.New("CAPABILITY_COMPILER_BRIDGE_PARAMETER_RESERVED")
+		return CapabilityReceipt{}, errors.New("PRODUCT_CAPABILITY_COMPILER_BRIDGE_FORBIDDEN")
 	}
 	if _, reserved := req.Parameters["compiler_run_id"]; reserved {
-		return CapabilityReceipt{}, errors.New("CAPABILITY_COMPILER_RUN_ALIAS_PARAMETER_RESERVED")
-	}
-	if err := req.CompilerBridge.validate(); err != nil {
-		return CapabilityReceipt{}, err
+		return CapabilityReceipt{}, errors.New("PRODUCT_CAPABILITY_COMPILER_RUN_ALIAS_FORBIDDEN")
 	}
 
 	snapshot, err := capability.LoadReleaseSnapshot(ctx, pool, req.EngineReleaseID)
@@ -77,50 +78,28 @@ func SubmitProductCapabilityCompile(
 		return CapabilityReceipt{}, err
 	}
 	resolvedIDs := make([]string, 0, len(resolved))
-	requiresCompilerBridge := false
 	for _, descriptor := range resolved {
-		resolvedIDs = append(resolvedIDs, descriptor.ID)
 		if descriptor.Kind == capability.KindStage {
-			requiresCompilerBridge = true
+			return CapabilityReceipt{}, fmt.Errorf(
+				"PRODUCT_CAPABILITY_LEGACY_STAGE_DEPENDENCY_FORBIDDEN:%s",
+				descriptor.ID,
+			)
 		}
-	}
-	if !requiresCompilerBridge {
-		return CapabilityReceipt{}, errors.New("PRODUCT_CAPABILITY_COMPILE_STAGE_BRIDGE_EXPECTED")
+		resolvedIDs = append(resolvedIDs, descriptor.ID)
 	}
 	targetModelRequirements, err := capability.ResolvedProductModelRequirements(resolved)
 	if err != nil {
 		return CapabilityReceipt{}, err
 	}
 
-	var subjectInputSubject uuid.UUID
-	var subjectInputManifestSHA string
-	if err := pool.QueryRow(ctx, `
-		SELECT subject_id,manifest_sha256 FROM subject_inputs WHERE id=$1
-	`, req.CompilerBridge.SubjectInputID).Scan(&subjectInputSubject, &subjectInputManifestSHA); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return CapabilityReceipt{}, ErrSubjectInputMismatch
-		}
-		return CapabilityReceipt{}, err
-	}
-	if subjectInputSubject != req.SubjectID {
-		return CapabilityReceipt{}, ErrSubjectInputMismatch
-	}
-	_, releasedPlanSHA, err := release.LoadGraph(ctx, pool, req.EngineReleaseID)
-	if err != nil {
-		return CapabilityReceipt{}, err
-	}
-	if releasedPlanSHA != req.CompilerBridge.PipelinePlanSHA256 {
-		return CapabilityReceipt{}, errors.New("CAPABILITY_COMPILER_BRIDGE_RELEASE_PLAN_DRIFT")
-	}
-
-	normalizedParameters := make(map[string]any, len(req.Parameters)+1)
+	normalizedParameters := make(map[string]any, len(req.Parameters))
 	for key, value := range req.Parameters {
 		normalizedParameters[key] = value
 	}
-	normalizedParameters["compiler_bridge"] = req.CompilerBridge.parameters(subjectInputManifestSHA)
 
 	seenInputs := map[uuid.UUID]struct{}{}
 	artifactRows := make([]productCapabilityInputIdentity, 0, len(req.InputArtifactIDs))
+	sourceObservationCount := 0
 	for _, id := range req.InputArtifactIDs {
 		if id == uuid.Nil {
 			return CapabilityReceipt{}, errors.New("PRODUCT_CAPABILITY_INPUT_ARTIFACT_ID_INVALID")
@@ -138,9 +117,21 @@ func SubmitProductCapabilityCompile(
 		`, id).Scan(&artifactType, &schemaVersion, &semanticSHA); err != nil {
 			return CapabilityReceipt{}, fmt.Errorf("product input artifact %s: %w", id, err)
 		}
+		if artifactType == "RealSaS.SourceObservation" && schemaVersion == "v1" {
+			sourceObservationCount++
+		}
 		artifactRows = append(artifactRows, productCapabilityInputIdentity{
-			ID: id.String(), ArtifactType: artifactType, SchemaVersion: schemaVersion, SemanticSHA: semanticSHA,
+			ID:            id.String(),
+			ArtifactType:  artifactType,
+			SchemaVersion: schemaVersion,
+			SemanticSHA:   semanticSHA,
 		})
+	}
+	if sourceObservationCount != 1 {
+		return CapabilityReceipt{}, fmt.Errorf(
+			"PRODUCT_CAPABILITY_SOURCE_OBSERVATION_CARDINALITY:%d",
+			sourceObservationCount,
+		)
 	}
 	sort.Slice(artifactRows, func(i, j int) bool { return artifactRows[i].ID < artifactRows[j].ID })
 
@@ -158,19 +149,18 @@ func SubmitProductCapabilityCompile(
 	}
 
 	spec := map[string]any{
-		"schema":                    "RealSaS.ProductCapabilityCompileSpec.v1",
-		"subject_id":                req.SubjectID.String(),
-		"subject_input_id":          req.CompilerBridge.SubjectInputID.String(),
-		"subject_input_manifest_sha256": subjectInputManifestSHA,
-		"engine_release_id":         req.EngineReleaseID.String(),
-		"engine_release_sha256":     releaseSHA,
-		"capability_set_sha256":     snapshot.CapabilitySetSHA256,
-		"target":                    capability.ProductProofCapabilityID,
-		"resolved_capabilities":     resolvedIDs,
-		"target_model_requirements": targetModelRequirements,
-		"input_artifacts":           artifactRows,
-		"parameters":                normalizedParameters,
-		"promotion_policy":          string(capability.PromotionQualifiedProductOnly),
+		"schema":                            "RealSaS.ProductCapabilityCompileSpec.v2",
+		"subject_id":                        req.SubjectID.String(),
+		"engine_release_id":                 req.EngineReleaseID.String(),
+		"engine_release_sha256":             releaseSHA,
+		"capability_set_sha256":             snapshot.CapabilitySetSHA256,
+		"target":                            capability.ProductProofCapabilityID,
+		"resolved_capabilities":             resolvedIDs,
+		"target_model_requirements":         targetModelRequirements,
+		"input_artifacts":                   artifactRows,
+		"parameters":                        normalizedParameters,
+		"promotion_policy":                  string(capability.PromotionQualifiedProductOnly),
+		"legacy_compiler_stage_dependency": false,
 	}
 	specSHA, err := semantic.JSONSHA256(spec)
 	if err != nil {
@@ -198,7 +188,10 @@ func SubmitProductCapabilityCompile(
 				return err
 			}
 			out = CapabilityReceipt{
-				CommandID: existing.ID, AttemptID: attemptID, ExecutionGoalID: goalID, ReusedIdempotencyKey: true,
+				CommandID:            existing.ID,
+				AttemptID:            attemptID,
+				ExecutionGoalID:      goalID,
+				ReusedIdempotencyKey: true,
 			}
 			return nil
 		}
@@ -209,16 +202,6 @@ func SubmitProductCapabilityCompile(
 				return ErrSubjectNotFound
 			}
 			return err
-		}
-		var bridgeSubject uuid.UUID
-		var manifestSHA string
-		if err := tx.QueryRow(ctx, `
-			SELECT subject_id,manifest_sha256 FROM subject_inputs WHERE id=$1 FOR SHARE
-		`, req.CompilerBridge.SubjectInputID).Scan(&bridgeSubject, &manifestSHA); err != nil {
-			return err
-		}
-		if bridgeSubject != req.SubjectID || manifestSHA != subjectInputManifestSHA {
-			return ErrSubjectInputMismatch
 		}
 		var txReleaseSHA, txPurpose string
 		if err := tx.QueryRow(ctx, `
@@ -238,14 +221,6 @@ func SubmitProductCapabilityCompile(
 			  (id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state)
 			VALUES ($1,$2,$3,'compile_candidate',$4,$5,'OPEN')
 		`, attemptID, req.SubjectID, req.EngineReleaseID, specSHA, req.RequestedBy); err != nil {
-			return err
-		}
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO compiler_run_bindings(
-				attempt_id,compiler_run_id,run_manifest_path,run_ledger_path,pipeline_plan_sha256
-			) VALUES ($1,$2,$3,$4,$5)
-		`, attemptID, req.CompilerBridge.CompilerRunID, req.CompilerBridge.RunManifestPath,
-			req.CompilerBridge.RunLedgerPath, req.CompilerBridge.PipelinePlanSHA256); err != nil {
 			return err
 		}
 
@@ -291,14 +266,14 @@ func SubmitProductCapabilityCompile(
 			return err
 		}
 		if err := appendAudit(ctx, tx, req.RequestedBy, "PRODUCT_CAPABILITY_COMPILE_ACCEPTED", req.SubjectID, &attemptID, nil, map[string]any{
-			"command_id":                commandID.String(),
-			"execution_goal_id":         goalID.String(),
-			"engine_release_id":         req.EngineReleaseID.String(),
-			"subject_input_id":          req.CompilerBridge.SubjectInputID.String(),
-			"target":                    capability.ProductProofCapabilityID,
-			"resolved_capabilities":     resolvedIDs,
-			"target_model_requirements": targetModelRequirements,
-			"promotion_policy":          string(capability.PromotionQualifiedProductOnly),
+			"command_id":                         commandID.String(),
+			"execution_goal_id":                  goalID.String(),
+			"engine_release_id":                  req.EngineReleaseID.String(),
+			"target":                             capability.ProductProofCapabilityID,
+			"resolved_capabilities":              resolvedIDs,
+			"target_model_requirements":          targetModelRequirements,
+			"promotion_policy":                   string(capability.PromotionQualifiedProductOnly),
+			"legacy_compiler_stage_dependency": false,
 		}); err != nil {
 			return err
 		}

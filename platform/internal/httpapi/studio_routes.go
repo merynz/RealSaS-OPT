@@ -141,5 +141,5 @@ func (a API) HandlerWithStudio() http.Handler {
 	})
 
 	mux.Handle("/", a.HandlerWithProductWorkspace())
-	return withProductOwner(mux)
+	return a.withProductOwner(mux)
 }

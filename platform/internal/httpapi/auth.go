@@ -3,12 +3,21 @@ package httpapi
 import (
 	"crypto/subtle"
 	"net/http"
+	"os"
 	"strings"
 )
 
-func requireBearer(w http.ResponseWriter, r *http.Request, expected string, scope string) bool {
-	expected = strings.TrimSpace(expected)
-	if expected == "" {
+func (a API) ProductGatewayToken() string {
+	return os.Getenv("REALSAS_PRODUCT_GATEWAY_TOKEN")
+}
+
+func (a API) OperatorToken() string {
+	return os.Getenv("REALSAS_OPERATOR_TOKEN")
+}
+
+func requireBearer(w http.ResponseWriter, r *http.Request, expected func() string, scope string) bool {
+	token := strings.TrimSpace(expected())
+	if token == "" {
 		respond(w, http.StatusServiceUnavailable, map[string]string{
 			"error": scope + "_AUTH_NOT_CONFIGURED",
 		})
@@ -21,7 +30,7 @@ func requireBearer(w http.ResponseWriter, r *http.Request, expected string, scop
 		return false
 	}
 	provided := strings.TrimSpace(strings.TrimPrefix(header, prefix))
-	if len(provided) != len(expected) || subtle.ConstantTimeCompare([]byte(provided), []byte(expected)) != 1 {
+	if len(provided) != len(token) || subtle.ConstantTimeCompare([]byte(provided), []byte(token)) != 1 {
 		respond(w, http.StatusUnauthorized, map[string]string{"error": "UNAUTHORIZED"})
 		return false
 	}

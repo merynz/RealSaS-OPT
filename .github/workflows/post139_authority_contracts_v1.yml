@@ -46,7 +46,7 @@ concurrency:
 jobs:
   contracts:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     env:
       PYTHONPATH: .
     steps:
@@ -93,5 +93,26 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           compression-level: 6
+      - name: Restore pinned Blender 4.0.2 archive
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/blender-4.0.2-linux-x64.tar.xz
+          key: observation-blender-4.0.2-linux-x64-5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a
+          fail-on-cache-miss: true
+      - name: Verify pinned Blender archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/blender-4.0.2-linux-x64.tar.xz"
+          echo "5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a  $archive" | sha256sum --check -
+          echo "POST139_BLENDER_ARCHIVE=$archive" >> "$GITHUB_ENV"
+      - name: Upload pinned Blender archive for local canonical closure
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-blender-4.0.2-linux-x64-${{ github.sha }}
+          path: ${{ env.POST139_BLENDER_ARCHIVE }}
+          if-no-files-found: error
+          retention-days: 2
+          compression-level: 0
       - name: Summary
         run: echo 'POST139_AUTHORITY_CONTRACTS_PASS'

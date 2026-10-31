@@ -30,6 +30,18 @@ func (a API) HandlerWithProductWorkspace() http.Handler {
 		respond(w, http.StatusOK, out)
 	})
 
+	mux.HandleFunc("GET /v1/operator/product/ops-snapshot", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
+		out, err := publicproduct.ProductOpsSnapshotState(r.Context(), a.Pool, a.CodeSHA)
+		if err != nil {
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+			return
+		}
+		respond(w, http.StatusOK, out)
+	})
+
 	mux.HandleFunc("POST /v1/operator/product/compiles/from-source-observation", func(w http.ResponseWriter, r *http.Request) {
 		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
 			return

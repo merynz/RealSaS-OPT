@@ -1,0 +1,55 @@
+name: corpus400-full139-family-sweep-v1
+
+on:
+  push:
+    branches:
+      - corpus400-full139-family-sweep-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus400-full139-family-sweep-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full139-sweep-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install narrow dependencies
+        run: python -m pip install --disable-pip-version-check numpy scipy pillow pytest trimesh fast-simplification
+
+      - name: Compile sweep and replay entrypoints
+        run: |
+          python -m py_compile \
+            tools/corpus/run_full139_truth_family_sweep_v1.py \
+            tools/corpus/run_full139_truth_family_sweep_v2.py \
+            tools/corpus/run_full139_truth_family_sweep_v3.py \
+            tools/corpus/launch_full139_truth_family_sweep_drive_v1.py \
+            tools/corpus/build_gltf_animation_canonical_replay_v1.py \
+            tools/corpus/validate_gltf_animation_canonical_replay_v1.py
+
+      - name: Run sweep orchestration and authority contracts
+        run: |
+          pytest -q \
+            tests/corpus/test_full139_truth_family_sweep_v1.py \
+            tests/corpus/test_full139_drive_launcher_v1.py \
+            tests/corpus/test_component_geometry_authority_v1.py \
+            tests/corpus/test_component_geometry_court_v1.py \
+            tests/corpus/test_mechanical_surface_topology_authority_v1.py \
+            tests/corpus/test_gltf_rig_skin_authority_e2e_v1.py \
+            tests/corpus/test_gltf_animation_authority_v1.py \
+            tests/corpus/test_gltf_animation_canonical_replay_v1.py \
+            tests/corpus/test_causal_response_authority_v1.py \
+            tests/corpus/test_source_observation_authority_v1.py \
+            tests/corpus/test_presentation_stage48_witness_v2.py

@@ -5,6 +5,7 @@ on:
     branches: [post139-corpus-audit-v1]
     paths:
       - '.github/workflows/post139_recover_and_seal_v1.yml'
+      - 'canonical/POST139_ACQUISITION_PINS_V1.json'
       - 'canonical/POST139_SUBJECT_POLICY_V1.json'
       - 'tools/corpus/post139_acquire_resilient_v1.py'
       - 'tools/corpus/post139_rebind_candidate_manifest_v1.py'
@@ -22,12 +23,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  recover-compile-seal:
+  recover-source:
     runs-on: ubuntu-24.04
-    timeout-minutes: 300
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        source_id:
+          - quaternius-platformer-kit
+          - quaternius-cube-world
+          - quaternius-sushi-restaurant
+          - quaternius-sci-fi-essentials
+          - quaternius-universal-base-characters
+          - kenney-mini-characters
+          - kenney-blocky-characters
+          - kenney-cube-pets
     env:
       PYTHONPATH: .
-      SOURCE_RUN_ID: '41192533150'
     steps:
       - uses: actions/checkout@v4
 
@@ -35,57 +48,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Unit contracts
+      - name: Install acquisition and Blender runtime dependencies
         run: |
           set -euo pipefail
-          python -m pip install --quiet pytest 'gdown==5.2.0'
-          python -m pytest -q \
-            tests/tools/test_post139_audit_v1.py \
-            tests/tools/test_post139_source_inventory_v1.py \
-            tests/tools/test_post139_compile_inventory_v2.py \
-            tests/tools/test_post139_corpus_authority_v1.py
-
-      - name: Restore immutable successful source workspaces
-        uses: actions/download-artifact@v4
-        with:
-          repository: merynz/RealSaS-OPT
-          run-id: ${{ env.SOURCE_RUN_ID }}
-          github-token: ${{ github.token }}
-          pattern: post139-source-*
-          path: ${{ runner.temp }}/downloaded
-          merge-multiple: false
-
-      - name: Normalize workspace and derive missing source set
-        shell: bash
-        run: |
-          set -euo pipefail
-          workspace="$RUNNER_TEMP/workspace"
-          mkdir -p "$workspace"
-          shopt -s nullglob
-          for folder in "$RUNNER_TEMP"/downloaded/post139-source-*; do
-            name="$(basename "$folder")"
-            source_id="${name#post139-source-}"
-            mv "$folder" "$workspace/$source_id"
-          done
-          python - canonical/POST139_SOURCE_REGISTRY_V1.json "$workspace" "$RUNNER_TEMP/missing-sources.txt" <<'PY'
-          import json,sys
-          from pathlib import Path
-          registry=json.loads(Path(sys.argv[1]).read_text())
-          workspace=Path(sys.argv[2])
-          required=[r['id'] for r in registry['sources'] if r['role']!='QUARANTINE']
-          present={p.name for p in workspace.iterdir() if p.is_dir()}
-          missing=[sid for sid in required if sid not in present]
-          Path(sys.argv[3]).write_text('\n'.join(missing)+('\n' if missing else ''))
-          print('POST139_REUSED_SOURCE_WORKSPACES', len(present))
-          print('POST139_MISSING_SOURCE_COUNT', len(missing))
-          print('POST139_MISSING_SOURCES', json.dumps(missing))
-          PY
-          echo "POST139_WORKSPACE=$workspace" >> "$GITHUB_ENV"
-          echo "POST139_MISSING_FILE=$RUNNER_TEMP/missing-sources.txt" >> "$GITHUB_ENV"
-
-      - name: Install Blender runtime dependencies
-        run: |
-          set -euo pipefail
+          python -m pip install --quiet 'gdown==5.2.0'
           sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 update -qq
           sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 install -y --no-install-recommends \
             libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 libgl1 unzip
@@ -112,42 +78,148 @@ jobs:
           test "$("$exe" --version | head -n 1)" = 'Blender 4.0.2'
           echo "BLENDER_EXE=$exe" >> "$GITHUB_ENV"
 
-      - name: Recover only missing source workspaces and audit them
+      - name: Recover exact publisher source
         shell: bash
         run: |
           set -euo pipefail
-          recovered="$RUNNER_TEMP/recovered-source-ids.txt"
-          : > "$recovered"
-          while IFS= read -r source_id; do
-            [ -n "$source_id" ] || continue
-            echo "POST139_RECOVER_SOURCE_BEGIN=$source_id"
-            root="$POST139_WORKSPACE/$source_id"
-            python tools/corpus/post139_acquire_resilient_v1.py \
-              --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
-              --source-id "$source_id" \
-              --out "$root" \
-              --attempts 4 \
-              --base-delay-seconds 20
-            python tools/corpus/post139_source_inventory_v1.py inventory \
-              --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
-              --source-root "$root/raw" \
-              --source-id "$source_id" \
-              --out "$root/inventory"
-            python tools/corpus/post139_rebind_candidate_manifest_v1.py \
-              --inventory "$root/inventory/SOURCE_INVENTORY.json" \
-              --manifest "$root/inventory/CANDIDATE_MANIFEST.json"
-            python tools/corpus/post139_audit_v1.py audit \
-              --source-root "$root/raw" \
-              --out "$root/audit" \
-              --manifest "$root/inventory/CANDIDATE_MANIFEST.json" \
-              --blender-exe "$BLENDER_EXE"
-            echo "$source_id" >> "$recovered"
-            echo "POST139_RECOVER_SOURCE_PASS=$source_id"
-            sleep 15
-          done < "$POST139_MISSING_FILE"
-          echo "POST139_RECOVERED_FILE=$recovered" >> "$GITHUB_ENV"
+          root="$RUNNER_TEMP/post139/${{ matrix.source_id }}"
+          echo "POST139_SOURCE_ROOT=$root" >> "$GITHUB_ENV"
+          python tools/corpus/post139_acquire_resilient_v1.py \
+            --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
+            --source-id '${{ matrix.source_id }}' \
+            --out "$root" \
+            --attempts 3 \
+            --base-delay-seconds 15
 
-      - name: Verify complete source workspace set
+      - name: Produce source byte ledger and candidate manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/corpus/post139_source_inventory_v1.py inventory \
+            --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
+            --source-root "$POST139_SOURCE_ROOT/raw" \
+            --source-id '${{ matrix.source_id }}' \
+            --out "$POST139_SOURCE_ROOT/inventory"
+          python tools/corpus/post139_rebind_candidate_manifest_v1.py \
+            --inventory "$POST139_SOURCE_ROOT/inventory/SOURCE_INVENTORY.json" \
+            --manifest "$POST139_SOURCE_ROOT/inventory/CANDIDATE_MANIFEST.json"
+
+      - name: Canonical Blender structural audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/corpus/post139_audit_v1.py audit \
+            --source-root "$POST139_SOURCE_ROOT/raw" \
+            --out "$POST139_SOURCE_ROOT/audit" \
+            --manifest "$POST139_SOURCE_ROOT/inventory/CANDIDATE_MANIFEST.json" \
+            --blender-exe "$BLENDER_EXE"
+
+      - name: Source recovery summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - "$POST139_SOURCE_ROOT" <<'PY'
+          import json,sys
+          from pathlib import Path
+          root=Path(sys.argv[1])
+          receipt=json.loads((root/'ACQUISITION_RECEIPT.json').read_text())
+          inv=json.loads((root/'inventory/SOURCE_INVENTORY.json').read_text())
+          audit=json.loads((root/'audit/POST139_AUDIT_INDEX.json').read_text())
+          print('POST139_RECOVERY_SOURCE_PASS', json.dumps({
+              'source_id': receipt['source_id'],
+              'transport': receipt.get('transport', receipt.get('acquisition_kind')),
+              'publisher_files': inv.get('publisher_file_count'),
+              'acquired_files': inv.get('raw_file_count'),
+              'audit_candidates': inv.get('audit_candidate_count'),
+              'audited': audit.get('audited_count'),
+              'audit_failures': audit.get('failure_count'),
+              'statuses': audit.get('status_counts'),
+          }, sort_keys=True))
+          if audit.get('failure_count'):
+              raise SystemExit(2)
+          PY
+
+      - name: Upload recovered immutable source workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-recovered-source-${{ matrix.source_id }}-${{ github.sha }}
+          path: ${{ env.POST139_SOURCE_ROOT }}/**
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
+
+      - name: Upload failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-recovery-debug-${{ matrix.source_id }}-${{ github.sha }}
+          path: ${{ runner.temp }}/post139/${{ matrix.source_id }}/**
+          if-no-files-found: ignore
+          retention-days: 14
+          compression-level: 6
+
+  compile-seal:
+    needs: recover-source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      PYTHONPATH: .
+      SOURCE_RUN_ID: '41192533150'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Restore 21 immutable successful source workspaces
+        uses: actions/download-artifact@v4
+        with:
+          repository: merynz/RealSaS-OPT
+          run-id: ${{ env.SOURCE_RUN_ID }}
+          github-token: ${{ github.token }}
+          pattern: post139-source-*
+          path: ${{ runner.temp }}/old-source-artifacts
+          merge-multiple: false
+
+      - name: Restore 8 recovered source workspaces
+        uses: actions/download-artifact@v4
+        with:
+          pattern: post139-recovered-source-*-${{ github.sha }}
+          path: ${{ runner.temp }}/recovered-source-artifacts
+          merge-multiple: false
+
+      - name: Assemble exact 29-source workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          workspace="$RUNNER_TEMP/workspace"
+          mkdir -p "$workspace"
+          shopt -s nullglob
+          old_count=0
+          for folder in "$RUNNER_TEMP"/old-source-artifacts/post139-source-*; do
+            name="$(basename "$folder")"
+            source_id="${name#post139-source-}"
+            mv "$folder" "$workspace/$source_id"
+            old_count=$((old_count+1))
+          done
+          recovered_count=0
+          for folder in "$RUNNER_TEMP"/recovered-source-artifacts/post139-recovered-source-*-${GITHUB_SHA}; do
+            name="$(basename "$folder")"
+            source_id="${name#post139-recovered-source-}"
+            source_id="${source_id%-$GITHUB_SHA}"
+            test ! -e "$workspace/$source_id"
+            mv "$folder" "$workspace/$source_id"
+            recovered_count=$((recovered_count+1))
+          done
+          echo "POST139_OLD_SOURCE_COUNT=$old_count"
+          echo "POST139_RECOVERED_SOURCE_COUNT=$recovered_count"
+          test "$old_count" -eq 21
+          test "$recovered_count" -eq 8
+          echo "POST139_WORKSPACE=$workspace" >> "$GITHUB_ENV"
+
+      - name: Verify complete source workspace closure
+        shell: bash
         run: |
           set -euo pipefail
           python - canonical/POST139_SOURCE_REGISTRY_V1.json "$POST139_WORKSPACE" <<'PY'
@@ -157,19 +229,29 @@ jobs:
           workspace=Path(sys.argv[2])
           required=[r['id'] for r in registry['sources'] if r['role']!='QUARANTINE']
           required_files=[
-            'ACQUISITION_RECEIPT.json', 'PUBLISHER_TREE.json',
-            'inventory/RAW_FILE_LEDGER.json', 'inventory/SOURCE_INVENTORY.json',
-            'inventory/CANDIDATE_MANIFEST.json', 'audit/POST139_AUDIT_INDEX.json',
+              'ACQUISITION_RECEIPT.json',
+              'PUBLISHER_TREE.json',
+              'inventory/RAW_FILE_LEDGER.json',
+              'inventory/SOURCE_INVENTORY.json',
+              'inventory/CANDIDATE_MANIFEST.json',
+              'audit/POST139_AUDIT_INDEX.json',
           ]
-          failures=[]
+          present={p.name for p in workspace.iterdir() if p.is_dir()}
+          missing_sources=sorted(set(required)-present)
+          extra_sources=sorted(present-set(required))
+          missing_files=[]
           for sid in required:
-            root=workspace/sid
-            for rel in required_files:
-              if not (root/rel).is_file(): failures.append(f'{sid}:{rel}')
-          print('POST139_COMPLETE_SOURCE_COUNT', len(required))
-          if failures:
-            print('POST139_WORKSPACE_CLOSURE_MISSING', json.dumps(failures, indent=2))
-            raise SystemExit(2)
+              root=workspace/sid
+              for rel in required_files:
+                  if not (root/rel).is_file():
+                      missing_files.append(f'{sid}:{rel}')
+          print('POST139_REQUIRED_SOURCE_COUNT', len(required))
+          print('POST139_PRESENT_SOURCE_COUNT', len(present))
+          if missing_sources or extra_sources or missing_files:
+              print('POST139_WORKSPACE_MISSING_SOURCES', json.dumps(missing_sources))
+              print('POST139_WORKSPACE_EXTRA_SOURCES', json.dumps(extra_sources))
+              print('POST139_WORKSPACE_MISSING_FILES', json.dumps(missing_files, indent=2))
+              raise SystemExit(2)
           PY
 
       - name: Compile corrected semantic V2 ledgers
@@ -204,6 +286,17 @@ jobs:
           cat "$authority/POST139_CORPUS_AUTHORITY_V1.json"
           echo "POST139_AUTHORITY_OUT=$authority" >> "$GITHUB_ENV"
 
+      - name: Emit sealed training-consumer manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          consumer="$RUNNER_TEMP/POST139_TRAINING_CONSUMER_MANIFEST_V1.json"
+          python tools/corpus/post139_training_consumer_v1.py emit \
+            --authority-dir "$POST139_AUTHORITY_OUT" \
+            --out "$consumer"
+          cp "$consumer" "$POST139_AUTHORITY_OUT/POST139_TRAINING_CONSUMER_MANIFEST_V1.json"
+          cat "$consumer"
+
       - name: Build deterministic materialization source closure
         shell: bash
         run: |
@@ -219,31 +312,6 @@ jobs:
           sha256sum "$closure_zip"
           echo "POST139_CLOSURE_DIR=$closure_dir" >> "$GITHUB_ENV"
           echo "POST139_CLOSURE_ZIP=$closure_zip" >> "$GITHUB_ENV"
-
-      - name: Upload recovered source workspaces
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          bundle="$RUNNER_TEMP/recovered-workspaces"
-          mkdir -p "$bundle"
-          if [ -f "$POST139_RECOVERED_FILE" ]; then
-            while IFS= read -r source_id; do
-              [ -n "$source_id" ] || continue
-              cp -a "$POST139_WORKSPACE/$source_id" "$bundle/$source_id"
-            done < "$POST139_RECOVERED_FILE"
-          fi
-          echo "POST139_RECOVERED_BUNDLE=$bundle" >> "$GITHUB_ENV"
-
-      - name: Upload recovered source evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: post139-recovered-source-workspaces-${{ github.sha }}
-          path: ${{ env.POST139_RECOVERED_BUNDLE }}/**
-          if-no-files-found: ignore
-          retention-days: 30
-          compression-level: 6
 
       - name: Upload corrected V2 ledgers and report
         uses: actions/upload-artifact@v4
@@ -271,6 +339,7 @@ jobs:
           compression-level: 0
 
       - name: Final fail-closed authority gate
+        shell: bash
         run: |
           set -euo pipefail
           python - "$POST139_FINAL_OUT/POST139_FINAL_INVENTORY_REPORT_V2.json" "$POST139_AUTHORITY_OUT/POST139_CORPUS_AUTHORITY_V1.json" <<'PY'

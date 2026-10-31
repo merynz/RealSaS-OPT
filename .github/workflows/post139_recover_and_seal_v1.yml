@@ -15,6 +15,7 @@ on:
       - 'tests/tools/test_post139_corpus_authority_v1.py'
       - 'docs/corpus/POST139_CORPUS_AUTHORITY_V1.md'
   workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: post139-recover-and-seal-${{ github.ref }}

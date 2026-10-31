@@ -117,6 +117,16 @@ def extract(source: Path, output: Path) -> dict:
     return json.loads(output.read_text())
 
 
+def diagnostic(payload: dict) -> dict:
+    return {
+        "metrics": payload["metrics"],
+        "fingerprints": payload["fingerprints"],
+        "geometry": payload["inventory"]["geometry"],
+        "rig": payload["inventory"]["rig"],
+        "skin": payload["inventory"]["skin"],
+    }
+
+
 def main() -> None:
     build_scene()
     with tempfile.TemporaryDirectory(prefix="realsas-post139-") as raw:
@@ -133,6 +143,9 @@ def main() -> None:
 
         glb_hash = glb_result["fingerprints"]["structural_subject"]
         fbx_hash = fbx_result["fingerprints"]["structural_subject"]
+        if glb_hash != fbx_hash:
+            print("POST139_GLTF_DIAGNOSTIC", json.dumps(diagnostic(glb_result), sort_keys=True))
+            print("POST139_FBX_DIAGNOSTIC", json.dumps(diagnostic(fbx_result), sort_keys=True))
         assert glb_hash == fbx_hash, {
             "glb": glb_hash,
             "fbx": fbx_hash,

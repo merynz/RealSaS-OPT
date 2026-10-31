@@ -31,13 +31,13 @@ type WorkspaceArtifact struct {
 }
 
 type WorkspaceLease struct {
-	CompileID        string              `json:"compile_id"`
+	CompileID         string              `json:"compile_id"`
 	ProductRevisionID uuid.UUID           `json:"product_revision_id"`
-	LeaseToken       uuid.UUID           `json:"lease_token"`
-	LeaseOwner       string              `json:"lease_owner"`
-	LeaseExpiry      time.Time           `json:"lease_expires_at"`
-	Artifacts        []WorkspaceArtifact `json:"artifacts"`
-	Attempt          int                 `json:"attempt"`
+	LeaseToken        uuid.UUID           `json:"lease_token"`
+	LeaseOwner        string              `json:"lease_owner"`
+	LeaseExpiry       time.Time           `json:"lease_expires_at"`
+	Artifacts         []WorkspaceArtifact `json:"artifacts"`
+	Attempt           int                 `json:"attempt"`
 }
 
 func ensureWorkspaceMaterialization(
@@ -383,9 +383,9 @@ func validateWorkspaceBundle(payload []byte) error {
 		return errors.New("PUBLIC_PRODUCT_WORKSPACE_BUNDLE_ZIP_INVALID")
 	}
 	required := map[string]bool{
-		"bundle_manifest.json":                    false,
+		"bundle_manifest.json":                  false,
 		"puppet/canonical_puppet_graph_v3.json": false,
-		"proof/product_proof_bundle_ir.json":     false,
+		"proof/product_proof_bundle_ir.json":    false,
 	}
 	for _, file := range reader.File {
 		name := strings.ReplaceAll(file.Name, "\\", "/")

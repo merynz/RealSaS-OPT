@@ -8,6 +8,10 @@ from .common import Json, LivingCompileError, VIEW_LABELS, load_product, load_pr
 from .runtime import motion_bakes
 
 
+DEFORM_JOINT_CLASS = "DEFORM_JOINT"
+ANIMATOR_CONTROL_CLASS = "ANIMATOR_CONTROL"
+
+
 def _mesh_scene_rows(product: Mapping[str, Any]) -> list[Json]:
     directions = ((product.get("directional_renderables") or {}).get("directions") or [])
     out: list[Json] = []
@@ -26,18 +30,29 @@ def _mesh_scene_rows(product: Mapping[str, Any]) -> list[Json]:
             vertices: list[list[float]] = []
             for vertex in vertices_raw:
                 binding = vertex.get("support_binding") or {}
-                xy = weighted_xy(binding.get("coefficients") or [], raster, field=str(vertex.get("canonical_mesh_vertex_id") or "mesh vertex"))
+                xy = weighted_xy(
+                    binding.get("coefficients") or [],
+                    raster,
+                    field=str(vertex.get("canonical_mesh_vertex_id") or "mesh vertex"),
+                )
                 vertices.append([xy[0], xy[1]])
             triangles: list[list[int]] = []
             for face in list(mesh.get("faces") or []):
                 if len(face) != 3 or any(str(vid) not in id_to_index for vid in face):
                     raise LivingCompileError("Living Compile requires triangulated qualified meshes")
                 triangles.append([id_to_index[str(vid)] for vid in face])
-            weight_by_id = {str(row.get("canonical_mesh_vertex_id")): row for row in list(mesh_skin.get("rows") or [])}
+            weight_by_id = {
+                str(row.get("canonical_mesh_vertex_id")): row
+                for row in list(mesh_skin.get("rows") or [])
+            }
             per_vertex_weights = []
             for vertex in vertices_raw:
                 row = weight_by_id.get(str(vertex.get("canonical_mesh_vertex_id"))) or {}
-                pairs = [[str(jid), float(weight)] for jid, weight in list(row.get("influences") or []) if float(weight) > 1e-10]
+                pairs = [
+                    [str(jid), float(weight)]
+                    for jid, weight in list(row.get("influences") or [])
+                    if float(weight) > 1e-10
+                ]
                 pairs.sort(key=lambda item: (-item[1], item[0]))
                 per_vertex_weights.append(pairs)
             component_id = str(component.get("component_id") or "BODY")
@@ -49,9 +64,12 @@ def _mesh_scene_rows(product: Mapping[str, Any]) -> list[Json]:
                 "triangles": triangles,
                 "weight_control_id": None,
                 "weight_solution": {
-                    "control_id": "", "status": "QUALIFIED", "weight_solution_status": "QUALIFIED",
+                    "control_id": "",
+                    "status": "QUALIFIED",
+                    "weight_solution_status": "QUALIFIED",
                     "weight_backend": str(mesh_skin.get("transfer_method") or "COMPILER_QUALIFIED_MESH_SKIN"),
-                    "confidence01": 1.0, "owner_control_resolution_ratio": 1.0,
+                    "confidence01": 1.0,
+                    "owner_control_resolution_ratio": 1.0,
                     "per_vertex_weights": per_vertex_weights,
                     "source_is_manifest_declared_weight_plan": False,
                     "source_is_current_v4_qualified_mesh_skin": True,
@@ -67,41 +85,112 @@ def _mesh_scene_rows(product: Mapping[str, Any]) -> list[Json]:
     return out
 
 
-def _joint_scene_rows(product: Mapping[str, Any]) -> tuple[list[Json], list[Json]]:
+def _anchor_for_entity(
+    mechanical: Mapping[str, Any],
+    raster: Mapping[str, tuple[float, float]],
+    support_surface_ids: list[str],
+    fallback_position: tuple[float, float, float],
+) -> list[float]:
+    points = [raster[sid] for sid in support_surface_ids if sid in raster]
+    if points:
+        return [sum(p[0] for p in points) / len(points), sum(p[1] for p in points) / len(points)]
+    surface_nodes = list((mechanical.get("surface") or {}).get("surface_nodes") or [])
+    candidates = []
+    for node in surface_nodes:
+        sid = str(node.get("surface_id") or "")
+        if sid not in raster:
+            continue
+        p = tuple(float(x) for x in (node.get("P") or (0, 0, 0)))
+        candidates.append((sum((a - b) ** 2 for a, b in zip(fallback_position, p)), raster[sid]))
+    return list(min(candidates, key=lambda x: x[0])[1]) if candidates else [0.0, 0.0]
+
+
+def _rig_scene_rows(product: Mapping[str, Any]) -> tuple[list[Json], list[Json], list[Json], list[Json]]:
     mechanical = product.get("mechanical_state") or {}
     joints = list((mechanical.get("skeleton") or {}).get("joints") or [])
-    controls: list[Json] = []
+    control_program = mechanical.get("control_program") or {}
+    animator_controls = list(control_program.get("controls") or [])
+    deform_rows: list[Json] = []
+    animator_rows: list[Json] = []
     edges: list[Json] = []
+
     for view in range(8):
         raster = surface_raster(product, view)
         for joint in joints:
             jid = str(joint.get("canonical_joint_id") or "")
-            support = list(joint.get("support_surface_ids") or [])
-            points = [raster[sid] for sid in support if sid in raster]
-            if points:
-                anchor = [sum(p[0] for p in points) / len(points), sum(p[1] for p in points) / len(points)]
-            else:
-                surface_nodes = list((mechanical.get("surface") or {}).get("surface_nodes") or [])
-                jpos = tuple(float(x) for x in (joint.get("position") or (0, 0, 0)))
-                candidates = []
-                for node in surface_nodes:
-                    sid = str(node.get("surface_id") or "")
-                    if sid not in raster:
-                        continue
-                    p = tuple(float(x) for x in (node.get("P") or (0, 0, 0)))
-                    candidates.append((sum((a - b) ** 2 for a, b in zip(jpos, p)), raster[sid]))
-                anchor = list(min(candidates, key=lambda x: x[0])[1]) if candidates else [0.0, 0.0]
-            controls.append({
-                "control_id": jid, "view_id": view_id(view), "anchor": anchor,
-                "control_class": "production_skeleton_bone", "participation": "deform", "source_part_id": jid,
-                "metadata": {"production_skeleton_bone": True, "hidden_driver": False, "current_v4": True},
+            if not jid:
+                raise LivingCompileError("canonical deform joint id is required")
+            support = [str(x) for x in list(joint.get("support_surface_ids") or [])]
+            jpos = tuple(float(x) for x in (joint.get("position") or (0, 0, 0)))
+            anchor = _anchor_for_entity(mechanical, raster, support, jpos)
+            deform_rows.append({
+                "control_id": jid,
+                "view_id": view_id(view),
+                "anchor": anchor,
+                "control_class": DEFORM_JOINT_CLASS,
+                "entity_kind": DEFORM_JOINT_CLASS,
+                "participation": "deform",
+                "source_part_id": jid,
+                "target_joint_ids": [jid],
+                "metadata": {
+                    "canonical_joint_id": jid,
+                    "production_skeleton_bone": True,
+                    "hidden_driver": False,
+                    "current_v4": True,
+                },
             })
+        for control in animator_controls:
+            cid = str(control.get("canonical_control_id") or "")
+            if not cid:
+                raise LivingCompileError("canonical animator control id is required")
+            support = [str(x) for x in list(control.get("support_surface_ids") or [])]
+            rest_p = tuple(float(x) for x in (control.get("rest_P") or (0, 0, 0)))
+            anchor = _anchor_for_entity(mechanical, raster, support, rest_p)
+            targets = [str(x) for x in list(control.get("target_canonical_joint_ids") or []) if str(x)]
+            animator_rows.append({
+                "control_id": cid,
+                "view_id": view_id(view),
+                "anchor": anchor,
+                "control_class": ANIMATOR_CONTROL_CLASS,
+                "entity_kind": ANIMATOR_CONTROL_CLASS,
+                "participation": "animation",
+                "source_part_id": cid,
+                "control_kind": str(control.get("control_kind") or ""),
+                "target_joint_ids": targets,
+                "parent_control_id": control.get("parent_canonical_control_id"),
+                "metadata": {
+                    **dict(control.get("metadata") or {}),
+                    "canonical_control_id": cid,
+                    "target_canonical_joint_ids": targets,
+                    "current_v4": True,
+                    "editable_motion_space": "ANIMATOR_CONTROLS",
+                    "constraint_execution_owner": "MECHANICS",
+                },
+            })
+
     for joint in joints:
         parent = joint.get("parent_canonical_id")
         child = str(joint.get("canonical_joint_id") or "")
         if parent:
-            edges.append({"edge_id": f"E:{parent}->{child}", "parent_control_id": str(parent), "child_control_id": child, "relation_type": "skeleton_hierarchy"})
-    return controls, edges
+            edges.append({
+                "edge_id": f"J:{parent}->{child}",
+                "parent_control_id": str(parent),
+                "child_control_id": child,
+                "relation_type": "skeleton_hierarchy",
+                "entity_kind": DEFORM_JOINT_CLASS,
+            })
+    for control in animator_controls:
+        parent = control.get("parent_canonical_control_id")
+        child = str(control.get("canonical_control_id") or "")
+        if parent:
+            edges.append({
+                "edge_id": f"C:{parent}->{child}",
+                "parent_control_id": str(parent),
+                "child_control_id": child,
+                "relation_type": "control_hierarchy",
+                "entity_kind": ANIMATOR_CONTROL_CLASS,
+            })
+    return [*deform_rows, *animator_rows], deform_rows, animator_rows, edges
 
 
 def _binding_rows(product: Mapping[str, Any]) -> list[Json]:
@@ -117,17 +206,29 @@ def _binding_rows(product: Mapping[str, Any]) -> list[Json]:
             points = [raster[sid] for sid in support]
             anchor = [sum(p[0] for p in points) / len(points), sum(p[1] for p in points) / len(points)]
             out.append({
-                "binding_id": f"B:V{view}:{jid}", "view_id": view_id(view), "source_part_id": support[0],
-                "primary_final_control_id": jid, "final_control_ids": [jid], "selected_anchor_xy": anchor,
-                "selected_socket_xy": anchor, "selected_pivot_xy": anchor, "selected_terminal_xy": anchor, "confidence01": 1.0,
+                "binding_id": f"B:V{view}:{jid}",
+                "view_id": view_id(view),
+                "source_part_id": support[0],
+                "primary_final_control_id": jid,
+                "final_control_ids": [jid],
+                "selected_anchor_xy": anchor,
+                "selected_socket_xy": anchor,
+                "selected_pivot_xy": anchor,
+                "selected_terminal_xy": anchor,
+                "confidence01": 1.0,
             })
     return out
 
 
 def _candidate_image_paths(root: Path, view: int) -> list[Path]:
     patterns = [
-        f"native_texture_source/textures/view_{view}.png", f"textures/view_{view}.png", f"textures/view_{view:02d}.png",
-        f"views/view_{view}.png", f"views/{VIEW_LABELS[view]}.png", f"source/view_{view}.png", f"source/{VIEW_LABELS[view]}.png",
+        f"native_texture_source/textures/view_{view}.png",
+        f"textures/view_{view}.png",
+        f"textures/view_{view:02d}.png",
+        f"views/view_{view}.png",
+        f"views/{VIEW_LABELS[view]}.png",
+        f"source/view_{view}.png",
+        f"source/{VIEW_LABELS[view]}.png",
     ]
     out = [root / rel for rel in patterns]
     for path in root.rglob("*.png"):
@@ -138,7 +239,8 @@ def _candidate_image_paths(root: Path, view: int) -> list[Path]:
     for path in out:
         path = path.resolve()
         if path not in seen:
-            seen.add(path); unique.append(path)
+            seen.add(path)
+            unique.append(path)
     return unique
 
 
@@ -148,41 +250,69 @@ def _source_rows(root: Path) -> list[Json]:
         asset: Json | None = None
         for path in _candidate_image_paths(root, view):
             if path.is_file():
-                asset = {"path": path.relative_to(root.resolve()).as_posix(), "width": 0, "height": 0, "source": "bundle-local"}
+                asset = {
+                    "path": path.relative_to(root.resolve()).as_posix(),
+                    "width": 0,
+                    "height": 0,
+                    "source": "bundle-local",
+                }
                 break
-        rows.append({"view_id": view_id(view), "view_index": view, "view_label": VIEW_LABELS[view], "assets": {"raw_image": asset, "clean_cutout": asset} if asset else {}})
+        rows.append({
+            "view_id": view_id(view),
+            "view_index": view,
+            "view_label": VIEW_LABELS[view],
+            "assets": {"raw_image": asset, "clean_cutout": asset} if asset else {},
+        })
     return rows
 
 
 def _dynamic_proof_legacy(proof: Mapping[str, Any], bakes: Mapping[str, Json]) -> Json:
-    motion = next((row for row in list(proof.get("domain_reports") or []) if str(row.get("proof_domain")) == "MOTION"), None)
+    motion = next(
+        (row for row in list(proof.get("domain_reports") or []) if str(row.get("proof_domain")) == "MOTION"),
+        None,
+    )
     passed = bool(motion and motion.get("status") == "PASS")
     clips = [{
-        "clip_id": clip_id, "intent": clip_id, "passed": passed,
-        "max_edge_stretch_ratio": 1.0, "return_to_rest_error01": 0.0, "max_secondary_offset01": 0.0,
-        "frame_count": len(list(bake.get("frames") or [])), "bake_hash": bake.get("bake_hash"),
-        "authority": "QUALIFICATION_OWNED_MOTION_BAKE", "failure_invariants": [] if passed else ["MOTION_PROOF_NOT_PASS"],
+        "clip_id": clip_id,
+        "intent": clip_id,
+        "passed": passed,
+        "max_edge_stretch_ratio": 1.0,
+        "return_to_rest_error01": 0.0,
+        "max_secondary_offset01": 0.0,
+        "frame_count": len(list(bake.get("frames") or [])),
+        "bake_hash": bake.get("bake_hash"),
+        "authority": "QUALIFICATION_OWNED_MOTION_BAKE",
+        "failure_invariants": [] if passed else ["MOTION_PROOF_NOT_PASS"],
     } for clip_id, bake in sorted(bakes.items())]
     return {
-        "available": bool(bakes), "passed": bool(bakes) and passed, "clip_count": len(clips),
-        "passed_clip_count": len(clips) if passed else 0, "uses_same_reference_evaluator": True,
-        "second_motion_solver_created": False, "clip_reports": clips,
+        "available": bool(bakes),
+        "passed": bool(bakes) and passed,
+        "clip_count": len(clips),
+        "passed_clip_count": len(clips) if passed else 0,
+        "uses_same_reference_evaluator": True,
+        "second_motion_solver_created": False,
+        "clip_reports": clips,
         "owner_findings": list((motion or {}).get("owner_attribution") or []),
     }
 
 
 def _dynamic_proof_summary(proof: Mapping[str, Any]) -> Json:
-    return {"overall_status": proof.get("overall_status"), "domains": [{
-        "proof_domain": row.get("proof_domain"), "status": row.get("status"),
-        "failure_signatures": list(row.get("failure_signatures") or []), "owner_attribution": list(row.get("owner_attribution") or []),
-        "domain_proof_hash": row.get("domain_proof_hash"),
-    } for row in list(proof.get("domain_reports") or [])]}
+    return {
+        "overall_status": proof.get("overall_status"),
+        "domains": [{
+            "proof_domain": row.get("proof_domain"),
+            "status": row.get("status"),
+            "failure_signatures": list(row.get("failure_signatures") or []),
+            "owner_attribution": list(row.get("owner_attribution") or []),
+            "domain_proof_hash": row.get("domain_proof_hash"),
+        } for row in list(proof.get("domain_reports") or [])],
+    }
 
 
 def build_scene(root: Path) -> Json:
     product = load_product(root)
     proof = load_proof(root, product)
-    controls, edges = _joint_scene_rows(product)
+    controls, deform_controls, animator_controls, edges = _rig_scene_rows(product)
     meshes = _mesh_scene_rows(product)
     bindings = _binding_rows(product)
     source_rows = _source_rows(root)
@@ -195,27 +325,74 @@ def build_scene(root: Path) -> Json:
         "animation_clip_loop": bool(clip.get("loop", False)),
     } for clip in list((product.get("motion_state") or {}).get("clips") or [])]
     index_payload = {
-        "schema_version": "RealSaS.LivingCompileIndex.v4", "source_views": source_rows,
-        "artifact_readiness": {"canonical_product": True, "proof": True, "runtime_motion_bake": bool(bakes)},
+        "schema_version": "RealSaS.LivingCompileIndex.v4",
+        "source_views": source_rows,
+        "artifact_readiness": {
+            "canonical_product": True,
+            "proof": True,
+            "runtime_motion_bake": bool(bakes),
+        },
         "animation_clips": clips,
     }
     model_payload = {"model_id": "CURRENT_V4_MODEL_STACK", "materially_influenced": True}
     proof_payload = {
-        "overall_strict_passed": proof.get("overall_status") == "PASS", "passed": proof.get("overall_status") == "PASS",
-        "artifact_chain_passed": True, "compiler_flow_passed": True, "product_quality_passed": proof.get("overall_status") == "PASS",
-        "blockers": [] if proof.get("overall_status") == "PASS" else [f"PRODUCT_PROOF_{proof.get('overall_status', 'UNKNOWN')}"] ,
-        "warnings": [], "recommended_claim": "CURRENT_V4_PROOF_GATED_PRODUCT", "proof_bundle_hash": proof.get("proof_bundle_hash"),
+        "overall_strict_passed": proof.get("overall_status") == "PASS",
+        "passed": proof.get("overall_status") == "PASS",
+        "artifact_chain_passed": True,
+        "compiler_flow_passed": True,
+        "product_quality_passed": proof.get("overall_status") == "PASS",
+        "blockers": [] if proof.get("overall_status") == "PASS" else [f"PRODUCT_PROOF_{proof.get('overall_status', 'UNKNOWN')}"],
+        "warnings": [],
+        "recommended_claim": "CURRENT_V4_PROOF_GATED_PRODUCT",
+        "proof_bundle_hash": proof.get("proof_bundle_hash"),
     }
     return {
-        "schema_version": "RealSaS.LivingCompileScene.v4", "bundle_root": str(root),
-        "product": {"schema_version": product.get("schema_version"), "product_state_hash": product.get("product_state_hash"), "representation_class": product.get("representation_class"), "mechanical_equivalence_class": product.get("mechanical_equivalence_class")},
-        "index": index_payload, "product_artifact_index": index_payload,
-        "proof": proof_payload, "model": model_payload, "model_influence": model_payload,
-        "dynamic_proof": _dynamic_proof_summary(proof), "dynamic_motion_closure": _dynamic_proof_legacy(proof, bakes),
-        "puppet": {"meshes": meshes, "rig": {"controls": controls, "edges": edges}}, "binding": {"bindings": bindings},
+        "schema_version": "RealSaS.LivingCompileScene.v4",
+        "bundle_root": str(root),
+        "product": {
+            "schema_version": product.get("schema_version"),
+            "product_state_hash": product.get("product_state_hash"),
+            "representation_class": product.get("representation_class"),
+            "mechanical_equivalence_class": product.get("mechanical_equivalence_class"),
+        },
+        "index": index_payload,
+        "product_artifact_index": index_payload,
+        "proof": proof_payload,
+        "model": model_payload,
+        "model_influence": model_payload,
+        "dynamic_proof": _dynamic_proof_summary(proof),
+        "dynamic_motion_closure": _dynamic_proof_legacy(proof, bakes),
+        "puppet": {
+            "meshes": meshes,
+            "rig": {
+                "controls": controls,
+                "deform_controls": deform_controls,
+                "animator_controls": animator_controls,
+                "edges": edges,
+                "editable_motion_space": "ANIMATOR_CONTROLS" if animator_controls else "LEGACY_DEFORM_CONTROL_FALLBACK",
+            },
+        },
+        "binding": {"bindings": bindings},
         "runtime": {"clips": clips, "proof_gated": proof.get("overall_status") == "PASS"},
-        "counts": {"views": 8, "meshes": len(meshes), "controls": len(controls) // 8 if controls else 0, "bindings": len(bindings)},
-        "weight_counts": {"final_render_meshes": len(meshes), "weighted_final_render_meshes": len(meshes)},
+        "counts": {
+            "views": 8,
+            "meshes": len(meshes),
+            "controls": len(controls) // 8 if controls else 0,
+            "deform_joints": len(deform_controls) // 8 if deform_controls else 0,
+            "animator_controls": len(animator_controls) // 8 if animator_controls else 0,
+            "bindings": len(bindings),
+        },
+        "weight_counts": {
+            "final_render_meshes": len(meshes),
+            "weighted_final_render_meshes": len(meshes),
+        },
         "weight_heatmap_is_canonical_product_data": bool(meshes),
-        "authority": {"canonical_product_mutated_by_ui": False, "user_edits_are_optional_layer": True, "user_edits_require_dynamic_revalidation": True, "runtime_frames_are_qualification_owned_bakes": True},
+        "authority": {
+            "canonical_product_mutated_by_ui": False,
+            "user_edits_are_optional_layer": True,
+            "user_edits_require_dynamic_revalidation": True,
+            "runtime_frames_are_qualification_owned_bakes": True,
+            "animation_authoring_uses_canonical_controls": bool(animator_controls),
+            "local_control_to_joint_preview_is_non_authoritative": True,
+        },
     }

@@ -72,11 +72,13 @@ jobs:
       - name: Full Platform Go tests
         working-directory: platform
         run: go test ./...
-      - name: Shipping product DB court
+      - name: Shipping product and Studio DB courts
         working-directory: platform
         env:
           REALSAS_DATABASE_URL: postgres://realsas:realsas@127.0.0.1:5432/realsas?sslmode=disable
           REALSAS_PRODUCT_E2E_DB_COURT: "1"
+          REALSAS_STUDIO_DB_COURT: "1"
         run: |
           go run ./cmd/realsas-migrate up
           go test ./internal/control -run '^TestShippingProductCompileDBCourt$' -count=1 -v
+          go test ./internal/studio -run '^TestStudioDBCourt$' -count=1 -v

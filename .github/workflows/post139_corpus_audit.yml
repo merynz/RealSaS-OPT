@@ -107,15 +107,50 @@ jobs:
           out = root / 'POST139_PUBLIC_ARCHIVE_CENSUS.json'
           out.write_text(json.dumps(report, indent=2, sort_keys=True) + '\n')
           print('POST139_UAC_PUBLIC_ARCHIVE_CENSUS', json.dumps(report, sort_keys=True))
-          if len(fbx) < 50:
-              raise SystemExit(f'POST139_UAC_FBX_CENSUS_TOO_SMALL:{len(fbx)}')
+          if len(fbx) != 52:
+              raise SystemExit(f'POST139_UAC_FBX_CENSUS_EXPECTED_52_GOT:{len(fbx)}')
           PY
           echo "POST139_UAC_PUBLIC_ARCHIVE_ROOT=$root" >> "$GITHUB_ENV"
+      - name: Canonical audit all 52 official FBX subjects
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_root="$POST139_UAC_PUBLIC_ARCHIVE_ROOT/Ultimate Animated Character Pack - Nov 2019/FBX"
+          out="$RUNNER_TEMP/post139-uac-audit"
+          python tools/corpus/post139_audit_v1.py audit \
+            --source-root "$source_root" \
+            --out "$out" \
+            --family Quaternius \
+            --pack 'Ultimate Animated Character' \
+            --provenance CLEAN_CC0_HUMAN_AUTHORED \
+            --license-name CC0 \
+            --blender-exe "$BLENDER_EXE"
+          cat "$out/POST139_AUDIT_INDEX.json"
+          python - "$out/POST139_AUDIT_INDEX.json" <<'PY'
+          import json
+          from pathlib import Path
+          import sys
+
+          index = json.loads(Path(sys.argv[1]).read_text())
+          if index['candidate_count'] != 52:
+              raise SystemExit(f"POST139_UAC_AUDIT_EXPECTED_52_GOT:{index['candidate_count']}")
+          if index['failure_count']:
+              raise SystemExit(f"POST139_UAC_AUDIT_FAILURES:{index['failure_count']}")
+          print('POST139_UAC_52_CANONICAL_AUDIT_PASS', json.dumps(index['status_counts'], sort_keys=True))
+          PY
+          echo "POST139_UAC_AUDIT_ROOT=$out" >> "$GITHUB_ENV"
       - name: Upload official archive census evidence
         uses: actions/upload-artifact@v4
         with:
           name: post139-uac-public-census-${{ github.sha }}
           path: ${{ env.POST139_UAC_PUBLIC_ARCHIVE_ROOT }}/POST139_PUBLIC_ARCHIVE_CENSUS.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload canonical 52-subject audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-uac-canonical-audit-${{ github.sha }}
+          path: ${{ env.POST139_UAC_AUDIT_ROOT }}/**
           if-no-files-found: error
           retention-days: 14
       - name: Summary

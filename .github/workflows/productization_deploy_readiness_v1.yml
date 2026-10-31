@@ -1,0 +1,46 @@
+name: productization-deploy-readiness-v1
+
+on:
+  push:
+    branches: [productization-deploy-readiness-v1]
+    paths:
+      - 'platform/**'
+      - 'compiler/realsas_compiler_core/modular_product_proof_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/proof_executor_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/worker.py'
+      - 'product/living_compile/**'
+      - '.github/workflows/productization_deploy_readiness_v1.yml'
+  pull_request:
+    paths:
+      - 'platform/**'
+      - 'compiler/realsas_compiler_core/modular_product_proof_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/proof_executor_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/worker.py'
+      - 'product/living_compile/**'
+      - '.github/workflows/productization_deploy_readiness_v1.yml'
+
+concurrency:
+  group: productization-deploy-readiness-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  platform-productization:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: platform/go.mod
+          cache-dependency-path: platform/go.sum
+      - name: Go format gate
+        working-directory: platform
+        run: test -z "$(gofmt -l .)"
+      - name: Go vet
+        working-directory: platform
+        run: go vet ./...
+      - name: Full Platform Go tests
+        working-directory: platform
+        run: go test ./...

@@ -35,6 +35,8 @@ jobs:
             tools/training/tessa_component_surface_topology_v1.py \
             tools/training/build_corpus_mechanical_tessa_teacher_v4.py \
             tools/training/validate_corpus_mechanical_tessa_teacher_v4.py \
+            tools/training/build_corpus_mechanical_tessa_teacher_v5.py \
+            tools/training/validate_corpus_mechanical_tessa_teacher_v5.py \
             tools/corpus/mechanical_surface_topology_authority_v1.py \
             tools/corpus/build_mechanical_surface_topology_manifest_v1.py \
             tools/corpus/validate_mechanical_surface_topology_authority_v1.py
@@ -49,4 +51,5 @@ jobs:
             tests/corpus/test_gltf_rig_skin_authority_e2e_v1.py \
             tests/corpus/test_gltf_animation_authority_v1.py \
             tests/corpus/test_mechanical_surface_topology_authority_v1.py \
-            tests/corpus/test_tessa_component_surface_topology_v1.py
+            tests/corpus/test_tessa_component_surface_topology_v1.py \
+            tests/corpus/test_tessa_mechanical_surface_topology_v5.py

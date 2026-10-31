@@ -24,15 +24,14 @@ func Start(
 	store artifactstore.Store,
 	codeSHA string,
 	req StartRequest,
-	ownerKeySHA256 string,
 	actor string,
 ) (StartResponse, error) {
 	if pool == nil || store == nil || strings.TrimSpace(actor) == "" {
 		return StartResponse{}, errors.New("pool, artifact store and actor are required")
 	}
-	ownerKeySHA256, err := NormalizeOwnerKeySHA256(ownerKeySHA256)
-	if err != nil {
-		return StartResponse{}, err
+	ownerKeySHA256, ok := OwnerKeySHA256FromContext(ctx)
+	if !ok {
+		return StartResponse{}, ErrProductOwnerRequired
 	}
 	views, err := validateViews(req.Views)
 	if err != nil {

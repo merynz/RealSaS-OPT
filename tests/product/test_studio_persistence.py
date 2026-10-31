@@ -127,6 +127,81 @@ class StudioPersistenceTests(unittest.TestCase):
             "GET", f"/v1/product/studio/projects/{self.project_id}/revisions?limit=200"
         )
 
+    def test_restore_is_identity_checked_append_only_proxy_and_returns_new_head(self):
+        project = {
+            "project_id": self.project_id,
+            "compile_id": self.compile_id,
+            "product_revision_id": "internal-base",
+        }
+        revision = {
+            "project_id": self.project_id,
+            "revision_number": 9,
+            "lock_version": 9,
+            "requires_requalification": True,
+            "authoring_revision_id": "internal-restored-revision",
+        }
+        head = {
+            "project_id": self.project_id,
+            "compile_id": self.compile_id,
+            "revision_number": 9,
+            "lock_version": 9,
+            "requires_requalification": True,
+            "authoring_payload": {
+                "schema_version": "RealSaS.UserPuppetEditLayer.v3",
+                "authority_class": "OPTIONAL_USER_AUTHORING_LAYER",
+            },
+            "authoring_revision_id": "internal-restored-revision",
+        }
+        with patch.dict(os.environ, self.env, clear=False), patch.object(
+            self.app,
+            "_gateway_json",
+            side_effect=[(200, project), (201, revision), (200, head)],
+        ) as gateway:
+            status, payload, content_type = self.app.dispatch(
+                "POST",
+                "/api/studio/restore",
+                {
+                    "bundle": self.bundle,
+                    "project_id": self.project_id,
+                    "expected_lock_version": 8,
+                    "revision_number": 3,
+                },
+            )
+        self.assertEqual(status, 200)
+        self.assertEqual(content_type, "application/json")
+        self.assertEqual(payload["schema_version"], "RealSaS.StudioRestore.v1")
+        self.assertEqual(payload["head"]["revision_number"], 9)
+        self.assertEqual(payload["head"]["authoring_payload"]["authority_class"], "OPTIONAL_USER_AUTHORING_LAYER")
+        self.assertNotIn("authoring_revision_id", payload["revision"])
+        self.assertNotIn("authoring_revision_id", payload["head"])
+        gateway.assert_has_calls([
+            call("GET", f"/v1/product/studio/projects/{self.project_id}"),
+            call(
+                "POST",
+                f"/v1/product/studio/projects/{self.project_id}/restore",
+                {
+                    "expected_lock_version": 8,
+                    "revision_number": 3,
+                    "created_by": "product-shell",
+                },
+            ),
+            call("GET", f"/v1/product/studio/projects/{self.project_id}/head"),
+        ])
+
+    def test_restore_rejects_project_from_another_compile_before_mutation(self):
+        project = {"project_id": self.project_id, "compile_id": "cmp_" + "d" * 32}
+        with patch.dict(os.environ, self.env, clear=False), patch.object(
+            self.app, "_gateway_json", return_value=(200, project)
+        ) as gateway:
+            with self.assertRaisesRegex(LivingCompileError, "does not belong"):
+                self.app._restore_studio_revision(
+                    self.compile_id,
+                    self.project_id,
+                    expected_lock_version=8,
+                    revision_number=3,
+                )
+        gateway.assert_called_once_with("GET", f"/v1/product/studio/projects/{self.project_id}")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -62,15 +62,13 @@ def _validate_topology(product: Mapping[str, Any], raw_rows: Any) -> tuple[list[
             anchor = finite_pair(row.get("anchor_xy"), field=f"add_bone[{index}].anchor_xy")
             user_bones.add(bone)
             parent[bone] = par
-            clean.append(
-                {
-                    "operation": op,
-                    "bone_id": bone,
-                    "parent_id": par,
-                    "anchor_xy": list(anchor),
-                    "display_name": str(row.get("display_name") or bone)[:128],
-                }
-            )
+            clean.append({
+                "operation": op,
+                "bone_id": bone,
+                "parent_id": par,
+                "anchor_xy": list(anchor),
+                "display_name": str(row.get("display_name") or bone)[:128],
+            })
         elif op == "delete_bone":
             bone = safe_id(row.get("bone_id"), field="bone_id")
             if bone not in canonical and bone not in user_bones:
@@ -131,18 +129,16 @@ def _validate_ik(raw_rows: Any, valid_bones: set[str]) -> list[Json]:
         iterations = int(row.get("iterations", 12))
         if iterations < 1 or iterations > 128:
             raise LivingCompileError("IK iterations must be within [1,128]")
-        out.append(
-            {
-                "constraint_id": cid,
-                "start_bone_id": start,
-                "end_bone_id": end,
-                "target_bone_id": target,
-                "mix": mix,
-                "iterations": iterations,
-                "bend_direction": -1 if int(row.get("bend_direction", 1)) < 0 else 1,
-                "enabled": bool(row.get("enabled", True)),
-            }
-        )
+        out.append({
+            "constraint_id": cid,
+            "start_bone_id": start,
+            "end_bone_id": end,
+            "target_bone_id": target,
+            "mix": mix,
+            "iterations": iterations,
+            "bend_direction": -1 if int(row.get("bend_direction", 1)) < 0 else 1,
+            "enabled": bool(row.get("enabled", True)),
+        })
     return out
 
 
@@ -375,17 +371,83 @@ def _validate_animation(raw_rows: Any, valid_controls: set[str]) -> list[Json]:
                     clean_key["bezier"] = _validate_bezier(key.get("bezier"), field=f"key[{ki}].bezier")
                 keys_out.append(clean_key)
             tracks_out.append({"bone_id": control, "control_id": control, "keys": keys_out})
-        out.append(
-            {
-                "clip_id": clip_id,
-                "display_name": str(clip.get("display_name") or clip_id)[:128],
-                "duration_seconds": duration,
-                "fps": fps,
-                "loop": bool(clip.get("loop", False)),
-                "tracks": tracks_out,
-            }
-        )
+        out.append({
+            "clip_id": clip_id,
+            "display_name": str(clip.get("display_name") or clip_id)[:128],
+            "duration_seconds": duration,
+            "fps": fps,
+            "loop": bool(clip.get("loop", False)),
+            "tracks": tracks_out,
+        })
     return out
+
+
+def _validate_binding_edits(
+    bindings: Mapping[str, Mapping[str, Any]],
+    controls: set[str],
+    raw_rows: Any,
+) -> list[Json]:
+    raw_rows = [] if raw_rows is None else raw_rows
+    if not isinstance(raw_rows, list) or len(raw_rows) > 4096:
+        raise LivingCompileError("binding_edits must be a list with <=4096 entries")
+    clean: list[Json] = []
+    seen: set[str] = set()
+    for index, raw in enumerate(raw_rows):
+        if not isinstance(raw, dict):
+            raise LivingCompileError("each binding edit must be an object")
+        bid = str(raw.get("binding_id") or "")
+        if bid not in bindings:
+            raise LivingCompileError(f"binding edit references unknown selected-view binding: {bid}")
+        if bid in seen:
+            raise LivingCompileError(f"duplicate binding edit: {bid}")
+        seen.add(bid)
+        control = safe_id(raw.get("primary_final_control_id"), field="binding primary control")
+        if control not in controls:
+            raise LivingCompileError(f"binding edit references unknown deform joint: {control}")
+        translation = finite_pair(raw.get("translation_xy", (0, 0)), field=f"binding[{index}].translation_xy")
+        rotation = finite(raw.get("rotation_degrees", 0), field=f"binding[{index}].rotation_degrees")
+        scale = finite_pair(raw.get("scale_xy", (1, 1)), field=f"binding[{index}].scale_xy")
+        if max(abs(translation[0]), abs(translation[1]), abs(rotation)) > 100000:
+            raise LivingCompileError("binding transform exceeds bounded authoring limits")
+        if not (0.01 <= scale[0] <= 100 and 0.01 <= scale[1] <= 100):
+            raise LivingCompileError("binding scale must be within [0.01,100]")
+        clean.append({
+            "binding_id": bid,
+            "primary_final_control_id": control,
+            "translation_xy": list(translation),
+            "rotation_degrees": rotation,
+            "scale_xy": list(scale),
+            "visible": bool(raw.get("visible", True)),
+        })
+    return clean
+
+
+def _validate_presentation_override(
+    meshes: Mapping[str, Mapping[str, Any]], raw: Any
+) -> Json | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, dict):
+        raise LivingCompileError("presentation_override must be an object or null")
+    canonical = list(meshes.keys())
+    order_raw = raw.get("slot_order_back_to_front", canonical)
+    hidden_raw = raw.get("hidden_mesh_ids", [])
+    if not isinstance(order_raw, list) or not isinstance(hidden_raw, list):
+        raise LivingCompileError("presentation override order/hidden values must be lists")
+    order = [safe_id(value, field="presentation slot id") for value in order_raw]
+    hidden = [safe_id(value, field="hidden slot id") for value in hidden_raw]
+    canonical_set = set(canonical)
+    if len(order) != len(canonical) or len(set(order)) != len(canonical) or set(order) != canonical_set:
+        raise LivingCompileError("presentation order must be an exact canonical slot permutation")
+    if len(set(hidden)) != len(hidden) or any(mesh_id not in canonical_set for mesh_id in hidden):
+        raise LivingCompileError("presentation hidden slots must be a unique canonical subset")
+    departure = bool(hidden) or any(mesh_id != canonical[index] for index, mesh_id in enumerate(order))
+    return {
+        "source_graphics_order_back_to_front": canonical,
+        "slot_order_back_to_front": order,
+        "hidden_mesh_ids": hidden,
+        "graphics_evidence_departure": departure,
+    }
 
 
 def save_user_layer(root: Path, payload: Mapping[str, Any]) -> Json:
@@ -395,21 +457,27 @@ def save_user_layer(root: Path, payload: Mapping[str, Any]) -> Json:
     rig = scene["puppet"]["rig"]
     deform_rows = list(rig.get("deform_controls") or rig.get("controls") or [])
     controls = {row["control_id"] for row in deform_rows if row["view_id"] == view_id(view)}
-    meshes = {row["mesh_id"]: row for row in scene["puppet"]["meshes"] if row["view_id"] == view_id(view)}
-    bindings = {row["binding_id"]: row for row in scene["binding"]["bindings"] if row["view_id"] == view_id(view)}
+    meshes = {
+        row["mesh_id"]: row
+        for row in scene["puppet"]["meshes"]
+        if row["view_id"] == view_id(view)
+    }
+    bindings = {
+        row["binding_id"]: row
+        for row in scene["binding"]["bindings"]
+        if row["view_id"] == view_id(view)
+    }
 
     rig_edits: list[Json] = []
     for raw in list(payload.get("edits") or []):
         control = safe_id(raw.get("control_id"), field="control_id")
         if control not in controls:
             raise LivingCompileError(f"rig edit references unknown deform joint in selected view: {control}")
-        rig_edits.append(
-            {
-                "control_id": control,
-                "rotation_degrees": finite(raw.get("rotation_degrees", 0), field="rotation_degrees"),
-                "translation_xy": list(finite_pair(raw.get("translation_xy", (0, 0)), field="translation_xy")),
-            }
-        )
+        rig_edits.append({
+            "control_id": control,
+            "rotation_degrees": finite(raw.get("rotation_degrees", 0), field="rotation_degrees"),
+            "translation_xy": list(finite_pair(raw.get("translation_xy", (0, 0)), field="translation_xy")),
+        })
 
     mesh_edits: list[Json] = []
     for raw in list(payload.get("mesh_vertex_edits") or []):
@@ -417,13 +485,11 @@ def save_user_layer(root: Path, payload: Mapping[str, Any]) -> Json:
         vi = int(raw.get("vertex_index", -1))
         if mid not in meshes or vi < 0 or vi >= len(meshes[mid]["vertices"]):
             raise LivingCompileError(f"mesh edit vertex outside range: {mid}:{vi}")
-        mesh_edits.append(
-            {
-                "mesh_id": mid,
-                "vertex_index": vi,
-                "translation_xy": list(finite_pair(raw.get("translation_xy", (0, 0)), field="mesh translation_xy")),
-            }
-        )
+        mesh_edits.append({
+            "mesh_id": mid,
+            "vertex_index": vi,
+            "translation_xy": list(finite_pair(raw.get("translation_xy", (0, 0)), field="mesh translation_xy")),
+        })
 
     mesh_topology = _validate_mesh_topology(meshes, payload.get("mesh_topology_edits"))
 
@@ -439,20 +505,15 @@ def save_user_layer(root: Path, payload: Mapping[str, Any]) -> Json:
             raise LivingCompileError(f"weight edit references unknown deform joint: {control}")
         if not -1 <= delta <= 1:
             raise LivingCompileError("weight_delta must be within [-1,1]")
-        weight_edits.append(
-            {"mesh_id": mid, "vertex_index": vi, "control_id": control, "weight_delta": delta}
-        )
+        weight_edits.append({
+            "mesh_id": mid,
+            "vertex_index": vi,
+            "control_id": control,
+            "weight_delta": delta,
+        })
 
-    binding_edits: list[Json] = []
-    for raw in list(payload.get("binding_edits") or []):
-        bid = str(raw.get("binding_id") or "")
-        control = safe_id(raw.get("primary_final_control_id"), field="binding primary control")
-        if bid not in bindings:
-            raise LivingCompileError(f"binding edit references unknown selected-view binding: {bid}")
-        if control not in controls:
-            raise LivingCompileError(f"binding edit references unknown deform joint: {control}")
-        binding_edits.append({"binding_id": bid, "primary_final_control_id": control})
-
+    binding_edits = _validate_binding_edits(bindings, controls, payload.get("binding_edits"))
+    presentation = _validate_presentation_override(meshes, payload.get("presentation_override"))
     topology, valid_bones = _validate_topology(product, payload.get("rig_topology_edits"))
     ik = _validate_ik(payload.get("ik_constraints"), valid_bones)
     canonical_controls = _control_ids(product)
@@ -475,12 +536,15 @@ def save_user_layer(root: Path, payload: Mapping[str, Any]) -> Json:
         "mesh_topology_edits": mesh_topology,
         "weight_edits": weight_edits,
         "binding_edits": binding_edits,
+        "presentation_override": presentation,
         "rig_topology_edits": topology,
         "ik_constraints": ik,
         "animation_edits": animation,
         "metadata": {
             "canonical_bundle_mutated": False,
             "mesh_topology_edit_count": len(mesh_topology),
+            "binding_override_count": len(binding_edits),
+            "graphics_evidence_departure": bool(presentation and presentation["graphics_evidence_departure"]),
             "topology_edit_count": len(topology),
             "ik_constraint_count": len(ik),
             "animation_clip_count": len(animation),
@@ -498,6 +562,8 @@ def save_user_layer(root: Path, payload: Mapping[str, Any]) -> Json:
         "mesh_topology_edit_count": len(mesh_topology),
         "weight_edit_count": len(weight_edits),
         "binding_edit_count": len(binding_edits),
+        "presentation_override_count": 1 if presentation else 0,
+        "graphics_evidence_departure": bool(presentation and presentation["graphics_evidence_departure"]),
         "rig_topology_edit_count": len(topology),
         "ik_constraint_count": len(ik),
         "animation_clip_count": len(animation),

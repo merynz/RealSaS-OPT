@@ -117,10 +117,10 @@ func CreateRequalificationResultSession(
 			return err
 		}
 		payload, _ := json.Marshal(map[string]any{
-			"base_compile_session_id":  baseSessionID,
-			"base_product_revision_id": baseRevisionID,
+			"base_compile_session_id":    baseSessionID,
+			"base_product_revision_id":   baseRevisionID,
 			"result_product_revision_id": resultProductRevisionID,
-			"public_id": publicID,
+			"public_id":                  publicID,
 		})
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO audit_events(actor,action,subject_id,attempt_id,payload)

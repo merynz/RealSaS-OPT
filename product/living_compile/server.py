@@ -5,7 +5,9 @@ import json
 import mimetypes
 import os
 import posixpath
+import urllib.error
 import urllib.parse
+import urllib.request
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -18,6 +20,22 @@ from .scene import build_scene
 
 
 PUBLIC_HTTP_ENV = "REALSAS_PUBLIC_HTTP"
+PRODUCT_GATEWAY_URL_ENV = "REALSAS_PRODUCT_GATEWAY_URL"
+PRODUCT_GATEWAY_TOKEN_ENV = "REALSAS_PRODUCT_GATEWAY_TOKEN"
+PRODUCT_COMPILE_ENABLED_ENV = "REALSAS_PRODUCT_COMPILE_ENABLED"
+PRODUCT_GATEWAY_TIMEOUT_SECONDS = 12
+
+_INTERNAL_KEYS = {
+    "artifact_id",
+    "artifact_ids",
+    "attempt_id",
+    "command_id",
+    "engine_release_id",
+    "execution_goal_id",
+    "input_artifact_ids",
+    "model_release_id",
+    "model_release_ids",
+}
 
 
 @dataclass
@@ -31,6 +49,8 @@ class LivingCompileApplication:
     def static_bytes(self, request_path: str) -> tuple[bytes, str]:
         if request_path == "/":
             relative = "index.html"
+        elif request_path in {"/workspace", "/workspace/"}:
+            relative = "workspace.html"
         else:
             relative = posixpath.normpath(request_path.lstrip("/"))
             if relative.startswith("../"):
@@ -40,19 +60,80 @@ class LivingCompileApplication:
             raise LivingCompileError(f"static asset not found: {relative}")
         return path.read_bytes(), mimetypes.guess_type(path.name)[0] or "application/octet-stream"
 
+    def _gateway_base(self) -> str | None:
+        raw = os.environ.get(PRODUCT_GATEWAY_URL_ENV, "").strip().rstrip("/")
+        if not raw:
+            return None
+        parsed = urllib.parse.urlparse(raw)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise LivingCompileError(f"{PRODUCT_GATEWAY_URL_ENV} must be an absolute http(s) URL")
+        return raw
+
+    def _production_compile_enabled(self) -> bool:
+        return self._gateway_base() is not None and os.environ.get(PRODUCT_COMPILE_ENABLED_ENV, "").strip() == "1"
+
+    def _gateway_json(self, method: str, path: str, body: Json | None = None) -> tuple[int, Json]:
+        base = self._gateway_base()
+        if base is None:
+            raise LivingCompileError("public product gateway is not configured")
+        data = None if body is None else json.dumps(body, separators=(",", ":")).encode("utf-8")
+        headers = {"Accept": "application/json"}
+        if data is not None:
+            headers["Content-Type"] = "application/json"
+        token = os.environ.get(PRODUCT_GATEWAY_TOKEN_ENV, "").strip()
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        request = urllib.request.Request(base + path, data=data, headers=headers, method=method)
+        try:
+            with urllib.request.urlopen(request, timeout=PRODUCT_GATEWAY_TIMEOUT_SECONDS) as response:
+                status = int(response.status)
+                raw = response.read(8 * 1024 * 1024)
+        except urllib.error.HTTPError as exc:
+            raw = exc.read(1024 * 1024)
+            try:
+                payload = json.loads(raw.decode("utf-8")) if raw else {}
+            except Exception:
+                payload = {}
+            message = payload.get("message") if isinstance(payload, dict) else None
+            raise LivingCompileError(message or f"product gateway rejected request with HTTP {exc.code}") from exc
+        except urllib.error.URLError as exc:
+            raise LivingCompileError(f"product gateway unavailable: {exc.reason}") from exc
+        try:
+            payload = json.loads(raw.decode("utf-8")) if raw else {}
+        except Exception as exc:
+            raise LivingCompileError("product gateway returned invalid JSON") from exc
+        if not isinstance(payload, dict):
+            raise LivingCompileError("product gateway returned a non-object response")
+        return status, payload
+
+    def _public_payload(self, value: Any) -> Any:
+        if isinstance(value, dict):
+            return {
+                key: self._public_payload(item)
+                for key, item in value.items()
+                if str(key).lower() not in _INTERNAL_KEYS
+            }
+        if isinstance(value, list):
+            return [self._public_payload(item) for item in value]
+        return value
+
     def project_capabilities(self) -> Json:
         bundle_root = product_bundle_root()
+        gateway_configured = self._gateway_base() is not None
+        compile_available = self._production_compile_enabled()
+        blockers: list[str] = []
+        if not gateway_configured:
+            blockers.append("PUBLIC_PRODUCT_GATEWAY_NOT_CONFIGURED")
+        elif not compile_available:
+            blockers.append("PRODUCT_COMPILE_NOT_ENABLED")
         return {
-            "schema_version": "RealSaS.ProductCapabilities.v2",
+            "schema_version": "RealSaS.ProductCapabilities.v3",
             "product_name": "RealSaS",
-            "mode": "OPEN_EXISTING_COMPILED_CHARACTER",
+            "mode": "AWAKEN_AND_EDIT_COMPILED_CHARACTER",
             "service_ready": True,
-            "compile_available": False,
-            "compile_blockers": [
-                "PRODUCTION_MODEL_RELEASES_PENDING",
-                "PRODUCT_PROOF_CAPABILITY_BINDING_PENDING",
-                "PRODUCTREVISION_CAPABILITY_FINALIZATION_PENDING",
-            ],
+            "compile_available": compile_available,
+            "public_compile_gateway": gateway_configured,
+            "compile_blockers": blockers,
             "product_roles": [
                 "INPUT",
                 "SHAPE",
@@ -77,8 +158,10 @@ class LivingCompileApplication:
                 "existing_bundle_inspection": True,
                 "user_edits_require_requalification": True,
                 "runtime_preview_requires_proof_pass": True,
-                "compile_from_ui": False,
+                "compile_from_ui": compile_available,
+                "browser_receives_platform_internal_ids": False,
                 "heuristic_model_fallback_allowed": False,
+                "presentation_preview_has_product_authority": False,
             },
         }
 
@@ -89,8 +172,9 @@ class LivingCompileApplication:
             return 200, {"status": "ok", "service": "realsas-product-shell"}, "application/json"
         if method == "GET" and parsed.path == "/readyz":
             return 200, self.project_capabilities(), "application/json"
-        if method == "GET" and (parsed.path == "/" or parsed.path.startswith("/static/")):
-            data, content_type = self.static_bytes("/" if parsed.path == "/" else parsed.path[len("/static"):])
+        if method == "GET" and (parsed.path in {"/", "/workspace", "/workspace/"} or parsed.path.startswith("/static/")):
+            path = parsed.path if parsed.path in {"/", "/workspace", "/workspace/"} else parsed.path[len("/static"):]
+            data, content_type = self.static_bytes(path)
             return 200, data, content_type
         if method == "GET" and parsed.path == "/api/living/scene":
             return 200, build_scene(bundle_path((query.get("bundle") or [None])[0])), "application/json"
@@ -126,12 +210,26 @@ class LivingCompileApplication:
             }, "application/json"
         if method == "GET" and parsed.path == "/api/project":
             return 200, self.project_capabilities(), "application/json"
-        if method == "POST" and parsed.path in {"/api/input/upload", "/api/project", "/api/compile/start", "/api/compile"}:
-            raise LivingCompileError(
-                "production compile orchestration is intentionally fail-closed until PRODUCTION ModelReleases, product.proof and ProductRevision capability finalization are bound"
-            )
+        if method == "POST" and parsed.path == "/api/compile/start":
+            if not self._production_compile_enabled():
+                raise LivingCompileError(
+                    "production compile is fail-closed; configure the public product gateway and explicitly enable product compile"
+                )
+            if not isinstance(body, dict):
+                raise LivingCompileError("JSON request body required")
+            status, payload = self._gateway_json("POST", "/v1/product/compiles", body)
+            return status, self._public_payload(payload), "application/json"
         if method == "GET" and parsed.path == "/api/compile/status":
-            raise LivingCompileError("no product-shell compile job exists yet; production capability orchestration is not bound")
+            if not self._production_compile_enabled():
+                raise LivingCompileError("production compile is fail-closed")
+            compile_id = (query.get("id") or [""])[0].strip()
+            if not compile_id or len(compile_id) > 160:
+                raise LivingCompileError("valid public compile id required")
+            safe_id = urllib.parse.quote(compile_id, safe="-_.~")
+            status, payload = self._gateway_json("GET", f"/v1/product/compiles/{safe_id}")
+            return status, self._public_payload(payload), "application/json"
+        if method == "POST" and parsed.path in {"/api/input/upload", "/api/project", "/api/compile"}:
+            raise LivingCompileError("unsupported legacy product-shell write route")
         raise LivingCompileError(f"unsupported route: {method} {parsed.path}")
 
 
@@ -189,7 +287,7 @@ def serve(host: str = "127.0.0.1", port: int = 8765) -> None:
     app = LivingCompileApplication.default()
     server = ThreadingHTTPServer((host, int(port)), make_handler(app))
     print(f"RealSaS: http://{host}:{port}")
-    print("Product shell is ready. Compile remains fail-closed until production model/proof/revision bindings are complete.")
+    print("Awaken surface is ready. Production compile remains fail-closed unless the public gateway is configured and enabled.")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -199,7 +297,7 @@ def serve(host: str = "127.0.0.1", port: int = 8765) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="RealSaS product/editor shell")
+    parser = argparse.ArgumentParser(description="RealSaS Awaken and editable character workspace")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     args = parser.parse_args(argv)

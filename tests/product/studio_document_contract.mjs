@@ -112,10 +112,10 @@ assert.equal(timeline.pasteKeys(), 1);
 assert.equal(clip.tracks[0].keys.length, 3);
 assert.equal(timeline.selectedKeys.has(keyID('ROOT', 1.5)), true);
 
-timeline.moveSelectedKeys(-0.5);
-assert.equal(timeline.selectedKeys.has(keyID('ROOT', 1)), true);
+timeline.moveSelectedKeys(-0.25, {snapToFrames: false});
+assert.equal(timeline.selectedKeys.has(keyID('ROOT', 1.25)), true);
 timeline.setSelectedCurve('step');
-const moved = clip.tracks[0].keys.find((item) => Math.abs(item.time_seconds - 1) <= 1e-6);
+const moved = clip.tracks[0].keys.find((item) => Math.abs(item.time_seconds - 1.25) <= 1e-6);
 assert.equal(moved.curve, 'step');
 
 timeline.duplicateClip('WALK', 'WALK_COPY');
@@ -123,6 +123,6 @@ assert.equal(animation.length, 2);
 assert.equal(timeline.clipID, 'WALK_COPY');
 timeline.setDuration(4, {scaleKeys: true});
 assert.equal(timeline.clip().duration_seconds, 4);
-assert.equal(timeline.clip().tracks[0].keys.at(-1).time_seconds, 3);
+assert.equal(timeline.clip().tracks[0].keys.at(-1).time_seconds, 2.5);
 
 console.log('STUDIO_DOCUMENT_CONTRACT_PASS');

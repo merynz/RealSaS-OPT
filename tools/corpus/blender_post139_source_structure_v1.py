@@ -71,14 +71,34 @@ def clear_scene():
 def import_source(path):
     suffix = path.suffix.lower()
     if suffix in {".gltf", ".glb"}:
-        # Blender's glTF importer otherwise creates an Icosphere helper in the
-        # glTF_not_exported collection for bone display. That helper is not source
-        # geometry and would poison geometry/rig normalization and cross-format hashes.
-        bpy.ops.import_scene.gltf(filepath=str(path), disable_bone_shape=True)
+        bpy.ops.import_scene.gltf(filepath=str(path))
     elif suffix == ".fbx":
         bpy.ops.import_scene.fbx(filepath=str(path), use_anim=True)
     else:
         raise ValueError(f"POST139_BLENDER_FORMAT_UNSUPPORTED:{suffix}")
+
+
+def importer_display_helpers(armatures):
+    """Return importer-created display objects that are not authored source geometry.
+
+    Blender's glTF importer may create an Icosphere custom-shape object for bone
+    display and place it in a ``glTF_not_exported`` collection. Blender versions
+    differ in whether this helper can be disabled by an import option, so corpus
+    identity must not depend on that option. We exclude both explicit pose-bone
+    custom shapes and mesh objects from the importer's not-exported collection.
+    """
+    helpers = set()
+    for armature in armatures:
+        for pose_bone in armature.pose.bones:
+            if pose_bone.custom_shape is not None:
+                helpers.add(pose_bone.custom_shape)
+
+    collection = bpy.data.collections.get("glTF_not_exported")
+    if collection is not None:
+        for obj in collection.all_objects:
+            if obj.type == "MESH":
+                helpers.add(obj)
+    return helpers
 
 
 def world_vertices(obj):
@@ -243,7 +263,16 @@ def main():
     for armature in armatures:
         armature.data.pose_position = "REST"
     bpy.context.view_layer.update()
-    mesh_objects = sorted((obj for obj in bpy.context.scene.objects if obj.type == "MESH"), key=lambda o: o.name)
+
+    ignored_helpers = importer_display_helpers(armatures)
+    mesh_objects = sorted(
+        (
+            obj
+            for obj in bpy.context.scene.objects
+            if obj.type == "MESH" and obj not in ignored_helpers
+        ),
+        key=lambda o: o.name,
+    )
     if not mesh_objects:
         raise SystemExit("POST139_BLENDER_NO_MESH")
     center, scale = global_normalization(mesh_objects)
@@ -263,6 +292,7 @@ def main():
             "blender_version": bpy.app.version_string,
             "canonical_space": "IMPORT_NORMALIZED_RIGID_AND_SCALE_INVARIANT_V1",
             "cross_format_dedup_ready": True,
+            "ignored_import_helper_count": len(ignored_helpers),
         },
         "source": {
             "path": str(source),

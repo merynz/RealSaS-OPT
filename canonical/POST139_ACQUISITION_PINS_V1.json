@@ -1,0 +1,21 @@
+{
+  "schema": "RealSaS.Post139.AcquisitionPins.v1",
+  "authority": "RECOVERY_TRANSPORT_PINNING_ONLY__NOT_CORPUS_OR_TRAINING_AUTHORITY",
+  "kenney_direct_zip_by_source_id": {
+    "kenney-mini-characters": "https://kenney.nl/media/pages/assets/mini-characters/bfc7e272b4-1774770718/kenney_mini-characters.zip",
+    "kenney-blocky-characters": "https://kenney.nl/media/pages/assets/blocky-characters/8369c0cf30-1749547469/kenney_blocky-characters_20.zip",
+    "kenney-cube-pets": "https://kenney.nl/media/pages/assets/cube-pets/44e58e945f-1774520254/kenney_cube-pets_1.0.zip"
+  },
+  "quaternius_itch_fallback": {
+    "allowed": true,
+    "required_upload_name_token": "[Standard]",
+    "required_archive_extension": ".zip",
+    "reject_upload_name_tokens": ["[Pro]", "[Source]"]
+  },
+  "invariants": {
+    "publisher_page_remains_primary_provenance_evidence": true,
+    "pin_is_transport_locator_not_identity_authority": true,
+    "downloaded_archive_is_always_hashed_before_audit": true,
+    "paid_or_nonstandard_itch_upload_is_never_selected": true
+  }
+}

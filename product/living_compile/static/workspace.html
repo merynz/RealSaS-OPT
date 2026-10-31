@@ -3,17 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>RealSaS · Workspace</title>
+  <title>RealSaS · Studio</title>
   <link rel="stylesheet" href="/static/css/living_compile.css">
   <link rel="stylesheet" href="/static/css/workspace.css">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="mark">RS</span><div><strong>RealSaS</strong><small>Character Compiler</small></div></div>
+    <div class="brand"><span class="mark">RS</span><div><strong>RealSaS</strong><small>Studio</small></div></div>
     <div class="bundle-open">
       <input id="bundlePath" placeholder="Open a compiled character bundle">
       <button id="openBundle">OPEN</button>
-      <button id="compileCharacter" class="primary" disabled>COMPILE</button>
     </div>
     <div class="authority"><span id="proofBadge" class="badge">NO CHARACTER</span><span id="stateHash" class="mono"></span></div>
   </header>
@@ -31,7 +30,7 @@
   </nav>
 
   <section class="compile-strip">
-    <div class="compile-state"><span class="status-dot"></span><strong id="compileState">READY FOR EXISTING CHARACTER</strong><span id="compileDetail">Open a proof-qualified ProductRevision or return to Awaken.</span></div>
+    <div class="compile-state"><span class="status-dot"></span><strong id="compileState">READY FOR CHARACTER</strong><span id="compileDetail">Open a proof-qualified character or return to Awaken.</span></div>
     <div class="compile-meter"><div id="compileProgress" class="compile-progress"></div></div>
     <div class="budget"><span>PERFORMANCE</span><strong>&lt;30s preview</strong><strong>≤3 min market bar</strong><strong>≤60s goal</strong></div>
   </section>
@@ -100,5 +99,6 @@
   <div id="toast" class="toast"></div>
   <script type="module" src="/static/js/app.js"></script>
   <script type="module" src="/static/js/product_shell.js"></script>
+  <script type="module" src="/static/js/workspace_bootstrap.js"></script>
 </body>
 </html>

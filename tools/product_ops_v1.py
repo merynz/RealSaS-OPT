@@ -9,7 +9,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-DEFAULT_PLATFORM_URL = "http://127.0.0.1:8080"
+DEFAULT_PLATFORM_URL = "http://127.0.0.1:8780"
 SNAPSHOT_PATH = "/v1/operator/product/ops-snapshot"
 HEALTH_PATH = "/health/live"
 
@@ -122,7 +122,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--platform-url",
         default=os.environ.get("REALSAS_PLATFORM_URL", DEFAULT_PLATFORM_URL),
-        help="Platform API root (default: REALSAS_PLATFORM_URL or http://127.0.0.1:8080)",
+        help="Platform API root (default: REALSAS_PLATFORM_URL or http://127.0.0.1:8780)",
     )
     parser.add_argument(
         "--operator-token",

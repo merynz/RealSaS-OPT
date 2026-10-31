@@ -110,7 +110,7 @@ services:
     environment:
       REALSAS_PLATFORM_URL: http://platform-api:8080
       REALSAS_OPERATOR_TOKEN: ${REALSAS_OPERATOR_TOKEN:-}
-      REALSAS_WORKSPACE_MATERIALIZER_COMMAND: ${REALSAS_WORKSPACE_MATERIALIZER_COMMAND:-}
+      REALSAS_WORKSPACE_MATERIALIZER_COMMAND: ${REALSAS_WORKSPACE_MATERIALIZER_COMMAND:-python -m product.workspace_worker.materialize_workspace_v1}
       REALSAS_PRODUCT_WORKSPACE_WORKER_NAME: product-workspace-worker
     depends_on:
       platform-api:

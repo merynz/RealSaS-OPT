@@ -1,4 +1,5 @@
 import {StudioTimeline, keyID} from './studio_timeline.js';
+import {normalizePose} from './studio_control_semantics.js';
 
 const $ = (selector) => document.querySelector(selector);
 const clamp = (value, lo, hi) => Math.max(lo, Math.min(hi, value));
@@ -20,7 +21,6 @@ function boot() {
   let autosaveTimer = null;
   let playing = false;
   let lastTime = 0;
-  let drag = null;
 
   const legacy = {
     clipChange: $('#clipSelect').onchange,
@@ -42,6 +42,22 @@ function boot() {
     return timeline.clip(S.clip);
   }
 
+  function animationControls() {
+    const view = `V${S.view}`;
+    const rig = S.scene?.puppet?.rig || {};
+    const canonical = (rig.animator_controls || []).filter((item) => item.view_id === view);
+    if (canonical.length) return canonical;
+    return (rig.deform_controls || rig.controls || []).filter((item) => item.view_id === view);
+  }
+
+  function selectedAnimationControlID() {
+    const allowed = new Set(animationControls().map((item) => item.control_id));
+    const primary = studio.selection?.primary()?.control_id;
+    if (primary && allowed.has(primary)) return primary;
+    if (S.sel?.control && allowed.has(S.sel.control)) return S.sel.control;
+    return null;
+  }
+
   function transaction(label, mutate) {
     bindTimeline();
     const before = documentModel.snapshot();
@@ -51,6 +67,7 @@ function boot() {
     dirty.markDirty();
     scheduleSave();
     refresh();
+    previewAt(S.t);
     return true;
   }
 
@@ -135,26 +152,19 @@ function boot() {
     };
 
     $('#animClipName').onchange = (event) => {
-      if (!userClip()) return;
-      transaction('Rename animation clip', () => timeline.renameClip(event.target.value));
+      if (userClip()) transaction('Rename animation clip', () => timeline.renameClip(event.target.value));
     };
-
     $('#animDuration').onchange = (event) => {
-      if (!userClip()) return;
-      transaction('Change animation duration', () => timeline.setDuration(Number(event.target.value), {scaleKeys: event.shiftKey}));
+      if (userClip()) transaction('Change animation duration', () => timeline.setDuration(Number(event.target.value), {scaleKeys: event.shiftKey}));
     };
-
     $('#animLoop').onchange = (event) => {
-      if (!userClip()) return;
-      transaction('Change animation loop', () => timeline.setLoop(event.target.checked));
+      if (userClip()) transaction('Change animation loop', () => timeline.setLoop(event.target.checked));
     };
-
     $('#fps').onchange = (event) => {
-      if (!userClip()) return;
-      transaction('Change animation FPS', () => timeline.setFPS(Number(event.target.value)));
+      if (userClip()) transaction('Change animation FPS', () => timeline.setFPS(Number(event.target.value)));
     };
 
-    $('#addKey').onclick = () => addCurrentTransformKey();
+    $('#addKey').onclick = addCurrentTransformKey;
     $('#deleteKey').onclick = () => {
       if (!userClip()) return toast('Runtime clips are read-only', true);
       transaction('Delete animation keys', () => timeline.deleteKeys());
@@ -169,13 +179,11 @@ function boot() {
 
     document.querySelectorAll('[data-curve]').forEach((button) => {
       button.onclick = () => {
-        if (!userClip()) return;
-        transaction(`Set ${button.dataset.curve} interpolation`, () => timeline.setSelectedCurve(button.dataset.curve));
+        if (userClip()) transaction(`Set ${button.dataset.curve} interpolation`, () => timeline.setSelectedCurve(button.dataset.curve));
       };
     });
-
     for (const id of ['curveX1', 'curveY1', 'curveX2', 'curveY2']) {
-      $(id.startsWith('#') ? id : `#${id}`).onchange = () => {
+      $(`#${id}`).onchange = () => {
         if (!userClip()) return;
         const bezier = ['#curveX1', '#curveY1', '#curveX2', '#curveY2'].map((selector) => Number($(selector).value));
         transaction('Edit Bezier curve', () => timeline.setSelectedBezier(bezier));
@@ -226,45 +234,18 @@ function boot() {
       if (!userClip()) return;
       const hit = hitKey(event);
       if (hit) {
-        timeline.selectKey(hit.controlID, hit.time, {add: event.shiftKey || event.ctrlKey || event.metaKey, toggle: event.ctrlKey || event.metaKey});
-        drag = {startX: event.clientX, selected: timeline.selectedKeyObjects().map(({track, key}) => ({controlID: track.bone_id, time: key.time_seconds}))};
-        dope.setPointerCapture(event.pointerId);
+        timeline.selectKey(hit.controlID, hit.time, {
+          add: event.shiftKey || event.ctrlKey || event.metaKey,
+          toggle: event.ctrlKey || event.metaKey,
+        });
       } else {
         timeline.clearKeySelection();
-        const time = timeFromEvent(event);
-        S.t = timeline.setPlayhead(time, {snapToFrame: event.shiftKey});
+        S.t = timeline.setPlayhead(timeFromEvent(event), {snapToFrame: event.shiftKey});
         previewAt(S.t);
       }
       drawDopesheet();
       drawCurve();
     };
-    dope.onpointermove = (event) => {
-      if (!drag || !userClip()) return;
-      const clip = timeline.clip();
-      const bounds = dope.getBoundingClientRect();
-      const secondsPerPixel = clip.duration_seconds / Math.max(1, bounds.width);
-      const delta = (event.clientX - drag.startX) * secondsPerPixel;
-      if (Math.abs(delta) < 0.0001) return;
-      const before = documentModel.snapshot();
-      timeline.moveSelectedKeys(delta, {snapToFrames: !event.altKey});
-      const after = documentModel.snapshot();
-      documentModel.replace(before);
-      timeline.bind(S.ed.animation);
-      timeline.selectedKeys = new Set(drag.selected.map((item) => keyID(item.controlID, item.time)));
-      timeline.moveSelectedKeys(delta, {snapToFrames: !event.altKey});
-      documentModel.replace(after);
-      timeline.bind(S.ed.animation);
-      drawDopesheet();
-    };
-    dope.onpointerup = (event) => {
-      if (!drag || !userClip()) return;
-      dope.releasePointerCapture?.(event.pointerId);
-      drag = null;
-      dirty.markDirty();
-      scheduleSave();
-      refresh();
-    };
-    dope.onpointercancel = () => { drag = null; };
 
     timeline.addEventListener('change', () => {
       S.t = timeline.playhead;
@@ -297,20 +278,14 @@ function boot() {
   }
 
   function addCurrentTransformKey() {
-    const clip = userClip();
-    if (!clip) return toast('Create or select a user clip', true);
-    const controlID = studio.selection?.primary()?.control_id || S.sel?.control;
-    if (!controlID) return toast('Select a control to key', true);
-    const edit = S.ed.rig.find((item) => item.control_id === controlID) || {translation_xy: [0, 0], rotation_degrees: 0};
+    if (!userClip()) return toast('Create or select a user clip', true);
+    const controlID = selectedAnimationControlID();
+    if (!controlID) return toast('Select an animator control to key', true);
+    const current = normalizePose(studio.animationPreviewPose?.get(controlID) || timeline.sample(controlID, S.t));
     transaction('Add animation key', () => {
       timeline.setPlayhead(S.t, {snapToFrame: true});
-      timeline.upsertTransformKey(controlID, {
-        translation_xy: [...(edit.translation_xy || [0, 0])],
-        rotation_degrees: Number(edit.rotation_degrees || 0),
-        scale_xy: [1, 1],
-      }, {curve: normalizedCurve($('#curveSelect').value)});
+      timeline.upsertTransformKey(controlID, current, {curve: normalizedCurve($('#curveSelect').value)});
     });
-    previewAt(S.t);
   }
 
   function nudge(direction) {
@@ -353,120 +328,10 @@ function boot() {
   function previewAt(time) {
     const clip = userClip();
     if (!clip) return;
-    S.previewPose.clear();
-    for (const control of currentControls()) {
-      const sampled = timeline.sample(control.control_id, time);
-      const base = S.ed.rig.find((item) => item.control_id === control.control_id);
-      const pose = sampled || base;
-      if (pose) S.previewPose.set(control.control_id, {
-        translation_xy: [...(pose.translation_xy || [0, 0])],
-        rotation_degrees: Number(pose.rotation_degrees || 0),
-        scale_xy: [...(pose.scale_xy || [1, 1])],
-      });
-    }
-    S.frame = {frame: {mesh_vertices_by_id: buildDeformedMeshes()}};
-    $('#timeReadout').textContent = `${time.toFixed(3)} / ${clip.duration_seconds.toFixed(3)}`;
-  }
-
-  function currentControls() {
-    const view = `V${S.view}`;
-    return S.scene?.puppet?.rig?.controls?.filter((item) => item.view_id === view) || [];
-  }
-
-  function currentMeshes() {
-    const view = `V${S.view}`;
-    return S.scene?.puppet?.meshes?.filter((item) => item.view_id === view) || [];
-  }
-
-  function parentMap() {
-    const map = new Map();
-    const valid = new Set(currentControls().map((item) => item.control_id));
-    for (const edge of S.scene?.puppet?.rig?.edges || []) {
-      if (valid.has(edge.child_control_id) && valid.has(edge.parent_control_id)) map.set(edge.child_control_id, edge.parent_control_id);
-    }
-    return map;
-  }
-
-  function controlMap() {
-    return new Map(currentControls().map((item) => [item.control_id, item]));
-  }
-
-  function chainFor(controlID, parents) {
-    const chain = [];
-    const seen = new Set();
-    let current = controlID;
-    while (current && !seen.has(current)) {
-      seen.add(current);
-      chain.unshift(current);
-      current = parents.get(current);
-    }
-    return chain;
-  }
-
-  function localPose(controlID) {
-    const preview = S.previewPose.get(controlID);
-    const edit = S.ed.rig.find((item) => item.control_id === controlID);
-    return preview || edit || {translation_xy: [0, 0], rotation_degrees: 0, scale_xy: [1, 1]};
-  }
-
-  function applyControlChain(point, controlID, controls, parents) {
-    let p = [...point];
-    const prior = [];
-    for (const id of chainFor(controlID, parents)) {
-      const control = controls.get(id);
-      if (!control) continue;
-      let anchor = [...control.anchor];
-      for (const transform of prior) anchor = applyLocal(anchor, transform.anchor, transform.pose);
-      const pose = localPose(id);
-      p = applyLocal(p, anchor, pose);
-      prior.push({anchor, pose});
-    }
-    return p;
-  }
-
-  function applyLocal(point, anchor, pose) {
-    const sx = Number(pose.scale_xy?.[0] ?? 1);
-    const sy = Number(pose.scale_xy?.[1] ?? 1);
-    const angle = Number(pose.rotation_degrees || 0) * Math.PI / 180;
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-    const x = (point[0] - anchor[0]) * sx;
-    const y = (point[1] - anchor[1]) * sy;
-    return [
-      anchor[0] + x * cos - y * sin + Number(pose.translation_xy?.[0] || 0),
-      anchor[1] + x * sin + y * cos + Number(pose.translation_xy?.[1] || 0),
-    ];
-  }
-
-  function buildDeformedMeshes() {
-    const result = {};
-    const controls = controlMap();
-    const parents = parentMap();
-    for (const mesh of currentMeshes()) {
-      result[mesh.mesh_id] = mesh.vertices.map((base, vertexIndex) => {
-        const edit = S.ed.mesh.find((item) => item.mesh_id === mesh.mesh_id && item.vertex_index === vertexIndex)?.translation_xy || [0, 0];
-        const source = [base[0] + edit[0], base[1] + edit[1]];
-        const weights = mesh.weight_solution?.per_vertex_weights?.[vertexIndex] || [];
-        let sum = 0;
-        let x = 0;
-        let y = 0;
-        for (const [controlID, rawWeight] of weights) {
-          const weight = clamp(Number(rawWeight || 0), 0, 1);
-          if (!weight || !controls.has(controlID)) continue;
-          const transformed = applyControlChain(source, controlID, controls, parents);
-          x += transformed[0] * weight;
-          y += transformed[1] * weight;
-          sum += weight;
-        }
-        if (sum < 1) {
-          x += source[0] * (1 - sum);
-          y += source[1] * (1 - sum);
-          sum = 1;
-        }
-        return sum > 0 ? [x / sum, y / sum] : source;
-      });
-    }
-    return result;
+    window.dispatchEvent(new CustomEvent('realsas:studio-animation-pose-changed', {
+      detail: {clip_id: S.clip, time_seconds: Number(time)},
+    }));
+    $('#timeReadout').textContent = `${Number(time).toFixed(3)} / ${Number(clip.duration_seconds).toFixed(3)}`;
   }
 
   function refresh() {
@@ -523,23 +388,20 @@ function boot() {
     ctx.globalAlpha = 1;
     tracks.forEach((track, row) => {
       const y = 28 + row * rowHeight;
+      const controlID = track.control_id || track.bone_id;
       ctx.fillStyle = '#71879a';
       ctx.font = '11px Consolas, monospace';
-      ctx.fillText(track.bone_id, 6, y + 4);
+      ctx.fillText(controlID, 6, y + 4);
       for (const key of track.keys || []) {
         const x = key.time_seconds / Math.max(0.0001, clip.duration_seconds) * canvas.width;
-        const selected = timeline.selectedKeys.has(keyID(track.bone_id, key.time_seconds));
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(Math.PI / 4);
+        const selected = timeline.selectedKeys.has(keyID(controlID, key.time_seconds));
+        ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4);
         ctx.fillStyle = selected ? '#ffffff' : '#ffd36b';
-        ctx.fillRect(-5, -5, 10, 10);
-        ctx.restore();
+        ctx.fillRect(-5, -5, 10, 10); ctx.restore();
       }
     });
     const playheadX = S.t / Math.max(0.0001, clip.duration_seconds) * canvas.width;
-    ctx.strokeStyle = '#ff6c77';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#ff6c77'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(playheadX, 0); ctx.lineTo(playheadX, canvas.height); ctx.stroke();
     $('#timeReadout').textContent = `${S.t.toFixed(3)} / ${clip.duration_seconds.toFixed(3)}`;
   }
@@ -556,13 +418,11 @@ function boot() {
     let distance = 12;
     (clip.tracks || []).forEach((track, row) => {
       const ky = 28 + row * rowHeight;
+      const controlID = track.control_id || track.bone_id;
       for (const key of track.keys || []) {
         const kx = key.time_seconds / Math.max(0.0001, clip.duration_seconds) * canvas.width;
         const d = Math.hypot(kx - x, ky - y);
-        if (d < distance) {
-          distance = d;
-          best = {controlID: track.bone_id, time: key.time_seconds};
-        }
+        if (d < distance) { distance = d; best = {controlID, time: key.time_seconds}; }
       }
     });
     return best;
@@ -580,15 +440,11 @@ function boot() {
     const selected = timeline.selectedKeyObjects()[0]?.key;
     const bezier = selected?.bezier || [0.25, 0.1, 0.25, 1];
     ['#curveX1', '#curveY1', '#curveX2', '#curveY2'].forEach((selector, index) => { $(selector).value = Number(bezier[index]).toFixed(2); });
-    ctx.fillStyle = '#090d12';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = '#253342';
-    ctx.strokeRect(12, 12, canvas.width - 24, canvas.height - 24);
-    ctx.strokeStyle = '#6e8296';
-    ctx.beginPath(); ctx.moveTo(12, canvas.height - 12); ctx.lineTo(canvas.width - 12, 12); ctx.stroke();
+    ctx.fillStyle = '#090d12'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#253342'; ctx.strokeRect(12, 12, canvas.width - 24, canvas.height - 24);
+    ctx.strokeStyle = '#6e8296'; ctx.beginPath(); ctx.moveTo(12, canvas.height - 12); ctx.lineTo(canvas.width - 12, 12); ctx.stroke();
     if (selected?.curve === 'step') {
-      ctx.strokeStyle = '#ffd36b';
-      ctx.beginPath(); ctx.moveTo(12, canvas.height - 12); ctx.lineTo(canvas.width - 12, canvas.height - 12); ctx.lineTo(canvas.width - 12, 12); ctx.stroke();
+      ctx.strokeStyle = '#ffd36b'; ctx.beginPath(); ctx.moveTo(12, canvas.height - 12); ctx.lineTo(canvas.width - 12, canvas.height - 12); ctx.lineTo(canvas.width - 12, 12); ctx.stroke();
       return;
     }
     ctx.strokeStyle = selected?.curve === 'bezier' ? '#ffd36b' : '#8dd2ff';

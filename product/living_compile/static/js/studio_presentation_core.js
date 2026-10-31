@@ -12,6 +12,7 @@ export function normalizePresentationOverride(raw, canonicalOrder) {
   const canonical = [...canonicalOrder];
   if (!raw || typeof raw !== 'object') {
     return {
+      view_id: null,
       source_graphics_order_back_to_front: canonical,
       slot_order_back_to_front: canonical,
       hidden_mesh_ids: [],
@@ -31,6 +32,7 @@ export function normalizePresentationOverride(raw, canonicalOrder) {
   if (hidden.some((id) => !canonicalSet.has(id))) throw new Error('hidden slot is not canonical');
   const departure = hidden.length > 0 || order.some((id, index) => id !== canonical[index]);
   return {
+    view_id: raw.view_id ? String(raw.view_id) : null,
     source_graphics_order_back_to_front: canonical,
     slot_order_back_to_front: order,
     hidden_mesh_ids: hidden,
@@ -62,8 +64,8 @@ export function setSlotHidden(raw, canonicalOrder, meshID, hidden) {
   return normalizePresentationOverride(state, canonicalOrder);
 }
 
-export function resetPresentationOverride(canonicalOrder) {
-  return normalizePresentationOverride(null, canonicalOrder);
+export function resetPresentationOverride(canonicalOrder, viewID = null) {
+  return {...normalizePresentationOverride(null, canonicalOrder), view_id: viewID ? String(viewID) : null};
 }
 
 function pair(value, fallback) {
@@ -77,6 +79,7 @@ export function normalizeBindingEdit(raw, bindingID, defaultControlID) {
   const rotation = Number(row.rotation_degrees ?? 0);
   const scale = pair(row.scale_xy, [1, 1]).map((value) => Math.max(0.01, Math.min(100, value)));
   return {
+    view_id: row.view_id ? String(row.view_id) : null,
     binding_id: String(bindingID),
     primary_final_control_id: String(row.primary_final_control_id || defaultControlID || ''),
     translation_xy: pair(row.translation_xy, [0, 0]),

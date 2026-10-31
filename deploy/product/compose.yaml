@@ -63,9 +63,10 @@ services:
     build:
       context: ../..
       dockerfile: deploy/product/Dockerfile.product
-    command: ["python", "-m", "product.living_compile.server", "--host", "0.0.0.0", "--port", "8765"]
+    command: ["python", "-m", "product.living_compile.public_server", "--host", "0.0.0.0", "--port", "8765"]
     environment:
       REALSAS_PUBLIC_HTTP: "1"
+      REALSAS_PRODUCT_COOKIE_SECURE: ${REALSAS_PRODUCT_COOKIE_SECURE:-0}
       REALSAS_PRODUCT_GATEWAY_URL: http://platform-api:8080
       REALSAS_PRODUCT_GATEWAY_TOKEN: ${REALSAS_PRODUCT_GATEWAY_TOKEN:-}
       REALSAS_PRODUCT_COMPILE_ENABLED: ${REALSAS_PRODUCT_COMPILE_ENABLED:-0}

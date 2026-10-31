@@ -164,7 +164,6 @@ func topologicalOrder(byID map[string]Descriptor) ([]Descriptor, error) {
 				ready = append(ready, child)
 				sort.Strings(ready)
 			}
-		}
 	}
 	if len(out) != len(byID) {
 		var cyclic []string
@@ -195,6 +194,83 @@ func (r *Registry) Resolve(targets ...string) ([]Descriptor, error) {
 	required := map[string]struct{}{}
 	var visit func(string) error
 	visit = func(id string) error {
+		descriptor, ok := r.byID[id]
+		if !ok {
+			return fmt.Errorf("unknown target capability %s", id)
+		}
+		if _, ok := required[id]; ok {
+			return nil
+		}
+		required[id] = struct{}{}
+		for _, dep := range descriptor.Dependencies {
+			if err := visit(dep); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	for _, target := range targets {
+		if err := visit(target); err != nil {
+			return nil, err
+		}
+	}
+	out := make([]Descriptor, 0, len(required))
+	for _, descriptor := range r.ordered {
+		if _, ok := required[descriptor.ID]; ok {
+			out = append(out, descriptor)
+		}
+	}
+	return out, nil
+}
+
+// ResolveWithSatisfied resolves a target graph while treating the supplied
+// capabilities as immutable, already-qualified leaves from a base
+// ProductRevision. A satisfied dependency is not executed and its own parents
+// are not traversed. Callers must seed the exact qualified artifacts for every
+// satisfied capability into the new Attempt; this method only defines execution
+// planning and never grants authority by itself.
+func (r *Registry) ResolveWithSatisfied(targets, satisfied []string) ([]Descriptor, error) {
+	if len(targets) == 0 {
+		return nil, errors.New("at least one target capability is required")
+	}
+	if len(satisfied) == 0 {
+		return nil, errors.New("satisfied capability set cannot be empty")
+	}
+	full, err := r.Resolve(targets...)
+	if err != nil {
+		return nil, err
+	}
+	closure := make(map[string]struct{}, len(full))
+	for _, descriptor := range full {
+		closure[descriptor.ID] = struct{}{}
+	}
+	targetSet := map[string]struct{}{}
+	for _, target := range targets {
+		targetSet[target] = struct{}{}
+	}
+	satisfiedSet := make(map[string]struct{}, len(satisfied))
+	for _, id := range satisfied {
+		if _, ok := r.byID[id]; !ok {
+			return nil, fmt.Errorf("unknown satisfied capability %s", id)
+		}
+		if _, ok := closure[id]; !ok {
+			return nil, fmt.Errorf("satisfied capability %s is outside target closure", id)
+		}
+		if _, isTarget := targetSet[id]; isTarget {
+			return nil, fmt.Errorf("target capability %s cannot be satisfied by base state", id)
+		}
+		if _, duplicate := satisfiedSet[id]; duplicate {
+			return nil, fmt.Errorf("duplicate satisfied capability %s", id)
+		}
+		satisfiedSet[id] = struct{}{}
+	}
+
+	required := map[string]struct{}{}
+	var visit func(string) error
+	visit = func(id string) error {
+		if _, satisfied := satisfiedSet[id]; satisfied {
+			return nil
+		}
 		descriptor, ok := r.byID[id]
 		if !ok {
 			return fmt.Errorf("unknown target capability %s", id)

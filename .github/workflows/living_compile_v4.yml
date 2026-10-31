@@ -51,6 +51,7 @@ jobs:
         run: >-
           PYTHONPATH=. python -m unittest -v
           tests.product.test_living_compile_v4
+          tests.product.test_mesh_topology_authoring
           tests.product.test_public_workspace_handoff
           tests.product.test_studio_persistence
           tests.product.test_intake_worker
@@ -68,6 +69,7 @@ jobs:
           experiments/single_family_e2e_v1/export_bundle_v1.py
           tests/product/test_deploy_contract.py
           tests/product/test_studio_persistence.py
+          tests/product/test_mesh_topology_authoring.py
           tests/product/test_workspace_materializer_v1.py
           tests/product/test_exact8_product_compile_tool.py
       - name: JavaScript syntax
@@ -80,6 +82,8 @@ jobs:
       - name: Studio editor-core contracts
         run: |
           node tests/product/studio_document_contract.mjs
+          node tests/product/studio_mesh_document_contract.mjs
+          node tests/product/studio_mesh_topology_core_contract.mjs
           node tests/product/studio_timeline_view_contract.mjs
           node tests/product/studio_weight_core_contract.mjs
           node tests/product/studio_rig_core_contract.mjs

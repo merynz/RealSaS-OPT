@@ -1,8 +1,14 @@
-"""Acquire publisher-controlled corpus sources and emit an exact raw inventory.
+"""Acquire publisher-controlled corpus sources and emit an exact source inventory.
 
-This utility records byte identity and representation structure.  It does not
-mint training authority.  Every raw file is retained in the ledger even when it
-is not a structural-audit candidate.
+Two inventories are intentionally distinct:
+
+* publisher tree: every authored file/path exposed by the publisher source;
+* acquired byte closure: the canonical structural representation lane and its
+  appearance/buffer dependencies, with exact SHA-256 and byte sizes.
+
+This lets RealSaS know the complete pack structure without hammering Google
+Drive by downloading redundant Blend/OBJ/FBX/glTF copies of the same actor.
+Training authority is never minted here.
 """
 from __future__ import annotations
 
@@ -12,6 +18,7 @@ import html as html_lib
 import json
 import re
 import shutil
+import time
 import urllib.parse
 import urllib.request
 import zipfile
@@ -20,11 +27,13 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 SCHEMA_RECEIPT = "RealSaS.Post139.AcquisitionReceipt.v1"
+SCHEMA_PUBLISHER_TREE = "RealSaS.Post139.PublisherTree.v1"
 SCHEMA_LEDGER = "RealSaS.Post139.RawFileLedger.v1"
 SCHEMA_INVENTORY = "RealSaS.Post139.SourceInventory.v1"
 SCHEMA_MANIFEST = "RealSaS.Post139.CandidateManifest.v1"
 MODEL_EXTENSIONS = {".gltf", ".glb", ".fbx", ".blend", ".obj"}
 PREFERRED_AUDIT_FORMATS = (".glb", ".gltf", ".fbx")
+DEPENDENCY_EXTENSIONS = {".bin", ".png", ".jpg", ".jpeg", ".webp", ".ktx", ".ktx2", ".dds", ".tga", ".bmp"}
 FORMAT_DIR_NAMES = {
     "fbx", "gltf", "glb", "obj", "blend", "blender", "models_fbx",
     "models_gltf", "models_glb", "models_obj", "models_blend",
@@ -58,8 +67,12 @@ def write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def read_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def load_registry(path: Path) -> dict[str, Any]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = read_json(path)
     if payload.get("schema") != "RealSaS.Post139.SourceRegistry.v1":
         raise ValueError("POST139_SOURCE_REGISTRY_SCHEMA_MISMATCH")
     return payload
@@ -100,8 +113,8 @@ def quaternius_drive_folder(row: dict[str, Any]) -> tuple[str, str]:
     acq = row["acquisition"]
     owner, name = acq["publisher_repository"].split("/", 1)
     page_url = f"https://raw.githubusercontent.com/{owner}/{name}/main/{acq['page_path']}"
-    html = fetch_text(page_url)
-    matches = list(dict.fromkeys(re.findall(r"https://drive\.google\.com/drive/folders/([A-Za-z0-9_-]+)", html)))
+    document = fetch_text(page_url)
+    matches = list(dict.fromkeys(re.findall(r"https://drive\.google\.com/drive/folders/([A-Za-z0-9_-]+)", document)))
     if len(matches) != 1:
         raise ValueError(f"POST139_QUATERNIUS_DRIVE_RESOLUTION:{row['id']}:{matches}")
     return matches[0], page_url
@@ -114,13 +127,37 @@ def kenney_official_zip(row: dict[str, Any]) -> tuple[str, str]:
     relative = re.findall(r"(?:href|data-url|data-download)=[\"'](/media/pages/assets/[^\"']+?\.zip)[\"']", document, flags=re.IGNORECASE)
     matches = list(dict.fromkeys(absolute + [urllib.parse.urljoin(page_url, value) for value in relative]))
     if not matches:
-        # The current Kenney page places the real ZIP behind the donation modal.
-        # Keep a broader final pass but still require a single official media URL.
         paths = re.findall(r"/media/pages/assets/[^\"'<> ]+?\.zip", document, flags=re.IGNORECASE)
         matches = list(dict.fromkeys(urllib.parse.urljoin(page_url, value) for value in paths))
     if len(matches) != 1:
         raise ValueError(f"POST139_KENNEY_ZIP_RESOLUTION:{row['id']}:{matches}")
     return matches[0], page_url
+
+
+def local_publisher_tree(raw: Path, source_id: str, transport: str) -> dict[str, Any]:
+    rows = []
+    extensions: Counter[str] = Counter()
+    for path in sorted(p for p in raw.rglob("*") if p.is_file()):
+        relative = path.relative_to(raw).as_posix()
+        extension = path.suffix.lower() or "<none>"
+        extensions[extension] += 1
+        rows.append({
+            "path": relative,
+            "extension": extension,
+            "size_bytes": path.stat().st_size,
+            "sha256": sha256_file(path),
+            "byte_state": "ACQUIRED_HASHED",
+        })
+    payload = {
+        "schema": SCHEMA_PUBLISHER_TREE,
+        "source_id": source_id,
+        "transport": transport,
+        "file_count": len(rows),
+        "extension_counts": dict(sorted(extensions.items())),
+        "files": rows,
+    }
+    payload["tree_digest"] = digest(rows)
+    return payload
 
 
 def acquire_zip(row: dict[str, Any], url: str, out: Path, raw: Path, receipt: dict[str, Any]) -> None:
@@ -139,6 +176,116 @@ def acquire_zip(row: dict[str, Any], url: str, out: Path, raw: Path, receipt: di
         "resolved_url": url,
         "archive_sha256": actual_sha,
         "archive_size_bytes": actual_size,
+    })
+
+
+def choose_quaternius_lane(files: list[Any]) -> tuple[str, list[Any]]:
+    by_extension: defaultdict[str, list[Any]] = defaultdict(list)
+    for item in files:
+        by_extension[Path(item.path).suffix.lower()].append(item)
+    lane = next((extension for extension in PREFERRED_AUDIT_FORMATS if by_extension.get(extension)), None)
+    if lane is None:
+        raise RuntimeError("POST139_QUATERNIUS_NO_STRUCTURAL_LANE")
+    selected = []
+    for item in files:
+        extension = Path(item.path).suffix.lower()
+        if extension == lane or extension in DEPENDENCY_EXTENSIONS:
+            selected.append(item)
+    return lane, selected
+
+
+def download_gdrive_item(gdown: Any, item: Any, raw: Path, attempts: int = 6) -> Path:
+    target = raw / item.path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    delays = [0, 4, 12, 30, 60, 90]
+    last_error: Exception | None = None
+    for attempt in range(attempts):
+        if target.is_file() and target.stat().st_size > 0:
+            return target
+        if delays[attempt]:
+            time.sleep(delays[attempt])
+        try:
+            result = gdown.download(
+                url=f"https://drive.google.com/uc?id={item.id}",
+                output=str(target),
+                quiet=True,
+                use_cookies=False,
+                resume=True,
+            )
+            if result and target.is_file() and target.stat().st_size > 0:
+                return target
+        except Exception as exc:
+            last_error = exc
+    raise RuntimeError(f"POST139_GDRIVE_FILE_DOWNLOAD_FAILED:{item.id}:{item.path}:{last_error}")
+
+
+def acquire_quaternius(row: dict[str, Any], out: Path, raw: Path, receipt: dict[str, Any]) -> None:
+    folder_id, page_url = quaternius_drive_folder(row)
+    try:
+        import gdown  # type: ignore
+    except ImportError as exc:
+        raise RuntimeError("POST139_GDOWN_REQUIRED") from exc
+    url = f"https://drive.google.com/drive/folders/{folder_id}"
+    listing = gdown.download_folder(
+        url=url,
+        output=str(raw),
+        quiet=True,
+        use_cookies=False,
+        remaining_ok=True,
+        skip_download=True,
+    )
+    if listing is None or not listing:
+        raise RuntimeError(f"POST139_GDOWN_FOLDER_LIST_FAILED:{row['id']}")
+    publisher_rows = []
+    extensions: Counter[str] = Counter()
+    for item in listing:
+        extension = Path(item.path).suffix.lower() or "<none>"
+        extensions[extension] += 1
+        publisher_rows.append({
+            "file_id": item.id,
+            "path": PurePosixPath(item.path).as_posix(),
+            "extension": extension,
+            "byte_state": "PUBLISHER_LISTED_NOT_ACQUIRED",
+        })
+    lane, selected = choose_quaternius_lane(listing)
+    acquired = []
+    for item in selected:
+        acquired.append(download_gdrive_item(gdown, item, raw))
+    acquired_by_id = {item.id: raw / item.path for item in selected if (raw / item.path).is_file()}
+    for row_entry in publisher_rows:
+        if row_entry["file_id"] in acquired_by_id:
+            path = acquired_by_id[row_entry["file_id"]]
+            row_entry.update({
+                "byte_state": "ACQUIRED_HASHED",
+                "size_bytes": path.stat().st_size,
+                "sha256": sha256_file(path),
+            })
+    publisher_tree = {
+        "schema": SCHEMA_PUBLISHER_TREE,
+        "source_id": row["id"],
+        "transport": "QUATERNIUS_OFFICIAL_PUBLIC_DRIVE",
+        "resolved_drive_folder_id": folder_id,
+        "file_count": len(publisher_rows),
+        "extension_counts": dict(sorted(extensions.items())),
+        "canonical_lane_extension": lane,
+        "acquired_file_count": len(acquired),
+        "files": publisher_rows,
+    }
+    publisher_tree["tree_digest"] = digest([
+        {"file_id": item["file_id"], "path": item["path"], "extension": item["extension"]}
+        for item in publisher_rows
+    ])
+    write_json(out / "PUBLISHER_TREE.json", publisher_tree)
+    receipt.update({
+        "status": "ACQUIRED_VERIFIED",
+        "publisher_page_raw_url": page_url,
+        "resolved_drive_folder_id": folder_id,
+        "resolved_url": url,
+        "publisher_file_count": len(publisher_rows),
+        "publisher_tree_digest": publisher_tree["tree_digest"],
+        "canonical_lane_extension": lane,
+        "downloaded_file_count": len(acquired),
+        "byte_scope": "CANONICAL_STRUCTURAL_LANE_PLUS_APPEARANCE_AND_BUFFER_DEPENDENCIES",
     })
 
 
@@ -176,20 +323,7 @@ def acquire(args: argparse.Namespace) -> None:
             "repository": repo, "ref": ref,
         })
     elif kind == "QUATERNIUS_OFFICIAL_PAGE_DRIVE":
-        folder_id, page_url = quaternius_drive_folder(row)
-        try:
-            import gdown  # type: ignore
-        except ImportError as exc:
-            raise RuntimeError("POST139_GDOWN_REQUIRED") from exc
-        url = f"https://drive.google.com/drive/folders/{folder_id}"
-        downloaded = gdown.download_folder(url=url, output=str(raw), quiet=False, use_cookies=False, remaining_ok=True)
-        if downloaded is None:
-            raise RuntimeError(f"POST139_GDOWN_FOLDER_FAILED:{row['id']}")
-        receipt.update({
-            "status": "ACQUIRED_VERIFIED", "publisher_page_raw_url": page_url,
-            "resolved_drive_folder_id": folder_id, "resolved_url": url,
-            "downloaded_file_count": len(downloaded),
-        })
+        acquire_quaternius(row, out, raw, receipt)
     elif kind == "KENNEY_OFFICIAL_PAGE_PENDING_RESOLVER":
         url, page_url = kenney_official_zip(row)
         acquire_zip(row, url, out, raw, receipt)
@@ -206,6 +340,8 @@ def acquire(args: argparse.Namespace) -> None:
     files = [path for path in raw.rglob("*") if path.is_file()]
     if not files:
         raise RuntimeError(f"POST139_ACQUISITION_EMPTY:{row['id']}")
+    if not (out / "PUBLISHER_TREE.json").is_file():
+        write_json(out / "PUBLISHER_TREE.json", local_publisher_tree(raw, row["id"], kind))
     receipt["raw_file_count"] = len(files)
     receipt["raw_tree_digest"] = digest(sorted((path.relative_to(raw).as_posix(), path.stat().st_size, sha256_file(path)) for path in files))
     write_json(out / "ACQUISITION_RECEIPT.json", receipt)
@@ -224,14 +360,37 @@ def representation_key(relative_path: str) -> str:
     return "/".join(slug(part) for part in stripped.parts)
 
 
+def publisher_representation_groups(publisher_tree: dict[str, Any] | None) -> list[dict[str, Any]]:
+    if not publisher_tree:
+        return []
+    groups: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in publisher_tree.get("files", []):
+        if row.get("extension") not in MODEL_EXTENSIONS:
+            continue
+        groups[representation_key(row["path"])].append({
+            key: row[key]
+            for key in ("file_id", "path", "extension", "byte_state", "size_bytes", "sha256")
+            if key in row
+        })
+    result = []
+    for key, rows in sorted(groups.items()):
+        rows = sorted(rows, key=lambda item: (item["extension"], item["path"]))
+        result.append({
+            "representation_key": key,
+            "representations": rows,
+            "format_counts": dict(sorted(Counter(item["extension"] for item in rows).items())),
+        })
+    return result
+
+
 def inventory(args: argparse.Namespace) -> None:
     root = Path(args.source_root).resolve()
     out = Path(args.out).resolve()
     if not root.is_dir():
         raise SystemExit(f"POST139_SOURCE_ROOT_MISSING:{root}")
-    source_meta = None
-    if args.registry:
-        source_meta = source_row(load_registry(Path(args.registry)), args.source_id)
+    source_meta = source_row(load_registry(Path(args.registry)), args.source_id) if args.registry else None
+    publisher_tree_path = root.parent / "PUBLISHER_TREE.json"
+    publisher_tree = read_json(publisher_tree_path) if publisher_tree_path.is_file() else None
     files = sorted(path for path in root.rglob("*") if path.is_file())
     ledger_rows = []
     extension_counts: Counter[str] = Counter()
@@ -283,6 +442,7 @@ def inventory(args: argparse.Namespace) -> None:
                 "provisional_role": "STRUCTURAL_AUDIT_CANDIDATE",
             })
 
+    publisher_groups = publisher_representation_groups(publisher_tree)
     inventory_payload = {
         "schema": SCHEMA_INVENTORY, "source_id": args.source_id, "source_root": str(root),
         "raw_file_count": len(ledger_rows), "raw_total_bytes": ledger["total_bytes"],
@@ -290,6 +450,11 @@ def inventory(args: argparse.Namespace) -> None:
         "model_file_count": sum(1 for row in ledger_rows if row["extension"] in MODEL_EXTENSIONS),
         "representation_group_count": len(representation_rows), "audit_candidate_count": len(candidates),
         "extension_counts": ledger["extension_counts"], "representation_groups": representation_rows,
+        "publisher_file_count": publisher_tree.get("file_count") if publisher_tree else len(ledger_rows),
+        "publisher_extension_counts": publisher_tree.get("extension_counts") if publisher_tree else ledger["extension_counts"],
+        "publisher_tree_digest": publisher_tree.get("tree_digest") if publisher_tree else None,
+        "publisher_representation_group_count": len(publisher_groups),
+        "publisher_representation_groups": publisher_groups,
     }
     manifest = {
         "schema": SCHEMA_MANIFEST, "source_id": args.source_id, "source_root": str(root),

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>RealSaS</title>
-  <meta name="description" content="Compile a source character into an editable living puppet.">
+  <meta name="description" content="Awaken a source character into an editable living puppet.">
   <link rel="stylesheet" href="/static/css/awaken.css">
 </head>
 <body>
@@ -14,48 +14,35 @@
     <div class="scene-grid" aria-hidden="true"></div>
     <div class="scene-scan" aria-hidden="true"></div>
     <div class="scene-vignette" aria-hidden="true"></div>
+    <div class="scene-aperture" aria-hidden="true"></div>
 
-    <header class="masthead">
-      <div class="brandline">
-        <span class="brandmark">RS</span>
-        <div class="brandcopy">
-          <strong>RealSaS</strong>
-          <span>character compiler</span>
-        </div>
-      </div>
+    <header class="masthead" aria-label="RealSaS">
+      <span class="brandmark">RS</span>
       <div id="mastStatus" class="mast-status"><i></i><span>INTAKE READY</span></div>
     </header>
 
-    <section class="stage-wrap" aria-label="Character compile stage">
-      <div class="stage-core">
-        <section class="hero">
-          <div class="hero-copy">
-            <p class="kicker">SOURCE → PUPPET</p>
-            <h1>Bring it to life.<span>Compile the character. Keep the character.</span></h1>
-            <p class="subline">Your artwork remains the source. RealSaS resolves structure, mechanics, appearance and motion into one editable puppet.</p>
-          </div>
+    <section class="stage-wrap" aria-label="Character awakening stage">
+      <section class="hero">
+        <div class="input-orbit">
+          <div class="orbit-ring orbit-ring-a" aria-hidden="true"></div>
+          <div class="orbit-ring orbit-ring-b" aria-hidden="true"></div>
+          <div class="pedestal-glow" aria-hidden="true"></div>
 
-          <div class="input-orbit">
-            <div class="orbit-ring" aria-hidden="true"></div>
-            <label id="dropzone" class="dropzone" for="sourceInput">
-              <input id="sourceInput" type="file" accept="image/png,image/webp,image/jpeg" multiple>
-              <div class="drop-empty">
-                <span class="drop-symbol">＋</span>
-                <strong>DROP CHARACTER</strong>
-                <span>Front image now.<br>Front + back when available.</span>
-              </div>
-              <div class="drop-preview"><img id="sourcePreview" alt="Selected source character"></div>
-              <span id="viewCount" class="view-count">0 VIEWS</span>
-            </label>
-          </div>
+          <label id="dropzone" class="dropzone" for="sourceInput">
+            <input id="sourceInput" type="file" accept="image/png,image/webp,image/jpeg" multiple>
+            <div class="drop-empty">
+              <span class="drop-symbol">＋</span>
+              <strong>DROP CHARACTER</strong>
+            </div>
+            <div class="drop-preview"><img id="sourcePreview" alt="Selected source character"></div>
+            <span id="viewCount" class="view-count">0 VIEWS</span>
+          </label>
+        </div>
 
-          <button id="awaken" class="awaken-button" type="button" disabled>AWAKEN</button>
-          <div class="caption">editable puppet · source-preserving appearance · proof-gated output</div>
-        </section>
+        <button id="awaken" class="awaken-button" type="button" disabled>AWAKEN</button>
 
         <aside class="telemetry" aria-label="Compiler telemetry">
-          <div class="telemetry-head"><span>Living Compile</span><span>v1</span></div>
-          <div class="pipeline">
+          <div class="pipeline" aria-hidden="true">
             <div class="pipe-step"><span class="n">01</span><span>Input</span><i class="state"></i></div>
             <div class="pipe-step"><span class="n">02</span><span>Shape</span><i class="state"></i></div>
             <div class="pipe-step"><span class="n">03</span><span>Mesh</span><i class="state"></i></div>
@@ -68,21 +55,21 @@
           </div>
           <div id="compilerLog" class="compiler-log" aria-live="polite"></div>
         </aside>
-      </div>
+      </section>
     </section>
 
     <section id="result" class="result" aria-live="polite">
-      <div class="result-card">
+      <div class="result-stage">
         <div class="result-art"><img id="resultPreview" alt="Compiled character preview"></div>
-        <small>PRODUCT PROOF · PASS</small>
-        <h2>Your character is alive.</h2>
-        <p>The puppet has cleared the compile path. Open the workspace to inspect mesh, rig, skin, presentation and motion.</p>
-        <a class="open-workspace" href="/workspace">OPEN WORKSPACE</a>
+        <div class="result-stream">
+          <small>PRODUCT PROOF · PASS</small>
+          <h2>ALIVE</h2>
+          <a class="open-workspace" href="/studio">OPEN STUDIO</a>
+        </div>
       </div>
     </section>
 
     <div class="dev-mode">MODE · <strong id="modeLabel">CHECKING GATEWAY</strong></div>
-    <div class="legal-note">source art remains user-owned · product authority is proof-gated</div>
   </main>
   <script type="module" src="/static/js/awaken.js"></script>
 </body>

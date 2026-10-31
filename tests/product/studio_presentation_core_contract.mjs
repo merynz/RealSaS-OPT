@@ -30,7 +30,7 @@ assert.throws(() => normalizePresentationOverride({slot_order_back_to_front: ['B
 assert.throws(() => setSlotHidden(state, canonical, 'UNKNOWN', true), /unknown slot/);
 
 const edits = [];
-const binding = {binding_id: 'B:V0:J:HAND', primary_final_control_id: 'J:HAND'};
+const binding = {binding_id: 'B:HAND', view_id: 'V0', primary_final_control_id: 'J:HAND'};
 let edit = bindingEditFor(edits, binding, false);
 assert.deepEqual(edit.translation_xy, [0, 0]);
 assert.deepEqual(edit.scale_xy, [1, 1]);
@@ -49,9 +49,20 @@ assert.deepEqual(edit.translation_xy, [12, -4]);
 assert.deepEqual(edit.scale_xy, [1.25, 0.75]);
 assert.equal(edit.visible, false);
 
+const sameIDOtherView = {binding_id: 'B:HAND', view_id: 'V1', primary_final_control_id: 'J:HAND'};
+const otherEdit = upsertBindingEdit(edits, sameIDOtherView, {
+  view_id: 'V1',
+  primary_final_control_id: 'J:HAND',
+  translation_xy: [-3, 2],
+});
+assert.equal(edits.length, 2);
+assert.equal(otherEdit.view_id, 'V1');
+assert.deepEqual(bindingEditFor(edits, binding).translation_xy, [12, -4]);
+assert.deepEqual(bindingEditFor(edits, sameIDOtherView).translation_xy, [-3, 2]);
+
 const hydrated = authoringLayerToEdits({
   view_id: 'V0',
-  binding_edits: edits.map(({view_id, ...row}) => row),
+  binding_edits: [edits[0]].map(({view_id, ...row}) => row),
   presentation_override: {...departedState, view_id: undefined},
 });
 assert.equal(hydrated.presentation.view_id, 'V0');

@@ -81,6 +81,7 @@ jobs:
         run: |
           node tests/product/studio_document_contract.mjs
           node tests/product/studio_timeline_view_contract.mjs
+          node tests/product/studio_weight_core_contract.mjs
       - name: Compose deployment contract
         run: >-
           docker compose

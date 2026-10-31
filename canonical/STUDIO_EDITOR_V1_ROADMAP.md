@@ -51,9 +51,16 @@ Current status:
 - append-only revision writes: DONE
 - client-held optimistic lock bridge: DONE
 - head/history APIs: DONE
-- reopen applies latest authoring payload to StudioDocument: NEXT
-- operation journal / undo / redo: NEXT
-- autosave: NEXT
+- reopen applies latest authoring payload to StudioDocument: DONE
+- StudioDocument authoring overlay boundary: DONE
+- StudioOperationJournal / undo / redo: DONE
+- StudioDirtyState clean/dirty/saving/conflict/requalification: DONE
+- debounced autosave + explicit Save + keyboard Save: DONE
+- playback isolated from authoring rig edits: DONE
+- Studio document/journal Node contract court: DONE
+- real Postgres Studio repository court: IN CI
+- revision history browser surface: API READY, UI DEFERRED
+- named snapshots: TODO
 
 ### B. Viewport and transforms — P0
 
@@ -69,6 +76,14 @@ Required:
 - box/lasso selection
 - art/mesh/rig/weight overlays
 - direction/view switching without losing selection semantics
+
+Current status:
+
+- zoom/fit and art/mesh/rig/weight overlays: PARTIAL EXISTING
+- single control/vertex selection and drag: PARTIAL EXISTING
+- StudioSelection multi-select model: NEXT
+- StudioToolContext + transform gizmos: NEXT
+- pan, snapping, pivot, lasso: NEXT
 
 ### C. Rig editor — P0
 
@@ -188,8 +203,8 @@ Platform service routes:
 
 ## 5. Implementation order
 
-1. Close Studio persistence: reopen head, local operation journal, autosave, conflict UX.
-2. Professional selection/transform foundation shared by Rig/Mesh/Attachment tools.
+1. Close Studio persistence: reopen head, local operation journal, autosave, conflict UX. **DONE except named snapshot/history presentation.**
+2. Professional selection/transform foundation shared by Rig/Mesh/Attachment tools. **NEXT.**
 3. Rig + IK creation/editing.
 4. Mesh/topology tools.
 5. Weight paint and deformation preview.

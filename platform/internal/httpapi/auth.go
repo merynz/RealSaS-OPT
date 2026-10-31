@@ -47,3 +47,25 @@ func requireProductOwner(w http.ResponseWriter, r *http.Request) (string, bool) 
 	}
 	return owner, true
 }
+
+// withProductOwner is intentionally scoped to the narrow service-token product
+// namespace. Developer/operator routes keep their existing identities. The
+// digest is placed in context so lower product/Studio layers can enforce the
+// same owner without accepting browser-controlled ids in request bodies.
+func withProductOwner(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/v1/product/") {
+			owner, ok := requireProductOwner(w, r)
+			if !ok {
+				return
+			}
+			ctx, err := publicproduct.WithOwnerKeySHA256(r.Context(), owner)
+			if err != nil {
+				respond(w, http.StatusUnauthorized, map[string]string{"error": err.Error()})
+				return
+			}
+			r = r.WithContext(ctx)
+		}
+		next.ServeHTTP(w, r)
+	})
+}

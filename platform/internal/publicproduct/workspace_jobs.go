@@ -20,6 +20,7 @@ import (
 )
 
 const MaxWorkspaceBundleBytes = 256 << 20
+const workspaceSourceObservationRole = "support:source_observation"
 
 var ErrNoWorkspaceJob = errors.New("PUBLIC_PRODUCT_WORKSPACE_JOB_NOT_AVAILABLE")
 
@@ -28,6 +29,7 @@ type WorkspaceArtifact struct {
 	ArtifactID    uuid.UUID `json:"artifact_id"`
 	ArtifactType  string    `json:"artifact_type"`
 	SchemaVersion string    `json:"schema_version"`
+	Scope         string    `json:"scope"`
 }
 
 type WorkspaceLease struct {
@@ -129,21 +131,45 @@ func ClaimWorkspaceJob(
 		if err != nil {
 			return err
 		}
-		defer rows.Close()
-		artifacts := make([]WorkspaceArtifact, 0, 7)
+		artifacts := make([]WorkspaceArtifact, 0, 8)
 		for rows.Next() {
 			var item WorkspaceArtifact
 			if err := rows.Scan(&item.Role, &item.ArtifactID, &item.ArtifactType, &item.SchemaVersion); err != nil {
+				rows.Close()
 				return err
 			}
+			item.Scope = "AUTHORITY"
 			artifacts = append(artifacts, item)
 		}
 		if err := rows.Err(); err != nil {
+			rows.Close()
 			return err
 		}
+		rows.Close()
 		if len(artifacts) != 7 {
-			return fmt.Errorf("PUBLIC_PRODUCT_WORKSPACE_ARTIFACT_COUNT_%d", len(artifacts))
+			return fmt.Errorf("PUBLIC_PRODUCT_WORKSPACE_AUTHORITY_ARTIFACT_COUNT_%d", len(artifacts))
 		}
+
+		var support WorkspaceArtifact
+		support.Role = workspaceSourceObservationRole
+		support.Scope = "SUPPORT"
+		if err := tx.QueryRow(ctx, `
+			SELECT s.source_observation_artifact_id,at.name,at.schema_version
+			FROM public_product_compile_sessions s
+			JOIN artifacts a ON a.id=s.source_observation_artifact_id
+			JOIN artifact_types at ON at.id=a.artifact_type_id
+			WHERE s.id=$1 AND s.source_observation_artifact_id IS NOT NULL
+		`, sessionID).Scan(&support.ArtifactID, &support.ArtifactType, &support.SchemaVersion); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return errors.New("PUBLIC_PRODUCT_WORKSPACE_SOURCE_OBSERVATION_SUPPORT_REQUIRED")
+			}
+			return err
+		}
+		if support.ArtifactType != "RealSaS.SourceObservation" || support.SchemaVersion != "v1" {
+			return errors.New("PUBLIC_PRODUCT_WORKSPACE_SOURCE_OBSERVATION_SUPPORT_DRIFT")
+		}
+		artifacts = append(artifacts, support)
+
 		lease = WorkspaceLease{
 			CompileID:         publicID,
 			ProductRevisionID: revisionID,
@@ -178,16 +204,34 @@ func ReadWorkspaceArtifactBytes(
 		return nil, WorkspaceArtifact{}, errors.New("PUBLIC_PRODUCT_WORKSPACE_ROLE_INVALID")
 	}
 	var item WorkspaceArtifact
-	if err := pool.QueryRow(ctx, `
-		SELECT pra.role,pra.artifact_id,at.name,at.schema_version
-		FROM product_revision_artifacts pra
-		JOIN artifacts a ON a.id=pra.artifact_id
-		JOIN artifact_types at ON at.id=a.artifact_type_id
-		WHERE pra.product_revision_id=$1 AND pra.role=$2
-	`, session.ProductRevisionID, role).Scan(
-		&item.Role, &item.ArtifactID, &item.ArtifactType, &item.SchemaVersion,
-	); err != nil {
-		return nil, WorkspaceArtifact{}, err
+	if role == workspaceSourceObservationRole {
+		item.Role = workspaceSourceObservationRole
+		item.Scope = "SUPPORT"
+		if err := pool.QueryRow(ctx, `
+			SELECT s.source_observation_artifact_id,at.name,at.schema_version
+			FROM public_product_compile_sessions s
+			JOIN artifacts a ON a.id=s.source_observation_artifact_id
+			JOIN artifact_types at ON at.id=a.artifact_type_id
+			WHERE s.id=$1 AND s.source_observation_artifact_id IS NOT NULL
+		`, session.ID).Scan(&item.ArtifactID, &item.ArtifactType, &item.SchemaVersion); err != nil {
+			return nil, WorkspaceArtifact{}, err
+		}
+		if item.ArtifactType != "RealSaS.SourceObservation" || item.SchemaVersion != "v1" {
+			return nil, WorkspaceArtifact{}, errors.New("PUBLIC_PRODUCT_WORKSPACE_SOURCE_OBSERVATION_SUPPORT_DRIFT")
+		}
+	} else {
+		if err := pool.QueryRow(ctx, `
+			SELECT pra.role,pra.artifact_id,at.name,at.schema_version
+			FROM product_revision_artifacts pra
+			JOIN artifacts a ON a.id=pra.artifact_id
+			JOIN artifact_types at ON at.id=a.artifact_type_id
+			WHERE pra.product_revision_id=$1 AND pra.role=$2
+		`, session.ProductRevisionID, role).Scan(
+			&item.Role, &item.ArtifactID, &item.ArtifactType, &item.SchemaVersion,
+		); err != nil {
+			return nil, WorkspaceArtifact{}, err
+		}
+		item.Scope = "AUTHORITY"
 	}
 	registered, err := registry.Read(ctx, pool, item.ArtifactID)
 	if err != nil {

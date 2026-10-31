@@ -24,10 +24,15 @@ func Start(
 	store artifactstore.Store,
 	codeSHA string,
 	req StartRequest,
+	ownerKeySHA256 string,
 	actor string,
 ) (StartResponse, error) {
 	if pool == nil || store == nil || strings.TrimSpace(actor) == "" {
 		return StartResponse{}, errors.New("pool, artifact store and actor are required")
+	}
+	ownerKeySHA256, err := NormalizeOwnerKeySHA256(ownerKeySHA256)
+	if err != nil {
+		return StartResponse{}, err
 	}
 	views, err := validateViews(req.Views)
 	if err != nil {
@@ -93,9 +98,9 @@ func Start(
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO public_product_compile_sessions(
 				id,public_id,subject_id,engine_release_id,release_channel_lock_version,
-				state,current_capability
-			) VALUES ($1,$2,$3,$4,$5,'WAITING_SOURCE_MATERIALIZATION','product.input')
-		`, sessionID, publicID, subject.SubjectID, channel.EngineReleaseID, channel.LockVersion); err != nil {
+				owner_key_sha256,state,current_capability
+			) VALUES ($1,$2,$3,$4,$5,$6,'WAITING_SOURCE_MATERIALIZATION','product.input')
+		`, sessionID, publicID, subject.SubjectID, channel.EngineReleaseID, channel.LockVersion, ownerKeySHA256); err != nil {
 			return err
 		}
 		for _, view := range imported {
@@ -122,6 +127,7 @@ func Start(
 			"release_channel_lock_version": channel.LockVersion,
 			"authority":                    "RAW_EXTERNAL_EVIDENCE_ONLY",
 			"intake_job_state":             "QUEUED",
+			"owner_bound":                  true,
 		})
 		_, err := tx.Exec(ctx, `
 			INSERT INTO audit_events(actor,action,subject_id,payload)

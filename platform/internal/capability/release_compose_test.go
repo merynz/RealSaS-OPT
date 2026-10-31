@@ -253,7 +253,7 @@ func TestProductProvidersAreSingleSourceOfControlReadyProductGraph(t *testing.T)
 	if !ok {
 		t.Fatal("product.graphics missing")
 	}
-	wantGraphics := []string{ProductMeshCapabilityID, ProductSkinCapabilityID, ProductMechanicsCapabilityID}
+	wantGraphics := []string{ProductShapeCapabilityID, ProductMeshCapabilityID, ProductSkinCapabilityID, ProductMechanicsCapabilityID}
 	if len(graphics.Dependencies) != len(wantGraphics) {
 		t.Fatalf("graphics dependencies=%v", graphics.Dependencies)
 	}

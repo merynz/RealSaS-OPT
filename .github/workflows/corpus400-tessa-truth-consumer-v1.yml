@@ -32,7 +32,7 @@ jobs:
       - name: Compile TESSA truth consumer tools
         run: |
           python -m py_compile \
-            models/tessa/truth/component_surface_topology_v1.py \
+            tools/training/tessa_component_surface_topology_v1.py \
             tools/training/build_corpus_mechanical_tessa_teacher_v4.py \
             tools/training/validate_corpus_mechanical_tessa_teacher_v4.py
 

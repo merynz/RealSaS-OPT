@@ -8,22 +8,33 @@
   },
   "quaternius_actor_lane_by_source_id": {
     "quaternius-platformer-kit": {
-      "include_path_tokens": ["character", "enemy"],
-      "exclude_path_tokens": ["nature", "platform", "mechanic", "hazard", "powerup", "number"],
-      "preferred_formats": [".glb", ".gltf", ".fbx"],
-      "expected_model_count": 10
+      "include_path_tokens": [
+        "character",
+        "enemy",
+        "mechanic",
+        "hazard",
+        "chest",
+        "spring",
+        "cannon",
+        "saw",
+        "spike",
+        "bouncer",
+        "lever",
+        "button",
+        "goal"
+      ],
+      "exclude_path_tokens": [],
+      "preferred_formats": [".glb", ".gltf", ".fbx"]
     },
     "quaternius-cube-world": {
       "include_path_tokens": ["character", "animal", "enemy"],
-      "exclude_path_tokens": ["environment", "nature", "prop", "block"],
-      "preferred_formats": [".glb", ".gltf", ".fbx"],
-      "expected_model_count": 22
+      "exclude_path_tokens": [],
+      "preferred_formats": [".glb", ".gltf", ".fbx"]
     },
     "quaternius-sushi-restaurant": {
-      "include_path_tokens": ["character"],
-      "exclude_path_tokens": ["food", "ingredient", "interior", "furniture", "prop"],
-      "preferred_formats": [".glb", ".gltf", ".fbx"],
-      "expected_model_count": 8
+      "include_path_tokens": ["character", "rabbit", "panda"],
+      "exclude_path_tokens": [],
+      "preferred_formats": [".glb", ".gltf", ".fbx"]
     }
   },
   "quaternius_itch_fallback": {
@@ -36,7 +47,8 @@
     "publisher_page_remains_primary_provenance_evidence": true,
     "pin_is_transport_locator_not_identity_authority": true,
     "publisher_tree_remains_complete_when_byte_scope_is_narrowed": true,
-    "mixed_pack_byte_scope_may_select_only_actor_models_and_exact_gltf_dependencies": true,
+    "mixed_pack_byte_scope_selects_a_mechanical_truth_superset_not_a_training_denominator": true,
+    "training_subject_counts_are_decided_only_after_structural_audit_and_global_compilation": true,
     "downloaded_archive_is_always_hashed_before_audit": true,
     "paid_or_nonstandard_itch_upload_is_never_selected": true
   }

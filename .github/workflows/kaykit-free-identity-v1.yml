@@ -1,0 +1,102 @@
+name: kaykit-free-identity-v1
+
+on:
+  push:
+    branches: [corpus400-full-candidate-audit-v1]
+    paths:
+      - 'tools/corpus/kaykit_actor_identity_v1.py'
+      - '.github/workflows/kaykit-free-identity-v1.yml'
+  workflow_dispatch:
+
+jobs:
+  actor-identity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        pack_id:
+          - kaykit-adventurers
+          - kaykit-skeletons
+          - kaykit-character-animations
+    env:
+      SOURCE_RUN_ID: '41238474588'
+      SOURCE_SHA: '986fa4cfda73e869b8f8fdeabaac870917a504e9'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install narrow dependencies
+        run: python -m pip install --disable-pip-version-check numpy
+      - name: Download immutable free-tier workspace
+        uses: actions/download-artifact@v4
+        with:
+          repository: merynz/RealSaS-OPT
+          run-id: ${{ env.SOURCE_RUN_ID }}
+          github-token: ${{ github.token }}
+          name: kaykit-free-${{ matrix.pack_id }}-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/workspace/${{ matrix.pack_id }}
+      - name: Compile actor identity and leakage lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/corpus/kaykit_actor_identity_v1.py
+          python tools/corpus/kaykit_actor_identity_v1.py \
+            --registry canonical/KAYKIT_FREE_SOURCE_REGISTRY_V1.json \
+            --pack-id '${{ matrix.pack_id }}' \
+            --workspace "$RUNNER_TEMP/workspace/${{ matrix.pack_id }}" \
+            --out "$RUNNER_TEMP/workspace/${{ matrix.pack_id }}/KAYKIT_ACTOR_IDENTITY_AUDIT_V1.json"
+          cat "$RUNNER_TEMP/workspace/${{ matrix.pack_id }}/KAYKIT_ACTOR_IDENTITY_AUDIT_V1.json" | python -m json.tool >/dev/null
+      - name: Upload actor identity audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaykit-identity-${{ matrix.pack_id }}-${{ github.sha }}
+          path: ${{ runner.temp }}/workspace/${{ matrix.pack_id }}/KAYKIT_ACTOR_IDENTITY_AUDIT_V1.json
+          if-no-files-found: error
+          retention-days: 90
+
+  summarize:
+    needs: actor-identity
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: kaykit-identity-*-${{ github.sha }}
+          path: ${{ runner.temp }}/identity
+          merge-multiple: false
+      - name: Build identity summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - "$RUNNER_TEMP/identity" "$RUNNER_TEMP/KAYKIT_ACTOR_IDENTITY_SUMMARY_V1.json" <<'PY'
+          import json,sys
+          from pathlib import Path
+          root=Path(sys.argv[1]); out=Path(sys.argv[2])
+          rows=[json.loads(p.read_text()) for p in sorted(root.rglob('KAYKIT_ACTOR_IDENTITY_AUDIT_V1.json'))]
+          summary={
+              'schema':'RealSaS.KayKitFree.ActorIdentitySummary.v1',
+              'source_run_id':41238474588,
+              'packs':[{
+                  'pack_id':r['pack_id'],
+                  'expected_role':r['expected_role'],
+                  'actor_export_candidate_count':r['actor_export_candidate_count'],
+                  'exact_mechanical_identity_count':r['exact_mechanical_identity_count'],
+                  'leakage_lineage_count':r['leakage_lineage_count'],
+                  'declared_free_subject_count':r['declared_free_subject_count'],
+                  'declared_count_reconciled':r['declared_count_reconciled'],
+              } for r in rows],
+          }
+          summary['totals']={
+              key:sum(int(r[key]) for r in rows)
+              for key in ('actor_export_candidate_count','exact_mechanical_identity_count','leakage_lineage_count')
+          }
+          out.write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(summary,indent=2,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kaykit-actor-identity-summary-${{ github.sha }}
+          path: ${{ runner.temp }}/KAYKIT_ACTOR_IDENTITY_SUMMARY_V1.json
+          if-no-files-found: error
+          retention-days: 90

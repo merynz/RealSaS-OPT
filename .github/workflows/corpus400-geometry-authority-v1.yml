@@ -27,7 +27,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install narrow dependencies
-        run: python -m pip install --disable-pip-version-check numpy pytest
+        run: python -m pip install --disable-pip-version-check numpy pytest trimesh
 
       - name: Compile component geometry authority tools
         run: |
@@ -40,4 +40,5 @@ jobs:
         run: |
           pytest -q \
             tests/corpus/test_component_geometry_authority_v1.py \
-            tests/corpus/test_component_geometry_court_v1.py
+            tests/corpus/test_component_geometry_court_v1.py \
+            tests/corpus/test_component_geometry_authority_e2e_v1.py

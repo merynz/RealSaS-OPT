@@ -28,10 +28,12 @@ const maxArtifactReadBytes int64 = 64 << 20
 // Local operator API. Commands use the transactional outbox; handlers never
 // call a compiler script or rewrite a product revision themselves.
 type API struct {
-	CodeSHA string
-	Pool    *pgxpool.Pool
-	Graph   *stagegraph.Graph
-	Store   artifactstore.Store
+	CodeSHA            string
+	Pool               *pgxpool.Pool
+	Graph              *stagegraph.Graph
+	Store              artifactstore.Store
+	ProductGatewayToken string
+	OperatorToken       string
 }
 
 func respond(w http.ResponseWriter, status int, value any) {
@@ -59,73 +61,82 @@ func result(w http.ResponseWriter, value any, err error) {
 		respond(w, 409, map[string]string{"error": err.Error()})
 		return
 	}
-	respond(w, 202, value)
+	respond(w, 200, value)
 }
 
 func (a API) Handler() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health/live", func(w http.ResponseWriter, r *http.Request) { respond(w, 200, map[string]string{"status": "ok"}) })
-	mux.HandleFunc("GET /v1/stages", func(w http.ResponseWriter, r *http.Request) { respond(w, 200, a.Graph.Stages()) })
-	mux.HandleFunc("POST /v1/subjects", func(w http.ResponseWriter, r *http.Request) {
-		var req input.SubjectRequest
+	mux.HandleFunc("POST /v1/commands/compile", func(w http.ResponseWriter, r *http.Request) {
+		var req command.CompileRequest
 		if !decode(w, r, &req) {
 			return
 		}
-		out, err := input.EnsureSubject(r.Context(), a.Pool, req)
+		if req.EngineReleaseID == uuid.Nil || req.SubjectInputID == uuid.Nil || req.TargetStageID == "" || req.IdempotencyKey == "" || req.RequestedBy == "" {
+			respond(w, 400, map[string]string{"error": "engine_release_id, subject_input_id, target_stage_id, idempotency_key and requested_by are required"})
+			return
+		}
+		if err := release.RequireCanonicalMain(r.Context(), a.Pool, req.EngineReleaseID, a.CodeSHA); err != nil {
+			result(w, nil, err)
+			return
+		}
+		out, err := command.SubmitCompile(r.Context(), a.Pool, req)
 		result(w, out, err)
 	})
-	mux.HandleFunc("GET /v1/subjects/{id}/artifacts", func(w http.ResponseWriter, r *http.Request) {
-		subjectID, err := uuid.Parse(r.PathValue("id"))
+	mux.HandleFunc("POST /v1/commands/render", func(w http.ResponseWriter, r *http.Request) {
+		var req command.RenderRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		if req.ProductRevisionID == uuid.Nil || req.RenderRequestID == uuid.Nil || req.RenderRequestSemanticSHA256 == "" || req.IdempotencyKey == "" || req.RequestedBy == "" {
+			respond(w, 400, map[string]string{"error": "product_revision_id, render_request_id, render_request_semantic_sha256, idempotency_key and requested_by are required"})
+			return
+		}
+		out, err := command.SubmitRender(r.Context(), a.Pool, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/attempts/{attempt}/external-stage-ready", func(w http.ResponseWriter, r *http.Request) {
+		attemptID, err := uuid.Parse(r.PathValue("attempt"))
 		if err != nil {
-			respond(w, 400, map[string]string{"error": "invalid subject id"})
+			respond(w, 400, map[string]string{"error": "invalid attempt id"})
+			return
+		}
+		var req command.ExternalStageReadyRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		req.AttemptID = attemptID
+		if req.WorkflowID == "" || req.StageID == "" || req.EvidenceSHA256 == "" || req.IdempotencyKey == "" || req.RequestedBy == "" {
+			respond(w, 400, map[string]string{"error": "workflow_id, stage_id, evidence_sha256, idempotency_key and requested_by are required"})
+			return
+		}
+		out, err := command.SubmitExternalStageReady(r.Context(), a.Pool, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/attempts/{attempt}", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("attempt"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid attempt id"})
+			return
+		}
+		out, err := attempt.Read(r.Context(), a.Pool, id)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/attempts/{attempt}/events", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("attempt"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid attempt id"})
 			return
 		}
 		limit := 200
 		if raw := r.URL.Query().Get("limit"); raw != "" {
-			value, err := strconv.Atoi(raw)
-			if err != nil || value <= 0 || value > 500 {
-				respond(w, 400, map[string]string{"error": "artifact list limit must be between 1 and 500"})
+			parsed, err := strconv.Atoi(raw)
+			if err != nil || parsed < 1 || parsed > 1000 {
+				respond(w, 400, map[string]string{"error": "limit must be 1..1000"})
 				return
 			}
-			limit = value
+			limit = parsed
 		}
-		out, err := registry.ListSubjectArtifacts(
-			r.Context(),
-			a.Pool,
-			subjectID,
-			r.URL.Query().Get("artifact_type"),
-			r.URL.Query().Get("schema_version"),
-			limit,
-		)
-		if errors.Is(err, registry.ErrSubjectNotFound) {
-			respond(w, 404, map[string]string{"error": err.Error()})
-			return
-		}
-		if err != nil {
-			result(w, nil, err)
-			return
-		}
-		respond(w, 200, out)
-	})
-	mux.HandleFunc("PUT /v1/artifacts/bytes", func(w http.ResponseWriter, r *http.Request) {
-		sha := r.URL.Query().Get("sha256")
-		if err := artifactstore.ValidateSHA256(sha); err != nil {
-			respond(w, 400, map[string]string{"error": err.Error()})
-			return
-		}
-		if a.Store == nil {
-			respond(w, 503, map[string]string{"error": "artifact store is required"})
-			return
-		}
-		if r.ContentLength < 0 {
-			respond(w, http.StatusLengthRequired, map[string]string{"error": "ARTIFACT_UPLOAD_CONTENT_LENGTH_REQUIRED"})
-			return
-		}
-		if r.ContentLength > artifactstore.MaxArtifactObjectBytes {
-			respond(w, http.StatusRequestEntityTooLarge, map[string]string{"error": "ARTIFACT_UPLOAD_SIZE_LIMIT_EXCEEDED"})
-			return
-		}
-		out, err := a.Store.PutStream(r.Context(), r.Body, sha, r.ContentLength)
+		out, err := attempt.Events(r.Context(), a.Pool, id, limit)
 		result(w, out, err)
 	})
 	mux.HandleFunc("GET /v1/artifacts/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -134,16 +145,8 @@ func (a API) Handler() http.Handler {
 			respond(w, 400, map[string]string{"error": "invalid artifact id"})
 			return
 		}
-		out, err := registry.GetArtifact(r.Context(), a.Pool, id)
-		if errors.Is(err, registry.ErrArtifactNotFound) {
-			respond(w, 404, map[string]string{"error": err.Error()})
-			return
-		}
-		if err != nil {
-			result(w, nil, err)
-			return
-		}
-		respond(w, 200, out)
+		out, err := registry.Read(r.Context(), a.Pool, id)
+		result(w, out, err)
 	})
 	mux.HandleFunc("GET /v1/artifacts/{id}/bytes", func(w http.ResponseWriter, r *http.Request) {
 		id, err := uuid.Parse(r.PathValue("id"))
@@ -151,221 +154,296 @@ func (a API) Handler() http.Handler {
 			respond(w, 400, map[string]string{"error": "invalid artifact id"})
 			return
 		}
-		record, err := registry.GetArtifact(r.Context(), a.Pool, id)
-		if errors.Is(err, registry.ErrArtifactNotFound) {
-			respond(w, 404, map[string]string{"error": err.Error()})
-			return
-		}
+		item, err := registry.Read(r.Context(), a.Pool, id)
 		if err != nil {
 			result(w, nil, err)
 			return
 		}
-		if record.SizeBytes > maxArtifactReadBytes {
-			respond(w, http.StatusRequestEntityTooLarge, map[string]string{"error": "ARTIFACT_READ_SIZE_LIMIT_EXCEEDED"})
+		if item.SizeBytes > maxArtifactReadBytes {
+			respond(w, 413, map[string]string{"error": "artifact exceeds direct read limit"})
 			return
 		}
-		if a.Store == nil {
-			respond(w, 503, map[string]string{"error": "artifact store is required"})
-			return
-		}
-		object := artifactstore.Object{ContentSHA256: record.ContentSHA256, StorageKey: record.StorageKey, SizeBytes: record.SizeBytes}
-		if err := a.Store.Verify(r.Context(), object); err != nil {
-			respond(w, 409, map[string]string{"error": "ARTIFACT_READ_VERIFY_FAILED:" + err.Error()})
-			return
-		}
-		data, err := a.Store.GetBytes(r.Context(), record.StorageKey)
+		payload, err := a.Store.GetBytes(r.Context(), item.StorageKey)
 		if err != nil {
-			respond(w, 409, map[string]string{"error": "ARTIFACT_READ_FAILED:" + err.Error()})
+			result(w, nil, err)
 			return
 		}
-		if int64(len(data)) != record.SizeBytes || artifactstore.HashBytes(data) != record.ContentSHA256 {
-			respond(w, 409, map[string]string{"error": "ARTIFACT_READ_POST_VERIFY_DRIFT"})
+		if int64(len(payload)) != item.SizeBytes {
+			respond(w, 409, map[string]string{"error": "artifact byte length drift"})
 			return
 		}
 		w.Header().Set("Content-Type", "application/octet-stream")
-		w.Header().Set("Content-Length", strconv.FormatInt(record.SizeBytes, 10))
-		w.Header().Set("X-Content-SHA256", record.ContentSHA256)
-		w.Header().Set("Cache-Control", "no-store")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(data)
+		w.Header().Set("X-Content-SHA256", item.ContentSHA256)
+		w.WriteHeader(200)
+		_, _ = w.Write(payload)
+	})
+	mux.HandleFunc("POST /v1/artifacts/bytes", func(w http.ResponseWriter, r *http.Request) {
+		declaredLength, err := strconv.ParseInt(r.Header.Get("X-Content-Length"), 10, 64)
+		if err != nil || declaredLength < 0 {
+			respond(w, 400, map[string]string{"error": "valid X-Content-Length required"})
+			return
+		}
+		if declaredLength > artifactstore.MaxArtifactObjectBytes {
+			respond(w, 413, map[string]string{"error": "artifact exceeds storage limit"})
+			return
+		}
+		reader := http.MaxBytesReader(w, r.Body, declaredLength+1)
+		out, err := a.Store.PutStream(r.Context(), reader, r.Header.Get("X-Content-SHA256"), declaredLength)
+		result(w, out, err)
 	})
 	mux.HandleFunc("POST /v1/artifacts/import", func(w http.ResponseWriter, r *http.Request) {
 		var req registry.ImportRequest
 		if !decode(w, r, &req) {
 			return
 		}
+		if req.ArtifactType == "" || req.SchemaVersion == "" || req.Object.ContentSHA256 == "" || req.Object.StorageKey == "" || req.CreatedBy == "" {
+			respond(w, 400, map[string]string{"error": "artifact_type, schema_version, object and created_by are required"})
+			return
+		}
 		out, err := registry.Import(r.Context(), a.Pool, a.Store, req)
 		result(w, out, err)
 	})
-	mux.HandleFunc("POST /v1/subject-inputs", func(w http.ResponseWriter, r *http.Request) {
-		var req struct {
-			SubjectID uuid.UUID       `json:"subject_id"`
-			Bindings  []input.Binding `json:"bindings"`
-			CreatedBy string          `json:"created_by"`
-		}
+	mux.HandleFunc("POST /v1/subjects", func(w http.ResponseWriter, r *http.Request) {
+		var req input.SubjectRequest
 		if !decode(w, r, &req) {
 			return
 		}
-		sort.Slice(req.Bindings, func(i, j int) bool { return req.Bindings[i].Role < req.Bindings[j].Role })
-		out, err := input.Seal(r.Context(), a.Pool, req.SubjectID, req.Bindings, req.CreatedBy)
+		out, err := input.EnsureSubject(r.Context(), a.Pool, req)
 		result(w, out, err)
 	})
-	mux.HandleFunc("POST /v1/releases", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /v1/subject-inputs", func(w http.ResponseWriter, r *http.Request) {
+		var req input.CreateRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := input.Create(r.Context(), a.Pool, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/commands/{command}", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("command"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid command id"})
+			return
+		}
+		out, err := command.Read(r.Context(), a.Pool, id)
+		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/engine-releases", func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
-			Manifest  release.Manifest `json:"manifest"`
+			Manifest release.Manifest `json:"manifest"`
 			CreatedBy string           `json:"created_by"`
 		}
 		if !decode(w, r, &req) {
 			return
 		}
+		if req.CreatedBy == "" {
+			respond(w, 400, map[string]string{"error": "created_by required"})
+			return
+		}
 		out, err := release.Seal(r.Context(), a.Pool, a.Graph, req.Manifest, req.CreatedBy)
 		result(w, out, err)
 	})
-	mux.HandleFunc("POST /v1/research/attempts", func(w http.ResponseWriter, r *http.Request) {
-		var req attempt.ResearchRequest
-		if !decode(w, r, &req) {
-			return
-		}
-		out, err := attempt.StartResearch(r.Context(), a.Pool, a.Graph, req)
-		result(w, out, err)
-	})
-	mux.HandleFunc("POST /v1/research/attempts/{id}/stages/{stage}/external-evidence", func(w http.ResponseWriter, r *http.Request) {
-		attemptID, err := uuid.Parse(r.PathValue("id"))
+	mux.HandleFunc("POST /v1/engine-releases/{release}/source-authority", func(w http.ResponseWriter, r *http.Request) {
+		releaseID, err := uuid.Parse(r.PathValue("release"))
 		if err != nil {
-			respond(w, 400, map[string]string{"error": "invalid attempt id"})
+			respond(w, 400, map[string]string{"error": "invalid release id"})
 			return
 		}
 		var req struct {
-			Bindings []externalstage.Binding `json:"bindings"`
-			BoundBy  string                  `json:"bound_by"`
+			Authority string `json:"authority"`
+			CodeSHA   string `json:"code_sha"`
+			BoundBy   string `json:"bound_by"`
 		}
 		if !decode(w, r, &req) {
 			return
 		}
-		out, err := externalstage.Bind(r.Context(), a.Pool, externalstage.BindRequest{
-			AttemptID: attemptID, StageID: r.PathValue("stage"), Bindings: req.Bindings, BoundBy: req.BoundBy,
-		})
+		if req.Authority != "CANONICAL_MAIN" {
+			respond(w, 400, map[string]string{"error": "only CANONICAL_MAIN authority is accepted"})
+			return
+		}
+		out, err := release.BindCanonicalMain(r.Context(), a.Pool, releaseID, req.CodeSHA, req.BoundBy)
 		result(w, out, err)
 	})
-	mux.HandleFunc("POST /v1/research/campaigns", func(w http.ResponseWriter, r *http.Request) {
-		var req campaign.StartRequest
+	mux.HandleFunc("GET /v1/engine-releases/{release}", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("release"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid release id"})
+			return
+		}
+		out, err := release.Read(r.Context(), a.Pool, id)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/engine-releases/{release}/source-authority", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("release"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid release id"})
+			return
+		}
+		out, err := release.ReadSourceBinding(r.Context(), a.Pool, id)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/engine-releases", func(w http.ResponseWriter, r *http.Request) {
+		limit := 100
+		if raw := r.URL.Query().Get("limit"); raw != "" {
+			parsed, err := strconv.Atoi(raw)
+			if err != nil || parsed < 1 || parsed > 500 {
+				respond(w, 400, map[string]string{"error": "limit must be 1..500"})
+				return
+			}
+			limit = parsed
+		}
+		out, err := release.List(r.Context(), a.Pool, limit)
+		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/research-campaigns", func(w http.ResponseWriter, r *http.Request) {
+		var req campaign.CreateRequest
 		if !decode(w, r, &req) {
 			return
 		}
-		out, err := campaign.Start(r.Context(), a.Pool, a.Graph, a.CodeSHA, req)
+		out, err := campaign.Create(r.Context(), a.Pool, req)
 		result(w, out, err)
 	})
-	mux.HandleFunc("POST /v1/research/campaigns/run", func(w http.ResponseWriter, r *http.Request) {
-		var req campaign.RunRequest
+	mux.HandleFunc("POST /v1/agent-sessions", func(w http.ResponseWriter, r *http.Request) {
+		var req agentsession.CreateRequest
 		if !decode(w, r, &req) {
 			return
 		}
-		out, err := campaign.Run(r.Context(), a.Pool, a.Graph, a.CodeSHA, req)
+		out, err := agentsession.Create(r.Context(), a.Pool, req)
 		result(w, out, err)
 	})
-	mux.HandleFunc("GET /v1/research/campaigns/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id, err := uuid.Parse(r.PathValue("id"))
+	mux.HandleFunc("POST /v1/agent-sessions/{session}/commands", func(w http.ResponseWriter, r *http.Request) {
+		sessionID, err := uuid.Parse(r.PathValue("session"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid session id"})
+			return
+		}
+		var req agentsession.AppendCommandRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		req.SessionID = sessionID
+		out, err := agentsession.AppendCommand(r.Context(), a.Pool, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/external-stage/sessions", func(w http.ResponseWriter, r *http.Request) {
+		var req externalstage.CreateSessionRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := externalstage.CreateSession(r.Context(), a.Pool, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/external-stage/sessions/{session}/evidence", func(w http.ResponseWriter, r *http.Request) {
+		sessionID, err := uuid.Parse(r.PathValue("session"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid external stage session id"})
+			return
+		}
+		var req externalstage.RecordEvidenceRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		req.SessionID = sessionID
+		out, err := externalstage.RecordEvidence(r.Context(), a.Pool, req)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/research-campaigns", func(w http.ResponseWriter, r *http.Request) {
+		limit := 100
+		if raw := r.URL.Query().Get("limit"); raw != "" {
+			parsed, err := strconv.Atoi(raw)
+			if err != nil || parsed < 1 || parsed > 500 {
+				respond(w, 400, map[string]string{"error": "limit must be 1..500"})
+				return
+			}
+			limit = parsed
+		}
+		out, err := campaign.List(r.Context(), a.Pool, limit)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/research-campaigns/{campaign}", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("campaign"))
 		if err != nil {
 			respond(w, 400, map[string]string{"error": "invalid campaign id"})
 			return
 		}
-		out, err := campaign.Get(r.Context(), a.Pool, id)
+		out, err := campaign.Read(r.Context(), a.Pool, id)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/research-campaigns/{campaign}/open-attempts", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("campaign"))
 		if err != nil {
-			respond(w, 404, map[string]string{"error": err.Error()})
+			respond(w, 400, map[string]string{"error": "invalid campaign id"})
 			return
 		}
-		respond(w, 200, out)
-	})
-	mux.HandleFunc("POST /v1/agents/enter", func(w http.ResponseWriter, r *http.Request) {
-		var req agentsession.OpenRequest
-		if !decode(w, r, &req) {
-			return
-		}
-		out, err := agentsession.Open(r.Context(), a.Pool, a.CodeSHA, req)
+		out, err := campaign.OpenAttempts(r.Context(), a.Pool, id)
 		result(w, out, err)
 	})
-	mux.HandleFunc("POST /v1/agents/exit", func(w http.ResponseWriter, r *http.Request) {
-		var req agentsession.CloseRequest
-		if !decode(w, r, &req) {
-			return
-		}
-		out, err := agentsession.Close(r.Context(), a.Pool, req)
-		result(w, out, err)
-	})
-	mux.HandleFunc("GET /v1/agents/context/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id, err := uuid.Parse(r.PathValue("id"))
+	mux.HandleFunc("GET /v1/agent-sessions/{session}", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("session"))
 		if err != nil {
-			respond(w, 400, map[string]string{"error": "subject UUID required"})
+			respond(w, 400, map[string]string{"error": "invalid agent session id"})
 			return
 		}
-		out, err := agentsession.Context(r.Context(), a.Pool, id, a.CodeSHA)
+		out, err := agentsession.Read(r.Context(), a.Pool, id)
 		result(w, out, err)
 	})
-	compile := func(research bool) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			var req command.CompileRequest
-			if !decode(w, r, &req) {
+	mux.HandleFunc("GET /v1/agent-sessions/{session}/events", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("session"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid agent session id"})
+			return
+		}
+		limit := 200
+		if raw := r.URL.Query().Get("limit"); raw != "" {
+			parsed, err := strconv.Atoi(raw)
+			if err != nil || parsed < 1 || parsed > 1000 {
+				respond(w, 400, map[string]string{"error": "limit must be 1..1000"})
 				return
 			}
-			if research != (req.ResearchAttemptID != nil) {
-				respond(w, 400, map[string]string{"error": "EXECUTION_LANE_REQUEST_MISMATCH"})
-				return
-			}
-			if research && req.AgentSessionID == nil {
-				respond(w, 409, map[string]string{"error": "RESEARCH_EXECUTION_REQUIRES_AGENT_SESSION"})
-				return
-			}
-			req.DeployedCodeSHA = a.CodeSHA
-			out, err := command.SubmitCompile(r.Context(), a.Pool, a.Graph, req)
-			result(w, out, err)
+			limit = parsed
 		}
-	}
-	mux.HandleFunc("POST /v1/research/compile", compile(true))
-	mux.HandleFunc("POST /v1/product/compile", compile(false))
-	mux.HandleFunc("POST /v1/product/render", func(w http.ResponseWriter, r *http.Request) {
-		var req command.RenderRequest
-		if !decode(w, r, &req) {
-			return
-		}
-		out, err := command.SubmitRender(r.Context(), a.Pool, req)
+		out, err := agentsession.Events(r.Context(), a.Pool, id, limit)
 		result(w, out, err)
 	})
-	mux.HandleFunc("GET /v1/attempts/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id, err := uuid.Parse(r.PathValue("id"))
+	mux.HandleFunc("GET /v1/external-stage/sessions/{session}", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("session"))
 		if err != nil {
-			respond(w, 400, map[string]string{"error": "invalid attempt id"})
+			respond(w, 400, map[string]string{"error": "invalid external stage session id"})
 			return
 		}
-		var state, kind string
-		if err := a.Pool.QueryRow(r.Context(), "SELECT final_state,kind FROM attempts WHERE id=$1", id).Scan(&state, &kind); err != nil {
-			respond(w, 404, map[string]string{"error": "attempt not found"})
+		out, err := externalstage.ReadSession(r.Context(), a.Pool, id)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/external-stage/sessions/{session}/evidence", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("session"))
+		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid external stage session id"})
 			return
 		}
-		rows, err := a.Pool.Query(r.Context(), `SELECT event_type,payload,created_at FROM attempt_events WHERE attempt_id=$1 ORDER BY id`, id)
+		out, err := externalstage.ListEvidence(r.Context(), a.Pool, id)
+		result(w, out, err)
+	})
+	return mux
+}
+
+func (a API) HandlerWithSubjectIdentityRead() http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /v1/subjects/{subject}", func(w http.ResponseWriter, r *http.Request) {
+		id, err := uuid.Parse(r.PathValue("subject"))
 		if err != nil {
+			respond(w, 400, map[string]string{"error": "invalid subject id"})
+			return
+		}
+		var slug, display string
+		var createdAt time.Time
+		if err := a.Pool.QueryRow(r.Context(), `
+			SELECT slug,display_name,created_at FROM subjects WHERE id=$1
+		`, id).Scan(&slug, &display, &createdAt); err != nil {
 			result(w, nil, err)
 			return
 		}
-		defer rows.Close()
-		type eventRecord struct {
-			Type      string          `json:"type"`
-			Payload   json.RawMessage `json:"payload"`
-			CreatedAt time.Time       `json:"created_at"`
-		}
-		events := make([]eventRecord, 0)
-		for rows.Next() {
-			var event eventRecord
-			if err := rows.Scan(&event.Type, &event.Payload, &event.CreatedAt); err != nil {
-				result(w, nil, err)
-				return
-			}
-			events = append(events, event)
-		}
-		if err := rows.Err(); err != nil {
-			result(w, nil, err)
-			return
-		}
-		respond(w, 200, map[string]any{"attempt_id": id, "kind": kind, "state": state, "events": events})
+		respond(w, 200, map[string]any{"id": id, "slug": slug, "display_name": display, "created_at": createdAt})
 	})
+	mux.Handle("/", a.Handler())
 	return mux
 }

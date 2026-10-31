@@ -60,6 +60,8 @@ def test_modular_cross_owner_boundary_is_evidence_not_automatic_weld():
     assert r["counts"]["edge_connected_face_component_count"] == 2
     assert r["counts"]["boundary_edge_count"] > 0
     assert r["counts"]["cross_owner_matched_boundary_edge_count"] > 0
+    assert r["cross_owner_boundary_evidence"]["trajectory_incompatible_count"] == 0
+    assert r["cross_owner_boundary_evidence"]["owner_pairs"][0]["trajectory_compatible_count"] > 0
     assert "CROSS_OWNER_BOUNDARY_SEAM_CANDIDATE" in r["failure_classes_observed"]
     assert r["authority"]["cross_owner_weld_performed"] is False
 

@@ -178,17 +178,19 @@ DONE / STRONG FOUNDATION:
 - translation/rotation/scale keys
 - key add/delete/select/multi-select/move/scale
 - key copy/paste and frame nudge
+- full sampled-pose copy/paste across user clips
 - step/linear/bezier editor interpolation
 - curve visualization and draggable Bezier tangent handles
 - timeline zoom/pan, fit-time and loop-range interaction foundation
 - dopesheet drag integrated with `StudioOperationJournal`
+- previous/next-frame onion ghost overlay with configurable frame offset
+- onion preview is local/non-authoritative and never dirties the Studio document
 - proof-owned runtime clips remain read-only
 - user-clip weighted deformation preview
+- Studio user-clip preview applies sibling mesh vertex edits exactly once instead of double-applying them in the viewport handoff
 
 REMAINING:
 
-- pose copy/paste
-- onion/ghost comparison
 - richer tangent modes and tangent policy UX
 - multi-clip organization polish
 - slot/draw-order keys
@@ -286,16 +288,17 @@ Platform service routes include owner-scoped Studio project/revision/history/res
 
 ## 5. Implementation order from current checkpoint
 
-1. Keep animation requalification `ANIMATION_LINEAR_V1` green across Motion, Platform and Postgres courts. **DONE at current checkpoint.**
-2. Remove temporary productization-only CI helpers and keep only stable shipping workflows. **NEXT CLEANUP.**
-3. Pose copy/paste + onion/ghost + tangent-mode polish.
-4. Add typed Rig/IK requalification adapter and dependency cut-set.
-5. Add typed Skin/weight requalification adapter.
-6. Add typed Graphics presentation/binding requalification adapters.
-7. Add Mesh/topology requalification adapter last because it invalidates the widest downstream authority set.
-8. Expose true compiler attachment anchors and richer evidence inspection.
-9. Finish named snapshots/history compare.
-10. Performance/profile pass and deployment polish.
+1. Keep animation requalification `ANIMATION_LINEAR_V1` green across Motion, Platform and Postgres courts. **DONE.**
+2. Remove temporary productization-only CI helpers and keep only stable shipping workflows. **DONE.**
+3. Pose copy/paste + onion/ghost + mesh-delta preview correction. **DONE at this checkpoint.**
+4. Richer tangent modes and multi-clip animation organization polish.
+5. Add typed Rig/IK requalification adapter and dependency cut-set.
+6. Add typed Skin/weight requalification adapter.
+7. Add typed Graphics presentation/binding requalification adapters.
+8. Add Mesh/topology requalification adapter last because it invalidates the widest downstream authority set.
+9. Expose true compiler attachment anchors and richer evidence inspection.
+10. Finish named snapshots/history compare.
+11. Performance/profile pass and deployment polish.
 
 ## 6. Performance budgets
 

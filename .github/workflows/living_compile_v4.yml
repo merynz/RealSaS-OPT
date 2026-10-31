@@ -93,6 +93,7 @@ jobs:
           node tests/product/studio_presentation_core_contract.mjs
           node tests/product/studio_requalification_core_contract.mjs
           node tests/product/studio_timeline_view_contract.mjs
+          node tests/product/studio_pose_onion_core_contract.mjs
           node tests/product/studio_weight_core_contract.mjs
           node tests/product/studio_rig_core_contract.mjs
       - name: Compose deployment contract

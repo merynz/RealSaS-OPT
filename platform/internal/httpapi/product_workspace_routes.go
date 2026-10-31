@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,11 +12,37 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/publicproduct"
 )
 
-// HandlerWithProductWorkspace adds the post-proof derived workspace lane around
-// the existing product/capability API. The browser never receives revision or
-// artifact identities; only the trusted edge may fetch the ready workspace zip.
+// HandlerWithProductWorkspace adds the post-proof derived workspace lane and
+// operator-only exact SourceObservation ingress around the existing
+// product/capability API. Browser traffic never receives revision/artifact ids.
 func (a API) HandlerWithProductWorkspace() http.Handler {
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("POST /v1/operator/product/compiles/from-source-observation", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
+		actor := strings.TrimSpace(r.Header.Get("X-RealSaS-Worker"))
+		if actor == "" {
+			respond(w, http.StatusBadRequest, map[string]string{"error": "X-RealSaS-Worker required"})
+			return
+		}
+		displayName := strings.TrimSpace(r.Header.Get("X-RealSaS-Display-Name"))
+		reader := http.MaxBytesReader(w, r.Body, publicproduct.MaxSourceObservationBytes+1)
+		payload, err := io.ReadAll(reader)
+		if err != nil {
+			respond(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+			return
+		}
+		out, err := publicproduct.StartFromSourceObservationBytes(
+			r.Context(), a.Pool, a.Store, a.CodeSHA, payload, displayName, actor,
+		)
+		if err != nil {
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+			return
+		}
+		respond(w, http.StatusAccepted, out)
+	})
 
 	mux.HandleFunc("POST /v1/operator/product/workspace/claim", func(w http.ResponseWriter, r *http.Request) {
 		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {

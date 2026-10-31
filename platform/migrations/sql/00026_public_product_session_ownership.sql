@@ -46,6 +46,7 @@ $$;
 
 -- +goose Down
 
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION realsas_public_product_session_identity_immutable()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -64,6 +65,7 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+-- +goose StatementEnd
 
 DROP INDEX ix_public_product_compile_sessions_owner_created;
 ALTER TABLE public_product_compile_sessions DROP CONSTRAINT ck_public_product_owner_key_sha256;

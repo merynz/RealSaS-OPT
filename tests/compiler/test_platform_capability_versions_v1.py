@@ -116,10 +116,16 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert mechanics["parameters"]["rig_program_mutation_allowed"] is False
 
     graphics = specs["product.graphics"]
-    assert graphics["policy"]["dependencies"] == ["product.mesh", "product.skin", "product.mechanics"]
+    assert graphics["policy"]["dependencies"] == [
+        "product.shape", "product.mesh", "product.skin", "product.mechanics",
+    ]
     assert graphics["entry_module"] == "compiler.realsas_compiler_services.platform_worker.graphics_executor_v1"
     assert graphics["parameters"]["executor_contract"] == "RealSaS.ProductGraphicsCompile.v1"
-    assert graphics["parameters"]["required_models"] == []
+    assert graphics["parameters"]["required_models"] == [
+        {"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"}
+    ]
+    assert graphics["parameters"]["input_shape_artifact_type"] == "RealSaS.ShapeProposal"
+    assert graphics["parameters"]["shared_scene_h_reused_without_scene_reencode"] is True
     assert graphics["parameters"]["graphics_owns_all_visual_presentation"] is True
     assert graphics["parameters"]["caa_is_graphics_appearance_sublayer"] is True
     assert graphics["parameters"]["visibility_occlusion_owner"] == "GRAPHICS"

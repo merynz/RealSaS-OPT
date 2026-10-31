@@ -1,0 +1,43 @@
+{
+  "schema": "RealSaS.Post139.SubjectPolicy.v1",
+  "authority": "SOURCE_SEMANTIC_IDENTITY_POLICY__APPLIED_BEFORE_GLOBAL_ADMISSION",
+  "reference_include_subject_ids_by_source": {
+    "quaternius-animated-mech": [
+      "quaternius-animated-mech-textured-george",
+      "quaternius-animated-mech-textured-leela",
+      "quaternius-animated-mech-textured-mike",
+      "quaternius-animated-mech-textured-stan"
+    ]
+  },
+  "exclude_subject_ids": [
+    "quaternius-cyberpunk-game-kit-enemies-enemy-2legs-gun",
+    "quaternius-cyberpunk-game-kit-enemies-enemy-flying-gun",
+    "quaternius-cyberpunk-game-kit-enemies-enemy-large-gun",
+    "quaternius-easy-animated-enemy-snake-angry",
+    "quaternius-zombie-apocalypse-kit-characters-characters-lis-singleweapon",
+    "quaternius-zombie-apocalypse-kit-characters-characters-matt-singleweapon",
+    "quaternius-zombie-apocalypse-kit-characters-characters-sam-singleweapon",
+    "quaternius-zombie-apocalypse-kit-characters-characters-shaun-singleweapon"
+  ],
+  "alias_subject_ids": {
+    "quaternius-cute-animated-fish-bluegoldfish": "quaternius-cute-animated-fish-goldfish"
+  },
+  "rationale": {
+    "quaternius-animated-mech": "Publisher exposes Flat Colors and Textured authored representations of George, Leela, Mike and Stan. The established RealSaS canonical source lineage uses the Textured glTF lane; Flat Colors remains audited evidence but is not an additional Base139 training row.",
+    "quaternius-cute-animated-fish-bluegoldfish": "BlueGoldfish and Goldfish collapse to one mechanical subject identity; appearance variation does not inflate the subject denominator.",
+    "quaternius-cyberpunk-game-kit-enemies-enemy-2legs-gun": "Gun export is an authored loadout variant of Enemy_2Legs, not a new subject identity.",
+    "quaternius-cyberpunk-game-kit-enemies-enemy-flying-gun": "Gun export is an authored loadout variant of Enemy_Flying, not a new subject identity.",
+    "quaternius-cyberpunk-game-kit-enemies-enemy-large-gun": "Gun export is an authored loadout variant of Enemy_Large, not a new subject identity.",
+    "quaternius-easy-animated-enemy-snake-angry": "Snake_angry is an authored state variant of Snake, not a new subject identity.",
+    "quaternius-zombie-apocalypse-kit-characters-characters-lis-singleweapon": "SingleWeapon export is an authored equipment variant of Lis.",
+    "quaternius-zombie-apocalypse-kit-characters-characters-matt-singleweapon": "SingleWeapon export is an authored equipment variant of Matt.",
+    "quaternius-zombie-apocalypse-kit-characters-characters-sam-singleweapon": "SingleWeapon export is an authored equipment variant of Sam.",
+    "quaternius-zombie-apocalypse-kit-characters-characters-shaun-singleweapon": "SingleWeapon export is an authored equipment variant of Shaun."
+  },
+  "invariants": {
+    "audit_evidence_is_never_deleted_by_policy": true,
+    "excluded_or_alias_rows_remain_in_identity_and_admission_ledgers": true,
+    "reference_variant_rows_remain_in_identity_and_admission_ledgers": true,
+    "lineage_components_only_contain_training_or_materialization_authority_rows": true
+  }
+}

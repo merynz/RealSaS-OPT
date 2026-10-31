@@ -8,13 +8,13 @@ Studio edits an already proof-qualified RealSaS puppet. It is not the Awaken sce
 
 Canonical rule:
 
-`ProductRevision (immutable) + StudioAuthoringRevision (sibling overlay) -> requalification -> optional new ProductRevision`
+`ProductRevision (immutable) + StudioAuthoringRevision (sibling overlay) -> compiler requalification -> optional new ProductRevision`
 
-Studio MUST NOT mutate the sealed ProductRevision or its canonical bundle in place.
+Studio MUST NOT mutate the sealed ProductRevision or its canonical bundle in place. Preview state is never authority. A Studio edit becomes canonical only after the affected product capabilities re-execute and terminal `product.proof` passes.
 
-## 2. Canonical editor state names
+## 2. Stable editor state names
 
-These names are reserved for Studio V1 implementation and should stay stable across backend, browser state and tests.
+These names are canonical for Studio V1 and should remain stable across backend, browser state and tests.
 
 - `StudioProject`: persistent editing project anchored to one immutable ProductRevision.
 - `StudioAuthoringRevision`: immutable persisted snapshot of the user-authored overlay.
@@ -27,202 +27,232 @@ These names are reserved for Studio V1 implementation and should stay stable acr
 - `StudioTimeline`: clip, playhead, loop range, tracks, keys and curve state.
 - `StudioDirtyState`: clean/dirty/saving/conflict/requalification-required state.
 
-## 3. V1 parity target
+## 3. Current V1 editor status
 
-The target is a professional 2D skeletal animation editor in the Spine class of workflow quality. It does not need to clone Spine's UI, but the core editing loop must be equivalently practical.
-
-A deployable Studio is not merely a puppet correction surface. A user must be able to open a compiled puppet, author or repair the puppet, create animation clips, key transforms, preview weighted deformation, save authoring revisions and continue later without mutating the sealed ProductRevision.
+The target is a professional 2D skeletal animation editor in the Spine class of workflow quality. The current implementation is a professional foundation, not a claim of complete Spine feature parity.
 
 ### A. Project/document system — P0
 
-Required:
+DONE:
 
 - proof-qualified immutable base puppet
-- persisted StudioProject
-- append-only StudioAuthoringRevision history
+- persisted `StudioProject`
+- append-only `StudioAuthoringRevision` history
 - optimistic concurrency using client-held lock version
 - reopen restores latest authoring head
 - explicit conflict state; no silent last-write-wins
-- autosave debounce plus explicit Save
-- revision history and named snapshots
-- local undo/redo independent of persisted revisions
+- debounced autosave plus explicit Save and keyboard Save
+- `StudioDocument` sibling-authoring boundary
+- `StudioOperationJournal` undo/redo
+- `StudioDirtyState`
+- browser revision-history drawer
+- audit-safe restore: restore appends a new revision instead of rewinding history
+- Postgres courts for stale editors, idempotent save/restore and append-only revision triggers
 
-Current status:
+REMAINING:
 
-- persistent project/revision/head schema: DONE
-- append-only revision writes: DONE
-- client-held optimistic lock bridge: DONE
-- head/history APIs: DONE
-- reopen applies latest authoring payload to StudioDocument: DONE
-- StudioDocument authoring overlay boundary: DONE
-- StudioOperationJournal / undo / redo: DONE
-- StudioDirtyState clean/dirty/saving/conflict/requalification: DONE
-- debounced autosave + explicit Save + keyboard Save: DONE
-- playback isolated from authoring rig edits: DONE
-- Studio editor-core Node contract court: DONE / EXPANDED
-- real Postgres Studio repository court: IN CI
-- revision history browser surface: API READY, UI DEFERRED
-- named snapshots: TODO
+- user-facing named snapshots/bookmarks on top of immutable revision history
+- history diff/compare presentation
 
 ### B. Viewport and transforms — P0
 
-Required:
+DONE / FOUNDATION:
 
-- pan/zoom/fit
-- high-DPI canvas
-- select/add/remove/multi-select
-- translate/rotate/scale gizmos
-- local/world transform modes
-- pivot editing
-- snapping and modifier keys
-- box/lasso selection
+- pan, zoom, fit and high-DPI interaction overlay
+- per-view multi-selection and primary selection
+- translate/rotate/scale transforms
+- snapping + modifier bypass
+- custom pivot data model
+- box selection
 - art/mesh/rig/weight overlays
-- direction/view switching without losing selection semantics
+- per-view selection preservation
+- local/world mode state and UI
 
-Current status:
+REMAINING:
 
-- zoom/fit and art/mesh/rig/weight overlays: EXISTING
-- `StudioSelection` per-view multi-select + primary selection: FOUNDATION DONE
-- `StudioToolContext`: FOUNDATION DONE
-- high-DPI interaction overlay: FOUNDATION DONE
-- translate/rotate/scale selection transforms: FOUNDATION DONE
-- pan + cursor-centered zoom: FOUNDATION DONE
-- translate/rotation/scale snapping + bypass modifier: FOUNDATION DONE
-- selection/primary/custom pivot data model: FOUNDATION DONE
-- box selection: FOUNDATION DONE
-- direction switching preserves per-view StudioSelection state: FOUNDATION DONE
-- local/world mode state and UI: FOUNDATION DONE; local-axis transform math still TODO
-- lasso selection: TODO
-- explicit draggable pivot gizmo: TODO
+- local-axis transform math completion
+- lasso selection
+- explicit draggable pivot gizmo
+- viewport performance profiling on large puppets
 
 ### C. Rig editor — P0
 
-Required:
+DONE / PROFESSIONAL FOUNDATION:
 
-- create/delete/reparent bones and controls
-- hierarchy tree reorder
-- bone length/orientation editing
-- deform vs control distinction
-- IK constraints and targets
-- constraint inspector
-- mirrored creation/editing where valid
-- canonical IDs remain stable; user-created IDs live in authoring namespace
+- deform-joint vs animator-control semantic split
+- control transforms
+- add/delete/reparent authoring operations
+- hierarchy editing foundation
+- bone position/length/orientation editing foundation
+- mirrored edit support foundation
+- IK authoring list/form and target editing
+- compiler/Mechanics remains true constraint authority
 
-Current status:
+REMAINING:
 
-- control transform editing: EXISTING + PROFESSIONAL TRANSFORM FOUNDATION
-- add/delete/reparent authoring operations: EXISTING FOUNDATION
-- basic IK authoring operation: EXISTING FOUNDATION
-- hierarchy reorder, bone length/orientation handles, mirrored authoring and complete constraint inspector: TODO
+- richer hierarchy reorder UX
+- richer direct bone-handle interaction
+- complete constraint inspector / constraint-specific gizmos
+- additional mirror policies where structural mapping is valid
 
 ### D. Mesh/topology editor — P0
 
-Required:
+DONE / STRUCTURAL P0:
 
 - vertex/edge/face selection
-- add/delete/split/weld vertices and edges
-- face creation/deletion
-- triangulation visualization
-- topology validity checks while editing
-- local remesh/repair command without silent canonical mutation
+- stable projected canonical IDs plus user-authoring IDs
+- add/move/delete vertex
+- add/delete face
+- split edge
+- weld vertices
+- prune unreferenced vertices
+- structural subtool and overlay
+- browser-side deterministic replay validation
+- server-side independent topology validation
+- duplicate-face, degenerate-area, manifold-edge and split/weld safety courts
+- canonical mesh remains immutable; structural edits live in `mesh_topology_edits`
+
+REMAINING:
+
+- local remesh/repair command with explicit user intent
 - UV/source-address inspection where available
-
-Current status:
-
-- vertex selection + multi-select transform: FOUNDATION DONE
-- existing triangulation display: EXISTING
-- edge/face selection and structural topology tools: TODO
-- topology validity/live repair courts: TODO
+- richer topology diagnostics and visual invalidity markers
 
 ### E. Skin/weight editor — P0
 
-Required:
+DONE / PROFESSIONAL FOUNDATION:
 
-- weight paint brush
-- add/subtract/replace/smooth modes
-- brush radius/strength/falloff
-- normalize and prune
-- lock influences
-- numeric per-vertex influence inspector
-- mirror/copy weights when mapping is valid
-- heat/gradient visualization
-- deformation preview while painting
+- per-vertex deform-joint weight authoring
+- add/subtract/replace/smooth brush modes
+- radius/strength/falloff
+- auto-normalization
+- influence locks
+- mirror workflow
+- numeric stats/inspection foundation
+- weight visualization
+- weighted deformation preview during user animation
+- undo/autosave integration
 
-Current status:
+REMAINING:
 
-- per-vertex weight delta authoring: EXISTING FOUNDATION
-- weight visualization: EXISTING FOUNDATION
-- Studio user-clip weighted deformation preview: FOUNDATION DONE
-- professional brush modes/radius/falloff/normalization/locks/mirror: TODO
+- richer influence table editing and pruning controls
+- copy/paste weight sets
+- more explicit symmetry-map diagnostics
+- larger-project performance profiling
 
 ### F. Slots, attachments and draw order — P0
 
-Required:
+DONE / P0 FOUNDATION:
 
-- attachment list and transforms
-- bind attachment to control/bone
-- slot/draw-order timeline
-- per-view presentation inspection
-- source-supported visibility/occlusion evidence display
-- explicit warning when user override departs from qualified Graphics evidence
+- Graphics-derived qualified per-view back-to-front order as default
+- slot reorder front/back
+- hide/show per view
+- reset to qualified Graphics presentation
+- explicit Graphics evidence departure state
+- attachment/socket binding editor
+- deform-joint reassignment
+- per-view translation, rotation, scale and visibility overrides
+- socket gizmo overlay
+- V0/V1 isolation keyed by `view_id + binding_id`
+- user presentation/binding edits remain sibling authoring data and require requalification
 
-Current status:
+AUTHORITY RULE:
 
-- attachment reassignment operation: EXISTING FOUNDATION
-- attachment transform/slot/draw-order editor and Graphics-evidence inspection: TODO
+Studio does not invent canonical draw-order truth. Qualified Graphics presentation is the default. User overrides are explicit departures and must be compiler-requalified before becoming authoritative.
+
+REMAINING:
+
+- expose/link true compiler attachment anchors when available instead of relying only on generic binding rows
+- slot/draw-order keying on the animation timeline
+- richer visibility/occlusion evidence inspection
 
 ### G. Animation editor — P0
 
-Required:
+DONE / STRONG FOUNDATION:
 
-- multiple clips
-- play/pause/stop/scrub/loop range
-- dopesheet with multi-track selection
-- key add/delete/duplicate/move/scale
-- transform channels
-- interpolation: step/linear/bezier
-- curve editor with tangent handles
-- copy/paste keys and poses
-- timeline zoom/pan
-- ghost/onion comparison where useful
-- canonical motion bake remains read-only; user clips/edits are sibling authoring data
+- multiple user clips
+- create/duplicate/delete/rename
+- duration/FPS/loop
+- play/pause/stop/scrub
+- animator-control transform tracks
+- translation/rotation/scale keys
+- key add/delete/select/multi-select/move/scale
+- key copy/paste and frame nudge
+- step/linear/bezier editor interpolation
+- curve visualization and draggable Bezier tangent handles
+- timeline zoom/pan, fit-time and loop-range interaction foundation
+- dopesheet drag integrated with `StudioOperationJournal`
+- proof-owned runtime clips remain read-only
+- user-clip weighted deformation preview
 
-Current status:
+REMAINING:
 
-- `StudioTimeline` authoring core: FOUNDATION DONE
-- user clip create/duplicate/delete/rename: FOUNDATION DONE
-- duration/FPS/loop authoring: FOUNDATION DONE
-- transform tracks and translation/rotation/scale keys: FOUNDATION DONE
-- key add/delete/select/multi-select/move/scale core: FOUNDATION DONE
-- key copy/paste and frame nudge: FOUNDATION DONE
-- step/linear/bezier interpolation: FOUNDATION DONE
-- Bezier numeric control + curve visualization: FOUNDATION DONE
-- local user-clip playback with weight-driven mesh deformation preview: FOUNDATION DONE
-- proof-owned runtime clips remain read-only: PRESERVED
-- dopesheet key drag integration with StudioOperationJournal: FOUNDATION DONE
-- draggable Bezier tangent handles: TODO
-- UI for selected-key time scaling: TODO
-- timeline zoom/pan + loop-range handles: TODO
-- pose copy/paste: TODO
-- onion/ghost comparison: TODO
+- pose copy/paste
+- onion/ghost comparison
+- richer tangent modes and tangent policy UX
+- multi-clip organization polish
+- slot/draw-order keys
+
+IMPORTANT SHIPPING LIMIT:
+
+The first compiler requalification slice intentionally accepts only one saved Studio animation clip in animator-control space with linear keys. The editor may preview richer interpolation, but Bezier/step execution is not allowed to mint canonical Motion until its runtime semantics receive separate qualification courts.
 
 ### H. Proof/requalification — P1
 
-Required:
+DONE / FIRST SHIPPING SLICE:
 
-- dirty edits clearly mark `requires_requalification`
-- show which proof domains an edit invalidates
-- requalification request from Studio
-- compare last qualified ProductRevision vs working authoring overlay
-- failed proof links user back to implicated edit/domain instead of generic failure
+- dirty edits mark requalification-required state
+- deterministic invalidated-domain planning
+- fail-closed unsupported edit sets
+- immutable `RealSaS.StudioAuthoringRevision/v1` capture with authority class `STUDIO_AUTHORING_INPUT`
+- distinct `PRODUCT_REQUALIFICATION` execution goal
+- exact base EngineRelease/model snapshot preserved
+- base ProductRevision never mutated
+- animation-only canonical cut-set inherits qualified Mesh/Rig/Skin/Mechanics/Graphics authority
+- requalification executes only `product.motion -> product.proof`
+- Motion consumes Studio animation through a typed proposal adapter and mints canonical `CanonicalMotionIR.v2`
+- terminal Proof must pass before a new ProductRevision is sealed
+- successful requalification creates a new opaque `cmp_*` session and new proof-gated workspace
+- browser polls opaque `srq_*` state through the product-shell boundary
+- Studio automatically hands off to the new clean workspace after PASS
+- Postgres court verifies no fake execution/PASS state is created at admission, exact model lineage is retained, and inherited authority remains qualified
+
+CURRENT SHIPPING SLICE:
+
+`ANIMATION_LINEAR_V1`
+
+Admission requirements:
+
+- current persisted Studio HEAD
+- exactly one user animation clip
+- animator-control track space
+- linear curve execution only
+- no mesh, topology, rig, weight, binding, IK or presentation-evidence departure edits in the same requalification request
+
+REMAINING REQUALIFICATION SLICES:
+
+1. Rig/IK edits -> Rig/Mechanics/Motion/Proof as required by typed authoring adapters.
+2. Weight edits -> Skin/Mechanics/Motion/Proof.
+3. Mesh/topology edits -> Mesh and all dependent downstream authorities through Proof.
+4. Binding/attachment edits -> typed Rig/Mechanics/Graphics downstream path.
+5. Presentation/draw-order edits -> Graphics downstream path.
+6. Qualified Bezier/step animation execution semantics.
+7. proof-failure UX that links directly to implicated edit/domain and affected evidence.
+
+No slice may be enabled merely because Studio can preview the edit. Each slice needs a typed compiler adapter, dependency cut-set, lineage rules and execution/proof courts.
 
 ### I. Export — P1
 
-Required:
+CURRENT RULE:
 
-- export only qualified native `.rss` as authoritative runtime package
-- explicit draft preview/export distinction for unqualified Studio edits
-- later engine adapters consume `.rss`; engine-specific state must not become Studio authority
+- `EXPORT` is authoritative only for the current proof-qualified base ProductRevision.
+- when Studio edits exist, UI explicitly says `EXPORT QUALIFIED BASE`; current edits are excluded.
+- after requalification PASS and handoff to the newly sealed ProductRevision, that new base may be exported normally.
+
+REMAINING:
+
+- edited-runtime export convenience once all relevant requalification slices are supported
+- engine adapter packaging/polish while keeping `.rss` as engine-agnostic authority
 
 ## 4. Backend/API contract
 
@@ -230,6 +260,7 @@ Public browser-visible identifiers:
 
 - compile: `cmp_<32 hex>`
 - Studio project: `stp_<32 hex>`
+- requalification: `srq_<32 hex>`
 - revision number + lock version
 
 Never expose:
@@ -242,34 +273,29 @@ Never expose:
 - internal authoring revision UUIDs
 - product gateway service token
 
-Current public edge routes:
+Public product-shell routes include:
 
 - `GET /api/studio/session?bundle=<public bundle>`
 - `GET /api/studio/history?id=<stp_...>&limit=N`
-- existing `POST /api/living/edit-layer` carries public Studio project id + expected lock version in production mode
+- `POST /api/studio/restore`
+- `POST /api/living/edit-layer`
+- Studio requalification request/status proxy routes
+- existing compile status/workspace handoff routes
 
-Platform service routes:
+Platform service routes include owner-scoped Studio project/revision/history/restore and requalification endpoints. Browser traffic reaches them through the product shell; service credentials stay server-side.
 
-- `POST /v1/product/compiles/{cmp}/studio-project`
-- `GET /v1/product/studio/projects/{stp}`
-- `GET /v1/product/studio/projects/{stp}/head`
-- `GET /v1/product/studio/projects/{stp}/revisions`
-- `POST /v1/product/studio/projects/{stp}/revisions`
+## 5. Implementation order from current checkpoint
 
-## 5. Implementation order
-
-The deploy target requires a real authoring loop, so animation is intentionally advanced in parallel instead of being deferred behind every puppet tool.
-
-1. Close Studio persistence: reopen head, local operation journal, autosave, conflict UX. **DONE except named snapshot/history presentation.**
-2. Professional selection/transform foundation shared by Rig/Mesh/Attachment tools. **FOUNDATION DONE.**
-3. Real animation-authoring foundation: StudioTimeline, clips, dopesheet keys, curves, weighted deformation preview. **FOUNDATION DONE.**
-4. Finish Rig + IK professional creation/editing and hierarchy UX.
-5. Finish Mesh/topology tools and live validity courts.
-6. Finish Weight Paint professional brush/deformation workflow.
-7. Finish animation parity: tangent handles, timeline zoom/pan, loop range, key scaling UI, pose copy/paste.
-8. Slots/attachments/draw order and Graphics evidence inspection.
-9. Proof invalidation/requalification UX.
-10. Revision-history/named snapshots, export polish and performance profiling.
+1. Keep animation requalification `ANIMATION_LINEAR_V1` green across Motion, Platform and Postgres courts. **DONE at current checkpoint.**
+2. Remove temporary productization-only CI helpers and keep only stable shipping workflows. **NEXT CLEANUP.**
+3. Pose copy/paste + onion/ghost + tangent-mode polish.
+4. Add typed Rig/IK requalification adapter and dependency cut-set.
+5. Add typed Skin/weight requalification adapter.
+6. Add typed Graphics presentation/binding requalification adapters.
+7. Add Mesh/topology requalification adapter last because it invalidates the widest downstream authority set.
+8. Expose true compiler attachment anchors and richer evidence inspection.
+9. Finish named snapshots/history compare.
+10. Performance/profile pass and deployment polish.
 
 ## 6. Performance budgets
 
@@ -288,6 +314,7 @@ Initial V1 budgets:
 
 - replacing Awaken with Studio controls
 - mutating ProductRevision directly from editor actions
+- promoting Studio preview state directly to product authority
 - hiding proof failures by silently repairing user edits
 - engine-specific editor forks
 - training/fitting models inside Studio interactive tools

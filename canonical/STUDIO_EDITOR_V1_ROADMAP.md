@@ -31,6 +31,8 @@ These names are reserved for Studio V1 implementation and should stay stable acr
 
 The target is a professional 2D skeletal animation editor in the Spine class of workflow quality. It does not need to clone Spine's UI, but the core editing loop must be equivalently practical.
 
+A deployable Studio is not merely a puppet correction surface. A user must be able to open a compiled puppet, author or repair the puppet, create animation clips, key transforms, preview weighted deformation, save authoring revisions and continue later without mutating the sealed ProductRevision.
+
 ### A. Project/document system — P0
 
 Required:
@@ -57,7 +59,7 @@ Current status:
 - StudioDirtyState clean/dirty/saving/conflict/requalification: DONE
 - debounced autosave + explicit Save + keyboard Save: DONE
 - playback isolated from authoring rig edits: DONE
-- Studio document/journal Node contract court: DONE
+- Studio editor-core Node contract court: DONE / EXPANDED
 - real Postgres Studio repository court: IN CI
 - revision history browser surface: API READY, UI DEFERRED
 - named snapshots: TODO
@@ -79,11 +81,19 @@ Required:
 
 Current status:
 
-- zoom/fit and art/mesh/rig/weight overlays: PARTIAL EXISTING
-- single control/vertex selection and drag: PARTIAL EXISTING
-- StudioSelection multi-select model: NEXT
-- StudioToolContext + transform gizmos: NEXT
-- pan, snapping, pivot, lasso: NEXT
+- zoom/fit and art/mesh/rig/weight overlays: EXISTING
+- `StudioSelection` per-view multi-select + primary selection: FOUNDATION DONE
+- `StudioToolContext`: FOUNDATION DONE
+- high-DPI interaction overlay: FOUNDATION DONE
+- translate/rotate/scale selection transforms: FOUNDATION DONE
+- pan + cursor-centered zoom: FOUNDATION DONE
+- translate/rotation/scale snapping + bypass modifier: FOUNDATION DONE
+- selection/primary/custom pivot data model: FOUNDATION DONE
+- box selection: FOUNDATION DONE
+- direction switching preserves per-view StudioSelection state: FOUNDATION DONE
+- local/world mode state and UI: FOUNDATION DONE; local-axis transform math still TODO
+- lasso selection: TODO
+- explicit draggable pivot gizmo: TODO
 
 ### C. Rig editor — P0
 
@@ -98,6 +108,13 @@ Required:
 - mirrored creation/editing where valid
 - canonical IDs remain stable; user-created IDs live in authoring namespace
 
+Current status:
+
+- control transform editing: EXISTING + PROFESSIONAL TRANSFORM FOUNDATION
+- add/delete/reparent authoring operations: EXISTING FOUNDATION
+- basic IK authoring operation: EXISTING FOUNDATION
+- hierarchy reorder, bone length/orientation handles, mirrored authoring and complete constraint inspector: TODO
+
 ### D. Mesh/topology editor — P0
 
 Required:
@@ -109,6 +126,13 @@ Required:
 - topology validity checks while editing
 - local remesh/repair command without silent canonical mutation
 - UV/source-address inspection where available
+
+Current status:
+
+- vertex selection + multi-select transform: FOUNDATION DONE
+- existing triangulation display: EXISTING
+- edge/face selection and structural topology tools: TODO
+- topology validity/live repair courts: TODO
 
 ### E. Skin/weight editor — P0
 
@@ -124,6 +148,13 @@ Required:
 - heat/gradient visualization
 - deformation preview while painting
 
+Current status:
+
+- per-vertex weight delta authoring: EXISTING FOUNDATION
+- weight visualization: EXISTING FOUNDATION
+- Studio user-clip weighted deformation preview: FOUNDATION DONE
+- professional brush modes/radius/falloff/normalization/locks/mirror: TODO
+
 ### F. Slots, attachments and draw order — P0
 
 Required:
@@ -134,6 +165,11 @@ Required:
 - per-view presentation inspection
 - source-supported visibility/occlusion evidence display
 - explicit warning when user override departs from qualified Graphics evidence
+
+Current status:
+
+- attachment reassignment operation: EXISTING FOUNDATION
+- attachment transform/slot/draw-order editor and Graphics-evidence inspection: TODO
 
 ### G. Animation editor — P0
 
@@ -150,6 +186,25 @@ Required:
 - timeline zoom/pan
 - ghost/onion comparison where useful
 - canonical motion bake remains read-only; user clips/edits are sibling authoring data
+
+Current status:
+
+- `StudioTimeline` authoring core: FOUNDATION DONE
+- user clip create/duplicate/delete/rename: FOUNDATION DONE
+- duration/FPS/loop authoring: FOUNDATION DONE
+- transform tracks and translation/rotation/scale keys: FOUNDATION DONE
+- key add/delete/select/multi-select/move/scale core: FOUNDATION DONE
+- key copy/paste and frame nudge: FOUNDATION DONE
+- step/linear/bezier interpolation: FOUNDATION DONE
+- Bezier numeric control + curve visualization: FOUNDATION DONE
+- local user-clip playback with weight-driven mesh deformation preview: FOUNDATION DONE
+- proof-owned runtime clips remain read-only: PRESERVED
+- dopesheet key drag integration with StudioOperationJournal: FOUNDATION DONE
+- draggable Bezier tangent handles: TODO
+- UI for selected-key time scaling: TODO
+- timeline zoom/pan + loop-range handles: TODO
+- pose copy/paste: TODO
+- onion/ghost comparison: TODO
 
 ### H. Proof/requalification — P1
 
@@ -203,16 +258,18 @@ Platform service routes:
 
 ## 5. Implementation order
 
+The deploy target requires a real authoring loop, so animation is intentionally advanced in parallel instead of being deferred behind every puppet tool.
+
 1. Close Studio persistence: reopen head, local operation journal, autosave, conflict UX. **DONE except named snapshot/history presentation.**
-2. Professional selection/transform foundation shared by Rig/Mesh/Attachment tools. **NEXT.**
-3. Rig + IK creation/editing.
-4. Mesh/topology tools.
-5. Weight paint and deformation preview.
-6. Dopesheet and key editing.
-7. Bezier curve editor.
+2. Professional selection/transform foundation shared by Rig/Mesh/Attachment tools. **FOUNDATION DONE.**
+3. Real animation-authoring foundation: StudioTimeline, clips, dopesheet keys, curves, weighted deformation preview. **FOUNDATION DONE.**
+4. Finish Rig + IK professional creation/editing and hierarchy UX.
+5. Finish Mesh/topology tools and live validity courts.
+6. Finish Weight Paint professional brush/deformation workflow.
+7. Finish animation parity: tangent handles, timeline zoom/pan, loop range, key scaling UI, pose copy/paste.
 8. Slots/attachments/draw order and Graphics evidence inspection.
 9. Proof invalidation/requalification UX.
-10. Export polish and performance profiling.
+10. Revision-history/named snapshots, export polish and performance profiling.
 
 ## 6. Performance budgets
 

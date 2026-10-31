@@ -220,3 +220,95 @@ type EngineStageRequest struct {
 	ExpectedSemanticSHA256 string              `json:"expected_semantic_sha256"`
 	AllowedExecuteStageIDs []string            `json:"allowed_execute_stage_ids"`
 }
+
+type EngineOutput struct {
+	RelativePath   string `json:"relative_path,omitempty"`
+	PayloadSchema  string `json:"payload_schema,omitempty"`
+	Role           string `json:"role"`
+	ArtifactType   string `json:"artifact_type"`
+	SchemaVersion  string `json:"schema_version"`
+	StorageKey     string `json:"storage_key"`
+	ContentSHA256  string `json:"content_sha256"`
+	SizeBytes      int64  `json:"size_bytes"`
+	AuthorityClass string `json:"authority_class"`
+}
+
+type EngineFailureEvidence struct {
+	Code                 string         `json:"code"`
+	Class                string         `json:"class"`
+	ReportedOwnerStageID string         `json:"reported_owner_stage_id,omitempty"`
+	Diagnostics          map[string]any `json:"diagnostics"`
+}
+
+type EngineStageResult struct {
+	StageID          string                 `json:"stage_id"`
+	Status           string                 `json:"status"`
+	ExecutedStageIDs []string               `json:"executed_stage_ids"`
+	Outputs          []EngineOutput         `json:"outputs"`
+	DiagnosticsHash  string                 `json:"diagnostics_hash"`
+	Failure          *EngineFailureEvidence `json:"failure,omitempty"`
+}
+
+type BindReusedStageRequest struct {
+	AttemptID              string `json:"attempt_id"`
+	StageID                string `json:"stage_id"`
+	ExpectedSemanticSHA256 string `json:"expected_semantic_sha256"`
+	ArtifactID             string `json:"artifact_id"`
+}
+
+type StageCommitRequest struct {
+	ExecutionID            string            `json:"execution_id"`
+	CommandID              string            `json:"command_id"`
+	AttemptID              string            `json:"attempt_id"`
+	StageID                string            `json:"stage_id"`
+	ExpectedSemanticSHA256 string            `json:"expected_semantic_sha256"`
+	AllowedExecuteStageIDs []string          `json:"allowed_execute_stage_ids"`
+	EngineResult           EngineStageResult `json:"engine_result"`
+}
+
+type StageActivityErrorRequest struct {
+	ExecutionID string `json:"execution_id"`
+	AttemptID   string `json:"attempt_id"`
+	StageID     string `json:"stage_id"`
+	Error       string `json:"error"`
+}
+
+type StageCommitResult struct {
+	StageID    string  `json:"stage_id"`
+	Status     string  `json:"status"`
+	ArtifactID *string `json:"artifact_id,omitempty"`
+}
+
+type CompileWorkflowResult struct {
+	AttemptID         string              `json:"attempt_id"`
+	Status            string              `json:"status"`
+	CompletedStages   []StageCommitResult `json:"completed_stages"`
+	ProductRevisionID *string             `json:"product_revision_id,omitempty"`
+}
+
+type RenderResolution struct {
+	CacheHit         bool           `json:"cache_hit"`
+	OutputArtifactID *string        `json:"output_artifact_id,omitempty"`
+	RuntimeRequest   map[string]any `json:"runtime_request,omitempty"`
+}
+
+type EngineRenderResult struct {
+	Status        string         `json:"status"`
+	OutputPath    string         `json:"output_path,omitempty"`
+	StorageKey    string         `json:"storage_key,omitempty"`
+	ContentSHA256 string         `json:"content_sha256"`
+	SizeBytes     int64          `json:"size_bytes"`
+	Diagnostics   map[string]any `json:"diagnostics,omitempty"`
+}
+
+type RenderCommitRequest struct {
+	CommandID       string             `json:"command_id"`
+	RenderRequestID string             `json:"render_request_id"`
+	EngineResult    EngineRenderResult `json:"engine_result"`
+}
+
+type RenderWorkflowResult struct {
+	Status           string `json:"status"`
+	CacheHit         bool   `json:"cache_hit"`
+	OutputArtifactID string `json:"output_artifact_id"`
+}

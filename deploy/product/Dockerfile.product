@@ -1,0 +1,22 @@
+FROM python:3.11-slim-bookworm
+
+RUN useradd --system --uid 10001 --create-home --home-dir /home/realsas realsas \
+    && mkdir -p /app /var/lib/realsas/bundles \
+    && chown -R realsas:realsas /app /var/lib/realsas /home/realsas
+
+WORKDIR /app
+COPY deploy/product/requirements.txt /tmp/product-requirements.txt
+RUN python -m pip install --no-cache-dir -r /tmp/product-requirements.txt \
+    && rm -f /tmp/product-requirements.txt
+COPY product ./product
+COPY compiler ./compiler
+COPY tools/start_exact8_product_compile_v1.py ./tools/start_exact8_product_compile_v1.py
+COPY tools/product_deploy_preflight_v1.py ./tools/product_deploy_preflight_v1.py
+
+ENV PYTHONPATH=/app \
+    PYTHONUNBUFFERED=1 \
+    REALSAS_PRODUCT_BUNDLE_ROOT=/var/lib/realsas/bundles
+VOLUME ["/var/lib/realsas/bundles"]
+EXPOSE 8765
+USER realsas
+CMD ["python", "-m", "product.living_compile.server", "--host", "0.0.0.0", "--port", "8765"]

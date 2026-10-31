@@ -26,6 +26,7 @@ const (
 	CommitCapabilityResultActivityName        = "platform.commit_capability_result.v1"
 	RecordCapabilityActivityErrorActivityName = "platform.record_capability_activity_error.v1"
 	FinalizeCapabilityGoalActivityName        = "platform.finalize_capability_goal.v1"
+	FinalizeCapabilityProductActivityName     = "platform.finalize_capability_product.v1"
 	EngineExecuteCapabilityActivityName       = "engine.execute_capability.v1"
 )
 
@@ -155,9 +156,10 @@ type CapabilityActivityErrorRequest struct {
 }
 
 type CapabilityWorkflowResult struct {
-	AttemptID string                   `json:"attempt_id"`
-	Status    string                   `json:"status"`
-	Completed []CapabilityCommitResult `json:"completed"`
+	AttemptID         string                   `json:"attempt_id"`
+	Status            string                   `json:"status"`
+	Completed         []CapabilityCommitResult `json:"completed"`
+	ProductRevisionID *string                  `json:"product_revision_id,omitempty"`
 }
 
 type RenderWorkflowInput struct {

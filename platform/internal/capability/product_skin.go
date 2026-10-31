@@ -28,7 +28,7 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			ProductMeshCapabilityID,
 			ProductRigCapabilityID,
 		},
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeDeveloper, ModeProduct},
 		ProductPassAuthority: false,
 		Aliases:              []string{"Skin", "MIRA"},
 		Metadata: map[string]any{

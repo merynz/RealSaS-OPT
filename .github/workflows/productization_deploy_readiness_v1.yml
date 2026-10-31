@@ -1,0 +1,102 @@
+name: productization-deploy-readiness-v1
+
+on:
+  push:
+    branches: [productization-deploy-readiness-v1]
+    paths:
+      - 'platform/**'
+      - 'compiler/realsas_compiler_core/modular_product_proof_v1.py'
+      - 'compiler/realsas_compiler_core/default_idle_provider_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/motion_executor_v2.py'
+      - 'compiler/realsas_compiler_services/platform_worker/proof_executor_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/worker.py'
+      - 'product/living_compile/**'
+      - 'deploy/product/.env.example'
+      - 'tools/admit_product_model_release_v1.py'
+      - 'tools/product_deploy_preflight_v1.py'
+      - 'tests/compiler/test_product_artifact_closure_v1.py'
+      - 'tests/product/test_model_admission_tool.py'
+      - 'tests/product/test_product_deploy_preflight.py'
+      - '.github/workflows/productization_deploy_readiness_v1.yml'
+  pull_request:
+    paths:
+      - 'platform/**'
+      - 'compiler/realsas_compiler_core/modular_product_proof_v1.py'
+      - 'compiler/realsas_compiler_core/default_idle_provider_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/motion_executor_v2.py'
+      - 'compiler/realsas_compiler_services/platform_worker/proof_executor_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/worker.py'
+      - 'product/living_compile/**'
+      - 'deploy/product/.env.example'
+      - 'tools/admit_product_model_release_v1.py'
+      - 'tools/product_deploy_preflight_v1.py'
+      - 'tests/compiler/test_product_artifact_closure_v1.py'
+      - 'tests/product/test_model_admission_tool.py'
+      - 'tests/product/test_product_deploy_preflight.py'
+      - '.github/workflows/productization_deploy_readiness_v1.yml'
+
+concurrency:
+  group: productization-deploy-readiness-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  platform-productization:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: realsas
+          POSTGRES_PASSWORD: realsas
+          POSTGRES_DB: realsas
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U realsas -d realsas"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: platform/go.mod
+          cache-dependency-path: platform/go.sum
+      - name: Shipping artifact closure court
+        run: python -m unittest -v tests.compiler.test_product_artifact_closure_v1
+      - name: Product model admission contract
+        run: |
+          python -m py_compile tools/admit_product_model_release_v1.py
+          python -m unittest -v tests.product.test_model_admission_tool
+      - name: Product deployment preflight contract
+        run: |
+          python -m py_compile tools/product_deploy_preflight_v1.py
+          python -m unittest -v tests.product.test_product_deploy_preflight
+      - name: Go format gate
+        working-directory: platform
+        run: |
+          drift="$(gofmt -l .)"
+          if [ -n "$drift" ]; then
+            printf 'gofmt drift:\n%s\n' "$drift"
+            gofmt -d $drift
+            exit 1
+          fi
+      - name: Go vet
+        working-directory: platform
+        run: go vet ./...
+      - name: Full Platform Go tests
+        working-directory: platform
+        run: go test ./...
+      - name: Shipping product and Studio DB courts
+        working-directory: platform
+        env:
+          REALSAS_DATABASE_URL: postgres://realsas:realsas@127.0.0.1:5432/realsas?sslmode=disable
+          REALSAS_PRODUCT_E2E_DB_COURT: "1"
+          REALSAS_STUDIO_DB_COURT: "1"
+        run: |
+          go run ./cmd/realsas-migrate up
+          go test ./internal/control -run '^TestShippingProductCompileDBCourt$' -count=1 -v
+          go test ./internal/studio -run '^TestStudioDBCourt$' -count=1 -v

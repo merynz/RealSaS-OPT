@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - 'compiler/realsas_compiler_core/graphics_v1.py'
+      - 'compiler/realsas_compiler_core/graphics_v2.py'
+      - 'compiler/realsas_compiler_core/graphics_evidence_v2.py'
+      - 'compiler/realsas_compiler_core/graphics_latent_transport_v1.py'
+      - 'compiler/realsas_compiler_core/graphics_relation_evidence_v1.py'
       - 'compiler/realsas_compiler_core/appearance_authority_v2.py'
       - 'compiler/realsas_compiler_core/canonical_graphics_ir_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/graphics_executor_v1.py'
@@ -12,7 +16,11 @@ on:
       - 'platform/internal/capability/release_compose.go'
       - 'platform/internal/capability/release_compose_test.go'
       - 'platform/internal/capability/contracts/product_capabilities_v1.json'
+      - 'platform/internal/capability/contracts/product_responsibilities_v1.json'
       - 'tests/compiler/test_canonical_graphics_product_v1.py'
+      - 'tests/compiler/test_graphics_v2.py'
+      - 'tests/compiler/test_graphics_latent_transport_v1.py'
+      - 'tests/compiler/test_graphics_relation_evidence_v1.py'
       - '.github/workflows/graphics_v1_product.yml'
   workflow_dispatch:
 
@@ -47,14 +55,22 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             compiler/realsas_compiler_core/graphics_v1.py \
+            compiler/realsas_compiler_core/graphics_v2.py \
+            compiler/realsas_compiler_core/graphics_evidence_v2.py \
+            compiler/realsas_compiler_core/graphics_latent_transport_v1.py \
+            compiler/realsas_compiler_core/graphics_relation_evidence_v1.py \
             compiler/realsas_compiler_core/appearance_authority_v2.py \
             compiler/realsas_compiler_core/canonical_graphics_ir_v1.py \
             compiler/realsas_compiler_services/platform_worker/graphics_executor_v1.py \
             compiler/realsas_compiler_services/platform_worker/worker.py
-      - name: Run canonical Graphics courts
+      - name: Run canonical and shared-scene Graphics courts
         run: |
           set -euo pipefail
-          pytest -q tests/compiler/test_canonical_graphics_product_v1.py
+          pytest -q \
+            tests/compiler/test_canonical_graphics_product_v1.py \
+            tests/compiler/test_graphics_v2.py \
+            tests/compiler/test_graphics_latent_transport_v1.py \
+            tests/compiler/test_graphics_relation_evidence_v1.py
       - name: Run Platform Graphics role courts
         working-directory: platform
         run: |

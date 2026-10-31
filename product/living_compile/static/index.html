@@ -3,99 +3,77 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>RealSaS Studio</title>
-  <link rel="stylesheet" href="/static/css/living_compile.css">
+  <title>RealSaS</title>
+  <meta name="description" content="Awaken a source character into an editable living puppet.">
+  <link rel="stylesheet" href="/static/css/awaken.css">
+  <link rel="stylesheet" href="/static/css/agent_reach.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand"><span class="mark">RS</span><div><strong>RealSaS</strong><small>Studio · Character Compiler</small></div></div>
-    <div class="bundle-open">
-      <input id="bundlePath" placeholder="Open an existing compiled character bundle">
-      <button id="openBundle">OPEN</button>
-      <button id="compileCharacter" class="primary" disabled>COMPILE</button>
-    </div>
-    <div class="authority"><span id="proofBadge" class="badge">NO CHARACTER</span><span id="stateHash" class="mono"></span></div>
-  </header>
+  <main class="awaken-shell">
+    <canvas id="depthScene" aria-hidden="true"></canvas>
+    <canvas id="agentReach" aria-hidden="true"></canvas>
+    <div class="scene-fog" aria-hidden="true"></div>
+    <div class="scene-grid" aria-hidden="true"></div>
+    <div class="scene-scan" aria-hidden="true"></div>
+    <div class="scene-vignette" aria-hidden="true"></div>
+    <div class="scene-aperture" aria-hidden="true"></div>
 
-  <nav id="productFlow" class="product-flow" aria-label="Product workflow">
-    <button class="stage active" data-stage="input"><span>01</span>INPUT</button>
-    <button class="stage" data-stage="shape"><span>02</span>SHAPE</button>
-    <button class="stage" data-stage="mesh"><span>03</span>MESH</button>
-    <button class="stage" data-stage="rig"><span>04</span>RIG</button>
-    <button class="stage" data-stage="skin"><span>05</span>SKIN</button>
-    <button class="stage" data-stage="graphics"><span>06</span>GRAPHICS</button>
-    <button class="stage" data-stage="animation"><span>07</span>ANIMATION</button>
-    <button class="stage" data-stage="proof"><span>08</span>PROOF</button>
-  </nav>
+    <header class="masthead" aria-label="RealSaS">
+      <span class="brandmark">RS</span>
+      <div id="mastStatus" class="mast-status"><i></i><span>INTAKE READY</span></div>
+    </header>
 
-  <section class="compile-strip">
-    <div class="compile-state"><span class="status-dot"></span><strong id="compileState">READY FOR EXISTING CHARACTER</strong><span id="compileDetail">Full compile service is not bound yet.</span></div>
-    <div class="compile-meter"><div id="compileProgress" class="compile-progress"></div></div>
-    <div class="budget"><span>PERFORMANCE</span><strong>&lt;30s preview</strong><strong>≤3 min market bar</strong><strong>≤60s goal</strong></div>
-  </section>
+    <section class="stage-wrap" aria-label="Character awakening stage">
+      <section class="hero">
+        <div class="input-orbit">
+          <div class="orbit-ring orbit-ring-a" aria-hidden="true"></div>
+          <div class="orbit-ring orbit-ring-b" aria-hidden="true"></div>
+          <div class="pedestal-glow" aria-hidden="true"></div>
 
-  <nav class="modebar" aria-label="Editing tools">
-    <span class="tool-label">EDIT</span>
-    <button class="mode active" data-mode="rig">RIG</button>
-    <button class="mode" data-mode="mesh">MESH</button>
-    <button class="mode" data-mode="weights">SKIN</button>
-    <button class="mode" data-mode="bindings">ATTACH</button>
-    <button class="mode" data-mode="topology">TOPOLOGY</button>
-    <button class="mode" data-mode="ik">IK</button>
-    <button class="mode" data-mode="animation">ANIMATION</button>
-    <span class="separator"></span>
-    <span id="activeProductStage" class="active-stage">INPUT</span>
-    <button id="saveLayer">SAVE EDITS</button>
-    <button id="exportRuntime" class="primary">EXPORT</button>
-  </nav>
+          <label id="dropzone" class="dropzone" for="sourceInput">
+            <input id="sourceInput" type="file" accept="image/png,image/webp,image/jpeg" multiple>
+            <div class="drop-empty">
+              <span class="drop-symbol">＋</span>
+              <strong>DROP CHARACTER</strong>
+            </div>
+            <div class="drop-preview"><img id="sourcePreview" alt="Selected source character"></div>
+            <span id="viewCount" class="view-count">0 VIEWS</span>
+          </label>
+        </div>
 
-  <main class="workspace">
-    <aside class="left panel">
-      <div class="panel-title">DIRECTION</div>
-      <div id="views" class="view-grid"></div>
-      <div class="panel-title">CHARACTER</div>
-      <div id="sceneTree" class="tree"></div>
-      <div class="panel-title">PROOF</div>
-      <div id="authorityText" class="authority-copy">Open a proof-gated compiled character.</div>
-    </aside>
+        <button id="awaken" class="awaken-button" type="button" disabled>AWAKEN</button>
 
-    <section class="center panel viewport-panel">
-      <div class="viewport-toolbar">
-        <span id="viewLabel">VIEW —</span>
-        <label><input id="showImage" type="checkbox" checked> ART</label>
-        <label><input id="showMesh" type="checkbox" checked> MESH</label>
-        <label><input id="showRig" type="checkbox" checked> RIG</label>
-        <label><input id="showWeights" type="checkbox"> SKIN</label>
-        <button id="fitView">FIT</button>
-      </div>
-      <canvas id="viewport" width="1100" height="820"></canvas>
-      <div id="hint" class="hint">Open a compiled character or start from Input.</div>
+        <aside class="telemetry" aria-label="Compiler telemetry">
+          <div class="pipeline" aria-hidden="true">
+            <div class="pipe-step"><span class="n">01</span><span>Input</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">02</span><span>Shape</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">03</span><span>Mesh</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">04</span><span>Rig</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">05</span><span>Skin</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">06</span><span>Mechanics</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">07</span><span>Graphics</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">08</span><span>Motion</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">09</span><span>Proof</span><i class="state"></i></div>
+          </div>
+          <div id="compilerLog" class="compiler-log" aria-live="polite"></div>
+        </aside>
+      </section>
     </section>
 
-    <aside class="right panel inspector">
-      <div class="panel-title">INSPECTOR</div>
-      <div id="productStageNote" class="stage-note">Input accepts the source character. Existing compiled bundles can already be inspected and edited.</div>
-      <div id="inspectorBody"></div>
-    </aside>
+    <section id="result" class="result" aria-live="polite">
+      <div class="result-stage">
+        <div class="result-art"><img id="resultPreview" alt="Compiled character preview"></div>
+        <div class="result-stream">
+          <small>PRODUCT PROOF · PASS</small>
+          <h2>ALIVE</h2>
+          <a class="open-workspace" href="/studio">OPEN STUDIO</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="dev-mode">MODE · <strong id="modeLabel">CHECKING GATEWAY</strong></div>
   </main>
-
-  <section class="timeline panel">
-    <div class="timeline-head">
-      <div class="transport"><button id="play">▶</button><button id="stop">■</button></div>
-      <select id="clipSelect"></select>
-      <span id="timeReadout" class="mono">0.000 / 0.000</span>
-      <label>FPS <input id="fps" type="number" min="1" max="120" value="30"></label>
-      <button id="newClip">NEW CLIP</button><button id="addKey">ADD KEY</button><button id="deleteKey">DELETE KEY</button>
-      <select id="curveSelect"><option value="linear">LINEAR</option><option value="step">STEP</option><option value="cubic">CUBIC</option></select>
-    </div>
-    <div class="timeline-body">
-      <div id="trackList" class="track-list"></div>
-      <div class="dope-wrap"><canvas id="dope" width="1500" height="220"></canvas></div>
-    </div>
-  </section>
-
-  <div id="toast" class="toast"></div>
-  <script type="module" src="/static/js/app.js"></script>
-  <script type="module" src="/static/js/product_shell.js"></script>
+  <script src="/static/js/agent_reach.js" defer></script>
+  <script type="module" src="/static/js/awaken.js"></script>
 </body>
 </html>

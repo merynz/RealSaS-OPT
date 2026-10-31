@@ -51,9 +51,18 @@ func main() {
 		slog.Error("artifact store", "error", err)
 		os.Exit(1)
 	}
-	handler := (httpapi.API{Pool: pool, Graph: graph, Store: store, CodeSHA: sourceCodeSHA}).HandlerWithCapabilityRun()
+	handler := (httpapi.API{
+		Pool:    pool,
+		Graph:   graph,
+		Store:   store,
+		CodeSHA: sourceCodeSHA,
+	}).HandlerWithStudio()
+	bindAddr := os.Getenv("REALSAS_PLATFORM_BIND_ADDR")
+	if bindAddr == "" {
+		bindAddr = "127.0.0.1:8080"
+	}
 	server := &http.Server{
-		Addr:              "127.0.0.1:8080",
+		Addr:              bindAddr,
 		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,

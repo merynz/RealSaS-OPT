@@ -37,9 +37,18 @@ func CapabilityWorkflow(ctx workflow.Context, input CapabilityWorkflowInput) (Ca
 	if err := workflow.ExecuteActivity(platformCtx, ResolveCapabilityGoalActivityName, input).Get(ctx, &goal); err != nil {
 		return CapabilityWorkflowResult{}, err
 	}
-	if goal.PromotionPolicy != "NEVER" {
+	switch goal.PromotionPolicy {
+	case "NEVER", "QUALIFIED_PRODUCT_ONLY":
+	default:
 		return CapabilityWorkflowResult{}, temporal.NewNonRetryableApplicationError(
-			"developer capability workflow cannot promote product state",
+			fmt.Sprintf("unsupported capability promotion policy %s", goal.PromotionPolicy),
+			"CapabilityPromotionContractViolation",
+			nil,
+		)
+	}
+	if goal.PromotionPolicy == "QUALIFIED_PRODUCT_ONLY" && goal.GoalType != "PRODUCT_COMPILE" {
+		return CapabilityWorkflowResult{}, temporal.NewNonRetryableApplicationError(
+			"qualified product promotion requires PRODUCT_COMPILE goal",
 			"CapabilityPromotionContractViolation",
 			nil,
 		)
@@ -92,8 +101,12 @@ func CapabilityWorkflow(ctx workflow.Context, input CapabilityWorkflowInput) (Ca
 		}
 	}
 
+	finalActivity := FinalizeCapabilityGoalActivityName
+	if goal.PromotionPolicy == "QUALIFIED_PRODUCT_ONLY" {
+		finalActivity = FinalizeCapabilityProductActivityName
+	}
 	var result CapabilityWorkflowResult
-	if err := workflow.ExecuteActivity(platformCtx, FinalizeCapabilityGoalActivityName, map[string]any{
+	if err := workflow.ExecuteActivity(platformCtx, finalActivity, map[string]any{
 		"command":   input,
 		"goal":      goal,
 		"completed": completed,

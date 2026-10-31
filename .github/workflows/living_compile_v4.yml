@@ -8,6 +8,10 @@ on:
   pull_request:
     paths:
       - 'product/**'
+      - 'deploy/product/**'
+      - 'tools/start_exact8_product_compile_v1.py'
+      - 'compiler/realsas_compiler_core/playback_full_surface_v3.py'
+      - 'compiler/realsas_compiler_services/platform_worker/source_observation_contract_v1.py'
       - 'tests/product/**'
       - 'experiments/single_family_e2e_v1/export_bundle_v1.py'
       - 'canonical/LIVING_COMPILE_V4_PRODUCT_SHELL_PROMOTION_20260905.md'
@@ -16,6 +20,10 @@ on:
     branches: [main]
     paths:
       - 'product/**'
+      - 'deploy/product/**'
+      - 'tools/start_exact8_product_compile_v1.py'
+      - 'compiler/realsas_compiler_core/playback_full_surface_v3.py'
+      - 'compiler/realsas_compiler_services/platform_worker/source_observation_contract_v1.py'
       - 'tests/product/**'
       - 'experiments/single_family_e2e_v1/export_bundle_v1.py'
       - '.github/workflows/living_compile_v4.yml'
@@ -34,13 +42,36 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Install product projection dependency
+        run: python -m pip install --disable-pip-version-check -r deploy/product/requirements.txt
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Python product-shell tests
-        run: PYTHONPATH=. python -m unittest -v tests.product.test_living_compile_v4
+      - name: Python product-shell, worker and deployment tests
+        run: >-
+          PYTHONPATH=. python -m unittest -v
+          tests.product.test_living_compile_v4
+          tests.product.test_mesh_topology_authoring
+          tests.product.test_public_workspace_handoff
+          tests.product.test_studio_persistence
+          tests.product.test_intake_worker
+          tests.product.test_workspace_worker
+          tests.product.test_workspace_materializer_v1
+          tests.product.test_exact8_product_compile_tool
+          tests.product.test_deploy_contract
       - name: Python syntax
-        run: python -m py_compile product/living_compile/*.py experiments/single_family_e2e_v1/export_bundle_v1.py
+        run: >-
+          python -m py_compile
+          product/living_compile/*.py
+          product/intake_worker/*.py
+          product/workspace_worker/*.py
+          tools/start_exact8_product_compile_v1.py
+          experiments/single_family_e2e_v1/export_bundle_v1.py
+          tests/product/test_deploy_contract.py
+          tests/product/test_studio_persistence.py
+          tests/product/test_mesh_topology_authoring.py
+          tests/product/test_workspace_materializer_v1.py
+          tests/product/test_exact8_product_compile_tool.py
       - name: JavaScript syntax
         shell: bash
         run: |
@@ -48,6 +79,20 @@ jobs:
           for f in product/living_compile/static/js/*.js; do
             node --check "$f"
           done
+      - name: Studio editor-core contracts
+        run: |
+          node tests/product/studio_document_contract.mjs
+          node tests/product/studio_mesh_document_contract.mjs
+          node tests/product/studio_mesh_topology_core_contract.mjs
+          node tests/product/studio_timeline_view_contract.mjs
+          node tests/product/studio_weight_core_contract.mjs
+          node tests/product/studio_rig_core_contract.mjs
+      - name: Compose deployment contract
+        run: >-
+          docker compose
+          --env-file deploy/product/.env.example
+          -f deploy/product/compose.yaml
+          config --quiet
       - name: Execution lane
         run: |
           echo 'execution_lane=github_hosted_public_standard'

@@ -22,6 +22,22 @@ def _one(request: dict[str, Any], artifact_type: str, schema_version: str) -> di
     return rows[0]
 
 
+def _optional_one(
+    request: dict[str, Any], artifact_type: str, schema_version: str
+) -> dict[str, Any] | None:
+    rows = [
+        dict(row)
+        for row in request.get("input_artifacts") or ()
+        if str(row.get("artifact_type") or "") == artifact_type
+        and str(row.get("schema_version") or "") == schema_version
+    ]
+    if len(rows) > 1:
+        raise RuntimeError(
+            f"MOTION_V2_INPUT_ARTIFACT_CARDINALITY:{artifact_type}:{schema_version}:{len(rows)}"
+        )
+    return rows[0] if rows else None
+
+
 def _json_payload(read_object, ref):
     try:
         value = json.loads(read_object(ref).decode("utf-8"))
@@ -62,6 +78,10 @@ def execute_motion_capability_v2(
         control_motion_proposal_from_dict_v1,
         qualify_control_motion_v1,
     )
+    from compiler.realsas_compiler_core.default_idle_provider_v1 import (
+        DEFAULT_IDLE_PROVIDER_V1,
+        build_default_idle_proposal_v1,
+    )
 
     rig = canonical_rig_from_dict_v2(
         _json_payload(read_object, _one(request, "RealSaS.CanonicalRigIR", "v2"))
@@ -69,9 +89,20 @@ def execute_motion_capability_v2(
     mechanics = canonical_mechanics_from_dict_v1(
         _json_payload(read_object, _one(request, "RealSaS.CanonicalMechanicsIR", "v1"))
     )
-    proposal = control_motion_proposal_from_dict_v1(
-        _json_payload(read_object, _one(request, "RealSaS.ControlMotionClipProposalIR", "v1"))
+    proposal_ref = _optional_one(
+        request, "RealSaS.ControlMotionClipProposalIR", "v1"
     )
+    if proposal_ref is None:
+        proposal = build_default_idle_proposal_v1(rig, mechanics)
+        provider = DEFAULT_IDLE_PROVIDER_V1
+        proposal_source = "PRODUCT_DEFAULT_PROVIDER"
+    else:
+        proposal = control_motion_proposal_from_dict_v1(
+            _json_payload(read_object, proposal_ref)
+        )
+        provider = str(proposal.metadata.get("provider") or "EXTERNAL_CONTROL_MOTION_PROVIDER")
+        proposal_source = "EXTERNAL_ARTIFACT"
+
     qualified = qualify_control_motion_v1(proposal, rig=rig, mechanics=mechanics)
     motion = mint_canonical_motion_v2(qualified)
     sealed = put_bytes(_json_bytes(motion))
@@ -95,9 +126,14 @@ def execute_motion_capability_v2(
             "control_program_hash": motion.control_program_hash,
             "mechanics_lineage_hash": motion.mechanics_lineage_hash,
             "track_count": len(motion.control_tracks),
+            "intent": motion.intent,
+            "motion_provider": provider,
+            "proposal_source": proposal_source,
+            "default_idle_provider_used": proposal_ref is None,
             "editable_motion_space": "ANIMATOR_CONTROLS",
             "direct_joint_track_authority": False,
             "constraint_solver_executed_by_compiler": False,
+            "compiler_retargeting_performed": False,
             "product_revision_pass_claimed": False,
         },
         "failure": None,

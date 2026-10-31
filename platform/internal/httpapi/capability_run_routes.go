@@ -2,12 +2,15 @@ package httpapi
 
 import (
 	"errors"
+	"io"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/command"
 	subjectinput "github.com/merynz/RealSaS-OPT/platform/internal/input"
+	"github.com/merynz/RealSaS-OPT/platform/internal/publicproduct"
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 )
 
@@ -30,14 +33,206 @@ type capabilityRunRequest struct {
 	RequestedBy      string                           `json:"requested_by"`
 }
 
-// HandlerWithCapabilityRun exposes the already-existing generic developer
-// capability command through the loopback operator API. The endpoint does not
-// mint product authority: SubmitCapabilityRun always creates a DEVELOPER_RUN
-// with promotion policy NEVER. The selected EngineRelease must also be bound to
-// the exact canonical-main SHA deployed by this API process, so an old or
-// branch-only release cannot be used to schedule current Engine work.
+type productCapabilityCompileRequest struct {
+	EngineReleaseID  uuid.UUID      `json:"engine_release_id"`
+	SubjectID        uuid.UUID      `json:"subject_id"`
+	InputArtifactIDs []uuid.UUID    `json:"input_artifact_ids"`
+	Parameters       map[string]any `json:"parameters,omitempty"`
+	IdempotencyKey   string         `json:"idempotency_key"`
+	RequestedBy      string         `json:"requested_by"`
+}
+
+// HandlerWithCapabilityRun exposes developer/operator capability controls plus
+// the narrow public product gateway. Public callers receive only opaque compile
+// ids and product-facing state; release, subject, artifact, command, attempt and
+// ProductRevision identities remain inside Platform.
 func (a API) HandlerWithCapabilityRun() http.Handler {
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("POST /v1/product/compiles", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.ProductGatewayToken, "PRODUCT_GATEWAY") {
+			return
+		}
+		var req publicproduct.StartRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := publicproduct.Start(
+			r.Context(), a.Pool, a.Store, a.CodeSHA, req, "public-product-gateway",
+		)
+		if errors.Is(err, publicproduct.ErrReleaseChannelUnbound) {
+			respond(w, http.StatusServiceUnavailable, map[string]string{"error": err.Error()})
+			return
+		}
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/product/compiles/{id}", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.ProductGatewayToken, "PRODUCT_GATEWAY") {
+			return
+		}
+		out, err := publicproduct.GetStatus(r.Context(), a.Pool, r.PathValue("id"))
+		if errors.Is(err, publicproduct.ErrCompileNotFound) {
+			respond(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+			return
+		}
+		if err != nil {
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+			return
+		}
+		respond(w, http.StatusOK, out)
+	})
+
+	mux.HandleFunc("POST /v1/operator/product/intake/claim", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
+		var req struct {
+			Owner        string `json:"owner"`
+			LeaseSeconds int64  `json:"lease_seconds,omitempty"`
+		}
+		if !decode(w, r, &req) {
+			return
+		}
+		if req.LeaseSeconds == 0 {
+			req.LeaseSeconds = 900
+		}
+		out, err := publicproduct.ClaimIntakeJob(
+			r.Context(), a.Pool, req.Owner, time.Duration(req.LeaseSeconds)*time.Second,
+		)
+		if errors.Is(err, publicproduct.ErrNoIntakeJob) {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/operator/product/compiles/{id}/intake-view/{slot}", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
+		leaseToken, err := uuid.Parse(r.Header.Get("X-RealSaS-Lease-Token"))
+		if err != nil {
+			respond(w, http.StatusBadRequest, map[string]string{"error": "valid X-RealSaS-Lease-Token required"})
+			return
+		}
+		payload, mimeType, originalName, err := publicproduct.ReadIntakeViewBytes(
+			r.Context(), a.Pool, a.Store, r.PathValue("id"), leaseToken, r.PathValue("slot"),
+		)
+		if err != nil {
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+			return
+		}
+		w.Header().Set("Content-Type", mimeType)
+		w.Header().Set("X-RealSaS-Original-Name", originalName)
+		w.Header().Set("Cache-Control", "no-store")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(payload)
+	})
+	mux.HandleFunc("POST /v1/operator/product/compiles/{id}/source-observation-bytes", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
+		leaseToken, err := uuid.Parse(r.Header.Get("X-RealSaS-Lease-Token"))
+		if err != nil {
+			respond(w, http.StatusBadRequest, map[string]string{"error": "valid X-RealSaS-Lease-Token required"})
+			return
+		}
+		actor := r.Header.Get("X-RealSaS-Worker")
+		if actor == "" {
+			respond(w, http.StatusBadRequest, map[string]string{"error": "X-RealSaS-Worker required"})
+			return
+		}
+		reader := http.MaxBytesReader(w, r.Body, publicproduct.MaxSourceObservationBytes+1)
+		payload, err := io.ReadAll(reader)
+		if err != nil {
+			respond(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+			return
+		}
+		out, err := publicproduct.CompleteIntakeBytes(
+			r.Context(), a.Pool, a.Store, a.CodeSHA, r.PathValue("id"), leaseToken, payload, actor,
+		)
+		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/operator/product/compiles/{id}/intake-fail", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
+		var req struct {
+			LeaseToken uuid.UUID `json:"lease_token"`
+			ErrorCode  string    `json:"error_code"`
+			Retry      bool      `json:"retry"`
+		}
+		if !decode(w, r, &req) {
+			return
+		}
+		if err := publicproduct.FailIntakeJob(
+			r.Context(), a.Pool, r.PathValue("id"), req.LeaseToken, req.ErrorCode, req.Retry,
+		); err != nil {
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+			return
+		}
+		respond(w, http.StatusOK, map[string]any{"status": "RECORDED", "retry": req.Retry})
+	})
+
+	mux.HandleFunc("POST /v1/operator/product-release-channel", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
+		var req struct {
+			EngineReleaseID uuid.UUID `json:"engine_release_id"`
+			Actor           string    `json:"actor"`
+		}
+		if !decode(w, r, &req) {
+			return
+		}
+		if req.EngineReleaseID == uuid.Nil || req.Actor == "" {
+			respond(w, http.StatusBadRequest, map[string]string{"error": "engine_release_id and actor are required"})
+			return
+		}
+		out, err := publicproduct.BindProductionRelease(
+			r.Context(), a.Pool, req.EngineReleaseID, a.CodeSHA, req.Actor,
+		)
+		result(w, out, err)
+	})
+	mux.HandleFunc("GET /v1/operator/product/compiles/{id}/raw-views", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
+		out, err := publicproduct.RawViewArtifactIDs(r.Context(), a.Pool, r.PathValue("id"))
+		if errors.Is(err, publicproduct.ErrCompileNotFound) {
+			respond(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+			return
+		}
+		if err != nil {
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+			return
+		}
+		respond(w, http.StatusOK, map[string]any{"public_id": r.PathValue("id"), "raw_view_artifact_ids": out})
+	})
+	mux.HandleFunc("POST /v1/operator/product/compiles/{id}/source-observation", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
+		var req struct {
+			ArtifactID uuid.UUID `json:"artifact_id"`
+			Actor      string    `json:"actor"`
+		}
+		if !decode(w, r, &req) {
+			return
+		}
+		if req.ArtifactID == uuid.Nil || req.Actor == "" {
+			respond(w, http.StatusBadRequest, map[string]string{"error": "artifact_id and actor are required"})
+			return
+		}
+		out, err := publicproduct.AttachSourceObservation(
+			r.Context(), a.Pool, a.CodeSHA, r.PathValue("id"), req.ArtifactID, req.Actor,
+		)
+		if errors.Is(err, publicproduct.ErrCompileNotFound) {
+			respond(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+			return
+		}
+		result(w, out, err)
+	})
+
 	mux.HandleFunc("GET /v1/subjects/{subject}/inputs/{input}", func(w http.ResponseWriter, r *http.Request) {
 		subjectID, err := uuid.Parse(r.PathValue("subject"))
 		if err != nil {
@@ -98,6 +293,32 @@ func (a API) HandlerWithCapabilityRun() http.Handler {
 			InputArtifactIDs: append([]uuid.UUID(nil), req.InputArtifactIDs...),
 			Parameters:       req.Parameters,
 			CompilerBridge:   bridge,
+			IdempotencyKey:   req.IdempotencyKey,
+			RequestedBy:      req.RequestedBy,
+		})
+		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/products/compile", func(w http.ResponseWriter, r *http.Request) {
+		var req productCapabilityCompileRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		if req.EngineReleaseID == uuid.Nil || req.SubjectID == uuid.Nil || len(req.InputArtifactIDs) == 0 ||
+			req.IdempotencyKey == "" || req.RequestedBy == "" {
+			respond(w, http.StatusBadRequest, map[string]string{
+				"error": "engine_release_id, subject_id, input_artifact_ids, idempotency_key and requested_by are required",
+			})
+			return
+		}
+		if err := release.RequireCanonicalMain(r.Context(), a.Pool, req.EngineReleaseID, a.CodeSHA); err != nil {
+			result(w, nil, err)
+			return
+		}
+		out, err := command.SubmitProductCapabilityCompile(r.Context(), a.Pool, command.ProductCapabilityCompileRequest{
+			EngineReleaseID:  req.EngineReleaseID,
+			SubjectID:        req.SubjectID,
+			InputArtifactIDs: append([]uuid.UUID(nil), req.InputArtifactIDs...),
+			Parameters:       req.Parameters,
 			IdempotencyKey:   req.IdempotencyKey,
 			RequestedBy:      req.RequestedBy,
 		})

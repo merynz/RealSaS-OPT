@@ -1,0 +1,43 @@
+name: Temporary productization gofmt
+
+on:
+  push:
+    branches: [productization-deploy-readiness-v1]
+
+permissions:
+  contents: write
+
+jobs:
+  gofmt:
+    if: ${{ !contains(github.event.head_commit.message, '[gofmt-bot]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: productization-deploy-readiness-v1
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - name: Canonical gofmt
+        shell: bash
+        run: |
+          set -euo pipefail
+          gofmt -w \
+            platform/internal/httpapi/auth.go \
+            platform/internal/httpapi/auth_test.go \
+            platform/internal/httpapi/capability_run_routes.go \
+            platform/internal/httpapi/product_workspace_routes.go \
+            platform/internal/publicproduct/*.go \
+            platform/internal/control/product_compile_db_integration_test.go \
+            platform/internal/control/product_compile_db_policy_fixture_test.go \
+            platform/cmd/realsas-api/main.go
+          if git diff --quiet; then
+            echo 'Already canonical.'
+            exit 0
+          fi
+          git config user.name 'realsas-gofmt-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -- '*.go'
+          git commit -m 'Canonicalize productization Go formatting [gofmt-bot]'
+          git push origin HEAD:productization-deploy-readiness-v1

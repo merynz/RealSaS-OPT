@@ -1,0 +1,138 @@
+name: realsas-product
+
+x-platform-environment: &platform-environment
+  REALSAS_DATABASE_URL: ${REALSAS_DATABASE_URL:-}
+  REALSAS_TEMPORAL_ADDRESS: ${REALSAS_TEMPORAL_ADDRESS:-}
+  REALSAS_TEMPORAL_NAMESPACE: ${REALSAS_TEMPORAL_NAMESPACE:-default}
+  REALSAS_ARTIFACT_ROOT: /var/lib/realsas/artifacts
+  REALSAS_REPO_ROOT: /app/repo
+  REALSAS_PRODUCT_GATEWAY_TOKEN: ${REALSAS_PRODUCT_GATEWAY_TOKEN:-}
+  REALSAS_OPERATOR_TOKEN: ${REALSAS_OPERATOR_TOKEN:-}
+
+x-platform-build: &platform-build
+  context: ../..
+  dockerfile: deploy/product/Dockerfile.platform
+  args:
+    REALSAS_SOURCE_CODE_SHA: ${REALSAS_SOURCE_CODE_SHA:-0000000000000000000000000000000000000000}
+
+services:
+  migrate:
+    build: *platform-build
+    command: ["realsas-migrate", "up"]
+    environment:
+      REALSAS_DATABASE_URL: ${REALSAS_DATABASE_URL:-}
+    restart: "no"
+    networks: [backend]
+
+  platform-api:
+    build: *platform-build
+    command: ["realsas-api"]
+    environment:
+      <<: *platform-environment
+      REALSAS_PLATFORM_BIND_ADDR: 0.0.0.0:8080
+    volumes:
+      - platform-artifacts:/var/lib/realsas/artifacts
+    expose: ["8080"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8080/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    restart: unless-stopped
+    networks: [backend]
+
+  control-worker:
+    build: *platform-build
+    command: ["realsas-control-worker"]
+    environment: *platform-environment
+    volumes:
+      - platform-artifacts:/var/lib/realsas/artifacts
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks: [backend]
+
+  web:
+    build:
+      context: ../..
+      dockerfile: deploy/product/Dockerfile.product
+    command: ["python", "-m", "product.living_compile.server", "--host", "0.0.0.0", "--port", "8765"]
+    environment:
+      REALSAS_PUBLIC_HTTP: "1"
+      REALSAS_PRODUCT_GATEWAY_URL: http://platform-api:8080
+      REALSAS_PRODUCT_GATEWAY_TOKEN: ${REALSAS_PRODUCT_GATEWAY_TOKEN:-}
+      REALSAS_PRODUCT_COMPILE_ENABLED: ${REALSAS_PRODUCT_COMPILE_ENABLED:-0}
+      REALSAS_PRODUCT_BUNDLE_ROOT: /var/lib/realsas/bundles
+    volumes:
+      - product-bundles:/var/lib/realsas/bundles
+    ports:
+      - "127.0.0.1:${REALSAS_WEB_PORT:-8765}:8765"
+    depends_on:
+      platform-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/healthz', timeout=2).read()"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    restart: unless-stopped
+    networks: [backend]
+
+  intake-worker:
+    profiles: ["workers"]
+    build:
+      context: ../..
+      dockerfile: deploy/product/Dockerfile.product
+    command: ["python", "-m", "product.intake_worker.worker"]
+    environment:
+      REALSAS_PLATFORM_URL: http://platform-api:8080
+      REALSAS_OPERATOR_TOKEN: ${REALSAS_OPERATOR_TOKEN:-}
+      REALSAS_SOURCE_MATERIALIZER_COMMAND: ${REALSAS_SOURCE_MATERIALIZER_COMMAND:-}
+      REALSAS_PRODUCT_INTAKE_WORKER_NAME: product-intake-worker
+    depends_on:
+      platform-api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks: [backend]
+
+  workspace-worker:
+    profiles: ["workers"]
+    build:
+      context: ../..
+      dockerfile: deploy/product/Dockerfile.product
+    command: ["python", "-m", "product.workspace_worker.worker"]
+    environment:
+      REALSAS_PLATFORM_URL: http://platform-api:8080
+      REALSAS_OPERATOR_TOKEN: ${REALSAS_OPERATOR_TOKEN:-}
+      REALSAS_WORKSPACE_MATERIALIZER_COMMAND: ${REALSAS_WORKSPACE_MATERIALIZER_COMMAND:-python -m product.workspace_worker.materialize_workspace_v1}
+      REALSAS_PRODUCT_WORKSPACE_WORKER_NAME: product-workspace-worker
+    depends_on:
+      platform-api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks: [backend]
+
+  engine-worker:
+    profiles: ["engine"]
+    image: ${REALSAS_ENGINE_IMAGE:-realsas-engine:unbound}
+    environment:
+      REALSAS_TEMPORAL_ADDRESS: ${REALSAS_TEMPORAL_ADDRESS:-}
+      REALSAS_TEMPORAL_NAMESPACE: ${REALSAS_TEMPORAL_NAMESPACE:-default}
+      REALSAS_ARTIFACT_ROOT: /var/lib/realsas/artifacts
+    volumes:
+      - platform-artifacts:/var/lib/realsas/artifacts
+    restart: unless-stopped
+    networks: [backend]
+
+networks:
+  backend: {}
+
+volumes:
+  platform-artifacts: {}
+  product-bundles: {}

@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
 )
 
@@ -242,6 +243,195 @@ func TestStudioDBCourt(t *testing.T) {
 		t.Fatalf("revision history drift after restore: %+v", history)
 	}
 
+	// Requalification starts only from the immutable saved HEAD. The first
+	// shipping slice is one linear animator-control clip and no other edit domain.
+	animationRevision, err := SaveRevision(ctx, pool, project.ProjectID, SaveRequest{
+		ExpectedLockVersion: 3,
+		AuthoringPayload:    studioDBRequalificationLayer(t, manifestSHA),
+		CreatedBy:           "studio-db-court",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if animationRevision.RevisionNumber != 4 || animationRevision.LockVersion != 4 {
+		t.Fatalf("unexpected animation revision: %+v", animationRevision)
+	}
+	var revisionCountBefore int
+	if err := pool.QueryRow(ctx, `SELECT count(*) FROM product_revisions WHERE subject_id=$1`, subjectID).Scan(&revisionCountBefore); err != nil {
+		t.Fatal(err)
+	}
+	store, err := artifactstore.NewLocal(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	requalification, err := RequestRequalification(ctx, pool, store, project.ProjectID, RequalificationRequest{
+		ExpectedLockVersion: 4,
+		RevisionNumber:      4,
+		CreatedBy:           "studio-db-court",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(requalification.RequalificationID, "srq_") || requalification.State != "QUEUED" || requalification.Terminal {
+		t.Fatalf("unexpected requalification admission: %+v", requalification)
+	}
+	if len(requalification.InvalidatedDomains) != 2 || requalification.InvalidatedDomains[0] != "MOTION" || requalification.InvalidatedDomains[1] != "PROOF" {
+		t.Fatalf("requalification domains drift: %+v", requalification.InvalidatedDomains)
+	}
+
+	// Repeating the same HEAD request reuses the durable public request instead
+	// of manufacturing a second Attempt or captured Studio artifact.
+	requalificationAgain, err := RequestRequalification(ctx, pool, store, project.ProjectID, RequalificationRequest{
+		ExpectedLockVersion: 4,
+		RevisionNumber:      4,
+		CreatedBy:           "studio-db-court-retry",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if requalificationAgain.RequalificationID != requalification.RequalificationID {
+		t.Fatalf("requalification idempotency drift: %s != %s", requalificationAgain.RequalificationID, requalification.RequalificationID)
+	}
+
+	var requalificationAttemptID, authoringArtifactID uuid.UUID
+	var requalificationKind string
+	var parentAttemptID *uuid.UUID
+	if err := pool.QueryRow(ctx, `
+		SELECT rq.attempt_id,rq.authoring_artifact_id,a.kind,a.parent_attempt_id
+		FROM studio_requalification_requests rq
+		JOIN attempts a ON a.id=rq.attempt_id
+		WHERE rq.public_id=$1
+	`, requalification.RequalificationID).Scan(
+		&requalificationAttemptID, &authoringArtifactID, &requalificationKind, &parentAttemptID,
+	); err != nil {
+		t.Fatal(err)
+	}
+	if requalificationKind != "requalification_candidate" || parentAttemptID == nil || *parentAttemptID != attemptID {
+		t.Fatalf("requalification attempt lineage drift: kind=%s parent=%v base=%s", requalificationKind, parentAttemptID, attemptID)
+	}
+
+	var capturedType, capturedSchema, capturedProducer string
+	var capturedParams []byte
+	if err := pool.QueryRow(ctx, `
+		SELECT t.name,t.schema_version,a.producer_contract,a.semantic_parameters
+		FROM artifacts a JOIN artifact_types t ON t.id=a.artifact_type_id
+		WHERE a.id=$1
+	`, authoringArtifactID).Scan(&capturedType, &capturedSchema, &capturedProducer, &capturedParams); err != nil {
+		t.Fatal(err)
+	}
+	if capturedType != "RealSaS.StudioAuthoringRevision" || capturedSchema != "v1" || capturedProducer != "RealSaS.StudioAuthoringCapture.v1" {
+		t.Fatalf("captured Studio artifact identity drift: %s %s %s", capturedType, capturedSchema, capturedProducer)
+	}
+	var captureMetadata map[string]any
+	if err := json.Unmarshal(capturedParams, &captureMetadata); err != nil {
+		t.Fatal(err)
+	}
+	if captureMetadata["authority_class"] != "STUDIO_AUTHORING_INPUT" || captureMetadata["qualification_granted"] != false || captureMetadata["can_promote_product_directly"] != false {
+		t.Fatalf("captured Studio authority drift: %+v", captureMetadata)
+	}
+	var captureQualifications int
+	if err := pool.QueryRow(ctx, `SELECT count(*) FROM qualifications WHERE artifact_id=$1`, authoringArtifactID).Scan(&captureQualifications); err != nil {
+		t.Fatal(err)
+	}
+	if captureQualifications != 0 {
+		t.Fatalf("Studio capture unexpectedly received qualification count=%d", captureQualifications)
+	}
+
+	for _, capabilityID := range animationRequalificationSatisfied {
+		prefix := "capability:" + capabilityID + ":%"
+		var inherited int
+		if err := pool.QueryRow(ctx, `
+			SELECT count(*) FROM attempt_artifacts
+			WHERE attempt_id=$1 AND origin='inherited' AND role LIKE $2
+		`, requalificationAttemptID, prefix).Scan(&inherited); err != nil {
+			t.Fatal(err)
+		}
+		if inherited == 0 {
+			t.Fatalf("missing inherited qualified authority for %s", capabilityID)
+		}
+	}
+	var prematureExecutions int
+	if err := pool.QueryRow(ctx, `SELECT count(*) FROM executions WHERE attempt_id=$1`, requalificationAttemptID).Scan(&prematureExecutions); err != nil {
+		t.Fatal(err)
+	}
+	if prematureExecutions != 0 {
+		t.Fatalf("requalification admission manufactured execution PASS state: count=%d", prematureExecutions)
+	}
+
+	var modelDrift bool
+	if err := pool.QueryRow(ctx, `
+		SELECT EXISTS(
+			(SELECT family,model_release_id,selected_channel,selected_channel_lock_version
+			 FROM attempt_model_releases WHERE attempt_id=$1
+			 EXCEPT
+			 SELECT family,model_release_id,selected_channel,selected_channel_lock_version
+			 FROM attempt_model_releases WHERE attempt_id=$2)
+			UNION ALL
+			(SELECT family,model_release_id,selected_channel,selected_channel_lock_version
+			 FROM attempt_model_releases WHERE attempt_id=$2
+			 EXCEPT
+			 SELECT family,model_release_id,selected_channel,selected_channel_lock_version
+			 FROM attempt_model_releases WHERE attempt_id=$1)
+		)
+	`, attemptID, requalificationAttemptID).Scan(&modelDrift); err != nil {
+		t.Fatal(err)
+	}
+	if modelDrift {
+		t.Fatal("requalification attempt did not copy the exact base model snapshot")
+	}
+
+	var goalType string
+	var resolvedRaw, parametersRaw []byte
+	if err := pool.QueryRow(ctx, `
+		SELECT goal_type,resolved_capability_ids,parameters
+		FROM execution_goals WHERE attempt_id=$1
+	`, requalificationAttemptID).Scan(&goalType, &resolvedRaw, &parametersRaw); err != nil {
+		t.Fatal(err)
+	}
+	if goalType != "PRODUCT_REQUALIFICATION" {
+		t.Fatalf("requalification goal type=%s", goalType)
+	}
+	var resolvedIDs []string
+	var goalParameters map[string]any
+	if err := json.Unmarshal(resolvedRaw, &resolvedIDs); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(parametersRaw, &goalParameters); err != nil {
+		t.Fatal(err)
+	}
+	if len(resolvedIDs) != 9 || resolvedIDs[len(resolvedIDs)-1] != "product.proof" {
+		t.Fatalf("requalification authority closure drift: %+v", resolvedIDs)
+	}
+	executionIDs, _ := goalParameters["execution_capability_ids"].([]any)
+	if len(executionIDs) != 2 || executionIDs[0] != "product.motion" || executionIDs[1] != "product.proof" {
+		t.Fatalf("requalification execution plan drift: %+v", goalParameters["execution_capability_ids"])
+	}
+
+	var revisionCountAfter int
+	if err := pool.QueryRow(ctx, `SELECT count(*) FROM product_revisions WHERE subject_id=$1`, subjectID).Scan(&revisionCountAfter); err != nil {
+		t.Fatal(err)
+	}
+	if revisionCountAfter != revisionCountBefore {
+		t.Fatalf("requalification admission minted ProductRevision before Proof: %d -> %d", revisionCountBefore, revisionCountAfter)
+	}
+	var baseManifestAfter string
+	if err := pool.QueryRow(ctx, `SELECT manifest_sha256 FROM product_revisions WHERE id=$1`, productRevisionID).Scan(&baseManifestAfter); err != nil {
+		t.Fatal(err)
+	}
+	if baseManifestAfter != manifestSHA {
+		t.Fatalf("base ProductRevision mutated during requalification admission: %s != %s", baseManifestAfter, manifestSHA)
+	}
+
+	// Requalification request identity is immutable in Postgres. Operational
+	// state may advance, but base/edit/Attempt lineage may not be rewritten.
+	if _, err := pool.Exec(ctx, `
+		UPDATE studio_requalification_requests
+		SET invalidated_domains='["PROOF"]'::jsonb
+		WHERE public_id=$1
+	`, requalification.RequalificationID); err == nil || !strings.Contains(err.Error(), "STUDIO_REQUALIFICATION_IDENTITY_IMMUTABLE") {
+		t.Fatalf("requalification identity mutation was not rejected: %v", err)
+	}
+
 	// Append-only is enforced by Postgres itself, not just by Go repository
 	// convention. Any in-place rewrite of a StudioAuthoringRevision must fail.
 	if _, err := pool.Exec(ctx, `
@@ -275,13 +465,75 @@ func studioDBCourtLayer(t *testing.T, stateHash, marker string) json.RawMessage 
 			"canonical_bundle_mutated": false,
 			"court_marker":             marker,
 		},
-		"rig_pose_edits":     []any{},
-		"mesh_vertex_edits":  []any{},
-		"weight_edits":       []any{},
-		"binding_edits":      []any{},
-		"rig_topology_edits": []any{},
-		"ik_constraints":     []any{},
-		"animation_edits":    []any{},
+		"rig_pose_edits":      []any{},
+		"mesh_vertex_edits":   []any{},
+		"mesh_topology_edits": []any{},
+		"weight_edits":        []any{},
+		"binding_edits":       []any{},
+		"presentation_override": nil,
+		"rig_topology_edits":  []any{},
+		"ik_constraints":      []any{},
+		"animation_edits":     []any{},
+	}
+	raw, err := json.Marshal(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return raw
+}
+
+func studioDBRequalificationLayer(t *testing.T, stateHash string) json.RawMessage {
+	t.Helper()
+	value := map[string]any{
+		"schema_version":                    AuthoringLayerSchema,
+		"source_product_state_hash":         stateHash,
+		"authority_class":                   "OPTIONAL_USER_AUTHORING_LAYER",
+		"can_promote_product_directly":      false,
+		"requires_compiler_requalification": true,
+		"view_id":                           "V0",
+		"metadata": map[string]any{
+			"canonical_bundle_mutated": false,
+			"animation_track_space":    "ANIMATOR_CONTROLS",
+			"court_marker":             "animation-requalification",
+		},
+		"rig_pose_edits":       []any{},
+		"mesh_vertex_edits":    []any{},
+		"mesh_topology_edits":  []any{},
+		"weight_edits":         []any{},
+		"binding_edits":        []any{},
+		"presentation_override": nil,
+		"rig_topology_edits":   []any{},
+		"ik_constraints":       []any{},
+		"animation_edits": []any{
+			map[string]any{
+				"clip_id":          "USER_DB_COURT",
+				"display_name":     "DB Court",
+				"duration_seconds": 1.0,
+				"fps":              30.0,
+				"loop":             true,
+				"tracks": []any{
+					map[string]any{
+						"control_id": "C0",
+						"keys": []any{
+							map[string]any{
+								"time_seconds":    0.0,
+								"rotation_degrees": 0.0,
+								"translation_xy":   []any{0.0, 0.0},
+								"scale_xy":         []any{1.0, 1.0},
+								"curve":            "linear",
+							},
+							map[string]any{
+								"time_seconds":    1.0,
+								"rotation_degrees": 15.0,
+								"translation_xy":   []any{1.0, 0.0},
+								"scale_xy":         []any{1.0, 1.0},
+								"curve":            "linear",
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 	raw, err := json.Marshal(value)
 	if err != nil {

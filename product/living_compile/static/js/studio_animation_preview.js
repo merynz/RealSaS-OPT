@@ -1,3 +1,5 @@
+import {derivePreviewJointPoses, normalizePose} from './studio_control_semantics.js';
+
 const $ = (selector) => document.querySelector(selector);
 const clamp = (value, lo, hi) => Math.max(lo, Math.min(hi, value));
 
@@ -10,6 +12,8 @@ function boot() {
 
   const S = studio.state;
   const timeline = studio.timeline;
+  studio.animationPreviewPose = new Map();
+  studio.refreshAnimationPreview = applyPreview;
 
   window.addEventListener('realsas:studio-animation-pose-changed', (event) => {
     const clipID = String(event.detail?.clip_id || S.clip || '');
@@ -25,48 +29,57 @@ function boot() {
     return `V${S.view}`;
   }
 
-  function controls() {
-    return S.scene?.puppet?.rig?.controls?.filter((item) => item.view_id === currentView()) || [];
+  function animatorControls() {
+    return S.scene?.puppet?.rig?.animator_controls?.filter((item) => item.view_id === currentView()) || [];
+  }
+
+  function deformControls() {
+    const rig = S.scene?.puppet?.rig || {};
+    return (rig.deform_controls || rig.controls || []).filter((item) => item.view_id === currentView());
   }
 
   function meshes() {
     return S.scene?.puppet?.meshes?.filter((item) => item.view_id === currentView()) || [];
   }
 
-  function baseRig(controlID) {
-    return S.ed.rig.find((item) => item.control_id === controlID) || {
-      translation_xy: [0, 0], rotation_degrees: 0, scale_xy: [1, 1],
-    };
+  function baseRig(jointID) {
+    return normalizePose(S.ed.rig.find((item) => item.control_id === jointID));
   }
 
-  function applyPreview(time) {
-    S.previewPose.clear();
-    for (const control of controls()) {
+  function applyPreview(time = S.t) {
+    if (timeline.animationEdits !== S.ed.animation) timeline.bind(S.ed.animation);
+    const clip = timeline.clip(S.clip);
+    if (!clip) return;
+
+    const animatorPoseMap = new Map();
+    for (const control of animatorControls()) {
       const sampled = timeline.sample(control.control_id, time);
-      const pose = sampled || baseRig(control.control_id);
-      S.previewPose.set(control.control_id, {
-        translation_xy: [...(pose.translation_xy || [0, 0])],
-        rotation_degrees: Number(pose.rotation_degrees || 0),
-        scale_xy: [...(pose.scale_xy || [1, 1])],
-      });
+      if (sampled) animatorPoseMap.set(control.control_id, normalizePose(sampled));
     }
+    studio.animationPreviewPose = animatorPoseMap;
+
+    const baseJointPoseMap = new Map();
+    for (const joint of deformControls()) baseJointPoseMap.set(joint.control_id, baseRig(joint.control_id));
+    const jointPoses = derivePreviewJointPoses(animatorControls(), animatorPoseMap, baseJointPoseMap);
+
+    S.previewPose.clear();
+    for (const [jointID, pose] of jointPoses) S.previewPose.set(jointID, pose);
     S.frame = {frame: {mesh_vertices_by_id: deformMeshes()}};
+
     const readout = $('#timeReadout');
-    const clip = timeline.clip();
-    if (readout && clip) readout.textContent = `${time.toFixed(3)} / ${Number(clip.duration_seconds || 0).toFixed(3)}`;
+    if (readout) readout.textContent = `${Number(time).toFixed(3)} / ${Number(clip.duration_seconds || 0).toFixed(3)}`;
   }
 
   function controlMap() {
-    return new Map(controls().map((item) => [item.control_id, item]));
+    return new Map(deformControls().map((item) => [item.control_id, item]));
   }
 
   function parentMap() {
-    const valid = new Set(controls().map((item) => item.control_id));
+    const valid = new Set(deformControls().map((item) => item.control_id));
     const parents = new Map();
     for (const edge of S.scene?.puppet?.rig?.edges || []) {
-      if (valid.has(edge.parent_control_id) && valid.has(edge.child_control_id)) {
-        parents.set(edge.child_control_id, edge.parent_control_id);
-      }
+      if (edge.entity_kind && edge.entity_kind !== 'DEFORM_JOINT') continue;
+      if (valid.has(edge.parent_control_id) && valid.has(edge.child_control_id)) parents.set(edge.child_control_id, edge.parent_control_id);
     }
     return parents;
   }
@@ -84,7 +97,7 @@ function boot() {
   }
 
   function pose(controlID) {
-    return S.previewPose.get(controlID) || baseRig(controlID);
+    return normalizePose(S.previewPose.get(controlID) || baseRig(controlID));
   }
 
   function applyLocal(point, anchor, value) {
@@ -128,12 +141,12 @@ function boot() {
         let total = 0;
         let x = 0;
         let y = 0;
-        for (const [controlID, rawWeight] of weights) {
+        for (const [jointID, rawWeight] of weights) {
           const weight = clamp(Number(rawWeight || 0), 0, 1);
-          if (!weight || !byControl.has(controlID)) continue;
-          const p = applyControlChain(source, controlID, byControl, parents);
-          x += p[0] * weight;
-          y += p[1] * weight;
+          if (!weight || !byControl.has(jointID)) continue;
+          const point = applyControlChain(source, jointID, byControl, parents);
+          x += point[0] * weight;
+          y += point[1] * weight;
           total += weight;
         }
         if (total < 1) {

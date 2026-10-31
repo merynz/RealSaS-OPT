@@ -50,19 +50,20 @@ function boot() {
   window.addEventListener('keydown', (event) => {
     const target = event.target;
     if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) return;
-    if (event.key === 'q') tools.setTool('select');
-    if (event.key === 'w') tools.setTool('translate');
-    if (event.key === 'e') tools.setTool('rotate');
-    if (event.key === 'r') tools.setTool('scale');
-    if (event.key === 'b') tools.setTool('box');
+    if (event.key.toLowerCase() === 'q') tools.setTool('select');
+    if (event.key.toLowerCase() === 'w') tools.setTool('translate');
+    if (event.key.toLowerCase() === 'e') tools.setTool('rotate');
+    if (event.key.toLowerCase() === 'r') tools.setTool('scale');
+    if (event.key.toLowerCase() === 'b') tools.setTool('box');
     if (event.key.toLowerCase() === 'x') tools.toggleTransformSpace();
     if (event.key.toLowerCase() === 'g') tools.setSnapEnabled(!tools.snapEnabled);
     if (event.key === 'Escape') cancelInteraction();
   });
 
   const observer = new MutationObserver(() => {
-    const nextView = `V${S.view}`;
+    const nextView = currentView();
     if (selection.viewID !== nextView) selection.setView(nextView);
+    renderToolbar();
     drawOverlay();
   });
   observer.observe($('#viewLabel'), {childList: true, characterData: true, subtree: true});
@@ -81,17 +82,52 @@ function boot() {
     return S.scene?.puppet?.meshes?.filter((item) => item.view_id === currentView()) || [];
   }
 
-  function rigValue(id) {
-    return S.ed.rig.find((item) => item.control_id === id) || {control_id: id, rotation_degrees: 0, translation_xy: [0, 0]};
+  function activeTimeline() {
+    const timeline = studio.timeline;
+    if (S.mode !== 'animation' || !timeline) return null;
+    if (timeline.animationEdits !== S.ed.animation) timeline.bind(S.ed.animation);
+    return timeline.clip(S.clip) ? timeline : null;
   }
 
-  function rigEdit(id) {
+  function rebindTimeline() {
+    const timeline = studio.timeline;
+    if (timeline && timeline.animationEdits !== S.ed.animation) timeline.bind(S.ed.animation);
+    return activeTimeline();
+  }
+
+  function baseRigValue(id) {
+    return S.ed.rig.find((item) => item.control_id === id) || {
+      control_id: id,
+      rotation_degrees: 0,
+      translation_xy: [0, 0],
+    };
+  }
+
+  function baseRigEdit(id) {
     let edit = S.ed.rig.find((item) => item.control_id === id);
     if (!edit) {
       edit = {control_id: id, rotation_degrees: 0, translation_xy: [0, 0]};
       S.ed.rig.push(edit);
     }
     return edit;
+  }
+
+  function controlPose(id) {
+    const timeline = activeTimeline();
+    const sampled = timeline?.sample(id, S.t);
+    if (sampled) {
+      return {
+        translation_xy: [...(sampled.translation_xy || [0, 0])],
+        rotation_degrees: Number(sampled.rotation_degrees || 0),
+        scale_xy: [...(sampled.scale_xy || [1, 1])],
+      };
+    }
+    const base = baseRigValue(id);
+    return {
+      translation_xy: [...(base.translation_xy || [0, 0])],
+      rotation_degrees: Number(base.rotation_degrees || 0),
+      scale_xy: [1, 1],
+    };
   }
 
   function meshDelta(meshID, index) {
@@ -111,8 +147,11 @@ function boot() {
     if (item.kind === 'control') {
       const control = controls().find((candidate) => candidate.control_id === item.control_id);
       if (!control) return null;
-      const edit = rigValue(item.control_id);
-      return [control.anchor[0] + Number(edit.translation_xy?.[0] || 0), control.anchor[1] + Number(edit.translation_xy?.[1] || 0)];
+      const pose = controlPose(item.control_id);
+      return [
+        control.anchor[0] + Number(pose.translation_xy?.[0] || 0),
+        control.anchor[1] + Number(pose.translation_xy?.[1] || 0),
+      ];
     }
     if (item.kind === 'vertex') {
       const mesh = meshes().find((candidate) => candidate.mesh_id === item.mesh_id);
@@ -133,8 +172,8 @@ function boot() {
   }
 
   function worldFromEvent(event) {
-    const p = intrinsicFromEvent(event);
-    return [(p[0] - S.cam.x) / S.cam.s, (p[1] - S.cam.y) / S.cam.s];
+    const point = intrinsicFromEvent(event);
+    return [(point[0] - S.cam.x) / S.cam.s, (point[1] - S.cam.y) / S.cam.s];
   }
 
   function screenFromWorld(point) {
@@ -148,7 +187,9 @@ function boot() {
     }
     const result = [];
     for (const mesh of meshes()) {
-      mesh.vertices.forEach((_, index) => result.push({kind: 'vertex', view_id: currentView(), mesh_id: mesh.mesh_id, vertex_index: index}));
+      mesh.vertices.forEach((_, index) => result.push({
+        kind: 'vertex', view_id: currentView(), mesh_id: mesh.mesh_id, vertex_index: index,
+      }));
     }
     return result;
   }
@@ -176,14 +217,17 @@ function boot() {
     if (!S.scene) return;
     overlay.setPointerCapture(event.pointerId);
     const world = worldFromEvent(event);
-    const pan = event.button === 1 || event.button === 2 || tools.tool === 'pan' || event.altKey && event.button === 0;
+    const pan = event.button === 1 || event.button === 2 || tools.tool === 'pan' || (event.altKey && event.button === 0);
     if (pan) {
       interaction = {kind: 'pan', start: intrinsicFromEvent(event), cam: {...S.cam}};
       return;
     }
 
     if (tools.tool === 'box') {
-      interaction = {kind: 'box', start: world, current: world, additive: event.shiftKey || event.ctrlKey || event.metaKey};
+      interaction = {
+        kind: 'box', start: world, current: world,
+        additive: event.shiftKey || event.ctrlKey || event.metaKey,
+      };
       drawOverlay();
       return;
     }
@@ -201,15 +245,24 @@ function boot() {
 
     if (!selection.size()) return;
     const before = documentModel.snapshot();
-    const positions = selection.active().map((item) => ({item, point: itemWorld(item)})).filter((row) => row.point);
-    const pivot = resolvePivot(positions);
+    const rows = selection.active().map((item) => {
+      const point = itemWorld(item);
+      if (!point) return null;
+      return {
+        item,
+        point,
+        pose: item.kind === 'control' ? controlPose(item.control_id) : null,
+      };
+    }).filter(Boolean);
+    const pivot = resolvePivot(rows);
     const vector = [world[0] - pivot[0], world[1] - pivot[1]];
     interaction = {
       kind: tools.tool === 'rotate' ? 'rotate' : tools.tool === 'scale' ? 'scale' : 'translate',
       start: world,
       before,
-      positions,
+      rows,
       pivot,
+      animation: Boolean(activeTimeline()),
       startAngle: Math.atan2(vector[1], vector[0]),
       startRadius: Math.max(1e-6, Math.hypot(vector[0], vector[1])),
       changed: false,
@@ -224,6 +277,7 @@ function boot() {
       S.cam.y = interaction.cam.y + point[1] - interaction.start[1];
       return;
     }
+
     const world = worldFromEvent(event);
     if (interaction.kind === 'box') {
       interaction.current = world;
@@ -232,48 +286,112 @@ function boot() {
     }
 
     documentModel.replace(interaction.before);
+    rebindTimeline();
+
     if (interaction.kind === 'translate') {
       let delta = [world[0] - interaction.start[0], world[1] - interaction.start[1]];
       delta = tools.snapTranslation(delta, event.altKey);
-      for (const row of interaction.positions) setItemWorld(row.item, [row.point[0] + delta[0], row.point[1] + delta[1]]);
+      for (const row of interaction.rows) {
+        writeItemTransform(row, {
+          point: [row.point[0] + delta[0], row.point[1] + delta[1]],
+          rotation: row.pose?.rotation_degrees,
+          scale: row.pose?.scale_xy,
+        });
+      }
     } else if (interaction.kind === 'rotate') {
       const vector = [world[0] - interaction.pivot[0], world[1] - interaction.pivot[1]];
       let angle = Math.atan2(vector[1], vector[0]) - interaction.startAngle;
       angle = tools.snapAngleRadians(angle, event.altKey);
-      for (const row of interaction.positions) {
-        const next = rotateAround(row.point, interaction.pivot, angle);
-        setItemWorld(row.item, next);
-        if (row.item.kind === 'control') rigEdit(row.item.control_id).rotation_degrees = Number(rigValue(row.item.control_id).rotation_degrees || 0) + angle * 180 / Math.PI;
+      const deltaDegrees = angle * 180 / Math.PI;
+      for (const row of interaction.rows) {
+        writeItemTransform(row, {
+          point: rotateAround(row.point, interaction.pivot, angle),
+          rotation: row.pose ? row.pose.rotation_degrees + deltaDegrees : undefined,
+          scale: row.pose?.scale_xy,
+        });
       }
     } else if (interaction.kind === 'scale') {
       const radius = Math.hypot(world[0] - interaction.pivot[0], world[1] - interaction.pivot[1]);
       let factor = radius / interaction.startRadius;
       factor = tools.snapScaleFactor(factor, event.altKey);
-      for (const row of interaction.positions) {
-        const next = [interaction.pivot[0] + (row.point[0] - interaction.pivot[0]) * factor, interaction.pivot[1] + (row.point[1] - interaction.pivot[1]) * factor];
-        setItemWorld(row.item, next);
+      for (const row of interaction.rows) {
+        writeItemTransform(row, {
+          point: [
+            interaction.pivot[0] + (row.point[0] - interaction.pivot[0]) * factor,
+            interaction.pivot[1] + (row.point[1] - interaction.pivot[1]) * factor,
+          ],
+          rotation: row.pose?.rotation_degrees,
+          scale: row.pose ? [row.pose.scale_xy[0] * factor, row.pose.scale_xy[1] * factor] : undefined,
+        });
       }
     }
+
     interaction.changed = true;
     dirty.markDirty();
+    refreshAnimationPreview();
     drawOverlay();
+  }
+
+  function writeItemTransform(row, {point, rotation, scale}) {
+    const item = row.item;
+    if (item.kind === 'control') {
+      const control = controls().find((candidate) => candidate.control_id === item.control_id);
+      if (!control) return;
+      const translation = [point[0] - control.anchor[0], point[1] - control.anchor[1]];
+      const timeline = activeTimeline();
+      if (timeline) {
+        const curve = curveForKey(timeline, item.control_id, S.t);
+        timeline.upsertTransformKey(item.control_id, {
+          translation_xy: translation,
+          rotation_degrees: Number.isFinite(rotation) ? rotation : row.pose?.rotation_degrees || 0,
+          scale_xy: Array.isArray(scale) ? scale : row.pose?.scale_xy || [1, 1],
+        }, {time: S.t, curve});
+        return;
+      }
+      const edit = baseRigEdit(item.control_id);
+      edit.translation_xy = translation;
+      if (Number.isFinite(rotation)) edit.rotation_degrees = rotation;
+      return;
+    }
+
+    if (item.kind === 'vertex') {
+      const mesh = meshes().find((candidate) => candidate.mesh_id === item.mesh_id);
+      const base = mesh?.vertices?.[item.vertex_index];
+      if (!base) return;
+      meshEdit(item.mesh_id, item.vertex_index).translation_xy = [point[0] - base[0], point[1] - base[1]];
+    }
+  }
+
+  function curveForKey(timeline, controlID, time) {
+    const track = timeline.clip()?.tracks?.find((item) => item.bone_id === controlID);
+    const exact = track?.keys?.find((key) => Math.abs(Number(key.time_seconds) - Number(time)) <= 1e-6);
+    if (exact?.curve) return exact.curve;
+    const raw = $('#curveSelect')?.value;
+    return raw === 'cubic' ? 'bezier' : (['step', 'linear', 'bezier'].includes(raw) ? raw : 'linear');
   }
 
   function pointerUp(event) {
     if (!interaction) return;
     if (interaction.kind === 'box') finishBox();
     else if (interaction.changed) {
-      journal.commit(`${capitalize(interaction.kind)} selection`, interaction.before, documentModel.snapshot());
+      const prefix = interaction.animation ? 'Animate' : 'Setup';
+      journal.commit(`${prefix} ${capitalize(interaction.kind)} selection`, interaction.before, documentModel.snapshot());
       dirty.markDirty();
+      refreshAnimationPreview();
       scheduleSave();
     }
     interaction = null;
     try { overlay.releasePointerCapture(event.pointerId); } catch {}
+    renderToolbar();
     drawOverlay();
   }
 
   function cancelInteraction() {
-    if (interaction?.before) documentModel.replace(interaction.before);
+    if (interaction?.before) {
+      documentModel.replace(interaction.before);
+      rebindTimeline();
+      refreshAnimationPreview();
+    }
     interaction = null;
     drawOverlay();
   }
@@ -291,21 +409,6 @@ function boot() {
     else inside.forEach((item) => selection.add(item, {primary: false}));
   }
 
-  function setItemWorld(item, point) {
-    if (item.kind === 'control') {
-      const control = controls().find((candidate) => candidate.control_id === item.control_id);
-      if (!control) return;
-      rigEdit(item.control_id).translation_xy = [point[0] - control.anchor[0], point[1] - control.anchor[1]];
-      return;
-    }
-    if (item.kind === 'vertex') {
-      const mesh = meshes().find((candidate) => candidate.mesh_id === item.mesh_id);
-      const base = mesh?.vertices?.[item.vertex_index];
-      if (!base) return;
-      meshEdit(item.mesh_id, item.vertex_index).translation_xy = [point[0] - base[0], point[1] - base[1]];
-    }
-  }
-
   function resolvePivot(rows) {
     if (tools.pivotMode === 'custom') return [...tools.customPivot];
     if (tools.pivotMode === 'primary') {
@@ -314,7 +417,10 @@ function boot() {
       if (point) return point;
     }
     if (!rows.length) return [0, 0];
-    return [rows.reduce((sum, row) => sum + row.point[0], 0) / rows.length, rows.reduce((sum, row) => sum + row.point[1], 0) / rows.length];
+    return [
+      rows.reduce((sum, row) => sum + row.point[0], 0) / rows.length,
+      rows.reduce((sum, row) => sum + row.point[1], 0) / rows.length,
+    ];
   }
 
   function rotateAround(point, pivot, angle) {
@@ -347,6 +453,13 @@ function boot() {
     }
   }
 
+  function refreshAnimationPreview() {
+    if (!activeTimeline()) return;
+    window.dispatchEvent(new CustomEvent('realsas:studio-animation-pose-changed', {
+      detail: {clip_id: S.clip, time_seconds: S.t},
+    }));
+  }
+
   function scheduleSave() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
@@ -362,6 +475,7 @@ function boot() {
     group.className = 'studio-transform-tools';
     group.innerHTML = `
       <span class="tool-separator"></span>
+      <span id="authoringContext" class="authoring-context">SETUP</span>
       <button data-studio-tool="select" title="Select · Q">SELECT</button>
       <button data-studio-tool="translate" title="Move · W">MOVE</button>
       <button data-studio-tool="rotate" title="Rotate · E">ROTATE</button>
@@ -374,7 +488,9 @@ function boot() {
       <input id="rotateSnap" class="mini-number" type="number" min=".1" step="1" value="15" title="Rotate snap degrees">
     `;
     bar.append(group);
-    group.querySelectorAll('[data-studio-tool]').forEach((button) => button.onclick = () => tools.setTool(button.dataset.studioTool));
+    group.querySelectorAll('[data-studio-tool]').forEach((button) => {
+      button.onclick = () => tools.setTool(button.dataset.studioTool);
+    });
     $('#transformSpace').onclick = () => tools.toggleTransformSpace();
     $('#snapEnabled').onchange = (event) => tools.setSnapEnabled(event.target.checked);
     $('#translateSnap').onchange = (event) => tools.configureSnapping({translate: Number(event.target.value)});
@@ -391,7 +507,7 @@ function boot() {
     const style = document.createElement('style');
     style.textContent = `
       .viewport-panel{position:relative}.viewport-panel #studioOverlay{position:absolute;inset:42px 0 0 0;width:100%;height:calc(100% - 42px);touch-action:none;z-index:5}
-      .studio-transform-tools{display:flex;align-items:center;gap:4px;margin-left:auto}.studio-transform-tools button.active{border-color:#8dd2ff;color:#fff;background:#183047}.tool-separator{width:1px;height:20px;background:#253342;margin:0 4px}.mini-number{width:52px}.snap-toggle{display:inline-flex;align-items:center;gap:3px}
+      .studio-transform-tools{display:flex;align-items:center;gap:4px;margin-left:auto}.studio-transform-tools button.active{border-color:#8dd2ff;color:#fff;background:#183047}.tool-separator{width:1px;height:20px;background:#253342;margin:0 4px}.mini-number{width:52px}.snap-toggle{display:inline-flex;align-items:center;gap:3px}.authoring-context{font:9px/1 Consolas,monospace;padding:4px 6px;border:1px solid #34485a;border-radius:3px;color:#91a6b7}.authoring-context.animate{border-color:#ffb45d;color:#ffd18f;background:#2b2118}
       .anim-authoring-tools{display:flex;align-items:center;gap:5px;flex-wrap:wrap}.anim-authoring-tools input[type=text]{width:90px}.anim-authoring-tools input[type=number]{width:66px}.anim-divider{width:1px;height:22px;background:#253342;margin:0 3px}.timeline-body{grid-template-columns:minmax(180px,240px) 1fr 240px}.curve-editor{border-left:1px solid #1d2a36;padding:8px;background:#0b1016}.curve-editor canvas{width:100%;height:140px}.curve-fields{display:grid;grid-template-columns:1fr 1fr;gap:4px}.curve-fields label{font-size:9px}.curve-fields input{width:56px}.curve-actions{display:flex;gap:4px;margin:7px 0}
     `;
     document.head.append(style);
@@ -407,9 +523,17 @@ function boot() {
   }
 
   function renderToolbar() {
-    document.querySelectorAll('[data-studio-tool]').forEach((button) => button.classList.toggle('active', button.dataset.studioTool === tools.tool));
+    document.querySelectorAll('[data-studio-tool]').forEach((button) => {
+      button.classList.toggle('active', button.dataset.studioTool === tools.tool);
+    });
     if ($('#transformSpace')) $('#transformSpace').textContent = tools.transformSpace.toUpperCase();
     if ($('#snapEnabled')) $('#snapEnabled').checked = tools.snapEnabled;
+    const context = $('#authoringContext');
+    if (context) {
+      const animate = Boolean(activeTimeline());
+      context.textContent = animate ? 'ANIMATE · AUTO KEY' : 'SETUP';
+      context.classList.toggle('animate', animate);
+    }
   }
 
   function drawOverlay() {
@@ -422,7 +546,10 @@ function boot() {
       ctx.strokeStyle = '#ffffff';
       ctx.fillStyle = 'rgba(141,210,255,.22)';
       ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(x, y, item.kind === 'control' ? 9 : 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y, item.kind === 'control' ? 9 : 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
     }
     const rows = selection.active().map((item) => ({item, point: itemWorld(item)})).filter((row) => row.point);
     if (rows.length && ['translate', 'rotate', 'scale'].includes(tools.tool)) drawGizmo(resolvePivot(rows));
@@ -443,7 +570,9 @@ function boot() {
     ctx.lineWidth = 2;
     if (tools.tool === 'rotate') {
       ctx.strokeStyle = '#ffd36b';
-      ctx.beginPath(); ctx.arc(x, y, 34, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y, 34, 0, Math.PI * 2);
+      ctx.stroke();
       return;
     }
     if (tools.tool === 'scale') {
@@ -452,16 +581,25 @@ function boot() {
       return;
     }
     ctx.strokeStyle = '#ff6c77';
-    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 45, y); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 45, y);
+    ctx.stroke();
     ctx.strokeStyle = '#6ee7a8';
-    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - 45); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y - 45);
+    ctx.stroke();
     ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   function frame() {
-    const nextView = `V${S.view}`;
+    const nextView = currentView();
     if (selection.viewID !== nextView) selection.setView(nextView);
+    renderToolbar();
     drawOverlay();
     requestAnimationFrame(frame);
   }

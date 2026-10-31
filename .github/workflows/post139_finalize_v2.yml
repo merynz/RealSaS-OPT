@@ -1,0 +1,117 @@
+name: post139-finalize-v2
+
+on:
+  push:
+    branches: [post139-corpus-audit-v1]
+    paths:
+      - 'canonical/POST139_FINALIZE_TRIGGER.txt'
+  workflow_dispatch:
+
+jobs:
+  finalize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      PYTHONPATH: .
+      SOURCE_RUN_ID: '41192533150'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download immutable source workspaces from source sweep
+        uses: actions/download-artifact@v4
+        with:
+          repository: merynz/RealSaS-OPT
+          run-id: ${{ env.SOURCE_RUN_ID }}
+          github-token: ${{ github.token }}
+          pattern: post139-source-*
+          path: ${{ runner.temp }}/downloaded
+          merge-multiple: false
+      - name: Normalize source workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          workspace="$RUNNER_TEMP/workspace"
+          mkdir -p "$workspace"
+          shopt -s nullglob
+          found=0
+          for folder in "$RUNNER_TEMP"/downloaded/post139-source-*; do
+            name="$(basename "$folder")"
+            source_id="${name#post139-source-}"
+            mv "$folder" "$workspace/$source_id"
+            found=$((found+1))
+          done
+          echo "POST139_SOURCE_ARTIFACT_COUNT=$found"
+          echo "POST139_WORKSPACE=$workspace" >> "$GITHUB_ENV"
+      - name: Finalize V2 inventory without hiding blockers
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/post139-final-v2"
+          args=(
+            --registry canonical/POST139_SOURCE_REGISTRY_V1.json
+            --workspace "$POST139_WORKSPACE"
+            --out "$out"
+            --allow-blockers
+          )
+          if [ -f canonical/POST139_SUBJECT_POLICY_V1.json ]; then
+            args+=(--semantic-overrides canonical/POST139_SUBJECT_POLICY_V1.json)
+          fi
+          python tools/corpus/post139_finalize_inventory_v2.py "${args[@]}"
+          python tools/corpus/post139_render_inventory_report_v1.py \
+            --inventory-dir "$out" \
+            --out "$out/REALSAS_POST139_EXACT_INVENTORY_V2.md"
+          cat "$out/POST139_FINAL_INVENTORY_REPORT_V2.json"
+          echo "POST139_FINAL_OUT=$out" >> "$GITHUB_ENV"
+      - name: Upload V2 global inventory evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-final-v2-${{ github.sha }}
+          path: ${{ env.POST139_FINAL_OUT }}/**
+          if-no-files-found: error
+          retention-days: 30
+      - name: Build sealed materialization closure when ready
+        id: closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - "$POST139_FINAL_OUT/POST139_FINAL_INVENTORY_REPORT_V2.json" <<'PY'
+          import json,sys
+          from pathlib import Path
+          report=json.loads(Path(sys.argv[1]).read_text())
+          if report['status'] != 'PASS_MATERIALIZATION_READY':
+              print('POST139_CLOSURE_SKIPPED_BLOCKED', report['blocker_count'])
+              raise SystemExit(3)
+          PY
+          closure_dir="$RUNNER_TEMP/post139-materialization-closure"
+          closure_zip="$RUNNER_TEMP/REALSAS_POST139_MATERIALIZATION_SOURCE_CLOSURE_V1.zip"
+          python tools/corpus/post139_build_materialization_closure_v1.py \
+            --workspace "$POST139_WORKSPACE" \
+            --plan "$POST139_FINAL_OUT/POST139_MATERIALIZATION_PLAN_V2.json" \
+            --out-dir "$closure_dir" \
+            --zip "$closure_zip"
+          echo "closure_zip=$closure_zip" >> "$GITHUB_OUTPUT"
+          sha256sum "$closure_zip"
+      - name: Upload sealed materialization closure
+        if: steps.closure.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-materialization-source-closure-${{ github.sha }}
+          path: ${{ steps.closure.outputs.closure_zip }}
+          if-no-files-found: error
+          retention-days: 30
+      - name: Readiness gate
+        if: always()
+        run: |
+          python - "$POST139_FINAL_OUT/POST139_FINAL_INVENTORY_REPORT_V2.json" <<'PY'
+          import json,sys
+          from pathlib import Path
+          report=json.loads(Path(sys.argv[1]).read_text())
+          print('POST139_FINAL_V2_STATUS', report['status'])
+          print('POST139_BASE139_TRAINING_ROWS', report['base139_training_rows'])
+          print('POST139_BASE139_STRUCTURAL_IDENTITIES', report['base139_structural_identities'])
+          print('POST139_POST_PRIMARY', report['post139_primary_materialization_subjects'])
+          print('POST139_POST_AUX', report['post139_auxiliary_materialization_subjects'])
+          print('POST139_EXPANDED_FULL_ROWS', report['expanded_full_training_rows'])
+          print('POST139_BLOCKERS', report['blocker_count'])
+          if report['status'] != 'PASS_MATERIALIZATION_READY':
+              raise SystemExit(2)
+          PY

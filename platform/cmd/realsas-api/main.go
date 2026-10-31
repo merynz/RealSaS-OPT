@@ -58,7 +58,7 @@ func main() {
 		CodeSHA:             sourceCodeSHA,
 		ProductGatewayToken: os.Getenv("REALSAS_PRODUCT_GATEWAY_TOKEN"),
 		OperatorToken:       os.Getenv("REALSAS_OPERATOR_TOKEN"),
-	}).HandlerWithCapabilityRun()
+	}).HandlerWithProductWorkspace()
 	server := &http.Server{
 		Addr:              "127.0.0.1:8080",
 		Handler:           handler,

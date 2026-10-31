@@ -174,7 +174,6 @@ def _inverse_bind_matrices(gltf: dict, buffers: list[bytes], skin: dict) -> np.n
     raw = _accessor(gltf, buffers, int(accessor_index))
     if raw.shape != (joint_count, 16):
         raise ValueError("GLTF_RIG_SKIN_INVERSE_BIND_LAYOUT")
-    # glTF matrices are column-major in the accessor stream.
     return raw.reshape(joint_count, 4, 4).transpose(0, 2, 1).astype(np.float64)
 
 
@@ -182,11 +181,8 @@ def _primitive_streams(gltf: dict, buffers: list[bytes]) -> tuple[list[dict], di
     nodes = list(gltf.get("nodes") or ())
     mesh_instances = []
     for node_index, node in enumerate(nodes):
-        if "mesh" not in node:
-            continue
-        if "skin" not in node:
-            continue
-        mesh_instances.append((node_index, int(node["mesh"]), int(node["skin"])))
+        if "mesh" in node and "skin" in node:
+            mesh_instances.append((node_index, int(node["mesh"]), int(node["skin"])))
     mesh_instances.sort(key=lambda row: (row[1], row[0], row[2]))
 
     positions = []
@@ -371,10 +367,10 @@ def build(source_path: Path, output_dir: Path) -> dict:
         "policy": {
             "joint_identity": "SKIN_INDEX_PLUS_SOURCE_JOINT_SLOT_PLUS_SOURCE_NODE_INDEX",
             "render_vertex_order": "SKINNED_MESH_INSTANCE_SORTED_BY_MESH_INDEX_THEN_NODE_INDEX__PRIMITIVE_SOURCE_ORDER__ACCESSOR_ROW_ORDER",
-            "weight_zero_columns_preserved": true,
-            "source_coordinates_preserved": true,
-            "source_mutated": false,
-            "importer_equivalence_required": true
+            "weight_zero_columns_preserved": True,
+            "source_coordinates_preserved": True,
+            "source_mutated": False,
+            "importer_equivalence_required": True,
         },
         "authority": {
             "raw_source_candidate_only": True,
@@ -384,11 +380,6 @@ def build(source_path: Path, output_dir: Path) -> dict:
             "training_authorized": False,
         },
     }
-    # JSON booleans above are Python literals in the actual object.
-    manifest["policy"]["weight_zero_columns_preserved"] = True
-    manifest["policy"]["source_coordinates_preserved"] = True
-    manifest["policy"]["source_mutated"] = False
-    manifest["policy"]["importer_equivalence_required"] = True
     manifest["rig_skin_identity_sha256"] = digest(manifest)
     manifest_path = output_dir / "GLTF_RIG_SKIN_AUTHORITY_MANIFEST_V1.json"
     manifest_path.write_text(json.dumps(manifest, sort_keys=True, indent=2, allow_nan=False) + "\n")

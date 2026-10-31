@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import unittest
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -11,9 +12,8 @@ Artifact = tuple[str, str]
 
 ROOT_INPUTS: frozenset[Artifact] = frozenset({("RealSaS.SourceObservation", "v1")})
 
-# This is the executable artifact surface, not merely the final ProductRevision
-# role set. Supplemental capability outputs are included because downstream
-# product capabilities consume them directly.
+# Executable artifact surface, including supplemental outputs consumed by later
+# capabilities. These are not all ProductRevision roles.
 PRODUCES: dict[str, frozenset[Artifact]] = {
     "product.input": frozenset(
         {
@@ -109,9 +109,8 @@ INTERNAL_PROVIDERS: dict[str, frozenset[Artifact]] = {
     "product.motion": frozenset({("RealSaS.ControlMotionClipProposalIR", "v1")}),
 }
 
-# These are the only admitted shipping closure debts at this revision. Keeping
-# them exact is useful: the court fails immediately if another capability starts
-# depending on an artifact that its dependency graph cannot actually deliver.
+# Only admitted shipping closure debt at this revision. The court fails if any
+# other capability acquires an undeliverable input.
 EXPECTED_OPEN_CLOSURE: dict[str, frozenset[Artifact]] = {
     "product.graphics": frozenset(
         {
@@ -143,33 +142,37 @@ def _missing(contract: dict, capability_id: str) -> frozenset[Artifact]:
     return REQUIRES[capability_id] - _accessible(contract, capability_id)
 
 
-def test_shipping_product_capability_set_matches_closure_court():
-    contract = _contract()
-    assert set(contract["capabilities"]) == set(PRODUCES) == set(REQUIRES)
+class ProductArtifactClosureV1Tests(unittest.TestCase):
+    def test_shipping_product_capability_set_matches_closure_court(self):
+        contract = _contract()
+        self.assertEqual(set(contract["capabilities"]), set(PRODUCES))
+        self.assertEqual(set(PRODUCES), set(REQUIRES))
+
+    def test_dependency_graph_has_only_declared_graphics_debt(self):
+        contract = _contract()
+        missing = {
+            capability_id: _missing(contract, capability_id)
+            for capability_id in REQUIRES
+            if _missing(contract, capability_id)
+        }
+        self.assertEqual(missing, EXPECTED_OPEN_CLOSURE)
+
+    def test_default_idle_provider_closed_old_motion_proposal_hole(self):
+        contract = _contract()
+        self.assertEqual(_missing(contract, "product.motion"), frozenset())
+        self.assertEqual(
+            INTERNAL_PROVIDERS["product.motion"],
+            frozenset({("RealSaS.ControlMotionClipProposalIR", "v1")}),
+        )
+
+    def test_graphics_debt_is_evidence_and_appearance_only(self):
+        contract = _contract()
+        missing = _missing(contract, "product.graphics")
+        self.assertEqual(missing, EXPECTED_OPEN_CLOSURE["product.graphics"])
+        self.assertNotIn(("RealSaS.CanonicalMeshIR", "v1"), missing)
+        self.assertNotIn(("RealSaS.CanonicalSkinIR", "v2"), missing)
+        self.assertNotIn(("RealSaS.CanonicalMechanicsIR", "v1"), missing)
 
 
-def test_dependency_graph_delivers_every_required_artifact_except_declared_graphics_debt():
-    contract = _contract()
-    missing = {
-        capability_id: _missing(contract, capability_id)
-        for capability_id in REQUIRES
-        if _missing(contract, capability_id)
-    }
-    assert missing == EXPECTED_OPEN_CLOSURE
-
-
-def test_default_idle_provider_closed_the_old_motion_proposal_hole():
-    contract = _contract()
-    assert _missing(contract, "product.motion") == frozenset()
-    assert INTERNAL_PROVIDERS["product.motion"] == frozenset(
-        {("RealSaS.ControlMotionClipProposalIR", "v1")}
-    )
-
-
-def test_graphics_debt_is_evidence_and_appearance_only_not_geometry_or_mechanics():
-    contract = _contract()
-    missing = _missing(contract, "product.graphics")
-    assert missing == EXPECTED_OPEN_CLOSURE["product.graphics"]
-    assert ("RealSaS.CanonicalMeshIR", "v1") not in missing
-    assert ("RealSaS.CanonicalSkinIR", "v2") not in missing
-    assert ("RealSaS.CanonicalMechanicsIR", "v1") not in missing
+if __name__ == "__main__":
+    unittest.main()

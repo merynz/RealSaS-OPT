@@ -24,7 +24,7 @@ func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) 
 		OwnerModuleID:        "product.shape",
 		ExecutorActivity:     "engine.execute_capability.v1",
 		Dependencies:         []string{ProductInputCapabilityID},
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeDeveloper, ModeProduct},
 		ProductPassAuthority: false,
 		Aliases:              []string{"Shape", "IRIS", "TESSA"},
 		Metadata: map[string]any{

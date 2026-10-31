@@ -20,7 +20,7 @@ func TestProductSkinDescriptorUsesDeformStructureParentClosure(t *testing.T) {
 	if d.ProductPassAuthority {
 		t.Fatal("Skin must not own ProductRevision PASS authority")
 	}
-	if len(d.AllowedModes) != 1 || d.AllowedModes[0] != ModeDeveloper {
+	if len(d.AllowedModes) != 2 || d.AllowedModes[0] != ModeDeveloper || d.AllowedModes[1] != ModeProduct {
 		t.Fatalf("Skin execution modes = %v", d.AllowedModes)
 	}
 	wantDeps := map[string]bool{

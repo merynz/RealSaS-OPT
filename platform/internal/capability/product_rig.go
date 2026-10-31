@@ -29,7 +29,7 @@ func (ProductRigProvider) Capabilities(context.Context) ([]Descriptor, error) {
 		Dependencies: []string{
 			ProductMeshCapabilityID,
 		},
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeDeveloper, ModeProduct},
 		ProductPassAuthority: false,
 		Aliases:              []string{"Rig", "AXIS"},
 		Metadata: map[string]any{

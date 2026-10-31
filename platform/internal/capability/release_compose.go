@@ -28,6 +28,7 @@ func ProductProviders() []Provider {
 		ProductMechanicsProvider{},
 		ProductGraphicsProvider{},
 		ProductMotionProvider{},
+		ProductProofProvider{},
 	}
 }
 
@@ -64,6 +65,26 @@ func productProviderCatalog(ctx context.Context) ([]Descriptor, error) {
 	return rows, nil
 }
 
+// releaseAdmissionStageRequirements are release-maturity anchors, not runtime
+// artifact dependencies. Shipping product.mesh no longer consumes legacy Stage
+// outputs: product.input materializes camera/observation/normalization authority
+// directly from SourceObservation. An EngineRelease may nevertheless advertise
+// Mesh only after its released Compiler contract includes the qualified
+// observation and normalization domains that define the Mesh court semantics.
+// Keeping this separate from Descriptor.Dependencies prevents those historical
+// stage nodes from leaking back into the shipping product execution closure.
+func releaseAdmissionStageRequirements(capabilityID string) []string {
+	switch capabilityID {
+	case ProductMeshCapabilityID:
+		return []string{
+			StageCapabilityID("07_OBSERVATION_CONTRACT_QUALIFIED"),
+			StageCapabilityID("08_NORMALIZATION_DOMAIN_QUALIFIED"),
+		}
+	default:
+		return nil
+	}
+}
+
 func admittedProductDescriptors(ctx context.Context, stageRows []Descriptor) ([]Descriptor, error) {
 	catalog, err := productProviderCatalog(ctx)
 	if err != nil {
@@ -94,6 +115,14 @@ func admittedProductDescriptors(ctx context.Context, stageRows []Descriptor) ([]
 		}
 		visiting[id] = true
 		defer delete(visiting, id)
+
+		for _, requirement := range releaseAdmissionStageRequirements(id) {
+			if _, ok := availableStages[requirement]; !ok {
+				memo[id] = true
+				return true, nil
+			}
+		}
+
 		for _, dependency := range descriptor.Dependencies {
 			if _, ok := availableStages[dependency]; ok {
 				continue
@@ -137,8 +166,9 @@ func admittedProductDescriptors(ctx context.Context, stageRows []Descriptor) ([]
 
 // BuildEngineReleaseRegistry composes the immutable release capability graph
 // from the exact released Compiler DAG plus only the source-owned product roles
-// whose declared dependencies are executable in that exact DAG. The source
-// catalog remains complete; admission is a release projection, not role deletion.
+// whose declared dependencies and release-maturity anchors are executable in
+// that exact DAG. The source catalog remains complete; admission is a release
+// projection, not role deletion.
 func BuildEngineReleaseRegistry(ctx context.Context, graph *stagegraph.Graph) (*Registry, error) {
 	if graph == nil {
 		return nil, fmt.Errorf("release capability registry requires stage graph")

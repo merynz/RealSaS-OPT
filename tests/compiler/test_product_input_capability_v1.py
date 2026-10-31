@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import hashlib
+
 import numpy as np
+import pytest
 import torch
 
 from compiler.realsas_compiler_services.platform_worker.input_capability_v1 import (
@@ -8,10 +11,17 @@ from compiler.realsas_compiler_services.platform_worker.input_capability_v1 impo
     decode_source_observation_v1,
     encode_source_observation_v1,
 )
+from compiler.realsas_compiler_services.platform_worker.product_input_authority_v1 import (
+    PRODUCT_INPUT_AUTHORITY_CONTRACT_V1,
+    build_product_input_authority_v1,
+)
 from compiler.realsas_compiler_services.platform_worker.scene_input_contract_v1 import (
     SHAPE_INPUT_SCHEMA_V1,
     decode_shape_input_v1,
     encode_shape_input_v1,
+)
+from compiler.realsas_compiler_services.platform_worker.source_observation_contract_v1 import (
+    decode_source_observation_arrays_v1,
 )
 from models.iris.v2.dinov2_foundation_v2 import DINOv2FoundationAuthorityV2
 from models.iris.vnext.inference_input_v1 import IRISVNextSceneInputsV1
@@ -22,11 +32,13 @@ def _camera_bundle():
     for index in range(8):
         rows.append(
             {
+                "view_index": index,
                 "origin": [0.0, 0.0, 2.0],
                 "right": [1.0, 0.0, 0.0],
                 "screen_up": [0.0, 1.0, 0.0],
                 "forward": [0.0, 0.0, -1.0],
                 "half_extent": 1.0,
+                "resolution": 1024,
             }
         )
     return {
@@ -40,6 +52,15 @@ def _camera_bundle():
     }
 
 
+def _qualified_rgba():
+    rgba = np.zeros((8, 4, 1024, 1024), dtype=np.uint8)
+    rgba[:, 0, 256:768, 256:768] = 100
+    rgba[:, 1, 256:768, 256:768] = 150
+    rgba[:, 2, 256:768, 256:768] = 200
+    rgba[:, 3, 256:768, 256:768] = 255
+    return rgba
+
+
 def test_source_observation_v1_roundtrip_is_exact_and_versioned():
     rgba = np.zeros((8, 4, 1024, 1024), dtype=np.uint8)
     rgba[:, 3] = 255
@@ -50,6 +71,45 @@ def test_source_observation_v1_roundtrip_is_exact_and_versioned():
     assert decoded.native_rgba.dtype == torch.uint8
     assert torch.equal(decoded.native_rgba[0], torch.from_numpy(rgba))
     assert decoded.camera_bundle["view_order"] == [f"V{i}" for i in range(8)]
+
+
+def test_product_input_authority_materializes_stage_free_camera_observation_and_normalization():
+    payload = encode_source_observation_v1(
+        native_rgba=_qualified_rgba(),
+        camera_bundle=_camera_bundle(),
+    )
+    source = decode_source_observation_arrays_v1(payload)
+    source_sha = hashlib.sha256(payload).hexdigest()
+
+    first = build_product_input_authority_v1(source, source_content_sha256=source_sha)
+    second = build_product_input_authority_v1(source, source_content_sha256=source_sha)
+    cameras, observation, normalization = first
+
+    assert first == second
+    assert cameras.schema_version == "RealSaS.QualifiedCameraSetIR.v1"
+    assert tuple(camera.view_index for camera in cameras.cameras) == tuple(range(8))
+    assert observation.schema_version == "RealSaS.QualifiedObservationSetIR.v1"
+    assert tuple(view.view_index for view in observation.views) == tuple(range(8))
+    assert all(view.qualification_state == "PASS" for view in observation.views)
+    assert normalization.schema_version == "RealSaS.NormalizationDomainIR.v1"
+    assert normalization.observation_set_binding_hash == observation.observation_set_hash
+    assert normalization.camera_set_binding_hash == cameras.camera_set_hash
+    assert normalization.center_xyz == (0.0, 0.0, 0.0)
+    assert normalization.half_extent == 1.0
+    assert normalization.metadata["product_input_authority"] == PRODUCT_INPUT_AUTHORITY_CONTRACT_V1
+    assert normalization.metadata["camera_refit_performed"] is False
+
+
+def test_product_input_authority_fails_closed_when_foreground_touches_frame_border():
+    rgba = _qualified_rgba()
+    rgba[:, 3, 0, 100] = 255
+    payload = encode_source_observation_v1(native_rgba=rgba, camera_bundle=_camera_bundle())
+    source = decode_source_observation_arrays_v1(payload)
+    with pytest.raises(RuntimeError, match="PRODUCT_INPUT_AUTHORITY_FOREGROUND_TOUCHES_BORDER:0"):
+        build_product_input_authority_v1(
+            source,
+            source_content_sha256=hashlib.sha256(payload).hexdigest(),
+        )
 
 
 def test_shape_input_transport_is_neutral_and_pickle_free():

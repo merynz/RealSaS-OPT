@@ -480,6 +480,20 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
             )
         return await _with_heartbeat(run_motion_v2, request)
 
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductProofCompile.v1"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.proof_executor_v1 import (
+            execute_proof_capability_v1,
+        )
+
+        def run_proof_v1(value):
+            return execute_proof_capability_v1(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
+            )
+        return await _with_heartbeat(run_proof_v1, request)
+
     if str(request.get("kind") or "") != "STAGE":
         return {
             "capability_id": str(request.get("capability_id") or ""),

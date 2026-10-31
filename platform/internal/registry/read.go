@@ -173,6 +173,13 @@ func GetArtifact(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (Artifac
 	return out, nil
 }
 
+// Read preserves the original registry read surface for workers and operator
+// services that predate the explicit GetArtifact naming. New code may prefer
+// GetArtifact; both names resolve the same registry authority and record.
+func Read(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (ArtifactRecord, error) {
+	return GetArtifact(ctx, pool, id)
+}
+
 func ListSubjectArtifacts(
 	ctx context.Context,
 	pool *pgxpool.Pool,

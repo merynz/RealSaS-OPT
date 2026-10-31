@@ -7,7 +7,8 @@ const (
 	ProductInputContractV1   = "RealSaS.ProductInputInference.v1"
 )
 
-// ProductInputProvider exposes the source-to-model-input lowering boundary.
+// ProductInputProvider exposes the source-to-model-input lowering boundary and
+// the deterministic source qualification authorities required by shipping Mesh.
 // The capability identity is stable; its versioned source/output schemas carry
 // replaceable scientific assumptions such as current view count and frontend.
 type ProductInputProvider struct{}
@@ -22,7 +23,7 @@ func (ProductInputProvider) Capabilities(context.Context) ([]Descriptor, error) 
 		Kind:                 KindModule,
 		OwnerModuleID:        "product.input",
 		ExecutorActivity:     "engine.execute_capability.v1",
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeDeveloper, ModeProduct},
 		ProductPassAuthority: false,
 		Aliases:              []string{"Input", "Observation"},
 		Metadata: map[string]any{
@@ -34,6 +35,14 @@ func (ProductInputProvider) Capabilities(context.Context) ([]Descriptor, error) 
 			"input_schema_version":                  "v1",
 			"output_artifact_type":                  "RealSaS.ShapeInput",
 			"output_schema_version":                 "v1",
+			"camera_output_artifact_type":           "RealSaS.QualifiedCameraSetIR",
+			"camera_output_schema_version":          "v1",
+			"observation_output_artifact_type":      "RealSaS.QualifiedObservationSetIR",
+			"observation_output_schema_version":     "v1",
+			"normalization_output_artifact_type":    "RealSaS.NormalizationDomainIR",
+			"normalization_output_schema_version":   "v1",
+			"source_qualification_owner":            "PRODUCT_INPUT",
+			"legacy_compiler_stage_bridge_required": false,
 			"platform_view_count_invariant":         false,
 			"source_truth_copied_into_output":       false,
 			"scientific_contract_is_replaceable":    true,

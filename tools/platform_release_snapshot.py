@@ -34,6 +34,20 @@ from tools.platform_capability_versions import (
 from tools.realsas_architecture import lightweight_implementation_closure
 
 
+# These are release-maturity anchors, not product runtime dependencies. Mesh no
+# longer consumes legacy Stage outputs; product.input recreates the qualified
+# source authorities directly from immutable SourceObservation. A release still
+# must carry the observation/normalization contract maturity that defines the
+# Mesh court before it can advertise product.mesh. The Go Platform independently
+# enforces the same rule and remains authoritative at snapshot sealing.
+_RELEASE_ADMISSION_STAGE_REQUIREMENTS = {
+    "product.mesh": (
+        "compiler.stage/07_OBSERVATION_CONTRACT_QUALIFIED",
+        "compiler.stage/08_NORMALIZATION_DOMAIN_QUALIFIED",
+    ),
+}
+
+
 def _stage_parameter_overrides(payload):
     if payload is None:
         return {}
@@ -51,6 +65,12 @@ def _admitted_product_capability_ids(plan) -> tuple[str, ...]:
         "compiler.stage/" + str(stage["id"])
         for stage in plan.get("stages", [])
     }
+    unknown_admission_roles = sorted(set(_RELEASE_ADMISSION_STAGE_REQUIREMENTS) - set(specs))
+    if unknown_admission_roles:
+        raise RuntimeError(
+            "PRODUCT_RELEASE_ADMISSION_CAPABILITY_UNKNOWN:"
+            + ",".join(unknown_admission_roles)
+        )
     memo: dict[str, bool] = {}
     visiting: set[str] = set()
 
@@ -63,6 +83,20 @@ def _admitted_product_capability_ids(plan) -> tuple[str, ...]:
             raise RuntimeError("PRODUCT_CAPABILITY_DEPENDENCY_UNKNOWN:" + capability_id)
         visiting.add(capability_id)
         try:
+            for requirement in _RELEASE_ADMISSION_STAGE_REQUIREMENTS.get(
+                capability_id, ()
+            ):
+                if not requirement.startswith("compiler.stage/"):
+                    raise RuntimeError(
+                        "PRODUCT_RELEASE_ADMISSION_STAGE_INVALID:"
+                        + capability_id
+                        + ":"
+                        + requirement
+                    )
+                if requirement not in stage_capabilities:
+                    memo[capability_id] = True
+                    return True
+
             policy = specs[capability_id]["policy"]
             dependencies = policy.get("dependencies") or []
             if not isinstance(dependencies, list):

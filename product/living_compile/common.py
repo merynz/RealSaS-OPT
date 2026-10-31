@@ -13,6 +13,8 @@ PRODUCT_SCHEMA = "RealSaS.CanonicalPuppetGraph.v3"
 PROOF_SCHEMA = "RealSaS.ProductProofBundleIR.v1"
 MOTION_BAKE_SCHEMA = "RealSaS.QualificationOwnedMotionBakeIR.v1"
 USER_LAYER_SCHEMA = "RealSaS.UserPuppetEditLayer.v3"
+PRODUCT_BUNDLE_ROOT_ENV = "REALSAS_PRODUCT_BUNDLE_ROOT"
+ALLOW_LEGACY_BUNDLE_PATHS_ENV = "REALSAS_ALLOW_LEGACY_BUNDLE_PATHS"
 
 
 class LivingCompileError(RuntimeError):
@@ -81,9 +83,33 @@ def parse_view(value: Any) -> int:
     return idx
 
 
+def product_bundle_root() -> Path | None:
+    raw = os.environ.get(PRODUCT_BUNDLE_ROOT_ENV, "").strip()
+    if not raw:
+        return None
+    root = Path(raw).expanduser().resolve()
+    if not root.is_dir():
+        raise LivingCompileError(f"configured product bundle root does not exist: {root}")
+    return root
+
+
 def bundle_path(value: Any) -> Path:
     if value is None:
-        raise LivingCompileError("bundle path is required")
+        raise LivingCompileError("bundle reference is required")
+    configured_root = product_bundle_root()
+    if configured_root is not None:
+        ref = str(value).strip().replace("\\", "/")
+        if not ref:
+            raise LivingCompileError("bundle reference is required")
+        root = within(configured_root, ref)
+        if not root.is_dir():
+            raise LivingCompileError(f"bundle does not exist under configured product root: {ref}")
+        return root
+
+    if os.environ.get(ALLOW_LEGACY_BUNDLE_PATHS_ENV, "1").strip() != "1":
+        raise LivingCompileError(
+            f"legacy filesystem bundle paths are disabled; configure {PRODUCT_BUNDLE_ROOT_ENV}"
+        )
     root = Path(str(value)).expanduser().resolve()
     if not root.is_dir():
         raise LivingCompileError(f"bundle directory does not exist: {root}")

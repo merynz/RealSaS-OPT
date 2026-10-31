@@ -46,7 +46,7 @@ func meshReleaseTestGraph(t *testing.T) *stagegraph.Graph {
 	return graph
 }
 
-func TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure(t *testing.T) {
+func TestBuildEngineReleaseRegistryIncludesStageFreeProductClosure(t *testing.T) {
 	registry, err := BuildEngineReleaseRegistry(context.Background(), meshReleaseTestGraph(t))
 	if err != nil {
 		t.Fatal(err)
@@ -63,6 +63,7 @@ func TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure(t *testing
 		ProductMechanicsCapabilityID,
 		ProductGraphicsCapabilityID,
 		ProductMotionCapabilityID,
+		ProductProofCapabilityID,
 	} {
 		if _, ok := registry.Get(id); !ok {
 			t.Fatalf("release registry missing %s", id)
@@ -76,6 +77,9 @@ func TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure(t *testing
 	seen := map[string]bool{}
 	for _, descriptor := range motionResolved {
 		seen[descriptor.ID] = true
+		if descriptor.Kind == KindStage {
+			t.Fatalf("shipping motion closure leaked Compiler stage %s", descriptor.ID)
+		}
 	}
 	for _, id := range []string{
 		ProductInputCapabilityID,
@@ -93,20 +97,6 @@ func TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure(t *testing
 	if seen[ProductGraphicsCapabilityID] {
 		t.Fatalf("motion must not depend on graphics; sibling product domains must remain independently schedulable: %+v", motionResolved)
 	}
-	for _, forbidden := range []string{
-		"09_IRIS_FIT_PREREGISTERED",
-		"10_IRIS_FIT",
-		"11_IRIS_CHECKPOINT_SEALED",
-		"12_ZERO_SURFACE_DECODED",
-		"13_GEOMETRY_SUBSTRATE_QUALIFIED",
-		"14_GSA_BUILD",
-		"15_RIGGING_SURFACE_QUALIFIED",
-		"17_MECHANICAL_PARTITION_QUALIFIED",
-	} {
-		if seen[StageCapabilityID(forbidden)] {
-			t.Fatalf("legacy fit-era stage leaked into product.motion closure: %s", forbidden)
-		}
-	}
 	if motionResolved[len(motionResolved)-1].ID != ProductMotionCapabilityID {
 		t.Fatalf("motion must resolve after all dependencies: %+v", motionResolved)
 	}
@@ -118,6 +108,9 @@ func TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure(t *testing
 	graphicsSeen := map[string]bool{}
 	for _, descriptor := range graphicsResolved {
 		graphicsSeen[descriptor.ID] = true
+		if descriptor.Kind == KindStage {
+			t.Fatalf("shipping graphics closure leaked Compiler stage %s", descriptor.ID)
+		}
 	}
 	for _, id := range []string{
 		ProductInputCapabilityID,
@@ -138,14 +131,78 @@ func TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure(t *testing
 	if graphicsResolved[len(graphicsResolved)-1].ID != ProductGraphicsCapabilityID {
 		t.Fatalf("graphics must resolve after its dependencies: %+v", graphicsResolved)
 	}
+
+	proofResolved, err := registry.Resolve(ProductProofCapabilityID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	proofSeen := map[string]bool{}
+	for _, descriptor := range proofResolved {
+		proofSeen[descriptor.ID] = true
+		if descriptor.Kind == KindStage {
+			t.Fatalf("shipping Proof closure leaked Compiler stage %s", descriptor.ID)
+		}
+	}
+	for _, id := range []string{
+		ProductInputCapabilityID,
+		ProductShapeCapabilityID,
+		ProductMeshCapabilityID,
+		ProductRigCapabilityID,
+		ProductSkinCapabilityID,
+		ProductMechanicsCapabilityID,
+		ProductGraphicsCapabilityID,
+		ProductMotionCapabilityID,
+		ProductProofCapabilityID,
+	} {
+		if !proofSeen[id] {
+			t.Fatalf("proof closure missing %s: %+v", id, proofResolved)
+		}
+	}
+	if proofResolved[len(proofResolved)-1].ID != ProductProofCapabilityID {
+		t.Fatalf("Proof must resolve after the full product state: %+v", proofResolved)
+	}
 }
 
 func TestProductProvidersAreSingleSourceOfControlReadyProductGraph(t *testing.T) {
 	providers := ProductProviders()
-	if len(providers) != 8 {
+	if len(providers) != 9 {
 		t.Fatalf("product provider count=%d", len(providers))
 	}
 	registry := productProvidersTestRegistry(t)
+
+	input, ok := registry.Get(ProductInputCapabilityID)
+	if !ok {
+		t.Fatal("product.input missing")
+	}
+	if input.Metadata["camera_output_artifact_type"] != "RealSaS.QualifiedCameraSetIR" ||
+		input.Metadata["observation_output_artifact_type"] != "RealSaS.QualifiedObservationSetIR" ||
+		input.Metadata["normalization_output_artifact_type"] != "RealSaS.NormalizationDomainIR" ||
+		input.Metadata["legacy_compiler_stage_bridge_required"] != false {
+		t.Fatalf("input source qualification boundary drift: %+v", input.Metadata)
+	}
+
+	mesh, ok := registry.Get(ProductMeshCapabilityID)
+	if !ok {
+		t.Fatal("product.mesh missing")
+	}
+	wantMesh := []string{ProductInputCapabilityID, ProductShapeCapabilityID}
+	if len(mesh.Dependencies) != len(wantMesh) {
+		t.Fatalf("mesh dependencies=%v want=%v", mesh.Dependencies, wantMesh)
+	}
+	for index, want := range wantMesh {
+		if mesh.Dependencies[index] != want {
+			t.Fatalf("mesh dependency[%d]=%s want=%s", index, mesh.Dependencies[index], want)
+		}
+	}
+	for _, dependency := range mesh.Dependencies {
+		if strings.HasPrefix(dependency, "compiler.stage/") {
+			t.Fatalf("legacy Compiler stage leaked into product.mesh: %s", dependency)
+		}
+	}
+	if mesh.Metadata["source_qualification_parent"] != ProductInputCapabilityID ||
+		mesh.Metadata["legacy_compiler_stage_bridge_required"] != false {
+		t.Fatalf("mesh source qualification parent drift: %+v", mesh.Metadata)
+	}
 
 	rig, ok := registry.Get(ProductRigCapabilityID)
 	if !ok {
@@ -196,7 +253,7 @@ func TestProductProvidersAreSingleSourceOfControlReadyProductGraph(t *testing.T)
 	if !ok {
 		t.Fatal("product.graphics missing")
 	}
-	wantGraphics := []string{ProductMeshCapabilityID, ProductSkinCapabilityID, ProductMechanicsCapabilityID}
+	wantGraphics := []string{ProductShapeCapabilityID, ProductMeshCapabilityID, ProductSkinCapabilityID, ProductMechanicsCapabilityID}
 	if len(graphics.Dependencies) != len(wantGraphics) {
 		t.Fatalf("graphics dependencies=%v", graphics.Dependencies)
 	}
@@ -234,16 +291,12 @@ func TestProductProvidersAreSingleSourceOfControlReadyProductGraph(t *testing.T)
 		t.Fatalf("motion Compiler overreach policy drift: %+v", motion.Metadata)
 	}
 
-	mesh, ok := registry.Get(ProductMeshCapabilityID)
+	proof, ok := registry.Get(ProductProofCapabilityID)
 	if !ok {
-		t.Fatal("product.mesh missing")
+		t.Fatal("product.proof missing")
 	}
-	for _, dependency := range mesh.Dependencies {
-		for _, forbidden := range []string{"IRIS_FIT", "CHECKPOINT_SEALED", "ZERO_SURFACE", "GEOMETRY_SUBSTRATE", "RIGGING_SURFACE", "MECHANICAL_PARTITION"} {
-			if strings.Contains(dependency, forbidden) {
-				t.Fatalf("legacy derived-stage dependency leaked into product.mesh: %s", dependency)
-			}
-		}
+	if !proof.ProductPassAuthority || proof.Metadata["product_revision_minting_owned_here"] != false {
+		t.Fatalf("proof terminal authority drift: %+v", proof)
 	}
 }
 
@@ -258,6 +311,7 @@ func TestModuleVersionPolicyAndParametersAreMintedFromDescriptor(t *testing.T) {
 		ProductMechanicsCapabilityID,
 		ProductGraphicsCapabilityID,
 		ProductMotionCapabilityID,
+		ProductProofCapabilityID,
 	} {
 		descriptor, ok := registry.Get(capabilityID)
 		if !ok {

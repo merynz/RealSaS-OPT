@@ -28,7 +28,7 @@ func (ProductMechanicsProvider) Capabilities(context.Context) ([]Descriptor, err
 			ProductRigCapabilityID,
 			ProductSkinCapabilityID,
 		},
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeDeveloper, ModeProduct},
 		ProductPassAuthority: false,
 		Aliases:              []string{"Mechanics", "ControlSolver"},
 		Metadata: map[string]any{

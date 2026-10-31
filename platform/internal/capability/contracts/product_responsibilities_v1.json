@@ -209,8 +209,9 @@
       "required_when_role_present": true,
       "authority_kind": "LEARNED_EVIDENCE",
       "exclusive": true,
-      "execution_owner_class": "HYBRID",
-      "owner_component": "RESEARCH_PROVIDER_UNSEALED",
+      "execution_owner_class": "MODEL",
+      "owner_component": "IRIS",
+      "model_family": "IRIS",
       "canonical_transform_id": "graphics_relation_evidence",
       "data_reduction": "BOUNDED_LOSSY",
       "source_truth_retained": true

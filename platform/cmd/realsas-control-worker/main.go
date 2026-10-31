@@ -84,6 +84,7 @@ func main() {
 	w.RegisterActivityWithOptions(activities.CommitCapabilityResult, activity.RegisterOptions{Name: orchestration.CommitCapabilityResultActivityName})
 	w.RegisterActivityWithOptions(activities.RecordCapabilityActivityError, activity.RegisterOptions{Name: orchestration.RecordCapabilityActivityErrorActivityName})
 	w.RegisterActivityWithOptions(activities.FinalizeCapabilityGoal, activity.RegisterOptions{Name: orchestration.FinalizeCapabilityGoalActivityName})
+	w.RegisterActivityWithOptions(activities.FinalizeCapabilityProduct, activity.RegisterOptions{Name: orchestration.FinalizeCapabilityProductActivityName})
 
 	fatalIf(w.Start(), "start temporal control worker")
 	defer w.Stop()

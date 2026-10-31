@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestProductInputCapabilityIsDeveloperOnlyAndReplaceable(t *testing.T) {
+func TestProductInputCapabilityIsProductExecutableAndReplaceable(t *testing.T) {
 	registry, err := Build(context.Background(), ProductInputProvider{})
 	if err != nil {
 		t.Fatal(err)
@@ -20,7 +20,7 @@ func TestProductInputCapabilityIsDeveloperOnlyAndReplaceable(t *testing.T) {
 	if descriptor.ProductPassAuthority {
 		t.Fatal("Input may not claim product-pass authority")
 	}
-	if len(descriptor.AllowedModes) != 1 || descriptor.AllowedModes[0] != ModeDeveloper {
+	if len(descriptor.AllowedModes) != 2 || descriptor.AllowedModes[0] != ModeDeveloper || descriptor.AllowedModes[1] != ModeProduct {
 		t.Fatalf("allowed modes=%v", descriptor.AllowedModes)
 	}
 	if descriptor.Metadata["executor_contract"] != ProductInputContractV1 {

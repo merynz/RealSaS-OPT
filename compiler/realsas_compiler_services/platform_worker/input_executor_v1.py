@@ -4,9 +4,13 @@ from __future__ import annotations
 
 Heavy Torch/DINO/scientific imports are intentionally deferred until Input is
 actually executed so generic Platform workers remain independent of this
-replaceable scientific implementation.
+replaceable scientific implementation. Product Input also materializes the
+model-independent camera, observation and normalization authorities directly
+from SourceObservation so shipping execution does not depend on a legacy
+Compiler-run bridge.
 """
 
+import json
 import os
 from pathlib import Path
 from time import perf_counter
@@ -74,6 +78,38 @@ def _dino_paths_from_deployment_root() -> tuple[Path, Path]:
     return foundation / "source", foundation / "dinov2_vits14_pretrain.pth"
 
 
+def _seal_json(
+    value: Any,
+    *,
+    role: str,
+    artifact_type: str,
+    schema_version: str,
+    authority_class: str,
+    put_bytes: Callable[[bytes], dict[str, Any]],
+) -> dict[str, Any]:
+    payload = value.to_dict() if hasattr(value, "to_dict") else value
+    raw = (
+        json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+        + "\n"
+    ).encode("utf-8")
+    sealed = put_bytes(raw)
+    return {
+        "role": role,
+        "artifact_type": artifact_type,
+        "schema_version": schema_version,
+        "storage_key": sealed["storage_key"],
+        "content_sha256": sealed["content_sha256"],
+        "size_bytes": sealed["size_bytes"],
+        "authority_class": authority_class,
+    }
+
+
 def execute_input_capability_v1(
     request: dict[str, Any],
     *,
@@ -90,10 +126,25 @@ def execute_input_capability_v1(
         raise RuntimeError("PRODUCT_INPUT_V1_EXECUTION_ID_REQUIRED")
 
     source_ref = _one_source_input(request)
-    source = decode_source_observation_v1(read_object(source_ref))
+    source_payload = read_object(source_ref)
+    source = decode_source_observation_v1(source_payload)
+    source_content_sha256 = str(source_ref.get("content_sha256") or "")
+
+    from compiler.realsas_compiler_services.platform_worker.product_input_authority_v1 import (
+        build_product_input_authority_v1,
+    )
+    from compiler.realsas_compiler_services.platform_worker.source_observation_contract_v1 import (
+        decode_source_observation_arrays_v1,
+    )
+
+    source_arrays = decode_source_observation_arrays_v1(source_payload)
+    cameras, observation, normalization = build_product_input_authority_v1(
+        source_arrays,
+        source_content_sha256=source_content_sha256,
+    )
+
     device = _device_from_environment()
     dino_source, dino_weights = _dino_paths_from_deployment_root()
-
     load_started = perf_counter()
     dino_model, loaded_authority = load_product_dino_v1(
         source_dir=dino_source,
@@ -107,26 +158,60 @@ def execute_input_capability_v1(
         loaded_authority=loaded_authority,
         device=device,
     )
-    sealed = put_bytes(result.payload)
-    diagnostics = dict(result.diagnostics)
-    diagnostics["dino_load_seconds"] = float(load_seconds)
-    diagnostics["source_content_sha256"] = str(source_ref.get("content_sha256") or "")
-    diagnostics["inference_device"] = str(device)
+    shape_sealed = put_bytes(result.payload)
+    outputs = [
+        {
+            "role": "shape_input",
+            "artifact_type": SHAPE_INPUT_ARTIFACT_TYPE_V1,
+            "schema_version": "v1",
+            "storage_key": shape_sealed["storage_key"],
+            "content_sha256": shape_sealed["content_sha256"],
+            "size_bytes": shape_sealed["size_bytes"],
+            "authority_class": INPUT_OUTPUT_AUTHORITY_V1,
+        },
+        _seal_json(
+            cameras,
+            role="qualified_cameras",
+            artifact_type="RealSaS.QualifiedCameraSetIR",
+            schema_version="v1",
+            authority_class="QUALIFIED_CAMERA_SET",
+            put_bytes=put_bytes,
+        ),
+        _seal_json(
+            observation,
+            role="qualified_observation",
+            artifact_type="RealSaS.QualifiedObservationSetIR",
+            schema_version="v1",
+            authority_class="QUALIFIED_OBSERVATION_SET",
+            put_bytes=put_bytes,
+        ),
+        _seal_json(
+            normalization,
+            role="normalization_domain",
+            artifact_type="RealSaS.NormalizationDomainIR",
+            schema_version="v1",
+            authority_class="QUALIFIED_NORMALIZATION_DOMAIN",
+            put_bytes=put_bytes,
+        ),
+    ]
 
+    diagnostics = dict(result.diagnostics)
+    diagnostics.update(
+        {
+            "dino_load_seconds": float(load_seconds),
+            "source_content_sha256": source_content_sha256,
+            "inference_device": str(device),
+            "camera_set_hash": cameras.camera_set_hash,
+            "observation_set_hash": observation.observation_set_hash,
+            "normalization_hash": normalization.normalization_hash,
+            "legacy_compiler_stage_bridge_required": False,
+            "product_input_output_count": len(outputs),
+        }
+    )
     return {
         "capability_id": str(request.get("capability_id") or ""),
         "status": "PASS",
-        "outputs": [
-            {
-                "role": "shape_input",
-                "artifact_type": SHAPE_INPUT_ARTIFACT_TYPE_V1,
-                "schema_version": "v1",
-                "storage_key": sealed["storage_key"],
-                "content_sha256": sealed["content_sha256"],
-                "size_bytes": sealed["size_bytes"],
-                "authority_class": INPUT_OUTPUT_AUTHORITY_V1,
-            }
-        ],
+        "outputs": outputs,
         "diagnostics": diagnostics,
         "failure": None,
     }

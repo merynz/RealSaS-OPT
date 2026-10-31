@@ -8,6 +8,32 @@ import (
 	"go.temporal.io/sdk/workflow"
 )
 
+func requalificationSatisfiedCapabilities(goal ResolvedCapabilityGoal) map[string]bool {
+	out := map[string]bool{}
+	if goal.GoalType != "PRODUCT_REQUALIFICATION" {
+		return out
+	}
+	raw, ok := goal.Parameters["satisfied_capability_ids"]
+	if !ok {
+		return out
+	}
+	switch values := raw.(type) {
+	case []string:
+		for _, value := range values {
+			if value != "" {
+				out[value] = true
+			}
+		}
+	case []any:
+		for _, value := range values {
+			if text, ok := value.(string); ok && text != "" {
+				out[text] = true
+			}
+		}
+	}
+	return out
+}
+
 func CapabilityWorkflow(ctx workflow.Context, input CapabilityWorkflowInput) (CapabilityWorkflowResult, error) {
 	platformCtx := workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
 		TaskQueue:              ControlTaskQueue,
@@ -37,16 +63,38 @@ func CapabilityWorkflow(ctx workflow.Context, input CapabilityWorkflowInput) (Ca
 	if err := workflow.ExecuteActivity(platformCtx, ResolveCapabilityGoalActivityName, input).Get(ctx, &goal); err != nil {
 		return CapabilityWorkflowResult{}, err
 	}
-	if goal.PromotionPolicy != "NEVER" {
+	switch goal.PromotionPolicy {
+	case "NEVER", "QUALIFIED_PRODUCT_ONLY":
+	default:
 		return CapabilityWorkflowResult{}, temporal.NewNonRetryableApplicationError(
-			"developer capability workflow cannot promote product state",
+			fmt.Sprintf("unsupported capability promotion policy %s", goal.PromotionPolicy),
 			"CapabilityPromotionContractViolation",
+			nil,
+		)
+	}
+	if goal.PromotionPolicy == "QUALIFIED_PRODUCT_ONLY" &&
+		goal.GoalType != "PRODUCT_COMPILE" && goal.GoalType != "PRODUCT_REQUALIFICATION" {
+		return CapabilityWorkflowResult{}, temporal.NewNonRetryableApplicationError(
+			"qualified product promotion requires PRODUCT_COMPILE or PRODUCT_REQUALIFICATION goal",
+			"CapabilityPromotionContractViolation",
+			nil,
+		)
+	}
+
+	satisfied := requalificationSatisfiedCapabilities(goal)
+	if goal.GoalType == "PRODUCT_REQUALIFICATION" && len(satisfied) == 0 {
+		return CapabilityWorkflowResult{}, temporal.NewNonRetryableApplicationError(
+			"product requalification requires qualified base capabilities",
+			"CapabilityRequalificationContractViolation",
 			nil,
 		)
 	}
 
 	completed := make([]CapabilityCommitResult, 0, len(goal.Steps))
 	for _, step := range goal.Steps {
+		if satisfied[step.CapabilityID] {
+			continue
+		}
 		var request EngineCapabilityRequest
 		if err := workflow.ExecuteActivity(platformCtx, PrepareCapabilityExecutionActivityName, PrepareCapabilityExecutionRequest{
 			CommandID:       input.CommandID,
@@ -92,8 +140,12 @@ func CapabilityWorkflow(ctx workflow.Context, input CapabilityWorkflowInput) (Ca
 		}
 	}
 
+	finalActivity := FinalizeCapabilityGoalActivityName
+	if goal.PromotionPolicy == "QUALIFIED_PRODUCT_ONLY" {
+		finalActivity = FinalizeCapabilityProductActivityName
+	}
 	var result CapabilityWorkflowResult
-	if err := workflow.ExecuteActivity(platformCtx, FinalizeCapabilityGoalActivityName, map[string]any{
+	if err := workflow.ExecuteActivity(platformCtx, finalActivity, map[string]any{
 		"command":   input,
 		"goal":      goal,
 		"completed": completed,

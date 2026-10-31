@@ -18,7 +18,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     implementations = capability_implementations()
     assert set(implementations) == {
         "product.input", "product.shape", "product.mesh", "product.rig", "product.skin",
-        "product.mechanics", "product.graphics", "product.motion",
+        "product.mechanics", "product.graphics", "product.motion", "product.proof",
     }
     assert set(specs) == set(implementations)
     assert specs["product.input"]["parameters"]["responsibility_ids"] == ["input.model_observation_lowering"]
@@ -47,17 +47,29 @@ def test_product_capability_implementations_are_complete_and_semantic():
         "motion.motion_solution", "motion.source_motion_admission",
         "motion.target_body_constraint_solution",
     ]
+    assert specs["product.proof"]["parameters"]["responsibility_ids"] == ["proof.product_pass_decision"]
     assert "rig.frame_observability_qualification" not in str(specs["product.rig"])
+
+    product_input = specs["product.input"]
+    assert product_input["parameters"]["camera_output_artifact_type"] == "RealSaS.QualifiedCameraSetIR"
+    assert product_input["parameters"]["observation_output_artifact_type"] == "RealSaS.QualifiedObservationSetIR"
+    assert product_input["parameters"]["normalization_output_artifact_type"] == "RealSaS.NormalizationDomainIR"
+    assert product_input["parameters"]["source_qualification_owner"] == "PRODUCT_INPUT"
+    assert product_input["parameters"]["legacy_compiler_stage_bridge_required"] is False
+
     assert specs["product.shape"]["parameters"]["required_models"] == [
         {"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"},
         {"family": "TESSA", "architecture_id": "RealSaS.TESSA.Structuralizer.v3"},
     ]
 
     mesh = specs["product.mesh"]
-    assert mesh["policy"]["dependencies"] == [
-        "product.shape", "compiler.stage/05_CAMERA_CONTRACT_SOLVED",
-        "compiler.stage/07_OBSERVATION_CONTRACT_QUALIFIED", "compiler.stage/08_NORMALIZATION_DOMAIN_QUALIFIED",
-    ]
+    assert mesh["policy"]["dependencies"] == ["product.input", "product.shape"]
+    assert not any(str(dep).startswith("compiler.stage/") for dep in mesh["policy"]["dependencies"])
+    assert mesh["parameters"]["input_camera_artifact_type"] == "RealSaS.QualifiedCameraSetIR"
+    assert mesh["parameters"]["input_observation_artifact_type"] == "RealSaS.QualifiedObservationSetIR"
+    assert mesh["parameters"]["input_normalization_artifact_type"] == "RealSaS.NormalizationDomainIR"
+    assert mesh["parameters"]["source_qualification_parent"] == "product.input"
+    assert mesh["parameters"]["legacy_compiler_stage_bridge_required"] is False
     assert mesh["parameters"]["required_models"] == []
     assert mesh["parameters"]["fit_allowed_during_product_execution"] is False
     assert mesh["parameters"]["legacy_ir_fit_stage_dependency"] is False
@@ -104,10 +116,16 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert mechanics["parameters"]["rig_program_mutation_allowed"] is False
 
     graphics = specs["product.graphics"]
-    assert graphics["policy"]["dependencies"] == ["product.mesh", "product.skin", "product.mechanics"]
+    assert graphics["policy"]["dependencies"] == [
+        "product.shape", "product.mesh", "product.skin", "product.mechanics",
+    ]
     assert graphics["entry_module"] == "compiler.realsas_compiler_services.platform_worker.graphics_executor_v1"
     assert graphics["parameters"]["executor_contract"] == "RealSaS.ProductGraphicsCompile.v1"
-    assert graphics["parameters"]["required_models"] == []
+    assert graphics["parameters"]["required_models"] == [
+        {"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"}
+    ]
+    assert graphics["parameters"]["input_shape_artifact_type"] == "RealSaS.ShapeProposal"
+    assert graphics["parameters"]["shared_scene_h_reused_without_scene_reencode"] is True
     assert graphics["parameters"]["graphics_owns_all_visual_presentation"] is True
     assert graphics["parameters"]["caa_is_graphics_appearance_sublayer"] is True
     assert graphics["parameters"]["visibility_occlusion_owner"] == "GRAPHICS"
@@ -123,6 +141,17 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert motion["parameters"]["direct_joint_track_authority"] is False
     assert motion["parameters"]["constraint_execution_owner"] == "MECHANICS"
 
+    proof = specs["product.proof"]
+    assert proof["policy"]["product_pass_authority"] is True
+    assert proof["policy"]["dependencies"] == [
+        "product.mesh", "product.rig", "product.skin", "product.mechanics",
+        "product.graphics", "product.motion",
+    ]
+    assert proof["parameters"]["executor_contract"] == "RealSaS.ProductProofCompile.v1"
+    assert proof["parameters"]["output_artifact_type"] == "RealSaS.ProductProofBundleIR"
+    assert proof["parameters"]["legacy_puppet_projection_required"] is False
+    assert proof["parameters"]["product_revision_minting_owned_here"] is False
+
     assert product_model_requirements() == [
         {"family": "AXIS", "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0"},
         {"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"},
@@ -132,7 +161,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     for capability_id, implementation in implementations.items():
         assert set(implementation) == {"implementation_sha256"}, capability_id
         assert _is_sha256(implementation["implementation_sha256"]), capability_id
-    assert len({implementations[x]["implementation_sha256"] for x in implementations}) == 8
+    assert len({implementations[x]["implementation_sha256"] for x in implementations}) == 9
 
 
 def test_release_snapshot_v2_carries_implementation_and_model_requirements():

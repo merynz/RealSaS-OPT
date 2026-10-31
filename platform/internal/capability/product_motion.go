@@ -27,7 +27,7 @@ func (ProductMotionProvider) Capabilities(context.Context) ([]Descriptor, error)
 			ProductRigCapabilityID,
 			ProductMechanicsCapabilityID,
 		},
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeDeveloper, ModeProduct},
 		ProductPassAuthority: false,
 		Aliases:              []string{"Motion", "ControlMotion"},
 		Metadata: map[string]any{

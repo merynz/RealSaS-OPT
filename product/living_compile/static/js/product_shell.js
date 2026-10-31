@@ -4,35 +4,39 @@ const $ = (selector) => document.querySelector(selector);
 const STAGES = {
   input: {
     mode: null,
-    note: 'Input owns the source character and compile request. Existing compiled bundles can already be opened; full inference binding remains fail-closed until P3 is complete.',
+    note: 'Input belongs to Awaken. Studio opens an already proof-qualified workspace and never starts a source compile from the editor shell.',
   },
   shape: {
     mode: 'mesh',
-    note: 'Shape is the qualified continuous character surface. This view currently inspects the compiled carrier through the mesh editor; direct Shape editing is not yet promoted.',
+    note: 'Shape is learned scene/surface evidence. It is proposal evidence only; Compiler remains the canonical Mesh authority.',
   },
   mesh: {
     mode: 'mesh',
-    note: 'Mesh shows the editable canonical topology used by mechanics, graphics and runtime.',
+    note: 'Mesh shows the editable canonical topology shared by rigging, mechanics and graphics.',
   },
   rig: {
     mode: 'rig',
-    note: 'Rig shows the editable control hierarchy and pose controls.',
+    note: 'Rig shows the editable control-ready deform graph, local frames, controls and constraints.',
   },
   skin: {
     mode: 'weights',
-    note: 'Skin shows deformation weights on the same canonical mesh. User edits remain staged until compiler requalification.',
+    note: 'Skin binds the deform structure to the same canonical mesh. User edits remain staged until Compiler requalification.',
+  },
+  mechanics: {
+    mode: 'rig',
+    note: 'Mechanics executes the rig control/constraint program and owns post-bind deformation validity. It does not own appearance or draw order.',
   },
   graphics: {
     mode: 'bindings',
-    note: 'Graphics owns source appearance and presentation relations such as visibility, draw order and attachment. Current UI exposes existing bindings while the new Graphics compiler is being connected.',
+    note: 'Graphics owns the complete visual/presentation domain: source-preserving appearance, visibility, occlusion, fragmentation, draw order and presentation attachments. CAA is its appearance sublayer.',
   },
   animation: {
     mode: 'animation',
-    note: 'Animation previews proof-owned motion and lets the user stage editable clips and keys.',
+    note: 'Animation drives animator controls. Mechanics resolves the resulting deform-joint pose; direct joint tracks are derived output, not editing authority.',
   },
   proof: {
     mode: null,
-    note: 'Proof is the final compiler verdict: geometry, mechanics, graphics and motion must all remain qualified before export.',
+    note: 'Proof is the final product-pass authority. Mechanics, Graphics and Motion must be qualified and runtime consequences must remain valid before export.',
   },
 };
 
@@ -50,20 +54,18 @@ function setStage(name) {
   }
 }
 
-function setCompileCapability(project) {
-  const button = $('#compileCharacter');
+function setGatewayCapability(project) {
   const state = $('#compileState');
   const detail = $('#compileDetail');
   const progress = $('#compileProgress');
   const available = Boolean(project?.compile_available);
-  if (button) {
-    button.disabled = !available;
-    button.title = available ? 'Compile character' : 'Full inference service is not bound to the product shell yet.';
-  }
-  if (state) state.textContent = available ? 'READY TO COMPILE' : 'EXISTING CHARACTER MODE';
+  const blockers = Array.isArray(project?.compile_blockers) ? project.compile_blockers : [];
+  if (state) state.textContent = available ? 'PRODUCT GATEWAY READY' : 'PRODUCT SHELL READY';
   if (detail) detail.textContent = available
-    ? 'Input will run the exact production model releases and compiler graph.'
-    : 'Compile remains fail-closed until ProductRevision → ModelRelease → inference binding is complete.';
+    ? 'Source compile starts in Awaken. This Studio session edits an already materialized proof-qualified character.'
+    : blockers.length
+      ? `Awaken compile waiting on: ${blockers.join(' · ')}`
+      : 'Awaken compile remains fail-closed until production model/proof/revision bindings are complete.';
   if (progress) progress.style.width = available ? '2%' : '0%';
 }
 
@@ -71,9 +73,9 @@ async function loadProductCapabilities() {
   try {
     const response = await fetch('/api/project');
     const project = await response.json();
-    setCompileCapability(response.ok ? project : null);
+    setGatewayCapability(response.ok ? project : null);
   } catch {
-    setCompileCapability(null);
+    setGatewayCapability(null);
   }
 }
 
@@ -85,7 +87,7 @@ function syncProofState() {
   const text = badge.textContent.trim().toUpperCase();
   if (text.includes('PASS')) {
     state.textContent = 'COMPILED · PROOF PASS';
-    detail.textContent = 'Character is available for inspection, editing, animation preview and export.';
+    detail.textContent = 'Character is available for inspection, editing, animation preview and qualified-base export.';
     $$('.stage').forEach((button) => button.classList.add('available'));
   } else if (text !== 'NO CHARACTER' && text !== 'NO BUNDLE') {
     state.textContent = 'COMPILED · REVIEW PROOF';
@@ -94,27 +96,6 @@ function syncProofState() {
 }
 
 $$('.stage').forEach((button) => button.addEventListener('click', () => setStage(button.dataset.stage)));
-
-$('#compileCharacter')?.addEventListener('click', async () => {
-  const button = $('#compileCharacter');
-  if (button?.disabled) return;
-  const state = $('#compileState');
-  const detail = $('#compileDetail');
-  if (state) state.textContent = 'STARTING COMPILE';
-  if (detail) detail.textContent = 'Submitting production compile request…';
-  try {
-    const response = await fetch('/api/compile/start', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({}),
-    });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload?.message || `HTTP ${response.status}`);
-  } catch (error) {
-    if (state) state.textContent = 'COMPILE UNAVAILABLE';
-    if (detail) detail.textContent = error.message;
-  }
-});
 
 const proofBadge = $('#proofBadge');
 if (proofBadge) new MutationObserver(syncProofState).observe(proofBadge, {childList: true, subtree: true, characterData: true});

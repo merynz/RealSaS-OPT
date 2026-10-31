@@ -71,7 +71,10 @@ def clear_scene():
 def import_source(path):
     suffix = path.suffix.lower()
     if suffix in {".gltf", ".glb"}:
-        bpy.ops.import_scene.gltf(filepath=str(path))
+        # Blender's glTF importer otherwise creates an Icosphere helper in the
+        # glTF_not_exported collection for bone display. That helper is not source
+        # geometry and would poison geometry/rig normalization and cross-format hashes.
+        bpy.ops.import_scene.gltf(filepath=str(path), disable_bone_shape=True)
     elif suffix == ".fbx":
         bpy.ops.import_scene.fbx(filepath=str(path), use_anim=True)
     else:

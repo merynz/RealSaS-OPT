@@ -235,6 +235,42 @@ class LivingCompileApplication:
         )
         return self._public_payload(revision)
 
+    def _restore_studio_revision(
+        self,
+        compile_id: str,
+        project_id: str,
+        expected_lock_version: int,
+        revision_number: int,
+    ) -> Json:
+        if not self._production_compile_enabled():
+            raise LivingCompileError("Studio persistence requires the production product gateway")
+        project_id = str(project_id).strip()
+        if not _PUBLIC_STUDIO_PROJECT.fullmatch(project_id):
+            raise LivingCompileError("valid public Studio project id required")
+        if int(expected_lock_version) < 0 or int(revision_number) <= 0:
+            raise LivingCompileError("valid Studio restore lock/revision required")
+        safe_project = urllib.parse.quote(project_id, safe="-_.~")
+        _, project = self._gateway_json("GET", f"/v1/product/studio/projects/{safe_project}")
+        if str(project.get("compile_id") or "") != compile_id:
+            raise LivingCompileError("Studio project does not belong to this compiled character")
+        _, revision = self._gateway_json(
+            "POST",
+            f"/v1/product/studio/projects/{safe_project}/restore",
+            {
+                "expected_lock_version": int(expected_lock_version),
+                "revision_number": int(revision_number),
+                "created_by": "product-shell",
+            },
+        )
+        _, head = self._gateway_json("GET", f"/v1/product/studio/projects/{safe_project}/head")
+        if str(head.get("project_id") or "") != project_id or str(head.get("compile_id") or "") != compile_id:
+            raise LivingCompileError("Studio restored head identity mismatch")
+        return {
+            "schema_version": "RealSaS.StudioRestore.v1",
+            "revision": self._public_payload(revision),
+            "head": self._public_payload(head),
+        }
+
     def project_capabilities(self) -> Json:
         bundle_root = product_bundle_root()
         gateway_configured = self._gateway_base() is not None
@@ -350,6 +386,25 @@ class LivingCompileApplication:
                 "GET", f"/v1/product/studio/projects/{safe_project}/revisions?limit={limit}"
             )
             return status, self._public_payload(payload), "application/json"
+        if method == "POST" and parsed.path == "/api/studio/restore":
+            if not isinstance(body, dict):
+                raise LivingCompileError("JSON request body required")
+            bundle_ref = body.get("bundle")
+            compile_id = self._compile_id_for_bundle(bundle_ref)
+            if compile_id is None:
+                raise LivingCompileError("Studio restore requires a public proof-gated bundle")
+            project_id = str(body.get("project_id") or "").strip()
+            try:
+                expected_lock_version = int(body.get("expected_lock_version"))
+                revision_number = int(body.get("revision_number"))
+            except (TypeError, ValueError) as exc:
+                raise LivingCompileError("valid Studio restore lock/revision required") from exc
+            return 200, self._restore_studio_revision(
+                compile_id,
+                project_id,
+                expected_lock_version,
+                revision_number,
+            ), "application/json"
         if method == "POST" and parsed.path == "/api/living/edit-layer":
             if not isinstance(body, dict):
                 raise LivingCompileError("JSON request body required")

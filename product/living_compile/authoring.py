@@ -10,7 +10,12 @@ from .scene import build_scene
 
 def _joint_ids(product: Mapping[str, Any]) -> set[str]:
     joints = ((product.get("mechanical_state") or {}).get("skeleton") or {}).get("joints") or []
-    return {str(row.get("canonical_joint_id")) for row in joints}
+    return {str(row.get("canonical_joint_id")) for row in joints if str(row.get("canonical_joint_id") or "")}
+
+
+def _control_ids(product: Mapping[str, Any]) -> set[str]:
+    controls = ((product.get("mechanical_state") or {}).get("control_program") or {}).get("controls") or []
+    return {str(row.get("canonical_control_id")) for row in controls if str(row.get("canonical_control_id") or "")}
 
 
 def _parent_map(product: Mapping[str, Any]) -> dict[str, str | None]:
@@ -78,7 +83,17 @@ def _validate_ik(raw_rows: Any, valid_bones: set[str]) -> list[Json]:
     return out
 
 
-def _validate_animation(raw_rows: Any, valid_bones: set[str]) -> list[Json]:
+def _validate_bezier(value: Any, *, field: str) -> list[float]:
+    raw = [0.25, 0.1, 0.25, 1.0] if value is None else value
+    if not isinstance(raw, (list, tuple)) or len(raw) != 4:
+        raise LivingCompileError(f"{field} must be [x1,y1,x2,y2]")
+    clean = [finite(item, field=f"{field}[{index}]") for index, item in enumerate(raw)]
+    if any(item < 0 or item > 1 for item in clean):
+        raise LivingCompileError(f"{field} values must be within [0,1]")
+    return clean
+
+
+def _validate_animation(raw_rows: Any, valid_controls: set[str]) -> list[Json]:
     raw_rows = [] if raw_rows is None else raw_rows
     if not isinstance(raw_rows, list) or len(raw_rows) > 128: raise LivingCompileError("animation_edits must be a list with <=128 clips")
     out = []; clip_ids = set()
@@ -88,13 +103,15 @@ def _validate_animation(raw_rows: Any, valid_bones: set[str]) -> list[Json]:
         if clip_id in clip_ids: raise LivingCompileError(f"duplicate user clip id: {clip_id}")
         clip_ids.add(clip_id); duration = finite(clip.get("duration_seconds", 1.0), field="duration_seconds")
         if duration <= 0 or duration > 600: raise LivingCompileError("animation duration must be within (0,600]")
+        fps = finite(clip.get("fps", 30), field="animation fps")
+        if fps < 1 or fps > 120: raise LivingCompileError("animation fps must be within [1,120]")
         tracks_out = []; seen_tracks = set()
         for track in list(clip.get("tracks") or []):
             if not isinstance(track, dict): raise LivingCompileError("animation track must be an object")
-            bone = safe_id(track.get("bone_id"), field="animation bone_id")
-            if bone not in valid_bones: raise LivingCompileError(f"animation track references unknown bone: {bone}")
-            if bone in seen_tracks: raise LivingCompileError(f"duplicate animation track for {bone}")
-            seen_tracks.add(bone); keys_out = []; previous = -math.inf
+            control = safe_id(track.get("control_id") or track.get("bone_id"), field="animation control_id")
+            if control not in valid_controls: raise LivingCompileError(f"animation track references unknown animator control: {control}")
+            if control in seen_tracks: raise LivingCompileError(f"duplicate animation track for {control}")
+            seen_tracks.add(control); keys_out = []; previous = -math.inf
             for ki, key in enumerate(list(track.get("keys") or [])):
                 if not isinstance(key, dict): raise LivingCompileError("animation key must be an object")
                 time = finite(key.get("time_seconds"), field=f"key[{ki}].time_seconds")
@@ -103,22 +120,27 @@ def _validate_animation(raw_rows: Any, valid_bones: set[str]) -> list[Json]:
                 if max(abs(rotation), abs(translation[0]), abs(translation[1])) > 100000: raise LivingCompileError("animation key exceeds bounded authoring preview limits")
                 if not (0.01 <= scale[0] <= 100 and 0.01 <= scale[1] <= 100): raise LivingCompileError("animation key scale must be within [0.01,100]")
                 curve = str(key.get("curve") or "linear").lower()
-                if curve not in {"linear", "step", "cubic"}: raise LivingCompileError("animation curve must be linear, step, or cubic")
-                keys_out.append({"time_seconds": time, "translation_xy": list(translation), "rotation_degrees": rotation, "scale_xy": list(scale), "curve": curve})
-            tracks_out.append({"bone_id": bone, "keys": keys_out})
-        out.append({"clip_id": clip_id, "display_name": str(clip.get("display_name") or clip_id)[:128], "duration_seconds": duration, "loop": bool(clip.get("loop", False)), "tracks": tracks_out})
+                if curve == "cubic": curve = "bezier"
+                if curve not in {"linear", "step", "bezier"}: raise LivingCompileError("animation curve must be linear, step, or bezier")
+                clean_key: Json = {"time_seconds": time, "translation_xy": list(translation), "rotation_degrees": rotation, "scale_xy": list(scale), "curve": curve}
+                if curve == "bezier": clean_key["bezier"] = _validate_bezier(key.get("bezier"), field=f"key[{ki}].bezier")
+                keys_out.append(clean_key)
+            tracks_out.append({"bone_id": control, "control_id": control, "keys": keys_out})
+        out.append({"clip_id": clip_id, "display_name": str(clip.get("display_name") or clip_id)[:128], "duration_seconds": duration, "fps": fps, "loop": bool(clip.get("loop", False)), "tracks": tracks_out})
     return out
 
 
 def save_user_layer(root: Path, payload: Mapping[str, Any]) -> Json:
     product = load_product(root); view = parse_view(payload.get("view_id", "V0")); scene = build_scene(root)
-    controls = {row["control_id"] for row in scene["puppet"]["rig"]["controls"] if row["view_id"] == view_id(view)}
+    rig = scene["puppet"]["rig"]
+    deform_rows = list(rig.get("deform_controls") or rig.get("controls") or [])
+    controls = {row["control_id"] for row in deform_rows if row["view_id"] == view_id(view)}
     meshes = {row["mesh_id"]: row for row in scene["puppet"]["meshes"] if row["view_id"] == view_id(view)}
     bindings = {row["binding_id"]: row for row in scene["binding"]["bindings"] if row["view_id"] == view_id(view)}
     rig_edits = []
     for raw in list(payload.get("edits") or []):
         control = safe_id(raw.get("control_id"), field="control_id")
-        if control not in controls: raise LivingCompileError(f"rig edit references unknown control in selected view: {control}")
+        if control not in controls: raise LivingCompileError(f"rig edit references unknown deform joint in selected view: {control}")
         rig_edits.append({"control_id": control, "rotation_degrees": finite(raw.get("rotation_degrees", 0), field="rotation_degrees"), "translation_xy": list(finite_pair(raw.get("translation_xy", (0, 0)), field="translation_xy"))})
     mesh_edits = []
     for raw in list(payload.get("mesh_vertex_edits") or []):
@@ -129,23 +151,27 @@ def save_user_layer(root: Path, payload: Mapping[str, Any]) -> Json:
     for raw in list(payload.get("weight_edits") or []):
         mid = str(raw.get("mesh_id") or ""); vi = int(raw.get("vertex_index", -1)); control = safe_id(raw.get("control_id"), field="weight control_id"); delta = finite(raw.get("weight_delta", 0), field="weight_delta")
         if mid not in meshes or vi < 0 or vi >= len(meshes[mid]["vertices"]): raise LivingCompileError("weight edit vertex outside range")
-        if control not in controls: raise LivingCompileError(f"weight edit references unknown control: {control}")
+        if control not in controls: raise LivingCompileError(f"weight edit references unknown deform joint: {control}")
         if not -1 <= delta <= 1: raise LivingCompileError("weight_delta must be within [-1,1]")
         weight_edits.append({"mesh_id": mid, "vertex_index": vi, "control_id": control, "weight_delta": delta})
     binding_edits = []
     for raw in list(payload.get("binding_edits") or []):
         bid = str(raw.get("binding_id") or ""); control = safe_id(raw.get("primary_final_control_id"), field="binding primary control")
         if bid not in bindings: raise LivingCompileError(f"binding edit references unknown selected-view binding: {bid}")
-        if control not in controls: raise LivingCompileError(f"binding edit references unknown control: {control}")
+        if control not in controls: raise LivingCompileError(f"binding edit references unknown deform joint: {control}")
         binding_edits.append({"binding_id": bid, "primary_final_control_id": control})
-    topology, valid_bones = _validate_topology(product, payload.get("rig_topology_edits")); ik = _validate_ik(payload.get("ik_constraints"), valid_bones); animation = _validate_animation(payload.get("animation_edits"), valid_bones)
+    topology, valid_bones = _validate_topology(product, payload.get("rig_topology_edits")); ik = _validate_ik(payload.get("ik_constraints"), valid_bones)
+    canonical_controls = _control_ids(product)
+    user_bones = valid_bones - _joint_ids(product)
+    valid_animation_controls = (canonical_controls | user_bones) if canonical_controls else valid_bones
+    animation = _validate_animation(payload.get("animation_edits"), valid_animation_controls)
     layer = {
         "schema_version": USER_LAYER_SCHEMA, "source_product_state_hash": product.get("product_state_hash"), "view_index": view, "view_id": view_id(view),
         "authority_class": "OPTIONAL_USER_AUTHORING_LAYER", "can_promote_product_directly": False, "requires_compiler_requalification": True,
         "requires_dynamic_revalidation": True, "deployment_status": "BLOCKED_PENDING_DYNAMIC_REVALIDATION",
         "rig_pose_edits": rig_edits, "mesh_vertex_edits": mesh_edits, "weight_edits": weight_edits, "binding_edits": binding_edits,
         "rig_topology_edits": topology, "ik_constraints": ik, "animation_edits": animation,
-        "metadata": {"canonical_bundle_mutated": False, "topology_edit_count": len(topology), "ik_constraint_count": len(ik), "animation_clip_count": len(animation), "authoring_surface": "LIVING_COMPILE_V4_EDITOR"},
+        "metadata": {"canonical_bundle_mutated": False, "topology_edit_count": len(topology), "ik_constraint_count": len(ik), "animation_clip_count": len(animation), "authoring_surface": "LIVING_COMPILE_V4_EDITOR", "animation_track_space": "ANIMATOR_CONTROLS" if canonical_controls else "LEGACY_DEFORM_CONTROL_FALLBACK"},
     }
     path = root.parent / f"{root.name}.user" / "layers" / f"view_{view:02d}.json"; json_write(path, layer)
     return {"schema_version": USER_LAYER_SCHEMA, "path": str(path), "edit_count": len(rig_edits), "mesh_vertex_edit_count": len(mesh_edits), "weight_edit_count": len(weight_edits), "binding_edit_count": len(binding_edits), "rig_topology_edit_count": len(topology), "ik_constraint_count": len(ik), "animation_clip_count": len(animation), "requires_dynamic_revalidation": True, "canonical_bundle_mutated": False}

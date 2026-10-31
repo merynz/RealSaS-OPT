@@ -43,6 +43,12 @@ _INTERNAL_KEYS = {
 }
 
 
+class ProductGatewayHTTPError(LivingCompileError):
+    def __init__(self, status: int, message: str):
+        super().__init__(message)
+        self.status = int(status)
+
+
 @dataclass
 class LivingCompileApplication:
     static_root: Path
@@ -117,7 +123,9 @@ class LivingCompileApplication:
                 payload = {}
             message = payload.get("message") if isinstance(payload, dict) else None
             error = payload.get("error") if isinstance(payload, dict) else None
-            raise LivingCompileError(message or error or f"product gateway rejected request with HTTP {exc.code}") from exc
+            raise ProductGatewayHTTPError(
+                int(exc.code), message or error or f"product gateway rejected request with HTTP {exc.code}"
+            ) from exc
         except urllib.error.URLError as exc:
             raise LivingCompileError(f"product gateway unavailable: {exc.reason}") from exc
         if len(raw) > max_bytes:
@@ -161,7 +169,7 @@ class LivingCompileApplication:
         match = _PUBLIC_BUNDLE.fullmatch(value)
         return match.group(1) if match else None
 
-    def _persist_studio_layer(self, compile_id: str, layer: Json) -> Json:
+    def _ensure_studio_session(self, compile_id: str) -> Json:
         if not self._production_compile_enabled():
             raise LivingCompileError("Studio persistence requires the production product gateway")
         safe_compile = urllib.parse.quote(compile_id, safe="-_.~")
@@ -173,16 +181,49 @@ class LivingCompileApplication:
         project_id = str(project.get("project_id") or "").strip()
         if not _PUBLIC_STUDIO_PROJECT.fullmatch(project_id):
             raise LivingCompileError("product gateway returned invalid Studio project id")
-        try:
-            lock_version = int(project.get("lock_version", 0))
-        except (TypeError, ValueError) as exc:
-            raise LivingCompileError("product gateway returned invalid Studio lock version") from exc
+        safe_project = urllib.parse.quote(project_id, safe="-_.~")
+        _, head = self._gateway_json("GET", f"/v1/product/studio/projects/{safe_project}/head")
+        if str(head.get("project_id") or "") != project_id or str(head.get("compile_id") or "") != compile_id:
+            raise LivingCompileError("Studio project/head identity mismatch")
+        return {
+            "schema_version": "RealSaS.StudioSession.v1",
+            "project": self._public_payload(project),
+            "head": self._public_payload(head),
+        }
+
+    def _persist_studio_layer(
+        self,
+        compile_id: str,
+        layer: Json,
+        *,
+        project_id: str | None = None,
+        expected_lock_version: int | None = None,
+    ) -> Json:
+        if not self._production_compile_enabled():
+            raise LivingCompileError("Studio persistence requires the production product gateway")
+        if project_id is None:
+            session = self._ensure_studio_session(compile_id)
+            project = session["project"]
+            project_id = str(project.get("project_id") or "").strip()
+            expected_lock_version = int(session["head"].get("lock_version", 0))
+        else:
+            project_id = str(project_id).strip()
+            if not _PUBLIC_STUDIO_PROJECT.fullmatch(project_id):
+                raise LivingCompileError("valid public Studio project id required")
+            if expected_lock_version is None or int(expected_lock_version) < 0:
+                raise LivingCompileError("Studio session lock version required")
+            safe_project = urllib.parse.quote(project_id, safe="-_.~")
+            _, project = self._gateway_json("GET", f"/v1/product/studio/projects/{safe_project}")
+            if str(project.get("compile_id") or "") != compile_id:
+                raise LivingCompileError("Studio project does not belong to this compiled character")
+        if not _PUBLIC_STUDIO_PROJECT.fullmatch(project_id):
+            raise LivingCompileError("product gateway returned invalid Studio project id")
         safe_project = urllib.parse.quote(project_id, safe="-_.~")
         _, revision = self._gateway_json(
             "POST",
             f"/v1/product/studio/projects/{safe_project}/revisions",
             {
-                "expected_lock_version": lock_version,
+                "expected_lock_version": int(expected_lock_version or 0),
                 "authoring_payload": layer,
                 "created_by": "product-shell",
             },
@@ -280,6 +321,30 @@ class LivingCompileApplication:
             if not path.is_file():
                 raise LivingCompileError(f"bundle asset not found: {rel}")
             return 200, path.read_bytes(), mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+        if method == "GET" and parsed.path == "/api/studio/session":
+            if not self._production_compile_enabled():
+                raise LivingCompileError("Studio persistence is fail-closed")
+            bundle_ref = (query.get("bundle") or [""])[0]
+            compile_id = self._compile_id_for_bundle(bundle_ref)
+            if compile_id is None:
+                raise LivingCompileError("Studio session requires a public proof-gated bundle")
+            return 200, self._ensure_studio_session(compile_id), "application/json"
+        if method == "GET" and parsed.path == "/api/studio/history":
+            if not self._production_compile_enabled():
+                raise LivingCompileError("Studio persistence is fail-closed")
+            project_id = (query.get("id") or [""])[0].strip()
+            if not _PUBLIC_STUDIO_PROJECT.fullmatch(project_id):
+                raise LivingCompileError("valid public Studio project id required")
+            raw_limit = (query.get("limit") or ["50"])[0]
+            try:
+                limit = max(1, min(200, int(raw_limit)))
+            except (TypeError, ValueError) as exc:
+                raise LivingCompileError("valid Studio revision history limit required") from exc
+            safe_project = urllib.parse.quote(project_id, safe="-_.~")
+            status, payload = self._gateway_json(
+                "GET", f"/v1/product/studio/projects/{safe_project}/revisions?limit={limit}"
+            )
+            return status, self._public_payload(payload), "application/json"
         if method == "POST" and parsed.path == "/api/living/edit-layer":
             if not isinstance(body, dict):
                 raise LivingCompileError("JSON request body required")
@@ -294,7 +359,20 @@ class LivingCompileApplication:
                 layer = json.loads(layer_path.read_text(encoding="utf-8"))
                 if not isinstance(layer, dict):
                     raise LivingCompileError("validated Studio authoring layer must be an object")
-                saved["studio_revision"] = self._persist_studio_layer(compile_id, layer)
+                project_id = body.get("studio_project_id")
+                raw_lock = body.get("expected_lock_version")
+                lock_version = None
+                if project_id is not None:
+                    try:
+                        lock_version = int(raw_lock)
+                    except (TypeError, ValueError) as exc:
+                        raise LivingCompileError("Studio session lock version required") from exc
+                saved["studio_revision"] = self._persist_studio_layer(
+                    compile_id,
+                    layer,
+                    project_id=str(project_id) if project_id is not None else None,
+                    expected_lock_version=lock_version,
+                )
                 saved["persistence"] = "PLATFORM_STUDIO_REVISION"
             return 200, saved, "application/json"
         if method == "POST" and parsed.path == "/api/export":
@@ -378,6 +456,8 @@ def make_handler(app: LivingCompileApplication):
                     raw = self.rfile.read(length) if length else b""
                     body = json.loads(raw.decode("utf-8")) if raw else {}
                 status, payload, content_type = app.dispatch(self.command, self.path, body)
+            except ProductGatewayHTTPError as exc:
+                status, payload, content_type = exc.status, {"error": type(exc).__name__, "message": str(exc)}, "application/json"
             except LivingCompileError as exc:
                 status, payload, content_type = 400, {"error": type(exc).__name__, "message": str(exc)}, "application/json"
             except Exception as exc:

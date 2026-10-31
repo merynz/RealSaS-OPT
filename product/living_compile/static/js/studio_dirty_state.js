@@ -31,6 +31,12 @@ export class StudioDirtyState extends EventTarget {
     this.emit();
   }
 
+  markClean() {
+    if (this.status !== 'conflict') this.status = 'clean';
+    this.lastError = null;
+    this.emit();
+  }
+
   markDirty() {
     if (this.status !== 'conflict') this.status = 'dirty';
     this.requiresRequalification = true;

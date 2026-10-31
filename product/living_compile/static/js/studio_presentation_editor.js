@@ -72,7 +72,13 @@ function canonicalOrder(viewID = currentViewID()) {
 }
 
 function presentation() {
-  return normalizePresentationOverride(S?.ed?.presentation, canonicalOrder());
+  const raw = S?.ed?.presentation;
+  if (raw?.view_id && raw.view_id !== currentViewID()) return resetPresentationOverride(canonicalOrder(), currentViewID());
+  return normalizePresentationOverride(raw, canonicalOrder());
+}
+
+function scopedPresentation(state) {
+  return {...state, view_id: currentViewID()};
 }
 
 function replaceViewMeshes(viewID, rows) {
@@ -190,18 +196,18 @@ function ensureInspector(force = false) {
   </div>`;
 
   body.querySelectorAll('[data-slot-up]').forEach((button) => button.onclick = () => operate('Move slot toward front', () => {
-    S.ed.presentation = moveSlot(S.ed.presentation, canonical, button.dataset.slotUp, 1);
+    S.ed.presentation = scopedPresentation(moveSlot(presentation(), canonical, button.dataset.slotUp, 1));
   }));
   body.querySelectorAll('[data-slot-down]').forEach((button) => button.onclick = () => operate('Move slot toward back', () => {
-    S.ed.presentation = moveSlot(S.ed.presentation, canonical, button.dataset.slotDown, -1);
+    S.ed.presentation = scopedPresentation(moveSlot(presentation(), canonical, button.dataset.slotDown, -1));
   }));
   body.querySelectorAll('[data-slot-hide]').forEach((button) => button.onclick = () => operate('Toggle slot visibility', () => {
     const id = button.dataset.slotHide;
     const current = presentation();
-    S.ed.presentation = setSlotHidden(current, canonical, id, !current.hidden_mesh_ids.includes(id));
+    S.ed.presentation = scopedPresentation(setSlotHidden(current, canonical, id, !current.hidden_mesh_ids.includes(id)));
   }));
   $('#presentationReset').onclick = () => operate('Reset Graphics presentation', () => {
-    S.ed.presentation = resetPresentationOverride(canonical);
+    S.ed.presentation = resetPresentationOverride(canonical, currentViewID());
   });
   body.querySelectorAll('[data-binding-select]').forEach((button) => button.onclick = () => {
     selectedBindingID = button.dataset.bindingSelect;
@@ -209,6 +215,7 @@ function ensureInspector(force = false) {
   });
   if ($('#bindingApply')) $('#bindingApply').onclick = () => operate('Edit attachment socket', () => {
     upsertBindingEdit(S.ed.bindings, selected, {
+      view_id: currentViewID(),
       primary_final_control_id: $('#bindingControl').value,
       translation_xy: [Number($('#bindingTX').value), Number($('#bindingTY').value)],
       rotation_degrees: Number($('#bindingRot').value),

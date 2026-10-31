@@ -79,6 +79,7 @@ class LivingCompileApplication:
             self._gateway_base() is not None
             and bool(self._gateway_token())
             and os.environ.get(PRODUCT_COMPILE_ENABLED_ENV, "").strip() == "1"
+            and product_bundle_root() is not None
         )
 
     def _gateway_request(
@@ -255,7 +256,7 @@ class LivingCompileApplication:
         if method == "POST" and parsed.path == "/api/compile/start":
             if not self._production_compile_enabled():
                 raise LivingCompileError(
-                    "production compile is fail-closed; configure the public product gateway, service token, and explicitly enable product compile"
+                    "production compile is fail-closed; configure the public product gateway, service token, workspace bundle root, and explicitly enable product compile"
                 )
             if not isinstance(body, dict):
                 raise LivingCompileError("JSON request body required")
@@ -350,7 +351,7 @@ def serve(host: str = "127.0.0.1", port: int = 8765) -> None:
     app = LivingCompileApplication.default()
     server = ThreadingHTTPServer((host, int(port)), make_handler(app))
     print(f"RealSaS: http://{host}:{port}")
-    print("Awaken surface is ready. Production compile remains fail-closed unless the public gateway is configured and enabled.")
+    print("Awaken surface is ready. Production compile remains fail-closed unless gateway, workspace storage, and product authority are configured.")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

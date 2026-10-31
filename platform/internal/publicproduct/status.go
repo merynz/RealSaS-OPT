@@ -30,27 +30,7 @@ func GetStatus(ctx context.Context, pool *pgxpool.Pool, publicID string) (Status
 		return Status{}, err
 	}
 	if finalState == "QUALIFIED" {
-		var revisionID uuid.UUID
-		if err := pool.QueryRow(ctx, `
-			SELECT id FROM product_revisions WHERE created_from_attempt_id=$1
-		`, *session.AttemptID).Scan(&revisionID); err != nil {
-			return Status{}, err
-		}
-		if _, err := pool.Exec(ctx, `
-			UPDATE public_product_compile_sessions
-			SET state='PASS',current_capability='product.proof',product_revision_id=$2,error_code=NULL
-			WHERE id=$1
-		`, session.ID, revisionID); err != nil {
-			return Status{}, err
-		}
-		return Status{
-			CompileID:   publicID,
-			Status:      "PASS",
-			Stage:       "PROOF",
-			Detail:      "Product proof passed. Your character is ready.",
-			Terminal:    true,
-			ResultReady: true,
-		}, nil
+		return qualifiedProductStatus(ctx, pool, session)
 	}
 	if finalState == "FAILED" {
 		_ = markFailed(ctx, pool, session.ID, "PRODUCT_COMPILE_FAILED")
@@ -113,6 +93,80 @@ func GetStatus(ctx context.Context, pool *pgxpool.Pool, publicID string) (Status
 		Detail:    "Compiling qualified product state.",
 		Terminal:  false,
 	}, nil
+}
+
+func qualifiedProductStatus(ctx context.Context, pool *pgxpool.Pool, session sessionRecord) (Status, error) {
+	var revisionID uuid.UUID
+	if err := pool.QueryRow(ctx, `
+		SELECT id FROM product_revisions WHERE created_from_attempt_id=$1
+	`, *session.AttemptID).Scan(&revisionID); err != nil {
+		return Status{}, err
+	}
+	if session.ProductRevisionID != nil && *session.ProductRevisionID != revisionID {
+		return Status{}, errors.New("PUBLIC_PRODUCT_REVISION_IDENTITY_DRIFT")
+	}
+	if _, err := pool.Exec(ctx, `
+		UPDATE public_product_compile_sessions
+		SET state='RUNNING',current_capability='workspace.materialization',
+		    product_revision_id=$2,error_code=NULL
+		WHERE id=$1 AND state <> 'PASS'
+	`, session.ID, revisionID); err != nil {
+		return Status{}, err
+	}
+	if err := ensureWorkspaceMaterialization(ctx, pool, session.ID, revisionID); err != nil {
+		return Status{}, err
+	}
+
+	var state string
+	var errorCode *string
+	if err := pool.QueryRow(ctx, `
+		SELECT state,last_error_code
+		FROM public_product_workspace_materializations
+		WHERE session_id=$1
+	`, session.ID).Scan(&state, &errorCode); err != nil {
+		return Status{}, err
+	}
+	switch state {
+	case "PASS":
+		if _, err := pool.Exec(ctx, `
+			UPDATE public_product_compile_sessions
+			SET state='PASS',current_capability='workspace.materialization',error_code=NULL
+			WHERE id=$1
+		`, session.ID); err != nil {
+			return Status{}, err
+		}
+		return Status{
+			CompileID:   session.PublicID,
+			Status:      "PASS",
+			Stage:       "FINALIZE",
+			Detail:      "Product proof passed and the editable workspace is ready.",
+			Terminal:    true,
+			ResultReady: true,
+		}, nil
+	case "FAILED":
+		code := "WORKSPACE_MATERIALIZATION_FAILED"
+		if errorCode != nil && strings.TrimSpace(*errorCode) != "" {
+			code = *errorCode
+		}
+		_ = markFailed(ctx, pool, session.ID, code)
+		return Status{
+			CompileID: session.PublicID,
+			Status:    "FAILED",
+			Stage:     "FINALIZE",
+			Detail:    "The product qualified, but its editable workspace could not be prepared.",
+			Terminal:  true,
+		}, nil
+	case "QUEUED", "LEASED":
+		return Status{
+			CompileID: session.PublicID,
+			Status:    "RUNNING",
+			Stage:     "FINALIZE",
+			Detail:    "Product proof passed. Preparing the editable workspace.",
+			Terminal:  false,
+		}, nil
+	default:
+		return Status{}, errors.New("PUBLIC_PRODUCT_WORKSPACE_STATE_INVALID")
+	}
 }
 
 func RawViewArtifactIDs(ctx context.Context, pool *pgxpool.Pool, publicID string) (map[string]uuid.UUID, error) {

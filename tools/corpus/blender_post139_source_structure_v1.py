@@ -18,7 +18,9 @@ from pathlib import Path
 import bpy
 from mathutils import Vector
 
-SOURCE_STRUCTURE_SCHEMA = "RealSaS.Post139.SourceStructure.v2"
+# Keep the additive evidence envelope compatible with the existing audit reader.
+# The extractor/canonical-space fields below carry the V2 semantic version.
+SOURCE_STRUCTURE_SCHEMA = "RealSaS.Post139.SourceStructure.v1"
 
 
 def canonical_bytes(value):
@@ -206,10 +208,7 @@ def skin_records(mesh_objects, center, scale):
             if influences:
                 skinned_vertices += 1
                 vertex_signatures.append(influences)
-                spatial_rows.append({
-                    "position": normalized_point(point, center, scale),
-                    "influences": influences,
-                })
+                spatial_rows.append({"position": normalized_point(point, center, scale), "influences": influences})
         legacy_records.append({
             "vertex_count": len(obj.data.vertices),
             "skinned_vertex_count": len(vertex_signatures),
@@ -223,15 +222,11 @@ def skin_records(mesh_objects, center, scale):
         if encoded != previous:
             spatial_unique.append(row)
         previous = encoded
-    return (
-        sorted(legacy_records, key=canonical_bytes),
-        skinned_vertices,
-        {
-            "binding_policy": "NORMALIZED_POSITION_PLUS_NAMED_WEIGHT_VECTOR",
-            "spatial_binding_count": len(spatial_unique),
-            "spatial_binding_hash": digest(spatial_unique),
-        },
-    )
+    return sorted(legacy_records, key=canonical_bytes), skinned_vertices, {
+        "binding_policy": "NORMALIZED_POSITION_PLUS_NAMED_WEIGHT_VECTOR",
+        "spatial_binding_count": len(spatial_unique),
+        "spatial_binding_hash": digest(spatial_unique),
+    }
 
 
 def image_record(image):
@@ -281,11 +276,7 @@ def appearance_records(mesh_objects):
             else:
                 slots.append(None)
         object_bindings.append({"object": obj.name, "material_slots": slots})
-    materials = []
-    for name in sorted(material_names):
-        material = bpy.data.materials.get(name)
-        if material is not None:
-            materials.append(material_record(material))
+    materials = [material_record(bpy.data.materials[name]) for name in sorted(material_names) if bpy.data.materials.get(name) is not None]
     images = sorted((image_record(image) for image in bpy.data.images), key=canonical_bytes)
     return {
         "materials": materials,
@@ -304,11 +295,7 @@ def animation_records():
         for curve in action.fcurves:
             keyframes = len(curve.keyframe_points)
             total_keyframes += keyframes
-            channels.append({
-                "data_path": curve.data_path,
-                "array_index": int(curve.array_index),
-                "keyframe_count": keyframes,
-            })
+            channels.append({"data_path": curve.data_path, "array_index": int(curve.array_index), "keyframe_count": keyframes})
         channels = sorted(channels, key=canonical_bytes)
         records.append({
             "name": action.name,
@@ -322,7 +309,7 @@ def animation_records():
     return sorted(records, key=lambda row: row["name"])
 
 
-def object_records(mesh_objects, armatures):
+def object_records(armatures):
     armature_names = {obj.name for obj in armatures}
     records = []
     for obj in sorted(bpy.context.scene.objects, key=lambda item: item.name):
@@ -373,7 +360,7 @@ def main():
     skin_legacy, skinned_vertices, skin_spatial = skin_records(mesh_objects, center, scale)
     appearance = appearance_records(mesh_objects)
     animations = animation_records()
-    objects = object_records(mesh_objects, armatures)
+    objects = object_records(armatures)
 
     legacy_geometry_hash = digest(geometry_legacy)
     rig_rest_hash = digest(rig)
@@ -394,11 +381,8 @@ def main():
             "ignored_import_helper_count": len(ignored_helpers),
         },
         "source": {
-            "path": str(source),
-            "name": source.name,
-            "extension": source.suffix.lower(),
-            "sha256": file_hash(source),
-            "size_bytes": source.stat().st_size,
+            "path": str(source), "name": source.name, "extension": source.suffix.lower(),
+            "sha256": file_hash(source), "size_bytes": source.stat().st_size,
         },
         "metrics": {
             "mesh_count": len(mesh_objects),
@@ -417,9 +401,7 @@ def main():
         "capabilities": {
             "geometry": bool(geometry_legacy),
             "appearance": bool(appearance["materials"] or appearance["images"] or appearance["has_vertex_color"]),
-            "rig": bool(rig),
-            "skin": skinned_vertices > 0,
-            "animation": bool(animations),
+            "rig": bool(rig), "skin": skinned_vertices > 0, "animation": bool(animations),
         },
         "fingerprints": {
             "geometry_topology": geometry_hash,

@@ -7,7 +7,10 @@ import json
 import numpy as np
 import pytest
 
-from compiler.realsas_compiler_core.canonical_mechanics_ir_v1 import CanonicalMechanicsIRV1
+from compiler.realsas_compiler_core.canonical_mechanics_ir_v1 import (
+    CanonicalMechanicsIRV1,
+    canonical_mechanics_lineage_hash_v1,
+)
 from compiler.realsas_compiler_core.canonical_motion_ir_v2 import (
     canonical_motion_from_dict_v2,
     mint_canonical_motion_v2,
@@ -17,6 +20,9 @@ from compiler.realsas_compiler_core.canonical_rig_ir_v2 import (
     CanonicalJointFrameIRV2,
     CanonicalRigControlIRV2,
     CanonicalRigIRV2,
+    _hash_control_program,
+    _hash_deform_structure,
+    canonical_rig_lineage_hash_v2,
 )
 from compiler.realsas_compiler_core.control_motion_ir_v1 import (
     ControlMotionClipProposalIRV1,
@@ -67,6 +73,21 @@ def _mechanics(rig):
         qualification_hash="a" * 64,
         mechanics_lineage_hash="b" * 64,
         metadata={"authority": "COMPILER_CANONICAL_MECHANICS"},
+    )
+
+
+def _sealed_executor_rig():
+    rig = replace(_rig(), deform_structure_hash="", control_program_hash="", rig_lineage_hash="")
+    rig = replace(rig, deform_structure_hash=_hash_deform_structure(rig))
+    rig = replace(rig, control_program_hash=_hash_control_program(rig))
+    return replace(rig, rig_lineage_hash=canonical_rig_lineage_hash_v2(rig))
+
+
+def _sealed_executor_mechanics(rig):
+    mechanics = replace(_mechanics(rig), mechanics_lineage_hash="")
+    return replace(
+        mechanics,
+        mechanics_lineage_hash=canonical_mechanics_lineage_hash_v1(mechanics),
     )
 
 
@@ -144,8 +165,8 @@ def _studio_layer(*, curve="linear", mesh_edit=False):
 
 
 def _execute_studio_motion(layer):
-    rig = _rig()
-    mechanics = _mechanics(rig)
+    rig = _sealed_executor_rig()
+    mechanics = _sealed_executor_mechanics(rig)
     objects = {
         "rig": json.dumps(rig.to_dict(), sort_keys=True).encode("utf-8"),
         "mechanics": json.dumps(mechanics.to_dict(), sort_keys=True).encode("utf-8"),

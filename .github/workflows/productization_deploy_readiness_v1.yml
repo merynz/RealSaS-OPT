@@ -37,7 +37,12 @@ jobs:
           cache-dependency-path: platform/go.sum
       - name: Go format gate
         working-directory: platform
-        run: test -z "$(gofmt -l .)"
+        run: |
+          drift="$(gofmt -l .)"
+          if [ -n "$drift" ]; then
+            printf 'gofmt drift:\n%s\n' "$drift"
+            exit 1
+          fi
       - name: Go vet
         working-directory: platform
         run: go vet ./...

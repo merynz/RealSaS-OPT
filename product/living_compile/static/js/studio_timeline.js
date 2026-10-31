@@ -10,6 +10,7 @@ export class StudioTimeline extends EventTarget {
   constructor(animationEdits = []) {
     super();
     this.animationEdits = animationEdits;
+    for (const clip of this.animationEdits) normalizeTrackAliases(clip);
     this.clipID = animationEdits[0]?.clip_id || null;
     this.playhead = 0;
     this.loopRange = null;

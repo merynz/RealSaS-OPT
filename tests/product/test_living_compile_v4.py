@@ -136,44 +136,84 @@ class LivingCompileV4Tests(unittest.TestCase):
         self.assertEqual(before, (self.root / "puppet/canonical_puppet_graph_v3.json").read_bytes())
         self.assertTrue(Path(out["path"]).is_file())
 
-    def test_static_shell_uses_realsas_brand_and_complete_domain_flow(self):
+    def test_root_is_awaken_and_workspace_keeps_complete_editor_flow(self):
         app = LivingCompileApplication.default()
         data, ctype = app.static_bytes("/")
         self.assertIn(b"<title>RealSaS</title>", data)
+        self.assertIn(b">AWAKEN</button>", data)
+        self.assertIn(b"Your character is alive.", data)
         self.assertNotIn(b"RealSaS Studio", data)
-        self.assertIn(b'data-stage="mechanics"', data)
-        self.assertIn(b'data-stage="graphics"', data)
         self.assertEqual(ctype, "text/html")
+
+        workspace, workspace_type = app.static_bytes("/workspace")
+        self.assertIn(b'data-stage="mechanics"', workspace)
+        self.assertIn(b'data-stage="graphics"', workspace)
+        self.assertIn(b'data-stage="proof"', workspace)
+        self.assertEqual(workspace_type, "text/html")
 
     def test_product_capabilities_are_deploy_explicit_and_compile_is_fail_closed(self):
         app = LivingCompileApplication.default()
-        status, payload, ctype = app.dispatch("GET", "/api/project")
-        self.assertEqual(status, 200)
-        self.assertEqual(ctype, "application/json")
-        self.assertEqual(payload["product_name"], "RealSaS")
-        self.assertEqual(payload["schema_version"], "RealSaS.ProductCapabilities.v2")
-        self.assertFalse(payload["compile_available"])
-        self.assertEqual(
-            payload["product_roles"],
-            ["INPUT", "SHAPE", "MESH", "RIG", "SKIN", "MECHANICS", "GRAPHICS", "MOTION", "PROOF"],
-        )
-        self.assertIn("PRODUCTION_MODEL_RELEASES_PENDING", payload["compile_blockers"])
-        self.assertFalse(payload["authority"]["heuristic_model_fallback_allowed"])
-        self.assertEqual(payload["latency_targets"]["preview_seconds_max"], 30)
-        self.assertEqual(payload["latency_targets"]["market_bar_full_compile_seconds_max"], 180)
-        self.assertEqual(payload["latency_targets"]["canonical_goal_full_compile_seconds_max"], 60)
-        with self.assertRaisesRegex(Exception, "production compile orchestration"):
-            app.dispatch("POST", "/api/compile/start", {})
+        with patch.dict(os.environ, {
+            "REALSAS_PRODUCT_GATEWAY_URL": "",
+            "REALSAS_PRODUCT_COMPILE_ENABLED": "",
+        }, clear=False):
+            status, payload, ctype = app.dispatch("GET", "/api/project")
+            self.assertEqual(status, 200)
+            self.assertEqual(ctype, "application/json")
+            self.assertEqual(payload["product_name"], "RealSaS")
+            self.assertEqual(payload["schema_version"], "RealSaS.ProductCapabilities.v3")
+            self.assertFalse(payload["compile_available"])
+            self.assertFalse(payload["public_compile_gateway"])
+            self.assertEqual(
+                payload["product_roles"],
+                ["INPUT", "SHAPE", "MESH", "RIG", "SKIN", "MECHANICS", "GRAPHICS", "MOTION", "PROOF"],
+            )
+            self.assertIn("PUBLIC_PRODUCT_GATEWAY_NOT_CONFIGURED", payload["compile_blockers"])
+            self.assertFalse(payload["authority"]["browser_receives_platform_internal_ids"])
+            self.assertFalse(payload["authority"]["presentation_preview_has_product_authority"])
+            self.assertEqual(payload["latency_targets"]["preview_seconds_max"], 30)
+            self.assertEqual(payload["latency_targets"]["market_bar_full_compile_seconds_max"], 180)
+            self.assertEqual(payload["latency_targets"]["canonical_goal_full_compile_seconds_max"], 60)
+            with self.assertRaisesRegex(Exception, "production compile is fail-closed"):
+                app.dispatch("POST", "/api/compile/start", {})
+
+    def test_public_gateway_is_explicitly_enabled_and_internal_ids_are_stripped(self):
+        app = LivingCompileApplication.default()
+        env = {
+            "REALSAS_PRODUCT_GATEWAY_URL": "https://product-gateway.example",
+            "REALSAS_PRODUCT_COMPILE_ENABLED": "1",
+        }
+        with patch.dict(os.environ, env, clear=False):
+            project = app.project_capabilities()
+            self.assertTrue(project["compile_available"])
+            self.assertTrue(project["public_compile_gateway"])
+            self.assertTrue(project["authority"]["compile_from_ui"])
+            with patch.object(app, "_gateway_json", return_value=(202, {
+                "compile_id": "cmp_public",
+                "status": "QUEUED",
+                "attempt_id": "internal-attempt",
+                "nested": {"engine_release_id": "internal-release", "stage": "INPUT"},
+            })):
+                status, payload, _ = app.dispatch("POST", "/api/compile/start", {"views": []})
+            self.assertEqual(status, 202)
+            self.assertEqual(payload["compile_id"], "cmp_public")
+            self.assertNotIn("attempt_id", payload)
+            self.assertNotIn("engine_release_id", payload["nested"])
+            self.assertEqual(payload["nested"]["stage"], "INPUT")
 
     def test_health_and_readiness_are_available_without_product_authority(self):
         app = LivingCompileApplication.default()
-        status, payload, _ = app.dispatch("GET", "/healthz")
-        self.assertEqual(status, 200)
-        self.assertEqual(payload["status"], "ok")
-        status, payload, _ = app.dispatch("GET", "/readyz")
-        self.assertEqual(status, 200)
-        self.assertTrue(payload["service_ready"])
-        self.assertFalse(payload["compile_available"])
+        with patch.dict(os.environ, {
+            "REALSAS_PRODUCT_GATEWAY_URL": "",
+            "REALSAS_PRODUCT_COMPILE_ENABLED": "",
+        }, clear=False):
+            status, payload, _ = app.dispatch("GET", "/healthz")
+            self.assertEqual(status, 200)
+            self.assertEqual(payload["status"], "ok")
+            status, payload, _ = app.dispatch("GET", "/readyz")
+            self.assertEqual(status, 200)
+            self.assertTrue(payload["service_ready"])
+            self.assertFalse(payload["compile_available"])
 
     def test_configured_bundle_root_rejects_host_filesystem_escape(self):
         app = LivingCompileApplication.default()

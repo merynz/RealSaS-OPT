@@ -190,7 +190,10 @@ def _rig_scene_rows(product: Mapping[str, Any]) -> tuple[list[Json], list[Json],
                 "relation_type": "control_hierarchy",
                 "entity_kind": ANIMATOR_CONTROL_CLASS,
             })
-    return [*deform_rows, *animator_rows], deform_rows, animator_rows, edges
+    # `rig.controls` remains the deform-joint compatibility surface consumed by
+    # the existing rig/skin editor. Animator controls are separate so animation
+    # authoring cannot accidentally become skin-weight authority.
+    return deform_rows, deform_rows, animator_rows, edges
 
 
 def _binding_rows(product: Mapping[str, Any]) -> list[Json]:

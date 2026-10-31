@@ -8,9 +8,10 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/studio"
 )
 
-// HandlerWithStudio adds the public Studio persistence lane around the product
-// gateway. The browser continues to see only opaque public compile/project ids;
-// ProductRevision and authoring revision UUIDs remain internal to Platform.
+// HandlerWithStudio adds the public Studio persistence and requalification lane
+// around the product gateway. The browser continues to see only opaque public
+// compile/project/requalification ids; ProductRevision, Attempt, artifact and
+// authoring revision UUIDs remain internal to Platform.
 func (a API) HandlerWithStudio() http.Handler {
 	mux := http.NewServeMux()
 
@@ -137,6 +138,48 @@ func (a API) HandlerWithStudio() http.Handler {
 			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
 		default:
 			respond(w, http.StatusCreated, out)
+		}
+	})
+
+	mux.HandleFunc("POST /v1/product/studio/projects/{id}/requalifications", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.ProductGatewayToken, "PRODUCT_GATEWAY") {
+			return
+		}
+		var req studio.RequalificationRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := studio.RequestRequalification(r.Context(), a.Pool, a.Store, r.PathValue("id"), req)
+		switch {
+		case errors.Is(err, studio.ErrProjectNotFound), errors.Is(err, studio.ErrRequalificationNotFound):
+			respond(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+		case errors.Is(err, studio.ErrRequalificationHeadRequired), errors.Is(err, studio.ErrRevisionConflict):
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+		case errors.Is(err, studio.ErrAuthoringPayloadInvalid):
+			respond(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		case errors.Is(err, studio.ErrRequalificationUnsupported):
+			respond(w, http.StatusUnprocessableEntity, map[string]string{"error": err.Error()})
+		case err != nil:
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+		default:
+			respond(w, http.StatusAccepted, out)
+		}
+	})
+
+	mux.HandleFunc("GET /v1/product/studio/projects/{id}/requalifications/{requalification}", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.ProductGatewayToken, "PRODUCT_GATEWAY") {
+			return
+		}
+		out, err := studio.GetRequalification(
+			r.Context(), a.Pool, r.PathValue("id"), r.PathValue("requalification"),
+		)
+		switch {
+		case errors.Is(err, studio.ErrProjectNotFound), errors.Is(err, studio.ErrRequalificationNotFound):
+			respond(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+		case err != nil:
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+		default:
+			respond(w, http.StatusOK, out)
 		}
 	})
 

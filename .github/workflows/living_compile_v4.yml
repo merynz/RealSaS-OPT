@@ -9,6 +9,8 @@ on:
     paths:
       - 'product/**'
       - 'deploy/product/**'
+      - 'compiler/realsas_compiler_core/playback_full_surface_v3.py'
+      - 'compiler/realsas_compiler_services/platform_worker/source_observation_contract_v1.py'
       - 'tests/product/**'
       - 'experiments/single_family_e2e_v1/export_bundle_v1.py'
       - 'canonical/LIVING_COMPILE_V4_PRODUCT_SHELL_PROMOTION_20260905.md'
@@ -18,6 +20,8 @@ on:
     paths:
       - 'product/**'
       - 'deploy/product/**'
+      - 'compiler/realsas_compiler_core/playback_full_surface_v3.py'
+      - 'compiler/realsas_compiler_services/platform_worker/source_observation_contract_v1.py'
       - 'tests/product/**'
       - 'experiments/single_family_e2e_v1/export_bundle_v1.py'
       - '.github/workflows/living_compile_v4.yml'
@@ -36,6 +40,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Install product projection dependency
+        run: python -m pip install --disable-pip-version-check -r deploy/product/requirements.txt
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -47,6 +53,7 @@ jobs:
           tests.product.test_studio_persistence
           tests.product.test_intake_worker
           tests.product.test_workspace_worker
+          tests.product.test_workspace_materializer_v1
           tests.product.test_deploy_contract
       - name: Python syntax
         run: >-
@@ -57,6 +64,7 @@ jobs:
           experiments/single_family_e2e_v1/export_bundle_v1.py
           tests/product/test_deploy_contract.py
           tests/product/test_studio_persistence.py
+          tests/product/test_workspace_materializer_v1.py
       - name: JavaScript syntax
         shell: bash
         run: |

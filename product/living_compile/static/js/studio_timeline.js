@@ -19,6 +19,7 @@ export class StudioTimeline extends EventTarget {
 
   bind(animationEdits) {
     this.animationEdits = animationEdits;
+    for (const clip of this.animationEdits) normalizeTrackAliases(clip);
     if (!this.animationEdits.some((clip) => clip.clip_id === this.clipID)) {
       this.clipID = this.animationEdits[0]?.clip_id || null;
       this.playhead = 0;
@@ -71,6 +72,7 @@ export class StudioTimeline extends EventTarget {
     const duplicate = clone(source);
     duplicate.clip_id = id;
     duplicate.display_name = `${source.display_name || source.clip_id} Copy`;
+    normalizeTrackAliases(duplicate);
     this.animationEdits.push(duplicate);
     this.clipID = id;
     this.playhead = 0;
@@ -143,11 +145,15 @@ export class StudioTimeline extends EventTarget {
     const clip = requiredClip(this.clip(clipID));
     const id = String(controlID || '').trim();
     if (!id) throw new TypeError('control id required');
-    let track = (clip.tracks || []).find((item) => item.bone_id === id);
+    let track = (clip.tracks || []).find((item) => trackControlID(item) === id);
     if (!track) {
-      track = {bone_id: id, keys: []};
+      track = {control_id: id, bone_id: id, keys: []};
       clip.tracks = clip.tracks || [];
       clip.tracks.push(track);
+    } else {
+      track.control_id = id;
+      track.bone_id = id;
+      track.keys = track.keys || [];
     }
     return track;
   }
@@ -181,8 +187,9 @@ export class StudioTimeline extends EventTarget {
     const wanted = new Set(keys);
     let deleted = 0;
     for (const track of clip.tracks || []) {
+      const id = trackControlID(track);
       const before = track.keys.length;
-      track.keys = track.keys.filter((key) => !wanted.has(keyID(track.bone_id, key.time_seconds)));
+      track.keys = track.keys.filter((key) => !wanted.has(keyID(id, key.time_seconds)));
       deleted += before - track.keys.length;
     }
     clip.tracks = (clip.tracks || []).filter((track) => track.keys.length > 0);
@@ -212,8 +219,9 @@ export class StudioTimeline extends EventTarget {
     if (!clip) return [];
     const rows = [];
     for (const track of clip.tracks || []) {
+      const id = trackControlID(track);
       for (const key of track.keys || []) {
-        if (this.selectedKeys.has(keyID(track.bone_id, key.time_seconds))) rows.push({track, key});
+        if (this.selectedKeys.has(keyID(id, key.time_seconds))) rows.push({track, key});
       }
     }
     return rows;
@@ -224,13 +232,13 @@ export class StudioTimeline extends EventTarget {
     const rows = this.selectedKeyObjects();
     if (!rows.length) return 0;
     const fps = positive(clip.fps || 30, 'fps');
-    const original = rows.map(({track, key}) => ({track, key, oldID: keyID(track.bone_id, key.time_seconds)}));
+    const original = rows.map(({track, key}) => ({track, key, controlID: trackControlID(track)}));
     this.selectedKeys.clear();
     for (const row of original) {
       let next = clamp(row.key.time_seconds + Number(deltaSeconds || 0), 0, clip.duration_seconds);
       if (snapToFrames) next = Math.round(next * fps) / fps;
       row.key.time_seconds = next;
-      this.selectedKeys.add(keyID(row.track.bone_id, next));
+      this.selectedKeys.add(keyID(row.controlID, next));
     }
     this.sortAll();
     this.emit();
@@ -244,8 +252,9 @@ export class StudioTimeline extends EventTarget {
     const amount = positive(factor, 'scale factor');
     this.selectedKeys.clear();
     for (const {track, key} of rows) {
+      const id = trackControlID(track);
       key.time_seconds = clamp(pivot + (key.time_seconds - pivot) * amount, 0, clip.duration_seconds);
-      this.selectedKeys.add(keyID(track.bone_id, key.time_seconds));
+      this.selectedKeys.add(keyID(id, key.time_seconds));
     }
     this.sortAll();
     this.emit();
@@ -280,7 +289,7 @@ export class StudioTimeline extends EventTarget {
     if (!rows.length) return 0;
     const origin = Math.min(...rows.map(({key}) => key.time_seconds));
     this.clipboard = rows.map(({track, key}) => ({
-      bone_id: track.bone_id,
+      control_id: trackControlID(track),
       offset_seconds: key.time_seconds - origin,
       key: clone(key),
     }));
@@ -292,13 +301,14 @@ export class StudioTimeline extends EventTarget {
     if (!this.clipboard.length) return 0;
     this.selectedKeys.clear();
     for (const row of this.clipboard) {
-      const track = this.ensureTrack(row.bone_id);
+      const controlID = String(row.control_id || row.bone_id || '');
+      const track = this.ensureTrack(controlID);
       const key = clone(row.key);
       key.time_seconds = clamp(Number(at || 0) + row.offset_seconds, 0, clip.duration_seconds);
       const index = track.keys.findIndex((candidate) => Math.abs(candidate.time_seconds - key.time_seconds) <= 1e-6);
       if (index >= 0) track.keys[index] = key;
       else track.keys.push(key);
-      this.selectedKeys.add(keyID(row.bone_id, key.time_seconds));
+      this.selectedKeys.add(keyID(controlID, key.time_seconds));
     }
     this.sortAll();
     this.emit();
@@ -307,7 +317,7 @@ export class StudioTimeline extends EventTarget {
 
   sample(controlID, time = this.playhead) {
     const clip = this.clip();
-    const track = clip?.tracks?.find((item) => item.bone_id === controlID);
+    const track = clip?.tracks?.find((item) => trackControlID(item) === controlID);
     if (!track?.keys?.length) return null;
     const keys = track.keys;
     let a = keys[0];
@@ -331,7 +341,12 @@ export class StudioTimeline extends EventTarget {
   sortAll() {
     const clip = this.clip();
     if (!clip) return;
-    for (const track of clip.tracks || []) track.keys.sort((a, b) => a.time_seconds - b.time_seconds);
+    for (const track of clip.tracks || []) {
+      const id = trackControlID(track);
+      track.control_id = id;
+      track.bone_id = id;
+      track.keys.sort((a, b) => a.time_seconds - b.time_seconds);
+    }
   }
 
   nextClipID(prefix = 'USER') {
@@ -357,6 +372,20 @@ export class StudioTimeline extends EventTarget {
 
 export function keyID(controlID, time) {
   return `${controlID}@${Number(time).toFixed(6)}`;
+}
+
+export function trackControlID(track) {
+  return String(track?.control_id || track?.bone_id || '');
+}
+
+function normalizeTrackAliases(clip) {
+  for (const track of clip?.tracks || []) {
+    const id = trackControlID(track);
+    if (!id) continue;
+    track.control_id = id;
+    track.bone_id = id;
+    track.keys = track.keys || [];
+  }
 }
 
 function requiredClip(clip) {

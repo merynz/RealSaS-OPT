@@ -91,7 +91,7 @@
       <span id="timeReadout" class="mono">0.000 / 0.000</span>
       <label>FPS <input id="fps" type="number" min="1" max="120" value="30"></label>
       <button id="newClip">NEW CLIP</button><button id="addKey">ADD KEY</button><button id="deleteKey">DELETE KEY</button>
-      <select id="curveSelect"><option value="linear">LINEAR</option><option value="step">STEP</option><option value="cubic">CUBIC</option></select>
+      <select id="curveSelect"><option value="linear">LINEAR</option><option value="step">STEP</option><option value="bezier">BEZIER</option></select>
     </div>
     <div class="timeline-body">
       <div id="trackList" class="track-list"></div>
@@ -102,6 +102,8 @@
   <div id="toast" class="toast"></div>
   <script type="module" src="/static/js/studio_persistence.js"></script>
   <script type="module" src="/static/js/app.js"></script>
+  <script type="module" src="/static/js/studio_transform_layer.js"></script>
+  <script type="module" src="/static/js/studio_animation_editor.js"></script>
   <script type="module" src="/static/js/product_shell.js"></script>
   <script type="module" src="/static/js/workspace_bootstrap.js"></script>
 </body>

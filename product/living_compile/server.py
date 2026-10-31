@@ -17,6 +17,7 @@ from .authoring import save_user_layer
 from .common import Json, LivingCompileError, bundle_path, finite, product_bundle_root, within
 from .runtime import runtime_clips, runtime_frame
 from .scene import build_scene
+from .workspace_cache import materialize_workspace_bundle
 
 
 PUBLIC_HTTP_ENV = "REALSAS_PUBLIC_HTTP"
@@ -24,6 +25,7 @@ PRODUCT_GATEWAY_URL_ENV = "REALSAS_PRODUCT_GATEWAY_URL"
 PRODUCT_GATEWAY_TOKEN_ENV = "REALSAS_PRODUCT_GATEWAY_TOKEN"
 PRODUCT_COMPILE_ENABLED_ENV = "REALSAS_PRODUCT_COMPILE_ENABLED"
 PRODUCT_GATEWAY_TIMEOUT_SECONDS = 12
+MAX_WORKSPACE_BUNDLE_DOWNLOAD_BYTES = 256 * 1024 * 1024
 
 _INTERNAL_KEYS = {
     "artifact_id",
@@ -79,22 +81,30 @@ class LivingCompileApplication:
             and os.environ.get(PRODUCT_COMPILE_ENABLED_ENV, "").strip() == "1"
         )
 
-    def _gateway_json(self, method: str, path: str, body: Json | None = None) -> tuple[int, Json]:
+    def _gateway_request(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: bytes | None = None,
+        accept: str,
+        content_type: str | None = None,
+        max_bytes: int,
+    ) -> tuple[int, bytes]:
         base = self._gateway_base()
         if base is None:
             raise LivingCompileError("public product gateway is not configured")
         token = self._gateway_token()
         if not token:
             raise LivingCompileError("public product gateway service token is not configured")
-        data = None if body is None else json.dumps(body, separators=(",", ":")).encode("utf-8")
-        headers = {"Accept": "application/json", "Authorization": f"Bearer {token}"}
-        if data is not None:
-            headers["Content-Type"] = "application/json"
-        request = urllib.request.Request(base + path, data=data, headers=headers, method=method)
+        headers = {"Accept": accept, "Authorization": f"Bearer {token}"}
+        if content_type is not None:
+            headers["Content-Type"] = content_type
+        request = urllib.request.Request(base + path, data=body, headers=headers, method=method)
         try:
             with urllib.request.urlopen(request, timeout=PRODUCT_GATEWAY_TIMEOUT_SECONDS) as response:
                 status = int(response.status)
-                raw = response.read(8 * 1024 * 1024)
+                raw = response.read(max_bytes + 1)
         except urllib.error.HTTPError as exc:
             raw = exc.read(1024 * 1024)
             try:
@@ -106,6 +116,20 @@ class LivingCompileApplication:
             raise LivingCompileError(message or error or f"product gateway rejected request with HTTP {exc.code}") from exc
         except urllib.error.URLError as exc:
             raise LivingCompileError(f"product gateway unavailable: {exc.reason}") from exc
+        if len(raw) > max_bytes:
+            raise LivingCompileError("product gateway response exceeds allowed size")
+        return status, raw
+
+    def _gateway_json(self, method: str, path: str, body: Json | None = None) -> tuple[int, Json]:
+        data = None if body is None else json.dumps(body, separators=(",", ":")).encode("utf-8")
+        status, raw = self._gateway_request(
+            method,
+            path,
+            body=data,
+            accept="application/json",
+            content_type="application/json" if data is not None else None,
+            max_bytes=8 * 1024 * 1024,
+        )
         try:
             payload = json.loads(raw.decode("utf-8")) if raw else {}
         except Exception as exc:
@@ -113,6 +137,9 @@ class LivingCompileApplication:
         if not isinstance(payload, dict):
             raise LivingCompileError("product gateway returned a non-object response")
         return status, payload
+
+    def _gateway_bytes(self, method: str, path: str, *, accept: str, max_bytes: int) -> tuple[int, bytes]:
+        return self._gateway_request(method, path, accept=accept, max_bytes=max_bytes)
 
     def _public_payload(self, value: Any) -> Any:
         if isinstance(value, dict):
@@ -138,6 +165,8 @@ class LivingCompileApplication:
             blockers.append("PUBLIC_PRODUCT_GATEWAY_TOKEN_NOT_CONFIGURED")
         if not compile_requested:
             blockers.append("PRODUCT_COMPILE_NOT_ENABLED")
+        if bundle_root is None:
+            blockers.append("PRODUCT_BUNDLE_ROOT_NOT_CONFIGURED")
         return {
             "schema_version": "RealSaS.ProductCapabilities.v3",
             "product_name": "RealSaS",
@@ -241,6 +270,27 @@ class LivingCompileApplication:
             safe_id = urllib.parse.quote(compile_id, safe="-_.~")
             status, payload = self._gateway_json("GET", f"/v1/product/compiles/{safe_id}")
             return status, self._public_payload(payload), "application/json"
+        if method == "GET" and parsed.path == "/api/compile/workspace":
+            if not self._production_compile_enabled():
+                raise LivingCompileError("production compile is fail-closed")
+            compile_id = (query.get("id") or [""])[0].strip()
+            if not compile_id or len(compile_id) > 96:
+                raise LivingCompileError("valid public compile id required")
+            safe_id = urllib.parse.quote(compile_id, safe="-_.~")
+            _, payload = self._gateway_bytes(
+                "GET",
+                f"/v1/product/compiles/{safe_id}/workspace-bundle",
+                accept="application/zip",
+                max_bytes=MAX_WORKSPACE_BUNDLE_DOWNLOAD_BYTES,
+            )
+            bundle = materialize_workspace_bundle(compile_id, payload)
+            return 200, {
+                "schema_version": "RealSaS.PublicWorkspaceHandoff.v1",
+                "compile_id": compile_id,
+                "bundle": bundle,
+                "workspace_url": "/workspace?bundle=" + urllib.parse.quote(bundle, safe=""),
+                "authority": "PROOF_GATED_WORKSPACE_BUNDLE",
+            }, "application/json"
         if method == "POST" and parsed.path in {"/api/input/upload", "/api/project", "/api/compile"}:
             raise LivingCompileError("unsupported legacy product-shell write route")
         raise LivingCompileError(f"unsupported route: {method} {parsed.path}")

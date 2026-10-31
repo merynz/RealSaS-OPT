@@ -4,6 +4,7 @@ let studio = null;
 let drawer = null;
 let button = null;
 let loading = false;
+let restoring = false;
 
 function escapeHTML(value) {
   return String(value ?? '')
@@ -61,7 +62,7 @@ function installDrawer() {
     </div>
     <div class="history-toolbar"><button id="studioHistoryRefresh">REFRESH</button><span id="studioHistoryState">—</span></div>
     <div id="studioHistoryList" class="history-list"><div class="history-empty">Open a persisted Studio project.</div></div>
-    <div class="history-foot">History is append-only. Requalification state belongs to each authoring head; ProductRevision authority is never rewritten here.</div>`;
+    <div class="history-foot">RESTORE is append-only: it copies the selected historical payload into a new revision. ProductRevision authority is never rewritten and the restored authoring head still requires compiler requalification.</div>`;
   document.body.append(drawer);
   $('#studioHistoryClose').onclick = () => close();
   $('#studioHistoryRefresh').onclick = () => void refresh();
@@ -93,12 +94,57 @@ function formatTime(value) {
   });
 }
 
-async function refresh() {
-  if (loading || !drawer?.classList.contains('open')) return;
+function applyRestoredHead(head) {
+  if (!head?.authoring_payload || typeof head.authoring_payload !== 'object') {
+    throw new Error('Restored Studio head does not contain an authoring payload');
+  }
+  studio.document.loadAuthoringLayer(head.authoring_payload);
+  studio.journal.clear();
+  studio.state.previewPose?.clear?.();
+  studio.state.frame = null;
+  studio.state.play = false;
+  studio.dirty.hydrate(head);
+  document.querySelector('.mode.active')?.click();
+  window.dispatchEvent(new CustomEvent('realsas:studio-authoring-restored', {detail: head}));
+}
+
+async function restoreRevision(revisionNumber) {
+  if (restoring) return;
+  if (studio?.dirty?.status !== 'clean') {
+    window.alert('Save or resolve current Studio edits before restoring a historical revision.');
+    return;
+  }
+  const target = Number(revisionNumber);
+  if (!Number.isInteger(target) || target <= 0) return;
+  const accepted = window.confirm(
+    `Restore REV ${target}?\n\nThis does not rewind history. RealSaS will create a new immutable revision from REV ${target}, and the new head will require compiler requalification.`,
+  );
+  if (!accepted) return;
+
+  restoring = true;
+  const state = $('#studioHistoryState');
+  if (state) state.textContent = `RESTORING REV ${target}…`;
+  try {
+    const persistence = window.RealSaSStudioPersistence;
+    if (!persistence?.restore) throw new Error('Studio restore capability unavailable');
+    const payload = await persistence.restore(target);
+    applyRestoredHead(payload.head);
+    if (state) state.textContent = `RESTORED AS REV ${Number(payload.head.revision_number || 0)}`;
+    await refresh(true);
+  } catch (error) {
+    if (state) state.textContent = 'RESTORE ERROR';
+    window.alert(error?.message || String(error));
+  } finally {
+    restoring = false;
+  }
+}
+
+async function refresh(force = false) {
+  if ((!force && loading) || !drawer?.classList.contains('open')) return;
   loading = true;
   const state = $('#studioHistoryState');
   const list = $('#studioHistoryList');
-  if (state) state.textContent = 'LOADING…';
+  if (state && !restoring) state.textContent = 'LOADING…';
   try {
     const persistence = window.RealSaSStudioPersistence;
     const bundle = studio?.state?.bundle;
@@ -114,23 +160,30 @@ async function refresh() {
       return;
     }
     const revisions = await persistence.history(100);
-    if (state) state.textContent = `${revisions.length} REVISION${revisions.length === 1 ? '' : 'S'}`;
+    if (state && !restoring) state.textContent = `${revisions.length} REVISION${revisions.length === 1 ? '' : 'S'}`;
     if (!list) return;
     if (!revisions.length) {
       list.innerHTML = '<div class="history-empty">No user authoring revisions yet. The proof-qualified base is unchanged.</div>';
       return;
     }
     list.innerHTML = revisions.map((row) => {
+      const revision = Number(row.revision_number || 0);
       const sha = String(row.payload_sha256 || '');
       const head = Boolean(row.is_head);
       const requal = Boolean(row.requires_requalification);
       return `<article class="history-row${head ? ' head' : ''}">
-        <div class="history-rev"><strong>REV ${Number(row.revision_number || 0)}</strong>${head ? '<span>HEAD</span>' : ''}</div>
+        <div class="history-rev"><strong>REV ${revision}</strong>${head ? '<span>HEAD</span>' : ''}</div>
         <div class="history-meta"><span>${escapeHTML(row.created_by || '—')}</span><span>${escapeHTML(formatTime(row.created_at))}</span></div>
         <div class="history-sha">${escapeHTML(sha.slice(0, 16) || '—')}</div>
-        <div class="history-state ${requal ? 'requal' : 'qualified'}">${requal ? 'REQUALIFICATION REQUIRED' : 'QUALIFIED'}</div>
+        <div class="history-row-foot">
+          <div class="history-state ${requal ? 'requal' : 'qualified'}">${requal ? 'REQUALIFICATION REQUIRED' : 'QUALIFIED'}</div>
+          ${head ? '' : `<button class="history-restore" data-restore-revision="${revision}">RESTORE</button>`}
+        </div>
       </article>`;
     }).join('');
+    list.querySelectorAll('[data-restore-revision]').forEach((restoreButton) => {
+      restoreButton.onclick = () => void restoreRevision(restoreButton.dataset.restoreRevision);
+    });
   } catch (error) {
     if (list) list.innerHTML = `<div class="history-error">${escapeHTML(error?.message || error)}</div>`;
     if (state) state.textContent = 'ERROR';

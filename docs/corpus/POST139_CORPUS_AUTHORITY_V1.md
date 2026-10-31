@@ -35,8 +35,12 @@ Structural duplicate identity remains `canonical geometry/topology + rest rig + 
 
 ## Recovery and sealing
 
-`.github/workflows/post139_recover_and_seal_v1.yml` reuses immutable source workspaces from source run `41192533150` and reacquires only missing sources. Recovery uses bounded retry/backoff and resumes partial Google Drive downloads. A transport failure therefore remains a transport failure; it does not mutate semantic corpus policy.
+`.github/workflows/post139_recover_and_seal_v1.yml` is the sole recovery/materialization orchestration owner. The authority-contract workflow only validates tooling contracts; it does not invoke recovery.
 
-After recovery the workflow runs source inventory and Blender audit for recovered sources, corrected V2 semantic compilation, corpus authority sealing plus standalone verification, deterministic materialization source closure, and a final fail-closed readiness gate.
+Recovery reuses the 21 immutable successful source workspaces from source run `41192533150` and operates on the eight missing sources as isolated matrix jobs with bounded parallelism. Each successful recovered source is uploaded as its own immutable workspace before aggregation. One source failure therefore cannot hide the state of the other recovery sources or force already-successful sources to be reacquired.
+
+Mixed publisher packs may narrow byte acquisition to a mechanically relevant source superset while preserving the complete publisher tree. Acquisition lane size is never a training denominator: subject count is decided only after canonical Blender audit, semantic policy, global identity/admission and lineage compilation. Exact glTF buffer/image dependencies are derived from the selected model documents and included in the acquired byte ledger.
+
+After all eight recovery jobs pass, the aggregate job combines them with the 21 immutable source workspaces, verifies the exact 29-source non-quarantine workspace closure, runs corrected V2 semantic compilation, corpus authority sealing plus standalone verification, emits the sealed training-consumer manifest, builds the deterministic materialization source closure, and applies the final fail-closed readiness gate.
 
 No Post139 training consumer should proceed unless the root status is `SEALED`, the V2 report is `PASS_MATERIALIZATION_READY`, and standalone authority verification passes.

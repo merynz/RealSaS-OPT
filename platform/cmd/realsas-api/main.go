@@ -51,7 +51,14 @@ func main() {
 		slog.Error("artifact store", "error", err)
 		os.Exit(1)
 	}
-	handler := (httpapi.API{Pool: pool, Graph: graph, Store: store, CodeSHA: sourceCodeSHA}).HandlerWithCapabilityRun()
+	handler := (httpapi.API{
+		Pool:                pool,
+		Graph:               graph,
+		Store:               store,
+		CodeSHA:             sourceCodeSHA,
+		ProductGatewayToken: os.Getenv("REALSAS_PRODUCT_GATEWAY_TOKEN"),
+		OperatorToken:       os.Getenv("REALSAS_OPERATOR_TOKEN"),
+	}).HandlerWithCapabilityRun()
 	server := &http.Server{
 		Addr:              "127.0.0.1:8080",
 		Handler:           handler,

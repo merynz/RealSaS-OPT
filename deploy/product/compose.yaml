@@ -33,6 +33,8 @@ services:
     volumes:
       - platform-artifacts:/var/lib/realsas/artifacts
     expose: ["8080"]
+    ports:
+      - "127.0.0.1:${REALSAS_OPERATOR_API_PORT:-8780}:8080"
     depends_on:
       migrate:
         condition: service_completed_successfully

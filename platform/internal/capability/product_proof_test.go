@@ -56,14 +56,8 @@ func TestProductProofIsTerminalProductPassAuthority(t *testing.T) {
 	}
 }
 
-func TestProductCompileCanTerminateAtProof(t *testing.T) {
-	// Product Mesh intentionally retains three released Compiler-stage parents.
-	// Validate the terminal product goal against the same release projection used
-	// in production rather than against a product-only synthetic registry.
-	registry, err := BuildEngineReleaseRegistry(context.Background(), meshReleaseTestGraph(t))
-	if err != nil {
-		t.Fatal(err)
-	}
+func TestProductCompileCanTerminateAtProofWithoutCompilerStages(t *testing.T) {
+	registry := productProvidersTestRegistry(t)
 	resolved, err := (Goal{
 		Type:            GoalProductCompile,
 		Targets:         []string{ProductProofCapabilityID},
@@ -79,6 +73,9 @@ func TestProductCompileCanTerminateAtProof(t *testing.T) {
 		t.Fatalf("terminal capability=%s want=%s", resolved[len(resolved)-1].ID, ProductProofCapabilityID)
 	}
 	for _, descriptor := range resolved {
+		if descriptor.Kind == KindStage {
+			t.Fatalf("shipping product closure leaked Compiler stage %s", descriptor.ID)
+		}
 		allowed := false
 		for _, mode := range descriptor.AllowedModes {
 			if mode == ModeProduct {

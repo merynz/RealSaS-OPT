@@ -20,14 +20,14 @@ type ProductOpsStudioState struct {
 }
 
 type ProductOpsSnapshot struct {
-	SchemaVersion             string                `json:"schema_version"`
-	GeneratedAt               time.Time             `json:"generated_at"`
-	Ready                     bool                  `json:"ready"`
-	SourceCodeSHA             string                `json:"source_code_sha"`
+	SchemaVersion             string                   `json:"schema_version"`
+	GeneratedAt               time.Time                `json:"generated_at"`
+	Ready                     bool                     `json:"ready"`
+	SourceCodeSHA             string                   `json:"source_code_sha"`
 	Preflight                 DeploymentPreflightState `json:"preflight"`
-	CompileSessions           []ProductOpsStateCount `json:"compile_sessions"`
-	WorkspaceMaterializations []ProductOpsStateCount `json:"workspace_materializations"`
-	Studio                    ProductOpsStudioState `json:"studio"`
+	CompileSessions           []ProductOpsStateCount   `json:"compile_sessions"`
+	WorkspaceMaterializations []ProductOpsStateCount   `json:"workspace_materializations"`
+	Studio                    ProductOpsStudioState    `json:"studio"`
 }
 
 // ProductOpsSnapshotState is the production-facing operator read model. It is

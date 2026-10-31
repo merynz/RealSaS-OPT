@@ -157,6 +157,7 @@ class LivingCompileV4Tests(unittest.TestCase):
             "REALSAS_PRODUCT_GATEWAY_URL": "",
             "REALSAS_PRODUCT_GATEWAY_TOKEN": "",
             "REALSAS_PRODUCT_COMPILE_ENABLED": "",
+            "REALSAS_PRODUCT_BUNDLE_ROOT": "",
         }, clear=False):
             status, payload, ctype = app.dispatch("GET", "/api/project")
             self.assertEqual(status, 200)
@@ -171,6 +172,7 @@ class LivingCompileV4Tests(unittest.TestCase):
             )
             self.assertIn("PUBLIC_PRODUCT_GATEWAY_NOT_CONFIGURED", payload["compile_blockers"])
             self.assertIn("PUBLIC_PRODUCT_GATEWAY_TOKEN_NOT_CONFIGURED", payload["compile_blockers"])
+            self.assertIn("PRODUCT_BUNDLE_ROOT_NOT_CONFIGURED", payload["compile_blockers"])
             self.assertFalse(payload["authority"]["browser_receives_platform_internal_ids"])
             self.assertFalse(payload["authority"]["browser_receives_gateway_service_token"])
             self.assertFalse(payload["authority"]["presentation_preview_has_product_authority"])
@@ -186,11 +188,29 @@ class LivingCompileV4Tests(unittest.TestCase):
             "REALSAS_PRODUCT_GATEWAY_URL": "https://product-gateway.example",
             "REALSAS_PRODUCT_GATEWAY_TOKEN": "",
             "REALSAS_PRODUCT_COMPILE_ENABLED": "1",
+            "REALSAS_PRODUCT_BUNDLE_ROOT": self.t.name,
         }, clear=False):
             project = app.project_capabilities()
             self.assertFalse(project["compile_available"])
             self.assertFalse(project["public_compile_gateway"])
             self.assertIn("PUBLIC_PRODUCT_GATEWAY_TOKEN_NOT_CONFIGURED", project["compile_blockers"])
+
+    def test_workspace_storage_is_required_before_compile_is_admitted(self):
+        app = LivingCompileApplication.default()
+        env = {
+            "REALSAS_PRODUCT_GATEWAY_URL": "https://product-gateway.example",
+            "REALSAS_PRODUCT_GATEWAY_TOKEN": "test-service-token",
+            "REALSAS_PRODUCT_COMPILE_ENABLED": "1",
+            "REALSAS_PRODUCT_BUNDLE_ROOT": "",
+        }
+        with patch.dict(os.environ, env, clear=False):
+            project = app.project_capabilities()
+            self.assertFalse(project["compile_available"])
+            self.assertTrue(project["public_compile_gateway"])
+            self.assertIn("PRODUCT_BUNDLE_ROOT_NOT_CONFIGURED", project["compile_blockers"])
+            self.assertFalse(project["authority"]["compile_from_ui"])
+            with self.assertRaisesRegex(Exception, "production compile is fail-closed"):
+                app.dispatch("POST", "/api/compile/start", {"views": []})
 
     def test_public_gateway_is_explicitly_enabled_and_internal_ids_are_stripped(self):
         app = LivingCompileApplication.default()
@@ -198,6 +218,7 @@ class LivingCompileV4Tests(unittest.TestCase):
             "REALSAS_PRODUCT_GATEWAY_URL": "https://product-gateway.example",
             "REALSAS_PRODUCT_GATEWAY_TOKEN": "test-service-token",
             "REALSAS_PRODUCT_COMPILE_ENABLED": "1",
+            "REALSAS_PRODUCT_BUNDLE_ROOT": self.t.name,
         }
         with patch.dict(os.environ, env, clear=False):
             project = app.project_capabilities()
@@ -223,6 +244,7 @@ class LivingCompileV4Tests(unittest.TestCase):
             "REALSAS_PRODUCT_GATEWAY_URL": "",
             "REALSAS_PRODUCT_GATEWAY_TOKEN": "",
             "REALSAS_PRODUCT_COMPILE_ENABLED": "",
+            "REALSAS_PRODUCT_BUNDLE_ROOT": "",
         }, clear=False):
             status, payload, _ = app.dispatch("GET", "/healthz")
             self.assertEqual(status, 200)

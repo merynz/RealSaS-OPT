@@ -13,7 +13,6 @@ import (
 func TestProductCapabilityWorkflowRunsProofTerminalAndReturnsProductRevision(t *testing.T) {
 	var suite testsuite.WorkflowTestSuite
 	env := suite.NewTestWorkflowEnvironment()
-	defer env.Close()
 
 	input := CapabilityWorkflowInput{
 		CommandID:       "11111111-1111-4111-8111-111111111111",
@@ -164,7 +163,6 @@ func TestProductCapabilityWorkflowRunsProofTerminalAndReturnsProductRevision(t *
 func TestProductCapabilityWorkflowDoesNotFinalizeWhenProofFails(t *testing.T) {
 	var suite testsuite.WorkflowTestSuite
 	env := suite.NewTestWorkflowEnvironment()
-	defer env.Close()
 
 	input := CapabilityWorkflowInput{
 		CommandID:       "11111111-1111-4111-8111-111111111111",

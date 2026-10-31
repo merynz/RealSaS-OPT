@@ -1,0 +1,75 @@
+name: post139-corpus-audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/post139_corpus_audit.yml'
+      - 'tools/corpus/post139_audit_v1.py'
+      - 'tools/corpus/blender_post139_source_structure_v1.py'
+      - 'tests/tools/test_post139_audit_v1.py'
+      - 'tests/fixtures/post139_corpus_audit_v1/**'
+      - 'docs/corpus/POST139_AUDIT.md'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/post139_corpus_audit.yml'
+      - 'tools/corpus/post139_audit_v1.py'
+      - 'tools/corpus/blender_post139_source_structure_v1.py'
+      - 'tests/tools/test_post139_audit_v1.py'
+      - 'tests/fixtures/post139_corpus_audit_v1/**'
+      - 'docs/corpus/POST139_AUDIT.md'
+  workflow_dispatch:
+
+concurrency:
+  group: post139-corpus-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-and-blender-smoke:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Direct GLTF audit unit tests
+        run: |
+          python -m pip install --quiet pytest
+          python -m pytest -q tests/tools/test_post139_audit_v1.py
+      - name: Install headless Blender runtime dependencies
+        run: |
+          sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 update -qq
+          sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 install -y --no-install-recommends libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 libgl1
+      - name: Restore pinned Blender 4.0.2 archive
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/blender-4.0.2-linux-x64.tar.xz
+          key: observation-blender-4.0.2-linux-x64-5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a
+      - name: Verify and unpack Blender 4.0.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/blender-4.0.2-linux-x64.tar.xz"
+          if [ ! -f "$archive" ]; then
+            curl --fail --location --retry 3 --retry-delay 2 'https://download.blender.org/release/Blender4.0/blender-4.0.2-linux-x64.tar.xz' --output "$archive"
+          fi
+          echo "5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a  $archive" | sha256sum --check -
+          tar -xJf "$archive" -C "$RUNNER_TEMP"
+          exe="$RUNNER_TEMP/blender-4.0.2-linux-x64/blender"
+          test "$("$exe" --version | head -n 1)" = 'Blender 4.0.2'
+          echo "BLENDER_EXE=$exe" >> "$GITHUB_ENV"
+      - name: Cross-format canonical fingerprint smoke
+        run: |
+          "$BLENDER_EXE" --background --factory-startup --python-exit-code 1 \
+            --python tests/fixtures/post139_corpus_audit_v1/blender_cross_format_smoke.py
+      - name: Summary
+        run: |
+          echo 'POST139_CORPUS_AUDIT_SOURCE_AND_BLENDER_SMOKE_PASS'
+          echo "commit=$GITHUB_SHA"
+          echo 'scope=engineering_source_audit_only'
+          echo 'training_or_product_authority=false'

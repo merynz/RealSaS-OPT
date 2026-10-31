@@ -11,9 +11,12 @@ on:
       - 'compiler/realsas_compiler_services/platform_worker/proof_executor_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/worker.py'
       - 'product/living_compile/**'
+      - 'deploy/product/.env.example'
       - 'tools/admit_product_model_release_v1.py'
+      - 'tools/product_deploy_preflight_v1.py'
       - 'tests/compiler/test_product_artifact_closure_v1.py'
       - 'tests/product/test_model_admission_tool.py'
+      - 'tests/product/test_product_deploy_preflight.py'
       - '.github/workflows/productization_deploy_readiness_v1.yml'
   pull_request:
     paths:
@@ -24,9 +27,12 @@ on:
       - 'compiler/realsas_compiler_services/platform_worker/proof_executor_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/worker.py'
       - 'product/living_compile/**'
+      - 'deploy/product/.env.example'
       - 'tools/admit_product_model_release_v1.py'
+      - 'tools/product_deploy_preflight_v1.py'
       - 'tests/compiler/test_product_artifact_closure_v1.py'
       - 'tests/product/test_model_admission_tool.py'
+      - 'tests/product/test_product_deploy_preflight.py'
       - '.github/workflows/productization_deploy_readiness_v1.yml'
 
 concurrency:
@@ -65,6 +71,10 @@ jobs:
         run: |
           python -m py_compile tools/admit_product_model_release_v1.py
           python -m unittest -v tests.product.test_model_admission_tool
+      - name: Product deployment preflight contract
+        run: |
+          python -m py_compile tools/product_deploy_preflight_v1.py
+          python -m unittest -v tests.product.test_product_deploy_preflight
       - name: Go format gate
         working-directory: platform
         run: |

@@ -6,17 +6,23 @@ on:
     paths:
       - 'platform/**'
       - 'compiler/realsas_compiler_core/modular_product_proof_v1.py'
+      - 'compiler/realsas_compiler_core/default_idle_provider_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/motion_executor_v2.py'
       - 'compiler/realsas_compiler_services/platform_worker/proof_executor_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/worker.py'
       - 'product/living_compile/**'
+      - 'tests/compiler/test_product_artifact_closure_v1.py'
       - '.github/workflows/productization_deploy_readiness_v1.yml'
   pull_request:
     paths:
       - 'platform/**'
       - 'compiler/realsas_compiler_core/modular_product_proof_v1.py'
+      - 'compiler/realsas_compiler_core/default_idle_provider_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/motion_executor_v2.py'
       - 'compiler/realsas_compiler_services/platform_worker/proof_executor_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/worker.py'
       - 'product/living_compile/**'
+      - 'tests/compiler/test_product_artifact_closure_v1.py'
       - '.github/workflows/productization_deploy_readiness_v1.yml'
 
 concurrency:
@@ -49,6 +55,8 @@ jobs:
         with:
           go-version-file: platform/go.mod
           cache-dependency-path: platform/go.sum
+      - name: Shipping artifact closure court
+        run: python -m unittest -v tests.compiler.test_product_artifact_closure_v1
       - name: Go format gate
         working-directory: platform
         run: |

@@ -9,6 +9,7 @@ on:
       - 'canonical/POST139_SUBJECT_POLICY_V1.json'
       - 'canonical/POST139_ACQUISITION_PINS_V1.json'
       - 'tools/corpus/post139_acquire_resilient_v1.py'
+      - 'tools/corpus/post139_acquire_itch_actor_lane_v1.py'
       - 'tools/corpus/post139_rebind_candidate_manifest_v1.py'
       - 'tools/corpus/post139_compile_inventory_v2.py'
       - 'tools/corpus/post139_corpus_authority_v1.py'
@@ -26,6 +27,7 @@ on:
       - 'canonical/POST139_SUBJECT_POLICY_V1.json'
       - 'canonical/POST139_ACQUISITION_PINS_V1.json'
       - 'tools/corpus/post139_acquire_resilient_v1.py'
+      - 'tools/corpus/post139_acquire_itch_actor_lane_v1.py'
       - 'tools/corpus/post139_rebind_candidate_manifest_v1.py'
       - 'tools/corpus/post139_compile_inventory_v2.py'
       - 'tools/corpus/post139_corpus_authority_v1.py'
@@ -58,6 +60,7 @@ jobs:
         run: |
           python -m py_compile \
             tools/corpus/post139_acquire_resilient_v1.py \
+            tools/corpus/post139_acquire_itch_actor_lane_v1.py \
             tools/corpus/post139_rebind_candidate_manifest_v1.py \
             tools/corpus/post139_compile_inventory_v2.py \
             tools/corpus/post139_corpus_authority_v1.py \

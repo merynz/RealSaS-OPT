@@ -29,7 +29,7 @@ jobs:
   source-and-blender-smoke:
     if: github.event.repository.private == false
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     env:
       PYTHONPATH: .
     steps:
@@ -44,7 +44,7 @@ jobs:
       - name: Install headless Blender runtime dependencies
         run: |
           sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 update -qq
-          sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 install -y --no-install-recommends libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 libgl1
+          sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 install -y --no-install-recommends libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 libgl1 unzip
       - name: Restore pinned Blender 4.0.2 archive
         uses: actions/cache@v4
         with:
@@ -67,6 +67,57 @@ jobs:
         run: |
           "$BLENDER_EXE" --background --factory-startup --python-exit-code 1 \
             --python tests/fixtures/post139_corpus_audit_v1/blender_cross_format_smoke.py
+      - name: Acquire and census official CC0 Quaternius UAC archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/ultimate_animated_character_pack_by_quaternius.zip"
+          root="$RUNNER_TEMP/uac-official"
+          curl --fail --location --retry 4 --retry-delay 3 \
+            'https://opengameart.org/sites/default/files/ultimate_animated_character_pack_by_quaternius.zip' \
+            --output "$archive"
+          echo "POST139_UAC_ARCHIVE_BYTES=$(stat -c %s "$archive")"
+          echo "POST139_UAC_ARCHIVE_SHA256=$(sha256sum "$archive" | awk '{print $1}')"
+          mkdir -p "$root"
+          unzip -q "$archive" -d "$root"
+          python - "$root" <<'PY'
+          from collections import Counter
+          from pathlib import Path
+          import json
+          import sys
+
+          root = Path(sys.argv[1])
+          files = sorted(p for p in root.rglob('*') if p.is_file())
+          extensions = Counter((p.suffix.lower() or '<none>') for p in files)
+          fbx = [p.relative_to(root).as_posix() for p in files if p.suffix.lower() == '.fbx']
+          blend = [p.relative_to(root).as_posix() for p in files if p.suffix.lower() == '.blend']
+          obj = [p.relative_to(root).as_posix() for p in files if p.suffix.lower() == '.obj']
+          report = {
+              'schema': 'RealSaS.Post139.PublicArchiveCensus.v1',
+              'source_family': 'Quaternius',
+              'pack': 'Ultimate Animated Character',
+              'license': 'CC0',
+              'file_count': len(files),
+              'extension_counts': dict(sorted(extensions.items())),
+              'fbx_count': len(fbx),
+              'blend_count': len(blend),
+              'obj_count': len(obj),
+              'fbx_files': fbx,
+          }
+          out = root / 'POST139_PUBLIC_ARCHIVE_CENSUS.json'
+          out.write_text(json.dumps(report, indent=2, sort_keys=True) + '\n')
+          print('POST139_UAC_PUBLIC_ARCHIVE_CENSUS', json.dumps(report, sort_keys=True))
+          if len(fbx) < 50:
+              raise SystemExit(f'POST139_UAC_FBX_CENSUS_TOO_SMALL:{len(fbx)}')
+          PY
+          echo "POST139_UAC_PUBLIC_ARCHIVE_ROOT=$root" >> "$GITHUB_ENV"
+      - name: Upload official archive census evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-uac-public-census-${{ github.sha }}
+          path: ${{ env.POST139_UAC_PUBLIC_ARCHIVE_ROOT }}/POST139_PUBLIC_ARCHIVE_CENSUS.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Summary
         run: |
           echo 'POST139_CORPUS_AUDIT_SOURCE_AND_BLENDER_SMOKE_PASS'

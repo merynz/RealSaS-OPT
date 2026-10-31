@@ -79,7 +79,7 @@ tools.setTool('translate');
 tools.configureSnapping({translate: 2, rotateDegrees: 15, scale: 0.25});
 assert.deepEqual(tools.snapTranslation([3.1, -2.9]), [4, -2]);
 assert.deepEqual(tools.snapTranslation([3.1, -2.9], true), [3.1, -2.9]);
-assert.equal(Math.round(tools.snapAngleRadians(Math.PI / 5) * 180 / Math.PI), 45);
+assert.equal(Math.round(tools.snapAngleRadians(Math.PI / 5) * 180 / Math.PI), 30);
 tools.setCustomPivot([10, 20]);
 assert.equal(tools.pivotMode, 'custom');
 assert.deepEqual(tools.customPivot, [10, 20]);

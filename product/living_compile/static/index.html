@@ -6,6 +6,7 @@
   <title>RealSaS</title>
   <meta name="description" content="Awaken a source character into an editable living puppet.">
   <link rel="stylesheet" href="/static/css/awaken.css">
+  <link rel="stylesheet" href="/static/css/awaken_input_slots.css">
   <link rel="stylesheet" href="/static/css/agent_reach.css">
 </head>
 <body>
@@ -39,6 +40,18 @@
             <div class="drop-preview"><img id="sourcePreview" alt="Selected source character"></div>
             <span id="viewCount" class="view-count">0 VIEWS</span>
           </label>
+
+          <div id="inputSlotLedger" class="input-slot-ledger" aria-live="polite" aria-label="Source view assignments">
+            <div class="input-slot required" data-input-slot="front">
+              <span>FRONT</span>
+              <strong id="frontSlotFile">REQUIRED</strong>
+            </div>
+            <button id="swapInputViews" class="swap-input-views" type="button" hidden>SWAP FRONT / BACK</button>
+            <div class="input-slot" data-input-slot="back">
+              <span>BACK</span>
+              <strong id="backSlotFile">OPTIONAL</strong>
+            </div>
+          </div>
         </div>
 
         <button id="awaken" class="awaken-button" type="button" disabled>AWAKEN</button>
@@ -74,6 +87,7 @@
     <div class="dev-mode">MODE · <strong id="modeLabel">CHECKING GATEWAY</strong></div>
   </main>
   <script src="/static/js/agent_reach.js" defer></script>
+  <script type="module" src="/static/js/awaken_input_slots.js"></script>
   <script type="module" src="/static/js/awaken.js"></script>
 </body>
 </html>

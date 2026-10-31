@@ -195,13 +195,13 @@ func studioDBCourtLayer(t *testing.T, stateHash, marker string) json.RawMessage 
 			"canonical_bundle_mutated": false,
 			"court_marker":             marker,
 		},
-		"rig_pose_edits":      []any{},
-		"mesh_vertex_edits":   []any{},
-		"weight_edits":        []any{},
-		"binding_edits":       []any{},
-		"rig_topology_edits":  []any{},
-		"ik_constraints":      []any{},
-		"animation_edits":     []any{},
+		"rig_pose_edits":     []any{},
+		"mesh_vertex_edits":  []any{},
+		"weight_edits":       []any{},
+		"binding_edits":      []any{},
+		"rig_topology_edits": []any{},
+		"ik_constraints":     []any{},
+		"animation_edits":    []any{},
 	}
 	raw, err := json.Marshal(value)
 	if err != nil {

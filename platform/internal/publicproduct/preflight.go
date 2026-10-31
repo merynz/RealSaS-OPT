@@ -40,7 +40,7 @@ type DeploymentPreflightState struct {
 	SourceCodeSHA               string           `json:"source_code_sha"`
 	Models                      []PreflightModel `json:"models"`
 	Blockers                    []string         `json:"blockers"`
-	Capabilities                map[string]bool   `json:"capabilities"`
+	Capabilities                map[string]bool  `json:"capabilities"`
 }
 
 // ProductDeploymentPreflightState reads only sealed/registered Platform state.
@@ -61,8 +61,8 @@ func ProductDeploymentPreflightState(
 		Blockers:      []string{},
 		Capabilities: map[string]bool{
 			"operator_exact_source_observation_ingress": true,
-			"post_proof_workspace_materialization":     true,
-			"studio_persistent_authoring":              true,
+			"post_proof_workspace_materialization":      true,
+			"studio_persistent_authoring":               true,
 		},
 	}
 	if len(codeSHA) != 40 {

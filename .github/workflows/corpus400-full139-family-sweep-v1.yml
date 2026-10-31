@@ -35,6 +35,7 @@ jobs:
             tools/corpus/run_full139_truth_family_sweep_v1.py \
             tools/corpus/run_full139_truth_family_sweep_v2.py \
             tools/corpus/run_full139_truth_family_sweep_v3.py \
+            tools/corpus/launch_full139_truth_family_sweep_drive_v1.py \
             tools/corpus/build_gltf_animation_canonical_replay_v1.py \
             tools/corpus/validate_gltf_animation_canonical_replay_v1.py
 
@@ -42,6 +43,7 @@ jobs:
         run: |
           pytest -q \
             tests/corpus/test_full139_truth_family_sweep_v1.py \
+            tests/corpus/test_full139_drive_launcher_v1.py \
             tests/corpus/test_component_geometry_authority_v1.py \
             tests/corpus/test_component_geometry_court_v1.py \
             tests/corpus/test_mechanical_surface_topology_authority_v1.py \

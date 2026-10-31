@@ -382,15 +382,23 @@ def _cross_owner_boundary_pairs(
                     summary["same_orientation_count"] += 1
                     orientation_conflicts += 1
 
-                raw_members = []
-                for qid in left["edge"] + right["edge"]:
-                    raw_members.extend(quotient.raw_members[qid])
-                drift = _trajectory_group_drift(posed, sorted(set(raw_members)), scale)
-                if drift is None:
+                endpoint_drifts = []
+                all_qids = left["edge"] + right["edge"]
+                for position_key in (lp0, lp1):
+                    raw_members = []
+                    for qid in all_qids:
+                        if _position_key(quotient.topology_vertices[qid]) == position_key:
+                            raw_members.extend(quotient.raw_members[qid])
+                    drift = _trajectory_group_drift(
+                        posed, sorted(set(raw_members)), scale
+                    )
+                    if drift is not None:
+                        endpoint_drifts.append(float(drift["max_over_subject_scale"]))
+                if not endpoint_drifts:
                     summary["trajectory_unknown_count"] += 1
                     trajectory_unknown += 1
                 else:
-                    value = float(drift["max_over_subject_scale"])
+                    value = max(endpoint_drifts)
                     summary["max_trajectory_drift_over_scale"] = max(
                         summary["max_trajectory_drift_over_scale"], value
                     )

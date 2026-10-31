@@ -3,15 +3,56 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from collections import namedtuple
 from pathlib import Path
 
-from tools.corpus.post139_source_inventory_v1 import inventory, representation_key
+from tools.corpus.post139_source_inventory_v1 import (
+    choose_quaternius_lane,
+    inventory,
+    publisher_representation_groups,
+    representation_key,
+)
 
 
 def test_representation_key_collapses_format_directories_without_collapsing_lanes():
     assert representation_key("Pack/FBX/Actors/Hero.fbx") == "pack/actors/hero"
     assert representation_key("Pack/glTF/Actors/Hero.gltf") == "pack/actors/hero"
     assert representation_key("Pack/FBX/Props/Hero.fbx") == "pack/props/hero"
+
+
+def test_quaternius_lane_prefers_glb_then_gltf_then_fbx_and_keeps_dependencies():
+    Item = namedtuple("Item", "id path local_path")
+    items = [
+        Item("1", "Pack/FBX/Actors/Hero.fbx", ""),
+        Item("2", "Pack/glTF/Actors/Hero.gltf", ""),
+        Item("3", "Pack/OBJ/Actors/Hero.obj", ""),
+        Item("4", "Pack/Textures/Hero.png", ""),
+        Item("5", "Pack/glTF/Hero.bin", ""),
+    ]
+    lane, selected = choose_quaternius_lane(items)
+    assert lane == ".gltf"
+    assert {item.id for item in selected} == {"2", "4", "5"}
+
+    items.append(Item("6", "Pack/GLB/Actors/Hero.glb", ""))
+    lane, selected = choose_quaternius_lane(items)
+    assert lane == ".glb"
+    assert {item.id for item in selected} == {"4", "5", "6"}
+
+
+def test_publisher_representation_groups_preserve_redundant_formats():
+    payload = {
+        "files": [
+            {"file_id": "a", "path": "Pack/FBX/Actors/Hero.fbx", "extension": ".fbx", "byte_state": "PUBLISHER_LISTED_NOT_ACQUIRED"},
+            {"file_id": "b", "path": "Pack/glTF/Actors/Hero.gltf", "extension": ".gltf", "byte_state": "ACQUIRED_HASHED", "size_bytes": 10, "sha256": "x"},
+            {"file_id": "c", "path": "Pack/OBJ/Actors/Hero.obj", "extension": ".obj", "byte_state": "PUBLISHER_LISTED_NOT_ACQUIRED"},
+            {"file_id": "d", "path": "Pack/FBX/Props/Sword.fbx", "extension": ".fbx", "byte_state": "PUBLISHER_LISTED_NOT_ACQUIRED"},
+        ]
+    }
+    groups = publisher_representation_groups(payload)
+    by_key = {row["representation_key"]: row for row in groups}
+    assert set(by_key) == {"pack/actors/hero", "pack/props/sword"}
+    assert by_key["pack/actors/hero"]["format_counts"] == {".fbx": 1, ".gltf": 1, ".obj": 1}
+    assert len(by_key["pack/actors/hero"]["representations"]) == 3
 
 
 def ns(root: Path, out: Path):

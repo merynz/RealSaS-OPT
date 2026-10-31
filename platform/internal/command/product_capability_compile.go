@@ -149,17 +149,17 @@ func SubmitProductCapabilityCompile(
 	}
 
 	spec := map[string]any{
-		"schema":                            "RealSaS.ProductCapabilityCompileSpec.v2",
-		"subject_id":                        req.SubjectID.String(),
-		"engine_release_id":                 req.EngineReleaseID.String(),
-		"engine_release_sha256":             releaseSHA,
-		"capability_set_sha256":             snapshot.CapabilitySetSHA256,
-		"target":                            capability.ProductProofCapabilityID,
-		"resolved_capabilities":             resolvedIDs,
-		"target_model_requirements":         targetModelRequirements,
-		"input_artifacts":                   artifactRows,
-		"parameters":                        normalizedParameters,
-		"promotion_policy":                  string(capability.PromotionQualifiedProductOnly),
+		"schema":                           "RealSaS.ProductCapabilityCompileSpec.v2",
+		"subject_id":                       req.SubjectID.String(),
+		"engine_release_id":                req.EngineReleaseID.String(),
+		"engine_release_sha256":            releaseSHA,
+		"capability_set_sha256":            snapshot.CapabilitySetSHA256,
+		"target":                           capability.ProductProofCapabilityID,
+		"resolved_capabilities":            resolvedIDs,
+		"target_model_requirements":        targetModelRequirements,
+		"input_artifacts":                  artifactRows,
+		"parameters":                       normalizedParameters,
+		"promotion_policy":                 string(capability.PromotionQualifiedProductOnly),
 		"legacy_compiler_stage_dependency": false,
 	}
 	specSHA, err := semantic.JSONSHA256(spec)
@@ -266,13 +266,13 @@ func SubmitProductCapabilityCompile(
 			return err
 		}
 		if err := appendAudit(ctx, tx, req.RequestedBy, "PRODUCT_CAPABILITY_COMPILE_ACCEPTED", req.SubjectID, &attemptID, nil, map[string]any{
-			"command_id":                         commandID.String(),
-			"execution_goal_id":                  goalID.String(),
-			"engine_release_id":                  req.EngineReleaseID.String(),
-			"target":                             capability.ProductProofCapabilityID,
-			"resolved_capabilities":              resolvedIDs,
-			"target_model_requirements":          targetModelRequirements,
-			"promotion_policy":                   string(capability.PromotionQualifiedProductOnly),
+			"command_id":                       commandID.String(),
+			"execution_goal_id":                goalID.String(),
+			"engine_release_id":                req.EngineReleaseID.String(),
+			"target":                           capability.ProductProofCapabilityID,
+			"resolved_capabilities":            resolvedIDs,
+			"target_model_requirements":        targetModelRequirements,
+			"promotion_policy":                 string(capability.PromotionQualifiedProductOnly),
 			"legacy_compiler_stage_dependency": false,
 		}); err != nil {
 			return err

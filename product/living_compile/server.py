@@ -5,6 +5,7 @@ import json
 import mimetypes
 import os
 import posixpath
+import re
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -26,6 +27,8 @@ PRODUCT_GATEWAY_TOKEN_ENV = "REALSAS_PRODUCT_GATEWAY_TOKEN"
 PRODUCT_COMPILE_ENABLED_ENV = "REALSAS_PRODUCT_COMPILE_ENABLED"
 PRODUCT_GATEWAY_TIMEOUT_SECONDS = 12
 MAX_WORKSPACE_BUNDLE_DOWNLOAD_BYTES = 256 * 1024 * 1024
+_PUBLIC_BUNDLE = re.compile(r"^public/(cmp_[0-9a-f]{32})/[0-9a-f]{64}$")
+_PUBLIC_STUDIO_PROJECT = re.compile(r"^stp_[0-9a-f]{32}$")
 
 _INTERNAL_KEYS = {
     "artifact_id",
@@ -51,7 +54,7 @@ class LivingCompileApplication:
     def static_bytes(self, request_path: str) -> tuple[bytes, str]:
         if request_path == "/":
             relative = "index.html"
-        elif request_path in {"/workspace", "/workspace/"}:
+        elif request_path in {"/workspace", "/workspace/", "/studio", "/studio/"}:
             relative = "workspace.html"
         else:
             relative = posixpath.normpath(request_path.lstrip("/"))
@@ -153,6 +156,39 @@ class LivingCompileApplication:
             return [self._public_payload(item) for item in value]
         return value
 
+    def _compile_id_for_bundle(self, bundle: Any) -> str | None:
+        value = str(bundle or "").strip().replace("\\", "/").strip("/")
+        match = _PUBLIC_BUNDLE.fullmatch(value)
+        return match.group(1) if match else None
+
+    def _persist_studio_layer(self, compile_id: str, layer: Json) -> Json:
+        if not self._production_compile_enabled():
+            raise LivingCompileError("Studio persistence requires the production product gateway")
+        safe_compile = urllib.parse.quote(compile_id, safe="-_.~")
+        _, project = self._gateway_json(
+            "POST",
+            f"/v1/product/compiles/{safe_compile}/studio-project",
+            {"created_by": "product-shell"},
+        )
+        project_id = str(project.get("project_id") or "").strip()
+        if not _PUBLIC_STUDIO_PROJECT.fullmatch(project_id):
+            raise LivingCompileError("product gateway returned invalid Studio project id")
+        try:
+            lock_version = int(project.get("lock_version", 0))
+        except (TypeError, ValueError) as exc:
+            raise LivingCompileError("product gateway returned invalid Studio lock version") from exc
+        safe_project = urllib.parse.quote(project_id, safe="-_.~")
+        _, revision = self._gateway_json(
+            "POST",
+            f"/v1/product/studio/projects/{safe_project}/revisions",
+            {
+                "expected_lock_version": lock_version,
+                "authoring_payload": layer,
+                "created_by": "product-shell",
+            },
+        )
+        return self._public_payload(revision)
+
     def project_capabilities(self) -> Json:
         bundle_root = product_bundle_root()
         gateway_configured = self._gateway_base() is not None
@@ -175,6 +211,7 @@ class LivingCompileApplication:
             "service_ready": True,
             "compile_available": compile_available,
             "public_compile_gateway": gateway_configured and gateway_token_configured,
+            "studio_persistence": gateway_configured and gateway_token_configured,
             "compile_blockers": blockers,
             "product_roles": [
                 "INPUT",
@@ -205,6 +242,7 @@ class LivingCompileApplication:
                 "browser_receives_gateway_service_token": False,
                 "heuristic_model_fallback_allowed": False,
                 "presentation_preview_has_product_authority": False,
+                "studio_edits_mutate_product_revision": False,
             },
         }
 
@@ -215,8 +253,15 @@ class LivingCompileApplication:
             return 200, {"status": "ok", "service": "realsas-product-shell"}, "application/json"
         if method == "GET" and parsed.path == "/readyz":
             return 200, self.project_capabilities(), "application/json"
-        if method == "GET" and (parsed.path in {"/", "/workspace", "/workspace/"} or parsed.path.startswith("/static/")):
-            path = parsed.path if parsed.path in {"/", "/workspace", "/workspace/"} else parsed.path[len("/static"):]
+        if method == "GET" and (
+            parsed.path in {"/", "/workspace", "/workspace/", "/studio", "/studio/"}
+            or parsed.path.startswith("/static/")
+        ):
+            path = (
+                parsed.path
+                if parsed.path in {"/", "/workspace", "/workspace/", "/studio", "/studio/"}
+                else parsed.path[len("/static"):]
+            )
             data, content_type = self.static_bytes(path)
             return 200, data, content_type
         if method == "GET" and parsed.path == "/api/living/scene":
@@ -238,7 +283,20 @@ class LivingCompileApplication:
         if method == "POST" and parsed.path == "/api/living/edit-layer":
             if not isinstance(body, dict):
                 raise LivingCompileError("JSON request body required")
-            return 200, save_user_layer(bundle_path(body.get("bundle")), body), "application/json"
+            bundle_ref = body.get("bundle")
+            saved = save_user_layer(bundle_path(bundle_ref), body)
+            saved["persistence"] = "LOCAL_AUTHORING_CACHE"
+            compile_id = self._compile_id_for_bundle(bundle_ref)
+            if compile_id is not None and self._production_compile_enabled():
+                layer_path = Path(str(saved.get("path") or ""))
+                if not layer_path.is_file():
+                    raise LivingCompileError("validated Studio authoring layer was not materialized")
+                layer = json.loads(layer_path.read_text(encoding="utf-8"))
+                if not isinstance(layer, dict):
+                    raise LivingCompileError("validated Studio authoring layer must be an object")
+                saved["studio_revision"] = self._persist_studio_layer(compile_id, layer)
+                saved["persistence"] = "PLATFORM_STUDIO_REVISION"
+            return 200, saved, "application/json"
         if method == "POST" and parsed.path == "/api/export":
             if not isinstance(body, dict):
                 raise LivingCompileError("JSON request body required")
@@ -253,6 +311,15 @@ class LivingCompileApplication:
             }, "application/json"
         if method == "GET" and parsed.path == "/api/project":
             return 200, self.project_capabilities(), "application/json"
+        if method == "GET" and parsed.path == "/api/studio/project":
+            if not self._production_compile_enabled():
+                raise LivingCompileError("Studio persistence is fail-closed")
+            project_id = (query.get("id") or [""])[0].strip()
+            if not _PUBLIC_STUDIO_PROJECT.fullmatch(project_id):
+                raise LivingCompileError("valid public Studio project id required")
+            safe_project = urllib.parse.quote(project_id, safe="-_.~")
+            status, payload = self._gateway_json("GET", f"/v1/product/studio/projects/{safe_project}")
+            return status, self._public_payload(payload), "application/json"
         if method == "POST" and parsed.path == "/api/compile/start":
             if not self._production_compile_enabled():
                 raise LivingCompileError(
@@ -289,7 +356,7 @@ class LivingCompileApplication:
                 "schema_version": "RealSaS.PublicWorkspaceHandoff.v1",
                 "compile_id": compile_id,
                 "bundle": bundle,
-                "workspace_url": "/workspace?bundle=" + urllib.parse.quote(bundle, safe=""),
+                "workspace_url": "/studio?bundle=" + urllib.parse.quote(bundle, safe=""),
                 "authority": "PROOF_GATED_WORKSPACE_BUNDLE",
             }, "application/json"
         if method == "POST" and parsed.path in {"/api/input/upload", "/api/project", "/api/compile"}:

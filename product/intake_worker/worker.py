@@ -14,10 +14,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from compiler.realsas_compiler_services.platform_worker.source_observation_contract_v1 import (
-    decode_source_observation_arrays_v1,
-)
-
 
 PLATFORM_URL_ENV = "REALSAS_PLATFORM_URL"
 OPERATOR_TOKEN_ENV = "REALSAS_OPERATOR_TOKEN"
@@ -238,6 +234,18 @@ def _write_request(
     return request_path, output_path
 
 
+def _validate_source_observation(payload: bytes) -> None:
+    try:
+        from compiler.realsas_compiler_services.platform_worker.source_observation_contract_v1 import (
+            decode_source_observation_arrays_v1,
+        )
+    except ModuleNotFoundError as exc:
+        raise IntakeWorkerError(
+            "SOURCE_OBSERVATION_CODEC_DEPENDENCY_MISSING"
+        ) from exc
+    decode_source_observation_arrays_v1(payload)
+
+
 def materialize_once(config: Config, client: PlatformClient | None = None) -> bool:
     client = client or PlatformClient(config)
     lease = client.claim()
@@ -285,7 +293,7 @@ def materialize_once(config: Config, client: PlatformClient | None = None) -> bo
             if not output_path.is_file():
                 raise IntakeWorkerError("MATERIALIZER_OUTPUT_MISSING")
             output = output_path.read_bytes()
-            decode_source_observation_arrays_v1(output)
+            _validate_source_observation(output)
             client.complete(compile_id, lease_token, output)
             return True
     except Exception as exc:

@@ -387,19 +387,13 @@ async function runProductionFlow() {
   openWorkspace.href = workspace.workspace_url || `/workspace?bundle=${encodeURIComponent(workspace.bundle)}`;
   openWorkspace.textContent = 'OPEN STUDIO';
   addLog('ProductRevision sealed · proof authority PASS', true);
-  await startIdleReveal(workspace.bundle).catch((error) => {
+  result.classList.add('show');
+  status.querySelector('span').textContent = 'ALIVE';
+  void startIdleReveal(workspace.bundle).catch((error) => {
     resultPreview.style.display = '';
     resultCanvas.style.display = 'none';
     addLog(`idle reveal unavailable · ${error.message}`, true);
   });
-}
-
-async function finishProductionReveal(flowPromise) {
-  const revealTask = flowPromise;
-  await Promise.race([revealTask, delay(250)]);
-  result.classList.add('show');
-  status.querySelector('span').textContent = 'ALIVE';
-  revealTask.catch(() => {});
 }
 
 awaken.addEventListener('click', async () => {
@@ -408,8 +402,7 @@ awaken.addEventListener('click', async () => {
   result.classList.remove('show');
   try {
     if (project?.compile_available && project?.public_compile_gateway) {
-      const flow = runProductionFlow();
-      await finishProductionReveal(flow);
+      await runProductionFlow();
     } else {
       await runPresentationFlow();
     }

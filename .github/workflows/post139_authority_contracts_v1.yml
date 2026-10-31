@@ -73,5 +73,25 @@ jobs:
             tests/tools/test_post139_compile_inventory_v2.py \
             tests/tools/test_post139_corpus_authority_v1.py \
             tests/tools/test_post139_training_consumer_v1.py
+      - name: Export exact branch tooling snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          snapshot="$RUNNER_TEMP/post139-tooling-snapshot"
+          mkdir -p "$snapshot"
+          cp -a canonical "$snapshot/canonical"
+          cp -a tools "$snapshot/tools"
+          cp -a tests "$snapshot/tests"
+          cp -a docs "$snapshot/docs"
+          printf '%s\n' "$GITHUB_SHA" > "$snapshot/GIT_SHA.txt"
+          echo "POST139_TOOLING_SNAPSHOT=$snapshot" >> "$GITHUB_ENV"
+      - name: Upload tooling snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-tooling-snapshot-${{ github.sha }}
+          path: ${{ env.POST139_TOOLING_SNAPSHOT }}/**
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 6
       - name: Summary
         run: echo 'POST139_AUTHORITY_CONTRACTS_PASS'

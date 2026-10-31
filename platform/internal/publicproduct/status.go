@@ -201,17 +201,26 @@ func loadSession(ctx context.Context, pool *pgxpool.Pool, publicID string) (sess
 		return sessionRecord{}, ErrCompileNotFound
 	}
 	var out sessionRecord
-	err := pool.QueryRow(ctx, `
+	base := `
 		SELECT id,public_id,subject_id,engine_release_id,release_channel_lock_version,
 		       source_observation_artifact_id,attempt_id,product_revision_id,state,
 		       current_capability,error_code
 		FROM public_product_compile_sessions
-		WHERE public_id=$1
-	`, publicID).Scan(
-		&out.ID, &out.PublicID, &out.SubjectID, &out.EngineReleaseID, &out.ChannelLockVersion,
-		&out.SourceObservationID, &out.AttemptID, &out.ProductRevisionID, &out.State,
-		&out.CurrentCapability, &out.ErrorCode,
-	)
+	`
+	var err error
+	if owner, scoped := OwnerKeySHA256FromContext(ctx); scoped {
+		err = pool.QueryRow(ctx, base+` WHERE public_id=$1 AND owner_key_sha256=$2`, publicID, owner).Scan(
+			&out.ID, &out.PublicID, &out.SubjectID, &out.EngineReleaseID, &out.ChannelLockVersion,
+			&out.SourceObservationID, &out.AttemptID, &out.ProductRevisionID, &out.State,
+			&out.CurrentCapability, &out.ErrorCode,
+		)
+	} else {
+		err = pool.QueryRow(ctx, base+` WHERE public_id=$1`, publicID).Scan(
+			&out.ID, &out.PublicID, &out.SubjectID, &out.EngineReleaseID, &out.ChannelLockVersion,
+			&out.SourceObservationID, &out.AttemptID, &out.ProductRevisionID, &out.State,
+			&out.CurrentCapability, &out.ErrorCode,
+		)
+	}
 	if errors.Is(err, pgx.ErrNoRows) {
 		return sessionRecord{}, ErrCompileNotFound
 	}

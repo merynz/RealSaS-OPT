@@ -10,6 +10,8 @@ RUN python -m pip install --no-cache-dir -r /tmp/product-requirements.txt \
     && rm -f /tmp/product-requirements.txt
 COPY product ./product
 COPY compiler ./compiler
+COPY tools/start_exact8_product_compile_v1.py ./tools/start_exact8_product_compile_v1.py
+COPY tools/product_deploy_preflight_v1.py ./tools/product_deploy_preflight_v1.py
 
 ENV PYTHONPATH=/app \
     PYTHONUNBUFFERED=1 \

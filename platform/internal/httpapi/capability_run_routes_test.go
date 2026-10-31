@@ -22,11 +22,13 @@ func TestCapabilityRunRejectsIncompleteRequestBeforeDatabaseAccess(t *testing.T)
 	}
 }
 
-func TestProductCapabilityCompileRejectsIncompleteRequestBeforeDatabaseAccess(t *testing.T) {
+func TestProductCapabilityCompileRejectsIncompleteOrLegacyBridgeRequestBeforeDatabaseAccess(t *testing.T) {
 	handler := (API{}).HandlerWithCapabilityRun()
 	for _, body := range []string{
 		`{}`,
 		`{"engine_release_id":"00000000-0000-0000-0000-000000000000","subject_id":"00000000-0000-0000-0000-000000000000","idempotency_key":"x","requested_by":"ci"}`,
+		`{"engine_release_id":"11111111-1111-1111-1111-111111111111","subject_id":"22222222-2222-2222-2222-222222222222","input_artifact_ids":[],"idempotency_key":"x","requested_by":"ci"}`,
+		`{"engine_release_id":"11111111-1111-1111-1111-111111111111","subject_id":"22222222-2222-2222-2222-222222222222","input_artifact_ids":["33333333-3333-3333-3333-333333333333"],"compiler_bridge":{},"idempotency_key":"x","requested_by":"ci"}`,
 		`{"unknown":true}`,
 		`{} {}`,
 	} {

@@ -17,8 +17,6 @@ func productRegistryForRequalificationTest(t *testing.T) *Registry {
 func TestResolveWithSatisfiedAnimationOnlyRunsMotionAndProof(t *testing.T) {
 	registry := productRegistryForRequalificationTest(t)
 	satisfied := []string{
-		ProductInputCapabilityID,
-		ProductShapeCapabilityID,
 		ProductMeshCapabilityID,
 		ProductRigCapabilityID,
 		ProductSkinCapabilityID,
@@ -45,7 +43,7 @@ func TestProductRequalificationGoalRequiresQualifiedBaseLeaves(t *testing.T) {
 	goal := Goal{
 		Type:            GoalProductRequalification,
 		Targets:         []string{ProductProofCapabilityID},
-		Satisfied:       []string{ProductInputCapabilityID, ProductShapeCapabilityID, ProductMeshCapabilityID, ProductRigCapabilityID, ProductSkinCapabilityID, ProductMechanicsCapabilityID, ProductGraphicsCapabilityID},
+		Satisfied:       []string{ProductMeshCapabilityID, ProductRigCapabilityID, ProductSkinCapabilityID, ProductMechanicsCapabilityID, ProductGraphicsCapabilityID},
 		PromotionPolicy: PromotionQualifiedProductOnly,
 	}
 	resolved, err := goal.Validate(registry)

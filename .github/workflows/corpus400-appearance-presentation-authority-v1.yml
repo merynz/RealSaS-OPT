@@ -35,7 +35,9 @@ jobs:
             tools/corpus/build_source_observation_authority_v1.py \
             tools/corpus/validate_source_observation_authority_v1.py \
             tools/corpus/build_presentation_family_authority_v1.py \
-            tools/corpus/validate_presentation_family_authority_v1.py
+            tools/corpus/validate_presentation_family_authority_v1.py \
+            tools/corpus/build_presentation_family_from_stage48_witness_v2.py \
+            tools/corpus/validate_presentation_family_from_stage48_witness_v2.py
 
       - name: Run accumulated truth-authority courts
         run: |
@@ -51,4 +53,5 @@ jobs:
             tests/corpus/test_tessa_mechanical_surface_topology_v5.py \
             tests/corpus/test_causal_response_authority_v1.py \
             tests/corpus/test_source_observation_authority_v1.py \
-            tests/corpus/test_presentation_family_authority_v1.py
+            tests/corpus/test_presentation_family_authority_v1.py \
+            tests/corpus/test_presentation_stage48_witness_v2.py

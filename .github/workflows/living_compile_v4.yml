@@ -9,6 +9,7 @@ on:
     paths:
       - 'product/**'
       - 'deploy/product/**'
+      - 'tools/start_exact8_product_compile_v1.py'
       - 'compiler/realsas_compiler_core/playback_full_surface_v3.py'
       - 'compiler/realsas_compiler_services/platform_worker/source_observation_contract_v1.py'
       - 'tests/product/**'
@@ -20,6 +21,7 @@ on:
     paths:
       - 'product/**'
       - 'deploy/product/**'
+      - 'tools/start_exact8_product_compile_v1.py'
       - 'compiler/realsas_compiler_core/playback_full_surface_v3.py'
       - 'compiler/realsas_compiler_services/platform_worker/source_observation_contract_v1.py'
       - 'tests/product/**'
@@ -54,6 +56,7 @@ jobs:
           tests.product.test_intake_worker
           tests.product.test_workspace_worker
           tests.product.test_workspace_materializer_v1
+          tests.product.test_exact8_product_compile_tool
           tests.product.test_deploy_contract
       - name: Python syntax
         run: >-
@@ -61,10 +64,12 @@ jobs:
           product/living_compile/*.py
           product/intake_worker/*.py
           product/workspace_worker/*.py
+          tools/start_exact8_product_compile_v1.py
           experiments/single_family_e2e_v1/export_bundle_v1.py
           tests/product/test_deploy_contract.py
           tests/product/test_studio_persistence.py
           tests/product/test_workspace_materializer_v1.py
+          tests/product/test_exact8_product_compile_tool.py
       - name: JavaScript syntax
         shell: bash
         run: |

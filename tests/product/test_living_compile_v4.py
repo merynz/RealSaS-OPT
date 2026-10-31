@@ -141,7 +141,9 @@ class LivingCompileV4Tests(unittest.TestCase):
         data, ctype = app.static_bytes("/")
         self.assertIn(b"<title>RealSaS</title>", data)
         self.assertIn(b">AWAKEN</button>", data)
-        self.assertIn(b"Your character is alive.", data)
+        self.assertIn(b'id="agentReach"', data)
+        self.assertIn(b"<h2>ALIVE</h2>", data)
+        self.assertIn(b">OPEN STUDIO</a>", data)
         self.assertNotIn(b"RealSaS Studio", data)
         self.assertEqual(ctype, "text/html")
 

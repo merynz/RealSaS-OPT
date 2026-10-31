@@ -1,9 +1,18 @@
 from __future__ import annotations
 
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
-from product.living_compile.authoring import _validate_binding_edits, _validate_presentation_override
+from product.living_compile.authoring import (
+    _validate_binding_edits,
+    _validate_presentation_override,
+    save_user_layer,
+)
 from product.living_compile.common import LivingCompileError
+from product.living_compile.scene import build_scene
+from tests.product.test_living_compile_v4 import fixture
 
 
 class StudioPresentationAuthoringTests(unittest.TestCase):
@@ -55,6 +64,37 @@ class StudioPresentationAuthoringTests(unittest.TestCase):
                 "primary_final_control_id": "J:HAND",
                 "scale_xy": [0, 1],
             }])
+
+    def test_save_roundtrip_persists_socket_and_graphics_departure(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "bundle"
+            root.mkdir()
+            fixture(root)
+            scene = build_scene(root)
+            mesh_id = next(row["mesh_id"] for row in scene["puppet"]["meshes"] if row["view_id"] == "V0")
+            binding = next(row for row in scene["binding"]["bindings"] if row["view_id"] == "V0")
+            result = save_user_layer(root, {
+                "view_id": "V0",
+                "binding_edits": [{
+                    "binding_id": binding["binding_id"],
+                    "primary_final_control_id": binding["primary_final_control_id"],
+                    "translation_xy": [5.0, -2.0],
+                    "rotation_degrees": 30.0,
+                    "scale_xy": [1.1, 0.9],
+                    "visible": True,
+                }],
+                "presentation_override": {
+                    "slot_order_back_to_front": [mesh_id],
+                    "hidden_mesh_ids": [mesh_id],
+                },
+            })
+            layer = json.loads(Path(result["path"]).read_text(encoding="utf-8"))
+            self.assertEqual(layer["binding_edits"][0]["translation_xy"], [5.0, -2.0])
+            self.assertEqual(layer["binding_edits"][0]["rotation_degrees"], 30.0)
+            self.assertEqual(layer["presentation_override"]["source_graphics_order_back_to_front"], [mesh_id])
+            self.assertEqual(layer["presentation_override"]["hidden_mesh_ids"], [mesh_id])
+            self.assertTrue(layer["metadata"]["graphics_evidence_departure"])
+            self.assertTrue(result["graphics_evidence_departure"])
 
 
 if __name__ == "__main__":

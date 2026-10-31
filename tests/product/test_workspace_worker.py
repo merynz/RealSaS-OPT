@@ -12,6 +12,7 @@ from product.workspace_worker.worker import (
     Config,
     REQUIRED_BUNDLE_FILES,
     REQUIRED_ROLES,
+    REQUIRED_SUPPORT_ROLES,
     WorkspaceWorkerError,
     _validate_bundle,
     _write_request,
@@ -26,12 +27,20 @@ class FakeClient:
         self.failures: list[tuple[str, bool]] = []
 
     def claim(self):
+        authority = [
+            {"role": role, "scope": "AUTHORITY", "artifact_id": f"authority-{index}"}
+            for index, role in enumerate(sorted(REQUIRED_ROLES))
+        ]
+        support = [
+            {"role": role, "scope": "SUPPORT", "artifact_id": f"support-{index}"}
+            for index, role in enumerate(sorted(REQUIRED_SUPPORT_ROLES))
+        ]
         return {
             "compile_id": "cmp_workspace",
             "product_revision_id": "11111111-1111-1111-1111-111111111111",
             "lease_token": "lease-token",
             "attempt": self.attempt,
-            "artifacts": [{"role": role} for role in sorted(REQUIRED_ROLES)],
+            "artifacts": [*authority, *support],
         }
 
     def download_artifact(self, compile_id: str, lease_token: str, role: str):
@@ -71,19 +80,32 @@ def write_valid_bundle(path: Path) -> None:
 
 
 class WorkspaceWorkerTests(unittest.TestCase):
-    def test_request_requires_exact_product_revision_roles(self):
+    def test_request_keeps_authority_and_support_separate(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
+            authority = [
+                {"role": role, "scope": "AUTHORITY", "path": f"/{role}"}
+                for role in sorted(REQUIRED_ROLES)
+            ]
+            support = [
+                {"role": role, "scope": "SUPPORT", "path": f"/{role}"}
+                for role in sorted(REQUIRED_SUPPORT_ROLES)
+            ]
             request, output = _write_request(
                 root,
                 "cmp_workspace",
                 {"product_revision_id": "revision", "attempt": 1},
-                [{"role": role, "path": f"/{role}"} for role in sorted(REQUIRED_ROLES)],
+                authority,
+                support,
             )
             payload = json.loads(request.read_text(encoding="utf-8"))
             self.assertEqual(set(payload["required_roles"]), REQUIRED_ROLES)
+            self.assertEqual(set(payload["required_support_roles"]), REQUIRED_SUPPORT_ROLES)
+            self.assertEqual({row["scope"] for row in payload["artifacts"]}, {"AUTHORITY"})
+            self.assertEqual({row["scope"] for row in payload["support_artifacts"]}, {"SUPPORT"})
             self.assertEqual(payload["required_output"]["path"], str(output))
             self.assertTrue(payload["authority"]["workspace_is_derived_not_product_authority"])
+            self.assertTrue(payload["authority"]["support_artifacts_are_non_authoritative"])
             self.assertTrue(payload["authority"]["proof_must_be_preserved"])
 
     def test_bundle_validator_rejects_missing_canonical_files(self):
@@ -99,6 +121,8 @@ class WorkspaceWorkerTests(unittest.TestCase):
 
         def fake_run(command, **kwargs):
             request = json.loads(Path(command[-1]).read_text(encoding="utf-8"))
+            self.assertEqual(len(request["artifacts"]), 7)
+            self.assertEqual(len(request["support_artifacts"]), 1)
             write_valid_bundle(Path(request["required_output"]["path"]))
             return subprocess.CompletedProcess(command, 0)
 
@@ -121,13 +145,27 @@ class WorkspaceWorkerTests(unittest.TestCase):
         self.assertEqual(len(client.failures), 1)
         self.assertTrue(client.failures[0][1])
 
-    def test_wrong_role_set_is_rejected_before_materializer(self):
+    def test_wrong_authority_role_set_is_rejected_before_materializer(self):
         client = FakeClient()
         lease = client.claim()
-        lease["artifacts"] = lease["artifacts"][:-1]
+        lease["artifacts"] = [
+            row for row in lease["artifacts"]
+            if not (row["scope"] == "AUTHORITY" and row["role"] == sorted(REQUIRED_ROLES)[0])
+        ]
         client.claim = lambda: lease
         with patch("product.workspace_worker.worker.subprocess.run") as run:
-            with self.assertRaisesRegex(WorkspaceWorkerError, "ROLE_SET_MISMATCH"):
+            with self.assertRaisesRegex(WorkspaceWorkerError, "CANONICAL_ROLE_SET_MISMATCH"):
+                materialize_once(config(), client)
+        run.assert_not_called()
+        self.assertEqual(client.completed, [])
+
+    def test_missing_support_is_rejected_before_materializer(self):
+        client = FakeClient()
+        lease = client.claim()
+        lease["artifacts"] = [row for row in lease["artifacts"] if row["scope"] != "SUPPORT"]
+        client.claim = lambda: lease
+        with patch("product.workspace_worker.worker.subprocess.run") as run:
+            with self.assertRaisesRegex(WorkspaceWorkerError, "SUPPORT_ROLE_SET_MISMATCH"):
                 materialize_once(config(), client)
         run.assert_not_called()
         self.assertEqual(client.completed, [])

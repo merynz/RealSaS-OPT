@@ -43,4 +43,6 @@ Mixed publisher packs may narrow byte acquisition to a mechanically relevant sou
 
 After all eight recovery jobs pass, the aggregate job combines them with the 21 immutable source workspaces, verifies the exact 29-source non-quarantine workspace closure, runs corrected V2 semantic compilation, corpus authority sealing plus standalone verification, emits the sealed training-consumer manifest, builds the deterministic materialization source closure, and applies the final fail-closed readiness gate.
 
+Recovery/seal executions are head-specific. A cancelled run or a run from an earlier orchestration head is staging evidence only and must never be interpreted as a sealed corpus result. After recovery or acquisition tooling changes, the canonical recovery workflow must execute from the current branch head before any final corpus count is consumed.
+
 No Post139 training consumer should proceed unless the root status is `SEALED`, the V2 report is `PASS_MATERIALIZATION_READY`, and standalone authority verification passes.

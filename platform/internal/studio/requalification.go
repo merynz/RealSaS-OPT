@@ -20,8 +20,8 @@ import (
 )
 
 var (
-	ErrRequalificationNotFound    = errors.New("STUDIO_REQUALIFICATION_NOT_FOUND")
-	ErrRequalificationUnsupported = errors.New("STUDIO_REQUALIFICATION_EDIT_SET_UNSUPPORTED")
+	ErrRequalificationNotFound     = errors.New("STUDIO_REQUALIFICATION_NOT_FOUND")
+	ErrRequalificationUnsupported  = errors.New("STUDIO_REQUALIFICATION_EDIT_SET_UNSUPPORTED")
 	ErrRequalificationHeadRequired = errors.New("STUDIO_REQUALIFICATION_CURRENT_SAVED_HEAD_REQUIRED")
 )
 
@@ -32,29 +32,29 @@ type RequalificationRequest struct {
 }
 
 type RequalificationStatus struct {
-	RequalificationID string   `json:"requalification_id"`
-	ProjectID         string   `json:"project_id"`
-	RevisionNumber    int64    `json:"revision_number"`
-	State             string   `json:"state"`
-	Stage             string   `json:"stage"`
-	Detail            string   `json:"detail"`
-	InvalidatedDomains []string `json:"invalidated_domains"`
-	ResultCompileID   string   `json:"result_compile_id,omitempty"`
-	Terminal          bool     `json:"terminal"`
-	CreatedAt         time.Time `json:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at"`
+	RequalificationID  string    `json:"requalification_id"`
+	ProjectID          string    `json:"project_id"`
+	RevisionNumber     int64     `json:"revision_number"`
+	State              string    `json:"state"`
+	Stage              string    `json:"stage"`
+	Detail             string    `json:"detail"`
+	InvalidatedDomains []string  `json:"invalidated_domains"`
+	ResultCompileID    string    `json:"result_compile_id,omitempty"`
+	Terminal           bool      `json:"terminal"`
+	CreatedAt          time.Time `json:"created_at"`
+	UpdatedAt          time.Time `json:"updated_at"`
 }
 
 type requalificationHead struct {
-	ProjectUUID       uuid.UUID
-	BaseSessionID     uuid.UUID
-	BaseRevisionID    uuid.UUID
-	BaseManifestSHA   string
-	RevisionUUID      uuid.UUID
-	RevisionNumber    int64
-	LockVersion       int64
-	PayloadSHA        string
-	Payload           json.RawMessage
+	ProjectUUID     uuid.UUID
+	BaseSessionID   uuid.UUID
+	BaseRevisionID  uuid.UUID
+	BaseManifestSHA string
+	RevisionUUID    uuid.UUID
+	RevisionNumber  int64
+	LockVersion     int64
+	PayloadSHA      string
+	Payload         json.RawMessage
 }
 
 var animationRequalificationSatisfied = []string{
@@ -114,8 +114,8 @@ func RequestRequalification(
 		ProducerContract: "RealSaS.StudioAuthoringCapture.v1",
 		AuthorityClass:   "STUDIO_AUTHORING_INPUT",
 		SemanticParameters: map[string]any{
-			"project_id":                       projectID,
-			"revision_number":                  head.RevisionNumber,
+			"project_id":                        projectID,
+			"revision_number":                   head.RevisionNumber,
 			"authoring_payload_sha256":          head.PayloadSHA,
 			"base_product_revision_id":          head.BaseRevisionID.String(),
 			"base_product_manifest_sha256":      head.BaseManifestSHA,
@@ -171,22 +171,22 @@ func RequestRequalification(
 }
 
 type requalificationRecord struct {
-	ID                   uuid.UUID
-	PublicID             string
-	ProjectUUID          uuid.UUID
-	RevisionUUID         uuid.UUID
-	RevisionNumber       int64
-	BaseSessionID        uuid.UUID
-	BaseRevisionID       uuid.UUID
-	AuthoringArtifactID  uuid.UUID
-	AttemptID            uuid.UUID
-	State                string
-	InvalidatedDomains   []string
-	ResultRevisionID     *uuid.UUID
-	ResultSessionID      *uuid.UUID
-	FailureCode          *string
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
+	ID                  uuid.UUID
+	PublicID            string
+	ProjectUUID         uuid.UUID
+	RevisionUUID        uuid.UUID
+	RevisionNumber      int64
+	BaseSessionID       uuid.UUID
+	BaseRevisionID      uuid.UUID
+	AuthoringArtifactID uuid.UUID
+	AttemptID           uuid.UUID
+	State               string
+	InvalidatedDomains  []string
+	ResultRevisionID    *uuid.UUID
+	ResultSessionID     *uuid.UUID
+	FailureCode         *string
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
 }
 
 func GetRequalification(
@@ -466,14 +466,14 @@ func publicRequalificationStatus(
 	record requalificationRecord,
 ) (RequalificationStatus, error) {
 	out := RequalificationStatus{
-		RequalificationID: record.PublicID,
-		ProjectID: projectID,
-		RevisionNumber: record.RevisionNumber,
-		State: record.State,
-		Stage: "MOTION",
+		RequalificationID:  record.PublicID,
+		ProjectID:          projectID,
+		RevisionNumber:     record.RevisionNumber,
+		State:              record.State,
+		Stage:              "MOTION",
 		InvalidatedDomains: append([]string(nil), record.InvalidatedDomains...),
-		CreatedAt: record.CreatedAt,
-		UpdatedAt: record.UpdatedAt,
+		CreatedAt:          record.CreatedAt,
+		UpdatedAt:          record.UpdatedAt,
 	}
 	switch record.State {
 	case "QUEUED":

@@ -29,6 +29,7 @@ PRODUCT_GATEWAY_TIMEOUT_SECONDS = 12
 MAX_WORKSPACE_BUNDLE_DOWNLOAD_BYTES = 256 * 1024 * 1024
 _PUBLIC_BUNDLE = re.compile(r"^public/(cmp_[0-9a-f]{32})/[0-9a-f]{64}$")
 _PUBLIC_STUDIO_PROJECT = re.compile(r"^stp_[0-9a-f]{32}$")
+_PUBLIC_STUDIO_REQUALIFICATION = re.compile(r"^srq_[0-9a-f]{32}$")
 
 _INTERNAL_KEYS = {
     "artifact_id",
@@ -271,12 +272,66 @@ class LivingCompileApplication:
             "head": self._public_payload(head),
         }
 
+    def _request_studio_requalification(
+        self,
+        compile_id: str,
+        project_id: str,
+        expected_lock_version: int,
+        revision_number: int,
+    ) -> Json:
+        if not self._production_compile_enabled():
+            raise LivingCompileError("Studio requalification requires the production product gateway")
+        project_id = str(project_id).strip()
+        if not _PUBLIC_STUDIO_PROJECT.fullmatch(project_id):
+            raise LivingCompileError("valid public Studio project id required")
+        if int(expected_lock_version) < 0 or int(revision_number) <= 0:
+            raise LivingCompileError("valid saved Studio revision required")
+        safe_project = urllib.parse.quote(project_id, safe="-_.~")
+        _, project = self._gateway_json("GET", f"/v1/product/studio/projects/{safe_project}")
+        if str(project.get("compile_id") or "") != compile_id:
+            raise LivingCompileError("Studio project does not belong to this compiled character")
+        _, payload = self._gateway_json(
+            "POST",
+            f"/v1/product/studio/projects/{safe_project}/requalifications",
+            {
+                "expected_lock_version": int(expected_lock_version),
+                "revision_number": int(revision_number),
+                "created_by": "product-shell",
+            },
+        )
+        requalification_id = str(payload.get("requalification_id") or "").strip()
+        if not _PUBLIC_STUDIO_REQUALIFICATION.fullmatch(requalification_id):
+            raise LivingCompileError("product gateway returned invalid Studio requalification id")
+        if str(payload.get("project_id") or "") != project_id:
+            raise LivingCompileError("Studio requalification project identity mismatch")
+        return self._public_payload(payload)
+
+    def _studio_requalification_status(self, project_id: str, requalification_id: str) -> Json:
+        if not self._production_compile_enabled():
+            raise LivingCompileError("Studio requalification requires the production product gateway")
+        project_id = str(project_id).strip()
+        requalification_id = str(requalification_id).strip()
+        if not _PUBLIC_STUDIO_PROJECT.fullmatch(project_id):
+            raise LivingCompileError("valid public Studio project id required")
+        if not _PUBLIC_STUDIO_REQUALIFICATION.fullmatch(requalification_id):
+            raise LivingCompileError("valid public Studio requalification id required")
+        safe_project = urllib.parse.quote(project_id, safe="-_.~")
+        safe_requalification = urllib.parse.quote(requalification_id, safe="-_.~")
+        _, payload = self._gateway_json(
+            "GET",
+            f"/v1/product/studio/projects/{safe_project}/requalifications/{safe_requalification}",
+        )
+        if str(payload.get("requalification_id") or "") != requalification_id or str(payload.get("project_id") or "") != project_id:
+            raise LivingCompileError("Studio requalification status identity mismatch")
+        return self._public_payload(payload)
+
     def project_capabilities(self) -> Json:
         bundle_root = product_bundle_root()
         gateway_configured = self._gateway_base() is not None
         gateway_token_configured = bool(self._gateway_token())
         compile_requested = os.environ.get(PRODUCT_COMPILE_ENABLED_ENV, "").strip() == "1"
         compile_available = self._production_compile_enabled()
+        studio_requalification_available = compile_available
         blockers: list[str] = []
         if not gateway_configured:
             blockers.append("PUBLIC_PRODUCT_GATEWAY_NOT_CONFIGURED")
@@ -294,6 +349,17 @@ class LivingCompileApplication:
             "compile_available": compile_available,
             "public_compile_gateway": gateway_configured and gateway_token_configured,
             "studio_persistence": gateway_configured and gateway_token_configured,
+            "studio_requalification_executor": studio_requalification_available,
+            "studio_requalification": {
+                "available": studio_requalification_available,
+                "supported_slice": "ANIMATION_LINEAR_V1",
+                "supported_edit_domains": ["animation"],
+                "max_animation_clips": 1,
+                "supported_curves": ["linear"],
+                "result_authority": "NEW_PRODUCT_REVISION_AFTER_PROOF_PASS",
+                "result_workspace": "NEW_CLEAN_PROOF_GATED_WORKSPACE",
+                "base_product_revision_mutated": False,
+            },
             "compile_blockers": blockers,
             "product_roles": [
                 "INPUT",
@@ -325,6 +391,8 @@ class LivingCompileApplication:
                 "heuristic_model_fallback_allowed": False,
                 "presentation_preview_has_product_authority": False,
                 "studio_edits_mutate_product_revision": False,
+                "studio_requalification_requires_saved_revision": True,
+                "studio_requalification_requires_proof_pass": True,
             },
         }
 
@@ -405,6 +473,30 @@ class LivingCompileApplication:
                 expected_lock_version,
                 revision_number,
             ), "application/json"
+        if method == "POST" and parsed.path == "/api/studio/requalify":
+            if not isinstance(body, dict):
+                raise LivingCompileError("JSON request body required")
+            bundle_ref = body.get("bundle")
+            compile_id = self._compile_id_for_bundle(bundle_ref)
+            if compile_id is None:
+                raise LivingCompileError("Studio requalification requires a public proof-gated bundle")
+            project_id = str(body.get("project_id") or "").strip()
+            try:
+                expected_lock_version = int(body.get("expected_lock_version"))
+                revision_number = int(body.get("revision_number"))
+            except (TypeError, ValueError) as exc:
+                raise LivingCompileError("valid saved Studio revision required") from exc
+            payload = self._request_studio_requalification(
+                compile_id,
+                project_id,
+                expected_lock_version,
+                revision_number,
+            )
+            return 202, payload, "application/json"
+        if method == "GET" and parsed.path == "/api/studio/requalification":
+            project_id = (query.get("project") or [""])[0].strip()
+            requalification_id = (query.get("id") or [""])[0].strip()
+            return 200, self._studio_requalification_status(project_id, requalification_id), "application/json"
         if method == "POST" and parsed.path == "/api/living/edit-layer":
             if not isinstance(body, dict):
                 raise LivingCompileError("JSON request body required")

@@ -313,9 +313,9 @@ func SubmitProductRequalification(
 			return err
 		}
 		if err := appendAudit(ctx, tx, req.RequestedBy, "PRODUCT_REQUALIFICATION_ACCEPTED", subjectID, &attemptID, &req.AuthoringArtifactID, map[string]any{
-			"command_id":                    commandID.String(),
-			"execution_goal_id":             goalID.String(),
-			"base_product_revision_id":      req.BaseProductRevisionID.String(),
+			"command_id":                     commandID.String(),
+			"execution_goal_id":              goalID.String(),
+			"base_product_revision_id":       req.BaseProductRevisionID.String(),
 			"authority_closure_capabilities": closureIDs,
 			"execution_capabilities":         executionIDs,
 			"satisfied_capabilities":         satisfied,

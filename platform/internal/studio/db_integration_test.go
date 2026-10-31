@@ -172,6 +172,69 @@ func TestStudioDBCourt(t *testing.T) {
 		t.Fatalf("revision history drift: %+v", history)
 	}
 
+	// Restore is append-only: selecting revision 1 creates revision 3 with the
+	// old payload rather than rewinding the project head to revision 1.
+	restored, err := RestoreRevision(ctx, pool, project.ProjectID, RestoreRequest{
+		ExpectedLockVersion: 2,
+		RevisionNumber:      1,
+		CreatedBy:           "studio-db-court-restore",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if restored.RevisionNumber != 3 || restored.LockVersion != 3 || restored.Idempotent || restored.PayloadSHA256 != first.PayloadSHA256 {
+		t.Fatalf("unexpected restored revision: %+v", restored)
+	}
+	if !restored.RequiresRequalification {
+		t.Fatal("restored Studio revision must require requalification")
+	}
+
+	// A stale restore request must obey the same optimistic concurrency rule.
+	if _, err := RestoreRevision(ctx, pool, project.ProjectID, RestoreRequest{
+		ExpectedLockVersion: 2,
+		RevisionNumber:      2,
+		CreatedBy:           "stale-restore",
+	}); !errors.Is(err, ErrRevisionConflict) {
+		t.Fatalf("expected stale restore lock conflict, got %v", err)
+	}
+
+	head, err = GetHead(ctx, pool, project.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if head.RevisionNumber != 3 || head.LockVersion != 3 || head.PayloadSHA256 != first.PayloadSHA256 {
+		t.Fatalf("head drift after restore: %+v", head)
+	}
+	decoded = map[string]any{}
+	if err := json.Unmarshal(head.AuthoringPayload, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	metadata, _ = decoded["metadata"].(map[string]any)
+	if metadata["court_marker"] != "first" {
+		t.Fatalf("restore did not recover revision 1 payload: %+v", metadata)
+	}
+
+	// Restoring the payload already at head is idempotent.
+	restoredAgain, err := RestoreRevision(ctx, pool, project.ProjectID, RestoreRequest{
+		ExpectedLockVersion: 3,
+		RevisionNumber:      1,
+		CreatedBy:           "studio-db-court-restore",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !restoredAgain.Idempotent || restoredAgain.RevisionNumber != 3 || restoredAgain.LockVersion != 3 {
+		t.Fatalf("idempotent restore drift: %+v", restoredAgain)
+	}
+
+	history, err = ListRevisions(ctx, pool, project.ProjectID, 50)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(history) != 3 || history[0].RevisionNumber != 3 || !history[0].IsHead || history[1].RevisionNumber != 2 || history[2].RevisionNumber != 1 {
+		t.Fatalf("revision history drift after restore: %+v", history)
+	}
+
 	// Append-only is enforced by Postgres itself, not just by Go repository
 	// convention. Any in-place rewrite of a StudioAuthoringRevision must fail.
 	if _, err := pool.Exec(ctx, `

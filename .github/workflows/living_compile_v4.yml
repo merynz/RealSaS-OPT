@@ -77,8 +77,10 @@ jobs:
           for f in product/living_compile/static/js/*.js; do
             node --check "$f"
           done
-      - name: Studio document contract
-        run: node tests/product/studio_document_contract.mjs
+      - name: Studio editor-core contracts
+        run: |
+          node tests/product/studio_document_contract.mjs
+          node tests/product/studio_timeline_view_contract.mjs
       - name: Compose deployment contract
         run: >-
           docker compose

@@ -101,63 +101,63 @@
   "consumers": {
     "IRIS_SCENE_GEOMETRY": {
       "requirements": [
-        {"family": "SOURCE_IMPORT", "mask_allowed": false},
-        {"family": "CAMERA_OBSERVATION", "mask_allowed": false},
-        {"family": "SURFACE_GEOMETRY", "mask_allowed": true},
-        {"family": "ORIENTED_NORMALS", "mask_allowed": true},
-        {"family": "SIGNED_DISTANCE_OCCUPANCY", "mask_allowed": true}
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "CAMERA_OBSERVATION", "required": true, "mask_allowed": false},
+        {"family": "SURFACE_GEOMETRY", "required": true, "mask_allowed": true},
+        {"family": "ORIENTED_NORMALS", "required": true, "mask_allowed": true},
+        {"family": "SIGNED_DISTANCE_OCCUPANCY", "required": false, "mask_allowed": true}
       ]
     },
     "IRIS_GRAPHICS_RESPONSE": {
       "requirements": [
-        {"family": "SOURCE_IMPORT", "mask_allowed": false},
-        {"family": "CAMERA_OBSERVATION", "mask_allowed": false},
-        {"family": "APPEARANCE_CAA", "mask_allowed": true},
-        {"family": "VISIBILITY_OCCLUSION", "mask_allowed": true},
-        {"family": "RAY_COMPOSITING", "mask_allowed": true},
-        {"family": "CAUSAL_RESPONSE", "mask_allowed": true}
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "CAMERA_OBSERVATION", "required": true, "mask_allowed": false},
+        {"family": "APPEARANCE_CAA", "required": true, "mask_allowed": true},
+        {"family": "VISIBILITY_OCCLUSION", "required": true, "mask_allowed": true},
+        {"family": "RAY_COMPOSITING", "required": true, "mask_allowed": true},
+        {"family": "CAUSAL_RESPONSE", "required": true, "mask_allowed": true}
       ]
     },
     "TESSA_TOPOLOGY": {
       "requirements": [
-        {"family": "SOURCE_IMPORT", "mask_allowed": false},
-        {"family": "CAMERA_OBSERVATION", "mask_allowed": false},
-        {"family": "SURFACE_GEOMETRY", "mask_allowed": true},
-        {"family": "SURFACE_TOPOLOGY", "mask_allowed": true},
-        {"family": "CAUSAL_RESPONSE", "mask_allowed": true}
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "CAMERA_OBSERVATION", "required": true, "mask_allowed": false},
+        {"family": "SURFACE_GEOMETRY", "required": true, "mask_allowed": true},
+        {"family": "SURFACE_TOPOLOGY", "required": true, "mask_allowed": true},
+        {"family": "CAUSAL_RESPONSE", "required": true, "mask_allowed": true}
       ]
     },
     "AXIS_RIG": {
       "requirements": [
-        {"family": "SOURCE_IMPORT", "mask_allowed": false},
-        {"family": "CAMERA_OBSERVATION", "mask_allowed": false},
-        {"family": "SURFACE_GEOMETRY", "mask_allowed": true},
-        {"family": "RIG_HIERARCHY", "mask_allowed": false}
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "CAMERA_OBSERVATION", "required": true, "mask_allowed": false},
+        {"family": "SURFACE_GEOMETRY", "required": true, "mask_allowed": true},
+        {"family": "RIG_HIERARCHY", "required": true, "mask_allowed": false}
       ]
     },
     "MIRA_SKIN": {
       "requirements": [
-        {"family": "SOURCE_IMPORT", "mask_allowed": false},
-        {"family": "SURFACE_GEOMETRY", "mask_allowed": true},
-        {"family": "RIG_HIERARCHY", "mask_allowed": false},
-        {"family": "SKIN_WEIGHTS", "mask_allowed": false}
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "SURFACE_GEOMETRY", "required": true, "mask_allowed": true},
+        {"family": "RIG_HIERARCHY", "required": true, "mask_allowed": false},
+        {"family": "SKIN_WEIGHTS", "required": true, "mask_allowed": false}
       ]
     },
     "MOTION_COMPILER_COURT": {
       "requirements": [
-        {"family": "SOURCE_IMPORT", "mask_allowed": false},
-        {"family": "SURFACE_GEOMETRY", "mask_allowed": true},
-        {"family": "RIG_HIERARCHY", "mask_allowed": false},
-        {"family": "SKIN_WEIGHTS", "mask_allowed": false},
-        {"family": "ANIMATION_KINEMATICS", "mask_allowed": true}
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "SURFACE_GEOMETRY", "required": true, "mask_allowed": true},
+        {"family": "RIG_HIERARCHY", "required": true, "mask_allowed": false},
+        {"family": "SKIN_WEIGHTS", "required": true, "mask_allowed": false},
+        {"family": "ANIMATION_KINEMATICS", "required": true, "mask_allowed": true}
       ]
     },
     "PRESENTATION_COMPILER_COURT": {
       "requirements": [
-        {"family": "SOURCE_IMPORT", "mask_allowed": false},
-        {"family": "APPEARANCE_CAA", "mask_allowed": true},
-        {"family": "VISIBILITY_OCCLUSION", "mask_allowed": true},
-        {"family": "RAY_COMPOSITING", "mask_allowed": true}
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "APPEARANCE_CAA", "required": true, "mask_allowed": true},
+        {"family": "VISIBILITY_OCCLUSION", "required": true, "mask_allowed": true},
+        {"family": "RAY_COMPOSITING", "required": true, "mask_allowed": true}
       ]
     }
   },

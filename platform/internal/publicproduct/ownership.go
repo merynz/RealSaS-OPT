@@ -12,6 +12,8 @@ import (
 
 const ProductOwnerHeader = "X-RealSaS-Product-Owner"
 
+type productOwnerContextKey struct{}
+
 var ownerKeySHA256Pattern = regexp.MustCompile(`^[0-9a-f]{64}$`)
 var ErrProductOwnerRequired = errors.New("PUBLIC_PRODUCT_OWNER_REQUIRED")
 
@@ -24,6 +26,26 @@ func NormalizeOwnerKeySHA256(value string) (string, error) {
 		return "", ErrProductOwnerRequired
 	}
 	return value, nil
+}
+
+func WithOwnerKeySHA256(ctx context.Context, value string) (context.Context, error) {
+	owner, err := NormalizeOwnerKeySHA256(value)
+	if err != nil {
+		return ctx, err
+	}
+	return context.WithValue(ctx, productOwnerContextKey{}, owner), nil
+}
+
+func OwnerKeySHA256FromContext(ctx context.Context) (string, bool) {
+	if ctx == nil {
+		return "", false
+	}
+	value, ok := ctx.Value(productOwnerContextKey{}).(string)
+	if !ok {
+		return "", false
+	}
+	owner, err := NormalizeOwnerKeySHA256(value)
+	return owner, err == nil
 }
 
 // RequireOwner deliberately returns ErrCompileNotFound for both unknown ids and

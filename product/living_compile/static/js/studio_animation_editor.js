@@ -1,4 +1,5 @@
-import {StudioTimeline, keyID} from './studio_timeline.js';
+import {StudioTimeline, keyID, trackControlID} from './studio_timeline.js';
+import {StudioTimelineView} from './studio_timeline_view.js';
 import {normalizePose} from './studio_control_semantics.js';
 
 const $ = (selector) => document.querySelector(selector);
@@ -16,11 +17,14 @@ function boot() {
   const journal = studio.journal;
   const dirty = studio.dirty;
   const timeline = new StudioTimeline(S.ed.animation);
+  const timelineView = new StudioTimelineView(1);
   studio.timeline = timeline;
+  studio.timelineView = timelineView;
 
   let autosaveTimer = null;
   let playing = false;
   let lastTime = 0;
+  let curveDrag = null;
 
   const legacy = {
     clipChange: $('#clipSelect').onchange,
@@ -96,6 +100,14 @@ function boot() {
       <button id="pasteKeys">PASTE</button>
       <button id="nudgeKeyLeft" title="Move selected keys one frame left">◀ KEY</button>
       <button id="nudgeKeyRight" title="Move selected keys one frame right">KEY ▶</button>
+      <label>SCALE <input id="keyTimeScale" type="number" min="0.01" max="100" step="0.05" value="1"></label>
+      <button id="applyKeyTimeScale">SCALE KEYS</button>
+      <span class="anim-divider"></span>
+      <button id="loopIn">LOOP IN</button>
+      <button id="loopOut">LOOP OUT</button>
+      <button id="clearLoopRange">CLEAR LOOP</button>
+      <button id="timelineResetView">FIT TIME</button>
+      <small id="timelineViewReadout" class="mono"></small>
     `;
     head.append(tools);
 
@@ -129,6 +141,9 @@ function boot() {
       S.t = 0;
       S.frame = null;
       S.previewPose.clear();
+      timelineView.bindDuration(clip.duration_seconds);
+      timelineView.reset();
+      timelineView.clearLoopRange();
     });
 
     $('#duplicateClip').onclick = () => {
@@ -137,6 +152,9 @@ function boot() {
         const clip = timeline.duplicateClip();
         S.clip = clip.clip_id;
         S.t = 0;
+        timelineView.bindDuration(clip.duration_seconds);
+        timelineView.reset();
+        timelineView.clearLoopRange();
       });
     };
 
@@ -148,6 +166,7 @@ function boot() {
         S.t = 0;
         S.frame = null;
         S.previewPose.clear();
+        timelineView.clearLoopRange();
       });
     };
 
@@ -176,6 +195,24 @@ function boot() {
     };
     $('#nudgeKeyLeft').onclick = () => nudge(-1);
     $('#nudgeKeyRight').onclick = () => nudge(1);
+    $('#applyKeyTimeScale').onclick = () => {
+      if (!userClip()) return toast('Select a user clip first', true);
+      if (!timeline.selectedKeys.size) return toast('Select keys to scale', true);
+      const factor = Number($('#keyTimeScale').value);
+      if (!Number.isFinite(factor) || factor <= 0) return toast('Key time scale must be > 0', true);
+      transaction('Scale selected key timing', () => timeline.scaleSelectedKeys(factor, S.t));
+    };
+
+    $('#loopIn').onclick = () => {
+      if (!userClip()) return;
+      timelineView.setLoopIn(S.t);
+    };
+    $('#loopOut').onclick = () => {
+      if (!userClip()) return;
+      timelineView.setLoopOut(S.t);
+    };
+    $('#clearLoopRange').onclick = () => timelineView.clearLoopRange();
+    $('#timelineResetView').onclick = () => timelineView.reset();
 
     document.querySelectorAll('[data-curve]').forEach((button) => {
       button.onclick = () => {
@@ -190,6 +227,8 @@ function boot() {
       };
     }
 
+    wireCurveHandles();
+
     $('#clipSelect').onchange = async (event) => {
       stopUserPlayback();
       S.clip = event.target.value;
@@ -199,9 +238,14 @@ function boot() {
       bindTimeline();
       if (timeline.clip(S.clip)) {
         timeline.selectClip(S.clip);
+        timelineView.bindDuration(timeline.clip().duration_seconds);
+        timelineView.reset();
+        timelineView.clearLoopRange();
         previewAt(0);
         refresh();
       } else if (legacy.clipChange) {
+        timelineView.clearLoopRange();
+        timelineView.reset();
         await legacy.clipChange.call($('#clipSelect'), event);
       }
     };
@@ -213,6 +257,11 @@ function boot() {
       }
       playing = !playing;
       S.play = false;
+      const [loopStart, loopEnd] = timelineView.loopBounds(0, timeline.clip().duration_seconds);
+      if (playing && timeline.clip().loop && (S.t < loopStart || S.t >= loopEnd)) {
+        S.t = timeline.setPlayhead(loopStart);
+        previewAt(S.t);
+      }
       lastTime = performance.now();
       $('#play').textContent = playing ? '❚❚' : '▶';
     };
@@ -223,9 +272,10 @@ function boot() {
         return;
       }
       stopUserPlayback();
-      S.t = 0;
-      timeline.setPlayhead(0);
-      previewAt(0);
+      const [loopStart] = timelineView.loopBounds(0, timeline.clip().duration_seconds);
+      S.t = loopStart;
+      timeline.setPlayhead(loopStart);
+      previewAt(loopStart);
       refresh();
     };
 
@@ -246,12 +296,29 @@ function boot() {
       drawDopesheet();
       drawCurve();
     };
+    dope.onwheel = (event) => {
+      if (!userClip()) return;
+      event.preventDefault();
+      if (event.shiftKey) {
+        timelineView.panBy(event.deltaY * timelineView.span() / 800);
+      } else {
+        const bounds = dope.getBoundingClientRect();
+        const unit = clamp((event.clientX - bounds.left) / Math.max(1, bounds.width), 0, 1);
+        const anchor = timelineView.unitToTime(unit);
+        const factor = Math.exp(-event.deltaY * 0.0015);
+        timelineView.setZoom(timelineView.zoom * factor, anchor);
+      }
+    };
 
     timeline.addEventListener('change', () => {
       S.t = timeline.playhead;
       refreshControls();
       drawDopesheet();
       drawCurve();
+    });
+    timelineView.addEventListener('change', () => {
+      drawDopesheet();
+      updateTimelineViewReadout();
     });
 
     window.addEventListener('keydown', (event) => {
@@ -273,8 +340,72 @@ function boot() {
       } else if (event.key === ',' || event.key === '.') {
         event.preventDefault();
         nudge(event.key === ',' ? -1 : 1);
+      } else if (event.key === '[') {
+        event.preventDefault();
+        timelineView.setLoopIn(S.t);
+      } else if (event.key === ']') {
+        event.preventDefault();
+        timelineView.setLoopOut(S.t);
       }
     });
+  }
+
+  function wireCurveHandles() {
+    const canvas = $('#curveCanvas');
+    canvas.onpointerdown = (event) => {
+      if (!userClip()) return;
+      const selected = timeline.selectedKeyObjects()[0]?.key;
+      if (!selected || selected.curve !== 'bezier') return;
+      const point = curveEventPoint(event);
+      const bezier = selected.bezier || [0.25, 0.1, 0.25, 1];
+      const h1 = curvePoint(bezier[0], bezier[1]);
+      const h2 = curvePoint(bezier[2], bezier[3]);
+      const d1 = Math.hypot(point[0] - h1[0], point[1] - h1[1]);
+      const d2 = Math.hypot(point[0] - h2[0], point[1] - h2[1]);
+      if (Math.min(d1, d2) > 16) return;
+      curveDrag = {
+        pointerID: event.pointerId,
+        handle: d1 <= d2 ? 0 : 1,
+        before: documentModel.snapshot(),
+        changed: false,
+      };
+      canvas.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    };
+    canvas.onpointermove = (event) => {
+      if (!curveDrag || event.pointerId !== curveDrag.pointerID) return;
+      const normalized = curveNormalizedPoint(event);
+      const selected = timeline.selectedKeyObjects()[0]?.key;
+      if (!selected) return;
+      const bezier = [...(selected.bezier || [0.25, 0.1, 0.25, 1])];
+      const offset = curveDrag.handle * 2;
+      bezier[offset] = normalized[0];
+      bezier[offset + 1] = normalized[1];
+      timeline.setSelectedBezier(bezier);
+      dirty.markDirty();
+      curveDrag.changed = true;
+      drawCurve();
+      event.preventDefault();
+    };
+    canvas.onpointerup = (event) => {
+      if (!curveDrag || event.pointerId !== curveDrag.pointerID) return;
+      try { canvas.releasePointerCapture(event.pointerId); } catch {}
+      if (curveDrag.changed) {
+        journal.commit('Edit Bezier tangent handles', curveDrag.before, documentModel.snapshot());
+        dirty.markDirty();
+        scheduleSave();
+      }
+      curveDrag = null;
+      event.preventDefault();
+    };
+    canvas.onpointercancel = () => {
+      if (curveDrag?.before) {
+        documentModel.replace(curveDrag.before);
+        timeline.bind(S.ed.animation);
+      }
+      curveDrag = null;
+      drawCurve();
+    };
   }
 
   function addCurrentTransformKey() {
@@ -311,10 +442,13 @@ function boot() {
       const delta = Math.max(0, (now - lastTime) / 1000);
       lastTime = now;
       let time = S.t + delta;
-      if (time > clip.duration_seconds) {
-        if (clip.loop) time %= clip.duration_seconds;
-        else {
-          time = clip.duration_seconds;
+      const [loopStart, loopEnd] = timelineView.loopBounds(0, clip.duration_seconds);
+      if (time > loopEnd) {
+        if (clip.loop) {
+          const span = Math.max(1e-9, loopEnd - loopStart);
+          time = loopStart + ((time - loopStart) % span);
+        } else {
+          time = loopEnd;
           stopUserPlayback();
         }
       }
@@ -356,13 +490,30 @@ function boot() {
     $('#animLoop').disabled = !clip;
     $('#duplicateClip').disabled = !clip;
     $('#deleteClip').disabled = !clip;
+    $('#applyKeyTimeScale').disabled = !clip;
+    $('#loopIn').disabled = !clip;
+    $('#loopOut').disabled = !clip;
+    $('#clearLoopRange').disabled = !clip;
+    $('#timelineResetView').disabled = !clip;
     if (clip) {
       $('#animClipName').value = clip.display_name || clip.clip_id;
       $('#animDuration').value = Number(clip.duration_seconds || 1).toFixed(3);
       $('#animLoop').checked = Boolean(clip.loop);
       $('#fps').value = Number(clip.fps || 30);
+      timelineView.bindDuration(clip.duration_seconds);
     }
     $('#keySelectionReadout').textContent = `${timeline.selectedKeys.size} key${timeline.selectedKeys.size === 1 ? '' : 's'} selected`;
+    updateTimelineViewReadout();
+  }
+
+  function updateTimelineViewReadout() {
+    const readout = $('#timelineViewReadout');
+    if (!readout) return;
+    const snapshot = timelineView.snapshot();
+    const loop = snapshot.loop_start_seconds !== null && snapshot.loop_end_seconds !== null
+      ? ` · LOOP ${snapshot.loop_start_seconds.toFixed(2)}–${snapshot.loop_end_seconds.toFixed(2)}`
+      : '';
+    readout.textContent = `×${snapshot.zoom.toFixed(2)} · ${snapshot.visible_start_seconds.toFixed(2)}–${snapshot.visible_end_seconds.toFixed(2)}${loop}`;
   }
 
   function drawDopesheet() {
@@ -377,32 +528,52 @@ function boot() {
     ctx.strokeStyle = '#243140';
     ctx.lineWidth = 1;
     const fps = Number(clip.fps || 30);
-    const major = Math.max(1, Math.round(fps / 2));
-    const frameCount = Math.max(1, Math.round(clip.duration_seconds * fps));
-    for (let frame = 0; frame <= frameCount; frame += 1) {
-      if (frame % major !== 0 && frameCount > 240) continue;
-      const x = frame / frameCount * canvas.width;
+    const startFrame = Math.floor(timelineView.start * fps);
+    const endFrame = Math.ceil(timelineView.end() * fps);
+    const visibleFrames = Math.max(1, endFrame - startFrame);
+    const major = visibleFrames > 240 ? Math.max(1, Math.round(fps / 2)) : 1;
+    for (let frame = startFrame; frame <= endFrame; frame += 1) {
+      if (frame % major !== 0) continue;
+      const time = frame / fps;
+      const x = timelineView.timeToUnit(time) * canvas.width;
       ctx.globalAlpha = frame % fps === 0 ? 0.8 : 0.25;
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
     }
     ctx.globalAlpha = 1;
+
+    if (timelineView.loopStart !== null && timelineView.loopEnd !== null) {
+      const x0 = timelineView.timeToUnit(timelineView.loopStart) * canvas.width;
+      const x1 = timelineView.timeToUnit(timelineView.loopEnd) * canvas.width;
+      ctx.fillStyle = 'rgba(255,211,107,.06)';
+      ctx.fillRect(Math.max(0, x0), 0, Math.min(canvas.width, x1) - Math.max(0, x0), canvas.height);
+      ctx.strokeStyle = '#ffd36b';
+      ctx.globalAlpha = 0.65;
+      for (const x of [x0, x1]) {
+        if (x >= 0 && x <= canvas.width) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+      }
+      ctx.globalAlpha = 1;
+    }
+
     tracks.forEach((track, row) => {
       const y = 28 + row * rowHeight;
-      const controlID = track.control_id || track.bone_id;
+      const controlID = trackControlID(track);
       ctx.fillStyle = '#71879a';
       ctx.font = '11px Consolas, monospace';
       ctx.fillText(controlID, 6, y + 4);
       for (const key of track.keys || []) {
-        const x = key.time_seconds / Math.max(0.0001, clip.duration_seconds) * canvas.width;
+        if (!timelineView.contains(key.time_seconds)) continue;
+        const x = timelineView.timeToUnit(key.time_seconds) * canvas.width;
         const selected = timeline.selectedKeys.has(keyID(controlID, key.time_seconds));
         ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4);
         ctx.fillStyle = selected ? '#ffffff' : '#ffd36b';
         ctx.fillRect(-5, -5, 10, 10); ctx.restore();
       }
     });
-    const playheadX = S.t / Math.max(0.0001, clip.duration_seconds) * canvas.width;
-    ctx.strokeStyle = '#ff6c77'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(playheadX, 0); ctx.lineTo(playheadX, canvas.height); ctx.stroke();
+    if (timelineView.contains(S.t)) {
+      const playheadX = timelineView.timeToUnit(S.t) * canvas.width;
+      ctx.strokeStyle = '#ff6c77'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(playheadX, 0); ctx.lineTo(playheadX, canvas.height); ctx.stroke();
+    }
     $('#timeReadout').textContent = `${S.t.toFixed(3)} / ${clip.duration_seconds.toFixed(3)}`;
   }
 
@@ -418,9 +589,10 @@ function boot() {
     let distance = 12;
     (clip.tracks || []).forEach((track, row) => {
       const ky = 28 + row * rowHeight;
-      const controlID = track.control_id || track.bone_id;
+      const controlID = trackControlID(track);
       for (const key of track.keys || []) {
-        const kx = key.time_seconds / Math.max(0.0001, clip.duration_seconds) * canvas.width;
+        if (!timelineView.contains(key.time_seconds)) continue;
+        const kx = timelineView.timeToUnit(key.time_seconds) * canvas.width;
         const d = Math.hypot(kx - x, ky - y);
         if (d < distance) { distance = d; best = {controlID, time: key.time_seconds}; }
       }
@@ -429,9 +601,32 @@ function boot() {
   }
 
   function timeFromEvent(event) {
-    const clip = userClip();
     const bounds = $('#dope').getBoundingClientRect();
-    return clamp((event.clientX - bounds.left) / Math.max(1, bounds.width) * clip.duration_seconds, 0, clip.duration_seconds);
+    const unit = (event.clientX - bounds.left) / Math.max(1, bounds.width);
+    return timelineView.unitToTime(unit);
+  }
+
+  function curveEventPoint(event) {
+    const canvas = $('#curveCanvas');
+    const bounds = canvas.getBoundingClientRect();
+    return [
+      (event.clientX - bounds.left) / Math.max(1, bounds.width) * canvas.width,
+      (event.clientY - bounds.top) / Math.max(1, bounds.height) * canvas.height,
+    ];
+  }
+
+  function curveNormalizedPoint(event) {
+    const canvas = $('#curveCanvas');
+    const point = curveEventPoint(event);
+    return [
+      clamp((point[0] - 12) / Math.max(1, canvas.width - 24), 0, 1),
+      clamp((canvas.height - 12 - point[1]) / Math.max(1, canvas.height - 24), 0, 1),
+    ];
+  }
+
+  function curvePoint(x, y) {
+    const canvas = $('#curveCanvas');
+    return [12 + x * (canvas.width - 24), canvas.height - 12 - y * (canvas.height - 24)];
   }
 
   function drawCurve() {
@@ -457,6 +652,17 @@ function boot() {
       if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
     ctx.stroke();
+
+    if (selected?.curve === 'bezier') {
+      const p0 = curvePoint(0, 0);
+      const p1 = curvePoint(bezier[0], bezier[1]);
+      const p2 = curvePoint(bezier[2], bezier[3]);
+      const p3 = curvePoint(1, 1);
+      ctx.strokeStyle = '#617386';
+      ctx.beginPath(); ctx.moveTo(...p0); ctx.lineTo(...p1); ctx.moveTo(...p3); ctx.lineTo(...p2); ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      for (const point of [p1, p2]) { ctx.beginPath(); ctx.arc(point[0], point[1], 5, 0, Math.PI * 2); ctx.fill(); }
+    }
   }
 
   function cubic(t, p0, p1, p2, p3) {

@@ -41,6 +41,7 @@ jobs:
           drift="$(gofmt -l .)"
           if [ -n "$drift" ]; then
             printf 'gofmt drift:\n%s\n' "$drift"
+            gofmt -d $drift
             exit 1
           fi
       - name: Go vet

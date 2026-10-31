@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'compiler/realsas_compiler_core/control_motion_ir_v1.py'
+      - 'compiler/realsas_compiler_core/default_idle_provider_v1.py'
       - 'compiler/realsas_compiler_core/canonical_motion_ir_v2.py'
       - 'compiler/realsas_compiler_core/control_motion_runtime_v2.py'
       - 'compiler/realsas_compiler_services/platform_worker/motion_executor_v2.py'
@@ -14,6 +15,7 @@ on:
       - 'platform/internal/capability/contracts/product_capabilities_v1.json'
       - 'tests/compiler/test_control_motion_v2.py'
       - 'tests/compiler/test_control_motion_ik_integration_v1.py'
+      - 'tests/compiler/test_default_idle_provider_v1.py'
       - '.github/workflows/motion_v2_product.yml'
   workflow_dispatch:
 
@@ -43,13 +45,15 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             compiler/realsas_compiler_core/control_motion_ir_v1.py \
+            compiler/realsas_compiler_core/default_idle_provider_v1.py \
             compiler/realsas_compiler_core/canonical_motion_ir_v2.py \
             compiler/realsas_compiler_core/control_motion_runtime_v2.py \
             compiler/realsas_compiler_services/platform_worker/motion_executor_v2.py \
             compiler/realsas_compiler_services/platform_worker/worker.py
-      - name: Run control-space Motion authority and IK integration courts
+      - name: Run control-space Motion authority, default IDLE and IK integration courts
         run: |
           set -euo pipefail
           pytest -q \
             tests/compiler/test_control_motion_v2.py \
-            tests/compiler/test_control_motion_ik_integration_v1.py
+            tests/compiler/test_control_motion_ik_integration_v1.py \
+            tests/compiler/test_default_idle_provider_v1.py

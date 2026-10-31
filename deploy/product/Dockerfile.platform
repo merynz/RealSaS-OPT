@@ -1,0 +1,35 @@
+ARG GO_IMAGE=golang:1.27.1-bookworm
+FROM ${GO_IMAGE} AS build
+
+ARG REALSAS_SOURCE_CODE_SHA
+RUN test "${#REALSAS_SOURCE_CODE_SHA}" -eq 40 \
+    && case "$REALSAS_SOURCE_CODE_SHA" in *[!0-9a-f]*) exit 1 ;; esac
+
+WORKDIR /src
+COPY platform/go.mod platform/go.sum ./platform/
+RUN cd platform && go mod download
+COPY platform ./platform
+RUN mkdir -p /out \
+    && cd platform \
+    && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.sourceCodeSHA=${REALSAS_SOURCE_CODE_SHA}" -o /out/realsas-api ./cmd/realsas-api \
+    && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/realsas-control-worker ./cmd/realsas-control-worker \
+    && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/realsas-migrate ./cmd/realsas-migrate \
+    && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/realsasctl ./cmd/realsasctl
+
+FROM debian:bookworm-slim
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --system --uid 10001 --create-home --home-dir /home/realsas realsas \
+    && mkdir -p /app/repo/canonical /var/lib/realsas/artifacts \
+    && chown -R realsas:realsas /var/lib/realsas /home/realsas
+
+WORKDIR /app/repo
+COPY canonical/MAINLINE_EXECUTION_PLAN_V2.json ./canonical/MAINLINE_EXECUTION_PLAN_V2.json
+COPY --from=build /out/realsas-api /out/realsas-control-worker /out/realsas-migrate /out/realsasctl /usr/local/bin/
+
+ENV REALSAS_REPO_ROOT=/app/repo \
+    REALSAS_ARTIFACT_ROOT=/var/lib/realsas/artifacts
+VOLUME ["/var/lib/realsas/artifacts"]
+USER realsas
+CMD ["realsas-api"]

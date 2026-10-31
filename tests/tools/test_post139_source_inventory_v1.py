@@ -14,6 +14,10 @@ def test_representation_key_collapses_format_directories_without_collapsing_lane
     assert representation_key("Pack/FBX/Props/Hero.fbx") == "pack/props/hero"
 
 
+def ns(root: Path, out: Path):
+    return argparse.Namespace(source_root=str(root), out=str(out), source_id="source", registry=None)
+
+
 def test_inventory_keeps_every_raw_file_and_selects_one_audit_representation(tmp_path: Path):
     root = tmp_path / "raw"
     (root / "Pack" / "FBX" / "Actors").mkdir(parents=True)
@@ -29,7 +33,7 @@ def test_inventory_keeps_every_raw_file_and_selects_one_audit_representation(tmp
     for relative, content in files.items():
         (root / relative).write_bytes(content)
     out = tmp_path / "out"
-    inventory(argparse.Namespace(source_root=str(root), out=str(out), source_id="source"))
+    inventory(ns(root, out))
     ledger = json.loads((out / "RAW_FILE_LEDGER.json").read_text())
     source_inventory = json.loads((out / "SOURCE_INVENTORY.json").read_text())
     manifest = json.loads((out / "CANDIDATE_MANIFEST.json").read_text())
@@ -47,11 +51,11 @@ def test_ledger_hash_changes_with_any_raw_byte(tmp_path: Path):
     source = root / "Actor.fbx"
     source.write_bytes(b"a")
     first = tmp_path / "first"
-    inventory(argparse.Namespace(source_root=str(root), out=str(first), source_id="source"))
+    inventory(ns(root, first))
     first_payload = json.loads((first / "RAW_FILE_LEDGER.json").read_text())
     source.write_bytes(b"b")
     second = tmp_path / "second"
-    inventory(argparse.Namespace(source_root=str(root), out=str(second), source_id="source"))
+    inventory(ns(root, second))
     second_payload = json.loads((second / "RAW_FILE_LEDGER.json").read_text())
     assert first_payload["ledger_sha256"] != second_payload["ledger_sha256"]
     assert first_payload["files"][0]["sha256"] == hashlib.sha256(b"a").hexdigest()

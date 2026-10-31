@@ -117,6 +117,29 @@ func (a API) HandlerWithStudio() http.Handler {
 		}
 	})
 
+	mux.HandleFunc("POST /v1/product/studio/projects/{id}/restore", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.ProductGatewayToken, "PRODUCT_GATEWAY") {
+			return
+		}
+		var req studio.RestoreRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		out, err := studio.RestoreRevision(r.Context(), a.Pool, r.PathValue("id"), req)
+		switch {
+		case errors.Is(err, studio.ErrProjectNotFound), errors.Is(err, studio.ErrRevisionNotFound):
+			respond(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+		case errors.Is(err, studio.ErrRevisionConflict):
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+		case errors.Is(err, studio.ErrAuthoringPayloadInvalid):
+			respond(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		case err != nil:
+			respond(w, http.StatusConflict, map[string]string{"error": err.Error()})
+		default:
+			respond(w, http.StatusCreated, out)
+		}
+	})
+
 	mux.Handle("/", a.HandlerWithProductWorkspace())
 	return mux
 }

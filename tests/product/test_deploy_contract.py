@@ -9,12 +9,14 @@ DEPLOY = ROOT / "deploy" / "product"
 
 
 class ProductDeployContractTests(unittest.TestCase):
-    def test_public_surface_is_loopback_only_and_platform_is_not_published(self):
+    def test_public_and_operator_surfaces_are_loopback_only(self):
         compose = (DEPLOY / "compose.yaml").read_text(encoding="utf-8")
         self.assertIn('"127.0.0.1:${REALSAS_WEB_PORT:-8765}:8765"', compose)
+        self.assertIn('"127.0.0.1:${REALSAS_OPERATOR_API_PORT:-8780}:8080"', compose)
         self.assertIn('expose: ["8080"]', compose)
         self.assertNotIn('"8080:8080"', compose)
         self.assertNotIn('"0.0.0.0:${REALSAS_WEB_PORT', compose)
+        self.assertNotIn('"0.0.0.0:${REALSAS_OPERATOR_API_PORT', compose)
 
     def test_compile_is_disabled_by_default_and_learned_execution_is_explicit(self):
         compose = (DEPLOY / "compose.yaml").read_text(encoding="utf-8")
@@ -24,6 +26,7 @@ class ProductDeployContractTests(unittest.TestCase):
         self.assertIn("profiles: [\"engine\"]", compose)
         self.assertIn("REALSAS_PRODUCT_COMPILE_ENABLED=0", env_example)
         self.assertIn("REALSAS_ENGINE_IMAGE=realsas-engine:unbound", env_example)
+        self.assertIn("REALSAS_OPERATOR_API_PORT=8780", env_example)
 
     def test_platform_image_binds_exact_source_identity(self):
         dockerfile = (DEPLOY / "Dockerfile.platform").read_text(encoding="utf-8")

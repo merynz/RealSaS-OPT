@@ -1,0 +1,99 @@
+name: post139-corpus-extension-audit
+
+on:
+  push:
+    branches:
+      - post139-corpus-extension-audit-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  REALSAS_ACQ_ROOT: _post139/source
+
+jobs:
+  full-source-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout audit branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install acquisition dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install requests gdown
+
+      - name: Install Blender
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender unzip
+          blender --version
+
+      - name: Acquire public/free extension sources
+        run: |
+          python tools/corpus_extension/acquire_post139_sources_v1.py | tee _post139_acquisition.log
+
+      - name: Select one authoritative source format per provider/pack
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('_post139/source')
+          order=['.glb','.gltf','.fbx','.blend']
+          records=[]
+          for provider in sorted(p for p in root.iterdir() if p.is_dir()):
+              for pack in sorted(p for p in provider.iterdir() if p.is_dir()):
+                  sources=[p for p in pack.rglob('*') if p.is_file() and p.suffix.lower() in order]
+                  exts={p.suffix.lower() for p in sources}
+                  chosen=next((e for e in order if e in exts),None)
+                  removed=0
+                  if chosen:
+                      for p in sources:
+                          if p.suffix.lower()!=chosen:
+                              p.unlink()
+                              removed+=1
+                  records.append({'provider':provider.name,'pack':pack.name,'chosen_extension':chosen,'kept':sum(1 for p in pack.rglob('*') if p.is_file() and p.suffix.lower()==chosen) if chosen else 0,'removed_lower_priority_sources':removed})
+          Path('_post139').mkdir(exist_ok=True)
+          import json
+          Path('_post139/SOURCE_FORMAT_SELECTION.json').write_text(json.dumps(records,indent=2))
+          print(json.dumps(records,indent=2))
+          PY
+
+      - name: Audit source bytes with Blender
+        run: |
+          mkdir -p _post139/audits
+          blender -b --python tools/corpus_extension/audit_source_blender_v1.py -- \
+            --input _post139/source \
+            --output _post139/audits | tee _post139_blender_audit.log
+
+      - name: Summarize capability and dedup evidence
+        run: |
+          python tools/corpus_extension/summarize_post139_audits_v1.py \
+            --audits _post139/audits \
+            --out _post139/summary | tee _post139_summary.log
+
+      - name: Freeze audit artifact
+        if: always()
+        run: |
+          mkdir -p _post139/artifact
+          cp -r _post139/audits _post139/artifact/ || true
+          cp -r _post139/summary _post139/artifact/ || true
+          cp _post139/source/ACQUISITION_RECEIPT.json _post139/artifact/ 2>/dev/null || true
+          cp _post139/SOURCE_FORMAT_SELECTION.json _post139/artifact/ 2>/dev/null || true
+          cp _post139_*log _post139/artifact/ 2>/dev/null || true
+          find _post139/artifact -type f -print0 | sort -z | xargs -0 sha256sum > _post139/artifact/ARTIFACT_SHA256SUMS.txt || true
+
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-corpus-extension-audit
+          path: _post139/artifact
+          if-no-files-found: error
+          retention-days: 14

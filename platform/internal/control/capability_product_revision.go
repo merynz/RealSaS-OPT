@@ -116,53 +116,123 @@ func loadModularRevisionBindingsTx(ctx context.Context, tx pgx.Tx, attemptID uui
 	return bindings, nil
 }
 
-func requireCapabilityProductGoalTx(ctx context.Context, tx pgx.Tx, goalID, attemptID uuid.UUID) ([]string, error) {
+func stringSetFromJSONValue(value any) map[string]bool {
+	out := map[string]bool{}
+	switch rows := value.(type) {
+	case []string:
+		for _, row := range rows {
+			if row != "" {
+				out[row] = true
+			}
+		}
+	case []any:
+		for _, row := range rows {
+			if text, ok := row.(string); ok && text != "" {
+				out[text] = true
+			}
+		}
+	}
+	return out
+}
+
+func requireCapabilityProductGoalTx(
+	ctx context.Context,
+	tx pgx.Tx,
+	goalID, attemptID uuid.UUID,
+) ([]string, map[string]bool, string, error) {
 	var goalType, promotionPolicy string
-	var targetsRaw, resolvedRaw []byte
+	var targetsRaw, resolvedRaw, parametersRaw []byte
 	if err := tx.QueryRow(ctx, `
-		SELECT goal_type,promotion_policy,target_capability_ids,resolved_capability_ids
+		SELECT goal_type,promotion_policy,target_capability_ids,resolved_capability_ids,parameters
 		FROM execution_goals
 		WHERE id=$1 AND attempt_id=$2
 		FOR UPDATE
-	`, goalID, attemptID).Scan(&goalType, &promotionPolicy, &targetsRaw, &resolvedRaw); err != nil {
-		return nil, err
+	`, goalID, attemptID).Scan(
+		&goalType, &promotionPolicy, &targetsRaw, &resolvedRaw, &parametersRaw,
+	); err != nil {
+		return nil, nil, "", err
 	}
-	if goalType != string(capability.GoalProductCompile) || promotionPolicy != string(capability.PromotionQualifiedProductOnly) {
-		return nil, errors.New("CAPABILITY_PRODUCT_FINALIZE_GOAL_POLICY_DRIFT")
+	if promotionPolicy != string(capability.PromotionQualifiedProductOnly) ||
+		(goalType != string(capability.GoalProductCompile) && goalType != string(capability.GoalProductRequalification)) {
+		return nil, nil, "", errors.New("CAPABILITY_PRODUCT_FINALIZE_GOAL_POLICY_DRIFT")
 	}
 	var targets, resolved []string
+	var parameters map[string]any
 	if err := json.Unmarshal(targetsRaw, &targets); err != nil {
-		return nil, err
+		return nil, nil, "", err
 	}
 	if err := json.Unmarshal(resolvedRaw, &resolved); err != nil {
-		return nil, err
+		return nil, nil, "", err
+	}
+	if err := json.Unmarshal(parametersRaw, &parameters); err != nil {
+		return nil, nil, "", err
 	}
 	if len(targets) != 1 || targets[0] != capability.ProductProofCapabilityID {
-		return nil, errors.New("CAPABILITY_PRODUCT_FINALIZE_PROOF_TARGET_REQUIRED")
+		return nil, nil, "", errors.New("CAPABILITY_PRODUCT_FINALIZE_PROOF_TARGET_REQUIRED")
 	}
 	if len(resolved) == 0 || resolved[len(resolved)-1] != capability.ProductProofCapabilityID {
-		return nil, errors.New("CAPABILITY_PRODUCT_FINALIZE_PROOF_TERMINAL_REQUIRED")
+		return nil, nil, "", errors.New("CAPABILITY_PRODUCT_FINALIZE_PROOF_TERMINAL_REQUIRED")
 	}
+
+	satisfied := map[string]bool{}
+	if goalType == string(capability.GoalProductRequalification) {
+		satisfied = stringSetFromJSONValue(parameters["satisfied_capability_ids"])
+		if len(satisfied) == 0 || satisfied[capability.ProductProofCapabilityID] {
+			return nil, nil, "", errors.New("CAPABILITY_PRODUCT_REQUALIFICATION_SATISFIED_SET_INVALID")
+		}
+	}
+	resolvedSet := map[string]bool{}
 	for _, capabilityID := range resolved {
+		resolvedSet[capabilityID] = true
+	}
+	for capabilityID := range satisfied {
+		if !resolvedSet[capabilityID] {
+			return nil, nil, "", fmt.Errorf("CAPABILITY_PRODUCT_REQUALIFICATION_SATISFIED_OUTSIDE_CLOSURE:%s", capabilityID)
+		}
+	}
+
+	for _, capabilityID := range resolved {
+		if satisfied[capabilityID] {
+			prefix := "capability:" + capabilityID + ":"
+			var inheritedQualified bool
+			if err := tx.QueryRow(ctx, `
+				SELECT EXISTS(
+					SELECT 1
+					FROM attempt_artifacts aa
+					JOIN qualifications q ON q.artifact_id=aa.artifact_id
+					WHERE aa.attempt_id=$1
+					  AND aa.origin='inherited'
+					  AND left(aa.role,$2)=$3
+					  AND q.qualification_type='CAPABILITY_EXECUTION_PASS'
+					  AND q.result='PASS'
+				)
+			`, attemptID, len(prefix), prefix).Scan(&inheritedQualified); err != nil {
+				return nil, nil, "", err
+			}
+			if !inheritedQualified {
+				return nil, nil, "", fmt.Errorf("CAPABILITY_PRODUCT_REQUALIFICATION_INHERITED_AUTHORITY_REQUIRED:%s", capabilityID)
+			}
+			continue
+		}
 		var status string
 		if err := tx.QueryRow(ctx, `
 			SELECT status FROM executions
 			WHERE attempt_id=$1 AND stage_contract=$2
 			ORDER BY retry_number DESC LIMIT 1
 		`, attemptID, capabilityID).Scan(&status); err != nil {
-			return nil, err
+			return nil, nil, "", err
 		}
 		if status != "PASS" {
-			return nil, fmt.Errorf("CAPABILITY_PRODUCT_FINALIZE_NOT_PASSED:%s:%s", capabilityID, status)
+			return nil, nil, "", fmt.Errorf("CAPABILITY_PRODUCT_FINALIZE_NOT_PASSED:%s:%s", capabilityID, status)
 		}
 	}
-	return resolved, nil
+	return resolved, satisfied, goalType, nil
 }
 
 // FinalizeCapabilityProduct mints a ProductRevision only after the terminal
-// product.proof capability has passed. It does not re-evaluate product quality,
-// project the modular graph back into the legacy puppet monolith, or synthesize a
-// runtime package. Runtime/export materialization remains a derived post-seal step.
+// product.proof capability has passed. Requalification may inherit exact,
+// previously-qualified upstream capability artifacts, but it never invents
+// executions for those leaves and never mutates the base ProductRevision.
 func (a Activities) FinalizeCapabilityProduct(ctx context.Context, request map[string]any) (orchestration.CapabilityWorkflowResult, error) {
 	if a.Pool == nil {
 		return orchestration.CapabilityWorkflowResult{}, errors.New("postgres pool is required")
@@ -204,25 +274,37 @@ func (a Activities) FinalizeCapabilityProduct(ctx context.Context, request map[s
 
 	var revisionID uuid.UUID
 	var resolved []string
+	var satisfied map[string]bool
+	var goalType string
 	err = persistence.WithSerializableRetry(ctx, a.Pool, 5, func(tx pgx.Tx) error {
-		resolved, err = requireCapabilityProductGoalTx(ctx, tx, goalID, attemptID)
+		resolved, satisfied, goalType, err = requireCapabilityProductGoalTx(ctx, tx, goalID, attemptID)
 		if err != nil {
 			return err
 		}
 
 		var subjectID, releaseID uuid.UUID
+		var parentAttemptID *uuid.UUID
 		var attemptKind, finalState string
 		if err := tx.QueryRow(ctx, `
-			SELECT subject_id,engine_release_id,kind,final_state
+			SELECT subject_id,engine_release_id,parent_attempt_id,kind,final_state
 			FROM attempts WHERE id=$1 FOR UPDATE
-		`, attemptID).Scan(&subjectID, &releaseID, &attemptKind, &finalState); err != nil {
+		`, attemptID).Scan(&subjectID, &releaseID, &parentAttemptID, &attemptKind, &finalState); err != nil {
 			return err
 		}
 		if releaseID != expectedReleaseID {
 			return errors.New("CAPABILITY_PRODUCT_FINALIZE_ENGINE_RELEASE_DRIFT")
 		}
-		if attemptKind != "compile_candidate" {
-			return fmt.Errorf("CAPABILITY_PRODUCT_FINALIZE_ATTEMPT_KIND:%s", attemptKind)
+		switch goalType {
+		case string(capability.GoalProductCompile):
+			if attemptKind != "compile_candidate" {
+				return fmt.Errorf("CAPABILITY_PRODUCT_FINALIZE_ATTEMPT_KIND:%s", attemptKind)
+			}
+		case string(capability.GoalProductRequalification):
+			if attemptKind != "requalification_candidate" || parentAttemptID == nil {
+				return fmt.Errorf("CAPABILITY_PRODUCT_REQUALIFICATION_ATTEMPT_KIND:%s", attemptKind)
+			}
+		default:
+			return fmt.Errorf("CAPABILITY_PRODUCT_FINALIZE_GOAL_TYPE:%s", goalType)
 		}
 		if finalState != "OPEN" && finalState != "QUALIFIED" {
 			return fmt.Errorf("CAPABILITY_PRODUCT_FINALIZE_ATTEMPT_STATE:%s", finalState)
@@ -249,6 +331,32 @@ func (a Activities) FinalizeCapabilityProduct(ctx context.Context, request map[s
 			"terminal_proof_capability": capability.ProductProofCapabilityID,
 			"bindings":                  bindings,
 			"model_releases":            modelRows,
+		}
+		if goalType == string(capability.GoalProductRequalification) {
+			var baseRevisionID uuid.UUID
+			if err := tx.QueryRow(ctx, `
+				SELECT id FROM product_revisions WHERE created_from_attempt_id=$1
+			`, *parentAttemptID).Scan(&baseRevisionID); err != nil {
+				return err
+			}
+			var authoringArtifactID uuid.UUID
+			var authoringSemanticSHA string
+			if err := tx.QueryRow(ctx, `
+				SELECT a.id,a.semantic_sha256
+				FROM execution_goal_inputs egi
+				JOIN artifacts a ON a.id=egi.artifact_id
+				JOIN artifact_types t ON t.id=a.artifact_type_id
+				WHERE egi.execution_goal_id=$1
+				  AND t.name='RealSaS.StudioAuthoringRevision'
+				  AND t.schema_version='v1'
+			`, goalID).Scan(&authoringArtifactID, &authoringSemanticSHA); err != nil {
+				return err
+			}
+			manifest["schema"] = "RealSaS.ProductRevisionManifest.v4"
+			manifest["revision_origin"] = "STUDIO_REQUALIFICATION"
+			manifest["base_product_revision_id"] = baseRevisionID.String()
+			manifest["studio_authoring_artifact_id"] = authoringArtifactID.String()
+			manifest["studio_authoring_semantic_sha256"] = authoringSemanticSHA
 		}
 		manifestSHA, err := semantic.JSONSHA256(manifest)
 		if err != nil {
@@ -309,6 +417,7 @@ func (a Activities) FinalizeCapabilityProduct(ctx context.Context, request map[s
 			"execution_goal_id":   goalID.String(),
 			"product_graph":       "MODULAR_CAPABILITY_V1",
 			"proof_capability_id": capability.ProductProofCapabilityID,
+			"goal_type":           goalType,
 			"model_release_count": len(modelRows),
 		})
 		_, err = tx.Exec(ctx, `
@@ -323,7 +432,11 @@ func (a Activities) FinalizeCapabilityProduct(ctx context.Context, request map[s
 
 	completed := make([]orchestration.CapabilityCommitResult, 0, len(resolved))
 	for _, capabilityID := range resolved {
-		completed = append(completed, orchestration.CapabilityCommitResult{CapabilityID: capabilityID, Status: "PASS"})
+		status := "PASS"
+		if satisfied[capabilityID] {
+			status = "INHERITED"
+		}
+		completed = append(completed, orchestration.CapabilityCommitResult{CapabilityID: capabilityID, Status: status})
 	}
 	value := revisionID.String()
 	return orchestration.CapabilityWorkflowResult{

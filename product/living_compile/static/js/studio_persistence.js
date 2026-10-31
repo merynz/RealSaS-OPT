@@ -4,6 +4,7 @@ const state = {
   bundle: null,
   session: null,
   pending: null,
+  requalification: null,
 };
 
 function requestPath(input) {
@@ -30,6 +31,7 @@ async function ensureSession(bundle) {
   if (state.pending && state.bundle === normalized) return state.pending;
 
   state.bundle = normalized;
+  state.requalification = null;
   state.pending = (async () => {
     const response = await nativeFetch(`/api/studio/session?bundle=${encodeURIComponent(normalized)}`, {
       cache: 'no-store',
@@ -107,7 +109,76 @@ async function restore(revisionNumber) {
     throw new Error('Studio restore returned an invalid head');
   }
   state.session = {...session, head: payload.head};
+  state.requalification = null;
   window.dispatchEvent(new CustomEvent('realsas:studio-restored', {detail: payload}));
+  return payload;
+}
+
+async function requestRequalification() {
+  const session = await ensureSession(state.bundle);
+  const projectID = session?.project?.project_id;
+  const lockVersion = Number(session?.head?.lock_version);
+  const revisionNumber = Number(session?.head?.revision_number);
+  if (
+    !state.bundle
+    || !projectID
+    || !Number.isInteger(lockVersion)
+    || !Number.isInteger(revisionNumber)
+    || revisionNumber <= 0
+  ) {
+    throw new Error('A persisted Studio HEAD revision is required before requalification');
+  }
+  const response = await nativeFetch('/api/studio/requalify', {
+    method: 'POST',
+    cache: 'no-store',
+    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      bundle: state.bundle,
+      project_id: projectID,
+      expected_lock_version: lockVersion,
+      revision_number: revisionNumber,
+    }),
+  });
+  const payload = await readJson(response);
+  if (!response.ok) {
+    if (response.status === 409) {
+      window.dispatchEvent(new CustomEvent('realsas:studio-conflict', {
+        detail: payload || {error: 'STUDIO_REQUALIFICATION_CURRENT_SAVED_HEAD_REQUIRED'},
+      }));
+    }
+    throw new Error(payload?.message || payload?.error || `Studio requalification unavailable (${response.status})`);
+  }
+  if (
+    !/^srq_[0-9a-f]{32}$/.test(String(payload?.requalification_id || ''))
+    || payload?.project_id !== projectID
+    || Number(payload?.revision_number) !== revisionNumber
+  ) {
+    throw new Error('Studio requalification returned an invalid public identity');
+  }
+  state.requalification = payload;
+  window.dispatchEvent(new CustomEvent('realsas:studio-requalification', {detail: payload}));
+  return payload;
+}
+
+async function requalificationStatus(requalificationID = state.requalification?.requalification_id) {
+  const projectID = state.session?.project?.project_id;
+  const id = String(requalificationID || '').trim();
+  if (!projectID || !/^srq_[0-9a-f]{32}$/.test(id)) {
+    throw new Error('Valid Studio requalification identity required');
+  }
+  const response = await nativeFetch(
+    `/api/studio/requalification?project=${encodeURIComponent(projectID)}&id=${encodeURIComponent(id)}`,
+    {cache: 'no-store', headers: {'Accept': 'application/json'}},
+  );
+  const payload = await readJson(response);
+  if (!response.ok) {
+    throw new Error(payload?.message || payload?.error || `Studio requalification status unavailable (${response.status})`);
+  }
+  if (payload?.project_id !== projectID || payload?.requalification_id !== id) {
+    throw new Error('Studio requalification status identity drift');
+  }
+  state.requalification = payload;
+  window.dispatchEvent(new CustomEvent('realsas:studio-requalification', {detail: payload}));
   return payload;
 }
 
@@ -142,6 +213,7 @@ window.fetch = async function realsasStudioFetch(input, init = {}) {
       payload_sha256: revision.payload_sha256 || state.session.head.payload_sha256,
       requires_requalification: Boolean(revision.requires_requalification),
     };
+    state.requalification = null;
     window.dispatchEvent(new CustomEvent('realsas:studio-saved', {detail: revision}));
   } else if (response.status === 409) {
     window.dispatchEvent(new CustomEvent('realsas:studio-conflict', {
@@ -156,6 +228,8 @@ window.RealSaSStudioPersistence = {
   ensureSession,
   history,
   restore,
+  requestRequalification,
+  requalificationStatus,
 };
 
 const initialBundle = new URLSearchParams(window.location.search).get('bundle');

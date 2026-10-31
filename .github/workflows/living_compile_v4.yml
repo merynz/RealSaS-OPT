@@ -41,6 +41,7 @@ jobs:
         run: >-
           PYTHONPATH=. python -m unittest -v
           tests.product.test_living_compile_v4
+          tests.product.test_public_workspace_handoff
           tests.product.test_intake_worker
           tests.product.test_workspace_worker
       - name: Python syntax

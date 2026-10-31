@@ -9,6 +9,13 @@ import {StudioOperationJournal} from '../../product/living_compile/static/js/stu
 import {StudioSelection} from '../../product/living_compile/static/js/studio_selection.js';
 import {StudioToolContext} from '../../product/living_compile/static/js/studio_tool_context.js';
 import {StudioTimeline, keyID} from '../../product/living_compile/static/js/studio_timeline.js';
+import {
+  animatorControls,
+  deformControls,
+  derivePreviewJointPoses,
+  isAnimatorControl,
+  isDeformJoint,
+} from '../../product/living_compile/static/js/studio_control_semantics.js';
 
 const persistedLayer = {
   schema_version: 'RealSaS.UserPuppetEditLayer.v3',
@@ -84,6 +91,27 @@ tools.setCustomPivot([10, 20]);
 assert.equal(tools.pivotMode, 'custom');
 assert.deepEqual(tools.customPivot, [10, 20]);
 
+// Canonical animator controls and deform joints are distinct editor entities.
+// Animation tracks persist control ids; local preview may derive joint poses but
+// that approximation does not mint joint-track authority.
+const editorEntities = [
+  {control_id: 'J:ROOT', entity_kind: 'DEFORM_JOINT', participation: 'deform'},
+  {control_id: 'C:ROOT', entity_kind: 'ANIMATOR_CONTROL', participation: 'animation', target_joint_ids: ['J:ROOT']},
+];
+assert.equal(isDeformJoint(editorEntities[0]), true);
+assert.equal(isAnimatorControl(editorEntities[1]), true);
+assert.deepEqual(deformControls(editorEntities).map((row) => row.control_id), ['J:ROOT']);
+assert.deepEqual(animatorControls(editorEntities).map((row) => row.control_id), ['C:ROOT']);
+const preview = derivePreviewJointPoses(
+  [editorEntities[1]],
+  new Map([['C:ROOT', {translation_xy: [8, -2], rotation_degrees: 15, scale_xy: [1.1, 0.9]}]]),
+  new Map([['J:ROOT', {translation_xy: [2, 3], rotation_degrees: 5, scale_xy: [1, 1]}]]),
+);
+assert.deepEqual(preview.get('J:ROOT').translation_xy, [10, 1]);
+assert.equal(preview.get('J:ROOT').rotation_degrees, 20);
+assert.deepEqual(preview.get('J:ROOT').scale_xy, [1.1, 0.9]);
+assert.equal(preview.get('J:ROOT').preview_metadata.authoritative_constraint_owner, 'MECHANICS');
+
 // StudioTimeline is a real clip-authoring core: clips/tracks/keys are editable,
 // key selections are movable/copyable, interpolation is authored, and sampling
 // produces a transform preview without mutating the canonical ProductRevision.
@@ -94,26 +122,27 @@ assert.equal(clip.clip_id, 'WALK');
 assert.equal(animation.length, 1);
 
 timeline.setPlayhead(0);
-timeline.upsertTransformKey('ROOT', {translation_xy: [0, 0], rotation_degrees: 0, scale_xy: [1, 1]}, {curve: 'linear'});
+timeline.upsertTransformKey('C:ROOT', {translation_xy: [0, 0], rotation_degrees: 0, scale_xy: [1, 1]}, {curve: 'linear'});
 timeline.setPlayhead(1);
-timeline.upsertTransformKey('ROOT', {translation_xy: [10, 4], rotation_degrees: 90, scale_xy: [1.2, 0.8]}, {curve: 'bezier'});
+timeline.upsertTransformKey('C:ROOT', {translation_xy: [10, 4], rotation_degrees: 90, scale_xy: [1.2, 0.8]}, {curve: 'bezier'});
 assert.equal(clip.tracks.length, 1);
+assert.equal(clip.tracks[0].bone_id, 'C:ROOT');
 assert.equal(clip.tracks[0].keys.length, 2);
 
-const mid = timeline.sample('ROOT', 0.5);
+const mid = timeline.sample('C:ROOT', 0.5);
 assert.ok(mid.translation_xy[0] > 0 && mid.translation_xy[0] < 10);
 assert.ok(mid.rotation_degrees > 0 && mid.rotation_degrees < 90);
 
-timeline.selectKey('ROOT', 1);
-assert.equal(timeline.selectedKeys.has(keyID('ROOT', 1)), true);
+timeline.selectKey('C:ROOT', 1);
+assert.equal(timeline.selectedKeys.has(keyID('C:ROOT', 1)), true);
 assert.equal(timeline.copySelectedKeys(), 1);
 timeline.setPlayhead(1.5);
 assert.equal(timeline.pasteKeys(), 1);
 assert.equal(clip.tracks[0].keys.length, 3);
-assert.equal(timeline.selectedKeys.has(keyID('ROOT', 1.5)), true);
+assert.equal(timeline.selectedKeys.has(keyID('C:ROOT', 1.5)), true);
 
 timeline.moveSelectedKeys(-0.25, {snapToFrames: false});
-assert.equal(timeline.selectedKeys.has(keyID('ROOT', 1.25)), true);
+assert.equal(timeline.selectedKeys.has(keyID('C:ROOT', 1.25)), true);
 timeline.setSelectedCurve('step');
 const moved = clip.tracks[0].keys.find((item) => Math.abs(item.time_seconds - 1.25) <= 1e-6);
 assert.equal(moved.curve, 'step');

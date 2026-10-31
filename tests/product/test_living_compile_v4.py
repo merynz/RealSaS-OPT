@@ -155,6 +155,7 @@ class LivingCompileV4Tests(unittest.TestCase):
         app = LivingCompileApplication.default()
         with patch.dict(os.environ, {
             "REALSAS_PRODUCT_GATEWAY_URL": "",
+            "REALSAS_PRODUCT_GATEWAY_TOKEN": "",
             "REALSAS_PRODUCT_COMPILE_ENABLED": "",
         }, clear=False):
             status, payload, ctype = app.dispatch("GET", "/api/project")
@@ -169,7 +170,9 @@ class LivingCompileV4Tests(unittest.TestCase):
                 ["INPUT", "SHAPE", "MESH", "RIG", "SKIN", "MECHANICS", "GRAPHICS", "MOTION", "PROOF"],
             )
             self.assertIn("PUBLIC_PRODUCT_GATEWAY_NOT_CONFIGURED", payload["compile_blockers"])
+            self.assertIn("PUBLIC_PRODUCT_GATEWAY_TOKEN_NOT_CONFIGURED", payload["compile_blockers"])
             self.assertFalse(payload["authority"]["browser_receives_platform_internal_ids"])
+            self.assertFalse(payload["authority"]["browser_receives_gateway_service_token"])
             self.assertFalse(payload["authority"]["presentation_preview_has_product_authority"])
             self.assertEqual(payload["latency_targets"]["preview_seconds_max"], 30)
             self.assertEqual(payload["latency_targets"]["market_bar_full_compile_seconds_max"], 180)
@@ -177,10 +180,23 @@ class LivingCompileV4Tests(unittest.TestCase):
             with self.assertRaisesRegex(Exception, "production compile is fail-closed"):
                 app.dispatch("POST", "/api/compile/start", {})
 
+    def test_gateway_url_without_service_token_stays_fail_closed(self):
+        app = LivingCompileApplication.default()
+        with patch.dict(os.environ, {
+            "REALSAS_PRODUCT_GATEWAY_URL": "https://product-gateway.example",
+            "REALSAS_PRODUCT_GATEWAY_TOKEN": "",
+            "REALSAS_PRODUCT_COMPILE_ENABLED": "1",
+        }, clear=False):
+            project = app.project_capabilities()
+            self.assertFalse(project["compile_available"])
+            self.assertFalse(project["public_compile_gateway"])
+            self.assertIn("PUBLIC_PRODUCT_GATEWAY_TOKEN_NOT_CONFIGURED", project["compile_blockers"])
+
     def test_public_gateway_is_explicitly_enabled_and_internal_ids_are_stripped(self):
         app = LivingCompileApplication.default()
         env = {
             "REALSAS_PRODUCT_GATEWAY_URL": "https://product-gateway.example",
+            "REALSAS_PRODUCT_GATEWAY_TOKEN": "test-service-token",
             "REALSAS_PRODUCT_COMPILE_ENABLED": "1",
         }
         with patch.dict(os.environ, env, clear=False):
@@ -205,6 +221,7 @@ class LivingCompileV4Tests(unittest.TestCase):
         app = LivingCompileApplication.default()
         with patch.dict(os.environ, {
             "REALSAS_PRODUCT_GATEWAY_URL": "",
+            "REALSAS_PRODUCT_GATEWAY_TOKEN": "",
             "REALSAS_PRODUCT_COMPILE_ENABLED": "",
         }, clear=False):
             status, payload, _ = app.dispatch("GET", "/healthz")

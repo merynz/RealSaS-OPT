@@ -69,20 +69,27 @@ class LivingCompileApplication:
             raise LivingCompileError(f"{PRODUCT_GATEWAY_URL_ENV} must be an absolute http(s) URL")
         return raw
 
+    def _gateway_token(self) -> str:
+        return os.environ.get(PRODUCT_GATEWAY_TOKEN_ENV, "").strip()
+
     def _production_compile_enabled(self) -> bool:
-        return self._gateway_base() is not None and os.environ.get(PRODUCT_COMPILE_ENABLED_ENV, "").strip() == "1"
+        return (
+            self._gateway_base() is not None
+            and bool(self._gateway_token())
+            and os.environ.get(PRODUCT_COMPILE_ENABLED_ENV, "").strip() == "1"
+        )
 
     def _gateway_json(self, method: str, path: str, body: Json | None = None) -> tuple[int, Json]:
         base = self._gateway_base()
         if base is None:
             raise LivingCompileError("public product gateway is not configured")
+        token = self._gateway_token()
+        if not token:
+            raise LivingCompileError("public product gateway service token is not configured")
         data = None if body is None else json.dumps(body, separators=(",", ":")).encode("utf-8")
-        headers = {"Accept": "application/json"}
+        headers = {"Accept": "application/json", "Authorization": f"Bearer {token}"}
         if data is not None:
             headers["Content-Type"] = "application/json"
-        token = os.environ.get(PRODUCT_GATEWAY_TOKEN_ENV, "").strip()
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
         request = urllib.request.Request(base + path, data=data, headers=headers, method=method)
         try:
             with urllib.request.urlopen(request, timeout=PRODUCT_GATEWAY_TIMEOUT_SECONDS) as response:
@@ -95,7 +102,8 @@ class LivingCompileApplication:
             except Exception:
                 payload = {}
             message = payload.get("message") if isinstance(payload, dict) else None
-            raise LivingCompileError(message or f"product gateway rejected request with HTTP {exc.code}") from exc
+            error = payload.get("error") if isinstance(payload, dict) else None
+            raise LivingCompileError(message or error or f"product gateway rejected request with HTTP {exc.code}") from exc
         except urllib.error.URLError as exc:
             raise LivingCompileError(f"product gateway unavailable: {exc.reason}") from exc
         try:
@@ -120,11 +128,15 @@ class LivingCompileApplication:
     def project_capabilities(self) -> Json:
         bundle_root = product_bundle_root()
         gateway_configured = self._gateway_base() is not None
+        gateway_token_configured = bool(self._gateway_token())
+        compile_requested = os.environ.get(PRODUCT_COMPILE_ENABLED_ENV, "").strip() == "1"
         compile_available = self._production_compile_enabled()
         blockers: list[str] = []
         if not gateway_configured:
             blockers.append("PUBLIC_PRODUCT_GATEWAY_NOT_CONFIGURED")
-        elif not compile_available:
+        if not gateway_token_configured:
+            blockers.append("PUBLIC_PRODUCT_GATEWAY_TOKEN_NOT_CONFIGURED")
+        if not compile_requested:
             blockers.append("PRODUCT_COMPILE_NOT_ENABLED")
         return {
             "schema_version": "RealSaS.ProductCapabilities.v3",
@@ -132,7 +144,7 @@ class LivingCompileApplication:
             "mode": "AWAKEN_AND_EDIT_COMPILED_CHARACTER",
             "service_ready": True,
             "compile_available": compile_available,
-            "public_compile_gateway": gateway_configured,
+            "public_compile_gateway": gateway_configured and gateway_token_configured,
             "compile_blockers": blockers,
             "product_roles": [
                 "INPUT",
@@ -160,6 +172,7 @@ class LivingCompileApplication:
                 "runtime_preview_requires_proof_pass": True,
                 "compile_from_ui": compile_available,
                 "browser_receives_platform_internal_ids": False,
+                "browser_receives_gateway_service_token": False,
                 "heuristic_model_fallback_allowed": False,
                 "presentation_preview_has_product_authority": False,
             },
@@ -213,7 +226,7 @@ class LivingCompileApplication:
         if method == "POST" and parsed.path == "/api/compile/start":
             if not self._production_compile_enabled():
                 raise LivingCompileError(
-                    "production compile is fail-closed; configure the public product gateway and explicitly enable product compile"
+                    "production compile is fail-closed; configure the public product gateway, service token, and explicitly enable product compile"
                 )
             if not isinstance(body, dict):
                 raise LivingCompileError("JSON request body required")

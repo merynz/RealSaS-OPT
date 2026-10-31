@@ -30,12 +30,20 @@ type capabilityRunRequest struct {
 	RequestedBy      string                           `json:"requested_by"`
 }
 
-// HandlerWithCapabilityRun exposes the already-existing generic developer
-// capability command through the loopback operator API. The endpoint does not
-// mint product authority: SubmitCapabilityRun always creates a DEVELOPER_RUN
-// with promotion policy NEVER. The selected EngineRelease must also be bound to
-// the exact canonical-main SHA deployed by this API process, so an old or
-// branch-only release cannot be used to schedule current Engine work.
+type productCapabilityCompileRequest struct {
+	EngineReleaseID  uuid.UUID                       `json:"engine_release_id"`
+	SubjectID        uuid.UUID                       `json:"subject_id"`
+	InputArtifactIDs []uuid.UUID                     `json:"input_artifact_ids,omitempty"`
+	Parameters       map[string]any                  `json:"parameters,omitempty"`
+	CompilerBridge   capabilityCompilerBridgeRequest `json:"compiler_bridge"`
+	IdempotencyKey   string                          `json:"idempotency_key"`
+	RequestedBy      string                          `json:"requested_by"`
+}
+
+// HandlerWithCapabilityRun exposes both the generic developer capability run
+// and the fixed-terminal product compile command. Product compile never accepts
+// an arbitrary target: product.proof is selected inside the command layer and
+// only QUALIFIED_PRODUCT_ONLY may mint a ProductRevision.
 func (a API) HandlerWithCapabilityRun() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /v1/subjects/{subject}/inputs/{input}", func(w http.ResponseWriter, r *http.Request) {
@@ -100,6 +108,39 @@ func (a API) HandlerWithCapabilityRun() http.Handler {
 			CompilerBridge:   bridge,
 			IdempotencyKey:   req.IdempotencyKey,
 			RequestedBy:      req.RequestedBy,
+		})
+		result(w, out, err)
+	})
+	mux.HandleFunc("POST /v1/products/compile", func(w http.ResponseWriter, r *http.Request) {
+		var req productCapabilityCompileRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		if req.EngineReleaseID == uuid.Nil || req.SubjectID == uuid.Nil ||
+			req.CompilerBridge.SubjectInputID == uuid.Nil || req.IdempotencyKey == "" || req.RequestedBy == "" {
+			respond(w, http.StatusBadRequest, map[string]string{
+				"error": "engine_release_id, subject_id, compiler_bridge.subject_input_id, idempotency_key and requested_by are required",
+			})
+			return
+		}
+		if err := release.RequireCanonicalMain(r.Context(), a.Pool, req.EngineReleaseID, a.CodeSHA); err != nil {
+			result(w, nil, err)
+			return
+		}
+		out, err := command.SubmitProductCapabilityCompile(r.Context(), a.Pool, command.ProductCapabilityCompileRequest{
+			EngineReleaseID:  req.EngineReleaseID,
+			SubjectID:        req.SubjectID,
+			InputArtifactIDs: append([]uuid.UUID(nil), req.InputArtifactIDs...),
+			Parameters:       req.Parameters,
+			CompilerBridge: command.CapabilityCompilerBridge{
+				SubjectInputID:     req.CompilerBridge.SubjectInputID,
+				CompilerRunID:      req.CompilerBridge.CompilerRunID,
+				RunManifestPath:    req.CompilerBridge.RunManifestPath,
+				RunLedgerPath:      req.CompilerBridge.RunLedgerPath,
+				PipelinePlanSHA256: req.CompilerBridge.PipelinePlanSHA256,
+			},
+			IdempotencyKey: req.IdempotencyKey,
+			RequestedBy:    req.RequestedBy,
 		})
 		result(w, out, err)
 	})

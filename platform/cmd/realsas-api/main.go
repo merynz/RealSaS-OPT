@@ -52,12 +52,10 @@ func main() {
 		os.Exit(1)
 	}
 	handler := (httpapi.API{
-		Pool:                pool,
-		Graph:               graph,
-		Store:               store,
-		CodeSHA:             sourceCodeSHA,
-		ProductGatewayToken: os.Getenv("REALSAS_PRODUCT_GATEWAY_TOKEN"),
-		OperatorToken:       os.Getenv("REALSAS_OPERATOR_TOKEN"),
+		Pool:    pool,
+		Graph:   graph,
+		Store:   store,
+		CodeSHA: sourceCodeSHA,
 	}).HandlerWithProductWorkspace()
 	server := &http.Server{
 		Addr:              "127.0.0.1:8080",

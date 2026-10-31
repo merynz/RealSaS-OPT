@@ -182,6 +182,7 @@ func TestShippingProductCompileDBCourt(t *testing.T) {
 			requirement.ArchitectureID, artifactID, sealedRelease.ReleaseID, sourceCodeSHA); err != nil {
 			t.Fatal(err)
 		}
+		installProductE2EProductionPolicy(t, ctx, pool, requirement, modelID, artifactID, suffix)
 		if _, err := pool.Exec(ctx, `
 			INSERT INTO model_channels(family,channel,model_release_id,lock_version)
 			VALUES ($1,'PRODUCTION',$2,0)

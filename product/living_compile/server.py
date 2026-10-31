@@ -34,12 +34,17 @@ _INTERNAL_KEYS = {
     "artifact_id",
     "artifact_ids",
     "attempt_id",
+    "authoring_revision_id",
     "command_id",
     "engine_release_id",
     "execution_goal_id",
     "input_artifact_ids",
     "model_release_id",
     "model_release_ids",
+    "product_revision_id",
+    "session_id",
+    "source_compile_session_id",
+    "source_product_revision_id",
 }
 
 

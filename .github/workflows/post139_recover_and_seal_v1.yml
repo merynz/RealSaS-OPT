@@ -8,7 +8,7 @@ on:
       - 'canonical/POST139_ACQUISITION_PINS_V1.json'
       - 'canonical/POST139_SUBJECT_POLICY_V1.json'
       - 'tools/corpus/post139_acquire_resilient_v1.py'
-      - 'tools/corpus/post139_acquire_itch_actor_lane_v1.py'
+      - 'tools/corpus/post139_acquire_drive_actor_lane_v2.py'
       - 'tools/corpus/post139_rebind_candidate_manifest_v1.py'
       - 'tools/corpus/post139_compile_inventory_v2.py'
       - 'tools/corpus/post139_corpus_authority_v1.py'
@@ -52,10 +52,10 @@ jobs:
       - name: Install acquisition and Blender runtime dependencies
         run: |
           set -euo pipefail
-          python -m pip install --quiet 'gdown==5.2.0'
+          python -m pip install --quiet 'gdown==5.2.0' 'requests>=2.32,<3'
           python -m py_compile \
             tools/corpus/post139_acquire_resilient_v1.py \
-            tools/corpus/post139_acquire_itch_actor_lane_v1.py
+            tools/corpus/post139_acquire_drive_actor_lane_v2.py
           sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 update -qq
           sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 install -y --no-install-recommends \
             libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 libgl1 unzip
@@ -91,7 +91,7 @@ jobs:
           echo "POST139_SOURCE_ROOT=$root" >> "$GITHUB_ENV"
           case "$source_id" in
             quaternius-platformer-kit|quaternius-cube-world|quaternius-sushi-restaurant)
-              python tools/corpus/post139_acquire_itch_actor_lane_v1.py \
+              python tools/corpus/post139_acquire_drive_actor_lane_v2.py \
                 --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
                 --pins canonical/POST139_ACQUISITION_PINS_V1.json \
                 --source-id "$source_id" \

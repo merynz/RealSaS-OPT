@@ -118,7 +118,7 @@ class PlatformClient:
             with urllib.request.urlopen(request, timeout=max(30, self.config.lease_seconds)) as response:
                 status = int(response.status)
                 payload = response.read(70 * 1024 * 1024)
-                response_headers = {k: v for k, v in response.headers.items()}
+                response_headers = {str(k).lower(): v for k, v in response.headers.items()}
         except urllib.error.HTTPError as exc:
             payload = exc.read(2 * 1024 * 1024)
             try:
@@ -165,8 +165,8 @@ class PlatformClient:
         )
         return (
             payload,
-            headers.get("Content-Type", "application/octet-stream"),
-            headers.get("X-RealSaS-Original-Name", f"{slot}.bin"),
+            headers.get("content-type", "application/octet-stream"),
+            headers.get("x-realsas-original-name", f"{slot}.bin"),
         )
 
     def complete(self, compile_id: str, lease_token: str, payload: bytes) -> dict[str, Any]:

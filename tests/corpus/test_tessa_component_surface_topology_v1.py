@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from models.tessa.truth.component_surface_topology_v1 import load_tessa_surface_topology_v1
+from tools.training.tessa_component_surface_topology_v1 import load_tessa_surface_topology_v1
 from tools.training.validate_corpus_mechanical_tessa_teacher_v4 import validate
 
 

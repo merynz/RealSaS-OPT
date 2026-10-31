@@ -48,6 +48,9 @@ func (a API) HandlerWithCapabilityRun() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /v1/product/compiles", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.ProductGatewayToken, "PRODUCT_GATEWAY") {
+			return
+		}
 		var req publicproduct.StartRequest
 		if !decode(w, r, &req) {
 			return
@@ -62,6 +65,9 @@ func (a API) HandlerWithCapabilityRun() http.Handler {
 		result(w, out, err)
 	})
 	mux.HandleFunc("GET /v1/product/compiles/{id}", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.ProductGatewayToken, "PRODUCT_GATEWAY") {
+			return
+		}
 		out, err := publicproduct.GetStatus(r.Context(), a.Pool, r.PathValue("id"))
 		if errors.Is(err, publicproduct.ErrCompileNotFound) {
 			respond(w, http.StatusNotFound, map[string]string{"error": err.Error()})
@@ -74,6 +80,9 @@ func (a API) HandlerWithCapabilityRun() http.Handler {
 		respond(w, http.StatusOK, out)
 	})
 	mux.HandleFunc("POST /v1/operator/product-release-channel", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
 		var req struct {
 			EngineReleaseID uuid.UUID `json:"engine_release_id"`
 			Actor           string    `json:"actor"`
@@ -91,6 +100,9 @@ func (a API) HandlerWithCapabilityRun() http.Handler {
 		result(w, out, err)
 	})
 	mux.HandleFunc("GET /v1/operator/product/compiles/{id}/raw-views", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
 		out, err := publicproduct.RawViewArtifactIDs(r.Context(), a.Pool, r.PathValue("id"))
 		if errors.Is(err, publicproduct.ErrCompileNotFound) {
 			respond(w, http.StatusNotFound, map[string]string{"error": err.Error()})
@@ -103,6 +115,9 @@ func (a API) HandlerWithCapabilityRun() http.Handler {
 		respond(w, http.StatusOK, map[string]any{"public_id": r.PathValue("id"), "raw_view_artifact_ids": out})
 	})
 	mux.HandleFunc("POST /v1/operator/product/compiles/{id}/source-observation", func(w http.ResponseWriter, r *http.Request) {
+		if !requireBearer(w, r, a.OperatorToken, "OPERATOR") {
+			return
+		}
 		var req struct {
 			ArtifactID uuid.UUID `json:"artifact_id"`
 			Actor      string    `json:"actor"`

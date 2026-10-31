@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/merynz/RealSaS-OPT/platform/internal/publicproduct"
 )
 
 func (a API) ProductGatewayToken() string {
@@ -35,4 +37,13 @@ func requireBearer(w http.ResponseWriter, r *http.Request, expected func() strin
 		return false
 	}
 	return true
+}
+
+func requireProductOwner(w http.ResponseWriter, r *http.Request) (string, bool) {
+	owner, err := publicproduct.NormalizeOwnerKeySHA256(r.Header.Get(publicproduct.ProductOwnerHeader))
+	if err != nil {
+		respond(w, http.StatusUnauthorized, map[string]string{"error": err.Error()})
+		return "", false
+	}
+	return owner, true
 }

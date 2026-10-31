@@ -18,6 +18,7 @@ import (
 const (
 	AuthoringLayerSchema = "RealSaS.UserPuppetEditLayer.v3"
 	maxAuthoringBytes    = 4 << 20
+	maxRevisionHistory   = 200
 )
 
 var (
@@ -59,6 +60,26 @@ type Revision struct {
 	RequiresRequalification bool      `json:"requires_requalification"`
 	CreatedAt               time.Time `json:"created_at"`
 	Idempotent              bool      `json:"idempotent"`
+}
+
+type Head struct {
+	ProjectID               string          `json:"project_id"`
+	CompileID               string          `json:"compile_id"`
+	RevisionNumber          int64           `json:"revision_number"`
+	LockVersion             int64           `json:"lock_version"`
+	PayloadSHA256           string          `json:"payload_sha256,omitempty"`
+	AuthoringPayload        json.RawMessage `json:"authoring_payload"`
+	RequiresRequalification bool            `json:"requires_requalification"`
+	UpdatedAt               time.Time       `json:"updated_at"`
+}
+
+type RevisionSummary struct {
+	RevisionNumber          int64     `json:"revision_number"`
+	PayloadSHA256           string    `json:"payload_sha256"`
+	RequiresRequalification bool      `json:"requires_requalification"`
+	CreatedBy               string    `json:"created_by"`
+	CreatedAt               time.Time `json:"created_at"`
+	IsHead                  bool      `json:"is_head"`
 }
 
 type projectIdentity struct {
@@ -146,6 +167,83 @@ func GetProject(ctx context.Context, pool *pgxpool.Pool, projectID string) (Proj
 		return Project{}, ErrProjectNotFound
 	}
 	return loadProjectByPublicID(ctx, pool, projectID)
+}
+
+func GetHead(ctx context.Context, pool *pgxpool.Pool, projectID string) (Head, error) {
+	projectID = strings.TrimSpace(projectID)
+	if pool == nil || !projectIDPattern.MatchString(projectID) {
+		return Head{}, ErrProjectNotFound
+	}
+	var out Head
+	var payload []byte
+	err := pool.QueryRow(ctx, `
+		SELECT p.public_id, s.public_id, COALESCE(ar.revision_number,0), h.lock_version,
+		       COALESCE(ar.payload_sha256,''), COALESCE(ar.authoring_payload,'null'::jsonb),
+		       (ar.id IS NOT NULL), h.updated_at
+		FROM studio_projects p
+		JOIN public_product_compile_sessions s ON s.id=p.source_compile_session_id
+		JOIN studio_project_heads h ON h.project_id=p.id
+		LEFT JOIN studio_authoring_revisions ar ON ar.id=h.authoring_revision_id
+		WHERE p.public_id=$1
+	`, projectID).Scan(
+		&out.ProjectID, &out.CompileID, &out.RevisionNumber, &out.LockVersion,
+		&out.PayloadSHA256, &payload, &out.RequiresRequalification, &out.UpdatedAt,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return Head{}, ErrProjectNotFound
+	}
+	if err != nil {
+		return Head{}, err
+	}
+	out.AuthoringPayload = json.RawMessage(payload)
+	return out, nil
+}
+
+func ListRevisions(ctx context.Context, pool *pgxpool.Pool, projectID string, limit int) ([]RevisionSummary, error) {
+	projectID = strings.TrimSpace(projectID)
+	if pool == nil || !projectIDPattern.MatchString(projectID) {
+		return nil, ErrProjectNotFound
+	}
+	if limit <= 0 {
+		limit = 50
+	}
+	if limit > maxRevisionHistory {
+		limit = maxRevisionHistory
+	}
+	rows, err := pool.Query(ctx, `
+		SELECT ar.revision_number, ar.payload_sha256, ar.requires_requalification,
+		       ar.created_by, ar.created_at, (h.authoring_revision_id=ar.id)
+		FROM studio_projects p
+		JOIN studio_project_heads h ON h.project_id=p.id
+		JOIN studio_authoring_revisions ar ON ar.project_id=p.id
+		WHERE p.public_id=$1
+		ORDER BY ar.revision_number DESC
+		LIMIT $2
+	`, projectID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make([]RevisionSummary, 0, limit)
+	for rows.Next() {
+		var item RevisionSummary
+		if err := rows.Scan(
+			&item.RevisionNumber, &item.PayloadSHA256, &item.RequiresRequalification,
+			&item.CreatedBy, &item.CreatedAt, &item.IsHead,
+		); err != nil {
+			return nil, err
+		}
+		out = append(out, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if len(out) == 0 {
+		if _, err := GetProject(ctx, pool, projectID); err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
 }
 
 func SaveRevision(ctx context.Context, pool *pgxpool.Pool, projectID string, req SaveRequest) (Revision, error) {

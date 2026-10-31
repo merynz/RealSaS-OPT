@@ -92,19 +92,30 @@ func SubmitProductRequalification(
 		Satisfied:       append([]string(nil), req.SatisfiedCapabilities...),
 		PromotionPolicy: capability.PromotionQualifiedProductOnly,
 	}
-	resolved, err := goal.Validate(snapshot.Registry)
+	executionResolved, err := goal.Validate(snapshot.Registry)
 	if err != nil {
 		return CapabilityReceipt{}, err
 	}
-	resolvedIDs := make([]string, 0, len(resolved))
-	for _, descriptor := range resolved {
+	executionIDs := make([]string, 0, len(executionResolved))
+	for _, descriptor := range executionResolved {
 		if descriptor.Kind == capability.KindStage {
 			return CapabilityReceipt{}, fmt.Errorf("PRODUCT_REQUALIFICATION_LEGACY_STAGE_DEPENDENCY_FORBIDDEN:%s", descriptor.ID)
 		}
-		resolvedIDs = append(resolvedIDs, descriptor.ID)
+		executionIDs = append(executionIDs, descriptor.ID)
 	}
-	if len(resolvedIDs) == 0 || resolvedIDs[len(resolvedIDs)-1] != capability.ProductProofCapabilityID {
+	if len(executionIDs) == 0 || executionIDs[len(executionIDs)-1] != capability.ProductProofCapabilityID {
 		return CapabilityReceipt{}, errors.New("PRODUCT_REQUALIFICATION_PROOF_TERMINAL_REQUIRED")
+	}
+	fullResolved, err := snapshot.Registry.Resolve(capability.ProductProofCapabilityID)
+	if err != nil {
+		return CapabilityReceipt{}, err
+	}
+	closureIDs := make([]string, 0, len(fullResolved))
+	for _, descriptor := range fullResolved {
+		if descriptor.Kind == capability.KindStage {
+			return CapabilityReceipt{}, fmt.Errorf("PRODUCT_REQUALIFICATION_LEGACY_STAGE_DEPENDENCY_FORBIDDEN:%s", descriptor.ID)
+		}
+		closureIDs = append(closureIDs, descriptor.ID)
 	}
 
 	satisfied := append([]string(nil), req.SatisfiedCapabilities...)
@@ -143,6 +154,7 @@ func SubmitProductRequalification(
 		"studio_authoring_artifact_id": req.AuthoringArtifactID.String(),
 		"satisfied_capability_ids":     satisfied,
 		"invalidated_domains":          invalidated,
+		"execution_capability_ids":     executionIDs,
 	}
 	spec := map[string]any{
 		"schema":                       "RealSaS.ProductRequalificationSpec.v1",
@@ -158,12 +170,13 @@ func SubmitProductRequalification(
 			"schema_version":  schemaVersion,
 			"semantic_sha256": authoringSemanticSHA,
 		},
-		"target":                capability.ProductProofCapabilityID,
-		"resolved_capabilities": resolvedIDs,
-		"satisfied_capabilities": satisfied,
-		"invalidated_domains":   invalidated,
-		"base_model_releases":   modelRows,
-		"promotion_policy":      string(capability.PromotionQualifiedProductOnly),
+		"target":                         capability.ProductProofCapabilityID,
+		"authority_closure_capabilities": closureIDs,
+		"execution_capabilities":         executionIDs,
+		"satisfied_capabilities":         satisfied,
+		"invalidated_domains":            invalidated,
+		"base_model_releases":            modelRows,
+		"promotion_policy":               string(capability.PromotionQualifiedProductOnly),
 	}
 	specSHA, err := semantic.JSONSHA256(spec)
 	if err != nil {
@@ -262,7 +275,7 @@ func SubmitProductRequalification(
 		}
 
 		targetsJSON, _ := json.Marshal([]string{capability.ProductProofCapabilityID})
-		resolvedJSON, _ := json.Marshal(resolvedIDs)
+		closureJSON, _ := json.Marshal(closureIDs)
 		paramsJSON, _ := json.Marshal(params)
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO execution_goals(
@@ -270,7 +283,7 @@ func SubmitProductRequalification(
 				resolved_capability_ids,parameters,spec_sha256
 			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 		`, goalID, attemptID, string(capability.GoalProductRequalification),
-			string(capability.PromotionQualifiedProductOnly), targetsJSON, resolvedJSON, paramsJSON, specSHA); err != nil {
+			string(capability.PromotionQualifiedProductOnly), targetsJSON, closureJSON, paramsJSON, specSHA); err != nil {
 			return err
 		}
 		if _, err := tx.Exec(ctx, `
@@ -281,17 +294,17 @@ func SubmitProductRequalification(
 		}
 
 		payload := map[string]any{
-			"schema":                    "RealSaS.RunCapabilityCommand.v1",
-			"command_id":                commandID.String(),
-			"attempt_id":                attemptID.String(),
-			"execution_goal_id":         goalID.String(),
-			"engine_release_id":         releaseID.String(),
-			"subject_id":                subjectID.String(),
-			"capability_set_sha256":     snapshot.CapabilitySetSHA256,
-			"spec_sha256":               specSHA,
-			"product_requalification":   true,
-			"base_product_revision_id":  req.BaseProductRevisionID.String(),
-			"authoring_artifact_id":      req.AuthoringArtifactID.String(),
+			"schema":                   "RealSaS.RunCapabilityCommand.v1",
+			"command_id":               commandID.String(),
+			"attempt_id":               attemptID.String(),
+			"execution_goal_id":        goalID.String(),
+			"engine_release_id":        releaseID.String(),
+			"subject_id":               subjectID.String(),
+			"capability_set_sha256":    snapshot.CapabilitySetSHA256,
+			"spec_sha256":              specSHA,
+			"product_requalification":  true,
+			"base_product_revision_id": req.BaseProductRevisionID.String(),
+			"authoring_artifact_id":    req.AuthoringArtifactID.String(),
 		}
 		if err := insertCommand(ctx, tx, commandID, RunCapability, subjectID, req.IdempotencyKey, payload); err != nil {
 			return err
@@ -300,13 +313,14 @@ func SubmitProductRequalification(
 			return err
 		}
 		if err := appendAudit(ctx, tx, req.RequestedBy, "PRODUCT_REQUALIFICATION_ACCEPTED", subjectID, &attemptID, &req.AuthoringArtifactID, map[string]any{
-			"command_id":               commandID.String(),
-			"execution_goal_id":        goalID.String(),
-			"base_product_revision_id": req.BaseProductRevisionID.String(),
-			"resolved_capabilities":    resolvedIDs,
-			"satisfied_capabilities":   satisfied,
-			"invalidated_domains":      invalidated,
-			"promotion_policy":         string(capability.PromotionQualifiedProductOnly),
+			"command_id":                    commandID.String(),
+			"execution_goal_id":             goalID.String(),
+			"base_product_revision_id":      req.BaseProductRevisionID.String(),
+			"authority_closure_capabilities": closureIDs,
+			"execution_capabilities":         executionIDs,
+			"satisfied_capabilities":         satisfied,
+			"invalidated_domains":            invalidated,
+			"promotion_policy":               string(capability.PromotionQualifiedProductOnly),
 		}); err != nil {
 			return err
 		}

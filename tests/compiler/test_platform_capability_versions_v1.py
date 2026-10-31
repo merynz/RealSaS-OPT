@@ -49,16 +49,27 @@ def test_product_capability_implementations_are_complete_and_semantic():
     ]
     assert specs["product.proof"]["parameters"]["responsibility_ids"] == ["proof.product_pass_decision"]
     assert "rig.frame_observability_qualification" not in str(specs["product.rig"])
+
+    product_input = specs["product.input"]
+    assert product_input["parameters"]["camera_output_artifact_type"] == "RealSaS.QualifiedCameraSetIR"
+    assert product_input["parameters"]["observation_output_artifact_type"] == "RealSaS.QualifiedObservationSetIR"
+    assert product_input["parameters"]["normalization_output_artifact_type"] == "RealSaS.NormalizationDomainIR"
+    assert product_input["parameters"]["source_qualification_owner"] == "PRODUCT_INPUT"
+    assert product_input["parameters"]["legacy_compiler_stage_bridge_required"] is False
+
     assert specs["product.shape"]["parameters"]["required_models"] == [
         {"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"},
         {"family": "TESSA", "architecture_id": "RealSaS.TESSA.Structuralizer.v3"},
     ]
 
     mesh = specs["product.mesh"]
-    assert mesh["policy"]["dependencies"] == [
-        "product.shape", "compiler.stage/05_CAMERA_CONTRACT_SOLVED",
-        "compiler.stage/07_OBSERVATION_CONTRACT_QUALIFIED", "compiler.stage/08_NORMALIZATION_DOMAIN_QUALIFIED",
-    ]
+    assert mesh["policy"]["dependencies"] == ["product.input", "product.shape"]
+    assert not any(str(dep).startswith("compiler.stage/") for dep in mesh["policy"]["dependencies"])
+    assert mesh["parameters"]["input_camera_artifact_type"] == "RealSaS.QualifiedCameraSetIR"
+    assert mesh["parameters"]["input_observation_artifact_type"] == "RealSaS.QualifiedObservationSetIR"
+    assert mesh["parameters"]["input_normalization_artifact_type"] == "RealSaS.NormalizationDomainIR"
+    assert mesh["parameters"]["source_qualification_parent"] == "product.input"
+    assert mesh["parameters"]["legacy_compiler_stage_bridge_required"] is False
     assert mesh["parameters"]["required_models"] == []
     assert mesh["parameters"]["fit_allowed_during_product_execution"] is False
     assert mesh["parameters"]["legacy_ir_fit_stage_dependency"] is False

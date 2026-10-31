@@ -11,6 +11,7 @@ import numpy as np
 from compiler.realsas_compiler_services.platform_worker.source_observation_contract_v1 import (
     encode_source_observation_arrays_v1,
 )
+from product.living_compile.authoring import save_user_layer
 from product.living_compile.scene import build_scene
 from product.workspace_worker.materialize_workspace_v1 import materialize
 
@@ -225,6 +226,11 @@ class WorkspaceMaterializerV1Tests(unittest.TestCase):
             self.assertTrue(scene["proof"]["passed"])
             self.assertEqual(scene["counts"]["views"], 8)
             self.assertEqual(scene["counts"]["meshes"], 8)
+            self.assertEqual(scene["counts"]["deform_joints"], 1)
+            self.assertEqual(scene["counts"]["animator_controls"], 1)
+            self.assertEqual(scene["puppet"]["rig"]["controls"][0]["control_id"], "J:ROOT")
+            self.assertEqual(scene["puppet"]["rig"]["animator_controls"][0]["control_id"], "C:ROOT")
+            self.assertEqual(scene["puppet"]["rig"]["editable_motion_space"], "ANIMATOR_CONTROLS")
             self.assertEqual(len(scene["index"]["source_views"]), 8)
 
             product = json.loads((bundle / "puppet" / "canonical_puppet_graph_v3.json").read_text())
@@ -238,6 +244,44 @@ class WorkspaceMaterializerV1Tests(unittest.TestCase):
             self.assertEqual(len(manifest["support_artifacts"]), 1)
             self.assertFalse(manifest["authority"]["workspace_projection_is_authority"])
             self.assertFalse(manifest["support_artifacts"][0]["product_authority"])
+
+            result = save_user_layer(bundle, {
+                "view_id": "V0",
+                "animation_edits": [{
+                    "clip_id": "USER_WAVE",
+                    "display_name": "Wave",
+                    "duration_seconds": 1.0,
+                    "fps": 30,
+                    "loop": False,
+                    "tracks": [{
+                        "control_id": "C:ROOT",
+                        "keys": [
+                            {
+                                "time_seconds": 0.0,
+                                "translation_xy": [0.0, 0.0],
+                                "rotation_degrees": 0.0,
+                                "scale_xy": [1.0, 1.0],
+                                "curve": "bezier",
+                                "bezier": [0.25, 0.1, 0.25, 1.0],
+                            },
+                            {
+                                "time_seconds": 0.5,
+                                "translation_xy": [12.0, 0.0],
+                                "rotation_degrees": 20.0,
+                                "scale_xy": [1.0, 1.0],
+                                "curve": "linear",
+                            },
+                        ],
+                    }],
+                }],
+            })
+            layer = json.loads(Path(result["path"]).read_text(encoding="utf-8"))
+            self.assertEqual(layer["metadata"]["animation_track_space"], "ANIMATOR_CONTROLS")
+            self.assertEqual(layer["animation_edits"][0]["fps"], 30.0)
+            self.assertEqual(layer["animation_edits"][0]["tracks"][0]["control_id"], "C:ROOT")
+            self.assertEqual(layer["animation_edits"][0]["tracks"][0]["bone_id"], "C:ROOT")
+            self.assertEqual(layer["animation_edits"][0]["tracks"][0]["keys"][0]["curve"], "bezier")
+            self.assertEqual(layer["animation_edits"][0]["tracks"][0]["keys"][0]["bezier"], [0.25, 0.1, 0.25, 1.0])
 
     def test_lineage_mismatch_fails_closed(self):
         with tempfile.TemporaryDirectory() as temp_dir:

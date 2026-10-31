@@ -95,6 +95,9 @@ def test_nonmanifold_edge_prevents_false_sign_authority():
 
 
 def test_render_seam_duplicates_collapse_only_within_same_owner():
+    # Four oriented tetra faces, but every face owns its own transport/render
+    # vertex copies. The exact same-owner quotient must recover four topology
+    # vertices without treating the transport duplicates as distinct geometry.
     vertices = np.asarray(
         [
             [0, 0, 0], [1, 0, 0], [0, 1, 0],
@@ -104,13 +107,19 @@ def test_render_seam_duplicates_collapse_only_within_same_owner():
         ],
         dtype=np.float64,
     )
-    faces = np.asarray([[0, 2, 1], [3, 6, 5], [7, 8, 6], [9, 10, 11]], dtype=np.int64)
+    faces = np.asarray(
+        [
+            [0, 2, 1],    # A,C,B
+            [3, 6, 5],    # A,B,D
+            [9, 10, 8],   # A,D,C
+            [11, 4, 7],   # B,C,D
+        ],
+        dtype=np.int64,
+    )
     authority = build_component_geometry_authority_v1(
         vertices, faces, np.zeros(4, dtype=np.int32)
     )
+    assert np.all(authority.raw_to_topology_vertex >= 0)
     assert len(authority.topology_vertices) == 4
-    # Raw vertex 4 is deliberately unreferenced: only referenced transport vertices
-    # participate in the quotient, so 11 referenced - 4 topology = 7 collapses.
-    assert authority.raw_to_topology_vertex[4] == -1
-    assert authority.exact_duplicate_collapse_count == 7
+    assert authority.exact_duplicate_collapse_count == 8
     assert np.count_nonzero(authority.sign_component_valid) == 1

@@ -31,19 +31,19 @@ type capabilityRunRequest struct {
 }
 
 type productCapabilityCompileRequest struct {
-	EngineReleaseID  uuid.UUID                       `json:"engine_release_id"`
-	SubjectID        uuid.UUID                       `json:"subject_id"`
-	InputArtifactIDs []uuid.UUID                     `json:"input_artifact_ids,omitempty"`
-	Parameters       map[string]any                  `json:"parameters,omitempty"`
-	CompilerBridge   capabilityCompilerBridgeRequest `json:"compiler_bridge"`
-	IdempotencyKey   string                          `json:"idempotency_key"`
-	RequestedBy      string                          `json:"requested_by"`
+	EngineReleaseID  uuid.UUID      `json:"engine_release_id"`
+	SubjectID        uuid.UUID      `json:"subject_id"`
+	InputArtifactIDs []uuid.UUID    `json:"input_artifact_ids"`
+	Parameters       map[string]any `json:"parameters,omitempty"`
+	IdempotencyKey   string         `json:"idempotency_key"`
+	RequestedBy      string         `json:"requested_by"`
 }
 
 // HandlerWithCapabilityRun exposes both the generic developer capability run
 // and the fixed-terminal product compile command. Product compile never accepts
-// an arbitrary target: product.proof is selected inside the command layer and
-// only QUALIFIED_PRODUCT_ONLY may mint a ProductRevision.
+// an arbitrary target or a legacy Compiler-run bridge: product.proof is selected
+// inside the command layer and only QUALIFIED_PRODUCT_ONLY may mint a
+// ProductRevision.
 func (a API) HandlerWithCapabilityRun() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /v1/subjects/{subject}/inputs/{input}", func(w http.ResponseWriter, r *http.Request) {
@@ -116,10 +116,10 @@ func (a API) HandlerWithCapabilityRun() http.Handler {
 		if !decode(w, r, &req) {
 			return
 		}
-		if req.EngineReleaseID == uuid.Nil || req.SubjectID == uuid.Nil ||
-			req.CompilerBridge.SubjectInputID == uuid.Nil || req.IdempotencyKey == "" || req.RequestedBy == "" {
+		if req.EngineReleaseID == uuid.Nil || req.SubjectID == uuid.Nil || len(req.InputArtifactIDs) == 0 ||
+			req.IdempotencyKey == "" || req.RequestedBy == "" {
 			respond(w, http.StatusBadRequest, map[string]string{
-				"error": "engine_release_id, subject_id, compiler_bridge.subject_input_id, idempotency_key and requested_by are required",
+				"error": "engine_release_id, subject_id, input_artifact_ids, idempotency_key and requested_by are required",
 			})
 			return
 		}
@@ -132,15 +132,8 @@ func (a API) HandlerWithCapabilityRun() http.Handler {
 			SubjectID:        req.SubjectID,
 			InputArtifactIDs: append([]uuid.UUID(nil), req.InputArtifactIDs...),
 			Parameters:       req.Parameters,
-			CompilerBridge: command.CapabilityCompilerBridge{
-				SubjectInputID:     req.CompilerBridge.SubjectInputID,
-				CompilerRunID:      req.CompilerBridge.CompilerRunID,
-				RunManifestPath:    req.CompilerBridge.RunManifestPath,
-				RunLedgerPath:      req.CompilerBridge.RunLedgerPath,
-				PipelinePlanSHA256: req.CompilerBridge.PipelinePlanSHA256,
-			},
-			IdempotencyKey: req.IdempotencyKey,
-			RequestedBy:    req.RequestedBy,
+			IdempotencyKey:   req.IdempotencyKey,
+			RequestedBy:      req.RequestedBy,
 		})
 		result(w, out, err)
 	})

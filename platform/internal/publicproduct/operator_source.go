@@ -142,9 +142,9 @@ func StartFromSourceObservation(
 			"attempt_id":                     receipt.AttemptID,
 			"source_observation_artifact_id": sourceObservationID,
 			"release_channel_lock_version":   channel.LockVersion,
-			"ingress":                         "OPERATOR_EXACT_SOURCE_OBSERVATION",
-			"raw_public_views_created":        false,
-			"intake_job_created":              false,
+			"ingress":                        "OPERATOR_EXACT_SOURCE_OBSERVATION",
+			"raw_public_views_created":       false,
+			"intake_job_created":             false,
 		})
 		_, err := tx.Exec(ctx, `
 			INSERT INTO audit_events(actor,action,subject_id,attempt_id,artifact_id,payload)

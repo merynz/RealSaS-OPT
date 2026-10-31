@@ -43,9 +43,6 @@ GEOMETRY_STATUS = "PASS_COMPONENT_GEOMETRY_AUTHORITY_CANDIDATE__INDEPENDENT_COUR
 GEOMETRY_COURT_SCHEMA = "RealSaS.ComponentGeometryAuthorityCourt.v1"
 GEOMETRY_COURT_STATUS = "PASS_COMPONENT_GEOMETRY_AUTHORITY_INDEPENDENT_COURT__FINAL_ADMISSION_SEPARATE"
 
-
-# Keep the 3D SAT implementation introduced by TESSA V3 rather than the historical
-# planar/legacy helper behind impl.has_self_intersection.
 impl.has_self_intersection = has_self_intersection_3d
 
 
@@ -147,7 +144,6 @@ def build(
         geometry_manifest_path, geometry_court_path, subject_id
     )
     source = load_tessa_surface_topology_v1(topology_path)
-    # The adapter above has already fail-closed if any source face is invalid.
     raw_to_q = np.asarray(source.raw_to_topology_vertex, dtype=np.int64)
     source_v_declared = np.asarray(source.vertices_source_world, dtype=np.float64)
     source_f = np.asarray(source.faces, dtype=np.int64)
@@ -182,11 +178,12 @@ def build(
 
     if len(raw_to_q) != len(raw_rest) or len(raw_faces) != len(source_f):
         raise ValueError("TESSA_V4_RAW_TOPOLOGY_BINDING")
-    if not np.array_equal(raw_faces, np.asarray(gm.get("counts") and raw_faces)):
-        # Deliberately no-op semantic guard removed below; exact face remap is checked
-        # by quotient cardinality and source declared vertices. Kept as explicit branch
-        # avoidance: raw render faces and quotient faces need not be numerically equal.
-        pass
+    if np.any(raw_to_q[raw_faces] < 0) or not np.array_equal(raw_to_q[raw_faces], source_f):
+        raise ValueError("TESSA_V4_STAGE47_FACE_QUOTIENT_DRIFT")
+    expected_face_owner = qowner[source_f[:, 0]]
+    if raw_owner.shape != (len(raw_faces),) or not np.array_equal(raw_owner, expected_face_owner):
+        raise ValueError("TESSA_V4_STAGE47_FACE_OWNER_DRIFT")
+
     scale = max(float(np.linalg.norm(raw_rest.max(0) - raw_rest.min(0))), 1.0e-9)
     tolerance = max(scale * 1.0e-9, 1.0e-11)
     source_v, rest_duplicate_drift = collapse_positions(
@@ -286,6 +283,8 @@ def build(
             "sign_component_relation_consumed": False,
             "sdf_or_occupancy_truth_consumed": False,
             "render_vertex_identity_used_as_topology": False,
+            "stage47_render_faces_exactly_remap_to_geometry_topology": True,
+            "stage47_face_owner_exact": True,
             "maximum_rest_duplicate_trajectory_drift": float(rest_duplicate_drift),
             "maximum_posed_duplicate_trajectory_drift": float(posed_duplicate_drift),
             "maximum_declared_rest_drift_over_scale": float(max_rest_drift / scale),

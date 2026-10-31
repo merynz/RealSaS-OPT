@@ -58,8 +58,6 @@ type requalificationHead struct {
 }
 
 var animationRequalificationSatisfied = []string{
-	capability.ProductInputCapabilityID,
-	capability.ProductShapeCapabilityID,
 	capability.ProductMeshCapabilityID,
 	capability.ProductRigCapabilityID,
 	capability.ProductSkinCapabilityID,

@@ -1,4 +1,4 @@
-import {keyID} from './studio_timeline.js';
+import {keyID, trackControlID} from './studio_timeline.js';
 
 const $ = (selector) => document.querySelector(selector);
 const clamp = (value, lo, hi) => Math.max(lo, Math.min(hi, value));
@@ -20,9 +20,6 @@ function boot() {
   let saveTimer = null;
 
   studio.selection.addEventListener('change', () => {
-    // app.js owns the Inspector renderer. Replaying the active mode action is a
-    // cheap local bridge that refreshes it without coupling StudioSelection to
-    // the legacy workspace module.
     document.querySelector('.mode.active')?.click();
   });
 
@@ -33,6 +30,7 @@ function boot() {
   for (const selector of ['#undoEdit', '#redoEdit']) {
     $(selector)?.addEventListener('click', () => queueMicrotask(() => {
       timeline.bind(S.ed.animation);
+      refreshPreview();
     }));
   }
 
@@ -50,7 +48,7 @@ function boot() {
     const clip = activeClip();
     if (!clip) return;
     const hit = hitKey(event, clip);
-    if (!hit) return; // preserve animation_editor scrubbing on empty timeline space
+    if (!hit) return;
     event.stopImmediatePropagation();
     event.preventDefault();
 
@@ -84,6 +82,7 @@ function boot() {
     timeline.moveSelectedKeys(delta, {snapToFrames: !event.altKey});
     dirty.markDirty();
     keyDrag.changed = true;
+    refreshPreview();
   }
 
   function onKeyPointerUp(event) {
@@ -94,6 +93,7 @@ function boot() {
     if (keyDrag.changed) {
       journal.commit('Move animation keys', keyDrag.before, documentModel.snapshot());
       dirty.markDirty();
+      refreshPreview();
       scheduleSave();
     }
     keyDrag = null;
@@ -105,6 +105,7 @@ function boot() {
     documentModel.replace(keyDrag.before);
     timeline.bind(S.ed.animation);
     timeline.selectedKeys = new Set(keyDrag.selected);
+    refreshPreview();
     keyDrag = null;
   }
 
@@ -116,17 +117,25 @@ function boot() {
     let best = null;
     let distance = 13;
     (clip.tracks || []).forEach((track, row) => {
+      const controlID = trackControlID(track);
       const ky = 28 + row * rowHeight;
       for (const key of track.keys || []) {
         const kx = clamp(key.time_seconds / Math.max(1e-6, clip.duration_seconds), 0, 1) * dope.width;
         const d = Math.hypot(kx - x, ky - y);
         if (d < distance) {
           distance = d;
-          best = {controlID: track.bone_id, time: key.time_seconds, id: keyID(track.bone_id, key.time_seconds)};
+          best = {controlID, time: key.time_seconds, id: keyID(controlID, key.time_seconds)};
         }
       }
     });
     return best;
+  }
+
+  function refreshPreview() {
+    if (!activeClip()) return;
+    window.dispatchEvent(new CustomEvent('realsas:studio-animation-pose-changed', {
+      detail: {clip_id: S.clip, time_seconds: S.t},
+    }));
   }
 
   function scheduleSave() {

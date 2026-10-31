@@ -8,6 +8,7 @@ on:
       - 'canonical/POST139_ACQUISITION_PINS_V1.json'
       - 'canonical/POST139_SUBJECT_POLICY_V1.json'
       - 'tools/corpus/post139_acquire_resilient_v1.py'
+      - 'tools/corpus/post139_acquire_itch_actor_lane_v1.py'
       - 'tools/corpus/post139_rebind_candidate_manifest_v1.py'
       - 'tools/corpus/post139_compile_inventory_v2.py'
       - 'tools/corpus/post139_corpus_authority_v1.py'
@@ -52,6 +53,9 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --quiet 'gdown==5.2.0'
+          python -m py_compile \
+            tools/corpus/post139_acquire_resilient_v1.py \
+            tools/corpus/post139_acquire_itch_actor_lane_v1.py
           sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 update -qq
           sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 install -y --no-install-recommends \
             libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 libgl1 unzip
@@ -82,14 +86,26 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          root="$RUNNER_TEMP/post139/${{ matrix.source_id }}"
+          source_id='${{ matrix.source_id }}'
+          root="$RUNNER_TEMP/post139/$source_id"
           echo "POST139_SOURCE_ROOT=$root" >> "$GITHUB_ENV"
-          python tools/corpus/post139_acquire_resilient_v1.py \
-            --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
-            --source-id '${{ matrix.source_id }}' \
-            --out "$root" \
-            --attempts 3 \
-            --base-delay-seconds 15
+          case "$source_id" in
+            quaternius-platformer-kit|quaternius-cube-world|quaternius-sushi-restaurant)
+              python tools/corpus/post139_acquire_itch_actor_lane_v1.py \
+                --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
+                --pins canonical/POST139_ACQUISITION_PINS_V1.json \
+                --source-id "$source_id" \
+                --out "$root"
+              ;;
+            *)
+              python tools/corpus/post139_acquire_resilient_v1.py \
+                --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
+                --source-id "$source_id" \
+                --out "$root" \
+                --attempts 3 \
+                --base-delay-seconds 15
+              ;;
+          esac
 
       - name: Produce source byte ledger and candidate manifest
         shell: bash

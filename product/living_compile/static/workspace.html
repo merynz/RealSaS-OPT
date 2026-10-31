@@ -46,8 +46,11 @@
     <button class="mode" data-mode="ik">IK</button>
     <button class="mode" data-mode="animation">ANIMATION</button>
     <span class="separator"></span>
+    <button id="undoEdit" title="Undo · Ctrl/Cmd+Z" disabled>UNDO</button>
+    <button id="redoEdit" title="Redo · Ctrl/Cmd+Shift+Z" disabled>REDO</button>
+    <span id="studioState" class="active-stage" data-state="clean">UNSAVED · CLEAN</span>
     <span id="activeProductStage" class="active-stage">INPUT</span>
-    <button id="saveLayer">SAVE EDITS</button>
+    <button id="saveLayer" title="Save · Ctrl/Cmd+S">SAVE EDITS</button>
     <button id="exportRuntime" class="primary">EXPORT</button>
   </nav>
 

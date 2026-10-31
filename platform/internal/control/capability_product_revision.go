@@ -187,6 +187,10 @@ func (a Activities) FinalizeCapabilityProduct(ctx context.Context, request map[s
 	if err != nil {
 		return orchestration.CapabilityWorkflowResult{}, err
 	}
+	expectedReleaseID, err := uuid.Parse(command.EngineReleaseID)
+	if err != nil || expectedReleaseID == uuid.Nil {
+		return orchestration.CapabilityWorkflowResult{}, errors.New("CAPABILITY_PRODUCT_FINALIZE_ENGINE_RELEASE_ID_INVALID")
+	}
 
 	sealedContract, err := product.SealContract(
 		ctx,
@@ -207,15 +211,18 @@ func (a Activities) FinalizeCapabilityProduct(ctx context.Context, request map[s
 		}
 
 		var subjectID, releaseID uuid.UUID
-		var finalState string
+		var attemptKind, finalState string
 		if err := tx.QueryRow(ctx, `
-			SELECT subject_id,engine_release_id,final_state
+			SELECT subject_id,engine_release_id,kind,final_state
 			FROM attempts WHERE id=$1 FOR UPDATE
-		`, attemptID).Scan(&subjectID, &releaseID, &finalState); err != nil {
+		`, attemptID).Scan(&subjectID, &releaseID, &attemptKind, &finalState); err != nil {
 			return err
 		}
-		if releaseID == uuid.Nil {
-			return errors.New("CAPABILITY_PRODUCT_FINALIZE_ENGINE_RELEASE_REQUIRED")
+		if releaseID != expectedReleaseID {
+			return errors.New("CAPABILITY_PRODUCT_FINALIZE_ENGINE_RELEASE_DRIFT")
+		}
+		if attemptKind != "compile_candidate" {
+			return fmt.Errorf("CAPABILITY_PRODUCT_FINALIZE_ATTEMPT_KIND:%s", attemptKind)
 		}
 		if finalState != "OPEN" && finalState != "QUALIFIED" {
 			return fmt.Errorf("CAPABILITY_PRODUCT_FINALIZE_ATTEMPT_STATE:%s", finalState)

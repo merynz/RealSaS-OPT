@@ -5,7 +5,8 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[2]
-STATIC_JS = ROOT / "product" / "living_compile" / "static" / "js"
+STATIC = ROOT / "product" / "living_compile" / "static"
+STATIC_JS = STATIC / "js"
 
 
 class AwakenProductionWiringTests(unittest.TestCase):
@@ -19,6 +20,19 @@ class AwakenProductionWiringTests(unittest.TestCase):
         self.assertIn("/api/compile/status?id=", source)
         self.assertIn("/api/compile/workspace?id=", source)
         self.assertIn("workspace.workspace_url", source)
+
+    def test_front_back_authority_is_visible_and_swap_changes_real_file_order(self):
+        html = (STATIC / "index.html").read_text(encoding="utf-8")
+        slots = (STATIC_JS / "awaken_input_slots.js").read_text(encoding="utf-8")
+        self.assertIn('data-input-slot="front"', html)
+        self.assertIn('id="frontSlotFile">REQUIRED', html)
+        self.assertIn('data-input-slot="back"', html)
+        self.assertIn('id="backSlotFile">OPTIONAL', html)
+        self.assertIn('id="swapInputViews"', html)
+        self.assertIn("transfer.items.add(selected[1])", slots)
+        self.assertIn("transfer.items.add(selected[0])", slots)
+        self.assertIn("input.files = transfer.files", slots)
+        self.assertIn("input.dispatchEvent(new Event('change'", slots)
 
     def test_studio_shell_cannot_start_a_source_compile(self):
         source = (STATIC_JS / "product_shell.js").read_text(encoding="utf-8")

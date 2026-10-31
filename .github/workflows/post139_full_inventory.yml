@@ -7,6 +7,7 @@ on:
       - '.github/workflows/post139_full_inventory.yml'
       - 'canonical/POST139_SOURCE_REGISTRY_V1.json'
       - 'tools/corpus/post139_source_inventory_v1.py'
+      - 'tools/corpus/post139_consolidate_publisher_inventory_v1.py'
       - 'tools/corpus/post139_build_audit_manifest_v1.py'
       - 'tools/corpus/post139_audit_v1.py'
       - 'tools/corpus/blender_post139_source_structure_v1.py'
@@ -53,10 +54,10 @@ jobs:
   audit-source:
     needs: preflight
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 2
       matrix:
         source_id:
           - quaternius-ultimate-monsters
@@ -152,10 +153,17 @@ jobs:
           inventory=json.loads((root/'inventory/SOURCE_INVENTORY.json').read_text())
           audit=json.loads((root/'audit/POST139_AUDIT_INDEX.json').read_text())
           print('POST139_PACK_SUMMARY', json.dumps({
-            'source_id':receipt['source_id'], 'raw_files':inventory['raw_file_count'],
-            'raw_bytes':inventory['raw_total_bytes'], 'representation_groups':inventory['representation_group_count'],
-            'audit_candidates':inventory['audit_candidate_count'], 'audited':audit['audited_count'],
-            'failures':audit['failure_count'], 'statuses':audit['status_counts'],
+            'source_id':receipt['source_id'],
+            'publisher_files':inventory.get('publisher_file_count'),
+            'publisher_representation_groups':inventory.get('publisher_representation_group_count'),
+            'acquired_files':inventory['raw_file_count'],
+            'acquired_bytes':inventory['raw_total_bytes'],
+            'canonical_representation_groups':inventory['representation_group_count'],
+            'audit_candidates':inventory['audit_candidate_count'],
+            'audited':audit['audited_count'],
+            'failures':audit['failure_count'],
+            'statuses':audit['status_counts'],
+            'publisher_tree_digest':inventory.get('publisher_tree_digest'),
             'raw_ledger_sha256':inventory['raw_ledger_sha256'],
           }, sort_keys=True))
           PY
@@ -201,17 +209,25 @@ jobs:
           done
           echo "POST139_WORKSPACE=$workspace" >> "$GITHUB_ENV"
           find "$workspace" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort
-      - name: Build global exact inventory and fail-closed freeze evidence
+      - name: Consolidate exact publisher inventory
         run: |
           out="$RUNNER_TEMP/post139-global"
+          mkdir -p "$out"
+          python tools/corpus/post139_consolidate_publisher_inventory_v1.py \
+            --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
+            --workspace "$POST139_WORKSPACE" \
+            --out "$out/POST139_EXACT_PUBLISHER_INVENTORY.json" || true
+          echo "POST139_GLOBAL_OUT=$out" >> "$GITHUB_ENV"
+      - name: Build global dedup and fail-closed freeze evidence
+        run: |
+          out="$POST139_GLOBAL_OUT"
           python tools/corpus/post139_global_freeze_v1.py \
             --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
             --workspace "$POST139_WORKSPACE" \
             --out "$out" \
             --allow-not-ready
           cat "$out/POST139_FREEZE_REPORT.json"
-          echo "POST139_GLOBAL_OUT=$out" >> "$GITHUB_ENV"
-      - name: Upload global inventory and freeze evidence
+      - name: Upload global exact inventory and freeze evidence
         uses: actions/upload-artifact@v4
         with:
           name: post139-global-freeze-${{ github.sha }}
@@ -220,13 +236,15 @@ jobs:
           retention-days: 14
       - name: Materialization readiness gate
         run: |
-          python - "$POST139_GLOBAL_OUT/POST139_FREEZE_REPORT.json" <<'PY'
+          python - "$POST139_GLOBAL_OUT/POST139_FREEZE_REPORT.json" "$POST139_GLOBAL_OUT/POST139_EXACT_PUBLISHER_INVENTORY.json" <<'PY'
           import json,sys
           from pathlib import Path
           report=json.loads(Path(sys.argv[1]).read_text())
+          publisher=json.loads(Path(sys.argv[2]).read_text()) if Path(sys.argv[2]).is_file() else {'status':'MISSING'}
+          print('POST139_PUBLISHER_INVENTORY_STATUS', publisher['status'])
           print('POST139_FINAL_STATUS', report['status'])
           print('POST139_PRIMARY_MATERIALIZATION_SUBJECTS', report['primary_materialization_subject_count'])
           print('POST139_BLOCKERS', report['blocker_count'])
-          if report['status'] != 'PASS_MATERIALIZATION_READY':
+          if publisher['status'] != 'COMPLETE' or report['status'] != 'PASS_MATERIALIZATION_READY':
               raise SystemExit(2)
           PY

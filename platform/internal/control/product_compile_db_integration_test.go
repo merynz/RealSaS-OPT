@@ -144,8 +144,11 @@ func TestShippingProductCompileDBCourt(t *testing.T) {
 		t.Fatal("shipping capability set sha missing")
 	}
 
-	suffix := uuid.NewString()
 	sourceCodeSHA := strings.Repeat("c", 40)
+	if _, err := release.BindCanonicalMain(ctx, pool, sealedRelease.ReleaseID, sourceCodeSHA, "product-e2e"); err != nil {
+		t.Fatal(err)
+	}
+	suffix := uuid.NewString()
 	modelIDs := map[string]uuid.UUID{}
 	for _, requirement := range modelRequirements {
 		artifactTypeID := uuid.New()

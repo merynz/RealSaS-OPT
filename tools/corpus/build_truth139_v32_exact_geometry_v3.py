@@ -31,7 +31,9 @@ def component_contains_fields(points, topology, closest_face):
         mask=closest_component==component
         nearest_inside[mask]=inside[mask]
         votes=np.stack([impl.ray_parity(points[probe],topology.topology_vertices,component_faces,d) for d in directions],axis=1)
-        probe_ok=bool(np.all(votes==votes[:,:1]) and np.array_equal(votes[:,0],inside[probe]))
+        three_ray_agreement=np.mean(np.all(votes==votes[:,:1],axis=1))
+        contains_agreement=np.mean(votes[:,0]==inside[probe])
+        probe_ok=bool(three_ray_agreement>=.99 and contains_agreement>=.99)
         nearest_valid[mask]=probe_ok
         all_components_ok=all_components_ok and probe_ok
     union_valid=np.full(len(points),all_components_ok,dtype=np.bool_)

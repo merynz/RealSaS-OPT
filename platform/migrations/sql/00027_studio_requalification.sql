@@ -3,9 +3,9 @@
 -- Requalification is a distinct production Attempt class. It may reuse exact
 -- qualified authority from one immutable base ProductRevision, but it can only
 -- mint a new ProductRevision after the terminal Proof capability passes.
-ALTER TABLE attempts DROP CONSTRAINT attempts_kind_check;
-ALTER TABLE attempts ADD CONSTRAINT attempts_kind_check
-    CHECK (kind IN ('research','repair','compile_candidate','requalification_candidate'));
+ALTER TABLE attempts DROP CONSTRAINT IF EXISTS ck_attempt_kind_dynamic;
+ALTER TABLE attempts ADD CONSTRAINT ck_attempt_kind_dynamic
+    CHECK (kind IN ('research','repair','compile_candidate','developer','proof','requalification_candidate'));
 
 CREATE TABLE studio_requalification_requests (
     id uuid PRIMARY KEY,
@@ -76,6 +76,6 @@ DROP FUNCTION realsas_studio_requalification_identity_immutable();
 DROP INDEX ix_studio_requalification_requests_state_created;
 DROP INDEX ix_studio_requalification_requests_project_created;
 DROP TABLE studio_requalification_requests;
-ALTER TABLE attempts DROP CONSTRAINT attempts_kind_check;
-ALTER TABLE attempts ADD CONSTRAINT attempts_kind_check
-    CHECK (kind IN ('research','repair','compile_candidate'));
+ALTER TABLE attempts DROP CONSTRAINT IF EXISTS ck_attempt_kind_dynamic;
+ALTER TABLE attempts ADD CONSTRAINT ck_attempt_kind_dynamic
+    CHECK (kind IN ('research','repair','compile_candidate','developer','proof'));

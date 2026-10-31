@@ -70,3 +70,8 @@ jobs:
             tests/tools/test_post139_training_consumer_v1.py
       - name: Summary
         run: echo 'POST139_AUTHORITY_CONTRACTS_PASS'
+
+  recover-and-seal:
+    needs: contracts
+    if: github.event_name == 'push' && github.ref == 'refs/heads/post139-corpus-audit-v1'
+    uses: ./.github/workflows/post139_recover_and_seal_v1.yml

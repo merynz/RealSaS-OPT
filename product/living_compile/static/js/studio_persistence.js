@@ -69,6 +69,48 @@ async function history(limit = 50) {
   return payload.revisions || [];
 }
 
+async function restore(revisionNumber) {
+  const target = Number(revisionNumber);
+  if (!Number.isInteger(target) || target <= 0) throw new Error('Valid Studio revision required');
+  const session = await ensureSession(state.bundle);
+  const projectID = session?.project?.project_id;
+  const lockVersion = Number(session?.head?.lock_version);
+  if (!projectID || !Number.isInteger(lockVersion) || !state.bundle) {
+    throw new Error('Persisted Studio session required before restore');
+  }
+
+  const response = await nativeFetch('/api/studio/restore', {
+    method: 'POST',
+    cache: 'no-store',
+    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      bundle: state.bundle,
+      project_id: projectID,
+      expected_lock_version: lockVersion,
+      revision_number: target,
+    }),
+  });
+  const payload = await readJson(response);
+  if (!response.ok) {
+    if (response.status === 409) {
+      window.dispatchEvent(new CustomEvent('realsas:studio-conflict', {
+        detail: payload || {error: 'STUDIO_REVISION_CONFLICT'},
+      }));
+    }
+    throw new Error(payload?.message || payload?.error || `Studio restore unavailable (${response.status})`);
+  }
+  if (
+    payload?.schema_version !== 'RealSaS.StudioRestore.v1'
+    || payload?.head?.project_id !== projectID
+    || !Number.isInteger(Number(payload?.head?.lock_version))
+  ) {
+    throw new Error('Studio restore returned an invalid head');
+  }
+  state.session = {...session, head: payload.head};
+  window.dispatchEvent(new CustomEvent('realsas:studio-restored', {detail: payload}));
+  return payload;
+}
+
 window.fetch = async function realsasStudioFetch(input, init = {}) {
   const path = requestPath(input);
   const method = String(init?.method || (typeof input !== 'string' ? input?.method : '') || 'GET').toUpperCase();
@@ -113,6 +155,7 @@ window.RealSaSStudioPersistence = {
   state,
   ensureSession,
   history,
+  restore,
 };
 
 const initialBundle = new URLSearchParams(window.location.search).get('bundle');

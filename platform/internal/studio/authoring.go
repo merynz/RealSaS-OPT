@@ -21,9 +21,9 @@ const (
 )
 
 var (
-	ErrProjectNotFound        = errors.New("STUDIO_PROJECT_NOT_FOUND")
-	ErrCompileNotReady        = errors.New("STUDIO_COMPILE_NOT_READY")
-	ErrRevisionConflict       = errors.New("STUDIO_REVISION_CONFLICT")
+	ErrProjectNotFound         = errors.New("STUDIO_PROJECT_NOT_FOUND")
+	ErrCompileNotReady         = errors.New("STUDIO_COMPILE_NOT_READY")
+	ErrRevisionConflict        = errors.New("STUDIO_REVISION_CONFLICT")
 	ErrAuthoringPayloadInvalid = errors.New("STUDIO_AUTHORING_PAYLOAD_INVALID")
 )
 

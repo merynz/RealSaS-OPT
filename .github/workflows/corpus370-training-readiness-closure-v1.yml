@@ -1,0 +1,55 @@
+name: corpus370-training-readiness-closure-v1
+
+on:
+  push:
+    branches:
+      - alfred/corpus370-training-readiness-closure-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  closure-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate closure contract JSON
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('canonical/CORPUS370_TRAINING_READINESS_CLOSURE_V1.json')
+          data = json.loads(p.read_text())
+          assert data['schema'] == 'RealSaS.Corpus370TrainingReadinessClosure.v1'
+          assert data['candidate_universe']['total_candidates'] == 370
+          assert data['training_authorized'] is False
+          assert data['historical_authority']['truth139_training_authorized_is_inventory_only'] is True
+          assert data['historical_authority']['historical_112_27_split_inherited'] is False
+          assert data['global_sdf']['requires'] == 'EXPLICIT_QUALIFIED_SOLID_ENTITY_OR_ASSEMBLY'
+          print('CORPUS370_CLOSURE_CONTRACT_PASS')
+          PY
+
+      - name: Validate closure narrative exists
+        run: |
+          test -s docs/corpus/CORPUS370_TRAINING_READINESS_CLOSURE_V1.md
+          grep -q '370 × family authority matrix' docs/corpus/CORPUS370_TRAINING_READINESS_CLOSURE_V1.md
+          echo CORPUS370_CLOSURE_NARRATIVE_PASS
+
+      - name: Refuse premature training authority
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('canonical/CORPUS370_TRAINING_READINESS_CLOSURE_V1.json').read_text())
+          if data.get('training_authorized'):
+              raise SystemExit('training_authorized must remain false until sealed readiness exists')
+          print('TRAINING_REMAINS_CLOSED_PASS')
+          PY

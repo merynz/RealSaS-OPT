@@ -15,6 +15,8 @@ these imports do not establish parity with historical admitted imports.
 | Measurement | Candidate rows |
 | --- | ---: |
 | Authored joints and nonzero skin weights | 328 |
+| All referenced vertices weighted (subset of 328) | 286 |
+| Partially weighted geometry (subset of 328) | 42 |
 | No authored joints in this import | 42 |
 | Multiple active mesh owners | 152 |
 | Every face belongs to a closed, consistently oriented vertex-manifold component | 69 |
@@ -23,6 +25,30 @@ The last row is a topological prerequisite, not a global SDF or animation-ready
 mesh count. Self-intersection, nesting, the chosen assembly boundary, raw/import
 equivalence, motion responses and consumer courts remain separate. Mesh ownership
 is an authored address, not a semantic label or evidence of modularity.
+
+The independent MeshLab intersection probe inspected all 69 closed-component
+candidates: 49 scenes had intersecting faces; 7 contained a component with detected
+self-intersection. These counts overlap. The probe is a diagnostic, not a solid
+assembly/nesting qualification, and does not authorize any global sign rows.
+
+Coincident-position inspection found duplicate positions within a single owner in
+279 candidates. Five candidates contain at least one such group with conflicting
+normalized skin weights at the declared 1e-6 diagnostic threshold. Rest position
+coincidence must not silently authorize a mechanical weld. Equal weights alone
+also do not replace full source/import/deformation equivalence.
+
+Historical evidence was also reopened without regeneration: all 973 ledger refs
+matched their hashes; all 139 geometry and RGB courts passed. The additional check
+reconstructed all 32,768 surface rows and 8,192 addressed distance rows per subject
+and independently queried 96 nearest distances per subject. Oriented source
+triangle-position multisets matched fresh imports for all 139; 128 also matched
+vertex/face arrays in their original order. Row order is not surface identity, and
+this geometric comparison does not claim full admitted import/skin equivalence.
+All 139 historical geometry manifests contain zero valid global sign rows.
+
+All 139 historical TESSA teachers selected SOURCE_FALLBACK and are rejected by the
+current court with LEGACY_CANDIDATE_REEVALUATION_REQUIRED. Geometry/RGB numerical
+reuse candidates and mechanical teacher qualification are separate outcomes.
 
 ## Reproduction from recovered source and inventory inputs
 

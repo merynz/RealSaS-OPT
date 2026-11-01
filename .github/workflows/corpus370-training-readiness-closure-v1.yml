@@ -1,0 +1,59 @@
+name: corpus370-training-readiness-closure-v1
+
+on:
+  push:
+    branches:
+      - corpus400-training-readiness-closure-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-training-readiness-closure-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  authority-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install narrow dependencies
+        run: python -m pip install --disable-pip-version-check numpy scipy pillow pytest trimesh fast-simplification
+
+      - name: Compile Corpus370 closure entrypoints
+        run: |
+          python -m py_compile \
+            tools/corpus/audit_corpus370_raw_source_capabilities_v1.py \
+            tools/corpus/build_corpus370_exact_source_roster_v1.py \
+            tools/corpus/build_corpus370_family_evidence_from_subject_sweeps_v1.py \
+            tools/corpus/build_corpus370_global_sdf_composite_evidence_v1.py \
+            tools/corpus/build_corpus370_subject_family_authority_matrix_v1.py \
+            tools/corpus/derive_corpus370_model_rosters_v1.py \
+            tools/corpus/plan_corpus370_family_authority_work_v1.py
+
+      - name: Run fail-closed authority tests
+        run: |
+          pytest -q \
+            tests/corpus/test_corpus370_subject_family_authority_matrix_v1.py
+
+      - name: Publish branch-scope notice
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          # Corpus370 readiness closure
+
+          This branch job validates source-side contracts only.
+
+          - It does not mint family authority.
+          - It does not create TRAIN / UNSEEN membership.
+          - It does not authorize training.
+          - Heavy 370-subject truth execution remains Platform Experiment -> Campaign -> Attempt owned and must bind an exact deployed revision.
+          EOF

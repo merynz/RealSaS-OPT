@@ -41,6 +41,7 @@ jobs:
             tools/corpus/build_corpus370_lineage_groups_v1.py \
             tools/corpus/seal_corpus370_lineage_split_v1.py \
             tools/corpus/plan_corpus370_family_authority_work_v1.py \
+            tools/corpus/gltf_bind_scene_v1.py \
             tools/corpus/build_gltf_rig_skin_authority_v1.py \
             tools/corpus/build_gltf_animation_authority_v1.py \
             tools/corpus/blender_fbx_rig_skin_replay_v1.py \
@@ -54,8 +55,11 @@ jobs:
             tools/corpus/run_corpus370_observation_sweep_v1.py \
             tools/corpus/prepare_corpus370_observation_packets_v2.py \
             tools/corpus/run_corpus370_observation_sweep_v2.py \
+            tools/corpus/rescue_corpus370_observation_packets_v3.py \
             tools/corpus/prepare_corpus370_platform_truth_bundle_v1.py \
+            tools/corpus/prepare_corpus370_platform_truth_bundle_v2.py \
             tools/platform_truth_cohort_bootstrap_v1.py \
+            tools/platform_observation_truth_cohort_bootstrap_v2.py \
             tools/truth_foundry/platform_corpus370_truth_operator_v1.py \
             tools/truth_foundry/observe_corpus370_truth_v1.py
 
@@ -63,6 +67,7 @@ jobs:
         run: |
           pytest -q \
             tests/corpus/test_corpus370_subject_family_authority_matrix_v1.py \
+            tests/corpus/test_gltf_bind_scene_uint8_offset_v1.py \
             tests/corpus/test_gltf_rig_skin_authority_e2e_v1.py \
             tests/corpus/test_gltf_animation_authority_v1.py \
             tests/corpus/test_gltf2_glb_authority_v1.py \
@@ -70,6 +75,7 @@ jobs:
             tests/corpus/test_corpus370_rig_skin_evidence_v1.py \
             tests/corpus/test_corpus370_authority_matrix_markdown_v1.py \
             tests/corpus/test_corpus370_source_transport_provenance_v1.py \
+            tests/corpus/test_corpus370_platform_family_input_bundle_v2.py \
             tests/corpus/test_corpus370_lineage_groups_v1.py \
             tests/corpus/test_corpus370_lineage_split_v1.py \
             tests/corpus/test_corpus370_truth_platform_contract_v1.py

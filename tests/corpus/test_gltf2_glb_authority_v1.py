@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import struct
 from pathlib import Path
@@ -7,9 +8,21 @@ from pathlib import Path
 import numpy as np
 
 from tools.corpus.build_gltf_animation_authority_v1 import build as build_animation
+from tools.corpus.build_gltf_animation_canonical_replay_v1 import build as build_replay
 from tools.corpus.build_gltf_rig_skin_authority_v1 import build as build_rig_skin
 from tools.corpus.validate_gltf_animation_authority_v1 import validate as validate_animation
+from tools.corpus.validate_gltf_animation_canonical_replay_v1 import validate as validate_replay
 from tools.corpus.validate_gltf_rig_skin_authority_v1 import validate as validate_rig_skin
+
+
+def _sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _write_json(path: Path, value: dict) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n")
+    return path
 
 
 def _align(blob: bytearray, value: int = 4) -> None:
@@ -116,3 +129,56 @@ def test_glb_uses_same_exact_gltf2_rig_skin_and_animation_courts(tmp_path: Path)
     animation_court = validate_animation(animation_manifest)
     assert animation_court["status"] == "PASS_GLTF_ANIMATION_KINEMATICS_SOURCE_COURT__CANONICAL_REPLAY_REQUIRED"
     assert animation_court["authority"]["training_authorized"] is False
+
+
+def test_glb_canonical_animation_replay_uses_binary_safe_source_reader(tmp_path: Path) -> None:
+    source = tmp_path / "subject.glb"
+    _write_glb(source)
+
+    rig_dir = tmp_path / "rig"
+    animation_dir = tmp_path / "animation"
+    build_rig_skin(source, rig_dir)
+    animation_manifest = build_animation(source, animation_dir)
+    animation_court = validate_animation(animation_manifest)
+
+    rig_manifest_path = rig_dir / "GLTF_RIG_SKIN_AUTHORITY_MANIFEST_V1.json"
+    animation_manifest_path = animation_dir / "GLTF_ANIMATION_KINEMATICS_MANIFEST_V1.json"
+    animation_court_path = _write_json(animation_dir / "GLTF_ANIMATION_KINEMATICS_COURT_V1.json", animation_court)
+    teacher_path = _write_json(
+        tmp_path / "teacher.json",
+        {
+            "schema": "RealSaS.TestTeacherScene.v1",
+            "subject_key": "subject_glb",
+            "calibration": {"native_control_frames_privileged": [{"name": "Root"}]},
+        },
+    )
+    importer_court_path = tmp_path / "GLTF_IMPORTED_RIG_SKIN_EQUIVALENCE_COURT_V1.json"
+    importer_court = {
+        "schema": "RealSaS.GltfImportedRigSkinEquivalenceCourt.v1",
+        "status": "PASS_GLTF_IMPORTED_RIG_SKIN_EQUIVALENCE__FINAL_ADMISSION_SEPARATE",
+        "subject_id": "subject_glb",
+        "inputs": {
+            "raw_source": {"path": str(source.resolve()), "sha256": _sha(source)},
+            "teacher_scene": {"path": str(teacher_path.resolve()), "sha256": _sha(teacher_path)},
+        },
+        "authority": {"importer_equivalence_passed": True, "training_authorized": False},
+    }
+    _write_json(importer_court_path, importer_court)
+
+    replay_path = tmp_path / "GLTF_ANIMATION_CANONICAL_REPLAY_V1.json"
+    replay = build_replay(
+        animation_manifest_path,
+        animation_court_path,
+        rig_manifest_path,
+        importer_court_path,
+        teacher_path,
+        replay_path,
+    )
+    assert replay["status"] == "PASS_GLTF_ANIMATION_CANONICAL_REPLAY_CANDIDATE__INDEPENDENT_COURT_REQUIRED"
+    assert replay["subject_id"] == "subject_glb"
+    assert replay["policy"]["gltf_and_glb_share_same_source_reader"] is True
+
+    replay_court = validate_replay(replay_path)
+    assert replay_court["status"] == "PASS_GLTF_ANIMATION_CANONICAL_REPLAY_INDEPENDENT_COURT__FINAL_ADMISSION_SEPARATE"
+    assert replay_court["family_candidate_outcomes"]["ANIMATION_KINEMATICS"] == "QUALIFIED_CORE_CANDIDATE"
+    assert replay_court["authority"]["training_authorized"] is False

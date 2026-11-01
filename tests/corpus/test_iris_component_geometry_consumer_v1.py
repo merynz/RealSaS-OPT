@@ -91,17 +91,10 @@ def build_fixture(tmp_path: Path):
     return manifest_path, court_path, recipe_path
 
 
-def test_consumer_court_binds_masked_global_sign_and_local_surface_sign_separately(tmp_path):
+def test_component_geometry_cannot_feed_a_global_sign_recipe(tmp_path):
     manifest_path, court_path, recipe_path = build_fixture(tmp_path)
-    receipt = validate_consumer(CONTRACT, recipe_path, manifest_path, court_path)
-    assert receipt["status"] == "PASS_IRIS_COMPONENT_GEOMETRY_CONSUMER_SEMANTICS__TRAINING_READINESS_SEPARATE"
-    assert receipt["target_bindings"]["surface_distance"]["valid_count"] == 256
-    assert 0 < receipt["target_bindings"]["global_sign"]["valid_query_count"] < 256
-    assert receipt["target_bindings"]["global_sign"]["unknown_dense_fill_performed"] is False
-    assert receipt["target_bindings"]["local_oriented_sdf"]["global_occupancy_labels_used"] is False
-    assert receipt["firewall"]["fstar_used_as_primary_geometry_authority"] is False
-    assert receipt["authority"]["consumer_semantics_qualified"] is True
-    assert receipt["authority"]["training_authorized"] is False
+    with pytest.raises(ValueError, match="IRIS_COMPONENT_SIGN_IS_NOT_GLOBAL_SOLID_SIGN"):
+        validate_consumer(CONTRACT, recipe_path, manifest_path, court_path)
 
 
 def test_wrong_global_sign_policy_fails_closed(tmp_path):

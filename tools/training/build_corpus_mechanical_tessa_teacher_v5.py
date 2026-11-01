@@ -93,7 +93,9 @@ def build(*,subject_id,mechanical_manifest_path,mechanical_court_path,response_c
         metrics,face_id,bar=v4.impl.evaluate_candidate(vertices,faces,source_v,source_f,source_fc,source_topology,source_owner,attachment_ids,isolated,actions,cameras,ratio,kind)
         rows.append(metrics)
         if metrics["mechanical_pass"]: qualified.append((metrics["face_count"],metrics["vertex_count"],ratio,vertices,faces,face_id,bar,metrics))
-    if not qualified: raise RuntimeError("TESSA_V5_NO_MECHANICALLY_ADMISSIBLE_FALLBACK")
+    diagnostic=v4.impl.write_candidate_diagnostics(subject_id=subject_id,output_dir=output_dir,candidates=rows,
+        parents={"mechanical_manifest":ref(mechanical_manifest_path),"mechanical_court":ref(mechanical_court_path),"response_chain":ref(response_chain_path),"camera_bundle":ref(camera_bundle_path)},producer_files=[Path(__file__),Path(v4.__file__),Path(v4.impl.__file__)])
+    if not qualified: raise RuntimeError("TESSA_V5_NO_MECHANICALLY_ADMISSIBLE_FALLBACK:"+str(diagnostic))
     qualified.sort(key=lambda x:(x[0],x[1],x[2])); _,_,ratio,vertices,faces,face_id,bar,selected=qualified[0]
     output_dir=Path(output_dir).resolve(); output_dir.mkdir(parents=True,exist_ok=True); mesh_path=output_dir/"CORPUS_MECHANICAL_TESSA_TEACHER_V5.npz"
     v4.impl.write_npz(mesh_path,vertices_source_world=vertices.astype(np.float32),faces=faces.astype(np.int32),source_triangle_id=face_id.astype(np.int32),source_barycentric=bar.astype(np.float32))

@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 from tools.training.tessa_component_surface_topology_v1 import load_tessa_surface_topology_v1
-from tools.training.validate_corpus_mechanical_tessa_teacher_v4 import validate
+from tools.training.validate_corpus_mechanical_tessa_teacher_v4 import validate, REQUIRED
 
 
 def sha256(path: Path) -> str:
@@ -100,6 +100,8 @@ def write_manifest_fixture(root: Path):
         "face_count": 2,
         "mechanical_pass": True,
     }
+    selected.update({key: True for key in REQUIRED})
+    selected["candidate_evaluation_contract"] = "MEASURED_ALL_KINDS_NO_FALLBACK_OVERRIDE_V1"
     manifest = {
         "schema": "RealSaS.CorpusMechanicalTESSATeacher.v4",
         "status": "PASS_CORPUS_MECHANICAL_TESSA_TEACHER_CANDIDATE__INDEPENDENT_COURT_REQUIRED",

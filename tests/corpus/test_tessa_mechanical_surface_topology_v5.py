@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from tools.training.validate_corpus_mechanical_tessa_teacher_v5 import validate
+from tools.training.validate_corpus_mechanical_tessa_teacher_v5 import validate, REQUIRED
 
 
 def sha(path: Path): return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -21,6 +21,8 @@ def fixture(root: Path):
     mc=root/"mechanical_court.json"; mc.write_text(json.dumps({"schema":"RealSaS.MechanicalSurfaceTopologyAuthorityCourt.v1","status":"PASS_MECHANICAL_SURFACE_TOPOLOGY_INDEPENDENT_COURT__FINAL_ADMISSION_SEPARATE","subject_id":"s","authority":{"independent_court_passed":True}},sort_keys=True)+"\n")
     teacher=root/"teacher.npz"; np.savez_compressed(teacher,vertices_source_world=v,faces=f,source_triangle_id=np.asarray([0,0,0,1],np.int32),source_barycentric=np.asarray([[1,0,0],[0,1,0],[0,0,1],[0,0,1]],np.float32))
     selected={"ratio":1.0,"kind":"SOURCE_FALLBACK","vertex_count":4,"face_count":2,"mechanical_pass":True}
+    selected.update({key: True for key in REQUIRED})
+    selected["candidate_evaluation_contract"] = "MEASURED_ALL_KINDS_NO_FALLBACK_OVERRIDE_V1"
     return {"schema":"RealSaS.CorpusMechanicalTESSATeacher.v5","status":"PASS_CORPUS_MECHANICAL_TESSA_TEACHER_V5_CANDIDATE__INDEPENDENT_COURT_REQUIRED","subject_id":"s","parents":{"mechanical_surface_manifest":{"path":str(mm),"sha256":sha(mm)},"mechanical_surface_court":{"path":str(mc),"sha256":sha(mc)}},"source_topology":{"surface_component_count":1,"qualified_cross_owner_seam_edge_count":1,"component_relation":"QUALIFIED_MECHANICAL_EDGE_CONNECTED_SURFACE","sdf_sign_topology_consumed":False,"appearance_addressing_consumed":False,"render_vertex_identity_used_as_topology":False},"candidates":[selected],"selected":selected,"teacher_mesh":{"path":str(teacher),"sha256":sha(teacher)},"family_candidate_outcomes":{"SURFACE_TOPOLOGY":"QUALIFIED_CONSUMER_CANDIDATE","CAUSAL_RESPONSE":"EXISTING_EVIDENCE_CONSUMED__NEW_FAMILY_COURT_STILL_REQUIRED"}}
 
 
@@ -39,3 +41,15 @@ def test_tessa_v5_rejects_sdf_sign_topology_dependency(tmp_path):
 def test_tessa_v5_rejects_seam_count_drift(tmp_path):
     m=fixture(tmp_path); m["source_topology"]["qualified_cross_owner_seam_edge_count"]=2
     with pytest.raises(ValueError,match="TESSA_V5_COURT_SEAM_COUNT"): validate(m)
+
+
+def test_source_fallback_must_prove_all_candidate_courts(tmp_path):
+    m=fixture(tmp_path); del m["selected"]["self_intersection_pass"]
+    with pytest.raises(ValueError, match="TESSA_V5_COURT_DECLARED_PASS_MISSING:self_intersection_pass"):
+        validate(m)
+
+
+def test_legacy_forced_pass_booleans_require_new_measured_evaluation(tmp_path):
+    m=fixture(tmp_path); del m["selected"]["candidate_evaluation_contract"]
+    with pytest.raises(ValueError, match="TESSA_V5_COURT_LEGACY_CANDIDATE_REEVALUATION_REQUIRED"):
+        validate(m)

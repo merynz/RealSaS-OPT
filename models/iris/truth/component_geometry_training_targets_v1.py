@@ -7,7 +7,7 @@ it only exposes already-qualified producer/court bytes in a shape that makes the
 intended loss semantics hard to misuse:
 
 - unsigned surface distance is dense over its explicitly valid query rows;
-- global signed distance and occupancy remain compact and indexed;
+- component signed distance and occupancy remain compact, indexed and addressed;
 - local oriented SDF/brackets are derived only from valid surface samples + normals;
 - local oriented sign is never relabeled as global inside/outside occupancy.
 """
@@ -24,6 +24,7 @@ class ComponentGeometryTrainingTargets:
     signed_query_index: np.ndarray
     signed_distance: np.ndarray
     occupancy: np.ndarray
+    signed_component_id: np.ndarray
     surface_xyz: np.ndarray
     surface_normal: np.ndarray
     surface_normal_valid: np.ndarray
@@ -35,6 +36,7 @@ class ComponentGeometryTrainingTargets:
         index = np.asarray(self.signed_query_index)
         signed = np.asarray(self.signed_distance)
         occupancy = np.asarray(self.occupancy)
+        component = np.asarray(self.signed_component_id)
         sx = np.asarray(self.surface_xyz)
         sn = np.asarray(self.surface_normal)
         nv = np.asarray(self.surface_normal_valid)
@@ -60,6 +62,8 @@ class ComponentGeometryTrainingTargets:
                 raise ValueError("IRIS_GEOMETRY_TARGET_SIGN_VALUE")
         if occupancy.dtype != np.bool_:
             raise ValueError("IRIS_GEOMETRY_TARGET_OCCUPANCY_DTYPE")
+        if component.shape != index.shape or not np.issubdtype(component.dtype, np.integer) or np.any(component < 0):
+            raise ValueError("IRIS_GEOMETRY_TARGET_SIGN_COMPONENT_ADDRESS")
         if sx.ndim != 2 or sx.shape[1:] != (3,) or sn.shape != sx.shape or nv.shape != (len(sx),):
             raise ValueError("IRIS_GEOMETRY_TARGET_SURFACE_LAYOUT")
         if not np.isfinite(sx).all() or not np.isfinite(sn).all():
@@ -71,7 +75,11 @@ class ComponentGeometryTrainingTargets:
             raise ValueError("IRIS_GEOMETRY_TARGET_NORMAL_UNIT")
 
     def global_sign_rows(self) -> dict[str, np.ndarray]:
-        """Return only globally sign-authoritative rows; never dense-fill unknowns."""
+        """Component parity does not define the scene solid, even with one mesh."""
+        raise ValueError("IRIS_COMPONENT_SIGN_IS_NOT_GLOBAL_SOLID_SIGN")
+
+    def component_sign_rows(self) -> dict[str, np.ndarray]:
+        """Return component-addressed targets for an explicitly conditioned consumer."""
         self.validate()
         index = np.asarray(self.signed_query_index, dtype=np.int64)
         return {
@@ -79,6 +87,7 @@ class ComponentGeometryTrainingTargets:
             "query_xyz": np.asarray(self.query_xyz)[index],
             "signed_distance": np.asarray(self.signed_distance),
             "occupancy": np.asarray(self.occupancy),
+            "component_id": np.asarray(self.signed_component_id),
         }
 
     def local_oriented_brackets(self, epsilons) -> dict[str, np.ndarray]:
@@ -118,6 +127,7 @@ def load_component_geometry_training_targets(distance_sign_npz, surface_npz) -> 
             "signed_query_index",
             "signed_distance_value",
             "occupancy_value",
+            "signed_component_id",
         }
         if not required.issubset(z.files):
             raise ValueError("IRIS_GEOMETRY_TARGET_DISTANCE_ARRAYS")
@@ -130,6 +140,7 @@ def load_component_geometry_training_targets(distance_sign_npz, surface_npz) -> 
         signed_query_index = np.asarray(z["signed_query_index"], dtype=np.int64)
         signed_distance = np.asarray(z["signed_distance_value"], dtype=np.float32)
         occupancy = np.asarray(z["occupancy_value"], dtype=np.bool_)
+        signed_component_id = np.asarray(z["signed_component_id"])
     with np.load(surface_npz, allow_pickle=False) as z:
         required = {"surface_xyz_canonical", "normal_canonical", "normal_valid"}
         if not required.issubset(z.files):
@@ -144,6 +155,7 @@ def load_component_geometry_training_targets(distance_sign_npz, surface_npz) -> 
         signed_query_index=signed_query_index,
         signed_distance=signed_distance,
         occupancy=occupancy,
+        signed_component_id=signed_component_id,
         surface_xyz=surface_xyz,
         surface_normal=surface_normal,
         surface_normal_valid=normal_valid,

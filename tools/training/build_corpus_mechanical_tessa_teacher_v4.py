@@ -245,8 +245,10 @@ def build(
                     metrics,
                 )
             )
+    diagnostic=impl.write_candidate_diagnostics(subject_id=subject_id,output_dir=output_dir,candidates=rows,
+        parents={"geometry_manifest":ref(geometry_manifest_path),"geometry_court":ref(geometry_court_path),"response_chain":ref(response_chain_path),"camera_bundle":ref(camera_bundle_path)},producer_files=[Path(__file__),Path(impl.__file__)])
     if not qualified:
-        raise RuntimeError("TESSA_V4_NO_MECHANICALLY_ADMISSIBLE_FALLBACK")
+        raise RuntimeError("TESSA_V4_NO_MECHANICALLY_ADMISSIBLE_FALLBACK:"+str(diagnostic))
     qualified.sort(key=lambda row: (row[0], row[1], row[2]))
     _, _, ratio, vertices, faces, face_id, barycentric, selected = qualified[0]
 

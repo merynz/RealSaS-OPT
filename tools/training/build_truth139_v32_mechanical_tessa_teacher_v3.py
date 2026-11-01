@@ -76,7 +76,9 @@ def build(subject_id,geometry_manifest_path,response_chain_path,camera_bundle,ou
     for ratio,v,f,kind in ladder:
         metrics,face_id,bar=impl.evaluate_candidate(v,f,source_v,source_f,source_fc,source_topology,source_face_object,attachment_ids,isolated,actions,cameras,ratio,kind); rows.append(metrics)
         if metrics["mechanical_pass"]: qualified.append((metrics["face_count"],metrics["vertex_count"],ratio,v,f,face_id,bar,metrics))
-    if not qualified: raise RuntimeError("V32_TESSA_V3_NO_MECHANICALLY_ADMISSIBLE_FALLBACK")
+    diagnostic=impl.write_candidate_diagnostics(subject_id=subject_id,output_dir=output_dir,candidates=rows,
+        parents={"geometry_manifest":impl.ref(geometry_manifest_path),"response_chain":impl.ref(response_chain_path),"camera_bundle":impl.ref(camera_bundle)},producer_files=[Path(__file__),Path(impl.__file__)])
+    if not qualified: raise RuntimeError("V32_TESSA_V3_NO_MECHANICALLY_ADMISSIBLE_FALLBACK:"+str(diagnostic))
     qualified.sort(key=lambda x:(x[0],x[1],x[2])); _,_,ratio,v,f,face_id,bar,selected=qualified[0]
     out=output_dir.resolve(); out.mkdir(parents=True,exist_ok=True); mesh=out/"V32_MECHANICAL_TESSA_TEACHER_V3.npz"
     impl.write_npz(mesh,vertices_source_world=v.astype(np.float32),faces=f.astype(np.int32),source_triangle_id=face_id.astype(np.int32),source_barycentric=bar.astype(np.float32))

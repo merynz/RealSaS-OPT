@@ -10,11 +10,16 @@ on:
       - 'tools/corpus/revalidate_existing_truth139_v1.py'
       - 'tools/corpus/probe_closed_source_embedding_v1.py'
       - 'tools/corpus/probe_source_coincidence_weights_v1.py'
+      - 'tools/corpus/*source_union_solid_candidate_v1.py'
+      - 'tools/corpus/revalidate_existing_source_observations_v1.py'
+      - 'tools/corpus/prepare_expanded_corpus_source_bundle_v1.py'
       - 'tools/training/*tessa_teacher*'
       - 'tests/corpus/test_teacher*'
       - 'tests/corpus/test_expanded_teacher_source_inspection_v1.py'
       - 'tests/corpus/test_existing_truth139_numeric_revalidation_v1.py'
       - 'tests/corpus/test_source_embedding_and_weights_probes_v1.py'
+      - 'tests/corpus/test_source_union_solid_candidate_v1.py'
+      - 'tests/corpus/test_expanded_corpus_source_bundle_v1.py'
       - 'tests/corpus/test_*component*'
       - 'tests/corpus/test_tessa*'
       - 'canonical/CORPUS_TEACHER_INSPECTION_AND_REUSE_POLICY_V1.json'
@@ -64,10 +69,12 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y libopengl0
-          python -m pip install numpy==2.3.5 scipy==1.17.0 trimesh==5.2.0 Rtree==1.4.1 Pillow==12.3.0 pytest==9.2.0 pymeshlab==2025.7.post1
+          python -m pip install numpy==2.3.5 scipy==1.17.0 trimesh==5.2.0 Rtree==1.4.1 Pillow==12.3.0 pytest==9.2.0 pymeshlab==2025.7.post1 manifold3d==3.5.4
           python -m pip install torch==2.8.0+cpu torchvision==0.23.0+cpu --index-url https://download.pytorch.org/whl/cpu
       - name: Verify geometry identity, intersections and mechanical seam evidence
         run: |
           python -m pytest -q \
             tests/corpus/test_existing_truth139_numeric_revalidation_v1.py \
-            tests/corpus/test_source_embedding_and_weights_probes_v1.py
+            tests/corpus/test_source_embedding_and_weights_probes_v1.py \
+            tests/corpus/test_source_union_solid_candidate_v1.py \
+            tests/corpus/test_expanded_corpus_source_bundle_v1.py

@@ -50,6 +50,31 @@ All 139 historical TESSA teachers selected SOURCE_FALLBACK and are rejected by t
 current court with LEGACY_CANDIDATE_REEVALUATION_REQUIRED. Geometry/RGB numerical
 reuse candidates and mechanical teacher qualification are separate outcomes.
 
+Existing source/camera/observation controls were independently rebound for all
+139 subjects: 139 passed without rerendering observations.
+
+## Source-union solid prototype
+
+62 closed-component scenes without detected component self-intersection have
+positive component volumes. A separate prototype constructs their Boolean union
+and samples distance to its actual boundary. This is explicitly a derived solid,
+not a replacement for authored surfaces, component identities or motion truth.
+The independent court reconstructs source quotient/connectivity separately,
+checks the boundary, verifies source-union membership, checks all signed query
+rows with solid-angle winding and independently checks nearest distances.
+
+31 prototypes pass those source-world geometry/SDF numeric courts. Remaining
+outcomes are 16 degenerate-face, 11 intersection, 3 distance and 1 sign failures.
+They remain blocked. No tolerance was changed to get the cohort through. All
+62 candidates and all failures are retained. The passing 31 are not a final
+training count: observation/camera normalization, family admission and TESSA
+deformation qualification remain separate.
+
+The source staging tool packages exact canonical source bytes and publisher
+resources for all 370 IDs. It verifies every canonical file again from the actual
+ZIP. This makes the future notebook's inputs reproducible without promoting its
+source cache to truth or training authority.
+
 ## Reproduction from recovered source and inventory inputs
 
 1. Run `compile_expanded_subject_candidates_v1.py` with the exact historical

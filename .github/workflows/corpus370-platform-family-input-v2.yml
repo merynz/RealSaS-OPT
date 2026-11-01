@@ -1,0 +1,147 @@
+name: corpus370-platform-family-input-v2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - corpus400-training-readiness-closure-v1
+    paths:
+      - 'canonical/CORPUS370_PLATFORM_FAMILY_INPUT_V2_TRIGGER.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-platform-family-input-v2
+  cancel-in-progress: true
+
+jobs:
+  build-family-input-bundle:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      PREP_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1
+      SOURCE_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/source_bundle
+      SOURCE_ARCHIVE_SHA256: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      PROVENANCE: /home/monster/realsas_authority/corpus370_preparation_v1/provenance/CORPUS370_SOURCE_PROVENANCE_INDEX_V1.json
+      OBSERVATIONS: /home/monster/realsas_authority/corpus370_preparation_v1/observations_rescue_v3/CORPUS370_PREPARED_OBSERVATION_PACKETS_V3.json
+      OUTPUT: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V2.zip
+      SUMMARY: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V2_SUMMARY.json
+      RCLONE_REMOTE: gdrive
+    steps:
+      - name: Checkout exact family-input revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify sealed parents
+        run: |
+          set -euo pipefail
+          test -x "$PLATFORM_ROOT/current/bin/realsas-python"
+          command -v rclone >/dev/null
+          rclone listremotes | grep -Fx 'gdrive:'
+          EXTRACTED="$SOURCE_ROOT/extracted/$SOURCE_ARCHIVE_SHA256"
+          MANIFEST="$EXTRACTED/SOURCE_BUNDLE_MANIFEST_V1.json"
+          test -d "$EXTRACTED"
+          test -f "$MANIFEST"
+          test -f "$ROSTER"
+          test -f "$PROVENANCE"
+          test -f "$OBSERVATIONS"
+          test "$(sha256sum "$ROSTER" | awk '{print $1}')" = "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          obs=json.loads(Path(os.environ['OBSERVATIONS']).read_text())
+          assert obs['schema']=='RealSaS.Corpus370PreparedObservationPackets.v3'
+          assert obs['subject_count']==370
+          assert obs['prepared_subject_count']+obs['failure_count']==370
+          assert obs['training_authorized'] is False
+          print('CORPUS370_FAMILY_INPUT_PARENTS=PASS',obs['prepared_subject_count'],obs['failure_count'])
+          PY
+
+      - name: Build exact full-universe family input bundle V2
+        run: |
+          set -euo pipefail
+          EXTRACTED="$SOURCE_ROOT/extracted/$SOURCE_ARCHIVE_SHA256"
+          MANIFEST="$EXTRACTED/SOURCE_BUNDLE_MANIFEST_V1.json"
+          "$PLATFORM_ROOT/current/bin/realsas-python" \
+            tools/corpus/prepare_corpus370_platform_truth_bundle_v2.py \
+            --exact-source-roster "$ROSTER" \
+            --source-bundle-manifest "$MANIFEST" \
+            --extracted-source-root "$EXTRACTED" \
+            --observation-index "$OBSERVATIONS" \
+            --provenance-index "$PROVENANCE" \
+            --output "$OUTPUT"
+
+      - name: Reopen bundle and seal transport identity
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import hashlib, json, os, zipfile
+          from pathlib import Path
+          out=Path(os.environ['OUTPUT'])
+          h=hashlib.sha256()
+          with out.open('rb') as f:
+              for block in iter(lambda:f.read(8*1024*1024),b''): h.update(block)
+          digest=h.hexdigest()
+          with zipfile.ZipFile(out) as z:
+              manifest=json.loads(z.read('BOOTSTRAP_MANIFEST.json'))
+              receipt=json.loads(z.read('BUNDLE_RECEIPT.json'))
+          assert manifest['schema']=='RealSaS.Corpus370PlatformFamilyInputBundle.v2'
+          assert manifest['candidate_subject_count']==370
+          assert manifest['observation_qualified_count']+manifest['observation_failed_count']==370
+          assert manifest['training_authorized'] is False
+          assert receipt['schema']=='RealSaS.Corpus370PlatformFamilyInputBundleReceipt.v2'
+          payload={
+              'schema':'RealSaS.Corpus370PlatformFamilyInputBundleSummary.v2',
+              'source_revision':os.environ['GITHUB_SHA'],
+              'bundle_sha256':digest,
+              'bundle_size_bytes':out.stat().st_size,
+              'candidate_subject_count':370,
+              'observation_qualified_count':manifest['observation_qualified_count'],
+              'observation_failed_count':manifest['observation_failed_count'],
+              'family_authority_minted':False,
+              'split_minted':False,
+              'training_authorized':False,
+          }
+          Path(os.environ['SUMMARY']).write_text(json.dumps(payload,sort_keys=True,indent=2)+'\n')
+          print(json.dumps(payload,sort_keys=True))
+          PY
+
+      - name: Upload immutable bundle to Drive transport
+        run: |
+          set -euo pipefail
+          SHA="$(sha256sum "$OUTPUT" | awk '{print $1}')"
+          DEST="corpus370_preparation_v1/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V2_${SHA}.zip"
+          rclone copyto "$OUTPUT" "$RCLONE_REMOTE:$DEST" --checksum --progress
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<PY
+          import json
+          from pathlib import Path
+          p=Path('$SUMMARY')
+          d=json.loads(p.read_text())
+          d['drive_transport_path']='$DEST'
+          p.write_text(json.dumps(d,sort_keys=True,indent=2)+'\n')
+          PY
+
+      - name: Publish family input summary
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ -f "$SUMMARY" ]; then
+            cat "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-platform-family-input-v2-${{ github.run_id }}
+          path: |
+            ${{ env.SUMMARY }}
+            ${{ env.OUTPUT }}
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

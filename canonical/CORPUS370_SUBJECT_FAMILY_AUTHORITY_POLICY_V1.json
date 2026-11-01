@@ -15,11 +15,23 @@
     "UNKNOWN"
   ],
   "semantics": {
-    "PASS": "Current independent court proves the exact family claim for the exact source/import/producer/consumer binding.",
-    "MASKED": "The family is scientifically inapplicable or absent for this subject; the target is omitted from the loss and must never be encoded as numeric zero.",
+    "PASS": "Current independent court proves the exact family claim for the exact source/import/producer/consumer binding. PASS may carry an explicit row-level validity mask; only proven-valid rows are consumable.",
+    "MASKED": "The entire family is scientifically inapplicable or absent for this subject; the family contributes no loss for this subject and must never be encoded as numeric zero.",
     "FAIL": "The family was tested under the current court and failed its fixed contract.",
     "QUARANTINED": "Source/provenance/lineage/semantic ambiguity prevents consumption until explicitly resolved.",
     "UNKNOWN": "No current court result is bound. UNKNOWN is never training-consumable."
+  },
+  "row_mask_semantics": {
+    "PASS_WITH_ROW_MASK_ALLOWED": true,
+    "row_mask_requires_current_court": true,
+    "invalid_rows_omitted_from_loss": true,
+    "invalid_rows_must_not_be_zero_filled": true,
+    "family_MASKED_is_not_partial_coverage": true,
+    "examples": [
+      "authored_skin_weights_valid_on_a_declared_subset_of_the_exact_SkinCarrier",
+      "source_oriented_normals_valid_only_on_non_degenerate_faces",
+      "appearance_targets_valid_only_on_directly_identifiable_source_equivalent_hits"
+    ]
   },
   "families": [
     "SOURCE_IMPORT",
@@ -76,7 +88,7 @@
         "CAUSAL_RESPONSE"
       ],
       "forbidden": ["UNKNOWN", "FAIL", "QUARANTINED"],
-      "notes": "GLOBAL_SOLID_SDF loss is enabled only for PASS cells. MASKED means no SDF loss for that sample."
+      "notes": "GLOBAL_SOLID_SDF loss is enabled only for PASS cells. Family MASKED means no SDF loss for that subject. PASS families may still carry courted row-level validity masks."
     },
     "TESSA": {
       "required_pass": [
@@ -85,7 +97,7 @@
         "TESSA_TEACHER"
       ],
       "forbidden": ["UNKNOWN", "MASKED", "FAIL", "QUARANTINED"],
-      "notes": "Historical SOURCE_FALLBACK selection is not teacher authority; the current topology/deformation/intersection courts must pass."
+      "notes": "Historical SOURCE_FALLBACK selection is not teacher authority; the current topology/deformation/intersection courts must pass. PASS targets may carry explicit row validity masks when the consumer contract supports them."
     },
     "MIRA": {
       "required_pass": [
@@ -94,7 +106,7 @@
         "SKIN_WEIGHTS"
       ],
       "forbidden": ["UNKNOWN", "MASKED", "FAIL", "QUARANTINED"],
-      "notes": "Skin truth is consumed only on its exact carrier with current source/import equivalence."
+      "notes": "Skin truth is consumed only on its exact carrier with current source/import equivalence. A PASS SKIN_WEIGHTS cell may expose an explicit validity mask; invalid/unweighted rows are omitted, never normalized or zero-filled silently."
     },
     "AXIS": {
       "required_pass": [
@@ -131,6 +143,7 @@
     "notebook_may_not_compute_or_override_eligibility": true,
     "notebook_consumes_only_sealed_matrix_rosters_split_and_readiness": true,
     "missing_family_target_is_omitted_not_zero_filled": true,
+    "row_level_validity_masks_are_hash_bound_training_inputs": true,
     "training_authorized_default": false
   }
 }

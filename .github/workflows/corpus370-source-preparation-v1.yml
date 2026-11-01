@@ -14,8 +14,8 @@ on:
       - 'tools/corpus/hydrate_corpus370_source_bundle_v1.py'
       - 'tools/corpus/build_corpus370_exact_source_roster_v1.py'
       - 'tools/corpus/acquire_corpus370_source_provenance_v1.py'
-      - 'tools/corpus/prepare_corpus370_observation_packets_v1.py'
-      - 'tools/corpus/run_corpus370_observation_sweep_v1.py'
+      - 'tools/corpus/prepare_corpus370_observation_packets_v2.py'
+      - 'tools/corpus/run_corpus370_observation_sweep_v2.py'
       - 'tools/corpus/prepare_corpus370_platform_truth_bundle_v1.py'
       - 'tools/corpus/iris_observation_admission_v1.py'
       - 'tools/corpus/ufbx_bind_scene_probe_v1.c'
@@ -23,6 +23,7 @@ on:
       - 'tools/observation/blender_controlled_8view_v1.py'
       - 'tools/observation/source_scene_contract_v2.py'
       - 'tools/observation/blender_source_parity_export_v1.py'
+      - 'tools/observation/pinned_evaluator_runtime_v1.py'
 
 permissions:
   contents: read
@@ -42,9 +43,9 @@ jobs:
       SOURCE_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/source_bundle
       ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
       PROVENANCE_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/provenance
-      OBSERVATION_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/observations
+      OBSERVATION_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/observations_v2
       PLATFORM_BUNDLE: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_PLATFORM_TRUTH_INPUT_BUNDLE_V1.zip
-      SUMMARY: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_SOURCE_PREPARATION_SUMMARY_V1.json
+      SUMMARY: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_SOURCE_PREPARATION_SUMMARY_V2.json
       BLENDER: /home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/blender-glibc239
       UFBX_REVISION: 5955c5c0b042ac2dc6f32955ab206aaec0620cfc
       UFBX_ROOT: /home/monster/.cache/realsas/ufbx/5955c5c0b042ac2dc6f32955ab206aaec0620cfc
@@ -73,10 +74,18 @@ jobs:
           "$PLATFORM_ROOT/current/bin/realsas-python" \
             tools/observation/install_pinned_evaluator_runtime_v1.py \
             --request canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json
-          test -x "$BLENDER"
-          ACTUAL_SHA="$(sha256sum "$BLENDER" | awk '{print $1}')"
-          test "$ACTUAL_SHA" = "c47c0b83d061621014c8312abd99db5c1ef057bcf5516faf4bb8d92b3ef6de60"
-          "$BLENDER" --version | head -n 1 | grep -F 'Blender 4.0.2'
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          from tools.observation.pinned_evaluator_runtime_v1 import launch_options, sha
+          blender=Path(os.environ['BLENDER']).resolve()
+          request=json.loads(Path('canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json').read_text())
+          assert blender.is_file()
+          assert sha(blender)==request['expected_evaluator_binary_sha256']=='c47c0b83d061621014c8312abd99db5c1ef057bcf5516faf4bb8d92b3ef6de60'
+          output=subprocess.check_output([str(blender),'--version'],text=True,**launch_options(blender,request['evaluator_runtime']))
+          assert output.splitlines()[0]=='Blender 4.0.2',output.splitlines()[0]
+          print('CORPUS370_PINNED_BLENDER_RUNTIME=PASS sha256='+sha(blender))
+          PY
 
       - name: Build independent pinned ufbx FBX bind probe
         run: |
@@ -127,31 +136,32 @@ jobs:
             --provenance-sources canonical/CORPUS370_SOURCE_PACK_PROVENANCE_V1.json \
             --output-root "$PROVENANCE_ROOT"
 
-      - name: Run failure-preserving 370 bind-rest observation sweep
+      - name: Run failure-preserving 370 bind-rest observation sweep V2
         run: |
           set -euo pipefail
           EXTRACTED="$SOURCE_ROOT/extracted/5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9"
           "$PLATFORM_ROOT/current/bin/realsas-python" \
-            tools/corpus/run_corpus370_observation_sweep_v1.py \
+            tools/corpus/run_corpus370_observation_sweep_v2.py \
             --exact-source-roster "$ROSTER" \
             --extracted-source-root "$EXTRACTED" \
             --output-root "$OBSERVATION_ROOT" \
             --blender "$BLENDER" \
             --probe "$UFBX_PROBE" \
-            --policy canonical/CORPUS370_IRIS_OBSERVATION_POLICY_V1.json
+            --policy canonical/CORPUS370_IRIS_OBSERVATION_POLICY_V1.json \
+            --runtime-request canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json
 
       - name: Build Platform truth input bundle only after 370 of 370 observation preparation
         id: platform_bundle
         run: |
           set -euo pipefail
-          OBS_INDEX="$OBSERVATION_ROOT/CORPUS370_PREPARED_OBSERVATION_PACKETS_V1.json"
+          OBS_INDEX="$OBSERVATION_ROOT/CORPUS370_PREPARED_OBSERVATION_PACKETS_V2.json"
           PROV_INDEX="$PROVENANCE_ROOT/CORPUS370_SOURCE_PROVENANCE_INDEX_V1.json"
           MANIFEST="$SOURCE_ROOT/extracted/5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9/SOURCE_BUNDLE_MANIFEST_V1.json"
           EXTRACTED="$SOURCE_ROOT/extracted/5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9"
           READY="$($PLATFORM_ROOT/current/bin/realsas-python - <<'PY'
           import json, os
           from pathlib import Path
-          p=Path(os.environ['OBSERVATION_ROOT'])/'CORPUS370_PREPARED_OBSERVATION_PACKETS_V1.json'
+          p=Path(os.environ['OBSERVATION_ROOT'])/'CORPUS370_PREPARED_OBSERVATION_PACKETS_V2.json'
           d=json.loads(p.read_text())
           print('true' if d.get('prepared_subject_count') == 370 and d.get('failure_count') == 0 else 'false')
           PY
@@ -193,20 +203,20 @@ jobs:
                   for block in iter(lambda:f.read(8*1024*1024),b''): h.update(block)
               return {'path':str(path),'sha256':h.hexdigest(),'size_bytes':path.stat().st_size}
 
-          root=Path(os.environ['PREP_ROOT'])
-          obs=ref(Path(os.environ['OBSERVATION_ROOT'])/'CORPUS370_PREPARED_OBSERVATION_PACKETS_V1.json')
+          obs=ref(Path(os.environ['OBSERVATION_ROOT'])/'CORPUS370_PREPARED_OBSERVATION_PACKETS_V2.json')
           prov=ref(Path(os.environ['PROVENANCE_ROOT'])/'CORPUS370_SOURCE_PROVENANCE_INDEX_V1.json')
           roster=ref(Path(os.environ['ROSTER']))
           source=ref(Path(os.environ['SOURCE_ROOT'])/'CORPUS370_SOURCE_BUNDLE_HYDRATION_V1.json')
           bundle=ref(Path(os.environ['PLATFORM_BUNDLE']))
           obs_doc=json.loads(Path(obs['path']).read_text()) if obs else {}
           payload={
-              'schema':'RealSaS.Corpus370SourcePreparationSummary.v1',
+              'schema':'RealSaS.Corpus370SourcePreparationSummary.v2',
               'source_revision':os.environ['GITHUB_SHA'],
               'source_bundle_hydration':source,
               'exact_source_roster':roster,
               'source_provenance':prov,
               'observation_packets':obs,
+              'observation_schema':obs_doc.get('schema'),
               'prepared_subject_count':obs_doc.get('prepared_subject_count',0),
               'observation_failure_count':obs_doc.get('failure_count',370),
               'platform_truth_bundle':bundle,
@@ -231,13 +241,13 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: corpus370-source-preparation-v1-${{ github.run_id }}
+          name: corpus370-source-preparation-v2-${{ github.run_id }}
           path: |
             ${{ env.SUMMARY }}
             ${{ env.ROSTER }}
             ${{ env.PROVENANCE_ROOT }}/CORPUS370_SOURCE_PROVENANCE_INDEX_V1.json
-            ${{ env.OBSERVATION_ROOT }}/CORPUS370_PREPARED_OBSERVATION_PACKETS_V1.json
-            ${{ env.OBSERVATION_ROOT }}/failures/*.json
+            ${{ env.OBSERVATION_ROOT }}/CORPUS370_PREPARED_OBSERVATION_PACKETS_V2.json
+            ${{ env.OBSERVATION_ROOT }}/failures_v2/*.json
           if-no-files-found: warn
           compression-level: 0
           retention-days: 30

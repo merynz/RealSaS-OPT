@@ -42,6 +42,7 @@ jobs:
             tools/corpus/seal_corpus370_lineage_split_v1.py \
             tools/corpus/plan_corpus370_family_authority_work_v1.py \
             tools/corpus/gltf_bind_scene_v1.py \
+            tools/corpus/audit_corpus370_source_camera_authority_v2.py \
             tools/corpus/build_gltf_rig_skin_authority_v1.py \
             tools/corpus/build_gltf_animation_authority_v1.py \
             tools/corpus/blender_fbx_rig_skin_replay_v1.py \
@@ -76,6 +77,7 @@ jobs:
             tests/corpus/test_corpus370_authority_matrix_markdown_v1.py \
             tests/corpus/test_corpus370_source_transport_provenance_v1.py \
             tests/corpus/test_corpus370_platform_family_input_bundle_v2.py \
+            tests/corpus/test_platform_observation_truth_cohort_bootstrap_v2.py \
             tests/corpus/test_corpus370_lineage_groups_v1.py \
             tests/corpus/test_corpus370_lineage_split_v1.py \
             tests/corpus/test_corpus370_truth_platform_contract_v1.py

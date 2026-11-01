@@ -5,8 +5,11 @@ on:
     paths:
       - 'models/iris/truth/component_geometry_training_targets_v1.py'
       - 'tools/corpus/plan_teacher_truth_revalidation_v1.py'
+      - 'tools/corpus/*teacher_source_inspection_v1.py'
+      - 'tools/corpus/compile_expanded_subject_candidates_v1.py'
       - 'tools/training/*tessa_teacher*'
       - 'tests/corpus/test_teacher*'
+      - 'tests/corpus/test_expanded_teacher_source_inspection_v1.py'
       - 'tests/corpus/test_*component*'
       - 'tests/corpus/test_tessa*'
       - 'canonical/CORPUS_TEACHER_INSPECTION_AND_REUSE_POLICY_V1.json'
@@ -39,5 +42,6 @@ jobs:
             tests/corpus/test_tessa_mechanical_surface_topology_v5.py \
             tests/corpus/test_teacher_sign_scope_regression_v1.py \
             tests/corpus/test_teacher_truth_revalidation_plan_v1.py \
+            tests/corpus/test_expanded_teacher_source_inspection_v1.py \
             tests/corpus/test_corpus_structural_geometry_audit_v1.py \
             tests/training/test_truth139_v32_spatial_index_v1.py

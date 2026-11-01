@@ -1,0 +1,136 @@
+{
+  "schema": "RealSaS.Corpus370SubjectFamilyAuthorityPolicy.v1",
+  "status": "RESEARCH_AUTHORITY_POLICY__NO_TRAINING_AUTHORITY",
+  "candidate_universe": {
+    "expected_subject_count": 370,
+    "established_base_count": 139,
+    "expansion_count": 231,
+    "campaign_name_is_not_subject_count": true
+  },
+  "cell_statuses": [
+    "PASS",
+    "MASKED",
+    "FAIL",
+    "QUARANTINED",
+    "UNKNOWN"
+  ],
+  "semantics": {
+    "PASS": "Current independent court proves the exact family claim for the exact source/import/producer/consumer binding.",
+    "MASKED": "The family is scientifically inapplicable or absent for this subject; the target is omitted from the loss and must never be encoded as numeric zero.",
+    "FAIL": "The family was tested under the current court and failed its fixed contract.",
+    "QUARANTINED": "Source/provenance/lineage/semantic ambiguity prevents consumption until explicitly resolved.",
+    "UNKNOWN": "No current court result is bound. UNKNOWN is never training-consumable."
+  },
+  "families": [
+    "SOURCE_IMPORT",
+    "CAMERA_OBSERVATION",
+    "SURFACE_GEOMETRY_UDF",
+    "GLOBAL_SOLID_SDF",
+    "SURFACE_NORMALS",
+    "APPEARANCE_CAA",
+    "VISIBILITY_OCCLUSION",
+    "RAY_COMPOSITING",
+    "MECHANICAL_SURFACE_TOPOLOGY",
+    "CAUSAL_RESPONSE",
+    "RIG_HIERARCHY",
+    "SKIN_WEIGHTS",
+    "ANIMATION_KINEMATICS",
+    "TESSA_TEACHER"
+  ],
+  "carrier_separation": {
+    "SourceSurface": "source art / exact observed surface evidence",
+    "ExplicitSolid": "only a separately qualified global solid/assembly used for GLOBAL_SOLID_SDF",
+    "MechanicalSurfaceTopology": "TESSA mechanical topology carrier",
+    "SkinCarrier": "exact carrier on which authored/qualified skin weights are defined",
+    "RigAnimation": "source-authored or separately qualified hierarchy/frames/animation",
+    "AppearanceAddress": "CAA / visibility / compositing addressing domain",
+    "same_vertex_set_required": false
+  },
+  "global_sdf": {
+    "sign_convention": "negative_inside__positive_outside__zero_boundary",
+    "target_scope": "EXPLICIT_QUALIFIED_SOLID_ENTITY_OR_ASSEMBLY",
+    "distance_magnitude": "distance_to_actual_boundary_of_that_same_explicit_solid",
+    "forbidden_promotions": [
+      "component_local_parity_to_global_sign",
+      "nearest_component_sign_to_global_occupancy",
+      "union_occupancy_times_raw_surface_udf_as_exact_union_sdf",
+      "silent_hole_closing",
+      "silent_decorative_geometry_drop",
+      "missing_sign_rows_encoded_as_zero"
+    ],
+    "open_or_modular_source_policy": "GLOBAL_SOLID_SDF_MASKED_UNLESS_A_SEPARATE_EXPLICIT_SOLID_COURT_PASSES"
+  },
+  "model_routes": {
+    "IRIS": {
+      "required_pass": [
+        "SOURCE_IMPORT",
+        "CAMERA_OBSERVATION",
+        "SURFACE_GEOMETRY_UDF"
+      ],
+      "optional_masked": [
+        "GLOBAL_SOLID_SDF",
+        "SURFACE_NORMALS",
+        "APPEARANCE_CAA",
+        "VISIBILITY_OCCLUSION",
+        "RAY_COMPOSITING",
+        "CAUSAL_RESPONSE"
+      ],
+      "forbidden": ["UNKNOWN", "FAIL", "QUARANTINED"],
+      "notes": "GLOBAL_SOLID_SDF loss is enabled only for PASS cells. MASKED means no SDF loss for that sample."
+    },
+    "TESSA": {
+      "required_pass": [
+        "SOURCE_IMPORT",
+        "MECHANICAL_SURFACE_TOPOLOGY",
+        "TESSA_TEACHER"
+      ],
+      "forbidden": ["UNKNOWN", "MASKED", "FAIL", "QUARANTINED"],
+      "notes": "Historical SOURCE_FALLBACK selection is not teacher authority; the current topology/deformation/intersection courts must pass."
+    },
+    "MIRA": {
+      "required_pass": [
+        "SOURCE_IMPORT",
+        "RIG_HIERARCHY",
+        "SKIN_WEIGHTS"
+      ],
+      "forbidden": ["UNKNOWN", "MASKED", "FAIL", "QUARANTINED"],
+      "notes": "Skin truth is consumed only on its exact carrier with current source/import equivalence."
+    },
+    "AXIS": {
+      "required_pass": [
+        "SOURCE_IMPORT",
+        "RIG_HIERARCHY",
+        "ANIMATION_KINEMATICS"
+      ],
+      "forbidden": ["UNKNOWN", "MASKED", "FAIL", "QUARANTINED"],
+      "post_corpus_dependencies": [
+        "frozen_IRIS_TESSA_product_shared_scene_release",
+        "frozen_MIRA_codec_identity"
+      ],
+      "notes": "Corpus eligibility does not by itself authorize AXIS training before the frozen upstream identities exist."
+    }
+  },
+  "evidence_rules": {
+    "source_inventory_or_pack_marketing_is_not_authority": true,
+    "producer_pass_without_independent_court_is_not_authority": true,
+    "historical_training_authorized_flag_is_ignored": true,
+    "historical_split_is_ignored": true,
+    "hash_exact_historical_evidence_may_be_reused_only_after_current_semantic_revalidation": true,
+    "every_pass_cell_requires_evidence_refs": true,
+    "every_non_pass_cell_requires_reason_codes": true,
+    "unknown_is_forbidden_in_sealed_model_rosters": true
+  },
+  "split_policy": {
+    "global_lineage_dedup_before_split": true,
+    "global_end_to_end_unseen_pool_isolated_before_any_model_training": true,
+    "no_cross_model_subject_leakage_into_global_unseen": true,
+    "model_specific_train_val_rosters_derive_after_global_holdout": true
+  },
+  "materialization_policy": {
+    "materialization_follows_sealed_authority": true,
+    "notebook_may_not_compute_or_override_eligibility": true,
+    "notebook_consumes_only_sealed_matrix_rosters_split_and_readiness": true,
+    "missing_family_target_is_omitted_not_zero_filled": true,
+    "training_authorized_default": false
+  }
+}

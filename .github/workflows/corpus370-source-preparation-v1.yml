@@ -50,7 +50,7 @@ jobs:
       UFBX_REVISION: 5955c5c0b042ac2dc6f32955ab206aaec0620cfc
       UFBX_ROOT: /home/monster/.cache/realsas/ufbx/5955c5c0b042ac2dc6f32955ab206aaec0620cfc
       UFBX_PROBE: /home/monster/realsas_authority/corpus370_preparation_v1/tools/ufbx_bind_scene_probe_v1
-      RCLONE_REMOTE: realsas-drive
+      RCLONE_REMOTE: gdrive
     steps:
       - name: Checkout exact branch revision
         uses: actions/checkout@v4
@@ -65,6 +65,7 @@ jobs:
           command -v rclone >/dev/null
           command -v git >/dev/null
           command -v cc >/dev/null
+          rclone listremotes | grep -Fx 'gdrive:'
           mkdir -p "$PREP_ROOT" "$PREP_ROOT/tools"
           echo "SOURCE_PREPARATION_REVISION=${GITHUB_SHA}"
 

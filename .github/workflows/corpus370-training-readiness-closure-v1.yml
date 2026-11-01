@@ -40,15 +40,18 @@ jobs:
             tools/corpus/derive_corpus370_model_rosters_v1.py \
             tools/corpus/plan_corpus370_family_authority_work_v1.py \
             tools/corpus/build_gltf_rig_skin_authority_v1.py \
-            tools/corpus/build_gltf_animation_authority_v1.py
+            tools/corpus/build_gltf_animation_authority_v1.py \
+            tools/corpus/blender_fbx_rig_skin_replay_v1.py \
+            tools/corpus/validate_fbx_imported_rig_skin_authority_v1.py
 
-      - name: Run fail-closed authority and glTF2 container tests
+      - name: Run fail-closed authority and source-format tests
         run: |
           pytest -q \
             tests/corpus/test_corpus370_subject_family_authority_matrix_v1.py \
             tests/corpus/test_gltf_rig_skin_authority_e2e_v1.py \
             tests/corpus/test_gltf_animation_authority_v1.py \
-            tests/corpus/test_gltf2_glb_authority_v1.py
+            tests/corpus/test_gltf2_glb_authority_v1.py \
+            tests/corpus/test_fbx_imported_rig_skin_authority_v1.py
 
       - name: Publish branch-scope notice
         run: |

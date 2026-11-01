@@ -62,7 +62,7 @@ def load_runtime(request_path: Path, blender: Path) -> tuple[dict, dict]:
     require(str(request.get("evaluator_executable") or "") == str(blender), "CORPUS370_OBSERVATION_RUNTIME_EXECUTABLE")
     require(str(request.get("expected_evaluator_binary_sha256") or "") == sha256(blender), "CORPUS370_OBSERVATION_RUNTIME_BINARY_SHA")
     runtime = dict(request.get("evaluator_runtime") or {})
-    launch_options(blender, runtime)  # validates runtime manifest and all private library bytes
+    launch_options(blender, runtime)
     return request, runtime
 
 
@@ -72,7 +72,6 @@ def _packet_complete(packet: Path, subject_id: str, source_sha: str, policy: dic
         "SOURCE_SCENE_SNAPSHOT.json",
         "camera_bundle.json",
         "IRIS_OBSERVATION_ADMISSION.json",
-        "REST_SURFACE_GEOMETRY.npz",
         *{f"V{i}.png" for i in range(int(policy["view_count"]))},
         *{f"V{i}.mask.bin" for i in range(int(policy["view_count"]))},
     }
@@ -244,7 +243,7 @@ def prepare(
         )
         print(json.dumps({"event": "CORPUS370_OBSERVATION_PACKET_V2", "index": index, "total": len(rows), "subject_id": sid, "state": state}), flush=True)
 
-    result = {
+    return {
         "schema": SCHEMA,
         "status": "PREPARED_OBSERVATION_INPUT_BYTES__CURRENT_FAMILY_COURTS_STILL_REQUIRED",
         "subject_count": len(outcomes),
@@ -260,7 +259,6 @@ def prepare(
         },
         "training_authorized": False,
     }
-    return result
 
 
 def main() -> None:

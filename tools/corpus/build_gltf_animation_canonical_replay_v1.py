@@ -6,11 +6,16 @@ from __future__ import annotations
 Source animation bytes remain the authority. This adapter proves those channels can
 be consumed as a coherent node-TRS hierarchy after source and imported rig/skin
 courts have passed. It does not claim physical dynamics or motion quality.
+
+Both JSON .gltf and binary .glb containers are decoded through the same independent
+SourceGLTF reader. Container format must never change canonical replay semantics.
 """
 
 import argparse, hashlib, json
 from pathlib import Path
 import numpy as np
+
+from tools.corpus.gltf_bind_scene_v1 import SourceGLTF
 
 ANIM_SCHEMA="RealSaS.GltfAnimationKinematicsAuthority.v1"
 ANIM_COURT_SCHEMA="RealSaS.GltfAnimationKinematicsAuthorityCourt.v1"
@@ -25,19 +30,16 @@ def sha256(path:Path)->str:
     with path.open('rb') as f:
         for c in iter(lambda:f.read(8<<20),b''): h.update(c)
     return h.hexdigest()
-
 def bound(row,code):
     row=dict(row or {}); p=Path(str(row.get('path') or '')).resolve()
     if not p.is_file() or sha256(p)!=str(row.get('sha256') or ''): raise ValueError(code)
     return p
-
 def digest(v)->str:return hashlib.sha256(json.dumps(v,sort_keys=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()
 
 def qnorm(q):
     q=np.asarray(q,np.float64); n=float(np.linalg.norm(q))
     if not np.isfinite(n) or n<=1e-12: raise ValueError('ANIM_REPLAY_QUATERNION_ZERO')
     return q/n
-
 def slerp(a,b,u):
     a=qnorm(a); b=qnorm(b); dot=float(np.dot(a,b))
     if dot<0: b=-b; dot=-dot
@@ -45,7 +47,6 @@ def slerp(a,b,u):
     if dot>0.9995:return qnorm((1-u)*a+u*b)
     th=np.arccos(dot); s=np.sin(th)
     return qnorm(np.sin((1-u)*th)/s*a+np.sin(u*th)/s*b)
-
 def sample(times,values,interp,path,t):
     times=np.asarray(times,np.float64); values=np.asarray(values,np.float64)
     if t<=times[0]: idx=0; u=0.
@@ -121,7 +122,7 @@ def build(animation_manifest_path:Path,animation_court_path:Path,rig_manifest_pa
     if source!=rsource or sha256(source)!=sha256(rsource): raise ValueError('ANIM_REPLAY_SOURCE_IDENTITY')
     if (rc.get('inputs') or {}).get('raw_source',{}).get('sha256')!=sha256(source): raise ValueError('ANIM_REPLAY_IMPORT_SOURCE_BINDING')
     if (rc.get('inputs') or {}).get('teacher_scene',{}).get('sha256')!=sha256(teacher_scene_path.resolve()): raise ValueError('ANIM_REPLAY_TEACHER_BINDING')
-    gltf=json.loads(source.read_text()); nodes=list(gltf.get('nodes') or []); parent=parents(nodes)
+    gltf=SourceGLTF(source).doc; nodes=list(gltf.get('nodes') or []); parent=parents(nodes)
     joints=sorted({int(j) for skin in gltf.get('skins') or [] for j in skin.get('joints') or []}); names=[str(nodes[j].get('name') or f'node_{j}') for j in joints]
     frames=list((teacher.get('calibration') or {}).get('native_control_frames_privileged') or []); frame_names=[str(x.get('name') or '') for x in frames]
     if set(names)!=set(frame_names) or len(names)!=len(frame_names): raise ValueError('ANIM_REPLAY_IMPORTED_JOINT_NAME_SET')
@@ -141,7 +142,7 @@ def build(animation_manifest_path:Path,animation_court_path:Path,rig_manifest_pa
         total_samples+=len(times)
     non_joint=sum(int(not c.get('target_is_skin_joint') or c.get('target_path') not in {'translation','rotation','scale'}) for a in am.get('animations') or [] for c in a.get('channels') or [])
     outcome='QUALIFIED_CORE_CANDIDATE' if non_joint==0 else 'QUALIFIED_MASKED_CANDIDATE'
-    payload={'schema':SCHEMA,'status':STATUS,'subject_id':teacher.get('subject_key'),'inputs':{'animation_manifest':{'path':str(animation_manifest_path.resolve()),'sha256':sha256(animation_manifest_path.resolve())},'animation_source_court':{'path':str(animation_court_path.resolve()),'sha256':sha256(animation_court_path.resolve())},'rig_manifest':{'path':str(rig_manifest_path.resolve()),'sha256':sha256(rig_manifest_path.resolve())},'rig_importer_court':{'path':str(rig_importer_court_path.resolve()),'sha256':sha256(rig_importer_court_path.resolve())},'teacher_scene':{'path':str(teacher_scene_path.resolve()),'sha256':sha256(teacher_scene_path.resolve())},'raw_source':{'path':str(source),'sha256':sha256(source)}},'animations':rows,'counts':{'animation_count':len(rows),'joint_count':len(joints),'replay_sample_count':int(total_samples),'non_joint_or_non_trs_channel_count':non_joint},'policy':{'sample_time_selection':'UNIQUE_KEYS_AND_INTERVAL_MIDPOINTS__DETERMINISTIC_MAX_9_QUANTILE_SUBSET_PER_CLIP','source_channel_arrays_already_independently_courted':True,'imported_rig_name_parent_and_skin_equivalence_required':True,'authored_animation_is_kinematic_truth_not_physics':True,'motion_quality_claimed':False},'family_candidate_outcome':outcome,'authority':{'canonical_replay_candidate_only':True,'independent_replay_court_required':True,'final_family_authority_minted':False,'training_authorized':False}}
+    payload={'schema':SCHEMA,'status':STATUS,'subject_id':teacher.get('subject_key'),'inputs':{'animation_manifest':{'path':str(animation_manifest_path.resolve()),'sha256':sha256(animation_manifest_path.resolve())},'animation_source_court':{'path':str(animation_court_path.resolve()),'sha256':sha256(animation_court_path.resolve())},'rig_manifest':{'path':str(rig_manifest_path.resolve()),'sha256':sha256(rig_manifest_path.resolve())},'rig_importer_court':{'path':str(rig_importer_court_path.resolve()),'sha256':sha256(rig_importer_court_path.resolve())},'teacher_scene':{'path':str(teacher_scene_path.resolve()),'sha256':sha256(teacher_scene_path.resolve())},'raw_source':{'path':str(source),'sha256':sha256(source)}},'animations':rows,'counts':{'animation_count':len(rows),'joint_count':len(joints),'replay_sample_count':int(total_samples),'non_joint_or_non_trs_channel_count':non_joint},'policy':{'sample_time_selection':'UNIQUE_KEYS_AND_INTERVAL_MIDPOINTS__DETERMINISTIC_MAX_9_QUANTILE_SUBSET_PER_CLIP','source_channel_arrays_already_independently_courted':True,'imported_rig_name_parent_and_skin_equivalence_required':True,'authored_animation_is_kinematic_truth_not_physics':True,'motion_quality_claimed':False,'gltf_and_glb_share_same_source_reader':True},'family_candidate_outcome':outcome,'authority':{'canonical_replay_candidate_only':True,'independent_replay_court_required':True,'final_family_authority_minted':False,'training_authorized':False}}
     payload['identity_sha256']=digest(payload); output=output.resolve(); output.parent.mkdir(parents=True,exist_ok=True); output.write_text(json.dumps(payload,sort_keys=True,indent=2,allow_nan=False)+'\n'); return payload
 
 def main():

@@ -4,7 +4,7 @@
   "purpose": "FINITE_CORPUS370_SOURCE_OBSERVATION_RESPONSE_AND_PRESENTATION_TRUTH__NO_TRAINING",
   "canonical_branch": "main",
   "execution_lane": "PLATFORM_RESEARCH_CAMPAIGN",
-  "compiler_plan": "canonical/TRUTH_CALIBRATION_EXECUTION_PLAN_V3.json",
+  "compiler_plan": "canonical/CORPUS370_TRUTH_EXECUTION_PLAN_V1.json",
   "required_stage_count": 10,
   "required_entry_stage_id": "01_SOURCE_BYTES_SEALED",
   "required_target_stage_id": "48_PRESENTATION_RESPONSE_TRUTH",

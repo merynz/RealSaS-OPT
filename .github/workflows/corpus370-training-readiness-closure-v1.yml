@@ -50,6 +50,8 @@ jobs:
             tools/corpus/acquire_corpus370_source_provenance_v1.py \
             tools/corpus/prepare_corpus370_observation_packets_v1.py \
             tools/corpus/run_corpus370_observation_sweep_v1.py \
+            tools/corpus/prepare_corpus370_observation_packets_v2.py \
+            tools/corpus/run_corpus370_observation_sweep_v2.py \
             tools/corpus/prepare_corpus370_platform_truth_bundle_v1.py \
             tools/platform_truth_cohort_bootstrap_v1.py \
             tools/truth_foundry/platform_corpus370_truth_operator_v1.py \

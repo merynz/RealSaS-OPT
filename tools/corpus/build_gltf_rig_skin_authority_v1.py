@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-"""Build raw-source rig/skin authority candidate from a glTF 2.0 source.
+"""Build raw-source rig/skin authority candidate from glTF 2.0 JSON or GLB.
 
 The producer reads only immutable source bytes. It does not consume Blender,
 TeacherSceneIR, Stage47, AXIS, MIRA or any imported representation. The output
@@ -17,6 +17,8 @@ from pathlib import Path
 from urllib.parse import unquote_to_bytes
 
 import numpy as np
+
+from tools.observation.source_scene_contract_v2 import _json_and_chunks
 
 
 SCHEMA = "RealSaS.GltfRigSkinAuthority.v1"
@@ -55,24 +57,33 @@ def digest(value) -> str:
     ).hexdigest()
 
 
-def _buffer_bytes(gltf: dict, source_path: Path) -> list[bytes]:
+def _buffer_bytes(gltf: dict, source_path: Path, chunks=()) -> list[bytes]:
+    binary = [data for kind, data in chunks if kind == 0x004E4942]
     result = []
     for index, row in enumerate(gltf.get("buffers") or ()):
-        uri = str(row.get("uri") or "")
-        if not uri:
-            raise ValueError(f"GLTF_RIG_SKIN_BUFFER_URI_REQUIRED:{index}")
-        if uri.startswith("data:"):
-            header, payload = uri.split(",", 1)
-            data = base64.b64decode(payload) if ";base64" in header else unquote_to_bytes(payload)
+        uri = row.get("uri")
+        if uri is None:
+            if not binary:
+                raise ValueError(f"GLTF_RIG_SKIN_EMBEDDED_BUFFER_REQUIRED:{index}")
+            data = binary.pop(0)
         else:
-            external = (source_path.parent / uri).resolve()
-            if not external.is_file():
-                raise FileNotFoundError("GLTF_RIG_SKIN_EXTERNAL_BUFFER:" + str(external))
-            data = external.read_bytes()
+            uri = str(uri)
+            if uri.startswith("data:"):
+                header, payload = uri.split(",", 1)
+                data = base64.b64decode(payload) if ";base64" in header else unquote_to_bytes(payload)
+            else:
+                external = (source_path.parent / uri).resolve()
+                if not external.is_relative_to(source_path.parent.resolve()):
+                    raise ValueError("GLTF_RIG_SKIN_EXTERNAL_BUFFER_ESCAPE:" + str(external))
+                if not external.is_file():
+                    raise FileNotFoundError("GLTF_RIG_SKIN_EXTERNAL_BUFFER:" + str(external))
+                data = external.read_bytes()
         expected = int(row.get("byteLength", -1))
         if expected < 0 or len(data) < expected:
             raise ValueError(f"GLTF_RIG_SKIN_BUFFER_LENGTH:{index}")
         result.append(data[:expected])
+    if binary:
+        raise ValueError("GLTF_RIG_SKIN_UNUSED_GLB_BINARY_CHUNK")
     return result
 
 
@@ -112,7 +123,7 @@ def _quat_matrix(value) -> np.ndarray:
     x, y, z, w = map(float, value)
     return np.asarray(
         [
-            [1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y), 0],
+            [1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (y * z + w * x), 0],
             [2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x), 0],
             [2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y), 0],
             [0, 0, 0, 1],
@@ -256,7 +267,7 @@ def _write_npz(path: Path, arrays: dict[str, np.ndarray]) -> None:
 def build(source_path: Path, output_dir: Path) -> dict:
     source_path = source_path.resolve()
     output_dir = output_dir.resolve()
-    gltf = json.loads(source_path.read_text())
+    gltf, chunks = _json_and_chunks(source_path)
     asset = dict(gltf.get("asset") or {})
     if not str(asset.get("version") or "").startswith("2"):
         raise ValueError("GLTF_RIG_SKIN_GLTF2_REQUIRED")
@@ -264,7 +275,7 @@ def build(source_path: Path, output_dir: Path) -> dict:
     skins = list(gltf.get("skins") or ())
     if not nodes or not skins:
         raise ValueError("GLTF_RIG_SKIN_NODES_OR_SKINS_MISSING")
-    buffers = _buffer_bytes(gltf, source_path)
+    buffers = _buffer_bytes(gltf, source_path, chunks)
     parents = _parents(nodes)
     world = _world_matrices(nodes, parents)
 
@@ -348,6 +359,7 @@ def build(source_path: Path, output_dir: Path) -> dict:
         "status": STATUS,
         "source": {"path": str(source_path), "sha256": sha256(source_path)},
         "source_format": "GLTF_2_0",
+        "source_container": "GLB" if source_path.suffix.lower() == ".glb" else "GLTF_JSON",
         "skins": skin_rows,
         "primitives": primitive_rows,
         "counts": {

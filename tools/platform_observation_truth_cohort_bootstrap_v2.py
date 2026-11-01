@@ -4,9 +4,9 @@ from __future__ import annotations
 """Bootstrap the observation-qualified projection of the Corpus370 candidate universe.
 
 The parent V2 family bundle always binds all 370 raw sources/provenance rows plus
-explicit observation preparation PASS/FAIL outcomes.  This bootstrap submits only
+explicit observation preparation PASS/FAIL outcomes. This bootstrap submits only
 subjects whose sealed parent row says observation_preparation.status == PASS to the
-observation-dependent Stage01..48 research DAG.  Excluded subjects are reported
+observation-dependent Stage01..48 research DAG. Excluded subjects are reported
 explicitly and remain available to observation-independent family courts.
 
 No family authority, split, training readiness, model promotion, or product
@@ -14,27 +14,33 @@ authority is minted here.
 """
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
+import tempfile
+import zipfile
 
 from tools import platform_truth_cohort_bootstrap_v1 as v1
-from tools.platform_artifact_store import fetch_google_drive_with_rclone
+from tools.platform_artifact_store import (
+    fetch_google_drive_with_rclone,
+    hydrate_row,
+    sha256_file,
+)
 from tools.platform_cohort_bootstrap_v1 import (
     api,
     external_inventory_row,
     file_ref,
-    hydrate_row,
     json_bytes,
     receipt_index,
     require,
-    safe_extract_verified,
 )
 from tools.platform_release_snapshot import snapshot
 
 ROOT = Path(__file__).resolve().parents[1]
 DESCRIPTOR_SCHEMA = "RealSaS.PlatformObservationTruthCohortBootstrapDescriptor.v2"
 BUNDLE_SCHEMA = "RealSaS.Corpus370PlatformFamilyInputBundle.v2"
+RECEIPT_SCHEMA = "RealSaS.Corpus370PlatformFamilyInputBundleReceipt.v2"
 CAMPAIGN_SCHEMA = "RealSaS.Corpus370ObservationTruthCampaign.v2"
 SOURCE_SCENE_PROFILE = "SOURCE_SCENE_BIND_V2"
 SOURCE_SCENE_ADMISSION = "CONTROLLED_FULL_SUBJECT_8VIEW_V2_SOURCE_SCENE"
@@ -43,6 +49,100 @@ SOURCE_LICENSE_PROFILE = "EXACT_SOURCE_PROVENANCE_V2"
 
 def load(path: Path):
     return json.loads(path.read_text())
+
+
+def digest_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def safe_extract_verified_v2(zip_path: Path, descriptor: dict, out_root: Path):
+    """Extract only an exact Corpus370 V2 family bundle.
+
+    The historical V1 helper intentionally accepts only the V1 Stage01 bundle
+    schema. Reusing it here would make the V2 bootstrap fail at runtime despite
+    successful static compilation. Keep the V1 boundary immutable and verify the
+    new transport contract explicitly instead.
+    """
+    bundle = dict(descriptor.get("cohort_bundle") or {})
+    manifest_member = str(bundle.get("bootstrap_manifest_member") or "")
+    receipt_member = str(bundle.get("bundle_receipt_member") or "")
+    require(manifest_member == "BOOTSTRAP_MANIFEST.json", "OBS_TRUTH_V2_MANIFEST_MEMBER")
+    require(receipt_member == "BUNDLE_RECEIPT.json", "OBS_TRUTH_V2_RECEIPT_MEMBER")
+    require(len(str(bundle.get("sha256") or "")) == 64, "OBS_TRUTH_V2_BUNDLE_SHA")
+
+    zip_path = zip_path.resolve()
+    require(zip_path.is_file(), "OBS_TRUTH_V2_BUNDLE_MISSING")
+    with zipfile.ZipFile(zip_path) as archive:
+        names = archive.namelist()
+        require(len(names) == len(set(names)), "OBS_TRUTH_V2_DUPLICATE_MEMBER")
+        require(manifest_member in names and receipt_member in names, "OBS_TRUTH_V2_REQUIRED_MEMBERS")
+
+        receipt = json.loads(archive.read(receipt_member))
+        require(receipt.get("schema") == RECEIPT_SCHEMA, "OBS_TRUTH_V2_RECEIPT_SCHEMA")
+        require(receipt.get("training_authorized") is False, "OBS_TRUTH_V2_RECEIPT_PREAUTHORIZED")
+        rows = list(receipt.get("files") or ())
+        expected = {str(row["path"]): row for row in rows}
+        require(int(receipt.get("file_count", -1)) == len(rows), "OBS_TRUTH_V2_RECEIPT_COUNT")
+        require(len(expected) == len(rows), "OBS_TRUTH_V2_RECEIPT_DUPLICATE_PATH")
+        require(set(names) == set(expected) | {receipt_member}, "OBS_TRUTH_V2_MEMBER_SET_DRIFT")
+        require(manifest_member in expected, "OBS_TRUTH_V2_MANIFEST_NOT_RECEIPTED")
+        require(
+            receipt.get("manifest_sha256") == expected[manifest_member]["sha256"],
+            "OBS_TRUTH_V2_MANIFEST_RECEIPT_DRIFT",
+        )
+
+        for name, row in expected.items():
+            relative = Path(name)
+            require(not relative.is_absolute() and ".." not in relative.parts, "OBS_TRUTH_V2_PATH_ESCAPE")
+            data = archive.read(name)
+            require(len(data) == int(row["size_bytes"]), "OBS_TRUTH_V2_SIZE_DRIFT:" + name)
+            require(digest_bytes(data) == row["sha256"], "OBS_TRUTH_V2_SHA_DRIFT:" + name)
+
+        manifest = json.loads(archive.read(manifest_member))
+        require(manifest.get("schema") == BUNDLE_SCHEMA, "OBS_TRUTH_V2_BUNDLE_SCHEMA")
+        require(manifest.get("training_authorized") is False, "OBS_TRUTH_V2_BUNDLE_PREAUTHORIZED")
+        require(int(manifest.get("candidate_subject_count", -1)) == 370, "OBS_TRUTH_V2_BUNDLE_CANDIDATE_COUNT")
+        require(
+            int(manifest.get("observation_qualified_count", -1))
+            + int(manifest.get("observation_failed_count", -1)) == 370,
+            "OBS_TRUTH_V2_BUNDLE_OBSERVATION_PARTITION",
+        )
+
+        target = (out_root / str(bundle["sha256"])).resolve()
+        target.mkdir(parents=True, exist_ok=True)
+        for name, row in expected.items():
+            path = (target / name).resolve()
+            require(path.is_relative_to(target), "OBS_TRUTH_V2_EXTRACT_ESCAPE")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            data = archive.read(name)
+            if path.exists():
+                require(
+                    path.is_file()
+                    and path.stat().st_size == len(data)
+                    and sha256_file(path) == row["sha256"],
+                    "OBS_TRUTH_V2_EXISTING_OBJECT_DRIFT:" + name,
+                )
+                continue
+            fd, temporary_name = tempfile.mkstemp(dir=path.parent, prefix=path.name + ".", suffix=".tmp")
+            os.close(fd)
+            temporary = Path(temporary_name)
+            try:
+                temporary.write_bytes(data)
+                require(sha256_file(temporary) == row["sha256"], "OBS_TRUTH_V2_EXTRACT_HASH_DRIFT:" + name)
+                os.replace(temporary, path)
+            finally:
+                temporary.unlink(missing_ok=True)
+
+        receipt_path = target / receipt_member
+        receipt_data = archive.read(receipt_member)
+        if receipt_path.exists():
+            require(
+                receipt_path.is_file() and digest_bytes(receipt_path.read_bytes()) == digest_bytes(receipt_data),
+                "OBS_TRUTH_V2_EXISTING_RECEIPT_DRIFT",
+            )
+        else:
+            receipt_path.write_bytes(receipt_data)
+        return manifest, receipt, target
 
 
 def subject_sections(subject: dict, bundle_root: Path, index: dict, overlay: dict) -> dict:
@@ -118,14 +218,8 @@ def main(args) -> dict:
     require(campaign_contract.get("schema") == CAMPAIGN_SCHEMA, "OBS_TRUTH_V2_CAMPAIGN_SCHEMA")
     require(campaign_contract.get("canonical_branch") == "main", "OBS_TRUTH_V2_MAIN_REQUIRED")
     plan = load((repo / campaign_contract["compiler_plan"]).resolve())
-    require(
-        int(plan["stage_count"]) == int(campaign_contract["required_stage_count"]),
-        "OBS_TRUTH_V2_PLAN_STAGE_COUNT",
-    )
-    require(
-        plan["stages"][-1]["id"] == campaign_contract["required_target_stage_id"],
-        "OBS_TRUTH_V2_TARGET_STAGE",
-    )
+    require(int(plan["stage_count"]) == int(campaign_contract["required_stage_count"]), "OBS_TRUTH_V2_PLAN_STAGE_COUNT")
+    require(plan["stages"][-1]["id"] == campaign_contract["required_target_stage_id"], "OBS_TRUTH_V2_TARGET_STAGE")
     require("iris_fit" not in set(v1.plan_manifest_keys(plan)), "OBS_TRUTH_V2_TRAINING_PLAN_FORBIDDEN")
     require(
         set(v1.plan_manifest_keys(plan)).issubset(
@@ -151,10 +245,9 @@ def main(args) -> dict:
         allow_remote=True,
     )
     require(hydrated["status"] in {"CAS_HIT", "HYDRATED"}, "OBS_TRUTH_V2_BUNDLE_HYDRATION")
-    bundle_manifest, receipt, bundle_root = safe_extract_verified(
+    bundle_manifest, receipt, bundle_root = safe_extract_verified_v2(
         Path(hydrated["path"]), descriptor, args.authority_root / "truth_cohort_bundles_v2"
     )
-    require(bundle_manifest.get("schema") == BUNDLE_SCHEMA, "OBS_TRUTH_V2_BUNDLE_SCHEMA")
     require(
         int(bundle_manifest.get("candidate_subject_count", -1))
         == int(campaign_contract["candidate_universe_subject_count"]) == 370,
@@ -171,23 +264,11 @@ def main(args) -> dict:
     candidate_ids = [str(row.get("subject_id") or "") for row in candidates]
     require(all(candidate_ids) and len(set(candidate_ids)) == 370, "OBS_TRUTH_V2_CANDIDATE_KEYS")
 
-    selected = [
-        row for row in candidates
-        if (row.get("observation_preparation") or {}).get("status") == "PASS"
-    ]
-    excluded = [
-        row for row in candidates
-        if (row.get("observation_preparation") or {}).get("status") == "FAIL"
-    ]
+    selected = [row for row in candidates if (row.get("observation_preparation") or {}).get("status") == "PASS"]
+    excluded = [row for row in candidates if (row.get("observation_preparation") or {}).get("status") == "FAIL"]
     require(len(selected) + len(excluded) == 370, "OBS_TRUTH_V2_PROJECTION_PARTITION")
-    require(
-        len(selected) == int(bundle_manifest.get("observation_qualified_count", -1)),
-        "OBS_TRUTH_V2_QUALIFIED_COUNT",
-    )
-    require(
-        len(excluded) == int(bundle_manifest.get("observation_failed_count", -1)),
-        "OBS_TRUTH_V2_EXCLUDED_COUNT",
-    )
+    require(len(selected) == int(bundle_manifest.get("observation_qualified_count", -1)), "OBS_TRUTH_V2_QUALIFIED_COUNT")
+    require(len(excluded) == int(bundle_manifest.get("observation_failed_count", -1)), "OBS_TRUTH_V2_EXCLUDED_COUNT")
     projection = campaign_contract["cohort_projection"]
     require(
         int(projection["minimum_subject_count"]) <= len(selected) <= int(projection["maximum_subject_count"]),
@@ -207,14 +288,7 @@ def main(args) -> dict:
             actor,
             f"urn:realsas:corpus370-observation-truth-v2:{descriptor['campaign_name']}:{sid}",
         )
-        state.append(
-            {
-                "key": sid,
-                "platform_subject_id": platform_id,
-                "subject_input_id": input_id,
-                "sections": sections,
-            }
-        )
+        state.append({"key": sid, "platform_subject_id": platform_id, "subject_input_id": input_id, "sections": sections})
 
     stage_params = v1.release_stage_parameters(descriptor, plan)
     release_request = snapshot(
@@ -247,12 +321,7 @@ def main(args) -> dict:
         run_id = f"CAMPAIGN_{campaign_id}_{row['platform_subject_id']}"
         run_root = args.authority_root / "runs" / run_id
         run_root.mkdir(parents=True, exist_ok=True)
-        manifest = {
-            "run_id": run_id,
-            "subject_id": row["key"],
-            "execution_class": "WITNESS",
-            **row["sections"],
-        }
+        manifest = {"run_id": run_id, "subject_id": row["key"], "execution_class": "WITNESS", **row["sections"]}
         manifest_path = run_root / "run_manifest.json"
         raw = json_bytes(manifest)
         if manifest_path.exists():

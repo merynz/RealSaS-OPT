@@ -1,0 +1,153 @@
+name: corpus370-source-camera-court-v2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - corpus400-training-readiness-closure-v1
+    paths:
+      - '.github/workflows/corpus370-source-camera-court-v2.yml'
+      - 'canonical/CORPUS370_SOURCE_CAMERA_AUTHORITY_POLICY_V2.json'
+      - 'tools/corpus/audit_corpus370_source_camera_authority_v2.py'
+      - 'tools/corpus/gltf_bind_scene_v1.py'
+      - 'tools/observation/source_scene_contract_v2.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-source-camera-court-v2
+  cancel-in-progress: true
+
+jobs:
+  source-camera-court:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 240
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      PREP_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1
+      SOURCE_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/source_bundle
+      SOURCE_ARCHIVE_SHA256: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      PARENT_INDEX: /home/monster/realsas_authority/corpus370_preparation_v1/observations_v2/CORPUS370_PREPARED_OBSERVATION_PACKETS_V2.json
+      COMPOSITE_INDEX: /home/monster/realsas_authority/corpus370_preparation_v1/observations_rescue_v3/CORPUS370_PREPARED_OBSERVATION_PACKETS_V3.json
+      PARENT_OBSERVATION_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/observations_v2
+      RESCUE_OBSERVATION_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/observations_rescue_v3
+      UFBX_PROBE: /home/monster/realsas_authority/corpus370_preparation_v1/tools/ufbx_bind_scene_probe_v1
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/source_camera_court_v2
+      EXPECTED_ROSTER_SHA256: 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+      EXPECTED_PARENT_SHA256: 129b173b5d789cf4dc020f883ee8b16db8156380dd0cae939319ad3c279c139a
+      EXPECTED_COMPOSITE_SHA256: 5007b0863eddce70833ad48c4bc26af92a7abd79b618c8dc5c69ade7f43840a7
+      RCLONE_REMOTE: gdrive
+    steps:
+      - name: Checkout exact court revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify exact immutable parents
+        run: |
+          set -euo pipefail
+          test -x "$PLATFORM_ROOT/current/bin/realsas-python"
+          test -x "$UFBX_PROBE"
+          test -f "$ROSTER"
+          test -f "$PARENT_INDEX"
+          test -f "$COMPOSITE_INDEX"
+          test "$(sha256sum "$ROSTER" | awk '{print $1}')" = "$EXPECTED_ROSTER_SHA256"
+          test "$(sha256sum "$PARENT_INDEX" | awk '{print $1}')" = "$EXPECTED_PARENT_SHA256"
+          test "$(sha256sum "$COMPOSITE_INDEX" | awk '{print $1}')" = "$EXPECTED_COMPOSITE_SHA256"
+          EXTRACTED="$SOURCE_ROOT/extracted/$SOURCE_ARCHIVE_SHA256"
+          test -d "$EXTRACTED"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          c=json.loads(Path(os.environ['COMPOSITE_INDEX']).read_text())
+          assert c['schema']=='RealSaS.Corpus370PreparedObservationPackets.v3'
+          assert c['subject_count']==370
+          assert c['prepared_subject_count']==294
+          assert c['failure_count']==76
+          assert c['training_authorized'] is False
+          print('CORPUS370_SOURCE_CAMERA_PARENTS=PASS')
+          PY
+
+      - name: Run independent source-import and camera courts without rerendering
+        run: |
+          set -euo pipefail
+          rm -rf "$OUTPUT_ROOT"
+          EXTRACTED="$SOURCE_ROOT/extracted/$SOURCE_ARCHIVE_SHA256"
+          "$PLATFORM_ROOT/current/bin/realsas-python" \
+            tools/corpus/audit_corpus370_source_camera_authority_v2.py \
+            --exact-source-roster "$ROSTER" \
+            --extracted-source-root "$EXTRACTED" \
+            --parent-v2-index "$PARENT_INDEX" \
+            --composite-v3-index "$COMPOSITE_INDEX" \
+            --parent-observation-root "$PARENT_OBSERVATION_ROOT" \
+            --rescue-observation-root "$RESCUE_OBSERVATION_ROOT" \
+            --probe "$UFBX_PROBE" \
+            --policy canonical/CORPUS370_SOURCE_CAMERA_AUTHORITY_POLICY_V2.json \
+            --output-root "$OUTPUT_ROOT"
+
+      - name: Verify complete current family partition
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ['OUTPUT_ROOT'])
+          sweep=json.loads((root/'CORPUS370_SOURCE_CAMERA_AUTHORITY_SWEEP_V2.json').read_text())
+          evidence=json.loads((root/'CORPUS370_SOURCE_CAMERA_FAMILY_EVIDENCE_V2.json').read_text())
+          assert sweep['schema']=='RealSaS.Corpus370SourceCameraAuthoritySweep.v2'
+          assert sweep['subject_count']==370
+          assert evidence['schema']=='RealSaS.Corpus370FamilyEvidenceIndex.v1'
+          assert evidence['subject_count']==370
+          for family in ('SOURCE_IMPORT','CAMERA_OBSERVATION'):
+              counts=evidence['rollup'][family]
+              assert counts['PASS']+counts['FAIL']==370,(family,counts)
+          assert evidence['training_authorized'] is False
+          print(json.dumps(evidence['rollup'],sort_keys=True))
+          PY
+
+      - name: Publish court summary
+        if: always()
+        run: |
+          set -euo pipefail
+          SWEEP="$OUTPUT_ROOT/CORPUS370_SOURCE_CAMERA_AUTHORITY_SWEEP_V2.json"
+          if [ -f "$SWEEP" ]; then
+            "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os
+          from pathlib import Path
+          d=json.loads((Path(os.environ['OUTPUT_ROOT'])/'CORPUS370_SOURCE_CAMERA_AUTHORITY_SWEEP_V2.json').read_text())
+          print('## Corpus370 source/camera court V2')
+          print('```json')
+          print(json.dumps({'subject_count':d['subject_count'],'rollup':d['rollup'],'training_authorized':d['training_authorized']},indent=2,sort_keys=True))
+          print('```')
+          PY
+          fi
+
+      - name: Upload immutable evidence index to Drive transport
+        if: success()
+        run: |
+          set -euo pipefail
+          command -v rclone >/dev/null
+          rclone listremotes | grep -Fx 'gdrive:'
+          EVIDENCE="$OUTPUT_ROOT/CORPUS370_SOURCE_CAMERA_FAMILY_EVIDENCE_V2.json"
+          SWEEP="$OUTPUT_ROOT/CORPUS370_SOURCE_CAMERA_AUTHORITY_SWEEP_V2.json"
+          EVIDENCE_SHA="$(sha256sum "$EVIDENCE" | awk '{print $1}')"
+          SWEEP_SHA="$(sha256sum "$SWEEP" | awk '{print $1}')"
+          rclone copyto "$EVIDENCE" "$RCLONE_REMOTE:corpus370_authority_v2/CORPUS370_SOURCE_CAMERA_FAMILY_EVIDENCE_V2_${EVIDENCE_SHA}.json" --checksum --progress
+          rclone copyto "$SWEEP" "$RCLONE_REMOTE:corpus370_authority_v2/CORPUS370_SOURCE_CAMERA_AUTHORITY_SWEEP_V2_${SWEEP_SHA}.json" --checksum --progress
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-source-camera-court-v2-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT_ROOT }}/CORPUS370_SOURCE_CAMERA_AUTHORITY_SWEEP_V2.json
+            ${{ env.OUTPUT_ROOT }}/CORPUS370_SOURCE_CAMERA_FAMILY_EVIDENCE_V2.json
+            ${{ env.OUTPUT_ROOT }}/subjects/*/SOURCE_IMPORT_AUTHORITY_COURT_V2.json
+            ${{ env.OUTPUT_ROOT }}/subjects/*/CAMERA_OBSERVATION_AUTHORITY_COURT_V2.json
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

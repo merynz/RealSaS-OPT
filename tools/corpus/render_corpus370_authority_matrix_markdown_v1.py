@@ -138,7 +138,10 @@ def render(matrix: dict) -> str:
             model_row = (row.get("model_eligibility") or {}).get(model) or {}
             required = list(model_row.get("required_pass") or ())
             families = row.get("families") or {}
-            states = "; ".join(f"`{family}`={_cell_text(families.get(family) or {})}" for family in required)
+            # Keep FAMILY=STATE literal in the report so Sir can scan/filter the
+            # table directly and downstream text checks do not depend on Markdown
+            # code-span punctuation.
+            states = "; ".join(f"{family}={_cell_text(families.get(family) or {})}" for family in required)
             mask_notes = []
             for family in required:
                 cell = families.get(family) or {}
@@ -152,7 +155,7 @@ def render(matrix: dict) -> str:
                     if scope and family in {"RIG_HIERARCHY", "SKIN_WEIGHTS"}:
                         mask_notes.append(f"{family}: {scope}")
             out.append(
-                f"| `{_escape(row.get('subject_id'))}` | `{_escape(row.get('source_format'))}` | `{_escape(row.get('source_id'))}` | {states} | {_escape('; '.join(dict.fromkeys(mask_notes)) or '—')} |"
+                f"| `{_escape(row.get('subject_id'))}` | `{_escape(row.get('source_format'))}` | `{_escape(row.get('source_id'))}` | {_escape(states)} | {_escape('; '.join(dict.fromkeys(mask_notes)) or '—')} |"
             )
         out.append("")
 

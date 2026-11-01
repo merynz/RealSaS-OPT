@@ -1,0 +1,49 @@
+{
+  "schema": "RealSaS.Corpus370SourceCameraAuthorityPolicy.v2",
+  "date": "2026-11-02",
+  "purpose": "INDEPENDENT_SOURCE_IMPORT_AND_CAMERA_OBSERVATION_AUTHORITY__NO_GRAPHICS_PROMOTION",
+  "candidate_subject_count": 370,
+  "source_import": {
+    "raw_source_sha256_required": true,
+    "independent_raw_reader_required": true,
+    "imported_evaluated_rest_geometry_required": true,
+    "maximum_relative_symmetric_vertex_error": 0.00001,
+    "bone_count_parity_required": true,
+    "imported_scene_internal_consistency_required": true,
+    "source_bind_rest_no_animation_required": true
+  },
+  "camera_observation": {
+    "source_import_pass_required": true,
+    "view_count": 8,
+    "resolution": 1024,
+    "minimum_border_margin_px": 8,
+    "single_common_center_required": true,
+    "single_common_half_extent_required": true,
+    "per_view_recenter_forbidden": true,
+    "per_view_pose_change_forbidden": true,
+    "orthonormal_camera_basis_required": true,
+    "camera_points_at_common_center_required": true,
+    "raster_hash_parity_required": true,
+    "foreground_mask_hash_parity_required": true,
+    "raster_alpha_equals_declared_mask_required": true,
+    "nonempty_foreground_required": true
+  },
+  "layer_separation": {
+    "raw_geometry_projection_must_equal_rgba_alpha_mask": false,
+    "reason": "RGBA alpha visibility is appearance/material evidence. Geometric projected support is a different carrier and cannot be required to equal alpha visibility for source/camera authority.",
+    "geometric_vs_alpha_mask_gap_consumer": "APPEARANCE_CAA_OR_VISIBILITY_OCCLUSION_EVIDENCE_ONLY",
+    "mask_gap_threshold_relaxed": false,
+    "historical_mask_gap_measurement_discarded": false
+  },
+  "authority": {
+    "families_emitted": [
+      "SOURCE_IMPORT",
+      "CAMERA_OBSERVATION"
+    ],
+    "appearance_authority_minted": false,
+    "visibility_authority_minted": false,
+    "surface_geometry_authority_minted": false,
+    "split_minted": false,
+    "training_authorized": false
+  }
+}

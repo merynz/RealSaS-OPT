@@ -96,12 +96,15 @@ def _normalize_claim(claim: dict[str, Any], statuses: set[str]) -> dict[str, Any
     require(refs, "CORPUS370_EVIDENCE_REFS_REQUIRED")
     if status != "PASS":
         require(reason_codes, "CORPUS370_NONPASS_REASON_REQUIRED")
+    metadata = claim.get("metadata") or {}
+    require(isinstance(metadata, dict), "CORPUS370_EVIDENCE_METADATA_OBJECT")
     return {
         "status": status,
         "reason_codes": reason_codes,
         "evidence_refs": refs,
         "court": court,
         "producer_refs": [dict(x) for x in claim.get("producer_refs") or ()],
+        "metadata": dict(metadata),
         "notes": claim.get("notes"),
     }
 
@@ -128,27 +131,26 @@ def _collect_claims(
     return claims
 
 
+def _empty_cell(status: str, reasons: list[str]) -> dict[str, Any]:
+    return {
+        "status": status,
+        "reason_codes": reasons,
+        "evidence_refs": [],
+        "court_refs": [],
+        "producer_refs": [],
+        "claim_metadata": [],
+    }
+
+
 def _resolve_cell(
     subject: dict[str, Any], family: str, claims: list[dict[str, Any]] | None
 ) -> dict[str, Any]:
     if not claims:
-        return {
-            "status": "UNKNOWN",
-            "reason_codes": ["NO_CURRENT_COURT_EVIDENCE"],
-            "evidence_refs": [],
-            "court_refs": [],
-            "producer_refs": [],
-        }
+        return _empty_cell("UNKNOWN", ["NO_CURRENT_COURT_EVIDENCE"])
     source_sha = subject["source_sha256"]
     mismatched = [x for x in claims if x["source_sha256"] != source_sha]
     if mismatched:
-        return {
-            "status": "QUARANTINED",
-            "reason_codes": ["SOURCE_SHA_MISMATCH"],
-            "evidence_refs": [],
-            "court_refs": [],
-            "producer_refs": [],
-        }
+        return _empty_cell("QUARANTINED", ["SOURCE_SHA_MISMATCH"])
     distinct = {x["status"] for x in claims}
     if len(distinct) != 1:
         return {
@@ -157,6 +159,7 @@ def _resolve_cell(
             "evidence_refs": [r for x in claims for r in x["evidence_refs"]],
             "court_refs": [x["court"] for x in claims],
             "producer_refs": [r for x in claims for r in x["producer_refs"]],
+            "claim_metadata": [x["metadata"] for x in claims if x["metadata"]],
         }
     status = next(iter(distinct))
     return {
@@ -165,6 +168,7 @@ def _resolve_cell(
         "evidence_refs": [r for x in claims for r in x["evidence_refs"]],
         "court_refs": [x["court"] for x in claims],
         "producer_refs": [r for x in claims for r in x["producer_refs"]],
+        "claim_metadata": [x["metadata"] for x in claims if x["metadata"]],
     }
 
 

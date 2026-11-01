@@ -1,0 +1,48 @@
+{
+  "schema": "RealSaS.SourceBundleTransportParts.v1",
+  "archive_filename": "CORPUS370_SOURCE_INPUT_BUNDLE_V1.zip",
+  "archive_sha256": "5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9",
+  "archive_size_bytes": 452258567,
+  "parts": [
+    {
+      "filename": "CORPUS370_SOURCE_INPUT_BUNDLE_V1.zip.part000",
+      "size_bytes": 94371840,
+      "sha256": "92cbb5a00243ceb3c6b5fab3b5d94462740c867d3cdb30e9d2c69067b66a144c",
+      "drive_file_id": "1WeNut5BeqMS8Rq-kmSsvTNGr5za3O6Ro",
+      "drive_url": "https://drive.google.com/file/d/1WeNut5BeqMS8Rq-kmSsvTNGr5za3O6Ro/view?usp=drivesdk"
+    },
+    {
+      "filename": "CORPUS370_SOURCE_INPUT_BUNDLE_V1.zip.part001",
+      "size_bytes": 94371840,
+      "sha256": "3c0a8c0064f1948a95c386275f6c202a5f3e414b6c346bde93251fa657c92085",
+      "drive_file_id": "1Jib1SvdDW-OOY6MVa1na8DMYyuD782ot",
+      "drive_url": "https://drive.google.com/file/d/1Jib1SvdDW-OOY6MVa1na8DMYyuD782ot/view?usp=drivesdk"
+    },
+    {
+      "filename": "CORPUS370_SOURCE_INPUT_BUNDLE_V1.zip.part002",
+      "size_bytes": 94371840,
+      "sha256": "47247e133ca30e71500643475c32f495b40b8a22bc4cb5af239b65f324e169f4",
+      "drive_file_id": "1B-o3stSwGSuwZL9cR5flA8zUWst2kRyW",
+      "drive_url": "https://drive.google.com/file/d/1B-o3stSwGSuwZL9cR5flA8zUWst2kRyW/view?usp=drivesdk"
+    },
+    {
+      "filename": "CORPUS370_SOURCE_INPUT_BUNDLE_V1.zip.part003",
+      "size_bytes": 94371840,
+      "sha256": "b212a13ba0fdc24ebecab6bd4fece885ad7f416234a48df9bc813f37f9e5a607",
+      "drive_file_id": "1XVjYUxAiPd_5Wv_pmnvmhrLibv0A23z3",
+      "drive_url": "https://drive.google.com/file/d/1XVjYUxAiPd_5Wv_pmnvmhrLibv0A23z3/view?usp=drivesdk"
+    },
+    {
+      "filename": "CORPUS370_SOURCE_INPUT_BUNDLE_V1.zip.part004",
+      "size_bytes": 74771207,
+      "sha256": "e0b1e368a6a2a4ccd8cf4fd7fb0e6acf2baffd50923fff0b87e34be6e8b72e89",
+      "drive_file_id": "1Qz3icEMillJx6OBx-IeNtpKjuWFTTV3o",
+      "drive_url": "https://drive.google.com/file/d/1Qz3icEMillJx6OBx-IeNtpKjuWFTTV3o/view?usp=drivesdk"
+    }
+  ],
+  "source_bundle_manifest_member": "SOURCE_BUNDLE_MANIFEST_V1.json",
+  "source_bundle_manifest_sha256": "99a3c98ea314ef4e4cb2b1fa62ac298128cc4d8d3c16b8c5c6da89449e57b61b",
+  "source_bytes_modified": false,
+  "training_authorized": false,
+  "drive_folder_id": "1_Gl4QH2C0wU1P2vTFPvLEfePhfTB-ZUK"
+}

@@ -1,0 +1,137 @@
+name: corpus370-gltf2-source-rig-animation-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - corpus400-training-readiness-closure-v1
+    paths:
+      - '.github/workflows/corpus370-gltf2-source-rig-animation-v1.yml'
+      - 'tools/corpus/run_corpus370_gltf_source_rig_animation_sweep_v1.py'
+      - 'tools/corpus/build_gltf_rig_skin_authority_v1.py'
+      - 'tools/corpus/validate_gltf_rig_skin_authority_v1.py'
+      - 'tools/corpus/build_gltf_animation_authority_v1.py'
+      - 'tools/corpus/validate_gltf_animation_authority_v1.py'
+      - 'tools/corpus/gltf_bind_scene_v1.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-gltf2-source-rig-animation-v1
+  cancel-in-progress: true
+
+jobs:
+  gltf2-source-rig-animation:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 240
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      PREP_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1
+      SOURCE_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/source_bundle
+      SOURCE_ARCHIVE_SHA256: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_gltf2_source_rig_animation_v1
+      EXPECTED_ROSTER_SHA256: 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+      RCLONE_REMOTE: gdrive
+    steps:
+      - name: Checkout exact source-court revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify immutable source universe
+        run: |
+          set -euo pipefail
+          test -x "$PLATFORM_ROOT/current/bin/realsas-python"
+          test -f "$ROSTER"
+          test "$(sha256sum "$ROSTER" | awk '{print $1}')" = "$EXPECTED_ROSTER_SHA256"
+          EXTRACTED="$SOURCE_ROOT/extracted/$SOURCE_ARCHIVE_SHA256"
+          test -d "$EXTRACTED"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          r=json.loads(Path(os.environ['ROSTER']).read_text())
+          rows=r['subjects']
+          assert len(rows)==370
+          assert sum(str(x['source_format']).lower()=='.gltf' for x in rows)==196
+          assert sum(str(x['source_format']).lower()=='.glb' for x in rows)==63
+          assert sum(str(x['source_format']).lower()=='.fbx' for x in rows)==111
+          assert r['training_authorized'] is False
+          print('CORPUS370_GLTF2_SOURCE_UNIVERSE=PASS')
+          PY
+
+      - name: Run failure-preserving 259-subject source-native courts
+        run: |
+          set -euo pipefail
+          rm -rf "$OUTPUT_ROOT"
+          EXTRACTED="$SOURCE_ROOT/extracted/$SOURCE_ARCHIVE_SHA256"
+          "$PLATFORM_ROOT/current/bin/realsas-python" \
+            tools/corpus/run_corpus370_gltf_source_rig_animation_sweep_v1.py \
+            --exact-source-roster "$ROSTER" \
+            --extracted-source-root "$EXTRACTED" \
+            --output-root "$OUTPUT_ROOT"
+
+      - name: Verify exact selected partition and no promotion
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ['OUTPUT_ROOT'])/'CORPUS370_GLTF2_SOURCE_RIG_ANIMATION_SWEEP_V1.json'
+          d=json.loads(p.read_text())
+          assert d['schema']=='RealSaS.Corpus370Gltf2SourceRigAnimationSweep.v1'
+          assert d['candidate_subject_count']==370
+          assert d['selected_subject_count']==259
+          assert d['format_counts']=={'gltf':196,'glb':63}
+          assert len(d['subjects'])==259
+          for family in ('RIG_SKIN_SOURCE','ANIMATION_SOURCE'):
+              r=d['rollup'][family]
+              assert r['PASS_SOURCE_COURT']+r['FAIL']==259,(family,r)
+          assert d['authority']['final_family_authority_minted'] is False
+          assert d['training_authorized'] is False
+          print(json.dumps(d['rollup'],sort_keys=True))
+          PY
+
+      - name: Publish source-court summary
+        if: always()
+        run: |
+          set -euo pipefail
+          INDEX="$OUTPUT_ROOT/CORPUS370_GLTF2_SOURCE_RIG_ANIMATION_SWEEP_V1.json"
+          if [ -f "$INDEX" ]; then
+            "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os
+          from pathlib import Path
+          d=json.loads((Path(os.environ['OUTPUT_ROOT'])/'CORPUS370_GLTF2_SOURCE_RIG_ANIMATION_SWEEP_V1.json').read_text())
+          print('## Corpus370 glTF2 source rig/animation sweep')
+          print('```json')
+          print(json.dumps({'selected_subject_count':d['selected_subject_count'],'format_counts':d['format_counts'],'rollup':d['rollup'],'training_authorized':d['training_authorized']},indent=2,sort_keys=True))
+          print('```')
+          PY
+          fi
+
+      - name: Upload immutable source sweep to Drive transport
+        if: success()
+        run: |
+          set -euo pipefail
+          command -v rclone >/dev/null
+          rclone listremotes | grep -Fx 'gdrive:'
+          INDEX="$OUTPUT_ROOT/CORPUS370_GLTF2_SOURCE_RIG_ANIMATION_SWEEP_V1.json"
+          SHA="$(sha256sum "$INDEX" | awk '{print $1}')"
+          rclone copyto "$INDEX" "$RCLONE_REMOTE:corpus370_authority_v2/CORPUS370_GLTF2_SOURCE_RIG_ANIMATION_SWEEP_V1_${SHA}.json" --checksum --progress
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-gltf2-source-rig-animation-v1-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT_ROOT }}/CORPUS370_GLTF2_SOURCE_RIG_ANIMATION_SWEEP_V1.json
+            ${{ env.OUTPUT_ROOT }}/subjects/*/rig_skin_source/*.json
+            ${{ env.OUTPUT_ROOT }}/subjects/*/rig_skin_source/*.npz
+            ${{ env.OUTPUT_ROOT }}/subjects/*/animation_source/*.json
+            ${{ env.OUTPUT_ROOT }}/subjects/*/animation_source/*.npz
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

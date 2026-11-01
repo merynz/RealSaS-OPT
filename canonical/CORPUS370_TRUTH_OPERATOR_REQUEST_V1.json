@@ -1,0 +1,80 @@
+{
+  "schema": "RealSaS.Corpus370TruthOperatorRequest.v1",
+  "enabled": false,
+  "training_allowed": false,
+  "activation_reason": "WAIT_EXACT_CORPUS370_PLATFORM_TRUTH_BUNDLE_AND_ROSTER_HASH",
+  "campaign_contract_repo_path": "canonical/CORPUS370_TRUTH_CAMPAIGN_V1.json",
+  "stage_parameters_repo_path": "canonical/TRUTH_CALIBRATION_STAGE_PARAMETERS_V2.json",
+  "campaign_name": "CORPUS370_SOURCE_RESPONSE_PRESENTATION_TRUTH_V1",
+  "experiment_slug": "corpus370-source-response-presentation-truth-v1",
+  "experiment_name": "Corpus370 source, response and presentation truth V1",
+  "research_question": "Which of the 370 exact candidate subjects provide independently qualified source, surface, solid, mechanical, rig/skin, animation and presentation truth under one fail-closed apparatus?",
+  "hypothesis": "A subject-family authority matrix built from exact source bytes and current independent courts will preserve useful partial supervision without fabricating missing global sign, topology, skin, animation or presentation labels.",
+  "policy_repo_path": "canonical/TEACHER_KINEMATIC_CALIBRATION_POLICY_V2.json",
+  "evaluator_executable": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/blender-glibc239",
+  "evaluator_version": "Blender 4.0.2",
+  "expected_evaluator_binary_sha256": "c47c0b83d061621014c8312abd99db5c1ef057bcf5516faf4bb8d92b3ef6de60",
+  "maximum_seconds_per_subject": 900,
+  "observation_runtime_replacement": {
+    "rule": "EXACT_ADMITTED_IMPORT_BYTES_REQUIRED",
+    "observation_producer_binary_sha256": "aab13f2e20400a7bc161813151acfe4586889aa964624f7a0bcfdfc066f9749d",
+    "evaluator_binary_sha256": "c47c0b83d061621014c8312abd99db5c1ef057bcf5516faf4bb8d92b3ef6de60"
+  },
+  "evaluator_runtime": {
+    "schema": "RealSaS.PinnedObservationNumericRuntime.v1",
+    "package_sha256": "cb11743530ba3ee0f943f4124b13dac50363a36842d682be65cd2beb5073c33e",
+    "original_blender_binary_sha256": "6fe78c9e0a1cca51a598eb37c3288b975357efbe86dcee18d5e6fdecaaf1847e",
+    "library_directory": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/lib",
+    "files": {
+      "loader": {
+        "path": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/ld-linux-x86-64.so.2",
+        "sha256": "6222a16be7f2d458d6870efe6e715fc0c8d45766fb79cf7dcc3125538d703e28"
+      },
+      "libc": {
+        "path": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/lib/libc.so.6",
+        "sha256": "511f825ee075610ac9c0f7f91e2c13de2000d0f7b859f6461137e809a0a009d0"
+      },
+      "libm": {
+        "path": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/lib/libm.so.6",
+        "sha256": "f06f2ce1f1833df5f41cf13b6447ff07bea993ad9b27297d3428c2f70ab3f0e7"
+      }
+    }
+  },
+  "presentation_truth": {
+    "mode": "OBSERVATION_REST_PRESENTATION_RESPONSE_TRUTH_V1",
+    "maximum_seconds_per_subject": 2400,
+    "measured_rays_per_subject": 32,
+    "minimum_pass_rays_per_subject": 16,
+    "maximum_hits_per_ray": 6,
+    "cycles_samples": 256,
+    "large_footprint_fraction": 0.0625,
+    "small_footprint_fraction": 0.03125,
+    "convergence_tolerance": 0.005,
+    "representation_tolerance": 0.005,
+    "measurement_tolerance": 0.0075,
+    "source_equivalence_tolerance": 0.005,
+    "pose_conditioned_action_budget": 16,
+    "geometric_rays_per_view": 32,
+    "student_observable_contribution_floor": 0.000001,
+    "action_measure": "CONTROL_BALANCED__EQUAL_MASS_PER_CONTROL_THEN_PER_SEALED_SIGN_AMPLITUDE_ROW",
+    "semantic_part_taxonomy": "FORBIDDEN"
+  },
+  "cohort_bundle": {
+    "provider": null,
+    "file_id": null,
+    "name": "CORPUS370_PLATFORM_TRUTH_INPUT_BUNDLE_V1.zip",
+    "sha256": null,
+    "size_bytes": null,
+    "bootstrap_manifest_member": "BOOTSTRAP_MANIFEST.json",
+    "bundle_receipt_member": "BUNDLE_RECEIPT.json"
+  },
+  "exact_source_roster_sha256": null,
+  "activation_requires": [
+    "370/370 exact source roster sealed",
+    "370/370 source provenance index complete",
+    "370/370 observation packets prepared and admission-checked",
+    "platform truth bundle archive hash verified",
+    "bundle Drive file identity recorded",
+    "same code revision deployed on main"
+  ]
+}

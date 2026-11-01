@@ -42,7 +42,9 @@ jobs:
             tools/corpus/build_gltf_rig_skin_authority_v1.py \
             tools/corpus/build_gltf_animation_authority_v1.py \
             tools/corpus/blender_fbx_rig_skin_replay_v1.py \
-            tools/corpus/validate_fbx_imported_rig_skin_authority_v1.py
+            tools/corpus/validate_fbx_imported_rig_skin_authority_v1.py \
+            tools/corpus/collect_corpus370_rig_skin_court_index_v1.py \
+            tools/corpus/build_corpus370_rig_skin_evidence_v1.py
 
       - name: Run fail-closed authority and source-format tests
         run: |
@@ -51,7 +53,8 @@ jobs:
             tests/corpus/test_gltf_rig_skin_authority_e2e_v1.py \
             tests/corpus/test_gltf_animation_authority_v1.py \
             tests/corpus/test_gltf2_glb_authority_v1.py \
-            tests/corpus/test_fbx_imported_rig_skin_authority_v1.py
+            tests/corpus/test_fbx_imported_rig_skin_authority_v1.py \
+            tests/corpus/test_corpus370_rig_skin_evidence_v1.py
 
       - name: Publish branch-scope notice
         run: |

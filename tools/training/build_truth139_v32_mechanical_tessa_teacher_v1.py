@@ -16,6 +16,7 @@ from PIL import Image, ImageDraw
 from models.iris.truth.measurements_v1 import triangle_metric_strain
 from models.iris.truth.presentation_response_v1 import build_surface_response_arrays_v1
 from tools.training.truth139_v32_spatial_index_v1 import new_rtree3
+from tools.training.tessa_candidate_diagnostics_v1 import write_candidate_diagnostics
 
 SCHEMA="RealSaS.Truth139V32MechanicalTESSATeacher.v1"
 STATUS="PASS_V32_MECHANICALLY_QUALIFIED_TESSA_TEACHER"
@@ -183,7 +184,9 @@ def build(subject_id,geometry_manifest_path:Path,response_chain_path:Path,camera
     for ratio,v,f,kind in ladder:
         metrics,face_id,bar=evaluate_candidate(v,f,source_v,source_f,source_fc,source_topology,source_face_object,attachment_ids,isolated,actions,cameras,ratio,kind);rows.append(metrics)
         if metrics["mechanical_pass"]:qualified.append((metrics["face_count"],metrics["vertex_count"],ratio,v,f,face_id,bar,metrics))
-    if not qualified:raise RuntimeError("V32_TESSA_NO_MECHANICALLY_ADMISSIBLE_FALLBACK")
+    diagnostic=write_candidate_diagnostics(subject_id=subject_id,output_dir=output_dir,candidates=rows,
+        parents={"geometry_manifest":ref(geometry_manifest_path),"response_chain":ref(response_chain_path),"camera_bundle":ref(camera_bundle)},producer_files=[Path(__file__)])
+    if not qualified:raise RuntimeError("V32_TESSA_NO_MECHANICALLY_ADMISSIBLE_FALLBACK:"+str(diagnostic))
     qualified.sort(key=lambda x:(x[0],x[1],x[2]));_,_,ratio,v,f,face_id,bar,selected=qualified[0];out=output_dir.resolve();out.mkdir(parents=True,exist_ok=True);mesh=out/"V32_MECHANICAL_TESSA_TEACHER.npz";write_npz(mesh,vertices_source_world=v.astype(np.float32),faces=f.astype(np.int32),source_triangle_id=face_id.astype(np.int32),source_barycentric=bar.astype(np.float32))
     manifest={"schema":SCHEMA,"status":STATUS,"subject_id":subject_id,"parents":{"geometry_manifest":ref(geometry_manifest_path),"response_chain":ref(response_chain_path),"camera_bundle":ref(camera_bundle)},"policy":{"mechanical_admissibility_precedes_compactness":True,"simplification_ladder_ratios":[.35,.5,.65,.8,1.0],"source_topology_is_fallback_member":True,"teacher_topology_is_student_conditioning":False,"simplified_candidate_required_courts":["surface_mapping","component","topology_hole_crack","attachment_object_separation","nondegenerate_all_actions","inversion_foldthrough","self_intersection","response_preservation","strain_jacobian_tail","motion_view_silhouette"],"selection":"MIN_FACE_COUNT_THEN_VERTEX_COUNT_AMONG_PASS"},"candidates":rows,"selected":selected,"teacher_mesh":ref(mesh),"training_performed":False,"qualification_minted":False}
     manifest["teacher_identity_sha256"]=digest(manifest);mp=out/"V32_MECHANICAL_TESSA_TEACHER_MANIFEST.json";mp.write_text(json.dumps(manifest,sort_keys=True,indent=2,allow_nan=False)+"\n");print(json.dumps({"status":STATUS,"subject_id":subject_id,"selected_face_count":selected["face_count"],"selected_kind":selected["kind"],"teacher_identity_sha256":manifest["teacher_identity_sha256"]},sort_keys=True));return manifest

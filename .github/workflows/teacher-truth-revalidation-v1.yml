@@ -14,6 +14,7 @@ on:
       - 'tools/corpus/revalidate_existing_source_observations_v1.py'
       - 'tools/corpus/prepare_expanded_corpus_source_bundle_v1.py'
       - 'tools/training/*tessa_teacher*'
+      - 'tools/training/tessa_candidate_diagnostics_v1.py'
       - 'tests/corpus/test_teacher*'
       - 'tests/corpus/test_expanded_teacher_source_inspection_v1.py'
       - 'tests/corpus/test_existing_truth139_numeric_revalidation_v1.py'
@@ -22,6 +23,7 @@ on:
       - 'tests/corpus/test_expanded_corpus_source_bundle_v1.py'
       - 'tests/corpus/test_*component*'
       - 'tests/corpus/test_tessa*'
+      - 'tests/training/test_tessa_candidate_diagnostics_v1.py'
       - 'canonical/CORPUS_TEACHER_INSPECTION_AND_REUSE_POLICY_V1.json'
       - '.github/workflows/teacher-truth-revalidation-v1.yml'
   workflow_dispatch:
@@ -54,7 +56,8 @@ jobs:
             tests/corpus/test_teacher_truth_revalidation_plan_v1.py \
             tests/corpus/test_expanded_teacher_source_inspection_v1.py \
             tests/corpus/test_corpus_structural_geometry_audit_v1.py \
-            tests/training/test_truth139_v32_spatial_index_v1.py
+            tests/training/test_truth139_v32_spatial_index_v1.py \
+            tests/training/test_tessa_candidate_diagnostics_v1.py
 
   numeric-inspection-kernels:
     if: github.event.repository.private == false

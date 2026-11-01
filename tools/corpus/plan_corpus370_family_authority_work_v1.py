@@ -33,12 +33,10 @@ def require(ok: bool, code: str) -> None:
 def _rig_lane(source_format: str, raw: dict) -> str:
     if not (raw.get("has_rig") and raw.get("has_skin_weights")):
         return "COURT_AUTHORED_RIG_SKIN_ABSENCE__DO_NOT_INFER_FROM_PACK"
-    if source_format == ".gltf":
-        return "GLTF_RAW_SOURCE_RIG_SKIN_PLUS_IMPORT_EQUIVALENCE"
-    if source_format == ".glb":
-        return "GLB_RAW_CONTAINER_RIG_SKIN_PLUS_IMPORT_EQUIVALENCE_REQUIRED"
+    if source_format in {".gltf", ".glb"}:
+        return "GLTF2_RAW_SOURCE_RIG_SKIN_PLUS_IMPORT_EQUIVALENCE"
     if source_format == ".fbx":
-        return "FBX_PINNED_SOURCE_IMPORT_PLUS_INDEPENDENT_REPLAY_EQUIVALENCE_REQUIRED"
+        return "FBX_PINNED_BLENDER_DECODE_PLUS_INDEPENDENT_IMPORTER_REPLAY_COURT"
     return "UNSUPPORTED_SOURCE_FORMAT"
 
 
@@ -47,12 +45,10 @@ def _animation_lane(source_format: str, raw: dict) -> str:
         return "COURT_AUTHORED_ANIMATION_ABSENCE__MASK_IF_CONFIRMED"
     if not raw.get("has_rig"):
         return "NODE_OR_MORPH_ANIMATION_ONLY_CANDIDATE__NOT_AXIS_RIG_KINEMATICS"
-    if source_format == ".gltf":
-        return "GLTF_RAW_ANIMATION_PLUS_CANONICAL_REPLAY"
-    if source_format == ".glb":
-        return "GLB_RAW_CONTAINER_ANIMATION_PLUS_CANONICAL_REPLAY_REQUIRED"
+    if source_format in {".gltf", ".glb"}:
+        return "GLTF2_RAW_ANIMATION_PLUS_CANONICAL_REPLAY"
     if source_format == ".fbx":
-        return "FBX_PINNED_SOURCE_IMPORT_PLUS_CANONICAL_REPLAY_REQUIRED"
+        return "FBX_PINNED_NATIVE_ANIMATION_IMPORT_PLUS_CANONICAL_REPLAY_REQUIRED"
     return "UNSUPPORTED_SOURCE_FORMAT"
 
 
@@ -88,7 +84,7 @@ def plan(roster_path: Path, census_path: Path) -> dict:
                     "CAUSAL_RESPONSE": "PRODUCE_ON_QUALIFIED_MECHANICAL_TOPOLOGY_AND_COURT",
                     "APPEARANCE_CAA": "PRODUCE_OR_REVALIDATE_PRESENTATION_MEASUREMENT__STUDENT_OBSERVABILITY_GATE",
                     "VISIBILITY_OCCLUSION": "PRODUCE_OR_REVALIDATE_PRESENTATION_MEASUREMENT__STUDENT_OBSERVABILITY_GATE",
-                    "RAY_COMPOSITING": "PRODUCE_OR_REVALIDATE_PRESENTATION_MEASUREMENT__STUDENT_OBSERVABILITY_GATE",
+                    "RAY_COMPOSITING": "PRODUCE_OR_REVALIDATE_PRESENTATION_MEASUREMENT__COMPILER_ORACLE_SCOPE_SEPARATE",
                     "RIG_HIERARCHY": _rig_lane(source["source_format"], raw),
                     "SKIN_WEIGHTS": _rig_lane(source["source_format"], raw),
                     "ANIMATION_KINEMATICS": _animation_lane(source["source_format"], raw),

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-"""Build source-native authored animation kinematics from immutable glTF bytes.
+"""Build source-native authored animation kinematics from immutable glTF 2.0 bytes.
 
 Authored clips are kinematic truth, not a physical-law claim. Exact source sampler
 times/values/interpolation and target joint identities are preserved. Canonical or
 Blender replay equivalence remains a separate court before final family authority.
+Both JSON .gltf and binary .glb containers are accepted under the same contract.
 """
 
 import argparse
@@ -16,6 +17,7 @@ from pathlib import Path
 import numpy as np
 
 from tools.corpus.build_gltf_rig_skin_authority_v1 import _accessor, _buffer_bytes
+from tools.observation.source_scene_contract_v2 import _json_and_chunks
 
 
 SCHEMA = "RealSaS.GltfAnimationKinematicsAuthority.v1"
@@ -48,10 +50,10 @@ def _write_npz(path: Path, arrays: dict[str, np.ndarray]) -> None:
 def build(source_path: Path, output_dir: Path) -> dict:
     source_path = source_path.resolve()
     output_dir = output_dir.resolve()
-    gltf = json.loads(source_path.read_text())
+    gltf, chunks = _json_and_chunks(source_path)
     if not str((gltf.get("asset") or {}).get("version") or "").startswith("2"):
         raise ValueError("GLTF_ANIMATION_GLTF2_REQUIRED")
-    buffers = _buffer_bytes(gltf, source_path)
+    buffers = _buffer_bytes(gltf, source_path, chunks)
     nodes = list(gltf.get("nodes") or ())
     animations = list(gltf.get("animations") or ())
     if not animations:
@@ -158,6 +160,7 @@ def build(source_path: Path, output_dir: Path) -> dict:
         "status": STATUS,
         "source": {"path": str(source_path), "sha256": sha256(source_path)},
         "source_format": "GLTF_2_0",
+        "source_container": "GLB" if source_path.suffix.lower() == ".glb" else "GLTF_JSON",
         "animations": animation_rows,
         "counts": {
             "animation_count": len(animation_rows),

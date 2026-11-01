@@ -1,0 +1,89 @@
+{
+  "schema": "RealSaS.Corpus370TrainingReadinessClosure.v1",
+  "status": "ACTIVE__TRAINING_CLOSED",
+  "candidate_universe": {
+    "established_truth139": 139,
+    "expansion_candidates": 231,
+    "total_candidates": 370,
+    "candidate_count_is_training_count": false
+  },
+  "authority_rule": "TRAINING_READY = SOURCE_AUTHORITY AND SUBJECT_FAMILY_AUTHORITY_MATRIX AND MODEL_SPECIFIC_ROSTER AND LINEAGE_SAFE_SPLIT AND CONSUMER_CONTRACT_MATCH AND SEALED_MATERIALIZATION",
+  "allowed_family_dispositions": ["PASS", "MASKED", "FAIL", "QUARANTINED", "UNKNOWN"],
+  "sealed_roster_forbids_unknown_consumed_families": true,
+  "families": [
+    "SOURCE_IMPORT",
+    "CAMERA_OBSERVATION",
+    "SURFACE_GEOMETRY_UDF",
+    "GLOBAL_SOLID_SDF",
+    "SURFACE_NORMALS",
+    "APPEARANCE_CAA",
+    "VISIBILITY_OCCLUSION",
+    "RAY_COMPOSITING",
+    "MECHANICAL_SURFACE_TOPOLOGY",
+    "CAUSAL_RESPONSE",
+    "RIG_HIERARCHY",
+    "SKIN_WEIGHTS",
+    "ANIMATION_KINEMATICS",
+    "TESSA_TEACHER"
+  ],
+  "global_sdf": {
+    "requires": "EXPLICIT_QUALIFIED_SOLID_ENTITY_OR_ASSEMBLY",
+    "distance_domain": "ACTUAL_BOUNDARY_OF_THE_SAME_QUALIFIED_SOLID",
+    "missing_sign": "MASKED_OR_ABSENT__NEVER_ZERO_FILLED",
+    "forbidden": [
+      "NEAREST_COMPONENT_SIGN_AS_GLOBAL_SIGN",
+      "COMPONENT_PARITY_AS_SUBJECT_GLOBAL_OCCUPANCY",
+      "UNION_OCCUPANCY_TIMES_SURFACE_UDF_AS_EXACT_UNION_SDF",
+      "SILENT_HOLE_CLOSING",
+      "SILENT_DECORATIVE_SURFACE_DELETION",
+      "ZERO_FILL_MISSING_SIGN"
+    ]
+  },
+  "models": {
+    "IRIS": {
+      "required_pass": ["SOURCE_IMPORT", "CAMERA_OBSERVATION", "SURFACE_GEOMETRY_UDF"],
+      "masked_allowed": ["GLOBAL_SOLID_SDF"],
+      "rule": "GLOBAL_SDF_LOSSES_CONSUME_ONLY_GLOBAL_SOLID_SDF_PASS_ROWS"
+    },
+    "TESSA": {
+      "required_pass": ["SOURCE_IMPORT", "MECHANICAL_SURFACE_TOPOLOGY", "TESSA_TEACHER"],
+      "source_fallback_is_automatic_pass": false,
+      "rule": "EVERY_SELECTED_TEACHER_INCLUDING_EXACT_SOURCE_FALLBACK_MUST_PASS_CURRENT_MECHANICAL_AND_DEFORMATION_COURTS"
+    },
+    "MIRA": {
+      "required_pass": ["SOURCE_IMPORT", "RIG_HIERARCHY", "SKIN_WEIGHTS"],
+      "rule": "SKIN_BINDS_EXACT_QUALIFIED_CARRIER"
+    },
+    "AXIS": {
+      "required_pass": ["SOURCE_IMPORT", "RIG_HIERARCHY"],
+      "conditional_pass": ["ANIMATION_KINEMATICS"],
+      "later_dependencies": ["FROZEN_PRODUCT_SHARED_SCENE", "FROZEN_MIRA_CODEC"]
+    }
+  },
+  "historical_authority": {
+    "truth139_training_authorized_is_inventory_only": true,
+    "historical_112_27_split_inherited": false,
+    "artifact_completion_is_training_readiness": false
+  },
+  "closure_order": [
+    "SOURCE_IMPORT_PARITY",
+    "EXPLICIT_SOLID_ASSEMBLY_AUTHORITY",
+    "TESSA_TEACHER_REQUALIFICATION",
+    "RIG_SKIN_ANIMATION_AUTHORITY",
+    "SOURCE_CAMERA_OBSERVATION_AND_GRAPHICS_COURTS",
+    "MECHANICAL_TOPOLOGY_AND_CAUSAL_RESPONSE_COURTS",
+    "SUBJECT_FAMILY_AUTHORITY_MATRIX",
+    "RESOLVE_REQUIRED_UNKNOWN",
+    "GLOBAL_DEDUP_AND_LEAKAGE_LINEAGE",
+    "MODEL_SPECIFIC_ROSTERS",
+    "LINEAGE_SAFE_SPLITS",
+    "SEALED_TRAINING_READINESS_RECEIPTS",
+    "DETERMINISTIC_MATERIALIZATION",
+    "MATERIALIZATION_REOPEN_AND_VERIFY",
+    "TRAIN_IRIS_TESSA",
+    "FREEZE_SHARED_SCENE",
+    "TRAIN_FREEZE_MIRA_CODEC",
+    "TRAIN_AXIS_V6"
+  ],
+  "training_authorized": false
+}

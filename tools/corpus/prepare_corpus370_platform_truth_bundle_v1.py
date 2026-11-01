@@ -143,7 +143,7 @@ def prepare(
         packet = Path(str(observation["packet_path"])).resolve()
         required_packet = [
             "SOURCE_REST_RENDER_CANDIDATE.json", "SOURCE_SCENE_SNAPSHOT.json", "camera_bundle.json",
-            "IRIS_OBSERVATION_ADMISSION.json", "REST_SURFACE_GEOMETRY.npz",
+            "IRIS_OBSERVATION_ADMISSION.json",
             *[f"V{i}.png" for i in range(8)], *[f"V{i}.mask.bin" for i in range(8)],
         ]
         packet_rows = {}
@@ -181,7 +181,6 @@ def prepare(
                     "source_scene_snapshot": packet_rows["SOURCE_SCENE_SNAPSHOT.json"],
                     "camera_bundle": packet_rows["camera_bundle.json"],
                     "iris_observation_admission": packet_rows["IRIS_OBSERVATION_ADMISSION.json"],
-                    "rest_surface_geometry": packet_rows["REST_SURFACE_GEOMETRY.npz"],
                 },
                 "training_authorized": False,
             }

@@ -48,7 +48,7 @@
       "page_url": "https://quaternius.com/packs/cubeworldkit.html",
       "required_page_markers": ["Cube World Kit", "CC0"]
     },
-    "quaternius-zombie-apocalypse": {
+    "quaternius-zombie-apocalypse-kit": {
       "publisher": "Quaternius",
       "page_url": "https://quaternius.com/packs/zombieapocalypsekit.html",
       "required_page_markers": ["Zombie Apocalypse Kit", "CC0"]
@@ -73,7 +73,7 @@
       "page_url": "https://quaternius.com/packs/animatedfish.html",
       "required_page_markers": ["Animated Fish Pack", "CC0"]
     },
-    "quaternius-cyberpunk": {
+    "quaternius-cyberpunk-game-kit": {
       "publisher": "Quaternius",
       "page_url": "https://quaternius.com/packs/cyberpunkgamekit.html",
       "required_page_markers": ["Cyberpunk Game Kit", "CC0"]
@@ -118,7 +118,7 @@
       "page_url": "https://quaternius.com/packs/cutemonsters",
       "required_page_markers": ["Cute Animated Monsters Pack", "CC0"]
     },
-    "quaternius-platformer-game-kit": {
+    "quaternius-platformer-kit": {
       "publisher": "Quaternius",
       "page_url": "https://quaternius.com/packs/ultimateplatformer.html",
       "required_page_markers": ["Platformer Game Kit", "CC0"]
@@ -143,12 +143,12 @@
       "page_url": "https://quaternius.com/packs/animatedmech",
       "required_page_markers": ["Animated Mech Pack", "CC0"]
     },
-    "quaternius-rpg-character": {
+    "quaternius-rpg-characters": {
       "publisher": "Quaternius",
       "page_url": "https://quaternius.com/packs/rpgcharacters.html",
       "required_page_markers": ["RPG Character Pack", "CC0"]
     },
-    "quaternius-toon-shooter": {
+    "quaternius-toon-shooter-kit": {
       "publisher": "Quaternius",
       "page_url": "https://quaternius.com/packs/toonshootergamekit.html",
       "required_page_markers": ["Toon Shooter Game Kit", "CC0"]

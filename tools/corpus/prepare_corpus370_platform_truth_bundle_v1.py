@@ -12,12 +12,15 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-import shutil
 from urllib.parse import unquote, urlparse
 import zipfile
 
 SCHEMA = "RealSaS.Corpus370PlatformStage01InputBundle.v1"
 RECEIPT_SCHEMA = "RealSaS.Corpus370PlatformStage01InputBundleReceipt.v1"
+OBSERVATION_SCHEMAS = {
+    "RealSaS.Corpus370PreparedObservationPackets.v1",
+    "RealSaS.Corpus370PreparedObservationPackets.v2",
+}
 
 
 def sha256(path: Path) -> str:
@@ -76,7 +79,7 @@ def prepare(
     observation_index_path: Path,
     provenance_index_path: Path,
     output: Path,
-) -> tuple[dict, dict]:
+) -> tuple[dict, dict, dict]:
     roster_path = roster_path.resolve()
     source_bundle_manifest_path = source_bundle_manifest_path.resolve()
     extracted_source_root = extracted_source_root.resolve()
@@ -89,9 +92,11 @@ def prepare(
 
     require(roster.get("schema") == "RealSaS.Corpus370ExactSourceRoster.v1" and int(roster.get("subject_count", -1)) == 370, "CORPUS370_PLATFORM_BUNDLE_ROSTER")
     require(source_manifest.get("schema") == "RealSaS.ExpandedCorpusSourceInputBundle.v1" and int(source_manifest.get("subject_count", -1)) == 370, "CORPUS370_PLATFORM_BUNDLE_SOURCE_MANIFEST")
-    require(observations.get("schema") == "RealSaS.Corpus370PreparedObservationPackets.v1" and int(observations.get("subject_count", -1)) == 370, "CORPUS370_PLATFORM_BUNDLE_OBSERVATIONS")
+    require(observations.get("schema") in OBSERVATION_SCHEMAS and int(observations.get("subject_count", -1)) == 370, "CORPUS370_PLATFORM_BUNDLE_OBSERVATIONS")
     require(provenance.get("schema") == "RealSaS.Corpus370SourceProvenanceIndex.v1" and int(provenance.get("subject_count", -1)) == 370, "CORPUS370_PLATFORM_BUNDLE_PROVENANCE")
-    require(all(doc.get("training_authorized") is False for doc in (roster, source_manifest, provenance)), "CORPUS370_PLATFORM_BUNDLE_PREAUTHORIZED")
+    require(all(doc.get("training_authorized") is False for doc in (roster, source_manifest, observations, provenance)), "CORPUS370_PLATFORM_BUNDLE_PREAUTHORIZED")
+    require(int(observations.get("prepared_subject_count", len(observations.get("subjects") or ()))) == 370, "CORPUS370_PLATFORM_BUNDLE_OBSERVATION_PREPARED_COUNT")
+    require(int(observations.get("failure_count", 0)) == 0, "CORPUS370_PLATFORM_BUNDLE_OBSERVATION_FAILURES")
 
     roster_rows = {str(row["subject_id"]): row for row in roster["subjects"]}
     source_rows = {str(row["subject_id"]): row for row in source_manifest["subjects"]}
@@ -124,9 +129,6 @@ def prepare(
             require(known is not None, "CORPUS370_PLATFORM_BUNDLE_GLTF_DEPENDENCY_NOT_SOURCE_BUNDLE:" + sid)
             dependencies.append(add_file(bundle_files, archive_path, dep, known["sha256"]))
 
-        # Native FBX resources are format-opaque. Preserve all raster resources from
-        # the same declared publisher raw tree so Blender resolves exactly the bytes
-        # shipped in the verified source bundle; no missing texture is synthesized.
         if source.suffix.lower() == ".fbx" and source_rel.startswith("assets/publishers/"):
             prefix = "/".join(source_rel.split("/")[:4]) + "/"
             for rel, known in sorted(source_file_index.items()):
@@ -136,7 +138,6 @@ def prepare(
                     continue
                 dep = (extracted_source_root / rel).resolve()
                 dependencies.append(add_file(bundle_files, "sources/" + rel, dep, known["sha256"]))
-        # Deduplicate dependency rows by archive path.
         dependencies = list({row["path"]: row for row in dependencies}.values())
 
         packet = Path(str(observation["packet_path"])).resolve()
@@ -153,8 +154,8 @@ def prepare(
 
         license_path = Path(str((provenance_row.get("license_bytes") or {}).get("path") or "")).resolve()
         page_path = Path(str((provenance_row.get("source_page_snapshot") or {}).get("path") or "")).resolve()
-        license_row = add_file(bundle_files, f"provenance/{sid}/LICENSE.txt", license_path, (provenance_row["license_bytes"])["sha256"])
-        page_row = add_file(bundle_files, f"provenance/{sid}/SOURCE_PAGE.snapshot", page_path, (provenance_row["source_page_snapshot"])["sha256"])
+        license_row = add_file(bundle_files, f"provenance/{sid}/LICENSE.txt", license_path, provenance_row["license_bytes"]["sha256"])
+        page_row = add_file(bundle_files, f"provenance/{sid}/SOURCE_PAGE.snapshot", page_path, provenance_row["source_page_snapshot"]["sha256"])
         legalcode_row = None
         if provenance_row.get("license_legalcode"):
             legalcode_path = Path(str(provenance_row["license_legalcode"]["path"])).resolve()
@@ -194,7 +195,7 @@ def prepare(
         "parents": {
             "exact_source_roster": {"path": str(roster_path), "sha256": sha256(roster_path)},
             "source_bundle_manifest": {"path": str(source_bundle_manifest_path), "sha256": sha256(source_bundle_manifest_path)},
-            "observation_packets": {"path": str(observation_index_path), "sha256": sha256(observation_index_path)},
+            "observation_packets": {"schema": observations["schema"], "path": str(observation_index_path), "sha256": sha256(observation_index_path)},
             "source_provenance": {"path": str(provenance_index_path), "sha256": sha256(provenance_index_path)},
         },
         "raw_source_mutated": False,
@@ -222,7 +223,6 @@ def prepare(
             else:
                 archive.write(row["source_path"], archive_path)
         archive.writestr("BUNDLE_RECEIPT.json", receipt_bytes)
-    # Reopen every receipt-bound member from the final archive before promotion.
     with zipfile.ZipFile(temp) as archive:
         require(set(archive.namelist()) == {row["path"] for row in receipt_files} | {"BUNDLE_RECEIPT.json"}, "CORPUS370_PLATFORM_BUNDLE_ARCHIVE_MEMBER_SET")
         for row in receipt_files:

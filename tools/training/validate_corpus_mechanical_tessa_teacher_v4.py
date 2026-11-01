@@ -221,14 +221,15 @@ def validate(manifest: dict) -> dict:
     for key in ("face_count", "vertex_count", "ratio", "kind"):
         if selected.get(key) != expected.get(key):
             raise ValueError("TESSA_V4_COURT_SELECTION_DRIFT:" + key)
-    if selected.get("kind") == "SIMPLIFIED":
-        for key in REQUIRED:
-            if selected.get(key) is not True:
-                raise ValueError("TESSA_V4_COURT_DECLARED_PASS_MISSING:" + key)
-        if _rest_self_intersection(vertices, faces):
-            raise ValueError("TESSA_V4_COURT_REST_SELF_INTERSECTION")
-    elif selected.get("kind") != "SOURCE_FALLBACK":
+    if selected.get("candidate_evaluation_contract") != "MEASURED_ALL_KINDS_NO_FALLBACK_OVERRIDE_V1":
+        raise ValueError("TESSA_V4_COURT_LEGACY_CANDIDATE_REEVALUATION_REQUIRED")
+    if selected.get("kind") not in {"SIMPLIFIED", "SOURCE_FALLBACK"}:
         raise ValueError("TESSA_V4_COURT_SELECTED_KIND")
+    for key in REQUIRED:
+        if selected.get(key) is not True:
+            raise ValueError("TESSA_V4_COURT_DECLARED_PASS_MISSING:" + key)
+    if _rest_self_intersection(vertices, faces):
+        raise ValueError("TESSA_V4_COURT_REST_SELF_INTERSECTION")
 
     response_outcome = (manifest.get("family_candidate_outcomes") or {}).get("CAUSAL_RESPONSE")
     if response_outcome != "EXISTING_EVIDENCE_CONSUMED__NEW_FAMILY_COURT_STILL_REQUIRED":

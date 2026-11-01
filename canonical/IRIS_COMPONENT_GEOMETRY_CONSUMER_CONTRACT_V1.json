@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.IrisComponentGeometryConsumerContract.v1",
-  "status": "LOCKED_NO_TRAINING_AUTHORITY_MINTED",
-  "purpose": "Bind IRIS geometry losses to explicit Corpus400 truth fields so masked or unavailable sign truth can never become an implicit dense target.",
+  "status": "BLOCKED_COMPONENT_SIGN_CANNOT_BIND_GLOBAL_SOLID_LOSSES",
+  "purpose": "Historical consumer specification retained for provenance. Component parity cannot qualify a global solid sign/occupancy recipe. The adapter rejects this binding; a separately qualified explicit-solid contract is required.",
   "accepted_geometry_manifest_schema": "RealSaS.ComponentGeometryAuthority.v1",
   "required_geometry_court_schema": "RealSaS.ComponentGeometryAuthorityCourt.v1",
   "required_geometry_court_status": "PASS_COMPONENT_GEOMETRY_AUTHORITY_INDEPENDENT_COURT__FINAL_ADMISSION_SEPARATE",

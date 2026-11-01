@@ -64,11 +64,15 @@ def validate(manifest:dict)->dict:
     expected=min(passed,key=lambda x:(int(x.get("face_count",1<<60)),int(x.get("vertex_count",1<<60)),float(x.get("ratio",1e30))))
     for key in ("face_count","vertex_count","ratio","kind"):
         if selected.get(key)!=expected.get(key): raise ValueError("TESSA_V5_COURT_SELECTION_DRIFT:"+key)
-    if selected.get("kind")=="SIMPLIFIED":
-        for key in REQUIRED:
-            if selected.get(key) is not True: raise ValueError("TESSA_V5_COURT_DECLARED_PASS_MISSING:"+key)
-        if _rest_self_intersection(vertices,faces): raise ValueError("TESSA_V5_COURT_REST_SELF_INTERSECTION")
-    elif selected.get("kind")!="SOURCE_FALLBACK": raise ValueError("TESSA_V5_COURT_KIND")
+    if selected.get("candidate_evaluation_contract") != "MEASURED_ALL_KINDS_NO_FALLBACK_OVERRIDE_V1":
+        raise ValueError("TESSA_V5_COURT_LEGACY_CANDIDATE_REEVALUATION_REQUIRED")
+    if selected.get("kind") not in {"SIMPLIFIED", "SOURCE_FALLBACK"}:
+        raise ValueError("TESSA_V5_COURT_SELECTED_KIND")
+    for key in REQUIRED:
+        if selected.get(key) is not True:
+            raise ValueError("TESSA_V5_COURT_DECLARED_PASS_MISSING:" + key)
+    if _rest_self_intersection(vertices, faces):
+        raise ValueError("TESSA_V5_COURT_REST_SELF_INTERSECTION")
     if (manifest.get("family_candidate_outcomes") or {}).get("CAUSAL_RESPONSE")!="EXISTING_EVIDENCE_CONSUMED__NEW_FAMILY_COURT_STILL_REQUIRED": raise ValueError("TESSA_V5_COURT_RESPONSE_OVERCLAIM")
     return {"schema":SCHEMA,"status":STATUS,"subject_id":manifest.get("subject_id"),"surface_component_count":int(len(np.unique(independent))),"qualified_cross_owner_seam_edge_count":int(st.get("qualified_cross_owner_seam_edge_count",0)),"source_rebind_max_error_over_scale":max_error,"family_candidate_outcomes":{"SURFACE_TOPOLOGY":"QUALIFIED_CONSUMER_CANDIDATE","CAUSAL_RESPONSE":"PENDING_NEW_FAMILY_COURT"},"authority":{"tessa_mechanical_surface_consumer_court_passed":True,"final_family_authority_minted":False,"training_authorized":False}}
 

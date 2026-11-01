@@ -1,0 +1,43 @@
+name: teacher-truth-revalidation-v1
+
+on:
+  pull_request:
+    paths:
+      - 'models/iris/truth/component_geometry_training_targets_v1.py'
+      - 'tools/corpus/plan_teacher_truth_revalidation_v1.py'
+      - 'tools/training/*tessa_teacher*'
+      - 'tests/corpus/test_teacher*'
+      - 'tests/corpus/test_*component*'
+      - 'tests/corpus/test_tessa*'
+      - 'canonical/CORPUS_TEACHER_INSPECTION_AND_REUSE_POLICY_V1.json'
+      - '.github/workflows/teacher-truth-revalidation-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  teacher-contracts:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install CPU court dependencies
+        run: python -m pip install numpy==2.3.5 scipy==1.17.0 trimesh==5.2.0 Rtree==1.4.1 Pillow==12.3.0 pytest==9.2.0
+      - name: Verify source, sign and teacher contracts
+        run: |
+          python -m pytest -q \
+            tests/corpus/test_component_geometry_authority_v1.py \
+            tests/corpus/test_component_geometry_court_v1.py \
+            tests/corpus/test_component_geometry_authority_e2e_v1.py \
+            tests/corpus/test_iris_component_geometry_consumer_v1.py \
+            tests/corpus/test_tessa_component_surface_topology_v1.py \
+            tests/corpus/test_tessa_mechanical_surface_topology_v5.py \
+            tests/corpus/test_teacher_sign_scope_regression_v1.py \
+            tests/corpus/test_teacher_truth_revalidation_plan_v1.py \
+            tests/corpus/test_corpus_structural_geometry_audit_v1.py \
+            tests/training/test_truth139_v32_spatial_index_v1.py

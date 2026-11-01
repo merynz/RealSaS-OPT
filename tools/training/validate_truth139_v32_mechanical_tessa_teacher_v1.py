@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse, hashlib, json
 from pathlib import Path
 import numpy as np
+from tools.training.truth139_v32_spatial_index_v1 import new_rtree3
 
 SCHEMA="RealSaS.Truth139V32MechanicalTESSATeacherCourt.v1"
 STATUS="PASS_V32_MECHANICAL_TESSA_TEACHER_REBINDS_EXACT_SOURCE_AND_DECLARED_COURTS"
@@ -32,7 +33,7 @@ def tri_intersect_sat(a,b,eps=1e-9):
     return True
 def rest_self_intersection(v,f):
     from rtree import index
-    tri=v[f];idx=index.Index()
+    tri=v[f];idx=new_rtree3()
     for i,t in enumerate(tri):
         lo=t.min(0);hi=t.max(0);idx.insert(i,(float(lo[0]),float(lo[1]),float(lo[2]),float(hi[0]),float(hi[1]),float(hi[2])))
     for i,t in enumerate(tri):
@@ -52,12 +53,16 @@ def validate(manifest):
     if max_error>.0105:raise ValueError("V32_TESSA_COURT_SOURCE_REBIND_ERROR")
     selected=dict(manifest.get("selected") or {})
     if selected.get("mechanical_pass") is not True:raise ValueError("V32_TESSA_COURT_SELECTED_NOT_PASS")
-    if selected.get("kind")=="SIMPLIFIED":
-        for key in REQUIRED_SIMPLIFIED_PASSES:
-            if selected.get(key) is not True:raise ValueError("V32_TESSA_COURT_DECLARED_PASS_MISSING:"+key)
-        if rest_self_intersection(v,f):raise ValueError("V32_TESSA_COURT_REST_SELF_INTERSECTION")
-    elif selected.get("kind")!="SOURCE_FALLBACK":raise ValueError("V32_TESSA_COURT_SELECTED_KIND")
-    r={"schema":SCHEMA,"status":STATUS,"subject_id":manifest["subject_id"],"teacher_identity_sha256":manifest["teacher_identity_sha256"],"selected_kind":selected.get("kind"),"selected_face_count":int(len(f)),"source_rebind_max_error_over_scale":max_error,"simplified_required_pass_fields_verified":selected.get("kind")=="SIMPLIFIED","training_performed":False,"qualification_minted":False};r["court_identity_sha256"]=digest(r);return r
+    if selected.get("candidate_evaluation_contract") != "MEASURED_ALL_KINDS_NO_FALLBACK_OVERRIDE_V1":
+        raise ValueError("V32_TESSA_COURT_LEGACY_CANDIDATE_REEVALUATION_REQUIRED")
+    if selected.get("kind") not in {"SIMPLIFIED", "SOURCE_FALLBACK"}:
+        raise ValueError("V32_TESSA_COURT_SELECTED_KIND")
+    for key in REQUIRED_SIMPLIFIED_PASSES:
+        if selected.get(key) is not True:
+            raise ValueError("V32_TESSA_COURT_DECLARED_PASS_MISSING:" + key)
+    if rest_self_intersection(v, f):
+        raise ValueError("V32_TESSA_COURT_REST_SELF_INTERSECTION")
+    r={"schema":SCHEMA,"status":STATUS,"subject_id":manifest["subject_id"],"teacher_identity_sha256":manifest["teacher_identity_sha256"],"selected_kind":selected.get("kind"),"selected_face_count":int(len(f)),"source_rebind_max_error_over_scale":max_error,"all_candidate_required_pass_fields_verified":True,"training_performed":False,"qualification_minted":False};r["court_identity_sha256"]=digest(r);return r
 
 def main():
     p=argparse.ArgumentParser();p.add_argument("--teacher-manifest",type=Path,required=True);p.add_argument("--output",type=Path,required=True);a=p.parse_args();r=validate(json.loads(a.teacher_manifest.resolve().read_text()));out=a.output.resolve();out.parent.mkdir(parents=True,exist_ok=True);tmp=out.with_suffix(out.suffix+".partial");tmp.write_text(json.dumps(r,sort_keys=True,indent=2)+"\n");tmp.replace(out);print(json.dumps({"status":r["status"],"court_identity_sha256":r["court_identity_sha256"]},sort_keys=True))

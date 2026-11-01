@@ -61,12 +61,16 @@ def validate(manifest):
     if gt.get("render_vertex_identity_used_as_topology") is not False or float(gt.get("maximum_posed_duplicate_trajectory_drift",1))>max(scale*1e-9,1e-11): raise ValueError("V32_TESSA_V3_COURT_QUOTIENT_DRIFT")
     selected=dict(manifest.get("selected") or {})
     if selected.get("mechanical_pass") is not True: raise ValueError("V32_TESSA_V3_COURT_SELECTED_NOT_PASS")
-    if selected.get("kind")=="SIMPLIFIED":
-        for key in REQUIRED:
-            if selected.get(key) is not True: raise ValueError("V32_TESSA_V3_COURT_DECLARED_PASS_MISSING:"+key)
-        if rest_self_intersection(v,f): raise ValueError("V32_TESSA_V3_COURT_REST_SELF_INTERSECTION")
-    elif selected.get("kind")!="SOURCE_FALLBACK": raise ValueError("V32_TESSA_V3_COURT_SELECTED_KIND")
-    out={"schema":SCHEMA,"status":STATUS,"subject_id":manifest["subject_id"],"teacher_identity_sha256":manifest["teacher_identity_sha256"],"selected_kind":selected.get("kind"),"selected_face_count":int(len(f)),"source_rebind_max_error_over_scale":max_error,"geometric_topology_vertex_count":int(len(sv)),"simplified_required_pass_fields_verified":selected.get("kind")=="SIMPLIFIED","training_performed":False,"qualification_minted":False}
+    if selected.get("candidate_evaluation_contract") != "MEASURED_ALL_KINDS_NO_FALLBACK_OVERRIDE_V1":
+        raise ValueError("V32_TESSA_V3_COURT_LEGACY_CANDIDATE_REEVALUATION_REQUIRED")
+    if selected.get("kind") not in {"SIMPLIFIED", "SOURCE_FALLBACK"}:
+        raise ValueError("V32_TESSA_V3_COURT_SELECTED_KIND")
+    for key in REQUIRED:
+        if selected.get(key) is not True:
+            raise ValueError("V32_TESSA_V3_COURT_DECLARED_PASS_MISSING:" + key)
+    if rest_self_intersection(v, f):
+        raise ValueError("V32_TESSA_V3_COURT_REST_SELF_INTERSECTION")
+    out={"schema":SCHEMA,"status":STATUS,"subject_id":manifest["subject_id"],"teacher_identity_sha256":manifest["teacher_identity_sha256"],"selected_kind":selected.get("kind"),"selected_face_count":int(len(f)),"source_rebind_max_error_over_scale":max_error,"geometric_topology_vertex_count":int(len(sv)),"all_candidate_required_pass_fields_verified":True,"training_performed":False,"qualification_minted":False}
     out["court_identity_sha256"]=digest(out); return out
 
 def main():

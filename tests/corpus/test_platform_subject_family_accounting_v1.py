@@ -1,8 +1,25 @@
 from __future__ import annotations
 import json
 from pathlib import Path
+import subprocess
+import sys
 
 from compiler.realsas_compiler_services.orchestrator.adapters import corpus_family_v1 as family
+
+
+def test_static_family_courts_import_without_neural_runtime():
+    program = '''
+import importlib.abc, sys
+class NoTorch(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path, target=None):
+        if fullname == "torch" or fullname.startswith("torch."):
+            raise RuntimeError("STATIC_COURT_IMPORTED_TORCH")
+sys.meta_path.insert(0, NoTorch())
+from compiler.realsas_compiler_services.orchestrator.adapters import corpus_family_v1
+assert "torch" not in sys.modules
+'''
+    subprocess.run([sys.executable, '-c', program], check=True,
+                   cwd=Path(__file__).resolve().parents[2], capture_output=True, text=True)
 
 
 def test_geometry_and_response_failures_preserve_independent_mechanical_and_tessa(monkeypatch, tmp_path):

@@ -10,6 +10,7 @@ from pathlib import Path
 import urllib.request
 from collections import Counter
 import shutil
+import subprocess
 
 
 def host_capacity():
@@ -38,6 +39,7 @@ def bound_run_progress(preparations):
     stages = {}
     failures = []
     ledgers = []
+    family_progress = []
     for entry in preparations:
         for row in entry.get('CAMPAIGN_BOOTSTRAP.json', {}).get('run_bindings', []):
             path = Path(row['run_ledger_path'])
@@ -53,8 +55,39 @@ def bound_run_progress(preparations):
                     failures.append({'subject_id': row['subject_id'], 'stage_id': stage['id'],
                                      'status': state, 'diagnostics': stage.get('diagnostics'),
                                      'failure_reason': stage.get('failure_reason')})
+            family_root = path.parent / 'artifacts' / '49_SUBJECT_TRUTH_FAMILIES'
+            if family_root.is_dir():
+                files = []
+                for child in sorted(family_root.glob('*/*')):
+                    if child.is_file():
+                        item = {'relative_path': str(child.relative_to(family_root)),
+                                'size_bytes': child.stat().st_size,
+                                'modified_ns': child.stat().st_mtime_ns}
+                        if child.name == 'COURT.json' and child.stat().st_size < 1 << 20:
+                            value = json.loads(child.read_text())
+                            item.update(status=value.get('status'), reason=value.get('reason'))
+                        files.append(item)
+                family_progress.append({'subject_id': row['subject_id'], 'files': files})
     return {'stage_counts': stages, 'failed_stage_rows': failures, 'bound_ledgers': ledgers,
+            'family_progress': family_progress,
             'scope': 'RUN_DIAGNOSTICS_ONLY__REGISTRY_REQUIRED_FOR_AUTHORITY'}
+
+
+def engine_diagnostics():
+    result = {'scope': 'READ_ONLY_ENGINE_DIAGNOSTICS'}
+    try:
+        process = subprocess.run(['journalctl', '--user', '-u', 'realsas-platform-engine.service',
+            '-n', '1200', '--no-pager', '-o', 'cat'], capture_output=True, text=True, timeout=10)
+        # Keep project execution/error lines; do not collect service configuration.
+        lines = process.stdout.splitlines()
+        result['recent_execution_lines'] = [line for line in lines
+            if any(word in line for word in ('CORPUS_FAMILY_OUTCOME', 'Error', 'Exception',
+                'Traceback', 'timed out', 'Failed', 'failure', 'Heartbeat'))
+            and not any(word in line.lower() for word in ('password', 'token=', 'postgresql://'))][-100:]
+        result['journal_exit_code'] = process.returncode
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        result['read_error'] = str(exc)
+    return result
 
 
 def partial_matrix(authority_root, platform_root, output, preparations, api_root):
@@ -177,6 +210,7 @@ def inspect(authority_root: Path, platform_root: Path, output: Path, api: str):
         report['deployment'] = json.loads(deployment.read_text())
     report['campaign_preparations'] = []
     report['host_capacity'] = host_capacity()
+    report['engine_diagnostics'] = engine_diagnostics()
     preparation_root = authority_root / 'corpus370_truth_preparation'
     if preparation_root.is_dir():
         for scope in sorted(preparation_root.iterdir()):

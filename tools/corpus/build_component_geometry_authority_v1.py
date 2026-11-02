@@ -154,7 +154,9 @@ def query_points(subject_id, vertices, surface_xyz, surface_normal, count):
     return np.concatenate((near, far), axis=0).astype(np.float64)
 
 
-def closest_valid_surface(query, vertices, faces, face_valid):
+def closest_valid_surface(query, vertices, faces, face_valid, *, chunk_size=64):
+    if not isinstance(chunk_size, int) or chunk_size < 1:
+        raise ValueError("COMPONENT_GEOMETRY_DISTANCE_CHUNK_SIZE")
     valid_face_ids = np.flatnonzero(face_valid)
     if not len(valid_face_ids):
         raise ValueError("COMPONENT_GEOMETRY_NO_DISTANCE_SURFACE")
@@ -163,12 +165,19 @@ def closest_valid_surface(query, vertices, faces, face_valid):
     except ImportError as exc:
         raise RuntimeError("COMPONENT_GEOMETRY_TRIMESH_REQUIRED") from exc
     mesh = trimesh.Trimesh(vertices=vertices, faces=faces[valid_face_ids], process=False)
-    try:
-        _, distance, local_face = trimesh.proximity.closest_point(mesh, query)
-    except ModuleNotFoundError:
-        _, distance, local_face = trimesh.proximity.closest_point_naive(mesh, query)
-    closest = valid_face_ids[np.asarray(local_face, dtype=np.int64)]
-    distance = np.asarray(distance, dtype=np.float64)
+    # Rtree candidate arrays can otherwise scale with every query and source
+    # triangle at once. Each nearest-surface result is query-independent; bound
+    # temporary memory without changing samples, distances or face identities.
+    distance = np.empty(len(query), dtype=np.float64)
+    closest = np.empty(len(query), dtype=np.int32)
+    for start in range(0, len(query), chunk_size):
+        end = min(start + chunk_size, len(query))
+        try:
+            _, values, local_face = trimesh.proximity.closest_point(mesh, query[start:end])
+        except ModuleNotFoundError:
+            _, values, local_face = trimesh.proximity.closest_point_naive(mesh, query[start:end])
+        distance[start:end] = values
+        closest[start:end] = valid_face_ids[np.asarray(local_face, dtype=np.int64)]
     if not np.isfinite(distance).all():
         raise ValueError("COMPONENT_GEOMETRY_NONFINITE_DISTANCE")
     return distance.astype(np.float32), closest.astype(np.int32)

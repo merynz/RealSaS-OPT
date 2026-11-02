@@ -4,9 +4,26 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from tools.corpus.build_component_geometry_authority_v1 import build
 from tools.corpus.validate_component_geometry_authority_v1 import validate
+from tools.corpus.build_component_geometry_authority_v1 import closest_valid_surface
+
+
+@pytest.mark.parametrize('chunk_size', [1, 7, 64])
+def test_bounded_distance_queries_preserve_exact_unbatched_results(tmp_path, chunk_size):
+    import trimesh
+    source, _, _ = _write_packet(tmp_path)
+    with np.load(source, allow_pickle=False) as z:
+        vertices, faces = z['rest_vertices_source_world'], z['faces']
+    valid = np.array([True, False, True, True, True])
+    query = np.random.default_rng(491).uniform(-1., 6., (179, 3))
+    mesh = trimesh.Trimesh(vertices=vertices, faces=faces[valid], process=False)
+    _, expected_distance, expected_face = trimesh.proximity.closest_point(mesh, query)
+    distance, face = closest_valid_surface(query, vertices, faces, valid, chunk_size=chunk_size)
+    np.testing.assert_array_equal(distance, expected_distance.astype(np.float32))
+    np.testing.assert_array_equal(face, np.flatnonzero(valid)[expected_face].astype(np.int32))
 
 
 def _write_packet(root: Path):

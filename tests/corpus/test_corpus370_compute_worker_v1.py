@@ -20,6 +20,8 @@ def test_exact294_export_preserves370_scope_input_bytes_and_notebook_identity(tm
     put(repo/exporter.PLAN,{'schema':'Synthetic.Plan'})
     binary=authority/'runtime/blender';binary.parent.mkdir(parents=True);binary.write_bytes(b'pinned-executable')
     binary.chmod(0o755)
+    resources=authority/'runtime-resources';resources.mkdir();(resources/'python.bin').write_bytes(b'embedded-python')
+    (binary.parent/'resources').symlink_to(resources,target_is_directory=True)
     texture=authority/'source/texture.bin';texture.parent.mkdir();texture.write_bytes(b'exact-texture')
     rows=[];members=[];receipts=[]
     for i in range(294):
@@ -40,6 +42,7 @@ def test_exact294_export_preserves370_scope_input_bytes_and_notebook_identity(tm
     seal=json.loads((out/'COMPUTE_CAPSULE.json').read_text())
     assert seal['worker_subject_count']==294 and len(seal['excluded_subjects'])==76
     assert seal['qualification_minted'] is False and seal['training_authorized'] is False
+    assert any(r['path']==str(binary.parent/'resources/python.bin') for r in seal['files'])
     with zipfile.ZipFile(out/'CORPUS370_COMPUTE_CAPSULE_V1.zip') as archive:
         assert len(archive.namelist())==len(set(r['object'] for r in seal['files']))+1
         for row in seal['files']:assert hashlib.sha256(archive.read(row['object'])).hexdigest()==row['sha256']

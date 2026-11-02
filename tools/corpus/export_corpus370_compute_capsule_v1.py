@@ -84,13 +84,26 @@ def build(preparation_path, expected_preparation_sha, *, authority_root, platfor
             manifest_path=Path(binding['run_manifest_path'])
             manifest=json.loads(manifest_path.read_text())
             require(manifest['run_id']==Path(binding['run_ledger_path']).parent.name,'COMPUTE_MANIFEST_RUN_DRIFT')
-            walk(manifest)
             executable=Path(manifest['truth_foundry']['evaluator_binary']['path'])
             runtime_root=executable.parent
+            if not any(executable.is_relative_to(Path(root)) for root in allowed_roots):
+                from tools.observation.pinned_evaluator_runtime_v1 import PATCHED_BINARY_SHA
+                require(executable.is_relative_to(Path('/home/monster/.cache/realsas/blender'))
+                        and executable.name=='blender-glibc239' and runtime_root.name=='numeric-runtime-239'
+                        and sha256(executable)==PATCHED_BINARY_SHA,'COMPUTE_PINNED_EVALUATOR_LOCATION')
+                allowed_roots.append(str(runtime_root))
+            walk(manifest)
             if str(runtime_root) not in runtimes:
                 runtimes.add(str(runtime_root))
-                for path in sorted(runtime_root.rglob('*')):
-                    if path.is_file():add(path,recurse=False)
+                # The pinned install links its4.0 resources and several libraries
+                # into the official distribution. Dereference their bytes while
+                # retaining each executable-relative address in the capsule.
+                for directory,dirs,names in os.walk(runtime_root,followlinks=True):
+                    dirs.sort();names.sort()
+                    for name in names:
+                        path=Path(directory)/name
+                        require(path.resolve().is_relative_to(runtime_root.parent.resolve()),'COMPUTE_RUNTIME_LINK_ESCAPE')
+                        if path.is_file():add(path,recurse=False)
             subjects.append({'subject_id':manifest['subject_id'],'platform_subject_id':binding['subject_id'],
                 'subject_input_id':binding['subject_input_id'],'parent_attempt_id':member['attempt_id'],
                 'parent_state_at_export':member['final_state'],'manifest':add(manifest_path,recurse=False)})

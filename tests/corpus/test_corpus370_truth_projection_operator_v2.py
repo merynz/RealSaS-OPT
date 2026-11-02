@@ -48,3 +48,25 @@ def test_enabled_v2_request_binds_real_bundle_and_finite_campaign():
     campaign = json.loads((root / request["campaign_contract_repo_path"]).read_text())
     assert campaign["required_target_stage_id"] == "49_SUBJECT_TRUTH_FAMILIES"
     assert campaign["candidate_universe_subject_count"] == 370
+
+
+def test_observation_window_does_not_count_open_attempts_as_failures(monkeypatch, tmp_path):
+    members = [{"attempt_id": state, "subject_id": state, "role": "COHORT"}
+               for state in ("OPEN", "FAILED", "COMPLETED")]
+    def api(root, method, path):
+        if path.startswith("/v1/research/campaigns/"):
+            return {"members": members}
+        return {"state": path.rsplit("/", 1)[-1], "events": []}
+    monkeypatch.setattr(observer, "api", api)
+    monkeypatch.setattr(observer, "export_stage", lambda *a, **k: None)
+    monkeypatch.setattr(observer, "export_diagnostics", lambda *a: [])
+    result = observer.observe({"schema": observer.PROJECTION_SCHEMA,
+        "member_count": 3, "candidate_subject_count": 370, "excluded_subject_count": 367,
+        "campaign_id": "c", "experiment_id": "e", "source_code_sha": "1" * 40},
+        api_root="unused", artifact_root=tmp_path, output=tmp_path,
+        maximum_seconds=0, interval_seconds=1, metadata_only=True)
+    assert result["failed_attempt_count"] == 1
+    assert result["pending_attempt_count"] == 1
+    assert result["observation_timed_out"] is True
+    assert result["execution_resubmitted"] is False
+    assert result["payload_export_mode"] == "REGISTRY_REFERENCES_ONLY"

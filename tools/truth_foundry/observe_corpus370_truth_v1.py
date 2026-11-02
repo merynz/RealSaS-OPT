@@ -46,7 +46,8 @@ def verified_cas(root: Path, ref: dict) -> Path:
     return path
 
 
-def export_stage(member: dict, stage: str, *, api_root: str, artifact_root: Path, output: Path):
+def export_stage(member: dict, stage: str, *, api_root: str, artifact_root: Path, output: Path,
+                 metadata_only: bool = False):
     records = api(api_root, "GET", f"/v1/subjects/{member['subject_id']}/artifacts?artifact_type=RealSaS.StageResultManifest&schema_version=v1&limit=500")
     rows = [
         row for row in records
@@ -76,6 +77,10 @@ def export_stage(member: dict, stage: str, *, api_root: str, artifact_root: Path
     for ref in manifest.get("outputs") or ():
         relative = PurePosixPath(ref["relative_path"])
         require(not relative.is_absolute() and ".." not in relative.parts and str(relative) == ref["relative_path"], "CORPUS370_OBSERVE_OUTPUT_PATH_ESCAPE")
+        if metadata_only:
+            outputs.append({"registry_output_reference": dict(ref),
+                            "payload_bytes_copied": False, "payload_bytes_reverified": False})
+            continue
         source = verified_cas(artifact_root, ref)
         destination = target / "outputs" / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -140,6 +145,7 @@ def observe(
     output: Path,
     maximum_seconds: float,
     interval_seconds: float,
+    metadata_only: bool = False,
 ) -> dict:
     require(preparation.get("schema") in {PREPARATION_SCHEMA, PROJECTION_SCHEMA}, "CORPUS370_OBSERVE_PREPARATION_SCHEMA")
     member_count = int(preparation.get("member_count", -1))
@@ -179,7 +185,8 @@ def observe(
             row = exported.setdefault(member["attempt_id"], {"attempt_id": member["attempt_id"], "subject_id": member["subject_id"], "stages": {}})
             for stage in STAGES:
                 if stage not in row["stages"]:
-                    value = export_stage(member, stage, api_root=api_root, artifact_root=artifact_root, output=output)
+                    value = export_stage(member, stage, api_root=api_root, artifact_root=artifact_root, output=output,
+                                         metadata_only=metadata_only)
                     if value is not None:
                         row["stages"][stage] = value
         elapsed = time.monotonic() - started
@@ -205,7 +212,9 @@ def observe(
                 "candidate_subject_count": 370,
                 "excluded_subject_count": preparation.get("excluded_subject_count", 0),
                 "observation_timed_out": timed_out,
-                "failed_attempt_count": sum(count for state, count in counts.items() if state not in SUCCESS),
+                "failed_attempt_count": sum(count for state, count in counts.items() if state in TERMINAL - SUCCESS),
+                "pending_attempt_count": sum(count for state, count in counts.items() if state not in TERMINAL),
+                "payload_export_mode": "REGISTRY_REFERENCES_ONLY" if metadata_only else "VERIFIED_PAYLOAD_BYTES",
                 "execution_resubmitted": False,
                 "training_submitted": False,
                 "truth_qualification_inferred": False,
@@ -226,6 +235,8 @@ def main() -> None:
     parser.add_argument("--api-root", default="http://127.0.0.1:8080")
     parser.add_argument("--maximum-seconds", type=float, default=21600)
     parser.add_argument("--interval-seconds", type=float, default=15)
+    parser.add_argument("--metadata-only", action="store_true",
+                        help="Copy bound stage manifests and references; payload bytes remain in Registry/CAS for later verified materialization.")
     args = parser.parse_args()
     result = observe(
         json.loads(args.preparation.read_text()),
@@ -234,6 +245,7 @@ def main() -> None:
         output=args.output,
         maximum_seconds=args.maximum_seconds,
         interval_seconds=args.interval_seconds,
+        metadata_only=args.metadata_only,
     )
     if result["observation_timed_out"]:
         raise SystemExit("CORPUS370_TRUTH_OBSERVATION_WINDOW_ENDED__ORIGINAL_CAMPAIGN_PRESERVED")

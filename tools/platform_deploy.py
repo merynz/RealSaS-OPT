@@ -58,7 +58,8 @@ def runtime_environment(root, authority, library_dir):
             "REALSAS_DATABASE_URL": f"postgresql:///postgres?host={root}/data/socket&port=55432",
             "REALSAS_TEMPORAL_ADDRESS": "127.0.0.1:7233", "REALSAS_TEMPORAL_NAMESPACE": "default",
             "LD_LIBRARY_PATH": library_dir, "PYTHONUNBUFFERED": "1",
-            "OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1"}
+            "OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1",
+            "REALSAS_ENGINE_MAX_CONCURRENT_ACTIVITIES": "4"}
 
 
 def python_launcher(python, library_dir):
@@ -221,7 +222,7 @@ def install(root, expected_sha, authority):
     command([python, "-m", "pip", "install", "--no-input", "--progress-bar", "off",
              "-r", source / "requirements/platform-deployment.txt"], timeout=600)
     for name in ("realsas-api", "realsas-control-worker", "realsas-migrate", "realsasctl"):
-        flags = ["-ldflags", f"-X main.sourceCodeSHA={expected_sha}"] if name == "realsas-api" else []
+        flags = ["-ldflags", f"-X main.sourceCodeSHA={expected_sha}"] if name in {"realsas-api", "realsas-control-worker"} else []
         command(["go", "build", *flags, "-o", binaries / name, f"./cmd/{name}"], cwd=source / "platform", timeout=300)
     # A pinned, checksum-verified official binary, never curl|sh/latest.
     with urllib.request.urlopen(TEMPORAL_URL, timeout=60) as response:

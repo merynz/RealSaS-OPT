@@ -4,8 +4,13 @@ import hashlib
 import json
 from pathlib import Path
 import zipfile
+import struct
+
+import pytest
 
 from tools.corpus.prepare_corpus370_platform_truth_bundle_v2 import prepare
+from tools.corpus.prepare_corpus370_platform_truth_bundle_v1 import gltf_dependencies as dependencies_v1
+from tools.corpus.prepare_corpus370_platform_truth_bundle_v2 import gltf_dependencies as dependencies_v2
 
 
 def _sha(path: Path) -> str:
@@ -16,6 +21,31 @@ def _write_json(path: Path, value: dict) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, sort_keys=True) + "\n")
     return path
+
+
+def write_glb(path, document):
+    data = json.dumps({"asset": {"version": "2.0"}, **document}).encode()
+    data += b" " * (-len(data) % 4)
+    path.write_bytes(struct.pack('<III', 0x46546C67, 2, 20 + len(data)) + struct.pack('<II', len(data), 0x4E4F534A) + data)
+
+
+@pytest.mark.parametrize('dependencies', [dependencies_v1, dependencies_v2])
+def test_binary_glb_transports_exact_external_images_and_buffers(tmp_path, dependencies):
+    texture = tmp_path / 'skin texture.png'
+    texture.write_bytes(b'exact-source-image')
+    buffer = tmp_path / 'mesh.bin'
+    buffer.write_bytes(b'exact-source-buffer')
+    source = tmp_path / 'subject.glb'
+    write_glb(source, {'images': [{'uri': 'skin%20texture.png'}], 'buffers': [{'uri': 'mesh.bin'}, {'uri': 'data:application/octet-stream;base64,AA=='}]})
+    before = source.read_bytes()
+    assert dependencies(source) == sorted([texture, buffer])
+    assert source.read_bytes() == before
+    texture.unlink()
+    with pytest.raises(ValueError, match='GLTF_DEPENDENCY_MISSING'):
+        dependencies(source)
+    write_glb(source, {'images': [{'uri': 'https://example.invalid/skin.png'}]})
+    with pytest.raises(ValueError, match='REMOTE_GLTF_DEPENDENCY'):
+        dependencies(source)
 
 
 def test_full_candidate_universe_survives_partial_observation_preparation(tmp_path: Path):
@@ -35,13 +65,17 @@ def test_full_candidate_universe_survives_partial_observation_preparation(tmp_pa
     license_file.write_text("CC0 test bytes\n")
     source_page = tmp_path / "SOURCE_PAGE.snapshot"
     source_page.write_text("source page bytes\n")
+    texture = extracted / 'assets' / 'shared texture.png'
+    texture.parent.mkdir(parents=True, exist_ok=True)
+    texture.write_bytes(b'qualified-external-texture')
 
     for index in range(370):
         sid = f"subject_{index:03d}"
         rel = f"assets/{sid}.glb"
         source = extracted / rel
         source.parent.mkdir(parents=True, exist_ok=True)
-        source.write_bytes(f"glb-{sid}".encode())
+        write_glb(source, {"extras": {"subject_id": sid},
+                           **({"images": [{"uri": "shared%20texture.png"}]} if index == 0 else {})})
         source_sha = _sha(source)
         roster_rows.append(
             {
@@ -138,7 +172,7 @@ def test_full_candidate_universe_survives_partial_observation_preparation(tmp_pa
             "schema": "RealSaS.ExpandedCorpusSourceInputBundle.v1",
             "subject_count": 370,
             "subjects": source_rows,
-            "files": [],
+            "files": [{"archive_path": "assets/shared texture.png", "sha256": _sha(texture), "size_bytes": texture.stat().st_size}],
             "training_authorized": False,
         },
     )
@@ -188,6 +222,7 @@ def test_full_candidate_universe_survives_partial_observation_preparation(tmp_pa
     assert len(manifest["subjects"]) == 370
     by_id = {row["subject_id"]: row for row in manifest["subjects"]}
     assert by_id[pass_sid]["observation_preparation"]["status"] == "PASS"
+    assert by_id[pass_sid]["source_dependencies"][0]["sha256"] == _sha(texture)
     assert by_id["subject_001"]["observation_preparation"]["status"] == "FAIL"
     assert by_id["subject_001"]["raw_source"]["sha256"] == roster_rows[1]["source_sha256"]
     assert manifest["training_authorized"] is False
@@ -197,4 +232,5 @@ def test_full_candidate_universe_survives_partial_observation_preparation(tmp_pa
         assert "BOOTSTRAP_MANIFEST.json" in zipped.namelist()
         assert "observations/subject_001/PREPARATION_FAILURE.json" in zipped.namelist()
         assert "observations/subject_000/IRIS_OBSERVATION_ADMISSION.json" in zipped.namelist()
+        assert zipped.read('sources/assets/shared texture.png') == texture.read_bytes()
         assert len(receipt["files"]) + 1 == len(zipped.namelist())

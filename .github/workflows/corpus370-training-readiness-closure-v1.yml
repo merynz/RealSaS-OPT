@@ -1,9 +1,17 @@
-name: corpus370-training-readiness-closure-v1
+name: corpus370-authority-contracts-v1
 
 on:
   push:
     branches:
       - corpus400-training-readiness-closure-v1
+      - corpus-family-consumer-bindings-v1
+  pull_request:
+    paths:
+      - 'tools/corpus/**'
+      - 'models/**/training_input_contract_v1.py'
+      - 'models/materialization_contract_v1.py'
+      - 'tests/corpus/**'
+      - '.github/workflows/corpus370-training-readiness-closure-v1.yml'
   workflow_dispatch:
 
 permissions:
@@ -70,6 +78,9 @@ jobs:
             tests/corpus/test_corpus370_subject_family_authority_matrix_v1.py \
             tests/corpus/test_gltf_bind_scene_uint8_offset_v1.py \
             tests/corpus/test_gltf_rig_skin_authority_e2e_v1.py \
+            tests/corpus/test_gltf_rig_skin_authority_v2.py \
+            tests/corpus/test_gltf_animation_canonical_replay_v1.py \
+            tests/corpus/test_partial_materialization_contract_v1.py \
             tests/corpus/test_gltf_animation_authority_v1.py \
             tests/corpus/test_gltf2_glb_authority_v1.py \
             tests/corpus/test_fbx_imported_rig_skin_authority_v1.py \
@@ -87,7 +98,7 @@ jobs:
       - name: Publish branch-scope notice
         run: |
           cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
-          # Corpus370 readiness closure
+          # Corpus370 source authority contracts
 
           This branch job validates source-side contracts only.
 

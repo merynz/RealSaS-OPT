@@ -176,6 +176,7 @@ jobs:
           cd ..
           python3 -m pytest -q \
             tests/compiler/test_platform_stage_inputs_v1.py \
+            tests/compiler/test_isolated_activity_v1.py \
             tests/compiler/test_platform_released_graph_v1.py \
             tests/repository/test_platform_host_preflight.py \
             tests/repository/test_platform_artifact_store.py \

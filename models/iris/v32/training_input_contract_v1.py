@@ -9,12 +9,12 @@ false-authority materialization impossible to feed into a future trainer.
 
 In particular:
 - source/camera/surface UDF are mandatory PASS families;
-- GLOBAL_SOLID_SDF may be MASKED, in which case no signed/occupancy payload exists;
+- a non-PASS GLOBAL_SOLID_SDF keeps its court status and has no signed/occupancy payload;
 - if GLOBAL_SOLID_SDF is PASS, signed distance and occupancy share one explicit
   validity mask and no invalid row is silently treated as zero supervision;
 - oriented normals are consumed only under SURFACE_NORMALS=PASS;
 - optional graphics/visibility/compositing/response families require exact bound
-  payload bytes when PASS and no payload bytes when MASKED.
+  payload bytes when PASS and no payload bytes otherwise.
 """
 
 from pathlib import Path
@@ -122,8 +122,8 @@ def _validate_geometry(manifest: dict[str, Any], statuses: dict[str, str]) -> di
 
 def _validate_global_sdf(manifest: dict[str, Any], statuses: dict[str, str]) -> dict[str, int]:
     ref = manifest.get("global_solid")
-    if statuses["GLOBAL_SOLID_SDF"] == "MASKED":
-        require(ref in {None, False}, "IRIS_V32_MASKED_GLOBAL_SDF_PAYLOAD_FORBIDDEN")
+    if statuses["GLOBAL_SOLID_SDF"] != "PASS":
+        require(ref is None or ref is False, "IRIS_V32_NONPASS_GLOBAL_SDF_PAYLOAD_FORBIDDEN")
         return {"global_sdf_query_count": 0, "global_sdf_valid_count": 0}
     require(isinstance(ref, dict), "IRIS_V32_GLOBAL_SDF_PAYLOAD_REQUIRED")
     _, arrays = load_npz(dict(ref), expected_schema=GLOBAL_SDF_SCHEMA)

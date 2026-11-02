@@ -179,24 +179,30 @@ def write_imported_stage47(root: Path, source_path: Path, positions, weights, in
     return teacher, geometry
 
 
-def test_raw_source_and_imported_skin_equivalence_end_to_end(tmp_path):
+@pytest.mark.parametrize("version", [1, 2])
+def test_raw_source_and_imported_skin_equivalence_end_to_end(tmp_path, version):
     source = tmp_path / "subject.gltf"
     positions, joints, weights, indices = write_synthetic_gltf(source)
     authority_dir = tmp_path / "authority"
-    manifest = build(source, authority_dir)
+    if version == 2:
+        from tools.corpus.build_gltf_rig_skin_authority_v2 import build as producer
+        from tools.corpus.validate_gltf_rig_skin_authority_v2 import validate as court
+    else:
+        producer, court = build, validate_source
+    manifest = producer(source, authority_dir)
     assert manifest["counts"]["joint_count_total"] == 2
     assert manifest["counts"]["render_vertex_count"] == 3
     assert manifest["counts"]["triangle_count"] == 1
     assert manifest["counts"]["nonzero_influence_count"] == 4
 
-    source_court = validate_source(manifest)
-    assert source_court["status"] == "PASS_GLTF_RIG_SKIN_SOURCE_AUTHORITY_INDEPENDENT_COURT__IMPORT_EQUIVALENCE_REQUIRED"
-    source_court_path = authority_dir / "GLTF_RIG_SKIN_AUTHORITY_COURT_V1.json"
+    source_court = court(manifest)
+    assert source_court["authority"]["source_rig_skin_court_passed"] is True
+    source_court_path = authority_dir / f"GLTF_RIG_SKIN_AUTHORITY_COURT_V{version}.json"
     source_court_path.write_text(json.dumps(source_court, sort_keys=True, indent=2) + "\n")
 
     teacher, geometry = write_imported_stage47(tmp_path, source, positions, weights, indices)
     import_court = validate_import(
-        authority_dir / "GLTF_RIG_SKIN_AUTHORITY_MANIFEST_V1.json",
+        authority_dir / f"GLTF_RIG_SKIN_AUTHORITY_MANIFEST_V{version}.json",
         source_court_path,
         teacher,
         geometry,
@@ -209,6 +215,12 @@ def test_raw_source_and_imported_skin_equivalence_end_to_end(tmp_path):
     assert import_court["equivalence"]["weight_indices_exact_after_joint_name_remap"] is True
     assert import_court["equivalence"]["semantic_skin_transfer_used"] is False
     assert import_court["authority"]["training_authorized"] is False
+    # A V2 manifest cannot borrow a V1 court, even for identical source bytes.
+    if version == 2:
+        source_court["schema"] = "RealSaS.GltfRigSkinAuthorityCourt.v1"
+        source_court_path.write_text(json.dumps(source_court) + "\n")
+        with pytest.raises(ValueError, match="SOURCE_COURT_STATUS"):
+            validate_import(authority_dir / "GLTF_RIG_SKIN_AUTHORITY_MANIFEST_V2.json", source_court_path, teacher, geometry)
 
 
 def test_imported_weight_value_drift_fails_closed(tmp_path):

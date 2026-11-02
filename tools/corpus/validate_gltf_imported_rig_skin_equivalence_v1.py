@@ -22,6 +22,13 @@ from tools.corpus.gltf_bind_scene_v1 import SourceGLTF, Y_TO_Z
 SOURCE_MANIFEST_SCHEMA = "RealSaS.GltfRigSkinAuthority.v1"
 SOURCE_COURT_SCHEMA = "RealSaS.GltfRigSkinAuthorityCourt.v1"
 SOURCE_COURT_STATUS = "PASS_GLTF_RIG_SKIN_SOURCE_AUTHORITY_INDEPENDENT_COURT__IMPORT_EQUIVALENCE_REQUIRED"
+SOURCE_CONTRACTS = {
+    SOURCE_MANIFEST_SCHEMA: (SOURCE_COURT_SCHEMA, SOURCE_COURT_STATUS),
+    "RealSaS.GltfRigSkinAuthority.v2": (
+        "RealSaS.GltfRigSkinAuthorityCourt.v2",
+        "PASS_GLTF_RIG_SKIN_SOURCE_AUTHORITY_V2_INDEPENDENT_COURT__IMPORT_EQUIVALENCE_REQUIRED",
+    ),
+}
 SCHEMA = "RealSaS.GltfImportedRigSkinEquivalenceCourt.v1"
 STATUS = "PASS_GLTF_IMPORTED_RIG_SKIN_EQUIVALENCE__FINAL_ADMISSION_SEPARATE"
 
@@ -171,13 +178,23 @@ def validate(source_manifest_path: Path, source_court_path: Path, teacher_scene_
     source_manifest = load_json(source_manifest_path, "GLTF_IMPORTED_EQUIVALENCE_SOURCE_MANIFEST")
     source_court = load_json(source_court_path, "GLTF_IMPORTED_EQUIVALENCE_SOURCE_COURT")
     teacher = load_json(teacher_scene_path, "GLTF_IMPORTED_EQUIVALENCE_TEACHER")
-    if source_manifest.get("schema") != SOURCE_MANIFEST_SCHEMA:
+    source_contract = SOURCE_CONTRACTS.get(source_manifest.get("schema"))
+    if source_contract is None:
         raise ValueError("GLTF_IMPORTED_EQUIVALENCE_SOURCE_SCHEMA")
-    if source_court.get("schema") != SOURCE_COURT_SCHEMA or source_court.get("status") != SOURCE_COURT_STATUS:
+    if (source_court.get("schema"), source_court.get("status")) != source_contract:
         raise ValueError("GLTF_IMPORTED_EQUIVALENCE_SOURCE_COURT_STATUS")
+    identity_payload = {k: v for k, v in source_court.items() if k != "court_identity_sha256"}
+    if source_court.get("court_identity_sha256") != digest(identity_payload):
+        raise ValueError("GLTF_IMPORTED_EQUIVALENCE_SOURCE_COURT_IDENTITY")
+    authority = source_court.get("authority") or {}
+    if authority.get("source_rig_skin_court_passed") is not True or authority.get("training_authorized") is not False:
+        raise ValueError("GLTF_IMPORTED_EQUIVALENCE_SOURCE_COURT_AUTHORITY")
     source_path = bound(source_manifest.get("source"), "GLTF_IMPORTED_EQUIVALENCE_SOURCE_DRIFT")
     if (source_court.get("source") or {}).get("sha256") != sha256(source_path):
         raise ValueError("GLTF_IMPORTED_EQUIVALENCE_SOURCE_COURT_BINDING")
+    arrays_path = bound((source_manifest.get("outputs") or {}).get("arrays"), "GLTF_IMPORTED_EQUIVALENCE_SOURCE_ARRAY_DRIFT")
+    if bound(source_court.get("producer_arrays"), "GLTF_IMPORTED_EQUIVALENCE_SOURCE_COURT_ARRAY_DRIFT") != arrays_path:
+        raise ValueError("GLTF_IMPORTED_EQUIVALENCE_SOURCE_COURT_ARRAY_BINDING")
     geometry_ref = None
     for row in teacher.get("geometry_payloads") or ():
         if Path(str(row.get("path") or "")).name == Path(geometry_response_path).name:

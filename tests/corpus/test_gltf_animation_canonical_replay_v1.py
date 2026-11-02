@@ -27,16 +27,22 @@ def imported_fixture(root:Path,source:Path):
     teacher=root/'TEACHER_SCENE.json';teacher.write_text(json.dumps({'schema':'RealSaS.TeacherSceneIR.v2','subject_key':'synthetic-animation','authority':'UNQUALIFIED_DERIVED_MEASUREMENTS','geometry_payloads':[{'path':str(geometry.resolve()),'sha256':sha(geometry),'size_bytes':geometry.stat().st_size}],'calibration':{'native_control_frames_privileged':[{'armature':'Rig','name':'Root','parent':None,'rest_matrix_world':np.eye(4).tolist()}]}},sort_keys=True)+'\n')
     return teacher,geometry
 
-def build_stack(root:Path):
+def build_stack(root:Path, version=1):
     source=root/'animated.gltf';write_source(source)
-    rig_dir=root/'rig';rm=build_rig(source,rig_dir);rc=validate_rig(rm);rc_path=rig_dir/'GLTF_RIG_SKIN_AUTHORITY_COURT_V1.json';rc_path.write_text(json.dumps(rc,sort_keys=True,indent=2)+'\n')
-    teacher,geometry=imported_fixture(root,source);ri=validate_import(rig_dir/'GLTF_RIG_SKIN_AUTHORITY_MANIFEST_V1.json',rc_path,teacher,geometry);ri_path=rig_dir/'GLTF_IMPORTED_RIG_SKIN_EQUIVALENCE_COURT_V1.json';ri_path.write_text(json.dumps(ri,sort_keys=True,indent=2)+'\n')
+    if version==2:
+        from tools.corpus.build_gltf_rig_skin_authority_v2 import build as rig_producer
+        from tools.corpus.validate_gltf_rig_skin_authority_v2 import validate as rig_court
+    else:rig_producer,rig_court=build_rig,validate_rig
+    rig_dir=root/'rig';rm=rig_producer(source,rig_dir);rc=rig_court(rm);rc_path=rig_dir/f'GLTF_RIG_SKIN_AUTHORITY_COURT_V{version}.json';rc_path.write_text(json.dumps(rc,sort_keys=True,indent=2)+'\n')
+    rig_manifest=rig_dir/f'GLTF_RIG_SKIN_AUTHORITY_MANIFEST_V{version}.json'
+    teacher,geometry=imported_fixture(root,source);ri=validate_import(rig_manifest,rc_path,teacher,geometry);ri_path=rig_dir/'GLTF_IMPORTED_RIG_SKIN_EQUIVALENCE_COURT_V1.json';ri_path.write_text(json.dumps(ri,sort_keys=True,indent=2)+'\n')
     anim_dir=root/'animation';am=build_animation(source,anim_dir);ac=validate_animation(am);ac_path=anim_dir/'GLTF_ANIMATION_KINEMATICS_COURT_V1.json';ac_path.write_text(json.dumps(ac,sort_keys=True,indent=2)+'\n')
-    replay_path=root/'ANIMATION_CANONICAL_REPLAY_V1.json';build_replay(anim_dir/'GLTF_ANIMATION_KINEMATICS_MANIFEST_V1.json',ac_path,rig_dir/'GLTF_RIG_SKIN_AUTHORITY_MANIFEST_V1.json',ri_path,teacher,replay_path)
+    replay_path=root/'ANIMATION_CANONICAL_REPLAY_V1.json';build_replay(anim_dir/'GLTF_ANIMATION_KINEMATICS_MANIFEST_V1.json',ac_path,rig_manifest,ri_path,teacher,replay_path)
     return replay_path
 
-def test_animation_canonical_replay_roundtrip(tmp_path:Path):
-    replay=build_stack(tmp_path);court=validate_replay(replay)
+@pytest.mark.parametrize('version',[1,2])
+def test_animation_canonical_replay_roundtrip(tmp_path:Path,version):
+    replay=build_stack(tmp_path,version);court=validate_replay(replay)
     assert court['status']=='PASS_GLTF_ANIMATION_CANONICAL_REPLAY_INDEPENDENT_COURT__FINAL_ADMISSION_SEPARATE'
     assert court['family_candidate_outcomes']['ANIMATION_KINEMATICS']=='QUALIFIED_CORE_CANDIDATE'
     assert court['authority']['canonical_replay_court_passed'] is True

@@ -20,6 +20,7 @@ from tools.corpus.gltf_bind_scene_v1 import SourceGLTF
 ANIM_SCHEMA="RealSaS.GltfAnimationKinematicsAuthority.v1"
 ANIM_COURT_SCHEMA="RealSaS.GltfAnimationKinematicsAuthorityCourt.v1"
 RIG_SCHEMA="RealSaS.GltfRigSkinAuthority.v1"
+RIG_SCHEMAS={RIG_SCHEMA,"RealSaS.GltfRigSkinAuthority.v2"}
 RIG_IMPORT_SCHEMA="RealSaS.GltfImportedRigSkinEquivalenceCourt.v1"
 SCHEMA="RealSaS.GltfAnimationCanonicalReplay.v1"
 STATUS="PASS_GLTF_ANIMATION_CANONICAL_REPLAY_CANDIDATE__INDEPENDENT_COURT_REQUIRED"
@@ -117,7 +118,8 @@ def replay_digest(nodes,parent,joints,channels,arrays,times):
 def build(animation_manifest_path:Path,animation_court_path:Path,rig_manifest_path:Path,rig_importer_court_path:Path,teacher_scene_path:Path,output:Path)->dict:
     am=json.loads(animation_manifest_path.resolve().read_text()); ac=json.loads(animation_court_path.resolve().read_text()); rm=json.loads(rig_manifest_path.resolve().read_text()); rc=json.loads(rig_importer_court_path.resolve().read_text()); teacher=json.loads(teacher_scene_path.resolve().read_text())
     if am.get('schema')!=ANIM_SCHEMA or ac.get('schema')!=ANIM_COURT_SCHEMA or not str(ac.get('status','')).startswith('PASS_'): raise ValueError('ANIM_REPLAY_SOURCE_COURT')
-    if rm.get('schema')!=RIG_SCHEMA or rc.get('schema')!=RIG_IMPORT_SCHEMA or not str(rc.get('status','')).startswith('PASS_'): raise ValueError('ANIM_REPLAY_RIG_COURT')
+    if rm.get('schema') not in RIG_SCHEMAS or rc.get('schema')!=RIG_IMPORT_SCHEMA or rc.get('status')!='PASS_GLTF_IMPORTED_RIG_SKIN_EQUIVALENCE__FINAL_ADMISSION_SEPARATE' or (rc.get('authority') or {}).get('importer_equivalence_passed') is not True: raise ValueError('ANIM_REPLAY_RIG_COURT')
+    if (rc.get('inputs') or {}).get('source_manifest',{}).get('sha256')!=sha256(rig_manifest_path.resolve()): raise ValueError('ANIM_REPLAY_RIG_MANIFEST_BINDING')
     source=bound(am.get('source'),'ANIM_REPLAY_SOURCE_DRIFT'); rsource=bound(rm.get('source'),'ANIM_REPLAY_RIG_SOURCE_DRIFT')
     if source!=rsource or sha256(source)!=sha256(rsource): raise ValueError('ANIM_REPLAY_SOURCE_IDENTITY')
     if (rc.get('inputs') or {}).get('raw_source',{}).get('sha256')!=sha256(source): raise ValueError('ANIM_REPLAY_IMPORT_SOURCE_BINDING')

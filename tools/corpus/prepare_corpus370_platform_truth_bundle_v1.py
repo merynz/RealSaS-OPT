@@ -15,6 +15,8 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 import zipfile
 
+from tools.observation.source_scene_contract_v2 import _json_and_chunks
+
 SCHEMA = "RealSaS.Corpus370PlatformStage01InputBundle.v1"
 RECEIPT_SCHEMA = "RealSaS.Corpus370PlatformStage01InputBundleReceipt.v1"
 OBSERVATION_SCHEMAS = {
@@ -56,9 +58,9 @@ def add_file(files: dict[str, dict], archive_path: str, path: Path, expected_sha
 
 
 def gltf_dependencies(source: Path) -> list[Path]:
-    if source.suffix.lower() != ".gltf":
+    if source.suffix.lower() not in {".gltf", ".glb"}:
         return []
-    doc = json.loads(source.read_text())
+    doc, _ = _json_and_chunks(source)
     rows = []
     for item in [*doc.get("buffers", []), *doc.get("images", [])]:
         uri = str(item.get("uri") or "")

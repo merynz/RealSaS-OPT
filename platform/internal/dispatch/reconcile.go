@@ -36,6 +36,19 @@ func unsuccessfulTerminal(status enumspb.WorkflowExecutionStatus) bool {
 // Running, unknown, undelivered and successfully completed workflows cannot be
 // failed here. In particular, this path never grants scientific qualification.
 func ReconcileFailedAttempts(ctx context.Context, pool *pgxpool.Pool, temporalClient WorkflowDescriber, limit int) (int, error) {
+	return reconcileFailedAttempts(ctx, pool, temporalClient, limit, nil)
+}
+
+// ReconcileFailedAttemptIDs is the scoped operator form. It never touches an
+// unrelated Attempt while a declared campaign is being retired for repair.
+func ReconcileFailedAttemptIDs(ctx context.Context, pool *pgxpool.Pool, temporalClient WorkflowDescriber, ids []uuid.UUID) (int, error) {
+	if len(ids) == 0 {
+		return 0, errors.New("scoped reconciliation requires Attempt ids")
+	}
+	return reconcileFailedAttempts(ctx, pool, temporalClient, len(ids), ids)
+}
+
+func reconcileFailedAttempts(ctx context.Context, pool *pgxpool.Pool, temporalClient WorkflowDescriber, limit int, ids []uuid.UUID) (int, error) {
 	if pool == nil || temporalClient == nil || limit < 1 {
 		return 0, errors.New("reconciliation requires database, Temporal and positive limit")
 	}
@@ -43,12 +56,13 @@ func ReconcileFailedAttempts(ctx context.Context, pool *pgxpool.Pool, temporalCl
 		SELECT a.id,c.id,c.command_type,c.payload
 		FROM attempts a JOIN commands c ON c.payload->>'attempt_id'=a.id::text
 		WHERE a.final_state='OPEN'
+		  AND ($2::uuid[] IS NULL OR a.id=ANY($2::uuid[]))
 		  AND c.command_type IN ('COMPILE_SUBJECT','RUN_CAPABILITY')
 		  AND (SELECT count(*) FROM commands x WHERE x.payload->>'attempt_id'=a.id::text)=1
 		  AND EXISTS (SELECT 1 FROM outbox_events o WHERE o.aggregate_type='Command'
 		              AND o.aggregate_id=c.id AND o.delivered_at IS NOT NULL)
 		ORDER BY a.created_at,a.id LIMIT $1
-	`, limit)
+	`, limit, ids)
 	if err != nil {
 		return 0, err
 	}

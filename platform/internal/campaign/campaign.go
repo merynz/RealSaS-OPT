@@ -26,13 +26,47 @@ const (
 )
 
 type StartRequest struct {
-	Name                     string      `json:"name"`
-	BaselineEngineReleaseID  uuid.UUID   `json:"baseline_engine_release_id"`
-	CandidateEngineReleaseID uuid.UUID   `json:"candidate_engine_release_id"`
-	TargetStageID            string      `json:"target_stage_id,omitempty"`
-	CohortSubjectIDs         []uuid.UUID `json:"cohort_subject_ids"`
-	RegressionSubjectIDs     []uuid.UUID `json:"regression_subject_ids,omitempty"`
-	CreatedBy                string      `json:"created_by"`
+	Name                     string                          `json:"name"`
+	BaselineEngineReleaseID  uuid.UUID                       `json:"baseline_engine_release_id"`
+	CandidateEngineReleaseID uuid.UUID                       `json:"candidate_engine_release_id"`
+	TargetStageID            string                          `json:"target_stage_id,omitempty"`
+	CohortSubjectIDs         []uuid.UUID                     `json:"cohort_subject_ids"`
+	RegressionSubjectIDs     []uuid.UUID                     `json:"regression_subject_ids,omitempty"`
+	CreatedBy                string                          `json:"created_by"`
+	ParentCampaignID         *uuid.UUID                      `json:"parent_campaign_id,omitempty"`
+	MemberInterventions      map[string]release.Intervention `json:"member_interventions,omitempty"`
+}
+
+func continuationParents(req StartRequest, parent Status) (map[uuid.UUID]uuid.UUID, error) {
+	if req.ParentCampaignID == nil || *req.ParentCampaignID != parent.CampaignID || req.BaselineEngineReleaseID != parent.CandidateEngineReleaseID {
+		return nil, errors.New("RESEARCH_CAMPAIGN_PARENT_RELEASE_SCOPE_DRIFT")
+	}
+	children, err := orderedMembers(req)
+	if err != nil {
+		return nil, err
+	}
+	if len(children) != len(parent.Members) || len(req.MemberInterventions) != len(children) {
+		return nil, errors.New("RESEARCH_CAMPAIGN_CONTINUATION_MEMBER_COUNT")
+	}
+	bySubject := map[uuid.UUID]Member{}
+	for _, m := range parent.Members {
+		bySubject[m.SubjectID] = m
+	}
+	result := map[uuid.UUID]uuid.UUID{}
+	for _, child := range children {
+		m, ok := bySubject[child.SubjectID]
+		if !ok || m.Role != child.Role || m.Ordinal != child.Ordinal {
+			return nil, errors.New("RESEARCH_CAMPAIGN_CONTINUATION_MEMBER_DRIFT")
+		}
+		if m.FinalState != "FAILED" && m.FinalState != "COMPLETED" {
+			return nil, errors.New("RESEARCH_CAMPAIGN_PARENT_ATTEMPT_STILL_OPEN")
+		}
+		if _, ok = req.MemberInterventions[child.SubjectID.String()]; !ok {
+			return nil, errors.New("RESEARCH_CAMPAIGN_MEMBER_INTERVENTION_REQUIRED")
+		}
+		result[child.SubjectID] = m.AttemptID
+	}
+	return result, nil
 }
 
 type Member struct {
@@ -194,6 +228,19 @@ func Start(ctx context.Context, pool *pgxpool.Pool, apiGraph *stagegraph.Graph, 
 	if err != nil {
 		return Status{}, err
 	}
+	parents := map[uuid.UUID]uuid.UUID{}
+	if req.ParentCampaignID != nil {
+		parent, e := Get(ctx, pool, *req.ParentCampaignID)
+		if e != nil {
+			return Status{}, e
+		}
+		parents, e = continuationParents(req, parent)
+		if e != nil {
+			return Status{}, e
+		}
+	} else if len(req.MemberInterventions) != 0 {
+		return Status{}, errors.New("RESEARCH_CAMPAIGN_INTERVENTIONS_REQUIRE_PARENT")
+	}
 	specMembers := make([]map[string]any, 0, len(members))
 	for _, row := range members {
 		specMembers = append(specMembers, map[string]any{"subject_id": row.SubjectID.String(), "role": row.Role, "ordinal": row.Ordinal})
@@ -207,6 +254,10 @@ func Start(ctx context.Context, pool *pgxpool.Pool, apiGraph *stagegraph.Graph, 
 		"execution_scope":             scope,
 		"canonical_code_sha":          deployedCodeSHA,
 		"members":                     specMembers,
+	}
+	if req.ParentCampaignID != nil {
+		spec["parent_campaign_id"] = req.ParentCampaignID.String()
+		spec["member_interventions"] = req.MemberInterventions
 	}
 	specSHA, err := semantic.JSONSHA256(spec)
 	if err != nil {
@@ -231,13 +282,19 @@ func Start(ctx context.Context, pool *pgxpool.Pool, apiGraph *stagegraph.Graph, 
 	recordEvent(ctx, pool, campaignID, "CAMPAIGN_STARTING", spec)
 
 	for _, row := range members {
-		started, err := attempt.StartResearch(ctx, pool, apiGraph, attempt.ResearchRequest{
+		childRequest := attempt.ResearchRequest{
 			SubjectID:                row.SubjectID,
 			BaselineEngineReleaseID:  req.BaselineEngineReleaseID,
 			CandidateEngineReleaseID: req.CandidateEngineReleaseID,
 			CreatedBy:                req.CreatedBy,
 			DeployedCodeSHA:          deployedCodeSHA,
-		})
+		}
+		if pid, ok := parents[row.SubjectID]; ok {
+			intervention := req.MemberInterventions[row.SubjectID.String()]
+			childRequest.ParentAttemptID = &pid
+			childRequest.Intervention = &intervention
+		}
+		started, err := attempt.StartResearch(ctx, pool, apiGraph, childRequest)
 		if err != nil {
 			_, _ = pool.Exec(ctx, "UPDATE research_campaigns SET state='START_FAILED' WHERE id=$1", campaignID)
 			recordEvent(ctx, pool, campaignID, "CAMPAIGN_MEMBER_START_FAILED", map[string]any{"subject_id": row.SubjectID, "role": row.Role, "error": err.Error()})

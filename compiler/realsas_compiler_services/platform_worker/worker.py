@@ -22,6 +22,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from compiler.realsas_compiler_services.orchestrator import mainline
 from compiler.realsas_compiler_services.platform_worker.model_inputs import materialize_model_releases
+from compiler.realsas_compiler_services.platform_worker.isolated_activity_v1 import run_isolated, IsolatedActivityError, activity_capacity
 from compiler.realsas_compiler_services.platform_worker.shape_executor_v1 import execute_shape_capability_v1
 from compiler.realsas_compiler_services.platform_worker.stage_inputs import hydrate_stage_inputs, verify_execution_version, released_execution_plan, verify_source_inputs
 
@@ -295,10 +296,20 @@ def _execute_stage_core(request: dict[str, Any]) -> dict[str, Any]:
 
 @activity.defn(name=EXECUTE_STAGE_ACTIVITY)
 async def execute_compile_stage(request: dict[str, Any]) -> dict[str, Any]:
-    return await _with_heartbeat(_execute_stage_core, request)
+    return await _isolated('compile_stage', request)
+
+
+async def _isolated(operation, request):
+    try:
+        return await run_isolated(operation, request, heartbeat=activity.heartbeat)
+    except IsolatedActivityError as exc:
+        from temporalio.exceptions import ApplicationError
+        raise ApplicationError(str(exc), type='EngineIsolatedActivityFailure', non_retryable=True) from exc
 
 
 async def _with_heartbeat(function, request):
+    if os.environ.get('REALSAS_ENGINE_PROCESS_CHILD') == '1':
+        return function(request)
     task = asyncio.create_task(asyncio.to_thread(function, request))
     while not task.done():
         activity.heartbeat({"stage_id": request.get("stage_id"), "phase": "running"})
@@ -329,6 +340,8 @@ def _resolve_stage_capability_binding(request: dict[str, Any]) -> tuple[str, str
 
 @activity.defn(name=EXECUTE_CAPABILITY_ACTIVITY)
 async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
+    if os.environ.get('REALSAS_ENGINE_PROCESS_CHILD') != '1':
+        return await _isolated('capability', request)
     metadata = dict(request.get("capability_metadata") or {})
     if (
         str(request.get("kind") or "") == "MODULE"
@@ -562,7 +575,7 @@ def _render_tail_sync(request: dict[str, Any]) -> dict[str, Any]:
 
 @activity.defn(name=RENDER_TAIL_ACTIVITY)
 async def render_runtime_tail(request: dict[str, Any]) -> dict[str, Any]:
-    return await _with_heartbeat(_render_tail_sync, request)
+    return await _isolated('render_tail', request)
 
 
 async def main() -> None:
@@ -573,6 +586,7 @@ async def main() -> None:
         client,
         task_queue=ENGINE_TASK_QUEUE,
         activities=[execute_compile_stage, execute_capability, render_runtime_tail],
+        max_concurrent_activities=activity_capacity(),
     )
     await worker.run()
 

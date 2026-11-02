@@ -124,6 +124,16 @@ jobs:
             -r requirements/platform-deployment.txt
           echo "PIP_NO_INDEX=1" >> "$GITHUB_ENV"
           echo "PIP_FIND_LINKS=$wheelhouse" >> "$GITHUB_ENV"
+      - name: Apply explicitly declared research lifecycle repair through the Go owner
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+        run: |
+          if test -f canonical/CORPUS370_WORKER_ISOLATION_REPAIR_V1.json; then
+            python tools/platform_cancel_campaign_v1.py \
+              --request canonical/CORPUS370_WORKER_ISOLATION_REPAIR_V1.json \
+              --repo "$GITHUB_WORKSPACE" --platform-root /home/monster/realsas_platform \
+              --expected-main-sha "$GITHUB_SHA" \
+              --output "/home/monster/realsas_platform/receipts/campaign-repair-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
+          fi
       - name: Reconcile terminal failed Attempts through the canonical Go owner
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
@@ -173,6 +183,7 @@ jobs:
           path: |
             /home/monster/realsas_platform/deployment.json
             /home/monster/realsas_platform/receipts/smoke-*.json
+            /home/monster/realsas_platform/receipts/campaign-repair-*.json
           if-no-files-found: ignore
           retention-days: 7
 
@@ -246,6 +257,16 @@ jobs:
             -r requirements/platform-deployment.txt
           echo "PIP_NO_INDEX=1" >> "$GITHUB_ENV"
           echo "PIP_FIND_LINKS=$wheelhouse" >> "$GITHUB_ENV"
+      - name: Apply explicitly declared research lifecycle repair through the Go owner
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+        run: |
+          if test -f canonical/CORPUS370_WORKER_ISOLATION_REPAIR_V1.json; then
+            python tools/platform_cancel_campaign_v1.py \
+              --request canonical/CORPUS370_WORKER_ISOLATION_REPAIR_V1.json \
+              --repo "$GITHUB_WORKSPACE" --platform-root /home/monster/realsas_platform \
+              --expected-main-sha "$GITHUB_SHA" \
+              --output "/home/monster/realsas_platform/receipts/campaign-repair-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
+          fi
       - name: Reconcile terminal failed Attempts through the canonical Go owner
         run: |
           if test -f /home/monster/realsas_platform/deployment.json; then
@@ -291,5 +312,6 @@ jobs:
           path: |
             /home/monster/realsas_platform/deployment.json
             /home/monster/realsas_platform/receipts/smoke-*.json
+            /home/monster/realsas_platform/receipts/campaign-repair-*.json
           if-no-files-found: ignore
           retention-days: 7

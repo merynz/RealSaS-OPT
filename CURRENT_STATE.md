@@ -1,3 +1,55 @@
+> **Worker/lifecycle repair source — 2026-11-02:** PR314 now includes supervised
+> process isolation for Python Engine activities, bounded concurrency, exact
+> native-descendant cleanup, and the Go-owned exact-Campaign cancellation path.
+> `canonical/CORPUS370_WORKER_ISOLATION_REPAIR_V1.json` binds only the original
+> 294 Attempt IDs and exact PREPARATION SHA; deployment may apply that explicit
+> lifecycle repair before the unchanged OPEN-Attempt guard. The original Campaign
+> has NOT yet been cancelled at this checkpoint. A child Campaign must declare
+> its terminal parent and per-member release/input intervention; retain every
+> actual qualified prefix artifact and compute previously unexecuted stages.
+> Read `docs/platform/ENGINE_ACTIVITY_ISOLATION_V1.md`. Unit/source tests pass;
+> PostgreSQL-backed cancellation/continuation checks must pass CI before merge.
+> libspatialindex explicitly forbids concurrent thread access; no current native
+> threaded Stage49 result is silently promoted into a new apparatus. The user
+> asked for a status report during work; this did not cancel the corpus goal.
+>
+> **First real execution readback — 2026-11-02 14:28 UTC:** Original Campaign
+> `14431b73-3369-46d4-9e93-dd36ed1686cb` remains active; do not resubmit it.
+> All 294 Attempts are OPEN. The 14:20 observer exported 16 committed Stage47
+> manifests and saw 14 Stage49 executions running. Three Stage47 ledgers failed
+> with `SOURCE_EXTERNAL_RESOURCE_MISSING_OR_ESCAPED`: GLB external textures were
+> omitted by the transport packer because it collected dependencies only for
+> `.gltf`. This is a packaging failure, not a morphology/truth rejection. Repair
+> both packers with the common binary-safe reader, retain raw bytes and URI guards,
+> then bind a repaired bundle to an explicit continuation; do not overwrite V2.
+> The old observer incorrectly counted all OPEN Attempts as failed; its reported
+> `failed_attempt_count=294` is not 294 terminal failures. The pending/failure
+> counter repair and short reference-only initial snapshots are in PR314.
+> Readback run `41461627488` reports 12 CPUs, ~7.7 GiB RAM, ~2.4 GiB available and
+> ~0.9 GiB swap used. Investigate stage-family progress/worker logs before changing
+> execution capacity. Bound the geometry nearest-surface workload without changing
+> queries or targets; exact chunk-invariance tests cover the proposed repair.
+> Latest historical Drive geometry-repair receipt is 17 complete / 122 failed
+> (97 nonclosed-manifold, 22 topology mismatch, 3 triangle collapse), not Truth139
+> readiness. Global-solid binding, other families, lineage review and all final
+> model/materialization readiness remain open. No notebook or optimizer yet.
+>
+> **Actual Corpus370 execution — 2026-11-02:** PR313 merged as
+> `36d26f2c39112f46ab82045582b4276bdb8e9108`; exact-main deployment run
+> `41455024458` succeeded. Actual workflow `41455683161` sealed all 294 prepared
+> inputs and submitted Campaign `14431b73-3369-46d4-9e93-dd36ed1686cb`, Experiment
+> `52c61b66-15f5-4249-9f95-13c780216679`, EngineRelease
+> `00aceafd-8b20-40b5-836f-fc5f306b6432`. The 76 excluded preparation failures
+> remain bound in PREPARATION.json; 294 submitted is not an eligibility count.
+> First Registry readback at 13:58 UTC observed 294 OPEN Attempts and no committed
+> Stage49 families. Resume/read those exact Attempts; do not resubmit. Read-only
+> workflow `corpus370-closure-input-readback-v1.yml` projects Registry-committed
+> family outputs into a clearly partial matrix/roster and publishes it to Drive.
+> The same first partial court aggregation has SOURCE_IMPORT/CAMERA 341 PASS /
+> 29 FAIL, FBX RIG 111 PASS and SKIN 108 PASS / 3 MASKED. glTF source rig courts
+> still require exact importer equivalence; numeric global-solid 31/62 PASS is
+> source-world evidence with current camera/canonical binding still open.
+>
 > **Corpus370 execution continuation — 2026-11-02:** The user requires actual
 > subject-family closure before materialization/training. The active operator
 > request is `canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V2.json`, binding the exact

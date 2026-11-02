@@ -66,6 +66,9 @@ START=time.monotonic()
 ram_gib=effective_memory_gib()
 print(f'Kullanılabilir çalışma zamanı RAM sınırı: {ram_gib:.1f} GiB')
 assert ram_gib>=22, 'Yüksek RAM çalışma zamanı seçin (en az 24 GiB önerilir), sonra Run All.'
+subprocess.run(['apt-get','update','-qq'],check=True)
+subprocess.run(['apt-get','install','-y','-qq','libxi6','libxrender1','libxfixes3','libxrandr2',
+                'libxxf86vm1','libsm6','libice6','libgl1','libxkbcommon0','libxinerama1'],check=True)
 for key in ('OMP_NUM_THREADS','OPENBLAS_NUM_THREADS','MKL_NUM_THREADS','NUMEXPR_NUM_THREADS'):
     os.environ[key]='1'
 drive.mount('/content/drive')
@@ -79,9 +82,9 @@ subprocess.run(['git','-C',str(CODE),'fetch','origin',CONFIG['code_sha']],check=
 subprocess.run(['git','-C',str(CODE),'checkout','--detach',CONFIG['code_sha']],check=True)
 assert subprocess.check_output(['git','-C',str(CODE),'rev-parse','HEAD'],text=True).strip()==CONFIG['code_sha']
 VENV=Path('/content/realsas-corpus370-worker-venv')
-if not (VENV/'bin/python').is_file():subprocess.run([sys.executable,'-m','venv',str(VENV)],check=True)
+if not (VENV/'bin/python').is_file():subprocess.run([sys.executable,'-m','venv','--without-pip',str(VENV)],check=True)
 PYTHON=str(VENV/'bin/python')
-subprocess.run([PYTHON,'-m','pip','install','--quiet','-r',str(CODE/'requirements/mainline-ci.txt'),
+subprocess.run([sys.executable,'-m','pip','--python',PYTHON,'install','--quiet','-r',str(CODE/'requirements/mainline-ci.txt'),
                 '-r',str(CODE/'requirements/truth-family-courts.txt')],check=True)
 os.environ['PYTHONPATH']=str(CODE)
 os.environ['REALSAS_AUTHORITY_ROOT']='/home/monster/realsas_authority'

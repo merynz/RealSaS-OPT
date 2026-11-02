@@ -33,6 +33,7 @@ jobs:
       ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
       OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_fbx_rig_skin_v1
       EXPECTED_ROSTER_SHA256: 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+      BLENDER_BIN: /home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
       RCLONE_REMOTE: gdrive
 
     steps:
@@ -46,7 +47,7 @@ jobs:
         run: |
           set -euo pipefail
           test -x "$PLATFORM_ROOT/current/bin/realsas-python"
-          command -v blender >/dev/null
+          test -x "$BLENDER_BIN"
           command -v rclone >/dev/null
           test -f "$ROSTER"
           test "$(sha256sum "$ROSTER" | awk '{print $1}')" = "$EXPECTED_ROSTER_SHA256"
@@ -87,7 +88,8 @@ jobs:
             tools/corpus/run_corpus370_fbx_rig_skin_sweep_v1.py \
             --exact-source-roster "$ROSTER" \
             --extracted-source-root "$EXTRACTED" \
-            --output-root "$OUTPUT_ROOT"
+            --output-root "$OUTPUT_ROOT" \
+            --blender "$BLENDER_BIN"
 
       - name: Verify exact FBX accounting and no authority mint
         run: |

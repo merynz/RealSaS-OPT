@@ -1,0 +1,174 @@
+name: corpus370-fbx-rig-skin-v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - corpus400-training-readiness-closure-v1
+    paths:
+      - '.github/workflows/corpus370-fbx-rig-skin-v1.yml'
+      - 'tools/corpus/blender_fbx_source_inspection_v1.py'
+      - 'tools/corpus/blender_fbx_rig_skin_replay_v1.py'
+      - 'tools/corpus/validate_fbx_imported_rig_skin_authority_v1.py'
+      - 'tools/corpus/collect_corpus370_rig_skin_court_index_v1.py'
+      - 'tools/corpus/run_corpus370_fbx_rig_skin_sweep_v1.py'
+      - 'tests/corpus/test_fbx_imported_rig_skin_authority_v1.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-fbx-rig-skin-v1
+  cancel-in-progress: true
+
+jobs:
+  fbx-rig-skin-v1:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 360
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      SOURCE_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/source_bundle
+      SOURCE_ARCHIVE_SHA256: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_fbx_rig_skin_v1
+      EXPECTED_ROSTER_SHA256: 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+      RCLONE_REMOTE: gdrive
+
+    steps:
+      - name: Checkout exact FBX court revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify immutable 370 source universe and FBX partition
+        run: |
+          set -euo pipefail
+          test -x "$PLATFORM_ROOT/current/bin/realsas-python"
+          command -v blender >/dev/null
+          command -v rclone >/dev/null
+          test -f "$ROSTER"
+          test "$(sha256sum "$ROSTER" | awk '{print $1}')" = "$EXPECTED_ROSTER_SHA256"
+          EXTRACTED="$SOURCE_ROOT/extracted/$SOURCE_ARCHIVE_SHA256"
+          test -d "$EXTRACTED"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          r=json.loads(Path(os.environ['ROSTER']).read_text())
+          rows=r['subjects']
+          assert r['schema']=='RealSaS.Corpus370ExactSourceRoster.v1'
+          assert r['subject_count']==370 and len(rows)==370
+          assert sum(str(x['source_format']).lower()=='.gltf' for x in rows)==196
+          assert sum(str(x['source_format']).lower()=='.glb' for x in rows)==63
+          assert sum(str(x['source_format']).lower()=='.fbx' for x in rows)==111
+          assert r['training_authorized'] is False
+          print('CORPUS370_FBX_RIG_SKIN_SOURCE_UNIVERSE=PASS')
+          PY
+
+      - name: Run FBX court contract tests and syntax checks
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" -m py_compile \
+            tools/corpus/blender_fbx_source_inspection_v1.py \
+            tools/corpus/blender_fbx_rig_skin_replay_v1.py \
+            tools/corpus/validate_fbx_imported_rig_skin_authority_v1.py \
+            tools/corpus/collect_corpus370_rig_skin_court_index_v1.py \
+            tools/corpus/run_corpus370_fbx_rig_skin_sweep_v1.py
+          "$PLATFORM_ROOT/current/bin/realsas-python" -m pytest -q \
+            tests/corpus/test_fbx_imported_rig_skin_authority_v1.py
+
+      - name: Run failure-preserving 111-subject FBX primary replay courts
+        run: |
+          set -euo pipefail
+          rm -rf "$OUTPUT_ROOT"
+          EXTRACTED="$SOURCE_ROOT/extracted/$SOURCE_ARCHIVE_SHA256"
+          "$PLATFORM_ROOT/current/bin/realsas-python" \
+            tools/corpus/run_corpus370_fbx_rig_skin_sweep_v1.py \
+            --exact-source-roster "$ROSTER" \
+            --extracted-source-root "$EXTRACTED" \
+            --output-root "$OUTPUT_ROOT"
+
+      - name: Verify exact FBX accounting and no authority mint
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ['OUTPUT_ROOT'])
+          sweep=json.loads((root/'CORPUS370_FBX_RIG_SKIN_SOURCE_SWEEP_V1.json').read_text())
+          index=json.loads((root/'CORPUS370_FBX_RIG_SKIN_COURT_INDEX_V1.json').read_text())
+          assert sweep['schema']=='RealSaS.Corpus370FbxRigSkinSourceSweep.v1'
+          assert sweep['candidate_subject_count']==370
+          assert sweep['selected_subject_count']==111
+          assert sweep['format_counts']=={'fbx':111}
+          assert len(sweep['subjects'])==111
+          r=sweep['rollup']['RIG_SKIN_SOURCE']
+          assert r['PASS_SOURCE_COURT']+r['FAIL']==111,r
+          assert index['schema']=='RealSaS.Corpus370RigSkinCourtIndex.v1'
+          assert index['subject_count']==r['PASS_SOURCE_COURT']
+          assert sweep['authority']['all_selected_subjects_accounted'] is True
+          assert sweep['authority']['final_family_authority_minted'] is False
+          assert sweep['authority']['split_minted'] is False
+          assert sweep['training_authorized'] is False
+          assert index['training_authorized'] is False
+          print(json.dumps({
+              'rollup':r,
+              'candidate_outcomes':sweep['candidate_outcomes'],
+              'failure_reasons':sweep['failure_reasons'],
+              'court_index_subject_count':index['subject_count'],
+          },sort_keys=True))
+          PY
+
+      - name: Publish FBX court summary
+        if: always()
+        run: |
+          set -euo pipefail
+          SWEEP="$OUTPUT_ROOT/CORPUS370_FBX_RIG_SKIN_SOURCE_SWEEP_V1.json"
+          if [ -f "$SWEEP" ]; then
+            "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ['OUTPUT_ROOT'])
+          d=json.loads((root/'CORPUS370_FBX_RIG_SKIN_SOURCE_SWEEP_V1.json').read_text())
+          print('## Corpus370 FBX rig/skin source sweep V1')
+          print('```json')
+          print(json.dumps({
+              'selected_subject_count':d['selected_subject_count'],
+              'rollup':d['rollup'],
+              'candidate_outcomes':d['candidate_outcomes'],
+              'failure_reasons':d['failure_reasons'],
+              'training_authorized':d['training_authorized'],
+          },indent=2,sort_keys=True))
+          print('```')
+          PY
+          fi
+
+      - name: Upload immutable FBX sweep and court index to Drive transport
+        if: success()
+        run: |
+          set -euo pipefail
+          rclone listremotes | grep -Fx 'gdrive:'
+          SWEEP="$OUTPUT_ROOT/CORPUS370_FBX_RIG_SKIN_SOURCE_SWEEP_V1.json"
+          INDEX="$OUTPUT_ROOT/CORPUS370_FBX_RIG_SKIN_COURT_INDEX_V1.json"
+          SWEEP_SHA="$(sha256sum "$SWEEP" | awk '{print $1}')"
+          INDEX_SHA="$(sha256sum "$INDEX" | awk '{print $1}')"
+          rclone copyto "$SWEEP" "$RCLONE_REMOTE:corpus370_authority_v2/CORPUS370_FBX_RIG_SKIN_SOURCE_SWEEP_V1_${SWEEP_SHA}.json" --checksum --progress
+          rclone copyto "$INDEX" "$RCLONE_REMOTE:corpus370_authority_v2/CORPUS370_FBX_RIG_SKIN_COURT_INDEX_V1_${INDEX_SHA}.json" --checksum --progress
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-fbx-rig-skin-v1-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT_ROOT }}/CORPUS370_FBX_RIG_SKIN_SOURCE_SWEEP_V1.json
+            ${{ env.OUTPUT_ROOT }}/CORPUS370_FBX_RIG_SKIN_COURT_INDEX_V1.json
+            ${{ env.OUTPUT_ROOT }}/subjects/*/fbx_rig_skin_v1/*.json
+            ${{ env.OUTPUT_ROOT }}/subjects/*/fbx_rig_skin_v1/*.log
+            ${{ env.OUTPUT_ROOT }}/subjects/*/fbx_rig_skin_v1/primary/*.json
+            ${{ env.OUTPUT_ROOT }}/subjects/*/fbx_rig_skin_v1/primary/*.npz
+            ${{ env.OUTPUT_ROOT }}/subjects/*/fbx_rig_skin_v1/replay/*.json
+            ${{ env.OUTPUT_ROOT }}/subjects/*/fbx_rig_skin_v1/replay/*.npz
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

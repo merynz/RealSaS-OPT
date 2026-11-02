@@ -139,7 +139,7 @@ script="""import json,sys
 from pathlib import Path
 from tools.corpus.run_corpus370_compute_worker_v1 import run
 from compiler.realsas_compiler_core.hashing import content_sha256
-"""+inspect.getsource(preserve_interrupted_work)+"""
+"""+'''+repr(inspect.getsource(preserve_interrupted_work))+'''+"""
 seal=json.loads((Path(sys.argv[1])/'COMPUTE_CAPSULE.json').read_text())
 recovered=preserve_interrupted_work(seal,content_sha256(seal),Path(sys.argv[2]),Path('/home/monster/realsas_authority'))
 if recovered:print('INTERRUPTED_COMPUTE_PRESERVED',len(recovered),flush=True)

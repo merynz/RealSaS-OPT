@@ -2,7 +2,7 @@ name: corpus370-closure-input-readback-v1
 on:
   workflow_dispatch:
   push:
-    branches: [corpus400-training-readiness-closure-v1]
+    branches: [corpus400-training-readiness-closure-v1, corpus-family-consumer-bindings-v1]
     paths:
       - '.github/workflows/corpus370-closure-input-readback-v1.yml'
       - 'tools/corpus/inspect_corpus370_closure_inputs_v1.py'
@@ -31,6 +31,11 @@ jobs:
         run: |
           rclone copyto "$OUTPUT/CORPUS370_CLOSURE_INPUT_READBACK_V1.json" \
             "gdrive:corpus370_authority_v2/CORPUS370_CLOSURE_INPUT_READBACK_V1_${GITHUB_RUN_ID}.json" --checksum
+          for NAME in CORPUS370_PARTIAL_AUTHORITY_MATRIX_V1.json CORPUS370_PARTIAL_MODEL_ROSTERS_V1.json CORPUS370_PARTIAL_AUTHORITY_MATRIX_V1.md; do
+            if [ -f "$OUTPUT/$NAME" ]; then
+              rclone copyto "$OUTPUT/$NAME" "gdrive:corpus370_authority_v2/${GITHUB_RUN_ID}_${NAME}" --checksum
+            fi
+          done
       - uses: actions/upload-artifact@v4
         if: always()
         with:

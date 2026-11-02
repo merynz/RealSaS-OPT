@@ -6,7 +6,8 @@ These helpers validate exact bytes and array shape/dtype/finite contracts. They 
 not infer family eligibility, split membership, or training readiness. A notebook or
 trainer may consume only manifests already projected from the sealed Corpus370
 matrix/rosters/split; missing truth is represented by absent family payloads plus an
-explicit MASKED family status, never by numeric zero fill.
+the original non-PASS family status, never by numeric zero fill. Optional FAIL and
+QUARANTINED outcomes retain their meaning while disabling their supervision.
 """
 
 import hashlib
@@ -18,7 +19,7 @@ import numpy as np
 
 SHA256_LEN = 64
 ALLOWED_SPLITS = {"TRAIN", "VAL", "GLOBAL_UNSEEN"}
-ALLOWED_FAMILY_STATES = {"PASS", "MASKED"}
+ALLOWED_FAMILY_STATES = {"PASS", "MASKED", "FAIL", "QUARANTINED"}
 
 
 def sha256(path: Path) -> str:
@@ -90,7 +91,7 @@ def require_payload_for_pass(
     if statuses[family] == "PASS":
         require(rows, "MATERIALIZATION_PASS_FAMILY_PAYLOAD_REQUIRED:" + family)
     else:
-        require(not rows, "MATERIALIZATION_MASKED_FAMILY_PAYLOAD_FORBIDDEN:" + family)
+        require(not rows, "MATERIALIZATION_NONPASS_FAMILY_PAYLOAD_FORBIDDEN:" + family)
     return [dict(row) for row in rows]
 
 

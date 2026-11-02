@@ -1,3 +1,19 @@
+> **Actual Corpus370 execution — 2026-11-02:** PR313 merged as
+> `36d26f2c39112f46ab82045582b4276bdb8e9108`; exact-main deployment run
+> `41455024458` succeeded. Actual workflow `41455683161` sealed all 294 prepared
+> inputs and submitted Campaign `14431b73-3369-46d4-9e93-dd36ed1686cb`, Experiment
+> `52c61b66-15f5-4249-9f95-13c780216679`, EngineRelease
+> `00aceafd-8b20-40b5-836f-fc5f306b6432`. The 76 excluded preparation failures
+> remain bound in PREPARATION.json; 294 submitted is not an eligibility count.
+> First Registry readback at 13:58 UTC observed 294 OPEN Attempts and no committed
+> Stage49 families. Resume/read those exact Attempts; do not resubmit. Read-only
+> workflow `corpus370-closure-input-readback-v1.yml` projects Registry-committed
+> family outputs into a clearly partial matrix/roster and publishes it to Drive.
+> The same first partial court aggregation has SOURCE_IMPORT/CAMERA 341 PASS /
+> 29 FAIL, FBX RIG 111 PASS and SKIN 108 PASS / 3 MASKED. glTF source rig courts
+> still require exact importer equivalence; numeric global-solid 31/62 PASS is
+> source-world evidence with current camera/canonical binding still open.
+>
 > **Corpus370 execution continuation — 2026-11-02:** The user requires actual
 > subject-family closure before materialization/training. The active operator
 > request is `canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V2.json`, binding the exact

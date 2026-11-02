@@ -158,6 +158,7 @@ def test_glb_canonical_animation_replay_uses_binary_safe_source_reader(tmp_path:
         "status": "PASS_GLTF_IMPORTED_RIG_SKIN_EQUIVALENCE__FINAL_ADMISSION_SEPARATE",
         "subject_id": "subject_glb",
         "inputs": {
+            "source_manifest": {"path": str(rig_manifest_path.resolve()), "sha256": _sha(rig_manifest_path)},
             "raw_source": {"path": str(source.resolve()), "sha256": _sha(source)},
             "teacher_scene": {"path": str(teacher_path.resolve()), "sha256": _sha(teacher_path)},
         },

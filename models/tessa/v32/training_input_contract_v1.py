@@ -101,8 +101,8 @@ def validate_manifest(path: Path) -> dict[str, Any]:
     counts = _validate_teacher_targets(manifest)
 
     # Static truth must not impersonate future IRIS-produced conditioning.
-    require(manifest.get("dense3d_z") in {None, False}, "TESSA_V32_STATIC_DENSE3D_Z_FORBIDDEN")
-    require(manifest.get("predicted_geometry_g") in {None, False}, "TESSA_V32_STATIC_PREDICTED_G_FORBIDDEN")
+    require(manifest.get("dense3d_z") is None or manifest.get("dense3d_z") is False, "TESSA_V32_STATIC_DENSE3D_Z_FORBIDDEN")
+    require(manifest.get("predicted_geometry_g") is None or manifest.get("predicted_geometry_g") is False, "TESSA_V32_STATIC_PREDICTED_G_FORBIDDEN")
     deps = dict(manifest.get("post_materialization_dependencies") or {})
     require(deps.get("frozen_iris_shared_scene_release_required") is True, "TESSA_V32_FROZEN_IRIS_DEPENDENCY")
     require(deps.get("qualified_geometry_g_from_frozen_iris_required") is True, "TESSA_V32_FROZEN_G_DEPENDENCY")

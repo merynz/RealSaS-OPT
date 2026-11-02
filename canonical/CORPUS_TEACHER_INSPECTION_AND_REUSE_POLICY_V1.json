@@ -1,0 +1,67 @@
+{
+  "schema": "RealSaS.CorpusTeacherInspectionAndReusePolicy.v1",
+  "status": "SOURCE_REVIEW_POLICY__NO_ADMISSION_OR_TRAINING_AUTHORITY",
+  "source_inspection": {
+    "required_for_every_subject_including_base139": true,
+    "required_evidence": [
+      "source_bytes_and_external_resource_hashes",
+      "source_to_importer_rest_pose_equivalence",
+      "active_scene_objects_and_authored_hierarchy",
+      "render_seams_and_mechanical_surface_equivalence",
+      "boundary_edges_nonmanifold_edges_vertex_links_orientation",
+      "self_intersections_nested_and_overlapping_shells",
+      "explicit_solid_entity_and_assembly_operations",
+      "rig_skin_and_authored_motion_replay_when_present",
+      "camera_and_pose_aligned_observations",
+      "candidate_teacher_absolute_and_source_relative_courts"
+    ],
+    "mesh_object_count_establishes_closed_solid": false,
+    "mesh_object_count_establishes_modular_semantics": false,
+    "genus_zero_required": false,
+    "zero_nonmanifold_edges_sufficient_for_admission": false,
+    "raw_bind_measurement_is_importer_or_posed_replay_qualification": false
+  },
+  "global_sdf": {
+    "sign_convention": "NEGATIVE_INSIDE__POSITIVE_OUTSIDE__ZERO_ON_BOUNDARY",
+    "target_scope": "EXPLICIT_QUALIFIED_SOLID_ENTITY_OR_ASSEMBLY",
+    "magnitude": "DISTANCE_TO_BOUNDARY_OF_THAT_SAME_SOLID",
+    "component_id_may_be_discarded_before_global_loss": false,
+    "nearest_component_parity_is_global_occupancy": false,
+    "union_occupancy_times_raw_surface_udf_is_exact_union_sdf": false,
+    "incomplete_solid_does_not_authorize_dense_global_sign": true,
+    "open_decorations_may_be_silently_filled_or_dropped": false
+  },
+  "reuse": {
+    "default": "PRESERVE_BYTES__REVALIDATE_ACTUAL_DEPENDENCIES",
+    "independent_families_invalidated_by_whole_repository_sha": false,
+    "historical_pass_or_training_authorized_is_current_admission": false,
+    "court_change_alone_requires_producer_rerun": false,
+    "changed_producer_semantics_or_inputs_requires_affected_output_regeneration": true,
+    "failed_court_may_be_overridden_by_source_fallback": false,
+    "unknown_dependency_identity": "REVALIDATE__DO_NOT_CERTIFY_REUSE"
+  },
+  "families": {
+    "SOURCE_IMPORT": {"action": "PRESERVE_REVALIDATE", "check": "exact source/resources, importer/rest transform and active scene"},
+    "CAMERA_OBSERVATION": {"action": "PRESERVE_REVALIDATE", "check": "exact source, rest state, normalization, camera and render policy"},
+    "SURFACE_GEOMETRY": {"action": "PRESERVE_REVALIDATE", "check": "surface/query/frame and distance semantics independent of global sign"},
+    "SURFACE_TOPOLOGY": {"action": "REVALIDATE_TEACHER_COURTS", "check": "mechanical equivalence, connectivity and measured candidate courts; source fallback receives identical checks"},
+    "SIGNED_DISTANCE_OCCUPANCY": {"action": "REESTABLISH_SOLID_SCOPE", "check": "source inspection, explicit assembly, independently qualified boundary, sign and distance to the same boundary"},
+    "ORIENTED_NORMALS": {"action": "PRESERVE_REVALIDATE", "check": "same source triangles, winding, normal transform and coordinate frame"},
+    "APPEARANCE_CAA": {"action": "PRESERVE_REVALIDATE", "check": "same source/resources, observation addressing and renderer; downstream rebind if carrier changes"},
+    "VISIBILITY_OCCLUSION": {"action": "PRESERVE_REVALIDATE", "check": "same source surfaces, pose, cameras, ray addressing and student observability; no modularity assumption"},
+    "RAY_COMPOSITING": {"action": "PRESERVE_REVALIDATE", "check": "same measured pose/camera/material/ray domain and observability admission"},
+    "CAUSAL_RESPONSE": {"action": "PRESERVE_REVALIDATE", "check": "preserve source intervention tensors; regenerate adjacency/rebound descendants only if their surface changes"},
+    "RIG_HIERARCHY": {"action": "PRESERVE_REVALIDATE", "check": "authored joint identity, hierarchy/rest transforms and importer equivalence"},
+    "SKIN_WEIGHTS": {"action": "PRESERVE_REVALIDATE", "check": "source vertex/joint addresses, weights and bind matrices; changed carrier requires a separately qualified mapping"},
+    "ANIMATION_KINEMATICS": {"action": "PRESERVE_REVALIDATE", "check": "authored channels, time domain, bind state and independent canonical replay"}
+  },
+  "consumer_routing": {
+    "IRIS_GLOBAL_SDF": "REQUIRES_QUALIFIED_EXPLICIT_SOLID__COMPONENT_TARGETS_FORBIDDEN",
+    "IRIS_SURFACE_APPEARANCE_RELATIONS": "FAMILY_SPECIFIC_ADMISSION_AND_OBSERVABILITY",
+    "TESSA_CLOSED_MESH": "REQUIRES_EXPLICIT_CLOSED_TARGET_CONTRACT_AND_COURTS",
+    "AXIS": "REQUIRES_AUTHORED_OR_SEPARATELY_QUALIFIED_RIG",
+    "MIRA": "REQUIRES_AUTHORED_OR_SEPARATELY_QUALIFIED_SKIN_ON_EXACT_CARRIER",
+    "modular_extra_value": "MEASURE_CONTACT_OCCLUSION_RESPONSE_DIVERSITY__DO_NOT_INFER_FROM_DISCONNECTEDNESS"
+  },
+  "authority": {"training_authorized": false, "split_created": false, "attempt_created": false}
+}

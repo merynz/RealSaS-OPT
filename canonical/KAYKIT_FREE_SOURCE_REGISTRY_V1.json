@@ -1,0 +1,216 @@
+{
+  "schema": "RealSaS.KayKitFree.SourceRegistry.v1",
+  "authority": "DISCOVERY_AND_ACQUISITION_REGISTRY__NOT_TRAINING_AUTHORITY",
+  "publisher": "Kay Lousberg / KayKit",
+  "license": "CC0-1.0",
+  "policy": {
+    "free_tier_only": true,
+    "paid_extra_excluded": true,
+    "paid_source_excluded": true,
+    "mystery_monthly_paid_series_excluded": true,
+    "complete_collection_paid_bundle_excluded": true,
+    "legacy_content_lane": "QUARANTINE_DUPLICATE_AUDIT_ONLY",
+    "publisher_controlled_source_required": true,
+    "family_truth_is_audited_independently": true,
+    "static_assets_may_feed_geometry_appearance_presentation_but_not_rig_skin_animation": true,
+    "animation_library_does_not_inflate_subject_count": true,
+    "appearance_only_variants_do_not_inflate_subject_count": true
+  },
+  "packs": [
+    {
+      "id": "kaykit-adventurers",
+      "name": "KayKit - Character Pack : Adventurers",
+      "official_page": "https://kaylousberg.itch.io/kaykit-adventurers",
+      "official_github": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0",
+      "acquisition": "OFFICIAL_GITHUB_PREFERRED__ITCH_FREE_FALLBACK",
+      "free_tier": "Free 2.0",
+      "expected_role": "FULL_TRUTH_ACTOR_CANDIDATE",
+      "declared_free_subject_count": 5,
+      "declared_truth": {"geometry": true, "appearance": true, "rig": true, "skin": true, "animation": true},
+      "notes": "Free tier is fully rigged and animated; accessories remain attachment evidence and do not inflate actor count."
+    },
+    {
+      "id": "kaykit-skeletons",
+      "name": "KayKit - Character Pack : Skeletons",
+      "official_page": "https://kaylousberg.itch.io/kaykit-skeletons",
+      "official_github": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0",
+      "acquisition": "OFFICIAL_GITHUB_PREFERRED__ITCH_FREE_FALLBACK",
+      "free_tier": "Free 1.1",
+      "expected_role": "FULL_TRUTH_ACTOR_CANDIDATE",
+      "declared_free_subject_count": 4,
+      "declared_truth": {"geometry": true, "appearance": true, "rig": true, "skin": true, "animation": true},
+      "notes": "Free tier contains four fully textured/rigged/animated skeleton actors plus accessories."
+    },
+    {
+      "id": "kaykit-character-animations",
+      "name": "KayKit - Character Animations",
+      "official_page": "https://kaylousberg.itch.io/kaykit-character-animations",
+      "official_github": null,
+      "acquisition": "OFFICIAL_ITCH_FREE",
+      "free_tier": "Free 1.1",
+      "expected_role": "ANIMATION_KINEMATICS_LIBRARY",
+      "declared_animation_count": 161,
+      "declared_truth": {"geometry": false, "appearance": false, "rig": true, "skin": false, "animation": true},
+      "notes": "Rig_Medium and Rig_Large motion library; animation capability only and never counted as independent subjects."
+    },
+    {
+      "id": "kaykit-dungeon",
+      "name": "KayKit - Dungeon Pack",
+      "official_page": "https://kaylousberg.itch.io/kaykit-dungeon-pack",
+      "official_github": "https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0",
+      "acquisition": "OFFICIAL_GITHUB_PREFERRED__ITCH_FREE_FALLBACK",
+      "expected_role": "STATIC_OR_ARTICULATED_PROP_CANDIDATES",
+      "declared_free_asset_count_min": 200,
+      "declared_truth": {"geometry": true, "appearance": true, "rig": "AUDIT", "skin": "AUDIT", "animation": "AUDIT"}
+    },
+    {
+      "id": "kaykit-platformer",
+      "name": "KayKit - Platformer Pack",
+      "official_page": "https://kaylousberg.itch.io/kaykit-platformer",
+      "official_github": null,
+      "acquisition": "OFFICIAL_ITCH_FREE",
+      "expected_role": "STATIC_OR_ARTICULATED_PROP_CANDIDATES",
+      "declared_free_unique_asset_count_min": 120,
+      "declared_truth": {"geometry": true, "appearance": true, "rig": "AUDIT", "skin": "AUDIT", "animation": "AUDIT"},
+      "notes": "Color variants must collapse by structural identity; paid EXTRA traps are excluded."
+    },
+    {
+      "id": "kaykit-forest-nature",
+      "name": "KayKit - Forest Nature Pack",
+      "official_page": "https://kaylousberg.itch.io/kaykit-forest",
+      "official_github": null,
+      "acquisition": "OFFICIAL_ITCH_FREE",
+      "expected_role": "STATIC_AUX_GEOMETRY_APPEARANCE",
+      "declared_free_unique_asset_count_min": 100,
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false}
+    },
+    {
+      "id": "kaykit-medieval-hexagon",
+      "name": "KayKit - Medieval Hexagon Pack",
+      "official_page": "https://kaylousberg.itch.io/kaykit-medieval-hexagon",
+      "official_github": "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0",
+      "acquisition": "OFFICIAL_GITHUB_PREFERRED__ITCH_FREE_FALLBACK",
+      "expected_role": "STATIC_AUX_GEOMETRY_APPEARANCE",
+      "declared_free_asset_count_min": 200,
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false},
+      "notes": "Free tier excludes units; color variants do not inflate subject count."
+    },
+    {
+      "id": "kaykit-board-game-bits",
+      "name": "KayKit : Board Game Bits",
+      "official_page": "https://kaylousberg.itch.io/board-game-bits",
+      "official_github": null,
+      "acquisition": "OFFICIAL_ITCH_FREE",
+      "expected_role": "STATIC_AUX_GEOMETRY_APPEARANCE",
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false}
+    },
+    {
+      "id": "kaykit-fantasy-weapons-bits",
+      "name": "KayKit : Fantasy Weapons Bits",
+      "official_page": "https://kaylousberg.itch.io/fantasy-weapons-bits",
+      "official_github": null,
+      "acquisition": "OFFICIAL_ITCH_FREE",
+      "expected_role": "ATTACHMENT_AND_STATIC_AUX",
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false}
+    },
+    {
+      "id": "kaykit-rpg-tools-bits",
+      "name": "KayKit : RPG Tools Bits",
+      "official_page": "https://kaylousberg.itch.io/rpg-tools-bits",
+      "official_github": null,
+      "acquisition": "OFFICIAL_ITCH_FREE",
+      "expected_role": "ATTACHMENT_AND_STATIC_AUX",
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false}
+    },
+    {
+      "id": "kaykit-holiday-bits",
+      "name": "KayKit : Holiday Bits",
+      "official_page": "https://kaylousberg.itch.io/holiday-bits",
+      "official_github": null,
+      "acquisition": "OFFICIAL_ITCH_FREE",
+      "expected_role": "STATIC_AUX_GEOMETRY_APPEARANCE",
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false}
+    },
+    {
+      "id": "kaykit-resource-bits",
+      "name": "KayKit : Resource Bits",
+      "official_page": "https://kaylousberg.itch.io/resource-bits",
+      "official_github": null,
+      "acquisition": "OFFICIAL_ITCH_FREE",
+      "expected_role": "STATIC_AUX_GEOMETRY_APPEARANCE",
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false}
+    },
+    {
+      "id": "kaykit-block-bits",
+      "name": "KayKit : Block Bits",
+      "official_page": "https://kaylousberg.itch.io/block-bits",
+      "official_github": null,
+      "acquisition": "OFFICIAL_ITCH_FREE",
+      "expected_role": "STATIC_AUX_GEOMETRY_APPEARANCE",
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false}
+    },
+    {
+      "id": "kaykit-halloween-bits",
+      "name": "KayKit : Halloween Bits",
+      "official_page": "https://kaylousberg.itch.io/halloween-bits",
+      "official_github": "https://github.com/KayKit-Game-Assets/KayKit-Halloween-Bits-1.0",
+      "acquisition": "OFFICIAL_GITHUB_PREFERRED__ITCH_FREE_FALLBACK",
+      "expected_role": "STATIC_AUX_GEOMETRY_APPEARANCE",
+      "declared_free_asset_count_min": 60,
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false}
+    },
+    {
+      "id": "kaykit-restaurant-bits",
+      "name": "KayKit : Restaurant Bits",
+      "official_page": "https://kaylousberg.itch.io/restaurant-bits",
+      "official_github": "https://github.com/KayKit-Game-Assets/KayKit-Restaurant-Bits-1.0",
+      "acquisition": "OFFICIAL_GITHUB_PREFERRED__ITCH_FREE_FALLBACK",
+      "expected_role": "STATIC_AUX_GEOMETRY_APPEARANCE",
+      "declared_free_asset_count_min": 140,
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false}
+    },
+    {
+      "id": "kaykit-prototype-bits",
+      "name": "KayKit : Prototype Bits",
+      "official_page": "https://kaylousberg.itch.io/prototype-bits",
+      "official_github": "https://github.com/KayKit-Game-Assets/KayKit-Prototype-Bits-1.0",
+      "acquisition": "OFFICIAL_GITHUB_PREFERRED__ITCH_FREE_FALLBACK",
+      "expected_role": "MIXED_STATIC_OR_ACTOR_AUDIT",
+      "declared_free_asset_count_min": 64,
+      "declared_truth": {"geometry": true, "appearance": true, "rig": "AUDIT", "skin": "AUDIT", "animation": "AUDIT"}
+    },
+    {
+      "id": "kaykit-furniture-bits",
+      "name": "KayKit : Furniture Bits",
+      "official_page": "https://kaylousberg.itch.io/furniture-bits",
+      "official_github": "https://github.com/KayKit-Game-Assets/KayKit-Furniture-Bits-1.0",
+      "acquisition": "OFFICIAL_GITHUB_PREFERRED__ITCH_FREE_FALLBACK",
+      "expected_role": "STATIC_AUX_GEOMETRY_APPEARANCE",
+      "declared_free_asset_count_min": 50,
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false}
+    },
+    {
+      "id": "kaykit-space-base-bits",
+      "name": "KayKit : Space Base Bits",
+      "official_page": "https://kaylousberg.itch.io/space-base-bits",
+      "official_github": "https://github.com/KayKit-Game-Assets/KayKit-Space-Base-Bits-1.0",
+      "acquisition": "OFFICIAL_GITHUB_PREFERRED__ITCH_FREE_FALLBACK",
+      "expected_role": "STATIC_AUX_GEOMETRY_APPEARANCE",
+      "declared_free_asset_count_min": 48,
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false}
+    },
+    {
+      "id": "kaykit-city-builder-bits",
+      "name": "KayKit : City Builder Bits",
+      "official_page": "https://kaylousberg.itch.io/city-builder-bits",
+      "official_github": "https://github.com/KayKit-Game-Assets/KayKit-City-Builder-Bits-1.0",
+      "acquisition": "OFFICIAL_GITHUB_PREFERRED__ITCH_FREE_FALLBACK",
+      "expected_role": "STATIC_AUX_GEOMETRY_APPEARANCE",
+      "declared_truth": {"geometry": true, "appearance": true, "rig": false, "skin": false, "animation": false}
+    }
+  ],
+  "legacy": {
+    "policy": "DISCOVER_ONLY__DO_NOT_TRAIN_UNTIL_DEDUPED_AGAINST_REMASTERED_PACKS",
+    "collection": "https://itch.io/c/6539942/kaykit-legacy-content"
+  }
+}

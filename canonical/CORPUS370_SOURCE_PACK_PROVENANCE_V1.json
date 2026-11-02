@@ -1,0 +1,168 @@
+{
+  "schema": "RealSaS.Corpus370SourcePackProvenanceSources.v1",
+  "date": "2026-11-01",
+  "license": {
+    "name": "Creative Commons CC0 1.0 Universal",
+    "ref": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "legalcode_url": "https://creativecommons.org/publicdomain/zero/1.0/legalcode.en",
+    "required_legalcode_markers": ["CC0 1.0 Universal"]
+  },
+  "packs": {
+    "kaykit-adventurers": {
+      "publisher": "KayKit",
+      "page_url": "https://www.kaylousberg.com/game-assets/characters-adventurers",
+      "required_page_markers": ["Characters : Adventurers", "CC0"]
+    },
+    "kaykit-skeletons": {
+      "publisher": "KayKit",
+      "page_url": "https://www.kaylousberg.com/game-assets/characters-skeletons",
+      "required_page_markers": ["Characters : Skeletons", "CC0"]
+    },
+    "kenney-cube-pets": {
+      "publisher": "Kenney",
+      "page_url": "https://kenney.nl/assets/cube-pets",
+      "required_page_markers": ["Cube Pets", "Creative Commons CC0"]
+    },
+    "kenney-mini-characters": {
+      "publisher": "Kenney",
+      "page_url": "https://kenney.nl/assets/mini-characters",
+      "required_page_markers": ["Mini Characters", "Creative Commons CC0"]
+    },
+    "kenney-blocky-characters": {
+      "publisher": "Kenney",
+      "page_url": "https://kenney.nl/assets/blocky-characters",
+      "required_page_markers": ["Blocky Characters", "Creative Commons CC0"]
+    },
+    "quaternius-animated-dinosaurs": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/animateddinosaurs.html",
+      "required_page_markers": ["Animated Dinosaur Pack", "CC0"]
+    },
+    "quaternius-cute-animated-fish": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/cutefish.html",
+      "required_page_markers": ["Animated Cute Fish Pack", "CC0"]
+    },
+    "quaternius-cube-world": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/cubeworldkit.html",
+      "required_page_markers": ["Cube World Kit", "CC0"]
+    },
+    "quaternius-zombie-apocalypse-kit": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/zombieapocalypsekit.html",
+      "required_page_markers": ["Zombie Apocalypse Kit", "CC0"]
+    },
+    "quaternius-ultimate-animated-character": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/ultimatedanimatedcharacter",
+      "required_page_markers": ["Ultimate Animated Character Pack", "CC0"]
+    },
+    "quaternius-easy-animated-enemy": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/easyenemy.html",
+      "required_page_markers": ["Easy Enemy Pack", "CC0"]
+    },
+    "quaternius-old-animated-monsters": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/animatedmonster.html",
+      "required_page_markers": ["Animated Monster Pack", "CC0"]
+    },
+    "quaternius-old-animated-fish": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/animatedfish.html",
+      "required_page_markers": ["Animated Fish Pack", "CC0"]
+    },
+    "quaternius-cyberpunk-game-kit": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/cyberpunkgamekit.html",
+      "required_page_markers": ["Cyberpunk Game Kit", "CC0"]
+    },
+    "quaternius-sushi-restaurant": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/sushirestaurantkit.html",
+      "required_page_markers": ["Sushi Restaurant Kit", "CC0"]
+    },
+    "quaternius-universal-base-characters": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/universalbasecharacters.html",
+      "required_page_markers": ["Universal Base Characters", "CC0"]
+    },
+    "quaternius-sci-fi-essentials": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/scifiessentialskit.html",
+      "required_page_markers": ["Sci-Fi Essentials Kit", "CC0"]
+    },
+    "quaternius-farm-animals": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/farmanimal.html",
+      "required_page_markers": ["Farm Animal Pack", "CC0"]
+    },
+    "quaternius-pirate-kit": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/piratekit.html",
+      "required_page_markers": ["Pirate Kit", "CC0"]
+    },
+    "quaternius-ultimate-modular-women": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/ultimatemodularwomen.html",
+      "required_page_markers": ["Ultimate Modular Women Pack", "CC0"]
+    },
+    "quaternius-ultimate-animated-animals": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/ultimateanimatedanimals.html",
+      "required_page_markers": ["Ultimate Animated Animal Pack", "CC0"]
+    },
+    "quaternius-cute-animated-monsters": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/cutemonsters",
+      "required_page_markers": ["Cute Animated Monsters Pack", "CC0"]
+    },
+    "quaternius-platformer-kit": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/ultimateplatformer.html",
+      "required_page_markers": ["Platformer Game Kit", "CC0"]
+    },
+    "quaternius-ultimate-monsters": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/ultimatemonsters.html",
+      "required_page_markers": ["Ultimate Monsters", "CC0"]
+    },
+    "quaternius-ultimate-space-kit": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/ultimatespacekit.html",
+      "required_page_markers": ["Ultimate Space Kit", "CC0"]
+    },
+    "quaternius-ultimate-modular-men": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/ultimatemodularcharacters.html",
+      "required_page_markers": ["Ultimate Modular Men Pack", "CC0"]
+    },
+    "quaternius-animated-mech": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/animatedmech",
+      "required_page_markers": ["Animated Mech Pack", "CC0"]
+    },
+    "quaternius-rpg-characters": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/rpgcharacters.html",
+      "required_page_markers": ["RPG Character Pack", "CC0"]
+    },
+    "quaternius-toon-shooter-kit": {
+      "publisher": "Quaternius",
+      "page_url": "https://quaternius.com/packs/toonshootergamekit.html",
+      "required_page_markers": ["Toon Shooter Game Kit", "CC0"]
+    }
+  },
+  "rules": {
+    "pack_page_must_be_official_publisher_domain": true,
+    "pack_identity_marker_required": true,
+    "cc0_marker_required_on_pack_page": true,
+    "exact_http_response_bytes_are_persisted_and_sha256_bound": true,
+    "legalcode_exact_bytes_are_persisted_once_and_reused_by_hash": true,
+    "redirect_target_is_recorded": true,
+    "source_page_snapshot_is_evidence_not_live_url_authority": true,
+    "training_authorized": false
+  },
+  "training_authorized": false
+}

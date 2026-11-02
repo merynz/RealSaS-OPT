@@ -1,0 +1,192 @@
+name: corpus370-truth-platform
+
+on:
+  workflow_run:
+    workflows: [platform-developer-deployment]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-truth-platform
+  cancel-in-progress: false
+
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    outputs:
+      decision: ${{ steps.resolve.outputs.decision }}
+      reason: ${{ steps.resolve.outputs.reason }}
+      expected_sha: ${{ steps.resolve.outputs.expected_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
+      - id: resolve
+        env:
+          EVENT: ${{ github.event_name }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, subprocess
+          from pathlib import Path
+
+          sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          request_path = 'canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V2.json'
+          request = json.loads(Path(request_path).read_text())
+          changed = subprocess.check_output(
+              ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD^1', 'HEAD'], text=True
+          ).splitlines()
+          enabled = request.get('enabled') is True
+          if not enabled:
+              decision, reason = 'NOOP', 'request_disabled_until_exact_bundle_is_sealed'
+          elif os.environ['EVENT'] == 'workflow_dispatch':
+              decision, reason = 'RUN', 'manual_dispatch_of_enabled_request'
+          elif os.environ['CONCLUSION'] != 'success':
+              decision, reason = 'NOOP', 'deployment_not_successful'
+          elif os.environ['HEAD_BRANCH'] != 'main':
+              decision, reason = 'NOOP', 'non_main_deployment'
+          elif request_path not in changed:
+              decision, reason = 'NOOP', 'operator_request_not_changed'
+          else:
+              decision, reason = 'RUN', 'sealed_request_changed_on_successful_main_deployment'
+          print(f'decision={decision}')
+          print(f'reason={reason}')
+          print(f'expected_sha={sha}')
+          PY
+
+  decision_receipt:
+    needs: activation
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      ACTIVATION_RESULT: ${{ needs.activation.result }}
+      DECISION: ${{ needs.activation.outputs.decision }}
+      REASON: ${{ needs.activation.outputs.reason }}
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+    steps:
+      - name: Publish Corpus370 truth decision
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          if os.environ.get('ACTIVATION_RESULT') != 'success':
+              raise SystemExit('CORPUS370_TRUTH_ACTIVATION_FAILED')
+          decision = os.environ.get('DECISION', '')
+          reason = os.environ.get('REASON', '')
+          sha = os.environ.get('EXPECTED_SHA', '')
+          if decision not in {'RUN', 'NOOP'} or not reason or len(sha) != 40:
+              raise SystemExit('CORPUS370_TRUTH_DECISION_INVALID')
+          Path(os.environ['GITHUB_STEP_SUMMARY']).write_text(
+              '# Corpus370 Platform truth decision\n\n'
+              f'- decision: `{decision}`\n'
+              f'- reason: `{reason}`\n'
+              f'- exact deployed SHA: `{sha}`\n', encoding='utf-8')
+          PY
+
+  coordinate:
+    needs: [activation, decision_receipt]
+    if: needs.activation.outputs.decision == 'RUN'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 45
+    env:
+      EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      OUTPUT: /home/monster/realsas_authority/corpus370_truth_preparation/${{ needs.activation.outputs.expected_sha }}
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      RCLONE_REMOTE: ${{ vars.REALSAS_RCLONE_DRIVE_REMOTE || 'gdrive' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+      - name: Restore exact pinned evaluator runtime
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" -m tools.observation.install_pinned_evaluator_runtime_v1 \
+            --request canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V2.json
+      - name: Create Experiment Campaign Attempts and submit exact run bindings
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/platform_corpus370_truth_operator_v1.py \
+            --request canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V2.json \
+            --repo "$GITHUB_WORKSPACE" --platform-root "$PLATFORM_ROOT" --authority-root "$AUTHORITY_ROOT" \
+            --expected-main-sha "$EXPECTED_SHA" --output "$OUTPUT" --rclone-remote "$RCLONE_REMOTE" --submit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-truth-preparation-${{ github.run_id }}
+          path: ${{ env.OUTPUT }}/
+          if-no-files-found: error
+          retention-days: 30
+
+  observe_initial:
+    needs: [activation, decision_receipt, coordinate]
+    if: needs.activation.outputs.decision == 'RUN' && needs.coordinate.result == 'success'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      PREPARATION: /home/monster/realsas_authority/corpus370_truth_preparation/${{ needs.activation.outputs.expected_sha }}/PREPARATION.json
+      OBSERVATION: /home/monster/realsas_authority/corpus370_truth_observation/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.activation.outputs.expected_sha }}
+      - name: Snapshot original Attempts and export any committed Stage47 Stage48 CAS evidence
+        continue-on-error: true
+        run: |
+          "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/observe_corpus370_truth_v1.py \
+            --preparation "$PREPARATION" --artifact-root "$PLATFORM_ROOT/artifacts" \
+            --output "$OBSERVATION" --maximum-seconds 1200 --interval-seconds 15
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-truth-observation-${{ github.run_id }}
+          path: ${{ env.OBSERVATION }}/
+          if-no-files-found: warn
+          retention-days: 30
+
+  finalize:
+    needs: [activation, decision_receipt, coordinate, observe_initial]
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      ACTIVATION_RESULT: ${{ needs.activation.result }}
+      RECEIPT_RESULT: ${{ needs.decision_receipt.result }}
+      COORDINATE_RESULT: ${{ needs.coordinate.result }}
+      OBSERVE_RESULT: ${{ needs.observe_initial.result }}
+      DECISION: ${{ needs.activation.outputs.decision }}
+      REASON: ${{ needs.activation.outputs.reason }}
+    steps:
+      - name: Require activation and submission semantics only
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          activation = os.environ.get('ACTIVATION_RESULT', '')
+          receipt = os.environ.get('RECEIPT_RESULT', '')
+          coordinate = os.environ.get('COORDINATE_RESULT', '')
+          decision = os.environ.get('DECISION', '')
+          if activation != 'success' or receipt != 'success':
+              raise SystemExit('CORPUS370_TRUTH_SELECTOR_OR_RECEIPT_FAILED')
+          if decision == 'RUN' and coordinate != 'success':
+              raise SystemExit('CORPUS370_TRUTH_SUBMISSION_FAILED:' + coordinate)
+          if decision == 'NOOP' and coordinate != 'skipped':
+              raise SystemExit('CORPUS370_TRUTH_NOOP_COORDINATE_NOT_SKIPPED:' + coordinate)
+          if decision not in {'RUN', 'NOOP'}:
+              raise SystemExit('CORPUS370_TRUTH_UNKNOWN_DECISION')
+          Path(os.environ['GITHUB_STEP_SUMMARY']).write_text(
+              '# Corpus370 Platform truth outcome\n\n'
+              f'- decision: `{decision}`\n'
+              f'- coordinate: `{coordinate}`\n'
+              f'- initial observer: `{os.environ.get("OBSERVE_RESULT", "")}`\n'
+              '- observer completion is not required for submission; the original Platform Campaign remains authoritative and may continue after this workflow.\n',
+              encoding='utf-8')
+          PY

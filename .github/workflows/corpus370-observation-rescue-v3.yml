@@ -1,0 +1,143 @@
+name: corpus370-observation-rescue-v3
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - corpus400-training-readiness-closure-v1
+    paths:
+      - '.github/workflows/corpus370-observation-rescue-v3.yml'
+      - 'tools/corpus/gltf_bind_scene_v1.py'
+      - 'tools/corpus/rescue_corpus370_observation_packets_v3.py'
+      - 'tests/corpus/test_gltf_bind_scene_uint8_offset_v1.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-observation-rescue-v3
+  cancel-in-progress: true
+
+jobs:
+  rescue-corpus370-observations:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 240
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      PREP_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1
+      SOURCE_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/source_bundle
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      PARENT_INDEX: /home/monster/realsas_authority/corpus370_preparation_v1/observations_v2/CORPUS370_PREPARED_OBSERVATION_PACKETS_V2.json
+      RESCUE_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/observations_rescue_v3
+      BLENDER: /home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/blender-glibc239
+      UFBX_PROBE: /home/monster/realsas_authority/corpus370_preparation_v1/tools/ufbx_bind_scene_probe_v1
+      EXPECTED_PARENT_SHA256: 129b173b5d789cf4dc020f883ee8b16db8156380dd0cae939319ad3c279c139a
+      EXPECTED_ROSTER_SHA256: 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+      SOURCE_ARCHIVE_SHA256: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+    steps:
+      - name: Checkout exact rescue revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify immutable parent and cached execution inputs
+        run: |
+          set -euo pipefail
+          test -x "$PLATFORM_ROOT/current/bin/realsas-python"
+          test -x "$BLENDER"
+          test -x "$UFBX_PROBE"
+          test -f "$ROSTER"
+          test -f "$PARENT_INDEX"
+          test "$(sha256sum "$ROSTER" | awk '{print $1}')" = "$EXPECTED_ROSTER_SHA256"
+          test "$(sha256sum "$PARENT_INDEX" | awk '{print $1}')" = "$EXPECTED_PARENT_SHA256"
+          EXTRACTED="$SOURCE_ROOT/extracted/$SOURCE_ARCHIVE_SHA256"
+          test -d "$EXTRACTED"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          from tools.observation.pinned_evaluator_runtime_v1 import launch_options, sha
+          blender=Path(os.environ['BLENDER']).resolve()
+          request=json.loads(Path('canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json').read_text())
+          assert sha(blender)==request['expected_evaluator_binary_sha256']
+          out=subprocess.check_output([str(blender),'--version'],text=True,
+                                      **launch_options(blender,request['evaluator_runtime']))
+          assert out.splitlines()[0]==request['evaluator_version'],out.splitlines()[0]
+          print('CORPUS370_RESCUE_RUNTIME=PASS',sha(blender))
+          PY
+
+      - name: Run uint8-only failure rescue without touching parent successes
+        run: |
+          set -euo pipefail
+          EXTRACTED="$SOURCE_ROOT/extracted/$SOURCE_ARCHIVE_SHA256"
+          "$PLATFORM_ROOT/current/bin/realsas-python" \
+            tools/corpus/rescue_corpus370_observation_packets_v3.py \
+            --parent-index "$PARENT_INDEX" \
+            --expected-parent-sha256 "$EXPECTED_PARENT_SHA256" \
+            --exact-source-roster "$ROSTER" \
+            --extracted-source-root "$EXTRACTED" \
+            --output-root "$RESCUE_ROOT" \
+            --blender "$BLENDER" \
+            --probe "$UFBX_PROBE" \
+            --policy canonical/CORPUS370_IRIS_OBSERVATION_POLICY_V1.json \
+            --runtime-request canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json \
+            --expected-rescue-count 23
+
+      - name: Verify composite partition and preserved parent successes
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          parent=json.loads(Path(os.environ['PARENT_INDEX']).read_text())
+          composite=json.loads((Path(os.environ['RESCUE_ROOT'])/'CORPUS370_PREPARED_OBSERVATION_PACKETS_V3.json').read_text())
+          assert composite['schema']=='RealSaS.Corpus370PreparedObservationPackets.v3'
+          assert composite['subject_count']==370
+          assert composite['prepared_subject_count']+composite['failure_count']==370
+          assert composite['parent']['sha256']==os.environ['EXPECTED_PARENT_SHA256']
+          assert composite['rescue']['selected_subject_count']==23
+          assert composite['rescue']['successful_parent_packets_recomputed'] is False
+          parent_success={r['subject_id']:r for r in parent['subjects']}
+          current={r['subject_id']:r for r in composite['subjects']}
+          for sid,row in parent_success.items():
+              assert current[sid]==row,(sid,'PARENT_SUCCESS_MUTATED')
+          print(json.dumps({
+              'prepared_subject_count':composite['prepared_subject_count'],
+              'failure_count':composite['failure_count'],
+              'rescued_subject_count':composite['rescue']['rescued_subject_count'],
+              'rescue_failure_count':composite['rescue']['rescue_failure_count'],
+          },sort_keys=True))
+          PY
+
+      - name: Publish rescue summary
+        if: always()
+        run: |
+          set -euo pipefail
+          INDEX="$RESCUE_ROOT/CORPUS370_PREPARED_OBSERVATION_PACKETS_V3.json"
+          if [ -f "$INDEX" ]; then
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os
+          from pathlib import Path
+          d=json.loads((Path(os.environ['RESCUE_ROOT'])/'CORPUS370_PREPARED_OBSERVATION_PACKETS_V3.json').read_text())
+          print(json.dumps({
+              'schema':d['schema'],'status':d['status'],
+              'prepared_subject_count':d['prepared_subject_count'],'failure_count':d['failure_count'],
+              'rescue':{k:d['rescue'][k] for k in ('selected_subject_count','rescued_subject_count','rescue_failure_count')},
+              'training_authorized':d['training_authorized'],
+          },indent=2,sort_keys=True))
+          PY
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-observation-rescue-v3-${{ github.run_id }}
+          path: |
+            ${{ env.RESCUE_ROOT }}/CORPUS370_PREPARED_OBSERVATION_PACKETS_V3.json
+            ${{ env.RESCUE_ROOT }}/rescue_failures_v3/*.json
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

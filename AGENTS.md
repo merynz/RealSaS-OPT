@@ -9,6 +9,29 @@ If the user says only “continue / devam et”, resume from canonical `main` an
 
 This repository must be resumable without conversational memory.
 
+## Platform evolution is required, not an excuse to stop
+
+The Platform and its orchestration are evolving engineering components, not an
+immutable constraint on authorized research. If a real research task exposes a
+missing capability, broken adapter, unsuitable lifecycle or incomplete execution
+path, diagnose and implement the owning generic Platform/orchestration repair,
+validate it, deploy the exact reviewed revision and resume the original work.
+Do not leave authorized work blocked merely because the current Platform cannot
+express or execute it.
+
+A repair must preserve the scientific contracts: immutable evidence and lineage,
+explicit failure accounting, independent courts, exact dependency identities and
+the research/product separation. Disabling a guard, weakening a truth criterion,
+fabricating PASS, silently dropping subjects or introducing an untracked direct
+execution path is not a Platform repair. Platform limitations must be resolved
+through actual capability development, with failing evidence and subsequent
+execution receipts retained.
+
+Report tests, submitted execution, completed execution and verified artifacts as
+separate states. A green contract workflow is not corpus closure. Continue an
+authorized task through its concrete deliverables; a status-only final response
+must not imply that agent work will resume automatically after the turn ends.
+
 Before research execution, read `realsasctl agent-context --id <subject UUID>`
 and enter with `agent-enter`: exact deployed main SHA, Attempt, released DAG,
 immutable SubjectInput and explicit target. A live session must be explicitly

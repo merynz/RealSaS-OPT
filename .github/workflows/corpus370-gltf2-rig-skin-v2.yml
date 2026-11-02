@@ -1,0 +1,138 @@
+name: corpus370-gltf2-rig-skin-v2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - corpus400-training-readiness-closure-v1
+    paths:
+      - '.github/workflows/corpus370-gltf2-rig-skin-v2.yml'
+      - 'tools/corpus/build_gltf_rig_skin_authority_v2.py'
+      - 'tools/corpus/validate_gltf_rig_skin_authority_v2.py'
+      - 'tools/corpus/run_corpus370_gltf_rig_skin_sweep_v2.py'
+      - 'tests/corpus/test_gltf_rig_skin_authority_v2.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-gltf2-rig-skin-v2
+  cancel-in-progress: true
+
+jobs:
+  gltf2-rig-skin-v2:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PLATFORM_ROOT: /home/monster/realsas_platform
+      PREP_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1
+      SOURCE_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1/source_bundle
+      SOURCE_ARCHIVE_SHA256: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_gltf2_rig_skin_v2
+      EXPECTED_ROSTER_SHA256: 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+      RCLONE_REMOTE: gdrive
+    steps:
+      - name: Checkout exact V2 court revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify immutable source universe
+        run: |
+          set -euo pipefail
+          test -x "$PLATFORM_ROOT/current/bin/realsas-python"
+          test -f "$ROSTER"
+          test "$(sha256sum "$ROSTER" | awk '{print $1}')" = "$EXPECTED_ROSTER_SHA256"
+          EXTRACTED="$SOURCE_ROOT/extracted/$SOURCE_ARCHIVE_SHA256"
+          test -d "$EXTRACTED"
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          r=json.loads(Path(os.environ['ROSTER']).read_text())
+          rows=r['subjects']
+          assert len(rows)==370
+          assert sum(str(x['source_format']).lower()=='.gltf' for x in rows)==196
+          assert sum(str(x['source_format']).lower()=='.glb' for x in rows)==63
+          assert sum(str(x['source_format']).lower()=='.fbx' for x in rows)==111
+          assert r['training_authorized'] is False
+          print('CORPUS370_GLTF2_RIG_SKIN_V2_SOURCE_UNIVERSE=PASS')
+          PY
+
+      - name: Run quaternion semantic regression tests
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" -m pytest -q tests/corpus/test_gltf_rig_skin_authority_v2.py
+
+      - name: Run failure-preserving 259-subject V2 rig skin courts
+        run: |
+          set -euo pipefail
+          rm -rf "$OUTPUT_ROOT"
+          EXTRACTED="$SOURCE_ROOT/extracted/$SOURCE_ARCHIVE_SHA256"
+          "$PLATFORM_ROOT/current/bin/realsas-python" \
+            tools/corpus/run_corpus370_gltf_rig_skin_sweep_v2.py \
+            --exact-source-roster "$ROSTER" \
+            --extracted-source-root "$EXTRACTED" \
+            --output-root "$OUTPUT_ROOT"
+
+      - name: Verify exact selected partition and repaired V1 failure class
+        run: |
+          set -euo pipefail
+          "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ['OUTPUT_ROOT'])/'CORPUS370_GLTF2_RIG_SKIN_SOURCE_SWEEP_V2.json'
+          d=json.loads(p.read_text())
+          assert d['schema']=='RealSaS.Corpus370Gltf2RigSkinSourceSweep.v2'
+          assert d['candidate_subject_count']==370
+          assert d['selected_subject_count']==259
+          assert d['format_counts']=={'gltf':196,'glb':63}
+          assert len(d['subjects'])==259
+          r=d['rollup']['RIG_SKIN_SOURCE']
+          assert r['PASS_SOURCE_COURT']+r['FAIL']==259,r
+          assert d['failure_reasons'].get('GLTF_RIG_SKIN_COURT_ARRAY_MISMATCH:joint_local_matrix',0)==0,d['failure_reasons']
+          assert d['authority']['final_family_authority_minted'] is False
+          assert d['training_authorized'] is False
+          print(json.dumps({'rollup':d['rollup'],'failure_reasons':d['failure_reasons']},sort_keys=True))
+          PY
+
+      - name: Publish V2 rig skin summary
+        if: always()
+        run: |
+          set -euo pipefail
+          INDEX="$OUTPUT_ROOT/CORPUS370_GLTF2_RIG_SKIN_SOURCE_SWEEP_V2.json"
+          if [ -f "$INDEX" ]; then
+            "$PLATFORM_ROOT/current/bin/realsas-python" - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os
+          from pathlib import Path
+          d=json.loads((Path(os.environ['OUTPUT_ROOT'])/'CORPUS370_GLTF2_RIG_SKIN_SOURCE_SWEEP_V2.json').read_text())
+          print('## Corpus370 glTF2 rig/skin source sweep V2')
+          print('```json')
+          print(json.dumps({'selected_subject_count':d['selected_subject_count'],'format_counts':d['format_counts'],'rollup':d['rollup'],'failure_reasons':d['failure_reasons'],'training_authorized':d['training_authorized']},indent=2,sort_keys=True))
+          print('```')
+          PY
+          fi
+
+      - name: Upload immutable V2 rig skin sweep to Drive transport
+        if: success()
+        run: |
+          set -euo pipefail
+          command -v rclone >/dev/null
+          rclone listremotes | grep -Fx 'gdrive:'
+          INDEX="$OUTPUT_ROOT/CORPUS370_GLTF2_RIG_SKIN_SOURCE_SWEEP_V2.json"
+          SHA="$(sha256sum "$INDEX" | awk '{print $1}')"
+          rclone copyto "$INDEX" "$RCLONE_REMOTE:corpus370_authority_v2/CORPUS370_GLTF2_RIG_SKIN_SOURCE_SWEEP_V2_${SHA}.json" --checksum --progress
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-gltf2-rig-skin-v2-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT_ROOT }}/CORPUS370_GLTF2_RIG_SKIN_SOURCE_SWEEP_V2.json
+            ${{ env.OUTPUT_ROOT }}/subjects/*/rig_skin_source_v2/*.json
+            ${{ env.OUTPUT_ROOT }}/subjects/*/rig_skin_source_v2/*.npz
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 30

@@ -105,10 +105,16 @@ class SourceGLTF:
                 world = self.world(node_index)
                 transformed = position @ world[:3, :3].T + world[:3, 3]
                 transformed = transformed @ Y_TO_Z.T
+                # glTF index accessors are allowed to be UNSIGNED_BYTE/SHORT/INT.
+                # Preserve their exact values, but widen before adding the global
+                # primitive vertex offset. NumPy 2.x correctly rejects adding a
+                # Python offset >255 directly to uint8; index storage width must
+                # never constrain the assembled scene-wide face index.
                 indices = (self.accessor(primitive["indices"]).ravel() if "indices" in primitive
-                           else np.arange(len(position))).reshape(-1, 3)
+                           else np.arange(len(position), dtype=np.int64))
+                indices = np.asarray(indices, dtype=np.int64).reshape(-1, 3)
                 vertices.extend(transformed.tolist())
-                faces.extend((indices + offset).tolist())
+                faces.extend((indices + np.int64(offset)).tolist())
                 meshes.append({"node_index": node_index, "vertex_count": len(position),
                                "skin_index": node.get("skin"), "material_index": primitive.get("material")})
                 offset += len(position)

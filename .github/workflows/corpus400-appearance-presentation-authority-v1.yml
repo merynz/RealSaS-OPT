@@ -1,0 +1,57 @@
+name: corpus400-appearance-presentation-authority-v1
+
+on:
+  push:
+    branches:
+      - corpus400-appearance-presentation-authority-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus400-appearance-presentation-authority-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-observation-presentation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install narrow dependencies
+        run: python -m pip install --disable-pip-version-check numpy scipy pillow pytest trimesh fast-simplification
+
+      - name: Compile source observation and graphics authority tools
+        run: |
+          python -m py_compile \
+            tools/corpus/build_source_observation_authority_v1.py \
+            tools/corpus/validate_source_observation_authority_v1.py \
+            tools/corpus/build_presentation_family_authority_v1.py \
+            tools/corpus/validate_presentation_family_authority_v1.py \
+            tools/corpus/build_presentation_family_from_stage48_witness_v2.py \
+            tools/corpus/validate_presentation_family_from_stage48_witness_v2.py
+
+      - name: Run accumulated truth-authority courts
+        run: |
+          pytest -q \
+            tests/corpus/test_component_geometry_authority_v1.py \
+            tests/corpus/test_component_geometry_court_v1.py \
+            tests/corpus/test_component_geometry_authority_e2e_v1.py \
+            tests/corpus/test_iris_component_geometry_consumer_v1.py \
+            tests/corpus/test_gltf_rig_skin_authority_e2e_v1.py \
+            tests/corpus/test_gltf_animation_authority_v1.py \
+            tests/corpus/test_mechanical_surface_topology_authority_v1.py \
+            tests/corpus/test_tessa_component_surface_topology_v1.py \
+            tests/corpus/test_tessa_mechanical_surface_topology_v5.py \
+            tests/corpus/test_causal_response_authority_v1.py \
+            tests/corpus/test_source_observation_authority_v1.py \
+            tests/corpus/test_presentation_family_authority_v1.py \
+            tests/corpus/test_presentation_stage48_witness_v2.py

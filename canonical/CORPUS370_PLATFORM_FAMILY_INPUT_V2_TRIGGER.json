@@ -1,0 +1,19 @@
+{
+  "schema": "RealSaS.Corpus370PlatformFamilyInputTrigger.v1",
+  "purpose": "Execute the full-universe Corpus370 family-input transport after failure-preserving Observation V3 accounting.",
+  "exact_source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+  "observation_input": {
+    "schema": "RealSaS.Corpus370PreparedObservationPackets.v3",
+    "path": "/home/monster/realsas_authority/corpus370_preparation_v1/observations_rescue_v3/CORPUS370_PREPARED_OBSERVATION_PACKETS_V3.json",
+    "required_candidate_subject_count": 370,
+    "required_accounting_invariant": "prepared_subject_count + failure_count == 370"
+  },
+  "authority_policy": {
+    "observation_failure_is_family_scoped": true,
+    "missing_subject_is_forbidden": true,
+    "failure_must_not_be_encoded_as_prepared": true,
+    "family_authority_minted": false,
+    "split_minted": false,
+    "training_authorized": false
+  }
+}

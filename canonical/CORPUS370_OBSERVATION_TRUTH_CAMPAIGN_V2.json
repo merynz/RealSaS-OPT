@@ -1,0 +1,42 @@
+{
+  "candidate_universe_subject_count": 370,
+  "canonical_branch": "main",
+  "closure_policy": {
+    "campaign_full_closure_requires_all_projected_attempts_terminal": true,
+    "failed_or_blocked_attempts_are_not_silently_removed": true,
+    "family_matrix_is_built_only_after_registry_bound_attempt_evidence_and_parent_failure_evidence_are_collected": true,
+    "observation_preparation_failures_are_separate_parent_evidence": true,
+    "per_subject_fail_closed_stage_results_remain_authoritative": true,
+    "training_authorized": false
+  },
+  "cohort_projection": {
+    "failed_observation_subjects_are_not_submitted_to_observation_dependent_stages": true,
+    "failed_observation_subjects_remain_in_candidate_universe": true,
+    "maximum_subject_count": 370,
+    "minimum_subject_count": 1,
+    "predicate": "observation_preparation.status == PASS",
+    "source": "RealSaS.Corpus370PlatformFamilyInputBundle.v2",
+    "subject_count_is_derived_from_sealed_bundle": true
+  },
+  "compiler_plan": "canonical/CORPUS370_FAMILY_TRUTH_EXECUTION_PLAN_V2.json",
+  "date": "2026-11-02",
+  "execution_lane": "PLATFORM_RESEARCH_CAMPAIGN",
+  "purpose": "FINITE_OBSERVATION_QUALIFIED_SOURCE_RESPONSE_AND_PRESENTATION_TRUTH__NO_TRAINING",
+  "required_entry_stage_id": "01_SOURCE_BYTES_SEALED",
+  "required_stage_count": 11,
+  "required_target_stage_id": "49_SUBJECT_TRUTH_FAMILIES",
+  "rules": {
+    "all_candidate_sources_and_provenance_remain_hash_bound_in_parent_bundle": true,
+    "bootstrap_mints_no_family_authority": true,
+    "campaign_coordinator_mints_no_family_authority": true,
+    "every_campaign_member_has_current_observation_preparation_PASS": true,
+    "excluded_subjects_are_explicitly_reported_not_silently_dropped": true,
+    "historical_truth139_split_ignored": true,
+    "historical_truth139_training_authority_ignored": true,
+    "same_released_truth_dag_for_all_members": true,
+    "same_stage_contracts_and_courts_for_all_members": true,
+    "subject_specific_production_code_forbidden": true,
+    "training_forbidden": true
+  },
+  "schema": "RealSaS.Corpus370ObservationTruthCampaign.v2"
+}

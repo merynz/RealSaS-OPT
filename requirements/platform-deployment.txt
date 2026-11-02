@@ -4,4 +4,5 @@
 -r mainline-ci.txt
 -r platform-worker.txt
 -r torch-cpu.txt
+-r truth-family-courts.txt
 pgserver==0.1.4

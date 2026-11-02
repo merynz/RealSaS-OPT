@@ -1,0 +1,93 @@
+{
+  "schema": "RealSaS.Truth139V32RemainingTruthsContract.v1",
+  "date": "2026-10-30",
+  "status": "FROZEN_REMAINING_TRUTH_MATERIALIZATION_CONTRACT__TRAINING_AUTHORITY_SEPARATE",
+  "architecture_freeze": "canonical/IRIS_TESSA_V32_PRETRUTH_ARCHITECTURE_FREEZE.json",
+  "prerequisites": {
+    "base139": {
+      "required_status": "PASS_FULL139_CANONICAL_V2_COMPOSITE_MATERIALIZATION_COMPLETE__DERIVED_TRUTH_ADMISSION_SEPARATE",
+      "subject_count": 139
+    },
+    "v2_extension": {
+      "required_status": "PASS_FULL139_V2_EXTENSION_COMPLETE__DERIVED_TRUTH_ADMISSION_SEPARATE",
+      "subject_count": 139
+    },
+    "response": {
+      "required_status": "PASS_FULL139_IRIS_RESPONSE_EVIDENCE_COMPLETE__DERIVED_TRUTH_ADMISSION_SEPARATE",
+      "subject_count": 139,
+      "recompute_response_here": false
+    }
+  },
+  "lanes": {
+    "STAGE48_RENDERER_INTERVENTION_WITNESS": {
+      "subject_count": 139,
+      "renderer_source_equivalence_required": true,
+      "duplicate_packed_and_raw_source_replays_required": true,
+      "response_truth_recomputed": false
+    },
+    "V32_EXACT3D_GEOMETRY": {
+      "subject_count": 139,
+      "surface_distance": "EXACT_TRIANGLE_DISTANCE",
+      "surface_normal": "EXACT_SOURCE_ORIENTATION_WITH_VALIDITY",
+      "global_sign": "VALIDITY_MASKED_FAIL_CLOSED",
+      "occupancy": "VALIDITY_MASKED_FAIL_CLOSED",
+      "fstar_authority": "AUXILIARY_SOURCE_CONSISTENCY_ONLY",
+      "independent_rebind_court_required": true
+    },
+    "V32_RGB_PATCH_EVIDENCE": {
+      "subject_count": 139,
+      "native_view_count": 8,
+      "native_resolution": 1024,
+      "resize_resolution": 518,
+      "patch_size": 14,
+      "patch_grid": [37, 37],
+      "raw_rgb_scalars_per_patch": 588,
+      "imagenet_normalization_applied": false,
+      "exact_source_pixel_rebind_court_required": true
+    },
+    "V32_MECHANICAL_TESSA_TEACHER": {
+      "subject_count": 139,
+      "policy": "MECHANICAL_ADMISSIBILITY_BEFORE_COMPACTNESS",
+      "deterministic_bounded_simplification_ladder": true,
+      "exact_source_topology_is_fallback_member": true,
+      "teacher_topology_is_student_conditioning": false,
+      "fail_closed_on_unproven_simplification": true,
+      "simplified_candidate_required_courts": [
+        "surface_mapping",
+        "component_preservation",
+        "topology_hole_crack_preservation",
+        "attachment_object_separation",
+        "nondegenerate_all_actions",
+        "inversion_foldthrough",
+        "self_intersection",
+        "response_preservation",
+        "strain_jacobian_tail",
+        "motion_view_silhouette"
+      ],
+      "independent_selected_teacher_rebind_court_required": true
+    }
+  },
+  "split": {
+    "unit": "LEAKAGE_CONNECTED_COMPONENT",
+    "target_train_fraction": 0.82,
+    "required_lineage": [
+      "source_sha256",
+      "skeleton_hierarchy_signature",
+      "topology_lineage_signature",
+      "material_lineage_signature"
+    ],
+    "conservative_extra_lineage": "source_family_signature",
+    "unseen_never_used_for_optimizer": true,
+    "unseen_never_used_for_checkpoint_selection": true,
+    "train_internal_validation_rows_fixed": true,
+    "train_internal_validation_rows_bind_parent_sha_and_exact_indices": true,
+    "development_or_regression_tainted_forced_out_of_unseen": true
+  },
+  "authority": {
+    "training_performed": false,
+    "training_authorized_only_after_all_prerequisites_and_139_subject_courts": true,
+    "qualification_minted": false,
+    "product_authority_changed": false,
+    "final_compiler_watertight_court_is_training_phase_e": true
+  }
+}

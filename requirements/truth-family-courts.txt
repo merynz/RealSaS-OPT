@@ -1,0 +1,4 @@
+# CPU numeric apparatus for Platform-owned source-family courts; no training.
+trimesh==5.2.0
+Rtree==1.4.1
+fast-simplification==0.2.0

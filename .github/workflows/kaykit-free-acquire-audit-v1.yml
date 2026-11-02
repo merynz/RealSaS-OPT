@@ -1,0 +1,174 @@
+name: kaykit-free-acquire-audit-v1
+
+on:
+  push:
+    branches: [corpus400-full-candidate-audit-v1]
+    paths:
+      - 'canonical/KAYKIT_FREE_SOURCE_REGISTRY_V1.json'
+      - 'tools/corpus/kaykit_free_source_audit_v1.py'
+      - '.github/workflows/kaykit-free-acquire-audit-v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: kaykit-free-acquire-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  acquire-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        pack_id:
+          - kaykit-adventurers
+          - kaykit-skeletons
+          - kaykit-character-animations
+          - kaykit-dungeon
+          - kaykit-platformer
+          - kaykit-forest-nature
+          - kaykit-medieval-hexagon
+          - kaykit-board-game-bits
+          - kaykit-fantasy-weapons-bits
+          - kaykit-rpg-tools-bits
+          - kaykit-holiday-bits
+          - kaykit-resource-bits
+          - kaykit-block-bits
+          - kaykit-halloween-bits
+          - kaykit-restaurant-bits
+          - kaykit-prototype-bits
+          - kaykit-furniture-bits
+          - kaykit-space-base-bits
+          - kaykit-city-builder-bits
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Resolve official free-tier URL
+        id: registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="$(python - '${{ matrix.pack_id }}' <<'PY'
+          import json,sys
+          rows={r['id']:r for r in json.load(open('canonical/KAYKIT_FREE_SOURCE_REGISTRY_V1.json'))['packs']}
+          print(rows[sys.argv[1]]['official_page'])
+          PY
+          )"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "KAYKIT_OFFICIAL_URL=$url"
+
+      - name: Install pinned itch free-download transport
+        run: |
+          set -euo pipefail
+          npm --version
+          npx -y itchio-downloader@1.2.4 --version
+          python -m py_compile tools/corpus/kaykit_free_source_audit_v1.py
+
+      - name: Acquire current official free tier
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/kaykit/${{ matrix.pack_id }}"
+          mkdir -p "$root/raw"
+          npx -y itchio-downloader@1.2.4 \
+            --url '${{ steps.registry.outputs.url }}' \
+            --downloadDirectory "$root/raw" \
+            --retries 3 \
+            --retryDelay 1500 \
+            --resume
+          echo "KAYKIT_PACK_ROOT=$root" >> "$GITHUB_ENV"
+          find "$root/raw" -maxdepth 2 -type f -printf '%P\t%s bytes\n' | sort
+
+      - name: Structural census and free-tier guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/corpus/kaykit_free_source_audit_v1.py \
+            --registry canonical/KAYKIT_FREE_SOURCE_REGISTRY_V1.json \
+            --pack-id '${{ matrix.pack_id }}' \
+            --download-root "$KAYKIT_PACK_ROOT/raw" \
+            --out "$KAYKIT_PACK_ROOT/KAYKIT_FREE_SOURCE_AUDIT_V1.json"
+          cat "$KAYKIT_PACK_ROOT/KAYKIT_FREE_SOURCE_AUDIT_V1.json" | python -m json.tool >/dev/null
+
+      - name: Upload immutable free-tier source workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaykit-free-${{ matrix.pack_id }}-${{ github.sha }}
+          path: ${{ env.KAYKIT_PACK_ROOT }}/**
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
+
+      - name: Upload acquisition failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaykit-free-debug-${{ matrix.pack_id }}-${{ github.sha }}
+          path: ${{ runner.temp }}/kaykit/${{ matrix.pack_id }}/**
+          if-no-files-found: ignore
+          retention-days: 14
+
+  summarize:
+    needs: acquire-audit
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download successful workspaces
+        uses: actions/download-artifact@v4
+        with:
+          pattern: kaykit-free-*-${{ github.sha }}
+          path: ${{ runner.temp }}/kaykit-workspaces
+          merge-multiple: false
+      - name: Build catalog census
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - "$RUNNER_TEMP/kaykit-workspaces" "$RUNNER_TEMP/KAYKIT_FREE_CATALOG_CENSUS_V1.json" <<'PY'
+          import json,sys
+          from pathlib import Path
+          root=Path(sys.argv[1]); out=Path(sys.argv[2])
+          rows=[]
+          for p in sorted(root.rglob('KAYKIT_FREE_SOURCE_AUDIT_V1.json')):
+              rows.append(json.loads(p.read_text()))
+          summary={
+              'schema':'RealSaS.KayKitFree.CatalogCensus.v1',
+              'expected_pack_count':19,
+              'completed_pack_count':len(rows),
+              'packs':[{
+                  'pack_id':r['pack_id'],
+                  'model_file_count':r['model_file_count'],
+                  'gltf_or_glb_count':r['gltf_or_glb_count'],
+                  'full_truth_actor_candidate_count':r['full_truth_actor_candidate_count'],
+                  'rigged_candidate_count':r['rigged_candidate_count'],
+                  'animated_candidate_count':r['animated_candidate_count'],
+                  'static_gltf_candidate_count':r['static_gltf_candidate_count'],
+                  'animation_clip_count':r['animation_clip_count'],
+              } for r in rows],
+          }
+          summary['totals']={
+              key:sum(int(r[key]) for r in rows)
+              for key in ('model_file_count','gltf_or_glb_count','full_truth_actor_candidate_count','rigged_candidate_count','animated_candidate_count','static_gltf_candidate_count','animation_clip_count')
+          }
+          out.write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(summary,indent=2,sort_keys=True))
+          PY
+      - name: Upload catalog census
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaykit-free-catalog-census-${{ github.sha }}
+          path: ${{ runner.temp }}/KAYKIT_FREE_CATALOG_CENSUS_V1.json
+          if-no-files-found: error
+          retention-days: 90

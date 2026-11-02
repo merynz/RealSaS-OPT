@@ -1,0 +1,46 @@
+name: corpus400-rig-skin-authority-v1
+
+on:
+  push:
+    branches:
+      - corpus400-rig-skin-authority-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus400-rig-skin-authority-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rig-skin-authority-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install narrow dependencies
+        run: python -m pip install --disable-pip-version-check numpy scipy pytest trimesh
+
+      - name: Compile rig and skin authority tools
+        run: |
+          python -m py_compile \
+            tools/corpus/build_gltf_rig_skin_authority_v1.py \
+            tools/corpus/validate_gltf_rig_skin_authority_v1.py \
+            tools/corpus/validate_gltf_imported_rig_skin_equivalence_v1.py
+
+      - name: Run complete truth-authority regression courts
+        run: |
+          pytest -q \
+            tests/corpus/test_component_geometry_authority_v1.py \
+            tests/corpus/test_component_geometry_court_v1.py \
+            tests/corpus/test_component_geometry_authority_e2e_v1.py \
+            tests/corpus/test_iris_component_geometry_consumer_v1.py \
+            tests/corpus/test_gltf_rig_skin_authority_e2e_v1.py

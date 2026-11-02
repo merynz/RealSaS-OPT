@@ -1,0 +1,34 @@
+{
+  "schema": "RealSaS.Corpus370TruthCampaign.v1",
+  "date": "2026-11-01",
+  "purpose": "FINITE_CORPUS370_SOURCE_OBSERVATION_RESPONSE_AND_PRESENTATION_TRUTH__NO_TRAINING",
+  "canonical_branch": "main",
+  "execution_lane": "PLATFORM_RESEARCH_CAMPAIGN",
+  "compiler_plan": "canonical/CORPUS370_TRUTH_EXECUTION_PLAN_V1.json",
+  "required_stage_count": 10,
+  "required_entry_stage_id": "01_SOURCE_BYTES_SEALED",
+  "required_target_stage_id": "48_PRESENTATION_RESPONSE_TRUTH",
+  "expected_subject_count": 370,
+  "rules": {
+    "every_subject_enters_at_exact_source_bytes": true,
+    "exact_license_and_source_provenance_bytes_required": true,
+    "camera_scene_pose_observation_and_normalization_qualified_per_subject": true,
+    "same_released_truth_dag_for_all_members": true,
+    "same_stage_contracts_and_courts_for_all_members": true,
+    "subject_specific_production_code_forbidden": true,
+    "failed_subject_must_remain_visible": true,
+    "external_compute_is_transport_not_scientific_authority": true,
+    "bootstrap_mints_no_family_authority": true,
+    "campaign_coordinator_mints_no_family_authority": true,
+    "historical_truth139_training_authority_ignored": true,
+    "historical_truth139_split_ignored": true,
+    "training_forbidden": true
+  },
+  "closure_policy": {
+    "campaign_full_closure_requires_all_370_attempts_terminal": true,
+    "per_subject_fail_closed_stage_results_remain_authoritative": true,
+    "failed_or_blocked_subjects_are_not_silently_removed": true,
+    "family_matrix_is_built_only_after_registry_bound_attempt_evidence_is_collected": true,
+    "training_authorized": false
+  }
+}

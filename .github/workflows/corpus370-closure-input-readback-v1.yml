@@ -1,0 +1,40 @@
+name: corpus370-closure-input-readback-v1
+on:
+  workflow_dispatch:
+  push:
+    branches: [corpus400-training-readiness-closure-v1]
+    paths:
+      - '.github/workflows/corpus370-closure-input-readback-v1.yml'
+      - 'tools/corpus/inspect_corpus370_closure_inputs_v1.py'
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-closure-input-readback-v1
+  cancel-in-progress: false
+jobs:
+  readback:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      OUTPUT: /home/monster/realsas_authority/corpus370_readback/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Read existing evidence and live Platform state only
+        run: |
+          /home/monster/realsas_platform/current/bin/realsas-python tools/corpus/inspect_corpus370_closure_inputs_v1.py \
+            --authority-root /home/monster/realsas_authority \
+            --platform-root /home/monster/realsas_platform --output "$OUTPUT"
+      - name: Publish readback for inspection
+        run: |
+          rclone copyto "$OUTPUT/CORPUS370_CLOSURE_INPUT_READBACK_V1.json" \
+            "gdrive:corpus370_authority_v2/CORPUS370_CLOSURE_INPUT_READBACK_V1_${GITHUB_RUN_ID}.json" --checksum
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-closure-input-readback-${{ github.run_id }}
+          path: ${{ env.OUTPUT }}/
+          if-no-files-found: error
+          retention-days: 30

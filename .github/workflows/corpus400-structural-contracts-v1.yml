@@ -1,0 +1,49 @@
+name: corpus400-structural-contracts-v1
+
+on:
+  push:
+    branches:
+      - corpus400-truth-integrity-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus400-structural-contracts-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  structural-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install narrow test dependencies
+        run: python -m pip install --disable-pip-version-check numpy pytest
+
+      - name: Compile structural audit tools
+        run: |
+          python -m py_compile \
+            tools/corpus/structural_geometry_audit_v1.py \
+            tools/corpus/topology_partition_court_v1.py \
+            tools/corpus/run_candidate_structural_audit_v1.py \
+            tools/corpus/audit_truth139_structural_integrity_v1.py \
+            tools/corpus/truth_authority_matrix_v1.py \
+            tools/corpus/truth_family_inventory_v1.py \
+            tools/corpus/audit_truth139_family_inventory_v1.py
+
+      - name: Run structural regression courts
+        run: |
+          pytest -q \
+            tests/corpus/test_corpus_structural_geometry_audit_v1.py \
+            tests/corpus/test_topology_partition_court_v1.py \
+            tests/corpus/test_truth_authority_matrix_v1.py \
+            tests/corpus/test_truth_family_inventory_v1.py

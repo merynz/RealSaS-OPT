@@ -1,0 +1,175 @@
+{
+  "schema": "RealSaS.CorpusTruthAuthorityContract.v1",
+  "status": "LOCKED_NO_SUBJECT_ADMISSION_MINTED",
+  "purpose": "One corpus authority substrate for IRIS, TESSA, AXIS, MIRA, presentation, motion and compiler courts without forcing every subject to provide every truth family.",
+  "subject_dispositions": [
+    "PENDING_AUTHORITY_AUDIT",
+    "ADMIT_CORE",
+    "ADMIT_MASKED",
+    "QUARANTINE_REPAIRABLE",
+    "DROP_UNSUITABLE"
+  ],
+  "family_authority_states": [
+    "PENDING",
+    "QUALIFIED_CORE",
+    "QUALIFIED_MASKED",
+    "UNAVAILABLE",
+    "UNSUPPORTED",
+    "QUARANTINE_REPAIRABLE",
+    "DROP_UNSUITABLE"
+  ],
+  "invariants": {
+    "raw_render_vertex_is_not_topology_vertex": true,
+    "topology_vertex_is_not_mechanics_identity": true,
+    "mechanics_identity_is_not_appearance_address": true,
+    "unknown_is_never_a_negative_target": true,
+    "masked_truth_requires_explicit_validity_mask": true,
+    "source_bytes_are_immutable": true,
+    "producer_and_independent_court_may_not_share_the_same_authority_helper": true,
+    "split_is_rebuilt_only_after_final_admission": true,
+    "training_requires_training_readiness_receipt": true
+  },
+  "family_order": [
+    "SOURCE_IMPORT",
+    "CAMERA_OBSERVATION",
+    "SURFACE_GEOMETRY",
+    "SURFACE_TOPOLOGY",
+    "SIGNED_DISTANCE_OCCUPANCY",
+    "ORIENTED_NORMALS",
+    "APPEARANCE_CAA",
+    "VISIBILITY_OCCLUSION",
+    "RAY_COMPOSITING",
+    "CAUSAL_RESPONSE",
+    "RIG_HIERARCHY",
+    "SKIN_WEIGHTS",
+    "ANIMATION_KINEMATICS"
+  ],
+  "families": {
+    "SOURCE_IMPORT": {
+      "description": "Exact raw-source identity, importer, rest/bind semantics and source equivalence evidence.",
+      "scope": "subject"
+    },
+    "CAMERA_OBSERVATION": {
+      "description": "Content-addressed observation/camera/normalization evidence visible to the student.",
+      "scope": "observation"
+    },
+    "SURFACE_GEOMETRY": {
+      "description": "Unsigned source surface geometry and qualified local addresses; open surfaces remain measurable where valid.",
+      "scope": "face_or_query"
+    },
+    "SURFACE_TOPOLOGY": {
+      "description": "Qualified surface connectivity. Surface components and sign/manifold components are distinct relations.",
+      "scope": "face_or_component"
+    },
+    "SIGNED_DISTANCE_OCCUPANCY": {
+      "description": "Signed distance and occupancy only where a qualified solid/sign authority exists.",
+      "scope": "component_or_query"
+    },
+    "ORIENTED_NORMALS": {
+      "description": "Qualified oriented surface normals with degeneracy and orientation validity masks.",
+      "scope": "face_or_query"
+    },
+    "APPEARANCE_CAA": {
+      "description": "Source-preserving appearance/alpha authority and addressing, including observed versus compiled-fill provenance.",
+      "scope": "surface_or_fragment"
+    },
+    "VISIBILITY_OCCLUSION": {
+      "description": "Camera-qualified visibility/occlusion evidence independent from appearance ownership.",
+      "scope": "fragment_or_ray"
+    },
+    "RAY_COMPOSITING": {
+      "description": "Complete ray stack, depth/tie, alpha/transmittance and compositing truth where renderer law is supported.",
+      "scope": "ray_or_fragment"
+    },
+    "CAUSAL_RESPONSE": {
+      "description": "Intervention-bound surface/mechanical/appearance response with explicit observability and validity.",
+      "scope": "locus_action_time"
+    },
+    "RIG_HIERARCHY": {
+      "description": "Exact source skeleton/control hierarchy, transforms and mechanically meaningful rig truth.",
+      "scope": "node_or_edge"
+    },
+    "SKIN_WEIGHTS": {
+      "description": "Exact source-topology skin influence columns and normalized weights bound to rig identity.",
+      "scope": "source_vertex_or_locus"
+    },
+    "ANIMATION_KINEMATICS": {
+      "description": "Authored clips/control trajectories and kinematic replay truth; not automatically a physical law.",
+      "scope": "clip_action_time"
+    }
+  },
+  "consumers": {
+    "IRIS_SCENE_GEOMETRY": {
+      "requirements": [
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "CAMERA_OBSERVATION", "required": true, "mask_allowed": false},
+        {"family": "SURFACE_GEOMETRY", "required": true, "mask_allowed": true},
+        {"family": "ORIENTED_NORMALS", "required": true, "mask_allowed": true},
+        {"family": "SIGNED_DISTANCE_OCCUPANCY", "required": false, "mask_allowed": true}
+      ]
+    },
+    "IRIS_GRAPHICS_RESPONSE": {
+      "requirements": [
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "CAMERA_OBSERVATION", "required": true, "mask_allowed": false},
+        {"family": "APPEARANCE_CAA", "required": true, "mask_allowed": true},
+        {"family": "VISIBILITY_OCCLUSION", "required": true, "mask_allowed": true},
+        {"family": "RAY_COMPOSITING", "required": true, "mask_allowed": true},
+        {"family": "CAUSAL_RESPONSE", "required": true, "mask_allowed": true}
+      ]
+    },
+    "TESSA_TOPOLOGY": {
+      "requirements": [
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "CAMERA_OBSERVATION", "required": true, "mask_allowed": false},
+        {"family": "SURFACE_GEOMETRY", "required": true, "mask_allowed": true},
+        {"family": "SURFACE_TOPOLOGY", "required": true, "mask_allowed": true},
+        {"family": "CAUSAL_RESPONSE", "required": true, "mask_allowed": true}
+      ]
+    },
+    "AXIS_RIG": {
+      "requirements": [
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "CAMERA_OBSERVATION", "required": true, "mask_allowed": false},
+        {"family": "SURFACE_GEOMETRY", "required": true, "mask_allowed": true},
+        {"family": "RIG_HIERARCHY", "required": true, "mask_allowed": false}
+      ]
+    },
+    "MIRA_SKIN": {
+      "requirements": [
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "SURFACE_GEOMETRY", "required": true, "mask_allowed": true},
+        {"family": "RIG_HIERARCHY", "required": true, "mask_allowed": false},
+        {"family": "SKIN_WEIGHTS", "required": true, "mask_allowed": false}
+      ]
+    },
+    "MOTION_COMPILER_COURT": {
+      "requirements": [
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "SURFACE_GEOMETRY", "required": true, "mask_allowed": true},
+        {"family": "RIG_HIERARCHY", "required": true, "mask_allowed": false},
+        {"family": "SKIN_WEIGHTS", "required": true, "mask_allowed": false},
+        {"family": "ANIMATION_KINEMATICS", "required": true, "mask_allowed": true}
+      ]
+    },
+    "PRESENTATION_COMPILER_COURT": {
+      "requirements": [
+        {"family": "SOURCE_IMPORT", "required": true, "mask_allowed": false},
+        {"family": "APPEARANCE_CAA", "required": true, "mask_allowed": true},
+        {"family": "VISIBILITY_OCCLUSION", "required": true, "mask_allowed": true},
+        {"family": "RAY_COMPOSITING", "required": true, "mask_allowed": true}
+      ]
+    }
+  },
+  "split_policy": {
+    "pre_admission_value": "PENDING_UNTIL_FINAL_ADMISSION",
+    "final_split_may_be_created_before_all_subject_dispositions_are_final": false,
+    "lineage_connected_variants_may_cross_train_unseen": false
+  },
+  "authority_boundary": {
+    "this_contract_mints_subject_admission": false,
+    "this_contract_mints_training_readiness": false,
+    "final_admission_requires_independent_family_courts": true,
+    "final_training_requires_single_training_readiness_receipt": true
+  }
+}

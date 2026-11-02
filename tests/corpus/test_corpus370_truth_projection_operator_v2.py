@@ -46,5 +46,5 @@ def test_enabled_v2_request_binds_real_bundle_and_finite_campaign():
     assert request["cohort_bundle"]["size_bytes"] == 1639176870
     assert request["cohort_bundle"]["sha256"] == "4462b7f90fcff58a8d56b1a975fde4f7f91cbda51417cad5121cf55f25994c5c"
     campaign = json.loads((root / request["campaign_contract_repo_path"]).read_text())
-    assert campaign["required_target_stage_id"] == "48_PRESENTATION_RESPONSE_TRUTH"
+    assert campaign["required_target_stage_id"] == "49_SUBJECT_TRUTH_FAMILIES"
     assert campaign["candidate_universe_subject_count"] == 370

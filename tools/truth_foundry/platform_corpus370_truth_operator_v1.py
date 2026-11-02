@@ -77,13 +77,13 @@ def prepare(
     campaign = load(campaign_path)
     require(
         campaign.get("schema") == ("RealSaS.Corpus370ObservationTruthCampaign.v2" if projected else "RealSaS.Corpus370TruthCampaign.v1")
-        and campaign.get("required_target_stage_id") == "48_PRESENTATION_RESPONSE_TRUTH"
+        and campaign.get("required_target_stage_id") == ("49_SUBJECT_TRUTH_FAMILIES" if projected else "48_PRESENTATION_RESPONSE_TRUTH")
         and int(campaign.get("candidate_universe_subject_count" if projected else "expected_subject_count", 0)) == 370
-        and int(campaign.get("required_stage_count", 0)) == 10,
+        and int(campaign.get("required_stage_count", 0)) == (11 if projected else 10),
         "CORPUS370_TRUTH_OPERATOR_CAMPAIGN_CONTRACT",
     )
     plan = load((repo / campaign["compiler_plan"]).resolve())
-    require(len(plan.get("stages") or ()) == 10 and plan["stages"][-1]["id"] == "48_PRESENTATION_RESPONSE_TRUTH", "CORPUS370_TRUTH_OPERATOR_PLAN_TARGET")
+    require(len(plan.get("stages") or ()) == campaign["required_stage_count"] and plan["stages"][-1]["id"] == campaign["required_target_stage_id"], "CORPUS370_TRUTH_OPERATOR_PLAN_TARGET")
 
     bundle = dict(request.get("cohort_bundle") or {})
     require(bundle.get("provider") == "google_drive", "CORPUS370_TRUTH_OPERATOR_BUNDLE_PROVIDER")
@@ -145,7 +145,7 @@ def prepare(
         "initial_state": "PREREGISTERED",
         "created_by": descriptor["actor"],
         "metadata": {
-            "scope": "CORPUS370_SOURCE_RESPONSE_PRESENTATION_TRUTH_ONLY",
+            "scope": "CORPUS370_SOURCE_RESPONSE_FAMILY_COURTS_ONLY" if projected else "CORPUS370_SOURCE_RESPONSE_PRESENTATION_TRUTH_ONLY",
             "expected_subject_count": 370,
             "exact_source_roster_sha256": roster_sha,
             "bundle_sha256": bundle["sha256"],
@@ -184,7 +184,7 @@ def prepare(
     member_count = projected_member_count(preflight, projected)
     status = bootstrap.api(api_root, "GET", "/v1/research/campaigns/" + campaign_id)
     require(
-        status.get("target_stage_id") == "48_PRESENTATION_RESPONSE_TRUTH"
+        status.get("target_stage_id") == campaign["required_target_stage_id"]
         and status.get("execution_scope") == "SOURCE_ENTRY_TO_RESEARCH_COMPONENT"
         and len(status.get("members") or ()) == member_count,
         "CORPUS370_TRUTH_OPERATOR_PLATFORM_CAMPAIGN_SCOPE",

@@ -7,7 +7,7 @@
     "no existing campaign may be silently resubmitted"
   ],
   "campaign_contract_repo_path": "canonical/CORPUS370_OBSERVATION_TRUTH_CAMPAIGN_V2.json",
-  "campaign_name": "CORPUS370_OBSERVATION_RESPONSE_PRESENTATION_TRUTH_V2",
+  "campaign_name": "CORPUS370_SOURCE_RESPONSE_FAMILY_COURTS_V2",
   "cohort_bundle": {
     "bootstrap_manifest_member": "BOOTSTRAP_MANIFEST.json",
     "bundle_receipt_member": "BUNDLE_RECEIPT.json",
@@ -42,8 +42,8 @@
   "evaluator_version": "Blender 4.0.2",
   "exact_source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
   "expected_evaluator_binary_sha256": "c47c0b83d061621014c8312abd99db5c1ef057bcf5516faf4bb8d92b3ef6de60",
-  "experiment_name": "Corpus370 observation-qualified response and presentation truth V2",
-  "experiment_slug": "corpus370-observation-response-presentation-truth-v2",
+  "experiment_name": "Corpus370 source response and independent family courts V2",
+  "experiment_slug": "corpus370-source-response-family-courts-v2",
   "hypothesis": "A subject-family authority matrix built from exact source bytes and current independent courts will preserve useful partial supervision without fabricating missing global sign, topology, skin, animation or presentation labels.",
   "maximum_seconds_per_subject": 900,
   "observation_runtime_replacement": {

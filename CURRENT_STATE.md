@@ -1,3 +1,21 @@
+> **Corpus370 execution continuation — 2026-11-02:** The user requires actual
+> subject-family closure before materialization/training. The active operator
+> request is `canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V2.json`, binding the exact
+> failure-preserving V2 bundle (370 candidates; 294 prepared / 76 explicit failure
+> rows). The finite Platform target is `49_SUBJECT_TRUTH_FAMILIES`: exact Stage47
+> response followed by independent surface geometry, mechanical topology, causal
+> response and TESSA V5 courts. Family failures are retained independently; stage
+> accounting success is not a family PASS or training readiness. Stage48 graphics
+> measurement remains a separate scope and is not repeated by this target.
+> Resume the original Campaign/Attempts and inspect Registry outputs; never blindly
+> submit a replacement after a timeout. Aggregate those outputs with existing
+> source/camera and rig/skin evidence, resolve global-solid and graphics authority,
+> seal lineage/split/materialization, and inspect the final model/target bindings
+> before delivering the materialization notebook. No optimizer is authorized here.
+> `AGENTS.md` requires repairing missing Platform capabilities while preserving
+> scientific evidence, rather than leaving authorized work blocked or bypassing it.
+>
+
 > **Pinned numeric-runtime repair — 2026-10-28:** Controlled sealed replay
 > reproduced all eight admitted hashes with glibc 2.39 and all eight native-host
 > hashes with glibc 2.43 on the same CPU and Blender. This isolates a runtime

@@ -81,7 +81,8 @@ jobs:
             tests/corpus/test_corpus370_lineage_groups_v1.py \
             tests/corpus/test_corpus370_lineage_split_v1.py \
             tests/corpus/test_corpus370_truth_platform_contract_v1.py \
-            tests/corpus/test_corpus370_truth_projection_operator_v2.py
+            tests/corpus/test_corpus370_truth_projection_operator_v2.py \
+            tests/corpus/test_platform_subject_family_accounting_v1.py
 
       - name: Publish branch-scope notice
         run: |

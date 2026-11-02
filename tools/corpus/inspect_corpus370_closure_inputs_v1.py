@@ -10,6 +10,84 @@ from pathlib import Path
 import urllib.request
 
 
+def partial_matrix(authority_root, platform_root, output, preparations, api_root):
+    """Replay existing court decisions; explicitly no final readiness seal."""
+    from tools.corpus.build_corpus370_subject_family_authority_matrix_v1 import build
+    from tools.corpus.derive_corpus370_model_rosters_v1 import derive
+    from tools.corpus.render_corpus370_authority_matrix_markdown_v1 import render
+    from tools.corpus.build_corpus370_rig_skin_evidence_v1 import build as rig_evidence
+    from tools.platform_cohort_bootstrap_v1 import api
+    from tools.truth_foundry.observe_corpus370_truth_v1 import verified_cas
+
+    prep = authority_root / 'corpus370_preparation_v1'
+    roster = prep / 'CORPUS370_EXACT_SOURCE_ROSTER_V1.json'
+    indexes = [prep / 'source_camera_court_v2/CORPUS370_SOURCE_CAMERA_FAMILY_EVIDENCE_V2.json']
+    fbx = authority_root / 'corpus370_fbx_rig_skin_v1/CORPUS370_FBX_RIG_SKIN_COURT_INDEX_V1.json'
+    if fbx.is_file():
+        path = output / 'CURRENT_FBX_FAMILY_EVIDENCE.json'
+        path.write_text(json.dumps(rig_evidence(roster, fbx), sort_keys=True, indent=2) + '\n')
+        indexes.append(path)
+    rows = {}
+    campaign_states = []
+    for entry in preparations:
+        prepared = entry.get('PREPARATION.json')
+        if not prepared:
+            continue
+        campaign = api(api_root, 'GET', '/v1/research/campaigns/' + prepared['campaign_id'])
+        counts = {}
+        for member in campaign['members']:
+            attempt = api(api_root, 'GET', '/v1/attempts/' + member['attempt_id'])
+            state = attempt['state']
+            counts[state] = counts.get(state, 0) + 1
+            # Only Registry-committed stage manifests are considered, never a
+            # partially written run directory or an uncommitted candidate.
+            bindings = api(api_root, 'GET', f"/v1/subjects/{member['subject_id']}/artifacts?artifact_type=RealSaS.StageResultManifest&schema_version=v1&limit=500")
+            matches = [b for b in bindings if b.get('source_id') == member['attempt_id']
+                       and b.get('source_kind') == 'ATTEMPT'
+                       and b.get('role') == 'stage:49_SUBJECT_TRUTH_FAMILIES']
+            if not matches:
+                continue
+            if len(matches) != 1:
+                raise ValueError('READBACK_DUPLICATE_REGISTRY_FAMILY_STAGE')
+            record = api(api_root, 'GET', '/v1/artifacts/' + matches[0]['artifact_id'])
+            manifest_path = verified_cas(platform_root / 'artifacts', record)
+            manifest = json.loads(manifest_path.read_text())
+            outputs = manifest.get('outputs', [])
+            selected = [r for r in outputs if r['payload_schema'] == 'RealSaS.Corpus370FamilyEvidenceIndex.v1']
+            if len(selected) != 1:
+                raise ValueError('READBACK_FAMILY_INDEX_CARDINALITY')
+            payload_path = verified_cas(platform_root / 'artifacts', selected[0])
+            payload = json.loads(payload_path.read_text())
+            digests = {r['content_sha256'] for r in outputs}
+            for row in payload['subjects']:
+                for claim in row['families'].values():
+                    if claim['court']['sha256'] not in digests:
+                        raise ValueError('READBACK_COURT_NOT_IN_REGISTRY_STAGE_OUTPUTS')
+                sid = row['subject_id']
+                if sid in rows and rows[sid] != row:
+                    raise ValueError('READBACK_CONFLICTING_ATTEMPT_FAMILY_INDEXES:' + sid)
+                rows[sid] = row
+        campaign_states.append({'campaign_id': prepared['campaign_id'], 'attempt_counts': counts})
+    if rows:
+        path = output / 'CURRENT_REGISTRY_FAMILY_EVIDENCE.json'
+        path.write_text(json.dumps({'schema': 'RealSaS.Corpus370FamilyEvidenceIndex.v1',
+            'subject_count': len(rows), 'subjects': list(rows.values()),
+            'training_authorized': False}, sort_keys=True, indent=2) + '\n')
+        indexes.append(path)
+    repo = Path(__file__).resolve().parents[2]
+    matrix = build(repo / 'canonical/CORPUS370_SUBJECT_FAMILY_AUTHORITY_POLICY_V1.json', roster, indexes)
+    matrix['readback_scope'] = 'PARTIAL_DIAGNOSTIC_PROJECTION__NOT_FINAL_ADMISSION_OR_READINESS'
+    matrix['observed_campaigns'] = campaign_states
+    matrix_path = output / 'CORPUS370_PARTIAL_AUTHORITY_MATRIX_V1.json'
+    matrix_path.write_text(json.dumps(matrix, sort_keys=True, indent=2) + '\n')
+    rosters = derive(matrix_path)
+    (output / 'CORPUS370_PARTIAL_MODEL_ROSTERS_V1.json').write_text(json.dumps(rosters, sort_keys=True, indent=2) + '\n')
+    (output / 'CORPUS370_PARTIAL_AUTHORITY_MATRIX_V1.md').write_text(render(matrix))
+    return {'family_rollup': matrix['rollup']['families'],
+            'model_rollup': matrix['rollup']['models'], 'campaign_states': campaign_states,
+            'registry_family_subject_count': len(rows), 'training_authorized': False}
+
+
 def sha256(path):
     h = hashlib.sha256()
     with path.open('rb') as stream:
@@ -60,6 +138,11 @@ def inspect(authority_root: Path, platform_root: Path, output: Path, api: str):
         for path in sorted(runs_root.glob('CAMPAIGN_*/artifacts/49_SUBJECT_TRUTH_FAMILIES/SUBJECT_FAMILY_EVIDENCE.json')):
             report['family_indexes'].append({'path': str(path), 'sha256': sha256(path),
                                              'payload': json.loads(path.read_text())})
+    try:
+        report['partial_matrix'] = partial_matrix(authority_root, platform_root, output,
+                                                  report['campaign_preparations'], api)
+    except Exception as exc:
+        report['partial_matrix'] = {'read_error': str(exc), 'training_authorized': False}
     keywords = ('CORPUS370_', 'CORPUS400_', 'FULL139_', 'SOURCE_UNION_',
                 'TRAINING_READINESS', 'TRUTH139_', 'SUBJECT_TRUTH_FAMILY_SWEEP_RECEIPT')
     summary_keys = ('schema', 'status', 'subject_count', 'candidate_subject_count',

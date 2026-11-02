@@ -2,11 +2,29 @@
 """Generate the separate heavy-compute notebook from a real sealed input export."""
 from __future__ import annotations
 import argparse
+import inspect
 import json
 from pathlib import Path, PurePosixPath
 import re
 from tools.notebooks.build_corpus370_materialization_v1 import cell
 from models.materialization_contract_v1 import require,sha256
+
+
+def effective_memory_gib(meminfo_text=None,cgroup_limits=None):
+    """Respect the container limit as well as the host's visible memory."""
+    if meminfo_text is None:meminfo_text=Path('/proc/meminfo').read_text()
+    host_kib=int(next(line.split()[1] for line in meminfo_text.splitlines() if line.startswith('MemTotal:')))
+    limits=[host_kib*1024]
+    if cgroup_limits is None:
+        cgroup_limits=[]
+        for name in ('/sys/fs/cgroup/memory.max','/sys/fs/cgroup/memory/memory.limit_in_bytes'):
+            try:cgroup_limits.append(Path(name).read_text().strip())
+            except OSError:pass
+    for value in cgroup_limits:
+        try:value=int(value)
+        except (ValueError,TypeError):continue
+        if value>0:limits.append(value)
+    return min(limits)/(1024**3)
 
 
 def build(seal_path,receipt_path,drive_folder):
@@ -43,10 +61,10 @@ ayrı kapılardır. Bu dosya materialization veya training notebook’u değildi
     setup='CONFIG = '+repr(cfg)+'\n'+'''import json, os, subprocess, sys, time
 from pathlib import Path
 from google.colab import drive
+'''+inspect.getsource(effective_memory_gib)+'''
 START=time.monotonic()
-meminfo=Path('/proc/meminfo').read_text().splitlines()
-ram_gib=int(next(line.split()[1] for line in meminfo if line.startswith('MemTotal:')))/(1024**2)
-print(f'Host RAM: {ram_gib:.1f} GiB')
+ram_gib=effective_memory_gib()
+print(f'Kullanılabilir çalışma zamanı RAM sınırı: {ram_gib:.1f} GiB')
 assert ram_gib>=22, 'Yüksek RAM çalışma zamanı seçin (en az 24 GiB önerilir), sonra Run All.'
 for key in ('OMP_NUM_THREADS','OPENBLAS_NUM_THREADS','MKL_NUM_THREADS','NUMEXPR_NUM_THREADS'):
     os.environ[key]='1'
@@ -99,7 +117,8 @@ print('Sonraki adım: Platform import/bağımsız doğrulama → final eligibili
     return {'nbformat':4,'nbformat_minor':5,'metadata':{'colab':{'name':'Corpus370_Compute_Worker_Run_All_v1.ipynb'},
         'kernelspec':{'display_name':'Python 3','language':'python','name':'python3'},
         'language_info':{'name':'python'},'realsas':cfg},
-        'cells':[cell('markdown',intro),cell('code',setup),cell('code',extract),cell('code',run)]}
+        'cells':[dict(cell(kind,source),id='corpus370-worker-'+str(i)) for i,(kind,source) in enumerate(
+            [('markdown',intro),('code',setup),('code',extract),('code',run)])]}
 
 
 def main():

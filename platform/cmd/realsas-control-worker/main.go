@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"log/slog"
@@ -18,6 +19,7 @@ import (
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
 
+	"github.com/merynz/RealSaS-OPT/platform/internal/agentsession"
 	"github.com/merynz/RealSaS-OPT/platform/internal/artifactstore"
 	"github.com/merynz/RealSaS-OPT/platform/internal/control"
 	"github.com/merynz/RealSaS-OPT/platform/internal/dispatch"
@@ -26,8 +28,12 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/stagegraph"
 )
 
+var sourceCodeSHA string
+
 func main() {
 	reconcileOnce := flag.Bool("reconcile-once", false, "close only Attempts whose bound Temporal workflow failed terminally")
+	cancelRequest := flag.String("cancel-campaign-request", "", "exact research Campaign cancellation request; preserves all evidence")
+	operatorRepo := flag.String("operator-repo", "", "canonical main checkout for a lifecycle repair before deployment")
 	flag.Parse()
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -54,6 +60,27 @@ func main() {
 	})
 	fatalIf(err, "connect temporal")
 	defer temporalClient.Close()
+	if *cancelRequest != "" {
+		checkout := *operatorRepo
+		if checkout == "" {
+			checkout = repoRoot
+		}
+		sha, err := agentsession.CanonicalCheckout(ctx, checkout)
+		fatalIf(err, "verify canonical cancellation operator")
+		if sha != sourceCodeSHA {
+			fatalIf(errors.New("CANCELLATION_OPERATOR_BINARY_MAIN_DRIFT"), "verify cancellation binary")
+		}
+		data, err := os.ReadFile(*cancelRequest)
+		fatalIf(err, "read cancellation request")
+		var request dispatch.CancelCampaignRequest
+		fatalIf(json.Unmarshal(data, &request), "decode cancellation request")
+		bounded, cancel := context.WithTimeout(ctx, 90*time.Second)
+		defer cancel()
+		receipt, err := dispatch.CancelResearchCampaign(bounded, pool, temporalClient, request)
+		_ = json.NewEncoder(os.Stdout).Encode(receipt)
+		fatalIf(err, "cancel exact research Campaign")
+		return
+	}
 	if *reconcileOnce {
 		count, err := dispatch.ReconcileFailedAttempts(ctx, pool, temporalClient, 32)
 		fatalIf(err, "reconcile failed workflows")

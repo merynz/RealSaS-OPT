@@ -1,3 +1,18 @@
+> **Worker/lifecycle repair source — 2026-11-02:** PR314 now includes supervised
+> process isolation for Python Engine activities, bounded concurrency, exact
+> native-descendant cleanup, and the Go-owned exact-Campaign cancellation path.
+> `canonical/CORPUS370_WORKER_ISOLATION_REPAIR_V1.json` binds only the original
+> 294 Attempt IDs and exact PREPARATION SHA; deployment may apply that explicit
+> lifecycle repair before the unchanged OPEN-Attempt guard. The original Campaign
+> has NOT yet been cancelled at this checkpoint. A child Campaign must declare
+> its terminal parent and per-member release/input intervention; retain every
+> actual qualified prefix artifact and compute previously unexecuted stages.
+> Read `docs/platform/ENGINE_ACTIVITY_ISOLATION_V1.md`. Unit/source tests pass;
+> PostgreSQL-backed cancellation/continuation checks must pass CI before merge.
+> libspatialindex explicitly forbids concurrent thread access; no current native
+> threaded Stage49 result is silently promoted into a new apparatus. The user
+> asked for a status report during work; this did not cancel the corpus goal.
+>
 > **First real execution readback — 2026-11-02 14:28 UTC:** Original Campaign
 > `14431b73-3369-46d4-9e93-dd36ed1686cb` remains active; do not resubmit it.
 > All 294 Attempts are OPEN. The 14:20 observer exported 16 committed Stage47

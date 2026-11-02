@@ -94,14 +94,19 @@ func LoadIntervention(ctx context.Context, pool *pgxpool.Pool, attemptID uuid.UU
 
 func (c *FrozenIntervention) CheckExecution(stageID string) error {
 	if c != nil && slices.Contains(c.FrozenStageIDs, stageID) {
-		return fmt.Errorf("INTERVENTION_FROZEN_STAGE_EXECUTION: %s", stageID)
+		// A partial parent has no output to preserve for an unexecuted stage.
+		// Its unchanged implementation/input identity still passes the resolver;
+		// only an actually captured baseline artifact forbids recomputation.
+		if _, exists := c.BaselineArtifactIDs[stageID]; exists {
+			return fmt.Errorf("INTERVENTION_FROZEN_STAGE_EXECUTION: %s", stageID)
+		}
 	}
 	return nil
 }
 
 func (c *FrozenIntervention) CheckReuse(stageID string, artifactID uuid.UUID) error {
 	if c != nil && slices.Contains(c.FrozenStageIDs, stageID) {
-		if id, ok := c.BaselineArtifactIDs[stageID]; !ok || id != artifactID {
+		if id, ok := c.BaselineArtifactIDs[stageID]; ok && id != artifactID {
 			return fmt.Errorf("INTERVENTION_EXACT_REUSE_REQUIRED: %s", stageID)
 		}
 	}

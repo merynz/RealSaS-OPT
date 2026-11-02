@@ -6,6 +6,7 @@ on:
       - corpus400-training-readiness-closure-v1
       - corpus-family-consumer-bindings-v1
       - corpus370-materialization-continuation-v1
+      - corpus370-materialization-checkpoint-v1
   pull_request:
     paths:
       - 'tools/corpus/**'
@@ -78,6 +79,8 @@ jobs:
           pytest -q \
             tests/corpus/test_corpus370_subject_family_authority_matrix_v1.py \
             tests/corpus/test_corpus370_isolated_continuation_v1.py \
+            tests/corpus/test_corpus370_materialization_checkpoint_v1.py \
+            tests/corpus/test_corpus370_numeric_projection_v1.py \
             tests/corpus/test_gltf_bind_scene_uint8_offset_v1.py \
             tests/corpus/test_gltf_rig_skin_authority_e2e_v1.py \
             tests/corpus/test_gltf_rig_skin_authority_v2.py \

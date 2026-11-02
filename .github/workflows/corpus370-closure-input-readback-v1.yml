@@ -31,7 +31,7 @@ jobs:
         run: |
           rclone copyto "$OUTPUT/CORPUS370_CLOSURE_INPUT_READBACK_V1.json" \
             "gdrive:corpus370_authority_v2/CORPUS370_CLOSURE_INPUT_READBACK_V1_${GITHUB_RUN_ID}.json" --checksum
-          for NAME in CORPUS370_PARTIAL_AUTHORITY_MATRIX_V1.json CORPUS370_PARTIAL_MODEL_ROSTERS_V1.json CORPUS370_PARTIAL_AUTHORITY_MATRIX_V1.md; do
+          for NAME in CORPUS370_PARTIAL_AUTHORITY_MATRIX_V1.json CORPUS370_PARTIAL_MODEL_ROSTERS_V1.json CORPUS370_PARTIAL_AUTHORITY_MATRIX_V1.md CORPUS370_PARTIAL_LINEAGE_GROUPS_V1.json; do
             if [ -f "$OUTPUT/$NAME" ]; then
               rclone copyto "$OUTPUT/$NAME" "gdrive:corpus370_authority_v2/${GITHUB_RUN_ID}_${NAME}" --checksum
             fi

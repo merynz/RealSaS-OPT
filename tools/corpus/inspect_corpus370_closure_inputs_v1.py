@@ -63,11 +63,17 @@ def partial_matrix(authority_root, platform_root, output, preparations, api_root
     from tools.corpus.derive_corpus370_model_rosters_v1 import derive
     from tools.corpus.render_corpus370_authority_matrix_markdown_v1 import render
     from tools.corpus.build_corpus370_rig_skin_evidence_v1 import build as rig_evidence
+    from tools.corpus.build_corpus370_lineage_groups_v1 import build as lineage_groups
     from tools.platform_cohort_bootstrap_v1 import api
     from tools.truth_foundry.observe_corpus370_truth_v1 import verified_cas
 
     prep = authority_root / 'corpus370_preparation_v1'
     roster = prep / 'CORPUS370_EXACT_SOURCE_ROSTER_V1.json'
+    lineage = lineage_groups(roster)
+    lineage_diagnostic = {'schema': 'RealSaS.Corpus370LineageDiagnostic.v1',
+        'scope': 'PARTIAL_LINEAGE_DIAGNOSTICS__NO_SPLIT_AUTHORITY',
+        'source_grouping': lineage, 'split_authorized': False, 'training_authorized': False}
+    (output / 'CORPUS370_PARTIAL_LINEAGE_GROUPS_V1.json').write_text(json.dumps(lineage_diagnostic, sort_keys=True, indent=2) + '\n')
     indexes = [prep / 'source_camera_court_v2/CORPUS370_SOURCE_CAMERA_FAMILY_EVIDENCE_V2.json']
     fbx = authority_root / 'corpus370_fbx_rig_skin_v1/CORPUS370_FBX_RIG_SKIN_COURT_INDEX_V1.json'
     if fbx.is_file():
@@ -137,7 +143,10 @@ def partial_matrix(authority_root, platform_root, output, preparations, api_root
     (output / 'CORPUS370_PARTIAL_AUTHORITY_MATRIX_V1.md').write_text(render(matrix))
     return {'family_rollup': matrix['rollup']['families'],
             'model_rollup': matrix['rollup']['models'], 'campaign_states': campaign_states,
-            'registry_family_subject_count': len(rows), 'training_authorized': False}
+            'registry_family_subject_count': len(rows), 'training_authorized': False,
+            'lineage_diagnostics': {'status': lineage.get('status'),
+                'group_count': len(lineage.get('groups', [])),
+                'unresolved_review_count': lineage['review_required_count']}}
 
 
 def sha256(path):

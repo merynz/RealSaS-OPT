@@ -19,6 +19,7 @@ from tools.platform_cohort_bootstrap_v1 import api
 from tools.truth_foundry.audit_native_teacher_bytes_v1 import sha256
 
 PREPARATION_SCHEMA = "RealSaS.Corpus370TruthCampaignPreparation.v1"
+PROJECTION_SCHEMA = "RealSaS.Corpus370TruthCampaignPreparation.v2"
 STAGES = ("47_SOURCE_RESPONSE_CALIBRATION", "48_PRESENTATION_RESPONSE_TRUTH")
 TERMINAL = {"FAILED", "FAIL", "ABSTAIN", "CANCELED", "CANCELLED", "ABORTED", "COMPLETED", "PASS", "BLOCKED"}
 SUCCESS = {"COMPLETED", "PASS"}
@@ -140,13 +141,20 @@ def observe(
     maximum_seconds: float,
     interval_seconds: float,
 ) -> dict:
-    require(preparation.get("schema") == PREPARATION_SCHEMA, "CORPUS370_OBSERVE_PREPARATION_SCHEMA")
-    require(int(preparation.get("member_count", -1)) == 370, "CORPUS370_OBSERVE_MEMBER_COUNT")
+    require(preparation.get("schema") in {PREPARATION_SCHEMA, PROJECTION_SCHEMA}, "CORPUS370_OBSERVE_PREPARATION_SCHEMA")
+    member_count = int(preparation.get("member_count", -1))
+    if preparation["schema"] == PROJECTION_SCHEMA:
+        require(preparation.get("candidate_subject_count") == 370
+                and 0 < member_count <= 370
+                and member_count + int(preparation.get("excluded_subject_count", -1)) == 370,
+                "CORPUS370_OBSERVE_MEMBER_ACCOUNTING")
+    else:
+        require(member_count == 370, "CORPUS370_OBSERVE_MEMBER_COUNT")
     require(0 < interval_seconds <= 60 and maximum_seconds >= 0, "CORPUS370_OBSERVE_POLL_BOUNDS")
     output.mkdir(parents=True, exist_ok=True)
     initial_campaign = api(api_root, "GET", "/v1/research/campaigns/" + preparation["campaign_id"])
     initial = {row["attempt_id"]: row for row in initial_campaign["members"]}
-    require(len(initial) == 370, "CORPUS370_OBSERVE_CAMPAIGN_MEMBER_COUNT")
+    require(len(initial) == member_count, "CORPUS370_OBSERVE_CAMPAIGN_MEMBER_COUNT")
     started = time.monotonic()
     exported: dict[str, dict] = {}
     while True:
@@ -191,7 +199,11 @@ def observe(
                 "attempt_state_counts": dict(sorted(counts.items())),
                 "exports": list(exported.values()),
                 "bound_run_diagnostics": diagnostics,
-                "all_370_attempts_terminal": all_terminal,
+                "all_370_attempts_terminal": all_terminal and member_count == 370,
+                "all_projected_attempts_terminal": all_terminal,
+                "member_count": member_count,
+                "candidate_subject_count": 370,
+                "excluded_subject_count": preparation.get("excluded_subject_count", 0),
                 "observation_timed_out": timed_out,
                 "failed_attempt_count": sum(count for state, count in counts.items() if state not in SUCCESS),
                 "execution_resubmitted": False,
@@ -202,7 +214,7 @@ def observe(
             write_json(output / "CORPUS370_TRUTH_OBSERVATION_V1.json", result)
             print(json.dumps({"all_terminal": all_terminal, "state_counts": result["attempt_state_counts"], "failed_attempt_count": result["failed_attempt_count"], "timed_out": timed_out}, sort_keys=True), flush=True)
             return result
-        print(json.dumps({"event": "CORPUS370_TRUTH_OBSERVE", "terminal": sum(row["state"] in TERMINAL for row in attempts), "total": 370, "elapsed_seconds": elapsed}, sort_keys=True), flush=True)
+        print(json.dumps({"event": "CORPUS370_TRUTH_OBSERVE", "terminal": sum(row["state"] in TERMINAL for row in attempts), "total": member_count, "elapsed_seconds": elapsed}, sort_keys=True), flush=True)
         time.sleep(min(interval_seconds, max(0.0, maximum_seconds - elapsed)))
 
 

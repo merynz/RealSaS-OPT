@@ -28,6 +28,10 @@ on:
       - '.github/workflows/teacher-truth-revalidation-v1.yml'
   workflow_dispatch:
 
+concurrency:
+  group: teacher-truth-revalidation-v1-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

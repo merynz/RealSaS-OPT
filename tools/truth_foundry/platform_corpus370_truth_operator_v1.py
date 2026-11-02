@@ -17,10 +17,24 @@ import subprocess
 from types import SimpleNamespace
 
 from tools import platform_truth_cohort_bootstrap_v1 as bootstrap
+from tools import platform_observation_truth_cohort_bootstrap_v2 as observation_bootstrap
 from tools.observation.pinned_evaluator_runtime_v1 import launch_options
 from tools.platform_artifact_store import sha256_file
 
 SCHEMA = "RealSaS.Corpus370TruthOperatorRequest.v1"
+PROJECTION_SCHEMA = "RealSaS.Corpus370ObservationTruthOperatorRequest.v2"
+
+
+def projected_member_count(preflight: dict, projected: bool) -> int:
+    if not projected:
+        return 370
+    count = int(preflight.get("cohort_subject_count", -1))
+    excluded = int(preflight.get("excluded_subject_count", -1))
+    require(preflight.get("candidate_subject_count") == 370
+            and 0 < count <= 370 and count + excluded == 370
+            and len(preflight.get("excluded_subjects") or []) == excluded,
+            "CORPUS370_TRUTH_OPERATOR_PROJECTION_ACCOUNTING")
+    return count
 
 
 def require(condition: bool, code: str) -> None:
@@ -45,7 +59,7 @@ def prepare(
     submit: bool,
 ) -> dict:
     require(
-        request.get("schema") == SCHEMA
+        request.get("schema") in {SCHEMA, PROJECTION_SCHEMA}
         and request.get("enabled") is True
         and request.get("training_allowed") is False,
         "CORPUS370_TRUTH_OPERATOR_SCOPE",
@@ -54,6 +68,7 @@ def prepare(
     platform_root = platform_root.resolve()
     authority_root = authority_root.resolve()
     output = output.resolve()
+    projected = request["schema"] == PROJECTION_SCHEMA
     require(load(platform_root / "deployment.json")["code_sha"] == expected_sha, "CORPUS370_TRUTH_OPERATOR_DEPLOYED_MAIN_DRIFT")
     require(subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip() == expected_sha, "CORPUS370_TRUTH_OPERATOR_CHECKOUT_DRIFT")
     require(subprocess.check_output(["git", "-C", str(repo), "ls-remote", "origin", "refs/heads/main"], text=True).split()[0] == expected_sha, "CORPUS370_TRUTH_OPERATOR_REMOTE_MAIN_DRIFT")
@@ -61,9 +76,9 @@ def prepare(
     campaign_path = (repo / request["campaign_contract_repo_path"]).resolve()
     campaign = load(campaign_path)
     require(
-        campaign.get("schema") == "RealSaS.Corpus370TruthCampaign.v1"
+        campaign.get("schema") == ("RealSaS.Corpus370ObservationTruthCampaign.v2" if projected else "RealSaS.Corpus370TruthCampaign.v1")
         and campaign.get("required_target_stage_id") == "48_PRESENTATION_RESPONSE_TRUTH"
-        and int(campaign.get("expected_subject_count", 0)) == 370
+        and int(campaign.get("candidate_universe_subject_count" if projected else "expected_subject_count", 0)) == 370
         and int(campaign.get("required_stage_count", 0)) == 10,
         "CORPUS370_TRUTH_OPERATOR_CAMPAIGN_CONTRACT",
     )
@@ -104,7 +119,7 @@ def prepare(
         "CORPUS370_TRUTH_OPERATOR_PRESENTATION_POLICY",
     )
     descriptor = {
-        "schema": "RealSaS.PlatformTruthCohortBootstrapDescriptor.v1",
+        "schema": observation_bootstrap.DESCRIPTOR_SCHEMA if projected else "RealSaS.PlatformTruthCohortBootstrapDescriptor.v1",
         "purpose": "RESEARCH",
         "training_allowed": False,
         "campaign_name": request["campaign_name"],
@@ -140,9 +155,18 @@ def prepare(
             "product_authority_changed": False,
         },
     }
-    experiment = bootstrap.api(api_root, "POST", "/v1/experiments", experiment_request)["experiment"]
+    previous = [row for row in bootstrap.api(api_root, "GET", "/v1/experiments")
+                if row.get('slug') == experiment_request['slug']]
+    require(len(previous) <= 1, 'CORPUS370_TRUTH_OPERATOR_AMBIGUOUS_EXPERIMENT')
+    if previous:
+        experiment = previous[0]
+        require(all(experiment.get(key) == experiment_request[key]
+                    for key in ('name', 'research_question', 'hypothesis', 'metadata')),
+                'CORPUS370_TRUTH_OPERATOR_EXISTING_EXPERIMENT_SCOPE_DRIFT')
+    else:
+        experiment = bootstrap.api(api_root, "POST", "/v1/experiments", experiment_request)["experiment"]
     bootstrap_path = output / "CAMPAIGN_BOOTSTRAP.json"
-    preflight = bootstrap.main(
+    preflight = load(bootstrap_path) if bootstrap_path.is_file() else (observation_bootstrap if projected else bootstrap).main(
         SimpleNamespace(
             repo=repo,
             descriptor=descriptor_path,
@@ -155,11 +179,14 @@ def prepare(
         )
     )
     campaign_id = preflight["campaign_id"]
+    require(preflight.get('bundle_sha256') == bundle['sha256'],
+            'CORPUS370_TRUTH_OPERATOR_RESUME_BUNDLE_DRIFT')
+    member_count = projected_member_count(preflight, projected)
     status = bootstrap.api(api_root, "GET", "/v1/research/campaigns/" + campaign_id)
     require(
         status.get("target_stage_id") == "48_PRESENTATION_RESPONSE_TRUTH"
         and status.get("execution_scope") == "SOURCE_ENTRY_TO_RESEARCH_COMPONENT"
-        and len(status.get("members") or ()) == 370,
+        and len(status.get("members") or ()) == member_count,
         "CORPUS370_TRUTH_OPERATOR_PLATFORM_CAMPAIGN_SCOPE",
     )
     bootstrap.api(api_root, "POST", "/v1/experiments/link", {
@@ -171,7 +198,7 @@ def prepare(
         })
 
     result = {
-        "schema": "RealSaS.Corpus370TruthCampaignPreparation.v1",
+        "schema": "RealSaS.Corpus370TruthCampaignPreparation.v2" if projected else "RealSaS.Corpus370TruthCampaignPreparation.v1",
         "source_code_sha": expected_sha,
         "experiment_id": experiment["id"],
         "campaign_id": campaign_id,
@@ -180,6 +207,9 @@ def prepare(
         "bundle_sha256": bundle["sha256"],
         "exact_source_roster_sha256": roster_sha,
         "member_count": len(status["members"]),
+        "candidate_subject_count": 370,
+        "excluded_subject_count": preflight.get("excluded_subject_count", 0),
+        "excluded_subjects": preflight.get("excluded_subjects", []),
         "bootstrap_receipt": {"path": str(bootstrap_path), "sha256": sha256_file(bootstrap_path)},
         "measurement_submitted": False,
         "training_submitted": False,
@@ -187,7 +217,8 @@ def prepare(
         "final_family_matrix_minted": False,
     }
     result_path = output / "PREPARATION.json"
-    if submit:
+    result_path.write_text(json.dumps(result, sort_keys=True, indent=2) + "\n")
+    if submit and status['state'] == 'READY':
         if experiment["lifecycle_state"] == "PREREGISTERED":
             bootstrap.api(api_root, "POST", "/v1/experiments/transition", {
                 "experiment_id": experiment["id"], "to_state": "RUNNING", "actor": descriptor["actor"]
@@ -200,6 +231,11 @@ def prepare(
             "requested_by": descriptor["actor"],
         })
         result["measurement_submitted"] = True
+    elif submit:
+        require(status['state'] in {'RUNNING', 'COMPLETED', 'FAILED', 'BLOCKED', 'ABSTAIN'},
+                'CORPUS370_TRUTH_OPERATOR_RESUME_CAMPAIGN_STATE')
+        result['measurement_submitted'] = True
+        result['existing_campaign_resumed_without_resubmission'] = True
     result_path.write_text(json.dumps(result, sort_keys=True, indent=2) + "\n")
     print(json.dumps({k: result[k] for k in ("experiment_id", "campaign_id", "engine_release_id", "member_count", "measurement_submitted", "training_submitted")}, sort_keys=True))
     return result

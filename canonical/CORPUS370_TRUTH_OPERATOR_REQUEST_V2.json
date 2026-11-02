@@ -1,0 +1,78 @@
+{
+  "activation_reason": "EXACT_FAILURE_PRESERVING_V2_BUNDLE_SEALED__OBSERVATION_PROJECTION_ONLY",
+  "activation_requires": [
+    "370 exact source and provenance rows remain sealed in parent bundle",
+    "observation PASS projection is derived from sealed bundle; failures remain explicit",
+    "same reviewed code revision deployed on main",
+    "no existing campaign may be silently resubmitted"
+  ],
+  "campaign_contract_repo_path": "canonical/CORPUS370_OBSERVATION_TRUTH_CAMPAIGN_V2.json",
+  "campaign_name": "CORPUS370_OBSERVATION_RESPONSE_PRESENTATION_TRUTH_V2",
+  "cohort_bundle": {
+    "bootstrap_manifest_member": "BOOTSTRAP_MANIFEST.json",
+    "bundle_receipt_member": "BUNDLE_RECEIPT.json",
+    "file_id": "1FIT0exXqrVA3jImURFmS0YLGW1Nwfd2Q",
+    "name": "CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V2_4462b7f90fcff58a8d56b1a975fde4f7f91cbda51417cad5121cf55f25994c5c.zip",
+    "provider": "google_drive",
+    "sha256": "4462b7f90fcff58a8d56b1a975fde4f7f91cbda51417cad5121cf55f25994c5c",
+    "size_bytes": 1639176870
+  },
+  "enabled": true,
+  "evaluator_executable": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/blender-glibc239",
+  "evaluator_runtime": {
+    "files": {
+      "libc": {
+        "path": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/lib/libc.so.6",
+        "sha256": "511f825ee075610ac9c0f7f91e2c13de2000d0f7b859f6461137e809a0a009d0"
+      },
+      "libm": {
+        "path": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/lib/libm.so.6",
+        "sha256": "f06f2ce1f1833df5f41cf13b6447ff07bea993ad9b27297d3428c2f70ab3f0e7"
+      },
+      "loader": {
+        "path": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/ld-linux-x86-64.so.2",
+        "sha256": "6222a16be7f2d458d6870efe6e715fc0c8d45766fb79cf7dcc3125538d703e28"
+      }
+    },
+    "library_directory": "/home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/lib",
+    "original_blender_binary_sha256": "6fe78c9e0a1cca51a598eb37c3288b975357efbe86dcee18d5e6fdecaaf1847e",
+    "package_sha256": "cb11743530ba3ee0f943f4124b13dac50363a36842d682be65cd2beb5073c33e",
+    "schema": "RealSaS.PinnedObservationNumericRuntime.v1"
+  },
+  "evaluator_version": "Blender 4.0.2",
+  "exact_source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+  "expected_evaluator_binary_sha256": "c47c0b83d061621014c8312abd99db5c1ef057bcf5516faf4bb8d92b3ef6de60",
+  "experiment_name": "Corpus370 observation-qualified response and presentation truth V2",
+  "experiment_slug": "corpus370-observation-response-presentation-truth-v2",
+  "hypothesis": "A subject-family authority matrix built from exact source bytes and current independent courts will preserve useful partial supervision without fabricating missing global sign, topology, skin, animation or presentation labels.",
+  "maximum_seconds_per_subject": 900,
+  "observation_runtime_replacement": {
+    "evaluator_binary_sha256": "c47c0b83d061621014c8312abd99db5c1ef057bcf5516faf4bb8d92b3ef6de60",
+    "observation_producer_binary_sha256": "aab13f2e20400a7bc161813151acfe4586889aa964624f7a0bcfdfc066f9749d",
+    "rule": "EXACT_ADMITTED_IMPORT_BYTES_REQUIRED"
+  },
+  "policy_repo_path": "canonical/TEACHER_KINEMATIC_CALIBRATION_POLICY_V2.json",
+  "presentation_truth": {
+    "action_measure": "CONTROL_BALANCED__EQUAL_MASS_PER_CONTROL_THEN_PER_SEALED_SIGN_AMPLITUDE_ROW",
+    "convergence_tolerance": 0.005,
+    "cycles_samples": 256,
+    "geometric_rays_per_view": 32,
+    "large_footprint_fraction": 0.0625,
+    "maximum_hits_per_ray": 6,
+    "maximum_seconds_per_subject": 2400,
+    "measured_rays_per_subject": 32,
+    "measurement_tolerance": 0.0075,
+    "minimum_pass_rays_per_subject": 16,
+    "mode": "OBSERVATION_REST_PRESENTATION_RESPONSE_TRUTH_V1",
+    "pose_conditioned_action_budget": 16,
+    "representation_tolerance": 0.005,
+    "semantic_part_taxonomy": "FORBIDDEN",
+    "small_footprint_fraction": 0.03125,
+    "source_equivalence_tolerance": 0.005,
+    "student_observable_contribution_floor": 1e-06
+  },
+  "research_question": "Which of the 370 exact candidate subjects provide independently qualified source, surface, solid, mechanical, rig/skin, animation and presentation truth under one fail-closed apparatus?",
+  "schema": "RealSaS.Corpus370ObservationTruthOperatorRequest.v2",
+  "stage_parameters_repo_path": "canonical/TRUTH_CALIBRATION_STAGE_PARAMETERS_V2.json",
+  "training_allowed": false
+}

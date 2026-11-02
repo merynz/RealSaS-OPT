@@ -36,7 +36,7 @@ jobs:
           from pathlib import Path
 
           sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
-          request_path = 'canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json'
+          request_path = 'canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V2.json'
           request = json.loads(Path(request_path).read_text())
           changed = subprocess.check_output(
               ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD^1', 'HEAD'], text=True
@@ -97,7 +97,7 @@ jobs:
       EXPECTED_SHA: ${{ needs.activation.outputs.expected_sha }}
       PLATFORM_ROOT: /home/monster/realsas_platform
       AUTHORITY_ROOT: /home/monster/realsas_authority
-      OUTPUT: /home/monster/realsas_authority/corpus370_truth_preparation/${{ github.run_id }}-${{ github.run_attempt }}
+      OUTPUT: /home/monster/realsas_authority/corpus370_truth_preparation/${{ needs.activation.outputs.expected_sha }}
       PYTHONPATH: ${{ github.workspace }}
       PYTHONUNBUFFERED: '1'
       RCLONE_REMOTE: ${{ vars.REALSAS_RCLONE_DRIVE_REMOTE || 'gdrive' }}
@@ -108,11 +108,11 @@ jobs:
       - name: Restore exact pinned evaluator runtime
         run: |
           "$PLATFORM_ROOT/current/bin/realsas-python" -m tools.observation.install_pinned_evaluator_runtime_v1 \
-            --request canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json
+            --request canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V2.json
       - name: Create Experiment Campaign Attempts and submit exact run bindings
         run: |
           "$PLATFORM_ROOT/current/bin/realsas-python" tools/truth_foundry/platform_corpus370_truth_operator_v1.py \
-            --request canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json \
+            --request canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V2.json \
             --repo "$GITHUB_WORKSPACE" --platform-root "$PLATFORM_ROOT" --authority-root "$AUTHORITY_ROOT" \
             --expected-main-sha "$EXPECTED_SHA" --output "$OUTPUT" --rclone-remote "$RCLONE_REMOTE" --submit
       - uses: actions/upload-artifact@v4
@@ -131,7 +131,7 @@ jobs:
     env:
       PLATFORM_ROOT: /home/monster/realsas_platform
       AUTHORITY_ROOT: /home/monster/realsas_authority
-      PREPARATION: /home/monster/realsas_authority/corpus370_truth_preparation/${{ github.run_id }}-${{ github.run_attempt }}/PREPARATION.json
+      PREPARATION: /home/monster/realsas_authority/corpus370_truth_preparation/${{ needs.activation.outputs.expected_sha }}/PREPARATION.json
       OBSERVATION: /home/monster/realsas_authority/corpus370_truth_observation/${{ github.run_id }}-${{ github.run_attempt }}
       PYTHONPATH: ${{ github.workspace }}
       PYTHONUNBUFFERED: '1'

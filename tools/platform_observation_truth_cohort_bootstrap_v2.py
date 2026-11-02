@@ -232,6 +232,19 @@ def main(args) -> dict:
     )
 
     actor = str(descriptor.get("actor") or "corpus370-observation-truth-bootstrap-v2")
+    progress_path = args.out.with_suffix('.progress.json')
+    descriptor_sha = digest_bytes(json_bytes(descriptor))
+    progress = load(progress_path) if progress_path.is_file() else {
+        'descriptor_sha256': descriptor_sha, 'subjects': {},
+    }
+    require(progress.get('descriptor_sha256') == descriptor_sha,
+            'OBS_TRUTH_V2_RESUME_DESCRIPTOR_DRIFT')
+
+    def checkpoint():
+        progress_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = progress_path.with_suffix('.partial')
+        temporary.write_bytes(json_bytes(progress))
+        os.replace(temporary, progress_path)
     overlay = dict(descriptor.get("additional_manifest_sections") or {})
     allowed = set(v1.plan_manifest_keys(plan))
     require(set(overlay).issubset(allowed), "OBS_TRUTH_V2_OVERLAY_UNDECLARED")
@@ -280,15 +293,23 @@ def main(args) -> dict:
     for subject in selected:
         sid = str(subject["subject_id"])
         sections = subject_sections(subject, bundle_root, index, overlay)
-        platform_id = v1.ensure_subject(args.api, sid, str(subject.get("display_name") or sid), actor)
-        input_id = v1.seal_sections(
-            args.api,
-            platform_id,
-            sections,
-            actor,
-            f"urn:realsas:corpus370-observation-truth-v2:{descriptor['campaign_name']}:{sid}",
-        )
+        sections_sha = digest_bytes(json_bytes(sections))
+        saved = progress['subjects'].get(sid)
+        if saved:
+            require(saved['sections_sha256'] == sections_sha, 'OBS_TRUTH_V2_RESUME_INPUT_DRIFT:' + sid)
+            platform_id, input_id = saved['platform_subject_id'], saved['subject_input_id']
+        else:
+            platform_id = v1.ensure_subject(args.api, sid, str(subject.get("display_name") or sid), actor)
+            input_id = v1.seal_sections(
+                args.api, platform_id, sections, actor,
+                f"urn:realsas:corpus370-observation-truth-v2:{descriptor['campaign_name']}:{sid}",
+            )
+            progress['subjects'][sid] = {'platform_subject_id': platform_id,
+                'subject_input_id': input_id, 'sections_sha256': sections_sha}
+            checkpoint()
         state.append({"key": sid, "platform_subject_id": platform_id, "subject_input_id": input_id, "sections": sections})
+        print(json.dumps({'event': 'CORPUS370_INPUT_SEALED', 'completed': len(state),
+                          'total': len(selected), 'subject_id': sid}), flush=True)
 
     stage_params = v1.release_stage_parameters(descriptor, plan)
     release_request = snapshot(
@@ -298,9 +319,17 @@ def main(args) -> dict:
         created_by=actor,
         stage_parameters=stage_params,
     )
-    release = api(args.api, "POST", "/v1/releases", release_request)
-    release_id = release["ReleaseID"]
-    campaign = api(
+    if not progress.get('release_id'):
+        progress['release_id'] = api(args.api, 'POST', '/v1/releases', release_request)['ReleaseID']
+        checkpoint()
+    release_id = progress['release_id']
+    if not progress.get('campaign_id'):
+        # Never duplicate a possibly submitted campaign after a lost response.
+        ops = api(args.api, 'GET', '/v1/ops/status')
+        existing = [r for r in ops.get('active_campaigns', [])
+                    if r.get('name') == descriptor['campaign_name']]
+        require(not existing, 'OBS_TRUTH_V2_EXISTING_CAMPAIGN_REQUIRES_EXPLICIT_RECOVERY')
+        campaign = api(
         args.api,
         "POST",
         "/v1/research/campaigns",
@@ -313,8 +342,10 @@ def main(args) -> dict:
             "regression_subject_ids": [],
             "created_by": actor,
         },
-    )
-    campaign_id = campaign["campaign_id"]
+        )
+        progress['campaign_id'] = campaign['campaign_id']
+        checkpoint()
+    campaign_id = progress['campaign_id']
 
     run_bindings = []
     for row in state:

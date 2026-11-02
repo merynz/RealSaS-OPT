@@ -17,6 +17,7 @@ def test_deployment_prewarm_is_exact_persistent_and_before_service_install():
         "requirements/mainline-ci.txt",
         "requirements/platform-worker.txt",
         "requirements/torch-cpu.txt",
+        "requirements/truth-family-courts.txt",
     ):
         assert requirement in text
 
@@ -34,6 +35,7 @@ def test_persistent_platform_uses_cpu_parent_runtime_not_mira_cuda_profile():
     deployment = (ROOT / "requirements/platform-deployment.txt").read_text(encoding="utf-8")
     assert "-r torch-cpu.txt" in deployment
     assert "torch-cuda.txt" not in deployment
+    assert "-r truth-family-courts.txt" in deployment
 
     text = WORKFLOW.read_text(encoding="utf-8")
     # CUDA profile changes may still exercise deployment contracts, but the

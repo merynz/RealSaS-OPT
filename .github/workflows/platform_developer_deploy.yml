@@ -18,6 +18,7 @@ on:
       - 'requirements/mainline-ci.txt'
       - 'requirements/platform-worker.txt'
       - 'requirements/torch-cpu.txt'
+      - 'requirements/truth-family-courts.txt'
       - 'requirements/torch-cuda.txt'
       - 'tests/repository/test_platform_deployment.py'
       - 'tests/repository/test_platform_wheelhouse_v1.py'
@@ -97,6 +98,7 @@ jobs:
               'requirements/mainline-ci.txt',
               'requirements/platform-worker.txt',
               'requirements/torch-cpu.txt',
+              'requirements/truth-family-courts.txt',
           )
           digest = hashlib.sha256()
           for raw in paths:
@@ -218,6 +220,7 @@ jobs:
               'requirements/mainline-ci.txt',
               'requirements/platform-worker.txt',
               'requirements/torch-cpu.txt',
+              'requirements/truth-family-courts.txt',
           )
           digest = hashlib.sha256()
           for raw in paths:

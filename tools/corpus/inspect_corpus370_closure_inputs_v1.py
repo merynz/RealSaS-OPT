@@ -90,6 +90,34 @@ def engine_diagnostics():
     return result
 
 
+def superseded_campaigns(preparations):
+    """A child may replace only explicitly declared family-stage evidence."""
+    by_id = {e['PREPARATION.json']['campaign_id']: e for e in preparations if e.get('PREPARATION.json')}
+    replaced = {}
+    for child_id, entry in by_id.items():
+        child = entry['PREPARATION.json']
+        parent_id = child.get('parent_campaign_id')
+        if not parent_id:
+            continue
+        if parent_id not in by_id or parent_id == child_id or parent_id in replaced:
+            raise ValueError('READBACK_AMBIGUOUS_CONTINUATION_PARENT')
+        parent_entry = by_id[parent_id]
+        parent = parent_entry['PREPARATION.json']
+        ref = child.get('parent_preparation', {})
+        path = Path(parent_entry['scope']) / 'PREPARATION.json'
+        if (ref.get('path') != str(path) or not path.is_file() or ref.get('sha256') != sha256(path)
+                or child.get('exact_source_roster_sha256') != parent.get('exact_source_roster_sha256')
+                or child.get('member_count') != parent.get('member_count')
+                or child.get('superseded_stage_ids') != ['49_SUBJECT_TRUTH_FAMILIES']):
+            raise ValueError('READBACK_CONTINUATION_SCOPE_DRIFT')
+        old_members = {r['subject_id'] for r in parent_entry['CAMPAIGN_BOOTSTRAP.json']['run_bindings']}
+        new_members = {r['subject_id'] for r in entry['CAMPAIGN_BOOTSTRAP.json']['run_bindings']}
+        if old_members != new_members or len(old_members) != parent['member_count']:
+            raise ValueError('READBACK_CONTINUATION_MEMBER_DRIFT')
+        replaced[parent_id] = child_id
+    return replaced
+
+
 def partial_matrix(authority_root, platform_root, output, preparations, api_root):
     """Replay existing court decisions; explicitly no final readiness seal."""
     from tools.corpus.build_corpus370_subject_family_authority_matrix_v1 import build
@@ -115,6 +143,7 @@ def partial_matrix(authority_root, platform_root, output, preparations, api_root
         indexes.append(path)
     rows = {}
     campaign_states = []
+    replaced = superseded_campaigns(preparations)
     for entry in preparations:
         prepared = entry.get('PREPARATION.json')
         if not prepared:
@@ -129,6 +158,8 @@ def partial_matrix(authority_root, platform_root, output, preparations, api_root
             last = (attempt.get('events') or [{}])[-1]
             kind = last.get('event_type', last.get('type', 'UNKNOWN'))
             event_counts[kind] = event_counts.get(kind, 0) + 1
+            if prepared['campaign_id'] in replaced:
+                continue
             # Only Registry-committed stage manifests are considered, never a
             # partially written run directory or an uncommitted candidate.
             bindings = api(api_root, 'GET', f"/v1/subjects/{member['subject_id']}/artifacts?artifact_type=RealSaS.StageResultManifest&schema_version=v1&limit=500")
@@ -158,7 +189,8 @@ def partial_matrix(authority_root, platform_root, output, preparations, api_root
                     raise ValueError('READBACK_CONFLICTING_ATTEMPT_FAMILY_INDEXES:' + sid)
                 rows[sid] = row
         campaign_states.append({'campaign_id': prepared['campaign_id'], 'attempt_counts': counts,
-                                'last_event_counts': event_counts})
+                                'last_event_counts': event_counts,
+                                'family_stage_superseded_by': replaced.get(prepared['campaign_id'])})
     if rows:
         path = output / 'CURRENT_REGISTRY_FAMILY_EVIDENCE.json'
         path.write_text(json.dumps({'schema': 'RealSaS.Corpus370FamilyEvidenceIndex.v1',

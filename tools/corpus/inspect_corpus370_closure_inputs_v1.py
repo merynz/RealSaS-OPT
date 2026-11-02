@@ -36,6 +36,30 @@ def inspect(authority_root: Path, platform_root: Path, output: Path, api: str):
     deployment = platform_root / 'deployment.json'
     if deployment.is_file():
         report['deployment'] = json.loads(deployment.read_text())
+    report['campaign_preparations'] = []
+    preparation_root = authority_root / 'corpus370_truth_preparation'
+    if preparation_root.is_dir():
+        for scope in sorted(preparation_root.iterdir()):
+            if not scope.is_dir() or scope.is_symlink():
+                continue
+            entry = {'scope': str(scope)}
+            for name in ('PREPARATION.json', 'CAMPAIGN_BOOTSTRAP.json', 'CAMPAIGN_BOOTSTRAP.progress.json'):
+                path = scope / name
+                if path.is_file():
+                    value = json.loads(path.read_text())
+                    if name.endswith('.progress.json'):
+                        entry[name] = {'sealed_subject_count': len(value.get('subjects', {})),
+                                       'release_id': value.get('release_id'),
+                                       'campaign_id': value.get('campaign_id')}
+                    else:
+                        entry[name] = value
+            report['campaign_preparations'].append(entry)
+    report['family_indexes'] = []
+    runs_root = authority_root / 'runs'
+    if runs_root.is_dir():
+        for path in sorted(runs_root.glob('CAMPAIGN_*/artifacts/49_SUBJECT_TRUTH_FAMILIES/SUBJECT_FAMILY_EVIDENCE.json')):
+            report['family_indexes'].append({'path': str(path), 'sha256': sha256(path),
+                                             'payload': json.loads(path.read_text())})
     keywords = ('CORPUS370_', 'CORPUS400_', 'FULL139_', 'SOURCE_UNION_',
                 'TRAINING_READINESS', 'TRUTH139_', 'SUBJECT_TRUTH_FAMILY_SWEEP_RECEIPT')
     summary_keys = ('schema', 'status', 'subject_count', 'candidate_subject_count',

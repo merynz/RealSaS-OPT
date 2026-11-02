@@ -81,6 +81,7 @@ jobs:
             tests/corpus/test_corpus370_isolated_continuation_v1.py \
             tests/corpus/test_corpus370_materialization_checkpoint_v1.py \
             tests/corpus/test_corpus370_numeric_projection_v1.py \
+            tests/corpus/test_corpus370_sealed_materialization_v1.py \
             tests/corpus/test_gltf_bind_scene_uint8_offset_v1.py \
             tests/corpus/test_gltf_rig_skin_authority_e2e_v1.py \
             tests/corpus/test_gltf_rig_skin_authority_v2.py \

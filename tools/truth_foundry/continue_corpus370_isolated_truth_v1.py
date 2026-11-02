@@ -118,7 +118,13 @@ def continue_corpus(args):
     parent = load(parent_path)
     bootstrap_path = bound(parent['bootstrap_receipt'])
     old = load(bootstrap_path)
-    old_descriptor = load(parent_path.parent / 'BOOTSTRAP_DESCRIPTOR.json')
+    descriptor_parent = parent_path
+    for _ in range(8):
+        descriptor_path = descriptor_parent.parent / 'BOOTSTRAP_DESCRIPTOR.json'
+        if descriptor_path.is_file(): break
+        descriptor_parent = bound(load(descriptor_parent)['parent_preparation'])
+    require(descriptor_path.is_file(), 'CORPUS_CONTINUATION_BOOTSTRAP_DESCRIPTOR_MISSING')
+    old_descriptor = load(descriptor_path)
     parent_status = api(args.api, 'GET', '/v1/research/campaigns/' + parent['campaign_id'])
     require(len(parent_status['members']) == parent['member_count'] == 294
             and all(m['final_state'] in {'COMPLETED', 'FAILED'} for m in parent_status['members']),
@@ -142,6 +148,7 @@ def continue_corpus(args):
     state = load(state_path) if state_path.exists() else {'identity': identity, 'subjects': {}}
     require(state['identity'] == identity, 'CORPUS_CONTINUATION_RESUME_SCOPE_DRIFT')
     def checkpoint(): write(state_path, state)
+    write(output / 'BOOTSTRAP_DESCRIPTOR.json', old_descriptor)
     rows = []
     actor = 'corpus370-isolated-materialization-inputs'
     for binding in old['run_bindings']:

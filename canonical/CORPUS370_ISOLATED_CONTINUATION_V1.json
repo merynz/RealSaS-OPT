@@ -1,13 +1,13 @@
 {
-  "schema": "RealSaS.Corpus370IsolatedContinuation.v1",
-  "enabled": true,
-  "training_authorized": false,
-  "original_preparation": {
-    "path": "/home/monster/realsas_authority/corpus370_truth_preparation/36d26f2c39112f46ab82045582b4276bdb8e9108/PREPARATION.json",
-    "sha256": "6b4ca3dfe1732072dc16e548c6c3781e91602bb60f430952bcf4d38a1e00b406"
-  },
+  "campaign_name": "CORPUS370_MATERIALIZATION_PREFIX_CLOSURE_V4",
   "compiler_plan": "canonical/CORPUS370_FAMILY_TRUTH_EXECUTION_PLAN_V2.json",
-  "direct_changed_stage_ids": ["49_SUBJECT_TRUTH_FAMILIES"],
-  "campaign_name": "CORPUS370_ISOLATED_FAMILY_TRUTH_V3",
-  "experiment_slug": "corpus370-isolated-family-truth-v3"
+  "direct_changed_stage_ids": [],
+  "enabled": true,
+  "experiment_slug": "corpus370-materialization-prefix-closure-v4",
+  "original_preparation": {
+    "path": "/home/monster/realsas_authority/corpus370_truth_preparation/2f92a42cdad18d43797f98c66c7dd2eeda8f5dc9_isolated/PREPARATION.json",
+    "sha256": "84c0a0ecac5897479606ed6d39c2565461df5faf75ef5b60789f10b5be273eba"
+  },
+  "schema": "RealSaS.Corpus370IsolatedContinuation.v1",
+  "training_authorized": false
 }

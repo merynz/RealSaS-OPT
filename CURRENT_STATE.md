@@ -1,3 +1,44 @@
+> **Materialization execution checkpoint — 2026-11-02 15:43 UTC:**
+> Main is `2f92a42cdad18d43797f98c66c7dd2eeda8f5dc9` (PR314/315 merged).
+> Both exact-main deployments and real API→Engine/reuse smokes passed. Original
+> Campaign `14431b73-3369-46d4-9e93-dd36ed1686cb` is terminal: 288 Temporal
+> cancellations, 4 previously failed workflows, 2 completed; original artifacts
+> and failures retained. Child Campaign `614fa91b-9b2a-4b81-8db5-1ae7127107b1`
+> release `ea6b4c8e-bffd-4fea-9e51-119df4c815e3` submitted 294 members in
+> successful workflow `41472938393`: 32 exact external-dependency closures repaired,
+> 262 SubjectInputs reused unchanged. Its PREPARATION SHA is
+> `84c0a0ecac5897479606ed6d39c2565461df5faf75ef5b60789f10b5be273eba`.
+> Initial observer: 2 COMPLETED / 17 FAILED / 275 OPEN at 15:39:30. Failures
+> include `INTERVENTION_BASELINE_ARTIFACT_MISSING:04_FULL_SUBJECT_ADMISSION`:
+> earlier repair changed execution/reuse checks but failed to restrict the
+> immutable frozen-stage set passed to strict resolver verification. PR316 now
+> captures only actually produced baseline artifact IDs before sealing the spec;
+> strict cold-cache/artifact-ID checks remain unchanged. Its canonical lifecycle
+> descriptor targets ONLY this exact child cohort; the following explicit V4
+> continuation changes no scientific adapter (`direct_changed_stage_ids=[]`).
+> Do not resubmit either old Campaign or edit their immutable specs.
+>
+> **Notebook path is now implemented, not yet authorized:** PR316 contains
+> per-subject/head checkpoint JSON+Markdown, numeric IRIS/TESSA projections,
+> full exact-byte closure exporter, resumable sealed-bundle materializer with
+> consumer verification, and a four-cell Colab Run All generator (Drive mount,
+> pinned code/archive/seal, elapsed time, visible progress, exact resume).
+> No production notebook was emitted: generator rejects OPEN checkpoints.
+> Focused numeric/materialization/notebook tests: 21 passed. Full source CI and
+> PostgreSQL-backed Platform CI are still required for final PR316 head.
+> The actual report in Drive is `41472668388_CORPUS370_MATERIALIZATION_CHECKPOINT_V1.md`
+> (file `1FnG5-r30yGBKSx-NUdr69lhlhMaO43Zt`). It is explicitly BLOCKED, not final N:
+> 2 Registry-complete old subject sweeps support IRIS surface+normals; both have
+> TESSA teacher FAIL (`TESSA_V5_NO_MECHANICALLY_ADMISSIBLE_FALLBACK`) and causal
+> response FAIL (`CAUSAL_COURT_TANGENT`). Other 368 required family sweeps are
+> unresolved. Global sign/graphics authority and real lineage audit/split remain
+> open. Do not turn UNKNOWN into MASKED, reuse local component sign as global,
+> substitute teacher geometry for student Z/G, or start an optimizer.
+> New V4 results must be inspected before final admission, target projection,
+> split, full bundle seal and actual notebook delivery. The notebook generator
+> expects already projected per-subject manifests; that final corpus-wide
+> projection index still needs binding to completed Registry family evidence.
+>
 > **Worker/lifecycle repair source — 2026-11-02:** PR314 now includes supervised
 > process isolation for Python Engine activities, bounded concurrency, exact
 > native-descendant cleanup, and the Go-owned exact-Campaign cancellation path.

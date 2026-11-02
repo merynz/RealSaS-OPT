@@ -73,6 +73,9 @@ def test_supersession_requires_hash_bound_parent_and_exact_cohort(tmp_path):
         'parent_preparation': {'path': str(p), 'sha256': sha(p)}},
         'CAMPAIGN_BOOTSTRAP.json': {'run_bindings': [{'subject_id': 's'}]}}
     assert superseded_campaigns([child, entry]) == {'old': 'new'}
+    child['PREPARATION.json']['superseded_stage_ids'] = []
+    assert superseded_campaigns([child, entry]) == {}
+    child['PREPARATION.json']['superseded_stage_ids'] = ['49_SUBJECT_TRUTH_FAMILIES']
     child['CAMPAIGN_BOOTSTRAP.json']['run_bindings'][0]['subject_id'] = 'other'
     with pytest.raises(ValueError, match='MEMBER_DRIFT'):
         superseded_campaigns([child, entry])

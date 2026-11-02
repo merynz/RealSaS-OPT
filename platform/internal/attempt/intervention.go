@@ -33,6 +33,19 @@ type InterventionInput struct {
 	ArtifactID uuid.UUID `json:"artifact_id"`
 }
 
+// PinAvailableStages preserves every actual baseline identity without inventing
+// an artifact for a stage the terminal parent never reached. Resolver checks
+// remain strict for this captured set, including cold-cache rejection.
+func (c *FrozenIntervention) PinAvailableStages() {
+	available := make([]string, 0, len(c.FrozenStageIDs))
+	for _, stageID := range c.FrozenStageIDs {
+		if id, ok := c.BaselineArtifactIDs[stageID]; ok && id != uuid.Nil {
+			available = append(available, stageID)
+		}
+	}
+	c.FrozenStageIDs = available
+}
+
 func PinInputs(loaded input.Loaded) []InterventionInput {
 	out := make([]InterventionInput, 0, len(loaded.RootInputs))
 	for i, row := range loaded.RootInputs {

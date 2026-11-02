@@ -222,6 +222,7 @@ func StartResearch(
 				if err := rows.Err(); err != nil {
 					return err
 				}
+				frozen.PinAvailableStages()
 				spec["intervention"] = frozen
 			}
 		}

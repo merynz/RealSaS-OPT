@@ -71,11 +71,22 @@ def deformation_measure(rest,faces,posed,weights,scale):
         u=e1/l1; x2=float(np.dot(e2,u)); y2sq=float(np.dot(e2,e2)-x2*x2)
         if y2sq<=tol: valid[:,fi]=False; continue
         y2=float(np.sqrt(max(y2sq,0.0))); R=np.asarray([[l1,x2],[0.0,y2]],np.float64); invR=np.linalg.inv(R)
-        for ai in range(na):
-            p=posed[ai,tri]; pe1=p[1]-p[0]; pe2=p[2]-p[0]; P=np.stack((pe1,pe2),axis=1); F=P@invR; C=F.T@F
-            eigval,eigvec=np.linalg.eigh(C)
-            if not np.isfinite(eigval).all() or eigval[0]<=1e-14: valid[ai,fi]=False; continue
-            s=np.sqrt(np.maximum(eigval,0.0)); minor[ai,fi]=s[0]; major[ai,fi]=s[1]; area[ai,fi]=float(np.sqrt(max(np.linalg.det(C),0.0))); aniso[ai,fi]=abs(s[1]-s[0]); axis=eigvec[:,1]; theta=float(np.arctan2(axis[1],axis[0])); tangent[ai,fi]=[np.cos(2*theta),np.sin(2*theta)]
+        # Batch only independent actions of this face. The rest basis, operation
+        # sequence, validity thresholds and reduction order below stay fixed.
+        # Working memory is O(action_count), never O(actions * all faces).
+        p=posed[:,tri,:]; pe1=p[:,1]-p[:,0]; pe2=p[:,2]-p[:,0]
+        P=np.stack((pe1,pe2),axis=2); F=P@invR; C=np.swapaxes(F,-1,-2)@F
+        eigval,eigvec=np.linalg.eigh(C)
+        action_valid=np.isfinite(eigval).all(axis=1)&(eigval[:,0]>1e-14)
+        valid[:,fi]=action_valid
+        selected=np.flatnonzero(action_valid)
+        if not len(selected): continue
+        s=np.sqrt(np.maximum(eigval[selected],0.0))
+        minor[selected,fi]=s[:,0]; major[selected,fi]=s[:,1]
+        area[selected,fi]=np.sqrt(np.maximum(np.linalg.det(C[selected]),0.0))
+        aniso[selected,fi]=np.abs(s[:,1]-s[:,0])
+        axis=eigvec[selected,:,1]; theta=np.arctan2(axis[:,1],axis[:,0])
+        tangent[selected,fi]=np.stack((np.cos(2*theta),np.sin(2*theta)),axis=1)
     mass=np.sum(weights[:,None]*valid,axis=0); face_valid=mass>0; safe=np.where(face_valid,mass,1.0)
     wm=weights[:,None]
     major_mean=np.sum(wm*np.where(valid,major,0),axis=0)/safe; minor_mean=np.sum(wm*np.where(valid,minor,0),axis=0)/safe; area_mean=np.sum(wm*np.where(valid,area,0),axis=0)/safe; aniso_mean=np.sum(wm*np.where(valid,aniso,0),axis=0)/safe

@@ -89,8 +89,9 @@ def build(*,subject_id,mechanical_manifest_path,mechanical_court_path,response_c
     source_topology=v4.impl.topology_signature(len(source_v),source_f,source_fc)
     ladder=v4.impl.simplify_by_component(source_v,source_f,[.35,.50,.65,.80,1.0],source_fc)
     rows=[]; qualified=[]
+    source_context=v4.impl.source_evaluation_context(source_v,source_f,isolated,actions,cameras)
     for ratio,vertices,faces,kind in ladder:
-        metrics,face_id,bar=v4.impl.evaluate_candidate(vertices,faces,source_v,source_f,source_fc,source_topology,source_owner,attachment_ids,isolated,actions,cameras,ratio,kind)
+        metrics,face_id,bar=v4.impl.evaluate_candidate(vertices,faces,source_v,source_f,source_fc,source_topology,source_owner,attachment_ids,isolated,actions,cameras,ratio,kind,source_context=source_context)
         rows.append(metrics)
         if metrics["mechanical_pass"]: qualified.append((metrics["face_count"],metrics["vertex_count"],ratio,vertices,faces,face_id,bar,metrics))
     diagnostic=v4.impl.write_candidate_diagnostics(subject_id=subject_id,output_dir=output_dir,candidates=rows,

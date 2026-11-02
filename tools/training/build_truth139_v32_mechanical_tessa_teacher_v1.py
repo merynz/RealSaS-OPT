@@ -140,7 +140,30 @@ def source_object_labels(replay,source_v,source_f):
     if np.any(face_obj!=face_obj[:,:1]):raise ValueError("V32_TESSA_SOURCE_FACE_CROSSES_OBJECT")
     return labels,face_obj[:,0],set(attachments)
 
-def evaluate_candidate(v,f,source_v,source_f,source_fc,source_topology,source_face_object,attachment_ids,isolated,actions,cameras,ratio,kind):
+def _source_evaluation_identity(source_v,source_f,isolated,actions,cameras):
+    h=hashlib.sha256()
+    for value in (source_v,source_f,isolated):
+        a=np.asarray(value); h.update(str((a.dtype.str,a.shape)).encode()); h.update(np.ascontiguousarray(a).tobytes())
+    h.update(json.dumps([actions,cameras],sort_keys=True,separators=(",",":"),allow_nan=False).encode())
+    return h.hexdigest()
+
+def source_evaluation_context(source_v,source_f,isolated,actions,cameras):
+    """One exact, process-local source evaluation shared by a candidate ladder.
+
+    All candidates still measure every gate. Only source-only measurements are
+    reused; their inputs are rechecked before each use and no global cache exists.
+    """
+    selected=np.unique(np.linspace(0,len(isolated)-1,min(5,len(isolated)),dtype=np.int64)) if len(isolated) else np.empty(0,dtype=np.int64)
+    return {"identity":_source_evaluation_identity(source_v,source_f,isolated,actions,cameras),
+            "source_posed_norm":np.asarray([face_normals(p,source_f)[0] for p in isolated]),
+            "source_response":build_surface_response_arrays_v1(source_v,source_f,isolated,actions),
+            "source_strain":strain_tail(source_v,source_f,isolated),
+            "source_masks":{(int(ai),ci):project_mask(isolated[ai],source_f,camera)
+                            for ai in selected for ci,camera in enumerate(cameras)}}
+
+def evaluate_candidate(v,f,source_v,source_f,source_fc,source_topology,source_face_object,attachment_ids,isolated,actions,cameras,ratio,kind,*,source_context=None):
+    if source_context is not None and source_context["identity"]!=_source_evaluation_identity(source_v,source_f,isolated,actions,cameras):
+        raise ValueError("TESSA_SOURCE_EVALUATION_CONTEXT_DRIFT")
     scale=max(float(np.linalg.norm(source_v.max(0)-source_v.min(0))),1e-9);vertex_face,bar,dist=nearest_mapping(v,source_v,source_f);mapping_pass=bool(np.max(dist)<=scale*.01)
     candidate_vc,candidate_fc=topology_components(len(v),f);centroid=np.mean(v[f],axis=1);cand_face_source,_,_=nearest_mapping(centroid,source_v,source_f);mapped_source_component=source_fc[cand_face_source]
     component_map={}
@@ -155,18 +178,20 @@ def evaluate_candidate(v,f,source_v,source_f,source_fc,source_topology,source_fa
     vertex_obj=source_face_object[vertex_face];face_objs=vertex_obj[f];attachment_pass=bool(np.all(face_objs==face_objs[:,:1]) and attachment_ids.issubset(set(map(int,np.unique(vertex_obj)))))
     posed=transfer_positions(vertex_face,bar,source_f,isolated);rest_norm,rest_valid=face_normals(v,f);posed_norm=[];posed_valid=[]
     for p in posed:n,val=face_normals(p,f);posed_norm.append(n);posed_valid.append(val)
-    posed_norm=np.asarray(posed_norm);posed_valid=np.asarray(posed_valid);nondegenerate=bool(np.all(rest_valid) and np.all(posed_valid));source_posed_norm=np.asarray([face_normals(p,source_f)[0] for p in isolated]);dot=np.sum(posed_norm*source_posed_norm[:,cand_face_source,:],axis=-1);fold_pass=bool(np.all(dot>-.05))
+    posed_norm=np.asarray(posed_norm);posed_valid=np.asarray(posed_valid);nondegenerate=bool(np.all(rest_valid) and np.all(posed_valid));source_posed_norm=source_context["source_posed_norm"] if source_context is not None else np.asarray([face_normals(p,source_f)[0] for p in isolated]);dot=np.sum(posed_norm*source_posed_norm[:,cand_face_source,:],axis=-1);fold_pass=bool(np.all(dot>-.05))
     selected=np.unique(np.linspace(0,len(isolated)-1,min(5,len(isolated)),dtype=np.int64)) if len(isolated) else np.empty(0,dtype=np.int64);self_intersection_pass=not has_self_intersection(v,f)
     if self_intersection_pass:
         for ai in selected:
             if has_self_intersection(posed[ai],f):self_intersection_pass=False;break
-    src_resp=build_surface_response_arrays_v1(source_v,source_f,isolated,actions);cand_resp=build_surface_response_arrays_v1(v,f,posed,actions);expected_nr=src_resp["surface_nonrigid_response"][cand_face_source];expected_en=src_resp["surface_response_energy"][cand_face_source]
+    src_resp=source_context["source_response"] if source_context is not None else build_surface_response_arrays_v1(source_v,source_f,isolated,actions);cand_resp=build_surface_response_arrays_v1(v,f,posed,actions);expected_nr=src_resp["surface_nonrigid_response"][cand_face_source];expected_en=src_resp["surface_response_energy"][cand_face_source]
     def nrms(a,b):return float(np.sqrt(np.mean((a-b)**2))/max(float(np.sqrt(np.mean(b*b))),1e-8))
     response_nrms=nrms(cand_resp["surface_nonrigid_response"],expected_nr);energy_nrms=nrms(cand_resp["surface_response_energy"],expected_en);response_pass=response_nrms<=.35 and energy_nrms<=.35
-    src_valid,src_strain,src_area=strain_tail(source_v,source_f,isolated);cand_valid,cand_strain,cand_area=strain_tail(v,f,posed);strain_pass=bool(cand_valid and src_valid and cand_strain<=src_strain+.20 and cand_area<=src_area+.20)
+    src_valid,src_strain,src_area=source_context["source_strain"] if source_context is not None else strain_tail(source_v,source_f,isolated);cand_valid,cand_strain,cand_area=strain_tail(v,f,posed);strain_pass=bool(cand_valid and src_valid and cand_strain<=src_strain+.20 and cand_area<=src_area+.20)
     ious=[]
     for ai in selected:
-        for camera in cameras:ious.append(silhouette_iou(project_mask(isolated[ai],source_f,camera),project_mask(posed[ai],f,camera)))
+        for ci,camera in enumerate(cameras):
+            source_mask=source_context["source_masks"][(int(ai),ci)] if source_context is not None else project_mask(isolated[ai],source_f,camera)
+            ious.append(silhouette_iou(source_mask,project_mask(posed[ai],f,camera)))
     silhouette_min=float(min(ious) if ious else 1.0);silhouette_pass=silhouette_min>=.94
     mechanical_pass=all([mapping_pass,component_pass,topology_pass,attachment_pass,nondegenerate,fold_pass,self_intersection_pass,response_pass,strain_pass,silhouette_pass])
     metrics={"candidate_evaluation_contract":"MEASURED_ALL_KINDS_NO_FALLBACK_OVERRIDE_V1","ratio":float(ratio),"kind":kind,"vertex_count":int(len(v)),"face_count":int(len(f)),"max_surface_distance_over_scale":float(np.max(dist)/scale),"mapping_pass":mapping_pass,"component_pass":component_pass,"topology_hole_crack_preservation_pass":topology_pass,"attachment_object_separation_pass":attachment_pass,"nondegenerate_all_actions_pass":nondegenerate,"inversion_foldthrough_pass":fold_pass,"self_intersection_pass":self_intersection_pass,"response_nrms":response_nrms,"energy_nrms":energy_nrms,"response_pass":response_pass,"strain_p99_log_stretch":cand_strain,"area_p99_log_ratio":cand_area,"strain_jacobian_tail_pass":strain_pass,"motion_view_silhouette_min_iou":silhouette_min,"silhouette_pass":silhouette_pass,"mechanical_pass":mechanical_pass}

@@ -59,7 +59,7 @@ def runtime_environment(root, authority, library_dir):
             "REALSAS_TEMPORAL_ADDRESS": "127.0.0.1:7233", "REALSAS_TEMPORAL_NAMESPACE": "default",
             "LD_LIBRARY_PATH": library_dir, "PYTHONUNBUFFERED": "1",
             "OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1",
-            "REALSAS_ENGINE_MAX_CONCURRENT_ACTIVITIES": "4"}
+            "REALSAS_ENGINE_MAX_CONCURRENT_ACTIVITIES": "1"}
 
 
 def python_launcher(python, library_dir):

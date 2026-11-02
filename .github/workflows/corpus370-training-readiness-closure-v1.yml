@@ -83,6 +83,8 @@ jobs:
             tests/corpus/test_corpus370_materialization_checkpoint_v1.py \
             tests/corpus/test_corpus370_numeric_projection_v1.py \
             tests/corpus/test_corpus370_numeric_optimization_v1.py \
+            tests/corpus/test_bounded_surface_response_v1.py \
+            tests/corpus/test_corpus370_compute_worker_v1.py \
             tests/corpus/test_corpus370_sealed_materialization_v1.py \
             tests/corpus/test_corpus370_materialization_bundle_v1.py \
             tests/corpus/test_corpus370_materialization_notebook_v1.py \

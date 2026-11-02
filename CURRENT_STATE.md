@@ -1,3 +1,32 @@
+> **Resource/offload repair — 2026-11-02:** Native runner updated to 2.338.2,
+> connected and accepted readback job125536951888, which completed successfully.
+> Its 20:39 UTC readback exposed Engine `oom-kill`, not merely runner unavailability.
+> Latest witnessed V4 state: 33 COMPLETED / 1 FAILED / 260 OPEN; IRIS33 / TESSA2
+> are partial court coverage, NOT final eligibility. The old queue-only diagnosis
+> below is historical. The user explicitly reaffirmed notebook offload when the
+> self-hosted machine cannot carry the workload.
+>
+> PR317 bounds the action/face working tensors and nearest queries, preserves
+> full-mesh scale/global adjacency/all samples, caches exact source-only TESSA
+> measurements, and batches the independent causal court. Cross-platform golden
+> floats use1e-13 equality tolerance (observed LAPACK1ULP), far below unchanged
+> scientific court thresholds; masks/addresses remain exact. Resource MemoryError
+> now escapes family accounting instead of becoming a scientific subject FAIL.
+>
+> The exact Go lifecycle descriptor targets ONLY V4 and preserves completed
+> artifacts. Automatic native continuation is DISABLED. Deployment uses one native
+> slot; heavy corpus work moves to a separate, serial high-RAM compute notebook.
+> The read-only compute export request pins exact V4 PREPARATION, all294 member
+> Attempt/SubjectInput identities, unchanged inputs/evaluator bytes, and the76
+> explicit preparation failures. Export workflow publishes the real capsule and
+> generated Run All notebook to Drive only after canonical-main merge.
+> Worker outputs are raw, persisted per subject, with exact resume hashes and
+> original parent identities. No Registry qualification or training authorization
+> is minted by the notebook. Native import/independent validation, unresolved global
+> sign/graphics, final authority matrix, actual lineage-safe split, target projection
+> and the final materialization notebook remain required. Do not call the compute
+> notebook a completed corpus materialization or claim that imports already exist.
+>
 > **Notebook delivery checkpoint — 2026-11-02 23:20 Europe/Istanbul:**
 > Canonical/deployed main remains `c16d9a17d73a308322ead20e065fa54d3f2be019`.
 > Active exact294 Campaign is `1613ca08-c05f-4df4-96d2-a675d142c70c`, EngineRelease

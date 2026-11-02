@@ -1,0 +1,10 @@
+{
+  "schema": "RealSaS.Corpus370ComputeExportRequest.v1",
+  "preparation": {
+    "path": "/home/monster/realsas_authority/corpus370_truth_preparation/c16d9a17d73a308322ead20e065fa54d3f2be019_isolated/PREPARATION.json",
+    "sha256": "451189d0d2221119727ea0015f6b43de83befd759f2c92a4339cbd5898c1fba8"
+  },
+  "drive_folder": "corpus370_compute_worker_v1",
+  "compute_only": true,
+  "training_authorized": false
+}

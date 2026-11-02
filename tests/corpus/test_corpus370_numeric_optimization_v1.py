@@ -8,14 +8,16 @@ from tools.corpus.validate_causal_response_authority_v1 import deformation_measu
 from tools.training import build_truth139_v32_mechanical_tessa_teacher_v1 as tessa
 
 
-def test_action_batching_preserves_every_frozen_scalar_output_bit():
+def test_action_batching_preserves_frozen_scalar_masks_and_numeric_measurements():
     path=Path('tests/fixtures/corpus370_numeric_optimization_v1/response_reference.json')
     reference=json.loads(path.read_text())
     assert reference['baseline_main_sha']=='c16d9a17d73a308322ead20e065fa54d3f2be019'
     args=[np.array(reference[k]) for k in ('rest','faces','posed','weights')]+[reference['scale']]
     result=deformation_measure(*args)
     for actual,expected in zip(result,reference['expected']):
-        np.testing.assert_array_equal(actual,np.asarray(expected))
+        expected=np.asarray(expected)
+        if actual.dtype.kind in 'biu':np.testing.assert_array_equal(actual,expected)
+        else:np.testing.assert_allclose(actual,expected,rtol=1e-13,atol=1e-13)
 
 
 def test_source_ladder_cache_keeps_all_candidate_metrics_and_bindings_exact():

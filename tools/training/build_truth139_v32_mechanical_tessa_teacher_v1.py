@@ -14,7 +14,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 from models.iris.truth.measurements_v1 import triangle_metric_strain
-from models.iris.truth.presentation_response_v1 import build_surface_response_arrays_v1
+from tools.training.bounded_surface_response_v1 import build_surface_response_arrays_v1
 from tools.training.truth139_v32_spatial_index_v1 import new_rtree3
 from tools.training.tessa_candidate_diagnostics_v1 import write_candidate_diagnostics
 
@@ -69,9 +69,13 @@ def topology_signature(vcount,faces,face_component):
 
 def barycentric(points,tri):
     a=tri[:,0];b=tri[:,1];c=tri[:,2];v0=b-a;v1=c-a;v2=points-a;d00=np.sum(v0*v0,1);d01=np.sum(v0*v1,1);d11=np.sum(v1*v1,1);d20=np.sum(v2*v0,1);d21=np.sum(v2*v1,1);den=d00*d11-d01*d01;v=np.divide(d11*d20-d01*d21,den,out=np.zeros_like(den),where=np.abs(den)>1e-20);w=np.divide(d00*d21-d01*d20,den,out=np.zeros_like(den),where=np.abs(den)>1e-20);return np.stack([1-v-w,v,w],1)
-def nearest_mapping(candidate,source_v,source_f):
+def nearest_mapping(candidate,source_v,source_f,*,query_chunk_size=64):
     import trimesh
-    mesh=trimesh.Trimesh(vertices=source_v,faces=source_f,process=False);closest,distance,face_id=trimesh.proximity.closest_point(mesh,candidate);face_id=np.asarray(face_id,dtype=np.int32);bar=barycentric(np.asarray(closest),source_v[source_f[face_id]]);return face_id,bar.astype(np.float32),np.asarray(distance,dtype=np.float64)
+    if type(query_chunk_size) is not int or query_chunk_size<1:raise ValueError('TESSA_QUERY_CHUNK_REQUIRED')
+    mesh=trimesh.Trimesh(vertices=source_v,faces=source_f,process=False)
+    rows=[trimesh.proximity.closest_point(mesh,candidate[i:i+query_chunk_size]) for i in range(0,len(candidate),query_chunk_size)]
+    closest,distance,face_id=[np.concatenate([r[k] for r in rows]) for k in range(3)]
+    face_id=np.asarray(face_id,dtype=np.int32);bar=barycentric(np.asarray(closest),source_v[source_f[face_id]]);return face_id,bar.astype(np.float32),np.asarray(distance,dtype=np.float64)
 def simplify_component(v,f,ratio):
     if ratio>=.999:return v.copy(),f.copy()
     import fast_simplification
@@ -93,7 +97,11 @@ def simplify_by_component(v,f,ratios,fc):
         except Exception:continue
     return out
 def transfer_positions(face_id,bar,source_f,posed):
-    tri=source_f[face_id];return np.sum(posed[:,tri,:]*bar[None,:,:,None],axis=2)
+    result=np.empty((len(posed),len(face_id),3),dtype=np.result_type(posed,bar))
+    for start in range(0,len(face_id),128):
+        stop=start+128;tri=source_f[face_id[start:stop]]
+        result[:,start:stop]=np.sum(posed[:,tri,:]*bar[None,start:stop,:,None],axis=2)
+    return result
 def face_normals(v,f):
     tri=v[f];n=np.cross(tri[:,1]-tri[:,0],tri[:,2]-tri[:,0]);l=np.linalg.norm(n,axis=1);valid=l>1e-12;out=np.zeros_like(n);out[valid]=n[valid]/l[valid,None];return out,valid
 
@@ -120,8 +128,14 @@ def has_self_intersection(v,f):
     return False
 
 def strain_tail(v,f,posed):
-    rest=v[f];posed_tri=posed[:,f,:];rr=np.broadcast_to(rest[None,...],posed_tri.shape);scale=max(float(np.linalg.norm(v.max(0)-v.min(0))),1e-9);strain,area,valid=triangle_metric_strain(rr,posed_tri,degeneracy_tolerance=1e-10*scale*scale)
-    c=2*strain+np.eye(2);eig=np.linalg.eigvalsh(c);eig=np.clip(eig,1e-12,None);stretch=np.sqrt(eig);dist=np.max(np.abs(np.log(stretch)),axis=-1);area_log=np.abs(np.log(np.clip(area,1e-12,None)));return bool(np.all(valid)),float(np.quantile(dist[valid],.99)) if np.any(valid) else float("inf"),float(np.quantile(area_log[valid],.99)) if np.any(valid) else float("inf")
+    scale=max(float(np.linalg.norm(v.max(0)-v.min(0))),1e-9);tails=[];areas=[];all_valid=True
+    for start in range(0,len(f),128):
+        block=f[start:start+128];rest=v[block];posed_tri=posed[:,block,:];rr=np.broadcast_to(rest[None,...],posed_tri.shape)
+        strain,area,valid=triangle_metric_strain(rr,posed_tri,degeneracy_tolerance=1e-10*scale*scale)
+        c=2*strain+np.eye(2);eig=np.linalg.eigvalsh(c);eig=np.clip(eig,1e-12,None);stretch=np.sqrt(eig);dist=np.max(np.abs(np.log(stretch)),axis=-1);area_log=np.abs(np.log(np.clip(area,1e-12,None)))
+        all_valid=all_valid and bool(np.all(valid));tails.append(dist[valid]);areas.append(area_log[valid])
+    tail=np.concatenate(tails);area=np.concatenate(areas)
+    return all_valid,float(np.quantile(tail,.99)) if len(tail) else float('inf'),float(np.quantile(area,.99)) if len(area) else float('inf')
 def project_mask(vertices,faces,camera,size=96):
     origin=np.asarray(camera["origin"],dtype=np.float64);right=np.asarray(camera["right"],dtype=np.float64);up=np.asarray(camera["screen_up"],dtype=np.float64);half=float(camera["half_extent"]);rel=vertices-origin[None,:];x=rel@right/half;y=rel@up/half;px=(x*.5+.5)*(size-1);py=(.5-y*.5)*(size-1);im=Image.new("1",(size,size),0);draw=ImageDraw.Draw(im)
     for tri in faces:draw.polygon([(float(px[i]),float(py[i])) for i in tri],fill=1)

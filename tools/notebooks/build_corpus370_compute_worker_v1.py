@@ -27,6 +27,37 @@ def effective_memory_gib(meminfo_text=None,cgroup_limits=None):
     return min(limits)/(1024**3)
 
 
+def preserve_interrupted_work(seal,capsule_identity,output,authority_root):
+    """Keep unsealed partial bytes, then retry only the incomplete compute slot."""
+    import hashlib, shutil, time, zipfile
+    output=Path(output);authority_root=Path(authority_root).resolve()
+    recovered=[]
+    for subject in seal['subjects']:
+        if (output/(subject['subject_id']+'.json')).exists():continue
+        run_id='COMPUTE_'+capsule_identity[:16]+'_'+subject['platform_subject_id']
+        root=authority_root/'runs'/run_id
+        if not root.exists():continue
+        if root.resolve().parent!=(authority_root/'runs').resolve():raise ValueError('WORKER_RECOVERY_PATH_ESCAPE')
+        recovery=output/'recovery';recovery.mkdir(parents=True,exist_ok=True)
+        archive=recovery/(run_id+'_'+str(time.time_ns())+'.zip')
+        staged=archive.with_suffix('.partial.zip')
+        with zipfile.ZipFile(staged,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=1) as zipped:
+            for path in sorted(root.rglob('*')):
+                if path.is_file():zipped.write(path,path.relative_to(root).as_posix())
+        staged.replace(archive)
+        digest=hashlib.sha256()
+        with archive.open('rb') as stream:
+            for block in iter(lambda:stream.read(8<<20),b''):digest.update(block)
+        receipt={'status':'UNSEALED_INTERRUPTED_COMPUTE_PRESERVED__NO_TRUTH_FAILURE',
+                 'subject_id':subject['subject_id'],'parent_attempt_id':subject['parent_attempt_id'],
+                 'capsule_identity':capsule_identity,'archive_sha256':digest.hexdigest(),
+                 'qualification_minted':False,'training_authorized':False}
+        archive.with_suffix('.json').write_text(json.dumps(receipt,sort_keys=True,indent=2)+'\n')
+        shutil.rmtree(root)
+        recovered.append(receipt)
+    return recovered
+
+
 def build(seal_path,receipt_path,drive_folder):
     seal=json.loads(seal_path.read_text());receipt=json.loads(receipt_path.read_text())
     require(seal.get('schema')=='RealSaS.Corpus370ComputeCapsule.v1'
@@ -107,7 +138,11 @@ print('INPUTS_PASS',round(time.monotonic()-START,1),'seconds')
 script="""import json,sys
 from pathlib import Path
 from tools.corpus.run_corpus370_compute_worker_v1 import run
+from compiler.realsas_compiler_core.hashing import content_sha256
+"""+inspect.getsource(preserve_interrupted_work)+"""
 seal=json.loads((Path(sys.argv[1])/'COMPUTE_CAPSULE.json').read_text())
+recovered=preserve_interrupted_work(seal,content_sha256(seal),Path(sys.argv[2]),Path('/home/monster/realsas_authority'))
+if recovered:print('INTERRUPTED_COMPUTE_PRESERVED',len(recovered),flush=True)
 report=run(seal,Path(sys.argv[2]),Path(sys.argv[1]))
 print(json.dumps({k:report[k] for k in ('accounted_subject_count','candidate_subject_count','elapsed_seconds','qualification_minted','training_authorized')},indent=2))
 """

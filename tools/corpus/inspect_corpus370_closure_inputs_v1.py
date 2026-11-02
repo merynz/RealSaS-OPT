@@ -108,13 +108,14 @@ def superseded_campaigns(preparations):
         if (ref.get('path') != str(path) or not path.is_file() or ref.get('sha256') != sha256(path)
                 or child.get('exact_source_roster_sha256') != parent.get('exact_source_roster_sha256')
                 or child.get('member_count') != parent.get('member_count')
-                or child.get('superseded_stage_ids') != ['49_SUBJECT_TRUTH_FAMILIES']):
+                or child.get('superseded_stage_ids') not in ([], ['49_SUBJECT_TRUTH_FAMILIES'])):
             raise ValueError('READBACK_CONTINUATION_SCOPE_DRIFT')
         old_members = {r['subject_id'] for r in parent_entry['CAMPAIGN_BOOTSTRAP.json']['run_bindings']}
         new_members = {r['subject_id'] for r in entry['CAMPAIGN_BOOTSTRAP.json']['run_bindings']}
         if old_members != new_members or len(old_members) != parent['member_count']:
             raise ValueError('READBACK_CONTINUATION_MEMBER_DRIFT')
-        replaced[parent_id] = child_id
+        if child.get('superseded_stage_ids'):
+            replaced[parent_id] = child_id
     return replaced
 
 

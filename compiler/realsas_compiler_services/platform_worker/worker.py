@@ -15,7 +15,6 @@ from PIL import Image
 from temporalio import activity
 from temporalio.client import Client
 from temporalio.worker import Worker
-from temporalio.exceptions import ApplicationError
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
@@ -304,6 +303,7 @@ async def _isolated(operation, request):
     try:
         return await run_isolated(operation, request, heartbeat=activity.heartbeat)
     except IsolatedActivityError as exc:
+        from temporalio.exceptions import ApplicationError
         raise ApplicationError(str(exc), type='EngineIsolatedActivityFailure', non_retryable=True) from exc
 
 

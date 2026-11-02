@@ -2,6 +2,8 @@ package dispatch
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"strings"
@@ -10,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
+	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 	commonpb "go.temporal.io/api/common/v1"
 	enumspb "go.temporal.io/api/enums/v1"
 	workflowpb "go.temporal.io/api/workflow/v1"
@@ -61,7 +64,11 @@ func TestCampaignCancellationBindsTemporalRunsPreservesCompletedMemberAndEvidenc
 	defer pool.Close()
 	releaseID, campaignID := uuid.New(), uuid.New()
 	code := strings.Repeat("a", 40)
-	if _, err = pool.Exec(ctx, `INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at) VALUES ($1,$2,$3,'RESEARCH','ci',now())`, releaseID, "cancel-"+releaseID.String(), hex64()); err != nil {
+	releaseDigest := sha256.Sum256([]byte(releaseID.String()))
+	if _, err = pool.Exec(ctx, `INSERT INTO engine_releases(id,name,release_sha256,purpose,created_by,sealed_at) VALUES ($1,$2,$3,'RESEARCH','ci',now())`, releaseID, "cancel-"+releaseID.String(), hex.EncodeToString(releaseDigest[:])); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = release.BindCanonicalMain(ctx, pool, releaseID, code, "ci"); err != nil {
 		t.Fatal(err)
 	}
 	unique := strings.Repeat("a", 32) + strings.ReplaceAll(uuid.NewString(), "-", "")

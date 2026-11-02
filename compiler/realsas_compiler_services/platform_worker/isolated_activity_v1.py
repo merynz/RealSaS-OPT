@@ -56,7 +56,7 @@ async def terminate_group(process, *, grace_seconds=5):
 
 
 def activity_capacity():
-    value = int(os.environ.get('REALSAS_ENGINE_MAX_CONCURRENT_ACTIVITIES', '4'))
+    value = int(os.environ.get('REALSAS_ENGINE_MAX_CONCURRENT_ACTIVITIES', '1'))
     if not 1 <= value <= 64:
         raise ValueError('ENGINE_ACTIVITY_CAPACITY_OUT_OF_RANGE')
     return value

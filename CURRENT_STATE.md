@@ -1,3 +1,66 @@
+> **Resource/offload repair — 2026-11-02:** Native runner updated to 2.338.2,
+> connected and accepted readback job125536951888, which completed successfully.
+> Its 20:39 UTC readback exposed Engine `oom-kill`, not merely runner unavailability.
+> Latest witnessed V4 state: 33 COMPLETED / 1 FAILED / 260 OPEN; IRIS33 / TESSA2
+> are partial court coverage, NOT final eligibility. The old queue-only diagnosis
+> below is historical. The user explicitly reaffirmed notebook offload when the
+> self-hosted machine cannot carry the workload.
+>
+> PR317 bounds the action/face working tensors and nearest queries, preserves
+> full-mesh scale/global adjacency/all samples, caches exact source-only TESSA
+> measurements, and batches the independent causal court. Cross-platform golden
+> floats use1e-13 equality tolerance (observed LAPACK1ULP), far below unchanged
+> scientific court thresholds; masks/addresses remain exact. Resource MemoryError
+> now escapes family accounting instead of becoming a scientific subject FAIL.
+>
+> The exact Go lifecycle descriptor targets ONLY V4 and preserves completed
+> artifacts. Automatic native continuation is DISABLED. Deployment uses one native
+> slot; heavy corpus work moves to a separate, serial high-RAM compute notebook.
+> The read-only compute export request pins exact V4 PREPARATION, all294 member
+> Attempt/SubjectInput identities, unchanged inputs/evaluator bytes, and the76
+> explicit preparation failures. Export workflow publishes the real capsule and
+> generated Run All notebook to Drive only after canonical-main merge.
+> Worker outputs are raw, persisted per subject, with exact resume hashes and
+> original parent identities. No Registry qualification or training authorization
+> is minted by the notebook. Native import/independent validation, unresolved global
+> sign/graphics, final authority matrix, actual lineage-safe split, target projection
+> and the final materialization notebook remain required. Do not call the compute
+> notebook a completed corpus materialization or claim that imports already exist.
+>
+> **Notebook delivery checkpoint — 2026-11-02 23:20 Europe/Istanbul:**
+> Canonical/deployed main remains `c16d9a17d73a308322ead20e065fa54d3f2be019`.
+> Active exact294 Campaign is `1613ca08-c05f-4df4-96d2-a675d142c70c`, EngineRelease
+> `b0f6500e-d4af-4c7b-bdc1-1d105fad60aa`; do not blindly resubmit or cancel it.
+> PREPARATION at `corpus370_truth_preparation/c16d9a17d73a308322ead20e065fa54d3f2be019_isolated/PREPARATION.json`
+> has SHA `451189d0d2221119727ea0015f6b43de83befd759f2c92a4339cbd5898c1fba8`.
+> Last verified live readback at 20:19 Istanbul (17:19 UTC): 26 COMPLETED /
+> 268 OPEN / no failed Attempts. Current court coverage was IRIS26 / TESSA2,
+> including26 surface+normal,3 causal response,2 mechanical teachers; this is
+> partial evidence, NOT final corpus eligibility or a sealed split. All global
+> sign and graphics cells remain UNKNOWN; lineage/split and the final projection
+> index still require closure. The final production notebook has not been emitted.
+>
+> A new readback requested at 23:10 Istanbul is still QUEUED without any active
+> workflow in this repository. The native `realsas-wsl-1660ti` runner is not
+> accepting that job; physical host/runner availability is not observable through
+> the available read-only repository APIs. Do not claim that measurements are
+> currently advancing or that the runner is definitively offline. Agent has no
+> remote WSL terminal. Restore authorized runner availability, let the already
+> queued readback finish, then inspect the actual current Campaign state before
+> choosing any lifecycle change. Preserve every original scope and court FAIL.
+>
+> Review branch `corpus370-numeric-throughput-v1` prepares two numeric cost fixes:
+> action-batched independent response measurement (unchanged thresholds/basis/
+> reduction order, all8 outputs bit-identical to frozen scalar regression), and
+> one hash-checked process-local source evaluation per TESSA candidate ladder.
+> Every candidate gate still runs; source masks/normals/response/strain are reused
+> only for exact input identity. Local600-face/64-action kernel benchmark:
+> .89117s scalar vs .06429s batched (~13.86x), NOT an end-to-end corpus estimate.
+> 17 focused numeric/court/teacher/scope tests passed. Implementation comparison
+> changes ONLY Stage49; stages01–08/47/48 retain identity. Code has NOT been
+> deployed or used to mint new family authority. Do not merge it over an unknown
+> active scope or schedule a duplicate corpus simply to report a speedup.
+>
 > **Materialization execution checkpoint — 2026-11-02 15:43 UTC:**
 > Main is `2f92a42cdad18d43797f98c66c7dd2eeda8f5dc9` (PR314/315 merged).
 > Both exact-main deployments and real API→Engine/reuse smokes passed. Original

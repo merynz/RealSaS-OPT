@@ -11,6 +11,16 @@ This repository must be resumable without conversational memory.
 
 ## Platform evolution is required, not an excuse to stop
 
+Resource capacity is an execution choice, not a scientific admission criterion.
+An online self-hosted runner does not prove that it can carry a corpus workload.
+After observed OOM or unsuitable resource capacity, move heavy research to the
+notebook/Colab compute-worker lane with exact input/release/Attempt bindings,
+bounded memory, serial subject checkpoints and resumable persisted outputs.
+Keep self-hosted coordination/lightweight validation separate. Do not repeatedly
+restart or resubmit the same heavy workload on the inadequate host. A notebook
+returns unqualified evidence; Platform import and independent courts still own
+admission. Resource exhaustion must not be counted as a subject truth failure.
+
 The Platform and its orchestration are evolving engineering components, not an
 immutable constraint on authorized research. If a real research task exposes a
 missing capability, broken adapter, unsuitable lifecycle or incomplete execution

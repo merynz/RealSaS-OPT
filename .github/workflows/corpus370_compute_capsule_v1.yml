@@ -1,0 +1,58 @@
+name: corpus370-compute-capsule-v1
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'canonical/CORPUS370_COMPUTE_EXPORT_V1.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-compute-capsule-v1
+  cancel-in-progress: false
+jobs:
+  export:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      OUTPUT: /home/monster/realsas_authority/corpus370_compute_exports/${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Export exact existing inputs; do not submit scientific computation
+        run: |
+          /home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from tools.corpus.export_corpus370_compute_capsule_v1 import build
+          from tools.notebooks.build_corpus370_compute_worker_v1 import build as notebook
+          cfg=json.loads(Path('canonical/CORPUS370_COMPUTE_EXPORT_V1.json').read_text())
+          out=Path(os.environ['OUTPUT'])
+          receipt=build(Path(cfg['preparation']['path']),cfg['preparation']['sha256'],
+              authority_root=Path('/home/monster/realsas_authority'),
+              platform_root=Path('/home/monster/realsas_platform'),repo=Path.cwd(),output=out,
+              api_root='http://127.0.0.1:8080')
+          drive_folder=cfg['drive_folder']+'/'+receipt['code_sha']
+          value=notebook(out/'COMPUTE_CAPSULE.json',out/'COMPUTE_CAPSULE_RECEIPT.json',drive_folder)
+          (out/'Corpus370_Compute_Worker_Run_All_v1.ipynb').write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n')
+          (out/'DRIVE_FOLDER.txt').write_text(drive_folder+'\n')
+          print(json.dumps(receipt,indent=2))
+          PY
+      - name: Publish full input package then notebook
+        run: |
+          DRIVE_FOLDER="$(cat "$OUTPUT/DRIVE_FOLDER.txt")"
+          rclone copyto "$OUTPUT/CORPUS370_COMPUTE_CAPSULE_V1.zip" "gdrive:$DRIVE_FOLDER/CORPUS370_COMPUTE_CAPSULE_V1.zip" --checksum --stats 30s
+          for NAME in COMPUTE_CAPSULE_RECEIPT.json COMPUTE_CAPSULE.json Corpus370_Compute_Worker_Run_All_v1.ipynb; do
+            rclone copyto "$OUTPUT/$NAME" "gdrive:$DRIVE_FOLDER/$NAME" --checksum
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-compute-capsule-receipt-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/COMPUTE_CAPSULE_RECEIPT.json
+            ${{ env.OUTPUT }}/COMPUTE_CAPSULE.json
+            ${{ env.OUTPUT }}/Corpus370_Compute_Worker_Run_All_v1.ipynb
+          if-no-files-found: error
+          retention-days: 30

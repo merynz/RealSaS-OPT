@@ -72,6 +72,9 @@ def measure_subject_families(*, sid, source_sha, scene_path, replay_path,
             claim = {'status': 'PASS', 'reason_codes': [],
                      'evidence_refs': [ref(candidate_path, json.loads(candidate_path.read_text())['schema'])],
                      'court': {**ref(path, result['schema']), 'status': 'PASS'}}
+        except MemoryError:
+            # Resource exhaustion is execution failure, never a scientific FAIL.
+            raise
         except Exception as exc:
             failure = {'schema': 'RealSaS.CorpusFamilyExecutionFailure.v1',
                        'status': 'FAIL', 'subject_id': sid, 'source_sha256': source_sha,

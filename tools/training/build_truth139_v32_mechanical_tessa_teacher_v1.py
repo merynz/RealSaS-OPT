@@ -14,7 +14,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 from models.iris.truth.measurements_v1 import triangle_metric_strain
-from models.iris.truth.presentation_response_v1 import build_surface_response_arrays_v1
+from tools.training.bounded_surface_response_v1 import build_surface_response_arrays_v1
 from tools.training.truth139_v32_spatial_index_v1 import new_rtree3
 from tools.training.tessa_candidate_diagnostics_v1 import write_candidate_diagnostics
 
@@ -69,9 +69,13 @@ def topology_signature(vcount,faces,face_component):
 
 def barycentric(points,tri):
     a=tri[:,0];b=tri[:,1];c=tri[:,2];v0=b-a;v1=c-a;v2=points-a;d00=np.sum(v0*v0,1);d01=np.sum(v0*v1,1);d11=np.sum(v1*v1,1);d20=np.sum(v2*v0,1);d21=np.sum(v2*v1,1);den=d00*d11-d01*d01;v=np.divide(d11*d20-d01*d21,den,out=np.zeros_like(den),where=np.abs(den)>1e-20);w=np.divide(d00*d21-d01*d20,den,out=np.zeros_like(den),where=np.abs(den)>1e-20);return np.stack([1-v-w,v,w],1)
-def nearest_mapping(candidate,source_v,source_f):
+def nearest_mapping(candidate,source_v,source_f,*,query_chunk_size=64):
     import trimesh
-    mesh=trimesh.Trimesh(vertices=source_v,faces=source_f,process=False);closest,distance,face_id=trimesh.proximity.closest_point(mesh,candidate);face_id=np.asarray(face_id,dtype=np.int32);bar=barycentric(np.asarray(closest),source_v[source_f[face_id]]);return face_id,bar.astype(np.float32),np.asarray(distance,dtype=np.float64)
+    if type(query_chunk_size) is not int or query_chunk_size<1:raise ValueError('TESSA_QUERY_CHUNK_REQUIRED')
+    mesh=trimesh.Trimesh(vertices=source_v,faces=source_f,process=False)
+    rows=[trimesh.proximity.closest_point(mesh,candidate[i:i+query_chunk_size]) for i in range(0,len(candidate),query_chunk_size)]
+    closest,distance,face_id=[np.concatenate([r[k] for r in rows]) for k in range(3)]
+    face_id=np.asarray(face_id,dtype=np.int32);bar=barycentric(np.asarray(closest),source_v[source_f[face_id]]);return face_id,bar.astype(np.float32),np.asarray(distance,dtype=np.float64)
 def simplify_component(v,f,ratio):
     if ratio>=.999:return v.copy(),f.copy()
     import fast_simplification
@@ -93,7 +97,11 @@ def simplify_by_component(v,f,ratios,fc):
         except Exception:continue
     return out
 def transfer_positions(face_id,bar,source_f,posed):
-    tri=source_f[face_id];return np.sum(posed[:,tri,:]*bar[None,:,:,None],axis=2)
+    result=np.empty((len(posed),len(face_id),3),dtype=np.result_type(posed,bar))
+    for start in range(0,len(face_id),128):
+        stop=start+128;tri=source_f[face_id[start:stop]]
+        result[:,start:stop]=np.sum(posed[:,tri,:]*bar[None,start:stop,:,None],axis=2)
+    return result
 def face_normals(v,f):
     tri=v[f];n=np.cross(tri[:,1]-tri[:,0],tri[:,2]-tri[:,0]);l=np.linalg.norm(n,axis=1);valid=l>1e-12;out=np.zeros_like(n);out[valid]=n[valid]/l[valid,None];return out,valid
 
@@ -120,8 +128,14 @@ def has_self_intersection(v,f):
     return False
 
 def strain_tail(v,f,posed):
-    rest=v[f];posed_tri=posed[:,f,:];rr=np.broadcast_to(rest[None,...],posed_tri.shape);scale=max(float(np.linalg.norm(v.max(0)-v.min(0))),1e-9);strain,area,valid=triangle_metric_strain(rr,posed_tri,degeneracy_tolerance=1e-10*scale*scale)
-    c=2*strain+np.eye(2);eig=np.linalg.eigvalsh(c);eig=np.clip(eig,1e-12,None);stretch=np.sqrt(eig);dist=np.max(np.abs(np.log(stretch)),axis=-1);area_log=np.abs(np.log(np.clip(area,1e-12,None)));return bool(np.all(valid)),float(np.quantile(dist[valid],.99)) if np.any(valid) else float("inf"),float(np.quantile(area_log[valid],.99)) if np.any(valid) else float("inf")
+    scale=max(float(np.linalg.norm(v.max(0)-v.min(0))),1e-9);tails=[];areas=[];all_valid=True
+    for start in range(0,len(f),128):
+        block=f[start:start+128];rest=v[block];posed_tri=posed[:,block,:];rr=np.broadcast_to(rest[None,...],posed_tri.shape)
+        strain,area,valid=triangle_metric_strain(rr,posed_tri,degeneracy_tolerance=1e-10*scale*scale)
+        c=2*strain+np.eye(2);eig=np.linalg.eigvalsh(c);eig=np.clip(eig,1e-12,None);stretch=np.sqrt(eig);dist=np.max(np.abs(np.log(stretch)),axis=-1);area_log=np.abs(np.log(np.clip(area,1e-12,None)))
+        all_valid=all_valid and bool(np.all(valid));tails.append(dist[valid]);areas.append(area_log[valid])
+    tail=np.concatenate(tails);area=np.concatenate(areas)
+    return all_valid,float(np.quantile(tail,.99)) if len(tail) else float('inf'),float(np.quantile(area,.99)) if len(area) else float('inf')
 def project_mask(vertices,faces,camera,size=96):
     origin=np.asarray(camera["origin"],dtype=np.float64);right=np.asarray(camera["right"],dtype=np.float64);up=np.asarray(camera["screen_up"],dtype=np.float64);half=float(camera["half_extent"]);rel=vertices-origin[None,:];x=rel@right/half;y=rel@up/half;px=(x*.5+.5)*(size-1);py=(.5-y*.5)*(size-1);im=Image.new("1",(size,size),0);draw=ImageDraw.Draw(im)
     for tri in faces:draw.polygon([(float(px[i]),float(py[i])) for i in tri],fill=1)
@@ -140,7 +154,30 @@ def source_object_labels(replay,source_v,source_f):
     if np.any(face_obj!=face_obj[:,:1]):raise ValueError("V32_TESSA_SOURCE_FACE_CROSSES_OBJECT")
     return labels,face_obj[:,0],set(attachments)
 
-def evaluate_candidate(v,f,source_v,source_f,source_fc,source_topology,source_face_object,attachment_ids,isolated,actions,cameras,ratio,kind):
+def _source_evaluation_identity(source_v,source_f,isolated,actions,cameras):
+    h=hashlib.sha256()
+    for value in (source_v,source_f,isolated):
+        a=np.asarray(value); h.update(str((a.dtype.str,a.shape)).encode()); h.update(np.ascontiguousarray(a).tobytes())
+    h.update(json.dumps([actions,cameras],sort_keys=True,separators=(",",":"),allow_nan=False).encode())
+    return h.hexdigest()
+
+def source_evaluation_context(source_v,source_f,isolated,actions,cameras):
+    """One exact, process-local source evaluation shared by a candidate ladder.
+
+    All candidates still measure every gate. Only source-only measurements are
+    reused; their inputs are rechecked before each use and no global cache exists.
+    """
+    selected=np.unique(np.linspace(0,len(isolated)-1,min(5,len(isolated)),dtype=np.int64)) if len(isolated) else np.empty(0,dtype=np.int64)
+    return {"identity":_source_evaluation_identity(source_v,source_f,isolated,actions,cameras),
+            "source_posed_norm":np.asarray([face_normals(p,source_f)[0] for p in isolated]),
+            "source_response":build_surface_response_arrays_v1(source_v,source_f,isolated,actions),
+            "source_strain":strain_tail(source_v,source_f,isolated),
+            "source_masks":{(int(ai),ci):project_mask(isolated[ai],source_f,camera)
+                            for ai in selected for ci,camera in enumerate(cameras)}}
+
+def evaluate_candidate(v,f,source_v,source_f,source_fc,source_topology,source_face_object,attachment_ids,isolated,actions,cameras,ratio,kind,*,source_context=None):
+    if source_context is not None and source_context["identity"]!=_source_evaluation_identity(source_v,source_f,isolated,actions,cameras):
+        raise ValueError("TESSA_SOURCE_EVALUATION_CONTEXT_DRIFT")
     scale=max(float(np.linalg.norm(source_v.max(0)-source_v.min(0))),1e-9);vertex_face,bar,dist=nearest_mapping(v,source_v,source_f);mapping_pass=bool(np.max(dist)<=scale*.01)
     candidate_vc,candidate_fc=topology_components(len(v),f);centroid=np.mean(v[f],axis=1);cand_face_source,_,_=nearest_mapping(centroid,source_v,source_f);mapped_source_component=source_fc[cand_face_source]
     component_map={}
@@ -155,18 +192,20 @@ def evaluate_candidate(v,f,source_v,source_f,source_fc,source_topology,source_fa
     vertex_obj=source_face_object[vertex_face];face_objs=vertex_obj[f];attachment_pass=bool(np.all(face_objs==face_objs[:,:1]) and attachment_ids.issubset(set(map(int,np.unique(vertex_obj)))))
     posed=transfer_positions(vertex_face,bar,source_f,isolated);rest_norm,rest_valid=face_normals(v,f);posed_norm=[];posed_valid=[]
     for p in posed:n,val=face_normals(p,f);posed_norm.append(n);posed_valid.append(val)
-    posed_norm=np.asarray(posed_norm);posed_valid=np.asarray(posed_valid);nondegenerate=bool(np.all(rest_valid) and np.all(posed_valid));source_posed_norm=np.asarray([face_normals(p,source_f)[0] for p in isolated]);dot=np.sum(posed_norm*source_posed_norm[:,cand_face_source,:],axis=-1);fold_pass=bool(np.all(dot>-.05))
+    posed_norm=np.asarray(posed_norm);posed_valid=np.asarray(posed_valid);nondegenerate=bool(np.all(rest_valid) and np.all(posed_valid));source_posed_norm=source_context["source_posed_norm"] if source_context is not None else np.asarray([face_normals(p,source_f)[0] for p in isolated]);dot=np.sum(posed_norm*source_posed_norm[:,cand_face_source,:],axis=-1);fold_pass=bool(np.all(dot>-.05))
     selected=np.unique(np.linspace(0,len(isolated)-1,min(5,len(isolated)),dtype=np.int64)) if len(isolated) else np.empty(0,dtype=np.int64);self_intersection_pass=not has_self_intersection(v,f)
     if self_intersection_pass:
         for ai in selected:
             if has_self_intersection(posed[ai],f):self_intersection_pass=False;break
-    src_resp=build_surface_response_arrays_v1(source_v,source_f,isolated,actions);cand_resp=build_surface_response_arrays_v1(v,f,posed,actions);expected_nr=src_resp["surface_nonrigid_response"][cand_face_source];expected_en=src_resp["surface_response_energy"][cand_face_source]
+    src_resp=source_context["source_response"] if source_context is not None else build_surface_response_arrays_v1(source_v,source_f,isolated,actions);cand_resp=build_surface_response_arrays_v1(v,f,posed,actions);expected_nr=src_resp["surface_nonrigid_response"][cand_face_source];expected_en=src_resp["surface_response_energy"][cand_face_source]
     def nrms(a,b):return float(np.sqrt(np.mean((a-b)**2))/max(float(np.sqrt(np.mean(b*b))),1e-8))
     response_nrms=nrms(cand_resp["surface_nonrigid_response"],expected_nr);energy_nrms=nrms(cand_resp["surface_response_energy"],expected_en);response_pass=response_nrms<=.35 and energy_nrms<=.35
-    src_valid,src_strain,src_area=strain_tail(source_v,source_f,isolated);cand_valid,cand_strain,cand_area=strain_tail(v,f,posed);strain_pass=bool(cand_valid and src_valid and cand_strain<=src_strain+.20 and cand_area<=src_area+.20)
+    src_valid,src_strain,src_area=source_context["source_strain"] if source_context is not None else strain_tail(source_v,source_f,isolated);cand_valid,cand_strain,cand_area=strain_tail(v,f,posed);strain_pass=bool(cand_valid and src_valid and cand_strain<=src_strain+.20 and cand_area<=src_area+.20)
     ious=[]
     for ai in selected:
-        for camera in cameras:ious.append(silhouette_iou(project_mask(isolated[ai],source_f,camera),project_mask(posed[ai],f,camera)))
+        for ci,camera in enumerate(cameras):
+            source_mask=source_context["source_masks"][(int(ai),ci)] if source_context is not None else project_mask(isolated[ai],source_f,camera)
+            ious.append(silhouette_iou(source_mask,project_mask(posed[ai],f,camera)))
     silhouette_min=float(min(ious) if ious else 1.0);silhouette_pass=silhouette_min>=.94
     mechanical_pass=all([mapping_pass,component_pass,topology_pass,attachment_pass,nondegenerate,fold_pass,self_intersection_pass,response_pass,strain_pass,silhouette_pass])
     metrics={"candidate_evaluation_contract":"MEASURED_ALL_KINDS_NO_FALLBACK_OVERRIDE_V1","ratio":float(ratio),"kind":kind,"vertex_count":int(len(v)),"face_count":int(len(f)),"max_surface_distance_over_scale":float(np.max(dist)/scale),"mapping_pass":mapping_pass,"component_pass":component_pass,"topology_hole_crack_preservation_pass":topology_pass,"attachment_object_separation_pass":attachment_pass,"nondegenerate_all_actions_pass":nondegenerate,"inversion_foldthrough_pass":fold_pass,"self_intersection_pass":self_intersection_pass,"response_nrms":response_nrms,"energy_nrms":energy_nrms,"response_pass":response_pass,"strain_p99_log_stretch":cand_strain,"area_p99_log_ratio":cand_area,"strain_jacobian_tail_pass":strain_pass,"motion_view_silhouette_min_iou":silhouette_min,"silhouette_pass":silhouette_pass,"mechanical_pass":mechanical_pass}

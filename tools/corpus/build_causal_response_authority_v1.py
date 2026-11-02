@@ -20,7 +20,7 @@ import json
 from pathlib import Path
 import numpy as np
 
-from models.iris.truth.presentation_response_v1 import build_surface_response_arrays_v1
+from tools.training.bounded_surface_response_v1 import build_surface_response_arrays_v1
 
 SCHEMA="RealSaS.CausalResponseAuthority.v1"
 STATUS="PASS_CAUSAL_RESPONSE_AUTHORITY_CANDIDATE__INDEPENDENT_COURT_REQUIRED"

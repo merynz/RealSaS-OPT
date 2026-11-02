@@ -1,12 +1,14 @@
 {
-  "campaign_name": "CORPUS370_MATERIALIZATION_PREFIX_CLOSURE_V4",
+  "campaign_name": "CORPUS370_EXTERNAL_COMPUTE_IMPORT_PENDING_V5",
   "compiler_plan": "canonical/CORPUS370_FAMILY_TRUTH_EXECUTION_PLAN_V2.json",
-  "direct_changed_stage_ids": [],
-  "enabled": true,
-  "experiment_slug": "corpus370-materialization-prefix-closure-v4",
+  "direct_changed_stage_ids": [
+    "49_SUBJECT_TRUTH_FAMILIES"
+  ],
+  "enabled": false,
+  "experiment_slug": "corpus370-external-compute-import-pending-v5",
   "original_preparation": {
-    "path": "/home/monster/realsas_authority/corpus370_truth_preparation/2f92a42cdad18d43797f98c66c7dd2eeda8f5dc9_isolated/PREPARATION.json",
-    "sha256": "84c0a0ecac5897479606ed6d39c2565461df5faf75ef5b60789f10b5be273eba"
+    "path": "/home/monster/realsas_authority/corpus370_truth_preparation/c16d9a17d73a308322ead20e065fa54d3f2be019_isolated/PREPARATION.json",
+    "sha256": "451189d0d2221119727ea0015f6b43de83befd759f2c92a4339cbd5898c1fba8"
   },
   "schema": "RealSaS.Corpus370IsolatedContinuation.v1",
   "training_authorized": false

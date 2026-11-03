@@ -1,5 +1,9 @@
 name: corpus370-evidence-slice-v1
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/corpus370-evidence-slice-v1.yml'
   workflow_dispatch:
     inputs:
       subjects:
@@ -16,7 +20,7 @@ jobs:
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 7
     env:
-      SUBJECT_IDS: ${{ inputs.subjects }}
+      SUBJECT_IDS: ${{ inputs.subjects || 'corpus_0c3efd578549abdcd2fb,corpus_17fefc47c1da85befb8d,corpus_1279ca142bf9b6aed964,corpus_636a2a3217982e9a876b,corpus_000ca1ae51f9582fde9e,corpus_0fbf08618decf883f035' }}
       OUTPUT: /tmp/corpus370-evidence-slice-${{ github.run_id }}
       PREP_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1
     steps:

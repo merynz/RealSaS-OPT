@@ -36,7 +36,7 @@ jobs:
             tools/corpus/export_corpus370_evidence_slice_v1.py \
             --bundle "$PREP_ROOT/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V2.zip" \
             --expected-sha256 4462b7f90fcff58a8d56b1a975fde4f7f91cbda51417cad5121cf55f25994c5c \
-            --subjects "$SUBJECT_IDS" --preparation-root "$PREP_ROOT" --output "$OUTPUT"
+            --all-native-views --subjects "$SUBJECT_IDS" --preparation-root "$PREP_ROOT" --output "$OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
           name: corpus370-evidence-slice-${{ github.run_id }}-${{ strategy.job-index }}
@@ -47,4 +47,4 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-# revision4: omit explicitly declared external image payloads from geometry diagnostics
+# revision5: exact eight-view inputs for the bounded versioned court pilot

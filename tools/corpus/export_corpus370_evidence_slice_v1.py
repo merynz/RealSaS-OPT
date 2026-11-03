@@ -19,7 +19,7 @@ def safe_name(name):
     return str(p)
 
 
-def export(bundle,expected_sha,subjects,output,*,preparation_root=None,maximum_bytes=128<<20,include_source_images=False):
+def export(bundle,expected_sha,subjects,output,*,preparation_root=None,maximum_bytes=128<<20,include_source_images=False,all_native_views=False):
     bundle=Path(bundle);output=Path(output);subjects=sorted(set(subjects))
     if not subjects or len(subjects)>12:raise ValueError('EVIDENCE_SLICE_SUBJECT_LIMIT')
     if any(not re.fullmatch(r'(corpus|truth139)_[0-9a-f]{20}',s) for s in subjects):raise ValueError('EVIDENCE_SLICE_SUBJECT_ID')
@@ -89,7 +89,7 @@ def export(bundle,expected_sha,subjects,output,*,preparation_root=None,maximum_b
                             observations=location/'observations'/sid
                             preparation=roster[sid].get('observation_preparation') or {}
                             failed_view=re.search(r':V(\d+):',str(preparation.get('reason') or ''))
-                            views={0,int(failed_view.group(1))} if failed_view else {0}
+                            views=set(range(8)) if all_native_views else ({0,int(failed_view.group(1))} if failed_view else {0})
                             for file in sorted(observations.glob('*')) if observations.is_dir() else []:
                                 if not file.is_file() or file.suffix not in ('.json','.png','.bin'):continue
                                 # Full native eight-view rasters duplicate sealed
@@ -104,6 +104,7 @@ def export(bundle,expected_sha,subjects,output,*,preparation_root=None,maximum_b
                     'native_imports':native_rows,'uncompressed_bytes':used,'qualification_minted':False,
                     'omitted_external_image_dependencies':list(omitted.values()),
                     'complete_render_input':False,'external_source_images_included':bool(include_source_images),
+                    'all_native_views_requested':bool(all_native_views),
                     'training_authorized':False,'source_data_mutated':False}
             target.writestr('EVIDENCE_SLICE.json',json.dumps(result,sort_keys=True,indent=2)+'\n')
         staged.replace(final)
@@ -117,4 +118,5 @@ if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--bundle',type=Path,required=True);p.add_argument('--expected-sha256',required=True)
     p.add_argument('--subjects',required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--preparation-root',type=Path)
     p.add_argument('--include-source-images',action='store_true')
-    a=p.parse_args();export(a.bundle,a.expected_sha256,a.subjects.split(','),a.output,preparation_root=a.preparation_root,include_source_images=a.include_source_images)
+    p.add_argument('--all-native-views',action='store_true')
+    a=p.parse_args();export(a.bundle,a.expected_sha256,a.subjects.split(','),a.output,preparation_root=a.preparation_root,include_source_images=a.include_source_images,all_native_views=a.all_native_views)

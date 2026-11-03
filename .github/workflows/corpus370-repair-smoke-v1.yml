@@ -16,6 +16,8 @@ on:
       - 'tools/corpus/classify_corpus370_observation_failures_v1.py'
       - 'tests/corpus/test_corpus370_observation_failure_strata_v1.py'
       - 'tests/corpus/test_observation_source_projection_degenerate_v1.py'
+      - 'tests/corpus/test_observation_precision_interval_v1.py'
+      - 'tools/corpus/iris_observation_admission_v3.py'
   workflow_dispatch:
 
 permissions:
@@ -45,4 +47,5 @@ jobs:
             tests/corpus/test_observation_v4_exact_import_packet_v1.py \
             tests/training/test_tessa_source_relative_contact_v1.py \
             tests/corpus/test_corpus370_observation_failure_strata_v1.py \
-            tests/corpus/test_observation_source_projection_degenerate_v1.py
+            tests/corpus/test_observation_source_projection_degenerate_v1.py \
+            tests/corpus/test_observation_precision_interval_v1.py

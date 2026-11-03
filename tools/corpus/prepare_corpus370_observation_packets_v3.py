@@ -74,6 +74,7 @@ def _packet_complete(packet: Path, subject_id: str, source_sha: str, policy: dic
         "SOURCE_SCENE_SNAPSHOT.json",
         "camera_bundle.json",
         "IRIS_OBSERVATION_ADMISSION.json",
+        "imported.json",
         *{f"V{i}.png" for i in range(int(policy["view_count"]))},
         *{f"V{i}.mask.bin" for i in range(int(policy["view_count"]))},
     }
@@ -81,6 +82,12 @@ def _packet_complete(packet: Path, subject_id: str, source_sha: str, policy: dic
         return False
     admission = json.loads((packet / "IRIS_OBSERVATION_ADMISSION.json").read_text())
     candidate = json.loads((packet / "SOURCE_REST_RENDER_CANDIDATE.json").read_text())
+    imported_path = packet / "imported.json"
+    if sha256(imported_path) != admission.get("imported_geometry_sha256"):
+        return False
+    imported = json.loads(imported_path.read_text())
+    if imported.get("import", {}).get("source_sha256") != source_sha:
+        return False
     return (
         admission.get("schema") == "RealSaS.IrisBindObservationAdmission.v1"
         and admission.get("status") == "PASS_IRIS_BIND_OBSERVATIONS"
@@ -221,6 +228,9 @@ def prepare(
                 if path.is_file():
                     shutil.copyfile(path, packet / path.name)
             shutil.copyfile(root / "admission" / sid / "IRIS_OBSERVATION_ADMISSION.json", packet / "IRIS_OBSERVATION_ADMISSION.json")
+            # Carry the ORIGINAL admitted bytes: code/hash equality alone cannot
+            # recreate JSON whitespace or object order byte-for-byte.
+            shutil.copyfile(imported, packet / "imported.json")
             require(_packet_complete(packet, sid, row["source_sha256"], policy, blender_sha), "CORPUS370_OBSERVATION_PACKET_INCOMPLETE:" + sid)
             state = "PREPARED_NEW_PACKET"
         admission = packet / "IRIS_OBSERVATION_ADMISSION.json"
@@ -236,6 +246,8 @@ def prepare(
                 "state": state,
                 "bindings": {
                     "observation_admission": {"path": str(admission), "sha256": sha256(admission)},
+                    "admitted_import_geometry": {"path": str(packet / "imported.json"),
+                                                 "sha256": sha256(packet / "imported.json")},
                     "source_rest_candidate": {"path": str(candidate), "sha256": sha256(candidate)},
                     "camera_bundle": {"path": str(camera), "sha256": sha256(camera)},
                     "source_scene_snapshot": {"path": str(snapshot), "sha256": sha256(snapshot)},

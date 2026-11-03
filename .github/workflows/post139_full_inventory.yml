@@ -1,0 +1,250 @@
+name: post139-full-inventory
+
+on:
+  push:
+    branches: [post139-corpus-audit-v1]
+    paths:
+      - '.github/workflows/post139_full_inventory.yml'
+      - 'canonical/POST139_SOURCE_REGISTRY_V1.json'
+      - 'tools/corpus/post139_source_inventory_v1.py'
+      - 'tools/corpus/post139_consolidate_publisher_inventory_v1.py'
+      - 'tools/corpus/post139_build_audit_manifest_v1.py'
+      - 'tools/corpus/post139_audit_v1.py'
+      - 'tools/corpus/blender_post139_source_structure_v1.py'
+      - 'tools/corpus/post139_global_freeze_v1.py'
+      - 'tests/tools/test_post139_source_inventory_v1.py'
+      - 'tests/tools/test_post139_audit_v1.py'
+  workflow_dispatch:
+
+concurrency:
+  group: post139-full-inventory-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit contracts
+        run: |
+          python -m pip install --quiet pytest
+          python -m pytest -q \
+            tests/tools/test_post139_audit_v1.py \
+            tests/tools/test_post139_source_inventory_v1.py
+      - name: Registry contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('canonical/POST139_SOURCE_REGISTRY_V1.json').read_text())
+          ids=[row['id'] for row in p['sources']]
+          assert p['schema']=='RealSaS.Post139.SourceRegistry.v1'
+          assert len(ids)==30 and len(set(ids))==30, (len(ids), len(set(ids)))
+          assert sum(row['role']=='REFERENCE_BASE139' for row in p['sources'])==10
+          assert sum(row['role']=='POST139_CANDIDATE' for row in p['sources'])==19
+          assert sum(row['role']=='QUARANTINE' for row in p['sources'])==1
+          assert sum(row.get('expected_subject_count',0) for row in p['sources'])==139
+          print('POST139_SOURCE_REGISTRY_PASS', len(ids))
+          PY
+
+  audit-source:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        source_id:
+          - quaternius-ultimate-monsters
+          - quaternius-cute-animated-monsters
+          - quaternius-ultimate-animated-animals
+          - quaternius-ultimate-space-kit
+          - quaternius-ultimate-modular-men
+          - quaternius-ultimate-modular-women
+          - quaternius-platformer-kit
+          - quaternius-rpg-characters
+          - quaternius-animated-mech
+          - quaternius-toon-shooter-kit
+          - quaternius-ultimate-animated-character
+          - quaternius-cute-animated-fish
+          - quaternius-cube-world
+          - quaternius-sushi-restaurant
+          - quaternius-pirate-kit
+          - quaternius-cyberpunk-game-kit
+          - quaternius-sci-fi-essentials
+          - quaternius-animated-dinosaurs
+          - quaternius-easy-animated-enemy
+          - quaternius-old-animated-fish
+          - quaternius-farm-animals
+          - quaternius-old-animated-monsters
+          - quaternius-zombie-apocalypse-kit
+          - quaternius-universal-base-characters
+          - kaykit-adventurers
+          - kaykit-skeletons
+          - kenney-mini-characters
+          - kenney-blocky-characters
+          - kenney-cube-pets
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install acquisition and Blender runtime dependencies
+        run: |
+          python -m pip install --quiet 'gdown==5.2.0'
+          sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 update -qq
+          sudo apt-get -o Acquire::Retries=6 -o Acquire::http::Timeout=30 install -y --no-install-recommends libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 libgl1 unzip
+      - name: Restore pinned Blender 4.0.2 archive
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/blender-4.0.2-linux-x64.tar.xz
+          key: observation-blender-4.0.2-linux-x64-5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a
+      - name: Verify and unpack Blender 4.0.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/blender-4.0.2-linux-x64.tar.xz"
+          if [ ! -f "$archive" ]; then
+            curl --fail --location --retry 3 --retry-delay 2 'https://download.blender.org/release/Blender4.0/blender-4.0.2-linux-x64.tar.xz' --output "$archive"
+          fi
+          echo "5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a  $archive" | sha256sum --check -
+          tar -xJf "$archive" -C "$RUNNER_TEMP"
+          exe="$RUNNER_TEMP/blender-4.0.2-linux-x64/blender"
+          test "$("$exe" --version | head -n 1)" = 'Blender 4.0.2'
+          echo "BLENDER_EXE=$exe" >> "$GITHUB_ENV"
+      - name: Acquire exact publisher source
+        run: |
+          root="$RUNNER_TEMP/post139/${{ matrix.source_id }}"
+          python tools/corpus/post139_source_inventory_v1.py acquire \
+            --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
+            --source-id '${{ matrix.source_id }}' \
+            --out "$root" --clean
+      - name: Produce byte ledger and representation inventory
+        run: |
+          root="$RUNNER_TEMP/post139/${{ matrix.source_id }}"
+          python tools/corpus/post139_source_inventory_v1.py inventory \
+            --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
+            --source-root "$root/raw" \
+            --source-id '${{ matrix.source_id }}' \
+            --out "$root/inventory"
+      - name: Canonical Blender audit of every structural representation group
+        run: |
+          root="$RUNNER_TEMP/post139/${{ matrix.source_id }}"
+          python tools/corpus/post139_audit_v1.py audit \
+            --source-root "$root/raw" \
+            --out "$root/audit" \
+            --manifest "$root/inventory/CANDIDATE_MANIFEST.json" \
+            --blender-exe "$BLENDER_EXE"
+      - name: Pack summary
+        run: |
+          root="$RUNNER_TEMP/post139/${{ matrix.source_id }}"
+          python - "$root" <<'PY'
+          import json,sys
+          from pathlib import Path
+          root=Path(sys.argv[1])
+          receipt=json.loads((root/'ACQUISITION_RECEIPT.json').read_text())
+          inventory=json.loads((root/'inventory/SOURCE_INVENTORY.json').read_text())
+          audit=json.loads((root/'audit/POST139_AUDIT_INDEX.json').read_text())
+          print('POST139_PACK_SUMMARY', json.dumps({
+            'source_id':receipt['source_id'],
+            'publisher_files':inventory.get('publisher_file_count'),
+            'publisher_representation_groups':inventory.get('publisher_representation_group_count'),
+            'acquired_files':inventory['raw_file_count'],
+            'acquired_bytes':inventory['raw_total_bytes'],
+            'canonical_representation_groups':inventory['representation_group_count'],
+            'audit_candidates':inventory['audit_candidate_count'],
+            'audited':audit['audited_count'],
+            'failures':audit['failure_count'],
+            'statuses':audit['status_counts'],
+            'publisher_tree_digest':inventory.get('publisher_tree_digest'),
+            'raw_ledger_sha256':inventory['raw_ledger_sha256'],
+          }, sort_keys=True))
+          PY
+      - name: Remove redundant downloaded archive before evidence upload
+        run: |
+          root="$RUNNER_TEMP/post139/${{ matrix.source_id }}"
+          rm -f "$root/download.zip" "$root/repository.zip"
+      - name: Upload exact source+audit workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-source-${{ matrix.source_id }}
+          path: ${{ runner.temp }}/post139/${{ matrix.source_id }}/**
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 6
+
+  aggregate-freeze:
+    needs: audit-source
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all completed source workspaces
+        uses: actions/download-artifact@v4
+        with:
+          pattern: post139-source-*
+          path: ${{ runner.temp }}/downloaded
+          merge-multiple: false
+      - name: Normalize workspace layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          workspace="$RUNNER_TEMP/workspace"
+          mkdir -p "$workspace"
+          shopt -s nullglob
+          for folder in "$RUNNER_TEMP"/downloaded/post139-source-*; do
+            name="$(basename "$folder")"
+            source_id="${name#post139-source-}"
+            mv "$folder" "$workspace/$source_id"
+          done
+          echo "POST139_WORKSPACE=$workspace" >> "$GITHUB_ENV"
+          find "$workspace" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort
+      - name: Consolidate exact publisher inventory
+        run: |
+          out="$RUNNER_TEMP/post139-global"
+          mkdir -p "$out"
+          python tools/corpus/post139_consolidate_publisher_inventory_v1.py \
+            --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
+            --workspace "$POST139_WORKSPACE" \
+            --out "$out/POST139_EXACT_PUBLISHER_INVENTORY.json" || true
+          echo "POST139_GLOBAL_OUT=$out" >> "$GITHUB_ENV"
+      - name: Build global dedup and fail-closed freeze evidence
+        run: |
+          out="$POST139_GLOBAL_OUT"
+          python tools/corpus/post139_global_freeze_v1.py \
+            --registry canonical/POST139_SOURCE_REGISTRY_V1.json \
+            --workspace "$POST139_WORKSPACE" \
+            --out "$out" \
+            --allow-not-ready
+          cat "$out/POST139_FREEZE_REPORT.json"
+      - name: Upload global exact inventory and freeze evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-global-freeze-${{ github.sha }}
+          path: ${{ env.POST139_GLOBAL_OUT }}/**
+          if-no-files-found: error
+          retention-days: 14
+      - name: Materialization readiness gate
+        run: |
+          python - "$POST139_GLOBAL_OUT/POST139_FREEZE_REPORT.json" "$POST139_GLOBAL_OUT/POST139_EXACT_PUBLISHER_INVENTORY.json" <<'PY'
+          import json,sys
+          from pathlib import Path
+          report=json.loads(Path(sys.argv[1]).read_text())
+          publisher=json.loads(Path(sys.argv[2]).read_text()) if Path(sys.argv[2]).is_file() else {'status':'MISSING'}
+          print('POST139_PUBLISHER_INVENTORY_STATUS', publisher['status'])
+          print('POST139_FINAL_STATUS', report['status'])
+          print('POST139_PRIMARY_MATERIALIZATION_SUBJECTS', report['primary_materialization_subject_count'])
+          print('POST139_BLOCKERS', report['blocker_count'])
+          if publisher['status'] != 'COMPLETE' or report['status'] != 'PASS_MATERIALIZATION_READY':
+              raise SystemExit(2)
+          PY

@@ -1,0 +1,792 @@
+{
+  "authority": "ENGINEERING_SOURCE_ACQUISITION_AND_AUDIT_PLAN__NOT_TRAINING_AUTHORITY",
+  "base139_expected_unique_full_truth": 139,
+  "generated_from": {
+    "base139_authority": "canonical/TRUTH_CORPUS_V1_STATUS_20261004.md",
+    "post139_checkpoint": "REALSAS_POST139_CORPUS_AUDIT_CHECKPOINT_V1.json"
+  },
+  "policy": {
+    "animation_is_separate_capability": true,
+    "appearance_only_variants_do_not_inflate_subject_count": true,
+    "cross_pack_dedup_required": true,
+    "global_dedup_against_base139_required": true,
+    "lineage_component_required": true,
+    "lineage_split_granularity": "creator -> leakage-connected structural lineage -> subject -> animation -> observations",
+    "primary_acquisition": "PUBLISHER_OR_AUTHOR_CONTROLLED_SOURCE",
+    "quarantine_is_never_materialization_eligible": true,
+    "raw_file_ledger_required": true,
+    "raw_inventory_formats": [
+      ".gltf",
+      ".glb",
+      ".fbx",
+      ".blend",
+      ".obj"
+    ],
+    "raw_sha256_required": true,
+    "structural_audit_formats": [
+      ".gltf",
+      ".glb",
+      ".fbx"
+    ],
+    "structural_duplicate_key": "canonical_geometry_topology + rig_rest + skin_weights",
+    "training_admission_required_truth": [
+      "geometry",
+      "appearance",
+      "rig",
+      "skin"
+    ],
+    "unresolved_source_is_fail_closed": true
+  },
+  "post139_checkpoint_candidate_rows": 256,
+  "schema": "RealSaS.Post139.SourceRegistry.v1",
+  "sources": [
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/ultimatemonsters.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "GLTF_FULL_TRUTH_ONLY",
+      "expected_subject_count": 50,
+      "expected_truth": {
+        "animation": true,
+        "appearance": true,
+        "geometry": true,
+        "rig": true,
+        "skin": true
+      },
+      "id": "quaternius-ultimate-monsters",
+      "license": "CC0",
+      "materialization_eligible": false,
+      "pack": "Ultimate Monsters",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "REFERENCE_BASE139",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/cutemonsters.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "GLTF_FULL_TRUTH_ONLY",
+      "expected_subject_count": 21,
+      "expected_truth": {
+        "animation": true,
+        "appearance": true,
+        "geometry": true,
+        "rig": true,
+        "skin": true
+      },
+      "id": "quaternius-cute-animated-monsters",
+      "license": "CC0",
+      "materialization_eligible": false,
+      "pack": "Cute Animated Monsters",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "REFERENCE_BASE139",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/ultimateanimatedanimals.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "GLTF_FULL_TRUTH_ONLY",
+      "expected_subject_count": 12,
+      "expected_truth": {
+        "animation": true,
+        "appearance": true,
+        "geometry": true,
+        "rig": true,
+        "skin": true
+      },
+      "id": "quaternius-ultimate-animated-animals",
+      "license": "CC0",
+      "materialization_eligible": false,
+      "pack": "Ultimate Animated Animals",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "REFERENCE_BASE139",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/ultimatespacekit.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "GLTF_FULL_TRUTH_ONLY",
+      "expected_subject_count": 12,
+      "expected_truth": {
+        "animation": true,
+        "appearance": true,
+        "geometry": true,
+        "rig": true,
+        "skin": true
+      },
+      "id": "quaternius-ultimate-space-kit",
+      "license": "CC0",
+      "materialization_eligible": false,
+      "pack": "Ultimate Space Kit",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "REFERENCE_BASE139",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/ultimatemodularcharacters.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "GLTF_FULL_TRUTH_ONLY",
+      "expected_subject_count": 11,
+      "expected_truth": {
+        "animation": true,
+        "appearance": true,
+        "geometry": true,
+        "rig": true,
+        "skin": true
+      },
+      "id": "quaternius-ultimate-modular-men",
+      "license": "CC0",
+      "materialization_eligible": false,
+      "pack": "Ultimate Modular Men",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "REFERENCE_BASE139",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/ultimatemodularwomen.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "GLTF_FULL_TRUTH_ONLY",
+      "expected_subject_count": 10,
+      "expected_truth": {
+        "animation": true,
+        "appearance": true,
+        "geometry": true,
+        "rig": true,
+        "skin": true
+      },
+      "id": "quaternius-ultimate-modular-women",
+      "license": "CC0",
+      "materialization_eligible": false,
+      "pack": "Ultimate Modular Women",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "REFERENCE_BASE139",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/ultimateplatformer.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "GLTF_FULL_TRUTH_ONLY",
+      "expected_subject_count": 10,
+      "expected_truth": {
+        "animation": true,
+        "appearance": true,
+        "geometry": true,
+        "rig": true,
+        "skin": true
+      },
+      "id": "quaternius-platformer-kit",
+      "license": "CC0",
+      "materialization_eligible": false,
+      "pack": "Platformer Kit",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "REFERENCE_BASE139",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/rpgcharacters.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "GLTF_FULL_TRUTH_ONLY",
+      "expected_subject_count": 6,
+      "expected_truth": {
+        "animation": true,
+        "appearance": true,
+        "geometry": true,
+        "rig": true,
+        "skin": true
+      },
+      "id": "quaternius-rpg-characters",
+      "license": "CC0",
+      "materialization_eligible": false,
+      "pack": "RPG Characters",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "REFERENCE_BASE139",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/animatedmech.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "GLTF_FULL_TRUTH_ONLY",
+      "expected_subject_count": 4,
+      "expected_truth": {
+        "animation": true,
+        "appearance": true,
+        "geometry": true,
+        "rig": true,
+        "skin": true
+      },
+      "id": "quaternius-animated-mech",
+      "license": "CC0",
+      "materialization_eligible": false,
+      "pack": "Animated Mech",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "REFERENCE_BASE139",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/toonshootergamekit.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "GLTF_FULL_TRUTH_ONLY",
+      "expected_subject_count": 3,
+      "expected_truth": {
+        "animation": true,
+        "appearance": true,
+        "geometry": true,
+        "rig": true,
+        "skin": true
+      },
+      "id": "quaternius-toon-shooter-kit",
+      "license": "CC0",
+      "materialization_eligible": false,
+      "pack": "Toon Shooter Kit",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "REFERENCE_BASE139",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "expected_sha256": "0295062cbc72da52ee804f39ac38694901a40458011f9b2638fc7ef13ed509da",
+        "expected_size_bytes": 48430012,
+        "kind": "DIRECT_ZIP",
+        "license_page": "https://opengameart.org/content/animated-characters-pack",
+        "publisher": "Quaternius",
+        "url": "https://opengameart.org/sites/default/files/ultimate_animated_character_pack_by_quaternius.zip"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "PUBLIC_DRIVE_SOURCE_LIST + MULTI_SUBJECT_STRUCTURAL_SAMPLE",
+      "checkpoint_candidate_subjects": 52,
+      "checkpoint_status": "ADMIT_CANDIDATE",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "YES"
+      },
+      "id": "quaternius-ultimate-animated-character",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "52 unique GLTF full-character exports. Worker/Suit/Wizard name overlaps with newer Truth139 assets were structurally different (rig/topology/geometry/weights).",
+      "pack": "Ultimate Animated Character",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/cutefish.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "PUBLIC_DRIVE_SOURCE_CENSUS",
+      "checkpoint_candidate_subjects": 32,
+      "checkpoint_status": "ADMIT_PENDING_BLENDER_FINAL",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "LIKELY_YES",
+        "skin": "LIKELY_YES"
+      },
+      "id": "quaternius-cute-animated-fish",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "48 FBX total; 32 fish actors + 16 props. Old Fish cross-pack duplicates require final FBX/Blender structural dedup.",
+      "pack": "Cute Animated Fish",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/cubeworldkit.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "PUBLIC_DRIVE_CENSUS + 3_MORPHOLOGY_STRUCTURAL_SAMPLES",
+      "checkpoint_candidate_subjects": 22,
+      "checkpoint_status": "ADMIT_CANDIDATE",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "YES"
+      },
+      "id": "quaternius-cube-world",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "4 characters + 9 animals + 9 enemies. Human, cat and demon samples all had skins, JOINTS/WEIGHTS and animations.",
+      "pack": "Cube World",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/sushirestaurantkit.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "PUBLIC_DRIVE_STRUCTURAL_AUDIT",
+      "checkpoint_candidate_subjects": 8,
+      "checkpoint_status": "ADMIT_CANDIDATE",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "YES"
+      },
+      "id": "quaternius-sushi-restaurant",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "7 rabbit variants + 1 panda. Rabbit variants were not color-only: rest/topology/geometry/weights differed.",
+      "pack": "Sushi Restaurant",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/piratekit.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "PUBLIC_DRIVE_CENSUS + STRUCTURAL_SAMPLE",
+      "checkpoint_candidate_subjects": 9,
+      "checkpoint_status": "ADMIT_CANDIDATE",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "YES"
+      },
+      "id": "quaternius-pirate-kit",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "Rigged character lane includes unusual morphology such as shark-humanoid/tentacle; static Enemy_Tentacle excluded.",
+      "pack": "Pirate Kit",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/cyberpunkgamekit.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "STRUCTURAL_AUDIT_CONFIRMED",
+      "checkpoint_candidate_subjects": 4,
+      "checkpoint_status": "ADMIT_CANDIDATE",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "YES"
+      },
+      "id": "quaternius-cyberpunk-game-kit",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "Character + 2Legs + Flying + Large enemy families; skin/weights/animations confirmed.",
+      "pack": "Cyberpunk Game Kit",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/scifiessentialskit.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "GLTF_TEXT_STRUCTURAL_AUDIT",
+      "checkpoint_candidate_subjects": 3,
+      "checkpoint_status": "ADMIT_CANDIDATE",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "YES"
+      },
+      "id": "quaternius-sci-fi-essentials",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "EyeDrone, QuadShell, Trilobite: skins and JOINTS/WEIGHTS confirmed.",
+      "pack": "Sci-Fi Essentials",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/animateddinosaurs.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "PUBLIC_DRIVE_SOURCE_CENSUS + AUTHOR_METADATA",
+      "checkpoint_candidate_subjects": 6,
+      "checkpoint_status": "ADMIT_PENDING_BLENDER_FINAL",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "LIKELY_YES"
+      },
+      "id": "quaternius-animated-dinosaurs",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "Triceratops, T-Rex, Stegosaurus, Parasaurolophus, Apatosaurus, Velociraptor.",
+      "pack": "Animated Dinosaurs",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/easyenemy.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "PUBLIC_DRIVE_SOURCE_CENSUS + AUTHOR_METADATA",
+      "checkpoint_candidate_subjects": 5,
+      "checkpoint_status": "ADMIT_PENDING_BLENDER_FINAL",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "LIKELY_YES"
+      },
+      "id": "quaternius-easy-animated-enemy",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "Spider, Wasp, Frog, Rat, Snake; Snake_angry treated as same authored subject variant.",
+      "pack": "Easy Animated Enemy",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/animatedfish.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "PUBLIC_DRIVE_SOURCE_CENSUS",
+      "checkpoint_candidate_subjects": 7,
+      "checkpoint_status": "OVERLAP_PENDING",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "LIKELY_YES",
+        "skin": "LIKELY_YES"
+      },
+      "id": "quaternius-old-animated-fish",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "Dolphin, Fish1/2/3, Manta ray, Shark, Whale. Cross-pack overlap with Cute Fish must be resolved by FBX/Blender structural hash.",
+      "pack": "Old Animated Fish",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/farmanimal.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "AUTHOR_METADATA",
+      "checkpoint_candidate_subjects": 7,
+      "checkpoint_status": "OVERLAP_PENDING",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "LIKELY_YES",
+        "skin": "LIKELY_YES"
+      },
+      "id": "quaternius-farm-animals",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "Potential overlap with later Ultimate Animals/Truth139; requires source hash/Blender comparison.",
+      "pack": "Farm Animals",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/animatedmonster.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "AUTHOR_METADATA",
+      "checkpoint_candidate_subjects": 4,
+      "checkpoint_status": "OVERLAP_PENDING",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "LIKELY_YES",
+        "skin": "LIKELY_YES"
+      },
+      "id": "quaternius-old-animated-monsters",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "Potential overlap with later Ultimate Monsters/Truth139; do not add until source-level dedup.",
+      "pack": "Old Animated Monsters",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/zombieapocalypsekit.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "PUBLIC_DRIVE_CENSUS",
+      "checkpoint_candidate_subjects": 10,
+      "checkpoint_status": "ADMIT_PENDING_FULL_SUBJECT_DEDUP",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "YES"
+      },
+      "id": "quaternius-zombie-apocalypse-kit",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "4 playable + 4 enemy + 2 dog authored actors; dismembered parts and SingleWeapon exports excluded.",
+      "pack": "Zombie Apocalypse Kit",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "QUATERNIUS_OFFICIAL_PAGE_DRIVE",
+        "page_path": "packs/universalbasecharacters.html",
+        "publisher_repository": "Quaternius/quaternius.github.io"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_PLUS_AUXILIARY_CLASSIFICATION",
+      "checkpoint_audit_level": "OFFICIAL_PAGE_CONTRACT",
+      "checkpoint_candidate_subjects": 6,
+      "checkpoint_status": "PARTIAL_TRUTH_AUXILIARY",
+      "checkpoint_truth": {
+        "animation": "NO",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "YES"
+      },
+      "id": "quaternius-universal-base-characters",
+      "license": "CC0",
+      "materialization_eligible": false,
+      "notes": "6 rigged base characters, but official page marks pack non-animated. Useful Geometry/Appearance/Rig/Skin truth; not motion truth.",
+      "pack": "Universal Base Characters",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Quaternius"
+    },
+    {
+      "acquisition": {
+        "kind": "GITHUB_REPOSITORY_ARCHIVE",
+        "ref": "main",
+        "repository": "KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_COLLAPSE_FORMAT_PAIRS",
+      "checkpoint_audit_level": "DRIVE_SOURCE_AND_TECHNICAL_AUDIT_CONFIRMED",
+      "checkpoint_candidate_subjects": 5,
+      "checkpoint_status": "ADMIT_CANDIDATE",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "YES"
+      },
+      "id": "kaykit-adventurers",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "5 unique artistic subjects in existing Drive snapshot; previous 10 full rows were GLB/FBX format pairs.",
+      "pack": "Adventurers current-free",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "KayKit"
+    },
+    {
+      "acquisition": {
+        "kind": "GITHUB_REPOSITORY_ARCHIVE",
+        "ref": "main",
+        "repository": "KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0"
+      },
+      "candidate_policy": "FULL_TRUTH_MODELS_COLLAPSE_FORMAT_PAIRS",
+      "checkpoint_audit_level": "2_PRESENT_CONFIRMED__2_OFFICIAL_REPO_PENDING_BYTE_AUDIT",
+      "checkpoint_candidate_subjects": 4,
+      "checkpoint_status": "ADMIT_CANDIDATE",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "YES"
+      },
+      "id": "kaykit-skeletons",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "Mage + Warrior already present; Minion + Rogue missing from Drive snapshot and should be acquired/audited.",
+      "pack": "Skeletons current-free",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "KayKit"
+    },
+    {
+      "acquisition": {
+        "kind": "KENNEY_OFFICIAL_PAGE_PENDING_RESOLVER",
+        "page_url": "https://kenney.nl/assets/mini-characters"
+      },
+      "candidate_policy": "FULL_TRUTH_CHARACTER_MODELS_EXCLUDE_MOBILITY_AND_ACCESSORY_PROPS",
+      "checkpoint_audit_level": "OFFICIAL_METADATA + MIRROR_FILE_CENSUS",
+      "checkpoint_candidate_subjects": 12,
+      "checkpoint_status": "ACQUIRE_OFFICIAL_ZIP_AND_AUDIT",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "EXPECTED_YES",
+        "geometry": "EXPECTED_YES",
+        "rig": "EXPECTED_YES",
+        "skin": "EXPECTED_YES"
+      },
+      "id": "kenney-mini-characters",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "12 character GLBs separated from aids/wheelchairs/props in mirror. Official ZIP required for canonical source hash.",
+      "pack": "Mini Characters",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Kenney"
+    },
+    {
+      "acquisition": {
+        "kind": "KENNEY_OFFICIAL_PAGE_PENDING_RESOLVER",
+        "page_url": "https://kenney.nl/assets/blocky-characters"
+      },
+      "candidate_policy": "FULL_TRUTH_CHARACTER_MODELS_EXCLUDE_MOBILITY_AND_ACCESSORY_PROPS",
+      "checkpoint_audit_level": "OFFICIAL_METADATA + MIRROR_FILE_CENSUS",
+      "checkpoint_candidate_subjects": 18,
+      "checkpoint_status": "ACQUIRE_OFFICIAL_ZIP_AND_AUDIT",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "EXPECTED_YES",
+        "geometry": "EXPECTED_YES",
+        "rig": "EXPECTED_YES",
+        "skin": "EXPECTED_YES"
+      },
+      "id": "kenney-blocky-characters",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "18 character GLBs (a-r) in mirror.",
+      "pack": "Blocky Characters",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Kenney"
+    },
+    {
+      "acquisition": {
+        "kind": "KENNEY_OFFICIAL_PAGE_PENDING_RESOLVER",
+        "page_url": "https://kenney.nl/assets/cube-pets"
+      },
+      "candidate_policy": "FULL_TRUTH_CHARACTER_MODELS_EXCLUDE_MOBILITY_AND_ACCESSORY_PROPS",
+      "checkpoint_audit_level": "OFFICIAL_METADATA + MIRROR_FILE_CENSUS",
+      "checkpoint_candidate_subjects": 24,
+      "checkpoint_status": "ACQUIRE_OFFICIAL_ZIP_AND_AUDIT",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "EXPECTED_YES",
+        "geometry": "EXPECTED_YES",
+        "rig": "EXPECTED_YES",
+        "skin": "EXPECTED_YES"
+      },
+      "id": "kenney-cube-pets",
+      "license": "CC0",
+      "materialization_eligible": true,
+      "notes": "24 named animal GLBs; very valuable morphology diversity.",
+      "pack": "Cube Pets",
+      "provenance": "CLEAN_CC0_HUMAN_AUTHORED",
+      "role": "POST139_CANDIDATE",
+      "source_family": "Kenney"
+    },
+    {
+      "acquisition": {
+        "kind": "NO_AUTO_ACQUIRE"
+      },
+      "candidate_policy": "QUARANTINE_ONLY",
+      "checkpoint_audit_level": "REPO_BINARY_LIST + DOCUMENTED_RIG/CLIPS",
+      "checkpoint_candidate_subjects": 18,
+      "checkpoint_status": "QUARANTINE_PROVENANCE",
+      "checkpoint_truth": {
+        "animation": "YES",
+        "appearance": "YES",
+        "geometry": "YES",
+        "rig": "YES",
+        "skin": "YES"
+      },
+      "id": "gobkit-free-animal-minion",
+      "license": "UNRESOLVED",
+      "materialization_eligible": false,
+      "notes": "10 animals + 8 minions. Technically strong, but first public repo lineage is 2026 and co-located with Forge; do not train on without stronger human-authorship evidence.",
+      "pack": "Free Animal + Minion",
+      "provenance": "UNCERTAIN_2026_REPO_FORGE_COLOCATED",
+      "role": "QUARANTINE",
+      "source_family": "Gobkit"
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+name: post139-authority-contracts-v1
+
+on:
+  push:
+    branches: [main, post139-corpus-audit-v1]
+    paths:
+      - '.github/workflows/post139_authority_contracts_v1.yml'
+      - '.github/workflows/post139_recover_and_seal_v1.yml'
+      - 'canonical/POST139_SUBJECT_POLICY_V1.json'
+      - 'canonical/POST139_ACQUISITION_PINS_V1.json'
+      - 'tools/corpus/post139_acquire_resilient_v1.py'
+      - 'tools/corpus/post139_acquire_drive_actor_lane_v2.py'
+      - 'tools/corpus/post139_rebind_candidate_manifest_v1.py'
+      - 'tools/corpus/post139_compile_inventory_v2.py'
+      - 'tools/corpus/post139_corpus_authority_v1.py'
+      - 'tools/corpus/post139_build_materialization_closure_v1.py'
+      - 'tools/corpus/post139_training_consumer_v1.py'
+      - 'tests/tools/test_post139_acquire_resilient_v1.py'
+      - 'tests/tools/test_post139_compile_inventory_v2.py'
+      - 'tests/tools/test_post139_corpus_authority_v1.py'
+      - 'tests/tools/test_post139_training_consumer_v1.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/post139_authority_contracts_v1.yml'
+      - '.github/workflows/post139_recover_and_seal_v1.yml'
+      - 'canonical/POST139_SUBJECT_POLICY_V1.json'
+      - 'canonical/POST139_ACQUISITION_PINS_V1.json'
+      - 'tools/corpus/post139_acquire_resilient_v1.py'
+      - 'tools/corpus/post139_acquire_drive_actor_lane_v2.py'
+      - 'tools/corpus/post139_rebind_candidate_manifest_v1.py'
+      - 'tools/corpus/post139_compile_inventory_v2.py'
+      - 'tools/corpus/post139_corpus_authority_v1.py'
+      - 'tools/corpus/post139_build_materialization_closure_v1.py'
+      - 'tools/corpus/post139_training_consumer_v1.py'
+      - 'tests/tools/test_post139_acquire_resilient_v1.py'
+      - 'tests/tools/test_post139_compile_inventory_v2.py'
+      - 'tests/tools/test_post139_corpus_authority_v1.py'
+      - 'tests/tools/test_post139_training_consumer_v1.py'
+  workflow_dispatch:
+
+concurrency:
+  group: post139-authority-contracts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install contract dependencies
+        run: python -m pip install --quiet pytest 'gdown==5.2.0' 'requests>=2.32,<3'
+      - name: Compile Python tooling
+        run: |
+          python -m py_compile \
+            tools/corpus/post139_acquire_resilient_v1.py \
+            tools/corpus/post139_acquire_drive_actor_lane_v2.py \
+            tools/corpus/post139_rebind_candidate_manifest_v1.py \
+            tools/corpus/post139_compile_inventory_v2.py \
+            tools/corpus/post139_corpus_authority_v1.py \
+            tools/corpus/post139_build_materialization_closure_v1.py \
+            tools/corpus/post139_training_consumer_v1.py
+      - name: Run authority contracts
+        run: |
+          python -m pytest -q \
+            tests/tools/test_post139_acquire_resilient_v1.py \
+            tests/tools/test_post139_compile_inventory_v2.py \
+            tests/tools/test_post139_corpus_authority_v1.py \
+            tests/tools/test_post139_training_consumer_v1.py
+      - name: Export exact branch tooling snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          snapshot="$RUNNER_TEMP/post139-tooling-snapshot"
+          mkdir -p "$snapshot"
+          cp -a canonical "$snapshot/canonical"
+          cp -a tools "$snapshot/tools"
+          cp -a tests "$snapshot/tests"
+          cp -a docs "$snapshot/docs"
+          printf '%s\n' "$GITHUB_SHA" > "$snapshot/GIT_SHA.txt"
+          echo "POST139_TOOLING_SNAPSHOT=$snapshot" >> "$GITHUB_ENV"
+      - name: Upload tooling snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-tooling-snapshot-${{ github.sha }}
+          path: ${{ env.POST139_TOOLING_SNAPSHOT }}/**
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 6
+      - name: Restore pinned Blender 4.0.2 archive
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/blender-4.0.2-linux-x64.tar.xz
+          key: observation-blender-4.0.2-linux-x64-5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a
+          fail-on-cache-miss: true
+      - name: Verify pinned Blender archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/blender-4.0.2-linux-x64.tar.xz"
+          echo "5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a  $archive" | sha256sum --check -
+          echo "POST139_BLENDER_ARCHIVE=$archive" >> "$GITHUB_ENV"
+      - name: Upload pinned Blender archive for local canonical closure
+        uses: actions/upload-artifact@v4
+        with:
+          name: post139-blender-4.0.2-linux-x64-${{ github.sha }}
+          path: ${{ env.POST139_BLENDER_ARCHIVE }}
+          if-no-files-found: error
+          retention-days: 2
+          compression-level: 0
+      - name: Summary
+        run: echo 'POST139_AUTHORITY_CONTRACTS_PASS'

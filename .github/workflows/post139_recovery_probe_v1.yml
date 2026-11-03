@@ -1,0 +1,89 @@
+name: post139-recovery-probe-v1
+
+on:
+  push:
+    branches: [post139-corpus-audit-v1]
+    paths:
+      - '.github/workflows/post139_recovery_probe_v1.yml'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - source_id: quaternius-platformer-kit
+            page_path: packs/ultimateplatformer.html
+          - source_id: quaternius-cube-world
+            page_path: packs/cubeworldkit.html
+          - source_id: quaternius-sushi-restaurant
+            page_path: packs/sushirestaurantkit.html
+          - source_id: quaternius-sci-fi-essentials
+            page_path: packs/scifiessentialskit.html
+          - source_id: quaternius-universal-base-characters
+            page_path: packs/universalbasecharacters.html
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deterministic public Drive lister
+        run: python -m pip install --quiet 'gdown==5.2.0'
+      - name: Enumerate publisher tree without byte downloads
+        env:
+          SOURCE_ID: ${{ matrix.source_id }}
+          PAGE_PATH: ${{ matrix.page_path }}
+        run: |
+          python - <<'PY'
+          import json, os, re, urllib.request
+          from collections import Counter
+          from pathlib import Path, PurePosixPath
+          import gdown
+
+          source_id=os.environ['SOURCE_ID']
+          page_path=os.environ['PAGE_PATH']
+          page_url=f'https://raw.githubusercontent.com/Quaternius/quaternius.github.io/main/{page_path}'
+          req=urllib.request.Request(page_url, headers={'User-Agent':'RealSaS-Post139-RecoveryProbe/1.0'})
+          with urllib.request.urlopen(req, timeout=60) as response:
+              html=response.read().decode('utf-8','replace')
+          ids=list(dict.fromkeys(re.findall(r'https://drive\.google\.com/drive/folders/([A-Za-z0-9_-]+)', html)))
+          if len(ids)!=1:
+              raise SystemExit(f'POST139_PROBE_DRIVE_RESOLUTION:{source_id}:{ids}')
+          folder_id=ids[0]
+          listing=gdown.download_folder(
+              url=f'https://drive.google.com/drive/folders/{folder_id}',
+              output=f'/tmp/post139-probe/{source_id}', quiet=True,
+              use_cookies=False, remaining_ok=True, skip_download=True,
+          )
+          if not listing:
+              raise SystemExit(f'POST139_PROBE_LIST_EMPTY:{source_id}')
+          files=[]
+          for item in listing:
+              p=PurePosixPath(item.path).as_posix()
+              ext=Path(p).suffix.lower() or '<none>'
+              files.append({'file_id':item.id,'path':p,'extension':ext})
+          model=[r for r in files if r['extension'] in {'.gltf','.glb','.fbx','.blend','.obj'}]
+          top=Counter(PurePosixPath(r['path']).parts[0] if PurePosixPath(r['path']).parts else '<root>' for r in model)
+          payload={
+              'schema':'RealSaS.Post139.RecoveryPublisherProbe.v1',
+              'source_id':source_id,'page_path':page_path,'drive_folder_id':folder_id,
+              'file_count':len(files),'model_file_count':len(model),
+              'top_level_model_counts':dict(sorted(top.items())),
+              'model_files':model,
+          }
+          out=Path('probe')/f'{source_id}.json'; out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
+          print('POST139_RECOVERY_PROBE_PASS', source_id, len(files), len(model), dict(sorted(top.items())))
+          print('POST139_MODEL_PATHS_BEGIN')
+          for row in model:
+              print(row['path'])
+          print('POST139_MODEL_PATHS_END')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: post139-recovery-probe-${{ matrix.source_id }}
+          path: probe/${{ matrix.source_id }}.json
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,288 @@
+{
+  "architecture_scope": "FINITE_SOURCE_RESPONSE_AND_INDEPENDENT_FAMILY_COURTS__NO_TRAINING",
+  "calibration_failure_contract": "EXPLICIT_FAILURE_RECEIPT__MASK_ABSENT_TARGETS__PRESERVE_INDEPENDENT_SURFACE",
+  "canonical_branch": "main",
+  "corpus370_contract": {
+    "expected_subject_count": 370,
+    "historical_training_authority_inherited": false,
+    "old_truth139_split_inherited": false,
+    "subject_failure_is_preserved_not_removed": true,
+    "training_authorized": false,
+    "truth_family_matrix_minted_by_execution_plan": false
+  },
+  "date": "2026-11-01",
+  "name": "Corpus370 source-surface separation V3",
+  "product_quality_axes": {
+    "appearance": "FIRST_CLASS",
+    "geometry": "FIRST_CLASS",
+    "mechanics": "FIRST_CLASS",
+    "presentation": "FIRST_CLASS",
+    "rule": "FAIL_ON_ANY_AXIS__NO_SILENT_CROSS_LAYER_COMPENSATION"
+  },
+  "resume_contract": {
+    "failure_semantics": "PRESERVE_VERIFIED_INDEPENDENT_UPSTREAM_OUTPUTS_AND_FAILED_SUBJECT_EVIDENCE",
+    "latest_alias_forbidden": true,
+    "repair_semantics": "ADDITIVE_CHILD_TRUTH_ONLY__NEVER_MUTATE_SEALED_SOURCE_OBSERVATION_OR_PRIOR_STAGE_OUTPUTS",
+    "rule": "PASS_OR_CACHE_HIT_REUSE_REQUIRES_INPUT_FINGERPRINT_AND_OUTPUT_SHA"
+  },
+  "schema": "RealSaS.MainlineExecutionPlan.v2",
+  "source_surface_contract": "EXACT_ADMITTED_IMPORT__NO_KINEMATIC_OR_TEXTURE_DEPENDENCY",
+  "stage_count": 11,
+  "stages": [
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.source:seal_source_bytes",
+      "depends_on": [],
+      "group": "source",
+      "id": "01_SOURCE_BYTES_SEALED",
+      "manifest_keys": [
+        "source_files"
+      ],
+      "ordinal": 1,
+      "policy": {
+        "cacheable": true,
+        "fail_closed": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "title": "Source bytes sealed"
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.source:seal_source_license_provenance",
+      "depends_on": [
+        "01_SOURCE_BYTES_SEALED"
+      ],
+      "group": "source",
+      "id": "02_SOURCE_LICENSE_PROVENANCE",
+      "manifest_keys": [
+        "source_license"
+      ],
+      "ordinal": 2,
+      "policy": {
+        "cacheable": true,
+        "fail_closed": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "title": "Source/license provenance sealed"
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:audit_source_mechanics_stage",
+      "depends_on": [
+        "01_SOURCE_BYTES_SEALED",
+        "02_SOURCE_LICENSE_PROVENANCE"
+      ],
+      "group": "source",
+      "id": "03_SOURCE_MECHANICAL_AUDIT",
+      "manifest_keys": [
+        "source_audit",
+        "observation"
+      ],
+      "ordinal": 3,
+      "policy": {
+        "cacheable": true,
+        "fail_closed": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "title": "Source mechanical audit"
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:admit_full_subject_stage",
+      "depends_on": [
+        "03_SOURCE_MECHANICAL_AUDIT"
+      ],
+      "group": "observation",
+      "id": "04_FULL_SUBJECT_ADMISSION",
+      "manifest_keys": [
+        "admission"
+      ],
+      "ordinal": 4,
+      "policy": {
+        "cacheable": true,
+        "fail_closed": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "title": "Full-subject admission"
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.observation_v2:qualify_camera_contract_stage",
+      "depends_on": [],
+      "group": "observation",
+      "id": "05_CAMERA_CONTRACT_SOLVED",
+      "manifest_keys": [
+        "observation"
+      ],
+      "ordinal": 5,
+      "policy": {
+        "cacheable": true,
+        "fail_closed": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "title": "Common 8-view camera contract"
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:materialize_observation_render_stage",
+      "depends_on": [
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED"
+      ],
+      "group": "observation",
+      "id": "06_OBSERVATION_RENDER_8VIEW",
+      "manifest_keys": [
+        "observation"
+      ],
+      "ordinal": 6,
+      "policy": {
+        "cacheable": true,
+        "fail_closed": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "title": "Materialize exact 8 source observations"
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:qualify_observation_contract_stage",
+      "depends_on": [
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "04_FULL_SUBJECT_ADMISSION",
+        "05_CAMERA_CONTRACT_SOLVED",
+        "06_OBSERVATION_RENDER_8VIEW"
+      ],
+      "group": "observation",
+      "id": "07_OBSERVATION_CONTRACT_QUALIFIED",
+      "manifest_keys": [
+        "observation"
+      ],
+      "ordinal": 7,
+      "policy": {
+        "cacheable": true,
+        "fail_closed": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "title": "Observation contract qualification"
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.preflight_v2:qualify_normalization_domain_stage",
+      "depends_on": [
+        "05_CAMERA_CONTRACT_SOLVED",
+        "07_OBSERVATION_CONTRACT_QUALIFIED"
+      ],
+      "group": "geometry",
+      "id": "08_NORMALIZATION_DOMAIN_QUALIFIED",
+      "manifest_keys": [
+        "normalization"
+      ],
+      "ordinal": 8,
+      "policy": {
+        "cacheable": true,
+        "fail_closed": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "title": "Normalization/field-domain qualification"
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.source_surface_v1:produce_source_surface_stage",
+      "depends_on": [
+        "01_SOURCE_BYTES_SEALED",
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED"
+      ],
+      "group": "truth",
+      "id": "50_SOURCE_SURFACE_ACQUIRED",
+      "manifest_keys": [
+        "source_files",
+        "source_audit",
+        "source_surface",
+        "observation"
+      ],
+      "ordinal": 9,
+      "policy": {
+        "cacheable": true,
+        "fail_closed": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "title": "Independent observation-admitted source surface"
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.source_capabilities_v1:measure_source_capabilities_stage",
+      "depends_on": [
+        "01_SOURCE_BYTES_SEALED",
+        "03_SOURCE_MECHANICAL_AUDIT",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED",
+        "50_SOURCE_SURFACE_ACQUIRED"
+      ],
+      "group": "truth",
+      "id": "51_SOURCE_CAPABILITIES_ACCOUNTED",
+      "manifest_keys": [
+        "source_files",
+        "source_audit",
+        "truth_foundry",
+        "source_surface"
+      ],
+      "ordinal": 10,
+      "policy": {
+        "cacheable": true,
+        "fail_closed": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "title": "Source capability measurement and explicit failure accounting"
+    },
+    {
+      "adapter": "compiler.realsas_compiler_services.orchestrator.adapters.corpus_family_v2:produce_subject_family_stage",
+      "depends_on": [
+        "50_SOURCE_SURFACE_ACQUIRED",
+        "51_SOURCE_CAPABILITIES_ACCOUNTED",
+        "08_NORMALIZATION_DOMAIN_QUALIFIED"
+      ],
+      "group": "truth",
+      "id": "49_SUBJECT_TRUTH_FAMILIES",
+      "manifest_keys": [
+        "source_files",
+        "source_audit",
+        "observation",
+        "source_surface"
+      ],
+      "ordinal": 11,
+      "policy": {
+        "cacheable": true,
+        "fail_closed": true,
+        "output_hash_required": true,
+        "product_pass_authority": false
+      },
+      "title": "Independent subject truth-family courts and explicit failures"
+    }
+  ],
+  "subject_specific_code_forbidden": true,
+  "truth_contract": {
+    "action_measure": "CONTROL_BALANCED__EQUAL_MASS_PER_CONTROL_THEN_PER_SEALED_SIGN_AMPLITUDE_ROW",
+    "canonical_mesh_binding_minted_by_stage48": false,
+    "mechanical_response_measurements": [
+      "PRINCIPAL_SURFACE_STRETCH",
+      "ANISOTROPY",
+      "NONRIGID_RESPONSE_MAGNITUDE",
+      "ADJACENT_RESPONSE_COHERENCE"
+    ],
+    "presentation_measurements": [
+      "POSE_CONDITIONED_RAY_ORDER",
+      "EFFECTIVE_ALPHA",
+      "INCOMING_TRANSMITTANCE",
+      "CONTRIBUTION",
+      "HIT_REMOVAL_RESPONSE"
+    ],
+    "primary_teacher_output": "QUALIFIED_RESPONSE_EVIDENCE_NOT_SEMANTIC_PART_CLASS",
+    "semantic_labels_forbidden": [
+      "cape",
+      "hair",
+      "shirt",
+      "weapon",
+      "drawable_owner"
+    ],
+    "student_supervision_minted_by_stage48": false
+  }
+}

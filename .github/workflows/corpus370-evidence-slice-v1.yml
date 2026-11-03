@@ -1,0 +1,39 @@
+name: corpus370-evidence-slice-v1
+on:
+  workflow_dispatch:
+    inputs:
+      subjects:
+        description: 'At most12 exact subject IDs for bounded read-only source diagnostics'
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-evidence-slice-v1
+  cancel-in-progress: false
+jobs:
+  readback:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 7
+    env:
+      SUBJECT_IDS: ${{ inputs.subjects }}
+      OUTPUT: /tmp/corpus370-evidence-slice-${{ github.run_id }}
+      PREP_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read exact small source evidence; no scientific execution
+        run: |
+          /home/monster/realsas_platform/current/bin/realsas-python \
+            tools/corpus/export_corpus370_evidence_slice_v1.py \
+            --bundle "$PREP_ROOT/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V2.zip" \
+            --expected-sha256 4462b7f90fcff58a8d56b1a975fde4f7f91cbda51417cad5121cf55f25994c5c \
+            --subjects "$SUBJECT_IDS" --preparation-root "$PREP_ROOT" --output "$OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: corpus370-evidence-slice-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/EVIDENCE_SLICE.zip
+            ${{ env.OUTPUT }}/EVIDENCE_SLICE_RECEIPT.json
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error

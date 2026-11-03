@@ -5,6 +5,16 @@ on:
     paths:
       - '.github/workflows/corpus370-postrun-regressions-v1.yml'
       - 'tools/corpus/*causal*'
+      - 'tools/corpus/*source*'
+      - 'tools/corpus/export_corpus370_evidence_slice_v1.py'
+      - 'models/iris/truth/local_oriented_probe_v1.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/source_*.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/corpus_family_v2.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/measurement_io_v1.py'
+      - 'canonical/CORPUS370_FAMILY_TRUTH_EXECUTION_PLAN_V3.json'
+      - 'tests/corpus/test_source_*'
+      - 'tests/corpus/test_isolated_local_probe_v1.py'
+      - 'tests/corpus/test_corpus370_evidence_slice_v1.py'
       - 'tools/corpus/run_corpus370_compute_worker_v1.py'
       - 'tools/training/build_truth139_v32_mechanical_tessa_teacher_v1.py'
       - 'tools/truth_foundry/blender_teacher_scene_v1.py'
@@ -50,4 +60,8 @@ jobs:
             tests/corpus/test_image_buffer_contract_v1.py \
             tests/corpus/test_process_log_streaming_v1.py \
             tests/corpus/test_tessa_mechanical_surface_topology_v5.py \
+            tests/corpus/test_source_rest_geometry_v1.py \
+            tests/corpus/test_source_capability_separation_v1.py \
+            tests/corpus/test_isolated_local_probe_v1.py \
+            tests/corpus/test_corpus370_evidence_slice_v1.py \
             tests/training/test_tessa_candidate_diagnostics_v1.py

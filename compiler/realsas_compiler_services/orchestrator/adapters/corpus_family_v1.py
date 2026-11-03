@@ -38,7 +38,9 @@ def write(path, value):
 
 
 def measure_subject_families(*, sid, source_sha, scene_path, replay_path,
-                             geometry_path, snapshot_path, camera_path, root):
+                             geometry_path, snapshot_path, camera_path, root,
+                             surface_geometry_path=None, missing_target_court_path=None,
+                             surface_family_claims=None):
     """Run independent families even when another family fails its court."""
     families = {}
     paths = {}
@@ -97,11 +99,45 @@ def measure_subject_families(*, sid, source_sha, scene_path, replay_path,
 
     def produce_geometry():
         out = root / 'geometry'
-        value = geometry.build(sid, geometry_path, snapshot_path, camera_path, out)
+        value = geometry.build(sid, surface_geometry_path or geometry_path, snapshot_path, camera_path, out)
         return out / 'COMPONENT_GEOMETRY_AUTHORITY_MANIFEST_V1.json'
 
-    lane('geometry', ('SURFACE_GEOMETRY_UDF', 'SURFACE_NORMALS'), produce_geometry,
-         lambda p: geometry_court.validate(json.loads(p.read_text())))
+    if surface_family_claims is None:
+        lane('geometry', ('SURFACE_GEOMETRY_UDF', 'SURFACE_NORMALS'), produce_geometry,
+             lambda p: geometry_court.validate(json.loads(p.read_text())))
+    else:
+        for name in ('SURFACE_GEOMETRY_UDF','SURFACE_NORMALS'):
+            claim=dict(surface_family_claims[name]);proof=load_file_ref(claim['court'])
+            _require(proof.get('subject_id')==sid and claim['status'] in {'PASS','MASKED','FAIL'},'CORPUS_FAMILY_SURFACE_REUSE_SUBJECT')
+            _require((claim['status']=='FAIL')==(claim['court']['status']=='FAIL'),'CORPUS_FAMILY_SURFACE_REUSE_STATE')
+            if claim['status']!='FAIL':
+                _require(proof.get('schema')=='RealSaS.ComponentGeometryAuthorityCourt.v1'
+                    and proof.get('authority',{}).get('independent_court_passed') is True
+                    and proof['authority'].get('training_authorized') is False,'CORPUS_FAMILY_SURFACE_REUSE_COURT')
+                key=outcome_keys[name];outcome=(proof.get('family_candidate_outcomes') or {}).get(key)
+                _require((claim['status']=='MASKED' and outcome=='UNAVAILABLE_CANDIDATE')
+                    or (claim['status']=='PASS' and outcome in {'QUALIFIED_CORE_CANDIDATE','QUALIFIED_MASKED_CANDIDATE'}),
+                    'CORPUS_FAMILY_SURFACE_REUSE_OUTCOME')
+            else:
+                _require(proof.get('status')=='FAIL','CORPUS_FAMILY_SURFACE_REUSE_FAILURE')
+            families[name]=claim
+
+    if scene_path is None:
+        _require(missing_target_court_path is not None,'CORPUS_FAMILY_ABSENCE_COURT_REQUIRED')
+        proof=json.loads(Path(missing_target_court_path).read_text())
+        _require(proof.get('schema')=='RealSaS.SourceCapabilityAbsenceCourt.v1'
+                 and proof.get('subject_id')==sid and proof.get('source_sha256')==source_sha
+                 and (proof.get('authority') or {}).get('independent_missing_target_check_passed') is True
+                 and proof['authority'].get('qualified_target_count')==0
+                 and proof['authority'].get('training_authorized') is False,'CORPUS_FAMILY_ABSENCE_COURT_INVALID')
+        for family in ('MECHANICAL_SURFACE_TOPOLOGY','CAUSAL_RESPONSE','TESSA_TEACHER'):
+            families[family]={'status':'MASKED','reason_codes':['CALIBRATION_TARGET_NOT_PRODUCED'],
+                'evidence_refs':[ref(missing_target_court_path,proof['schema'])],
+                'court':{**ref(missing_target_court_path,proof['schema']),'status':'PASS'}}
+            print(json.dumps({'event':'CORPUS_FAMILY_OUTCOME','subject_id':sid,'families':[family],
+                              'status':'MASKED','family_status':{family:'MASKED'},
+                              'reason_codes':['CALIBRATION_TARGET_NOT_PRODUCED']}),flush=True)
+        return {'subject_id':sid,'source_sha256':source_sha,'families':families}
 
     def produce_mechanical():
         out = root / 'mechanical'

@@ -1,7 +1,10 @@
 """Existing input bytes remain exact when their transport containers change."""
 import hashlib
+import ast
+import errno
 import json
 from pathlib import Path
+from types import SimpleNamespace
 import zipfile
 import pytest
 from tools.corpus import corpus370_thin_transport_v1 as thin
@@ -67,3 +70,35 @@ def test_wrong_base_bytes_are_rejected_before_runtime_install(source):
     base.write_bytes(b'wrong-bundle')
     with pytest.raises(ValueError,match='THIN_BASE_BUNDLE_DRIFT'):
         thin.hydrate(out/'CORPUS370_COMPUTE_THIN_V1.zip',receipt['thin_sha256'],receipt['original_seal_sha256'],base,out/'cache')
+
+
+def test_distinct_filesystems_keep_exact_bytes_with_atomic_copy(tmp_path,monkeypatch):
+    obj=tmp_path/'object';obj.write_bytes(b'bytes');dest=tmp_path/'elsewhere'/'input'
+    def separate_mount(*args):raise OSError(errno.EXDEV,'different filesystem')
+    monkeypatch.setattr(thin.os,'link',separate_mount)
+    thin.place_object(obj,dest,digest(b'bytes'),5)
+    assert dest.read_bytes()==b'bytes' and not list(dest.parent.glob('*.thin-partial'))
+
+
+def test_new_notebook_constructs_self_contained_hydration_without_a_publisher_wait(source):
+    from tools.notebooks.build_corpus370_thin_compute_v1 import build
+    config,operator,base,out,seal=source;receipt=thin.build(config,operator,out)
+    original_receipt=out/'ORIGINAL_RECEIPT.json'
+    original_receipt.write_text(json.dumps({'code_sha':'a'*40,'seal_sha256':thin.sha(seal),'archive_sha256':'c'*64}))
+    notebook=build(seal,original_receipt,out/'THIN_TRANSPORT_RECEIPT.json','folder')
+    for cell in notebook['cells']:
+        if cell['cell_type']=='code':ast.parse(''.join(cell['source']))
+    assert 'ARCHIVE.is_file' not in ''.join(notebook['cells'][1]['source'])
+    code=''.join(notebook['cells'][2]['source'])
+    assert 'time.sleep' not in code and 'while not' not in code
+    root=out/'drive';(root/'corpus370_preparation_v1').mkdir(parents=True)
+    (root/'corpus370_preparation_v1/base.zip').write_bytes(base.read_bytes())
+    code=code.replace("Path('/content/drive/MyDrive')",'Path('+repr(str(root))+')')
+    code=code.replace("Path('/content/corpus370-worker-inputs')",'Path('+repr(str(out/'cache'))+')')
+    calls=[]
+    namespace={'Path':Path,'DRIVE':out,'CONFIG':notebook['metadata']['realsas'],'json':json,'PYTHON':'python',
+        'subprocess':SimpleNamespace(run=lambda args,**kwargs:calls.append(args)),'time':SimpleNamespace(monotonic=lambda:0),'START':0}
+    exec(compile(code,'thin-notebook-extract','exec'),namespace)
+    script=calls[0][3];tree=ast.parse(script)
+    definitions={n.name for n in tree.body if isinstance(n,ast.FunctionDef)}
+    assert {'hydrate','place_object','sha','safe_member','require'}<=definitions

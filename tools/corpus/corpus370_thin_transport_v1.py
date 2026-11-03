@@ -29,6 +29,18 @@ def safe_member(name):
     return p
 
 
+def place_object(obj,destination,digest,size):
+    import errno
+    destination.parent.mkdir(parents=True,exist_ok=True)
+    try:os.link(obj,destination)
+    except OSError as error:
+        if error.errno!=errno.EXDEV:raise
+        staged=destination.with_suffix(destination.suffix+'.thin-partial')
+        shutil.copyfile(obj,staged)
+        require(staged.stat().st_size==size and sha(staged)==digest,'THIN_COPY_BYTES_DRIFT')
+        staged.replace(destination)
+
+
 def fresh_runtime(original_executable,cache):
     from tools.observation.install_pinned_evaluator_runtime_v1 import install
     original=Path(original_executable);root=cache/'provider'/'blender-4.0.2-linux-x64'/'numeric-runtime-239'
@@ -131,7 +143,7 @@ def hydrate(thin_path,expected_thin_sha,expected_seal_sha,base_path,cache):
                 require(destination.is_absolute() and '..' not in destination.parts
                     and any(destination.is_relative_to(root) and destination.resolve().is_relative_to(root.resolve()) for root in roots),'THIN_DESTINATION_ESCAPE')
                 if destination.exists():require(destination.is_file() and sha(destination)==digest,'THIN_EXISTING_BYTES_DRIFT:'+str(destination))
-                else:destination.parent.mkdir(parents=True,exist_ok=True);os.link(obj,destination)
+                else:place_object(obj,destination,digest,row['size_bytes'])
                 if row['executable']:destination.chmod(destination.stat().st_mode|0o111)
                 if index%250==0:print(f'INPUT_VERIFY {index}/{len(seal["files"])}',flush=True)
     (cache/'COMPUTE_CAPSULE.json').write_bytes(raw)

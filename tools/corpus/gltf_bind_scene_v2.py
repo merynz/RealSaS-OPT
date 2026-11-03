@@ -38,33 +38,37 @@ class SourceGLTFBindRestV2(SourceGLTF):
 
     def _bind_joint_worlds(self):
         doc = self.doc
-        skins_used = {
-            int(node["skin"]): index
-            for index, node in enumerate(doc.get("nodes", []))
-            if "mesh" in node and "skin" in node
-        }
+        # One glTF skin can be instanced by several mesh nodes. A dictionary
+        # keyed by skin would silently pick the last and hide frame ambiguity.
+        instances = {}
+        for node_index, node in enumerate(doc.get("nodes", [])):
+            if "mesh" in node and "skin" in node:
+                instances.setdefault(int(node["skin"]), []).append(node_index)
         by_joint = {}
-        for skin_index, mesh_node in sorted(skins_used.items()):
-            skin = doc["skins"][skin_index]
-            joints = list(skin["joints"])
-            if len(set(joints)) != len(joints):
-                raise ValueError("RAW_GLTF_BIND_DUPLICATE_JOINT")
-            if "inverseBindMatrices" in skin:
-                matrices = self.accessor(skin["inverseBindMatrices"])
-                if matrices.shape != (len(joints), 16):
-                    raise ValueError("RAW_GLTF_BIND_INVERSE_MATRIX_COUNT")
-                matrices = matrices.reshape(-1, 4, 4).transpose(0, 2, 1)
-            else:
-                # glTF 2.0 defines omitted inverseBindMatrices as identity.
-                matrices = np.repeat(np.eye(4)[None], len(joints), axis=0)
-            mesh_world = _matrix(self.world(mesh_node), "RAW_GLTF_BIND_SKIN_FRAME")
-            for joint, inv_bind in zip(joints, matrices):
-                if not 0 <= int(joint) < len(doc["nodes"]):
-                    raise ValueError("RAW_GLTF_BIND_UNKNOWN_JOINT")
-                authored_bind = mesh_world @ _inverse(
-                    inv_bind, "RAW_GLTF_BIND_SINGULAR_INVERSE_BIND")
-                authored_bind = _matrix(authored_bind, "RAW_GLTF_BIND_MATRIX_DOMAIN")
-                by_joint.setdefault(int(joint), []).append(authored_bind)
+        for skin_index, mesh_nodes in sorted(instances.items()):
+            if not 0 <= skin_index < len(doc.get("skins", [])):
+                raise ValueError("RAW_GLTF_BIND_UNKNOWN_SKIN")
+            for mesh_node in mesh_nodes:
+                skin = doc["skins"][skin_index]
+                joints = list(skin["joints"])
+                if len(set(joints)) != len(joints):
+                    raise ValueError("RAW_GLTF_BIND_DUPLICATE_JOINT")
+                if "inverseBindMatrices" in skin:
+                    matrices = self.accessor(skin["inverseBindMatrices"])
+                    if matrices.shape != (len(joints), 16):
+                        raise ValueError("RAW_GLTF_BIND_INVERSE_MATRIX_COUNT")
+                    matrices = matrices.reshape(-1, 4, 4).transpose(0, 2, 1)
+                else:
+                    # glTF 2.0 defines omitted inverseBindMatrices as identity.
+                    matrices = np.repeat(np.eye(4)[None], len(joints), axis=0)
+                mesh_world = _matrix(self.world(mesh_node), "RAW_GLTF_BIND_SKIN_FRAME")
+                for joint, inv_bind in zip(joints, matrices):
+                    if not 0 <= int(joint) < len(doc["nodes"]):
+                        raise ValueError("RAW_GLTF_BIND_UNKNOWN_JOINT")
+                    authored_bind = mesh_world @ _inverse(
+                        inv_bind, "RAW_GLTF_BIND_SINGULAR_INVERSE_BIND")
+                    authored_bind = _matrix(authored_bind, "RAW_GLTF_BIND_MATRIX_DOMAIN")
+                    by_joint.setdefault(int(joint), []).append(authored_bind)
         for joint, frames in by_joint.items():
             if any(not np.allclose(frames[0], frame, atol=1e-9, rtol=0)
                    for frame in frames[1:]):

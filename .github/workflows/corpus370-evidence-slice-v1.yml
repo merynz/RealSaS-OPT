@@ -1,7 +1,7 @@
 name: corpus370-evidence-slice-v1
 on:
   push:
-    branches: [main]
+    branches: [main, 'ci/corpus370-evidence-slice-v1']
     paths:
       - '.github/workflows/corpus370-evidence-slice-v1.yml'
   workflow_dispatch:

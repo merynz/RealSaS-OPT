@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        subjects: ${{ fromJSON(inputs.subjects != '' && format('[{0}]', toJSON(inputs.subjects)) || '["corpus_0c3efd578549abdcd2fb,corpus_17fefc47c1da85befb8d","corpus_1279ca142bf9b6aed964,corpus_636a2a3217982e9a876b","corpus_000ca1ae51f9582fde9e,corpus_0fbf08618decf883f035"]') }}
+        subjects: ${{ fromJSON(inputs.subjects != '' && format('[{0}]', toJSON(inputs.subjects)) || '["corpus_af623aec64c806e56abf,truth139_07455b9e058affdd69c3","corpus_808c86d0f7f49e102184,corpus_583d22a00ea3b92b3a0a","truth139_5a84086fb4933610f592,corpus_b6e6c534f69bb0336157"]') }}
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 7
     env:
@@ -30,6 +30,10 @@ jobs:
       PREP_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1
     steps:
       - uses: actions/checkout@v4
+      - name: Report independent raw FBX evaluator ABI without executing source scenes
+        run: |
+          sha256sum "$PREP_ROOT/tools/ufbx_bind_scene_probe_v1"
+          readelf --version-info "$PREP_ROOT/tools/ufbx_bind_scene_probe_v1" | tail -n 24
       - name: Read exact small source evidence; no scientific execution
         run: |
           /home/monster/realsas_platform/current/bin/realsas-python \
@@ -46,5 +50,4 @@ jobs:
           compression-level: 0
           retention-days: 7
           if-no-files-found: error
-
-# revision5: exact eight-view inputs for the bounded versioned court pilot
+# revision6: sealed-calibration bridge and independent bind-frame pilot

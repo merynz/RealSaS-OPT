@@ -1,0 +1,45 @@
+name: corpus370-mask-failure-evidence-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths: ['.github/workflows/corpus370-mask-failure-evidence-v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-mask-failure-evidence-v1
+  cancel-in-progress: false
+jobs:
+  bounded-readonly:
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        subjects:
+          - 'corpus_5fdf026c4f23563f9d41,corpus_379a4a00b6839b0fe34c'
+          - 'corpus_e24308080ee602953fdd,corpus_145489b734d05b8a79c8'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 9
+    env:
+      PREP_ROOT: /home/monster/realsas_authority/corpus370_preparation_v1
+      OUTPUT: /tmp/corpus370-mask-evidence-${{ github.run_id }}-${{ strategy.job-index }}
+      SUBJECTS: ${{ matrix.subjects }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Export original selected observed failures, not recalculated truth
+        run: |
+          set -euo pipefail
+          /home/monster/realsas_platform/current/bin/realsas-python -u \
+            tools/corpus/export_corpus370_evidence_slice_v1.py \
+            --bundle "$PREP_ROOT/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V2.zip" \
+            --expected-sha256 4462b7f90fcff58a8d56b1a975fde4f7f91cbda51417cad5121cf55f25994c5c \
+            --subjects "$SUBJECTS" --preparation-root "$PREP_ROOT" --output "$OUTPUT" --all-native-views
+      - uses: actions/upload-artifact@v4
+        with:
+          name: corpus370-mask-evidence-${{ github.run_id }}-${{ strategy.job-index }}
+          path: |
+            ${{ env.OUTPUT }}/EVIDENCE_SLICE.zip
+            ${{ env.OUTPUT }}/EVIDENCE_SLICE_RECEIPT.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7

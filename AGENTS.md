@@ -5,7 +5,7 @@
 Before IRIS foundation/training work, read
 `canonical/IRIS_SINGLE_VIEW_FOUNDATION_DECISION_V1.json` and
 `docs/models/IRIS_SINGLE_VIEW_FOUNDATION_20261103.md`.
-The user authorizes Large-backbone research for one real image→full3D prediction.
+The future product candidate is one real front-facing image→eight predicted\nviews→full3D. The user has DEFERRED this frontend implementation: finish the\ncurrent multiview corpus/materialization/model-truth scope first. Single-view\nvalidation does not become an extra gate on current multiview work. Larger DINO\nalone does not provide a multiview generator or prove dataset sufficiency.
 This supersedes the old Small-only apparatus default and S-ceiling prerequisite,
 not historical evidence or exact replay identities. Multi-view target renderings
 must not leak into student conditioning. A larger encoder requires a versioned

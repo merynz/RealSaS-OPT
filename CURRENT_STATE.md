@@ -1,3 +1,12 @@
+> **User sequencing / single-view deferred — 2026-11-03:** Record one front-facing
+> input→normalization→eight jointly predicted camera-conditioned views as the NEXT
+> product research task. The user explicitly defers this implementation; finish
+> current multiview corpus/IRIS/TESSA truth alignment and materialization first.
+> Single-view validation is not a new blocker on that current scope. Larger DINO
+> alone does not supply a multiview generator or guarantee corpus sufficiency.
+> Existing truth/model/split/materialization gates and lack of training permission
+> remain. See the updated single-view decision JSON and design document.
+>
 > **Single-view product / Large foundation decision — 2026-11-03:** The user
 > confirms one real RGB reference→full3D prediction. Eight calibrated research
 > inputs do not establish this capability. Small is no longer the primary default

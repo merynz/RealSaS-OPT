@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.IRISSingleViewFoundationDecision.v1",
   "date": "2026-11-03",
-  "status": "DESIGN_REVISION_REQUIRED__EMPIRICAL_SELECTION_PENDING",
+  "status": "SINGLE_VIEW_FRONTEND_DEFERRED__CURRENT_MULTIVIEW_CORPUS_FIRST",
   "product_input": {
     "observed_rgb_views": 1,
     "camera_pose": "UNKNOWN_UNLESS_ESTIMATED_OR_EXPLICITLY_PROVIDED",
@@ -120,5 +120,25 @@
     "siglip2": "https://arxiv.org/abs/2502.14786",
     "siglip2_model": "https://huggingface.co/google/siglip2-large-patch16-512",
     "trellis2_pipeline": "https://huggingface.co/microsoft/TRELLIS.2-4B/blob/main/pipeline.json"
+  },
+  "active_scope": {
+    "priority": "Finish current exact370 source truth, family/head coverage, lineage split and materialization; repair current model/truth interfaces.",
+    "conditioning": "CURRENT_MULTIVIEW_RESEARCH_APPARATUS",
+    "single_view_frontend_implementation": "DEFERRED_BY_USER_20261103",
+    "single_view_validation_blocks_current_multiview_work": false,
+    "current_training_authorized": false,
+    "training_blockers": "Existing corpus/model/target/readiness gates remain; single-view capability is a separate later product milestone."
+  },
+  "future_single_view_frontend": {
+    "decision": "RECORDED_FOR_NEXT_STAGE__NOT_IMPLEMENTATION_AUTHORIZATION_NOW",
+    "observed_views": 1,
+    "input_guidance": "Front-facing character image; orthographic assumption must be declared and validated.",
+    "generated_views": 8,
+    "camera_layout": "Prefer existing eight-camera canonical orbit, subject to exact normalization and axis binding.",
+    "normalization": "Input camera simplification does not remove pose, scale and common-frame requirements.",
+    "producer": "Joint camera-conditioned RGB/normal prediction; pretrained compatible multiview/3D prior must be assessed separately.",
+    "generated_evidence": "PREDICTED_CONDITIONING__NOT_SOURCE_TRUTH",
+    "comparison": "Six-view baseline may be compared later; no claim eight is empirically optimal.",
+    "data_sufficiency": "UNPROVEN__LARGER_2D_ENCODER_DOES_NOT_GUARANTEE_SINGLE_VIEW_COMPLETION"
   }
 }

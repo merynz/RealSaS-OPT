@@ -1,7 +1,24 @@
 # Single-view IRIS foundation decision — 2026-11-03
 
-Status: **design revision required; empirical backbone selection pending; no training authorization**.
+Status: **single-view frontend deferred by user; current multiview corpus/materialization first; empirical backbone selection pending; no training authorization**.
 Machine-readable decision: [IRIS_SINGLE_VIEW_FOUNDATION_DECISION_V1.json](../../canonical/IRIS_SINGLE_VIEW_FOUNDATION_DECISION_V1.json).
+
+## User sequencing decision — 2026-11-03
+
+The accepted future product candidate is **one front-facing reference → pose/camera
+normalization → eight jointly predicted, camera-conditioned views → IRIS/TESSA**.
+The user explicitly deferred its implementation until the current corpus and
+multiview model/truth work are complete. Do not turn this future single-view
+milestone into a new gate on current multiview corpus closure/materialization.
+This does not authorize current training: existing family/head, sign/probe,
+tangent-frame, loader, split and materialization checks still apply.
+
+A larger DINO encoder does not guarantee missing-side generation or overcome
+unproven data sufficiency. Assess a compatible pretrained multiview/3D generative
+prior and domain coverage separately before resuming this future work. The eight
+source views remain truth targets; predicted views never become source truth.
+The design below is retained for that later milestone, not an instruction to
+change the running notebook or current research conditioning.
 
 ## Product objective and scope
 
@@ -77,7 +94,7 @@ pin its target layers, rank, adapter weights and parent checkpoint. Copying rank
 or adding LoRA to a randomly initialized decoder is not equivalent transfer learning.
 A pretrained2D encoder alone does not supply a pretrained3D completion prior.
 
-## Required evidence before training readiness
+## Required evidence before future single-view training readiness
 
 Use identical lineage-safe splits and qualified head masks. Compare Large arms
 with exactly one real observed view; evaluate held-out views as targets only.

@@ -1,0 +1,34 @@
+name: corpus370-thin-transport-v1
+on:
+  push:
+    branches: [corpus370-compute-thin-transport-v1]
+    paths:
+      - 'tools/corpus/corpus370_thin_transport_v1.py'
+      - '.github/workflows/corpus370_thin_transport_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-thin-transport-v1
+  cancel-in-progress: false
+jobs:
+  export-existing-bytes:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PYTHONUNBUFFERED: '1'
+      OUTPUT: /home/monster/realsas_authority/corpus370_thin_transports/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read-only repack of sealed7a61 inputs; verify reconstructed runtime byte providers
+        run: |
+          /home/monster/realsas_platform/current/bin/realsas-python -m tools.corpus.corpus370_thin_transport_v1 --config canonical/CORPUS370_COMPUTE_EXPORT_V1.json --operator canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V2.json --output "$OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: corpus370-thin-transport-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/CORPUS370_COMPUTE_THIN_V1.zip
+            ${{ env.OUTPUT }}/THIN_TRANSPORT_RECEIPT.json
+          if-no-files-found: error
+          retention-days: 30

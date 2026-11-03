@@ -5,7 +5,11 @@
 Before IRIS foundation/training work, read
 `canonical/IRIS_SINGLE_VIEW_FOUNDATION_DECISION_V1.json` and
 `docs/models/IRIS_SINGLE_VIEW_FOUNDATION_20261103.md`.
-The future product candidate is one real front-facing image→eight predicted\nviews→full3D. The user has DEFERRED this frontend implementation: finish the\ncurrent multiview corpus/materialization/model-truth scope first. Single-view\nvalidation does not become an extra gate on current multiview work. Larger DINO\nalone does not provide a multiview generator or prove dataset sufficiency.
+The future product candidate is one real front-facing image→eight predicted
+views→full3D. The user has DEFERRED this frontend implementation: finish the
+current multiview corpus/materialization/model-truth scope first. Single-view
+validation does not become an extra gate on current multiview work. Larger DINO
+alone does not provide a multiview generator or prove dataset sufficiency.
 This supersedes the old Small-only apparatus default and S-ceiling prerequisite,
 not historical evidence or exact replay identities. Multi-view target renderings
 must not leak into student conditioning. A larger encoder requires a versioned
@@ -229,3 +233,4 @@ A FIT/witness PASS is scoped evidence for the exact subject/apparatus. Engineeri
 8. `docs/platform/adr/0003-go-control-plane.md`
 9. `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md`
 10. older recovery/scientific material only as needed for provenance
+

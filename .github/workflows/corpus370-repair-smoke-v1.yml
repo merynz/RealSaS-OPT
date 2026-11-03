@@ -1,0 +1,43 @@
+name: corpus370-repair-smoke-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/corpus370-repair-smoke-v1.yml'
+      - 'tools/corpus/gltf_bind_scene_v2.py'
+      - 'tools/corpus/iris_observation_admission_v2.py'
+      - 'tools/corpus/prepare_corpus370_observation_packets_v3.py'
+      - 'tools/corpus/run_corpus370_observation_sweep_v3.py'
+      - 'tools/corpus/verify_gltf_bind_rest_pilot_v1.py'
+      - 'tools/training/*source_relative_contact_v1.py'
+      - 'tests/corpus/test_gltf_*'
+      - 'tests/corpus/test_observation_v3_exact_import_packet_v1.py'
+      - 'tests/training/test_tessa_source_relative_contact_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-repair-smoke-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  independent-repair-smoke:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements/mainline-ci.txt -r requirements/truth-family-courts.txt
+      - name: Bind-rest, resume and contact regressions (separate from heavy courts)
+        run: |
+          python -m pytest -q \
+            tests/corpus/test_gltf_bind_scene_v2.py \
+            tests/corpus/test_gltf_bind_rest_pilot_v1.py \
+            tests/corpus/test_gltf_skin_instance_ambiguity_v1.py \
+            tests/corpus/test_observation_v3_exact_import_packet_v1.py \
+            tests/training/test_tessa_source_relative_contact_v1.py

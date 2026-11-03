@@ -3,7 +3,8 @@ from __future__ import annotations
 
 """Prepare Corpus370 bind-rest observations under an exact pinned numeric runtime.
 
-V2 retains the V1 source/observation semantics but makes Blender launch provenance
+V4 preserves original 8-view policy, adds versioned raw bind-rest and exact resumption.
+The pinned Blender launch provenance remains
 explicit. The patched 4.0.2 executable has a relative PT_INTERP and MUST be launched
 through pinned_evaluator_runtime_v1.launch_options(); bare execution is invalid.
 Packet identity binds source bytes, producer source, policy, Blender binary and the
@@ -48,6 +49,7 @@ def source_binding() -> dict:
         "tools/observation/pinned_evaluator_runtime_v1.py",
         "tools/corpus/gltf_bind_scene_v1.py",
         "tools/corpus/gltf_bind_scene_v2.py",
+        "tools/corpus/ufbx_bind_scene_probe_v2.c",
         "tools/corpus/iris_observation_admission_v2.py",
         "tools/corpus/iris_observation_admission_v1.py",
         "tools/corpus/prepare_corpus370_observation_packets_v4.py",

@@ -1,3 +1,30 @@
+> **Completed Corpus370 audit and tested repairs — 2026-11-03:**
+> The sealed7a61 worker finished294 inputs:268 COMPUTED_UNQUALIFIED,26 execution
+> failures;76 earlier preparation failures remain separate (47 mask,29 bind-vertex).
+> All294 receipts/logs/archives and9,747 archived files verified by SHA/size/CRC;
+> archive bytes4,079,694,727. No unresolved integrity error or evidence mutation.
+> Geometry/normals/mechanical family PASS268 each; geometry/normals251 core+17
+> masked. Causal response23 PASS/245 FAIL (208 tangent,31 face-index,6 trajectory);
+> TESSA14 PASS/254 FAIL (17 invalid faces,237 no passing candidate). Response PASS
+> has ZERO valid tangent rows, and response/TESSA PASS intersection is ZERO.
+> These are family measurements, not IRIS/TESSA eligible counts. Component sign
+> is not global sign. Semantic lineage and train/val/unseen remain unminted.
+> PR324 supplies tested versioned responseV2/independent court, exact TESSA
+> face/incident-corner correspondence, actionable image diagnostics and live
+> stdout/stderr/subject/stage/count/elapsed heartbeats. Archived-array witnesses
+> reproduce the corrections; the trajectory guard still rejects. No training or
+> requalification was run. Source regression passes do not promote old evidence.
+> See `canonical/CORPUS370_POSTRUN_AUDIT_20261103.json` and
+> `docs/corpus/CORPUS370_POSTRUN_REPAIRS_20261103.md`.
+> Resume with a new exact Platform child Attempt/release and scoped repair worker:
+> re-evaluate responseV2 and corrected TESSA on all268 sealed Stage47 inputs with
+> explicit original dependencies. Repair independent source-only acquisition and
+> diagnose26 execution/76 preparation failures; never fabricate zero actions,
+> loosen exact-import/trajectory/sign guards or silently drop candidates.
+> Then close the final family matrix, target projections/row masks, actual model
+> loader and lineage split; present readiness coverage before final materialization.
+> Keep8 real source views; the one-reference product frontend remains deferred.
+>
 > **Read-only live failure triage — 2026-11-03 18:37 Istanbul snapshot:**
 > 190/294 worker subjects accounted:164 COMPUTED_UNQUALIFIED,26 EXECUTION_FAILED.
 > All26 failed archives and3 representative completed archives verified by size,
@@ -710,3 +737,4 @@ These are preserved research programs and should enter through Experiment/Attemp
 Historical numbered-stage documents are lineage/reference material. They must not override current responsibility ownership or recreate a parallel authority graph.
 
 When the user says only **`continue / devam et`**, continue the immediate work order above from the first unresolved item. Do not silently return to the retired 2026-10-16 IRIS→TESSA/FIT8 work order, and do not activate future Graphics research before the current Skin/Mechanics prerequisites are closed.
+

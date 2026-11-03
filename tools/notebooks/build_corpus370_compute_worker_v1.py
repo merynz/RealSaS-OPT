@@ -2,11 +2,60 @@
 """Generate the separate heavy-compute notebook from a real sealed input export."""
 from __future__ import annotations
 import argparse
+import inspect
 import json
 from pathlib import Path, PurePosixPath
 import re
 from tools.notebooks.build_corpus370_materialization_v1 import cell
 from models.materialization_contract_v1 import require,sha256
+
+
+def effective_memory_gib(meminfo_text=None,cgroup_limits=None):
+    """Respect the container limit as well as the host's visible memory."""
+    if meminfo_text is None:meminfo_text=Path('/proc/meminfo').read_text()
+    host_kib=int(next(line.split()[1] for line in meminfo_text.splitlines() if line.startswith('MemTotal:')))
+    limits=[host_kib*1024]
+    if cgroup_limits is None:
+        cgroup_limits=[]
+        for name in ('/sys/fs/cgroup/memory.max','/sys/fs/cgroup/memory/memory.limit_in_bytes'):
+            try:cgroup_limits.append(Path(name).read_text().strip())
+            except OSError:pass
+    for value in cgroup_limits:
+        try:value=int(value)
+        except (ValueError,TypeError):continue
+        if value>0:limits.append(value)
+    return min(limits)/(1024**3)
+
+
+def preserve_interrupted_work(seal,capsule_identity,output,authority_root):
+    """Keep unsealed partial bytes, then retry only the incomplete compute slot."""
+    import hashlib, shutil, time, zipfile
+    output=Path(output);authority_root=Path(authority_root).resolve()
+    recovered=[]
+    for subject in seal['subjects']:
+        if (output/(subject['subject_id']+'.json')).exists():continue
+        run_id='COMPUTE_'+capsule_identity[:16]+'_'+subject['platform_subject_id']
+        root=authority_root/'runs'/run_id
+        if not root.exists():continue
+        if root.resolve().parent!=(authority_root/'runs').resolve():raise ValueError('WORKER_RECOVERY_PATH_ESCAPE')
+        recovery=output/'recovery';recovery.mkdir(parents=True,exist_ok=True)
+        archive=recovery/(run_id+'_'+str(time.time_ns())+'.zip')
+        staged=archive.with_suffix('.partial.zip')
+        with zipfile.ZipFile(staged,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=1) as zipped:
+            for path in sorted(root.rglob('*')):
+                if path.is_file():zipped.write(path,path.relative_to(root).as_posix())
+        staged.replace(archive)
+        digest=hashlib.sha256()
+        with archive.open('rb') as stream:
+            for block in iter(lambda:stream.read(8<<20),b''):digest.update(block)
+        receipt={'status':'UNSEALED_INTERRUPTED_COMPUTE_PRESERVED__NO_TRUTH_FAILURE',
+                 'subject_id':subject['subject_id'],'parent_attempt_id':subject['parent_attempt_id'],
+                 'capsule_identity':capsule_identity,'archive_sha256':digest.hexdigest(),
+                 'qualification_minted':False,'training_authorized':False}
+        archive.with_suffix('.json').write_text(json.dumps(receipt,sort_keys=True,indent=2)+'\n')
+        shutil.rmtree(root)
+        recovered.append(receipt)
+    return recovered
 
 
 def build(seal_path,receipt_path,drive_folder):
@@ -43,11 +92,14 @@ ayrı kapılardır. Bu dosya materialization veya training notebook’u değildi
     setup='CONFIG = '+repr(cfg)+'\n'+'''import json, os, subprocess, sys, time
 from pathlib import Path
 from google.colab import drive
+'''+inspect.getsource(effective_memory_gib)+'''
 START=time.monotonic()
-meminfo=Path('/proc/meminfo').read_text().splitlines()
-ram_gib=int(next(line.split()[1] for line in meminfo if line.startswith('MemTotal:')))/(1024**2)
-print(f'Host RAM: {ram_gib:.1f} GiB')
+ram_gib=effective_memory_gib()
+print(f'Kullanılabilir çalışma zamanı RAM sınırı: {ram_gib:.1f} GiB')
 assert ram_gib>=22, 'Yüksek RAM çalışma zamanı seçin (en az 24 GiB önerilir), sonra Run All.'
+subprocess.run(['apt-get','update','-qq'],check=True)
+subprocess.run(['apt-get','install','-y','-qq','libxi6','libxrender1','libxfixes3','libxrandr2',
+                'libxxf86vm1','libsm6','libice6','libgl1','libxkbcommon0','libxinerama1'],check=True)
 for key in ('OMP_NUM_THREADS','OPENBLAS_NUM_THREADS','MKL_NUM_THREADS','NUMEXPR_NUM_THREADS'):
     os.environ[key]='1'
 drive.mount('/content/drive')
@@ -61,9 +113,9 @@ subprocess.run(['git','-C',str(CODE),'fetch','origin',CONFIG['code_sha']],check=
 subprocess.run(['git','-C',str(CODE),'checkout','--detach',CONFIG['code_sha']],check=True)
 assert subprocess.check_output(['git','-C',str(CODE),'rev-parse','HEAD'],text=True).strip()==CONFIG['code_sha']
 VENV=Path('/content/realsas-corpus370-worker-venv')
-if not (VENV/'bin/python').is_file():subprocess.run([sys.executable,'-m','venv',str(VENV)],check=True)
+if not (VENV/'bin/python').is_file():subprocess.run([sys.executable,'-m','venv','--without-pip',str(VENV)],check=True)
 PYTHON=str(VENV/'bin/python')
-subprocess.run([PYTHON,'-m','pip','install','--quiet','-r',str(CODE/'requirements/mainline-ci.txt'),
+subprocess.run([sys.executable,'-m','pip','--python',PYTHON,'install','--quiet','-r',str(CODE/'requirements/mainline-ci.txt'),
                 '-r',str(CODE/'requirements/truth-family-courts.txt')],check=True)
 os.environ['PYTHONPATH']=str(CODE)
 os.environ['REALSAS_AUTHORITY_ROOT']='/home/monster/realsas_authority'
@@ -86,7 +138,11 @@ print('INPUTS_PASS',round(time.monotonic()-START,1),'seconds')
 script="""import json,sys
 from pathlib import Path
 from tools.corpus.run_corpus370_compute_worker_v1 import run
+from compiler.realsas_compiler_core.hashing import content_sha256
+"""+'''+repr(inspect.getsource(preserve_interrupted_work))+'''+"""
 seal=json.loads((Path(sys.argv[1])/'COMPUTE_CAPSULE.json').read_text())
+recovered=preserve_interrupted_work(seal,content_sha256(seal),Path(sys.argv[2]),Path('/home/monster/realsas_authority'))
+if recovered:print('INTERRUPTED_COMPUTE_PRESERVED',len(recovered),flush=True)
 report=run(seal,Path(sys.argv[2]),Path(sys.argv[1]))
 print(json.dumps({k:report[k] for k in ('accounted_subject_count','candidate_subject_count','elapsed_seconds','qualification_minted','training_authorized')},indent=2))
 """
@@ -99,7 +155,8 @@ print('Sonraki adım: Platform import/bağımsız doğrulama → final eligibili
     return {'nbformat':4,'nbformat_minor':5,'metadata':{'colab':{'name':'Corpus370_Compute_Worker_Run_All_v1.ipynb'},
         'kernelspec':{'display_name':'Python 3','language':'python','name':'python3'},
         'language_info':{'name':'python'},'realsas':cfg},
-        'cells':[cell('markdown',intro),cell('code',setup),cell('code',extract),cell('code',run)]}
+        'cells':[dict(cell(kind,source),id='corpus370-worker-'+str(i)) for i,(kind,source) in enumerate(
+            [('markdown',intro),('code',setup),('code',extract),('code',run)])]}
 
 
 def main():

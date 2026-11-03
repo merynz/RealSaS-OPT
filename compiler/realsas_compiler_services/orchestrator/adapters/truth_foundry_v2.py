@@ -38,6 +38,8 @@ def _run(executable, program, arguments, log_path, maximum_seconds, subject, run
                 except subprocess.TimeoutExpired:
                     process.kill()
                     process.wait()
+    if code in (-9,137):
+        raise MemoryError('TRUTH_REST_V2_PROCESS_KILLED__EXECUTION_RETRY_REQUIRED:'+str(code))
     _require(code == 0, 'TRUTH_REST_V2_BLENDER_FAILED__INSPECT_BOUND_LOG:' + str(log_path))
 
 

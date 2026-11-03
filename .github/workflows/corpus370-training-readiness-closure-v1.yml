@@ -87,6 +87,7 @@ jobs:
             tests/corpus/test_corpus370_compute_worker_v1.py \
             tests/corpus/test_corpus370_worker_ram_admission_v1.py \
             tests/corpus/test_corpus370_pending_compute_notebook_v1.py \
+            tests/corpus/test_corpus370_compute_publication_v1.py \
             tests/corpus/test_corpus370_sealed_materialization_v1.py \
             tests/corpus/test_corpus370_materialization_bundle_v1.py \
             tests/corpus/test_corpus370_materialization_notebook_v1.py \

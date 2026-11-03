@@ -1,3 +1,21 @@
+> **Compute publication recovery — 2026-11-03:** Export41526186943 successfully
+> sealed294 exact inputs in about4minutes. Archive2037365166bytes has SHA
+> `4aa855302017162c94d34638d995c03e8019da21fb21bb214d166785d085ace3`, seal SHA
+> `4140247ae8fd6ea93c367cb953ed8ee115e1df9709a640250ac9fcfac18d5ee1`.
+> Its Drive upload was cancelled at the90minute job boundary; Drive target was
+> still empty on readback. This is transport failure, not a new subject/court FAIL.
+> Original metadata/notebook survived as artifact13185224022. Native7a61 deployment
+> and exact API/Engine/reuse smoke completed successfully in41526187153.
+> PR318 then merged as1e305f16f3dc895b85d98968ff2ce408473be524; its native deployment
+> also passed in41614704651. Scientific input/code remains sealed7a61.
+> Publication recovery reuses that exact existing ZIP, verifies its SHA/size/seal,
+> stages in a new directory, preserves a complete authenticated GitHub artifact,
+> and uses bounded network waits plus visible rclone progress. Drive readiness
+> receipt is uploaded LAST, after a remote checksum check. No scientific execution,
+> new Campaign or qualification is created. See
+> `docs/platform/CORPUS370_COMPUTE_PUBLICATION_V1.md`. Recheck actual publication
+> receipt and Drive size/hash before calling the notebook's inputs ready.
+>
 > **Resource/offload repair — 2026-11-02:** Native runner updated to 2.338.2,
 > connected and accepted readback job125536951888, which completed successfully.
 > Its 20:39 UTC readback exposed Engine `oom-kill`, not merely runner unavailability.

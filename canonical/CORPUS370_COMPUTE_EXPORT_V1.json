@@ -5,6 +5,14 @@
     "sha256": "451189d0d2221119727ea0015f6b43de83befd759f2c92a4339cbd5898c1fba8"
   },
   "drive_folder": "corpus370_compute_worker_v1",
+  "existing_capsule": {
+    "directory": "/home/monster/realsas_authority/corpus370_compute_exports/7a61c575b780cf99844fad3f5edc596f1ed8b754",
+    "code_sha": "7a61c575b780cf99844fad3f5edc596f1ed8b754",
+    "archive_sha256": "4aa855302017162c94d34638d995c03e8019da21fb21bb214d166785d085ace3",
+    "archive_size_bytes": 2037365166,
+    "seal_sha256": "4140247ae8fd6ea93c367cb953ed8ee115e1df9709a640250ac9fcfac18d5ee1",
+    "original_export_run_id": 41526186943
+  },
   "compute_only": true,
   "training_authorized": false
 }

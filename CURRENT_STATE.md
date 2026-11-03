@@ -1,3 +1,26 @@
+> **Read-only live failure triage — 2026-11-03 18:37 Istanbul snapshot:**
+> 190/294 worker subjects accounted:164 COMPUTED_UNQUALIFIED,26 EXECUTION_FAILED.
+> All26 failed archives and3 representative completed archives verified by size,
+> SHA and ZIP CRC; all164 completed subject logs inspected.23 failures are zero-bone
+> Kenney sources (18 Blocky +5 Cube Pets) unsupported by the pose-bone-only Stage47;
+> one is image-buffer layout; two are admitted-import byte mismatches. Stage08 is
+> PASS and Stage49 remains PENDING for all26: mandatory TeacherScene dependency
+> still prevents independent source geometry on these sources. Do not drop whole
+> subjects or fabricate rig/texture/sign authority to get around that dependency.
+> Lane logs for164 completed subjects: geometry/normals/mechanical164 PASS each;
+> response20 PASS/144 FAIL (119 tangent,19 face validity,6 trajectory); TESSA7 PASS/
+> 157 FAIL (15 invalid faces,142 no qualified candidate). These are intermediate
+> lane outcomes, not final family/head admission; PASS logging may precede MASKED.
+> Exact archived-array replay reproduced a TESSA identity-mesh face493 nearest
+> relabeling error: vertex trajectories are identical, yet wrong face comparison
+> produces response NRMS22566.394623195174 and a false fold comparison. Another
+> representative has scalar agreement <6e-8 but tangent differences near2.0.
+> A third has8 invalid faces and duplicate trajectory drift2.98e-8 vs1.14e-8 limit.
+> Do not globally loosen thresholds or override SOURCE_FALLBACK acceptance.
+> See `canonical/CORPUS370_FAILURE_TRIAGE_20261103.json` for exact identities,
+> per-subject causes and pending generic repairs. No runtime/producer/threshold
+> changes or new qualification were made; the running sealed7a61 notebook continues.
+>
 > **User sequencing / single-view deferred — 2026-11-03:** Record one front-facing
 > input→normalization→eight jointly predicted camera-conditioned views as the NEXT
 > product research task. The user explicitly defers this implementation; finish

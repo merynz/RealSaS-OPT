@@ -1,4 +1,4 @@
-"""Versioned bind-rest admission using the independently sourced glTF joint rest reader.
+"""Versioned bind-rest admission with projection-degeneracy-safe source mask court.
 
 Historical admission V1 is untouched. The PASS schema remains the same exact
 observation/geometry claim, but producer source identity is new and must be
@@ -42,7 +42,15 @@ def project_mask(vertices, faces, camera):
         centers = np.stack([xx + .5, yy + .5], axis=-1)
         valid = np.ones(xx.shape, bool)
         edges = np.roll(triangle, -1, axis=0) - triangle
-        if abs(edges[0,0]*edges[1,1]-edges[0,1]*edges[1,0]) < 1e-12:
+        # Reject the *numerical phantom* of a zero-area projected face.
+        # The old absolute 1e-12 px^2 cutoff could retain a 100px-long
+        # collinear triangle whose ~1e-12 determinant comes from rounding.
+        # Scale by the two projected edge norms: a tiny apparent area alone
+        # is not evidence of visible raster coverage. True nondegenerate
+        # thin triangles keep their area and all eight views remain required.
+        signed_area2 = edges[0,0]*edges[1,1]-edges[0,1]*edges[1,0]
+        scale2 = float(np.linalg.norm(edges[0])*np.linalg.norm(edges[1]))
+        if abs(signed_area2) <= 1e-10*scale2:
             continue
         for edge in edges:
             axis = np.array([-edge[1], edge[0]])

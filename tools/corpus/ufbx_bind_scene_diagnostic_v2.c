@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
         if (attached_bone) quoted(attached_bone->name); else printf("null");
         printf(",\"source_parent_node\":");
         if (node->parent) quoted(node->parent->name); else printf("null");
-        printf("],\"cluster_bind_world\":[");
+        printf(",\"cluster_bind_world\":[");
         size_t available=0, abnormal=0;
         for (size_t i=0;i<m->vertices.count;++i) {
             if(i) putchar(',');

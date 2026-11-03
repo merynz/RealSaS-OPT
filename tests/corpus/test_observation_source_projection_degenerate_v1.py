@@ -55,3 +55,13 @@ def test_projected_face_cannot_be_replaced_with_inferred_geometry():
     real = repaired.project_mask(v, np.asarray([[0, 1, 2]]), CAMERA)
     assert not near.any()
     assert real.any()
+
+
+def test_projection_diagnostics_report_abstained_face_not_certain_background():
+    v = from_pixels([(64.5, 12.), (64.5, 100.), (64.5000000002, 90.)])
+    diag = {}
+    mask = repaired.project_mask(v, np.asarray([[0, 1, 2]]),
+                                 CAMERA, diagnostics=diag)
+    assert mask.sum() == 0
+    assert diag["numerical_zero_projected_area_face_count"] == 1
+    assert diag["zero_area_policy"].startswith("RELATIVE_PROJECTED_AREA")

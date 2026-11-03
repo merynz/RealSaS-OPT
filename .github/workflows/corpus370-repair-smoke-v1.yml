@@ -13,6 +13,8 @@ on:
       - 'tests/corpus/test_gltf_*'
       - 'tests/corpus/test_observation_v4_exact_import_packet_v1.py'
       - 'tests/training/test_tessa_source_relative_contact_v1.py'
+      - 'tools/corpus/classify_corpus370_observation_failures_v1.py'
+      - 'tests/corpus/test_corpus370_observation_failure_strata_v1.py'
   workflow_dispatch:
 
 permissions:
@@ -40,4 +42,5 @@ jobs:
             tests/corpus/test_gltf_bind_rest_pilot_v1.py \
             tests/corpus/test_gltf_skin_instance_ambiguity_v1.py \
             tests/corpus/test_observation_v4_exact_import_packet_v1.py \
-            tests/training/test_tessa_source_relative_contact_v1.py
+            tests/training/test_tessa_source_relative_contact_v1.py \
+            tests/corpus/test_corpus370_observation_failure_strata_v1.py

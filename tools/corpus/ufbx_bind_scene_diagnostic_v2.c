@@ -55,6 +55,44 @@ static int bind_sample(const ufbx_mesh *m, size_t i, ufbx_vec3 *out, double *sum
     *sum = total;
     return 1;
 }
+/* For unskinned bone-parent meshes, compare current source joint frame
+   with the authored skin cluster bind frame. Never choose ambiguous frames. */
+static int parent_bind_candidate(const ufbx_scene *scene, const ufbx_node *mesh_node,
+                                 ufbx_matrix *out, const ufbx_node **bone) {
+    if (mesh_node->mesh->skin_deformers.count != 0) return 0;
+    const ufbx_node *p = mesh_node->parent;
+    while (p && p != scene->root_node) {
+        if (p->bone) break;
+        p = p->parent;
+    }
+    if (!p || p == scene->root_node) return 0;
+    size_t match = 0;
+    ufbx_matrix unique = {0};
+    for (size_t mi=0; mi<scene->meshes.count; ++mi) {
+        const ufbx_mesh *mesh=scene->meshes.data[mi];
+        for (size_t si=0; si<mesh->skin_deformers.count; ++si) {
+            const ufbx_skin_deformer *skin=mesh->skin_deformers.data[si];
+            for (size_t ci=0; ci<skin->clusters.count; ++ci) {
+                const ufbx_skin_cluster *cluster=skin->clusters.data[ci];
+                if (cluster->bone_node != p) continue;
+                if (!(fabs((double)ufbx_matrix_determinant(&p->node_to_world))>1e-12))
+                    return 0;
+                ufbx_matrix inverse=ufbx_matrix_invert(&p->node_to_world);
+                ufbx_matrix relative=ufbx_matrix_mul(&inverse,&mesh_node->geometry_to_world);
+                ufbx_matrix current=ufbx_matrix_mul(&cluster->bind_to_world,&relative);
+                if (!match) unique=current;
+                else {
+                    for (int k=0; k<12; ++k)
+                        if (fabs((double)(unique.v[k]-current.v[k]))>1e-9) return 0;
+                }
+                ++match;
+            }
+        }
+    }
+    if (!match) return 0;
+    *out=unique; *bone=p;
+    return 1;
+}
 int main(int argc, char **argv) {
     if (argc != 2) return 2;
     ufbx_load_opts opts = {0};
@@ -80,6 +118,18 @@ int main(int argc, char **argv) {
             if(i) putchar(',');
             vec(ufbx_transform_position(&node->geometry_to_world,m->vertices.data[i]));
         }
+        printf("],\"bone_parent_bind_world\":[");
+        ufbx_matrix parent_bind={0}; const ufbx_node *attached_bone=NULL;
+        int eligible=parent_bind_candidate(scene,node,&parent_bind,&attached_bone);
+        for (size_t vi=0;vi<m->vertices.count;++vi) {
+            if(vi) putchar(',');
+            if (eligible) vec(ufbx_transform_position(&parent_bind,m->vertices.data[vi]));
+            else printf("null");
+        }
+        printf("],\"attached_bone\":");
+        if (attached_bone) quoted(attached_bone->name); else printf("null");
+        printf(",\"source_parent_node\":");
+        if (node->parent) quoted(node->parent->name); else printf("null");
         printf("],\"cluster_bind_world\":[");
         size_t available=0, abnormal=0;
         for (size_t i=0;i<m->vertices.count;++i) {

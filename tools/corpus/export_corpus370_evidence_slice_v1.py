@@ -81,8 +81,15 @@ def export(bundle,expected_sha,subjects,output,*,preparation_root=None,maximum_b
                                 add(name,raw,'UNQUALIFIED_NATIVE_WORKING_BYTES')
                                 native_rows.append({'subject_id':sid,'source_path':str(imported),'slice_path':name,'sha256':hashlib.sha256(raw).hexdigest()})
                             observations=location/'observations'/sid
+                            preparation=roster[sid].get('observation_preparation') or {}
+                            failed_view=re.search(r':V(\d+):',str(preparation.get('reason') or ''))
+                            views={0,int(failed_view.group(1))} if failed_view else {0}
                             for file in sorted(observations.glob('*')) if observations.is_dir() else []:
                                 if not file.is_file() or file.suffix not in ('.json','.png','.bin'):continue
+                                # Full native eight-view rasters duplicate sealed
+                                # inputs and can swamp a diagnostic slice. Keep
+                                # exact metadata plus front/failed-view evidence.
+                                if file.suffix!='.json' and not any(file.name in (f'V{v}.png',f'V{v}.mask.bin') for v in views):continue
                                 if not file.resolve().is_relative_to(root):raise ValueError('EVIDENCE_SLICE_NATIVE_SYMLINK_ESCAPE')
                                 if file.stat().st_size>maximum_bytes-used:raise ValueError('EVIDENCE_SLICE_BYTE_LIMIT')
                                 add('native/'+sid+'/'+location.name+'/observations/'+file.name,file.read_bytes(),'UNQUALIFIED_NATIVE_WORKING_BYTES')

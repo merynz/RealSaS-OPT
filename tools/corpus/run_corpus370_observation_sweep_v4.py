@@ -9,9 +9,9 @@ import json
 from pathlib import Path
 import traceback
 
-from tools.corpus.prepare_corpus370_observation_packets_v3 import prepare
+from tools.corpus.prepare_corpus370_observation_packets_v4 import prepare
 
-SCHEMA = "RealSaS.Corpus370PreparedObservationPackets.v3"
+SCHEMA = "RealSaS.Corpus370PreparedObservationPackets.v4"
 
 
 def sha256(path: Path) -> str:
@@ -45,7 +45,7 @@ def sweep(
     require(len({row["subject_id"] for row in rows}) == 370, "CORPUS370_OBSERVATION_SWEEP_ROSTER_IDS")
 
     output_root.mkdir(parents=True, exist_ok=True)
-    failure_root = output_root / "failures_v3"
+    failure_root = output_root / "failures_v4"
     failure_root.mkdir(parents=True, exist_ok=True)
     subjects = []
     failures = []
@@ -73,7 +73,7 @@ def sweep(
                 binding = current_binding
             else:
                 require(binding == current_binding, "CORPUS370_OBSERVATION_SWEEP_PRODUCER_BINDING_DRIFT")
-            print(json.dumps({"event": "CORPUS370_OBSERVATION_SWEEP_V3_PASS", "index": index, "total": 370, "subject_id": sid}), flush=True)
+            print(json.dumps({"event": "CORPUS370_OBSERVATION_SWEEP_V4_PASS", "index": index, "total": 370, "subject_id": sid}), flush=True)
         except Exception as exc:
             failure = {
                 "subject_id": sid,
@@ -90,7 +90,7 @@ def sweep(
             path.write_text(json.dumps(failure, sort_keys=True, indent=2) + "\n")
             failure["receipt"] = {"path": str(path), "sha256": sha256(path)}
             failures.append(failure)
-            print(json.dumps({"event": "CORPUS370_OBSERVATION_SWEEP_V3_FAIL", "index": index, "total": 370, "subject_id": sid, "error_type": type(exc).__name__, "reason": str(exc)}), flush=True)
+            print(json.dumps({"event": "CORPUS370_OBSERVATION_SWEEP_V4_FAIL", "index": index, "total": 370, "subject_id": sid, "error_type": type(exc).__name__, "reason": str(exc)}), flush=True)
 
     result = {
         "schema": SCHEMA,
@@ -111,7 +111,7 @@ def sweep(
         },
         "training_authorized": False,
     }
-    index_path = output_root / "CORPUS370_PREPARED_OBSERVATION_PACKETS_V3.json"
+    index_path = output_root / "CORPUS370_PREPARED_OBSERVATION_PACKETS_V4.json"
     index_path.write_text(json.dumps(result, sort_keys=True, indent=2) + "\n")
     print(json.dumps({"schema": SCHEMA, "status": result["status"], "prepared_subject_count": len(subjects), "failure_count": len(failures), "index_sha256": sha256(index_path)}, sort_keys=True))
     return result

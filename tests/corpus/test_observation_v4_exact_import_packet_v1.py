@@ -1,10 +1,10 @@
-"""V3 replay checks *every* byte-bound view, not only receipt headings."""
+"""V4 replay checks *every* byte-bound view, not only receipt headings."""
 import json
 from pathlib import Path
 
 import pytest
 
-from tools.corpus.prepare_corpus370_observation_packets_v3 import (
+from tools.corpus.prepare_corpus370_observation_packets_v4 import (
     _packet_complete, sha256,
 )
 
@@ -52,7 +52,7 @@ def packet_fixture(root: Path):
     return sid, source, blender, {"view_count": 8, "resolution": 64}
 
 
-def test_v3_packet_requires_exact_original_admitted_import_bytes(tmp_path):
+def test_v4_packet_requires_exact_original_admitted_import_bytes(tmp_path):
     sid, source, blender, policy = packet_fixture(tmp_path)
     assert _packet_complete(tmp_path, sid, source, policy, blender)
     p = tmp_path / "imported.json"

@@ -22,7 +22,7 @@ from tools.corpus.iris_observation_admission_v2 import audit_subject
 from tools.observation.pinned_evaluator_runtime_v1 import launch_options
 
 ROOT = Path(__file__).resolve().parents[2]
-SCHEMA = "RealSaS.Corpus370PreparedObservationPackets.v3"
+SCHEMA = "RealSaS.Corpus370PreparedObservationPackets.v4"
 REQUEST_SCHEMA = "RealSaS.Corpus370TruthOperatorRequest.v1"
 
 
@@ -50,7 +50,7 @@ def source_binding() -> dict:
         "tools/corpus/gltf_bind_scene_v2.py",
         "tools/corpus/iris_observation_admission_v2.py",
         "tools/corpus/iris_observation_admission_v1.py",
-        "tools/corpus/prepare_corpus370_observation_packets_v3.py",
+        "tools/corpus/prepare_corpus370_observation_packets_v4.py",
         "canonical/CORPUS370_IRIS_OBSERVATION_POLICY_V1.json",
     )
     return {path: sha256(ROOT / path) for path in paths}

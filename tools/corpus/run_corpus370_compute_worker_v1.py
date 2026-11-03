@@ -14,6 +14,7 @@ import zipfile
 
 from models.materialization_contract_v1 import require, sha256
 from tools.corpus.export_corpus370_compute_capsule_v1 import SCHEMA,TARGET
+from compiler.realsas_compiler_services.process_log_v1 import follow_process_log
 
 
 def write(path,value):
@@ -108,8 +109,12 @@ def run_subject(seal,subject,output):
         if sid not in closure:continue
         if mainline.dependency_failure_ids(plan,ledger,sid):continue
         print(json.dumps({'event':'WORKER_STAGE','subject':subject['subject_id'],'stage':sid}),flush=True)
+        stage_started=time.monotonic()
         mainline._run_stage(plan=plan,ledger=ledger,manifest=manifest,manifest_path=worker_manifest,
                             run_id=run_id,stage_id=sid,ledger_path=ledger_path)
+        print(json.dumps({'event':'WORKER_STAGE_FINISHED','subject':subject['subject_id'],'stage':sid,
+            'status':mainline._ledger_map(ledger)[sid]['status'],
+            'elapsed_seconds':round(time.monotonic()-stage_started,3)}),flush=True)
     mainline.validate_ledger(plan,ledger,require_product_pass_authority=False)
     target=mainline._ledger_map(ledger)[TARGET]
     state='COMPUTED_UNQUALIFIED' if target['status'] in mainline.PASS_STATUSES else 'EXECUTION_FAILED'
@@ -153,14 +158,9 @@ def run(seal,output,cache):
                     '--seal',str(cache/'WORKER_SEAL.json'),'--output',str(output)],stdout=stream,stderr=subprocess.STDOUT,
                     start_new_session=True)
                 try:
-                    while process.poll() is None:
-                        try:process.wait(timeout=30)
-                        except subprocess.TimeoutExpired:
-                            with log.open('rb') as current:
-                                current.seek(max(0,log.stat().st_size-2048))
-                                lines=current.read().decode('utf-8','replace').splitlines()
-                            latest=lines[-1][:500] if lines else 'başlatılıyor'
-                            print(f'COMPUTE {index}/{len(seal["subjects"])} {subject["subject_id"]}: {latest}',flush=True)
+                    follow_process_log(process,log,context={'event':'COMPUTE_HEARTBEAT',
+                        'subject':subject['subject_id'],'subject_index':index,
+                        'subject_count':len(seal['subjects'])},heartbeat_seconds=30.)
                 except BaseException:
                     import signal
                     os.killpg(process.pid,signal.SIGKILL);process.wait();raise

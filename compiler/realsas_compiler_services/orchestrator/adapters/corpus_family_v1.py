@@ -16,8 +16,8 @@ from tools.corpus import build_component_geometry_authority_v1 as geometry
 from tools.corpus import validate_component_geometry_authority_v1 as geometry_court
 from tools.corpus import build_mechanical_surface_topology_manifest_v1 as mechanical
 from tools.corpus import validate_mechanical_surface_topology_authority_v1 as mechanical_court
-from tools.corpus import build_causal_response_authority_v1 as response
-from tools.corpus import validate_causal_response_authority_v1 as response_court
+from tools.corpus import build_causal_response_authority_v2 as response
+from tools.corpus import validate_causal_response_authority_v2 as response_court
 from tools.training import build_corpus_mechanical_tessa_teacher_v5 as tessa
 from tools.training import validate_corpus_mechanical_tessa_teacher_v5 as tessa_court
 
@@ -92,7 +92,8 @@ def measure_subject_families(*, sid, source_sha, scene_path, replay_path,
                     families[family].update(status='MASKED', reason_codes=['COURTED_NO_VALID_TARGET_ROWS'])
         print(json.dumps({'event': 'CORPUS_FAMILY_OUTCOME', 'subject_id': sid,
                           'families': list(family_names), 'status': claim['status'],
-                          'reason_codes': claim['reason_codes']}), flush=True)
+                          'reason_codes': claim['reason_codes'],
+                          'family_status': {f: families[f]['status'] for f in family_names}}), flush=True)
 
     def produce_geometry():
         out = root / 'geometry'
@@ -113,7 +114,7 @@ def measure_subject_families(*, sid, source_sha, scene_path, replay_path,
     def produce_response():
         out = root / 'response'
         response.build(sid, paths['mechanical'], root / 'mechanical/COURT.json', scene_path, out)
-        return out / 'CAUSAL_RESPONSE_AUTHORITY_MANIFEST_V1.json'
+        return out / 'CAUSAL_RESPONSE_AUTHORITY_MANIFEST_V2.json'
 
     lane('response', ('CAUSAL_RESPONSE',), produce_response, response_court.validate,
          ('MECHANICAL_SURFACE_TOPOLOGY',))

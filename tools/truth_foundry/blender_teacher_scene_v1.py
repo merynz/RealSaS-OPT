@@ -21,6 +21,7 @@ ROOT=Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
 from tools.iris_vnext import blender_authored_teacher_export_v1 as source_transport
 from tools.iris_vnext import blender_authored_teacher_export_v3 as geometry_transport
+from tools.truth_foundry.image_buffer_contract_v1 import validate_image_buffer_layout
 
 
 def sha256(path):
@@ -78,10 +79,15 @@ def _appearance_and_uv(meshes,rest):
                     if hasattr(node,'image') and node.image:
                         image=node.image
                         if image.name not in images:
-                            count=len(image.pixels);pixels=np.empty(count,dtype=np.float32);image.pixels.foreach_get(pixels)
+                            count=len(image.pixels)
                             width,height=map(int,image.size)
-                            if width<=0 or height<=0 or count%(width*height):raise ValueError('TEACHER_SCENE_IMAGE_BUFFER_LAYOUT')
-                            images[image.name]={'pixels':pixels,'size':[width,height],'buffer_channels':count//(width*height),
+                            context={'image_name':image.name,'image_filepath':str(image.filepath),
+                                     'image_source':str(image.source),'has_data':bool(image.has_data),
+                                     'source_file_channels':int(image.channels),'object':obj.name,
+                                     'material':material.name,'node':node.name}
+                            channels=validate_image_buffer_layout(width=width,height=height,pixel_count=count,context=context)
+                            pixels=np.empty(count,dtype=np.float32);image.pixels.foreach_get(pixels)
+                            images[image.name]={'pixels':pixels,'size':[width,height],'buffer_channels':channels,
                                                'source_file_channels':int(image.channels),'buffer_is_float':bool(image.is_float),
                                                'colour_space':image.colorspace_settings.name,'alpha_mode':image.alpha_mode,
                                                'value_domain':'BLENDER_IMAGE_BUFFER__SOURCE_RENDERER_QUALIFICATION_REQUIRED'}

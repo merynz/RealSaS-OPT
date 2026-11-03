@@ -1,3 +1,38 @@
+> **Actual thin input availability — 2026-11-03:** Read-only native transport run
+> 41627179582 completed, artifact13226387715. A fresh reconstruction of the pinned
+> runtime was compared against original input bytes:5818 unique objects come from
+> the already-published base ZIP,5338 from authenticated runtime reconstruction,
+> and811 from the exact overlay (18188466raw bytes). Thin ZIP is7586146bytes,
+> SHA `edf024254862c22a22db9dcbd1e7333d7fef6c27234e24909ae8967db2f6e0d5`.
+> Connected Drive upload created file1ZNIfLyw4qMoISgSwjr4O7F5Co_4eJv1y in the
+> existing7a61 compute folder; downloaded readback matched that exact SHA and size.
+> Original8.27MB capsule seal4140247a, all18286 file rows,294 subject inputs,
+> scientific7a61 code and worker result identity remain unchanged. Do not await
+> the failed monolithic publisher or upload its final readiness receipt.
+> New generator `tools/notebooks/build_corpus370_thin_compute_v1.py` verifies
+> mounted existing base ZIP and small overlay directly, reports source-copy/input
+> progress and stops on missing/drifted inputs. No unbounded publisher wait.
+> It is a compute worker, NOT corpus qualification/materialization/training.
+>
+> **Confirmed transport failure / thin recovery — 2026-11-03:** Publication
+> 41616613311 failed at10:18:55UTC with Drive403 RATE_LIMIT_EXCEEDED for rclone's
+> shared project202264815644. Its full GitHub backup had reached729808896bytes
+> when the10minute step limit killed it; no full backup artifact was finalized.
+> Only the8.27MB seal reached Drive. The old notebook's wait loop did NOT detect
+> terminal publication failure, so its repeated messages were not progress.
+> Stop that wait cell. Do not resubmit the same monolithic transport.
+>
+> The existing Drive base bundle4462b7f9 covers5818 unique capsule objects.
+> Remaining non-runtime inputs are348 objects/10851385bytes; fresh pinned-runtime
+> reconstruction plus exact original cache overlays can preserve all6134 runtime
+> file rows without uploading the full runtime. Thin transport keeps original seal
+> 4140247a and scientific7a61 code unchanged, checks every destination SHA/size,
+> preserves source/Attempt/split boundaries, and grants no authority. Its native
+> review-branch job is read-only repacking of sealed bytes, not new measurement.
+> Obtain and verify the small transport artifact, upload it through connected
+> Drive, verify readback, then deliver the new notebook with no publisher wait.
+> Main/PR contract success alone is NOT input availability or completed science.
+>
 > **Compute publication recovery — 2026-11-03:** Export41526186943 successfully
 > sealed294 exact inputs in about4minutes. Archive2037365166bytes has SHA
 > `4aa855302017162c94d34638d995c03e8019da21fb21bb214d166785d085ace3`, seal SHA

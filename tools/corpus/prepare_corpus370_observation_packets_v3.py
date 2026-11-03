@@ -69,35 +69,78 @@ def load_runtime(request_path: Path, blender: Path) -> tuple[dict, dict]:
 
 
 def _packet_complete(packet: Path, subject_id: str, source_sha: str, policy: dict, blender_sha: str) -> bool:
+    """Only reuse a complete, hash-bound original eight-view packet.
+
+    Admission was previously checked by header alone. That could reuse a PNG,
+    mask, camera or scene snapshot corrupted after the original PASS, especially
+    after a Colab/Drive interruption. A stale/corrupt packet must be rebuilt,
+    never silently promoted on subject-id or file-presence alone.
+    """
+    count = int(policy["view_count"])
     required = {
         "SOURCE_REST_RENDER_CANDIDATE.json",
         "SOURCE_SCENE_SNAPSHOT.json",
         "camera_bundle.json",
         "IRIS_OBSERVATION_ADMISSION.json",
         "imported.json",
-        *{f"V{i}.png" for i in range(int(policy["view_count"]))},
-        *{f"V{i}.mask.bin" for i in range(int(policy["view_count"]))},
+        *{f"V{i}.png" for i in range(count)},
+        *{f"V{i}.mask.bin" for i in range(count)},
     }
     if any(not (packet / name).is_file() for name in required):
         return False
-    admission = json.loads((packet / "IRIS_OBSERVATION_ADMISSION.json").read_text())
-    candidate = json.loads((packet / "SOURCE_REST_RENDER_CANDIDATE.json").read_text())
-    imported_path = packet / "imported.json"
-    if sha256(imported_path) != admission.get("imported_geometry_sha256"):
+    try:
+        admission_path = packet / "IRIS_OBSERVATION_ADMISSION.json"
+        candidate_path = packet / "SOURCE_REST_RENDER_CANDIDATE.json"
+        camera_path = packet / "camera_bundle.json"
+        snapshot_path = packet / "SOURCE_SCENE_SNAPSHOT.json"
+        imported_path = packet / "imported.json"
+        admission = json.loads(admission_path.read_text())
+        candidate = json.loads(candidate_path.read_text())
+        camera = json.loads(camera_path.read_text())
+        imported = json.loads(imported_path.read_text())
+        snapshot = json.loads(snapshot_path.read_text())
+        if not (
+            admission.get("schema") == "RealSaS.IrisBindObservationAdmission.v1"
+            and admission.get("status") == "PASS_IRIS_BIND_OBSERVATIONS"
+            and admission.get("subject_id") == subject_id
+            and admission.get("source_sha256") == source_sha
+            and admission.get("candidate_sha256") == sha256(candidate_path)
+            and admission.get("camera_sha256") == sha256(camera_path)
+            and admission.get("imported_geometry_sha256") == sha256(imported_path)
+            and imported.get("import", {}).get("source_sha256") == source_sha
+            and candidate.get("subject_id") == subject_id
+            and candidate.get("source_sha256") == source_sha
+            and candidate.get("blender_binary_sha256") == blender_sha
+            and candidate.get("source_scene_snapshot", {}).get("sha256")
+                == sha256(snapshot_path)
+            and snapshot.get("source_sha256") == source_sha
+            and int(candidate.get("resolution", -1)) == int(policy["resolution"])
+            and camera.get("schema") == "RealSaS.CameraProjectionBundle.v1"
+            and len(camera.get("cameras") or []) == count
+        ):
+            return False
+        a_views = admission.get("views") or []
+        c_views = candidate.get("views") or []
+        if len(a_views) != count or len(c_views) != count:
+            return False
+        if ([v.get("view_index") for v in a_views] != list(range(count))
+                or [v.get("view_index") for v in c_views] != list(range(count))
+                or [v.get("view_index") for v in camera["cameras"]]
+                    != list(range(count))):
+            return False
+        for i in range(count):
+            image_sha = sha256(packet / f"V{i}.png")
+            mask_sha = sha256(packet / f"V{i}.mask.bin")
+            if not (
+                a_views[i].get("raster_sha256") == image_sha
+                and a_views[i].get("mask_sha256") == mask_sha
+                and c_views[i].get("raster", {}).get("sha256") == image_sha
+                and c_views[i].get("foreground_mask", {}).get("sha256") == mask_sha
+            ):
+                return False
+        return True
+    except (OSError, ValueError, TypeError, KeyError, AttributeError):
         return False
-    imported = json.loads(imported_path.read_text())
-    if imported.get("import", {}).get("source_sha256") != source_sha:
-        return False
-    return (
-        admission.get("schema") == "RealSaS.IrisBindObservationAdmission.v1"
-        and admission.get("status") == "PASS_IRIS_BIND_OBSERVATIONS"
-        and admission.get("subject_id") == subject_id
-        and admission.get("source_sha256") == source_sha
-        and candidate.get("subject_id") == subject_id
-        and candidate.get("source_sha256") == source_sha
-        and candidate.get("blender_binary_sha256") == blender_sha
-        and int(candidate.get("resolution", -1)) == int(policy["resolution"])
-    )
 
 
 def run_blender(blender: Path, runtime: dict, arguments: list[str], log_path: Path) -> None:

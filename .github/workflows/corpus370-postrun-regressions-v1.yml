@@ -30,6 +30,8 @@ on:
       - 'tools/corpus/prepare_corpus370_observation_packets_v3.py'
       - 'tools/corpus/run_corpus370_observation_sweep_v3.py'
       - 'tests/corpus/test_gltf_bind_scene_v2.py'
+      - 'tests/corpus/test_gltf_bind_rest_pilot_v1.py'
+      - 'tools/corpus/verify_gltf_bind_rest_pilot_v1.py'
       - 'tools/training/validate_tessa_source_relative_contact_v1.py'
       - 'tests/training/test_tessa_source_relative_contact_v1.py'
       - 'tests/corpus/test_image_buffer_contract_v1.py'
@@ -65,6 +67,7 @@ jobs:
             tests/corpus/test_tessa_exact_correspondence_v1.py \
             tests/training/test_tessa_source_relative_contact_v1.py \
             tests/corpus/test_gltf_bind_scene_v2.py \
+            tests/corpus/test_gltf_bind_rest_pilot_v1.py \
             tests/corpus/test_teacher_sign_scope_regression_v1.py \
             tests/corpus/test_platform_subject_family_accounting_v1.py \
             tests/corpus/test_image_buffer_contract_v1.py \

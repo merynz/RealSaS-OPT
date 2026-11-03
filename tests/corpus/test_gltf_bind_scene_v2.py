@@ -20,7 +20,7 @@ def fixture(path: Path, *, joint_y=1.0, bind_y=2.0, conflicting_skin=False):
         value = np.asarray(array)
         data = value.tobytes()
         while len(binary) % 4:
-            binary += b"\\x00"
+            binary.append(0)  # exactly one padding byte; 4-byte bufferView alignment
         views.append({"buffer": 0, "byteOffset": len(binary), "byteLength": len(data)})
         binary += data
         accessors.append({"bufferView": len(views)-1,

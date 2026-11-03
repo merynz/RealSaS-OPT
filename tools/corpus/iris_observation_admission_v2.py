@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
-def project_mask(vertices, faces, camera):
+def project_mask(vertices, faces, camera, *, diagnostics=None):
     """Conservative triangle/pixel intersection via the separating-axis theorem.
 
     Pixel centers alone miss partially covered thin tips. Triangle edge normals
@@ -32,6 +32,7 @@ def project_mask(vertices, faces, camera):
     xy = np.stack([delta @ camera["right"], -(delta @ camera["screen_up"])], axis=1)
     xy = (xy / camera["half_extent"] + 1.) * (.5 * resolution)
     mask = np.zeros((resolution, resolution), bool)
+    numerical_zero_area_faces = 0
     for face in faces:
         triangle = xy[face]
         lo = np.maximum(np.floor(triangle.min(0)).astype(int), 0)
@@ -51,6 +52,7 @@ def project_mask(vertices, faces, camera):
         signed_area2 = edges[0,0]*edges[1,1]-edges[0,1]*edges[1,0]
         scale2 = float(np.linalg.norm(edges[0])*np.linalg.norm(edges[1]))
         if abs(signed_area2) <= 1e-10*scale2:
+            numerical_zero_area_faces += 1
             continue
         for edge in edges:
             axis = np.array([-edge[1], edge[0]])
@@ -60,6 +62,9 @@ def project_mask(vertices, faces, camera):
             valid &= (projected + radius >= projections.min() - 1e-9)
             valid &= (projected - radius <= projections.max() + 1e-9)
         mask[lo[1]:hi[1]+1, lo[0]:hi[0]+1] |= valid
+    if diagnostics is not None:
+        diagnostics["numerical_zero_projected_area_face_count"] = numerical_zero_area_faces
+        diagnostics["zero_area_policy"] = "RELATIVE_PROJECTED_AREA_LE_1E_MINUS_10__NOT_SOURCE_GEOMETRY_REMOVAL"
     return mask
 
 def audit_subject(row, source_root, imported_root, observations_root, probe, output_root, policy):
@@ -112,7 +117,8 @@ def audit_subject(row, source_root, imported_root, observations_root, probe, out
         declared = np.frombuffer(binary.read_bytes(), np.uint8).reshape(actual.shape) > 0
         if not np.array_equal(actual, declared):
             raise ValueError("ADMISSION_ALPHA_MASK_DRIFT")
-        reference = project_mask(a, np.asarray(raw["faces"]), camera)
+        projection_diag = {}
+        reference = project_mask(a, np.asarray(raw["faces"]), camera, diagnostics=projection_diag)
         reference_path = output / f"V{index}.reference.png"
         Image.fromarray(reference.astype(np.uint8)*255).save(reference_path)
         if not actual.any() or not reference.any():
@@ -120,6 +126,10 @@ def audit_subject(row, source_root, imported_root, observations_root, probe, out
         gap = float(max(distance_transform_edt(~actual)[reference].max(),
                         distance_transform_edt(~reference)[actual].max()))
         metrics = {"view_index": index, "maximum_mask_gap_px": gap,
+                   "numerical_zero_projected_area_face_count": projection_diag["numerical_zero_projected_area_face_count"],
+                   "reference_only_pixel_count": int(np.count_nonzero(reference & ~actual)),
+                   "raster_only_pixel_count": int(np.count_nonzero(actual & ~reference)),
+                   "unmatched_reference_pixel_supervision": "UNKNOWN__NO_NUMERIC_ZERO_TARGET",
                    "raster_sha256": digest(png), "mask_sha256": digest(binary),
                    "reference_sha256": digest(reference_path),
                    "border_margin_px": view["border_margin_px"]}

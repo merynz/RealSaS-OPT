@@ -96,6 +96,20 @@ int main(int argc,char **argv) {
         }
         offset+=m->vertices.count;
     }
+    printf("],\"objects\":[");
+    size_t object_count=0;
+    for (size_t n=0;n<scene->nodes.count;n++) {
+        ufbx_node *node=scene->nodes.data[n];
+        if (!node->mesh) continue;
+        if(object_count++) putchar(',');
+        printf("{\"name\":");str(node->name);
+        printf(",\"vertex_count\":%zu,\"has_skin\":%s,\"source_parent_bone\":",
+            node->mesh->vertices.count,node->mesh->skin_deformers.count?"true":"false");
+        const ufbx_node *p=node->parent;
+        while(p && p!=scene->root_node && !p->bone) p=p->parent;
+        if(p && p!=scene->root_node) str(p->name);else printf("null");
+        printf("}");
+    }
     printf("],\"bone_count\":%zu,\"materials\":[",scene->bones.count);
     for(size_t i=0;i<scene->materials.count;i++){
         ufbx_material *m=scene->materials.data[i];

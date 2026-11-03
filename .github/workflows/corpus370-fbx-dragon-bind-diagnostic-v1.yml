@@ -74,6 +74,13 @@ jobs:
             --diagnostic "$OUT/DRAGON_RAW_BIND_CANDIDATES.json" \
             --source-sha256 "$SOURCE_SHA" --import-sha256 "$IMPORT_SHA" \
             --output "$OUT/DRAGON_BIND_COMPARISON.json"
+          cc -O2 -std=c99 -I"$UFBX_ROOT" tools/corpus/ufbx_bind_scene_probe_v2.c "$UFBX_ROOT/ufbx.c" -lm -o "$OUT/ufbx_bind_v2"
+          "$OUT/ufbx_bind_v2" "$SOURCE" > "$OUT/DRAGON_V2_SOURCE_BIND_REST.json"
+          /home/monster/realsas_platform/current/bin/realsas-python -u tools/corpus/verify_fbx_bind_rest_v2_pilot_v1.py \
+            --source "$SOURCE" --imported "$IMPORT" \
+            --v2 "$OUT/DRAGON_V2_SOURCE_BIND_REST.json" \
+            --source-sha "$SOURCE_SHA" --import-sha "$IMPORT_SHA" \
+            --original-limit 0.00001 --output "$OUT/DRAGON_V2_BIND_REST_PILOT.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -81,6 +88,8 @@ jobs:
           path: |
             ${{ env.OUT }}/DRAGON_BIND_COMPARISON.json
             ${{ env.OUT }}/DRAGON_RAW_BIND_CANDIDATES.json
+            ${{ env.OUT }}/DRAGON_V2_SOURCE_BIND_REST.json
+            ${{ env.OUT }}/DRAGON_V2_BIND_REST_PILOT.json
           compression-level: 1
           retention-days: 7
           if-no-files-found: warn

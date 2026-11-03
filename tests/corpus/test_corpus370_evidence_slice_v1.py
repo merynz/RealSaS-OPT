@@ -40,3 +40,20 @@ def test_native_packet_cannot_read_outside_preparation_root(tmp_path):
     p,sid=bundle(tmp_path);root=tmp_path/'prep';index=root/'observations_v2/CORPUS370_PREPARED_OBSERVATION_PACKETS_V2.json'
     index.parent.mkdir(parents=True);index.write_text(json.dumps({'subjects':[{'subject_id':sid,'packet_path':'/tmp/outside/packet/'+sid}]}))
     with pytest.raises(ValueError,match='NATIVE_ESCAPE'):export(p,sha(p),[sid],tmp_path/'out',preparation_root=root)
+
+
+def test_native_rasters_are_bounded_to_front_and_first_failed_view(tmp_path):
+    p,sid=bundle(tmp_path);root=tmp_path/'prep';location=root/'observations_v2/objects/identity'
+    index=root/'observations_v2/CORPUS370_PREPARED_OBSERVATION_PACKETS_V2.json'
+    index.parent.mkdir(parents=True);index.write_text(json.dumps({'subjects':[{'subject_id':sid,'packet_path':str(location/'packet'/sid)}]}))
+    with zipfile.ZipFile(p) as z:
+        manifest=json.loads(z.read('BOOTSTRAP_MANIFEST.json'));raw=z.read('sources/asset.glb')
+    manifest['subjects'][0]['observation_preparation']={'status':'FAIL','reason':'ADMISSION_MASK_DRIFT:'+sid+':V2:5.0'}
+    with zipfile.ZipFile(p,'w') as z:z.writestr('BOOTSTRAP_MANIFEST.json',json.dumps(manifest));z.writestr('sources/asset.glb',raw)
+    obs=location/'observations'/sid;obs.mkdir(parents=True)
+    for v in range(8):(obs/f'V{v}.png').write_bytes(b'exact raster')
+    (obs/'camera_bundle.json').write_text('{}')
+    r=export(p,sha(p),[sid],tmp_path/'out',preparation_root=root)
+    with zipfile.ZipFile(r['archive']['path']) as z:
+        names={n.rsplit('/',1)[-1] for n in z.namelist() if n.startswith('native/')}
+        assert names=={'V0.png','V2.png','camera_bundle.json'}

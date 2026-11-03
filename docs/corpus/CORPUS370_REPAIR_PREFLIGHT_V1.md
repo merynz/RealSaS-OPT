@@ -46,14 +46,18 @@ collision freedom or product motion qualification. The V5 criterion and all old
 FAIL evidence remain unchanged by this patch. The contact-contract candidate and
 its representative source replay are still pending.
 
-The bounded evidence-slice workflow is manual, read-only, and performs no Blender
-or truth execution. It verifies the existing full input bundle and exports at most
+The bounded evidence-slice workflow is read-only and performs no Blender or truth
+execution. It runs on a reviewed workflow change to main or an explicit manual
+request. It verifies the existing full input bundle and exports at most
 12 selected source packets, native preparation/import diagnostics and128MiB of
 uncompressed files. No broad Drive inventory or full corpus is copied. This is
 needed because the connected provider rejects the1.6GB base ZIP above its256MiB
 per-file transport limit. The resulting authenticated artifact makes the small
 pilot reproducible without another whole-corpus run. This is not a new Attempt,
 source repair, qualification, materialization or training result.
+Native raster selection keeps front and first-failed-view evidence rather than
+duplicating all eight views. The initial six-subject readback exceeded its128MiB
+guard and failed closed; the guard remains unchanged after bounding that selection.
 
 Pending before the notebook: native hierarchy control support under a new policy;
 the image-buffer failure; both admitted-import mismatches;47 mask/29 bind-vertex

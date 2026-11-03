@@ -1,0 +1,489 @@
+{
+  "schema": "RealSaS.Corpus370ReadOnlyFailureAudit.v1",
+  "snapshot_at_utc": "2026-11-03T15:37:37.204Z",
+  "snapshot_at_local": "2026-11-03 18:37:37 +03",
+  "status": "INTERIM_READ_ONLY_DIAGNOSTIC__NOT_CORPUS_QUALIFICATION",
+  "scientific_code_sha": "7a61c575b780cf99844fad3f5edc596f1ed8b754",
+  "capsule_seal_sha256": "4140247ae8fd6ea93c367cb953ed8ee115e1df9709a640250ac9fcfac18d5ee1",
+  "progress_snapshot_sha256": "84b787824acc368b3358cd08cd416e79c58f91ebe34d8244c4a456d9311a82b7",
+  "capsule_identity": "309a04c9ddaed09d0a94fc03b3827e5382b1e7ea7cc98967336cf7c972fc3e88",
+  "scope": {
+    "candidate_subjects": 370,
+    "prepared_worker_subjects": 294,
+    "prior_preparation_failures": 76,
+    "accounted_at_snapshot": 190,
+    "computed_unqualified": 164,
+    "execution_failed": 26,
+    "remaining_worker_subjects_at_snapshot": 104
+  },
+  "inspection": {
+    "failed_archives_verified": 26,
+    "representative_completed_archives_verified": 3,
+    "archive_download_or_integrity_errors": [],
+    "completed_subject_logs_read": 164,
+    "completed_log_read_errors": []
+  },
+  "execution_failure_categories": {
+    "NO_SUPPORTED_BONE_CONTROLS": 23,
+    "ADMITTED_IMPORT_BYTES_DRIFT": 2,
+    "IMAGE_BUFFER_LAYOUT": 1
+  },
+  "family_lane_log_summary": {
+    "SURFACE_GEOMETRY_UDF PASS ": 164,
+    "SURFACE_NORMALS PASS ": 164,
+    "MECHANICAL_SURFACE_TOPOLOGY PASS ": 164,
+    "CAUSAL_RESPONSE FAIL CAUSAL_RESPONSE_MECHANICAL_TRAJECTORY_DRIFT": 6,
+    "TESSA_TEACHER FAIL TESSA_V5_INVALID_SOURCE_FACE_REPAIR_REQUIRED": 15,
+    "CAUSAL_RESPONSE FAIL CAUSAL_COURT_TANGENT": 119,
+    "TESSA_TEACHER FAIL TESSA_V5_NO_MECHANICALLY_ADMISSIBLE_FALLBACK": 142,
+    "CAUSAL_RESPONSE PASS ": 20,
+    "CAUSAL_RESPONSE FAIL CAUSAL_COURT_FACE_INDEX": 19,
+    "TESSA_TEACHER PASS ": 7
+  },
+  "family_log_note": "These are lane log outcomes. Stage49 can log PASS before assigning MASKED for no valid target rows; final target coverage, subject/head admission and split are not inferred here.",
+  "numeric_replay": {
+    "schema": "RealSaS.Corpus370ReadOnlyNumericFailureReplay.v1",
+    "qualification_minted": false,
+    "training_authorized": false,
+    "original_truth_bytes_mutated": false,
+    "results": [
+      {
+        "subject_id": "corpus_808c86d0f7f49e102184",
+        "archive_sha256": "cc756934b0abed298af9a00814c182ce40c5f86112a5d3fb794939089b3cd8a5",
+        "vertices_raw": 226,
+        "vertices_mechanical": 224,
+        "actions": 306,
+        "faces": 452,
+        "invalid_mechanical_faces": 8,
+        "maximum_duplicate_trajectory_drift": 2.980232594040878e-8,
+        "trajectory_drift_tolerance": 1.1426877775976858e-8,
+        "bad_duplicate_groups": 2
+      },
+      {
+        "subject_id": "corpus_af623aec64c806e56abf",
+        "archive_sha256": "29a04a727898c9d9fdd5dda3bf972252932a423e89a16e6264b633e630c0b13d",
+        "vertices_raw": 253,
+        "vertices_mechanical": 253,
+        "actions": 198,
+        "faces": 502,
+        "invalid_mechanical_faces": 0,
+        "maximum_duplicate_trajectory_drift": 0,
+        "trajectory_drift_tolerance": 1.1703443268984497e-8,
+        "bad_duplicate_groups": 0,
+        "producer_face_count": 502,
+        "court_face_count": 501,
+        "producer_only_faces": 1,
+        "court_only_faces": 0,
+        "tangent_indices_equal": false,
+        "source_fallback_face_addressing": {
+          "face_count": 502,
+          "nearest_centroid_nonidentity_count": 1,
+          "maximum_centroid_distance": 1.102966657657453e-8,
+          "normal_comparison_min_dot": -0.9760491436110532,
+          "fold_gate_from_remapped_source_faces": false,
+          "response_nrms_from_remapped_faces": 22566.394623195174,
+          "energy_nrms_from_remapped_faces": 0.00016029167041661823,
+          "identity_face_response_error": 0,
+          "nonidentity_face_ids": [
+            493
+          ]
+        },
+        "source_fallback_mapping": {
+          "maximum_declared_nearest_distance": 0,
+          "maximum_barycentric_rest_error": 0,
+          "maximum_trajectory_error": 0,
+          "affected_vertices_above_1e9_scale": 0
+        }
+      },
+      {
+        "subject_id": "truth139_07455b9e058affdd69c3",
+        "archive_sha256": "04639c4d55b5dc47a9eb7f891df9bcd3d328aa24d825920befec1b13a5149e6c",
+        "vertices_raw": 528,
+        "vertices_mechanical": 260,
+        "actions": 36,
+        "faces": 512,
+        "invalid_mechanical_faces": 0,
+        "maximum_duplicate_trajectory_drift": 0,
+        "trajectory_drift_tolerance": 3.673759408435406e-9,
+        "bad_duplicate_groups": 0,
+        "producer_face_count": 512,
+        "court_face_count": 512,
+        "producer_only_faces": 0,
+        "court_only_faces": 0,
+        "tangent_indices_equal": true,
+        "tangent_max_abs_difference": 1.999995454365037,
+        "tangent_reflected_max_abs_difference": 1.9999600833652722,
+        "tangent_row_match_count": 198,
+        "tangent_reflected_match_count": 190,
+        "scalar_max_abs_difference": {
+          "stretch_major": 5.946642134269098e-8,
+          "stretch_minor": 2.9796550338190286e-8,
+          "area_ratio": 5.65060522816907e-8,
+          "anisotropy": 1.135861535037086e-10,
+          "nonrigid_response": 1.5379016202882179e-10
+        },
+        "source_fallback_face_addressing": {
+          "face_count": 512,
+          "nearest_centroid_nonidentity_count": 0,
+          "maximum_centroid_distance": 2.498001805406602e-16,
+          "normal_comparison_min_dot": 0.9999999999999996,
+          "fold_gate_from_remapped_source_faces": true,
+          "response_nrms_from_remapped_faces": 0,
+          "energy_nrms_from_remapped_faces": 0,
+          "identity_face_response_error": 0,
+          "nonidentity_face_ids": []
+        },
+        "source_fallback_mapping": {
+          "maximum_declared_nearest_distance": 0,
+          "maximum_barycentric_rest_error": 0,
+          "maximum_trajectory_error": 0,
+          "affected_vertices_above_1e9_scale": 0
+        }
+      }
+    ]
+  },
+  "unresolved": [
+    "Exact numerical/serialization difference behind the two admitted-import hash mismatches has not been determined.",
+    "The failing image name/path/dimensions are not included in the old error; image buffer root detail requires bounded source diagnostics.",
+    "Three numeric representatives explain concrete failure mechanisms; they do not establish the exact mechanism in every family failure.",
+    "Future independent source-only geometry validation is required before recovering any Stage47-blocked subject.",
+    "No tolerance, truth criterion, status, split, notebook, producer or original evidence has been changed."
+  ],
+  "qualification_minted": false,
+  "training_authorized": false,
+  "running_notebook_changed": false,
+  "original_evidence_mutated": false,
+  "failed_subjects": [
+    {
+      "subject_id": "corpus_0c3efd578549abdcd2fb",
+      "source_name": "character-r.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "53bc88115c23a7989ec510a555965a053b15ccf68c54e8925eddc09d6f6028c6",
+      "drive_file_id": "1tcjhhMtuC9oDAqc2C_3YyXE6_-Anrd9q"
+    },
+    {
+      "subject_id": "corpus_0db22710eb7113a303eb",
+      "source_name": "character-m.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "ecf4eb4e42c87ba1c6259a9ada95c36dd1827eaaae747419d7b7013689e5c64a",
+      "drive_file_id": "1ZbuHK1CbCps8VsGGtJY1IpOdsmXqFkXx"
+    },
+    {
+      "subject_id": "corpus_1279ca142bf9b6aed964",
+      "source_name": "BlueGoldfish.fbx",
+      "source_pack": "quaternius-cute-animated-fish",
+      "category": "ADMITTED_IMPORT_BYTES_DRIFT",
+      "import_bone_count": 7,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "c30a47fdafbd13418f732be84bf22b475e24c43e28f8f47f1fc91384bf12bc0b",
+      "drive_file_id": "11tzZAfBF5g2nS6KTClbh08KXQBAI9ncZ"
+    },
+    {
+      "subject_id": "corpus_17fefc47c1da85befb8d",
+      "source_name": "Superhero_Male_FullBody.fbx",
+      "source_pack": "quaternius-universal-base-characters",
+      "category": "IMAGE_BUFFER_LAYOUT",
+      "import_bone_count": 65,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "39a5a01ddff3e98118ec7b1fdb7ac8e8581da9a3fc5a71eeb7f8af3833433039",
+      "drive_file_id": "1Eoon7VYCtl24jDjv_iFgZlQTBJsR9IC3"
+    },
+    {
+      "subject_id": "corpus_185604ee3e7741666c5a",
+      "source_name": "character-h.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "4f57986c678682d0825cd32957d9a98ec0fef928d01c1f62a6fb75e508196ed2",
+      "drive_file_id": "1BcZYJihBSvPI0XUeq-KLHVD6775TxKjJ"
+    },
+    {
+      "subject_id": "corpus_1d8caeb1ad8296654175",
+      "source_name": "character-n.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "d2496f7c89a6d20702454c0269dd8e04d1bb1ac8db3acd46a3e0791e9d36b64f",
+      "drive_file_id": "1LXfbM3a8NsxbcKjyqMY4xt_DjVO2a7KV"
+    },
+    {
+      "subject_id": "corpus_27adc231d9c5a72c2bff",
+      "source_name": "animal-bunny.glb",
+      "source_pack": "kenney-cube-pets",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "7573ee6b3f318eb07e40d0f9c8e220c08272d001168ebaf85f28dfa87def4377",
+      "drive_file_id": "1PXE7aHpsfXwNheuv8mtvXeh0YfvnV9XM"
+    },
+    {
+      "subject_id": "corpus_414286037cd0b786a442",
+      "source_name": "character-l.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "7ebfb4fe5de75b4c5c238c190bb2e026da93e2b4994eaef3f61298244ef6f69d",
+      "drive_file_id": "1UsJJC2qNLcehcN7UIVB1aCCIVJaLj8bM"
+    },
+    {
+      "subject_id": "corpus_4cc3c4fbab7d7dba75cc",
+      "source_name": "character-d.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "d8cc65fcc1da1b9b6afb42b2d26996cdfcc6ef766f07876f75b475e321c44162",
+      "drive_file_id": "1kxlkVi_5mdm62W4QGS8aq69BHqYZWBNK"
+    },
+    {
+      "subject_id": "corpus_555da8c9b555ed70e025",
+      "source_name": "animal-panda.glb",
+      "source_pack": "kenney-cube-pets",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "064781c1121fef92c1dd210ac62a726c350c8bc2f39e5d2d4b9b42c3e49ac90f",
+      "drive_file_id": "1RfVk-MutYStbt53kId4JU_6Ocm1-hcFS"
+    },
+    {
+      "subject_id": "corpus_636a2a3217982e9a876b",
+      "source_name": "Superhero_Female_FullBody.fbx",
+      "source_pack": "quaternius-universal-base-characters",
+      "category": "ADMITTED_IMPORT_BYTES_DRIFT",
+      "import_bone_count": 65,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "173b4103cd4d9c5eb1f903625eaeda7a48170ae5df22188cc7048990af7139ef",
+      "drive_file_id": "1hIb7tOz8a4gsRH3h-CrzvTfNathF4Btv"
+    },
+    {
+      "subject_id": "corpus_699a1c89e3739d6c2124",
+      "source_name": "character-i.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "dd4f68a77c4481ecf94b7c76cf3307c8dbae69e58a13e38babedaef60e7e49b9",
+      "drive_file_id": "1Xi-o7x62r_V50R2DYKO1iLLJK7KS_JVS"
+    },
+    {
+      "subject_id": "corpus_764ed282bbee634a9c14",
+      "source_name": "animal-crab.glb",
+      "source_pack": "kenney-cube-pets",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "1a15e610f995f2d3219d6e63885545bc6365398671ac8906c782cdf33c840b7f",
+      "drive_file_id": "1sk3zSnkjeWFuQ37BXopazIgRrEuJgprZ"
+    },
+    {
+      "subject_id": "corpus_7be73089027de1d94405",
+      "source_name": "animal-fox.glb",
+      "source_pack": "kenney-cube-pets",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "e353807d10c8fcb9529ac3ee31fd2751d04176b7e71339861cbd863c132b0793",
+      "drive_file_id": "1F-qZexMlzr2J6W2Bc3aE98LJLNMMrUf2"
+    },
+    {
+      "subject_id": "corpus_7d388c71965159f6379c",
+      "source_name": "character-e.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "bbfdf7ec9240c1a78ace8b193fbd8f556b184d8f9273e5a1600cc02b8b020704",
+      "drive_file_id": "1-jlR1n_FaejD7uS6NsCKn1jV0I-CblZX"
+    },
+    {
+      "subject_id": "corpus_8a11319d1af58f423a96",
+      "source_name": "character-p.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "079b50e82d676fedae162d12753ae21ec58687322e700c6c68e97bebc169bb79",
+      "drive_file_id": "1x7vurUFnqMAEAkBoswpjC1qqYxbISSQU"
+    },
+    {
+      "subject_id": "corpus_ace7119d387cbe84d035",
+      "source_name": "character-j.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "ffc5529f5a684741e135d825584c5ecfc68c6db0a1e84a5a28aead6f8bf41a7f",
+      "drive_file_id": "1UMW6eXnhR42HLfXIAJk7ueA8dKCfvgXg"
+    },
+    {
+      "subject_id": "corpus_aea63a38c4f200e3cc60",
+      "source_name": "character-b.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "485212a95bc4535439a5d1096560d784ad95209904dbe2f0ef7c2833aa269b71",
+      "drive_file_id": "15DXVOIkE_r4rN61zeT-Mbim8eBrzkQJt"
+    },
+    {
+      "subject_id": "corpus_ca2090b32a80818ec5a4",
+      "source_name": "character-c.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "b105b9b0a35f2345c8401bfb12fc48512e3404131110393c7f41134c50dfe420",
+      "drive_file_id": "1p59p61HICEtHLPfRm4R7KbEjZ_5vwhMw"
+    },
+    {
+      "subject_id": "corpus_cab0574f81e6650bcf15",
+      "source_name": "character-a.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "42dba2a9fe9bb5e023ee7451a65ecd373a013e05644087f98778faa4dbabf44a",
+      "drive_file_id": "196VsW16sgmc73gci2k6_DgTbYBR6oOXx"
+    },
+    {
+      "subject_id": "corpus_d69e165056bb91ec0c68",
+      "source_name": "character-q.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "fbde6812cc210e9a090f289ae5160abb4b1f1fc3251beb17a73b2926354b0a08",
+      "drive_file_id": "18eV3l-gG9rBV9JSyG-ywAEdZKcJpym_1"
+    },
+    {
+      "subject_id": "corpus_d7803899dd36b7a56057",
+      "source_name": "animal-pig.glb",
+      "source_pack": "kenney-cube-pets",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "159cb3c62346393e749d1399ddebde5853b68b398a991f2cdb63b629795788be",
+      "drive_file_id": "1YLBYdP43lXfD5dNosdahGNA3l9Z9l2Tg"
+    },
+    {
+      "subject_id": "corpus_dcb24bd490d02b0129cc",
+      "source_name": "character-o.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "5529397b18ea15453fdcf5d8941e0c62a7a7fe2af6261859d81669e0793da97b",
+      "drive_file_id": "1SY1wBEbRlE5T0TUqYw9y_FqzjMHEl1tg"
+    },
+    {
+      "subject_id": "corpus_e153403dfb728bbad186",
+      "source_name": "character-k.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "250e59435ecd861c0b3c170b0e08349b25a24f9bcbb87785d00b5edb3fb24015",
+      "drive_file_id": "1qGPMYRhoUmRux8WaHmqBMAAIiSOs_CpD"
+    },
+    {
+      "subject_id": "corpus_e28300750fb422fcf176",
+      "source_name": "character-g.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "4e312377e40a871cb133dbc49ffa6d3c4a256ef7cebee3919ca38335ffb28786",
+      "drive_file_id": "19EdzhfvjRNIe1ehSA4-SbLpZAliVQkrr"
+    },
+    {
+      "subject_id": "corpus_f9da237deef1c59cb7ab",
+      "source_name": "character-f.glb",
+      "source_pack": "kenney-blocky-characters",
+      "category": "NO_SUPPORTED_BONE_CONTROLS",
+      "import_bone_count": 0,
+      "stage08_status": "PASS",
+      "stage47_status": "FAIL",
+      "stage49_status": "PENDING",
+      "archive_sha256": "0569d08084a6e9ed708cf3f757aaf3ca814a8c51db10a63423e2fae188bb6197",
+      "drive_file_id": "1lzWo_6Ydil9HPduujdEVHw4zzX4OKbTX"
+    }
+  ],
+  "evidence_reports": {
+    "markdown": {
+      "name": "Corpus370_Failure_Audit_20261103_1837.md",
+      "library_file_id": "libfile_fd9ae73eacb48191a745733c2d65bdda"
+    },
+    "json": {
+      "name": "Corpus370_Failure_Audit_20261103_1837.json",
+      "library_file_id": "libfile_ffb5de2f5214819199da88cb8a587cf7"
+    }
+  },
+  "repairs_implemented": false,
+  "next_actions": [
+    "Finish current immutable compute scope; this snapshot is not final corpus state.",
+    "Version the source-only geometry/family path so unsupported kinematics or texture do not prevent independent geometry measurement.",
+    "Unify observable tangent frames and face validity laws while retaining independent court implementation.",
+    "Preserve exact source-face identity for identity geometry instead of relabeling face centroids by generic nearest search; keep all mechanical gates.",
+    "Diagnose the missing image buffer detail and the two admitted-import byte mismatches without weakening guards.",
+    "Re-execute only actually impacted scopes through Platform child Attempt/release; retain raw failures and unrelated family evidence."
+  ]
+}

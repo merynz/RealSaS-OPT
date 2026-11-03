@@ -72,7 +72,14 @@ def audit_subject(row, source_root, imported_root, observations_root, probe, out
     if source.suffix.lower() in (".gltf", ".glb"):
         raw = SourceGLTFBindRestV2(source).geometry()
     else:
+        if source.suffix.lower() != ".fbx":
+            raise ValueError("ADMISSION_SOURCE_FORMAT_UNSUPPORTED")
         raw = json.loads(subprocess.check_output([str(probe), str(source)]))
+        if raw.get("reader_schema") != "RealSaS.SourceFBXBindRestReader.v2":
+            # A historically pinned V1 executable may produce a plausible
+            # vertex set while losing all authored bone-parent rest repairs.
+            # Never let V4 silently reuse its raw-node-default semantics.
+            raise ValueError("ADMISSION_FBX_BIND_REST_V2_READER_REQUIRED")
     a, b = np.asarray(raw["vertices"]), np.asarray(imported["vertices"])
     diagonal = float(np.linalg.norm(np.ptp(a, axis=0)))
     relative = float(max(cKDTree(a).query(b)[0].max(), cKDTree(b).query(a)[0].max()) / diagonal)

@@ -57,3 +57,18 @@ def test_native_rasters_are_bounded_to_front_and_first_failed_view(tmp_path):
     with zipfile.ZipFile(r['archive']['path']) as z:
         names={n.rsplit('/',1)[-1] for n in z.namelist() if n.startswith('native/')}
         assert names=={'V0.png','V2.png','camera_bundle.json'}
+
+
+def test_pack_images_are_explicitly_omitted_without_claiming_complete_render_input(tmp_path):
+    p,sid=bundle(tmp_path);image=b'unrelated pack image'
+    with zipfile.ZipFile(p) as z:m=json.loads(z.read('BOOTSTRAP_MANIFEST.json'));raw=z.read('sources/asset.glb')
+    dep={'path':'sources/hair_normal.png','sha256':hashlib.sha256(image).hexdigest(),'size_bytes':len(image)}
+    m['subjects'][0]['source_dependencies']=[dep]
+    with zipfile.ZipFile(p,'w') as z:
+        z.writestr('BOOTSTRAP_MANIFEST.json',json.dumps(m));z.writestr('sources/asset.glb',raw);z.writestr(dep['path'],image)
+    r=export(p,sha(p),[sid],tmp_path/'out')
+    assert r['omitted_external_image_dependencies']==[dep] and r['complete_render_input'] is False
+    with zipfile.ZipFile(r['archive']['path']) as z:assert dep['path'] not in z.namelist()
+    full=export(p,sha(p),[sid],tmp_path/'full',include_source_images=True)
+    assert full['omitted_external_image_dependencies']==[]
+    with zipfile.ZipFile(full['archive']['path']) as z:assert z.read(dep['path'])==image

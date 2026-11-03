@@ -19,7 +19,7 @@ def safe_name(name):
     return str(p)
 
 
-def export(bundle,expected_sha,subjects,output,*,preparation_root=None,maximum_bytes=128<<20):
+def export(bundle,expected_sha,subjects,output,*,preparation_root=None,maximum_bytes=128<<20,include_source_images=False):
     bundle=Path(bundle);output=Path(output);subjects=sorted(set(subjects))
     if not subjects or len(subjects)>12:raise ValueError('EVIDENCE_SLICE_SUBJECT_LIMIT')
     if any(not re.fullmatch(r'(corpus|truth139)_[0-9a-f]{20}',s) for s in subjects):raise ValueError('EVIDENCE_SLICE_SUBJECT_ID')
@@ -38,7 +38,13 @@ def export(bundle,expected_sha,subjects,output,*,preparation_root=None,maximum_b
                 if 'path' in value and 'sha256' in value and 'size_bytes' in value:yield value
                 else:
                     for child in value.values():yield from file_refs(child)
-        refs={r['path']:r for row in selected for r in file_refs(row)}
+        image_suffixes={'.png','.jpg','.jpeg','.webp','.bmp','.tga','.tif','.tiff','.ktx','.ktx2','.dds','.exr','.hdr'}
+        # Pack-level dependency inventories include unrelated hairstyle/normal
+        # textures. This geometry diagnostic preserves their exact references
+        # but explicitly omits external image bytes; it is not a renderer input.
+        omitted={r['path']:r for row in selected for r in row.get('source_dependencies',[])
+                 if not include_source_images and PurePosixPath(r['path']).suffix.lower() in image_suffixes}
+        refs={r['path']:r for row in selected for r in file_refs(row) if r['path'] not in omitted}
         staged=output/'EVIDENCE_SLICE.partial.zip';final=output/'EVIDENCE_SLICE.zip'
         with zipfile.ZipFile(staged,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=1) as target:
             def add(name,raw,scope):
@@ -96,6 +102,8 @@ def export(bundle,expected_sha,subjects,output,*,preparation_root=None,maximum_b
             result={'schema':'RealSaS.Corpus370EvidenceSlice.v1','source_bundle_sha256':expected_sha,
                     'subjects':selected,'requested_subject_ids':subjects,'files':list(entries.values()),
                     'native_imports':native_rows,'uncompressed_bytes':used,'qualification_minted':False,
+                    'omitted_external_image_dependencies':list(omitted.values()),
+                    'complete_render_input':False,'external_source_images_included':bool(include_source_images),
                     'training_authorized':False,'source_data_mutated':False}
             target.writestr('EVIDENCE_SLICE.json',json.dumps(result,sort_keys=True,indent=2)+'\n')
         staged.replace(final)
@@ -108,4 +116,5 @@ def export(bundle,expected_sha,subjects,output,*,preparation_root=None,maximum_b
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--bundle',type=Path,required=True);p.add_argument('--expected-sha256',required=True)
     p.add_argument('--subjects',required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--preparation-root',type=Path)
-    a=p.parse_args();export(a.bundle,a.expected_sha256,a.subjects.split(','),a.output,preparation_root=a.preparation_root)
+    p.add_argument('--include-source-images',action='store_true')
+    a=p.parse_args();export(a.bundle,a.expected_sha256,a.subjects.split(','),a.output,preparation_root=a.preparation_root,include_source_images=a.include_source_images)

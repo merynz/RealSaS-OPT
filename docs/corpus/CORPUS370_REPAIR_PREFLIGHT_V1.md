@@ -60,6 +60,20 @@ duplicating all eight views. The initial six-subject readback exceeded its128MiB
 guard and failed closed; the guard remains unchanged after bounding that selection.
 The default six-subject diagnostic is three serial pairs, with distinct bounded
 artifacts. Explicit manual selections remain subject to the same byte ceiling.
+External pack image payloads are explicitly omitted by default, with every omitted
+reference retained in the receipt. Buffers, primary sources, provenance, admitted
+metadata and selected actual rasters remain byte-exact. This slice declares
+`complete_render_input=false`; it cannot stand in for an appearance input closure.
+The three serial pairs completed after this change (about9MiB combined).
+
+The six-source diagnostic found the original admitted imports for the four
+previous Stage47 failures. Independent rest reconstruction passed for character-r,
+Superhero_Male, BlueGoldfish and Superhero_Female. Geometry/normal courts were also
+replayed on character-r and Superhero_Male and returned core candidates. In both
+FBX byte-mismatch cases, original and regenerated arrays are identical after the
+declared object-name ordering; raw JSON object order differs. The next calibration
+input must bind the original bytes, while retaining the exact geometry replay.
+These are bounded regression results, not new Platform qualification or eligibility.
 
 Pending before the notebook: native hierarchy control support under a new policy;
 the image-buffer failure; both admitted-import mismatches;47 mask/29 bind-vertex

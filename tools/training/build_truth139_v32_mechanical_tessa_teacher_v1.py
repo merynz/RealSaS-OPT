@@ -175,11 +175,40 @@ def source_evaluation_context(source_v,source_f,isolated,actions,cameras):
             "source_masks":{(int(ai),ci):project_mask(isolated[ai],source_f,camera)
                             for ai in selected for ci,camera in enumerate(cameras)}}
 
+def candidate_source_correspondence(v, f, source_v, source_f):
+    """Preserve proven index identity before any ambiguous proximity query.
+
+    Equality is exact for both arrays; the candidate kind/ratio is not evidence.
+    A source vertex is bound to its own incident corner, so coincident vertices
+    with different authored trajectories cannot exchange their motion either.
+    """
+    if np.array_equal(v, source_v) and np.array_equal(f, source_f):
+        vertices, first = np.unique(source_f.reshape(-1), return_index=True)
+        if len(vertices) == len(source_v):
+            vertex_face = np.empty(len(v), dtype=np.int64)
+            bar = np.zeros((len(v), 3), dtype=np.float64)
+            distance = np.zeros(len(v), dtype=np.float64)
+        else:
+            # Unreferenced vertices have no incident source corner. Keep their
+            # ordinary measured mapping; all referenced vertices retain identity.
+            vertex_face, bar, distance = nearest_mapping(v, source_v, source_f)
+        vertex_face[vertices] = first // 3
+        bar[vertices] = 0.0
+        bar[vertices, first % 3] = 1.0
+        distance[vertices] = 0.0
+        return vertex_face, bar, distance, np.arange(len(f), dtype=np.int64), 'EXACT_INDEX_IDENTITY'
+    vertex_face, bar, distance = nearest_mapping(v, source_v, source_f)
+    face_source, _, _ = nearest_mapping(np.mean(v[f], axis=1), source_v, source_f)
+    return vertex_face, bar, distance, face_source, 'MEASURED_NEAREST_SURFACE'
+
+
 def evaluate_candidate(v,f,source_v,source_f,source_fc,source_topology,source_face_object,attachment_ids,isolated,actions,cameras,ratio,kind,*,source_context=None):
     if source_context is not None and source_context["identity"]!=_source_evaluation_identity(source_v,source_f,isolated,actions,cameras):
         raise ValueError("TESSA_SOURCE_EVALUATION_CONTEXT_DRIFT")
-    scale=max(float(np.linalg.norm(source_v.max(0)-source_v.min(0))),1e-9);vertex_face,bar,dist=nearest_mapping(v,source_v,source_f);mapping_pass=bool(np.max(dist)<=scale*.01)
-    candidate_vc,candidate_fc=topology_components(len(v),f);centroid=np.mean(v[f],axis=1);cand_face_source,_,_=nearest_mapping(centroid,source_v,source_f);mapped_source_component=source_fc[cand_face_source]
+    scale=max(float(np.linalg.norm(source_v.max(0)-source_v.min(0))),1e-9)
+    vertex_face,bar,dist,cand_face_source,correspondence=candidate_source_correspondence(v,f,source_v,source_f)
+    mapping_pass=bool(np.max(dist)<=scale*.01)
+    candidate_vc,candidate_fc=topology_components(len(v),f);mapped_source_component=source_fc[cand_face_source]
     component_map={}
     for cc in np.unique(candidate_fc):
         vals=np.unique(mapped_source_component[candidate_fc==cc]);component_map[int(cc)]=vals.tolist()
@@ -209,6 +238,7 @@ def evaluate_candidate(v,f,source_v,source_f,source_fc,source_topology,source_fa
     silhouette_min=float(min(ious) if ious else 1.0);silhouette_pass=silhouette_min>=.94
     mechanical_pass=all([mapping_pass,component_pass,topology_pass,attachment_pass,nondegenerate,fold_pass,self_intersection_pass,response_pass,strain_pass,silhouette_pass])
     metrics={"candidate_evaluation_contract":"MEASURED_ALL_KINDS_NO_FALLBACK_OVERRIDE_V1","ratio":float(ratio),"kind":kind,"vertex_count":int(len(v)),"face_count":int(len(f)),"max_surface_distance_over_scale":float(np.max(dist)/scale),"mapping_pass":mapping_pass,"component_pass":component_pass,"topology_hole_crack_preservation_pass":topology_pass,"attachment_object_separation_pass":attachment_pass,"nondegenerate_all_actions_pass":nondegenerate,"inversion_foldthrough_pass":fold_pass,"self_intersection_pass":self_intersection_pass,"response_nrms":response_nrms,"energy_nrms":energy_nrms,"response_pass":response_pass,"strain_p99_log_stretch":cand_strain,"area_p99_log_ratio":cand_area,"strain_jacobian_tail_pass":strain_pass,"motion_view_silhouette_min_iou":silhouette_min,"silhouette_pass":silhouette_pass,"mechanical_pass":mechanical_pass}
+    metrics['source_correspondence'] = correspondence
     return metrics,vertex_face,bar
 
 def build(subject_id,geometry_manifest_path:Path,response_chain_path:Path,camera_bundle:Path,output_dir:Path):

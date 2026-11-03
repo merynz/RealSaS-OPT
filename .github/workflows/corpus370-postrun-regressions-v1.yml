@@ -1,0 +1,53 @@
+name: corpus370-postrun-regressions-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/corpus370-postrun-regressions-v1.yml'
+      - 'tools/corpus/*causal*'
+      - 'tools/corpus/run_corpus370_compute_worker_v1.py'
+      - 'tools/training/build_truth139_v32_mechanical_tessa_teacher_v1.py'
+      - 'tools/truth_foundry/blender_teacher_scene_v1.py'
+      - 'tools/truth_foundry/image_buffer_contract_v1.py'
+      - 'compiler/realsas_compiler_services/process_log_v1.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/corpus_family_v1.py'
+      - 'compiler/realsas_compiler_services/orchestrator/adapters/truth_foundry_v2.py'
+      - 'tests/corpus/test_causal_response_authority_v2.py'
+      - 'tests/corpus/test_tessa_exact_correspondence_v1.py'
+      - 'tests/corpus/test_image_buffer_contract_v1.py'
+      - 'tests/corpus/test_process_log_streaming_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-postrun-regressions-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  postrun-regressions:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU court dependencies
+        run: python -m pip install -r requirements/mainline-ci.txt -r requirements/truth-family-courts.txt
+      - name: Run versioned measurements and preserved rejection regressions
+        run: |
+          python -m pytest -q \
+            tests/corpus/test_causal_response_authority_v1.py \
+            tests/corpus/test_causal_response_authority_v2.py \
+            tests/corpus/test_bounded_surface_response_v1.py \
+            tests/corpus/test_corpus370_numeric_optimization_v1.py \
+            tests/corpus/test_tessa_exact_correspondence_v1.py \
+            tests/corpus/test_teacher_sign_scope_regression_v1.py \
+            tests/corpus/test_platform_subject_family_accounting_v1.py \
+            tests/corpus/test_image_buffer_contract_v1.py \
+            tests/corpus/test_process_log_streaming_v1.py \
+            tests/corpus/test_tessa_mechanical_surface_topology_v5.py \
+            tests/training/test_tessa_candidate_diagnostics_v1.py

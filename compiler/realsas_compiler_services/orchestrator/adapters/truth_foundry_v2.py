@@ -18,20 +18,18 @@ if TYPE_CHECKING:
 
 
 def _run(executable, program, arguments, log_path, maximum_seconds, subject, runtime=None):
+    from compiler.realsas_compiler_services.process_log_v1 import follow_process_log
     with log_path.open('w') as log:
         process = subprocess.Popen([str(executable), '-b', '--factory-startup', '--python-exit-code', '2',
             '--python', str(program), '--', *map(str, arguments)], stdout=log, stderr=subprocess.STDOUT,
             **launch_options(executable, runtime))
-        started = time.monotonic()
         try:
-            while True:
-                try:
-                    code = process.wait(timeout=20)
-                    break
-                except subprocess.TimeoutExpired:
-                    elapsed = time.monotonic() - started
-                    print(f'[TRUTH_REST_V2_HEARTBEAT] subject={subject} elapsed_s={elapsed:.1f}', flush=True)
-                    _require(elapsed < maximum_seconds, 'TRUTH_REST_V2_TIME_BUDGET_EXCEEDED')
+            try:
+                code=follow_process_log(process,log_path,context={'event':'TRUTH_REST_V2_HEARTBEAT',
+                    'subject':subject,'stage':'47_SOURCE_RESPONSE_CALIBRATION'},
+                    heartbeat_seconds=20.,maximum_seconds=maximum_seconds)
+            except TimeoutError:
+                _require(False,'TRUTH_REST_V2_TIME_BUDGET_EXCEEDED')
         finally:
             if process.poll() is None:
                 process.terminate()

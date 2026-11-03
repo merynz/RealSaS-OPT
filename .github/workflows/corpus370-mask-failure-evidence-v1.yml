@@ -33,7 +33,7 @@ jobs:
             tools/corpus/export_corpus370_evidence_slice_v1.py \
             --bundle "$PREP_ROOT/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V2.zip" \
             --expected-sha256 4462b7f90fcff58a8d56b1a975fde4f7f91cbda51417cad5121cf55f25994c5c \
-            --subjects "$SUBJECTS" --preparation-root "$PREP_ROOT" --output "$OUTPUT" --all-native-views
+            --subjects "$SUBJECTS" --preparation-root "$PREP_ROOT" --output "$OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
           name: corpus370-mask-evidence-${{ github.run_id }}-${{ strategy.job-index }}

@@ -32,7 +32,12 @@ jobs:
       - name: Verify immutable source, original importer and exact ufbx commit
         run: |
           set -euo pipefail
-          test "$(git -C "$UFBX_ROOT" rev-parse HEAD)" = 5955c5c0b042ac2dc6f32955ab206aaec0620cfc
+          ACTUAL_UFBX="$(git -C "$UFBX_ROOT" rev-parse HEAD 2>/dev/null || true)"
+          echo "DIAGNOSTIC_UFBX_REV=${ACTUAL_UFBX:-MISSING}"
+          echo "DIAGNOSTIC_UFBX_C_EXISTS=$([ -f "$UFBX_ROOT/ufbx.c" ] && echo yes || echo no)"
+          echo "DIAGNOSTIC_SOURCE_EXISTS=$([ -f "$PREP/source_bundle/extracted/5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9/sources/assets/publishers/quaternius-old-animated-monsters/raw/FBX/Dragon.fbx" ] && echo yes || echo no)"
+          echo "DIAGNOSTIC_IMPORT_EXISTS=$([ -f "$PREP/observations_v2/objects/957859df240a200395bfc663bbd107fdbf6e655e18fdeb5badfe696d5bb9cf86/imported/corpus_b6e6c534f69bb0336157/imported.json" ] && echo yes || echo no)"
+          test "$ACTUAL_UFBX" = 5955c5c0b042ac2dc6f32955ab206aaec0620cfc
           test -f "$UFBX_ROOT/ufbx.c"
           SOURCE="$PREP/source_bundle/extracted/5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9/sources/assets/publishers/quaternius-old-animated-monsters/raw/FBX/Dragon.fbx"
           IMPORT="$PREP/observations_v2/objects/957859df240a200395bfc663bbd107fdbf6e655e18fdeb5badfe696d5bb9cf86/imported/corpus_b6e6c534f69bb0336157/imported.json"

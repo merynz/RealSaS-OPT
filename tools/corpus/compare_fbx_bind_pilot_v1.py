@@ -70,6 +70,15 @@ def compare(source, imported, diagnostic, source_sha, import_sha):
             else:
                 scale = max(float(np.linalg.norm(np.ptp(expected, axis=0))), 1e-9)
                 entry["default_relative_error"] = hausdorff(default, expected, scale)
+                parent_rows = raw.get("bone_parent_bind_world") or []
+                entry["source_parent_node"] = raw.get("source_parent_node")
+                entry["attached_bone"] = raw.get("attached_bone")
+                entry["bone_parent_bind_relative_error"] = (
+                    hausdorff(parent_rows, expected, scale)
+                    if len(parent_rows) == len(expected)
+                       and all(v is not None for v in parent_rows)
+                    else None
+                )
                 bind_rows = raw["cluster_bind_world"]
                 if len(bind_rows) == len(expected) and all(v is not None for v in bind_rows):
                     entry["cluster_bind_relative_error"] = hausdorff(bind_rows, expected, scale)

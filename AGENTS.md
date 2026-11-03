@@ -1,5 +1,18 @@
 # RealSaS-OPT Agent Entry Contract
 
+## Single-view product objective — 2026-11-03
+
+Before IRIS foundation/training work, read
+`canonical/IRIS_SINGLE_VIEW_FOUNDATION_DECISION_V1.json` and
+`docs/models/IRIS_SINGLE_VIEW_FOUNDATION_20261103.md`.
+The user authorizes Large-backbone research for one real image→full3D prediction.
+This supersedes the old Small-only apparatus default and S-ceiling prerequisite,
+not historical evidence or exact replay identities. Multi-view target renderings
+must not leak into student conditioning. A larger encoder requires a versioned
+frontend/projection/cache/checkpoint path; old eight-view/384 validators are not
+a single-view product contract. No training authorization or empirical winner is
+minted by the decision.
+
 ## Mandatory current handoff — 2026-10-11
 
 **First read:** `CURRENT_STATE.md`, then `docs/platform/EXECUTION_LANES.md`.

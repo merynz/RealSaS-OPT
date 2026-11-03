@@ -58,6 +58,8 @@ source repair, qualification, materialization or training result.
 Native raster selection keeps front and first-failed-view evidence rather than
 duplicating all eight views. The initial six-subject readback exceeded its128MiB
 guard and failed closed; the guard remains unchanged after bounding that selection.
+The default six-subject diagnostic is three serial pairs, with distinct bounded
+artifacts. Explicit manual selections remain subject to the same byte ceiling.
 
 Pending before the notebook: native hierarchy control support under a new policy;
 the image-buffer failure; both admitted-import mismatches;47 mask/29 bind-vertex

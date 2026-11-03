@@ -91,7 +91,7 @@ def export(bundle,expected_sha,subjects,output,*,preparation_root=None,maximum_b
                                 # exact metadata plus front/failed-view evidence.
                                 if file.suffix!='.json' and not any(file.name in (f'V{v}.png',f'V{v}.mask.bin') for v in views):continue
                                 if not file.resolve().is_relative_to(root):raise ValueError('EVIDENCE_SLICE_NATIVE_SYMLINK_ESCAPE')
-                                if file.stat().st_size>maximum_bytes-used:raise ValueError('EVIDENCE_SLICE_BYTE_LIMIT')
+                                if file.stat().st_size>maximum_bytes-used:raise ValueError(f'EVIDENCE_SLICE_BYTE_LIMIT:{file.name}:{file.stat().st_size}:{maximum_bytes-used}')
                                 add('native/'+sid+'/'+location.name+'/observations/'+file.name,file.read_bytes(),'UNQUALIFIED_NATIVE_WORKING_BYTES')
             result={'schema':'RealSaS.Corpus370EvidenceSlice.v1','source_bundle_sha256':expected_sha,
                     'subjects':selected,'requested_subject_ids':subjects,'files':list(entries.values()),

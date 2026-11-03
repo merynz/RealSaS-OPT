@@ -1,3 +1,17 @@
+> **Single-view product / Large foundation decision — 2026-11-03:** The user
+> confirms one real RGB reference→full3D prediction. Eight calibrated research
+> inputs do not establish this capability. Small is no longer the primary default
+> and no Small-ceiling experiment is required before authorized Large research.
+> Preferred candidate is DINOv3-L/16; DINOv2-L/14 is the required reference;
+> SigLIP2-L is an alternative, Giant is optional. Empirical winner is UNSELECTED.
+> See `canonical/IRIS_SINGLE_VIEW_FOUNDATION_DECISION_V1.json` and
+> `docs/models/IRIS_SINGLE_VIEW_FOUNDATION_20261103.md`. Current S/384/eight-view
+> frontend, cache, input projections and camera/scale assumptions require a new
+> versioned path. No weights were swapped, no GPU comparison or optimizer ran.
+> Keep source truths independent; hidden/generated views remain predicted input
+> or target-only evidence, never extra observed truth. Final370/masks/lineage,
+> materialization, sign/probe + tangent repair and model readiness remain open.
+>
 > **Actual thin input availability — 2026-11-03:** Read-only native transport run
 > 41627179582 completed, artifact13226387715. A fresh reconstruction of the pinned
 > runtime was compared against original input bytes:5818 unique objects come from

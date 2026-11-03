@@ -1,0 +1,124 @@
+{
+  "schema": "RealSaS.IRISSingleViewFoundationDecision.v1",
+  "date": "2026-11-03",
+  "status": "DESIGN_REVISION_REQUIRED__EMPIRICAL_SELECTION_PENDING",
+  "product_input": {
+    "observed_rgb_views": 1,
+    "camera_pose": "UNKNOWN_UNLESS_ESTIMATED_OR_EXPLICITLY_PROVIDED",
+    "alpha": "PREDICTED_OR_PROVIDED__NOT_ORACLE",
+    "object_scale": "NO_SOURCE_3D_NORMALIZATION_ORACLE",
+    "output": "FULL_3D_PREDICTION__HIDDEN_REGIONS_ARE_PREDICTED"
+  },
+  "supersedes": {
+    "document": "canonical/IRIS_REPROJECTION_CENTERED_V2_PREREG_20260831.md",
+    "scope": "Small-only compute default and requirement to prove Small representation ceiling before larger-backbone research. Historical evidence and exact replay contracts remain unchanged."
+  },
+  "backbone_policy": {
+    "minimum_primary_capacity": "LARGE",
+    "preferred_research_candidate": "dinov3_vitl16",
+    "required_reference_candidate": "dinov2_vitl14",
+    "alternative_candidate": "google/siglip2-large-patch16-512",
+    "giant_status": "OPTIONAL_HIGHER_COST_COMPARATOR__NOT_AUTOMATIC_DEFAULT",
+    "small_status": "HISTORICAL_REPLAY_OR_EXPLICIT_ABLATION_ONLY",
+    "winner": "UNSELECTED_PENDING_SINGLE_VIEW_DOMAIN_EVIDENCE"
+  },
+  "profiles": [
+    {
+      "id": "dinov2_vitl14",
+      "repository": "facebookresearch/dinov2",
+      "patch_size": 14,
+      "embedding_dim": 1024,
+      "approximate_vision_parameters": 300000000,
+      "license": "Apache-2.0",
+      "role": "LARGE_REFERENCE"
+    },
+    {
+      "id": "dinov3_vitl16",
+      "repository": "facebookresearch/dinov3",
+      "model_id": "facebook/dinov3-vitl16-pretrain-lvd1689m",
+      "patch_size": 16,
+      "embedding_dim": 1024,
+      "register_tokens": 4,
+      "approximate_vision_parameters": 300000000,
+      "license": "DINOv3 License",
+      "role": "PREFERRED_RESEARCH_CANDIDATE__NOT_ADMITTED"
+    },
+    {
+      "id": "siglip2_large_patch16_512",
+      "model_id": "google/siglip2-large-patch16-512",
+      "patch_size": 16,
+      "embedding_dim": 1024,
+      "input_hw": [
+        512,
+        512
+      ],
+      "license": "Apache-2.0",
+      "role": "ALTERNATIVE_IMAGE_ENCODER"
+    },
+    {
+      "id": "dinov2_vitg14",
+      "repository": "facebookresearch/dinov2",
+      "patch_size": 14,
+      "embedding_dim": 1536,
+      "approximate_vision_parameters": 1100000000,
+      "license": "Apache-2.0",
+      "role": "OPTIONAL_COMPARATOR"
+    }
+  ],
+  "adaptation_policy": {
+    "initial_comparison": "FROZEN_IMAGE_ENCODERS_WITH_TRAINABLE_RECONSTRUCTION_NETWORK",
+    "lora": "SEPARATE_ABLATION_WITH_EXPLICIT_PLACEMENT_RANK_TARGET_LAYERS_AND_PARENT_CHECKPOINT",
+    "encoder_lora_cache": "INVALIDATES_FROZEN_FEATURE_CACHE",
+    "reconstructor_lora_cache": "ENCODER_FEATURE_CACHE_REUSABLE_ONLY_IF_ENCODER_AND_PREPROCESS_IDENTITIES_UNCHANGED",
+    "rank128_copy_from_stdgenpp": "NOT_JUSTIFIED_WITHOUT_OUR_OWN_EVIDENCE"
+  },
+  "runtime_gaps": [
+    "Current DINOv2-S authority loader rejects other architecture/weights; keep it for historical replay.",
+    "vNext inference and foundation cache enforce eight views and 384 dimensions.",
+    "V3.2.3 trained feature fusion assumes 576 channels and calibrated camera inputs.",
+    "Implement new versioned single-view frontend, backbone-specific projection, visible-view selection and cache/checkpoint identities; do not loosen historical validators.",
+    "No larger encoder weight load, GPU parity or single-view completion evaluation has been executed."
+  ],
+  "cache_binding_required": [
+    "source_revision",
+    "weight_sha256",
+    "weight_size_bytes",
+    "model_id",
+    "constructor",
+    "patch_grid",
+    "feature_levels",
+    "level_dims",
+    "register_token_handling",
+    "preprocessing_implementation_sha256",
+    "input_camera_convention",
+    "subject_input_identity",
+    "observed_view_ids",
+    "lineage_split_identity",
+    "adaptation_weights_if_any"
+  ],
+  "single_view_evaluation_required": [
+    "All arms receive exactly one real RGB view; remaining real renders are target-only.",
+    "Changing hidden target images/cameras must not change inference conditioning.",
+    "Disjoint lineage train/validation/global-unseen; no split minted from candidate count.",
+    "Evaluate observed and occluded geometry/appearance separately using only qualified target families; masked regions never count as successes.",
+    "Compare geometry, normals, appearance high-frequency detail, completion failures, peak VRAM, latency and feature-cache bytes.",
+    "Declare pretrained 3D reconstruction prior or from-scratch decoder explicitly; a larger 2D encoder is not a pretrained 3D completion model.",
+    "Any synthesized views/normals are predicted conditions with provenance, never independent truth.",
+    "Select a separate single-view model/camera/pose interface; no eight-view repeat or source-bound camera/scale leakage."
+  ],
+  "training_authorized": false,
+  "optimizer_executed": false,
+  "weights_swapped": false,
+  "feature_cache_minted": false,
+  "scientific_qualification_minted": false,
+  "corpus_truth_worker_changed": false,
+  "sources": {
+    "stdgenpp": "https://arxiv.org/html/2601.07660v1",
+    "dinov2": "https://github.com/facebookresearch/dinov2/blob/main/MODEL_CARD.md",
+    "dinov3": "https://github.com/facebookresearch/dinov3/blob/main/MODEL_CARD.md",
+    "dinov3_license": "https://github.com/facebookresearch/dinov3/blob/main/LICENSE.md",
+    "siglip2": "https://arxiv.org/abs/2502.14786",
+    "siglip2_model": "https://huggingface.co/google/siglip2-large-patch16-512",
+    "trellis2_pipeline": "https://huggingface.co/microsoft/TRELLIS.2-4B/blob/main/pipeline.json"
+  }
+}

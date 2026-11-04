@@ -24,6 +24,7 @@ on:
       - 'tests/corpus/test_corpus370_historical_observation_reuse_v1.py'
       - 'tools/corpus/rescue_corpus370_observation_delta_v5.py'
       - 'tests/corpus/test_corpus370_platform_mixed_v5_bundle_v1.py'
+      - 'tests/corpus/test_corpus370_delta_rescue_coordinator_v5.py'
       - 'tests/corpus/test_observation_source_projection_degenerate_v1.py'
       - 'tests/corpus/test_observation_precision_interval_v1.py'
       - 'tools/corpus/iris_observation_admission_v3.py'
@@ -60,5 +61,6 @@ jobs:
             tests/corpus/test_corpus370_source_surface_cohort_bootstrap_v3.py \
             tests/corpus/test_corpus370_historical_observation_reuse_v1.py \
             tests/corpus/test_corpus370_platform_mixed_v5_bundle_v1.py \
+            tests/corpus/test_corpus370_delta_rescue_coordinator_v5.py \
             tests/corpus/test_observation_source_projection_degenerate_v1.py \
             tests/corpus/test_observation_precision_interval_v1.py

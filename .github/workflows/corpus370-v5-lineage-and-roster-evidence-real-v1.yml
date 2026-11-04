@@ -15,7 +15,21 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  strict-source-lineage-contract-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Reject production split without independent structural fingerprint courts
+        run: |
+          python -m pip install --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus370_lineage_groups_v1.py
+
   exact-370-lineage-review-and-model-rosters:
+    needs: strict-source-lineage-contract-tests
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 30
     env:
@@ -34,6 +48,7 @@ jobs:
           test "$(sha256sum "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
           "$PY" -u tools/corpus/build_corpus370_lineage_groups_v1.py \
             --exact-source-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
+            --require-complete-structural-fingerprints \
             --output "$OUTPUT/CORPUS370_PRELIMINARY_LINEAGE_GROUPS_V1.json"
           "$PY" -u tools/corpus/derive_corpus370_model_rosters_v1.py \
             --matrix "$V5_MATRIX" \

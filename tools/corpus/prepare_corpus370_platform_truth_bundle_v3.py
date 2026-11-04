@@ -196,7 +196,8 @@ def prepare(
     # eligible for V4 repair. Do not accept an unbound synthetic composite.
     if observations.get("schema") == "RealSaS.Corpus370PreparedObservationPackets.v5":
         parent = observations.get("parent") or {}
-        require(parent.get("schema") == "RealSaS.Corpus370PreparedObservationPackets.v3"
+        require(parent.get("sha256") == "5007b0863eddce70833ad48c4bc26af92a7abd79b618c8dc5c69ade7f43840a7"
+                and parent.get("schema") == "RealSaS.Corpus370PreparedObservationPackets.v3"
                 and parent.get("prepared_subject_count") == 294
                 and parent.get("failure_count") == 76
                 and sha256(Path(str(parent.get("path") or ""))) == parent.get("sha256"),

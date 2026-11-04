@@ -180,3 +180,38 @@ def test_visibility_negative_is_not_different_drawable_negative():
     result=court(proposal(),pairs)
     assert result["qualified_different_drawable_negatives"]==0
     assert result["operational_layer_student_targets_minted"] is False
+
+
+def test_overfragmented_source_receives_review_warning_not_training_authority():
+    # 48 disconnected patches can render and reveal independently but
+    # would produce a terrible one-drawable-per-patch Studio default.
+    faces=np.arange(48*3,dtype=np.int32).reshape(48,3)
+    v=np.zeros((48*3,3),np.float64)
+    for face in range(48):
+        x=float(face%12)*2
+        y=float(face//12)*2
+        v[face*3:face*3+3]=[[x,y,0],[x+1,y,0],[x,y+1,0]]
+    posed=np.stack([v,v.copy()])
+    pairs=fixtures()[3]
+    pairs["rows"][0]["source_face_a_teacher_only"]=0
+    pairs["rows"][0]["source_face_b_teacher_only"]=1
+    pairs["rows"][1]["source_face_a_teacher_only"]=2
+    pairs["rows"][1]["source_face_b_teacher_only"]=3
+    candidates=compile_candidates(v,faces,posed,pairs["rows"],parents=PARENTS)
+    result=court(candidates,pairs)
+    assert result["selected_slot_count"]==48
+    assert result["overfragmentation_review_required"] is True
+    assert result["functional_layer_compilation_status"]=="ABSTAIN_OVERFRAGMENTED_SELECTED_CANDIDATE"
+    assert result["graphics_family_authorized"] is False
+    assert result["operational_layer_student_targets_minted"] is False
+
+
+def test_tiny_source_ray_coverage_cannot_mint_product_editability():
+    result=court(proposal(),fixtures()[3])
+    assert result["source_faces_touched_by_independent_ray_courts"]==4
+    assert result["source_face_coverage_fraction"]==1.0
+    # Even 100% touched faces in a tiny fixture do not substitute for
+    # heldout motion/view render, appearance and editing consequence.
+    assert result["insufficient_spatial_edit_evidence_review_required"] is True
+    assert result["functional_layer_compilation_status"]=="ABSTAIN_UNDERSAMPLED_EDIT_CONSEQUENCES"
+    assert result["training_authorized"] is False

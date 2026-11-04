@@ -12,7 +12,7 @@ permissions:
 jobs:
   hosted-blender-and-resource-baseline:
     if: github.event.repository.private == false
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4

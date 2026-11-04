@@ -1,0 +1,73 @@
+name: corpus370-v5-component-geometry-family-three-subject-pilot-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths: ['.github/workflows/corpus370-v5-component-geometry-family-three-subject-pilot-v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-v5-component-geometry-family-three-subject-pilot-v1
+  cancel-in-progress: false
+jobs:
+  exact-canonical-geometry-and-independent-sign-courts:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      REST: /home/monster/realsas_authority/corpus370_source_rest_courts_v1_8ab2ebf5/SOURCE_REST_COURTS_INDEX.json
+      OUTPUT: /home/monster/realsas_authority/corpus370_component_geometry_courts_v1_384c9294
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify unchanged original V5 and 352/352 rest courts
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          test "$(sha256sum "$REST" | cut -d' ' -f1)" = 384c92940e1ea8eec7bbb98cf319eeda5f89222c07b782b607998e2067f1d9c8
+          "$PY" -m py_compile \
+            tools/corpus/audit_corpus370_v5_component_geometry_courts_v1.py \
+            tools/corpus/build_component_geometry_authority_v1.py \
+            tools/corpus/validate_component_geometry_authority_v1.py
+      - name: Run exact Stage50 component geometry and independent solid-angle pilot
+        run: |
+          set -euo pipefail
+          "$PY" -u tools/corpus/audit_corpus370_v5_component_geometry_courts_v1.py \
+            --source-rest-courts-index "$REST" \
+            --v5-index "$V5" \
+            --output-root "$OUTPUT" \
+            --subject-id corpus_b6e6c534f69bb0336157 \
+            --subject-id corpus_5fdf026c4f23563f9d41 \
+            --subject-id corpus_000ca1ae51f9582fde9e
+      - name: Reopen three typed outcomes and prove no invented global sign/training
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ['OUTPUT'])/'COMPONENT_GEOMETRY_COURTS_INDEX.json').read_text())
+          expected={'corpus_b6e6c534f69bb0336157','corpus_5fdf026c4f23563f9d41','corpus_000ca1ae51f9582fde9e'}
+          assert d['schema']=='RealSaS.Corpus370V5ComponentGeometryIndependentSweep.v1'
+          assert expected.issubset(d['subject_results'])
+          assert d['observation_qualified_count']==352 and d['observation_excluded_count']==18
+          assert d['authority']['global_union_sign_proven'] is False
+          assert d['authority']['family_admission_minted'] is False
+          assert d['training_authorized'] is False
+          for sid in expected:
+              row=d['subject_results'][sid]
+              assert row['status'] in {'PASS_COMPONENT_GEOMETRY_COURT','FAIL_COMPONENT_GEOMETRY_COURT'}
+              assert row['training_authorized'] is False
+          print(json.dumps(d['latest_selection_summary'],sort_keys=True),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v5-canonical-geometry-three-subjects-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/COMPONENT_GEOMETRY_COURTS_INDEX.json
+            ${{ env.OUTPUT }}/failures/*.json
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 1

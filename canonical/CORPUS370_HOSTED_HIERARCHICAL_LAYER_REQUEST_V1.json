@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.Corpus370HostedHierarchicalLayerResearchRequest.v1",
-  "status": "ACTIVATED_3_REAL_SHA_EXACT_SOURCE_HIERARCHICAL_GROUP_COURT",
+  "status": "REPLAY_NUMPY_INT_SCALAR_JSON_ACCOUNTING_FIX__SOURCE_PARENTS_UNCHANGED",
   "enabled": true,
   "source_locked": true,
   "training_authorized": false,
@@ -28,5 +28,6 @@
   "student_source_face_ids_exposed": false,
   "student_rig_or_semantic_source_names_exposed": false,
   "model_training_authorized": false,
-  "notes": "Now running original canonical 3 subjects on source-preserving grouped anonymous edit hypothesis. Independently selected train view0 and only evaluated view4; full-image renderer and model authority remain FALSE."
+  "notes": "Now running original canonical 3 subjects on source-preserving grouped anonymous edit hypothesis. Independently selected train view0 and only evaluated view4; full-image renderer and model authority remain FALSE.",
+  "replay_note": "First job did all three private independent source-level hierarchy courts, then failed at JSON aggregation due numpy.bool_ sum yielding numpy.int64; use int() for counts, do not alter source observations, target counts, or authority."
 }

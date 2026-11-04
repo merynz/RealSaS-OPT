@@ -79,6 +79,29 @@ def _material_domain(global_map,face_index):
     return str(mesh.name)+":"+str(material)
 
 
+def _remove_two_faces(global_map,face_a,face_b):
+    """Render removal of both source-addressed faces, not a semantic layer."""
+    touched=set()
+    for face in (face_a,face_b):
+        mesh,local,original,transparent=global_map[face]
+        mesh.polygons[local].material_index=transparent
+        touched.add(mesh)
+    for mesh in touched:mesh.update()
+    bpy.context.view_layer.update()
+
+
+def _recolor_one_face(global_map,face,color):
+    """Change a single addressed face only; other domains are untouched."""
+    mesh,local,original,transparent=global_map[face]
+    original_material=mesh.materials[original]
+    recolor=_palette_material(original_material,color,suffix="A_"+str(face))
+    target=len(mesh.materials)
+    mesh.materials.append(recolor)
+    mesh.polygons[local].material_index=target
+    mesh.update()
+    bpy.context.view_layer.update()
+
+
 def _modify_two_faces(global_map,face_a,face_b,*,color_a,color_b):
     touched=set()
     for face,color in ((face_a,color_a),(face_b,color_b)):
@@ -251,6 +274,55 @@ def run(job_path,output_path):
                     row.update(status="ABSTAIN_ALPHA_COMPOSITING_RECONSTRUCTION")
                     result["rows"].append(row)
                     continue
+                # Required morphology-agnostic reciprocal source-locus
+                # controls: B-only removal and (A,B) removal. A hidden B
+                # can become observable after A is removed. This is NOT
+                # a drawable or mechanical-owner label.
+                appearance._set_soup_mode(global_map,mode="REMOVAL",face_index=face_b)
+                remove_b=_measure(cam,key,ray,"remove_b_"+str(index),scratch)
+                appearance._set_soup_mode(global_map,mode="FULL")
+                _remove_two_faces(global_map,face_a,face_b)
+                remove_ab=_measure(cam,key,ray,"remove_ab_"+str(index),scratch)
+                appearance._set_soup_mode(global_map,mode="FULL")
+                no_op=_measure(cam,key,ray,"noop_"+str(index),scratch)
+                _recolor_one_face(global_map,face_a,COLOR_B)
+                recolor_a=_measure(cam,key,ray,"recolor_a_"+str(index),scratch)
+                appearance._set_soup_mode(global_map,mode="FULL")
+                recolor_a_noop=_measure(cam,key,ray,"recolor_a_noop_"+str(index),scratch)
+                row["generic_counterfactual"]={
+                    "schema":"RealSaS.Corpus370GenericLocusCounterfactual.v1",
+                    "source_sha256":sha(source),
+                    "camera_sha256":sha(camera_path),
+                    "rest_geometry_sha256":sha(geometry_path),
+                    "view_index":int(ray["view_index"]),
+                    "pixel_x":int(ray["pixel_x"]),
+                    "pixel_y":int(ray["pixel_y"]),
+                    "locus_a":{
+                        "face_index_teacher_only":face_a,
+                        "barycentric_teacher_only":ray["hits"][0]["source_barycentric_teacher_only"],
+                    },
+                    "locus_b":{
+                        "face_index_teacher_only":face_b,
+                        "barycentric_teacher_only":ray["hits"][1]["source_barycentric_teacher_only"],
+                    },
+                    "carrier_mode":mode,
+                    "camera_ray_complete":bool(ray["complete"]),
+                    "depth_tie":bool(ray["has_depth_tie"]),
+                    "interventions_preserve_geometry_camera_pose_alpha":True,
+                    "teacher_labels_to_student":False,
+                    "owner_identity_minted":False,
+                    "training_authorized":False,
+                    "semantic_or_material_name_as_label":False,
+                    "rgba":{
+                        "full":_rgba(baseline),
+                        "noop":_rgba(no_op),
+                        "remove_a":_rgba(removal),
+                        "remove_b":_rgba(remove_b),
+                        "remove_both":_rgba(remove_ab),
+                        "recolor_a":_rgba(recolor_a),
+                        "recolor_a_noop":_rgba(recolor_a_noop),
+                    },
+                }
                 appearance._set_soup_mode(global_map,mode="FULL")
                 _modify_two_faces(global_map,face_a,face_b,
                                   color_a=COLOR_B,color_b=COLOR_A)

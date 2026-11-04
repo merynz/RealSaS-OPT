@@ -1,0 +1,71 @@
+name: corpus370-v5-lineage-and-roster-evidence-real-v1
+
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-v5-lineage-and-roster-evidence-real-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v5-lineage-and-roster-evidence-real-v1
+  cancel-in-progress: false
+
+jobs:
+  exact-370-lineage-review-and-model-rosters:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      PREP: /home/monster/realsas_authority/corpus370_preparation_v1
+      V5_MATRIX: /home/monster/realsas_authority/corpus370_v5_current_family_requalification/41838505934-1/CORPUS370_V5_CURRENT_FAMILY_MATRIX_V1.json
+      OUTPUT: /home/monster/realsas_authority/corpus370_v5_lineage_review/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build review-only lineage candidates and exact current model rosters
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUTPUT"
+          test -f "$V5_MATRIX"
+          test "$(sha256sum "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+          "$PY" -u tools/corpus/build_corpus370_lineage_groups_v1.py \
+            --exact-source-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
+            --output "$OUTPUT/CORPUS370_PRELIMINARY_LINEAGE_GROUPS_V1.json"
+          "$PY" -u tools/corpus/derive_corpus370_model_rosters_v1.py \
+            --matrix "$V5_MATRIX" \
+            --output "$OUTPUT/CORPUS370_CURRENT_MODEL_ROSTERS_V1.json"
+      - name: Independently prohibit unqualified cross-format split from name-only/exact-byte census
+        run: |
+          "$PY" - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json,hashlib
+          from pathlib import Path
+          root=Path(os.environ['OUTPUT'])
+          lineage=json.loads((root/'CORPUS370_PRELIMINARY_LINEAGE_GROUPS_V1.json').read_text())
+          rosters=json.loads((root/'CORPUS370_CURRENT_MODEL_ROSTERS_V1.json').read_text())
+          assert lineage['subject_count']==370
+          assert lineage['parents']['structural_fingerprints'] is None
+          assert lineage['parents']['review_decisions'] is None
+          assert lineage['training_authorized'] is False
+          assert rosters['training_authorized'] is False
+          print('## Corpus370 exact source and lineage review census')
+          print('370 source rows:',lineage['subject_count'])
+          print('Exact-byte same-source groups:',lineage['exact_source_duplicate_group_count'])
+          print('Author-name/path review candidates:',lineage['review_required_count'])
+          print('Structural+rig/skin cross-format equivalence: **NOT YET COURTED**.')
+          print('Final lineage split: **NOT AUTHORIZED BY THIS CENSUS** even if the script says PASS_LINEAGE_GROUPS_SEALED; cross-format false-distinct risks require the missing independent structural fingerprint court and reviewed collisions.')
+          for model,item in rosters['models'].items():
+              print(model, 'roster:',json.dumps({'eligible_count':len(item.get('subject_ids',[])),'missing':item.get('missing_required_families')},sort_keys=True)[:600])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v5-lineage-review-and-rosters-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/CORPUS370_PRELIMINARY_LINEAGE_GROUPS_V1.json
+            ${{ env.OUTPUT }}/CORPUS370_CURRENT_MODEL_ROSTERS_V1.json
+          if-no-files-found: warn
+          retention-days: 30

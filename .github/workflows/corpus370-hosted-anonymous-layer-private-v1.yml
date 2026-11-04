@@ -1,0 +1,135 @@
+name: corpus370-hosted-anonymous-layer-private-v1
+
+# Stage A: use already independently SHA-sealed 3-source native/visibility
+# evidence. Do NOT download original art/semantic names or leak teacher arrays
+# into public GitHub artifacts. The private candidate layer faces stay in Drive.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - 'canonical/CORPUS370_HOSTED_ANON_LAYER_REQUEST_V1.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-hosted-anonymous-layer-private-v1
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify-source-exact-pilot-request:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.gate.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        name: Require original source/heldout split and zero training authority
+        env:
+          PRIVATE_SECRET_PRESENT: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os
+          from pathlib import Path
+          d=json.loads(Path('canonical/CORPUS370_HOSTED_ANON_LAYER_REQUEST_V1.json').read_text())
+          assert d["schema"]=="RealSaS.Corpus370HostedAnonymousLayerRequest.v1"
+          assert d["original_native_visibility_join_run_id"]==41916724594
+          assert d["original_native_visibility_join_attempt"]==1
+          assert d["original_private_join_receipt_sha256"]=="e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a"
+          assert d["expected_subjects"]==3 and d["expected_source_hit_pairs"]==6
+          assert d["train_view"]==0 and d["heldout_view"]==4
+          assert len(d["candidate_types"])==7
+          for key in ("author_drawable_identity_qualified","graphics_owner_training_authorized",
+                      "product_compilation_authorized","model_training_authorized",
+                      "student_source_ids_exposed"):
+              assert d[key] is False
+          assert d["private_source_only"] is True and d["sha_verified_inputs"] is True
+          ready=d["enabled"] is True and os.environ["PRIVATE_SECRET_PRESENT"]=="true"
+          print("ready="+str(ready).lower())
+          PY
+
+  measure-real-anonymous-layer-candidates:
+    needs: verify-source-exact-pilot-request
+    if: needs.verify-source-exact-pilot-request.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      RCLONE_CONFIG: /tmp/realsas-c370-anon-private.conf
+      PRIVATE_JOIN_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_visibility_pair_join_v1/41916724594-1
+      PRIVATE_JOIN_LOCAL: /home/monster/realsas_authority/corpus370_hosted_native_visibility_pairs/41916724594-1
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_anonymous_layer_private/${{ github.run_id }}-${{ github.run_attempt }}
+      OUTPUT_REMOTE: gdrive:corpus370_preparation_v1/hosted_anonymous_layer_pilot_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify CPU and candidate/consumer contract tests
+        run: |
+          set -euo pipefail
+          test "$(awk '/MemTotal:/{print $2}' /proc/meminfo)" -ge 14000000
+          sudo install -d -o "$USER" -g "$(id -gn)" -m 0700 /home/monster/realsas_authority
+          mkdir -p "$OUTPUT_ROOT"
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/corpus/compile_corpus370_anonymous_layer_proposals_v1.py \
+            tools/corpus/court_corpus370_anonymous_layer_edit_proxy_v1.py \
+            tools/corpus/run_corpus370_anonymous_layer_private_batch_v1.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_anonymous_layer_compiler_v1.py
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Authenticate private Google Drive transport without logging keys
+        env:
+          PRIVATE_RCLONE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$PRIVATE_RCLONE_CONFIG_B64"
+          printf '%s' "$PRIVATE_RCLONE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          rclone lsf "$PRIVATE_JOIN_REMOTE" --max-depth 1 >/dev/null
+          echo "PRIVATE_ORIGINAL_NATIVE_VISIBILITY_JOIN_ACCESS_OK"
+      - name: Restore just previous courted native/canonical/source-ray parents (not raw art)
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$PRIVATE_JOIN_LOCAL"
+          rclone copy "$PRIVATE_JOIN_REMOTE" "$PRIVATE_JOIN_LOCAL" \
+            --checksum --transfers 3 --checkers 3 --timeout 90s --retries 3
+          test "$(sha256sum "$PRIVATE_JOIN_LOCAL/CORPUS370_NATIVE_VISIBILITY_PAIR_JOIN_V1.json" | cut -d' ' -f1)" = e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a
+          echo "SOURCE_CANONICAL_NATIVE_PAIRS_AND_PARENT_SHA_EXACT"
+      - name: Run per-source anonymous operational layer proposal and independent atomic edit proxy
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 -u tools/corpus/run_corpus370_anonymous_layer_private_batch_v1.py \
+            --private-native-visibility-join-root "$PRIVATE_JOIN_LOCAL" \
+            --output-root "$OUTPUT_ROOT" \
+            > "$OUTPUT_ROOT/PRIVATE_ANON_LAYER_COMPILER_LOG.txt" 2>&1
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["OUTPUT_ROOT"])/"CORPUS370_ANON_LAYER_PRIVATE_BATCH_V1.json"
+          x=json.loads(p.read_text())
+          assert x["schema"]=="RealSaS.Corpus370AnonymousLayerPrivateBatch.v1"
+          assert x["qualified_candidate_subjects"]==3 and x["failure_count"]==0
+          assert x["candidate_count_total"]==21
+          assert x["training_authorized"] is False
+          assert x["graphics_owner_truth_minted"] is False
+          print("## Real source-native anonymous operational layer pilot")
+          print("Source-equivalent subjects:",x["qualified_candidate_subjects"])
+          print("Anonymous candidate partitions:",x["candidate_count_total"])
+          print("Train-view 0, diagnostic heldout-view 4")
+          print("Selected candidate preserved both observed hidden ray edits on heldout:",x["selected_heldout_full_reveal_count"],"/3 subjects")
+          print("CAUTION: atomic edit proxy only, full Blender render/edit/CAA court NOT executed")
+          print("Source author drawable owner truth: UNKNOWN, no model training")
+          PY
+      - name: Publish SHA-sealed private layers/proxy receipts even on failure
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -s "$RCLONE_CONFIG" && test -d "$OUTPUT_ROOT"; then
+            rclone copy "$OUTPUT_ROOT" "$OUTPUT_REMOTE" \
+              --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+            echo "ANON_LAYER_PRIVATE_RECEIPTS_STORED__NO_PUBLIC_TEACHER_FACE_LISTS"
+          fi

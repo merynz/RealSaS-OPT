@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370HostedNativeVisibilityPairJoinRequest.v1",
-  "enabled": false,
-  "status": "DISABLED_UNTIL_INDEPENDENT_PRIVATE_NATIVE_RECEIPTS_VALIDATED",
+  "enabled": true,
+  "status": "ACTIVATED_SHA_PINNED_3X2_REAL_SOURCE_NATIVE_VISIBILITY_CANONICAL_JOIN",
   "source_locked": true,
   "teacher_only": true,
   "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
@@ -14,5 +14,5 @@
   "expected_subjects": 3,
   "expected_pixel_pairs": 6,
   "training_authorized": false,
-  "notes": "Provisional private research join only. Exact source-rest + native authored teacher + 2-view independent visibility. No cause/ownership/graphics/TESSA training authority."
+  "notes": "Only exact original three source subjects from real successful native pilot 41915393652 and independent visibility court 41904446622. Source-rest and frame equivalence independently replayed. No owner, causal response, training or product authority."
 }

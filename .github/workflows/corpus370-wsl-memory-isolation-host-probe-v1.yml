@@ -7,6 +7,8 @@ on:
     branches: [corpus370-source-relative-contact-v1-review]
     paths:
       - '.github/workflows/corpus370-wsl-memory-isolation-host-probe-v1.yml'
+      - 'tools/corpus/run_corpus370_wsl_isolated_v1.py'
+      - 'tools/corpus/probe_corpus370_wsl_scope_v1.py'
   workflow_dispatch:
 
 permissions:

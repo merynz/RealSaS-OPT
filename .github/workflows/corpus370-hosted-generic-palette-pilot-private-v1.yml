@@ -170,9 +170,16 @@ jobs:
           assert r['graphics_family_authority_minted'] is False
           print('# Source-exact generic graphics/alpha pilot')
           print('Measured source-locus palette rows:',r.get('measured_valid_palette_rows',0))
+          print('V2 reciprocal TWO-locus:',r.get('v2_two_causal_locus_rows',0))
+          print('V2 reciprocal ONE-locus:',r.get('v2_one_causal_locus_rows',0))
+          print('V2 reciprocal ABSTAIN:',r.get('v2_abstain_rows',0))
           print('Failures:',r.get('failure_count',0))
+          print('Graphics owner positives/negatives: 0 / 0 (not certified)')
           print('Generic owner and training: UNKNOWN / NOT AUTHORIZED')
           assert r['failure_count']==0,'REAL_SOURCE_PALETTE_PILOT_SUBJECT_REPAIR_REQUIRED'
+          assert r['qualified_same_owner_pairs']==0 and r['qualified_different_owner_pairs']==0
+          assert r['v2_two_causal_locus_rows']+r['v2_one_causal_locus_rows']+r['v2_abstain_rows']==r['measured_valid_palette_rows'], 'RECIPROCAL_V2_ROW_CENSUS_DRIFT'
+          assert r['v2_two_causal_locus_rows']>0,'RECIPROCAL_V2_NO_TWO_LOCUS_CANDIDATES'
           PY
       - name: Save private evidence/causal receipts to Drive even if pilot fails
         if: always()

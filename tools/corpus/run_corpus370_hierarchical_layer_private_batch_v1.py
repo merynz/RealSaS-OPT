@@ -185,7 +185,7 @@ def run(join_root,anon_root,output):
         if v["status"].startswith("PASS_")
     }
     report["heldout_proxy_reveal_count"]=sum(
-        v.get("heldout_reveal_fraction_diagnostic_only")==1.0
+        int(v.get("heldout_reveal_fraction_diagnostic_only")==1.0)
         for v in report["subjects"].values())
     save(result_file,report)
     print(json.dumps({

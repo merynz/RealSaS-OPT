@@ -39,7 +39,7 @@ def evaluate(row):
     require(isinstance(row,dict) and row.get("schema")==SCHEMA,"RECIPROCAL_V2_SCHEMA")
     for key in ("source_sha256","camera_sha256","rest_geometry_sha256"):
         s=row.get(key)
-        require(isinstance(s,str) and len(s)==64 and set(s)<set("0123456789abcdef"),
+        require(isinstance(s,str) and len(s)==64 and set(s)<=set("0123456789abcdef"),
                 "RECIPROCAL_V2_SOURCE_SHA:"+key)
     for key in ("training_authorized","owner_identity_minted",
                 "teacher_labels_to_student","semantic_or_material_name_as_label"):

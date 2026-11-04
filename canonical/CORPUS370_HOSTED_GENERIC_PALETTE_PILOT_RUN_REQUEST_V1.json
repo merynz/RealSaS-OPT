@@ -1,9 +1,9 @@
 {
   "schema": "RealSaS.Corpus370HostedGenericPalettePilotRunRequest.v1",
-  "enabled": false,
+  "enabled": true,
   "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
   "source_ray_run_id": 41883539256,
   "source_ray_run_attempt": 1,
   "training_authorized": false,
-  "notes": "Do not activate until all352 geometric rays are privately sealed. No semantic ownership or training promotion."
+  "notes": "Activated only after GitHub-hosted all352 ray run 41883539256 completed SUCCESS, 352 SHA-indexed subject receipt folders independently listed in private Google Drive. One-time preregistered 3-subject Blender counterfactual pilot. No training, Graphics owner, Product or Compiler authority."
 }

@@ -9,6 +9,8 @@ on:
       - 'tools/corpus/generic_source_locus_counterfactual_v1.py'
       - 'tools/corpus/court_corpus370_visibility_oracle_consumer_v1.py'
       - 'tools/corpus/qualify_corpus370_visibility_oracle_batch_v1.py'
+      - 'tools/corpus/diagnose_corpus370_generic_pair_kinematics_v1.py'
+      - 'tests/corpus/test_corpus370_generic_pair_kinematics_v1.py'
       - 'tests/corpus/test_corpus370_visibility_oracle_consumer_v1.py'
       - 'tests/corpus/test_corpus370_visibility_oracle_batch_v1.py'
       - 'tools/corpus/generic_source_locus_reciprocal_palette_v2.py'
@@ -31,6 +33,8 @@ on:
       - 'tools/corpus/generic_source_locus_counterfactual_v1.py'
       - 'tools/corpus/court_corpus370_visibility_oracle_consumer_v1.py'
       - 'tools/corpus/qualify_corpus370_visibility_oracle_batch_v1.py'
+      - 'tools/corpus/diagnose_corpus370_generic_pair_kinematics_v1.py'
+      - 'tests/corpus/test_corpus370_generic_pair_kinematics_v1.py'
       - 'tests/corpus/test_corpus370_visibility_oracle_consumer_v1.py'
       - 'tests/corpus/test_corpus370_visibility_oracle_batch_v1.py'
       - 'tests/corpus/test_generic_source_locus_counterfactual_v1.py'
@@ -54,6 +58,7 @@ jobs:
           python3 -m py_compile \
             tools/corpus/court_corpus370_visibility_oracle_consumer_v1.py \
             tools/corpus/qualify_corpus370_visibility_oracle_batch_v1.py \
+            tools/corpus/diagnose_corpus370_generic_pair_kinematics_v1.py \
             tools/corpus/generic_source_locus_counterfactual_v1.py \
             tools/corpus/generic_source_locus_reciprocal_palette_v2.py \
             tools/corpus/select_generic_source_locus_rays_v1.py \
@@ -73,5 +78,6 @@ jobs:
             tests/corpus/test_corpus370_v5_palette_intervention_v1.py \
             tests/corpus/test_corpus370_source_locus_visibility_v1.py \
             tests/corpus/test_corpus370_visibility_oracle_consumer_v1.py \
-            tests/corpus/test_corpus370_visibility_oracle_batch_v1.py
+            tests/corpus/test_corpus370_visibility_oracle_batch_v1.py \
+            tests/corpus/test_corpus370_generic_pair_kinematics_v1.py
           echo "GENERIC_SOURCE_LOCUS_CONTRACTS_ONLY__NO_MEASURED_SUBJECTS_NO_OWNER_AUTHORITY"

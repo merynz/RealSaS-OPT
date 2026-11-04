@@ -96,12 +96,17 @@ def snapshot(root: Path) -> tuple[dict | None, str | None]:
 
 
 def recover_remote(root: Path, remote: str) -> None:
-    """Restore trusted bytes before the original worker checks identity itself."""
+    """Restore only if local run has no checkpoint; never downgrade local work."""
     require(remote.startswith(REMOTE_PREFIX) and ".." not in remote and
             not remote.endswith("/"), "NATIVE_RECOVERY_REMOTE_IDENTITY")
     root.mkdir(parents=True, exist_ok=True)
-    # An empty new remote is legitimate. Never assume remote metadata alone
-    # confers truth authority; the original sweep verifies its exact source_id.
+    local, _ = snapshot(root)
+    if local is not None:
+        # The previous runner may have finished more subjects than the remote.
+        # Leave local data immutable; sync_progress will replay new bytes.
+        return
+    # An empty new remote is legitimate. All remote bytes are subsequently
+    # verified against subject court/teacher hashes and source_identity.
     exists = subprocess.run(["rclone", "lsf", remote, "--max-depth", "1"],
                             check=False, stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL, timeout=90).returncode == 0
@@ -117,12 +122,20 @@ def sync_progress(root: Path, remote: str, previous: set[str], previous_hash: st
         return previous, previous_hash
     subjects = set(state["results"])
     require(subjects.issuperset(previous), "NATIVE_RECOVERY_CHECKPOINT_REGRESSED")
-    # Upload files for newly finished subjects first; remote index LAST.
-    for sid in sorted(subjects - previous):
-        rclone(["copy", str(root / "subjects" / sid),
-                remote + "/subjects/" + sid, "--checksum", "--transfers", "2"])
-    # A checkpoint may change its final status/rollup without a new subject.
-    rclone(["copyto", str(root / INDEX), remote + "/" + INDEX, "--checksum"])
+    # Freeze exactly the checkpoint whose subject set was validated. The real
+    # worker can atomically advance the live index while remote files upload.
+    # Never upload the newer live index until its own subjects are uploaded.
+    staging = root / (".remote_checkpoint_" + digest + ".json")
+    staging.write_bytes((root / INDEX).read_bytes())
+    require(sha(staging) == digest, "NATIVE_RECOVERY_CONCURRENT_INDEX_ADVANCE")
+    try:
+        for sid in sorted(subjects - previous):
+            rclone(["copy", str(root / "subjects" / sid),
+                    remote + "/subjects/" + sid, "--checksum", "--transfers", "2"])
+        # Remote index LAST, and always the frozen validated snapshot.
+        rclone(["copyto", str(staging), remote + "/" + INDEX, "--checksum"])
+    finally:
+        staging.unlink(missing_ok=True)
     print(json.dumps({
         "event": "NATIVE_V5_REMOTE_CHECKPOINT_VERIFIED",
         "measured_result_count": len(subjects),

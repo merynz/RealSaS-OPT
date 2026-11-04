@@ -14,6 +14,7 @@ on:
       - '.github/workflows/corpus370-hosted-native-visibility-pair-join-private-v1.yml'
       - '.github/workflows/corpus370-parallel-evidence-campaign-v1.yml'
       - '.github/workflows/corpus370-hosted-anonymous-layer-private-v1.yml'
+      - '.github/workflows/corpus370-hosted-hierarchical-layer-private-v1.yml'
   workflow_dispatch:
 
 permissions:
@@ -41,4 +42,5 @@ jobs:
             .github/workflows/corpus370-hosted-native-teacher-pilot-private-v1.yml \
             .github/workflows/corpus370-hosted-native-visibility-pair-join-private-v1.yml \
             .github/workflows/corpus370-parallel-evidence-campaign-v1.yml \
-            .github/workflows/corpus370-hosted-anonymous-layer-private-v1.yml
+            .github/workflows/corpus370-hosted-anonymous-layer-private-v1.yml \
+            .github/workflows/corpus370-hosted-hierarchical-layer-private-v1.yml

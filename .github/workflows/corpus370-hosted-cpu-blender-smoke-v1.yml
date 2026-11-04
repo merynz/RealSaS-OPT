@@ -1,0 +1,38 @@
+name: corpus370-hosted-cpu-blender-smoke-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-hosted-cpu-blender-smoke-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hosted-blender-and-resource-baseline:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read standard hosted runner capacity
+        run: |
+          set -euo pipefail
+          nproc
+          free -h
+          df -h /
+          test "$(nproc)" -ge 2
+          test "$(awk '/MemTotal:/{print $2}' /proc/meminfo)" -ge 10000000
+          echo "HOSTED_CPU_CAPACITY_MEASURED_NO_TRUTH_AUTHORITY"
+      - name: Install Ubuntu-packaged Blender via signed APT distribution
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends blender
+          blender --version | head -8
+      - name: Validate real headless mesh extraction on a temporary cube
+        run: |
+          set -euo pipefail
+          blender --background --factory-startup --python-exit-code 4 --python-expr             "import bpy; bpy.ops.mesh.primitive_cube_add(); obj=bpy.context.active_object; assert obj.type == 'MESH'; assert len(obj.data.vertices) == 8; print('HOSTED_BLENDER_HEADLESS_CUBE_PASS')"
+          echo "NO_CORPUS_SOURCE_READ_NO_STUDENT_TRAINING"

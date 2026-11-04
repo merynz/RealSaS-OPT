@@ -21,7 +21,8 @@ def _slot_identifier(slot) -> str | None:
 
 def capture_imported_action_bindings(actions: dict[str, object]) -> dict[str, list[dict]]:
     """Map each exact Blender Action to its imported active/NLA owners."""
-    bindings = {a.name: [] for a in actions.values()}
+    imported_actions = {action.name: action for action in actions.values()}
+    bindings = {name: [] for name in imported_actions}
     for owner in base._animation_owners():
         animation = getattr(owner, "animation_data", None)
         if animation is None:
@@ -37,7 +38,7 @@ def capture_imported_action_bindings(actions: dict[str, object]) -> dict[str, li
                         (strip.action, getattr(strip, "action_slot", None), "NLA_IMPORTER")
                     )
         for action, slot, origin in references:
-            if action.name not in bindings or actions[action.name] is not action:
+            if action.name not in bindings or imported_actions[action.name] is not action:
                 continue
             bindings[action.name].append({
                 "owner": owner,

@@ -289,6 +289,23 @@ def run(job_path,output_path):
                 recolor_a=_measure(cam,key,ray,"recolor_a_"+str(index),scratch)
                 appearance._set_soup_mode(global_map,mode="FULL")
                 recolor_a_noop=_measure(cam,key,ray,"recolor_a_noop_"+str(index),scratch)
+                # V2: isolate B's causal contribution under both normal
+                # visibility and A-removal. An unchanged removal image does
+                # NOT imply zero effect: same-colour/opaque layers can mask it.
+                appearance._set_soup_mode(global_map,mode="FULL")
+                _recolor_one_face(global_map,face_b,COLOR_B)
+                recolor_b=_measure(cam,key,ray,"recolor_b_"+str(index),scratch)
+                appearance._set_soup_mode(global_map,mode="FULL")
+                recolor_b_noop=_measure(cam,key,ray,"recolor_b_noop_"+str(index),scratch)
+                appearance._set_soup_mode(global_map,mode="REMOVAL",face_index=face_b)
+                _recolor_one_face(global_map,face_a,COLOR_B)
+                recolor_a_given_remove_b=_measure(
+                    cam,key,ray,"recolor_a_given_remove_b_"+str(index),scratch)
+                appearance._set_soup_mode(global_map,mode="REMOVAL",face_index=face_a)
+                _recolor_one_face(global_map,face_b,COLOR_B)
+                recolor_b_given_remove_a=_measure(
+                    cam,key,ray,"recolor_b_given_remove_a_"+str(index),scratch)
+                appearance._set_soup_mode(global_map,mode="FULL")
                 row["generic_counterfactual"]={
                     "schema":"RealSaS.Corpus370GenericLocusCounterfactual.v1",
                     "source_sha256":sha(source),
@@ -321,6 +338,21 @@ def run(job_path,output_path):
                         "remove_both":_rgba(remove_ab),
                         "recolor_a":_rgba(recolor_a),
                         "recolor_a_noop":_rgba(recolor_a_noop),
+                    },
+                }
+                # Preserve the old V1 raw measurements byte-for-byte in
+                # their own declared schema; V2 gets newly measured arms and
+                # is independently courted into a DIFFERENT receipt.
+                v1=row["generic_counterfactual"]
+                row["generic_counterfactual_v2"]={
+                    **v1,
+                    "schema":"RealSaS.Corpus370GenericLocusReciprocalPalette.v2",
+                    "rgba":{
+                        **v1["rgba"],
+                        "recolor_b":_rgba(recolor_b),
+                        "recolor_a_given_remove_b":_rgba(recolor_a_given_remove_b),
+                        "recolor_b_given_remove_a":_rgba(recolor_b_given_remove_a),
+                        "recolor_b_noop":_rgba(recolor_b_noop),
                     },
                 }
                 appearance._set_soup_mode(global_map,mode="FULL")

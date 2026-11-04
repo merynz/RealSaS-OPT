@@ -1,0 +1,85 @@
+{
+  "schema": "RealSaS.Corpus370AnonymousLayerRealPilotCheckpoint.v1",
+  "status": "REAL_SOURCE_BOUND_ANONYMOUS_LAYER_PROXY_MEASURED__PRODUCT_ADMISSION_ABSTAIN",
+  "date_utc": "2026-11-04",
+  "provenance": {
+    "source_parent": "SHA_SEALED_REAL_NATIVE_VISIBILITY_CANONICAL_JOIN",
+    "source_join_run_id": 41916724594,
+    "source_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+    "initial_anonymous_layer_run_id": 41927955013,
+    "quality_guardrail_rerun_id": 41928889420,
+    "quality_guardrail_rerun_conclusion": "SUCCESS",
+    "private_summary_sha256": "47b3f3beb7a3625504ccf8488d6fe0cd8fbe0014421c5e4c77748f829c9f01ca",
+    "private_drive_folder": "gdrive:corpus370_preparation_v1/hosted_anonymous_layer_pilot_v1/41928889420-1",
+    "all_privileged_faces_in_private_drive_only": true
+  },
+  "measured": {
+    "exact_source_subjects": 3,
+    "source_faces_total": 3408,
+    "candidate_partition_algorithms": 7,
+    "candidate_partitions_total": 21,
+    "source_hits_per_subject": 2,
+    "training_view": 0,
+    "heldout_view": 4,
+    "heldout_rays_per_subject": 1,
+    "heldout_proxy_reveal_success_subjects": 3,
+    "failed_subjects": 0,
+    "operational_compiler_product_pass_subjects": 0,
+    "per_subject": [
+      {
+        "reference": "CAT",
+        "source_faces": 684,
+        "selected_candidate": "MANIFOLD_COMPONENTS",
+        "selected_slots": 260,
+        "face_coverage_fraction": 0.005847953216374269,
+        "heldout_reveal_proxy_fraction": 1,
+        "quality": "ABSTAIN_OVERFRAGMENTED_SELECTED_CANDIDATE"
+      },
+      {
+        "reference": "TRICERATOPS",
+        "source_faces": 1334,
+        "selected_candidate": "TRAIN_VIEW_RAY_SEEDED",
+        "selected_slots": 8,
+        "face_coverage_fraction": 0.0029985007496251873,
+        "heldout_reveal_proxy_fraction": 1,
+        "quality": "ABSTAIN_UNDERSAMPLED_EDIT_CONSEQUENCES"
+      },
+      {
+        "reference": "COWFISH",
+        "source_faces": 1390,
+        "selected_candidate": "TRAIN_VIEW_RAY_SEEDED",
+        "selected_slots": 9,
+        "face_coverage_fraction": 0.0028776978417266188,
+        "heldout_reveal_proxy_fraction": 1,
+        "quality": "ABSTAIN_UNDERSAMPLED_EDIT_CONSEQUENCES"
+      }
+    ]
+  },
+  "meaning": {
+    "positive_proof": "SOURCE_FACE_ANONYMOUS_PARTITIONS_EXIST_AND_EXPRESS_ONE_HELDOUT_MEASURED_FRONT_A_HIDDEN_B_ATOMIC_LAYER_TOGGLE_PER_SUBJECT",
+    "false_conclusions": [
+      "THIS_DOES_NOT_PROVE_HUMAN_AUTHORED_DRAWABLE_OWNERSHIP",
+      "THIS_DOES_NOT_PROVE_INDEPENDENT_FULL_IMAGE_ALPHA_RENDER_EDIT_REPLAY",
+      "THIS_DOES_NOT_ESTABLISH_CORRECT_PUPPET_LAYER_GRANULARITY",
+      "THIS_DOES_NOT_ESTABLISH_CANONICAL_3D_TO_2D_CAA_SEAM_AND_ATTACHMENT_PERSISTENCE",
+      "THIS_DOES_NOT_PROVE_AN_UNSEEN_MODEL_HAS_LEARNED_LAYER_IDENTITY"
+    ],
+    "source_semantic_labels_in_student": false,
+    "mechanical_owner_minted": false,
+    "same_drawable_positive_pairs": 0,
+    "different_drawable_negative_pairs": 0,
+    "animation_teacher_student_leakage_allowed": false,
+    "graphics_family_authorized": false,
+    "tessa_teacher_authorized": false,
+    "lineage_sealed_for_training": false,
+    "materialization_authorized": false,
+    "training_authorized": false
+  },
+  "next_evidence_gates": [
+    "MULTI_PIXEL_MULTI_VIEW_FULL_SOURCE_ALPHA_DEPTH_AND_EDITS__NEVER_ONLY_ONE_HELDOUT_PIXEL",
+    "ANONYMOUS_PATCH_HIERARCHY_WITH_PERCEPTUAL_AND_SOURCE_ATTACHED_GROUP_MERGE_FOR_CAT_260_COMPONENTS",
+    "INDEPENDENT_SPLIT_MERGE_CAUSAL_CONSUMER_WITH_HIDDEN_REAPPEARANCE_AND_SEAM_FIDELITY",
+    "TRUE_ISOLATED_MECHANICAL_CONTROL_REPLAY_OF_SOURCE_RIG_AND_REVIEWED_NEGATIVE_EDIT_CASES",
+    "SUBJECT_FAMILY_AUTHORITY_MATRIX_AND_LINEAGE_SAFE_MODEL_ROSTER_BEFORE_MATERIALIZATION"
+  ]
+}

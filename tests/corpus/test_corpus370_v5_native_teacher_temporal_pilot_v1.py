@@ -32,7 +32,7 @@ def subject(tmp_path, *, moved):
         posed_vertices_source_world=posed)
     payload={
         "schema":"RealSaS.IRISVNextAuthoredTeacherExport.v1",
-        "transport_revision":3, "subject_id":"subject_fixture",
+        "transport_revision":4, "subject_id":"subject_fixture",
         "source":{"sha256":source_sha},
         "observation_admission_sha256":admission_sha,
         "teacher_only":True,

@@ -14,8 +14,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
+import socket
+import stat
 import subprocess
 from pathlib import Path
 
@@ -49,6 +52,27 @@ def build_command(*, unit: str, high_mib: int, max_mib: int,
     ]
 
 
+def scope_bus_environment() -> dict[str,str]:
+    """Bind noninteractive system GitHub runner service to its existing user bus.
+
+    The installed runner is a SYSTEM service running as monster, not a login
+    shell: XDG_RUNTIME_DIR/DBUS_SESSION_BUS_ADDRESS are intentionally absent.
+    systemd-run --user --scope needs both. Never manufacture a bus or fall
+    back to unrestricted execution if /run/user/<uid>/bus is missing.
+    """
+    uid=os.getuid()
+    root=Path("/run/user")/str(uid)
+    bus=root/"bus"
+    require(root.is_dir() and root.stat().st_uid==uid,
+            "WSL_SCOPE_USER_RUNTIME_DIR_MISSING_OR_WRONG_OWNER")
+    require(bus.exists() and stat.S_ISSOCK(bus.stat().st_mode),
+            "WSL_SCOPE_USER_DBUS_SOCKET_UNAVAILABLE")
+    env=os.environ.copy()
+    env["XDG_RUNTIME_DIR"]=str(root)
+    env["DBUS_SESSION_BUS_ADDRESS"]="unix:path="+str(bus)
+    return env
+
+
 def execute(*, unit: str, high_mib: int, max_mib: int, swap_mib: int,
             cpu_quota: int, child: list[str], minimum_ram_gib: float,
             minimum_disk_gib: float, report_path: Path | None) -> int:
@@ -79,7 +103,8 @@ def execute(*, unit: str, high_mib: int, max_mib: int, swap_mib: int,
     require(not gate["blockers"], "WSL_SCOPE_RESOURCE_PREFLIGHT_BLOCKED")
     # Run the source-locked worker directly; no shell and no fallback.
     # systemd-run --scope waits for process exit and propagates failure.
-    result = subprocess.run(command, check=False)
+    result = subprocess.run(command, check=False,
+                            env=scope_bus_environment())
     print(json.dumps({
         "event":"CORPUS370_WSL_ISOLATED_WORKER_EXIT",
         "unit":unit,"exit_code":result.returncode,

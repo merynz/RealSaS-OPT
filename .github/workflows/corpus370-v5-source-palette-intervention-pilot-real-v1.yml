@@ -1,0 +1,106 @@
+name: corpus370-v5-source-palette-intervention-pilot-real-v1
+
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-v5-source-palette-intervention-pilot-real-v1.yml'
+      - 'tools/truth_foundry/blender_corpus370_source_locus_palette_v1.py'
+      - 'tools/corpus/run_corpus370_v5_palette_intervention_pilot_v1.py'
+      - 'tools/corpus/validate_corpus370_v5_palette_intervention_v1.py'
+      - 'tests/corpus/test_corpus370_v5_palette_intervention_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v5-source-palette-intervention-pilot-real-v1
+  cancel-in-progress: false
+
+jobs:
+  independent-palette-alpha-court-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Reconstruct source pigment change and alpha with independent math
+        run: |
+          python -m pip install --disable-pip-version-check numpy pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus370_v5_palette_intervention_v1.py
+
+  real-blender-source-interventions:
+    needs: independent-palette-alpha-court-tests
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      BLENDER: /home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
+      PREP: /home/monster/realsas_authority/corpus370_preparation_v1
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      SOURCE_ARCHIVE_SHA: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      GEOMETRIC_PILOT: /home/monster/realsas_authority/corpus370_v5_source_locus_rays/41841352996-1/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json
+      OUTPUT: /home/monster/realsas_authority/corpus370_palette_intervention_real/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import immutable V5 sources and run real colour-only alpha controls at geometric rays
+        run: |
+          set -euo pipefail
+          test -x "$PY" && test -x "$BLENDER" && test -f "$GEOMETRIC_PILOT"
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          "$PY" -u tools/corpus/run_corpus370_v5_palette_intervention_pilot_v1.py \
+            --v5-index "$V5" \
+            --exact-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
+            --geometric-ray-index "$GEOMETRIC_PILOT" \
+            --extracted-source-root "$PREP/source_bundle/extracted/$SOURCE_ARCHIVE_SHA" \
+            --blender "$BLENDER" \
+            --output "$OUTPUT"
+      - name: Show measured PASS/ABSTAIN and source-specific renderer failures
+        if: always()
+        run: |
+          if test -f "$OUTPUT/CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json"; then
+            "$PY" - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          r=json.loads((Path(os.environ['OUTPUT'])/'CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json').read_text())
+          print('## V5 reversible palette/alpha source intervention pilot')
+          print('Genuine Blender RGB and alpha measurements; no graphical owner labels.')
+          print('Measured valid source/palette rays:',r.get('measured_valid_palette_rows',0))
+          for sid,v in r['subjects'].items():
+              print('- '+sid+': '+v['status']+'; valid='+str(v.get('measured_valid_palette_rows',0)))
+          print('Failures:',r.get('failure_count',0))
+          print('No family, teacher owner, IRIS model or training authority minted.')
+          PY
+          fi
+      - name: Fail closed on missing real renderer court or zero usable source colour interventions
+        run: |
+          "$PY" - <<'PY'
+          import os,json
+          from pathlib import Path
+          p=Path(os.environ['OUTPUT'])/'CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json'
+          r=json.loads(p.read_text())
+          assert len(r['subjects'])==len(r['exact_subject_ids'])==3
+          assert r['graphics_family_authority_minted'] is False
+          assert r['training_authorized'] is False
+          assert r['failure_count']==0,'PALETTE_REAL_RENDER_FAILURE_NEEDS_REPAIR:'+str(r['failure_count'])
+          assert r['measured_valid_palette_rows']>0,'PALETTE_NO_VALID_REPLAYED_RGBA_INTERVENTION'
+          print('SOURCE_RENDER_PALETTE_PILOT_PASS_CANDIDATES__GRAPHICS_OWNER_ADMISSION_SEPARATE')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v5-real-palette-interventions-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json
+            ${{ env.OUTPUT }}/subjects/*/SOURCE_PALETTE_RENDER_JOB_V1.json
+            ${{ env.OUTPUT }}/subjects/*/SOURCE_PALETTE_INTERVENTION_V1.json
+            ${{ env.OUTPUT }}/subjects/*/SOURCE_PALETTE_INDEPENDENT_COURT_V1.json
+            ${{ env.OUTPUT }}/subjects/*/PALETTE_INTERVENTION_FAILURE_V1.json
+            ${{ env.OUTPUT }}/subjects/*/BLENDER_LOG.txt
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 1

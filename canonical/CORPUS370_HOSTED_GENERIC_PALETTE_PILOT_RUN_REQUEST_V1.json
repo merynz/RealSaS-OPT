@@ -1,0 +1,9 @@
+{
+  "schema": "RealSaS.Corpus370HostedGenericPalettePilotRunRequest.v1",
+  "enabled": false,
+  "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
+  "source_ray_run_id": 41883539256,
+  "source_ray_run_attempt": 1,
+  "training_authorized": false,
+  "notes": "Do not activate until all352 geometric rays are privately sealed. No semantic ownership or training promotion."
+}

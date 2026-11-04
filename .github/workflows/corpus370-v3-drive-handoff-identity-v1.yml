@@ -1,0 +1,135 @@
+name: corpus370-v3-drive-handoff-identity-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths: ['.github/workflows/corpus370-v3-drive-handoff-identity-v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-v3-drive-handoff-identity-v1
+  cancel-in-progress: false
+jobs:
+  resolve-sealed-v3-bundle-id-and-draft-operator:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      RCLONE_REMOTE: gdrive
+      PACK_ROOT: /home/monster/realsas_authority/corpus370_family_input_v3_41811091267
+      OUTPUT: /tmp/corpus370-v3-handoff-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recheck local exact SHA before Drive metadata identity
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          mkdir -p "$OUTPUT"
+          test -f "$PACK_ROOT/FAMILY_INPUT_V3_SEAL.json"
+          test -f "$PACK_ROOT/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V3.zip"
+          "$PY" - <<'PY'
+          import json,os,hashlib
+          from pathlib import Path
+          root=Path(os.environ['PACK_ROOT'])
+          seal=json.loads((root/'FAMILY_INPUT_V3_SEAL.json').read_text())
+          bundle=root/'CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V3.zip'
+          with bundle.open('rb') as f: actual=hashlib.file_digest(f,'sha256').hexdigest()
+          assert actual=='60d90ed0bddb3e978fb844bd5148566d2856e5fe7d7b8944d9b48fc64b313bd0'
+          assert actual==seal['bundle_sha256']
+          assert seal['bundle_bytes']==bundle.stat().st_size==1950380601
+          assert seal['source_v5_index_sha256']=='8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4'
+          assert (seal['original_v3_rehashed'],seal['new_v4_repaired'],seal['source_observation_failure_count'])==(294,58,18)
+          assert seal['training_authorized'] is False
+          print('CORPUS370_V3_SHA_LOCAL_VERIFIED=PASS',flush=True)
+          PY
+      - name: Read exact Google Drive file ID, size and remote hashes
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY'
+          import hashlib,json,os,subprocess
+          from pathlib import Path
+          root=Path(os.environ['PACK_ROOT'])
+          out=Path(os.environ['OUTPUT'])
+          seal=json.loads((root/'FAMILY_INPUT_V3_SEAL.json').read_text())
+          bundle=root/'CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V3.zip'
+          uri=os.environ['RCLONE_REMOTE']+':'+seal['drive_transport_path']
+          result=subprocess.run(['rclone','lsjson','--stat','--hash',uri],capture_output=True,text=True,check=True)
+          remote=json.loads(result.stdout)
+          assert isinstance(remote,dict) and remote.get('IsDir') is False
+          assert remote['Name']==seal['drive_transport_path'].split('/')[-1]
+          assert remote['Size']==bundle.stat().st_size
+          file_id=remote.get('ID')
+          assert isinstance(file_id,str) and file_id and ('\t' not in file_id)
+          hashes=remote.get('Hashes') or {}
+          with bundle.open('rb') as f: md5=hashlib.file_digest(f,'md5').hexdigest()
+          assert hashes.get('MD5')==md5, 'CORPUS370_V3_REMOTE_MD5_NOT_VERIFIED'
+          remote_sha=hashes.get('SHA-256')
+          assert remote_sha is None or remote_sha==seal['bundle_sha256'], 'CORPUS370_V3_REMOTE_SHA_DRIFT'
+          receipt={
+            'schema':'RealSaS.Corpus370V3DriveHandoffIdentity.v1',
+            'file_id':file_id,
+            'drive_transport_path':seal['drive_transport_path'],
+            'sha256':seal['bundle_sha256'],'md5':md5,'size_bytes':bundle.stat().st_size,
+            'remote_md5_verified':True,
+            'remote_sha256_verified':remote_sha is not None,
+            'source_v5_index_sha256':seal['source_v5_index_sha256'],
+            'candidate_count':370,'observation_pass_count':352,'observation_fail_count':18,
+            'platform_engine_release_minted':False,'training_authorized':False
+          }
+          (out/'DRIVE_HANDOFF_V3_IDENTITY.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
+          print(json.dumps({k:receipt[k] for k in
+              ('file_id','sha256','size_bytes','remote_md5_verified','remote_sha256_verified')},
+              sort_keys=True),flush=True)
+          PY
+      - name: Prepare disabled, immutable operator request for reviewed Platform V3 release
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY'
+          import json,os
+          from pathlib import Path
+          out=Path(os.environ['OUTPUT'])
+          old=json.loads(Path('canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V2.json').read_text())
+          handoff=json.loads((out/'DRIVE_HANDOFF_V3_IDENTITY.json').read_text())
+          old.update({
+              'schema':'RealSaS.Corpus370SourceSurfaceTruthOperatorRequest.v3',
+              'enabled':False,
+              'activation_reason':'SEALED_352_PLUS_18_V3_DRIVE_HANDOFF__REVIEW_AND_DEPLOY_PENDING',
+              'activation_requires':[
+                'V3 source geometry and Stage50 independent courts verified',
+                '352 PASS, 18 FAIL and 370 exact source/provenance inputs retained',
+                'reviewed code committed to main and identical main revision deployed',
+                'no existing V3 campaign submitted under mismatched identity',
+              ],
+              'campaign_contract_repo_path':'canonical/CORPUS370_SOURCE_SURFACE_TRUTH_CAMPAIGN_V3.json',
+              'campaign_name':'CORPUS370_SOURCE_SURFACE_AND_FAMILY_COURTS_V3',
+              'cohort_bundle':{
+                'provider':'google_drive','file_id':handoff['file_id'],
+                'name':handoff['drive_transport_path'].split('/')[-1],
+                'sha256':handoff['sha256'],'size_bytes':handoff['size_bytes'],
+                'bootstrap_manifest_member':'BOOTSTRAP_MANIFEST.json',
+                'bundle_receipt_member':'BUNDLE_RECEIPT.json',
+              },
+              'experiment_name':'Corpus370 V3 source-surface and independent family courts',
+              'experiment_slug':'corpus370-source-surface-independent-families-v3',
+              'research_question':'Which of the 370 original subjects has independently court-qualified surface, solid, topology, normals and mechanic truth for IRIS/TESSA under strict family masks?',
+              'hypothesis':'Exact admitted source geometry and independent per-family courts preserve partial supervision without fabricating global union sign, skin, or missing teacher motion.',
+              'training_allowed':False
+          })
+          old.pop('presentation_truth',None)
+          old.pop('presentation_measurement_parameters',None)
+          assert old['enabled'] is False and old['training_allowed'] is False
+          assert old['cohort_bundle']['sha256']=='60d90ed0bddb3e978fb844bd5148566d2856e5fe7d7b8944d9b48fc64b313bd0'
+          assert 'presentation_truth' not in old
+          (out/'OPERATOR_REQUEST_V3_DRAFT_DISABLED.json').write_text(json.dumps(old,indent=2,sort_keys=True)+'\n')
+          print('CORPUS370_V3_DISABLED_REQUEST_IDENTITY=PASS',flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v3-drive-identity-and-disabled-operator-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/DRIVE_HANDOFF_V3_IDENTITY.json
+            ${{ env.OUTPUT }}/OPERATOR_REQUEST_V3_DRAFT_DISABLED.json
+          retention-days: 30
+          if-no-files-found: warn

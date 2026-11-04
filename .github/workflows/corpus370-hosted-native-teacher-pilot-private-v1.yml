@@ -108,6 +108,41 @@ jobs:
           test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
           test "$(sha256sum "$ROSTER" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
           echo "PRIVATE_V5_370_ROSTER_AND_352_ADMITTED_OBSERVATIONS_SHA_EXACT"
+      - name: Census real authored-motion eligibility and prior graphics-pilot overlap
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          from tools.corpus.audit_corpus370_v5_source_rest_courts_v1 import row_input
+          from tools.corpus.run_corpus370_v5_native_teacher_temporal_pilot_v1 import choose_subjects
+          v5=json.loads(Path(os.environ["V5"]).read_text())
+          roster=json.loads(Path(os.environ["ROSTER"]).read_text())
+          assert (v5["prepared_subject_count"],v5["failure_count"])==(352,18)
+          total=0
+          native=set()
+          for row in v5["subjects"]:
+              bindings=row_input(row)
+              admission=json.loads(Path(bindings["admission"]["path"]).read_text())
+              assert admission["subject_id"]==row["subject_id"]
+              assert admission["source_sha256"]==row["source_sha256"]
+              total+=1
+              if admission.get("native_motion_inventory"):
+                  native.add(row["subject_id"])
+          fixed={"corpus_000ca1ae51f9582fde9e",
+                 "corpus_004e16e05b90505ca23c",
+                 "corpus_00a3688e42a29045056b"}
+          selected=choose_subjects(v5,roster,3)
+          assert len(selected)==3
+          assert all(s[0]["subject_id"] in native for s in selected)
+          print("## Exact-source V5 authored action inventory")
+          print("Observation-qualified:",total)
+          print("Has native authored action:",len(native))
+          print("No native action (family MASKED, not zero):",total-len(native))
+          print("Prior graphics three with native authored action:",len(native & fixed))
+          print("Teacher candidates selected by original source/format rule:",len(selected))
+          print("No new source data, no synthetic motion, no training authority")
+          PY
       - name: Install byte-verified Blender 4.5.14 (same as geometry pilot)
         run: |
           set -euo pipefail

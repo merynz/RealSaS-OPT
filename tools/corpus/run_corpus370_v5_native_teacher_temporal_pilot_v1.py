@@ -83,7 +83,7 @@ def court_teacher(row,source,bindings,output,npz_path):
     require(npz_path.is_file() and receipt_path.is_file(),"TEMPORAL_PILOT_EXPORT_MISSING")
     receipt=json.loads(receipt_path.read_text())
     require(receipt.get("schema")==TEACHER_SCHEMA
-            and receipt.get("transport_revision")==3
+            and receipt.get("transport_revision")==4
             and receipt.get("subject_id")==sid
             and receipt.get("source",{}).get("sha256")==source["source_sha256"]
             and receipt.get("observation_admission_sha256")==bindings["admission"]["sha256"]
@@ -143,7 +143,7 @@ def run(v5_path,roster_path,root,blender,output,max_subjects=3,max_frames=4):
         "schema":SCHEMA,"status":"PILOT_EXECUTION_INCOMPLETE",
         "input_v5_sha256":V5_SHA,"roster_sha256":ROSTER_SHA,
         "orchestrator_sha256":sha(source_code),
-        "teacher_exporter":"tools/iris_vnext/blender_authored_teacher_export_v3.py",
+        "teacher_exporter":"tools/iris_vnext/blender_authored_teacher_export_v4.py",
         "teacher_source_revision":os.environ.get("GITHUB_SHA"),
         "selected_subject_ids":[row["subject_id"] for row,_,_,_ in selected],
         "results":[],"max_frames_per_clip":max_frames,
@@ -158,7 +158,7 @@ def run(v5_path,roster_path,root,blender,output,max_subjects=3,max_frames=4):
         teacher=folder/"teacher.npz";log_path=folder/"BLENDER_LOG.txt"
         command=[
             str(blender),"-b","--factory-startup","--python-exit-code","3",
-            "--python","tools/iris_vnext/blender_authored_teacher_export_v3.py","--",
+            "--python","tools/iris_vnext/blender_authored_teacher_export_v4.py","--",
             "--source",str(source_path),"--expected-source-sha256",source["source_sha256"],
             "--subject-id",sid,"--observation-admission",bindings["admission"]["path"],
             "--output",str(teacher),"--max-frames-per-clip",str(max_frames),

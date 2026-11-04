@@ -23,6 +23,7 @@ ABSTAINS={
     "ABSTAIN_RENDER_SOURCE_PARITY",
     "ABSTAIN_ALPHA_COMPOSITING_RECONSTRUCTION",
     "ABSTAIN_ALPHA_CHANGED_BY_RECOLOR",
+    "ABSTAIN_PALETTE_NO_OBSERVABLE_RGB_DELTA",
 }
 TOL=0.025
 
@@ -139,6 +140,11 @@ def court(document):
             abstained+=1
             continue
         require(max_alpha<=TOL,"PALETTE_COURT_RECOLOR_DID_NOT_PRESERVE_ALPHA")
+        if row["status"]=="ABSTAIN_PALETTE_NO_OBSERVABLE_RGB_DELTA":
+            require(delta<=0.005+1e-6,"PALETTE_COURT_FALSE_RGB_ABSTAIN")
+            abstained+=1
+            continue
+        require(delta>0.005,"PALETTE_COURT_INVISIBLE_PALETTE_FALSE_PASS")
         passed+=1
         paired+=int(bool(row.get("different_source_domains")))
     require(passed==document.get("qualified_intervention_rows")

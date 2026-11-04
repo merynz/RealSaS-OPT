@@ -56,8 +56,8 @@ jobs:
       RCLONE_CONFIG: /tmp/corpus370-source-hit-vis-rclone.conf
       EXPECTED_SHA: ${{ needs.resolve-sha-bound-private-request.outputs.summary_sha256 }}
       SOURCE_REMOTE: gdrive:corpus370_preparation_v1/hosted_generic_palette_reciprocal/41883539256-1/41902211474-1
-      LOCAL_INPUT: ${{ runner.temp }}/private-source-visibility-parent
-      OUTPUT: ${{ runner.temp }}/private-source-visibility-court
+      LOCAL_INPUT: /tmp/corpus370-private-source-visibility-parent
+      OUTPUT: /tmp/corpus370-private-source-visibility-court
     steps:
       - uses: actions/checkout@v4
       - name: Prepare independent math and transport, no Blender/private corpus required

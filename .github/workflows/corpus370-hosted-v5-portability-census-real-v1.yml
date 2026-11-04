@@ -49,6 +49,11 @@ jobs:
         run: |
           set -euo pipefail
           test -x "$PY"
+          # This is a READ-ONLY source producer identity check. The digest is
+          # compared to the hosted Blender 4.5.14 binary before any teacher migration.
+          blender=/home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
+          test -x "$blender"
+          sha256sum "$blender"
           mkdir -p "$OUT"
           "$PY" -u tools/corpus/plan_corpus370_hosted_portability_v1.py \
             --v5-index "$V5" \

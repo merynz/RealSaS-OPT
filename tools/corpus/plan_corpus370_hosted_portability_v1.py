@@ -133,7 +133,7 @@ def capture(v5_path,roster_path,rest_path,source_root,*,sha_all:bool=True):
             "category_reference_counts":dict(sorted(categories.items())),
             "fits_14gib_when_double_staged":2*total<14*1024**3,
             "source_archive_dependency_count":categories["SOURCE_TREE_DEPENDENCY"],
-            "absolute_path_root":str(REQUIRED_BASE),
+            "preserves_original_source_absolute_paths":True,
             "private_inventory_must_not_upload_to_public_artifact":True,
         },
     }

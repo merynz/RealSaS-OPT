@@ -32,8 +32,10 @@ def _rgba(value, mode):
     require(mode in MODES, "LOCUS_RGB_CARRIER_UNKNOWN")
     require(isinstance(value, (list, tuple)) and len(value) == 4,
             "LOCUS_RGBA_SHAPE")
-    require(all(type(x) in (float, int) and math.isfinite(x) and 0 <= x <= 1
-                for x in value), "LOCUS_RGBA_RANGE_OR_NONFINITE")
+    # Linear EXR channels may legitimately exceed 1.0 (HDR). Only alpha
+    # is normalized; reject non-finite channels, not legitimate HDR samples.
+    require(all(type(x) in (float,int) and math.isfinite(x) for x in value)
+            and 0 <= float(value[3]) <= 1, "LOCUS_RGBA_RANGE_OR_NONFINITE")
     r, g, b, a = (float(x) for x in value)
     return (r, g, b, a) if mode == "PREMULTIPLIED_LINEAR_RGB" else (
         r * a, g * a, b * a, a)

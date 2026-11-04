@@ -8,6 +8,7 @@ on:
       - '.github/workflows/corpus370-hosted-v5-portability-census-real-v1.yml'
       - '.github/workflows/corpus370-hosted-cpu-blender-smoke-v1.yml'
       - '.github/actionlint.yaml'
+      - '.github/workflows/corpus370-hosted-generic-palette-pilot-private-v1.yml'
   workflow_dispatch:
 
 permissions:
@@ -29,4 +30,5 @@ jobs:
             -shellcheck= -pyflakes= \
             .github/workflows/corpus370-hosted-v5-source-rays-all352-private-v1.yml \
             .github/workflows/corpus370-hosted-v5-portability-census-real-v1.yml \
-            .github/workflows/corpus370-hosted-cpu-blender-smoke-v1.yml
+            .github/workflows/corpus370-hosted-cpu-blender-smoke-v1.yml \
+            .github/workflows/corpus370-hosted-generic-palette-pilot-private-v1.yml

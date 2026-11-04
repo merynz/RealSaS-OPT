@@ -5,5 +5,7 @@
   "source_ray_run_id": 41883539256,
   "source_ray_run_attempt": 1,
   "training_authorized": false,
-  "notes": "Activated only after GitHub-hosted all352 ray run 41883539256 completed SUCCESS, 352 SHA-indexed subject receipt folders independently listed in private Google Drive. One-time preregistered 3-subject Blender counterfactual pilot. No training, Graphics owner, Product or Compiler authority."
+  "notes": "V1 real hosted 3/3 subjects, 6/6 palette rows PASS but one removal-only abstain despite large recolor response; V2 adds independently measured recolor B, recolor A without B, recolor B without A and separate V2 court. Original V1 receipts immutable in private Drive. Not training/model/ownership authority.",
+  "protocol_revision": "GENERIC_RECIPROCAL_PALETTE_V2",
+  "parent_v1_measured_blender_run": 41899364106
 }

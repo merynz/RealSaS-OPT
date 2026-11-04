@@ -1,0 +1,8 @@
+{
+  "schema": "RealSaS.Corpus370HostedRaysRunRequest.v1",
+  "status": "DISABLED_UNTIL_PRIVATE_SHA_AND_DRIVE_CREDENTIAL_VERIFIED",
+  "enabled": false,
+  "expected_manifest_sha256": null,
+  "training_authorized": false,
+  "notes": "Only update after exact V5 370/352 private shard receipt and restricted Drive credential are in place. Push to review branch triggers hosted activation, heavy worker remains disabled until true."
+}

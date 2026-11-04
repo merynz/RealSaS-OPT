@@ -4,6 +4,10 @@ name: corpus370-hosted-v5-source-rays-all352-private-v1
 # NEVER stores corpus bytes, teacher NPZ or private receipts in public artifacts.
 # Requires a dedicated, least-privileged Drive credential in an Actions secret.
 on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - 'canonical/CORPUS370_HOSTED_V5_RAYS_RUN_REQUEST_V1.json'
   workflow_dispatch:
     inputs:
       expected_manifest_sha256:
@@ -19,14 +23,53 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  all352-private-v5-geometric-rays:
+  resolve-private-shard-activation:
     if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.resolve.outputs.ready }}
+      manifest_sha256: ${{ steps.resolve.outputs.manifest_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate frozen request, private access and exact SHA activation
+        id: resolve
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_MANIFEST_SHA: ${{ inputs.expected_manifest_sha256 }}
+          PRIVATE_DRIVE_SECRET_PRESENT: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os,re
+          from pathlib import Path
+          if os.environ['EVENT']=='workflow_dispatch':
+              enabled=True
+              pin=os.environ.get('INPUT_MANIFEST_SHA','')
+          else:
+              p=Path('canonical/CORPUS370_HOSTED_V5_RAYS_RUN_REQUEST_V1.json')
+              d=json.loads(p.read_text())
+              assert d['schema']=='RealSaS.Corpus370HostedRaysRunRequest.v1'
+              assert d['training_authorized'] is False
+              enabled=d.get('enabled') is True
+              pin=d.get('expected_manifest_sha256') or ''
+          present=os.environ.get('PRIVATE_DRIVE_SECRET_PRESENT')=='true'
+          if enabled:
+              assert re.fullmatch(r'[0-9a-f]{64}',pin),'HOSTED_ACTIVATION_EXACT_PRIVATE_MANIFEST_SHA_REQUIRED'
+          ready=enabled and present
+          print('ready='+str(ready).lower())
+          print('manifest_sha256='+(pin if ready else ''))
+          PY
+          echo "HOSTED_C370_ACTIVATION_ONLY_WHEN_EXACT_MANIFEST_AND_RESTRICTED_DRIVE_SECRET_PRESENT"
+  all352-private-v5-geometric-rays:
+    needs: resolve-private-shard-activation
+    if: needs.resolve-private-shard-activation.outputs.ready == 'true' && github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 330
     env:
       PYTHONPATH: ${{ github.workspace }}
       RCLONE_CONFIG: ${{ runner.temp }}/realsas-drive.conf
-      MANIFEST_SHA: ${{ inputs.expected_manifest_sha256 }}
+      MANIFEST_SHA: ${{ needs.resolve-private-shard-activation.outputs.manifest_sha256 }}
       INPUT_REMOTE: gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards
       V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
       REST: /home/monster/realsas_authority/corpus370_source_rest_courts_v1_8ab2ebf5/SOURCE_REST_COURTS_INDEX.json

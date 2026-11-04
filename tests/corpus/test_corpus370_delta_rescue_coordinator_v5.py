@@ -22,7 +22,7 @@ def inputs(root):
         if i<294:
             original=root/"legacy"/"objects"/f"{i:064x}"/"imported"/sid/"imported.json"
             write(original,{"import":{"source_sha256":row["source_sha256"]}})
-            path=original.parent.parent/"packet"/sid
+            path=original.parents[2]/"packet"/sid
             path.mkdir(parents=True,exist_ok=True)
             successes.append({"subject_id":sid,"source_sha256":row["source_sha256"],
                               "packet_path":str(path)})

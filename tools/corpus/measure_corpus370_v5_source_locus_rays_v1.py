@@ -195,9 +195,23 @@ def main():
     p.add_argument("--v5-index",type=Path,required=True)
     p.add_argument("--source-rest-index",type=Path,required=True)
     p.add_argument("--output-dir",type=Path,required=True)
-    p.add_argument("--subject-id",action="append",dest="subject_ids",required=True)
+    p.add_argument("--subject-id",action="append",dest="subject_ids",default=[])
+    p.add_argument("--all",action="store_true")
     a=p.parse_args()
-    result=run(a.v5_index,a.source_rest_index,a.output_dir,subject_ids=a.subject_ids)
+    require(bool(a.subject_ids) != bool(a.all),"SOURCE_RAY_EXPLICIT_COHORT_CHOICE")
+    if a.all:
+        require(sha(a.v5_index)==V5_SHA,"SOURCE_RAY_V5_ALL_EXACT_PARENT")
+        index=json.loads(a.v5_index.read_text())
+        require((index.get("subject_count"),index.get("prepared_subject_count"),
+                 index.get("failure_count"))==(370,352,18)
+                and index.get("training_authorized") is False,
+                "SOURCE_RAY_V5_ALL_INPUT_SCOPE")
+        subject_ids=sorted(row["subject_id"] for row in index["subjects"])
+        require(len(subject_ids)==len(set(subject_ids))==352,
+                "SOURCE_RAY_ALL_NO_MISSING_SUBJECT")
+    else:
+        subject_ids=a.subject_ids
+    result=run(a.v5_index,a.source_rest_index,a.output_dir,subject_ids=subject_ids)
     print(json.dumps({"status":result["status"],"subject_results":{
         k:v["status"] for k,v in result["subject_results"].items()
         },"training_authorized":False},sort_keys=True),flush=True)

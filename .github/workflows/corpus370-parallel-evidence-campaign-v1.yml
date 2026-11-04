@@ -1,0 +1,295 @@
+name: corpus370-parallel-evidence-campaign-v1
+
+# Three independent real-data worker lanes. Each is private, source SHA-pinned,
+# and a research candidate only. No model training or ownership release.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - 'canonical/CORPUS370_PARALLEL_EVIDENCE_CAMPAIGN_V1.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-parallel-evidence-campaign-v1
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  attest-immutable-campaign-request:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.gate.outputs.ready }}
+      manifest_sha: ${{ steps.gate.outputs.manifest_sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enforce three-lane SHA/source/training boundaries
+        id: gate
+        env:
+          PRIVATE_DRIVE_PRESENT: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os,re
+          from pathlib import Path
+          d=json.loads(Path('canonical/CORPUS370_PARALLEL_EVIDENCE_CAMPAIGN_V1.json').read_text())
+          assert d["schema"]=="RealSaS.Corpus370ParallelEvidenceCampaign.v1"
+          assert d["lanes"]==["GRAPHICS","NATIVE","AUTHORITY"]
+          assert d["graphics"]["subject_count"]==8
+          assert d["native"]["subject_count"]==8
+          assert d["native"]["max_frames_per_clip"]==4
+          assert d["authority"]["subject_count"]==370
+          assert d["authority"]["admitted_observation"]==352
+          assert d["authority"]["excluded"]==18
+          for key in ("lineage_split_authorized","model_training_authorized",
+                      "graphics_owner_authorized","causal_response_authorized",
+                      "tessa_teacher_authorized"):
+              assert d[key] is False, key
+          p=d["fixed_sources"]
+          expected={
+              "private_manifest_sha256":"cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
+              "v5_sha256":"8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+              "roster_sha256":"925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+              "rest_index_sha256":"384c92940e1ea8eec7bbb98cf319eeda5f89222c07b782b607998e2067f1d9c8",
+              "rays_352_sha256":"0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70",
+              "native_three_sha256":"5aa3c4d9cc97ab669d2a7a951a4c9d18218ef5ea4d6f58f5b1ff1ac5b89cc272",
+              "joined_three_sha256":"e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+          }
+          assert p==expected and all(re.fullmatch(r"[0-9a-f]{64}",x) for x in p.values())
+          ready=d.get("enabled") is True and os.environ["PRIVATE_DRIVE_PRESENT"]=="true"
+          print("ready="+str(ready).lower())
+          print("manifest_sha="+(p["private_manifest_sha256"] if ready else ""))
+          PY
+
+  run-three-independent-private-evidence-lanes:
+    needs: attest-immutable-campaign-request
+    if: needs.attest-immutable-campaign-request.outputs.ready == 'true'
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        lane: [GRAPHICS, NATIVE, AUTHORITY]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 260
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      LANE: ${{ matrix.lane }}
+      MANIFEST_SHA: ${{ needs.attest-immutable-campaign-request.outputs.manifest_sha }}
+      RCLONE_CONFIG: /tmp/realsas-c370-parallel-campaign-private.conf
+      SOURCE_SHARDS: gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards
+      RAY_REMOTE: gdrive:corpus370_preparation_v1/hosted_source_locus_rays_all352/41883539256-1
+      NATIVE_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_temporal_pilot_v1/41915393652-1
+      JOIN_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_visibility_pair_join_v1/41916724594-1
+      RAY_ROOT: /home/monster/realsas_authority/corpus370_hosted_ray_outputs/41883539256-1
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      REST: /home/monster/realsas_authority/corpus370_source_rest_courts_v1_8ab2ebf5/SOURCE_REST_COURTS_INDEX.json
+      SOURCE_ARCHIVE_SHA: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_parallel_campaign/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.lane }}
+      OUTPUT_REMOTE: gdrive:corpus370_preparation_v1/hosted_parallel_evidence_campaign_v1/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.lane }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify independent hosted worker capacity and producer syntax
+        run: |
+          set -euo pipefail
+          test "$(awk '/MemTotal:/{print $2}' /proc/meminfo)" -ge 14000000
+          test "$(df -Pk / | awk 'NR==2{print $4}')" -ge 9000000
+          sudo install -d -o "$USER" -g "$(id -gn)" -m 0700 /home/monster/realsas_authority
+          mkdir -p "$OUTPUT_ROOT"
+          python3 -m py_compile \
+            tools/corpus/select_corpus370_parallel_graphics_cohort_v1.py \
+            tools/corpus/run_corpus370_v5_palette_intervention_pilot_v1.py \
+            tools/corpus/run_corpus370_v5_native_teacher_temporal_pilot_v1.py \
+            tools/corpus/audit_corpus370_parallel_evidence_intersection_v1.py
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Check shared synthetic source selection contract (each lane independent)
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_parallel_graphics_cohort_v1.py
+      - name: Bind least-privileged Drive secret without printing its contents
+        env:
+          PRIVATE_RCLONE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$PRIVATE_RCLONE_CONFIG_B64"
+          printf '%s' "$PRIVATE_RCLONE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          rclone lsf "$SOURCE_SHARDS" --max-depth 1 --files-only >/dev/null
+          echo "PRIVATE_SOURCE_TRANSPORT_AUTHENTICATED"
+      - name: Independently materialize exact original SHA-bound V5+370 roster in each lane
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$RUNNER_TEMP/c370-private" "$RUNNER_TEMP/c370-objects"
+          rclone copy "$SOURCE_SHARDS" "$RUNNER_TEMP/c370-private" \
+            --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+          python3 -u tools/corpus/hosted_v5_private_shards_v1.py hydrate \
+            --manifest "$RUNNER_TEMP/c370-private/PRIVATE_V5_SHARD_MANIFEST.json" \
+            --expected-manifest-sha256 "$MANIFEST_SHA" \
+            --private-dir "$RUNNER_TEMP/c370-private" \
+            --object-cache "$RUNNER_TEMP/c370-objects" \
+            > "$OUTPUT_ROOT/PRIVATE_HYDRATE_LOG.txt" 2>&1
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          test "$(sha256sum "$ROSTER" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+          test "$(sha256sum "$REST" | cut -d' ' -f1)" = 384c92940e1ea8eec7bbb98cf319eeda5f89222c07b782b607998e2067f1d9c8
+          echo "LANE_PRIVATE_SHA_EXACT_ORIGINAL_370_352"
+      - name: Retrieve source geometry ray index for graphics and authority
+        if: matrix.lane != 'NATIVE'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RAY_ROOT"
+          rclone copyto "$RAY_REMOTE/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            "$RAY_ROOT/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            --checksum --timeout 90s --retries 3
+          test "$(sha256sum "$RAY_ROOT/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" | cut -d' ' -f1)" = 0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70
+          echo "ALL352_GEOMETRIC_RAY_INDEX_SHA_VERIFIED"
+      - name: Download and verify byte-identical Blender 4.5.14 for real source-only experiments
+        if: matrix.lane != 'AUTHORITY'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/c370-blender"
+          base=https://download.blender.org/release/Blender4.5
+          file=blender-4.5.14-linux-x64.tar.xz
+          curl -fL --retry 4 --max-time 300 "$base/$file" -o "$RUNNER_TEMP/c370-blender/$file"
+          curl -fL --retry 4 --max-time 120 "$base/blender-4.5.14.sha256" -o "$RUNNER_TEMP/c370-blender/official.sha256"
+          ARCHIVE="$RUNNER_TEMP/c370-blender/$file" CHECKSUMS="$RUNNER_TEMP/c370-blender/official.sha256" python3 - <<'PY'
+          import os,re,hashlib
+          from pathlib import Path
+          f=Path(os.environ["ARCHIVE"])
+          lines=[x for x in Path(os.environ["CHECKSUMS"]).read_text().splitlines() if f.name in x]
+          assert len(lines)==1
+          expected=re.findall(r"[0-9a-fA-F]{64}",lines[0])
+          assert len(expected)==1
+          with f.open("rb") as stream:
+              assert hashlib.file_digest(stream,"sha256").hexdigest()==expected[0].lower()
+          PY
+          tar -xJf "$RUNNER_TEMP/c370-blender/$file" -C "$RUNNER_TEMP/c370-blender"
+          test "$(sha256sum "$RUNNER_TEMP/c370-blender/blender-4.5.14-linux-x64/blender" | cut -d' ' -f1)" = 050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8
+      - name: GRAPHICS — preselect 8 new exact geometric sources and fetch only their private ray receipts
+        if: matrix.lane == 'GRAPHICS'
+        run: |
+          set -euo pipefail
+          python3 -u tools/corpus/select_corpus370_parallel_graphics_cohort_v1.py \
+            --v5-index "$V5" --exact-roster "$ROSTER" \
+            --all352-ray-index "$RAY_ROOT/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            --subset-ray-index "$OUTPUT_ROOT/SELECTED_8_SOURCE_RAYS_INDEX_V1.json" \
+            --selection-receipt "$OUTPUT_ROOT/GEOMETRY_ONLY_COHORT_SELECTION_V1.json" \
+            > "$OUTPUT_ROOT/PRIVATE_GRAPHICS_SELECTION_LOG.txt" 2>&1
+          python3 - <<'PY' > "$RUNNER_TEMP/c370-selection-ids.txt"
+          import json,os
+          from pathlib import Path
+          doc=json.loads((Path(os.environ["OUTPUT_ROOT"])/"SELECTED_8_SOURCE_RAYS_INDEX_V1.json").read_text())
+          assert len(doc["subject_ids"])==8
+          for sid in doc["subject_ids"]:
+              print(sid)
+          PY
+          while IFS= read -r sid; do
+            test -n "$sid"
+            mkdir -p "$RAY_ROOT/subjects/$sid"
+            rclone copyto "$RAY_REMOTE/subjects/$sid/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json" \
+              "$RAY_ROOT/subjects/$sid/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json" \
+              --checksum --timeout 90s --retries 3
+          done < "$RUNNER_TEMP/c370-selection-ids.txt"
+          echo "EIGHT_UNSEEN_IN_GRAPHICS_PILOT__GEOMETRIC_SELECTION_ONLY"
+      - name: GRAPHICS — independent actual Blender RGB/alpha causal interventions and reciprocal courts
+        if: matrix.lane == 'GRAPHICS'
+        run: |
+          set -euo pipefail
+          python3 -u tools/corpus/run_corpus370_v5_palette_intervention_pilot_v1.py \
+            --v5-index "$V5" --exact-roster "$ROSTER" \
+            --geometric-ray-index "$OUTPUT_ROOT/SELECTED_8_SOURCE_RAYS_INDEX_V1.json" \
+            --extracted-source-root "/home/monster/realsas_authority/corpus370_preparation_v1/source_bundle/extracted/$SOURCE_ARCHIVE_SHA" \
+            --blender "$RUNNER_TEMP/c370-blender/blender-4.5.14-linux-x64/blender" \
+            --output "$OUTPUT_ROOT" --expanded-geometric-cohort \
+            > "$OUTPUT_ROOT/PRIVATE_GRAPHICS_BLENDER_LOG.txt" 2>&1
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          d=json.loads((Path(os.environ["OUTPUT_ROOT"])/"CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json").read_text())
+          assert d["training_authorized"] is False
+          assert d["graphics_family_authority_minted"] is False
+          assert d["qualified_same_owner_pairs"]==0
+          assert d["qualified_different_owner_pairs"]==0
+          assert len(d["exact_subject_ids"])==8 and len(d["subjects"])==8
+          print("## GRAPHICS lane — 8 new real Blender source-locus interventions")
+          print("Source subjects accounted:",len(d["subjects"]))
+          print("Successful independent RGB/alpha courts:",8-d["failure_count"])
+          print("Failures requiring repair:",d["failure_count"])
+          print("Reciprocal two-locus measured rows:",d["v2_two_causal_locus_rows"])
+          print("Reciprocal ABSTAIN:",d["v2_abstain_rows"])
+          print("Drawable owner labels and training authority: NONE")
+          if d["failure_count"]>0:
+              raise ValueError("GRAPHICS_REAL_SOURCE_FAILURES_REQUIRE_REPAIR")
+          PY
+      - name: NATIVE — measure eight source-authored morphology/animation teachers
+        if: matrix.lane == 'NATIVE'
+        run: |
+          set -euo pipefail
+          python3 -u tools/corpus/run_corpus370_v5_native_teacher_temporal_pilot_v1.py \
+            --v5-index "$V5" --exact-source-roster "$ROSTER" \
+            --extracted-source-root "/home/monster/realsas_authority/corpus370_preparation_v1/source_bundle/extracted/$SOURCE_ARCHIVE_SHA" \
+            --blender "$RUNNER_TEMP/c370-blender/blender-4.5.14-linux-x64/blender" \
+            --output "$OUTPUT_ROOT" --max-subjects 8 --max-frames 4 \
+            > "$OUTPUT_ROOT/PRIVATE_NATIVE_TEACHER_LOG.txt" 2>&1
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          d=json.loads((Path(os.environ["OUTPUT_ROOT"])/"CORPUS370_V5_AUTHORED_TEMPORAL_PILOT_V1.json").read_text())
+          assert d["no_model_training"] is True and d["training_authorized"] is False
+          assert len(d["results"])==len(d["selected_subject_ids"])==8
+          failed=sum(x["status"].startswith("FAIL_") for x in d["results"])
+          print("## NATIVE lane — eight source-authored subjects")
+          print("Measured subjects:",len(d["results"]))
+          print("Source-authored nonstatic candidates:",sum(x["status"].startswith("PASS_") for x in d["results"]))
+          print("Static/MASKED:",sum(x["status"].startswith("MASKED_") for x in d["results"]))
+          print("Failures to repair:",failed)
+          print("Causal Response, mechanics owner and training: NOT PROVEN")
+          if failed:
+              raise ValueError("NATIVE_REAL_SOURCE_FAILURES_REQUIRE_REPAIR")
+          PY
+      - name: AUTHORITY — read back 370×head evidence and independent missing-family intersection
+        if: matrix.lane == 'AUTHORITY'
+        run: |
+          set -euo pipefail
+          rclone copyto "$NATIVE_REMOTE/CORPUS370_V5_AUTHORED_TEMPORAL_PILOT_V1.json" \
+            "$OUTPUT_ROOT/EXACT_NATIVE_THREE_SUMMARY.json" --checksum --retries 3
+          rclone copyto "$JOIN_REMOTE/CORPUS370_NATIVE_VISIBILITY_PAIR_JOIN_V1.json" \
+            "$OUTPUT_ROOT/EXACT_NATIVE_VISIBILITY_THREE_JOIN.json" --checksum --retries 3
+          python3 -u tools/corpus/audit_corpus370_parallel_evidence_intersection_v1.py \
+            --v5 "$V5" --roster "$ROSTER" --rest "$REST" \
+            --rays "$RAY_ROOT/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            --native "$OUTPUT_ROOT/EXACT_NATIVE_THREE_SUMMARY.json" \
+            --joint "$OUTPUT_ROOT/EXACT_NATIVE_VISIBILITY_THREE_JOIN.json" \
+            --output "$OUTPUT_ROOT/CORPUS370_PARALLEL_EVIDENCE_INTERSECTION_V1.json" \
+            > "$OUTPUT_ROOT/PRIVATE_AUTHORITY_INTERSECTION_LOG.txt" 2>&1
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          x=json.loads((Path(os.environ["OUTPUT_ROOT"])/"CORPUS370_PARALLEL_EVIDENCE_INTERSECTION_V1.json").read_text())
+          c=x["measured_candidate_counts"]
+          assert x["subject_count"]==370 and c["observation_pass"]==352
+          assert c["observation_fail"]==18 and c["native_join_subjects"]==3
+          assert x["training_authorized"] is False
+          assert x["materialization_authorized"] is False
+          print("## AUTHORITY lane — 370-subject exact evidence readback")
+          print("Observation candidate PASS:",c["observation_pass"])
+          print("Observation FAIL requiring repair:",c["observation_fail"])
+          print("Source-rest geometry candidate receipts:",c["independent_source_rest_pass"])
+          print("Source-geometry ray candidate receipts:",c["source_geometric_rays_measured"])
+          print("Previously qualified native+graphics join subjects:",c["native_join_subjects"])
+          print("Unproven target families: Graphics ownership, Response, TESSA, global solid SDF")
+          print("Global unseen lineage split and materialization: NOT SEALED")
+          PY
+      - name: Publish all lane-specific private receipts even after independent failure
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -s "$RCLONE_CONFIG" && test -d "$OUTPUT_ROOT"; then
+            rclone copy "$OUTPUT_ROOT" "$OUTPUT_REMOTE" \
+              --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+            echo "PRIVATE_PARALLEL_LANE_RECEIPTS_STORED_NO_PUBLIC_ARTIFACT"
+          fi

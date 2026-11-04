@@ -66,6 +66,11 @@ def qualify(document):
         a_solid=front_alpha>=1.0-OPAQUE_EPS
         b_direct=b["recolor_direct"]>TOL
         b_after_a=b["recolor_given_a_absent"]>TOL
+        # Fully opaque A at the source locus and a material-edit response
+        # from B *through* it is a real renderer/order contradiction, not
+        # proof of B's original visibility. Never promote such a sample.
+        require(not (a_direct and a_solid and b_direct),
+                "VIS_COURT_OPAQUE_FRONT_BACK_RESPONSE_CONTRADICTION")
         if b_direct:
             b_label="POSITIVE_VISIBLE_CONTRIBUTOR"
             b_basis="DIRECT_RECOLOR_FULL"

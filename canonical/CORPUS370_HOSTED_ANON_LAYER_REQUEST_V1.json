@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370HostedAnonymousLayerRequest.v1",
-  "status": "DISABLED_UNTIL_CONTRACT_AND_ACTIONLINT_PASS",
-  "enabled": false,
+  "status": "ACTIVATED_SHA_BOUND_3_SUBJECT_ANON_LAYER_PROXY_RESEARCH_ONLY",
+  "enabled": true,
   "original_native_visibility_join_run_id": 41916724594,
   "original_native_visibility_join_attempt": 1,
   "original_private_join_receipt_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",

@@ -142,6 +142,7 @@ def build(
     roster_path: Path,
     structural_fingerprint_path: Path | None = None,
     review_decisions_path: Path | None = None,
+    require_complete_structural_fingerprints: bool = False,
 ) -> dict:
     roster_doc = load(roster_path)
     require(roster_doc.get("schema") == ROSTER_SCHEMA, "CORPUS370_LINEAGE_ROSTER_SCHEMA")
@@ -171,6 +172,7 @@ def build(
             })
 
     fingerprints, fingerprint_refs = _fingerprints(structural_fingerprint_path, roster)
+    structural_coverage_missing = sorted(set(roster) - set(fingerprints))
     by_fingerprint = defaultdict(list)
     for sid, fp in fingerprints.items():
         by_fingerprint[fp].append(sid)
@@ -262,13 +264,26 @@ def build(
 
     return {
         "schema": SCHEMA,
-        "status": "PASS_LINEAGE_GROUPS_SEALED" if not final_unresolved else "BLOCKED_LINEAGE_REVIEW_REQUIRED",
+        "status": (
+            "BLOCKED_INDEPENDENT_STRUCTURAL_FINGERPRINT_COVERAGE_REQUIRED"
+            if require_complete_structural_fingerprints and structural_coverage_missing
+            else "BLOCKED_LINEAGE_REVIEW_REQUIRED"
+            if final_unresolved
+            else "PASS_LINEAGE_GROUPS_SEALED"
+        ),
         "subject_count": 370,
         "lineage_count": len(groups),
         "multi_subject_lineage_count": sum(int(group["subject_count"] > 1) for group in groups),
         "exact_source_duplicate_group_count": sum(int(len(values) > 1) for values in by_source.values()),
         "courted_structural_duplicate_group_count": sum(int(len(values) > 1) for values in by_fingerprint.values()),
         "review_required_count": len(final_unresolved),
+        "complete_independent_structural_fingerprint_required": bool(require_complete_structural_fingerprints),
+        "missing_independently_courted_structural_subject_count": (
+            len(structural_coverage_missing) if require_complete_structural_fingerprints else None
+        ),
+        "missing_independently_courted_structural_subject_ids": (
+            structural_coverage_missing if require_complete_structural_fingerprints else None
+        ),
         "groups": groups,
         "subject_to_lineage": subject_to_lineage,
         "resolved_reviews": resolved_reviews,
@@ -278,7 +293,9 @@ def build(
             "structural_fingerprints": None if structural_fingerprint_path is None else {"path": str(structural_fingerprint_path.resolve()), "sha256": sha256(structural_fingerprint_path)},
             "review_decisions": None if review_decisions_path is None else {"path": str(review_decisions_path.resolve()), "sha256": sha256(review_decisions_path)},
         },
-        "split_authorized": not final_unresolved,
+        "split_authorized": not final_unresolved and (
+            not require_complete_structural_fingerprints or not structural_coverage_missing
+        ),
         "training_authorized": False,
     }
 
@@ -288,9 +305,11 @@ def main() -> None:
     parser.add_argument("--exact-source-roster", type=Path, required=True)
     parser.add_argument("--structural-fingerprint-index", type=Path)
     parser.add_argument("--review-decisions", type=Path)
+    parser.add_argument("--require-complete-structural-fingerprints", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    result = build(args.exact_source_roster, args.structural_fingerprint_index, args.review_decisions)
+    result = build(args.exact_source_roster, args.structural_fingerprint_index, args.review_decisions,
+        require_complete_structural_fingerprints=args.require_complete_structural_fingerprints)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, sort_keys=True, indent=2) + "\n")
     print(json.dumps({k: result[k] for k in ("schema", "status", "subject_count", "lineage_count", "multi_subject_lineage_count", "review_required_count", "split_authorized", "training_authorized")}, sort_keys=True))

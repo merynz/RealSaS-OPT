@@ -155,7 +155,9 @@ def run(*,v5_path,roster_path,rest_index_path,native_root,palette_root,
             require(native_court["status"]==NATIVE_PASS
                     and native_court["source_sha256"]==original[sid]["source_sha256"]
                     and native_court["teacher_arrays"]["sha256"]==native_rows[sid]["teacher_arrays"]["sha256"]
-                    and native_court["teacher_manifest"]["sha256"]==native_rows[sid]["teacher_manifest"]["sha256"],
+                    and native_court["teacher_manifest"]["sha256"]==native_rows[sid]["teacher_manifest"]["sha256"]
+                    and native_court["training_authorized"] is False
+                    and native_court["family_authority_minted"] is False,
                     "JOINT_NATIVE_TEACHER_COURT_PARENT_DRIFT")
             teacher_npz=checked(native_court["teacher_arrays"]["path"],
                                 native_court["teacher_arrays"]["sha256"],"JOINT_TEACHER_ARRAY_SHA")
@@ -169,8 +171,12 @@ def run(*,v5_path,roster_path,rest_index_path,native_root,palette_root,
                     "JOINT_TEACHER_RECEIPT_NOT_SOURCE_LOCKED")
             color_path=palette_root/"subjects"/sid/"SOURCE_PALETTE_INTERVENTION_V1.json"
             color=json.loads(color_path.read_text())
-            require(sha(color_path)==vis_batch["subjects"][sid].get("source_render_sha256",
-                     sha(color_path)), "JOINT_PALETTE_PARENT_SHA")
+            require(color.get("subject_id")==sid
+                    and color.get("source_sha256")==original[sid]["source_sha256"]
+                    and color.get("authority",{}).get("training_authorized") is False
+                    and color.get("authority",{}).get("graphics_family_minted") is False
+                    and len(color.get("rows",[]))==2,
+                    "JOINT_PALETTE_SCOPE")
             vis_path=visibility_root/"subjects"/sid/"SOURCE_HIT_VISIBILITY_CANDIDATE_COURT_V1.json"
             vis=read(vis_path,vis_batch["subjects"][sid]["receipt_sha256"],
                      "JOINT_VISIBILITY_RECEIPT_SHA")
@@ -223,6 +229,8 @@ def run(*,v5_path,roster_path,rest_index_path,native_root,palette_root,
                     authored_rest_vertices=teacher["rest_vertices_source_world"],
                     authored_faces=teacher["faces"],
                 )
+            require(canonical["measures"]["frame_count"]==joint["authored_pose_count"],
+                    "JOINT_CANONICAL_NATIVE_FRAME_COUNT_DRIFT")
             require(joint["training_authorized"] is False
                     and joint["qualified_same_drawable_positives"]==0
                     and joint["qualified_different_drawable_negatives"]==0

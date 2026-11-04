@@ -100,10 +100,11 @@ def run(v5_path,roster_path,rays_index_path,source_root,join_root,
     rayfile=Path(geometry["receipt"]["path"]).resolve()
     raydoc=load(rayfile,geometry["receipt"]["sha256"],
                 "FULL_FRAME_ORIGINAL_GEOMETRIC_RAY_SHA")
-    require(raydoc["source_sha256"]==src["source_sha256"]
-            and raydoc["source_rest_geometry"]["sha256"]==
-                join["subjects"][sid]["pair_diagnostic_receipt"]["sha256"] # overwritten below: rest handled in pair receipt
-            if False else True,"FULL_FRAME_UNREACHABLE")
+    require(raydoc.get("source_sha256")==src["source_sha256"]
+            and raydoc.get("authority",{}).get("training_authorized") is False
+            and raydoc.get("status")==
+                "SOURCE_GEOMETRIC_RAY_CANDIDATES_MEASURED__RENDERED_ALPHA_AND_OWNER_COURTS_REQUIRED",
+            "FULL_FRAME_RAY_SOURCE_SCOPE")
     # Bind the original source-rest geometry to the independent native/pair
     # court, not to an arbitrary visually similar mesh.
     pairref=join["subjects"][sid]["pair_diagnostic_receipt"]

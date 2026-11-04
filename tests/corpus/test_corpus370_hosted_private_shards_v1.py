@@ -50,7 +50,7 @@ def test_roundtrip_reconstitutes_exact_private_original_bytes(tmp_path,monkeypat
     assert receipt["training_authorized"] is False
     assert receipt["shard_count"]==1
     assert (out/"PUBLIC_PATH_FREE_RECEIPT.json").is_file()
-    assert "source" not in (out/"PUBLIC_PATH_FREE_RECEIPT.json").read_text()
+    assert str(root) not in (out/"PUBLIC_PATH_FREE_RECEIPT.json").read_text()
     restored=tmp_path/"restored"/"home"/"monster"/"realsas_authority"
     restored.mkdir(parents=True)
     status=shards.hydrate(out/"PRIVATE_V5_SHARD_MANIFEST.json",out,

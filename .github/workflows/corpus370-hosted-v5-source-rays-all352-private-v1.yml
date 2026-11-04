@@ -31,6 +31,7 @@ jobs:
       V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
       REST: /home/monster/realsas_authority/corpus370_source_rest_courts_v1_8ab2ebf5/SOURCE_REST_COURTS_INDEX.json
       SOURCE_ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      RESULT_ROOT: /home/monster/realsas_authority/corpus370_hosted_ray_outputs/${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
       - name: Verify fail-closed SHA pins, public VM RAM and SSD budget
@@ -83,16 +84,16 @@ jobs:
       - name: Re-measure complete 352 source-locus geometric rays on GitHub-hosted CPU
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/hosted352"
+          mkdir -p "$RESULT_ROOT"
           python -u tools/corpus/measure_corpus370_v5_source_locus_rays_v1.py \
             --v5-index "$V5" \
             --source-rest-index "$REST" \
-            --output-dir "$RUNNER_TEMP/hosted352" \
-            --all > "$RUNNER_TEMP/hosted352/PRIVATE_WORKER_LOG.txt" 2>&1
+            --output-dir "$RESULT_ROOT" \
+            --all > "$RESULT_ROOT/PRIVATE_WORKER_LOG.txt" 2>&1
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json,os
           from pathlib import Path
-          path=Path(os.environ["RUNNER_TEMP"])/"hosted352"/"SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json"
+          path=Path(os.environ["RESULT_ROOT"])/"SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json"
           result=json.loads(path.read_text())
           assert result["status"]=="PILOT_SUBJECTS_ACCOUNTED__GRAPHICS_AUTHORITY_SEPARATE"
           assert len(result["subject_results"])==352
@@ -108,8 +109,8 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          if test -s "$RCLONE_CONFIG" && test -d "$RUNNER_TEMP/hosted352"; then
-            rclone copy "$RUNNER_TEMP/hosted352" \
+          if test -s "$RCLONE_CONFIG" && test -d "$RESULT_ROOT"; then
+            rclone copy "$RESULT_ROOT" \
               "gdrive:corpus370_preparation_v1/hosted_source_locus_rays_all352/${{ github.run_id }}-${{ github.run_attempt }}" \
               --checksum --transfers 2 --timeout 90s --retries 3
             echo "PRIVATE_HOSTED_SOURCE_RAY_EVIDENCE_UPLOADED"

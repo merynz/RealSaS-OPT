@@ -253,7 +253,7 @@ def run(job_path,output_path):
                     continue
                 appearance._set_soup_mode(global_map,mode="FULL")
                 _modify_two_faces(global_map,face_a,face_b,
-                                  color_a=COLOR_A,color_b=COLOR_B)
+                                  color_a=COLOR_B,color_b=COLOR_A)
                 split=_measure(cam,key,ray,"palette_split_"+str(index),scratch)
                 split_a,split_rgb=_premul(split,mode)
                 appearance._set_soup_mode(global_map,mode="FULL")
@@ -270,8 +270,11 @@ def run(job_path,output_path):
                     different_source_domains=bool(row["source_material_domains_teacher_only"][0]!=
                                                   row["source_material_domains_teacher_only"][1]),
                     split_and_collision_are_color_only=True,
-                    status=("PASS_SOURCE_RENDER_INTERVENTION_CANDIDATE__DRAWABLE_OWNER_SEPARATE"
-                            if alpha_delta<=TOL else "ABSTAIN_ALPHA_CHANGED_BY_RECOLOR"))
+                    status=("ABSTAIN_ALPHA_CHANGED_BY_RECOLOR"
+                            if alpha_delta>TOL else
+                            "ABSTAIN_PALETTE_NO_OBSERVABLE_RGB_DELTA"
+                            if float(np.linalg.norm(split_rgb-collision_rgb))<=0.005
+                            else "PASS_SOURCE_RENDER_INTERVENTION_CANDIDATE__DRAWABLE_OWNER_SEPARATE"))
                 result["rows"].append(row)
         finally:
             appearance._set_soup_mode(global_map,mode="FULL")

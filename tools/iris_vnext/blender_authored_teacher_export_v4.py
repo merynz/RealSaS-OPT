@@ -185,7 +185,7 @@ def main():
                 {
                     "action": requested_name,
                     "imported_action": str(action.name),
-                    "armature": armature_name,
+                    "armature": control.get("armature"),
                     "frame": int(frame),
                 }
             )

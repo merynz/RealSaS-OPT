@@ -79,6 +79,7 @@ jobs:
       - name: Re-court immutable raw source, V5 admitted import and exact 8-view cameras for all 370
         run: |
           set -euo pipefail
+          mkdir -p "$OUTPUT"
           "$PY" -u tools/corpus/requalify_corpus370_v5_source_camera_families_v1.py \
             --v5-index "$V5" --source-rest-index "$REST" \
             --exact-source-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
@@ -125,11 +126,18 @@ jobs:
       - name: Build 370 whole-universe current per-family matrix, preserving UNKNOWN
         run: |
           set -euo pipefail
+          FBX_INDEX="/home/monster/realsas_authority/corpus370_fbx_rig_skin_v1/CORPUS370_FBX_RIG_SKIN_COURT_INDEX_V1.json"
+          test "$(sha256sum "$FBX_INDEX" | cut -d' ' -f1)" = b3f1e0e5e2252e8203acb6c36b3142b1ac8ca1c077673ffb40fc37d5b4f8db9d
+          "$PY" tools/corpus/build_corpus370_rig_skin_evidence_v1.py \
+            --exact-source-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
+            --court-index "$FBX_INDEX" \
+            --output "$OUTPUT/CORPUS370_V5_FBX_IMPORTED_RIG_SKIN_EVIDENCE_V1.json"
           "$PY" tools/corpus/build_corpus370_subject_family_authority_matrix_v1.py \
             --policy canonical/CORPUS370_SUBJECT_FAMILY_AUTHORITY_POLICY_V1.json \
             --candidate-manifest "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
             --evidence-index "$OUTPUT/CORPUS370_V5_SOURCE_CAMERA_FAMILY_EVIDENCE_V1.json" \
             --evidence-index "$OUTPUT/CORPUS370_V5_SOURCE_GEOMETRY_FAMILY_EVIDENCE_V1.json" \
+            --evidence-index "$OUTPUT/CORPUS370_V5_FBX_IMPORTED_RIG_SKIN_EVIDENCE_V1.json" \
             --output "$OUTPUT/CORPUS370_V5_CURRENT_FAMILY_MATRIX_V1.json"
           "$PY" tools/corpus/build_corpus370_materialization_checkpoint_v1.py \
             --matrix "$OUTPUT/CORPUS370_V5_CURRENT_FAMILY_MATRIX_V1.json" \
@@ -145,6 +153,7 @@ jobs:
         with:
           name: corpus370-v5-current-family-matrix-370-${{ github.run_id }}
           path: |
+            ${{ env.OUTPUT }}/CORPUS370_V5_FBX_IMPORTED_RIG_SKIN_EVIDENCE_V1.json
             ${{ env.OUTPUT }}/CORPUS370_V5_CURRENT_FAMILY_MATRIX_V1.json
             ${{ env.OUTPUT }}/CORPUS370_MATERIALIZATION_CHECKPOINT_V1.json
             ${{ env.OUTPUT }}/CORPUS370_MATERIALIZATION_CHECKPOINT_V1.md

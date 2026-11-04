@@ -1,0 +1,14 @@
+{
+  "schema": "RealSaS.Corpus370HostedNativeTeacherPilotRequest.v1",
+  "status": "DISABLED_PENDING_SHA_EXACT_HOSTED_NATIVE_TEACHER_SCOPE",
+  "enabled": false,
+  "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
+  "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+  "exact_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+  "subjects_max": 3,
+  "frames_per_clip_max": 4,
+  "source_locked": true,
+  "teacher_only": true,
+  "training_authorized": false,
+  "notes": "One-time real native authored motion teaching pilot using exactly original V5 source import on private 16GiB Github-hosted Blender. No model training, drawable owner authority, or product claim."
+}

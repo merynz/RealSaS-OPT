@@ -1,0 +1,146 @@
+name: corpus370-v5-platform-family-input-v3-real
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths: ['.github/workflows/corpus370-v5-platform-family-input-v3-real.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-v5-platform-family-input-v3-real
+  cancel-in-progress: false
+jobs:
+  materialize-exact-family-input-transport:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      PREP: /home/monster/realsas_authority/corpus370_preparation_v1
+      V5_ROOT: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot
+      SOURCE_ARCHIVE_SHA: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      ROSTER_SHA: 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+      V5_INDEX_SHA: 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+      ORIGINAL_V3_SHA: 5007b0863eddce70833ad48c4bc26af92a7abd79b618c8dc5c69ade7f43840a7
+      RCLONE_REMOTE: gdrive
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_family_input_v3_${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail closed on all original and mixed-version parents
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          command -v rclone >/dev/null
+          rclone listremotes | grep -Fx 'gdrive:'
+          test "$(sha256sum "$V5_ROOT/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json" | cut -d' ' -f1)" = "$V5_INDEX_SHA"
+          test "$(sha256sum "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" | cut -d' ' -f1)" = "$ROSTER_SHA"
+          test "$(sha256sum "$PREP/observations_rescue_v3/CORPUS370_PREPARED_OBSERVATION_PACKETS_V3.json" | cut -d' ' -f1)" = "$ORIGINAL_V3_SHA"
+          test -f "$PREP/source_bundle/extracted/$SOURCE_ARCHIVE_SHA/SOURCE_BUNDLE_MANIFEST_V1.json"
+          test -f "$PREP/provenance/CORPUS370_SOURCE_PROVENANCE_INDEX_V1.json"
+          "$PY" - <<'PY'
+          import os,json
+          from pathlib import Path
+          d=json.loads((Path(os.environ['V5_ROOT'])/'CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json').read_text())
+          assert d['schema']=='RealSaS.Corpus370PreparedObservationPackets.v5'
+          assert (d['subject_count'],d['prepared_subject_count'],d['failure_count'])==(370,352,18)
+          assert (d['historical_v3_pass_preserved_count'],d['new_v4_repaired_count'])==(294,58)
+          assert d['original_v3_failures_selected_count']==76
+          assert d['unselected_original_failure_count']==0
+          assert d['training_authorized'] is False
+          assert len({x['subject_id'] for x in d['subjects']+d['failures']})==370
+          print('SOURCE_V5_370_COHORT_PARENT_IDENTITY=PASS',flush=True)
+          PY
+      - name: Pack independent full-universe V3 Platform research inputs
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUTPUT_ROOT"
+          "$PY" -u tools/corpus/prepare_corpus370_platform_truth_bundle_v3.py \
+            --exact-source-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
+            --source-bundle-manifest "$PREP/source_bundle/extracted/$SOURCE_ARCHIVE_SHA/SOURCE_BUNDLE_MANIFEST_V1.json" \
+            --extracted-source-root "$PREP/source_bundle/extracted/$SOURCE_ARCHIVE_SHA" \
+            --observation-index "$V5_ROOT/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json" \
+            --provenance-index "$PREP/provenance/CORPUS370_SOURCE_PROVENANCE_INDEX_V1.json" \
+            --output "$OUTPUT_ROOT/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V3.zip" \
+            | tee "$OUTPUT_ROOT/PACKER_REPORT.jsonl"
+      - name: Reopen sealed transport; check all 352 original imports and all 18 typed fails
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          root=Path(os.environ['OUTPUT_ROOT'])
+          bundle=root/'CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V3.zip'
+          manifest_member='BOOTSTRAP_MANIFEST.json'
+          with zipfile.ZipFile(bundle) as z:
+              manifest=json.loads(z.read(manifest_member))
+              receipt=json.loads(z.read('BUNDLE_RECEIPT.json'))
+              assert manifest['schema']=='RealSaS.Corpus370PlatformFamilyInputBundle.v3'
+              assert receipt['schema']=='RealSaS.Corpus370PlatformFamilyInputBundleReceipt.v3'
+              assert manifest['candidate_subject_count']==370
+              assert (manifest['observation_qualified_count'],manifest['observation_failed_count'])==(352,18)
+              assert manifest['training_authorized'] is False and receipt['training_authorized'] is False
+              assert len(manifest['subjects'])==370
+              by_id={r['subject_id']:r for r in manifest['subjects']}
+              assert len(by_id)==370
+              legacy=0;new=0;failed=0
+              for sid,row in by_id.items():
+                  obs=row['observation_preparation']
+                  if obs['status']=='FAIL':
+                      failed+=1
+                      ref=obs['failure_receipt']
+                      assert hashlib.sha256(z.read(ref['path'])).hexdigest()==ref['sha256']
+                      continue
+                  assert obs['status']=='PASS'
+                  key='observations/'+sid+'/imported.json'
+                  target=obs['admitted_import_geometry']
+                  assert target['path']==key
+                  assert hashlib.sha256(z.read(key)).hexdigest()==target['sha256']
+                  assert obs['iris_observation_admission']['path'] in z.namelist()
+                  if obs['historical_v3_pass_reattested']:
+                      legacy+=1
+                      assert obs['new_v4_admission_claimed'] is False
+                  else:
+                      new+=1
+                      assert obs['new_v4_admission_claimed'] is True
+              assert (legacy,new,failed)==(294,58,18),(legacy,new,failed)
+              assert receipt['manifest_sha256']==hashlib.sha256(z.read(manifest_member)).hexdigest()
+          bundle_sha=hashlib.file_digest(bundle.open('rb'),'sha256').hexdigest()
+          report={
+              'schema':'RealSaS.Corpus370PlatformFamilyInputV3RealSeal.v1',
+              'code_revision':os.environ['GITHUB_SHA'],
+              'source_v5_index_sha256':os.environ['V5_INDEX_SHA'],
+              'bundle_sha256':bundle_sha,'bundle_bytes':bundle.stat().st_size,
+              'candidate_count':370,'original_v3_rehashed':legacy,'new_v4_repaired':new,
+              'source_observation_failure_count':failed,
+              'stage50_platform_attempt_created':False,
+              'family_authority_minted':False,'training_authorized':False
+          }
+          (root/'FAMILY_INPUT_V3_SEAL.json').write_text(json.dumps(report,sort_keys=True,indent=2)+'\n')
+          print(json.dumps(report,sort_keys=True),flush=True)
+          PY
+      - name: Publish immutable SHA-addressed transport in Google Drive
+        run: |
+          set -euo pipefail
+          SHA="$(sha256sum "$OUTPUT_ROOT/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V3.zip" | cut -d' ' -f1)"
+          DEST="corpus370_preparation_v1/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V3_${SHA}.zip"
+          rclone copyto "$OUTPUT_ROOT/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V3.zip" "$RCLONE_REMOTE:$DEST" --checksum --progress
+          "$PY" - <<'PY'
+          import os,json
+          from pathlib import Path
+          root=Path(os.environ['OUTPUT_ROOT'])
+          p=root/'FAMILY_INPUT_V3_SEAL.json'
+          d=json.loads(p.read_text())
+          d['drive_transport_path']='corpus370_preparation_v1/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V3_'+d['bundle_sha256']+'.zip'
+          p.write_text(json.dumps(d,sort_keys=True,indent=2)+'\n')
+          print(json.dumps(d,sort_keys=True),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v5-platform-family-input-v3-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT_ROOT }}/FAMILY_INPUT_V3_SEAL.json
+            ${{ env.OUTPUT_ROOT }}/PACKER_REPORT.jsonl
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 0

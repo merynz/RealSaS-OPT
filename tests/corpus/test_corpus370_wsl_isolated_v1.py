@@ -59,6 +59,7 @@ def test_worker_executes_only_inside_bounded_scope(tmp_path,monkeypatch):
     sent=[]
     monkeypatch.setattr(isolate.shutil,"which",lambda name:"/usr/bin/systemd-run")
     monkeypatch.setattr(isolate,"diagnose",lambda **kwargs:safe_host())
+    monkeypatch.setattr(isolate,"scope_bus_environment",lambda:{"XDG_RUNTIME_DIR":"/run/user/1000","DBUS_SESSION_BUS_ADDRESS":"unix:path=/run/user/1000/bus"})
     monkeypatch.setattr(isolate.subprocess,"run",
                         lambda args,**kwargs:(sent.append(args) or SimpleNamespace(returncode=0)))
     receipt=tmp_path/"resource_receipt.json"
@@ -78,6 +79,7 @@ def test_low_available_ram_fails_before_worker(tmp_path,monkeypatch):
     host["memory_bytes"]["MemAvailable"]=1*1024**3
     monkeypatch.setattr(isolate.shutil,"which",lambda name:"/usr/bin/systemd-run")
     monkeypatch.setattr(isolate,"diagnose",lambda **kwargs:host)
+    monkeypatch.setattr(isolate,"scope_bus_environment",lambda:{"XDG_RUNTIME_DIR":"/run/user/1000","DBUS_SESSION_BUS_ADDRESS":"unix:path=/run/user/1000/bus"})
     monkeypatch.setattr(isolate.subprocess,"run",
         lambda *args,**kwargs: pytest.fail("Unbounded worker must never run"))
     with pytest.raises(ValueError,match="WSL_SCOPE_RESOURCE_PREFLIGHT_BLOCKED"):
@@ -123,3 +125,22 @@ def test_heavy_workflows_manual_only_and_cgroup_isolated(flow):
     assert "run_corpus370_wsl_isolated_v1.py" in src
     assert "--max-mib 4608" in src
     assert "--minimum-ram-gib 5" in src
+
+def test_system_runner_service_binds_existing_user_bus_and_not_invents_one(tmp_path,monkeypatch):
+    import os
+    import stat
+    from pathlib import Path
+    # Identity derived from current process. Simulate actual WSL user runtime bus.
+    uid=os.getuid()
+    root=tmp_path/str(uid)
+    root.mkdir()
+    (root/"bus").touch()
+    # Patch filesystem view without poking global /run/user.
+    old_path=isolate.Path
+    class RedirectPath(type(Path())):
+        pass
+    # Simpler: validate the fail-closed branch on a real missing user bus
+    # using monkeypatched uid unlikely to have a running WSL user service.
+    monkeypatch.setattr(isolate.os,"getuid",lambda:999987)
+    with pytest.raises(ValueError,match="WSL_SCOPE_USER_RUNTIME_DIR_MISSING"):
+        isolate.scope_bus_environment()

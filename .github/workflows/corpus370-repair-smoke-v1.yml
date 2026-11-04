@@ -20,6 +20,8 @@ on:
       - 'tools/platform_source_surface_cohort_bootstrap_v3.py'
       - 'canonical/CORPUS370_SOURCE_SURFACE_TRUTH_CAMPAIGN_V3.json'
       - 'tests/corpus/test_corpus370_source_surface_cohort_bootstrap_v3.py'
+      - 'tools/corpus/audit_corpus370_historical_observation_reuse_v1.py'
+      - 'tests/corpus/test_corpus370_historical_observation_reuse_v1.py'
       - 'tests/corpus/test_observation_source_projection_degenerate_v1.py'
       - 'tests/corpus/test_observation_precision_interval_v1.py'
       - 'tools/corpus/iris_observation_admission_v3.py'
@@ -54,5 +56,6 @@ jobs:
             tests/corpus/test_corpus370_observation_failure_strata_v1.py \
             tests/corpus/test_corpus370_platform_family_input_bundle_v3.py \
             tests/corpus/test_corpus370_source_surface_cohort_bootstrap_v3.py \
+            tests/corpus/test_corpus370_historical_observation_reuse_v1.py \
             tests/corpus/test_observation_source_projection_degenerate_v1.py \
             tests/corpus/test_observation_precision_interval_v1.py

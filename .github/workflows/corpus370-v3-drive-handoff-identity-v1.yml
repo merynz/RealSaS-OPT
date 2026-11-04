@@ -63,16 +63,39 @@ jobs:
           assert isinstance(file_id,str) and file_id and ('\t' not in file_id)
           hashes=remote.get('Hashes') or {}
           with bundle.open('rb') as f: md5=hashlib.file_digest(f,'md5').hexdigest()
-          assert hashes.get('MD5')==md5, 'CORPUS370_V3_REMOTE_MD5_NOT_VERIFIED'
+          remote_md5=hashes.get('MD5')
           remote_sha=hashes.get('SHA-256')
-          assert remote_sha is None or remote_sha==seal['bundle_sha256'], 'CORPUS370_V3_REMOTE_SHA_DRIFT'
+          if remote_md5 is not None:
+              assert remote_md5==md5, 'CORPUS370_V3_REMOTE_MD5_MISMATCH'
+          if remote_sha is not None:
+              assert remote_sha==seal['bundle_sha256'], 'CORPUS370_V3_REMOTE_SHA_MISMATCH'
+          remote_sha_verified=remote_sha is not None
+          # Drive backends can omit hash fields for large files. Missing remote
+          # metadata is NOT a corruption verdict or a reason to bypass a check:
+          # stream the entire immutable remote object and compare true SHA-256.
+          if not remote_sha_verified:
+              print('CORPUS370_V3_REMOTE_SHA_FIELD_UNAVAILABLE__STREAM_VERIFY_START',flush=True)
+              digest=hashlib.sha256()
+              proc=subprocess.Popen(
+                  ['rclone','cat',uri],stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+              )
+              assert proc.stdout is not None
+              for chunk in iter(lambda:proc.stdout.read(8<<20),b''):
+                  digest.update(chunk)
+              proc.stdout.close()
+              rc=proc.wait(timeout=60)
+              error=(proc.stderr.read() if proc.stderr is not None else b'').decode('utf-8',errors='replace')
+              assert rc==0, 'CORPUS370_V3_REMOTE_STREAM_FAILED:'+error[-400:]
+              assert digest.hexdigest()==seal['bundle_sha256'], 'CORPUS370_V3_REMOTE_STREAM_SHA_MISMATCH'
+              remote_sha_verified=True
+              print('CORPUS370_V3_REMOTE_STREAM_SHA256_VERIFIED',flush=True)
           receipt={
             'schema':'RealSaS.Corpus370V3DriveHandoffIdentity.v1',
             'file_id':file_id,
             'drive_transport_path':seal['drive_transport_path'],
             'sha256':seal['bundle_sha256'],'md5':md5,'size_bytes':bundle.stat().st_size,
-            'remote_md5_verified':True,
-            'remote_sha256_verified':remote_sha is not None,
+            'remote_md5_verified':remote_md5 is not None,
+            'remote_sha256_verified':remote_sha_verified,
             'source_v5_index_sha256':seal['source_v5_index_sha256'],
             'candidate_count':370,'observation_pass_count':352,'observation_fail_count':18,
             'platform_engine_release_minted':False,'training_authorized':False

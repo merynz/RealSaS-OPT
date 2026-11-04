@@ -121,7 +121,8 @@ def test_same_source_face_invalid_as_two_editable_loci():
 
 def test_one_view_not_enough_for_heldout():
     v,f,poses,pairs=fixtures()
-    pairs["rows"]=pairs["rows"][:1]
+    pairs["rows"]=[pairs["rows"][0],copy.deepcopy(pairs["rows"][0])]
+    pairs["rows"][1]["pixel_x"]=9
     with pytest.raises(ValueError,match="0_TRAIN_4_HELDOUT"):
         compile_candidates(v,f,poses,pairs["rows"],parents=PARENTS)
 

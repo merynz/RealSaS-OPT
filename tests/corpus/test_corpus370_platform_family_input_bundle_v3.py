@@ -100,6 +100,7 @@ def fixture(root):
     candidate = write(packet / "SOURCE_REST_RENDER_CANDIDATE.json", {
         "subject_id": subject_id, "source_sha256": source_sha,
         "source_scene_snapshot": {"sha256": sha(snapshot)},
+        "camera_bundle": {"sha256": sha(camera)},
         "blender_binary_sha256": blender_sha, "resolution": policy["resolution"],
         "views": candidate_views,
     })

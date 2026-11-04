@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370HostedHierarchicalLayerResearchRequest.v1",
-  "status": "DISABLED_PENDING_WORKFLOW_ACTIONLINT",
-  "enabled": false,
+  "status": "ACTIVATED_3_REAL_SHA_EXACT_SOURCE_HIERARCHICAL_GROUP_COURT",
+  "enabled": true,
   "source_locked": true,
   "training_authorized": false,
   "private_original_native_visibility_run_id": 41916724594,
@@ -28,5 +28,5 @@
   "student_source_face_ids_exposed": false,
   "student_rig_or_semantic_source_names_exposed": false,
   "model_training_authorized": false,
-  "notes": "Measures actual source-bound grouped anonymous puppet edit candidates, with no new source import, no training/model release, and deliberately no full-frame graphics qualification. Independent full-image renderer must follow."
+  "notes": "Now running original canonical 3 subjects on source-preserving grouped anonymous edit hypothesis. Independently selected train view0 and only evaluated view4; full-image renderer and model authority remain FALSE."
 }

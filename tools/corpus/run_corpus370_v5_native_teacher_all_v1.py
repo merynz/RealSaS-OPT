@@ -96,7 +96,7 @@ def source_identity(blender):
         "v5_index_sha256":V5_SHA,"exact_source_roster_sha256":ROSTER_SHA,
         "source_code_sha256":{str(p.relative_to(repo)):sha(p) for p in paths},
         "blender_binary_sha256":sha(blender),
-        "max_frames_per_clip":4,
+        "max_frames_per_clip":16,
     }
 
 
@@ -112,7 +112,7 @@ def _stable_receipt(row):
     )}
 
 
-def measure(row,root,blender,output,max_frames=4,*,resume=None):
+def measure(row,root,blender,output,max_frames=16,*,resume=None):
     sid=row["subject_id"]
     source_path=(root/row["source"]["source_relative_path"]).resolve()
     require(source_path.is_relative_to(root) and source_path.is_file()
@@ -170,12 +170,12 @@ def measure(row,root,blender,output,max_frames=4,*,resume=None):
     return actual
 
 
-def sweep(v5_path,roster_path,root,blender,output,*,max_frames=4):
+def sweep(v5_path,roster_path,root,blender,output,*,max_frames=16):
     v5_path=Path(v5_path).resolve();roster_path=Path(roster_path).resolve()
     root=Path(root).resolve();blender=Path(blender).resolve();output=Path(output).resolve()
     require(sha(v5_path)==V5_SHA and sha(roster_path)==ROSTER_SHA,
             "ALL_NATIVE_PINNED_COHORT")
-    require(blender.is_file() and root.is_dir() and max_frames==4,
+    require(blender.is_file() and root.is_dir() and max_frames==16,
             "ALL_NATIVE_RUNTIME_OR_SAMPLE_DRIFT")
     v5=json.loads(v5_path.read_text());sources=json.loads(roster_path.read_text())
     subjects,no_native,excluded=roster(v5,sources)
@@ -236,7 +236,7 @@ def main():
     p.add_argument("--extracted-source-root",type=Path,required=True)
     p.add_argument("--blender",type=Path,required=True)
     p.add_argument("--output",type=Path,required=True)
-    p.add_argument("--max-frames",type=int,default=4)
+    p.add_argument("--max-frames",type=int,default=16)
     a=p.parse_args()
     sweep(a.v5_index,a.exact_source_roster,a.extracted_source_root,
           a.blender,a.output,max_frames=a.max_frames)

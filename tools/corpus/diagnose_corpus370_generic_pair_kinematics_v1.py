@@ -247,6 +247,8 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--rest-geometry", type=Path, required=True)
     p.add_argument("--authored-teacher", type=Path, required=True)
+    p.add_argument("--authored-teacher-receipt", type=Path, required=True)
+    p.add_argument("--expected-teacher-receipt-sha256", required=True)
     p.add_argument("--independent-visibility", type=Path, required=True)
     p.add_argument("--source-sha256", required=True)
     p.add_argument("--expected-rest-sha256", required=True)
@@ -257,6 +259,7 @@ def main() -> None:
     for path,expected in (
         (args.rest_geometry,args.expected_rest_sha256),
         (args.authored_teacher,args.expected_teacher_sha256),
+        (args.authored_teacher_receipt,args.expected_teacher_receipt_sha256),
         (args.independent_visibility,args.expected_visibility_sha256),
     ):
         require(path.is_file() and sha(path) == expected, "PAIR_PARENT_BYTES_SHA_DRIFT")
@@ -267,6 +270,19 @@ def main() -> None:
             and vis.get("qualified_same_drawable_positives") == 0
             and vis.get("qualified_different_drawable_negatives") == 0,
             "PAIR_VISIBILITY_NOT_BOUNDED_SOURCE_EVIDENCE")
+    # An arbitrary NPZ with plausible geometry can otherwise spoof the
+    # motion of another source. Bind the exact authored exporter receipt too.
+    teacher_receipt = json.loads(args.authored_teacher_receipt.read_text())
+    require(
+        teacher_receipt.get("schema") == "RealSaS.IRISVNextAuthoredTeacherExport.v1"
+        and teacher_receipt.get("subject_id") == vis.get("subject_id")
+        and teacher_receipt.get("source", {}).get("sha256") == args.source_sha256
+        and teacher_receipt.get("output", {}).get("sha256") == args.expected_teacher_sha256
+        and teacher_receipt.get("teacher_only") is True
+        and teacher_receipt.get("canonical_M_G_W_minted") is False
+        and teacher_receipt.get("teacher_rig_skin_motion_allowed_as_inference_input") is False,
+        "PAIR_AUTHORED_TEACHER_RECEIPT_SOURCE_BINDING"
+    )
     pairs = []
     for row in vis.get("rows",[]):
         require(row.get("status") == "MEASURED_SOURCE_HIT_VISIBILITY_CANDIDATE_ONLY"
@@ -308,6 +324,7 @@ def main() -> None:
             authored_faces=t["faces"],
         )
     args.output.parent.mkdir(parents=True,exist_ok=True)
+    result["parents"]["authored_teacher_receipt_sha256"] = args.expected_teacher_receipt_sha256
     args.output.write_text(json.dumps(result,sort_keys=True,indent=2,allow_nan=False)+"\n")
     print(json.dumps({k:v for k,v in result.items() if k!="rows"},sort_keys=True))
 

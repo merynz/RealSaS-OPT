@@ -68,7 +68,7 @@ jobs:
     timeout-minutes: 330
     env:
       PYTHONPATH: ${{ github.workspace }}
-      RCLONE_CONFIG: ${{ runner.temp }}/realsas-drive.conf
+      RCLONE_CONFIG: /tmp/realsas-c370-private-rclone.conf
       MANIFEST_SHA: ${{ needs.resolve-private-shard-activation.outputs.manifest_sha256 }}
       INPUT_REMOTE: gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards
       V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json

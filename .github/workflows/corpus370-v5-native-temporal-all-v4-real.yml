@@ -1,13 +1,7 @@
 name: corpus370-v5-native-temporal-all-v4-real
+# Manual-only while this repository uses an 8 GiB WSL self-hosted runner.
+# Source code pushes must NOT auto-start the heavy Blender corpus.
 on:
-  push:
-    branches: [corpus370-source-relative-contact-v1-review]
-    paths:
-      - '.github/workflows/corpus370-v5-native-temporal-all-v4-real.yml'
-      - 'tools/corpus/run_corpus370_v5_native_teacher_all_v1.py'
-      - 'tests/corpus/test_corpus370_v5_native_teacher_all_v1.py'
-      - 'tools/corpus/run_corpus370_v5_native_drive_recovery_v1.py'
-      - 'tests/corpus/test_corpus370_v5_native_drive_recovery_v1.py'
   workflow_dispatch:
 
 permissions:
@@ -53,23 +47,30 @@ jobs:
         run: |
           set -euo pipefail
           test -x "$PY" && test -x "$BLENDER"
+          command -v systemd-run >/dev/null
           command -v rclone >/dev/null
           rclone listremotes | grep -Fx 'gdrive:'
           test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
           test "$(sha256sum "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
-      - name: Restore and resume original source-locked native truth with crash-safe remote checkpointing
+      - name: Restore native truth in OOM-contained memory scope with 45-second checkpoints
         run: |
           set -euo pipefail
           "$PY" -m py_compile tools/corpus/run_corpus370_v5_native_drive_recovery_v1.py
-          "$PY" -u tools/corpus/run_corpus370_v5_native_drive_recovery_v1.py \
-            --python "$PY" \
-            --v5-index "$V5" \
-            --exact-source-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
-            --extracted-source-root "$PREP/source_bundle/extracted/$SOURCE_ARCHIVE_SHA" \
-            --blender "$BLENDER" \
-            --output "$OUTPUT" \
-            --remote "$DRIVE" \
-            --interval-seconds 45
+          "$PY" -m py_compile tools/corpus/run_corpus370_wsl_isolated_v1.py
+          "$PY" -u tools/corpus/run_corpus370_wsl_isolated_v1.py \
+            --unit "realsas-c370-native-${{ github.run_id }}" \
+            --high-mib 3584 --max-mib 4608 --swap-mib 1024 --cpu-quota 180 \
+            --minimum-ram-gib 5 --minimum-disk-gib 12 \
+            --report-path "$OUTPUT/CORPUS370_WSL_RESOURCE_PREFLIGHT_V1.json" \
+            -- "$PY" -u tools/corpus/run_corpus370_v5_native_drive_recovery_v1.py \
+              --python "$PY" \
+              --v5-index "$V5" \
+              --exact-source-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
+              --extracted-source-root "$PREP/source_bundle/extracted/$SOURCE_ARCHIVE_SHA" \
+              --blender "$BLENDER" \
+              --output "$OUTPUT" \
+              --remote "$DRIVE" \
+              --interval-seconds 45
       - name: Publish immutable teacher-only source truth bytes and receipts in Drive
         run: |
           set -euo pipefail
@@ -105,6 +106,7 @@ jobs:
           name: corpus370-v5-native-temporal-all-v4-${{ github.run_id }}
           path: |
             ${{ env.OUTPUT }}/CORPUS370_V5_ALL_AUTHORED_TEMPORAL_TEACHER_V1.json
+            ${{ env.OUTPUT }}/CORPUS370_WSL_RESOURCE_PREFLIGHT_V1.json
             ${{ env.OUTPUT }}/subjects/*/TEMPORAL_TEACHER_COURT_V1.json
             ${{ env.OUTPUT }}/subjects/*/teacher.npz.json
           if-no-files-found: warn

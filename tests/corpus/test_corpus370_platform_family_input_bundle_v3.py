@@ -81,6 +81,8 @@ def fixture(root):
     camera = write(packet / "camera_bundle.json", {
         "schema": "RealSaS.CameraProjectionBundle.v1",
         "cameras": [{"view_index": i} for i in range(8)],
+        "common_center_xyz": [0.0, 0.0, 0.0],
+        "common_half_extent": 1.0,
     })
     candidate_views, admission_views = [], []
     for i in range(8):

@@ -145,3 +145,68 @@ def test_invisible_palette_delta_cannot_pretend_to_be_positive_supervision():
     receipt=court(data)
     assert receipt["measured_valid_palette_rows"]==0
     assert receipt["abstained_rows"]==1
+
+
+def _with_real_reciprocal_locus_controls():
+    """A small synthetic image consequence, NOT a measured Corpus370 subject."""
+    data=fixture()
+    data["parents"]["camera"]={"sha256":"c"*64}
+    data["parents"]["geometry"]={"sha256":"d"*64}
+    row=data["rows"][0]
+    row["generic_counterfactual"]={
+        "schema":"RealSaS.Corpus370GenericLocusCounterfactual.v1",
+        "source_sha256":"b"*64,
+        "camera_sha256":"c"*64,
+        "rest_geometry_sha256":"d"*64,
+        "view_index":1,"pixel_x":23,"pixel_y":41,
+        "locus_a":{"face_index_teacher_only":3,
+                   "barycentric_teacher_only":[0.2,0.3,0.5]},
+        "locus_b":{"face_index_teacher_only":8,
+                   "barycentric_teacher_only":[0.1,0.1,0.8]},
+        "carrier_mode":"STRAIGHT_LINEAR_RGB",
+        "camera_ray_complete":True,"depth_tie":False,
+        "interventions_preserve_geometry_camera_pose_alpha":True,
+        "teacher_labels_to_student":False,
+        "owner_identity_minted":False,"training_authorized":False,
+        "semantic_or_material_name_as_label":False,
+        "rgba":{
+            "full":[0.6,0.26,0.2,1.0],
+            "noop":[0.6,0.26,0.2,1.0],
+            "remove_a":[0.9,0.5,0.5,1.0],
+            "remove_b":[0.6,0.26,0.2,1.0],
+            "remove_both":[0,0,0,0],
+            "recolor_a":[0.2,0.5,0.4,1.0],
+            "recolor_a_noop":[0.6,0.26,0.2,1.0],
+        }
+    }
+    return data
+
+
+def test_valid_reciprocal_causal_loci_do_not_mint_drawable_owner():
+    data=_with_real_reciprocal_locus_controls()
+    result=court(data)
+    assert result["generic_two_causal_loci_count"]==1
+    assert result["generic_counterfactual_status"]=="MEASURED_SOURCE_LOCI_ONLY__OWNER_UNKNOWN"
+    assert result["generic_counterfactuals"][0]["same_drawable"]=="UNKNOWN"
+    assert result["student_drawable_ownership_qualified"] is False
+
+
+def test_reciprocal_parent_forgery_refused():
+    data=_with_real_reciprocal_locus_controls()
+    data["rows"][0]["generic_counterfactual"]["camera_sha256"]="f"*64
+    with pytest.raises(ValueError,match="GENERIC_LOCUS_PARENT_DRIFT"):
+        court(data)
+
+
+def test_incomplete_reciprocal_removal_refused():
+    data=_with_real_reciprocal_locus_controls()
+    del data["rows"][0]["generic_counterfactual"]["rgba"]["remove_both"]
+    with pytest.raises(ValueError,match="MISSING_COUNTERFACTUAL_ARM"):
+        court(data)
+
+
+def test_palette_noop_rgb_drift_cannot_pretend_measured():
+    data=_with_real_reciprocal_locus_controls()
+    data["rows"][0]["generic_counterfactual"]["rgba"]["recolor_a_noop"]=[0,0,0,0]
+    with pytest.raises(ValueError,match="NOOP_PARITY_FAILED"):
+        court(data)

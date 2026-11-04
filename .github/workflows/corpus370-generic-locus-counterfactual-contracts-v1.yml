@@ -18,6 +18,10 @@ on:
       - 'tools/corpus/compile_corpus370_hierarchical_layer_groups_v1.py'
       - 'tools/corpus/court_corpus370_hierarchical_layer_groups_v1.py'
       - 'tests/corpus/test_corpus370_hierarchical_layer_groups_v1.py'
+      - 'tools/corpus/compile_corpus370_multiview_geometry_groups_v2.py'
+      - 'tools/corpus/court_corpus370_multiview_geometry_groups_v2.py'
+      - 'tools/corpus/run_corpus370_multiview_geometry_groups_private_v2.py'
+      - 'tests/corpus/test_corpus370_multiview_geometry_groups_v2.py'
       - 'tools/truth_foundry/blender_corpus370_native_bone_counterfactual_v1.py'
       - 'tests/corpus/test_corpus370_native_bone_counterfactual_v1.py'
       - 'tests/corpus/test_corpus370_generic_pair_kinematics_v1.py'
@@ -52,6 +56,10 @@ on:
       - 'tools/corpus/compile_corpus370_hierarchical_layer_groups_v1.py'
       - 'tools/corpus/court_corpus370_hierarchical_layer_groups_v1.py'
       - 'tests/corpus/test_corpus370_hierarchical_layer_groups_v1.py'
+      - 'tools/corpus/compile_corpus370_multiview_geometry_groups_v2.py'
+      - 'tools/corpus/court_corpus370_multiview_geometry_groups_v2.py'
+      - 'tools/corpus/run_corpus370_multiview_geometry_groups_private_v2.py'
+      - 'tests/corpus/test_corpus370_multiview_geometry_groups_v2.py'
       - 'tools/truth_foundry/blender_corpus370_native_bone_counterfactual_v1.py'
       - 'tests/corpus/test_corpus370_native_bone_counterfactual_v1.py'
       - 'tests/corpus/test_corpus370_generic_pair_kinematics_v1.py'
@@ -85,6 +93,9 @@ jobs:
             tools/corpus/run_corpus370_anonymous_layer_private_batch_v1.py \
             tools/corpus/compile_corpus370_hierarchical_layer_groups_v1.py \
             tools/corpus/court_corpus370_hierarchical_layer_groups_v1.py \
+            tools/corpus/compile_corpus370_multiview_geometry_groups_v2.py \
+            tools/corpus/court_corpus370_multiview_geometry_groups_v2.py \
+            tools/corpus/run_corpus370_multiview_geometry_groups_private_v2.py \
             tools/corpus/generic_source_locus_counterfactual_v1.py \
             tools/corpus/generic_source_locus_reciprocal_palette_v2.py \
             tools/corpus/select_generic_source_locus_rays_v1.py \
@@ -108,5 +119,6 @@ jobs:
             tests/corpus/test_corpus370_generic_pair_kinematics_v1.py \
             tests/corpus/test_corpus370_native_bone_counterfactual_v1.py \
             tests/corpus/test_corpus370_anonymous_layer_compiler_v1.py \
-            tests/corpus/test_corpus370_hierarchical_layer_groups_v1.py
+            tests/corpus/test_corpus370_hierarchical_layer_groups_v1.py \
+            tests/corpus/test_corpus370_multiview_geometry_groups_v2.py
           echo "GENERIC_SOURCE_LOCUS_CONTRACTS_ONLY__NO_MEASURED_SUBJECTS_NO_OWNER_AUTHORITY"

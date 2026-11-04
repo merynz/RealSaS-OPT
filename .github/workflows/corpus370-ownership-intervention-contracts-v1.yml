@@ -1,0 +1,39 @@
+name: corpus370-ownership-intervention-contracts-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - canonical/CORPUS370_OWNERSHIP_INTERVENTION_PILOT_V1.json
+      - tools/corpus/validate_corpus370_ownership_intervention_pilot_v1.py
+      - tests/corpus/test_corpus370_ownership_intervention_pilot_v1.py
+      - .github/workflows/corpus370-ownership-intervention-contracts-v1.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - canonical/CORPUS370_OWNERSHIP_INTERVENTION_PILOT_V1.json
+      - tools/corpus/validate_corpus370_ownership_intervention_pilot_v1.py
+      - tests/corpus/test_corpus370_ownership_intervention_pilot_v1.py
+      - .github/workflows/corpus370-ownership-intervention-contracts-v1.yml
+
+permissions:
+  contents: read
+
+jobs:
+  preregistration-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate declared no-training experimental contract
+        env:
+          PYTHONPATH: .
+        run: |
+          python tools/corpus/validate_corpus370_ownership_intervention_pilot_v1.py
+      - name: Verify negative examples and leak-resistant controls
+        env:
+          PYTHONPATH: .
+        run: |
+          python -m unittest discover -s tests/corpus -p 'test_corpus370_ownership_intervention_pilot_v1.py' -v

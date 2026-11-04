@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370MultiviewGeometryGroupsRequest.v2",
-  "status": "DISABLED_PENDING_WORKFLOW_ACTIONLINT",
-  "enabled": false,
+  "status": "ACTIVATED_ORIGINAL_THREE_SOURCE_MULTIVIEW_GEOMETRY_WITH_VIEW4_INDEPENDENT_RENDER_EDIT_HOLDOUT",
+  "enabled": true,
   "source_locked": true,
   "original_source_rest_native_visibility_run_id": 41916724594,
   "original_source_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
@@ -23,5 +23,5 @@
   "materialization_authorized": false,
   "training_authorized": false,
   "model_training_authorized": false,
-  "notes": "No image/view4 edit consequence is used by producer; view4 is independent rendered source-hit diagnostic, not final full-frame. All source geometry is SHA-verified original Corpus370. Generic heuristics only."
+  "notes": "Production research: source SHA-locked 64 rays per subject. Geometry constraints only views0/2/6. Real previous rendered edit consequence from view4 supplied to separate court after source-only candidate compilation. This does NOT mint semantic/editable owner labels or model training authority."
 }

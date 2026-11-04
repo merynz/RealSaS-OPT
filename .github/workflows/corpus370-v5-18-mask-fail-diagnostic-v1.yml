@@ -1,0 +1,43 @@
+name: corpus370-v5-18-mask-fail-diagnostic-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths: ['.github/workflows/corpus370-v5-18-mask-fail-diagnostic-v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-v5-18-mask-fail-diagnostic-v1
+  cancel-in-progress: false
+jobs:
+  independent-overlay-census:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      OUT: /tmp/corpus370-v5-remaining-mask-evidence-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact unsuccessful V5 parent and original mask policy
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          "$PY" -m py_compile tools/corpus/audit_corpus370_v5_failed_masks_v1.py
+      - name: Reopen original view masks and independent projection mismatch
+        run: |
+          set -euo pipefail
+          "$PY" -u tools/corpus/audit_corpus370_v5_failed_masks_v1.py \
+            --v5-index "$V5" --output "$OUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v5-18-mask-failure-diagnostics-${{ github.run_id }}
+          path: |
+            ${{ env.OUT }}/CORPUS370_V5_18_MASK_DIAGNOSTIC.json
+            ${{ env.OUT }}/18_MASK_FAILURE_CONTACT_SHEET.png
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 30

@@ -1,8 +1,8 @@
 {
   "schema": "RealSaS.Corpus370HostedRaysRunRequest.v1",
-  "status": "DISABLED_UNTIL_PRIVATE_SHA_AND_DRIVE_CREDENTIAL_VERIFIED",
-  "enabled": false,
-  "expected_manifest_sha256": null,
+  "status": "ACTIVATED_FOR_SHA_PINNED_PRIVATE_HOSTED_GEOMETRIC_RAYS_ONLY",
+  "enabled": true,
+  "expected_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
   "training_authorized": false,
-  "notes": "Only update after exact V5 370/352 private shard receipt and restricted Drive credential are in place. Push to review branch triggers hosted activation, heavy worker remains disabled until true."
+  "notes": "One-time private hosted geometric ray measurement. Private V5 shards uploaded to Drive and exact immutable manifest SHA read back. Secret presence confirmed by repository owner; worker verifies remote bytes and source SHA before measurement. No training, no graphics or product authority."
 }

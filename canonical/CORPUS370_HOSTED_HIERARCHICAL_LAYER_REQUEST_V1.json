@@ -1,0 +1,32 @@
+{
+  "schema": "RealSaS.Corpus370HostedHierarchicalLayerResearchRequest.v1",
+  "status": "DISABLED_PENDING_WORKFLOW_ACTIONLINT",
+  "enabled": false,
+  "source_locked": true,
+  "training_authorized": false,
+  "private_original_native_visibility_run_id": 41916724594,
+  "private_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+  "private_prior_anonymous_run_id": 41928889420,
+  "private_prior_anonymous_batch_sha256": "47b3f3beb7a3625504ccf8488d6fe0cd8fbe0014421c5e4c77748f829c9f01ca",
+  "selected_subject_count": 3,
+  "algorithm": "ANONYMOUS_SOURCE_PATCH_HIERARCHY",
+  "target_group_counts": [
+    8,
+    16,
+    32,
+    64
+  ],
+  "heldout_used_for_training": false,
+  "camera_views": {
+    "training": 0,
+    "independent_diagnostic": 4
+  },
+  "operator": "NONDESTRUCTIVE_EDITOR_LAYER_GROUPING__NO_MESH_WELD",
+  "scope": "PRODUCT_RESEARCH_ONLY",
+  "family_authority_minted": false,
+  "renderer_full_frame_court_executed": false,
+  "student_source_face_ids_exposed": false,
+  "student_rig_or_semantic_source_names_exposed": false,
+  "model_training_authorized": false,
+  "notes": "Measures actual source-bound grouped anonymous puppet edit candidates, with no new source import, no training/model release, and deliberately no full-frame graphics qualification. Independent full-image renderer must follow."
+}

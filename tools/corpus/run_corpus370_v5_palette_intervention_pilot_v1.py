@@ -145,6 +145,11 @@ def run(v5_path,roster_path,ray_index_path,root,blender,output):
             require(result.returncode==0,"PALETTE_PILOT_BLENDER_EXIT:"+str(result.returncode))
             require(manifest_path.is_file(),"PALETTE_PILOT_NO_MANIFEST")
             value=json.loads(manifest_path.read_text())
+            require(value.get("sample_policy")=="GEOMETRY_ONLY_OPPOSITE_VIEW_DIVERSE_V1"
+                    and type(value.get("sampled_view_indices")) is list
+                    and len(value["sampled_view_indices"])==2
+                    and len(set(value["sampled_view_indices"]))==2,
+                    "PALETTE_PILOT_INDEPENDENT_CAMERA_VIEW_DIVERSITY_REQUIRED")
             measured=court(value)
             # V2 independent court binds new reciprocal recolor arms, keeps
             # V1 receipts unchanged and forbids drawable/training authority.
@@ -171,6 +176,8 @@ def run(v5_path,roster_path,ray_index_path,root,blender,output):
                 "v2_two_causal_locus_rows":measured_v2["two_locus_count"],
                 "v2_one_causal_locus_rows":measured_v2["one_locus_count"],
                 "v2_abstain_rows":measured_v2["abstain_count"],
+                "sampled_view_indices":value["sampled_view_indices"],
+                "sample_policy":value["sample_policy"],
                 "measured_valid_palette_rows":measured["measured_valid_palette_rows"],
                 "measured_abstain_rows":measured["abstained_rows"],
                 "same_drawable_truth_minted":False,

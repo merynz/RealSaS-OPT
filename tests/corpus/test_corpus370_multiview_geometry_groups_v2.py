@@ -7,7 +7,57 @@ from tools.corpus.compile_corpus370_multiview_geometry_groups_v2 import (
     build,geometry_constraints,refine_only_conflicts,
 )
 from tools.corpus.court_corpus370_multiview_geometry_groups_v2 import qualify
-from tests.corpus.test_corpus370_hierarchical_layer_groups_v1 import fixtures
+def fixtures(n=80):
+    v=np.zeros((3*n,3),np.float64)
+    for i in range(n):
+        x=float(i%10)*2.;y=float(i//10)*2.
+        v[3*i:3*i+3]=[[x,y,0],[x+.3,y,0],[x,y+.3,0]]
+    faces=np.arange(3*n,dtype=np.int32).reshape(n,3)
+    posed=np.stack([v,v.copy(),v.copy()])
+    posed[1,::3,2]+=.05
+    def row(view,a,b):
+        return {
+            "view_index":view,
+            "pixel_x":view+2,"pixel_y":7,
+            "source_face_a_teacher_only":a,
+            "source_face_b_teacher_only":b,
+            "source_hit_visibility_owner":"SOURCE_LOCUS_ONLY",
+            "same_drawable":"UNKNOWN","different_drawable":"UNKNOWN",
+            "training_authorized":False,
+        }
+    pairs={
+        "schema":"RealSaS.Corpus370GenericPairKinematicDiagnosticBatch.v1",
+        "parents":{"source_sha256":"a"*64},
+        "rows":[row(0,0,n-1),row(4,10,n-10)],
+        "pair_count":2,
+        "qualified_same_drawable_positives":0,
+        "qualified_different_drawable_negatives":0,
+        "training_authorized":False,
+    }
+    proposal={
+        "schema":"RealSaS.Corpus370AnonymousLayerProposal.v1",
+        "parents":{"source_sha256":"a"*64,
+                   "canonical_arrays_sha256":"b"*64,
+                   "source_pair_receipt_sha256":"c"*64},
+        "face_count":n,
+        "source_semantic_or_material_names_used":False,
+        "training_authorized":False,
+        "graphics_owner_minted":False,
+        "candidates":[{
+            "candidate":"MANIFOLD_COMPONENTS",
+            "slot_count":n,
+            "face_slot_teacher_only":list(range(n)),
+        }],
+    }
+    previous={
+        "schema":"RealSaS.Corpus370AnonymousLayerEditProxyCourt.v1",
+        "selected_candidate_train_only":"MANIFOLD_COMPONENTS",
+        "selected_slot_count":n,
+        "training_authorized":False,
+        "graphics_family_authorized":False,
+    }
+    return v,faces,posed,pairs,proposal,previous
+
 
 
 def rays(n=80):

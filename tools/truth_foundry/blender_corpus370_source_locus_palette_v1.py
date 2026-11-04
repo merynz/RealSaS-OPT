@@ -30,6 +30,7 @@ from tools.iris_vnext import blender_authored_teacher_export_v3 as geometry_tran
 from tools.truth_foundry import blender_source_appearance_policy_replay_v1 as replay
 from tools.truth_foundry import blender_source_ray_appearance_measure_v1 as appearance
 from tools.truth_foundry.blender_teacher_scene_v1 import _appearance_and_uv
+from tools.corpus.select_generic_source_locus_rays_v1 import select_rays as select_generic_rays
 
 
 SCHEMA = "RealSaS.Corpus370SourceLocusPaletteIntervention.v1"
@@ -195,7 +196,10 @@ def run(job_path,output_path):
                      r.get("status")=="VALID_GEOMETRIC_FULL_STACK_CANDIDATE"
                      and len(r.get("hits") or [])>=2]
         require(bool(target_rays),"PALETTE_NO_MULTIHIT_VALID_SOURCE_RAY")
-        selected=target_rays[:int(job.get("maximum_rays",2))]
+        selected=select_generic_rays(
+            target_rays,maximum=int(job.get("maximum_rays",2)))
+        result["sampled_view_indices"]=[int(r["view_index"]) for r in selected]
+        result["sample_policy"]="GEOMETRY_ONLY_OPPOSITE_VIEW_DIVERSE_V1"
         scratch=tmp/"scratch";scratch.mkdir(parents=True,exist_ok=True)
         first=selected[0]
         appearance._set_micro_camera(cam,cameras[first["view_index"]],

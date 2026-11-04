@@ -11,6 +11,8 @@ on:
       - 'tools/corpus/check_corpus370_runner_capacity_v1.py'
       - 'tools/corpus/diagnose_corpus370_wsl_runner_v1.py'
       - 'tests/corpus/test_corpus370_wsl_isolated_v1.py'
+      - 'tools/corpus/probe_corpus370_wsl_scope_v1.py'
+      - 'tests/corpus/test_corpus370_wsl_scope_probe_v1.py'
   workflow_dispatch:
 
 permissions:
@@ -29,5 +31,5 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --disable-pip-version-check pytest
-          python -m py_compile tools/corpus/run_corpus370_wsl_isolated_v1.py
-          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus370_wsl_isolated_v1.py
+          python -m py_compile tools/corpus/run_corpus370_wsl_isolated_v1.py tools/corpus/probe_corpus370_wsl_scope_v1.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus370_wsl_isolated_v1.py tests/corpus/test_corpus370_wsl_scope_probe_v1.py

@@ -16,6 +16,8 @@ from pathlib import Path
 
 import numpy as np
 
+from tools.corpus.generic_source_locus_counterfactual_v1 import evaluate_row
+
 SCHEMA="RealSaS.Corpus370SourceLocusPaletteIntervention.v1"
 STATUS="MEASURED_SOURCE_PALETTE_PILOT__NO_GRAPHICS_FAMILY_AUTHORITY"
 PASS="PASS_SOURCE_RENDER_INTERVENTION_CANDIDATE__DRAWABLE_OWNER_SEPARATE"
@@ -83,6 +85,7 @@ def court(document):
     require(mode in ("PREMULTIPLIED_LINEAR_RGB","STRAIGHT_LINEAR_RGB"),
             "PALETTE_COURT_CARRIER_MISSING")
     passed=0;abstained=0;paired=0
+    generic_evidence=[]
     for row in rows:
         require(row.get("status") in {PASS,*ABSTAINS},"PALETTE_COURT_ROW_STATUS")
         require(row.get("material_semantic_name_used_as_label") is False
@@ -135,6 +138,26 @@ def court(document):
                 "PALETTE_COURT_RGB_METRIC_DRIFT")
         require(row.get("split_and_collision_are_color_only") is True,
                 "PALETTE_COURT_SPLIT_PALETTE_CONTROL")
+        # An independent pure-Python court verifies the additional
+        # reciprocal source-locus counterfactual controls. A SOURCE face
+        # address remains privileged; any result must keep ownership UNKNOWN.
+        generic=row.get("generic_counterfactual")
+        if generic is not None:
+            require(generic.get("source_sha256")==document.get("source_sha256")
+                    and generic.get("camera_sha256")==job.get("camera",{}).get("sha256")
+                    and generic.get("rest_geometry_sha256")==job.get("geometry",{}).get("sha256")
+                    and generic.get("view_index")==row["view_index"]
+                    and generic.get("pixel_x")==row["pixel_x"]
+                    and generic.get("pixel_y")==row["pixel_y"]
+                    and generic.get("locus_a",{}).get("face_index_teacher_only")==faces[0]
+                    and generic.get("locus_b",{}).get("face_index_teacher_only")==faces[1],
+                    "PALETTE_COURT_GENERIC_LOCUS_PARENT_DRIFT")
+            measured=evaluate_row(generic)
+            require(measured.get("same_drawable")=="UNKNOWN"
+                    and measured.get("graphics_owner")=="UNKNOWN"
+                    and measured.get("training_authorized") is False,
+                    "PALETTE_COURT_GENERIC_OWNER_FORGERY")
+            generic_evidence.append(measured)
         if row["status"]=="ABSTAIN_ALPHA_CHANGED_BY_RECOLOR":
             require(max_alpha>TOL-1e-6,"PALETTE_COURT_FALSE_ALPHA_ABSTAIN")
             abstained+=1
@@ -158,6 +181,13 @@ def court(document):
         "measured_valid_palette_rows":passed,
         "measured_source_domain_pair_controls":paired,
         "abstained_rows":abstained,
+        "generic_counterfactual_status":(
+            "MEASURED_SOURCE_LOCI_ONLY__OWNER_UNKNOWN" if generic_evidence
+            else "NOT_MEASURED__GENERIC_COUNTERFACTUAL_ARMS_MISSING"),
+        "generic_two_causal_loci_count":sum(
+            x["measured_a_causal"] and x["measured_b_causal"]
+            for x in generic_evidence),
+        "generic_counterfactuals":generic_evidence,
         "student_drawable_ownership_qualified":False,
         "family_authority_minted":False,
         "training_authorized":False,

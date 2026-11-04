@@ -27,6 +27,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Compile Blender and host renderer sources without importing bpy
+        run: |
+          python -m py_compile \
+            tools/truth_foundry/blender_corpus370_source_locus_palette_v1.py \
+            tools/corpus/run_corpus370_v5_palette_intervention_pilot_v1.py \
+            tools/corpus/validate_corpus370_v5_palette_intervention_v1.py
       - name: Reconstruct source pigment change and alpha with independent math
         run: |
           python -m pip install --disable-pip-version-check numpy pytest

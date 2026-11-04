@@ -164,6 +164,14 @@ def court(proposal,independent_pair_doc):
     require(single["train_ray_atomic_layer_reveal_hits"]==0
             and single["heldout_ray_atomic_layer_reveal_hits"]==0,
             "ANON_EDIT_SINGLE_BASELINE_CONTRADICTION")
+    touched_faces=len({face for _,a,b in pair_rows for face in (a,b)})
+    coverage=touched_faces/n
+    # Research *quality warnings*, never assertions of author boundaries.
+    # A small hand-picked number of source hits is insufficient evidence
+    # to promote a thousands-face graphics partition into a Studio product.
+    overfragmented=(selected["slot_count"]>32
+                    and selected["slot_count"]/n>0.20)
+    undersampled=(len(pair_rows)<max(8,math.ceil(n/200)))
     return {
         "schema":SCHEMA,
         "status":"BOUNDED_SOURCE_HIT_ATOMIC_LAYER_EDIT_PROXY_ONLY__NOT_DRAWABLE_AUTHORITY",
@@ -175,6 +183,18 @@ def court(proposal,independent_pair_doc):
         "selected_candidate_train_only":selected["candidate"],
         "selected_slot_count":selected["slot_count"],
         "selected_heldout_reveal_fraction_diagnostic_only":selected["heldout_fraction"],
+        "source_face_coverage_fraction":coverage,
+        "source_faces_touched_by_independent_ray_courts":touched_faces,
+        "selected_layer_to_face_ratio":selected["slot_count"]/n,
+        "overfragmentation_review_required":overfragmented,
+        "insufficient_spatial_edit_evidence_review_required":undersampled,
+        "functional_layer_compilation_status":(
+            "ABSTAIN_OVERFRAGMENTED_SELECTED_CANDIDATE"
+            if overfragmented else
+            "ABSTAIN_UNDERSAMPLED_EDIT_CONSEQUENCES"
+            if undersampled else
+            "RESEARCH_PROXY_ONLY__FULL_RENDER_PENDING"
+        ),
         "candidate_scores":results,
         "full_render_edit_replay_required":True,
         "cross_view_seam_and_appearance_replay_required":True,

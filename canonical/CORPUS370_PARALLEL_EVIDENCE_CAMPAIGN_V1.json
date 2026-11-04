@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370ParallelEvidenceCampaign.v1",
-  "status": "DISABLED_PENDING_THREE_LANE_CI",
-  "enabled": false,
+  "status": "ACTIVATED_THREE_INDEPENDENT_GITHUB_HOSTED_EVIDENCE_LANES",
+  "enabled": true,
   "campaign": "GRAPHICS_8_FRESH__NATIVE_8__370_EVIDENCE_INTERSECTION",
   "lanes": [
     "GRAPHICS",
@@ -42,5 +42,5 @@
   "graphics_owner_authorized": false,
   "causal_response_authorized": false,
   "tessa_teacher_authorized": false,
-  "notes": "No lanes depend on another campaign lane. All read only immutable original V5 source/teacher evidence and output independent versioned receipts. Join happens only after each independently seals its own results. Failed subjects stay explicit FAIL/UNKNOWN, never cherry-picked or zero-filled."
+  "notes": "Immutable V5 370/352 input, 352 SHA-bound source rays, completed 3-subject source/native/visibility proofs. Three independent workers run Graphics(8 fresh), Native(8 source-authored), Authority(370 evidence intersection) concurrently; all private source/teacher results in Drive, no family promotion/training. No per-subject replacements on failed court."
 }

@@ -6,7 +6,13 @@ must not create a same-drawable positive. Privileged IDs are addresses only.
 """
 from __future__ import annotations
 
-import numpy as np
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+from tools.corpus.diagnose_corpus370_generic_pair_kinematics_v1 import main
+\nimport numpy as np
 import pytest
 
 from tools.corpus.diagnose_corpus370_generic_pair_kinematics_v1 import analyze
@@ -174,3 +180,102 @@ def test_invalid_sha_binding_rejected():
                 authored_teacher_sha256="c"*64,
                 independent_visibility_sha256="d"*64,
                 authored_rest_vertices=v,authored_faces=f)
+
+
+def _fixture_cli(tmp_path,monkeypatch):
+    v,f=source()
+    posed=np.stack([v,v+[.1,.2,.3]])
+    rest_path=tmp_path/"rest.npz"
+    teacher_path=tmp_path/"authored.npz"
+    receipt_path=tmp_path/"authored.npz.json"
+    vis_path=tmp_path/"visibility.json"
+    result_path=tmp_path/"result.json"
+    np.savez(rest_path,rest_vertices_source_world=v,faces=f)
+    np.savez(teacher_path,rest_vertices_source_world=v,faces=f,
+             posed_vertices_source_world=posed)
+    file_sha=lambda x:hashlib.sha256(x.read_bytes()).hexdigest()
+    hashes={"rest":file_sha(rest_path),"teacher":file_sha(teacher_path)}
+    vis={
+        "schema":"RealSaS.Corpus370BoundedSourceHitVisibilityCandidateCourt.v1",
+        "subject_id":"synthetic_sample","source_sha256":"a"*64,
+        "qualified_same_drawable_positives":0,
+        "qualified_different_drawable_negatives":0,
+        "training_authorized":False,
+        "rows":[{
+            "status":"MEASURED_SOURCE_HIT_VISIBILITY_CANDIDATE_ONLY",
+            "source_sha256":"a"*64,
+            "rest_geometry_sha256":hashes["rest"],
+            "view_index":0,"pixel_x":4,"pixel_y":7,
+            "targets":[
+                {"source_face_teacher_only":0,
+                 "barycentric_teacher_only":[.2,.4,.4],
+                 "visibility_label":"POSITIVE_VISIBLE_CONTRIBUTOR"},
+                {"source_face_teacher_only":1,
+                 "barycentric_teacher_only":[.4,.2,.4],
+                 "visibility_label":"NEGATIVE_OPAQUE_OCCLUDED_CONTRIBUTOR"},
+            ],
+        }]
+    }
+    vis_path.write_text(json.dumps(vis))
+    receipt={
+        "schema":"RealSaS.IRISVNextAuthoredTeacherExport.v1",
+        "subject_id":"synthetic_sample",
+        "source":{"sha256":"a"*64},
+        "output":{"sha256":hashes["teacher"]},
+        "teacher_only":True,
+        "canonical_M_G_W_minted":False,
+        "teacher_rig_skin_motion_allowed_as_inference_input":False,
+    }
+    receipt_path.write_text(json.dumps(receipt))
+    args=[
+        "generic_kinematic", "--rest-geometry",str(rest_path),
+        "--authored-teacher",str(teacher_path),
+        "--authored-teacher-receipt",str(receipt_path),
+        "--independent-visibility",str(vis_path),
+        "--source-sha256","a"*64,
+        "--expected-rest-sha256",hashes["rest"],
+        "--expected-teacher-sha256",hashes["teacher"],
+        "--expected-teacher-receipt-sha256",file_sha(receipt_path),
+        "--expected-visibility-sha256",file_sha(vis_path),
+        "--output",str(result_path),
+    ]
+    monkeypatch.setattr(sys,"argv",args)
+    return vis_path,receipt_path,result_path,file_sha
+
+
+def test_cli_sha_bound_real_layout_emits_teacher_only_npz_receipt(tmp_path,monkeypatch):
+    _,_,output,_=_fixture_cli(tmp_path,monkeypatch)
+    main()
+    result=json.loads(output.read_text())
+    assert result["pair_count"]==1
+    assert result["qualified_same_drawable_positives"]==0
+    assert result["qualified_different_drawable_negatives"]==0
+    assert result["training_authorized"] is False
+    assert len(result["parents"]["authored_teacher_receipt_sha256"])==64
+
+
+def test_cli_forged_teacher_identity_rejected_even_if_bytes_rehashed(tmp_path,monkeypatch):
+    vis,receipt,output,sha=_fixture_cli(tmp_path,monkeypatch)
+    data=json.loads(receipt.read_text())
+    data["source"]["sha256"]="f"*64
+    receipt.write_text(json.dumps(data))
+    args=sys.argv[:]
+    pos=args.index("--expected-teacher-receipt-sha256")+1
+    args[pos]=sha(receipt)
+    monkeypatch.setattr(sys,"argv",args)
+    with pytest.raises(ValueError,match="TEACHER_RECEIPT_SOURCE_BINDING"):
+        main()
+    assert not output.exists()
+
+
+def test_cli_tampered_visibility_source_sha_rejected(tmp_path,monkeypatch):
+    vis,receipt,output,sha=_fixture_cli(tmp_path,monkeypatch)
+    data=json.loads(vis.read_text())
+    data["rows"][0]["rest_geometry_sha256"]="c"*64
+    vis.write_text(json.dumps(data))
+    args=sys.argv[:]
+    args[args.index("--expected-visibility-sha256")+1]=sha(vis)
+    monkeypatch.setattr(sys,"argv",args)
+    with pytest.raises(ValueError,match="ROW_SOURCE_IDENTITY"):
+        main()
+    assert not output.exists()

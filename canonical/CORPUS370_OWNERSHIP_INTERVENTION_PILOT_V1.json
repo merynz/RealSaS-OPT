@@ -1,0 +1,134 @@
+{
+  "schema": "RealSaS.Corpus370OwnershipInterventionPilot.v1",
+  "phase": "PREREGISTERED_NOT_EXECUTED",
+  "purpose": "Measure source-locus mechanical and graphical ownership supervision utility without semantic-label leakage",
+  "scope": "SMALL_MORPHOLOGY_STRATIFIED_PILOT__NO_FAMILY_AUTHORITY",
+  "no_training_authority": true,
+  "source_immutable": true,
+  "references": {
+    "methodology": "https://github.com/hyz317/StdGEN/blob/main/blender/blender_lrm_script.py",
+    "limitation": "Original StdGEN naming-based Hair/Body/Face/CLOTH palettes and layered render are teacher-method ideas only; not a claim about exact StdGEN++ training or transferable labels/assets."
+  },
+  "selection": {
+    "min_subjects": 3,
+    "max_subjects": 8,
+    "require_exact_source_sha256": true,
+    "require_current_independent_observation_court": true,
+    "preregister_before_measuring": true,
+    "morphology_strata_required": true,
+    "global_lineage_cluster_disjoint_holdout": true,
+    "all_view_and_palette_variants_share_lineage": true
+  },
+  "measurement": {
+    "preserve": [
+      "source_mesh",
+      "source_uv",
+      "source_material_alpha",
+      "camera",
+      "time",
+      "rig_and_skin_identity",
+      "source_art_bytes"
+    ],
+    "source_address": "source_triangle_id+barycentric+source_sha256",
+    "baseline_conditions": [
+      "FULL",
+      "STANDALONE",
+      "REMOVAL"
+    ],
+    "palette_conditions": [
+      "NOOP_ORIGINAL",
+      "SINGLE_LOCUS_RECOLOR",
+      "SPLIT_ONE_DOMAIN_DIFFERENT_COLORS",
+      "COLLISION_DIFFERENT_DOMAINS_SAME_COLOR"
+    ],
+    "mechanical_conditions": [
+      "ZERO_CONTROL",
+      "PARENT_TO_CHILD",
+      "CHILD_TO_PARENT",
+      "COMMON_ROOT_SHAM"
+    ],
+    "require_randomized_deterministic_palette": true,
+    "palette_seed": 370330,
+    "require_noop_source_parity": true,
+    "require_reversible_and_replay_court": true,
+    "require_full_stack_alpha_aware_rays": true,
+    "missing_mechanics": "MASKED_NOT_ZERO",
+    "unknown_secondary_physics": "ABSTAIN_NOT_STIFFNESS_LABEL"
+  },
+  "student_arms": [
+    {
+      "name": "UNMODIFIED_RGB_TARGET_ONLY",
+      "observation": "SOURCE_RGB_ORIGINAL",
+      "teacher_targets": "QUALIFIED_INTERVENTION_MEASUREMENTS_ONLY",
+      "same_lineage_split": true
+    },
+    {
+      "name": "RECOLORED_OBSERVATION_ABLATION",
+      "observation": "RECOLORED_SOURCE_RGBA",
+      "teacher_targets": "SAME_QUALIFIED_INTERVENTION_MEASUREMENTS_ONLY",
+      "same_lineage_split": true
+    }
+  ],
+  "student_visible_fields": [
+    "source_rgb",
+    "source_alpha",
+    "camera",
+    "observed_view",
+    "observation_patch_features"
+  ],
+  "teacher_only_fields": [
+    "source_triangle_id",
+    "source_barycentric",
+    "teacher_material_name",
+    "teacher_semantic_name",
+    "source_bone_id",
+    "source_skin_id",
+    "source_drawable_id",
+    "teacher_motion_control"
+  ],
+  "forbid_semantic_name_as_owner_label": true,
+  "require_joint_targets": [
+    "SAME_DRAWABLE",
+    "DIFFERENT_DRAWABLE",
+    "CUT_VS_ATTACHMENT",
+    "MECHANICAL_OWNER",
+    "RELATIVE_DEFORMATION",
+    "VIEW_SPECIFIC_OCCLUSION",
+    "ALPHA_COMPOSITING",
+    "SOURCE_LOCUS_CANONICAL_JOIN"
+  ],
+  "required_label_states": [
+    "POSITIVE",
+    "NEGATIVE",
+    "NOT_APPLICABLE",
+    "ABSTAIN"
+  ],
+  "target_requirements": {
+    "independent_court_per_measured_positive": true,
+    "independent_court_per_measured_negative": true,
+    "camera_view_time_conditioning": true,
+    "exact_source_locus_and_canonical_binding": true,
+    "separate_graphical_and_mechanical_ownership": true,
+    "source_art_fidelity": true,
+    "stage48_zero_pair_warning_not_overridden": true
+  },
+  "comparison": {
+    "baseline": "EXISTING_FULL_STANDALONE_REMOVAL",
+    "same_source_and_compute_budget": true,
+    "measure_usable_positive_negative_and_abstain_counts": true,
+    "measure_cross_family_intersection": true,
+    "measure_oracle_consumer_consequence": true,
+    "select_best_arm_using_sealed_train_val_only": true,
+    "if_no_measured_gain": "KEEP_RECOLOR_AS_TEACHER_ORACLE_ONLY"
+  },
+  "prohibited": {
+    "material_or_semantic_name_as_student_label": true,
+    "color_similarity_as_owner_label": true,
+    "source_ids_as_student_input": true,
+    "unverified_positive_or_negative_labels": true,
+    "skipping_missing_subjects_silently": true,
+    "relaxing_existing_geometry_or_two_pixel_thresholds": true,
+    "minting_model_release": true,
+    "starting_optimizer_from_this_spec": true
+  }
+}

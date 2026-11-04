@@ -54,7 +54,7 @@ def write(path,value):
     stage.replace(path)
 
 
-def run(v5_path,roster_path,ray_index_path,root,blender,output):
+def run(v5_path,roster_path,ray_index_path,root,blender,output,*,expanded_cohort=False):
     v5_path=Path(v5_path).resolve();roster_path=Path(roster_path).resolve()
     ray_index_path=Path(ray_index_path).resolve();root=Path(root).resolve()
     blender=Path(blender).resolve();output=Path(output).resolve()
@@ -64,15 +64,22 @@ def run(v5_path,roster_path,ray_index_path,root,blender,output):
             "PALETTE_PILOT_RUNTIME_MISSING")
     v5=json.loads(v5_path.read_text());roster=json.loads(roster_path.read_text())
     rays=json.loads(ray_index_path.read_text())
-    require(rays.get("schema")==RAY_SCHEMA and
-            rays.get("status")=="PILOT_SUBJECTS_ACCOUNTED__GRAPHICS_AUTHORITY_SEPARATE"
-            and set(rays.get("subject_ids") or ())==set(EXPECTED_SUBJECTS)
-            and rays.get("training_authorized") is False,
+    selected=list(rays.get("subject_ids") or ())
+    require(rays.get("schema")==RAY_SCHEMA
+            and rays.get("status")=="PILOT_SUBJECTS_ACCOUNTED__GRAPHICS_AUTHORITY_SEPARATE"
+            and rays.get("training_authorized") is False
+            and rays.get("graphics_owner_truth_minted") is False
+            and len(selected)==len(set(selected))
+            and (
+                (not expanded_cohort and selected==EXPECTED_SUBJECTS)
+                or (expanded_cohort and 1<=len(selected)<=8
+                    and set(rays.get("subject_results") or {})==set(selected))
+            ),
             "PALETTE_PILOT_EXACT_RAY_SOURCE_SELECTION")
     qualified={r["subject_id"]:r for r in v5["subjects"]}
     sources={r["subject_id"]:r for r in roster["subjects"]}
     require(len(qualified)==352 and len(sources)==370
-            and set(EXPECTED_SUBJECTS).issubset(qualified),
+            and set(selected).issubset(qualified),
             "PALETTE_PILOT_COHORT")
     output.mkdir(parents=True,exist_ok=True)
     summary={
@@ -81,14 +88,15 @@ def run(v5_path,roster_path,ray_index_path,root,blender,output):
         "v5_index_sha256":V5_SHA,
         "exact_roster_sha256":ROSTER_SHA,
         "ray_pilot_index_sha256":sha(ray_index_path),
-        "exact_subject_ids":EXPECTED_SUBJECTS,
+        "exact_subject_ids":selected,
+        "expanded_geometric_cohort":bool(expanded_cohort),
         "subjects":{},
         "teacher_only":True,
         "graphics_family_authority_minted":False,
         "training_authorized":False,
     }
     index_path=output/"CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json"
-    for i,sid in enumerate(EXPECTED_SUBJECTS,1):
+    for i,sid in enumerate(selected,1):
         started=time.monotonic()
         folder=output/"subjects"/sid
         folder.mkdir(parents=True,exist_ok=True)
@@ -204,12 +212,15 @@ def run(v5_path,roster_path,ray_index_path,root,blender,output):
         write(index_path,summary)
         print(json.dumps({
             "event":"V5_PALETTE_SOURCE_INTERVENTION",
-            "index":i,"total":3,
+            "index":i,"total":len(selected),
             "subject_id":sid,
             "status":summary["subjects"][sid]["status"],
             "valid_rows":summary["subjects"][sid].get("measured_valid_palette_rows"),
         },sort_keys=True),flush=True)
-    summary["status"]="ALL_THREE_SOURCE_PALETTE_PILOT_SUBJECTS_ACCOUNTED__ADMISSION_SEPARATE"
+    summary["status"]=(
+        "ALL_EXPANDED_SOURCE_PALETTE_SUBJECTS_ACCOUNTED__ADMISSION_SEPARATE"
+        if expanded_cohort else
+        "ALL_THREE_SOURCE_PALETTE_PILOT_SUBJECTS_ACCOUNTED__ADMISSION_SEPARATE")
     summary["failure_count"]=sum(x["status"].startswith("FAIL_") for x in summary["subjects"].values())
     summary["measured_valid_palette_rows"]=sum(x.get("measured_valid_palette_rows",0)
                                                 for x in summary["subjects"].values())
@@ -238,9 +249,12 @@ def main():
     p.add_argument("--extracted-source-root",type=Path,required=True)
     p.add_argument("--blender",type=Path,required=True)
     p.add_argument("--output",type=Path,required=True)
+    p.add_argument("--expanded-geometric-cohort",action="store_true",
+                   help="Allow a separately preregistered, geometry-selected subset of <=8 source subjects.")
     a=p.parse_args()
     run(a.v5_index,a.exact_roster,a.geometric_ray_index,
-        a.extracted_source_root,a.blender,a.output)
+        a.extracted_source_root,a.blender,a.output,
+        expanded_cohort=a.expanded_geometric_cohort)
 
 
 if __name__=="__main__":main()

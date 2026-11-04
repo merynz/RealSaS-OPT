@@ -11,6 +11,8 @@ on:
       - 'tools/corpus/select_generic_source_locus_rays_v1.py'
       - 'tools/corpus/court_corpus370_source_locus_visibility_v1.py'
       - 'tools/corpus/qualify_corpus370_hosted_hit_visibility_v1.py'
+      - 'models/iris/v32/training_input_contract_v1.py'
+      - 'tests/corpus/test_partial_materialization_contract_v1.py'
       - 'tests/corpus/test_corpus370_source_locus_visibility_v1.py'
       - 'tests/corpus/test_select_generic_source_locus_rays_v1.py'
       - 'tests/corpus/test_generic_source_locus_reciprocal_palette_v2.py'
@@ -47,6 +49,7 @@ jobs:
             tools/corpus/select_generic_source_locus_rays_v1.py \
             tools/corpus/court_corpus370_source_locus_visibility_v1.py \
             tools/corpus/qualify_corpus370_hosted_hit_visibility_v1.py \
+            models/iris/v32/training_input_contract_v1.py \
             tools/corpus/run_corpus370_v5_palette_intervention_pilot_v1.py \
             tools/corpus/validate_corpus370_v5_palette_intervention_v1.py \
             tools/truth_foundry/blender_corpus370_source_locus_palette_v1.py
@@ -56,5 +59,6 @@ jobs:
             tests/corpus/test_generic_source_locus_reciprocal_palette_v2.py \
             tests/corpus/test_select_generic_source_locus_rays_v1.py \
             tests/corpus/test_corpus370_source_locus_visibility_v1.py \
+            tests/corpus/test_partial_materialization_contract_v1.py \
             tests/corpus/test_corpus370_v5_palette_intervention_v1.py
           echo "GENERIC_SOURCE_LOCUS_CONTRACTS_ONLY__NO_MEASURED_SUBJECTS_NO_OWNER_AUTHORITY"

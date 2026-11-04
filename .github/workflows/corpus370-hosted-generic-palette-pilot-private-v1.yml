@@ -101,7 +101,22 @@ jobs:
           set -euo pipefail
           rayroot="/home/monster/realsas_authority/corpus370_hosted_ray_outputs/$RAY_RUN-$RAY_ATTEMPT"
           mkdir -p "$rayroot" "$OUTPUT_ROOT"
-          rclone copy             "gdrive:corpus370_preparation_v1/hosted_source_locus_rays_all352/$RAY_RUN-$RAY_ATTEMPT"             "$rayroot" --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+          remote="gdrive:corpus370_preparation_v1/hosted_source_locus_rays_all352/$RAY_RUN-$RAY_ATTEMPT"
+          # The 352-way upstream court has already passed. Fetch only its
+          # SHA-bound index + the preregistered 3 exact source-locus receipts.
+          # Avoid downloading unrelated private subjects to this worker.
+          rclone copyto "$remote/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            "$rayroot/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            --checksum --timeout 90s --retries 3
+          for sid in \
+            corpus_000ca1ae51f9582fde9e \
+            corpus_004e16e05b90505ca23c \
+            corpus_00a3688e42a29045056b; do
+            mkdir -p "$rayroot/subjects/$sid"
+            rclone copyto "$remote/subjects/$sid/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json" \
+              "$rayroot/subjects/$sid/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json" \
+              --checksum --timeout 90s --retries 3
+          done
           python3 - <<'PY'
           import os,json
           from pathlib import Path

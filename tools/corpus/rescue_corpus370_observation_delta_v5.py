@@ -21,6 +21,7 @@ from tools.corpus.prepare_corpus370_observation_packets_v4 import (
 
 PARENT_SCHEMA = "RealSaS.Corpus370PreparedObservationPackets.v3"
 SCHEMA = "RealSaS.Corpus370PreparedObservationPackets.v5"
+PINNED_HISTORICAL_V3_SHA256 = "5007b0863eddce70833ad48c4bc26af92a7abd79b618c8dc5c69ade7f43840a7"
 
 
 def sha(path):
@@ -41,7 +42,7 @@ def rescue(*, parent_index_path, expected_parent_sha256, roster_path,
         Path(parent_index_path).resolve(), Path(roster_path).resolve(),
         Path(output_root).resolve(),
     )
-    require(expected_parent_sha256 == "5007b0863eddce70833ad48c4bc26af92a7abd79b618c8dc5c69ade7f43840a7"
+    require(expected_parent_sha256 == PINNED_HISTORICAL_V3_SHA256
             and sha(parent_index_path) == expected_parent_sha256,
             "CORPUS370_DELTA_V5_PARENT_SHA_DRIFT")
     require(sha(roster_path) == expected_roster_sha256,

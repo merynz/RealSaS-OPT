@@ -1,0 +1,82 @@
+name: corpus370-v5-authored-temporal-teacher-pilot-real-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-v5-authored-temporal-teacher-pilot-real-v1.yml'
+      - 'tools/corpus/run_corpus370_v5_native_teacher_temporal_pilot_v1.py'
+      - 'tests/corpus/test_corpus370_v5_native_teacher_temporal_pilot_v1.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-v5-authored-temporal-teacher-pilot-real-v1
+  cancel-in-progress: false
+
+jobs:
+  temporal-teacher-independent-court-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify teacher source byte and masked/static evidence contracts
+        run: |
+          python -m pip install --disable-pip-version-check numpy scipy pillow pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus370_v5_native_teacher_temporal_pilot_v1.py
+
+  source-locked-blender-v3-measured-pilot:
+    needs: temporal-teacher-independent-court-tests
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      BLENDER: /home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
+      PREP: /home/monster/realsas_authority/corpus370_preparation_v1
+      SOURCE_ARCHIVE_SHA: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      OUTPUT: /home/monster/realsas_authority/corpus370_v5_temporal_teacher_pilot/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render real authored mesh/pose teacher on three predetermined V5 source subjects
+        run: |
+          set -euo pipefail
+          test -x "$PY" && test -x "$BLENDER"
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          "$PY" -u tools/corpus/run_corpus370_v5_native_teacher_temporal_pilot_v1.py \
+            --v5-index "$V5" \
+            --exact-source-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
+            --extracted-source-root "$PREP/source_bundle/extracted/$SOURCE_ARCHIVE_SHA" \
+            --blender "$BLENDER" --output "$OUTPUT" \
+            --max-subjects 3 --max-frames 4
+      - name: Surface measured pilot findings (no fictional causal truth)
+        if: always()
+        run: |
+          if test -f "$OUTPUT/CORPUS370_V5_AUTHORED_TEMPORAL_PILOT_V1.json"; then
+            "$PY" - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          d=json.loads((Path(os.environ['OUTPUT'])/'CORPUS370_V5_AUTHORED_TEMPORAL_PILOT_V1.json').read_text())
+          print('## Real authored temporal evidence pilot')
+          print('Teacher-only; NO causal intervention/model admission.')
+          print('Selected:', ', '.join(d['selected_subject_ids']))
+          print('Results:',json.dumps(d.get('rollup',{}),sort_keys=True))
+          for row in d.get('results',[]):
+              print('- '+row['subject_id']+': '+row['status']+'; '+str(row.get('reason','')))
+          PY
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v5-authored-temporal-pilot-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/CORPUS370_V5_AUTHORED_TEMPORAL_PILOT_V1.json
+            ${{ env.OUTPUT }}/subjects/*/TEMPORAL_TEACHER_COURT_V1.json
+            ${{ env.OUTPUT }}/subjects/*/teacher.npz.json
+            ${{ env.OUTPUT }}/subjects/*/BLENDER_LOG.txt
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 1

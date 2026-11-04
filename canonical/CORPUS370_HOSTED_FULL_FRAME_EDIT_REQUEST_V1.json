@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370FullFrameAnonymousEditRequest.v1",
-  "enabled": false,
-  "status": "DISABLED_UNTIL_FULL_RASTER_CONTRACT_AND_ACTIONLINT_PASS",
+  "enabled": true,
+  "status": "ACTIVATED_ORIGINAL_THREE_SOURCE_FULL_FOV_RGBA_AND_ANONYMOUS_GROUP_EDIT_REPLAY",
   "source_locked": true,
   "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
   "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
@@ -34,5 +34,6 @@
   "animation_replay_authorized": false,
   "model_training_authorized": false,
   "training_authorized": false,
-  "notes": "First full-FOV bounded downsampled rest-pose appearance & whole anonymous group edit replay on 3 original sources. This is NOT 8-view total CAA, source native motion, hidden texture completion or training admission. All source art, face labels and images remain private Drive."
+  "notes": "First full-FOV bounded downsampled rest-pose appearance & whole anonymous group edit replay on 3 original sources. This is NOT 8-view total CAA, source native motion, hidden texture completion or training admission. All source art, face labels and images remain private Drive.",
+  "run_notes": "Three parallel Ubuntu hosted independent Blender original source rest-pose source-vs-soup and 4 group suppression arms, 2 opposite cameras 192x192, all private Drive. Full production CAA/editable author identity, animation replay and model training remain false."
 }

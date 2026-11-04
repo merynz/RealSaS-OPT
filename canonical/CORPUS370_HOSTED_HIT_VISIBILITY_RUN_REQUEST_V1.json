@@ -1,10 +1,10 @@
 {
   "schema": "RealSaS.Corpus370HostedSourceHitVisibilityRequest.v1",
-  "enabled": false,
+  "enabled": true,
   "expected_source_pilot_summary_sha256": "638579beb83edfa90614dd8db5c4da77406862a5cfaa3e8653d0cc67ad93e10e",
   "source_pilot_run_id": 41902211474,
   "source_ray_run_id": 41883539256,
   "subject_count": 3,
   "training_authorized": false,
-  "notes": "Private two-view v2 source-locus manifests; independent V1,V2 replay and strictly bounded visible/opaque-occluded per-hit candidates only. No source faces, RGB, source asset or producer metadata in public artifacts; no drawable/attachment/mechanical/model authority."
+  "notes": "One-time REAL private counterfactual source-hit visibility evidence replay against 3 subjects and 0/4 view pilot 41902211474, SHA-locked summary + original V1/V2 courts. Outputs bounded positive visible and negative opaque-occluded source-hit candidates ONLY; drawable owner, graphics family, training and model remain NOT AUTHORIZED. No public private payloads."
 }

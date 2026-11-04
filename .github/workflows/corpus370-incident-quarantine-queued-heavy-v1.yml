@@ -1,0 +1,41 @@
+name: corpus370-incident-quarantine-queued-heavy-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-incident-quarantine-queued-heavy-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  quarantine-only-unstarted-hazardous-heavy-jobs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Cancel only original UNSTARTED unsafe heavy runs; preserve local truth/checkpoints
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const originalQueuedRuns = [
+              41851612569, // native temporal: post-crash, old workflow lacks memory preflight
+              41842197638  // all352 ray: old workflow lacks memory preflight
+            ];
+            for (const run_id of originalQueuedRuns) {
+              const args = {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id,
+              };
+              const {data: run} = await github.rest.actions.getWorkflowRun(args);
+              core.info('Run ' + run_id + ': ' + run.status + '/' + run.conclusion);
+              if (!['queued', 'pending', 'waiting', 'requested'].includes(run.status)) {
+                core.info('SKIP: not waiting; do not interrupt started work.');
+                continue;
+              }
+              await github.rest.actions.cancelWorkflowRun(args);
+              core.info('CANCEL_REQUESTED_FOR_UNSTARTED_RUN=' + run_id);
+            }
+            core.info('Source truth and original WSL checkpoint directories unchanged.');

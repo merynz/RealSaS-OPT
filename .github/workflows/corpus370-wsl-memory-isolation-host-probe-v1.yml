@@ -1,0 +1,47 @@
+name: corpus370-wsl-memory-isolation-host-probe-v1
+
+# One small self-hosted probe. No Blender, no corpus source reads, no training.
+# The heavy workflows remain workflow_dispatch only.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-wsl-memory-isolation-host-probe-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe-wsl-cgroup-resource-isolation-only:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 8
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm WSL runner resource baseline without deleting any bytes
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          command -v systemd-run >/dev/null
+          "$PY" -m py_compile \
+            tools/corpus/run_corpus370_wsl_isolated_v1.py \
+            tools/corpus/probe_corpus370_wsl_scope_v1.py
+          free -h
+          df -h /
+          echo "RUNNER_RESOURCE_PROBE_NO_CORPUS_MEASUREMENTS_STARTED"
+      - name: Create tiny bounded scope and verify effective kernel cgroup values
+        run: |
+          set -euo pipefail
+          "$PY" -u tools/corpus/run_corpus370_wsl_isolated_v1.py \
+            --unit "realsas-c370-probe-${{ github.run_id }}" \
+            --high-mib 3584 --max-mib 4608 --swap-mib 1024 --cpu-quota 180 \
+            --minimum-ram-gib 5 --minimum-disk-gib 12 \
+            -- "$PY" -u tools/corpus/probe_corpus370_wsl_scope_v1.py
+      - name: Record no source files or checkpoints modified
+        run: |
+          echo 'WSL_CGROUP_MEMORY_ISOLATION_HOST_PROBE_PASS'
+          echo 'Blender source truth workers: NOT STARTED'
+          echo 'No cleanup, no corpus deletes, no training or authority release'

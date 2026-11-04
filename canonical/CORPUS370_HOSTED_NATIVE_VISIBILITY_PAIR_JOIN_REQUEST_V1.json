@@ -1,0 +1,18 @@
+{
+  "schema": "RealSaS.Corpus370HostedNativeVisibilityPairJoinRequest.v1",
+  "enabled": false,
+  "status": "DISABLED_UNTIL_INDEPENDENT_PRIVATE_NATIVE_RECEIPTS_VALIDATED",
+  "source_locked": true,
+  "teacher_only": true,
+  "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
+  "native_teacher_run_id": 41915393652,
+  "native_teacher_attempt": 1,
+  "native_teacher_summary_sha256": "5aa3c4d9cc97ab669d2a7a951a4c9d18218ef5ea4d6f58f5b1ff1ac5b89cc272",
+  "palette_run_id": 41902211474,
+  "source_hit_visibility_run_id": 41904446622,
+  "visibility_batch_sha256": "fbca92b37ed71975de31b77b91a1fba7871c40b03b4b0ebb5b1695669c43bcbd",
+  "expected_subjects": 3,
+  "expected_pixel_pairs": 6,
+  "training_authorized": false,
+  "notes": "Provisional private research join only. Exact source-rest + native authored teacher + 2-view independent visibility. No cause/ownership/graphics/TESSA training authority."
+}

@@ -1,9 +1,6 @@
 name: corpus370-v5-source-locus-geometric-ray-all352-real-v1
+# Manual-only until source-replay OOM isolation is qualified on WSL.
 on:
-  push:
-    branches: [corpus370-source-relative-contact-v1-review]
-    paths:
-      - '.github/workflows/corpus370-v5-source-locus-geometric-ray-all352-real-v1.yml'
   workflow_dispatch:
 
 permissions:
@@ -32,13 +29,19 @@ jobs:
           test -x "$PY"
           test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
           test "$(sha256sum "$REST" | cut -d' ' -f1)" = 384c92940e1ea8eec7bbb98cf319eeda5f89222c07b782b607998e2067f1d9c8
-          "$PY" -m py_compile tools/corpus/measure_corpus370_v5_source_locus_rays_v1.py
+          "$PY" -m py_compile tools/corpus/measure_corpus370_v5_source_locus_rays_v1.py tools/corpus/run_corpus370_wsl_isolated_v1.py
+          command -v systemd-run >/dev/null
       - name: Measure exact complete source ray stacks for ALL 352 V5 observed sources
         run: |
           set -euo pipefail
-          "$PY" -u tools/corpus/measure_corpus370_v5_source_locus_rays_v1.py \
-            --v5-index "$V5" --source-rest-index "$REST" \
-            --output-dir "$OUTPUT" --all
+          "$PY" -u tools/corpus/run_corpus370_wsl_isolated_v1.py \
+            --unit "realsas-c370-rays-${{ github.run_id }}" \
+            --high-mib 3584 --max-mib 4608 --swap-mib 1024 --cpu-quota 180 \
+            --minimum-ram-gib 5 --minimum-disk-gib 12 \
+            --report-path "$OUTPUT/CORPUS370_WSL_RESOURCE_PREFLIGHT_V1.json" \
+            -- "$PY" -u tools/corpus/measure_corpus370_v5_source_locus_rays_v1.py \
+              --v5-index "$V5" --source-rest-index "$REST" \
+              --output-dir "$OUTPUT" --all
       - name: Independently check accounting and source SHA-address evidence for 352
         run: |
           set -euo pipefail
@@ -86,6 +89,7 @@ jobs:
           name: corpus370-v5-source-locus-rays-all352-${{ github.run_id }}
           path: |
             ${{ env.OUTPUT }}/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json
+            ${{ env.OUTPUT }}/CORPUS370_WSL_RESOURCE_PREFLIGHT_V1.json
             ${{ env.OUTPUT }}/subjects/*/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json
           if-no-files-found: warn
           retention-days: 30

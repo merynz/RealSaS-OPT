@@ -20,7 +20,7 @@ import zipfile
 SCHEMA="RealSaS.Corpus370HostedPrivateV5Shards.v1"
 INV_SCHEMA="RealSaS.Corpus370HostedPortabilityInventory.v1"
 ALLOWED_ROOT=Path("/home/monster/realsas_authority")
-MAX_STORAGE_BYTES=11*1024**3
+MAX_STORAGE_BYTES=4*1024**3
 MIN_SHARD=64*1024**2
 MAX_SHARD=3*1024**3
 
@@ -38,7 +38,8 @@ def digest(path):
     return h.hexdigest()
 
 
-def safe_relative(path,root=ALLOWED_ROOT):
+def safe_relative(path,root=None):
+    root=Path(root) if root is not None else ALLOWED_ROOT
     p=Path(path)
     require(p.is_absolute() and p!=root and p.is_relative_to(root)
             and ".." not in p.parts,

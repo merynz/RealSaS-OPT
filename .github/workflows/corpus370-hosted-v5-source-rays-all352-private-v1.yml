@@ -1,0 +1,119 @@
+name: corpus370-hosted-v5-source-rays-all352-private-v1
+
+# MANUAL only. Uses 4-vCPU/16GiB free public GitHub-hosted compute, but
+# NEVER stores corpus bytes, teacher NPZ or private receipts in public artifacts.
+# Requires a dedicated, least-privileged Drive credential in an Actions secret.
+on:
+  workflow_dispatch:
+    inputs:
+      expected_manifest_sha256:
+        description: "Exact private V5 shard-manifest SHA256 from sealed transport receipt"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-hosted-v5-source-rays-all352-private-v1
+  cancel-in-progress: false
+
+jobs:
+  all352-private-v5-geometric-rays:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      RCLONE_CONFIG: ${{ runner.temp }}/realsas-drive.conf
+      MANIFEST_SHA: ${{ inputs.expected_manifest_sha256 }}
+      INPUT_REMOTE: gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      REST: /home/monster/realsas_authority/corpus370_source_rest_courts_v1_8ab2ebf5/SOURCE_REST_COURTS_INDEX.json
+      SOURCE_ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify fail-closed SHA pins, public VM RAM and SSD budget
+        run: |
+          set -euo pipefail
+          test "$(nproc)" -ge 4
+          test "$(awk '/MemTotal:/{print $2}' /proc/meminfo)" -ge 14000000
+          test "$(df -Pk / | awk 'NR==2{print $4}')" -ge 9000000
+          python3 - <<'PY'
+          import os,re
+          from tools.corpus.measure_corpus370_v5_source_locus_rays_v1 import V5_SHA,REST_SHA
+          assert re.fullmatch(r"[a-f0-9]{64}",os.environ["MANIFEST_SHA"])
+          assert len(V5_SHA)==len(REST_SHA)==64
+          print("HOSTED_352_V5_FAIL_CLOSED_PINS_VALIDATED")
+          PY
+      - name: Install minimal numerical and authenticated data transport tools
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check numpy
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Bind private Drive transport without leaking token into public logs
+        env:
+          DRIVE_RCLONE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          test -n "$DRIVE_RCLONE_CONFIG_B64" || { echo "HOSTED_DRIVE_CREDENTIAL_NOT_CONFIGURED"; exit 3; }
+          umask 077
+          printf '%s' "$DRIVE_RCLONE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          rclone lsf "$INPUT_REMOTE" --max-depth 1 --files-only >/dev/null
+          echo "PRIVATE_DRIVE_ACCESS_PASS__NO_TOKEN_DISCLOSED"
+      - name: Fetch SHA-sealed private data and reconstruct ORIGINAL V5 absolute paths
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/private-v5" "$RUNNER_TEMP/private-objects"
+          rclone copy "$INPUT_REMOTE" "$RUNNER_TEMP/private-v5" \
+            --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+          test -s "$RUNNER_TEMP/private-v5/PRIVATE_V5_SHARD_MANIFEST.json"
+          sudo install -d -o "$USER" -g "$(id -gn)" -m 0700 \
+            /home/monster /home/monster/realsas_authority
+          python -u tools/corpus/hosted_v5_private_shards_v1.py hydrate \
+            --manifest "$RUNNER_TEMP/private-v5/PRIVATE_V5_SHARD_MANIFEST.json" \
+            --expected-manifest-sha256 "$MANIFEST_SHA" \
+            --private-dir "$RUNNER_TEMP/private-v5" \
+            --object-cache "$RUNNER_TEMP/private-objects"
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          test "$(sha256sum "$REST" | cut -d' ' -f1)" = 384c92940e1ea8eec7bbb98cf319eeda5f89222c07b782b607998e2067f1d9c8
+          test "$(sha256sum "$SOURCE_ROSTER" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+          echo "EXACT_V5_370_AND_352_SOURCE_REST_INPUTS_RESTORED"
+      - name: Re-measure complete 352 source-locus geometric rays on GitHub-hosted CPU
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/hosted352"
+          python -u tools/corpus/measure_corpus370_v5_source_locus_rays_v1.py \
+            --v5-index "$V5" \
+            --source-rest-index "$REST" \
+            --output-dir "$RUNNER_TEMP/hosted352" \
+            --all > "$RUNNER_TEMP/hosted352/PRIVATE_WORKER_LOG.txt" 2>&1
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          path=Path(os.environ["RUNNER_TEMP"])/"hosted352"/"SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json"
+          result=json.loads(path.read_text())
+          assert result["status"]=="PILOT_SUBJECTS_ACCOUNTED__GRAPHICS_AUTHORITY_SEPARATE"
+          assert len(result["subject_results"])==352
+          assert result["training_authorized"] is False
+          bad=sum(r["status"]!="MEASURED_GEOMETRIC_RAY_CANDIDATE"
+                  for r in result["subject_results"].values())
+          print("# Hosted CPU V5 geometric-source ray sweep")
+          print("Exact V5 source rows: 352; measured failures:",bad)
+          print("Graphics, alpha and training authority: NOT MINTED")
+          assert bad==0,"HOSTED_352_GEOMETRIC_RAY_FAILURES_REQUIRE_REPAIR"
+          PY
+      - name: Publish private source-locus evidence to authenticated Drive, never public Actions artifact
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -s "$RCLONE_CONFIG" && test -d "$RUNNER_TEMP/hosted352"; then
+            rclone copy "$RUNNER_TEMP/hosted352" \
+              "gdrive:corpus370_preparation_v1/hosted_source_locus_rays_all352/${{ github.run_id }}-${{ github.run_attempt }}" \
+              --checksum --transfers 2 --timeout 90s --retries 3
+            echo "PRIVATE_HOSTED_SOURCE_RAY_EVIDENCE_UPLOADED"
+          else
+            echo "NO_HOSTED_SOURCE_RAY_EVIDENCE_TO_PUBLISH"
+          fi

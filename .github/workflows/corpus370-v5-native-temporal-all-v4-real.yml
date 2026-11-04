@@ -6,6 +6,8 @@ on:
       - '.github/workflows/corpus370-v5-native-temporal-all-v4-real.yml'
       - 'tools/corpus/run_corpus370_v5_native_teacher_all_v1.py'
       - 'tests/corpus/test_corpus370_v5_native_teacher_all_v1.py'
+      - 'tools/corpus/run_corpus370_v5_native_drive_recovery_v1.py'
+      - 'tests/corpus/test_corpus370_v5_native_drive_recovery_v1.py'
   workflow_dispatch:
 
 permissions:
@@ -29,7 +31,8 @@ jobs:
           python -m pip install --disable-pip-version-check numpy scipy pillow pytest
           PYTHONPATH=. python -m pytest -q \
             tests/corpus/test_corpus370_v5_native_teacher_all_v1.py \
-            tests/corpus/test_corpus370_v5_native_teacher_temporal_pilot_v1.py
+            tests/corpus/test_corpus370_v5_native_teacher_temporal_pilot_v1.py \
+            tests/corpus/test_corpus370_v5_native_drive_recovery_v1.py
 
   full-source-authored-animation-sweep:
     needs: exact-authority-native-roster-tests
@@ -42,8 +45,8 @@ jobs:
       PREP: /home/monster/realsas_authority/corpus370_preparation_v1
       SOURCE_ARCHIVE_SHA: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
       V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
-      OUTPUT: /home/monster/realsas_authority/corpus370_native_temporal_v4_full_${{ github.sha }}
-      DRIVE: gdrive:corpus370_truth_v5_native_temporal_v4/${{ github.sha }}
+      OUTPUT: /home/monster/realsas_authority/corpus370_native_temporal_v4_full_59df951966a05f3f62e965251dec3d672c28b531
+      DRIVE: gdrive:corpus370_truth_v5_native_temporal_v4/59df951966a05f3f62e965251dec3d672c28b531
     steps:
       - uses: actions/checkout@v4
       - name: Verify source and 16-frame teacher producer identities before native 352 sweep
@@ -54,15 +57,19 @@ jobs:
           rclone listremotes | grep -Fx 'gdrive:'
           test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
           test "$(sha256sum "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
-      - name: Materialize all exact authored rest/pose teacher candidates (16 frames per clip, resumable)
+      - name: Restore and resume original source-locked native truth with crash-safe remote checkpointing
         run: |
           set -euo pipefail
-          "$PY" -u tools/corpus/run_corpus370_v5_native_teacher_all_v1.py \
+          "$PY" -m py_compile tools/corpus/run_corpus370_v5_native_drive_recovery_v1.py
+          "$PY" -u tools/corpus/run_corpus370_v5_native_drive_recovery_v1.py \
+            --python "$PY" \
             --v5-index "$V5" \
             --exact-source-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
             --extracted-source-root "$PREP/source_bundle/extracted/$SOURCE_ARCHIVE_SHA" \
-            --blender "$BLENDER" --max-frames 16 \
-            --output "$OUTPUT"
+            --blender "$BLENDER" \
+            --output "$OUTPUT" \
+            --remote "$DRIVE" \
+            --interval-seconds 45
       - name: Publish immutable teacher-only source truth bytes and receipts in Drive
         run: |
           set -euo pipefail

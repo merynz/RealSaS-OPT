@@ -1,0 +1,146 @@
+name: corpus370-hosted-source-hit-visibility-court-v1
+
+# Private parent-byte revalidation of real V2 RGB/alpha interventions.
+# Absolutely no source art, teacher face IDs or per-ray payload in public artifacts.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - 'canonical/CORPUS370_HOSTED_HIT_VISIBILITY_RUN_REQUEST_V1.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-hosted-source-hit-visibility-court-v1
+  cancel-in-progress: false
+
+jobs:
+  resolve-sha-bound-private-request:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.scope.outputs.ready }}
+      summary_sha256: ${{ steps.scope.outputs.summary_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require exact parent receipts and configured private access
+        id: scope
+        env:
+          DRIVE_SECRET_EXISTS: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import os,json,re
+          from pathlib import Path
+          p=Path('canonical/CORPUS370_HOSTED_HIT_VISIBILITY_RUN_REQUEST_V1.json')
+          d=json.loads(p.read_text())
+          assert d['schema']=='RealSaS.Corpus370HostedSourceHitVisibilityRequest.v1'
+          assert d['training_authorized'] is False
+          assert d['source_pilot_run_id']==41902211474
+          assert d['source_ray_run_id']==41883539256
+          assert d['subject_count']==3
+          assert re.fullmatch(r'[0-9a-f]{64}',d['expected_source_pilot_summary_sha256'])
+          ready=d['enabled'] is True and os.environ['DRIVE_SECRET_EXISTS']=='true'
+          print('ready='+str(ready).lower())
+          print('summary_sha256='+(d['expected_source_pilot_summary_sha256'] if ready else ''))
+          PY
+
+  independently-court-private-source-hit-visibility:
+    needs: resolve-sha-bound-private-request
+    if: github.event.repository.private == false && needs.resolve-sha-bound-private-request.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      RCLONE_CONFIG: /tmp/corpus370-source-hit-vis-rclone.conf
+      EXPECTED_SHA: ${{ needs.resolve-sha-bound-private-request.outputs.summary_sha256 }}
+      SOURCE_REMOTE: gdrive:corpus370_preparation_v1/hosted_generic_palette_reciprocal/41883539256-1/41902211474-1
+      LOCAL_INPUT: ${{ runner.temp }}/private-source-visibility-parent
+      OUTPUT: ${{ runner.temp }}/private-source-visibility-court
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare independent math and transport, no Blender/private corpus required
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Access private source evidence without exposing the token
+        env:
+          DRIVE_RCLONE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_RCLONE_CONFIG_B64"
+          printf '%s' "$DRIVE_RCLONE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          rclone lsf "$SOURCE_REMOTE" --max-depth 1 --files-only >/dev/null
+          echo "PRIVATE_V2_SOURCE_DRIVE_READ_PASS"
+      - name: Restore exact V2 source-replay manifest and only its three courted subjects
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$LOCAL_INPUT" "$OUTPUT"
+          rclone copyto "$SOURCE_REMOTE/CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json" \
+            "$LOCAL_INPUT/CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json" \
+            --checksum --timeout 90s --retries 3
+          test "$(sha256sum "$LOCAL_INPUT/CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json" | cut -d' ' -f1)" = "$EXPECTED_SHA"
+          python3 - <<'PY'
+          import json,os,subprocess
+          from pathlib import Path
+          root=Path(os.environ['LOCAL_INPUT'])
+          d=json.loads((root/'CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json').read_text())
+          assert d['schema']=='RealSaS.Corpus370V5SourcePaletteInterventionPilot.v1'
+          assert d['training_authorized'] is False and d['graphics_family_authority_minted'] is False
+          assert len(d['subjects'])==len(d['exact_subject_ids'])==3
+          remote=os.environ['SOURCE_REMOTE']
+          for sid in d['exact_subject_ids']:
+              assert sid in d['subjects'] and sid.startswith('corpus_')
+              out=root/'subjects'/sid
+              out.mkdir(parents=True,exist_ok=True)
+              for name in ('SOURCE_PALETTE_INTERVENTION_V1.json',
+                           'SOURCE_PALETTE_RECIPROCAL_CAUSAL_COURT_V2.json'):
+                  src=f'{remote}/subjects/{sid}/{name}'
+                  dst=str(out/name)
+                  r=subprocess.run(
+                      ['rclone','copyto',src,dst,
+                       '--checksum','--timeout','90s','--retries','3'],
+                      capture_output=True,check=False,timeout=180,
+                  )
+                  assert r.returncode==0,'PRIVATE_REPLAY_PARENT_FETCH_FAILED'
+          print('EXACT_THREE_PRIVATE_RENDER_AND_INDEPENDENT_V2_COURTS_RESTORED')
+          PY
+      - name: Independently replay renderer and both causal courts; qualify only per-hit visibility
+        run: |
+          set -euo pipefail
+          python3 -u tools/corpus/qualify_corpus370_hosted_hit_visibility_v1.py \
+            --summary "$LOCAL_INPUT/CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json" \
+            --input-root "$LOCAL_INPUT" \
+            --output-root "$OUTPUT" \
+            --expected-summary-sha256 "$EXPECTED_SHA"
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ['OUTPUT'])/'CORPUS370_HOSTED_SOURCE_HIT_VISIBILITY_BATCH_V1.json').read_text())
+          assert d['training_authorized'] is False and d['graphics_family_authority_minted'] is False
+          assert d['qualified_same_drawable_positives']==d['qualified_different_drawable_negatives']==0
+          print('# Bounded REAL source-hit visibility candidates (private proof)')
+          print('Source subjects:',d['subject_count'])
+          print('Source-locus/ray hits:',d['evaluated_source_hit_count'])
+          print('Visible positive hits:',d['visible_source_hit_positives'])
+          print('Opaque-occluded negative hits:',d['opaque_occluded_source_hit_negatives'])
+          print('ABSTAIN hits:',d['abstain_source_hits'])
+          print('Drawable/cut/attachment/mechanical owner: UNKNOWN, 0/0 qualified')
+          print('IRIS head/model/training/materialization authority: NOT MINTED')
+          PY
+      - name: Store private candidate targets and parent digests only in authenticated Drive
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -s "$RCLONE_CONFIG" && test -d "$OUTPUT"; then
+            rclone copy "$OUTPUT" \
+              "gdrive:corpus370_preparation_v1/hosted_source_hit_visibility_v1/41902211474/${{ github.run_id }}-${{ github.run_attempt }}" \
+              --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+            echo "PRIVATE_SOURCE_HIT_VISIBILITY_COURT_RECEIPTS_PUBLISHED"
+          fi

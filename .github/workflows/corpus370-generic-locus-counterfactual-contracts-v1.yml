@@ -32,7 +32,7 @@ permissions:
 
 concurrency:
   group: corpus370-generic-locus-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   synthetic-source-locus-contract-no-ownership-promotion:

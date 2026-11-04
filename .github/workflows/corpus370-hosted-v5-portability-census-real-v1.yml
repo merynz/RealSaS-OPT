@@ -25,7 +25,11 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile tools/corpus/plan_corpus370_hosted_portability_v1.py
-          python -m pip install --disable-pip-version-check numpy
+          python -m pip install --disable-pip-version-check numpy pytest
+          PYTHONPATH=. python -m pytest -q \
+            tests/corpus/test_corpus370_hosted_portability_v1.py \
+            tests/corpus/test_corpus370_hosted_private_shards_v1.py
+          python -m py_compile tools/corpus/hosted_v5_private_shards_v1.py
           PYTHONPATH=. python -c "from tools.corpus.plan_corpus370_hosted_portability_v1 import V5_SHA,REST_PIN,ROSTER_SHA; assert all(len(x)==64 for x in (V5_SHA,REST_PIN,ROSTER_SHA))"
   source-identity-input-bom-on-wsl:
     needs: inventory-contract-hosted
@@ -62,6 +66,29 @@ jobs:
             "gdrive:corpus370_preparation_v1/hosted_portability_v1/PRIVATE_EXACT_HOSTED_BOM.json" \
             --checksum --transfers 1 --timeout 90s
           echo "PRIVATE_SHA_MANIFEST_UPLOADED_TO_DRIVE_NO_PUBLIC_BYTES"
+      - name: Produce SHA-exact original-path private object shards without a public source artifact
+        run: |
+          set -euo pipefail
+          "$PY" -u tools/corpus/hosted_v5_private_shards_v1.py export \
+            --private-inventory "$OUT/PRIVATE_EXACT_HOSTED_BOM.json" \
+            --output-dir "$OUT/private_shards" \
+            --max-shard-mib 768
+          test -s "$OUT/private_shards/PRIVATE_V5_SHARD_MANIFEST.json"
+      - name: Upload authenticated private V5 shards and seal receipt LAST in Google Drive
+        run: |
+          set -euo pipefail
+          remote="gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards"
+          for shard in "$OUT"/private_shards/private-objects-*.zip; do
+            rclone copyto "$shard" "$remote/$(basename "$shard")" \
+              --checksum --transfers 1 --checkers 1 --timeout 90s --retries 3
+          done
+          rclone copyto "$OUT/private_shards/PRIVATE_V5_SHARD_MANIFEST.json" \
+            "$remote/PRIVATE_V5_SHARD_MANIFEST.json" \
+            --checksum --transfers 1 --timeout 90s
+          rclone copyto "$OUT/private_shards/PUBLIC_PATH_FREE_RECEIPT.json" \
+            "$remote/PUBLIC_PATH_FREE_RECEIPT.json" \
+            --checksum --transfers 1 --timeout 90s
+          echo "PRIVATE_SOURCE_SHARDS_UPLOADED_DRIVE_RECEIPT_LAST"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -21,7 +21,8 @@ jobs:
           script: |
             const originalQueuedRuns = [
               41851612569, // native temporal: post-crash, old workflow lacks memory preflight
-              41842197638  // all352 ray: old workflow lacks memory preflight
+              41842197638, // all352 ray: old workflow lacks memory preflight
+              41844980208  // palette Blender pilot: old workflow lacks memory preflight
             ];
             for (const run_id of originalQueuedRuns) {
               const args = {

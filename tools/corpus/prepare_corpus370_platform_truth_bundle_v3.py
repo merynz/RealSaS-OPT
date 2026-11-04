@@ -29,13 +29,17 @@ import zipfile
 
 from tools.observation.source_scene_contract_v2 import _json_and_chunks
 from tools.corpus.prepare_corpus370_observation_packets_v4 import _packet_complete
+from tools.corpus.audit_corpus370_historical_observation_reuse_v1 import inspect as inspect_legacy
 
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "canonical/CORPUS370_IRIS_OBSERVATION_POLICY_V1.json"
 
 SCHEMA = "RealSaS.Corpus370PlatformFamilyInputBundle.v3"
 RECEIPT_SCHEMA = "RealSaS.Corpus370PlatformFamilyInputBundleReceipt.v3"
-OBSERVATION_SCHEMAS = {"RealSaS.Corpus370PreparedObservationPackets.v4"}
+OBSERVATION_SCHEMAS = {
+    "RealSaS.Corpus370PreparedObservationPackets.v4",
+    "RealSaS.Corpus370PreparedObservationPackets.v5",
+}
 REQUIRED_PACKET_FILES = (
     "SOURCE_REST_RENDER_CANDIDATE.json",
     "SOURCE_SCENE_SNAPSHOT.json",
@@ -187,6 +191,20 @@ def prepare(
             and policy.get("training_authorized") is False
             and policy.get("view_count") == 8,
             "CORPUS370_PLATFORM_V3_SOURCE_POLICY")
+    # V5 is an explicitly typed composite: 294 old strict PASS rows were
+    # independently rehashed in their original place; only old FAIL rows were
+    # eligible for V4 repair. Do not accept an unbound synthetic composite.
+    if observations.get("schema") == "RealSaS.Corpus370PreparedObservationPackets.v5":
+        parent = observations.get("parent") or {}
+        require(parent.get("schema") == "RealSaS.Corpus370PreparedObservationPackets.v3"
+                and parent.get("prepared_subject_count") == 294
+                and parent.get("failure_count") == 76
+                and sha256(Path(str(parent.get("path") or ""))) == parent.get("sha256"),
+                "CORPUS370_PLATFORM_V3_V5_PARENT_BINDING")
+        require((observations.get("authority") or {}).get("old_pass_status_upgraded_to_v4") is False,
+                "CORPUS370_PLATFORM_V3_V5_FALSE_RECLASSIFICATION")
+        require(observations.get("historical_v3_pass_preserved_count") == 294,
+                "CORPUS370_PLATFORM_V3_V5_294_PARENT_SUCCESS_REQUIRED")
     worker_binding = observations.get("binding") or {}
     require((worker_binding.get("policy") or {}).get("sha256") == sha256(POLICY_PATH),
             "CORPUS370_PLATFORM_V3_WORKER_POLICY_DRIFT")
@@ -321,40 +339,74 @@ def prepare(
                 "CORPUS370_PLATFORM_V3_OBSERVATION_SOURCE_IDENTITY:" + sid,
             )
             packet = Path(str(observation["packet_path"])).resolve()
-            require(_packet_complete(packet, sid, roster_row["source_sha256"],
-                                    policy, blender_sha),
-                    "CORPUS370_PLATFORM_V3_EIGHT_VIEW_PACKET_OR_IMPORT_NOT_PROVEN:" + sid)
+            producer = observation.get("evidence_producer")
+            composite = observations["schema"] == "RealSaS.Corpus370PreparedObservationPackets.v5"
+            if composite:
+                require(producer in (
+                    "HISTORICAL_V3_PASS_BYTES_RECHECKED",
+                    "NEW_V4_REPAIR_FROM_ORIGINAL_FAIL",
+                ), "CORPUS370_PLATFORM_V3_UNTYPED_V5_SOURCE:" + sid)
+            else:
+                require(producer is None, "CORPUS370_PLATFORM_V3_V4_CANNOT_REDECLARE_PRODUCER:" + sid)
+
+            legacy = producer == "HISTORICAL_V3_PASS_BYTES_RECHECKED"
+            if legacy:
+                court = inspect_legacy(observation, policy)
+                require(court["status"] == "EXACT_HISTORICAL_V3_PASS_BYTES_REUSABLE"
+                        and court["legacy_admission_sha256"] == observation.get("legacy_admission_sha256"),
+                        "CORPUS370_PLATFORM_V3_HISTORICAL_PASS_BYTES_NOT_PROVEN:" + sid)
+                original = Path(str((observation.get("admitted_import_geometry") or {}).get("path") or "")).resolve()
+                require(original == (packet.parent.parent / "imported" / sid / "imported.json").resolve()
+                        and court["original_import_sha256"]
+                            == (observation.get("admitted_import_geometry") or {}).get("sha256"),
+                        "CORPUS370_PLATFORM_V3_HISTORICAL_IMPORT_IDENTITY:" + sid)
+            else:
+                require(_packet_complete(packet, sid, roster_row["source_sha256"],
+                                        policy, blender_sha),
+                        "CORPUS370_PLATFORM_V3_EIGHT_VIEW_PACKET_OR_IMPORT_NOT_PROVEN:" + sid)
+                original = packet / "imported.json"
+                if composite:
+                    prior = observation.get("parent_failure_receipt") or {}
+                    prior_path = Path(str(prior.get("path") or "")).resolve()
+                    require(prior_path.is_file() and sha256(prior_path) == prior.get("sha256"),
+                            "CORPUS370_PLATFORM_V3_V4_REPAIR_ORIGINAL_FAILURE_DRIFT:" + sid)
+
             packet_rows = {
                 name: add_file(bundle_files, f"observations/{sid}/{name}", packet / name)
-                for name in REQUIRED_PACKET_FILES
+                for name in REQUIRED_PACKET_FILES if name != "imported.json"
             }
+            packet_rows["imported.json"] = add_file(
+                bundle_files, f"observations/{sid}/imported.json",
+                original, observation.get("admitted_import_geometry", {}).get("sha256")
+                          if legacy else None,
+            )
             admission = json.loads((packet / "IRIS_OBSERVATION_ADMISSION.json").read_text())
             require(
                 admission.get("status") == "PASS_IRIS_BIND_OBSERVATIONS"
-                and admission.get("source_sha256") == roster_row["source_sha256"],
+                and admission.get("source_sha256") == roster_row["source_sha256"]
+                and admission.get("imported_geometry_sha256")
+                    == packet_rows["imported.json"]["sha256"],
                 "CORPUS370_PLATFORM_V3_OBSERVATION_ADMISSION:" + sid,
             )
-            # The V4 packet's admitted import, source observation and rasters
-            # are SHA-bound. Verify index references as well as packet content;
-            # a forged record must not redirect Stage50 to arbitrary JSON.
-            bindings = observation.get("bindings") or {}
-            for binding_role, filename in (
-                ("admitted_import_geometry", "imported.json"),
-                ("observation_admission", "IRIS_OBSERVATION_ADMISSION.json"),
-                ("source_rest_candidate", "SOURCE_REST_RENDER_CANDIDATE.json"),
-                ("camera_bundle", "camera_bundle.json"),
-                ("source_scene_snapshot", "SOURCE_SCENE_SNAPSHOT.json"),
-            ):
-                expected = bindings.get(binding_role) or {}
-                require(expected.get("sha256") == packet_rows[filename]["sha256"]
-                        and Path(str(expected.get("path") or "")).resolve()
-                            == (packet / filename).resolve(),
-                        "CORPUS370_PLATFORM_V3_WORKER_PACKET_REFERENCE_DRIFT:" + sid + ":" + binding_role)
-            require(admission.get("imported_geometry_sha256")
-                    == packet_rows["imported.json"]["sha256"],
-                    "CORPUS370_PLATFORM_V3_ADMITTED_IMPORT_DRIFT:" + sid)
+            if not legacy:
+                bindings = observation.get("bindings") or {}
+                for binding_role, filename in (
+                    ("admitted_import_geometry", "imported.json"),
+                    ("observation_admission", "IRIS_OBSERVATION_ADMISSION.json"),
+                    ("source_rest_candidate", "SOURCE_REST_RENDER_CANDIDATE.json"),
+                    ("camera_bundle", "camera_bundle.json"),
+                    ("source_scene_snapshot", "SOURCE_SCENE_SNAPSHOT.json"),
+                ):
+                    expected = bindings.get(binding_role) or {}
+                    require(expected.get("sha256") == packet_rows[filename]["sha256"]
+                            and Path(str(expected.get("path") or "")).resolve()
+                                == (packet / filename).resolve(),
+                            "CORPUS370_PLATFORM_V3_WORKER_PACKET_REFERENCE_DRIFT:" + sid + ":" + binding_role)
             subject["observation_preparation"] = {
                 "status": "PASS",
+                "producer_scope": producer or "CURRENT_V4_ONLY",
+                "historical_v3_pass_reattested": legacy,
+                "new_v4_admission_claimed": not legacy,
                 "packet_schema": observation.get("packet_schema"),
                 "packet_identity": observation.get("packet_identity"),
                 "source_rest_candidate": packet_rows["SOURCE_REST_RENDER_CANDIDATE.json"],
@@ -417,6 +469,7 @@ def prepare(
             "observation_failure_does_not_remove_subject_from_candidate_universe": True,
             "observation_failed_subject_forbidden_from_observation_dependent_lane": True,
             "exact_admitted_import_bytes_required_for_each_observation_pass": True,
+            "historical_v3_pass_has_its_own_identity_never_v4_promoted": True,
             "unqualified_observation_cannot_mint_source_surface": True,
             "family_authority_minted": False,
             "split_minted": False,

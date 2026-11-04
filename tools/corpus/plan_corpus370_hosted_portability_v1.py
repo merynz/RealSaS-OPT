@@ -24,7 +24,6 @@ from tools.corpus.audit_corpus370_v5_source_rest_courts_v1 import row_input
 SCHEMA="RealSaS.Corpus370HostedPortabilityInventory.v1"
 V5_SHA="8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4"
 ROSTER_SHA="925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355"
-REST_SHA="384c92940e1ea8eec7bbb98cf319eeda5f89222c07bbb98cf319eeda5b89222c07"
 # The original REST index SHA is passed to the CLI and must equal this exact
 # independent source-rest court receipt from the completed 352 sweep.
 REST_PIN="384c92940e1ea8eec7bbb98cf319eeda5f89222c07b782b607998e2067f1d9c8"

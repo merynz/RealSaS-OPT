@@ -12,7 +12,8 @@ import sys
 from pathlib import Path
 
 from tools.corpus.diagnose_corpus370_generic_pair_kinematics_v1 import main
-\nimport numpy as np
+
+import numpy as np
 import pytest
 
 from tools.corpus.diagnose_corpus370_generic_pair_kinematics_v1 import analyze

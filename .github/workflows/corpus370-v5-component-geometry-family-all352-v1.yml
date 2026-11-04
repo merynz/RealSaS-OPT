@@ -1,0 +1,92 @@
+name: corpus370-v5-component-geometry-family-all352-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths: ['.github/workflows/corpus370-v5-component-geometry-family-all352-v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-v5-component-geometry-family-all352-v1
+  cancel-in-progress: false
+jobs:
+  source-locked-352-independent-component-geometry-courts:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 240
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      REST: /home/monster/realsas_authority/corpus370_source_rest_courts_v1_8ab2ebf5/SOURCE_REST_COURTS_INDEX.json
+      OUTPUT: /home/monster/realsas_authority/corpus370_component_geometry_courts_v1_384c9294
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact 352 PASS and 18 excluded parent identity
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          test "$(sha256sum "$REST" | cut -d' ' -f1)" = 384c92940e1ea8eec7bbb98cf319eeda5f89222c07b782b607998e2067f1d9c8
+          "$PY" -m py_compile tools/corpus/audit_corpus370_v5_component_geometry_courts_v1.py
+      - name: Run all 352 independent canonical UDF topology normals and component-sign courts
+        run: |
+          set -euo pipefail
+          "$PY" -u tools/corpus/audit_corpus370_v5_component_geometry_courts_v1.py \
+            --source-rest-courts-index "$REST" \
+            --v5-index "$V5" \
+            --output-root "$OUTPUT" \
+            --all
+      - name: Prove complete 352-subject accounting without minting training or global solid truth
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ['OUTPUT'])/'COMPONENT_GEOMETRY_COURTS_INDEX.json').read_text())
+          rows=d['subject_results']
+          summary=d['latest_selection_summary']
+          assert d['schema']=='RealSaS.Corpus370V5ComponentGeometryIndependentSweep.v1'
+          assert len(rows)==352 and len(d['excluded_observation_subject_ids'])==18
+          assert d['status']=='ALL_352_COURTS_ACCOUNTED__NOT_TRAINING'
+          assert summary['requested_subject_count']==352
+          assert summary['subject_outcome_count']==352
+          assert summary['independent_court_pass_count']+summary['independent_court_fail_count']==352
+          assert summary['unexamined_observation_pass_count']==0
+          assert d['authority']['global_union_sign_proven'] is False
+          assert d['authority']['family_admission_minted'] is False
+          assert d['authority']['model_targets_issued'] is False
+          assert d['training_authorized'] is False
+          assert all(r['training_authorized'] is False for r in rows.values())
+          assert not set(rows).intersection(d['excluded_observation_subject_ids'])
+          print(json.dumps(summary,sort_keys=True,indent=2),flush=True)
+          PY
+      - name: Publish reviewer-readable rollup (no model admission)
+        if: always()
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          path=Path(os.environ['OUTPUT'])/'COMPONENT_GEOMETRY_COURTS_INDEX.json'
+          print('## Corpus370 V5 source-independent geometry-family sweep')
+          if not path.is_file():
+              print('No sealed source-independent geometry rollup was found.')
+          else:
+              d=json.loads(path.read_text())
+              print('Status: '+d['status'])
+              print('Training authority: FALSE')
+              print('Global solid sign authority: FALSE')
+              print('```json')
+              print(json.dumps(d.get('latest_selection_summary'),indent=2,sort_keys=True))
+              print('```')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v5-component-geometry-all352-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/COMPONENT_GEOMETRY_COURTS_INDEX.json
+            ${{ env.OUTPUT }}/failures/*.json
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 1

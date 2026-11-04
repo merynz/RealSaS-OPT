@@ -33,6 +33,7 @@ from tools.corpus.audit_corpus370_historical_observation_reuse_v1 import inspect
 
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "canonical/CORPUS370_IRIS_OBSERVATION_POLICY_V1.json"
+PINNED_HISTORICAL_V3_SHA256 = "5007b0863eddce70833ad48c4bc26af92a7abd79b618c8dc5c69ade7f43840a7"
 
 SCHEMA = "RealSaS.Corpus370PlatformFamilyInputBundle.v3"
 RECEIPT_SCHEMA = "RealSaS.Corpus370PlatformFamilyInputBundleReceipt.v3"
@@ -196,7 +197,7 @@ def prepare(
     # eligible for V4 repair. Do not accept an unbound synthetic composite.
     if observations.get("schema") == "RealSaS.Corpus370PreparedObservationPackets.v5":
         parent = observations.get("parent") or {}
-        require(parent.get("sha256") == "5007b0863eddce70833ad48c4bc26af92a7abd79b618c8dc5c69ade7f43840a7"
+        require(parent.get("sha256") == PINNED_HISTORICAL_V3_SHA256
                 and parent.get("schema") == "RealSaS.Corpus370PreparedObservationPackets.v3"
                 and parent.get("prepared_subject_count") == 294
                 and parent.get("failure_count") == 76

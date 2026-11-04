@@ -179,6 +179,8 @@ def run(job_path,output_path):
                                       first["pixel_x"],first["pixel_y"],1/32.)
         carrier=appearance._calibrate_rgb_carrier(cam,cameras[first["view_index"]],scratch)
         mode=str(carrier["mode"])
+        result["carrier_mode"]=mode
+        result["carrier_calibration"]=carrier
         original={}
         for index,ray in enumerate(selected):
             original[index]=_measure(cam,cameras[ray["view_index"]],ray,

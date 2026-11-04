@@ -18,6 +18,7 @@ import traceback
 
 from tools.corpus.audit_corpus370_v5_source_rest_courts_v1 import row_input
 from tools.corpus.validate_corpus370_v5_palette_intervention_v1 import court
+from tools.corpus.generic_source_locus_reciprocal_palette_v2 import court_document as court_v2
 
 SCHEMA="RealSaS.Corpus370V5SourcePaletteInterventionPilot.v1"
 V5_SHA="8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4"
@@ -145,16 +146,31 @@ def run(v5_path,roster_path,ray_index_path,root,blender,output):
             require(manifest_path.is_file(),"PALETTE_PILOT_NO_MANIFEST")
             value=json.loads(manifest_path.read_text())
             measured=court(value)
+            # V2 independent court binds new reciprocal recolor arms, keeps
+            # V1 receipts unchanged and forbids drawable/training authority.
+            measured_v2=court_v2(value)
+            require(measured_v2["subject_id"]==sid
+                    and measured_v2["source_sha256"]==source["source_sha256"]
+                    and measured_v2["training_authorized"] is False
+                    and measured_v2["graphics_family_authority_minted"] is False,
+                    "PALETTE_V2_INDEPENDENT_SOURCE_IDENTITY")
             require(measured["subject_id"]==sid
                     and measured["source_sha256"]==source["source_sha256"],
                     "PALETTE_PILOT_INDEPENDENT_COURT_IDENTITY")
             court_path=folder/"SOURCE_PALETTE_INDEPENDENT_COURT_V1.json"
+            court_v2_path=folder/"SOURCE_PALETTE_RECIPROCAL_CAUSAL_COURT_V2.json"
             measured["parent"]={"path":str(manifest_path),"sha256":sha(manifest_path)}
+            measured_v2["parent"]={"path":str(manifest_path),"sha256":sha(manifest_path)}
             write(court_path,measured)
+            write(court_v2_path,measured_v2)
             summary["subjects"][sid]={
                 "status":"PASS_BOUNDED_PALETTE_RENDER_COURT",
                 "source_sha256":source["source_sha256"],
                 "independent_court":ref(court_path,measured["schema"]),
+                "reciprocal_causal_court_v2":ref(court_v2_path,measured_v2["schema"]),
+                "v2_two_causal_locus_rows":measured_v2["two_locus_count"],
+                "v2_one_causal_locus_rows":measured_v2["one_locus_count"],
+                "v2_abstain_rows":measured_v2["abstain_count"],
                 "measured_valid_palette_rows":measured["measured_valid_palette_rows"],
                 "measured_abstain_rows":measured["abstained_rows"],
                 "same_drawable_truth_minted":False,
@@ -190,6 +206,14 @@ def run(v5_path,roster_path,ray_index_path,root,blender,output):
     summary["failure_count"]=sum(x["status"].startswith("FAIL_") for x in summary["subjects"].values())
     summary["measured_valid_palette_rows"]=sum(x.get("measured_valid_palette_rows",0)
                                                 for x in summary["subjects"].values())
+    summary["v2_two_causal_locus_rows"]=sum(x.get("v2_two_causal_locus_rows",0)
+                                            for x in summary["subjects"].values())
+    summary["v2_one_causal_locus_rows"]=sum(x.get("v2_one_causal_locus_rows",0)
+                                            for x in summary["subjects"].values())
+    summary["v2_abstain_rows"]=sum(x.get("v2_abstain_rows",0)
+                                  for x in summary["subjects"].values())
+    summary["qualified_same_owner_pairs"]=0
+    summary["qualified_different_owner_pairs"]=0
     write(index_path,summary)
     print(json.dumps({"event":"V5_PALETTE_INTERVENTION_SUMMARY",
                       "failures":summary["failure_count"],

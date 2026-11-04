@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.Corpus370HostedAnonymousLayerRequest.v1",
-  "status": "ACTIVATED_SHA_BOUND_3_SUBJECT_ANON_LAYER_PROXY_RESEARCH_ONLY",
+  "status": "RERUN_SHA_EXACT_ANON_LAYER_WITH_PROSPECTIVE_COMPLEXITY_AND_PIXEL_EVIDENCE_ABSTAIN_GATES",
   "enabled": true,
   "original_native_visibility_join_run_id": 41916724594,
   "original_native_visibility_join_attempt": 1,
@@ -25,5 +25,11 @@
   "author_drawable_identity_qualified": false,
   "graphics_owner_training_authorized": false,
   "product_compilation_authorized": false,
-  "model_training_authorized": false
+  "model_training_authorized": false,
+  "review_quality": {
+    "max_selected_layer_to_face_fraction_before_review": 0.2,
+    "min_selected_slot_count_for_overfragmentation_warning": 33,
+    "minimum_measured_ray_count_before_spatial_sufficiency": 8,
+    "note": "All warnings are research-level, never inferred author drawable ownership or negative examples."
+  }
 }

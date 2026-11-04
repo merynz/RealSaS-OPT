@@ -130,3 +130,18 @@ def test_new_measured_validity_can_be_abstain_not_fake_negative():
     # a reason label unsupported by the computed RGB/alpha.
     with pytest.raises(ValueError,match="RECONSTRUCTION_METRIC_DRIFT"):
         court(data)
+
+
+def test_invisible_palette_delta_cannot_pretend_to_be_positive_supervision():
+    data=fixture()
+    row=data["rows"][0]
+    row["palette_collision_rgba"]=row["palette_distinct_rgba"].copy()
+    row["palette_rgb_difference_norm"]=0.
+    with pytest.raises(ValueError,match="INVISIBLE_PALETTE_FALSE_PASS"):
+        court(data)
+    row["status"]="ABSTAIN_PALETTE_NO_OBSERVABLE_RGB_DELTA"
+    data["qualified_intervention_rows"]=0
+    data["abstain_intervention_rows"]=1
+    receipt=court(data)
+    assert receipt["measured_valid_palette_rows"]==0
+    assert receipt["abstained_rows"]==1

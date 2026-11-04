@@ -64,6 +64,7 @@ def fixture():
         "subject_id":"synthetic", "source_sha256":"b"*64,
         "parents":{
            "schema":"RealSaS.Corpus370SourceLocusPaletteJob.v1",
+           "subject_id":"synthetic",
            "source":{"sha256":"b"*64},"camera":{"sha256":"c"*64},
            "geometry":{"sha256":"d"*64},"training_authorized":False,
         },

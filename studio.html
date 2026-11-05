@@ -4,16 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>BUSTED · Studio</title>
+  <meta name="theme-color" content="#07111b">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="./static/css/living_compile.css">
   <link rel="stylesheet" href="./static/css/workspace.css">
   <link rel="stylesheet" href="./static/css/studio_requalification.css">
   <link rel="stylesheet" href="./static/css/studio_history.css">
   <link rel="stylesheet" href="./static/css/studio_pose_onion.css">
   <link rel="stylesheet" href="./static/css/studio_brand.css">
+  <link rel="stylesheet" href="./static/css/busted_studio_layout.css">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><a class="studio-brand-link" href="./index.html" aria-label="BUSTED home"><span class="mark">B</span><div><strong>BUSTED</strong><small>STUDIO · REALSAS</small></div></a></div>
+    <div class="brand"><a class="studio-brand-link" href="./index.html" aria-label="BUSTED home"><img class="busted-studio-mark" src="./static/brand/busted-mark.svg" width="35" height="35" alt=""><div><strong>BUSTED</strong><small>STUDIO · REALSAS</small></div></a></div>
+    <div class="studio-panel-controls" aria-label="Workspace panels"><button id="toggleScenePanel" class="studio-panel-toggle" type="button" aria-expanded="false" aria-controls="scenePanel">SCENE</button><button id="toggleInspectorPanel" class="studio-panel-toggle" type="button" aria-expanded="false" aria-controls="inspectorPanel">INSPECTOR</button></div>
     <div class="bundle-open">
       <input id="bundlePath" placeholder="Open a compiled character bundle">
       <button id="openBundle">OPEN</button>
@@ -59,7 +67,7 @@
   </nav>
 
   <main class="workspace">
-    <aside class="left panel">
+    <aside id="scenePanel" class="left panel">
       <div class="panel-title">DIRECTION</div>
       <div id="views" class="view-grid"></div>
       <div class="panel-title">CHARACTER</div>
@@ -81,7 +89,7 @@
       <div id="hint" class="hint">Open a compiled character or return to Awaken.</div>
     </section>
 
-    <aside class="right panel inspector">
+    <aside id="inspectorPanel" class="right panel inspector">
       <div class="panel-title">INSPECTOR</div>
       <div id="productStageNote" class="stage-note">Input accepts the source character. Existing compiled bundles can already be inspected and edited.</div>
       <div id="inspectorBody"></div>
@@ -119,5 +127,6 @@
   <script type="module" src="./static/js/studio_editor_bridge.js"></script>
   <script type="module" src="./static/js/product_shell.js"></script>
   <script type="module" src="./static/js/workspace_bootstrap.js"></script>
+  <script src="./static/js/busted_studio_panels.js" defer></script>
 </body>
 </html>

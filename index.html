@@ -4,10 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>BUSTED · Awaken</title>
-  <meta name="description" content="Awaken a source character into an editable living puppet.">
+  <meta name="description" content="BUSTED turns source artwork into editable living puppets. Powered by RealSaS.">
+  <meta name="theme-color" content="#07111b">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="./static/css/awaken.css">
   <link rel="stylesheet" href="./static/css/awaken_input_slots.css">
   <link rel="stylesheet" href="./static/css/awaken_stage.css">
+  <link rel="stylesheet" href="./static/css/busted_awaken_v3.css">
 </head>
 <body>
   <main class="awaken-shell">
@@ -20,7 +27,7 @@
 
     <header class="masthead" aria-label="BUSTED navigation">
       <nav class="mast-links" aria-label="Primary navigation">
-        <a class="brand-home" href="./index.html" aria-current="page"><span class="brandmark">B</span><span class="brand-name">BUSTED<small>POWERED BY REALSAS</small></span></a>
+        <a class="brand-home" href="./index.html" aria-current="page"><img class="busted-logomark" src="./static/brand/busted-mark.svg" width="40" height="40" alt=""><span class="brand-name">BUSTED<small>POWERED BY REALSAS</small></span></a>
         <a class="studio-link" href="./studio.html">STUDIO <span aria-hidden="true">↗</span></a>
       </nav>
       <div id="mastStatus" class="mast-status"><i></i><span>INTAKE READY</span></div>
@@ -28,6 +35,13 @@
 
     <section class="stage-wrap" aria-label="Character awakening stage">
       <section class="hero">
+        <div class="hero-intro">
+          <p class="hero-eyebrow"><span class="eyebrow-marker" aria-hidden="true"></span> CHARACTER COMPILER / 001</p>
+          <h1>AWAKEN<span class="hero-title-period">.</span></h1>
+          <p class="hero-copy">Your art, <em>alive.</em></p>
+          <p class="hero-description">Compile your character into an editable puppet. Keep its identity, control its structure, and make every movement yours.</p>
+          <div class="hero-meta"><span>ART → STRUCTURE</span><span>STRUCTURE → LIFE</span></div>
+        </div>
         <div class="input-orbit">
           <div class="orbit-ring orbit-ring-a" aria-hidden="true"></div>
           <div class="orbit-ring orbit-ring-b" aria-hidden="true"></div>
@@ -36,8 +50,9 @@
           <label id="dropzone" class="dropzone" for="sourceInput">
             <input id="sourceInput" type="file" accept="image/png,image/webp,image/jpeg" multiple>
             <div class="drop-empty">
-              <span class="drop-symbol">＋</span>
+              <span class="drop-symbol" aria-hidden="true">＋</span>
               <strong>DROP CHARACTER</strong>
+              <span class="drop-subtitle">PNG, JPG or WEBP · FRONT / BACK</span>
             </div>
             <div class="drop-preview"><img id="sourcePreview" alt="Selected source character"></div>
             <span id="viewCount" class="view-count">0 VIEWS</span>

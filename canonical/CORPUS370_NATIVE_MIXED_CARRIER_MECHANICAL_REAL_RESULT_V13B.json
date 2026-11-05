@@ -1,0 +1,186 @@
+{
+  "schema": "RealSaS.Corpus370NativeMixedCarrierRealResult.v13b",
+  "date_utc": "2026-11-05",
+  "status": "REAL_ORIGINAL_SOURCE_NODE_OBJECT_AND_ARMATURE_ACTUATOR_CAUSAL_MECHANICS_3_OF_3_CLOSED_NO_ARTIST_OWNER",
+  "research_pilot_only": true,
+  "hosted": {
+    "github_actions_run_id": 42040199925,
+    "run_url": "https://github.com/merynz/RealSaS-OPT/actions/runs/42040199925",
+    "success_jobs": 4,
+    "failure_jobs": 0,
+    "three_original_source_workers": 3,
+    "private_evidence_root": "gdrive:corpus370_preparation_v1/hosted_native_carrier_private_v13b/42040199925-1",
+    "independent_court_sha256_verified_after_hosting": 3,
+    "raw_source_perturbation_npz_sha256_verified_after_hosting": 3,
+    "second_independent_raw_rigid_vs_local_replay_sources": 3
+  },
+  "lineage": {
+    "original_v9_authored_native_source_run_id": 42014234494,
+    "original_v10_raster_edit_equivalence_run_id": 42017257514,
+    "original_v11_heldout_query_plan_run_id": 42024346219,
+    "original_v12_heldout_source_raster_run_id": 42027947576,
+    "original_v13_armature_only_mechanics_run_id": 42033190490,
+    "first_v13b_source_run_id": 42035670775,
+    "first_v13b_result": "CAT_SUCCESS_TRICERATOPS_AND_COWFISH_FAILED_FBX_RAW_TAKE_VS_ACTION_NAME_BINDING_LOOKUP",
+    "corrected_v13b_run_id": 42040199925,
+    "original_source_asset_sha_unchanged": true,
+    "original_v9_three_source_native_pose_indices_unchanged": true,
+    "source_raster_edit_partition_hypotheses_v12_unchanged": true,
+    "glTF_rigless_CAT_original_importer_object_controls_required": true,
+    "FBX_resolved_Action_name_original_binding_verified": true
+  },
+  "totals": {
+    "source_subjects": 3,
+    "original_source_authored_pose_instances": 9,
+    "source_native_anonymous_measured_carrier_count": 55,
+    "original_pose_bone_carriers": 46,
+    "original_imported_object_node_carriers": 9,
+    "pose_by_control_by_axis_cases": 495,
+    "plus_minus_source_actuation_arms": 990,
+    "source_effectful_cases": 396,
+    "local_nonrigid_effect_cases": 357,
+    "global_rigid_like_effect_cases": 39,
+    "no_effect_masked_cases": 99,
+    "nonreversible_source_control_cases": 0,
+    "no_native_control_abstain_subjects": 0
+  },
+  "original_method": {
+    "source_original_importer_and_actions": true,
+    "source_observation_vertex_identity_authoritative": true,
+    "source_control_types": [
+      "POSE_BONE",
+      "IMPORTED_ANIMATED_OBJECT"
+    ],
+    "native_source_original_carrier_basis_rotation_degrees": 5,
+    "axes": [
+      "X",
+      "Y",
+      "Z"
+    ],
+    "positive_negative_interventions": true,
+    "source_action_pose_replay_predeclared": true,
+    "source_control_names_are_privileged_teacher_only": true,
+    "source_object_owner_control_selected_from_original_action_bindings": true,
+    "source_mesh_bone_material_names_as_student_targets": false,
+    "source_intervention_measured_in_vertex_coordinates": true,
+    "source_original_R_G_B_A_raster_under_each_V13b_perturbation_rendered": false,
+    "source_original_analytic_global_SE3_sham": true,
+    "source_restore_noop_checked": true
+  },
+  "per_subject": [
+    {
+      "label": "CAT",
+      "subject_id": "corpus_000ca1ae51f9582fde9e",
+      "original_source_sha256": "1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850",
+      "original_pose_indices_teacher_only": [
+        12,
+        18,
+        26
+      ],
+      "source_pose_bone_controls": 0,
+      "source_imported_object_node_controls": 8,
+      "source_controls_total": 8,
+      "source_control_pose_axis_cases": 72,
+      "effective_cases": 72,
+      "local_nonrigid_cases": 63,
+      "global_rigid_like_cases": 9,
+      "no_effect_cases": 0,
+      "nonreversible_cases": 0,
+      "candidate_geometry_mixed_group_events": {
+        "8": 63,
+        "16": 63,
+        "32": 63,
+        "64": 54
+      },
+      "original_v13_bone_only_status": "ABSTAIN_NO_NATIVE_ARMATURE_CORRECTLY",
+      "v13b_status": "REAL_ORIGINAL_NATIVE_RIG_OR_OBJECT_ACTUATOR_RESPONSE_OBSERVED_NO_OWNER",
+      "independent_court_sha256": "b31cbb88ff62b97d08c163e2c731f582ff63b5357053efe57076a6517cc6e7bd",
+      "raw_vertex_response_npz_sha256": "845160bb55d3c0e1f251c14f507aeed157c0cbf675514d0e1407e66c16d90293",
+      "independent_raw_npz_rigid_local_replay_verified": true
+    },
+    {
+      "label": "TRICERATOPS",
+      "subject_id": "corpus_004e16e05b90505ca23c",
+      "original_source_sha256": "ad66b51cc5fc44c9a3429a5b1b98a61621af08d58d102d8a817499bd6a7f5b5a",
+      "original_pose_indices_teacher_only": [
+        7,
+        13,
+        16
+      ],
+      "source_pose_bone_controls": 39,
+      "source_imported_object_node_controls": 0,
+      "source_controls_total": 39,
+      "source_control_pose_axis_cases": 351,
+      "effective_cases": 261,
+      "local_nonrigid_cases": 249,
+      "global_rigid_like_cases": 12,
+      "no_effect_cases": 90,
+      "nonreversible_cases": 0,
+      "candidate_geometry_mixed_group_events": {
+        "8": 252,
+        "16": 252,
+        "32": 252
+      },
+      "v13b_status": "REAL_ORIGINAL_NATIVE_RIG_OR_OBJECT_ACTUATOR_RESPONSE_OBSERVED_NO_OWNER",
+      "independent_court_sha256": "7e1a24928c961edef95c9cd2aa80e0b6d90aa9eb5e98b4542e2a2089295bd92c",
+      "raw_vertex_response_npz_sha256": "139409f919a668e370dbe03444a1e613fecdab81d2ecc91688b59f5ad4b17748",
+      "independent_raw_npz_rigid_local_replay_verified": true
+    },
+    {
+      "label": "COWFISH",
+      "subject_id": "corpus_00a3688e42a29045056b",
+      "original_source_sha256": "e6898505d56d8057c975b6376f123876dd957347282413cf3fb825754841b989",
+      "original_pose_indices_teacher_only": [
+        1,
+        6,
+        10
+      ],
+      "source_pose_bone_controls": 7,
+      "source_imported_object_node_controls": 1,
+      "source_controls_total": 8,
+      "source_control_pose_axis_cases": 72,
+      "effective_cases": 63,
+      "local_nonrigid_cases": 45,
+      "global_rigid_like_cases": 18,
+      "no_effect_cases": 9,
+      "nonreversible_cases": 0,
+      "candidate_geometry_mixed_group_events": {
+        "8": 45,
+        "16": 45,
+        "32": 45
+      },
+      "v13b_status": "REAL_ORIGINAL_NATIVE_RIG_OR_OBJECT_ACTUATOR_RESPONSE_OBSERVED_NO_OWNER",
+      "independent_court_sha256": "e44c786bb262f545b3a72e21443c8456f12d3607c8c4cc29d2c100246bf85784",
+      "raw_vertex_response_npz_sha256": "333e7555bfe54f6f47473b96a8361d501729b3075cbcdfec5fc0f2657c84c7c5",
+      "independent_raw_npz_rigid_local_replay_verified": true
+    }
+  ],
+  "interpretation": {
+    "three_source_original_rig_node_causal_response_instrumentation_demonstrated": true,
+    "geometry_partition_k_is_not_artist_layer_count": true,
+    "source_kinematic_controls_are_not_model_semantic_priors": true,
+    "observed_nonrigid_response_not_necessarily_separate_drawable": true,
+    "shared_rigid_response_not_same_drawable_proof": true,
+    "v12_native_rgba_edit_consequence_and_v13b_true_control_response_not_yet_a_joint_rendered_same_intervention": true,
+    "source_authored_shape_key_carriers_unmeasured": true,
+    "fixed_group_count_best_optimality_not_proven": true,
+    "unknown_source_drawable_ownership_must_remain_masked": true,
+    "three_source_pilot_not_generic_unseen_370_coverage": true
+  },
+  "authority": {
+    "artist_same_drawable_positive_pairs": 0,
+    "artist_different_drawable_negative_pairs": 0,
+    "native_full_resolution_CAA_pass": false,
+    "source_attachment_owner_authorized": false,
+    "graphics_owner_authorized": false,
+    "source_bone_name_art_layer_labels_authorized": false,
+    "training_authorized": false,
+    "iris_training_authorized": false,
+    "tessa_training_authorized": false,
+    "materialization_authorized": false,
+    "puppet_product_authorized": false,
+    "observation_pass_count_unchanged": 352,
+    "observation_fail_or_mask_count_unchanged": 18
+  },
+  "next_gate": "V14 independent source perturbation RGBA/alpha depth/occlusion and mechanical response edit consequence join with root/null controls plus heldout source morphologies; no artist-owned editable region authority until separately validated."
+}

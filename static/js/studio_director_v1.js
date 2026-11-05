@@ -9,7 +9,7 @@
   const $=s=>document.querySelector(s);
   const workspaceButtons=[...dock.querySelectorAll('[data-director-workspace]')];
   const commandButtons=[...dock.querySelectorAll('[data-director-command]')];
-  const toolCommands=new Set(['select','translate','rotate','scale']);
+  const toolCommands=new Set(['select','translate','rotate','scale','ik-reach']);
   const legacyModes={rig:'rig',mesh:'mesh',skin:'weights',attach:'bindings',ik:'ik'};
   const params=new URLSearchParams(location.search);
   let studio=null;
@@ -122,9 +122,9 @@
     });
     for(const button of commandButtons){
       const command=button.dataset.directorCommand;
-      const needsClip=['add-key','play'].includes(command);
+      const needsClip=['add-key','play','ik-reach'].includes(command);
       const needsControl=needsClip;
-      const isMotion=['new-clip','add-key','play','stop'].includes(command);
+      const isMotion=['new-clip','add-key','play','stop','ik-reach'].includes(command);
       const isPuppet=Object.prototype.hasOwnProperty.call(legacyModes,command);
       button.hidden=(isMotion&&workspace!=='motion')||(isPuppet&&workspace!=='puppet');
       button.disabled=command!=='open'&&(!loaded||(needsClip&&(!currentClip||(needsControl&&!controlCount))));

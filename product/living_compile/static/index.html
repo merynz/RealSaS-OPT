@@ -31,6 +31,7 @@
   <link rel="stylesheet" href="/static/css/busted_awaken_reactor_v3.css?v=3.1.0">
   <link rel="stylesheet" href="/static/css/busted_product_story_v1.css?v=1.0.0">
   <link rel="stylesheet" href="/static/css/busted_story_refinement_v2.css?v=2.1.0">
+  <link rel="stylesheet" href="/static/css/busted_generic_discovery_v1.css?v=1.0.0">
 </head>
 <body>
   <main class="awaken-shell">
@@ -51,7 +52,7 @@
           <p class="hero-eyebrow"><span class="eyebrow-marker" aria-hidden="true"></span> SOURCE ART / REAL CONTROL</p>
           <h1>BRING YOUR<br>CHARACTER<br><span class="hero-title-accent">TO LIFE<span class="hero-title-period">.</span></span></h1>
           <p class="hero-copy">Your art should do more than sit still.</p>
-          <p class="hero-description">Turn your character artwork into an editable puppet you can pose, animate and control. More source views help preserve more of your original art.</p>
+          <p class="hero-description">We're building a compiler that discovers how your character is put together — geometry, mechanics and appearance — and turns it into a puppet you can direct.</p>
           <div class="hero-meta"><span>ARTWORK → PUPPET</span><span>POSE · ANIMATE · EDIT</span></div>
         </div>
         <div id="structuralField" class="structural-field" aria-hidden="true">
@@ -96,7 +97,7 @@
               <span class="busted-guide-visual-tag">FRONT / FULL CHARACTER</span>
             </div>
             <h3>Start with the front.</h3>
-            <p>Show the whole character in one image. Keep the head, hands and feet visible, with a pose where limbs can be distinguished.</p>
+            <p>Show the entire character in one image. Keep its important parts, joints and distinctive shapes visible wherever possible.</p>
             <div class="busted-guide-format">PNG <i></i> JPG <i></i> WEBP</div>
           </article>
           <article class="busted-guide-card">
@@ -111,7 +112,7 @@
               <span class="busted-guide-visual-tag">BACK / SAME CHARACTER</span>
             </div>
             <h3>Add the back.</h3>
-            <p>A matching back view can help clarify unseen shapes and details. Keep the scale, proportions and pose as consistent as possible.</p>
+            <p>A matching back view can help clarify hidden shapes and attachments. Keep scale, proportions and pose consistent.</p>
             <div class="busted-guide-format">SAME DESIGN <i></i> SAME PROPORTIONS</div>
           </article>
           <article class="busted-guide-card">
@@ -126,7 +127,7 @@
               <span class="busted-guide-visual-tag">CLEAN / READABLE / UNCROPPED</span>
             </div>
             <h3>Make the shapes readable.</h3>
-            <p>Prefer a clear silhouette and simple background. Heavy overlaps, hidden joints and cropped parts leave more uncertainty.</p>
+            <p>Prefer a clear silhouette and simple background. Heavy overlaps, hidden connections and cropped parts leave more uncertainty.</p>
             <div class="busted-guide-format">TRANSPARENT BACKGROUND HELPS</div>
           </article>
         </div>
@@ -143,17 +144,17 @@
             <div class="busted-preflight-good">
               <span class="busted-preflight-kicker">HELPS THE COMPILER</span>
               <p><span aria-hidden="true">+</span> Whole character in frame</p>
-              <p><span aria-hidden="true">+</span> Visible, distinguishable limbs</p>
+              <p><span aria-hidden="true">+</span> Visible, distinguishable body parts</p>
               <p><span aria-hidden="true">+</span> Matching front and back proportions</p>
             </div>
             <div class="busted-preflight-hard">
               <span class="busted-preflight-kicker">CAN INTRODUCE UNCERTAINTY</span>
-              <p><span aria-hidden="true">−</span> Cropped feet, hands or accessories</p>
-              <p><span aria-hidden="true">−</span> Limbs hiding behind one another</p>
+              <p><span aria-hidden="true">−</span> Cropped appendages or accessories</p>
+              <p><span aria-hidden="true">−</span> Important parts hiding behind others</p>
               <p><span aria-hidden="true">−</span> Conflicting views or extreme perspective</p>
             </div>
           </div>
-          <p class="busted-preflight-note">These are recommendations, not strict style rules. Unusual characters are welcome; uncertain regions may need additional review.</p>
+          <p class="busted-preflight-note">These are recommendations, not strict style rules. Humanoid proportions are not required. Novel morphologies are the research target; uncertain regions may still need review.</p>
         </div>
 
         <div class="busted-guide-howto" aria-label="Prepare and compile a puppet">
@@ -176,65 +177,87 @@
       <div class="busted-technology-inner">
         <div class="busted-technology-title">
           <p class="busted-section-index"><span>03</span> / OUR MODELS</p>
-          <h2 id="technologyHeading">YOUR ART.<br>OUR MODELS.<br><em>REAL CONTROL.</em></h2>
-          <p>The goal isn't just to produce another animation. It's to compile the character itself — how its parts connect, deform and move together — so you can direct what happens next.</p>
+          <h2 id="technologyHeading">NOT A TEMPLATE.<br>YOUR CHARACTER.<br><em>REAL CONTROL.</em></h2>
+          <p>We don't begin by assuming your character has two arms and two legs. Our models are being trained to discover the structure of the character in front of them — and compile how that structure moves.</p>
         </div>
         <div class="busted-technology-flow" aria-label="How our models approach the puppet compilation pipeline">
-          <div class="busted-technology-flowtop"><span>FROM YOUR IMAGE</span><span>TO A LIVING PUPPET</span></div>
+          <div class="busted-technology-flowtop"><span>UNSEEN ARTWORK</span><span>DISCOVER → COMPILE → CONTROL</span></div>
           <div class="busted-technology-stages">
             <article>
               <div class="busted-technology-stagehead"><span>01</span><i></i><span>SEE</span></div>
-              <h3>Read the character.</h3>
-              <p>Understand visible parts, hidden surfaces and the relationships behind the artwork.</p>
-              <div class="busted-tech-micro">SOURCE · LAYERS · DEPTH</div>
+              <h3>Discover its parts.</h3>
+              <p>Discover shapes, connections, depth and hidden surfaces without fixing a humanoid anatomy in advance.</p>
+              <div class="busted-tech-micro">MORPHOLOGY · TOPOLOGY</div>
             </article>
             <article>
               <div class="busted-technology-stagehead"><span>02</span><i></i><span>BUILD</span></div>
-              <h3>Compile its mechanics.</h3>
-              <p>Work out geometry, joint relationships and influence so the whole character can respond to a new pose.</p>
-              <div class="busted-tech-micro">MESH · RIG · INFLUENCE</div>
+              <h3>Solve how it moves.</h3>
+              <p>Build geometry, joints, influence and graphics relationships for the structure actually found.</p>
+              <div class="busted-tech-micro">GEOMETRY · MECHANICS · GRAPHICS</div>
             </article>
             <article>
               <div class="busted-technology-stagehead"><span>03</span><i></i><span>AWAKEN</span></div>
-              <h3>Bring the puppet alive.</h3>
-              <p>Deliver the character as a controllable puppet, beginning with an Idle. Motion is something you add to it.</p>
-              <div class="busted-tech-micro">PUPPET · IDLE · CONTROL</div>
+              <h3>Give it a living state.</h3>
+              <p>Compile a persistent, controllable puppet with its first Idle. Add compatible motions when you need them.</p>
+              <div class="busted-tech-micro">PUPPET · IDLE · MOTION</div>
             </article>
+          </div>
+          <div class="busted-generic-difference" aria-label="From fixed templates to generic character understanding">
+            <div class="busted-generic-caption">
+              <span>THE RESEARCH DIFFERENCE</span>
+              <span>UNDERSTAND FIRST · COMPILE SECOND</span>
+            </div>
+            <div class="busted-generic-comparison">
+              <div class="busted-generic-template">
+                <span class="busted-generic-kicker">KNOWN STRUCTURE</span>
+                <h3>Fit the template.</h3>
+                <p>Start with expected bones and find where they belong in an image.</p>
+                <div class="busted-generic-code" aria-hidden="true">HEAD / ARM / ARM / LEG / LEG</div>
+              </div>
+              <div class="busted-generic-divider" aria-hidden="true">≠</div>
+              <div class="busted-generic-discovery">
+                <span class="busted-generic-kicker">OPEN MORPHOLOGY</span>
+                <h3>Discover the character.</h3>
+                <p>Infer the parts, topology, movement relationships and appearance that this character actually has.</p>
+                <div class="busted-generic-code" aria-hidden="true">PARTS → JOINTS → INFLUENCE → CONTROL</div>
+              </div>
+            </div>
+            <p class="busted-generic-caption-note">A knight, a bird, a spider, a serpent: the representation should adapt to the subject, not the other way around.</p>
+          </div>
+          <div class="busted-control-outcomes" aria-label="What structural character understanding enables">
+            <div><span>01 / INTERACT</span><strong>Drag a target.</strong><p>Move a sword tip; let the connected body respond.</p></div>
+            <div><span>02 / TURN</span><strong>Keep the pose.</strong><p>Change direction while mechanics and visual identity stay related.</p></div>
+            <div><span>03 / ACT</span><strong>Choose a motion.</strong><p>Apply an appropriate library preset to the same puppet.</p></div>
           </div>
           <div class="busted-model-capabilities" aria-label="Research and compiler capabilities">
             <div class="busted-model-capabilities-head">
               <span>UNDER THE HOOD / OUR MODELS</span>
-              <span>DESIGN TARGETS · NOT A LIVE DEMO</span>
+              <span>ONE CHARACTER · ONE COHERENT SYSTEM</span>
             </div>
             <div class="busted-model-capabilities-grid">
-              <div><span>01 / PERCEPTION</span><strong>Depth &amp; visibility</strong><small>Understand what's visible, overlapping or out of view.</small></div>
-              <div><span>02 / GEOMETRY</span><strong>Shape &amp; appearance</strong><small>Preserve the original artwork on a movable structure.</small></div>
-              <div><span>03 / MECHANICS</span><strong>Joints &amp; influence</strong><small>Resolve what should move when you pull a control.</small></div>
-              <div><span>04 / CONTROL</span><strong>Pose &amp; motion</strong><small>Make the same puppet respond to new targets and actions.</small></div>
+              <div><span>01 / MORPHOLOGY</span><strong>Find the structure</strong><small>Discover parts and relationships, not predefined limb labels.</small></div>
+              <div><span>02 / GRAPHICS</span><strong>Preserve the art</strong><small>Keep depth, visibility and appearance consistent as it moves.</small></div>
+              <div><span>03 / MECHANICS</span><strong>Move as one</strong><small>Know which joints, surfaces and contacts should respond together.</small></div>
+              <div><span>04 / MOTION</span><strong>Adapt the movement</strong><small>Apply compatible presets to the puppet’s own morphology.</small></div>
             </div>
-          </div>
-          <div class="busted-output-contract" aria-label="The difference between an animation-first workflow and a puppet-first workflow">
-            <div><span>ANIMATION-FIRST</span><p>Choose a movement.</p><small>The clip is the main deliverable.</small></div>
-            <div class="busted-output-versus" aria-hidden="true">≠</div>
-            <div><span>PUPPET-FIRST</span><p>Direct the character.</p><small>Mechanics, appearance and Idle belong to one persistent puppet.</small></div>
           </div>
           <div class="busted-compile-vs-studio" aria-label="What Compile builds and what Studio lets you do">
             <div class="busted-compile-role">
               <span>01 / COMPILE</span>
               <h3>The character is the result.</h3>
-              <p>Our models and compiler are designed to do the structural work: geometry, rig, skin, graphics relationships and the first Idle.</p>
+              <p>Our models and compiler take responsibility for morphology, geometry, rig, influence, layers and the first Idle — before Studio opens.</p>
               <small>THE HEAVY LIFT HAPPENS HERE</small>
             </div>
             <div class="busted-studio-role">
               <span>02 / STUDIO</span>
               <h3>Then make it your own.</h3>
-              <p>Inspect, fine-tune and directly pose the puppet. Build a special motion clip when you want something beyond its initial state.</p>
+              <p>Grab controls, fine-tune the result, attach motion presets or author a special action. The core puppet should already be there.</p>
               <small>CREATIVE CONTROL, NOT MANDATORY SETUP</small>
             </div>
           </div>
           <div class="busted-technology-principle">
             <span class="busted-principle-mark" aria-hidden="true">⌁</span>
-            <p><strong>We don't generate a new character every time it moves.</strong> We aim to compile 3D-aware mechanics beneath its original 2D appearance, so the character keeps its identity as you control it.</p>
+            <p><strong>A generic system shouldn't need a new rig template for every creature.</strong> We are building 3D-aware mechanics beneath the original 2D appearance so unfamiliar characters can become controllable puppets.</p>
           </div>
           <div class="busted-technology-foot">
             <span>STRUCTURE · SOURCE FIDELITY · CONTROL</span>

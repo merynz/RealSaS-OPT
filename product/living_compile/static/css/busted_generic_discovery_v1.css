@@ -1,0 +1,116 @@
+/* Generic structure research — educational, deliberately non-demo visuals.
+ * Makes RealSaS's open morphology problem visually distinct from rig fitting.
+ * Existing product sections retain their layout and animation settings.
+ */
+#technology .busted-generic-difference{
+  margin:18px 0 0;
+  border:1px solid rgba(167,178,248,.34);
+  background:linear-gradient(135deg,rgba(16,25,63,.75),rgba(26,28,68,.80));
+  box-shadow:inset 0 1px 0 rgba(204,211,255,.08);
+}
+#technology .busted-generic-caption{
+  display:flex;justify-content:space-between;align-items:center;gap:18px;
+  padding:16px 21px;
+  border-bottom:1px solid rgba(157,168,242,.22);
+  color:#c4c9f4;
+  font:600 9px/1.5 "IBM Plex Mono",monospace;
+  letter-spacing:.095em;
+}
+#technology .busted-generic-caption span:last-child{color:#8ea4d2}
+#technology .busted-generic-comparison{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 43px minmax(0,1.12fr);
+  align-items:stretch;gap:0;
+}
+#technology .busted-generic-template,
+#technology .busted-generic-discovery{
+  display:flex;flex-direction:column;min-width:0;
+  padding:29px clamp(14px,2vw,29px) 25px;
+}
+#technology .busted-generic-template{
+  background:radial-gradient(ellipse 93% 75% at 50% 0%,rgba(106,114,174,.10),transparent);
+  opacity:.75;
+}
+#technology .busted-generic-discovery{
+  background:
+    radial-gradient(ellipse 98% 85% at 70% 28%,rgba(115,102,245,.20),transparent),
+    linear-gradient(125deg,rgba(68,57,147,.14),rgba(35,45,102,.30));
+  border-left:1px solid rgba(171,168,250,.16);
+}
+#technology .busted-generic-kicker{
+  color:#9bb0e5;font:600 9px/1.4 "IBM Plex Mono",monospace;
+  letter-spacing:.10em;
+}
+#technology .busted-generic-discovery .busted-generic-kicker{color:#d0c6ff}
+#technology .busted-generic-comparison h3{
+  margin:14px 0 12px;color:#f1efff;
+  font:650 clamp(22px,2.04vw,30px)/1.13 "Space Grotesk",sans-serif;
+  letter-spacing:-.045em;
+}
+#technology .busted-generic-comparison p{
+  max-width:360px;margin:0 0 26px;flex:1;
+  color:#a9b7d8;font:400 13px/1.75 "Space Grotesk",sans-serif;
+}
+#technology .busted-generic-discovery p{color:#c1cbed}
+#technology .busted-generic-code{
+  width:100%;
+  padding:13px 0 0;
+  color:#9aaddb;
+  border-top:1px solid rgba(141,154,227,.23);
+  font:600 8px/1.65 "IBM Plex Mono",monospace;
+  letter-spacing:.05em;
+  overflow-wrap:anywhere;
+}
+#technology .busted-generic-discovery .busted-generic-code{color:#c5c2ff}
+#technology .busted-generic-divider{
+  display:flex;align-items:center;justify-content:center;
+  font:400 20px/1 "Space Grotesk",sans-serif;
+  color:#b4b9e7;
+  background:linear-gradient(180deg,rgba(15,24,58,.04),rgba(25,26,70,.38),rgba(15,24,58,.04));
+}
+#technology .busted-generic-caption-note{
+  border-top:1px solid rgba(155,165,241,.17);
+  padding:17px 22px;margin:0;
+  color:#a7b9df;font:400 12px/1.65 "Space Grotesk",sans-serif;
+}
+#technology .busted-control-outcomes{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  border:1px solid rgba(156,164,245,.25);
+  background:linear-gradient(113deg,rgba(22,28,76,.38),rgba(20,29,69,.38));
+  margin-top:18px;
+}
+#technology .busted-control-outcomes>div{
+  padding:24px clamp(13px,1.7vw,23px) 25px;min-width:0;
+}
+#technology .busted-control-outcomes>div+div{border-left:1px solid rgba(155,160,237,.16)}
+#technology .busted-control-outcomes span{
+  color:#a8b4ea;font:600 8px/1.4 "IBM Plex Mono",monospace;
+  letter-spacing:.08em;
+}
+#technology .busted-control-outcomes strong{
+  display:block;margin:12px 0 9px;
+  color:#f0f0ff;font:650 clamp(17px,1.8vw,22px)/1.14 "Space Grotesk",sans-serif;
+  letter-spacing:-.03em;
+}
+#technology .busted-control-outcomes p{
+  margin:0;color:#a9bbdf;font:400 12px/1.7 "Space Grotesk",sans-serif;
+}
+#technology .busted-output-contract{margin-top:18px}
+@media(max-width:720px){
+  #technology .busted-generic-caption{padding:15px;flex-direction:column;align-items:start;gap:5px}
+  #technology .busted-generic-comparison{grid-template-columns:1fr}
+  #technology .busted-generic-template,
+  #technology .busted-generic-discovery{padding:22px 18px}
+  #technology .busted-generic-template{opacity:.8}
+  #technology .busted-generic-divider{height:36px}
+  #technology .busted-generic-discovery{border:0;border-top:1px solid rgba(171,168,250,.18)}
+  #technology .busted-generic-comparison h3{font-size:24px}
+  #technology .busted-generic-comparison p{margin-bottom:16px}
+  #technology .busted-generic-caption-note{padding:14px 17px}
+  #technology .busted-control-outcomes{grid-template-columns:1fr}
+  #technology .busted-control-outcomes>div{padding:20px 17px}
+  #technology .busted-control-outcomes>div+div{
+    border-left:0;border-top:1px solid rgba(155,160,237,.16)
+  }
+  #technology .busted-control-outcomes strong{font-size:22px;margin-top:9px}
+}

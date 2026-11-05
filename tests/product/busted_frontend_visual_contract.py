@@ -65,22 +65,29 @@ async def run():
                 assert await page.locator("#artworkGuide .busted-input-preflight").count()==1
                 assert await page.locator("#technology .busted-technology-stages article").count()==3
                 assert await page.locator("#technology .busted-model-capabilities-grid > div").count()==4
-                assert await page.locator("#technology .busted-output-contract").count()==1
+                assert await page.locator("#technology .busted-output-contract").count()==0, "Duplicate comparison returned"
                 assert "OUR MODELS" in (await page.locator("#technology").inner_text())
-                assert "ANIMATION-FIRST" in (await page.locator("#technology").inner_text())
-                assert "PUPPET-FIRST" in (await page.locator("#technology").inner_text())
+                assert "KNOWN STRUCTURE" in (await page.locator("#technology").inner_text())
+                assert "OPEN MORPHOLOGY" in (await page.locator("#technology").inner_text())
+                assert await page.locator("#technology .busted-generic-comparison > div.busted-generic-template").count()==1
+                assert await page.locator("#technology .busted-generic-comparison > div.busted-generic-discovery").count()==1
+                assert await page.locator("#technology .busted-control-outcomes > div").count()==3
+                assert "Discover the character." in (await page.locator("#technology").inner_text())
+                assert "A knight, a bird, a spider, a serpent" in (await page.locator("#technology").inner_text())
                 assert await page.locator("#technology .busted-compile-vs-studio > div").count()==2
                 technology_text=await page.locator("#technology").inner_text()
                 assert "THE HEAVY LIFT HAPPENS HERE" in technology_text
                 assert "CREATIVE CONTROL, NOT MANDATORY SETUP" in technology_text
                 assert "The character is the result." in technology_text
                 assert "Then make it your own." in technology_text
+                assert "NOT A TEMPLATE." in technology_text
+                assert "PARTS" not in technology_text or "MORPHOLOGY" in technology_text
                 assert "BUSTED" not in (await page.locator("#technology").inner_text()), (
                     "Brand repeated inside the educational model chapter"
                 )
                 assert "FRONT" in (await page.locator("#artworkGuide").inner_text())
                 assert "BACK" in (await page.locator("#artworkGuide").inner_text())
-                assert "TO A LIVING PUPPET" in (await page.locator("#technology").inner_text())
+                assert "DISCOVER → COMPILE → CONTROL" in (await page.locator("#technology").inner_text())
                 assert await page.locator("#technology .busted-editorial-link").get_attribute("href")=="#awakenChamber"
                 for ident in ["#artworkGuide","#technology"]:
                     bounds=await metrics(page,ident)

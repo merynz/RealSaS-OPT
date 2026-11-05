@@ -334,7 +334,7 @@ def run(args):
     seal(out/"PRIVATE_MECHANICAL_RGBA_JOIN_BATCH_V14.json",result)
     print(json.dumps({k:v for k,v in result.items()
                      if k!="failure_reason"},sort_keys=True),flush=True)
-    require(result["status"]=="MEASURED_REAL_V11_HELDOUT_NATIVE_EDIT_RESPONSES_V14__NO_OWNER",
+    require(result["status"]=="MEASURED_REAL_SAME_CAUSAL_NATIVE_CONTROL_RGBA_V14__OWNER_UNKNOWN",
             "V14_ORIGINAL_NATIVE_MECHANICAL_RGBA_COURT_NOT_COMPLETED")
     return result
 

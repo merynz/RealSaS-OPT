@@ -49,7 +49,7 @@ def evidence():
               "artist_different_drawable_negative_pairs":0,
               "graphics_owner_authorized":False,"training_authorized":False,
               "all_control_restoration_noop_max_error":0.}
-    return rest,faces,native,baseline,tensor,manifest,proposal,v11,v12
+    return rest,faces,native,baseline,tensor,manifest,proposal,v11,v12,[0,1,2]
 
 def test_native_local_vs_root_control_without_owner_admission(evidence):
     result=evaluate(*evidence)

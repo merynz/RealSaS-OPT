@@ -1,0 +1,143 @@
+{
+  "schema": "RealSaS.Corpus370AllViewRestFullFrameEditRealResult.v3",
+  "status": "THREE_SOURCE_8INPUT_VIEW_2RENDER_VIEW_OPERATIONAL_EDIT_EXPRESSIBILITY_PASS__NOT_OWNER_TRUTH",
+  "provenance": {
+    "original_352_source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+    "geometry_352_rays_index_sha256": "0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70",
+    "source_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+    "anonymous_layer_parent_sha256": "47b3f3beb7a3625504ccf8488d6fe0cd8fbe0014421c5e4c77748f829c9f01ca",
+    "allview_group_run_id": 41986038051,
+    "allview_group_private_summary_sha256": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1",
+    "full_frame_blender_run_id": 41988158657,
+    "full_frame_blender_conclusion": "SUCCESS",
+    "private_drive_folder": "gdrive:corpus370_preparation_v1/hosted_anonymous_full_frame_allview_private_v3/41988158657-1",
+    "independent_runs_completed": 3
+  },
+  "measurement_definition": {
+    "geometry_views_supplied_to_compiler": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "renderer_edit_response_views_assessed": [
+      0,
+      4
+    ],
+    "view4_geometry_unseen": false,
+    "view4_render_edit_response_withheld_from_compiler": true,
+    "source_rest_only": true,
+    "raster_resolution": [
+      192,
+      192
+    ],
+    "blender_arms_per_render_view": 6,
+    "native_full_resolution": false,
+    "pixels_per_subject": 73728,
+    "total_independent_fov_pixels": 221184,
+    "observed_source_to_triangle_soup_rgba_p99": 0,
+    "observed_no_op_rgba_max": 0,
+    "allow_derived_author_drawable_labels": false
+  },
+  "subjects": [
+    {
+      "reference": "CAT",
+      "source_sha256": "1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850",
+      "source_faces": 684,
+      "previous_v2_groups": 8,
+      "previous_v2_view4_separable": false,
+      "allview_geometric_ray_constraints": 43,
+      "allview_group_count": 8,
+      "view0": {
+        "separable": true,
+        "front_removal_pixels": 1944,
+        "back_removal_pixels": 1242,
+        "back_after_front_removal_pixels": 1270
+      },
+      "view4": {
+        "separable": true,
+        "front_removal_pixels": 752,
+        "back_removal_pixels": 237,
+        "back_after_front_removal_pixels": 2612
+      },
+      "render_manifest_sha256": "ea2e8ef3363e05d4ea233cec1126704982fe12ccbaa9863036c1b06fdc458e80",
+      "render_array_sha256": "78cc6be60cd0abca3a417268e98eb5c39f105624db8913eeaf5a57c3f1af0872",
+      "independent_court_sha256": "1bf791f5055dc779f34c21263836cb1d7f1421c36ebfced06a2184eefed60637",
+      "status": "PASS_BOUNDED_TWO_RENDER_VIEW_SOURCE_EDIT_EXPRESSIBILITY"
+    },
+    {
+      "reference": "TRICERATOPS",
+      "source_sha256": "ad66b51cc5fc44c9a3429a5b1b98a61621af08d58d102d8a817499bd6a7f5b5a",
+      "source_faces": 1334,
+      "allview_geometric_ray_constraints": 60,
+      "allview_group_count": 8,
+      "view0": {
+        "separable": true,
+        "front_removal_pixels": 945,
+        "back_removal_pixels": 905,
+        "back_after_front_removal_pixels": 2413
+      },
+      "view4": {
+        "separable": true,
+        "front_removal_pixels": 999,
+        "back_removal_pixels": 634,
+        "back_after_front_removal_pixels": 2194
+      },
+      "render_manifest_sha256": "694315d9151b1bc6f98c3d91a823a6327f79fc859c46d99562b8851663c31897",
+      "render_array_sha256": "5c016aef047cbba213e9b9c4e958ec1899afb990ad9bfbbf6f8c32ee5c74e63a",
+      "independent_court_sha256": "9951b7438d46a10d0840befc4fc9c88b99296b0aca7509c46914dd63389eba2a",
+      "status": "PASS_BOUNDED_TWO_RENDER_VIEW_SOURCE_EDIT_EXPRESSIBILITY"
+    },
+    {
+      "reference": "COWFISH",
+      "source_sha256": "e6898505d56d8057c975b6376f123876dd957347282413cf3fb825754841b989",
+      "source_faces": 1390,
+      "allview_geometric_ray_constraints": 49,
+      "allview_group_count": 8,
+      "view0": {
+        "separable": true,
+        "front_removal_pixels": 440,
+        "back_removal_pixels": 468,
+        "back_after_front_removal_pixels": 607
+      },
+      "view4": {
+        "separable": true,
+        "front_removal_pixels": 3779,
+        "back_removal_pixels": 448,
+        "back_after_front_removal_pixels": 1040
+      },
+      "render_manifest_sha256": "713bc5e71edc403007374eecab087a16497a049dc29d171a195a4e099c5fbdcc",
+      "render_array_sha256": "86e3c0feb18b6ef976db5ddc8e9b0cf219e29bb2b6963acfd9fef8122e5ab274",
+      "independent_court_sha256": "84174d52142be7d455cab31de128064c092941e0ff69aa90d7f86854b3d3519f",
+      "status": "PASS_BOUNDED_TWO_RENDER_VIEW_SOURCE_EDIT_EXPRESSIBILITY"
+    }
+  ],
+  "authority": {
+    "source_original_art_preserved": true,
+    "operational_group_topology_candidate_only": true,
+    "same_drawable_positive_count": 0,
+    "different_drawable_negative_count": 0,
+    "author_artwork_drawable_partition_qualified": false,
+    "model_student_slot_targets_minted": false,
+    "additional_alpha_semantic_truth_generated": false,
+    "native_resolution_8render_view_appearance_caa_qualified": false,
+    "source_rig_pose_motion_court_qualified": false,
+    "mechanical_owner_authorized": false,
+    "graphics_owner_family_authorized": false,
+    "tessa_teacher_authorized": false,
+    "corpus_materialization_authorized": false,
+    "training_authorized": false,
+    "product_compilation_authorized": false
+  },
+  "next_gates": [
+    "EIGHT_RENDER_VIEW_FULL_FOV_SOURCE_PARITY_AND_PERSISTENT_SLOT_EDIT_CONSEQUENCES",
+    "SOURCE_NATIVE_AUTHORED_POSE_AND_MECHANICAL_PERTURBATION_ACROSS_SOURCE_TRIANGLE_ADDRESS",
+    "MULTI_EDIT_RANDOMIZED_PAIRED_GROUPS_SPLIT_MERGE_AND_COMPLEXITY_REGULARIZATION",
+    "INDEPENDENT_OWNER_NEGATIVE_OR_ABSTAIN_LABELS_WITHOUT_SEMANTIC_STUDENT_NAMES",
+    "ALL_352_SUBJECT_FAMILY_AUTHORITY_MATRIX_BEFORE_MATERIALIZATION"
+  ]
+}

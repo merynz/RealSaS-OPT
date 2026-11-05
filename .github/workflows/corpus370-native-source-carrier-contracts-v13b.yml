@@ -6,6 +6,7 @@ on:
       - '.github/workflows/corpus370-native-source-carrier-contracts-v13b.yml'
       - 'tools/truth_foundry/blender_corpus370_native_carrier_intervention_v13b.py'
       - 'tools/corpus/court_corpus370_native_carrier_mechanics_v13b.py'
+      - 'tools/corpus/corpus370_native_action_binding_v13b.py'
       - 'tools/corpus/run_corpus370_native_carrier_private_v13b.py'
       - 'tests/corpus/test_corpus370_native_carrier_v13b.py'
   pull_request:
@@ -14,6 +15,7 @@ on:
       - '.github/workflows/corpus370-native-source-carrier-contracts-v13b.yml'
       - 'tools/truth_foundry/blender_corpus370_native_carrier_intervention_v13b.py'
       - 'tools/corpus/court_corpus370_native_carrier_mechanics_v13b.py'
+      - 'tools/corpus/corpus370_native_action_binding_v13b.py'
       - 'tools/corpus/run_corpus370_native_carrier_private_v13b.py'
       - 'tests/corpus/test_corpus370_native_carrier_v13b.py'
 permissions:
@@ -34,5 +36,6 @@ jobs:
           python3 -m py_compile \
             tools/truth_foundry/blender_corpus370_native_carrier_intervention_v13b.py \
             tools/corpus/court_corpus370_native_carrier_mechanics_v13b.py \
+            tools/corpus/corpus370_native_action_binding_v13b.py \
             tools/corpus/run_corpus370_native_carrier_private_v13b.py
           PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_native_carrier_v13b.py

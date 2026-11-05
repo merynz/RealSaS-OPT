@@ -147,3 +147,6 @@ html,body{overflow-x:clip;scroll-behavior:smooth}
  .chamber-console .compiler-log{height:43px;min-height:43px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* No decorative text may overprint visible UI controls. */
+.matrix-trace[hidden]{display:none!important}

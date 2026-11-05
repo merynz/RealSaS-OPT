@@ -26,6 +26,7 @@ export function installAwakenReactor(button, sourceViewport) {
   const canvas=document.createElement('canvas');
   canvas.id='awakenIgnitionCanvas';
   canvas.className='awaken-ignition-canvas';
+  canvas.hidden=true; // no ambient VFX, including during initial page load
   canvas.setAttribute('aria-hidden','true');
   button.prepend(canvas);
   const ctx=canvas.getContext('2d', {alpha:true});

@@ -362,6 +362,12 @@ async def run():
               requestAnimationFrame(measure);
             }""")
             await animated.locator("#awaken").click()
+            await animated.wait_for_timeout(610)
+            await animated.locator("#awaken").screenshot(path=str(OUT / "awaken_reactor_charge_1366.png"))
+            await animated.wait_for_function("""() =>
+              document.querySelector('#awaken')?.dataset.ignitionPhase === 'igniting'
+            """, timeout=2700)
+            await animated.locator("#awaken").screenshot(path=str(OUT / "awaken_reactor_blast_1366.png"))
             await animated.wait_for_function("""() => {
               const proof=window.__reactorProof;
               return proof?.phases.includes('charging') &&

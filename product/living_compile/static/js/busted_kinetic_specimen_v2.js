@@ -51,7 +51,7 @@
     const yaw=-.17+Math.sin(sec*.18)*.22+lookX*.52;
     const pitch=-.065+lookY*.17;
     const c=Math.cos(yaw),s=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
-    const scale=Math.min(w/355,h/600)*1.13;
+    const scale=Math.min(w/355,h/600)*1.04;
     const cx=w*.51,cy=h*.49;
     function rotate(v){
       const x=v[0]*c-v[2]*s,z=v[0]*s+v[2]*c;
@@ -184,7 +184,7 @@
       if(name==='root'||name==='crown'||name.endsWith('Foot')||name.endsWith('Knuckle'))continue;
       const p=project(raw),major=['pelvis','spine','chest','head'].includes(name);
       const pulse=.70+.20*Math.sin(sec*1.8+raw[1]*.03);
-      ctx.beginPath();ctx.arc(p.x,p.y,(major?4.5:2.8)*scale,p.p?0:0,Math.PI*2);
+      ctx.beginPath();ctx.arc(p.x,p.y,(major?4.5:2.8)*scale,0,Math.PI*2);
       ctx.fillStyle='rgba(224,238,255,'+pulse.toFixed(2)+')';
       ctx.shadowColor='#a5ccff';ctx.shadowBlur=major?11:7;ctx.fill();ctx.shadowBlur=0;
       ctx.beginPath();ctx.arc(p.x,p.y,(major?11:7)*scale,0,Math.PI*2);

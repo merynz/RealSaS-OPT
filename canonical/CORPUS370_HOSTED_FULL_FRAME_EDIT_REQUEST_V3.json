@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370FullFrameAnonymousEditRequest.v3",
-  "enabled": false,
-  "status": "DISABLED_AWAITING_REAL_ALLVIEW_V3_BATCH_SHA_AND_FULLFRAME_ACTIONLINT",
+  "enabled": true,
+  "status": "ACTIVE_ORIGINAL_THREE_SOURCE_ALLVIEW_3WORKER_FULLFOV_RGBA_AND_EDIT_REPLAY",
   "source_locked": true,
   "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
   "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
@@ -34,7 +34,7 @@
   "model_training_authorized": false,
   "training_authorized": false,
   "notes": "Compare full 192x192 source-vs-soup Blender RGBA, no-op and independently suppressible group A/B at view0 and view4 using eight-view source geometry-selected operational layers, with heldout rendered EDIT outcome and source bytes SHA locked. No author drawable/CAA/model training authority.",
-  "run_notes": "Disabled until original allview group private batch SHA is sealed, consumer runner bound, CI and workflow lint succeed.",
+  "run_notes": "Activated after actionlint and contract CI success. Source original 352/370 pipeline and allview v3 source group candidate exact SHA verified. Three Blender 192x192 full-camera-FOV 6-arm renders for views0/4 with independently withheld edit response. NO owner truth, native CAA, product authority or training.",
   "source_allview_group_batch_sha256": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1",
   "input_geometry_views": [
     0,

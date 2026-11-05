@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370PrivateEightViewIndependentReplayRequest.v4",
-  "enabled": false,
-  "status": "PREPARED__SOURCE_RUN_MUST_COMPLETE_SUCCESS_BEFORE_ACTIVATION",
+  "enabled": true,
+  "status": "ACTIVATED_SOURCE_BYTE_EXACT_THREE_SUBJECT_EIGHT_VIEW_INDEPENDENT_RGBA_REPLAY",
   "real_original_blender_run_id": 41991513344,
   "expected_worker_subject_count": 3,
   "expected_ordinal_folders": [
@@ -27,5 +27,6 @@
   "artist_drawable_owner_identity_minted": false,
   "model_training_authorized": false,
   "training_authorized": false,
-  "no_public_images_or_source_faces": true
+  "no_public_images_or_source_faces": true,
+  "activation_proof": "Original Blender run 41991513344 SUCCESS; actionlint 41992106783 SUCCESS; scoped CI 41992127058 SUCCESS."
 }

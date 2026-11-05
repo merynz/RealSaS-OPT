@@ -59,6 +59,9 @@ assert.equal(reachableTwoBoneConstraints({joints,edges,animatorControls:[
  {control_id:'multi',view_id:'V0',target_joint_ids:['shoulder','elbow']}
 ],constraints,viewID:'V0'}).length,0);
 assert.equal(reachableTwoBoneConstraints({joints,edges,animatorControls,constraints,viewID:'V1'}).length,0);
+assert.equal(reachableTwoBoneConstraints({joints,edges,animatorControls,constraints:[{
+ ...constraints[0],target_bone_id:'elbow'
+}],viewID:'V0'}).length,0);
 const invalidEdges=[...edges,{parent_control_id:'wrist',child_control_id:'elbow',relation_type:'skeleton_hierarchy'}];
 assert.equal(reachableTwoBoneConstraints({joints,edges:invalidEdges,animatorControls,constraints,viewID:'V0'}).length,0);
 

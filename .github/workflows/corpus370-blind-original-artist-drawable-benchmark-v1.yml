@@ -15,7 +15,7 @@ permissions:
   contents: read
 concurrency:
   group: corpus370-original-artist-blind-benchmark-v1-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   no-label-leakage-source-authority:
     runs-on: ubuntu-24.04

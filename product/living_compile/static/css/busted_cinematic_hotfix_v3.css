@@ -1,0 +1,72 @@
+/* BUSTED / Visual audit hotfix 03
+ * Fixes two real regressions seen in the 1440px Playwright witness:
+ *  - legacy transform:none!important had pinned every code spirit at x=0/y=0;
+ *  - body-level rain rendered behind opaque section backgrounds.
+ * Stage-local rain is now composited ABOVE its own scenery but BELOW UI.
+ */
+#introduction,#awakenChamber {isolation:isolate!important;}
+#introduction > .busted-stage-rain,
+#awakenChamber > .busted-stage-rain {
+  position:absolute!important;inset:0!important;
+  width:100%;height:100%;display:block;
+  pointer-events:none!important;
+  mix-blend-mode:screen;
+  z-index:1!important;
+  opacity:.93;
+  background:transparent;
+}
+#introduction > .busted-stage-rain {
+  opacity:.86;
+  mask-image:linear-gradient(90deg,rgba(0,0,0,.16) 0%,rgba(0,0,0,.36) 40%,rgba(0,0,0,.80) 72%,rgba(0,0,0,.80));
+}
+#awakenChamber > .busted-stage-rain {
+  z-index:2!important;
+  opacity:.84;
+  mask-image:
+    radial-gradient(ellipse 38% 51% at 50% 47%,rgba(0,0,0,.11),rgba(0,0,0,.90) 94%);
+}
+#introduction .stage-wrap{position:relative!important;z-index:3!important;}
+#introduction .descend-link{z-index:4!important;}
+#awakenChamber>#matrixTypewriter{z-index:4!important;pointer-events:none!important;}
+#awakenChamber>.chamber-inner{z-index:10!important;}
+#awakenChamber>#matrixTypewriter .spatial-code-spirit{
+  position:absolute!important;left:0!important;top:0!important;
+  /* The runtime owns transform via inline !important to beat historical
+     transform:none!important. DO NOT define transform here. */
+  max-width:300px;overflow:hidden!important;
+  text-overflow:clip;
+}
+#awakenChamber>#matrixTypewriter .spatial-code-spirit .matrix-trace-line {
+  color:#c0d3ff!important;
+  text-shadow:0 0 10px rgba(151,177,255,.32);
+}
+#awakenChamber>#matrixTypewriter .spatial-code-spirit::after {
+  content:"";position:absolute;left:0;top:-2px;width:50%;
+  height:1px;opacity:.4;pointer-events:none;
+  background:linear-gradient(90deg,rgba(141,173,255,.57),transparent);
+}
+#structuralField{
+  background:
+    radial-gradient(ellipse 40% 46% at 51% 47%,rgba(98,89,210,.21),transparent 87%),
+    radial-gradient(ellipse 46% 43% at 50% 69%,rgba(38,91,189,.10),transparent 91%),
+    linear-gradient(165deg,rgba(5,8,23,.27),rgba(13,12,42,.28),rgba(4,7,18,.20))!important;
+}
+#structuralField::before{
+  opacity:.63;
+  border-radius:32% 32% 31% 31%/18% 18% 16% 16%;
+}
+#structuralField .field-reference-top,
+#structuralField .field-reference-bottom {
+  text-shadow:0 0 14px rgba(112,135,246,.21);
+}
+#structuralCanvas {filter:drop-shadow(0 0 12px rgba(119,132,255,.18))}
+#introduction .hero-copy {letter-spacing:-.025em!important}
+#awakenChamber .chamber-header h2{background:linear-gradient(100deg,#f7f8ff 25%,#d2ddff 57%,#aca8ff);-webkit-background-clip:text;background-clip:text;color:transparent!important}
+@media(max-width:760px){
+  #introduction > .busted-stage-rain{opacity:.43;mask-image:linear-gradient(180deg,rgba(0,0,0,.11),rgba(0,0,0,.40) 60%,rgba(0,0,0,.55))}
+  #awakenChamber > .busted-stage-rain{opacity:.33;}
+  #awakenChamber>#matrixTypewriter .spatial-code-spirit{max-width:calc(100vw - 40px);}
+}
+@media(prefers-reduced-motion:reduce){
+  #introduction > .busted-stage-rain,#awakenChamber > .busted-stage-rain{opacity:.22!important;}
+}

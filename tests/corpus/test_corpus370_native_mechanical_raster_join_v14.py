@@ -151,3 +151,28 @@ def test_no_real_visible_change_remains_abstain_not_train():
     result=evaluate(*args)
     assert result["all_original_source_camera_cases_passed"] is False
     assert result["training_authorized"] is False
+
+
+def test_replay_blender_numpy_source_geometry_roundoff_keeps_opaque_control_ids():
+    from tools.corpus.corpus370_native_raster_join_plan_v14 import verify_locked_source_selection
+    rest,baseline,interventions=native()
+    plan=select(rest,baseline,interventions,[0,1,2],2,[0,1,2])
+    replay=copy.deepcopy(plan)
+    replay["controls"][0]["source_global_rigid_residual"]+=7e-11
+    assert verify_locked_source_selection(replay,plan)
+    for mutation in ("control","class","training","numeric","control_count","source_readset"):
+        bad=copy.deepcopy(replay)
+        if mutation=="control":
+            bad["controls"][0]["control_index_teacher_only"]+=1
+        elif mutation=="class":
+            bad["controls"][0]["source_response_class_teacher_only"]="ARTIST_LAYER"
+        elif mutation=="training":
+            bad["training_authorized"]=True
+        elif mutation=="numeric":
+            bad["controls"][0]["source_global_rigid_residual"]+=1e-4
+        elif mutation=="control_count":
+            bad["selected_control_count"]+=1
+        elif mutation=="source_readset":
+            bad["raster_pixels_seen_during_control_selection"]=True
+        with pytest.raises(ValueError):
+            verify_locked_source_selection(bad,plan)

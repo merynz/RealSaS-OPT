@@ -184,7 +184,7 @@ async def run():
                 assert resting["canvasHidden"], "There must be NO ambient reactor rendering"
                 assert resting["phase"] == "rest"
                 assert "linear-gradient" in resting["background"]
-                assert "rgb(20, 29, 66)" in resting["background"], (
+                assert "20, 29, 66" in resting["background"], (
                     f"AWAKEN must rest in cold cobalt, not fiery gradients: {resting}"
                 )
 

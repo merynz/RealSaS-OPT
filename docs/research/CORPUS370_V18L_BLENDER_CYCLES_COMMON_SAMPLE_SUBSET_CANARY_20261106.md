@@ -33,6 +33,8 @@ Compare two operations on the *same set of eight Cycles samples*:
 
 The source FULL target is real Cycles under this exact frozen subset + BOX policy, **not the 32spp original artist appearance target**. Report every 192×192 pixel for the four cameras; don't only report pixels where a proposed method succeeds, and don't count K1 whole-character candidates as editable success. Compare the locked cameras 4/6 separately from exploratory cameras 0/2. Preserve raw array SHA and independent court SHA readback in private Drive.
 
+**Non-vacuity gate, fixed before source results:** At least one originally rendered source FULL pixel within each nontrivial source must exhibit a max inter-subset premultiplied RGBA difference above `.025` (8 distinct source subset indices). If none does, the sample-index test is *vacuously consistent*: it may only have replayed the same pixel-center visibility, and cannot establish anti-alias/common-sampling effects. The source court must count this explicitly for original Cat and Triceratops; keep any absence a fail-closed scientific result rather than assigning negative graphics relations.
+
 Possible outcomes:
 - Sample-best and fixed pre-filter both reproduce the original source subset while postfilter fails: **controlled proof of raster operation order under one common Cycles sampling domain**, not arbitrary art layer ownership.
 - Per-index best fails: source pixel sample alignment / shader sampling / face deletion mechanism must be diagnosed before claiming a fixed common-domain reference.

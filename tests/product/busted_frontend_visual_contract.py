@@ -181,48 +181,54 @@ async def run():
                 )
                 await page.evaluate("""() => {
                   const button=document.querySelector('#awaken');
-                  window.__ignitionVisualProof={phases:[],sample:null};
+                  window.__ignitionVisualProof={phases:[]};
                   const proof=window.__ignitionVisualProof;
                   new MutationObserver(() => {
                     const phase=button.classList.contains('is-charging')?'charge':
                       button.classList.contains('is-igniting')?'ignition':'rest';
                     proof.phases.push(phase);
-                    if(phase==='charge'){
-                      setTimeout(() => {
-                        const p=getComputedStyle(button,'::before');
-                        const face=button.getBoundingClientRect();
-                        proof.sample={
-                          opacity:parseFloat(p.opacity),
-                          scale:new DOMMatrixReadOnly(p.transform).a,
-                          width:parseFloat(p.width),height:parseFloat(p.height),
-                          faceWidth:face.width,faceHeight:face.height
-                        };
-                      },200);
-                    }
                   }).observe(button,{attributes:true,attributeFilter:['class']});
                 }""")
                 await button.click()
                 await page.wait_for_function("""() => {
                   const proof=window.__ignitionVisualProof;
                   const b=document.querySelector('#awaken');
-                  return proof?.sample&&proof.phases.includes('charge')&&
-                    proof.phases.includes('ignition')&&proof.phases.includes('rest')&&
+                  return proof?.phases.includes('charge')&&
+                    proof.phases.includes('ignition')&&
+                    proof.phases.includes('rest')&&
                     !b.classList.contains('is-charging')&&
                     !b.classList.contains('is-igniting');
                 }""", timeout=5000)
-                proof=await page.evaluate("window.__ignitionVisualProof")
-                assert .08 < proof["sample"]["scale"] < 1, (
-                    f"Ignition charge never filled the actual button face: {proof}"
+                # Separate a deterministic geometry/CSS probe from the real
+                # click transition. On slow canvas frames a 200ms timer can run
+                # AFTER the 940ms interaction has already finished.
+                await button.evaluate("b=>b.classList.add('is-charging')")
+                await page.wait_for_timeout(220)
+                sample=await button.evaluate("""button => {
+                  const p=getComputedStyle(button,'::before');
+                  const face=button.getBoundingClientRect();
+                  return {
+                    opacity:parseFloat(p.opacity),
+                    scale:new DOMMatrixReadOnly(p.transform).a,
+                    width:parseFloat(p.width),height:parseFloat(p.height),
+                    faceWidth:face.width,faceHeight:face.height
+                  };
+                }""")
+                assert .08 < sample["scale"] <= 1, (
+                    f"Ignition charge did not advance across the button face: {sample}"
                 )
-                assert proof["sample"]["opacity"] > .9, (
-                    f"Ignition power overlay not visible: {proof}"
+                assert sample["opacity"] > .9, (
+                    f"Ignition power overlay not visible: {sample}"
                 )
-                assert abs(proof["sample"]["width"]-proof["sample"]["faceWidth"]) <= 3, (
-                    f"Ignition overlay and actual button widths differ: {proof}"
+                assert abs(sample["width"]-sample["faceWidth"]) <= 3, (
+                    f"Ignition overlay and button widths differ: {sample}"
                 )
-                assert abs(proof["sample"]["height"]-proof["sample"]["faceHeight"]) <= 3, (
-                    f"Ignition overlay and actual button heights differ: {proof}"
+                assert abs(sample["height"]-sample["faceHeight"]) <= 3, (
+                    f"Ignition overlay and button heights differ: {sample}"
                 )
+                if width == 1440:
+                    await button.screenshot(path=str(OUT / "awaken_click_charge_1440.png"))
+                await button.evaluate("b=>b.classList.remove('is-charging')")
                 assert await page.evaluate("window.__ignitionCompilePosts") == 0, (
                     "Preview ignition must never start a real compile!"
                 )

@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.Corpus370PersistentEightViewRestEditRealResult.v4",
-  "status": "REAL_THREE_SOURCE_EIGHT_CAMERA_FIXED_GROUP_PAIR_EDIT_CONSEQUENCES_MEASURED__NO_DRAWABLE_OWNER_AUTHORITY",
+  "status": "REAL_3_SOURCE_EIGHT_CAMERA_PERSISTENT_EDIT_AND_INDEPENDENT_PIXEL_BYTE_REPLAY_PASS__NO_OWNER_AUTHORITY",
   "provenance": {
     "v5_source_index_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
     "source_ray_index_sha256": "0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70",
@@ -12,7 +12,9 @@
     "actual_blender_run_head_sha256": "ee3fc58b68e1846a8c2040222d3178f6a8df9e6b",
     "actual_source_private_folder": "gdrive:corpus370_preparation_v1/hosted_persistent_eight_view_edit_private_v4/41991513344-1",
     "independent_byte_replay_workflow_run": 41992330283,
-    "independent_byte_replay_conclusion_at_checkpoint": "IN_PROGRESS__DO_NOT_CLAIM_SUCCESS"
+    "independent_byte_replay_conclusion_at_checkpoint": "SUCCESS",
+    "independent_byte_replay_sha256": "52e9a1c490a6ecc3e0c9a38b6fc54ea648784fd3eaa552e38c3e7b48081b2656",
+    "independent_byte_replay_private_folder": "gdrive:corpus370_preparation_v1/hosted_eight_view_independent_replay_v4/41992330283-1"
   },
   "measurement": {
     "three_sha_identical_original_subjects": 3,
@@ -35,7 +37,11 @@
     "source_animatable_skin_or_deform_courted": false,
     "sampled_editor_group_slots_per_subject": 2,
     "selected_group_slots_per_subject": 8,
-    "full_group_slot_census_qualified": false
+    "full_group_slot_census_qualified": false,
+    "independent_byte_replay_subjects_passed": 3,
+    "independent_byte_replay_subjects_failed": 0,
+    "independent_byte_replay_pixel_count": 884736,
+    "independent_sealed_blender_court_exact_recomputed_match": true
   },
   "per_subject": [
     {

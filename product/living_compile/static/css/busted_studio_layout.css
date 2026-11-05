@@ -27,7 +27,7 @@ body{display:grid;grid-template-rows:56px 46px 38px 44px minmax(0,1fr) var(--stu
 .modebar button{font-size:10px;padding:6px 8px}
 .modebar .separator{flex:1 0 12px}
 .modebar .active-stage{font-size:9px;white-space:nowrap}
-.workspace{height:auto;min-height:0;display:grid;grid-template-columns:clamp(172px,16vw,248px) minmax(0,1fr) clamp(212px,20vw,318px);overflow:hidden}
+.workspace{grid-row:5;grid-column:1;height:auto;min-height:0;display:grid;grid-template-columns:clamp(172px,16vw,248px) minmax(0,1fr) clamp(212px,20vw,318px);overflow:hidden}
 .workspace>*{min-width:0;min-height:0}
 .left,.right{overflow:auto;scrollbar-width:thin;overscroll-behavior:contain}
 .viewport-panel{overflow:hidden;min-height:0}
@@ -36,7 +36,7 @@ body{display:grid;grid-template-rows:56px 46px 38px 44px minmax(0,1fr) var(--stu
 .hint{max-width:92%;width:max-content;text-align:center;white-space:normal;color:#b8cedb;border-color:#3c5566}
 .panel-title{color:#afc9da;font-size:10px}
 .stage-note,.authority-copy{color:#9ebacd}
-.timeline{height:auto;min-height:0;overflow:hidden;display:grid;grid-template-rows:42px minmax(0,1fr);border-color:#34495d}
+.timeline{grid-row:6;grid-column:1;height:auto;min-height:0;overflow:hidden;display:grid;grid-template-rows:42px minmax(0,1fr);border-color:#34495d}
 .timeline-head{height:auto;min-width:0;overflow-x:auto;scrollbar-width:thin}
 .timeline-head>*{flex-shrink:0}
 .timeline-body{height:auto;min-height:0;grid-template-columns:clamp(150px,19vw,248px) minmax(0,1fr)}

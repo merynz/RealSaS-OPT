@@ -19,7 +19,7 @@
   const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
   let width=1,height=1,dpr=1,frame=0,last=0,epoch=0,visible=false;
   let aimX=0,aimY=0,lookX=0,lookY=0;
-  const latitude=39,longitude=62;
+  const latitude=26,longitude=42;
   const triangles=[];
   for(let j=0;j<latitude-1;j++) for(let i=0;i<longitude;i++){
     const a=j*longitude+i,b=j*longitude+(i+1)%longitude;
@@ -36,7 +36,7 @@
   function size(){
     const r=field.getBoundingClientRect();
     width=Math.max(1,r.width);height=Math.max(1,r.height);
-    dpr=Math.min(devicePixelRatio||1,1.7);
+    dpr=Math.min(devicePixelRatio||1,1.3);
     canvas.width=Math.round(width*dpr);
     canvas.height=Math.round(height*dpr);
     canvas.style.width=width+'px';canvas.style.height=height+'px';
@@ -127,7 +127,7 @@
       ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(c.x,c.y);ctx.closePath();
       ctx.fillStyle='rgba('+r+','+g+','+bl+','+clamp(shade,.06,.68).toFixed(3)+')';
       ctx.fill();
-      if(i%4===0){
+      if(i%7===0){
         ctx.strokeStyle='rgba(166,180,255,'+(.04+light*.15).toFixed(3)+')';
         ctx.lineWidth=.5;ctx.stroke();
       }
@@ -143,8 +143,9 @@
     }
     // Tri-axis gyroscopes are sampled as transformed world-space circles.
     function gimbal(radius,tilt,spin,color,widthLine){
-      const count=164;
-      let previous=null;
+      // One batched path per orbit instead of 84 shadowed stroke calls.
+      const count=84;
+      ctx.beginPath();
       for(let i=0;i<=count;i++){
         const a=i/count*TAU+spin;
         const p=proj([
@@ -152,12 +153,12 @@
           radius*Math.sin(a)*Math.cos(tilt),
           radius*Math.sin(a)*Math.sin(tilt)
         ]);
-        if(previous){
-          const alpha=clamp((170-(p.z+previous.z)*.5)/350,.05,.65);
-          stroke(previous,p,color,alpha.toFixed(3),widthLine,alpha>.5?4:0);
-        }
-        previous=p;
+        if(i===0)ctx.moveTo(p.x,p.y);
+        else ctx.lineTo(p.x,p.y);
       }
+      ctx.lineWidth=widthLine;
+      ctx.strokeStyle='rgba('+color+',.32)';
+      ctx.stroke();
     }
     gimbal(177,.74+t*.055,t*.08,'170,151,255',1.25);
     gimbal(192,-.88-t*.038,-t*.045,'103,203,255',.85);
@@ -188,7 +189,7 @@
   function animate(now){
     frame=0;
     if(!visible||document.hidden||reduced.matches)return;
-    if(now-last>=34){last=now;draw(now)}
+    if(now-last>=52){last=now;draw(now)}
     frame=requestAnimationFrame(animate);
   }
   function sync(){

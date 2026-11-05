@@ -52,6 +52,7 @@ jobs:
           PYTHONPATH=. python -m unittest -v
           tests.product.test_living_compile_v4
           tests.product.test_awaken_production_wiring
+          tests.product.test_busted_awaken_stage_contract
           tests.product.test_mesh_topology_authoring
           tests.product.test_studio_presentation_authoring
           tests.product.test_public_workspace_handoff

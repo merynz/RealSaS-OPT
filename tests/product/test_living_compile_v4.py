@@ -139,7 +139,7 @@ class LivingCompileV4Tests(unittest.TestCase):
     def test_root_is_awaken_and_workspace_keeps_complete_editor_flow(self):
         app = LivingCompileApplication.default()
         data, ctype = app.static_bytes("/")
-        self.assertIn("<title>BUSTED · Awaken</title>".encode("utf-8"), data)
+        self.assertIn("<title>BUSTED — Bring Your Character to Life</title>".encode("utf-8"), data)
         self.assertIn(b"COMPILE CHARACTER <span", data)
         self.assertIn(b'id="matrixTypewriter"', data)
         self.assertNotIn(b'id="agentReach"', data)

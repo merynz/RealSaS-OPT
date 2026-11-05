@@ -99,6 +99,7 @@ def build_adaptive_plan(proposal,pairs,prior_v9_manifest,v10_report,
     splits={key for key,children in event_children.items() if len(children)>=2}
     require(splits,"V11_NO_GEOMETRIC_BRANCHING")
     candidates={}
+    uninformative_leaves=0
     for leaf in range(finest):
         if leaf in excluded:continue
         idx=np.flatnonzero((by_size[finest]==leaf)&valid)
@@ -108,7 +109,13 @@ def build_adaptive_plan(proposal,pairs,prior_v9_manifest,v10_report,
         ancestors={(size,int(by_size[size][face])) for size in sizes}
         events={(a,b,int(by_size[a][face])) for a,b in zip(sizes[:-1],sizes[1:])}
         events&=splits
-        require(events,"V11_SOURCE_FINEST_LEAF_NO_SPLIT_BRANCH")
+        # An otherwise valid source leaf can be a single-child descendant
+        # across every adjacent tested resolution. It is NOT a malformed
+        # morphology: there is simply no new parent-child split to probe.
+        # Count this case as uninformative geometry, never a drawable FAIL.
+        if not events:
+            uninformative_leaves+=1
+            continue
         candidates[leaf]={"face":face,"area":float(area[idx].sum()),
                           "events":events,"ancestors":ancestors}
     require(candidates,"V11_NO_VALID_HELDOUT_GEOMETRY_PATCHES")
@@ -157,6 +164,7 @@ def build_adaptive_plan(proposal,pairs,prior_v9_manifest,v10_report,
         "prior_finest_group_ids_excluded_count":len(excluded),
         "source_finest_groups_count":finest,
         "source_finest_heldout_valid_leaf_count":len(selected)+len(candidates),
+        "heldout_valid_unsplittable_leaf_count":uninformative_leaves,
         "new_source_face_intervention_query_count":len(selected),
         "query_budget":max_queries,
         "potential_splittable_parent_events":len(splits),

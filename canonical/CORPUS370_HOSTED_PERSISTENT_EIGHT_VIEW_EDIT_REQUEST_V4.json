@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370PersistentEightViewEditResearchRequest.v4",
-  "enabled": false,
-  "status": "DISABLED_UNTIL_ACTIONLINT_AND_CONTRACTS_GREEN",
+  "enabled": true,
+  "status": "ACTIVATED_REAL_3_PARALLEL_8_CAMERA_PERSISTENT_SOURCE_GROUP_EDIT_COURT",
   "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
   "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
   "source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
@@ -54,5 +54,6 @@
   "training_authorized": false,
   "note": "On real 3 subjects, 3 parallel Blender workers render same original source and same anonymous group A/B face-slot IDs for all eight cameras. View4 source geometry is input but its rendering edit consequence was withheld during group compilation. Offscreen/hidden effects are ABSTAIN not negative. Rest-pose 192 FOV is not CAA/skin/pose or training admission.",
   "rest_pose_only": true,
-  "full_field_of_view": true
+  "full_field_of_view": true,
+  "activated_only_after_contracts": "github actions scoped CI 41991409923 SUCCESS; hosted workflow actionlint 41991399246 SUCCESS"
 }

@@ -1,0 +1,86 @@
+name: corpus370-v16-real-original-dual-native-control-interaction
+
+on:
+  push:
+    branches: [corpus370-v16-dual-native-control-interaction-v1]
+    paths:
+      - '.github/workflows/corpus370-v16-real-original-dual-native-control-interaction.yml'
+      - 'tools/corpus/hosted_corpus370_native_pair_source_v16.sh'
+      - 'tools/truth_foundry/blender_corpus370_dual_native_control_v16.py'
+      - 'tools/corpus/court_corpus370_dual_native_interaction_v16.py'
+      - 'tests/corpus/test_corpus370_dual_native_interaction_v16.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v16-real-joint-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  independent-dual-control-court-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify syntax of both independent court and Blender source
+        run: |
+          python3 -m py_compile \
+            tools/corpus/court_corpus370_dual_native_interaction_v16.py \
+            tools/truth_foundry/blender_corpus370_dual_native_control_v16.py
+          bash -n tools/corpus/hosted_corpus370_native_pair_source_v16.sh
+      - name: V16 original-source joint-causality redteam - no false artist labels
+        run: |
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_dual_native_interaction_v16.py
+
+  real-original-paired-source:
+    needs: independent-dual-control-court-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+          - subject: TRICERATOPS
+            ordinal: 1
+          - subject: COWFISH
+            ordinal: 2
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SUBJECT_ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install private original native source transport
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Verify exact V14 3-source original parent and prohibition on forged artist labels
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("canonical/CORPUS370_V14_REAL_NATIVE_CONTROL_RGBA_CAUSAL_REPAIR_RESULT_V1.json").read_text())
+          assert d["schema"]=="RealSaS.Corpus370V14OriginalNativeMechanicalRGBAIndependentCourtRealResult.v1"
+          assert d["status"]=="REAL_ORIGINAL_SOURCE_NATIVE_CONTROL_TO_RGBA_CAUSAL_REPAIR_3_OF_3_COURTS_PASS__DRAWABLE_OWNER_UNKNOWN"
+          assert d["corrected_real_blender_run_id"]==42075029264
+          assert d["original_perturbed_source_vs_soup_qualified_camera_cases"]==144
+          assert d["independent_artist_same_drawable_pairs"]==0
+          assert d["independent_artist_different_drawable_pairs"]==0
+          assert not d["graphics_owner_authorized"]
+          assert not d["iris_training_authorized"]
+          assert not d["tessa_training_authorized"]
+          assert not d["materialization_authorized"]
+          PY
+      - name: Physically render four real joint native controls per original pose/camera then court fresh RGBA
+        run: |
+          set -euo pipefail
+          bash tools/corpus/hosted_corpus370_native_pair_source_v16.sh

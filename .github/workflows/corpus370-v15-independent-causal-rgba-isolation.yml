@@ -90,10 +90,24 @@ jobs:
           set -euo pipefail
           export RCLONE_CONFIG="$RUNNER_TEMP/v15-rclone.conf"
           RESULT="$RUNNER_TEMP/v15-causal-$SUBJECT.json"
-          REMOTE="gdrive:corpus370_preparation_v1/hosted_causal_rgba_isolation_relation_v15/${{ github.run_id }}-${{ github.run_attempt }}/$ORDINAL"
+          # Subject-first independent publisher path prevents parallel worker
+          # Google Drive directory-creation races. The initial V15 court had
+          # all three sources pass, but one remote cat raced Drive indexing.
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_causal_rgba_isolation_relation_v15/$SUBJECT/${{ github.run_id }}-${{ github.run_attempt }}"
           rclone copyto "$RESULT" "$REMOTE/V15_CAUSAL_RGBA_ISOLATION_RELATION.json" --checksum --retries 3
-          test "$(sha256sum "$RESULT" | cut -d' ' -f1)" = "$(rclone cat "$REMOTE/V15_CAUSAL_RGBA_ISOLATION_RELATION.json" | sha256sum | cut -d' ' -f1)"
-          sha256sum "$RESULT"
+          LOCAL_SHA="$(sha256sum "$RESULT" | cut -d' ' -f1)"
+          verified=0
+          for retry in 1 2 3 4 5 6 7 8; do
+            if rclone cat "$REMOTE/V15_CAUSAL_RGBA_ISOLATION_RELATION.json" > "$RUNNER_TEMP/v15-published-check.json" 2>/dev/null; then
+              if test "$LOCAL_SHA" = "$(sha256sum "$RUNNER_TEMP/v15-published-check.json" | cut -d' ' -f1)"; then
+                verified=1
+                break
+              fi
+            fi
+            sleep 5
+          done
+          test "$verified" -eq 1
+          echo "V15_PRIVATE_REMOTE_EXACT_SHA_VERIFIED=$LOCAL_SHA"
       - uses: actions/upload-artifact@v4
         with:
           name: v15-source-${{ matrix.subject }}-${{ github.run_id }}

@@ -99,5 +99,17 @@ class BustedAwakenStageContractTests(unittest.TestCase):
         self.assertNotIn("busted_awaken_fire_v1.css",html)
         self.assertIn("preview only",app.lower())
 
+    def test_matrix_code_density_is_halved_without_slowing_the_motion(self):
+        stage=(STATIC/"js"/"busted_stage_rain_v2.js").read_text("utf-8")
+        typing=(STATIC/"js"/"busted_spatial_typing_v4.js").read_text("utf-8")
+        global_rain=(STATIC/"js"/"busted_spatial_rain_v1.js").read_text("utf-8")
+        self.assertIn("scene.kind==='hero'?13:12",stage)
+        self.assertIn("scene.kind==='hero'?36:32",stage)
+        self.assertIn("const count=small?1:tablet?4:6",typing)
+        self.assertIn("const counts=mobile?[7,5,3]:[20,13,9]",global_rain)
+        self.assertIn("random(1500,2350)",typing)  # one mobile trace: halve reappearance
+        self.assertIn("rate:random(54,88)",typing)   # character-typing speed unchanged
+        self.assertIn("speed:random(23,46)",stage)  # rain-fall speed unchanged
+
 if __name__=="__main__":
     unittest.main()

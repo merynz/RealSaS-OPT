@@ -27,6 +27,7 @@
   <link rel="stylesheet" href="./static/css/busted_visual_priority_v1.css?v=1.0.0">
   <link rel="stylesheet" href="./static/css/busted_cinematic_v2.css?v=2.0.1">
   <link rel="stylesheet" href="./static/css/busted_cinematic_hotfix_v3.css?v=3.2.0">
+  <link rel="stylesheet" href="./static/css/busted_compile_terminal_v1.css?v=1.0.0">
 </head>
 <body>
   <main class="awaken-shell">
@@ -115,6 +116,11 @@
             </div>
             <div class="compile-monitor-heading"><span>LIVE COMPILER ACTIVITY</span><span id="compileLiveStage" aria-live="polite">AWAITING SOURCE</span></div>
         <aside class="telemetry" id="compileMonitor" aria-label="Compiler telemetry">
+          <div id="compileProgressConsole" class="compile-progress-console" data-verified="false" data-running="false" aria-label="Verified compiler stage progress">
+            <div class="progress-head"><span>COMPILER / STAGES SEALED</span><strong id="compileProgressPercent">—%</strong></div>
+            <div id="compileProgressBlocks" class="progress-blocks" aria-hidden="true"></div>
+            <div class="progress-foot"><span id="compileProgressContext">AWAITING VERIFIED EVENTS</span><span id="compileProgressSource">STAGES 0/9</span></div>
+          </div>
           <div class="pipeline" aria-hidden="true">
             <div class="pipe-step"><span class="n">01</span><span>Input</span><i class="state"></i></div>
             <div class="pipe-step"><span class="n">02</span><span>Shape</span><i class="state"></i></div>
@@ -140,7 +146,7 @@
         <div class="result-art"><img id="resultPreview" alt="Compiled character preview"></div>
         <div class="result-stream">
           <small>PRODUCT PROOF · PASS</small>
-          <h2>ALIVE</h2>
+          <h2>QUALIFIED</h2>
           <a class="open-workspace" href="./studio.html">OPEN STUDIO</a>
         </div>
       </div>
@@ -153,6 +159,6 @@
   <script src="./static/js/busted_spatial_rain_v1.js?v=1.2.0" defer></script>
   <script src="./static/js/busted_stage_rain_v2.js?v=2.2.0" defer></script>
   <script type="module" src="./static/js/awaken_input_slots.js"></script>
-  <script type="module" src="./static/js/awaken.js?v=7.1.0"></script>
+  <script type="module" src="./static/js/awaken.js?v=7.2.0"></script>
 </body>
 </html>

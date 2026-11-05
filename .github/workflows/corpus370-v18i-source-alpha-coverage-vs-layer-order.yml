@@ -49,11 +49,18 @@ jobs:
       PYTHONPATH: ${{ github.workspace }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install read-only private archive transport
+      - name: Install SHA-pinned portable rclone (no apt mirror dependency)
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends rclone
+          VERSION=1.75.2
+          ARCHIVE="$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 \
+            "https://github.com/rclone/rclone/releases/download/v${VERSION}/rclone-v${VERSION}-linux-amd64.zip" \
+            -o "$ARCHIVE"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
+          unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
+          test -x "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64/rclone"
+          echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
           python3 -m pip install --disable-pip-version-check numpy
       - name: Diagnose alpha union-vs-order from SHA-locked original V18h frames
         run: |

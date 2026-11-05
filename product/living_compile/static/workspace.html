@@ -23,7 +23,7 @@
   <header class="topbar">
     <div class="brand"><a class="studio-brand-link" href="/" aria-label="BUSTED home"><img class="busted-studio-mark" src="/static/brand/busted-mark.svg" width="35" height="35" alt=""><div><strong>BUSTED</strong><small>STUDIO · REALSAS</small></div></a></div>
     <nav class="studio-primary-nav" aria-label="Product areas"><a href="/studio" aria-current="page">Puppet Editor</a><a href="/motion" data-bundle-nav="motion">Motion Lab</a><a href="/export" data-bundle-nav="export">Export</a></nav>
-    <div class="studio-panel-controls" aria-label="Workspace panels"><button id="toggleScenePanel" class="studio-panel-toggle" type="button" aria-expanded="false" aria-controls="scenePanel">SCENE</button><button id="toggleInspectorPanel" class="studio-panel-toggle" type="button" aria-expanded="false" aria-controls="inspectorPanel">INSPECTOR</button></div>
+    
     <div class="bundle-open">
       <input id="bundlePath" placeholder="Open a compiled character bundle">
       <button id="openBundle">OPEN</button>
@@ -50,6 +50,7 @@
   </section>
 
   <nav class="modebar" aria-label="Editing tools">
+    <div class="studio-panel-controls" aria-label="Workspace panels"><button id="toggleScenePanel" class="studio-panel-toggle" type="button" aria-expanded="false" aria-controls="scenePanel">SCENE</button><button id="toggleInspectorPanel" class="studio-panel-toggle" type="button" aria-expanded="false" aria-controls="inspectorPanel">INSPECTOR</button></div>
     <span class="tool-label">PUPPET TOOLS</span>
     <button class="mode active" data-mode="rig">RIG</button>
     <button class="mode" data-mode="mesh">MESH</button>

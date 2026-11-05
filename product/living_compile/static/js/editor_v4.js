@@ -17,7 +17,10 @@
   doc.querySelector('#focusBundleInput')?.addEventListener('click',()=>{
     const input=doc.querySelector('#bundlePath');
     if(input&&getComputedStyle(input).display!=='none')input.focus();
-    else doc.querySelector('#toggleScenePanel')?.click();
+    else {
+      doc.body.classList.add('bundle-input-open');
+      input?.focus();
+    }
   });
   timeline?.addEventListener('click',()=>{
     const on=!doc.body.classList.contains('timeline-open');
@@ -31,10 +34,27 @@
     }
     if(more)more.open=false;
   });
-  doc.addEventListener('keydown',e=>{if(e.key==='Escape'){if(more)more.open=false;if(stages)stages.open=false;}});
+  doc.addEventListener('keydown',e=>{if(e.key==='Escape'){if(more)more.open=false;if(stages)stages.open=false;doc.body.classList.remove('bundle-input-open');}});
   doc.addEventListener('pointerdown',e=>{
     if(more?.open&&!more.contains(e.target))more.open=false;
     if(stages?.open&&!stages.contains(e.target))stages.open=false;
   });
+
+  // Transform commands remain real editor operations; expose them on demand.
+  const toolbar=doc.querySelector('.viewport-toolbar');
+  function organizeToolbar(){
+    const group=doc.querySelector('#studioTransformTools');
+    if(!toolbar||!group||group.closest('.transform-menu'))return;
+    const details=doc.createElement('details');
+    details.className='transform-menu';
+    details.id='transformMenu';
+    const summary=doc.createElement('summary');
+    summary.textContent='TRANSFORMS';
+    group.replaceWith(details);details.append(summary,group);
+  }
+  if(toolbar){
+    new MutationObserver(organizeToolbar).observe(toolbar,{childList:true});
+    organizeToolbar();
+  }
   sync();
 })();

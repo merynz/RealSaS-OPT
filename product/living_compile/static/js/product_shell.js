@@ -63,9 +63,7 @@ function setGatewayCapability(project) {
   if (state) state.textContent = available ? 'PRODUCT GATEWAY READY' : 'PRODUCT SHELL READY';
   if (detail) detail.textContent = available
     ? 'Source compile starts in Awaken. This Studio session edits an already materialized proof-qualified character.'
-    : blockers.length
-      ? `Awaken compile waiting on: ${blockers.join(' · ')}`
-      : 'Awaken compile remains fail-closed until production model/proof/revision bindings are complete.';
+    : 'Open an existing qualified puppet or return to Awaken. New compiles require the production gateway.';
   if (progress) progress.style.width = available ? '2%' : '0%';
 }
 

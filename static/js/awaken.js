@@ -32,6 +32,53 @@ const productStages = [
   ['PROOF', 'product_proof::pass'],
 ];
 
+const progressConsole=document.querySelector('#compileProgressConsole');
+const progressPercent=document.querySelector('#compileProgressPercent');
+const progressContext=document.querySelector('#compileProgressContext');
+const progressSource=document.querySelector('#compileProgressSource');
+const progressBlocks=document.querySelector('#compileProgressBlocks');
+const progressSegments=24;
+if(progressBlocks)for(let i=0;i<progressSegments;i++)progressBlocks.append(document.createElement('span'));
+const progressCells=progressBlocks?[...progressBlocks.children]:[];
+let lastCompletedStage=0;
+/* The percent is NEVER elapsed-time estimation. It is either reported by the
+ * gateway explicitly, or the discrete share of *completed* compiler stages.
+ * Unknown progress stays —% until the compiler reports real evidence. */
+function updateCompileProgress({percent=null,completed=null,stage='AWAITING SIGNAL',running=false,source='STAGE COMPLETION'}={}){
+  const p=Number.isFinite(percent)?Math.max(0,Math.min(100,percent)):null;
+  if(progressPercent)progressPercent.textContent=p===null?'—%':Math.floor(p)+'%';
+  if(progressContext)progressContext.textContent=String(stage).slice(0,80);
+  if(progressSource)progressSource.textContent=completed===null?'AWAITING EVIDENCE':
+    String(source).slice(0,32)+' · '+completed+'/9';
+  if(progressConsole){
+    progressConsole.dataset.verified=String(p!==null);
+    progressConsole.dataset.running=String(running);
+  }
+  const lit=p===null?0:Math.floor(p/100*progressSegments);
+  progressCells.forEach((cell,i)=>{
+    cell.classList.toggle('done',i<lit);
+    cell.classList.toggle('leading',i===lit-1&&lit>0&&running);
+  });
+}
+function reportedPercent(payload){
+  const candidates=[payload?.progress_percent,payload?.progress?.percent_complete,payload?.progress?.percent];
+  for(const value of candidates){
+    if(typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=100)return value;
+  }
+  return null;
+}
+function onCompilerEvidence(payload,stageName,index,terminal){
+  const failed=terminal&&String(payload?.status||'').toUpperCase()!=='PASS';
+  const passed=terminal&&!failed;
+  if(index>=0)lastCompletedStage=Math.max(lastCompletedStage,index);
+  const completed=passed?9:Math.min(8,lastCompletedStage);
+  const explicit=reportedPercent(payload);
+  const percent=passed?100:explicit!==null?explicit:index>=0||lastCompletedStage>0?
+    Math.floor(completed/9*100):null;
+  updateCompileProgress({percent,completed,stage:stageName||String(payload?.status||'AWAITING EVIDENCE').toUpperCase(),
+    running:!terminal,source:explicit!==null?'SERVER PROGRESS':'STAGES SEALED'});
+}
+
 const resultCanvas = document.createElement('canvas');
 resultCanvas.width = 360;
 resultCanvas.height = 420;
@@ -238,20 +285,35 @@ async function startIdleReveal(bundle) {
   const scene = await apiJson(`/api/living/scene?bundle=${encodeURIComponent(bundle)}`);
   const runtime = await apiJson(`/api/runtime/clips?bundle=${encodeURIComponent(bundle)}`);
   const idle = (runtime.clips || []).find((clip) => String(clip.intent || '').toLowerCase() === 'idle')
-    || (runtime.clips || []).find((clip) => String(clip.clip_id || '').toLowerCase().includes('idle'))
-    || (runtime.clips || [])[0];
+    || (runtime.clips || []).find((clip) => String(clip.clip_id || '').toLowerCase().includes('idle'));
   if (!idle) throw new Error('proof-qualified workspace has no runtime motion bake');
   const sourceImage = await loadBundleImage(bundle, scene);
-  resultPreview.style.display = 'none';
-  resultCanvas.style.display = 'block';
   addLog(`runtime reveal · ${idle.clip_id} · qualification-owned bake`, true);
+  let firstFrame=true;
   const started = performance.now();
   while (generation === revealGeneration) {
     const duration = Math.max(0.001, Number(idle.duration_seconds) || 1);
     const t = ((performance.now() - started) / 1000) % duration;
     const frame = await apiJson(`/api/runtime/frame?bundle=${encodeURIComponent(bundle)}&clip=${encodeURIComponent(idle.clip_id)}&time=${encodeURIComponent(t)}`);
     if (generation !== revealGeneration) break;
+    if(firstFrame){
+      const meshes=frame?.frame?.mesh_vertices_by_id;
+      if(!meshes||typeof meshes!=='object'||!Object.keys(meshes).length){
+        throw new Error('idle runtime frame has no deformable mesh evidence');
+      }
+    }
     renderCompiledFrame(scene, frame, sourceImage);
+    if(firstFrame){
+      firstFrame=false;
+      resultPreview.style.display='none';
+      resultCanvas.style.display='block';
+      result.classList.add('alive-reveal');
+      const heading=result.querySelector('.result-stream h2');
+      if(heading)heading.textContent='ALIVE';
+      status.querySelector('span').textContent='ALIVE';
+      showLiveCompileStatus('PUPPET ALIVE','Verified editable puppet and actual Idle runtime frame are ready.');
+      addLog('idle verified · the puppet is alive',true);
+    }
     await delay(70);
   }
   if (sourceImage?.dataset?.objectUrl) URL.revokeObjectURL(sourceImage.dataset.objectUrl);
@@ -281,6 +343,8 @@ async function startProductionCompile() {
 
 async function runProductionFlow() {
   resetPipeline();
+  lastCompletedStage=0;
+  updateCompileProgress({percent:0,completed:0,stage:'SUBMITTING',running:true});
   shell.classList.add('compiling');
   status.classList.add('ready');
   status.querySelector('span').textContent = 'SUBMITTING';
@@ -302,6 +366,8 @@ async function runProductionFlow() {
       serverDetail || (stageName ? `Compiler reports stage: ${stageName.toLowerCase()}.` : 'Waiting for further compiler status.')
     );
     const index = productStages.findIndex(([name]) => stageName.includes(name));
+    const isTerminal = Boolean(payload.terminal)||['PASS','FAILED','ERROR'].includes(String(payload.status||'').toUpperCase());
+    onCompilerEvidence(payload,stageName,index,isTerminal);
     if (index >= 0 && index !== lastStage) {
       pipeline.forEach((step, i) => {
         step.classList.toggle('active', i === index);
@@ -332,12 +398,18 @@ async function runProductionFlow() {
   openWorkspace.href = workspace.workspace_url || `/workspace?bundle=${encodeURIComponent(workspace.bundle)}`;
   openWorkspace.textContent = 'OPEN STUDIO';
   addLog('ProductRevision sealed · proof authority PASS', true);
-  showLiveCompileStatus('PRODUCT PROOF · PASS', 'Verified editable puppet workspace is ready.');
+  updateCompileProgress({percent:100,completed:9,stage:'PROOF PASSED · WORKSPACE READY',running:false});
+  showLiveCompileStatus('PRODUCT PROOF · PASS', 'Qualified puppet sealed. Verifying actual Idle runtime.');
+  const heading=result.querySelector('.result-stream h2');
+  if(heading)heading.textContent='QUALIFIED';
+  result.classList.remove('alive-reveal');
   result.classList.add('show');
-  status.querySelector('span').textContent = 'ALIVE';
+  status.querySelector('span').textContent='PUPPET QUALIFIED';
   void startIdleReveal(workspace.bundle).catch((error) => {
     resultPreview.style.display = '';
     resultCanvas.style.display = 'none';
+    status.querySelector('span').textContent='IDLE UNAVAILABLE';
+    showLiveCompileStatus('IDLE UNAVAILABLE','The qualified puppet exists, but the Idle preview could not be verified.');
     addLog(`idle reveal unavailable · ${error.message}`, true);
   });
 }
@@ -345,7 +417,7 @@ async function runProductionFlow() {
 awaken.addEventListener('click', async () => {
   if (running || !selectedFiles.length) return;
   running = true;
-  result.classList.remove('show');
+  result.classList.remove('show','alive-reveal');
   try {
     if (project?.compile_available && project?.public_compile_gateway) {
       await runProductionFlow();
@@ -363,6 +435,7 @@ awaken.addEventListener('click', async () => {
     status.querySelector('span').textContent = 'INTAKE READY';
     awaken.disabled = false;
     showLiveCompileStatus('COMPILE FAILED', error.message);
+    updateCompileProgress({percent:null,completed:null,stage:'COMPILER FAILED',running:false});
     addLog(`compile rejected · ${error.message}`, true);
   } finally {
     running = false;

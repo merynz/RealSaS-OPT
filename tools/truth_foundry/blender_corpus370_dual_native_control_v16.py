@@ -242,6 +242,7 @@ def render(job_path, parent_path, original_npz, output_path):
                 prior["native_rig_control_names_private_inventory_sha256"],
             "V16_ORIGINAL_SOURCE_ANIMATED_CARRIER_INVENTORY_SHA")
         arrays=[]
+        native_joint_arrays=[]
         witness=[]
         control_specs=[]
         for selected in selection["controls"]:
@@ -276,6 +277,7 @@ def render(job_path, parent_path, original_npz, output_path):
             joint_support=support[0] | support[1]
             base_basis=[spec[-1].matrix_basis.copy() for spec in control_specs]
             camera_images=[]
+            camera_joint_xyz=[]
             for vi,view in enumerate(job["view_indices"]):
                 _camera_full(cam,camera[view],192)
                 def draw(label, mode, visible_faces=None):
@@ -297,6 +299,7 @@ def render(job_path, parent_path, original_npz, output_path):
                     "ISOLATED_AB_BASE":draw("ISOLATED_AB_BASE","SOUP",joint_support)
                 }
                 pair_witness=[]
+                pair_vertices=[]
                 for sign_a,sign_b in PAIR_SIGN:
                     key=("PLUS" if sign_a>0 else "MINUS")+"_"+(
                         "PLUS" if sign_b>0 else "MINUS")
@@ -319,6 +322,7 @@ def render(job_path, parent_path, original_npz, output_path):
                     require(float(np.linalg.norm(joint-xyz))>2e-4*extent,
                         "V16_REAL_JOINT_NATIVE_CONTROL_NO_MECHANICAL_EFFECT")
                     _set_animated_soup(face_map,faces,joint)
+                    pair_vertices.append(joint.copy())
                     unique_objects=[]
                     for s in control_specs:
                         if all(s[3] is not z for z in unique_objects):
@@ -364,17 +368,25 @@ def render(job_path, parent_path, original_npz, output_path):
                     "V16_ORIGINAL_TWO_NATIVE_CONTROLS_FOUR_SIGN_PAIRS_PER_VIEW")
                 camera_images.append(np.stack([current[name] for name in arms],axis=0))
                 witness.extend(pair_witness)
+                camera_joint_xyz.append(np.stack(pair_vertices,axis=0))
             arrays.append(np.stack(camera_images,axis=0))
+            native_joint_arrays.append(np.stack(camera_joint_xyz,axis=0))
             base._neutralize_animation()
     data=np.stack(arrays,axis=0).astype(np.float16)
+    joint_vertices=np.stack(native_joint_arrays,axis=0).astype(np.float64)
     arms=_joint_arms()
     require(data.shape==(3,4,len(arms),192,192,4)
-        and len(witness)==48 and np.isfinite(data).all(),
-        "V16_FULL_REAL_POSE_VIEW_PAIRED_RGBA_ARRAYS")
+        and joint_vertices.shape==(3,4,4,len(rest),3)
+        and len(witness)==48
+        and np.isfinite(data).all() and np.isfinite(joint_vertices).all(),
+        "V16_FULL_REAL_POSE_VIEW_PAIRED_RGBA_AND_3D_VERTEX_ARRAYS")
     out=Path(output_path).resolve()
     out.parent.mkdir(parents=True,exist_ok=True)
     npz=out.with_suffix(".npz")
-    np.savez_compressed(npz,original_native_dual_control_rgba=data)
+    np.savez_compressed(
+        npz,original_native_dual_control_rgba=data,
+        original_native_dual_control_world_vertices=joint_vertices
+    )
     result={
         "schema":SCHEMA,
         "status":"V16_REAL_ORIGINAL_TWO_NATIVE_CONTROLS_SIMULTANEOUS_RGBA__INDEPENDENT_COURT_REQUIRED",
@@ -400,6 +412,8 @@ def render(job_path, parent_path, original_npz, output_path):
         "original_source_action_frozen_and_exact_vertices_before_after_render":True,
         "joint_visuals_from_real_original_native_blender_source":True,
         "no_expected_joint_ground_truth_fabricated_from_single_v13b":True,
+        "private_original_joint_world_vertices_for_independent_court":True,
+        "joint_source_world_vertex_shape":[int(v) for v in joint_vertices.shape],
         "native_source_joint_mechanics_vs_independent_single_effect_witness":witness,
         "original_dual_control_rgba_npz_sha256":sha(npz),
         "original_dual_control_rgba_npz_path":str(npz),

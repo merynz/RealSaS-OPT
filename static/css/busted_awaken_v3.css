@@ -120,3 +120,15 @@ body{font-family:var(--busted-display);color:var(--busted-white)}
  .telemetry{height:27px}
 }
 @media(prefers-reduced-motion:reduce){.depth-code-track span.typing::after{animation:none}}
+
+/* Homepage hierarchy v4: BUSTED is the product, Awaken is a single operation. */
+.hero-intro h1{font-size:clamp(56px,6.5vw,112px);line-height:1.02;letter-spacing:-.075em;white-space:normal;max-width:850px}
+.hero-title-accent{display:block;font-size:1.2em;color:#e9f7ff;text-shadow:0 0 44px rgba(122,199,236,.13)}
+.hero-copy{margin-top:26px;font-size:clamp(19px,1.7vw,27px);letter-spacing:-.03em;color:#dce9f2}
+.hero-description{font-size:clamp(14px,1vw,16px)}
+.depth-backplane{background-image:radial-gradient(ellipse at 50% 50%,rgba(87,143,185,.12),transparent 64%);border-color:transparent}
+.depth-floor{display:none} /* deliberate: the grid was a reference metaphor, not the product */
+.depth-code-track{max-width:32%;gap:4px;white-space:nowrap;line-height:1.4;text-shadow:0 0 6px rgba(153,208,237,.12)}
+@media(max-width:1080px){.hero-intro h1{font-size:clamp(56px,6.8vw,92px)}}
+@media(max-width:780px){.hero-intro h1{font-size:clamp(49px,9vw,73px)}.depth-code-track{max-width:34%;opacity:.2!important}}
+@media(max-width:430px){.hero-intro h1{font-size:clamp(43px,10vw,58px)}}

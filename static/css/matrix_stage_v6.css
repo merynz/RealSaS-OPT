@@ -124,3 +124,24 @@
     opacity:calc(var(--trace-alpha) * .84);
   }
 }
+
+/* V6.2: foreground code is above the atmospheric scrims but below UI,
+   and uses measured, obstruction-aware positions rather than blind slots. */
+.awaken-shell>.matrix-typewriter{
+  position:absolute;inset:0;z-index:7;
+  pointer-events:none;overflow:hidden;
+  perspective:1100px;perspective-origin:50% 50%;
+  transform-style:preserve-3d;
+}
+.awaken-shell>.matrix-typewriter .matrix-trace{
+  z-index:auto;position:absolute;overflow:hidden;
+  opacity:var(--trace-alpha);color:var(--trace-tone);
+  text-shadow:0 0 10px rgba(163,176,255,.20);
+}
+.awaken-shell>.matrix-typewriter .matrix-trace[hidden]{display:none!important}
+.awaken-shell>.matrix-typewriter .matrix-trace-line{
+  height:1.65em;white-space:nowrap;overflow:hidden;
+}
+@media(max-width:780px){
+  .awaken-shell>.matrix-typewriter{perspective:850px}
+}

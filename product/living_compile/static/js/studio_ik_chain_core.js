@@ -97,6 +97,9 @@ export function reachableTwoBoneConstraints({joints=[],edges=[],animatorControls
     if(constraint.enabled===false)continue;
     const startID=String(constraint.start_bone_id||''),endID=String(constraint.end_bone_id||'');
     const middleID=parent.get(endID);
+    // In this first authoring slice the authored IK target is the endpoint
+    // itself. Independent target-bone authorities need a typed Mechanics lane.
+    if(String(constraint.target_bone_id||'')!==endID)continue;
     if(!middleID||parent.get(middleID)!==startID)continue;
     if([startID,middleID,endID].some(id=>!byJoint.has(id)||invalid.has(id)))continue;
     if(!controllers.has(startID)||!controllers.has(middleID))continue;

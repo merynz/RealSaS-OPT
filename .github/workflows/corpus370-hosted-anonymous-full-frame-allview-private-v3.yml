@@ -148,7 +148,17 @@ jobs:
             "$RAYS_LOCAL/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
             --checksum --timeout 90s --retries 3
           test "$(sha256sum "$JOIN_LOCAL/CORPUS370_NATIVE_VISIBILITY_PAIR_JOIN_V1.json" | cut -d' ' -f1)" = e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a
-          test "$(sha256sum "$GROUP_LOCAL/CORPUS370_MULTIVIEW_GEOMETRY_GROUPS_PRIVATE_BATCH_V2.json" | cut -d' ' -f1)" = 1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1
+          test "$(sha256sum "$GROUP_LOCAL/CORPUS370_ALLVIEW_GEOMETRY_GROUPS_PRIVATE_BATCH_V3.json" | cut -d' ' -f1)" = 1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["GROUP_LOCAL"])/"CORPUS370_ALLVIEW_GEOMETRY_GROUPS_PRIVATE_BATCH_V3.json").read_text())
+          assert d["schema"]=="RealSaS.Corpus370AllViewGeometricLayerPrivateBatch.v3"
+          assert d["candidate_qualified_count"]==3 and d["failure_count"]==0
+          assert d["heldout_proxy_revealed_count"]==3
+          assert d["model_training_authorized"] is False
+          assert d["graphics_owner_authorized"] is False
+          PY
           test "$(sha256sum "$RAYS_LOCAL/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" | cut -d' ' -f1)" = 0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70
           SUBJECT_ORDINAL=${{ matrix.subject_ordinal }} python3 - <<'PY' > "$RUNNER_TEMP/c370-selected-one-subject.txt"
           import json,os

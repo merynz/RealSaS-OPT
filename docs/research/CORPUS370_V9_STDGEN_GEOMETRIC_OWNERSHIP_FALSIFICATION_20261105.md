@@ -33,3 +33,10 @@ Important distinction:
 
 ## Next
 After V9, perform independently controlled positive/negative drawable interventions and split/merge edit equivalence classes, then connect only independently qualified geometric constraints to IRIS/TESSA with loss masks and original SHA parentage. No admission from this report.
+
+
+## Prior distinction (must not oversell)
+
+"Geometry without pre-specified semantic classes" does NOT mean "prior-free learning" in an absolute sense. Existing V7/V9 candidate sizes 8/16/32/64, nested partitions, smoothness/topology, chosen camera views, source pose sampling, renderer, etc. are **structural and experimental priors**. We are refusing *ontology-specific drawable labels* and hidden subject/mesh-name shortcuts, not every inductive bias. Our eventual geometry-only generic layer proposal must not silently depend on fixed class counts as a final owner definition. Scale-consistent adaptive partitioning, under-/over-segmentation adversarial controls and editor-operation equivalence classes should be separately measured.
+
+StdGEN++ also *does* use geometric priors and 3D field/renderer consistency, not just named categories; its deliberate semantic constraints are advantageous when ontology matches. The actual comparison must be on target editable puppet behavior across representative morphologies, not on a marketing claim of zero competitors.

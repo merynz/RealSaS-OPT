@@ -1,0 +1,68 @@
+name: corpus370-v17-real-posed-source-rays-to-causal-rgba
+
+on:
+  push:
+    branches: [corpus370-v17-posed-source-ray-causal-join-v1]
+    paths:
+      - '.github/workflows/corpus370-v17-real-posed-source-rays-to-causal-rgba.yml'
+      - 'tools/corpus/measure_corpus370_v17_posed_source_ray_to_causal_rgba_v1.py'
+      - 'tools/corpus/court_corpus370_v17_posed_source_ray_to_rgba_join_v1.py'
+      - 'tools/corpus/hosted_corpus370_v17_posed_source_ray_rgba.sh'
+      - 'tests/corpus/test_corpus370_v17_posed_source_ray_to_rgba_join_v1.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v17-real-posed-rays-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  original-pose-ray-and-rgba-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independent code syntax and hosted shell
+        run: |
+          python3 -m py_compile \
+            tools/corpus/measure_corpus370_v17_posed_source_ray_to_causal_rgba_v1.py \
+            tools/corpus/court_corpus370_v17_posed_source_ray_to_rgba_join_v1.py
+          bash -n tools/corpus/hosted_corpus370_v17_posed_source_ray_rgba.sh
+      - name: Validate independent actual triangle barycentric and pixel origin redteam
+        run: |
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_v17_posed_source_ray_to_rgba_join_v1.py
+
+  original-source-pose-rays-and-causal-pixels:
+    needs: original-pose-ray-and-rgba-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+          - subject: TRICERATOPS
+            ordinal: 1
+          - subject: COWFISH
+            ordinal: 2
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SUBJECT_ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install original immutable source private artifact transport
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Independent posed-source triangle ray and original A+B counterfactual RGB-alpha agreement
+        run: |
+          set -euo pipefail
+          bash tools/corpus/hosted_corpus370_v17_posed_source_ray_rgba.sh

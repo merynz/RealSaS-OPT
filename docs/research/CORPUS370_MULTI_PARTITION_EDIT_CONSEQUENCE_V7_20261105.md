@@ -1,6 +1,6 @@
 # Corpus370 V7 — real-source multi-partition edit consequence experiment
 
-**Status:** V7 source-backed implementation / test CI PASS; hosted private execution **requested**, not yet independently result-verified. Do not assert a real V7 winner or source pose / CAA / owner / model-training authority.
+**Status (2026-11-05):** source-backed V7 code contract CI [42002649532](https://github.com/merynz/RealSaS-OPT/actions/runs/42002649532) SUCCESS, three real original-source Blender workers and [hosted run 42002891207](https://github.com/merynz/RealSaS-OPT/actions/runs/42002891207) SUCCESS, all three private independent-court JSON SHA-256 values reverified against actual downloaded bytes. **No real V7 drawable winner / pose / CAA / owner / training authority.**
 
 ## Purpose
 
@@ -37,6 +37,38 @@ Strict source SHA, nested face-partition membership, original candidate list and
 - \`canonical/CORPUS370_HOSTED_MULTI_PARTITION_EDIT_REQUEST_V7.json\`
 
 All original asset data, source-addressed faces, render pixels and fine-reference identity remain in private Drive. Public GitHub receives no raw source art. A genuine final V7 source result must be based on independent private court SHA readback, not a green synthetic contract.
+
+## Real measured results and per-subject limitation
+
+Canonical readback: \`canonical/CORPUS370_MULTI_PARTITION_REAL_SOURCE_EDIT_RESULT_V7.json\`, which binds run 42002891207, original source SHA lineage and exact private court result SHA-256. The three independent court JSON files were downloaded separately and SHA-256 compared against their respective runner seals: **3/3 exact matches, no mismatches**. This is a **byte-check of existing courts**, not an additional full NPZ replay in a separate process.
+
+All 24 source/soup/no-op camera-view parity measurements PASS on the 192×192 rest raster, and 736 total Blender render arms were run (352 CAT, 160 TRICERATOPS, 224 COWFISH).
+
+Each table cell below is the **sum of extra changed source RGBA pixel instances across the selected source-edit proxy tasks × eight cameras**, compared to the finest actually available nested partition. These are *not unique pixel coordinates* and *not human drawable quality scores*. The finest candidate has a tautological zero.
+
+| Original source | 8-group delta | 16-group delta | 32-group delta | 64-group delta | Distinct source proxy tasks |
+|---|---:|---:|---:|---:|---:|
+| CAT | **34,558** | 24,811 | 4,197 | 0 (reference) | 4 |
+| TRICERATOPS | **486** | 0 | 0 (reference) | UNAVAILABLE | 2 |
+| COWFISH | **2,083** | 12 | 0 (reference) | UNAVAILABLE | 3 |
+
+Isolation/full peel differences relative to finest existing source group (extra RGBA pixel instances):
+
+| Original source | 8 groups | 16 groups | 32 groups | 64 groups |
+|---|---:|---:|---:|---:|
+| CAT | 147,539 | 111,038 | 36,525 | 0 (reference) |
+| TRICERATOPS | 2,461 | 0 | 0 (reference) | UNAVAILABLE |
+| COWFISH | 7,348 | 23 | 0 (reference) | UNAVAILABLE |
+
+The 8-group CAT compiler choice has a **strong bounded counterexample**: editing selected original source locations under 8 groups affects substantially more source pixels than the fine existing partition. For TRICERATOPS, 16 groups are equivalent to 32 **only for the 2 selected reference tasks**; COWFISH 16 groups are close on 3 tasks but not identical. Neither observation proves 16 is the rightful product setting or that CAT needs exactly 64.
+
+Real V7 court hashes:
+
+- CAT: \`b356f8409c9e776e28335a1f985ac09c0e12b75b26a57451182a8979fc05cee9\`
+- TRICERATOPS: \`aa03eaf125008fe813a985fe60cc0b3a83883bb2fc57294af0cdfedc77d0fb2f\`
+- COWFISH: \`f17f5d3c7e04fd841a2cf3fa5f248a8cd32d3b1ec9d3a11461b49d7c09a14555\`
+
+The private original-source files, per-face edit task addresses and pixel arrays remain off GitHub.
 
 ## Two critical limits
 

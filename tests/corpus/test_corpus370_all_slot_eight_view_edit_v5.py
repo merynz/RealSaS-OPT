@@ -58,6 +58,12 @@ def test_all_slots_and_all_views_are_independently_courted():
     assert c["all_source_slots_courted_in_all_views"] is True
     assert c["slot_direct_effect_any_view_count"]==8
     assert c["slot_direct_effect_unobserved_ids_teacher_only"]==[]
+    assert len(c["slot_observability_teacher_only"])==8
+    assert all(x["status"]=="OBSERVED_DIRECT_REMOVAL_PIXEL_EFFECT__NOT_DRAWABLE_IDENTITY"
+               and x["same_drawable"]=="UNKNOWN"
+               and x["different_drawable"]=="UNKNOWN"
+               and x["training_authorized"] is False
+               for x in c["slot_observability_teacher_only"])
     assert c["bounded_parity_and_separable_views"]==8
     assert c["independently_measured_view4_group_b_reveal"]>0
     assert c["original_full_fov_pixels_measured"]==8*128*128
@@ -73,6 +79,9 @@ def test_hidden_or_unseen_group_is_abstain_not_different_drawable():
     c=evaluate(p,m)
     assert c["slot_direct_effect_any_view_count"]==7
     assert c["slot_direct_effect_unobserved_ids_teacher_only"]==[7]
+    assert c["slot_observability_teacher_only"][7]["status"]=="ABSTAIN_NO_DIRECT_EFFECT_IN_EIGHT_REST_CAMERAS"
+    assert c["slot_observability_teacher_only"][7]["same_drawable"]=="UNKNOWN"
+    assert c["slot_observability_teacher_only"][7]["different_drawable"]=="UNKNOWN"
     assert c["unobserved_group_is_owner_negative"] is False
     assert c["different_drawable_negative_pairs"]==0
 

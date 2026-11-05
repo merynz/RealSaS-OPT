@@ -89,9 +89,31 @@ async def run():
                     assert panel["x"] > -5 and panel["width"] >= 220, f"Scene panel inaccessible: {panel}"
                     await page.keyboard.press("Escape")
                     assert await control.get_attribute("aria-expanded") == "false"
+                # Advanced tools are progressive, and the animation timeline is opt-in.
+                assert await page.locator("#studioWelcome").is_visible(), "Empty editor requires understandable onboarding"
+                assert not await page.locator("#advancedStages").get_attribute("open"), "Stage inspector should default collapsed"
+                assert await page.locator("#toggleTimeline").get_attribute("aria-pressed") == "false"
+                await page.locator("#toggleTimeline").click()
+                assert await page.locator("#toggleTimeline").get_attribute("aria-pressed") == "true"
+                await page.locator("#toggleTimeline").click()
+
+                # Two separate product areas, not fake features in a crowded editor.
+                for area, title in [("motion", "Motion Lab"), ("export", "Export")]:
+                    await page.goto(BASE + "/" + area, wait_until="networkidle", timeout=25000)
+                    assert title in (await page.title()), f"Missing {title} at {width}x{height}"
+                    ext = await page.evaluate("document.documentElement.scrollWidth")
+                    assert ext <= width + 2, f"{title} document overflow ({ext}) at {width}x{height}"
+                    assert await page.locator("#proofStatus").inner_text() == "NO QUALIFIED PUPPET"
+                    if area == "motion":
+                        assert await page.locator("#motionPlay").is_disabled(), "Motion must be fail-closed without a puppet"
+                        assert await page.locator("#presetShelf button").count() == 8
+                        assert await page.locator("#presetShelf button:not([disabled])").count() == 0
+                    else:
+                        assert await page.locator("#prepareExport").is_disabled(), "Export must be fail-closed without proof"
+                    await page.screenshot(path=str(OUT / f"{area}_{width}x{height}.png"), full_page=True)
                 if errors:
                     raise AssertionError(f"Browser runtime errors at {width}x{height}: {errors[:4]}")
-                print(f"PASS {width}x{height} Awaken + Studio: no page overflow, Studio timeline visible, navigation functional")
+                print(f"PASS {width}x{height} Awaken + Puppet Editor + Motion Lab + Export")
             except Exception as error:
                 failures.append(f"{width}x{height}: {error}")
                 print("FAIL", failures[-1])

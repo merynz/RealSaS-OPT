@@ -120,7 +120,7 @@ jobs:
             tools/corpus/corpus370_partition_edit_plan_v7.py \
             tools/corpus/court_corpus370_heldout_native_edit_v12.py \
             tools/truth_foundry/blender_corpus370_heldout_native_edit_render_v12.py \
-            tools/corpus/run_corpus370_native_animated_partition_private_v9.py
+            tools/corpus/run_corpus370_heldout_native_edit_private_v12.py
           PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_heldout_native_edit_v12.py
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends rclone
@@ -206,7 +206,7 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
-          python3 -u tools/corpus/run_corpus370_native_animated_partition_private_v9.py \
+          python3 -u tools/corpus/run_corpus370_heldout_native_edit_private_v12.py \
             --extracted-source-root "/home/monster/realsas_authority/corpus370_preparation_v1/source_bundle/extracted/5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9" \
             --blender "$RUNNER_TEMP/blender45/blender-4.5.14-linux-x64/blender" \
             --v5-index "$V5" --exact-roster "$ROSTER" \
@@ -235,11 +235,9 @@ jobs:
           assert d["heldout_new_source_queries"]==12
           assert d["unqualified_original_vs_soup_pose_views"]>=0
           assert d["graphics_owner_authorized"] is False
-          assert d["animated_render_caa_authorized"] is False
-          assert d["graphics_owner_authorized"] is False
           assert d["training_authorized"] is False
           print("## Real native motion source/soup; three poses, four original cameras")
-          print("Worker:",d["subject_ordinal"])
+          print("Worker:",d["worker"])
           print("Real rendered arms:",d["real_render_arm_count"])
           print("Original/soup qualified parity pose-views:",d["qualified_original_vs_soup_pose_views"],"/12")
           print("Parity failures remain blocked, no layer authority")

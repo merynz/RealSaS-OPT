@@ -1,0 +1,134 @@
+/* BUSTED / AWAKEN Ignition v2
+ * Dormant state inherits the cool cobalt/violet product language.
+ * Fire exists ONLY in a single user-triggered charge -> ignition cycle.
+ * CSS compositor effects; no continuous canvas, intervals or background animation.
+ */
+#awakenChamber .chamber-console .compile-action {
+  width:100%!important;
+  min-width:0!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button {
+  box-sizing:border-box!important;
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:59px!important;
+  margin:0!important;
+  padding:0 22px!important;
+  overflow:hidden!important;
+  isolation:isolate;
+  border:1px solid rgba(150,166,245,.62)!important;
+  border-radius:2px!important;
+  color:#e2e7ff!important;
+  background:linear-gradient(112deg,#17234e 0%,#182550 43%,#292251 74%,#19214a 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(216,225,255,.12),0 0 18px rgba(91,105,216,.09)!important;
+  text-shadow:0 0 8px rgba(185,199,255,.18)!important;
+  filter:none!important;
+  opacity:1!important;
+  transform:none!important;
+  transition:border-color .22s ease,box-shadow .22s ease,background-color .22s ease!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button::before,
+#awakenChamber .chamber-console #awaken.awaken-button::after {
+  content:"";
+  position:absolute!important;
+  inset:0!important;
+  pointer-events:none!important;
+  z-index:0!important;
+  border-radius:inherit;
+  width:100%;height:100%;box-sizing:border-box;
+  background-clip:border-box;
+  transition:none!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button::before {
+  background:linear-gradient(90deg,
+    rgba(66,98,213,.0) 0%,rgba(116,138,255,.67) 18%,
+    rgba(167,115,243,.88) 41%,rgba(249,113,78,.92) 67%,
+    rgba(255,191,107,.98) 100%)!important;
+  /* Do not mark animated properties !important: that suppresses CSS keyframes. */
+  transform:scaleX(0);
+  transform-origin:left center;
+  opacity:0;
+}
+#awakenChamber .chamber-console #awaken.awaken-button::after {
+  background:
+    radial-gradient(ellipse 72% 140% at 55% 50%,rgba(255,242,192,.94),rgba(255,145,72,.76) 37%,rgba(219,67,72,.34) 68%,transparent 100%)!important;
+  transform:scale(.73);
+  opacity:0;
+}
+#awakenChamber .chamber-console #awaken.awaken-button span {
+  position:relative;z-index:2;color:inherit!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button:not(:disabled):not(.is-charging):not(.is-igniting):hover {
+  border-color:rgba(195,202,255,.88)!important;
+  background:linear-gradient(112deg,#1a2b5a 0%,#222d64 50%,#30245d 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(216,225,255,.19),0 0 24px rgba(117,132,241,.15)!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button.is-charging {
+  color:#fff!important;
+  border-color:rgba(183,175,255,.9)!important;
+  box-shadow:inset 0 1px 0 rgba(226,229,255,.31),0 0 27px rgba(126,103,242,.23)!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button.is-charging::before {
+  opacity:1!important;
+  animation:bustedChargeSweep .49s cubic-bezier(.15,.12,.70,.95) forwards!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button.is-igniting {
+  color:#fff!important;
+  border-color:rgba(255,224,170,.94)!important;
+  box-shadow:inset 0 1px 0 rgba(255,239,197,.48),0 0 36px rgba(239,119,72,.41)!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button.is-igniting::before {
+  transform:scaleX(1);
+  opacity:1!important;
+  background:linear-gradient(95deg,#7457cb,#c663a8 30%,#e76569 57%,#ffa959 88%)!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button.is-igniting::after {
+  animation:bustedIgnitionFlash .41s cubic-bezier(.18,.58,.35,1) both!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button:focus-visible {
+  outline:2px solid rgba(200,207,255,.90)!important;
+  outline-offset:3px!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button:disabled {
+  opacity:.66!important;
+  cursor:not-allowed!important;
+  box-shadow:inset 0 1px 0 rgba(212,223,255,.07)!important;
+}
+/* The offline PREVIEW button is intentionally clickable for this visual
+   microinteraction only. A separate status line still says COMPILER OFFLINE. */
+#awakenChamber .chamber-console #awaken.awaken-button[data-ignition-preview="true"] {
+  cursor:pointer!important;
+}
+@keyframes bustedChargeSweep {
+  0% {transform:scaleX(0);filter:brightness(.8)}
+  70% {filter:brightness(1.07)}
+  100% {transform:scaleX(1);filter:brightness(1.2)}
+}
+@keyframes bustedIgnitionFlash {
+  0% {opacity:0;transform:scale(.78)}
+  25% {opacity:.98;transform:scale(1)}
+  48% {opacity:.66;transform:scale(1.10)}
+  100% {opacity:0;transform:scale(1.28)}
+}
+@media(max-width:760px){
+  #awakenChamber .chamber-console #awaken.awaken-button{
+    min-height:55px!important;padding-inline:16px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #awakenChamber .chamber-console #awaken.awaken-button::before,
+  #awakenChamber .chamber-console #awaken.awaken-button::after {
+    animation:none!important;
+    transition:none!important;
+  }
+  #awakenChamber .chamber-console #awaken.awaken-button.is-charging::before {
+    opacity:.42!important;transform:scaleX(1)!important;
+  }
+  #awakenChamber .chamber-console #awaken.awaken-button.is-igniting::after{
+    opacity:.35!important;transform:none!important;
+  }
+}

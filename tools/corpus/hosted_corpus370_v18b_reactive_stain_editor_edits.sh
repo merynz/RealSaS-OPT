@@ -104,6 +104,15 @@ done
 # Cat/Triceratops independent courts passed; Cowfish must also PASS and
 # upload its independent private receipt before enabling real V18b source jobs.
 # Never substitute a cancelled V18a run or look up "latest" dynamically.
+# Independent remote courts for all three V18a original sources were SHA-readback
+# checked in run 42097722762. These pins prevent an old/partial court from
+# silently qualifying the V18b Blender group edit experiment.
+case "$SUBJECT" in
+  CAT) EXPECTED_V18A_COURT_SHA=2801bc94c58349f7561071f2c36d9a30b8d13b3b476aa4430e164f2e5de02c7b ;;
+  TRICERATOPS) EXPECTED_V18A_COURT_SHA=bd7ac5e561af6d4a4bbab8aac555951e5c7e6b97f589a700ef3691edc89ce5c0 ;;
+  COWFISH) EXPECTED_V18A_COURT_SHA=16e20721019911d5f52181f8d427794aff352ebf5b187568c7b57058850b221e ;;
+  *) echo "Unexpected original source $SUBJECT" >&2; exit 2 ;;
+esac
 V18A_RUN=42097722762-1
 STAIN="$D/corpus370_reactive_stain_v18a_parent/$V18A_RUN/$SUBJECT"
 mkdir -p "$STAIN"
@@ -115,6 +124,8 @@ do
   rclone copyto "$VM/hosted_reactive_stain_v18a/$SUBJECT/$V18A_RUN/$name" "$STAIN/$name" --checksum --retries 3
   test -s "$STAIN/$name"
 done
+test "$(sha256sum "$STAIN/PRIVATE_INDEPENDENT_REACTIVE_STAIN_COURT_V18A.json" | cut -d' ' -f1)" = "$EXPECTED_V18A_COURT_SHA"
+echo "V18B_PARENT_V18A_ORIGINAL_SOURCE_COURT_SHA_MATCHED=$SUBJECT/$EXPECTED_V18A_COURT_SHA"
 
 # Exact original renderer binary and downloaded SHA-file. No new source
 # shapes are generated or inferred. The original authored character is used.

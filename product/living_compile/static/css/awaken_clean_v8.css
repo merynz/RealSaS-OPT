@@ -45,7 +45,7 @@ html,body{overflow-x:clip;scroll-behavior:smooth}
 .awaken-chamber{
   position:relative;isolation:isolate;
   min-height:100svh;
-  padding:clamp(108px,12svh,145px) clamp(22px,5.5vw,94px) 45px;
+  padding:clamp(155px,17svh,178px) clamp(22px,5.5vw,94px) 45px;
   background:radial-gradient(ellipse at 65% 55%,rgba(47,46,112,.14),transparent 63%),linear-gradient(135deg,#080b18,#060816 60%,#050611);
   overflow:hidden;
 }
@@ -130,7 +130,7 @@ html,body{overflow-x:clip;scroll-behavior:smooth}
  .landing-screen .hero-description{margin-inline:auto}
  .landing-screen .hero-intro h1{font-size:clamp(49px,10vw,77px)}
  .landing-screen>.matrix-typewriter .matrix-trace{opacity:calc(var(--trace-alpha)*.39)}
- .awaken-chamber{padding:105px 18px 30px}
+ .awaken-chamber{padding:182px 18px 30px}
  .chamber-header{justify-content:center;text-align:center;margin-bottom:17px}
  .chamber-header .chamber-eyebrow{font-size:9px}
  .chamber-header h2{font-size:40px}

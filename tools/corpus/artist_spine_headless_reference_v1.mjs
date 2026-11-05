@@ -157,6 +157,7 @@ async function main(){
   };
   await fs.writeFile(path.join(out,"receipt.json"),seal(receipt));
   console.log(JSON.stringify(receipt));
-  dest.delete();surface.delete();
+  if(typeof ck.Free==="function")ck.Free(dest);
+  surface.delete();
 }
 main().catch(e=>{console.error(String(e.stack||e));process.exit(9)});

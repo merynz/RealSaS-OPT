@@ -79,7 +79,11 @@ def test_fit_channels_are_strictly_blind_to_heldout_source_pose():
     original=stain.face_stain_features(rest,faces,base,controls,joint,picks)
     controls_bad=controls.copy()
     joint_bad=joint.copy()
-    controls_bad[2]+=np.array([20.,-100.,23.])
+    # Hidden-pose mutation must change *within-component* response variance.
+    # A uniform translation of every vertex cannot do that when each group
+    # is mechanically homogeneous; that is not a valid heldout falsifier.
+    controls_bad[2,0,0,0,0,0]+=.7
+    controls_bad[2,1,0,1,6,1]-=.4
     joint_bad[2]+=np.array([-90.,10.,400.])
     after=stain.face_stain_features(rest,faces,base,controls_bad,
                                     joint_bad,picks)

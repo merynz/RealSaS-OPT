@@ -1,0 +1,66 @@
+name: corpus370-v18b-transparent-bounce-source-witness
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18b-transparent-bounce-source-witness.yml'
+      - 'tools/truth_foundry/blender_corpus370_v18b_transparency_bounce_witness_v1.py'
+      - 'tools/corpus/court_corpus370_v18b_transparency_bounce_witness_v1.py'
+      - 'tools/corpus/hosted_corpus370_v18b_transparency_bounce_witness_v1.sh'
+      - 'tests/corpus/test_corpus370_v18b_transparency_bounce_witness_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18b-bounce-witness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-blender-empty-bounce-witness-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independent numeric redteam and syntax, no Blender rendering
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          bash -n tools/corpus/hosted_corpus370_v18b_transparency_bounce_witness_v1.sh
+          python3 -m py_compile \
+            tools/truth_foundry/blender_corpus370_v18b_transparency_bounce_witness_v1.py \
+            tools/corpus/court_corpus370_v18b_transparency_bounce_witness_v1.py
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_v18b_transparency_bounce_witness_v1.py
+
+  original-failed-source-empty-bounce-causal-witness:
+    needs: exact-blender-empty-bounce-witness-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+          - subject: TRICERATOPS
+            ordinal: 1
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SUBJECT_ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch sealed V14 source and archived V18b diagnosis
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Render only 12 original empty-scene frames and independently court opaque remnants
+        run: |
+          set -euo pipefail
+          bash tools/corpus/hosted_corpus370_v18b_transparency_bounce_witness_v1.sh

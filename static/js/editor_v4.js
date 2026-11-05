@@ -51,6 +51,7 @@
     const summary=doc.createElement('summary');
     summary.textContent='TRANSFORMS';
     group.replaceWith(details);details.append(summary,group);
+    details.addEventListener('toggle',()=>toolbar.classList.toggle('tools-popover-open',details.open));
   }
   if(toolbar){
     new MutationObserver(organizeToolbar).observe(toolbar,{childList:true});

@@ -1,0 +1,114 @@
+name: corpus370-v18b-archived-render-parity-diagnostic
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18b-archived-render-parity-diagnostic.yml'
+      - 'tools/corpus/diagnose_corpus370_v18b_sealed_render_parity_v1.py'
+      - 'tests/corpus/test_corpus370_v18b_sealed_render_parity_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18b-archived-diagnostic-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  archived-parity-redteam-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and immutable RGB/alpha/no-op counterexamples
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile tools/corpus/diagnose_corpus370_v18b_sealed_render_parity_v1.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18b_sealed_render_parity_v1.py
+
+  archived-original-source-parity-and-probe-diagnosis:
+    needs: archived-parity-redteam-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+          - subject: TRICERATOPS
+            ordinal: 1
+          - subject: COWFISH
+            ordinal: 2
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SUBJECT_ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install read-only private transport and numeric analysis dependency
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+          python3 -m pip install --disable-pip-version-check numpy
+      - name: Reopen immutable V18b 42100552844-1 renders and V14 parent; diagnose without Blender
+        run: |
+          set -euo pipefail
+          umask 077
+          export RCLONE_CONFIG="$RUNNER_TEMP/corpus370-parity-rclone.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          BASE="$RUNNER_TEMP/c370-v18b-retrospective"
+          mkdir -p "$BASE"
+          REMOTE_ROOT="gdrive:corpus370_preparation_v1"
+          OLD="$REMOTE_ROOT/hosted_reactive_edit_v18b/$SUBJECT/42100552844-1"
+          V14="$REMOTE_ROOT/hosted_native_mechanical_rgba_private_v14/42075029264-1/$SUBJECT_ORDINAL"
+          for extension in json npz; do
+            rclone copyto "$OLD/PRIVATE_ORIGINAL_V18B_HELDOUT_STAIN_EDITOR_RENDER.$extension" \
+              "$BASE/editor.$extension" --checksum --retries 3
+            test -s "$BASE/editor.$extension"
+          done
+          rclone copyto "$V14/PRIVATE_REAL_NATIVE_MECHANICAL_RGBA_MANIFEST_V14.npz" \
+            "$BASE/v14.npz" --checksum --retries 3
+          rclone copyto "$V14/PRIVATE_NATIVE_MECHANICAL_RGBA_JOIN_JOB_V14.json" \
+            "$BASE/v14-job.json" --checksum --retries 3
+          test -s "$BASE/v14.npz"
+          test -s "$BASE/v14-job.json"
+          python3 -u tools/corpus/diagnose_corpus370_v18b_sealed_render_parity_v1.py \
+            --manifest "$BASE/editor.json" \
+            --editor-npz "$BASE/editor.npz" \
+            --v14-npz "$BASE/v14.npz" \
+            --v14-job "$BASE/v14-job.json" \
+            --output "$BASE/PRIVATE_ARCHIVED_V18B_RENDER_PARITY_DIAGNOSIS_V1.json"
+          BASE="$BASE" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          path=Path(os.environ["BASE"])/"PRIVATE_ARCHIVED_V18B_RENDER_PARITY_DIAGNOSIS_V1.json"
+          d=json.loads(path.read_text())
+          assert d["status"]=="ARCHIVED_RENDER_PARITY_AND_PROBE_VISIBILITY_DIAGNOSED__NO_AUTHORITY"
+          assert d["original_v18b_workflow_run"]=="42100552844-1"
+          assert d["new_renders_performed"]==0
+          assert d["aggregate"]["per_view_count"]==4
+          assert d["aggregate"]["observable_single_face_proxy_cases"]+d["aggregate"]["unobservable_single_face_proxy_cases"]==24
+          assert d["source_pixels_exposed_in_report"] is False
+          assert d["original_artist_drawable_same_different_labels"]=="UNKNOWN"
+          assert all(d[k] is False for k in (
+              "source_editability_qualified", "graphics_owner_authorized",
+              "iris_training_authorized", "tessa_training_authorized",
+              "training_authorized", "materialization_authorized",
+          ))
+          print("V18B_ARCHIVED_PARITY_DIAGNOSIS_MEASURED_NO_NEW_ARTIST_OR_TRAINING_AUTHORITY")
+          PY
+          DEST="$REMOTE_ROOT/hosted_reactive_edit_v18b_archived_parity_v1/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/PRIVATE_ARCHIVED_V18B_RENDER_PARITY_DIAGNOSIS_V1.json"
+          rclone copyto "$BASE/PRIVATE_ARCHIVED_V18B_RENDER_PARITY_DIAGNOSIS_V1.json" "$DEST" --checksum --retries 3
+          rclone cat "$DEST" > "$BASE/readback.json"
+          test "$(sha256sum "$BASE/readback.json" | cut -d' ' -f1)" = \
+            "$(sha256sum "$BASE/PRIVATE_ARCHIVED_V18B_RENDER_PARITY_DIAGNOSIS_V1.json" | cut -d' ' -f1)"
+          echo "V18B_ARCHIVED_PARITY_DIAGNOSTIC_REMOTE_SHA=$(sha256sum "$BASE/readback.json" | cut -d' ' -f1)"

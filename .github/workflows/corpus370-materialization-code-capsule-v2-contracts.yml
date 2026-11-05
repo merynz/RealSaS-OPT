@@ -1,0 +1,37 @@
+name: corpus370-materialization-code-capsule-v2-contracts
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-materialization-code-capsule-v2-contracts.yml'
+      - 'tools/notebooks/build_corpus370_materialization_capsule_v2.py'
+      - 'tools/corpus/build_corpus370_materialization_code_capsule_v1.py'
+      - 'tests/corpus/test_corpus370_materialization_capsule_v2.py'
+  pull_request:
+    paths:
+      - '.github/workflows/corpus370-materialization-code-capsule-v2-contracts.yml'
+      - 'tools/notebooks/build_corpus370_materialization_capsule_v2.py'
+      - 'tools/corpus/build_corpus370_materialization_code_capsule_v1.py'
+      - 'tests/corpus/test_corpus370_materialization_capsule_v2.py'
+permissions:
+  contents: read
+jobs:
+  no-github-private-clone-readiness-exact-code-capsule:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install numeric test contracts
+        run: python3 -m pip install --disable-pip-version-check numpy pytest
+      - name: Test code archive from immutable source commit and fail closed Run All
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/notebooks/build_corpus370_materialization_capsule_v2.py tools/corpus/build_corpus370_materialization_code_capsule_v1.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_materialization_capsule_v2.py
+      - name: Build actual sealed code-only capsule of current exact private source SHA
+        run: |
+          set -euo pipefail
+          python3 tools/corpus/build_corpus370_materialization_code_capsule_v1.py \
+            --repo . --code-sha "$(git rev-parse HEAD)" \
+            --output "$RUNNER_TEMP/CORPUS370_MATERIALIZATION_CODE_CAPSULE_V1.zip"
+          test -s "$RUNNER_TEMP/CORPUS370_MATERIALIZATION_CODE_CAPSULE_V1.zip"

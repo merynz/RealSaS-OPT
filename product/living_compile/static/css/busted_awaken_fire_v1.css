@@ -19,8 +19,8 @@
  color:#fffaf3!important;
  background:
   linear-gradient(116deg,
-   #661a30 0%,#a52b37 18%,#cc3e35 33%,
-   #ec6337 48%,#f78943 66%,#cb3e48 83%,#872647 100%)!important;
+   #66192e 0%,#b72e39 18%,#dc4131 33%,
+   #fb7432 48%,#ffac55 66%,#d74549 83%,#912342 100%)!important;
  background-size:180% 100%!important;
  background-position:14% 50%!important;
  box-shadow:
@@ -67,9 +67,9 @@
  outline:2px solid #ffe0bf!important;outline-offset:4px!important;
 }
 #awakenChamber .chamber-console #awaken.awaken-button:disabled{
- opacity:.83!important;
+ opacity:.94!important;
  cursor:not-allowed!important;
- filter:saturate(.79) brightness(.90);
+ filter:saturate(1.04) brightness(1.03);
  transform:none!important;
 }
 #awakenChamber .chamber-console #awaken.awaken-button:disabled::before{

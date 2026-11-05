@@ -190,11 +190,12 @@ def run(args):
              if x["subject_id"]==args.subject_id]
     require(len(sources)==1,"V10_ORIGINAL_V9_SUBJECT_REQUIRED")
     row=sources[0]
-    manifest=read_checked(args.manifest,row["render_manifest_sha256"]
-            if "render_manifest_sha256" in row else args.expected_manifest_sha256,
-            "V10_RENDERMANIFEST_SHA")
-    # V9 source public row stores array & court digests; the separate manifest
-    # digest comes from the trusted private V9 receipt / exact explicit CLI.
+    require(row.get("render_manifest_sha256")==args.expected_manifest_sha256,
+            "V10_PUBLIC_SEALED_RENDER_MANIFEST_SHA_NOT_ARBITRARY")
+    manifest=read_checked(args.manifest,row["render_manifest_sha256"],
+                          "V10_RENDERMANIFEST_SHA")
+    # The independent V9 public seal binds source, render manifest,
+    # original RGBA bytes and the separately courted V9 verdict by SHA.
     require(manifest["source_sha256"]==row["source_sha256"]
             and manifest["array_sha256"]==row["private_render_arrays_sha256"],
             "V10_PARENT_MANIFEST_OR_ARRAY_BINDING")

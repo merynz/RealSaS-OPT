@@ -1,12 +1,12 @@
 /* BUSTED / Reactor AWAKEN v3
  * Dark, glassy and dead-quiet at rest. One-shot procedural energy exists
  * strictly on click and is painted inside this exact button border box.
- * The button matches the SOURCE ARTWORK viewport, not the wider metadata rail.
+ * The button occupies the ENTIRE compile action, including its interactive surface.
  */
 #awakenChamber .chamber-console .compile-action{
   display:flex!important;
   flex-direction:column!important;
-  align-items:center!important;
+  align-items:stretch!important;
   gap:11px!important;
   width:100%!important;
   min-width:0!important;
@@ -18,12 +18,12 @@
   flex:none!important;
   align-items:center!important;
   justify-content:space-between!important;
-  width:min(100%,var(--awaken-fit-width,345px))!important;
+  width:100%!important;
   max-width:100%!important;
   min-width:0!important;
   height:59px!important;
   min-height:59px!important;
-  margin:0 auto!important;
+  margin:0!important;
   padding:0 20px!important;
   overflow:hidden!important;
   border:1px solid rgba(139,157,237,.62)!important;
@@ -121,9 +121,9 @@
   cursor:pointer!important;
 }
 #awakenChamber .chamber-console .compile-availability{
-  width:min(100%,var(--awaken-fit-width,345px))!important;
+  width:100%!important;
   max-width:100%;
-  margin:0 auto!important;
+  margin:0!important;
   text-align:center!important;
 }
 @media(max-width:760px){

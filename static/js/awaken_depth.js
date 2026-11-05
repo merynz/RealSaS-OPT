@@ -101,14 +101,81 @@
       traces.push(state);typeRoot.appendChild(lane);
     }
     root.appendChild(fragment);
+    layoutTraces();
     paint();
+  }
+
+
+  function fitCode(row) {
+    // A complete line must fit; clipping text is not an acceptable fallback.
+    const options=[];
+    for(let i=0;i<12;i++)options.push(generateCode());
+    options.push('rig.bind();','mesh.compile();','scene.resolve();','skin.attach();');
+    for(const text of options){
+      row.textContent=text;
+      if(row.scrollWidth <= row.clientWidth-8)return text;
+    }
+    return '';
+  }
+
+  function rectIntersects(a,b,pad=10) {
+    return a.left < b.right+pad && a.right > b.left-pad &&
+      a.top < b.bottom+pad && a.bottom > b.top-pad;
+  }
+
+  function layoutTraces() {
+    const bounds=typeRoot.getBoundingClientRect();
+    const width=bounds.width,height=bounds.height;
+    if(!width || !height)return;
+    const mobile=narrow.matches;
+    const perspective=mobile?850:1100;
+    const viewportBottom=Math.min(height,window.innerHeight-bounds.top);
+    const obstacles=['.masthead','.hero-intro','.input-orbit','#awaken','#compileAvailability','#inputSlotLedger','.telemetry','.dev-mode']
+      .map(sel=>document.querySelector(sel))
+      .filter(el=>el && getComputedStyle(el).display!=='none' && el.getBoundingClientRect().height>0)
+      .map(el=>{
+        const r=el.getBoundingClientRect();
+        return {left:r.left-bounds.left,top:r.top-bounds.top,right:r.right-bounds.left,bottom:r.bottom-bounds.top};
+      });
+    const occupied=[];
+    const desiredW=mobile?Math.min(190,width*.43):width<1150?235:290;
+    const desiredH=mobile?49:62;
+    const xs=mobile?[12,width-desiredW-12,Math.max(12,(width-desiredW)/2)]:
+      [25,width-desiredW-25,Math.round((width-desiredW)/2)];
+    const yFractions=mobile?[.13,.28,.42,.56,.72,.85]:[.13,.22,.35,.48,.61,.75,.86];
+    const positions=[];
+    for(const fy of yFractions){
+      for(const x of xs){
+        const y=Math.round(viewportBottom*fy);
+        const candidate={left:x,top:y,right:x+desiredW,bottom:y+desiredH};
+        if(candidate.bottom > viewportBottom-12 || candidate.top < 76)continue;
+        if(obstacles.some(r=>rectIntersects(candidate,r,12)))continue;
+        positions.push(candidate);
+      }
+    }
+    // Slots are never forced beneath hero copy, upload, navigation or status UI.
+    // If free space runs out, omit low-priority decoration rather than overlap.
+    for(const trace of traces){
+      const pos=positions.find(p=>!occupied.some(other=>rectIntersects(other,p,12)));
+      if(!pos){trace.lane.hidden=true;continue;}
+      occupied.push(pos);
+      trace.lane.hidden=false;
+      const z=Number((trace.lane.style.transform.match(/-?\d+/)||[])[0])||-150;
+      const ratio=(perspective-z)/perspective;
+      trace.lane.style.left=(width/2+(pos.left-width/2)*ratio).toFixed(2)+'px';
+      trace.lane.style.top=(height/2+(pos.top-height/2)*ratio).toFixed(2)+'px';
+      trace.lane.style.width=(desiredW*ratio).toFixed(2)+'px';
+      trace.lane.style.height=(desiredH*ratio).toFixed(2)+'px';
+      trace.lines=trace.rows.map(row=>fitCode(row));
+      trace.lastCycle=Math.floor((elapsed+trace.offset)/trace.cycle);
+    }
   }
 
   function paint(){
     for(const trace of traces){
       const t=elapsed+trace.offset,cycle=Math.floor(t/trace.cycle);
       if(cycle!==trace.lastCycle){
-        trace.lines=trace.rows.map(generateCode);
+        trace.lines=trace.rows.map(row=>fitCode(row));
         trace.lastCycle=cycle;
       }
       const local=t%trace.cycle;
@@ -138,6 +205,13 @@
     else paint();
   }
   build();start();
+  document.fonts?.ready?.then(()=>{layoutTraces();paint()});
+  let resizeQueued=false;
+  window.addEventListener('resize',()=>{
+    if(resizeQueued)return;
+    resizeQueued=true;
+    requestAnimationFrame(()=>{resizeQueued=false;layoutTraces();paint()});
+  });
   narrow.addEventListener?.('change',()=>{build();start()});
   reduced.addEventListener?.('change',start);
   document.addEventListener('visibilitychange',start);

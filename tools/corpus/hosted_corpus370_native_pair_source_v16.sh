@@ -116,6 +116,8 @@ d=json.loads(p.read_text())
 assert d["status"]=="V16_REAL_JOINT_NATIVE_CONTROLS_CAUSAL_NONADDITIVITY_MEASURED__AUTHOR_OWNER_UNKNOWN"
 assert d["causal_joint_visual_counterfactual_cases"]==48
 assert d["independently_replayed_qualifying_source_soup_RGBA_case_count"]==48
+assert d["independent_original_dual_control_world_vertex_and_v13b_single_mechanics_verified_cases"]==48
+assert d["identical_original_native_A_plus_B_vertices_across_all_camera_views_verified_cases"]==48
 assert d["aggregate_effects"]["joint_ab_effect_pixel_instances"]>0
 assert not d["graphics_owner_authorized"] and not d["training_authorized"]
 assert not d["materialization_authorized"]

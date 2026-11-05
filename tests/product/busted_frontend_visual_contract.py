@@ -217,8 +217,8 @@ async def run():
                 assert .08 < sample["scale"] <= 1, (
                     f"Ignition charge did not advance across the button face: {sample}"
                 )
-                assert sample["opacity"] > .9, (
-                    f"Ignition power overlay not visible: {sample}"
+                assert sample["opacity"] >= .38 and sample["scale"] == 1, (
+                    f"Reduced-motion ignition must be a subdued full-face static state: {sample}"
                 )
                 assert abs(sample["width"]-sample["faceWidth"]) <= 3, (
                     f"Ignition overlay and button widths differ: {sample}"
@@ -350,7 +350,30 @@ async def run():
                 f"Code does not progress over time: {initial!r} -> {later!r}"
             )
             await animated.screenshot(path=str(OUT / "awaken_animated_chamber_1366x768.png"))
-            print("PASS 1366x768 animated Matrix typing: characters progressively appear")
+            # Separate motion-enabled power-fill witness. A CSS !important on
+            # the base pseudo element previously pinned the scale at zero.
+            await animated.wait_for_function("""() =>
+              document.querySelector('#awaken')?.dataset.ignitionPreview === 'true'
+            """, timeout=5000)
+            button=animated.locator("#awaken")
+            await button.evaluate("b=>b.classList.add('is-charging')")
+            await animated.wait_for_timeout(235)
+            moving=await button.evaluate("""b=>{
+              const p=getComputedStyle(b,'::before');
+              const face=b.getBoundingClientRect();
+              return {opacity:parseFloat(p.opacity),
+                scale:new DOMMatrixReadOnly(p.transform).a,
+                width:parseFloat(p.width),height:parseFloat(p.height),
+                faceWidth:face.width,faceHeight:face.height};
+            }""")
+            assert moving["opacity"] >= .9 and .08 < moving["scale"] <= 1, (
+                f"Normal-motion charge is not visibly filling: {moving}"
+            )
+            assert abs(moving["width"]-moving["faceWidth"]) <= 3
+            assert abs(moving["height"]-moving["faceHeight"]) <= 3
+            await button.screenshot(path=str(OUT / "awaken_motion_charge_1366.png"))
+            await button.evaluate("b=>b.classList.remove('is-charging')")
+            print("PASS 1366x768 animated Matrix typing + full-surface ignition charge")
         except Exception as error:
             failures.append(f"animated typewriter: {error}")
             print("FAIL", failures[-1])

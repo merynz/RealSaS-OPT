@@ -71,6 +71,41 @@ def supported_labels(a, foreground):
     return result, count
 
 
+def audit_background_bridge(original_labels, foreground):
+    """Quantify visually disconnected regions sharing a V1 graph label.
+
+    This detects a comparison trap: a region count from an RGB graph may
+    silently combine multiple *foreground-disconnected* islands because the
+    graph was formed on a transparent black full image.
+    """
+    raw = np.asarray(original_labels, np.int64)
+    require(raw.shape == foreground.shape
+            and np.all(raw[~foreground] == -1)
+            and np.all(raw[foreground] >= 0),
+            "GENERIC_SPLIT_V1_GRAPH_FOREGROUND_AUTHORITY")
+    contiguous, split_count = supported_labels(raw, foreground)
+    old = np.unique(raw[foreground])
+    require(np.array_equal(old, np.arange(len(old))),
+            "GENERIC_SPLIT_V1_GRAPH_REGION_GAPS")
+    # The same old label may occur in multiple new connected components.
+    keys = raw[foreground] * split_count + contiguous[foreground]
+    old_per_component = np.unique(keys) // split_count
+    counts = np.bincount(old_per_component, minlength=len(old))
+    require(int(counts.sum()) == split_count,
+            "GENERIC_SPLIT_BRIDGE_COMPONENT_ACCOUNTING")
+    return contiguous, {
+        "v1_image_graph_region_count": int(len(old)),
+        "v1_graph_foreground_four_connected_components": int(split_count),
+        "v1_labels_with_multiple_disconnected_foreground_islands":
+            int(np.count_nonzero(counts > 1)),
+        "additional_visible_components_hidden_by_v1_graph_labels":
+            int(split_count - len(old)),
+        "maximum_disconnected_foreground_components_per_v1_region":
+            int(counts.max(initial=0)),
+        "not_artist_drawable_truth": True,
+    }
+
+
 def build_seed(rgba, params):
     require(rgba.ndim == 3 and rgba.shape[2] == 4 and rgba.dtype == np.uint8,
             "GENERIC_SPLIT_ONLY_RGBA8888")
@@ -266,6 +301,16 @@ def write_candidate(rgba_file, public_file, base_npz, base_manifest,
         require(set(d.files) == {"alpha_connected", "image_graph"}
                 and d["image_graph"].shape == rgba.shape[:2],
                 "GENERIC_SPLIT_PARENT_REGION_FORMAT")
+        parent_graph = np.asarray(d["image_graph"], dtype=np.int32)
+    foreground = rgba[..., 3] > PARAMS["alpha_foreground"]
+    connected_parent, bridge_audit = audit_background_bridge(
+        parent_graph, foreground
+    )
+    # Same original pixels, same graph params: the only permitted difference
+    # between V1 and V2 before merging is foreground 4-connectivity.
+    independent_seed = build_seed(rgba, PARAMS["seed_graph"])
+    require(np.array_equal(connected_parent, independent_seed),
+            "GENERIC_SPLIT_RECOMPUTED_PARENT_GRAPH_SEED_MISMATCH")
     arrays, reports = predict_candidates(rgba)
     candidate_npz = Path(candidate_npz)
     candidate_manifest = Path(candidate_manifest)
@@ -282,6 +327,7 @@ def write_candidate(rgba_file, public_file, base_npz, base_manifest,
         "precommitted_algorithm_parameters": PARAMS,
         "algorithms": list(METHODS),
         "image_only_region_reports": reports,
+        "v1_graph_foreground_connectivity_audit": bridge_audit,
         "source_mesh_face_incidence_read": False,
         "source_artist_slot_name_or_count_read": False,
         "original_artist_edit_reference_read_during_prediction": False,
@@ -405,6 +451,16 @@ def court_candidates(rgba_file, public_file, base_npz, base_manifest,
             and parent.get("drawable_ownership_authorized") is False
             and parent.get("training_authorized") is False,
             "GENERIC_SPLIT_PARENT_V1_MANIFEST_TAMPER_OR_AUTHORITY_FORGERY")
+    with np.load(base_npz, allow_pickle=False) as frozen_parent:
+        require(set(frozen_parent.files) == {"alpha_connected", "image_graph"},
+                "GENERIC_SPLIT_COURT_PARENT_PREDICTION_FORMAT")
+        _, expected_bridge_audit = audit_background_bridge(
+            frozen_parent["image_graph"],
+            rgba[..., 3] > PARAMS["alpha_foreground"]
+        )
+    require(candidate.get("v1_graph_foreground_connectivity_audit") ==
+                expected_bridge_audit,
+            "GENERIC_SPLIT_V1_GRAPH_CONNECTIVITY_AUDIT_FORGERY")
     require(candidate.get("schema") == PRED_SCHEMA
             and candidate.get("status") ==
                 "V2_IMAGE_ONLY_SPLIT_MERGE_PREDICTION_SEALED__NO_OWNER"

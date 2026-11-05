@@ -103,7 +103,7 @@ def test_predict_has_no_artist_reference_parameter_or_author_count(tmp_path):
     image, public, npz, manifest, reference, private_dir = getargs(tmp_path)
     pred = json.loads(manifest.read_text())
     assert pred["schema"] == PRED_SCHEMA
-    assert "slot" not in json.dumps(pred).lower()
+    assert not any("hidden-art-name-" in value for value in json.dumps(pred).split())
     assert pred["reference_used_during_prediction"] is False
     assert pred["artist_slot_names_or_layer_count_exposed"] is False
     assert pred["drawable_ownership_authorized"] is False

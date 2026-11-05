@@ -1,0 +1,114 @@
+name: corpus370-graphics-evidence-ir-v1-original-source
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-graphics-evidence-ir-v1-original-source.yml'
+      - 'tools/corpus/compile_corpus370_graphics_evidence_ir_v1.py'
+      - 'tools/corpus/court_corpus370_graphics_evidence_ir_v1.py'
+      - 'tests/corpus/test_corpus370_graphics_evidence_ir_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-generic-graphics-evidence-ir-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  graphics-evidence-ir-unknown-and-geometry-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure source-ray evidence cannot silently become artist component labels
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/corpus/compile_corpus370_graphics_evidence_ir_v1.py \
+            tools/corpus/court_corpus370_graphics_evidence_ir_v1.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_graphics_evidence_ir_v1.py
+
+  graphics-evidence-ir-original-source-court:
+    needs: graphics-evidence-ir-unknown-and-geometry-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            v18j_court_sha: 81dc4101d585b35d054972af5e14ab1df5c3192436829f71fe758dca8609584f
+          - subject: TRICERATOPS
+            v18j_court_sha: 117dd9a3be10c3864bea21b3ccabdf2ec8ad042212c9b6e07d8f49b0971592e5
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      EXPECTED_V18J_SHA: ${{ matrix.v18j_court_sha }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact portable private transport without apt
+        run: |
+          set -euo pipefail
+          VERSION=1.75.2
+          ARCHIVE="$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 \
+            "https://github.com/rclone/rclone/releases/download/v${VERSION}/rclone-v${VERSION}-linux-amd64.zip" \
+            -o "$ARCHIVE"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
+          unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
+          test -x "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64/rclone"
+          echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
+          python3 -m pip install --disable-pip-version-check numpy
+      - name: Type-check and independently recompile original source ray evidence
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/graphics-evidence-ir-source.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          D="$RUNNER_TEMP/source-graphics-ir"
+          mkdir -p "$D"
+          P="gdrive:corpus370_preparation_v1/hosted_source_subpixel_attribution_v18j/$SUBJECT/42125868885-1"
+          rclone copyto "$P/PRIVATE_V18J_SOURCE_SUBPIXEL_RAY_ATTRIBUTION.json" "$D/v18j-source.json" --checksum --retries 3
+          rclone copyto "$P/PRIVATE_INDEPENDENT_V18J_SOURCE_SUBPIXEL_COURT.json" "$D/v18j-court.json" --checksum --retries 3
+          test "$(sha256sum "$D/v18j-court.json"|cut -d' ' -f1)" = "$EXPECTED_V18J_SHA"
+          python3 -u tools/corpus/compile_corpus370_graphics_evidence_ir_v1.py \
+            --proposal "$D/v18j-source.json" --v18j-court "$D/v18j-court.json" \
+            --expected-v18j-court-sha "$EXPECTED_V18J_SHA" \
+            --output "$D/PRIVATE_GRAPHICS_EVIDENCE_IR_V1.json"
+          python3 -u tools/corpus/court_corpus370_graphics_evidence_ir_v1.py \
+            --ir "$D/PRIVATE_GRAPHICS_EVIDENCE_IR_V1.json" \
+            --v18j-proposal "$D/v18j-source.json" --v18j-court "$D/v18j-court.json" \
+            --expected-v18j-court-sha "$EXPECTED_V18J_SHA" \
+            --output "$D/PRIVATE_INDEPENDENT_GRAPHICS_EVIDENCE_IR_COURT_V1.json"
+          D="$D" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["D"])/"PRIVATE_INDEPENDENT_GRAPHICS_EVIDENCE_IR_COURT_V1.json"
+          v=json.loads(p.read_text())
+          assert v["status"]=="SOURCE_TYPED_GRAPHICS_EVIDENCE_RECOMPILED__UNKNOWN_OWNER_AND_NO_TRAINING"
+          assert v["source_pixel_observations_recompiled"]>0
+          assert v["same_drawable_training_pairs_qualified"]==0
+          assert v["different_drawable_training_pairs_qualified"]==0
+          assert v["model_training_target_count"]==0
+          assert v["operational_editable_layer_identity"]=="UNKNOWN"
+          assert all(v[k] is False for k in (
+            "graphics_owner_authorized","iris_training_authorized",
+            "tessa_training_authorized","materialization_authorized",
+            "training_authorized"))
+          print("ORIGINAL_GRAPHICS_EVIDENCE_IR_ONLY__NO_NEW_DRAWABLE_TRUTH",flush=True)
+          PY
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_graphics_evidence_ir_v1/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          rclone copyto "$D/PRIVATE_GRAPHICS_EVIDENCE_IR_V1.json" "$REMOTE/PRIVATE_GRAPHICS_EVIDENCE_IR_V1.json" --checksum --retries 3
+          rclone copyto "$D/PRIVATE_INDEPENDENT_GRAPHICS_EVIDENCE_IR_COURT_V1.json" "$REMOTE/PRIVATE_INDEPENDENT_GRAPHICS_EVIDENCE_IR_COURT_V1.json" --checksum --retries 3
+          rclone cat "$REMOTE/PRIVATE_INDEPENDENT_GRAPHICS_EVIDENCE_IR_COURT_V1.json" > "$D/remote.json"
+          test "$(sha256sum "$D/remote.json"|cut -d' ' -f1)" = "$(sha256sum "$D/PRIVATE_INDEPENDENT_GRAPHICS_EVIDENCE_IR_COURT_V1.json"|cut -d' ' -f1)"
+          echo "GRAPHICS_EVIDENCE_IR_INDEPENDENT_SOURCE_COURT_SHA=$(sha256sum "$D/remote.json"|cut -d' ' -f1)"

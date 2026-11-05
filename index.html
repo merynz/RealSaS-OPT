@@ -11,7 +11,10 @@
 </head>
 <body>
   <main class="awaken-shell">
-    <canvas id="depthScene" aria-hidden="true"></canvas>
+    <div class="depth-world" aria-hidden="true">
+      <div class="depth-backplane"><div id="depthCode" class="depth-code"></div></div>
+      <div class="depth-floor"></div>
+    </div>
     <div class="scene-fog" aria-hidden="true"></div>
     <div class="scene-vignette" aria-hidden="true"></div>
 
@@ -54,6 +57,7 @@
         </div>
 
         <button id="awaken" class="awaken-button" type="button" disabled>AWAKEN</button>
+        <p id="compileAvailability" class="compile-availability" role="status">UI PREVIEW · COMPILER OFFLINE</p>
 
         <aside class="telemetry" aria-label="Compiler telemetry">
           <div class="pipeline" aria-hidden="true">

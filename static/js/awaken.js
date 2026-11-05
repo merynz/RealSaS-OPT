@@ -40,6 +40,8 @@ const resultCtx = resultCanvas.getContext('2d');
 
 let project = null;
 let selectedFiles = [];
+let activeSourceObjectURL = null;
+const compileAvailability = document.querySelector('#compileAvailability');
 let running = false;
 let revealGeneration = 0;
 
@@ -58,18 +60,38 @@ async function apiJson(url, options = {}) {
   return payload;
 }
 
+function syncGatewayUI() {
+  const ready = Boolean(project?.compile_available && project?.public_compile_gateway);
+  awaken.disabled = running || !ready || selectedFiles.length === 0;
+  awaken.title = ready ? (selectedFiles.length ? 'Compile selected source views' : 'Select a front view first') : 'Compiler offline: preview only';
+  if (compileAvailability) {
+    compileAvailability.textContent = ready ? 'COMPILER READY · VERIFIED GATEWAY' : 'UI PREVIEW · COMPILER OFFLINE';
+    compileAvailability.classList.toggle('ready', ready);
+  }
+}
+
 function setFiles(files) {
   selectedFiles = [...files].filter((file) => file.type.startsWith('image/')).slice(0, 2);
-  if (!selectedFiles.length) return;
-  const url = URL.createObjectURL(selectedFiles[0]);
-  preview.src = url;
-  resultPreview.src = url;
+  if (activeSourceObjectURL) URL.revokeObjectURL(activeSourceObjectURL);
+  activeSourceObjectURL = null;
+  revealGeneration += 1;
+  result.classList.remove('show');
+  if (!selectedFiles.length) {
+    dropzone.classList.remove('has-image');
+    preview.removeAttribute('src');
+    resultPreview.removeAttribute('src');
+    viewCount.textContent = '0 VIEWS';
+    syncGatewayUI();
+    return;
+  }
+  activeSourceObjectURL = URL.createObjectURL(selectedFiles[0]);
+  preview.src = activeSourceObjectURL;
+  resultPreview.src = activeSourceObjectURL;
   resultPreview.style.display = '';
   resultCanvas.style.display = 'none';
-  revealGeneration += 1;
   dropzone.classList.add('has-image');
   viewCount.textContent = `${selectedFiles.length} VIEW${selectedFiles.length > 1 ? 'S' : ''}`;
-  awaken.disabled = false;
+  syncGatewayUI();
   addLog(`source intake armed · ${selectedFiles.length} view${selectedFiles.length > 1 ? 's' : ''}`, true);
 }
 
@@ -333,7 +355,10 @@ async function loadProject() {
       status.classList.add('ready');
       status.querySelector('span').textContent = 'PRODUCTION READY';
     }
+    syncGatewayUI();
   } catch {
+    project = null;
+    syncGatewayUI();
     modeLabel.textContent = 'UI PREVIEW · COMPILER OFFLINE';
   }
 }

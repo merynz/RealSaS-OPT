@@ -12,7 +12,11 @@
     "independent_v6_run_conclusion": "SUCCESS",
     "github_actions_successful_jobs": 4,
     "private_drive_folder": "gdrive:corpus370_preparation_v1/hosted_anonymous_full_peel_private_v6/41997241779-1",
-    "private_data_remain_private": true
+    "private_data_remain_private": true,
+    "independently_downloaded_drive_court_json_byte_sha256_reverified_count": 3,
+    "independently_downloaded_drive_court_json_byte_sha256_mismatch_count": 0,
+    "independent_byte_sha_algorithm": "SHA-256",
+    "independent_byte_sha_verification_scope": "EACH_OF_THREE_PRIVATE_ORIGINAL_COURT_JSON_FILES__SOURCE_RGBA_ARRAY_SHA_REPLAY_NOT_RERUN_IN_THIS_CHECK"
   },
   "scope": {
     "real_original_sources": 3,

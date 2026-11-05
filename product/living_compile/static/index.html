@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="/static/css/matrix_stage_v6.css?v=6.3.0"><link rel="stylesheet" href="/static/css/busted_components_v6.css">
   <link rel="stylesheet" href="/static/css/chamber_v1.css?v=1.0.0">
   <link rel="stylesheet" href="/static/css/awaken_clean_v8.css?v=8.4.0">
+  <link rel="stylesheet" href="/static/css/busted_engine_v1.css?v=1.0.0">
 
 
 </head>
@@ -46,19 +47,26 @@
       <section class="stage-wrap" aria-label="BUSTED introduction">
         <div class="hero">
         <div class="hero-intro">
-          <p class="hero-eyebrow"><span class="eyebrow-marker" aria-hidden="true"></span> BUSTED / AWAKEN 01</p>
-          <h1>Your art.<span class="hero-title-accent"> Alive<span class="hero-title-period">.</span></span></h1>
-          <p class="hero-copy">An editable puppet, not another video.</p>
-          <p class="hero-description">Compile your character into an editable puppet. Keep its identity, control its structure, and make every movement yours.</p>
-          <div class="hero-meta"><span>ART → STRUCTURE</span><span>STRUCTURE → LIFE</span></div>
+          <p class="hero-eyebrow"><span class="eyebrow-marker" aria-hidden="true"></span> BUSTED / CHARACTER COMPILATION</p>
+          <h1>WE DON'T<br>GENERATE.<br><span class="hero-title-accent">WE COMPILE<span class="hero-title-period">.</span></span></h1>
+          <p class="hero-copy">An image is just the beginning.</p>
+          <p class="hero-description">Turn source artwork into a persistent, editable puppet. Real geometry. Real articulation. Your character stays yours.</p>
+          <div class="hero-meta"><span>IMAGE → STRUCTURE</span><span>STRUCTURE → CONTROL</span></div>
+        </div>
+        <div id="structuralField" class="structural-field" aria-hidden="true">
+          <div class="field-reference field-reference-top"><span>REF / 01</span><span>STRUCTURAL CARRIER</span></div>
+          <canvas id="structuralCanvas" width="720" height="780"></canvas>
+          <div class="field-pulse" aria-hidden="true"></div>
+          <div class="field-reference field-reference-bottom"><span>PROCEDURAL GEOMETRY STUDY</span><span>NOT COMPILED OUTPUT</span></div>
+          <div class="field-ordinate"><span>TOPOLOGY</span><span>ARTICULATION</span><span>DEFORMATION</span></div>
         </div>
         </div>
       </section>
       <a class="descend-link" href="#awakenChamber" aria-label="Scroll to character intake">
         <span class="descend-icon" aria-hidden="true">↓</span>
-        <span>ENTER THE CHAMBER <small>SCROLL TO AWAKEN</small></span>
+        <span>COMPILE YOUR CHARACTER <small>CONTINUE TO SOURCE INTAKE</small></span>
       </a>
-      <div class="landing-foot" aria-hidden="true"><span>01 / DISCOVER</span><span>02 / AWAKEN</span></div>
+      <div class="landing-foot" aria-hidden="true"><span>GEOMETRY</span><span>MECHANICS</span><span>PRESENTATION</span></div>
     </section>
 
     <section id="awakenChamber" class="awaken-chamber" aria-label="Awaken character intake">
@@ -70,9 +78,9 @@
       <div id="matrixTypewriter" class="matrix-typewriter" aria-hidden="true"></div>
       <div class="chamber-inner">
         <div class="chamber-header">
-          <p class="chamber-eyebrow"><span class="chamber-index">02</span> / CHARACTER INTAKE</p>
-          <h2>AWAKEN<span class="chamber-dot">.</span></h2>
-          <p>Bring your character to life.</p>
+          <p class="chamber-eyebrow"><span class="chamber-index">02</span> / AWAKEN</p>
+          <h2>YOUR ART. <span class="chamber-dot">IN.</span></h2>
+          <p>Editable structure comes out.</p>
         </div>
         <div class="chamber-workspace">
           <div class="chamber-intake">
@@ -108,13 +116,20 @@
 
           </div>
           <div class="chamber-console">
-            <div class="console-heading"><span>02 / COMPILER CONSOLE</span><span id="compileLiveStage" aria-live="polite">AWAITING SOURCE</span></div>
-            <h3>Compile into a puppet.</h3>
-            <p class="console-copy" id="compileStatusMessage">Select your character to begin. Real compiler stages will appear here when connected.</p>
-        <button id="awaken" class="awaken-button" type="button" disabled>AWAKEN</button>
-        <p id="compileAvailability" class="compile-availability" role="status">UI PREVIEW · COMPILER OFFLINE</p>
-
-        <aside class="telemetry" aria-label="Compiler telemetry">
+            <div class="chamber-method"><span>THE COMPILER</span><span>REAL STRUCTURE / REAL CONTROL</span></div>
+            <h3>Not frames.<br><em>A puppet.</em></h3>
+            <p class="console-copy" id="compileStatusMessage">Source artwork becomes an editable character representation — geometry, rigging and deformation you can actually inspect.</p>
+            <div class="chamber-deliverables" aria-label="Puppet structure">
+              <div><span>01</span><strong>GEOMETRY</strong><small>Surface & topology</small></div>
+              <div><span>02</span><strong>RIG & SKIN</strong><small>Editable articulation</small></div>
+              <div><span>03</span><strong>MOTION</strong><small>Mechanics-aware clips</small></div>
+            </div>
+            <div class="compile-action">
+              <button id="awaken" class="awaken-button" type="button" disabled>COMPILE CHARACTER <span aria-hidden="true">↗</span></button>
+              <p id="compileAvailability" class="compile-availability" role="status">UI PREVIEW · COMPILER OFFLINE</p>
+            </div>
+            <div class="compile-monitor-heading"><span>COMPILER ACTIVITY</span><span id="compileLiveStage" aria-live="polite">AWAITING SOURCE</span></div>
+        <aside class="telemetry" id="compileMonitor" aria-label="Compiler telemetry">
           <div class="pipeline" aria-hidden="true">
             <div class="pipe-step"><span class="n">01</span><span>Input</span><i class="state"></i></div>
             <div class="pipe-step"><span class="n">02</span><span>Shape</span><i class="state"></i></div>
@@ -147,6 +162,7 @@
     <div class="dev-mode">MODE · <strong id="modeLabel">CHECKING GATEWAY</strong></div>
   </main>
   <script src="/static/js/awaken_depth.js?v=8.4.0" defer></script>
+  <script src="/static/js/busted_engine_field.js?v=1.0.0" defer></script>
   <script type="module" src="/static/js/awaken_input_slots.js"></script>
   <script type="module" src="/static/js/awaken.js?v=7.1.0"></script>
 </body>

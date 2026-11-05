@@ -40,14 +40,14 @@
   // placed text. Each reservation has a unique vertical row and bounded width.
   // Perspective compensation preserves x/y while changing real z depth.
   const desktopSlots=[
-    {x:4,y:15,w:29},{x:58,y:12,w:29},
-    {x:6,y:35,w:29},{x:61,y:34,w:31},
-    {x:4,y:57,w:31},{x:60,y:56,w:31},
-    {x:6,y:79,w:31},{x:59,y:80,w:30}
+    {x:3,y:9,w:43},{x:54,y:9,w:43},
+    {x:3,y:32,w:43},{x:54,y:32,w:43},
+    {x:3,y:55,w:43},{x:54,y:55,w:43},
+    {x:3,y:78,w:43},{x:54,y:78,w:43}
   ];
   const mobileSlots=[
-    {x:5,y:18,w:42},{x:55,y:31,w:40},
-    {x:5,y:63,w:42},{x:55,y:83,w:39}
+    {x:5,y:7,w:90},{x:5,y:30,w:90},
+    {x:5,y:53,w:90},{x:5,y:76,w:90}
   ];
 
   function build(){
@@ -118,54 +118,27 @@
     return '';
   }
 
-  function rectIntersects(a,b,pad=10) {
-    return a.left < b.right+pad && a.right > b.left-pad &&
-      a.top < b.bottom+pad && a.bottom > b.top-pad;
-  }
-
   function layoutTraces() {
+    // This code belongs exclusively to the Chamber's reserved visualization.
+    // No status text, real input, header or primary control can be painted here.
     const bounds=typeRoot.getBoundingClientRect();
     const width=bounds.width,height=bounds.height;
-    if(!width || !height)return;
+    if(width<=0||height<=0)return;
     const mobile=narrow.matches;
     const perspective=mobile?850:1100;
-    const viewportBottom=Math.min(height,window.innerHeight-bounds.top);
-    const obstacles=['.masthead','.hero-intro','.input-orbit','#awaken','#compileAvailability','#inputSlotLedger','.telemetry','.dev-mode']
-      .map(sel=>document.querySelector(sel))
-      .filter(el=>el && getComputedStyle(el).display!=='none' && el.getBoundingClientRect().height>0)
-      .map(el=>{
-        const r=el.getBoundingClientRect();
-        return {left:r.left-bounds.left,top:r.top-bounds.top,right:r.right-bounds.left,bottom:r.bottom-bounds.top};
-      });
-    const occupied=[];
-    const desiredW=mobile?Math.min(190,width*.43):width<1150?235:290;
-    const desiredH=mobile?49:62;
-    const xs=mobile?[12,width-desiredW-12,Math.max(12,(width-desiredW)/2)]:
-      [25,width-desiredW-25,Math.round((width-desiredW)/2)];
-    const yFractions=mobile?[.13,.28,.42,.56,.72,.85]:[.13,.22,.35,.48,.61,.75,.86];
-    const positions=[];
-    for(const fy of yFractions){
-      for(const x of xs){
-        const y=Math.round(viewportBottom*fy);
-        const candidate={left:x,top:y,right:x+desiredW,bottom:y+desiredH};
-        if(candidate.bottom > viewportBottom-12 || candidate.top < 76)continue;
-        if(obstacles.some(r=>rectIntersects(candidate,r,12)))continue;
-        positions.push(candidate);
-      }
-    }
-    // Slots are never forced beneath hero copy, upload, navigation or status UI.
-    // If free space runs out, omit low-priority decoration rather than overlap.
-    for(const trace of traces){
-      const pos=positions.find(p=>!occupied.some(other=>rectIntersects(other,p,12)));
-      if(!pos){trace.lane.hidden=true;continue;}
-      occupied.push(pos);
-      trace.lane.hidden=false;
+    const slots=mobile?mobileSlots:desktopSlots;
+    for(let i=0;i<traces.length;i++){
+      const trace=traces[i],slot=slots[i];
+      if(!slot){trace.lane.hidden=true;continue}
+      const x=slot.x/100*width,y=slot.y/100*height;
+      const w=slot.w/100*width,h=mobile?58:59;
       const z=Number((trace.lane.style.transform.match(/-?\d+/)||[])[0])||-150;
       const ratio=(perspective-z)/perspective;
-      trace.lane.style.left=(width/2+(pos.left-width/2)*ratio).toFixed(2)+'px';
-      trace.lane.style.top=(height/2+(pos.top-height/2)*ratio).toFixed(2)+'px';
-      trace.lane.style.width=(desiredW*ratio).toFixed(2)+'px';
-      trace.lane.style.height=(desiredH*ratio).toFixed(2)+'px';
+      trace.lane.hidden=false;
+      trace.lane.style.left=(width/2+(x-width/2)*ratio).toFixed(2)+'px';
+      trace.lane.style.top=(height/2+(y-height/2)*ratio).toFixed(2)+'px';
+      trace.lane.style.width=(w*ratio).toFixed(2)+'px';
+      trace.lane.style.height=(h*ratio).toFixed(2)+'px';
       trace.lines=trace.rows.map(row=>fitCode(row));
       trace.lastCycle=Math.floor((elapsed+trace.offset)/trace.cycle);
     }
@@ -210,7 +183,7 @@
   window.addEventListener('resize',()=>{
     if(resizeQueued)return;
     resizeQueued=true;
-    requestAnimationFrame(()=>{resizeQueued=false;layoutTraces();paint()});
+    setTimeout(()=>{resizeQueued=false;layoutTraces();paint()},80);
   });
   narrow.addEventListener?.('change',()=>{build();start()});
   reduced.addEventListener?.('change',start);

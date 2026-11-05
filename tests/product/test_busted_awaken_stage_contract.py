@@ -90,7 +90,12 @@ class BustedAwakenStageContractTests(unittest.TestCase):
         self.assertIn("async function playAwakenIgnition()",app)
         self.assertIn("await playAwakenIgnition();",app)
         self.assertIn("Ignition interaction preview only. No compile session was started.",app)
-        self.assertIn("busted_awaken_ignition_v2.css",html)
+        self.assertIn("busted_awaken_reactor_v3.css",html)
+        self.assertIn("busted_spatial_typing_v4.js?v=4.1.0",html)
+        self.assertIn("busted_stage_rain_v2.js?v=2.3.0",html)
+        self.assertIn("busted_spatial_rain_v1.js?v=1.3.0",html)
+        self.assertIn("installAwakenReactor",app)
+        self.assertIn("busted_ignition_reactor_v3.js",app)
         self.assertNotIn("busted_awaken_fire_v1.css",html)
         self.assertIn("preview only",app.lower())
 

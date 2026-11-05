@@ -135,7 +135,7 @@ def test_court_rejects_tampering_and_pixel_replay_drift(fault):
     elif fault=="wrong_resolution":m["full_frame_resolution"]=256
     elif fault=="nonfinite":p[0,4,0,0,0]=np.nan
     elif fault=="nonzero_noop":p[3,2,40,40,0]=.99
-    elif fault=="bad_fine_reference":p[4,4,40,40,3]=1.
+    elif fault=="bad_fine_reference":p[4,4,24,28,3]=1.
     elif fault=="counterfeit_source":proposal["source_sha256"]="b"*64
     with pytest.raises(ValueError):
         evaluate(p,m,proposal,pairs)

@@ -1,9 +1,6 @@
 name: BUSTED Pages Live Witness
 # Manual incident-recovery/proof tool; never run on ordinary product PRs.
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/busted_pages_live_witness_v1.yml'
   workflow_dispatch:
 jobs:
   public-pages-witness:

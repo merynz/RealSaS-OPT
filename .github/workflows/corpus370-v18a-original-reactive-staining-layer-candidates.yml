@@ -1,0 +1,68 @@
+name: corpus370-v18a-original-reactive-staining-layer-candidates
+
+on:
+  push:
+    branches: [corpus370-v18-reactive-staining-operational-layers-v1]
+    paths:
+      - '.github/workflows/corpus370-v18a-original-reactive-staining-layer-candidates.yml'
+      - 'tools/corpus/compile_corpus370_v18a_reactive_staining.py'
+      - 'tools/corpus/court_corpus370_v18a_reactive_staining.py'
+      - 'tools/corpus/hosted_corpus370_v18a_reactive_staining.sh'
+      - 'tests/corpus/test_corpus370_v18a_reactive_staining.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18a-reactive-original-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  virtual-reagent-and-independent-court-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax-check experiment, independent court, source transport
+        run: |
+          python3 -m py_compile \
+            tools/corpus/compile_corpus370_v18a_reactive_staining.py \
+            tools/corpus/court_corpus370_v18a_reactive_staining.py
+          bash -n tools/corpus/hosted_corpus370_v18a_reactive_staining.sh
+      - name: Redteam reactive virtual dye, heldout source pose and anonymous group invariance
+        run: |
+          python3 -m pip install --disable-pip-version-check numpy pytest Pillow
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_v18a_reactive_staining.py
+
+  original-signed-native-reactive-stain:
+    needs: virtual-reagent-and-independent-court-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 110
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+          - subject: TRICERATOPS
+            ordinal: 1
+          - subject: COWFISH
+            ordinal: 2
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SUBJECT_ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SHA-locked original source private artifact transport
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Physically measured source native virtual dye -> variable-K anonymous edit proposals, with heldout pose2 independent court
+        run: |
+          set -euo pipefail
+          bash tools/corpus/hosted_corpus370_v18a_reactive_staining.sh

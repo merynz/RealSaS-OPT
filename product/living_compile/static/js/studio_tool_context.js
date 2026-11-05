@@ -1,4 +1,4 @@
-const TOOLS = new Set(['select', 'translate', 'rotate', 'scale', 'pan', 'box', 'lasso', 'pivot']);
+const TOOLS = new Set(['select', 'translate', 'rotate', 'scale', 'pan', 'box', 'lasso', 'pivot', 'ik-reach']);
 const SPACES = new Set(['world', 'local']);
 const PIVOT_MODES = new Set(['selection', 'primary', 'custom']);
 

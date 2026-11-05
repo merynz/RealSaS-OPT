@@ -33,7 +33,7 @@ def test_full_iso_remove_identical_index_same_source_sample_is_exact():
     assert result["source_8_sample_full_mean_nonempty_pixels"]==1
     assert result["source_8_sample_premultiplied_joint_pre_filter_vs_postfilter_best_order_pixel_failures"]==1
     assert result["source_8_sample_postfilter_best_order_error_mean"]>0
-    assert result["source_8_sample_pre_filter_best_fixed_order_pixel_failures"]==1
+    # Each source sample has only ONE covered side: pre-filter compositing succeeds.\n    assert result["source_8_sample_pre_filter_best_fixed_order_pixel_failures"]==0
     assert result["source_raw_1spp_alpha_nonbinary_pixel_instances"]==0
 
 

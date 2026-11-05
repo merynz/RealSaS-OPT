@@ -143,8 +143,8 @@ def test_court_rejects_tampering_and_pixel_replay_drift(fault):
 
 def test_refinement_break_and_missing_face_rejected():
     proposal,pairs=parents()
-    labels=proposal["candidates"][2]["face_slot_teacher_only"]
-    labels[1],labels[20]=labels[20],labels[1]  # preserve census; break refinement
+    labels=proposal["candidates"][1]["face_slot_teacher_only"]
+    labels[1],labels[12]=labels[12],labels[1]  # preserves 16 labels, violates 8->16 nesting
     with pytest.raises(ValueError,match="PARTITION_NOT_NESTED"):
         build_plan(proposal,pairs)
     proposal,pairs=parents()

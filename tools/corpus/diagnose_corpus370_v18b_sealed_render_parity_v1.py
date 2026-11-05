@@ -64,8 +64,18 @@ def pair_metrics(left, right):
     }
 
 
-def diagnose(manifest_path, edited_path, v14_path):
+def diagnose(manifest_path, edited_path, v14_path, v14_job_path):
     manifest = json.loads(Path(manifest_path).read_text())
+    parent_job = json.loads(Path(v14_job_path).read_text())
+    require(parent_job.get("schema") ==
+            "RealSaS.Corpus370SourceNativeMechanicalRasterJointJob.v14"
+            and parent_job.get("subject_id") == manifest.get("subject_id")
+            and parent_job.get("source", {}).get("sha256") ==
+                manifest.get("original_source_sha256")
+            and parent_job.get("training_authorized") is False
+            and parent_job.get("graphics_owner_authorized") is False
+            and manifest.get("source_original_v14_job_sha256") == sha(v14_job_path),
+            "V18B_DIAGNOSTIC_V14_JOB_PARENT_INVALID")
     require(manifest.get("schema") == RENDER
             and manifest.get("status") ==
             "V18B_REAL_ORIGINAL_SOURCE_STAIN_GROUP_EDITS_RENDERED__INDEPENDENT_COURT_REQUIRED"
@@ -205,15 +215,15 @@ def main():
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--editor-npz", type=Path, required=True)
     parser.add_argument("--v14-npz", type=Path, required=True)
+    parser.add_argument("--v14-job", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    result = diagnose(args.manifest, args.editor_npz, args.v14_npz)
+    result = diagnose(args.manifest, args.editor_npz, args.v14_npz, args.v14_job)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True,
                                        allow_nan=False) + "\n")
     print(json.dumps({
         "status": result["status"],
-        "source_subject_id": result["source_subject_id_private"],
         "aggregate": result["aggregate"],
         "view_breakdown": [
             {

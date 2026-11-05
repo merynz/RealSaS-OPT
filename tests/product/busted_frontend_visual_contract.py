@@ -72,6 +72,19 @@ async def run():
                     x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};
                 })""")
                 assert len(traces) == (4 if width<=780 else 8), f"Wrong number of typing reservations: {traces}"
+                typewriter = await page.locator("#matrixTypewriter").evaluate("""el => {
+                  const css=getComputedStyle(el);
+                  const first=el.querySelector('.matrix-trace');
+                  const trace=getComputedStyle(first);
+                  const lines=Array.from(el.querySelectorAll('.matrix-trace-line')).map(x=>x.textContent);
+                  return {z:css.zIndex,display:css.display,opacity:Number(trace.opacity),lines};
+                }""")
+                assert int(typewriter["z"]) >= 8, f"Typing hidden behind atmosphere: {typewriter}"
+                assert typewriter["display"] != "none", "Typing layer is hidden"
+                assert typewriter["opacity"] > .6, f"Typing too faint: {typewriter}"
+                assert any(len(line)>8 and any(ch in line for ch in ".=()") for line in typewriter["lines"]), (
+                    f"Expected readable code snippets, not only glyph rain: {typewriter}"
+                )
                 assert len({t["slot"] for t in traces}) == len(traces), "Duplicate text reservation"
                 assert len({t["depth"] for t in traces}) >= 2, "All text is on one depth plane"
                 for i,left in enumerate(traces):

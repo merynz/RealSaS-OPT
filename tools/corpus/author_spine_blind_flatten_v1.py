@@ -272,8 +272,10 @@ def flatten(source:dict,*,source_bytes:bytes,seed:int=370)->tuple[dict,dict,dict
     common_address_sha=digest(canonical_bytes(list(range(len(anonymous_triangles)))))
     hidden={
         "schema":HIDDEN,
-        "artist_original_project_sha256":source_sha,
+        "human_authored_source_export_sha256":source_sha,
         "source_original_git_blob_sha_expected_only_from_external_verification":None,
+        "native_artist_editable_project_file_verified":False,
+        "original_atlas_and_alpha_artwork_reconstructed":False,
         "anonymous_merged_surface_sha256":digest(merged_bytes),
         "common_face_address_sha256":common_address_sha,
         "artist_slot_id_teacher_only_per_face":hidden_labels,
@@ -302,7 +304,10 @@ def flatten(source:dict,*,source_bytes:bytes,seed:int=370)->tuple[dict,dict,dict
         "setup_active_attachment_count_teacher_only":active_count,
         "setup_supported_attachment_count_teacher_only":len(private_group),
         "unsupported_original_attachment_count":len(unsupported),
-        "original_artist_layers_authority_for_2d_source_only":True,
+        "original_human_authored_spine_export_slot_structure_measured":True,
+        "editable_native_spine_artist_project_bytes_verified":False,
+        "original_atlas_image_and_author_alpha_CAA_verified":False,
+        "original_artist_layers_authority_for_2d_source_only":False,
         "anonymous_input_author_names_hidden":True,
         "native_composite_appearance_CAA_qualified":False,
         "native_spine_animation_runtime_qualified":False,

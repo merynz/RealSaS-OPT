@@ -28,7 +28,7 @@ from tools.truth_foundry.blender_corpus370_multi_partition_edit_v7 import (
 from tools.truth_foundry.blender_corpus370_heldout_native_edit_render_v12 import _set_animated_soup
 from tools.corpus.corpus370_native_action_binding_v13b import bound_rows_for_source_action
 from tools.corpus.corpus370_native_raster_join_plan_v14 import (
-    SCHEMA as PLAN_SCHEMA,arms_for_plan,select
+    SCHEMA as PLAN_SCHEMA,arms_for_plan,select,verify_locked_source_selection
 )
 
 SCHEMA="RealSaS.Corpus370SourceNativeMechanicalRasterJointRender.v14"
@@ -126,7 +126,7 @@ def render(job_path,output_path):
             "V14_ORIGINAL_SOURCE_V13B_NATIVE_VERTEX_POSE_TOPOLOGY_IDENTITY")
     expected=select(rv,baselines,interventions,job["pose_indices"],
                     prior["source_controls_measured_count"],job["pose_indices"])
-    require(expected==selection,
+    require(verify_locked_source_selection(expected,selection),
             "V14_PRECOMMIT_SOURCE_CONTROL_NOT_RECONSTRUCTIBLE_FROM_ORIGINAL_V13B_VERTICES")
     camera={int(x["view_index"]):x for x in cameras["cameras"]}
     require(set(camera)==set(range(8)),

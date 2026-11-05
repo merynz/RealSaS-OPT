@@ -68,6 +68,10 @@ class LivingCompileApplication:
             relative = "index.html"
         elif request_path in {"/workspace", "/workspace/", "/studio", "/studio/"}:
             relative = "workspace.html"
+        elif request_path in {"/motion", "/motion/"}:
+            relative = "motion.html"
+        elif request_path in {"/export", "/export/"}:
+            relative = "export.html"
         else:
             relative = posixpath.normpath(request_path.lstrip("/"))
             if relative.startswith("../"):
@@ -404,12 +408,12 @@ class LivingCompileApplication:
         if method == "GET" and parsed.path == "/readyz":
             return 200, self.project_capabilities(), "application/json"
         if method == "GET" and (
-            parsed.path in {"/", "/workspace", "/workspace/", "/studio", "/studio/"}
+            parsed.path in {"/", "/workspace", "/workspace/", "/studio", "/studio/", "/motion", "/motion/", "/export", "/export/"}
             or parsed.path.startswith("/static/")
         ):
             path = (
                 parsed.path
-                if parsed.path in {"/", "/workspace", "/workspace/", "/studio", "/studio/"}
+                if parsed.path in {"/", "/workspace", "/workspace/", "/studio", "/studio/", "/motion", "/motion/", "/export", "/export/"}
                 else parsed.path[len("/static"):]
             )
             data, content_type = self.static_bytes(path)

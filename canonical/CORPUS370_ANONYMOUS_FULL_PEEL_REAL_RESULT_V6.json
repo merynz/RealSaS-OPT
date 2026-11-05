@@ -1,0 +1,132 @@
+{
+  "schema": "RealSaS.Corpus370AnonymousFullPeelRealResult.v6",
+  "status": "REAL_THREE_SOURCE_FULL_PEEL_EIGHT_VIEW_COURTS_PASS__TWO_DIRECTLY_HIDDEN_SOURCE_SLOTS_REVEALED__NO_OWNER_AUTHORITY",
+  "date_utc": "2026-11-05",
+  "provenance": {
+    "original_v5_observation_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+    "original_source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+    "original_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+    "existing_allview_group_court_sha256": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1",
+    "previous_v5_all_slot_source_edit_run_id": 41995533913,
+    "independent_v6_real_github_actions_run_id": 41997241779,
+    "independent_v6_run_conclusion": "SUCCESS",
+    "github_actions_successful_jobs": 4,
+    "private_drive_folder": "gdrive:corpus370_preparation_v1/hosted_anonymous_full_peel_private_v6/41997241779-1",
+    "private_data_remain_private": true
+  },
+  "scope": {
+    "real_original_sources": 3,
+    "camera_views": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "original_rest_pose_only": true,
+    "raster_pixels_per_view": [
+      192,
+      192
+    ],
+    "cycles_samples": 32,
+    "selected_source_geometry_operational_slot_count": 8,
+    "source_slots_constant_across_all_eight_cameras": true,
+    "per_camera_render_arms": 21,
+    "baseline_original_source_soup_noop_arms": 3,
+    "single_slot_removal_arms": 8,
+    "all_other_slots_peeled_slot_isolation_arms": 8,
+    "all_source_slots_removed_arm": 1,
+    "both_anchor_groups_removed_arm": 1,
+    "rendered_full_field_of_view": true,
+    "native_resolution_appearance_qualified": false,
+    "native_authored_pose_or_rig_replay_qualified": false
+  },
+  "measurements": {
+    "total_source_slot_eight_camera_individual_tests": 24,
+    "group_slots_direct_edit_effect_observed_in_at_least_one_camera": 22,
+    "group_slots_without_direct_edit_effect": 2,
+    "group_slots_visible_after_full_peel_in_at_least_one_camera": 24,
+    "previously_direct_invisible_group_slots_revealed_after_full_peel": 2,
+    "groups_unobserved_even_after_full_peel": 0,
+    "source_noop_parity_camera_views_passed": 24,
+    "source_noop_parity_camera_views_total": 24,
+    "source_soup_p99_rgba_error_max": 0,
+    "soup_noop_rgba_max_error": 0,
+    "all_source_original_fov_pixels": 884736,
+    "all_21_arm_render_pixel_instances": 18579456,
+    "render_arms_executed": 504
+  },
+  "per_source": [
+    {
+      "source_reference": "CAT",
+      "worker_ordinal": 0,
+      "original_source_sha256": "1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850",
+      "source_group_count": 8,
+      "group_slots_with_direct_pixels": 7,
+      "group_slots_with_isolation_pixels": 8,
+      "source_slot_with_zero_direct_pixels_teacher_only": 7,
+      "source_slot7_pixel_count_direct_removal_all_views": 0,
+      "source_slot7_pixel_count_full_peel_isolation_all_views": 1040,
+      "view4_conditional_anchor_reveal_pixels": 2612,
+      "parity_views_passed": 8,
+      "independent_court_sha256": "adde5ed29759726204f70b484b19a498fabed76b5444654d922acef83029d1de",
+      "status": "PASS_SOURCE_HIDDEN_SLOT_REVEAL__NO_DRAWABLE_IDENTITY"
+    },
+    {
+      "source_reference": "TRICERATOPS",
+      "worker_ordinal": 1,
+      "original_source_sha256": "ad66b51cc5fc44c9a3429a5b1b98a61621af08d58d102d8a817499bd6a7f5b5a",
+      "source_group_count": 8,
+      "group_slots_with_direct_pixels": 8,
+      "group_slots_with_isolation_pixels": 8,
+      "direct_unobserved_slots": 0,
+      "view4_conditional_anchor_reveal_pixels": 2194,
+      "parity_views_passed": 8,
+      "independent_court_sha256": "c190091e36288147735f411df8d4dd4c659a24ef4ec9ae8bf9ddbc7e87a65eb1",
+      "status": "PASS_ALL_GROUPS_ISOLATION__NO_DRAWABLE_IDENTITY"
+    },
+    {
+      "source_reference": "COWFISH",
+      "worker_ordinal": 2,
+      "original_source_sha256": "e6898505d56d8057c975b6376f123876dd957347282413cf3fb825754841b989",
+      "source_group_count": 8,
+      "group_slots_with_direct_pixels": 7,
+      "group_slots_with_isolation_pixels": 8,
+      "source_slot_with_zero_direct_pixels_teacher_only": 6,
+      "source_slot6_pixel_count_direct_removal_all_views": 0,
+      "source_slot6_pixel_count_full_peel_isolation_all_views": 50,
+      "view4_conditional_anchor_reveal_pixels": 1040,
+      "parity_views_passed": 8,
+      "independent_court_sha256": "36a6c3d90a6ec269ec651e4895e17b45f166974a60864090bf899d39551100a9",
+      "status": "PASS_SOURCE_HIDDEN_SLOT_REVEAL__NO_DRAWABLE_IDENTITY"
+    }
+  ],
+  "authority": {
+    "source_slot_full_peel_reveal_measured": true,
+    "compiler_source_semantic_names_as_training_labels": false,
+    "image_visible_positive_negative_drawable_identity_minted": false,
+    "author_drawable_same_pairs_certified": 0,
+    "author_drawable_different_pairs_certified": 0,
+    "operational_group_count_eight_proven_optimal": false,
+    "source_native_motion_and_mechanics_courted": false,
+    "per_group_editable_after_skin_motion": false,
+    "full_native_resolution_appearance_caa_authorized": false,
+    "source_to_canonical_training_projection_certified": false,
+    "graphics_owner_training_authorized": false,
+    "mechanical_response_training_authorized": false,
+    "tessa_teacher_authorized": false,
+    "materialization_authorized": false,
+    "product_compilation_authorized": false,
+    "training_authorized": false
+  },
+  "next_scientific_gates": [
+    "COMPETING_SOURCE_ANONYMOUS_GROUP_PARTITIONS_WITH_FULL_FIELD_RENDER_EDIT_ALPHA_DEPTH_AND_COMPLEXITY",
+    "ORIGINAL_NATIVE_MULTI_POSE_ANCHORED_SKIN_GROUP_PERSISTENCE_WITH_INDEPENDENT_ORACLE",
+    "ISOLATED_CONTROLS_ZERO_A_TO_B_B_TO_A_ROOT_SHAM_REVERSAL_AMPLITUDE_AND_SAME_DIFFERENT_ABSTAIN",
+    "CANONICAL_SOURCE_TO_MODEL_TARGET_IDENTITY_AND_LINEAGE_SAFE_LOSS_MASKS",
+    "FULL_NATIVE_RESOLUTION_2D_GRAPHICS_CAA_DRAW_ORDER_SEAMS_OCCLUSION"
+  ]
+}

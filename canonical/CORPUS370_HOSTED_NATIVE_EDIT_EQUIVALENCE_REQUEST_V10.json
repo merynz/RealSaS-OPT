@@ -1,0 +1,23 @@
+{
+  "schema": "RealSaS.Corpus370NativeEditResponseEquivalenceResearchRequest.v10",
+  "enabled": true,
+  "date_utc": "2026-11-05",
+  "subject_count": 3,
+  "previous_real_hosted_v9_run_id": 42014234494,
+  "previous_real_source_render_arm_count": 1104,
+  "previous_real_v9_qualified_pose_views": 36,
+  "native_pose_views_per_subject": 12,
+  "source_original_v9_git_blob_sha1": "cac396962b3b5976b9cfe660f0bb592a3a7f57ad",
+  "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+  "source_allview_partition_batch_sha256": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1",
+  "pairwise_all_candidate_sizes": true,
+  "tested_edit_scope": "SOURCE_NATIVE_3_AUTHORED_POSES_X_4_ORIGINAL_CAMERAS_EACH",
+  "reference_policy": "DIRECT_ALL_CANDIDATE_PAIRWISE_RENDER_EDIT_EQUIVALENCE_NO_FINEST_ARTIST_TRUTH",
+  "semantic_class_priors_as_target": false,
+  "finest_partition_promoted_as_artist_truth": false,
+  "human_artist_drawable_identity_minted": false,
+  "model_training_authorized": false,
+  "graphics_owner_authorized": false,
+  "all_source_art_and_source_hit_pixel_arrays_private": true,
+  "note": "Three independent hosted readers of sealed V9 real native animation full RGBA, all candidate partitions pairwise with direct remove/isolate, no reference assumed artist truth. Test-scoped equivalence only, no training, no graphics owner."
+}

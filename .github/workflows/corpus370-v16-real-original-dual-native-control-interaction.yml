@@ -9,13 +9,6 @@ on:
       - 'tools/truth_foundry/blender_corpus370_dual_native_control_v16.py'
       - 'tools/corpus/court_corpus370_dual_native_interaction_v16.py'
       - 'tests/corpus/test_corpus370_dual_native_interaction_v16.py'
-  pull_request:
-    paths:
-      - '.github/workflows/corpus370-v16-real-original-dual-native-control-interaction.yml'
-      - 'tools/corpus/hosted_corpus370_native_pair_source_v16.sh'
-      - 'tools/truth_foundry/blender_corpus370_dual_native_control_v16.py'
-      - 'tools/corpus/court_corpus370_dual_native_interaction_v16.py'
-      - 'tests/corpus/test_corpus370_dual_native_interaction_v16.py'
 
 permissions:
   contents: read

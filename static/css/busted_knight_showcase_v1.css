@@ -174,3 +174,25 @@
 @media(prefers-reduced-motion:reduce){
   .knight-art,.knight-rig-canvas,.knight-control{transition:none}
 }
+
+/* 1.1 — original Knight artwork only; hide comparison panel. */
+.knight-art-clip{
+ position:absolute;z-index:3;left:50%;top:49%;
+ transform:translate(-50%,-50%);
+ width:min(100%,460px);height:min(100%,460px);
+ overflow:hidden;pointer-events:none;
+ mix-blend-mode:screen;transition:opacity .25s ease;
+}
+.knight-art-clip>.knight-art{
+ position:absolute;left:0;top:0;
+ width:200%;height:100%;max-width:none;max-height:none;
+ transform:none;object-fit:fill;aspect-ratio:auto;
+ transition:none;
+}
+.knight-showcase[data-layer="rig"] .knight-art-clip{opacity:.21}
+.knight-showcase[data-layer="weights"] .knight-art-clip{opacity:.20}
+.knight-showcase[data-layer="rig"] .knight-art,
+.knight-showcase[data-layer="weights"] .knight-art{opacity:1}
+@media(max-width:1140px){.knight-art-clip{width:min(100%,390px);height:min(100%,390px)}}
+@media(max-width:870px){.knight-art-clip{width:min(100%,370px);height:min(100%,370px)}}
+@media(max-width:530px){.knight-art-clip{width:min(100%,295px);height:min(100%,295px)}}

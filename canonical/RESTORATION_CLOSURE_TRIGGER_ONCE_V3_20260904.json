@@ -1,9 +1,0 @@
-{
-  "schema": "RealSaS.RestorationClosureTriggerOnce.v3",
-  "date": "2026-09-04",
-  "branch": "restoration/compiler-runtime-promotion-v1-20260903",
-  "runner": "self-hosted/linux/x64/realsas",
-  "attempt": 3,
-  "purpose": "Run the hardened restoration-wide closure on the latest restoration head. Dependency bootstrap now avoids pip self-upgrade, forces binary wheels, uses bounded network timeouts/retries, and emits host diagnostics before tests.",
-  "fit_authorization": false
-}

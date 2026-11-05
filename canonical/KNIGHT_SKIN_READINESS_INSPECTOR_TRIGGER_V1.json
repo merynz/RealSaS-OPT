@@ -1,8 +1,0 @@
-{
-  "schema": "RealSaS.KnightSkinReadinessInspectorTrigger.v1",
-  "operation": "KNIGHT_SKIN_READINESS_INSPECT",
-  "enabled": true,
-  "request_revision": 4,
-  "authority": "READ_ONLY_DIAGNOSTIC__NO_QUALIFICATION_NO_MODEL_PROMOTION_NO_PRODUCT_SKIN_ACTIVATION",
-  "notes": "Post-retirement exact-main redeploy/readiness refresh: after the completed Stage47 measurement campaign workflows are safely retired, redeploy current main and verify Knight typed Skin parents plus MIRA ModelRelease/channel state. No import, inference, qualification, promotion, activation or ProductRevision creation."
-}

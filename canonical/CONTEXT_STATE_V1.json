@@ -1,7 +1,0 @@
-{
-  "schema_version": 1,
-  "status": "SUPERSEDED__DO_NOT_USE_FOR_CURRENT_STATE",
-  "superseded_by": "canonical/CONTEXT_STATE_V2.json",
-  "reason": "FIT2 authority hygiene transaction 2026-09-13 removed stale Geppetto-running/Arachne-blocked state.",
-  "historical_content_available_in_git_history": true
-}

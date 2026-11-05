@@ -70,6 +70,10 @@ async function apiJson(url, options = {}) {
 function syncGatewayUI() {
   const ready = Boolean(project?.compile_available && project?.public_compile_gateway);
   awaken.disabled = running || !ready || selectedFiles.length === 0;
+  if (status) {
+    status.querySelector('span').textContent = ready ? 'COMPILER READY' : 'COMPILER OFFLINE';
+    status.classList.toggle('ready', ready);
+  }
   awaken.title = ready ? (selectedFiles.length ? 'Compile selected source views' : 'Select a front view first') : 'Compiler offline: preview only';
   if (compileAvailability) {
     compileAvailability.textContent = ready ? 'COMPILER READY · VERIFIED GATEWAY' : 'UI PREVIEW · COMPILER OFFLINE';

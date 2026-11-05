@@ -51,6 +51,7 @@ jobs:
         run: >-
           PYTHONPATH=. python -m unittest -v
           tests.product.test_living_compile_v4
+          tests.product.test_busted_director_progress_contract
           tests.product.test_awaken_production_wiring
           tests.product.test_busted_awaken_stage_contract
           tests.product.test_busted_product_areas
@@ -98,6 +99,7 @@ jobs:
           node tests/product/studio_pose_onion_core_contract.mjs
           node tests/product/studio_weight_core_contract.mjs
           node tests/product/studio_rig_core_contract.mjs
+          node tests/product/studio_ik_chain_contract.mjs
       - name: Compose deployment contract
         run: >-
           docker compose

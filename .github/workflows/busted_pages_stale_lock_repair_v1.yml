@@ -1,0 +1,108 @@
+name: BUSTED Pages Stale Lock Repair
+# Manual incident-recovery/proof tool; never run on ordinary product PRs.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  deployments: write
+jobs:
+  cancel-stale-pages-and-rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      STUCK_SHA: 4f5c472766eb526c54f7bb303744d2f76dd10a13
+    steps:
+      - name: Confirm stale Pages deployment and request explicit cancellation
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://api.github.com/repos/${REPO}"
+          args=(-H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json")
+          get_code="$(curl -sS -o /tmp/stuck-before.json -w '%{http_code}' "${args[@]}" \
+            "${api}/pages/deployments/${STUCK_SHA}")"
+          echo "STUCK_PAGES_STATUS_HTTP=${get_code}"
+          cat /tmp/stuck-before.json
+          echo
+          cancel_code="$(curl -sS -X POST -o /tmp/cancel-result.json -w '%{http_code}' \
+            "${args[@]}" "${api}/pages/deployments/${STUCK_SHA}/cancel")"
+          echo "EXPLICIT_PAGES_CANCEL_HTTP=${cancel_code}"
+          if [[ "${cancel_code}" != "204" && "${cancel_code}" != "404" ]]; then
+            cat /tmp/cancel-result.json
+            exit 9
+          fi
+          sleep 4
+          post_code="$(curl -sS -o /tmp/stuck-after.json -w '%{http_code}' "${args[@]}" \
+            "${api}/pages/deployments/${STUCK_SHA}")"
+          echo "AFTER_CANCEL_HTTP=${post_code}"
+          cat /tmp/stuck-after.json
+          echo
+      - name: Clear only the exact orphaned GitHub Pages deployment record if necessary
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://api.github.com/repos/${REPO}"
+          args=(-H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json")
+          curl -fsSL "${args[@]}" "${api}/deployments?environment=github-pages&per_page=100" -o /tmp/repo-deployments.json
+          python - <<'PY'
+          import json,os
+          ds=json.load(open('/tmp/repo-deployments.json'))
+          rows=[{'id':d.get('id'),'sha':d.get('sha'),'environment':d.get('environment'),'created_at':d.get('created_at')}
+                for d in ds if d.get('sha')==os.environ['STUCK_SHA'] and d.get('environment')=='github-pages']
+          print('MATCHING_STALE_DEPLOYMENTS='+json.dumps(rows))
+          open('/tmp/stale-id','w').write(str(rows[0]['id']) if len(rows)==1 else '')
+          PY
+          stale_id="$(cat /tmp/stale-id)"
+          if [[ -z "${stale_id}" ]]; then
+            echo 'NO_EXACT_ORPHAN_DEPLOYMENT_RECORD_TO_DELETE'
+            exit 0
+          fi
+          # The exact old SHA has no successful Pages run. This record is stuck
+          # and is not the last successfully published revision.
+          code="$(curl -sS -o /tmp/inactive-response.json -w '%{http_code}' -X POST \
+            "${args[@]}" -H 'Content-Type: application/json' \
+            -d '{"state":"inactive","description":"Abandoned Pages deploy; cancel stale SHA lock before rebuilding current preview"}' \
+            "${api}/deployments/${stale_id}/statuses")"
+          echo "STALE_DEPLOYMENT_INACTIVE_HTTP=${code}"
+          if [[ "${code}" != "201" ]]; then cat /tmp/inactive-response.json;exit 10;fi
+          code="$(curl -sS -o /tmp/delete-response.json -w '%{http_code}' -X DELETE \
+            "${args[@]}" "${api}/deployments/${stale_id}")"
+          echo "STALE_DEPLOYMENT_DELETE_HTTP=${code}"
+          if [[ "${code}" != "204" ]]; then cat /tmp/delete-response.json;exit 11;fi
+      - name: Submit a single rebuild of the selected preview source
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://api.github.com/repos/${REPO}"
+          args=(-H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json")
+          curl -fsSL "${args[@]}" "${api}/pages" -o /tmp/pages.json
+          source="$(python -c 'import json; print((json.load(open("/tmp/pages.json")).get("source") or {}).get("branch",""))')"
+          echo "PAGES_SOURCE=${source}"
+          if [[ "${source}" != "busted-live-preview" ]]; then echo "REFUSE_WRONG_SOURCE";exit 12;fi
+          code="$(curl -sS -o /tmp/build-result.json -w '%{http_code}' -X POST "${args[@]}" \
+            "${api}/pages/builds")"
+          echo "REBUILD_HTTP=${code}"
+          if [[ "${code}" != "201" && "${code}" != "202" ]]; then cat /tmp/build-result.json;exit 13;fi
+      - name: Witness updated HTML and fiery CSS on real public Pages URL
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://merynz.github.io/RealSaS-OPT"
+          for i in $(seq 1 42); do
+            curl -fsSL --retry 2 -H 'Cache-Control: no-cache' \
+              "${base}/index.html?busted_repair=${GITHUB_RUN_ID}_${i}" -o /tmp/site.html
+            status="$(curl -sS -o /dev/null -w '%{http_code}' \
+              "${base}/static/css/busted_awaken_fire_v1.css?busted_repair=${GITHUB_RUN_ID}_${i}")"
+            if grep -q 'busted_awaken_fire_v1.css' /tmp/site.html && \
+               grep -q '<h2>QUALIFIED</h2>' /tmp/site.html && [[ "${status}" == "200" ]]; then
+              echo 'PUBLIC_PAGES_CURRENT=YES'
+              echo "FIRE_CSS_HTTP=${status}"
+              exit 0
+            fi
+            echo "PUBLIC_PAGES_PENDING attempt=${i} fire_http=${status}"
+            sleep 7
+          done
+          echo 'PUBLIC_PAGES_CURRENT=NO'
+          exit 14

@@ -1,0 +1,91 @@
+/* BUSTED / AWAKEN Fiery Gradient v1
+ * Entire CTA surface is a controlled high-energy plasma gradient.
+ * No shader/canvas/no per-frame JS. Static while disabled; hover for gateway.
+ */
+#awakenChamber .chamber-console .compile-action{
+ width:100%!important;min-width:0!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button{
+ box-sizing:border-box!important;
+ position:relative!important;
+ display:flex!important;
+ align-items:center!important;
+ justify-content:space-between!important;
+ width:100%!important;min-width:0!important;
+ min-height:60px!important;
+ padding:0 22px!important;margin:0!important;
+ border:1px solid rgba(255,184,142,.83)!important;
+ border-radius:2px!important;
+ color:#fffaf3!important;
+ background:
+  linear-gradient(116deg,
+   #66192e 0%,#b72e39 18%,#dc4131 33%,
+   #fb7432 48%,#ffac55 66%,#d74549 83%,#912342 100%)!important;
+ background-size:180% 100%!important;
+ background-position:14% 50%!important;
+ box-shadow:
+  inset 0 1px 0 rgba(255,234,213,.35),
+  inset 0 -16px 24px rgba(75,14,36,.24),
+  0 0 24px rgba(227,79,73,.18),
+  0 15px 33px rgba(21,7,28,.39)!important;
+ text-shadow:0 1px 8px rgba(81,16,32,.35)!important;
+ isolation:isolate;overflow:hidden!important;
+ transition:background-position .75s ease,border-color .3s ease,
+   box-shadow .3s ease,transform .25s ease!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button::before{
+ content:"";position:absolute!important;inset:0!important;z-index:0;
+ background:linear-gradient(110deg,transparent 16%,rgba(255,238,199,.10) 33%,rgba(255,245,218,.23) 45%,transparent 59%)!important;
+ opacity:.55;transform:translateX(-75%)!important;
+ transition:transform .9s cubic-bezier(.22,.61,.36,1)!important;
+ pointer-events:none!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button::after{
+ content:"";position:absolute;inset:1px;z-index:0;
+ pointer-events:none!important;
+ background:linear-gradient(180deg,rgba(255,236,220,.17) 0%,transparent 29%,transparent 71%,rgba(62,7,23,.20) 100%);
+}
+#awakenChamber .chamber-console #awaken.awaken-button span{
+ position:relative;z-index:1;
+ color:inherit;font-size:21px;
+ text-shadow:0 0 13px rgba(255,226,202,.48);
+}
+#awakenChamber .chamber-console #awaken.awaken-button:not(:disabled):hover{
+ border-color:#ffdfbd!important;
+ background-position:90% 50%!important;
+ box-shadow:
+  inset 0 1px 0 rgba(255,246,228,.45),
+  inset 0 -15px 22px rgba(83,13,27,.16),
+  0 0 39px rgba(249,105,53,.33),
+  0 16px 40px rgba(25,8,31,.40)!important;
+ transform:translateY(-2px)!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button:not(:disabled):hover::before{
+ transform:translateX(88%)!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button:focus-visible{
+ outline:2px solid #ffe0bf!important;outline-offset:4px!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button:disabled{
+ opacity:.94!important;
+ cursor:not-allowed!important;
+ filter:saturate(1.04) brightness(1.03);
+ transform:none!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button:disabled::before{
+ transform:translateX(-75%)!important;
+}
+.compiling #awakenChamber .chamber-console #awaken.awaken-button{
+ opacity:.77!important;
+}
+@media(max-width:760px){
+ #awakenChamber .chamber-console #awaken.awaken-button{
+  min-height:55px!important;padding-inline:16px!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ #awakenChamber .chamber-console #awaken.awaken-button,
+ #awakenChamber .chamber-console #awaken.awaken-button::before{
+  transition:none!important;
+ }
+}

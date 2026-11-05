@@ -149,6 +149,21 @@ async def run():
                 }""")
                 assert stage_rain["ink"] > 30, f"Stage-local Matrix rain rendered blank: {stage_rain}"
                 assert await page.locator("#awaken").is_disabled(), "Offline preview must never offer a fake compile"
+                # Fiery AWAKEN is a real full-face gradient, not a narrow edge
+                # accent. Its offline-disabled state remains visible, but inert.
+                fiery=await page.locator("#awaken").evaluate("""button => {
+                  const face=button.getBoundingClientRect();
+                  const parent=button.closest('.compile-action').getBoundingClientRect();
+                  const style=getComputedStyle(button);
+                  return {width:face.width,parentWidth:parent.width,
+                    background:style.backgroundImage,opacity:style.opacity};
+                }""")
+                assert fiery["width"] >= fiery["parentWidth"]-3, (
+                    f"AWAKEN fiery gradient does not cover the full CTA: {fiery}"
+                )
+                assert "linear-gradient" in fiery["background"], (
+                    f"AWAKEN lost its gradient face: {fiery}"
+                )
 
 
                 # Studio link is real navigation, even without a compiled bundle.
@@ -211,6 +226,12 @@ async def run():
                 )
                 assert await director.locator('[data-director-command="new-clip"]').is_disabled(), (
                     "Unqualified puppet must not be editable"
+                )
+                assert await director.locator('[data-director-command="ik-reach"]').is_disabled(), (
+                    "IK reach cannot be offered without qualified rig, user clip and mapped controls"
+                )
+                assert await page.locator("#studioIKReachOverlay").count() == 1, (
+                    "IK Reach interaction layer did not initialize"
                 )
                 await director.locator('[data-director-workspace="puppet"]').click()
                 assert await page.locator("body").get_attribute("data-studio-workspace") == "puppet"

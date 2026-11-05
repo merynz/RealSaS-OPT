@@ -1,12 +1,12 @@
 /* BUSTED / Reactor AWAKEN v3
  * Dark, glassy and dead-quiet at rest. One-shot procedural energy exists
  * strictly on click and is painted inside this exact button border box.
- * The button occupies the ENTIRE compile action, including its interactive surface.
+ * The compact button is CENTERED beneath the upload card; the canvas exactly fits the button.
  */
 #awakenChamber .chamber-console .compile-action{
   display:flex!important;
   flex-direction:column!important;
-  align-items:stretch!important;
+  align-items:center!important;
   gap:11px!important;
   width:100%!important;
   min-width:0!important;
@@ -17,14 +17,15 @@
   box-sizing:border-box!important;
   flex:none!important;
   align-items:center!important;
-  justify-content:space-between!important;
-  width:100%!important;
-  max-width:100%!important;
+  justify-content:center!important;
+  gap:0!important;
+  width:max-content!important;
+  max-width:calc(100% - 24px)!important;
   min-width:0!important;
-  height:59px!important;
-  min-height:59px!important;
-  margin:0!important;
-  padding:0 20px!important;
+  height:54px!important;
+  min-height:54px!important;
+  margin:0 auto!important;
+  padding:0 31px!important;
   overflow:hidden!important;
   border:1px solid rgba(139,157,237,.62)!important;
   border-radius:1px!important;
@@ -58,12 +59,13 @@
   opacity:1!important;
 }
 #awakenChamber .chamber-console #awaken.awaken-button .awaken-label{
-  font:650 11px/1.1 "IBM Plex Mono",monospace!important;
-  letter-spacing:.10em!important;
+  font:700 15px/1 "IBM Plex Mono",monospace!important;
+  letter-spacing:.14em!important;
+  text-align:center!important;
 }
 #awakenChamber .chamber-console #awaken.awaken-button .awaken-glyph{
-  font:400 21px/1 "IBM Plex Mono",monospace!important;
-  transition:transform .17s ease,color .17s ease!important;
+  display:none!important; /* AWAKEN must sit in the optical center */
+  transition:none!important;
 }
 #awakenChamber .chamber-console #awaken.awaken-button .awaken-ignition-canvas{
   position:absolute!important;
@@ -123,16 +125,16 @@
 #awakenChamber .chamber-console .compile-availability{
   width:100%!important;
   max-width:100%;
-  margin:0!important;
+  margin:0 auto!important;
   text-align:center!important;
 }
 @media(max-width:760px){
   #awakenChamber .chamber-console #awaken.awaken-button{
-    height:55px!important;min-height:55px!important;
-    padding:0 15px!important;
+    height:51px!important;min-height:51px!important;
+    padding:0 27px!important;
   }
   #awakenChamber .chamber-console #awaken.awaken-button .awaken-label{
-    font-size:10px!important;
+    font-size:14px!important;
   }
 }
 @media(prefers-reduced-motion:reduce){

@@ -27,7 +27,17 @@ jobs:
           curl -fsSL "$URL/static/js/busted_spatial_typing_v4.js?pages_witness=${GITHUB_RUN_ID}" -o /tmp/typing.js
           curl -fsSL "$URL/static/js/busted_ignition_reactor_v3.js?pages_witness=${GITHUB_RUN_ID}" -o /tmp/reactor.js
           curl -fsSL "$URL/static/css/busted_product_story_v1.css?pages_witness=${GITHUB_RUN_ID}" -o /tmp/story.css
-          if grep -q 'id="artworkGuide"' /tmp/busted-live-index.html && \
+          curl -fsSL "$URL/static/css/busted_story_refinement_v2.css?pages_witness=${GITHUB_RUN_ID}" -o /tmp/story-refine.css
+          echo "=== Compiler-first product positioning: LIVE ==="
+          grep -E 'The character is the result|PUPPET-FIRST|ANIMATION-FIRST|CREATIVE CONTROL' /tmp/busted-live-index.html || true
+          if grep -q 'The character is the result.' /tmp/busted-live-index.html && \
+             grep -q 'CREATIVE CONTROL, NOT MANDATORY SETUP' /tmp/busted-live-index.html && \
+             grep -q 'PUPPET-FIRST' /tmp/busted-live-index.html && \
+             grep -q 'ANIMATION-FIRST' /tmp/busted-live-index.html && \
+             grep -q 'busted_story_refinement_v2.css?v=2.1.0' /tmp/busted-live-index.html && \
+             grep -q 'busted-compile-vs-studio' /tmp/story-refine.css && \
+             grep -q 'width:max-content!important' /tmp/live-fire.css && \
+             grep -q 'id="artworkGuide"' /tmp/busted-live-index.html && \
              grep -q 'id="technology"' /tmp/busted-live-index.html && \
              grep -q 'busted_product_story_v1.css?v=1.0.0' /tmp/busted-live-index.html && \
              grep -q '#artworkGuide' /tmp/story.css && \

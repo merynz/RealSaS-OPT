@@ -1,0 +1,230 @@
+/* BUSTED Editorial refinement v2
+ * Kavya UX learning: explain input→editable structure at a glance, then let
+ * technically curious users explore model responsibilities.
+ * No competitor assets, fabricated puppet demos or fake telemetry.
+ */
+#artworkGuide .busted-guide-intro p {
+  color:#c2cbe4;
+}
+#artworkGuide .busted-guide-card h3{
+  font-size:clamp(23px,2.18vw,30px);
+}
+#artworkGuide .busted-guide-illustration {
+  margin-top:21px;
+  height:143px;
+  background:
+    radial-gradient(ellipse 54% 68% at 50% 49%,rgba(104,108,213,.17),transparent 78%),
+    repeating-linear-gradient(90deg,transparent 0 41px,rgba(125,149,219,.028) 42px 43px);
+}
+#artworkGuide .busted-guide-card:hover .busted-guide-illustration{
+  background:
+    radial-gradient(ellipse 54% 68% at 50% 49%,rgba(122,118,233,.22),transparent 78%),
+    repeating-linear-gradient(90deg,transparent 0 41px,rgba(125,149,219,.028) 42px 43px);
+}
+#artworkGuide .busted-input-preflight{
+  position:relative;
+  margin:38px 0 0;
+  border:1px solid rgba(147,166,244,.34);
+  background:
+    linear-gradient(90deg,rgba(32,43,94,.38),rgba(20,26,64,.40)),
+    radial-gradient(ellipse at 74% 42%,rgba(92,82,185,.09),transparent);
+}
+#artworkGuide .busted-input-preflight::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,transparent,#a5b0ff,transparent);
+}
+#artworkGuide .busted-input-preflight-head{
+  padding:21px 24px 18px;
+  border-bottom:1px solid rgba(148,167,240,.22);
+  display:flex;align-items:end;justify-content:space-between;gap:26px;
+}
+#artworkGuide .busted-input-preflight-head>div>span,
+#artworkGuide .busted-preflight-kicker,
+#artworkGuide .busted-preflight-aside{
+  display:block;color:#98aadd;
+  font:600 9px/1.5 "IBM Plex Mono",monospace;letter-spacing:.10em;
+}
+#artworkGuide .busted-input-preflight-head h3{
+  margin:7px 0 0;
+  color:#edf1ff;font:650 clamp(19px,2.2vw,27px)/1.24 "Space Grotesk",sans-serif;
+  letter-spacing:-.035em;
+}
+#artworkGuide .busted-preflight-aside{
+  max-width:230px;color:#8494c3;text-align:right;
+}
+#artworkGuide .busted-input-preflight-pairs{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+}
+#artworkGuide .busted-input-preflight-pairs>div{padding:23px 24px 22px}
+#artworkGuide .busted-input-preflight-pairs>div+div{
+  border-left:1px solid rgba(149,164,237,.19);
+}
+#artworkGuide .busted-preflight-good .busted-preflight-kicker{color:#c0caff}
+#artworkGuide .busted-preflight-hard .busted-preflight-kicker{color:#99a9d5}
+#artworkGuide .busted-input-preflight-pairs p{
+  margin:14px 0 0;
+  display:flex;align-items:baseline;gap:14px;
+  color:#c2cce6;font:400 13px/1.5 "Space Grotesk",sans-serif;
+}
+#artworkGuide .busted-input-preflight-pairs p span{
+  font:700 16px/1 "IBM Plex Mono",monospace;
+  color:#a7b9ff;flex:none;
+}
+#artworkGuide .busted-preflight-hard p{color:#96a8cc}
+#artworkGuide .busted-preflight-hard p span{color:#8d93cf}
+#artworkGuide .busted-preflight-note{
+  margin:0!important;padding:15px 24px;
+  color:#899bc7!important;font:400 11px/1.6 "Space Grotesk",sans-serif!important;
+  border-top:1px solid rgba(149,166,239,.15);
+}
+#technology .busted-technology-inner{
+  grid-template-columns:minmax(280px,.72fr) minmax(0,1.28fr);
+}
+#technology .busted-technology-title h2{
+  font-size:clamp(48px,4.4vw,75px);line-height:1.06;
+}
+#technology .busted-technology-title>p:last-child{
+  max-width:430px;
+}
+#technology .busted-model-capabilities{
+  margin-top:18px;border:1px solid rgba(150,166,245,.31);
+  background:linear-gradient(145deg,rgba(22,32,82,.39),rgba(23,22,59,.50));
+}
+#technology .busted-model-capabilities-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  border-bottom:1px solid rgba(151,165,241,.25);
+  padding:14px 17px;
+  font:600 9px/1.4 "IBM Plex Mono",monospace;
+  color:#c0c9f3;letter-spacing:.085em;
+}
+#technology .busted-model-capabilities-head span:last-child{color:#818fb8}
+#technology .busted-model-capabilities-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+}
+#technology .busted-model-capabilities-grid>div{
+  padding:19px 19px 17px;
+  display:flex;flex-direction:column;gap:5px;
+  min-height:114px;
+}
+#technology .busted-model-capabilities-grid>div:nth-child(even){
+  border-left:1px solid rgba(151,161,241,.18)
+}
+#technology .busted-model-capabilities-grid>div:nth-child(n+3){
+  border-top:1px solid rgba(151,161,241,.18)
+}
+#technology .busted-model-capabilities-grid span{
+  font:600 8px/1.4 "IBM Plex Mono",monospace;
+  letter-spacing:.08em;color:#99adf0;
+}
+#technology .busted-model-capabilities-grid strong{
+  font:650 17px/1.25 "Space Grotesk",sans-serif;
+  color:#eff0ff;letter-spacing:-.02em;
+}
+#technology .busted-model-capabilities-grid small{
+  font:400 12px/1.55 "Space Grotesk",sans-serif;
+  color:#9cacd3;
+}
+#technology .busted-output-contract {
+  display:grid;grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);
+  align-items:stretch;margin-top:19px;
+  border:1px solid rgba(151,160,240,.26);
+  background:linear-gradient(112deg,rgba(9,15,42,.58),rgba(39,39,100,.38));
+}
+#technology .busted-output-contract>div:not(.busted-output-versus){
+  display:flex;flex-direction:column;justify-content:center;gap:6px;
+  min-width:0;padding:20px 21px;
+}
+#technology .busted-output-contract>div:first-child{
+  opacity:.70;
+}
+#technology .busted-output-contract>div:last-child{
+  border-left:1px solid rgba(171,161,255,.25);
+  background:linear-gradient(100deg,rgba(69,69,161,.13),rgba(66,62,160,.28));
+}
+#technology .busted-output-contract span{
+  font:600 8px/1.4 "IBM Plex Mono",monospace;
+  color:#9dabdc;letter-spacing:.095em;
+}
+#technology .busted-output-contract>div:last-child span{color:#c4beff}
+#technology .busted-output-contract p{
+  margin:0;font:650 clamp(17px,1.8vw,23px)/1.2 "Space Grotesk",sans-serif;
+  color:#f0f0ff;letter-spacing:-.035em;
+}
+#technology .busted-output-contract small{
+  color:#a2b2d1;font:400 11px/1.45 "Space Grotesk",sans-serif;
+}
+#technology .busted-output-versus{
+  display:flex;justify-content:center;align-items:center;
+  color:#a7b4ed;font:500 19px/1 "Space Grotesk",sans-serif;
+}
+#technology .busted-technology-principle{margin-top:18px}
+@media(max-width:1120px){
+ #technology .busted-technology-inner{grid-template-columns:1fr;gap:15px}
+ #technology .busted-technology-title h2{font-size:clamp(45px,6.4vw,73px)}
+}
+@media(max-width:720px){
+ #artworkGuide .busted-input-preflight-head{
+  align-items:start;flex-direction:column;gap:10px;padding:19px 17px 15px
+ }
+ #artworkGuide .busted-preflight-aside{text-align:left}
+ #artworkGuide .busted-input-preflight-pairs{grid-template-columns:1fr}
+ #artworkGuide .busted-input-preflight-pairs>div{padding:20px 17px}
+ #artworkGuide .busted-input-preflight-pairs>div+div{
+  border-left:0;border-top:1px solid rgba(149,164,237,.20);
+ }
+ #artworkGuide .busted-preflight-note{padding:13px 17px}
+ #technology .busted-model-capabilities-head{flex-direction:column;align-items:start}
+ #technology .busted-model-capabilities-grid>div{padding:18px 14px;min-height:127px}
+ #technology .busted-model-capabilities-grid strong{font-size:15px}
+ #technology .busted-model-capabilities-grid small{font-size:11px}
+ #technology .busted-output-contract{grid-template-columns:minmax(0,1fr);gap:0}
+ #technology .busted-output-contract>div:not(.busted-output-versus){padding:19px 17px}
+ #technology .busted-output-versus{height:24px}
+ #technology .busted-output-contract>div:last-child{
+  border-left:0;border-top:1px solid rgba(171,161,255,.25)
+ }
+}
+
+/* Editorial distinction: Compiler owns puppet construction; Studio is an
+ * optional manipulation/authoring layer over the already-compiled character.
+ * Do not imply rig export alone is the differentiator. */
+#technology .busted-compile-vs-studio{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:1px;margin-top:18px;
+  padding:1px;border:1px solid rgba(161,174,252,.29);
+  background:rgba(163,169,248,.20);
+}
+#technology .busted-compile-vs-studio>div{
+  min-width:0;padding:24px 23px 22px;
+  display:flex;flex-direction:column;
+  background:linear-gradient(125deg,rgba(17,27,71,.98),rgba(22,27,66,.95));
+}
+#technology .busted-compile-vs-studio .busted-compile-role{
+  background:linear-gradient(125deg,rgba(38,49,110,.93),rgba(25,30,76,.96));
+}
+#technology .busted-compile-vs-studio span{
+  color:#a6b6ef;font:600 9px/1.4 "IBM Plex Mono",monospace;
+  letter-spacing:.11em;
+}
+#technology .busted-compile-vs-studio h3{
+  color:#f0efff;font:650 clamp(20px,1.9vw,27px)/1.17 "Space Grotesk",sans-serif;
+  letter-spacing:-.035em;margin:13px 0 11px;
+}
+#technology .busted-compile-vs-studio p{
+  color:#b1bfdd;font:400 13px/1.7 "Space Grotesk",sans-serif;
+  margin:0 0 22px;flex:1;
+}
+#technology .busted-compile-vs-studio small{
+  color:#b9b9ed;font:600 8px/1.5 "IBM Plex Mono",monospace;
+  letter-spacing:.045em;border-top:1px solid rgba(159,172,253,.18);
+  padding-top:13px;
+}
+#technology .busted-output-contract>div:last-child{
+  border-color:rgba(174,180,255,.36);
+}
+#technology .busted-technology-principle{margin-top:18px}
+@media(max-width:720px){
+  #technology .busted-compile-vs-studio{grid-template-columns:1fr}
+  #technology .busted-compile-vs-studio>div{padding:23px 17px 20px}
+  #technology .busted-compile-vs-studio h3{font-size:23px}
+}

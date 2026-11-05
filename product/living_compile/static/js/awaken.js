@@ -116,12 +116,18 @@ async function apiJson(url, options = {}) {
 
 function syncGatewayUI() {
   const ready = Boolean(project?.compile_available && project?.public_compile_gateway);
-  awaken.disabled = running || !ready || selectedFiles.length === 0;
+  // Offline users can inspect the one-shot visual interaction, but no compile
+  // action is offered or submitted: the adjacent status is always explicit.
+  awaken.disabled = running || (ready && selectedFiles.length === 0);
+  awaken.dataset.ignitionPreview = String(!ready);
+  awaken.setAttribute('aria-label', ready ? 'Awaken your character' :
+    'Preview ignition interaction — compiler offline');
   if (status) {
     status.querySelector('span').textContent = ready ? 'COMPILER READY' : 'COMPILER OFFLINE';
     status.classList.toggle('ready', ready);
   }
-  awaken.title = ready ? (selectedFiles.length ? 'Compile selected source views' : 'Select a front view first') : 'Compiler offline: preview only';
+  awaken.title = ready ? (selectedFiles.length ? 'Compile selected source views' : 'Select a front view first') :
+    'Preview ignition effect only · compiler offline';
   if (compileAvailability) {
     compileAvailability.textContent = ready ? 'COMPILER READY · VERIFIED GATEWAY' : 'UI PREVIEW · COMPILER OFFLINE';
     compileAvailability.classList.toggle('ready', ready);
@@ -414,31 +420,47 @@ async function runProductionFlow() {
   });
 }
 
-awaken.addEventListener('click', async () => {
-  if (running || !selectedFiles.length) return;
-  running = true;
-  result.classList.remove('show','alive-reveal');
+// Only direct user interaction powers the ignition. No ambient fiery state.
+async function playAwakenIgnition() {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  awaken.classList.remove('is-charging', 'is-igniting');
+  void awaken.offsetWidth; // permit successive user-triggered cycles
+  awaken.classList.add('is-charging');
   try {
-    if (project?.compile_available && project?.public_compile_gateway) {
+    await delay(reduced ? 80 : 510);
+    awaken.classList.replace('is-charging', 'is-igniting');
+    await delay(reduced ? 90 : 430);
+  } finally {
+    awaken.classList.remove('is-charging', 'is-igniting');
+  }
+}
+
+awaken.addEventListener('click', async () => {
+  const ready = Boolean(project?.compile_available && project?.public_compile_gateway);
+  if (running || (ready && !selectedFiles.length)) return;
+  running = true;
+  try {
+    // The charge belongs to a click, not to page load, hover or scrolling.
+    await playAwakenIgnition();
+    if (ready) {
+      result.classList.remove('show','alive-reveal');
       await runProductionFlow();
     } else {
-      // Static hosting deliberately cannot simulate proof or mint a ProductRevision.
-      status.querySelector('span').textContent = 'PREVIEW ONLY';
+      // This is a visual-only preview, not a fake compile or a simulated result.
       modeLabel.textContent = 'UI PREVIEW · COMPILER OFFLINE';
-      awaken.disabled = true;
-      showLiveCompileStatus('COMPILER OFFLINE', 'Static preview only. No simulated compile, proof or puppet output.');
-      addLog('Compiler not connected. No simulated compile or proof.', true);
+      showLiveCompileStatus('COMPILER OFFLINE',
+        'Ignition interaction preview only. No compile session was started.');
     }
   } catch (error) {
     shell.classList.remove('compiling');
     status.classList.remove('ready');
     status.querySelector('span').textContent = 'INTAKE READY';
-    awaken.disabled = false;
     showLiveCompileStatus('COMPILE FAILED', error.message);
     updateCompileProgress({percent:null,completed:null,stage:'COMPILER FAILED',running:false});
     addLog(`compile rejected · ${error.message}`, true);
   } finally {
     running = false;
+    if (!ready || !shell.classList.contains('compiling')) syncGatewayUI();
   }
 });
 

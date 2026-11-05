@@ -37,6 +37,8 @@ async def run():
                 await page.locator("#compileAvailability").wait_for()
                 await page.screenshot(path=str(OUT / f"awaken_{width}x{height}.png"), full_page=True)
                 await page.locator("#awakenChamber").screenshot(path=str(OUT / f"chamber_{width}x{height}.png"))
+                await page.locator("#artworkGuide").screenshot(path=str(OUT / f"guide_{width}x{height}.png"))
+                await page.locator("#technology").screenshot(path=str(OUT / f"technology_{width}x{height}.png"))
 
                 extent = await page.evaluate("({scroll:document.documentElement.scrollWidth,inner:window.innerWidth})")
                 if extent["scroll"] > width+2:
@@ -53,8 +55,23 @@ async def run():
                 intro = await metrics(page, "#introduction")
                 chamber = await metrics(page, "#awakenChamber")
                 assert intro["height"] >= height-2, f"Landing no longer fills first viewport: {intro}"
-                assert chamber["y"] >= intro["bottom"]-2, f"Chamber overlaps introductory section: {chamber}"
-                assert drop["y"] >= chamber["y"], f"Source input not located in second section: {drop}"
+                guide=await metrics(page,"#artworkGuide")
+                technology=await metrics(page,"#technology")
+                assert guide["y"] >= intro["bottom"]-2, f"Artwork guide overlaps landing: {guide}"
+                assert technology["y"] >= guide["bottom"]-2, f"Technology story overlaps guide: {technology}"
+                assert chamber["y"] >= technology["bottom"]-2, f"Compile intake overlaps technology story: {chamber}"
+                assert drop["y"] >= chamber["y"], f"Source input outside compiler section: {drop}"
+                assert await page.locator("#artworkGuide .busted-guide-card").count()==3
+                assert await page.locator("#technology .busted-technology-stages article").count()==3
+                assert "FRONT" in (await page.locator("#artworkGuide").inner_text())
+                assert "BACK" in (await page.locator("#artworkGuide").inner_text())
+                assert "EDITABLE CHARACTER" in (await page.locator("#technology").inner_text())
+                assert await page.locator("#technology .busted-editorial-link").get_attribute("href")=="#awakenChamber"
+                for ident in ["#artworkGuide","#technology"]:
+                    bounds=await metrics(page,ident)
+                    assert bounds["x"]>=-1 and bounds["right"]<=width+2, (
+                        f"New product story chapter extends outside viewport: {ident} {bounds}"
+                    )
                 assert not await page.locator("#introduction .matrix-trace").count(), "Typed code belongs only to character intake"
                 assert not await page.locator(".matrix-column").count(), "Old CSS rain must not compete with the global renderer"
                 intake_title=(await page.locator(".chamber-header h2").inner_text()).strip()
@@ -177,10 +194,12 @@ async def run():
                     canvasHidden:document.querySelector('#awakenIgnitionCanvas').hidden
                   };
                 }""")
-                assert abs(resting["width"]-resting["sourceWidth"]) < 2.5, (
-                    f"AWAKEN must match actual character source viewport, not the console: {resting}"
+                assert abs(resting["width"]-resting["parentWidth"]) <= 2.5, (
+                    f"AWAKEN must fill its ACTUAL interactive container edge-to-edge: {resting}"
                 )
-                assert resting["width"] <= resting["parentWidth"]+2
+                assert resting["width"] >= resting["sourceWidth"], (
+                    f"AWAKEN interactive surface must not shrink to the separate upload card: {resting}"
+                )
                 assert resting["canvasHidden"], "There must be NO ambient reactor rendering"
                 assert resting["phase"] == "rest"
                 assert "linear-gradient" in resting["background"]

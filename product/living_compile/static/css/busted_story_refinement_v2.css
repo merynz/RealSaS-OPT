@@ -184,3 +184,47 @@
   border-left:0;border-top:1px solid rgba(171,161,255,.25)
  }
 }
+
+/* Editorial distinction: Compiler owns puppet construction; Studio is an
+ * optional manipulation/authoring layer over the already-compiled character.
+ * Do not imply rig export alone is the differentiator. */
+#technology .busted-compile-vs-studio{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:1px;margin-top:18px;
+  padding:1px;border:1px solid rgba(161,174,252,.29);
+  background:rgba(163,169,248,.20);
+}
+#technology .busted-compile-vs-studio>div{
+  min-width:0;padding:24px 23px 22px;
+  display:flex;flex-direction:column;
+  background:linear-gradient(125deg,rgba(17,27,71,.98),rgba(22,27,66,.95));
+}
+#technology .busted-compile-vs-studio .busted-compile-role{
+  background:linear-gradient(125deg,rgba(38,49,110,.93),rgba(25,30,76,.96));
+}
+#technology .busted-compile-vs-studio span{
+  color:#a6b6ef;font:600 9px/1.4 "IBM Plex Mono",monospace;
+  letter-spacing:.11em;
+}
+#technology .busted-compile-vs-studio h3{
+  color:#f0efff;font:650 clamp(20px,1.9vw,27px)/1.17 "Space Grotesk",sans-serif;
+  letter-spacing:-.035em;margin:13px 0 11px;
+}
+#technology .busted-compile-vs-studio p{
+  color:#b1bfdd;font:400 13px/1.7 "Space Grotesk",sans-serif;
+  margin:0 0 22px;flex:1;
+}
+#technology .busted-compile-vs-studio small{
+  color:#b9b9ed;font:600 8px/1.5 "IBM Plex Mono",monospace;
+  letter-spacing:.045em;border-top:1px solid rgba(159,172,253,.18);
+  padding-top:13px;
+}
+#technology .busted-output-contract>div:last-child{
+  border-color:rgba(174,180,255,.36);
+}
+#technology .busted-technology-principle{margin-top:18px}
+@media(max-width:720px){
+  #technology .busted-compile-vs-studio{grid-template-columns:1fr}
+  #technology .busted-compile-vs-studio>div{padding:23px 17px 20px}
+  #technology .busted-compile-vs-studio h3{font-size:23px}
+}

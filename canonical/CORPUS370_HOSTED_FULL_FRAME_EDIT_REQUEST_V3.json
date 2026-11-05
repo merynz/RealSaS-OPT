@@ -35,7 +35,7 @@
   "training_authorized": false,
   "notes": "Compare full 192x192 source-vs-soup Blender RGBA, no-op and independently suppressible group A/B at view0 and view4 using eight-view source geometry-selected operational layers, with heldout rendered EDIT outcome and source bytes SHA locked. No author drawable/CAA/model training authority.",
   "run_notes": "Disabled until original allview group private batch SHA is sealed, consumer runner bound, CI and workflow lint succeed.",
-  "source_allview_group_batch_sha256": "__PENDING_REAL_ALLVIEW_V3_BATCH_SHA256__",
+  "source_allview_group_batch_sha256": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1",
   "input_geometry_views": [
     0,
     1,

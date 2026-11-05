@@ -37,3 +37,15 @@ No original editable native artist project file or training license verified; of
 Freeze these three examples as a source-diagnostic set; do not tune threshold parameters against the hidden original artist edit references and relabel them heldout success. Obtain disjoint original authored artists/morphologies and distinct original edit poses, create genuine heldout creator/family partitions and physically isolated input-vs-court operation. Develop a generic behavior-conditioned ownership model incorporating occlusion, repeated edit response and source appearance alpha authority without leaking source bone/object/attachment labels into the student. V13b/V14 source causal mechanics is complementary court-only proof and does not equal image-derived drawable identity.
 
 Authority remains FALSE for artist SAME/DIF pairs, image-to-3D source mechanics ownership, artist drawable recovery, native CAA/draw order, model training, materialization and product compile. Tests passing means our negative measurement is reliable, not that product-level ownership is solved.
+
+## Follow-up independent exact topology audit — genuine original sources, 37/37 test gates
+
+Additional precommitted code checks that the V2 seed graph is exactly equal, pixel-for-pixel and label-for-label, to the previously sealed V1 image-graph prediction after ONLY splitting transparent-background-connected foreground islands. Independent court recomputes the diagnostic and rejects forged counts. Real follow-up GitHub-hosted source run: https://github.com/merynz/RealSaS-OPT/actions/runs/42070614120. All 3 workers PASS; 37/37 focused tests in each worker. The image candidate NPZ SHA and all original edit scores are identical to the initial real run.
+
+| Source | V1 raw graph labels | Foreground 4-connected components | Original graph labels comprising multiple visible islands | Additional components hidden by raw labels | Maximum disconnected visible islands under one raw label |
+|---|---:|---:|---:|---:|---:|
+| Spineboy | 150 | 1005 | 98 | 855 | 229 |
+| Owl | 136 | 813 | 84 | 677 | 77 |
+| Raptor | 166 | 938 | 116 | 772 | 127 |
+
+**Interpretation:** V1 undercounted independent connected presentation regions because a raw image graph can reuse one label across many visible disconnected islands. V2 graph split/merge did not discover editable authored part identity; the observed edit IoU *still decreased on all sources*. A true artist drawable can itself have disconnected islands, so the split is not a graphics-owner truth label. This is an auditable counterexample to trusting raw graph component counts or to equating connectivity with editability.

@@ -71,6 +71,7 @@ def build_adaptive_plan(proposal,pairs,prior_v9_manifest,v10_report,
                 and key[0]<key[1]
                 and row.get("total_source_edit_task_count")==len(previous_faces)
                 and type(row.get("indistinguishable_source_edit_task_count")) is int
+                and 0 <= row["indistinguishable_source_edit_task_count"] <= len(previous_faces)
                 and row.get("graphics_owner_authorized") is False
                 and row.get("training_authorized") is False,
                 "V11_PRIOR_EXACT_PARTITION_PAIRWISE_CENSUS")

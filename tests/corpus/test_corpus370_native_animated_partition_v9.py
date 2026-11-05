@@ -6,7 +6,33 @@ to hosted Blender original source and separate renderer consumer.
 import copy
 import numpy as np
 import pytest
-from tests.corpus.test_corpus370_multi_partition_edit_v7 import parents
+def parents():
+    sizes=(8,16,32)
+    face_count=32
+    proposal={
+        "schema":"RealSaS.Corpus370AllViewGeometryOperationalGroups.v3",
+        "status":"ALL_8_INPUT_VIEW_GEOMETRY_LAYER_HYPOTHESES__RENDER_OUTCOME_HELDOUT",
+        "source_sha256":"a"*64,"source_face_count":face_count,
+        "training_authorized":False,"graphics_owner_truth_minted":False,
+        "view4_rendered_edit_consequences_used_by_compiler":False,
+        "candidates":[{
+            "slot_count":size,"candidate":f"ALLVIEW_GEOMETRY_GROUPS_{size}",
+            "source_faces_changed":False,"training_authorized":False,
+            "face_slot_teacher_only":[i//(face_count//size) for i in range(face_count)],
+        } for size in sizes],
+    }
+    pairs={
+        "parents":{"source_sha256":"a"*64},
+        "training_authorized":False,
+        "rows":[
+            {"view_index":0,"source_face_a_teacher_only":0,
+             "source_face_b_teacher_only":8},
+            {"view_index":4,"source_face_a_teacher_only":4,
+             "source_face_b_teacher_only":12},
+        ],
+    }
+    return proposal,pairs
+
 from tools.corpus.corpus370_partition_edit_plan_v7 import build_plan,arm_names
 from tools.corpus.court_corpus370_native_animated_partition_v9 import evaluate
 

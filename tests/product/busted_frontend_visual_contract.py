@@ -65,10 +65,10 @@ async def run():
                 assert await page.locator("#artworkGuide .busted-input-preflight").count()==1
                 assert await page.locator("#technology .busted-technology-stages article").count()==3
                 assert await page.locator("#technology .busted-model-capabilities-grid > div").count()==4
-                assert await page.locator("#technology .busted-output-contract").count()==1
+                assert await page.locator("#technology .busted-output-contract").count()==0, "Duplicate comparison returned"
                 assert "OUR MODELS" in (await page.locator("#technology").inner_text())
-                assert "FIXED-RIG APPROACH" in (await page.locator("#technology").inner_text())
-                assert "OUR GENERIC RESEARCH" in (await page.locator("#technology").inner_text())
+                assert "KNOWN STRUCTURE" in (await page.locator("#technology").inner_text())
+                assert "OPEN MORPHOLOGY" in (await page.locator("#technology").inner_text())
                 assert await page.locator("#technology .busted-generic-comparison > div.busted-generic-template").count()==1
                 assert await page.locator("#technology .busted-generic-comparison > div.busted-generic-discovery").count()==1
                 assert await page.locator("#technology .busted-control-outcomes > div").count()==3

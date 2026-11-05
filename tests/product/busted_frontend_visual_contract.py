@@ -80,7 +80,7 @@ async def run():
                 )
                 assert "FRONT" in (await page.locator("#artworkGuide").inner_text())
                 assert "BACK" in (await page.locator("#artworkGuide").inner_text())
-                assert "EDITABLE CHARACTER" in (await page.locator("#technology").inner_text())
+                assert "TO A LIVING PUPPET" in (await page.locator("#technology").inner_text())
                 assert await page.locator("#technology .busted-editorial-link").get_attribute("href")=="#awakenChamber"
                 for ident in ["#artworkGuide","#technology"]:
                     bounds=await metrics(page,ident)

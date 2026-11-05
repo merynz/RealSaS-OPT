@@ -1,7 +1,7 @@
 # Corpus370 V18i — Alpha filtering vs draw-order explanations for V18h failures
 
 Date: 2026-11-05. PR #343, branch `corpus370-v18b-reactive-stain-source-edit-court-v1`.  
-**Status: research; V18h 3/3 original source workers SUCCESS; V18i archival independent source courts initiated but exact outcomes not yet assumed.**
+**Status: V18i original-source independent court 3/3 PASS, SHA readback verified; NO GRAPHICS OR TRAINING AUTHORITY.**
 
 ## Proven evidence — not conjecture
 
@@ -33,7 +33,30 @@ V18i thus measures for **all four original views × all three frozen thresholds 
 
 - Frozen parent [V18h run 42120479356](https://github.com/merynz/RealSaS-OPT/actions/runs/42120479356) and exact original independent courts SHA readback. No changed V18a threshold, chosen group or character.
 - V18i code: `tools/corpus/court_corpus370_v18i_emissive_alpha_coverage_diagnostics.py`; synthetic/redteam test including the mathematical half/half opaque coverage counterexample: `tests/corpus/test_corpus370_v18i_emissive_alpha_coverage_diagnostics.py`; workflow: `.github/workflows/corpus370-v18i-source-alpha-coverage-vs-layer-order.yml`.
-- Actual V18i run: https://github.com/merynz/RealSaS-OPT/actions/runs/42122645313 . Contracts PASS; source jobs were initiated; **not declared successful or numerically interpreted in this record before independent court results**.
+- Actual V18i final run: https://github.com/merynz/RealSaS-OPT/actions/runs/42123720590 — **3/3 PASS** (contract, Cat, Triceratops). First attempt `42122645313` had Cat source PASS but Triceratops transport stuck in Ubuntu apt installation. Replaced only transport installation by the official rclone v1.75.2 linux-amd64 ZIP with **static SHA-256** `349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702`, retaining exactly the original V18h SHA parents and mathematical court. First run cancelled by GitHub branch workflow concurrency after corrected run began; no scientific acceptance was based on this operational restart.
+
+Final independent V18i private output SHA-256 readback:
+- Cat: `763c4bfebe78cc04dc37cd48aa1258b2b2ddffd0b222a158fc8fedf7d0d575d0`
+- Triceratops: `36b1bb856c24fa204dbb1cd3cef0a0cbbdfb2cc7fd5b8b31f59cd22286883bd2`
+
+### Actual source outcome: breakdown of the 2-layer pixelwise-oracle error
+
+Same immutable V18a group containing V11 target ordinal 0; exact four original camera views summed. Counts are repeated *view/pixel instances*, **not artist region counts**.
+
+| Source | V18a threshold | Full original groups K | This probe's faces | Emissive pixelwise-oracle failures | Alpha mismatch alone guarantees failure | Residual RGB/depth/coverage failure with alpha match |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| CAT | .045 | 320 | 2 | 0 | 0 | 0 |
+| CAT | .10 | 288 | 2 | 0 | 0 | 0 |
+| CAT | .18 | 280 | 2 | 0 | 0 | 0 |
+| TRICERATOPS | .045 | 469 | 1 | 43 | **17** | **26** |
+| TRICERATOPS | .10 | 22 | 1298 | 457 | **172** | **285** |
+| TRICERATOPS | .18 | 1 | 1334 | 0 | 0 | 0 |
+
+For Triceratops .10, **172/457 (37.6%)** oracle failure pixels violate the order-invariant alpha identity `aF == aG+aR-aG*aR`; no choice of which image to draw on top can repair these under the two-layer postfiltered representation. The other **285/457 (62.4%)** have alpha identity within tolerance, but neither G-over-R nor R-over-G reconstructs premultiplied RGB under the original straight alpha assumption. This latter set does NOT independently prove reversed ordering, nor rule out alpha/raster transport subtleties: it is only a residual category.
+
+The original V18h grouping at .18 makes the complement physically empty, so **0 error is vacuous** and must NEVER be promoted as a successful drawable decomposition. Cat's original group was already zero-error in the lit source; the Cat result is not evidence that emissive materials fixed its other groups.
+
+**Scientific implications:** Both alpha/coverage representation and visibility/order/appearance treatment require investigation. No single `REPEL` or `ATTRACT` source-face edge may be inferred from these pixel counts alone. The next decisive test is **source-posed fixed 4x4 subpixel geometric ray attribution** of known alpha-failing, RGB-only failing, and passing pixels using existing V17b tools, with per-ray depth tie/incomplete states explicitly UNKNOWN. The original `failed/pass` image stratum is retrospective/outcome-based and thus serves only explanatory diagnosis; it cannot be presented as a blind heldout truth benchmark.
 - Source RGBA/teacher-only identities retained in private Drive only; exact source emission/private files receive hash-checked readback. Explanations are relative to an assumed straight-RGB→premultiplied conversion used by V18g/V18h, not source artist RGB truth.
 - No original artist drawable labels, negative `REPEL` relation, model-training or materialization admission. ALL `graphics_owner_authorized`, `iris_training_authorized`, `tessa_training_authorized`, `training_authorized`, `materialization_authorized` are **false**.
 

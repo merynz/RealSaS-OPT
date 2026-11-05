@@ -61,15 +61,31 @@ async def run():
                 assert "START" in intake_title and "HERE." in intake_title, f"Intake copy drift: {intake_title}"
                 headline=(await page.locator(".hero-intro h1").inner_text()).strip()
                 assert "BRING YOUR" in headline and "TO LIFE." in headline, f"BUSTED consumer promise drift: {headline}"
-                assert await page.locator("#structuralCanvas").is_visible(), "Procedural reference carrier absent"
-                canvas_evidence=await page.locator("#structuralCanvas").evaluate("""canvas => {
-                  const ctx=canvas.getContext('2d');
-                  const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
-                  let occupied=0;
-                  for(let i=3;i<pixels.length;i+=4)if(pixels[i]>40)occupied++;
-                  return {occupied,width:canvas.width,height:canvas.height};
+                assert await page.locator("#knightShowcase").is_visible(), "Knight technical stage missing"
+                await page.wait_for_function("window.bustedKnightShowcase?.nativeReady === true", timeout=12000)
+                art=await page.locator("#knightMotionFrame").evaluate("""img => ({
+                    complete:img.complete,naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight,
+                    src:img.getAttribute('src')
+                })""")
+                assert art["complete"] and art["naturalWidth"]>0, f"Authentic Knight media not decoded: {art}"
+                assert await page.locator('#knightBoneSelect option').count()==6, "Native sample bones unavailable"
+                await page.locator('[data-knight-mode="rig"]').click()
+                assert await page.locator("#knightShowcase").get_attribute("data-layer")=="rig"
+                rig=await page.locator("#knightRigCanvas").evaluate("""canvas=>{
+                    const pixels=canvas.getContext('2d').getImageData(0,0,512,512).data;
+                    let ink=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]>40)ink++;
+                    return ink;
                 }""")
-                assert canvas_evidence["occupied"]>350, f"Spatial carrier produced no geometry: {canvas_evidence}"
+                assert rig>75, f"Native rig did not render: {rig}"
+                await page.locator('[data-knight-mode="weights"]').click()
+                await page.locator("#knightBoneSelect").select_option("10")
+                assert await page.locator("#knightShowcase").get_attribute("data-layer")=="weights"
+                await page.locator('[data-knight-motion="run"]').click()
+                assert "run.gif" in (await page.locator("#knightMotionFrame").get_attribute("src"))
+                await page.locator('[data-knight-motion="slash"]').click()
+                assert "slash.gif" in (await page.locator("#knightMotionFrame").get_attribute("src"))
+                await page.locator('[data-knight-motion="idle"]').click()
+                await page.locator('[data-knight-mode="art"]').click()
                 assert await page.locator("#compileMonitor").is_hidden(), "Compiler console must remain contextual"
                 assert await page.locator("#bustedSpatialRain").is_visible(), "Global data rain not created"
                 rain=await page.locator("#bustedSpatialRain").evaluate("""canvas=>{

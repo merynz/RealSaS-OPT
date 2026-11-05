@@ -1,6 +1,6 @@
 # Corpus370 V18k — geometry-precommitted sample-aware compositing canary
 
-Date: 2026-11-06 (Türkiye local). **PREREGISTERED; THIS DOCUMENT PREDATES NEW ORIGINAL-SOURCE V18K MEASUREMENTS.** Draft PR #343, branch `corpus370-v18b-reactive-stain-source-edit-court-v1`. Do not equate any prospective PASS with drawable identity, original art alpha or model training authority.
+Date: 2026-11-06 (Türkiye local). **PREREGISTERED DESIGN FOLLOWED BY ORIGINAL-SOURCE 3/3 INDEPENDENT COURT PASS; REPORT BELOW; NO MODEL/DRAWABLE AUTHORITY.** Draft PR #343, branch `corpus370-v18b-reactive-stain-source-edit-court-v1`. Do not equate any prospective PASS with drawable identity, original art alpha or model training authority.
 
 ## Exact research claim to falsify
 
@@ -36,6 +36,60 @@ This is a source-geometry **mechanism canary**, not guaranteed exact Cycles veri
 The independent court will re-open **actual original source geometry + original source renderer bytes** and recompute all rays and numeric evidence; not merely compare self-declared summary counts. No geometry first hit is converted to a learning input or a `SAME_DRAWABLE` / `DIFFERENT_DRAWABLE` edge.
 
 All outputs `graphics_owner_authorized=false`, `iris_training_authorized=false`, `tessa_training_authorized=false`, `training_authorized=false`, `materialization_authorized=false`.
+
+## Independent original-source outcome — completed, 3/3 PASS
+
+Run `42128783773-1`, https://github.com/merynz/RealSaS-OPT/actions/runs/42128783773 : redteam 9/9 PASS, CAT original source PASS, TRICERATOPS original source PASS. Independently re-opened original source assets and reran all selected geometric 4×4 samples, SHA-checked readback to private Drive.
+
+- Cat: 744 source threshold/view pixel rows, **3,968 unique geometric subpixel rays**; private independent court SHA `0019f17e7f1c08fcdad5c530957a4f7ae5f80bbbfe23ecca083be51ab5aa5535`.
+- Triceratops: 751 source threshold/view pixel rows, **6,416 unique geometric subpixel rays**; private independent court SHA `48d9142ac948d4805ea183b84199e9a13a9a3e841b514acdea1cc17364d01545`.
+- Every queried source ray was complete/untied in both subjects. Repeated threshold/view rows reuse immutable 4×4 original geometry rays; never treat them as independent rays or independent subjects.
+- The original private source-pixel dataset was retrieved and aggregates independently cross-tabulated after the hosted court passed; no raw source mesh/source-face/private raster pixel data committed to Git.
+
+### Critical holdout camera 4/6 result — Triceratops, frozen threshold 0.10
+
+| Evidence over the 149 preselected original pixels | Count |
+| --- | ---: |
+| Actual V18h original Blender `FULL` versus Blender `G OVER R` / `R OVER G` both fail at tolerance 0.025 | **16** |
+| Sampled original geometry shows opposing nearest G/R surface across subsamples | **14** |
+| At 4×4 source-ray sampling, joint-then-filter differs from best filter-then-OVER by more than .025 | **11** |
+| Geometric joint-then-filter is closer to **actual** V18h full Blender source than Blender part-OVER | **15**, all 15 were among the 16 failed Blender postfilter pixels |
+| Failures rescued inside error tolerance .025 by geometric joint sampling | **3 / 16** |
+| Pixels for which the 4×4 geometric joint-then-filter is worse than actual Blender postfilter | **131 / 149** |
+| Pixels for which it is better | 15 / 149 |
+| No numerical difference (up to 1e-10) | 3 / 149 |
+| Actual Blender independent-layer postfilter errors above .025 | **16 / 149** |
+| Geometric uniform-4×4 joint errors above .025 when compared to original V18h full render | **32 / 149** |
+| Average pixel max-premultiplied-RGBA error, actual Blender layer OVER | **0.01850** |
+| Average pixel max-premultiplied-RGBA error, geometric joint-then-filter | **0.02536** |
+| Average pixel max-premultiplied-RGBA error, geometric filter-then-OVER | **0.03515** |
+
+This is a **two-sided result**:
+- The *same-geometry, same-samples* counterexample is real: joint 4×4 depth compositing and postfiltered 4×4 alpha OVER can differ. Local source nearest-surface order is not necessarily one uniform layer order. On the 16 real V18h layer-OVER-failing pixels, the geometry-first estimate is closer on 15; this gives genuine motivation to preserve K-hit/sample-aware source geometry in Graphics Evidence IR.
+- The **unsolved** source appearance obligation dominates global quality: a 4×4 deterministic geometric sample image is **worse on 131 other (previously accurately composited) pixels**, and doubles the number of pixels above the declared 0.025 source error bound from 16 to 32. Geometric sample compositing is NOT an accurate substitution for 32spp Cycles. Do not present the 15 improved pixels as general success, or blame every residual on a specific stochastic filter until controlled repro qualifies it.
+
+For further discrimination *within the 16 failing heldout pixels*, geometric joint-then-filter is closer than geometric filter-then-OVER on 11, which limits how much of the 15 apparent gains can be attributed to the *actual order-of-operations change* rather than different sample pattern or other approximations. Only 3 become source-tolerance PASS. One of the 16 gets worse.
+
+### Exploratory camera 0/2 replication and controls
+
+| Original source/threshold | Pixel queries | Real Blender independent-layer failures | 4×4 sample-aware improves Blender on prior failing pixels | 4×4 sample-aware all-pixel failures |
+| --- | ---: | ---: | ---: | ---: |
+| TRICERATOPS 0.045 exploratory | 118 | 4 | 3 | 17 |
+| TRICERATOPS 0.10 exploratory | 150 | 9 | 8 | 23 |
+| TRICERATOPS 0.18 exploratory | 108 | 0, **K1 vacuous** | 0 | 15 |
+| TRICERATOPS 0.045 locked views | 118 | 4 | 3 | 18 |
+| TRICERATOPS 0.10 locked views | 149 | 16 | 15 | 32 |
+| TRICERATOPS 0.18 locked views | 108 | 0, **K1 vacuous** | 0 | 15 |
+
+CAT is an **uninformative control for failure** under this original frozen V18h target group: zero actual Blender two-layer source failures for 124 original pixels per threshold across exploratory views and another 124 per threshold in locked views. Yet the 4×4 geometric approximation generates 15 errors above tolerance in the locked view group (each threshold). This directly warns against claiming that geometry-only 4×4 sampling preserves already-good 2D source appearance.
+
+### Revised research decision (after FAIL-CLOSED quality evaluation)
+
+1. **Do not promote V18k joint 4×4 render to a production renderer.** It is an explanatory geometry oracle and a plausible structural ingredient, but its source fidelity is insufficient in this controlled test.
+2. For operational 2D presentation, retain original source 3D surface addressing, visibility/partial source-ray order, and the original appearance authority. Introduce source-matched *common sampling / filter policy* where full, isolate, remainder and sample-first renderer share the exact sampling domain. Either prove exact Cycles sample/coverage linkage or use a self-consistent independent raster reference followed by **separate verification against original artist presentation**; do not conflate these tests.
+3. Reconstruct **same-source** 2D compositing on heldout motions/views with opacity, overlap, source texture, depth ties and masking; alpha and RGB source appearance must pass independently.
+4. Only then audit the **editable layer operation and group boundaries** via original-source heldout edit consequences. No V18k sample ray becomes a must-link/cannot-link or IRIS student input.
+5. Fail-closed status remains: original graphics-owner labels UNKNOWN; IRIS/TESSA/materialization/training authorizations FALSE. `main` untouched and PR #343 draft/open.
 
 ## Candidate downstream only
 

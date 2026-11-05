@@ -82,14 +82,16 @@ def test_fit_channels_are_strictly_blind_to_heldout_source_pose():
     # Hidden-pose mutation must change *within-component* response variance.
     # A uniform translation of every vertex cannot do that when each group
     # is mechanically homogeneous; that is not a valid heldout falsifier.
-    controls_bad[2,0,0,0,0,0]+=.7
-    controls_bad[2,1,0,1,6,1]-=.4
+    controls_bad[2,0,0,0,1,0]+=.7
+    controls_bad[2,1,0,1,5,1]-=.4
     joint_bad[2]+=np.array([-90.,10.,400.])
     after=stain.face_stain_features(rest,faces,base,controls_bad,
                                     joint_bad,picks)
     assert np.array_equal(original,after)
     # Heldout *evaluation* notices the source change, but clustering didn't.
-    labels=stain.component_labels(original,stain.face_edges(faces),.1)
+    # Two genuinely multi-face candidate regions: singleton components
+    # trivially have zero within-group variance and cannot falsify this gate.
+    labels=np.array([0,0,1,1],np.int32)
     a=independent_heldout_fraction(faces,base,controls,picks,labels,6.)
     b=independent_heldout_fraction(faces,base,controls_bad,picks,labels,6.)
     assert a is not None and b is not None and abs(a-b)>1e-7

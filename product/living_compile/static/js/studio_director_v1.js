@@ -48,6 +48,17 @@
     chooseMode(workspace==='motion'?'animation':'rig');
     showTimeline(workspace==='motion');
     studio?.toolContext?.setTool('select');
+    // The empty shell explains its current workspace without fabricating a puppet.
+    const welcome=document.querySelector('#studioWelcome');
+    const h1=welcome?.querySelector('h1');
+    const copy=welcome?.querySelector('p');
+    const kicker=welcome?.querySelector('.welcome-kicker');
+    if(h1)h1.innerHTML=workspace==='motion'?
+      'Then give it<br><em>motion.</em>':'The puppet<br><em>is the product.</em>';
+    if(copy)copy.textContent=workspace==='motion'?
+      'Open a proof-qualified puppet, create a user clip, and animate real controls on the timeline.':
+      'Work on structure, rig, weights and appearance. Open a qualified character to begin.';
+    if(kicker)kicker.textContent=workspace==='motion'?'MOTION WORKSPACE / BUSTED':'PUPPET EDITOR / BUSTED';
     if(updateURL){
       const url=new URL(location.href);
       if(workspace==='motion')url.searchParams.set('workspace','motion');

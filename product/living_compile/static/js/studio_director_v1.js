@@ -14,7 +14,8 @@
   const params=new URLSearchParams(location.search);
   let studio=null;
   let workspace=params.get('workspace')==='motion'?'motion':'puppet';
-  let lastState='';
+  let lastState='',probeAttempts=0;
+  document.body.dataset.studioWorkspace=workspace;
   function ready(){
     const s=studio?.state;
     return Boolean(s?.bundle&&s?.scene?.puppet&&s?.scene?.proof?.passed===true);
@@ -123,7 +124,10 @@
   }
   function connect(){
     studio=window.RealSaSStudio||null;
-    if(!studio||!studio.toolContext){requestAnimationFrame(connect);return}
+    if(!studio||!studio.toolContext){
+      if(probeAttempts++<100)setTimeout(connect,350);
+      return;
+    }
     studio.toolContext.addEventListener('change',()=>render(true));
     studio.selection?.addEventListener('change',()=>render(true));
     studio.dirty?.addEventListener('change',()=>render(true));
@@ -135,5 +139,7 @@
     }
     requestAnimationFrame(watch);
   }
+  // Tabs remain usable even when this static preview has no backend session.
+  switchWorkspace(workspace,{updateURL:false});
   connect();
 })();

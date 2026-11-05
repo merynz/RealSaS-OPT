@@ -38,7 +38,7 @@
 }
 .chamber-code-visual .matrix-trace{
   position:absolute;height:59px;overflow:hidden;z-index:auto;
-  opacity:calc(var(--trace-alpha) * .73);filter:saturate(.81);
+  opacity:calc(var(--trace-alpha) * .90);filter:saturate(.81);
   color:var(--trace-tone);font-weight:600;
   text-shadow:0 0 9px rgba(129,136,241,.12);
 }

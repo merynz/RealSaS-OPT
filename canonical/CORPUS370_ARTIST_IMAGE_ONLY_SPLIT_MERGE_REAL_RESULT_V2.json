@@ -1,0 +1,194 @@
+{
+  "schema": "RealSaS.Corpus370OriginalArtistImageOnlySplitMergeRealResult.v2",
+  "status": "MEASURED_REAL_IMAGE_ONLY_SPLIT_MERGE_3_OF_3_SUCCESS__NO_QUALIFIED_EDIT_BOUNDARY_BREAKTHROUGH",
+  "research_run_id": 42070010839,
+  "research_run_url": "https://github.com/merynz/RealSaS-OPT/actions/runs/42070010839",
+  "code_head_sha": "4b48cfa45b0441b94049686f0356f2b46110902d",
+  "parent_v1_pr": 333,
+  "current_pr": 334,
+  "parallel_corpus370_pr": 327,
+  "source_rgb_a_resolution": [
+    768,
+    768
+  ],
+  "input_model_scope": "single-original-composite-RGBA-only",
+  "private_reference_scope": "independent original authored Spine runtime hide/isolate court, read only after prediction SHA seal",
+  "candidate_parameters": {
+    "seed_graph": {
+      "scale": 180,
+      "sigma": 0.8,
+      "min_size": 140
+    },
+    "fine_graph": {
+      "scale": 75,
+      "sigma": 0.8,
+      "min_size": 55
+    },
+    "conservative": {
+      "max_score": 0.085,
+      "max_border": 0.11,
+      "max_mean": 0.18
+    },
+    "adaptive": {
+      "max_score": 0.135,
+      "max_border": 0.18,
+      "max_mean": 0.26
+    },
+    "fine": {
+      "max_score": 0.105,
+      "max_border": 0.14,
+      "max_mean": 0.23
+    },
+    "merge_score": "0.55*original_boundary_RGB_jump+0.30*mean_region_RGB_jump+0.15*normalized_Ward",
+    "regions": "foreground-only four-neighbor contiguous proposals, no target artist-part count",
+    "artist_labels_in_predictions": false,
+    "source_rig_or_mesh_in_predictions": false
+  },
+  "source_results": [
+    {
+      "source": "Spineboy",
+      "job_id": 127395039826,
+      "source_rgba_sha256": "0e5e89c8cdc64da2b29b00771f6d05bb253ab9e61d0ccc69487904863a10691e",
+      "parent_baseline_prediction_sha256": "77d4bf19ca3c4e918a02e702e1f5cb41057186c2a9648f1cfe642f2121f21896",
+      "split_merge_prediction_sha256": "e5879206405c688fb9d7456d8c8688344cbaecfb70e93acbe9fa2c079676ce08",
+      "observable_edits": 18,
+      "masked_edits": 0,
+      "graph_v1": {
+        "regions": 150,
+        "mean_iou": 0.27866972012937,
+        "effect_recall": 0.2548645796693633,
+        "matched_edits": 18
+      },
+      "v2_seed_coarse_regions": 1005,
+      "v2_seed_fine_regions": 1713,
+      "split_merge_conservative": {
+        "regions": 381,
+        "mean_iou": 0.2178236653767994,
+        "effect_recall": 0.36827998593035527,
+        "matched_edits": 18
+      },
+      "split_merge_adaptive": {
+        "regions": 165,
+        "mean_iou": 0.1808773626080415,
+        "effect_recall": 0.3620612029546254,
+        "matched_edits": 18
+      },
+      "fine_split_merge": {
+        "regions": 285,
+        "mean_iou": 0.16766016085128002,
+        "effect_recall": 0.3034611326064017,
+        "matched_edits": 18
+      },
+      "source_image_only_merges": {
+        "conservative": 624,
+        "adaptive": 840,
+        "fine": 1428
+      }
+    },
+    {
+      "source": "Owl",
+      "job_id": 127395039583,
+      "source_rgba_sha256": "d3287212a4123c437fc784f41e2aeefdd9031d76ebe61c28f07cd2bd0b7b261d",
+      "parent_baseline_prediction_sha256": "306687062dd5360b0deb589921c7ba9f8848cfa9d7248565ea77442bcdefebb2",
+      "split_merge_prediction_sha256": "8f43e3b33c4ee33843816bb7f06565af02bb97f26a742b31ac78eea9051d329d",
+      "observable_edits": 22,
+      "masked_edits": 3,
+      "graph_v1": {
+        "regions": 136,
+        "mean_iou": 0.4177557459809574,
+        "effect_recall": 0.3547827727312302,
+        "matched_edits": 22
+      },
+      "v2_seed_coarse_regions": 813,
+      "v2_seed_fine_regions": 1523,
+      "split_merge_conservative": {
+        "regions": 111,
+        "mean_iou": 0.378684718738989,
+        "effect_recall": 0.5202353658182662,
+        "matched_edits": 22
+      },
+      "split_merge_adaptive": {
+        "regions": 42,
+        "mean_iou": 0.2391078292014374,
+        "effect_recall": 0.46838813593754536,
+        "matched_edits": 22
+      },
+      "fine_split_merge": {
+        "regions": 144,
+        "mean_iou": 0.25646800738356884,
+        "effect_recall": 0.4118031169283455,
+        "matched_edits": 22
+      },
+      "source_image_only_merges": {
+        "conservative": 702,
+        "adaptive": 771,
+        "fine": 1379
+      }
+    },
+    {
+      "source": "Raptor",
+      "job_id": 127395039772,
+      "source_rgba_sha256": "fcf4bd8b61443536b7c3bf736f1d46e90895399673cef1c08b137984cdddf922",
+      "parent_baseline_prediction_sha256": "bee8b712476a170945978d628b0a22a6e00374171056741bafd9a9cf7a6ffade",
+      "split_merge_prediction_sha256": "9da338002000675e38d38a71629f4d77262fb9aa3da817984bc8b00d43b51c2b",
+      "observable_edits": 33,
+      "masked_edits": 2,
+      "graph_v1": {
+        "regions": 166,
+        "mean_iou": 0.29251169088020246,
+        "effect_recall": 0.3217023667768219,
+        "matched_edits": 33
+      },
+      "v2_seed_coarse_regions": 938,
+      "v2_seed_fine_regions": 1866,
+      "split_merge_conservative": {
+        "regions": 461,
+        "mean_iou": 0.2707010852483398,
+        "effect_recall": 0.38848454035829444,
+        "matched_edits": 33
+      },
+      "split_merge_adaptive": {
+        "regions": 219,
+        "mean_iou": 0.13353241124380807,
+        "effect_recall": 0.3554245882557564,
+        "matched_edits": 33
+      },
+      "fine_split_merge": {
+        "regions": 457,
+        "mean_iou": 0.23677394539737412,
+        "effect_recall": 0.41508234884872164,
+        "matched_edits": 33
+      },
+      "source_image_only_merges": {
+        "conservative": 477,
+        "adaptive": 719,
+        "fine": 1409
+      }
+    }
+  ],
+  "aggregate": {
+    "original_source_attachment_edit_cases": 78,
+    "observable_artist_hide_effect_cases": 73,
+    "masked_or_invisible_author_hide_cases": 5,
+    "real_source_jobs_success": 3,
+    "redteam_contract_tests_per_source": 35,
+    "source_cases_beating_v1_graph_iou": 0,
+    "source_cases_beating_v1_graph_effect_recall_conservative": 3,
+    "source_cases_v2_conservative_pareto_dominates_baseline_iou_and_recall": 0
+  },
+  "critical_interpretations": [
+    "The v1 image-graph region label count is not necessarily the count of foreground four-connected visible proposals. The v2 coarse image-only splitting explicitly separates background-bridged/disconnected foreground regions before merging.",
+    "Greedy color/edge-consistency merges improve effect pixel recall but reduce mean one-to-one original-hide-edit support IoU in all three source cases. This is not true artist drawable reconstruction.",
+    "Original hide-effect supports overlap and some original art is occluded. Color edits and alpha/draw-order cannot be inferred from one view. No unseen-family generalization established.",
+    "Do not tune the three precommitted thresholds on these three independent court outputs and then re-label the same subjects heldout success; add genuinely new source morphologies and behavior tests."
+  ],
+  "original_native_editor_project_file_verified": false,
+  "independent_native_caa_proven": false,
+  "source_draw_order_proven": false,
+  "artist_same_drawable_pairs_minted": 0,
+  "artist_different_drawable_pairs_minted": 0,
+  "graphics_owner_authorized": false,
+  "training_authorized": false,
+  "materialization_authorized": false,
+  "puppet_product_compilation_authorized": false
+}

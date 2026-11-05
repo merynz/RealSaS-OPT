@@ -47,15 +47,16 @@ export function installAwakenReactor(button, sourceViewport) {
     };
   });
 
-  function fitToArtwork(){
-    const card=sourceViewport.getBoundingClientRect();
-    if(card.width>0 && Number.isFinite(card.width))
-      button.style.setProperty('--awaken-fit-width',`${card.width.toFixed(2)}px`);
+  // Geometry belongs to the action container, not the separate dropzone.
+  // CSS stretches the button to that full width, so a stale measured width
+  // must never override the actual click target.
+  function fitToAction(){
+    if(running)measure();
   }
-  const resizeObserver=new ResizeObserver(fitToArtwork);
-  resizeObserver.observe(sourceViewport);
-  addEventListener('resize',fitToArtwork,{passive:true});
-  fitToArtwork();
+  const action=button.closest('.compile-action');
+  if(!action)throw new Error('AWAKEN action container missing');
+  const resizeObserver=new ResizeObserver(fitToAction);
+  resizeObserver.observe(action);
 
   function measure(){
     const r=button.getBoundingClientRect();
@@ -260,7 +261,7 @@ export function installAwakenReactor(button, sourceViewport) {
         resolve(true);
       },220));
     }
-    fitToArtwork();measure();
+    measure();
     generation++;
     button.dataset.ignitionGeneration=String(generation);
     running=true;canvas.hidden=false;
@@ -289,5 +290,5 @@ export function installAwakenReactor(button, sourceViewport) {
     frame=requestAnimationFrame(runner);
     return complete;
   }
-  return {play,fitToArtwork,get active(){return running}};
+  return {play,get active(){return running}};
 }

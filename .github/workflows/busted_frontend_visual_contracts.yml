@@ -1,0 +1,44 @@
+name: BUSTED Visual Contracts
+
+on:
+  pull_request:
+    paths:
+      - 'product/living_compile/static/**'
+      - 'tests/product/busted_frontend_visual_contract.py'
+      - '.github/workflows/busted_frontend_visual_contracts.yml'
+
+jobs:
+  responsive-browser:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install product server and Playwright
+        run: |
+          python -m pip install --disable-pip-version-check -r deploy/product/requirements.txt playwright
+          python -m playwright install --with-deps chromium
+      - name: Measure responsive browser layout
+        run: |
+          set -euo pipefail
+          export REALSAS_PRODUCT_COMPILE_ENABLED=0
+          python -m product.living_compile.public_server --host 127.0.0.1 --port 8765 > /tmp/busted-public-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8765/healthz > /dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8765/healthz
+          python tests/product/busted_frontend_visual_contract.py
+      - name: Upload Awaken and Studio viewport screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: busted-responsive-screenshots
+          path: .artifacts/busted-visual/*.png
+          if-no-files-found: ignore
+          retention-days: 14

@@ -1,5 +1,3 @@
-const canvas = document.querySelector('#depthScene');
-const ctx = canvas.getContext('2d');
 const shell = document.querySelector('.awaken-shell');
 const input = document.querySelector('#sourceInput');
 const dropzone = document.querySelector('#dropzone');
@@ -14,6 +12,13 @@ const status = document.querySelector('#mastStatus');
 const viewCount = document.querySelector('#viewCount');
 const result = document.querySelector('#result');
 const modeLabel = document.querySelector('#modeLabel');
+const compileLiveStage = document.querySelector('#compileLiveStage');
+const compileStatusMessage = document.querySelector('#compileStatusMessage');
+
+function showLiveCompileStatus(stage, detail) {
+  if (compileLiveStage) compileLiveStage.textContent = String(stage || 'AWAITING SOURCE');
+  if (compileStatusMessage) compileStatusMessage.textContent = String(detail || 'Waiting for compiler events.');
+}
 
 const productStages = [
   ['INPUT', 'source_observation::qualified'],
@@ -42,77 +47,10 @@ const resultCtx = resultCanvas.getContext('2d');
 
 let project = null;
 let selectedFiles = [];
+let activeSourceObjectURL = null;
+const compileAvailability = document.querySelector('#compileAvailability');
 let running = false;
-let particles = [];
-let codeColumns = [];
-let startTime = performance.now();
 let revealGeneration = 0;
-
-function resize() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = Math.floor(innerWidth * dpr);
-  canvas.height = Math.floor(innerHeight * dpr);
-  canvas.style.width = `${innerWidth}px`;
-  canvas.style.height = `${innerHeight}px`;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  seedDepth();
-}
-
-function seedDepth() {
-  const words = [
-    'scene.memory', 'surface.query', 'mesh.compile', 'rig.program', 'weights.solve',
-    'mechanics.validate', 'appearance.authority', 'motion.compile', 'proof.pass',
-    'typed.evidence', 'persistent.identity', 'source.wins', 'product.revision',
-  ];
-  codeColumns = Array.from({length: Math.max(16, Math.floor(innerWidth / 90))}, (_, i) => ({
-    x: (i + 0.5) * innerWidth / Math.max(16, Math.floor(innerWidth / 90)),
-    z: Math.random(),
-    speed: 0.000035 + Math.random() * 0.00005,
-    phrase: words[i % words.length],
-    phase: Math.random() * 100,
-  }));
-  particles = Array.from({length: 56}, () => ({
-    x: Math.random() * innerWidth,
-    y: Math.random() * innerHeight,
-    z: Math.random(),
-    speed: 0.015 + Math.random() * 0.045,
-  }));
-}
-
-function drawDepth(now) {
-  const w = innerWidth;
-  const h = innerHeight;
-  ctx.clearRect(0, 0, w, h);
-  ctx.save();
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  for (const column of codeColumns) {
-    column.z += column.speed * (now - startTime);
-    if (column.z > 1.2) column.z = 0.02;
-    const depth = Math.max(0.06, column.z);
-    const horizon = h * 0.46;
-    const x = w * 0.5 + (column.x - w * 0.5) * (0.18 + depth * 1.34);
-    const y = horizon + (depth * depth) * h * 0.52 + Math.sin(now * 0.00025 + column.phase) * 7;
-    const alpha = Math.max(0, Math.min(0.12, depth * 0.11));
-    const size = 7 + depth * 5;
-    ctx.font = `${size}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
-    ctx.fillStyle = `rgba(143,176,195,${alpha})`;
-    ctx.fillText(column.phrase, x, y);
-  }
-  for (const p of particles) {
-    p.y -= p.speed;
-    if (p.y < -4) {
-      p.y = h + 4;
-      p.x = Math.random() * w;
-    }
-    const a = 0.03 + p.z * 0.12;
-    ctx.fillStyle = `rgba(180,213,230,${a})`;
-    ctx.fillRect(p.x, p.y, 1 + p.z, 1 + p.z);
-  }
-  ctx.restore();
-  startTime = now;
-  requestAnimationFrame(drawDepth);
-}
 
 function addLog(message, hot = false) {
   const row = document.createElement('div');
@@ -129,18 +67,46 @@ async function apiJson(url, options = {}) {
   return payload;
 }
 
+function syncGatewayUI() {
+  const ready = Boolean(project?.compile_available && project?.public_compile_gateway);
+  awaken.disabled = running || !ready || selectedFiles.length === 0;
+  if (status) {
+    status.querySelector('span').textContent = ready ? 'COMPILER READY' : 'COMPILER OFFLINE';
+    status.classList.toggle('ready', ready);
+  }
+  awaken.title = ready ? (selectedFiles.length ? 'Compile selected source views' : 'Select a front view first') : 'Compiler offline: preview only';
+  if (compileAvailability) {
+    compileAvailability.textContent = ready ? 'COMPILER READY · VERIFIED GATEWAY' : 'UI PREVIEW · COMPILER OFFLINE';
+    compileAvailability.classList.toggle('ready', ready);
+  }
+}
+
 function setFiles(files) {
   selectedFiles = [...files].filter((file) => file.type.startsWith('image/')).slice(0, 2);
-  if (!selectedFiles.length) return;
-  const url = URL.createObjectURL(selectedFiles[0]);
-  preview.src = url;
-  resultPreview.src = url;
+  if (activeSourceObjectURL) URL.revokeObjectURL(activeSourceObjectURL);
+  activeSourceObjectURL = null;
+  revealGeneration += 1;
+  result.classList.remove('show');
+  if (!selectedFiles.length) {
+    dropzone.classList.remove('has-image');
+    preview.removeAttribute('src');
+    resultPreview.removeAttribute('src');
+    viewCount.textContent = '0 VIEWS';
+    syncGatewayUI();
+    showLiveCompileStatus('AWAITING SOURCE', 'Select a front character view to begin.');
+    return;
+  }
+  activeSourceObjectURL = URL.createObjectURL(selectedFiles[0]);
+  preview.src = activeSourceObjectURL;
+  resultPreview.src = activeSourceObjectURL;
   resultPreview.style.display = '';
   resultCanvas.style.display = 'none';
-  revealGeneration += 1;
   dropzone.classList.add('has-image');
   viewCount.textContent = `${selectedFiles.length} VIEW${selectedFiles.length > 1 ? 'S' : ''}`;
-  awaken.disabled = false;
+  syncGatewayUI();
+  showLiveCompileStatus('SOURCE ATTACHED', project?.compile_available && project?.public_compile_gateway
+    ? 'Source views selected. Use AWAKEN to submit them to the verified compiler gateway.'
+    : 'Source views selected. This static preview has no production compiler connection.');
   addLog(`source intake armed · ${selectedFiles.length} view${selectedFiles.length > 1 ? 's' : ''}`, true);
 }
 
@@ -318,6 +284,7 @@ async function runProductionFlow() {
   shell.classList.add('compiling');
   status.classList.add('ready');
   status.querySelector('span').textContent = 'SUBMITTING';
+  showLiveCompileStatus('SUBMITTING', 'Sending selected source views to the production compiler.');
   awaken.disabled = true;
   addLog('submitting public compile session', true);
   const session = await startProductionCompile();
@@ -329,6 +296,11 @@ async function runProductionFlow() {
   while (!terminal) {
     const payload = await apiJson(`/api/compile/status?id=${encodeURIComponent(compileID)}`);
     const stageName = String(payload.stage || payload.capability || '').toUpperCase();
+    const serverDetail = String(payload.detail || payload.message || '').trim();
+    showLiveCompileStatus(
+      stageName || String(payload.status || 'RUNNING').toUpperCase(),
+      serverDetail || (stageName ? `Compiler reports stage: ${stageName.toLowerCase()}.` : 'Waiting for further compiler status.')
+    );
     const index = productStages.findIndex(([name]) => stageName.includes(name));
     if (index >= 0 && index !== lastStage) {
       pipeline.forEach((step, i) => {
@@ -360,6 +332,7 @@ async function runProductionFlow() {
   openWorkspace.href = workspace.workspace_url || `/workspace?bundle=${encodeURIComponent(workspace.bundle)}`;
   openWorkspace.textContent = 'OPEN STUDIO';
   addLog('ProductRevision sealed · proof authority PASS', true);
+  showLiveCompileStatus('PRODUCT PROOF · PASS', 'Verified editable puppet workspace is ready.');
   result.classList.add('show');
   status.querySelector('span').textContent = 'ALIVE';
   void startIdleReveal(workspace.bundle).catch((error) => {
@@ -377,17 +350,19 @@ awaken.addEventListener('click', async () => {
     if (project?.compile_available && project?.public_compile_gateway) {
       await runProductionFlow();
     } else {
-      // Production UI never fabricates a compile graph or proof result.
-      status.querySelector('span').textContent = 'COMPILER OFFLINE';
-      modeLabel.textContent = 'COMPILER OFFLINE · NO PRODUCT AUTHORITY';
-      awaken.disabled = false;
-      addLog('Compile unavailable · requires a qualified production gateway', true);
+      // Static hosting deliberately cannot simulate proof or mint a ProductRevision.
+      status.querySelector('span').textContent = 'PREVIEW ONLY';
+      modeLabel.textContent = 'UI PREVIEW · COMPILER OFFLINE';
+      awaken.disabled = true;
+      showLiveCompileStatus('COMPILER OFFLINE', 'Static preview only. No simulated compile, proof or puppet output.');
+      addLog('Compiler not connected. No simulated compile or proof.', true);
     }
   } catch (error) {
     shell.classList.remove('compiling');
     status.classList.remove('ready');
     status.querySelector('span').textContent = 'INTAKE READY';
     awaken.disabled = false;
+    showLiveCompileStatus('COMPILE FAILED', error.message);
     addLog(`compile rejected · ${error.message}`, true);
   } finally {
     running = false;
@@ -399,19 +374,21 @@ async function loadProject() {
     const response = await fetch('/api/project', {cache: 'no-store'});
     project = await response.json();
     const production = response.ok && project?.compile_available && project?.public_compile_gateway;
-    modeLabel.textContent = production ? 'PRODUCTION GATEWAY' : 'COMPILER OFFLINE · NO PRODUCT AUTHORITY';
+    modeLabel.textContent = production ? 'PRODUCTION GATEWAY' : 'UI PREVIEW · COMPILER OFFLINE';
     if (production) {
       status.classList.add('ready');
       status.querySelector('span').textContent = 'PRODUCTION READY';
     }
+    syncGatewayUI();
+    if (!production) showLiveCompileStatus('COMPILER OFFLINE', 'This preview shows the experience; real compilation requires the production gateway.');
   } catch {
-    modeLabel.textContent = 'COMPILER OFFLINE · NO PRODUCT AUTHORITY';
+    project = null;
+    syncGatewayUI();
+    modeLabel.textContent = 'UI PREVIEW · COMPILER OFFLINE';
+    showLiveCompileStatus('COMPILER OFFLINE', 'This preview does not generate or claim a compiled puppet.');
   }
 }
 
-window.addEventListener('resize', resize);
-resize();
-requestAnimationFrame(drawDepth);
 loadProject();
 addLog('living compile surface online');
 addLog('awaiting source observation');

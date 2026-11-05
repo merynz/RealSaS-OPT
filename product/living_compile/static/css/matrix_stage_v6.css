@@ -1,0 +1,126 @@
+/* BUSTED Matrix v6 — distant midnight-blue data rain + reserved z-depth typewriting. */
+.awaken-shell{
+  background:
+    radial-gradient(ellipse 43% 64% at 53% 42%,rgba(45,42,116,.17),transparent 80%),
+    linear-gradient(114deg,#03050d 0%,#050712 38%,#070919 66%,#03050d 100%);
+}
+.matrix-stage{background:transparent;perspective:1100px}
+.matrix-column{color:#8597ec;text-shadow:0 0 10px rgba(91,108,242,var(--matrix-glow))}
+.matrix-column.matrix-far{color:#435c9e;text-shadow:none}
+.matrix-column.matrix-highlight{color:#a3bdff}
+.matrix-stream{
+  background:linear-gradient(to bottom,
+    rgba(228,235,255,.87) 0%,
+    rgba(145,170,255,.76) 13%,
+    rgba(92,106,209,.42) 54%,
+    rgba(56,56,132,.08) 85%,
+    transparent 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.matrix-column.matrix-highlight .matrix-stream{
+  background:linear-gradient(to bottom,#e2e9ff 0%,#b5a5ff 15%,rgba(111,127,236,.35) 65%,transparent 100%);
+  -webkit-background-clip:text;background-clip:text;
+}
+.matrix-trace{
+  position:absolute;z-index:1;box-sizing:border-box;
+  height:50px;overflow:hidden;pointer-events:none;
+  color:var(--trace-tone);opacity:var(--trace-alpha);
+  font:500 var(--trace-font)/1.55 var(--busted-mono),Consolas,monospace;
+  letter-spacing:.01em;white-space:nowrap;text-shadow:0 0 12px rgba(123,142,243,.15);
+  contain:paint;
+}
+.matrix-trace-line{display:block;overflow:hidden;text-overflow:clip;white-space:nowrap;height:1.55em}
+.matrix-trace-line.typing::after{content:"▍";color:#d6d5ff;animation:matrixCaret 1.2s steps(1,end) infinite}
+@keyframes matrixCaret{0%,49%{opacity:.78}50%,100%{opacity:0}}
+.matrix-aura{
+  background:
+    radial-gradient(ellipse 26% 38% at 51% 41%,rgba(111,98,218,.11),transparent 86%),
+    radial-gradient(ellipse 28% 36% at 84% 61%,rgba(61,96,202,.065),transparent 90%);
+  filter:blur(6px);
+}
+.matrix-horizon{
+  background:
+    linear-gradient(to right,transparent 49.94%,rgba(137,128,239,.045) 50%,transparent 50.06%),
+    linear-gradient(105deg,transparent 49.94%,rgba(97,109,209,.027) 50%,transparent 50.06%),
+    linear-gradient(75deg,transparent 49.94%,rgba(97,109,209,.027) 50%,transparent 50.06%);
+  opacity:.44;
+}
+.matrix-center-clear{
+  background:
+    radial-gradient(ellipse 33% 43% at 29% 43%,rgba(3,5,13,.83),transparent 98%),
+    radial-gradient(ellipse 30% 44% at 73% 44%,rgba(3,5,13,.75),transparent 98%),
+    linear-gradient(to bottom,rgba(2,3,10,.61),transparent 17%,transparent 80%,rgba(2,3,10,.78));
+}
+.matrix-scanlines{
+  opacity:.13;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(156,155,244,.075) 4px,transparent 5px);
+}
+.scene-vignette{box-shadow:inset 0 0 140px rgba(0,0,0,.37),inset 0 -80px 130px rgba(0,0,0,.43)}
+.hero-intro h1{text-shadow:0 5px 38px rgba(0,0,0,.53)}
+.hero-title-accent{color:#edf1ff;text-shadow:0 0 29px rgba(112,103,227,.15)}
+.hero-title-period{color:#b7acff;text-shadow:0 0 30px rgba(158,135,255,.34)}
+.hero-eyebrow{color:#b2bdff}
+.eyebrow-marker{background:linear-gradient(90deg,#a8afff,transparent);box-shadow:0 0 16px rgba(125,125,234,.29)}
+.hero-meta span{border-color:rgba(146,151,246,.28)}
+.dropzone{
+  border-color:rgba(158,165,247,.53);
+  background:linear-gradient(145deg,rgba(22,27,61,.85),rgba(8,11,25,.94));
+  box-shadow:0 27px 81px rgba(0,0,0,.55),inset 0 0 56px rgba(117,111,239,.045),0 0 65px rgba(92,83,226,.12);
+}
+.dropzone:hover,.dropzone.drag{
+  border-color:rgba(196,193,255,.83);
+  box-shadow:0 29px 85px rgba(0,0,0,.59),0 0 49px rgba(99,109,231,.20);
+}
+.awaken-button{
+  border-color:rgba(166,164,249,.61);
+  background:linear-gradient(115deg,rgba(49,45,119,.94),rgba(27,34,80,.97));
+  color:#f2f2ff;
+}
+.studio-link:hover{border-color:rgba(182,178,255,.76);color:#f0efff}
+@media(max-width:780px){
+ .matrix-stage{perspective:850px}
+ .matrix-trace{height:41px;opacity:calc(var(--trace-alpha)*.7)}
+ .matrix-column{opacity:calc(var(--matrix-opacity)*.75)}
+}
+@media(prefers-reduced-motion:reduce){
+ .matrix-trace-line.typing::after{animation:none}
+ .matrix-stream{animation:none;opacity:.43;transform:translate3d(0,25vh,0)}
+}
+
+/* BUSTED v6.1: code authority is visual prominence, not compiler authority.
+   The dark atmospheric veil covers distant rain but NOT the nearer typewriter.
+   The code remains behind the real hero and intake UI, yet is legible in
+   unobstructed screen regions. */
+.matrix-stage>.matrix-typewriter{
+  position:absolute;
+  inset:0;
+  z-index:9;
+  transform-style:preserve-3d;
+  overflow:visible;
+  pointer-events:none;
+  isolation:auto;
+}
+.matrix-typewriter .matrix-trace{
+  z-index:auto;
+  color:var(--trace-tone);
+  opacity:var(--trace-alpha);
+  height:62px;
+  font-weight:600;
+  line-height:1.65;
+  text-shadow:0 0 10px rgba(161,170,255,.20),0 0 22px rgba(93,108,217,.12);
+}
+.matrix-typewriter .matrix-trace-line{
+  height:1.65em;
+  line-height:1.65;
+  padding-inline:1px;
+}
+.matrix-typewriter .matrix-trace-line.typing::after{
+  color:#ebdfff;
+  text-shadow:0 0 8px rgba(170,148,255,.6);
+}
+@media(max-width:780px){
+  .matrix-typewriter .matrix-trace{
+    height:50px;
+    opacity:calc(var(--trace-alpha) * .84);
+  }
+}

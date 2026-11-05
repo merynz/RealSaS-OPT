@@ -20,6 +20,8 @@
   <link rel="stylesheet" href="./static/css/chamber_v1.css?v=1.0.0">
   <link rel="stylesheet" href="./static/css/awaken_clean_v8.css?v=8.4.0">
   <link rel="stylesheet" href="./static/css/busted_engine_v1.css?v=1.0.0">
+  <link rel="stylesheet" href="./static/css/busted_spatial_rain_v1.css?v=1.0.0">
+  <link rel="stylesheet" href="./static/css/busted_intake_stage_v2.css?v=2.0.0">
 
 
 </head>
@@ -34,14 +36,6 @@
     </header>
 
     <section id="introduction" class="landing-screen" aria-label="BUSTED introduction">
-      <div class="matrix-stage" aria-hidden="true">
-        <div id="landingDepthCode" class="matrix-space"></div>
-        <div class="matrix-aura"></div>
-        <div class="matrix-horizon"></div>
-        <div class="matrix-center-clear"></div>
-        <div class="matrix-scanlines"></div>
-      </div>
-
       <div class="scene-fog" aria-hidden="true"></div>
       <div class="scene-vignette" aria-hidden="true"></div>
       <section class="stage-wrap" aria-label="BUSTED introduction">
@@ -56,7 +50,6 @@
         <div id="structuralField" class="structural-field" aria-hidden="true">
           <div class="field-reference field-reference-top"><span>REF / 01</span><span>STRUCTURAL CARRIER</span></div>
           <canvas id="structuralCanvas" width="720" height="780"></canvas>
-          <div id="landingMatrixTypewriter" class="matrix-typewriter" aria-hidden="true"></div>
           <div class="field-pulse" aria-hidden="true"></div>
           <div class="field-reference field-reference-bottom"><span>PROCEDURAL GEOMETRY STUDY</span><span>NOT COMPILED OUTPUT</span></div>
           <div class="field-ordinate"><span>TOPOLOGY</span><span>ARTICULATION</span><span>DEFORMATION</span></div>
@@ -70,26 +63,17 @@
       <div class="landing-foot" aria-hidden="true"><span>GEOMETRY</span><span>MECHANICS</span><span>PRESENTATION</span></div>
     </section>
 
-    <section id="awakenChamber" class="awaken-chamber" aria-label="Awaken character intake">
-      <div class="matrix-stage" aria-hidden="true">
-        <div id="depthCode" class="matrix-space"></div>
-        <div class="matrix-aura"></div><div class="matrix-horizon"></div>
-        <div class="matrix-center-clear"></div><div class="matrix-scanlines"></div>
-      </div>
-
+    <section id="awakenChamber" class="awaken-chamber" aria-label="Character intake and compilation">
+      <div id="matrixTypewriter" class="matrix-typewriter" aria-hidden="true"></div>
       <div class="chamber-inner">
         <div class="chamber-header">
-          <p class="chamber-eyebrow"><span class="chamber-index">02</span> / AWAKEN</p>
-          <h2>YOUR ART. <span class="chamber-dot">IN.</span></h2>
-          <p>Editable structure comes out.</p>
-        </div>
-        <div class="chamber-data-rail" aria-label="Ambient compilation code">
-          <div class="chamber-data-rule"><span>COMPILATION LANGUAGE / AMBIENT STUDY</span><span>NON-OPERATIONAL VISUALIZATION</span></div>
-          <div id="matrixTypewriter" class="matrix-typewriter" aria-hidden="true"></div>
+          <p class="chamber-eyebrow"><span class="chamber-index">02</span> / CHARACTER COMPILER</p>
+          <h2>AWAKEN<span class="chamber-dot">.</span></h2>
+          <p id="compileStatusMessage">Your art in. An editable puppet out.</p>
         </div>
         <div class="chamber-workspace">
           <div class="chamber-intake">
-            <div class="chamber-docking-label"><span>01 / SOURCE MATERIAL</span><span>FRONT + BACK</span></div>
+            <div class="chamber-docking-label"><span>SOURCE / 01</span><span>FRONT · BACK OPTIONAL</span></div>
         <div class="input-orbit">
           <div class="orbit-ring orbit-ring-a" aria-hidden="true"></div>
           <div class="orbit-ring orbit-ring-b" aria-hidden="true"></div>
@@ -119,21 +103,14 @@
           </div>
         </div>
 
+
           </div>
           <div class="chamber-console">
-            <div class="chamber-method"><span>THE COMPILER</span><span>REAL STRUCTURE / REAL CONTROL</span></div>
-            <h3>Not frames.<br><em>A puppet.</em></h3>
-            <p class="console-copy" id="compileStatusMessage">Source artwork becomes an editable character representation — geometry, rigging and deformation you can actually inspect.</p>
-            <div class="chamber-deliverables" aria-label="Puppet structure">
-              <div><span>01</span><strong>GEOMETRY</strong><small>Surface & topology</small></div>
-              <div><span>02</span><strong>RIG & SKIN</strong><small>Editable articulation</small></div>
-              <div><span>03</span><strong>MOTION</strong><small>Mechanics-aware clips</small></div>
-            </div>
             <div class="compile-action">
               <button id="awaken" class="awaken-button" type="button" disabled>COMPILE CHARACTER <span aria-hidden="true">↗</span></button>
               <p id="compileAvailability" class="compile-availability" role="status">UI PREVIEW · COMPILER OFFLINE</p>
             </div>
-            <div class="compile-monitor-heading"><span>COMPILER ACTIVITY</span><span id="compileLiveStage" aria-live="polite">AWAITING SOURCE</span></div>
+            <div class="compile-monitor-heading"><span>LIVE COMPILER ACTIVITY</span><span id="compileLiveStage" aria-live="polite">AWAITING SOURCE</span></div>
         <aside class="telemetry" id="compileMonitor" aria-label="Compiler telemetry">
           <div class="pipeline" aria-hidden="true">
             <div class="pipe-step"><span class="n">01</span><span>Input</span><i class="state"></i></div>
@@ -150,6 +127,7 @@
         </aside>
           </div>
         </div>
+        <div class="chamber-foot"><span>SOURCE OWNERSHIP RETAINED</span><span>EDITABLE STRUCTURE IS THE PRODUCT</span></div>
       </div>
     </section>
 
@@ -166,8 +144,9 @@
 
     <div class="dev-mode">MODE · <strong id="modeLabel">CHECKING GATEWAY</strong></div>
   </main>
-  <script src="./static/js/awaken_depth.js?v=8.4.0" defer></script>
+  <script src="./static/js/busted_code_typing_v2.js?v=2.0.0" defer></script>
   <script src="./static/js/busted_engine_field.js?v=1.0.0" defer></script>
+  <script src="./static/js/busted_spatial_rain_v1.js?v=1.0.0" defer></script>
   <script type="module" src="./static/js/awaken_input_slots.js"></script>
   <script type="module" src="./static/js/awaken.js?v=7.1.0"></script>
 </body>

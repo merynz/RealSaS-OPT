@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370NativeSourceActuatorResearchRequest.v13",
   "enabled": true,
-  "status": "RETRY_HOSTED_RUN_DISCOVERY_AFTER_SHA_EXACT_GATE_AUDIT",
+  "status": "RETRY_WORKER_PRECHECK_FILENAME_REPAIR__TRUE_ORIGINAL_SOURCE_RIG_INTERVENTION",
   "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
   "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
   "source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
@@ -89,5 +89,8 @@
   "exact_v9_three_authored_pose_indices": true,
   "prior_v12_pixels_new_renders_required": false,
   "retry_reason": "Host runner did not produce discoverable private V13 receipt, worker status UNKNOWN. Request original source parents/pose selection unchanged. Retry to capture exact GitHub hosted run and diagnose without minting false truth.",
-  "original_parent_sha_unchanged": true
+  "original_parent_sha_unchanged": true,
+  "previous_real_hosted_attempt_run_id": 42032938984,
+  "previous_failure": "Workflow worker py_compile referenced nonexisting court_corpus370_native_actuator_v13.py while actual court_corpus370_native_actuator_mechanics_v13.py exists. All 3 failed before source hydration. Corrected workflow only; original source parents, original rig motions and V11 geometry selection unchanged.",
+  "source_truth_parent_sha_unchanged": true
 }

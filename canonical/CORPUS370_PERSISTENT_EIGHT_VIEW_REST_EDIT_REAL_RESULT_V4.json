@@ -1,0 +1,108 @@
+{
+  "schema": "RealSaS.Corpus370PersistentEightViewRestEditRealResult.v4",
+  "status": "REAL_THREE_SOURCE_EIGHT_CAMERA_FIXED_GROUP_PAIR_EDIT_CONSEQUENCES_MEASURED__NO_DRAWABLE_OWNER_AUTHORITY",
+  "provenance": {
+    "v5_source_index_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+    "source_ray_index_sha256": "0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70",
+    "source_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+    "allview_group_compiler_private_summary_sha256": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1",
+    "allview_group_compiler_run": 41986038051,
+    "actual_blender_parallel_run": 41991513344,
+    "actual_blender_workflow_conclusion": "SUCCESS",
+    "actual_blender_run_head_sha256": "ee3fc58b68e1846a8c2040222d3178f6a8df9e6b",
+    "actual_source_private_folder": "gdrive:corpus370_preparation_v1/hosted_persistent_eight_view_edit_private_v4/41991513344-1",
+    "independent_byte_replay_workflow_run": 41992330283,
+    "independent_byte_replay_conclusion_at_checkpoint": "IN_PROGRESS__DO_NOT_CLAIM_SUCCESS"
+  },
+  "measurement": {
+    "three_sha_identical_original_subjects": 3,
+    "source_geometry_views_compiler_received": 8,
+    "full_fov_rest_blender_views_per_subject": 8,
+    "full_fov_render_arms_per_view": 6,
+    "same_anonymous_pair_across_all_eight_views": true,
+    "raster_resolution": [
+      192,
+      192
+    ],
+    "cameras_rest_image_raster_count": 24,
+    "unique_full_fov_camera_pixels": 884736,
+    "full_fov_six_arm_pixel_instances": 5308416,
+    "source_soup_rgba_p99_error_measured_max": 0,
+    "source_soup_noop_rgba_max_error_measured": 0,
+    "source_material_authority_preserved": true,
+    "native_full_resolution": false,
+    "native_pose_validation_executed": false,
+    "source_animatable_skin_or_deform_courted": false,
+    "sampled_editor_group_slots_per_subject": 2,
+    "selected_group_slots_per_subject": 8,
+    "full_group_slot_census_qualified": false
+  },
+  "per_subject": [
+    {
+      "reference": "CAT",
+      "source_sha256": "1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850",
+      "geometric_source_faces": 684,
+      "selected_operational_layer_groups": 8,
+      "views_source_and_noop_parity_passed": 8,
+      "views_with_edit_effect_a": 8,
+      "views_with_b_after_a": 8,
+      "fixed_pair_view4_conditional_b_pixels": 2612,
+      "render_manifest_sha256": "8e422fcf1381c1f8ed25051fba61e91d7480dfbbf744b46ef78a57478d2742ee",
+      "render_array_sha256": "6e5bca72e6fc112e8bf198e6e799b18e1d7d48f5f5bceaf1bbfd3941b66400f5",
+      "source_independent_court_sha256": "5ca4bf94c0e5926fbb233797b77f51cf1e8796c47070ce84f1d64cf333c4b30d",
+      "measured_status": "PASS_BOUNDED_OPERATIONAL_PAIR_EDITABILITY__NOT_AUTHOR_DRAWABLE_TRUTH"
+    },
+    {
+      "reference": "TRICERATOPS",
+      "source_sha256": "ad66b51cc5fc44c9a3429a5b1b98a61621af08d58d102d8a817499bd6a7f5b5a",
+      "geometric_source_faces": 1334,
+      "selected_operational_layer_groups": 8,
+      "views_source_and_noop_parity_passed": 8,
+      "views_with_edit_effect_a": 8,
+      "views_with_b_after_a": 8,
+      "fixed_pair_view4_conditional_b_pixels": 2194,
+      "render_manifest_sha256": "7da23db57f6d4743cb65b37ca27195b5eb1a55e0fabf9d1a7e92914f37005a77",
+      "render_array_sha256": "54901eaf84019dc53546442d65f60adb27370d2e2328d7673d2dbfad5525ad49",
+      "source_independent_court_sha256": "8e1bc8579c45e375e06ab085a74f178244b1046354df2a6775adce655f4c46b2",
+      "measured_status": "PASS_BOUNDED_OPERATIONAL_PAIR_EDITABILITY__NOT_AUTHOR_DRAWABLE_TRUTH"
+    },
+    {
+      "reference": "COWFISH",
+      "source_sha256": "e6898505d56d8057c975b6376f123876dd957347282413cf3fb825754841b989",
+      "geometric_source_faces": 1390,
+      "selected_operational_layer_groups": 8,
+      "views_source_and_noop_parity_passed": 8,
+      "views_with_edit_effect_a": 8,
+      "views_with_b_after_a": 8,
+      "fixed_pair_view4_conditional_b_pixels": 1040,
+      "render_manifest_sha256": "70327f3bb64419f003a4e071d11cb6f99c3af2c0dd4db130d59fbda6d90e4955",
+      "render_array_sha256": "4aeffdd3f2a8820bec21688596965ff92f3f05afc96dea1c592fe4b253c9674c",
+      "source_independent_court_sha256": "25513e2b615af6d80749e4b1cf9f06ea48bcd81d25c509415317ca889f6a8293",
+      "measured_status": "PASS_BOUNDED_OPERATIONAL_PAIR_EDITABILITY__NOT_AUTHOR_DRAWABLE_TRUTH"
+    }
+  ],
+  "authority": {
+    "sampled_only_two_of_eight_slots": true,
+    "fixed_group_count_8_is_policy_floor_not_verified_optimum": true,
+    "causal_group_pair_expressibility_not_drawable_identity": true,
+    "same_drawable_positive_pairs_minted": 0,
+    "different_drawable_negative_pairs_minted": 0,
+    "full_author_drawable_partition_qualified": false,
+    "source_semantic_material_names_student_labels": false,
+    "full_native_8view_appearance_caa_authorized": false,
+    "authored_motion_persistent_editability_courted": false,
+    "mechanical_owner_authorized": false,
+    "graphics_owner_training_authorized": false,
+    "tessa_teacher_authorized": false,
+    "materialization_authorized": false,
+    "product_compilation_authorized": false,
+    "training_authorized": false
+  },
+  "next_evidence_gates": [
+    "ALL_SOURCE_ANONYMOUS_GROUP_SLOTS_ABLATION_ACROSS_EIGHT_CAMERAS__NOT_ONLY_TWO_CHOSEN_SLOTS",
+    "MEANINGFUL_HIERARCHICAL_GROUP_COUNT_SELECTION_FROM_UNSEEN_EDIT_EFFECTS_AND_COMPLEXITY__NOT_FIXED_EIGHT",
+    "SOURCE_NATIVE_MULTI_POSE_SKIN_AND_MECHANICAL_ANCHOR_STABILITY_WITH_VERTEX_PROVENANCE",
+    "CANONICAL_3D_MECHANICS_TO_2D_GRAPHICS_CAA_ALPHA_SEAMS_OCCLUSION_AND_DRAW_ORDER",
+    "SOURCE_FAMILY_AUTHORITY_MATRIX_FOR_352_V5_OBSERVATION_SUBJECTS__NO_SYNTHETIC_FALSE_NEGATIVES"
+  ]
+}

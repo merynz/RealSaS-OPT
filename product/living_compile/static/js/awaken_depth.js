@@ -113,18 +113,21 @@
   }
 
 
-  function fitCode(row) {
-    // A complete line must fit; clipping text is not an acceptable fallback.
-    const options=[];
-    for(let i=0;i<12;i++)options.push(generateCode());
-    options.push('rig.bind();','mesh.compile();','scene.resolve();','skin.attach();');
-    for(const text of options){
-      row.textContent=text;
-      const rowWidth=row.clientWidth || row.parentElement?.clientWidth || Number.parseFloat(row.parentElement?.style.width) || 0;
-      if(rowWidth >= 64 && row.scrollWidth <= rowWidth-8)return text;
-    }
-    // Do not silently erase entire lines if font/layout metrics are unavailable.
-    return 'rig.bind();';
+  // Code length is determined from explicit slot geometry, never from a hidden
+  // DOM node's 0px clientWidth. This fixes the repeated rig.bind() fallback.
+  let previousCode = '';
+  function fitCode(maxChars) {
+    const candidates=[];
+    for(let i=0;i<22;i++)candidates.push(generateCode());
+    candidates.push(
+      'rig.solve();','mesh.decode();','skin.bind();','axis.resolve();',
+      'shape.fit();','scene.observe();','joint.attach();','motion.sample();',
+      'mesh.compile();','source.project();','vertex.trace();','atlas.stitch();'
+    );
+    const fitting=candidates.filter(text=>text.length<=maxChars && text!==previousCode);
+    const result=fitting.length ? pick(fitting) : pick(['rig.solve();','skin.bind();','mesh.fit();']);
+    previousCode=result;
+    return result;
   }
 
   function layoutTraces() {
@@ -148,7 +151,10 @@
       trace.lane.style.top=(height/2+(y-height/2)*ratio).toFixed(2)+'px';
       trace.lane.style.width=(w*ratio).toFixed(2)+'px';
       trace.lane.style.height=(h*ratio).toFixed(2)+'px';
-      trace.lines=trace.rows.map(row=>fitCode(row));
+      const fontPx=Number.parseFloat(trace.lane.style.getPropertyValue('--trace-font'))||12;
+      const maxChars=Math.max(12,Math.floor((w-20)/(fontPx*.67)));
+      trace.maxChars=maxChars;
+      trace.lines=trace.rows.map(()=>fitCode(maxChars));
       trace.lastCycle=Math.floor((elapsed+trace.offset)/trace.cycle);
     }
   }
@@ -157,7 +163,7 @@
     for(const trace of traces){
       const t=elapsed+trace.offset,cycle=Math.floor(t/trace.cycle);
       if(cycle!==trace.lastCycle){
-        trace.lines=trace.rows.map(row=>fitCode(row));
+        trace.lines=trace.rows.map(()=>fitCode(trace.maxChars||20));
         trace.lastCycle=cycle;
       }
       const local=t%trace.cycle;

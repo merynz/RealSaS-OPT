@@ -18,8 +18,9 @@
   <link rel="stylesheet" href="/static/css/matrix_stage_v5.css">
   <link rel="stylesheet" href="/static/css/matrix_stage_v6.css?v=6.3.0"><link rel="stylesheet" href="/static/css/busted_components_v6.css">
   <link rel="stylesheet" href="/static/css/chamber_v1.css?v=1.0.0">
-  <link rel="stylesheet" href="/static/css/chamber_v2.css?v=2.0.0">
-  <link rel="stylesheet" href="/static/css/chamber_v3.css?v=3.0.0">
+  <link rel="stylesheet" href="/static/css/awaken_clean_v8.css?v=8.0.0">
+
+
 </head>
 <body>
   <main class="awaken-shell">
@@ -40,9 +41,8 @@
         <div class="matrix-scanlines"></div>
       </div>
       <div id="landingMatrixTypewriter" class="matrix-typewriter" aria-hidden="true"></div>
-    <div class="scene-fog" aria-hidden="true"></div>
-    <div class="scene-vignette" aria-hidden="true"></div>
-
+      <div class="scene-fog" aria-hidden="true"></div>
+      <div class="scene-vignette" aria-hidden="true"></div>
       <section class="stage-wrap" aria-label="BUSTED introduction">
         <div class="hero">
         <div class="hero-intro">
@@ -52,7 +52,6 @@
           <p class="hero-description">Compile your character into an editable puppet. Keep its identity, control its structure, and make every movement yours.</p>
           <div class="hero-meta"><span>ART → STRUCTURE</span><span>STRUCTURE → LIFE</span></div>
         </div>
-
         </div>
       </section>
       <a class="descend-link" href="#awakenChamber" aria-label="Scroll to character intake">
@@ -62,28 +61,18 @@
       <div class="landing-foot" aria-hidden="true"><span>01 / DISCOVER</span><span>02 / AWAKEN</span></div>
     </section>
 
-    <section id="awakenChamber" class="awaken-chamber" aria-label="Character compilation chamber">
-      <div class="chamber-glow" aria-hidden="true"></div>
+    <section id="awakenChamber" class="awaken-chamber" aria-label="Awaken character intake">
+      <div class="matrix-stage" aria-hidden="true">
+        <div id="depthCode" class="matrix-space"></div>
+        <div class="matrix-aura"></div><div class="matrix-horizon"></div>
+        <div class="matrix-center-clear"></div><div class="matrix-scanlines"></div>
+      </div>
+      <div id="matrixTypewriter" class="matrix-typewriter" aria-hidden="true"></div>
       <div class="chamber-inner">
         <div class="chamber-header">
-          <p class="chamber-eyebrow"><span class="chamber-index">02</span> / BUSTED · AWAKEN</p>
-          <h2>Where your art<br><span>becomes alive.</span></h2>
-          <p>Bring your source into the chamber. The compiler turns a character into an editable puppet — and reports what it is actually doing.</p>
-        </div>
-        <div class="chamber-code-visual" id="chamberCodeVisual" aria-label="Decorative compilation code atmosphere">
-          <div class="chamber-code-head" aria-hidden="true">
-            <span>DATA SPACE / 0X01</span>
-            <span>CODE VISUALIZATION</span>
-          </div>
-    <div class="matrix-stage" aria-hidden="true">
-      <div id="depthCode" class="matrix-space"></div>
-      <div class="matrix-aura"></div>
-      <div class="matrix-horizon"></div>
-      <div class="matrix-center-clear"></div>
-      <div class="matrix-scanlines"></div>
-    </div>
-    <div id="matrixTypewriter" class="matrix-typewriter" aria-hidden="true"></div>
-
+          <p class="chamber-eyebrow"><span class="chamber-index">02</span> / CHARACTER INTAKE</p>
+          <h2>AWAKEN<span class="chamber-dot">.</span></h2>
+          <p>Bring your character to life.</p>
         </div>
         <div class="chamber-workspace">
           <div class="chamber-intake">
@@ -117,12 +106,11 @@
           </div>
         </div>
 
-
           </div>
           <div class="chamber-console">
             <div class="console-heading"><span>02 / COMPILER CONSOLE</span><span id="compileLiveStage" aria-live="polite">AWAITING SOURCE</span></div>
             <h3>Compile into a puppet.</h3>
-            <p class="console-copy" id="compileStatusMessage">Select your character to begin. Live compiler events appear below only when a production gateway is connected.</p>
+            <p class="console-copy" id="compileStatusMessage">Select your character to begin. Real compiler stages will appear here when connected.</p>
         <button id="awaken" class="awaken-button" type="button" disabled>AWAKEN</button>
         <p id="compileAvailability" class="compile-availability" role="status">UI PREVIEW · COMPILER OFFLINE</p>
 
@@ -142,7 +130,6 @@
         </aside>
           </div>
         </div>
-        <p class="chamber-footnote">SOURCE-OWNED ARTWORK <span>·</span> EDITABLE STRUCTURE <span>·</span> REAL PRODUCT PROOF</p>
       </div>
     </section>
 
@@ -159,7 +146,7 @@
 
     <div class="dev-mode">MODE · <strong id="modeLabel">CHECKING GATEWAY</strong></div>
   </main>
-  <script src="/static/js/awaken_depth.js?v=8.0.0" defer></script>
+  <script src="/static/js/awaken_depth.js?v=8.1.0" defer></script>
   <script type="module" src="/static/js/awaken_input_slots.js"></script>
   <script type="module" src="/static/js/awaken.js?v=7.0.0"></script>
 </body>

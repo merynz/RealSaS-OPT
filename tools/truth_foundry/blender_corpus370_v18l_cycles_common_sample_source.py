@@ -311,16 +311,16 @@ def run(job_path,stain_report_path,stain_npz_path,stain_court_path,
         require(scene.render.engine=="CYCLES","V18L_REAL_CYCLES_REQUIRED")
         require(all(hasattr(scene.cycles,k) for k in (
             "use_sample_subset","sample_offset","sample_subset_length",
-            "use_adaptive_sampling","samples","seed","filter_type","filter_width")),
+            "use_adaptive_sampling","samples","seed","pixel_filter_type","filter_width")),
             "V18L_BLENDER_45_SAMPLE_SUBSET_API_MISSING")
         scene.cycles.samples=32
         scene.cycles.seed=0
         scene.cycles.use_adaptive_sampling=False
         scene.cycles.use_sample_subset=True
         scene.cycles.sample_subset_length=1
-        scene.cycles.filter_type="BOX"
+        scene.cycles.pixel_filter_type="BOX"
         scene.cycles.filter_width=0.01
-        require(scene.cycles.filter_type=="BOX"
+        require(scene.cycles.pixel_filter_type=="BOX"
             and scene.cycles.use_sample_subset
             and scene.cycles.sample_subset_length==1
             and scene.cycles.samples==32,

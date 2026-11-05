@@ -143,7 +143,7 @@ class LivingCompileV4Tests(unittest.TestCase):
         self.assertIn(b"AWAKEN <span", data)
         self.assertIn(b'id="matrixTypewriter"', data)
         self.assertNotIn(b'id="agentReach"', data)
-        self.assertIn(b"<h2>ALIVE</h2>", data)
+        self.assertIn(b"<h2>QUALIFIED</h2>", data)
         self.assertIn(b">OPEN STUDIO</a>", data)
         self.assertNotIn(b"RealSaS Studio", data)
         self.assertEqual(ctype, "text/html")

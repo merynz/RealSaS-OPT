@@ -148,7 +148,7 @@
       const max=Math.max(13,Math.floor((w-10)/((small?9:11.2)*.68)));
       const t={el,rows,side,depth,w,h,x:0,y:0,startX:0,startY:0,targetX:0,targetY:0,
         travelling:false,hold:0,movedAt:0,duration:random(11000,21000),opacity:.26+depth*.39,
-        offset:random(2800,8800)+i*530,interval:random(11200,19000),
+        offset:300+i*430+random(0,650),interval:random(11200,19000),
         rate:random(65,115),gap:random(900,1550),lastCycle:-1,lines:[line(max),line(max)],max};
       const start=findLocation(t,true);
       if (!start) continue;

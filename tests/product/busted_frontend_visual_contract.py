@@ -126,6 +126,28 @@ async def run():
                 }""")
                 assert safe["visible"]>=1, f"No safe visible typing track: {safe}"
                 assert not safe["collisions"], f"Typed code overprints intake UI: {safe}"
+                # Previously legacy transform:none!important forced every spirit to
+                # the same origin. Verify actual independently placed rectangles.
+                spatial = await page.locator("#awakenChamber .spatial-code-spirit").evaluate_all("""nodes =>
+                  nodes.map(node => {
+                    const b=node.getBoundingClientRect();
+                    return {x:Math.round(b.x), y:Math.round(b.y),
+                      transform:getComputedStyle(node).transform};
+                  })
+                """)
+                assert spatial and all(p["transform"] != "none" for p in spatial), (
+                    f"Spatial code transforms are being overridden: {spatial}"
+                )
+                if width >= 960:
+                    xs = {round(p["x"]/30) for p in spatial}
+                    assert len(xs) >= 2, f"Spatial code collapsed into one column: {spatial}"
+                stage_rain = await page.locator("#awakenChamber > canvas.busted-stage-rain").evaluate("""canvas => {
+                  const pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+                  let ink=0;
+                  for(let i=3;i<pixels.length;i+=16) if(pixels[i]>20) ink++;
+                  return {width:canvas.width,height:canvas.height,ink};
+                }""")
+                assert stage_rain["ink"] > 30, f"Stage-local Matrix rain rendered blank: {stage_rain}"
                 assert await page.locator("#awaken").is_disabled(), "Offline preview must never offer a fake compile"
 
 

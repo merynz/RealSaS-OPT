@@ -1,0 +1,62 @@
+name: corpus370-multi-partition-contracts-v7
+
+# Synthetic counterfactual contracts only: real original source stays private.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-multi-partition-contracts-v7.yml'
+      - 'tools/corpus/corpus370_partition_edit_plan_v7.py'
+      - 'tools/corpus/court_corpus370_multi_partition_edit_v7.py'
+      - 'tools/corpus/run_corpus370_multi_partition_private_v7.py'
+      - 'tools/truth_foundry/blender_corpus370_multi_partition_edit_v7.py'
+      - 'tests/corpus/test_corpus370_multi_partition_edit_v7.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/corpus370-multi-partition-contracts-v7.yml'
+      - 'tools/corpus/corpus370_partition_edit_plan_v7.py'
+      - 'tools/corpus/court_corpus370_multi_partition_edit_v7.py'
+      - 'tools/corpus/run_corpus370_multi_partition_private_v7.py'
+      - 'tools/truth_foundry/blender_corpus370_multi_partition_edit_v7.py'
+      - 'tests/corpus/test_corpus370_multi_partition_edit_v7.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-multi-partition-v7-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  independent-source-proxy-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source-only Python compilation and counterfeit regressions
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/corpus/corpus370_partition_edit_plan_v7.py \
+            tools/corpus/court_corpus370_multi_partition_edit_v7.py \
+            tools/corpus/run_corpus370_multi_partition_private_v7.py \
+            tools/truth_foundry/blender_corpus370_multi_partition_edit_v7.py
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_multi_partition_edit_v7.py
+      - name: Assert true owner and model authority are out of scope
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          source=Path("tools/corpus/court_corpus370_multi_partition_edit_v7.py").read_text()
+          for marker in ('"same_drawable_positive_pairs":0',
+                         '"different_drawable_negative_pairs":0',
+                         '"pareto_or_optimal_partition_selected":False',
+                         '"training_authorized":False',
+                         '"reference_is_not_artist_truth":True'):
+              assert marker in source,marker
+          print("COMPETING_PARTITIONS_ARE_SOURCE_EDIT_PROXIES__NOT_DRAWABLE_TRUTH")
+          PY

@@ -89,18 +89,26 @@ async def run():
                            '.chamber-console h3','.chamber-console .console-copy',
                            '#awaken','#compileAvailability','.chamber-console .telemetry'];
                       const blockers=selectors.map(s=>scope.querySelector(s)).filter(Boolean)
-                        .map(el=>{
-                          // Text elements occupy less ink than their CSS block boxes.
-                          // The old detector treated blank padding as text collision.
+                        .flatMap(el=>{
                           const inkTargets=['.hero-eyebrow','.hero-intro h1','.hero-copy',
                             '.hero-description','.hero-meta'];
-                          if(inkTargets.some(selector=>el.matches(selector))){
-                            const range=document.createRange();
-                            range.selectNodeContents(el);
-                            const ink=range.getBoundingClientRect();
-                            if(ink.width>0&&ink.height>0)return ink;
+                          if(!inkTargets.some(selector=>el.matches(selector))){
+                            return [el.getBoundingClientRect()];
                           }
-                          return el.getBoundingClientRect();
+                          // Range.selectNodeContents(element) includes block-wide child
+                          // boxes. Measure actual individual text nodes instead.
+                          const walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
+                          const result=[];
+                          let node;
+                          while((node=walker.nextNode())){
+                            if(!node.textContent.trim())continue;
+                            const range=document.createRange();
+                            range.selectNodeContents(node);
+                            for(const ink of range.getClientRects()){
+                              if(ink.width>0&&ink.height>0)result.push(ink);
+                            }
+                          }
+                          return result.length?result:[el.getBoundingClientRect()];
                         });
                       const tracks=Array.from(scope.querySelectorAll('.matrix-trace'))
                         .filter(el=>getComputedStyle(el).display!=='none')

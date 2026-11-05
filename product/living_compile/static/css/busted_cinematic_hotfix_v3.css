@@ -12,18 +12,18 @@
   pointer-events:none!important;
   mix-blend-mode:screen;
   z-index:1!important;
-  opacity:.93;
+  opacity:1;
   background:transparent;
 }
 #introduction > .busted-stage-rain {
-  opacity:.86;
-  mask-image:linear-gradient(90deg,rgba(0,0,0,.16) 0%,rgba(0,0,0,.36) 40%,rgba(0,0,0,.80) 72%,rgba(0,0,0,.80));
+  opacity:1;
+  mask-image:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.40) 36%,rgba(0,0,0,.88) 71%,rgba(0,0,0,.92));
 }
 #awakenChamber > .busted-stage-rain {
   z-index:2!important;
-  opacity:.84;
+  opacity:1;
   mask-image:
-    radial-gradient(ellipse 38% 51% at 50% 47%,rgba(0,0,0,.11),rgba(0,0,0,.90) 94%);
+    radial-gradient(ellipse 32% 44% at 50% 47%,rgba(0,0,0,.19),rgba(0,0,0,1) 93%);
 }
 #introduction .stage-wrap{position:relative!important;z-index:3!important;}
 #introduction .descend-link{z-index:4!important;}
@@ -62,11 +62,23 @@
 #structuralCanvas {filter:drop-shadow(0 0 12px rgba(119,132,255,.18))}
 #introduction .hero-copy {letter-spacing:-.025em!important}
 #awakenChamber .chamber-header h2{background:linear-gradient(100deg,#f7f8ff 25%,#d2ddff 57%,#aca8ff);-webkit-background-clip:text;background-clip:text;color:transparent!important}
+/* Typed text stays fixed until it disappears. Its final terminal mark
+   blinks during the one-second hold, never while the text is moving. */
+#awakenChamber>#matrixTypewriter .spatial-code-spirit .matrix-trace-line.terminal-hold::after{
+  content:"▍";
+  display:inline;
+  margin-left:2px;
+  color:#e8efff;
+  text-shadow:0 0 8px rgba(179,189,255,.75);
+  animation:bustedFinalCaret .54s steps(1,end) infinite;
+}
+@keyframes bustedFinalCaret{0%,48%{opacity:1}49%,100%{opacity:0}}
 @media(max-width:760px){
-  #introduction > .busted-stage-rain{opacity:.43;mask-image:linear-gradient(180deg,rgba(0,0,0,.11),rgba(0,0,0,.40) 60%,rgba(0,0,0,.55))}
-  #awakenChamber > .busted-stage-rain{opacity:.33;}
+  #introduction > .busted-stage-rain{opacity:.60;mask-image:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.45) 60%,rgba(0,0,0,.7))}
+  #awakenChamber > .busted-stage-rain{opacity:.52;}
   #awakenChamber>#matrixTypewriter .spatial-code-spirit{max-width:calc(100vw - 40px);}
 }
 @media(prefers-reduced-motion:reduce){
-  #introduction > .busted-stage-rain,#awakenChamber > .busted-stage-rain{opacity:.22!important;}
+  #introduction > .busted-stage-rain,#awakenChamber > .busted-stage-rain{opacity:.28!important;}
+  #awakenChamber .matrix-trace-line.terminal-hold::after{animation:none!important}
 }

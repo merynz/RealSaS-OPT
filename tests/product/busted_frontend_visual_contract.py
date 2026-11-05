@@ -53,6 +53,18 @@ async def run():
                     assert title["right"] < drop["x"]+12, f"Desktop Awaken columns overlap at {width}x{height}: {title} {drop}"
                 else:
                     assert title["bottom"] <= drop["y"]+12, f"Mobile Awaken hierarchy overlaps at {width}x{height}"
+                # Matrix VFX uses reserved screen-space lanes: no typed-code collisions.
+                # Motion reduction freezes the CSS streams for reproducible geometry.
+                matrix = await page.locator(".matrix-column").evaluate_all("""elements => elements.map(el => {
+                  const r=el.getBoundingClientRect();
+                  return {lane:Number(el.dataset.lane), x:r.x, right:r.right, width:r.width,
+                    depth:Number(el.dataset.depth)};
+                }).sort((a,b)=>a.x-b.x)""")
+                assert len(matrix) == (13 if width<=780 else 30), f"Unexpected number of matrix lanes at {width}: {len(matrix)}"
+                assert all(0<=m["depth"]<=1 for m in matrix), "Invalid 3D depth parameter"
+                for left,right in zip(matrix,matrix[1:]):
+                    assert left["right"] <= right["x"] + 1, f"Matrix text lanes overlap at {width}: {left} vs {right}"
+                assert await page.locator(".matrix-trace").count() == 0, "Unbounded floating code fragments should not be present"
                 assert await page.locator("#awaken").is_disabled(), "Offline preview must never offer a fake compile"
 
                 # Studio link is real navigation, even without a compiled bundle.

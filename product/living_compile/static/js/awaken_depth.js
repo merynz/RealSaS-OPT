@@ -55,6 +55,14 @@
     {x:5,y:7,w:90},{x:5,y:30,w:90},
     {x:5,y:53,w:90},{x:5,y:76,w:90}
   ];
+  function slotsFor(role,mobile) {
+    if(role!=='landing')return mobile?mobileSlots:desktopSlots;
+    if(mobile)return landingMobileSlots;
+    // 960px laptop widths have less space beside a multiline hero.
+    // Move ambient lines right instead of masking product copy.
+    if(window.innerWidth<1100)return landingDesktopSlots.map(slot=>({...slot,x:74,w:22}));
+    return landingDesktopSlots;
+  }
 
   function build(){
     root.replaceChildren();typeRoot.replaceChildren();streams.length=0;traces.length=0;elapsed=0;
@@ -86,7 +94,7 @@
       fragment.appendChild(lane);
     }
 
-    const initialSlots=role==="landing"?(mobile?landingMobileSlots:landingDesktopSlots):(mobile?mobileSlots:desktopSlots);
+    const initialSlots=slotsFor(role,mobile);
     for(const [i,slot] of initialSlots.entries()){
       const depth=random(.22,.84), z=Math.round(-325+depth*220);
       const scaleCorrection=(stagePerspective-z)/stagePerspective;
@@ -138,7 +146,7 @@
     if(width<=0||height<=0)return;
     const mobile=narrow.matches;
     const perspective=mobile?850:1100;
-    const slots=role==="landing"?(mobile?landingMobileSlots:landingDesktopSlots):(mobile?mobileSlots:desktopSlots);
+    const slots=slotsFor(role,mobile);
     for(let i=0;i<traces.length;i++){
       const trace=traces[i],slot=slots[i];
       if(!slot){trace.lane.hidden=true;continue}

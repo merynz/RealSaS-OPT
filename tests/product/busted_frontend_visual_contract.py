@@ -91,6 +91,10 @@ async def run():
                     assert await control.get_attribute("aria-expanded") == "false"
                 # Advanced tools are progressive, and the animation timeline is opt-in.
                 assert await page.locator("#studioWelcome").is_visible(), "Empty editor requires understandable onboarding"
+                canvas_rect = await metrics(page, ".viewport-panel")
+                welcome_rect = await metrics(page, "#studioWelcome")
+                assert canvas_rect["width"] >= width*.72, f"Editor canvas collapsed: {canvas_rect} at {width}x{height}"
+                assert welcome_rect["width"] >= width*.67, f"Editor onboarding collapsed: {welcome_rect} at {width}x{height}"
                 assert not await page.locator("#advancedStages").get_attribute("open"), "Stage inspector should default collapsed"
                 assert await page.locator("#toggleTimeline").get_attribute("aria-pressed") == "false"
                 await page.locator("#toggleTimeline").click()

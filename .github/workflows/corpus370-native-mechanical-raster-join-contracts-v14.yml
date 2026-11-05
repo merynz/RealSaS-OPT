@@ -1,0 +1,41 @@
+name: corpus370-native-mechanical-raster-join-contracts-v14
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-native-mechanical-raster-join-contracts-v14.yml'
+      - 'tools/corpus/corpus370_native_raster_join_plan_v14.py'
+      - 'tools/corpus/court_corpus370_mechanical_raster_join_v14.py'
+      - 'tools/corpus/run_corpus370_native_mechanical_raster_private_v14.py'
+      - 'tools/truth_foundry/blender_corpus370_native_mechanical_raster_join_v14.py'
+      - 'tests/corpus/test_corpus370_native_mechanical_raster_join_v14.py'
+  pull_request:
+    paths:
+      - '.github/workflows/corpus370-native-mechanical-raster-join-contracts-v14.yml'
+      - 'tools/corpus/corpus370_native_raster_join_plan_v14.py'
+      - 'tools/corpus/court_corpus370_mechanical_raster_join_v14.py'
+      - 'tools/corpus/run_corpus370_native_mechanical_raster_private_v14.py'
+      - 'tools/truth_foundry/blender_corpus370_native_mechanical_raster_join_v14.py'
+      - 'tests/corpus/test_corpus370_native_mechanical_raster_join_v14.py'
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-native-mechanical-raster-join-contracts-v14-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  native-control-to-rgba-independent-court:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact bounded numeric test dependencies
+        run: python3 -m pip install --disable-pip-version-check numpy pytest
+      - name: Verify original Blender syntax and real-lineage fail closed tests
+        run: |
+          set -euo pipefail
+          python3 -m py_compile \
+            tools/corpus/corpus370_native_raster_join_plan_v14.py \
+            tools/corpus/court_corpus370_mechanical_raster_join_v14.py \
+            tools/corpus/run_corpus370_native_mechanical_raster_private_v14.py \
+            tools/truth_foundry/blender_corpus370_native_mechanical_raster_join_v14.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_native_mechanical_raster_join_v14.py

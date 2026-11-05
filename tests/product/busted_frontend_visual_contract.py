@@ -148,21 +148,56 @@ async def run():
                   return {width:canvas.width,height:canvas.height,ink};
                 }""")
                 assert stage_rain["ink"] > 30, f"Stage-local Matrix rain rendered blank: {stage_rain}"
-                assert await page.locator("#awaken").is_disabled(), "Offline preview must never offer a fake compile"
-                # Fiery AWAKEN is a real full-face gradient, not a narrow edge
-                # accent. Its offline-disabled state remains visible, but inert.
-                fiery=await page.locator("#awaken").evaluate("""button => {
+                # The offline CTA permits one clearly labeled ignition-only
+                # visual preview. It must never POST a real compile session.
+                await page.wait_for_function("""() =>
+                  document.querySelector('#awaken')?.dataset.ignitionPreview === 'true'
+                """, timeout=5000)
+                await page.evaluate("""() => {
+                  window.__ignitionCompilePosts=0;
+                  const original=window.fetch.bind(window);
+                  window.fetch=(url,options={})=>{
+                    if(String(url).includes('/api/compile/start'))
+                      window.__ignitionCompilePosts++;
+                    return original(url,options);
+                  };
+                }""")
+                button=page.locator("#awaken")
+                assert await button.is_enabled(), "Offline ignition interaction cannot be pressed"
+                resting=await button.evaluate("""button => {
                   const face=button.getBoundingClientRect();
                   const parent=button.closest('.compile-action').getBoundingClientRect();
                   const style=getComputedStyle(button);
                   return {width:face.width,parentWidth:parent.width,
-                    background:style.backgroundImage,opacity:style.opacity};
+                    background:style.backgroundImage,charging:button.classList.contains('is-charging')};
                 }""")
-                assert fiery["width"] >= fiery["parentWidth"]-3, (
-                    f"AWAKEN fiery gradient does not cover the full CTA: {fiery}"
+                assert resting["width"] >= resting["parentWidth"]-3, (
+                    f"AWAKEN CTA no longer fills its intended region: {resting}"
                 )
-                assert "linear-gradient" in fiery["background"], (
-                    f"AWAKEN lost its gradient face: {fiery}"
+                assert "linear-gradient" in resting["background"]
+                assert not resting["charging"]
+                assert "rgb(23, 35, 78)" in resting["background"], (
+                    f"AWAKEN must rest in cold cobalt; no permanent orange fire: {resting}"
+                )
+                await button.click()
+                await page.wait_for_function("""() =>
+                  document.querySelector('#awaken')?.classList.contains('is-charging')
+                """, timeout=1500)
+                if width == 1440:
+                    await button.screenshot(path=str(OUT / "awaken_click_charge_1440.png"))
+                await page.wait_for_function("""() =>
+                  document.querySelector('#awaken')?.classList.contains('is-igniting')
+                """, timeout=2200)
+                await page.wait_for_function("""() => {
+                  const b=document.querySelector('#awaken');
+                  return !b.classList.contains('is-charging')&&!b.classList.contains('is-igniting');
+                }""", timeout=2200)
+                assert await page.evaluate("window.__ignitionCompilePosts") == 0, (
+                    "Preview ignition must never start a real compile!"
+                )
+                assert await page.locator("#compileAvailability").inner_text() == "UI PREVIEW · COMPILER OFFLINE"
+                assert not await page.locator("#result").evaluate("el=>el.classList.contains('show')"), (
+                    "Ignition alone cannot fabricate a compiled product"
                 )
 
 

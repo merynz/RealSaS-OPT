@@ -105,7 +105,7 @@ def test_blind_control_selection_reproducible_from_original_vertex_source_only()
     assert a["raster_pixels_seen_during_control_selection"] is False
     assert a["controls"][0]["source_response_class_teacher_only"]=="LOCAL_NONRIGID"
     assert a["source_bone_or_object_identity_as_artist_target"] is False
-    assert len(arms_for_plan(a)[0])==5+len(a["controls"])*5
+    assert len(arms_for_plan(a)[0])==5+len(a["controls"])*7
 
 @pytest.mark.parametrize("attack",[
     "wrong_source","wrong_manifest","false_training","false_owner",
@@ -133,7 +133,10 @@ def test_v14_false_truth_forgery_and_lineage_fail_closed(attack):
     elif attack=="false_CAA":r["native_full_resolution_caa_authorized"]=True
     elif attack=="source_layer_name":r["source_bone_mesh_material_names_as_drawable_labels"]=True
     elif attack=="illegal_rgba":x[...,3]=float("nan")
-    elif attack=="false_noop":x[:,:,r["rendered_arms"].index("SOUP_NOOP"),10:150,10:150,0]=1
+    elif attack=="false_noop":
+        x[:,:,r["rendered_arms"].index("SOUP_NOOP"),10:150,10:150,0]=1
+        assert evaluate(*a)["all_original_source_camera_cases_passed"] is False
+        return
     elif attack=="wrong_root":r["root_sham"]="AUTHOR_ROOT_PROVED"
     with pytest.raises((ValueError,AssertionError,KeyError)):
         evaluate(*a)

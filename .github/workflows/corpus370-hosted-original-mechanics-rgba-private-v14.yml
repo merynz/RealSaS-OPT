@@ -1,0 +1,47 @@
+name: corpus370-hosted-original-mechanics-rgba-private-v14
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths: [canonical/CORPUS370_HOSTED_NATIVE_MECHANICAL_RGBA_REQUEST_V14.json]
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-hosted-mechanical-raster-v14
+  cancel-in-progress: false
+jobs:
+  source-native-rgba:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        ordinal: [0,1,2]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 220
+    env:
+      SUBJECT_ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact V13b source court gate and unchanged training prohibition
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('canonical/CORPUS370_HOSTED_NATIVE_MECHANICAL_RGBA_REQUEST_V14.json').read_text())
+          assert d['schema']=='RealSaS.Corpus370NativeMechanicalRGBAResearchRequest.v14'
+          assert d['enabled'] is True
+          assert d['training_authorized'] is False and d['graphics_owner_authorized'] is False
+          assert d['prior_v13b_real_native_carrier_run_id']==42040199925
+          assert d['v14_original_same_perturbation_rgba_required'] is True
+          assert d['control_selection_by_original_vertex_response_before_rgba'] is True
+          assert d['artist_layer_ownership_minted'] is False
+          PY
+      - name: Install private transport
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Real Blender source +/- intervention RGBA and independent court
+        run: bash tools/corpus/hosted_corpus370_native_mechanical_raster_v14.sh

@@ -1,0 +1,235 @@
+name: corpus370-artist-image-only-split-merge-v2
+
+on:
+  push:
+    branches: [alfred/generic-image-split-merge-v2]
+    paths:
+      - '.github/workflows/corpus370-artist-image-only-split-merge-v2.yml'
+      - 'tools/corpus/artist_image_only_edit_baseline_v1.py'
+      - 'tests/corpus/test_artist_image_only_edit_baseline_v1.py'
+      - 'tools/corpus/artist_image_only_split_merge_v2.py'
+      - 'tests/corpus/test_artist_image_only_split_merge_v2.py'
+  pull_request:
+    paths:
+      - '.github/workflows/corpus370-artist-image-only-split-merge-v2.yml'
+      - 'tools/corpus/artist_image_only_edit_baseline_v1.py'
+      - 'tests/corpus/test_artist_image_only_edit_baseline_v1.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-image-only-split-merge-v2-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  official-original-human-artist-source-render:
+    name: Original source RGBA image-only split/merge - ${{ matrix.subject }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - subject: spineboy
+            source_dir: spine-android/app/src/main/assets
+            json_blob: 4a58fecd32a97bad83a9169056c44db3f17dba4e
+            atlas_blob: 33f0db102bfd643ed3f3c021b6821ac2a775ad03
+            expected_active: 18
+            expected_png_sha256: ab874448a224f8a92188e133735062c86e5f93eb7286b0fc37c5d39864e6569f
+          - subject: owl
+            source_dir: examples/owl/export
+            json_blob: d42317f7c0bbe7c8c508765d16b0c643d65fb847
+            atlas_blob: 0c1c5283335b5b162c58a231515ecf1e3741975b
+            expected_active: 25
+            expected_png_sha256: 5fb4ceefbbdcf1171a2e94d7c1aae1363db1d5fb8986199238de09d2374e6691
+          - subject: raptor
+            source_dir: examples/raptor/export
+            json_blob: 27456d62db9f9772a2ca3d0ddad40b21995cddd7
+            atlas_blob: 92387eb054c28ae9c3e2c8f19abf6f3cabd77176
+            expected_active: 35
+            expected_png_sha256: c2fcb6ac6c363f5b37f622feb727aed64fbd0205897a7ba8b6b45f8a091ab125
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SOURCE_DIR: ${{ matrix.source_dir }}
+      JSON_BLOB: ${{ matrix.json_blob }}
+      ATLAS_BLOB: ${{ matrix.atlas_blob }}
+      EXPECTED_ACTIVE: ${{ matrix.expected_active }}
+      PNG_SHA256: ${{ matrix.expected_png_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Ephemeral official renderer dependencies under source license
+        run: |
+          set -euo pipefail
+          WORK="$RUNNER_TEMP/real_original_artist_renderer"
+          mkdir -p "$WORK"
+          cp tools/corpus/artist_spine_headless_reference_v1.mjs "$WORK/runner.mjs"
+          cd "$WORK"
+          npm init -y >/dev/null
+          npm install --no-save --no-package-lock \
+            @esotericsoftware/spine-canvaskit@4.3.13 \
+            @esotericsoftware/spine-core@4.3.13 \
+            canvaskit-wasm@0.39.1
+          node --check runner.mjs
+      - name: Download original source JSON, atlas and original art page for evaluation
+        run: |
+          set -euo pipefail
+          BASE="$RUNNER_TEMP/real_original_artist_renderer/source"
+          mkdir -p "$BASE"
+          PREFIX="https://raw.githubusercontent.com/EsotericSoftware/spine-runtimes/4.3/$SOURCE_DIR"
+          for ASSET in "$SUBJECT-pro.json" "$SUBJECT.atlas" "$SUBJECT.png"; do
+            curl --fail --silent --show-error --location --retry 3 \
+              "$PREFIX/$ASSET" --output "$BASE/$ASSET"
+          done
+          test "$(git hash-object "$BASE/$SUBJECT-pro.json")" = "$JSON_BLOB"
+          test "$(git hash-object "$BASE/$SUBJECT.atlas")" = "$ATLAS_BLOB"
+          test "$(file -b --mime-type "$BASE/$SUBJECT.png")" = "image/png"
+          echo "$PNG_SHA256  $BASE/$SUBJECT.png" | sha256sum -c -
+          echo "GENUINE_ORIGINAL_AUTHOR_SOURCE_EXPORTED_ART_ASSET_SHA_VERIFIED"
+          sha256sum "$BASE"/*
+      - name: Render only image to algorithm and original hide/isolate to private court
+        run: |
+          set -euo pipefail
+          WORK="$RUNNER_TEMP/real_original_artist_renderer"
+          node "$WORK/runner.mjs" \
+            --source "$WORK/source/$SUBJECT-pro.json" \
+            --atlas "$WORK/source/$SUBJECT.atlas" \
+            --output "$WORK/output"
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const root=path.join(process.env.RUNNER_TEMP,"real_original_artist_renderer","output");
+          const receipt=JSON.parse(fs.readFileSync(path.join(root,"receipt.json"),"utf8"));
+          const input=JSON.parse(fs.readFileSync(path.join(root,"model_input","manifest.json"),"utf8"));
+          const hidden=JSON.parse(fs.readFileSync(path.join(root,"private_artist_court","reference.json"),"utf8"));
+          if(receipt.status!=="OFFICIAL_RUNTIME_ORIGINAL_SOURCE_RGBA_AND_PRIVATE_HIDE_ISOLATE_REFS_PRODUCED__NO_MODEL_OWNER")
+            throw Error("ORIGINAL_AUTHORED_SOURCE_RENDERER_NOT_FINISHED");
+          if(receipt.original_active_attachments_teacher_only!==Number(process.env.EXPECTED_ACTIVE))
+            throw Error("SOURCE_SETUP_AUTHOR_ATTACHMENT_MISMATCH");
+          if(receipt.author_hide_isolate_measured_pair_count!==Number(process.env.EXPECTED_ACTIVE))
+            throw Error("AUTHOR_SOURCE_ORIGINAL_HIDE_ISOLATE_INCOMPLETE");
+          if(!(receipt.original_raster_occupied_alpha_pixels>0) ||
+             !hidden.original_hide_isolate_restoration_exact ||
+             input.original_artist_slot_names_present ||
+             input.original_artist_layer_count_present ||
+             input.source_mesh_face_incidence_present ||
+             !input.consumer_image_only_source_input ||
+             input.training_authorized ||
+             hidden.training_authorized)
+             throw Error("ORIGINAL_SOURCE_IMAGE_REFERENCE_OR_LABEL_LEAKAGE");
+          console.log("REAL_ORIGINAL_HUMAN_ART_REFERENCE_RGBA_IMAGE_AND_HIDE_ISOLATE_COURT_MEASURED");
+          console.log(JSON.stringify({
+            original_source_SHA256:receipt.original_source_export_SHA256,
+            original_merged_image_RGBA_SHA256:receipt.original_rendered_RGBA_SHA256,
+            original_art_alpha_pixel_count:receipt.original_raster_occupied_alpha_pixels,
+            original_active_artist_slot_hide_isolate_cases:receipt.author_hide_isolate_measured_pair_count,
+            original_isolate_nonzero_alpha_cases:receipt.source_isolated_artwork_nonzero_alpha_cases,
+            original_hide_observable_RGBA_effect_cases:receipt.source_hide_causes_observable_RGBA_change_cases,
+            original_hide_unobservable_or_masked_cases:receipt.source_hidden_or_compositor_masked_hide_cases,
+            artist_layer_names_available_to_model:false,
+            original_native_art_project_verified:false,
+            any_model_recovery_run:false,
+            training_authorized:false
+          }));
+          JS
+      - name: Predict candidate regions from the image ONLY, no artist metadata
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy scipy scikit-image pytest
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_artist_image_only_edit_baseline_v1.py tests/corpus/test_artist_image_only_split_merge_v2.py
+          python3 -m py_compile tools/corpus/artist_image_only_split_merge_v2.py
+          WORK="$RUNNER_TEMP/real_original_artist_renderer/output"
+          python3 tools/corpus/artist_image_only_edit_baseline_v1.py predict \
+            --rgba "$WORK/model_input/anonymous_flattened_rgba.bin" \
+            --public-manifest "$WORK/model_input/manifest.json" \
+            --prediction-npz "$WORK/model_input/predicted_regions.npz" \
+            --prediction-manifest "$WORK/model_input/predicted_regions.json"
+          sha256sum "$WORK/model_input/predicted_regions.npz" "$WORK/model_input/predicted_regions.json"
+      - name: Precommit generic image-only split/merge before any private court read
+        run: |
+          set -euo pipefail
+          WORK="$RUNNER_TEMP/real_original_artist_renderer/output"
+          python3 tools/corpus/artist_image_only_split_merge_v2.py predict \
+            --rgba "$WORK/model_input/anonymous_flattened_rgba.bin" \
+            --public-manifest "$WORK/model_input/manifest.json" \
+            --baseline-npz "$WORK/model_input/predicted_regions.npz" \
+            --baseline-manifest "$WORK/model_input/predicted_regions.json" \
+            --prediction-npz "$WORK/model_input/split_merge_v2.npz" \
+            --prediction-manifest "$WORK/model_input/split_merge_v2.json"
+          sha256sum "$WORK/model_input/split_merge_v2.npz" \
+            "$WORK/model_input/split_merge_v2.json"
+      - name: Open private artist court only AFTER image-only prediction is sealed
+        run: |
+          set -euo pipefail
+          WORK="$RUNNER_TEMP/real_original_artist_renderer/output"
+          python3 tools/corpus/artist_image_only_edit_baseline_v1.py court \
+            --rgba "$WORK/model_input/anonymous_flattened_rgba.bin" \
+            --public-manifest "$WORK/model_input/manifest.json" \
+            --prediction-npz "$WORK/model_input/predicted_regions.npz" \
+            --prediction-manifest "$WORK/model_input/predicted_regions.json" \
+            --private-reference "$WORK/private_artist_court/reference.json" \
+            --private-dir "$WORK/private_artist_court" \
+            --receipt "$WORK/edit_support_diagnostic.json"
+          python3 - <<'PY'
+          import os,json
+          from pathlib import Path
+          path=Path(os.environ["RUNNER_TEMP"])/"real_original_artist_renderer/output/edit_support_diagnostic.json"
+          d=json.loads(path.read_text())
+          assert d["status"]=="SOURCE_ARTIST_EDIT_SUPPORT_BASELINES_MEASURED__NOT_DRAWABLE_TRUTH"
+          assert d["author_hide_observable_cases"]>0
+          assert not d["training_authorized"] and not d["graphics_owner_authorized"]
+          assert not d["exact_artist_drawable_identity_proven"]
+          print("REAL_ARTIST_IMAGE_ONLY_EDIT_SUPPORT_BASELINE_NOT_OWNERSHIP")
+          print(json.dumps({
+            "source_RGBA_SHA256":d["source_RGBA_SHA256"],
+            "observable_artist_hide_cases":d["author_hide_observable_cases"],
+            "unobservable_masked_cases":d["author_hide_unobservable_masked_cases"],
+            "image_only_edit_support_metrics":
+              d["metrics_mean_edit_support_iou_not_artist_membership_accuracy"],
+            "artist_drawable_recovery_proven":False,
+            "training_authorized":False
+          },sort_keys=True))
+          PY
+      - name: Court frozen split/merge proposals vs real author-edit effects without owner promotion
+        run: |
+          set -euo pipefail
+          WORK="$RUNNER_TEMP/real_original_artist_renderer/output"
+          python3 tools/corpus/artist_image_only_split_merge_v2.py court \
+            --rgba "$WORK/model_input/anonymous_flattened_rgba.bin" \
+            --public-manifest "$WORK/model_input/manifest.json" \
+            --baseline-npz "$WORK/model_input/predicted_regions.npz" \
+            --baseline-manifest "$WORK/model_input/predicted_regions.json" \
+            --baseline-receipt "$WORK/edit_support_diagnostic.json" \
+            --prediction-npz "$WORK/model_input/split_merge_v2.npz" \
+            --prediction-manifest "$WORK/model_input/split_merge_v2.json" \
+            --private-reference "$WORK/private_artist_court/reference.json" \
+            --private-dir "$WORK/private_artist_court" \
+            --receipt "$WORK/split_merge_v2_edit_support_court.json"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["RUNNER_TEMP"])/
+            "real_original_artist_renderer/output/split_merge_v2_edit_support_court.json").read_text())
+          assert d["status"]=="REAL_IMAGE_ONLY_GENERIC_SPLIT_MERGE_V2_EVALUATED__NO_ARTIST_OWNER"
+          assert d["observed_original_author_hide_effects"]>0
+          assert not d["graphics_owner_authorized"] and not d["training_authorized"]
+          assert not d["materialization_authorized"]
+          assert d["new_same_drawable_pairs_minted"]==0
+          assert d["new_different_drawable_pairs_minted"]==0
+          print("FROZEN_IMAGE_ONLY_SPLIT_MERGE_V2_REAL_EDIT_SUPPORT_NO_OWNER")
+          print(json.dumps({
+            "source_RGBA_SHA256":d["source_RGBA_SHA256"],
+            "v1_sha":d["v1_prediction_parent_sha256"],
+            "v2_sha":d["v2_sealed_prediction_sha256"],
+            "observable_edits":d["observed_original_author_hide_effects"],
+            "masked_edits":d["masked_original_author_hide_effects"],
+            "v1_baselines":d["v1_image_only_baselines"],
+            "precommitted_candidate_methods":d["v2_image_only_candidate_results"],
+            "artist_owner_proven":False,"training_authorized":False
+          },sort_keys=True))
+          PY
+      - name: Protect original art and private masks against redistribution
+        run: echo "All third-party original art and pixel court remain in ephemeral hosted runner; only verified aggregate measures emitted."

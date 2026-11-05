@@ -66,6 +66,7 @@ body:not(.has-puppet) .modebar .mode{opacity:.58}
 body:not(.has-puppet) .viewport-toolbar{background:#101e2a}
 @media(min-width:871px){
  body:not(.has-puppet) .workspace{grid-template-columns:0 minmax(0,1fr) 0}
+ body:not(.has-puppet) .workspace .viewport-panel{grid-column:2}
  body:not(.has-puppet) #scenePanel,body:not(.has-puppet) #inspectorPanel{display:none}
 }
 .modebar .studio-panel-controls{display:none}

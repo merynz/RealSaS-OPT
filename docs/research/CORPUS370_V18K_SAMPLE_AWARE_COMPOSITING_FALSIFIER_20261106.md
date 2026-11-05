@@ -83,6 +83,25 @@ For further discrimination *within the 16 failing heldout pixels*, geometric joi
 
 CAT is an **uninformative control for failure** under this original frozen V18h target group: zero actual Blender two-layer source failures for 124 original pixels per threshold across exploratory views and another 124 per threshold in locked views. Yet the 4×4 geometric approximation generates 15 errors above tolerance in the locked view group (each threshold). This directly warns against claiming that geometry-only 4×4 sampling preserves already-good 2D source appearance.
 
+### Separate independent, SHA-pinned full-domain residual crosscheck — 3/3 PASS
+
+The source raw JSON was cross-tabulated again on **all sampled original pixels**, including successful original-Blender pixels, after V18k qualification. New independent read-only check (different Actions run, no rays retrained or rendered):
+https://github.com/merynz/RealSaS-OPT/actions/runs/42130127097 — three jobs successful: adversarial tests, original CAT source, original TRICERATOPS source.
+
+Each job opens the fixed V18k raw source JSON plus its exact independent source court SHA. The court **recomputes** every per-pixel baseline, 4×4 joint, and 4×4 independent-group error and checks all groups/camera partitions, K1 vacuity and zero training authority. The two private Drive output reports were SHA readback verified:
+
+- CAT `8bec78d701b80a9f1d3299b29ca95e8350eba12d4b6227be212b61c17ad80cb8`.
+- TRICERATOPS `e72252f8fb756756943fb944fd21968fbec8fc2fb193399764d5646f2027b26a`.
+
+In particular the independently re-courted Triceratops locked `0.10` source sample set verifies **149 total, 16 baseline failures, 32 geometric joint failures, 15 of 16 previously failing pixels closer to source, only 3 rescued into tolerance, 131 total regressions**. This outcome includes previously passing pixels, so it is not an error-selected optimism metric. It also retains original four-camera coverage and the frozen proposed part K; neither the parent court nor the crosscheck can convert it into drawable truth.
+
+The crosscheck uses the **same sealed original V18k producer data** and is not an independently collected new source cohort, nor a second ray-geometry implementation; it is an independently executable full-domain reaggregation designed to prevent selective reporting.
+
+Code:
+- `tools/corpus/court_corpus370_v18k_paired_source_error_crosscheck.py`
+- `tests/corpus/test_corpus370_v18k_paired_source_error_crosscheck.py`
+- `.github/workflows/corpus370-v18k-full-domain-paired-error-crosscheck.yml`
+
 ### Revised research decision (after FAIL-CLOSED quality evaluation)
 
 1. **Do not promote V18k joint 4×4 render to a production renderer.** It is an explanatory geometry oracle and a plausible structural ingredient, but its source fidelity is insufficient in this controlled test.

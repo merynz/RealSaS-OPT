@@ -238,7 +238,7 @@ function renderIK(body, model, bone, signature) {
       <div class="weight-toggles"><label><input id="ikEnabled" type="checkbox"${active.enabled === false ? '' : ' checked'}> ENABLED</label><label><input id="ikBend" type="checkbox"${Number(active.bend_direction || 1) < 0 ? ' checked' : ''}> BEND NEGATIVE</label></div>
       <button id="ikApply">APPLY CONSTRAINT</button>
     </div>` : ''}
-    <div class="rig-note">IK references deform bones only. True constraint execution remains owned by Mechanics; Studio edits are authoring data until requalified.</div>
+    <div class="rig-note">For live two-segment authoring preview choose START (shoulder), END (wrist), and map one animator control to START and elbow. The end target is dragged in Motion / IK REACH. Canonical Mechanics is unchanged until requalification.</div>
   </div>`;
 
   body.querySelectorAll('[data-ik-index]').forEach((button) => {
@@ -250,7 +250,8 @@ function renderIK(body, model, bone, signature) {
   $('#ikNew').onclick = () => operate('Add IK constraint', () => {
     const ids = hierarchyRows(rigModel()).map((row) => row.bone_id);
     const end = S.sel.control && ids.includes(S.sel.control) ? S.sel.control : ids[0] || fallback;
-    const parent = rigModel().nodes.get(end)?.parent_id || ids[0] || end;
+    const mid = rigModel().nodes.get(end)?.parent_id || '';
+    const parent = rigModel().nodes.get(mid)?.parent_id || mid || ids[0] || end;
     let index = 1;
     const existing = new Set(S.ed.ik.map((row) => row.constraint_id));
     while (existing.has(`IK:USER:${index}`)) index += 1;

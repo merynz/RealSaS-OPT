@@ -80,7 +80,15 @@ On Triceratops the sample-first **fixed-order** method is closer to its *actual 
 
 The important controlled causal claim is **not** that V18l made a product renderer. Within exact source-matched eight-sample Cycles data, non-commuting per-sample color/alpha visibility combination and postfiltered image combination explain observed compositing discrepancies; a single global layer order remains insufficient at some pixels. The per-index best-of-two oracle is **not an implemented depth-driven scheduling policy** and carries privileged source outcomes. Unseen source morphology, real source textures, CAA, motion and heldout independently editable graphics are still unqualified.
 
-A *separate* nonvacuity source court on these same exact original rendered bytes is required to reproduce sample diversity counts and paired pixel class improvements and regressions, with an explicit fail-closed anti-vacuity gate. Code: `tools/corpus/court_corpus370_v18l_source_sample_diversity.py`; workflow: `.github/workflows/corpus370-v18l-source-index-nonvacuity-court.yml`. Exact original-run SHA outputs are inputs; do not count this as independent new source collection.
+**The separate independent source non-vacuity court also completed 3/3 PASS.** Exact Actions run `42132690866-1`: https://github.com/merynz/RealSaS-OPT/actions/runs/42132690866 . Its redteam, Cat and Triceratops private SHA-linked evidence jobs all passed. Original raw 4×8×3×192×192×4 Blender RGBA were independently reopened; the exact original V18l independent source court SHA was validated; every source camera's sample diversity, same-index oracle failure, pre/postfilter pixel residual and all-image gains/regressions were recomputed. Independent Drive SHA readback receipts:
+- CAT nonvacuity court `2aafa6e0bf90bec47579d20930e7cc418993eec7fdd7f3984407f01d8ca1f28c`
+- TRICERATOPS nonvacuity court `f06458bb33ae148030400a68a1562fc0558bb0d3e9ea3ad8475af390e98e5dd3`
+
+All eight original Cycles subset indices genuinely vary source FULL premultiplied RGBA in **every** camera: CAT 427/509/427/533 and TRICERATOPS 200/542/290/545 varied source pixels across four views. Therefore the single-index matching success is **not vacuously identical frame replay**. The independent full-domain court verified Triceratops 216 postfilter errors, 85 fixed sample-first errors, 139 lower-error pixels, 0 higher-error pixels, and 1,577 total original source pixel-view occurrences with nonzero sample-index variation. It also verified Cat 0/0 and 1,896 such varying pixel-view occurrences.
+
+The new nonvacuity court is a separate **recomputation** over the same actual original V18l source data, not a new independently collected subject/pose or proof of original 32spp film equivalence. Source texture/CAA and artist-independent editability remain UNKNOWN.
+
+Code: `tools/corpus/court_corpus370_v18l_source_sample_diversity.py`, `tests/corpus/test_corpus370_v18l_source_sample_diversity.py`, and `.github/workflows/corpus370-v18l-source-index-nonvacuity-court.yml`.
 
 ## Revised next decision
 

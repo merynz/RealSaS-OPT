@@ -147,6 +147,7 @@ def run(job_path, archived_diagnostic, output_path):
         face_index=np.arange(len(faces),dtype=np.int32)
         _group_mode(face_map,face_index,excluded=set(range(len(faces))))
         result=[]
+        observed_frames=[]
         for view in VIEWS:
             _camera_full(cam,camera[view],192)
             scene.cycles.transparent_max_bounces=baseline_bounces
@@ -160,6 +161,7 @@ def run(job_path, archived_diagnostic, output_path):
             hidden=_frame(scratch/f"empty_hidden_v{view}.exr",192)
             for obj in soup:obj.hide_render=False
             bpy.context.view_layer.update()
+            observed_frames.append(np.stack((low,high,hidden),axis=0))
             low_a=alpha_metrics(low);high_a=alpha_metrics(high)
             hidden_a=alpha_metrics(hidden)
             result.append({
@@ -174,12 +176,17 @@ def run(job_path, archived_diagnostic, output_path):
                 "non_soup_scene_alpha_suspected":
                     hidden_a["alpha_over_original_threshold"],
             })
+    out=Path(output_path)
+    out.parent.mkdir(parents=True,exist_ok=True)
+    archive=out.with_suffix(".npz")
+    np.savez_compressed(archive,empty_variants_rgba=np.stack(observed_frames,axis=0).astype(np.float32))
     payload={
         "schema":SCHEMA,"status":STATUS,
         "original_source_id_private":job["subject_id"],
         "original_source_sha256":job["source"]["sha256"],
         "parent_v14_job_sha256":sha(job_path),
         "parent_v18b_archived_diagnostic_sha256":sha(archived_diagnostic),
+        "independently_reopenable_render_rgba_npz_sha256":sha(archive),
         "original_v18b_source_run":"42100552844-1",
         "archived_retrospective_run":"42105598958-1",
         "original_heldout_pose_ordinal":2,
@@ -198,8 +205,6 @@ def run(job_path, archived_diagnostic, output_path):
         "materialization_authorized":False,
         "training_authorized":False,
     }
-    out=Path(output_path)
-    out.parent.mkdir(parents=True,exist_ok=True)
     out.write_text(json.dumps(payload,indent=2,sort_keys=True,allow_nan=False)+"\n")
     print(json.dumps({
         "status":STATUS,

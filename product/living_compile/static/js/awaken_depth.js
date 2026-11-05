@@ -157,6 +157,28 @@
       trace.lines=trace.rows.map(()=>fitCode(maxChars));
       trace.lastCycle=Math.floor((elapsed+trace.offset)/trace.cycle);
     }
+
+    // Draw decorative text only where it cannot compete with product copy.
+    // Actual DOM bounds, not guessed coordinates, govern the decision.
+    const blockSelectors = role==='landing'
+      ? ['.masthead','.landing-screen .hero-intro','.descend-link','.landing-foot']
+      : ['.masthead','.chamber-header','.chamber-docking-label','.chamber-intake .dropzone',
+         '.chamber-intake .input-slot-ledger','.chamber-console .console-heading',
+         '.chamber-console h3','.chamber-console .console-copy',
+         '#awaken','#compileAvailability','.chamber-console .telemetry'];
+    const blockers=blockSelectors.map(sel=>document.querySelector(sel)).filter(el=>{
+      if(!el)return false;
+      const style=getComputedStyle(el);
+      return style.display!=='none'&&style.visibility!=='hidden';
+    }).map(el=>el.getBoundingClientRect());
+    const padding=role==='landing'?16:10;
+    for(const trace of traces){
+      const box=trace.lane.getBoundingClientRect();
+      trace.lane.hidden=blockers.some(block=>
+        box.left < block.right+padding && box.right > block.left-padding &&
+        box.top < block.bottom+padding && box.bottom > block.top-padding
+      );
+    }
   }
 
   function paint(){

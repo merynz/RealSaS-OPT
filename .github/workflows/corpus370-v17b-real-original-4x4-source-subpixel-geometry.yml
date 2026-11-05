@@ -1,0 +1,68 @@
+name: corpus370-v17b-real-original-4x4-source-subpixel-geometry
+
+on:
+  push:
+    branches: [corpus370-v17b-subpixel-source-ray-coverage-v1]
+    paths:
+      - '.github/workflows/corpus370-v17b-real-original-4x4-source-subpixel-geometry.yml'
+      - 'tools/corpus/measure_corpus370_v17b_original_subpixel_coverage_v1.py'
+      - 'tools/corpus/court_corpus370_v17b_subpixel_coverage_v1.py'
+      - 'tools/corpus/hosted_corpus370_v17b_source_subpixel_coverage.sh'
+      - 'tests/corpus/test_corpus370_v17b_subpixel_coverage_v1.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v17b-real-source-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  original-subpixel-geometry-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate original source geometry and coverage contract code
+        run: |
+          python3 -m py_compile \
+            tools/corpus/measure_corpus370_v17b_original_subpixel_coverage_v1.py \
+            tools/corpus/court_corpus370_v17b_subpixel_coverage_v1.py
+          bash -n tools/corpus/hosted_corpus370_v17b_source_subpixel_coverage.sh
+      - name: Independently redteam 4x4 ray geometry and unknown source authority
+        run: |
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_v17b_subpixel_coverage_v1.py
+
+  original-source-unknown-ray-subpixels:
+    needs: original-subpixel-geometry-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+          - subject: TRICERATOPS
+            ordinal: 1
+          - subject: COWFISH
+            ordinal: 2
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SUBJECT_ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact original V14/V16/V17 source transport
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Re-evaluate 16 physical source-rays per previously unknown ray, court with original triangle world and original pixel
+        run: |
+          set -euo pipefail
+          bash tools/corpus/hosted_corpus370_v17b_source_subpixel_coverage.sh

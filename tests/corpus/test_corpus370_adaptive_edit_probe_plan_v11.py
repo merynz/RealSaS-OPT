@@ -117,3 +117,29 @@ def test_forgeries_non_nested_source_and_unobservable_geometry_fail_closed(fault
     elif fault=="unusable_source_triangle":e[4]["rest_vertices_source_world"][:]=0
     with pytest.raises(ValueError):
         run(tuple(e),budget)
+
+
+def test_valid_unsplittable_leaf_is_noninformative_not_subject_failure():
+    e=list(evidence())
+    # Construct a strictly nested but uneven original geometric partition:
+    # one coarse region has a single child and that child one finest leaf.
+    # This is valid for arbitrary morphologies; a forced two-way branch prior
+    # would incorrectly fail the entire source.
+    e[0]["candidates"][1]["face_slot_teacher_only"][30]=14
+    for i in (28,29,30):
+        e[0]["candidates"][0]["face_slot_teacher_only"][i]=6
+    # Source prior V9 plan is now rebound to the same altered hypothetical
+    # ORIGINAL group tree, while V10 remains an explicit test-only prior.
+    from tools.corpus.corpus370_partition_edit_plan_v7 import build_plan
+    e[2]["plan"]=build_plan(e[0],e[1])
+    for row in e[3]["pairwise_equivalence_classes_scoped_to_tested_source_edits"]:
+        row["total_source_edit_task_count"]=len(e[2]["plan"]["tasks"])
+        if (row["candidate_a"],row["candidate_b"])==(16,32):
+            row["indistinguishable_source_edit_task_count"]=len(e[2]["plan"]["tasks"])
+    result=run(tuple(e))
+    assert result["heldout_valid_unsplittable_leaf_count"]>=1
+    assert result["new_source_face_intervention_query_count"]==12
+    assert 31 not in [t["finest_group_id_teacher_only"]
+                      for t in result["query_targets_source_teacher_only"]]
+    assert result["graphics_owner_authorized"] is False
+    assert result["training_authorized"] is False

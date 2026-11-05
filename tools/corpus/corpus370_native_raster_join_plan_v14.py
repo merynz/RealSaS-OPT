@@ -122,3 +122,52 @@ def arms_for_plan(plan):
             arms.extend((real,soup,active))
             pairs.append((real,soup,active))
     return arms,pairs
+
+
+def verify_locked_source_selection(replayed,locked,*,relative_numeric_tolerance=1e-8):
+    """Two independent NumPy/BLAS processes may differ in last-bit Kabsch RMS.
+
+    Allow ONLY bounded source-numeric repeatability; selected control IDs,
+    axis, response class, and every authority/lineage bit remain exact.
+    The full precommitted JSON is separately SHA checked by the caller.
+    """
+    require(isinstance(locked,dict) and isinstance(replayed,dict)
+            and set(locked)==set(replayed)
+            and type(relative_numeric_tolerance) is float
+            and 0<relative_numeric_tolerance<=1e-8,
+            "V14_SOURCE_RASTER_BLIND_PLAN_SCHEMA_DRIFT")
+    numeric=("source_global_rigid_residual","source_reverse_global_rigid_residual",
+             "source_max_displacement")
+    import math
+    for key in locked:
+        if key=="controls":
+            controls=locked[key]
+            original=replayed[key]
+            require(isinstance(controls,list) and len(controls)==len(original)
+                    and len(controls) in (1,2),
+                    "V14_PRECOMMITTED_CONTROL_CARDINALITY_DRIFT")
+            for prior,reproduced in zip(controls,original):
+                require(set(prior)==set(reproduced),
+                        "V14_PRECOMMITTED_CONTROL_SCHEMA_DRIFT")
+                for field in prior:
+                    if field in numeric:
+                        a,b=prior[field],reproduced[field]
+                        require(type(a) in (float,int) and type(b) in (float,int)
+                                and math.isfinite(a) and math.isfinite(b)
+                                and abs(a-b)<=relative_numeric_tolerance*max(1.,abs(a),abs(b)),
+                                "V14_PRECOMMITTED_SOURCE_NUMERIC_METRIC_DRIFT:"+field)
+                    else:
+                        require(type(prior[field])==type(reproduced[field])
+                                and prior[field]==reproduced[field],
+                                "V14_PRECOMMITTED_CAUSAL_CONTROL_IDENTITY_DRIFT:"+field)
+        elif key=="source_relative_activity_threshold":
+            a,b=locked[key],replayed[key]
+            require(type(a) in (float,int) and type(b) in (float,int)
+                    and math.isfinite(a) and math.isfinite(b)
+                    and abs(a-b)<=relative_numeric_tolerance*max(1.,abs(a),abs(b)),
+                    "V14_SOURCE_ACTIVITY_THRESHOLD_REPEATABILITY")
+        else:
+            require(type(locked[key])==type(replayed[key])
+                    and locked[key]==replayed[key],
+                    "V14_RASTER_BLIND_NONNUMERIC_AUTHORITY_DRIFT:"+key)
+    return True

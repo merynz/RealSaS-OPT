@@ -83,7 +83,7 @@ async def run():
                     )
                     safety = await page.locator(section).evaluate("""(scope)=>{
                       const selectors=scope.id==='introduction'
-                        ? ['.hero-intro','.descend-link','.landing-foot']
+                        ? ['.hero-eyebrow','.hero-intro h1','.hero-copy','.hero-description','.hero-meta','.descend-link','.landing-foot']
                         : ['.chamber-header','.chamber-docking-label','.dropzone',
                            '.input-slot-ledger','.chamber-console .console-heading',
                            '.chamber-console h3','.chamber-console .console-copy',

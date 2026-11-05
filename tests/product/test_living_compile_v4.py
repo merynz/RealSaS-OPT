@@ -140,7 +140,7 @@ class LivingCompileV4Tests(unittest.TestCase):
         app = LivingCompileApplication.default()
         data, ctype = app.static_bytes("/")
         self.assertIn("<title>BUSTED — Bring Your Character to Life</title>".encode("utf-8"), data)
-        self.assertIn(b"AWAKEN <span", data)
+        self.assertIn(b'class="awaken-label">AWAKEN</span>', data)
         self.assertIn(b'id="matrixTypewriter"', data)
         self.assertNotIn(b'id="agentReach"', data)
         self.assertIn(b"<h2>QUALIFIED</h2>", data)

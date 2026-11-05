@@ -3,7 +3,7 @@
 Date: 2026-11-05. **Evidence-only research record; not graphics-truth/model readiness.**  
 Parent V18b actual source render run: `42100552844-1` (3 original sources, 2 FAIL in combined edit court).  
 Qualified retrospective diagnosis: `42105598958-1` (4/4 jobs PASS, including 3 original-source archived pixel reads).  
-Current targeted witness: `42106976442-1` (bounded 2-source 12-frame Blender witness per source). **CAT independent source court PASS**; TRICERATOPS worker still underway at the time of this update.  
+Current targeted witness: `42106976442-1` (bounded 2-source 12-frame Blender witness per source). **CAT and TRICERATOPS independent source courts both PASS** (3/3 run jobs completed successfully).  
 Branch: `corpus370-v18b-reactive-stain-source-edit-court-v1`, draft PR #343. Do not merge to main or to Corpus370 #327.
 
 ## Why we did not rerun 624 edited Blender frames
@@ -70,7 +70,10 @@ GitHub source worker in run `42106976442-1` independently finished successfully 
 
 The original failed empty-mask reproduced exactly (view 2 = 10 alpha-remnant pixels, view 6 = 10; views 0/4 = 0). With `transparent_max_bounces=256`, **all four views have 0 remnant pixels**. With actual soup `hide_render=true`, likewise **all four views have 0 remnant pixels**. The independent court re-opened 12 raw rendered RGBA frames and reported `transparent_bounce_limit_hypothesis_supported=true`. No artist-owner or model/training authority was minted. This independently supports a **Cycles transparency-path saturation** cause for Cat, rather than bad source/soup correspondence or V18a segmentation.
 
-The second source TRICERATOPS must be judged separately from its independent real court, not inferred from Cat.
+The second source TRICERATOPS was independently measured and **PASS** on its own 12 actual Blender RGBA frames: view 0 **20→0→0**; view 2 **1→0→0**; view 4 **18→0→0**; view 6 **1→0→0** alpha-remnant pixels (original Transparent BSDF → 256 transparent bounces → geometry physically hidden). The independent court's remotely SHA-readback receipt is `d750452cd3db1f6552909aa7ba893533d266babb3d43d1eb9ea8ba6c2f0e2674`. Thus transparency-path exhaustion is a reproduced causal source of V18b EMPTY alpha failure on **both** affected original subjects, not just an extrapolation from Cat.
+
+The frozen V18b original group-edit images remain **unqualified**: other REMOVE/ISOLATE arms also used the inadequate Transparent BSDF path. A clean physically removed geometry edit canary + independent court are still required; it would be scientifically invalid to promote all old edit rows solely because `SOUP_EMPTY` can be repaired.
+
 
 ## After causal witness — continuation gate
 

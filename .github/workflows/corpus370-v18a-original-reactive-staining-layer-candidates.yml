@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: corpus370-v18a-reactive-original-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   virtual-reagent-and-independent-court-contracts:

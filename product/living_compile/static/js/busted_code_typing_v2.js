@@ -13,6 +13,7 @@
  const verbs=['project','compile','resolve','validate','observe','bind','attach','seal','trace','compute','sample','stitch','decode','verify','normalize','reconcile','fit','measure','map','estimate','transform','propagate','address','solve'];
  const fields=['canonical','world','local','normal','depth','owner','parent','weights','joint','edge','vertex','surface','chart','alpha','visible','camera','confidence','topology','identity','pose','index','order','material','constraint'];
  const pick=a=>a[Math.floor(Math.random()*a.length)];
+ const decodeAlphabet='01ABCDEF<>[]{}';
  const number=()=>String(Math.floor(Math.random()*256)).padStart(2,'0');
  const scalar=()=>Math.random().toFixed(3);
  let previous=[],traces=[],timer=null,time=0,observed=false,last=performance.now();
@@ -46,14 +47,22 @@
    const bounds=area.getBoundingClientRect();
    const width=bounds.width,height=bounds.height;
    if(width<100||height<140)return;
-   const mobile=width<750,tablet=width<1170;
+   const mobile=width<760,tablet=width<1170;
    const lineHeight=mobile?43:47;
    const slots=[];
    if(mobile){
-     // At phone widths the central intake owns the width. Only the unused
-     // bottom runway may contain code; no typography under the drop target.
-     for(const x of [.05,.51])for(const frac of [.85,.92])
-       slots.push({left:width*x,top:height*frac,width:width*.43,height:lineHeight});
+     // The stage explicitly reserves mobile code space below upload controls.
+     // Use actual layout geometry instead of guessing percentage positions.
+     const reserve=area.querySelector('#matrixMobileCodeReserve');
+     if(reserve){
+       const r=reserve.getBoundingClientRect();
+       slots.push({
+         left:r.left-bounds.left+12,
+         top:r.top-bounds.top+12,
+         width:Math.max(0,r.width-24),
+         height:70
+       });
+     }
    }else{
      const trackWidth=Math.min(tablet?225:292,width*(tablet?.25:.26));
      for(const frac of [.24,.39,.57,.75,.87]){
@@ -110,9 +119,14 @@
      t.rows.forEach((row,i)=>{
        const age=local-i*t.gap;
        const n=reduced.matches?t.lines[i].length:Math.max(0,Math.min(t.lines[i].length,Math.floor(age/t.rate)));
-       const txt=t.lines[i].slice(0,n);
+       const activelyTyping=!reduced.matches&&age>=0&&n<t.lines[i].length;
+       const decoding=activelyTyping&&n>1&&Math.floor((time+t.offset)/180)%5===0;
+       const txt=decoding
+         ?t.lines[i].slice(0,n-1)+decodeAlphabet[(Math.floor(time/90)+i)%decodeAlphabet.length]
+         :t.lines[i].slice(0,n);
        if(row.textContent!==txt)row.textContent=txt;
-       row.classList.toggle('typing',!reduced.matches&&age>=0&&n<t.lines[i].length);
+       row.classList.toggle('typing',activelyTyping);
+       row.classList.toggle('decoding',decoding);
      });
    }
  }

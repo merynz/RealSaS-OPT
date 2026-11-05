@@ -503,3 +503,61 @@ body,.awaken-shell{background:var(--engine-void)!important;color:var(--engine-pa
   .structural-field{cursor:default}
   .descend-link .descend-icon{transition:none!important}
 }
+/* Deliberately measured text surfaces. No terminal letters over product copy. */
+.structural-field>.matrix-typewriter{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  overflow:hidden;perspective:1100px;perspective-origin:50% 50%;
+  transform-style:preserve-3d;
+}
+.structural-field .matrix-trace{
+  position:absolute;overflow:hidden;height:59px;
+  opacity:calc(var(--trace-alpha) * .56);
+  color:var(--trace-tone);
+  font:500 var(--trace-font)/1.55 var(--engine-mono);
+  text-shadow:0 0 10px rgba(162,176,249,.16);
+}
+.structural-field .matrix-trace-line{
+  height:1.55em;display:block;white-space:nowrap;overflow:hidden;
+}
+.structural-field .matrix-trace[hidden],
+.chamber-data-rail .matrix-trace[hidden]{display:none!important}
+.chamber-data-rail{
+  position:relative;isolation:isolate;height:217px;overflow:hidden;
+  border-top:1px solid rgba(153,171,237,.13);
+  border-bottom:1px solid rgba(153,171,237,.13);
+  background:
+    linear-gradient(90deg,rgba(28,34,81,.075),transparent 34%,rgba(44,55,112,.07));
+  margin:0 0 clamp(28px,4svh,47px);
+}
+.chamber-data-rule{
+  position:absolute;top:9px;left:11px;right:11px;z-index:3;
+  display:flex;justify-content:space-between;gap:12px;
+  color:#7185b1;font:500 8px/1.2 var(--engine-mono);letter-spacing:.06em;
+  pointer-events:none;
+}
+.chamber-data-rail>.matrix-typewriter{
+  position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none;
+  perspective:1100px;perspective-origin:50% 50%;transform-style:preserve-3d;
+}
+.chamber-data-rail .matrix-trace{
+  position:absolute;height:38px;overflow:hidden;
+  opacity:calc(var(--trace-alpha) * .66);
+  color:var(--trace-tone);
+  font:500 var(--trace-font)/1.55 var(--engine-mono);
+  text-shadow:0 0 8px rgba(160,180,255,.1);
+}
+.chamber-data-rail .matrix-trace-line{
+  display:block;height:1.55em;white-space:nowrap;overflow:hidden;
+}
+.chamber-data-rail .matrix-trace-line.typing::after,
+.structural-field .matrix-trace-line.typing::after{color:#d7d9ff}
+@media(max-width:870px){
+  .structural-field>.matrix-typewriter,
+  .chamber-data-rail>.matrix-typewriter{perspective:850px}
+}
+@media(max-width:530px){
+  .chamber-data-rail{height:215px;margin-bottom:25px}
+  .chamber-data-rule{font-size:7px}
+  .chamber-data-rule span:last-child{display:none}
+  .structural-field .matrix-trace{opacity:calc(var(--trace-alpha) * .40)}
+}

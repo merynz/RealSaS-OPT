@@ -151,7 +151,7 @@
       const trace=traces[i],slot=slots[i];
       if(!slot){trace.lane.hidden=true;continue}
       const x=slot.x/100*width,y=slot.y/100*height;
-      const w=slot.w/100*width,h=mobile?58:59;
+      const w=slot.w/100*width,h=role==='chamber'?38:(mobile?47:59);
       const z=Number((trace.lane.style.transform.match(/-?\d+/)||[])[0])||-150;
       const ratio=(perspective-z)/perspective;
       trace.lane.hidden=false;
@@ -184,9 +184,8 @@
     const padding=role==='landing'?16:10;
     for(const trace of traces){
       const box=trace.lane.getBoundingClientRect();
-      // Slot zero is an intentionally reserved top ambient strip, kept
-      // above the Chamber's actual form and labels even at phone widths.
-      trace.lane.hidden=role==='chamber' && trace===traces[0] ? false : blockers.some(block=>
+      // Rails have reserved geometry, but never overprint real control text.
+      trace.lane.hidden=blockers.some(block=>
         box.left < block.right+padding && box.right > block.left-padding &&
         box.top < block.bottom+padding && box.bottom > block.top-padding
       );

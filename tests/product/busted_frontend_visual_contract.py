@@ -67,8 +67,14 @@ async def run():
                 assert await page.locator("#technology .busted-model-capabilities-grid > div").count()==4
                 assert await page.locator("#technology .busted-output-contract").count()==1
                 assert "OUR MODELS" in (await page.locator("#technology").inner_text())
-                assert "RENDERED FRAMES" in (await page.locator("#technology").inner_text())
-                assert "EDITABLE PUPPET" in (await page.locator("#technology").inner_text())
+                assert "ANIMATION-FIRST" in (await page.locator("#technology").inner_text())
+                assert "PUPPET-FIRST" in (await page.locator("#technology").inner_text())
+                assert await page.locator("#technology .busted-compile-vs-studio > div").count()==2
+                technology_text=await page.locator("#technology").inner_text()
+                assert "THE HEAVY LIFT HAPPENS HERE" in technology_text
+                assert "CREATIVE CONTROL, NOT MANDATORY SETUP" in technology_text
+                assert "The character is the result." in technology_text
+                assert "Then make it your own." in technology_text
                 assert "BUSTED" not in (await page.locator("#technology").inner_text()), (
                     "Brand repeated inside the educational model chapter"
                 )

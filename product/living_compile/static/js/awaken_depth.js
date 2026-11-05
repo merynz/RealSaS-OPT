@@ -40,14 +40,14 @@
   // placed text. Each reservation has a unique vertical row and bounded width.
   // Perspective compensation preserves x/y while changing real z depth.
   const desktopSlots=[
-    {x:4,y:15,w:29},{x:58,y:12,w:29},
-    {x:6,y:35,w:29},{x:61,y:34,w:31},
-    {x:4,y:57,w:31},{x:60,y:56,w:31},
-    {x:6,y:79,w:31},{x:59,y:80,w:30}
+    {x:3,y:9,w:43},{x:54,y:9,w:43},
+    {x:3,y:32,w:43},{x:54,y:32,w:43},
+    {x:3,y:55,w:43},{x:54,y:55,w:43},
+    {x:3,y:78,w:43},{x:54,y:78,w:43}
   ];
   const mobileSlots=[
-    {x:5,y:18,w:42},{x:55,y:31,w:40},
-    {x:5,y:63,w:42},{x:55,y:83,w:39}
+    {x:5,y:7,w:90},{x:5,y:30,w:90},
+    {x:5,y:53,w:90},{x:5,y:76,w:90}
   ];
 
   function build(){
@@ -101,14 +101,54 @@
       traces.push(state);typeRoot.appendChild(lane);
     }
     root.appendChild(fragment);
+    layoutTraces();
     paint();
+  }
+
+
+  function fitCode(row) {
+    // A complete line must fit; clipping text is not an acceptable fallback.
+    const options=[];
+    for(let i=0;i<12;i++)options.push(generateCode());
+    options.push('rig.bind();','mesh.compile();','scene.resolve();','skin.attach();');
+    for(const text of options){
+      row.textContent=text;
+      if(row.scrollWidth <= row.clientWidth-8)return text;
+    }
+    return '';
+  }
+
+  function layoutTraces() {
+    // This code belongs exclusively to the Chamber's reserved visualization.
+    // No status text, real input, header or primary control can be painted here.
+    const bounds=typeRoot.getBoundingClientRect();
+    const width=bounds.width,height=bounds.height;
+    if(width<=0||height<=0)return;
+    const mobile=narrow.matches;
+    const perspective=mobile?850:1100;
+    const slots=mobile?mobileSlots:desktopSlots;
+    for(let i=0;i<traces.length;i++){
+      const trace=traces[i],slot=slots[i];
+      if(!slot){trace.lane.hidden=true;continue}
+      const x=slot.x/100*width,y=slot.y/100*height;
+      const w=slot.w/100*width,h=mobile?58:59;
+      const z=Number((trace.lane.style.transform.match(/-?\d+/)||[])[0])||-150;
+      const ratio=(perspective-z)/perspective;
+      trace.lane.hidden=false;
+      trace.lane.style.left=(width/2+(x-width/2)*ratio).toFixed(2)+'px';
+      trace.lane.style.top=(height/2+(y-height/2)*ratio).toFixed(2)+'px';
+      trace.lane.style.width=(w*ratio).toFixed(2)+'px';
+      trace.lane.style.height=(h*ratio).toFixed(2)+'px';
+      trace.lines=trace.rows.map(row=>fitCode(row));
+      trace.lastCycle=Math.floor((elapsed+trace.offset)/trace.cycle);
+    }
   }
 
   function paint(){
     for(const trace of traces){
       const t=elapsed+trace.offset,cycle=Math.floor(t/trace.cycle);
       if(cycle!==trace.lastCycle){
-        trace.lines=trace.rows.map(generateCode);
+        trace.lines=trace.rows.map(row=>fitCode(row));
         trace.lastCycle=cycle;
       }
       const local=t%trace.cycle;
@@ -138,6 +178,13 @@
     else paint();
   }
   build();start();
+  document.fonts?.ready?.then(()=>{layoutTraces();paint()});
+  let resizeQueued=false;
+  window.addEventListener('resize',()=>{
+    if(resizeQueued)return;
+    resizeQueued=true;
+    setTimeout(()=>{resizeQueued=false;layoutTraces();paint()},80);
+  });
   narrow.addEventListener?.('change',()=>{build();start()});
   reduced.addEventListener?.('change',start);
   document.addEventListener('visibilitychange',start);

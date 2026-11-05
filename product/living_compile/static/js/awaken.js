@@ -12,6 +12,13 @@ const status = document.querySelector('#mastStatus');
 const viewCount = document.querySelector('#viewCount');
 const result = document.querySelector('#result');
 const modeLabel = document.querySelector('#modeLabel');
+const compileLiveStage = document.querySelector('#compileLiveStage');
+const compileStatusMessage = document.querySelector('#compileStatusMessage');
+
+function showLiveCompileStatus(stage, detail) {
+  if (compileLiveStage) compileLiveStage.textContent = String(stage || 'AWAITING SOURCE');
+  if (compileStatusMessage) compileStatusMessage.textContent = String(detail || 'Waiting for compiler events.');
+}
 
 const productStages = [
   ['INPUT', 'source_observation::qualified'],
@@ -82,6 +89,7 @@ function setFiles(files) {
     resultPreview.removeAttribute('src');
     viewCount.textContent = '0 VIEWS';
     syncGatewayUI();
+    showLiveCompileStatus('AWAITING SOURCE', 'Select a front character view to begin.');
     return;
   }
   activeSourceObjectURL = URL.createObjectURL(selectedFiles[0]);
@@ -92,6 +100,9 @@ function setFiles(files) {
   dropzone.classList.add('has-image');
   viewCount.textContent = `${selectedFiles.length} VIEW${selectedFiles.length > 1 ? 'S' : ''}`;
   syncGatewayUI();
+  showLiveCompileStatus('SOURCE ATTACHED', project?.compile_available && project?.public_compile_gateway
+    ? 'Source views selected. Use AWAKEN to submit them to the verified compiler gateway.'
+    : 'Source views selected. This static preview has no production compiler connection.');
   addLog(`source intake armed · ${selectedFiles.length} view${selectedFiles.length > 1 ? 's' : ''}`, true);
 }
 
@@ -269,6 +280,7 @@ async function runProductionFlow() {
   shell.classList.add('compiling');
   status.classList.add('ready');
   status.querySelector('span').textContent = 'SUBMITTING';
+  showLiveCompileStatus('SUBMITTING', 'Sending selected source views to the production compiler.');
   awaken.disabled = true;
   addLog('submitting public compile session', true);
   const session = await startProductionCompile();
@@ -280,6 +292,11 @@ async function runProductionFlow() {
   while (!terminal) {
     const payload = await apiJson(`/api/compile/status?id=${encodeURIComponent(compileID)}`);
     const stageName = String(payload.stage || payload.capability || '').toUpperCase();
+    const serverDetail = String(payload.detail || payload.message || '').trim();
+    showLiveCompileStatus(
+      stageName || String(payload.status || 'RUNNING').toUpperCase(),
+      serverDetail || (stageName ? `Compiler reports stage: ${stageName.toLowerCase()}.` : 'Waiting for further compiler status.')
+    );
     const index = productStages.findIndex(([name]) => stageName.includes(name));
     if (index >= 0 && index !== lastStage) {
       pipeline.forEach((step, i) => {
@@ -311,6 +328,7 @@ async function runProductionFlow() {
   openWorkspace.href = workspace.workspace_url || `/workspace?bundle=${encodeURIComponent(workspace.bundle)}`;
   openWorkspace.textContent = 'OPEN STUDIO';
   addLog('ProductRevision sealed · proof authority PASS', true);
+  showLiveCompileStatus('PRODUCT PROOF · PASS', 'Verified editable puppet workspace is ready.');
   result.classList.add('show');
   status.querySelector('span').textContent = 'ALIVE';
   void startIdleReveal(workspace.bundle).catch((error) => {
@@ -328,17 +346,19 @@ awaken.addEventListener('click', async () => {
     if (project?.compile_available && project?.public_compile_gateway) {
       await runProductionFlow();
     } else {
-      // Production UI never fabricates a compile graph or proof result.
-      status.querySelector('span').textContent = 'COMPILER OFFLINE';
-      modeLabel.textContent = 'COMPILER OFFLINE · NO PRODUCT AUTHORITY';
-      awaken.disabled = false;
-      addLog('Compile unavailable · requires a qualified production gateway', true);
+      // Static hosting deliberately cannot simulate proof or mint a ProductRevision.
+      status.querySelector('span').textContent = 'PREVIEW ONLY';
+      modeLabel.textContent = 'UI PREVIEW · COMPILER OFFLINE';
+      awaken.disabled = true;
+      showLiveCompileStatus('COMPILER OFFLINE', 'Static preview only. No simulated compile, proof or puppet output.');
+      addLog('Compiler not connected. No simulated compile or proof.', true);
     }
   } catch (error) {
     shell.classList.remove('compiling');
     status.classList.remove('ready');
     status.querySelector('span').textContent = 'INTAKE READY';
     awaken.disabled = false;
+    showLiveCompileStatus('COMPILE FAILED', error.message);
     addLog(`compile rejected · ${error.message}`, true);
   } finally {
     running = false;
@@ -350,16 +370,18 @@ async function loadProject() {
     const response = await fetch('/api/project', {cache: 'no-store'});
     project = await response.json();
     const production = response.ok && project?.compile_available && project?.public_compile_gateway;
-    modeLabel.textContent = production ? 'PRODUCTION GATEWAY' : 'COMPILER OFFLINE · NO PRODUCT AUTHORITY';
+    modeLabel.textContent = production ? 'PRODUCTION GATEWAY' : 'UI PREVIEW · COMPILER OFFLINE';
     if (production) {
       status.classList.add('ready');
       status.querySelector('span').textContent = 'PRODUCTION READY';
     }
     syncGatewayUI();
+    if (!production) showLiveCompileStatus('COMPILER OFFLINE', 'This preview shows the experience; real compilation requires the production gateway.');
   } catch {
     project = null;
     syncGatewayUI();
-    modeLabel.textContent = 'COMPILER OFFLINE · NO PRODUCT AUTHORITY';
+    modeLabel.textContent = 'UI PREVIEW · COMPILER OFFLINE';
+    showLiveCompileStatus('COMPILER OFFLINE', 'This preview does not generate or claim a compiled puppet.');
   }
 }
 

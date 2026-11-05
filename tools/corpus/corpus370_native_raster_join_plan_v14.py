@@ -104,6 +104,7 @@ def arms_for_plan(plan):
             and plan["selected_control_count"] in (1,2),"V14_RASTER_BLIND_PRECOMMIT_VALIDATION")
     arms=["ORIGINAL_BASE","SOUP_BASE","SOUP_NOOP",
           "ROOT_SHAM_ORIGINAL","ROOT_SHAM_SOUP"]
+    arms.extend(f"ACTIVE_C{ci:02d}_BASE" for ci in range(plan["selected_control_count"]))
     pairs=[]
     seen=set()
     for ci,r in enumerate(plan["controls"]):
@@ -117,6 +118,7 @@ def arms_for_plan(plan):
         for sign in ("PLUS","MINUS"):
             real=f"SOURCE_C{ci:02d}_{sign}"
             soup=f"SOUP_C{ci:02d}_{sign}"
-            arms.extend((real,soup))
-            pairs.append((real,soup))
+            active=f"ACTIVE_C{ci:02d}_{sign}"
+            arms.extend((real,soup,active))
+            pairs.append((real,soup,active))
     return arms,pairs

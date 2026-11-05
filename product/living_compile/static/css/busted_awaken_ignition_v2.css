@@ -39,6 +39,8 @@
   pointer-events:none!important;
   z-index:0!important;
   border-radius:inherit;
+  width:100%;height:100%;box-sizing:border-box;
+  background-clip:border-box;
   transition:none!important;
 }
 #awakenChamber .chamber-console #awaken.awaken-button::before {
@@ -46,15 +48,16 @@
     rgba(66,98,213,.0) 0%,rgba(116,138,255,.67) 18%,
     rgba(167,115,243,.88) 41%,rgba(249,113,78,.92) 67%,
     rgba(255,191,107,.98) 100%)!important;
-  transform:scaleX(0)!important;
-  transform-origin:left center!important;
-  opacity:0!important;
+  /* Do not mark animated properties !important: that suppresses CSS keyframes. */
+  transform:scaleX(0);
+  transform-origin:left center;
+  opacity:0;
 }
 #awakenChamber .chamber-console #awaken.awaken-button::after {
   background:
     radial-gradient(ellipse 72% 140% at 55% 50%,rgba(255,242,192,.94),rgba(255,145,72,.76) 37%,rgba(219,67,72,.34) 68%,transparent 100%)!important;
-  transform:scale(.73)!important;
-  opacity:0!important;
+  transform:scale(.73);
+  opacity:0;
 }
 #awakenChamber .chamber-console #awaken.awaken-button span {
   position:relative;z-index:2;color:inherit!important;
@@ -79,7 +82,7 @@
   box-shadow:inset 0 1px 0 rgba(255,239,197,.48),0 0 36px rgba(239,119,72,.41)!important;
 }
 #awakenChamber .chamber-console #awaken.awaken-button.is-igniting::before {
-  transform:scaleX(1)!important;
+  transform:scaleX(1);
   opacity:1!important;
   background:linear-gradient(95deg,#7457cb,#c663a8 30%,#e76569 57%,#ffa959 88%)!important;
 }

@@ -136,7 +136,7 @@ def run(job_path,output_path):
     group_labels={
         c["slot_count"]:np.asarray(c["face_slot_teacher_only"],np.int32)
         for c in layer["candidates"]
-        if c["slot_count"] in plan["source_geometry_candidate_sizes"]
+        if c["slot_count"] in original_plan["source_geometry_candidate_sizes"]
     }
     sizes=original_plan["source_geometry_candidate_sizes"]
     tasks=heldout["query_targets_source_teacher_only"]

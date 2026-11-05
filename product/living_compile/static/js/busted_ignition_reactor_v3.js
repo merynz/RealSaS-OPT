@@ -100,7 +100,7 @@ export function installAwakenReactor(button, sourceViewport) {
   }
 
   function chargeField(t) {
-    const p=smooth((t-.025)/.665);
+    const p=smooth((t-.006)/.525);
     if(p<=0)return;
     const front=mix(0,width-2,p);
     const visible=clamp(p*1.65+.12);
@@ -147,13 +147,13 @@ export function installAwakenReactor(button, sourceViewport) {
   }
 
   function ignitionBlast(t){
-    const attack=smooth((t-.67)/.12);
-    const decay=1-smooth((t-.83)/.13);
+    const attack=smooth((t-.525)/.052);
+    const decay=1-smooth((t-.625)/.078);
     const heat=attack*decay;
     if(heat<=0)return;
     const centerX=width*.64,centerY=height*.5;
     // Compression into a white-hot core, then an expanding shock front.
-    const size=mix(12,width*.9,smooth((t-.72)/.18));
+    const size=mix(12,width*.9,smooth((t-.555)/.14));
     const flash=ctx.createRadialGradient(centerX,centerY,2,centerX,centerY,size);
     flash.addColorStop(0,rgba(255,249,233,1.0*heat));
     flash.addColorStop(.12,rgba(255,221,158,.98*heat));
@@ -168,7 +168,7 @@ export function installAwakenReactor(button, sourceViewport) {
     ctx.fillRect(-width,-height,width*3,height*3);
     ctx.restore();
 
-    const spread=smooth((t-.76)/.15);
+    const spread=smooth((t-.55)/.14);
     const ringW=mix(3,width*.68,spread);
     ctx.save();ctx.globalAlpha=heat*.9;
     ctx.strokeStyle=rgba(255,218,173,.86);ctx.lineWidth=mix(2,.6,spread);
@@ -180,12 +180,12 @@ export function installAwakenReactor(button, sourceViewport) {
     for(let i=0;i<5;i++){
       const y=centerY+(i-2)*height*.12;
       const reach=width*(.24+.18*noise(i*4.2));
-      const phase=1-smooth(Math.abs(t-(.79+i*.013))/.10);
+      const phase=1-smooth(Math.abs(t-(.595+i*.012))/.084);
       if(phase<=0)continue;
       glowLine(centerX-reach*.65,y,centerX+reach,y,rgba(255,234-i*17,202-i*29,.6*phase),11,i===2?2.8:1.15);
     }
     for(let i=0;i<sparks.length;i++){
-      const p=sparks[i],life=(t-(.76+p.offset))/.25;
+      const p=sparks[i],life=(t-(.56+p.offset))/.24;
       if(life<0||life>p.life)continue;
       const fade=Math.pow(1-life/p.life,1.4);
       const x=centerX+p.x*width+p.vx*life*.34;
@@ -197,8 +197,8 @@ export function installAwakenReactor(button, sourceViewport) {
   }
 
   function afterglow(t){
-    if(t<.80)return;
-    const fade=1-smooth((t-.84)/.16);
+    if(t<.705)return;
+    const fade=1-smooth((t-.70)/.30);
     if(fade<=0)return;
     const coreX=width*.64;
     const halo=ctx.createRadialGradient(coreX,height*.5,2,coreX,height*.5,width*.65);
@@ -227,7 +227,7 @@ export function installAwakenReactor(button, sourceViewport) {
       chargeField(.70);ignitionBlast(t);
     }else{
       ctx.save();
-      ctx.globalAlpha=1-smooth((t-.72)/.24);
+      ctx.globalAlpha=1-smooth((t-.705)/.14);
       chargeField(.70);
       ctx.restore();
       afterglow(t);

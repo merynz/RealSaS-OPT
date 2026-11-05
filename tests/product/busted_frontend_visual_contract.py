@@ -179,19 +179,50 @@ async def run():
                 assert "rgb(23, 35, 78)" in resting["background"], (
                     f"AWAKEN must rest in cold cobalt; no permanent orange fire: {resting}"
                 )
+                await page.evaluate("""() => {
+                  const button=document.querySelector('#awaken');
+                  window.__ignitionVisualProof={phases:[],sample:null};
+                  const proof=window.__ignitionVisualProof;
+                  new MutationObserver(() => {
+                    const phase=button.classList.contains('is-charging')?'charge':
+                      button.classList.contains('is-igniting')?'ignition':'rest';
+                    proof.phases.push(phase);
+                    if(phase==='charge'){
+                      setTimeout(() => {
+                        const p=getComputedStyle(button,'::before');
+                        const face=button.getBoundingClientRect();
+                        proof.sample={
+                          opacity:parseFloat(p.opacity),
+                          scale:new DOMMatrixReadOnly(p.transform).a,
+                          width:parseFloat(p.width),height:parseFloat(p.height),
+                          faceWidth:face.width,faceHeight:face.height
+                        };
+                      },200);
+                    }
+                  }).observe(button,{attributes:true,attributeFilter:['class']});
+                }""")
                 await button.click()
-                await page.wait_for_function("""() =>
-                  document.querySelector('#awaken')?.classList.contains('is-charging')
-                """, timeout=1500)
-                if width == 1440:
-                    await button.screenshot(path=str(OUT / "awaken_click_charge_1440.png"))
-                await page.wait_for_function("""() =>
-                  document.querySelector('#awaken')?.classList.contains('is-igniting')
-                """, timeout=2200)
                 await page.wait_for_function("""() => {
+                  const proof=window.__ignitionVisualProof;
                   const b=document.querySelector('#awaken');
-                  return !b.classList.contains('is-charging')&&!b.classList.contains('is-igniting');
-                }""", timeout=2200)
+                  return proof?.sample&&proof.phases.includes('charge')&&
+                    proof.phases.includes('ignition')&&proof.phases.includes('rest')&&
+                    !b.classList.contains('is-charging')&&
+                    !b.classList.contains('is-igniting');
+                }""", timeout=5000)
+                proof=await page.evaluate("window.__ignitionVisualProof")
+                assert .08 < proof["sample"]["scale"] < 1, (
+                    f"Ignition charge never filled the actual button face: {proof}"
+                )
+                assert proof["sample"]["opacity"] > .9, (
+                    f"Ignition power overlay not visible: {proof}"
+                )
+                assert abs(proof["sample"]["width"]-proof["sample"]["faceWidth"]) <= 3, (
+                    f"Ignition overlay and actual button widths differ: {proof}"
+                )
+                assert abs(proof["sample"]["height"]-proof["sample"]["faceHeight"]) <= 3, (
+                    f"Ignition overlay and actual button heights differ: {proof}"
+                )
                 assert await page.evaluate("window.__ignitionCompilePosts") == 0, (
                     "Preview ignition must never start a real compile!"
                 )

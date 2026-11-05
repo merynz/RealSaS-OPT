@@ -149,6 +149,6 @@ def test_source_byte_sha_is_original_not_derived_editor_label(authored):
     blob=raw(authored)
     merged,hidden,r=flatten(authored,source_bytes=blob)
     assert r["original_source_SHA256"]==hashlib.sha256(blob).hexdigest()
-    assert hidden["artist_original_project_sha256"]==r["original_source_SHA256"]
+    assert hidden["human_authored_source_export_sha256"]==r["original_source_SHA256"]
     assert len(hidden["artist_slot_id_teacher_only_per_face"])==len(merged["faces"])
     assert hidden["anonymous_merged_surface_sha256"]==r["anonymous_merged_surface_sha256"]

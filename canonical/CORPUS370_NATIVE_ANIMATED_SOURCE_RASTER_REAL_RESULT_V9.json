@@ -19,7 +19,8 @@
     "private_evidence_root": "gdrive:corpus370_preparation_v1/hosted_native_animated_partition_private_v9/42014234494-1",
     "first_hosted_attempt_id": 42013088875,
     "first_hosted_attempt_status": "FAILED_CONTRACT_FALSE_ASSUMPTION_V4_POSED_SNAPSHOT_NOT_TRIANGULATED",
-    "first_attempt_fix": "Use per-object authored polygon connectivity signature and exact source native posed vertex array, not missing freeze_triangulation_false face list"
+    "first_attempt_fix": "Use per-object authored polygon connectivity signature and exact source native posed vertex array, not missing freeze_triangulation_false face list",
+    "original_render_manifest_sha256_verified_separately": 3
   },
   "parents": {
     "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
@@ -85,7 +86,8 @@
       },
       "independent_private_court_sha256": "d53baa0edeed2b570cef5f84394d91adfca2a5c0efbb721e959b5780e2e40e4b",
       "private_render_arrays_sha256": "024cbd674f97d921a666f73a188e9e2b739f5a8f358c1b3593745f7a11566bab",
-      "whole_frame_occlusion_artifact_and_caa_minted": false
+      "whole_frame_occlusion_artifact_and_caa_minted": false,
+      "render_manifest_sha256": "0aac3ad8fd49bb8bce65f18e3f770e6c186478309a7368760e4c68a6c5aa1ec8"
     },
     {
       "label": "TRICERATOPS",
@@ -122,7 +124,8 @@
       },
       "independent_private_court_sha256": "1289010d4999fe1bb21384963189c0c067940003d096c3ca35f077921554274c",
       "private_render_arrays_sha256": "d882dccebe9f1d5f06052ab94a047b47a90fd873b8a8a2a5dba6db4e9fc4adc8",
-      "whole_frame_occlusion_artifact_and_caa_minted": false
+      "whole_frame_occlusion_artifact_and_caa_minted": false,
+      "render_manifest_sha256": "4e2597a3b9541daebe9bdc6663b60bc42fa7cf8288398831edc6bcb5624478ff"
     },
     {
       "label": "COWFISH",
@@ -159,7 +162,8 @@
       },
       "independent_private_court_sha256": "683b4d63e0b164db3fa9fe644c0e0353ce2b920efdfe29a9e3dd43d3735ed113",
       "private_render_arrays_sha256": "6f8178bd5cdfe84c800982c3983efa4c15d7da5256c6b61361ec45d3313e8bcc",
-      "whole_frame_occlusion_artifact_and_caa_minted": false
+      "whole_frame_occlusion_artifact_and_caa_minted": false,
+      "render_manifest_sha256": "5416e808cefdd5b88284fb84c817c7f8cf79978bf6c701bb65e355b0e480b1eb"
     }
   ],
   "science_scope": {

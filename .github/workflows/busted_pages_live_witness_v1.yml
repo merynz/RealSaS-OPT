@@ -1,6 +1,9 @@
 name: BUSTED Pages Live Witness
 # Manual incident-recovery/proof tool; never run on ordinary product PRs.
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/busted_pages_live_witness_v1.yml'
   workflow_dispatch:
 jobs:
   public-pages-witness:
@@ -15,15 +18,23 @@ jobs:
           curl --fail --location --silent --show-error --retry 3 \
             -H 'Cache-Control: no-cache' "$URL/index.html?pages_witness=${GITHUB_RUN_ID}" -o /tmp/busted-live-index.html
           echo "=== Public page revision markers ==="
-          grep -E 'busted_awaken_ignition|busted_compile_terminal|studio_director|QUALIFIED|ALIVE' /tmp/busted-live-index.html || true
+          grep -E 'busted_awaken_reactor|busted_compile_terminal|studio_director|QUALIFIED|ALIVE' /tmp/busted-live-index.html || true
           echo "=== Pages HTML content fingerprint ==="
           sha256sum /tmp/busted-live-index.html
-          echo "=== Public fiery CSS status ==="
-          curl -sSLI --retry 3 "$URL/static/css/busted_awaken_ignition_v2.css?pages_witness=${GITHUB_RUN_ID}" | sed -n '1,18p'
-          curl --fail -sSL --retry 3 "$URL/static/css/busted_awaken_ignition_v2.css?pages_witness=${GITHUB_RUN_ID}" -o /tmp/live-fire.css
+          echo "=== Public reactor CSS status ==="
+          curl -sSLI --retry 3 "$URL/static/css/busted_awaken_reactor_v3.css?pages_witness=${GITHUB_RUN_ID}" | sed -n '1,18p'
+          curl --fail -sSL --retry 3 "$URL/static/css/busted_awaken_reactor_v3.css?pages_witness=${GITHUB_RUN_ID}" -o /tmp/live-fire.css
           grep -E 'fiery|#awaken.awaken-button|#ffac55' /tmp/live-fire.css || true
-          echo "=== Authoritative public page check ==="
-          if grep -q 'busted_awaken_ignition_v2.css' /tmp/busted-live-index.html && grep -q '<h2>QUALIFIED</h2>' /tmp/busted-live-index.html; then
+          echo "=== Authoritative live source and half-density check ==="
+          curl -fsSL "$URL/static/js/busted_stage_rain_v2.js?pages_witness=${GITHUB_RUN_ID}" -o /tmp/rain.js
+          curl -fsSL "$URL/static/js/busted_spatial_typing_v4.js?pages_witness=${GITHUB_RUN_ID}" -o /tmp/typing.js
+          curl -fsSL "$URL/static/js/busted_ignition_reactor_v3.js?pages_witness=${GITHUB_RUN_ID}" -o /tmp/reactor.js
+          if grep -q 'busted_awaken_reactor_v3.css' /tmp/busted-live-index.html && \
+             grep -q 'busted_spatial_typing_v4.js?v=4.1.0' /tmp/busted-live-index.html && \
+             grep -q '<h2>QUALIFIED</h2>' /tmp/busted-live-index.html && \
+             grep -q "hero'?36:32" /tmp/rain.js && \
+             grep -q 'tablet?4:6' /tmp/typing.js && \
+             grep -q 'installAwakenReactor' /tmp/reactor.js; then
             echo 'PUBLIC_PAGES_CURRENT=YES'
           else
             echo 'PUBLIC_PAGES_CURRENT=NO'

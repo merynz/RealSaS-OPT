@@ -121,7 +121,7 @@
   }
 
   function put(t) {
-    t.el.style.transform='translate3d('+t.x.toFixed(1)+'px,'+t.y.toFixed(1)+'px,0)';
+    t.el.style.setProperty('transform','translate3d('+t.x.toFixed(1)+'px,'+t.y.toFixed(1)+'px,0)','important');
     t.el.style.setProperty('--trace-opacity',t.opacity.toFixed(3));
   }
 

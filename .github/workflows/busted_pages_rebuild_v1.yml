@@ -1,8 +1,7 @@
 name: BUSTED Pages Source and Rebuild
+# First rebuild attempt was diagnosed blocked by stale Pages deployment.
+# Keep this as manual-only once the recovery lane owns the stuck lock.
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/busted_pages_rebuild_v1.yml'
   workflow_dispatch:
 permissions:
   contents: read

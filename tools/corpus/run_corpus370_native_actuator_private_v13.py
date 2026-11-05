@@ -219,7 +219,7 @@ def run(args):
                 restarr["rest_vertices_source_world"],restarr["faces"],
                 nativearr["posed_vertices_source_world"],
                 arr["baseline_vertices"],arr["native_control_perturbed_vertices"],
-                manifest,proposal,heldout,v12row)
+                manifest,proposal,heldout,v12row,v9row["original_pose_indices_teacher_only"])
         court["parents"]={
             "original_source_sha256":source["source_sha256"],
             "original_v12_public_sha256":sha(args.public_v12),

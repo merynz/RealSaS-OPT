@@ -100,9 +100,11 @@ done
 
 
 
-# Use a specific already SHA-courted original source V18a stain job. This is
-# NOT a general latest or dynamic-retrained layer search.
-V18A_RUN=42095639620-1
+# Use the exact V18a run 6 (SHA 5de27047c5bf4436a4f406b72947872c415d3a55).
+# Cat/Triceratops independent courts passed; Cowfish must also PASS and
+# upload its independent private receipt before enabling real V18b source jobs.
+# Never substitute a cancelled V18a run or look up "latest" dynamically.
+V18A_RUN=42097722762-1
 STAIN="$D/corpus370_reactive_stain_v18a_parent/$V18A_RUN/$SUBJECT"
 mkdir -p "$STAIN"
 for name in \

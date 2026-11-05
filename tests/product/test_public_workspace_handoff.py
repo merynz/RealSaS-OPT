@@ -58,7 +58,7 @@ class PublicWorkspaceHandoffTests(unittest.TestCase):
             gateway.assert_called_once()
 
             studio, studio_type = app.static_bytes("/studio")
-            self.assertIn(b"RealSaS \xc2\xb7 Studio", studio)
+            self.assertIn(b"BUSTED \xc2\xb7 Studio", studio)
             self.assertEqual(studio_type, "text/html")
 
 

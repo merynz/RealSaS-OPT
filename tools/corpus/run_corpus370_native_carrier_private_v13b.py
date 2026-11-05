@@ -14,7 +14,7 @@ import traceback
 import numpy as np
 from tools.corpus.audit_corpus370_v5_source_rest_courts_v1 import row_input
 from tools.corpus.corpus370_partition_edit_plan_v7 import build_plan
-from tools.corpus.court_corpus370_native_actuator_mechanics_v13 import evaluate
+from tools.corpus.court_corpus370_native_carrier_mechanics_v13b import evaluate
 from tools.corpus.run_corpus370_native_animated_partition_private_v9 import (
     sha,read,ref,seal,require,pick_three_poses,V5_SHA,ROSTER_SHA,RAYS_SHA,JOIN_SHA,
     GROUP_SHA,NATIVE_SHA
@@ -29,7 +29,7 @@ def run(args):
     out=Path(args.output).resolve()
     out.mkdir(parents=True,exist_ok=True)
     result={"schema":SCHEMA,
-            "status":"FAIL_V13BB_HELDOUT_NATIVE_SOURCE_RENDER_NOT_CLOSED",
+            "status":"FAIL_V13B_HELDOUT_NATIVE_SOURCE_RENDER_NOT_CLOSED",
             "worker":args.subject_ordinal,
             "graphics_owner_authorized":False,
             "training_authorized":False}
@@ -209,7 +209,7 @@ def run(args):
              "--","--job",str(jobpath),"--output",str(manifestpath)]
         proc=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
                             text=True,check=False,timeout=14400)
-        (out/"PRIVATE_ANON_ACTUATOR_BLENDER_V13BB_LOG.txt").write_text(proc.stdout[-380000:])
+        (out/"PRIVATE_ANON_ACTUATOR_BLENDER_V13B_LOG.txt").write_text(proc.stdout[-380000:])
         require(proc.returncode==0,
                 "V13B_NATIVE_ORIGINAL_RIG_ACTUATOR_BLENDER_EXIT_"+str(proc.returncode))
         manifest=read(manifestpath,sha(manifestpath),
@@ -251,7 +251,7 @@ def run(args):
                 and court["positive_different_drawable_labels"]==0,
                 "V13B_SOURCE_NATIVE_INTERVENTION_NOT_ARTIST_DRAWABLE")
         result.update({
-            "status":"MEASURED_REAL_ORIGINAL_SOURCE_RIG_ANONYMOUS_ACTUATION_V13BB_NO_OWNER",
+            "status":"MEASURED_REAL_SOURCE_RIG_OR_OBJECT_ANONYMOUS_ACTUATION_V13B_NO_OWNER",
             "subject_id":sid,"subject_label":label,
             "source_sha256":source["source_sha256"],
             "original_native_author_pose_indices":pose_indices,
@@ -284,10 +284,10 @@ def run(args):
     except (KeyboardInterrupt,MemoryError):
         raise
     except Exception as exc:
-        result["status"]="FAIL_REAL_V13BB_SOURCE_RENDER_OR_COURT"
+        result["status"]="FAIL_REAL_V13B_SOURCE_RENDER_OR_COURT"
         result["failure_type"]=type(exc).__name__
         result["failure_reason"]=str(exc)
-        seal(out/"PRIVATE_V13BB_SOURCE_FAILURE_RECEIPT.json",{
+        seal(out/"PRIVATE_V13B_SOURCE_FAILURE_RECEIPT.json",{
             "reason":str(exc),"type":type(exc).__name__,
             "traceback":traceback.format_exc(),
             "training_authorized":False,"graphics_owner_authorized":False
@@ -296,7 +296,7 @@ def run(args):
     seal(out/"PRIVATE_HELDOUT_NATIVE_EDIT_BATCH_V13B.json",result)
     print(json.dumps({k:v for k,v in result.items()
                      if k!="failure_reason"},sort_keys=True),flush=True)
-    require(result["status"]=="MEASURED_REAL_ORIGINAL_SOURCE_RIG_ANONYMOUS_ACTUATION_V13BB_NO_OWNER",
+    require(result["status"]=="MEASURED_REAL_SOURCE_RIG_OR_OBJECT_ANONYMOUS_ACTUATION_V13B_NO_OWNER",
             "V13B_HELDOUT_ANIMATED_SOURCE_RENDER_REQUIRES_REPAIR")
     return result
 

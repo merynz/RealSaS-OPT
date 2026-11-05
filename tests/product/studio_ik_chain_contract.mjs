@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import {solveTwoBoneReach,reachableTwoBoneConstraints,worldJointAnchor} from '../../product/living_compile/static/js/studio_ik_chain_core.js';
+import {StudioTimeline} from '../../product/living_compile/static/js/studio_timeline.js';
+import {derivePreviewJointPoses} from '../../product/living_compile/static/js/studio_control_semantics.js';
 const near=(a,b,eps=1e-5)=>assert.ok(Math.abs(a-b)<eps,`expected ${a} ~= ${b}`);
 const point=(a,b)=>{near(a[0],b[0]);near(a[1],b[1]);};
 
@@ -70,5 +72,27 @@ point(worldJointAnchor('wrist',{joints,edges,jointPoses:new Map()}),[2,0]);
 point(worldJointAnchor('wrist',{joints,edges,jointPoses:new Map([
  ['shoulder',{rotation_degrees:90,translation_xy:[0,0],scale_xy:[1,1]}],
 ])}),[0,2]);
+
+// Provenance: the solver's exact deltas can be authored as user clip keys
+// and sampled through Studio's real animator→deform preview bridge.
+const clipTimeline=new StudioTimeline([]);
+clipTimeline.createClip({clipID:'USER_IK',durationSeconds:1,fps:30});
+const reach=solveTwoBoneReach({start:[0,0],middle:[1,0],end:[2,0],target:[1,1]});
+clipTimeline.upsertTransformKey('anim_shoulder',{
+ translation_xy:[0,0],rotation_degrees:reach.start_delta_degrees,scale_xy:[1,1],
+},{time:0});
+clipTimeline.upsertTransformKey('anim_elbow',{
+ translation_xy:[0,0],rotation_degrees:reach.middle_delta_degrees,scale_xy:[1,1],
+},{time:0});
+near(clipTimeline.sample('anim_shoulder',0).rotation_degrees,90);
+near(clipTimeline.sample('anim_elbow',0).rotation_degrees,-90);
+const userPose=new Map([
+ ['anim_shoulder',clipTimeline.sample('anim_shoulder',0)],
+ ['anim_elbow',clipTimeline.sample('anim_elbow',0)]
+]);
+const preview=derivePreviewJointPoses(animatorControls,userPose,new Map());
+near(preview.get('shoulder').rotation_degrees,90);
+near(preview.get('elbow').rotation_degrees,-90);
+assert.equal(preview.get('shoulder').preview_metadata.authoritative_constraint_owner,'MECHANICS');
 
 console.log('STUDIO_IK_CHAIN_CONTRACT_PASS');

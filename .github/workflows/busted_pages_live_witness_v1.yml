@@ -1,0 +1,33 @@
+name: BUSTED Pages Live Witness
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/busted_pages_live_witness_v1.yml'
+  workflow_dispatch:
+jobs:
+  public-pages-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch public GitHub Pages HTML and CSS directly
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://merynz.github.io/RealSaS-OPT"
+          curl --fail --location --silent --show-error --retry 3 \
+            -H 'Cache-Control: no-cache' "$URL/index.html?pages_witness=${GITHUB_RUN_ID}" -o /tmp/busted-live-index.html
+          echo "=== Public page revision markers ==="
+          grep -E 'busted_awaken_fire|busted_compile_terminal|studio_director|QUALIFIED|ALIVE' /tmp/busted-live-index.html || true
+          echo "=== Pages HTML content fingerprint ==="
+          sha256sum /tmp/busted-live-index.html
+          echo "=== Public fiery CSS status ==="
+          curl -sSLI --retry 3 "$URL/static/css/busted_awaken_fire_v1.css?pages_witness=${GITHUB_RUN_ID}" | sed -n '1,18p'
+          curl --fail -sSL --retry 3 "$URL/static/css/busted_awaken_fire_v1.css?pages_witness=${GITHUB_RUN_ID}" -o /tmp/live-fire.css
+          grep -E 'fiery|#awaken.awaken-button|#ffac55' /tmp/live-fire.css || true
+          echo "=== Authoritative public page check ==="
+          if grep -q 'busted_awaken_fire_v1.css' /tmp/busted-live-index.html && grep -q '<h2>QUALIFIED</h2>' /tmp/busted-live-index.html; then
+            echo 'PUBLIC_PAGES_CURRENT=YES'
+          else
+            echo 'PUBLIC_PAGES_CURRENT=NO'
+            exit 1
+          fi

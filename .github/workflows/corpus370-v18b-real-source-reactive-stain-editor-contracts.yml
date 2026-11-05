@@ -1,0 +1,32 @@
+name: corpus370-v18b-real-source-reactive-stain-editor-contracts
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18b-real-source-reactive-stain-editor-contracts.yml'
+      - 'tools/truth_foundry/blender_corpus370_v18b_reactive_stain_heldout_edits.py'
+      - 'tools/corpus/court_corpus370_v18b_reactive_stain_editor_edits.py'
+      - 'tools/corpus/hosted_corpus370_v18b_reactive_stain_editor_edits.sh'
+      - 'tests/corpus/test_corpus370_v18b_reactive_stain_editor_edits.py'
+
+permissions:
+  contents: read
+
+jobs:
+  editor-source-truth-redteam-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source original Blender edit and independent court syntax
+        run: |
+          python3 -m py_compile \
+            tools/truth_foundry/blender_corpus370_v18b_reactive_stain_heldout_edits.py \
+            tools/corpus/court_corpus370_v18b_reactive_stain_editor_edits.py
+          bash -n tools/corpus/hosted_corpus370_v18b_reactive_stain_editor_edits.sh
+      - name: Adversarially reject false editable artist layers and source edit image corruption
+        run: |
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_v18b_reactive_stain_editor_edits.py

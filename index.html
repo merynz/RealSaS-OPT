@@ -25,11 +25,12 @@
 
 
   <link rel="stylesheet" href="./static/css/busted_visual_priority_v1.css?v=1.0.0">
-  <link rel="stylesheet" href="./static/css/busted_cinematic_v2.css?v=2.0.1">
+  <link rel="stylesheet" href="./static/css/busted_cinematic_v2.css?v=2.0.0">
   <link rel="stylesheet" href="./static/css/busted_cinematic_hotfix_v3.css?v=3.2.0">
   <link rel="stylesheet" href="./static/css/busted_compile_terminal_v1.css?v=1.0.0">
-  <link rel="stylesheet" href="./static/css/busted_awaken_reactor_v3.css?v=3.0.0">
+  <link rel="stylesheet" href="./static/css/busted_awaken_reactor_v3.css?v=3.1.0">
   <link rel="stylesheet" href="./static/css/busted_product_story_v1.css?v=1.0.0">
+  <link rel="stylesheet" href="./static/css/busted_story_refinement_v2.css?v=2.0.0">
 </head>
 <body>
   <main class="awaken-shell">
@@ -47,7 +48,7 @@
       <section class="stage-wrap" aria-label="BUSTED introduction">
         <div class="hero">
         <div class="hero-intro">
-          <p class="hero-eyebrow"><span class="eyebrow-marker" aria-hidden="true"></span> BUSTED / EDITABLE CHARACTERS</p>
+          <p class="hero-eyebrow"><span class="eyebrow-marker" aria-hidden="true"></span> SOURCE ART / REAL CONTROL</p>
           <h1>BRING YOUR<br>CHARACTER<br><span class="hero-title-accent">TO LIFE<span class="hero-title-period">.</span></span></h1>
           <p class="hero-copy">Your art should do more than sit still.</p>
           <p class="hero-description">Turn your character artwork into an editable puppet you can pose, animate and control. More source views help preserve more of your original art.</p>
@@ -64,7 +65,7 @@
       </section>
       <a class="descend-link" href="#artworkGuide" aria-label="Explore how to prepare your character artwork">
         <span class="descend-icon" aria-hidden="true">↓</span>
-        <span>HOW BUSTED WORKS <small>START WITH YOUR ARTWORK</small></span>
+        <span>EXPLORE THE PROCESS <small>START WITH YOUR ARTWORK</small></span>
       </a>
       <div class="landing-foot" aria-hidden="true"><span>GEOMETRY</span><span>MECHANICS</span><span>PRESENTATION</span></div>
     </section>
@@ -77,8 +78,8 @@
             <h2 id="guideHeading">GIVE IT<br><em>SOMETHING REAL.</em></h2>
           </div>
           <div class="busted-guide-intro">
-            <p>BUSTED starts with the character you already made. A clear reference gives the compiler more to understand — and you more to work with afterward.</p>
-            <span class="busted-subtle-cap">NO SPECIAL PROMPT. YOUR ARTWORK IS THE INPUT.</span>
+            <p>Start with the character you already designed. Good reference art helps our models understand its parts, proportions and structure — without asking you to redraw it.</p>
+            <span class="busted-subtle-cap">NO PROMPTS TO LEARN. YOUR ARTWORK IS THE INPUT.</span>
           </div>
         </div>
 
@@ -130,7 +131,32 @@
           </article>
         </div>
 
-        <div class="busted-guide-howto" aria-label="How to use BUSTED">
+        <div class="busted-input-preflight" aria-label="Input preparation checklist">
+          <div class="busted-input-preflight-head">
+            <div>
+              <span>BEFORE YOU UPLOAD</span>
+              <h3>Give the models a clear starting point.</h3>
+            </div>
+            <span class="busted-preflight-aside">ARTWORK CHECK / NOT AN AUTOMATED VALIDATION</span>
+          </div>
+          <div class="busted-input-preflight-pairs">
+            <div class="busted-preflight-good">
+              <span class="busted-preflight-kicker">HELPS THE COMPILER</span>
+              <p><span aria-hidden="true">+</span> Whole character in frame</p>
+              <p><span aria-hidden="true">+</span> Visible, distinguishable limbs</p>
+              <p><span aria-hidden="true">+</span> Matching front and back proportions</p>
+            </div>
+            <div class="busted-preflight-hard">
+              <span class="busted-preflight-kicker">CAN INTRODUCE UNCERTAINTY</span>
+              <p><span aria-hidden="true">−</span> Cropped feet, hands or accessories</p>
+              <p><span aria-hidden="true">−</span> Limbs hiding behind one another</p>
+              <p><span aria-hidden="true">−</span> Conflicting views or extreme perspective</p>
+            </div>
+          </div>
+          <p class="busted-preflight-note">These are recommendations, not strict style rules. Unusual characters are welcome; uncertain regions may need additional review.</p>
+        </div>
+
+        <div class="busted-guide-howto" aria-label="Prepare and compile a puppet">
           <p class="busted-guide-howto-title">THE SHORT VERSION</p>
           <div class="busted-guide-howto-steps">
             <div><span>01</span><strong>Prepare</strong><small>A clear front image</small></div>
@@ -141,7 +167,7 @@
         </div>
         <div class="busted-guide-bottom">
           <p><strong>A useful rule:</strong> If you can clearly see which part is which, the compiler has a better starting point. Difficult artwork may still need review and adjustment.</p>
-          <a href="#technology" class="busted-editorial-link">WHAT DOES BUSTED BUILD? <span aria-hidden="true">↗</span></a>
+          <a href="#technology" class="busted-editorial-link">WHAT DO OUR MODELS BUILD? <span aria-hidden="true">↗</span></a>
         </div>
       </div>
     </section>
@@ -149,31 +175,48 @@
     <section id="technology" class="busted-technology" aria-labelledby="technologyHeading">
       <div class="busted-technology-inner">
         <div class="busted-technology-title">
-          <p class="busted-section-index"><span>03</span> / THE IDEA BEHIND BUSTED</p>
-          <h2 id="technologyHeading">NOT ANOTHER<br>FRAME GENERATOR.<br><em>A PUPPET COMPILER.</em></h2>
-          <p>Most tools stop at an image or a sequence of frames. We're building a different kind of result: an editable character with structure underneath its appearance.</p>
+          <p class="busted-section-index"><span>03</span> / OUR MODELS</p>
+          <h2 id="technologyHeading">YOUR ART.<br>OUR MODELS.<br><em>REAL CONTROL.</em></h2>
+          <p>A video shows movement. An editable puppet gives you control. Our models work toward understanding the character behind the image — not simply drawing another frame.</p>
         </div>
-        <div class="busted-technology-flow" aria-label="Conceptual BUSTED compilation pipeline">
+        <div class="busted-technology-flow" aria-label="How our models approach the puppet compilation pipeline">
           <div class="busted-technology-flowtop"><span>FROM YOUR IMAGE</span><span>TO AN EDITABLE CHARACTER</span></div>
           <div class="busted-technology-stages">
             <article>
               <div class="busted-technology-stagehead"><span>01</span><i></i><span>SEE</span></div>
-              <h3>Understand the art.</h3>
-              <p>Look at the character's shape, visible parts and how those parts relate.</p>
-              <div class="busted-tech-micro">SOURCE · APPEARANCE</div>
+              <h3>Understand the source.</h3>
+              <p>Identify the visible shapes, ownership and what needs to stay recognisable.</p>
+              <div class="busted-tech-micro">SOURCE · RELATIONSHIPS</div>
             </article>
             <article>
               <div class="busted-technology-stagehead"><span>02</span><i></i><span>BUILD</span></div>
-              <h3>Give it structure.</h3>
-              <p>Work toward a mesh, rig and skin that can move without becoming a new drawing every frame.</p>
-              <div class="busted-tech-micro">MESH · RIG · WEIGHTS</div>
+              <h3>Build its mechanics.</h3>
+              <p>Infer the mesh, joints and influence relationships that support real poses.</p>
+              <div class="busted-tech-micro">MESH · JOINTS · SKIN</div>
             </article>
             <article>
               <div class="busted-technology-stagehead"><span>03</span><i></i><span>AWAKEN</span></div>
-              <h3>Make it yours to control.</h3>
-              <p>The goal is a persistent puppet that begins with an Idle and can be posed, animated and edited.</p>
-              <div class="busted-tech-micro">PUPPET · IDLE · MOTION</div>
+              <h3>Keep it editable.</h3>
+              <p>Compile an editable puppet with an initial Idle, then pose and animate that same character.</p>
+              <div class="busted-tech-micro">PUPPET · IDLE · STUDIO</div>
             </article>
+          </div>
+          <div class="busted-model-capabilities" aria-label="Research and compiler capabilities">
+            <div class="busted-model-capabilities-head">
+              <span>UNDER THE HOOD / OUR MODELS</span>
+              <span>DESIGN TARGETS · NOT A LIVE DEMO</span>
+            </div>
+            <div class="busted-model-capabilities-grid">
+              <div><span>01 / PERCEPTION</span><strong>Layers &amp; visibility</strong><small>Know what is in front, behind or hidden.</small></div>
+              <div><span>02 / STRUCTURE</span><strong>Mesh &amp; weights</strong><small>Give each surface a way to deform.</small></div>
+              <div><span>03 / MECHANICS</span><strong>Skeleton &amp; joints</strong><small>Understand how parts move together.</small></div>
+              <div><span>04 / PRESENTATION</span><strong>Art fidelity</strong><small>Keep the original character recognisable.</small></div>
+            </div>
+          </div>
+          <div class="busted-output-contract" aria-label="Why the editable puppet is different from a rendered video">
+            <div><span>RENDERED FRAMES</span><p>You watch the motion.</p><small>Pixels define the result.</small></div>
+            <div class="busted-output-versus" aria-hidden="true">≠</div>
+            <div><span>EDITABLE PUPPET</span><p>You control the motion.</p><small>Structure, weights and keys remain accessible.</small></div>
           </div>
           <div class="busted-technology-principle">
             <span class="busted-principle-mark" aria-hidden="true">⌁</span>
@@ -231,7 +274,7 @@
           </div>
           <div class="chamber-console">
             <div class="compile-action">
-              <button id="awaken" class="awaken-button" type="button" disabled aria-label="Awaken your character"><span class="awaken-label">AWAKEN</span><span class="awaken-glyph" aria-hidden="true">↗</span></button>
+              <button id="awaken" class="awaken-button" type="button" disabled aria-label="Awaken your character"><span class="awaken-label">AWAKEN</span></button>
               <p id="compileAvailability" class="compile-availability" role="status">UI PREVIEW · COMPILER OFFLINE</p>
             </div>
             <div class="compile-monitor-heading"><span>LIVE COMPILER ACTIVITY</span><span id="compileLiveStage" aria-live="polite">AWAITING SOURCE</span></div>

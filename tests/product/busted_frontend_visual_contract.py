@@ -81,6 +81,27 @@ async def run():
                     assert all(v["x"] >= v["left"]-3 and v["right"] <= v["limit"]+3 for v in tracks), (
                         f"{section}: code is cut off at edges: {tracks}"
                     )
+                    safety = await page.locator(section).evaluate("""(scope)=>{
+                      const selectors=scope.id==='introduction'
+                        ? ['.hero-intro','.descend-link','.landing-foot']
+                        : ['.chamber-header','.chamber-docking-label','.dropzone',
+                           '.input-slot-ledger','.chamber-console .console-heading',
+                           '.chamber-console h3','.chamber-console .console-copy',
+                           '#awaken','#compileAvailability','.chamber-console .telemetry'];
+                      const blockers=selectors.map(s=>scope.querySelector(s)).filter(Boolean)
+                        .map(el=>el.getBoundingClientRect());
+                      const tracks=Array.from(scope.querySelectorAll('.matrix-trace'))
+                        .filter(el=>getComputedStyle(el).display!=='none')
+                        .map(el=>el.getBoundingClientRect());
+                      const collisions=tracks.flatMap(track=>blockers.filter(b=>
+                        track.left<b.right+3 && track.right>b.left-3 &&
+                        track.top<b.bottom+3 && track.bottom>b.top-3
+                      ).map(b=>({track:{x:track.x,y:track.y},block:{x:b.x,y:b.y}})));
+                      return {visible:tracks.length,collisions};
+                    }""")
+                    assert safety["visible"]>=1, f"{section}: no ambient code remains visible"
+                    assert not safety["collisions"], f"{section}: ambient code overprints UI: {safety}"
+
                 assert await page.locator("#awaken").is_disabled(), "Offline preview must never offer a fake compile"
 
 

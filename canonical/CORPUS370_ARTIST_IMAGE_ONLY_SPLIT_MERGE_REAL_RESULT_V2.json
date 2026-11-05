@@ -83,6 +83,14 @@
         "conservative": 624,
         "adaptive": 840,
         "fine": 1428
+      },
+      "source_image_only_transparency_bridge_audit": {
+        "v1_image_graph_region_count": 150,
+        "v1_graph_foreground_four_connected_components": 1005,
+        "v1_labels_with_multiple_disconnected_foreground_islands": 98,
+        "additional_visible_components_hidden_by_v1_graph_labels": 855,
+        "maximum_disconnected_foreground_components_per_v1_region": 229,
+        "not_artist_drawable_truth": true
       }
     },
     {
@@ -123,6 +131,14 @@
         "conservative": 702,
         "adaptive": 771,
         "fine": 1379
+      },
+      "source_image_only_transparency_bridge_audit": {
+        "v1_image_graph_region_count": 136,
+        "v1_graph_foreground_four_connected_components": 813,
+        "v1_labels_with_multiple_disconnected_foreground_islands": 84,
+        "additional_visible_components_hidden_by_v1_graph_labels": 677,
+        "maximum_disconnected_foreground_components_per_v1_region": 77,
+        "not_artist_drawable_truth": true
       }
     },
     {
@@ -163,6 +179,14 @@
         "conservative": 477,
         "adaptive": 719,
         "fine": 1409
+      },
+      "source_image_only_transparency_bridge_audit": {
+        "v1_image_graph_region_count": 166,
+        "v1_graph_foreground_four_connected_components": 938,
+        "v1_labels_with_multiple_disconnected_foreground_islands": 116,
+        "additional_visible_components_hidden_by_v1_graph_labels": 772,
+        "maximum_disconnected_foreground_components_per_v1_region": 127,
+        "not_artist_drawable_truth": true
       }
     }
   ],
@@ -171,10 +195,12 @@
     "observable_artist_hide_effect_cases": 73,
     "masked_or_invisible_author_hide_cases": 5,
     "real_source_jobs_success": 3,
-    "redteam_contract_tests_per_source": 35,
+    "redteam_contract_tests_per_source": 37,
     "source_cases_beating_v1_graph_iou": 0,
     "source_cases_beating_v1_graph_effect_recall_conservative": 3,
-    "source_cases_v2_conservative_pareto_dominates_baseline_iou_and_recall": 0
+    "source_cases_v2_conservative_pareto_dominates_baseline_iou_and_recall": 0,
+    "additional_visible_four_connected_components_hidden_by_v1_graph_labels": 2304,
+    "v1_graph_labels_with_multiple_visible_disconnected_islands": 298
   },
   "critical_interpretations": [
     "The v1 image-graph region label count is not necessarily the count of foreground four-connected visible proposals. The v2 coarse image-only splitting explicitly separates background-bridged/disconnected foreground regions before merging.",
@@ -190,5 +216,8 @@
   "graphics_owner_authorized": false,
   "training_authorized": false,
   "materialization_authorized": false,
-  "puppet_product_compilation_authorized": false
+  "puppet_product_compilation_authorized": false,
+  "latest_topology_audited_run_id": 42070614120,
+  "latest_topology_audited_run_url": "https://github.com/merynz/RealSaS-OPT/actions/runs/42070614120",
+  "latest_topology_code_head_sha": "b04e0f12c8781f37599ca4a23ad6d23762830fed"
 }

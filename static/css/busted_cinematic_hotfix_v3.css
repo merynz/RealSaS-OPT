@@ -16,12 +16,12 @@
   background:transparent;
 }
 #introduction > .busted-stage-rain {
-  opacity:1;
+  opacity:.86;
   mask-image:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.40) 36%,rgba(0,0,0,.88) 71%,rgba(0,0,0,.92));
 }
 #awakenChamber > .busted-stage-rain {
   z-index:2!important;
-  opacity:1;
+  opacity:.85;
   mask-image:
     radial-gradient(ellipse 32% 44% at 50% 47%,rgba(0,0,0,.19),rgba(0,0,0,1) 93%);
 }
@@ -74,8 +74,8 @@
 }
 @keyframes bustedFinalCaret{0%,48%{opacity:1}49%,100%{opacity:0}}
 @media(max-width:760px){
-  #introduction > .busted-stage-rain{opacity:.60;mask-image:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.45) 60%,rgba(0,0,0,.7))}
-  #awakenChamber > .busted-stage-rain{opacity:.52;}
+  #introduction > .busted-stage-rain{opacity:.48;mask-image:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.45) 60%,rgba(0,0,0,.7))}
+  #awakenChamber > .busted-stage-rain{opacity:.43;}
   #awakenChamber>#matrixTypewriter .spatial-code-spirit{max-width:calc(100vw - 40px);}
 }
 @media(prefers-reduced-motion:reduce){

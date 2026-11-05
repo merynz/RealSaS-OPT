@@ -38,6 +38,8 @@ def evaluate(pixels,render,selection,prior_v13b_manifest,prior_v13b_batch,prior_
             and render.get("original_source_rest_and_animated_face_identity") is True
             and render.get("source_pose_matches_original_v13b_vertex_oracle") is True
             and render.get("perturbed_source_pose_matches_original_v13b_native_control") is True
+            and render.get("source_native_control_raster_animated_action_frozen_then_restored") is True
+            and render.get("source_native_perturbed_vertices_verified_before_and_after_render") is True
             and render.get("source_active_faces_are_not_artist_drawables") is True
             and render.get("source_bone_mesh_material_names_as_drawable_labels") is False
             and render.get("original_source_action_name_as_model_feature") is False

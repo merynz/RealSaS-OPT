@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="/static/css/matrix_stage_v6.css?v=6.3.0"><link rel="stylesheet" href="/static/css/busted_components_v6.css">
   <link rel="stylesheet" href="/static/css/chamber_v1.css?v=1.0.0">
   <link rel="stylesheet" href="/static/css/chamber_v2.css?v=2.0.0">
+  <link rel="stylesheet" href="/static/css/chamber_v3.css?v=3.0.0">
 </head>
 <body>
   <main class="awaken-shell">
@@ -31,6 +32,14 @@
     </header>
 
     <section id="introduction" class="landing-screen" aria-label="BUSTED introduction">
+      <div class="matrix-stage" aria-hidden="true">
+        <div id="landingDepthCode" class="matrix-space"></div>
+        <div class="matrix-aura"></div>
+        <div class="matrix-horizon"></div>
+        <div class="matrix-center-clear"></div>
+        <div class="matrix-scanlines"></div>
+      </div>
+      <div id="landingMatrixTypewriter" class="matrix-typewriter" aria-hidden="true"></div>
     <div class="scene-fog" aria-hidden="true"></div>
     <div class="scene-vignette" aria-hidden="true"></div>
 
@@ -150,7 +159,7 @@
 
     <div class="dev-mode">MODE · <strong id="modeLabel">CHECKING GATEWAY</strong></div>
   </main>
-  <script src="/static/js/awaken_depth.js?v=7.0.0" defer></script>
+  <script src="/static/js/awaken_depth.js?v=8.0.0" defer></script>
   <script type="module" src="/static/js/awaken_input_slots.js"></script>
   <script type="module" src="/static/js/awaken.js?v=7.0.0"></script>
 </body>

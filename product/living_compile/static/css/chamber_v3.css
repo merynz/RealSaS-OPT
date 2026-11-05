@@ -1,0 +1,39 @@
+/* v8: one visual grammar throughout the Awaken page.
+   Landing code stays in vacant right/peripheral regions, underneath true UI.
+   The identical animation runs independently in the compilation chamber. */
+.landing-screen>.matrix-stage{
+  display:block!important;
+  position:absolute;inset:0;z-index:0;
+  perspective:1100px;perspective-origin:50% 50%;
+  opacity:.77;pointer-events:none;overflow:hidden;
+}
+.landing-screen>.matrix-typewriter{
+  display:block!important;
+  position:absolute;inset:0;z-index:4;
+  perspective:1100px;perspective-origin:50% 50%;
+  transform-style:preserve-3d;pointer-events:none;overflow:hidden;
+}
+.landing-screen>.matrix-typewriter .matrix-trace{
+  opacity:calc(var(--trace-alpha) * .46);
+  filter:saturate(.70);
+  text-shadow:0 0 8px rgba(140,151,251,.10);
+  height:60px;
+}
+.landing-screen>.matrix-typewriter .matrix-trace[hidden]{display:none!important}
+.landing-screen>.matrix-typewriter .matrix-trace-line{
+  display:block;height:1.65em;overflow:hidden;white-space:nowrap;
+}
+.landing-screen .hero-intro,
+.landing-screen .descend-link,
+.landing-screen .landing-foot{position:relative;z-index:8}
+.landing-screen>.matrix-stage .matrix-column{opacity:calc(var(--matrix-opacity) * .59)}
+.landing-screen>.matrix-stage .matrix-stream{animation-duration:calc(var(--matrix-duration) * 1.25)}
+@media(max-width:780px){
+  .landing-screen>.matrix-stage,
+  .landing-screen>.matrix-typewriter{perspective:850px}
+  .landing-screen>.matrix-typewriter .matrix-trace{opacity:calc(var(--trace-alpha) * .31)}
+  .landing-screen>.matrix-stage .matrix-column{opacity:calc(var(--matrix-opacity) * .42)}
+}
+@media(prefers-reduced-motion:reduce){
+  .landing-screen>.matrix-typewriter .matrix-trace-line.typing::after{animation:none}
+}

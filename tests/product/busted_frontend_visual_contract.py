@@ -89,7 +89,19 @@ async def run():
                            '.chamber-console h3','.chamber-console .console-copy',
                            '#awaken','#compileAvailability','.chamber-console .telemetry'];
                       const blockers=selectors.map(s=>scope.querySelector(s)).filter(Boolean)
-                        .map(el=>el.getBoundingClientRect());
+                        .map(el=>{
+                          // Text elements occupy less ink than their CSS block boxes.
+                          // The old detector treated blank padding as text collision.
+                          const inkTargets=['.hero-eyebrow','.hero-intro h1','.hero-copy',
+                            '.hero-description','.hero-meta'];
+                          if(inkTargets.some(selector=>el.matches(selector))){
+                            const range=document.createRange();
+                            range.selectNodeContents(el);
+                            const ink=range.getBoundingClientRect();
+                            if(ink.width>0&&ink.height>0)return ink;
+                          }
+                          return el.getBoundingClientRect();
+                        });
                       const tracks=Array.from(scope.querySelectorAll('.matrix-trace'))
                         .filter(el=>getComputedStyle(el).display!=='none')
                         .map(el=>el.getBoundingClientRect());

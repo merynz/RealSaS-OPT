@@ -1,1 +1,0 @@
-Knight / native demo excerpt. Media and sampled weights are technical reference, not qualified product output. Original artist: Quaternius Animated Knight Pack (CC0).

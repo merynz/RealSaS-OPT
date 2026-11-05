@@ -25,7 +25,6 @@
 
 
   <link rel="stylesheet" href="./static/css/busted_visual_priority_v1.css?v=1.0.0">
-  <link rel="stylesheet" href="./static/css/busted_knight_showcase_v1.css?v=1.1.0">
 </head>
 <body>
   <main class="awaken-shell">
@@ -49,46 +48,13 @@
           <p class="hero-description">Turn your character artwork into an editable puppet you can pose, animate and control. More source views help preserve more of your original art.</p>
           <div class="hero-meta"><span>ARTWORK → PUPPET</span><span>POSE · ANIMATE · EDIT</span></div>
         </div>
-        <div class="knight-showcase" id="knightShowcase" aria-label="Interactive Knight technical demonstration">
-          <div class="knight-showcase-top">
-            <span class="knight-sample-icon" aria-hidden="true">✣</span>
-            <span>KNIGHT / INTERACTIVE TECH DEMO</span>
-            <span class="knight-demo-id">V0 · NATIVE DEMO</span>
-          </div>
-          <div class="knight-viewport" id="knightViewport">
-            <div class="knight-halo" aria-hidden="true"></div>
-            <div class="knight-art-clip" aria-hidden="true">
-            <img id="knightMotionFrame" class="knight-art" src="./static/media/knight/idle.gif" alt="Knight moving in the native technical demonstration" decoding="async" fetchpriority="high">
-            </div>
-            <canvas id="knightRigCanvas" class="knight-rig-canvas" width="512" height="512" aria-label="Actual Knight rig and sampled skin-weight inspection"></canvas>
-            <span class="knight-ground" aria-hidden="true"></span>
-            <div class="knight-overlay-note"><span id="knightModeReadout">ARTWORK</span><span>EXACT 8-VIEW SOURCE DEMO</span></div>
-          </div>
-          <div class="knight-control-deck">
-            <div class="knight-control-row" role="group" aria-label="Knight animation">
-              <span class="knight-control-title">MOTION</span>
-              <button type="button" class="knight-control active" data-knight-motion="idle" aria-pressed="true">IDLE</button>
-              <button type="button" class="knight-control" data-knight-motion="run" aria-pressed="false">RUN</button>
-              <button type="button" class="knight-control" data-knight-motion="slash" aria-pressed="false">SLASH</button>
-            </div>
-            <div class="knight-control-row knight-view-controls" role="group" aria-label="Knight structural layers">
-              <span class="knight-control-title">REVEAL</span>
-              <button type="button" class="knight-control active" data-knight-mode="art" aria-pressed="true">ART</button>
-              <button type="button" class="knight-control" data-knight-mode="rig" aria-pressed="false">RIG</button>
-              <button type="button" class="knight-control" data-knight-mode="weights" aria-pressed="false">WEIGHTS</button>
-            </div>
-            <label class="knight-bone-select" for="knightBoneSelect">INFLUENCE
-              <select id="knightBoneSelect" aria-label="Select bone to inspect skin weights" disabled>
-                <option>LOAD RIG</option>
-              </select>
-            </label>
-          </div>
-          <div class="knight-showcase-foot">
-            <span id="knightEvidenceText">Native Knight technical preview</span>
-            <span>REFERENCE DEMO · NOT PRODUCT QUALIFICATION</span>
-          </div>
+        <div id="structuralField" class="structural-field" aria-hidden="true">
+          <div class="field-reference field-reference-top"><span>REF / 01</span><span>STRUCTURAL CARRIER</span></div>
+          <canvas id="structuralCanvas" width="720" height="780"></canvas>
+          <div class="field-pulse" aria-hidden="true"></div>
+          <div class="field-reference field-reference-bottom"><span>PROCEDURAL GEOMETRY STUDY</span><span>NOT COMPILED OUTPUT</span></div>
+          <div class="field-ordinate"><span>TOPOLOGY</span><span>ARTICULATION</span><span>DEFORMATION</span></div>
         </div>
-
         </div>
       </section>
       <a class="descend-link" href="#awakenChamber" aria-label="Scroll to character intake">
@@ -181,7 +147,7 @@
     <div class="dev-mode">MODE · <strong id="modeLabel">CHECKING GATEWAY</strong></div>
   </main>
   <script src="./static/js/busted_code_typing_v2.js?v=2.2.0" defer></script>
-  <script src="./static/js/busted_knight_showcase_v1.js?v=1.0.0" defer></script>
+  <script src="./static/js/busted_engine_field.js?v=1.0.0" defer></script>
   <script src="./static/js/busted_spatial_rain_v1.js?v=1.1.0" defer></script>
   <script type="module" src="./static/js/awaken_input_slots.js"></script>
   <script type="module" src="./static/js/awaken.js?v=7.1.0"></script>

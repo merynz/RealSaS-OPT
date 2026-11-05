@@ -97,7 +97,7 @@ body{font-family:var(--busted-display);color:var(--busted-white)}
  .brand-name{font-size:12px}.brand-name small{font-size:7px}
  .busted-logomark{width:36px;height:36px}
  .mast-status{display:none}
- .hero-intro h1{font-size:clamp(50px,12vw,67px)}
+ .hero-intro h1{font-size:clamp(38px,10vw,52px);letter-spacing:-.085em;max-width:100%}
  .hero-meta span{font-size:8px}
  .input-slot-ledger{grid-template-columns:1fr 1fr;top:calc(50% + 140px)}
  .input-orbit{height:380px}

@@ -44,10 +44,15 @@
           : Math.max(0,Math.min(original.length,Math.floor(age / charMs)));
         const next = original.slice(0,characters);
         if (row.textContent !== next) row.textContent = next;
+        const typing = !reduceMotion && age >= 0 && characters < original.length && local < cycleMs - holdMs;
+        row.classList.toggle('typing', typing);
       });
       // A brief empty beat before the next writing cycle.
       if (!reduceMotion && local > cycleMs - holdMs) {
-        lane.rows.forEach(row => {if (row.textContent) row.textContent = '';});
+        lane.rows.forEach(row => {
+          if (row.textContent) row.textContent = '';
+          row.classList.remove('typing');
+        });
       }
     }
   }

@@ -14,6 +14,9 @@
  const char=()=>alphabet.charAt(Math.floor(Math.random()*alphabet.length));
  let width=0,height=0,dpr=1,lanes=[],raf=0,last=0,clock=0,prev=0,shift=0,aim=0;
  const product=Boolean(document.querySelector('.workspace,.motion-layout,.export-layout'));
+ // Awaken already has its own visible stage-local rain. Keep the global
+ // canvas as a one-frame decorative fallback, not a third animation loop.
+ const homeStage=Boolean(document.querySelector('#introduction')&&document.querySelector('#awakenChamber'));
  function rebuild(){
    width=Math.max(1,innerWidth);height=Math.max(1,innerHeight);
    dpr=Math.min(devicePixelRatio||1,1.6);
@@ -71,7 +74,7 @@
    }
  }
  function frame(now){
-   raf=0;if(document.hidden||reduced.matches)return;
+   raf=0;if(document.hidden||reduced.matches||homeStage)return;
    const dt=prev?Math.min(100,now-prev):0;prev=now;clock+=dt;
    shift+=(aim-shift)*.045;
    if(now-last>=((width<760||product)?67:43)){draw();last=now}
@@ -79,7 +82,7 @@
  }
  function sync(){
    if(raf)cancelAnimationFrame(raf);raf=0;prev=0;
-   if(!document.hidden&&!reduced.matches)raf=requestAnimationFrame(frame);
+   if(!document.hidden&&!reduced.matches&&!homeStage)raf=requestAnimationFrame(frame);
    else draw();
  }
  addEventListener('resize',()=>{if(raf)cancelAnimationFrame(raf);raf=0;rebuild();sync()},{passive:true});

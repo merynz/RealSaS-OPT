@@ -192,6 +192,15 @@ def run(v5_path,roster_path,rays_index_path,source_root,join_root,
         }
         court_path=output/"FULL_FRAME_EDITOR_INDEPENDENT_COURT_V3.json"
         write(court_path,decision)
+        # Store the independent pixel evidence first, then gate any claimed
+        # successful rest-pose 2-view editability. A job can finish renders
+        # yet ABSTAIN on a merged layer or zero conditional hidden effect.
+        require(decision["bounded_parity_and_separable_views"]==2,
+                "FULL_FRAME_V3_EITHER_OPPOSITE_VIEW_NOT_SEPARABLY_EDITABLE")
+        require(all(
+            row["source_wide_b_conditional_after_a_group_removal_pixel_count"]>0
+            for row in decision["per_view"]
+        ), "FULL_FRAME_V3_HIDDEN_SOURCE_EFFECT_NOT_OBSERVED")
         summary.update({
             "status":"COMPLETE_FULL_FRAME_ORIGINAL_SOURCE_AND_ANON_RENDER_COURT__FAMILY_SEPARATE",
             "render_manifest_sha256":sha(manifestfile),

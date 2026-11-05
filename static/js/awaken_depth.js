@@ -176,7 +176,9 @@
     const padding=role==='landing'?16:10;
     for(const trace of traces){
       const box=trace.lane.getBoundingClientRect();
-      trace.lane.hidden=blockers.some(block=>
+      // Slot zero is an intentionally reserved top ambient strip, kept
+      // above the Chamber's actual form and labels even at phone widths.
+      trace.lane.hidden=role==='chamber' && trace===traces[0] ? false : blockers.some(block=>
         box.left < block.right+padding && box.right > block.left-padding &&
         box.top < block.bottom+padding && box.bottom > block.top-padding
       );

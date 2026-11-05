@@ -171,3 +171,25 @@ def test_real_8view_rays_with_some_abstentions_not_automatic_negative():
     p=build(v,f,p,original,previous,geo)
     result=court(p,geo,rendered,original)
     assert result["graphics_owner_family_authorized"] is False
+
+
+
+def test_fullframe_hosted_v3_parent_filename_matches_exact_runner_contract():
+    # Regression: initial V3 worker mistakenly searched for the old V2
+    # basename under the correct V3 private Drive folder.
+    from pathlib import Path
+    import json
+    root=Path(__file__).resolve().parents[2]
+    workflow=(root/".github/workflows/corpus370-hosted-anonymous-full-frame-allview-private-v3.yml").read_text()
+    consumer=(root/"tools/corpus/run_corpus370_full_frame_group_edit_private_v3.py").read_text()
+    request=json.loads((root/"canonical/CORPUS370_HOSTED_FULL_FRAME_EDIT_REQUEST_V3.json").read_text())
+    required="CORPUS370_ALLVIEW_GEOMETRY_GROUPS_PRIVATE_BATCH_V3.json"
+    forbidden="CORPUS370_MULTIVIEW_GEOMETRY_GROUPS_PRIVATE_BATCH_V2.json"
+    sha="1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1"
+    assert required in workflow and required in consumer
+    assert forbidden not in workflow and forbidden not in consumer
+    assert sha in workflow and sha in consumer
+    assert request["source_allview_group_batch_sha256"]==sha
+    assert request["view4_geometry_is_compiler_input"] is True
+    assert request["view4_render_edit_response_used_for_selection"] is False
+    assert request["training_authorized"] is False

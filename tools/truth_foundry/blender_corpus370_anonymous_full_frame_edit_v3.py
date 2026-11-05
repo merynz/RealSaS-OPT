@@ -156,7 +156,7 @@ def run(job_path,output_path):
     require(chosen is not None
             and chosen["slot_count"]==court["selected_group_count"]
             and chosen["training_authorized"] is False
-            and len(chosen["face_slot_teacher_only"])==layer["face_count"],
+            and len(chosen["face_slot_teacher_only"])==layer["source_face_count"],
             "ANON_FULL_FRAME_COURT_SELECTED_HYPOTHESIS")
     labels=np.asarray(chosen["face_slot_teacher_only"],np.int32)
     with np.load(rest_path,allow_pickle=False) as rest:

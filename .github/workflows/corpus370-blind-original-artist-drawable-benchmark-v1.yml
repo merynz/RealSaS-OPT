@@ -1,0 +1,31 @@
+name: corpus370-blind-original-artist-drawable-benchmark-contracts-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-blind-original-artist-drawable-benchmark-v1.yml'
+      - 'tools/corpus/court_artist_blinded_partition_v1.py'
+      - 'tests/corpus/test_court_artist_blinded_partition_v1.py'
+  pull_request:
+    paths:
+      - '.github/workflows/corpus370-blind-original-artist-drawable-benchmark-v1.yml'
+      - 'tools/corpus/court_artist_blinded_partition_v1.py'
+      - 'tests/corpus/test_court_artist_blinded_partition_v1.py'
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-original-artist-blind-benchmark-v1-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  no-label-leakage-source-authority:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install independent geometric metric dependencies
+        run: python3 -m pip install --disable-pip-version-check numpy scipy pytest
+      - name: Compile and test blind original artist drawable court
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/corpus/court_artist_blinded_partition_v1.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_court_artist_blinded_partition_v1.py

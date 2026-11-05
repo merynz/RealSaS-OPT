@@ -86,7 +86,13 @@ class BustedAwakenStageContractTests(unittest.TestCase):
         self.assertIn("project?.compile_available && project?.public_compile_gateway",app)
         self.assertIn("COMPILER OFFLINE",app)
         self.assertIn('id="compileAvailability"',html)
-        self.assertIn("awaken.disabled = running || !ready",app)
+        self.assertIn("awaken.disabled = running || (ready && selectedFiles.length === 0)",app)
+        self.assertIn("async function playAwakenIgnition()",app)
+        self.assertIn("await playAwakenIgnition();",app)
+        self.assertIn("Ignition interaction preview only. No compile session was started.",app)
+        self.assertIn("busted_awaken_ignition_v2.css",html)
+        self.assertNotIn("busted_awaken_fire_v1.css",html)
+        self.assertIn("preview only",app.lower())
 
 if __name__=="__main__":
     unittest.main()

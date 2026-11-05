@@ -18,6 +18,8 @@ class BustedAwakenStageContractTests(unittest.TestCase):
         self.assertIn("Math.random", stage)
         self.assertIn("translateZ(", stage)
         self.assertIn("generateGlyphs", stage)
+        self.assertIn("desktopSlots", stage)
+        self.assertIn("matrix-trace", stage)
         self.assertIn("compensate", stage)
         self.assertIn("numberOfLanes", stage)
         self.assertNotIn("runPresentationFlow", app)

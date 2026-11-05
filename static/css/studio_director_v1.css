@@ -139,6 +139,17 @@ body[data-studio-workspace="motion"] .viewport-panel::before{
  .director-workspaces button{min-width:120px;padding-inline:9px}
  .director-commands{justify-content:flex-start}
 }
+/* Narrow top-of-editor status should not spill a raw progress glyph into
+ * a truncated line when no character exists. The real state remains in the
+ * requalification strip below. */
+@media(max-width:760px){
+ body:not(.has-puppet) .compile-strip{display:flex!important;align-items:center!important;min-width:0!important;overflow:hidden!important}
+ body:not(.has-puppet) .compile-strip .compile-state{min-width:0!important;max-width:100%!important;overflow:hidden!important}
+ body:not(.has-puppet) .compile-strip #compileState{display:inline-block;max-width:calc(100vw - 45px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ body:not(.has-puppet) .compile-strip #compileDetail,
+ body:not(.has-puppet) .compile-strip .compile-meter,
+ body:not(.has-puppet) .compile-strip .budget{display:none!important}
+}
 @media(max-width:760px){
  body{grid-template-rows:52px 31px 35px 48px 40px 38px minmax(0,1fr) var(--studio-timeline-height)!important}
  .studio-director{gap:6px;padding:4px 7px}

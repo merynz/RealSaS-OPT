@@ -16,10 +16,20 @@
   <link rel="stylesheet" href="./static/css/awaken_stage.css">
   <link rel="stylesheet" href="./static/css/busted_awaken_v3.css">
   <link rel="stylesheet" href="./static/css/matrix_stage_v5.css">
-  <link rel="stylesheet" href="./static/css/matrix_stage_v6.css?v=6.1.1"><link rel="stylesheet" href="./static/css/busted_components_v6.css">
+  <link rel="stylesheet" href="./static/css/matrix_stage_v6.css?v=6.3.0"><link rel="stylesheet" href="./static/css/busted_components_v6.css">
+  <link rel="stylesheet" href="./static/css/chamber_v1.css?v=1.0.0">
 </head>
 <body>
   <main class="awaken-shell">
+    <header class="masthead" aria-label="BUSTED navigation">
+      <nav class="mast-links" aria-label="Primary navigation">
+        <a class="brand-home" href="./index.html" aria-current="page"><img class="busted-logomark" src="./static/brand/busted-mark.svg" width="40" height="40" alt=""><span class="brand-name">BUSTED<small>POWERED BY REALSAS</small></span></a>
+        <a class="studio-link" href="./studio.html">STUDIO <span aria-hidden="true">↗</span></a>
+      </nav>
+      <div id="mastStatus" class="mast-status"><i></i><span>INTAKE READY</span></div>
+    </header>
+
+    <section id="introduction" class="landing-screen" aria-label="BUSTED introduction">
     <div class="matrix-stage" aria-hidden="true">
       <div id="depthCode" class="matrix-space"></div>
       <div class="matrix-aura"></div>
@@ -31,16 +41,8 @@
     <div class="scene-fog" aria-hidden="true"></div>
     <div class="scene-vignette" aria-hidden="true"></div>
 
-    <header class="masthead" aria-label="BUSTED navigation">
-      <nav class="mast-links" aria-label="Primary navigation">
-        <a class="brand-home" href="./index.html" aria-current="page"><img class="busted-logomark" src="./static/brand/busted-mark.svg" width="40" height="40" alt=""><span class="brand-name">BUSTED<small>POWERED BY REALSAS</small></span></a>
-        <a class="studio-link" href="./studio.html">STUDIO <span aria-hidden="true">↗</span></a>
-      </nav>
-      <div id="mastStatus" class="mast-status"><i></i><span>INTAKE READY</span></div>
-    </header>
-
-    <section class="stage-wrap" aria-label="Character awakening stage">
-      <section class="hero">
+      <section class="stage-wrap" aria-label="BUSTED introduction">
+        <div class="hero">
         <div class="hero-intro">
           <p class="hero-eyebrow"><span class="eyebrow-marker" aria-hidden="true"></span> BUSTED / AWAKEN 01</p>
           <h1>Your art.<span class="hero-title-accent"> Alive<span class="hero-title-period">.</span></span></h1>
@@ -48,6 +50,27 @@
           <p class="hero-description">Compile your character into an editable puppet. Keep its identity, control its structure, and make every movement yours.</p>
           <div class="hero-meta"><span>ART → STRUCTURE</span><span>STRUCTURE → LIFE</span></div>
         </div>
+
+        </div>
+      </section>
+      <a class="descend-link" href="#awakenChamber" aria-label="Scroll to character intake">
+        <span class="descend-icon" aria-hidden="true">↓</span>
+        <span>ENTER THE CHAMBER <small>SCROLL TO AWAKEN</small></span>
+      </a>
+      <div class="landing-foot" aria-hidden="true"><span>01 / DISCOVER</span><span>02 / AWAKEN</span></div>
+    </section>
+
+    <section id="awakenChamber" class="awaken-chamber" aria-label="Character compilation chamber">
+      <div class="chamber-glow" aria-hidden="true"></div>
+      <div class="chamber-inner">
+        <div class="chamber-header">
+          <p class="chamber-eyebrow"><span class="chamber-index">02</span> / BUSTED · AWAKEN</p>
+          <h2>Where your art<br><span>becomes alive.</span></h2>
+          <p>Bring your source into the chamber. The compiler turns a character into an editable puppet — and reports what it is actually doing.</p>
+        </div>
+        <div class="chamber-workspace">
+          <div class="chamber-intake">
+            <div class="chamber-docking-label"><span>01 / SOURCE MATERIAL</span><span>FRONT + BACK</span></div>
         <div class="input-orbit">
           <div class="orbit-ring orbit-ring-a" aria-hidden="true"></div>
           <div class="orbit-ring orbit-ring-b" aria-hidden="true"></div>
@@ -77,6 +100,12 @@
           </div>
         </div>
 
+
+          </div>
+          <div class="chamber-console">
+            <div class="console-heading"><span>02 / COMPILER CONSOLE</span><span id="compileLiveStage" aria-live="polite">AWAITING SOURCE</span></div>
+            <h3>Compile into a puppet.</h3>
+            <p class="console-copy" id="compileStatusMessage">Select your character to begin. Live compiler events appear below only when a production gateway is connected.</p>
         <button id="awaken" class="awaken-button" type="button" disabled>AWAKEN</button>
         <p id="compileAvailability" class="compile-availability" role="status">UI PREVIEW · COMPILER OFFLINE</p>
 
@@ -94,7 +123,10 @@
           </div>
           <div id="compilerLog" class="compiler-log" aria-live="polite"></div>
         </aside>
-      </section>
+          </div>
+        </div>
+        <p class="chamber-footnote">SOURCE-OWNED ARTWORK <span>·</span> EDITABLE STRUCTURE <span>·</span> REAL PRODUCT PROOF</p>
+      </div>
     </section>
 
     <section id="result" class="result" aria-live="polite">
@@ -110,7 +142,7 @@
 
     <div class="dev-mode">MODE · <strong id="modeLabel">CHECKING GATEWAY</strong></div>
   </main>
-  <script src="./static/js/awaken_depth.js?v=6.1.1" defer></script>
+  <script src="./static/js/awaken_depth.js?v=6.3.0" defer></script>
   <script type="module" src="./static/js/awaken_input_slots.js"></script>
   <script type="module" src="./static/js/awaken.js"></script>
 </body>

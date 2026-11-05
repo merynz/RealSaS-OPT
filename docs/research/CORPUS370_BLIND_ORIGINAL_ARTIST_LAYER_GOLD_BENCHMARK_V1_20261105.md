@@ -56,3 +56,25 @@ Run baseline geometry-only connected components, UV/material islands (labeled ex
 A real original human-art authored layered asset and license must be verified; exact flatten reconstruction/parity and hidden reference must be sealed; the source adapter must prove face/pixel membership and alpha; predictions are locked before artist labels; independent court produces split/merge/IoU/coverage and behavioral-edit comparisons; unseen authors/families and occlusion cases evaluated separately.
 
 **Research benchmark pilot only, no artist-layer recovery result yet.** No source ownership, IRIS/TESSA training, materialization or ModelRelease authority until independent proof gates are met. The V14 source native 3D-to-RGBA mechanical court remains complementary: it establishes whether causes change images, whereas this new benchmark asks whether those effects reconstruct the actual artist editable representation.
+
+## Directly inspected external true layer source candidate — NOT an admitted bench subject
+
+The official source export in EsotericSoftware/spine-runtimes (4.3 reference,
+path spine-android/app/src/main/assets/spineboy-pro.json) was read directly
+through GitHub as an independent original authored rig *candidate*. Verified
+source Git blob SHA: 4a58fecd32a97bad83a9169056c44db3f17dba4e.
+Decoded metadata: 52 original slots, one default skin, 12 mesh attachments,
+66 region attachments and 11 animation names. Those are NOT 52 art layers or
+proof of artist drawable correspondence; some attachments are alternatives
+within a slot and appearance changes over time. No original source artwork,
+runtime code or sample files were copied into the RealSaS repository.
+
+Source metadata reference:
+https://github.com/EsotericSoftware/spine-runtimes/blob/4.3/spine-android/app/src/main/assets/spineboy-pro.json
+
+Official runtime repository says its examples can be evaluated free of charge;
+that is NOT proof of rights for redistribution or ML training. This is a
+candidate for private evaluation only, after an explicit source/project,
+atlas/original-part material and licensing check. To avoid humanoid-only
+sample bias, a nonhumanoid authored rig/source from a different asset family
+must be tested as a heldout subject in the same blind benchmark.

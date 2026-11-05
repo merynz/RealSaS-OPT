@@ -196,11 +196,19 @@ def run(job_path,output_path):
             evaluated=v4._extract_snapshot(meshes,freeze_triangulation=False)
             current=np.asarray(evaluated["vertices"],np.float64)
             max_pose_error=float(np.max(np.abs(current-native_posed[pidx])))
-            require(np.array_equal(np.asarray(evaluated["faces"]),faces)
-                    and np.array_equal(np.asarray(evaluated["face_owner"]),face_owner)
+            # The V4 authored-teacher exporter deliberately freezes triangle
+            # addresses only in the rest snapshot. Subsequent evaluated poses
+            # are sampled WITHOUT triangulation, and prove source topology by
+            # the exact per-owner polygon cycles/material signature. Requiring
+            # a non-existent animated triangle list is a false failure.
+            require(evaluated["polygon_signature"]==snapshot["polygon_signature"]
                     and current.shape==rv.shape
                     and max_pose_error<=tol,
-                    "V9_REPLAYED_ORIGINAL_SOURCE_POSE_NOT_TEACHER_EQUIVALENT")
+                    "V9_REPLAYED_ORIGINAL_SOURCE_POSE_NOT_TEACHER_EQUIVALENT:"
+                    +str({"pose_index":pidx,
+                          "polygon_signature_equal":evaluated["polygon_signature"]==snapshot["polygon_signature"],
+                          "vertex_shape_equal":current.shape==rv.shape,
+                          "max_pose_error":max_pose_error,"tolerance":tol}))
             _set_animated_soup(face_map,faces,native_posed[pidx])
             pose_views=[]
             for view in job["view_indices"]:

@@ -70,6 +70,8 @@ def evidence():
         "original_source_rest_and_animated_face_identity":True,
         "source_pose_matches_original_v13b_vertex_oracle":True,
         "perturbed_source_pose_matches_original_v13b_native_control":True,
+        "source_native_control_raster_animated_action_frozen_then_restored":True,
+        "source_native_perturbed_vertices_verified_before_and_after_render":True,
         "source_active_faces_are_not_artist_drawables":True,
         "source_bone_mesh_material_names_as_drawable_labels":False,
         "original_source_action_name_as_model_feature":False,
@@ -111,7 +113,8 @@ def test_blind_control_selection_reproducible_from_original_vertex_source_only()
     "wrong_source","wrong_manifest","false_training","false_owner",
     "forged_poses","camera_injection","artist_identity","source_raster_not_equal",
     "fake_parent","forged_controls","false_CAA","source_layer_name",
-    "illegal_rgba","false_noop","wrong_root"
+    "illegal_rgba","false_noop","wrong_root",
+    "source_action_not_frozen","post_render_vertices_not_verified"
 ])
 def test_v14_false_truth_forgery_and_lineage_fail_closed(attack):
     a=list(copy.deepcopy(evidence()))
@@ -138,6 +141,10 @@ def test_v14_false_truth_forgery_and_lineage_fail_closed(attack):
         assert evaluate(*a)["all_original_source_camera_cases_passed"] is False
         return
     elif attack=="wrong_root":r["root_sham"]="AUTHOR_ROOT_PROVED"
+    elif attack=="source_action_not_frozen":
+        r["source_native_control_raster_animated_action_frozen_then_restored"]=False
+    elif attack=="post_render_vertices_not_verified":
+        r["source_native_perturbed_vertices_verified_before_and_after_render"]=False
     with pytest.raises((ValueError,AssertionError,KeyError)):
         evaluate(*a)
 

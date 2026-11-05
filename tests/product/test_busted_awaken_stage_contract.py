@@ -39,7 +39,7 @@ class BustedAwakenStageContractTests(unittest.TestCase):
         self.assertNotIn("animatePositions",typer)
         self.assertNotIn("travelling",typer)
         self.assertIn("IntersectionObserver",typer)
-        self.assertIn("symbols",typer)
+        self.assertIn("alphabet",typer)
         self.assertIn("not compiler telemetry or proof",typer)
         self.assertIn("const triangles=",specimen)
         self.assertIn("MORPHOLOGICAL FIELD",html)

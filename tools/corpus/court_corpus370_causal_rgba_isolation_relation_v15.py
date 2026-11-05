@@ -190,6 +190,7 @@ def evaluate(root,canonical_path,source_name):
             "anonymous_teacher_control_ordinal":ci,
             "original_source_mechanical_control_is_not_drawable":True,
             "all_pose_view_sign_cases":24,
+            "v14_raw_RGBA_control_effect_pixel_instances":0,
             "whole_scene_effect_pixel_instances":0,
             "isolated_active_surface_effect_pixel_instances":0,
             "same_pixel_observed_in_both_effects":0,
@@ -221,6 +222,7 @@ def evaluate(root,canonical_path,source_name):
                         and raw_isolate_diff==
                         row["causal_source_face_active_isolation_changed_pixel_instances"],
                         "V15_INDEPENDENT_ORIGINAL_V14_EDITS_PIXEL_REPLAY")
+                    item["v14_raw_RGBA_control_effect_pixel_instances"]+=raw_source_diff
                     require(float(np.percentile(
                         np.max(np.abs(altered-soup),axis=-1),99
                     ))<=TOL,
@@ -268,7 +270,9 @@ def evaluate(root,canonical_path,source_name):
         controls.append(item)
     require(len(effect_rows)==len(reference)==48,
             "V15_REFERENCE_SOURCE_EDIT_CASE_SET_INCOMPLETE")
-    require([c["whole_scene_effect_pixel_instances"] for c in controls] ==
+    # Canonical V14 counts use raw max-channel RGBA. V15's premultiplied
+    # alpha-aware effect may legitimately count slightly fewer pixels.
+    require([c["v14_raw_RGBA_control_effect_pixel_instances"] for c in controls] ==
                 source["source_perturbed_control_visible_pixel_instances"],
             "V15_CANONICAL_SOURCE_VISIBLE_CONTROL_COUNTS_DRIFT")
     total={key:sum(int(row[key]) for row in controls) for key in (

@@ -60,6 +60,7 @@ jobs:
           echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
           unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
+          python3 -m pip install --disable-pip-version-check numpy
       - name: Reopen full original V18k sealed source and recompare all pixels
         run: |
           set -euo pipefail

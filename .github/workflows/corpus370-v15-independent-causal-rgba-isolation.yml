@@ -1,0 +1,102 @@
+name: corpus370-v15-independent-causal-rgba-isolation
+
+on:
+  push:
+    branches: [alfred/v15-native-causal-rgba-overlap-evidence]
+    paths:
+      - '.github/workflows/corpus370-v15-independent-causal-rgba-isolation.yml'
+      - 'tools/corpus/court_corpus370_causal_rgba_isolation_relation_v15.py'
+      - 'tests/corpus/test_corpus370_causal_rgba_isolation_relation_v15.py'
+
+permissions:
+  contents: read
+
+jobs:
+  source-contracts:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --disable-pip-version-check numpy pytest
+      - run: PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_causal_rgba_isolation_relation_v15.py
+
+  original-source-evidence:
+    needs: source-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+          - subject: TRICERATOPS
+            ordinal: 1
+          - subject: COWFISH
+            ordinal: 2
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy
+          sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends rclone
+      - name: Exact SHA-frozen original source original/isolated RGBA evidence
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/v15-rclone.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          INPUT="$RUNNER_TEMP/v15-private"
+          mkdir -p "$INPUT"
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_native_mechanical_rgba_private_v14/42075029264-1/$ORDINAL"
+          for name in \
+            PRIVATE_REAL_NATIVE_MECHANICAL_RGBA_MANIFEST_V14.json \
+            PRIVATE_REAL_NATIVE_MECHANICAL_RGBA_MANIFEST_V14.npz \
+            PRIVATE_INDEPENDENT_GEOMETRIC_MECHANICAL_RGBA_COURT_V14.json \
+            PRIVATE_MECHANICAL_RGBA_JOIN_BATCH_V14.json
+          do
+            rclone copyto "$REMOTE/$name" "$INPUT/$name" --checksum --retries 3
+            test -s "$INPUT/$name"
+          done
+      - name: Replay original causal +/- against source surface isolate in premultiplied RGBA
+        run: |
+          set -euo pipefail
+          RESULT="$RUNNER_TEMP/v15-causal-$SUBJECT.json"
+          python3 -u tools/corpus/court_corpus370_causal_rgba_isolation_relation_v15.py \
+            --canonical canonical/CORPUS370_V14_REAL_NATIVE_CONTROL_RGBA_CAUSAL_REPAIR_RESULT_V1.json \
+            --source "$SUBJECT" \
+            --private-root "$RUNNER_TEMP/v15-private" \
+            --output "$RESULT"
+          RESULT="$RESULT" python3 - <<'PY'
+          import os,json
+          from pathlib import Path
+          d=json.loads(Path(os.environ["RESULT"]).read_text())
+          assert d["status"]=="REAL_NATIVE_CAUSAL_RGBA_ALPHA_AWARE_ISOLATION_RELATION_COURTED__AUTHOR_OWNER_UNKNOWN"
+          assert d["pose_view_sign_control_cases"]==48
+          assert d["independent_courted_source_controls"]==2
+          for k in ("graphics_owner_authorized","iris_training_authorized","tessa_training_authorized","materialization_authorized","product_authorized"):
+            assert d[k] is False,k
+          assert d["author_same_drawable_positive_pairs"]==0 and d["author_different_drawable_negative_pairs"]==0
+          print("V15_CAUSAL_RGBA_ALPHA_ISOLATE_REAL_PASS_NO_AUTHOR_OWNER",d["subject_id"])
+          PY
+      - name: Persist exact anonymized diagnostic receipt to private Drive and audit its SHA
+        run: |
+          set -euo pipefail
+          export RCLONE_CONFIG="$RUNNER_TEMP/v15-rclone.conf"
+          RESULT="$RUNNER_TEMP/v15-causal-$SUBJECT.json"
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_causal_rgba_isolation_relation_v15/${{ github.run_id }}-${{ github.run_attempt }}/$ORDINAL"
+          rclone copyto "$RESULT" "$REMOTE/V15_CAUSAL_RGBA_ISOLATION_RELATION.json" --checksum --retries 3
+          test "$(sha256sum "$RESULT" | cut -d' ' -f1)" = "$(rclone cat "$REMOTE/V15_CAUSAL_RGBA_ISOLATION_RELATION.json" | sha256sum | cut -d' ' -f1)"
+          sha256sum "$RESULT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v15-source-${{ matrix.subject }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/v15-causal-${{ matrix.subject }}.json
+          if-no-files-found: error
+          retention-days: 90

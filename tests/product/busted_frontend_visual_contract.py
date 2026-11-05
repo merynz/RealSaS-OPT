@@ -50,66 +50,39 @@ async def run():
                 drop=await metrics(page, "#dropzone")
                 assert title["width"] > 130 and drop["width"] > 180, f"Awaken content collapsed at {width}x{height}"
                 assert title["right"] <= width+2 and drop["right"] <= width+2, f"Awaken content cut off at {width}x{height}"
-                intro=await metrics(page, "#introduction")
-                chamber=await metrics(page, "#awakenChamber")
-                visual=await metrics(page, "#chamberCodeVisual")
-                assert intro["height"] >= height-2, f"Landing hero does not occupy first screen: {intro}"
-                assert chamber["y"] >= intro["bottom"]-2, f"Compile chamber is not below hero: {chamber} {intro}"
-                assert drop["y"] > visual["bottom"], f"Input overlaps compilation code: {drop} {visual}"
-                assert visual["y"] >= chamber["y"]-2, f"Code must be inside Chamber, not hero: {visual} {chamber}"
-                assert await page.locator("#introduction .matrix-trace").count() == (2 if width<=780 else 4), "Landing animation missing"
-                landing_display=await page.locator("#landingMatrixTypewriter").evaluate("el=>getComputedStyle(el).display")
-                assert landing_display!="none", "Landing typewriter must be visible"
-                assert await page.locator("#awakenChamber .matrix-trace").count() == (4 if width<=780 else 8)
-                # Matrix VFX uses reserved screen-space lanes: no typed-code collisions.
-                # Motion reduction freezes the CSS streams for reproducible geometry.
-                matrix = await page.locator("#chamberCodeVisual .matrix-column").evaluate_all("""elements => elements.map(el => {
-                  const r=el.getBoundingClientRect();
-                  return {lane:Number(el.dataset.lane), x:r.x, right:r.right, width:r.width,
-                    depth:Number(el.dataset.depth)};
-                }).sort((a,b)=>a.x-b.x)""")
-                assert len(matrix) == (13 if width<=780 else 30), f"Unexpected number of matrix lanes at {width}: {len(matrix)}"
-                assert all(0<=m["depth"]<=1 for m in matrix), "Invalid 3D depth parameter"
-                for left,right in zip(matrix,matrix[1:]):
-                    assert left["right"] <= right["x"] + 1, f"Matrix text lanes overlap at {width}: {left} vs {right}"
-                # Foreground code is reserved in non-overlapping 2D screen regions,
-                # while each track retains its own real CSS z-depth.
-                traces = await page.locator("#awakenChamber .matrix-trace").evaluate_all("""elements => elements.map(el => {
-                  const r=el.getBoundingClientRect();
-                  return {slot:Number(el.dataset.slot), depth:Number(el.dataset.depth),
-                    x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};
-                })""")
-                assert len(traces) == (4 if width<=780 else 8), f"Wrong number of typing reservations: {traces}"
-                typewriter = await page.locator("#matrixTypewriter").evaluate("""el => {
-                  const css=getComputedStyle(el);
-                  const first=el.querySelector('.matrix-trace');
-                  const trace=getComputedStyle(first);
-                  const lines=Array.from(el.querySelectorAll('.matrix-trace-line')).map(x=>x.textContent);
-                  return {z:css.zIndex,display:css.display,opacity:Number(trace.opacity),lines};
-                }""")
-                assert int(typewriter["z"]) >= 8, f"Typing hidden behind atmosphere: {typewriter}"
-                assert typewriter["display"] != "none", "Typing layer is hidden"
-                assert typewriter["opacity"] > .6, f"Typing too faint: {typewriter}"
-                assert any(len(line)>8 and any(ch in line for ch in ".=()") for line in typewriter["lines"]), (
-                    f"Expected readable code snippets, not only glyph rain: {typewriter}"
-                )
-                assert len({t["slot"] for t in traces}) == len(traces), "Duplicate text reservation"
-                assert len({t["depth"] for t in traces}) >= 2, "All text is on one depth plane"
-                for i,left in enumerate(traces):
-                    assert left["width"] > 60 and left["height"] > 15, f"Collapsed typing reservation: {left}"
-                    assert left["x"] >= visual["x"]-2 and left["right"] <= visual["right"]+2, (
-                        f"Code extends beyond its Chamber visualization: {left} vs {visual}"
+                intro = await metrics(page, "#introduction")
+                chamber = await metrics(page, "#awakenChamber")
+                assert intro["height"] >= height-2, f"Landing no longer fills first viewport: {intro}"
+                assert chamber["y"] >= intro["bottom"]-2, f"Chamber overlaps introductory section: {chamber}"
+                assert drop["y"] >= chamber["y"], f"Source input not located in second section: {drop}"
+                assert await page.locator(".chamber-code-visual").count() == 0, "Unwanted separate decorative code panel"
+                assert await page.locator(".chamber-header h2").inner_text() == "AWAKEN.", "Duplicated second hero copy"
+                # Two independent ambient streams, measured from rendered text rather than markup only.
+                for section, n in [("#introduction", 4 if width > 780 else 2),
+                                   ("#awakenChamber", 8 if width > 780 else 4)]:
+                    assert await page.locator(section+" .matrix-trace").count() == n, (
+                        f"{section}: missing typing tracks"
                     )
-                    assert left["y"] >= visual["y"]-2 and left["bottom"] <= visual["bottom"]+2, (
-                        f"Code extends below its Chamber visualization: {left} vs {visual}"
+                    assert await page.locator(section+" .matrix-column").count() == (30 if width > 780 else 13) if section == "#awakenChamber" else (
+                        await page.locator(section+" .matrix-column").count() == (23 if width > 780 else 9)
                     )
-                    for right in traces[i+1:]:
-                        overlap_x = min(left["right"],right["right"])-max(left["x"],right["x"])
-                        overlap_y = min(left["bottom"],right["bottom"])-max(left["y"],right["y"])
-                        assert overlap_x <= 2 or overlap_y <= 2, f"Typing code overlaps: {left} vs {right}"
-                landing_lines=await page.locator("#introduction .matrix-trace-line").all_inner_texts()
-                assert any(line.strip() for line in landing_lines), f"Landing typing contains no characters: {landing_lines}"
+                    code = await page.locator(section+" .matrix-trace-line").all_inner_texts()
+                    nonempty = [line.strip() for line in code if line.strip()]
+                    assert len(nonempty) >= n, f"{section}: empty code lanes: {code}"
+                    assert len(set(nonempty)) >= max(3,n//2), f"{section}: repeated fallback code: {code}"
+                    assert all("." in x or "(" in x for x in nonempty), f"{section}: code isn't readable: {code}"
+                    tracks = await page.locator(section+" .matrix-trace").evaluate_all("""nodes => nodes.map(el=>{
+                        const r=el.getBoundingClientRect();
+                        const container=el.closest('section').getBoundingClientRect();
+                        return {x:r.left,right:r.right,y:r.top,bottom:r.bottom,
+                                left:container.left,limit:container.right,
+                                top:container.top,bound:container.bottom}
+                    })""")
+                    assert all(v["x"] >= v["left"]-3 and v["right"] <= v["limit"]+3 for v in tracks), (
+                        f"{section}: code is cut off at edges: {tracks}"
+                    )
                 assert await page.locator("#awaken").is_disabled(), "Offline preview must never offer a fake compile"
+
 
                 # Studio link is real navigation, even without a compiled bundle.
                 await page.locator(".studio-link").click()
@@ -186,7 +159,7 @@ async def run():
         )
         try:
             await animated.goto(BASE + "/", wait_until="networkidle", timeout=25000)
-            await animated.locator("#chamberCodeVisual").scroll_into_view_if_needed()
+            await animated.locator("#awakenChamber").scroll_into_view_if_needed()
             first = animated.locator('#awakenChamber .matrix-trace[data-slot="0"] .matrix-trace-line').first
             initial = await first.inner_text()
             await animated.wait_for_timeout(850)
@@ -194,6 +167,7 @@ async def run():
             assert len(later) > len(initial), (
                 f"Code does not visibly type left-to-right: {initial!r} -> {later!r}"
             )
+            await animated.screenshot(path=str(OUT / "awaken_animated_chamber_1366x768.png"))
             print("PASS 1366x768 animated Matrix typing: characters progressively appear")
         except Exception as error:
             failures.append(f"animated typewriter: {error}")

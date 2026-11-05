@@ -219,6 +219,7 @@ jobs:
           assert d["schema"]=="RealSaS.Corpus370FullFrameAnonymousEditorPrivateRunner.v3"
           assert d["status"]=="COMPLETE_FULL_FRAME_ORIGINAL_SOURCE_AND_ANON_RENDER_COURT__FAMILY_SEPARATE"
           assert d["full_frame_pixels"]==2*192*192
+          assert d["bounded_appearance_parity_and_group_separation_views"]==2
           assert d["training_authorized"] is False
           assert d["graphics_owner_authorized"] is False
           print("## Original source real full-FOV RGBA + anonymous group edits")

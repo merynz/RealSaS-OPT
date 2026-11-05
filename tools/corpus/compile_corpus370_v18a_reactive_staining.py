@@ -291,7 +291,8 @@ def execute(a):
             sha(job["selected_source_controls"]["path"]),
         "V18A_ORIGINAL_V13B_AND_BLIND_CONTROL_PARENT_SHA")
     plan=load(job["selected_source_controls"]["path"])
-    require(plan==manifest["selected_source_controls"]
+    require(sha(job["selected_source_controls"]["path"])==
+                manifest["precommitted_blind_v14_control_plan_sha256"]
         and plan["selected_control_count"]==2
         and plan["raster_pixels_seen_during_control_selection"] is False,
         "V18A_ORIGINAL_RASTER_BLIND_CONTROL_PLAN")

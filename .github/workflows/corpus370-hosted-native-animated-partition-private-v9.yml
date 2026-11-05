@@ -1,7 +1,7 @@
 name: corpus370-hosted-native-animated-partition-private-v9
 
-# Source-bound PRIVATE non-raster evidence: 3 real authored pose / anonymous group
-# courts. Original source faces and teacher pose arrays remain on private Drive.
+# Source-bound PRIVATE original authored-animation + RGBA intervention evidence.
+# Real rendered pixels and source face/teacher annotations remain on private Drive.
 on:
   push:
     branches: [corpus370-source-relative-contact-v1-review]
@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  validate-original-source-v8-request:
+  validate-original-source-v9-request:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
@@ -64,8 +64,8 @@ jobs:
           PY
 
   original-source-authored-native-pose-workers:
-    needs: validate-original-source-v8-request
-    if: needs.validate-original-source-v8-request.outputs.ready == 'true'
+    needs: validate-original-source-v9-request
+    if: needs.validate-original-source-v9-request.outputs.ready == 'true'
     strategy:
       fail-fast: false
       max-parallel: 3
@@ -76,7 +76,7 @@ jobs:
     env:
       PYTHONPATH: ${{ github.workspace }}
       RCLONE_CONFIG: /tmp/realsas-c370-native-animated-v9.conf
-      MANIFEST_SHA: ${{ needs.validate-original-source-v8-request.outputs.manifest_sha }}
+      MANIFEST_SHA: ${{ needs.validate-original-source-v9-request.outputs.manifest_sha }}
       ORIGINAL_V5_SHARDS: gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards
       RAYS_REMOTE: gdrive:corpus370_preparation_v1/hosted_source_locus_rays_all352/41883539256-1
       JOIN_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_visibility_pair_join_v1/41916724594-1
@@ -89,10 +89,10 @@ jobs:
       GROUP_LOCAL: /home/monster/realsas_authority/corpus370_allview_groups_v3/41986038051-1
       NATIVE_LOCAL: /home/monster/realsas_authority/corpus370_hosted_native_teacher_pilot/41915393652-1
       OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_native_animated_partition_v9/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.subject_ordinal }}
-      OUTPUT_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_pose_partition_private_v8/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.subject_ordinal }}
+      OUTPUT_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_animated_partition_private_v9/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.subject_ordinal }}
     steps:
       - uses: actions/checkout@v4
-      - name: Validate bounded private research host and V8 counterfeit contracts
+      - name: Validate bounded private original-source research host and V9 counterfeit contracts
         run: |
           set -euo pipefail
           test "$(awk '/MemTotal:/{print $2}' /proc/meminfo)" -ge 14000000

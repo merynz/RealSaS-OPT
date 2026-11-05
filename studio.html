@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="./static/css/studio_brand.css">
   <link rel="stylesheet" href="./static/css/busted_studio_layout.css">
   <link rel="stylesheet" href="./static/css/editor_v4.css"><link rel="stylesheet" href="./static/css/busted_components_v6.css">
+  <link rel="stylesheet" href="./static/css/studio_director_v1.css?v=1.0.0">
 <link rel="stylesheet" href="./static/css/busted_spatial_rain_v1.css?v=1.0.0"><link rel="stylesheet" href="./static/css/busted_visual_priority_v1.css?v=1.0.0"></head>
 <body>
   <header class="topbar">
@@ -47,6 +48,33 @@
     <div class="compile-state"><span class="status-dot"></span><strong id="compileState">READY FOR CHARACTER</strong><span id="compileDetail">Open a proof-qualified character or return to Awaken.</span></div>
     <div class="compile-meter"><div id="compileProgress" class="compile-progress"></div></div>
     <div class="budget"><span>PERFORMANCE</span><strong>&lt;30s preview</strong><strong>≤3 min market bar</strong><strong>≤60s goal</strong></div>
+  </section>
+
+  <section id="studioDirector" class="studio-director" aria-label="Linked Puppet and Motion workspaces" data-ready="false" data-workspace="puppet">
+    <div class="director-workspaces" role="group" aria-label="Editor workspace">
+      <button type="button" data-director-workspace="puppet" aria-pressed="true" class="active"><span>01</span><b>PUPPET</b><small>Structure &amp; skin</small></button>
+      <button type="button" data-director-workspace="motion" aria-pressed="false"><span>02</span><b>MOTION</b><small>Pose &amp; animate</small></button>
+    </div>
+    <div class="director-context" aria-live="polite"><strong id="directorStatus">NO PUPPET LOADED</strong><small id="directorSelection">WAITING FOR QUALIFIED BUNDLE</small></div>
+    <div class="director-commands" role="group" aria-label="Real Studio tools">
+      <button type="button" class="director-primary" data-director-command="open">OPEN BUNDLE</button>
+      <button type="button" data-director-command="rig" disabled>RIG</button>
+      <button type="button" data-director-command="mesh" disabled>MESH</button>
+      <button type="button" data-director-command="skin" disabled>SKIN</button>
+      <button type="button" data-director-command="attach" disabled>ATTACH</button>
+      <button type="button" data-director-command="ik" disabled title="Constraint authoring; live solve is not yet connected">IK</button>
+      <button type="button" data-director-command="select" disabled>SELECT</button>
+      <button type="button" data-director-command="translate" disabled>MOVE</button>
+      <button type="button" data-director-command="rotate" disabled>ROTATE</button>
+      <button type="button" data-director-command="scale" disabled>SCALE</button>
+      <button type="button" data-director-command="new-clip" disabled>NEW CLIP</button>
+      <button type="button" data-director-command="add-key" disabled>ADD KEY</button>
+      <button type="button" data-director-command="play" disabled>PLAY</button>
+      <button type="button" data-director-command="stop" disabled>STOP</button>
+      <button type="button" data-director-command="fit" disabled>FIT</button>
+      <button type="button" data-director-command="save" disabled>SAVE</button>
+    </div>
+    <span id="directorInstruction" hidden>Open a qualified puppet to access editor tools.</span>
   </section>
 
   <nav class="modebar" aria-label="Editing tools">
@@ -131,5 +159,6 @@
   <script type="module" src="./static/js/workspace_bootstrap.js"></script>
   <script src="./static/js/busted_studio_panels.js" defer></script>
   <script src="./static/js/editor_v4.js" defer></script>
+  <script src="./static/js/studio_director_v1.js?v=1.0.0" defer></script>
 <script src="./static/js/busted_spatial_rain_v1.js?v=1.0.0" defer></script></body>
 </html>

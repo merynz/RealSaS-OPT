@@ -79,3 +79,5 @@ body.bundle-input-open .topbar .bundle-open{display:flex!important;position:fixe
 body.bundle-input-open .bundle-open input{display:block;width:100%;min-width:0}
 @media(max-width:870px){.modebar .studio-panel-controls{display:flex;order:-1;margin-right:7px}.modebar .studio-panel-toggle{border-color:#365b6e;color:#d5ebf6;background:#183344}}
 @media(max-width:660px){.modebar .studio-panel-controls{margin-right:3px}.modebar .studio-panel-toggle{font-size:8px;padding:6px}.studio-primary-nav a{font-size:9px}.transform-menu[open] #studioTransformTools{min-width:260px}}
+
+.viewport-toolbar.tools-popover-open{position:relative;z-index:91;overflow:visible}

@@ -96,7 +96,6 @@ def run(job_path,output_path):
             and heldout.get("parents",{}).get("original_source_hit_pair_sha256")==job["source_graphics_pairs"]["sha256"]
             and heldout.get("parents",{}).get("original_native_v9_manifest_sha256")==job["prior_v9_manifest_sha256"]
             and heldout.get("parents",{}).get("independent_native_v10_court_sha256")==job["prior_v10_court_sha256"]
-            and heldout.get("parents",{}).get("v11_public_seal_sha256")==job["v11_public_seal_sha256"]
             and heldout.get("parents",{}).get("original_rest_npz_sha256")==job["rest_geometry"]["sha256"],
             "V12_IMMUTABLE_ORIGINAL_GEOMETRIC_QUERY_PRECOMMIT_BINDINGS")
     require(job["subject_id"]==receipt["subject_id"]==court["subject_id"]

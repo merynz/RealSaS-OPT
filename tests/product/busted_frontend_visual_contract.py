@@ -38,7 +38,13 @@ async def run():
                 await page.screenshot(path=str(OUT / f"awaken_{width}x{height}.png"), full_page=True)
 
                 extent = await page.evaluate("({scroll:document.documentElement.scrollWidth,inner:window.innerWidth})")
-                assert extent["scroll"] <= width+2, f"Awaken horizontal overflow: {extent} at {width}x{height}"
+                if extent["scroll"] > width+2:
+                    offenders = await page.evaluate("""() => Array.from(document.querySelectorAll('*')).map(e => {
+                      const r=e.getBoundingClientRect();
+                      return {tag:e.tagName.toLowerCase(),className:typeof e.className==='string'?e.className:'',id:e.id,
+                        x:Math.round(r.x),right:Math.round(r.right),width:Math.round(r.width),overflow:getComputedStyle(e).overflowX};
+                    }).filter(x=>x.right>innerWidth+2).slice(0,24)""")
+                    raise AssertionError(f"Awaken horizontal overflow: {extent} offenders={offenders} at {width}x{height}")
                 title=await metrics(page, ".hero-intro h1")
                 drop=await metrics(page, "#dropzone")
                 assert title["width"] > 130 and drop["width"] > 180, f"Awaken content collapsed at {width}x{height}"

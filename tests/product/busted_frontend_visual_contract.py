@@ -62,7 +62,16 @@ async def run():
                 assert chamber["y"] >= technology["bottom"]-2, f"Compile intake overlaps technology story: {chamber}"
                 assert drop["y"] >= chamber["y"], f"Source input outside compiler section: {drop}"
                 assert await page.locator("#artworkGuide .busted-guide-card").count()==3
+                assert await page.locator("#artworkGuide .busted-input-preflight").count()==1
                 assert await page.locator("#technology .busted-technology-stages article").count()==3
+                assert await page.locator("#technology .busted-model-capabilities-grid > div").count()==4
+                assert await page.locator("#technology .busted-output-contract").count()==1
+                assert "OUR MODELS" in (await page.locator("#technology").inner_text())
+                assert "RENDERED FRAMES" in (await page.locator("#technology").inner_text())
+                assert "EDITABLE PUPPET" in (await page.locator("#technology").inner_text())
+                assert "BUSTED" not in (await page.locator("#technology").inner_text()), (
+                    "Brand repeated inside the educational model chapter"
+                )
                 assert "FRONT" in (await page.locator("#artworkGuide").inner_text())
                 assert "BACK" in (await page.locator("#artworkGuide").inner_text())
                 assert "EDITABLE CHARACTER" in (await page.locator("#technology").inner_text())
@@ -186,19 +195,31 @@ async def run():
                   const face=button.getBoundingClientRect();
                   const source=document.querySelector('#dropzone').getBoundingClientRect();
                   const parent=button.closest('.compile-action').getBoundingClientRect();
+                  const label=button.querySelector('.awaken-label').getBoundingClientRect();
                   const style=getComputedStyle(button);
                   return {
                     width:face.width,height:face.height,
                     sourceWidth:source.width,parentWidth:parent.width,
+                    buttonCenter:face.x+face.width/2,
+                    sourceCenter:source.x+source.width/2,
+                    labelCenter:label.x+label.width/2,
                     background:style.backgroundImage,phase:button.dataset.ignitionPhase || 'rest',
                     canvasHidden:document.querySelector('#awakenIgnitionCanvas').hidden
                   };
                 }""")
-                assert abs(resting["width"]-resting["parentWidth"]) <= 2.5, (
-                    f"AWAKEN must fill its ACTUAL interactive container edge-to-edge: {resting}"
+                # COMPACT means sized to its AWAKEN word, not stretched to
+                # the entire action rail. Center relative to the upload card.
+                assert 95 <= resting["width"] <= 205, (
+                    f"AWAKEN should be a compact word-sized button, not a panel: {resting}"
                 )
-                assert resting["width"] >= resting["sourceWidth"], (
-                    f"AWAKEN interactive surface must not shrink to the separate upload card: {resting}"
+                assert resting["width"] < resting["parentWidth"] * .65, (
+                    f"AWAKEN still occupies the entire action rail: {resting}"
+                )
+                assert abs(resting["buttonCenter"]-resting["sourceCenter"]) <= 5, (
+                    f"AWAKEN must be centered below character upload: {resting}"
+                )
+                assert abs(resting["labelCenter"]-resting["buttonCenter"]) <= 3, (
+                    f"AWAKEN text must be optically centered within the button: {resting}"
                 )
                 assert resting["canvasHidden"], "There must be NO ambient reactor rendering"
                 assert resting["phase"] == "rest"

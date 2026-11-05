@@ -25,6 +25,7 @@ function boot(){
   panel.append(layer);
   const ctx=layer.getContext('2d');
   let drag=null,saveTimer=0,lastDraw=0,previousMessage='',cache=[];
+  let lastCanvasWidth=0,lastCanvasHeight=0,lastCanvasLeft=NaN,lastCanvasTop=NaN;
   const note=document.createElement('div');
   note.id='studioIKReachStatus';
   note.setAttribute('role','status');
@@ -78,13 +79,18 @@ function boot(){
   function resize(){
     const v=viewport.getBoundingClientRect(),p=panel.getBoundingClientRect();
     const dpr=Math.min(devicePixelRatio||1,1.5);
-    layer.width=Math.max(1,Math.round(v.width*dpr));
-    layer.height=Math.max(1,Math.round(v.height*dpr));
-    layer.style.left=(v.left-p.left)+'px';
-    layer.style.top=(v.top-p.top)+'px';
-    layer.style.width=v.width+'px';
-    layer.style.height=v.height+'px';
-    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const w=Math.max(1,Math.round(v.width*dpr)),h=Math.max(1,Math.round(v.height*dpr));
+    const left=v.left-p.left,top=v.top-p.top;
+    if(w!==lastCanvasWidth||h!==lastCanvasHeight){
+      layer.width=w;layer.height=h;ctx.setTransform(dpr,0,0,dpr,0,0);
+      lastCanvasWidth=w;lastCanvasHeight=h;
+    }
+    if(left!==lastCanvasLeft||top!==lastCanvasTop){
+      layer.style.left=left+'px';layer.style.top=top+'px';
+      lastCanvasLeft=left;lastCanvasTop=top;
+    }
+    if(layer.style.width!==v.width+'px')layer.style.width=v.width+'px';
+    if(layer.style.height!==v.height+'px')layer.style.height=v.height+'px';
   }
   function screen(world){
     const b=viewport.getBoundingClientRect();
@@ -204,7 +210,12 @@ function boot(){
       [c.start_control_id,startPose],
       [c.middle_control_id,midPose],
     ];
-    for(const [id,pose] of keys)timeline.upsertTransformKey(id,pose,{time:S.t,curve:'linear'});
+    for(const [id,pose] of keys){
+      const track=timeline.clip()?.tracks?.find(row=>(row.control_id||row.bone_id)===id);
+      const existing=track?.keys?.find(key=>Math.abs(Number(key.time_seconds)-S.t)<1e-6);
+      const curve=['step','linear','bezier'].includes(existing?.curve)?existing.curve:'linear';
+      timeline.upsertTransformKey(id,{...pose,bezier:existing?.bezier},{time:S.t,curve});
+    }
     studio.dirty.markDirty();
     studio.refreshAnimationPreview(S.t);
     drag.target=desired;
@@ -228,6 +239,7 @@ function boot(){
   }
   function cancel(){
     if(!drag)return;
+    try{layer.releasePointerCapture(drag.pointerID)}catch{}
     studio.document.replace(drag.before);
     rebind();studio.refreshAnimationPreview(S.t);
     drag=null;refresh(performance.now());

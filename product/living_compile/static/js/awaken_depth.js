@@ -2,7 +2,8 @@
 (() => {
   'use strict';
   const root=document.querySelector('#depthCode');
-  if(!root)return;
+  const typeRoot=document.querySelector('#matrixTypewriter');
+  if(!root||!typeRoot)return;
   const narrow=window.matchMedia('(max-width: 780px)');
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
   const glyphs='0123456789ABCDEFアイウエオカキクケコサシスセソタチツテト<>[]{}:/';
@@ -50,7 +51,7 @@
   ];
 
   function build(){
-    root.replaceChildren();streams.length=0;traces.length=0;elapsed=0;
+    root.replaceChildren();typeRoot.replaceChildren();streams.length=0;traces.length=0;elapsed=0;
     const mobile=narrow.matches,numberOfLanes=mobile?13:30,stagePerspective=mobile?850:1100;
     const fragment=document.createDocumentFragment();
     for(let i=0;i<numberOfLanes;i++){
@@ -89,15 +90,15 @@
       lane.style.top=(47+(slot.y-47)*scaleCorrection).toFixed(3)+'%';
       lane.style.width=(slot.w*scaleCorrection).toFixed(3)+'%';
       lane.style.transform='translateZ('+z+'px)';
-      lane.style.setProperty('--trace-font',random(mobile?9:10,mobile?11:13).toFixed(1)+'px');
-      lane.style.setProperty('--trace-alpha',random(.20,.37).toFixed(3));
-      lane.style.setProperty('--trace-tone',pick(['#b9c9ff','#a2d7ff','#b5b2ff','#92baf1']));
+      lane.style.setProperty('--trace-font',random(mobile?10:12,mobile?12:14).toFixed(1)+'px');
+      lane.style.setProperty('--trace-alpha',random(.72,.90).toFixed(3));
+      lane.style.setProperty('--trace-tone',pick(['#c7d4ff','#b5ddff','#d0c1ff','#bfd0ff']));
       const rows=Array.from({length:2},()=>{
         const span=document.createElement('span');
         span.className='matrix-trace-line';lane.appendChild(span);return span;
       });
-      const state={lane,rows,lines:rows.map(generateCode),rate:random(72,150),offset:random(0,7900),cycle:random(13000,19500),stagger:random(1050,2100),lastCycle:-1};
-      traces.push(state);fragment.appendChild(lane);
+      const state={lane,rows,lines:rows.map(generateCode),rate:random(65,118),offset:(i*1350)%7100,cycle:random(13000,18000),stagger:random(850,1500),lastCycle:-1};
+      traces.push(state);typeRoot.appendChild(lane);
     }
     root.appendChild(fragment);
     paint();

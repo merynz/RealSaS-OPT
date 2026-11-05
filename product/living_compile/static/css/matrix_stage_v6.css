@@ -86,3 +86,41 @@
  .matrix-trace-line.typing::after{animation:none}
  .matrix-stream{animation:none;opacity:.43;transform:translate3d(0,25vh,0)}
 }
+
+/* BUSTED v6.1: code authority is visual prominence, not compiler authority.
+   The dark atmospheric veil covers distant rain but NOT the nearer typewriter.
+   The code remains behind the real hero and intake UI, yet is legible in
+   unobstructed screen regions. */
+.matrix-stage>.matrix-typewriter{
+  position:absolute;
+  inset:0;
+  z-index:9;
+  transform-style:preserve-3d;
+  overflow:visible;
+  pointer-events:none;
+  isolation:auto;
+}
+.matrix-typewriter .matrix-trace{
+  z-index:auto;
+  color:var(--trace-tone);
+  opacity:var(--trace-alpha);
+  height:62px;
+  font-weight:600;
+  line-height:1.65;
+  text-shadow:0 0 10px rgba(161,170,255,.20),0 0 22px rgba(93,108,217,.12);
+}
+.matrix-typewriter .matrix-trace-line{
+  height:1.65em;
+  line-height:1.65;
+  padding-inline:1px;
+}
+.matrix-typewriter .matrix-trace-line.typing::after{
+  color:#ebdfff;
+  text-shadow:0 0 8px rgba(170,148,255,.6);
+}
+@media(max-width:780px){
+  .matrix-typewriter .matrix-trace{
+    height:50px;
+    opacity:calc(var(--trace-alpha) * .84);
+  }
+}

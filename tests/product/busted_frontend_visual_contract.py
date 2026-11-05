@@ -148,10 +148,11 @@ async def run():
                   return {width:canvas.width,height:canvas.height,ink};
                 }""")
                 assert stage_rain["ink"] > 30, f"Stage-local Matrix rain rendered blank: {stage_rain}"
-                # The offline CTA permits one clearly labeled ignition-only
-                # visual preview. It must never POST a real compile session.
+                # Offline CTA lets visitors view the interaction, but may
+                # NEVER submit a real compile or present ProductProof.
                 await page.wait_for_function("""() =>
-                  document.querySelector('#awaken')?.dataset.ignitionPreview === 'true'
+                  document.querySelector('#awaken')?.dataset.ignitionPreview === 'true' &&
+                  document.querySelector('#awakenIgnitionCanvas') !== null
                 """, timeout=5000)
                 await page.evaluate("""() => {
                   window.__ignitionCompilePosts=0;
@@ -163,80 +164,54 @@ async def run():
                   };
                 }""")
                 button=page.locator("#awaken")
-                assert await button.is_enabled(), "Offline ignition interaction cannot be pressed"
+                assert await button.is_enabled(), "Offline visual ignition cannot be pressed"
                 resting=await button.evaluate("""button => {
                   const face=button.getBoundingClientRect();
+                  const source=document.querySelector('#dropzone').getBoundingClientRect();
                   const parent=button.closest('.compile-action').getBoundingClientRect();
                   const style=getComputedStyle(button);
-                  return {width:face.width,parentWidth:parent.width,
-                    background:style.backgroundImage,charging:button.classList.contains('is-charging')};
-                }""")
-                assert resting["width"] >= resting["parentWidth"]-3, (
-                    f"AWAKEN CTA no longer fills its intended region: {resting}"
-                )
-                assert "linear-gradient" in resting["background"]
-                assert not resting["charging"]
-                assert "rgb(23, 35, 78)" in resting["background"], (
-                    f"AWAKEN must rest in cold cobalt; no permanent orange fire: {resting}"
-                )
-                await page.evaluate("""() => {
-                  const button=document.querySelector('#awaken');
-                  window.__ignitionVisualProof={phases:[]};
-                  const proof=window.__ignitionVisualProof;
-                  new MutationObserver(() => {
-                    const phase=button.classList.contains('is-charging')?'charge':
-                      button.classList.contains('is-igniting')?'ignition':'rest';
-                    proof.phases.push(phase);
-                  }).observe(button,{attributes:true,attributeFilter:['class']});
-                }""")
-                await button.click()
-                await page.wait_for_function("""() => {
-                  const proof=window.__ignitionVisualProof;
-                  const b=document.querySelector('#awaken');
-                  return proof?.phases.includes('charge')&&
-                    proof.phases.includes('ignition')&&
-                    proof.phases.includes('rest')&&
-                    !b.classList.contains('is-charging')&&
-                    !b.classList.contains('is-igniting');
-                }""", timeout=5000)
-                # Separate a deterministic geometry/CSS probe from the real
-                # click transition. On slow canvas frames a 200ms timer can run
-                # AFTER the 940ms interaction has already finished.
-                await button.evaluate("b=>b.classList.add('is-charging')")
-                await page.wait_for_timeout(220)
-                sample=await button.evaluate("""button => {
-                  const p=getComputedStyle(button,'::before');
-                  const face=button.getBoundingClientRect();
                   return {
-                    opacity:parseFloat(p.opacity),
-                    scale:new DOMMatrixReadOnly(p.transform).a,
-                    width:parseFloat(p.width),height:parseFloat(p.height),
-                    faceWidth:face.width,faceHeight:face.height
+                    width:face.width,height:face.height,
+                    sourceWidth:source.width,parentWidth:parent.width,
+                    background:style.backgroundImage,phase:button.dataset.ignitionPhase || 'rest',
+                    canvasHidden:document.querySelector('#awakenIgnitionCanvas').hidden
                   };
                 }""")
-                assert .08 < sample["scale"] <= 1, (
-                    f"Ignition charge did not advance across the button face: {sample}"
+                assert abs(resting["width"]-resting["sourceWidth"]) < 2.5, (
+                    f"AWAKEN must match actual character source viewport, not the console: {resting}"
                 )
-                assert sample["opacity"] >= .38 and sample["scale"] == 1, (
-                    f"Reduced-motion ignition must be a subdued full-face static state: {sample}"
+                assert resting["width"] <= resting["parentWidth"]+2
+                assert resting["canvasHidden"], "There must be NO ambient reactor rendering"
+                assert resting["phase"] == "rest"
+                assert "linear-gradient" in resting["background"]
+                assert "rgb(20, 29, 66)" in resting["background"], (
+                    f"AWAKEN must rest in cold cobalt, not fiery gradients: {resting}"
                 )
-                assert abs(sample["width"]-sample["faceWidth"]) <= 3, (
-                    f"Ignition overlay and button widths differ: {sample}"
+
+                # Reduced-motion mode: short static ignition, never a
+                # stroboscopic Canvas, and always reset after the click.
+                await page.evaluate("""() => {
+                  const b=document.querySelector('#awaken');
+                  window.__ignitionPhases=[];
+                  new MutationObserver(() => {
+                    window.__ignitionPhases.push(b.dataset.ignitionPhase || 'rest');
+                  }).observe(b,{attributes:true,attributeFilter:['data-ignition-phase']});
+                }""")
+                await button.click()
+                await page.wait_for_function("""() =>
+                  window.__ignitionPhases?.includes('igniting') &&
+                  window.__ignitionPhases?.includes('rest')
+                """, timeout=5000)
+                assert await page.locator("#awakenIgnitionCanvas").is_hidden(), (
+                    "Reduced-motion ignition must not render a Canvas animation"
                 )
-                assert abs(sample["height"]-sample["faceHeight"]) <= 3, (
-                    f"Ignition overlay and button heights differ: {sample}"
-                )
-                if width == 1440:
-                    await button.screenshot(path=str(OUT / "awaken_click_charge_1440.png"))
-                await button.evaluate("b=>b.classList.remove('is-charging')")
                 assert await page.evaluate("window.__ignitionCompilePosts") == 0, (
-                    "Preview ignition must never start a real compile!"
+                    "Ignition preview must never call /api/compile/start"
                 )
                 assert await page.locator("#compileAvailability").inner_text() == "UI PREVIEW · COMPILER OFFLINE"
                 assert not await page.locator("#result").evaluate("el=>el.classList.contains('show')"), (
-                    "Ignition alone cannot fabricate a compiled product"
+                    "Visual ignition cannot invent a compiled puppet"
                 )
-
 
                 # Studio link is real navigation, even without a compiled bundle.
                 await page.locator(".studio-link").click()
@@ -350,30 +325,58 @@ async def run():
                 f"Code does not progress over time: {initial!r} -> {later!r}"
             )
             await animated.screenshot(path=str(OUT / "awaken_animated_chamber_1366x768.png"))
-            # Separate motion-enabled power-fill witness. A CSS !important on
-            # the base pseudo element previously pinned the scale at zero.
+            # Normal-motion witness: the real VFX Canvas must contain energy,
+            # in exactly the button's bounding box, for one click only.
             await animated.wait_for_function("""() =>
               document.querySelector('#awaken')?.dataset.ignitionPreview === 'true'
             """, timeout=5000)
-            button=animated.locator("#awaken")
-            await button.evaluate("b=>b.classList.add('is-charging')")
-            await animated.wait_for_timeout(235)
-            moving=await button.evaluate("""b=>{
-              const p=getComputedStyle(b,'::before');
-              const face=b.getBoundingClientRect();
-              return {opacity:parseFloat(p.opacity),
-                scale:new DOMMatrixReadOnly(p.transform).a,
-                width:parseFloat(p.width),height:parseFloat(p.height),
-                faceWidth:face.width,faceHeight:face.height};
+            await animated.evaluate("""() => {
+              const button=document.querySelector('#awaken');
+              const canvas=document.querySelector('#awakenIgnitionCanvas');
+              window.__reactorProof={phases:[],maxInk:0,maxAlpha:0,dimension:null};
+              const witness=window.__reactorProof;
+              new MutationObserver(()=>{
+                witness.phases.push(button.dataset.ignitionPhase||'rest');
+              }).observe(button,{attributes:true,attributeFilter:['data-ignition-phase']});
+              const measure=()=>{
+                if(!canvas.hidden&&canvas.width>0&&canvas.height>0){
+                  const context=canvas.getContext('2d');
+                  const w=canvas.width,h=canvas.height;
+                  const px=context.getImageData(0,0,w,h).data;
+                  let ink=0,maxAlpha=0;
+                  for(let i=3;i<px.length;i+=32){
+                    if(px[i]>16)ink++;
+                    maxAlpha=Math.max(maxAlpha,px[i]);
+                  }
+                  witness.maxInk=Math.max(witness.maxInk,ink);
+                  witness.maxAlpha=Math.max(witness.maxAlpha,maxAlpha);
+                  const face=button.getBoundingClientRect();
+                  witness.dimension={width:face.width,height:face.height,
+                    canvasWidth:canvas.getBoundingClientRect().width,
+                    canvasHeight:canvas.getBoundingClientRect().height};
+                }
+                if(button.dataset.ignitionPhase!=='rest' ||
+                   !witness.phases.includes('rest'))
+                  requestAnimationFrame(measure);
+              };
+              requestAnimationFrame(measure);
             }""")
-            assert moving["opacity"] >= .9 and .08 < moving["scale"] <= 1, (
-                f"Normal-motion charge is not visibly filling: {moving}"
+            await animated.locator("#awaken").click()
+            await animated.wait_for_function("""() => {
+              const proof=window.__reactorProof;
+              return proof?.phases.includes('charging') &&
+                proof?.phases.includes('igniting') &&
+                proof?.phases.includes('recovering') &&
+                proof?.phases.includes('rest');
+            }""", timeout=7000)
+            reactor=await animated.evaluate("window.__reactorProof")
+            assert reactor["maxInk"] > 50 and reactor["maxAlpha"] > 40, (
+                f"Reactor never painted a visible energy sequence: {reactor}"
             )
-            assert abs(moving["width"]-moving["faceWidth"]) <= 3
-            assert abs(moving["height"]-moving["faceHeight"]) <= 3
-            await button.screenshot(path=str(OUT / "awaken_motion_charge_1366.png"))
-            await button.evaluate("b=>b.classList.remove('is-charging')")
-            print("PASS 1366x768 animated Matrix typing + full-surface ignition charge")
+            assert abs(reactor["dimension"]["width"]-reactor["dimension"]["canvasWidth"]) <= 2
+            assert abs(reactor["dimension"]["height"]-reactor["dimension"]["canvasHeight"]) <= 2
+            assert await animated.locator("#awakenIgnitionCanvas").is_hidden()
+            print("PASS 1366x768 animated Matrix typing + one-shot reactor ignition")
         except Exception as error:
             failures.append(f"animated typewriter: {error}")
             print("FAIL", failures[-1])

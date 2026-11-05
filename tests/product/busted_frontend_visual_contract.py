@@ -56,7 +56,18 @@ async def run():
                 assert chamber["y"] >= intro["bottom"]-2, f"Chamber overlaps introductory section: {chamber}"
                 assert drop["y"] >= chamber["y"], f"Source input not located in second section: {drop}"
                 assert await page.locator(".chamber-code-visual").count() == 0, "Unwanted separate decorative code panel"
-                assert await page.locator(".chamber-header h2").inner_text() == "AWAKEN.", "Duplicated second hero copy"
+                assert (await page.locator(".chamber-header h2").inner_text()).strip() == "YOUR ART. IN.", "Unexpected intake hierarchy"
+                assert "WE COMPILE" in (await page.locator(".hero-intro h1").inner_text()), "Compiler identity missing"
+                assert await page.locator("#structuralCanvas").is_visible(), "Procedural carrier absent"
+                canvas_evidence=await page.locator("#structuralCanvas").evaluate("""canvas => {
+                  const ctx=canvas.getContext('2d');
+                  const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+                  let occupied=0;
+                  for(let i=3;i<pixels.length;i+=4)if(pixels[i]>40)occupied++;
+                  return {occupied,width:canvas.width,height:canvas.height};
+                }""")
+                assert canvas_evidence["occupied"]>350, f"Spatial carrier produced no geometry: {canvas_evidence}"
+                assert await page.locator("#compileMonitor").is_hidden(), "Compiler console must not appear before real compilation"
                 # Two independent ambient streams, measured from rendered text rather than markup only.
                 for section, n in [("#introduction", 4 if width > 780 else 2),
                                    ("#awakenChamber", 8 if width > 780 else 4)]:

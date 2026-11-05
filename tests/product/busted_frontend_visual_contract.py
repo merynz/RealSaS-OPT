@@ -64,7 +64,22 @@ async def run():
                 assert all(0<=m["depth"]<=1 for m in matrix), "Invalid 3D depth parameter"
                 for left,right in zip(matrix,matrix[1:]):
                     assert left["right"] <= right["x"] + 1, f"Matrix text lanes overlap at {width}: {left} vs {right}"
-                assert await page.locator(".matrix-trace").count() == 0, "Unbounded floating code fragments should not be present"
+                # Foreground code is reserved in non-overlapping 2D screen regions,
+                # while each track retains its own real CSS z-depth.
+                traces = await page.locator(".matrix-trace").evaluate_all("""elements => elements.map(el => {
+                  const r=el.getBoundingClientRect();
+                  return {slot:Number(el.dataset.slot), depth:Number(el.dataset.depth),
+                    x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};
+                })""")
+                assert len(traces) == (4 if width<=780 else 8), f"Wrong number of typing reservations: {traces}"
+                assert len({t["slot"] for t in traces}) == len(traces), "Duplicate text reservation"
+                assert len({t["depth"] for t in traces}) >= 2, "All text is on one depth plane"
+                for i,left in enumerate(traces):
+                    assert left["width"] > 60 and left["height"] > 15, f"Collapsed typing reservation: {left}"
+                    for right in traces[i+1:]:
+                        overlap_x = min(left["right"],right["right"])-max(left["x"],right["x"])
+                        overlap_y = min(left["bottom"],right["bottom"])-max(left["y"],right["y"])
+                        assert overlap_x <= 2 or overlap_y <= 2, f"Typing code overlaps: {left} vs {right}"
                 assert await page.locator("#awaken").is_disabled(), "Offline preview must never offer a fake compile"
 
                 # Studio link is real navigation, even without a compiled bundle.

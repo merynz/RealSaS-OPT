@@ -3,24 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>RealSaS</title>
+  <title>BUSTED · Awaken</title>
   <meta name="description" content="Awaken a source character into an editable living puppet.">
   <link rel="stylesheet" href="./static/css/awaken.css">
   <link rel="stylesheet" href="./static/css/awaken_input_slots.css">
-  <link rel="stylesheet" href="./static/css/agent_reach.css">
+  <link rel="stylesheet" href="./static/css/awaken_stage.css">
 </head>
 <body>
   <main class="awaken-shell">
     <canvas id="depthScene" aria-hidden="true"></canvas>
-    <canvas id="agentReach" aria-hidden="true"></canvas>
     <div class="scene-fog" aria-hidden="true"></div>
-    <div class="scene-grid" aria-hidden="true"></div>
-    <div class="scene-scan" aria-hidden="true"></div>
     <div class="scene-vignette" aria-hidden="true"></div>
-    <div class="scene-aperture" aria-hidden="true"></div>
 
-    <header class="masthead" aria-label="RealSaS">
-      <span class="brandmark">RS</span>
+    <header class="masthead" aria-label="BUSTED navigation">
+      <nav class="mast-links" aria-label="Primary navigation">
+        <a class="brand-home" href="./index.html" aria-current="page"><span class="brandmark">B</span><span class="brand-name">BUSTED<small>POWERED BY REALSAS</small></span></a>
+        <a class="studio-link" href="./studio.html">STUDIO <span aria-hidden="true">↗</span></a>
+      </nav>
       <div id="mastStatus" class="mast-status"><i></i><span>INTAKE READY</span></div>
     </header>
 
@@ -86,7 +85,7 @@
 
     <div class="dev-mode">MODE · <strong id="modeLabel">CHECKING GATEWAY</strong></div>
   </main>
-  <script src="./static/js/agent_reach.js" defer></script>
+  <script src="./static/js/awaken_depth.js" defer></script>
   <script type="module" src="./static/js/awaken_input_slots.js"></script>
   <script type="module" src="./static/js/awaken.js"></script>
 </body>

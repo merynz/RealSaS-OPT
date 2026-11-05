@@ -1,5 +1,3 @@
-const canvas = document.querySelector('#depthScene');
-const ctx = canvas.getContext('2d');
 const shell = document.querySelector('.awaken-shell');
 const input = document.querySelector('#sourceInput');
 const dropzone = document.querySelector('#dropzone');
@@ -43,76 +41,7 @@ const resultCtx = resultCanvas.getContext('2d');
 let project = null;
 let selectedFiles = [];
 let running = false;
-let particles = [];
-let codeColumns = [];
-let startTime = performance.now();
 let revealGeneration = 0;
-
-function resize() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = Math.floor(innerWidth * dpr);
-  canvas.height = Math.floor(innerHeight * dpr);
-  canvas.style.width = `${innerWidth}px`;
-  canvas.style.height = `${innerHeight}px`;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  seedDepth();
-}
-
-function seedDepth() {
-  const words = [
-    'scene.memory', 'surface.query', 'mesh.compile', 'rig.program', 'weights.solve',
-    'mechanics.validate', 'appearance.authority', 'motion.compile', 'proof.pass',
-    'typed.evidence', 'persistent.identity', 'source.wins', 'product.revision',
-  ];
-  codeColumns = Array.from({length: Math.max(16, Math.floor(innerWidth / 90))}, (_, i) => ({
-    x: (i + 0.5) * innerWidth / Math.max(16, Math.floor(innerWidth / 90)),
-    z: Math.random(),
-    speed: 0.000035 + Math.random() * 0.00005,
-    phrase: words[i % words.length],
-    phase: Math.random() * 100,
-  }));
-  particles = Array.from({length: 56}, () => ({
-    x: Math.random() * innerWidth,
-    y: Math.random() * innerHeight,
-    z: Math.random(),
-    speed: 0.015 + Math.random() * 0.045,
-  }));
-}
-
-function drawDepth(now) {
-  const w = innerWidth;
-  const h = innerHeight;
-  ctx.clearRect(0, 0, w, h);
-  ctx.save();
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  for (const column of codeColumns) {
-    column.z += column.speed * (now - startTime);
-    if (column.z > 1.2) column.z = 0.02;
-    const depth = Math.max(0.06, column.z);
-    const horizon = h * 0.46;
-    const x = w * 0.5 + (column.x - w * 0.5) * (0.18 + depth * 1.34);
-    const y = horizon + (depth * depth) * h * 0.52 + Math.sin(now * 0.00025 + column.phase) * 7;
-    const alpha = Math.max(0, Math.min(0.12, depth * 0.11));
-    const size = 7 + depth * 5;
-    ctx.font = `${size}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
-    ctx.fillStyle = `rgba(143,176,195,${alpha})`;
-    ctx.fillText(column.phrase, x, y);
-  }
-  for (const p of particles) {
-    p.y -= p.speed;
-    if (p.y < -4) {
-      p.y = h + 4;
-      p.x = Math.random() * w;
-    }
-    const a = 0.03 + p.z * 0.12;
-    ctx.fillStyle = `rgba(180,213,230,${a})`;
-    ctx.fillRect(p.x, p.y, 1 + p.z, 1 + p.z);
-  }
-  ctx.restore();
-  startTime = now;
-  requestAnimationFrame(drawDepth);
-}
 
 function addLog(message, hot = false) {
   const row = document.createElement('div');
@@ -291,33 +220,6 @@ async function startIdleReveal(bundle) {
   if (sourceImage?.dataset?.objectUrl) URL.revokeObjectURL(sourceImage.dataset.objectUrl);
 }
 
-async function runPresentationFlow() {
-  resetPipeline();
-  shell.classList.add('compiling');
-  status.classList.add('ready');
-  status.querySelector('span').textContent = 'COMPILING';
-  awaken.disabled = true;
-  openWorkspace.href = '/workspace';
-  openWorkspace.textContent = 'OPEN STUDIO';
-  addLog('presentation compile graph admitted', true);
-  for (let i = 0; i < productStages.length; i += 1) {
-    const [name, event] = productStages[i];
-    if (i > 0) {
-      pipeline[i - 1].classList.remove('active');
-      pipeline[i - 1].classList.add('done');
-    }
-    pipeline[i].classList.add('active');
-    addLog(`${String(i + 1).padStart(2, '0')} ${name.toLowerCase()} · ${event}`, true);
-    await delay(i === 0 ? 720 : 560 + Math.random() * 380);
-  }
-  pipeline.at(-1).classList.remove('active');
-  pipeline.at(-1).classList.add('done');
-  addLog('presentation complete · no product authority', true);
-  await delay(500);
-  result.classList.add('show');
-  status.querySelector('span').textContent = 'PREVIEW';
-}
-
 async function startProductionCompile() {
   const views = await Promise.all(selectedFiles.map(async (file, index) => ({
     slot: index === 0 ? 'front' : 'back',
@@ -436,9 +338,6 @@ async function loadProject() {
   }
 }
 
-window.addEventListener('resize', resize);
-resize();
-requestAnimationFrame(drawDepth);
 loadProject();
 addLog('living compile surface online');
 addLog('awaiting source observation');

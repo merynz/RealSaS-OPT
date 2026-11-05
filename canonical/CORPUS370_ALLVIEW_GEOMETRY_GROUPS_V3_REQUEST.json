@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370AllViewGeometryGroupsResearchRequest.v3",
-  "status": "PREREGISTERED_DISABLED_UNTIL_CI_AND_ACTIONLINT",
-  "enabled": false,
+  "status": "ACTIVATED_REAL_THREE_SOURCE_ALLVIEW_GEOMETRY_INTERVENTION_HOLDOUT_PILOT",
+  "enabled": true,
   "source_locked": true,
   "source_three_subject_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
   "source_three_subject_anonymous_layer_batch_sha256": "47b3f3beb7a3625504ccf8488d6fe0cd8fbe0014421c5e4c77748f829c9f01ca",
@@ -34,5 +34,5 @@
   "materialization_authorized": false,
   "product_compilation_authorized": false,
   "training_authorized": false,
-  "note": "8 original source cameras are input geometry; heldout is the independently measured edit response at camera4, not unseen camera. Never confuse operational layer groups with artist drawable identity."
+  "note": "8 original source cameras are input geometry; heldout is the independently measured edit response at camera4, not unseen camera. Never confuse operational layer groups with artist drawable identity. Activation after independent CI/actionlint SUCCESS. No training, owner or native-pose CAA admission."
 }

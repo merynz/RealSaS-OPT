@@ -153,8 +153,31 @@ def physical_group_mode(soup, face_map, base_meshes, labels, excluded):
 
 
 def run(job_path,stain_report_path,stain_npz_path,stain_court_path,
-        v14_original_pixels,output_path):
+        v14_original_pixels,parent_v18f_court_path,parent_v18g_court_path,
+        expected_v18f_sha,expected_v18g_sha,output_path):
     job=json.loads(Path(job_path).read_text())
+    parent_f=json.loads(Path(parent_v18f_court_path).read_text())
+    parent_g=json.loads(Path(parent_v18g_court_path).read_text())
+    require(sha(parent_v18f_court_path)==expected_v18f_sha
+        and sha(parent_v18g_court_path)==expected_v18g_sha
+        and len(expected_v18f_sha)==64 and len(expected_v18g_sha)==64
+        and parent_f.get("schema")=="RealSaS.Corpus370IndependentFullPhysicalFaceEditCourt.v18f"
+        and parent_f.get("status")==
+             "ORIGINAL_FULL_PHYSICAL_EDITS_SOURCE_CONSEQUENCES_COURTED__ARTIST_DRAWABLE_UNKNOWN"
+        and parent_f.get("source_sha256")==job["source"]["sha256"]
+        and parent_f.get("original_source_id")==job["subject_id"]
+        and parent_f.get("physical_render_face_counts_courted") is True
+        and parent_f.get("training_authorized") is False
+        and parent_g.get("schema")==
+             "RealSaS.Corpus370IndependentOriginalPhysicalCompositingDiagnostics.v18g"
+        and parent_g.get("status")==
+             "ORIGINAL_SOURCE_PHYSICAL_LAYER_COMPLEMENT_ALPHA_COMPOSING_DIAGNOSED__NO_OWNER_TRUTH"
+        and parent_g.get("original_source_sha256")==job["source"]["sha256"]
+        and parent_g.get("source_subject_private")==job["subject_id"]
+        and parent_g.get("exact_v18f_independent_court_sha256")==expected_v18f_sha
+        and parent_g.get("training_authorized") is False
+        and parent_g.get("graphics_owner_authorized") is False,
+        "V18H_ORIGINAL_V18F_V18G_INDEPENDENT_COURTS_SHA_BINDING")
     stain=json.loads(Path(stain_report_path).read_text())
     independent=json.loads(Path(stain_court_path).read_text())
     require(job.get("schema")==V14_JOB
@@ -297,11 +320,9 @@ def run(job_path,stain_report_path,stain_npz_path,stain_court_path,
         emit_rest=emission_material("V18H_FIXED_EMISSIVE_BLUE_COMPLEMENT",(0.04,0.14,0.92))
         for ob in meshes: ob.hide_render=True
         for ob in soup: ob.hide_render=False
-        cam=cam
         names=ops()
         render_cases=[]
         face_count_checks=[]
-        group_counts=[]
         for vi,view in enumerate(VIEWS):
             _camera_full(cam,camera[view],192)
             current={}
@@ -315,7 +336,6 @@ def run(job_path,stain_report_path,stain_npz_path,stain_court_path,
                 group=int(labels[targets[0]])
                 present=set(int(v) for v in np.unique(labels))
                 require(group in present,"V18H_ORIGINAL_FROZEN_GROUP_NOT_FOUND")
-                group_counts.append([float(t),int(group),int(np.count_nonzero(labels==group))])
                 # Rebind each soup object to its original complete mesh
                 # before changing material colors. Removed temp meshes are
                 # never used to determine group membership.
@@ -369,8 +389,12 @@ def run(job_path,stain_report_path,stain_npz_path,stain_court_path,
         "frozen_tested_stain_similarity_thresholds":list(THRESHOLDS),
         "original_full_stain_similarity_thresholds":list(SOURCE_THRESHOLDS),
         "original_source_heldout_pose_vertices_verified":True,
-        "source_rest_triangle_UV_material_authority_reused":True,
-        "source_vs_original_v14_RGBA_reference_source_parity_verified":True,
+        "source_rest_triangle_UV_material_authority_reused":False,
+        "original_UV_material_textures_deliberately_not_tested_under_emission":True,
+        "source_vs_original_v14_RGBA_reference_source_parity_verified":False,
+        "source_v14_parity_authority_inherited_only_from_sealed_v18f_parent":True,
+        "parent_v18f_independent_court_sha256":sha(parent_v18f_court_path),
+        "parent_v18g_independent_compositing_sha256":sha(parent_v18g_court_path),
         "new_source_actual_edited_rgba_npz_sha256":sha(npz),
         "diagnostic_emission_color_group_rgb":[.90,.08,.035],
         "diagnostic_emission_color_complement_rgb":[.04,.14,.92],
@@ -399,9 +423,13 @@ def run(job_path,stain_report_path,stain_npz_path,stain_court_path,
 if __name__=="__main__":
     p=argparse.ArgumentParser()
     for key in ("job","stain_report","stain_npz","stain_court",
-                "v14_original_pixels","output"):
+                "v14_original_pixels","parent_v18f_court","parent_v18g_court",
+                "output"):
         p.add_argument("--"+key.replace("_","-"),type=Path,required=True)
+    p.add_argument("--expected-v18f-sha",required=True)
+    p.add_argument("--expected-v18g-sha",required=True)
     argv=sys.argv[sys.argv.index("--")+1:] if "--" in sys.argv else None
     a=p.parse_args(argv)
     run(a.job,a.stain_report,a.stain_npz,a.stain_court,
-        a.v14_original_pixels,a.output)
+        a.v14_original_pixels,a.parent_v18f_court,a.parent_v18g_court,
+        a.expected_v18f_sha,a.expected_v18g_sha,a.output)

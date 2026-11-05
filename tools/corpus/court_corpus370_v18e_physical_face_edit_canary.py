@@ -50,7 +50,7 @@ def image_delta_metrics(a,b):
         "source_effect_exists":bool(effect.any()),
     }
 
-def evaluate(manifest_path,edited_path,stain_path,stain_court_path,
+def evaluate(manifest_path,edited_path,stain_path,stain_npz_path,stain_court_path,
              v14_job_path,v14_pixels_path):
     manifest=load(manifest_path);v14=load(v14_job_path)
     stain=load(stain_path);stain_court=load(stain_court_path)
@@ -68,6 +68,7 @@ def evaluate(manifest_path,edited_path,stain_path,stain_court_path,
         and manifest.get("source_original_v14_job_sha256")==sha(v14_job_path)
         and manifest.get("original_v14_RGBA_sha256")==sha(v14_pixels_path)
         and manifest.get("source_reactive_stain_report_sha256")==sha(stain_path)
+        and manifest.get("source_reactive_stain_npz_sha256")==sha(stain_npz_path)
         and manifest.get("independent_source_stain_court_sha256")==sha(stain_court_path)
         and manifest.get("new_source_actual_edited_rgba_npz_sha256")==sha(edited_path)
         and v14.get("schema")=="RealSaS.Corpus370SourceNativeMechanicalRasterJointJob.v14"
@@ -108,10 +109,14 @@ def evaluate(manifest_path,edited_path,stain_path,stain_court_path,
         parent=np.asarray(f["original_native_actuator_rgba"],np.float32)
     with np.load(Path(v14["rest_geometry"]["path"]),allow_pickle=False) as f:
         faces=np.asarray(f["faces"],np.int64)
-    with np.load(Path(stain["source_reactive_stain_npz_path"]) if
-                 "source_reactive_stain_npz_path" in stain else
-                 Path(v14["rest_geometry"]["path"]),allow_pickle=False) as f:
-        pass
+    with np.load(stain_npz_path,allow_pickle=False) as f:
+        stain_faces=np.asarray(f["faces"],np.int64)
+        labels=np.asarray(f["labels_0p1"],np.int32)
+    require(np.array_equal(faces,stain_faces)
+        and labels.shape==(len(faces),)
+        and len(labels)>0 and np.all(labels>=0),
+        "V18E_COURT_PARENT_STAIN_SOURCE_FACE_ARRAY")
+    group_size=int(np.count_nonzero(labels==labels[target]))
     require(images.shape==(4,len(ARMS),192,192,4)
             and parent.ndim==6 and parent.shape[0:2]==(3,4)
             and parent.shape[3:]==(192,192,4)
@@ -120,10 +125,9 @@ def evaluate(manifest_path,edited_path,stain_path,stain_court_path,
     original_arms,_=arms_for_plan(load(v14["selected_source_controls"]["path"]))
     origindex=original_arms.index("ORIGINAL_BASE")
     n=len(faces)
-    # Physically removed counts are exact requirements for no-op / empty /
-    # single-face interventions. Group counts are independently validated
-    # below with the original sealed stain partition.
-    required_counts=[n,n,n,0,n-1,1,None,None]
+    # Every physically removed count is independently checked against the
+    # sealed V18a source-face partition, not only the producer metadata.
+    required_counts=[n,n,n,0,n-1,1,n-group_size,group_size]
     claimed=manifest["actual_visible_original_source_triangles_per_arm_view"]
     require(len(claimed)==4
             and all(len(row)==len(ARMS) for row in claimed),
@@ -173,6 +177,7 @@ def evaluate(manifest_path,edited_path,stain_path,stain_court_path,
         "parent_v14_job_sha256":sha(v14_job_path),
         "parent_v14_rgba_sha256":sha(v14_pixels_path),
         "parent_v18a_stain_report_sha256":sha(stain_path),
+        "parent_v18a_stain_npz_sha256":sha(stain_npz_path),
         "parent_v18a_stain_court_sha256":sha(stain_court_path),
         "independently_reopened_v18e_manifest_sha256":sha(manifest_path),
         "independently_reopened_v18e_rgba_sha256":sha(edited_path),
@@ -191,12 +196,12 @@ def evaluate(manifest_path,edited_path,stain_path,stain_court_path,
 
 def main():
     p=argparse.ArgumentParser()
-    for key in ("render_manifest","edited_npz","stain_report","stain_court",
+    for key in ("render_manifest","edited_npz","stain_report","stain_npz","stain_court",
                 "v14_job","v14_original_pixels","output"):
         p.add_argument("--"+key.replace("_","-"),type=Path,required=True)
     a=p.parse_args()
     output=evaluate(a.render_manifest,a.edited_npz,a.stain_report,
-                    a.stain_court,a.v14_job,a.v14_original_pixels)
+                    a.stain_npz,a.stain_court,a.v14_job,a.v14_original_pixels)
     a.output.parent.mkdir(parents=True,exist_ok=True)
     a.output.write_text(json.dumps(output,sort_keys=True,indent=2,allow_nan=False)+"\n")
     print(json.dumps({

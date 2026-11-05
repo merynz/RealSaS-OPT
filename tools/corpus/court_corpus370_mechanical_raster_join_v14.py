@@ -23,7 +23,7 @@ def require(ok,reason):
 def change(a,b):
     return np.max(np.abs(np.asarray(a,np.float32)-np.asarray(b,np.float32)),axis=-1)
 
-def evaluate(pixels,render,selection,prior_v13b_manifest,prior_v13b_public_source):
+def evaluate(pixels,render,selection,prior_v13b_manifest,prior_v13b_batch,prior_v13b_public_source):
     controls=selection.get("controls")
     arms,pairs=arms_for_plan(selection)
     require(render.get("schema")==RENDER
@@ -54,11 +54,18 @@ def evaluate(pixels,render,selection,prior_v13b_manifest,prior_v13b_public_sourc
             and render["source_private_v13b_intervention_array_sha256"]==
                 prior_v13b_public_source["raw_vertex_response_npz_sha256"]
             and render["source_private_v13b_intervention_manifest_sha256"]==
-                prior_v13b_public_source["v13b_manifest_sha256"]
+                prior_v13b_batch["native_intervention_manifest_sha256"]
+            and prior_v13b_batch["native_vertex_response_npz_sha256"]==
+                render["source_private_v13b_intervention_array_sha256"]
+            and prior_v13b_batch["independent_mechanics_court_sha256"]==
+                prior_v13b_public_source["independent_court_sha256"]
             and prior_v13b_manifest["source_controls_measured_count"]==
                 selection["source_control_inventory_count_teacher_only"]
             and prior_v13b_public_source["source_controls_total"]==
                 selection["source_control_inventory_count_teacher_only"]
+            and prior_v13b_batch["subject_id"]==render["subject_id"]
+            and prior_v13b_batch["training_authorized"] is False
+            and prior_v13b_batch["graphics_owner_authorized"] is False
             and render["original_source_control_carrier_kinds_teacher_only"]==
                 prior_v13b_manifest["native_control_carrier_types_teacher_only"]
             and prior_v13b_public_source["local_nonrigid_cases"]>0

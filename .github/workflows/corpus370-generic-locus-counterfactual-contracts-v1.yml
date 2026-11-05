@@ -33,6 +33,7 @@ on:
       - 'tools/corpus/court_corpus370_persistent_eight_view_edit_v4.py'
       - 'tools/corpus/run_corpus370_persistent_eight_view_edit_private_v4.py'
       - 'tests/corpus/test_corpus370_persistent_eight_view_edit_v4.py'
+      - 'tools/corpus/qualify_corpus370_persistent_eight_view_batch_v4.py'
       - '.github/workflows/corpus370-hosted-anonymous-full-frame-allview-private-v3.yml'
       - 'tools/corpus/run_corpus370_allview_geometry_groups_private_v3.py'
       - '.github/workflows/corpus370-hosted-allview-geometry-groups-private-v3.yml'
@@ -129,6 +130,7 @@ jobs:
             tools/truth_foundry/blender_corpus370_anonymous_full_frame_edit_v4.py \
             tools/corpus/court_corpus370_persistent_eight_view_edit_v4.py \
             tools/corpus/run_corpus370_persistent_eight_view_edit_private_v4.py \
+            tools/corpus/qualify_corpus370_persistent_eight_view_batch_v4.py \
             tools/truth_foundry/blender_corpus370_anonymous_full_frame_edit_v1.py \
             tools/corpus/court_corpus370_anonymous_full_frame_edit_v1.py \
             tools/corpus/run_corpus370_full_frame_group_edit_private_v1.py \

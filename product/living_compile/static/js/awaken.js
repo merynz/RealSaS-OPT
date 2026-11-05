@@ -1,3 +1,4 @@
+import {installAwakenReactor} from './busted_ignition_reactor_v3.js';
 const shell = document.querySelector('.awaken-shell');
 const input = document.querySelector('#sourceInput');
 const dropzone = document.querySelector('#dropzone');
@@ -14,6 +15,7 @@ const result = document.querySelector('#result');
 const modeLabel = document.querySelector('#modeLabel');
 const compileLiveStage = document.querySelector('#compileLiveStage');
 const compileStatusMessage = document.querySelector('#compileStatusMessage');
+const ignitionReactor = installAwakenReactor(awaken, dropzone);
 
 function showLiveCompileStatus(stage, detail) {
   if (compileLiveStage) compileLiveStage.textContent = String(stage || 'AWAITING SOURCE');
@@ -420,19 +422,9 @@ async function runProductionFlow() {
   });
 }
 
-// Only direct user interaction powers the ignition. No ambient fiery state.
+// The click VFX is its own one-shot render surface, not compiler progress.
 async function playAwakenIgnition() {
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  awaken.classList.remove('is-charging', 'is-igniting');
-  void awaken.offsetWidth; // permit successive user-triggered cycles
-  awaken.classList.add('is-charging');
-  try {
-    await delay(reduced ? 80 : 510);
-    awaken.classList.replace('is-charging', 'is-igniting');
-    await delay(reduced ? 90 : 430);
-  } finally {
-    awaken.classList.remove('is-charging', 'is-igniting');
-  }
+  return ignitionReactor.play();
 }
 
 awaken.addEventListener('click', async () => {

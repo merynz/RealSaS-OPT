@@ -1,6 +1,6 @@
 # Corpus370 V18h — source-controlled emissive compositing falsifier and generic modular fallback
 
-Date: 2026-11-05. Status: **PREREGISTERED RESEARCH; ORIGINAL SOURCE RUN IN PROGRESS; NO DRAWABLE OR TRAINING AUTHORITY**.  
+Date: 2026-11-05. Status: **REAL ORIGINAL SOURCE RUN 3/3 PASS; INDEPENDENT COURTS AND PRIVATE REMOTE SHA READBACK VERIFIED; NO DRAWABLE OR TRAINING AUTHORITY**.  
 Repo: merynz/RealSaS-OPT, draft PR #343, branch `corpus370-v18b-reactive-stain-source-edit-court-v1`.  
 Actions: https://github.com/merynz/RealSaS-OPT/actions/runs/42120479356 (2 original source jobs, independent redteam before Blender).
 
@@ -21,6 +21,25 @@ The separate V18h independent court reopens the 40 RGBA frames, checks exact par
 This is a targeted *causal intervention on material/illumination*, not an image-quality contest. A zero emissive error could implicate lighting/appearance coupling while leaving other source regimes unresolved. Nonzero errors under emission suggest raster-sampling coverage, partial multi-hit depth interleaving, shadowing still retained by other scene paths, or representation issues; disaggregate with V17 original ordered source rays. **No V18h result, whether PASS or FAIL, proves original artist layer labels.**
 
 Do not equate `0.18 Triceratops K=1` perfect OVER score to editability; such case has empty complement.
+
+## Original V18h causal outcome — independently confirmed
+
+Actual source run `42120479356-1` completed **3/3 job SUCCESS** (redteam + Cat + Triceratops). Independent court reopened each full 40-frame original Blender V18h payload and the exact original V18f/V18g courts. Private SHA-256 receipts: CAT `305a518f238de91903128fb13fcccac5f2179fa944e9281a6a3cbc0f7b756ee2`, TRICERATOPS `6e493f531bc6e2a914b621e15bb8aceb8e3de62f75515a24261ad3a1656d73ff`.
+
+The measured source **one-target-per-threshold** comparison is:
+
+| Source | Frozen threshold | Parent original lit failure pixels | New emission-only failure pixels | Emissive discriminating overlap pixels | Group size |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| CAT | .045 | 0 | 0 | 20 | 2 faces |
+| CAT | .10 | 0 | 0 | 20 | 2 faces |
+| CAT | .18 | 0 | 0 | 20 | 2 faces |
+| TRICERATOPS | .045 | 17 | **43** | 75 | 1 face |
+| TRICERATOPS | .10 | 197 | **457** | 2,785 | 1,298 faces |
+| TRICERATOPS | .18 | 0 | 0 | **0** | 1,334 faces (whole source) |
+
+At .18 Triceratops remains K=1 and is an **uninformative perfect reconstruction**. The controlled emissive Triceratops test worsened its failure count, **disfavouring shading-only explanations for that one fixed source group**. Cat's corresponding original lit reference already had zero error and thus provides no evidence that emission improved Cat; earlier Cat failures from V18g were over **other** groups.
+
+A remaining hypothesis is **sample-filtering / antialias coverage** (filtered alpha of isolated source subsets is not equal to the alpha required by joint source compositing), alongside within-pixel mixed ray order. This is not proved by V18h. V18i's exact alpha inclusion-exclusion test was therefore preregistered to distinguish order-invariant alpha mismatches from RGB/order-only errors on the same sealed original source bytes. It does not re-render or mint artist labels: `docs/research/CORPUS370_V18I_ALPHA_COVERAGE_VS_DRAW_ORDER_FALSIFICATION_20261105.md`.
 
 ## Scientific selection of modular StdGEN-inspired alternative (not merely renaming labels)
 

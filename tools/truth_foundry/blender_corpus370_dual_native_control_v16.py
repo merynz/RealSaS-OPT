@@ -66,6 +66,56 @@ def _joint_arms():
     ]
 
 
+@contextlib.contextmanager
+def _freeze_all_original_actions_for_native_joint_render(
+    original_carriers, source_meshes, expected_joint_vertices,
+    original_polygon_signature, tolerance
+):
+    """Atomic action freeze for *all* native joint carriers before one render.
+
+    Freezing just the first bound source Action while leaving the other
+    evaluated by bpy.ops.render.render() is a false joint intervention.
+    Handles armature/pose-bone and imported animated object source carriers.
+    """
+    def verify_native(code):
+        observed=v4._extract_snapshot(source_meshes,freeze_triangulation=False)
+        world=np.asarray(observed["vertices"],np.float64)
+        require(observed["polygon_signature"]==original_polygon_signature
+            and world.shape==expected_joint_vertices.shape
+            and np.max(np.abs(world-expected_joint_vertices))<=tolerance,
+            code)
+    verify_native("V16_PRE_RENDER_NATIVE_AB_VERTICES_FALSE")
+    states=[]
+    for obj in original_carriers:
+        ad=obj.animation_data
+        require(ad is not None and ad.action is not None,
+            "V16_NATIVE_JOINT_ORIGINAL_CARRIER_ACTION_MISSING")
+        basis=obj.matrix_basis.copy()
+        pose_bases=(
+            [(pb,pb.matrix_basis.copy()) for pb in obj.pose.bones]
+            if obj.type=="ARMATURE" else [])
+        states.append((obj,ad,ad.action,getattr(ad,"action_slot",None),
+                       basis,pose_bases))
+    require(len(states)>=1, "V16_EMPTY_ORIGINAL_NATIVE_CARRIERS")
+    try:
+        for obj,ad,action,slot,basis,pbs in states:
+            ad.action=None
+        for obj,ad,action,slot,basis,pbs in states:
+            obj.matrix_basis=basis.copy()
+            for pb,pb_basis in pbs:
+                pb.matrix_basis=pb_basis.copy()
+        bpy.context.view_layer.update()
+        verify_native("V16_SIMULTANEOUS_AB_ACTIONS_FROZEN_SOURCE_DRIFT")
+        yield
+        verify_native("V16_POST_REAL_RENDER_FROZEN_AB_VERTICES_DRIFT")
+    finally:
+        for obj,ad,action,slot,basis,pbs in states:
+            ad.action=action
+            if slot is not None:
+                ad.action_slot=slot
+        bpy.context.view_layer.update()
+
+
 def render(job_path, parent_path, original_npz, output_path):
     job=_json(job_path)
     parent=_json(parent_path)
@@ -273,13 +323,10 @@ def render(job_path, parent_path, original_npz, output_path):
                     for s in control_specs:
                         if all(s[3] is not z for z in unique_objects):
                             unique_objects.append(s[3])
-                    with contextlib.ExitStack() as stack:
-                        for obj in unique_objects:
-                            stack.enter_context(
-                                v14._freeze_original_action_for_native_source_render(
-                                    obj,meshes,joint,faces,
-                                    snapshot["polygon_signature"],tol
-                                ))
+                    with _freeze_all_original_actions_for_native_joint_render(
+                        unique_objects,meshes,joint,
+                        snapshot["polygon_signature"],tol
+                    ):
                         src=draw("SOURCE_AB_"+key,"SOURCE")
                     sou=draw("SOUP_AB_"+key,"SOUP")
                     iso=draw("ISOLATED_AB_"+key,"SOUP",joint_support)

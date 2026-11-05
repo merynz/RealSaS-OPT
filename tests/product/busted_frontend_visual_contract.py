@@ -55,10 +55,11 @@ async def run():
                 assert intro["height"] >= height-2, f"Landing no longer fills first viewport: {intro}"
                 assert chamber["y"] >= intro["bottom"]-2, f"Chamber overlaps introductory section: {chamber}"
                 assert drop["y"] >= chamber["y"], f"Source input not located in second section: {drop}"
-                assert await page.locator(".chamber-code-visual").count() == 0, "Unwanted separate decorative code panel"
-                assert (await page.locator(".chamber-header h2").inner_text()).strip() == "YOUR ART. IN.", "Unexpected intake hierarchy"
+                assert not await page.locator("#introduction .matrix-trace").count(), "Typed code belongs only to character intake"
+                assert not await page.locator(".matrix-column").count(), "Old CSS rain must not compete with the global renderer"
+                assert (await page.locator(".chamber-header h2").inner_text()).strip() == "AWAKEN.", "Wrong intake identity"
                 assert "WE COMPILE" in (await page.locator(".hero-intro h1").inner_text()), "Compiler identity missing"
-                assert await page.locator("#structuralCanvas").is_visible(), "Procedural carrier absent"
+                assert await page.locator("#structuralCanvas").is_visible(), "Procedural reference carrier absent"
                 canvas_evidence=await page.locator("#structuralCanvas").evaluate("""canvas => {
                   const ctx=canvas.getContext('2d');
                   const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
@@ -67,72 +68,38 @@ async def run():
                   return {occupied,width:canvas.width,height:canvas.height};
                 }""")
                 assert canvas_evidence["occupied"]>350, f"Spatial carrier produced no geometry: {canvas_evidence}"
-                assert await page.locator("#compileMonitor").is_hidden(), "Compiler console must not appear before real compilation"
-                # Two independent ambient streams, measured from rendered text rather than markup only.
-                for section, n in [("#introduction", 4 if width > 780 else 2),
-                                   ("#awakenChamber", 8 if width > 780 else 4)]:
-                    assert await page.locator(section+" .matrix-trace").count() == n, (
-                        f"{section}: missing typing tracks"
-                    )
-                    assert await page.locator(section+" .matrix-column").count() == (30 if width > 780 else 13) if section == "#awakenChamber" else (
-                        await page.locator(section+" .matrix-column").count() == (23 if width > 780 else 9)
-                    )
-                    code = await page.locator(section+" .matrix-trace-line").all_inner_texts()
-                    nonempty = [line.strip() for line in code if line.strip()]
-                    assert len(nonempty) >= n, f"{section}: empty code lanes: {code}"
-                    assert len(set(nonempty)) >= max(3,n//2), f"{section}: repeated fallback code: {code}"
-                    assert all("." in x or "(" in x for x in nonempty), f"{section}: code isn't readable: {code}"
-                    tracks = await page.locator(section+" .matrix-trace").evaluate_all("""nodes => nodes.map(el=>{
-                        const r=el.getBoundingClientRect();
-                        const container=el.closest('section').getBoundingClientRect();
-                        return {x:r.left,right:r.right,y:r.top,bottom:r.bottom,
-                                left:container.left,limit:container.right,
-                                top:container.top,bound:container.bottom}
-                    })""")
-                    assert all(v["x"] >= v["left"]-3 and v["right"] <= v["limit"]+3 for v in tracks), (
-                        f"{section}: code is cut off at edges: {tracks}"
-                    )
-                    safety = await page.locator(section).evaluate("""(scope)=>{
-                      const selectors=scope.id==='introduction'
-                        ? ['.hero-eyebrow','.hero-intro h1','.hero-copy','.hero-description','.hero-meta','.descend-link','.landing-foot']
-                        : ['.chamber-header','.chamber-docking-label','.dropzone',
-                           '.input-slot-ledger','.chamber-console .console-heading',
-                           '.chamber-console h3','.chamber-console .console-copy',
-                           '#awaken','#compileAvailability','.chamber-console .telemetry'];
-                      const blockers=selectors.map(s=>scope.querySelector(s)).filter(Boolean)
-                        .flatMap(el=>{
-                          const inkTargets=['.hero-eyebrow','.hero-intro h1','.hero-copy',
-                            '.hero-description','.hero-meta'];
-                          if(!inkTargets.some(selector=>el.matches(selector))){
-                            return [el.getBoundingClientRect()];
-                          }
-                          // Range.selectNodeContents(element) includes block-wide child
-                          // boxes. Measure actual individual text nodes instead.
-                          const walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
-                          const result=[];
-                          let node;
-                          while((node=walker.nextNode())){
-                            if(!node.textContent.trim())continue;
-                            const range=document.createRange();
-                            range.selectNodeContents(node);
-                            for(const ink of range.getClientRects()){
-                              if(ink.width>0&&ink.height>0)result.push(ink);
-                            }
-                          }
-                          return result.length?result:[el.getBoundingClientRect()];
-                        });
-                      const tracks=Array.from(scope.querySelectorAll('.matrix-trace'))
-                        .filter(el=>getComputedStyle(el).display!=='none')
-                        .map(el=>el.getBoundingClientRect());
-                      const collisions=tracks.flatMap(track=>blockers.filter(b=>
-                        track.left<b.right+3 && track.right>b.left-3 &&
-                        track.top<b.bottom+3 && track.bottom>b.top-3
-                      ).map(b=>({track:{x:track.x,y:track.y},block:{x:b.x,y:b.y}})));
-                      return {visible:tracks.length,collisions};
-                    }""")
-                    assert safety["visible"]>=1, f"{section}: no ambient code remains visible"
-                    assert not safety["collisions"], f"{section}: ambient code overprints UI: {safety}"
-
+                assert await page.locator("#compileMonitor").is_hidden(), "Compiler console must remain contextual"
+                assert await page.locator("#bustedSpatialRain").is_visible(), "Global data rain not created"
+                rain=await page.locator("#bustedSpatialRain").evaluate("""canvas=>{
+                  const pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+                  let ink=0;
+                  for(let i=3;i<pixels.length;i+=24)if(pixels[i]>8)ink++;
+                  return {width:canvas.width,height:canvas.height,ink};
+                }""")
+                assert rain["ink"]>80, f"Data rain has no visible glyphs: {rain}"
+                assert abs(drop["x"]+drop["width"]/2-(chamber["x"]+chamber["width"]/2))<=35, (
+                    f"Character input is not centered: {drop} {chamber}"
+                )
+                assert await page.locator("#awakenChamber #matrixTypewriter").count()==1
+                assert await page.locator("#introduction #matrixTypewriter").count()==0
+                code=await page.locator("#awakenChamber .matrix-trace-line").all_inner_texts()
+                nonempty=[x.strip() for x in code if x.strip()]
+                assert len(nonempty)>=2, f"No visible source-shaped code in Awaken: {code}"
+                assert len(set(nonempty))>=2, f"Repeated fallback code in Awaken: {code}"
+                safe=await page.locator("#awakenChamber").evaluate("""scope=>{
+                  const blocks=['.chamber-header','#dropzone','#inputSlotLedger',
+                    '.chamber-console .compile-action','.chamber-foot']
+                    .map(s=>scope.querySelector(s)).filter(Boolean)
+                    .map(el=>el.getBoundingClientRect());
+                  const traces=Array.from(scope.querySelectorAll('.matrix-trace')).filter(el=>
+                    getComputedStyle(el).display!=='none').map(el=>el.getBoundingClientRect());
+                  const collisions=traces.flatMap(t=>blocks.filter(b=>
+                    t.left<b.right+5&&t.right>b.left-5&&t.top<b.bottom+5&&t.bottom>b.top-5
+                  ).map(b=>({code:{x:t.x,y:t.y},ui:{x:b.x,y:b.y}})));
+                  return {visible:traces.length,collisions};
+                }""")
+                assert safe["visible"]>=1, f"No safe visible typing track: {safe}"
+                assert not safe["collisions"], f"Typed code overprints intake UI: {safe}"
                 assert await page.locator("#awaken").is_disabled(), "Offline preview must never offer a fake compile"
 
 
@@ -147,6 +114,8 @@ async def run():
                 status_rect=await metrics(page, "#requalificationStrip")
                 viewport_rect=await metrics(page, ".workspace")
                 assert status_rect["bottom"] <= viewport_rect["y"]+2, f"Requalification strip is outside Studio header: {status_rect} {viewport_rect}"
+                assert await page.locator("#bustedSpatialRain").is_visible(), "Rain missing in Puppet Editor"
+                assert await page.locator(".matrix-trace").count()==0, "Typed code leaked into Puppet Editor"
                 await page.screenshot(path=str(OUT / f"studio_{width}x{height}.png"), full_page=True)
 
                 rows=await page.evaluate("""() => ({
@@ -186,6 +155,8 @@ async def run():
                 for area, title in [("motion", "Motion Lab"), ("export", "Export")]:
                     await page.goto(BASE + "/" + area, wait_until="networkidle", timeout=25000)
                     assert title in (await page.title()), f"Missing {title} at {width}x{height}"
+                    assert await page.locator("#bustedSpatialRain").is_visible(), f"Rain missing on {area}"
+                    assert await page.locator(".matrix-trace").count()==0, f"Typed code leaked into {area}"
                     ext = await page.evaluate("document.documentElement.scrollWidth")
                     assert ext <= width + 2, f"{title} document overflow ({ext}) at {width}x{height}"
                     assert await page.locator("#proofStatus").inner_text() == "NO QUALIFIED PUPPET"
@@ -212,12 +183,11 @@ async def run():
         try:
             await animated.goto(BASE + "/", wait_until="networkidle", timeout=25000)
             await animated.locator("#awakenChamber").scroll_into_view_if_needed()
-            first = animated.locator('#awakenChamber .matrix-trace[data-slot="0"] .matrix-trace-line').first
-            initial = await first.inner_text()
-            await animated.wait_for_timeout(850)
-            later = await first.inner_text()
-            assert len(later) > len(initial), (
-                f"Code does not visibly type left-to-right: {initial!r} -> {later!r}"
+            initial = await animated.locator('#awakenChamber .matrix-trace-line').all_inner_texts()
+            await animated.wait_for_timeout(950)
+            later = await animated.locator('#awakenChamber .matrix-trace-line').all_inner_texts()
+            assert len(initial)==len(later) and any(a!=b for a,b in zip(initial,later)), (
+                f"Code does not progress over time: {initial!r} -> {later!r}"
             )
             await animated.screenshot(path=str(OUT / "awaken_animated_chamber_1366x768.png"))
             print("PASS 1366x768 animated Matrix typing: characters progressively appear")

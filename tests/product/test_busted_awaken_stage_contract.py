@@ -1,43 +1,57 @@
 from pathlib import Path
 import unittest
 
-ROOT = Path(__file__).resolve().parents[2]
-STATIC = ROOT / "product" / "living_compile" / "static"
+ROOT=Path(__file__).resolve().parents[2]
+STATIC=ROOT/"product"/"living_compile"/"static"
 
 class BustedAwakenStageContractTests(unittest.TestCase):
-    def test_spatial_scene_is_non_canvas_and_static(self):
-        html = (STATIC / "index.html").read_text(encoding="utf-8")
-        app = (STATIC / "js" / "awaken.js").read_text(encoding="utf-8")
-        stage = (STATIC / "js" / "awaken_depth.js").read_text(encoding="utf-8")
-        self.assertIn('id="depthCode"', html)
-        self.assertNotIn('id="depthScene"', html)
-        self.assertNotIn('id="agentReach"', html)
-        self.assertNotIn("agent_reach.js", html)
-        self.assertNotIn("requestAnimationFrame", stage)
-        self.assertNotIn("getContext(", stage)
-        self.assertIn("Math.random", stage)
-        self.assertIn("translateZ(", stage)
-        self.assertIn("generateGlyphs", stage)
-        self.assertIn("desktopSlots", stage)
-        self.assertIn("matrix-trace", stage)
-        self.assertIn("compensate", stage)
-        self.assertIn("numberOfLanes", stage)
-        self.assertNotIn("runPresentationFlow", app)
-        self.assertIn("visibilitychange", stage)
-        self.assertIn("prefers-reduced-motion", stage)
+    def test_global_spatial_rain_and_scoped_code(self):
+        html=(STATIC/"index.html").read_text("utf-8")
+        rain=(STATIC/"js"/"busted_spatial_rain_v1.js").read_text("utf-8")
+        typer=(STATIC/"js"/"busted_code_typing_v2.js").read_text("utf-8")
+        self.assertIn('id="awakenChamber"',html)
+        self.assertIn('id="matrixTypewriter"',html)
+        self.assertNotIn('id="landingMatrixTypewriter"',html)
+        self.assertNotIn('id="landingDepthCode"',html)
+        self.assertIn('id="dropzone"',html)
+        self.assertIn("busted_spatial_rain_v1.js",html)
+        self.assertIn("busted_code_typing_v2.js",html)
+        self.assertNotIn("src=\"/static/js/awaken_depth.js",html)
+        self.assertIn("className='busted-spatial-rain'",rain)
+        self.assertIn("requestAnimationFrame",rain)
+        self.assertIn("prefers-reduced-motion",rain)
+        self.assertIn("document.hidden",rain)
+        self.assertIn("visibilitychange",rain)
+        self.assertIn("generate(max)",typer)
+        self.assertIn("Math.random",typer)
+        self.assertIn("traces",typer)
+        self.assertIn("collide",typer)
+        self.assertIn("IntersectionObserver",typer)
+        self.assertNotIn("getContext(",typer)
+        self.assertNotIn("runPresentationFlow",typer)
+
+    def test_all_product_pages_share_rain_only_home_types(self):
+        pages=["index.html","workspace.html","motion.html","export.html"]
+        for page in pages:
+            html=(STATIC/page).read_text("utf-8")
+            self.assertIn("busted_spatial_rain_v1.js",html)
+            self.assertIn("busted_spatial_rain_v1.css",html)
+            if page=="index.html":
+                self.assertIn("busted_code_typing_v2.js",html)
+            else:
+                self.assertNotIn("busted_code_typing_v2.js",html)
 
     def test_navigation_and_fail_closed_gateway(self):
-        html = (STATIC / "index.html").read_text(encoding="utf-8")
-        app = (STATIC / "js" / "awaken.js").read_text(encoding="utf-8")
-        studio = (STATIC / "workspace.html").read_text(encoding="utf-8")
-        self.assertIn('class="studio-link" href="/studio"', html)
-        self.assertIn('href="/"', studio)
-        self.assertIn("BUSTED · Studio", studio)
-        self.assertIn("workspace.workspace_url", app)
-        self.assertIn("project?.compile_available && project?.public_compile_gateway", app)
-        self.assertIn("COMPILER OFFLINE", app)
-        self.assertIn('id="compileAvailability"', html)
-        self.assertIn("awaken.disabled = running || !ready", app)
+        html=(STATIC/"index.html").read_text("utf-8")
+        app=(STATIC/"js"/"awaken.js").read_text("utf-8")
+        studio=(STATIC/"workspace.html").read_text("utf-8")
+        self.assertIn('class="studio-link" href="/studio"',html)
+        self.assertIn('href="/"',studio)
+        self.assertIn("workspace.workspace_url",app)
+        self.assertIn("project?.compile_available && project?.public_compile_gateway",app)
+        self.assertIn("COMPILER OFFLINE",app)
+        self.assertIn('id="compileAvailability"',html)
+        self.assertIn("awaken.disabled = running || !ready",app)
 
-if __name__ == "__main__":
+if __name__=="__main__":
     unittest.main()

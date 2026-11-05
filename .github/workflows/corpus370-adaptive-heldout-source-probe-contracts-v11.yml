@@ -1,0 +1,35 @@
+name: corpus370-adaptive-heldout-source-probe-contracts-v11
+
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-adaptive-heldout-source-probe-contracts-v11.yml'
+      - 'tools/corpus/corpus370_adaptive_edit_probe_plan_v11.py'
+      - 'tests/corpus/test_corpus370_adaptive_edit_probe_plan_v11.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/corpus370-adaptive-heldout-source-probe-contracts-v11.yml'
+      - 'tools/corpus/corpus370_adaptive_edit_probe_plan_v11.py'
+      - 'tests/corpus/test_corpus370_adaptive_edit_probe_plan_v11.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-adaptive-heldout-probe-v11-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  nonsemantic-source-query-negative-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile geometry-only V11 and verify 17 counterfeit negatives
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile tools/corpus/corpus370_adaptive_edit_probe_plan_v11.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_adaptive_edit_probe_plan_v11.py

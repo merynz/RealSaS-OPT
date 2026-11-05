@@ -162,6 +162,21 @@ def test_transparency_bridge_raw_graph_label_cut_to_true_foreground_components()
     assert np.all(regions[~mask] == -1)
 
 
+def test_v1_graph_islands_background_bridge_audit_is_explicit():
+    from tools.corpus.artist_image_only_split_merge_v2 import audit_background_bridge
+    foreground = np.zeros((20, 20), bool)
+    foreground[1:4, 1:4] = True
+    foreground[9:13, 13:18] = True
+    original = np.full((20, 20), -1, np.int32)
+    original[foreground] = 0
+    separated, report = audit_background_bridge(original, foreground)
+    assert report["v1_image_graph_region_count"] == 1
+    assert report["v1_graph_foreground_four_connected_components"] == 2
+    assert report["v1_labels_with_multiple_disconnected_foreground_islands"] == 1
+    assert report["additional_visible_components_hidden_by_v1_graph_labels"] == 1
+    assert separated[2, 2] != separated[10, 15]
+
+
 def test_no_fixed_artist_part_count_and_deterministic_visual_optimization(tmp_path):
     img = fixtures(tmp_path)["rgba"]
     a, report_a = predict_candidates(img)
@@ -211,6 +226,7 @@ def test_independent_court_scoring_identical_on_parent_baselines(tmp_path):
     "private_hide_byte_forgery", "private_author_count_forgery",
     "private_source_sha_forgery", "private_editor_claim",
     "parent_court_fake_owner", "parent_court_observable_drift",
+    "candidate_manifest_forged_connectivity_audit",
 ])
 def test_false_authority_source_leak_and_art_edit_court_fail_closed(tmp_path, attack):
     x = fixtures(tmp_path)
@@ -239,6 +255,7 @@ def test_false_authority_source_leak_and_art_edit_court_fail_closed(tmp_path, at
             "private_editor_claim": "private_json",
             "parent_court_fake_owner": "base_receipt",
             "parent_court_observable_drift": "base_receipt",
+            "candidate_manifest_forged_connectivity_audit": "candidate_manifest",
         }[attack]
         path = x[key]
         payload = json.loads(path.read_text())
@@ -270,6 +287,10 @@ def test_false_authority_source_leak_and_art_edit_court_fail_closed(tmp_path, at
             payload["graphics_owner_authorized"] = True
         elif attack == "parent_court_observable_drift":
             payload["author_hide_observable_cases"] = 12
+        elif attack == "candidate_manifest_forged_connectivity_audit":
+            payload["v1_graph_foreground_connectivity_audit"][
+                "v1_graph_foreground_four_connected_components"
+            ] = 999
         path.write_text(json.dumps(payload))
     with pytest.raises((ValueError, AssertionError, KeyError, OSError)):
         court(x)

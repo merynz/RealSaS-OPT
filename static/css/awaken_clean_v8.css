@@ -114,6 +114,7 @@ html,body{overflow-x:clip;scroll-behavior:smooth}
 .chamber-docking-label{color:#c0c4e2}
 .dev-mode{margin-top:0}
 @media(max-width:1000px){
+ .awaken-chamber{padding-top:200px}
  .chamber-workspace{grid-template-columns:minmax(0,1fr);gap:14px}
  .chamber-intake{padding-top:0}
  .chamber-intake .input-orbit{height:385px}

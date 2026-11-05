@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370NativeMechanicalRGBAResearchRequest.v14",
   "enabled": true,
-  "status": "ACTIVATE_V14_EXACT_SAME_SOURCE_CAUSAL_CONTROL_ORIGINAL_RGBA_WITH_UNCERTAIN_OWNER",
+  "status": "RETRY_V14_POST_18_OF_18_INDEPENDENT_RASTER_COURT_CONTRACTS_PASS",
   "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
   "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
   "source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
@@ -120,5 +120,8 @@
   "source_face_isolation_composited_rgba_precommitted": true,
   "artist_same_drawable_positive_pairs": 0,
   "artist_different_drawable_negative_pairs": 0,
-  "real_v14_measurement_already_complete": false
+  "real_v14_measurement_already_complete": false,
+  "first_hosted_attempt_run_id": 42061645614,
+  "first_hosted_failure": "Two synthetic test expectations corrected; real source Blender work did not begin.",
+  "focused_v14_contract_workflow_run_id": 42061751112
 }

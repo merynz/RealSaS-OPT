@@ -1,0 +1,199 @@
+{
+  "schema": "RealSaS.Corpus370NativeAnimatedPartitionRealSourceResearchResult.v9",
+  "status": "PASS_REAL_NATIVE_AUTHORED_POSE_RSASTER_MEASUREMENTS_3_3__NO_ARTIST_OWNER_OR_TRAINING",
+  "date_utc": "2026-11-05",
+  "hosted": {
+    "github_actions_run_id": 42014234494,
+    "github_actions_url": "https://github.com/merynz/RealSaS-OPT/actions/runs/42014234494",
+    "jobs_succeeded": 4,
+    "jobs_failed": 0,
+    "real_source_workers_succeeded": 3,
+    "original_source_full_fov_192x192_render_arms": 1104,
+    "real_authored_pose_count_rendered": 9,
+    "total_source_pose_camera_pairs": 36,
+    "original_source_vs_posed_triangle_soup_parity_qualified_pairs": 36,
+    "source_vs_soup_noop_identity_pairs": 36,
+    "per_source_independent_court_sha256_verified_separately": 3,
+    "per_source_original_render_array_sha256_verified_separately": 3,
+    "all_raw_rgba_and_source_author_metadata_private": true,
+    "private_evidence_root": "gdrive:corpus370_preparation_v1/hosted_native_animated_partition_private_v9/42014234494-1",
+    "first_hosted_attempt_id": 42013088875,
+    "first_hosted_attempt_status": "FAILED_CONTRACT_FALSE_ASSUMPTION_V4_POSED_SNAPSHOT_NOT_TRIANGULATED",
+    "first_attempt_fix": "Use per-object authored polygon connectivity signature and exact source native posed vertex array, not missing freeze_triangulation_false face list"
+  },
+  "parents": {
+    "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+    "exact_source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+    "source_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+    "allview_geometric_group_proposal_batch_sha256": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1",
+    "real_authored_native_teacher_summary_sha256": "5aa3c4d9cc97ab669d2a7a951a4c9d18218ef5ea4d6f58f5b1ff1ac5b89cc272",
+    "geometry_input_cameras": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "native_render_camera_views": [
+      0,
+      2,
+      4,
+      6
+    ],
+    "per_source_native_pose_selection": "3 high-source-displacement sampled poses from distinct original authored takes, not semantic names or render edits"
+  },
+  "per_subject": [
+    {
+      "label": "CAT",
+      "subject_id": "corpus_000ca1ae51f9582fde9e",
+      "source_sha256": "1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850",
+      "native_teacher_sha256": "c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603",
+      "original_pose_indices_teacher_only": [
+        12,
+        18,
+        26
+      ],
+      "real_authored_poses": 3,
+      "original_source_camera_views": 4,
+      "full_rgba_render_arms_per_pose_view": 44,
+      "total_render_arms": 528,
+      "source_original_vs_soup_qualified_pose_view_count": 12,
+      "no_op_exact_rgba_identity": true,
+      "source_vs_soup_p99_max_across_views": 5.960464477539063e-8,
+      "source_vs_soup_abs_max_rgb_alpha": 0.0026013851165771484,
+      "reference_policy": "FINEST_AVAILABLE_GEOMETRY_HYPOTHESIS_ONLY_64_NOT_ARTIST_TRUTH",
+      "candidate_edit_delta_pixels_vs_fine": {
+        "8": {
+          "direct": 65910,
+          "isolate": 192675
+        },
+        "16": {
+          "direct": 51669,
+          "isolate": 147869
+        },
+        "32": {
+          "direct": 7038,
+          "isolate": 54298
+        },
+        "64": {
+          "direct": 0,
+          "isolate": 0
+        }
+      },
+      "independent_private_court_sha256": "d53baa0edeed2b570cef5f84394d91adfca2a5c0efbb721e959b5780e2e40e4b",
+      "private_render_arrays_sha256": "024cbd674f97d921a666f73a188e9e2b739f5a8f358c1b3593745f7a11566bab",
+      "whole_frame_occlusion_artifact_and_caa_minted": false
+    },
+    {
+      "label": "TRICERATOPS",
+      "subject_id": "corpus_004e16e05b90505ca23c",
+      "source_sha256": "ad66b51cc5fc44c9a3429a5b1b98a61621af08d58d102d8a817499bd6a7f5b5a",
+      "native_teacher_sha256": "c18a9c9b98a3323ff43f4845934b22976765a887e31233b01964fa9c55f7f36d",
+      "original_pose_indices_teacher_only": [
+        7,
+        13,
+        16
+      ],
+      "real_authored_poses": 3,
+      "original_source_camera_views": 4,
+      "full_rgba_render_arms_per_pose_view": 20,
+      "total_render_arms": 240,
+      "source_original_vs_soup_qualified_pose_view_count": 12,
+      "no_op_exact_rgba_identity": true,
+      "source_vs_soup_p99_max_across_views": 0,
+      "source_vs_soup_abs_max_rgb_alpha": 0.026481003,
+      "reference_policy": "FINEST_AVAILABLE_GEOMETRY_HYPOTHESIS_ONLY_32_NOT_ARTIST_TRUTH",
+      "candidate_edit_delta_pixels_vs_fine": {
+        "8": {
+          "direct": 721,
+          "isolate": 3120
+        },
+        "16": {
+          "direct": 0,
+          "isolate": 0
+        },
+        "32": {
+          "direct": 0,
+          "isolate": 0
+        }
+      },
+      "independent_private_court_sha256": "1289010d4999fe1bb21384963189c0c067940003d096c3ca35f077921554274c",
+      "private_render_arrays_sha256": "d882dccebe9f1d5f06052ab94a047b47a90fd873b8a8a2a5dba6db4e9fc4adc8",
+      "whole_frame_occlusion_artifact_and_caa_minted": false
+    },
+    {
+      "label": "COWFISH",
+      "subject_id": "corpus_00a3688e42a29045056b",
+      "source_sha256": "e6898505d56d8057c975b6376f123876dd957347282413cf3fb825754841b989",
+      "native_teacher_sha256": "4f89ecd61b1376699d4e0940777adafea9633c2abc4560ffb7e71cdd8fa1dd50",
+      "original_pose_indices_teacher_only": [
+        1,
+        6,
+        10
+      ],
+      "real_authored_poses": 3,
+      "original_source_camera_views": 4,
+      "full_rgba_render_arms_per_pose_view": 28,
+      "total_render_arms": 336,
+      "source_original_vs_soup_qualified_pose_view_count": 12,
+      "no_op_exact_rgba_identity": true,
+      "source_vs_soup_p99_max_across_views": 0,
+      "source_vs_soup_abs_max_rgb_alpha": 0,
+      "reference_policy": "FINEST_AVAILABLE_GEOMETRY_HYPOTHESIS_ONLY_32_NOT_ARTIST_TRUTH",
+      "candidate_edit_delta_pixels_vs_fine": {
+        "8": {
+          "direct": 4626,
+          "isolate": 9631
+        },
+        "16": {
+          "direct": 10,
+          "isolate": 32
+        },
+        "32": {
+          "direct": 0,
+          "isolate": 0
+        }
+      },
+      "independent_private_court_sha256": "683b4d63e0b164db3fa9fe644c0e0353ce2b920efdfe29a9e3dd43d3735ed113",
+      "private_render_arrays_sha256": "6f8178bd5cdfe84c800982c3983efa4c15d7da5256c6b61361ec45d3313e8bcc",
+      "whole_frame_occlusion_artifact_and_caa_minted": false
+    }
+  ],
+  "science_scope": {
+    "parity_meaning": "At 192 squared, 32 samples, source-vs-soup compare full RGBA per frame using p99 source pixel signal <=0.025, noop maximum signal <=0.0025 and nonzero source alpha occupancy; not exact all-pixel equality",
+    "coarse_vs_fine_meaning": "Measured extra edit pixels vs finest AVAILABLE geometry hypothesis, not artist-authored source layer, and no optimal group count selected",
+    "render_input_specific": "Three native frames from different source-authored actions per subject, four of eight original source cameras, no source rig control perturbations",
+    "semantic_labels_exposed_as_model_targets": false,
+    "base_source_mesh_names_as_drawable_targets": false,
+    "source_triangle_group_ids_student_targets": false,
+    "source_motion_is_causal_control": false,
+    "source_natively_animated_resolution_full_caa_pass": false,
+    "draw_order_authority_minted": false,
+    "independent_same_drawable_positives": 0,
+    "independent_different_drawable_negatives": 0,
+    "caveat": "Source geometry / animated source parity / edit-consequence sensitivity is an evidence component only. Ontology-free artist layer ownership remains an underdetermined target in equivalence classes. Fixed group candidates also encode a structural prior."
+  },
+  "authority": {
+    "graphics_owner_authorized": false,
+    "same_drawable_identity_authorized": false,
+    "different_drawable_identity_authorized": false,
+    "mechanical_attachment_ownership_authorized": false,
+    "source_native_resolution_appearance_caa_authorized": false,
+    "tessa_training_authorized": false,
+    "iris_training_authorized": false,
+    "training_authorized": false,
+    "materialization_authorized": false,
+    "product_compilation_authorized": false,
+    "v5_corpus_observation_pass_count_unchanged": 352,
+    "v5_corpus_observation_failure_count_unchanged": 18
+  },
+  "next_gates": [
+    "Verify native source-resolution and all eight cameras, z-depth and alpha at seams/overlap as distinct CAA court",
+    "Test independent source-authored mechanic counterfactual controls with sham/root-only controls and reconstruct arbitrary morphology response",
+    "Test split/merge hypothesis equivalence classes against controlled editor interventions and independent human drawable authority for irreducibly ambiguous cases",
+    "Convert only typed independently-courted constraints into loss masks, not selected 8/16/32/64 source group IDs into ground truth"
+  ]
+}

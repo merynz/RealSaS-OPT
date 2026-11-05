@@ -226,11 +226,14 @@ export function installAwakenReactor(button, sourceViewport) {
     else if(dt<=IGNITION_END_MS){
       chargeField(.70);ignitionBlast(t);
     }else{
-      chargeField(.70);afterglow(t);
+      ctx.save();
+      ctx.globalAlpha=1-smooth((t-.72)/.24);
+      chargeField(.70);
+      ctx.restore();
+      afterglow(t);
     }
     ctx.restore();
-    if(dt<DURATION_MS&&running)frame=requestAnimationFrame(draw);
-    else finish();
+    if(dt>=DURATION_MS)finish();
   }
   function finish(){
     if(frame)cancelAnimationFrame(frame);

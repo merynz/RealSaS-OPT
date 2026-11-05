@@ -1,7 +1,8 @@
 /* BUSTED: typed compiler-language study.
  * Scoped ONLY to #awakenChamber. The snippets are illustrative source-shaped
  * fragments, NOT live status, proof, actual source excerpts or backend activity.
- * Thousands of unique combinations, never a repeated static fallback string.
+ * Thousands of unique combinations. Prefix resolves left-to-right while
+ * a short trailing decode window scrambles, settles, then holds stable.
  */
 (() => {
  'use strict';
@@ -120,10 +121,34 @@
        const age=local-i*t.gap;
        const n=reduced.matches?t.lines[i].length:Math.max(0,Math.min(t.lines[i].length,Math.floor(age/t.rate)));
        const activelyTyping=!reduced.matches&&age>=0&&n<t.lines[i].length;
-       const decoding=activelyTyping&&n>1&&Math.floor((time+t.offset)/180)%5===0;
-       const txt=decoding
-         ?t.lines[i].slice(0,n-1)+decodeAlphabet[(Math.floor(time/90)+i)%decodeAlphabet.length]
-         :t.lines[i].slice(0,n);
+       let txt=t.lines[i].slice(0,n);
+       let decoding=false;
+       if(activelyTyping&&n>0){
+         // The last 1-4 glyphs of a newly decoded line briefly scramble,
+         // while the already resolved prefix remains readable and stable.
+         // All substitutions preserve the target string length.
+         const unresolved=Math.min(n,4);
+         const stable=n-unresolved;
+         const seed=Math.floor((time+t.offset+i*141)/90);
+         let tail='';
+         for(let k=0;k<unresolved;k++){
+           const actual=t.lines[i].charAt(stable+k);
+           const reveal=(seed+k*3)%(unresolved+3)<2;
+           tail+=reveal?actual:decodeAlphabet[(seed*7+k*5+i)%decodeAlphabet.length];
+         }
+         txt=t.lines[i].slice(0,stable)+tail;
+         decoding=true;
+       } else if(!reduced.matches&&n===t.lines[i].length&&n>7){
+         // Rare single-character verification sweep over a complete line;
+         // the line immediately returns to its exact canonical text.
+         const phase=(time+t.offset+i*73)%5400;
+         if(phase<240){
+           const position=2+Math.floor((time+t.offset)/5400*7+i*13)%(n-3);
+           const glyph=decodeAlphabet[(Math.floor(phase/90)+i)%decodeAlphabet.length];
+           txt=t.lines[i].slice(0,position)+glyph+t.lines[i].slice(position+1);
+           decoding=true;
+         }
+       }
        if(row.textContent!==txt)row.textContent=txt;
        row.classList.toggle('typing',activelyTyping);
        row.classList.toggle('decoding',decoding);

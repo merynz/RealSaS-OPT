@@ -27,6 +27,13 @@ class BustedAwakenStageContractTests(unittest.TestCase):
         self.assertIn("traces",typer)
         self.assertIn("collide",typer)
         self.assertIn("IntersectionObserver",typer)
+        self.assertIn("last 1-4 glyphs",typer)
+        self.assertIn("trailing decode window",typer)
+        self.assertNotIn("lastMutation",rain)
+        self.assertIn("busted_visual_priority_v1.css",html)
+        self.assertNotIn("POWERED BY REALSAS",html)
+        self.assertNotIn("WE DON'T",html)
+
         self.assertNotIn("getContext(",typer)
         self.assertNotIn("runPresentationFlow",typer)
 

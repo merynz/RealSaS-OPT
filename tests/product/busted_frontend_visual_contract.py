@@ -57,8 +57,10 @@ async def run():
                 assert drop["y"] >= chamber["y"], f"Source input not located in second section: {drop}"
                 assert not await page.locator("#introduction .matrix-trace").count(), "Typed code belongs only to character intake"
                 assert not await page.locator(".matrix-column").count(), "Old CSS rain must not compete with the global renderer"
-                assert (await page.locator(".chamber-header h2").inner_text()).strip() == "AWAKEN.", "Wrong intake identity"
-                assert "WE COMPILE" in (await page.locator(".hero-intro h1").inner_text()), "Compiler identity missing"
+                intake_title=(await page.locator(".chamber-header h2").inner_text()).strip()
+                assert "START" in intake_title and "HERE." in intake_title, f"Intake copy drift: {intake_title}"
+                headline=(await page.locator(".hero-intro h1").inner_text()).strip()
+                assert "BRING YOUR" in headline and "TO LIFE." in headline, f"BUSTED consumer promise drift: {headline}"
                 assert await page.locator("#structuralCanvas").is_visible(), "Procedural reference carrier absent"
                 canvas_evidence=await page.locator("#structuralCanvas").evaluate("""canvas => {
                   const ctx=canvas.getContext('2d');
@@ -82,6 +84,30 @@ async def run():
                 )
                 assert await page.locator("#awakenChamber #matrixTypewriter").count()==1
                 assert await page.locator("#introduction #matrixTypewriter").count()==0
+                layers=await page.evaluate("""()=>{
+                  const z=selector=>Number(getComputedStyle(document.querySelector(selector)).zIndex);
+                  const bodyRain=document.querySelector('body > #bustedSpatialRain');
+                  const userInterface=document.querySelector('#awakenChamber > .chamber-inner');
+                  const typing=document.querySelector('#awakenChamber > #matrixTypewriter');
+                  const shell=document.querySelector('main.awaken-shell');
+                  return {rainBody:bodyRain?.parentElement===document.body,
+                    rain:z('#bustedSpatialRain'),shell:z('.awaken-shell'),
+                    typing:z('#awakenChamber > #matrixTypewriter'),
+                    ui:z('#awakenChamber > .chamber-inner'),
+                    pointerEvents:getComputedStyle(bodyRain).pointerEvents,
+                    codePointerEvents:getComputedStyle(typing).pointerEvents,
+                    labelAtCenter:!!document.elementFromPoint(
+                      document.querySelector('#dropzone').getBoundingClientRect().left+
+                      document.querySelector('#dropzone').getBoundingClientRect().width/2,
+                      document.querySelector('#dropzone').getBoundingClientRect().top+
+                      document.querySelector('#dropzone').getBoundingClientRect().height/2
+                    )?.closest('#dropzone')};
+                }""")
+                assert layers["rainBody"] and layers["rain"] < layers["shell"], f"Rain is above main shell: {layers}"
+                assert layers["typing"] < layers["ui"], f"Typing is above product UI: {layers}"
+                assert layers["pointerEvents"]=="none" and layers["codePointerEvents"]=="none", (
+                    f"Decorative layers intercept user interaction: {layers}"
+                )
                 code=await page.locator("#awakenChamber .matrix-trace-line").all_inner_texts()
                 nonempty=[x.strip() for x in code if x.strip()]
                 assert len(nonempty)>=2, f"No visible source-shaped code in Awaken: {code}"

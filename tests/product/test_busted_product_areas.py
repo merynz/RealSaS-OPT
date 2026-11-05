@@ -57,7 +57,7 @@ class BustedProductAreasTests(unittest.TestCase):
         self.assertIn("const verbs=",js)
         self.assertIn("const fields=",js)
         self.assertIn("previous.push(output)",js)
-        self.assertIn("never a repeated static fallback",js.lower())
+        self.assertIn("trailing decode window",js.lower())
         self.assertIn("multi-depth visual simulation",rain.lower())
         self.assertIn("ctx.fillText",rain)
         self.assertIn("document.hidden",rain)

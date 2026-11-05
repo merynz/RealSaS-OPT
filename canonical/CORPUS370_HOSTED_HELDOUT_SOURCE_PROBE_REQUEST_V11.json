@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.Corpus370HeldoutOriginalSourceBranchResearchRequest.v11",
-  "status": "ACTIVATE_SHA_EXACT_THREE_REAL_SOURCE_HELDOUT_GEOMETRIC_QUERY_DESIGNS",
+  "status": "RETRY_GENERIC_SPLIT_TREE_UNINFORMATIVE_LEAF_ABSTAIN",
   "date_utc": "2026-11-05",
   "enabled": true,
   "subject_count": 3,
@@ -24,5 +24,9 @@
   "iris_training_authorized": false,
   "materialization_authorized": false,
   "training_authorized": false,
-  "note": "Independent private 12 new source triangle interventions chosen across source geometry tree, excluding prior finest leaves. V10 equiv class only used to prioritize tests. Not V11 full RGBA render and not evidence of drawable owner. Original source addresses and triangle faces remain private."
+  "note": "Independent private 12 new source triangle interventions chosen across source geometry tree, excluding prior finest leaves. V10 equiv class only used to prioritize tests. Not V11 full RGBA render and not evidence of drawable owner. Original source addresses and triangle faces remain private.",
+  "source_truth_parent_sha_unchanged": true,
+  "first_hosted_run_id": 42023576821,
+  "first_hosted_status": "FAILED_VALID_SINGLE_CHILD_NESTED_SOURCE_LEAF_REJECTED_AS_SPLIT",
+  "repair_semantics": "Count legal source geometry leaves that do not add a split as uninformative, select other previously untouched fine leaves, do not force binary hierarchy or semantic owner"
 }

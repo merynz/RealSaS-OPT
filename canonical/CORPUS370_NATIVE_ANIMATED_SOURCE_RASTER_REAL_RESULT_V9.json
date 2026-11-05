@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.Corpus370NativeAnimatedPartitionRealSourceResearchResult.v9",
-  "status": "PASS_REAL_NATIVE_AUTHORED_POSE_RSASTER_MEASUREMENTS_3_3__NO_ARTIST_OWNER_OR_TRAINING",
+  "status": "PASS_REAL_NATIVE_AUTHORED_POSE_RASTER_MEASUREMENTS_3_3__NO_ARTIST_OWNER_OR_TRAINING",
   "date_utc": "2026-11-05",
   "hosted": {
     "github_actions_run_id": 42014234494,

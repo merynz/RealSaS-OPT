@@ -1,0 +1,71 @@
+{
+  "schema": "RealSaS.Corpus370AllViewGeometryGroupingRealResult.v3",
+  "status": "THREE_REAL_ALL8_GEOMETRY_GROUP_HYPOTHESES_COURTED__ALL_3_SOURCE_EDIT_PAIRS_SEPARABLE__FULL_RGBA_CAA_SEPARATE",
+  "source_parent_sha": {
+    "original_native_visibility_join": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+    "original_anonymous_layer_batch": "47b3f3beb7a3625504ccf8488d6fe0cd8fbe0014421c5e4c77748f829c9f01ca",
+    "original_all352_source_geometry_rays": "0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70",
+    "private_v3_batch": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1"
+  },
+  "source_private_location": "gdrive:corpus370_preparation_v1/hosted_allview_geometry_groups_v3/41986038051-1",
+  "github_actions_run_id": 41986038051,
+  "github_actions_conclusion": "SUCCESS",
+  "compiler_geometry_views": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "independently_heldout_outcome": "RENDER_EDIT_INTERVENTION_VIEW_4_NOT_CAMERA_GEOMETRY",
+  "previous_v2_heldout_render_edit_separable_count": 2,
+  "v3_heldout_render_edit_separable_count": 3,
+  "real_source_subjects": 3,
+  "source_failures": 0,
+  "per_subject": [
+    {
+      "category": "CAT",
+      "initial_atomic_patch_count": 260,
+      "source_only_geometry_constraints": 43,
+      "selected_operational_groups": 8,
+      "independent_view4_edit_expressible": true,
+      "claim": "BOUNDED_SOURCE_FACE_EDIT_PROXY_ONLY"
+    },
+    {
+      "category": "TRICERATOPS",
+      "initial_atomic_patch_count": 8,
+      "source_only_geometry_constraints": 60,
+      "selected_operational_groups": 8,
+      "independent_view4_edit_expressible": true,
+      "claim": "BOUNDED_SOURCE_FACE_EDIT_PROXY_ONLY"
+    },
+    {
+      "category": "COWFISH",
+      "initial_atomic_patch_count": 9,
+      "source_only_geometry_constraints": 49,
+      "selected_operational_groups": 8,
+      "independent_view4_edit_expressible": true,
+      "claim": "BOUNDED_SOURCE_FACE_EDIT_PROXY_ONLY"
+    }
+  ],
+  "authority": {
+    "source_mesh_faces_changed": false,
+    "material_or_semantic_names_as_student_labels": false,
+    "source_geometry_camera4_is_input": true,
+    "rendered_edit_effect_camera4_is_not_in_compiler": true,
+    "full_camera_fov_v3_render_executed": false,
+    "full_native_resolution_caa_qualified": false,
+    "author_drawable_identity_minted": false,
+    "same_drawable_truth_positives": 0,
+    "different_drawable_truth_negatives": 0,
+    "mechanical_owner_minted": false,
+    "tessa_teacher_authorized": false,
+    "materialization_authorized": false,
+    "product_compilation_authorized": false,
+    "training_authorized": false
+  },
+  "next_validation": "Three parallel SHA-verified original Blender 192x192 full FOV REST RGBA source/soup/noop/group removal/conditional reveal for selected all8 geometry groups; no owner/training authority."
+}

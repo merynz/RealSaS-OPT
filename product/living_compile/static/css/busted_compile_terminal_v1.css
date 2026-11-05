@@ -1,0 +1,91 @@
+/* BUSTED Compile Terminal / Evidence-led vintage progress readout.
+ * Percentage = documented server percent OR COMPLETED pipeline-stage share.
+ * It is NEVER estimated elapsed time or artificial animation progress.
+ */
+.compile-progress-console{
+ display:grid;gap:8px;padding:11px 12px 10px;
+ border:1px solid rgba(144,162,255,.27);
+ background:
+  linear-gradient(110deg,rgba(18,20,52,.73),rgba(10,17,39,.86)),
+  radial-gradient(ellipse at 77% 38%,rgba(72,58,172,.13),transparent 65%);
+ box-shadow:inset 0 1px 0 rgba(179,184,255,.065),0 0 22px rgba(76,71,157,.035);
+ margin:7px 0 10px;position:relative;isolation:isolate;
+}
+.compile-progress-console::before{
+ content:"";height:1px;position:absolute;inset:0 6px auto;
+ background:linear-gradient(90deg,transparent,#748eff70,#aa93ff70,transparent);
+}
+.compile-progress-console .progress-head{
+ display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+ font:600 9px/1.15 "IBM Plex Mono",monospace;letter-spacing:.115em;color:#a8b9e4;
+}
+.compile-progress-console .progress-head strong{
+ font:600 clamp(19px,2vw,28px)/1 "IBM Plex Mono",monospace;
+ letter-spacing:-.055em;white-space:nowrap;color:#e2e5ff;
+ text-shadow:0 0 14px rgba(131,146,255,.26);
+}
+.compile-progress-console[data-verified="true"] .progress-head strong{
+ color:#e9e8ff;text-shadow:0 0 18px rgba(171,149,255,.36);
+}
+.progress-blocks{
+ display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:3px;
+ height:13px;width:100%;overflow:hidden;
+}
+.progress-blocks span{
+ display:block;min-width:0;
+ background:linear-gradient(180deg,rgba(35,42,85,.76),rgba(22,30,64,.86));
+ border:1px solid rgba(108,129,212,.26);
+ box-shadow:inset 0 1px 0 rgba(169,180,255,.04);
+}
+.progress-blocks span.done{
+ background:linear-gradient(180deg,rgba(176,172,255,.99),rgba(86,112,239,.82) 52%,rgba(51,78,185,.87));
+ border-color:rgba(190,189,255,.70);
+ box-shadow:0 0 6px rgba(136,146,255,.30),inset 0 1px 0 rgba(239,235,255,.28);
+}
+.progress-blocks span.leading{
+ background:linear-gradient(180deg,#ebefff,#b7a9ff 54%,#737fff);
+ box-shadow:0 0 12px rgba(162,149,255,.52);
+}
+.compile-progress-console[data-running="true"][data-verified="false"] .progress-blocks span:first-child{
+ animation:bustedCompileSearching .85s steps(2,end) infinite;
+}
+@keyframes bustedCompileSearching{
+ 0%{border-color:rgba(129,145,226,.2);background:rgba(40,53,105,.31)}
+ 50%{border-color:rgba(175,172,255,.75);background:rgba(112,118,227,.47)}
+ 100%{border-color:rgba(129,145,226,.2);background:rgba(40,53,105,.31)}
+}
+.compile-progress-console .progress-foot{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ font:500 9px/1.4 "IBM Plex Mono",monospace;
+ color:#9fb3d9;letter-spacing:.035em;
+}
+.compile-progress-console .progress-foot span:last-child{
+ color:#b7a6ed;white-space:nowrap;
+}
+#result.alive-reveal .result-art{
+ animation:bustedRealPuppetReveal .85s ease-out both;
+}
+#result.alive-reveal .result-stream h2{
+ animation:bustedAliveText .9s ease-out both;
+}
+@keyframes bustedRealPuppetReveal{
+ 0%{opacity:.16;filter:brightness(1.8) saturate(.5);transform:scale(.972)}
+ 48%{opacity:1;filter:brightness(1.35) saturate(1.2)}
+ 100%{opacity:1;filter:brightness(1) saturate(1);transform:scale(1)}
+}
+@keyframes bustedAliveText{
+ 0%{opacity:.25;letter-spacing:.18em;text-shadow:0 0 35px #b2b9ff}
+ 100%{opacity:1;letter-spacing:inherit;text-shadow:0 0 12px #a7aeff50}
+}
+@media(max-width:760px){
+ .compile-progress-console{padding:9px 8px}
+ .progress-blocks{gap:2px;height:11px}
+ .compile-progress-console .progress-head{font-size:8px}
+ .compile-progress-console .progress-foot{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){
+ .compile-progress-console .progress-blocks span,
+ #result.alive-reveal .result-art,#result.alive-reveal .result-stream h2{
+  animation:none!important;
+ }
+}

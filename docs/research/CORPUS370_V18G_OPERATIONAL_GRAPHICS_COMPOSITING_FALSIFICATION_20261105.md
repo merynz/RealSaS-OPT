@@ -2,7 +2,7 @@
 
 Date: 2026-11-05 (UTC). Status: **RESEARCH / RETROSPECTIVE SOURCE DIAGNOSTIC; NOT NEW DRAWABLE TRAINING TRUTH**.  
 Branch `corpus370-v18b-reactive-stain-source-edit-court-v1`, PR #343.  
-V18g run: `42116712393`, https://github.com/merynz/RealSaS-OPT/actions/runs/42116712393 . At initial commit the two original-source jobs are underway; this document deliberately does NOT assume their independent outcomes.
+V18g run: `42116712393`, https://github.com/merynz/RealSaS-OPT/actions/runs/42116712393 . **FINAL VERIFIED: 3/3 PASS** (one independent adversarial contract + CAT + TRICERATOPS original source). Source reports and exact hashes are recorded below.
 
 ## Origin and exact previous measurements
 
@@ -68,7 +68,31 @@ At `0.10`, the six fixed precommitted V11 target queries all belong to one V18a 
 
 At `0.045` and `0.10`, even a best-per-pixel choice of G-over-R vs R-over-G fails to match the actual source alpha/premultiplied RGBA at some pixels. This falsifies the simplest two-layer *independent render + standard OVER* hypothesis at those measured pixels. The source of discrepancies may be lighting coupling, subpixel rasterization, ray-depth interleaving, ambient occlusion or other geometry/compositing effects; do **not** attribute them to grouping alone. Confirm on a strictly source-ray-ordered / emission-only controlled replay before admitting any negative layer/truth.
 
-The independent court's original `source-only; NO_OWNER_TRUTH` status remains. **CAT original-source V18g job still in progress at time of this update; do not infer it from Triceratops.**
+The independent court's original `source-only; NO_OWNER_TRUTH` status remains. **CAT original-source V18g job independently completed PASS**, separately SHA-verified as detailed in the next section. No source student or artist labels granted.
+
+## Second independent source result — CAT (CONFIRMED)
+
+V18g CAT original-source job in run `42116712393` **PASS**, with SHA-verified remote Drive readback of independent report: `89e7fd6f71bee76e32937c5f1693ff0c177bc8eea26550a82156162df5f65f3d`.
+
+| Threshold | K, all source groups | Distinct V11-probed groups | Order-discriminating overlap pixels | Pixels NOT reconstructible with best pixelwise OVER order | Neither order works at informative overlap |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 0.045 | 320 | 6 | 1,591 | 147 | 39 |
+| 0.10 | 288 | 6 | 1,533 | 261 | 39 |
+| 0.18 | 280 | 6 | 1,533 | 261 | 39 |
+
+Source group identity deduplication uses the frozen V18a source face labels. **Do not deduplicate by equality of rendered pixels**: distinct original groups can be projected to the same image or be invisible at the given camera, but remain distinct source groups. Twenty-four unique `(group,view)` cases per candidate are examined; 14 show both complements, 13 have discriminating overlap per candidate.
+
+Contrasting Triceratops: all six frozen V11 target faces collapse to **one probed group** at `0.10` (K total 22), and to the **whole character** at `0.18` (K total 1, no discriminating overlap). Cat's six probed faces remain six distinct groups at all original thresholds, yet even its finer partition produces source pixels that fail under either of the two independent-render standard OVER orders. This is concrete evidence that **2D presentation composability is an independent graphics obligation, not a consequence of mechanical grouping or a smaller/larger K**.
+
+Measured nonreconstruction under naive alpha-over is **not** proof of a wrong grouping by itself. Original source image can include correlated illumination, nonlinear shading, different ray-hit order within one projected pixel, anti-aliased subpixel mixtures, and effects of deleting geometry on lighting. The next diagnostic should distinguish **lighting coupling vs interleaved depth / K-hit compositing**, keeping all unobservable cases UNKNOWN.
+
+## New research decision after two independent source courts
+
+1. Before promoting negative `REPEL` graph edges, use a strictly source-consistent, controlled *emissive/no-shadow* or equivalent material replay for the **same exact geometry**, poses and cameras, retaining exact lineage and comparing to its own controlled original. If the apparently impossible OVER pixels vanish under emissive transport, shading/light transport is implicated; if not, examine ray-depth interleaving, transparent alpha semantics and multi-sample coverage. No new artist gold from either outcome.
+2. Use V17 full ordered source rays / CAA to test **layer order as a partial, view-dependent relation** rather than a global fixed ranking. The renderer's per-pixel best-oracle is a diagnostic only and must never leak into student Graphics head input.
+3. Explicitly test *nontrivial edit objectives*. A K=1 segmentation can perfectly reconstruct the unedited source yet fail to provide independently addressable consumer edits. Candidate ranking needs measured task support and complexity/Pareto regularization, with semantic names unavailable.
+4. Only after these renderer/order gates can signed `ATTRACT / REPEL / UNKNOWN` relation evidence be fed to Mutex Watershed / Lifted Multicut baselines. These solvers cannot supply truthful edge signs by themselves.
+5. Maintain **graphics_owner_authorized=false** and **all training/materialization authority=false**. IRIS student learnability is a separate subsequent gate.
 
 ## Code and evidence
 

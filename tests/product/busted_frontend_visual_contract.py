@@ -163,6 +163,26 @@ async def run():
                 print("FAIL", failures[-1])
             finally:
                 await page.close()
+        # Verify actual progressive left-to-right typing with motion enabled.
+        animated = await browser.new_page(
+            viewport={"width": 1366, "height": 768},
+            reduced_motion="no-preference"
+        )
+        try:
+            await animated.goto(BASE + "/", wait_until="networkidle", timeout=25000)
+            first = animated.locator('.matrix-trace[data-slot="0"] .matrix-trace-line').first
+            initial = await first.inner_text()
+            await animated.wait_for_timeout(850)
+            later = await first.inner_text()
+            assert len(later) > len(initial), (
+                f"Code does not visibly type left-to-right: {initial!r} -> {later!r}"
+            )
+            print("PASS 1366x768 animated Matrix typing: characters progressively appear")
+        except Exception as error:
+            failures.append(f"animated typewriter: {error}")
+            print("FAIL", failures[-1])
+        finally:
+            await animated.close()
         await browser.close()
     if failures:
         raise AssertionError("\n".join(failures))

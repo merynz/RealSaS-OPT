@@ -291,33 +291,6 @@ async function startIdleReveal(bundle) {
   if (sourceImage?.dataset?.objectUrl) URL.revokeObjectURL(sourceImage.dataset.objectUrl);
 }
 
-async function runPresentationFlow() {
-  resetPipeline();
-  shell.classList.add('compiling');
-  status.classList.add('ready');
-  status.querySelector('span').textContent = 'COMPILING';
-  awaken.disabled = true;
-  openWorkspace.href = '/workspace';
-  openWorkspace.textContent = 'OPEN STUDIO';
-  addLog('presentation compile graph admitted', true);
-  for (let i = 0; i < productStages.length; i += 1) {
-    const [name, event] = productStages[i];
-    if (i > 0) {
-      pipeline[i - 1].classList.remove('active');
-      pipeline[i - 1].classList.add('done');
-    }
-    pipeline[i].classList.add('active');
-    addLog(`${String(i + 1).padStart(2, '0')} ${name.toLowerCase()} · ${event}`, true);
-    await delay(i === 0 ? 720 : 560 + Math.random() * 380);
-  }
-  pipeline.at(-1).classList.remove('active');
-  pipeline.at(-1).classList.add('done');
-  addLog('presentation complete · no product authority', true);
-  await delay(500);
-  result.classList.add('show');
-  status.querySelector('span').textContent = 'PREVIEW';
-}
-
 async function startProductionCompile() {
   const views = await Promise.all(selectedFiles.map(async (file, index) => ({
     slot: index === 0 ? 'front' : 'back',
@@ -404,7 +377,11 @@ awaken.addEventListener('click', async () => {
     if (project?.compile_available && project?.public_compile_gateway) {
       await runProductionFlow();
     } else {
-      await runPresentationFlow();
+      // Production UI never fabricates a compile graph or proof result.
+      status.querySelector('span').textContent = 'COMPILER OFFLINE';
+      modeLabel.textContent = 'COMPILER OFFLINE · NO PRODUCT AUTHORITY';
+      awaken.disabled = false;
+      addLog('Compile unavailable · requires a qualified production gateway', true);
     }
   } catch (error) {
     shell.classList.remove('compiling');
@@ -422,13 +399,13 @@ async function loadProject() {
     const response = await fetch('/api/project', {cache: 'no-store'});
     project = await response.json();
     const production = response.ok && project?.compile_available && project?.public_compile_gateway;
-    modeLabel.textContent = production ? 'PRODUCTION GATEWAY' : 'PRESENTATION PREVIEW · NO PRODUCT AUTHORITY';
+    modeLabel.textContent = production ? 'PRODUCTION GATEWAY' : 'COMPILER OFFLINE · NO PRODUCT AUTHORITY';
     if (production) {
       status.classList.add('ready');
       status.querySelector('span').textContent = 'PRODUCTION READY';
     }
   } catch {
-    modeLabel.textContent = 'PRESENTATION PREVIEW · NO PRODUCT AUTHORITY';
+    modeLabel.textContent = 'COMPILER OFFLINE · NO PRODUCT AUTHORITY';
   }
 }
 

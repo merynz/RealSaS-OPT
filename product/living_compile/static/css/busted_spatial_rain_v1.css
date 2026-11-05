@@ -1,0 +1,30 @@
+/* Shared ambient rain; 3D atmosphere without interfering with product authority. */
+.busted-spatial-rain{
+ position:fixed;inset:0;width:100vw;height:100dvh;
+ z-index:5;pointer-events:none;user-select:none;contain:strict;
+ mix-blend-mode:screen;opacity:.83;
+ mask-image:linear-gradient(90deg,rgba(0,0,0,.17),rgba(0,0,0,.55) 34%,black 75%);
+}
+body:has(.awaken-shell) .busted-spatial-rain{opacity:1}
+body:has(.workspace) .busted-spatial-rain{opacity:.18}
+body[data-page="motion"] .busted-spatial-rain,
+body[data-page="export"] .busted-spatial-rain{opacity:.27}
+body:has(.awaken-shell) .masthead{z-index:80!important}
+body:has(.awaken-shell) .landing-screen .stage-wrap,
+body:has(.awaken-shell) .landing-screen .hero,
+body:has(.awaken-shell) .descend-link,
+body:has(.awaken-shell) .chamber-inner{position:relative;z-index:10}
+body:has(.workspace) .topbar,body:has(.workspace) .studio-stages,
+body:has(.workspace) .modebar,body:has(.workspace) .workspace,
+body:has(.workspace) .timeline{position:relative;z-index:10}
+body[data-page="motion"] .site-header,body[data-page="motion"] .page-intro,
+body[data-page="motion"] .motion-layout,body[data-page="export"] .site-header,
+body[data-page="export"] .page-intro,body[data-page="export"] .export-layout{
+ position:relative;z-index:10;
+}
+body[data-page="motion"],body[data-page="export"]{background-color:#050713!important}
+@media(max-width:760px){
+ .busted-spatial-rain{mask-image:linear-gradient(90deg,rgba(0,0,0,.38),#000 53%,rgba(0,0,0,.7))}
+ body:has(.workspace) .busted-spatial-rain{opacity:.13}
+}
+@media(prefers-reduced-motion:reduce){.busted-spatial-rain{opacity:.23!important}}

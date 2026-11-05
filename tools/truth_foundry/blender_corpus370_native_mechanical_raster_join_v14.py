@@ -9,6 +9,7 @@ No alpha/draw order/appearance CAA or artist drawable ownership is minted.
 """
 from __future__ import annotations
 import argparse,hashlib,json,sys,tempfile
+from contextlib import contextmanager
 from pathlib import Path
 import bpy
 import numpy as np
@@ -59,6 +60,62 @@ def _inventory_digest(rows):
     return hashlib.sha256("\n".join(
         kind+":"+obj.name+":"+(bone.name if bone is not None else "")
         for kind,obj,bone in rows).encode()).hexdigest()
+
+@contextmanager
+def _freeze_original_action_for_native_source_render(
+    carrier_object, source_meshes, expected_vertices, source_faces,
+    original_polygon_signature, tolerance
+):
+    """Preserve a V13b-verified native source control through bpy render.
+
+    Blender's render depsgraph re-evaluates the bound action, silently
+    discarding temporary matrix_basis perturbations: a true synthetic
+    action-controlled raster test establishes that direct override produces
+    ZERO image change while temporary action freeze preserves the edit.
+    Freeze ONLY the original action owner for one SOURCE_C arm. Cache the
+    complete pose-bone basis on armatures and the source object basis; do
+    not replace the original scene by a rendered soup or fabricate a rig.
+    Verify exact source topology and V13b perturbed world vertices BEFORE
+    and AFTER the real Blender renderer. Restore the original action/slot.
+    Source ids and control names remain teacher-only.
+    """
+    ad=carrier_object.animation_data
+    require(ad is not None and ad.action is not None,
+            "V14_RENDER_BOUND_NATIVE_SOURCE_ACTION_REQUIRED")
+    action=ad.action
+    slot=getattr(ad,"action_slot",None)
+    basis=carrier_object.matrix_basis.copy()
+    pose_basis=(
+        [(bone,bone.matrix_basis.copy()) for bone in carrier_object.pose.bones]
+        if carrier_object.type=="ARMATURE" else []
+    )
+    def exact_source_position(code):
+        observed=v4._extract_snapshot(source_meshes,freeze_triangulation=False)
+        xyz=np.asarray(observed["vertices"],np.float64)
+        require(
+            observed["polygon_signature"]==original_polygon_signature
+            and xyz.shape==expected_vertices.shape
+            and np.max(np.abs(xyz-expected_vertices))<=tolerance,
+            code
+        )
+    exact_source_position("V14_ACTION_FREEZE_PRE_RENDER_ORIGINAL_VERTEX_DRIFT")
+    try:
+        # A detached action stops render-time source pose re-evaluation from
+        # silently erasing the same native +5/-5 control perturbation.
+        ad.action=None
+        carrier_object.matrix_basis=basis.copy()
+        for bone,mat in pose_basis:
+            bone.matrix_basis=mat.copy()
+        bpy.context.view_layer.update()
+        exact_source_position("V14_ACTION_FREEZE_REBOUND_SOURCE_VERTICES_DRIFT")
+        yield
+        exact_source_position("V14_ACTION_FREEZE_POST_RENDER_SOURCE_VERTICES_DRIFT")
+    finally:
+        ad.action=action
+        if slot is not None:
+            ad.action_slot=slot
+        bpy.context.view_layer.update()
+
 
 def render(job_path,output_path):
     job=load(job_path)
@@ -251,8 +308,12 @@ def render(job_path,output_path):
                                 and np.max(np.abs(pos-expected_pos))<=tol,
                                 "V14_ACTUAL_SOURCE_NATIVE_CONTROL_NOT_ORIGINAL_V13B_INTERVENTION")
                         _set_animated_soup(face_map,faces,expected_pos)
-                        rendered[f"SOURCE_C{ci:02d}_{sign_name}"]=draw(
-                            f"SOURCE_C{ci:02d}_{sign_name}","SOURCE")
+                        with _freeze_original_action_for_native_source_render(
+                            obj,meshes,expected_pos,faces,
+                            snap["polygon_signature"],tol
+                        ):
+                            rendered[f"SOURCE_C{ci:02d}_{sign_name}"]=draw(
+                                f"SOURCE_C{ci:02d}_{sign_name}","SOURCE")
                         rendered[f"SOUP_C{ci:02d}_{sign_name}"]=draw(
                             f"SOUP_C{ci:02d}_{sign_name}","SOUP")
                         rendered[f"ACTIVE_C{ci:02d}_{sign_name}"]=draw(
@@ -292,6 +353,8 @@ def render(job_path,output_path):
         "original_source_rest_and_animated_face_identity":True,
         "source_pose_matches_original_v13b_vertex_oracle":True,
         "perturbed_source_pose_matches_original_v13b_native_control":True,
+        "source_native_control_raster_animated_action_frozen_then_restored":True,
+        "source_native_perturbed_vertices_verified_before_and_after_render":True,
         "original_native_source_carrier_inventory_sha256":
             prior["native_rig_control_names_private_inventory_sha256"],
         "source_private_control_selection_sha256":sha(job["selected_source_controls"]["path"]),

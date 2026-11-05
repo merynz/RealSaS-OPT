@@ -193,3 +193,18 @@ def test_fullframe_hosted_v3_parent_filename_matches_exact_runner_contract():
     assert request["view4_geometry_is_compiler_input"] is True
     assert request["view4_render_edit_response_used_for_selection"] is False
     assert request["training_authorized"] is False
+
+
+
+def test_v3_blender_consumer_reads_current_source_face_count_not_old_field():
+    # Regression: source exact V3 worker had an old V2 face_count lookup,
+    # causing all 3 Blender renders to fail before any pixels were measured.
+    from pathlib import Path
+    root=Path(__file__).resolve().parents[2]
+    producer=(root/"tools/corpus/compile_corpus370_allview_geometry_groups_v3.py").read_text()
+    blender=(root/"tools/truth_foundry/blender_corpus370_anonymous_full_frame_edit_v3.py").read_text()
+    assert '"source_face_count":len(tri)' in producer
+    assert 'layer["source_face_count"]' in blender
+    assert 'layer["face_count"]' not in blender
+    assert '"RealSaS.Corpus370AllViewGeometryEditorProxyCourt.v3"' in blender
+    assert 'court["render_intervention_view4_seen_for_compilation"] is False' in blender

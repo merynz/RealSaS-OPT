@@ -54,10 +54,14 @@ class BustedProductAreasTests(unittest.TestCase):
         css = (STATIC / "css" / "busted_awaken_v3.css").read_text("utf-8")
         self.assertIn("Math.random", js)
         self.assertIn("translateZ(", js)
-        self.assertIn("lane.lines=lane.rows.map(fmt)", js)
+        self.assertIn("generateGlyphs", js)
+        self.assertIn("numberOfLanes", js)
+        self.assertIn("compensate", js)
         self.assertNotIn("requestAnimationFrame", js)
         self.assertNotIn("getContext(", js)
-        self.assertIn(".depth-floor{display:none}", css)
+        matrix = (STATIC / "css" / "matrix_stage_v5.css").read_text("utf-8")
+        self.assertIn(".depth-floor{display:none!important}", matrix)
+        self.assertIn("matrixDescent", matrix)
 
 if __name__ == "__main__":
     unittest.main()

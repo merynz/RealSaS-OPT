@@ -60,7 +60,7 @@ def _controls_noop_and_root(rest):
     }
 
 def evaluate(rest,faces,native_original,baseline,measured,manifest,
-             proposal,v11_plan,v12_public_result):
+             proposal,v11_plan,v12_public_result,original_v9_pose_indices):
     rest=np.asarray(rest,dtype=np.float64)
     faces=np.asarray(faces,dtype=np.int64)
     native_original=np.asarray(native_original,dtype=np.float64)
@@ -78,7 +78,7 @@ def evaluate(rest,faces,native_original,baseline,measured,manifest,
         and manifest.get("source_control_inventory_count")>=manifest.get("source_controls_measured_count")
         and manifest.get("original_source_teacher_pose_count")==3
         and manifest.get("original_selected_pose_indices_teacher_only")==
-             v12_public_result["same_original_authored_v9_poses_teacher_only"]
+             original_v9_pose_indices
         and manifest.get("axes")==["X","Y","Z"]
         and manifest.get("rotation_degrees")==5.0
         and manifest.get("no_anon_control_intervention_result_as_drawable_truth") is True

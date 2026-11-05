@@ -54,7 +54,7 @@ def test_a_local_fix_does_not_hide_global_regression():
     assert result["geometric_joint_tied_blender_postfilter"]==1
     assert result["geometric_mixed_nearest_among_blender_failures"]==1
     assert result["geometric_joint_beats_geometry_postfilter_among_blender_failures"]==1
-    assert result["source_alpha_identity_wrong_under_blender_postfilter"] if False else True
+    assert result["blender_postfilter_alpha_invariant_failures"]==3
 
 
 def test_whole_character_zero_error_is_vacuous_not_gold():

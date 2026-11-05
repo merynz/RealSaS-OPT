@@ -52,6 +52,9 @@ def test_merge_contains_no_human_layer_names_ids_or_counts(authored):
     assert r["setup_supported_attachment_count_teacher_only"]==3
     assert not r["true_artist_layer_benchmark_PASS"]
     assert not r["native_composite_appearance_CAA_qualified"]
+    assert r["editable_native_spine_artist_project_bytes_verified"] is False
+    assert r["original_atlas_image_and_author_alpha_CAA_verified"] is False
+    assert hidden["native_artist_editable_project_file_verified"] is False
     assert len(hidden["artist_slot_id_teacher_only_per_face"])==4
     assert len(set(hidden["artist_slot_id_teacher_only_per_face"]))==3
     assert set(input["faces"][0]).issubset(range(10))

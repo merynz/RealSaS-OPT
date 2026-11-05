@@ -47,6 +47,14 @@ class BustedAwakenStageContractTests(unittest.TestCase):
         self.assertNotIn(">COMPILE CHARACTER",html)
         self.assertIn("const latitude=",specimen)
         self.assertIn("IntersectionObserver",stage_rain)
+        # Performance budget: the home page must not render a redundant
+        # full-screen rain animation above its stage-local canvases.
+        self.assertIn("homeStage",rain)
+        self.assertIn("!homeStage",rain)
+        self.assertIn("scene.width<760?86:62",stage_rain)
+        self.assertIn("scene.dpr=Math.min(devicePixelRatio||1,1.15)",stage_rain)
+        self.assertIn("const latitude=26,longitude=42",specimen)
+        self.assertIn("if(now-last>=52)",specimen)
         self.assertIn("prefers-reduced-motion",specimen)
         self.assertNotIn("product_proof::pass",specimen)
         self.assertNotIn("lastMutation",rain)

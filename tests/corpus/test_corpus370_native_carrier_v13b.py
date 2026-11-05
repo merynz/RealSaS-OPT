@@ -119,3 +119,35 @@ def test_root_global_translation_is_not_drawable_split(evidence):
     assert out["analytic_uniform_root_translation_sham"]["root_control_sham_source_geometry_only"] is True
     assert out["source_bone_names_or_ontology_as_inference_target"] is False
     assert out["source_generated_control_perturbation_is_art_author_label"] is False
+
+
+# These tests reproduce the actual original FBX importer mismatch observed in
+# hosted run 42035670775: source receipt 'Armature|Take' != Action.name.
+from types import SimpleNamespace
+from tools.corpus.corpus370_native_action_binding_v13b import bound_rows_for_source_action
+
+def test_original_fbx_qualified_take_resolves_blender_action_identity():
+    source_take="Armature|Triceratops_Death"
+    original_action=SimpleNamespace(name="Triceratops_Death")
+    row={"owner":object(),"slot_identifier":"FBX_IMPORTED_SLOT"}
+    resolved={source_take:original_action}
+    bindings={original_action.name:[row]}
+    assert bound_rows_for_source_action(source_take,resolved,bindings)==[row]
+    assert source_take not in bindings
+
+@pytest.mark.parametrize("action,bindings,source",[
+    ("Rig|Take",{}, "Rig|Take"),
+    ("Rig|Take",{"Different":[]}, "Rig|Take"),
+    ("Rig|Take",{"Take":[]}, "OTHER_TAKE"),
+    ("Rig|Take",{"Take":None}, "Rig|Take"),
+])
+def test_source_action_name_cannot_fabricate_missing_native_binding(action,bindings,source):
+    resolved={action:SimpleNamespace(name="Take")}
+    with pytest.raises(ValueError):
+        bound_rows_for_source_action(source,resolved,bindings)
+
+def test_rigless_imported_node_object_action_resolves_without_armature_prior():
+    native=SimpleNamespace(name="Cat_Run")
+    binding={"owner":object(),"kind":"IMPORTED_ANIMATED_OBJECT"}
+    assert bound_rows_for_source_action("CatSource|Run",{"CatSource|Run":native},
+                                        {"Cat_Run":[binding]}) == [binding]

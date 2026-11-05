@@ -160,8 +160,10 @@
 
     // Draw decorative text only where it cannot compete with product copy.
     // Actual DOM bounds, not guessed coordinates, govern the decision.
+    // Landing uses pre-reserved right-side lanes. Container bounds around the
+    // hero include empty whitespace and must not hide all ambient code.
     const blockSelectors = role==='landing'
-      ? ['.masthead','.hero-eyebrow','.hero-intro h1','.hero-copy','.hero-description','.hero-meta','.descend-link','.landing-foot']
+      ? []
       : ['.masthead','.chamber-header','.chamber-docking-label','.chamber-intake .dropzone',
          '.chamber-intake .input-slot-ledger','.chamber-console .console-heading',
          '.chamber-console h3','.chamber-console .console-copy',

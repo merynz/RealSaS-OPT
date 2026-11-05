@@ -17,10 +17,12 @@
   <link rel="stylesheet" href="/static/css/studio_pose_onion.css">
   <link rel="stylesheet" href="/static/css/studio_brand.css">
   <link rel="stylesheet" href="/static/css/busted_studio_layout.css">
+  <link rel="stylesheet" href="/static/css/editor_v4.css">
 </head>
 <body>
   <header class="topbar">
     <div class="brand"><a class="studio-brand-link" href="/" aria-label="BUSTED home"><img class="busted-studio-mark" src="/static/brand/busted-mark.svg" width="35" height="35" alt=""><div><strong>BUSTED</strong><small>STUDIO · REALSAS</small></div></a></div>
+    <nav class="studio-primary-nav" aria-label="Product areas"><a href="/studio" aria-current="page">Puppet Editor</a><a href="/motion" data-bundle-nav="motion">Motion Lab</a><a href="/export" data-bundle-nav="export">Export</a></nav>
     <div class="studio-panel-controls" aria-label="Workspace panels"><button id="toggleScenePanel" class="studio-panel-toggle" type="button" aria-expanded="false" aria-controls="scenePanel">SCENE</button><button id="toggleInspectorPanel" class="studio-panel-toggle" type="button" aria-expanded="false" aria-controls="inspectorPanel">INSPECTOR</button></div>
     <div class="bundle-open">
       <input id="bundlePath" placeholder="Open a compiled character bundle">
@@ -29,7 +31,7 @@
     <div class="authority"><span id="proofBadge" class="badge">NO CHARACTER</span><span id="stateHash" class="mono"></span></div>
   </header>
 
-  <nav id="productFlow" class="product-flow" aria-label="Product workflow">
+  <details id="advancedStages" class="studio-stages"><summary>COMPILER STAGES <span>09</span></summary><nav id="productFlow" class="product-flow" aria-label="Product workflow">
     <button class="stage active" data-stage="input"><span>01</span>INPUT</button>
     <button class="stage" data-stage="shape"><span>02</span>SHAPE</button>
     <button class="stage" data-stage="mesh"><span>03</span>MESH</button>
@@ -39,7 +41,7 @@
     <button class="stage" data-stage="graphics"><span>07</span>GRAPHICS</button>
     <button class="stage" data-stage="animation"><span>08</span>MOTION</button>
     <button class="stage" data-stage="proof"><span>09</span>PROOF</button>
-  </nav>
+  </nav></details>
 
   <section class="compile-strip">
     <div class="compile-state"><span class="status-dot"></span><strong id="compileState">READY FOR CHARACTER</strong><span id="compileDetail">Open a proof-qualified character or return to Awaken.</span></div>
@@ -48,31 +50,29 @@
   </section>
 
   <nav class="modebar" aria-label="Editing tools">
-    <a class="back-awaken" href="/">← AWAKEN</a>
-    <span class="tool-label">EDIT</span>
+    <span class="tool-label">PUPPET TOOLS</span>
     <button class="mode active" data-mode="rig">RIG</button>
     <button class="mode" data-mode="mesh">MESH</button>
     <button class="mode" data-mode="weights">SKIN</button>
     <button class="mode" data-mode="bindings">ATTACH</button>
-    <button class="mode" data-mode="topology">TOPOLOGY</button>
-    <button class="mode" data-mode="ik">IK</button>
-    <button class="mode" data-mode="animation">ANIMATION</button>
+    <details id="advancedTools" class="advanced-tools"><summary>MORE TOOLS</summary><div class="advanced-menu"><button class="mode" data-mode="topology">TOPOLOGY</button><button class="mode" data-mode="ik">IK</button><button class="mode" data-mode="animation">KEYFRAMES</button></div></details>
+    <button id="toggleTimeline" class="timeline-toggle" type="button" aria-pressed="false">SHOW TIMELINE</button>
     <span class="separator"></span>
     <button id="undoEdit" title="Undo · Ctrl/Cmd+Z" disabled>UNDO</button>
     <button id="redoEdit" title="Redo · Ctrl/Cmd+Shift+Z" disabled>REDO</button>
     <span id="studioState" class="active-stage" data-state="clean">UNSAVED · CLEAN</span>
     <span id="activeProductStage" class="active-stage">INPUT</span>
     <button id="saveLayer" title="Save · Ctrl/Cmd+S">SAVE EDITS</button>
-    <button id="exportRuntime" class="primary">EXPORT</button>
+    <button id="exportRuntime" class="primary" hidden>EXPORT</button>
   </nav>
 
   <main class="workspace">
     <aside id="scenePanel" class="left panel">
-      <div class="panel-title">DIRECTION</div>
+      <div class="panel-title">VIEWS</div>
       <div id="views" class="view-grid"></div>
-      <div class="panel-title">CHARACTER</div>
+      <div class="panel-title">SCENE TREE</div>
       <div id="sceneTree" class="tree"></div>
-      <div class="panel-title">PROOF</div>
+      <div class="panel-title">EVIDENCE</div>
       <div id="authorityText" class="authority-copy">Open a proof-gated compiled character.</div>
     </aside>
 
@@ -86,17 +86,18 @@
         <button id="fitView">FIT</button>
       </div>
       <canvas id="viewport" width="1100" height="820"></canvas>
+      <div id="studioWelcome" class="studio-welcome" aria-label="Studio start"><span class="welcome-glyph" aria-hidden="true">◇</span><div class="welcome-kicker">PUPPET EDITOR / BUSTED</div><h1>The puppet<br><em>is the product.</em></h1><p>Work on structure, rig, weights and appearance. Open a qualified character to begin.</p><div class="welcome-actions"><a href="/">AWAKEN A CHARACTER ↗</a><button id="focusBundleInput" type="button">OPEN BUNDLE</button></div><small>Nothing is compiled or qualified in this empty editor.</small></div>
       <div id="hint" class="hint">Open a compiled character or return to Awaken.</div>
     </section>
 
     <aside id="inspectorPanel" class="right panel inspector">
-      <div class="panel-title">INSPECTOR</div>
+      <div class="panel-title">PROPERTIES</div>
       <div id="productStageNote" class="stage-note">Input accepts the source character. Existing compiled bundles can already be inspected and edited.</div>
       <div id="inspectorBody"></div>
     </aside>
   </main>
 
-  <section class="timeline panel">
+  <section id="studioTimeline" class="timeline panel">
     <div class="timeline-head">
       <div class="transport"><button id="play">▶</button><button id="stop">■</button></div>
       <select id="clipSelect"></select>
@@ -128,5 +129,6 @@
   <script type="module" src="/static/js/product_shell.js"></script>
   <script type="module" src="/static/js/workspace_bootstrap.js"></script>
   <script src="/static/js/busted_studio_panels.js" defer></script>
+  <script src="/static/js/editor_v4.js" defer></script>
 </body>
 </html>

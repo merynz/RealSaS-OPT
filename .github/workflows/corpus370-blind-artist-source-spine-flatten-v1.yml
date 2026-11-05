@@ -7,15 +7,19 @@ on:
       - '.github/workflows/corpus370-blind-artist-source-spine-flatten-v1.yml'
       - 'tools/corpus/author_spine_blind_flatten_v1.py'
       - 'tools/corpus/artist_blind_topology_leakage_audit_v1.py'
+      - 'tools/corpus/artist_blind_neutral_carrier_v1.py'
       - 'tests/corpus/test_artist_spine_blind_flatten_v1.py'
       - 'tests/corpus/test_artist_blind_topology_leakage_audit_v1.py'
+      - 'tests/corpus/test_artist_blind_neutral_carrier_v1.py'
   pull_request:
     paths:
       - '.github/workflows/corpus370-blind-artist-source-spine-flatten-v1.yml'
       - 'tools/corpus/author_spine_blind_flatten_v1.py'
       - 'tools/corpus/artist_blind_topology_leakage_audit_v1.py'
+      - 'tools/corpus/artist_blind_neutral_carrier_v1.py'
       - 'tests/corpus/test_artist_spine_blind_flatten_v1.py'
       - 'tests/corpus/test_artist_blind_topology_leakage_audit_v1.py'
+      - 'tests/corpus/test_artist_blind_neutral_carrier_v1.py'
 
 permissions:
   contents: read
@@ -35,8 +39,8 @@ jobs:
       - name: Validate real source adapter + synthetic falsification tests
         run: |
           set -euo pipefail
-          python3 -m py_compile tools/corpus/author_spine_blind_flatten_v1.py tools/corpus/artist_blind_topology_leakage_audit_v1.py
-          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_artist_spine_blind_flatten_v1.py tests/corpus/test_artist_blind_topology_leakage_audit_v1.py
+          python3 -m py_compile tools/corpus/author_spine_blind_flatten_v1.py tools/corpus/artist_blind_topology_leakage_audit_v1.py tools/corpus/artist_blind_neutral_carrier_v1.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_artist_spine_blind_flatten_v1.py tests/corpus/test_artist_blind_topology_leakage_audit_v1.py tests/corpus/test_artist_blind_neutral_carrier_v1.py
       - name: Fetch original public sample into TEMPORARY evaluation location
         run: |
           set -euo pipefail
@@ -73,6 +77,11 @@ jobs:
             --prediction "$RUNNER_TEMP/artist_source_evaluation/model_prediction/components.json" \
             --private-reference "$RUNNER_TEMP/artist_source_evaluation/private_court/artist.json" \
             --receipt "$RUNNER_TEMP/artist_source_evaluation/public_summary/topology_leakage.json"
+          PYTHONPATH=. python3 tools/corpus/artist_blind_neutral_carrier_v1.py \
+            --anonymous-input "$RUNNER_TEMP/artist_source_evaluation/model_input/merged.json" \
+            --neutral-carrier "$RUNNER_TEMP/artist_source_evaluation/model_input/neutral_grid.json" \
+            --receipt "$RUNNER_TEMP/artist_source_evaluation/public_summary/neutral_carrier.json" \
+            --cells 24
           python3 - <<'PY'
           import json,os
           from pathlib import Path
@@ -92,6 +101,10 @@ jobs:
           assert m["disconnected_topology_can_leak_original_author_partition"] is True
           assert "spineboy" not in json.dumps(m).lower()
           topology=json.loads((root/"public_summary/topology_leakage.json").read_text())
+          neutral=json.loads((root/"public_summary/neutral_carrier.json").read_text())
+          assert neutral["one_connected_component"] is True
+          assert neutral["source_artist_face_labels_comparable_to_grid_faces"] is False
+          assert neutral["artist_drawable_recovery_accuracy"] is None
           assert topology["this_is_true_artist_drawable_recovery"] is False
           assert topology["original_unsupported_source_attachment_count"]==r["unsupported_original_attachment_count"]
           print("ORIGINAL_AUTHORING_SEAMS_SOURCE_TOPOLOGY_LEAKAGE_NOT_GENERIC_ARTIST_RECOVERY")

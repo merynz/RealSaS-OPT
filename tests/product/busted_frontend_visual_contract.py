@@ -57,11 +57,13 @@ async def run():
                 assert chamber["y"] >= intro["bottom"]-2, f"Compile chamber is not below hero: {chamber} {intro}"
                 assert drop["y"] > visual["bottom"], f"Input overlaps compilation code: {drop} {visual}"
                 assert visual["y"] >= chamber["y"]-2, f"Code must be inside Chamber, not hero: {visual} {chamber}"
-                assert not await page.locator("#introduction .matrix-trace").count(), "Hero must not contain computational code"
+                assert await page.locator("#introduction .matrix-trace").count() == (2 if width<=780 else 4), "Landing animation missing"
+                landing_display=await page.locator("#landingMatrixTypewriter").evaluate("el=>getComputedStyle(el).display")
+                assert landing_display!="none", "Landing typewriter must be visible"
                 assert await page.locator("#awakenChamber .matrix-trace").count() == (4 if width<=780 else 8)
                 # Matrix VFX uses reserved screen-space lanes: no typed-code collisions.
                 # Motion reduction freezes the CSS streams for reproducible geometry.
-                matrix = await page.locator(".matrix-column").evaluate_all("""elements => elements.map(el => {
+                matrix = await page.locator("#chamberCodeVisual .matrix-column").evaluate_all("""elements => elements.map(el => {
                   const r=el.getBoundingClientRect();
                   return {lane:Number(el.dataset.lane), x:r.x, right:r.right, width:r.width,
                     depth:Number(el.dataset.depth)};
@@ -72,7 +74,7 @@ async def run():
                     assert left["right"] <= right["x"] + 1, f"Matrix text lanes overlap at {width}: {left} vs {right}"
                 # Foreground code is reserved in non-overlapping 2D screen regions,
                 # while each track retains its own real CSS z-depth.
-                traces = await page.locator(".matrix-trace").evaluate_all("""elements => elements.map(el => {
+                traces = await page.locator("#awakenChamber .matrix-trace").evaluate_all("""elements => elements.map(el => {
                   const r=el.getBoundingClientRect();
                   return {slot:Number(el.dataset.slot), depth:Number(el.dataset.depth),
                     x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};
@@ -105,6 +107,8 @@ async def run():
                         overlap_x = min(left["right"],right["right"])-max(left["x"],right["x"])
                         overlap_y = min(left["bottom"],right["bottom"])-max(left["y"],right["y"])
                         assert overlap_x <= 2 or overlap_y <= 2, f"Typing code overlaps: {left} vs {right}"
+                landing_lines=await page.locator("#introduction .matrix-trace-line").all_inner_texts()
+                assert any(line.strip() for line in landing_lines), f"Landing typing contains no characters: {landing_lines}"
                 assert await page.locator("#awaken").is_disabled(), "Offline preview must never offer a fake compile"
 
                 # Studio link is real navigation, even without a compiled bundle.
@@ -183,7 +187,7 @@ async def run():
         try:
             await animated.goto(BASE + "/", wait_until="networkidle", timeout=25000)
             await animated.locator("#chamberCodeVisual").scroll_into_view_if_needed()
-            first = animated.locator('.matrix-trace[data-slot="0"] .matrix-trace-line').first
+            first = animated.locator('#awakenChamber .matrix-trace[data-slot="0"] .matrix-trace-line').first
             initial = await first.inner_text()
             await animated.wait_for_timeout(850)
             later = await first.inner_text()

@@ -91,6 +91,7 @@ def test_new_targets_are_deterministic_heldout_and_without_owner_labels():
     "missing_candidate_pair","invalid_edit_task_count","duplicate_candidate_pair",
     "non_nested_group","rest_face_order_changed","nonfinite_rest",
     "invalid_budget","v9_wrong_parent","unusable_source_triangle",
+    "negative_equivalence_count","overfull_equivalence_count",
 ])
 def test_forgeries_non_nested_source_and_unobservable_geometry_fail_closed(fault):
     e=list(copy.deepcopy(evidence()))
@@ -115,6 +116,12 @@ def test_forgeries_non_nested_source_and_unobservable_geometry_fail_closed(fault
     elif fault=="invalid_budget":budget=2
     elif fault=="v9_wrong_parent":e[2]["plan"]["source_sha256"]="z"*64
     elif fault=="unusable_source_triangle":e[4]["rest_vertices_source_world"][:]=0
+    elif fault=="negative_equivalence_count":
+        e[3]["pairwise_equivalence_classes_scoped_to_tested_source_edits"][0][
+            "indistinguishable_source_edit_task_count"]=-1
+    elif fault=="overfull_equivalence_count":
+        e[3]["pairwise_equivalence_classes_scoped_to_tested_source_edits"][0][
+            "indistinguishable_source_edit_task_count"]=len(e[2]["plan"]["tasks"])+1
     with pytest.raises(ValueError):
         run(tuple(e),budget)
 

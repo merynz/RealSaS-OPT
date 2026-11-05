@@ -1,0 +1,114 @@
+{
+  "schema": "RealSaS.Corpus370OriginalArtistImageOnlyEditSupportRealResult.v1",
+  "status": "THREE_REAL_ORIGINAL_ARTIST_EXPORT_RGBA_EDIT_SUPPORT_DIAGNOSTICS_PASS__OWNER_UNPROVEN",
+  "date_utc": "2026-11-05",
+  "pull_request": 333,
+  "stacked_parent_pull_request": 327,
+  "run_id": 42064435486,
+  "run_url": "https://github.com/merynz/RealSaS-OPT/actions/runs/42064435486",
+  "run_conclusion": "success",
+  "source_license_note": "Original Spine example export JSON/atlas/art used for ephemeral evaluation only. Native editable editor project not verified; no training/redistribution rights asserted.",
+  "resolution": [
+    768,
+    768
+  ],
+  "prediction_input": "UNALTERED_ORIGINAL_SOURCE_RGBA_ONLY__NO_AUTHOR_SLOTS_OR_MESH",
+  "algorithms": {
+    "alpha_connected": "FOUR_CONNECTED_NONZERO_ALPHA_NO_FIXED_K",
+    "image_graph": "FELZENSZWALB_RGB_GRAPH_SCALE_180_SIGMA_0_8_MIN_SIZE_140_NO_FIXED_K"
+  },
+  "independent_court": "ONE_TO_ONE_HUNGARIAN_MATCH_TO_TRUE_ORIGINAL_AUTHOR_HIDE_COMPOSITE_CHANGE_SUPPORT__NOT_AUTHOR_PART_OWNERSHIP",
+  "subject_results": [
+    {
+      "subject": "Spineboy",
+      "run_job_id": 127374542569,
+      "source_rgba_sha256": "0e5e89c8cdc64da2b29b00771f6d05bb253ab9e61d0ccc69487904863a10691e",
+      "image_only_prediction_sha256": "77d4bf19ca3c4e918a02e702e1f5cb41057186c2a9648f1cfe642f2121f21896",
+      "active_original_source_attachments": 18,
+      "observable_hide_effects": 18,
+      "masked_hide_effects": 0,
+      "alpha_connected": {
+        "regions": 1,
+        "matched_visible_edits": 1,
+        "mean_iou": 0.016969540181336937,
+        "edit_support_recall": 0.2713330988392543
+      },
+      "image_graph": {
+        "regions": 150,
+        "matched_visible_edits": 18,
+        "mean_iou": 0.27866972012937,
+        "edit_support_recall": 0.2548645796693633
+      },
+      "edit_effect_pixel_instances": 142150
+    },
+    {
+      "subject": "Owl",
+      "run_job_id": 127374542478,
+      "source_rgba_sha256": "d3287212a4123c437fc784f41e2aeefdd9031d76ebe61c28f07cd2bd0b7b261d",
+      "image_only_prediction_sha256": "306687062dd5360b0deb589921c7ba9f8848cfa9d7248565ea77442bcdefebb2",
+      "active_original_source_attachments": 25,
+      "observable_hide_effects": 22,
+      "masked_hide_effects": 3,
+      "alpha_connected": {
+        "regions": 2,
+        "matched_visible_edits": 2,
+        "mean_iou": 0.016455961682547045,
+        "edit_support_recall": 0.32221319325536174
+      },
+      "image_graph": {
+        "regions": 136,
+        "matched_visible_edits": 22,
+        "mean_iou": 0.4177557459809574,
+        "edit_support_recall": 0.3547827727312302
+      },
+      "edit_effect_pixel_instances": 137828
+    },
+    {
+      "subject": "Raptor",
+      "run_job_id": 127374541944,
+      "source_rgba_sha256": "fcf4bd8b61443536b7c3bf736f1d46e90895399673cef1c08b137984cdddf922",
+      "image_only_prediction_sha256": "bee8b712476a170945978d628b0a22a6e00374171056741bafd9a9cf7a6ffade",
+      "active_original_source_attachments": 35,
+      "observable_hide_effects": 33,
+      "masked_hide_effects": 2,
+      "alpha_connected": {
+        "regions": 2,
+        "matched_visible_edits": 2,
+        "mean_iou": 0.009547668609316651,
+        "edit_support_recall": 0.28636795418969
+      },
+      "image_graph": {
+        "regions": 166,
+        "matched_visible_edits": 33,
+        "mean_iou": 0.29251169088020246,
+        "edit_support_recall": 0.3217023667768219
+      },
+      "edit_effect_pixel_instances": 149486
+    }
+  ],
+  "aggregate": {
+    "original_active_attachments": 78,
+    "observable_edit_effects": 73,
+    "masked_edit_effects": 5,
+    "alpha_connected_regions_total": 5,
+    "image_graph_regions_total": 452,
+    "training_examples_admitted": 0,
+    "author_drawable_positive_pairs": 0,
+    "author_drawable_negative_pairs": 0
+  },
+  "explicit_limitations": [
+    "Edit-support similarity is not artist drawable mask/slot ownership accuracy; hide effects can overlap and each source attachment can have partial visibility.",
+    "Hungarian one-to-one matching can favor overfragmented proposals; inspect region utilization, matched effect recall and visual edit performance.",
+    "A single RGBA composite does not reveal fully occluded original source art; five hidden/masked hide-effect controls are excluded from visual-edit IoU, not labeled negative.",
+    "Original Spine export assets are not verified native editor project files; no user-supplied training license.",
+    "No temporal stability, true alpha compositing by our own compiler, source draw order, attachment behavior or independent graphics ownership PASS.",
+    "Source RGBA, private hide/isolate arrays and model predictions are ephemeral runner files; public reproducibility uses immutable SHA-bound source bytes, code and GitHub logs."
+  ],
+  "author_artist_project_verified": false,
+  "proprietary_art_redistributed": false,
+  "graphics_owner_authorized": false,
+  "source_appearance_caa_authorized": false,
+  "model_training_authorized": false,
+  "materialization_authorized": false,
+  "product_authority_minted": false
+}

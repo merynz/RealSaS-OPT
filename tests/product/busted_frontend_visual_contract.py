@@ -58,7 +58,14 @@ async def run():
                 # Studio link is real navigation, even without a compiled bundle.
                 await page.locator(".studio-link").click()
                 await page.locator(".workspace").wait_for()
+                await page.locator("#requalificationStrip").wait_for()
                 assert "Studio" in (await page.title()), f"Studio navigation failed: {page.url}"
+                assert "NO QUALIFIED CHARACTER" in (await page.locator("#requalTitle").inner_text()), "Empty Studio must never claim qualification"
+                assert "PROOF PASS" not in (await page.locator("#requalDomains").inner_text()), "Empty Studio falsely reports ProductProof PASS"
+                assert await page.locator("#exportRuntime").is_disabled(), "Empty Studio must not export unqualified content"
+                status_rect=await metrics(page, "#requalificationStrip")
+                viewport_rect=await metrics(page, ".workspace")
+                assert status_rect["bottom"] <= viewport_rect["y"]+2, f"Requalification strip is outside Studio header: {status_rect} {viewport_rect}"
                 await page.screenshot(path=str(OUT / f"studio_{width}x{height}.png"), full_page=True)
 
                 rows=await page.evaluate("""() => ({

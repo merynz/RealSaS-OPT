@@ -25,6 +25,8 @@ on:
       - 'tools/corpus/compile_corpus370_allview_geometry_groups_v3.py'
       - 'tools/corpus/court_corpus370_allview_geometry_groups_v3.py'
       - 'tests/corpus/test_corpus370_allview_geometry_groups_v3.py'
+      - 'tools/corpus/run_corpus370_allview_geometry_groups_private_v3.py'
+      - '.github/workflows/corpus370-hosted-allview-geometry-groups-private-v3.yml'
       - 'tools/truth_foundry/blender_corpus370_anonymous_full_frame_edit_v1.py'
       - 'tools/corpus/court_corpus370_anonymous_full_frame_edit_v1.py'
       - 'tests/corpus/test_corpus370_anonymous_full_frame_edit_v1.py'
@@ -111,6 +113,7 @@ jobs:
             tools/corpus/run_corpus370_multiview_geometry_groups_private_v2.py \
             tools/corpus/compile_corpus370_allview_geometry_groups_v3.py \
             tools/corpus/court_corpus370_allview_geometry_groups_v3.py \
+            tools/corpus/run_corpus370_allview_geometry_groups_private_v3.py \
             tools/truth_foundry/blender_corpus370_anonymous_full_frame_edit_v1.py \
             tools/corpus/court_corpus370_anonymous_full_frame_edit_v1.py \
             tools/corpus/run_corpus370_full_frame_group_edit_private_v1.py \

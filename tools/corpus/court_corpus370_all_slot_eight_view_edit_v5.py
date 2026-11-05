@@ -166,6 +166,21 @@ def evaluate(pixels,manifest):
                 v["all_source_slot_independent_removal_pixel_counts"][str(slot)]>0
                 for v in views)
         ],
+        "slot_observability_teacher_only":[{
+            "slot_id":slot,
+            "direct_effect_view_count":sum(int(
+                v["all_source_slot_independent_removal_pixel_counts"][str(slot)]>0)
+                for v in views),
+            "status":(
+                "OBSERVED_DIRECT_REMOVAL_PIXEL_EFFECT__NOT_DRAWABLE_IDENTITY"
+                if any(v["all_source_slot_independent_removal_pixel_counts"][str(slot)]>0
+                       for v in views) else
+                "ABSTAIN_NO_DIRECT_EFFECT_IN_EIGHT_REST_CAMERAS"
+            ),
+            "same_drawable":"UNKNOWN",
+            "different_drawable":"UNKNOWN",
+            "training_authorized":False,
+        } for slot in slots],
         "unobserved_group_is_owner_negative":False,
         "persistent_group_pair_across_all_views":True,
         "independently_measured_view4_group_b_reveal":int(views[4][

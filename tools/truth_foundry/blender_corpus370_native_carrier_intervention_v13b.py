@@ -134,7 +134,7 @@ def run(job_path, output_path):
         frame=receipt["sampled_frames"][pidx]
         require(frame["action"] in resolved and type(frame["frame"]) is int,
                 "V13B_AUTHOR_ORIGINAL_NATIVE_ACTION_POSE_BINDING")
-        carrier=actions.activate_action(resolved[frame["action"]],bindings)
+        replay_control=actions.activate_action(resolved[frame["action"]],bindings)
         bpy.context.scene.frame_set(frame["frame"])
         bpy.context.view_layer.update()
         evaluated=v4._extract_snapshot(meshes,freeze_triangulation=False)
@@ -182,7 +182,7 @@ def run(job_path, output_path):
             "exact_original_native_pose_replayed":True,
             "control_inventory_count":count_total,
             "controls_measured":selected,
-            "action_carrier_kind_teacher_only":carrier["carrier_kind"]
+            "action_carrier_kind_teacher_only":replay_control["carrier_kind"]
         })
         base._neutralize_animation()
     out=Path(output_path).resolve()

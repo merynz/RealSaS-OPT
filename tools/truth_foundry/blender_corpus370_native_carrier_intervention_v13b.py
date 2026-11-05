@@ -190,11 +190,11 @@ def run(job_path, output_path):
     npz=out.with_suffix(".npz")
     np.savez_compressed(npz,baseline_vertices=np.stack(baseline),
                        native_control_perturbed_vertices=np.stack(tensors))
-    digest=hashlib.sha256("\\n".join(k+":"+obj.name+":"+(bone.name if bone is not None else "")
+    digest=hashlib.sha256("\n".join(k+":"+obj.name+":"+(bone.name if bone is not None else "")
                                        for k,obj,bone in controls).encode()).hexdigest()
     result={
         "schema":SCHEMA,
-        "status":"V13B_REAL_ORIGINAL_AUTHORED_SOURCE_ANONYMOUS_RIG_INTERVENTION__INDEPENDENT_COURT_REQUIRED",
+        "status":"V13B_REAL_ORIGINAL_SOURCE_ANONYMOUS_NATIVE_CARRIER_INTERVENTION__INDEPENDENT_COURT_REQUIRED",
         "subject_id":job["subject_id"],"source_sha256":job["source"]["sha256"],
         "original_source_teacher_pose_count":3,
         "source_control_inventory_count":count_total,

@@ -49,21 +49,20 @@ def premultiplied(a):
     return np.concatenate((a[...,:3]*a[...,3:4],a[...,3:4]),axis=-1)
 
 
-def measure(a0,a1,b0,b1,ab,isolated_ab,tol=TOL):
+def measure(a0,a1,b0,b1,ab,isolated_base,isolated_ab,tol=TOL):
     """Counterfactual spatial effect support and nonlinear interaction."""
     require(0<tol<=TOL,"V16_FROZEN_THRESHOLD")
-    img=[premultiplied(z) for z in (a0,a1,b0,b1,ab,isolated_ab)]
-    baseline,a,again,b,joint,isolated=img
+    img=[premultiplied(z) for z in (a0,a1,b0,b1,ab,isolated_base,isolated_ab)]
+    baseline,a,again,b,joint,isolated_origin,isolated=img
     require(np.array_equal(baseline,again),
         "V16_SAME_ORIGINAL_BASELINE_FOR_A_AND_B")
     sig=lambda d:np.max(np.abs(d),axis=-1)>tol
     source_a=sig(a-baseline)
     source_b=sig(b-baseline)
     source_ab=sig(joint-baseline)
-    iso_ab=sig(isolated-baseline)
-    # The *isolated AB* scene has a different baseline from full scene;
-    # compare isolate against a separately rendered isolation BASE in a
-    # distinct second instrument when available, never counterfeit it here.
+    iso_ab=sig(isolated-isolated_origin)
+    # Identical active source-face union support in isolated BASE and joint ±
+    # scenes: never compare isolated paint to the FULL-scene baseline.
     nonlinear=sig(joint-a-b+baseline)
     incremental_a_given_b=sig(joint-b)
     incremental_b_given_a=sig(joint-a)
@@ -82,6 +81,13 @@ def measure(a0,a1,b0,b1,ab,isolated_ab,tol=TOL):
         "single_b_only_effect_pixel_instances":int(only_b.sum()),
         "single_effect_union_pixel_instances":int(union_ab.sum()),
         "joint_ab_effect_pixel_instances":int(source_ab.sum()),
+        "joint_isolated_active_face_effect_pixel_instances":int(iso_ab.sum()),
+        "joint_full_and_isolated_effect_overlap_pixel_instances":
+            int((iso_ab & source_ab).sum()),
+        "joint_isolation_only_effect_pixel_instances__unresolved_visibility_or_compositing":
+            int((iso_ab & ~source_ab).sum()),
+        "joint_full_only_effect_pixel_instances__contextual":
+            int((source_ab & ~iso_ab).sum()),
         "joint_nonadditive_rgba_response_pixel_instances":int(nonlinear.sum()),
         "incremental_a_given_b_pixel_instances":int(incremental_a_given_b.sum()),
         "incremental_b_given_a_pixel_instances":int(incremental_b_given_a.sum()),
@@ -91,7 +97,7 @@ def measure(a0,a1,b0,b1,ab,isolated_ab,tol=TOL):
         "single_a_alpha_effect_pixel_instances":int(alpha_a.sum()),
         "single_b_alpha_effect_pixel_instances":int(alpha_b.sum()),
         "joint_alpha_effect_pixel_instances":int(alpha_ab.sum()),
-        "joint_effect_active_face_isolation_observability":"NOT_MEASURED_WITH_AN_IDENTICAL_ISOLATED_BASELINE",
+        "joint_effect_active_face_isolation_observability":"EXACT_SAME_ACTIVE_SOURCE_FACE_UNION_RENDERED_IN_BASELINE_AND_JOINT_SOURCE_CONTROL",
         "source_drawable_same_as_control":False,
         "proves_artist_drawable_equivalence":False,
     }
@@ -121,7 +127,7 @@ def evaluate(source_name, v14_public_path, original_root, v16_json_path,
             and joined.get("source_pose_count")==3
             and joined.get("source_camera_views")==[0,2,4,6]
             and joined.get("signed_control_pairs")==list(PAIRS)
-            and joined.get("blender_render_arms")==156
+            and joined.get("blender_render_arms")==168
             and joined.get("joint_original_source_to_soup_parity_rechecked") is True
             and joined.get("original_source_action_frozen_and_exact_vertices_before_after_render") is True
             and joined.get("joint_visuals_from_real_original_native_blender_source") is True
@@ -136,14 +142,13 @@ def evaluate(source_name, v14_public_path, original_root, v16_json_path,
             and joined.get("training_authorized") is False
             and joined.get("materialization_authorized") is False,
             "V16_ORIGINAL_JOINT_SOURCE_MANIFEST_PRIVILEGED_AUTHORITY_OR_SHA")
-    from tools.truth_foundry.blender_corpus370_dual_native_control_v16 import _joint_arms
-    # This helper is pure but imports bpy. Normal hosted COURT must never need
-    # Blender or native scene/semantic names, so derive arm names separately.
-    expected=["ORIGINAL_BASE"]+[
+    # Court must not import Blender or control carriers: only typed observed
+    # source images, blind anonymous A/B handles, and frozen source SHA chain.
+    expected=["ORIGINAL_BASE","ISOLATED_AB_BASE"]+[
         mode+"_"+s for s in PAIRS
         for mode in ("SOURCE_AB","SOUP_AB","ISOLATED_AB")
     ]
-    require(joined["rendered_arms"]==expected and len(expected)==13,
+    require(joined["rendered_arms"]==expected and len(expected)==14,
         "V16_EXACT_ORIGINAL_SOURCE_JOINT_ARMS")
     require(len(joined["native_source_joint_mechanics_vs_independent_single_effect_witness"])==48,
         "V16_NATIVE_JOINT_MECHANICS_WITNESS_NOT_COMPLETE")
@@ -160,7 +165,7 @@ def evaluate(source_name, v14_public_path, original_root, v16_json_path,
     old_arms,_=arms_for_plan(plan)
     require(old_arms==parent_render["rendered_arms"]
         and old.shape==(3,4,19,192,192,4)
-        and new.shape==(3,4,13,192,192,4)
+        and new.shape==(3,4,14,192,192,4)
         and np.isfinite(old).all() and np.isfinite(new).all()
         and np.min(old[...,3])>=-1e-5 and np.max(old[...,3])<=1.00001
         and np.min(new[...,3])>=-1e-5 and np.max(new[...,3])<=1.00001,
@@ -196,6 +201,7 @@ def evaluate(source_name, v14_public_path, original_root, v16_json_path,
                     joint=new[pose,iv,ji["SOURCE_AB_"+sign]]
                     soup=new[pose,iv,ji["SOUP_AB_"+sign]]
                     iso=new[pose,iv,ji["ISOLATED_AB_"+sign]]
+                    iso_base=new[pose,iv,ji["ISOLATED_AB_BASE"]]
                     p99=float(np.percentile(
                         np.max(np.abs(joint-soup),axis=-1),99))
                     require(p99<=TOL, "V16_REAL_ORIGINAL_AB_SOURCE_SOUP_PIXEL_PARITY")
@@ -205,7 +211,7 @@ def evaluate(source_name, v14_public_path, original_root, v16_json_path,
                             "V16_COURT_V16_RENDERER_SOUSED_SOUSED_PARITY_DRIFT")
                     a=old[pose,iv,oi["SOURCE_C00_"+s1]]
                     b=old[pose,iv,oi["SOURCE_C01_"+s2]]
-                    m=measure(b14,a,b14,b,joint,iso)
+                    m=measure(b14,a,b14,b,joint,iso_base,iso)
                     metric_keys=tuple(m) if metric_keys is None else metric_keys
                     for key,value in m.items():
                         if type(value) is int: aggregates[key]=aggregates.get(key,0)+value

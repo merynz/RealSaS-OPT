@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370FullFrameAnonymousEditRequest.v3",
   "enabled": true,
-  "status": "ACTIVE_ORIGINAL_THREE_SOURCE_ALLVIEW_3WORKER_FULLFOV_RGBA_AND_EDIT_REPLAY",
+  "status": "REPLAY_REPAIRED_V3_PARENT_BASENAME__REAL_FULL_FRAME_SHA_LOCKED",
   "source_locked": true,
   "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
   "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
@@ -48,5 +48,6 @@
   ],
   "render_edit_holdout_view": 4,
   "view4_geometry_is_compiler_input": true,
-  "view4_render_edit_response_used_for_selection": false
+  "view4_render_edit_response_used_for_selection": false,
+  "replay_note": "Run 41986998716 all three workers failed before Blender because V3 parent folder was paired with stale V2 batch basename. Workflow now validates exact V3 batch filename, schema, 3/3 subjects, and SHA, plus adversarial regression fixture; ORIGINAL SOURCE BYTES AND GROUP CANDIDATE SHA UNCHANGED."
 }

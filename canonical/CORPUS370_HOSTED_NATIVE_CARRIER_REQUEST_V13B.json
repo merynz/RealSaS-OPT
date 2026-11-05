@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370NativeCarrierResearchRequest.v13b",
   "enabled": true,
-  "status": "ACTIVATE_ORIGINAL_SOURCE_ANIMATED_OBJECT_NODE_PLUS_ARMATURE_SOURCE_CONTROLS__NO_PRIOR",
+  "status": "RETRY_V13B_EXACT_FBX_SOURCE_ACTION_ALIAS_TO_RESOLVED_BLENDER_ACTION_BINDING",
   "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
   "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
   "source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
@@ -102,5 +102,12 @@
   "original_author_source_motion_control_bindings_required": true,
   "primitive_source_node_transform_and_bone_matrix_actuation_only": true,
   "no_shape_key_fallback_conjured": true,
-  "source_lineage_v9_v10_v11_v12_v13_unmodified": true
+  "source_lineage_v9_v10_v11_v12_v13_unmodified": true,
+  "previous_v13b_hosted_run_id": 42035670775,
+  "previous_v13b_real_original_cat_success": true,
+  "previous_v13b_cowfish_triceratops_failure": "Source FBX action alias is importer-qualified and differs from Blender Action.name; original source worker wrongly attempted bindings[source_alias] rather than bindings[resolved[source_alias].name].",
+  "fb_x_action_name_provenance_correction_only": true,
+  "source_truth_geometry_animation_and_group_selection_unchanged": true,
+  "source_rig_and_object_carrier_ontology_still_teacher_only": true,
+  "real_v13b_measurement_already_complete": false
 }

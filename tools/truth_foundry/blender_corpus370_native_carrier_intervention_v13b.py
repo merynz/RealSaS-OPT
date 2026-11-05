@@ -108,7 +108,15 @@ def run(job_path, output_path):
     object_owners={}
     unsupported_native_owner_types=set()
     for action_name in original_actions:
-        for row in bindings[action_name]:
+        # Source receipt retains importer-qualified action identifier; the
+        # captured Blender binding dictionary is keyed by the resolved
+        # Blender Action.name, which can differ for FBX owner-qualified names.
+        # Reuse precisely the same resolution as activate_action, NEVER
+        # fabricate a binding on missing actions.
+        action=resolved[action_name]
+        require(action.name in bindings,
+                "V13B_ORIGINAL_SOURCE_ACTION_RESOLVED_BINDING_NOT_FOUND")
+        for row in bindings[action.name]:
             owner=row["owner"]
             if isinstance(owner,bpy.types.Object) and owner.type in ("EMPTY","MESH","ARMATURE"):
                 object_owners[id(owner)]=owner

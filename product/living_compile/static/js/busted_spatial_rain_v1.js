@@ -24,7 +24,8 @@
    canvas.style.width=width+'px';canvas.style.height=height+'px';
    ctx.setTransform(dpr,0,0,dpr,0,0);
    const mobile=width<760;
-   const counts=mobile?[13,10,5]:[39,26,17];lanes=[];
+   // Halve concurrent data streams on Studio/Motion/Export as well.
+   const counts=mobile?[7,5,3]:[20,13,9];lanes=[];
    for(let layer=0;layer<3;layer++){
      const cells=counts[layer],stepX=width/cells;
      for(let i=0;i<cells;i++){

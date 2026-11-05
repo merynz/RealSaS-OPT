@@ -102,7 +102,9 @@
     t.typeFinish=t.gap+t.lines[1].length*t.rate;
     t.holdFinish=t.typeFinish+1050; // ~1 second of completed text + blinking terminal mark
     t.fadeFinish=t.holdFinish+340;
-    t.duration=t.fadeFinish+random(450,850);
+    // On phones one trace cannot be split into half an element: double
+    // its invisible interval instead, maintaining the same typing speed.
+    t.duration=t.fadeFinish+(reserved?random(1500,2350):random(450,850));
   }
   function paint(){
     for(const t of traces){
@@ -147,7 +149,9 @@
     stage.replaceChildren();traces=[];measure();
     if(bounds.width<120||bounds.height<150)return;
     const small=Boolean(reserved),tablet=bounds.width<1170;
-    const count=small?1:tablet?8:11;
+    // One half the concurrent typed-code traces; mobile keeps its single
+    // collision-safe trace, but each subsequent appearance is spaced out.
+    const count=small?1:tablet?4:6;
     for(let i=0;i<count;i++){
       const depth=random(.25,.98),side=i%2?'right':'left';
       const w=small?Math.min(330,reserved.w):tablet?175:Math.min(248,Math.max(160,bounds.width*.18));

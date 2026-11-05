@@ -20,7 +20,9 @@ jobs:
       - name: Install product server and Playwright
         run: |
           python -m pip install --disable-pip-version-check -r deploy/product/requirements.txt playwright
-          python -m playwright install --with-deps chromium
+          # GitHub-hosted ubuntu-latest already provides Chromium system libs;
+          # do not run an unnecessary apt upgrade on every frontend PR.
+          python -m playwright install chromium
       - name: Measure responsive browser layout
         run: |
           set -euo pipefail

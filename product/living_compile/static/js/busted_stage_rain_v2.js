@@ -32,7 +32,8 @@
     scene.ctx.setTransform(scene.dpr,0,0,scene.dpr,0,0);
     scene.lanes=[];
     const narrow=scene.width<760;
-    const count=narrow?(scene.kind==='hero'?26:23):(scene.kind==='hero'?72:63);
+    // Half the visible streams, not their velocity / typography timing.
+    const count=narrow?(scene.kind==='hero'?13:12):(scene.kind==='hero'?36:32);
     for(let i=0;i<count;i++){
       const depth=Math.pow(Math.random(),.8);
       const font=(narrow?9:9.7)+depth*(narrow?3.2:4.7)+random(-.45,.45);

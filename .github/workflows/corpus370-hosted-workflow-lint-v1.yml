@@ -19,6 +19,7 @@ on:
       - '.github/workflows/corpus370-hosted-anonymous-full-frame-private-v1.yml'
       - '.github/workflows/corpus370-hosted-allview-geometry-groups-private-v3.yml'
       - '.github/workflows/corpus370-hosted-anonymous-full-frame-allview-private-v3.yml'
+      - '.github/workflows/corpus370-hosted-persistent-eight-view-edit-private-v4.yml'
   workflow_dispatch:
 
 permissions:
@@ -51,4 +52,5 @@ jobs:
             .github/workflows/corpus370-hosted-multiview-geometry-groups-private-v2.yml \
             .github/workflows/corpus370-hosted-anonymous-full-frame-private-v1.yml \
             .github/workflows/corpus370-hosted-allview-geometry-groups-private-v3.yml \
-            .github/workflows/corpus370-hosted-anonymous-full-frame-allview-private-v3.yml
+            .github/workflows/corpus370-hosted-anonymous-full-frame-allview-private-v3.yml \
+            .github/workflows/corpus370-hosted-persistent-eight-view-edit-private-v4.yml

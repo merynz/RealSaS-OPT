@@ -52,5 +52,7 @@
   "materialization_authorized": false,
   "product_compilation_authorized": false,
   "training_authorized": false,
-  "note": "On real 3 subjects, 3 parallel Blender workers render same original source and same anonymous group A/B face-slot IDs for all eight cameras. View4 source geometry is input but its rendering edit consequence was withheld during group compilation. Offscreen/hidden effects are ABSTAIN not negative. Rest-pose 192 FOV is not CAA/skin/pose or training admission."
+  "note": "On real 3 subjects, 3 parallel Blender workers render same original source and same anonymous group A/B face-slot IDs for all eight cameras. View4 source geometry is input but its rendering edit consequence was withheld during group compilation. Offscreen/hidden effects are ABSTAIN not negative. Rest-pose 192 FOV is not CAA/skin/pose or training admission.",
+  "rest_pose_only": true,
+  "full_field_of_view": true
 }

@@ -199,7 +199,26 @@ async def run():
                 assert await page.locator("#toggleTimeline").get_attribute("aria-pressed") == "true"
                 await page.locator("#toggleTimeline").click()
 
-                # Two separate product areas, not fake features in a crowded editor.
+                # One qualified puppet will back two linked authoring workspaces.
+                # The empty shell may switch contexts but must never fake authoring.
+                director = page.locator("#studioDirector")
+                assert await director.count() == 1, "Studio director tabs missing"
+                assert await director.locator('[data-director-command="add-key"]').is_disabled()
+                await director.locator('[data-director-workspace="motion"]').click()
+                assert await page.locator("body").get_attribute("data-studio-workspace") == "motion"
+                assert await page.locator("#toggleTimeline").get_attribute("aria-pressed") == "true", (
+                    "Motion workspace must expose the real animation timeline"
+                )
+                assert await director.locator('[data-director-command="new-clip"]').is_disabled(), (
+                    "Unqualified puppet must not be editable"
+                )
+                await director.locator('[data-director-workspace="puppet"]').click()
+                assert await page.locator("body").get_attribute("data-studio-workspace") == "puppet"
+                assert await page.locator("#toggleTimeline").get_attribute("aria-pressed") == "false"
+                assert await page.locator("#requalTitle").inner_text() == "NO QUALIFIED CHARACTER"
+
+                # Motion Lab remains the baked-clip playback area, while Studio
+                # Motion workspace authors user keys on the same puppet.
                 for area, title in [("motion", "Motion Lab"), ("export", "Export")]:
                     await page.goto(BASE + "/" + area, wait_until="networkidle", timeout=25000)
                     assert title in (await page.title()), f"Missing {title} at {width}x{height}"

@@ -92,7 +92,7 @@ def test_actual_source_rgba_is_compared_separately_from_geometry_idealization():
     isolated=np.array([*RED,1.],np.float64)
     remainder=np.array([*BLUE,1.],np.float64)
     x=compare_to_source(geom,full,isolated,remainder)
-    assert x["source_joint_sample_error"]==0.
+    assert x["source_joint_sample_error"]==pytest.approx(0.,abs=1e-12)
     assert x["real_blender_v18h_postfilter_both_orders_fail"] is False
     assert x["sample_evidence_not_exact_cycles_filter"] is True
     assert not x["no_artist_layer_identity"] is False

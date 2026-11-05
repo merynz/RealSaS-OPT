@@ -29,6 +29,7 @@
   <link rel="stylesheet" href="/static/css/busted_cinematic_hotfix_v3.css?v=3.2.0">
   <link rel="stylesheet" href="/static/css/busted_compile_terminal_v1.css?v=1.0.0">
   <link rel="stylesheet" href="/static/css/busted_awaken_reactor_v3.css?v=3.0.0">
+  <link rel="stylesheet" href="/static/css/busted_product_story_v1.css?v=1.0.0">
 </head>
 <body>
   <main class="awaken-shell">
@@ -61,18 +62,136 @@
         </div>
         </div>
       </section>
-      <a class="descend-link" href="#awakenChamber" aria-label="Scroll to character intake">
+      <a class="descend-link" href="#artworkGuide" aria-label="Explore how to prepare your character artwork">
         <span class="descend-icon" aria-hidden="true">↓</span>
-        <span>AWAKEN YOUR CHARACTER <small>CONTINUE TO SOURCE INTAKE</small></span>
+        <span>HOW BUSTED WORKS <small>START WITH YOUR ARTWORK</small></span>
       </a>
       <div class="landing-foot" aria-hidden="true"><span>GEOMETRY</span><span>MECHANICS</span><span>PRESENTATION</span></div>
+    </section>
+
+    <section id="artworkGuide" class="busted-guide" aria-labelledby="guideHeading">
+      <div class="busted-guide-inner">
+        <div class="busted-guide-heading">
+          <div>
+            <p class="busted-section-index"><span>02</span> / PREPARE YOUR ART</p>
+            <h2 id="guideHeading">GIVE IT<br><em>SOMETHING REAL.</em></h2>
+          </div>
+          <div class="busted-guide-intro">
+            <p>BUSTED starts with the character you already made. A clear reference gives the compiler more to understand — and you more to work with afterward.</p>
+            <span class="busted-subtle-cap">NO SPECIAL PROMPT. YOUR ARTWORK IS THE INPUT.</span>
+          </div>
+        </div>
+
+        <div class="busted-guide-cards" aria-label="Preparing character images for compilation">
+          <article class="busted-guide-card">
+            <div class="busted-guide-card-top"><span>INPUT / 01</span><strong>REQUIRED</strong></div>
+            <div class="busted-guide-illustration" aria-hidden="true">
+              <div class="busted-guide-image-outline">
+                <svg viewBox="0 0 120 116" fill="none">
+                  <path d="M41 96V80L30 65V42L46 35L48 27C41 11 50 8 59 8S78 11 70 27L73 35L89 42V65L77 80V96M30 44L20 67L23 85M89 44L99 67L96 85M48 77L46 107M72 77L74 107" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M51 35L59 44L69 35M47 75L74 75M59 44V75" stroke="currentColor" stroke-width="1.1" opacity=".48"/>
+                </svg>
+              </div>
+              <span class="busted-guide-visual-tag">FRONT / FULL CHARACTER</span>
+            </div>
+            <h3>Start with the front.</h3>
+            <p>Show the whole character in one image. Keep the head, hands and feet visible, with a pose where limbs can be distinguished.</p>
+            <div class="busted-guide-format">PNG <i></i> JPG <i></i> WEBP</div>
+          </article>
+          <article class="busted-guide-card">
+            <div class="busted-guide-card-top"><span>INPUT / 02</span><strong class="busted-guide-optional">OPTIONAL</strong></div>
+            <div class="busted-guide-illustration" aria-hidden="true">
+              <div class="busted-guide-image-outline busted-guide-image-rear">
+                <svg viewBox="0 0 120 116" fill="none">
+                  <path d="M41 96V80L30 65V42L46 35L48 27C41 11 50 8 59 8S78 11 70 27L73 35L89 42V65L77 80V96M30 44L20 67L23 85M89 44L99 67L96 85M48 77L46 107M72 77L74 107" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M47 35Q59 41 72 35M46 49H74M47 75L73 75" stroke="currentColor" stroke-width="1.1" opacity=".54"/>
+                </svg>
+              </div>
+              <span class="busted-guide-visual-tag">BACK / SAME CHARACTER</span>
+            </div>
+            <h3>Add the back.</h3>
+            <p>A matching back view can help clarify unseen shapes and details. Keep the scale, proportions and pose as consistent as possible.</p>
+            <div class="busted-guide-format">SAME DESIGN <i></i> SAME PROPORTIONS</div>
+          </article>
+          <article class="busted-guide-card">
+            <div class="busted-guide-card-top"><span>INPUT / 03</span><strong>GOOD PRACTICE</strong></div>
+            <div class="busted-guide-illustration busted-guide-clean" aria-hidden="true">
+              <svg viewBox="0 0 180 126" fill="none">
+                <path d="M34 39H23V21H45M147 39H158V21H136M34 85H23V103H45M147 85H158V103H136" stroke="currentColor" opacity=".85" stroke-width="1.8"/>
+                <path d="M68 84V72L61 66V51L73 46L77 39C74 29 80 23 90 23S106 29 103 39L108 46L120 51V66L113 72V84M61 53L54 70M120 53L127 70M81 84L77 100M100 84L104 100" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="142" cy="97" r="13" stroke="currentColor" opacity=".75"/>
+                <path d="M135 97L140 102L149 91" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+              <span class="busted-guide-visual-tag">CLEAN / READABLE / UNCROPPED</span>
+            </div>
+            <h3>Make the shapes readable.</h3>
+            <p>Prefer a clear silhouette and simple background. Heavy overlaps, hidden joints and cropped parts leave more uncertainty.</p>
+            <div class="busted-guide-format">TRANSPARENT BACKGROUND HELPS</div>
+          </article>
+        </div>
+
+        <div class="busted-guide-howto" aria-label="How to use BUSTED">
+          <p class="busted-guide-howto-title">THE SHORT VERSION</p>
+          <div class="busted-guide-howto-steps">
+            <div><span>01</span><strong>Prepare</strong><small>A clear front image</small></div>
+            <div><span>02</span><strong>Upload</strong><small>Add a back view if you have one</small></div>
+            <div><span>03</span><strong>Awaken</strong><small>Follow real compile progress</small></div>
+            <div><span>04</span><strong>Make it move</strong><small>Open the verified puppet in Studio</small></div>
+          </div>
+        </div>
+        <div class="busted-guide-bottom">
+          <p><strong>A useful rule:</strong> If you can clearly see which part is which, the compiler has a better starting point. Difficult artwork may still need review and adjustment.</p>
+          <a href="#technology" class="busted-editorial-link">WHAT DOES BUSTED BUILD? <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section id="technology" class="busted-technology" aria-labelledby="technologyHeading">
+      <div class="busted-technology-inner">
+        <div class="busted-technology-title">
+          <p class="busted-section-index"><span>03</span> / THE IDEA BEHIND BUSTED</p>
+          <h2 id="technologyHeading">NOT ANOTHER<br>FRAME GENERATOR.<br><em>A PUPPET COMPILER.</em></h2>
+          <p>Most tools stop at an image or a sequence of frames. We're building a different kind of result: an editable character with structure underneath its appearance.</p>
+        </div>
+        <div class="busted-technology-flow" aria-label="Conceptual BUSTED compilation pipeline">
+          <div class="busted-technology-flowtop"><span>FROM YOUR IMAGE</span><span>TO AN EDITABLE CHARACTER</span></div>
+          <div class="busted-technology-stages">
+            <article>
+              <div class="busted-technology-stagehead"><span>01</span><i></i><span>SEE</span></div>
+              <h3>Understand the art.</h3>
+              <p>Look at the character's shape, visible parts and how those parts relate.</p>
+              <div class="busted-tech-micro">SOURCE · APPEARANCE</div>
+            </article>
+            <article>
+              <div class="busted-technology-stagehead"><span>02</span><i></i><span>BUILD</span></div>
+              <h3>Give it structure.</h3>
+              <p>Work toward a mesh, rig and skin that can move without becoming a new drawing every frame.</p>
+              <div class="busted-tech-micro">MESH · RIG · WEIGHTS</div>
+            </article>
+            <article>
+              <div class="busted-technology-stagehead"><span>03</span><i></i><span>AWAKEN</span></div>
+              <h3>Make it yours to control.</h3>
+              <p>The goal is a persistent puppet that begins with an Idle and can be posed, animated and edited.</p>
+              <div class="busted-tech-micro">PUPPET · IDLE · MOTION</div>
+            </article>
+          </div>
+          <div class="busted-technology-principle">
+            <span class="busted-principle-mark" aria-hidden="true">⌁</span>
+            <p><strong>We don't redraw your character for every frame.</strong> We work toward 3D-aware movement beneath its original 2D appearance, with an editable structure you can keep using.</p>
+          </div>
+          <div class="busted-technology-foot">
+            <span>STRUCTURE · SOURCE FIDELITY · CONTROL</span>
+            <a href="#awakenChamber" class="busted-editorial-link">PREPARE A CHARACTER <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section id="awakenChamber" class="awaken-chamber" aria-label="Character intake and compilation">
       <div id="matrixTypewriter" class="matrix-typewriter" aria-hidden="true"></div>
       <div class="chamber-inner">
         <div class="chamber-header">
-          <p class="chamber-eyebrow"><span class="chamber-index">02</span> / CHARACTER COMPILER</p>
+          <p class="chamber-eyebrow"><span class="chamber-index">04</span> / CHARACTER COMPILER</p>
           <h2>START <span class="chamber-dot">HERE.</span></h2>
           <p id="compileStatusMessage">Upload your artwork. Build a character you can actually control.</p>
         </div>

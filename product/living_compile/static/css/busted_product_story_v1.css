@@ -1,0 +1,347 @@
+/* BUSTED product chapters 01: practical input guidance + technical idea.
+ * Quiet editorial system: precise luminous lines, restrained gradient fields,
+ * no pretend puppet results or continuous decorative render loops.
+ */
+#artworkGuide, #technology {
+  position:relative;isolation:isolate;overflow:hidden;scroll-margin-top:60px;
+  color:#eef0ff;
+}
+#artworkGuide *, #technology * {box-sizing:border-box}
+#artworkGuide .busted-section-index,#technology .busted-section-index {
+  display:flex;align-items:center;gap:12px;
+  margin:0 0 32px;
+  color:#adbaf1;font:600 10px/1.5 "IBM Plex Mono",monospace;letter-spacing:.13em;
+}
+#artworkGuide .busted-section-index span,#technology .busted-section-index span {
+  display:grid;place-items:center;width:32px;height:27px;flex:none;
+  background:rgba(95,86,172,.17);border:1px solid rgba(176,171,249,.48);
+  color:#e4dfff;letter-spacing:0;
+}
+#artworkGuide {
+  background:
+    radial-gradient(ellipse 48% 57% at 19% 22%,rgba(69,67,161,.14),transparent 82%),
+    radial-gradient(ellipse 38% 68% at 91% 78%,rgba(68,93,171,.10),transparent 86%),
+    linear-gradient(152deg,#060a19 0%,#0b1026 50%,#070a19 100%);
+  padding:clamp(105px,12vw,165px) clamp(22px,6.5vw,104px) clamp(82px,9vw,118px);
+  border-top:1px solid rgba(158,168,243,.17);
+}
+#artworkGuide::before,#technology::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;
+  background:repeating-linear-gradient(90deg,transparent 0 117px,rgba(155,176,255,.016) 118px 119px);
+  mask-image:linear-gradient(90deg,transparent,black 17%,black 82%,transparent);
+}
+#artworkGuide .busted-guide-inner,#technology .busted-technology-inner {
+  max-width:1330px;margin:0 auto;position:relative;
+}
+#artworkGuide .busted-guide-heading {
+  display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);
+  align-items:end;column-gap:clamp(30px,5.5vw,100px);
+  margin-bottom:clamp(48px,6vw,86px);
+}
+#artworkGuide h2,#technology h2{
+  margin:0;color:#f0f3ff;
+  font:700 clamp(46px,5.6vw,87px)/1.01 "Space Grotesk",sans-serif;
+  letter-spacing:-.073em;
+}
+#artworkGuide h2 em,#technology h2 em {
+  font-style:normal;color:#bdc5ff;
+  background:linear-gradient(103deg,#e2e7ff,#98b9ff 48%,#b9a5eb);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+#artworkGuide .busted-guide-intro{padding-bottom:8px}
+#artworkGuide .busted-guide-intro p{
+  margin:0 0 19px;
+  color:#bdc7e2;font:400 clamp(16px,1.53vw,21px)/1.65 "Space Grotesk",sans-serif;
+  letter-spacing:-.012em;
+}
+#artworkGuide .busted-subtle-cap {
+  font:500 9px/1.6 "IBM Plex Mono",monospace;letter-spacing:.08em;color:#8496c8;
+}
+#artworkGuide .busted-guide-cards{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  border-top:1px solid rgba(160,178,254,.36);
+  border-bottom:1px solid rgba(160,178,254,.25);
+}
+#artworkGuide .busted-guide-card {
+  min-width:0;position:relative;
+  display:flex;flex-direction:column;
+  padding:27px clamp(18px,2.1vw,34px) 31px;
+  background:linear-gradient(180deg,rgba(33,44,97,.13),transparent 92%);
+}
+#artworkGuide .busted-guide-card:first-child{padding-left:0}
+#artworkGuide .busted-guide-card:last-child{padding-right:0}
+#artworkGuide .busted-guide-card + .busted-guide-card{border-left:1px solid rgba(142,164,243,.18)}
+#artworkGuide .busted-guide-card-top{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  font:600 9px/1.4 "IBM Plex Mono",monospace;letter-spacing:.10em;
+  color:#94a6d5;
+}
+#artworkGuide .busted-guide-card-top strong {
+  font:600 9px/1.4 "IBM Plex Mono",monospace;letter-spacing:.07em;color:#ced1ff;
+}
+#artworkGuide .busted-guide-card-top .busted-guide-optional{color:#9cbbe5}
+#artworkGuide .busted-guide-illustration{
+  position:relative;height:164px;margin:13px 0 21px;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 48%,rgba(88,99,203,.13),transparent 72%);
+  border-bottom:1px solid rgba(151,174,248,.11);
+}
+#artworkGuide .busted-guide-illustration::before{
+  content:"";position:absolute;inset:13px 0 28px;pointer-events:none;
+  background:
+    linear-gradient(90deg,transparent 49.7%,rgba(166,184,255,.09) 50%,transparent 50.3%),
+    repeating-linear-gradient(0deg,transparent 0 19px,rgba(138,155,227,.035) 20px 21px);
+  mask-image:radial-gradient(ellipse at 50% 48%,black,transparent 80%);
+}
+#artworkGuide .busted-guide-image-outline{
+  position:relative;display:grid;place-items:center;
+  width:87px;height:111px;margin-top:-10px;
+  border:1px solid rgba(149,169,246,.60);
+  box-shadow:0 0 25px rgba(100,119,230,.06),inset 0 0 19px rgba(64,74,159,.05);
+  color:#a7b7ef;
+  background:linear-gradient(145deg,rgba(32,44,97,.28),rgba(14,20,55,.16));
+}
+#artworkGuide .busted-guide-image-outline::before{
+  content:"";position:absolute;inset:7px;border:1px dashed rgba(152,175,255,.17);
+}
+#artworkGuide .busted-guide-image-outline svg{position:absolute;inset:0;width:100%;height:100%}
+#artworkGuide .busted-guide-image-rear{
+  box-shadow:9px -7px 0 -1px #0b1129,9px -7px 0 0 rgba(144,163,246,.27);
+}
+#artworkGuide .busted-guide-clean>svg{
+  width:190px;height:135px;color:#a5b6f2;
+  filter:drop-shadow(0 0 14px rgba(127,136,249,.13));
+  margin-top:-11px;
+}
+#artworkGuide .busted-guide-visual-tag{
+  position:absolute;left:0;right:0;bottom:10px;text-align:center;
+  font:500 8px/1.4 "IBM Plex Mono",monospace;
+  letter-spacing:.055em;color:#869bd1;
+}
+#artworkGuide .busted-guide-card h3{
+  margin:0 0 10px;color:#eef0ff;
+  font:650 clamp(21px,2.2vw,30px)/1.1 "Space Grotesk",sans-serif;
+  letter-spacing:-.035em;
+}
+#artworkGuide .busted-guide-card p{
+  margin:0 0 23px;max-width:340px;
+  color:#aabada;font:400 14px/1.75 "Space Grotesk",sans-serif;
+}
+#artworkGuide .busted-guide-format{
+  display:flex;align-items:center;gap:9px;
+  margin-top:auto;padding-top:12px;
+  color:#aebcf0;font:600 9px/1.4 "IBM Plex Mono",monospace;
+  letter-spacing:.055em;
+  border-top:1px solid rgba(143,157,238,.13);
+}
+#artworkGuide .busted-guide-format i{
+  width:3px;height:3px;border-radius:50%;background:#a8b0f8;
+}
+#artworkGuide .busted-guide-bottom,
+#technology .busted-technology-foot {
+  display:flex;align-items:center;justify-content:space-between;
+  gap:24px;padding-top:clamp(32px,4.5vw,54px);
+}
+#artworkGuide .busted-guide-bottom p{
+  margin:0;max-width:600px;
+  color:#a9b8db;font:400 13px/1.75 "Space Grotesk",sans-serif;
+}
+#artworkGuide .busted-guide-bottom strong{color:#dce3ff;font-weight:600}
+#artworkGuide .busted-editorial-link,
+#technology .busted-editorial-link{
+  display:inline-flex;justify-content:space-between;align-items:center;gap:24px;
+  min-height:51px;padding:0 19px;flex:none;
+  text-decoration:none;color:#eef0ff;
+  font:600 10px/1.5 "IBM Plex Mono",monospace;
+  letter-spacing:.07em;
+  border:1px solid rgba(155,164,252,.56);
+  background:linear-gradient(102deg,rgba(49,57,123,.76),rgba(42,36,101,.69));
+  transition:transform .17s ease,border-color .17s ease,background .17s ease;
+}
+#artworkGuide .busted-editorial-link span,
+#technology .busted-editorial-link span{font:400 21px/1 "Space Grotesk",sans-serif}
+#artworkGuide .busted-editorial-link:hover,
+#technology .busted-editorial-link:hover{
+  border-color:#cbd0ff;
+  background:linear-gradient(102deg,rgba(68,80,163,.9),rgba(62,46,131,.85));
+  transform:translateY(-2px);
+}
+#artworkGuide .busted-editorial-link:focus-visible,
+#technology .busted-editorial-link:focus-visible{outline:2px solid #d3d9ff;outline-offset:3px}
+
+/* Second chapter — a little more technical, still human-readable. */
+#technology {
+  padding:clamp(105px,12vw,159px) clamp(22px,6.5vw,104px) clamp(99px,10vw,151px);
+  background:
+    radial-gradient(ellipse 38% 65% at 82% 23%,rgba(77,65,169,.19),transparent 80%),
+    radial-gradient(ellipse 52% 68% at 8% 90%,rgba(54,89,163,.14),transparent 79%),
+    linear-gradient(135deg,#070a1a,#090b22 53%,#050a1b);
+  border-top:1px solid rgba(167,173,247,.20);
+  border-bottom:1px solid rgba(167,173,247,.23);
+}
+#technology .busted-technology-inner{
+  display:grid;grid-template-columns:minmax(285px,.74fr) minmax(0,1.26fr);
+  align-items:start;column-gap:clamp(40px,6vw,105px);
+}
+#technology .busted-technology-title{
+  position:relative;padding-bottom:28px;
+}
+#technology .busted-technology-title h2{
+  font-size:clamp(43px,4.15vw,68px);
+  line-height:1.075;
+}
+#technology .busted-technology-title>p:last-child{
+  margin:29px 0 0;max-width:440px;
+  color:#b5c2df;font:400 clamp(15px,1.3vw,18px)/1.75 "Space Grotesk",sans-serif;
+}
+#technology .busted-technology-flow{
+  padding-top:61px;
+  min-width:0;
+}
+#technology .busted-technology-flowtop{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:15px;padding:0 0 18px;
+  border-bottom:1px solid rgba(158,174,249,.39);
+  color:#9caddd;font:600 9px/1.4 "IBM Plex Mono",monospace;letter-spacing:.08em;
+}
+#technology .busted-technology-flowtop span:last-child{color:#d6d3ff}
+#technology .busted-technology-stages{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+}
+#technology .busted-technology-stages article{
+  display:flex;flex-direction:column;
+  min-width:0;padding:30px clamp(12px,1.7vw,27px) 32px;
+}
+#technology .busted-technology-stages article:first-child{padding-left:0}
+#technology .busted-technology-stages article:last-child{padding-right:0}
+#technology .busted-technology-stages article+article{border-left:1px solid rgba(153,169,244,.18)}
+#technology .busted-technology-stagehead{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:31px;
+  color:#a7b6ed;font:600 9px/1.3 "IBM Plex Mono",monospace;letter-spacing:.09em;
+}
+#technology .busted-technology-stagehead span:first-child{color:#d8dbff}
+#technology .busted-technology-stagehead i{height:1px;flex:1;background:linear-gradient(90deg,rgba(143,158,249,.58),rgba(143,158,249,.04))}
+#technology .busted-technology-stages h3{
+  margin:0 0 10px;color:#eff1ff;
+  font:650 clamp(19px,1.8vw,25px)/1.13 "Space Grotesk",sans-serif;
+  letter-spacing:-.027em;
+}
+#technology .busted-technology-stages p{
+  margin:0 0 25px;flex:1;
+  color:#aab9d9;font:400 13px/1.72 "Space Grotesk",sans-serif;
+}
+#technology .busted-tech-micro{
+  padding-top:13px;
+  border-top:1px solid rgba(143,158,240,.16);
+  font:500 8px/1.4 "IBM Plex Mono",monospace;letter-spacing:.045em;
+  color:#a6b9ec;
+}
+#technology .busted-technology-principle{
+  display:grid;grid-template-columns:46px minmax(0,1fr);
+  align-items:center;gap:16px;
+  padding:24px 22px;
+  background:linear-gradient(100deg,rgba(51,56,132,.42),rgba(38,37,96,.25));
+  border:1px solid rgba(156,157,240,.36);
+  box-shadow:inset 0 1px 0 rgba(194,196,255,.06);
+}
+#technology .busted-principle-mark{
+  display:grid;place-items:center;width:46px;height:46px;
+  color:#d4d6ff;border:1px solid rgba(164,175,255,.53);
+  background:rgba(116,111,216,.13);
+  font:400 28px/1 "Space Grotesk",sans-serif;
+}
+#technology .busted-technology-principle p{
+  margin:0;color:#b2c0dc;font:400 13px/1.68 "Space Grotesk",sans-serif;
+}
+#technology .busted-technology-principle strong{font-weight:650;color:#e4e8ff}
+#technology .busted-technology-foot>span{
+  color:#9fafdc;
+  font:600 10px/1.5 "IBM Plex Mono",monospace;letter-spacing:.08em;
+}
+@media(max-width:1120px){
+  #technology .busted-technology-inner{grid-template-columns:1fr;gap:15px}
+  #technology .busted-technology-title h2{font-size:clamp(45px,6.4vw,73px)}
+  #technology .busted-technology-title>p:last-child{max-width:790px}
+  #technology .busted-technology-flow{padding-top:0}
+}
+@media(max-width:900px){
+  #artworkGuide .busted-guide-heading{grid-template-columns:1fr;gap:22px}
+  #artworkGuide .busted-guide-intro p{max-width:740px}
+  #artworkGuide .busted-guide-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #artworkGuide .busted-guide-card{padding:20px 12px 25px}
+  #artworkGuide .busted-guide-card h3{font-size:21px}
+  #artworkGuide .busted-guide-card p{font-size:13px}
+}
+@media(max-width:720px){
+  #artworkGuide,#technology{padding:103px 24px 85px}
+  #artworkGuide .busted-guide-heading{margin-bottom:36px}
+  #artworkGuide h2{font-size:clamp(43px,10.4vw,68px)}
+  #artworkGuide .busted-guide-cards{grid-template-columns:1fr}
+  #artworkGuide .busted-guide-card,
+  #artworkGuide .busted-guide-card:first-child,
+  #artworkGuide .busted-guide-card:last-child{padding:22px 0 27px}
+  #artworkGuide .busted-guide-card + .busted-guide-card{border-left:0;border-top:1px solid rgba(142,164,243,.21)}
+  #artworkGuide .busted-guide-illustration{height:125px;margin:6px 0 19px}
+  #artworkGuide .busted-guide-image-outline{transform:scale(.84)}
+  #artworkGuide .busted-guide-card p{max-width:100%;font-size:14px}
+  #artworkGuide .busted-guide-bottom,#technology .busted-technology-foot{flex-direction:column;align-items:stretch;gap:24px}
+  #artworkGuide .busted-editorial-link,#technology .busted-editorial-link{width:100%}
+  #technology .busted-technology-title h2{font-size:clamp(38px,9.1vw,61px)}
+  #technology .busted-technology-stages{grid-template-columns:1fr}
+  #technology .busted-technology-stages article,
+  #technology .busted-technology-stages article:first-child,
+  #technology .busted-technology-stages article:last-child{padding:23px 0}
+  #technology .busted-technology-stages article+article{border-left:0;border-top:1px solid rgba(153,169,244,.21)}
+  #technology .busted-technology-stagehead{margin-bottom:13px;max-width:240px}
+  #technology .busted-technology-stages p{margin-bottom:16px}
+  #technology .busted-technology-principle{grid-template-columns:40px minmax(0,1fr);gap:12px;padding:18px 14px}
+  #technology .busted-principle-mark{width:40px;height:40px}
+}
+@media(prefers-reduced-motion:reduce){
+  #artworkGuide .busted-editorial-link,#technology .busted-editorial-link{transition:none}
+}
+
+/* Small operational guide: actual product journey, not a simulated compile. */
+#artworkGuide .busted-guide-howto{
+  margin-top:35px;padding:23px 24px 21px;
+  border:1px solid rgba(154,168,245,.28);
+  background:linear-gradient(110deg,rgba(24,36,80,.56),rgba(29,29,73,.42));
+}
+#artworkGuide .busted-guide-howto-title{
+  margin:0 0 21px;color:#c3cef5;
+  font:600 9px/1.4 "IBM Plex Mono",monospace;letter-spacing:.115em;
+}
+#artworkGuide .busted-guide-howto-steps{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;
+}
+#artworkGuide .busted-guide-howto-steps>div{
+  min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr);
+  align-content:start;column-gap:11px;row-gap:4px;padding:0 15px;
+}
+#artworkGuide .busted-guide-howto-steps>div:first-child{padding-left:0}
+#artworkGuide .busted-guide-howto-steps>div+div{border-left:1px solid rgba(151,169,249,.20)}
+#artworkGuide .busted-guide-howto-steps span{
+  grid-row:1/3;color:#a3b6fb;
+  font:600 11px/1.5 "IBM Plex Mono",monospace;
+}
+#artworkGuide .busted-guide-howto-steps strong{
+  color:#e6eaff;font:600 13px/1.4 "Space Grotesk",sans-serif;
+}
+#artworkGuide .busted-guide-howto-steps small{
+  color:#8fa3cd;font:400 11px/1.5 "Space Grotesk",sans-serif;
+}
+@media(max-width:950px){
+  #artworkGuide .busted-guide-howto-steps{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:22px}
+  #artworkGuide .busted-guide-howto-steps>div:nth-child(3){padding-left:0;border-left:0}
+}
+@media(max-width:520px){
+  #artworkGuide .busted-guide-howto{padding:21px 15px}
+  #artworkGuide .busted-guide-howto-steps{grid-template-columns:1fr;gap:16px}
+  #artworkGuide .busted-guide-howto-steps>div,
+  #artworkGuide .busted-guide-howto-steps>div:first-child{
+    padding:0;border:0;column-gap:14px;
+  }
+  #artworkGuide .busted-guide-howto-steps>div+div{border:0}
+}

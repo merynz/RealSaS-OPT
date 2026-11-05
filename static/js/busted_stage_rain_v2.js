@@ -32,16 +32,16 @@
     scene.ctx.setTransform(scene.dpr,0,0,scene.dpr,0,0);
     scene.lanes=[];
     const narrow=scene.width<760;
-    const count=narrow?(scene.kind==='hero'?23:16):(scene.kind==='hero'?72:58);
+    const count=narrow?(scene.kind==='hero'?34:29):(scene.kind==='hero'?104:91);
     for(let i=0;i<count;i++){
       const depth=Math.pow(Math.random(),.8);
-      const font=(narrow?9:10)+depth*(narrow?4:7)+random(-1,1);
+      const font=(narrow?10:11)+depth*(narrow?5:7)+random(-.6,.6);
       const space=font*random(1.20,1.50);
-      const length=Math.round(random(8,26)*(0.75+depth*.55));
+      const length=Math.round(random(11,32)*(.75+depth*.55));
       scene.lanes.push({
-        x:random(4,scene.width-4),offset:random(-scene.height,scene.height+length*space),
+        x:random(4,scene.width-4),offset:random(-length*space,scene.height+length*space),
         depth,font,space,length,
-        speed:random(19,44)*(0.4+depth*2.2),
+        speed:random(28,57)*(.5+depth*1.9),
         phase:random(0,Math.PI*2),
         sway:random(2,16),
         light:Math.random()>.79,
@@ -58,21 +58,22 @@
     ctx.textAlign='center';ctx.textBaseline='middle';
     for(const lane of scene.lanes){
       const extent=lane.length*lane.space;
-      const span=scene.height+extent*2;
-      const head=((lane.offset+t*lane.speed+extent)%span)-extent;
+      const span=scene.height+extent*1.65;
+      const raw=lane.offset+t*lane.speed+extent;
+      const head=((raw%span)+span)%span-extent;
       const px=lane.x+Math.sin(t*.2+lane.phase)*lane.sway*lane.depth;
-      const col=lane.light?[184,203,255]:lane.depth>.58?[132,157,255]:[91,113,197];
-      const opacityScale=lane.depth>.65?.74:lane.depth>.3?.48:.32;
+      const col=lane.light?[207,234,255]:lane.depth>.58?[164,190,255]:[109,135,224];
+      const opacityScale=lane.depth>.65?.96:lane.depth>.3?.73:.52;
       ctx.font=`500 ${lane.font.toFixed(1)}px "IBM Plex Mono", monospace`;
       for(let n=0;n<lane.length;n++){
         const y=head-n*lane.space;
         if(y<-25||y>scene.height+25)continue;
-        const fade=Math.pow(1-n/lane.length,1.25);
+        const fade=Math.pow(1-n/lane.length,.78);
         let alpha=fade*opacityScale;
-        if(n===0)alpha=Math.min(.91,alpha*1.3);
+        if(n===0)alpha=Math.min(1,alpha*1.45);
         if(alpha<.018)continue;
         ctx.fillStyle=`rgba(${col.join(',')},${alpha.toFixed(3)})`;
-        ctx.shadowBlur=n===0&&lane.light?10:0;
+        ctx.shadowBlur=n===0?((lane.light||lane.depth>.65)?13:6):0;
         ctx.shadowColor='rgba(161,167,255,.55)';
         ctx.fillText(lane.letters[n],px,y);
       }

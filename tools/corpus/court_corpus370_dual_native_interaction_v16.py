@@ -132,6 +132,7 @@ def evaluate(source_name, v14_public_path, original_root, v16_json_path,
             and joined.get("original_source_action_frozen_and_exact_vertices_before_after_render") is True
             and joined.get("joint_visuals_from_real_original_native_blender_source") is True
             and joined.get("no_expected_joint_ground_truth_fabricated_from_single_v13b") is True
+            and joined.get("private_original_joint_world_vertices_for_independent_court") is True
             and joined.get("source_artist_drawable_names_or_part_count_used") is False
             and joined.get("source_rig_bone_material_names_as_model_features") is False
             and joined.get("source_presentation_draw_order_proven") is False
@@ -158,14 +159,36 @@ def evaluate(source_name, v14_public_path, original_root, v16_json_path,
             "V16_FROZEN_ORIGINAL_V14_RGBA_MEMBERS")
         old=np.asarray(f["original_native_actuator_rgba"],np.float32)
     with np.load(v16_npz_path,allow_pickle=False) as f:
-        require(f.files==["original_native_dual_control_rgba"],
-            "V16_FROZEN_JOINT_RGBA_MEMBERS")
+        require(set(f.files)=={
+            "original_native_dual_control_rgba",
+            "original_native_dual_control_world_vertices"
+        }, "V16_FROZEN_JOINT_RGBA_AND_MECHANICAL_MEMBERS")
         new=np.asarray(f["original_native_dual_control_rgba"],np.float32)
+        joint_world=np.asarray(
+            f["original_native_dual_control_world_vertices"],np.float64)
+    v14_job=read(v14_job_path)
+    require(v14_job.get("schema")==
+        "RealSaS.Corpus370SourceNativeMechanicalRasterJointJob.v14"
+        and v14_job["source"]["sha256"]==row["source_sha256"]
+        and v14_job["v13b_array"]["sha256"]==
+            joined["original_v13b_control_vertex_array_sha256"]
+        and sha(v14_job["v13b_array"]["path"])==
+            joined["original_v13b_control_vertex_array_sha256"],
+        "V16_EXACT_ORIGINAL_V13B_NATIVE_MECHANICAL_PARENT_ARRAY")
+    with np.load(v14_job["v13b_array"]["path"],allow_pickle=False) as f:
+        single_baselines=np.asarray(f["baseline_vertices"],np.float64)
+        single_vertices=np.asarray(
+            f["native_control_perturbed_vertices"],np.float64)
     plan=parent_render["selected_source_controls"]
     old_arms,_=arms_for_plan(plan)
     require(old_arms==parent_render["rendered_arms"]
         and old.shape==(3,4,19,192,192,4)
         and new.shape==(3,4,14,192,192,4)
+        and joint_world.shape==(3,4,4,single_baselines.shape[1],3)
+        and joined["joint_source_world_vertex_shape"]==
+            list(joint_world.shape)
+        and single_baselines.shape==(3,joint_world.shape[3],3)
+        and np.isfinite(joint_world).all()
         and np.isfinite(old).all() and np.isfinite(new).all()
         and np.min(old[...,3])>=-1e-5 and np.max(old[...,3])<=1.00001
         and np.min(new[...,3])>=-1e-5 and np.max(new[...,3])<=1.00001,
@@ -187,6 +210,11 @@ def evaluate(source_name, v14_public_path, original_root, v16_json_path,
     case_rows=[]
     metric_keys=None
     aggregates={}
+    source_geometry_verified=0
+    independent_cross_camera_joint_geometry_pass=0
+    c0,c1=plan["controls"]
+    require(c0["control_index_teacher_only"]!=c1["control_index_teacher_only"],
+        "V16_TWO_DISTINCT_ORIGINAL_NATIVE_CONTROL_HANDLES")
     all_parity=True
     for pose in range(3):
         for iv,view in enumerate([0,2,4,6]):
@@ -202,6 +230,47 @@ def evaluate(source_name, v14_public_path, original_root, v16_json_path,
                     soup=new[pose,iv,ji["SOUP_AB_"+sign]]
                     iso=new[pose,iv,ji["ISOLATED_AB_"+sign]]
                     iso_base=new[pose,iv,ji["ISOLATED_AB_BASE"]]
+                    joint_index=PAIRS.index(sign)
+                    xyz=joint_world[pose,iv,joint_index]
+                    orig=single_baselines[pose]
+                    i0=0 if s1=="PLUS" else 1
+                    i1=0 if s2=="PLUS" else 1
+                    vertex_a=single_vertices[
+                        pose,c0["control_index_teacher_only"],
+                        c0["axis_index_teacher_only"],i0]
+                    vertex_b=single_vertices[
+                        pose,c1["control_index_teacher_only"],
+                        c1["axis_index_teacher_only"],i1]
+                    interaction=np.linalg.norm(
+                        xyz-(vertex_a+vertex_b-orig),axis=-1)
+                    true_displacement=np.linalg.norm(xyz-orig,axis=-1)
+                    require(
+                        np.isclose(
+                            float(true_displacement.max(initial=0)),
+                            witness[(pose,view,1 if s1=="PLUS" else -1,
+                                     1 if s2=="PLUS" else -1)
+                            ]["joint_native_max_displacement"],
+                            atol=1e-6,rtol=1e-6
+                        )
+                        and np.isclose(
+                            float(interaction.max(initial=0)),
+                            witness[(pose,view,1 if s1=="PLUS" else -1,
+                                     1 if s2=="PLUS" else -1)
+                            ]["joint_native_vs_single_control_additive_max_residual"],
+                            atol=1e-6,rtol=1e-6
+                        )
+                        and np.isclose(
+                            float(interaction.mean()),
+                            witness[(pose,view,1 if s1=="PLUS" else -1,
+                                     1 if s2=="PLUS" else -1)
+                            ]["joint_native_vs_single_control_additive_mean_residual"],
+                            atol=1e-6,rtol=1e-6
+                        ),
+                        "V16_ORIGINAL_ACTUAL_SOURCE_AB_MECHANICAL_WITNESS_FORGED"
+                    )
+                    source_geometry_verified+=1
+                    if np.max(np.abs(xyz-joint_world[pose,0,joint_index]))<=1e-5:
+                        independent_cross_camera_joint_geometry_pass+=1
                     p99=float(np.percentile(
                         np.max(np.abs(joint-soup),axis=-1),99))
                     require(p99<=TOL, "V16_REAL_ORIGINAL_AB_SOURCE_SOUP_PIXEL_PARITY")
@@ -225,6 +294,8 @@ def evaluate(source_name, v14_public_path, original_root, v16_json_path,
                         "original_artist_owner_relation":"UNKNOWN"
                     })
     require(len(case_rows)==48
+        and source_geometry_verified==48
+        and independent_cross_camera_joint_geometry_pass==48
         and aggregates["joint_ab_effect_pixel_instances"]>0,
         "V16_SOURCE_CONTROL_PAIR_NO_REAL_CAUSAL_RESPONSE")
     return {
@@ -244,6 +315,9 @@ def evaluate(source_name, v14_public_path, original_root, v16_json_path,
         "source_native_joint_vs_original_v13b_single_mechanics_nonadditive_witness_count":len(witness),
         "independently_replayed_qualifying_source_soup_RGBA_case_count":len(case_rows),
         "causal_joint_effect_rows":case_rows,
+        "independent_original_dual_control_world_vertex_and_v13b_single_mechanics_verified_cases":source_geometry_verified,
+        "identical_original_native_A_plus_B_vertices_across_all_camera_views_verified_cases":
+            independent_cross_camera_joint_geometry_pass,
         "aggregate_effects":aggregates,
         "joint_nonadditivity_is_not_artist_editable_layer_equivalence":True,
         "original_mechanical_source_controls_as_model_features":False,

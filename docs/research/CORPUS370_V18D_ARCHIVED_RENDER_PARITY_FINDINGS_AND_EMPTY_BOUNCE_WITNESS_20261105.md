@@ -3,7 +3,7 @@
 Date: 2026-11-05. **Evidence-only research record; not graphics-truth/model readiness.**  
 Parent V18b actual source render run: `42100552844-1` (3 original sources, 2 FAIL in combined edit court).  
 Qualified retrospective diagnosis: `42105598958-1` (4/4 jobs PASS, including 3 original-source archived pixel reads).  
-Current targeted witness: `42106976442-1` (bounded 2-source 12-frame Blender witness per source, with independent pixel court); outcome **NOT YET RECORDED** here.  
+Current targeted witness: `42106976442-1` (bounded 2-source 12-frame Blender witness per source). **CAT independent source court PASS**; TRICERATOPS worker still underway at the time of this update.  
 Branch: `corpus370-v18b-reactive-stain-source-edit-court-v1`, draft PR #343. Do not merge to main or to Corpus370 #327.
 
 ## Why we did not rerun 624 edited Blender frames
@@ -63,6 +63,14 @@ Paths:
 - `tests/corpus/test_corpus370_v18b_transparency_bounce_witness_v1.py`
 
 Witness run: https://github.com/merynz/RealSaS-OPT/actions/runs/42106976442
+
+## First actual causal outcome: CAT
+
+GitHub source worker in run `42106976442-1` independently finished successfully and remotely SHA-readback verified source court receipt `d31d987a6cf592263503bb96201be95872638822f62b19435d6d42e21125c693`.
+
+The original failed empty-mask reproduced exactly (view 2 = 10 alpha-remnant pixels, view 6 = 10; views 0/4 = 0). With `transparent_max_bounces=256`, **all four views have 0 remnant pixels**. With actual soup `hide_render=true`, likewise **all four views have 0 remnant pixels**. The independent court re-opened 12 raw rendered RGBA frames and reported `transparent_bounce_limit_hypothesis_supported=true`. No artist-owner or model/training authority was minted. This independently supports a **Cycles transparency-path saturation** cause for Cat, rather than bad source/soup correspondence or V18a segmentation.
+
+The second source TRICERATOPS must be judged separately from its independent real court, not inferred from Cat.
 
 ## After causal witness — continuation gate
 

@@ -50,6 +50,7 @@ jobs:
             expected_active: 35
             expected_png_sha256: c2fcb6ac6c363f5b37f622feb727aed64fbd0205897a7ba8b6b45f8a091ab125
     env:
+      PYTHONPATH: ${{ github.workspace }}
       SUBJECT: ${{ matrix.subject }}
       SOURCE_DIR: ${{ matrix.source_dir }}
       JSON_BLOB: ${{ matrix.json_blob }}

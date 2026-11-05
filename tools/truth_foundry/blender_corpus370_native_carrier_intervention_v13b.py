@@ -19,6 +19,7 @@ from tools.iris_vnext import blender_authored_teacher_export_v1 as base
 from tools.iris_vnext import blender_authored_teacher_export_v2 as transport
 from tools.iris_vnext import blender_authored_teacher_export_v4 as v4
 from tools.iris_vnext import blender_authored_teacher_export_v4_actions as actions
+from tools.corpus.corpus370_native_action_binding_v13b import bound_rows_for_source_action
 from tools.truth_foundry.blender_corpus370_multi_partition_edit_v7 import (
     sha,verify,require
 )
@@ -108,15 +109,9 @@ def run(job_path, output_path):
     object_owners={}
     unsupported_native_owner_types=set()
     for action_name in original_actions:
-        # Source receipt retains importer-qualified action identifier; the
-        # captured Blender binding dictionary is keyed by the resolved
-        # Blender Action.name, which can differ for FBX owner-qualified names.
-        # Reuse precisely the same resolution as activate_action, NEVER
-        # fabricate a binding on missing actions.
-        action=resolved[action_name]
-        require(action.name in bindings,
-                "V13B_ORIGINAL_SOURCE_ACTION_RESOLVED_BINDING_NOT_FOUND")
-        for row in bindings[action.name]:
+        # Exact importer-qualified source action -> resolved Blender Action.name.
+        # Never use the source alias directly as the captured binding key.
+        for row in bound_rows_for_source_action(action_name,resolved,bindings):
             owner=row["owner"]
             if isinstance(owner,bpy.types.Object) and owner.type in ("EMPTY","MESH","ARMATURE"):
                 object_owners[id(owner)]=owner

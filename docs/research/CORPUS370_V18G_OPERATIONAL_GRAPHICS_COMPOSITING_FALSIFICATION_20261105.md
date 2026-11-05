@@ -50,6 +50,26 @@ Per view/target/threshold: group and remainder alpha support, overlapping/strict
 
 **Never mint** `artist_same/different_drawable`, `graphics_owner_authorized`, `iris_training_authorized`, `tessa_training_authorized`, `materialization_authorized`, or `training_authorized`. When conflicting possible partitions are indistinguishable, keep equivalent candidates or abstain; do not infer a global artist class.
 
+## First independent source result — TRICERATOPS (CONFIRMED)
+
+V18g source job in run `42116712393` **PASS**, including full independent SHA-verified readback to private Drive: `9f3677de0ff1243982a1cdd15f0f6760ac425872f391884c4ea37d0a86bbfd1d`.
+
+The original frozen V18a threshold and true source-face grouping is unchanged:
+
+| Threshold | K, all source groups | Distinct V11-probed groups | Informative draw-order overlap pixels | Pixels NOT reconstructible with either per-pixel OVER order | Both directions fail on informative overlap pixels |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 0.045 | 469 | 6 | 459 | 119 | 6 |
+| 0.10 | 22 | 1 | 1,139 | 197 | 20 |
+| 0.18 | 1 | 1 (all source faces) | **0** | **0** | **0** |
+
+These are **unique source-group/view sums**, not multiplied by six V11 queries that may hit the same group. The `0.18` "perfect" compositing score is **vacuous**: the complement contains no geometry and there is no order-discriminating overlap. Do not rank this as a superior drawable or 2D presentation decomposition.
+
+At `0.10`, the six fixed precommitted V11 target queries all belong to one V18a candidate group. Its group-level hide/isolate cannot independently address these six loci. That is a **measurable limitation under the declared group-edit primitive**, not a claim that the source artist intended six layers.
+
+At `0.045` and `0.10`, even a best-per-pixel choice of G-over-R vs R-over-G fails to match the actual source alpha/premultiplied RGBA at some pixels. This falsifies the simplest two-layer *independent render + standard OVER* hypothesis at those measured pixels. The source of discrepancies may be lighting coupling, subpixel rasterization, ray-depth interleaving, ambient occlusion or other geometry/compositing effects; do **not** attribute them to grouping alone. Confirm on a strictly source-ray-ordered / emission-only controlled replay before admitting any negative layer/truth.
+
+The independent court's original `source-only; NO_OWNER_TRUTH` status remains. **CAT original-source V18g job still in progress at time of this update; do not infer it from Triceratops.**
+
 ## Code and evidence
 
 - `tools/corpus/court_corpus370_v18g_operational_compositing_diagnostics.py`

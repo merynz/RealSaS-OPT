@@ -43,11 +43,11 @@ function installPanel() {
   if (!modebar) return;
   const section = document.createElement('section');
   section.id = 'requalificationStrip';
-  section.className = 'requalification-strip qualified';
+  section.className = 'requalification-strip unbound';
   section.innerHTML = `
     <div class="requal-status">
       <span class="requal-dot"></span>
-      <div><strong id="requalTitle">QUALIFIED BASE</strong><span id="requalDetail">No Studio authoring changes invalidate the proof-qualified base.</span></div>
+      <div><strong id="requalTitle">NO QUALIFIED CHARACTER</strong><span id="requalDetail">Open a proof-qualified puppet bundle.</span></div>
     </div>
     <div id="requalDomains" class="requal-domains" aria-label="Invalidated product domains"></div>
     <button id="requalAction" disabled>REQUALIFY</button>`;
@@ -95,7 +95,7 @@ function animationSliceSupport(plan) {
 
 function frame() {
   render();
-  requestAnimationFrame(frame);
+  window.setTimeout(frame, document.hidden ? 1000 : 250);
 }
 
 function render(force = false) {
@@ -104,7 +104,9 @@ function render(force = false) {
   const plan = currentPlan();
   const dirty = studio.dirty?.snapshot?.() || {};
   const support = animationSliceSupport(plan);
+  const qualifiedBase = Boolean(studio?.state?.scene?.proof?.passed === true && studio?.state?.bundle);
   const signature = JSON.stringify([
+    qualifiedBase,
     plan,
     dirty.status,
     dirty.revision_number,
@@ -124,6 +126,24 @@ function render(force = false) {
   const action = $('#requalAction');
   const exportButton = $('#exportRuntime');
   if (!strip || !title || !detail || !domains || !action) return;
+
+  // A visually clean editor is not evidence of an actual qualified product.
+  if (!qualifiedBase) {
+    strip.className = 'requalification-strip unbound';
+    title.textContent = 'NO QUALIFIED CHARACTER';
+    detail.textContent = 'Open a proof-qualified puppet bundle to enable authoring and export.';
+    domains.innerHTML = '<span class="requal-domain">NO PRODUCT PROOF</span>';
+    action.disabled = true;
+    action.textContent = 'NO BUNDLE';
+    if (exportButton) {
+      exportButton.disabled = true;
+      exportButton.textContent = 'EXPORT';
+      exportButton.title = 'Export requires an opened proof-qualified character.';
+      exportButton.dataset.exportScope = 'none';
+    }
+    return;
+  }
+  if (exportButton) exportButton.disabled = false;
 
   if (!plan.required) {
     strip.className = 'requalification-strip qualified';

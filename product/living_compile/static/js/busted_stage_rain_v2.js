@@ -1,4 +1,4 @@
-/* BUSTED / Stage Rain v2
+/* BUSTED / Stage Rain v2.2 — distant, rate-limited glyph field
  * Foreground atmospheric coding weather: stage-local canvas, safely under UI.
  * Ambient simulation only. Independent velocity, x-drift and depth. */
 (() => {
@@ -24,7 +24,7 @@
     const rect=scene.host.getBoundingClientRect();
     scene.width=Math.max(1,Math.round(rect.width));
     scene.height=Math.max(1,Math.round(scene.host.offsetHeight));
-    scene.dpr=Math.min(devicePixelRatio||1,1.5);
+    scene.dpr=Math.min(devicePixelRatio||1,1.15);
     scene.canvas.width=Math.round(scene.width*scene.dpr);
     scene.canvas.height=Math.round(scene.height*scene.dpr);
     scene.canvas.style.width=scene.width+'px';
@@ -32,19 +32,19 @@
     scene.ctx.setTransform(scene.dpr,0,0,scene.dpr,0,0);
     scene.lanes=[];
     const narrow=scene.width<760;
-    const count=narrow?(scene.kind==='hero'?34:29):(scene.kind==='hero'?104:91);
+    const count=narrow?(scene.kind==='hero'?26:23):(scene.kind==='hero'?72:63);
     for(let i=0;i<count;i++){
       const depth=Math.pow(Math.random(),.8);
-      const font=(narrow?10:11)+depth*(narrow?5:7)+random(-.6,.6);
+      const font=(narrow?9:9.7)+depth*(narrow?3.2:4.7)+random(-.45,.45);
       const space=font*random(1.20,1.50);
-      const length=Math.round(random(11,32)*(.75+depth*.55));
+      const length=Math.round(random(10,25)*(.78+depth*.40));
       scene.lanes.push({
         x:random(4,scene.width-4),offset:random(-length*space,scene.height+length*space),
         depth,font,space,length,
-        speed:random(28,57)*(.5+depth*1.9),
+        speed:random(23,46)*(.52+depth*1.45),
         phase:random(0,Math.PI*2),
-        sway:random(2,16),
-        light:Math.random()>.79,
+        sway:random(1,8),
+        light:Math.random()>.84,
         letters:Array.from({length},symbol)
       });
     }
@@ -63,7 +63,7 @@
       const head=((raw%span)+span)%span-extent;
       const px=lane.x+Math.sin(t*.2+lane.phase)*lane.sway*lane.depth;
       const col=lane.light?[207,234,255]:lane.depth>.58?[164,190,255]:[109,135,224];
-      const opacityScale=lane.depth>.65?.96:lane.depth>.3?.73:.52;
+      const opacityScale=lane.depth>.65?.80:lane.depth>.3?.64:.48;
       ctx.font=`500 ${lane.font.toFixed(1)}px "IBM Plex Mono", monospace`;
       for(let n=0;n<lane.length;n++){
         const y=head-n*lane.space;
@@ -73,7 +73,7 @@
         if(n===0)alpha=Math.min(1,alpha*1.45);
         if(alpha<.018)continue;
         ctx.fillStyle=`rgba(${col.join(',')},${alpha.toFixed(3)})`;
-        ctx.shadowBlur=n===0?((lane.light||lane.depth>.65)?13:6):0;
+        ctx.shadowBlur=n===0&&lane.light?4:0;
         ctx.shadowColor='rgba(161,167,255,.55)';
         ctx.fillText(lane.letters[n],px,y);
       }
@@ -90,7 +90,7 @@
     for(const scene of scenes){
       if(!scene.visible)continue;
       scene.clock+=dt;
-      if(scene.clock-scene.lastPaint>40){
+      if(scene.clock-scene.lastPaint>(scene.width<760?86:62)){
         draw(scene);
         scene.lastPaint=scene.clock;
       }

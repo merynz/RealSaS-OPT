@@ -59,7 +59,7 @@ def _difference(a,b):
 
 
 def _joint_arms():
-    return ["ORIGINAL_BASE"]+[
+    return ["ORIGINAL_BASE","ISOLATED_AB_BASE"]+[
         mode+"_"+a+"_"+b
         for a,b in (("PLUS","PLUS"),("PLUS","MINUS"),("MINUS","PLUS"),("MINUS","MINUS"))
         for mode in ("SOURCE_AB","SOUP_AB","ISOLATED_AB")
@@ -242,7 +242,10 @@ def render(job_path, parent_path, original_npz, output_path):
                 old_base=original_images[pi,vi,oldix["ORIGINAL_BASE"]]
                 require(_difference(now_base,old_base)<=.025,
                     "V16_V14_EXACT_ORIGINAL_SOURCE_RGBA_BASELINE_DRIFT")
-                current={"ORIGINAL_BASE":now_base}
+                current={
+                    "ORIGINAL_BASE":now_base,
+                    "ISOLATED_AB_BASE":draw("ISOLATED_AB_BASE","SOUP",joint_support)
+                }
                 pair_witness=[]
                 for sign_a,sign_b in PAIR_SIGN:
                     key=("PLUS" if sign_a>0 else "MINUS")+"_"+(

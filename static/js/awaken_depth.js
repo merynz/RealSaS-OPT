@@ -1,8 +1,7 @@
 /* BUSTED / layered computational atmosphere; decorative, not live compiler evidence. */
 (() => {
   'use strict';
-  const root=document.querySelector('#depthCode');
-  const typeRoot=document.querySelector('#matrixTypewriter');
+  function createScene(root,typeRoot,role){
   if(!root||!typeRoot)return;
   const narrow=window.matchMedia('(max-width: 780px)');
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -45,6 +44,13 @@
     {x:3,y:55,w:43},{x:54,y:55,w:43},
     {x:3,y:78,w:43},{x:54,y:78,w:43}
   ];
+  const landingDesktopSlots=[
+    {x:68,y:15,w:28},{x:68,y:36,w:28},
+    {x:68,y:57,w:28},{x:68,y:77,w:28}
+  ];
+  const landingMobileSlots=[
+    {x:57,y:13,w:39},{x:6,y:76,w:40}
+  ];
   const mobileSlots=[
     {x:5,y:7,w:90},{x:5,y:30,w:90},
     {x:5,y:53,w:90},{x:5,y:76,w:90}
@@ -52,7 +58,7 @@
 
   function build(){
     root.replaceChildren();typeRoot.replaceChildren();streams.length=0;traces.length=0;elapsed=0;
-    const mobile=narrow.matches,numberOfLanes=mobile?13:30,stagePerspective=mobile?850:1100;
+    const mobile=narrow.matches,numberOfLanes=role==="landing"?(mobile?9:23):(mobile?13:30),stagePerspective=mobile?850:1100;
     const fragment=document.createDocumentFragment();
     for(let i=0;i<numberOfLanes;i++){
       const depth=random(.04,.96);
@@ -80,7 +86,8 @@
       fragment.appendChild(lane);
     }
 
-    for(const [i,slot] of (mobile?mobileSlots:desktopSlots).entries()){
+    const initialSlots=role==="landing"?(mobile?landingMobileSlots:landingDesktopSlots):(mobile?mobileSlots:desktopSlots);
+    for(const [i,slot] of initialSlots.entries()){
       const depth=random(.22,.84), z=Math.round(-325+depth*220);
       const scaleCorrection=(stagePerspective-z)/stagePerspective;
       const lane=document.createElement('div');
@@ -113,9 +120,11 @@
     options.push('rig.bind();','mesh.compile();','scene.resolve();','skin.attach();');
     for(const text of options){
       row.textContent=text;
-      if(row.scrollWidth <= row.clientWidth-8)return text;
+      const rowWidth=row.clientWidth || row.parentElement?.clientWidth || Number.parseFloat(row.parentElement?.style.width) || 0;
+      if(rowWidth >= 64 && row.scrollWidth <= rowWidth-8)return text;
     }
-    return '';
+    // Do not silently erase entire lines if font/layout metrics are unavailable.
+    return 'rig.bind();';
   }
 
   function layoutTraces() {
@@ -126,7 +135,7 @@
     if(width<=0||height<=0)return;
     const mobile=narrow.matches;
     const perspective=mobile?850:1100;
-    const slots=mobile?mobileSlots:desktopSlots;
+    const slots=role==="landing"?(mobile?landingMobileSlots:landingDesktopSlots):(mobile?mobileSlots:desktopSlots);
     for(let i=0;i<traces.length;i++){
       const trace=traces[i],slot=slots[i];
       if(!slot){trace.lane.hidden=true;continue}
@@ -189,4 +198,7 @@
   reduced.addEventListener?.('change',start);
   document.addEventListener('visibilitychange',start);
   window.addEventListener('pagehide',()=>{if(interval!==null)clearInterval(interval);interval=null},{once:true});
+  }
+  createScene(document.querySelector('#landingDepthCode'),document.querySelector('#landingMatrixTypewriter'),'landing');
+  createScene(document.querySelector('#depthCode'),document.querySelector('#matrixTypewriter'),'chamber');
 })();

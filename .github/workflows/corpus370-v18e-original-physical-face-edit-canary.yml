@@ -1,0 +1,66 @@
+name: corpus370-v18e-original-physical-face-edit-canary
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18e-original-physical-face-edit-canary.yml'
+      - 'tools/truth_foundry/blender_corpus370_v18e_physical_face_edit_canary.py'
+      - 'tools/corpus/court_corpus370_v18e_physical_face_edit_canary.py'
+      - 'tools/corpus/hosted_corpus370_v18e_physical_face_edit_canary.sh'
+      - 'tests/corpus/test_corpus370_v18e_physical_face_edit_canary.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18e-original-physical-canary-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  original-physical-edit-canary-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile Blender code and redteam pixel edit consequences
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/truth_foundry/blender_corpus370_v18e_physical_face_edit_canary.py \
+            tools/corpus/court_corpus370_v18e_physical_face_edit_canary.py
+          bash -n tools/corpus/hosted_corpus370_v18e_physical_face_edit_canary.sh
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_v18e_physical_face_edit_canary.py
+
+  original-native-source-physical-face-edit-canary:
+    needs: original-physical-edit-canary-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+          - subject: TRICERATOPS
+            ordinal: 1
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SUBJECT_ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install private SHA-exact original source transport
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Edit physically real source triangles at heldout original pose and independently court
+        run: |
+          set -euo pipefail
+          bash tools/corpus/hosted_corpus370_v18e_physical_face_edit_canary.sh

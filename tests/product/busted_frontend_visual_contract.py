@@ -36,6 +36,7 @@ async def run():
                 assert response and response.status == 200, f"Awaken HTTP failure at {width}x{height}"
                 await page.locator("#compileAvailability").wait_for()
                 await page.screenshot(path=str(OUT / f"awaken_{width}x{height}.png"), full_page=True)
+                await page.locator("#awakenChamber").screenshot(path=str(OUT / f"chamber_{width}x{height}.png"))
 
                 extent = await page.evaluate("({scroll:document.documentElement.scrollWidth,inner:window.innerWidth})")
                 if extent["scroll"] > width+2:
@@ -49,10 +50,15 @@ async def run():
                 drop=await metrics(page, "#dropzone")
                 assert title["width"] > 130 and drop["width"] > 180, f"Awaken content collapsed at {width}x{height}"
                 assert title["right"] <= width+2 and drop["right"] <= width+2, f"Awaken content cut off at {width}x{height}"
-                if width >= 781:
-                    assert title["right"] < drop["x"]+12, f"Desktop Awaken columns overlap at {width}x{height}: {title} {drop}"
-                else:
-                    assert title["bottom"] <= drop["y"]+12, f"Mobile Awaken hierarchy overlaps at {width}x{height}"
+                intro=await metrics(page, "#introduction")
+                chamber=await metrics(page, "#awakenChamber")
+                visual=await metrics(page, "#chamberCodeVisual")
+                assert intro["height"] >= height-2, f"Landing hero does not occupy first screen: {intro}"
+                assert chamber["y"] >= intro["bottom"]-2, f"Compile chamber is not below hero: {chamber} {intro}"
+                assert drop["y"] > visual["bottom"], f"Input overlaps compilation code: {drop} {visual}"
+                assert visual["y"] >= chamber["y"]-2, f"Code must be inside Chamber, not hero: {visual} {chamber}"
+                assert not await page.locator("#introduction .matrix-trace").count(), "Hero must not contain computational code"
+                assert await page.locator("#awakenChamber .matrix-trace").count() == (4 if width<=780 else 8)
                 # Matrix VFX uses reserved screen-space lanes: no typed-code collisions.
                 # Motion reduction freezes the CSS streams for reproducible geometry.
                 matrix = await page.locator(".matrix-column").evaluate_all("""elements => elements.map(el => {
@@ -89,6 +95,12 @@ async def run():
                 assert len({t["depth"] for t in traces}) >= 2, "All text is on one depth plane"
                 for i,left in enumerate(traces):
                     assert left["width"] > 60 and left["height"] > 15, f"Collapsed typing reservation: {left}"
+                    assert left["x"] >= visual["x"]-2 and left["right"] <= visual["right"]+2, (
+                        f"Code extends beyond its Chamber visualization: {left} vs {visual}"
+                    )
+                    assert left["y"] >= visual["y"]-2 and left["bottom"] <= visual["bottom"]+2, (
+                        f"Code extends below its Chamber visualization: {left} vs {visual}"
+                    )
                     for right in traces[i+1:]:
                         overlap_x = min(left["right"],right["right"])-max(left["x"],right["x"])
                         overlap_y = min(left["bottom"],right["bottom"])-max(left["y"],right["y"])
@@ -170,6 +182,7 @@ async def run():
         )
         try:
             await animated.goto(BASE + "/", wait_until="networkidle", timeout=25000)
+            await animated.locator("#chamberCodeVisual").scroll_into_view_if_needed()
             first = animated.locator('.matrix-trace[data-slot="0"] .matrix-trace-line').first
             initial = await first.inner_text()
             await animated.wait_for_timeout(850)

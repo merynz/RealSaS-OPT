@@ -1,0 +1,71 @@
+name: BUSTED Pages Source and Rebuild
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/busted_pages_rebuild_v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+jobs:
+  rebuild-if-source-matches:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Read actual Pages publication source
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${REPO}/pages" -o /tmp/pages.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/pages.json'))
+          print('PAGES_CONFIG='+json.dumps({
+              'url':p.get('html_url'),'status':p.get('status'),'build_type':p.get('build_type'),
+              'source':p.get('source'),'cname':p.get('cname')
+          },sort_keys=True))
+          PY
+          SOURCE="$(python -c "import json; print((json.load(open('/tmp/pages.json')).get('source') or {}).get('branch',''))")"
+          if [[ "${SOURCE}" != "busted-live-preview" ]]; then
+            echo "PAGES_SOURCE_MISMATCH actual=${SOURCE:-none} expected=busted-live-preview"
+            exit 12
+          fi
+          echo "PAGES_SOURCE_MATCH=YES"
+      - name: Request GitHub Pages rebuild from correct preview branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Rebuild request uses GitHub Pages API, not fake front-end cache busting"
+          code="$(curl --silent --show-error --location -o /tmp/build.json -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${REPO}/pages/builds")"
+          echo "REBUILD_HTTP=${code}"
+          cat /tmp/build.json
+          [[ "${code}" == "201" || "${code}" == "202" ]]
+      - name: Check that the public static site catches up
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://merynz.github.io/RealSaS-OPT"
+          for i in $(seq 1 32); do
+            curl -fsSL --retry 2 -H "Cache-Control: no-cache" \
+              "${base}/index.html?busted_pages_rebuild=${GITHUB_RUN_ID}_${i}" -o /tmp/html
+            status="$(curl -s -o /dev/null -w '%{http_code}' \
+              "${base}/static/css/busted_awaken_fire_v1.css?busted_pages_rebuild=${GITHUB_RUN_ID}_${i}")"
+            if grep -q 'busted_awaken_fire_v1.css' /tmp/html && grep -q '<h2>QUALIFIED</h2>' /tmp/html && [[ "${status}" == "200" ]]; then
+              echo "PAGES_PUBLICATION_CONFIRMED=YES"
+              echo "FIRE_CSS_HTTP=${status}"
+              exit 0
+            fi
+            echo "PAGES_NOT_CURRENT check=${i} fire_http=${status}"
+            sleep 8
+          done
+          echo "PAGES_PUBLICATION_CONFIRMED=NO"
+          exit 13

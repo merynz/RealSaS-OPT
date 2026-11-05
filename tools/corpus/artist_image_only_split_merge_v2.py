@@ -392,6 +392,19 @@ def court_candidates(rgba_file, public_file, base_npz, base_manifest,
     parent = json.loads(Path(base_manifest).read_text())
     v1 = json.loads(Path(base_receipt).read_text())
     candidate = json.loads(Path(candidate_manifest).read_text())
+    require(parent.get("schema") == V1_PRED_SCHEMA
+            and parent.get("status") ==
+                "IMAGE_ONLY_PREDICTION_LOCKED_BEFORE_ARTIST_REFERENCE"
+            and parent.get("image_RGBA_SHA256") ==
+                public["image_RGBA_SHA256"]
+            and parent.get("prediction_arrays_sha256") ==
+                digest(Path(base_npz).read_bytes())
+            and parent.get("reference_used_during_prediction") is False
+            and parent.get("artist_slot_names_or_layer_count_exposed") is False
+            and parent.get("artist_original_mesh_face_incidence_exposed") is False
+            and parent.get("drawable_ownership_authorized") is False
+            and parent.get("training_authorized") is False,
+            "GENERIC_SPLIT_PARENT_V1_MANIFEST_TAMPER_OR_AUTHORITY_FORGERY")
     require(candidate.get("schema") == PRED_SCHEMA
             and candidate.get("status") ==
                 "V2_IMAGE_ONLY_SPLIT_MERGE_PREDICTION_SEALED__NO_OWNER"

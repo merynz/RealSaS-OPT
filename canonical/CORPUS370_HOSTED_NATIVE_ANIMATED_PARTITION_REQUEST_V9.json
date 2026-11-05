@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.Corpus370NativeAnimatedPartitionResearchRequest.v9",
   "enabled": true,
-  "status": "ACTIVATED_SOURCE_ORIGINAL_AUTHORED_MOTION_VS_POSED_SOUP_INTERVENTIONS__NO_TRAINING",
+  "status": "RETRY_NATIVE_POSE_TO_V4_POLYGON_SIGNATURE_EXACT_PROTOCOL",
   "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
   "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
   "source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
@@ -55,5 +55,13 @@
     6
   ],
   "raster_resolution": 192,
-  "cycles_samples": 32
+  "cycles_samples": 32,
+  "replay_revision": "AUTHOR_V4_POLYGON_SIGNATURE_AT_POSED_FRAMES__REST_TRIANGLE_ORDER_ONLY",
+  "first_hosted_attempt": {
+    "run_id": 42013088875,
+    "conclusion": "SOURCE_POSE_REPLAY_ASSERTION_FALSE_FAIL",
+    "cause": "V4 posed snapshot deliberately excludes face list; V9 erroneously required absent frozen rest triangle faces in posed snapshot",
+    "initial_receipts_private_path": "gdrive:corpus370_preparation_v1/hosted_native_pose_partition_private_v8/42013088875-1"
+  },
+  "parent_source_sha_unchanged": true
 }

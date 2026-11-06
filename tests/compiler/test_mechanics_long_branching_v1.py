@@ -78,3 +78,84 @@ def test_morphology_policy_and_missing_contact_authority_fail_closed():
             maximum_dofs=71,
             jacobian_mode="ANALYTIC_RESEARCH_V1",
         )
+
+
+def test_explicit_active_dof_policy_solves_reachable_drag_without_rewriting_rig():
+    case=make_morphology_case_v1(24)
+    from compiler.realsas_compiler_core.mechanics_multigoal_solver_v1 import (
+        solve_declared_multi_goal_v1,
+    )
+    selected=(("J:1:0","RY"),)
+    result=solve_declared_multi_goal_v1(
+        case.rig,case.overrides,
+        pinned_contact_control_ids=case.pins,
+        pinned_world_targets=case.pin_world_targets,
+        active_parameter_keys=selected,
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+        regularization=1e-8,goal_tolerance=2e-3,max_nfev=80,
+    )
+    assert result.status=="PASS_MULTIGOAL_BEHAVIORAL_COURT"
+    assert result.metadata["active_solver_parameter_count"]==1
+    assert result.metadata["frozen_solver_parameter_count"]==23
+    assert result.metadata["active_dof_selection_is_representation_policy_not_source_truth"] is True
+    assert result.max_drag_residual<2e-3
+    assert result.max_pin_residual<2e-3
+    assert all(abs(angle)<1e-12 for jid,axis,angle in result.parameters_rad
+               if (jid,axis) not in selected)
+    assert len(case.rig.local_frames)==27
+
+
+def test_explicit_active_dof_policy_does_not_fake_pass_when_target_needs_two_joints():
+    case=make_morphology_case_v1(24)
+    from tools.mechanics.benchmark_long_branching_ik_v1 import _rotated_about_axis
+    by_id={j.canonical_joint_id:np.asarray(j.P) for j in case.rig.joints}
+    p1=by_id["J:1:0"]
+    p2=by_id["J:1:1"]
+    tip=by_id["TIP:1"]
+    axis=np.asarray((0.,1.,0.))
+    # Independent two-joint forward: joint 1 rotates distal segment,
+    # joint 0 rotates the entire descendant subtree.
+    p_after_first=p1+_rotated_about_axis(p2-p1,axis,.12)
+    p_target=p_after_first+_rotated_about_axis(
+        _rotated_about_axis(tip-p2,axis,.25),axis,.12,
+    )
+    from compiler.realsas_compiler_core.mechanics_control_solver_v1 import ControlTransformIRV1
+    new_edit=(
+        ControlTransformIRV1("C:1",
+            translation=tuple(map(float,p_target-tip))),
+    )
+    incomplete=solve_declared_multi_goal_v1(
+        case.rig,new_edit,
+        pinned_contact_control_ids=case.pins,
+        pinned_world_targets=case.pin_world_targets,
+        active_parameter_keys=(("J:1:0","RY"),),
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+        regularization=1e-8,goal_tolerance=2e-3,max_nfev=90,
+    )
+    assert incomplete.status=="FAIL_MULTIGOAL_BEHAVIORAL_COURT"
+    assert incomplete.max_drag_residual>2e-3
+    full=solve_declared_multi_goal_v1(
+        case.rig,new_edit,
+        pinned_contact_control_ids=case.pins,
+        pinned_world_targets=case.pin_world_targets,
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+        regularization=1e-8,goal_tolerance=2e-3,max_nfev=90,
+    )
+    assert full.status=="PASS_MULTIGOAL_BEHAVIORAL_COURT"
+    assert full.max_drag_residual<2e-3
+
+
+def test_active_dof_policy_rejects_missing_duplicate_or_unknown_declared_axes():
+    case=make_morphology_case_v1(24)
+    for selected in (
+        (), (("J:1:0","RX"),),
+        (("J:1:0","RY"),("J:1:0","RY")),
+    ):
+        with pytest.raises(QualificationError,match="ACTIVE_DOF_POLICY_INVALID"):
+            solve_declared_multi_goal_v1(
+                case.rig,case.overrides,
+                pinned_contact_control_ids=case.pins,
+                pinned_world_targets=case.pin_world_targets,
+                active_parameter_keys=selected,
+                jacobian_mode="ANALYTIC_RESEARCH_V1",
+            )

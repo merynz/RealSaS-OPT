@@ -175,7 +175,7 @@ def test_synthesis_consumes_evidence_coverage_without_minting_puppet_capability(
         SourceGraphicsEvidenceV0(
             mesh_binding_hash="a" * 64, skin_binding_hash="b" * 64,
             source_graphics_binding_hash=SRC, face_count=4,
-            input_mode="SYNTHETIC_FIXTURE",
+            input_mode="TEACHER_SOURCE_KNOWN",
         ),
         PuppetCapabilityContractV0(
             2, ("INDEPENDENT_ATLAS_EDITS", "HIDDEN_EDIT_STATE_PERSISTENCE")
@@ -198,3 +198,33 @@ def test_synthesis_consumes_evidence_coverage_without_minting_puppet_capability(
     assert len(out.executable_candidate_ids) >= 2
     assert not out.source_qualified_candidate_ids
     assert not any(out.authority.values())
+
+
+def test_student_and_synthetic_inputs_cannot_consume_teacher_claims():
+    rows = tuple(map(claim, FACTS[:2]))
+    for mode in ("STUDENT_INFERRED_UNQUALIFIED", "SYNTHETIC_FIXTURE"):
+        ev = SourceGraphicsEvidenceV0(
+            mesh_binding_hash="a" * 64, skin_binding_hash="b" * 64,
+            source_graphics_binding_hash=SRC, face_count=4, input_mode=mode,
+        )
+        with pytest.raises(QualificationError, match="TEACHER_SOURCE_EVIDENCE_FORBIDDEN"):
+            synthesize_operational_representations_v0(
+                ev, PuppetCapabilityContractV0(2, ("INDEPENDENT_ATLAS_EDITS",)),
+                source_claims=rows,
+                independently_admitted_artifacts={
+                    rows[0].evidence_artifact_hash: admission(rows)
+                },
+            )
+
+
+def test_student_source_face_grouping_from_teacher_is_rejected():
+    ev = SourceGraphicsEvidenceV0(
+        mesh_binding_hash="a" * 64, skin_binding_hash="b" * 64,
+        source_graphics_binding_hash=SRC, face_count=4,
+        source_face_group_ids=(0, 0, 1, 1),
+        input_mode="STUDENT_INFERRED_UNQUALIFIED",
+    )
+    with pytest.raises(QualificationError, match="SOURCE_FACE_GROUPS_FORBIDDEN"):
+        synthesize_operational_representations_v0(
+            ev, PuppetCapabilityContractV0(2, ("INDEPENDENT_ATLAS_EDITS",))
+        )

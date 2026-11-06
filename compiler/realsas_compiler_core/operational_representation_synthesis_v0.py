@@ -206,6 +206,15 @@ def synthesize_operational_representations_v0(
     evidence.validate()
     contract.validate()
     policy.validate()
+    # Raw source receipts and artist/source-proposal face groups cannot be
+    # smuggled into model inference or synthetic fixture input. Teacher mode
+    # is an explicit source-backed *oracle*, never the student input contract.
+    if evidence.input_mode != "TEACHER_SOURCE_KNOWN":
+        _require(not source_claims and not independently_admitted_artifacts,
+                 "ORS_TEACHER_SOURCE_EVIDENCE_FORBIDDEN_IN_STUDENT_INPUT")
+    if evidence.input_mode == "STUDENT_INFERRED_UNQUALIFIED":
+        _require(not evidence.source_face_group_ids,
+                 "ORS_STUDENT_SOURCE_FACE_GROUPS_FORBIDDEN")
     candidates = []
     seen_layouts = set()
     for candidate_id, packet_faces in _packet_layouts(evidence, policy):

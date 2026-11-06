@@ -126,3 +126,61 @@ def test_status_and_thresholds_not_artist_gold():
     assert STATUS.endswith("NO_GRAPHIC_OWNER_PROOF")
     assert SCHEMA.endswith(".v18r")
     assert GAPS==(.005,.02,.05)
+
+from tools.corpus.court_corpus370_v18r_source_world_graph_evidence import (
+    check_payload,
+)
+
+
+def court_sample():
+    geom=original_geometry_metrics(*evidence_example())
+    return {
+      "schema":SCHEMA,"status":STATUS,
+      "source_graphics_compiler_drawable_owner":"UNKNOWN",
+      "visual_surface_appearance_and_uv_boundary":"UNOBSERVED_NOT_FABRICATED",
+      "source_geometry_proximity_hypotheses_are_not_graphics_owner_labels":True,
+      "source_heldout_pose2_only_court_no_fit":True,
+      "same_drawable_training_pairs_qualified":0,
+      "different_drawable_training_pairs_qualified":0,
+      "graphics_owner_authorized":False,"iris_training_authorized":False,
+      "tessa_training_authorized":False,"materialization_authorized":False,
+      "training_authorized":False,
+      "original_source_world_evidence_teacher_private":geom,
+    }
+
+
+def test_independent_court_accepts_full_source_replay_only():
+    original=court_sample()
+    assert check_payload(original,original)
+
+
+@pytest.mark.parametrize("attack",(
+   "fake_uv","make_merge","forge_pose2","artist_owner",
+   "training","forge_crease","fake_surface_distance",
+))
+def test_source_world_independent_court_catches_forged_authority(attack):
+    original=court_sample()
+    fake=copy.deepcopy(original)
+    if attack=="fake_uv":
+        fake["visual_surface_appearance_and_uv_boundary"]="VERIFIED"
+    elif attack=="make_merge":
+        fake["original_source_world_evidence_teacher_private"][
+          "source_lifted_world_proximity_evidence_private"][0][
+          "original_artist_owner_merge"]="TRUE"
+    elif attack=="forge_pose2":
+        fake["original_source_world_evidence_teacher_private"][
+          "heldout_pose_not_used_to_generate_candidates"]=False
+    elif attack=="artist_owner":
+        fake["source_graphics_compiler_drawable_owner"]="VERIFIED"
+    elif attack=="training":
+        fake["iris_training_authorized"]=True
+    elif attack=="forge_crease":
+        fake["original_source_world_evidence_teacher_private"][
+          "source_local_geometry_edge_evidence_private"][0][
+          "source_graphic_owner_separation"]="TRUE"
+    else:
+        fake["original_source_world_evidence_teacher_private"][
+          "source_lifted_world_proximity_evidence_private"][0][
+          "source_surface_exact_gap"]="VERIFIED_FULL_TRIANGLE_GAP"
+    with pytest.raises(ValueError,match="V18R_INDEPENDENT_"):
+        check_payload(fake,original)

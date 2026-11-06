@@ -93,6 +93,8 @@ def solve_declared_multi_goal_v1(
     maximum_dofs: int = 72,
     maximum_goals: int = 16,
     initial_parameters_rad: Sequence[tuple[str, str, float]] | None = None,
+    jacobian_mode: str = "NUMERIC_V1",
+    verify_analytic_jacobian: bool = False,
 ) -> MechanicsMultiGoalResultV1:
     for v, code, allow_zero in (
         (goal_tolerance, "MULTIGOAL_TOLERANCE_INVALID", False),
@@ -102,6 +104,11 @@ def solve_declared_multi_goal_v1(
             raise QualificationError(code)
     if min(max_nfev, maximum_joints, maximum_dofs, maximum_goals) < 1:
         raise QualificationError("MULTIGOAL_RESOURCE_POLICY_INVALID")
+
+    if jacobian_mode not in {"NUMERIC_V1", "ANALYTIC_RESEARCH_V1"}:
+        raise QualificationError("MULTIGOAL_JACOBIAN_MODE_UNSUPPORTED")
+    if verify_analytic_jacobian and jacobian_mode != "ANALYTIC_RESEARCH_V1":
+        raise QualificationError("MULTIGOAL_JACOBIAN_COURT_REQUIRES_ANALYTIC")
 
     joint_by = {j.canonical_joint_id: j for j in rig.joints}
     if not joint_by or len(joint_by) != len(rig.joints) or len(joint_by) > maximum_joints:
@@ -235,28 +242,44 @@ def solve_declared_multi_goal_v1(
     if set(authored) - goal_control_ids or set(pins) - goal_control_ids:
         raise QualificationError("MULTIGOAL_ORPHANED_CONTROL_OR_PIN")
 
-    def forward(q: np.ndarray) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray]]:
+    parameter_axes = {
+        "RX": np.array((1., 0., 0.)),
+        "RY": np.array((0., 1., 0.)),
+        "RZ": np.array((0., 0., 1.)),
+    }
+    ancestor_sets: dict[str, set[str]] = {}
+    for jid in joint_by:
+        ancestors: set[str] = set()
+        current: str | None = jid
+        while current is not None:
+            ancestors.add(current)
+            current = joint_by[current].parent_canonical_joint_id
+        ancestor_sets[jid] = ancestors
+
+    def forward(q: np.ndarray) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray], np.ndarray]:
         p_world: dict[str, np.ndarray] = {}
         rot_world: dict[str, np.ndarray] = {}
+        world_axes = np.zeros((len(param_schema), 3), dtype=np.float64)
         for jid in topological:
-            local = np.eye(3)
-            for index, label in params_by_joint[jid]:
-                local = local @ _axis_rotation(label, float(q[index]))
-            basis = frames[jid]
-            local_world = basis @ local @ basis.T
             parent = joint_by[jid].parent_canonical_joint_id
+            parent_rotation = rot_world[parent] if parent is not None else np.eye(3)
+            local = np.eye(3)
+            basis = frames[jid]
+            for index, label in params_by_joint[jid]:
+                if jacobian_mode == "ANALYTIC_RESEARCH_V1":
+                    # World axis BEFORE this local DOF rotates.
+                    world_axes[index] = parent_rotation @ basis @ local @ parameter_axes[label]
+                local = local @ _axis_rotation(label, float(q[index]))
+            local_world = basis @ local @ basis.T
             if parent is None:
                 p_world[jid] = rest[jid].copy()
-                rot_world[jid] = local_world
             else:
-                parent_rot = rot_world[parent]
-                p_world[jid] = p_world[parent] + parent_rot @ (rest[jid] - rest[parent])
-                rot_world[jid] = parent_rot @ local_world
-        return p_world, rot_world
+                p_world[jid] = p_world[parent] + parent_rotation @ (rest[jid] - rest[parent])
+            rot_world[jid] = parent_rotation @ local_world
+        return p_world, rot_world, world_axes
 
-    contact_weight = 100.0
     def residual(q: np.ndarray) -> np.ndarray:
-        p, _ = forward(q)
+        p, _, _ = forward(q)
         blocks = [
             (10.0 if kind == "PIN" else 1.0) * (p[jid] - target)
             for _, _, jid, target, kind in goals
@@ -264,6 +287,22 @@ def solve_declared_multi_goal_v1(
         if regularization:
             blocks.append(math.sqrt(regularization) * q)
         return np.concatenate(blocks)
+
+    def analytic_jacobian(q: np.ndarray) -> np.ndarray:
+        p, _, world_axes = forward(q)
+        rows = 3 * len(goals) + (len(param_schema) if regularization else 0)
+        out = np.zeros((rows, len(param_schema)), dtype=np.float64)
+        for gi, (_, _, tip, _, kind) in enumerate(goals):
+            weight = 10.0 if kind == "PIN" else 1.0
+            for index, (pivot, _) in enumerate(param_schema):
+                if pivot not in ancestor_sets[tip]:
+                    continue
+                out[gi * 3:gi * 3 + 3, index] = (
+                    weight * np.cross(world_axes[index], p[tip] - p[pivot])
+                )
+        if regularization:
+            out[3 * len(goals):, :] = math.sqrt(regularization) * np.eye(len(param_schema))
+        return out
 
     lower_np, upper_np = np.asarray(lower), np.asarray(upper)
     if initial_parameters_rad is None:
@@ -281,10 +320,26 @@ def solve_declared_multi_goal_v1(
         x0 = np.minimum(np.maximum(x0, lower_np), upper_np)
     opt = least_squares(
         residual, x0, bounds=(lower_np, upper_np),
+        jac=analytic_jacobian if jacobian_mode == "ANALYTIC_RESEARCH_V1" else "2-point",
         method="trf", max_nfev=int(max_nfev),
         xtol=1e-10, ftol=1e-10, gtol=1e-10,
     )
-    p, rotations = forward(opt.x)
+    p, rotations, _ = forward(opt.x)
+    jacobian_debug_error = None
+    if verify_analytic_jacobian:
+        # Independent central difference at the actual solved joint angles.
+        # The diagnostic is opt-in; source teacher labels never enter here.
+        h = 1e-6
+        numeric_columns = []
+        for index in range(len(param_schema)):
+            delta = np.zeros(len(param_schema), dtype=np.float64)
+            delta[index] = h
+            numeric_columns.append((residual(opt.x + delta) - residual(opt.x - delta)) / (2 * h))
+        numeric = np.column_stack(numeric_columns)
+        jacobian_debug_error = float(np.max(np.abs(numeric - analytic_jacobian(opt.x))))
+        if (not math.isfinite(jacobian_debug_error)
+                or jacobian_debug_error > 1e-5):
+            raise QualificationError("MULTIGOAL_ANALYTIC_JACOBIAN_DIFFERENTIAL_FAILURE")
     reported_goals: list[MechanicsGoalResidualV1] = []
     for constraint_id, cid, jid, target, kind in goals:
         reported_goals.append(MechanicsGoalResidualV1(
@@ -332,6 +387,8 @@ def solve_declared_multi_goal_v1(
         solver_evaluations=int(opt.nfev),
         metadata={
             "solver_termination": str(opt.message),
+            "jacobian_mode": jacobian_mode,
+            "analytic_jacobian_finite_difference_max_error": jacobian_debug_error,
             "optimization_converged": bool(opt.success),
             "declared_angle_limit_count": limits_present,
             "unbounded_rotation_chart_count": len(param_schema) - limits_present,

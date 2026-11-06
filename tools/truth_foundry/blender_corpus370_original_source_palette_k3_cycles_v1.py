@@ -21,8 +21,9 @@ from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
 from tools.observation.blender_controlled_8view_v2 import (
-    import_rest, preserve_alpha_unlit, configure
+    import_rest, configure
 )
+from tools.truth_foundry import blender_source_appearance_policy_replay_v1 as replay
 from tools.truth_foundry.blender_corpus370_v18m_cycles_source_depth import (
     source_depth_material, normalize_source_depth_for_camera,
 )
@@ -207,17 +208,23 @@ def prepare_original(args,out):
             if mat.name in source_mats:
                 req(source_mats[mat.name][0] is mat,"SOURCE_MATERIAL_NAME_COLLISION")
             source_mats[mat.name]=(mat,colors.index(key))
-    receipts=preserve_alpha_unlit(meshes)
+    # V18n's prequalified cross-Blender source shader adapter consumes the
+    # sealed 4.0 observation policy, NOT the 4.5 importer blend_method.
+    # It rejects any upstream Base Color/Alpha link/default drift.
+    receipts=replay._replay_transform(
+        replay._materials_from_render_meshes(meshes),
+        list(policy["material_transform"]))
     req(len(receipts)==len(policy["material_transform"])
-        and {x["material"] for x in receipts}=={
-           x["material"] for x in policy["material_transform"]},
-        "SOURCE_UNLIT_MATERIAL_POLICY_CENSUS")
-    for row in receipts:
-        required=next(x for x in policy["material_transform"]
-                      if x["material"]==row["material"])
-        for key in ("operation","alpha_policy","source_color_linked","source_alpha_linked"):
-            req(row.get(key)==required.get(key),
-                "SOURCE_UNLIT_POLICY_CHANGED_"+key)
+        and {r["material"] for r in receipts}
+            =={r["material"] for r in policy["material_transform"]}
+        and all(r.get("replayed") is True for r in receipts),
+        "SOURCE_ORIGINAL_MATERIAL_REPLAY_DID_NOT_CLOSE")
+    for current in receipts:
+        declared=next(x for x in policy["material_transform"]
+                      if x["material"]==current["material"])
+        for field in ("operation","alpha_policy"):
+            req(current.get(field)==declared.get(field),
+                "SOURCE_SEALED_ALPHA_REPLAY_POLICY_DRIFT_"+field)
     emitted={}
     for name,(mat,k) in source_mats.items():
         emissive=[v for v in mat.node_tree.nodes if v.type=="EMISSION"]

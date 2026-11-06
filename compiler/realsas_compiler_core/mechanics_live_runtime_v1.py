@@ -191,6 +191,7 @@ def evaluate_mechanics_intervention_frame_v1(
     active_parameter_keys: tuple[tuple[str, str], ...] | None = None,
     active_parameter_policy: str = "EXPLICIT_OR_ALL",
     preferred_parameter_keys: tuple[tuple[str,str], ...] | None = None,
+    singularity_recovery_mode: str = "DISABLED",
     prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
     multi_goal_jacobian_mode: str = "NUMERIC_V1",
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
@@ -243,6 +244,8 @@ def evaluate_mechanics_intervention_frame_v1(
             raise QualificationError("LIVE_MECHANICS_WARM_START_REQUIRES_MULTI_GOAL")
         if multi_goal_jacobian_mode != "NUMERIC_V1":
             raise QualificationError("LIVE_MECHANICS_JACOBIAN_MODE_REQUIRES_MULTI_GOAL")
+        if singularity_recovery_mode != "DISABLED":
+            raise QualificationError("LIVE_MECHANICS_RECOVERY_MODE_REQUIRES_MULTI_GOAL")
         if (active_parameter_keys is not None
                 or preferred_parameter_keys is not None
                 or active_parameter_policy != "EXPLICIT_OR_ALL"):
@@ -258,6 +261,7 @@ def evaluate_mechanics_intervention_frame_v1(
             active_parameter_keys=active_parameter_keys,
             active_parameter_policy=active_parameter_policy,
             preferred_parameter_keys=preferred_parameter_keys,
+            singularity_recovery_mode=singularity_recovery_mode,
             jacobian_mode=multi_goal_jacobian_mode,
         )
         pose = solved.pose
@@ -343,6 +347,7 @@ def evaluate_mechanics_intervention_frame_v1(
             ),
             "active_parameter_policy": active_parameter_policy,
             "rank_policy_prior_basis_reused": prior_rank_reused,
+            "singularity_recovery_mode": singularity_recovery_mode,
             "attachment_frames_evaluated_before_secondary": True,
             "attachment_frame_count": len(attachment_result.frames),
             "secondary_motion_mode": (
@@ -382,6 +387,7 @@ def evaluate_mechanics_intervention_sequence_v1(
     multi_goal_jacobian_mode: str = "NUMERIC_V1",
     active_parameter_keys: tuple[tuple[str, str], ...] | None = None,
     active_parameter_policy: str = "EXPLICIT_OR_ALL",
+    singularity_recovery_mode: str = "DISABLED",
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
 ) -> MechanicsInterventionSequenceV1:
     if not steps:
@@ -416,6 +422,7 @@ def evaluate_mechanics_intervention_sequence_v1(
             active_parameter_keys=active_parameter_keys,
             active_parameter_policy=active_parameter_policy,
             preferred_parameter_keys=prev_rank_selection,
+            singularity_recovery_mode=singularity_recovery_mode,
             secondary_motion_policy=secondary_motion_policy,
             secondary_motion_previous_state=prev_secondary_state,
             secondary_motion_dt_seconds=(
@@ -500,6 +507,7 @@ def evaluate_mechanics_intervention_sequence_v1(
             ),
             "active_parameter_policy": active_parameter_policy,
             "rank_policy_selection_changes": rank_selection_changes,
+            "singularity_recovery_mode": singularity_recovery_mode,
             "rank_policy_selection_reused_frames": rank_selection_reused,
             "solver_mode": solver_mode,
             "pinned_contact_control_ids": tuple(pinned_contact_control_ids),

@@ -144,10 +144,16 @@ def measure_relations(*, faces, face_uv, baseline_vertices, island_for_face,
             xyz[0, va][:, None, :] - xyz[0, vb][None, :, :], axis=-1)
         p1 = np.linalg.norm(
             xyz[1, va][:, None, :] - xyz[1, vb][None, :, :], axis=-1)
-        require(bool(np.min(p0) / extent <= WORLD_GAP_TOL) ==
-                bool(evidence["source_fit_both_pose_min_vertex_gap_le_0p005"])
-                or np.min(p1) / extent > WORLD_GAP_TOL,
-                "V18R_FIT_SOURCE_GAP_JOINT_PROVENANCE_DRIFT")
+        # V18r reports per-pose nearest distances independently. Their
+        # witnesses might involve DIFFERENT vertex pairs; we require only
+        # fidelity to that exact prior measurement, not equivalence with
+        # the stricter new same-pair identity condition.
+        independently_near_on_both = bool(
+            np.min(p0) / extent <= WORLD_GAP_TOL
+            and np.min(p1) / extent <= WORLD_GAP_TOL)
+        require(independently_near_on_both ==
+                bool(evidence["source_fit_both_pose_min_vertex_gap_le_0p005"]),
+                "V18R_FIT_SOURCE_GAP_PROVENANCE_DRIFT")
         joint = np.argwhere(
             (p0 <= WORLD_GAP_TOL * extent) &
             (p1 <= WORLD_GAP_TOL * extent))

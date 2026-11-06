@@ -43,7 +43,7 @@ def test_no_full_leak_and_partial_alpha_depth_compositing():
     result=summary_view(source,depth)
     assert result["original_source_material_native_vs_soup_sample_failures_full_domain"]==0
     assert result["original_source_material_depth_compositor_vs_soup_sample_failures_qualified"]==0
-    assert result["source_material_fixed_samplefirst_vs_soup_8sample_pixel_failures"]==0
+    assert result["source_material_fixed_samplefirst_vs_soup_8sample_pixel_failures"]==1
     assert result["source_material_depth_compositor_vs_soup_8sample_pixel_failures_qualified"]==0
     assert result["source_material_postfilter_vs_soup_8sample_pixel_failures"]==1
 

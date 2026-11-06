@@ -129,6 +129,7 @@ def test_independent_source_fk_lbs_all_axes_and_oracle_product_deformer(tmp_path
     out=compare_stage47_source_fk_lbs_v1(
         teacher,npz,error_threshold_source_world=1e-9,
         product_probe_count=12,
+        prepared_probe=True,
     )
     assert out["status"].startswith("PASS")
     assert out["action_count"]==36
@@ -138,6 +139,10 @@ def test_independent_source_fk_lbs_all_axes_and_oracle_product_deformer(tmp_path
     assert probe["product_deformer_invoked"] is True
     assert probe["probe_count"]==12
     assert probe["max_vertex_error_world"]<1e-10
+    assert probe["prepared_kernel_probe"]["prepared_kernel_invoked"] is True
+    assert probe["prepared_kernel_probe"]["prepared_once_for_all_actions"] is True
+    assert probe["prepared_kernel_probe"]["max_parity_error_vs_legacy_world"]<1e-10
+    assert probe["prepared_kernel_probe"]["max_error_vs_blender_world"]<1e-10
     assert probe["canonical_rig_minted"] is False
     assert out["source_to_canonical_geometry_binding_qualified"] is False
 
@@ -174,3 +179,11 @@ def test_corrupt_parent_relationship_and_student_authority_fail_closed(tmp_path)
     teacher.write_text(json.dumps(data))
     with pytest.raises(Stage47CorrespondenceError,match="AUTHORITY_OR_GEOMETRY"):
         compare_stage47_source_fk_lbs_v1(teacher,npz)
+
+
+def test_prepared_product_probe_requires_real_nonzero_product_probe_set(tmp_path):
+    teacher,npz=_toy(tmp_path)
+    with pytest.raises(Stage47CorrespondenceError,match="POLICY_INVALID"):
+        compare_stage47_source_fk_lbs_v1(
+            teacher,npz,prepared_probe=True,product_probe_count=0,
+        )

@@ -63,7 +63,27 @@ def lineage_maps(lineage: dict) -> tuple[dict[str, dict], dict[str, str]]:
     groups = {str(row["lineage_id"]): dict(row) for row in lineage.get("groups") or ()}
     subject_to_lineage = {str(k): str(v) for k, v in (lineage.get("subject_to_lineage") or {}).items()}
     require(len(subject_to_lineage) == int(lineage.get("subject_count", -1)) == 370, "CORPUS370_SPLIT_LINEAGE_SUBJECT_SET")
-    require(set(subject_to_lineage.values()).issubset(groups), "CORPUS370_SPLIT_LINEAGE_GROUP_REF")
+    require(set(subject_to_lineage.values()) == set(groups), "CORPUS370_SPLIT_LINEAGE_GROUP_REF")
+    # A sealed map is not sufficient evidence of a lineage partition: its
+    # reciprocal groups must cover each subject exactly once. Otherwise a
+    # forged/stale group can silently split identical actors across partitions.
+    seen = set()
+    for lineage_id, group in groups.items():
+        members = group.get("subject_ids")
+        require(isinstance(members, list) and members
+                and all(isinstance(sid, str) and sid for sid in members)
+                and len(members) == len(set(members))
+                and group.get("lineage_id") == lineage_id
+                and group.get("subject_count") == len(members),
+                "CORPUS370_SPLIT_LINEAGE_GROUP_MEMBERS")
+        for sid in members:
+            require(sid in subject_to_lineage
+                    and subject_to_lineage[sid] == lineage_id
+                    and sid not in seen,
+                    "CORPUS370_SPLIT_LINEAGE_RECIPROCAL_PARTITION")
+            seen.add(sid)
+    require(seen == set(subject_to_lineage),
+            "CORPUS370_SPLIT_LINEAGE_RECIPROCAL_COVERAGE")
     return groups, subject_to_lineage
 
 
@@ -71,6 +91,8 @@ def model_eligible_lineages(rosters: dict, subject_to_lineage: dict[str, str]) -
     result = {}
     for model, payload in (rosters.get("models") or {}).items():
         ids = [str(row["subject_id"]) for row in payload.get("eligible_subjects") or ()]
+        require(len(ids) == len(set(ids)),
+                "CORPUS370_SPLIT_MODEL_DUPLICATE_SUBJECT:" + model)
         require(all(sid in subject_to_lineage for sid in ids), "CORPUS370_SPLIT_MODEL_UNKNOWN_SUBJECT:" + model)
         result[model] = {subject_to_lineage[sid] for sid in ids}
     return result

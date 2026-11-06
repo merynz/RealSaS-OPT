@@ -1,0 +1,69 @@
+{
+  "schema": "RealSaS.MechanicsMultiAttachmentFeasibilityPriorityResearchReceipt.v1",
+  "date_utc": "2026-11-06",
+  "repository": "merynz/RealSaS-OPT",
+  "branch": "research/mechanics-generic-closure-v1",
+  "pull_request": 353,
+  "tested_commit_sha": "36e69a1fda55bf83944e74502e3a3ea7fd67d988",
+  "github_actions": {
+    "run_id": 42288736079,
+    "job_id": 128136287844,
+    "workflow": "mechanics-generic-closure-v1",
+    "conclusion": "success",
+    "focused_mechanics_tests_passed": 120,
+    "ownership_firewall": "PASS_MECHANICS_RUNTIME_RESEARCH_OWNERSHIP_FIREWALL"
+  },
+  "research_files": [
+    "compiler/realsas_compiler_core/mechanics_attachment_feasibility_v1.py",
+    "compiler/realsas_compiler_core/mechanics_attachment_priority_v1.py",
+    "tests/compiler/test_mechanics_attachment_feasibility_v1.py",
+    "tests/compiler/test_mechanics_attachment_priority_v1.py"
+  ],
+  "necessary_rigid_contradiction_types": [
+    "RIGID_POINT_DISTANCE",
+    "RIGID_PARENT_ORIENTATION",
+    "RIGID_FRAME_POINT_DISPLACEMENT"
+  ],
+  "rigid_test_scope": "Only two attachments on the same declared parent; exact rigid coordinate invariants with explicit position and SO(3) angular tolerance. No global feasibility proof.",
+  "per_pair_thresholds": {
+    "distance": "2*position_tolerance",
+    "orientation": "2*orientation_tolerance",
+    "coupled": "2*position_tolerance + 2*local_segment_length*sin(orientation_tolerance/2)"
+  },
+  "priority_policy": {
+    "default": "ALL_REQUESTED_ATTACHMENT_TRACKS_HARD",
+    "always_hard": "ALL DECLARED IK CONTROLS AND WORLD CONTACT PINS",
+    "advisory": "ONLY EXPLICITLY SELECTED per-anchor POSITION and/or ORIENTATION tracks; all measured and reported",
+    "cannot_mint_source_truth": true,
+    "cannot_silently_downgrade_capability": true
+  },
+  "explicit_statuses": [
+    "NO_PAIRWISE_RIGID_CONFLICT_GLOBAL_IK_UNDETERMINED",
+    "FAIL_DECLARED_RIGID_ATTACHMENT_CONFLICT",
+    "FAIL_HARD_RIGID_ATTACHMENT_CONFLICT",
+    "FAIL_HARD_IK_OR_CONTACT_CONTRACT",
+    "PASS_HARD_AND_ALL_REQUESTED_TARGETS",
+    "PASS_HARD_WITH_UNMET_ADVISORY_TARGETS"
+  ],
+  "negative_tests": [
+    "same-parent world point displacement impossible while local rigid distance fixed",
+    "same-parent grip orientation goals demand different parent world rotation",
+    "distance-compatible pair rejected when declared oriented-grip displacement is impossible",
+    "near-tolerance geometry accepted without global IK PASS",
+    "separate-parent target pairs remain indeterminate in the rigid preflight; nonlinear solver may still FAIL",
+    "unknown anchor, nonfinite target, unqualified local orientation and incomplete priority assignment rejected",
+    "advisory mismatch separately measured, full requested goals false even if hard constraints PASS"
+  ],
+  "scientific_limits": {
+    "synthetic_rig_only": true,
+    "source_teacher_truth_minted": false,
+    "global_nonconvex_ik_feasibility_proven": false,
+    "force_friction_collision_implemented": false,
+    "automatic_priority_choice_implemented": false,
+    "advisory_policy_is_runtime_only": true,
+    "model_training_authorized": false,
+    "graphics_authority_changed": false,
+    "whole_product_fps_qualified": false
+  },
+  "next": "source-native multiple attachment experiments and cross-parent feasibility tests; only after capability authority decide production priority semantics"
+}

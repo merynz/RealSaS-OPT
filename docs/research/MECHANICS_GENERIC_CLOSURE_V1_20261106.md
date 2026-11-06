@@ -298,3 +298,69 @@ constraint, and compare target/pose continuity across sequences.
 Then execute the same problem on source-native authored controls and qualified
 source→canonical mappings across different morphologies. This is still
 research-only and must not mint generic/unseen model authority.
+
+## 2026-11-06: first non-oracle rank-revealing actuator decision
+
+We now have a genuine generic **solver-time** decision candidate:
+`active_parameter_policy="RANK_REVEALING_RESEARCH_V1"`.
+
+Unlike the earlier manually chosen 1/2/3-actuator *synthetic-oracle*
+policy, this uses only the supplied declared canonical joint/control
+tree, current joint angles, and current world goal/pin constraints.
+For each constraint, it forms the exact analytic world-position
+Jacobian. It excludes the artificial regularization rows, performs
+pivoted QR column selection at a declared numerical threshold
+(relative (1e-6), absolute (1e-9)), and solves with only its
+linearly independent candidate actuators. All other declared joints
+remain in CanonicalRig and retain their valid current warm-start
+angles. Selection never authorizes source DOF removal.
+
+Critically, success is decided by **all original full-space drag and
+pin residuals**, never by the reduced objective alone. If the
+candidate misses any target or optimization fails, the solver invokes
+a full-DOF retry. A retry may *also* fail if the local nonlinear
+optimizer is stuck at a singular starting pose: the failure is reported
+explicitly and is not silently certified.
+
+**Verified independent GitHub CPU court:** `42279339544` on
+`a9abd29750be4ca84fde2ef9ed55b1ce7fa8af67`,
+**73 focused tests PASS**. Evidence:
+`docs/research/MECHANICS_RANK_REVEALING_ACTUATORS_20261106.json`.
+
+| Morphology | All declared rotational DOFs | Rank-selected DOFs | Full solve | Non-oracle rank solve | Ratio |
+|---|---:|---:|---:|---:|---:|
+| Two branches | 24 | 4 | 74.08 ms | 9.90 ms | 7.48x |
+| Four branches | 48 | 8 | 228.54 ms | 28.27 ms | 8.08x |
+| Six branches | 72 | 12 | 351.21 ms | 42.43 ms | 8.28x |
+
+All held reachable world goals and pins within the configured tolerance
+on these three *synthetic* curved-tree cases. Each single CPU duration
+is an engineering diagnostic, not an FPS or P95 percentile.
+The independent rest-tip Jacobian rank is 4/8/12 (versus
+24/48/72 individually affecting rotational columns); this is
+**task-position observability**, not general identifiability under
+all deformation, contact, temporal or source evidence.
+
+The adversarial **straight-chain nonlinear singularity** proves the
+boundary: rank selection invokes its full-DOF fallback, but the full
+local SciPy optimizer also remains unable to meet that target.
+Expected and observed result is **FAIL**, not a fake PASS.
+Other negative courts reject unknown actuator IDs, non-analytic
+rank selection, invalid world contact anchors and unsupported solver
+operators. Default `NUMERIC_V1` and full-DOF `EXPLICIT_OR_ALL` stay
+unchanged; the new policy is opt-in, experimental only.
+
+**Research conclusion:** task-space QR is a promising **representation
+policy** for selecting a smaller solver subspace without changing the
+source rig or the puppet capability promise. We have NOT demonstrated
+stable selection between nearby mouse positions; hysteresis, sticky
+controls, deterministic task preference and fallback pose continuity
+need a separate temporal court. At 42.43 ms for a 72-DOF synthetic
+solve, this also does not meet 16.67 ms or 60 FPS, even before
+Graphics and rendering.
+
+**Next:** direct continuous-drag/pin motion tests with subspace-selection
+churn metrics, declared attachment orientation constraints and an
+independent source→canonical mechanics comparison across several
+research-exposed morphologies. No AXIS/MIRA model training authority is
+minted by this result.

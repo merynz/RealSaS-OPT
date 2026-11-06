@@ -131,3 +131,36 @@ def test_live_solver_mode_and_pins_fail_closed():
         evaluate_mechanics_intervention_frame_v1(
             mesh, rig, skin, mechanics, pinned_contact_control_ids=("B_HANDLE",),
         )
+
+
+def test_live_multi_goal_analytic_jacobian_executes_pins_with_prepared_skin():
+    from compiler.realsas_compiler_core.mechanics_prepared_skin_v1 import (
+        prepare_mechanics_skin_deformer_v1,
+    )
+    mesh,rig,skin,mechanics=_objects()
+    prepared=prepare_mechanics_skin_deformer_v1(mesh,rig,skin)
+    override=(ControlTransformIRV1("A_HANDLE",translation=(-0.4,0.8,0.)),)
+    numeric=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,overrides=override,
+        pinned_contact_control_ids=("B_HANDLE",),
+        solver_mode="DECLARED_MULTI_GOAL_V1",
+        prepared_skin=prepared,max_allowed_constraint_residual=1e-3,
+    )
+    analytic=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,overrides=override,
+        pinned_contact_control_ids=("B_HANDLE",),
+        solver_mode="DECLARED_MULTI_GOAL_V1",
+        prepared_skin=prepared,max_allowed_constraint_residual=1e-3,
+        multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1",
+    )
+    assert numeric.status==analytic.status=="PASS_MECHANICS_BEHAVIORAL_COURT"
+    assert analytic.metadata["multi_goal_jacobian_mode"]=="ANALYTIC_RESEARCH_V1"
+    assert np.max(np.linalg.norm(
+        np.asarray(numeric.deformation.positions)
+        -np.asarray(analytic.deformation.positions),axis=1,
+    )) < 1e-4
+    with pytest.raises(QualificationError,match="JACOBIAN_MODE_REQUIRES_MULTI_GOAL"):
+        evaluate_mechanics_intervention_frame_v1(
+            mesh,rig,skin,mechanics,
+            multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1",
+        )

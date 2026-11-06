@@ -1,0 +1,145 @@
+name: Original Cat authored-pose face-UV anchor transport physical independent court V1
+on:
+  push:
+    branches: [research/original-pose-subface-uv-transport-physical-v1]
+    paths:
+      - 'tools/corpus/measure_original_pose_subface_uv_transport_physical_v1.py'
+      - 'tools/corpus/court_original_pose_subface_uv_transport_physical_v1.py'
+      - 'tests/corpus/test_original_pose_subface_uv_transport_physical_v1.py'
+      - '.github/workflows/original-cat-pose-subface-uv-transport-physical-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cat-original-pose-face-uv-transport-v1-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  adversarial-transport-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Synthetic original pose/UV/physical source sample and independent first-hit regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install 'numpy>=1.26,<3' 'shapely>=2.1,<3' 'pytest>=8,<10'
+          python -m py_compile tools/corpus/measure_original_pose_subface_uv_transport_physical_v1.py tools/corpus/court_original_pose_subface_uv_transport_physical_v1.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_original_pose_subface_uv_transport_physical_v1.py tests/corpus/test_original_source_face_pixel_uv_exact_depth_v2.py
+  original-cat-private-physical-pose-transport-court:
+    needs: adversarial-transport-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Reopen SHA-immutable original Cat V3 physical poses and native source face/UV/camera bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m pip install 'numpy>=1.26,<3' 'shapely>=2.1,<3'
+          D="$RUNNER_TEMP/original-cat-pose-uv-anchor"
+          mkdir -p "$D/private" "$D/output"
+          export RCLONE_CONFIG="$D/rclone.conf"
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          R="$D/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 4 --max-time 180 https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$D"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          ROOT="gdrive:corpus370_preparation_v1"
+          T="$ROOT/hosted_native_temporal_pilot_v1/41915393652-1/subjects/corpus_000ca1ae51f9582fde9e"
+          F="$ROOT/hosted_graphics_source_face_uv_alignment_v0/CAT/42284306947-1"
+          V="$ROOT/hosted_drawable_capability_pose_transport_v3/CAT/42273572984-1"
+          Q="$ROOT/hosted_operational_cat_source_uv_plan_v2/CAT/42260446130-1"
+          U="$ROOT/hosted_cat_subface_relations_graphics_source_truth_v1/CAT/42305586590-1"
+          rclone copyto "$T/teacher.npz" "$D/private/teacher.npz" --checksum --retries 4
+          rclone copyto "$F/PRIVATE_CAT_NATIVE_FACE_UV_V0.npz" "$D/private/face-uv.npz" --checksum --retries 4
+          rclone copyto "$F/PRIVATE_CAT_NATIVE_TEACHER_GLTF_UV_ALIGNMENT_V0.json" "$D/private/uv-binding.json" --checksum --retries 4
+          rclone copyto "$Q/PRIVATE_CAT_ORIGINAL_SOURCE_UV_EDIT_PLAN_V2.json" "$D/private/uv-plan.json" --checksum --retries 4
+          rclone copyto "$V/PRIVATE_CAT_NATIVE_POSE_UV_EDIT_CYCLES_V3.json" "$D/private/v3-manifest.json" --checksum --retries 4
+          rclone copyto "$V/PRIVATE_CAT_NATIVE_POSE_UV_EDIT_CYCLES_SAMPLES_V3.npz" "$D/private/v3-samples.npz" --checksum --retries 4
+          rclone copyto "$V/PRIVATE_INDEPENDENT_CAT_POSE_UV_TRANSPORT_V3.json" "$D/private/v3-court.json" --checksum --retries 4
+          rclone copyto "$U/PRIVATE_INDEPENDENT_CAT_SUBFACE_REL_GRAPHICS_JOIN_COURT_V1.json" "$D/private/v18u-court.json" --checksum --retries 4
+          INPUT="$ROOT/hosted_operational_drawable_inputs_v1/42220981274-1/ORIGINAL_TWO_SOURCE_INPUTS.zip"
+          rclone copyto "$INPUT" "$D/private/source-inputs.zip" --checksum --retries 4
+          D="$D" python - <<'PY'
+          from pathlib import Path
+          import os,zipfile,json,hashlib
+          d=Path(os.environ["D"])/"private"
+          p=d/"source-inputs.zip"
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=="e3c758b0a4dc9bd3e7f889e94366fa7ff40517deb15e68a202d525b62de13948"
+          with zipfile.ZipFile(p) as z:
+            m=json.loads(z.read("PRIVATE_TRANSPORT_MANIFEST.json"))
+            assert m["parent_manifest_sha256"]=="cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172"
+            rows=[r for r in m["files"] if r["relative_path"].endswith("/corpus_000ca1ae51f9582fde9e/camera_bundle.json")]
+            assert len(rows)==1
+            row=rows[0]
+            raw=z.read("objects/"+row["sha256"])
+            assert hashlib.sha256(raw).hexdigest()==row["sha256"]=="300b935a47379f6c44d4b4356554d1c32a86ca3b732a62405c73da9e0ec6adf0"
+            (d/"camera.json").write_bytes(raw)
+          pins={
+            "teacher.npz":"c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603",
+            "face-uv.npz":"7f3afdc4f0f848de3aa06bda2220151427d352368a0f235ca09d5d96f7834787",
+            "uv-binding.json":"b966a3793c682cb06ec70341e659aabbded9343ace3d645c08643de40f2799d7",
+            "camera.json":"300b935a47379f6c44d4b4356554d1c32a86ca3b732a62405c73da9e0ec6adf0",
+            "uv-plan.json":"8be8fccde3d9cc97f7ba452fd50c1a9f4ebea2e34da590a22d30872b2b0f497b",
+            "v3-manifest.json":"89dcb4d516e5579e766b19bd2d25eb31cbfaaa64f27ce34632405d99ce6874bc",
+            "v3-court.json":"0171e9ec836d7b3c44ec64abcc59f712ebd33a87c2ad4edf6188976dc08e272c",
+            "v3-samples.npz":"b2bb4fa9fc0b777bb8418aebc729123616b774b55eeb215ba17651e7f3448e0d",
+            "v18u-court.json":"6e864c460aa4b27acd243787f4cee992018e90a1c2e7cdc2d39c590ea0af564a",
+          }
+          for name,expected in pins.items():
+            with (d/name).open("rb") as f:
+              assert hashlib.file_digest(f,"sha256").hexdigest()==expected,name
+          print("ORIGINAL_CAT_ALL_NATIVE_POSE_SOURCE_PARENTS_SHA_PINNED",flush=True)
+          PY
+      - name: Qualify exact source face UV correspondence and original physical Cycles effects at BOTH poses, independently court anchors
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/original-cat-pose-uv-anchor"
+          python -m tools.corpus.measure_original_pose_subface_uv_transport_physical_v1 \
+            --root "$D/private" \
+            --output "$D/output/PRIVATE_CAT_POSE_FACE_UV_ANCHOR_PHYSICAL_V1.json"
+          python -m tools.corpus.court_original_pose_subface_uv_transport_physical_v1 \
+            --root "$D/private" \
+            --producer "$D/output/PRIVATE_CAT_POSE_FACE_UV_ANCHOR_PHYSICAL_V1.json" \
+            --output "$D/output/PRIVATE_INDEPENDENT_CAT_POSE_FACE_UV_ANCHOR_COURT_V1.json"
+          D="$D" python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ["D"])/"output"
+          j=json.loads((d/"PRIVATE_INDEPENDENT_CAT_POSE_FACE_UV_ANCHOR_COURT_V1.json").read_text())
+          assert j["status"]=="PASS_ORIGINAL_CAT_POSE0_POSE14_SAME_FACE_UV_ANCHOR_PHYSICAL_TRANSPORT__OWNER_UNKNOWN"
+          assert j["qualified_source_face_pixels_pose0"]>=32000
+          assert j["qualified_source_face_pixels_pose14"]>=32000
+          assert j["original_same_barycentric_UV_anchor_physical_transport_witnesses"]>=30000
+          assert j["original_transported_anchors_moving_at_least_1_pixel"]>=28000
+          assert j["original_source_artist_drawable_owner"]=="UNKNOWN"
+          assert j["iris_training_authorized"] is False
+          print("ORIGINAL_CAT_TWO_NATIVE_POSES_UV_PHYSICAL_SOURCE_FACE_ANCHOR_COURT_PASS",flush=True)
+          PY
+          export RCLONE_CONFIG="$D/rclone.conf"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_cat_pose_subface_uv_physical_transport_v1/CAT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in "$D/output/"*.json; do
+            NAME="$(basename "$F")"
+            rclone copyto "$F" "$REMOTE/$NAME" --checksum --retries 5
+            rclone cat "$REMOTE/$NAME" > "$D/output/readback-$NAME"
+            cmp "$F" "$D/output/readback-$NAME"
+            sha256sum "$F"
+          done
+          echo "CAT_POSE0_POSE14_SOURCE_FACE_UV_TRANSPORT_COURT_SHA_READBACK_PASS__TRAINING_FALSE__OWNER_UNKNOWN"

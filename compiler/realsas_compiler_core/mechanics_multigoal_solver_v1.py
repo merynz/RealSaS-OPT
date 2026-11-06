@@ -137,10 +137,10 @@ def solve_declared_multi_goal_v1(
             raise QualificationError(code)
     if orientation_tolerance_rad>math.pi:
         raise QualificationError("MULTIGOAL_ORIENTATION_TOLERANCE_INVALID")
-    if ((attachment_orientation_targets is not None
-         or attachment_position_targets is not None)
-            and jacobian_mode != "ANALYTIC_RESEARCH_V1"):
-        raise QualificationError("MULTIGOAL_ATTACHMENT_POSE_REQUIRES_ANALYTIC")
+    if attachment_orientation_targets is not None and jacobian_mode != "ANALYTIC_RESEARCH_V1":
+        raise QualificationError("MULTIGOAL_ORIENTATION_REQUIRES_ANALYTIC")
+    if attachment_position_targets is not None and jacobian_mode != "ANALYTIC_RESEARCH_V1":
+        raise QualificationError("MULTIGOAL_ATTACHMENT_POSITION_REQUIRES_ANALYTIC")
     if min(max_nfev, maximum_joints, maximum_dofs, maximum_goals) < 1:
         raise QualificationError("MULTIGOAL_RESOURCE_POLICY_INVALID")
 

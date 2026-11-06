@@ -3,6 +3,7 @@ from __future__ import annotations
 """Non-humanoid long-tree Mechanics evaluation, no corpus/model input."""
 
 from dataclasses import replace
+import math
 import numpy as np
 import pytest
 

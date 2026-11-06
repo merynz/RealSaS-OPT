@@ -1,0 +1,51 @@
+{
+  "schema": "RealSaS.MechanicsRealSourcePilotReceipt.v1",
+  "date_utc": "2026-11-06",
+  "status": "PASS_SOURCE_BYTES_AND_BASIC_RESPONSE_DIAGNOSTIC_ONLY",
+  "scope": "READ_ONLY_RESEARCH_EXPOSED__NOT_PRODUCT_OR_MODEL_AUTHORITY",
+  "subject_key": "truth139_fff1396de9c37b2bab05",
+  "source_label": "Quaternius Ultimate Monsters / Dino.gltf (privileged source locator; not student feature)",
+  "stage47_drive_folder": "https://drive.google.com/drive/folders/1bNnNFIEWeUvNrQzMIFBNdKQ9jWLyOGBS",
+  "source_teacher_url": "https://drive.google.com/file/d/1GtinNxBwE-bUzWoHJpkNiIsVNO9UBQoj/view",
+  "source_npz_url": "https://drive.google.com/file/d/1nTYZPFOffuBMDuLqeub7Z-UaQQNE_QTr/view",
+  "source_sha256": "d7c57a4ad6444f9c845ecdc13782a7430fcb377594a00f719cd2d37b9434b6de",
+  "teacher_scene_sha256": "87eacdb230f19feae5b0d3e15b67d504fe40908f703254faa4a4d29e9b117b6e",
+  "source_geometry_npz_sha256": "c13e837029ab80c78c989c01698d31ae10446c18fa8907e1a8840c33ca6c75fb",
+  "shape": {
+    "vertex_count": 3266,
+    "face_count": 5414,
+    "source_control_parameter_count": 129,
+    "action_count": 774,
+    "sign_pair_count": 387
+  },
+  "measured": {
+    "rest_identity_max_abs": 0,
+    "sham_max_abs": 0,
+    "root_translation_max_abs_error": 8.326672684688674e-17,
+    "source_weight_covered_vertex_count": 3266,
+    "source_weight_max_simplex_error": 3.725290298461914e-8,
+    "nonzero_source_consequence_actions": 738,
+    "source_displacement_median_world": 0.004366949285635292,
+    "source_displacement_p90_world": 0.03854519028675793,
+    "source_displacement_max_world": 0.16273910250609927,
+    "source_pair_even_residual_median_world": 0.00014300449762611622,
+    "source_pair_even_residual_p90_world": 0.007743302928176777
+  },
+  "measurement_semantics": {
+    "coordinate_frame": "SOURCE_WORLD",
+    "action_measure": "UNSEALED__NO_IMPLICIT_UNIFORM_LAW",
+    "authored_joint_limits": "UNKNOWN",
+    "source_weight_lbs_equivalence": "NOT_QUALIFIED",
+    "native_clip_rest_compatible": false,
+    "privileged_controls_student_input": false
+  },
+  "authority_firewall": {
+    "research_exposed_subject": true,
+    "allow_use_as_future_blind_unseen": false,
+    "allow_student_training": false,
+    "compiled_mechanics_correspondence_qualified": false,
+    "source_skin_carrier_transport_qualified": false,
+    "graphics_authority_claimed": false
+  },
+  "method_note": "Values computed in read-only container inspection from the exact downloaded source Stage47 teacher JSON and NPZ. GitHub automated source-audit script exists, but this receipt is not a separately independently-courted compiler-vs-Blender result."
+}

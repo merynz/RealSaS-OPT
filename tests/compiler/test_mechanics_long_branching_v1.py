@@ -289,3 +289,42 @@ def test_rank_hysteresis_rejects_unknown_and_non_rank_prior_basis():
             case.rig,case.overrides,
             preferred_parameter_keys=(("J:1:0","RY"),),**args,
         )
+
+
+def test_bounded_deterministic_multistart_recovers_reachable_singular_target():
+    from tests.compiler.test_mechanics_multigoal_solver_v1 import _branched_rig
+    from compiler.realsas_compiler_core.mechanics_control_solver_v1 import ControlTransformIRV1
+    rig=_branched_rig()
+    edit=(ControlTransformIRV1("A_HANDLE",translation=(-.7,1.2,0.)),)
+    recovered=solve_declared_multi_goal_v1(
+        rig,edit,pinned_contact_control_ids=("B_HANDLE",),
+        pinned_world_targets={"B_HANDLE":(-2.,0.,0.)},
+        active_parameter_policy="RANK_REVEALING_RESEARCH_V1",
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+        singularity_recovery_mode="BOUNDED_DETERMINISTIC_SEEDS_V1",
+        regularization=1e-9,goal_tolerance=2e-3,max_nfev=350,
+    )
+    assert recovered.metadata["rank_revealing_fallback_to_all"] is True
+    assert 1<=recovered.metadata["singularity_recovery_trials"]<=6
+    assert recovered.metadata["singularity_recovery_rescued"] is True
+    assert recovered.status=="PASS_MULTIGOAL_BEHAVIORAL_COURT"
+    assert recovered.max_drag_residual<2e-3
+    assert recovered.max_pin_residual<2e-3
+    assert len(recovered.parameters_rad)==3
+
+
+def test_singularity_recovery_requires_declared_analytic_full_dof_authority():
+    case=make_morphology_case_v1(24)
+    with pytest.raises(QualificationError,match="SINGULARITY_RECOVERY_REQUIRES_ANALYTIC"):
+        solve_declared_multi_goal_v1(
+            case.rig,case.overrides,
+            singularity_recovery_mode="BOUNDED_DETERMINISTIC_SEEDS_V1",
+            jacobian_mode="NUMERIC_V1",
+        )
+    with pytest.raises(QualificationError,match="SINGULARITY_RECOVERY_REQUIRES_FULL_DOF"):
+        solve_declared_multi_goal_v1(
+            case.rig,case.overrides,
+            singularity_recovery_mode="BOUNDED_DETERMINISTIC_SEEDS_V1",
+            jacobian_mode="ANALYTIC_RESEARCH_V1",
+            active_parameter_keys=(("J:1:0","RY"),),
+        )

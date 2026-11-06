@@ -82,7 +82,7 @@ def court(root,producer,output):
         and m["teacher_pose_sample_ordinals"]==[0,14]
         and m["original_calibrated_view_indices"]==list(VIEWS)
         and m["original_same_cycles_sample_offsets"]==[0,16]
-        and m["source_original_pose_geometry_replay_receipts"] if False else True,
+        and len(m["original_source_pose_geometry_replay_receipts"])==2,
         "SEALED_PRODUCER_OR_ORIGINAL_PHYSICAL_SCOPE")
     # Explicit chained validation separate from the compound to avoid
     # accidental boolean-precedence bypass of any single source obligation.

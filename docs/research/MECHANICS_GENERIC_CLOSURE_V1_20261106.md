@@ -529,3 +529,82 @@ feasibility, proper source-native multi-tool grip evidence, app-level
 capability contract for which goals can *legally* be advisory,
 priority stability under continuous edits, and full runtime/render
 performance with morphologically diverse authored subjects.
+
+## 2026-11-06: explicit cross-parent 6D bridge for a shared rigid prop and independently grounded third limb
+
+The previous **same-parent rigidity court** could reject pairwise contradiction
+but could not mechanically couple two separately joint-owned attachment
+frames. The new `mechanics_relative_attachment_bridge_v1.py` introduces a
+typed **research-only** relative 6D bridge across different declared
+parent joints, SHA-bound to `rig_lineage_hash` and `control_program_hash`.
+A bridge names two canonical attachment anchors and an explicitly
+declared A-frame-to-B-frame rigid position/orientation offset, with a
+nonempty declaration evidence reference. This is **not** automatic
+discovery of a weapon or source-authoritative grip connection.
+
+For grip frames `(P_A,R_A)`, `(P_B,R_B)` and declared A-relative rigid
+transform `(t_AB,Q_AB)`, the solver checks the full six-dimensional
+relationship:
+- Position residual: `P_B - (P_A + R_A @ t_AB)`.
+- Rotation chordal residual: `R_B - (R_A @ Q_AB)`; independent final
+  residual is the geodesic SO(3) angular distance in radians.
+
+The exact, task-space analytic FK derivative is obtained for every
+declared rotational DOF as the difference between the B grip's world
+position/basis response and the A-projected bridge response.
+Rank-revealing subspace selection, warm start and bounded singularity
+policy can therefore *see* the new 3+9 task rows. No undeclared DOF,
+joint stretch, hidden constraint or source physical parameter is created.
+The solver performs its own complete residual check and a **separate
+post-pose independent bridge court** runs from world joint positions
+and local canonical attachment frames before any secondary skin motion.
+All original pin, drag, grip target and bridge residuals must satisfy
+their declared tolerances before a full Mechanics PASS.
+
+**Nontrivial behavioral proof:** One branch's distal IK target can move
+the *other* branch via only the declared relative rigid bridge even when
+that second branch has no direct target. A geometrically contradictory
+pin plus drag + bridge remains explicit FAIL. Another three-branch rig
+adds an independently pinned distal contact: moving the two linked
+hand/prop branches across **five changing target angles** preserves that
+fixed third contact and both world grip poses. Deliberately unreachable
+contact stays FAIL. Unknown/duplicate bridge/anchor IDs, same-parent
+misuse, stale lineage, unauthored grip axes and invalid SO(3) matrices
+fail closed.
+
+The mechanism is exercised by:
+`tests/compiler/test_mechanics_relative_attachment_bridge_v1.py`;
+the full-frame benchmark is
+`tools/mechanics/benchmark_relative_attachment_bridge_v1.py`.
+This is a *small synthetic research rig*, not a character proof.
+
+**GitHub verification:** Tested code head
+`a240f1ba08cc2c01ff6718ef0edbab65fe034601`,
+Actions run `42291808979`, **128/128 focused Mechanics tests PASS**
+and Mechanics research ownership firewall PASS.
+
+**Measured CPU diagnostic (GitHub runner):** 12 frames after 3 warmups,
+8 joints / 5 rotational DOF / **3 prepared-skin vertices**,
+two grip anchors + one planted distal control.
+Full primary solve, independent bridge world-frame court and
+3-vertex LBS: p50 **4.129 ms**, p95 **4.199 ms**, max **4.219 ms**.
+Max world drag/contact discrepancy **4.386e-5**, bridge
+position discrepancy **2.193e-5**, bridge SO(3) angle
+**1.096e-5 rad**; segment-length strain at floating-point precision.
+
+The receipt
+`MECHANICS_CROSS_PARENT_6D_GRIP_GROUNDED_THIRD_LIMB_20261106.json`
+contains measured values, qualified scope, tested SHA and explicit
+nonclaims. This benchmark is **not** evidence that a realistic
+30–80 bone, thousands-of-vertices character plus graphics renderer
+meets a product FPS budget; no real source sword/attachment
+authority, collision, friction, semantic body-part ownership or
+training target was minted.
+
+**Next scientific barrier:** verify actual source-authorized joint/prop
+attachment relationships and local grip frames; compare model
+compiler's canonical grip/DOF contracts to independent source
+interventions on research-exposed diverse morphologies. Then measure
+multi-contact, secondary motion and Graphics end-to-end on realistic
+meshes. Keep the coupling opt-in until capability and source evidence
+are validated.

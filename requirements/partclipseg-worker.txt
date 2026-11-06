@@ -1,0 +1,17 @@
+# Isolated Python 3.10 research worker for official PartCLIPSeg code at
+# kaist-cvml/part-clipseg@8abceefff960920019096982688e3e8209ed39de.
+# Torch/torchvision are installed separately from the cu121 PyTorch index.
+# This environment is intentionally independent from the current SAM2/
+# Transformers 5.19 RealSaS research environment.
+numpy==1.23.5
+Pillow==9.5.0
+huggingface-hub==0.36.0
+tokenizers==0.13.3
+safetensors>=0.2.1
+ftfy==6.3.1
+regex
+requests
+packaging>=20.0
+filelock
+pyyaml>=5.1
+tqdm>=4.27

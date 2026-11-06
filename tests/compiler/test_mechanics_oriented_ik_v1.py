@@ -300,3 +300,72 @@ def test_live_full_grip_pose_solve_keeps_secondary_and_other_constraints_intact(
     assert frame.metadata["attachment_max_position_residual_world"]<1e-3
     assert frame.metadata["attachment_target_orientation_status"]=="PASS_ATTACHMENT_FRAME_COURT"
     assert frame.metadata["rig_or_skin_mutated"] is False
+
+
+def test_six_dimensional_grip_motion_sequence_tracks_continuous_orientation_and_world_pin():
+    from compiler.realsas_compiler_core.mechanics_live_runtime_v1 import (
+        MechanicsInterventionStepV1, evaluate_mechanics_intervention_sequence_v1,
+    )
+    mesh,rig,skin,mechanics=_objects()
+    rig=replace(rig,attachment_anchors=(CanonicalAttachmentAnchorIRV2(
+        "GRIP:A",parent_canonical_joint_id="A1",
+        local_P=(1.,0.,0.),source_proposal_anchor_id="synthetic:grip",
+        metadata={"local_basis":I},
+    ),))
+    angles=(.11,.15,.19,.23,.27)
+    steps=tuple(
+        MechanicsInterventionStepV1(
+            time_seconds=float(i)/30.,
+            overrides=_goals(angle),
+            attachment_world_positions={
+                "GRIP:A":(1.+math.cos(angle),math.sin(angle),0.),
+            },
+            attachment_world_orientations={"GRIP:A":_rz(angle)},
+        ) for i,angle in enumerate(angles)
+    )
+    scene=evaluate_mechanics_intervention_sequence_v1(
+        mesh,rig,skin,mechanics,steps,
+        solver_mode="DECLARED_MULTI_GOAL_V1",
+        multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1",
+        attachment_orientation_mode="SOLVE_DECLARED_RESEARCH_V1",
+        pinned_contact_control_ids=("B_HANDLE",),
+        pinned_world_targets={"B_HANDLE":(-2.,0.,0.)},
+        max_allowed_constraint_residual=1e-3,
+    )
+    assert scene.status=="PASS_MECHANICS_SEQUENCE_DIAGNOSTIC"
+    assert scene.metadata["per_frame_attachment_pose_tracks_supported"] is True
+    assert scene.metadata["multi_goal_warm_start_frame_count"]==len(steps)-1
+    assert scene.max_vertex_speed>=0.
+    for frame,angle in zip(scene.frames,angles):
+        assert frame.status=="PASS_MECHANICS_BEHAVIORAL_COURT"
+        assert frame.attachment_frames.status=="PASS_ATTACHMENT_FRAME_COURT"
+        a=frame.attachment_frames.frames[0]
+        assert a.position_target_residual_world<1e-3
+        assert a.angular_target_residual_rad<1e-3
+        assert np.allclose(a.world_P,
+                           (1.+math.cos(angle),math.sin(angle),0.),
+                           atol=1e-3)
+        solved={j.canonical_joint_id:j for j in frame.pose.joints}
+        assert np.allclose(solved["B2"].solved_P,(-2.,0.,0.),atol=1e-3)
+
+
+def test_conflicting_static_and_keyframed_attachment_authority_fails_closed():
+    from compiler.realsas_compiler_core.mechanics_live_runtime_v1 import (
+        MechanicsInterventionStepV1, evaluate_mechanics_intervention_sequence_v1,
+    )
+    mesh,rig,skin,mechanics=_objects()
+    step=MechanicsInterventionStepV1(
+        time_seconds=0.,
+        attachment_world_positions={"X":(0.,0.,0.)},
+        attachment_world_orientations={"X":I},
+    )
+    with pytest.raises(QualificationError,match="POSITION_SCHEDULE_CONFLICT"):
+        evaluate_mechanics_intervention_sequence_v1(
+            mesh,rig,skin,mechanics,(step,),
+            required_attachment_world_positions={"X":(0.,0.,0.)},
+        )
+    with pytest.raises(QualificationError,match="ORIENTATION_SCHEDULE_CONFLICT"):
+        evaluate_mechanics_intervention_sequence_v1(
+            mesh,rig,skin,mechanics,(step,),
+            required_attachment_world_orientations={"X":I},
+        )

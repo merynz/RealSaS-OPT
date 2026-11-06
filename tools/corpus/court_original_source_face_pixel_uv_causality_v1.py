@@ -25,6 +25,7 @@ PINS={
     "rest.npz":"748609aca5ba7c509aa390ed65baeca7612b8879aa00409735da3a96758379cf",
     "face-uv.npz":"7f3afdc4f0f848de3aa06bda2220151427d352368a0f235ca09d5d96f7834787",
     "camera.json":"300b935a47379f6c44d4b4356554d1c32a86ca3b732a62405c73da9e0ec6adf0",
+    "source-policy.json":"c8fe4e307ddbbaf5cc0892cffc4267bd08e394f2299f4e70155ffc6207190a4b",
     "uv-plan.json":"8be8fccde3d9cc97f7ba452fd50c1a9f4ebea2e34da590a22d30872b2b0f497b",
     "physical.npz":"d422b7d7d082fba5deac5dd1239b8c6aec078f4d635a7bd5b1f10e514100b114",
     "physical-manifest.json":"8a56e47a09f5c1216de2c97e6f13d5e04385f7fe7d2e580d0085b2ab69dc2da1",
@@ -115,6 +116,7 @@ def independently_court(root,report_path,output):
     plan=json.loads((root/"uv-plan.json").read_text())
     camera=json.loads((root/"camera.json").read_text())
     manifest=json.loads((root/"physical-manifest.json").read_text())
+    policy=json.loads((root/"source-policy.json").read_text())
     court=json.loads((root/"physical-court.json").read_text())
     bind=json.loads((root/"uv-binding.json").read_text())
     req(q["schema"]==SOURCE
@@ -145,6 +147,9 @@ def independently_court(root,report_path,output):
         and manifest["original_camera_bundle_sha256"]==PINS["camera.json"]
         and manifest["original_source_uv_edit_plan_sha256"]==PINS["uv-plan.json"]
         and manifest["original_source_rest_only"] is True
+        and manifest["original_source_material_policy_sha256"]==PINS["source-policy.json"]
+        and policy["material_mode"]=="unlit_preserve_alpha"
+        and policy["source_sha256"]==ORIGINAL_SOURCE
         and court["status"]==
            "PASS_ORIGINAL_CAT_LINKED_UV_EDIT_CONSEQUENCE_SUPERPOSITION__OWNER_UNKNOWN"
         and court["failed_obligations"]==[],

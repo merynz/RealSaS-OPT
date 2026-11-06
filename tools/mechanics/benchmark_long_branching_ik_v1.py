@@ -194,6 +194,7 @@ def solve_and_court_v1(
     jacobian_mode: str="ANALYTIC_RESEARCH_V1",
     max_nfev: int=90,
     derivative_check: bool=False,
+    active_parameter_keys: tuple[tuple[str,str],...] | None=None,
 ) -> dict:
     started=time.perf_counter()
     result: MechanicsMultiGoalResultV1=solve_declared_multi_goal_v1(
@@ -205,6 +206,7 @@ def solve_and_court_v1(
         regularization=1e-8,
         max_nfev=max_nfev,
         verify_analytic_jacobian=derivative_check,
+        active_parameter_keys=active_parameter_keys,
     )
     elapsed=(time.perf_counter()-started)*1000
     by_joint={j.canonical_joint_id:np.asarray(j.solved_P) for j in result.pose.joints}
@@ -228,6 +230,8 @@ def solve_and_court_v1(
         "solver_mode":jacobian_mode,
         "runtime_ms":elapsed,
         "solver_evaluations":result.solver_evaluations,
+        "active_solver_parameters":result.metadata["active_solver_parameter_count"],
+        "frozen_solver_parameters":result.metadata["frozen_solver_parameter_count"],
         "joint_count":len(case.rig.joints),
         "control_count":len(case.rig.controls),
         "pin_count":len(case.pins),
@@ -248,11 +252,43 @@ def run_court_v1(*,dois:tuple[int,...]=(24,48,72),max_nfev:int=90)->dict:
         measured=solve_and_court_v1(case,max_nfev=max_nfev,
                                     derivative_check=(dof==24))
         observed=_observability(case)
+        # The source-free synthetic fixture *specifies* each drag as a
+        # single joint-0 rotation. Its matching sparse actuator policy is a
+        # known fixture oracle, not generic control discovery or truth.
+        sparse_keys=tuple(
+            (f"J:{index}:0",PLANES[index%3][0])
+            for index in range(len(case.rig.controls))
+            if index%2==1
+        )
+        reduced=solve_and_court_v1(
+            case,max_nfev=max_nfev,active_parameter_keys=sparse_keys,
+        )
         if (measured["status"]!="PASS_MULTIGOAL_BEHAVIORAL_COURT" or
+                reduced["status"]!="PASS_MULTIGOAL_BEHAVIORAL_COURT" or
                 measured["max_segment_length_absolute_error_world"]>1e-8 or
+                reduced["max_segment_length_absolute_error_world"]>1e-8 or
                 not observed["all_dofs_individually_affect_an_endpoint"]):
             raise AssertionError("MECHANICS_MORPHOLOGY_FUNCTIONAL_COURT_FAIL")
-        cases.append({"morphology":case.morphology,**observed,**measured})
+        cases.append({
+            "morphology":case.morphology,**observed,**measured,
+            "explicit_synthetic_oracle_policy":{
+                "scope":"KNOWN_FIXTURE_TARGET_GENERATION_ONLY_NOT_GENERIC",
+                "selected_actuators":list(map(list,sparse_keys)),
+                "active_dof_count":reduced["active_solver_parameters"],
+                "frozen_dof_count":reduced["frozen_solver_parameters"],
+                "solver_status":reduced["status"],
+                "solver_runtime_ms":reduced["runtime_ms"],
+                "max_drag_residual_world":reduced["max_drag_residual_world"],
+                "max_pin_residual_world":reduced["max_pin_residual_world"],
+                "max_segment_length_absolute_error_world":reduced[
+                    "max_segment_length_absolute_error_world"
+                ],
+                "full_over_sparse_wall_ratio_observed":(
+                    measured["runtime_ms"]/reduced["runtime_ms"]
+                ),
+                "unselected_dof_truth_is_not_invalidated":True,
+            },
+        })
     return {
         "schema":SCHEMA,"status":"PASS_MORPHOLOGY_RESEARCH_COURT",
         "cases":cases,
@@ -267,6 +303,8 @@ def run_court_v1(*,dois:tuple[int,...]=(24,48,72),max_nfev:int=90)->dict:
             "real_source_physical_DOF_limits_proven":False,
             "full_product_runtime_FPS_certified":False,
             "contact_is_world_position_not_force_or_friction":True,
+            "sparse_actuator_policy_is_oracle_for_known_synthetic_target":True,
+            "policy_for_arbitrary_targets_qualified":False,
         },
     }
 

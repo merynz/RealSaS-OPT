@@ -25,6 +25,7 @@ import math
 
 import numpy as np
 from scipy.optimize import least_squares
+from scipy.linalg import qr
 
 from .canonical_rig_ir_v2 import CanonicalRigIRV2
 from .mechanics_control_solver_v1 import (
@@ -95,6 +96,7 @@ def solve_declared_multi_goal_v1(
     maximum_goals: int = 16,
     initial_parameters_rad: Sequence[tuple[str, str, float]] | None = None,
     active_parameter_keys: Sequence[tuple[str, str]] | None = None,
+    active_parameter_policy: str = "EXPLICIT_OR_ALL",
     jacobian_mode: str = "NUMERIC_V1",
     verify_analytic_jacobian: bool = False,
 ) -> MechanicsMultiGoalResultV1:
@@ -111,6 +113,12 @@ def solve_declared_multi_goal_v1(
         raise QualificationError("MULTIGOAL_JACOBIAN_MODE_UNSUPPORTED")
     if verify_analytic_jacobian and jacobian_mode != "ANALYTIC_RESEARCH_V1":
         raise QualificationError("MULTIGOAL_JACOBIAN_COURT_REQUIRES_ANALYTIC")
+    if active_parameter_policy not in {"EXPLICIT_OR_ALL", "RANK_REVEALING_RESEARCH_V1"}:
+        raise QualificationError("MULTIGOAL_ACTIVE_DOF_POLICY_MODE_UNSUPPORTED")
+    if active_parameter_policy == "RANK_REVEALING_RESEARCH_V1" and (
+        active_parameter_keys is not None or jacobian_mode != "ANALYTIC_RESEARCH_V1"
+    ):
+        raise QualificationError("MULTIGOAL_RANK_POLICY_REQUIRES_AUTO_ANALYTIC")
 
     joint_by = {j.canonical_joint_id: j for j in rig.joints}
     if not joint_by or len(joint_by) != len(rig.joints) or len(joint_by) > maximum_joints:
@@ -342,11 +350,35 @@ def solve_declared_multi_goal_v1(
                 np.any(x0 < lower_np-1e-12) or np.any(x0 > upper_np+1e-12)):
             raise QualificationError("MULTIGOAL_WARM_START_OUT_OF_BOUNDS")
         x0 = np.minimum(np.maximum(x0, lower_np), upper_np)
-    # An optional solver-time representation policy freezes all unselected
-    # declared DOFs at their validated initial configuration. This is NOT
-    # evidence that those DOFs are physically unnecessary, nor a change to the
-    # canonical rig contract. Every constraint residual remains fully checked.
-    if active_parameter_keys is None:
+    # Rank-revealing task-space policy considers only goal-position
+    # observations. Never include diagonal regularization rows in the
+    # observability rank: they are policy penalties, not evidence of effects.
+    policy_candidate_rank: int | None = None
+    policy_fallback = False
+    policy_candidate_keys: tuple[tuple[str, str], ...] = ()
+    if active_parameter_policy == "RANK_REVEALING_RESEARCH_V1":
+        task_jac = analytic_jacobian(x0)[:3*len(goals), :]
+        if not np.isfinite(task_jac).all():
+            raise QualificationError("MULTIGOAL_RANK_POLICY_JACOBIAN_NONFINITE")
+        _, triangular, pivot_columns = qr(task_jac, pivoting=True, mode="economic")
+        diagonal = np.abs(np.diag(triangular))
+        pivot_floor = max(
+            1e-9,
+            float(np.max(diagonal))*1e-6 if diagonal.size else 0.0,
+        )
+        policy_candidate_rank = int(np.count_nonzero(diagonal > pivot_floor))
+        if policy_candidate_rank:
+            selected_indices = sorted(
+                int(i) for i in pivot_columns[:policy_candidate_rank]
+            )
+        else:
+            # Zero linearized effects do NOT prove the nonlinear target is
+            # unreachable. Preserve every DOF rather than hallucinating a
+            # zero-control solution.
+            selected_indices = list(range(len(param_schema)))
+        active_idx = np.asarray(selected_indices, dtype=np.int64)
+        policy_candidate_keys = tuple(param_schema[i] for i in active_idx)
+    elif active_parameter_keys is None:
         active_idx = np.arange(len(param_schema), dtype=np.int64)
     else:
         try:
@@ -356,30 +388,48 @@ def solve_declared_multi_goal_v1(
         if (not selected or len(set(selected)) != len(selected)
                 or not set(selected).issubset(set(param_schema))):
             raise QualificationError("MULTIGOAL_ACTIVE_DOF_POLICY_INVALID")
-        active_idx = np.asarray([
-            i for i, key in enumerate(param_schema) if key in set(selected)
-        ], dtype=np.int64)
-    frozen_q = x0.copy()
+        selected_set = set(selected)
+        active_idx = np.asarray(
+            [i for i, key in enumerate(param_schema) if key in selected_set],
+            dtype=np.int64,
+        )
 
-    def expand_active(active_q: np.ndarray) -> np.ndarray:
-        full = frozen_q.copy()
-        full[active_idx] = active_q
-        return full
+    def optimize_subspace(indices: np.ndarray, seed: np.ndarray):
+        def expand_active(active_q: np.ndarray) -> np.ndarray:
+            full = seed.copy()
+            full[indices] = active_q
+            return full
 
-    def residual_active(active_q: np.ndarray) -> np.ndarray:
-        return residual(expand_active(active_q))
+        def residual_active(active_q: np.ndarray) -> np.ndarray:
+            return residual(expand_active(active_q))
 
-    def jacobian_active(active_q: np.ndarray) -> np.ndarray:
-        return analytic_jacobian(expand_active(active_q))[:, active_idx]
+        def jacobian_active(active_q: np.ndarray) -> np.ndarray:
+            return analytic_jacobian(expand_active(active_q))[:, indices]
 
-    opt = least_squares(
-        residual_active, x0[active_idx],
-        bounds=(lower_np[active_idx], upper_np[active_idx]),
-        jac=jacobian_active if jacobian_mode == "ANALYTIC_RESEARCH_V1" else "2-point",
-        method="trf", max_nfev=int(max_nfev),
-        xtol=1e-10, ftol=1e-10, gtol=1e-10,
-    )
-    solution_q = expand_active(opt.x)
+        optimized = least_squares(
+            residual_active, seed[indices],
+            bounds=(lower_np[indices], upper_np[indices]),
+            jac=jacobian_active if jacobian_mode == "ANALYTIC_RESEARCH_V1" else "2-point",
+            method="trf", max_nfev=int(max_nfev),
+            xtol=1e-10, ftol=1e-10, gtol=1e-10,
+        )
+        return optimized, expand_active(optimized.x)
+
+    opt, solution_q = optimize_subspace(active_idx, x0)
+    candidate_nfev = int(opt.nfev)
+    if active_parameter_policy == "RANK_REVEALING_RESEARCH_V1":
+        candidate_positions, _, _ = forward(solution_q)
+        candidate_failed = not bool(opt.success) or any(
+            np.linalg.norm(candidate_positions[tip]-target) > goal_tolerance
+            for _, _, tip, target, _ in goals
+        )
+        if candidate_failed:
+            # Candidate policy was too restrictive for this goal/pose.
+            # Retry with the entire DECLARED DOF set. This is an explicit
+            # representation-policy fallback, never a change to source truth.
+            policy_fallback = True
+            active_idx = np.arange(len(param_schema), dtype=np.int64)
+            opt, solution_q = optimize_subspace(active_idx, solution_q)
     p, rotations, _ = forward(solution_q)
     jacobian_debug_error = None
     if verify_analytic_jacobian:
@@ -455,6 +505,11 @@ def solve_declared_multi_goal_v1(
             "active_solver_parameter_count": int(len(active_idx)),
             "frozen_solver_parameter_count": int(len(param_schema) - len(active_idx)),
             "active_dof_selection_is_representation_policy_not_source_truth": True,
+            "active_parameter_policy": active_parameter_policy,
+            "rank_revealing_candidate_task_rank": policy_candidate_rank,
+            "rank_revealing_candidate_parameter_keys": policy_candidate_keys,
+            "rank_revealing_fallback_to_all": policy_fallback,
+            "rank_revealing_candidate_solver_nfev": candidate_nfev,
             "compiler_rig_synthesis_performed": False,
             "training_authority_minted": False,
             "product_mechanics_release_minted": False,

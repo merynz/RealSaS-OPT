@@ -219,7 +219,7 @@ def main():
         "independent_ray_consequence_court":"NOT_EVALUATED",
         "original_artist_owner":"UNKNOWN",
         **{x:False for x in DENIED}}
-    (out/"PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V1.json").write_text(
+    (out/"PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V2.json").write_text(
         json.dumps(report,sort_keys=True,indent=2,allow_nan=False)+"\n",encoding="utf-8")
     print(json.dumps({"status":"ORIGINAL_SOURCE_EDIT_RASTERS_PRODUCED__NO_OWNER",
         "edits":len(edits),"views":list(VIEWS),"training_authorized":False}),flush=True)

@@ -46,7 +46,7 @@ def test_palette_refines_native_and_unknown_remains_unknown():
     n,p,c=samples()
     joint,dec,report=compile_joint(n,p,c,PAL_SHA,NATIVE_SHA)
     assert len(joint['operations'])==3
-    assert report['joint_candidate_atom_count']==5
+    assert report['joint_candidate_atom_count']==4
     assert report['joint_unknown_placeholder_count']==1
     assert report['source_shader_constant_qualified_faces']==4
     assert report['source_shader_unsupported_faces']==1

@@ -1,0 +1,23 @@
+{
+  "schema": "RealSaS.MechanicsSourceNativeFKLBSResearchReceipt.v1",
+  "subject_key": "truth139_fff1396de9c37b2bab05",
+  "notes": "Supplemental diagnostic: source skin/influence reachability and measured isolated-rotation response. This is not control intent or graphics ownership truth.",
+  "measurements": {
+    "source_native_bones_without_direct_skin_count": 5,
+    "source_native_bones_without_descendant_skin_count": 2,
+    "isolated_rotation_zero_response_control_parameter_count": 6,
+    "distinct_unresponsive_bone_count": 2,
+    "reason_status": "ISOLATED_ROTATION_ONLY_NO_AUTHORED_IK_POLE_EXERCISE",
+    "permanent_inactive_control_inference_allowed": false,
+    "explanation": "Two rest native control bones named as pole targets have no skinned descendants. Zero response to the audited perturbation does not imply lack of importance when their declared IK role is exercised. Unweighted intermediate nodes with weighted descendants CAN influence geometry. Distinguish skin-support reachability from control-program causal influence."
+  },
+  "required_next_evidence": [
+    "DECLARE_CONTROL_ROLE_WITH_PROVENANCE_NOT_SOURCE_NAME",
+    "EXERCISE_IK_POLE_INPUT_VIA_SOURCE_NATIVE_INTERVENTION",
+    "QUALIFY_CANONICAL_CONTROL_AND_FRAME_BINDING",
+    "REQUIRE_NATIVE_MULTICONTROL_CONSEQUENCE_MATCH_BEFORE_GENERIC_CLOSURE"
+  ],
+  "research_exposed_subject": true,
+  "student_model_input_allowed": false,
+  "source_oracle_status": "RESEARCH_ONLY_NOT_CANONICAL_MODEL"
+}

@@ -4,6 +4,8 @@ on:
     branches: [research/graphics-source-face-uv-alignment-v0]
     paths:
       - 'tools/corpus/court_original_source_face_uv_alignment_v0.py'
+      - 'tools/corpus/qualify_source_uv_inventory_v0.py'
+      - 'tools/truth_foundry/blender_original_teacher_face_uv_native_alignment_v0.py'
       - '.github/workflows/source-face-uv-original-cat-v0.yml'
   workflow_dispatch:
 permissions:
@@ -75,4 +77,46 @@ jobs:
           fi
           rclone cat "$DEST/PRIVATE_CAT_SOURCE_FACE_UV_ALIGNMENT_V0.json" > "$D/readback.json"
           cmp "$D/readback.json" "$D/out/PRIVATE_CAT_SOURCE_FACE_UV_ALIGNMENT_V0.json"
-          echo "PRIVATE_FACE_BINDING_AUDIT_ARCHIVED__NO_OWNER_OR_TRAINING_AUTHORITY"
+          echo "INITIAL_SINGLE_PRIMITIVE_GATE_ARCHIVED__MULTIPRIMITIVE_EXPECTED_UNKNOWN"
+          sudo apt-get -o Acquire::Retries=5 update -qq
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 libgl1
+          curl -fL --retry 4 --max-time 300 https://download.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz -o "$D/blender-4.5.14-linux-x64.tar.xz"
+          curl -fL --retry 4 --max-time 120 https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256 -o "$D/blender-checksums.txt"
+          D="$D" python - <<'PY'
+          import hashlib,os,re
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          rows=[r for r in (d/"blender-checksums.txt").read_text().splitlines()
+                if "blender-4.5.14-linux-x64.tar.xz" in r]
+          assert len(rows)==1
+          tokens=re.findall(r"[a-fA-F0-9]{64}",rows[0])
+          assert len(tokens)==1
+          with (d/"blender-4.5.14-linux-x64.tar.xz").open("rb") as f:
+              assert hashlib.file_digest(f,"sha256").hexdigest()==tokens[0].lower()
+          PY
+          tar -xJf "$D/blender-4.5.14-linux-x64.tar.xz" -C "$D"
+          BLENDER="$D/blender-4.5.14-linux-x64/blender"
+          test "$(sha256sum "$BLENDER" | cut -d' ' -f1)" = 050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8
+          "$BLENDER" --background --factory-startup --threads 2 --python-exit-code 1 \
+            --python tools/truth_foundry/blender_original_teacher_face_uv_native_alignment_v0.py -- \
+            --source "$D/cat.glb" --teacher "$D/teacher.npz" \
+            --expected-source-sha 1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850 \
+            --expected-teacher-sha c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603 \
+            --report "$D/out/PRIVATE_CAT_NATIVE_TEACHER_GLTF_UV_ALIGNMENT_V0.json" \
+            --private-face-uv "$D/out/PRIVATE_CAT_NATIVE_FACE_UV_V0.npz"
+          for FILE in PRIVATE_CAT_NATIVE_TEACHER_GLTF_UV_ALIGNMENT_V0.json PRIVATE_CAT_NATIVE_FACE_UV_V0.npz; do
+            if [ -s "$D/out/$FILE" ]; then
+              rclone copyto "$D/out/$FILE" "$DEST/$FILE" --checksum --retries 3
+              rclone cat "$DEST/$FILE" > "$D/check-$FILE"
+              cmp "$D/out/$FILE" "$D/check-$FILE"
+            fi
+          done
+          D="$D" python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          p=json.loads((d/"out/PRIVATE_CAT_NATIVE_TEACHER_GLTF_UV_ALIGNMENT_V0.json").read_text())
+          assert p["source_artist_owner"]=="UNKNOWN" and p["training_authorized"] is False
+          assert p["source_to_teacher_face_uv_binding"]=="VERIFIED_NATIVE_BLENDER_FACE_ORDER_AND_RAW_GLTF_UV_MULTISET",p["reason"]
+          print("ORIGINAL_SOURCE_TO_TEACHER_UV_FACE_IDENTITY_VERIFIED__PUPPET_PARITY_UNKNOWN",flush=True)
+          PY

@@ -39,9 +39,9 @@ This is *fine-grained SOURCE evidence*, not a mandated runtime decomposition or 
 
 Parent source physical V2 PR #367, run 42303181542, admitted 49,494 source face/pixel/UV edit witnesses covering 427 of 684 original Cat triangles; all 395,952 intended per-sample edit effects and 791,904 other-edit checks passed. Original source independent geometry and Cycles sample court SHA a34a3050917fe563321f5e57c1ba1556844dc516965abdff201a6930913d015d. Original V18s source-world UV/mechanics independent court SHA c35ab620e3cf0955bb0b8ca445838d0320b50240bf357a706385eeeb1b67e09c.
 
-New source post-hoc inventory is counted **from previously sealed parent face-ID/pixel rows**; no source UV region, pixel, camera or threshold was chosen to maximize a desired count. The independent new court does not import the source producer and separately recomputes all event incidence and cross-family edge counts.
+New source post-hoc inventory is counted **from previously sealed parent face-ID/pixel rows**; no source UV region, pixel, camera or threshold was chosen to maximize a desired count. The independent new court does not import the source producer and separately recomputes all event incidence and cross-family edge counts. The PASS source-private artifact destination is `gdrive:corpus370_preparation_v1/hosted_cat_subface_relations_graphics_source_truth_v1/CAT/42305586590-1`.
 
-Pilot counts, to be promoted ONLY if new independent original source court passes:
+**INDEPENDENT ORIGINAL SOURCE COURT PASS:** [GitHub Actions run 42305586590](https://github.com/merynz/RealSaS-OPT/actions/runs/42305586590), 2/2 jobs successful, including 7/7 adversarial tests, independent full source face/pixel V18s/V18q join and physically court-admitted V2 parent receipts. Original-source private producer SHA `1dea8e92da10b7c8a502c2773355ab449af77cc63eb38429ca3db55033731df0`; independently recalculated court SHA `6e864c460aa4b27acd243787f4cee992018e90a1c2e7cdc2d39c590ea0af564a`; both private Drive readback byte-equal. Therefore these are independently **source-admitted in their declared observation scopes**, not pilot claims:
 
 | Scope of original observation | Pilot count |
 |---|---:|

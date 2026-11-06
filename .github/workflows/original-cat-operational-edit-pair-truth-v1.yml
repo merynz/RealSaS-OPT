@@ -1,0 +1,114 @@
+name: Original Cat source operational edit-response pair targets V1
+on:
+  push:
+    branches:
+      - research/iris-operational-edit-relation-target-v1
+    paths:
+      - 'tools/corpus/derive_operational_edit_response_pair_truth_v1.py'
+      - 'tools/corpus/court_operational_edit_response_pair_truth_v1.py'
+      - 'tests/corpus/test_operational_edit_response_pair_truth_v1.py'
+      - '.github/workflows/original-cat-operational-edit-pair-truth-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  adversarial-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Source intervention edit relation adversarial contracts
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/corpus/derive_operational_edit_response_pair_truth_v1.py tools/corpus/court_operational_edit_response_pair_truth_v1.py
+          python -m unittest -v tests.corpus.test_operational_edit_response_pair_truth_v1
+
+  original-cat-source-target-independent-court:
+    needs: adversarial-contracts
+    runs-on: ubuntu-latest
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Reopen SHA-pinned original source physical pose/UV address receipts
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/source-edit-signature-truth"
+          mkdir -p "$D/private" "$D/results"
+          export RCLONE_CONFIG="$D/rclone.conf"
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          R="$D/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 4 --max-time 180 https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$D"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          P="gdrive:corpus370_preparation_v1/hosted_cat_pose_subface_uv_physical_transport_v1/CAT/42307569041-1"
+          rclone copyto "$P/PRIVATE_CAT_POSE_FACE_UV_ANCHOR_PHYSICAL_V1.json" "$D/private/parent.json" --checksum --retries 5
+          rclone copyto "$P/PRIVATE_INDEPENDENT_CAT_POSE_FACE_UV_ANCHOR_COURT_V1.json" "$D/private/court.json" --checksum --retries 5
+          echo "974c1a2a4cdbd51f2d799cc29a8d3b4ef3bbb36ba6442a3cc79c8f541d44ca6b  $D/private/parent.json" | sha256sum --check
+          echo "3ab8cbedd37d31e3fed6ddb554fab6fe5c80294076b7aaf94897b713e4bdad8c  $D/private/court.json" | sha256sum --check
+          echo "ORIGINAL_PHYSICAL_CAT_POSE_UV_COURT_SOURCES_SHA_PASS"
+      - name: Derive same-face operational source edit-response pair target candidates and independently re-court all
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/source-edit-signature-truth"
+          python -m tools.corpus.derive_operational_edit_response_pair_truth_v1 \
+            --source-parent "$D/private/parent.json" \
+            --independent-court "$D/private/court.json" \
+            --source-parent-sha256 "974c1a2a4cdbd51f2d799cc29a8d3b4ef3bbb36ba6442a3cc79c8f541d44ca6b" \
+            --independent-court-sha256 "3ab8cbedd37d31e3fed6ddb554fab6fe5c80294076b7aaf94897b713e4bdad8c" \
+            --operations 3 \
+            --output "$D/results/PRIVATE_CAT_OPERATIONAL_EDIT_RESPONSE_PAIR_TRUTH_CANDIDATES_V1.json"
+          python -m tools.corpus.court_operational_edit_response_pair_truth_v1 \
+            --source-parent "$D/private/parent.json" \
+            --source-court "$D/private/court.json" \
+            --candidate "$D/results/PRIVATE_CAT_OPERATIONAL_EDIT_RESPONSE_PAIR_TRUTH_CANDIDATES_V1.json" \
+            --output "$D/results/PRIVATE_INDEPENDENT_CAT_OPERATIONAL_EDIT_RESPONSE_PAIR_COURT_V1.json"
+          D="$D" python - <<'PY'
+          import json, os
+          from pathlib import Path
+          d = Path(os.environ["D"]) / "results"
+          j = json.loads((d / "PRIVATE_INDEPENDENT_CAT_OPERATIONAL_EDIT_RESPONSE_PAIR_COURT_V1.json").read_text())
+          assert j["status"] == "PASS_SOURCE_PHYSICAL_EDIT_SIGNATURE_PAIRS__IRIS_CONSUMER_PENDING"
+          assert j["counts"]["source_measured_same_signature_pairs"] > 0
+          assert j["counts"]["source_measured_different_signature_pairs"] > 0
+          assert j["iris_training_authorized"] is False
+          assert j["artist_drawable_owner"] == "UNKNOWN"
+          print("SOURCE_EDITS_BOTH_PAIR_CLASSES_PHYSICAL_COURT_PASS__NO_OWNER_NO_TRAINING")
+          PY
+      - name: Private immutable target + court publication and byte-level Drive readback
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/source-edit-signature-truth"
+          export RCLONE_CONFIG="$D/rclone.conf"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_iris_operational_edit_response_pair_truth_v1/CAT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in "$D/results/"*.json; do
+            NAME="$(basename "$F")"
+            rclone copyto "$F" "$REMOTE/$NAME" --checksum --retries 5
+            for N in 1 2 3 4 5; do
+              if rclone cat "$REMOTE/$NAME" > "$D/results/readback-$NAME" && cmp "$F" "$D/results/readback-$NAME"; then
+                break
+              fi
+              sleep 3
+            done
+            cmp "$F" "$D/results/readback-$NAME"
+            sha256sum "$F"
+          done
+          echo "EDIT_RESPONSE_PAIR_SOURCE_TARGET_AND_INDEPENDENT_COURT_SHA_READBACK_PASS__TRAINING_FALSE"

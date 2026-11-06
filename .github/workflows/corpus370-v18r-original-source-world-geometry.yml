@@ -1,0 +1,152 @@
+name: corpus370-v18r-original-source-world-geometry
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18r-original-source-world-geometry.yml'
+      - 'tools/corpus/compile_corpus370_v18r_source_world_graph_evidence.py'
+      - 'tools/corpus/court_corpus370_v18r_source_world_graph_evidence.py'
+      - 'tests/corpus/test_corpus370_v18r_source_world_graph_evidence.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18r-original-world-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v18r-original-source-geometry-redteam:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prove heldout original authored pose never creates artist links
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/corpus/compile_corpus370_v18r_source_world_graph_evidence.py \
+            tools/corpus/court_corpus370_v18r_source_world_graph_evidence.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18r_source_world_graph_evidence.py
+
+  v18r-source-geometry-original-blender-poses:
+    needs: v18r-original-source-geometry-redteam
+    runs-on: ubuntu-24.04
+    timeout-minutes: 38
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+            v18q_court_sha: 14971fef75168d20866a4b807789930ceb5ab16ba0dca306fafe85d402879061
+            v13b_manifest_sha: 1024d5483eed8be755d5d0e3c6d8cf9b014a23cc104ddda3ff9c2dd8d1b414f1
+            v13b_array_sha: 845160bb55d3c0e1f251c14f507aeed157c0cbf675514d0e1407e66c16d90293
+            v13b_court_sha: b31cbb88ff62b97d08c163e2c731f582ff63b5357053efe57076a6517cc6e7bd
+          - subject: TRICERATOPS
+            ordinal: 1
+            v18q_court_sha: eb957e87899d9a2f5183f67556bcd692df25df63678a598048578f756c621215
+            v13b_manifest_sha: 080899b7f41b9989a07bc74d2580386c5aafad4018053d33f9feda47ae617e43
+            v13b_array_sha: 139409f919a668e370dbe03444a1e613fecdab81d2ecc91688b59f5ad4b17748
+            v13b_court_sha: 7e1a24928c961edef95c9cd2aa80e0b6d90aa9eb5e98b4542e2a2089295bd92c
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      ORDINAL: ${{ matrix.ordinal }}
+      V18Q_COURT_SHA: ${{ matrix.v18q_court_sha }}
+      V13B_MANIFEST_SHA: ${{ matrix.v13b_manifest_sha }}
+      V13B_ARRAY_SHA: ${{ matrix.v13b_array_sha }}
+      V13B_COURT_SHA: ${{ matrix.v13b_court_sha }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: SHA-verified portable remote source geometry transport
+        run: |
+          set -euo pipefail
+          VERSION=1.75.2
+          ARCHIVE="$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 \
+            "https://github.com/rclone/rclone/releases/download/v${VERSION}/rclone-v${VERSION}-linux-amd64.zip" \
+            -o "$ARCHIVE"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
+          unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
+          python3 -m pip install --disable-pip-version-check numpy
+      - name: Join original V13b source world XYZ to V18q graph by original source and exact rest/pose SHA
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/v18r-private-source-world.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          D="$RUNNER_TEMP/v18r-original-source"
+          mkdir -p "$D"
+          ROOT="gdrive:corpus370_preparation_v1"
+          Q="$ROOT/hosted_source_typed_graph_v18q/$SUBJECT/42203223280-1"
+          A="$ROOT/hosted_reactive_stain_v18a/$SUBJECT/42097722762-1"
+          G="$ROOT/hosted_native_carrier_private_v13b/42040199925-1/$ORDINAL"
+          rclone copyto "$Q/PRIVATE_SOURCE_GRAPH_EVIDENCE_V18Q.json" "$D/v18q-ir.json" --checksum --retries 3
+          rclone copyto "$Q/PRIVATE_INDEPENDENT_V18Q_GRAPH_EVIDENCE_COURT.json" "$D/v18q-court.json" --checksum --retries 3
+          rclone copyto "$A/PRIVATE_REACTIVE_STAIN_REPORT_V18A.json" "$D/v18a.json" --checksum --retries 3
+          rclone copyto "$A/PRIVATE_REACTIVE_STAIN_CANDIDATE_V18A.npz" "$D/v18a.npz" --checksum --retries 3
+          rclone copyto "$G/PRIVATE_ORIGINAL_ANON_ACTUATOR_MANIFEST_V13B.json" "$D/v13b.json" --checksum --retries 3
+          rclone copyto "$G/PRIVATE_ORIGINAL_ANON_ACTUATOR_MANIFEST_V13B.npz" "$D/v13b.npz" --checksum --retries 3
+          rclone copyto "$G/INDEPENDENT_ANONYMOUS_NATIVE_ACTUATOR_COURT_V13B.json" "$D/v13b-court.json" --checksum --retries 3
+          test "$(sha256sum "$D/v18q-court.json" | cut -d' ' -f1)" = "$V18Q_COURT_SHA"
+          test "$(sha256sum "$D/v13b.json" | cut -d' ' -f1)" = "$V13B_MANIFEST_SHA"
+          test "$(sha256sum "$D/v13b.npz" | cut -d' ' -f1)" = "$V13B_ARRAY_SHA"
+          test "$(sha256sum "$D/v13b-court.json" | cut -d' ' -f1)" = "$V13B_COURT_SHA"
+          python3 -u tools/corpus/compile_corpus370_v18r_source_world_graph_evidence.py \
+            --v18q-ir "$D/v18q-ir.json" --v18q-court "$D/v18q-court.json" \
+            --v18a-manifest "$D/v18a.json" --v18a-npz "$D/v18a.npz" \
+            --v13b-manifest "$D/v13b.json" --v13b-array "$D/v13b.npz" \
+            --v13b-court "$D/v13b-court.json" \
+            --expected-v18q-court-sha "$V18Q_COURT_SHA" \
+            --expected-v13b-court-sha "$V13B_COURT_SHA" \
+            --output "$D/PRIVATE_V18R_SOURCE_WORLD_GRAPH_EVIDENCE.json"
+          python3 -u tools/corpus/court_corpus370_v18r_source_world_graph_evidence.py \
+            --ir-path "$D/PRIVATE_V18R_SOURCE_WORLD_GRAPH_EVIDENCE.json" \
+            --v18q-ir "$D/v18q-ir.json" --v18q-court "$D/v18q-court.json" \
+            --v18a-manifest "$D/v18a.json" --v18a-npz "$D/v18a.npz" \
+            --v13b-manifest "$D/v13b.json" --v13b-array "$D/v13b.npz" \
+            --v13b-court "$D/v13b-court.json" \
+            --expected-v18q-court-sha "$V18Q_COURT_SHA" \
+            --expected-v13b-court-sha "$V13B_COURT_SHA" \
+            --output "$D/PRIVATE_INDEPENDENT_V18R_SOURCE_WORLD_COURT.json"
+          D="$D" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          x=json.loads((d/"PRIVATE_INDEPENDENT_V18R_SOURCE_WORLD_COURT.json").read_text())
+          assert x["status"]=="SOURCE_GEOMETRY_SPATIAL_AND_CREASE_COURTED__OWNER_UNKNOWN"
+          assert x["original_artist_drawable_owner"]=="UNKNOWN"
+          assert x["original_source_heldout_pose2_not_used_for_fit"] is True
+          assert x["original_source_material_and_uv_boundary_not_measured"] is True
+          assert x["no_actual_artist_layer_edit_court_claim"] is True
+          assert all(x[k] is False for k in (
+            "graphics_owner_authorized","iris_training_authorized",
+            "tessa_training_authorized","materialization_authorized",
+            "training_authorized"))
+          print("V18R_REAL_SOURCE_WORLD_XYZ_SHA_BOUND__NO_ARTIST_OWNER",flush=True)
+          PY
+          OUT="$ROOT/hosted_source_world_graph_v18r/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in PRIVATE_V18R_SOURCE_WORLD_GRAPH_EVIDENCE.json PRIVATE_INDEPENDENT_V18R_SOURCE_WORLD_COURT.json; do
+             rclone copyto "$D/$F" "$OUT/$F" --checksum --retries 3
+             GOT=0
+             for attempt in 1 2 3 4 5 6; do
+               if rclone cat "$OUT/$F" > "$D/remote-$F" 2>/dev/null && test -s "$D/remote-$F"; then
+                 test "$(sha256sum "$D/$F" | cut -d' ' -f1)" = "$(sha256sum "$D/remote-$F" | cut -d' ' -f1)"
+                 GOT=1
+                 break
+               fi
+               sleep 4
+             done
+             test "$GOT" = 1
+          done
+          echo "V18R_ORIGINAL_SOURCE_WORLD_INDEPENDENT_COURT_SHA=$(sha256sum "$D/PRIVATE_INDEPENDENT_V18R_SOURCE_WORLD_COURT.json"|cut -d' ' -f1)"

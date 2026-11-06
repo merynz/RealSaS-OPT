@@ -1,0 +1,89 @@
+{
+  "schema": "RealSaS.MechanicsCrossParent6DGripGroundContactResearchReceipt.v1",
+  "date_utc": "2026-11-06",
+  "repository": "merynz/RealSaS-OPT",
+  "pull_request": 353,
+  "research_branch": "research/mechanics-generic-closure-v1",
+  "tested_code_sha": "a240f1ba08cc2c01ff6718ef0edbab65fe034601",
+  "github_actions": {
+    "workflow": "mechanics-generic-closure-v1",
+    "run_id": 42291808979,
+    "job_id": 128146850549,
+    "conclusion": "success",
+    "focused_mechanics_tests_passed": 128,
+    "ownership_firewall": "PASS_MECHANICS_RUNTIME_RESEARCH_OWNERSHIP_FIREWALL"
+  },
+  "new_files": {
+    "contract_and_independent_court": "compiler/realsas_compiler_core/mechanics_relative_attachment_bridge_v1.py",
+    "solve_and_analytic_fk_jacobian": "compiler/realsas_compiler_core/mechanics_multigoal_solver_v1.py",
+    "live_motion_sequence": "compiler/realsas_compiler_core/mechanics_live_runtime_v1.py",
+    "positive_and_negative_regressions": "tests/compiler/test_mechanics_relative_attachment_bridge_v1.py",
+    "measured_cpu_benchmark": "tools/mechanics/benchmark_relative_attachment_bridge_v1.py"
+  },
+  "contract": {
+    "bridge_kind": "EXPLICIT_RUNTIME_DECLARED_CROSS_PARENT_RELATIVE_SE3_RESEARCH",
+    "relation": "Two distinct joint-owned 3D grip frames linked by explicitly supplied A-to-B local position and relative proper 3x3 rotation",
+    "declared_authority": [
+      "CanonicalRig anchor IDs and local_P",
+      "each anchor's explicitly authored metadata.local_basis",
+      "typed relative bridge contract with declaration_evidence_id and rig/control lineage SHA"
+    ],
+    "no_automatic_shared_prop_discovery": true,
+    "physical_source_truth_claimed": false,
+    "capability": "Simultaneous world grip-relative position/orientation, user-driven IK target and separate planted world contact",
+    "representation_policy": "Exact analytic FK Jacobian; independent full-space final residual and post-pose bridge court; warm-started sequential control",
+    "source_separate_from_capability_contract": true
+  },
+  "behavioral_evidence": {
+    "dual_branch_positive": "Drag distal A2 tip, B2 tip moves without explicit B control in the exact declared relative rigid frame",
+    "contact_positive": "Separate A and B hand branches share one 6D relative bridge while third C chain foot is pinned at (.6,-2.2,0) during five changing A2 drag angles (.08,.10,.12,.14,.16)",
+    "negative": [
+      "B rigidly pinned at incompatible target while A dragged: independent resulting relative bridge fails, no silent success",
+      "unreachable C foot world target returns live FAIL",
+      "unknown or duplicate bridge IDs and anchor pairs fail validation",
+      "same-parent pair must go to existing rigidity necessary-condition court",
+      "stale rig/control lineage, missing declared local grip frames, nonfinite relative displacement and nonorthogonal relative rotation rejected",
+      "legacy FABRIK or numerical Jacobian invocation with bridge rejected"
+    ],
+    "gradient": "Exact analytic Jacobian of 3-vector relative world positions and 9-entry relative proper orientation basis difference, independently checked against centered finite difference",
+    "live_secondary_order": "Bridge verified on primary pose before secondary physics; no geometry/Graphics draw-order authority minted"
+  },
+  "benchmarks": {
+    "run_id": 42291808979,
+    "sampled_frames": 12,
+    "warmup": 3,
+    "skeleton_joint_count": 8,
+    "rotational_dof_count": 5,
+    "simultaneous_grips": 2,
+    "world_contact_count": 1,
+    "synthetic_skin_vertex_count": 3,
+    "prepared_skin_reused": true,
+    "CPU_full_mechanics_frame_p50_ms": 4.129035999999999,
+    "CPU_full_mechanics_frame_p95_ms": 4.19936985,
+    "CPU_full_mechanics_frame_max_ms": 4.218605,
+    "max_drag_position_residual_world": 0.00004385594295836685,
+    "max_contact_position_residual_world": 0.00004385594295836685,
+    "max_bridge_position_residual_world": 0.000021925779038351845,
+    "max_bridge_orientation_residual_rad": 0.000010961503226066917,
+    "max_segment_length_relative_error": 2.220446049250313e-16,
+    "environment": {
+      "python": "3.11.18",
+      "numpy": "2.1.3",
+      "scipy": "1.14.1",
+      "runner": "GitHub-hosted Azure Linux CPU"
+    },
+    "warning": "3-VERTEX SYNTHETIC mechanics benchmark; neither native teacher mesh 3k+ verts, realistic 50+ joint rig nor 2D Graphics/render included; not real-time/FPS product certification"
+  },
+  "training_and_authority_limits": {
+    "source_native_shared_weapon_evidence_used": false,
+    "source_geometry_mechanics_correspondence_proven": false,
+    "true_contact_friction_or_force_proven": false,
+    "model_training_authority_minted": false,
+    "blind_unseen_character_generalization_proven": false,
+    "graphics_CAA_draw_order_qualified": false,
+    "whole_product_60fps_certified": false,
+    "secondary_motion_physical_parameters_source_qualified": false,
+    "automatic_bridge_compilation_from_source_proven": false
+  },
+  "next": "Source-authorized attachment-bridge truth and comparison on diverse character morphologies; independent continuity/edge cases with rotation, physical collision contact and control priority; benchmark larger skinned rigs with Graphics/renderer"
+}

@@ -215,7 +215,7 @@ def independently_court(root,report_path,output):
         per_view[view][f"source_edit_{edit}_face_pixels"]+=1
         per_view[view]["positive_original_samples"]+=8
         per_view[view]["other_edit_absence_obligations"]+=16
-    require(len(original_faces)==q["counts"][
+    req(len(original_faces)==q["counts"][
         "qualified_original_source_face_count"]
         and positive==q["counts"][
         "qualified_original_source_sample_face_edit_effect_count"]

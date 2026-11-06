@@ -50,7 +50,7 @@ jobs:
       EXT: ${{ matrix.ext }}
       DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
       PYTHONPATH: ${{ github.workspace }}
-      D: ${{ runner.temp }}/od-palette-${{ matrix.subject }}
+      D: ${{ github.workspace }}/od-palette-${{ matrix.subject }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

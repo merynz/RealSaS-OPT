@@ -118,7 +118,7 @@ jobs:
           set -euo pipefail
           umask 077
           D="$RUNNER_TEMP/source-cat-uv"
-          python -m tools.corpus.prepare_corpus370_original_uv_atlas_edit_images_v1 --original-atlas "$D/src/Textures/colormap.png" --source-plan "$D/plan.json" --output-dir "$D/edits"
+          python -m tools.corpus.prepare_corpus370_original_uv_atlas_edit_images_v2 --original-atlas "$D/src/Textures/colormap.png" --source-plan "$D/plan.json" --output-dir "$D/edits"
       - name: Render exact same original-source Cycles sample indices across all atlas edit arms
         run: |
           set -euo pipefail
@@ -131,7 +131,7 @@ jobs:
           set -euo pipefail
           umask 077
           D="$RUNNER_TEMP/source-cat-uv"
-          python -m tools.corpus.court_corpus370_original_cat_uv_texture_cycles_v1 --source "$D/src/animal-cat.glb" --atlas "$D/src/Textures/colormap.png" --source-plan "$D/plan.json" --prepared-atlas-manifest "$D/edits/PRIVATE_SOURCE_UV_ATLAS_EDIT_IMAGES_V1.json" --prepared-atlas-dir "$D/edits" --render-manifest "$D/render/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.json" --source-samples "$D/render/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.npz" --output "$D/PRIVATE_INDEPENDENT_CAT_SOURCE_UV_EDIT_CONSEQUENCE_COURT_V2.json"
+          python -m tools.corpus.court_corpus370_original_cat_uv_texture_cycles_v2 --source "$D/src/animal-cat.glb" --atlas "$D/src/Textures/colormap.png" --source-plan "$D/plan.json" --prepared-atlas-manifest "$D/edits/PRIVATE_SOURCE_UV_ATLAS_EDIT_IMAGES_V1.json" --prepared-atlas-dir "$D/edits" --render-manifest "$D/render/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.json" --source-samples "$D/render/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.npz" --output "$D/PRIVATE_INDEPENDENT_CAT_SOURCE_UV_EDIT_CONSEQUENCE_COURT_V2.json"
       - name: Preserve original source Cat PASS/FAIL evidence and hash verify private readback
         if: always()
         run: |

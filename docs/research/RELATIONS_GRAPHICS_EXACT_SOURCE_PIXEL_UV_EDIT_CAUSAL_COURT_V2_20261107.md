@@ -46,7 +46,7 @@ The theorem is geometric **and conditional on the physical Cycles camera sample 
 - Source V1 receipt pins: producer ad26d6f23baa25cb8ebcf38b9d8256344b83c9bed7c342f7a1688cc659208a65, independent physical court 2b77b43ec09afe37fb1f277887c9e946133c034d3d736f4b8ed0f5d40f2f5bc0. All **608** previously physically court-accepted source face/pixel/edit addresses must be a literal subset of V2's new addresses. If one disappears, V2 fails.
 - Source original Cat GLB, 684 native face indices, source rest XYZ, raw glTF UV, camera, source unlit material policy, UV operation plan, original source Cycles 256 frames and independent source edit court are exactly the same SHA-locked original artifact bytes as V1. No new source render; no threshold, pixel mask or source-camera fitting.
 
-## Current measured local pilot — independently heldout until GitHub court PASS
+## Actual original-source independently courted result — PASS
 
 The new original-source pixel/mask logic was first evaluated locally against exact original Cat source bytes. It found **49,494** source face/pixel/UV edit candidate witnesses across four original cameras:
 
@@ -60,9 +60,11 @@ The new original-source pixel/mask logic was first evaluated locally against exa
 
 Edit counts 24,851 / 24,400 / **243** by original atlas edit indices 0/1/2 respectively. All eight exact original Cycles sample offset frames for all candidate addresses had physically observed target edit effects above inherited original 0.025 PM-RGBA tolerance, with no observed other-edit effect above that tolerance and original BASE alpha opaque.
 
-These numbers are PRELIMINARY at the time of writing. Only an independently successful GitHub real source court with immutable Drive SHA readback can promote them to an admitted physical source truth subset. In particular the edit2 result is deliberately bounded (243 source pixel addresses), not 6,048 entire source sample-incidences or source drawable ownership.
+**The independent original source court succeeded:** GitHub Actions [42303181542](https://github.com/merynz/RealSaS-OPT/actions/runs/42303181542), 2/2 PASS, including a separate source clip/depth and all 256 original same-Cycles source sample recheck. All 49,494 original face/pixel/edit witnesses are independently courted as SOUND SUFFICIENT SOURCE FACTS, not original artist-part identity. In particular the edit2 result is deliberately bounded (243 source pixel addresses), not 6,048 entire source sample-incidences or source drawable ownership.
 
-Expected original source physical *sample obligations* if independent court qualifies every candidate: 395,952 intended edited sample effects and 791,904 other-edit absence checks.
+**Physically independent court admitted original source sample obligations:** 395,952 intended edited sample effects and 791,904 other-edit absence checks, zero observed failures at inherited original 0.025 PM-RGBA tolerance. The 49,494 admitted pixels belong to **427 distinct original Cat source faces out of 684**. The other 257 original faces have no V2 full-pixel witness and are UNKNOWN here, not source negative.
+
+**Sealed readback:** original private V2 face/source pixel observation report SHA `c2ab94ae6250159b046286efaa2f062c857a7557ad38d5942491dbf89ac16116`, independent original geometry-and-physical-sample court SHA `a34a3050917fe563321f5e57c1ba1556844dc516965abdff201a6930913d015d`. Both archived at `gdrive:corpus370_preparation_v1/hosted_cat_source_face_pixel_uv_exact_depth_v2/CAT/42303181542-1` with byte-level readback.
 
 ## What this does NOT establish
 

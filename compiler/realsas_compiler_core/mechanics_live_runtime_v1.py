@@ -149,6 +149,8 @@ def evaluate_mechanics_intervention_frame_v1(
     time_seconds: float | None = None,
     max_allowed_constraint_residual: float = 1.0e-4,
     max_allowed_segment_strain: float = 1.0e-3,
+    solver_mode: str = "FABRIK_V1",
+    pinned_contact_control_ids: tuple[str, ...] = (),
 ) -> MechanicsInterventionFrameV1:
     _strict_lineage(mesh, rig, skin, mechanics)
     limit_residual = _finite_tolerance(
@@ -185,7 +187,21 @@ def evaluate_mechanics_intervention_frame_v1(
     # Consistent authored-order events, irrespective of mouse event order.
     controls = tuple(by_id[row.canonical_control_id] for row in rig.controls
                      if row.canonical_control_id in by_id)
-    pose = solve_control_pose_v1(rig, controls)
+    multi_status: str | None = None
+    if solver_mode == "FABRIK_V1":
+        if pinned_contact_control_ids:
+            raise QualificationError("LIVE_MECHANICS_PINS_REQUIRE_MULTI_GOAL")
+        pose = solve_control_pose_v1(rig, controls)
+    elif solver_mode == "DECLARED_MULTI_GOAL_V1":
+        from .mechanics_multigoal_solver_v1 import solve_declared_multi_goal_v1
+        solved = solve_declared_multi_goal_v1(
+            rig, controls, pinned_contact_control_ids=pinned_contact_control_ids,
+            goal_tolerance=limit_residual,
+        )
+        pose = solved.pose
+        multi_status = solved.status
+    else:
+        raise QualificationError("LIVE_MECHANICS_SOLVER_MODE_UNSUPPORTED")
     deformed = deform_mesh_lbs_v1(mesh, rig, skin, pose)
     maximum_residual = max((abs(float(v)) for _, v in pose.constraint_residuals), default=0.0)
     if not math.isfinite(maximum_residual):
@@ -196,6 +212,8 @@ def evaluate_mechanics_intervention_frame_v1(
         failures.append("CONSTRAINT_RESIDUAL_EXCEEDED")
     if strain > limit_strain:
         failures.append("SEGMENT_STRAIN_EXCEEDED")
+    if multi_status is not None and multi_status != "PASS_MULTIGOAL_BEHAVIORAL_COURT":
+        failures.append("MULTIGOAL_SOLVER_NOT_QUALIFIED")
     return MechanicsInterventionFrameV1(
         pose=pose, deformation=deformed,
         active_control_ids=tuple(x.canonical_control_id for x in controls),
@@ -214,6 +232,9 @@ def evaluate_mechanics_intervention_frame_v1(
             "model_inference_performed": False,
             "graphics_authority_claimed": False,
             "time_seconds": time_seconds,
+            "solver_mode": solver_mode,
+            "pinned_contact_control_ids": tuple(pinned_contact_control_ids),
+            "multi_goal_status": multi_status,
         },
     )
 
@@ -228,6 +249,8 @@ def evaluate_mechanics_intervention_sequence_v1(
     motion: CanonicalMotionIRV2 | None = None,
     max_allowed_constraint_residual: float = 1.0e-4,
     max_allowed_segment_strain: float = 1.0e-3,
+    solver_mode: str = "FABRIK_V1",
+    pinned_contact_control_ids: tuple[str, ...] = (),
 ) -> MechanicsInterventionSequenceV1:
     if not steps:
         raise QualificationError("LIVE_MECHANICS_SEQUENCE_EMPTY")
@@ -246,6 +269,8 @@ def evaluate_mechanics_intervention_sequence_v1(
             motion=motion, time_seconds=(step.time_seconds if motion is not None else None),
             max_allowed_constraint_residual=max_allowed_constraint_residual,
             max_allowed_segment_strain=max_allowed_segment_strain,
+            solver_mode=solver_mode,
+            pinned_contact_control_ids=pinned_contact_control_ids,
         )
         if frames:
             dt = float(step.time_seconds - steps[index - 1].time_seconds)
@@ -282,6 +307,8 @@ def evaluate_mechanics_intervention_sequence_v1(
             "all_samples_are_stateless_overrides": True,
             "motion_authority_unchanged": True,
             "training_authorized": False,
+            "solver_mode": solver_mode,
+            "pinned_contact_control_ids": tuple(pinned_contact_control_ids),
         },
     )
 

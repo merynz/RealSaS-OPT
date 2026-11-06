@@ -1,0 +1,36 @@
+name: living-compile-export-authority-guard-v1
+
+on:
+  pull_request:
+    paths:
+      - 'product/living_compile/server.py'
+      - 'product/living_compile/authoring.py'
+      - 'product/living_compile/common.py'
+      - 'tests/product/test_living_compile_export_guard_v1.py'
+      - '.github/workflows/living_compile_export_authority_guard_v1.yml'
+      - 'docs/platform/LIVING_COMPILE_EXPORT_REQUALIFICATION_GUARD_20261107.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  export-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install fixed CPU product-test profile
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Check actual authoring/edit/export API and fail-closed courts
+        run: |
+          PYTHONPATH=. python -m unittest -v \
+            tests.product.test_living_compile_export_guard_v1 \
+            tests.product.test_living_compile_v4

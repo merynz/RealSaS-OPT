@@ -433,7 +433,7 @@ def run(job_path,stain_report_path,stain_npz_path,stain_court_path,
     np.savez_compressed(npz,source_material_cycles_sample_rgba=out)
     result={
         "schema":SCHEMA,
-        "status":"V18L_ORIGINAL_CYCLES_COMMON_SOURCE_SAMPLE_RENDERED__INDEPENDENT_COURT_REQUIRED",
+        "status":"V18N_ORIGINAL_MATERIAL_CYCLES_SOURCE_REPLAYED__INDEPENDENT_COURT_REQUIRED",
         "subject_id":job["subject_id"],
         "original_source_sha256":job["source"]["sha256"],
         "source_original_v14_job_sha256":sha(job_path),

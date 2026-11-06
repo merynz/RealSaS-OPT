@@ -1,14 +1,9 @@
 name: corpus370-v18n-original-material-depth-replay
 
+# V18n original physical 128-frame acquisitions are sealed. Rerun only by
+# deliberate workflow dispatch; the separate lightweight recovery/court workflow
+# validates immutable originals without wasting a source Blender rerender.
 on:
-  push:
-    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
-    paths:
-      - '.github/workflows/corpus370-v18n-original-material-depth-replay.yml'
-      - 'tools/truth_foundry/blender_corpus370_v18n_original_material_samples.py'
-      - 'tools/corpus/court_corpus370_v18n_original_material_sample_replay.py'
-      - 'tools/corpus/hosted_corpus370_v18n_original_material_samples.sh'
-      - 'tests/corpus/test_corpus370_v18n_original_material_sample_replay.py'
   workflow_dispatch:
 
 permissions:

@@ -17,3 +17,11 @@ After [#363](https://github.com/merynz/RealSaS-OPT/pull/363) typed Rig/Skin cont
 **Not included:** Motion worker/CAS/Go ProductRevision wiring, model inference, automatic motion generation, clip blending/retarget, 6D multigoal research promotion, editable UI or Graphics. Those are separate product integration cuts and proof gates.
 
 **Merge order:** PR #363 → PR #364 → this Motion V2 slice. An earlier stacked PR base is temporary; rebase to actual main after preceding squash merge before accepting a PR review. No merge before all required CI succeeds.
+
+## Exact-main CI admission audit (2026-11-07)
+
+- #363 and #364 are already merged to current `main` at `ffcbaa9ca68a31bda0c07511fcb886556941c1a0`; this PR is directly based on that commit and its review diff contains exactly the eight files enumerated above.
+- The three original Motion source modules and two original V6 tests still match pinned V6 #297 Git blobs **5/5**; preservation is a migration proof, **not** interactive/product readiness.
+- On previous head `43a32cbfc8ecf9f377a49eb08e75840ae122da5b`, the dedicated Motion CI and three other observed runs passed, but no `current-mainline-ci` was visible among commit-associated PR runs. The absence of the required broad check is a verification gap, **not** implied success.
+- This documentation checkpoint deliberately creates a new PR synchronization event against the already updated main. **Do not merge** until the new exact-head dedicated Motion CI, Platform/Go if invoked, current-mainline Compiler regressions and other required affected checks are actually observed successful.
+- Product capability execution remains blocked on typed V2 producer/worker/Go routing and independent source/behavioral evidence; a Motion V2 code merge does not mint a ProductRevision.

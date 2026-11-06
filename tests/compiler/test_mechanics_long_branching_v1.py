@@ -208,7 +208,7 @@ def test_rank_policy_mode_cannot_hallucinate_a_numeric_jacobian_or_combine_expli
         )
 
 
-def test_rank_policy_falls_back_to_full_declared_dofs_on_nonlinear_straight_chain_target():
+def test_rank_policy_falls_back_to_full_declared_dofs_but_does_not_hallucinate_nonlinear_success():
     from tests.compiler.test_mechanics_multigoal_solver_v1 import _branched_rig
     from compiler.realsas_compiler_core.mechanics_control_solver_v1 import ControlTransformIRV1
     rig=_branched_rig()
@@ -225,10 +225,12 @@ def test_rank_policy_falls_back_to_full_declared_dofs_on_nonlinear_straight_chai
         jacobian_mode="ANALYTIC_RESEARCH_V1",
         regularization=1e-9,goal_tolerance=2e-3,max_nfev=400,
     )
-    assert result.status=="PASS_MULTIGOAL_BEHAVIORAL_COURT"
     assert result.metadata["rank_revealing_candidate_task_rank"]==2
     assert result.metadata["rank_revealing_fallback_to_all"] is True
     assert result.metadata["active_solver_parameter_count"]==3
-    assert result.max_drag_residual<2e-3
-    assert result.max_pin_residual<2e-3
+    # Rank restoration gives every declared variable back to the optimizer;
+    # it is NOT a guarantee that a local nonlinear solver can escape a
+    # singular straight-chain starting pose. Fail closed, not fake PASS.
+    assert result.status=="FAIL_MULTIGOAL_BEHAVIORAL_COURT"
+    assert result.max_drag_residual>2e-3
     assert len(result.parameters_rad)==3

@@ -1,0 +1,96 @@
+name: Relations Graphics proof-carrying truth contract v1
+on:
+  push:
+    branches: [research/relations-graphics-proof-contract-v1]
+    paths:
+      - 'tools/corpus/relations_graphics_proof_contract_v1.py'
+      - 'tools/corpus/court_relations_graphics_identifiability_real_sources_v1.py'
+      - 'tests/corpus/test_relations_graphics_proof_contract_v1.py'
+      - 'tests/corpus/test_relations_graphics_identifiability_real_sources_v1.py'
+      - '.github/workflows/relations-graphics-proof-contract-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: relations-graphics-proof-v1-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  mathematical-proofs-and-redteam:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Finite version space, exact quotient, unknown and source-lineage tests
+        run: |
+          python -m pip install 'pytest>=8,<10'
+          python -m py_compile tools/corpus/relations_graphics_proof_contract_v1.py tools/corpus/court_relations_graphics_identifiability_real_sources_v1.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_relations_graphics_proof_contract_v1.py tests/corpus/test_relations_graphics_identifiability_real_sources_v1.py
+  independent-original-source-truth-inventory:
+    needs: mathematical-proofs-and-redteam
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Join immutable V18s Cat UV and K3 Triceratops source court receipts, never local face labels
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/relations-graphics-proof-v1"
+          mkdir -p "$D/private" "$D/out"
+          export RCLONE_CONFIG="$D/rclone.conf"
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          R="$D/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$D"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          ROOT="gdrive:corpus370_preparation_v1"
+          S="$ROOT/hosted_relations_graphics_uv_world_truth_v18s/CAT/42293745266-1"
+          C="$ROOT/hosted_operational_source_cat_uv_graphics_ledger_v1/CAT/42264927264-1"
+          T="$ROOT/hosted_operational_original_k3_source_cycles_v1/TRICERATOPS/42248465757-1"
+          rclone copyto "$S/PRIVATE_SOURCE_UV_WORLD_MECHANICAL_RELATION_EVIDENCE_V18S.json" "$D/private/PRIVATE_SOURCE_UV_WORLD_MECHANICAL_RELATION_EVIDENCE_V18S.json" --checksum --retries 3
+          rclone copyto "$S/PRIVATE_INDEPENDENT_SOURCE_UV_WORLD_RELATION_COURT_V18S.json" "$D/private/PRIVATE_INDEPENDENT_SOURCE_UV_WORLD_RELATION_COURT_V18S.json" --checksum --retries 3
+          rclone copyto "$C/PRIVATE_SOURCE_CAT_UV_GRAPHICS_EDIT_LEDGER_V1.json" "$D/private/PRIVATE_SOURCE_CAT_UV_GRAPHICS_EDIT_LEDGER_V1.json" --checksum --retries 3
+          rclone copyto "$C/PRIVATE_INDEPENDENT_SOURCE_CAT_UV_GRAPHICS_LEDGER_COURT_V1.json" "$D/private/PRIVATE_INDEPENDENT_SOURCE_CAT_UV_GRAPHICS_LEDGER_COURT_V1.json" --checksum --retries 3
+          rclone copyto "$T/PRIVATE_INDEPENDENT_ORIGINAL_SOURCE_K3_SAME_INDEX_COURT_V1.json" "$D/private/PRIVATE_INDEPENDENT_ORIGINAL_SOURCE_K3_SAME_INDEX_COURT_V1.json" --checksum --retries 3
+          python -m tools.corpus.court_relations_graphics_identifiability_real_sources_v1 \
+            --root "$D/private" \
+            --output "$D/out/PRIVATE_RELATIONS_GRAPHICS_IDENTIFIABILITY_SOURCE_INVENTORY_V1.json"
+          D="$D" python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          j=json.loads((d/"out/PRIVATE_RELATIONS_GRAPHICS_IDENTIFIABILITY_SOURCE_INVENTORY_V1.json").read_text())
+          assert j["status"]=="INDEPENDENT_SOURCE_FAMILIES_RECONCILED__NO_SYNTHETIC_OWNER_LABEL"
+          assert j["cat_local_source_graph_join_to_edited_sample_pixel"]["local_consequence_join_authorized"] is False
+          assert j["author_drawable_identifiability"]=="NOT_IDENTIFIED"
+          assert j["iris_training_authorized"] is False
+          assert j["same_drawable_training_pairs_qualified"]==0
+          assert j["different_drawable_training_pairs_qualified"]==0
+          print("SOURCE_REAL_COURTS_JOINED_AT_SUBJECT_SCOPE__FACE_CAUSAL_JOIN_UNKNOWN__NO_ARTIST_OWNER")
+          PY
+          DEST="$ROOT/hosted_relations_graphics_proof_contract_v1/CAT_TRICERATOPS/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          F="$D/out/PRIVATE_RELATIONS_GRAPHICS_IDENTIFIABILITY_SOURCE_INVENTORY_V1.json"
+          rclone copyto "$F" "$DEST/$(basename "$F")" --checksum --retries 3
+          for N in 1 2 3 4 5; do
+            if rclone cat "$DEST/$(basename "$F")" > "$D/out/readback.json" 2>/dev/null && test -s "$D/out/readback.json"; then
+              cmp "$F" "$D/out/readback.json"
+              break
+            fi
+            sleep 3
+          done
+          cmp "$F" "$D/out/readback.json"
+          sha256sum "$F"
+          echo "PROOF_CARRYING_SOURCE_EVIDENCE_COURT_PASS__NO_TRAINING_ADMISSION"

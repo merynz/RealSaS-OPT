@@ -195,6 +195,7 @@ def solve_and_court_v1(
     max_nfev: int=90,
     derivative_check: bool=False,
     active_parameter_keys: tuple[tuple[str,str],...] | None=None,
+    active_parameter_policy: str="EXPLICIT_OR_ALL",
 ) -> dict:
     started=time.perf_counter()
     result: MechanicsMultiGoalResultV1=solve_declared_multi_goal_v1(
@@ -207,6 +208,7 @@ def solve_and_court_v1(
         max_nfev=max_nfev,
         verify_analytic_jacobian=derivative_check,
         active_parameter_keys=active_parameter_keys,
+        active_parameter_policy=active_parameter_policy,
     )
     elapsed=(time.perf_counter()-started)*1000
     by_joint={j.canonical_joint_id:np.asarray(j.solved_P) for j in result.pose.joints}
@@ -232,6 +234,12 @@ def solve_and_court_v1(
         "solver_evaluations":result.solver_evaluations,
         "active_solver_parameters":result.metadata["active_solver_parameter_count"],
         "frozen_solver_parameters":result.metadata["frozen_solver_parameter_count"],
+        "rank_policy_candidate_count":result.metadata.get(
+            "rank_revealing_candidate_task_rank"
+        ),
+        "rank_policy_full_fallback_used":result.metadata.get(
+            "rank_revealing_fallback_to_all"
+        ),
         "joint_count":len(case.rig.joints),
         "control_count":len(case.rig.controls),
         "pin_count":len(case.pins),
@@ -263,14 +271,32 @@ def run_court_v1(*,dois:tuple[int,...]=(24,48,72),max_nfev:int=90)->dict:
         reduced=solve_and_court_v1(
             case,max_nfev=max_nfev,active_parameter_keys=sparse_keys,
         )
+        auto=solve_and_court_v1(
+            case,max_nfev=max_nfev,
+            active_parameter_policy="RANK_REVEALING_RESEARCH_V1",
+        )
         if (measured["status"]!="PASS_MULTIGOAL_BEHAVIORAL_COURT" or
                 reduced["status"]!="PASS_MULTIGOAL_BEHAVIORAL_COURT" or
+                auto["status"]!="PASS_MULTIGOAL_BEHAVIORAL_COURT" or
                 measured["max_segment_length_absolute_error_world"]>1e-8 or
                 reduced["max_segment_length_absolute_error_world"]>1e-8 or
                 not observed["all_dofs_individually_affect_an_endpoint"]):
             raise AssertionError("MECHANICS_MORPHOLOGY_FUNCTIONAL_COURT_FAIL")
         cases.append({
             "morphology":case.morphology,**observed,**measured,
+            "generic_task_jacobian_policy":{
+                "selection_evidence":"DECLARED_KINEMATIC_TASK_JACOBIAN_ONLY",
+                "candidate_rank":auto["rank_policy_candidate_count"],
+                "fallback_to_full":auto["rank_policy_full_fallback_used"],
+                "actual_solved_parameters":auto["active_solver_parameters"],
+                "runtime_ms":auto["runtime_ms"],
+                "max_drag_residual_world":auto["max_drag_residual_world"],
+                "max_pin_residual_world":auto["max_pin_residual_world"],
+                "full_over_rank_policy_runtime_ratio_observed":(
+                    measured["runtime_ms"]/auto["runtime_ms"]
+                ),
+                "policy_is_not_source_DOFS_or_physical_truth":True,
+            },
             "explicit_synthetic_oracle_policy":{
                 "scope":"KNOWN_FIXTURE_TARGET_GENERATION_ONLY_NOT_GENERIC",
                 "selected_actuators":list(map(list,sparse_keys)),
@@ -305,6 +331,7 @@ def run_court_v1(*,dois:tuple[int,...]=(24,48,72),max_nfev:int=90)->dict:
             "contact_is_world_position_not_force_or_friction":True,
             "sparse_actuator_policy_is_oracle_for_known_synthetic_target":True,
             "policy_for_arbitrary_targets_qualified":False,
+            "rank_policy_dynamic_fallback_can_restore_full_declared_DOFs":True,
         },
     }
 

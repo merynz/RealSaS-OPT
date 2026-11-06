@@ -30,6 +30,10 @@ from scipy.linalg import qr
 from .canonical_rig_ir_v2 import CanonicalRigIRV2
 from .mechanics_attachment_frames_v1 import _matrix
 from .mechanics_attachment_feasibility_v1 import evaluate_declared_attachment_rigidity_v1
+from .mechanics_relative_attachment_bridge_v1 import (
+    DeclaredRelativeAttachmentBridgeV1, RelativeAttachmentBridgeResidualV1,
+    prepare_declared_relative_attachment_bridges_v1,
+)
 from .mechanics_control_solver_v1 import (
     ControlTransformIRV1, MechanicsPoseIRV1, SolvedJointTransformIRV1,
     _control_world_transforms,
@@ -79,6 +83,9 @@ class MechanicsMultiGoalResultV1:
     attachment_position_goals: tuple[MechanicsAttachmentPositionResidualV1, ...] = ()
     max_attachment_position_residual_world: float = 0.
     max_orientation_residual_rad: float = 0.
+    relative_attachment_bridges: tuple[RelativeAttachmentBridgeResidualV1, ...] = ()
+    max_relative_bridge_position_residual_world: float = 0.
+    max_relative_bridge_orientation_residual_rad: float = 0.
     metadata: dict = field(default_factory=dict)
 
 
@@ -114,6 +121,7 @@ def solve_declared_multi_goal_v1(
     pinned_world_targets: Mapping[str, Sequence[float]] | None = None,
     attachment_orientation_targets: Mapping[str, Sequence[Sequence[float]]] | None = None,
     attachment_position_targets: Mapping[str, Sequence[float]] | None = None,
+    relative_attachment_bridges: Sequence[DeclaredRelativeAttachmentBridgeV1] = (),
     orientation_tolerance_rad: float = 1e-3,
     attachment_preflight_mode: str = "DISABLED",
     goal_tolerance: float = 1e-3,
@@ -145,6 +153,8 @@ def solve_declared_multi_goal_v1(
         raise QualificationError("MULTIGOAL_ORIENTATION_REQUIRES_ANALYTIC")
     if attachment_position_targets is not None and jacobian_mode != "ANALYTIC_RESEARCH_V1":
         raise QualificationError("MULTIGOAL_ATTACHMENT_POSITION_REQUIRES_ANALYTIC")
+    if relative_attachment_bridges and jacobian_mode != "ANALYTIC_RESEARCH_V1":
+        raise QualificationError("MULTIGOAL_RELATIVE_BRIDGE_REQUIRES_ANALYTIC")
     if min(max_nfev, maximum_joints, maximum_dofs, maximum_goals) < 1:
         raise QualificationError("MULTIGOAL_RESOURCE_POLICY_INVALID")
 
@@ -382,6 +392,13 @@ def solve_declared_multi_goal_v1(
                 +first.constraint_kind+":"+",".join(first.anchor_ids)
             )
 
+    prepared_bridges=(
+        prepare_declared_relative_attachment_bridges_v1(
+            rig,relative_attachment_bridges,maximum_bridges=maximum_goals,
+        ) if relative_attachment_bridges else ()
+    )
+    if len(goals)+len(attachment_position_goals)+len(orientation_goals)+len(prepared_bridges)>maximum_goals*4:
+        raise QualificationError("MULTIGOAL_COMBINED_TASK_RESOURCE_BOUND")
     parameter_axes = {
         "RX": np.array((1., 0., 0.)),
         "RY": np.array((0., 1., 0.)),
@@ -432,6 +449,17 @@ def solve_declared_multi_goal_v1(
             (world_rot[parent]@local-target).ravel()
             for _,parent,local,target in orientation_goals
         )
+        for link in prepared_bridges:
+            a,b=link.parent_a_id,link.parent_b_id
+            Ra,Rb=world_rot[a],world_rot[b]
+            grip_a=p[a]+Ra@link.local_a_P
+            grip_b=p[b]+Rb@link.local_b_P
+            anchor_a_R=Ra@link.local_a_basis
+            predicted_b_P=grip_a+anchor_a_R@link.a_to_b_local_P
+            predicted_b_R=anchor_a_R@link.a_to_b_local_basis
+            actual_b_R=Rb@link.local_b_basis
+            blocks.append(grip_b-predicted_b_P)
+            blocks.append((actual_b_R-predicted_b_R).ravel())
         if regularization:
             blocks.append(math.sqrt(regularization) * q)
         return np.concatenate(blocks)
@@ -439,7 +467,7 @@ def solve_declared_multi_goal_v1(
     def analytic_jacobian(q: np.ndarray) -> np.ndarray:
         p, forward_rot, world_axes = forward(q)
         task_rows=(3*len(goals)+3*len(attachment_position_goals)
-                   +9*len(orientation_goals))
+                   +9*len(orientation_goals)+12*len(prepared_bridges))
         rows = task_rows + (len(param_schema) if regularization else 0)
         out = np.zeros((rows, len(param_schema)), dtype=np.float64)
         for gi, (_, _, tip, _, kind) in enumerate(goals):
@@ -470,6 +498,29 @@ def solve_declared_multi_goal_v1(
                 out[rowstart:rowstart+9,index]=np.cross(
                     world_axes[index],world_basis.T
                 ).T.ravel()
+        bridge_start=3*len(goals)+3*len(attachment_position_goals)+9*len(orientation_goals)
+        for gi,link in enumerate(prepared_bridges):
+            a,b=link.parent_a_id,link.parent_b_id
+            Ra,Rb=forward_rot[a],forward_rot[b]
+            A_R=Ra@link.local_a_basis
+            B_R=Rb@link.local_b_basis
+            target_B_R=A_R@link.a_to_b_local_basis
+            grip_A=p[a]+Ra@link.local_a_P
+            grip_B=p[b]+Rb@link.local_b_P
+            target_B_P=grip_A+A_R@link.a_to_b_local_P
+            rowstart=bridge_start+12*gi
+            for index,(pivot,_) in enumerate(param_schema):
+                axis=world_axes[index]
+                derivative=np.zeros(3,dtype=np.float64)
+                dR=np.zeros((3,3),dtype=np.float64)
+                if pivot in ancestor_sets[b]:
+                    derivative+=np.cross(axis,grip_B-p[pivot])
+                    dR+=np.cross(axis,B_R.T).T
+                if pivot in ancestor_sets[a]:
+                    derivative-=np.cross(axis,target_B_P-p[pivot])
+                    dR-=np.cross(axis,target_B_R.T).T
+                out[rowstart:rowstart+3,index]=derivative
+                out[rowstart+3:rowstart+12,index]=dR.ravel()
         if regularization:
             out[task_rows:, :] = math.sqrt(regularization) * np.eye(len(param_schema))
         return out
@@ -498,7 +549,8 @@ def solve_declared_multi_goal_v1(
     policy_preferred_span_error: float | None = None
     if active_parameter_policy == "RANK_REVEALING_RESEARCH_V1":
         task_jac = analytic_jacobian(x0)[
-            :3*len(goals)+3*len(attachment_position_goals)+9*len(orientation_goals), :
+            :3*len(goals)+3*len(attachment_position_goals)
+             +9*len(orientation_goals)+12*len(prepared_bridges), :
         ]
         if not np.isfinite(task_jac).all():
             raise QualificationError("MULTIGOAL_RANK_POLICY_JACOBIAN_NONFINITE")
@@ -596,13 +648,31 @@ def solve_declared_multi_goal_v1(
             for _,parent,local,target in attachment_position_goals
         ):
             return False
-        return all(
+        if any(
             math.acos(float(np.clip(
                 (np.trace(target.T@(rotations[parent]@local))-1.)/2.,
                 -1.,1.,
-            ))) <= orientation_tolerance_rad
+            ))) > orientation_tolerance_rad
             for _,parent,local,target in orientation_goals
-        )
+        ):
+            return False
+        for link in prepared_bridges:
+            a,b=link.parent_a_id,link.parent_b_id
+            Ra,Rb=rotations[a],rotations[b]
+            grip_a=positions[a]+Ra@link.local_a_P
+            grip_b=positions[b]+Rb@link.local_b_P
+            A_R=Ra@link.local_a_basis
+            target_p=grip_a+A_R@link.a_to_b_local_P
+            predicted_R=A_R@link.a_to_b_local_basis
+            actual_R=Rb@link.local_b_basis
+            if np.linalg.norm(grip_b-target_p)>goal_tolerance:
+                return False
+            angle=math.acos(float(np.clip(
+                (np.trace(predicted_R.T@actual_R)-1.)/2.,-1.,1.,
+            )))
+            if angle>orientation_tolerance_rad:
+                return False
+        return True
 
     opt, solution_q = optimize_subspace(active_idx, x0)
     candidate_nfev = int(opt.nfev)
@@ -709,12 +779,37 @@ def solve_declared_multi_goal_v1(
         ) for aid,parent,local,target in orientation_goals
     )
     orientation_max=max((r.residual_rad for r in reported_orientations),default=0.)
+    reported_relative_bridges=[]
+    for link in prepared_bridges:
+        a,b=link.parent_a_id,link.parent_b_id
+        Ra,Rb=rotations[a],rotations[b]
+        grip_a=p[a]+Ra@link.local_a_P
+        grip_b=p[b]+Rb@link.local_b_P
+        A_R=Ra@link.local_a_basis
+        expected_p=grip_a+A_R@link.a_to_b_local_P
+        expected_R=A_R@link.a_to_b_local_basis
+        actual_R=Rb@link.local_b_basis
+        reported_relative_bridges.append(RelativeAttachmentBridgeResidualV1(
+            bridge_id=link.bridge_id,
+            anchor_a_id=link.anchor_a_id,anchor_b_id=link.anchor_b_id,
+            expected_world_b_P=tuple(map(float,expected_p)),
+            actual_world_b_P=tuple(map(float,grip_b)),
+            expected_world_b_basis=tuple(tuple(map(float,row)) for row in expected_R),
+            actual_world_b_basis=tuple(tuple(map(float,row)) for row in actual_R),
+            position_residual_world=float(np.linalg.norm(grip_b-expected_p)),
+            orientation_residual_rad=math.acos(float(np.clip(
+                (np.trace(expected_R.T@actual_R)-1.)/2.,-1.,1.,
+            ))),
+        ))
+    max_bridge_p=max((r.position_residual_world for r in reported_relative_bridges),default=0.)
+    max_bridge_R=max((r.orientation_residual_rad for r in reported_relative_bridges),default=0.)
     drag_max = max((g.residual_world for g in reported_goals if g.goal_kind == "DRAG"), default=0.0)
     pin_max = max((g.residual_world for g in reported_goals if g.goal_kind == "PIN"), default=0.0)
     passes = bool(
         opt.success and drag_max<=goal_tolerance and pin_max<=goal_tolerance
         and orientation_max<=orientation_tolerance_rad
         and attachment_position_max<=goal_tolerance
+        and max_bridge_p<=goal_tolerance and max_bridge_R<=orientation_tolerance_rad
     )
     rows = tuple(SolvedJointTransformIRV1(
         canonical_joint_id=jid,
@@ -751,6 +846,9 @@ def solve_declared_multi_goal_v1(
         attachment_position_goals=reported_attachment_positions,
         max_orientation_residual_rad=orientation_max,
         max_attachment_position_residual_world=attachment_position_max,
+        relative_attachment_bridges=tuple(reported_relative_bridges),
+        max_relative_bridge_position_residual_world=max_bridge_p,
+        max_relative_bridge_orientation_residual_rad=max_bridge_R,
         metadata={
             "solver_termination": str(opt.message),
             "jacobian_mode": jacobian_mode,
@@ -761,6 +859,8 @@ def solve_declared_multi_goal_v1(
             "pinned_contact_count": len(pins),
             "declared_attachment_orientation_goal_count": len(orientation_goals),
             "declared_attachment_position_goal_count": len(attachment_position_goals),
+            "cross_parent_relative_bridge_count": len(prepared_bridges),
+            "cross_parent_bridge_is_explicit_runtime_contract_not_source_truth": True,
             "attachment_preflight_mode": attachment_preflight_mode,
             "attachment_preflight_pairwise_witness_count": preflight_witness_count,
             "preflight_is_necessary_not_global_feasibility": True,

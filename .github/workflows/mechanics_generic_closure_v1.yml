@@ -42,6 +42,16 @@ jobs:
       - name: Existing and new Mechanics behavior regression
         run: |
           pytest -q tests/compiler/test_mechanics_control_solver_v1.py tests/compiler/test_control_motion_ik_integration_v1.py tests/compiler/test_mechanics_multigoal_solver_v1.py tests/compiler/test_mechanics_live_multigoal_integration_v1.py tests/mechanics/test_stage47_source_mechanics_audit_v1.py tests/mechanics/test_stage47_source_fk_lbs_comparison_v1.py tests/compiler/test_mechanics_surface_control_effects_v1.py tests/compiler/test_mechanics_control_response_court_v1.py
+      - name: Temporary read-only source-kernel export for Stage47 oracle experiment
+        if: github.head_ref == 'research/mechanics-generic-closure-v1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mechanics-source-kernel-research-only
+          path: |
+            compiler/realsas_compiler_core/*.py
+            tools/mechanics/compare_stage47_source_fk_lbs_v1.py
+          retention-days: 1
+          if-no-files-found: error
       - name: Research ownership firewall
         run: |
           python - <<'PY'

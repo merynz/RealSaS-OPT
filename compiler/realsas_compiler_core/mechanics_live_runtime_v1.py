@@ -12,6 +12,7 @@ call does NOT certify genericity, physical simulation, or real-time frame rate.
 """
 
 from dataclasses import dataclass, field
+from typing import Mapping, Sequence
 import math
 
 import numpy as np
@@ -173,6 +174,7 @@ def evaluate_mechanics_intervention_frame_v1(
     max_allowed_segment_strain: float = 1.0e-3,
     solver_mode: str = "FABRIK_V1",
     pinned_contact_control_ids: tuple[str, ...] = (),
+    pinned_world_targets: Mapping[str, Sequence[float]] | None = None,
     initial_parameters_rad: tuple[tuple[str, str, float], ...] | None = None,
     prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
     multi_goal_jacobian_mode: str = "NUMERIC_V1",
@@ -215,7 +217,7 @@ def evaluate_mechanics_intervention_frame_v1(
     multi_status: str | None = None
     solved_parameters: tuple[tuple[str, str, float], ...] = ()
     if solver_mode == "FABRIK_V1":
-        if pinned_contact_control_ids:
+        if pinned_contact_control_ids or pinned_world_targets is not None:
             raise QualificationError("LIVE_MECHANICS_PINS_REQUIRE_MULTI_GOAL")
         if initial_parameters_rad is not None:
             raise QualificationError("LIVE_MECHANICS_WARM_START_REQUIRES_MULTI_GOAL")
@@ -226,6 +228,7 @@ def evaluate_mechanics_intervention_frame_v1(
         from .mechanics_multigoal_solver_v1 import solve_declared_multi_goal_v1
         solved = solve_declared_multi_goal_v1(
             rig, controls, pinned_contact_control_ids=pinned_contact_control_ids,
+            pinned_world_targets=pinned_world_targets,
             goal_tolerance=limit_residual,
             initial_parameters_rad=initial_parameters_rad,
             jacobian_mode=multi_goal_jacobian_mode,
@@ -277,6 +280,9 @@ def evaluate_mechanics_intervention_frame_v1(
             "time_seconds": time_seconds,
             "solver_mode": solver_mode,
             "pinned_contact_control_ids": tuple(pinned_contact_control_ids),
+            "explicit_contact_world_anchor_count": (
+                len(pinned_world_targets) if pinned_world_targets is not None else 0
+            ),
             "multi_goal_status": multi_status,
             "warm_start_used": initial_parameters_rad is not None,
             "multi_goal_jacobian_mode": multi_goal_jacobian_mode,
@@ -300,6 +306,7 @@ def evaluate_mechanics_intervention_sequence_v1(
     max_allowed_segment_strain: float = 1.0e-3,
     solver_mode: str = "FABRIK_V1",
     pinned_contact_control_ids: tuple[str, ...] = (),
+    pinned_world_targets: Mapping[str, Sequence[float]] | None = None,
     prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
     multi_goal_jacobian_mode: str = "NUMERIC_V1",
 ) -> MechanicsInterventionSequenceV1:
@@ -324,6 +331,7 @@ def evaluate_mechanics_intervention_sequence_v1(
             max_allowed_segment_strain=max_allowed_segment_strain,
             solver_mode=solver_mode,
             pinned_contact_control_ids=pinned_contact_control_ids,
+            pinned_world_targets=pinned_world_targets,
             initial_parameters_rad=prev_solution if solver_mode == "DECLARED_MULTI_GOAL_V1" else None,
             prepared_skin=prepared_skin,
             multi_goal_jacobian_mode=multi_goal_jacobian_mode,
@@ -380,6 +388,9 @@ def evaluate_mechanics_intervention_sequence_v1(
             "multi_goal_jacobian_mode": multi_goal_jacobian_mode,
             "solver_mode": solver_mode,
             "pinned_contact_control_ids": tuple(pinned_contact_control_ids),
+            "explicit_contact_world_anchor_count": (
+                len(pinned_world_targets) if pinned_world_targets is not None else 0
+            ),
         },
     )
 

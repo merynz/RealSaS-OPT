@@ -1,0 +1,66 @@
+name: Cat V3 A1 source physical residual attribution and noise floor v1
+on:
+  push:
+    branches: [research/cat-v3-blender-exr-origin-court-v1]
+    paths:
+      - 'tools/corpus/court_cat_v3_reference_residual_attribution_v1.py'
+      - 'tests/corpus/test_cat_v3_reference_residual_attribution_v1.py'
+      - '.github/workflows/cat-v3-reference-residual-attribution-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cat-v3-a1-residual-attribution-v1-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  physical-residual-classification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Exact original A1 residual/alpha/sampling source variance, no masks or training promotion
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m pip install 'numpy>=1.26,<3' 'pytest>=8,<10'
+          python -m pytest -q tests/corpus/test_cat_v3_reference_residual_attribution_v1.py
+          D="$RUNNER_TEMP/cat-v3-source-residual-v1"
+          mkdir -p "$D"
+          export RCLONE_CONFIG="$D/rclone.conf"
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          R="$D/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$D"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          ROOT="gdrive:corpus370_preparation_v1"
+          SOURCE="$ROOT/hosted_drawable_capability_pose_transport_v3/CAT/42273572984-1"
+          V0="$ROOT/hosted_original_cat_v3_puppet_physical_parity_v0/CAT/42285528834-1"
+          A1="$ROOT/hosted_cat_v3_blender_pixel_origin_amendment_a1/CAT/42286928169-1"
+          rclone copyto "$SOURCE/PRIVATE_CAT_NATIVE_POSE_UV_EDIT_CYCLES_SAMPLES_V3.npz" "$D/PRIVATE_CAT_NATIVE_POSE_UV_EDIT_CYCLES_SAMPLES_V3.npz" --checksum --retries 3
+          for F in PRIVATE_CAT_V3_PUPPET_REFERENCE_PREDICTIONS_V0.npz PRIVATE_INDEPENDENT_CAT_V3_PUPPET_REFERENCE_PHYSICAL_PARITY_V0.json; do
+            rclone copyto "$V0/$F" "$D/$F" --checksum --retries 3
+          done
+          rclone copyto "$A1/PRIVATE_CAT_V3_BLENDER_PIXEL_ORIGIN_AMENDMENT_A1_COURT.json" "$D/PRIVATE_CAT_V3_BLENDER_PIXEL_ORIGIN_AMENDMENT_A1_COURT.json" --checksum --retries 3
+          echo "b2bb4fa9fc0b777bb8418aebc729123616b774b55eeb215ba17651e7f3448e0d  $D/PRIVATE_CAT_NATIVE_POSE_UV_EDIT_CYCLES_SAMPLES_V3.npz" | sha256sum --check
+          echo "55675886ae92c3b122647b1749290675dc8fbc13d1c617c9340ec42fe3e702d8  $D/PRIVATE_CAT_V3_PUPPET_REFERENCE_PREDICTIONS_V0.npz" | sha256sum --check
+          echo "90759dd7f431b89ccc697824a9f9485fa2cdef15360a89746d0978dbd1ae50b4  $D/PRIVATE_INDEPENDENT_CAT_V3_PUPPET_REFERENCE_PHYSICAL_PARITY_V0.json" | sha256sum --check
+          echo "ea856eebc796aec4d5dd548948085258aac05f4a53574d1aa2152aff7b914568  $D/PRIVATE_CAT_V3_BLENDER_PIXEL_ORIGIN_AMENDMENT_A1_COURT.json" | sha256sum --check
+          python -m tools.corpus.court_cat_v3_reference_residual_attribution_v1 \
+            --root "$D" --output "$D/PRIVATE_CAT_V3_REFERENCE_RESIDUAL_ATTRIBUTION_V1.json"
+          DEST="$ROOT/hosted_cat_v3_reference_residual_attribution_v1/CAT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          F="$D/PRIVATE_CAT_V3_REFERENCE_RESIDUAL_ATTRIBUTION_V1.json"
+          rclone copyto "$F" "$DEST/$(basename "$F")" --checksum --retries 3
+          rclone cat "$DEST/$(basename "$F")" > "$D/readback.json"
+          cmp "$F" "$D/readback.json"
+          sha256sum "$F"
+          echo "SOURCE_VARIANCE_LOWER_BOUND_AND_RENDER_RESIDUALS_COURTED__NO_GRAPHICS_TRAINING_AUTHORITY"

@@ -1,0 +1,47 @@
+name: Drawable V3 Cat original authored-pose source UV edit physical court
+on:
+  push:
+    branches: [research/drawable-capability-pose-transport-v3]
+    paths:
+      - 'tools/truth_foundry/blender_corpus370_cat_authored_pose_uv_edits_v3.py'
+      - 'tools/corpus/court_drawable_capability_pose_transport_v3.py'
+      - 'tools/corpus/hosted_drawable_capability_pose_transport_v3.sh'
+      - 'tests/corpus/test_drawable_capability_pose_transport_v3.py'
+      - '.github/workflows/drawable-capability-pose-transport-v3.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: drawable-capability-pose-transport-v3-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  source-pose-edit-operator-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Synthetic pose edit falsification, original provenance and decision V2 regressions
+        run: |
+          set -euo pipefail
+          python -m pip install 'numpy>=1.26,<3' 'pillow>=10,<13' 'pytest>=8,<10'
+          python -m py_compile tools/truth_foundry/blender_corpus370_cat_authored_pose_uv_edits_v3.py tools/corpus/court_drawable_capability_pose_transport_v3.py
+          python -m pytest -q tests/corpus/test_drawable_capability_pose_transport_v3.py tests/corpus/test_drawable_capability_decision_v2.py
+  new-original-native-pose-physical-source:
+    needs: source-pose-edit-operator-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Original Cat two authored-pose physical source renderer and independently courted edit consequences
+        run: |
+          set -euo pipefail
+          bash tools/corpus/hosted_drawable_capability_pose_transport_v3.sh

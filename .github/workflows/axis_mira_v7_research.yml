@@ -1,0 +1,50 @@
+name: axis-mira-v7-research
+
+on:
+  pull_request:
+    paths:
+      - 'models/axis/rig_program_model_v7.py'
+      - 'models/mira/skin_fsq_codec_v7.py'
+      - 'compiler/realsas_compiler_core/mechanics_interaction_v1.py'
+      - 'tests/models/test_axis_mira_v7_research.py'
+      - 'canonical/AXIS_MIRA_V7_CORPUS370_PREREG_V1.json'
+      - 'docs/research/AXIS_MIRA_V7_SKINTOKENS_PLUSPLUS_20261106.md'
+      - '.github/workflows/axis_mira_v7_research.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  v7-contract-courts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU research requirements
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Syntax
+        run: |
+          python -m py_compile models/axis/rig_program_model_v7.py models/mira/skin_fsq_codec_v7.py compiler/realsas_compiler_core/mechanics_interaction_v1.py
+      - name: Source and Mechanic court
+        run: |
+          pytest -q tests/models/test_axis_mira_v7_research.py
+      - name: Verify no V7 training authority was minted
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path('canonical/AXIS_MIRA_V7_CORPUS370_PREREG_V1.json').read_text())
+          assert d['training']['allowed_now'] is False
+          assert d['training']['checkpoint_product_authority'] is False
+          assert d['owner_contract']['graphics'] == 'SEPARATE_IRIS_LINKED_GRAPHICS_COMPILER'
+          assert d['skin']['vocab_size'] == 64000
+          assert d['skin']['source_vae_attention_parity_claimed'] is False
+          print('AXIS_MIRA_V7_RESEARCH_AUTHORITY_SEALED')
+          PY

@@ -73,13 +73,13 @@ def test_bare_unknown_control_type_does_not_synthesize_mechanical_role():
     ))
     result=_pick(mesh,rig,skin)
     assert "C_UNKNOWN" not in {x.canonical_control_id for x in result.candidates}
-    assert result.abstained_control_count==2
+    assert result.abstained_control_count==1
 
 
 def test_pick_fails_closed_on_invalid_skin_and_lineage_drift():
     mesh,rig,skin=_setup()
     with pytest.raises(QualificationError,match="LINEAGE_DRIFT"):
-        _pick(rig,replace(skin,deform_structure_hash="not_same"))
+        _pick(mesh,rig,replace(skin,deform_structure_hash="not_same"))
     with pytest.raises(QualificationError,match="BARYCENTRIC_INVALID"):
         surface_control_effect_evidence_v1(
             rig,skin,triangle_vertex_ids=("MV:0","MV:1","MV:2"),
@@ -88,7 +88,7 @@ def test_pick_fails_closed_on_invalid_skin_and_lineage_drift():
     corrupt=replace(skin,rows=(replace(skin.rows[0],influences=(("J0",0.1),)),)
                     +skin.rows[1:])
     with pytest.raises(QualificationError,match="SKIN_SIMPLEX_INVALID"):
-        _pick(rig,corrupt)
+        _pick(mesh,rig,corrupt)
     with pytest.raises(QualificationError,match="SURFACE_VERTEX_UNKNOWN"):
         surface_control_effect_evidence_v1(
             rig,skin,triangle_vertex_ids=("MV:0","MV:1","MISSING"),

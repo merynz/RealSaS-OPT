@@ -1,0 +1,130 @@
+name: Original Cat source-to-teacher face UV alignment physical-input probe v0
+on:
+  push:
+    branches: [research/graphics-source-face-uv-alignment-v0]
+    paths:
+      - 'tools/corpus/court_original_source_face_uv_alignment_v0.py'
+      - 'tools/corpus/qualify_source_uv_inventory_v0.py'
+      - 'tools/truth_foundry/blender_original_teacher_face_uv_native_alignment_v0.py'
+      - '.github/workflows/source-face-uv-original-cat-v0.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: source-face-uv-cat-v0-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-private-source-face-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Exact SHA original teacher/GLB source address gate, no public source bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m pip install 'numpy>=1.26,<3' 'pillow>=10,<13'
+          D="$RUNNER_TEMP/cat-source-face-uv-v0"
+          ROOT="gdrive:corpus370_preparation_v1"
+          mkdir -p "$D/out"
+          export RCLONE_CONFIG="$D/rclone.conf"
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          R="$D/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$D"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          rclone copyto "$ROOT/hosted_operational_drawable_inputs_v1/42220981274-1/ORIGINAL_TWO_SOURCE_INPUTS.zip" "$D/inputs.zip" --checksum --retries 3
+          echo "e3c758b0a4dc9bd3e7f889e94366fa7ff40517deb15e68a202d525b62de13948  $D/inputs.zip" | sha256sum --check
+          NATIVE="$ROOT/hosted_native_temporal_pilot_v1/41915393652-1/subjects/corpus_000ca1ae51f9582fde9e"
+          rclone copyto "$NATIVE/teacher.npz" "$D/teacher.npz" --checksum --retries 3
+          echo "c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603  $D/teacher.npz" | sha256sum --check
+          D="$D" python - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          with zipfile.ZipFile(d/"inputs.zip") as z:
+              manifest=json.loads(z.read("PRIVATE_TRANSPORT_MANIFEST.json"))
+              assert manifest["parent_manifest_sha256"]=="cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172"
+              rows=[r for r in manifest["files"] if r["relative_path"].endswith("/Models/GLB format/animal-cat.glb")]
+              assert len(rows)==1
+              r=rows[0]
+              payload=z.read("objects/"+r["sha256"])
+              expected="1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850"
+              assert len(payload)==r["size_bytes"] and hashlib.sha256(payload).hexdigest()==r["sha256"]==expected
+              (d/"cat.glb").write_bytes(payload)
+              texrows=[r for r in manifest["files"] if r["relative_path"].endswith("/Models/GLB format/Textures/colormap.png")]
+              assert len(texrows)==1
+              texrow=texrows[0]
+              texture=z.read("objects/"+texrow["sha256"])
+              texture_sha="2f6d0032e51c2d49b13b8e689d59eb39aa3ee6c32f2a1851213e11fc7593177d"
+              assert len(texture)==texrow["size_bytes"] and hashlib.sha256(texture).hexdigest()==texrow["sha256"]==texture_sha
+              (d/"Textures").mkdir(exist_ok=True)
+              (d/"Textures/colormap.png").write_bytes(texture)
+          print("PRIVATE_CAT_GLTF_SOURCE_BYTES_SHA_VERIFIED")
+          PY
+          python -m tools.corpus.court_original_source_face_uv_alignment_v0 \
+            --glb "$D/cat.glb" --teacher "$D/teacher.npz" \
+            --expected-glb-sha 1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850 \
+            --expected-teacher-sha c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603 \
+            --output "$D/out/PRIVATE_CAT_SOURCE_FACE_UV_ALIGNMENT_V0.json" \
+            --private-face-uv "$D/out/PRIVATE_CAT_SOURCE_FACE_UV_V0.npz"
+          DEST="$ROOT/hosted_graphics_source_face_uv_alignment_v0/CAT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          rclone copyto "$D/out/PRIVATE_CAT_SOURCE_FACE_UV_ALIGNMENT_V0.json" "$DEST/PRIVATE_CAT_SOURCE_FACE_UV_ALIGNMENT_V0.json" --checksum --retries 3
+          if [ -s "$D/out/PRIVATE_CAT_SOURCE_FACE_UV_V0.npz" ]; then
+            rclone copyto "$D/out/PRIVATE_CAT_SOURCE_FACE_UV_V0.npz" "$DEST/PRIVATE_CAT_SOURCE_FACE_UV_V0.npz" --checksum --retries 3
+          fi
+          rclone cat "$DEST/PRIVATE_CAT_SOURCE_FACE_UV_ALIGNMENT_V0.json" > "$D/readback.json"
+          cmp "$D/readback.json" "$D/out/PRIVATE_CAT_SOURCE_FACE_UV_ALIGNMENT_V0.json"
+          echo "INITIAL_SINGLE_PRIMITIVE_GATE_ARCHIVED__MULTIPRIMITIVE_EXPECTED_UNKNOWN"
+          sudo apt-get -o Acquire::Retries=5 update -qq
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 libgl1
+          curl -fL --retry 4 --max-time 300 https://download.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz -o "$D/blender-4.5.14-linux-x64.tar.xz"
+          curl -fL --retry 4 --max-time 120 https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256 -o "$D/blender-checksums.txt"
+          D="$D" python - <<'PY'
+          import hashlib,os,re
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          rows=[r for r in (d/"blender-checksums.txt").read_text().splitlines()
+                if "blender-4.5.14-linux-x64.tar.xz" in r]
+          assert len(rows)==1
+          tokens=re.findall(r"[a-fA-F0-9]{64}",rows[0])
+          assert len(tokens)==1
+          with (d/"blender-4.5.14-linux-x64.tar.xz").open("rb") as f:
+              assert hashlib.file_digest(f,"sha256").hexdigest()==tokens[0].lower()
+          PY
+          tar -xJf "$D/blender-4.5.14-linux-x64.tar.xz" -C "$D"
+          BLENDER="$D/blender-4.5.14-linux-x64/blender"
+          test "$(sha256sum "$BLENDER" | cut -d' ' -f1)" = 050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8
+          "$BLENDER" --background --factory-startup --threads 2 --python-exit-code 1 \
+            --python tools/truth_foundry/blender_original_teacher_face_uv_native_alignment_v0.py -- \
+            --source "$D/cat.glb" --teacher "$D/teacher.npz" \
+            --expected-source-sha 1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850 \
+            --expected-teacher-sha c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603 \
+            --report "$D/out/PRIVATE_CAT_NATIVE_TEACHER_GLTF_UV_ALIGNMENT_V0.json" \
+            --private-face-uv "$D/out/PRIVATE_CAT_NATIVE_FACE_UV_V0.npz"
+          for FILE in PRIVATE_CAT_NATIVE_TEACHER_GLTF_UV_ALIGNMENT_V0.json PRIVATE_CAT_NATIVE_FACE_UV_V0.npz; do
+            if [ -s "$D/out/$FILE" ]; then
+              rclone copyto "$D/out/$FILE" "$DEST/$FILE" --checksum --retries 3
+              rclone cat "$DEST/$FILE" > "$D/check-$FILE"
+              cmp "$D/out/$FILE" "$D/check-$FILE"
+            fi
+          done
+          D="$D" python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          p=json.loads((d/"out/PRIVATE_CAT_NATIVE_TEACHER_GLTF_UV_ALIGNMENT_V0.json").read_text())
+          assert p["source_artist_owner"]=="UNKNOWN" and p["training_authorized"] is False
+          assert p["source_to_teacher_face_uv_binding"]=="VERIFIED_NATIVE_BLENDER_FACE_ORDER_AND_RAW_GLTF_UV_MULTISET",p["reason"]
+          print("ORIGINAL_SOURCE_TO_TEACHER_UV_FACE_IDENTITY_VERIFIED__PUPPET_PARITY_UNKNOWN",flush=True)
+          PY

@@ -42,6 +42,8 @@ class OperationalPuppetRuntimeV0:
                  candidate: RepresentationCandidateV0, mesh, face_uv,
                  texture_rgba_u8, edit_rectangles):
         evidence.validate()
+        _require(evidence.input_mode != "STUDENT_INFERRED_UNQUALIFIED",
+                 "ORS_RUNTIME_STUDENT_SOURCE_GEOMETRY_UNQUALIFIED")
         _require((candidate.mesh_binding_hash == evidence.mesh_binding_hash
                   and candidate.skin_binding_hash == evidence.skin_binding_hash
                   and candidate.source_graphics_binding_hash

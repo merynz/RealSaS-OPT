@@ -277,8 +277,8 @@ def produce(source_root:Path,output:Path):
             and bind.get("source_uv_comparison",{}).get("matched") is True
             and bind.get("original_glb_sha256")==CAT
             and bind.get("original_teacher_sha256")==PINS["teacher.npz"]
-            and bind.get("face_uv_array_sha256")==PINS["face-uv.npz"] or
-            False,
+            and bind.get("face_uv_array_sha256")==
+            "d49962185c59b7287062336e701bcee02ae00b31bba0610c2119f7e09c78c8f6",
             "SOURCE_FAMILY_IDENTITY_UNVERIFIED")
     require(manifest.get("original_source_sha256")==CAT
             and manifest.get("original_camera_bundle_sha256")==PINS["camera.json"]

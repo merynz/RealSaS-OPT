@@ -1,0 +1,26 @@
+name: corpus370-v18o-variable-k-layer-compositor-contracts
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18o-variable-k-layer-compositor-contracts.yml'
+      - 'tools/corpus/court_corpus370_v18o_variable_k_source_compositor.py'
+      - 'tests/corpus/test_corpus370_v18o_variable_k_source_compositor.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-variable-k-anonymous-and-nonbinary-material-alpha-redteam:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pure contract; never outputs original artist graphics ownership
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile tools/corpus/court_corpus370_v18o_variable_k_source_compositor.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18o_variable_k_source_compositor.py

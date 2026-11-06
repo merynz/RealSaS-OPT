@@ -1,0 +1,110 @@
+name: corpus370-v18g-original-physical-compositing-diagnostics
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18g-original-physical-compositing-diagnostics.yml'
+      - 'tools/corpus/court_corpus370_v18g_operational_compositing_diagnostics.py'
+      - 'tests/corpus/test_corpus370_v18g_operational_compositing_diagnostics.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18g-archive-compositor-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v18g-compositing-constraints:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compositing, visibility and ambiguity adversarial suite
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile tools/corpus/court_corpus370_v18g_operational_compositing_diagnostics.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18g_operational_compositing_diagnostics.py
+
+  v18g-original-source-archive-compositing-diagnosis:
+    needs: v18g-compositing-constraints
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            expected_v18f_court: 9fba1f6f74ff5fd9a60ffb842f49ff8ba0a4169e2c8cf3ed504bec0374c26276
+            expected_v18a_court: 2801bc94c58349f7561071f2c36d9a30b8d13b3b476aa4430e164f2e5de02c7b
+          - subject: TRICERATOPS
+            expected_v18f_court: 6c578d92f8f7bc4d867632afd629d989b79f045f38a8edead4e75ab14b1b5f38
+            expected_v18a_court: bd7ac5e561af6d4a4bbab8aac555951e5c7e6b97f589a700ef3691edc89ce5c0
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      EXPECTED_V18F_COURT_SHA: ${{ matrix.expected_v18f_court }}
+      EXPECTED_V18A_COURT_SHA: ${{ matrix.expected_v18a_court }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install read-only sealed original-source Drive transport
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+          python3 -m pip install --disable-pip-version-check numpy
+      - name: Reopen frozen physical edit RGBA and independently diagnose alpha compositing
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/v18g-private-transport.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          mkdir -p "$RUNNER_TEMP/v18g"
+          D="$RUNNER_TEMP/v18g"
+          OLD="gdrive:corpus370_preparation_v1/hosted_full_physical_edit_v18f/$SUBJECT/42114401233-1"
+          STAIN="gdrive:corpus370_preparation_v1/hosted_reactive_stain_v18a/$SUBJECT/42097722762-1"
+          for ext in json npz; do
+            rclone copyto "$OLD/PRIVATE_ORIGINAL_V18F_FULL_PHYSICAL_EDIT_RENDER.$ext" "$D/original-v18f.$ext" --checksum --retries 3
+            test -s "$D/original-v18f.$ext"
+          done
+          rclone copyto "$OLD/PRIVATE_INDEPENDENT_ORIGINAL_V18F_FULL_PHYSICAL_EDIT_COURT.json" "$D/parent-v18f-court.json" --checksum --retries 3
+          test "$(sha256sum "$D/parent-v18f-court.json" | cut -d' ' -f1)" = "$EXPECTED_V18F_COURT_SHA"
+          rclone copyto "$STAIN/PRIVATE_REACTIVE_STAIN_CANDIDATE_V18A.npz" "$D/v18a-candidates.npz" --checksum --retries 3
+          rclone copyto "$STAIN/PRIVATE_INDEPENDENT_REACTIVE_STAIN_COURT_V18A.json" "$D/v18a-court.json" --checksum --retries 3
+          test "$(sha256sum "$D/v18a-court.json" | cut -d' ' -f1)" = "$EXPECTED_V18A_COURT_SHA"
+          python3 -u tools/corpus/court_corpus370_v18g_operational_compositing_diagnostics.py \
+            --render-manifest "$D/original-v18f.json" \
+            --render-npz "$D/original-v18f.npz" \
+            --parent-court "$D/parent-v18f-court.json" \
+            --v18a-npz "$D/v18a-candidates.npz" \
+            --v18a-court "$D/v18a-court.json" \
+            --expected-parent-court-sha256 "$EXPECTED_V18F_COURT_SHA" \
+            --output "$D/PRIVATE_V18G_ORIGINAL_PHYSICAL_COMPOSITING_DIAGNOSIS.json"
+          D="$D" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["D"])/"PRIVATE_V18G_ORIGINAL_PHYSICAL_COMPOSITING_DIAGNOSIS.json"
+          d=json.loads(p.read_text())
+          assert d["status"]=="ORIGINAL_SOURCE_PHYSICAL_LAYER_COMPLEMENT_ALPHA_COMPOSING_DIAGNOSED__NO_OWNER_TRUTH"
+          assert d["no_new_blender_renders"] is True
+          assert d["original_v18f_run"]=="42114401233-1"
+          assert len(d["per_original_source_target_view_threshold"])==72
+          assert list(d["per_threshold_unique_group_view_summary"])==["0.045","0.1","0.18"] or set(d["per_threshold_unique_group_view_summary"])=={"0.045","0.1","0.18"}
+          assert d["artist_drawable_identity"]=="UNKNOWN"
+          assert d["operational_drawable_identity"]=="UNKNOWN"
+          assert not any(d[k] for k in ("graphics_owner_authorized","iris_training_authorized","tessa_training_authorized","materialization_authorized","training_authorized"))
+          print("V18G_SOURCE_COMPOSITING_DIAGNOSTICS_INDEPENDENT_PASS__NO_DRAWABLE_AUTHORITY",flush=True)
+          PY
+          TARGET="gdrive:corpus370_preparation_v1/hosted_original_physical_compositing_v18g/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/PRIVATE_V18G_ORIGINAL_PHYSICAL_COMPOSITING_DIAGNOSIS.json"
+          rclone copyto "$D/PRIVATE_V18G_ORIGINAL_PHYSICAL_COMPOSITING_DIAGNOSIS.json" "$TARGET" --checksum --retries 3
+          rclone cat "$TARGET" > "$D/readback.json"
+          test "$(sha256sum "$D/readback.json" | cut -d' ' -f1)" = "$(sha256sum "$D/PRIVATE_V18G_ORIGINAL_PHYSICAL_COMPOSITING_DIAGNOSIS.json" | cut -d' ' -f1)"
+          echo "V18G_ORIGINAL_SOURCE_COMPOSITING_DIAGNOSIS_REMOTE_SHA=$(sha256sum "$D/readback.json" | cut -d' ' -f1)"

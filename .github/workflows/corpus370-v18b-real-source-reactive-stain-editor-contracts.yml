@@ -1,0 +1,110 @@
+name: corpus370-v18b-real-source-reactive-stain-editor-contracts
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18b-real-source-reactive-stain-editor-contracts.yml'
+      - 'tools/truth_foundry/blender_corpus370_v18b_reactive_stain_heldout_edits.py'
+      - 'tools/corpus/court_corpus370_v18b_reactive_stain_editor_edits.py'
+      - 'tools/corpus/hosted_corpus370_v18b_reactive_stain_editor_edits.sh'
+      - 'tests/corpus/test_corpus370_v18b_reactive_stain_editor_edits.py'
+
+permissions:
+  contents: read
+  actions: read
+
+# Avoid duplicate full original Blender matrices on successive branch commits.
+concurrency:
+  group: corpus370-v18b-source-edits-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  editor-source-truth-redteam-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source original Blender edit and independent court syntax
+        run: |
+          python3 -m py_compile \
+            tools/truth_foundry/blender_corpus370_v18b_reactive_stain_heldout_edits.py \
+            tools/corpus/court_corpus370_v18b_reactive_stain_editor_edits.py
+          bash -n tools/corpus/hosted_corpus370_v18b_reactive_stain_editor_edits.sh
+      - name: Adversarially reject false editable artist layers and source edit image corruption
+        run: |
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_v18b_reactive_stain_editor_edits.py
+
+  qualify-v18a-parent-run:
+    needs: editor-source-truth-redteam-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Require exact SHA-locked V18a completed original Cat Triceratops Cowfish courts
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          repo = os.environ["GITHUB_REPOSITORY"]
+          run_id = 42097722762
+          sha = "5de27047c5bf4436a4f406b72947872c415d3a55"
+          def fetch(path):
+              request = urllib.request.Request(
+                  "https://api.github.com/repos/" + repo + path,
+                  headers={
+                      "Accept": "application/vnd.github+json",
+                      "Authorization": "Bearer " + os.environ["GITHUB_TOKEN"],
+                      "X-GitHub-Api-Version": "2022-11-28",
+                  },
+              )
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  return json.load(response)
+          run = fetch("/actions/runs/" + str(run_id))
+          assert run["head_sha"] == sha, "V18A_PARENT_SHA_MISMATCH"
+          assert run["status"] == "completed" and run["conclusion"] == "success", "V18A_NOT_QUALIFIED"
+          jobs = fetch("/actions/runs/" + str(run_id) + "/jobs?per_page=100")["jobs"]
+          expected = {
+              "virtual-reagent-and-independent-court-contracts",
+              "original-signed-native-reactive-stain (CAT, 0)",
+              "original-signed-native-reactive-stain (TRICERATOPS, 1)",
+              "original-signed-native-reactive-stain (COWFISH, 2)",
+          }
+          assert {j["name"] for j in jobs} == expected, "V18A_JOB_SET_UNEXPECTED"
+          assert all(j["status"] == "completed" and j["conclusion"] == "success" for j in jobs), "V18A_SOURCE_COURT_NOT_PASS"
+          print("V18A_EXACT_ORIGINAL_3_OF_3_COURTS_SUCCESS", run_id, sha)
+          PY
+
+  original-source-stain-group-heldout-edits:
+    needs: qualify-v18a-parent-run
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+          - subject: TRICERATOPS
+            ordinal: 1
+          - subject: COWFISH
+            ordinal: 2
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SUBJECT_ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact original source private transport
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Replay true original Blender pose2 hide-isolate edits and independently court all three frozen stain policies
+        run: |
+          set -euo pipefail
+          bash tools/corpus/hosted_corpus370_v18b_reactive_stain_editor_edits.sh

@@ -1,0 +1,113 @@
+name: corpus370-v18i-source-alpha-coverage-vs-layer-order
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18i-source-alpha-coverage-vs-layer-order.yml'
+      - 'tools/corpus/court_corpus370_v18i_emissive_alpha_coverage_diagnostics.py'
+      - 'tests/corpus/test_corpus370_v18i_emissive_alpha_coverage_diagnostics.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18i-alpha-identifiability-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v18i-source-alpha-math-and-corruption-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independent alpha-over and source-invalidity redteam
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile tools/corpus/court_corpus370_v18i_emissive_alpha_coverage_diagnostics.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18i_emissive_alpha_coverage_diagnostics.py
+
+  v18i-original-source-render-alpha-order-diagnostics:
+    needs: v18i-source-alpha-math-and-corruption-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            v18h_court_sha: 305a518f238de91903128fb13fcccac5f2179fa944e9281a6a3cbc0f7b756ee2
+          - subject: TRICERATOPS
+            v18h_court_sha: 6e493f531bc6e2a914b621e15bb8aceb8e3de62f75515a24261ad3a1656d73ff
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      EXPECTED_V18H_COURT_SHA: ${{ matrix.v18h_court_sha }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SHA-pinned portable rclone (no apt mirror dependency)
+        run: |
+          set -euo pipefail
+          VERSION=1.75.2
+          ARCHIVE="$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 \
+            "https://github.com/rclone/rclone/releases/download/v${VERSION}/rclone-v${VERSION}-linux-amd64.zip" \
+            -o "$ARCHIVE"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
+          unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
+          test -x "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64/rclone"
+          echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
+          python3 -m pip install --disable-pip-version-check numpy
+      - name: Diagnose alpha union-vs-order from SHA-locked original V18h frames
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/v18i-archive.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          D="$RUNNER_TEMP/v18i"
+          mkdir -p "$D"
+          PARENT="gdrive:corpus370_preparation_v1/hosted_emissive_compositing_v18h/$SUBJECT/42120479356-1"
+          for ext in json npz; do
+            rclone copyto "$PARENT/PRIVATE_ORIGINAL_V18H_EMISSIVE_COMPLEMENT_RENDER.$ext" "$D/render.$ext" --checksum --retries 3
+            test -s "$D/render.$ext"
+          done
+          rclone copyto "$PARENT/PRIVATE_INDEPENDENT_V18H_EMISSIVE_COMPOSITING_COURT.json" "$D/court.json" --checksum --retries 3
+          test "$(sha256sum "$D/court.json" | cut -d' ' -f1)" = "$EXPECTED_V18H_COURT_SHA"
+          python3 -u tools/corpus/court_corpus370_v18i_emissive_alpha_coverage_diagnostics.py \
+            --render-manifest "$D/render.json" --render-npz "$D/render.npz" \
+            --v18h-court "$D/court.json" --expected-v18h-court-sha "$EXPECTED_V18H_COURT_SHA" \
+            --output "$D/PRIVATE_V18I_SOURCE_ALPHA_COVERAGE_VS_ORDER.json"
+          D="$D" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["D"])/"PRIVATE_V18I_SOURCE_ALPHA_COVERAGE_VS_ORDER.json"
+          d=json.loads(p.read_text())
+          assert d["status"]=="SOURCE_EMISSIVE_ALPHA_COVERAGE_VS_ORDER_DIAGNOSED__NO_DRAWABLE_TRUTH"
+          assert d["new_blender_renders"]==0
+          assert d["original_v18h_run"]=="42120479356-1"
+          assert len(d["per_view_threshold"])==12
+          assert set(d["per_threshold"])=={"0.045","0.1","0.18"}
+          assert all(x["two_order_oracle_failure_pixel_instances"]==
+             x["alpha_mismatch_explains_oracle_failure_pixel_instances"]+
+             x["RGB_or_order_failure_without_alpha_mismatch_pixel_instances"]
+             for x in d["per_threshold"].values())
+          assert d["anti_aliasing_mechanism_proved"] is False
+          assert d["source_artist_editable_layer_labels"]=="UNKNOWN"
+          assert d["source_operational_drawable_layers"]=="UNKNOWN"
+          assert all(d[x] is False for x in ("graphics_owner_authorized",
+             "iris_training_authorized","tessa_training_authorized",
+             "materialization_authorized","training_authorized"))
+          print("V18I_RECOMPUTED_ALPHA_VS_ORDER_SOURCE_DIAGNOSTIC__NO_GRAPHICS_TRUTH",flush=True)
+          PY
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_emissive_alpha_coverage_v18i/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/PRIVATE_V18I_SOURCE_ALPHA_COVERAGE_VS_ORDER.json"
+          rclone copyto "$D/PRIVATE_V18I_SOURCE_ALPHA_COVERAGE_VS_ORDER.json" "$REMOTE" --checksum --retries 3
+          rclone cat "$REMOTE" > "$D/readback.json"
+          test "$(sha256sum "$D/readback.json"|cut -d' ' -f1)" = "$(sha256sum "$D/PRIVATE_V18I_SOURCE_ALPHA_COVERAGE_VS_ORDER.json"|cut -d' ' -f1)"
+          echo "V18I_INDEPENDENT_ALPHA_COVERAGE_REMOTE_COURT_SHA=$(sha256sum "$D/readback.json"|cut -d' ' -f1)"

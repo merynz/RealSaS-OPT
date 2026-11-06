@@ -1,0 +1,111 @@
+name: corpus370-v18k-full-domain-paired-error-crosscheck
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18k-full-domain-paired-error-crosscheck.yml'
+      - 'tools/corpus/court_corpus370_v18k_paired_source_error_crosscheck.py'
+      - 'tests/corpus/test_corpus370_v18k_paired_source_error_crosscheck.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18k-full-domain-error-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  paired-full-domain-error-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recompute synthetic regression and old failure cases without cherry-picking
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile tools/corpus/court_corpus370_v18k_paired_source_error_crosscheck.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18k_paired_source_error_crosscheck.py
+
+  paired-full-domain-original-source-court:
+    needs: paired-full-domain-error-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            v18k_parent_court_sha: 0019f17e7f1c08fcdad5c530957a4f7ae5f80bbbfe23ecca083be51ab5aa5535
+          - subject: TRICERATOPS
+            v18k_parent_court_sha: 48d9142ac948d4805ea183b84199e9a13a9a3e841b514acdea1cc17364d01545
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      EXPECTED_V18K_COURT_SHA: ${{ matrix.v18k_parent_court_sha }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SHA-verified portable rclone, no apt
+        run: |
+          set -euo pipefail
+          VERSION=1.75.2
+          ARCHIVE="$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 \
+            "https://github.com/rclone/rclone/releases/download/v${VERSION}/rclone-v${VERSION}-linux-amd64.zip" \
+            -o "$ARCHIVE"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
+          unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
+          python3 -m pip install --disable-pip-version-check numpy
+      - name: Reopen full original V18k sealed source and recompare all pixels
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/v18k-error-archive.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          D="$RUNNER_TEMP/v18k-recomparison"
+          mkdir -p "$D"
+          P="gdrive:corpus370_preparation_v1/hosted_source_sample_compositing_v18k/$SUBJECT/42128783773-1"
+          rclone copyto "$P/PRIVATE_V18K_ORIGINAL_SOURCE_JOINT_SAMPLE_COMPOSITOR.json" "$D/source.json" --checksum --retries 3
+          rclone copyto "$P/PRIVATE_INDEPENDENT_V18K_SOURCE_SAMPLE_COMPOSITOR_COURT.json" "$D/court.json" --checksum --retries 3
+          test "$(sha256sum "$D/court.json" | cut -d' ' -f1)" = "$EXPECTED_V18K_COURT_SHA"
+          python3 -u tools/corpus/court_corpus370_v18k_paired_source_error_crosscheck.py \
+            --proposal "$D/source.json" --parent-court "$D/court.json" \
+            --expected-parent-court-sha "$EXPECTED_V18K_COURT_SHA" \
+            --output "$D/PRIVATE_V18K_FULL_DOMAIN_PAIRED_SOURCE_CROSSCHECK.json"
+          D="$D" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["D"])/"PRIVATE_V18K_FULL_DOMAIN_PAIRED_SOURCE_CROSSCHECK.json").read_text())
+          assert d["status"]=="SOURCE_PAIRS_REEVALUATED__LOCAL_GAINS_AND_GLOBAL_REGRESSIONS_BOTH_REPORTED"
+          assert d["original_v18k_run"]=="42128783773-1"
+          assert d["all_source_error_classes_included_not_only_prior_failures"] is True
+          assert d["same_geometry_sample_domain_still_not_blender_cycles_32spp"] is True
+          assert set(d["per_frozen_camera_partition_and_threshold"])=={
+            f"{v}:{t}" for v in ("EXPLORATORY","LOCKED_EVALUATION")
+            for t in ("0.045","0.1","0.18")}
+          if os.environ["SUBJECT"]=="TRICERATOPS":
+              q=d["per_frozen_camera_partition_and_threshold"]["LOCKED_EVALUATION:0.1"]
+              assert q["source_pixel_count"]==149
+              assert q["blender_postfilter_failed"]==16
+              assert q["geometric_joint_failed"]==32
+              assert q["geometric_joint_beats_blender_among_original_blender_failures"]==15
+              assert q["geometric_joint_worse_than_blender_postfilter"]==131
+              assert q["geometric_joint_rescues_original_blender_failures_under_tolerance"]==3
+          assert all(d[k] is False for k in ("graphics_owner_authorized",
+            "iris_training_authorized","tessa_training_authorized",
+            "materialization_authorized","training_authorized"))
+          print("V18K_ORIGINAL_SOURCE_FULL_DOMAIN_GAINS_AND_REGRESSIONS_RECONCILED",flush=True)
+          PY
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_v18k_full_domain_crosscheck_v1/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/PRIVATE_V18K_FULL_DOMAIN_PAIRED_SOURCE_CROSSCHECK.json"
+          rclone copyto "$D/PRIVATE_V18K_FULL_DOMAIN_PAIRED_SOURCE_CROSSCHECK.json" "$REMOTE" --checksum --retries 3
+          rclone cat "$REMOTE" > "$D/readback.json"
+          test "$(sha256sum "$D/readback.json"|cut -d' ' -f1)" = "$(sha256sum "$D/PRIVATE_V18K_FULL_DOMAIN_PAIRED_SOURCE_CROSSCHECK.json"|cut -d' ' -f1)"
+          echo "V18K_FULL_DOMAIN_PAIRED_SOURCE_CROSSCHECK_SHA=$(sha256sum "$D/readback.json"|cut -d' ' -f1)"

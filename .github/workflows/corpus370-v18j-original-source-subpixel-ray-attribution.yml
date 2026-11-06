@@ -1,0 +1,72 @@
+name: corpus370-v18j-original-source-subpixel-ray-attribution
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18j-original-source-subpixel-ray-attribution.yml'
+      - 'tools/corpus/measure_corpus370_v18j_source_subpixel_order_attribution.py'
+      - 'tools/corpus/court_corpus370_v18j_source_subpixel_order_attribution.py'
+      - 'tools/corpus/hosted_corpus370_v18j_source_subpixel_order_attribution.sh'
+      - 'tests/corpus/test_corpus370_v18j_source_subpixel_order_attribution.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18j-original-source-subpixel-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v18j-original-ray-and-unknown-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reproduce geometric 4x4, bottom-up framebuffer and source pixel strata
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          bash -n tools/corpus/hosted_corpus370_v18j_source_subpixel_order_attribution.sh
+          python3 -m py_compile \
+            tools/corpus/measure_corpus370_v18j_source_subpixel_order_attribution.py \
+            tools/corpus/court_corpus370_v18j_source_subpixel_order_attribution.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18j_source_subpixel_order_attribution.py
+
+  v18j-original-pose-ray-vs-observed-alpha-and-rgb:
+    needs: v18j-original-ray-and-unknown-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+          - subject: TRICERATOPS
+            ordinal: 1
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SUBJECT_ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SHA-pinned portable rclone transport, avoid apt mirror
+        run: |
+          set -euo pipefail
+          VERSION=1.75.2
+          ARCHIVE="$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 \
+            "https://github.com/rclone/rclone/releases/download/v${VERSION}/rclone-v${VERSION}-linux-amd64.zip" \
+            -o "$ARCHIVE"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
+          unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
+          test -x "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64/rclone"
+          echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
+      - name: Reopen exact source geometry and pixel parents; independently remeasure 4x4 rays
+        run: |
+          set -euo pipefail
+          bash tools/corpus/hosted_corpus370_v18j_source_subpixel_order_attribution.sh

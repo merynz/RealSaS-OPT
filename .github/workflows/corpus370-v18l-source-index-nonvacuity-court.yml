@@ -1,0 +1,117 @@
+name: corpus370-v18l-source-index-nonvacuity-court
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18l-source-index-nonvacuity-court.yml'
+      - 'tools/corpus/court_corpus370_v18l_source_sample_diversity.py'
+      - 'tests/corpus/test_corpus370_v18l_source_sample_diversity.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18l-source-index-diversity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v18l-source-subset-nonvacuity-and-order-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test original source subset diversity and per-sample commutativity
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile tools/corpus/court_corpus370_v18l_source_sample_diversity.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18l_source_sample_diversity.py
+
+  v18l-original-source-nonvacuity-independent-court:
+    needs: v18l-source-subset-nonvacuity-and-order-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            expected_source_court_sha: cce24e65850308ed0c27bcb63f33ec060ae7242fa57b27f4c82dc075e8be9a17
+          - subject: TRICERATOPS
+            expected_source_court_sha: 3245c11e49bc3e39b3209eda2ff771b39ec0269b7f66c45949476d8cb557333d
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      EXPECTED_SOURCE_COURT_SHA: ${{ matrix.expected_source_court_sha }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: SHA-pinned private source artifact transport, no apt
+        run: |
+          set -euo pipefail
+          VERSION=1.75.2
+          ARCHIVE="$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 \
+            "https://github.com/rclone/rclone/releases/download/v${VERSION}/rclone-v${VERSION}-linux-amd64.zip" \
+            -o "$ARCHIVE"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
+          unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
+          python3 -m pip install --disable-pip-version-check numpy
+      - name: Reopen original Cycles per-index frames and disallow vacuous matches
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/v18l-diversity-source.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          D="$RUNNER_TEMP/v18l-diversity"
+          mkdir -p "$D"
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_cycles_common_sample_v18l/$SUBJECT/42131579613-1"
+          rclone copyto "$REMOTE/PRIVATE_V18L_ORIGINAL_CYCLES_COMMON_SAMPLE_RENDER.json" "$D/render.json" --checksum --retries 3
+          rclone copyto "$REMOTE/PRIVATE_V18L_ORIGINAL_CYCLES_COMMON_SAMPLE_RENDER.npz" "$D/render.npz" --checksum --retries 3
+          rclone copyto "$REMOTE/PRIVATE_INDEPENDENT_V18L_CYCLES_COMMON_SAMPLE_COURT.json" "$D/court.json" --checksum --retries 3
+          test "$(sha256sum "$D/court.json" | cut -d' ' -f1)" = "$EXPECTED_SOURCE_COURT_SHA"
+          python3 -u tools/corpus/court_corpus370_v18l_source_sample_diversity.py \
+            --manifest "$D/render.json" --rgba "$D/render.npz" \
+            --source-court "$D/court.json" \
+            --expected-source-court-sha "$EXPECTED_SOURCE_COURT_SHA" \
+            --output "$D/PRIVATE_V18L_INDEPENDENT_SOURCE_SUBSET_DIVERSITY.json"
+          D="$D" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=json.loads((Path(os.environ["D"])/"PRIVATE_V18L_INDEPENDENT_SOURCE_SUBSET_DIVERSITY.json").read_text())
+          assert p["status"]=="V18L_SOURCE_SAMPLE_DIVERSITY_INDEPENDENTLY_AUDITED__DRAWABLE_UNKNOWN"
+          assert p["nonvacuity_gate_passed"] is True
+          assert p["same_sample_offset_is_not_guarantee_of_exact_rays"] is True
+          assert len(p["per_original_view"])==4
+          assert all(x["real_cycles_subset_index_variability_observed"] for x in p["per_original_view"])
+          assert all(x["source_render_same_index_sample_oracle_fail_instances"]==0 for x in p["per_original_view"])
+          full=p["per_original_view"]
+          if os.environ["SUBJECT"]=="TRICERATOPS":
+              assert sum(z["source_8_subset_postfilter_order_fail_pixels"] for z in full)==216
+              assert sum(z["source_8_subset_prefilter_order_fail_pixels"] for z in full)==85
+              assert sum(z["source_8_subset_prefilter_improves_error_pixels"] for z in full)==139
+              assert sum(z["source_8_subset_prefilter_worsens_error_pixels"] for z in full)==0
+              assert p["total_nonvacuous_pixel_view_occurrences"]==1577
+          else:
+              assert sum(z["source_8_subset_postfilter_order_fail_pixels"] for z in full)==0
+              assert sum(z["source_8_subset_prefilter_order_fail_pixels"] for z in full)==0
+              assert p["total_nonvacuous_pixel_view_occurrences"]==1896
+          assert p["same_drawable_training_pairs"]==0
+          assert p["different_drawable_training_pairs"]==0
+          assert all(p[k] is False for k in ("graphics_owner_authorized",
+              "iris_training_authorized","tessa_training_authorized",
+              "materialization_authorized","training_authorized"))
+          print("V18L_ORIGINAL_NONVACUOUS_SOURCE_COURT_RECONCILED__ARTIST_UNKNOWN",flush=True)
+          PY
+          FINAL="gdrive:corpus370_preparation_v1/hosted_cycles_subset_nonvacuity_v18l/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/PRIVATE_V18L_INDEPENDENT_SOURCE_SUBSET_DIVERSITY.json"
+          rclone copyto "$D/PRIVATE_V18L_INDEPENDENT_SOURCE_SUBSET_DIVERSITY.json" "$FINAL" --checksum --retries 3
+          rclone cat "$FINAL" > "$D/readback.json"
+          test "$(sha256sum "$D/readback.json"|cut -d' ' -f1)" = "$(sha256sum "$D/PRIVATE_V18L_INDEPENDENT_SOURCE_SUBSET_DIVERSITY.json"|cut -d' ' -f1)"
+          echo "V18L_INDEPENDENT_SOURCE_NONVACUITY_COURT_SHA=$(sha256sum "$D/readback.json"|cut -d' ' -f1)"

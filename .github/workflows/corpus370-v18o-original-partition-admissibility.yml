@@ -1,0 +1,130 @@
+name: corpus370-v18o-original-partition-admissibility
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18o-original-partition-admissibility.yml'
+      - 'tools/corpus/court_corpus370_v18o_anonymous_partition_admissibility.py'
+      - 'tests/corpus/test_corpus370_v18o_anonymous_partition_admissibility.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18o-original-partition-admissibility-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v18o-source-candidate-viability-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit anonymized source face partition diagnostics and negative art authority
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile tools/corpus/court_corpus370_v18o_anonymous_partition_admissibility.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18o_anonymous_partition_admissibility.py
+
+  v18o-independent-original-source-partition-court:
+    needs: v18o-source-candidate-viability-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            stain_court_sha: 2801bc94c58349f7561071f2c36d9a30b8d13b3b476aa4430e164f2e5de02c7b
+            material_court_sha: 99425ef370650913e5959d17ad6e02d59dc3c47ea2cb1e789f0c56af7bab319f
+          - subject: TRICERATOPS
+            stain_court_sha: bd7ac5e561af6d4a4bbab8aac555951e5c7e6b97f589a700ef3691edc89ce5c0
+            material_court_sha: 5c90e874a21bb549f0947c0745133f5d57d3afa11a4abcccd780cf59453b2f6b
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      EXPECTED_STAIN_COURT_SHA: ${{ matrix.stain_court_sha }}
+      EXPECTED_MATERIAL_COURT_SHA: ${{ matrix.material_court_sha }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get SHA-verified portable rclone and numpy
+        run: |
+          set -euo pipefail
+          VERSION=1.75.2
+          ARCHIVE="$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 \
+            "https://github.com/rclone/rclone/releases/download/v${VERSION}/rclone-v${VERSION}-linux-amd64.zip" \
+            -o "$ARCHIVE"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
+          unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
+          python3 -m pip install --disable-pip-version-check numpy
+      - name: Independent SHA-court original V18a anonymous partition imbalance and V18n real heldout edit
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/v18o-original-source.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          D="$RUNNER_TEMP/v18o-source"
+          mkdir -p "$D"
+          ROOT="gdrive:corpus370_preparation_v1"
+          A="$ROOT/hosted_reactive_stain_v18a/$SUBJECT/42097722762-1"
+          M="$ROOT/hosted_cycles_source_material_v18n/$SUBJECT/42137097177-1"
+          C="$ROOT/hosted_cycles_source_material_recovery_v18n/$SUBJECT/42138873648-1"
+          rclone copyto "$A/PRIVATE_REACTIVE_STAIN_REPORT_V18A.json" "$D/stain.json" --checksum --retries 3
+          rclone copyto "$A/PRIVATE_REACTIVE_STAIN_CANDIDATE_V18A.npz" "$D/stain.npz" --checksum --retries 3
+          rclone copyto "$A/PRIVATE_INDEPENDENT_REACTIVE_STAIN_COURT_V18A.json" "$D/stain-court.json" --checksum --retries 3
+          rclone copyto "$M/PRIVATE_V18N_ORIGINAL_SOURCE_MATERIAL_CYCLES_SAMPLES.npz" "$D/material.npz" --checksum --retries 3
+          rclone copyto "$C/PRIVATE_CANONICAL_V18N_SOURCE_MATERIAL_MANIFEST.json" "$D/material.json" --checksum --retries 3
+          rclone copyto "$C/PRIVATE_INDEPENDENT_V18N_SOURCE_MATERIAL_COURT.json" "$D/material-court.json" --checksum --retries 3
+          test "$(sha256sum "$D/stain-court.json"|cut -d' ' -f1)" = "$EXPECTED_STAIN_COURT_SHA"
+          test "$(sha256sum "$D/material-court.json"|cut -d' ' -f1)" = "$EXPECTED_MATERIAL_COURT_SHA"
+          python3 -u tools/corpus/court_corpus370_v18o_anonymous_partition_admissibility.py \
+            --stain-manifest "$D/stain.json" --stain-npz "$D/stain.npz" \
+            --stain-court "$D/stain-court.json" \
+            --v18n-manifest "$D/material.json" --v18n-npz "$D/material.npz" \
+            --v18n-court "$D/material-court.json" \
+            --expected-stain-court-sha "$EXPECTED_STAIN_COURT_SHA" \
+            --expected-v18n-court-sha "$EXPECTED_MATERIAL_COURT_SHA" \
+            --output "$D/PRIVATE_INDEPENDENT_V18O_SOURCE_PARTITION_VIABILITY_COURT.json"
+
+          D="$D" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          z=json.loads((Path(os.environ["D"])/"PRIVATE_INDEPENDENT_V18O_SOURCE_PARTITION_VIABILITY_COURT.json").read_text())
+          assert z["status"]=="ORIGINAL_SOURCE_PARTITION_COMPLEXITY_AND_EDIT_CONSEQUENCES_COURTED__OWNER_UNKNOWN"
+          assert [x["frozen_original_source_threshold"] for x in z["all_original_source_frozen_thresholds"]]==[.045,.1,.18]
+          assert z["artist_graphics_ownership"]=="UNKNOWN"
+          assert z["same_drawable_truth_minted"]==0 and z["different_drawable_truth_minted"]==0
+          assert z["original_source_varK_compositing_render_admitted"] is False
+          assert z["original_heldout_real_source_material_edit_locus"]["all_original_source_camera_native_soup_sample_failures"]==0
+          assert all(z[k] is False for k in ("graphics_owner_authorized",
+               "iris_training_authorized","tessa_training_authorized",
+               "materialization_authorized","training_authorized"))
+          current=z["all_original_source_frozen_thresholds"][1]
+          if os.environ["SUBJECT"]=="CAT":
+              assert current["candidate_component_count"]==288
+              assert current["largest_component_faces"]==22
+              assert current["partition_has_at_least_64_components"] is True
+              assert z["original_heldout_real_source_material_edit_locus"]["source_selected_group_removal_sample_effects_total"]==0
+          else:
+              assert current["candidate_component_count"]==22
+              assert current["largest_component_faces"]==1298
+              assert current["largest_component_has_at_least_90pct_source_faces"] is True
+              assert z["original_heldout_real_source_material_edit_locus"]["source_selected_group_removal_sample_effects_total"]>0
+          print("V18O_ORIGINAL_SOURCE_PARTITION_GEOMETRY_AND_REAL_EDIT_COURTED__ARTIST_UNKNOWN",flush=True)
+          PY
+
+          OUT="$ROOT/hosted_original_source_partition_viability_v18o/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/PRIVATE_INDEPENDENT_V18O_SOURCE_PARTITION_VIABILITY_COURT.json"
+          rclone copyto "$D/PRIVATE_INDEPENDENT_V18O_SOURCE_PARTITION_VIABILITY_COURT.json" "$OUT" --checksum --retries 3
+          rclone cat "$OUT" > "$D/court-remote-readback.json"
+          test "$(sha256sum "$D/court-remote-readback.json"|cut -d' ' -f1)" = "$(sha256sum "$D/PRIVATE_INDEPENDENT_V18O_SOURCE_PARTITION_VIABILITY_COURT.json"|cut -d' ' -f1)"
+          echo "V18O_SOURCE_CANDIDATE_INDEPENDENT_COURT_SHA=$(sha256sum "$D/PRIVATE_INDEPENDENT_V18O_SOURCE_PARTITION_VIABILITY_COURT.json"|cut -d' ' -f1)"

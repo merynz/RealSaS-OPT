@@ -1,0 +1,65 @@
+name: corpus370-v18h-original-emissive-compositing-witness
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18h-original-emissive-compositing-witness.yml'
+      - 'tools/truth_foundry/blender_corpus370_v18h_emissive_compositing_witness.py'
+      - 'tools/corpus/court_corpus370_v18h_emissive_compositing_witness.py'
+      - 'tools/corpus/hosted_corpus370_v18h_emissive_compositing_witness.sh'
+      - 'tests/corpus/test_corpus370_v18h_emissive_compositing_witness.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18h-emission-source-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  original-emissive-compositing-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and source compositing redteam without Blender renders
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          bash -n tools/corpus/hosted_corpus370_v18h_emissive_compositing_witness.sh
+          python3 -m py_compile \
+            tools/truth_foundry/blender_corpus370_v18h_emissive_compositing_witness.py \
+            tools/corpus/court_corpus370_v18h_emissive_compositing_witness.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18h_emissive_compositing_witness.py
+
+  original-source-emissive-compositing-witness:
+    needs: original-emissive-compositing-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+          - subject: TRICERATOPS
+            ordinal: 1
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SUBJECT_ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install original source SHA-exact private transport
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Run frozen original pose 2 two-color emission and independent V18g lighting contrast court
+        run: |
+          set -euo pipefail
+          bash tools/corpus/hosted_corpus370_v18h_emissive_compositing_witness.sh

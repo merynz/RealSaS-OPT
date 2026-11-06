@@ -30,7 +30,10 @@ def require(c,code):
     if not c:raise ValueError(code)
 
 def digest_file(path):
-    with Path(path).open("rb") as f:return hashlib.file_digest(f,"sha256").hexdigest()
+    with Path(path).open("rb") as f:
+        h=hashlib.sha256()
+        for data in iter(lambda:f.read(1<<20),b""):h.update(data)
+        return h.hexdigest()
 
 def hash_faces(x):
     return hashlib.sha256(np.ascontiguousarray(x,dtype="<i8").tobytes()).hexdigest()

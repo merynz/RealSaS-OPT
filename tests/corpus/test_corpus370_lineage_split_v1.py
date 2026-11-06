@@ -161,3 +161,24 @@ def test_duplicate_group_id_cannot_be_overwritten_by_dictionary(tmp_path: Path):
     lineage.write_text(json.dumps(doc))
     with pytest.raises(ValueError, match="CORPUS370_SPLIT_LINEAGE_DUPLICATE_GROUP"):
         build(lineage, rosters, Path("canonical/CORPUS370_LINEAGE_SPLIT_POLICY_V1.json"))
+
+
+def test_same_source_bytes_in_distinct_lineages_fail_closed(tmp_path: Path):
+    lineage, rosters = fixtures(tmp_path)
+    doc = json.loads(lineage.read_text())
+    # Different subject IDs and valid reciprocal lineage maps cannot disguise
+    # identical source bytes. No semantic names are needed for this proof.
+    doc["groups"][1]["source_sha256"] = list(doc["groups"][0]["source_sha256"])
+    lineage.write_text(json.dumps(doc))
+    with pytest.raises(ValueError, match="CORPUS370_SPLIT_SOURCE_SHA_CROSS_LINEAGE_LEAKAGE"):
+        build(lineage, rosters, Path("canonical/CORPUS370_LINEAGE_SPLIT_POLICY_V1.json"))
+
+
+@pytest.mark.parametrize("invalid", [[], ["bad-sha"], ["a" * 64, "a" * 64]])
+def test_missing_malformed_or_duplicate_source_provenance_blocks_split(tmp_path: Path, invalid):
+    lineage, rosters = fixtures(tmp_path)
+    doc = json.loads(lineage.read_text())
+    doc["groups"][0]["source_sha256"] = invalid
+    lineage.write_text(json.dumps(doc))
+    with pytest.raises(ValueError, match="CORPUS370_SPLIT_LINEAGE_SOURCE_SHA_CENSUS"):
+        build(lineage, rosters, Path("canonical/CORPUS370_LINEAGE_SPLIT_POLICY_V1.json"))

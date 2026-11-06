@@ -75,9 +75,15 @@ def test_unknown_and_unreachable_baselines_fail_closed():
 
 def test_measured_control_court_requires_real_triangle_and_valid_policy():
     mesh,rig,skin,mechanics=_make()
+    from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import canonical_mesh_lineage_hash_v1
+    broken=replace(mesh,faces=(),mesh_lineage_hash="")
+    broken=replace(broken,mesh_lineage_hash=canonical_mesh_lineage_hash_v1(broken))
+    broken_rig=replace(rig,mesh_lineage_hash=broken.mesh_lineage_hash)
+    broken_skin=replace(skin,mesh_lineage_hash=broken.mesh_lineage_hash)
+    broken_mechanics=replace(mechanics,mesh_lineage_hash=broken.mesh_lineage_hash)
     with pytest.raises(QualificationError,match="HIT_NOT_CANONICAL_FACE"):
         evaluate_declared_control_response_v1(
-            replace(mesh,faces=()),rig,skin,mechanics,
+            broken,broken_rig,broken_skin,broken_mechanics,
             triangle_vertex_ids=("MV:0","MV:1","MV:2"),
             barycentric=(0.15,0.25,0.60),
         )

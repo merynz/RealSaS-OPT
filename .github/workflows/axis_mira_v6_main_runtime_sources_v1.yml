@@ -1,0 +1,47 @@
+name: axis-mira-v6-main-runtime-source-security-v1
+
+on:
+  pull_request:
+    paths:
+      - 'models/axis/rig_program_model_v6.py'
+      - 'models/axis/rig_program_decode_v6.py'
+      - 'models/axis/runtime_checkpoint_v2.py'
+      - 'models/axis/scene_conditioning_v6.py'
+      - 'models/mira/skin_fsq_codec_v6.py'
+      - 'models/mira/conditioning_v6.py'
+      - 'models/mira/runtime_checkpoint_v2.py'
+      - 'tests/models/test_axis_mira_v6_product_runtime.py'
+      - 'tests/models/test_mira_v6_skin_fsq_codec.py'
+      - 'tests/models/test_axis_mira_v6_checkpoint_security_v1.py'
+      - '.github/workflows/axis_mira_v6_main_runtime_sources_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  runtime-sources:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install frozen CPU compiler and safe Torch runtime
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Compile upstream V6 source and secure loaders
+        run: |
+          python -m compileall -q models/axis models/mira
+      - name: V6 RigProgram/SkinCode runtime and checkpoint security courts
+        run: |
+          python -m pytest -q \
+            tests/models/test_axis_mira_v6_product_runtime.py \
+            tests/models/test_mira_v6_skin_fsq_codec.py \
+            tests/models/test_axis_mira_v6_checkpoint_security_v1.py

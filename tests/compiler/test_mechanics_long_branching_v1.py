@@ -295,10 +295,17 @@ def test_bounded_deterministic_multistart_recovers_reachable_singular_target():
     from tests.compiler.test_mechanics_multigoal_solver_v1 import _branched_rig
     from compiler.realsas_compiler_core.mechanics_control_solver_v1 import ControlTransformIRV1
     rig=_branched_rig()
-    edit=(ControlTransformIRV1("A_HANDLE",translation=(-.7,1.2,0.)),)
+    # Independent analytic witness: root=acos(.8), A1=B1=-2*root
+    # sends A2=(1.6,0,0) and B2=(-1.6,0,0). Both targets are thus
+    # geometrically REACHABLE although x-displacement has zero first
+    # derivative at the straight rest pose.
+    root=math.acos(.8)
+    assert 2*math.cos(root)==pytest.approx(1.6)
+    assert math.sin(root)+math.sin(-root)==pytest.approx(0.,abs=1e-12)
+    edit=(ControlTransformIRV1("A_HANDLE",translation=(-.4,0.,0.)),)
     recovered=solve_declared_multi_goal_v1(
         rig,edit,pinned_contact_control_ids=("B_HANDLE",),
-        pinned_world_targets={"B_HANDLE":(-2.,0.,0.)},
+        pinned_world_targets={"B_HANDLE":(-1.6,0.,0.)},
         active_parameter_policy="RANK_REVEALING_RESEARCH_V1",
         jacobian_mode="ANALYTIC_RESEARCH_V1",
         singularity_recovery_mode="BOUNDED_DETERMINISTIC_SEEDS_V1",

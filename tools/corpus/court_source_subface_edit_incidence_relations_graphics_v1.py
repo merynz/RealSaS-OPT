@@ -52,7 +52,7 @@ def recompute_independent(root,producer_path,output):
         and report["original_source_sha256"]==
             v18s["original_source_sha256"]==v2["original_source_sha256"]==
             v18s_court["original_source_sha256"]==
-            v2_court["source_original_glb_sha256"]==CAT
+            v2_court["original_source_sha256"]==CAT
         and v2_court["status"]==
             "PASS_ORIGINAL_FACE_PIXEL_UV_EDIT_CAUSALITY_EXACT_LOCAL_DEPTH__OWNER_UNKNOWN"
         and v2_court["producer_source_witness_sha256"]==PINS["v2.json"]

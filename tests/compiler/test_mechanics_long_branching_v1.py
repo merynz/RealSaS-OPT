@@ -234,3 +234,58 @@ def test_rank_policy_falls_back_to_full_declared_dofs_but_does_not_hallucinate_n
     assert result.status=="FAIL_MULTIGOAL_BEHAVIORAL_COURT"
     assert result.max_drag_residual>2e-3
     assert len(result.parameters_rad)==3
+
+
+def test_rank_hysteresis_keeps_previous_independently_spanning_actuator_set():
+    case=make_morphology_case_v1(24)
+    first=solve_declared_multi_goal_v1(
+        case.rig,case.overrides,
+        pinned_contact_control_ids=case.pins,
+        pinned_world_targets=case.pin_world_targets,
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+        active_parameter_policy="RANK_REVEALING_RESEARCH_V1",
+        regularization=1e-8,goal_tolerance=2e-3,
+    )
+    assert first.status=="PASS_MULTIGOAL_BEHAVIORAL_COURT"
+    original=case.overrides[0]
+    from compiler.realsas_compiler_core.mechanics_control_solver_v1 import ControlTransformIRV1
+    second_edit=(ControlTransformIRV1(
+        original.canonical_control_id,
+        translation=(original.translation[0]+.0001,
+                     original.translation[1],original.translation[2]),
+    ),)
+    again=solve_declared_multi_goal_v1(
+        case.rig,second_edit,
+        pinned_contact_control_ids=case.pins,
+        pinned_world_targets=case.pin_world_targets,
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+        active_parameter_policy="RANK_REVEALING_RESEARCH_V1",
+        preferred_parameter_keys=first.metadata["rank_revealing_candidate_parameter_keys"],
+        initial_parameters_rad=first.parameters_rad,
+        regularization=1e-8,goal_tolerance=2e-3,
+    )
+    assert again.status=="PASS_MULTIGOAL_BEHAVIORAL_COURT"
+    assert again.metadata["rank_revealing_prior_basis_reused"] is True
+    assert (again.metadata["rank_revealing_candidate_parameter_keys"]
+            ==first.metadata["rank_revealing_candidate_parameter_keys"])
+    assert again.max_drag_residual<2e-3
+
+
+def test_rank_hysteresis_rejects_unknown_and_non_rank_prior_basis():
+    case=make_morphology_case_v1(24)
+    args=dict(
+        pinned_contact_control_ids=case.pins,
+        pinned_world_targets=case.pin_world_targets,
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+    )
+    with pytest.raises(QualificationError,match="HYSTERESIS_SCHEMA_INVALID"):
+        solve_declared_multi_goal_v1(
+            case.rig,case.overrides,
+            active_parameter_policy="RANK_REVEALING_RESEARCH_V1",
+            preferred_parameter_keys=(("NONEXISTENT","RY"),),**args,
+        )
+    with pytest.raises(QualificationError,match="HYSTERESIS_REQUIRES_RANK_POLICY"):
+        solve_declared_multi_goal_v1(
+            case.rig,case.overrides,
+            preferred_parameter_keys=(("J:1:0","RY"),),**args,
+        )

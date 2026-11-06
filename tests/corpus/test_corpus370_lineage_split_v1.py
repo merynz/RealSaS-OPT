@@ -121,7 +121,7 @@ def test_small_model_roster_is_not_starved_by_global_holdout(tmp_path: Path):
     ("missing_member", "GROUP_MEMBERS"),
     ("cross_group", "RECIPROCAL_PARTITION"),
     ("duplicate_member", "GROUP_MEMBERS"),
-    ("phantom_group", "GROUP_REF"),
+    ("phantom_group", "GROUP_CENSUS"),
 ])
 def test_sealed_lineage_reciprocity_cannot_be_forged(tmp_path: Path, mutation: str, code: str):
     lineage, rosters = fixtures(tmp_path)
@@ -151,4 +151,13 @@ def test_duplicate_eligible_subject_cannot_be_silently_collapsed(tmp_path: Path)
         dict(doc["models"]["IRIS"]["eligible_subjects"][0]))
     rosters.write_text(json.dumps(doc))
     with pytest.raises(ValueError, match="CORPUS370_SPLIT_MODEL_DUPLICATE_SUBJECT:IRIS"):
+        build(lineage, rosters, Path("canonical/CORPUS370_LINEAGE_SPLIT_POLICY_V1.json"))
+
+
+def test_duplicate_group_id_cannot_be_overwritten_by_dictionary(tmp_path: Path):
+    lineage, rosters = fixtures(tmp_path)
+    doc = json.loads(lineage.read_text())
+    doc["groups"][1]["lineage_id"] = doc["groups"][0]["lineage_id"]
+    lineage.write_text(json.dumps(doc))
+    with pytest.raises(ValueError, match="CORPUS370_SPLIT_LINEAGE_DUPLICATE_GROUP"):
         build(lineage, rosters, Path("canonical/CORPUS370_LINEAGE_SPLIT_POLICY_V1.json"))

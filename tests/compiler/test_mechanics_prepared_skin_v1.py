@@ -168,3 +168,47 @@ def test_prepared_skin_cannot_be_written_or_reenabled():
         assert not arr.flags.writeable
         with pytest.raises(ValueError):
             arr.setflags(write=True)
+
+
+def test_vectorized_behavioral_court_preserves_permutation_and_full_vertex_authority():
+    from compiler.realsas_compiler_core.mechanics_live_runtime_v1 import _behavioral_metrics
+    mesh,rig,skin,prepared=_objects()
+    pose=solve_control_pose_v1(
+        rig,(ControlTransformIRV1("C_ROOT",translation=(0.2,-0.4,0.8)),),
+    )
+    deformed=deform_mesh_lbs_v1(mesh,rig,skin,pose)
+    expected=_behavioral_metrics(mesh,rig,pose,deformed)
+    reversed_deform=replace(
+        deformed,
+        canonical_mesh_vertex_ids=tuple(reversed(deformed.canonical_mesh_vertex_ids)),
+        positions=tuple(reversed(deformed.positions)),
+    )
+    permuted=_behavioral_metrics(mesh,rig,pose,reversed_deform)
+    assert np.allclose(expected,permuted,atol=1e-12,rtol=0.)
+    with pytest.raises(QualificationError,match="PREPARED_VERTEX_ORDER_DRIFT"):
+        _behavioral_metrics(mesh,rig,pose,reversed_deform,prepared_skin=prepared)
+    with pytest.raises(QualificationError,match="VERTEX_COVERAGE_DRIFT"):
+        _behavioral_metrics(
+            mesh,rig,pose,replace(
+                deformed,
+                canonical_mesh_vertex_ids=("MV:0","MV:1","MV:1"),
+            ),
+        )
+    with pytest.raises(QualificationError,match="VERTEX_NONFINITE"):
+        _behavioral_metrics(
+            mesh,rig,pose,replace(
+                deformed,
+                positions=(deformed.positions[0],(float("nan"),0.,0.),deformed.positions[2]),
+            ),
+        )
+
+
+def test_prepared_rest_coordinates_are_immutable_and_full_mesh_coverage():
+    mesh,rig,skin,prepared=_objects()
+    assert prepared.rest_vertex_positions.shape==(len(mesh.vertices),3)
+    assert prepared.rest_vertex_positions.flags.writeable is False
+    with pytest.raises(ValueError):
+        prepared.rest_vertex_positions.setflags(write=True)
+    pose=solve_control_pose_v1(rig,())
+    frame=deform_prepared_mechanics_skin_v1(prepared,pose)
+    assert len(frame.positions)==len(mesh.vertices)

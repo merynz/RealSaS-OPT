@@ -48,7 +48,7 @@ def verify(ir, palette, render, source_court, native_court, contract, *, sha_ind
         ir.get("nonbinary_alpha_tested") is False and
         ir.get("original_source_teacher_private") is True,
         "FALSE_OWNER_OR_TRAINING_AUTHORITY")
-    expected={k:sha_index[k] for k in sha_index}
+    expected={k:v for k,v in sha_index.items() if k!="ledger_sha256"}
     assert_true(ir.get("parent_receipts")==expected and
         sha_index["original_source_sha256"]==
         ir["original_source_sha256"]==palette["original_source_sha256"]==

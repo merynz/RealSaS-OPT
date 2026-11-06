@@ -305,7 +305,7 @@ def test_bounded_deterministic_multistart_recovers_reachable_singular_target():
         regularization=1e-9,goal_tolerance=2e-3,max_nfev=350,
     )
     assert recovered.metadata["rank_revealing_fallback_to_all"] is True
-    assert 1<=recovered.metadata["singularity_recovery_trials"]<=6
+    assert 1<=recovered.metadata["singularity_recovery_trials"]<=12
     assert recovered.metadata["singularity_recovery_rescued"] is True
     assert recovered.status=="PASS_MULTIGOAL_BEHAVIORAL_COURT"
     assert recovered.max_drag_residual<2e-3

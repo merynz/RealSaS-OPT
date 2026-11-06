@@ -36,7 +36,7 @@ def _finite_number(x) -> bool:
     import math
     return type(x) in (int, float) and math.isfinite(float(x))
 
-def _locus(row: dict) -> dict:
+def _locus(row: dict, *, teacher=None) -> dict:
     bary = row["pose0_center_source_barycentric"]
     require(isinstance(bary, list) and len(bary) == 3 and
             all(_finite_number(x) and -1e-8 <= x <= 1 + 1e-8 for x in bary)
@@ -56,15 +56,29 @@ def _locus(row: dict) -> dict:
             and row["exact_Cycles_sample_ray_UV_correspondence"] ==
                 "UNKNOWN_NOT_ASSERTED",
             "SOURCE_PROOF_OR_UNKNOWN_SCOPE_VIOLATED")
-    return {
+    locus = {
         "original_face_id_TEACHER_PRIVATE": row["original_face_id"],
         "source_barycentric_TEACHER_PRIVATE": bary,
         "source_view_index": row["original_camera_view"],
         "pose0_pixel_xy_TEACHER_PRIVATE": p0,
         "pose14_qualified_pixel_xy_TEACHER_PRIVATE": p14,
     }
+    if teacher is not None:
+        # Original teacher geometry produces supervised query addresses only,
+        # not any source-edit operation ID in student features.
+        positions, faces = teacher
+        import numpy as np
+        fi = row["original_face_id"]
+        require(0 <= fi < len(faces), "SOURCE_FACE_OUT_OF_RANGE")
+        ids = faces[fi]
+        for pose in (0, 14):
+            vertices = np.asarray(positions[pose, ids], dtype=np.float64)
+            point = np.asarray(bary, dtype=np.float64) @ vertices
+            require(np.isfinite(point).all(), "NONFINITE_TEACHER_QUERY")
+            locus[f"source_world_xyz_pose{pose}_TEACHER_PRIVATE"] = point.tolist()
+    return locus
 
-def derive_pairs(anchors: list[dict], *, num_operations: int) -> list[dict]:
+def derive_pairs(anchors: list[dict], *, num_operations: int, teacher=None) -> list[dict]:
     """One positive per certified (face,view,op), one negative per distinct op pair.
 
     Both endpoints reside on the SAME original triangle at DISTINCT barycentric
@@ -88,7 +102,7 @@ def derive_pairs(anchors: list[dict], *, num_operations: int) -> list[dict]:
         groups[(view, face)][op].append(a)
     rows = []
     def add(a, b, value):
-        la, lb = _locus(a), _locus(b)
+        la, lb = _locus(a, teacher=teacher), _locus(b, teacher=teacher)
         require(la["source_barycentric_TEACHER_PRIVATE"] != lb["source_barycentric_TEACHER_PRIVATE"],
                 "IDENTICAL_SOURCE_LOCI")
         ops = (a["original_uv_edit_index"], b["original_uv_edit_index"])
@@ -125,9 +139,20 @@ def derive_pairs(anchors: list[dict], *, num_operations: int) -> list[dict]:
     return rows
 
 def run(parent_path: Path, court_path: Path, out_path: Path,
-        parent_sha: str, court_sha: str, num_operations: int) -> dict:
+        parent_sha: str, court_sha: str, num_operations: int,
+        teacher_path: Path, teacher_sha: str) -> dict:
     require(digest(parent_path) == parent_sha, "PARENT_SHA_DRIFT")
     require(digest(court_path) == court_sha, "INDEPENDENT_COURT_SHA_DRIFT")
+    require(digest(teacher_path) == teacher_sha and
+            teacher_sha == "c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603",
+            "TEACHER_POSED_GEOMETRY_SHA_DRIFT")
+    import numpy as np
+    with np.load(teacher_path, allow_pickle=False) as raw_teacher:
+        positions = np.asarray(raw_teacher["posed_vertices_source_world"], dtype=np.float64)
+        faces = np.asarray(raw_teacher["faces"], dtype=np.int64)
+    require(positions.shape == (32, 1204, 3) and faces.shape == (684, 3)
+            and np.all((faces >= 0) & (faces < positions.shape[1]))
+            and np.isfinite(positions).all(), "ORIGINAL_TEACHER_MESH_INVALID")
     source = json.loads(parent_path.read_text())
     court = json.loads(court_path.read_text())
     require(source.get("schema") == SOURCE_PARENT
@@ -148,8 +173,10 @@ def run(parent_path: Path, court_path: Path, out_path: Path,
                  "training_authorized", "materialization_authorized"):
         require(source.get(name) is False and court.get(name) is False,
                 "FORGED_PARENT_AUTHORITY:" + name)
+    require(source["original_parent_bytes_sha256"]["teacher.npz"] == teacher_sha,
+            "ORIGINAL_SOURCE_TEACHER_PARENT_DRIFT")
     pairs = derive_pairs(source["original_source_transported_uv_anchors_PRIVATE"],
-                         num_operations=num_operations)
+                         num_operations=num_operations, teacher=(positions, faces))
     positives = sum(r["measured_edit_signature_agreement"] == 1.0 for r in pairs)
     negatives = len(pairs) - positives
     require(positives > 0 and negatives > 0, "MISSING_POSITIVE_OR_NEGATIVE_SOURCE_SUPPORT")
@@ -158,6 +185,9 @@ def run(parent_path: Path, court_path: Path, out_path: Path,
         "original_source_sha256": source["original_source_sha256"],
         "independent_source_parent_sha256": parent_sha,
         "independent_source_court_sha256": court_sha,
+        "source_teacher_posed_geometry_sha256": teacher_sha,
+        "query_xyz_coordinate_frame": "ORIGINAL_SOURCE_WORLD__CANONICAL_MODEL_NORMALIZATION_NOT_BOUND",
+        "source_teacher_query_point_per_locus_both_poses": True,
         "measured_source_intervention_count": num_operations,
         "source_pose_ordinals": [0, 14], "original_camera_views": [0, 2, 4, 6],
         "pair_address_domain": "SAME_ORIGINAL_FACE_DISTINCT_BARYCENTRIC_SURFACE_LOCI",
@@ -194,7 +224,10 @@ if __name__ == "__main__":
     ap.add_argument("--source-parent-sha256", required=True)
     ap.add_argument("--independent-court-sha256", required=True)
     ap.add_argument("--operations", type=int, default=3)
+    ap.add_argument("--teacher", type=Path, required=True)
+    ap.add_argument("--teacher-sha256", required=True)
     ap.add_argument("--output", type=Path, required=True)
     a = ap.parse_args()
     run(a.source_parent, a.independent_court, a.output,
-        a.source_parent_sha256, a.independent_court_sha256, a.operations)
+        a.source_parent_sha256, a.independent_court_sha256, a.operations,
+        a.teacher, a.teacher_sha256)

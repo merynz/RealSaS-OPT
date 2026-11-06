@@ -47,7 +47,7 @@ def test_v2_skin_rejects_modified_deform_structure_without_lineage_resealing():
 
 def test_v2_skin_rejects_modified_weights_without_lineage_resealing():
     original = _sealed_skin().to_dict()
-    original["rows"][0]["influences"][0] = ["J:0", 0.5]
+    original["rows"][0]["influences"] = (("J:0", 0.5), ("J:1", 0.25))
     with pytest.raises(QualificationError, match="CANONICAL_SKIN_V2_LINEAGE_HASH_DRIFT"):
         canonical_skin_from_dict_v2(original)
 

@@ -127,6 +127,9 @@ def solve_declared_multi_goal_v1(
         raise QualificationError("MULTIGOAL_SINGULARITY_RECOVERY_MODE_UNSUPPORTED")
     if singularity_recovery_mode != "DISABLED" and active_parameter_keys is not None:
         raise QualificationError("MULTIGOAL_SINGULARITY_RECOVERY_REQUIRES_FULL_DOF")
+    if (singularity_recovery_mode != "DISABLED"
+            and jacobian_mode != "ANALYTIC_RESEARCH_V1"):
+        raise QualificationError("MULTIGOAL_SINGULARITY_RECOVERY_REQUIRES_ANALYTIC")
 
     joint_by = {j.canonical_joint_id: j for j in rig.joints}
     if not joint_by or len(joint_by) != len(rig.joints) or len(joint_by) > maximum_joints:

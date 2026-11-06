@@ -99,14 +99,21 @@ class RayStackVisibilityTruthV1:
         depths: tuple[float, ...],
         provenance: str,
     ) -> "RayStackVisibilityTruthV1":
+        """Conserve complete GEOMETRIC ray order without minting visibility truth.
+
+        Source geometry proves the ordered ray intersections, not the
+        source-over alpha / authored 2D visibility of each contributor.
+        Even the first hit may be transparent. Qualified compositing
+        visibility must come from separately admitted explicit evidence
+        (e.g. the validity-aware all-hit V3 adapter), not inferred from
+        rank alone. complete_stack refers to geometry ONLY.
+        """
         if not face_ids:
             raise ValueError("GRAPHICS_TRUTH_V3_COMPLETE_STACK_EMPTY")
         visibility = tuple(
-            QualifiedProbabilityTargetV2(
-                value=1.0 if rank == 0 else 0.0,
-                authority=EvidenceAuthority.DETERMINISTIC_DERIVED,
-                provenance=provenance + f":rank={rank}",
-                valid_for_training=True,
+            QualifiedProbabilityTargetV2.abstain(
+                provenance=provenance +
+                f":rank={rank}:GEOMETRY_ORDER_ONLY__ALPHA_UNOBSERVED"
             )
             for rank in range(len(face_ids))
         )

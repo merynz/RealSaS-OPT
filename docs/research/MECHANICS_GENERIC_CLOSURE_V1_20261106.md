@@ -390,3 +390,70 @@ Three hardening experiments have now been executed in **isolated Mechanics PR #3
 `MECHANICS_TEMPORAL_SECONDARY_ATTACHMENT_20261106.json`.
 
 Remaining important barriers: 3D attachment/grip orientation as actual IK constraints, physics/collision/force truth, rigorous arbitrary seek/replay with state reset, real morphologically diverse source→canonical correspondence and full Graphics/render end-to-end latency. No product FPS or learning authority minted.
+
+## 2026-11-06: first executable 3D attachment orientation AND complete 6D grip-frame IK
+
+The previous read-only `mechanics_attachment_frames_v1.py` could check
+whether an announced sword grip frame happened to match the current pose,
+but could not **make the IK solver honor the orientation**. This gap has
+now been closed for *explicitly declared* anchor frames, research-only.
+
+The `solve_declared_multi_goal_v1` function now accepts:
+- `attachment_orientation_targets`: canonical anchor ID to an independent
+  proper 3×3 world rotation target. The anchor MUST have an explicitly
+  declared `metadata.local_basis`; an unauthored parent basis is NOT
+  promoted to grip truth.
+- `attachment_position_targets`: canonical anchor ID to a world 3D point.
+  Uses the anchor's declared `local_P` even if the grip orientation
+  is unknown.
+- Independent end-effector drag and world-position contact pin goals remain
+  intact and must **all** pass in the same final pose.
+
+The exact, analytic FK Jacobian for an attachment frame uses the existing
+declared parent-ancestry rotational axes `a`, pivot `p`, world anchor
+`g=P_parent+R_parent@local_P`, and world anchor basis
+`R=R_parent@local_basis`:
+
+- Position derivative: `dg/dtheta = a × (g-p)`.
+- Orientation derivative: for each basis column `R[:,i]`,
+  `dR[:,i]/dtheta = a × R[:,i]`.
+
+The orientation objective minimizes nine chordal matrix-entry differences,
+and the independent final pass/fail court measures the geodesic SO(3)
+angle. The position and orientation Jacobian blocks are differentiated
+against independent centered finite differences in tests. No
+force, friction or source physical DOF limit is inferred from these
+equations. Rank-revealing QR and full-DOF fallback now include the declared
+attachment target rows; optimizer or policy success is **not** a substitute
+for measuring every original constraint residual.
+
+Live intervention explicitly opts in via
+`attachment_orientation_mode="SOLVE_DECLARED_RESEARCH_V1"` and
+`solver_mode="DECLARED_MULTI_GOAL_V1"` with
+`multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1"`.
+The previous default `EVALUATE_ONLY` is unchanged; it never pretends
+to have executed orientation IK. The full mechanism includes a
+`MechanicsInterventionStepV1` schedule for *per-frame* attachment
+world-position and world-orientation targets without editing the source
+CanonicalRig or immutable motion clip. Conflicting global/step track
+ownership is rejected.
+
+**Verified GitHub CI**:
+- Tested head: `d76362eb9d5970a76aee8067b9ec300d4d631738`.
+- Workflow run `42286207240`: **106/106 focused Mechanics tests PASS**
+  and runtime ownership firewall PASS.
+- Receipt: `MECHANICS_DECLARED_6D_GRIP_IK_20261106.json`.
+- Test: `tests/compiler/test_mechanics_oriented_ik_v1.py`.
+
+Tested behavior: analytically reachable grip orientation and position
+simultaneously with a draggable end-effector and separate pinned branch;
+intentional incompatible grip or position target FAILs; missing or forged
+anchor/local basis FAILs; five continuous keyframes follow changing
+6D grip targets and keep planted contact.
+
+**Still unproven**: real sword/source-authored grip frames,
+nonhumanoid full-body orientation IK under several attachments,
+collision/contact force, renderer/Graphics and true product frame
+budget. The synthetic test creates its own grip basis; this does
+not admit or train any Corpus370/AXIS/MIRA subject and does not
+supersede source truth or drawable representation policy.

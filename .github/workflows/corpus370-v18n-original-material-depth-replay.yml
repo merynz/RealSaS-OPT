@@ -1,0 +1,72 @@
+name: corpus370-v18n-original-material-depth-replay
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18n-original-material-depth-replay.yml'
+      - 'tools/truth_foundry/blender_corpus370_v18n_original_material_samples.py'
+      - 'tools/corpus/court_corpus370_v18n_original_material_sample_replay.py'
+      - 'tools/corpus/hosted_corpus370_v18n_original_material_samples.sh'
+      - 'tests/corpus/test_corpus370_v18n_original_material_sample_replay.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18n-original-material-samples-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-material-and-alpha-unknown-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Adversarial artist/source alpha, UV, native soup and depth-no-oracle contracts
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          bash -n tools/corpus/hosted_corpus370_v18n_original_material_samples.sh
+          python3 -m py_compile \
+            tools/truth_foundry/blender_corpus370_v18n_original_material_samples.py \
+            tools/corpus/court_corpus370_v18n_original_material_sample_replay.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18n_original_material_sample_replay.py
+
+  original-source-material-native-vs-physical-soup-depth-court:
+    needs: source-material-and-alpha-unknown-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 115
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+          - subject: TRICERATOPS
+            ordinal: 1
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SUBJECT_ORDINAL: ${{ matrix.ordinal }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: SHA-256 verified portable rclone transport
+        run: |
+          set -euo pipefail
+          VERSION=1.75.2
+          ARCHIVE="$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 \
+            "https://github.com/rclone/rclone/releases/download/v${VERSION}/rclone-v${VERSION}-linux-amd64.zip" \
+            -o "$ARCHIVE"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
+          unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
+          test -x "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64/rclone"
+          echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
+      - name: Independently measure original source material/UV/shader replay and depth compositor
+        run: |
+          set -euo pipefail
+          bash tools/corpus/hosted_corpus370_v18n_original_material_samples.sh

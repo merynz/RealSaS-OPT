@@ -251,3 +251,111 @@ def test_live_bridge_requires_explicit_analytic_multi_goal():
                 mesh,rig,skin,mechanics,
                 relative_attachment_bridges=(link,),**kwargs,
             )
+
+
+
+def _three_branch_foot_contact_scene():
+    """Two object grips on distinct branches; third branch plants a foot.
+
+    The foot uses TWO hinges and a terminal link, so its fixed world
+    target remains reachable as the other two branches jointly rotate.
+    There is no semantic name requirement in Mechanics; these labels are
+    synthetic readability, not source inferred ownership.
+    """
+    from compiler.realsas_compiler_core.canonical_rig_ir_v2 import (
+        CanonicalDeformJointIRV2, CanonicalJointFrameIRV2,
+        CanonicalRigChainIRV2, CanonicalRigControlIRV2,
+        CanonicalRigConstraintIRV2,
+    )
+    mesh,rig,skin,mechanics=_objects()
+    declaration,bridge=_rig_and_bridge()
+    rig=replace(
+        rig,
+        joints=rig.joints+(
+            CanonicalDeformJointIRV2("C1",(0.,-.8,0.),"BASE","synthetic:c1"),
+            CanonicalDeformJointIRV2("C2",(0.,-1.6,0.),"C1","synthetic:c2"),
+            CanonicalDeformJointIRV2("C3",(0.,-2.4,0.),"C2","synthetic:c3"),
+        ),
+        local_frames=rig.local_frames+(
+            CanonicalJointFrameIRV2("C1",I,("RZ",)),
+            CanonicalJointFrameIRV2("C2",I,("RZ",)),
+            CanonicalJointFrameIRV2("C3",I,()),
+        ),
+        controls=rig.controls+(
+            CanonicalRigControlIRV2(
+                "C_CONTACT","IK_EFFECTOR",("C3",),None,
+                (0.,-2.4,0.),"synthetic:contact",
+            ),
+        ),
+        chains=rig.chains+(
+            CanonicalRigChainIRV2(
+                "CHAIN_C",("BASE","C1","C2","C3"),
+                "GENERIC_KINEMATIC_CHAIN","synthetic:chain_c",
+            ),
+        ),
+        constraints=(rig.constraints[0],CanonicalRigConstraintIRV2(
+            "C_PIN","IK",("C_CONTACT",),("C3",),"CHAIN_C",
+            {"p0":1.,"p2":1.},"synthetic:ground_contact",
+        )),
+        attachment_anchors=declaration.attachment_anchors,
+    )
+    mechanics=replace(
+        mechanics,
+        constraint_schedule=("A_IK","C_PIN"),
+    )
+    return mesh,rig,skin,mechanics,bridge
+
+
+def test_two_handed_rigid_object_can_rotate_across_5_frames_while_independent_foot_is_planted():
+    mesh,rig,skin,mechanics,bridge=_three_branch_foot_contact_scene()
+    foot=(.6,-2.2,0.)
+    angles=(.08,.10,.12,.14,.16)
+    steps=tuple(MechanicsInterventionStepV1(
+        time_seconds=i/30.,
+        overrides=_drag_to_world(_rotated_targets(theta)[0]),
+    ) for i,theta in enumerate(angles))
+    scene=evaluate_mechanics_intervention_sequence_v1(
+        mesh,rig,skin,mechanics,steps,
+        solver_mode="DECLARED_MULTI_GOAL_V1",
+        multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1",
+        pinned_contact_control_ids=("C_CONTACT",),
+        pinned_world_targets={"C_CONTACT":foot},
+        relative_attachment_bridges=(bridge,),
+        max_allowed_constraint_residual=1e-3,
+    )
+    assert scene.status=="PASS_MECHANICS_SEQUENCE_DIAGNOSTIC",[
+        (f.status,f.failures,f.metadata["multi_goal_status"]) for f in scene.frames
+    ]
+    assert scene.metadata["multi_goal_warm_start_frame_count"]==len(steps)-1
+    assert scene.metadata["relative_bridge_count"]==1
+    assert scene.max_vertex_speed>0.
+    for frame,theta in zip(scene.frames,angles):
+        assert frame.status=="PASS_MECHANICS_BEHAVIORAL_COURT",frame.failures
+        assert frame.relative_attachment_court.status=="PASS_DECLARED_RELATIVE_BRIDGE_COURT"
+        assert frame.relative_attachment_court.max_position_residual_world<1e-3
+        assert frame.relative_attachment_court.max_orientation_residual_rad<1e-3
+        by={j.canonical_joint_id:np.asarray(j.solved_P) for j in frame.pose.joints}
+        a,b=_rotated_targets(theta)
+        assert np.allclose(by["A2"],a,atol=1e-3)
+        assert np.allclose(by["B2"],b,atol=1e-3)
+        assert np.allclose(by["C3"],foot,atol=1e-3)
+        assert frame.max_segment_length_relative_error<1e-8
+        assert frame.metadata["rig_or_skin_mutated"] is False
+
+
+def test_two_handed_bridge_plus_physically_unreachable_foot_cannot_claim_success():
+    mesh,rig,skin,mechanics,bridge=_three_branch_foot_contact_scene()
+    a,_=_rotated_targets(.12)
+    trial=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,
+        overrides=_drag_to_world(a),
+        solver_mode="DECLARED_MULTI_GOAL_V1",
+        multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1",
+        pinned_contact_control_ids=("C_CONTACT",),
+        pinned_world_targets={"C_CONTACT":(100.,100.,0.)},
+        relative_attachment_bridges=(bridge,),
+        max_allowed_constraint_residual=1e-3,
+    )
+    assert trial.status=="FAIL_MECHANICS_BEHAVIORAL_COURT"
+    assert "MULTIGOAL_SOLVER_NOT_QUALIFIED" in trial.failures
+    assert trial.metadata["control_synthesis_performed"] is False

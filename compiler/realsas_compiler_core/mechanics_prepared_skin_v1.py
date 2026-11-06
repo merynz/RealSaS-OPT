@@ -148,7 +148,7 @@ def deform_prepared_mechanics_skin_v1(
                 and expected_deform_structure_hash!=prepared.deform_structure_hash)):
         raise QualificationError("MECHANICS_PREPARED_LBS_POSE_OR_BINDING_DRIFT")
     by_joint={row.canonical_joint_id:row for row in pose.joints}
-    if (len(by_joint)!=prepared.canonical_joint_ids.__len__()
+    if (len(by_joint)!=len(prepared.canonical_joint_ids)
             or len(pose.joints)!=len(by_joint)
             or set(by_joint)!=set(prepared.canonical_joint_ids)):
         raise QualificationError("MECHANICS_PREPARED_LBS_POSE_JOINT_COVERAGE_DRIFT")
@@ -170,10 +170,10 @@ def deform_prepared_mechanics_skin_v1(
     if not np.isfinite(contribution).all():
         raise QualificationError("MECHANICS_PREPARED_LBS_CONTRIBUTION_NONFINITE")
     weighted=prepared.influence_weights[:,None]*contribution
-    out=np.column_stack((
+    out=np.stack([
         np.bincount(vv,weights=weighted[:,k],minlength=prepared.vertex_count)
         for k in range(3)
-    ))
+    ],axis=1)
     if not np.isfinite(out).all():
         raise QualificationError("MECHANICS_PREPARED_LBS_RESULT_NONFINITE")
     return DeformedMeshIRV1(

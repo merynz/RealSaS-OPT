@@ -56,6 +56,7 @@ class MechanicsInterventionFrameV1:
     status: str
     failures: tuple[str, ...] = ()
     joint_parameter_solution_rad: tuple[tuple[str, str, float], ...] = ()
+    rank_policy_candidate_keys: tuple[tuple[str, str], ...] = ()
     secondary_motion_state: SecondaryMotionStateV1 | None = None
     attachment_frames: AttachmentWorldFrameCourtV1 | None = None
     metadata: dict = field(default_factory=dict)
@@ -189,6 +190,7 @@ def evaluate_mechanics_intervention_frame_v1(
     initial_parameters_rad: tuple[tuple[str, str, float], ...] | None = None,
     active_parameter_keys: tuple[tuple[str, str], ...] | None = None,
     active_parameter_policy: str = "EXPLICIT_OR_ALL",
+    preferred_parameter_keys: tuple[tuple[str,str], ...] | None = None,
     prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
     multi_goal_jacobian_mode: str = "NUMERIC_V1",
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
@@ -232,6 +234,8 @@ def evaluate_mechanics_intervention_frame_v1(
                      if row.canonical_control_id in by_id)
     multi_status: str | None = None
     solved_parameters: tuple[tuple[str, str, float], ...] = ()
+    solved_rank_keys: tuple[tuple[str, str], ...] = ()
+    prior_rank_reused = False
     if solver_mode == "FABRIK_V1":
         if pinned_contact_control_ids or pinned_world_targets is not None:
             raise QualificationError("LIVE_MECHANICS_PINS_REQUIRE_MULTI_GOAL")
@@ -240,6 +244,7 @@ def evaluate_mechanics_intervention_frame_v1(
         if multi_goal_jacobian_mode != "NUMERIC_V1":
             raise QualificationError("LIVE_MECHANICS_JACOBIAN_MODE_REQUIRES_MULTI_GOAL")
         if (active_parameter_keys is not None
+                or preferred_parameter_keys is not None
                 or active_parameter_policy != "EXPLICIT_OR_ALL"):
             raise QualificationError("LIVE_MECHANICS_DOF_POLICY_REQUIRES_MULTI_GOAL")
         pose = solve_control_pose_v1(rig, controls)
@@ -252,11 +257,18 @@ def evaluate_mechanics_intervention_frame_v1(
             initial_parameters_rad=initial_parameters_rad,
             active_parameter_keys=active_parameter_keys,
             active_parameter_policy=active_parameter_policy,
+            preferred_parameter_keys=preferred_parameter_keys,
             jacobian_mode=multi_goal_jacobian_mode,
         )
         pose = solved.pose
         multi_status = solved.status
         solved_parameters = solved.parameters_rad
+        solved_rank_keys = solved.metadata.get(
+            "rank_revealing_candidate_parameter_keys", ()
+        )
+        prior_rank_reused = bool(solved.metadata.get(
+            "rank_revealing_prior_basis_reused", False
+        ))
     else:
         raise QualificationError("LIVE_MECHANICS_SOLVER_MODE_UNSUPPORTED")
     attachment_result = evaluate_attachment_world_frames_v1(rig,pose)
@@ -307,6 +319,7 @@ def evaluate_mechanics_intervention_frame_v1(
                 else "PASS_MECHANICS_BEHAVIORAL_COURT"),
         failures=tuple(failures),
         joint_parameter_solution_rad=solved_parameters,
+        rank_policy_candidate_keys=solved_rank_keys,
         secondary_motion_state=secondary_result.state if secondary_result is not None else None,
         attachment_frames=attachment_result,
         metadata={
@@ -329,6 +342,7 @@ def evaluate_mechanics_intervention_frame_v1(
                 or active_parameter_policy != "EXPLICIT_OR_ALL"
             ),
             "active_parameter_policy": active_parameter_policy,
+            "rank_policy_prior_basis_reused": prior_rank_reused,
             "attachment_frames_evaluated_before_secondary": True,
             "attachment_frame_count": len(attachment_result.frames),
             "secondary_motion_mode": (
@@ -384,6 +398,9 @@ def evaluate_mechanics_intervention_sequence_v1(
     prev_solution: tuple[tuple[str, str, float], ...] | None = None
     warm_start_frame_count = 0
     prev_secondary_state: SecondaryMotionStateV1 | None = None
+    prev_rank_selection: tuple[tuple[str,str], ...] | None = None
+    rank_selection_changes=0
+    rank_selection_reused=0
     for index, step in enumerate(steps):
         frame = evaluate_mechanics_intervention_frame_v1(
             mesh, rig, skin, mechanics, overrides=step.overrides,
@@ -398,6 +415,7 @@ def evaluate_mechanics_intervention_sequence_v1(
             multi_goal_jacobian_mode=multi_goal_jacobian_mode,
             active_parameter_keys=active_parameter_keys,
             active_parameter_policy=active_parameter_policy,
+            preferred_parameter_keys=prev_rank_selection,
             secondary_motion_policy=secondary_motion_policy,
             secondary_motion_previous_state=prev_secondary_state,
             secondary_motion_dt_seconds=(
@@ -409,6 +427,18 @@ def evaluate_mechanics_intervention_sequence_v1(
             frame.secondary_motion_state
             if frame.status == "PASS_MECHANICS_BEHAVIORAL_COURT" else None
         )
+        if active_parameter_policy=="RANK_REVEALING_RESEARCH_V1":
+            next_rank = (
+                frame.rank_policy_candidate_keys
+                if frame.status=="PASS_MECHANICS_BEHAVIORAL_COURT"
+                else ()
+            )
+            if prev_rank_selection is not None and next_rank:
+                rank_selection_changes+=int(next_rank!=prev_rank_selection)
+                rank_selection_reused+=int(
+                    bool(frame.metadata["rank_policy_prior_basis_reused"])
+                )
+            prev_rank_selection = next_rank if next_rank else None
         if prev_solution is not None and solver_mode == "DECLARED_MULTI_GOAL_V1":
             warm_start_frame_count += 1
         prev_solution = (
@@ -469,6 +499,8 @@ def evaluate_mechanics_intervention_sequence_v1(
                 or active_parameter_policy != "EXPLICIT_OR_ALL"
             ),
             "active_parameter_policy": active_parameter_policy,
+            "rank_policy_selection_changes": rank_selection_changes,
+            "rank_policy_selection_reused_frames": rank_selection_reused,
             "solver_mode": solver_mode,
             "pinned_contact_control_ids": tuple(pinned_contact_control_ids),
             "explicit_contact_world_anchor_count": (

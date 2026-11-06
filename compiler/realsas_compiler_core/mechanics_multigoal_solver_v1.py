@@ -97,6 +97,7 @@ def solve_declared_multi_goal_v1(
     initial_parameters_rad: Sequence[tuple[str, str, float]] | None = None,
     active_parameter_keys: Sequence[tuple[str, str]] | None = None,
     active_parameter_policy: str = "EXPLICIT_OR_ALL",
+    preferred_parameter_keys: Sequence[tuple[str, str]] | None = None,
     jacobian_mode: str = "NUMERIC_V1",
     verify_analytic_jacobian: bool = False,
 ) -> MechanicsMultiGoalResultV1:
@@ -119,6 +120,8 @@ def solve_declared_multi_goal_v1(
         active_parameter_keys is not None or jacobian_mode != "ANALYTIC_RESEARCH_V1"
     ):
         raise QualificationError("MULTIGOAL_RANK_POLICY_REQUIRES_AUTO_ANALYTIC")
+    if preferred_parameter_keys is not None and active_parameter_policy != "RANK_REVEALING_RESEARCH_V1":
+        raise QualificationError("MULTIGOAL_HYSTERESIS_REQUIRES_RANK_POLICY")
 
     joint_by = {j.canonical_joint_id: j for j in rig.joints}
     if not joint_by or len(joint_by) != len(rig.joints) or len(joint_by) > maximum_joints:
@@ -356,6 +359,8 @@ def solve_declared_multi_goal_v1(
     policy_candidate_rank: int | None = None
     policy_fallback = False
     policy_candidate_keys: tuple[tuple[str, str], ...] = ()
+    policy_preferred_reused = False
+    policy_preferred_span_error: float | None = None
     if active_parameter_policy == "RANK_REVEALING_RESEARCH_V1":
         task_jac = analytic_jacobian(x0)[:3*len(goals), :]
         if not np.isfinite(task_jac).all():
@@ -376,6 +381,34 @@ def solve_declared_multi_goal_v1(
             # unreachable. Preserve every DOF rather than hallucinating a
             # zero-control solution.
             selected_indices = list(range(len(param_schema)))
+        # Temporal hysteresis: retain a previous valid, *independently*
+        # spanning actuator basis instead of pivoting to another equally
+        # capable basis merely because column norms crossed. No source
+        # identity inference; this is solely runtime numerical policy.
+        if preferred_parameter_keys is not None:
+            try:
+                prior = tuple((str(jid), str(axis)) for jid, axis in preferred_parameter_keys)
+            except (TypeError, ValueError) as exc:
+                raise QualificationError("MULTIGOAL_HYSTERESIS_SCHEMA_INVALID") from exc
+            if (not prior or len(set(prior)) != len(prior)
+                    or not set(prior).issubset(set(param_schema))):
+                raise QualificationError("MULTIGOAL_HYSTERESIS_SCHEMA_INVALID")
+            if policy_candidate_rank and len(prior) == policy_candidate_rank:
+                prior_set=set(prior)
+                prior_idx=[i for i,key in enumerate(param_schema) if key in prior_set]
+                preferred_columns=task_jac[:, prior_idx]
+                orthogonal, triangular_prior=np.linalg.qr(
+                    preferred_columns,mode="reduced")
+                preferred_rank=int(np.count_nonzero(
+                    np.abs(np.diag(triangular_prior))>pivot_floor))
+                if preferred_rank == policy_candidate_rank:
+                    error=float(np.linalg.norm(
+                        task_jac-orthogonal@(orthogonal.T@task_jac)
+                    )/max(float(np.linalg.norm(task_jac)),1e-12))
+                    policy_preferred_span_error=error
+                    if error<=1e-4:
+                        selected_indices=prior_idx
+                        policy_preferred_reused=True
         active_idx = np.asarray(selected_indices, dtype=np.int64)
         policy_candidate_keys = tuple(param_schema[i] for i in active_idx)
     elif active_parameter_keys is None:
@@ -508,6 +541,8 @@ def solve_declared_multi_goal_v1(
             "active_parameter_policy": active_parameter_policy,
             "rank_revealing_candidate_task_rank": policy_candidate_rank,
             "rank_revealing_candidate_parameter_keys": policy_candidate_keys,
+            "rank_revealing_prior_basis_reused": policy_preferred_reused,
+            "rank_revealing_prior_span_relative_error": policy_preferred_span_error,
             "rank_revealing_fallback_to_all": policy_fallback,
             "rank_revealing_candidate_solver_nfev": candidate_nfev,
             "compiler_rig_synthesis_performed": False,

@@ -95,3 +95,33 @@ A real read-only source investigation now exists for **Truth139 `truth139_fff139
 The independent audit code `tools/mechanics/audit_stage47_source_mechanics_v1.py` validates SHA-bound source evidence and signed perturbation pairs, but **does not compare the RealSaS compiler solver to source Blender results** because the source→canonical joint/weight correspondence is not yet qualified. In particular, these source controls are `KINEMATIC_PARAMETER__NOT_PHYSICAL_DOF_OR_JOINT_LIMIT`, and the teacher explicitly declares `source_weight_lbs_equivalence=NOT_QUALIFIED`. All source-private handles and names remain teacher-only.
 
 **Scientific next barrier:** inventing an IK rest-compatible interaction target is not source-authored IK truth. Before source-vs-compiler comparison, build a separately courted canonical joint/skin mapping that preserves source rest frames and response-space provenance, and compare source-intervention tensors against independent compiled pose/deformation. A numerically perfect optimization result against its own goals is never sufficient for source equivalence.
+
+## Second increment: measured source FK/LBS closure, controls and warm-start (2026-11-06)
+
+**Actual Stage47 source-world measurements, exact hashes:** `docs/research/MECHANICS_STAGE47_SOURCE_NATIVE_FKLBS_REPLAY_20261106.json`. Source `truth139_fff1396de9c37b2bab05` has **43** native rest bone frames, **129** isolated 3-axis kinematic parameters, **3,266** source vertices, **6,571** sparse source weight coefficients and **774** Blender-measured interventions. Independent analytical replay of each native local bone rotation through the declared source parent forest and descendant influence mass reproduces **all 774** within maximum vertex L2 error **1.2653386341165218e-6 source units**; per-action max error p95 **8.358747185028643e-7**; no action exceeds the preregistered local research threshold of **2.5e-6**. All source input bytes were SHA-verified before running local experiment.
+
+`tools/mechanics/compare_stage47_source_fk_lbs_v1.py` is the reproducible source read-only court. It expects the exact source teacher JSON + NPZ from connected Drive, cross-checks the source hash, source frame/parameter alignment, signed action pairing, armature hierarchy and weight CSR. The optional `--product-probes N` path separately calls the **real** `deform_mesh_lbs_v1` on an explicitly `UNQUALIFIED_SOURCE_ORACLE_RESEARCH_ONLY` carrier/rig/skin. CI covers this same path using a separate synthetic source-bone oracle and measured deformation fixture; it does **not** download the private 24.5MB Stage47 source NPZ during ordinary PR checks.
+
+**Do not conflate:** whole-source analytical source rig deformer equivalence is a PASS for *source-local* mechanical response. It is not a PASS for IRIS/TESSA source→CanonicalMesh fidelity, AXIS controls, MIRA skin output, a learned V7 model, or a product-quality source→compiled Mechanics binding. The actual RealSaS LBS probe has **only** run in the synthetic CI fixture so far; full real-source oracle-to-product-LBS execution remains a research work item. Neither source teacher source names nor source weights can become student model inputs.
+
+**Important control-role distinction:** measured source bones include **5** with zero **direct** skin weight, **2** without **any descendant** skinned vertices and **6** local rotational parameters with exactly zero measured isolated deformation. Those controls have source-private pole-target names, but this stage did not measure their participation in an IK constraint. It is wrong to equate zero direct weight with "no mechanical control effect" or to call pole controls obsolete. The only valid conclusion is no effect under the measured **isolated native rotation experiment**. See `MECHANICS_STAGE47_CONTROL_SKIN_CAUSAL_SEPARATION_20261106.json`.
+
+New `compiler/realsas_compiler_core/mechanics_surface_control_effects_v1.py` models the **declared causal effect graph**: ROOT/FK/SOCKET/GLOBAL control targets propagate to their declared joint descendants, while control inputs to authored constraints gain evidence from explicitly targeted output joints or chain joints. For any hit triangle and barycentrics, the runtime returns ranked control candidates and effect paths, or `AMBIGUOUS` / `ABSTAIN`; no controls or source semantics are invented. CI proves a ROOT with only an unweighted root target can still influence every skinned descendant and an IK pole with no direct skin target can still influence a declared IK chain. This graph is **not** the same as evidence that the resulting model produces a correct native control program on unseen subjects.
+
+The multi-goal reference solver also now accepts *validated, schema-bound previous joint configurations* as warm-start parameters. Live sequences carry a qualified previous solution forward to the next frame; a failed frame clears the warm start. This is for smooth drag research and runtime performance evaluation, not a 60fps claim. Default FABRIK runtime remains unchanged.
+
+## Reproducibility
+
+```bash
+python tools/mechanics/compare_stage47_source_fk_lbs_v1.py \
+  --teacher /secure/TEACHER_SCENE.json \
+  --npz /secure/geometry_and_response.npz \
+  --expected-teacher-sha256 87eacdb230f19feae5b0d3e15b67d504fe40908f703254faa4a4d29e9b117b6e \
+  --expected-npz-sha256 c13e837029ab80c78c989c01698d31ae10446c18fa8907e1a8840c33ca6c75fb \
+  --product-probes 12 \
+  --report /secure/source_native_lbs_court_v1.json
+```
+
+The source is read-only and remains outside git. The report is reproducible by an authorized executor with exact source bytes; never upload artist source meshes, original bone names or full teacher arrays into public CI artifacts. `--product-probes 12` remains a **planned execution** on actual Stage47 bytes until a corresponding artifact/receipt is recorded.
+
+**Next hard scientific step:** validate the actual product-LBS oracle probe on exact real Stage47 source bytes and then define source→canonical surface and local-frame correspondence evidence from independently qualified geometry; challenge the binding with mismatched source, barycentric support forgery, axis flips and wrong parentage. Validate source-equivalent multi-action deformation without using target/source bone names as student features.

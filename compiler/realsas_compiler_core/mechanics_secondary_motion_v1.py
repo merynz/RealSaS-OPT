@@ -214,49 +214,46 @@ def step_secondary_motion_v1(
         prior_tick_count=int(previous_state.metadata.get("simulation_tick_count",0))
         if prior_tick_count<0 or prior_tick_count>1000000000:
             raise QualificationError("SECONDARY_STATE_TICK_COUNT_INVALID")
+    # Coupled secondary descendants MUST update parent-to-child at every
+    # physics tick. Integrating all T1 ticks and only then all T2 ticks
+    # produces different poses for 1x(1/30s) vs 2x(1/60s), even under a
+    # fixed primary target. This execution order preserves that partition.
     result_positions=dict(primary_positions)
-    state_out:dict[str,SecondaryJointStateV1]={}
-    rotations:dict[str,np.ndarray]={}
-    max_segment_error=0.0
-    max_deviation=0.0
-    for cfg,ids in validated:
-        omega=2*math.pi*float(cfg.frequency_hz)
-        for parent_id, jid in zip(ids,ids[1:]):
-            parent=result_positions[parent_id]
-            primary_parent=primary_positions[parent_id]
-            original=primary_positions[jid]
-            native_segment=original-primary_parent
-            length=float(np.linalg.norm(native_segment))
-            if not math.isfinite(length) or length<=1e-8:
-                raise QualificationError("SECONDARY_DEGENERATE_SEGMENT")
-            target=parent+native_segment
-            if previous_state is None:
-                new_position=target.copy()
-                new_velocity=np.zeros(3,dtype=np.float64)
-            else:
-                old_position=_v3(previous[jid].world_P,"SECONDARY_STATE_POSITION_INVALID")
-                old_velocity=_v3(previous[jid].world_velocity,"SECONDARY_STATE_VELOCITY_INVALID")
-                # Exact critically damped homogeneous response to a fixed
-                # target over dt. Target moves across steps, never inferred
-                # from unobserved source forces.
-                # Independent fixed-step integration of the bounded position
-                # response. For a fixed primary target, one 1/30s frame and
-                # two 1/60s frames follow identical 1/60s physics ticks.
-                # No hidden variable-step lumping or arbitrary frame-rate
-                # dependence is introduced within the declared substep grid.
-                sub_dt=dt/integration_steps
-                new_position=old_position.copy()
-                new_velocity=old_velocity.copy()
-                forward=native_segment/length
-                for _ in range(integration_steps):
-                    error=new_position-target
+    velocities:dict[str,np.ndarray]={}
+    for jid in owned:
+        if previous_state is None:
+            result_positions[jid]=primary_positions[jid].copy()
+            velocities[jid]=np.zeros(3,dtype=np.float64)
+        else:
+            result_positions[jid]=_v3(
+                previous[jid].world_P,"SECONDARY_STATE_POSITION_INVALID")
+            velocities[jid]=_v3(
+                previous[jid].world_velocity,"SECONDARY_STATE_VELOCITY_INVALID")
+    if integration_steps:
+        sub_dt=dt/integration_steps
+        for _ in range(integration_steps):
+            for cfg,ids in validated:
+                omega=2*math.pi*float(cfg.frequency_hz)
+                for parent_id,jid in zip(ids,ids[1:]):
+                    parent=result_positions[parent_id]
+                    native_segment=(
+                        primary_positions[jid]-primary_positions[parent_id]
+                    )
+                    length=float(np.linalg.norm(native_segment))
+                    if not math.isfinite(length) or length<=1e-8:
+                        raise QualificationError("SECONDARY_DEGENERATE_SEGMENT")
+                    target=parent+native_segment
+                    old_position=result_positions[jid]
+                    old_velocity=velocities[jid]
+                    error=old_position-target
                     decay=math.exp(-omega*sub_dt)
-                    coefficient=new_velocity+omega*error
+                    coefficient=old_velocity+omega*error
                     unconstrained=target+(error+coefficient*sub_dt)*decay
                     radial=unconstrained-parent
                     if np.linalg.norm(radial)<=1e-10:
                         radial=native_segment.copy()
                     direction=_unit(radial,"SECONDARY_RADIAL_DEGENERATE")
+                    forward=native_segment/length
                     cos_angle=float(np.clip(np.dot(direction,forward),-1.,1.))
                     angle=math.acos(cos_angle)
                     if angle>cfg.max_deviation_rad:
@@ -265,21 +262,38 @@ def step_secondary_motion_v1(
                         direction=(math.cos(cfg.max_deviation_rad)*forward
                                    +math.sin(cfg.max_deviation_rad)*transverse)
                     updated=parent+length*direction
-                    new_velocity=(updated-new_position)/sub_dt
+                    new_velocity=(updated-old_position)/sub_dt
                     if not np.isfinite(new_velocity).all():
                         raise QualificationError("SECONDARY_VELOCITY_NONFINITE")
-                    new_position=updated
-            segment=new_position-parent
-            max_segment_error=max(max_segment_error,
-                                  abs(float(np.linalg.norm(segment))-length))
+                    result_positions[jid]=updated
+                    velocities[jid]=new_velocity
+    state_out:dict[str,SecondaryJointStateV1]={}
+    rotations:dict[str,np.ndarray]={}
+    max_segment_error=0.0
+    max_deviation=0.0
+    for cfg,ids in validated:
+        for parent_id,jid in zip(ids,ids[1:]):
+            parent=result_positions[parent_id]
+            segment=result_positions[jid]-parent
+            native_segment=(
+                primary_positions[jid]-primary_positions[parent_id]
+            )
+            length=float(np.linalg.norm(native_segment))
+            if not math.isfinite(length) or length<=1e-8:
+                raise QualificationError("SECONDARY_DEGENERATE_SEGMENT")
+            max_segment_error=max(
+                max_segment_error,abs(float(np.linalg.norm(segment))-length)
+            )
             deviation=math.acos(float(np.clip(
                 np.dot(segment/length,native_segment/length),-1.,1.)))
             max_deviation=max(max_deviation,deviation)
-            result_positions[jid]=new_position
             swing=_minimal_rotation(native_segment,segment)
-            rotations[jid]=swing@np.asarray(primary[jid].rotation_basis,dtype=np.float64)
+            rotations[jid]=swing@np.asarray(
+                primary[jid].rotation_basis,dtype=np.float64
+            )
             state_out[jid]=SecondaryJointStateV1(
-                jid,tuple(map(float,new_position)),tuple(map(float,new_velocity)),
+                jid,tuple(map(float,result_positions[jid])),
+                tuple(map(float,velocities[jid])),
             )
     rows=tuple(
         replace(j,

@@ -2,7 +2,7 @@
 
 **Reviewed product goal:** Input → Shape → Mesh → Rig v2 → Skin v2 → Mechanics v1 → {Graphics, Motion v2} → Proof → ProductRevision.  
 **Source of two V2 CAS executors:** #297 pinned commit `dd3089957e3126d93db4ad2804e30511cfdca348`.  
-**Current prerequisite:** #373 V6 runtime source and safe checkpoint loaders. This PR is temporarily stacked on #373 to keep imports/test scope honest; it must be rebased directly onto updated `main`, retargeted and fully retested after #373 merges.
+**Current prerequisite:** #373 V6 runtime source and safe checkpoint loaders. PR #373 was merged as `fb2b0caa0571ed0fbeec1a28571529e246264bba`; this branch is now rebuilt directly on that secured `main` and must pass exact-head full CI before acceptance.
 
 ## What actually changes
 
@@ -31,7 +31,7 @@ The original AXIS/MIRA package and grammar tests remain mandatory. **No test her
 
 ## Next integration gates
 
-1. Merge #373 after all exact-head CI and review. Rebase this short-lived branch to new main; require broad current-mainline/compiler/Go/CAA checks in addition to dedicated CI. **No bulk merging #297.**
+1. Preserve the merged #373 secure source baseline and require dedicated worker, broad current-mainline/compiler, Go/CAA and product wiring gates on the current exact head. **No bulk merging #297.**
 2. Only after real output/ModelRelease proof, make one versioned Go product descriptor transition from Rig/Skin v1 to v2 as a separate reviewed change. The operator must refuse incompatible checkpoint channels and missing typed parents.
 3. Register Mechanics, then separate Graphics and Motion sibling roles, with proof-carrying exact ProductRevision. Runtime must render from actual CanonicalMotion v2 controls and Mechanics deformation, preserving Graphics draw order and source appearance; old baked Stage40/43 render is not sufficient.
 4. Complete edit→requalification→native .rss export/reopen and cold compile/warm playback tests before calling BUSTED available.

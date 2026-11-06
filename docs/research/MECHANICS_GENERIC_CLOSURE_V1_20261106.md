@@ -159,3 +159,48 @@ These are **kernel-only timings**. They exclude IK/constraint solve, collision, 
 4. Blind morphology-held-out source checks with pre-registered research exposure. This exposed Dino is never later promoted to unseen.
 
 The temporary **code-only** GitHub artifact used to access the exact private repo kernel in the execution container was uploaded with one-day retention during the experiment and its workflow upload step subsequently removed; artist source assets were never uploaded to GitHub.
+
+## CPU Mechanics complete-frame reference — 2026-11-06
+
+The LBS-only 18.28× gain revealed a second bottleneck: the legacy behavioral
+court converted and checked each vertex separately in Python. The
+`mechanics_live_runtime_v1.py::_behavioral_metrics` implementation now
+vectorizes its **full** canonical vertex finite-position/displacement tests and
+uses the immutable rest-position cache prepared exactly once by
+`mechanics_prepared_skin_v1.py`. The same semantic checks remain present:
+joint-set equality, parent-child segment strain, exact vertex-ID coverage,
+finite geometry and measured maximum full-vertex displacement. Nonprepared
+legacy mode retains an exact ID-reordering fallback, including duplicate-ID,
+missing-vertex and NaN failure courts. No sampling approximation.
+
+The full executable frame court is
+`tools/mechanics/benchmark_live_mechanics_v1.py`; it uses a seeded
+**synthetic 5-joint/3-DOF branched rig**, two IK goals, one stationary control
+point, previous qualified joint solution warm-start, full LBS and complete
+behavioral diagnostic. It explicitly excludes renderer/Graphics, contact force,
+collision, data transfer, frame pacing and any model inference.
+GitHub Actions runs it on the `mechanics_generic_closure_v1` job, publishes
+JSON evidence artifacts with a short retention and **only gates on
+correctness** (not arbitrary shared-runner FPS).
+
+**Verified CI:** commit `dcefe18c5b7efc3b55eef1076ef14c9bbcc2bfb2`,
+Actions run `42273795156`, **48 tests PASS**.
+Complete report: `MECHANICS_CPU_FULL_FRAME_COURT_20261106.json`.
+
+| Research load | Prepared full Mechanics p50 | Prepared p95 | Legacy sampled p50 | Vertex L2 parity max |
+|---|---:|---:|---:|---:|
+| 3,266 vertices, 6,532 influences | 5.924 ms | 6.393 ms | 57.807 ms | 4.48e-16 |
+| 8,192 vertices, 16,384 influences | 11.351 ms | 12.109 ms | 143.126 ms | 4.48e-16 |
+
+These are **small sample sizes** (16 and 10 actual timed frames) on one
+GitHub-hosted CPU. P95 under 16.67 ms on this *fixture* is **not product
+60 FPS proof**. Product must also account for graphics, rendering, motion
+decoding, input handling and larger articulated systems.
+
+**Next identified bottleneck**: multi-goal SciPy least-squares currently
+computes a numerical finite-difference Jacobian. Its cost grows with declared
+joint DOF count. The 3-DOF benchmark is intentionally **not** extrapolated to
+a 43-bone/129-parameter source skeleton: source-native rotation parameters
+are not qualified CanonicalRig physical DOF truth. A separate
+DOF/morphology-scaling court and analytically differentiated kinematics
+should precede any latency or generic closure claim.

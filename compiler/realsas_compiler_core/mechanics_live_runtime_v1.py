@@ -21,6 +21,10 @@ from .canonical_rig_ir_v2 import CanonicalRigIRV2
 from .canonical_skin_ir_v2 import CanonicalSkinIRV2
 from .canonical_mechanics_ir_v1 import CanonicalMechanicsIRV1
 from .canonical_motion_ir_v2 import CanonicalMotionIRV2
+from .mechanics_prepared_skin_v1 import (
+    PreparedMechanicsSkinDeformerV1,
+    deform_prepared_mechanics_skin_v1,
+)
 from .control_motion_runtime_v2 import sample_control_transforms_v2
 from .mechanics_control_solver_v1 import (
     ControlTransformIRV1, DeformedMeshIRV1, MechanicsPoseIRV1,
@@ -153,6 +157,7 @@ def evaluate_mechanics_intervention_frame_v1(
     solver_mode: str = "FABRIK_V1",
     pinned_contact_control_ids: tuple[str, ...] = (),
     initial_parameters_rad: tuple[tuple[str, str, float], ...] | None = None,
+    prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
 ) -> MechanicsInterventionFrameV1:
     _strict_lineage(mesh, rig, skin, mechanics)
     limit_residual = _finite_tolerance(
@@ -209,7 +214,16 @@ def evaluate_mechanics_intervention_frame_v1(
         solved_parameters = solved.parameters_rad
     else:
         raise QualificationError("LIVE_MECHANICS_SOLVER_MODE_UNSUPPORTED")
-    deformed = deform_mesh_lbs_v1(mesh, rig, skin, pose)
+    deformed = (
+        deform_prepared_mechanics_skin_v1(
+            prepared_skin, pose,
+            expected_mesh_lineage_hash=mesh.mesh_lineage_hash,
+            expected_skin_lineage_hash=skin.skin_lineage_hash,
+            expected_deform_structure_hash=rig.deform_structure_hash,
+        )
+        if prepared_skin is not None
+        else deform_mesh_lbs_v1(mesh, rig, skin, pose)
+    )
     maximum_residual = max((abs(float(v)) for _, v in pose.constraint_residuals), default=0.0)
     if not math.isfinite(maximum_residual):
         raise QualificationError("LIVE_MECHANICS_RESIDUAL_NONFINITE")
@@ -244,6 +258,10 @@ def evaluate_mechanics_intervention_frame_v1(
             "pinned_contact_control_ids": tuple(pinned_contact_control_ids),
             "multi_goal_status": multi_status,
             "warm_start_used": initial_parameters_rad is not None,
+            "deformer_kernel": (
+                "PREPARED_SPARSE_NUMPY_RESEARCH_ONLY"
+                if prepared_skin is not None else "LEGACY_LBS_V1"
+            ),
         },
     )
 
@@ -260,6 +278,7 @@ def evaluate_mechanics_intervention_sequence_v1(
     max_allowed_segment_strain: float = 1.0e-3,
     solver_mode: str = "FABRIK_V1",
     pinned_contact_control_ids: tuple[str, ...] = (),
+    prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
 ) -> MechanicsInterventionSequenceV1:
     if not steps:
         raise QualificationError("LIVE_MECHANICS_SEQUENCE_EMPTY")
@@ -283,6 +302,7 @@ def evaluate_mechanics_intervention_sequence_v1(
             solver_mode=solver_mode,
             pinned_contact_control_ids=pinned_contact_control_ids,
             initial_parameters_rad=prev_solution if solver_mode == "DECLARED_MULTI_GOAL_V1" else None,
+            prepared_skin=prepared_skin,
         )
         if prev_solution is not None and solver_mode == "DECLARED_MULTI_GOAL_V1":
             warm_start_frame_count += 1
@@ -327,6 +347,10 @@ def evaluate_mechanics_intervention_sequence_v1(
             "all_samples_are_stateless_overrides": solver_mode != "DECLARED_MULTI_GOAL_V1",
             "control_overrides_are_transient": True,
             "multi_goal_warm_start_frame_count": warm_start_frame_count,
+            "deformer_kernel": (
+                "PREPARED_SPARSE_NUMPY_RESEARCH_ONLY"
+                if prepared_skin is not None else "LEGACY_LBS_V1"
+            ),
             "motion_authority_unchanged": True,
             "training_authorized": False,
             "solver_mode": solver_mode,

@@ -112,3 +112,70 @@ def test_invalid_original_source_graph_refused(attack):
 def test_schema_and_epistemic_status_persistent():
     assert SCHEMA.endswith(".v18q")
     assert STATUS.endswith("ARTIST_OWNER_UNKNOWN")
+
+from tools.corpus.court_corpus370_v18q_graph_affinity_hypotheses import (
+    verify_ir,
+)
+
+
+def valid_ir():
+    graph=graph_proposals(*original_source_fixture())
+    return {
+      "schema":SCHEMA,"status":STATUS,
+      "artist_graphics_ownership":"UNKNOWN",
+      "compiler_graphics_proof":"NOT_QUALIFIED",
+      "source_original_face_uv_material_relation":
+           "NOT_PRESENT_IN_SHA_BOUND_V18A_ARRAYS",
+      "source_original_multiview_visibility_relation":
+           "NOT_PRESENT_IN_SHA_BOUND_V18A_ARRAYS",
+      "same_drawable_training_pairs_qualified":0,
+      "different_drawable_training_pairs_qualified":0,
+      "graphics_owner_authorized":False,
+      "iris_training_authorized":False,
+      "tessa_training_authorized":False,
+      "materialization_authorized":False,
+      "training_authorized":False,
+      "source_private_graph":graph,
+      "independent_edit_court_observations_not_for_fitting":{
+         "source_v18o_edit_outcome_used_to_rank_hypotheses":False,
+         "source_edit_consequence_for_new_graph_hypotheses":"NOT_EVALUATED",
+         "original_source_cross_pose_graphics_owner_stability":"UNKNOWN",
+      },
+    }
+
+
+def test_independent_replay_and_no_owner_label_admit():
+    original=valid_ir()
+    assert verify_ir(original,original)
+
+
+@pytest.mark.parametrize("attack",(
+ "graph_mutation","promote_owner","invent_uv","claim_heldout",
+ "cannot_link","make_lifted_same","edit_rank_leakage",
+))
+def test_independent_court_detects_claim_forgery(attack):
+    import copy
+    original=valid_ir()
+    fake=copy.deepcopy(original)
+    if attack=="graph_mutation":
+        fake["source_private_graph"]["source_original_local_edge_count"]+=1
+    elif attack=="promote_owner":
+        fake["graphics_owner_authorized"]=True
+    elif attack=="invent_uv":
+        fake["source_original_face_uv_material_relation"]="VERIFIED"
+    elif attack=="claim_heldout":
+        fake["independent_edit_court_observations_not_for_fitting"][
+           "source_edit_consequence_for_new_graph_hypotheses"]="PASS"
+    elif attack=="cannot_link":
+        fake["source_private_graph"][
+           "source_local_graph_affinity_evidence_ir_teacher_private"][0][
+           "must_separate_artist_drawable"]="TRUE"
+    elif attack=="make_lifted_same":
+        fake["source_private_graph"][
+           "source_nonlocal_graph_affinity_hypotheses_teacher_private"][0][
+           "can_merge_artist_drawable"]="TRUE"
+    else:
+        fake["independent_edit_court_observations_not_for_fitting"][
+           "source_v18o_edit_outcome_used_to_rank_hypotheses"]=True
+    with pytest.raises(ValueError,match="V18Q_INDEPENDENT_"):
+        verify_ir(fake,original)

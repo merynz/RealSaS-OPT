@@ -30,6 +30,7 @@ class PreparedMechanicsSkinDeformerV1:
     influence_joint_indices: np.ndarray
     influence_weights: np.ndarray
     rest_offset_vectors: np.ndarray
+    rest_vertex_positions: np.ndarray
     vertex_count: int
     influence_count: int
     mesh_lineage_hash: str
@@ -118,6 +119,7 @@ def prepare_mechanics_skin_deformer_v1(
         influence_joint_indices=_readonly(jis),
         influence_weights=_readonly(ws),
         rest_offset_vectors=_readonly(offsets),
+        rest_vertex_positions=_readonly(vertices),
         vertex_count=n,
         influence_count=len(weights),
         mesh_lineage_hash=mesh.mesh_lineage_hash,

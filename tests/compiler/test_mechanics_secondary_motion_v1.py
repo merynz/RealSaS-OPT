@@ -274,8 +274,11 @@ def test_secondary_substep_budget_and_invalid_fixed_step_fail_closed():
     base=_frame(obj,0.)
     mesh,rig,skin,mechanics,policy,prepared=obj
     limited=replace(policy,maximum_substeps=2)
+    # The budget court must use a state initialized under the SAME physics
+    # policy; changing budget with an old state correctly requires reset.
+    limited_base=_frame(obj,0.,policy=limited)
     with pytest.raises(QualificationError,match="SUBSTEP_RESOURCE_BOUND"):
-        _frame(obj,.1,prev=base.secondary_motion_state,dt=.1,policy=limited)
+        _frame(obj,.1,prev=limited_base.secondary_motion_state,dt=.1,policy=limited)
     bad=replace(policy,fixed_step_seconds=0.)
     with pytest.raises(QualificationError,match="SUBSTEP_POLICY_INVALID"):
         _frame(obj,0.,policy=bad)

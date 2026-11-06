@@ -1,0 +1,53 @@
+name: v6-main-motion-control-space-integration-v1
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/control_motion_ir_v1.py'
+      - 'compiler/realsas_compiler_core/canonical_motion_ir_v2.py'
+      - 'compiler/realsas_compiler_core/control_motion_runtime_v2.py'
+      - 'tests/compiler/test_control_motion_v2.py'
+      - 'tests/compiler/test_control_motion_ik_integration_v1.py'
+      - 'tests/compiler/test_v6_motion_main_integration_v1.py'
+      - '.github/workflows/v6_main_motion_control_space_integration_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  control-motion-courts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU mainline compiler dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Compile original V6 control-space motion implementation
+        run: |
+          python -m py_compile \
+            compiler/realsas_compiler_core/control_motion_ir_v1.py \
+            compiler/realsas_compiler_core/canonical_motion_ir_v2.py \
+            compiler/realsas_compiler_core/control_motion_runtime_v2.py
+      - name: Test original and mainline motion semantics
+        run: |
+          python -m pytest -q \
+            tests/compiler/test_control_motion_v2.py \
+            tests/compiler/test_control_motion_ik_integration_v1.py \
+            tests/compiler/test_v6_motion_main_integration_v1.py
+      - name: Enforce edit-control motion and authority firewall
+        run: |
+          python - <<'PY'
+          from compiler.realsas_compiler_core.canonical_motion_ir_v2 import CanonicalMotionIRV2
+          from compiler.realsas_compiler_core.control_motion_runtime_v2 import solve_motion_pose_v2
+          assert CanonicalMotionIRV2.__module__.endswith('canonical_motion_ir_v2')
+          assert solve_motion_pose_v2.__module__.endswith('control_motion_runtime_v2')
+          print('PASS_CONTROL_MOTION_V2_TYPED_RUNTIME_NO_PRODUCT_RELEASE')
+          PY

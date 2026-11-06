@@ -236,7 +236,7 @@ def audit(v18m_manifest,v18m_npz,v18l_manifest,v18l_npz,v18l_court,
         and m.get("source_depth_normalization_to_max")==.98
         and m.get("source_face_depth_evidence_is_teacher_private_not_art_layer_label") is True
         and m.get("source_edit_arms")==["GROUP_DEPTH","REMAINDER_DEPTH"]
-        and m.get("source_original_v18m_parent_v18l_run")=="42131579613-1"
+        and m.get("original_source_v18m_parent_v18l_run")=="42131579613-1"
         and len(m.get("source_depth_per_view_source_geometry_only_normalized_ranges",[]))==4
         and all(len(v)==2 and v[1]>v[0]>0
             for v in m["source_depth_per_view_source_geometry_only_normalized_ranges"])

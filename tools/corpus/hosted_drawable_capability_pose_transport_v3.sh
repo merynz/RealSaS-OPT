@@ -60,7 +60,8 @@ rclone copyto "$NATIVE/teacher.npz.json" "$D/teacher.json" --checksum --retries 
 rclone copyto "$ROOT/hosted_operational_cat_source_uv_plan_v2/CAT/42260446130-1/PRIVATE_CAT_ORIGINAL_SOURCE_UV_EDIT_PLAN_V2.json" "$D/plan.json" --checksum --retries 3
 EDIT="$ROOT/hosted_operational_cat_uv_texture_cycles_v2/CAT/42263195370-1"
 rclone copyto "$EDIT/PRIVATE_SOURCE_UV_ATLAS_EDIT_IMAGES_V1.json" "$D/atlas-assets.json" --checksum --retries 3
-for ARM in BASE SINGLE_0 SINGLE_1 SINGLE_2; do
+# Verify ALL eight immutable V2 atlas arms even though V3 renders only the first four.
+for ARM in BASE SINGLE_0 SINGLE_1 SINGLE_2 PAIR_01 PAIR_02 PAIR_12 JOINT_012; do
   rclone copyto "$EDIT/atlas/$ARM.png" "$D/atlas/$ARM.png" --checksum --retries 3
 done
 echo "c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603  $D/teacher.npz" | sha256sum --check

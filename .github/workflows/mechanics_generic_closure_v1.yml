@@ -1,0 +1,93 @@
+name: mechanics-generic-closure-v1
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/mechanics_control_solver_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_live_runtime_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_multigoal_solver_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_surface_control_effects_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_control_response_court_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_prepared_skin_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_secondary_motion_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_attachment_frames_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_attachment_feasibility_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_attachment_priority_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_relative_attachment_bridge_v1.py'
+      - 'tests/compiler/test_mechanics_control_solver_v1.py'
+      - 'tests/compiler/test_mechanics_multigoal_solver_v1.py'
+      - 'tests/compiler/test_mechanics_long_branching_v1.py'
+      - 'tests/compiler/test_mechanics_surface_control_effects_v1.py'
+      - 'tests/compiler/test_mechanics_control_response_court_v1.py'
+      - 'tests/compiler/test_mechanics_prepared_skin_v1.py'
+      - 'tests/compiler/test_mechanics_secondary_motion_v1.py'
+      - 'tests/compiler/test_mechanics_attachment_frames_v1.py'
+      - 'tests/compiler/test_mechanics_oriented_ik_v1.py'
+      - 'tests/compiler/test_mechanics_attachment_feasibility_v1.py'
+      - 'tests/compiler/test_mechanics_attachment_priority_v1.py'
+      - 'tests/compiler/test_mechanics_relative_attachment_bridge_v1.py'
+      - 'tests/compiler/test_mechanics_live_multigoal_integration_v1.py'
+      - 'tools/mechanics/audit_stage47_source_mechanics_v1.py'
+      - 'tests/mechanics/test_stage47_source_mechanics_audit_v1.py'
+      - 'tools/mechanics/compare_stage47_source_fk_lbs_v1.py'
+      - 'tools/mechanics/benchmark_live_mechanics_v1.py'
+      - 'tools/mechanics/benchmark_multigoal_jacobian_v1.py'
+      - 'tools/mechanics/benchmark_long_branching_ik_v1.py'
+      - 'tools/mechanics/benchmark_relative_attachment_bridge_v1.py'
+      - 'tools/mechanics/audit_v7_mechanics_execution_gap_v1.py'
+      - 'tests/mechanics/test_v7_mechanics_execution_gap_v1.py'
+      - 'tests/mechanics/test_stage47_source_fk_lbs_comparison_v1.py'
+      - 'tests/compiler/test_control_motion_ik_integration_v1.py'
+      - 'docs/research/MECHANICS_GENERIC_CLOSURE_V1_20261106.md'
+      - '.github/workflows/mechanics_generic_closure_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mechanics-runtime-courts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deterministic CPU dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Compile Mechanics and Motion runtime
+        run: |
+          python -m py_compile compiler/realsas_compiler_core/mechanics_control_solver_v1.py compiler/realsas_compiler_core/mechanics_live_runtime_v1.py compiler/realsas_compiler_core/mechanics_multigoal_solver_v1.py compiler/realsas_compiler_core/control_motion_runtime_v2.py tools/mechanics/audit_stage47_source_mechanics_v1.py tools/mechanics/compare_stage47_source_fk_lbs_v1.py compiler/realsas_compiler_core/mechanics_attachment_frames_v1.py compiler/realsas_compiler_core/mechanics_attachment_feasibility_v1.py compiler/realsas_compiler_core/mechanics_attachment_priority_v1.py compiler/realsas_compiler_core/mechanics_relative_attachment_bridge_v1.py tools/mechanics/audit_v7_mechanics_execution_gap_v1.py compiler/realsas_compiler_core/mechanics_surface_control_effects_v1.py compiler/realsas_compiler_core/mechanics_control_response_court_v1.py compiler/realsas_compiler_core/mechanics_prepared_skin_v1.py compiler/realsas_compiler_core/mechanics_secondary_motion_v1.py
+      - name: Existing and new Mechanics behavior regression
+        run: |
+          pytest -q tests/compiler/test_mechanics_control_solver_v1.py tests/compiler/test_control_motion_ik_integration_v1.py tests/compiler/test_mechanics_multigoal_solver_v1.py tests/compiler/test_mechanics_live_multigoal_integration_v1.py tests/mechanics/test_stage47_source_mechanics_audit_v1.py tests/mechanics/test_stage47_source_fk_lbs_comparison_v1.py tests/compiler/test_mechanics_surface_control_effects_v1.py tests/compiler/test_mechanics_control_response_court_v1.py tests/compiler/test_mechanics_prepared_skin_v1.py tests/compiler/test_mechanics_long_branching_v1.py tests/compiler/test_mechanics_secondary_motion_v1.py tests/compiler/test_mechanics_attachment_frames_v1.py tests/compiler/test_mechanics_oriented_ik_v1.py tests/compiler/test_mechanics_attachment_feasibility_v1.py tests/compiler/test_mechanics_attachment_priority_v1.py tests/compiler/test_mechanics_relative_attachment_bridge_v1.py tests/mechanics/test_v7_mechanics_execution_gap_v1.py
+      - name: Audit inherited AXIS V7 typed producer versus actual Mechanics capabilities
+        run: |
+          mkdir -p /tmp/mechanics-cpu-court
+          python -m tools.mechanics.audit_v7_mechanics_execution_gap_v1 --out /tmp/mechanics-cpu-court/v7_producer_mechanics_gap.json
+      - name: Profile full Mechanics drag and pinned-contact CPU frames
+        run: |
+          mkdir -p /tmp/mechanics-cpu-court
+          python -m tools.mechanics.benchmark_live_mechanics_v1 --vertices 3266 --frames 16 --warmup 3 --out /tmp/mechanics-cpu-court/branch3266.json
+          python -m tools.mechanics.benchmark_live_mechanics_v1 --vertices 8192 --frames 10 --warmup 2 --out /tmp/mechanics-cpu-court/branch8192.json
+          python -m tools.mechanics.benchmark_multigoal_jacobian_v1 --frames 8 --warmup 2 --out /tmp/mechanics-cpu-court/dof_jacobian_scale.json
+          python -m tools.mechanics.benchmark_long_branching_ik_v1 --out /tmp/mechanics-cpu-court/long_branching_24_48_72.json --max-nfev 90
+          python -m tools.mechanics.benchmark_relative_attachment_bridge_v1 --out /tmp/mechanics-cpu-court/cross_parent_bridge_3branch.json --frames 12 --warmup 3
+      - name: Publish benchmark diagnostic only (no source assets)
+        uses: actions/upload-artifact@v4
+        with:
+          name: mechanics-full-frame-cpu-research
+          path: /tmp/mechanics-cpu-court/*.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Research ownership firewall
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('compiler/realsas_compiler_core/mechanics_live_runtime_v1.py').read_text()
+          assert 'model_inference_performed' in source
+          assert 'graphics_authority_claimed' in source
+          assert 'control_synthesis_performed' in source
+          print('PASS_MECHANICS_RUNTIME_RESEARCH_OWNERSHIP_FIREWALL')
+          PY

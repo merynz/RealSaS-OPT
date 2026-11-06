@@ -1,0 +1,610 @@
+# RealSaS Mechanics Generic Closure V1 — independent research lane
+
+**2026-11-06**  
+**Status:** RESEARCH_ONLY / NO MODEL TRAINING AUTHORITY / NO GRAPHICS AUTHORITY  
+**Branch:** `research/mechanics-generic-closure-v1`, based on V6 (`axis-v6-rig-program-product`); separate from Corpus370 #327, IRIS/TESSA, and SkinTokens++ #352.
+
+## Product requirement
+
+`compile → interactive puppet`. After compile, mouse-selected surface controls are interpreted through the **already declared** Rig control program. Mechanics owns control-space execution, constraint solving, pose, deformation and typed runtime reports. Motion owns control trajectories. IRIS-connected Graphics Compiler owns appearance, layers, visibility, occlusion, draw order and 2D rendering; none are mechanics targets.
+
+Not every physical pick is automatically an IK target. The user interface may select a declared control through influence/barycentric support, with ambiguity or absence represented explicitly. A handle does not exist merely because the Compiler would like one. The Mechanics solver must never invent parent joints or control programs.
+
+## Concrete V1 finding and fix
+
+Existing `mechanics_control_solver_v1.py` transformed **only directly targeted joint positions** for `GLOBAL/ROOT/FK/SOCKET_CONTROL`. A root translation therefore left children behind (non-rigid segmentation of one chain), even though the root's skin row moved. This is a behavioral bug for any real puppet.
+
+V1 propagates each declared direct-control transform through that target's complete deform hierarchy and processes controls shallow-to-deep. It preserves direct child-control overrides for the child's subtree and then applies declared constraints. This does not solve the full DOF/contact system; it repairs basic FK/ROOT semantics and is tested on a canonical three-joint chain through the actual LBS runtime.
+
+## Mechanics runtime behavioral court
+
+New `mechanics_live_runtime_v1.py`:
+- one deterministic executor for standalone edits or Motion-controlled pose with transient mouse overrides;
+- verifies exact mesh/rig/skin/Mechanics lineage and constraint schedule;
+- accepts only declared control IDs; rejects duplicate edits and invalid motion time binding;
+- never mutates original rig, skin, or motion clips;
+- computes on **full mesh** via canonical LBS, measures max constraint residual and parent-child segment length strain;
+- returns typed PASS/FAIL behavior status. Unreachable IK targets are **not** falsely reported as solved;
+- supports monotone real-time input sequences with measured per-vertex speed/acceleration diagnostic, with no FPS claim;
+- produces no rendering, graphics or model-training authority.
+
+These are runtime diagnostic courts, not an independent Blender-source-equivalence proof. A numerical residual from the same solver is not enough to establish source-equivalent movement; the next phase must compare independent source interventions.
+
+## Current mechanical executability gaps
+
+1. **DOF**: `CanonicalJointFrameIR.v2` carries discrete DOF labels but no proved numeric angular/translation limits; current FABRIK solver does not enforce joint-space DOF/limits. Do **not** silently infer legal limit values from rotation responsiveness.
+2. **Grammar mismatch**: AXIS V6 advertises `IK, AIM, LIMIT_ROTATION, LIMIT_TRANSLATION, FOLLOW, COPY_TRANSFORM, PATH, STRETCH`, while runtime schema supports exactly `IK, AIM, FOLLOW, COPY_TRANSFORM, STRETCH`. A proposed rig containing unsupported operators must be rejected until typed executable semantics and independent courts are provided. No nominal support.
+3. **Multi-chain concurrency/contact**: sequential constraints do not yet solve simultaneous targets with planted feet, weighted priorities or closed-chain contact. Local single-effector success does not prove dynamic whole-body control.
+4. **Attachments**: stable attachment position, orientation, held-object rigidity and grip are separate tests; correct wrist positioning alone is not grip proof.
+5. **Performance**: current Python/NumPy solver and full mesh LBS have no verified 60FPS or P95 bound, and cannot be described as the final low-latency product runtime.
+6. **Unseen**: Knight and the canonical three-joint unit fixture are regressions, never genericity evidence.
+
+## Real measured evidence already located (read-only)
+
+- Drive stage47 observed source/calibration workflow: `https://drive.google.com/drive/folders/1R4ROrfPNtkdnSYAn9LTQUF7N7PLJOlop`, including immutable per-subject job + admitted observation records. The sampled job is explicitly `training_allowed=false`.
+- Drive `M_EVIDENCE_SUPPORT_V55.json`, `https://drive.google.com/file/d/1bIGdq3azS5JJ5G8TU9sJy9JoWMdkmKCP/view`, includes 3653 lifted M vertices and 14632 nonzero coefficients, but clearly states `EVIDENCE_FEATURE_LIFT_ONLY__NOT_SKIN_FIELD_TRANSPORT`, `source_skin_used=false`; **never feed this as MIRA skin truth**.
+- Drive Corpus370 partial authority matrix run 41835338185: `https://drive.google.com/file/d/1zoO19fUZAv-QtiSbqIzdxEB5fKKSvMEJ/view`, OPEN and unsealed, 107 MIRA-eligible **research candidates**, 108 SKIN PASS, 3 MASKED; not train-ready, data family status may change as PR #327 advances.
+
+All evidence is **read-only**. No PR #327 files, authority rosters, producers, geometry operators, upstream model configurations, Drive source bytes or shared training split are modified in this lane. We will not expose globally held-out subjects to research simply to accelerate debugging.
+
+## Next research campaign: real-source mechanical behavior
+
+Use the source-native rig + animation + observed intervention tensors, not just static carrier position. For a bounded pre-registered research-exposed, morphology-diverse TRAIN candidate subset, create an independently derived `SourceIntervention` and `CompiledMechanicsIntervention` pair with exact hashes:
+
+- rest/bind/world-frame and inverse-bind equivalence;
+- matched world-space articulated pose under isolated joint perturbations, control target drags, and simultaneous targets;
+- parent-child invariants, attachment frame rigidity, global orientation and local pole behavior;
+- normalized vertex displacement on valid rows, joint-frame residual and acute fold/inversion;
+- abstain on unknown/ambiguous source mapping and unfinished SkinCarrier authority;
+- no source-bone names or teacher-only source IDs as student model features;
+- independent numerical court, never same helper used for producer and validator;
+- clean single-holdout roster frozen **before** any performance-guided tuning.
+
+Store original source intervention bytes by SHA, separate from prediction/artifact. Do not conflate source authored behavior with arbitrary interactive IK target behavior. Random poses improve intervention coverage but do not confer source-authored control intent.
+
+## Planned closure sequence
+
+A. **Baseline repair / dynamic runtime (this PR):** root/FK hierarchy, motion+edit overlay, whole-carrier runtime diagnostics, negative courts and CI.
+
+B. **Generic mechanics constraints:** versioned joint-space DOF/limits representation with known/unknown masks and no fabricated angular bounds, simultaneous IK targets, contact constraints and clearly typed failure/priority rules.
+
+C. **Real-evidence behavioral court:** retrieve a few exact Drive source assets through read-only acquisition, run Blender source-native interventions on GitHub Actions/worker, write SHA-locked result artifacts, compare independently to Mechanics. Retire diagnostics that only check their own implementation.
+
+D. **Motion and latency:** typed interactive control tracks, temporal continuity/velocity/acceleration/jerk, stress on branching/wing/tail/creeping chains, bounded frame times in production runtime. No neural model per animation frame.
+
+E. **Upstream release binding:** once frozen IRIS/TESSA and MIRA/AXIS releases exist, replace oracle mechanical carriers with real product outputs, train/evaluate only against sealed lineage-aware rosters, and preserve Graphics authority.
+
+**Acceptance** requires behavioral correctness with repeatable source-independent evidence across multiple morphologies. Passing a three-joint fixture proves a specific bug fix, not generic closure.
+
+## V1 continuation: simultaneous declared goals and real Stage47 source inspection
+
+The next increment, still **research only**, is in
+`compiler/realsas_compiler_core/mechanics_multigoal_solver_v1.py`. It is an opt-in SciPy rotational-FK constrained least-squares *reference solver* rather than a product replacement for FABRIK:
+
+- solves multiple independently declared `IK_EFFECTOR` goals in one nonlinear objective;
+- supports exact rest-position pins for declared IK control targets with stronger priority, without synthesizing a foot or contact rig;
+- uses `CanonicalJointFrameIRV2.dof_labels` as rotation-axis permissions only; explicit `metadata.rotation_limits_rad` is enforced if present, otherwise ±π is **numerical chart domain only** and no anatomical limit is claimed;
+- preserves parent-child segment lengths by forward kinematics; reports every drag/pin residual in source/rig world units;
+- fails closed on unsupported pole inputs, translational/scale DOFs, unsupported operators, FK overlays and undeclared handles;
+- exposes opt-in `solver_mode="DECLARED_MULTI_GOAL_V1"` through the same live Mechanics and LBS diagnostic path, with active Motion still separately controlled.
+- runtime solves have no measured 60 FPS or p95 guarantee; SciPy optimizer is a research-quality comparison baseline.
+
+A real read-only source investigation now exists for **Truth139 `truth139_fff1396de9c37b2bab05`** (Dino.glTF), with exact Google Drive source files and a SHA-verified Stage47 NPZ recorded at
+`docs/research/MECHANICS_STAGE47_REAL_SOURCE_PILOT_20261106.json`. This explicitly research-exposes that subject: it must **not** become future blind unseen. The verified source tensor has **3,266 vertices, 129 privileged kinematic control parameters, and 774 source-native interventions** (387 signed pairs); 738 interventions show nonzero geometric response. Source rest, sham and root translation checks match within numerical tolerance.
+
+The independent audit code `tools/mechanics/audit_stage47_source_mechanics_v1.py` validates SHA-bound source evidence and signed perturbation pairs, but **does not compare the RealSaS compiler solver to source Blender results** because the source→canonical joint/weight correspondence is not yet qualified. In particular, these source controls are `KINEMATIC_PARAMETER__NOT_PHYSICAL_DOF_OR_JOINT_LIMIT`, and the teacher explicitly declares `source_weight_lbs_equivalence=NOT_QUALIFIED`. All source-private handles and names remain teacher-only.
+
+**Scientific next barrier:** inventing an IK rest-compatible interaction target is not source-authored IK truth. Before source-vs-compiler comparison, build a separately courted canonical joint/skin mapping that preserves source rest frames and response-space provenance, and compare source-intervention tensors against independent compiled pose/deformation. A numerically perfect optimization result against its own goals is never sufficient for source equivalence.
+
+## Second increment: measured source FK/LBS closure, controls and warm-start (2026-11-06)
+
+**Actual Stage47 source-world measurements, exact hashes:** `docs/research/MECHANICS_STAGE47_SOURCE_NATIVE_FKLBS_REPLAY_20261106.json`. Source `truth139_fff1396de9c37b2bab05` has **43** native rest bone frames, **129** isolated 3-axis kinematic parameters, **3,266** source vertices, **6,571** sparse source weight coefficients and **774** Blender-measured interventions. Independent analytical replay of each native local bone rotation through the declared source parent forest and descendant influence mass reproduces **all 774** within maximum vertex L2 error **1.2653386341165218e-6 source units**; per-action max error p95 **8.358747185028643e-7**; no action exceeds the preregistered local research threshold of **2.5e-6**. All source input bytes were SHA-verified before running local experiment.
+
+`tools/mechanics/compare_stage47_source_fk_lbs_v1.py` is the reproducible source read-only court. It expects the exact source teacher JSON + NPZ from connected Drive, cross-checks the source hash, source frame/parameter alignment, signed action pairing, armature hierarchy and weight CSR. The optional `--product-probes N` path separately calls the **real** `deform_mesh_lbs_v1` on an explicitly `UNQUALIFIED_SOURCE_ORACLE_RESEARCH_ONLY` carrier/rig/skin. CI covers this same path using a separate synthetic source-bone oracle and measured deformation fixture; it does **not** download the private 24.5MB Stage47 source NPZ during ordinary PR checks.
+
+**Do not conflate:** whole-source analytical source rig deformer equivalence is a PASS for *source-local* mechanical response. It is not a PASS for IRIS/TESSA source→CanonicalMesh fidelity, AXIS controls, MIRA skin output, a learned V7 model, or a product-quality source→compiled Mechanics binding. The actual RealSaS LBS probe has **only** run in the synthetic CI fixture so far; full real-source oracle-to-product-LBS execution remains a research work item. Neither source teacher source names nor source weights can become student model inputs.
+
+**Important control-role distinction:** measured source bones include **5** with zero **direct** skin weight, **2** without **any descendant** skinned vertices and **6** local rotational parameters with exactly zero measured isolated deformation. Those controls have source-private pole-target names, but this stage did not measure their participation in an IK constraint. It is wrong to equate zero direct weight with "no mechanical control effect" or to call pole controls obsolete. The only valid conclusion is no effect under the measured **isolated native rotation experiment**. See `MECHANICS_STAGE47_CONTROL_SKIN_CAUSAL_SEPARATION_20261106.json`.
+
+New `compiler/realsas_compiler_core/mechanics_surface_control_effects_v1.py` models the **declared causal effect graph**: ROOT/FK/SOCKET/GLOBAL control targets propagate to their declared joint descendants, while control inputs to authored constraints gain evidence from explicitly targeted output joints or chain joints. For any hit triangle and barycentrics, the runtime returns ranked control candidates and effect paths, or `AMBIGUOUS` / `ABSTAIN`; no controls or source semantics are invented. CI proves a ROOT with only an unweighted root target can still influence every skinned descendant and an IK pole with no direct skin target can still influence a declared IK chain. This graph is **not** the same as evidence that the resulting model produces a correct native control program on unseen subjects.
+
+The multi-goal reference solver also now accepts *validated, schema-bound previous joint configurations* as warm-start parameters. Live sequences carry a qualified previous solution forward to the next frame; a failed frame clears the warm start. This is for smooth drag research and runtime performance evaluation, not a 60fps claim. Default FABRIK runtime remains unchanged.
+
+## Reproducibility
+
+```bash
+python tools/mechanics/compare_stage47_source_fk_lbs_v1.py \
+  --teacher /secure/TEACHER_SCENE.json \
+  --npz /secure/geometry_and_response.npz \
+  --expected-teacher-sha256 87eacdb230f19feae5b0d3e15b67d504fe40908f703254faa4a4d29e9b117b6e \
+  --expected-npz-sha256 c13e837029ab80c78c989c01698d31ae10446c18fa8907e1a8840c33ca6c75fb \
+  --product-probes 12 \
+  --report /secure/source_native_lbs_court_v1.json
+```
+
+The source is read-only and remains outside git. The report is reproducible by an authorized executor with exact source bytes; never upload artist source meshes, original bone names or full teacher arrays into public CI artifacts. `--product-probes 12` remains a **planned execution** on actual Stage47 bytes until a corresponding artifact/receipt is recorded.
+
+**Next hard scientific step:** validate the actual product-LBS oracle probe on exact real Stage47 source bytes and then define source→canonical surface and local-frame correspondence evidence from independently qualified geometry; challenge the binding with mismatched source, barycentric support forgery, axis flips and wrong parentage. Validate source-equivalent multi-action deformation without using target/source bone names as student features.
+
+## 2026-11-06 third increment: observable controls + prepared runtime over real source
+
+### Separate a declared relationship from observed mechanical response
+
+The original control-surface graph was only a *potential effect* estimate and had two dangerous shortcuts: it could accept a fabricated triangle containing valid mesh vertex IDs, and it could treat a bare `IK_EFFECTOR` with a target joint but **no executable IK constraint** as a mechanically effective control. Both are now fail-closed.
+
+`mechanics_surface_control_effects_v1.py` now requires a source-consistent `CanonicalMeshIR` hash and membership in **actual canonical triangle topology**; checks unknown surface vertices separately; excludes orphaned IK inputs; and validates supported executable constraint operators. Reachability of an IK chain is limited to declared chain joints rather than assuming all arbitrary subtrees respond.
+
+New `mechanics_control_response_court_v1.py` evaluates actual canonical Mechanics + LBS via small signed translation/rotation interventions to distinguish **graph-potential** from **observed local response**. It provides a typed no-effect/inconclusive result, never automatically deletes an unresponsive pole control. This is a deliberately expensive offline analysis, not the per-frame UI picker and not native-source causal proof.
+
+### Prepared sparse skin execution — real-world numeric comparison
+
+`mechanics_prepared_skin_v1.py` adds a bounded SHA-bound, source-read-only per-character cache of sparse vertex/joint influences and rest offsets. Frame execution applies vectorized world transformations with NumPy einsum + bincount instead of rebuilding Python-side per-vertex/per-weight structures. The returned `DeformedMeshIRV1` remains the same deformation contract; zero Graphics or model ownership. `mechanics_live_runtime_v1.py` accepts `prepared_skin=` as explicit opt-in. The original loop-based `deform_mesh_lbs_v1` stays default and is the independent parity oracle.
+
+An exact-source, real product-kernel experiment was executed on the private Truth139 Dino Stage47 teacher scene and observed Blender NPZ after verifying input SHA-256, the Compiler vendor bundle SHA and the visible optimizer SHA. Both actual RealSaS implementations were called on **128 deterministic action indices spanning all 774 source interventions** with the **same oracle-supplied source-local rig/skin and posed joints**. See `docs/research/MECHANICS_STAGE47_PRODUCT_LBS_PREPARED_128_20261106.json`.
+
+**Numeric comparison on that sample (source-world units):**
+- Original actual product LBS vs source Blender: maximum vertex L2 **9.487445122129821e-7**.
+- Prepared product LBS vs source Blender: maximum vertex L2 **9.487445126094705e-7**.
+- Prepared vs original product LBS: maximum vertex L2 **8.95090418262362e-16**.
+- Measured median original deform-only CPU time **66.028 ms**; measured median prepared deform-only CPU time **3.612 ms**, **18.278× faster** on that container/session/hardware. One-time prep **4.246 ms**.
+- Source-native analytical reference still spans all **774** interventions, but *actual* product-kernel comparison currently spans **128**; an exhaustive legacy-kernel run exceeded local execution limits and is explicitly **NOT PASS**.
+
+These are **kernel-only timings**. They exclude IK/constraint solve, collision, contacts, Motion sampling, graphics, skinning uploads, drawing, and engine/frame overhead. They are not any 60fps/P95 shipping certification. No user input was stored as student training truth.
+
+### Closure still open
+
+1. Independently qualified source↔canonical mesh, rest-frame and joint/control correspondence, sourced from real IRIS/TESSA and AXIS/MIRA outputs rather than oracle teacher imports.
+2. Attachments/orientation, full-body contact, multi-chain priority resolution, temporal stress testing across diverse morphologies.
+3. Cached solver state and actual end-to-end interactive frame benchmark including skin, Motion and graphics handoff, not just LBS kernel.
+4. Blind morphology-held-out source checks with pre-registered research exposure. This exposed Dino is never later promoted to unseen.
+
+The temporary **code-only** GitHub artifact used to access the exact private repo kernel in the execution container was uploaded with one-day retention during the experiment and its workflow upload step subsequently removed; artist source assets were never uploaded to GitHub.
+
+## CPU Mechanics complete-frame reference — 2026-11-06
+
+The LBS-only 18.28× gain revealed a second bottleneck: the legacy behavioral
+court converted and checked each vertex separately in Python. The
+`mechanics_live_runtime_v1.py::_behavioral_metrics` implementation now
+vectorizes its **full** canonical vertex finite-position/displacement tests and
+uses the immutable rest-position cache prepared exactly once by
+`mechanics_prepared_skin_v1.py`. The same semantic checks remain present:
+joint-set equality, parent-child segment strain, exact vertex-ID coverage,
+finite geometry and measured maximum full-vertex displacement. Nonprepared
+legacy mode retains an exact ID-reordering fallback, including duplicate-ID,
+missing-vertex and NaN failure courts. No sampling approximation.
+
+The full executable frame court is
+`tools/mechanics/benchmark_live_mechanics_v1.py`; it uses a seeded
+**synthetic 5-joint/3-DOF branched rig**, two IK goals, one stationary control
+point, previous qualified joint solution warm-start, full LBS and complete
+behavioral diagnostic. It explicitly excludes renderer/Graphics, contact force,
+collision, data transfer, frame pacing and any model inference.
+GitHub Actions runs it on the `mechanics_generic_closure_v1` job, publishes
+JSON evidence artifacts with a short retention and **only gates on
+correctness** (not arbitrary shared-runner FPS).
+
+**Verified CI:** commit `dcefe18c5b7efc3b55eef1076ef14c9bbcc2bfb2`,
+Actions run `42273795156`, **48 tests PASS**.
+Complete report: `MECHANICS_CPU_FULL_FRAME_COURT_20261106.json`.
+
+| Research load | Prepared full Mechanics p50 | Prepared p95 | Legacy sampled p50 | Vertex L2 parity max |
+|---|---:|---:|---:|---:|
+| 3,266 vertices, 6,532 influences | 5.924 ms | 6.393 ms | 57.807 ms | 4.48e-16 |
+| 8,192 vertices, 16,384 influences | 11.351 ms | 12.109 ms | 143.126 ms | 4.48e-16 |
+
+These are **small sample sizes** (16 and 10 actual timed frames) on one
+GitHub-hosted CPU. P95 under 16.67 ms on this *fixture* is **not product
+60 FPS proof**. Product must also account for graphics, rendering, motion
+decoding, input handling and larger articulated systems.
+
+**Next identified bottleneck**: multi-goal SciPy least-squares currently
+computes a numerical finite-difference Jacobian. Its cost grows with declared
+joint DOF count. The 3-DOF benchmark is intentionally **not** extrapolated to
+a 43-bone/129-parameter source skeleton: source-native rotation parameters
+are not qualified CanonicalRig physical DOF truth. A separate
+DOF/morphology-scaling court and analytically differentiated kinematics
+should precede any latency or generic closure claim.
+
+## 2026-11-06 — Analytic rotational FK Jacobian research candidate
+
+The previous SciPy multi-goal solver used an expensive numerical finite-difference Jacobian. An opt-in ANALYTIC_RESEARCH_V1 mode now computes the exact rotational FK positional derivative: dP_tip/dtheta = world_axis × (P_tip - P_pivot) for ancestors of an effector. Drag/pin weights and angle regularization have exact matching Jacobian rows. The default remains NUMERIC_V1.
+
+An independent centered finite-difference differential court (outside timed measurement) verifies the new derivative. Tests cover 3, 6, 9 and 15 rotational DOFs, pinned goal behavior, unsupported solver modes, unreachable targets, explicitly declared limits, and live prepared LBS interaction.
+
+Verified GitHub Actions run 42275027914 at head 315d13edec75e71a009ec689df887684ccb3617e: 55 focused Mechanics tests PASS. Analytic vs numeric solver CPU p50 measured on the same GitHub runner: at 3 DOF 3.635 vs 4.194 ms (1.15x); 6 DOF 4.763 vs 6.917 ms (1.45x); 9 DOF 5.833 vs 9.776 ms (1.68x); 15 DOF 7.576 vs 15.445 ms (2.04x). Maximum independently checked derivative error was about 1.24e-9.
+
+Versioned receipt: docs/research/MECHANICS_ANALYTIC_JACOBIAN_DOF_SCALE_20261106.json. Executable reproducibility: python -m tools.mechanics.benchmark_multigoal_jacobian_v1 --frames 8 --warmup 2 --out /tmp/dof_jacobian_scale.json
+
+Scope: five joints with 3–15 declared rotational parameters, two IK goals and a position pin. This is a numerical/sparsity stress fixture, not 15 proven independently observable source controls. The 15-DOF fixture includes terminal joint rotations that do not move their own joint origins. It is NOT a 43-bone source correspondence court, DOF truth mint, force/contact/collision model, or product 60-FPS certification.
+
+Next scientific barrier: genuinely longer articulated trees, mixed morphologies, source-frame axis correspondence, multi-contact and grip orientation, validated full frame time through source-bound canonical outputs. Keep the numeric fallback until that evidence exists.
+
+## 2026-11-06: long branching morphology / contact / DOF observability research
+
+The 3–15-DOF Jacobian experiment was a five-joint reference and could not test
+larger genuine joint trees. An independent **24/48/72 real-actuating-DOF**
+synthetic Mechanics court has now been added, without modifying the IRIS,
+TESSA, Corpus370 or model learning lanes:
+
+- `tools/mechanics/benchmark_long_branching_ik_v1.py` generates three curved
+  articulated trees: 2 branches/27 joints/24 DOF, 4 branches/53 joints/48 DOF,
+  6 branches/79 joints/72 DOF. Each branch has twelve declared pivot DOFs and
+  one constrained terminal tip. XY, XZ and YZ planes and RX/RY/RZ axes are
+  all represented; no semantic body-part source names are inputs.
+- Half of the declared controls are **world-space positional pins**, half are
+  simultaneously dragged. The new `pinned_world_targets` contract preserves
+  an explicitly supplied world contact point rather than silently resetting it
+  to its control's rest position. Unknown or missing pin IDs, NaNs, non-3D
+  anchors and simultaneously overridden pins fail closed.
+- Exact rest position FK Jacobian is measured independently from each pivot
+  using axis cross-product geometry. All **24/48/72 declared DOFs have nonzero
+  impact on at least one terminal tip**, but endpoint-position Jacobian
+  ranks are respectively **4/8/12**, leaving **20/40/60 underdetermined
+  dimensions** in these experiments. A nonzero causal effect is not proof of
+  unique inverse controllability or source-authored behavior.
+- The original *full-DOF* analytic SciPy reference solver successfully
+  satisfies the reachable targets and pin constraints for all three trees;
+  segment length errors remain at numerical precision. On the GitHub runner,
+  single full-solve durations were **94.01/277.44/422.36 ms**. These are
+  deliberately NOT realtime or product FPS evidence.
+- A **separate, explicit and typed runtime representation policy**
+  `active_parameter_keys` may freeze unselected declared DOFs at the
+  current validated warm-start angles. All canonical rig joints, DOF labels
+  and solver constraint residual checks remain intact. In the synthetic
+  stress fixture alone we know from the *test generator* that each dragged
+  goal was produced by rotating the first pivot of that branch. Selecting
+  those oracle-known 1/2/3 actuators reduces the respective solve durations
+  to **8.51/26.42/39.20 ms** on the same one-shot runner experiment.
+  This is a deliberately **oracle-chosen policy**, NOT a learned model,
+  generic control discovery or proof that arbitrary goals need only one pivot.
+- Crucial negative test: a target constructed from **two independent pivot
+  rotations** is **unreachable** by the one-pivot active policy and must
+  return FAIL. The full solver succeeds on that same target. The runtime
+  refuses invalid, undeclared, empty or duplicate selected DOF keys; no
+  silent degradation of capability is allowed.
+
+### Source truth vs capability contract vs representation policy
+
+**Source truth:** This new trial uses synthetic rig data only, so it produces
+NO new teacher-source DOF, IK or contact ground truth. Existing Stage47
+source-native measurements remain a separate read-only authority.
+
+**Capability contract:** A usable puppet must hold declared world-position
+contacts while solving independent controlled targets; no goal can be called
+solved unless each original full-space residual passes. In the product
+contract, orientation, attachment grip, collision/contact force and skin
+consequences still require dedicated independent courts.
+
+**Representation policy:** Choosing an active subspace is a performance and
+control-style decision among *possible* solutions. It must not delete
+unselected source DOFs, fabricate physical angular limits, or redefine
+the puppet's capability contract. Its validity may depend on pose and target.
+An operator that can solve one known target is not necessarily sufficient
+for nearby or two-pivot target edits.
+
+**GitHub verification:** 68 focused Mechanics tests PASS on Actions run
+`42278009295` at test head
+`2e0cccf89828243133fbdcb45189d36f4ea565b5`.
+Evidence receipt:
+`docs/research/MECHANICS_LONG_BRANCHING_DOF_POLICY_20261106.json`.
+
+### Next independent blocker
+
+Develop a **task-space, rank-revealing active-actuator selection court**
+that uses only declared joint/control/constraint evidence, not the private
+synthetic target-generation answer or an anatomical-name heuristic. Require
+dynamic fallback when a chosen subspace fails an original capability
+constraint, and compare target/pose continuity across sequences.
+Then execute the same problem on source-native authored controls and qualified
+source→canonical mappings across different morphologies. This is still
+research-only and must not mint generic/unseen model authority.
+
+## 2026-11-06: first non-oracle rank-revealing actuator decision
+
+We now have a genuine generic **solver-time** decision candidate:
+`active_parameter_policy="RANK_REVEALING_RESEARCH_V1"`.
+
+Unlike the earlier manually chosen 1/2/3-actuator *synthetic-oracle*
+policy, this uses only the supplied declared canonical joint/control
+tree, current joint angles, and current world goal/pin constraints.
+For each constraint, it forms the exact analytic world-position
+Jacobian. It excludes the artificial regularization rows, performs
+pivoted QR column selection at a declared numerical threshold
+(relative (1e-6), absolute (1e-9)), and solves with only its
+linearly independent candidate actuators. All other declared joints
+remain in CanonicalRig and retain their valid current warm-start
+angles. Selection never authorizes source DOF removal.
+
+Critically, success is decided by **all original full-space drag and
+pin residuals**, never by the reduced objective alone. If the
+candidate misses any target or optimization fails, the solver invokes
+a full-DOF retry. A retry may *also* fail if the local nonlinear
+optimizer is stuck at a singular starting pose: the failure is reported
+explicitly and is not silently certified.
+
+**Verified independent GitHub CPU court:** `42279339544` on
+`a9abd29750be4ca84fde2ef9ed55b1ce7fa8af67`,
+**73 focused tests PASS**. Evidence:
+`docs/research/MECHANICS_RANK_REVEALING_ACTUATORS_20261106.json`.
+
+| Morphology | All declared rotational DOFs | Rank-selected DOFs | Full solve | Non-oracle rank solve | Ratio |
+|---|---:|---:|---:|---:|---:|
+| Two branches | 24 | 4 | 74.08 ms | 9.90 ms | 7.48x |
+| Four branches | 48 | 8 | 228.54 ms | 28.27 ms | 8.08x |
+| Six branches | 72 | 12 | 351.21 ms | 42.43 ms | 8.28x |
+
+All held reachable world goals and pins within the configured tolerance
+on these three *synthetic* curved-tree cases. Each single CPU duration
+is an engineering diagnostic, not an FPS or P95 percentile.
+The independent rest-tip Jacobian rank is 4/8/12 (versus
+24/48/72 individually affecting rotational columns); this is
+**task-position observability**, not general identifiability under
+all deformation, contact, temporal or source evidence.
+
+The adversarial **straight-chain nonlinear singularity** proves the
+boundary: rank selection invokes its full-DOF fallback, but the full
+local SciPy optimizer also remains unable to meet that target.
+Expected and observed result is **FAIL**, not a fake PASS.
+Other negative courts reject unknown actuator IDs, non-analytic
+rank selection, invalid world contact anchors and unsupported solver
+operators. Default `NUMERIC_V1` and full-DOF `EXPLICIT_OR_ALL` stay
+unchanged; the new policy is opt-in, experimental only.
+
+**Research conclusion:** task-space QR is a promising **representation
+policy** for selecting a smaller solver subspace without changing the
+source rig or the puppet capability promise. We have NOT demonstrated
+stable selection between nearby mouse positions; hysteresis, sticky
+controls, deterministic task preference and fallback pose continuity
+need a separate temporal court. At 42.43 ms for a 72-DOF synthetic
+solve, this also does not meet 16.67 ms or 60 FPS, even before
+Graphics and rendering.
+
+**Next:** direct continuous-drag/pin motion tests with subspace-selection
+churn metrics, declared attachment orientation constraints and an
+independent source→canonical mechanics comparison across several
+research-exposed morphologies. No AXIS/MIRA model training authority is
+minted by this result.
+
+## 2026-11-06: independent runtime study with Spine as *reference*, not equivalent mechanics
+
+Spine public docs identify important production-runtime patterns: explicit constraint evaluation order and world-transform recomputation; physics constraints use a controlled update rate; timeline/state physics needs explicit reset and replay. These are engineering lessons, not shared 3D source-truth contracts. Our compiler/puppet requires additional 3D morphology, attachment orientation, source-world evidence and 2D Graphics/CAA separation. No Spine runtime code is imported or copied. See `MECHANICS_SPINE_RUNTIME_INDEPENDENT_DESIGN_20261106.md`.
+
+Three hardening experiments have now been executed in **isolated Mechanics PR #353**.
+
+**Secondary motion** (`mechanics_secondary_motion_v1.py`):
+- Source-agnostic *declared* trailing chains only, critically damped position lag and bounded angular cone. Frequency/stiffness and time policy are **user/runtime choices, not physical teacher truth**.
+- Primary joint/constraint owners and attached grip joints are excluded. The complete primary pose must pass its solver and declared grip orientation checks before secondary is allowed to change any joint.
+- A bug was caught where sequential *all ticks per parent, then all ticks per child* yielded different results when time was partitioned. It was fixed with **parent-to-child integration at each bounded internal physics substep**. For a constant primary target, one 1/30-second sample and two 1/60-second samples now match within 1e-11 pose precision under the tested configuration.
+- Physics runtime state stores its exact runtime-policy SHA-256. Changing frequency/maximum substeps/fixed time step requires a **new explicit reset**, rather than silently resuming incompatible velocities. State also exposes frame and physics-tick counts separately. Arbitrary timeline seeking through replay is **not yet implemented**.
+
+**Temporal actuator hysteresis + singularity recovery** (`mechanics_multigoal_solver_v1.py`):
+- A previous rank-complete actuator selection can be retained when independent task-space Jacobian projection proves it still spans the currently required observations. Churn caused by a real rank/span change is tracked separately from **unjustified** switching. The seven-frame drag sequence reports no unjustified switching under test.
+- An opt-in bounded deterministic restart mode tries at most **12 valid declared-DOF initial configurations** only if the original nonlinear goal court fails; no new control, joint or limit is created. An independently verified reachable straight-chain radial target with a nonrest contact pin was recovered in the test. A *mathematically impossible* alternative source-independent pinned test remains explicit FAIL. The technique does not prove global nonlinear convergence or arbitrary trajectory smoothness.
+
+**3D attachment orientation consequences** (`mechanics_attachment_frames_v1.py`):
+- Read-only attachment world position and 3×3 basis evaluation from the primary solved joint. A declared local grip basis is mandatory to claim specific object orientation authority; otherwise only the parent basis is reported as **unqualified**.
+- A wrong required grip orientation returns FAIL and cannot be hidden by secondary motion; rig, controls, CAA/Graphics and source truth remain unchanged.
+- This is an **orientation consequence court**, *not* a 3D orientation-aware IK optimizer, a full attachment constraint solver or a dynamic collision/force simulation.
+
+**GitHub evidence:** tested head `668bbd44eaa3d26898be8864fe1bfb198587c44b`, Actions run `42284413119`, **94 focused tests PASS** and Mechanics ownership firewall PASS. Signed research-only report:
+`MECHANICS_TEMPORAL_SECONDARY_ATTACHMENT_20261106.json`.
+
+Remaining important barriers: 3D attachment/grip orientation as actual IK constraints, physics/collision/force truth, rigorous arbitrary seek/replay with state reset, real morphologically diverse source→canonical correspondence and full Graphics/render end-to-end latency. No product FPS or learning authority minted.
+
+## 2026-11-06: first executable 3D attachment orientation AND complete 6D grip-frame IK
+
+The previous read-only `mechanics_attachment_frames_v1.py` could check
+whether an announced sword grip frame happened to match the current pose,
+but could not **make the IK solver honor the orientation**. This gap has
+now been closed for *explicitly declared* anchor frames, research-only.
+
+The `solve_declared_multi_goal_v1` function now accepts:
+- `attachment_orientation_targets`: canonical anchor ID to an independent
+  proper 3×3 world rotation target. The anchor MUST have an explicitly
+  declared `metadata.local_basis`; an unauthored parent basis is NOT
+  promoted to grip truth.
+- `attachment_position_targets`: canonical anchor ID to a world 3D point.
+  Uses the anchor's declared `local_P` even if the grip orientation
+  is unknown.
+- Independent end-effector drag and world-position contact pin goals remain
+  intact and must **all** pass in the same final pose.
+
+The exact, analytic FK Jacobian for an attachment frame uses the existing
+declared parent-ancestry rotational axes `a`, pivot `p`, world anchor
+`g=P_parent+R_parent@local_P`, and world anchor basis
+`R=R_parent@local_basis`:
+
+- Position derivative: `dg/dtheta = a × (g-p)`.
+- Orientation derivative: for each basis column `R[:,i]`,
+  `dR[:,i]/dtheta = a × R[:,i]`.
+
+The orientation objective minimizes nine chordal matrix-entry differences,
+and the independent final pass/fail court measures the geodesic SO(3)
+angle. The position and orientation Jacobian blocks are differentiated
+against independent centered finite differences in tests. No
+force, friction or source physical DOF limit is inferred from these
+equations. Rank-revealing QR and full-DOF fallback now include the declared
+attachment target rows; optimizer or policy success is **not** a substitute
+for measuring every original constraint residual.
+
+Live intervention explicitly opts in via
+`attachment_orientation_mode="SOLVE_DECLARED_RESEARCH_V1"` and
+`solver_mode="DECLARED_MULTI_GOAL_V1"` with
+`multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1"`.
+The previous default `EVALUATE_ONLY` is unchanged; it never pretends
+to have executed orientation IK. The full mechanism includes a
+`MechanicsInterventionStepV1` schedule for *per-frame* attachment
+world-position and world-orientation targets without editing the source
+CanonicalRig or immutable motion clip. Conflicting global/step track
+ownership is rejected.
+
+**Verified GitHub CI**:
+- Tested head: `d76362eb9d5970a76aee8067b9ec300d4d631738`.
+- Workflow run `42286207240`: **106/106 focused Mechanics tests PASS**
+  and runtime ownership firewall PASS.
+- Receipt: `MECHANICS_DECLARED_6D_GRIP_IK_20261106.json`.
+- Test: `tests/compiler/test_mechanics_oriented_ik_v1.py`.
+
+Tested behavior: analytically reachable grip orientation and position
+simultaneously with a draggable end-effector and separate pinned branch;
+intentional incompatible grip or position target FAILs; missing or forged
+anchor/local basis FAILs; five continuous keyframes follow changing
+6D grip targets and keep planted contact.
+
+**Still unproven**: real sword/source-authored grip frames,
+nonhumanoid full-body orientation IK under several attachments,
+collision/contact force, renderer/Graphics and true product frame
+budget. The synthetic test creates its own grip basis; this does
+not admit or train any Corpus370/AXIS/MIRA subject and does not
+supersede source truth or drawable representation policy.
+
+## 2026-11-06: multi-attachment feasibility and explicit priority WITHOUT source-truth demotion
+
+**New necessary-condition court:** `mechanics_attachment_feasibility_v1.py`
+checks whether multiple requested 3D attachment frames sharing the SAME
+declared parent can coexist under one rigid parent transform.
+
+- Point distance: world target inter-anchor separation must equal declared
+  local inter-anchor distance, up to **2× positional tolerance**.
+- Two oriented grips on the same parent imply the same world parent
+  orientation, up to **2× angular tolerance**.
+- One oriented grip plus two requested grip point positions implies the
+  corresponding rigid world displacement. The bound includes both point
+  tolerances and rotation tolerance
+  (`2*pos_tol + 2*local_distance*sin(orientation_tol/2)`).
+
+The court returns deterministic typed pair witnesses with IDs, constraint
+kind, mismatch, tolerated mismatch and explanatory evidence. Its
+nonconflicting result is deliberately named
+`NO_PAIRWISE_RIGID_CONFLICT_GLOBAL_IK_UNDETERMINED`.
+Absence of a *same-parent* contradiction is NOT global multi-body
+feasibility. Separate parents can still have mutually unreachable goals
+or fail the nonlinear solver. Even same-parent requirements can fail
+because the declared physical DOFs cannot realize the necessary transform.
+
+**Integration:** `mechanics_multigoal_solver_v1.py` exposes an
+optional `attachment_preflight_mode="RIGID_HARD_NECESSARY_V1"`.
+When a rigid contradiction is independently witnessed, a typed fail-closed
+`QualificationError` stops optimization without pretending the requested
+motion is attainable. The established solver default remains
+`attachment_preflight_mode="DISABLED"` to preserve existing behavior
+and legacy tests.
+
+**Explicit runtime preference — separate from capability authority:**
+`mechanics_attachment_priority_v1.py` provides
+`execute_explicit_attachment_priority_v1()`. Every requested attachment
+track defaults to `HARD`; the application may *explicitly* mark
+individual position/orientation tracks `ADVISORY`. All IK goals and world
+contact pins are always HARD and cannot be demoted by this interface.
+Advisory targets are still independently measured against the final
+primary pose, and their unmet residuals remain visible.
+
+The result distinguishes:
+- `FAIL_HARD_RIGID_ATTACHMENT_CONFLICT`: independent proof of impossible
+  hard grip geometry; numerical optimizer was never invoked.
+- `FAIL_HARD_IK_OR_CONTACT_CONTRACT`: no known same-parent rigid
+  contradiction, but the fully declared primary solver fails its hard
+  constraints.
+- `PASS_HARD_WITH_UNMET_ADVISORY_TARGETS`: mandatory constraints were
+  satisfied, but **the complete originally requested goal set was NOT**.
+  This is not a source-authoritative full puppet compile PASS.
+- `PASS_HARD_AND_ALL_REQUESTED_TARGETS`: hard solver and all advisory
+  goals meet their own independent tolerances.
+
+The priority is a **representation/runtime policy explicitly supplied by
+the caller**. It does not infer desired edit capability, change source
+truth, create a physical joint limit, synthesize an attachment, or
+silently remove any requested goal. No automatic priority optimization
+or source-derived importance weighting is claimed.
+
+**GitHub verification:** 120 focused Mechanics tests PASS and ownership
+firewall PASS, Actions run `42288736079` on tested head
+`36e69a1fda55bf83944e74502e3a3ea7fd67d988`.
+The full result and scientific boundaries are recorded in
+`docs/research/MECHANICS_MULTI_ATTACHMENT_PRIORITY_FEASIBILITY_20261106.json`.
+Original 6D grip/secondary/temporal courts remain in the same suite.
+
+**Next independent blockers:** rigorous cross-parent constraints and contact
+feasibility, proper source-native multi-tool grip evidence, app-level
+capability contract for which goals can *legally* be advisory,
+priority stability under continuous edits, and full runtime/render
+performance with morphologically diverse authored subjects.
+
+## 2026-11-06: explicit cross-parent 6D bridge for a shared rigid prop and independently grounded third limb
+
+The previous **same-parent rigidity court** could reject pairwise contradiction
+but could not mechanically couple two separately joint-owned attachment
+frames. The new `mechanics_relative_attachment_bridge_v1.py` introduces a
+typed **research-only** relative 6D bridge across different declared
+parent joints, SHA-bound to `rig_lineage_hash` and `control_program_hash`.
+A bridge names two canonical attachment anchors and an explicitly
+declared A-frame-to-B-frame rigid position/orientation offset, with a
+nonempty declaration evidence reference. This is **not** automatic
+discovery of a weapon or source-authoritative grip connection.
+
+For grip frames `(P_A,R_A)`, `(P_B,R_B)` and declared A-relative rigid
+transform `(t_AB,Q_AB)`, the solver checks the full six-dimensional
+relationship:
+- Position residual: `P_B - (P_A + R_A @ t_AB)`.
+- Rotation chordal residual: `R_B - (R_A @ Q_AB)`; independent final
+  residual is the geodesic SO(3) angular distance in radians.
+
+The exact, task-space analytic FK derivative is obtained for every
+declared rotational DOF as the difference between the B grip's world
+position/basis response and the A-projected bridge response.
+Rank-revealing subspace selection, warm start and bounded singularity
+policy can therefore *see* the new 3+9 task rows. No undeclared DOF,
+joint stretch, hidden constraint or source physical parameter is created.
+The solver performs its own complete residual check and a **separate
+post-pose independent bridge court** runs from world joint positions
+and local canonical attachment frames before any secondary skin motion.
+All original pin, drag, grip target and bridge residuals must satisfy
+their declared tolerances before a full Mechanics PASS.
+
+**Nontrivial behavioral proof:** One branch's distal IK target can move
+the *other* branch via only the declared relative rigid bridge even when
+that second branch has no direct target. A geometrically contradictory
+pin plus drag + bridge remains explicit FAIL. Another three-branch rig
+adds an independently pinned distal contact: moving the two linked
+hand/prop branches across **five changing target angles** preserves that
+fixed third contact and both world grip poses. Deliberately unreachable
+contact stays FAIL. Unknown/duplicate bridge/anchor IDs, same-parent
+misuse, stale lineage, unauthored grip axes and invalid SO(3) matrices
+fail closed.
+
+The mechanism is exercised by:
+`tests/compiler/test_mechanics_relative_attachment_bridge_v1.py`;
+the full-frame benchmark is
+`tools/mechanics/benchmark_relative_attachment_bridge_v1.py`.
+This is a *small synthetic research rig*, not a character proof.
+
+**GitHub verification:** Tested code head
+`a240f1ba08cc2c01ff6718ef0edbab65fe034601`,
+Actions run `42291808979`, **128/128 focused Mechanics tests PASS**
+and Mechanics research ownership firewall PASS.
+
+**Measured CPU diagnostic (GitHub runner):** 12 frames after 3 warmups,
+8 joints / 5 rotational DOF / **3 prepared-skin vertices**,
+two grip anchors + one planted distal control.
+Full primary solve, independent bridge world-frame court and
+3-vertex LBS: p50 **4.129 ms**, p95 **4.199 ms**, max **4.219 ms**.
+Max world drag/contact discrepancy **4.386e-5**, bridge
+position discrepancy **2.193e-5**, bridge SO(3) angle
+**1.096e-5 rad**; segment-length strain at floating-point precision.
+
+The receipt
+`MECHANICS_CROSS_PARENT_6D_GRIP_GROUNDED_THIRD_LIMB_20261106.json`
+contains measured values, qualified scope, tested SHA and explicit
+nonclaims. This benchmark is **not** evidence that a realistic
+30–80 bone, thousands-of-vertices character plus graphics renderer
+meets a product FPS budget; no real source sword/attachment
+authority, collision, friction, semantic body-part ownership or
+training target was minted.
+
+**Next scientific barrier:** verify actual source-authorized joint/prop
+attachment relationships and local grip frames; compare model
+compiler's canonical grip/DOF contracts to independent source
+interventions on research-exposed diverse morphologies. Then measure
+multi-contact, secondary motion and Graphics end-to-end on realistic
+meshes. Keep the coupling opt-in until capability and source evidence
+are validated.

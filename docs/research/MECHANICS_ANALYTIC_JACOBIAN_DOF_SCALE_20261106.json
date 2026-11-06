@@ -1,0 +1,75 @@
+{
+  "schema": "RealSaS.MechanicsAnalyticJacobianDOFScaleReceipt.v1",
+  "date_utc": "2026-11-06",
+  "research_only": true,
+  "source": "merynz/RealSaS-OPT PR #353",
+  "head_sha_tested": "315d13edec75e71a009ec689df887684ccb3617e",
+  "github_actions_run_id": 42275027914,
+  "github_actions_workflow": "mechanics-generic-closure-v1",
+  "github_actions_result": "success",
+  "mechanics_test_result": "55 pytest PASS",
+  "comparison": {
+    "reference_numeric_mode": "NUMERIC_V1",
+    "experimental_mode": "ANALYTIC_RESEARCH_V1",
+    "full_solver": "compiler/realsas_compiler_core/mechanics_multigoal_solver_v1.py::solve_declared_multi_goal_v1",
+    "runner": "GitHub-hosted Ubuntu runner, Python 3.11.18, numpy 2.1.3, scipy 1.14.1",
+    "fixture": "Five-joint branched synthetic rig, two declared IK goals, one position pin, DOF labels RX/RY/RZ; 3,6,9,15 rotational DOF variants; 8 measured frames per method plus two warmup; warm-start if prior successful; no source geometry or weights used.",
+    "goal_world_residual_max_all_variants_approx": 0.000198715,
+    "derivative_check": "Separate independent centered finite-difference Jacobian at solved joint angles, outside wall-time measurements.",
+    "variants": [
+      {
+        "rotational_dof_count": 3,
+        "numeric_solver_p50_ms": 4.193567,
+        "analytic_solver_p50_ms": 3.6354255,
+        "numeric_solver_p95_ms": 5.26205275,
+        "analytic_solver_p95_ms": 4.3013657,
+        "p50_observed_speedup_ratio": 1.1535,
+        "max_central_difference_derivative_error": 1.2408901965861585e-9,
+        "passed_frames_each": 8
+      },
+      {
+        "rotational_dof_count": 6,
+        "numeric_solver_p50_ms": 6.917171,
+        "analytic_solver_p50_ms": 4.762559,
+        "numeric_solver_p95_ms": 8.2559935,
+        "analytic_solver_p95_ms": 5.62188005,
+        "p50_observed_speedup_ratio": 1.4524,
+        "max_central_difference_derivative_error": 1.2408902009229672e-9,
+        "passed_frames_each": 8
+      },
+      {
+        "rotational_dof_count": 9,
+        "numeric_solver_p50_ms": 9.7763875,
+        "analytic_solver_p50_ms": 5.833393,
+        "numeric_solver_p95_ms": 11.63168325,
+        "analytic_solver_p95_ms": 7.0203713,
+        "p50_observed_speedup_ratio": 1.6759,
+        "max_central_difference_derivative_error": 1.2408901965861585e-9,
+        "passed_frames_each": 8
+      },
+      {
+        "rotational_dof_count": 15,
+        "numeric_solver_p50_ms": 15.4452885,
+        "analytic_solver_p50_ms": 7.57572,
+        "numeric_solver_p95_ms": 21.5452662,
+        "analytic_solver_p95_ms": 9.2194887,
+        "p50_observed_speedup_ratio": 2.0388,
+        "max_central_difference_derivative_error": 1.2408901965861585e-9,
+        "passed_frames_each": 8
+      }
+    ]
+  },
+  "microbenchmark_scope": {
+    "only_solver": true,
+    "skin_and_mesh_deformation": false,
+    "behavioral_full_vertex_court": false,
+    "motion_and_graphics": false,
+    "source_to_canonical_binding": false,
+    "sample_count_low": true,
+    "production_realtime_certified": false,
+    "learned_model_training_authorized": false,
+    "physical_joint_range_inferred": false,
+    "pole_force_contact_and_collisions_supported": false
+  },
+  "next": "Test morphologically diverse and longer kinematic chains with 20-72 effective DOF, independent source-frame/axis correspondence and real-world contact orientation; retain numeric default until qualification."
+}

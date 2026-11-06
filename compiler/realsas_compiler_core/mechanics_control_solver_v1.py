@@ -268,20 +268,75 @@ def solve_control_pose_v1(
     pos = {jid: p.copy() for jid, p in rest.items()}
     explicit_rot: dict[str, np.ndarray] = {}
 
-    # Direct animator controls are applied before constraints. ROOT/GLOBAL/FK are
-    # transform controls; IK/AIM target controls are consumed by constraints.
-    for control in rig.controls:
+    # Direct animator controls apply rigid transforms to the entire declared
+    # deform subtree. Earlier V1 logic moved only target joints, tearing the
+    # chain and making ROOT/FK drags physically inconsistent.
+    #
+    # Sort shallow-to-deep by joint hierarchy, NOT source declaration order:
+    # an explicitly declared child FK overrides the parent transform only in
+    # its own subtree; unaffected siblings remain under their parent.
+    children: dict[str, list[str]] = {jid: [] for jid in joint_by}
+    for joint in rig.joints:
+        parent = joint.parent_canonical_joint_id
+        if parent is not None:
+            if parent not in joint_by:
+                raise QualificationError("MECHANICS_JOINT_PARENT_UNKNOWN")
+            children[parent].append(joint.canonical_joint_id)
+    depths: dict[str, int] = {}
+    visiting: set[str] = set()
+
+    def depth(jid: str) -> int:
+        if jid in depths:
+            return depths[jid]
+        if jid in visiting:
+            raise QualificationError("MECHANICS_JOINT_PARENT_CYCLE")
+        visiting.add(jid)
+        parent = joint_by[jid].parent_canonical_joint_id
+        level = 0 if parent is None else depth(parent) + 1
+        visiting.remove(jid)
+        depths[jid] = level
+        return level
+
+    for jid in joint_by:
+        depth(jid)
+
+    def subtree(jid: str) -> tuple[str, ...]:
+        if jid not in joint_by:
+            raise QualificationError("MECHANICS_CONTROL_TARGET_UNKNOWN")
+        result: list[str] = []
+        queue = [jid]
+        while queue:
+            current = queue.pop()
+            result.append(current)
+            queue.extend(children[current])
+        return tuple(result)
+
+    direct_controls = [
+        (index, control)
+        for index, control in enumerate(rig.controls)
+        if control.control_kind in {"GLOBAL", "ROOT", "FK", "SOCKET_CONTROL"}
+    ]
+    direct_controls.sort(
+        key=lambda pair: (
+            min((depth(jid) for jid in pair[1].target_canonical_joint_ids), default=10**9),
+            pair[0],
+        )
+    )
+    # Control effect is a transform of rest-local coordinates, as defined by
+    # the declared control transform hierarchy. Do not infer a new rig.
+    for _, control in direct_controls:
         cid = control.canonical_control_id
         world_p, world_r, world_s = cw[cid]
-        if control.control_kind not in {"GLOBAL", "ROOT", "FK", "SOCKET_CONTROL"}:
-            continue
         rest_c = _v3(control.rest_P, "MECHANICS_CONTROL_REST_INVALID")
-        for jid in control.target_canonical_joint_ids:
-            if jid not in pos:
-                raise QualificationError("MECHANICS_CONTROL_TARGET_UNKNOWN")
-            rel = rest[jid] - rest_c
-            pos[jid] = world_p + world_r @ (rel * world_s)
-            explicit_rot[jid] = world_r
+        reached: set[str] = set()
+        for root_id in control.target_canonical_joint_ids:
+            for jid in subtree(root_id):
+                if jid in reached:
+                    continue
+                reached.add(jid)
+                rel = rest[jid] - rest_c
+                pos[jid] = world_p + world_r @ (rel * world_s)
+                explicit_rot[jid] = world_r
 
     chain_by = {c.canonical_chain_id: c for c in rig.chains}
     residuals: list[tuple[str, float]] = []

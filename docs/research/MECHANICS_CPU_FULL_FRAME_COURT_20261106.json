@@ -1,0 +1,84 @@
+{
+  "schema": "RealSaS.MechanicsFullFrameCPUResearchReceipt.v1",
+  "recorded_at_utc": "2026-11-06",
+  "status": "PASS_CPU_MECHANICS_BEHAVIOR_AND_LBS_PARITY_ONLY",
+  "repository": "merynz/RealSaS-OPT",
+  "branch": "research/mechanics-generic-closure-v1",
+  "pull_request": 353,
+  "head_sha_measured": "dcefe18c5b7efc3b55eef1076ef14c9bbcc2bfb2",
+  "github_actions": {
+    "run_id": 42273795156,
+    "name": "mechanics-generic-closure-v1",
+    "conclusion": "success",
+    "tests_passed": 48,
+    "cpu_report_artifact_id": 13531142924,
+    "artifact_retention_days": 7
+  },
+  "reproduction": {
+    "command_3266": "python -m tools.mechanics.benchmark_live_mechanics_v1 --vertices 3266 --frames 16 --warmup 3 --out /tmp/mechanics/branch3266.json",
+    "command_8192": "python -m tools.mechanics.benchmark_live_mechanics_v1 --vertices 8192 --frames 10 --warmup 2 --out /tmp/mechanics/branch8192.json",
+    "source_file": "tools/mechanics/benchmark_live_mechanics_v1.py",
+    "benchmark_seed": 20261106,
+    "input_truth_type": "SEEDED_SYNTHETIC_5_JOINT_3_DOF_2_CHAIN_2_IK_1_PIN",
+    "student_training_allowed": false,
+    "real_corpus_truth_or_teacher_used": false
+  },
+  "results": [
+    {
+      "vertex_count": 3266,
+      "influence_count": 6532,
+      "measured_frames": 16,
+      "legacy_parity_sample_count": 4,
+      "full_mechanics_prepared_p50_ms": 5.9237885,
+      "full_mechanics_prepared_p95_ms": 6.3931315,
+      "full_mechanics_legacy_sample_p50_ms": 57.8073685,
+      "full_mechanics_legacy_sample_p95_ms": 59.50444035,
+      "prepared_cache_build_ms": 3.305149,
+      "max_prepared_legacy_vertex_l2": 4.47545209131181e-16,
+      "max_constraint_residual": 0.00019871465708442282,
+      "max_segment_strain": 2.220446049250313e-16,
+      "failed_frames": 0,
+      "warm_started_frames": 16
+    },
+    {
+      "vertex_count": 8192,
+      "influence_count": 16384,
+      "measured_frames": 10,
+      "legacy_parity_sample_count": 3,
+      "full_mechanics_prepared_p50_ms": 11.351362,
+      "full_mechanics_prepared_p95_ms": 12.1092674,
+      "full_mechanics_legacy_sample_p50_ms": 143.125662,
+      "full_mechanics_legacy_sample_p95_ms": 143.2654329,
+      "prepared_cache_build_ms": 28.19755,
+      "max_prepared_legacy_vertex_l2": 4.47545209131181e-16,
+      "max_constraint_residual": 0.00019861995364947385,
+      "max_segment_strain": 2.220446049250313e-16,
+      "failed_frames": 0,
+      "warm_started_frames": 10
+    }
+  ],
+  "scope": {
+    "measured": "full deterministic Mechanics CPU frame evaluation (two declared IK goals, one pinned target, warm-start, prepared deform, full segment and vertex diagnostics)",
+    "unmeasured": [
+      "Graphics",
+      "2D draw order",
+      "renderer",
+      "frame pacing",
+      "GPU upload",
+      "collision",
+      "force-based contact",
+      "3D camera",
+      "model inference",
+      "model-produced canonical mesh or rig",
+      "real 43-bone runtime throughput"
+    ],
+    "physical_pinning_certified": false,
+    "full_product_60fps_certified": false,
+    "stable_p95_tail_certified": false,
+    "sample_count_is_low": true,
+    "graphics_authority_claimed": false,
+    "model_train_authority_minted": false,
+    "research_subjects_exposed": false
+  },
+  "next_stage": "SOLVER_DOF_SCALING_AND_TYPED_ANALYTIC_JACOBIAN_RESEARCH_WITH_REAL_SOURCE_CORRESPONDENCE_LATER"
+}

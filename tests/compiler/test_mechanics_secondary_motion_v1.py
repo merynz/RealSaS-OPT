@@ -307,3 +307,21 @@ def test_secondary_cannot_hide_failed_primary_grip_orientation():
                 "GRIP_PROTECTED":I,
             },
         )
+
+
+def test_secondary_runtime_physics_policy_edit_requires_explicit_reset():
+    obj=_secondary_objects()
+    mesh,rig,skin,mechanics,policy,prepared=obj
+    start=_frame(obj,0.)
+    altered=replace(policy,chains=(replace(
+        policy.chains[0],frequency_hz=3.4,
+    ),))
+    with pytest.raises(QualificationError,match="STATE_POLICY_DRIFT_REQUIRES_RESET"):
+        _frame(obj,.5,prev=start.secondary_motion_state,dt=1/60,policy=altered)
+    reset=_frame(obj,.5,policy=altered)
+    assert reset.status=="PASS_MECHANICS_BEHAVIORAL_COURT"
+    assert reset.secondary_motion_state.step_count==0
+    assert (reset.secondary_motion_state.metadata["runtime_policy_sha256"]
+            !=start.secondary_motion_state.metadata["runtime_policy_sha256"])
+    next_frame=_frame(obj,.5,prev=reset.secondary_motion_state,dt=1/60,policy=altered)
+    assert next_frame.status=="PASS_MECHANICS_BEHAVIORAL_COURT"

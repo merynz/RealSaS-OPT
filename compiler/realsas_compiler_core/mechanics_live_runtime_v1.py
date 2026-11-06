@@ -435,6 +435,7 @@ def evaluate_mechanics_intervention_sequence_v1(
     active_parameter_policy: str = "EXPLICIT_OR_ALL",
     singularity_recovery_mode: str = "DISABLED",
     required_attachment_world_orientations: Mapping[str, Sequence[Sequence[float]]] | None = None,
+    required_attachment_world_positions: Mapping[str, Sequence[float]] | None = None,
     attachment_orientation_mode: str = "EVALUATE_ONLY",
     attachment_orientation_tolerance_rad: float = 1e-3,
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,

@@ -12,6 +12,8 @@ No Graphics draw ordering, collision, cloth solver or friction is inferred.
 """
 
 from dataclasses import dataclass, field, replace
+import hashlib
+import json
 import math
 
 import numpy as np
@@ -168,6 +170,20 @@ def step_secondary_motion_v1(
     dt_seconds: float | None = None,
 ) -> SecondaryMotionStepResultV1:
     joint_by, validated, owned = _params(rig,policy)
+    policy_signature=hashlib.sha256(json.dumps(
+        {
+            "schema":policy.schema_version,
+            "rig":policy.rig_lineage_hash,
+            "control":policy.control_program_hash,
+            "fixed_step":policy.fixed_step_seconds,
+            "max_dt":policy.maximum_dt_seconds,
+            "max_substeps":policy.maximum_substeps,
+            "chains":[
+                (c.canonical_chain_id,c.frequency_hz,c.max_deviation_rad)
+                for c in policy.chains
+            ],
+        },sort_keys=True,separators=(",",":"),
+    ).encode("utf-8")).hexdigest()
     if (primary_pose.rig_lineage_hash != rig.rig_lineage_hash or
             primary_pose.control_program_hash != rig.control_program_hash):
         raise QualificationError("SECONDARY_PRIMARY_POSE_LINEAGE_DRIFT")
@@ -194,6 +210,11 @@ def step_secondary_motion_v1(
                 previous_state.control_program_hash != rig.control_program_hash or
                 previous_state.secondary_joint_ids != owned):
             raise QualificationError("SECONDARY_STATE_LINEAGE_OR_DOMAIN_DRIFT")
+        if previous_state.metadata.get("runtime_policy_sha256") != policy_signature:
+            raise QualificationError("SECONDARY_STATE_POLICY_DRIFT_REQUIRES_RESET")
+        if (not isinstance(previous_state.step_count,int)
+                or previous_state.step_count<0):
+            raise QualificationError("SECONDARY_STATE_STEP_COUNT_INVALID")
         if dt_seconds is None:
             raise QualificationError("SECONDARY_STEP_DT_REQUIRED")
         try:
@@ -312,7 +333,8 @@ def step_secondary_motion_v1(
                   "physical_truth_minted":False,"training_authorized":False,
                   "simulation_tick_count":prior_tick_count+integration_steps,
                   "integration_substeps_this_frame":integration_steps,
-                  "fixed_step_seconds":policy.fixed_step_seconds},
+                  "fixed_step_seconds":policy.fixed_step_seconds,
+                  "runtime_policy_sha256":policy_signature},
     )
     return SecondaryMotionStepResultV1(
         pose=replace(primary_pose,joints=rows,metadata={

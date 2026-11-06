@@ -203,3 +203,32 @@ def test_live_pin_anchor_without_declared_pin_fails_closed():
             solver_mode="DECLARED_MULTI_GOAL_V1",
             pinned_world_targets={"B_HANDLE":(-2.,0.,0.)},
         )
+
+
+def test_live_rank_policy_hysteresis_keeps_actuator_basis_during_drag():
+    mesh,rig,skin,mechanics=_objects()
+    from compiler.realsas_compiler_core.mechanics_prepared_skin_v1 import (
+        prepare_mechanics_skin_deformer_v1,
+    )
+    prepared=prepare_mechanics_skin_deformer_v1(mesh,rig,skin)
+    steps=tuple(MechanicsInterventionStepV1(
+        time_seconds=float(i)/30.,
+        overrides=(ControlTransformIRV1(
+            "A_HANDLE",translation=(math.cos(angle)-1.,math.sin(angle),0.),
+        ),),
+    ) for i,angle in enumerate((.06,.08,.10,.12,.14,.16,.18)))
+    result=evaluate_mechanics_intervention_sequence_v1(
+        mesh,rig,skin,mechanics,steps,
+        prepared_skin=prepared,
+        solver_mode="DECLARED_MULTI_GOAL_V1",
+        multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1",
+        active_parameter_policy="RANK_REVEALING_RESEARCH_V1",
+        pinned_contact_control_ids=("B_HANDLE",),
+        max_allowed_constraint_residual=1e-3,
+    )
+    assert result.status=="PASS_MECHANICS_SEQUENCE_DIAGNOSTIC"
+    assert result.metadata["rank_policy_selection_changes"]==0
+    assert result.metadata["rank_policy_selection_reused_frames"]>=5
+    assert all(f.rank_policy_candidate_keys for f in result.frames)
+    assert result.max_vertex_speed>=0.
+    assert all(f.max_constraint_residual<1e-3 for f in result.frames)

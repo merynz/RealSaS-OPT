@@ -107,7 +107,7 @@ jobs:
           assert j["mechanical_source_local_edges_both_rest_physical_observed"]==218
           assert j["mechanical_axis_divergent_source_local_edges_both_observed"]==31
           assert j["source_lifted_graph_pairs_both_islands_rest_physical_observed"]==725
-          assert j["original_source_artist_drawable_ownership"]=="UNKNOWN"
+          assert j["source_artist_drawable_ownership"]=="UNKNOWN"
           assert j["source_fit_mechanics_and_rest_graphics_observations"]=="DIFFERENT_SOURCE_POSE_SCOPES"
           assert j["iris_training_authorized"] is False
           print("REAL_ORIGINAL_CAT_SUBFACE_SAME_TRIANGLE_DIFFERENT_PHYSICAL_EDIT_WITNESSES_COURT_PASS",flush=True)

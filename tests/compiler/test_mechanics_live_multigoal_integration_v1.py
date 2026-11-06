@@ -3,6 +3,7 @@ from __future__ import annotations
 """Integration: opt-in multi-goal Mechanics through full deform runtime."""
 
 from dataclasses import replace
+import math
 import numpy as np
 import pytest
 
@@ -92,13 +93,16 @@ def test_unreachable_live_multi_goal_returns_failure_and_not_fake_success():
 
 def test_sequence_supports_declared_pin_without_per_frame_neural_inference():
     mesh, rig, skin, mechanics = _objects()
-    overrides = (-0.1, -0.2, -0.4)
+    # Targets must lie on the reachable arc of an articulated two-link chain
+    # whose opposite branch is pinned at full extension.
+    angles = (0.0, 0.2, 0.4)
     steps = tuple(MechanicsInterventionStepV1(
         time_seconds=float(i) * 0.1,
         overrides=(ControlTransformIRV1(
-            "A_HANDLE", translation=(value, 0.0, 0.),
+            "A_HANDLE", translation=(math.cos(angle) - 1.0,
+                                     math.sin(angle), 0.0),
         ),),
-    ) for i, value in enumerate(overrides))
+    ) for i, angle in enumerate(angles))
     result = evaluate_mechanics_intervention_sequence_v1(
         mesh, rig, skin, mechanics, steps,
         solver_mode="DECLARED_MULTI_GOAL_V1",

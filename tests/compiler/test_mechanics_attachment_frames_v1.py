@@ -127,3 +127,17 @@ def test_attachment_frame_is_evaluated_in_primary_mechanics_before_secondary():
     assert frame.metadata["attachment_frames_evaluated_before_secondary"] is True
     assert frame.metadata["attachment_frame_count"]==1
     assert frame.attachment_frames.frames[0].orientation_authority=="DECLARED_LOCAL_GRIP_BASIS_RESEARCH_ONLY"
+
+
+def test_runtime_orientation_requirement_is_real_fail_not_automatically_rotated_grip():
+    mesh,rig,skin,mechanics=_case()
+    frame=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,
+        required_attachment_world_orientations={"GRIP:0":I},
+    )
+    assert frame.status=="FAIL_MECHANICS_BEHAVIORAL_COURT"
+    assert "ATTACHMENT_FRAME_NOT_QUALIFIED" in frame.failures
+    assert frame.metadata["attachment_target_orientation_status"]=="FAIL_ATTACHMENT_ORIENTATION_TARGET"
+    assert frame.attachment_frames.max_target_angular_residual_rad>1.5
+    # This is an evaluator, never a disguised IK orientation optimizer:
+    assert frame.attachment_frames.metadata["orientation_ik_solver_executed"] is False

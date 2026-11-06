@@ -31,6 +31,10 @@ from .mechanics_secondary_motion_v1 import (
     SecondaryMotionStateV1,
     step_secondary_motion_v1,
 )
+from .mechanics_attachment_frames_v1 import (
+    AttachmentWorldFrameCourtV1,
+    evaluate_attachment_world_frames_v1,
+)
 from .control_motion_runtime_v2 import sample_control_transforms_v2
 from .mechanics_control_solver_v1 import (
     ControlTransformIRV1, DeformedMeshIRV1, MechanicsPoseIRV1,
@@ -53,6 +57,7 @@ class MechanicsInterventionFrameV1:
     failures: tuple[str, ...] = ()
     joint_parameter_solution_rad: tuple[tuple[str, str, float], ...] = ()
     secondary_motion_state: SecondaryMotionStateV1 | None = None
+    attachment_frames: AttachmentWorldFrameCourtV1 | None = None
     metadata: dict = field(default_factory=dict)
 
 
@@ -254,6 +259,7 @@ def evaluate_mechanics_intervention_frame_v1(
         solved_parameters = solved.parameters_rad
     else:
         raise QualificationError("LIVE_MECHANICS_SOLVER_MODE_UNSUPPORTED")
+    attachment_result = evaluate_attachment_world_frames_v1(rig,pose)
     secondary_result = None
     if secondary_motion_policy is not None:
         secondary_result = step_secondary_motion_v1(
@@ -287,6 +293,8 @@ def evaluate_mechanics_intervention_frame_v1(
         failures.append("MULTIGOAL_SOLVER_NOT_QUALIFIED")
     if secondary_result is not None and secondary_result.status != "PASS_SECONDARY_MOTION_BOUNDED":
         failures.append("SECONDARY_MOTION_BOUNDS_EXCEEDED")
+    if attachment_result.status != "PASS_ATTACHMENT_FRAME_COURT":
+        failures.append("ATTACHMENT_FRAME_NOT_QUALIFIED")
     return MechanicsInterventionFrameV1(
         pose=pose, deformation=deformed,
         active_control_ids=tuple(x.canonical_control_id for x in controls),
@@ -300,6 +308,7 @@ def evaluate_mechanics_intervention_frame_v1(
         failures=tuple(failures),
         joint_parameter_solution_rad=solved_parameters,
         secondary_motion_state=secondary_result.state if secondary_result is not None else None,
+        attachment_frames=attachment_result,
         metadata={
             "authority": "MECHANICS_RUNTIME_DIAGNOSTIC_ONLY",
             "control_synthesis_performed": False,
@@ -320,6 +329,8 @@ def evaluate_mechanics_intervention_frame_v1(
                 or active_parameter_policy != "EXPLICIT_OR_ALL"
             ),
             "active_parameter_policy": active_parameter_policy,
+            "attachment_frames_evaluated_before_secondary": True,
+            "attachment_frame_count": len(attachment_result.frames),
             "secondary_motion_mode": (
                 "CRITICALLY_DAMPED_DECLARED_CHAIN_RESEARCH"
                 if secondary_result is not None else "DISABLED"

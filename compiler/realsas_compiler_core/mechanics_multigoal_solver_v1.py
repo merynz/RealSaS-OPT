@@ -92,6 +92,7 @@ def solve_declared_multi_goal_v1(
     maximum_joints: int = 128,
     maximum_dofs: int = 72,
     maximum_goals: int = 16,
+    initial_parameters_rad: Sequence[tuple[str, str, float]] | None = None,
 ) -> MechanicsMultiGoalResultV1:
     for v, code, allow_zero in (
         (goal_tolerance, "MULTIGOAL_TOLERANCE_INVALID", False),
@@ -265,7 +266,19 @@ def solve_declared_multi_goal_v1(
         return np.concatenate(blocks)
 
     lower_np, upper_np = np.asarray(lower), np.asarray(upper)
-    x0 = np.minimum(np.maximum(np.zeros(len(param_schema)), lower_np), upper_np)
+    if initial_parameters_rad is None:
+        x0 = np.minimum(np.maximum(np.zeros(len(param_schema)), lower_np), upper_np)
+    else:
+        if (len(initial_parameters_rad) != len(param_schema)
+                or tuple((str(jid),str(label)) for jid,label,_ in initial_parameters_rad)
+                    != tuple(param_schema)):
+            raise QualificationError("MULTIGOAL_WARM_START_SCHEMA_DRIFT")
+        x0 = np.asarray([float(value) for _,_,value in initial_parameters_rad],
+                        dtype=np.float64)
+        if (not np.isfinite(x0).all() or
+                np.any(x0 < lower_np-1e-12) or np.any(x0 > upper_np+1e-12)):
+            raise QualificationError("MULTIGOAL_WARM_START_OUT_OF_BOUNDS")
+        x0 = np.minimum(np.maximum(x0, lower_np), upper_np)
     opt = least_squares(
         residual, x0, bounds=(lower_np, upper_np),
         method="trf", max_nfev=int(max_nfev),
@@ -323,6 +336,7 @@ def solve_declared_multi_goal_v1(
             "declared_angle_limit_count": limits_present,
             "unbounded_rotation_chart_count": len(param_schema) - limits_present,
             "pinned_contact_count": len(pins),
+            "warm_start_supplied": initial_parameters_rad is not None,
             "compiler_rig_synthesis_performed": False,
             "training_authority_minted": False,
             "product_mechanics_release_minted": False,

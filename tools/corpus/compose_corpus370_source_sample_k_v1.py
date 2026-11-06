@@ -44,7 +44,9 @@ def compose_isolated_original_source_k(
     indices=np.argsort(zz,axis=1,kind="stable")
     ordered_z=np.take_along_axis(zz,indices,axis=1)
     ordered_geo=np.take_along_axis(geo,indices,axis=1)
-    diffs=np.diff(ordered_z,axis=1)
+    diffs=np.subtract(ordered_z[:,1:],ordered_z[:,:-1],
+                      out=np.zeros_like(ordered_z[:,1:]),
+                      where=(ordered_geo[:,1:] & ordered_geo[:,:-1]))
     close=(ordered_geo[:,1:] & ordered_geo[:,:-1]
            & np.isfinite(diffs) & (diffs<=depth_tie_eps))
     ties=np.any(close,axis=1)

@@ -120,3 +120,51 @@ def test_prepared_pose_drift_fails_closed_before_deform():
     with pytest.raises(QualificationError,match="POSE_JOINT_COVERAGE_DRIFT"):
         deform_prepared_mechanics_skin_v1(
             prepared,replace(pose,joints=pose.joints[:2]))
+
+
+def test_prepared_live_motion_and_intervention_runtime_match_default_kernel():
+    from compiler.realsas_compiler_core.mechanics_live_runtime_v1 import (
+        MechanicsInterventionStepV1,
+        evaluate_mechanics_intervention_frame_v1,
+        evaluate_mechanics_intervention_sequence_v1,
+    )
+    from tests.compiler.test_mechanics_control_solver_v1 import _mechanics_fixture
+    mesh,rig,skin,prepared=_objects()
+    mechanics=_mechanics_fixture(mesh,rig,skin)
+    transforms=(ControlTransformIRV1("C_ROOT",translation=(0.8,-0.3,0.25)),)
+    old=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,overrides=transforms,
+    )
+    fast=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,overrides=transforms,prepared_skin=prepared,
+    )
+    assert old.status==fast.status=="PASS_MECHANICS_BEHAVIORAL_COURT"
+    assert np.allclose(old.deformation.positions,fast.deformation.positions,atol=1e-11)
+    assert fast.metadata["deformer_kernel"]=="PREPARED_SPARSE_NUMPY_RESEARCH_ONLY"
+    assert old.metadata["deformer_kernel"]=="LEGACY_LBS_V1"
+    steps=tuple(MechanicsInterventionStepV1(
+        time_seconds=float(i)*0.1,
+        overrides=(ControlTransformIRV1("C_ROOT",translation=(float(i)*0.1,0.,0.)),),
+    ) for i in range(3))
+    old_seq=evaluate_mechanics_intervention_sequence_v1(
+        mesh,rig,skin,mechanics,steps,
+    )
+    fast_seq=evaluate_mechanics_intervention_sequence_v1(
+        mesh,rig,skin,mechanics,steps,prepared_skin=prepared,
+    )
+    assert old_seq.status==fast_seq.status
+    assert fast_seq.max_vertex_speed==pytest.approx(old_seq.max_vertex_speed,abs=1e-8)
+    assert fast_seq.max_vertex_acceleration==pytest.approx(old_seq.max_vertex_acceleration,abs=1e-8)
+
+
+def test_prepared_skin_cannot_be_written_or_reenabled():
+    mesh,rig,skin,prepared=_objects()
+    for arr in (
+        prepared.rest_offset_vectors,
+        prepared.influence_weights,
+        prepared.influence_vertex_indices,
+        prepared.influence_joint_indices,
+    ):
+        assert not arr.flags.writeable
+        with pytest.raises(ValueError):
+            arr.setflags(write=True)

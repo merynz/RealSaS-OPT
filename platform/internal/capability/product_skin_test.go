@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestProductSkinDescriptorUsesModernParentClosure(t *testing.T) {
+func TestProductSkinDescriptorUsesDeformStructureParentClosure(t *testing.T) {
 	descriptors, err := (ProductSkinProvider{}).Capabilities(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -38,41 +38,29 @@ func TestProductSkinDescriptorUsesModernParentClosure(t *testing.T) {
 			t.Fatal("legacy Stage15 leaked into Skin parent closure")
 		}
 	}
-	if got := d.Metadata["mesh_and_rig_are_canonical_parents"]; got != true {
-		t.Fatalf("Mesh/Rig canonical parent contract = %v", got)
+
+	parents, ok := d.Metadata["canonical_parents"].([]any)
+	if !ok || len(parents) != 2 || parents[0] != "CANONICAL_MESH" || parents[1] != "CANONICAL_RIG_DEFORM_STRUCTURE" {
+		t.Fatalf("Skin canonical parent contract = %#v", d.Metadata["canonical_parents"])
 	}
-	if got := d.Metadata["feature_evidence_source"]; got != "PRODUCT_MESH_OUTPUT" {
-		t.Fatalf("RiggingSurface source = %v", got)
+	if got := d.Metadata["full_control_program_is_skin_parent"]; got != false {
+		t.Fatalf("full control program skin-parent claim = %v", got)
 	}
-	if got := d.Metadata["material_support_source"]; got != "PRODUCT_MESH_OUTPUT" {
-		t.Fatalf("material-support source = %v", got)
+	if got := d.Metadata["axis_rerun_allowed"]; got != false {
+		t.Fatalf("AXIS rerun policy = %v", got)
 	}
-	if got := d.Metadata["legacy_stage15_dependency"]; got != false {
-		t.Fatalf("legacy Stage15 dependency = %v", got)
+	if got := d.Metadata["compiler_code_search_allowed"]; got != false {
+		t.Fatalf("Compiler code search policy = %v", got)
 	}
-	if got := d.Metadata["feature_evidence_is_canonical_parent"]; got != false {
-		t.Fatalf("RiggingSurface canonical parent claim = %v", got)
+	if got := d.Metadata["compiler_code_repair_allowed"]; got != false {
+		t.Fatalf("Compiler code repair policy = %v", got)
 	}
-	if got := d.Metadata["material_support_is_canonical_parent"]; got != false {
-		t.Fatalf("material-support canonical parent claim = %v", got)
+	if got := d.Metadata["post_hoc_surface_skin_transfer_allowed"]; got != false {
+		t.Fatalf("post-hoc skin transfer policy = %v", got)
 	}
-	if got := d.Metadata["inference_compute_contract"]; got != "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF" {
-		t.Fatalf("MIRA compute contract = %v", got)
-	}
-	if got := d.Metadata["cuda_required"]; got != true {
-		t.Fatalf("MIRA CUDA requirement = %v", got)
-	}
-	if got := d.Metadata["cuda_bf16_required"]; got != true {
-		t.Fatalf("MIRA BF16 requirement = %v", got)
-	}
-	if got := d.Metadata["tf32_allowed"]; got != false {
-		t.Fatalf("MIRA TF32 policy = %v", got)
-	}
+
 	if got := d.Metadata["model_release_admission_owner"]; got != "PLATFORM_MODEL_REQUIREMENTS" {
 		t.Fatalf("model release admission owner = %v", got)
-	}
-	if got := d.Metadata["operational_model_state_embedded_in_source"]; got != false {
-		t.Fatalf("operational model state source policy = %v", got)
 	}
 	wantResearch := []any{"RESEARCH", "CANDIDATE"}
 	gotResearch, ok := d.Metadata["research_execution_model_channels"].([]any)
@@ -88,45 +76,12 @@ func TestProductSkinDescriptorUsesModernParentClosure(t *testing.T) {
 	if !ok || len(gotProduct) != 1 || gotProduct[0] != "PRODUCTION" {
 		t.Fatalf("product model channels = %#v", d.Metadata["product_execution_model_channels"])
 	}
-	for _, forbidden := range []string{
-		"activation_state",
-		"activation_blocker",
-		"current_platform_mira_modelrelease_bound",
-	} {
-		if _, exists := d.Metadata[forbidden]; exists {
-			t.Fatalf("operational Platform state leaked into Skin source metadata: %s", forbidden)
-		}
-	}
-	if got := d.Metadata["historical_checkpoint_backed_mira_v55_exists"]; got != true {
-		t.Fatalf("historical MIRA checkpoint claim = %v", got)
-	}
-	if got := d.Metadata["historical_mira_v55_learned_directly_on_exact_m"]; got != true {
-		t.Fatalf("historical direct-on-M learned claim = %v", got)
-	}
-	if got := d.Metadata["historical_mira_v55_terminal_pass"]; got != true {
-		t.Fatalf("historical MIRA terminal pass = %v", got)
-	}
-	if got := d.Metadata["historical_mira_v55_product_authority"]; got != false {
-		t.Fatalf("historical MIRA product authority = %v", got)
-	}
-	if got := d.Metadata["historical_mira_v55_generalization_claimed"]; got != false {
-		t.Fatalf("historical MIRA generalization claim = %v", got)
-	}
-	if got := d.Metadata["historical_mira_v55_compute_profile_preserved"]; got != true {
-		t.Fatalf("historical MIRA compute-profile claim = %v", got)
-	}
-	if got := d.Metadata["current_repo_mira_v55_runtime_source_recovered"]; got != true {
-		t.Fatalf("current MIRA runtime source recovery claim = %v", got)
-	}
-	if got := d.Metadata["current_mira_v55_runtime_package_recovered"]; got != true {
-		t.Fatalf("current MIRA runtime package recovery claim = %v", got)
-	}
-	if got := d.Metadata["post_hoc_surface_skin_transfer_allowed"]; got != false {
-		t.Fatalf("post-hoc skin transfer policy = %v", got)
+	if got := d.Metadata["operational_model_state_embedded_in_source"]; got != false {
+		t.Fatalf("operational model state source policy = %v", got)
 	}
 }
 
-func TestSkinIsCataloguedWithoutEmbeddingLiveActivationState(t *testing.T) {
+func TestSkinIsCataloguedWithStaticModelRequirementOnly(t *testing.T) {
 	found := false
 	for _, provider := range ProductProviders() {
 		descriptors, err := provider.Capabilities(context.Background())
@@ -140,6 +95,19 @@ func TestSkinIsCataloguedWithoutEmbeddingLiveActivationState(t *testing.T) {
 			found = true
 			if descriptor.Metadata["model_release_admission_owner"] != "PLATFORM_MODEL_REQUIREMENTS" {
 				t.Fatalf("Skin admission escaped Platform model selection: %+v", descriptor.Metadata)
+			}
+			required, ok := descriptor.Metadata["required_models"].([]any)
+			if !ok || len(required) != 1 {
+				t.Fatalf("Skin static model requirement = %#v", descriptor.Metadata["required_models"])
+			}
+			for _, forbidden := range []string{
+				"activation_state",
+				"activation_blocker",
+				"current_platform_mira_modelrelease_bound",
+			} {
+				if _, exists := descriptor.Metadata[forbidden]; exists {
+					t.Fatalf("operational Platform state leaked into Skin source metadata: %s", forbidden)
+				}
 			}
 		}
 	}

@@ -1,0 +1,55 @@
+name: motion-v2-product
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/control_motion_ir_v1.py'
+      - 'compiler/realsas_compiler_core/canonical_motion_ir_v2.py'
+      - 'compiler/realsas_compiler_core/control_motion_runtime_v2.py'
+      - 'compiler/realsas_compiler_services/platform_worker/motion_executor_v2.py'
+      - 'compiler/realsas_compiler_services/platform_worker/worker.py'
+      - 'platform/internal/capability/product_motion.go'
+      - 'platform/internal/capability/product_mechanics.go'
+      - 'platform/internal/capability/release_compose.go'
+      - 'platform/internal/capability/contracts/product_capabilities_v1.json'
+      - 'tests/compiler/test_control_motion_v2.py'
+      - 'tests/compiler/test_control_motion_ik_integration_v1.py'
+      - '.github/workflows/motion_v2_product.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: motion-v2-product-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  motion-control-space-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install reviewed dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Compile Motion product sources
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            compiler/realsas_compiler_core/control_motion_ir_v1.py \
+            compiler/realsas_compiler_core/canonical_motion_ir_v2.py \
+            compiler/realsas_compiler_core/control_motion_runtime_v2.py \
+            compiler/realsas_compiler_services/platform_worker/motion_executor_v2.py \
+            compiler/realsas_compiler_services/platform_worker/worker.py
+      - name: Run control-space Motion authority and IK integration courts
+        run: |
+          set -euo pipefail
+          pytest -q \
+            tests/compiler/test_control_motion_v2.py \
+            tests/compiler/test_control_motion_ik_integration_v1.py

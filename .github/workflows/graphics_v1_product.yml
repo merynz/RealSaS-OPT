@@ -1,0 +1,67 @@
+name: graphics-v1-product
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/graphics_v1.py'
+      - 'compiler/realsas_compiler_core/appearance_authority_v2.py'
+      - 'compiler/realsas_compiler_core/canonical_graphics_ir_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/graphics_executor_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/worker.py'
+      - 'platform/internal/capability/product_graphics.go'
+      - 'platform/internal/capability/release_compose.go'
+      - 'platform/internal/capability/release_compose_test.go'
+      - 'platform/internal/capability/contracts/product_capabilities_v1.json'
+      - 'tests/compiler/test_canonical_graphics_product_v1.py'
+      - '.github/workflows/graphics_v1_product.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: graphics-v1-product-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  graphics-contract-and-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache: true
+          cache-dependency-path: platform/go.sum
+      - name: Install reviewed Python dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/platform-worker.txt
+      - name: Compile Graphics product sources
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            compiler/realsas_compiler_core/graphics_v1.py \
+            compiler/realsas_compiler_core/appearance_authority_v2.py \
+            compiler/realsas_compiler_core/canonical_graphics_ir_v1.py \
+            compiler/realsas_compiler_services/platform_worker/graphics_executor_v1.py \
+            compiler/realsas_compiler_services/platform_worker/worker.py
+      - name: Run canonical Graphics courts
+        run: |
+          set -euo pipefail
+          pytest -q tests/compiler/test_canonical_graphics_product_v1.py
+      - name: Run Platform Graphics role courts
+        working-directory: platform
+        run: |
+          set -euo pipefail
+          unformatted="$(gofmt -l internal/capability/product_graphics.go internal/capability/release_compose.go internal/capability/release_compose_test.go)"
+          if [[ -n "$unformatted" ]]; then
+            printf 'GRAPHICS_GO_FORMAT_DRIFT\n%s\n' "$unformatted"
+            exit 1
+          fi
+          go test ./internal/capability -run 'TestBuildEngineReleaseRegistryIncludesControlReadyProductClosure|TestProductProvidersAreSingleSourceOfControlReadyProductGraph|TestModuleVersionPolicyAndParametersAreMintedFromDescriptor'

@@ -13,7 +13,7 @@ def _load(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def test_product_rig_preserves_fit1_axis_authority_without_stealing_post_bind_mechanics():
+def test_fit1_axis541_remains_historical_regression_while_product_rig_moves_to_v6():
     baseline = _load(PROMOTION)
     capabilities = _load(CAPABILITIES)["capabilities"]
     ledger = _load(RESPONSIBILITIES)["responsibilities"]
@@ -21,6 +21,7 @@ def test_product_rig_preserves_fit1_axis_authority_without_stealing_post_bind_me
     metadata = rig["metadata"]
     architecture = baseline["architecture"]
 
+    # The sealed Knight/FIT1 witness is immutable historical evidence.
     assert baseline["claims"]["fit1_knight_mechanical_relative_source_envelope_closed"] is True
     assert baseline["claims"]["product_authority"] is False
     assert architecture["axis_parent_authority"] == "HARD_CAUSAL_REQUIRED_TREE"
@@ -28,20 +29,27 @@ def test_product_rig_preserves_fit1_axis_authority_without_stealing_post_bind_me
     assert architecture["axis_diffusion_runtime_authority"] is False
     assert architecture["axis_geometry_authority"] == "ORDERED_256_BIN_XYZ_ARGMAX"
 
-    assert metadata["hard_parent_authority_preserved"] is True
+    # Active product Rig is now the V6 control-ready program, not the historical
+    # AXIS541 skeleton-only implementation.
+    assert metadata["executor_contract"] == "RealSaS.ProductRigInference.v2"
+    assert metadata["output_schema_version"] == "v2"
     assert metadata["compiler_parent_reselection_allowed"] is False
-    assert metadata["frame_observability_claimed"] is False
-    assert metadata["post_bind_frame_observability_required"] is True
+    assert metadata["compiler_control_synthesis_allowed"] is False
+    assert metadata["compiler_constraint_synthesis_allowed"] is False
+    assert metadata["compiler_constraint_solver_execution_allowed"] is False
     assert metadata["mesh_is_canonical_parent"] is True
     assert metadata["feature_evidence_is_canonical_parent"] is False
     assert metadata["fit_allowed_during_product_execution"] is False
     assert metadata["required_models"] == [
         {
             "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
+            "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0",
         }
     ]
 
+    # Post-bind observable behavior remains Mechanics responsibility. Moving Rig
+    # to a richer control program does not move deformation/observability proof
+    # upstream into AXIS or the Rig Compiler court.
     by_id = {row["id"]: row for row in ledger}
     assert "rig.frame_observability_qualification" not in by_id
     post_bind = by_id["mechanics.post_bind_frame_observability_qualification"]

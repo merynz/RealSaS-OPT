@@ -1,0 +1,152 @@
+name: knight-control-space-regression-v1
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/canonical_rig_ir_v2.py'
+      - 'compiler/realsas_compiler_core/mechanics_control_solver_v1.py'
+      - 'compiler/realsas_compiler_core/control_motion_ir_v1.py'
+      - 'compiler/realsas_compiler_core/canonical_motion_ir_v2.py'
+      - 'compiler/realsas_compiler_core/control_motion_runtime_v2.py'
+      - 'tools/demo/run_knight_control_space_equivalence_v1.py'
+      - '.github/workflows/knight_control_space_regression_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: knight-control-space-regression-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  knight-control-space-equivalence:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      RUN_ID: SUBJECT2_KNIGHT_DEMO_V2_20260924
+      AUTHORITY_ROOT: /home/monster/realsas_authority
+      REPLAY_AUTHORITY: /tmp/knight_control_space_replay_authority
+      OUT: /tmp/knight_control_space_equivalence_v1/REPORT.json
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pinned regression dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+
+      - name: Compile control-space regression sources
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            compiler/realsas_compiler_core/canonical_rig_ir_v2.py \
+            compiler/realsas_compiler_core/mechanics_control_solver_v1.py \
+            tools/demo/run_knight_control_space_equivalence_v1.py
+
+      - name: Build exact historical Knight replay ledger
+        run: |
+          set -euo pipefail
+          SOURCE_RUN="$AUTHORITY_ROOT/runs/$RUN_ID"
+          REPLAY_RUN="$REPLAY_AUTHORITY/runs/$RUN_ID"
+          rm -rf "$REPLAY_AUTHORITY"
+          mkdir -p "$REPLAY_RUN"
+          ln -s "$SOURCE_RUN/run_manifest.json" "$REPLAY_RUN/run_manifest.json"
+          ln -s "$SOURCE_RUN/inputs" "$REPLAY_RUN/inputs"
+          ln -s "$SOURCE_RUN/artifacts" "$REPLAY_RUN/artifacts"
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          run_id = os.environ['RUN_ID']
+          root = Path(os.environ['AUTHORITY_ROOT']) / 'runs' / run_id
+          target = Path(os.environ['REPLAY_AUTHORITY']) / 'runs' / run_id / 'ACTIVE_RUN_V2.json'
+          ledger = json.loads((root / 'ACTIVE_RUN_V2.json').read_text())
+          refs = {
+              '05_CAMERA_CONTRACT_SOLVED': (
+                  'RealSaS.QualifiedCameraSetIR.v1',
+                  root / 'artifacts/05_CAMERA_CONTRACT_SOLVED/qualified_camera_set.json',
+                  '312a9b1afe4ea1fcdc481232ac951fb6a6815fee532fbb93646e97e609b5b80a',
+              ),
+              '18_CANONICAL_MESH_ADDRESSING_BUILD': (
+                  'RealSaS.CanonicalMeshCandidateIR.v1',
+                  root / 'artifacts/18_CANONICAL_MESH_ADDRESSING_BUILD/canonical_mesh_candidate.json',
+                  '0db35bbcdd3565cf42c74127fa33c66d39545e1ec84d1b1c74f1dac5bb6072d3',
+              ),
+              '28_SKELETON_QUALIFIED': (
+                  'RealSaS.QualifiedSkeletonIR.v1',
+                  root / 'artifacts/28_SKELETON_QUALIFIED/qualified_skeleton.json',
+                  'e89d0b64cf23b2954f2b30fb37836ee2b3287749a79c90a76185437b9217e987',
+              ),
+              '32_SKIN_QUALIFIED': (
+                  'RealSaS.QualifiedSkinIR.v1',
+                  root / 'artifacts/32_SKIN_QUALIFIED/qualified_skin.json',
+                  'f1a937de488ec2a620ee292b3f865a3b2ca97b9466401555beb08b1d2f945a09',
+              ),
+          }
+          def sha(path: Path) -> str:
+              h = hashlib.sha256()
+              with path.open('rb') as handle:
+                  for chunk in iter(lambda: handle.read(1 << 20), b''):
+                      h.update(chunk)
+              return h.hexdigest()
+          for row in ledger['stages']:
+              sid = str(row['id'])
+              if sid not in refs:
+                  continue
+              schema, path, expected = refs[sid]
+              actual = sha(path)
+              if actual != expected:
+                  raise RuntimeError(f'KNIGHT_CONTROL_REPLAY_STAGE_DRIFT:{sid}:{actual}:{expected}')
+              row['status'] = 'PASS_DEMO_ONLY'
+              row['blockers'] = []
+              row['outputs'] = [{
+                  'path': str(path.resolve()),
+                  'sha256': actual,
+                  'authority_class': 'EXACT_HISTORICAL_REGRESSION_REPLAY',
+                  'schema': schema,
+              }]
+          target.write_text(json.dumps(ledger, indent=2, sort_keys=True) + '\n')
+          print('KNIGHT_CONTROL_REPLAY_LEDGER_PASS')
+          PY
+
+      - name: Reproduce sealed Knight motion through control-space Mechanics
+        run: |
+          set -euo pipefail
+          rm -rf "$(dirname "$OUT")"
+          PYTHONPATH=. python -m tools.demo.run_knight_control_space_equivalence_v1 \
+            --authority-root "$REPLAY_AUTHORITY" \
+            --run-id "$RUN_ID" \
+            --out "$OUT"
+          test -s "$OUT"
+
+      - name: Summarize equivalence residuals
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          report = json.loads(Path(os.environ['OUT']).read_text())
+          print('KNIGHT_CONTROL_SPACE_STATUS', report['status'])
+          print('KNIGHT_CONTROL_SPACE_AGGREGATE', json.dumps(report['aggregate'], sort_keys=True))
+          for row in report['clips']:
+              print('KNIGHT_CONTROL_SPACE_CLIP', json.dumps(row, sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knight-control-space-equivalence-v1
+          path: /tmp/knight_control_space_equivalence_v1/REPORT.json
+          if-no-files-found: warn

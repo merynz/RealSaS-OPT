@@ -14,7 +14,7 @@ class GraphicsTruthV3Tests(unittest.TestCase):
         self.assertNotIn("visibility_probability_b", PAIR_KEYS_V3)
         self.assertNotIn("global_visibility", PAIR_KEYS_V3)
 
-    def test_complete_three_hit_stack_marks_only_frontmost_visible(self):
+    def test_complete_three_hit_stack_abstains_on_composited_visibility(self):
         truth = RayStackVisibilityTruthV1.from_complete_depth_order(
             view_index=2,
             ray_index=11,
@@ -23,9 +23,27 @@ class GraphicsTruthV3Tests(unittest.TestCase):
             provenance="unit:complete-all-hit",
         )
         values, valid = truth.training_maps()
-        self.assertEqual(values, (1.0, 0.0, 0.0))
-        self.assertEqual(valid, (True, True, True))
+        self.assertEqual(values, (0.0, 0.0, 0.0))
+        self.assertEqual(valid, (False, False, False))
         self.assertTrue(truth.complete_stack)
+        self.assertEqual(truth.face_ids, (10, 20, 30))
+        self.assertEqual(truth.depths, (1.0, 2.0, 3.0))
+        self.assertTrue(all("ALPHA_UNOBSERVED" in t.provenance
+                            for t in truth.visibility))
+
+    def test_nearest_ray_geometry_not_an_artist_layer_or_alpha_witness(self):
+        # Opaque and translucent source appearances have exactly the same
+        # geometric ray order. A rank-only constructor cannot know which.
+        for semantic_source_case in ("OPAQUE", "TRANSLUCENT_FRONT"):
+            truth = RayStackVisibilityTruthV1.from_complete_depth_order(
+                view_index=1, ray_index=semantic_source_case == "OPAQUE",
+                face_ids=(3, 8), depths=(0.8, 1.3),
+                provenance="unit:depth-not-alpha:" + semantic_source_case,
+            )
+            values, masks = truth.training_maps()
+            self.assertEqual(values, (0.0, 0.0))
+            self.assertEqual(masks, (False, False))
+            self.assertTrue(truth.complete_stack)
 
     def test_incomplete_stack_must_abstain(self):
         truth = RayStackVisibilityTruthV1.abstain_incomplete(

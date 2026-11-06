@@ -199,9 +199,8 @@ def test_bridge_rejects_unknown_anchor_same_parent_stale_lineage_and_nonorthogon
 
 def test_live_world_bridge_runs_full_skin_and_5_frame_warm_motion_sequence():
     mesh,rig,skin,mechanics=_objects()
-    _,link=_rig_and_bridge()
-    _,authored= _rig_and_bridge()
-    rig=replace(rig,attachment_anchors=authored.attachment_anchors if hasattr(authored,"attachment_anchors") else _rig_and_bridge()[0].attachment_anchors)
+    authored,link=_rig_and_bridge()
+    rig=replace(rig,attachment_anchors=authored.attachment_anchors)
     # Both synthetic rig fixtures intentionally use the same joint/lineage
     # naming and root-space geometry, so the declared link is still bound.
     theta=.1

@@ -359,6 +359,16 @@ def compare_stage47_source_fk_lbs_v1(
                 indices,bones,weights,offsets,actions,observed,
                 selected_indices=selected,
             )
+        direct_weighted_bones = set(map(int,bones.tolist()))
+        zero_direct_skin_bones = len(mats)-len(direct_weighted_bones)
+        zero_descendant_skin_bones = sum(
+            not np.any(mass[bone_id] > 1e-12)
+            for bone_id in range(len(mats))
+        )
+        isolated_rot_zero_response_controls = sum(
+            not any(v > 1e-9 for v in signal[control_id*6:control_id*6+6])
+            for control_id in range(len(controls))
+        )
         passed = max_err <= error_threshold_source_world and (
             probes is None or probes["max_vertex_error_world"] <= error_threshold_source_world
         )
@@ -374,6 +384,10 @@ def compare_stage47_source_fk_lbs_v1(
             "source_vertex_count": len(rest),
             "action_count": len(actions),
             "measured_nonzero_action_count": sum(v>1e-9 for v in signal),
+            "source_native_bones_without_direct_skin_count": zero_direct_skin_bones,
+            "source_native_bones_without_descendant_skin_count": zero_descendant_skin_bones,
+            "isolated_rotation_zero_response_control_parameter_count": isolated_rot_zero_response_controls,
+            "zero_isolated_rotation_response_does_not_prove_ik_control_inactive": True,
             "source_native_fk_lbs_max_vertex_error_world": max_err,
             "source_native_fk_lbs_mean_vertex_error_world": sum_l1/count,
             "source_native_fk_lbs_rms_coordinate_error_world": math.sqrt(sum_sq/(3*count)),

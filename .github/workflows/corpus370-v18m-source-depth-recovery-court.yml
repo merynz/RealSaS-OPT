@@ -1,0 +1,129 @@
+name: corpus370-v18m-source-depth-recovery-court
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18m-source-depth-recovery-court.yml'
+      - 'tools/corpus/court_corpus370_v18m_depth_ordered_source_compositor.py'
+      - 'tests/corpus/test_corpus370_v18m_depth_ordered_source_compositor.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18m-source-depth-recovery-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v18m-recovery-court-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prove V18m oracle-free depth manifest and unknown contracts
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile tools/corpus/court_corpus370_v18m_depth_ordered_source_compositor.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18m_depth_ordered_source_compositor.py
+
+  v18m-reopen-original-immutable-source-depth:
+    needs: v18m-recovery-court-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            parent_v18l_sha: cce24e65850308ed0c27bcb63f33ec060ae7242fa57b27f4c82dc075e8be9a17
+          - subject: TRICERATOPS
+            parent_v18l_sha: 3245c11e49bc3e39b3209eda2ff771b39ec0269b7f66c45949476d8cb557333d
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      EXPECTED_V18L_SHA: ${{ matrix.parent_v18l_sha }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SHA-verified private-source transport and numpy
+        run: |
+          set -euo pipefail
+          VERSION=1.75.2
+          ARCHIVE="$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 \
+            "https://github.com/rclone/rclone/releases/download/v${VERSION}/rclone-v${VERSION}-linux-amd64.zip" \
+            -o "$ARCHIVE"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
+          unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
+          test -x "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64/rclone"
+          echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
+          python3 -m pip install --disable-pip-version-check numpy
+      - name: Court already archived original Blender depth without rerender or changed source
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/v18m-sha-source.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          D="$RUNNER_TEMP/v18m-source-independent"
+          mkdir -p "$D"
+          M="gdrive:corpus370_preparation_v1/hosted_cycles_source_depth_v18m/$SUBJECT/42134142993-1"
+          L="gdrive:corpus370_preparation_v1/hosted_cycles_common_sample_v18l/$SUBJECT/42131579613-1"
+          rclone copyto "$M/PRIVATE_V18M_ORIGINAL_SOURCE_CYCLES_VIEW_DEPTH.json" "$D/v18m.json" --checksum --retries 3
+          rclone copyto "$M/PRIVATE_V18M_ORIGINAL_SOURCE_CYCLES_VIEW_DEPTH.npz" "$D/v18m.npz" --checksum --retries 3
+          rclone copyto "$L/PRIVATE_V18L_ORIGINAL_CYCLES_COMMON_SAMPLE_RENDER.json" "$D/v18l.json" --checksum --retries 3
+          rclone copyto "$L/PRIVATE_V18L_ORIGINAL_CYCLES_COMMON_SAMPLE_RENDER.npz" "$D/v18l.npz" --checksum --retries 3
+          rclone copyto "$L/PRIVATE_INDEPENDENT_V18L_CYCLES_COMMON_SAMPLE_COURT.json" "$D/v18l-court.json" --checksum --retries 3
+          test "$(sha256sum "$D/v18l-court.json"|cut -d' ' -f1)" = "$EXPECTED_V18L_SHA"
+          D="$D" SUBJECT="$SUBJECT" python3 - <<'PY'
+          import json,os,hashlib
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          m=json.loads((d/"v18m.json").read_text())
+          l=json.loads((d/"v18l.json").read_text())
+          sha=lambda p:hashlib.file_digest(p.open("rb"),"sha256").hexdigest()
+          assert m["original_source_sha256"]==l["original_source_sha256"]
+          assert m["subject_id"]==l["subject_id"]
+          assert m["original_source_v18m_parent_v18l_run"]=="42131579613-1"
+          assert m["new_source_actual_edited_rgba_npz_sha256"]==sha(d/"v18m.npz")
+          assert m["source_independent_v18l_raw_rgba_sha256"]==sha(d/"v18l.npz")
+          assert m["source_independent_v18l_court_sha256"]==sha(d/"v18l-court.json")
+          assert all(m[x] is False for x in (
+             "graphics_owner_authorized","iris_training_authorized",
+             "tessa_training_authorized","materialization_authorized",
+             "training_authorized"))
+          print("V18M_ALREADY_MEASURED_ORIGINAL_SOURCE_SHA_IMMUTABLE",flush=True)
+          PY
+          python3 -u tools/corpus/court_corpus370_v18m_depth_ordered_source_compositor.py \
+            --v18m-manifest "$D/v18m.json" --v18m-npz "$D/v18m.npz" \
+            --v18l-manifest "$D/v18l.json" --v18l-npz "$D/v18l.npz" \
+            --v18l-court "$D/v18l-court.json" \
+            --expected-v18l-court-sha "$EXPECTED_V18L_SHA" \
+            --output "$D/PRIVATE_INDEPENDENT_V18M_SOURCE_DEPTH_COMPOSITOR_COURT.json"
+          D="$D" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          z=json.loads((Path(os.environ["D"])/"PRIVATE_INDEPENDENT_V18M_SOURCE_DEPTH_COMPOSITOR_COURT.json").read_text())
+          assert z["status"]=="ORIGINAL_CYCLES_SOURCE_LOCAL_DEPTH_ORDER_COURTED__ARTIST_DRAWABLE_UNKNOWN"
+          assert z["oracle_free_source_depth_order_predictor"] is True
+          assert z["full_source_rgba_used_only_in_independent_scoring"] is True
+          assert len(z["original_source_camera_reports"])==4
+          assert sum(q["original_source_pixel_sample_instances"] for q in
+              z["original_source_camera_reports"])==4*8*192*192
+          assert all(z[k] is False for k in (
+             "graphics_owner_authorized","iris_training_authorized",
+             "tessa_training_authorized","materialization_authorized",
+             "training_authorized"))
+          print("V18M_ORIGINAL_SOURCE_DEPTH_REPLAY_INDEPENDENT_COURT_QUALIFIED__NO_TRAINING",flush=True)
+          PY
+          P="gdrive:corpus370_preparation_v1/hosted_cycles_source_depth_recovery_v18m/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/PRIVATE_INDEPENDENT_V18M_SOURCE_DEPTH_COMPOSITOR_COURT.json"
+          rclone copyto "$D/PRIVATE_INDEPENDENT_V18M_SOURCE_DEPTH_COMPOSITOR_COURT.json" "$P" --checksum --retries 3
+          rclone cat "$P" > "$D/remote.json"
+          test "$(sha256sum "$D/remote.json"|cut -d' ' -f1)" = "$(sha256sum "$D/PRIVATE_INDEPENDENT_V18M_SOURCE_DEPTH_COMPOSITOR_COURT.json"|cut -d' ' -f1)"
+          echo "V18M_ORIGINAL_SOURCE_SHA_RECOVERED_INDEPENDENT_COURT_SHA=$(sha256sum "$D/remote.json"|cut -d' ' -f1)"

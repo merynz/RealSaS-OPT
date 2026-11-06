@@ -1,0 +1,336 @@
+from __future__ import annotations
+
+"""Mechanics multi-goal articulation research (V1, non-shipping).
+
+A deterministic, small/medium-rig least-squares reference court for simultaneous
+declared IK effectors and planted-contact controls. It is deliberately separate
+from the established FABRIK product solver, so no existing runtime behavior or
+Compiler ModelRelease authority can silently change.
+
+Rotation DOF is derived ONLY from explicitly declared CanonicalJointFrame
+RX/RY/RZ labels. Optional metadata.rotation_limits_rad may supply *explicit*
+limits; absent limits mean a numerical [-pi, pi] rotation chart, NOT a claim
+about authored/physical joint range.
+
+Not supported in this version: translational/scale joint DOFs, indirect pole
+constraints, unrestricted FK overlays, collision, force or hard contact
+dynamics. Every unsupported operator/DOF fails closed. Outcomes include
+per-target WORLD-space residuals, not solver-success-only heuristics.
+"""
+
+from dataclasses import dataclass, field
+from math import pi
+from typing import Mapping, Sequence
+import math
+
+import numpy as np
+from scipy.optimize import least_squares
+
+from .canonical_rig_ir_v2 import CanonicalRigIRV2
+from .mechanics_control_solver_v1 import (
+    ControlTransformIRV1, MechanicsPoseIRV1, SolvedJointTransformIRV1,
+    _control_world_transforms,
+)
+from .types import QualificationError
+
+
+@dataclass(frozen=True)
+class MechanicsGoalResidualV1:
+    canonical_constraint_id: str
+    canonical_control_id: str
+    canonical_tip_joint_id: str
+    target_P: tuple[float, float, float]
+    solved_P: tuple[float, float, float]
+    residual_world: float
+    goal_kind: str  # DRAG | PIN
+
+
+@dataclass(frozen=True)
+class MechanicsMultiGoalResultV1:
+    pose: MechanicsPoseIRV1
+    goals: tuple[MechanicsGoalResidualV1, ...]
+    status: str
+    max_drag_residual: float
+    max_pin_residual: float
+    parameters_rad: tuple[tuple[str, str, float], ...]
+    solver_evaluations: int
+    metadata: dict = field(default_factory=dict)
+
+
+def _basis3(rows: Sequence[Sequence[float]], jid: str) -> np.ndarray:
+    try:
+        basis = np.asarray(rows, dtype=np.float64)
+    except (TypeError, ValueError) as exc:
+        raise QualificationError("MULTIGOAL_JOINT_FRAME_INVALID:" + jid) from exc
+    if basis.shape != (3, 3) or not np.isfinite(basis).all():
+        raise QualificationError("MULTIGOAL_JOINT_FRAME_INVALID:" + jid)
+    if (np.max(np.abs(basis @ basis.T - np.eye(3))) > 1e-4
+            or abs(np.linalg.det(basis) - 1.0) > 1e-4):
+        raise QualificationError("MULTIGOAL_JOINT_FRAME_NOT_ORTHONORMAL:" + jid)
+    return basis.T  # local coordinates -> canonical rest coordinates
+
+
+def _axis_rotation(axis: str, angle: float) -> np.ndarray:
+    co, si = math.cos(angle), math.sin(angle)
+    if axis == "RX":
+        return np.array(((1., 0., 0.), (0., co, -si), (0., si, co)))
+    if axis == "RY":
+        return np.array(((co, 0., si), (0., 1., 0.), (-si, 0., co)))
+    if axis == "RZ":
+        return np.array(((co, -si, 0.), (si, co, 0.), (0., 0., 1.)))
+    raise QualificationError("MULTIGOAL_DOF_UNSUPPORTED:" + axis)
+
+
+def solve_declared_multi_goal_v1(
+    rig: CanonicalRigIRV2,
+    control_transforms: Sequence[ControlTransformIRV1] = (),
+    *,
+    pinned_contact_control_ids: Sequence[str] = (),
+    goal_tolerance: float = 1e-3,
+    regularization: float = 1e-4,
+    max_nfev: int = 200,
+    maximum_joints: int = 128,
+    maximum_dofs: int = 72,
+    maximum_goals: int = 16,
+) -> MechanicsMultiGoalResultV1:
+    for v, code, allow_zero in (
+        (goal_tolerance, "MULTIGOAL_TOLERANCE_INVALID", False),
+        (regularization, "MULTIGOAL_REGULARIZATION_INVALID", True),
+    ):
+        if not math.isfinite(float(v)) or (float(v) < 0.0 if allow_zero else float(v) <= 0.0):
+            raise QualificationError(code)
+    if min(max_nfev, maximum_joints, maximum_dofs, maximum_goals) < 1:
+        raise QualificationError("MULTIGOAL_RESOURCE_POLICY_INVALID")
+
+    joint_by = {j.canonical_joint_id: j for j in rig.joints}
+    if not joint_by or len(joint_by) != len(rig.joints) or len(joint_by) > maximum_joints:
+        raise QualificationError("MULTIGOAL_JOINT_DOMAIN_INVALID")
+    frame_by = {row.canonical_joint_id: row for row in rig.local_frames}
+    if len(frame_by) != len(rig.local_frames) or set(frame_by) != set(joint_by):
+        raise QualificationError("MULTIGOAL_FRAME_COVERAGE_DRIFT")
+    controls = {row.canonical_control_id: row for row in rig.controls}
+    if len(controls) != len(rig.controls):
+        raise QualificationError("MULTIGOAL_CONTROL_DOMAIN_INVALID")
+    authored = {row.canonical_control_id: row for row in control_transforms}
+    if len(authored) != len(control_transforms) or set(authored) - set(controls):
+        raise QualificationError("MULTIGOAL_CONTROL_OVERRIDE_UNKNOWN_OR_DUPLICATE")
+    pins = tuple(map(str, pinned_contact_control_ids))
+    if len(set(pins)) != len(pins) or any(cid not in controls for cid in pins):
+        raise QualificationError("MULTIGOAL_PIN_UNKNOWN_OR_DUPLICATE")
+    if set(pins) & set(authored):
+        raise QualificationError("MULTIGOAL_PIN_HAS_OVERRIDE")
+    if any(controls[cid].control_kind != "IK_EFFECTOR" for cid in pins):
+        raise QualificationError("MULTIGOAL_PIN_NOT_DECLARED_IK_EFFECTOR")
+    for cid, row in authored.items():
+        if controls[cid].control_kind != "IK_EFFECTOR":
+            raise QualificationError("MULTIGOAL_OVERRIDE_NOT_DECLARED_IK_EFFECTOR:" + cid)
+        q = np.asarray(row.rotation_quat_wxyz, dtype=np.float64)
+        s = np.asarray(row.scale, dtype=np.float64)
+        if (q.shape != (4,) or not np.isfinite(q).all() or
+                abs(float(np.linalg.norm(q)) - 1.0) > 1e-6 or
+                np.max(np.abs(q - (1., 0., 0., 0.))) > 1e-6 or
+                s.shape != (3,) or not np.isfinite(s).all() or
+                np.max(np.abs(s - 1.0)) > 1e-6):
+            raise QualificationError("MULTIGOAL_TARGET_ONLY_TRANSLATION:" + cid)
+
+    # Explicit causal parent graph is input authority; derive only traversal.
+    topological: list[str] = []
+    visiting: set[str] = set()
+    visited: set[str] = set()
+
+    def visit(jid: str) -> None:
+        if jid in visited:
+            return
+        if jid in visiting:
+            raise QualificationError("MULTIGOAL_JOINT_PARENT_CYCLE")
+        visiting.add(jid)
+        p = joint_by[jid].parent_canonical_joint_id
+        if p is not None:
+            if p not in joint_by:
+                raise QualificationError("MULTIGOAL_JOINT_PARENT_UNKNOWN")
+            visit(p)
+        visiting.remove(jid)
+        visited.add(jid)
+        topological.append(jid)
+
+    for jid in joint_by:
+        visit(jid)
+
+    rest: dict[str, np.ndarray] = {}
+    frames: dict[str, np.ndarray] = {}
+    param_schema: list[tuple[str, str]] = []
+    lower: list[float] = []
+    upper: list[float] = []
+    limits_present = 0
+    for jid in topological:
+        p = np.asarray(joint_by[jid].P, dtype=np.float64)
+        if p.shape != (3,) or not np.isfinite(p).all():
+            raise QualificationError("MULTIGOAL_REST_POSITION_INVALID")
+        rest[jid] = p
+        frame = frame_by[jid]
+        frames[jid] = _basis3(frame.basis, jid)
+        labels = tuple(map(str, frame.dof_labels))
+        if len(set(labels)) != len(labels):
+            raise QualificationError("MULTIGOAL_DUPLICATE_DOF:" + jid)
+        if any(label not in {"RX", "RY", "RZ"} for label in labels):
+            raise QualificationError("MULTIGOAL_UNSUPPORTED_DOF:" + jid)
+        limits = frame.metadata.get("rotation_limits_rad", {})
+        if not isinstance(limits, Mapping) or set(limits) - set(labels):
+            raise QualificationError("MULTIGOAL_LIMIT_METADATA_INVALID:" + jid)
+        for label in labels:
+            if label in limits:
+                raw = np.asarray(limits[label], dtype=np.float64)
+                if (raw.shape != (2,) or not np.isfinite(raw).all()
+                        or not -pi <= raw[0] < raw[1] <= pi):
+                    raise QualificationError("MULTIGOAL_ROTATION_LIMIT_INVALID:" + jid)
+                lo, hi = float(raw[0]), float(raw[1])
+                limits_present += 1
+            else:
+                lo, hi = -pi, pi  # chart only: never claimed physical limits
+            param_schema.append((jid, label))
+            lower.append(lo)
+            upper.append(hi)
+    if not param_schema or len(param_schema) > maximum_dofs:
+        raise QualificationError("MULTIGOAL_DOF_RESOURCE_BOUND")
+    params_by_joint: dict[str, list[tuple[int, str]]] = {jid: [] for jid in joint_by}
+    for index, (jid, label) in enumerate(param_schema):
+        params_by_joint[jid].append((index, label))
+
+    control_world = _control_world_transforms(rig, authored)
+    chains = {row.canonical_chain_id: row for row in rig.chains}
+    if len(chains) != len(rig.chains):
+        raise QualificationError("MULTIGOAL_CHAIN_DUPLICATE")
+    goals: list[tuple[str, str, str, np.ndarray, str]] = []
+    for constraint in rig.constraints:
+        if constraint.operator_id != "IK":
+            raise QualificationError("MULTIGOAL_OPERATOR_UNSUPPORTED:" + constraint.operator_id)
+        if len(constraint.input_canonical_control_ids) != 1:
+            raise QualificationError("MULTIGOAL_POLE_NOT_YET_EXECUTABLE")
+        if constraint.canonical_chain_id not in chains:
+            raise QualificationError("MULTIGOAL_CHAIN_UNKNOWN")
+        chain = chains[constraint.canonical_chain_id].canonical_joint_ids
+        if len(chain) < 2 or any(jid not in joint_by for jid in chain):
+            raise QualificationError("MULTIGOAL_CHAIN_INVALID")
+        if any(joint_by[child].parent_canonical_joint_id != parent
+               for parent, child in zip(chain, chain[1:])):
+            raise QualificationError("MULTIGOAL_CHAIN_NOT_CONTIGUOUS")
+        if (len(constraint.output_canonical_joint_ids) not in (0, 1)
+                or (constraint.output_canonical_joint_ids
+                    and constraint.output_canonical_joint_ids[0] != chain[-1])):
+            raise QualificationError("MULTIGOAL_EFFECTOR_TIP_MISMATCH")
+        if float(constraint.parameters.get("p0", 1.0)) != 1.0:
+            raise QualificationError("MULTIGOAL_PARTIAL_CONSTRAINT_UNSUPPORTED")
+        if float(constraint.parameters.get("p2", 1.0)) > 1.0:
+            raise QualificationError("MULTIGOAL_STRETCH_UNSUPPORTED")
+        cid = constraint.input_canonical_control_ids[0]
+        if cid not in controls or controls[cid].control_kind != "IK_EFFECTOR":
+            raise QualificationError("MULTIGOAL_IK_CONTROL_NOT_DECLARED")
+        kind = "PIN" if cid in pins else "DRAG"
+        target = np.asarray(control_world[cid][0], dtype=np.float64)
+        goals.append((constraint.canonical_constraint_id, cid, chain[-1], target, kind))
+    if not goals or len(goals) > maximum_goals:
+        raise QualificationError("MULTIGOAL_GOAL_RESOURCE_BOUND")
+    goal_control_ids = {g[1] for g in goals}
+    if set(authored) - goal_control_ids or set(pins) - goal_control_ids:
+        raise QualificationError("MULTIGOAL_ORPHANED_CONTROL_OR_PIN")
+
+    def forward(q: np.ndarray) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray]]:
+        p_world: dict[str, np.ndarray] = {}
+        rot_world: dict[str, np.ndarray] = {}
+        for jid in topological:
+            local = np.eye(3)
+            for index, label in params_by_joint[jid]:
+                local = local @ _axis_rotation(label, float(q[index]))
+            basis = frames[jid]
+            local_world = basis @ local @ basis.T
+            parent = joint_by[jid].parent_canonical_joint_id
+            if parent is None:
+                p_world[jid] = rest[jid].copy()
+                rot_world[jid] = local_world
+            else:
+                parent_rot = rot_world[parent]
+                p_world[jid] = p_world[parent] + parent_rot @ (rest[jid] - rest[parent])
+                rot_world[jid] = parent_rot @ local_world
+        return p_world, rot_world
+
+    contact_weight = 100.0
+    def residual(q: np.ndarray) -> np.ndarray:
+        p, _ = forward(q)
+        blocks = [
+            (10.0 if kind == "PIN" else 1.0) * (p[jid] - target)
+            for _, _, jid, target, kind in goals
+        ]
+        if regularization:
+            blocks.append(math.sqrt(regularization) * q)
+        return np.concatenate(blocks)
+
+    lower_np, upper_np = np.asarray(lower), np.asarray(upper)
+    x0 = np.minimum(np.maximum(np.zeros(len(param_schema)), lower_np), upper_np)
+    opt = least_squares(
+        residual, x0, bounds=(lower_np, upper_np),
+        method="trf", max_nfev=int(max_nfev),
+        xtol=1e-10, ftol=1e-10, gtol=1e-10,
+    )
+    p, rotations = forward(opt.x)
+    reported_goals: list[MechanicsGoalResidualV1] = []
+    for constraint_id, cid, jid, target, kind in goals:
+        reported_goals.append(MechanicsGoalResidualV1(
+            canonical_constraint_id=constraint_id,
+            canonical_control_id=cid,
+            canonical_tip_joint_id=jid,
+            target_P=tuple(map(float, target)),
+            solved_P=tuple(map(float, p[jid])),
+            residual_world=float(np.linalg.norm(p[jid] - target)),
+            goal_kind=kind,
+        ))
+    drag_max = max((g.residual_world for g in reported_goals if g.goal_kind == "DRAG"), default=0.0)
+    pin_max = max((g.residual_world for g in reported_goals if g.goal_kind == "PIN"), default=0.0)
+    passes = bool(opt.success and drag_max <= goal_tolerance and pin_max <= goal_tolerance)
+    rows = tuple(SolvedJointTransformIRV1(
+        canonical_joint_id=jid,
+        rest_P=tuple(map(float, rest[jid])),
+        solved_P=tuple(map(float, p[jid])),
+        rotation_basis=tuple(tuple(float(v) for v in row) for row in rotations[jid]),
+    ) for jid in joint_by)
+    pose = MechanicsPoseIRV1(
+        joints=rows, rig_lineage_hash=rig.rig_lineage_hash,
+        control_program_hash=rig.control_program_hash,
+        constraint_residuals=tuple(
+            (g.canonical_constraint_id, g.residual_world) for g in reported_goals
+        ),
+        metadata={
+            "authority": "MECHANICS_RESEARCH_MULTI_GOAL_ONLY",
+            "solver_family": "SCIPY_ROTATIONAL_FK_LEAST_SQUARES_V1",
+            "model_inference_performed": False,
+            "graphics_authority_claimed": False,
+            "rig_program_mutated": False,
+            "contact_is_world_position_pin_not_force_dynamics": True,
+        },
+    )
+    return MechanicsMultiGoalResultV1(
+        pose=pose, goals=tuple(reported_goals),
+        status=("PASS_MULTIGOAL_BEHAVIORAL_COURT" if passes
+                else "FAIL_MULTIGOAL_BEHAVIORAL_COURT"),
+        max_drag_residual=drag_max, max_pin_residual=pin_max,
+        parameters_rad=tuple(
+            (jid, label, float(value))
+            for (jid, label), value in zip(param_schema, opt.x)
+        ),
+        solver_evaluations=int(opt.nfev),
+        metadata={
+            "solver_termination": str(opt.message),
+            "optimization_converged": bool(opt.success),
+            "declared_angle_limit_count": limits_present,
+            "unbounded_rotation_chart_count": len(param_schema) - limits_present,
+            "pinned_contact_count": len(pins),
+            "compiler_rig_synthesis_performed": False,
+            "training_authority_minted": False,
+            "product_mechanics_release_minted": False,
+        },
+    )
+
+
+__all__ = [
+    "MechanicsGoalResidualV1", "MechanicsMultiGoalResultV1",
+    "solve_declared_multi_goal_v1",
+]

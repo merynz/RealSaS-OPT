@@ -98,6 +98,7 @@ def solve_declared_multi_goal_v1(
     active_parameter_keys: Sequence[tuple[str, str]] | None = None,
     active_parameter_policy: str = "EXPLICIT_OR_ALL",
     preferred_parameter_keys: Sequence[tuple[str, str]] | None = None,
+    singularity_recovery_mode: str = "DISABLED",
     jacobian_mode: str = "NUMERIC_V1",
     verify_analytic_jacobian: bool = False,
 ) -> MechanicsMultiGoalResultV1:
@@ -122,6 +123,10 @@ def solve_declared_multi_goal_v1(
         raise QualificationError("MULTIGOAL_RANK_POLICY_REQUIRES_AUTO_ANALYTIC")
     if preferred_parameter_keys is not None and active_parameter_policy != "RANK_REVEALING_RESEARCH_V1":
         raise QualificationError("MULTIGOAL_HYSTERESIS_REQUIRES_RANK_POLICY")
+    if singularity_recovery_mode not in {"DISABLED", "BOUNDED_DETERMINISTIC_SEEDS_V1"}:
+        raise QualificationError("MULTIGOAL_SINGULARITY_RECOVERY_MODE_UNSUPPORTED")
+    if singularity_recovery_mode != "DISABLED" and active_parameter_keys is not None:
+        raise QualificationError("MULTIGOAL_SINGULARITY_RECOVERY_REQUIRES_FULL_DOF")
 
     joint_by = {j.canonical_joint_id: j for j in rig.joints}
     if not joint_by or len(joint_by) != len(rig.joints) or len(joint_by) > maximum_joints:
@@ -463,6 +468,49 @@ def solve_declared_multi_goal_v1(
             policy_fallback = True
             active_idx = np.arange(len(param_schema), dtype=np.int64)
             opt, solution_q = optimize_subspace(active_idx, solution_q)
+    recovery_trials=0
+    recovery_rescued=False
+    if singularity_recovery_mode == "BOUNDED_DETERMINISTIC_SEEDS_V1":
+        first_positions, _, _=forward(solution_q)
+        first_failed = not bool(opt.success) or any(
+            np.linalg.norm(first_positions[tip]-target) > goal_tolerance
+            for _,_,tip,target,_ in goals
+        )
+        if first_failed:
+            # Search a *finite*, documented set of perturbations, never a
+            # fabricated DOF/limit or stochastic/learned prior. Straight
+            # rest poses often have zero radial Jacobian, although a
+            # nonlinear bent-chain solution is reachable.
+            active_idx=np.arange(len(param_schema),dtype=np.int64)
+            task_jac=analytic_jacobian(solution_q)[:3*len(goals)]
+            drag_rows=np.concatenate([
+                np.arange(3*i,3*i+3,dtype=np.int64)
+                for i,g in enumerate(goals) if g[-1]=="DRAG"
+            ]) if any(g[-1]=="DRAG" for g in goals) else np.arange(task_jac.shape[0])
+            ranks=np.linalg.norm(task_jac[drag_rows],axis=0)
+            candidate_columns=sorted(
+                range(len(param_schema)), key=lambda i:(-float(ranks[i]),i)
+            )[:3]
+            for idx in candidate_columns:
+                for signed in (0.35,-0.35):
+                    seed=solution_q.copy()
+                    seed[idx]=min(max(float(seed[idx]+signed),
+                                      float(lower_np[idx])+1e-10),
+                                  float(upper_np[idx])-1e-10)
+                    if abs(seed[idx]-solution_q[idx])<1e-9:
+                        continue
+                    recovered, recovered_q=optimize_subspace(active_idx,seed)
+                    recovery_trials+=1
+                    positions,_,_=forward(recovered_q)
+                    if bool(recovered.success) and all(
+                        np.linalg.norm(positions[tip]-target) <= goal_tolerance
+                        for _,_,tip,target,_ in goals
+                    ):
+                        opt,solution_q=recovered,recovered_q
+                        recovery_rescued=True
+                        break
+                if recovery_rescued:
+                    break
     p, rotations, _ = forward(solution_q)
     jacobian_debug_error = None
     if verify_analytic_jacobian:
@@ -545,6 +593,10 @@ def solve_declared_multi_goal_v1(
             "rank_revealing_prior_span_relative_error": policy_preferred_span_error,
             "rank_revealing_fallback_to_all": policy_fallback,
             "rank_revealing_candidate_solver_nfev": candidate_nfev,
+            "singularity_recovery_mode": singularity_recovery_mode,
+            "singularity_recovery_trials": recovery_trials,
+            "singularity_recovery_rescued": recovery_rescued,
+            "singularity_recovery_is_bounded_local_multistart_not_global_proof": True,
             "compiler_rig_synthesis_performed": False,
             "training_authority_minted": False,
             "product_mechanics_release_minted": False,

@@ -1,0 +1,115 @@
+name: Drawable capability decision v2 original physical-source court
+on:
+  push:
+    branches: [research/drawable-capability-decision-v2]
+    paths:
+      - 'tools/corpus/*drawable_capability_decision_v2.py'
+      - 'tests/corpus/test_drawable_capability_decision_v2.py'
+      - '.github/workflows/drawable-capability-decision-v2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: drawable-capability-decision-v2-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Exact finite solver, adversarial court, parent regressions
+        run: |
+          python -m pip install 'numpy>=1.26,<3' 'pillow>=10,<13' 'pytest>=8,<10'
+          python -m pytest -q tests/corpus/test_drawable_capability_decision_v2.py tests/corpus/test_corpus370_operational_edit_algebra_v1.py tests/corpus/test_corpus370_source_sample_k_v1.py tests/corpus/test_corpus370_original_cat_uv_texture_cycles_v2.py tests/corpus/test_corpus370_source_cat_uv_consequence_ledger_v1.py
+  original-physical-decision-court:
+    needs: contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Pinned private transport
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m pip install 'numpy>=1.26,<3'
+          R="$RUNNER_TEMP/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v1.75.2-linux-amd64" >> "$GITHUB_PATH"
+          D="$RUNNER_TEMP/drawable-decision"
+          mkdir -p "$D/cat" "$D/tric" "$D/out"
+          test -n "$DRIVE_CONFIG_B64"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$D/rclone.conf"
+      - name: Read immutable PR351 physical evidence only
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/drawable-decision"
+          export RCLONE_CONFIG="$D/rclone.conf"
+          ROOT="gdrive:corpus370_preparation_v1"
+          CAT="$ROOT/hosted_operational_cat_uv_texture_cycles_v2/CAT/42263195370-1"
+          TRIC="$ROOT/hosted_operational_original_k3_source_cycles_v1/TRICERATOPS/42248465757-1"
+          for NAME in PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.json PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.npz PRIVATE_INDEPENDENT_CAT_SOURCE_UV_EDIT_CONSEQUENCE_COURT_V2.json; do
+            rclone copyto "$CAT/$NAME" "$D/cat/$NAME" --checksum --retries 3
+          done
+          for NAME in PRIVATE_ORIGINAL_SOURCE_K3_SAME_CYCLES_SAMPLES_V1.json PRIVATE_ORIGINAL_SOURCE_K3_SAME_CYCLES_SAMPLES_V1.npz PRIVATE_INDEPENDENT_ORIGINAL_SOURCE_K3_SAME_INDEX_COURT_V1.json; do
+            rclone copyto "$TRIC/$NAME" "$D/tric/$NAME" --checksum --retries 3
+          done
+      - name: Candidate decisions and independent physical counter-court
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/drawable-decision"
+          python -m tools.corpus.measure_drawable_capability_decision_v2 --inputs "$D" --output "$D/out/DECISION_ANALYSIS_V2.json"
+          python -m tools.corpus.court_drawable_capability_decision_v2 --inputs "$D" --report "$D/out/DECISION_ANALYSIS_V2.json" --output "$D/out/INDEPENDENT_DECISION_COURT_V2.json"
+          python -c 'import json,os,pathlib; p=pathlib.Path(os.environ["RUNNER_TEMP"])/"drawable-decision/out/EXECUTION.json"; p.write_text(json.dumps({"code_sha":os.environ["GITHUB_SHA"],"run_id":os.environ["GITHUB_RUN_ID"],"run_attempt":os.environ["GITHUB_RUN_ATTEMPT"],"new_blender_renders":0,"training_authorized":False},sort_keys=True,indent=2)+"\n")'
+      - name: Preserve and SHA-readback private result
+        if: always()
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/drawable-decision"
+          if [ ! -s "$D/rclone.conf" ]; then exit 0; fi
+          export RCLONE_CONFIG="$D/rclone.conf"
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_drawable_capability_decision_v2/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in "$D/out/"*.json; do
+            if [ -s "$F" ]; then
+              NAME="$(basename "$F")"
+              rclone copyto "$F" "$REMOTE/$NAME" --checksum --retries 3
+              rclone cat "$REMOTE/$NAME" > "$D/readback-$NAME"
+              cmp "$F" "$D/readback-$NAME"
+              sha256sum "$F"
+            fi
+          done
+  architecture-discovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: platform/go.mod
+          cache-dependency-path: platform/go.sum
+      - name: Source map and actual changed-file impact
+        run: |
+          python tools/realsas_architecture.py --json-out "$RUNNER_TEMP/architecture.json" map > "$RUNNER_TEMP/map.log"
+          python tools/realsas_architecture.py --json-out "$RUNNER_TEMP/impact.json" impact --path tools/corpus/drawable_capability_decision_v2.py --path tools/corpus/measure_drawable_capability_decision_v2.py --path tools/corpus/court_drawable_capability_decision_v2.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: drawable-v2-source-impact
+          path: |
+            ${{ runner.temp }}/architecture.json
+            ${{ runner.temp }}/impact.json
+            ${{ runner.temp }}/map.log

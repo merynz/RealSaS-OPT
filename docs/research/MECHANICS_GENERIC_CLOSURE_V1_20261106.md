@@ -218,3 +218,83 @@ Versioned receipt: docs/research/MECHANICS_ANALYTIC_JACOBIAN_DOF_SCALE_20261106.
 Scope: five joints with 3–15 declared rotational parameters, two IK goals and a position pin. This is a numerical/sparsity stress fixture, not 15 proven independently observable source controls. The 15-DOF fixture includes terminal joint rotations that do not move their own joint origins. It is NOT a 43-bone source correspondence court, DOF truth mint, force/contact/collision model, or product 60-FPS certification.
 
 Next scientific barrier: genuinely longer articulated trees, mixed morphologies, source-frame axis correspondence, multi-contact and grip orientation, validated full frame time through source-bound canonical outputs. Keep the numeric fallback until that evidence exists.
+
+## 2026-11-06: long branching morphology / contact / DOF observability research
+
+The 3–15-DOF Jacobian experiment was a five-joint reference and could not test
+larger genuine joint trees. An independent **24/48/72 real-actuating-DOF**
+synthetic Mechanics court has now been added, without modifying the IRIS,
+TESSA, Corpus370 or model learning lanes:
+
+- `tools/mechanics/benchmark_long_branching_ik_v1.py` generates three curved
+  articulated trees: 2 branches/27 joints/24 DOF, 4 branches/53 joints/48 DOF,
+  6 branches/79 joints/72 DOF. Each branch has twelve declared pivot DOFs and
+  one constrained terminal tip. XY, XZ and YZ planes and RX/RY/RZ axes are
+  all represented; no semantic body-part source names are inputs.
+- Half of the declared controls are **world-space positional pins**, half are
+  simultaneously dragged. The new `pinned_world_targets` contract preserves
+  an explicitly supplied world contact point rather than silently resetting it
+  to its control's rest position. Unknown or missing pin IDs, NaNs, non-3D
+  anchors and simultaneously overridden pins fail closed.
+- Exact rest position FK Jacobian is measured independently from each pivot
+  using axis cross-product geometry. All **24/48/72 declared DOFs have nonzero
+  impact on at least one terminal tip**, but endpoint-position Jacobian
+  ranks are respectively **4/8/12**, leaving **20/40/60 underdetermined
+  dimensions** in these experiments. A nonzero causal effect is not proof of
+  unique inverse controllability or source-authored behavior.
+- The original *full-DOF* analytic SciPy reference solver successfully
+  satisfies the reachable targets and pin constraints for all three trees;
+  segment length errors remain at numerical precision. On the GitHub runner,
+  single full-solve durations were **94.01/277.44/422.36 ms**. These are
+  deliberately NOT realtime or product FPS evidence.
+- A **separate, explicit and typed runtime representation policy**
+  `active_parameter_keys` may freeze unselected declared DOFs at the
+  current validated warm-start angles. All canonical rig joints, DOF labels
+  and solver constraint residual checks remain intact. In the synthetic
+  stress fixture alone we know from the *test generator* that each dragged
+  goal was produced by rotating the first pivot of that branch. Selecting
+  those oracle-known 1/2/3 actuators reduces the respective solve durations
+  to **8.51/26.42/39.20 ms** on the same one-shot runner experiment.
+  This is a deliberately **oracle-chosen policy**, NOT a learned model,
+  generic control discovery or proof that arbitrary goals need only one pivot.
+- Crucial negative test: a target constructed from **two independent pivot
+  rotations** is **unreachable** by the one-pivot active policy and must
+  return FAIL. The full solver succeeds on that same target. The runtime
+  refuses invalid, undeclared, empty or duplicate selected DOF keys; no
+  silent degradation of capability is allowed.
+
+### Source truth vs capability contract vs representation policy
+
+**Source truth:** This new trial uses synthetic rig data only, so it produces
+NO new teacher-source DOF, IK or contact ground truth. Existing Stage47
+source-native measurements remain a separate read-only authority.
+
+**Capability contract:** A usable puppet must hold declared world-position
+contacts while solving independent controlled targets; no goal can be called
+solved unless each original full-space residual passes. In the product
+contract, orientation, attachment grip, collision/contact force and skin
+consequences still require dedicated independent courts.
+
+**Representation policy:** Choosing an active subspace is a performance and
+control-style decision among *possible* solutions. It must not delete
+unselected source DOFs, fabricate physical angular limits, or redefine
+the puppet's capability contract. Its validity may depend on pose and target.
+An operator that can solve one known target is not necessarily sufficient
+for nearby or two-pivot target edits.
+
+**GitHub verification:** 68 focused Mechanics tests PASS on Actions run
+`42278009295` at test head
+`2e0cccf89828243133fbdcb45189d36f4ea565b5`.
+Evidence receipt:
+`docs/research/MECHANICS_LONG_BRANCHING_DOF_POLICY_20261106.json`.
+
+### Next independent blocker
+
+Develop a **task-space, rank-revealing active-actuator selection court**
+that uses only declared joint/control/constraint evidence, not the private
+synthetic target-generation answer or an anatomical-name heuristic. Require
+dynamic fallback when a chosen subspace fails an original capability
+constraint, and compare target/pose continuity across sequences.
+Then execute the same problem on source-native authored controls and qualified
+source→canonical mappings across different morphologies. This is still
+research-only and must not mint generic/unseen model authority.

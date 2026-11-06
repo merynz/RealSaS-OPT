@@ -1,0 +1,47 @@
+name: axis-mira-v6-main-worker-producer-consumer-v1
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_services/platform_worker/rig_executor_v2.py'
+      - 'compiler/realsas_compiler_services/platform_worker/skin_executor_v2.py'
+      - 'compiler/realsas_compiler_services/platform_worker/worker.py'
+      - 'tests/compiler/test_axis_mira_v6_worker_producer_consumer_v1.py'
+      - '.github/workflows/axis_mira_v6_main_worker_producer_consumer_v1.yml'
+      - 'docs/platform/AXIS_MIRA_V6_WORKER_PRODUCER_CONSUMER_20261107.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  producer-consumer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned CPU and worker requirements
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/platform-worker.txt
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
+      - name: Compile two original V6 workers and actual dispatcher
+        run: |
+          python -m py_compile \
+            compiler/realsas_compiler_services/platform_worker/rig_executor_v2.py \
+            compiler/realsas_compiler_services/platform_worker/skin_executor_v2.py \
+            compiler/realsas_compiler_services/platform_worker/worker.py
+      - name: Execute parent and ModelRelease rejection courts
+        run: |
+          python -m pytest -q \
+            tests/compiler/test_axis_mira_v6_worker_producer_consumer_v1.py \
+            tests/compiler/test_mechanics_cas_worker_main_v1.py \
+            tests/models/test_axis_mira_v6_product_runtime.py \
+            tests/models/test_axis_mira_v6_checkpoint_security_v1.py

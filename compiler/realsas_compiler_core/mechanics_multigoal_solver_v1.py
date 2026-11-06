@@ -495,8 +495,11 @@ def solve_declared_multi_goal_v1(
                 range(len(param_schema)), key=lambda i:(-float(ranks[i]),i)
             )[:3]
             for idx in candidate_columns:
-                for signed in (0.35,-0.35):
-                    seed=solution_q.copy()
+                # Restart from the last VALID supplied pose, not from an
+                # already compromised local-minimum solution. Larger angles
+                # reveal second-order radial reachability at straight chains.
+                for signed in (0.70,-0.70,1.30,-1.30):
+                    seed=x0.copy()
                     seed[idx]=min(max(float(seed[idx]+signed),
                                       float(lower_np[idx])+1e-10),
                                   float(upper_np[idx])-1e-10)

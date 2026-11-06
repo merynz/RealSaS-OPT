@@ -1,0 +1,99 @@
+name: Original Cat source physical factorial Möbius truth independent court
+on:
+  push:
+    branches: [research/relations-graphics-proof-contract-v1]
+    paths:
+      - 'tools/corpus/source_intervention_mobius_truth_v1.py'
+      - 'tools/corpus/court_source_intervention_mobius_v1.py'
+      - 'tests/corpus/test_source_intervention_mobius_truth_v1.py'
+      - '.github/workflows/source-intervention-mobius-original-cat-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: original-cat-mobius-truth-v1-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  algebra-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Pure mathematical identities, no original source files
+        run: |
+          python -m pip install 'numpy>=1.26,<3' 'pytest>=8,<10'
+          python -m py_compile tools/corpus/source_intervention_mobius_truth_v1.py tools/corpus/court_source_intervention_mobius_v1.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_source_intervention_mobius_truth_v1.py
+  original-full-factorial-independent-source-court:
+    needs: algebra-regressions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: SHA-join all original 8 Cat intervention arms then independently rederive physical Möbius coefficients
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m pip install 'numpy>=1.26,<3'
+          D="$RUNNER_TEMP/cat-original-source-mobius-v1"
+          mkdir -p "$D/inputs" "$D/out"
+          export RCLONE_CONFIG="$D/rclone.conf"
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          R="$D/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$D"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          ROOT="gdrive:corpus370_preparation_v1"
+          SRC="$ROOT/hosted_operational_cat_uv_texture_cycles_v2/CAT/42263195370-1"
+          rclone copyto "$SRC/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.npz" "$D/inputs/original-physical-samples.npz" --checksum --retries 5
+          rclone copyto "$SRC/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.json" "$D/inputs/original-physical-manifest.json" --checksum --retries 5
+          rclone copyto "$SRC/PRIVATE_INDEPENDENT_CAT_SOURCE_UV_EDIT_CONSEQUENCE_COURT_V2.json" "$D/inputs/original-physical-independent-court.json" --checksum --retries 5
+          echo "d422b7d7d082fba5deac5dd1239b8c6aec078f4d635a7bd5b1f10e514100b114  $D/inputs/original-physical-samples.npz" | sha256sum --check
+          echo "8a56e47a09f5c1216de2c97e6f13d5e04385f7fe7d2e580d0085b2ab69dc2da1  $D/inputs/original-physical-manifest.json" | sha256sum --check
+          echo "90b85b9c1a963b23f7c3037ca443975bf2d5c5d4123568d8aa8e54557e433c08  $D/inputs/original-physical-independent-court.json" | sha256sum --check
+          python -m tools.corpus.source_intervention_mobius_truth_v1 \
+            --root "$D/inputs" \
+            --output "$D/out/PRIVATE_CAT_ORIGINAL_SOURCE_INTERVENTION_MOBIUS_V1.json"
+          python -m tools.corpus.court_source_intervention_mobius_v1 \
+            --root "$D/inputs" \
+            --producer "$D/out/PRIVATE_CAT_ORIGINAL_SOURCE_INTERVENTION_MOBIUS_V1.json" \
+            --output "$D/out/PRIVATE_INDEPENDENT_CAT_SOURCE_INTERVENTION_MOBIUS_COURT_V1.json"
+          D="$D" python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          j=json.loads((d/"out/PRIVATE_INDEPENDENT_CAT_SOURCE_INTERVENTION_MOBIUS_COURT_V1.json").read_text())
+          assert j["status"]=="EIGHT_ORIGINAL_PHYSICAL_SOURCE_ARMS_UNIQUELY_DECOMPOSED_BY_MOBIUS__NO_OWNER"
+          assert j["no_high_order_interactions_above_inherited_tolerance"] is True
+          assert j["nonzero_0_1_interaction_below_inherited_tolerance"] is True
+          assert j["training_authorized"] is False and j["materialization_authorized"] is False
+          assert j["original_author_drawable_ownership"]=="UNKNOWN"
+          print("ORIGINAL_CAT_MOBIUS_PHYSICAL_8_ARMS_256_FRAMES_INDEPENDENT_SOURCE_COURT_PASS",flush=True)
+          PY
+          DEST="$ROOT/hosted_original_cat_intervention_mobius_v1/CAT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in "$D/out/"*.json; do
+            rclone copyto "$F" "$DEST/$(basename "$F")" --checksum --retries 5
+            for N in 1 2 3 4 5 6; do
+              if rclone cat "$DEST/$(basename "$F")" > "$D/out/readback-$(basename "$F")" 2>/dev/null && test -s "$D/out/readback-$(basename "$F")"; then
+                cmp "$F" "$D/out/readback-$(basename "$F")"
+                break
+              fi
+              sleep 4
+            done
+            cmp "$F" "$D/out/readback-$(basename "$F")"
+            sha256sum "$F"
+          done
+          echo "ORIGINAL_CAT_MOBIUS_SOURCE_INTERVENTION_PROOF_SHA_READBACK_PASS__NO_OWNER_LABELS"

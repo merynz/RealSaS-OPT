@@ -75,3 +75,23 @@ D. **Motion and latency:** typed interactive control tracks, temporal continuity
 E. **Upstream release binding:** once frozen IRIS/TESSA and MIRA/AXIS releases exist, replace oracle mechanical carriers with real product outputs, train/evaluate only against sealed lineage-aware rosters, and preserve Graphics authority.
 
 **Acceptance** requires behavioral correctness with repeatable source-independent evidence across multiple morphologies. Passing a three-joint fixture proves a specific bug fix, not generic closure.
+
+## V1 continuation: simultaneous declared goals and real Stage47 source inspection
+
+The next increment, still **research only**, is in
+`compiler/realsas_compiler_core/mechanics_multigoal_solver_v1.py`. It is an opt-in SciPy rotational-FK constrained least-squares *reference solver* rather than a product replacement for FABRIK:
+
+- solves multiple independently declared `IK_EFFECTOR` goals in one nonlinear objective;
+- supports exact rest-position pins for declared IK control targets with stronger priority, without synthesizing a foot or contact rig;
+- uses `CanonicalJointFrameIRV2.dof_labels` as rotation-axis permissions only; explicit `metadata.rotation_limits_rad` is enforced if present, otherwise ±π is **numerical chart domain only** and no anatomical limit is claimed;
+- preserves parent-child segment lengths by forward kinematics; reports every drag/pin residual in source/rig world units;
+- fails closed on unsupported pole inputs, translational/scale DOFs, unsupported operators, FK overlays and undeclared handles;
+- exposes opt-in `solver_mode="DECLARED_MULTI_GOAL_V1"` through the same live Mechanics and LBS diagnostic path, with active Motion still separately controlled.
+- runtime solves have no measured 60 FPS or p95 guarantee; SciPy optimizer is a research-quality comparison baseline.
+
+A real read-only source investigation now exists for **Truth139 `truth139_fff1396de9c37b2bab05`** (Dino.glTF), with exact Google Drive source files and a SHA-verified Stage47 NPZ recorded at
+`docs/research/MECHANICS_STAGE47_REAL_SOURCE_PILOT_20261106.json`. This explicitly research-exposes that subject: it must **not** become future blind unseen. The verified source tensor has **3,266 vertices, 129 privileged kinematic control parameters, and 774 source-native interventions** (387 signed pairs); 738 interventions show nonzero geometric response. Source rest, sham and root translation checks match within numerical tolerance.
+
+The independent audit code `tools/mechanics/audit_stage47_source_mechanics_v1.py` validates SHA-bound source evidence and signed perturbation pairs, but **does not compare the RealSaS compiler solver to source Blender results** because the source→canonical joint/weight correspondence is not yet qualified. In particular, these source controls are `KINEMATIC_PARAMETER__NOT_PHYSICAL_DOF_OR_JOINT_LIMIT`, and the teacher explicitly declares `source_weight_lbs_equivalence=NOT_QUALIFIED`. All source-private handles and names remain teacher-only.
+
+**Scientific next barrier:** inventing an IK rest-compatible interaction target is not source-authored IK truth. Before source-vs-compiler comparison, build a separately courted canonical joint/skin mapping that preserves source rest frames and response-space provenance, and compare source-intervention tensors against independent compiled pose/deformation. A numerically perfect optimization result against its own goals is never sufficient for source equivalence.

@@ -1,0 +1,114 @@
+name: Corpus370 original Cat UV source graphics consequence ledger + authority v1
+on:
+  push:
+    branches: [corpus370-operational-drawable-decision-v1]
+    paths:
+      - 'tools/corpus/compile_corpus370_source_cat_uv_consequence_ledger_v1.py'
+      - 'tools/corpus/court_corpus370_source_cat_uv_consequence_ledger_v1.py'
+      - 'tests/corpus/test_corpus370_source_cat_uv_consequence_ledger_v1.py'
+      - '.github/workflows/corpus370-source-cat-uv-consequence-ledger-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-cat-uv-consequence-ledger-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-cat-uv-ledger-adversarial-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Syntax and 14 adversarial source owner/authority/scope contracts
+        run: |
+          set -euo pipefail
+          python -m pip install 'pytest>=8,<10'
+          python -m py_compile tools/corpus/compile_corpus370_source_cat_uv_consequence_ledger_v1.py tools/corpus/court_corpus370_source_cat_uv_consequence_ledger_v1.py
+          python -m pytest -q tests/corpus/test_corpus370_source_cat_uv_consequence_ledger_v1.py
+  original-cat-uv-ledger-sha-independent-real:
+    needs: original-cat-uv-ledger-adversarial-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare SHA-locked source-only private transport
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/original-cat-source-uv-ledger"
+          mkdir -p "$D"
+          R="$RUNNER_TEMP/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 "https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip" -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v1.75.2-linux-amd64" >> "$GITHUB_PATH"
+          test -n "$DRIVE_CONFIG_B64"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$D/private-rclone.conf"
+          test -s "$D/private-rclone.conf"
+          unset DRIVE_CONFIG_B64
+      - name: Reopen immutable original Cat source UV V2 real physical edit receipts by exact SHA
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/original-cat-source-uv-ledger"
+          export RCLONE_CONFIG="$D/private-rclone.conf"
+          ROOT="gdrive:corpus370_preparation_v1"
+          rclone copyto "$ROOT/hosted_operational_cat_source_uv_plan_v2/CAT/42260446130-1/PRIVATE_CAT_ORIGINAL_SOURCE_UV_EDIT_PLAN_V2.json" "$D/plan.json" --checksum --retries 3
+          rclone copyto "$ROOT/hosted_operational_cat_uv_texture_cycles_v2/CAT/42263195370-1/PRIVATE_SOURCE_UV_ATLAS_EDIT_IMAGES_V1.json" "$D/atlas-assets.json" --checksum --retries 3
+          rclone copyto "$ROOT/hosted_operational_cat_uv_texture_cycles_v2/CAT/42263195370-1/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.json" "$D/render.json" --checksum --retries 3
+          rclone copyto "$ROOT/hosted_operational_cat_uv_texture_cycles_v2/CAT/42263195370-1/PRIVATE_INDEPENDENT_CAT_SOURCE_UV_EDIT_CONSEQUENCE_COURT_V2.json" "$D/source-court.json" --checksum --retries 3
+          echo "8be8fccde3d9cc97f7ba452fd50c1a9f4ebea2e34da590a22d30872b2b0f497b  $D/plan.json" | sha256sum --check
+          echo "0e9a2fcf6a2c048eb6e99048793290b8865d802689f59b7c8c20bc6390cf479a  $D/atlas-assets.json" | sha256sum --check
+          echo "8a56e47a09f5c1216de2c97e6f13d5e04385f7fe7d2e580d0085b2ab69dc2da1  $D/render.json" | sha256sum --check
+          echo "90b85b9c1a963b23f7c3037ca443975bf2d5c5d4123568d8aa8e54557e433c08  $D/source-court.json" | sha256sum --check
+      - name: Compile original Cat typed source-only Graphics candidate truth families
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/original-cat-source-uv-ledger"
+          python -m tools.corpus.compile_corpus370_source_cat_uv_consequence_ledger_v1 --source-plan "$D/plan.json" --atlas-assets "$D/atlas-assets.json" --original-render-manifest "$D/render.json" --independent-court "$D/source-court.json" --truth-contract canonical/CORPUS_TRUTH_AUTHORITY_CONTRACT_V1.json --expected-independent-court-sha256 90b85b9c1a963b23f7c3037ca443975bf2d5c5d4123568d8aa8e54557e433c08 --output "$D/PRIVATE_SOURCE_CAT_UV_GRAPHICS_EDIT_LEDGER_V1.json"
+      - name: Independently cross-court every original source edit and forbidden owner/materialization promotion
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/original-cat-source-uv-ledger"
+          python -m tools.corpus.court_corpus370_source_cat_uv_consequence_ledger_v1 --ledger "$D/PRIVATE_SOURCE_CAT_UV_GRAPHICS_EDIT_LEDGER_V1.json" --source-plan "$D/plan.json" --atlas-assets "$D/atlas-assets.json" --original-render-manifest "$D/render.json" --independent-court "$D/source-court.json" --truth-contract canonical/CORPUS_TRUTH_AUTHORITY_CONTRACT_V1.json --output "$D/PRIVATE_INDEPENDENT_SOURCE_CAT_UV_GRAPHICS_LEDGER_COURT_V1.json"
+          D="$D" python - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["D"])
+          a=json.loads((p/"PRIVATE_SOURCE_CAT_UV_GRAPHICS_EDIT_LEDGER_V1.json").read_text())
+          b=json.loads((p/"PRIVATE_INDEPENDENT_SOURCE_CAT_UV_GRAPHICS_LEDGER_COURT_V1.json").read_text())
+          assert b["status"]=="PASS_CAT_SOURCE_UV_GRAPHICS_LEDGER_ACCOUNTING__TRUTH_AUTHORITY_PENDING"
+          assert a["source_edit_consequence_totals"]=={
+            "single_edit_sample_incidents_by_operation":[290979,264554,6048],
+            "pairwise_visible_sample_support_overlap":{"0_1":2799,"0_2":0,"1_2":0},
+            "heldout_source_pair_joint_sample_mismatches":0,
+            "heldout_source_pair_joint_eight_sample_mean_mismatches":0,
+            "source_alpha_drift":0}
+          assert set(a["family_matrix_bridge"])=={"APPEARANCE_CAA","CAUSAL_RESPONSE"}
+          assert all(x["final_family_authority_state"]=="PENDING"
+                     and x["training_target_minted"] is False
+                     for x in a["family_matrix_bridge"].values())
+          assert a["same_drawable_training_pairs_qualified"]==0
+          assert a["different_drawable_training_pairs_qualified"]==0
+          assert not a["training_authorized"]
+          print("CAT_UV_ORIGINAL_SOURCE_EDIT_FAMILY_CANDIDATES_ONLY__NO_OWNER_OR_TRAINING_AUTHORITY",flush=True)
+          PY
+      - name: Preserve immutable original source-private receipts and readback compare
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/original-cat-source-uv-ledger"
+          export RCLONE_CONFIG="$D/private-rclone.conf"
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_operational_source_cat_uv_graphics_ledger_v1/CAT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in PRIVATE_SOURCE_CAT_UV_GRAPHICS_EDIT_LEDGER_V1.json PRIVATE_INDEPENDENT_SOURCE_CAT_UV_GRAPHICS_LEDGER_COURT_V1.json; do
+            rclone copyto "$D/$F" "$REMOTE/$F" --checksum --retries 3
+            rclone cat "$REMOTE/$F" > "$D/readback-$F"
+            cmp "$D/$F" "$D/readback-$F"
+          done
+          echo "ORIGINAL_SOURCE_CAT_UV_GRAPHICS_LEDGER_PRIVATE_SHA_READBACK_2_FAMILIES_PENDING"

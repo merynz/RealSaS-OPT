@@ -1,0 +1,71 @@
+name: corpus370-operational-drawable-inputs-v1
+on:
+  push:
+    branches: [corpus370-operational-drawable-decision-v1]
+    paths: ['.github/workflows/corpus370-operational-drawable-inputs-v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: operational-drawable-inputs-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  exact-private-transport:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare exact transport tool
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --max-time 180 https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip -o "$RUNNER_TEMP/rclone.zip"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $RUNNER_TEMP/rclone.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/rclone.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v1.75.2-linux-amd64" >> "$GITHUB_PATH"
+      - name: Extract only exact two-source input dependencies without scientific execution
+        run: |
+          set -euo pipefail
+          umask 077
+          export RCLONE_CONFIG="$RUNNER_TEMP/private.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          export OD_INPUTS="$RUNNER_TEMP/od-inputs"
+          mkdir -p "$OD_INPUTS"
+          rclone copy gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards "$OD_INPUTS" --checksum --transfers 2 --checkers 2 --retries 3
+          python3 - <<'PY'
+          import os,json,hashlib,zipfile
+          from pathlib import Path
+          d=Path(os.environ['OD_INPUTS']); m=d/'PRIVATE_V5_SHARD_MANIFEST.json'
+          h=lambda p: hashlib.file_digest(p.open('rb'),'sha256').hexdigest()
+          assert h(m)=='cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172'
+          doc=json.loads(m.read_text())
+          ids=('corpus_000ca1ae51f9582fde9e','corpus_004e16e05b90505ca23c')
+          selected=[]
+          for f in doc['files']:
+              p=f['relative_path']
+              source=p.endswith('/animal-cat.glb') or p.endswith('/Triceratops.fbx')
+              texture=any(v in p for v in ('kenney-cube-pets/raw/','quaternius-animated-dinosaurs/raw/')) and Path(p).suffix.lower() in ('.png','.jpg','.jpeg','.tga','.bmp') and '/Previews/' not in p
+              if source or texture or any(i in p for i in ids): selected.append(f)
+          needed={f['sha256']:f for f in selected}; found=set()
+          out=d/'ORIGINAL_TWO_SOURCE_INPUTS.zip'
+          with zipfile.ZipFile(out,'w',compression=zipfile.ZIP_DEFLATED) as dst:
+              for sh in doc['shards']:
+                  p=d/sh['name'];assert p.stat().st_size==sh['size_bytes'] and h(p)==sh['sha256']
+                  with zipfile.ZipFile(p) as src:
+                      for sha in sorted(needed.keys() & set(sh['object_ids'])):
+                          b=src.read('objects/'+sha);assert len(b)==needed[sha]['size_bytes'] and hashlib.sha256(b).hexdigest()==sha
+                          dst.writestr('objects/'+sha,b);found.add(sha)
+              assert found==needed.keys()
+              dst.writestr('PRIVATE_TRANSPORT_MANIFEST.json',json.dumps({'schema':'RealSaS.ExactTwoSourceTransport.v1','parent_manifest_sha256':h(m),'files':selected,'training_authorized':False,'scientific_execution':False},sort_keys=True,indent=2)+'\n')
+          receipt={'schema':'RealSaS.ExactTwoSourceTransportReceipt.v1','archive_sha256':h(out),'archive_size':out.stat().st_size,'file_count':len(selected),'unique_objects':len(found),'scientific_execution':False,'training_authorized':False}
+          (d/'TRANSPORT_RECEIPT.json').write_text(json.dumps(receipt,sort_keys=True,indent=2)+'\n')
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+          DEST="gdrive:corpus370_preparation_v1/hosted_operational_drawable_inputs_v1/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in ORIGINAL_TWO_SOURCE_INPUTS.zip TRANSPORT_RECEIPT.json; do
+            rclone copyto "$OD_INPUTS/$F" "$DEST/$F" --checksum --retries 3
+            rclone cat "$DEST/$F" > "$OD_INPUTS/readback-$F" --retries 6 --low-level-retries 6
+            cmp "$OD_INPUTS/$F" "$OD_INPUTS/readback-$F"
+          done

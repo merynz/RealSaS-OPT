@@ -1,0 +1,131 @@
+name: Corpus370 original Cat linked UV atlas edit source plan v2 glTF top-left
+on:
+  push:
+    branches: [corpus370-operational-drawable-decision-v1]
+    paths:
+      - 'tools/corpus/compile_corpus370_original_source_uv_edit_plan_v2.py'
+      - 'tests/corpus/test_corpus370_original_source_uv_edit_plan_v1.py'
+      - '.github/workflows/corpus370-original-cat-uv-edit-plan-v2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-original-cat-uv-source-plan-v2-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-source-uv-address-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Deterministic source GLB UV address and adversarial cases
+        run: |
+          set -euo pipefail
+          python -m pip install 'numpy>=1.26,<3' 'pillow>=10,<13' 'pytest>=8,<10'
+          python -m pytest -q tests/corpus/test_corpus370_original_source_uv_edit_plan_v1.py
+  original-cat-sha-sealed-glb-uv-atlas-plan:
+    needs: original-source-uv-address-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      CAT_SHA: 1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850
+      ATLAS_SHA: 2f6d0032e51c2d49b13b8e689d59eb39aa3ee6c32f2a1851213e11fc7593177d
+      SID: corpus_000ca1ae51f9582fde9e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Prepare pinned private original-source transport
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m pip install 'numpy>=1.26,<3' 'pillow>=10,<13'
+          R="$RUNNER_TEMP/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 "https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip" -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v1.75.2-linux-amd64" >> "$GITHUB_PATH"
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/original-cat-uv-plan-rclone.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+      - name: Download original archived Cat and texture, enforce every raw SHA
+        run: |
+          set -euo pipefail
+          umask 077
+          export RCLONE_CONFIG="$RUNNER_TEMP/original-cat-uv-plan-rclone.conf"
+          D="$RUNNER_TEMP/original-cat-uv-plan"
+          mkdir -p "$D/src/Textures"
+          rclone copyto "gdrive:corpus370_preparation_v1/hosted_operational_drawable_inputs_v1/42220981274-1/ORIGINAL_TWO_SOURCE_INPUTS.zip" "$D/inputs.zip" --checksum --retries 3
+          echo "e3c758b0a4dc9bd3e7f889e94366fa7ff40517deb15e68a202d525b62de13948  $D/inputs.zip" | sha256sum --check
+          D="$D" python - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          root=Path(os.environ["D"])
+          with zipfile.ZipFile(root/"inputs.zip") as z:
+            manifest=json.loads(z.read("PRIVATE_TRANSPORT_MANIFEST.json"))
+            assert manifest["parent_manifest_sha256"]=="cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172"
+            rows=manifest["files"]
+            targets=[
+                ("/Models/GLB format/animal-cat.glb","src/animal-cat.glb"),
+                ("/Models/GLB format/Textures/colormap.png","src/Textures/colormap.png"),
+                ("/subjects/corpus_000ca1ae51f9582fde9e/SOURCE_REST_GEOMETRY_V1.npz","rest.npz"),
+                ("/corpus_000ca1ae51f9582fde9e/SOURCE_REST_RENDER_CANDIDATE.json","policy.json"),
+                ("/corpus_000ca1ae51f9582fde9e/camera_bundle.json","camera.json"),
+            ]
+            for suffix,out in targets:
+              candidates=[x for x in rows if x["relative_path"].endswith(suffix)]
+              assert len(candidates)==1,(suffix,len(candidates))
+              parent=candidates[0]
+              data=z.read("objects/"+parent["sha256"])
+              assert len(data)==parent["size_bytes"] and hashlib.sha256(data).hexdigest()==parent["sha256"]
+              path=root/out;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data)
+          for name,expected in (
+              ("src/animal-cat.glb",os.environ["CAT_SHA"]),
+              ("src/Textures/colormap.png",os.environ["ATLAS_SHA"]),
+              ("rest.npz","748609aca5ba7c509aa390ed65baeca7612b8879aa00409735da3a96758379cf"),
+              ("camera.json","300b935a47379f6c44d4b4356554d1c32a86ca3b732a62405c73da9e0ec6adf0"),
+              ("policy.json","c8fe4e307ddbbaf5cc0892cffc4267bd08e394f2299f4e70155ffc6207190a4b"),
+          ):
+              assert hashlib.sha256((root/name).read_bytes()).hexdigest()==expected,name
+          PY
+      - name: Original source UV atlas plan and prior falsification boundary
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/original-cat-uv-plan"
+          python -m tools.corpus.compile_corpus370_original_source_uv_edit_plan_v2 --source "$D/src/animal-cat.glb" --atlas "$D/src/Textures/colormap.png" --rest-geometry "$D/rest.npz" --camera-bundle "$D/camera.json" --source-policy "$D/policy.json" --subject-id "$SID" --expected-source-sha256 "$CAT_SHA" --expected-atlas-sha256 "$ATLAS_SHA" --output "$D/PRIVATE_CAT_ORIGINAL_SOURCE_UV_EDIT_PLAN_V2.json"
+          D="$D" python - <<'PY'
+          import json,os
+          from pathlib import Path
+          z=json.loads((Path(os.environ["D"])/"PRIVATE_CAT_ORIGINAL_SOURCE_UV_EDIT_PLAN_V2.json").read_text())
+          assert z["source_glb_triangle_count"]==684
+          assert z["source_texture_size_px"]==[512,512]
+          assert [(a["uv_tile_u"],a["uv_tile_v"],a["source_triangle_uv_centroid_count"]) for a in z["selected_original_source_uv_edits"]]==[
+              (6,6,292),(6,7,246),(7,6,63)]
+          assert z["source_uv_coordinate_origin"]=="GLTF_2_IMAGE_TOP_LEFT__UV_V_INCREASES_DOWN"
+          assert z["source_uv_to_png_y_flip_applied"] is False
+          assert [a["source_rgba_png_pixel_rectangle_xyxy_exclusive"] for a in z["selected_original_source_uv_edits"]]==[[384,384,448,448],[384,448,448,512],[448,384,512,448]]
+          assert not z["selection_used_original_rendered_2d_image"]
+          assert not z["graphics_owner_authorized"]
+          assert not z["training_authorized"]
+          print("ORIGINAL_CAT_UV_TEXTURE_ADDR_SOURCE_COURTED__NOT_DRAWABLE_OWNER",flush=True)
+          PY
+      - name: Preserve immutable private original Cat UV plan and read back
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/original-cat-uv-plan"
+          export RCLONE_CONFIG="$RUNNER_TEMP/original-cat-uv-plan-rclone.conf"
+          F="PRIVATE_CAT_ORIGINAL_SOURCE_UV_EDIT_PLAN_V2.json"
+          DEST="gdrive:corpus370_preparation_v1/hosted_operational_cat_source_uv_plan_v2/CAT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          rclone copyto "$D/$F" "$DEST/$F" --checksum --retries 3
+          rclone cat "$DEST/$F" > "$D/source-readback-$F"
+          cmp "$D/$F" "$D/source-readback-$F"
+          echo "CAT_ORIGINAL_UV_PLAN_SHA_READBACK__SOURCE_OPERATIONS_ONLY"

@@ -1,0 +1,145 @@
+name: Corpus370 original physical palette footprint v2 source court
+on:
+  push:
+    branches: [corpus370-operational-drawable-decision-v1]
+    paths:
+      - 'tools/truth_foundry/blender_corpus370_operational_palette_physical_render_v2.py'
+      - 'tools/corpus/court_corpus370_operational_palette_footprint_v2.py'
+      - 'tests/corpus/test_corpus370_operational_palette_footprint_v2.py'
+      - '.github/workflows/corpus370-operational-palette-footprint-v2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-original-physical-footprint-v2-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  unit-court:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'numpy>=1.26,<3' 'pillow>=10,<13' 'pytest>=8,<10'
+      - run: python -m pytest -q tests/corpus/test_corpus370_operational_palette_footprint_v2.py tests/corpus/test_corpus370_operational_palette_pixel_consequence_v1.py
+  exact-original-rest-source-physical-render:
+    needs: unit-court
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+      D: ${{ github.workspace }}/private-physical-footprint-v2
+      ORIGINAL_SOURCE_SHA: ad66b51cc5fc44c9a3429a5b1b98a61621af08d58d102d8a817499bd6a7f5b5a
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify pinned evaluator toolchain
+        run: |
+          set -euo pipefail
+          sudo apt-get -o Acquire::Retries=6 update -qq
+          sudo apt-get -o Acquire::Retries=6 install -y --no-install-recommends libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 libgl1
+          python -m pip install 'numpy>=1.26,<3' 'pillow>=10,<13'
+          B="$RUNNER_TEMP/blender-4.0.2-linux-x64.tar.xz"
+          curl --fail --location --retry 3 --retry-delay 2 'https://download.blender.org/release/Blender4.0/blender-4.0.2-linux-x64.tar.xz' -o "$B"
+          echo "5583a5588736da8858c522ef17fff5d73be59c47a6fe91ad29c6f3263e22086a  $B" | sha256sum --check
+          tar -xJf "$B" -C "$RUNNER_TEMP"
+          EXE="$RUNNER_TEMP/blender-4.0.2-linux-x64/blender"
+          test "$("$EXE" --version|head -n1)" = 'Blender 4.0.2'
+          echo "BLENDER_EXE=$EXE" >> "$GITHUB_ENV"
+          R="$RUNNER_TEMP/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 "https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip" -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v1.75.2-linux-amd64" >> "$GITHUB_PATH"
+      - name: SHA-sealed original source and previously independently qualified palette
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$D"
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/physical-footprint-v2-drive.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          ROOT="gdrive:corpus370_preparation_v1"
+          rclone copyto "$ROOT/hosted_operational_drawable_inputs_v1/42220981274-1/ORIGINAL_TWO_SOURCE_INPUTS.zip" "$D/sources.zip" --checksum --retries 3
+          echo "e3c758b0a4dc9bd3e7f889e94366fa7ff40517deb15e68a202d525b62de13948  $D/sources.zip" | sha256sum --check
+          rclone copyto "$ROOT/hosted_operational_shader_palette_v1/TRICERATOPS/42236071677-1/PRIVATE_ORIGINAL_SHADER_CONSTANT_PALETTE_FACTS_V1.json" "$D/palette.json" --checksum --retries 3
+          rclone copyto "$ROOT/hosted_reactive_stain_v18a/TRICERATOPS/42097722762-1/PRIVATE_REACTIVE_STAIN_CANDIDATE_V18A.npz" "$D/v18a.npz" --checksum --retries 3
+          echo "8ff5534e4e8d7549cb9d419e4aea58511e0e042f9113e7d5807a8652a1b76edc  $D/palette.json" | sha256sum --check
+          python - <<'PY'
+          import json,os,hashlib,zipfile
+          from pathlib import Path
+          d=Path(os.environ['D'])
+          with zipfile.ZipFile(d/'sources.zip') as z:
+            manifest=json.loads(z.read('PRIVATE_TRANSPORT_MANIFEST.json'))
+            assert manifest['parent_manifest_sha256']=='cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172'
+            rows=manifest['files']
+            sid='corpus_004e16e05b90505ca23c'
+            def find(suffix):
+              result=[r for r in rows if r['relative_path'].endswith(suffix) and (sid in r['relative_path'] or suffix.endswith('Triceratops.fbx'))]
+              assert len(result)==1,(suffix,len(result))
+              r=result[0];data=z.read('objects/'+r['sha256'])
+              assert len(data)==r['size_bytes'] and hashlib.sha256(data).hexdigest()==r['sha256']
+              return data
+            (d/'source.fbx').write_bytes(find('/Triceratops.fbx'))
+            (d/'rest.npz').write_bytes(find('/SOURCE_REST_GEOMETRY_V1.npz'))
+            (d/'camera.json').write_bytes(find('/camera_bundle.json'))
+            (d/'policy.json').write_bytes(find('/SOURCE_REST_RENDER_CANDIDATE.json'))
+          assert hashlib.sha256((d/'source.fbx').read_bytes()).hexdigest()==os.environ['ORIGINAL_SOURCE_SHA']
+          assert hashlib.sha256((d/'rest.npz').read_bytes()).hexdigest()=='282cdd2813da95ab65ec8211c8338daeb263395659f556f2e7c01d76cc9afcd0'
+          assert hashlib.sha256((d/'camera.json').read_bytes()).hexdigest()=='e73917f650ee2dd925efe68a88e2fafdd5f99dbc5b7c410b7de0532ecf66bb0d'
+          PY
+      - name: Physical edit renders on new heldout-relative diagonal cameras
+        run: |
+          set -euo pipefail
+          umask 077
+          "$BLENDER_EXE" --background --factory-startup --threads 2 --python-exit-code 1 --python tools/truth_foundry/blender_corpus370_operational_palette_physical_render_v2.py -- --source "$D/source.fbx" --source-sha256 "$ORIGINAL_SOURCE_SHA" --source-policy "$D/policy.json" --camera-bundle "$D/camera.json" --source-palette "$D/palette.json" --v18a-npz "$D/v18a.npz" --output-dir "$RUNNER_TEMP/od-footprint-v2-renders"
+      - name: Independent source-rest analytic 3x3 footprint pixel court
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m tools.corpus.court_corpus370_operational_palette_footprint_v2 --source "$D/source.fbx" --source-rest "$D/rest.npz" --camera-bundle "$D/camera.json" --source-policy "$D/policy.json" --palette-facts "$D/palette.json" --render-manifest "$RUNNER_TEMP/od-footprint-v2-renders/PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V2.json" --render-root "$RUNNER_TEMP/od-footprint-v2-renders" --output-dir "$RUNNER_TEMP/od-footprint-v2-court"
+      - name: Persist original evidence even if the new scientific gate fails
+        if: always()
+        run: |
+          set -euo pipefail
+          umask 077
+          export RCLONE_CONFIG="$RUNNER_TEMP/physical-footprint-v2-drive.conf"
+          if [ ! -s "$RCLONE_CONFIG" ]; then
+            echo "NO_SECRET_CONFIG_SO_NO_PRIVATE_EVIDENCE_AVAILABLE"
+            exit 0
+          fi
+          R="$RUNNER_TEMP/od-footprint-v2-renders"
+          C="$RUNNER_TEMP/od-footprint-v2-court"
+          DEST="gdrive:corpus370_preparation_v1/hosted_operational_physical_footprint_v2/TRICERATOPS/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V2.json PRIVATE_INDEPENDENT_SOURCE_PHYSICAL_FOOTPRINT_V2_COURT.json; do
+            case "$F" in
+              PRIVATE_ORIGINAL*) FROM="$R/$F" ;;
+              *) FROM="$C/$F" ;;
+            esac
+            if [ -s "$FROM" ]; then
+              rclone copyto "$FROM" "$DEST/$F" --checksum --retries 3
+              rclone cat "$DEST/$F" > "$D/v2-readback-$F"
+              cmp "$FROM" "$D/v2-readback-$F"
+            fi
+          done
+          if [ -s "$R/PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V2.json" ]; then
+            for V in 1 3 5 7; do
+              for LABEL in BASELINE EDIT_0 EDIT_1 EDIT_2; do
+                FROM="$R/$LABEL/V$V.png"
+                if [ -s "$FROM" ]; then
+                  TO="$DEST/$LABEL/V$V.png"
+                  rclone copyto "$FROM" "$TO" --checksum --retries 3
+                  rclone cat "$TO" > "$D/v2-readback-$LABEL-V$V.png"
+                  cmp "$FROM" "$D/v2-readback-$LABEL-V$V.png"
+                fi
+              done
+            done
+          fi
+          echo "FOOTPRINT_V2_PRIVATE_SOURCE_EVIDENCE_SHA_READBACK_VERIFIED__NO_GRAPHICS_OWNER"

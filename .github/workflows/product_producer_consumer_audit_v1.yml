@@ -1,0 +1,40 @@
+name: product-producer-consumer-audit-v1
+
+on:
+  pull_request:
+    paths:
+      - 'tools/product_producer_consumer_audit_v1.py'
+      - 'tests/repository/test_product_producer_consumer_audit_v1.py'
+      - 'docs/platform/PRODUCT_PRODUCER_CONSUMER_GAP_MAP_20261107.md'
+      - '.github/workflows/product_producer_consumer_audit_v1.yml'
+      - 'platform/internal/capability/contracts/product_capabilities_v1.json'
+      - 'platform/internal/capability/release_compose.go'
+      - 'platform/internal/control/product_render.go'
+      - 'compiler/realsas_compiler_services/platform_worker/worker.py'
+      - 'compiler/realsas_compiler_services/platform_worker/mesh_executor_v1.py'
+      - 'product/living_compile/server.py'
+      - 'product/living_compile/authoring.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  producer-consumer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned CPU test requirements
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Run product contract negative courts
+        run: python -m pytest -q tests/repository/test_product_producer_consumer_audit_v1.py
+      - name: Audit registered producer and consumer wiring
+        run: python -m tools.product_producer_consumer_audit_v1 --strict-registered

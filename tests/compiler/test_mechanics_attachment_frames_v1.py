@@ -98,7 +98,7 @@ def test_bad_attachment_frames_and_parent_controls_fail_closed():
         evaluate_attachment_world_frames_v1(
             replace(rig,attachment_anchors=(
                 replace(rig.attachment_anchors[0],
-                        metadata={"local_basis":((2.,0.,0.),(0.,1.,0.),(0.,0.,1.)}),
+                        metadata={"local_basis":((2.,0.,0.),(0.,1.,0.),(0.,0.,1.))}),
             )),pose,
         )
     with pytest.raises(QualificationError,match="CONTROL_PARENT_NOT_EXECUTABLE_V1"):

@@ -41,8 +41,10 @@ class PreparedMechanicsSkinDeformerV1:
 
 
 def _readonly(values: np.ndarray) -> np.ndarray:
-    values.setflags(write=False)
-    return values
+    # bytes-backed NumPy views cannot be made writable again by a consumer.
+    # This protects the once-prepared carrier against accidental control-frame
+    # mutation (ordinary setflags(write=False) can be reversed on owners).
+    return np.frombuffer(values.tobytes(), dtype=values.dtype).reshape(values.shape)
 
 
 def prepare_mechanics_skin_deformer_v1(
@@ -91,7 +93,10 @@ def prepare_mechanics_skin_deformer_v1(
             if joint_id not in joint_index or joint_id in seen:
                 raise QualificationError("MECHANICS_PREPARED_LBS_SKIN_JOINT_INVALID")
             seen.add(joint_id)
-            w=float(raw_w)
+            try:
+                w=float(raw_w)
+            except (ValueError,TypeError) as exc:
+                raise QualificationError("MECHANICS_PREPARED_LBS_SKIN_WEIGHT_INVALID") from exc
             if not math.isfinite(w) or w<0.0:
                 raise QualificationError("MECHANICS_PREPARED_LBS_SKIN_WEIGHT_INVALID")
             vi.append(row_id)

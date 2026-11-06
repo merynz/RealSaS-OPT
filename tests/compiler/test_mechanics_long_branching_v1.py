@@ -159,3 +159,50 @@ def test_active_dof_policy_rejects_missing_duplicate_or_unknown_declared_axes():
                 active_parameter_keys=selected,
                 jacobian_mode="ANALYTIC_RESEARCH_V1",
             )
+
+
+@pytest.mark.parametrize("dof_count,expected_rank",[(24,4),(48,8),(72,12)])
+def test_generic_rank_policy_uses_only_declared_task_jacobian_and_restores_full_capability(
+    dof_count,expected_rank,
+):
+    case=make_morphology_case_v1(dof_count)
+    solved=solve_declared_multi_goal_v1(
+        case.rig,case.overrides,
+        pinned_contact_control_ids=case.pins,
+        pinned_world_targets=case.pin_world_targets,
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+        active_parameter_policy="RANK_REVEALING_RESEARCH_V1",
+        goal_tolerance=2e-3,regularization=1e-8,max_nfev=90,
+    )
+    assert solved.status=="PASS_MULTIGOAL_BEHAVIORAL_COURT"
+    assert solved.metadata["rank_revealing_candidate_task_rank"]==expected_rank
+    assert len(solved.metadata["rank_revealing_candidate_parameter_keys"])==expected_rank
+    assert solved.metadata["active_dof_selection_is_representation_policy_not_source_truth"] is True
+    assert solved.max_pin_residual<2e-3
+    assert solved.max_drag_residual<2e-3
+    assert len(solved.parameters_rad)==dof_count
+
+
+def test_rank_policy_mode_cannot_hallucinate_a_numeric_jacobian_or_combine_explicit_keys():
+    case=make_morphology_case_v1(24)
+    with pytest.raises(QualificationError,match="RANK_POLICY_REQUIRES_AUTO_ANALYTIC"):
+        solve_declared_multi_goal_v1(
+            case.rig,case.overrides,
+            pinned_contact_control_ids=case.pins,
+            pinned_world_targets=case.pin_world_targets,
+            jacobian_mode="NUMERIC_V1",
+            active_parameter_policy="RANK_REVEALING_RESEARCH_V1",
+        )
+    with pytest.raises(QualificationError,match="RANK_POLICY_REQUIRES_AUTO_ANALYTIC"):
+        solve_declared_multi_goal_v1(
+            case.rig,case.overrides,
+            pinned_contact_control_ids=case.pins,
+            pinned_world_targets=case.pin_world_targets,
+            jacobian_mode="ANALYTIC_RESEARCH_V1",
+            active_parameter_policy="RANK_REVEALING_RESEARCH_V1",
+            active_parameter_keys=(("J:1:0","RY"),),
+        )
+    with pytest.raises(QualificationError,match="ACTIVE_DOF_POLICY_MODE_UNSUPPORTED"):
+        solve_declared_multi_goal_v1(
+            case.rig,active_parameter_policy="AUTOGENERATE_SOURCE_RIG",
+        )

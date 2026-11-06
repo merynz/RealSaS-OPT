@@ -28,6 +28,7 @@ from scipy.optimize import least_squares
 from scipy.linalg import qr
 
 from .canonical_rig_ir_v2 import CanonicalRigIRV2
+from .mechanics_attachment_frames_v1 import _matrix
 from .mechanics_control_solver_v1 import (
     ControlTransformIRV1, MechanicsPoseIRV1, SolvedJointTransformIRV1,
     _control_world_transforms,
@@ -47,6 +48,15 @@ class MechanicsGoalResidualV1:
 
 
 @dataclass(frozen=True)
+class MechanicsOrientationGoalResidualV1:
+    canonical_anchor_id: str
+    parent_canonical_joint_id: str
+    target_world_basis: tuple[tuple[float, float, float], ...]
+    solved_world_basis: tuple[tuple[float, float, float], ...]
+    residual_rad: float
+
+
+@dataclass(frozen=True)
 class MechanicsMultiGoalResultV1:
     pose: MechanicsPoseIRV1
     goals: tuple[MechanicsGoalResidualV1, ...]
@@ -55,6 +65,8 @@ class MechanicsMultiGoalResultV1:
     max_pin_residual: float
     parameters_rad: tuple[tuple[str, str, float], ...]
     solver_evaluations: int
+    orientation_goals: tuple[MechanicsOrientationGoalResidualV1, ...] = ()
+    max_orientation_residual_rad: float = 0.
     metadata: dict = field(default_factory=dict)
 
 
@@ -88,6 +100,8 @@ def solve_declared_multi_goal_v1(
     *,
     pinned_contact_control_ids: Sequence[str] = (),
     pinned_world_targets: Mapping[str, Sequence[float]] | None = None,
+    attachment_orientation_targets: Mapping[str, Sequence[Sequence[float]]] | None = None,
+    orientation_tolerance_rad: float = 1e-3,
     goal_tolerance: float = 1e-3,
     regularization: float = 1e-4,
     max_nfev: int = 200,
@@ -105,9 +119,14 @@ def solve_declared_multi_goal_v1(
     for v, code, allow_zero in (
         (goal_tolerance, "MULTIGOAL_TOLERANCE_INVALID", False),
         (regularization, "MULTIGOAL_REGULARIZATION_INVALID", True),
+        (orientation_tolerance_rad, "MULTIGOAL_ORIENTATION_TOLERANCE_INVALID", False),
     ):
         if not math.isfinite(float(v)) or (float(v) < 0.0 if allow_zero else float(v) <= 0.0):
             raise QualificationError(code)
+    if orientation_tolerance_rad>math.pi:
+        raise QualificationError("MULTIGOAL_ORIENTATION_TOLERANCE_INVALID")
+    if attachment_orientation_targets is not None and jacobian_mode != "ANALYTIC_RESEARCH_V1":
+        raise QualificationError("MULTIGOAL_ORIENTATION_REQUIRES_ANALYTIC")
     if min(max_nfev, maximum_joints, maximum_dofs, maximum_goals) < 1:
         raise QualificationError("MULTIGOAL_RESOURCE_POLICY_INVALID")
 
@@ -285,6 +304,30 @@ def solve_declared_multi_goal_v1(
     if set(authored) - goal_control_ids or set(pins) - goal_control_ids:
         raise QualificationError("MULTIGOAL_ORPHANED_CONTROL_OR_PIN")
 
+    # Orientation targets may constrain ONLY an explicit declared local
+    # 3D attachment frame, never a synthesized hand/grip frame.
+    orientation_goals: list[tuple[str, str, np.ndarray, np.ndarray]] = []
+    requested=dict(attachment_orientation_targets or {})
+    anchors={row.canonical_anchor_id: row for row in rig.attachment_anchors}
+    if len(anchors)!=len(rig.attachment_anchors):
+        raise QualificationError("MULTIGOAL_ORIENTATION_DUPLICATE_ANCHOR")
+    if set(requested)-set(anchors):
+        raise QualificationError("MULTIGOAL_ORIENTATION_ANCHOR_UNKNOWN")
+    if len(requested)>maximum_goals:
+        raise QualificationError("MULTIGOAL_ORIENTATION_GOAL_RESOURCE_BOUND")
+    for aid in sorted(requested):
+        anchor=anchors[aid]
+        parent=anchor.parent_canonical_joint_id
+        if (parent not in joint_by or
+                anchor.parent_canonical_control_id is not None):
+            raise QualificationError("MULTIGOAL_ORIENTATION_PARENT_NOT_EXECUTABLE")
+        local_basis=anchor.metadata.get("local_basis")
+        if local_basis is None:
+            raise QualificationError("MULTIGOAL_ORIENTATION_UNDECLARED_GRIP_BASIS")
+        local=_matrix(local_basis,"MULTIGOAL_ORIENTATION_LOCAL_BASIS_INVALID")
+        target=_matrix(requested[aid],"MULTIGOAL_ORIENTATION_TARGET_BASIS_INVALID")
+        orientation_goals.append((aid,parent,local,target))
+
     parameter_axes = {
         "RX": np.array((1., 0., 0.)),
         "RY": np.array((0., 1., 0.)),
@@ -322,18 +365,23 @@ def solve_declared_multi_goal_v1(
         return p_world, rot_world, world_axes
 
     def residual(q: np.ndarray) -> np.ndarray:
-        p, _, _ = forward(q)
+        p, world_rot, _ = forward(q)
         blocks = [
             (10.0 if kind == "PIN" else 1.0) * (p[jid] - target)
             for _, _, jid, target, kind in goals
         ]
+        blocks.extend(
+            (world_rot[parent]@local-target).ravel()
+            for _,parent,local,target in orientation_goals
+        )
         if regularization:
             blocks.append(math.sqrt(regularization) * q)
         return np.concatenate(blocks)
 
     def analytic_jacobian(q: np.ndarray) -> np.ndarray:
-        p, _, world_axes = forward(q)
-        rows = 3 * len(goals) + (len(param_schema) if regularization else 0)
+        p, forward_rot, world_axes = forward(q)
+        task_rows=3*len(goals)+9*len(orientation_goals)
+        rows = task_rows + (len(param_schema) if regularization else 0)
         out = np.zeros((rows, len(param_schema)), dtype=np.float64)
         for gi, (_, _, tip, _, kind) in enumerate(goals):
             weight = 10.0 if kind == "PIN" else 1.0
@@ -343,8 +391,19 @@ def solve_declared_multi_goal_v1(
                 out[gi * 3:gi * 3 + 3, index] = (
                     weight * np.cross(world_axes[index], p[tip] - p[pivot])
                 )
+        for gi,(_, parent, local, _) in enumerate(orientation_goals):
+            world_basis=forward_rot[parent]@local
+            rowstart=3*len(goals)+9*gi
+            for index,(pivot,_) in enumerate(param_schema):
+                if pivot not in ancestor_sets[parent]:
+                    continue
+                # Exact derivative of all world rotation basis columns:
+                # d(R @ local)/dtheta = [axis_world]x @ (R @ local).
+                out[rowstart:rowstart+9,index]=np.cross(
+                    world_axes[index],world_basis.T
+                ).T.ravel()
         if regularization:
-            out[3 * len(goals):, :] = math.sqrt(regularization) * np.eye(len(param_schema))
+            out[task_rows:, :] = math.sqrt(regularization) * np.eye(len(param_schema))
         return out
 
     lower_np, upper_np = np.asarray(lower), np.asarray(upper)
@@ -370,7 +429,7 @@ def solve_declared_multi_goal_v1(
     policy_preferred_reused = False
     policy_preferred_span_error: float | None = None
     if active_parameter_policy == "RANK_REVEALING_RESEARCH_V1":
-        task_jac = analytic_jacobian(x0)[:3*len(goals), :]
+        task_jac = analytic_jacobian(x0)[:3*len(goals)+9*len(orientation_goals), :]
         if not np.isfinite(task_jac).all():
             raise QualificationError("MULTIGOAL_RANK_POLICY_JACOBIAN_NONFINITE")
         _, triangular, pivot_columns = qr(task_jac, pivoting=True, mode="economic")
@@ -456,14 +515,23 @@ def solve_declared_multi_goal_v1(
         )
         return optimized, expand_active(optimized.x)
 
+    def goals_satisfied(q: np.ndarray) -> bool:
+        positions, rotations, _=forward(q)
+        if any(np.linalg.norm(positions[tip]-target) > goal_tolerance
+               for _,_,tip,target,_ in goals):
+            return False
+        return all(
+            math.acos(float(np.clip(
+                (np.trace(target.T@(rotations[parent]@local))-1.)/2.,
+                -1.,1.,
+            ))) <= orientation_tolerance_rad
+            for _,parent,local,target in orientation_goals
+        )
+
     opt, solution_q = optimize_subspace(active_idx, x0)
     candidate_nfev = int(opt.nfev)
     if active_parameter_policy == "RANK_REVEALING_RESEARCH_V1":
-        candidate_positions, _, _ = forward(solution_q)
-        candidate_failed = not bool(opt.success) or any(
-            np.linalg.norm(candidate_positions[tip]-target) > goal_tolerance
-            for _, _, tip, target, _ in goals
-        )
+        candidate_failed = not bool(opt.success) or not goals_satisfied(solution_q)
         if candidate_failed:
             # Candidate policy was too restrictive for this goal/pose.
             # Retry with the entire DECLARED DOF set. This is an explicit
@@ -474,11 +542,7 @@ def solve_declared_multi_goal_v1(
     recovery_trials=0
     recovery_rescued=False
     if singularity_recovery_mode == "BOUNDED_DETERMINISTIC_SEEDS_V1":
-        first_positions, _, _=forward(solution_q)
-        first_failed = not bool(opt.success) or any(
-            np.linalg.norm(first_positions[tip]-target) > goal_tolerance
-            for _,_,tip,target,_ in goals
-        )
+        first_failed = not bool(opt.success) or not goals_satisfied(solution_q)
         if first_failed:
             # Search a *finite*, documented set of perturbations, never a
             # fabricated DOF/limit or stochastic/learned prior. Straight
@@ -507,11 +571,7 @@ def solve_declared_multi_goal_v1(
                         continue
                     recovered, recovered_q=optimize_subspace(active_idx,seed)
                     recovery_trials+=1
-                    positions,_,_=forward(recovered_q)
-                    if bool(recovered.success) and all(
-                        np.linalg.norm(positions[tip]-target) <= goal_tolerance
-                        for _,_,tip,target,_ in goals
-                    ):
+                    if bool(recovered.success) and goals_satisfied(recovered_q):
                         opt,solution_q=recovered,recovered_q
                         recovery_rescued=True
                         break
@@ -544,9 +604,27 @@ def solve_declared_multi_goal_v1(
             residual_world=float(np.linalg.norm(p[jid] - target)),
             goal_kind=kind,
         ))
+    reported_orientations=tuple(
+        MechanicsOrientationGoalResidualV1(
+            canonical_anchor_id=aid,
+            parent_canonical_joint_id=parent,
+            target_world_basis=tuple(tuple(map(float,row)) for row in target),
+            solved_world_basis=tuple(
+                tuple(map(float,row)) for row in (rotations[parent]@local)
+            ),
+            residual_rad=math.acos(float(np.clip(
+                (np.trace(target.T@(rotations[parent]@local))-1.)/2.,
+                -1.,1.,
+            ))),
+        ) for aid,parent,local,target in orientation_goals
+    )
+    orientation_max=max((r.residual_rad for r in reported_orientations),default=0.)
     drag_max = max((g.residual_world for g in reported_goals if g.goal_kind == "DRAG"), default=0.0)
     pin_max = max((g.residual_world for g in reported_goals if g.goal_kind == "PIN"), default=0.0)
-    passes = bool(opt.success and drag_max <= goal_tolerance and pin_max <= goal_tolerance)
+    passes = bool(
+        opt.success and drag_max<=goal_tolerance and pin_max<=goal_tolerance
+        and orientation_max<=orientation_tolerance_rad
+    )
     rows = tuple(SolvedJointTransformIRV1(
         canonical_joint_id=jid,
         rest_P=tuple(map(float, rest[jid])),
@@ -578,6 +656,8 @@ def solve_declared_multi_goal_v1(
             for (jid, label), value in zip(param_schema, solution_q)
         ),
         solver_evaluations=int(opt.nfev),
+        orientation_goals=reported_orientations,
+        max_orientation_residual_rad=orientation_max,
         metadata={
             "solver_termination": str(opt.message),
             "jacobian_mode": jacobian_mode,
@@ -586,6 +666,8 @@ def solve_declared_multi_goal_v1(
             "declared_angle_limit_count": limits_present,
             "unbounded_rotation_chart_count": len(param_schema) - limits_present,
             "pinned_contact_count": len(pins),
+            "declared_attachment_orientation_goal_count": len(orientation_goals),
+            "attachment_orientation_chordal_objective_geodesic_final_gate": True,
             "explicit_world_contact_anchor_count": len(anchor_map),
             "contact_anchors_are_declared_control_references": True,
             "warm_start_supplied": initial_parameters_rad is not None,
@@ -611,6 +693,6 @@ def solve_declared_multi_goal_v1(
 
 
 __all__ = [
-    "MechanicsGoalResidualV1", "MechanicsMultiGoalResultV1",
+    "MechanicsGoalResidualV1", "MechanicsOrientationGoalResidualV1", "MechanicsMultiGoalResultV1",
     "solve_declared_multi_goal_v1",
 ]

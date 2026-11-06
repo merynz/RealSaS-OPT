@@ -18,8 +18,10 @@ It gives evidence and ambiguity rather than asserting a unique correct handle.
 from dataclasses import dataclass, field
 import math
 
+from .canonical_mesh_ir_v1 import CanonicalMeshIR, canonical_mesh_lineage_hash_v1
 from .canonical_rig_ir_v2 import CanonicalRigIRV2
 from .canonical_skin_ir_v2 import CanonicalSkinIRV2
+from .rig_constraint_schema_v1 import validate_rig_constraint_operator_v1
 from .types import QualificationError
 
 
@@ -46,6 +48,7 @@ class MechanicsSurfaceControlEvidenceV1:
 
 
 def surface_control_effect_evidence_v1(
+    mesh: CanonicalMeshIR,
     rig: CanonicalRigIRV2,
     skin: CanonicalSkinIRV2,
     *,
@@ -55,14 +58,22 @@ def surface_control_effect_evidence_v1(
     ambiguous_score_delta: float = 0.05,
     maximum_candidates: int = 12,
 ) -> MechanicsSurfaceControlEvidenceV1:
-    if (rig.mesh_lineage_hash != skin.mesh_lineage_hash or
-            rig.deform_structure_hash != skin.deform_structure_hash):
+    if (mesh.mesh_lineage_hash != rig.mesh_lineage_hash or
+            mesh.mesh_lineage_hash != skin.mesh_lineage_hash or
+            rig.deform_structure_hash != skin.deform_structure_hash or
+            mesh.mesh_lineage_hash != canonical_mesh_lineage_hash_v1(mesh) or
+            mesh.metadata.get("authority") != "COMPILER_CANONICAL_MESH"):
+
         raise QualificationError("MECHANICS_EFFECT_LINEAGE_DRIFT")
     if (len(triangle_vertex_ids) != 3 or len(set(triangle_vertex_ids)) != 3 or
             len(barycentric) != 3 or
             not all(math.isfinite(float(v)) and v >= 0.0 for v in barycentric) or
             abs(sum(map(float, barycentric))-1.0) > 1e-5):
         raise QualificationError("MECHANICS_EFFECT_SURFACE_BARYCENTRIC_INVALID")
+    # A collection of three vertex IDs is not yet a surface triangle. Exact
+    # canonical topology membership must be proved before control evidence.
+    if frozenset(triangle_vertex_ids) not in {frozenset(f) for f in mesh.faces}:
+        raise QualificationError("MECHANICS_EFFECT_HIT_NOT_CANONICAL_FACE")
     if (maximum_candidates < 1 or not math.isfinite(minimum_support)
             or not 0.0 <= minimum_support <= 1.0 or
             not math.isfinite(ambiguous_score_delta) or
@@ -130,15 +141,17 @@ def surface_control_effect_evidence_v1(
             for jid in control.target_canonical_joint_ids:
                 possible[cid].update(subtree(jid))
                 evidence[cid].add("DECLARED_DIRECT_SUBTREE")
-        # Some IK effectors have a directly declared output target; the rig
-        # relation is explicit, but a bare pole without an IK constraint is not.
-        if control.control_kind=="IK_EFFECTOR":
-            for jid in control.target_canonical_joint_ids:
-                if jid not in joints:
-                    raise QualificationError("MECHANICS_EFFECT_CONTROL_JOINT_UNKNOWN")
-                possible[cid].add(jid)
-                evidence[cid].add("DECLARED_IK_TIP")
+        # An IK_EFFECTOR handle that is not referenced by an executable
+        # constraint is mechanically inert in V1, regardless of a declared
+        # target joint. The tip field alone is not a solver operator.
     for constraint in rig.constraints:
+        validate_rig_constraint_operator_v1(
+            operator_id=constraint.operator_id,
+            input_control_count=len(constraint.input_canonical_control_ids),
+            output_joint_count=len(constraint.output_canonical_joint_ids),
+            has_chain=constraint.canonical_chain_id is not None,
+            parameters=constraint.parameters,
+        )
         out:set[str]=set()
         cid_list=constraint.input_canonical_control_ids
         for cid in cid_list:
@@ -148,10 +161,14 @@ def surface_control_effect_evidence_v1(
             chain=chains.get(constraint.canonical_chain_id)
             if chain is None:
                 raise QualificationError("MECHANICS_EFFECT_CONSTRAINT_CHAIN_UNKNOWN")
-            for jid in chain.canonical_joint_ids:
-                out.update(subtree(jid))
+            if constraint.operator_id in {"IK","STRETCH"}:
+                # Execution changes only declared chain joints; it does not
+                # automatically edit arbitrary sibling subtrees.
+                out.update(chain.canonical_joint_ids)
         for jid in constraint.output_canonical_joint_ids:
-            out.update(subtree(jid))
+            if jid not in joints:
+                raise QualificationError("MECHANICS_EFFECT_CONSTRAINT_JOINT_UNKNOWN")
+            out.add(jid)
         for cid in cid_list:
             # For mechanical interpretation, no semantic body-part names.
             possible[cid].update(out)
@@ -197,6 +214,9 @@ def surface_control_effect_evidence_v1(
             "new_control_synthesis_performed":False,
             "graphics_or_layer_authority_claimed":False,
             "unweighted_controls_can_have_declared_causal_effect":True,
+            "canonical_face_membership_verified":True,
+            "unreferenced_ik_control_not_claimed_executable":True,
+            "effect_is_graph_reachability_not_observed_response":True,
         },
     )
 

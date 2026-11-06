@@ -35,6 +35,10 @@ from .mechanics_attachment_frames_v1 import (
     AttachmentWorldFrameCourtV1,
     evaluate_attachment_world_frames_v1,
 )
+from .mechanics_relative_attachment_bridge_v1 import (
+    DeclaredRelativeAttachmentBridgeV1, RelativeAttachmentBridgeCourtV1,
+    evaluate_declared_relative_attachment_bridges_v1,
+)
 from .control_motion_runtime_v2 import sample_control_transforms_v2
 from .mechanics_control_solver_v1 import (
     ControlTransformIRV1, DeformedMeshIRV1, MechanicsPoseIRV1,
@@ -59,6 +63,7 @@ class MechanicsInterventionFrameV1:
     rank_policy_candidate_keys: tuple[tuple[str, str], ...] = ()
     secondary_motion_state: SecondaryMotionStateV1 | None = None
     attachment_frames: AttachmentWorldFrameCourtV1 | None = None
+    relative_attachment_court: RelativeAttachmentBridgeCourtV1 | None = None
     metadata: dict = field(default_factory=dict)
 
 
@@ -198,6 +203,7 @@ def evaluate_mechanics_intervention_frame_v1(
     required_attachment_world_positions: Mapping[str, Sequence[float]] | None = None,
     attachment_orientation_mode: str = "EVALUATE_ONLY",
     attachment_orientation_tolerance_rad: float = 1e-3,
+    relative_attachment_bridges: tuple[DeclaredRelativeAttachmentBridgeV1, ...] = (),
     prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
     multi_goal_jacobian_mode: str = "NUMERIC_V1",
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
@@ -221,6 +227,11 @@ def evaluate_mechanics_intervention_frame_v1(
     }:
         raise QualificationError("LIVE_MECHANICS_ATTACHMENT_ORIENTATION_MODE_UNSUPPORTED")
     solve_orientation = attachment_orientation_mode=="SOLVE_DECLARED_RESEARCH_V1"
+    if relative_attachment_bridges and (
+        solver_mode!="DECLARED_MULTI_GOAL_V1"
+        or multi_goal_jacobian_mode!="ANALYTIC_RESEARCH_V1"
+    ):
+        raise QualificationError("LIVE_MECHANICS_RELATIVE_BRIDGE_REQUIRES_ANALYTIC_MULTI_GOAL")
     if solve_orientation and (
         solver_mode!="DECLARED_MULTI_GOAL_V1"
         or multi_goal_jacobian_mode!="ANALYTIC_RESEARCH_V1"
@@ -288,6 +299,7 @@ def evaluate_mechanics_intervention_frame_v1(
                 required_attachment_world_positions if solve_orientation else None
             ),
             orientation_tolerance_rad=attachment_orientation_tolerance_rad,
+            relative_attachment_bridges=relative_attachment_bridges,
             jacobian_mode=multi_goal_jacobian_mode,
         )
         pose = solved.pose
@@ -310,6 +322,13 @@ def evaluate_mechanics_intervention_frame_v1(
         angular_tolerance_rad=attachment_orientation_tolerance_rad,
         position_tolerance_world=limit_residual,
     )
+    relative_result=(
+        evaluate_declared_relative_attachment_bridges_v1(
+            rig,pose,relative_attachment_bridges,
+            position_tolerance_world=limit_residual,
+            orientation_tolerance_rad=attachment_orientation_tolerance_rad,
+        ) if relative_attachment_bridges else None
+    )
     primary_constraint_residual = max(
         (abs(float(v)) for _,v in pose.constraint_residuals),default=0.0,
     )
@@ -317,6 +336,8 @@ def evaluate_mechanics_intervention_frame_v1(
         (multi_status is not None and multi_status != "PASS_MULTIGOAL_BEHAVIORAL_COURT")
         or primary_constraint_residual > limit_residual
         or attachment_result.status != "PASS_ATTACHMENT_FRAME_COURT"
+        or (relative_result is not None and
+            relative_result.status != "PASS_DECLARED_RELATIVE_BRIDGE_COURT")
     ):
         raise QualificationError("SECONDARY_REQUIRES_QUALIFIED_PRIMARY_MECHANICS")
     secondary_result = None
@@ -354,6 +375,9 @@ def evaluate_mechanics_intervention_frame_v1(
         failures.append("SECONDARY_MOTION_BOUNDS_EXCEEDED")
     if attachment_result.status != "PASS_ATTACHMENT_FRAME_COURT":
         failures.append("ATTACHMENT_FRAME_NOT_QUALIFIED")
+    if (relative_result is not None and
+            relative_result.status != "PASS_DECLARED_RELATIVE_BRIDGE_COURT"):
+        failures.append("RELATIVE_ATTACHMENT_BRIDGE_NOT_QUALIFIED")
     return MechanicsInterventionFrameV1(
         pose=pose, deformation=deformed,
         active_control_ids=tuple(x.canonical_control_id for x in controls),
@@ -369,6 +393,7 @@ def evaluate_mechanics_intervention_frame_v1(
         rank_policy_candidate_keys=solved_rank_keys,
         secondary_motion_state=secondary_result.state if secondary_result is not None else None,
         attachment_frames=attachment_result,
+        relative_attachment_court=relative_result,
         metadata={
             "authority": "MECHANICS_RUNTIME_DIAGNOSTIC_ONLY",
             "control_synthesis_performed": False,
@@ -394,6 +419,11 @@ def evaluate_mechanics_intervention_frame_v1(
             "singularity_recovery_mode": singularity_recovery_mode,
             "attachment_frames_evaluated_before_secondary": True,
             "attachment_frame_count": len(attachment_result.frames),
+            "relative_bridge_count": len(relative_attachment_bridges),
+            "relative_bridge_status": (
+                relative_result.status if relative_result is not None else "DISABLED"
+            ),
+            "relative_bridge_authored_runtime_only_not_source_truth": True,
             "attachment_target_orientation_status": attachment_result.status,
             "attachment_max_position_residual_world": attachment_result.max_target_position_residual_world,
             "attachment_orientation_mode": attachment_orientation_mode,
@@ -440,6 +470,7 @@ def evaluate_mechanics_intervention_sequence_v1(
     required_attachment_world_positions: Mapping[str, Sequence[float]] | None = None,
     attachment_orientation_mode: str = "EVALUATE_ONLY",
     attachment_orientation_tolerance_rad: float = 1e-3,
+    relative_attachment_bridges: tuple[DeclaredRelativeAttachmentBridgeV1, ...] = (),
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
 ) -> MechanicsInterventionSequenceV1:
     if not steps:
@@ -495,6 +526,7 @@ def evaluate_mechanics_intervention_sequence_v1(
             ),
             attachment_orientation_mode=attachment_orientation_mode,
             attachment_orientation_tolerance_rad=attachment_orientation_tolerance_rad,
+            relative_attachment_bridges=relative_attachment_bridges,
             secondary_motion_policy=secondary_motion_policy,
             secondary_motion_previous_state=prev_secondary_state,
             secondary_motion_dt_seconds=(
@@ -591,6 +623,8 @@ def evaluate_mechanics_intervention_sequence_v1(
             "rank_policy_selection_unjustified_churn": rank_selection_unjustified_churn,
             "singularity_recovery_mode": singularity_recovery_mode,
             "attachment_orientation_mode": attachment_orientation_mode,
+            "relative_bridge_count": len(relative_attachment_bridges),
+            "relative_bridge_is_explicit_runtime_contract": True,
             "per_frame_attachment_pose_tracks_supported": True,
             "attachment_position_target_required_count": (
                 len(required_attachment_world_positions)

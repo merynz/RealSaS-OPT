@@ -237,3 +237,48 @@ def test_secondary_negative_provenance_timing_state_and_parameters():
         _frame(obj,0.,policy=replace(policy,chains=policy.chains+policy.chains))
     with pytest.raises(QualificationError,match="POLICY_AUTHORITY_LINEAGE_DRIFT"):
         _frame(obj,0.,policy=replace(policy,control_program_hash="stale"))
+
+
+def test_secondary_fixed_ticks_are_repeatable_across_frame_partition():
+    obj=_secondary_objects()
+    initialized=_frame(obj,0.)
+    # The target primary pose is constant after one instantaneous root edit.
+    # 1 x 1/30s must match 2 x 1/60s under fixed 60Hz secondary stepping.
+    once=_frame(obj,1.,prev=initialized.secondary_motion_state,dt=1/30)
+    half=_frame(obj,1.,prev=initialized.secondary_motion_state,dt=1/60)
+    twice=_frame(obj,1.,prev=half.secondary_motion_state,dt=1/60)
+    for p,q in zip(once.pose.joints,twice.pose.joints):
+        assert np.allclose(p.solved_P,q.solved_P,atol=1e-11,rtol=0.)
+        assert np.allclose(p.rotation_basis,q.rotation_basis,atol=1e-11,rtol=0.)
+    assert once.secondary_motion_state.metadata["integration_substeps_this_frame"]==2
+    assert twice.secondary_motion_state.metadata["simulation_tick_count"]==2
+    assert once.secondary_motion_state.metadata["simulation_tick_count"]==2
+    # Runtime frame count and internal physics tick count are distinct.
+    assert once.secondary_motion_state.step_count==1
+    assert twice.secondary_motion_state.step_count==2
+
+
+def test_secondary_reset_explicitly_clears_lag_and_discards_prior_state():
+    obj=_secondary_objects()
+    base=_frame(obj,0.)
+    moved=_frame(obj,1.,prev=base.secondary_motion_state,dt=1/60)
+    reset=_frame(obj,1.)  # intentional seek/reset, no previous state
+    assert reset.secondary_motion_state.step_count==0
+    assert reset.secondary_motion_state.metadata["simulation_tick_count"]==0
+    assert reset.pose != moved.pose
+    assert np.allclose(reset.pose.joints[-1].solved_P,(1.,0.,2.),atol=1e-9)
+
+
+def test_secondary_substep_budget_and_invalid_fixed_step_fail_closed():
+    obj=_secondary_objects()
+    base=_frame(obj,0.)
+    mesh,rig,skin,mechanics,policy,prepared=obj
+    limited=replace(policy,maximum_substeps=2)
+    with pytest.raises(QualificationError,match="SUBSTEP_RESOURCE_BOUND"):
+        _frame(obj,.1,prev=base.secondary_motion_state,dt=.1,policy=limited)
+    bad=replace(policy,fixed_step_seconds=0.)
+    with pytest.raises(QualificationError,match="SUBSTEP_POLICY_INVALID"):
+        _frame(obj,0.,policy=bad)
+    bad=replace(policy,maximum_substeps=0)
+    with pytest.raises(QualificationError,match="SUBSTEP_POLICY_INVALID"):
+        _frame(obj,0.,policy=bad)

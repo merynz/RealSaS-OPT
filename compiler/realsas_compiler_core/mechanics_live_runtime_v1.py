@@ -66,6 +66,8 @@ class MechanicsInterventionFrameV1:
 class MechanicsInterventionStepV1:
     time_seconds: float
     overrides: tuple[ControlTransformIRV1, ...] = ()
+    attachment_world_positions: Mapping[str, Sequence[float]] | None = None
+    attachment_world_orientations: Mapping[str, Sequence[Sequence[float]]] | None = None
 
 
 @dataclass(frozen=True)
@@ -446,6 +448,12 @@ def evaluate_mechanics_intervention_sequence_v1(
         raise QualificationError("LIVE_MECHANICS_SEQUENCE_TIME_NONFINITE")
     if any(b.time_seconds <= a.time_seconds for a, b in zip(steps, steps[1:])):
         raise QualificationError("LIVE_MECHANICS_SEQUENCE_TIME_NOT_STRICTLY_INCREASING")
+    if (required_attachment_world_positions is not None and
+            any(step.attachment_world_positions is not None for step in steps)):
+        raise QualificationError("LIVE_MECHANICS_ATTACHMENT_POSITION_SCHEDULE_CONFLICT")
+    if (required_attachment_world_orientations is not None and
+            any(step.attachment_world_orientations is not None for step in steps)):
+        raise QualificationError("LIVE_MECHANICS_ATTACHMENT_ORIENTATION_SCHEDULE_CONFLICT")
     frames: list[MechanicsInterventionFrameV1] = []
     maximum_speed = 0.0
     maximum_acceleration = 0.0
@@ -475,8 +483,16 @@ def evaluate_mechanics_intervention_sequence_v1(
             active_parameter_policy=active_parameter_policy,
             preferred_parameter_keys=prev_rank_selection,
             singularity_recovery_mode=singularity_recovery_mode,
-            required_attachment_world_orientations=required_attachment_world_orientations,
-            required_attachment_world_positions=required_attachment_world_positions,
+            required_attachment_world_orientations=(
+                step.attachment_world_orientations
+                if step.attachment_world_orientations is not None
+                else required_attachment_world_orientations
+            ),
+            required_attachment_world_positions=(
+                step.attachment_world_positions
+                if step.attachment_world_positions is not None
+                else required_attachment_world_positions
+            ),
             attachment_orientation_mode=attachment_orientation_mode,
             attachment_orientation_tolerance_rad=attachment_orientation_tolerance_rad,
             secondary_motion_policy=secondary_motion_policy,
@@ -575,6 +591,7 @@ def evaluate_mechanics_intervention_sequence_v1(
             "rank_policy_selection_unjustified_churn": rank_selection_unjustified_churn,
             "singularity_recovery_mode": singularity_recovery_mode,
             "attachment_orientation_mode": attachment_orientation_mode,
+            "per_frame_attachment_pose_tracks_supported": True,
             "attachment_position_target_required_count": (
                 len(required_attachment_world_positions)
                 if required_attachment_world_positions is not None else 0

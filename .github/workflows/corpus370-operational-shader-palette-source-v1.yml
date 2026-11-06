@@ -145,6 +145,36 @@ jobs:
           C="$RUNNER_TEMP/od-physical-source-court-TRICERATOPS"
           "$BLENDER_EXE" --background --factory-startup --threads 2 --python-exit-code 1 --python tools/truth_foundry/blender_corpus370_operational_palette_physical_render_v1.py -- --source "$D/source.$EXT" --source-sha256 "$SOURCE_SHA" --source-policy "$D/policy.json" --camera-bundle "$D/camera.json" --source-palette "$RUNNER_TEMP/od-palette-out-$SUBJECT/PRIVATE_ORIGINAL_SHADER_CONSTANT_PALETTE_FACTS_V1.json" --v18a-npz "$D/v18a.npz" --output-dir "$P"
           "$BLENDER_EXE" --background --factory-startup --threads 2 --python-exit-code 1 --python tools/truth_foundry/blender_corpus370_operational_palette_physical_independent_ray_court_v1.py -- --source "$D/source.$EXT" --source-sha256 "$SOURCE_SHA" --source-policy "$D/policy.json" --camera-bundle "$D/camera.json" --source-palette "$RUNNER_TEMP/od-palette-out-$SUBJECT/PRIVATE_ORIGINAL_SHADER_CONSTANT_PALETTE_FACTS_V1.json" --render-manifest "$P/PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V1.json" --render-root "$P" --output-dir "$C"
+      - name: Preserve failed physical edit source-court evidence privately
+        if: failure() && matrix.subject == 'TRICERATOPS'
+        run: |
+          set -euo pipefail
+          umask 077
+          export RCLONE_CONFIG="$RUNNER_TEMP/source-private-palette.conf"
+          SRC="$RUNNER_TEMP/od-physical-TRICERATOPS"
+          COURT="$RUNNER_TEMP/od-physical-source-court-TRICERATOPS"
+          DEST="gdrive:corpus370_preparation_v1/hosted_operational_physical_edit_failures_v1/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          if [ -s "$COURT/PRIVATE_INDEPENDENT_ORIGINAL_PHYSICAL_PALETTE_RAY_COURT_V1.json" ]; then
+            rclone copyto "$COURT/PRIVATE_INDEPENDENT_ORIGINAL_PHYSICAL_PALETTE_RAY_COURT_V1.json" "$DEST/PRIVATE_INDEPENDENT_ORIGINAL_PHYSICAL_PALETTE_RAY_COURT_V1.json" --checksum --retries 3
+            rclone cat "$DEST/PRIVATE_INDEPENDENT_ORIGINAL_PHYSICAL_PALETTE_RAY_COURT_V1.json" > "$D/failure-court-readback.json"
+            cmp "$COURT/PRIVATE_INDEPENDENT_ORIGINAL_PHYSICAL_PALETTE_RAY_COURT_V1.json" "$D/failure-court-readback.json"
+          fi
+          if [ -s "$SRC/PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V1.json" ]; then
+            rclone copyto "$SRC/PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V1.json" "$DEST/PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V1.json" --checksum --retries 3
+            rclone cat "$DEST/PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V1.json" > "$D/failure-manifest-readback.json"
+            cmp "$SRC/PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V1.json" "$D/failure-manifest-readback.json"
+            for V in 0 2 4 6; do
+              for LABEL in BASELINE EDIT_0 EDIT_1 EDIT_2; do
+                FROM="$SRC/$LABEL/V$V.png"
+                if [ -s "$FROM" ]; then
+                  rclone copyto "$FROM" "$DEST/$LABEL/V$V.png" --checksum --retries 3
+                  rclone cat "$DEST/$LABEL/V$V.png" > "$D/failure-$LABEL-V$V.png"
+                  cmp "$FROM" "$D/failure-$LABEL-V$V.png"
+                fi
+              done
+            done
+          fi
+          echo "PRIVATE_FAIL_COURT_DIAGNOSTICS_CHECKSUM_READBACK_DONE__SCIENCE_GATE_STILL_FAIL"
       - name: Immutable private upload and checksum readback
         run: |
           set -euo pipefail

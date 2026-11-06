@@ -1,0 +1,43 @@
+name: mechanics-generic-closure-v1
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/mechanics_control_solver_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_live_runtime_v1.py'
+      - 'tests/compiler/test_mechanics_control_solver_v1.py'
+      - 'tests/compiler/test_control_motion_ik_integration_v1.py'
+      - 'docs/research/MECHANICS_GENERIC_CLOSURE_V1_20261106.md'
+      - '.github/workflows/mechanics_generic_closure_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mechanics-runtime-courts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deterministic CPU dependencies
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Compile Mechanics and Motion runtime
+        run: |
+          python -m py_compile compiler/realsas_compiler_core/mechanics_control_solver_v1.py compiler/realsas_compiler_core/mechanics_live_runtime_v1.py compiler/realsas_compiler_core/control_motion_runtime_v2.py
+      - name: Existing and new Mechanics behavior regression
+        run: |
+          pytest -q tests/compiler/test_mechanics_control_solver_v1.py tests/compiler/test_control_motion_ik_integration_v1.py
+      - name: Research ownership firewall
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('compiler/realsas_compiler_core/mechanics_live_runtime_v1.py').read_text()
+          assert 'model_inference_performed' in source
+          assert 'graphics_authority_claimed' in source
+          assert 'control_synthesis_performed' in source
+          print('PASS_MECHANICS_RUNTIME_RESEARCH_OWNERSHIP_FIREWALL')
+          PY

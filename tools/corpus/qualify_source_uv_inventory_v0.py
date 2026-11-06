@@ -9,9 +9,7 @@ from dataclasses import dataclass
 import math
 import numpy as np
 
-from tools.corpus.compile_corpus370_original_source_uv_edit_plan_v2 import (
-    glb_document, accessor,
-)
+from tools.corpus.glb_binary_accessor_v0 import glb_document, accessor
 
 SCHEMA = "RealSaS.SourceUVTriangleInventory.v0"
 QUANTIZATION = 100000  # 1e-5 normalized UV, <= 0.00512 source texels / 512 texture

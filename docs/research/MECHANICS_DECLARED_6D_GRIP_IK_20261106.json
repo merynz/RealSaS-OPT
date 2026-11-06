@@ -1,0 +1,58 @@
+{
+  "schema": "RealSaS.MechanicsDeclared6DGripIKResearchReceipt.v1",
+  "date_utc": "2026-11-06",
+  "repository": "merynz/RealSaS-OPT",
+  "pull_request": 353,
+  "branch": "research/mechanics-generic-closure-v1",
+  "tested_commit_sha": "d76362eb9d5970a76aee8067b9ec300d4d631738",
+  "github_actions": {
+    "workflow": "mechanics-generic-closure-v1",
+    "run_id": 42286207240,
+    "job_id": 128127567694,
+    "conclusion": "success",
+    "focused_mechanics_tests_passed": 106,
+    "ownership_firewall": "PASS_MECHANICS_RUNTIME_RESEARCH_OWNERSHIP_FIREWALL"
+  },
+  "mechanics_product_scope": {
+    "status": "PASS_SYNTHETIC_DECLARED_FULL_ATTACHMENT_FRAME_IK_RESEARCH",
+    "primary_contract": "3D position and 3D orientation on explicitly declared grip anchor with existing positional drag and fixed world-space contact constraints",
+    "run_mode": "SOLVE_DECLARED_RESEARCH_V1",
+    "default_mode": "EVALUATE_ONLY",
+    "objective": "9-row chordal Frobenius rotation-basis difference combined with 3-row world grip-point position, standard IK drag and pin residuals",
+    "analytic_jacobian": "world angular axis cross each rotated local-basis column for orientation; world angular axis cross (world grip point - pivot) for grip-position derivative",
+    "final_court": "independent SO(3) angle geodesic tolerance and explicit world-frame positional error; solver success alone insufficient",
+    "authority": "declared canonical rig attachment local_P and optional explicitly present metadata.local_basis",
+    "source_truth_minted": false,
+    "source_physical_joint_limits_inferred": false,
+    "model_training_authorized": false,
+    "graphics_visibility_claimed": false,
+    "collision_or_friction_dynamics_claimed": false,
+    "production_fps_claimed": false
+  },
+  "verified_cases": [
+    "simultaneously drag distal A2 tip, orient attached A1 grip to target world 3x3 rotation and preserve B2 planted world contact",
+    "full grip-frame world point + orientation 6D objective, independent analytic Jacobian checked vs centered finite differences",
+    "contradictory target world position or orientation explicitly FAILs original full constraint",
+    "missing local grip orientation cannot be used as orientation target; position-only declared grip can still be solved without inventing orientation",
+    "invalid/unknown world grip targets, nonorthonormal 3x3 basis and unsupported mode rejected",
+    "live runtime defaults to evaluator and requires explicit opted-in analytic multigoal solver",
+    "five-frame sequence drives time-varying attachment world position and world orientation while preserving pinned contact and warm start",
+    "competing static and keyed frame target authority rejected"
+  ],
+  "files": {
+    "solver": "compiler/realsas_compiler_core/mechanics_multigoal_solver_v1.py",
+    "frame_evaluator": "compiler/realsas_compiler_core/mechanics_attachment_frames_v1.py",
+    "runtime": "compiler/realsas_compiler_core/mechanics_live_runtime_v1.py",
+    "tests": "tests/compiler/test_mechanics_oriented_ik_v1.py",
+    "ci": ".github/workflows/mechanics_generic_closure_v1.yml"
+  },
+  "limits": [
+    "Synthetic explicitly authored grip fixture only; no independent source→canonical correspondence court or unseen subjects",
+    "3D grip rotation is explicit metadata rather than an automatic inferred contact frame",
+    "one attached grip on a 5-joint dual-chain case; not arbitrary orientation-heavy complex morphology",
+    "9-row chordal optimization is exact derivative of the chosen objective but not a guarantee of global nonlinear convergence",
+    "local 6D attachment constraints use numerical tolerances, not hard force-contact or friction constraints",
+    "per-frame target maps are transient runtime data; no canonical training authority"
+  ],
+  "next": "Full grip + ground contact with multiple named attachment anchors and source-native rig artifacts; test oriented rank selection/morphology scaling and timing including deform+Graphics; add priority/overconstraint courts"
+}

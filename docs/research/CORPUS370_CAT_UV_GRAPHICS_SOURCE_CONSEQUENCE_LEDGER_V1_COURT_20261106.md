@@ -14,7 +14,7 @@ V1 wrong glTF UV V coordinate mapping remains an immutable scientific FAIL; the 
 
 ## Real source-evidence ledger and independent counter-court
 
-[Typed original Cat source Graphics ledger CI run 42264927264 — 2/2 PASS](https://github.com/merynz/RealSaS-OPT/actions/runs/42264927264): original immutable Cat UV plan, atlas physical edit assets, original source Blender manifest, original independent physical source court and canonical RealSaS Truth Authority contract were all SHA verified. Source ledger compiled and independently courted; 14 adversarial tests passed (13 tests? refer to exact pytest log for count). Private Drive SHA readback exact.
+[Typed original Cat source Graphics ledger CI run 42264927264 — 2/2 PASS](https://github.com/merynz/RealSaS-OPT/actions/runs/42264927264): original immutable Cat UV plan, atlas physical edit assets, original source Blender manifest, original independent physical source court and canonical RealSaS Truth Authority contract were all SHA verified. Source ledger compiled and independently courted; 14 adversarial tests passed (verified from independent CI job log). Private Drive SHA readback exact.
 
 - [Original source-only Cat Graphics ledger](https://drive.google.com/file/d/1H75vB5957-w-seRJnVqy3ALVlCBmHthX/view), SHA **60ce8085c91282d43e2a16147d08dd6883764a5168270812f9f1be7e46a4b435**.
 - [Independent Cat ledger authority/source court](https://drive.google.com/file/d/1a_LWij2XJ5Wk7xw9L-z1_14ssIAHdhrs/view), SHA **92afb720dff9ba6a6524901d7363e217ed499f1fdf22bbee0b09c8dabfda0b3e**.

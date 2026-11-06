@@ -107,6 +107,8 @@ def _behavioral_metrics(
     rig: CanonicalRigIRV2,
     pose: MechanicsPoseIRV1,
     deformation: DeformedMeshIRV1,
+    *,
+    prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
 ) -> tuple[float, float]:
     joint_rest = {r.canonical_joint_id: np.asarray(r.P, dtype=np.float64) for r in rig.joints}
     joint_solved = {r.canonical_joint_id: np.asarray(r.solved_P, dtype=np.float64) for r in pose.joints}
@@ -128,18 +130,33 @@ def _behavioral_metrics(
             continue
         strain = max(strain, abs(solved_length / rest_length - 1.0))
 
-    rest_vertices = {r.canonical_mesh_vertex_id: np.asarray(r.P, dtype=np.float64)
-                     for r in mesh.vertices}
-    if (len(rest_vertices) != len(mesh.vertices)
-            or len(deformation.positions) != len(deformation.canonical_mesh_vertex_ids)
-            or set(rest_vertices) != set(deformation.canonical_mesh_vertex_ids)):
+    # Complete, finite vertex-displacement court. Vectorize the numerical
+    # operation; do not relax coverage or topology authority for speed.
+    ids = tuple(deformation.canonical_mesh_vertex_ids)
+    if len(ids) != len(deformation.positions) or len(ids) != len(mesh.vertices):
         raise QualificationError("LIVE_MECHANICS_VERTEX_COVERAGE_DRIFT")
-    displacement = 0.0
-    for vid, p in zip(deformation.canonical_mesh_vertex_ids, deformation.positions):
-        current = np.asarray(p, dtype=np.float64)
-        if current.shape != (3,) or not np.isfinite(current).all():
-            raise QualificationError("LIVE_MECHANICS_VERTEX_NONFINITE")
-        displacement = max(displacement, float(np.linalg.norm(current - rest_vertices[vid])))
+    positions = np.asarray(deformation.positions, dtype=np.float64)
+    if positions.shape != (len(ids), 3) or not np.isfinite(positions).all():
+        raise QualificationError("LIVE_MECHANICS_VERTEX_NONFINITE")
+    if prepared_skin is not None:
+        if (ids != prepared_skin.canonical_mesh_vertex_ids
+                or len(mesh.vertices) != prepared_skin.vertex_count):
+            raise QualificationError("LIVE_MECHANICS_PREPARED_VERTEX_ORDER_DRIFT")
+        rest = prepared_skin.rest_vertex_positions
+    else:
+        mesh_ids = tuple(v.canonical_mesh_vertex_id for v in mesh.vertices)
+        if len(set(mesh_ids)) != len(mesh_ids) or len(set(ids)) != len(ids):
+            raise QualificationError("LIVE_MECHANICS_VERTEX_COVERAGE_DRIFT")
+        rest = np.asarray([r.P for r in mesh.vertices], dtype=np.float64)
+        if mesh_ids != ids:
+            id_to_index = {vid: i for i, vid in enumerate(mesh_ids)}
+            try:
+                rest = rest[[id_to_index[vid] for vid in ids]]
+            except KeyError as exc:
+                raise QualificationError("LIVE_MECHANICS_VERTEX_COVERAGE_DRIFT") from exc
+    if rest.shape != positions.shape or not np.isfinite(rest).all():
+        raise QualificationError("LIVE_MECHANICS_VERTEX_COVERAGE_DRIFT")
+    displacement = float(np.max(np.linalg.norm(positions - rest, axis=1))) if len(ids) else 0.0
     return strain, displacement
 
 
@@ -227,7 +244,7 @@ def evaluate_mechanics_intervention_frame_v1(
     maximum_residual = max((abs(float(v)) for _, v in pose.constraint_residuals), default=0.0)
     if not math.isfinite(maximum_residual):
         raise QualificationError("LIVE_MECHANICS_RESIDUAL_NONFINITE")
-    strain, displacement = _behavioral_metrics(mesh, rig, pose, deformed)
+    strain, displacement = _behavioral_metrics(mesh, rig, pose, deformed, prepared_skin=prepared_skin)
     failures: list[str] = []
     if maximum_residual > limit_residual:
         failures.append("CONSTRAINT_RESIDUAL_EXCEEDED")

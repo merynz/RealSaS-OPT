@@ -1,6 +1,6 @@
 # Corpus370 V18m — original Cycles source depth, oracle-free local G/R visibility
 
-Date: 2026-11-06 (Türkiye). **Preregistered source geometry-depth intervention; real original source workflow pending final independent court.** Draft PR #343; no main merge or new training/materialization authority.
+Date: 2026-11-06 (Türkiye). **REAL ORIGINAL SOURCE SHA-LOCKED INDEPENDENT RECOVERY COURT 3/3 PASS; controlled emission only; graphic ownership UNKNOWN.** Draft PR #343; no main merge or new training/materialization authority.
 
 ## Research continuity and core falsification
 
@@ -40,6 +40,43 @@ V18m **predictor API accepts only V18l's original G/R isolated color RGBA and V1
 3. Depth ties/invalid values grow: report unknown coverage and abstain, do not declare PASS on an empty or tiny qualified subset.
 4. Cat trivially passes while Triceratops does not: Cat is control, not evidence for complex morphology.
 5. Original V18l FULL RGB verifies prediction only in court, never conditions depth decision.
+
+## Real original-source outcome and independent source court
+
+Source **render acquisition** (new Blender 4.5.14 Cycles original depth frames) performed for CAT and TRICERATOPS on `42134142993-1`, checked via original author pose2 and frozen V18a. The original bundled 3/3 workflow itself failed **after rendering** because its new manifest validation checked the wrong spelling of an existing producer parent-run key: it looked for `source_original_v18m_parent_v18l_run` instead of `original_source_v18m_parent_v18l_run`. The original render manifests and source depth NPZ bytes were uploaded privately on EXIT. This was a **court key binding bug, not a renderer or source measurement failure**. Fixed in commit `476f605b`. The original, immutable failed-job output archives were subsequently reopened under a **separate, read-only, independent SHA-bound recovery court** rather than rerendered:
+
+https://github.com/merynz/RealSaS-OPT/actions/runs/42135271057 — **3/3 PASS**: redteam 11/11 PASS, Cat exact original source PASS, Triceratops exact original source PASS; all source NPZ and court SHA-readback verified. The recovery court reads exact original `42134142993-1` artifacts and exact original V18l `42131579613-1` reference full/group/removal frames, with frozen expected original V18l independent court receipts above.
+
+Private independent recovery SHA receipts:
+- CAT `a39879e4558139ca2f418c1b4f33c581f0f6ced9c7fa4a89b5faed425266e889`.
+- TRICERATOPS `3981af638b632a512b3fde4ac6a75d5d0e2d8a831a81f5becb017af26233ac99`.
+
+**Every original Cycles subset pixel in both sources** was valid and fully qualified: 4 cameras × 8 sample indices × 192×192 pixels = **1,179,648 source pixel-sample observations PER SUBJECT**; **0 depth/color alpha mismatches, 0 depth ties/unknowns, 0 invalid depth observations**. Predictor receiving **ONLY original physically isolated G/R color and depth images**, with NO input from original FULL, yielded **0 per-sample RGBA errors, 0 per eight-sample pixel errors**, and no errors worse than fixed sample-first G/R in any qualified original pixel. This is a source-authoritative mechanism test in an original Blender fixed-emission environment, NOT learned unseen model output or full artist CAA fidelity.
+
+### Triceratops original-source geometry and full-domain results
+
+| Frozen original camera view | Original independent Cycles samples with both G and R physically present | Blender postfilter OVER erroneous pixels | Best fixed-order sample-first erroneous pixels | Source depth-order oracle-free predicted erroneous pixels |
+| --- | ---: | ---: | ---: | ---: |
+| 0 | 7,966 | 7 | 0 | **0** |
+| 2 | 1,209 | 64 | 7 | **0** |
+| 4 (locked) | 7,954 | 77 | 70 | **0** |
+| 6 (locked) | 1,213 | 68 | 8 | **0** |
+| **Total** | **18,342** | **216** | **85** | **0** |
+
+On **locked cameras 4 and 6**, source-depth predicts the actual original Cycles subset source FULL without error on all 16×192×192 queried positions across both views, resolves the **78** residual fixed-order failures and all **145** former postfilter OVER failures there, with zero regressions. Across all four views it resolves **85/85** best-fixed-order failures. Unlike per-pixel oracle picking by outcome color, this result is measured from **depth-emission-shaded original source G/R visibility**, not source FULL RGB outcomes.
+
+The original source geometry visibly changes nearest side depending on camera and pixel sample: Triceratops G-frontmost counts are `19,403 / 39,854 / 18,186 / 39,801` and R-frontmost counts `0 / 1,250 / 1,224 / 1,249` across original views `0/2/4/6`. Both sides can be physically present along the original source depth stack at **18,342 total sample-pixel instances**. Source group labels remain **arbitrary V18a proposals** and the result does not validate the proposed partition as artistic or operationally editable.
+
+### Cat control
+
+Cat has `5 / 0 / 5 / 0` source G/R simultaneous samples across the four views, and the fixed frozen candidate group is only two source faces. Its oracle-free depth result is perfectly correct (0 errors), but **Cat is nearly vacuous as a difficult frontmost-draw-order test**. It is a source transport/alignment control, not the genericity argument. Triceratops supplies the meaningful overlap and mixed ordering.
+
+### Scientific boundary and next obligation
+
+- **Demonstrated:** Given exact original source teacher 3D geometry and per-sample Blender Cycles source depth for **two physically edited source groups**, a depth-sorted, per-sample, source-private G/R compositor produces matching fixed-emission full image on original heldout pose2 and reserved cameras. The original FULL RGB is used only by independent scoring.
+- **Not demonstrated:** IRIS can infer those depth maps from unseen 2D input, graphics owner is discovered, arbitrary K anonymous parts work, original UV/textures/straight-alpha/CAA and motion holdout render fidelity match, compositing works with transparent/intersecting material, or global fixed draw order can represent arbitrary source.
+- **No naive direct model training label promotion**: depth shader and source-face group belong to original source teacher measurement. Source ray locality and partial order can become **typed evidence/valid mask** in Graphics Evidence IR, but only a separately qualified consumer contract can authorize student target distillation.
+- **Next V18n:** Use *original source materials and appearance carrier* under controlled source-locus interventions while preserving sample-aware depth and provenance. Generalize G/R to variable number K with per-sample depth sorting, then remeasure drawability via heldout physical edits and source appearance; original source art alpha/render policy remain independently checked.
 
 ### Implementation
 

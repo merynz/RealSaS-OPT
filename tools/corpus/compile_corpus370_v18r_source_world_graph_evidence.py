@@ -210,14 +210,14 @@ def compile_source(v18q_ir,v18q_court,v18a_manifest,v18a_npz,
         and gc.get("schema")=="RealSaS.Corpus370IndependentTypedGraphAffinityHypothesisCourt.v18q"
         and gc.get("status")=="ORIGINAL_SOURCE_GRAPH_HYPOTHESES_REPLAYED__NO_OWNER_OR_STUDENT_GOLD"
         and gc.get("source_original_graph_hypothesis_ir_sha256")==sha(v18q_ir)
-        and a.get("schema")=="RealSaS.Corpus370OriginalReactiveStainMechanicalCandidates.v18a"
+        and a.get("schema")=="RealSaS.Corpus370NativeReactiveStainCandidate.v18a"
         and a.get("private_candidate_npz_sha256")==sha(v18a_npz)
         and a.get("parent_source_immutable_sha256",{}).get(
             "v13b_source_intervention")==sha(v13b_array)
         and a.get("parent_source_immutable_sha256",{}).get(
             "source_rest_geometry")==m.get("rest_source_sha256")
         and m.get("source_pose_articulation_array_sha256")==sha(v13b_array)
-        and m.get("schema")=="RealSaS.Corpus370NativeCarrierActuatorIntervention.v13b"
+        and m.get("schema")=="RealSaS.Corpus370NativeCarrierActuatorInterventionRender.v13b"
         and m.get("status")==
             "V13B_REAL_ORIGINAL_SOURCE_ANONYMOUS_NATIVE_CARRIER_INTERVENTION__INDEPENDENT_COURT_REQUIRED"
         and mc.get("schema")=="RealSaS.Corpus370AnonymousNativeMixedCarrierResponseCourt.v13b"

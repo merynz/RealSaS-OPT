@@ -1,0 +1,26 @@
+name: Original source-to-canonical face UV alignment v0 research gate
+on:
+  push:
+    branches: [research/graphics-source-face-uv-alignment-v0]
+    paths:
+      - 'tools/corpus/court_original_source_face_uv_alignment_v0.py'
+      - 'tests/corpus/test_original_source_face_uv_alignment_v0.py'
+      - '.github/workflows/source-face-uv-alignment-v0.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fail-closed-source-face-identity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install bounded CPU dependencies
+        run: python -m pip install 'numpy>=1.26,<3' 'pillow>=10,<13' 'pytest>=8,<10'
+      - name: Exercise index/metric mapping authority and abstention controls
+        run: |
+          python -m py_compile tools/corpus/court_original_source_face_uv_alignment_v0.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_original_source_face_uv_alignment_v0.py

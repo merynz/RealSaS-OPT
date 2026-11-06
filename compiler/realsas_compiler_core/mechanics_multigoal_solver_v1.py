@@ -48,6 +48,15 @@ class MechanicsGoalResidualV1:
 
 
 @dataclass(frozen=True)
+class MechanicsAttachmentPositionResidualV1:
+    canonical_anchor_id: str
+    parent_canonical_joint_id: str
+    target_world_P: tuple[float, float, float]
+    solved_world_P: tuple[float, float, float]
+    residual_world: float
+
+
+@dataclass(frozen=True)
 class MechanicsOrientationGoalResidualV1:
     canonical_anchor_id: str
     parent_canonical_joint_id: str
@@ -66,6 +75,8 @@ class MechanicsMultiGoalResultV1:
     parameters_rad: tuple[tuple[str, str, float], ...]
     solver_evaluations: int
     orientation_goals: tuple[MechanicsOrientationGoalResidualV1, ...] = ()
+    attachment_position_goals: tuple[MechanicsAttachmentPositionResidualV1, ...] = ()
+    max_attachment_position_residual_world: float = 0.
     max_orientation_residual_rad: float = 0.
     metadata: dict = field(default_factory=dict)
 
@@ -101,6 +112,7 @@ def solve_declared_multi_goal_v1(
     pinned_contact_control_ids: Sequence[str] = (),
     pinned_world_targets: Mapping[str, Sequence[float]] | None = None,
     attachment_orientation_targets: Mapping[str, Sequence[Sequence[float]]] | None = None,
+    attachment_position_targets: Mapping[str, Sequence[float]] | None = None,
     orientation_tolerance_rad: float = 1e-3,
     goal_tolerance: float = 1e-3,
     regularization: float = 1e-4,
@@ -125,8 +137,10 @@ def solve_declared_multi_goal_v1(
             raise QualificationError(code)
     if orientation_tolerance_rad>math.pi:
         raise QualificationError("MULTIGOAL_ORIENTATION_TOLERANCE_INVALID")
-    if attachment_orientation_targets is not None and jacobian_mode != "ANALYTIC_RESEARCH_V1":
-        raise QualificationError("MULTIGOAL_ORIENTATION_REQUIRES_ANALYTIC")
+    if ((attachment_orientation_targets is not None
+         or attachment_position_targets is not None)
+            and jacobian_mode != "ANALYTIC_RESEARCH_V1"):
+        raise QualificationError("MULTIGOAL_ATTACHMENT_POSE_REQUIRES_ANALYTIC")
     if min(max_nfev, maximum_joints, maximum_dofs, maximum_goals) < 1:
         raise QualificationError("MULTIGOAL_RESOURCE_POLICY_INVALID")
 
@@ -307,14 +321,33 @@ def solve_declared_multi_goal_v1(
     # Orientation targets may constrain ONLY an explicit declared local
     # 3D attachment frame, never a synthesized hand/grip frame.
     orientation_goals: list[tuple[str, str, np.ndarray, np.ndarray]] = []
+    attachment_position_goals: list[tuple[str, str, np.ndarray, np.ndarray]] = []
     requested=dict(attachment_orientation_targets or {})
+    requested_positions=dict(attachment_position_targets or {})
     anchors={row.canonical_anchor_id: row for row in rig.attachment_anchors}
     if len(anchors)!=len(rig.attachment_anchors):
         raise QualificationError("MULTIGOAL_ORIENTATION_DUPLICATE_ANCHOR")
     if set(requested)-set(anchors):
         raise QualificationError("MULTIGOAL_ORIENTATION_ANCHOR_UNKNOWN")
-    if len(requested)>maximum_goals:
-        raise QualificationError("MULTIGOAL_ORIENTATION_GOAL_RESOURCE_BOUND")
+    if set(requested_positions)-set(anchors):
+        raise QualificationError("MULTIGOAL_ATTACHMENT_POSITION_ANCHOR_UNKNOWN")
+    if len(requested)+len(requested_positions)>maximum_goals:
+        raise QualificationError("MULTIGOAL_ATTACHMENT_GOAL_RESOURCE_BOUND")
+    for aid in sorted(requested_positions):
+        anchor=anchors[aid]
+        parent=anchor.parent_canonical_joint_id
+        if (parent not in joint_by or
+                anchor.parent_canonical_control_id is not None):
+            raise QualificationError("MULTIGOAL_ATTACHMENT_POSITION_PARENT_NOT_EXECUTABLE")
+        try:
+            local=np.asarray(anchor.local_P,dtype=np.float64)
+            target=np.asarray(requested_positions[aid],dtype=np.float64)
+        except (TypeError,ValueError) as exc:
+            raise QualificationError("MULTIGOAL_ATTACHMENT_POSITION_INVALID") from exc
+        if (local.shape!=(3,) or target.shape!=(3,)
+                or not np.isfinite(local).all() or not np.isfinite(target).all()):
+            raise QualificationError("MULTIGOAL_ATTACHMENT_POSITION_INVALID")
+        attachment_position_goals.append((aid,parent,local,target))
     for aid in sorted(requested):
         anchor=anchors[aid]
         parent=anchor.parent_canonical_joint_id
@@ -371,6 +404,10 @@ def solve_declared_multi_goal_v1(
             for _, _, jid, target, kind in goals
         ]
         blocks.extend(
+            p[parent]+world_rot[parent]@local-target
+            for _,parent,local,target in attachment_position_goals
+        )
+        blocks.extend(
             (world_rot[parent]@local-target).ravel()
             for _,parent,local,target in orientation_goals
         )
@@ -380,7 +417,8 @@ def solve_declared_multi_goal_v1(
 
     def analytic_jacobian(q: np.ndarray) -> np.ndarray:
         p, forward_rot, world_axes = forward(q)
-        task_rows=3*len(goals)+9*len(orientation_goals)
+        task_rows=(3*len(goals)+3*len(attachment_position_goals)
+                   +9*len(orientation_goals))
         rows = task_rows + (len(param_schema) if regularization else 0)
         out = np.zeros((rows, len(param_schema)), dtype=np.float64)
         for gi, (_, _, tip, _, kind) in enumerate(goals):
@@ -391,9 +429,18 @@ def solve_declared_multi_goal_v1(
                 out[gi * 3:gi * 3 + 3, index] = (
                     weight * np.cross(world_axes[index], p[tip] - p[pivot])
                 )
+        for gi,(_,parent,local,_) in enumerate(attachment_position_goals):
+            grip_position=p[parent]+forward_rot[parent]@local
+            start=3*len(goals)+3*gi
+            for index,(pivot,_) in enumerate(param_schema):
+                if pivot not in ancestor_sets[parent]:
+                    continue
+                out[start:start+3,index]=np.cross(
+                    world_axes[index],grip_position-p[pivot]
+                )
         for gi,(_, parent, local, _) in enumerate(orientation_goals):
             world_basis=forward_rot[parent]@local
-            rowstart=3*len(goals)+9*gi
+            rowstart=3*len(goals)+3*len(attachment_position_goals)+9*gi
             for index,(pivot,_) in enumerate(param_schema):
                 if pivot not in ancestor_sets[parent]:
                     continue
@@ -429,7 +476,9 @@ def solve_declared_multi_goal_v1(
     policy_preferred_reused = False
     policy_preferred_span_error: float | None = None
     if active_parameter_policy == "RANK_REVEALING_RESEARCH_V1":
-        task_jac = analytic_jacobian(x0)[:3*len(goals)+9*len(orientation_goals), :]
+        task_jac = analytic_jacobian(x0)[
+            :3*len(goals)+3*len(attachment_position_goals)+9*len(orientation_goals), :
+        ]
         if not np.isfinite(task_jac).all():
             raise QualificationError("MULTIGOAL_RANK_POLICY_JACOBIAN_NONFINITE")
         _, triangular, pivot_columns = qr(task_jac, pivoting=True, mode="economic")
@@ -520,6 +569,12 @@ def solve_declared_multi_goal_v1(
         if any(np.linalg.norm(positions[tip]-target) > goal_tolerance
                for _,_,tip,target,_ in goals):
             return False
+        if any(
+            np.linalg.norm(positions[parent]+rotations[parent]@local-target)
+            > goal_tolerance
+            for _,parent,local,target in attachment_position_goals
+        ):
+            return False
         return all(
             math.acos(float(np.clip(
                 (np.trace(target.T@(rotations[parent]@local))-1.)/2.,
@@ -604,6 +659,20 @@ def solve_declared_multi_goal_v1(
             residual_world=float(np.linalg.norm(p[jid] - target)),
             goal_kind=kind,
         ))
+    reported_attachment_positions=tuple(
+        MechanicsAttachmentPositionResidualV1(
+            canonical_anchor_id=aid,
+            parent_canonical_joint_id=parent,
+            target_world_P=tuple(map(float,target)),
+            solved_world_P=tuple(map(float,p[parent]+rotations[parent]@local)),
+            residual_world=float(np.linalg.norm(
+                p[parent]+rotations[parent]@local-target
+            )),
+        ) for aid,parent,local,target in attachment_position_goals
+    )
+    attachment_position_max=max(
+        (r.residual_world for r in reported_attachment_positions),default=0.
+    )
     reported_orientations=tuple(
         MechanicsOrientationGoalResidualV1(
             canonical_anchor_id=aid,
@@ -624,6 +693,7 @@ def solve_declared_multi_goal_v1(
     passes = bool(
         opt.success and drag_max<=goal_tolerance and pin_max<=goal_tolerance
         and orientation_max<=orientation_tolerance_rad
+        and attachment_position_max<=goal_tolerance
     )
     rows = tuple(SolvedJointTransformIRV1(
         canonical_joint_id=jid,
@@ -657,7 +727,9 @@ def solve_declared_multi_goal_v1(
         ),
         solver_evaluations=int(opt.nfev),
         orientation_goals=reported_orientations,
+        attachment_position_goals=reported_attachment_positions,
         max_orientation_residual_rad=orientation_max,
+        max_attachment_position_residual_world=attachment_position_max,
         metadata={
             "solver_termination": str(opt.message),
             "jacobian_mode": jacobian_mode,
@@ -667,6 +739,7 @@ def solve_declared_multi_goal_v1(
             "unbounded_rotation_chart_count": len(param_schema) - limits_present,
             "pinned_contact_count": len(pins),
             "declared_attachment_orientation_goal_count": len(orientation_goals),
+            "declared_attachment_position_goal_count": len(attachment_position_goals),
             "attachment_orientation_chordal_objective_geodesic_final_gate": True,
             "explicit_world_contact_anchor_count": len(anchor_map),
             "contact_anchors_are_declared_control_references": True,
@@ -693,6 +766,7 @@ def solve_declared_multi_goal_v1(
 
 
 __all__ = [
-    "MechanicsGoalResidualV1", "MechanicsOrientationGoalResidualV1", "MechanicsMultiGoalResultV1",
+    "MechanicsGoalResidualV1", "MechanicsOrientationGoalResidualV1",
+    "MechanicsAttachmentPositionResidualV1", "MechanicsMultiGoalResultV1",
     "solve_declared_multi_goal_v1",
 ]

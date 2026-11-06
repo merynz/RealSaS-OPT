@@ -1,0 +1,60 @@
+{
+  "schema": "RealSaS.AxisMiraV7Corpus370Prereg.v1",
+  "date_utc": "2026-11-06",
+  "status": "RESEARCH_SOURCE_ONLY__NO_TRAINING_AUTHORITY",
+  "branch": "research/axis-mira-v7-skintokens-control-370",
+  "source_cohort": {
+    "candidate_count": 370,
+    "admitted_for_training": null,
+    "observation_pass_not_equivalent_to_truth_admission": true,
+    "upstream_work": "PR #327"
+  },
+  "owner_contract": {
+    "axis": "LEARNED_MECHANICS_RIG_CONTROL_AND_SKIN_CODE",
+    "mira": "LEARNED_MECHANICAL_SKIN_FIELD_CODEC",
+    "mechanics": "EXECUTABLE_CONSTRAINTS_IK_DEFORMATION_INTERACTION",
+    "graphics": "SEPARATE_IRIS_LINKED_GRAPHICS_COMPILER",
+    "motion": "CONTROL_SPACE_MOTION"
+  },
+  "rig": {
+    "architecture_id": "RealSaS.AXIS.UnifiedRigControlSkin.CausalCrossAttention.v7_0",
+    "scene_dim": 47,
+    "hidden_dim": 768,
+    "layers": 16,
+    "heads": 12,
+    "max_sequence_length": 4096,
+    "skin_vocab_size": 64000
+  },
+  "skin": {
+    "architecture_id": "RealSaS.MIRA.CarrierNativeFSQ.STGradient.ActiveField.v7_0",
+    "tokens_per_joint": 4,
+    "fsq_levels": [
+      8,
+      8,
+      8,
+      5,
+      5,
+      5
+    ],
+    "vocab_size": 64000,
+    "source_vae_attention_parity_claimed": false
+  },
+  "required_receipts": [
+    "CORPUS370_SOURCE_FAMILY_QUALIFICATION",
+    "CORPUS370_MECHANICS_INTERVENTION_TRUTH",
+    "CORPUS370_CANONICAL_MESH_SHARED_SCENE_BINDINGS",
+    "CORPUS370_DENSE_SKIN_TARGET_AUTHORITY",
+    "CORPUS370_LEAKAGE_CONNECTED_TRAIN_UNSEEN_SPLIT",
+    "MIRA_V7_CODEC_FROZEN_TRAIN_ONLY",
+    "AXIS_V7_CAUSAL_EVENT_TEACHER_SEAL",
+    "MECHANICS_INTERACTABILITY_BEHAVIOR_COURT"
+  ],
+  "training": {
+    "allowed_now": false,
+    "checkpoint_product_authority": false,
+    "unseen_tuning_allowed": false,
+    "source_name_student_truth_allowed": false,
+    "compiler_control_synthesis_allowed": false,
+    "graphics_train_target_in_axis_mira": false
+  }
+}

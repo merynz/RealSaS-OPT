@@ -54,11 +54,15 @@ jobs:
           echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
           unzip -q "$R" -d "$D"
           export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          python -m pip install 'numpy>=1.26,<3'
+          T="gdrive:corpus370_preparation_v1/hosted_native_temporal_pilot_v1/41915393652-1/subjects/corpus_000ca1ae51f9582fde9e"
           P="gdrive:corpus370_preparation_v1/hosted_cat_pose_subface_uv_physical_transport_v1/CAT/42307569041-1"
+          rclone copyto "$T/teacher.npz" "$D/private/teacher.npz" --checksum --retries 5
           rclone copyto "$P/PRIVATE_CAT_POSE_FACE_UV_ANCHOR_PHYSICAL_V1.json" "$D/private/parent.json" --checksum --retries 5
           rclone copyto "$P/PRIVATE_INDEPENDENT_CAT_POSE_FACE_UV_ANCHOR_COURT_V1.json" "$D/private/court.json" --checksum --retries 5
           echo "974c1a2a4cdbd51f2d799cc29a8d3b4ef3bbb36ba6442a3cc79c8f541d44ca6b  $D/private/parent.json" | sha256sum --check
           echo "3ab8cbedd37d31e3fed6ddb554fab6fe5c80294076b7aaf94897b713e4bdad8c  $D/private/court.json" | sha256sum --check
+          echo "c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603  $D/private/teacher.npz" | sha256sum --check
           echo "ORIGINAL_PHYSICAL_CAT_POSE_UV_COURT_SOURCES_SHA_PASS"
       - name: Derive same-face operational source edit-response pair target candidates and independently re-court all
         shell: bash
@@ -72,11 +76,14 @@ jobs:
             --source-parent-sha256 "974c1a2a4cdbd51f2d799cc29a8d3b4ef3bbb36ba6442a3cc79c8f541d44ca6b" \
             --independent-court-sha256 "3ab8cbedd37d31e3fed6ddb554fab6fe5c80294076b7aaf94897b713e4bdad8c" \
             --operations 3 \
+            --teacher "$D/private/teacher.npz" \
+            --teacher-sha256 "c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603" \
             --output "$D/results/PRIVATE_CAT_OPERATIONAL_EDIT_RESPONSE_PAIR_TRUTH_CANDIDATES_V1.json"
           python -m tools.corpus.court_operational_edit_response_pair_truth_v1 \
             --source-parent "$D/private/parent.json" \
             --source-court "$D/private/court.json" \
             --candidate "$D/results/PRIVATE_CAT_OPERATIONAL_EDIT_RESPONSE_PAIR_TRUTH_CANDIDATES_V1.json" \
+            --teacher "$D/private/teacher.npz" \
             --output "$D/results/PRIVATE_INDEPENDENT_CAT_OPERATIONAL_EDIT_RESPONSE_PAIR_COURT_V1.json"
           D="$D" python - <<'PY'
           import json, os

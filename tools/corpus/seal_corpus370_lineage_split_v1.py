@@ -60,7 +60,11 @@ def target_count(total: int, fraction: float, minimum: int, maximum: int | None 
 
 
 def lineage_maps(lineage: dict) -> tuple[dict[str, dict], dict[str, str]]:
-    groups = {str(row["lineage_id"]): dict(row) for row in lineage.get("groups") or ()}
+    rows = lineage.get("groups") or ()
+    require(len(rows) == int(lineage.get("lineage_count", -1)),
+            "CORPUS370_SPLIT_LINEAGE_GROUP_CENSUS")
+    groups = {str(row["lineage_id"]): dict(row) for row in rows}
+    require(len(groups) == len(rows), "CORPUS370_SPLIT_LINEAGE_DUPLICATE_GROUP")
     subject_to_lineage = {str(k): str(v) for k, v in (lineage.get("subject_to_lineage") or {}).items()}
     require(len(subject_to_lineage) == int(lineage.get("subject_count", -1)) == 370, "CORPUS370_SPLIT_LINEAGE_SUBJECT_SET")
     require(set(subject_to_lineage.values()) == set(groups), "CORPUS370_SPLIT_LINEAGE_GROUP_REF")

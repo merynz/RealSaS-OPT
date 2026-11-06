@@ -49,7 +49,12 @@ def test_candidate_generation_is_subject_free_and_retains_strong_alternatives():
         "per_face_shared_carrier": 6,
     }
     assert len(out.executable_candidate_ids) == 4
-    assert all(v == "SATISFIED" for v in out.capability_states.values())
+    assert all(v == "UNKNOWN" for v in out.capability_states.values())
+    assert all(v == "SUPPORTED_BY_REFERENCE_EXECUTOR" for v in
+               out.reference_executor_capability_states.values())
+    assert not out.source_qualified_candidate_ids
+    assert all(v == "UNKNOWN" for v in
+               out.source_evidence_readiness.per_operation_source_observability.values())
     assert out.source_artist_ownership == "UNKNOWN"
     assert out.physical_source_qualification == "UNKNOWN"
     assert out.measured_runtime_cost == "UNMEASURED_COST"
@@ -64,6 +69,7 @@ def test_no_false_qualification_when_contract_exceeds_runtime():
         e(), c("INDEPENDENT_ATLAS_EDITS", "INDEPENDENT_ATTACHMENT_RELEASE",
                "SECONDARY_MOTION", "NONBINARY_ALPHA_SOURCE_PARITY"))
     assert out.capability_states["INDEPENDENT_ATTACHMENT_RELEASE"] == "UNKNOWN"
+    assert out.reference_executor_capability_states["INDEPENDENT_ATTACHMENT_RELEASE"] == "NOT_IMPLEMENTED_IN_REFERENCE"
     assert out.capability_states["SECONDARY_MOTION"] == "UNKNOWN"
     assert out.capability_states["NONBINARY_ALPHA_SOURCE_PARITY"] == "UNKNOWN"
     assert not out.executable_candidate_ids

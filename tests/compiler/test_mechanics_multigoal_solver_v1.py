@@ -195,3 +195,71 @@ def test_warm_start_cannot_change_dof_schema_or_violate_known_limits():
     bad[0] = (jid, axis, 20.0)
     with pytest.raises(QualificationError, match="WARM_START_OUT_OF_BOUNDS"):
         solve_declared_multi_goal_v1(rig, initial_parameters_rad=bad)
+
+
+@pytest.mark.parametrize("dof_count",[3,6,9,15])
+def test_opt_in_analytic_jacobian_matches_numeric_goals_and_independent_central_difference(dof_count):
+    rig=_branched_rig()
+    # Generic label data, no teacher bone names or physics limits assumed.
+    declared={
+        "BASE":["RZ"],"A1":["RZ"],"A2":[],
+        "B1":["RZ"],"B2":[],
+    }
+    extras=[
+        ("BASE","RY"),("A1","RY"),("B1","RY"),
+        ("BASE","RX"),("A1","RX"),("B1","RX"),
+        ("A2","RZ"),("A2","RY"),("A2","RX"),
+        ("B2","RZ"),("B2","RY"),("B2","RX"),
+    ]
+    for jid,axis in extras[:dof_count-3]:
+        declared[jid].append(axis)
+    rig=replace(rig,local_frames=tuple(
+        replace(row,dof_labels=tuple(declared[row.canonical_joint_id]))
+        for row in rig.local_frames
+    ))
+    angle=0.19
+    edit=(ControlTransformIRV1(
+        "A_HANDLE",translation=(math.cos(angle)-1.,math.sin(angle),0.),
+    ),)
+    baseline=solve_declared_multi_goal_v1(
+        rig,edit,pinned_contact_control_ids=("B_HANDLE",),
+        jacobian_mode="NUMERIC_V1",goal_tolerance=1e-3,max_nfev=400,
+    )
+    analytic=solve_declared_multi_goal_v1(
+        rig,edit,pinned_contact_control_ids=("B_HANDLE",),
+        jacobian_mode="ANALYTIC_RESEARCH_V1",verify_analytic_jacobian=True,
+        goal_tolerance=1e-3,max_nfev=400,
+    )
+    assert analytic.status==baseline.status=="PASS_MULTIGOAL_BEHAVIORAL_COURT"
+    assert analytic.max_drag_residual<1e-3
+    assert analytic.max_pin_residual<1e-3
+    assert analytic.metadata["jacobian_mode"]=="ANALYTIC_RESEARCH_V1"
+    assert analytic.metadata["analytic_jacobian_finite_difference_max_error"]<1e-6
+    assert abs(analytic.max_pin_residual-baseline.max_pin_residual)<1e-3
+    assert abs(analytic.max_drag_residual-baseline.max_drag_residual)<1e-3
+    assert len(analytic.parameters_rad)==dof_count
+
+
+def test_opt_in_analytic_jacobian_fails_closed_for_unsupported_mode_and_court():
+    rig=_branched_rig()
+    with pytest.raises(QualificationError,match="JACOBIAN_MODE_UNSUPPORTED"):
+        solve_declared_multi_goal_v1(rig,jacobian_mode="JAX_AUTOMATIC")
+    with pytest.raises(QualificationError,match="JACOBIAN_COURT_REQUIRES_ANALYTIC"):
+        solve_declared_multi_goal_v1(rig,verify_analytic_jacobian=True)
+
+
+def test_analytic_jacobian_respects_declared_angle_limit_and_unreachable_goal():
+    rig=_branched_rig(root_dofs=(),right_limit=(-0.1,0.1))
+    result=solve_declared_multi_goal_v1(
+        rig,
+        (ControlTransformIRV1("A_HANDLE",translation=(-0.4,0.8,0.)),),
+        pinned_contact_control_ids=("B_HANDLE",),
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+        verify_analytic_jacobian=True,
+        max_nfev=150,regularization=1e-10,
+    )
+    assert result.status=="FAIL_MULTIGOAL_BEHAVIORAL_COURT"
+    assert result.max_drag_residual>0.4
+    q={f"{jid}:{axis}":angle for jid,axis,angle in result.parameters_rad}
+    assert abs(q["A1:RZ"])<=.1000000001
+    assert result.metadata["analytic_jacobian_finite_difference_max_error"]<1e-6

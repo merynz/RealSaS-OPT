@@ -29,6 +29,7 @@ from scipy.linalg import qr
 
 from .canonical_rig_ir_v2 import CanonicalRigIRV2
 from .mechanics_attachment_frames_v1 import _matrix
+from .mechanics_attachment_feasibility_v1 import evaluate_declared_attachment_rigidity_v1
 from .mechanics_control_solver_v1 import (
     ControlTransformIRV1, MechanicsPoseIRV1, SolvedJointTransformIRV1,
     _control_world_transforms,
@@ -114,6 +115,7 @@ def solve_declared_multi_goal_v1(
     attachment_orientation_targets: Mapping[str, Sequence[Sequence[float]]] | None = None,
     attachment_position_targets: Mapping[str, Sequence[float]] | None = None,
     orientation_tolerance_rad: float = 1e-3,
+    attachment_preflight_mode: str = "DISABLED",
     goal_tolerance: float = 1e-3,
     regularization: float = 1e-4,
     max_nfev: int = 200,
@@ -137,6 +139,8 @@ def solve_declared_multi_goal_v1(
             raise QualificationError(code)
     if orientation_tolerance_rad>math.pi:
         raise QualificationError("MULTIGOAL_ORIENTATION_TOLERANCE_INVALID")
+    if attachment_preflight_mode not in {"DISABLED","RIGID_HARD_NECESSARY_V1"}:
+        raise QualificationError("MULTIGOAL_ATTACHMENT_PREFLIGHT_MODE_UNSUPPORTED")
     if attachment_orientation_targets is not None and jacobian_mode != "ANALYTIC_RESEARCH_V1":
         raise QualificationError("MULTIGOAL_ORIENTATION_REQUIRES_ANALYTIC")
     if attachment_position_targets is not None and jacobian_mode != "ANALYTIC_RESEARCH_V1":
@@ -360,6 +364,23 @@ def solve_declared_multi_goal_v1(
         local=_matrix(local_basis,"MULTIGOAL_ORIENTATION_LOCAL_BASIS_INVALID")
         target=_matrix(requested[aid],"MULTIGOAL_ORIENTATION_TARGET_BASIS_INVALID")
         orientation_goals.append((aid,parent,local,target))
+
+    preflight_witness_count=0
+    if attachment_preflight_mode=="RIGID_HARD_NECESSARY_V1":
+        preflight=evaluate_declared_attachment_rigidity_v1(
+            rig,
+            required_world_positions=attachment_position_targets,
+            required_world_orientations=attachment_orientation_targets,
+            position_tolerance_world=goal_tolerance,
+            orientation_tolerance_rad=orientation_tolerance_rad,
+        )
+        preflight_witness_count=len(preflight.witnesses)
+        if preflight_witness_count:
+            first=preflight.witnesses[0]
+            raise QualificationError(
+                "MULTIGOAL_RIGID_ATTACHMENT_CONFLICT:"
+                +first.constraint_kind+":"+",".join(first.anchor_ids)
+            )
 
     parameter_axes = {
         "RX": np.array((1., 0., 0.)),
@@ -740,6 +761,9 @@ def solve_declared_multi_goal_v1(
             "pinned_contact_count": len(pins),
             "declared_attachment_orientation_goal_count": len(orientation_goals),
             "declared_attachment_position_goal_count": len(attachment_position_goals),
+            "attachment_preflight_mode": attachment_preflight_mode,
+            "attachment_preflight_pairwise_witness_count": preflight_witness_count,
+            "preflight_is_necessary_not_global_feasibility": True,
             "attachment_orientation_chordal_objective_geodesic_final_gate": True,
             "explicit_world_contact_anchor_count": len(anchor_map),
             "contact_anchors_are_declared_control_references": True,

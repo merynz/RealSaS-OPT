@@ -130,6 +130,49 @@ Suppose two original source worlds have the same observed 2D input image \(x\) b
 
 This does **not** rule out probabilistic IRIS learning, good priors, useful representation prediction or confidence-calibrated targets; it rules out asserting that teacher-private unobserved relations are **uniquely implied by a single image** without additional assumptions.
 
+### Theorem 7 — A COMPLETE finite source-intervention truth has a UNIQUE interaction decomposition (Möbius inversion)
+
+This is a **positive identification result** beyond the limitations of drawable grouping.
+
+Let \(U=\{u_1,\dots,u_m\}\) be \(m\) independently implementable original-source Boolean edits. Suppose all \(2^m\) originally physically rendered intervention combinations are observed at the EXACT SAME source, pose, camera, renderer policy and sample index. Fix any qualified pixel/ray and let \(Y(S)\in V\), \(S\subseteq U\), be the source linear-premultiplied RGBA vector for edited subset \(S\). Here \(V=\mathbb R^4\), or the entire aligned observed source image vector space.
+
+Define for each intervention subset \(A\):
+
+\[
+\boxed{\quad
+\Delta(A)=\sum_{B\subseteq A}(-1)^{|A|-|B|}Y(B).
+\quad}
+\]
+
+Then every independently observed source edit render has the exact reconstruction
+
+\[
+\boxed{\quad Y(S)=\sum_{A\subseteq S}\Delta(A).\quad}
+\]
+
+**Proof:** Substitute the first equation into the second and exchange the two finite sums. The coefficient on any \(Y(B)\) becomes
+\(\sum_{A:\,B\subseteq A\subseteq S}(-1)^{|A|-|B|}=(1-1)^{|S|-|B|}\), which is 1 when \(B=S\) and 0 otherwise. Thus the output is exactly \(Y(S)\). This is an invertible upper-triangular transform with unit diagonal, so **the interaction coefficients are unique** in this complete finite intervention and measurement domain. QED.
+
+The terms have clear *operational* meaning: \(\Delta(\emptyset)\) baseline, \(\Delta(\{i\})\) independent first-order source edit effect, \(\Delta(\{i,j\})\) nonadditive pair interaction, and \(\Delta(\{i,j,k\})\) remaining third-order interaction. There is NO source author drawable or layer identity in this algebra. A 3-control source can have eight uniquely observable operation states without requiring any particular layer count.
+
+**Unknown and applicability:** If a required subset \(Y(B)\) is missing, the Möbius coefficients depending on it are not identified from that incomplete table without additional assumptions. At larger \(m\) the full factorial requires \(2^m\) source renders; choose a bounded preregistered operation scope or adaptive valid experiment design. Nonlinear alpha/depth compositing is allowed inside measured \(Y(S)\) as long as all observations are in the same *output vector space* and have the same source sample alignment. Nonlinear scene interactions then appear as nonzero higher-order \(\Delta\), not as an assumption of additivity.
+
+#### Real original-source Cat full factorial (rest pose, NOT IRIS student)
+
+Original #351 physically rendered all 8 combinations of THREE disjoint 64×64 source atlas RGB-invert edits in four original cameras and eight exactly matched Cycles sample offsets: **256 original physical rendered arms**; array SHA d422b7d7d082fba5deac5dd1239b8c6aec078f4d635a7bd5b1f10e514100b114, independent original court SHA 90b85b9c1a963b23f7c3037ca443975bf2d5c5d4123568d8aa8e54557e433c08.
+
+Direct source-array evaluation with NO artist labels yields the following initial inspection (source-independent court must validate it before final admission):
+
+- First-order effects \(\Delta(\{0\}),\Delta(\{1\}),\Delta(\{2\})\) exceed the precommitted 0.025 premultiplied RGBA threshold at **290,979 / 264,554 / 6,048** original sample-pixel incidences; 0 and 1 share **2,799** projected source sample incidences.
+- Pair interaction \(\Delta(\{0,1\})\) has nonzero maximum channel magnitude about **0.005160898**, but **0** source sample-pixel incidents exceed 0.025.
+- Pair effects \(\Delta(\{0,2\})\), \(\Delta(\{1,2\})\) and third-order \(\Delta(\{0,1,2\})\) are exactly zero in the observed stored source sample arrays under the measured PM conversion; **0** threshold incidents.
+- Full Möbius inversion reconstructs every stored physical source arm to floating-point precision; this is an algebraic identity, NOT an independently heldout new-render generalization test.
+- The source 0/1 projected supports do overlap, yet their measured nonadditivity is small. Hence **projected effect overlap does not imply nonlinear interaction or a necessary drawable separation**.
+
+**Physical verification lane:** producer \`tools/corpus/source_intervention_mobius_truth_v1.py\`; independent closed-form inclusion-exclusion court \`tools/corpus/court_source_intervention_mobius_v1.py\`; new GitHub source workflow \`.github/workflows/source-intervention-mobius-original-cat-v1.yml\`. These use SHA-immutable original source samples, validate the original independent court, perform two distinct mathematical computations, preserve original 0.025 tolerance and avoid any source face/artist inference.
+
+This theorem gives a mathematically identified and source-physically measurable **edit-consequence relation algebra**, complementary to the earlier mechanical/source-UV and view-depth relations. It is a concrete component of the generic Relations/Graphics truth contract, not a synonym for puppet GraphicsIR segmentation.
+
 ## III. Exact physical-source reality check
 
 The source court uses the following previously independently sealed ORIGINAL documents, with a separate SHA for each producer and independent verdict:

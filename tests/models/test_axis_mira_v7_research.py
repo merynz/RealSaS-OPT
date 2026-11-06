@@ -149,3 +149,32 @@ def test_mechanics_pick_is_anonymous_readonly_and_declared_only():
             rig, bad_skin, triangle_vertex_ids=("V0", "V1", "V2"),
             barycentric=(0.2, 0.5, 0.3),
         )
+
+
+def test_mira_v7_attention_cv_ae_active_sampling_gradient_and_token_parity():
+    from models.mira.skin_attention_codec_v7 import (
+        MIRAAttentionConfigV7, MIRAAttentionSkinCodecV7,
+    )
+    torch.manual_seed(711)
+    cfg = MIRAAttentionConfigV7(
+        hidden_dim=32, attention_heads=4, attention_layers=2,
+        active_samples_per_joint=5, tokens_per_joint=2,
+        levels=(3, 3), max_vertices=128, max_joints=8,
+    )
+    model = MIRAAttentionSkinCodecV7(cfg)
+    vertices = torch.randn(2, 19, 7)
+    joints = torch.randn(2, 4, 25)
+    truth = torch.softmax(torch.randn(2, 19, 4) * 2, dim=-1)
+    indices, weights = model._active_samples(truth)
+    assert indices.shape == (2, 4, 5)
+    assert torch.all(weights[:, :, :-1] >= weights[:, :, 1:])
+    out = model(truth, vertices, joints)
+    assert out["token_ids"].shape == (2, 4, 2)
+    out["reconstruction_loss"].backward()
+    assert model.learned_queries.grad is not None
+    assert float(model.learned_queries.grad.abs().sum()) > 0.0
+    assert model.attention_latent.weight.grad is not None
+    assert float(model.attention_latent.weight.grad.abs().sum()) > 0.0
+    with torch.no_grad():
+        decoded = model.decode_tokens(out["token_ids"], vertices, joints)
+        assert torch.allclose(out["reconstructed_weights"], decoded, atol=1e-6, rtol=0.0)

@@ -26,6 +26,10 @@ def _assignment(tree: ast.AST, name: str) -> ast.expr:
         if (isinstance(item,ast.Assign)
                 and any(isinstance(t,ast.Name) and t.id==name for t in item.targets)):
             return item.value
+        if (isinstance(item,ast.AnnAssign)
+                and isinstance(item.target,ast.Name)
+                and item.target.id==name and item.value is not None):
+            return item.value
     raise ValueError("V7_GAP_AUDIT_SYMBOL_MISSING:"+name)
 
 

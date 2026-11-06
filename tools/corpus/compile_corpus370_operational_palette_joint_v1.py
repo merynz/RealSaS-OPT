@@ -92,7 +92,7 @@ def compile_joint(native,palette,court,palette_sha,original_native_sha):
         "palette_unsupported_is_unknown":True,
         "mechanical_native_only_source_evidence_sha256":original_native_sha,
         "source_shader_palette_fact_sha256":palette_sha,
-        "source_shader_independent_court_claim_sha256":court["palette_producer_sha256"],
+        "source_shader_independent_court_verified_producer_sha256":court["palette_producer_sha256"],
         "joint_evidence_sha256":digest(joint),
         "joint_candidate_atom_count":len(decision["atoms"]),
         "joint_unknown_placeholder_count":decision["audit"]["unknown_face_count"],
@@ -121,6 +121,7 @@ def main():
             comparison=baseline_mismatch(np.asarray(v[key],dtype=np.int64),
                                          joint["operations"])
             comparisons["V18A_THRESHOLD_"+threshold]=comparison
+    summary["source_shader_independent_court_receipt_sha256"]=sha(a.palette_court)
     summary["v18a_baseline_comparison"]=comparisons
     summary["native_only_atom_count"]=len(compile_evidence(n)["atoms"])
     summary["added_palette_tasks_change_quotient"]=(

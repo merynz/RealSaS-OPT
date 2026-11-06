@@ -101,8 +101,8 @@ def independently_verify(root:Path, report_path:Path, output_path:Path):
                 value["source_operation_subset_cardinality"]==mask.bit_count() and
                 value["source_sample_operation_pixels_above_original_tolerance"]==count and
                 abs(value["source_max_abs_linear_pm_rgba_effect"]-max_error)<1e-11
-                and value["source_max_abs_alpha_effect"] is None if mask==0 else
-                value["source_max_abs_alpha_effect"] is not None,
+                and (value["source_max_abs_alpha_effect"] is None if mask==0 else
+                     value["source_max_abs_alpha_effect"] is not None),
                 "COEFFICIENT_RECOUNT_OR_SOURCE_MASK_DRIFT:"+str(mask))
         records.append({
             "bitmask":mask,"order":mask.bit_count(),

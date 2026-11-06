@@ -206,3 +206,29 @@ def test_rank_policy_mode_cannot_hallucinate_a_numeric_jacobian_or_combine_expli
         solve_declared_multi_goal_v1(
             case.rig,active_parameter_policy="AUTOGENERATE_SOURCE_RIG",
         )
+
+
+def test_rank_policy_falls_back_to_full_declared_dofs_on_nonlinear_straight_chain_target():
+    from tests.compiler.test_mechanics_multigoal_solver_v1 import _branched_rig
+    from compiler.realsas_compiler_core.mechanics_control_solver_v1 import ControlTransformIRV1
+    rig=_branched_rig()
+    # At a completely straight rest chain, the endpoint Jacobian has
+    # rank 2 despite three declared DOFs. The inward/outward movement of
+    # a bent two-link chain is a second-order effect at that singularity.
+    edit=(ControlTransformIRV1(
+        "A_HANDLE",translation=(-0.7,1.2,0.),
+    ),)
+    result=solve_declared_multi_goal_v1(
+        rig,edit,pinned_contact_control_ids=("B_HANDLE",),
+        pinned_world_targets={"B_HANDLE":(-2.,0.,0.)},
+        active_parameter_policy="RANK_REVEALING_RESEARCH_V1",
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+        regularization=1e-9,goal_tolerance=2e-3,max_nfev=400,
+    )
+    assert result.status=="PASS_MULTIGOAL_BEHAVIORAL_COURT"
+    assert result.metadata["rank_revealing_candidate_task_rank"]==2
+    assert result.metadata["rank_revealing_fallback_to_all"] is True
+    assert result.metadata["active_solver_parameter_count"]==3
+    assert result.max_drag_residual<2e-3
+    assert result.max_pin_residual<2e-3
+    assert len(result.parameters_rad)==3

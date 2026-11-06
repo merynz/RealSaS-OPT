@@ -1,0 +1,131 @@
+name: Original Cat sub-face UV edit incidence Relations Graphics original-source court
+on:
+  push:
+    branches: [research/source-subface-edit-incidence-truth-v1]
+    paths:
+      - 'tools/corpus/compile_source_subface_edit_incidence_relations_graphics_v1.py'
+      - 'tools/corpus/court_source_subface_edit_incidence_relations_graphics_v1.py'
+      - 'tests/corpus/test_source_subface_edit_incidence_relations_graphics_v1.py'
+      - '.github/workflows/original-cat-subface-relations-graphics-truth-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cat-subface-rel-graphics-v1-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  subface-epistemic-contract-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Synthetic original face/subface two-edit and FIT/REST nonjoin tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install 'pytest>=8,<10'
+          python -m py_compile tools/corpus/compile_source_subface_edit_incidence_relations_graphics_v1.py tools/corpus/court_source_subface_edit_incidence_relations_graphics_v1.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_source_subface_edit_incidence_relations_graphics_v1.py
+  actual-cat-v18s-physical-v2-independent-cross-scope-court:
+    needs: subface-epistemic-contract-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: SHA-bound original V18s geometry, V18q island graph and V2 physical Cat pixel witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/cat-source-subface-relgraphics"
+          mkdir -p "$D/private" "$D/output"
+          export RCLONE_CONFIG="$D/rclone.conf"
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          R="$D/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$D"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          ROOT="gdrive:corpus370_preparation_v1"
+          S="$ROOT/hosted_relations_graphics_uv_world_truth_v18s/CAT/42293745266-1"
+          Q="$ROOT/hosted_source_typed_graph_v18q/CAT/42203223280-1"
+          V="$ROOT/hosted_cat_source_face_pixel_uv_exact_depth_v2/CAT/42303181542-1"
+          rclone copyto "$S/PRIVATE_SOURCE_UV_WORLD_MECHANICAL_RELATION_EVIDENCE_V18S.json" "$D/private/v18s.json" --checksum --retries 4
+          rclone copyto "$S/PRIVATE_INDEPENDENT_SOURCE_UV_WORLD_RELATION_COURT_V18S.json" "$D/private/v18s-court.json" --checksum --retries 4
+          rclone copyto "$Q/PRIVATE_SOURCE_GRAPH_EVIDENCE_V18Q.json" "$D/private/v18q.json" --checksum --retries 4
+          rclone copyto "$V/PRIVATE_CAT_ORIGINAL_EXACT_FACE_PIXEL_UV_EDIT_WITNESSES_V2.json" "$D/private/v2.json" --checksum --retries 4
+          rclone copyto "$V/PRIVATE_INDEPENDENT_CAT_ORIGINAL_EXACT_FACE_UV_CAUSAL_COURT_V2.json" "$D/private/v2-court.json" --checksum --retries 4
+          D="$D" python - <<'PY'
+          from pathlib import Path
+          import os,hashlib
+          p=Path(os.environ["D"])/"private"
+          pins={
+            "v18s.json":"cbf44fee069e79ea3a7591669fede47befe0fb0ff7eab02aa4d5b3479a75a829",
+            "v18s-court.json":"c35ab620e3cf0955bb0b8ca445838d0320b50240bf357a706385eeeb1b67e09c",
+            "v18q.json":"ad88115d2cf0ffc00d241da30218a60589c25983e5d1df5d8391f07089bce0d2",
+            "v2.json":"c2ab94ae6250159b046286efaa2f062c857a7557ad38d5942491dbf89ac16116",
+            "v2-court.json":"a34a3050917fe563321f5e57c1ba1556844dc516965abdff201a6930913d015d"
+          }
+          for name,expected in pins.items():
+            with (p/name).open("rb") as f:
+              assert hashlib.file_digest(f,"sha256").hexdigest()==expected,name
+          print("ALL_FIVE_ORIGINAL_CAT_SOURCE_PARENT_BYTES_IMMUTABLE_SHA_VERIFIED",flush=True)
+          PY
+      - name: Independently verify per-source-face same-view contradictory UV edit response and V18s graph join
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/cat-source-subface-relgraphics"
+          python -m tools.corpus.compile_source_subface_edit_incidence_relations_graphics_v1 \
+            --root "$D/private" \
+            --output "$D/output/PRIVATE_CAT_SUBFACE_REL_GRAPHICS_SOURCE_JOIN_V1.json"
+          python -m tools.corpus.court_source_subface_edit_incidence_relations_graphics_v1 \
+            --root "$D/private" \
+            --report "$D/output/PRIVATE_CAT_SUBFACE_REL_GRAPHICS_SOURCE_JOIN_V1.json" \
+            --output "$D/output/PRIVATE_INDEPENDENT_CAT_SUBFACE_REL_GRAPHICS_JOIN_COURT_V1.json"
+          D="$D" python - <<'PY'
+          from pathlib import Path
+          import os,json
+          d=Path(os.environ["D"])
+          j=json.loads((d/"output/PRIVATE_INDEPENDENT_CAT_SUBFACE_REL_GRAPHICS_JOIN_COURT_V1.json").read_text())
+          assert j["status"]=="PASS_SOURCE_SUBFACE_EDIT_INCIDENCE_V18S_CROSS_SCOPE_RECOUNT__NO_ARTIST_OWNER"
+          assert j["source_distinct_face_count_with_positive_rest_edit_witness"]==427
+          assert j["source_face_dual_edit_same_view_counterexamples"]==90
+          assert j["source_face_camera_dual_edit_witnesses"]==130
+          assert j["mechanical_source_local_edges_both_rest_physical_observed"]==218
+          assert j["mechanical_axis_divergent_source_local_edges_both_observed"]==31
+          assert j["source_lifted_graph_pairs_both_islands_rest_physical_observed"]==725
+          assert j["original_source_artist_drawable_ownership"]=="UNKNOWN"
+          assert j["source_fit_mechanics_and_rest_graphics_observations"]=="DIFFERENT_SOURCE_POSE_SCOPES"
+          assert j["iris_training_authorized"] is False
+          print("REAL_ORIGINAL_CAT_SUBFACE_SAME_TRIANGLE_DIFFERENT_PHYSICAL_EDIT_WITNESSES_COURT_PASS",flush=True)
+          PY
+          export RCLONE_CONFIG="$D/rclone.conf"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          DEST="gdrive:corpus370_preparation_v1/hosted_cat_subface_relations_graphics_source_truth_v1/CAT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in "$D/output/"*.json; do
+            NAME="$(basename "$F")"
+            rclone copyto "$F" "$DEST/$NAME" --checksum --retries 5
+            for ATTEMPT in 1 2 3 4 5 6; do
+              if rclone cat "$DEST/$NAME" > "$D/output/readback-$NAME" 2>/dev/null && test -s "$D/output/readback-$NAME"; then
+                cmp "$F" "$D/output/readback-$NAME"
+                break
+              fi
+              sleep 4
+            done
+            cmp "$F" "$D/output/readback-$NAME"
+            sha256sum "$F"
+          done
+          echo "SUBFACE_RELATIONS_GRAPHICS_SOURCE_TRUTH_COURT_SHA_READBACK_PASS__NO_ARTIST_OWNER__NO_STUDENT_ADMISSION"

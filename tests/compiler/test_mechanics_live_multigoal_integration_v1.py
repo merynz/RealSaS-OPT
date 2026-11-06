@@ -112,6 +112,12 @@ def test_sequence_supports_declared_pin_without_per_frame_neural_inference():
     assert result.status == "PASS_MECHANICS_SEQUENCE_DIAGNOSTIC"
     assert result.metadata["training_authorized"] is False
     assert result.metadata["pinned_contact_control_ids"] == ("B_HANDLE",)
+    assert result.metadata["multi_goal_warm_start_frame_count"] == 2
+    assert result.metadata["all_samples_are_stateless_overrides"] is False
+    assert result.metadata["control_overrides_are_transient"] is True
+    assert result.frames[0].metadata["warm_start_used"] is False
+    assert result.frames[1].metadata["warm_start_used"] is True
+    assert result.frames[2].metadata["warm_start_used"] is True
     assert result.max_vertex_speed >= 0.0
 
 

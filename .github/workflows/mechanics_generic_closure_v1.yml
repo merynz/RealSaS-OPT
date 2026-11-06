@@ -18,6 +18,7 @@ on:
       - 'tools/mechanics/audit_stage47_source_mechanics_v1.py'
       - 'tests/mechanics/test_stage47_source_mechanics_audit_v1.py'
       - 'tools/mechanics/compare_stage47_source_fk_lbs_v1.py'
+      - 'tools/mechanics/benchmark_live_mechanics_v1.py'
       - 'tests/mechanics/test_stage47_source_fk_lbs_comparison_v1.py'
       - 'tests/compiler/test_control_motion_ik_integration_v1.py'
       - 'docs/research/MECHANICS_GENERIC_CLOSURE_V1_20261106.md'
@@ -44,6 +45,18 @@ jobs:
       - name: Existing and new Mechanics behavior regression
         run: |
           pytest -q tests/compiler/test_mechanics_control_solver_v1.py tests/compiler/test_control_motion_ik_integration_v1.py tests/compiler/test_mechanics_multigoal_solver_v1.py tests/compiler/test_mechanics_live_multigoal_integration_v1.py tests/mechanics/test_stage47_source_mechanics_audit_v1.py tests/mechanics/test_stage47_source_fk_lbs_comparison_v1.py tests/compiler/test_mechanics_surface_control_effects_v1.py tests/compiler/test_mechanics_control_response_court_v1.py tests/compiler/test_mechanics_prepared_skin_v1.py
+      - name: Profile full Mechanics drag and pinned-contact CPU frames
+        run: |
+          mkdir -p /tmp/mechanics-cpu-court
+          python tools/mechanics/benchmark_live_mechanics_v1.py --vertices 3266 --frames 16 --warmup 3 --out /tmp/mechanics-cpu-court/branch3266.json
+          python tools/mechanics/benchmark_live_mechanics_v1.py --vertices 8192 --frames 10 --warmup 2 --out /tmp/mechanics-cpu-court/branch8192.json
+      - name: Publish benchmark diagnostic only (no source assets)
+        uses: actions/upload-artifact@v4
+        with:
+          name: mechanics-full-frame-cpu-research
+          path: /tmp/mechanics-cpu-court/*.json
+          retention-days: 7
+          if-no-files-found: error
       - name: Research ownership firewall
         run: |
           python - <<'PY'

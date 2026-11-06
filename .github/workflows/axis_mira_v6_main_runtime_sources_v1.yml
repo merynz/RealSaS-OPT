@@ -45,3 +45,7 @@ jobs:
             tests/models/test_axis_mira_v6_product_runtime.py \
             tests/models/test_mira_v6_skin_fsq_codec.py \
             tests/models/test_axis_mira_v6_checkpoint_security_v1.py
+      - name: Audit changed product source availability and registered consumer wiring
+        run: |
+          python -m pytest -q tests/repository/test_product_producer_consumer_audit_v1.py
+          python -m tools.product_producer_consumer_audit_v1 --strict-registered

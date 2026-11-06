@@ -1,0 +1,163 @@
+name: Corpus370 original Cat texture UV same-Cycles physical edit court v2 top-left
+on:
+  push:
+    branches: [corpus370-operational-drawable-decision-v1]
+    paths:
+      - 'tools/truth_foundry/blender_corpus370_original_cat_uv_texture_cycles_v2.py'
+      - 'tools/corpus/prepare_corpus370_original_uv_atlas_edit_images_v2.py'
+      - 'tools/corpus/court_corpus370_original_cat_uv_texture_cycles_v2.py'
+      - 'tests/corpus/test_corpus370_original_cat_uv_texture_cycles_v2.py'
+      - '.github/workflows/corpus370-original-cat-uv-texture-cycles-v2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-original-cat-uv-physical-source-v2-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-uv-source-edit-and-heldout-algebra-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Source PNG mutation and independent heldout superposition adversarial tests
+        run: |
+          set -euo pipefail
+          python -m pip install 'numpy>=1.26,<3' 'pillow>=10,<13' 'pytest>=8,<10'
+          python -m py_compile tools/truth_foundry/blender_corpus370_original_cat_uv_texture_cycles_v2.py tools/corpus/prepare_corpus370_original_uv_atlas_edit_images_v2.py tools/corpus/court_corpus370_original_cat_uv_texture_cycles_v2.py
+          python -m pytest -q tests/corpus/test_corpus370_original_cat_uv_texture_cycles_v2.py tests/corpus/test_corpus370_original_source_uv_edit_plan_v1.py
+  original-cat-real-cycles-source-texture-edit:
+    needs: original-uv-source-edit-and-heldout-algebra-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      ORIGINAL_SOURCE_SHA: 1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850
+      ORIGINAL_ATLAS_SHA: 2f6d0032e51c2d49b13b8e689d59eb39aa3ee6c32f2a1851213e11fc7593177d
+      ORIGINAL_PLAN_SHA: 8be8fccde3d9cc97f7ba452fd50c1a9f4ebea2e34da590a22d30872b2b0f497b
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Source fixed Blender 4.5.14 and rclone transport
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get -o Acquire::Retries=6 update -qq
+          sudo apt-get -o Acquire::Retries=6 install -y --no-install-recommends libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 libgl1
+          python -m pip install 'numpy>=1.26,<3' 'pillow>=10,<13'
+          D="$RUNNER_TEMP/source-cat-uv"
+          mkdir -p "$D/blender" "$D/src/Textures"
+          curl -fL --retry 4 --max-time 300 https://download.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz -o "$D/blender/source.tar.xz"
+          curl -fL --retry 4 --max-time 120 https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256 -o "$D/blender/checksums"
+          D="$D" python - <<'PY'
+          import hashlib,os,re
+          from pathlib import Path
+          d=Path(os.environ["D"])/"blender"
+          rows=[z for z in (d/"checksums").read_text().splitlines()
+                if "blender-4.5.14-linux-x64.tar.xz" in z]
+          assert len(rows)==1
+          matches=re.findall(r"[a-fA-F0-9]{64}",rows[0])
+          assert len(matches)==1
+          with (d/"source.tar.xz").open("rb") as f:
+            assert hashlib.file_digest(f,"sha256").hexdigest()==matches[0].lower()
+          PY
+          tar -xJf "$D/blender/source.tar.xz" -C "$D/blender"
+          BIN="$D/blender/blender-4.5.14-linux-x64/blender"
+          test "$(sha256sum "$BIN"|cut -d' ' -f1)" = 050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8
+          echo "BLENDER_EXE=$BIN" >> "$GITHUB_ENV"
+          R="$RUNNER_TEMP/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 "https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip" -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v1.75.2-linux-amd64" >> "$GITHUB_PATH"
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$D/private-rclone.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+      - name: Reopen immutable source GLB, PNG, camera, admitted material and precommitted UV plan
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/source-cat-uv"
+          export RCLONE_CONFIG="$D/private-rclone.conf"
+          ROOT="gdrive:corpus370_preparation_v1"
+          rclone copyto "$ROOT/hosted_operational_drawable_inputs_v1/42220981274-1/ORIGINAL_TWO_SOURCE_INPUTS.zip" "$D/inputs.zip" --checksum --retries 3
+          echo "e3c758b0a4dc9bd3e7f889e94366fa7ff40517deb15e68a202d525b62de13948  $D/inputs.zip" | sha256sum --check
+          rclone copyto "$ROOT/hosted_operational_cat_source_uv_plan_v2/CAT/42260446130-1/PRIVATE_CAT_ORIGINAL_SOURCE_UV_EDIT_PLAN_V2.json" "$D/plan.json" --checksum --retries 3
+          echo "$ORIGINAL_PLAN_SHA  $D/plan.json" | sha256sum --check
+          D="$D" python - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          with zipfile.ZipFile(d/"inputs.zip") as z:
+            m=json.loads(z.read("PRIVATE_TRANSPORT_MANIFEST.json"))
+            assert m["parent_manifest_sha256"]=="cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172"
+            paths=[
+              ("/Models/GLB format/animal-cat.glb","src/animal-cat.glb",os.environ["ORIGINAL_SOURCE_SHA"]),
+              ("/Models/GLB format/Textures/colormap.png","src/Textures/colormap.png",os.environ["ORIGINAL_ATLAS_SHA"]),
+              ("/subjects/corpus_000ca1ae51f9582fde9e/SOURCE_REST_GEOMETRY_V1.npz","rest.npz","748609aca5ba7c509aa390ed65baeca7612b8879aa00409735da3a96758379cf"),
+              ("/corpus_000ca1ae51f9582fde9e/SOURCE_REST_RENDER_CANDIDATE.json","policy.json","c8fe4e307ddbbaf5cc0892cffc4267bd08e394f2299f4e70155ffc6207190a4b"),
+              ("/corpus_000ca1ae51f9582fde9e/camera_bundle.json","camera.json","300b935a47379f6c44d4b4356554d1c32a86ca3b732a62405c73da9e0ec6adf0"),
+            ]
+            for suffix,name,expected in paths:
+              rows=[x for x in m["files"] if x["relative_path"].endswith(suffix)]
+              assert len(rows)==1,(suffix,len(rows))
+              r=rows[0];data=z.read("objects/"+r["sha256"])
+              assert len(data)==r["size_bytes"] and hashlib.sha256(data).hexdigest()==r["sha256"]==expected
+              out=d/name;out.parent.mkdir(parents=True,exist_ok=True);out.write_bytes(data)
+          PY
+      - name: Physically create original PNG UV atlas edits with private exact source image masks
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/source-cat-uv"
+          python -m tools.corpus.prepare_corpus370_original_uv_atlas_edit_images_v1 --original-atlas "$D/src/Textures/colormap.png" --source-plan "$D/plan.json" --output-dir "$D/edits"
+      - name: Render exact same original-source Cycles sample indices across all atlas edit arms
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/source-cat-uv"
+          "$BLENDER_EXE" --background --factory-startup --threads 2 --python-exit-code 1 --python tools/truth_foundry/blender_corpus370_original_cat_uv_texture_cycles_v2.py -- --source "$D/src/animal-cat.glb" --original-atlas "$D/src/Textures/colormap.png" --source-plan "$D/plan.json" --prepared-atlas-manifest "$D/edits/PRIVATE_SOURCE_UV_ATLAS_EDIT_IMAGES_V1.json" --prepared-atlas-dir "$D/edits" --camera-bundle "$D/camera.json" --source-policy "$D/policy.json" --output-dir "$D/render" > "$D/blender-render.log" 2>&1 || { tail -n 150 "$D/blender-render.log"; exit 1; }
+          tail -n 15 "$D/blender-render.log"
+      - name: Independent actual heldout pair/joint full source Cycles edit court
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/source-cat-uv"
+          python -m tools.corpus.court_corpus370_original_cat_uv_texture_cycles_v1 --source "$D/src/animal-cat.glb" --atlas "$D/src/Textures/colormap.png" --source-plan "$D/plan.json" --prepared-atlas-manifest "$D/edits/PRIVATE_SOURCE_UV_ATLAS_EDIT_IMAGES_V1.json" --prepared-atlas-dir "$D/edits" --render-manifest "$D/render/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.json" --source-samples "$D/render/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.npz" --output "$D/PRIVATE_INDEPENDENT_CAT_SOURCE_UV_EDIT_CONSEQUENCE_COURT_V2.json"
+      - name: Preserve original source Cat PASS/FAIL evidence and hash verify private readback
+        if: always()
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/source-cat-uv"
+          if [ ! -s "$D/private-rclone.conf" ]; then
+            echo "NO_PRIVATE_SOURCE_TRANSPORT_CONFIG"
+            exit 0
+          fi
+          export RCLONE_CONFIG="$D/private-rclone.conf"
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_operational_cat_uv_texture_cycles_v2/CAT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in "$D/edits/PRIVATE_SOURCE_UV_ATLAS_EDIT_IMAGES_V1.json" "$D/render/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.json" "$D/render/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.npz" "$D/PRIVATE_INDEPENDENT_CAT_SOURCE_UV_EDIT_CONSEQUENCE_COURT_V2.json" "$D/blender-render.log"; do
+            if [ -s "$F" ]; then
+              NAME="$(basename "$F")"
+              rclone copyto "$F" "$REMOTE/$NAME" --checksum --retries 3
+              rclone cat "$REMOTE/$NAME" > "$D/readback-$NAME"
+              cmp "$F" "$D/readback-$NAME"
+            fi
+          done
+          for F in "$D/edits/"*.png; do
+            if [ -s "$F" ]; then
+              NAME="$(basename "$F")"
+              rclone copyto "$F" "$REMOTE/atlas/$NAME" --checksum --retries 3
+              rclone cat "$REMOTE/atlas/$NAME" > "$D/readback-$NAME"
+              cmp "$F" "$D/readback-$NAME"
+            fi
+          done
+          echo "ORIGINAL_CAT_TEXTURE_UV_SOURCE_RASTER_RECEIPTS_SHA_VERIFIED__NO_DRAWABLE_OWNER"

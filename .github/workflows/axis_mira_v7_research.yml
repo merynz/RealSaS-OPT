@@ -4,7 +4,8 @@ on:
   pull_request:
     paths:
       - 'models/axis/rig_program_model_v7.py'
-      - 'models/mira/skin_fsq_codec_v7.py'\n      - 'models/mira/skin_attention_codec_v7.py'
+      - 'models/mira/skin_fsq_codec_v7.py'
+      - 'models/mira/skin_attention_codec_v7.py'
       - 'compiler/realsas_compiler_core/mechanics_interaction_v1.py'
       - 'tests/models/test_axis_mira_v7_research.py'
       - 'canonical/AXIS_MIRA_V7_CORPUS370_PREREG_V1.json'

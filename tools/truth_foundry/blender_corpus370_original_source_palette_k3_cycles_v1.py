@@ -7,6 +7,7 @@ No artist drawable names or training supervision minted.
 """
 from __future__ import annotations
 import argparse
+import bmesh
 import hashlib
 import json
 import math
@@ -82,15 +83,16 @@ def frame(scene,output):
     return img
 
 def build_source_isolates(meshes,colors,original_faces,expected_keys):
-    """Reconstruct isolated meshes from EXACT evaluated original source tris.
+    """Physically remove nonselected raw FBX polygons on exact source clones.
 
-    FBX polygons are not necessarily triangles. The *source truth address* is
-    the canonical evaluated Blender loop_triangle, not raw object polygons.
-    These physical meshes contain ONLY their own source palette triangles.
-    No nonselected geometry exists, and no transparent-face simulation occurs.
+    Original polygons can be quads. Keep original native local coordinates,
+    matrix_world, raw polygon triangulation, normals and rest modifiers rather
+    than rebuilding world-space triangle soup and changing edge rasterization.
+    Original source truth identity remains CANONICAL evaluated loop_triangles.
     """
     source_verts=[]
     source_faces=[]
+    observed_colors=[]
     by_color=[0,0,0]
     clones={k:[] for k in range(3)}
     deps=bpy.context.evaluated_depsgraph_get()
@@ -103,59 +105,57 @@ def build_source_isolates(meshes,colors,original_faces,expected_keys):
             world=[tuple(float(x) for x in (evaluated.matrix_world@v.co))
                    for v in mesh.vertices]
             source_verts.extend(world)
-            selected={k:[] for k in range(3)}
-            selected_slots={k:[] for k in range(3)}
             for tri in mesh.loop_triangles:
-                global_face=[start+int(k) for k in tri.vertices]
-                source_faces.append(global_face)
-                slot_idx=int(tri.material_index)
-                req(0<=slot_idx<len(obj.material_slots),
+                source_faces.append([start+int(v) for v in tri.vertices])
+                index=int(tri.material_index)
+                req(0<=index<len(obj.material_slots),
                     "SOURCE_TRIANGLE_MATERIAL_SLOT_INVALID")
-                mat=obj.material_slots[slot_idx].material
+                mat=obj.material_slots[index].material
                 key=rgb_key(mat)
-                req(key in colors,"SOURCE_ORIGINAL_COLOR_NOT_QUALIFIED")
-                group=colors.index(key)
-                selected[group].append(tuple(int(k) for k in tri.vertices))
-                selected_slots[group].append(slot_idx)
-                by_color[group]+=1
-            for k in range(3):
-                part=bpy.data.meshes.new("PRIVATE_SOURCE_EXACT_TRIANGLES_"+str(k)+"_"+obj.name)
-                part.from_pydata(world,[],selected[k])
-                part.update()
-                for slot in obj.material_slots:
-                    req(slot.material is not None,"SOURCE_MATERIAL_SLOT_NULL")
-                    part.materials.append(slot.material)
-                req(len(part.polygons)==len(selected_slots[k]),
-                    "TRIANGLE_ONLY_PHYSICAL_ISOLATE_CENSUS")
-                for poly,slot_idx in zip(part.polygons,selected_slots[k]):
-                    poly.material_index=slot_idx
-                isolated=bpy.data.objects.new(
-                    "PRIVATE_SOURCE_PALETTE_ISOLATE_"+str(k)+"_"+obj.name,part)
-                bpy.context.scene.collection.objects.link(isolated)
-                isolated.hide_render=True
-                clones[k].append(isolated)
+                req(key in colors,"SOURCE_ORIGINAL_TRIANGLE_COLOR_NOT_QUALIFIED")
+                k=colors.index(key)
+                observed_colors.append(k)
+                by_color[k]+=1
         finally:evaluated.to_mesh_clear()
+        for k in range(3):
+            clone=obj.copy()
+            clone.data=obj.data.copy()
+            clone.name="PRIVATE_ORIGINAL_POLYGON_ISOLATE_"+str(k)+"_"+obj.name
+            bpy.context.scene.collection.objects.link(clone)
+            bm=bmesh.new()
+            try:
+                bm.from_mesh(clone.data)
+                bm.faces.ensure_lookup_table()
+                nonselected=[]
+                for face in bm.faces:
+                    slot=int(face.material_index)
+                    req(0<=slot<len(obj.material_slots),
+                        "SOURCE_POLYGON_MATERIAL_SLOT_INVALID")
+                    mat=obj.material_slots[slot].material
+                    key=rgb_key(mat)
+                    req(key in colors,"SOURCE_POLYGON_MATERIAL_NOT_QUALIFIED")
+                    if colors.index(key)!=k:
+                        nonselected.append(face)
+                if nonselected:
+                    bmesh.ops.delete(bm,geom=nonselected,context="FACES")
+                bm.to_mesh(clone.data)
+            finally:
+                bm.free()
+            clone.data.update()
+            clone.hide_render=True
+            # Tris are computed from the ORIGINAL still-quad source topology;
+            # source face membership is preserved by the frozen color policy.
+            clone.data.calc_loop_triangles()
+            clones[k].append(clone)
     req(np.array_equal(np.asarray(source_faces,dtype=np.int64),original_faces),
         "SOURCE_EXACT_TRIANGLE_CANONICAL_FACE_ORDER_DRIFT")
-    req(len(source_faces)==len(expected_keys),"SOURCE_FACE_KEY_CENSUS")
-    # Crucially: actual source color classification came from Blender original
-    # per-face material slots and MUST independently match the SHA-sealed
-    # previously qualified original face-color membership.
-    flattened=[]
-    for obj in meshes:
-        evaluated=obj.evaluated_get(deps)
-        mesh=evaluated.to_mesh()
-        try:
-            mesh.calc_loop_triangles()
-            for tri in mesh.loop_triangles:
-                mat=obj.material_slots[int(tri.material_index)].material
-                flattened.append(colors.index(rgb_key(mat)))
-        finally:evaluated.to_mesh_clear()
-    req(flattened==expected_keys,"SOURCE_ORIGINAL_FACE_COLOR_ADDRESS_DRIFT")
-    req(sum(by_color)==len(original_faces) and all(k>0 for k in by_color),
-        "ORIGINAL_PHYSICAL_FACE_CENSUS")
-    req(sum(len(ob.data.polygons) for grp in clones.values() for ob in grp)
-        ==len(original_faces),"ISOLATED_TRIANGLES_EXACT_UNION")
+    req(len(observed_colors)==len(expected_keys)
+        and observed_colors==expected_keys,
+        "SOURCE_CANONICAL_FACE_TO_PALETTE_ADDRESS_DRIFT")
+    verified_counts=[sum(len(ob.data.loop_triangles) for ob in clones[k]) for k in range(3)]
+    req(verified_counts==by_color and sum(verified_counts)==len(original_faces)
+        and all(x>0 for x in verified_counts),
+        "ORIGINAL_PHYSICALLY_REMOVED_POLYGON_TRIANGLE_CENSUS")
     return clones,by_color,np.asarray(source_verts,dtype=np.float64)
 
 def prepare_original(args,out):

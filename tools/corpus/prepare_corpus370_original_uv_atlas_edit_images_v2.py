@@ -32,17 +32,22 @@ def sha(path):
     return h.hexdigest()
 
 def build(original,plan,plan_sha,out):
-    req(plan["schema"]=="RealSaS.Corpus370OriginalSourceUVAtlasEditPlan.v2"
-        and plan["status"]=="ORIGINAL_SOURCE_UV_OPERATION_PLAN_FROZEN__NOT_RENDER_COURTED"
-        and plan["source_original_texture_sha256"]==sha(original)
-        and plan["original_source_texture_edit_rule"]==
-            "ATLAS_TILE_U8_RGB_INVERT__ALPHA_UNCHANGED"
-        and plan["original_source_uv_operation_count"]==3
-        and plan["source_texture_size_px"]==[512,512]
-        and plan.get("source_uv_coordinate_origin")=="GLTF_2_IMAGE_TOP_LEFT__UV_V_INCREASES_DOWN"
-        and plan.get("source_uv_to_png_y_flip_applied") is False
-        and all(plan.get(k) is False for k in FLAGS),
-        "SOURCE_UV_PLAN_PROVENANCE")
+    req(plan.get("schema")=="RealSaS.Corpus370OriginalSourceUVAtlasEditPlan.v2",
+        "PLAN_SCHEMA")
+    req(plan.get("status")=="ORIGINAL_SOURCE_UV_OPERATION_PLAN_FROZEN__NOT_RENDER_COURTED",
+        "PLAN_STATUS")
+    req(plan.get("source_original_texture_sha256")==sha(original),
+        "PLAN_ORIGINAL_ATLAS_SHA")
+    req(plan.get("original_source_texture_edit_rule")==
+        "ATLAS_TILE_U8_RGB_INVERT__ALPHA_UNCHANGED","PLAN_RGB_EDIT_RULE")
+    req(plan.get("original_source_uv_operation_count")==3,"PLAN_OPERATION_COUNT")
+    req(plan.get("source_texture_size_px")==[512,512],"PLAN_TEXTURE_SIZE")
+    req(plan.get("source_uv_coordinate_origin")==
+        "GLTF_2_IMAGE_TOP_LEFT__UV_V_INCREASES_DOWN","PLAN_GLTF_UV_ORIGIN")
+    req(plan.get("source_uv_to_png_y_flip_applied") is False,
+        "PLAN_ORIGINAL_PNG_NOT_FLIPPED")
+    for k in FLAGS:
+        req(plan.get(k) is False,"PLAN_FORGED_AUTHORITY_"+k.upper())
     operations=plan["selected_original_source_uv_edits"]
     req([x["source_uv_edit_operation_index"] for x in operations]==[0,1,2],
         "OPERATION_INDEX_DRIFT")

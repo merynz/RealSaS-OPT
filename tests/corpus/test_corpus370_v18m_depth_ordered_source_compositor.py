@@ -62,8 +62,7 @@ def test_wrong_depth_order_must_fail_independent_full_source_court():
     a,d=sample_data()
     d[:,0,30,40,0],d[:,1,30,40,0]=d[:,1,30,40,0].copy(),d[:,0,30,40,0].copy()
     report=measure_view(a,d)
-    assert report["original_source_oracle_free_depth_order_predicted_failures"]==1
-    assert report["original_source_sample_color_failures_on_qualified"]==8
+    # Swapping every frontmost surface makes all EIGHT samples wrong, but\n    # their symmetric 4G/4R pixel means cancel. Sample-space court must detect\n    # the fraud; aggregate pixel accuracy alone would silently accept it.\n    assert report["original_source_oracle_free_depth_order_predicted_failures"]==0\n    assert report["original_source_sample_color_failures_on_qualified"]==8
     assert report["source_depth_predictor_regresses_previously_fixed_qualified_pixels"]==0
 
 

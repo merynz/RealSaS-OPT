@@ -1,0 +1,144 @@
+name: Original Cat source face-pixel-UV edit causality conservative independent court
+on:
+  push:
+    branches: [research/source-face-edit-causal-address-court-v1]
+    paths:
+      - 'tools/corpus/measure_original_source_face_pixel_uv_causality_v1.py'
+      - 'tools/corpus/court_original_source_face_pixel_uv_causality_v1.py'
+      - 'tests/corpus/test_original_source_face_pixel_uv_causality_v1.py'
+      - '.github/workflows/original-cat-source-face-pixel-uv-causality-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: original-cat-face-uv-causal-bridge-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  source-conservative-geometry-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Counterexample tests for full-pixel face coverage, occlusion, UV tile, source EXR row origin, edited sample
+        run: |
+          set -euo pipefail
+          python -m pip install 'numpy>=1.26,<3' 'pytest>=8,<10'
+          python -m py_compile tools/corpus/measure_original_source_face_pixel_uv_causality_v1.py tools/corpus/court_original_source_face_pixel_uv_causality_v1.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_original_source_face_pixel_uv_causality_v1.py
+  original-cat-independent-physical-source-court:
+    needs: source-conservative-geometry-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fetch sealed original GLB/source world, native teacher face UV and original 256 Cycles physical samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m pip install 'numpy>=1.26,<3'
+          D="$RUNNER_TEMP/cat-source-face-uv-causal"
+          mkdir -p "$D/input" "$D/out"
+          export RCLONE_CONFIG="$D/rclone.conf"
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          R="$D/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$D"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          ROOT="gdrive:corpus370_preparation_v1"
+          INPUT="$ROOT/hosted_operational_drawable_inputs_v1/42220981274-1"
+          SOURCE="$ROOT/hosted_native_temporal_pilot_v1/41915393652-1/subjects/corpus_000ca1ae51f9582fde9e"
+          UV="$ROOT/hosted_graphics_source_face_uv_alignment_v0/CAT/42284306947-1"
+          PLAN="$ROOT/hosted_operational_cat_source_uv_plan_v2/CAT/42260446130-1"
+          PHYS="$ROOT/hosted_operational_cat_uv_texture_cycles_v2/CAT/42263195370-1"
+          rclone copyto "$INPUT/ORIGINAL_TWO_SOURCE_INPUTS.zip" "$D/input.zip" --checksum --retries 4
+          echo "e3c758b0a4dc9bd3e7f889e94366fa7ff40517deb15e68a202d525b62de13948  $D/input.zip" | sha256sum --check
+          D="$D" python - <<'PY'
+          import os,json,hashlib,zipfile
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          with zipfile.ZipFile(d/"input.zip") as z:
+            manifest=json.loads(z.read("PRIVATE_TRANSPORT_MANIFEST.json"))
+            assert manifest["parent_manifest_sha256"]=="cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172"
+            rows=[
+              ("/Models/GLB format/animal-cat.glb","source.glb","1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850"),
+              ("/subjects/corpus_000ca1ae51f9582fde9e/SOURCE_REST_GEOMETRY_V1.npz","rest.npz","748609aca5ba7c509aa390ed65baeca7612b8879aa00409735da3a96758379cf"),
+              ("/corpus_000ca1ae51f9582fde9e/camera_bundle.json","camera.json","300b935a47379f6c44d4b4356554d1c32a86ca3b732a62405c73da9e0ec6adf0"),
+              ("/corpus_000ca1ae51f9582fde9e/SOURCE_REST_RENDER_CANDIDATE.json","source-policy.json","c8fe4e307ddbbaf5cc0892cffc4267bd08e394f2299f4e70155ffc6207190a4b"),
+            ]
+            for suffix,name,sha in rows:
+              found=[x for x in manifest["files"] if x["relative_path"].endswith(suffix)]
+              assert len(found)==1,(suffix,len(found))
+              r=found[0];raw=z.read("objects/"+r["sha256"])
+              assert len(raw)==r["size_bytes"] and hashlib.sha256(raw).hexdigest()==r["sha256"]==sha
+              (d/"input"/name).write_bytes(raw)
+          PY
+          rclone copyto "$SOURCE/teacher.npz" "$D/input/teacher.npz" --checksum --retries 4
+          rclone copyto "$UV/PRIVATE_CAT_NATIVE_FACE_UV_V0.npz" "$D/input/face-uv.npz" --checksum --retries 4
+          rclone copyto "$UV/PRIVATE_CAT_NATIVE_TEACHER_GLTF_UV_ALIGNMENT_V0.json" "$D/input/uv-binding.json" --checksum --retries 4
+          rclone copyto "$PLAN/PRIVATE_CAT_ORIGINAL_SOURCE_UV_EDIT_PLAN_V2.json" "$D/input/uv-plan.json" --checksum --retries 4
+          rclone copyto "$PHYS/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.npz" "$D/input/physical.npz" --checksum --retries 4
+          rclone copyto "$PHYS/PRIVATE_CAT_SOURCE_UV_SAME_CYCLES_SAMPLES_V2.json" "$D/input/physical-manifest.json" --checksum --retries 4
+          rclone copyto "$PHYS/PRIVATE_INDEPENDENT_CAT_SOURCE_UV_EDIT_CONSEQUENCE_COURT_V2.json" "$D/input/physical-court.json" --checksum --retries 4
+          echo "c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603  $D/input/teacher.npz" | sha256sum --check
+          echo "7f3afdc4f0f848de3aa06bda2220151427d352368a0f235ca09d5d96f7834787  $D/input/face-uv.npz" | sha256sum --check
+          echo "8be8fccde3d9cc97f7ba452fd50c1a9f4ebea2e34da590a22d30872b2b0f497b  $D/input/uv-plan.json" | sha256sum --check
+          echo "d422b7d7d082fba5deac5dd1239b8c6aec078f4d635a7bd5b1f10e514100b114  $D/input/physical.npz" | sha256sum --check
+      - name: Produce conservative all-subpixel source face/UV certificate; independent direct all-triangle court
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/cat-source-face-uv-causal"
+          python -m tools.corpus.measure_original_source_face_pixel_uv_causality_v1 \
+            --source-root "$D/input" \
+            --output "$D/out/PRIVATE_CAT_ORIGINAL_FACE_PIXEL_EDIT_WITNESSES_V1.json"
+          python -m tools.corpus.court_original_source_face_pixel_uv_causality_v1 \
+            --source-root "$D/input" \
+            --report "$D/out/PRIVATE_CAT_ORIGINAL_FACE_PIXEL_EDIT_WITNESSES_V1.json" \
+            --output "$D/out/PRIVATE_INDEPENDENT_CAT_FACE_PIXEL_UV_CAUSAL_COURT_V1.json"
+          D="$D" python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          a=json.loads((d/"out/PRIVATE_INDEPENDENT_CAT_FACE_PIXEL_UV_CAUSAL_COURT_V1.json").read_text())
+          assert a["status"]=="PASS_ORIGINAL_FACE_PIXEL_UV_EDIT_CAUSALITY_CONSERVATIVE_SUBSET__OWNER_UNKNOWN"
+          assert a["source_original_face_pixel_court_count"]==608
+          assert a["source_original_distinct_face_count"]==24
+          assert a["source_original_8_sample_positive_face_edit_court"]==4864
+          assert a["source_original_2_other_edits_absence_obligations"]==9728
+          assert a["source_original_edit_qualified_pixels_by_edit"]==[555,53,0]
+          assert a["source_unwitnessed_faces_and_edits"]=="UNKNOWN__NOT_FALSE"
+          assert a["iris_training_authorized"] is False
+          print("REAL_ORIGINAL_CAT_SOURCE_FACE_PIXEL_UV_EDIT_BRIDGE_608_PHYSICAL_WITNESSES_INDEPENDENT_COURT_PASS")
+          PY
+          export RCLONE_CONFIG="$D/rclone.conf"
+          R="$D/rclone-v1.75.2-linux-amd64"
+          export PATH="$R:$PATH"
+          DEST="gdrive:corpus370_preparation_v1/hosted_cat_source_face_pixel_uv_causality_v1/CAT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in "$D/out/"*.json; do
+            NAME="$(basename "$F")"
+            rclone copyto "$F" "$DEST/$NAME" --checksum --retries 5
+            for N in 1 2 3 4 5 6; do
+              if rclone cat "$DEST/$NAME" > "$D/out/readback-$NAME" 2>/dev/null && test -s "$D/out/readback-$NAME"; then
+                cmp "$F" "$D/out/readback-$NAME"
+                break
+              fi
+              sleep 4
+            done
+            cmp "$F" "$D/out/readback-$NAME"
+            sha256sum "$F"
+          done
+          echo "CAT_SOURCE_FACE_PIXEL_UV_CAUSAL_PROOF_SHA_READBACK_PASS__OWNER_UNKNOWN__TRAINING_FALSE"

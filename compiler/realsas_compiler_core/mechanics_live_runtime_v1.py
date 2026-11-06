@@ -26,6 +26,11 @@ from .mechanics_prepared_skin_v1 import (
     PreparedMechanicsSkinDeformerV1,
     deform_prepared_mechanics_skin_v1,
 )
+from .mechanics_secondary_motion_v1 import (
+    SecondaryMotionPolicyV1,
+    SecondaryMotionStateV1,
+    step_secondary_motion_v1,
+)
 from .control_motion_runtime_v2 import sample_control_transforms_v2
 from .mechanics_control_solver_v1 import (
     ControlTransformIRV1, DeformedMeshIRV1, MechanicsPoseIRV1,
@@ -47,6 +52,7 @@ class MechanicsInterventionFrameV1:
     status: str
     failures: tuple[str, ...] = ()
     joint_parameter_solution_rad: tuple[tuple[str, str, float], ...] = ()
+    secondary_motion_state: SecondaryMotionStateV1 | None = None
     metadata: dict = field(default_factory=dict)
 
 
@@ -180,6 +186,9 @@ def evaluate_mechanics_intervention_frame_v1(
     active_parameter_policy: str = "EXPLICIT_OR_ALL",
     prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
     multi_goal_jacobian_mode: str = "NUMERIC_V1",
+    secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
+    secondary_motion_previous_state: SecondaryMotionStateV1 | None = None,
+    secondary_motion_dt_seconds: float | None = None,
 ) -> MechanicsInterventionFrameV1:
     _strict_lineage(mesh, rig, skin, mechanics)
     limit_residual = _finite_tolerance(
@@ -245,6 +254,16 @@ def evaluate_mechanics_intervention_frame_v1(
         solved_parameters = solved.parameters_rad
     else:
         raise QualificationError("LIVE_MECHANICS_SOLVER_MODE_UNSUPPORTED")
+    secondary_result = None
+    if secondary_motion_policy is not None:
+        secondary_result = step_secondary_motion_v1(
+            rig, pose, secondary_motion_policy,
+            previous_state=secondary_motion_previous_state,
+            dt_seconds=secondary_motion_dt_seconds,
+        )
+        pose = secondary_result.pose
+    elif secondary_motion_previous_state is not None or secondary_motion_dt_seconds is not None:
+        raise QualificationError("LIVE_MECHANICS_SECONDARY_POLICY_REQUIRED")
     deformed = (
         deform_prepared_mechanics_skin_v1(
             prepared_skin, pose,
@@ -266,6 +285,8 @@ def evaluate_mechanics_intervention_frame_v1(
         failures.append("SEGMENT_STRAIN_EXCEEDED")
     if multi_status is not None and multi_status != "PASS_MULTIGOAL_BEHAVIORAL_COURT":
         failures.append("MULTIGOAL_SOLVER_NOT_QUALIFIED")
+    if secondary_result is not None and secondary_result.status != "PASS_SECONDARY_MOTION_BOUNDED":
+        failures.append("SECONDARY_MOTION_BOUNDS_EXCEEDED")
     return MechanicsInterventionFrameV1(
         pose=pose, deformation=deformed,
         active_control_ids=tuple(x.canonical_control_id for x in controls),
@@ -278,6 +299,7 @@ def evaluate_mechanics_intervention_frame_v1(
                 else "PASS_MECHANICS_BEHAVIORAL_COURT"),
         failures=tuple(failures),
         joint_parameter_solution_rad=solved_parameters,
+        secondary_motion_state=secondary_result.state if secondary_result is not None else None,
         metadata={
             "authority": "MECHANICS_RUNTIME_DIAGNOSTIC_ONLY",
             "control_synthesis_performed": False,
@@ -298,6 +320,18 @@ def evaluate_mechanics_intervention_frame_v1(
                 or active_parameter_policy != "EXPLICIT_OR_ALL"
             ),
             "active_parameter_policy": active_parameter_policy,
+            "secondary_motion_mode": (
+                "CRITICALLY_DAMPED_DECLARED_CHAIN_RESEARCH"
+                if secondary_result is not None else "DISABLED"
+            ),
+            "secondary_motion_max_segment_length_error": (
+                secondary_result.max_secondary_segment_error
+                if secondary_result is not None else None
+            ),
+            "secondary_motion_max_deviation_rad": (
+                secondary_result.max_secondary_angular_deviation_rad
+                if secondary_result is not None else None
+            ),
             "deformer_kernel": (
                 "PREPARED_SPARSE_NUMPY_RESEARCH_ONLY"
                 if prepared_skin is not None else "LEGACY_LBS_V1"
@@ -323,6 +357,7 @@ def evaluate_mechanics_intervention_sequence_v1(
     multi_goal_jacobian_mode: str = "NUMERIC_V1",
     active_parameter_keys: tuple[tuple[str, str], ...] | None = None,
     active_parameter_policy: str = "EXPLICIT_OR_ALL",
+    secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
 ) -> MechanicsInterventionSequenceV1:
     if not steps:
         raise QualificationError("LIVE_MECHANICS_SEQUENCE_EMPTY")
@@ -337,6 +372,7 @@ def evaluate_mechanics_intervention_sequence_v1(
     prev_dt: float | None = None
     prev_solution: tuple[tuple[str, str, float], ...] | None = None
     warm_start_frame_count = 0
+    prev_secondary_state: SecondaryMotionStateV1 | None = None
     for index, step in enumerate(steps):
         frame = evaluate_mechanics_intervention_frame_v1(
             mesh, rig, skin, mechanics, overrides=step.overrides,
@@ -351,6 +387,16 @@ def evaluate_mechanics_intervention_sequence_v1(
             multi_goal_jacobian_mode=multi_goal_jacobian_mode,
             active_parameter_keys=active_parameter_keys,
             active_parameter_policy=active_parameter_policy,
+            secondary_motion_policy=secondary_motion_policy,
+            secondary_motion_previous_state=prev_secondary_state,
+            secondary_motion_dt_seconds=(
+                float(step.time_seconds - steps[index-1].time_seconds)
+                if secondary_motion_policy is not None and index else None
+            ),
+        )
+        prev_secondary_state = (
+            frame.secondary_motion_state
+            if frame.status == "PASS_MECHANICS_BEHAVIORAL_COURT" else None
         )
         if prev_solution is not None and solver_mode == "DECLARED_MULTI_GOAL_V1":
             warm_start_frame_count += 1
@@ -400,6 +446,11 @@ def evaluate_mechanics_intervention_sequence_v1(
                 if prepared_skin is not None else "LEGACY_LBS_V1"
             ),
             "motion_authority_unchanged": True,
+            "secondary_motion_mode": (
+                "CRITICALLY_DAMPED_DECLARED_CHAIN_RESEARCH"
+                if secondary_motion_policy is not None else "DISABLED"
+            ),
+            "secondary_runtime_policy_is_not_source_physics_truth": True,
             "training_authorized": False,
             "multi_goal_jacobian_mode": multi_goal_jacobian_mode,
             "active_dof_is_runtime_policy_not_rig_truth": (

@@ -176,6 +176,7 @@ def evaluate_mechanics_intervention_frame_v1(
     pinned_contact_control_ids: tuple[str, ...] = (),
     pinned_world_targets: Mapping[str, Sequence[float]] | None = None,
     initial_parameters_rad: tuple[tuple[str, str, float], ...] | None = None,
+    active_parameter_keys: tuple[tuple[str, str], ...] | None = None,
     prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
     multi_goal_jacobian_mode: str = "NUMERIC_V1",
 ) -> MechanicsInterventionFrameV1:
@@ -223,6 +224,8 @@ def evaluate_mechanics_intervention_frame_v1(
             raise QualificationError("LIVE_MECHANICS_WARM_START_REQUIRES_MULTI_GOAL")
         if multi_goal_jacobian_mode != "NUMERIC_V1":
             raise QualificationError("LIVE_MECHANICS_JACOBIAN_MODE_REQUIRES_MULTI_GOAL")
+        if active_parameter_keys is not None:
+            raise QualificationError("LIVE_MECHANICS_DOF_POLICY_REQUIRES_MULTI_GOAL")
         pose = solve_control_pose_v1(rig, controls)
     elif solver_mode == "DECLARED_MULTI_GOAL_V1":
         from .mechanics_multigoal_solver_v1 import solve_declared_multi_goal_v1
@@ -231,6 +234,7 @@ def evaluate_mechanics_intervention_frame_v1(
             pinned_world_targets=pinned_world_targets,
             goal_tolerance=limit_residual,
             initial_parameters_rad=initial_parameters_rad,
+            active_parameter_keys=active_parameter_keys,
             jacobian_mode=multi_goal_jacobian_mode,
         )
         pose = solved.pose
@@ -286,6 +290,7 @@ def evaluate_mechanics_intervention_frame_v1(
             "multi_goal_status": multi_status,
             "warm_start_used": initial_parameters_rad is not None,
             "multi_goal_jacobian_mode": multi_goal_jacobian_mode,
+            "active_dof_is_runtime_policy_not_rig_truth": active_parameter_keys is not None,
             "deformer_kernel": (
                 "PREPARED_SPARSE_NUMPY_RESEARCH_ONLY"
                 if prepared_skin is not None else "LEGACY_LBS_V1"
@@ -309,6 +314,7 @@ def evaluate_mechanics_intervention_sequence_v1(
     pinned_world_targets: Mapping[str, Sequence[float]] | None = None,
     prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
     multi_goal_jacobian_mode: str = "NUMERIC_V1",
+    active_parameter_keys: tuple[tuple[str, str], ...] | None = None,
 ) -> MechanicsInterventionSequenceV1:
     if not steps:
         raise QualificationError("LIVE_MECHANICS_SEQUENCE_EMPTY")
@@ -335,6 +341,7 @@ def evaluate_mechanics_intervention_sequence_v1(
             initial_parameters_rad=prev_solution if solver_mode == "DECLARED_MULTI_GOAL_V1" else None,
             prepared_skin=prepared_skin,
             multi_goal_jacobian_mode=multi_goal_jacobian_mode,
+            active_parameter_keys=active_parameter_keys,
         )
         if prev_solution is not None and solver_mode == "DECLARED_MULTI_GOAL_V1":
             warm_start_frame_count += 1
@@ -386,6 +393,7 @@ def evaluate_mechanics_intervention_sequence_v1(
             "motion_authority_unchanged": True,
             "training_authorized": False,
             "multi_goal_jacobian_mode": multi_goal_jacobian_mode,
+            "active_dof_is_runtime_policy_not_rig_truth": active_parameter_keys is not None,
             "solver_mode": solver_mode,
             "pinned_contact_control_ids": tuple(pinned_contact_control_ids),
             "explicit_contact_world_anchor_count": (

@@ -1,0 +1,42 @@
+name: mechanics-main-cas-rest-worker-integration-v1
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_services/platform_worker/mechanics_executor_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/worker.py'
+      - 'tests/compiler/test_mechanics_cas_worker_main_v1.py'
+      - '.github/workflows/mechanics_main_cas_rest_worker_integration_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  mechanics-cas-rest-courts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned compiler and Platform worker dependencies
+        run: |
+          python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          python -m pip install --no-input --progress-bar off -r requirements/platform-worker.txt
+      - name: Verify syntax
+        run: |
+          python -m py_compile \
+            compiler/realsas_compiler_services/platform_worker/mechanics_executor_v1.py \
+            compiler/realsas_compiler_services/platform_worker/worker.py \
+            tests/compiler/test_mechanics_cas_worker_main_v1.py
+      - name: Execute CAS adapter and independent fail-closed regression courts
+        run: |
+          python -m pytest -q \
+            tests/compiler/test_mechanics_cas_worker_main_v1.py \
+            tests/compiler/test_v6_mechanics_main_integration_v1.py

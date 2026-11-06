@@ -1,0 +1,109 @@
+name: Corpus370 operational native edit-support source court v1
+on:
+  push:
+    branches: [corpus370-operational-drawable-decision-v1]
+    paths:
+      - 'tools/corpus/measure_corpus370_operational_native_support_v1.py'
+      - 'tools/corpus/court_corpus370_operational_native_support_v1.py'
+      - 'tests/corpus/test_corpus370_operational_native_support_v1.py'
+      - '.github/workflows/corpus370-operational-native-support-source-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-operational-native-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  synthetic-source-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'numpy>=1.26,<3' 'pytest>=8,<10'
+      - name: Source-chain and algebra tests
+        run: |
+          python -m pytest -q tests/corpus/test_corpus370_operational_edit_algebra_v1.py tests/corpus/test_corpus370_operational_native_support_v1.py
+  original-native-sources:
+    needs: synthetic-source-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            ordinal: 0
+            manifest_sha: 1024d5483eed8be755d5d0e3c6d8cf9b014a23cc104ddda3ff9c2dd8d1b414f1
+            array_sha: 845160bb55d3c0e1f251c14f507aeed157c0cbf675514d0e1407e66c16d90293
+            court_sha: b31cbb88ff62b97d08c163e2c731f582ff63b5357053efe57076a6517cc6e7bd
+          - subject: TRICERATOPS
+            ordinal: 1
+            manifest_sha: 080899b7f41b9989a07bc74d2580386c5aafad4018053d33f9feda47ae617e43
+            array_sha: 139409f919a668e370dbe03444a1e613fecdab81d2ecc91688b59f5ad4b17748
+            court_sha: 7e1a24928c961edef95c9cd2aa80e0b6d90aa9eb5e98b4542e2a2089295bd92c
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      ORDINAL: ${{ matrix.ordinal }}
+      V13B_MANIFEST_SHA: ${{ matrix.manifest_sha }}
+      V13B_ARRAY_SHA: ${{ matrix.array_sha }}
+      V13B_COURT_SHA: ${{ matrix.court_sha }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Prepare SHA-pinned runtime
+        run: |
+          set -euo pipefail
+          python -m pip install 'numpy>=1.26,<3'
+          R="$RUNNER_TEMP/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 "https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip" -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v1.75.2-linux-amd64" >> "$GITHUB_PATH"
+      - name: Original FIT support, algebra, independent heldout source court
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/operational-native-source.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          D="$RUNNER_TEMP/operational-native-$SUBJECT"
+          mkdir -p "$D"
+          ROOT="gdrive:corpus370_preparation_v1"
+          A="$ROOT/hosted_reactive_stain_v18a/$SUBJECT/42097722762-1"
+          G="$ROOT/hosted_native_carrier_private_v13b/42040199925-1/$ORDINAL"
+          rclone copyto "$A/PRIVATE_REACTIVE_STAIN_REPORT_V18A.json" "$D/a.json" --checksum --retries 3
+          rclone copyto "$A/PRIVATE_REACTIVE_STAIN_CANDIDATE_V18A.npz" "$D/a.npz" --checksum --retries 3
+          rclone copyto "$G/PRIVATE_ORIGINAL_ANON_ACTUATOR_MANIFEST_V13B.json" "$D/m.json" --checksum --retries 3
+          rclone copyto "$G/PRIVATE_ORIGINAL_ANON_ACTUATOR_MANIFEST_V13B.npz" "$D/m.npz" --checksum --retries 3
+          rclone copyto "$G/INDEPENDENT_ANONYMOUS_NATIVE_ACTUATOR_COURT_V13B.json" "$D/mc.json" --checksum --retries 3
+          test "$(sha256sum "$D/m.json"|cut -d' ' -f1)" = "$V13B_MANIFEST_SHA"
+          test "$(sha256sum "$D/m.npz"|cut -d' ' -f1)" = "$V13B_ARRAY_SHA"
+          test "$(sha256sum "$D/mc.json"|cut -d' ' -f1)" = "$V13B_COURT_SHA"
+          python -m tools.corpus.measure_corpus370_operational_native_support_v1 --v18a-manifest "$D/a.json" --v18a-npz "$D/a.npz" --v13b-manifest "$D/m.json" --v13b-npz "$D/m.npz" --v13b-court "$D/mc.json" --evidence "$D/PRIVATE_OPERATIONAL_NATIVE_SUPPORT_FIT_EVIDENCE_V1.json" --report "$D/PRIVATE_OPERATIONAL_NATIVE_SUPPORT_FIT_REPORT_V1.json"
+          python -m tools.corpus.compile_corpus370_operational_edit_algebra_v1 --evidence "$D/PRIVATE_OPERATIONAL_NATIVE_SUPPORT_FIT_EVIDENCE_V1.json" --output "$D/PRIVATE_OPERATIONAL_DRAWABLE_EDIT_ALGEBRA_V1.json"
+          python -m tools.corpus.court_corpus370_operational_native_support_v1 --v18a-manifest "$D/a.json" --v18a-npz "$D/a.npz" --v13b-manifest "$D/m.json" --v13b-npz "$D/m.npz" --v13b-court "$D/mc.json" --evidence "$D/PRIVATE_OPERATIONAL_NATIVE_SUPPORT_FIT_EVIDENCE_V1.json" --decision "$D/PRIVATE_OPERATIONAL_DRAWABLE_EDIT_ALGEBRA_V1.json" --source-report "$D/PRIVATE_OPERATIONAL_NATIVE_SUPPORT_FIT_REPORT_V1.json" --output "$D/PRIVATE_INDEPENDENT_OPERATIONAL_NATIVE_SUPPORT_COURT_V1.json"
+          DEST="$ROOT/hosted_operational_drawable_native_support_v1/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in PRIVATE_OPERATIONAL_NATIVE_SUPPORT_FIT_EVIDENCE_V1.json PRIVATE_OPERATIONAL_NATIVE_SUPPORT_FIT_REPORT_V1.json PRIVATE_OPERATIONAL_DRAWABLE_EDIT_ALGEBRA_V1.json PRIVATE_INDEPENDENT_OPERATIONAL_NATIVE_SUPPORT_COURT_V1.json; do
+            rclone copyto "$D/$F" "$DEST/$F" --checksum --retries 3
+            OK=0
+            for attempt in 1 2 3 4 5 6; do
+              if rclone cat "$DEST/$F" > "$D/readback-$F" 2>/dev/null && test -s "$D/readback-$F"; then
+                test "$(sha256sum "$D/$F"|cut -d' ' -f1)" = "$(sha256sum "$D/readback-$F"|cut -d' ' -f1)"
+                OK=1
+                break
+              fi
+              sleep 4
+            done
+            test "$OK" = 1
+          done
+          echo "ORIGINAL_$SUBJECT_NATIVE_WORKLOAD_COURTED__NO_OWNER_PASS"

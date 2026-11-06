@@ -27,7 +27,9 @@ Mechanics v1 then consumes the exact Mesh/Rig/Skin typed triple. No product capa
 
 The tests execute *real current canonical parsers and worker entrypoints* against synthetic CAS JSON; the absence of model releases is a hard error, not an invitation to fabricate fake learned output. The worker dispatch is exercised through the actual async activity and marked as a synthetic probe only.
 
-The original AXIS/MIRA package and grammar tests remain mandatory. **No test here claims successful learned inference, real checkpoint admission, source-verified genericity, 6D grip, Graphics/CAA integration, .rss editing, 60fps, ProductRevision or model quality.** These require qualified exact artifacts, source interventions and product end-to-end proof, not a fallback model.
+The original AXIS/MIRA package and grammar tests remain mandatory. **No test here claims successful learned inference, real checkpoint admission, source-verified genericity, 6D grip, Graphics/CAA integration, .rss editing, 60fps, ProductRevision or model quality.**
+
+A new `main`-targeted `synchronize` commit is required after restacking: PR checks run on the exact reviewed source and must include `current-mainline-ci`, not only the path-scoped worker suite. These require qualified exact artifacts, source interventions and product end-to-end proof, not a fallback model.
 
 ## Next integration gates
 

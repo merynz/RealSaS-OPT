@@ -62,6 +62,14 @@ jobs:
               expected="1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850"
               assert len(payload)==r["size_bytes"] and hashlib.sha256(payload).hexdigest()==r["sha256"]==expected
               (d/"cat.glb").write_bytes(payload)
+              texrows=[r for r in manifest["files"] if r["relative_path"].endswith("/Models/GLB format/Textures/colormap.png")]
+              assert len(texrows)==1
+              texrow=texrows[0]
+              texture=z.read("objects/"+texrow["sha256"])
+              texture_sha="2f6d0032e51c2d49b13b8e689d59eb39aa3ee6c32f2a1851213e11fc7593177d"
+              assert len(texture)==texrow["size_bytes"] and hashlib.sha256(texture).hexdigest()==texrow["sha256"]==texture_sha
+              (d/"Textures").mkdir(exist_ok=True)
+              (d/"Textures/colormap.png").write_bytes(texture)
           print("PRIVATE_CAT_GLTF_SOURCE_BYTES_SHA_VERIFIED")
           PY
           python -m tools.corpus.court_original_source_face_uv_alignment_v0 \

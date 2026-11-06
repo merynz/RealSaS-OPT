@@ -29,7 +29,10 @@ def check(cond,label):
     if not cond:raise ValueError("ORIGINAL_PALETTE_COURT_"+label)
 
 def sha(path):
-    with Path(path).open("rb") as f:return hashlib.file_digest(f,"sha256").hexdigest()
+    with Path(path).open("rb") as f:
+        h=hashlib.sha256()
+        for data in iter(lambda:f.read(1<<20),b""):h.update(data)
+        return h.hexdigest()
 
 def rgba_of_material(mat,policy):
     if mat is None:return None

@@ -48,7 +48,7 @@ jobs:
         with:
           name: mechanics-source-kernel-research-only
           path: |
-            compiler/realsas_compiler_core/*.py
+            compiler/realsas_compiler_core/**/*.py
             compiler/vendor/realsas_v05_current_execution_closure.b64/*
             tools/mechanics/compare_stage47_source_fk_lbs_v1.py
           retention-days: 1

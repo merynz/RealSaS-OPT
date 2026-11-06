@@ -1,0 +1,77 @@
+name: Corpus370 original variable-K same-sample depth compositor regression
+on:
+  push:
+    branches: [corpus370-operational-drawable-decision-v1]
+    paths:
+      - 'tools/corpus/compose_corpus370_source_sample_k_v1.py'
+      - 'tools/corpus/court_corpus370_original_source_sample_k2_regression_v1.py'
+      - 'tests/corpus/test_corpus370_source_sample_k_v1.py'
+      - '.github/workflows/corpus370-source-sample-k-regression-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-source-sample-k-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  pure-variable-k-and-v18n-regression-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'numpy>=1.26,<3' 'pytest>=8,<10'
+      - name: K1 K2 K3 source-depth and no-artist-owner redteam
+        run: |
+          python -m pytest -q tests/corpus/test_corpus370_source_sample_k_v1.py tests/corpus/test_corpus370_v18n_original_material_sample_replay.py
+  immutable-original-source-regression:
+    needs: pure-variable-k-and-v18n-regression-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'numpy>=1.26,<3'
+      - name: Prepare SHA-verified private source transport
+        run: |
+          set -euo pipefail
+          umask 077
+          R="$RUNNER_TEMP/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 "https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip" -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v1.75.2-linux-amd64" >> "$GITHUB_PATH"
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/source-sample-k-v1-rclone.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+      - name: Court exact unchanged original V18m V18n source sample NPZ
+        run: |
+          set -euo pipefail
+          umask 077
+          export RCLONE_CONFIG="$RUNNER_TEMP/source-sample-k-v1-rclone.conf"
+          D="$RUNNER_TEMP/source-sample-k-v1"
+          mkdir -p "$D"
+          ROOT="gdrive:corpus370_preparation_v1"
+          N="$ROOT/hosted_cycles_source_material_v18n/TRICERATOPS/42137097177-1"
+          M="$ROOT/hosted_cycles_source_depth_v18m/TRICERATOPS/42134142993-1"
+          rclone copyto "$N/PRIVATE_V18N_ORIGINAL_SOURCE_MATERIAL_CYCLES_SAMPLES.json" "$D/v18n.json" --checksum --retries 3
+          rclone copyto "$N/PRIVATE_V18N_ORIGINAL_SOURCE_MATERIAL_CYCLES_SAMPLES.npz" "$D/v18n.npz" --checksum --retries 3
+          rclone copyto "$M/PRIVATE_V18M_ORIGINAL_SOURCE_CYCLES_VIEW_DEPTH.json" "$D/v18m.json" --checksum --retries 3
+          rclone copyto "$M/PRIVATE_V18M_ORIGINAL_SOURCE_CYCLES_VIEW_DEPTH.npz" "$D/v18m.npz" --checksum --retries 3
+          test "$(sha256sum "$D/v18n.npz" | cut -d' ' -f1)" = 1431ac67fb4e98b7f53ccf0e22f8d035b214a865498dfccd32a5a17f295ea0f8
+          test "$(sha256sum "$D/v18m.npz" | cut -d' ' -f1)" = ece272a9ebb3aabe5350e7d877dbc4a13047f6416c569444b104423345f84eca
+          python -m tools.corpus.court_corpus370_original_source_sample_k2_regression_v1 --v18n-manifest "$D/v18n.json" --v18n-npz "$D/v18n.npz" --v18m-manifest "$D/v18m.json" --v18m-npz "$D/v18m.npz" --output "$D/PRIVATE_SOURCE_SAMPLE_VARIABLE_K_REAL_ORIGINAL_REGRESSION_V1.json"
+          DEST="$ROOT/hosted_operational_sample_k_original_regression_v1/TRICERATOPS/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          rclone copyto "$D/PRIVATE_SOURCE_SAMPLE_VARIABLE_K_REAL_ORIGINAL_REGRESSION_V1.json" "$DEST/PRIVATE_SOURCE_SAMPLE_VARIABLE_K_REAL_ORIGINAL_REGRESSION_V1.json" --checksum --retries 3
+          rclone cat "$DEST/PRIVATE_SOURCE_SAMPLE_VARIABLE_K_REAL_ORIGINAL_REGRESSION_V1.json" > "$D/readback.json"
+          cmp "$D/PRIVATE_SOURCE_SAMPLE_VARIABLE_K_REAL_ORIGINAL_REGRESSION_V1.json" "$D/readback.json"
+          echo "ORIGINAL_V18N_SOURCE_VARIABLE_K2_SHA_COURT_PASS_NO_OWNER_PROMOTION"

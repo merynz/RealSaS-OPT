@@ -77,8 +77,8 @@ jobs:
                 ("/Models/GLB format/animal-cat.glb","src/animal-cat.glb"),
                 ("/Models/GLB format/Textures/colormap.png","src/Textures/colormap.png"),
                 ("/subjects/corpus_000ca1ae51f9582fde9e/SOURCE_REST_GEOMETRY_V1.npz","rest.npz"),
-                ("/subjects/corpus_000ca1ae51f9582fde9e/SOURCE_REST_RENDER_CANDIDATE.json","policy.json"),
-                ("/subjects/corpus_000ca1ae51f9582fde9e/camera_bundle.json","camera.json"),
+                ("/corpus_000ca1ae51f9582fde9e/SOURCE_REST_RENDER_CANDIDATE.json","policy.json"),
+                ("/corpus_000ca1ae51f9582fde9e/camera_bundle.json","camera.json"),
             ]
             for suffix,out in targets:
               candidates=[x for x in rows if x["relative_path"].endswith(suffix)]

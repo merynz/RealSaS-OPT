@@ -192,7 +192,7 @@ def run(root,output):
         and v2court["producer_source_witness_sha256"]==PINS["v2.json"]
         and source["original_source_sha256"]==source_court["original_source_sha256"]==
             q["original_source_sha256"]==v2["original_source_sha256"]==
-            v2court["source_original_glb_sha256"]==CAT
+            v2court["original_source_sha256"]==CAT
         and source["parent_source_byte_sha256"]["teacher"]==
             v2["original_parent_sha256"]["teacher.npz"]
         and source["parent_source_byte_sha256"]["uv"]==

@@ -4,8 +4,10 @@ on:
     branches: [research/operational-representation-synthesis-v0]
     paths:
       - 'compiler/realsas_compiler_core/operational_representation_synthesis_v0.py'
+      - 'compiler/realsas_compiler_core/graphics_source_readiness_v0.py'
       - 'compiler/realsas_compiler_core/operational_puppet_runtime_v0.py'
       - 'tests/corpus/test_operational_representation_synthesis_v0.py'
+      - 'tests/corpus/test_graphics_source_readiness_v0.py'
       - '.github/workflows/operational-representation-synthesis-v0.yml'
   workflow_dispatch:
 permissions:
@@ -24,5 +26,5 @@ jobs:
           python -m pip install 'numpy>=1.26,<3' 'scipy>=1.11,<2' 'pillow>=10,<13' 'pytest>=8,<10'
       - name: Byte-compile and exercise executable puppet with V2/V3 research regressions
         run: |
-          python -m py_compile compiler/realsas_compiler_core/operational_representation_synthesis_v0.py compiler/realsas_compiler_core/operational_puppet_runtime_v0.py
-          PYTHONPATH=. python -m pytest -q tests/corpus/test_operational_representation_synthesis_v0.py tests/corpus/test_drawable_capability_decision_v2.py tests/corpus/test_drawable_capability_pose_transport_v3.py
+          python -m py_compile compiler/realsas_compiler_core/graphics_source_readiness_v0.py compiler/realsas_compiler_core/operational_representation_synthesis_v0.py compiler/realsas_compiler_core/operational_puppet_runtime_v0.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_graphics_source_readiness_v0.py tests/corpus/test_operational_representation_synthesis_v0.py tests/corpus/test_drawable_capability_decision_v2.py tests/corpus/test_drawable_capability_pose_transport_v3.py

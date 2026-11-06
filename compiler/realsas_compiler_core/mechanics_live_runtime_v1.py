@@ -193,6 +193,8 @@ def evaluate_mechanics_intervention_frame_v1(
     preferred_parameter_keys: tuple[tuple[str,str], ...] | None = None,
     singularity_recovery_mode: str = "DISABLED",
     required_attachment_world_orientations: Mapping[str, Sequence[Sequence[float]]] | None = None,
+    attachment_orientation_mode: str = "EVALUATE_ONLY",
+    attachment_orientation_tolerance_rad: float = 1e-3,
     prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
     multi_goal_jacobian_mode: str = "NUMERIC_V1",
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
@@ -211,6 +213,17 @@ def evaluate_mechanics_intervention_frame_v1(
     if motion is not None and time_seconds is None:
         raise QualificationError("LIVE_MECHANICS_MOTION_TIME_REQUIRED")
 
+    if attachment_orientation_mode not in {
+        "EVALUATE_ONLY","SOLVE_DECLARED_RESEARCH_V1"
+    }:
+        raise QualificationError("LIVE_MECHANICS_ATTACHMENT_ORIENTATION_MODE_UNSUPPORTED")
+    solve_orientation = attachment_orientation_mode=="SOLVE_DECLARED_RESEARCH_V1"
+    if solve_orientation and (
+        solver_mode!="DECLARED_MULTI_GOAL_V1"
+        or multi_goal_jacobian_mode!="ANALYTIC_RESEARCH_V1"
+        or not required_attachment_world_orientations
+    ):
+        raise QualificationError("LIVE_MECHANICS_ORIENTATION_SOLVE_REQUIRES_DECLARED_ANALYTIC_MULTI_GOAL")
     known_controls = {c.canonical_control_id for c in rig.controls}
     if len(known_controls) != len(rig.controls):
         raise QualificationError("LIVE_MECHANICS_DUPLICATE_RIG_CONTROLS")
@@ -264,6 +277,10 @@ def evaluate_mechanics_intervention_frame_v1(
             active_parameter_policy=active_parameter_policy,
             preferred_parameter_keys=preferred_parameter_keys,
             singularity_recovery_mode=singularity_recovery_mode,
+            attachment_orientation_targets=(
+                required_attachment_world_orientations if solve_orientation else None
+            ),
+            orientation_tolerance_rad=attachment_orientation_tolerance_rad,
             jacobian_mode=multi_goal_jacobian_mode,
         )
         pose = solved.pose
@@ -282,6 +299,7 @@ def evaluate_mechanics_intervention_frame_v1(
         raise QualificationError("LIVE_MECHANICS_SOLVER_MODE_UNSUPPORTED")
     attachment_result = evaluate_attachment_world_frames_v1(
         rig,pose,required_world_orientations=required_attachment_world_orientations,
+        angular_tolerance_rad=attachment_orientation_tolerance_rad,
     )
     primary_constraint_residual = max(
         (abs(float(v)) for _,v in pose.constraint_residuals),default=0.0,
@@ -368,6 +386,8 @@ def evaluate_mechanics_intervention_frame_v1(
             "attachment_frames_evaluated_before_secondary": True,
             "attachment_frame_count": len(attachment_result.frames),
             "attachment_target_orientation_status": attachment_result.status,
+            "attachment_orientation_mode": attachment_orientation_mode,
+            "attachment_orientation_solver_is_opt_in": True,
             "secondary_motion_mode": (
                 "CRITICALLY_DAMPED_DECLARED_CHAIN_RESEARCH"
                 if secondary_result is not None else "DISABLED"
@@ -407,6 +427,8 @@ def evaluate_mechanics_intervention_sequence_v1(
     active_parameter_policy: str = "EXPLICIT_OR_ALL",
     singularity_recovery_mode: str = "DISABLED",
     required_attachment_world_orientations: Mapping[str, Sequence[Sequence[float]]] | None = None,
+    attachment_orientation_mode: str = "EVALUATE_ONLY",
+    attachment_orientation_tolerance_rad: float = 1e-3,
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
 ) -> MechanicsInterventionSequenceV1:
     if not steps:
@@ -445,6 +467,8 @@ def evaluate_mechanics_intervention_sequence_v1(
             preferred_parameter_keys=prev_rank_selection,
             singularity_recovery_mode=singularity_recovery_mode,
             required_attachment_world_orientations=required_attachment_world_orientations,
+            attachment_orientation_mode=attachment_orientation_mode,
+            attachment_orientation_tolerance_rad=attachment_orientation_tolerance_rad,
             secondary_motion_policy=secondary_motion_policy,
             secondary_motion_previous_state=prev_secondary_state,
             secondary_motion_dt_seconds=(
@@ -540,6 +564,7 @@ def evaluate_mechanics_intervention_sequence_v1(
             "rank_policy_selection_rank_changes": rank_selection_rank_changes,
             "rank_policy_selection_unjustified_churn": rank_selection_unjustified_churn,
             "singularity_recovery_mode": singularity_recovery_mode,
+            "attachment_orientation_mode": attachment_orientation_mode,
             "attachment_target_required_count": (
                 len(required_attachment_world_orientations)
                 if required_attachment_world_orientations is not None else 0

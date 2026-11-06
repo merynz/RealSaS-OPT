@@ -33,6 +33,7 @@ on:
       - 'tools/mechanics/benchmark_live_mechanics_v1.py'
       - 'tools/mechanics/benchmark_multigoal_jacobian_v1.py'
       - 'tools/mechanics/benchmark_long_branching_ik_v1.py'
+      - 'tools/mechanics/benchmark_relative_attachment_bridge_v1.py'
       - 'tests/mechanics/test_stage47_source_fk_lbs_comparison_v1.py'
       - 'tests/compiler/test_control_motion_ik_integration_v1.py'
       - 'docs/research/MECHANICS_GENERIC_CLOSURE_V1_20261106.md'
@@ -66,6 +67,7 @@ jobs:
           python -m tools.mechanics.benchmark_live_mechanics_v1 --vertices 8192 --frames 10 --warmup 2 --out /tmp/mechanics-cpu-court/branch8192.json
           python -m tools.mechanics.benchmark_multigoal_jacobian_v1 --frames 8 --warmup 2 --out /tmp/mechanics-cpu-court/dof_jacobian_scale.json
           python -m tools.mechanics.benchmark_long_branching_ik_v1 --out /tmp/mechanics-cpu-court/long_branching_24_48_72.json --max-nfev 90
+          python -m tools.mechanics.benchmark_relative_attachment_bridge_v1 --out /tmp/mechanics-cpu-court/cross_parent_bridge_3branch.json --frames 12 --warmup 3
       - name: Publish benchmark diagnostic only (no source assets)
         uses: actions/upload-artifact@v4
         with:

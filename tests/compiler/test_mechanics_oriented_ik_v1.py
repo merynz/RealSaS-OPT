@@ -173,3 +173,130 @@ def test_live_orientation_mode_requires_analytical_multigoal_and_target():
         evaluate_mechanics_intervention_frame_v1(
             mesh,rig,skin,mechanics,attachment_orientation_mode="INFER_SWORD_GRIP",
         )
+
+
+def test_full_six_dimensional_grip_frame_meets_position_orientation_and_planted_contact():
+    rig=_orientation_rig()
+    theta=.31
+    grip_target=(1.+math.cos(theta),math.sin(theta),0.)
+    solved=solve_declared_multi_goal_v1(
+        rig,_goals(theta),
+        pinned_contact_control_ids=("B_HANDLE",),
+        pinned_world_targets={"B_HANDLE":(-2.,0.,0.)},
+        attachment_position_targets={"GRIP:A":grip_target},
+        attachment_orientation_targets={"GRIP:A":_rz(theta)},
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+        verify_analytic_jacobian=True,
+        regularization=1e-9,goal_tolerance=1e-3,
+        orientation_tolerance_rad=1e-3,
+    )
+    assert solved.status=="PASS_MULTIGOAL_BEHAVIORAL_COURT"
+    assert solved.max_orientation_residual_rad<1e-3
+    assert solved.max_attachment_position_residual_world<1e-3
+    assert solved.max_pin_residual<1e-3
+    assert solved.max_drag_residual<1e-3
+    assert solved.metadata["analytic_jacobian_finite_difference_max_error"]<1e-6
+    assert solved.metadata["declared_attachment_position_goal_count"]==1
+    assert len(solved.attachment_position_goals)==1
+    checked=evaluate_attachment_world_frames_v1(
+        rig,solved.pose,
+        required_world_positions={"GRIP:A":grip_target},
+        required_world_orientations={"GRIP:A":_rz(theta)},
+    )
+    assert checked.status=="PASS_ATTACHMENT_FRAME_COURT"
+    assert checked.max_target_position_residual_world<1e-3
+    assert checked.max_target_angular_residual_rad<1e-3
+
+
+def test_contradictory_full_frame_position_fails_even_when_tip_and_rotation_are_satisfied():
+    rig=_orientation_rig()
+    theta=.3
+    solved=solve_declared_multi_goal_v1(
+        rig,_goals(theta),
+        pinned_contact_control_ids=("B_HANDLE",),
+        pinned_world_targets={"B_HANDLE":(-2.,0.,0.)},
+        attachment_position_targets={"GRIP:A":(20.,0.,0.)},
+        attachment_orientation_targets={"GRIP:A":_rz(theta)},
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+        regularization=1e-9,goal_tolerance=1e-3,
+        orientation_tolerance_rad=1e-3,
+    )
+    assert solved.status=="FAIL_MULTIGOAL_BEHAVIORAL_COURT"
+    assert solved.max_attachment_position_residual_world>1.
+    assert solved.metadata["product_mechanics_release_minted"] is False
+
+
+def test_position_only_attachment_frame_court_needs_no_fabricated_orientation():
+    rig=_orientation_rig()
+    unqualified=replace(rig,attachment_anchors=(
+        replace(rig.attachment_anchors[0],metadata={}),
+    ))
+    solved=solve_declared_multi_goal_v1(
+        unqualified,_goals(.25),
+        pinned_contact_control_ids=("B_HANDLE",),
+        pinned_world_targets={"B_HANDLE":(-2.,0.,0.)},
+        attachment_position_targets={"GRIP:A":(1.+math.cos(.25),math.sin(.25),0.)},
+        jacobian_mode="ANALYTIC_RESEARCH_V1",
+        regularization=1e-9,goal_tolerance=1e-3,
+    )
+    assert solved.status=="PASS_MULTIGOAL_BEHAVIORAL_COURT"
+    court=evaluate_attachment_world_frames_v1(
+        unqualified,solved.pose,
+        required_world_positions={"GRIP:A":(1.+math.cos(.25),math.sin(.25),0.)},
+    )
+    assert court.status=="PASS_ATTACHMENT_FRAME_COURT"
+    assert court.frames[0].orientation_authority=="PARENT_ORIENTATION_ONLY_NOT_AUTHORED_GRIP"
+
+
+def test_attachment_position_target_validation_and_analytic_mode_fail_closed():
+    rig=_orientation_rig()
+    for target,code in (
+        ((1.,2.),"POSITION_INVALID"),
+        ((float("nan"),0.,0.),"POSITION_INVALID"),
+    ):
+        with pytest.raises(QualificationError,match=code):
+            solve_declared_multi_goal_v1(
+                rig,_goals(.2),
+                attachment_position_targets={"GRIP:A":target},
+                jacobian_mode="ANALYTIC_RESEARCH_V1",
+            )
+    with pytest.raises(QualificationError,match="POSITION_ANCHOR_UNKNOWN"):
+        solve_declared_multi_goal_v1(
+            rig,_goals(.2),
+            attachment_position_targets={"UNKNOWN":(0.,0.,0.)},
+            jacobian_mode="ANALYTIC_RESEARCH_V1",
+        )
+    with pytest.raises(QualificationError,match="POSITION_REQUIRES_ANALYTIC"):
+        solve_declared_multi_goal_v1(
+            rig,_goals(.2),
+            attachment_position_targets={"GRIP:A":(0.,0.,0.)},
+        )
+
+
+def test_live_full_grip_pose_solve_keeps_secondary_and_other_constraints_intact():
+    mesh,rig,skin,mechanics=_objects()
+    rig=replace(rig,attachment_anchors=(CanonicalAttachmentAnchorIRV2(
+        "GRIP:A",parent_canonical_joint_id="A1",
+        local_P=(1.,0.,0.),source_proposal_anchor_id="synthetic:grip",
+        metadata={"local_basis":I},
+    ),))
+    angle=.24
+    frame=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,
+        overrides=_goals(angle),
+        solver_mode="DECLARED_MULTI_GOAL_V1",
+        multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1",
+        attachment_orientation_mode="SOLVE_DECLARED_RESEARCH_V1",
+        required_attachment_world_positions={
+            "GRIP:A":(1.+math.cos(angle),math.sin(angle),0.),
+        },
+        required_attachment_world_orientations={"GRIP:A":_rz(angle)},
+        pinned_contact_control_ids=("B_HANDLE",),
+        pinned_world_targets={"B_HANDLE":(-2.,0.,0.)},
+        max_allowed_constraint_residual=1e-3,
+    )
+    assert frame.status=="PASS_MECHANICS_BEHAVIORAL_COURT",frame.failures
+    assert frame.attachment_frames.status=="PASS_ATTACHMENT_FRAME_COURT"
+    assert frame.metadata["attachment_max_position_residual_world"]<1e-3
+    assert frame.metadata["attachment_target_orientation_status"]=="PASS_ATTACHMENT_FRAME_COURT"
+    assert frame.metadata["rig_or_skin_mutated"] is False

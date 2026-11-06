@@ -204,3 +204,17 @@ a 43-bone/129-parameter source skeleton: source-native rotation parameters
 are not qualified CanonicalRig physical DOF truth. A separate
 DOF/morphology-scaling court and analytically differentiated kinematics
 should precede any latency or generic closure claim.
+
+## 2026-11-06 — Analytic rotational FK Jacobian research candidate
+
+The previous SciPy multi-goal solver used an expensive numerical finite-difference Jacobian. An opt-in ANALYTIC_RESEARCH_V1 mode now computes the exact rotational FK positional derivative: dP_tip/dtheta = world_axis × (P_tip - P_pivot) for ancestors of an effector. Drag/pin weights and angle regularization have exact matching Jacobian rows. The default remains NUMERIC_V1.
+
+An independent centered finite-difference differential court (outside timed measurement) verifies the new derivative. Tests cover 3, 6, 9 and 15 rotational DOFs, pinned goal behavior, unsupported solver modes, unreachable targets, explicitly declared limits, and live prepared LBS interaction.
+
+Verified GitHub Actions run 42275027914 at head 315d13edec75e71a009ec689df887684ccb3617e: 55 focused Mechanics tests PASS. Analytic vs numeric solver CPU p50 measured on the same GitHub runner: at 3 DOF 3.635 vs 4.194 ms (1.15x); 6 DOF 4.763 vs 6.917 ms (1.45x); 9 DOF 5.833 vs 9.776 ms (1.68x); 15 DOF 7.576 vs 15.445 ms (2.04x). Maximum independently checked derivative error was about 1.24e-9.
+
+Versioned receipt: docs/research/MECHANICS_ANALYTIC_JACOBIAN_DOF_SCALE_20261106.json. Executable reproducibility: python -m tools.mechanics.benchmark_multigoal_jacobian_v1 --frames 8 --warmup 2 --out /tmp/dof_jacobian_scale.json
+
+Scope: five joints with 3–15 declared rotational parameters, two IK goals and a position pin. This is a numerical/sparsity stress fixture, not 15 proven independently observable source controls. The 15-DOF fixture includes terminal joint rotations that do not move their own joint origins. It is NOT a 43-bone source correspondence court, DOF truth mint, force/contact/collision model, or product 60-FPS certification.
+
+Next scientific barrier: genuinely longer articulated trees, mixed morphologies, source-frame axis correspondence, multi-contact and grip orientation, validated full frame time through source-bound canonical outputs. Keep the numeric fallback until that evidence exists.

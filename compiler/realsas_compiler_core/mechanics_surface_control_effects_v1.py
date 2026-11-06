@@ -70,6 +70,11 @@ def surface_control_effect_evidence_v1(
             not all(math.isfinite(float(v)) and v >= 0.0 for v in barycentric) or
             abs(sum(map(float, barycentric))-1.0) > 1e-5):
         raise QualificationError("MECHANICS_EFFECT_SURFACE_BARYCENTRIC_INVALID")
+    known_vertex_ids = {v.canonical_mesh_vertex_id for v in mesh.vertices}
+    if len(known_vertex_ids) != len(mesh.vertices):
+        raise QualificationError("MECHANICS_EFFECT_MESH_DUPLICATE_VERTEX_ID")
+    if any(vid not in known_vertex_ids for vid in triangle_vertex_ids):
+        raise QualificationError("MECHANICS_EFFECT_SURFACE_VERTEX_UNKNOWN")
     # A collection of three vertex IDs is not yet a surface triangle. Exact
     # canonical topology membership must be proved before control evidence.
     if frozenset(triangle_vertex_ids) not in {frozenset(f) for f in mesh.faces}:

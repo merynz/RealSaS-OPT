@@ -94,6 +94,7 @@ def solve_declared_multi_goal_v1(
     maximum_dofs: int = 72,
     maximum_goals: int = 16,
     initial_parameters_rad: Sequence[tuple[str, str, float]] | None = None,
+    active_parameter_keys: Sequence[tuple[str, str]] | None = None,
     jacobian_mode: str = "NUMERIC_V1",
     verify_analytic_jacobian: bool = False,
 ) -> MechanicsMultiGoalResultV1:
@@ -341,13 +342,45 @@ def solve_declared_multi_goal_v1(
                 np.any(x0 < lower_np-1e-12) or np.any(x0 > upper_np+1e-12)):
             raise QualificationError("MULTIGOAL_WARM_START_OUT_OF_BOUNDS")
         x0 = np.minimum(np.maximum(x0, lower_np), upper_np)
+    # An optional solver-time representation policy freezes all unselected
+    # declared DOFs at their validated initial configuration. This is NOT
+    # evidence that those DOFs are physically unnecessary, nor a change to the
+    # canonical rig contract. Every constraint residual remains fully checked.
+    if active_parameter_keys is None:
+        active_idx = np.arange(len(param_schema), dtype=np.int64)
+    else:
+        try:
+            selected = tuple((str(jid), str(axis)) for jid, axis in active_parameter_keys)
+        except (ValueError, TypeError) as exc:
+            raise QualificationError("MULTIGOAL_ACTIVE_DOF_POLICY_INVALID") from exc
+        if (not selected or len(set(selected)) != len(selected)
+                or not set(selected).issubset(set(param_schema))):
+            raise QualificationError("MULTIGOAL_ACTIVE_DOF_POLICY_INVALID")
+        active_idx = np.asarray([
+            i for i, key in enumerate(param_schema) if key in set(selected)
+        ], dtype=np.int64)
+    frozen_q = x0.copy()
+
+    def expand_active(active_q: np.ndarray) -> np.ndarray:
+        full = frozen_q.copy()
+        full[active_idx] = active_q
+        return full
+
+    def residual_active(active_q: np.ndarray) -> np.ndarray:
+        return residual(expand_active(active_q))
+
+    def jacobian_active(active_q: np.ndarray) -> np.ndarray:
+        return analytic_jacobian(expand_active(active_q))[:, active_idx]
+
     opt = least_squares(
-        residual, x0, bounds=(lower_np, upper_np),
-        jac=analytic_jacobian if jacobian_mode == "ANALYTIC_RESEARCH_V1" else "2-point",
+        residual_active, x0[active_idx],
+        bounds=(lower_np[active_idx], upper_np[active_idx]),
+        jac=jacobian_active if jacobian_mode == "ANALYTIC_RESEARCH_V1" else "2-point",
         method="trf", max_nfev=int(max_nfev),
         xtol=1e-10, ftol=1e-10, gtol=1e-10,
     )
-    p, rotations, _ = forward(opt.x)
+    solution_q = expand_active(opt.x)
+    p, rotations, _ = forward(solution_q)
     jacobian_debug_error = None
     if verify_analytic_jacobian:
         # Independent central difference at the actual solved joint angles.
@@ -357,9 +390,9 @@ def solve_declared_multi_goal_v1(
         for index in range(len(param_schema)):
             delta = np.zeros(len(param_schema), dtype=np.float64)
             delta[index] = h
-            numeric_columns.append((residual(opt.x + delta) - residual(opt.x - delta)) / (2 * h))
+            numeric_columns.append((residual(solution_q + delta) - residual(solution_q - delta)) / (2 * h))
         numeric = np.column_stack(numeric_columns)
-        jacobian_debug_error = float(np.max(np.abs(numeric - analytic_jacobian(opt.x))))
+        jacobian_debug_error = float(np.max(np.abs(numeric - analytic_jacobian(solution_q))))
         if (not math.isfinite(jacobian_debug_error)
                 or jacobian_debug_error > 1e-5):
             raise QualificationError("MULTIGOAL_ANALYTIC_JACOBIAN_DIFFERENTIAL_FAILURE")
@@ -405,7 +438,7 @@ def solve_declared_multi_goal_v1(
         max_drag_residual=drag_max, max_pin_residual=pin_max,
         parameters_rad=tuple(
             (jid, label, float(value))
-            for (jid, label), value in zip(param_schema, opt.x)
+            for (jid, label), value in zip(param_schema, solution_q)
         ),
         solver_evaluations=int(opt.nfev),
         metadata={
@@ -419,6 +452,9 @@ def solve_declared_multi_goal_v1(
             "explicit_world_contact_anchor_count": len(anchor_map),
             "contact_anchors_are_declared_control_references": True,
             "warm_start_supplied": initial_parameters_rad is not None,
+            "active_solver_parameter_count": int(len(active_idx)),
+            "frozen_solver_parameter_count": int(len(param_schema) - len(active_idx)),
+            "active_dof_selection_is_representation_policy_not_source_truth": True,
             "compiler_rig_synthesis_performed": False,
             "training_authority_minted": False,
             "product_mechanics_release_minted": False,

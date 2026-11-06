@@ -118,7 +118,7 @@ def test_small_model_roster_is_not_starved_by_global_holdout(tmp_path: Path):
 
 
 @pytest.mark.parametrize("mutation,code", [
-    ("missing_member", "RECIPROCAL_COVERAGE"),
+    ("missing_member", "GROUP_MEMBERS"),
     ("cross_group", "RECIPROCAL_PARTITION"),
     ("duplicate_member", "GROUP_MEMBERS"),
     ("phantom_group", "GROUP_REF"),

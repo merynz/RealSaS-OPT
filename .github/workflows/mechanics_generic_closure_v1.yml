@@ -48,8 +48,8 @@ jobs:
       - name: Profile full Mechanics drag and pinned-contact CPU frames
         run: |
           mkdir -p /tmp/mechanics-cpu-court
-          python tools/mechanics/benchmark_live_mechanics_v1.py --vertices 3266 --frames 16 --warmup 3 --out /tmp/mechanics-cpu-court/branch3266.json
-          python tools/mechanics/benchmark_live_mechanics_v1.py --vertices 8192 --frames 10 --warmup 2 --out /tmp/mechanics-cpu-court/branch8192.json
+          python -m tools.mechanics.benchmark_live_mechanics_v1 --vertices 3266 --frames 16 --warmup 3 --out /tmp/mechanics-cpu-court/branch3266.json
+          python -m tools.mechanics.benchmark_live_mechanics_v1 --vertices 8192 --frames 10 --warmup 2 --out /tmp/mechanics-cpu-court/branch8192.json
       - name: Publish benchmark diagnostic only (no source assets)
         uses: actions/upload-artifact@v4
         with:

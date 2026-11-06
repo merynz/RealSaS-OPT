@@ -7,6 +7,10 @@ on:
       - 'tools/truth_foundry/blender_corpus370_operational_palette_independent_court_v1.py'
       - 'tools/corpus/compile_corpus370_operational_palette_joint_v1.py'
       - 'tests/corpus/test_corpus370_operational_palette_joint_v1.py'
+      - 'tools/corpus/court_corpus370_operational_palette_pixel_consequence_v1.py'
+      - 'tools/truth_foundry/blender_corpus370_operational_palette_physical_render_v1.py'
+      - 'tools/truth_foundry/blender_corpus370_operational_palette_physical_independent_ray_court_v1.py'
+      - 'tests/corpus/test_corpus370_operational_palette_pixel_consequence_v1.py'
       - '.github/workflows/corpus370-operational-shader-palette-source-v1.yml'
   workflow_dispatch:
 permissions:
@@ -25,7 +29,7 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install 'numpy>=1.26,<3' 'pytest>=8,<10'
       - run: |
-          python -m pytest -q tests/corpus/test_corpus370_operational_edit_algebra_v1.py tests/corpus/test_corpus370_operational_native_support_v1.py tests/corpus/test_corpus370_operational_palette_joint_v1.py
+          python -m pytest -q tests/corpus/test_corpus370_operational_edit_algebra_v1.py tests/corpus/test_corpus370_operational_native_support_v1.py tests/corpus/test_corpus370_operational_palette_joint_v1.py tests/corpus/test_corpus370_operational_palette_pixel_consequence_v1.py
   original-blender-palette:
     needs: joint-contracts
     runs-on: ubuntu-24.04
@@ -114,6 +118,7 @@ jobs:
             (d/('source.'+os.environ['EXT'])).write_bytes(source)
             (d/'rest.npz').write_bytes(exact(lambda p:sid in p and p.endswith('/SOURCE_REST_GEOMETRY_V1.npz')))
             (d/'policy.json').write_bytes(exact(lambda p:sid in p and p.endswith('/SOURCE_REST_RENDER_CANDIDATE.json')))
+            (d/'camera.json').write_bytes(exact(lambda p:sid in p and p.endswith('/camera_bundle.json')))
             # Restore exact GLB texture dependency if present; no texture replacement or synthesis.
             if os.environ['SUBJECT']=='CAT':
               material=exact(lambda p:p.endswith('/Models/GLB format/Textures/colormap.png'))
@@ -131,6 +136,15 @@ jobs:
           "$BLENDER_EXE" --background --factory-startup --threads 2 --python-exit-code 1 --python tools/truth_foundry/blender_corpus370_operational_palette_v1.py -- --source "$D/source.$EXT" --source-sha256 "$SOURCE_SHA" --v18a-npz "$D/v18a.npz" --rest-npz "$D/rest.npz" --source-policy "$D/policy.json" --output-dir "$RUNNER_TEMP/od-palette-out-$SUBJECT"
           "$BLENDER_EXE" --background --factory-startup --threads 2 --python-exit-code 1 --python tools/truth_foundry/blender_corpus370_operational_palette_independent_court_v1.py -- --source "$D/source.$EXT" --source-sha256 "$SOURCE_SHA" --v18a-npz "$D/v18a.npz" --reference-rest-npz "$D/rest.npz" --source-policy "$D/policy.json" --facts "$RUNNER_TEMP/od-palette-out-$SUBJECT/PRIVATE_ORIGINAL_SHADER_CONSTANT_PALETTE_FACTS_V1.json" --output-dir "$RUNNER_TEMP/od-palette-out-$SUBJECT"
           python -m tools.corpus.compile_corpus370_operational_palette_joint_v1 --native-evidence "$D/native.json" --source-palette "$RUNNER_TEMP/od-palette-out-$SUBJECT/PRIVATE_ORIGINAL_SHADER_CONSTANT_PALETTE_FACTS_V1.json" --palette-court "$RUNNER_TEMP/od-palette-out-$SUBJECT/PRIVATE_INDEPENDENT_ORIGINAL_SHADER_PALETTE_COURT_V1.json" --v18a-npz "$D/v18a.npz" --joint-evidence "$RUNNER_TEMP/od-palette-out-$SUBJECT/PRIVATE_PALETTE_NATIVE_JOINT_EVIDENCE_V1.json" --joint-decision "$RUNNER_TEMP/od-palette-out-$SUBJECT/PRIVATE_PALETTE_NATIVE_JOINT_DECISION_V1.json" --summary "$RUNNER_TEMP/od-palette-out-$SUBJECT/PRIVATE_PALETTE_NATIVE_JOINT_SUMMARY_V1.json"
+      - name: Real Triceratops physical palette edit and independent original source-ray court
+        if: matrix.subject == 'TRICERATOPS'
+        run: |
+          set -euo pipefail
+          umask 077
+          P="$RUNNER_TEMP/od-physical-TRICERATOPS"
+          C="$RUNNER_TEMP/od-physical-source-court-TRICERATOPS"
+          "$BLENDER_EXE" --background --factory-startup --threads 2 --python-exit-code 1 --python tools/truth_foundry/blender_corpus370_operational_palette_physical_render_v1.py -- --source "$D/source.$EXT" --source-sha256 "$SOURCE_SHA" --source-policy "$D/policy.json" --camera-bundle "$D/camera.json" --source-palette "$RUNNER_TEMP/od-palette-out-$SUBJECT/PRIVATE_ORIGINAL_SHADER_CONSTANT_PALETTE_FACTS_V1.json" --v18a-npz "$D/v18a.npz" --output-dir "$P"
+          "$BLENDER_EXE" --background --factory-startup --threads 2 --python-exit-code 1 --python tools/truth_foundry/blender_corpus370_operational_palette_physical_independent_ray_court_v1.py -- --source "$D/source.$EXT" --source-sha256 "$SOURCE_SHA" --source-policy "$D/policy.json" --camera-bundle "$D/camera.json" --source-palette "$RUNNER_TEMP/od-palette-out-$SUBJECT/PRIVATE_ORIGINAL_SHADER_CONSTANT_PALETTE_FACTS_V1.json" --render-manifest "$P/PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V1.json" --render-root "$P" --output-dir "$C"
       - name: Immutable private upload and checksum readback
         run: |
           set -euo pipefail
@@ -151,4 +165,29 @@ jobs:
             done
             test "$GOT" = 1
           done
+          if [ "$SUBJECT" = TRICERATOPS ]; then
+            SRC="$RUNNER_TEMP/od-physical-TRICERATOPS"
+            COURT="$RUNNER_TEMP/od-physical-source-court-TRICERATOPS"
+            OUT="$DEST/physical_source_edit"
+            for F in "PRIVATE_ORIGINAL_PHYSICAL_PALETTE_RENDER_MANIFEST_V1.json" "PRIVATE_INDEPENDENT_ORIGINAL_PHYSICAL_PALETTE_RAY_COURT_V1.json"; do
+              case "$F" in
+                PRIVATE_INDEPENDENT*) FROM="$COURT/$F" ;;
+                *) FROM="$SRC/$F" ;;
+              esac
+              rclone copyto "$FROM" "$OUT/$F" --checksum --retries 3
+              rclone cat "$OUT/$F" > "$D/physical-readback-$F"
+              cmp "$FROM" "$D/physical-readback-$F"
+            done
+            for V in 0 2 4 6; do
+              for LABEL in BASELINE EDIT_0 EDIT_1 EDIT_2; do
+                FROM="$SRC/$LABEL/V$V.png"
+                TO="$OUT/$LABEL/V$V.png"
+                test -s "$FROM"
+                rclone copyto "$FROM" "$TO" --checksum --retries 3
+                rclone cat "$TO" > "$D/physical-readback-$LABEL-V$V.png"
+                cmp "$FROM" "$D/physical-readback-$LABEL-V$V.png"
+              done
+            done
+            echo "TRICERATOPS_ORIGINAL_PHYSICAL_EDIT_SOURCE_RAY_COURT_SEALED__NO_OWNER_AUTHORITY"
+          fi
           echo "SOURCE_PALETTE_JOINT_SHA_READBACK_VERIFIED__NO_GRAPHICS_OWNER"

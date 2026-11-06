@@ -205,7 +205,7 @@ def _teacher_oracle_product_probe(
     skin = CanonicalSkinIRV2(
         rows=tuple(CanonicalSkinRowIRV2(
             canonical_mesh_vertex_id=vid, influences=tuple(grouped[i]),
-            source_candidate_vertex_id=f"TEACHER_ONLY:{i}",
+            source_carrier_vertex_id=f"TEACHER_ONLY:{i}",
         ) for i, vid in enumerate(vertex_ids)),
         mesh_lineage_hash=mesh_sha, deform_structure_hash=rig_sha,
         mesh_carrier_evidence_hash="5"*64, mesh_carrier_topology_hash="6"*64,

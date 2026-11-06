@@ -36,7 +36,7 @@ Their published checkpoint naming includes `skin_vae_2_10_32768`. **Our 64,000 v
 |---|---|---|---|
 | Unified skeleton + skin sequence | Yes | Yes, via typed V6 wire reused by V7 | new event grammar for interaction-affordance targets only after teacher seal |
 | FSQ + straight-through reconstruction | Yes | V7 MIRA uses true gradient-carrying code path | verify with reconstruction-only backward court |
-| Spatial attention-based VAE | Yes | **Not yet**; first V7 codec uses carrier-native weighted regional pooling | replace baseline with conditional sampled/query attention before serious performance claims |
+| Spatial attention-based VAE | Yes | Two V7 options: baseline uses weighted pooling; new **learned-query local attention candidate** encodes active sampled support. Not exact upstream CVAE parity | compare baseline and new attention candidate under equal train/validation budgets; add geometry-conditioned decoder attention only if measured improvements justify it |
 | Rig conditioning | Learned mesh encoder | Current IRIS/TESSA-adaptable 47-D surface evidence seam | first-class versioned shared-scene adapter, no hidden oracle truth |
 | Skeleton generation | Yes | V6 RigProgram language extended by large V7 decoder | require true free-running unseen tests |
 | Control rig / interaction affordances | Not the core TokenRig target | V6 control/constraint program + runtime implicit pick from declared controls | learned/evidence-grounded affordances; local DOF/limit solver |
@@ -46,7 +46,7 @@ Their published checkpoint naming includes `skin_vae_2_10_32768`. **Our 64,000 v
 ## Implementation in this V7 research branch
 
 - `models/mira/skin_fsq_codec_v7.py`: 64k code vocabulary from (8,8,8,5,5,5), 4 tokens/joint, large carrier ceiling, sparse-aware reconstruction, teacher-relative edge gradient loss, reconstruction-only STE gradient. **Initial codec baseline, not full official architecture.**
-- `models/axis/rig_program_model_v7.py`: 16 x 768, 12-head conditional causal model; typed RigProgram + SkinCodes, tied embedding/output projection, sparse skin logits at SKIN_CODE positions, V6 wire contract and variable morpologies.
+- `models/mira/skin_attention_codec_v7.py`: source-inspired but independently implemented learned-query per-joint attention with bounded active-support top-k sampling, inherited straight-through FSQ decode. Not weight compatible with upstream.\n- `models/axis/rig_program_model_v7.py`: 16 x 768, 12-head conditional causal model; typed RigProgram + SkinCodes, tied embedding/output projection, sparse skin logits at SKIN_CODE positions, V6 wire contract and variable morpologies.
 - `compiler/realsas_compiler_core/mechanics_interaction_v1.py`: generic barycentric hit-to-declared-control scoring over qualified skin/rig. This is runtime interpretation of already generated structure; it **does not** synthesize control rig, choose new rig parents, or make Graphics decisions.
 - `tests/models/test_axis_mira_v7_research.py`: reconstruction-only gradient, hard-code parity, sparse CE/backprop, read-only pick, fail-closed lineage.
 
@@ -70,7 +70,7 @@ No V7 training or ProductRevision promotion is authorized by this research branc
 
 **A — engineering research candidate (this PR):** higher-capacity coupled Rig/Skin model, improved V7 baseline codec, typed Mechanics hit interaction, CI, exact upstream code references, versioned corpus gate.
 
-**B — architecture science:** rebuild MIRA around learned sampled/query-conditioned FSQ-CVAE as upstream; quantify active-support sampling on nonhumanoid corpus, gradient preservation, smoothness and reconstruction at 32k vs 64k, fixed budget.
+**B — architecture science:** benchmark new local-attention MIRA vs initial pooling baseline, then evaluate deeper conditional decoder/encoder parity against upstream; quantify active-support sampling on nonhumanoid corpus, gradient preservation, smoothness and reconstruction at 32k vs 64k, fixed budget.
 
 **C — mechanics semantics:** local DOF/limits, targets/attachments orientation, multi-constraint solves, influence-to-control ambiguity and abstention, spatial interaction tracking; no graphics authority creep.
 

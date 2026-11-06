@@ -161,13 +161,15 @@ The terms have clear *operational* meaning: \(\Delta(\emptyset)\) baseline, \(\D
 
 Original #351 physically rendered all 8 combinations of THREE disjoint 64×64 source atlas RGB-invert edits in four original cameras and eight exactly matched Cycles sample offsets: **256 original physical rendered arms**; array SHA d422b7d7d082fba5deac5dd1239b8c6aec078f4d635a7bd5b1f10e514100b114, independent original court SHA 90b85b9c1a963b23f7c3037ca443975bf2d5c5d4123568d8aa8e54557e433c08.
 
-Direct source-array evaluation with NO artist labels yields the following initial inspection (source-independent court must validate it before final admission):
+Direct source-array measurement, now independently validated on unchanged original source bytes by [GitHub Actions run 42298052382](https://github.com/merynz/RealSaS-OPT/actions/runs/42298052382), yields the following exact measured finite-domain result:
 
 - First-order effects \(\Delta(\{0\}),\Delta(\{1\}),\Delta(\{2\})\) exceed the precommitted 0.025 premultiplied RGBA threshold at **290,979 / 264,554 / 6,048** original sample-pixel incidences; 0 and 1 share **2,799** projected source sample incidences.
 - Pair interaction \(\Delta(\{0,1\})\) has nonzero maximum channel magnitude about **0.005160898**, but **0** source sample-pixel incidents exceed 0.025.
 - Pair effects \(\Delta(\{0,2\})\), \(\Delta(\{1,2\})\) and third-order \(\Delta(\{0,1,2\})\) are exactly zero in the observed stored source sample arrays under the measured PM conversion; **0** threshold incidents.
 - Full Möbius inversion reconstructs every stored physical source arm to floating-point precision; this is an algebraic identity, NOT an independently heldout new-render generalization test.
 - The source 0/1 projected supports do overlap, yet their measured nonadditivity is small. Hence **projected effect overlap does not imply nonlinear interaction or a necessary drawable separation**.
+
+**Independent original physical source proof PASS:** producer source output SHA bf4256bb596a56cce731a3ae97d9294c9c92876a73e7dacf19aad175ba7d35cb; separate inclusion–exclusion court SHA d6ab439c66824d2798bc6aaaa5e584d68c4b4c3277abd40ccbd4e6dbe9588185. Two workflow jobs successful; original bytes private, SHA readback verified. This court validates the bounded original Cat source edit-interaction result, not arbitrary pose/general artist grouping.
 
 **Physical verification lane:** producer \`tools/corpus/source_intervention_mobius_truth_v1.py\`; independent closed-form inclusion-exclusion court \`tools/corpus/court_source_intervention_mobius_v1.py\`; new GitHub source workflow \`.github/workflows/source-intervention-mobius-original-cat-v1.yml\`. These use SHA-immutable original source samples, validate the original independent court, perform two distinct mathematical computations, preserve original 0.025 tolerance and avoid any source face/artist inference.
 

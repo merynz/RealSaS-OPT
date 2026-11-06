@@ -82,7 +82,7 @@ def test_pick_fails_closed_on_invalid_skin_and_lineage_drift():
         _pick(mesh,rig,replace(skin,deform_structure_hash="not_same"))
     with pytest.raises(QualificationError,match="BARYCENTRIC_INVALID"):
         surface_control_effect_evidence_v1(
-            rig,skin,triangle_vertex_ids=("MV:0","MV:1","MV:2"),
+            mesh,rig,skin,triangle_vertex_ids=("MV:0","MV:1","MV:2"),
             barycentric=(0.5,0.5,0.5),
         )
     corrupt=replace(skin,rows=(replace(skin.rows[0],influences=(("J0",0.1),)),)
@@ -91,7 +91,7 @@ def test_pick_fails_closed_on_invalid_skin_and_lineage_drift():
         _pick(mesh,rig,corrupt)
     with pytest.raises(QualificationError,match="SURFACE_VERTEX_UNKNOWN"):
         surface_control_effect_evidence_v1(
-            rig,skin,triangle_vertex_ids=("MV:0","MV:1","MISSING"),
+            mesh,rig,skin,triangle_vertex_ids=("MV:0","MV:1","MISSING"),
             barycentric=(0.1,0.3,0.6),
         )
 

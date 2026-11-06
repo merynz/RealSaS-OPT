@@ -47,7 +47,12 @@ def test_long_chain_wrong_contact_world_target_rejected_as_unsolved_not_rewritte
     anchors=dict(case.pin_world_targets)
     pinned=case.pins[0]
     anchors[pinned]=(100.,100.,100.)
-    unsolvable=replace(case,pin_world_targets=anchors)
+    targets=dict(case.targets_world)
+    targets[pinned]=anchors[pinned]
+    # Keep independent expected goal aligned with the *intentionally altered*
+    # declared world pin. Otherwise the reference court correctly reports
+    # a forged target declaration, before testing unreachable mechanics.
+    unsolvable=replace(case,pin_world_targets=anchors,targets_world=targets)
     result=solve_and_court_v1(unsolvable,max_nfev=30)
     assert result["status"]=="FAIL_MULTIGOAL_BEHAVIORAL_COURT"
     assert result["max_pin_residual_world"]>1.0

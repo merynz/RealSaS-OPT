@@ -53,9 +53,17 @@ def expected_from_original(anchors, num_ops):
                           op2, representatives[op2], 0)] += 1
     return expected
 
-def audit(source_path, source_court_path, target_path, output_path):
+def audit(source_path, source_court_path, target_path, output_path, teacher_path):
     require(sha(source_path) == PARENT_SHA, "ORIGINAL_PHYSICAL_SOURCE_PARENT_SHA")
     require(sha(source_court_path) == COURT_SHA, "ORIGINAL_PHYSICAL_SOURCE_COURT_SHA")
+    teacher_sha = "c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603"
+    require(sha(teacher_path) == teacher_sha, "ORIGINAL_TEACHER_SHA")
+    import numpy as np
+    with np.load(teacher_path, allow_pickle=False) as teacher:
+        posed = np.asarray(teacher["posed_vertices_source_world"], dtype=np.float64)
+        faces = np.asarray(teacher["faces"], dtype=np.int64)
+    require(posed.shape == (32, 1204, 3) and faces.shape == (684, 3),
+            "ORIGINAL_TEACHER_SHAPE")
     source = json.loads(Path(source_path).read_text())
     court = json.loads(Path(source_court_path).read_text())
     target = json.loads(Path(target_path).read_text())
@@ -72,7 +80,11 @@ def audit(source_path, source_court_path, target_path, output_path):
             and target.get("independent_source_court_sha256") == COURT_SHA
             and target.get("source_pose_ordinals") == [0, 14]
             and target.get("original_camera_views") == [0, 2, 4, 6]
-            and target.get("source_evidence_valid") is True,
+            and target.get("source_evidence_valid") is True
+            and target.get("source_teacher_posed_geometry_sha256") == teacher_sha
+            and target.get("source_teacher_query_point_per_locus_both_poses") is True
+            and target.get("query_xyz_coordinate_frame") ==
+                "ORIGINAL_SOURCE_WORLD__CANONICAL_MODEL_NORMALIZATION_NOT_BOUND",
             "DERIVED_SOURCE_PARENT_IDENTITY")
     for key in ("iris_training_authorized", "iris_model_head_trained",
                 "student_input_contains_teacher_op_id",
@@ -109,6 +121,21 @@ def audit(source_path, source_court_path, target_path, output_path):
                     and original["source_pose0_and_pose14_independent_physical_positive"] is True
                     and original["original_artist_drawable_owner"] == "UNKNOWN",
                     "SOURCE_BARYCENTRIC_OR_PHYSICAL_EVIDENCE_INVALID")
+            # Independent exact 3D point reconstruction: original face vertex
+            # identities and each original native authored pose, not screen
+            # backprojection or a student-inferred source position.
+            ids = faces[face]
+            bary = original["pose0_center_source_barycentric"]
+            for pose in (0, 14):
+                point = [
+                    sum(float(bary[k]) * float(posed[pose, ids[k], axis])
+                        for k in range(3))
+                    for axis in range(3)
+                ]
+                declared = locus[f"source_world_xyz_pose{pose}_TEACHER_PRIVATE"]
+                require(len(declared) == 3 and
+                        max(abs(float(x) - float(y)) for x, y in zip(declared, point)) <= 1e-10,
+                        "SOURCE_WORLD_POINT_INDEPENDENT_GEOMETRY_BINDING")
         label = p["measured_edit_signature_agreement"]
         require(label in (0.0, 1.0) and label == float(ops[0] == ops[1])
                 and p["validity_source_physical_both_poses"] is True
@@ -138,6 +165,9 @@ def audit(source_path, source_court_path, target_path, output_path):
         "original_source_sha256": source["original_source_sha256"],
         "source_parent_sha256": PARENT_SHA,
         "source_court_sha256": COURT_SHA,
+        "source_teacher_posed_geometry_sha256": teacher_sha,
+        "source_world_points_recomputed_both_poses": True,
+        "canonical_normalization_bound": False,
         "derived_target_sha256": sha(target_path),
         "counts": c,
         "same_face_different_UV_loci_checked": pos + neg,
@@ -160,6 +190,7 @@ if __name__ == "__main__":
     ap.add_argument("--source-parent", type=Path, required=True)
     ap.add_argument("--source-court", type=Path, required=True)
     ap.add_argument("--candidate", type=Path, required=True)
+    ap.add_argument("--teacher", type=Path, required=True)
     ap.add_argument("--output", type=Path, required=True)
     a = ap.parse_args()
-    audit(a.source_parent, a.source_court, a.candidate, a.output)
+    audit(a.source_parent, a.source_court, a.candidate, a.output, a.teacher)

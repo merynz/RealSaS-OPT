@@ -1,0 +1,106 @@
+name: Corpus370 original graphics K3 consequence evidence ledger and matrix nonpromotion v1
+on:
+  push:
+    branches: [corpus370-operational-drawable-decision-v1]
+    paths:
+      - 'tools/corpus/compile_corpus370_source_graphics_consequence_ledger_v1.py'
+      - 'tools/corpus/court_corpus370_source_graphics_consequence_ledger_v1.py'
+      - 'tests/corpus/test_corpus370_source_graphics_consequence_ledger_v1.py'
+      - '.github/workflows/corpus370-original-graphics-consequence-ledger-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-source-graphics-evidence-ledger-v1-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  typed-consequence-ledger-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Synthetic adversarial typed IR and independent family nonpromotion court
+        run: |
+          set -euo pipefail
+          python -m pip install 'pytest>=8,<10'
+          python -m py_compile tools/corpus/compile_corpus370_source_graphics_consequence_ledger_v1.py tools/corpus/court_corpus370_source_graphics_consequence_ledger_v1.py
+          python -m pytest -q tests/corpus/test_corpus370_source_graphics_consequence_ledger_v1.py
+  original-triceratops-immutable-k3-evidence:
+    needs: typed-consequence-ledger-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin immutable source evidence transport
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/corpus370-graphics-consequence-ledger"
+          mkdir -p "$D"
+          R="$RUNNER_TEMP/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 "https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip" -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v1.75.2-linux-amd64" >> "$GITHUB_PATH"
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$D/source-private-rclone.conf"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+      - name: Reopen exact real original source court and compiled source graph evidence
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/corpus370-graphics-consequence-ledger"
+          export RCLONE_CONFIG="$D/source-private-rclone.conf"
+          ROOT="gdrive:corpus370_preparation_v1"
+          rclone copyto "$ROOT/hosted_operational_shader_palette_v1/TRICERATOPS/42236071677-1/PRIVATE_ORIGINAL_SHADER_CONSTANT_PALETTE_FACTS_V1.json" "$D/palette.json" --checksum --retries 3
+          rclone copyto "$ROOT/hosted_operational_original_k3_source_cycles_v1/TRICERATOPS/42248465757-1/PRIVATE_ORIGINAL_SOURCE_K3_SAME_CYCLES_SAMPLES_V1.json" "$D/renderer.json" --checksum --retries 3
+          rclone copyto "$ROOT/hosted_operational_original_k3_source_cycles_v1/TRICERATOPS/42248465757-1/PRIVATE_INDEPENDENT_ORIGINAL_SOURCE_K3_SAME_INDEX_COURT_V1.json" "$D/court.json" --checksum --retries 3
+          rclone copyto "$ROOT/hosted_operational_drawable_native_support_v1/TRICERATOPS/42231532311-1/PRIVATE_INDEPENDENT_OPERATIONAL_NATIVE_SUPPORT_COURT_V1.json" "$D/native.json" --checksum --retries 3
+          echo "8ff5534e4e8d7549cb9d419e4aea58511e0e042f9113e7d5807a8652a1b76edc  $D/palette.json" | sha256sum --check
+          echo "a93b777191a40f3c11faa9735b042058b9984436bf59f947093b799a83d11b37  $D/renderer.json" | sha256sum --check
+          echo "021786e2bc9bc28d30d717c08eec3d92e64fca1ebc714a451ab85e2988b4882d  $D/court.json" | sha256sum --check
+          echo "4fe3fc6e35f411a77e5aef89b74938726155445494e8531a326472b35a754707  $D/native.json" | sha256sum --check
+          python -m tools.corpus.compile_corpus370_source_graphics_consequence_ledger_v1 --palette "$D/palette.json" --render-manifest "$D/renderer.json" --independent-court "$D/court.json" --native-court "$D/native.json" --truth-contract canonical/CORPUS_TRUTH_AUTHORITY_CONTRACT_V1.json --subject-id corpus_004e16e05b90505ca23c --expected-independent-court-sha256 021786e2bc9bc28d30d717c08eec3d92e64fca1ebc714a451ab85e2988b4882d --output "$D/PRIVATE_SOURCE_GRAPHICS_EDIT_CONSEQUENCE_LEDGER_V1.json"
+          python -m tools.corpus.court_corpus370_source_graphics_consequence_ledger_v1 --ledger "$D/PRIVATE_SOURCE_GRAPHICS_EDIT_CONSEQUENCE_LEDGER_V1.json" --palette "$D/palette.json" --render-manifest "$D/renderer.json" --independent-court "$D/court.json" --native-court "$D/native.json" --truth-contract canonical/CORPUS_TRUTH_AUTHORITY_CONTRACT_V1.json --output "$D/PRIVATE_INDEPENDENT_SOURCE_GRAPHICS_CONSEQUENCE_LEDGER_COURT_V1.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ["RUNNER_TEMP"])/"corpus370-graphics-consequence-ledger"
+          a=json.loads((d/"PRIVATE_SOURCE_GRAPHICS_EDIT_CONSEQUENCE_LEDGER_V1.json").read_text())
+          b=json.loads((d/"PRIVATE_INDEPENDENT_SOURCE_GRAPHICS_CONSEQUENCE_LEDGER_COURT_V1.json").read_text())
+          assert b["status"]=="PASS_SOURCE_CONSEQUENCE_LEDGER_ACCOUNTING__FINAL_AUTHORITY_PENDING"
+          assert a["original_source_sample_totals"]=={
+              "qualified":1179646,"unknown":2,"overlap":14908,
+              "independent_color_operations":3,
+              "per_color_changed_sample_incidents":[4265,157526,7955]}
+          assert set(a["family_matrix_bridge"])=={
+              "APPEARANCE_CAA","VISIBILITY_OCCLUSION","RAY_COMPOSITING","CAUSAL_RESPONSE"}
+          assert all(row["final_family_authority_state"]=="PENDING" and
+              row["training_target_minted"] is False
+              for row in a["family_matrix_bridge"].values())
+          assert a["same_drawable_training_pairs_qualified"]==0
+          assert a["different_drawable_training_pairs_qualified"]==0
+          assert b["training_authorized"] is False
+          print("SOURCE_GRAPHICS_FAMILY_EVIDENCE_ONLY__FINAL_MATRIX_PENDING",flush=True)
+          PY
+      - name: SHA verified private source receipt readback
+        run: |
+          set -euo pipefail
+          umask 077
+          D="$RUNNER_TEMP/corpus370-graphics-consequence-ledger"
+          export RCLONE_CONFIG="$D/source-private-rclone.conf"
+          REMOTE="gdrive:corpus370_preparation_v1/hosted_operational_source_graphics_consequence_ledger_v1/TRICERATOPS/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in PRIVATE_SOURCE_GRAPHICS_EDIT_CONSEQUENCE_LEDGER_V1.json PRIVATE_INDEPENDENT_SOURCE_GRAPHICS_CONSEQUENCE_LEDGER_COURT_V1.json; do
+            rclone copyto "$D/$F" "$REMOTE/$F" --checksum --retries 3
+            rclone cat "$REMOTE/$F" > "$D/readback-$F"
+            cmp "$D/$F" "$D/readback-$F"
+          done
+          echo "INDEPENDENT_SOURCE_GRAPHICS_LEDGER__4_FAMILIES_CANDIDATE_ONLY__0_OWNER_LABELS"

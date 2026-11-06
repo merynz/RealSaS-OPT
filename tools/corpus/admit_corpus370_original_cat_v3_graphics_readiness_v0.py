@@ -57,7 +57,7 @@ def build_from_recomputed_court_v0(court: dict, *, court_sha: str) -> dict:
         "PASS_ORIGINAL_CAT_POSE_UV_EDIT_PHYSICAL_SOURCE__FIXED_SCREEN_CLASS_VIOLATED",
         "PHYSICAL_COURT_NOT_PASS")
     require(court.get("schema") ==
-        "RealSaS.IndependentCatPoseUVTransportSourceCourt.v3",
+        "RealSaS.Corpus370IndependentOriginalCatPoseUVTransportCourt.v3",
         "INDEPENDENT_COURT_SCHEMA_DRIFT")
     require(court.get("source_original_blender_physical_sample_sha256") == RENDER_SHA
         and court.get("source_original_blender_physical_render_manifest_sha256") ==

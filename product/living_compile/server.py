@@ -11,9 +11,29 @@ from pathlib import Path
 from typing import Any
 
 from .authoring import save_user_layer
-from .common import Json, LivingCompileError, bundle_path, finite, within
+from .common import Json, LivingCompileError, bundle_path, finite, load_product, load_proof, within
 from .runtime import runtime_clips, runtime_frame
 from .scene import build_scene
+
+
+def _qualified_original_native_path(root: Path) -> Path:
+    """Export authority applies to path references AND raw .rss blob reads.
+
+    Only existing source-bound PASS packages may be referenced; user-edited
+    layers are never silently treated as a newly qualified ProductRevision.
+    This is not native byte/ABI identity qualification.
+    """
+    layers = root.parent / f"{root.name}.user" / "layers"
+    if layers.is_symlink() or (layers.is_dir() and any(layers.glob("*.json"))):
+        raise LivingCompileError("EXPORT_USER_EDITS_REQUIRE_COMPILER_REQUALIFICATION")
+    product = load_product(root)
+    proof = load_proof(root, product)
+    if proof.get("overall_status") != "PASS":
+        raise LivingCompileError("EXPORT_PRODUCT_PROOF_PASS_REQUIRED")
+    native = within(root, "native/realsas_runtime.rss")
+    if not native.is_file():
+        raise LivingCompileError("proof-gated native .rss package is not present in this output root")
+    return native
 
 
 @dataclass
@@ -55,6 +75,13 @@ class LivingCompileApplication:
             root = bundle_path((query.get("bundle") or [None])[0])
             rel = (query.get("path") or [""])[0]
             path = within(root, rel)
+            # The generic asset endpoint must not bypass the product export gate.
+            # Resolve aliases/symlinks first; any RSS is either the exact
+            # qualified original package or rejected as undeclared.
+            if path.suffix.lower() == ".rss":
+                native = _qualified_original_native_path(root)
+                if path != native:
+                    raise LivingCompileError("EXPORT_UNDECLARED_RSS_BLOB_FORBIDDEN")
             if not path.is_file():
                 raise LivingCompileError(f"bundle asset not found: {rel}")
             return 200, path.read_bytes(), mimetypes.guess_type(path.name)[0] or "application/octet-stream"
@@ -65,9 +92,8 @@ class LivingCompileApplication:
         if method == "POST" and parsed.path == "/api/export":
             if not isinstance(body, dict):
                 raise LivingCompileError("JSON request body required")
-            root = bundle_path(body.get("bundle")); native = root / "native" / "realsas_runtime.rss"
-            if not native.is_file():
-                raise LivingCompileError("proof-gated native .rss package is not present in this output root")
+            root = bundle_path(body.get("bundle"))
+            native = _qualified_original_native_path(root)
             return 200, {"schema_version": "RealSaS.LivingCompileExportRef.v1", "package_path": str(native), "authority": "EXISTING_PROOF_GATED_NATIVE_RUNTIME"}, "application/json"
         if method == "GET" and parsed.path == "/api/project":
             return 200, {

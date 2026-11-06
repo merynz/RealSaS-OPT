@@ -1,0 +1,133 @@
+name: corpus370-v18q-original-source-graph-evidence
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18q-original-source-graph-evidence.yml'
+      - 'tools/corpus/compile_corpus370_v18q_graph_affinity_hypotheses.py'
+      - 'tools/corpus/court_corpus370_v18q_graph_affinity_hypotheses.py'
+      - 'tests/corpus/test_corpus370_v18q_graph_affinity_hypotheses.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18q-original-graph-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v18q-graph-epistemic-redteam:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independently check SAME/DIFFERENT unknown and heldout leakage
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/corpus/compile_corpus370_v18q_graph_affinity_hypotheses.py \
+            tools/corpus/court_corpus370_v18q_graph_affinity_hypotheses.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_v18q_graph_affinity_hypotheses.py
+
+  v18q-private-original-source-graph-ir:
+    needs: v18q-graph-epistemic-redteam
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            v18a_sha: 2801bc94c58349f7561071f2c36d9a30b8d13b3b476aa4430e164f2e5de02c7b
+            v18o_sha: 19d660c5e4a5289d9ddc74048a6aeff9eecd66011fc4a4e3f3f7a8393d0fe239
+            v18p_sha: 503e1b3879acfa15ab03741ae4ed0afd56270707d7fbff55b490c908b8659502
+          - subject: TRICERATOPS
+            v18a_sha: bd7ac5e561af6d4a4bbab8aac555951e5c7e6b97f589a700ef3691edc89ce5c0
+            v18o_sha: fad9481945af06fbdbaf654974dec60f9d708b898755965748143afc07b0c2ee
+            v18p_sha: e5eb1d9078630792015816c1d8f728818d31b116bf3f4e36e30812a63906ca5b
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      V18A_SHA: ${{ matrix.v18a_sha }}
+      V18O_SHA: ${{ matrix.v18o_sha }}
+      V18P_SHA: ${{ matrix.v18p_sha }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify immutable source transport
+        run: |
+          set -euo pipefail
+          VERSION=1.75.2
+          ARCHIVE="$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 \
+            "https://github.com/rclone/rclone/releases/download/v${VERSION}/rclone-v${VERSION}-linux-amd64.zip" \
+            -o "$ARCHIVE"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
+          unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
+          python3 -m pip install --disable-pip-version-check numpy
+      - name: Compile typed original source graph evidence and independent exact-source replay
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/c370-v18q-priv.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          ROOT="gdrive:corpus370_preparation_v1"
+          D="$RUNNER_TEMP/v18q-private"
+          mkdir -p "$D"
+          A="$ROOT/hosted_reactive_stain_v18a/$SUBJECT/42097722762-1"
+          O="$ROOT/hosted_original_source_partition_viability_v18o/$SUBJECT/42193599098-1"
+          P="$ROOT/hosted_source_response_topology_v18p/$SUBJECT/42201517989-1"
+          rclone copyto "$A/PRIVATE_REACTIVE_STAIN_REPORT_V18A.json" "$D/v18a.json" --checksum --retries 3
+          rclone copyto "$A/PRIVATE_REACTIVE_STAIN_CANDIDATE_V18A.npz" "$D/v18a.npz" --checksum --retries 3
+          rclone copyto "$A/PRIVATE_INDEPENDENT_REACTIVE_STAIN_COURT_V18A.json" "$D/v18a-court.json" --checksum --retries 3
+          rclone copyto "$O/PRIVATE_INDEPENDENT_V18O_SOURCE_PARTITION_VIABILITY_COURT.json" "$D/v18o-court.json" --checksum --retries 3
+          rclone copyto "$P/PRIVATE_V18P_ORIGINAL_SOURCE_RESPONSE_TOPOLOGY_COURT.json" "$D/v18p-court.json" --checksum --retries 3
+          test "$(sha256sum "$D/v18a-court.json" | cut -d' ' -f1)" = "$V18A_SHA"
+          test "$(sha256sum "$D/v18o-court.json" | cut -d' ' -f1)" = "$V18O_SHA"
+          test "$(sha256sum "$D/v18p-court.json" | cut -d' ' -f1)" = "$V18P_SHA"
+          python3 -u tools/corpus/compile_corpus370_v18q_graph_affinity_hypotheses.py \
+            --stain-manifest "$D/v18a.json" --stain-npz "$D/v18a.npz" \
+            --stain-court "$D/v18a-court.json" \
+            --v18p-court "$D/v18p-court.json" --v18o-court "$D/v18o-court.json" \
+            --expected-stain-sha "$V18A_SHA" \
+            --expected-v18p-sha "$V18P_SHA" --expected-v18o-sha "$V18O_SHA" \
+            --output "$D/PRIVATE_SOURCE_GRAPH_EVIDENCE_V18Q.json"
+          python3 -u tools/corpus/court_corpus370_v18q_graph_affinity_hypotheses.py \
+            --graph-ir "$D/PRIVATE_SOURCE_GRAPH_EVIDENCE_V18Q.json" \
+            --stain-manifest "$D/v18a.json" --stain-npz "$D/v18a.npz" \
+            --stain-court "$D/v18a-court.json" \
+            --v18p-court "$D/v18p-court.json" --v18o-court "$D/v18o-court.json" \
+            --expected-stain-sha "$V18A_SHA" \
+            --expected-v18p-sha "$V18P_SHA" --expected-v18o-sha "$V18O_SHA" \
+            --output "$D/PRIVATE_INDEPENDENT_V18Q_GRAPH_EVIDENCE_COURT.json"
+          D="$D" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          z=json.loads((d/"PRIVATE_INDEPENDENT_V18Q_GRAPH_EVIDENCE_COURT.json").read_text())
+          assert z["status"]=="ORIGINAL_SOURCE_GRAPH_HYPOTHESES_REPLAYED__NO_OWNER_OR_STUDENT_GOLD"
+          assert z["original_artist_graphic_owner"]=="UNKNOWN"
+          assert z["candidate_graph_cut_outcome_heldout_editor_test"]=="NOT_EVALUATED"
+          assert z["source_original_appearance_boundary"]=="NOT_YET_BOUND"
+          assert z["source_original_occ_order_for_graph"]=="NOT_YET_BOUND"
+          assert all(z[k] is False for k in (
+            "graphics_owner_authorized","iris_training_authorized",
+            "tessa_training_authorized","materialization_authorized",
+            "training_authorized"))
+          print("V18Q_REAL_SOURCE_TYPED_GRAPH_COURT_NO_ARTIST_OWNER",flush=True)
+          PY
+          OUT="$ROOT/hosted_source_typed_graph_v18q/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in PRIVATE_SOURCE_GRAPH_EVIDENCE_V18Q.json PRIVATE_INDEPENDENT_V18Q_GRAPH_EVIDENCE_COURT.json; do
+             rclone copyto "$D/$F" "$OUT/$F" --checksum --retries 3
+             rclone cat "$OUT/$F" > "$D/readback-$F"
+             test "$(sha256sum "$D/$F"|cut -d' ' -f1)" = "$(sha256sum "$D/readback-$F"|cut -d' ' -f1)"
+          done
+          echo "V18Q_ORIGINAL_TYPED_GRAPH_COURT_SHA=$(sha256sum "$D/PRIVATE_INDEPENDENT_V18Q_GRAPH_EVIDENCE_COURT.json"|cut -d' ' -f1)"

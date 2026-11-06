@@ -282,3 +282,28 @@ def test_secondary_substep_budget_and_invalid_fixed_step_fail_closed():
     bad=replace(policy,maximum_substeps=0)
     with pytest.raises(QualificationError,match="SUBSTEP_POLICY_INVALID"):
         _frame(obj,0.,policy=bad)
+
+
+def test_secondary_cannot_hide_failed_primary_grip_orientation():
+    obj=_secondary_objects()
+    mesh,rig,skin,mechanics,policy,prepared=obj
+    anchor=CanonicalAttachmentAnchorIRV2(
+        "GRIP_PROTECTED",
+        parent_canonical_joint_id="BASE",
+        local_P=(0.,0.,0.),
+        source_proposal_anchor_id="fixture:grip",
+        metadata={"local_basis":(
+            (0.,-1.,0.),(1.,0.,0.),(0.,0.,1.)
+        )},
+    )
+    rig=replace(rig,attachment_anchors=(anchor,))
+    with pytest.raises(
+        QualificationError,match="SECONDARY_REQUIRES_QUALIFIED_PRIMARY_MECHANICS"
+    ):
+        evaluate_mechanics_intervention_frame_v1(
+            mesh,rig,skin,mechanics,prepared_skin=prepared,
+            secondary_motion_policy=policy,
+            required_attachment_world_orientations={
+                "GRIP_PROTECTED":I,
+            },
+        )

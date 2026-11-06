@@ -22,7 +22,11 @@ def test_current_sources_do_not_overclaim_an_e2e_product():
     assert report["product_e2e_qualified"] is False
     assert report["product_e2e_proof"] == "NOT_EXECUTED_OR_MEASURED_BY_THIS_AUDIT"
     assert report["v2_candidate"]["motion_source_present"]
-    assert report["v2_candidate"]["missing_model_runtime_sources"] == list(V2_MODEL_MODULES)
+    # This audit must follow the exact source tree: V6 model runtime sources are
+    # now available, but their presence cannot grant model/product authority.
+    assert report["v2_candidate"]["missing_model_runtime_sources"] == [
+        path for path in V2_MODEL_MODULES if not read_snapshot()["source_files"][path]
+    ]
     assert report["runtime_consumption"]["legacy_stage40_43_46_product_route_present"]
     assert report["runtime_consumption"]["frame_baked_render_consumer_present"]
     assert not report["runtime_consumption"]["canonical_motion_v2_render_bridge_verified"]
@@ -103,6 +107,15 @@ def test_premature_mechanics_registration_cannot_forge_v2_parent_versions():
     assert "REGISTERED_EXECUTOR_DISPATCH_MISSING:product.mechanics" not in report["registered_issues"]
     assert "REGISTERED_ARTIFACT_SCHEMA_MISMATCH:product.rig->product.mechanics" in report["registered_issues"]
     assert "REGISTERED_ARTIFACT_SCHEMA_MISMATCH:product.skin->product.mechanics" in report["registered_issues"]
+
+
+def test_missing_v2_runtime_source_remains_an_explicit_product_blocker():
+    snapshot = deepcopy(read_snapshot())
+    snapshot["source_files"][V2_MODEL_MODULES[0]] = False
+    report = evaluate(snapshot)
+    assert V2_MODEL_MODULES[0] in report["v2_candidate"]["missing_model_runtime_sources"]
+    assert "V2_RIG_SKIN_MODEL_RUNTIME_SOURCE_DEPENDENCIES_MISSING" in report["product_completion_blockers"]
+    assert report["product_e2e_qualified"] is False
 
 
 def test_contract_edge_recipes_cover_known_steady_product_prefix():

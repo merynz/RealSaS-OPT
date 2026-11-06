@@ -167,6 +167,7 @@ def court(source,source_sha,source_policy_path,camera_path,palette_path,
     require(set(material_keys)==expected_keys,"ORIGINAL_SOURCE_SHADER_RGB_CHANGED")
     source_rays=original_source_rays(camera,colors)
     receipts=[]
+    collateral_samples=[]
     sample_totals={k:{"selected":0,"unselected":0,"selected_unchanged":0,
                        "collateral":0,"max_alpha":0.0} for k in range(len(colors))}
     for vi in VIEWS:
@@ -190,6 +191,45 @@ def court(source,source_sha,source_policy_path,camera_path,palette_path,
                                   obj[s["y"],s["x"],3])>=0.995]
             claim=judge_edit_rgba(base,obj,valid_samples,idx,
                                   min_selected_samples=0,min_unselected_samples=0)
+            # Investigate every failing collateral claim without weakening the
+            # frozen source-ray interior locality criterion or its tolerances.
+            for point in valid_samples:
+                if point["color_index"]==idx:
+                    continue
+                x,y=point["x"],point["y"]
+                magnitude=float(np.max(np.abs(
+                    base[y,x,:3]-obj[y,x,:3])))
+                if magnitude<=3.0/255.0:
+                    continue
+                c=camera["cameras"][vi]
+                origin=Vector(tuple(map(float,c["origin"])))
+                right=Vector(tuple(map(float,c["right"])))
+                up=Vector(tuple(map(float,c["screen_up"])))
+                fw=Vector(tuple(map(float,c["forward"])))
+                fw.normalize()
+                extent=float(c["half_extent"])
+                deps=bpy.context.evaluated_depsgraph_get()
+                probe=[]
+                for dx,dy in ((0,0),(-1.75,0),(-0.75,0),(-0.25,0),
+                              (0.25,0),(0.75,0),(1.75,0),
+                              (0,-1.75),(0,-0.75),(0,-0.25),
+                              (0,0.25),(0,0.75),(0,1.75)):
+                    rx=2.0*((x+0.5+dx)/RES)-1.0
+                    ry=1.0-2.0*((y+0.5+dy)/RES)
+                    color=ray_color(
+                        deps,origin+extent*rx*right+extent*ry*up,
+                        fw,{tuple(k):j for j,k in enumerate(colors)})
+                    probe.append({"offset_px":[dx,dy],"source_ray_color_index":color})
+                collateral_samples.append({
+                    "view_index":vi,
+                    "edited_color_index":idx,
+                    "pixel_xy_top_left":[x,y],
+                    "source_center_palette_index":point["color_index"],
+                    "observed_rgb_difference_max":magnitude,
+                    "baseline_rgba":[float(v) for v in base[y,x]],
+                    "edited_rgba":[float(v) for v in obj[y,x]],
+                    "original_source_subpixel_ray_stencil":probe,
+                })
             sums=sample_totals[idx]
             sums["selected"]+=claim["selected_count"]
             sums["unselected"]+=claim["unselected_count"]
@@ -233,6 +273,7 @@ def court(source,source_sha,source_policy_path,camera_path,palette_path,
         "original_source_ray_view_coverage":{k:v["coverage"] for k,v in source_rays.items()},
         "edit_color_totals":sample_totals,
         "failures":failures,
+        "source_private_collateral_diagnostics":collateral_samples,
         "source_raw_lit_shading_parity":"NOT_EVALUATED",
         "all_pixels_physical_locality":"NOT_CLAIMED__ONLY_INTERIOR_SAMPLES_AND_GLOBAL_ALPHA",
         "original_art_drawable_ownership":"UNKNOWN",

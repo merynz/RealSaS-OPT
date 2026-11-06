@@ -1,0 +1,78 @@
+{
+  "schema": "RealSaS.MechanicsTemporalSecondaryAttachmentCourt.v1",
+  "date_utc": "2026-11-06",
+  "status": "PASS_ISOLATED_SYNTHETIC_RUNTIME_RESEARCH_ONLY",
+  "repository": "merynz/RealSaS-OPT",
+  "pull_request": 353,
+  "tested_commit_sha": "668bbd44eaa3d26898be8864fe1bfb198587c44b",
+  "github_actions": {
+    "run_id": 42284413119,
+    "workflow": "mechanics-generic-closure-v1",
+    "job_id": 128121423566,
+    "conclusion": "success",
+    "focused_pytest_passed": 94,
+    "ownership_firewall": "PASS_MECHANICS_RUNTIME_RESEARCH_OWNERSHIP_FIREWALL"
+  },
+  "research_implementations": {
+    "secondary_motion": "compiler/realsas_compiler_core/mechanics_secondary_motion_v1.py",
+    "attachment_frames": "compiler/realsas_compiler_core/mechanics_attachment_frames_v1.py",
+    "multi_ik_hysteresis_singularity": "compiler/realsas_compiler_core/mechanics_multigoal_solver_v1.py",
+    "live_runtime": "compiler/realsas_compiler_core/mechanics_live_runtime_v1.py",
+    "negative_courts": [
+      "tests/compiler/test_mechanics_secondary_motion_v1.py",
+      "tests/compiler/test_mechanics_attachment_frames_v1.py",
+      "tests/compiler/test_mechanics_long_branching_v1.py",
+      "tests/compiler/test_mechanics_live_multigoal_integration_v1.py"
+    ]
+  },
+  "verified_behavior": {
+    "secondary_declared_only": true,
+    "secondary_runs_after_qualified_primary_ik_and_attachment": true,
+    "secondary_cannot_touch_primary_ik_or_attachment_owner": true,
+    "secondary_segment_length_error_upper_bound_fixture": 1e-9,
+    "secondary_cone_bound_rad_fixture": 0.85,
+    "secondary_parent_child_simultaneous_internal_60hz_step": true,
+    "partition_equivalence_test": "1×1/30s vs 2×1/60s with constant primary target; joint positions & bases within absolute 1e-11",
+    "policy_change_requires_reset": true,
+    "policy_sha256_bindings": true,
+    "bounded_maximum_substeps": true,
+    "scene_seek_fast_forward_implemented": false,
+    "hysteresis_retain_previous_independent_span": true,
+    "hysteresis_unjustified_control_switches_on_seven_frame_fixture": 0,
+    "hysteresis_rank_or_span_dependent_switching_allowed": true,
+    "hysteresis_frames_with_reused_prior_basis_min_tested": 4,
+    "singularity_recovery": "BOUNDED_DETERMINISTIC_SEEDS_V1 opt-in; <=12 deterministic starts at declared rotational DOFs; actual analytically reachable collapsed-chain radial fixture rescued; unreachable fixture remains FAIL",
+    "singularity_global_convergence_claimed": false,
+    "attachment_orientation_eval": "declared local 3x3 grip basis tracked through primary joint world basis and position",
+    "attachment_orientation_wrong_target_returns": "FAIL_ATTACHMENT_ORIENTATION_TARGET",
+    "attachment_orientation_ik_solver_implemented": false,
+    "unknown_grip_orientation_source_authority_inferred": false,
+    "secondary_blocks_unqualified_primary_attachment": true
+  },
+  "source_authority_firewall": {
+    "IRIS_TESSA_training_changed": false,
+    "Corpus370_truth_changed": false,
+    "Graphics_compiler_changed": false,
+    "AXIS_MIRA_training_changed": false,
+    "source_physical_stiffness_damping_mass_inferred": false,
+    "orientation_grip_source_truth_minted": false,
+    "production_60fps_claimed": false,
+    "source_to_canonical_binding_proven": false,
+    "blind_unseen_generalization_claimed": false,
+    "model_learning_authorized": false
+  },
+  "spine_design_references": [
+    "https://esotericsoftware.com/spine-physics-constraints",
+    "https://esotericsoftware.com/spine-constraints#Order",
+    "https://esotericsoftware.com/spine-runtime-skeletons",
+    "https://esotericsoftware.com/spine-transform-constraints"
+  ],
+  "source_copying": "No Spine runtime source copied, design practices translated independently",
+  "open_research": [
+    "orientation IK integrated in nonlinear multi-goal Jacobian and full-body attachment grip",
+    "true friction/contact physics and collision",
+    "secondary chain interactions and per-character physically measured parameters",
+    "arbitrary timeline seek replay, constraint priority and fixed-step accumulator",
+    "multi-morphology source-bound proof and full graphics/render performance"
+  ]
+}

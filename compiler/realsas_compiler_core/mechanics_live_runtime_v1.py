@@ -41,6 +41,7 @@ class MechanicsInterventionFrameV1:
     max_rest_vertex_displacement: float
     status: str
     failures: tuple[str, ...] = ()
+    joint_parameter_solution_rad: tuple[tuple[str, str, float], ...] = ()
     metadata: dict = field(default_factory=dict)
 
 
@@ -151,6 +152,7 @@ def evaluate_mechanics_intervention_frame_v1(
     max_allowed_segment_strain: float = 1.0e-3,
     solver_mode: str = "FABRIK_V1",
     pinned_contact_control_ids: tuple[str, ...] = (),
+    initial_parameters_rad: tuple[tuple[str, str, float], ...] | None = None,
 ) -> MechanicsInterventionFrameV1:
     _strict_lineage(mesh, rig, skin, mechanics)
     limit_residual = _finite_tolerance(
@@ -188,18 +190,23 @@ def evaluate_mechanics_intervention_frame_v1(
     controls = tuple(by_id[row.canonical_control_id] for row in rig.controls
                      if row.canonical_control_id in by_id)
     multi_status: str | None = None
+    solved_parameters: tuple[tuple[str, str, float], ...] = ()
     if solver_mode == "FABRIK_V1":
         if pinned_contact_control_ids:
             raise QualificationError("LIVE_MECHANICS_PINS_REQUIRE_MULTI_GOAL")
+        if initial_parameters_rad is not None:
+            raise QualificationError("LIVE_MECHANICS_WARM_START_REQUIRES_MULTI_GOAL")
         pose = solve_control_pose_v1(rig, controls)
     elif solver_mode == "DECLARED_MULTI_GOAL_V1":
         from .mechanics_multigoal_solver_v1 import solve_declared_multi_goal_v1
         solved = solve_declared_multi_goal_v1(
             rig, controls, pinned_contact_control_ids=pinned_contact_control_ids,
             goal_tolerance=limit_residual,
+            initial_parameters_rad=initial_parameters_rad,
         )
         pose = solved.pose
         multi_status = solved.status
+        solved_parameters = solved.parameters_rad
     else:
         raise QualificationError("LIVE_MECHANICS_SOLVER_MODE_UNSUPPORTED")
     deformed = deform_mesh_lbs_v1(mesh, rig, skin, pose)
@@ -225,6 +232,7 @@ def evaluate_mechanics_intervention_frame_v1(
         status=("FAIL_MECHANICS_BEHAVIORAL_COURT" if failures
                 else "PASS_MECHANICS_BEHAVIORAL_COURT"),
         failures=tuple(failures),
+        joint_parameter_solution_rad=solved_parameters,
         metadata={
             "authority": "MECHANICS_RUNTIME_DIAGNOSTIC_ONLY",
             "control_synthesis_performed": False,
@@ -235,6 +243,7 @@ def evaluate_mechanics_intervention_frame_v1(
             "solver_mode": solver_mode,
             "pinned_contact_control_ids": tuple(pinned_contact_control_ids),
             "multi_goal_status": multi_status,
+            "warm_start_used": initial_parameters_rad is not None,
         },
     )
 
@@ -263,6 +272,8 @@ def evaluate_mechanics_intervention_sequence_v1(
     maximum_acceleration = 0.0
     prev_velocity: dict[str, np.ndarray] | None = None
     prev_dt: float | None = None
+    prev_solution: tuple[tuple[str, str, float], ...] | None = None
+    warm_start_frame_count = 0
     for index, step in enumerate(steps):
         frame = evaluate_mechanics_intervention_frame_v1(
             mesh, rig, skin, mechanics, overrides=step.overrides,
@@ -271,6 +282,15 @@ def evaluate_mechanics_intervention_sequence_v1(
             max_allowed_segment_strain=max_allowed_segment_strain,
             solver_mode=solver_mode,
             pinned_contact_control_ids=pinned_contact_control_ids,
+            initial_parameters_rad=prev_solution if solver_mode == "DECLARED_MULTI_GOAL_V1" else None,
+        )
+        if prev_solution is not None and solver_mode == "DECLARED_MULTI_GOAL_V1":
+            warm_start_frame_count += 1
+        prev_solution = (
+            frame.joint_parameter_solution_rad
+            if frame.status == "PASS_MECHANICS_BEHAVIORAL_COURT"
+               and solver_mode == "DECLARED_MULTI_GOAL_V1"
+            else None
         )
         if frames:
             dt = float(step.time_seconds - steps[index - 1].time_seconds)
@@ -304,7 +324,9 @@ def evaluate_mechanics_intervention_sequence_v1(
         ) else "FAIL_MECHANICS_SEQUENCE_DIAGNOSTIC"),
         metadata={
             "authority": "MECHANICS_RUNTIME_DIAGNOSTIC_ONLY",
-            "all_samples_are_stateless_overrides": True,
+            "all_samples_are_stateless_overrides": solver_mode != "DECLARED_MULTI_GOAL_V1",
+            "control_overrides_are_transient": True,
+            "multi_goal_warm_start_frame_count": warm_start_frame_count,
             "motion_authority_unchanged": True,
             "training_authorized": False,
             "solver_mode": solver_mode,

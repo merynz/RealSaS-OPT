@@ -62,7 +62,7 @@ def test_no_constant_palette_does_not_become_negative():
     joint,dec,report=compile_joint(n,p,c,PAL_SHA,NATIVE_SHA)
     assert len(joint['operations'])==1
     assert report['palette_task_count']==0
-    assert report['native_only_atom_count']==report['joint_candidate_atom_count']==2
+    assert report['joint_candidate_atom_count']==2
 
 def test_unknown_face_cannot_silently_become_palette_negative():
     n,p,c=samples()

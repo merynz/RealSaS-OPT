@@ -86,6 +86,7 @@ def solve_declared_multi_goal_v1(
     control_transforms: Sequence[ControlTransformIRV1] = (),
     *,
     pinned_contact_control_ids: Sequence[str] = (),
+    pinned_world_targets: Mapping[str, Sequence[float]] | None = None,
     goal_tolerance: float = 1e-3,
     regularization: float = 1e-4,
     max_nfev: int = 200,
@@ -127,6 +128,23 @@ def solve_declared_multi_goal_v1(
         raise QualificationError("MULTIGOAL_PIN_UNKNOWN_OR_DUPLICATE")
     if set(pins) & set(authored):
         raise QualificationError("MULTIGOAL_PIN_HAS_OVERRIDE")
+    # A declared contact may be held at a previously observed WORLD position,
+    # rather than silently snapping to a control's rest position each frame.
+    # Exact pin-set binding avoids treating a visual pick as an implicit pin.
+    if pinned_world_targets is None:
+        anchor_map: dict[str, np.ndarray] = {}
+    else:
+        if not isinstance(pinned_world_targets, Mapping) or set(pinned_world_targets) != set(pins):
+            raise QualificationError("MULTIGOAL_PIN_WORLD_TARGET_BINDING_DRIFT")
+        anchor_map = {}
+        for cid in pins:
+            try:
+                p = np.asarray(pinned_world_targets[cid], dtype=np.float64)
+            except (ValueError, TypeError) as exc:
+                raise QualificationError("MULTIGOAL_PIN_WORLD_TARGET_INVALID") from exc
+            if p.shape != (3,) or not np.isfinite(p).all():
+                raise QualificationError("MULTIGOAL_PIN_WORLD_TARGET_INVALID")
+            anchor_map[cid] = p.copy()
     if any(controls[cid].control_kind != "IK_EFFECTOR" for cid in pins):
         raise QualificationError("MULTIGOAL_PIN_NOT_DECLARED_IK_EFFECTOR")
     for cid, row in authored.items():
@@ -234,7 +252,12 @@ def solve_declared_multi_goal_v1(
         if cid not in controls or controls[cid].control_kind != "IK_EFFECTOR":
             raise QualificationError("MULTIGOAL_IK_CONTROL_NOT_DECLARED")
         kind = "PIN" if cid in pins else "DRAG"
-        target = np.asarray(control_world[cid][0], dtype=np.float64)
+        target = (
+            anchor_map[cid]
+            if cid in anchor_map else np.asarray(control_world[cid][0], dtype=np.float64)
+        )
+        if target.shape != (3,) or not np.isfinite(target).all():
+            raise QualificationError("MULTIGOAL_GOAL_WORLD_TARGET_INVALID")
         goals.append((constraint.canonical_constraint_id, cid, chain[-1], target, kind))
     if not goals or len(goals) > maximum_goals:
         raise QualificationError("MULTIGOAL_GOAL_RESOURCE_BOUND")
@@ -393,6 +416,8 @@ def solve_declared_multi_goal_v1(
             "declared_angle_limit_count": limits_present,
             "unbounded_rotation_chart_count": len(param_schema) - limits_present,
             "pinned_contact_count": len(pins),
+            "explicit_world_contact_anchor_count": len(anchor_map),
+            "contact_anchors_are_declared_control_references": True,
             "warm_start_supplied": initial_parameters_rad is not None,
             "compiler_rig_synthesis_performed": False,
             "training_authority_minted": False,

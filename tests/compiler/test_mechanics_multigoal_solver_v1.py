@@ -152,3 +152,46 @@ def test_rest_pose_is_exact_and_source_independent():
         assert np.allclose(j.solved_P, original.P, atol=1e-8)
     assert result.metadata["training_authority_minted"] is False
     assert result.metadata["product_mechanics_release_minted"] is False
+
+
+def test_explicit_warm_start_preserves_solution_and_parameter_identity():
+    rig = _branched_rig()
+    first = solve_declared_multi_goal_v1(
+        rig,
+        (ControlTransformIRV1("A_HANDLE", translation=(-0.4, 0.8, 0.)),),
+        pinned_contact_control_ids=("B_HANDLE",),
+        regularization=1e-9, goal_tolerance=1e-3, max_nfev=400,
+    )
+    assert first.status == "PASS_MULTIGOAL_BEHAVIORAL_COURT"
+    again = solve_declared_multi_goal_v1(
+        rig,
+        (ControlTransformIRV1("A_HANDLE", translation=(-0.4, 0.8, 0.)),),
+        pinned_contact_control_ids=("B_HANDLE",),
+        regularization=1e-9, goal_tolerance=1e-3, max_nfev=400,
+        initial_parameters_rad=first.parameters_rad,
+    )
+    assert again.status == "PASS_MULTIGOAL_BEHAVIORAL_COURT"
+    assert again.metadata["warm_start_supplied"] is True
+    assert again.max_drag_residual < 1e-3
+    assert again.max_pin_residual < 1e-3
+    assert again.solver_evaluations <= first.solver_evaluations
+
+
+def test_warm_start_cannot_change_dof_schema_or_violate_known_limits():
+    rig = _branched_rig(root_dofs=(), right_limit=(-0.1, 0.1))
+    base = solve_declared_multi_goal_v1(rig)
+    params = base.parameters_rad
+    assert params
+    with pytest.raises(QualificationError, match="WARM_START_SCHEMA_DRIFT"):
+        solve_declared_multi_goal_v1(rig, initial_parameters_rad=params[:-1])
+    bad = list(params)
+    jid, axis, value = bad[0]
+    bad[0] = (jid, "TX", value)
+    with pytest.raises(QualificationError, match="WARM_START_SCHEMA_DRIFT"):
+        solve_declared_multi_goal_v1(rig, initial_parameters_rad=bad)
+    bad[0] = (jid, axis, float("nan"))
+    with pytest.raises(QualificationError, match="WARM_START_OUT_OF_BOUNDS"):
+        solve_declared_multi_goal_v1(rig, initial_parameters_rad=bad)
+    bad[0] = (jid, axis, 20.0)
+    with pytest.raises(QualificationError, match="WARM_START_OUT_OF_BOUNDS"):
+        solve_declared_multi_goal_v1(rig, initial_parameters_rad=bad)

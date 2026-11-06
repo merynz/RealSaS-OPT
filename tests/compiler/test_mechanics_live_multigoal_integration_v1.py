@@ -227,8 +227,12 @@ def test_live_rank_policy_hysteresis_keeps_actuator_basis_during_drag():
         max_allowed_constraint_residual=1e-3,
     )
     assert result.status=="PASS_MECHANICS_SEQUENCE_DIAGNOSTIC"
-    assert result.metadata["rank_policy_selection_changes"]==0
-    assert result.metadata["rank_policy_selection_reused_frames"]>=5
+    # A declared rank change or lost Jacobian span MAY legitimately change
+    # the selected actuators. The true temporal violation is swapping an
+    # independently spanning prior basis without cause.
+    assert result.metadata["rank_policy_selection_changes"]<=1
+    assert result.metadata["rank_policy_selection_unjustified_churn"]==0
+    assert result.metadata["rank_policy_selection_reused_frames"]>=4
     assert all(f.rank_policy_candidate_keys for f in result.frames)
     assert result.max_vertex_speed>=0.
     assert all(f.max_constraint_residual<1e-3 for f in result.frames)

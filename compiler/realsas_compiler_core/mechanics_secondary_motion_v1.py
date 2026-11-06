@@ -39,6 +39,8 @@ class SecondaryMotionPolicyV1:
     control_program_hash: str
     chains: tuple[SecondaryChainPolicyV1, ...]
     maximum_dt_seconds: float = 0.20
+    fixed_step_seconds: float = 1.0 / 60.0
+    maximum_substeps: int = 32
     schema_version: str = "RealSaS.SecondaryMotionPolicy.v1"
 
 
@@ -94,6 +96,12 @@ def _params(rig: CanonicalRigIRV2, policy: SecondaryMotionPolicyV1):
     if (not math.isfinite(float(policy.maximum_dt_seconds))
             or not 0 < policy.maximum_dt_seconds <= 0.25):
         raise QualificationError("SECONDARY_DT_RESOURCE_POLICY_INVALID")
+    if (not math.isfinite(float(policy.fixed_step_seconds))
+            or policy.fixed_step_seconds <= 0
+            or policy.fixed_step_seconds > policy.maximum_dt_seconds
+            or not isinstance(policy.maximum_substeps, int)
+            or not 1 <= policy.maximum_substeps <= 64):
+        raise QualificationError("SECONDARY_SUBSTEP_POLICY_INVALID")
     if not policy.chains or len(policy.chains) > 32:
         raise QualificationError("SECONDARY_CHAIN_RESOURCE_POLICY_INVALID")
     joint_by = {j.canonical_joint_id: j for j in rig.joints}
@@ -179,6 +187,8 @@ def step_secondary_motion_v1(
             raise QualificationError("SECONDARY_INIT_REQUIRES_NO_DT")
         previous={}
         step_count=0
+        integration_steps=0
+        prior_tick_count=0
     else:
         if (previous_state.rig_lineage_hash != rig.rig_lineage_hash or
                 previous_state.control_program_hash != rig.control_program_hash or
@@ -196,6 +206,14 @@ def step_secondary_motion_v1(
         if len(previous)!=len(previous_state.joints) or set(previous)!=set(owned):
             raise QualificationError("SECONDARY_STATE_JOINT_COVERAGE_DRIFT")
         step_count=previous_state.step_count+1
+        integration_steps=max(1,int(math.ceil(
+            (dt/policy.fixed_step_seconds)-1e-10
+        )))
+        if integration_steps>policy.maximum_substeps:
+            raise QualificationError("SECONDARY_SUBSTEP_RESOURCE_BOUND")
+        prior_tick_count=int(previous_state.metadata.get("simulation_tick_count",0))
+        if prior_tick_count<0 or prior_tick_count>1000000000:
+            raise QualificationError("SECONDARY_STATE_TICK_COUNT_INVALID")
     result_positions=dict(primary_positions)
     state_out:dict[str,SecondaryJointStateV1]={}
     rotations:dict[str,np.ndarray]={}
@@ -221,26 +239,36 @@ def step_secondary_motion_v1(
                 # Exact critically damped homogeneous response to a fixed
                 # target over dt. Target moves across steps, never inferred
                 # from unobserved source forces.
-                error=old_position-target
-                decay=math.exp(-omega*dt)
-                coefficient=old_velocity+omega*error
-                unconstrained=target+(error+coefficient*dt)*decay
-                radial=unconstrained-parent
-                if np.linalg.norm(radial)<=1e-10:
-                    radial=native_segment.copy()
-                direction=_unit(radial,"SECONDARY_RADIAL_DEGENERATE")
+                # Independent fixed-step integration of the bounded position
+                # response. For a fixed primary target, one 1/30s frame and
+                # two 1/60s frames follow identical 1/60s physics ticks.
+                # No hidden variable-step lumping or arbitrary frame-rate
+                # dependence is introduced within the declared substep grid.
+                sub_dt=dt/integration_steps
+                new_position=old_position.copy()
+                new_velocity=old_velocity.copy()
                 forward=native_segment/length
-                cos_angle=float(np.clip(np.dot(direction,forward),-1.,1.))
-                angle=math.acos(cos_angle)
-                if angle>cfg.max_deviation_rad:
-                    transverse=direction-cos_angle*forward
-                    transverse=_unit(transverse,"SECONDARY_CONE_DEGENERATE")
-                    direction=(math.cos(cfg.max_deviation_rad)*forward
-                               +math.sin(cfg.max_deviation_rad)*transverse)
-                new_position=parent+length*direction
-                new_velocity=(new_position-old_position)/dt
-                if not np.isfinite(new_velocity).all():
-                    raise QualificationError("SECONDARY_VELOCITY_NONFINITE")
+                for _ in range(integration_steps):
+                    error=new_position-target
+                    decay=math.exp(-omega*sub_dt)
+                    coefficient=new_velocity+omega*error
+                    unconstrained=target+(error+coefficient*sub_dt)*decay
+                    radial=unconstrained-parent
+                    if np.linalg.norm(radial)<=1e-10:
+                        radial=native_segment.copy()
+                    direction=_unit(radial,"SECONDARY_RADIAL_DEGENERATE")
+                    cos_angle=float(np.clip(np.dot(direction,forward),-1.,1.))
+                    angle=math.acos(cos_angle)
+                    if angle>cfg.max_deviation_rad:
+                        transverse=direction-cos_angle*forward
+                        transverse=_unit(transverse,"SECONDARY_CONE_DEGENERATE")
+                        direction=(math.cos(cfg.max_deviation_rad)*forward
+                                   +math.sin(cfg.max_deviation_rad)*transverse)
+                    updated=parent+length*direction
+                    new_velocity=(updated-new_position)/sub_dt
+                    if not np.isfinite(new_velocity).all():
+                        raise QualificationError("SECONDARY_VELOCITY_NONFINITE")
+                    new_position=updated
             segment=new_position-parent
             max_segment_error=max(max_segment_error,
                                   abs(float(np.linalg.norm(segment))-length))
@@ -267,7 +295,10 @@ def step_secondary_motion_v1(
         joints=tuple(state_out[jid] for jid in owned),
         step_count=step_count,
         metadata={"authority":"SECONDARY_DETERMINISTIC_RUNTIME_STATE_ONLY",
-                  "physical_truth_minted":False,"training_authorized":False},
+                  "physical_truth_minted":False,"training_authorized":False,
+                  "simulation_tick_count":prior_tick_count+integration_steps,
+                  "integration_substeps_this_frame":integration_steps,
+                  "fixed_step_seconds":policy.fixed_step_seconds},
     )
     return SecondaryMotionStepResultV1(
         pose=replace(primary_pose,joints=rows,metadata={
@@ -287,6 +318,9 @@ def step_secondary_motion_v1(
         metadata={"rig_or_skin_mutated":False,
                   "primary_ik_or_contact_controls_mutated":False,
                   "secondary_policy_is_not_source_truth":True,
+                  "physics_step_policy":"BOUNDED_FIXED_SUBSTEPS_V1",
+                  "simulation_substeps":integration_steps,
+                  "reset_is_explicit_previous_state_none":True,
                   "collision_cloth_force_simulation_claimed":False,
                   "graphics_authority_claimed":False},
     )

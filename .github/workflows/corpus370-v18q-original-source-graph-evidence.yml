@@ -127,7 +127,21 @@ jobs:
           OUT="$ROOT/hosted_source_typed_graph_v18q/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           for F in PRIVATE_SOURCE_GRAPH_EVIDENCE_V18Q.json PRIVATE_INDEPENDENT_V18Q_GRAPH_EVIDENCE_COURT.json; do
              rclone copyto "$D/$F" "$OUT/$F" --checksum --retries 3
-             rclone cat "$OUT/$F" > "$D/readback-$F"
-             test "$(sha256sum "$D/$F"|cut -d' ' -f1)" = "$(sha256sum "$D/readback-$F"|cut -d' ' -f1)"
+             # Drive's newly created nested folders can be temporarily
+             # unreadable right after a successful upload; never relax SHA.
+             # Re-open the *same exact bytes* with bounded readback retries.
+             GOT=0
+             for attempt in 1 2 3 4 5 6 7 8; do
+                if rclone cat "$OUT/$F" > "$D/readback-$F" 2>/dev/null && test -s "$D/readback-$F"; then
+                   if test "$(sha256sum "$D/$F"|cut -d' ' -f1)" = "$(sha256sum "$D/readback-$F"|cut -d' ' -f1)"; then
+                      GOT=1
+                      break
+                   fi
+                   echo "V18Q_ORIGINAL_PRIVATE_SOURCE_READBACK_SHA_DRIFT" >&2
+                   exit 3
+                fi
+                sleep 4
+             done
+             test "$GOT" = 1
           done
           echo "V18Q_ORIGINAL_TYPED_GRAPH_COURT_SHA=$(sha256sum "$D/PRIVATE_INDEPENDENT_V18Q_GRAPH_EVIDENCE_COURT.json"|cut -d' ' -f1)"

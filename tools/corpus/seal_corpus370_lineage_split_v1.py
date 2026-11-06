@@ -88,6 +88,22 @@ def lineage_maps(lineage: dict) -> tuple[dict[str, dict], dict[str, str]]:
             seen.add(sid)
     require(seen == set(subject_to_lineage),
             "CORPUS370_SPLIT_LINEAGE_RECIPROCAL_COVERAGE")
+    # Source-byte identity is a hard lineage link, not merely a publisher
+    # stratification hint. Never allow an identical source SHA in two lineages:
+    # that could put the exact same teacher asset in TRAIN and unseen.
+    source_sha_owner = {}
+    for lineage_id, group in groups.items():
+        hashes = group.get("source_sha256")
+        require(isinstance(hashes, list) and hashes
+                and all(isinstance(h, str) and len(h) == 64
+                        and all(c in "0123456789abcdef" for c in h)
+                        for h in hashes)
+                and len(hashes) == len(set(hashes)),
+                "CORPUS370_SPLIT_LINEAGE_SOURCE_SHA_CENSUS")
+        for source_sha in hashes:
+            previous = source_sha_owner.setdefault(source_sha, lineage_id)
+            require(previous == lineage_id,
+                    "CORPUS370_SPLIT_SOURCE_SHA_CROSS_LINEAGE_LEAKAGE")
     return groups, subject_to_lineage
 
 

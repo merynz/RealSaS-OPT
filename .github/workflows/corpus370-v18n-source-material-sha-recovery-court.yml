@@ -1,0 +1,136 @@
+name: corpus370-v18n-source-material-sha-recovery-court
+
+on:
+  push:
+    branches: [corpus370-v18b-reactive-stain-source-edit-court-v1]
+    paths:
+      - '.github/workflows/corpus370-v18n-source-material-sha-recovery-court.yml'
+      - 'tools/corpus/recover_corpus370_v18n_original_material_status_receipt.py'
+      - 'tools/corpus/court_corpus370_v18n_original_material_sample_replay.py'
+      - 'tests/corpus/test_corpus370_v18n_status_only_recovery.py'
+      - 'tests/corpus/test_corpus370_v18n_original_material_sample_replay.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v18n-source-material-recovery-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v18n-source-manifest-immutability-and-source-appearance-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate only producer status may change and opacity/UV source is fail-closed
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/corpus/recover_corpus370_v18n_original_material_status_receipt.py \
+            tools/corpus/court_corpus370_v18n_original_material_sample_replay.py
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_v18n_status_only_recovery.py \
+            tests/corpus/test_corpus370_v18n_original_material_sample_replay.py
+
+  v18n-independent-original-material-source-court:
+    needs: v18n-source-manifest-immutability-and-source-appearance-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - subject: CAT
+            expected_original_v18n_manifest_sha: 79e3044bd030dea0788388573df7e75687a0454bd06bae7f61b4e43808c1eca6
+            expected_v18m_court_sha: a39879e4558139ca2f418c1b4f33c581f0f6ced9c7fa4a89b5faed425266e889
+          - subject: TRICERATOPS
+            expected_original_v18n_manifest_sha: 7530def09abace3936ca9715460e78157254970850c733aa7e0f9dbd37ab2913
+            expected_v18m_court_sha: 3981af638b632a512b3fde4ac6a75d5d0e2d8a831a81f5becb017af26233ac99
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      EXPECTED_V18N_RAW_MANIFEST_SHA: ${{ matrix.expected_original_v18n_manifest_sha }}
+      EXPECTED_V18M_COURT_SHA: ${{ matrix.expected_v18m_court_sha }}
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact SHA-verified portable Drive transport
+        run: |
+          set -euo pipefail
+          VERSION=1.75.2
+          ARCHIVE="$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64.zip"
+          curl -fLsS --retry 3 --connect-timeout 12 --max-time 180 \
+            "https://github.com/rclone/rclone/releases/download/v${VERSION}/rclone-v${VERSION}-linux-amd64.zip" \
+            -o "$ARCHIVE"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $ARCHIVE" | sha256sum --check
+          unzip -q "$ARCHIVE" -d "$RUNNER_TEMP"
+          test -x "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64/rclone"
+          echo "$RUNNER_TEMP/rclone-v${VERSION}-linux-amd64" >> "$GITHUB_PATH"
+          python3 -m pip install --disable-pip-version-check numpy
+      - name: Reopen immutable original Cycles material source and independently score without rerender
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          export RCLONE_CONFIG="$RUNNER_TEMP/v18n-source-only-court.conf"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          D="$RUNNER_TEMP/v18n-original-source-material"
+          mkdir -p "$D"
+          ROOT="gdrive:corpus370_preparation_v1"
+          N="$ROOT/hosted_cycles_source_material_v18n/$SUBJECT/42137097177-1"
+          M="$ROOT/hosted_cycles_source_depth_v18m/$SUBJECT/42134142993-1"
+          C="$ROOT/hosted_cycles_source_depth_recovery_v18m/$SUBJECT/42135271057-1"
+          rclone copyto "$N/PRIVATE_V18N_ORIGINAL_SOURCE_MATERIAL_CYCLES_SAMPLES.json" "$D/original-v18n.json" --checksum --retries 3
+          rclone copyto "$N/PRIVATE_V18N_ORIGINAL_SOURCE_MATERIAL_CYCLES_SAMPLES.npz" "$D/original-v18n.npz" --checksum --retries 3
+          rclone copyto "$M/PRIVATE_V18M_ORIGINAL_SOURCE_CYCLES_VIEW_DEPTH.json" "$D/v18m.json" --checksum --retries 3
+          rclone copyto "$M/PRIVATE_V18M_ORIGINAL_SOURCE_CYCLES_VIEW_DEPTH.npz" "$D/v18m.npz" --checksum --retries 3
+          rclone copyto "$C/PRIVATE_INDEPENDENT_V18M_SOURCE_DEPTH_COMPOSITOR_COURT.json" "$D/v18m-court.json" --checksum --retries 3
+          test "$(sha256sum "$D/original-v18n.json" | cut -d' ' -f1)" = "$EXPECTED_V18N_RAW_MANIFEST_SHA"
+          test "$(sha256sum "$D/v18m-court.json" | cut -d' ' -f1)" = "$EXPECTED_V18M_COURT_SHA"
+
+          python3 -u tools/corpus/recover_corpus370_v18n_original_material_status_receipt.py \
+            --source-manifest "$D/original-v18n.json" \
+            --source-rgba "$D/original-v18n.npz" \
+            --expected-original-source-manifest-sha "$EXPECTED_V18N_RAW_MANIFEST_SHA" \
+            --canonical-manifest "$D/PRIVATE_CANONICAL_V18N_SOURCE_MATERIAL_MANIFEST.json" \
+            --receipt "$D/PRIVATE_STATUS_ONLY_V18N_SOURCE_RECOVERY_RECEIPT.json"
+          python3 -u tools/corpus/court_corpus370_v18n_original_material_sample_replay.py \
+            --v18n-manifest "$D/PRIVATE_CANONICAL_V18N_SOURCE_MATERIAL_MANIFEST.json" \
+            --v18n-npz "$D/original-v18n.npz" \
+            --v18m-manifest "$D/v18m.json" --v18m-npz "$D/v18m.npz" \
+            --v18m-court "$D/v18m-court.json" \
+            --expected-v18m-court-sha "$EXPECTED_V18M_COURT_SHA" \
+            --output "$D/PRIVATE_INDEPENDENT_V18N_SOURCE_MATERIAL_COURT.json"
+          D="$D" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          c=json.loads((d/"PRIVATE_INDEPENDENT_V18N_SOURCE_MATERIAL_COURT.json").read_text())
+          receipt=json.loads((d/"PRIVATE_STATUS_ONLY_V18N_SOURCE_RECOVERY_RECEIPT.json").read_text())
+          assert c["status"]=="SOURCE_MATERIAL_POLICY_RGBA_AND_DEPTH_ORDER_EVALUATED__ARTIST_OWNER_UNKNOWN"
+          assert c["source_native_full_is_scoring_only_not_predictor_input"] is True
+          assert c["source_soup_full_is_scoring_only_not_predictor_input"] is True
+          assert len(c["original_source_camera_reports"])==4
+          assert sum(v["source_cycles_per_sample_instances"] for v in
+            c["original_source_camera_reports"])==4*8*192*192
+          assert receipt["only_field_changed"]=="status"
+          assert c["original_untransformed_artist_material_policy_qualified"] is False
+          assert all(c[k] is False for k in ("graphics_owner_authorized",
+            "iris_training_authorized","tessa_training_authorized",
+            "materialization_authorized","training_authorized"))
+          print("V18N_ORIGINAL_SOURCE_MATERIAL_RGBA_COURTED__NO_DRAWABLE_OR_STUDENT",flush=True)
+          PY
+
+          OUT="gdrive:corpus370_preparation_v1/hosted_cycles_source_material_recovery_v18n/$SUBJECT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in PRIVATE_STATUS_ONLY_V18N_SOURCE_RECOVERY_RECEIPT.json PRIVATE_CANONICAL_V18N_SOURCE_MATERIAL_MANIFEST.json PRIVATE_INDEPENDENT_V18N_SOURCE_MATERIAL_COURT.json; do
+            rclone copyto "$D/$F" "$OUT/$F" --checksum --retries 3
+            rclone cat "$OUT/$F" > "$D/readback-$F"
+            test "$(sha256sum "$D/$F"|cut -d' ' -f1)" = "$(sha256sum "$D/readback-$F"|cut -d' ' -f1)"
+          done
+          echo "V18N_ORIGINAL_MATERIAL_INDEPENDENT_SOURCE_COURT_SHA=$(sha256sum "$D/PRIVATE_INDEPENDENT_V18N_SOURCE_MATERIAL_COURT.json"|cut -d' ' -f1)"

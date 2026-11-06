@@ -12,6 +12,10 @@ import re
 
 from .hashing import content_sha256
 from .types import QualificationError
+from .graphics_source_readiness_v0 import (
+    GraphicsAdmittedArtifactV0, GraphicsSourceClaimV0, GraphicsSourceReadinessV0,
+    audit_graphics_source_readiness_v0,
+)
 
 SHA = re.compile(r"^[0-9a-f]{64}$")
 KNOWN_OPERATIONS = frozenset({
@@ -137,7 +141,10 @@ class SynthesisResultV0:
     policy: RepresentationPolicyV0
     candidates: tuple[RepresentationCandidateV0, ...]
     capability_states: dict[str, str]
-    executable_candidate_ids: tuple[str, ...]
+    reference_executor_capability_states: dict[str, str]
+    source_evidence_readiness: GraphicsSourceReadinessV0
+    executable_candidate_ids: tuple[str, ...]  # reference-executable ONLY
+    source_qualified_candidate_ids: tuple[str, ...] = ()
     physical_source_qualification: str = "UNKNOWN"
     measured_runtime_cost: str = "UNMEASURED_COST"
     source_artist_ownership: str = "UNKNOWN"
@@ -186,11 +193,15 @@ def synthesize_operational_representations_v0(
     evidence: SourceGraphicsEvidenceV0,
     contract: PuppetCapabilityContractV0,
     policy: RepresentationPolicyV0 = RepresentationPolicyV0(),
+    *,
+    source_claims: tuple[GraphicsSourceClaimV0, ...] = (),
+    independently_admitted_artifacts: dict[str, GraphicsAdmittedArtifactV0] | None = None,
 ) -> SynthesisResultV0:
-    """Produce strong layouts without reading any source target render.
+    """Produce layouts and evidence obligations without reading target images.
 
-    Capability states cover *implemented reference executor* operations only.
-    No candidate receives physical source qualification from this function.
+    An implemented CPU reference operation never equals independently qualified
+    source-runtime parity. Final capability states remain UNKNOWN here. An
+    independent physical court is REQUIRED for any future SATISFIED verdict.
     """
     evidence.validate()
     contract.validate()
@@ -224,15 +235,27 @@ def synthesize_operational_representations_v0(
         validate_candidate_v0(value, face_count=evidence.face_count,
                               address_count=contract.independent_edit_address_count)
         candidates.append(value)
-    states = {
-        op: ("SATISFIED" if op in IMPLEMENTED_OPERATIONS else "UNKNOWN")
+    readiness = audit_graphics_source_readiness_v0(
+        source_graphics_binding_hash=evidence.source_graphics_binding_hash,
+        required_operations=contract.required_operations,
+        claims=tuple(source_claims),
+        admitted_artifacts=independently_admitted_artifacts,
+    )
+    executor_states = {
+        op: ("SUPPORTED_BY_REFERENCE_EXECUTOR" if op in IMPLEMENTED_OPERATIONS
+             else "NOT_IMPLEMENTED_IN_REFERENCE")
         for op in contract.required_operations
     }
-    # UNKNOWN is not waived: a partial executor is not a qualified full puppet.
+    # Reference executable != physical source matched; deliberately no PASS
+    # and no source-validated candidates until a separate source parity court.
     executable = tuple(c.candidate_id for c in candidates) if (
-        all(state == "SATISFIED" for state in states.values())) else ()
+        all(op in IMPLEMENTED_OPERATIONS for op in contract.required_operations)
+    ) else ()
     return SynthesisResultV0(
         evidence=evidence, contract=contract, policy=policy,
-        candidates=tuple(candidates), capability_states=states,
+        candidates=tuple(candidates),
+        capability_states={op: "UNKNOWN" for op in contract.required_operations},
+        reference_executor_capability_states=executor_states,
+        source_evidence_readiness=readiness,
         executable_candidate_ids=executable,
     )

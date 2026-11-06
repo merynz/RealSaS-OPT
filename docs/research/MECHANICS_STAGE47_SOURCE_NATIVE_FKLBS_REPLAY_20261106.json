@@ -1,0 +1,57 @@
+{
+  "schema": "RealSaS.MechanicsSourceNativeFKLBSResearchReceipt.v1",
+  "observed_at_utc": "2026-11-06",
+  "status": "PASS_SOURCE_NATIVE_ANALYTICAL_FK_LBS_ONLY",
+  "subject_key": "truth139_fff1396de9c37b2bab05",
+  "source_kind": "TRUTH139_STAGE47_MEASURED_BLENDER_SOURCE_WORLD",
+  "input": {
+    "teacher_scene_sha256": "87eacdb230f19feae5b0d3e15b67d504fe40908f703254faa4a4d29e9b117b6e",
+    "geometry_response_sha256": "c13e837029ab80c78c989c01698d31ae10446c18fa8907e1a8840c33ca6c75fb",
+    "source_sha256": "d7c57a4ad6444f9c845ecdc13782a7430fcb377594a00f719cd2d37b9434b6de",
+    "teacher_drive_url": "https://drive.google.com/file/d/1GtinNxBwE-bUzWoHJpkNiIsVNO9UBQoj/view",
+    "measured_npz_drive_url": "https://drive.google.com/file/d/1nTYZPFOffuBMDuLqeub7Z-UaQQNE_QTr/view"
+  },
+  "structure": {
+    "source_native_bone_count": 43,
+    "source_native_control_parameter_count": 129,
+    "source_vertices": 3266,
+    "source_weight_records": 6571,
+    "measured_interventions": 774,
+    "positive_negative_pairs": 387,
+    "nonzero_consequence_actions": 738,
+    "all_source_weight_rows_covered": true
+  },
+  "method": {
+    "reference_impl": "independent analytical descendant-influence-mass source-world FK/LBS; for each one-bone rest-local rotation, world rigid transform = M_rest * R_local * inverse(M_rest), applied to vertices with summed descendant-bone skin mass",
+    "measured_reference": "Blender Stage47 measured isolated_position arrays, derived at exact admitted source rest",
+    "validation_scope": "SOURCE_NATIVE_AUTHORING_DEFORMATION_ONLY",
+    "source_vs_compiler_model_comparison_performed": false,
+    "source_to_canonical_structure_mapping_proven": false,
+    "actual_product_deformer_with_real_source_arrays_measured": false,
+    "actual_product_deformer_with_synthetic_oracle_pose_ci_test": true
+  },
+  "metrics": {
+    "source_world_max_vertex_error_all_774": 0.0000012653386341165218,
+    "source_world_max_coordinate_abs_error_all_774": 0.000001208113546091738,
+    "source_world_mean_per_action_mean_vertex_error": 2.8984418433364496e-8,
+    "source_world_median_per_action_max_vertex_error": 4.5500758189607664e-7,
+    "source_world_p95_per_action_max_vertex_error": 8.358747185028643e-7,
+    "action_count_below_1e_5_max_vertex_error": 774,
+    "action_count_below_1e_6_max_vertex_error": 767,
+    "check_source_scale_and_conversion": true,
+    "action_world_error_threshold_research": 0.0000025
+  },
+  "test_sources": {
+    "measured_local_script": "Standalone exact-hash read-only source-array analysis; migration to versioned tools/mechanics/compare_stage47_source_fk_lbs_v1.py in PR #353",
+    "unit_suite": "tests/mechanics/test_stage47_source_fk_lbs_comparison_v1.py, includes actual RealSaS deform_mesh_lbs_v1 on synthetic oracle-only CanonicalRig/Skin fixtures",
+    "github_pr": "https://github.com/merynz/RealSaS-OPT/pull/353"
+  },
+  "authority_firewall": {
+    "source_teacher_privileged_identifiers_student_input_allowed": false,
+    "source_to_product_binding_qualified": false,
+    "training_authorized": false,
+    "blind_unseen_eligibility": false,
+    "graphics_authority": false,
+    "modelrelease_authorized": false
+  }
+}

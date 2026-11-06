@@ -8,6 +8,7 @@ on:
       - 'compiler/realsas_compiler_core/mechanics_multigoal_solver_v1.py'
       - 'tests/compiler/test_mechanics_control_solver_v1.py'
       - 'tests/compiler/test_mechanics_multigoal_solver_v1.py'
+      - 'tests/compiler/test_mechanics_live_multigoal_integration_v1.py'
       - 'tests/compiler/test_control_motion_ik_integration_v1.py'
       - 'docs/research/MECHANICS_GENERIC_CLOSURE_V1_20261106.md'
       - '.github/workflows/mechanics_generic_closure_v1.yml'
@@ -32,7 +33,7 @@ jobs:
           python -m py_compile compiler/realsas_compiler_core/mechanics_control_solver_v1.py compiler/realsas_compiler_core/mechanics_live_runtime_v1.py compiler/realsas_compiler_core/mechanics_multigoal_solver_v1.py compiler/realsas_compiler_core/control_motion_runtime_v2.py
       - name: Existing and new Mechanics behavior regression
         run: |
-          pytest -q tests/compiler/test_mechanics_control_solver_v1.py tests/compiler/test_control_motion_ik_integration_v1.py tests/compiler/test_mechanics_multigoal_solver_v1.py
+          pytest -q tests/compiler/test_mechanics_control_solver_v1.py tests/compiler/test_control_motion_ik_integration_v1.py tests/compiler/test_mechanics_multigoal_solver_v1.py tests/compiler/test_mechanics_live_multigoal_integration_v1.py
       - name: Research ownership firewall
         run: |
           python - <<'PY'

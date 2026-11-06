@@ -5,6 +5,8 @@ on:
     paths:
       - 'tools/corpus/court_original_source_face_uv_alignment_v0.py'
       - 'tests/corpus/test_original_source_face_uv_alignment_v0.py'
+      - 'tests/corpus/test_source_uv_inventory_v0.py'
+      - 'tools/corpus/qualify_source_uv_inventory_v0.py'
       - '.github/workflows/source-face-uv-alignment-v0.yml'
   workflow_dispatch:
 permissions:
@@ -23,4 +25,4 @@ jobs:
       - name: Exercise index/metric mapping authority and abstention controls
         run: |
           python -m py_compile tools/corpus/court_original_source_face_uv_alignment_v0.py
-          PYTHONPATH=. python -m pytest -q tests/corpus/test_original_source_face_uv_alignment_v0.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_original_source_face_uv_alignment_v0.py tests/corpus/test_source_uv_inventory_v0.py

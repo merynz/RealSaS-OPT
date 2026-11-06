@@ -1,0 +1,111 @@
+name: Original Cat V3 physical-source vs compiled reference puppet parity v0
+on:
+  push:
+    branches: [research/original-cat-puppet-physical-parity-v0]
+    paths:
+      - 'tools/corpus/compile_original_cat_v3_puppet_reference_predictions_v0.py'
+      - 'tools/corpus/court_original_cat_v3_puppet_reference_parity_v0.py'
+      - '.github/workflows/original-cat-puppet-parity-physical-v0.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: original-cat-v3-puppet-parity-v0-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  immutable-source-to-puppet-physical-comparison:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile without source targets, then independently court original Cycles
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m pip install 'numpy>=1.26,<3' 'scipy>=1.11,<2' 'pillow>=10,<13'
+          D="$RUNNER_TEMP/cat-v3-reference-physical-v0"
+          ROOT="gdrive:corpus370_preparation_v1"
+          mkdir -p "$D/inputs" "$D/compiled" "$D/court"
+          export RCLONE_CONFIG="$D/rclone.conf"
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          R="$D/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$D"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+
+          # No source target pixels are fetched until AFTER prediction archive.
+          rclone copyto "$ROOT/hosted_operational_drawable_inputs_v1/42220981274-1/ORIGINAL_TWO_SOURCE_INPUTS.zip" "$D/inputs.zip" --checksum --retries 3
+          echo "e3c758b0a4dc9bd3e7f889e94366fa7ff40517deb15e68a202d525b62de13948  $D/inputs.zip" | sha256sum --check
+          NATIVE="$ROOT/hosted_native_temporal_pilot_v1/41915393652-1/subjects/corpus_000ca1ae51f9582fde9e"
+          rclone copyto "$NATIVE/teacher.npz" "$D/inputs/teacher.npz" --checksum --retries 3
+          echo "c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603  $D/inputs/teacher.npz" | sha256sum --check
+          rclone copyto "$ROOT/hosted_operational_cat_source_uv_plan_v2/CAT/42260446130-1/PRIVATE_CAT_ORIGINAL_SOURCE_UV_EDIT_PLAN_V2.json" "$D/inputs/plan.json" --checksum --retries 3
+          echo "8be8fccde3d9cc97f7ba452fd50c1a9f4ebea2e34da590a22d30872b2b0f497b  $D/inputs/plan.json" | sha256sum --check
+
+          UV="$ROOT/hosted_graphics_source_face_uv_alignment_v0/CAT/42284306947-1"
+          rclone copyto "$UV/PRIVATE_CAT_NATIVE_TEACHER_GLTF_UV_ALIGNMENT_V0.json" "$D/inputs/alignment.json" --checksum --retries 3
+          rclone copyto "$UV/PRIVATE_CAT_NATIVE_FACE_UV_V0.npz" "$D/inputs/face-uv.npz" --checksum --retries 3
+
+          D="$D" python - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          with zipfile.ZipFile(d/"inputs.zip") as z:
+              manifest=json.loads(z.read("PRIVATE_TRANSPORT_MANIFEST.json"))
+              assert manifest["parent_manifest_sha256"]=="cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172"
+              expected=[
+                ("/Models/GLB format/Textures/colormap.png","texture.png","2f6d0032e51c2d49b13b8e689d59eb39aa3ee6c32f2a1851213e11fc7593177d"),
+                ("/corpus_000ca1ae51f9582fde9e/camera_bundle.json","camera.json","300b935a47379f6c44d4b4356554d1c32a86ca3b732a62405c73da9e0ec6adf0"),
+              ]
+              for suffix,name,sha in expected:
+                  matches=[r for r in manifest["files"] if r["relative_path"].endswith(suffix)]
+                  assert len(matches)==1
+                  row=matches[0]
+                  payload=z.read("objects/"+row["sha256"])
+                  assert len(payload)==row["size_bytes"] and hashlib.sha256(payload).hexdigest()==row["sha256"]==sha
+                  (d/"inputs"/name).write_bytes(payload)
+          alignment=json.loads((d/"inputs/alignment.json").read_text())
+          assert alignment["source_to_teacher_face_uv_binding"]=="VERIFIED_NATIVE_BLENDER_FACE_ORDER_AND_RAW_GLTF_UV_MULTISET"
+          assert alignment["source_uv_comparison"]["matched"] is True
+          print("ORIGINAL_SOURCE_FACE_UV_WITNESS_VERIFIED__TARGET_IMAGES_NOT_DOWNLOADED",flush=True)
+          PY
+
+          python -m tools.corpus.compile_original_cat_v3_puppet_reference_predictions_v0 \
+            --root "$D/inputs" --output "$D/compiled"
+
+          DEST="$ROOT/hosted_original_cat_v3_puppet_physical_parity_v0/CAT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in "$D/compiled/"*.npz "$D/compiled/"*.json; do
+            rclone copyto "$F" "$DEST/$(basename "$F")" --checksum --retries 3
+            rclone cat "$DEST/$(basename "$F")" > "$D/check-$(basename "$F")"
+            cmp "$F" "$D/check-$(basename "$F")"
+          done
+          echo "REFERENCE_PREDICTIONS_IMMUTABLY_UPLOADED_BEFORE_ORIGINAL_TARGET_FETCH"
+
+          # Independent physical source arrays enter ONLY this court directory.
+          SOURCE="$ROOT/hosted_drawable_capability_pose_transport_v3/CAT/42273572984-1"
+          for F in PRIVATE_CAT_NATIVE_POSE_UV_EDIT_CYCLES_SAMPLES_V3.npz PRIVATE_CAT_NATIVE_POSE_UV_EDIT_CYCLES_V3.json PRIVATE_INDEPENDENT_CAT_POSE_UV_TRANSPORT_V3.json; do
+            rclone copyto "$SOURCE/$F" "$D/court/$F" --checksum --retries 3
+          done
+          echo "b2bb4fa9fc0b777bb8418aebc729123616b774b55eeb215ba17651e7f3448e0d  $D/court/PRIVATE_CAT_NATIVE_POSE_UV_EDIT_CYCLES_SAMPLES_V3.npz" | sha256sum --check
+          echo "89dcb4d516e5579e766b19bd2d25eb31cbfaaa64f27ce34632405d99ce6874bc  $D/court/PRIVATE_CAT_NATIVE_POSE_UV_EDIT_CYCLES_V3.json" | sha256sum --check
+          echo "0171e9ec836d7b3c44ec64abcc59f712ebd33a87c2ad4edf6188976dc08e272c  $D/court/PRIVATE_INDEPENDENT_CAT_POSE_UV_TRANSPORT_V3.json" | sha256sum --check
+          cp "$D/compiled/"*.npz "$D/court/"
+          cp "$D/compiled/"*.json "$D/court/"
+          python -m tools.corpus.court_original_cat_v3_puppet_reference_parity_v0 \
+            --root "$D/court" --output "$D/court/PRIVATE_INDEPENDENT_CAT_V3_PUPPET_REFERENCE_PHYSICAL_PARITY_V0.json"
+          F="$D/court/PRIVATE_INDEPENDENT_CAT_V3_PUPPET_REFERENCE_PHYSICAL_PARITY_V0.json"
+          rclone copyto "$F" "$DEST/$(basename "$F")" --checksum --retries 3
+          rclone cat "$DEST/$(basename "$F")" > "$D/court-readback.json"
+          cmp "$F" "$D/court-readback.json"
+          sha256sum "$F"
+          echo "FINISHED_SOURCE_PHYSICAL_COMPARISON__STATUS_IN_REPORT__NO_TRAINING_ADMISSION"

@@ -80,3 +80,96 @@ def test_v6_operator_schema_rejects_unproven_and_illformed_runtime_behavior():
             operator_id="IK", input_control_count=1,
             output_joint_count=2, has_chain=True, parameters={"p0": float("nan")}
         )
+
+
+def _qualified_synthetic_carrier_skin(mesh, rig):
+    from compiler.realsas_compiler_core.carrier_skin_v1 import (
+        QualifiedCarrierSkinIR, QualifiedCarrierSkinRow
+    )
+    from compiler.realsas_compiler_core.hashing import content_sha256
+
+    root_joint_id=rig.joints[0].canonical_joint_id
+    rows=tuple(
+        QualifiedCarrierSkinRow(
+            carrier_vertex_id=v.source_candidate_vertex_id,
+            influences=((root_joint_id,1.0),),
+            simplex_residual_before=0.0,
+            correction_l1=0.0,
+        ) for v in mesh.vertices
+    )
+    draft=QualifiedCarrierSkinIR(
+        rows=rows,
+        carrier_evidence_hash=mesh.carrier_evidence_hash,
+        carrier_topology_hash=mesh.carrier_topology_hash,
+        carrier_geometry_hash=mesh.carrier_geometry_hash,
+        skeleton_binding_hash=rig.deform_structure_hash,
+        qualification_report={"status":"PASS_DIRECT_CARRIER_SKIN",
+                              "test_fixture_only_not_teacher_evidence":True},
+        skin_lineage_hash="",
+    )
+    sealed_hash=content_sha256({
+        "carrier_evidence_hash":draft.carrier_evidence_hash,
+        "carrier_topology_hash":draft.carrier_topology_hash,
+        "carrier_geometry_hash":draft.carrier_geometry_hash,
+        "skeleton_binding_hash":draft.skeleton_binding_hash,
+        "rows":[row.to_dict() for row in draft.rows],
+        "qualification_report":draft.qualification_report,
+        "metadata":draft.metadata,
+    })
+    return replace(draft,skin_lineage_hash=sealed_hash)
+
+
+def _real_rig_fixture():
+    from compiler.realsas_compiler_core.canonical_rig_ir_v2 import mint_canonical_rig_v2
+    from compiler.realsas_compiler_core.rig_program_ir_v1 import qualify_rig_program_v1
+    from tests.compiler.test_control_ready_rig_v2 import _mesh,_proposal
+    mesh=_mesh()
+    rig=mint_canonical_rig_v2(
+        mesh,qualified_program=qualify_rig_program_v1(_proposal(mesh))
+    )
+    return mesh,rig
+
+
+def test_main_v6_rig_to_skin_mint_preserves_mesh_and_deform_authority():
+    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import mint_canonical_skin_v2
+    mesh,rig=_real_rig_fixture()
+    qualified=_qualified_synthetic_carrier_skin(mesh,rig)
+    skin=mint_canonical_skin_v2(
+        mesh,rig,qualified_skin=qualified,
+        skin_code_proposal_hash="a"*64,
+        skin_codec_architecture_id="fixture-codec-no-model-release",
+        skin_codec_checkpoint_hash="b"*64,
+    )
+    assert skin.mesh_lineage_hash==mesh.mesh_lineage_hash
+    assert skin.deform_structure_hash==rig.deform_structure_hash
+    assert skin.carrier_skin_qualification_hash==qualified.skin_lineage_hash
+    assert all(len(row.influences)==1 for row in skin.rows)
+    assert skin.metadata["skin_code_decode_is_model_owned"] is True
+    assert skin.metadata["control_program_mutation_invalidates_skin"] is False
+    assert canonical_skin_from_dict_v2(skin.to_dict())==skin
+
+
+def test_main_skin_mint_rejects_valid_hash_but_wrong_skeleton_binding():
+    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import mint_canonical_skin_v2
+    mesh,rig=_real_rig_fixture()
+    qualified=_qualified_synthetic_carrier_skin(mesh,rig)
+    # A re-sealed and internally consistent source receipt still MUST NOT be
+    # allowed to bind a different deform-structure identity.
+    drifted=replace(qualified,skeleton_binding_hash="f"*64)
+    from compiler.realsas_compiler_core.hashing import content_sha256
+    drifted=replace(drifted,skin_lineage_hash=content_sha256({
+        "carrier_evidence_hash":drifted.carrier_evidence_hash,
+        "carrier_topology_hash":drifted.carrier_topology_hash,
+        "carrier_geometry_hash":drifted.carrier_geometry_hash,
+        "skeleton_binding_hash":drifted.skeleton_binding_hash,
+        "rows":[row.to_dict() for row in drifted.rows],
+        "qualification_report":drifted.qualification_report,
+        "metadata":drifted.metadata,
+    }))
+    with pytest.raises(QualificationError,match="DEFORM_STRUCTURE_BINDING_DRIFT"):
+        mint_canonical_skin_v2(
+            mesh,rig,qualified_skin=drifted,
+            skin_code_proposal_hash="a"*64,
+            skin_codec_architecture_id="fixture-codec-no-model-release",
+            skin_codec_checkpoint_hash="b"*64,
+        )

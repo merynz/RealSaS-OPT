@@ -81,6 +81,10 @@ def audit(source_path, source_court_path, target_path, output_path, teacher_path
             and target.get("source_pose_ordinals") == [0, 14]
             and target.get("original_camera_views") == [0, 2, 4, 6]
             and target.get("source_evidence_valid") is True
+            and target.get("unconditioned_intrinsic_static_relation_label_valid") is False
+            and target.get("student_intervention_conditioning_required") is True
+            and target.get("declared_intervention_grammar") ==
+                "SOURCE_ARBITRARY_UV_RECTANGLE_RGB_INVERT__THREE_FIXED_CONTROLS"
             and target.get("source_teacher_posed_geometry_sha256") == teacher_sha
             and target.get("source_teacher_query_point_per_locus_both_poses") is True
             and target.get("query_xyz_coordinate_frame") ==

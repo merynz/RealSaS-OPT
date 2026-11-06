@@ -1,0 +1,130 @@
+name: Corpus370 V18s original Cat Relations/Graphics source UV world truth court
+on:
+  push:
+    branches: [research/relations-graphics-original-uv-spatial-truth-v18s]
+    paths:
+      - 'tools/corpus/compile_corpus370_v18s_original_uv_world_relations.py'
+      - 'tools/corpus/court_corpus370_v18s_original_uv_world_relations.py'
+      - 'tests/corpus/test_corpus370_v18s_original_uv_world_relations.py'
+      - '.github/workflows/corpus370-v18s-original-relations-graphics-source-truth.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-v18s-original-truth-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  source-relation-algebra-redteam:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test original relation source semantics, no artist grouping
+        run: |
+          python -m pip install 'numpy>=1.26,<3' 'pytest>=8,<10'
+          python -m py_compile tools/corpus/compile_corpus370_v18s_original_uv_world_relations.py tools/corpus/court_corpus370_v18s_original_uv_world_relations.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus370_v18s_original_uv_world_relations.py
+  cat-original-private-source-court:
+    needs: source-relation-algebra-redteam
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Exact original Cat 684-face 260-island SHA source parents, remeasure and independently court
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m pip install 'numpy>=1.26,<3'
+          D="$RUNNER_TEMP/v18s-original-cat-relations-graphics"
+          mkdir -p "$D/input" "$D/out"
+          export RCLONE_CONFIG="$D/rclone.conf"
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          unset DRIVE_CONFIG_B64
+          R="$D/rclone-v1.75.2-linux-amd64.zip"
+          curl -fLsS --retry 3 --max-time 180 https://github.com/rclone/rclone/releases/download/v1.75.2/rclone-v1.75.2-linux-amd64.zip -o "$R"
+          echo "349ac8fba6ff65d6247043f1750cdcb518ec5d500ef91463a10d37c0ccdf3702  $R" | sha256sum --check
+          unzip -q "$R" -d "$D"
+          export PATH="$D/rclone-v1.75.2-linux-amd64:$PATH"
+          ROOT="gdrive:corpus370_preparation_v1"
+          Q="$ROOT/hosted_source_typed_graph_v18q/CAT/42203223280-1"
+          R18="$ROOT/hosted_source_world_graph_v18r/CAT/42205390304-1"
+          A="$ROOT/hosted_reactive_stain_v18a/CAT/42097722762-1"
+          V13="$ROOT/hosted_native_carrier_private_v13b/42040199925-1/0"
+          NATIVE="$ROOT/hosted_native_temporal_pilot_v1/41915393652-1/subjects/corpus_000ca1ae51f9582fde9e"
+          UV="$ROOT/hosted_graphics_source_face_uv_alignment_v0/CAT/42284306947-1"
+          rclone copyto "$R18/PRIVATE_V18R_SOURCE_WORLD_GRAPH_EVIDENCE.json" "$D/input/v18r.json" --checksum --retries 3
+          rclone copyto "$R18/PRIVATE_INDEPENDENT_V18R_SOURCE_WORLD_COURT.json" "$D/input/v18r-court.json" --checksum --retries 3
+          rclone copyto "$Q/PRIVATE_SOURCE_GRAPH_EVIDENCE_V18Q.json" "$D/input/v18q.json" --checksum --retries 3
+          rclone copyto "$Q/PRIVATE_INDEPENDENT_V18Q_GRAPH_EVIDENCE_COURT.json" "$D/input/v18q-court.json" --checksum --retries 3
+          rclone copyto "$A/PRIVATE_REACTIVE_STAIN_CANDIDATE_V18A.npz" "$D/input/v18a.npz" --checksum --retries 3
+          rclone copyto "$V13/PRIVATE_ORIGINAL_ANON_ACTUATOR_MANIFEST_V13B.npz" "$D/input/v13b.npz" --checksum --retries 3
+          rclone copyto "$NATIVE/teacher.npz" "$D/input/teacher.npz" --checksum --retries 3
+          rclone copyto "$UV/PRIVATE_CAT_NATIVE_FACE_UV_V0.npz" "$D/input/face-uv.npz" --checksum --retries 3
+          rclone copyto "$UV/PRIVATE_CAT_NATIVE_TEACHER_GLTF_UV_ALIGNMENT_V0.json" "$D/input/uv-alignment.json" --checksum --retries 3
+          cat > "$D/pins.json" <<'JSON'
+          {
+            "v18r": "16a4302389c7ede0d3cb8aac0e85c8cc9d8e4fcaac4e209252a8903b16d7a900",
+            "v18r_court": "b07740d8024441e16727e6dc344512b4566f31e066c99e0e2f3edf3eff25acba",
+            "v18q": "ad88115d2cf0ffc00d241da30218a60589c25983e5d1df5d8391f07089bce0d2",
+            "v18q_court": "14971fef75168d20866a4b807789930ceb5ab16ba0dca306fafe85d402879061",
+            "v18a": "0b788d26ab89aec65ba8925148496c1242f368705c72fab4789a8f63da439905",
+            "v13b": "845160bb55d3c0e1f251c14f507aeed157c0cbf675514d0e1407e66c16d90293",
+            "teacher": "c2792c8efb36c4ccdf9178c6b933351b50364bbd28707e9365a3c115db00d603",
+            "uv": "7f3afdc4f0f848de3aa06bda2220151427d352368a0f235ca09d5d96f7834787",
+            "uv_binding": "b966a3793c682cb06ec70341e659aabbded9343ace3d645c08643de40f2799d7"
+          }
+          JSON
+          python -m tools.corpus.compile_corpus370_v18s_original_uv_world_relations \
+            --inputs "$D/input" --pins "$D/pins.json" \
+            --output "$D/out/PRIVATE_SOURCE_UV_WORLD_MECHANICAL_RELATION_EVIDENCE_V18S.json"
+          python -m tools.corpus.court_corpus370_v18s_original_uv_world_relations \
+            --inputs "$D/input" --pins "$D/pins.json" \
+            --report "$D/out/PRIVATE_SOURCE_UV_WORLD_MECHANICAL_RELATION_EVIDENCE_V18S.json" \
+            --output "$D/out/PRIVATE_INDEPENDENT_SOURCE_UV_WORLD_RELATION_COURT_V18S.json"
+          D="$D" python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ["D"])
+          c=json.loads((d/"out/PRIVATE_INDEPENDENT_SOURCE_UV_WORLD_RELATION_COURT_V18S.json").read_text())
+          assert c["status"]=="ORIGINAL_SOURCE_UV_WORLD_MECHANICS_RELATIONS_RECOMPUTED__OWNER_UNKNOWN"
+          assert c["source_original_face_count"]==684
+          assert c["source_original_island_count"]==260
+          assert c["source_local_evidence_recount"]["all"]==424
+          assert c["source_local_evidence_recount"]["uv_continuous"]==424
+          assert c["source_local_evidence_recount"]["axis_divergent_but_uv_continuous"]==59
+          assert c["source_lifted_evidence_recount"]["retrieval_candidates_total"]==1150
+          assert c["source_lifted_evidence_recount"]["same_vertex_pair_world_near_both_fit"]==497
+          assert c["source_lifted_evidence_recount"]["world_fit_near_with_coincident_uv"]==480
+          assert c["source_lifted_evidence_recount"]["world_fit_near_without_coincident_uv"]==17
+          assert c["source_artist_drawable_owner"]=="UNKNOWN"
+          assert all(c[k] is False for k in (
+            "graphics_owner_authorized","iris_training_authorized",
+            "tessa_training_authorized","training_authorized",
+            "materialization_authorized"))
+          print("V18S_SOURCE_RELATIONS_GRAPHICS_UV__REAL_ORIGINAL_COURT_PASS",flush=True)
+          PY
+          DEST="$ROOT/hosted_relations_graphics_uv_world_truth_v18s/CAT/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          for F in "$D/out/"*.json; do
+            rclone copyto "$F" "$DEST/$(basename "$F")" --checksum --retries 3
+            for ATTEMPT in 1 2 3 4 5 6; do
+              if rclone cat "$DEST/$(basename "$F")" > "$D/readback-$(basename "$F")" 2>/dev/null && test -s "$D/readback-$(basename "$F")"; then
+                cmp "$F" "$D/readback-$(basename "$F")"
+                break
+              fi
+              sleep 4
+            done
+            cmp "$F" "$D/readback-$(basename "$F")"
+            sha256sum "$F"
+          done
+          echo "V18S_TWO_INDEPENDENT_SOURCE_EVIDENCE_ARTIFACTS_SHA_READBACK_PASS__NO_OWNER_TRAINING_ADMISSION"

@@ -53,7 +53,7 @@ def k_compose(layer_rgba,depth_rgba,*,tie_epsilon=TIE_EPS):
     sorted_hit=np.take_along_axis(hit,order,axis=1)
     # Ties among consecutive actual geometry hits do not have an evidence
     # ordering; UNKNOWN, even if one layer's source paint alpha is zero.
-    near=(np.abs(np.diff(sorted_z,axis=1))<=tie_epsilon)
+    # Empty rays have +inf depth; transform empty sorted slots to zero only\n    # for tie subtraction, and require BOTH hit bits before counting a tie.\n    finite_pair_depth=np.where(sorted_hit,sorted_z,0.)\n    near=(np.abs(np.diff(finite_pair_depth,axis=1))<=tie_epsilon)
     both=(sorted_hit[:,:-1]&sorted_hit[:,1:])
     tied=np.any(both&near,axis=1)
     valid=~(invalid|tied)

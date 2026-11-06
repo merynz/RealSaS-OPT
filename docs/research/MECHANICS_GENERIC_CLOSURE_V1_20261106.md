@@ -125,3 +125,37 @@ python tools/mechanics/compare_stage47_source_fk_lbs_v1.py \
 The source is read-only and remains outside git. The report is reproducible by an authorized executor with exact source bytes; never upload artist source meshes, original bone names or full teacher arrays into public CI artifacts. `--product-probes 12` remains a **planned execution** on actual Stage47 bytes until a corresponding artifact/receipt is recorded.
 
 **Next hard scientific step:** validate the actual product-LBS oracle probe on exact real Stage47 source bytes and then define source→canonical surface and local-frame correspondence evidence from independently qualified geometry; challenge the binding with mismatched source, barycentric support forgery, axis flips and wrong parentage. Validate source-equivalent multi-action deformation without using target/source bone names as student features.
+
+## 2026-11-06 third increment: observable controls + prepared runtime over real source
+
+### Separate a declared relationship from observed mechanical response
+
+The original control-surface graph was only a *potential effect* estimate and had two dangerous shortcuts: it could accept a fabricated triangle containing valid mesh vertex IDs, and it could treat a bare `IK_EFFECTOR` with a target joint but **no executable IK constraint** as a mechanically effective control. Both are now fail-closed.
+
+`mechanics_surface_control_effects_v1.py` now requires a source-consistent `CanonicalMeshIR` hash and membership in **actual canonical triangle topology**; checks unknown surface vertices separately; excludes orphaned IK inputs; and validates supported executable constraint operators. Reachability of an IK chain is limited to declared chain joints rather than assuming all arbitrary subtrees respond.
+
+New `mechanics_control_response_court_v1.py` evaluates actual canonical Mechanics + LBS via small signed translation/rotation interventions to distinguish **graph-potential** from **observed local response**. It provides a typed no-effect/inconclusive result, never automatically deletes an unresponsive pole control. This is a deliberately expensive offline analysis, not the per-frame UI picker and not native-source causal proof.
+
+### Prepared sparse skin execution — real-world numeric comparison
+
+`mechanics_prepared_skin_v1.py` adds a bounded SHA-bound, source-read-only per-character cache of sparse vertex/joint influences and rest offsets. Frame execution applies vectorized world transformations with NumPy einsum + bincount instead of rebuilding Python-side per-vertex/per-weight structures. The returned `DeformedMeshIRV1` remains the same deformation contract; zero Graphics or model ownership. `mechanics_live_runtime_v1.py` accepts `prepared_skin=` as explicit opt-in. The original loop-based `deform_mesh_lbs_v1` stays default and is the independent parity oracle.
+
+An exact-source, real product-kernel experiment was executed on the private Truth139 Dino Stage47 teacher scene and observed Blender NPZ after verifying input SHA-256, the Compiler vendor bundle SHA and the visible optimizer SHA. Both actual RealSaS implementations were called on **128 deterministic action indices spanning all 774 source interventions** with the **same oracle-supplied source-local rig/skin and posed joints**. See `docs/research/MECHANICS_STAGE47_PRODUCT_LBS_PREPARED_128_20261106.json`.
+
+**Numeric comparison on that sample (source-world units):**
+- Original actual product LBS vs source Blender: maximum vertex L2 **9.487445122129821e-7**.
+- Prepared product LBS vs source Blender: maximum vertex L2 **9.487445126094705e-7**.
+- Prepared vs original product LBS: maximum vertex L2 **8.95090418262362e-16**.
+- Measured median original deform-only CPU time **66.028 ms**; measured median prepared deform-only CPU time **3.612 ms**, **18.278× faster** on that container/session/hardware. One-time prep **4.246 ms**.
+- Source-native analytical reference still spans all **774** interventions, but *actual* product-kernel comparison currently spans **128**; an exhaustive legacy-kernel run exceeded local execution limits and is explicitly **NOT PASS**.
+
+These are **kernel-only timings**. They exclude IK/constraint solve, collision, contacts, Motion sampling, graphics, skinning uploads, drawing, and engine/frame overhead. They are not any 60fps/P95 shipping certification. No user input was stored as student training truth.
+
+### Closure still open
+
+1. Independently qualified source↔canonical mesh, rest-frame and joint/control correspondence, sourced from real IRIS/TESSA and AXIS/MIRA outputs rather than oracle teacher imports.
+2. Attachments/orientation, full-body contact, multi-chain priority resolution, temporal stress testing across diverse morphologies.
+3. Cached solver state and actual end-to-end interactive frame benchmark including skin, Motion and graphics handoff, not just LBS kernel.
+4. Blind morphology-held-out source checks with pre-registered research exposure. This exposed Dino is never later promoted to unseen.
+
+The temporary **code-only** GitHub artifact used to access the exact private repo kernel in the execution container was uploaded with one-day retention during the experiment and its workflow upload step subsequently removed; artist source assets were never uploaded to GitHub.

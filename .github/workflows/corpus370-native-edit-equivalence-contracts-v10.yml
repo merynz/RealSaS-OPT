@@ -19,7 +19,7 @@ permissions:
 
 concurrency:
   group: corpus370-native-edit-equivalence-contracts-v10-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   original-native-edit-response-negative-contracts:

@@ -186,7 +186,7 @@ def test_no_silent_source_texture_glb_sha_substitution():
 def test_missing_heldout_joint_target_is_not_a_pass():
     docs=list(make())
     docs[3]["independent_court_per_camera"][0]["source_heldout_pair_joint_court"].pop()
-    with pytest.raises(ValueError,match="SOURCE_PAIR_JOINT_INDEPENDENT_HOLDOUT"):
+    with pytest.raises(ValueError,match="ORIGINAL_SOURCE_PER_VIEW_EFFECT_CENSUS"):
         compile_evidence(*docs,receipts=PARENTS)
 
 def test_no_silent_original_uv_v_axis_flip():

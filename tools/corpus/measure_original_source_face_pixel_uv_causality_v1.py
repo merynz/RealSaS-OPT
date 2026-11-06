@@ -30,6 +30,7 @@ PINS={
     "face-uv.npz":"7f3afdc4f0f848de3aa06bda2220151427d352368a0f235ca09d5d96f7834787",
     "uv-binding.json":"b966a3793c682cb06ec70341e659aabbded9343ace3d645c08643de40f2799d7",
     "camera.json":"300b935a47379f6c44d4b4356554d1c32a86ca3b732a62405c73da9e0ec6adf0",
+    "source-policy.json":"c8fe4e307ddbbaf5cc0892cffc4267bd08e394f2299f4e70155ffc6207190a4b",
     "uv-plan.json":"8be8fccde3d9cc97f7ba452fd50c1a9f4ebea2e34da590a22d30872b2b0f497b",
     "physical.npz":"d422b7d7d082fba5deac5dd1239b8c6aec078f4d635a7bd5b1f10e514100b114",
     "physical-manifest.json":"8a56e47a09f5c1216de2c97e6f13d5e04385f7fe7d2e580d0085b2ab69dc2da1",
@@ -266,6 +267,7 @@ def produce(source_root:Path,output:Path):
     court=j("physical-court.json")
     bind=j("uv-binding.json")
     plan=j("uv-plan.json")
+    policy=j("source-policy.json")
     camera=j("camera.json")
     require(manifest.get("schema")==
             "RealSaS.Corpus370OriginalCatSourceTextureSameCyclesEditEvidence.v2"
@@ -282,6 +284,11 @@ def produce(source_root:Path,output:Path):
             "SOURCE_FAMILY_IDENTITY_UNVERIFIED")
     require(manifest.get("original_source_sha256")==CAT
             and manifest.get("original_camera_bundle_sha256")==PINS["camera.json"]
+            and manifest.get("original_source_material_policy_sha256")==PINS["source-policy.json"]
+            and policy.get("material_mode")=="unlit_preserve_alpha"
+            and policy.get("source_sha256")==CAT
+            and len(policy.get("material_transform") or [])==1
+            and policy["material_transform"][0].get("source_color_linked") is True
             and manifest.get("original_source_uv_edit_plan_sha256")==PINS["uv-plan.json"]
             and manifest.get("source_original_sample_npz_sha256")==PINS["physical.npz"]
             and manifest.get("camera_indices")==list(VIEWS)

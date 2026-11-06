@@ -36,7 +36,7 @@ The source material groups may be disconnected: 3 original color operations do N
 
 The separate ledger court does NOT import ledger compiler. It recomputes all per-view and per-edit counts from SHA-verified original producer and independent source-court reports and checks all source/no-owner contracts. 13 adversarial tests reject original source SHA forgery, court status falsification, missing edit arm, nonbinary alpha, incorrect per-family evidence, false pose2 proof, source teacher leakage into student input, and minted SAME_DRAWABLE or DIFFERENT_DRAWABLE labels.
 
-No final numeric training validity mask, QUALIFIED_CORE/QUALIFIED_MASKED family admission, reusable artist-owned layer IDs or materialization readiness is minted. Every source observation is linked to original source identity, exact court receipts, rest pose and camera domain. The 370-person corpus (370 source candidate subjects) final authority matrix remains governed by its own independent family courts.
+No final numeric training validity mask, QUALIFIED_CORE/QUALIFIED_MASKED family admission, reusable artist-owned layer IDs or materialization readiness is minted. Every source observation is linked to original source identity, exact court receipts, rest pose and camera domain. The Corpus370 cohort (370 source candidate subjects) final authority matrix remains governed by its own independent family courts.
 
 ## Files and next step
 

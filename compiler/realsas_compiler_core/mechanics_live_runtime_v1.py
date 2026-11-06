@@ -192,6 +192,7 @@ def evaluate_mechanics_intervention_frame_v1(
     active_parameter_policy: str = "EXPLICIT_OR_ALL",
     preferred_parameter_keys: tuple[tuple[str,str], ...] | None = None,
     singularity_recovery_mode: str = "DISABLED",
+    required_attachment_world_orientations: Mapping[str, Sequence[Sequence[float]]] | None = None,
     prepared_skin: PreparedMechanicsSkinDeformerV1 | None = None,
     multi_goal_jacobian_mode: str = "NUMERIC_V1",
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
@@ -275,7 +276,18 @@ def evaluate_mechanics_intervention_frame_v1(
         ))
     else:
         raise QualificationError("LIVE_MECHANICS_SOLVER_MODE_UNSUPPORTED")
-    attachment_result = evaluate_attachment_world_frames_v1(rig,pose)
+    attachment_result = evaluate_attachment_world_frames_v1(
+        rig,pose,required_world_orientations=required_attachment_world_orientations,
+    )
+    primary_constraint_residual = max(
+        (abs(float(v)) for _,v in pose.constraint_residuals),default=0.0,
+    )
+    if secondary_motion_policy is not None and (
+        (multi_status is not None and multi_status != "PASS_MULTIGOAL_BEHAVIORAL_COURT")
+        or primary_constraint_residual > limit_residual
+        or attachment_result.status != "PASS_ATTACHMENT_FRAME_COURT"
+    ):
+        raise QualificationError("SECONDARY_REQUIRES_QUALIFIED_PRIMARY_MECHANICS")
     secondary_result = None
     if secondary_motion_policy is not None:
         secondary_result = step_secondary_motion_v1(
@@ -350,6 +362,7 @@ def evaluate_mechanics_intervention_frame_v1(
             "singularity_recovery_mode": singularity_recovery_mode,
             "attachment_frames_evaluated_before_secondary": True,
             "attachment_frame_count": len(attachment_result.frames),
+            "attachment_target_orientation_status": attachment_result.status,
             "secondary_motion_mode": (
                 "CRITICALLY_DAMPED_DECLARED_CHAIN_RESEARCH"
                 if secondary_result is not None else "DISABLED"
@@ -388,6 +401,7 @@ def evaluate_mechanics_intervention_sequence_v1(
     active_parameter_keys: tuple[tuple[str, str], ...] | None = None,
     active_parameter_policy: str = "EXPLICIT_OR_ALL",
     singularity_recovery_mode: str = "DISABLED",
+    required_attachment_world_orientations: Mapping[str, Sequence[Sequence[float]]] | None = None,
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
 ) -> MechanicsInterventionSequenceV1:
     if not steps:
@@ -423,6 +437,7 @@ def evaluate_mechanics_intervention_sequence_v1(
             active_parameter_policy=active_parameter_policy,
             preferred_parameter_keys=prev_rank_selection,
             singularity_recovery_mode=singularity_recovery_mode,
+            required_attachment_world_orientations=required_attachment_world_orientations,
             secondary_motion_policy=secondary_motion_policy,
             secondary_motion_previous_state=prev_secondary_state,
             secondary_motion_dt_seconds=(
@@ -508,6 +523,10 @@ def evaluate_mechanics_intervention_sequence_v1(
             "active_parameter_policy": active_parameter_policy,
             "rank_policy_selection_changes": rank_selection_changes,
             "singularity_recovery_mode": singularity_recovery_mode,
+            "attachment_target_required_count": (
+                len(required_attachment_world_orientations)
+                if required_attachment_world_orientations is not None else 0
+            ),
             "rank_policy_selection_reused_frames": rank_selection_reused,
             "solver_mode": solver_mode,
             "pinned_contact_control_ids": tuple(pinned_contact_control_ids),

@@ -364,3 +364,29 @@ churn metrics, declared attachment orientation constraints and an
 independent source→canonical mechanics comparison across several
 research-exposed morphologies. No AXIS/MIRA model training authority is
 minted by this result.
+
+## 2026-11-06: independent runtime study with Spine as *reference*, not equivalent mechanics
+
+Spine public docs identify important production-runtime patterns: explicit constraint evaluation order and world-transform recomputation; physics constraints use a controlled update rate; timeline/state physics needs explicit reset and replay. These are engineering lessons, not shared 3D source-truth contracts. Our compiler/puppet requires additional 3D morphology, attachment orientation, source-world evidence and 2D Graphics/CAA separation. No Spine runtime code is imported or copied. See `MECHANICS_SPINE_RUNTIME_INDEPENDENT_DESIGN_20261106.md`.
+
+Three hardening experiments have now been executed in **isolated Mechanics PR #353**.
+
+**Secondary motion** (`mechanics_secondary_motion_v1.py`):
+- Source-agnostic *declared* trailing chains only, critically damped position lag and bounded angular cone. Frequency/stiffness and time policy are **user/runtime choices, not physical teacher truth**.
+- Primary joint/constraint owners and attached grip joints are excluded. The complete primary pose must pass its solver and declared grip orientation checks before secondary is allowed to change any joint.
+- A bug was caught where sequential *all ticks per parent, then all ticks per child* yielded different results when time was partitioned. It was fixed with **parent-to-child integration at each bounded internal physics substep**. For a constant primary target, one 1/30-second sample and two 1/60-second samples now match within 1e-11 pose precision under the tested configuration.
+- Physics runtime state stores its exact runtime-policy SHA-256. Changing frequency/maximum substeps/fixed time step requires a **new explicit reset**, rather than silently resuming incompatible velocities. State also exposes frame and physics-tick counts separately. Arbitrary timeline seeking through replay is **not yet implemented**.
+
+**Temporal actuator hysteresis + singularity recovery** (`mechanics_multigoal_solver_v1.py`):
+- A previous rank-complete actuator selection can be retained when independent task-space Jacobian projection proves it still spans the currently required observations. Churn caused by a real rank/span change is tracked separately from **unjustified** switching. The seven-frame drag sequence reports no unjustified switching under test.
+- An opt-in bounded deterministic restart mode tries at most **12 valid declared-DOF initial configurations** only if the original nonlinear goal court fails; no new control, joint or limit is created. An independently verified reachable straight-chain radial target with a nonrest contact pin was recovered in the test. A *mathematically impossible* alternative source-independent pinned test remains explicit FAIL. The technique does not prove global nonlinear convergence or arbitrary trajectory smoothness.
+
+**3D attachment orientation consequences** (`mechanics_attachment_frames_v1.py`):
+- Read-only attachment world position and 3×3 basis evaluation from the primary solved joint. A declared local grip basis is mandatory to claim specific object orientation authority; otherwise only the parent basis is reported as **unqualified**.
+- A wrong required grip orientation returns FAIL and cannot be hidden by secondary motion; rig, controls, CAA/Graphics and source truth remain unchanged.
+- This is an **orientation consequence court**, *not* a 3D orientation-aware IK optimizer, a full attachment constraint solver or a dynamic collision/force simulation.
+
+**GitHub evidence:** tested head `668bbd44eaa3d26898be8864fe1bfb198587c44b`, Actions run `42284413119`, **94 focused tests PASS** and Mechanics ownership firewall PASS. Signed research-only report:
+`MECHANICS_TEMPORAL_SECONDARY_ATTACHMENT_20261106.json`.
+
+Remaining important barriers: 3D attachment/grip orientation as actual IK constraints, physics/collision/force truth, rigorous arbitrary seek/replay with state reset, real morphologically diverse source→canonical correspondence and full Graphics/render end-to-end latency. No product FPS or learning authority minted.

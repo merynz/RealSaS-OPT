@@ -457,3 +457,75 @@ collision/contact force, renderer/Graphics and true product frame
 budget. The synthetic test creates its own grip basis; this does
 not admit or train any Corpus370/AXIS/MIRA subject and does not
 supersede source truth or drawable representation policy.
+
+## 2026-11-06: multi-attachment feasibility and explicit priority WITHOUT source-truth demotion
+
+**New necessary-condition court:** `mechanics_attachment_feasibility_v1.py`
+checks whether multiple requested 3D attachment frames sharing the SAME
+declared parent can coexist under one rigid parent transform.
+
+- Point distance: world target inter-anchor separation must equal declared
+  local inter-anchor distance, up to **2× positional tolerance**.
+- Two oriented grips on the same parent imply the same world parent
+  orientation, up to **2× angular tolerance**.
+- One oriented grip plus two requested grip point positions implies the
+  corresponding rigid world displacement. The bound includes both point
+  tolerances and rotation tolerance
+  (`2*pos_tol + 2*local_distance*sin(orientation_tol/2)`).
+
+The court returns deterministic typed pair witnesses with IDs, constraint
+kind, mismatch, tolerated mismatch and explanatory evidence. Its
+nonconflicting result is deliberately named
+`NO_PAIRWISE_RIGID_CONFLICT_GLOBAL_IK_UNDETERMINED`.
+Absence of a *same-parent* contradiction is NOT global multi-body
+feasibility. Separate parents can still have mutually unreachable goals
+or fail the nonlinear solver. Even same-parent requirements can fail
+because the declared physical DOFs cannot realize the necessary transform.
+
+**Integration:** `mechanics_multigoal_solver_v1.py` exposes an
+optional `attachment_preflight_mode="RIGID_HARD_NECESSARY_V1"`.
+When a rigid contradiction is independently witnessed, a typed fail-closed
+`QualificationError` stops optimization without pretending the requested
+motion is attainable. The established solver default remains
+`attachment_preflight_mode="DISABLED"` to preserve existing behavior
+and legacy tests.
+
+**Explicit runtime preference — separate from capability authority:**
+`mechanics_attachment_priority_v1.py` provides
+`execute_explicit_attachment_priority_v1()`. Every requested attachment
+track defaults to `HARD`; the application may *explicitly* mark
+individual position/orientation tracks `ADVISORY`. All IK goals and world
+contact pins are always HARD and cannot be demoted by this interface.
+Advisory targets are still independently measured against the final
+primary pose, and their unmet residuals remain visible.
+
+The result distinguishes:
+- `FAIL_HARD_RIGID_ATTACHMENT_CONFLICT`: independent proof of impossible
+  hard grip geometry; numerical optimizer was never invoked.
+- `FAIL_HARD_IK_OR_CONTACT_CONTRACT`: no known same-parent rigid
+  contradiction, but the fully declared primary solver fails its hard
+  constraints.
+- `PASS_HARD_WITH_UNMET_ADVISORY_TARGETS`: mandatory constraints were
+  satisfied, but **the complete originally requested goal set was NOT**.
+  This is not a source-authoritative full puppet compile PASS.
+- `PASS_HARD_AND_ALL_REQUESTED_TARGETS`: hard solver and all advisory
+  goals meet their own independent tolerances.
+
+The priority is a **representation/runtime policy explicitly supplied by
+the caller**. It does not infer desired edit capability, change source
+truth, create a physical joint limit, synthesize an attachment, or
+silently remove any requested goal. No automatic priority optimization
+or source-derived importance weighting is claimed.
+
+**GitHub verification:** 120 focused Mechanics tests PASS and ownership
+firewall PASS, Actions run `42288736079` on tested head
+`36e69a1fda55bf83944e74502e3a3ea7fd67d988`.
+The full result and scientific boundaries are recorded in
+`docs/research/MECHANICS_MULTI_ATTACHMENT_PRIORITY_FEASIBILITY_20261106.json`.
+Original 6D grip/secondary/temporal courts remain in the same suite.
+
+**Next independent blockers:** rigorous cross-parent constraints and contact
+feasibility, proper source-native multi-tool grip evidence, app-level
+capability contract for which goals can *legally* be advisory,
+priority stability under continuous edits, and full runtime/render
+performance with morphologically diverse authored subjects.

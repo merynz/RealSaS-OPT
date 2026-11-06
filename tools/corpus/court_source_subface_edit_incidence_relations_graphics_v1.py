@@ -73,7 +73,7 @@ def recompute_independent(root,producer_path,output):
             "UNKNOWN_NOT_FALSE"
         and report["source_subface_locus_contract"]==
             "SOURCE_GLTF_FACE_INDEX_PLUS_BARYCENTRIC_UV_SUBADDRESS_PLUS_EDIT_PLUS_POSE_VIEW_SAMPLE"
-        and report["source_original_artistic_drawable_ownership"]=="UNKNOWN"
+        and report["original_source_artistic_drawable_ownership"]=="UNKNOWN"
         and all(report[k] is False for k in (
             "graphics_owner_authorized","iris_training_authorized",
             "tessa_training_authorized","materialization_authorized",

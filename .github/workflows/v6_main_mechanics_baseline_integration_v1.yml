@@ -1,0 +1,51 @@
+name: v6-main-mechanics-baseline-integration-v1
+
+on:
+  pull_request:
+    paths:
+      - 'compiler/realsas_compiler_core/canonical_mechanics_ir_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_control_solver_v1.py'
+      - 'tests/compiler/test_mechanics_control_solver_v1.py'
+      - 'tests/compiler/test_canonical_mechanics_ir_v1.py'
+      - 'tests/compiler/test_v6_mechanics_main_integration_v1.py'
+      - '.github/workflows/v6_main_mechanics_baseline_integration_v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  mechanics-baseline-contract-courts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install independent CPU compiler requirements
+        run: python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+      - name: Compile imported original mechanics modules
+        run: |
+          python -m py_compile \
+            compiler/realsas_compiler_core/mechanics_control_solver_v1.py \
+            compiler/realsas_compiler_core/canonical_mechanics_ir_v1.py
+      - name: Run original V6 and main-integration Mechanics regressions
+        run: |
+          python -m pytest -q \
+            tests/compiler/test_mechanics_control_solver_v1.py \
+            tests/compiler/test_canonical_mechanics_ir_v1.py \
+            tests/compiler/test_v6_mechanics_main_integration_v1.py
+      - name: Preserve deliberate research and product barriers
+        run: |
+          python - <<'PY'
+          from compiler.realsas_compiler_core.canonical_mechanics_ir_v1 import CanonicalMechanicsIRV1
+          from compiler.realsas_compiler_core.mechanics_control_solver_v1 import solve_control_pose_v1
+          assert CanonicalMechanicsIRV1.__module__.endswith('canonical_mechanics_ir_v1')
+          assert solve_control_pose_v1.__module__.endswith('mechanics_control_solver_v1')
+          print('PASS_V6_MECHANICS_REST_AND_REFERENCE_SOLVER_NO_MODEL_OR_PRODUCT_RELEASE')
+          PY

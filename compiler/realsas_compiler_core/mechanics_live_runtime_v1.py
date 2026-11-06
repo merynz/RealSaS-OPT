@@ -238,6 +238,7 @@ def evaluate_mechanics_intervention_frame_v1(
     solved_parameters: tuple[tuple[str, str, float], ...] = ()
     solved_rank_keys: tuple[tuple[str, str], ...] = ()
     prior_rank_reused = False
+    prior_rank_span_error: float | None = None
     if solver_mode == "FABRIK_V1":
         if pinned_contact_control_ids or pinned_world_targets is not None:
             raise QualificationError("LIVE_MECHANICS_PINS_REQUIRE_MULTI_GOAL")
@@ -274,6 +275,9 @@ def evaluate_mechanics_intervention_frame_v1(
         prior_rank_reused = bool(solved.metadata.get(
             "rank_revealing_prior_basis_reused", False
         ))
+        prior_rank_span_error = solved.metadata.get(
+            "rank_revealing_prior_span_relative_error"
+        )
     else:
         raise QualificationError("LIVE_MECHANICS_SOLVER_MODE_UNSUPPORTED")
     attachment_result = evaluate_attachment_world_frames_v1(
@@ -359,6 +363,7 @@ def evaluate_mechanics_intervention_frame_v1(
             ),
             "active_parameter_policy": active_parameter_policy,
             "rank_policy_prior_basis_reused": prior_rank_reused,
+            "rank_policy_prior_span_relative_error": prior_rank_span_error,
             "singularity_recovery_mode": singularity_recovery_mode,
             "attachment_frames_evaluated_before_secondary": True,
             "attachment_frame_count": len(attachment_result.frames),
@@ -421,6 +426,8 @@ def evaluate_mechanics_intervention_sequence_v1(
     prev_rank_selection: tuple[tuple[str,str], ...] | None = None
     rank_selection_changes=0
     rank_selection_reused=0
+    rank_selection_rank_changes=0
+    rank_selection_unjustified_churn=0
     for index, step in enumerate(steps):
         frame = evaluate_mechanics_intervention_frame_v1(
             mesh, rig, skin, mechanics, overrides=step.overrides,
@@ -456,7 +463,15 @@ def evaluate_mechanics_intervention_sequence_v1(
                 else ()
             )
             if prev_rank_selection is not None and next_rank:
-                rank_selection_changes+=int(next_rank!=prev_rank_selection)
+                changed=next_rank!=prev_rank_selection
+                rank_selection_changes+=int(changed)
+                rank_selection_rank_changes+=int(
+                    changed and len(next_rank)!=len(prev_rank_selection)
+                )
+                prior_span=frame.metadata["rank_policy_prior_span_relative_error"]
+                if (changed and len(next_rank)==len(prev_rank_selection)
+                        and prior_span is not None and prior_span<=1e-4):
+                    rank_selection_unjustified_churn+=1
                 rank_selection_reused+=int(
                     bool(frame.metadata["rank_policy_prior_basis_reused"])
                 )
@@ -522,6 +537,8 @@ def evaluate_mechanics_intervention_sequence_v1(
             ),
             "active_parameter_policy": active_parameter_policy,
             "rank_policy_selection_changes": rank_selection_changes,
+            "rank_policy_selection_rank_changes": rank_selection_rank_changes,
+            "rank_policy_selection_unjustified_churn": rank_selection_unjustified_churn,
             "singularity_recovery_mode": singularity_recovery_mode,
             "attachment_target_required_count": (
                 len(required_attachment_world_orientations)

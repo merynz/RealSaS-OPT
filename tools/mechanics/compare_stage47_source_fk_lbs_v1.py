@@ -20,6 +20,7 @@ import argparse
 import hashlib
 import json
 import math
+import time
 from pathlib import Path
 
 import numpy as np
@@ -142,6 +143,7 @@ def _teacher_oracle_product_probe(
     observed: np.ndarray,
     *,
     selected_indices: list[int],
+    prepared_probe: bool = False,
 ) -> dict:
     from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import (
         CanonicalMeshIR, CanonicalMeshVertexIR,
@@ -215,8 +217,22 @@ def _teacher_oracle_product_probe(
         skin_codec_checkpoint_hash="a"*64, skin_lineage_hash=skin_sha,
         metadata={"authority": "UNQUALIFIED_SOURCE_ORACLE_RESEARCH_ONLY"},
     )
+    prepared = None
+    prepare_seconds = None
+    if prepared_probe:
+        from compiler.realsas_compiler_core.mechanics_prepared_skin_v1 import (
+            prepare_mechanics_skin_deformer_v1,
+            deform_prepared_mechanics_skin_v1,
+        )
+        started = time.perf_counter()
+        prepared = prepare_mechanics_skin_deformer_v1(mesh, rig, skin)
+        prepare_seconds = time.perf_counter() - started
     maximum = 0.0
     per_probe: list[float] = []
+    legacy_seconds: list[float] = []
+    prepared_seconds: list[float] = []
+    prepared_max_parity = 0.0
+    prepared_max_blender = 0.0
     for action_index in selected_indices:
         action = actions[action_index]
         bone_id = int(action["control_index_privileged"]) // 3
@@ -244,8 +260,28 @@ def _teacher_oracle_product_probe(
             control_program_hash=rig.control_program_hash,
             metadata={"authority": "TEACHER_ORACLE_POSE_UNQUALIFIED"},
         )
+        started = time.perf_counter()
         result = deform_mesh_lbs_v1(mesh, rig, skin, pose)
+        legacy_seconds.append(time.perf_counter() - started)
         arr = np.asarray(result.positions, dtype=np.float64)
+        if prepared is not None:
+            started = time.perf_counter()
+            prepared_result = deform_prepared_mechanics_skin_v1(
+                prepared, pose,
+                expected_mesh_lineage_hash=mesh.mesh_lineage_hash,
+                expected_skin_lineage_hash=skin.skin_lineage_hash,
+                expected_deform_structure_hash=rig.deform_structure_hash,
+            )
+            prepared_seconds.append(time.perf_counter() - started)
+            fast = np.asarray(prepared_result.positions, dtype=np.float64)
+            prepared_max_parity = max(
+                prepared_max_parity,
+                float(np.max(np.linalg.norm(fast - arr, axis=1))),
+            )
+            prepared_max_blender = max(
+                prepared_max_blender,
+                float(np.max(np.linalg.norm(fast - observed[action_index], axis=1))),
+            )
         error = float(np.max(np.linalg.norm(arr-observed[action_index],axis=1)))
         per_probe.append(error)
         maximum = max(maximum,error)
@@ -255,6 +291,18 @@ def _teacher_oracle_product_probe(
         "max_vertex_error_world": maximum,
         "median_probe_max_error_world": float(np.median(per_probe)),
         "product_deformer_invoked": True,
+        "prepared_kernel_probe": (
+            None if prepared is None else {
+                "prepared_kernel_invoked": True,
+                "prepared_once_for_all_actions": True,
+                "prepare_seconds_observed": prepare_seconds,
+                "max_parity_error_vs_legacy_world": prepared_max_parity,
+                "max_error_vs_blender_world": prepared_max_blender,
+                "median_legacy_deform_seconds": float(np.median(legacy_seconds)),
+                "median_prepared_deform_seconds": float(np.median(prepared_seconds)),
+                "reference_cpu_only_not_shipping_latency_proof": True,
+            }
+        ),
         "oracle_pose_supplied": True,
         "canonical_rig_minted": False,
         "compiler_skeleton_or_controls_produced": False,
@@ -267,12 +315,14 @@ def compare_stage47_source_fk_lbs_v1(
     *,
     error_threshold_source_world: float = 2.5e-6,
     product_probe_count: int = 0,
+    prepared_probe: bool = False,
     expected_teacher_sha256: str | None = None,
     expected_geometry_sha256: str | None = None,
 ) -> dict:
     if (not math.isfinite(float(error_threshold_source_world)) or
             error_threshold_source_world <= 0 or
-            product_probe_count < 0 or product_probe_count > 128):
+            product_probe_count < 0 or product_probe_count > 128
+            or (prepared_probe and product_probe_count == 0)):
         raise Stage47CorrespondenceError("SOURCE_REPLAY_POLICY_INVALID")
     teacher_sha, geometry_sha = _sha(teacher_path), _sha(geometry_path)
     if expected_teacher_sha256 and teacher_sha != expected_teacher_sha256:
@@ -358,6 +408,7 @@ def compare_stage47_source_fk_lbs_v1(
                 rest,faces,mats,parents,descendants,
                 indices,bones,weights,offsets,actions,observed,
                 selected_indices=selected,
+                prepared_probe=prepared_probe,
             )
         direct_weighted_bones = set(map(int,bones.tolist()))
         zero_direct_skin_bones = len(mats)-len(direct_weighted_bones)
@@ -370,7 +421,15 @@ def compare_stage47_source_fk_lbs_v1(
             for control_id in range(len(controls))
         )
         passed = max_err <= error_threshold_source_world and (
-            probes is None or probes["max_vertex_error_world"] <= error_threshold_source_world
+            probes is None or (
+                probes["max_vertex_error_world"] <= error_threshold_source_world and (
+                    probes["prepared_kernel_probe"] is None or (
+                        probes["prepared_kernel_probe"]["max_parity_error_vs_legacy_world"] <= 1e-8
+                        and probes["prepared_kernel_probe"]["max_error_vs_blender_world"]
+                            <= error_threshold_source_world
+                    )
+                )
+            )
         )
         return {
             "schema": SCHEMA,
@@ -413,6 +472,7 @@ def main() -> None:
     parser.add_argument("--report",type=Path,required=True)
     parser.add_argument("--threshold-source-world",type=float,default=2.5e-6)
     parser.add_argument("--product-probes",type=int,default=0)
+    parser.add_argument("--prepared-probe",action="store_true")
     parser.add_argument("--expected-teacher-sha256")
     parser.add_argument("--expected-npz-sha256")
     args=parser.parse_args()
@@ -420,6 +480,7 @@ def main() -> None:
         args.teacher,args.npz,
         error_threshold_source_world=args.threshold_source_world,
         product_probe_count=args.product_probes,
+        prepared_probe=args.prepared_probe,
         expected_teacher_sha256=args.expected_teacher_sha256,
         expected_geometry_sha256=args.expected_npz_sha256,
     )

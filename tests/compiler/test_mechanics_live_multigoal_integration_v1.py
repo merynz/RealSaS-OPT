@@ -164,3 +164,42 @@ def test_live_multi_goal_analytic_jacobian_executes_pins_with_prepared_skin():
             mesh,rig,skin,mechanics,
             multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1",
         )
+
+
+def test_declared_world_contact_anchor_survives_live_motion_sequence():
+    mesh,rig,skin,mechanics=_objects()
+    from compiler.realsas_compiler_core.mechanics_prepared_skin_v1 import (
+        prepare_mechanics_skin_deformer_v1,
+    )
+    prepared=prepare_mechanics_skin_deformer_v1(mesh,rig,skin)
+    steps=tuple(MechanicsInterventionStepV1(
+        time_seconds=i/20.,
+        overrides=(ControlTransformIRV1(
+            "A_HANDLE",
+            translation=(math.cos(angle)-1.,math.sin(angle),0.),
+        ),),
+    ) for i,angle in enumerate((0.1,0.2,0.3)))
+    result=evaluate_mechanics_intervention_sequence_v1(
+        mesh,rig,skin,mechanics,steps,prepared_skin=prepared,
+        solver_mode="DECLARED_MULTI_GOAL_V1",
+        multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1",
+        pinned_contact_control_ids=("B_HANDLE",),
+        pinned_world_targets={"B_HANDLE":(-2.,0.,0.)},
+        max_allowed_constraint_residual=1e-3,
+    )
+    assert result.status=="PASS_MECHANICS_SEQUENCE_DIAGNOSTIC"
+    assert result.metadata["explicit_contact_world_anchor_count"]==1
+    assert result.metadata["multi_goal_warm_start_frame_count"]==2
+    assert all(f.max_constraint_residual<1e-3 for f in result.frames)
+    assert all(f.metadata["multi_goal_jacobian_mode"]=="ANALYTIC_RESEARCH_V1"
+               for f in result.frames)
+
+
+def test_live_pin_anchor_without_declared_pin_fails_closed():
+    mesh,rig,skin,mechanics=_objects()
+    with pytest.raises(QualificationError,match="PIN_WORLD_TARGET_BINDING_DRIFT"):
+        evaluate_mechanics_intervention_frame_v1(
+            mesh,rig,skin,mechanics,
+            solver_mode="DECLARED_MULTI_GOAL_V1",
+            pinned_world_targets={"B_HANDLE":(-2.,0.,0.)},
+        )

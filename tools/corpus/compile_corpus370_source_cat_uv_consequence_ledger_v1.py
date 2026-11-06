@@ -8,6 +8,7 @@ texture edits and emits only source-conditioned candidate truth family facts.
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -179,8 +180,8 @@ def compile_evidence(plan,assets,renderer,court,contract,*,receipts):
             "source_view":v,
             "sample_offsets":list(OFFSETS),
             "effect_measurement_granularity":"SOURCE_SAMPLED_IMAGE_AGGREGATE_NOT_ART_DRAWABLE",
-            "source_individual_uv_edit_sample_incidents":counts,
-            "source_pairwise_visible_effect_support_overlap":pair,
+            "source_individual_uv_edit_sample_incidents":list(counts),
+            "source_pairwise_visible_effect_support_overlap":dict(pair),
             "source_edit_alpha_drift":0,
             "heldout_pair_joint_sample_mismatch_count":0,
             "heldout_pair_joint_eight_sample_mean_mismatch_count":0,
@@ -198,7 +199,7 @@ def compile_evidence(plan,assets,renderer,court,contract,*,receipts):
         "subject_id":plan["subject_id"],"original_source_sha256":src,
         "original_texture_sha256":atlas,"parent_receipts":receipts,
         "source_operation_domain":"ORIGINAL_GLTF_UV_TEXTURE_RGB_EDIT__NO_DRAWABLE_IDENTITY",
-        "source_uv_edit_operations":edits,"source_uv_atlas_edits_are_art_drawables":False,
+        "source_uv_edit_operations":copy.deepcopy(edits),"source_uv_atlas_edits_are_art_drawables":False,
         "source_graphics_effect_per_view":output_views,
         "source_edit_consequence_totals":{
             "single_edit_sample_incidents_by_operation":all_effects,

@@ -34,6 +34,7 @@ class AttachmentWorldFrameV1:
     world_basis: Mat3
     orientation_authority: str
     angular_target_residual_rad: float | None = None
+    position_target_residual_world: float | None = None
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,7 @@ class AttachmentWorldFrameCourtV1:
     frames: tuple[AttachmentWorldFrameV1,...]
     max_target_angular_residual_rad: float
     status: str
+    max_target_position_residual_world: float = 0.
     metadata: dict = field(default_factory=dict)
 
 
@@ -61,11 +63,16 @@ def evaluate_attachment_world_frames_v1(
     primary_pose: MechanicsPoseIRV1,
     *,
     required_world_orientations: Mapping[str, Sequence[Sequence[float]]] | None=None,
+    required_world_positions: Mapping[str, Sequence[float]] | None=None,
     angular_tolerance_rad: float=1e-3,
+    position_tolerance_world: float=1e-3,
 ) -> AttachmentWorldFrameCourtV1:
     if (primary_pose.rig_lineage_hash!=rig.rig_lineage_hash or
             primary_pose.control_program_hash!=rig.control_program_hash):
         raise QualificationError("ATTACHMENT_POSE_LINEAGE_DRIFT")
+    if (not math.isfinite(float(position_tolerance_world))
+            or not 0<=position_tolerance_world):
+        raise QualificationError("ATTACHMENT_POSITION_TOLERANCE_INVALID")
     if (not math.isfinite(float(angular_tolerance_rad))
             or not 0<=angular_tolerance_rad<=math.pi):
         raise QualificationError("ATTACHMENT_TOLERANCE_POLICY_INVALID")
@@ -78,10 +85,12 @@ def evaluate_attachment_world_frames_v1(
     if len(set(anchor_ids))!=len(anchor_ids):
         raise QualificationError("ATTACHMENT_DUPLICATE_ANCHOR")
     required=dict(required_world_orientations or {})
-    if not set(required).issubset(set(anchor_ids)):
+    required_positions=dict(required_world_positions or {})
+    if not (set(required)|set(required_positions)).issubset(set(anchor_ids)):
         raise QualificationError("ATTACHMENT_TARGET_ANCHOR_UNKNOWN")
     frames=[]
     largest=0.0
+    largest_position=0.0
     for anchor in rig.attachment_anchors:
         if (anchor.parent_canonical_joint_id is None
                 or anchor.parent_canonical_control_id is not None):
@@ -110,6 +119,18 @@ def evaluate_attachment_world_frames_v1(
                 authored_basis,"ATTACHMENT_LOCAL_GRIP_BASIS_INVALID")
             basis=R@local_basis
             authority="DECLARED_LOCAL_GRIP_BASIS_RESEARCH_ONLY"
+        position_residual=None
+        if anchor.canonical_anchor_id in required_positions:
+            try:
+                target_position=np.asarray(
+                    required_positions[anchor.canonical_anchor_id],dtype=np.float64
+                )
+            except (TypeError,ValueError) as exc:
+                raise QualificationError("ATTACHMENT_TARGET_POSITION_INVALID") from exc
+            if target_position.shape!=(3,) or not np.isfinite(target_position).all():
+                raise QualificationError("ATTACHMENT_TARGET_POSITION_INVALID")
+            position_residual=float(np.linalg.norm(p-target_position))
+            largest_position=max(largest_position,position_residual)
         residual=None
         if anchor.canonical_anchor_id in required:
             target=_matrix(
@@ -128,13 +149,18 @@ def evaluate_attachment_world_frames_v1(
             world_basis=tuple(tuple(map(float,row)) for row in basis),
             orientation_authority=authority,
             angular_target_residual_rad=residual,
+            position_target_residual_world=position_residual,
         ))
     return AttachmentWorldFrameCourtV1(
         frames=tuple(frames),
         max_target_angular_residual_rad=largest,
-        status=("PASS_ATTACHMENT_FRAME_COURT"
-                if largest<=angular_tolerance_rad
-                else "FAIL_ATTACHMENT_ORIENTATION_TARGET"),
+        max_target_position_residual_world=largest_position,
+        status=(
+            "FAIL_ATTACHMENT_ORIENTATION_TARGET" if largest>angular_tolerance_rad
+            else "FAIL_ATTACHMENT_POSITION_TARGET"
+            if largest_position>position_tolerance_world
+            else "PASS_ATTACHMENT_FRAME_COURT"
+        ),
         metadata={
             "authority":"MECHANICS_DECLARED_ATTACHMENT_RESEARCH_ONLY",
             "pose_origin":"PRIMARY_BEFORE_SECONDARY",

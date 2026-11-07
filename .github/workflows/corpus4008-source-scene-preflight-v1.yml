@@ -6,6 +6,7 @@ on:
     paths:
       - 'tools/corpus/probe_corpus4008_source_scene_v1.py'
       - 'tools/corpus/build_corpus4008_source_preflight_v1.py'
+      - 'tools/corpus/merge_corpus4008_source_preflight_shards_v1.py'
       - 'tests/corpus/test_corpus4008_source_scene_probe_v1.py'
       - 'tests/corpus/test_corpus4008_source_preflight_v1.py'
       - '.github/workflows/corpus4008-source-scene-preflight-v1.yml'
@@ -14,6 +15,7 @@ on:
     paths:
       - 'tools/corpus/probe_corpus4008_source_scene_v1.py'
       - 'tools/corpus/build_corpus4008_source_preflight_v1.py'
+      - 'tools/corpus/merge_corpus4008_source_preflight_shards_v1.py'
       - 'tests/corpus/test_corpus4008_source_scene_probe_v1.py'
       - 'tests/corpus/test_corpus4008_source_preflight_v1.py'
       - '.github/workflows/corpus4008-source-scene-preflight-v1.yml'

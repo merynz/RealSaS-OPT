@@ -50,6 +50,9 @@ def test_reacquisition_refuses_html_sha_mismatch_and_bogus_redirect(tmp_path):
     a=fetch_one(row,tmp_path,max_bytes=1024,session=FakeSession(blob))
     assert a["source_bytes_recovered"] is True
     assert (tmp_path/(h+".glb")).read_bytes()==blob
+    cached=fetch_one(row,tmp_path,max_bytes=1024,session=FakeSession(b"bad"))
+    assert cached["status"]=="EXACT_SOURCE_CACHED_AND_REVERIFIED"
+    assert cached["source_bytes_recovered"] is True
     (tmp_path/(h+".glb")).unlink()
     bad=fetch_one(row,tmp_path,max_bytes=1024,session=FakeSession(b"not the source"))
     assert bad["status"]=="SHA_MISMATCH__REACQUISITION_NOT_ACCEPTED"

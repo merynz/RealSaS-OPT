@@ -126,7 +126,7 @@ jobs:
           root="$RUNNER_TEMP/c4008-deep"
           "$root/runtime/blender-4.5.14-linux-x64/blender" --background --factory-startup --python-exit-code 1 --python tools/corpus/blender_corpus4008_lookdev_study_v1.py -- \
             --source "$root/source/kaykit.glb" --expected-sha256 93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545 \
-            --asset-id asset_551ea351b43a1787d0f55536 --candidate-id kaykit_cc0:93e6e25213009952 \
+            --asset-id asset_551ea351b43a1787d0f55536 --candidate-id kaykit_cc0:93e6e25213009952276d9cf3 \
             --output "$root/output/kaykit_lookdev" --resolution 640
           python -m tools.corpus.validate_corpus4008_deep_diagnostic_v1 \
             --control "$root/output/kaykit.control.json" \

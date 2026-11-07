@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.GlobalTruthFoundryAllCohortRegistry.v2",
-  "status": "SOURCE_COHORT_SCOPE_RECONCILED__53_CROSS_CORPUS_IDENTITY_SUSPECTS_QUARANTINED__NO_HEAD_ADMISSION",
+  "status": "ALL_53_CROSS_CORPUS_BYTE_SHA_DUPLICATE_PAIRS_VERIFIED__TRAINING_MASKS_CLOSED",
   "analysis_date_utc": "2026-11-07",
   "immutable_input_receipts": {
     "master_4008_jsonl_sha256": "475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913",
@@ -83,8 +83,8 @@
     "new_sha96_prefix_crosswalk_pairs": 53,
     "master_quaternius_sha96_crosswalk_pairs": 48,
     "master_kaykit_sha96_crosswalk_pairs": 5,
-    "actual_source_bytes_full_sha_verified_pairs": 3,
-    "prefix_matches_awaiting_original_byte_rehash": 50,
+    "actual_source_bytes_full_sha_verified_pairs": 53,
+    "prefix_matches_awaiting_original_byte_rehash": 0,
     "protected_split_identity_risk_pairs": 16,
     "split_distribution_of_pairs": {
       "FIT": 37,
@@ -98,7 +98,16 @@
     "protected_split_target_routes_quarantined": 1184,
     "true_training_leakage_observed": false,
     "court_resolution": "PENDING_NO_MERGE_NO_TRAINING_PASS",
-    "old_zero_overlap_scope_explanation": "The earlier zero checks compared only 3192 Master SHA-recovered Objaverse originals; it excluded the 228 unrehash Quaternius/KayKit identities."
+    "old_zero_overlap_scope_explanation": "The earlier zero checks compared only 3192 Master SHA-recovered Objaverse originals; it excluded the 228 unrehash Quaternius/KayKit identities.",
+    "original_master_quaternius_rehashed_as_duplicate": 48,
+    "original_master_kaykit_rehashed_as_duplicate": 5,
+    "original_master_quaternius_still_not_rehashed_in_this_court": 143,
+    "original_master_kaykit_still_not_rehashed_in_this_court": 32,
+    "provisional_canonical_source_clusters_after_only_53_verified_edges": 4325,
+    "all_53_physical_source_sha_matches_closed": true,
+    "cross_format_semantic_duplicate_court_done": false,
+    "unique_character_count_certified": false,
+    "model_training_admitted_by_this_court": 0
   },
   "original_master_publisher_counts": {
     "objaverse_animated_originals": 3765,

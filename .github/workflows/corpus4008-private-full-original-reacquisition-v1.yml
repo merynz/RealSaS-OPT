@@ -1,0 +1,112 @@
+name: corpus4008-private-full-original-reacquisition-v1
+
+# Bounded 32-way restoration of ALL 3,214 historical non-holdout Objaverse
+# original-source candidates. Prior 135 heldout remain untouched. All source
+# bytes are SHA-256 checked and staged ONLY in private audit quarantine.
+# No graphics/semantic/character/training admission; no source-root mutation.
+on:
+  push:
+    branches: [corpus4008-source-structure-and-camera-audit-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-private-full-original-reacquisition-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-private-full-original-reacquisition-v1
+  cancel-in-progress: false
+
+jobs:
+  source-original-reacquisition:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c4008-full-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/original_recovery_full_v1/${{ github.run_id }}-${{ github.run_attempt }}/shard-${{ matrix.shard }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test exact source-hash cache and 32-way ownership
+        run: |
+          python -m pip install --disable-pip-version-check pytest requests==2.32.3
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_github_original_pilot_v1.py tests/corpus/test_corpus4008_github_source_shard_v1.py
+      - name: Gate on private Drive credential and exclude public artifacts
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'NO_PRIVATE_DRIVE_AUTHORITY__NO_DOWNLOAD' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Restore sealed source recovery plan and valid earlier exact caches
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+          INDEX: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          root="$RUNNER_TEMP/c4008-full-private"
+          mkdir -p "$root/output/verified_quarantine_objects"
+          rclone copyto "$REMOTE/audits/source_recovery_v1/42371850821-1/RECOVERY_PRIVATE.json" "$root/PLAN.json" --retries 3
+          test "$(sha256sum "$root/PLAN.json" | cut -d ' ' -f1)" = 3c1088fb26d2171ccde8b8dfaac3406a26ba12e16eb3b6506c11c8ccc775426f
+          if test "$INDEX" -lt 8; then
+            rclone copy "$REMOTE/audits/original_recovery_shards_v1/42372844889-1/shard-$INDEX/verified_quarantine_objects" \
+              "$root/output/verified_quarantine_objects" --retries 3 --checksum
+          fi
+          echo 'EXACT_PRIVATE_SOURCE_PLAN_AND_PREVIOUS_VERIFIED_CACHE_PRESENT'
+      - name: Recover all eligible, non-holdout originals in one of 32 exclusive shards
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          INDEX: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-full-private"
+          python -m tools.corpus.recover_corpus4008_github_source_shard_v1 \
+            --plan "$root/PLAN.json" --output "$root/output" \
+            --shard-count 32 --shard-index "$INDEX" \
+            --max-objects 128 --max-original-mib 64
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'c4008-full-private/output/SHARD_PUBLIC.json'
+          d=json.loads(p.read_text())
+          assert d['deferred_count']==0,'SHARD_CAP_DROPPED_ELIGIBLE_SOURCE'
+          assert d['training_authorized'] is False
+          print('## Original-source private recovery')
+          print('Shard:',d['shard_index'],'of',d['shard_count'])
+          print('Selected original files:',d['selected_count'])
+          print('SHA-verified bytes available:',d['exact_source_bytes_recovered'])
+          print('Unprocessed eligible:',d['deferred_count'])
+          print('Failed/missing/oversize:',
+                d['selected_count']-d['exact_source_bytes_recovered'])
+          print('Authoritative training admitted: False')
+          for status,count in d['result_statuses'].items():
+              print(status+':',count)
+          PY
+      - name: Store proof and exact-byte sources in restricted Drive quarantine only
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-full-private/output"
+          if test -s "$RCLONE_CONFIG" && test -s "$root/SHARD_PRIVATE.json"; then
+            rclone copyto "$root/SHARD_PRIVATE.json" "$PRIVATE_OUTPUT/SHARD_PRIVATE.json" --retries 4
+            rclone copyto "$root/SHARD_PUBLIC.json" "$PRIVATE_OUTPUT/SHARD_PUBLIC.json" --retries 4
+            rclone copy "$root/verified_quarantine_objects" "$PRIVATE_OUTPUT/verified_quarantine_objects" --checksum --retries 4
+            echo 'SHA-pinned originals quarantined privately; canonical Master root unchanged.'
+          fi

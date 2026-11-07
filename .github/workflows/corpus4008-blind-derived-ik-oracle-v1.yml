@@ -156,7 +156,7 @@ jobs:
       - name: Test source-only derived RigProgram CCD targets and skinned consequences
         if: steps.gate.outputs.ready == 'true'
         env:
-          PYTHONPATH: ${D}{{ github.workspace }}/engine
+          PYTHONPATH: ${{ github.workspace }}/engine
         run: |
           set -euo pipefail
           umask 077

@@ -1,0 +1,208 @@
+name: corpus4008-heldout-derived-ik-frontier-v1
+
+# Native CC0 source rigs, original constraints are held OUT of the inference
+# snapshot. Oracle evaluated AFTER SHA-freezing source-only candidate program.
+# No training admission or Compiler auto-completion.
+on:
+  push:
+    branches: [corpus4008-blind-derived-rigprogram-court-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-heldout-derived-ik-frontier-v1.yml'
+      - 'tools/corpus/derive_corpus4008_rigprogram_prior_v1.py'
+      - 'tools/corpus/blender_corpus4008_blind_ik_discovery_v1.py'
+      - 'tools/corpus/blender_corpus4008_derived_ik_target_assay_v1.py'
+      - 'tests/corpus/test_corpus4008_blind_derived_ik_v1.py'
+      - 'models/axis/experimental_derived_control_adapter_v1.py'
+      - 'tests/corpus/test_corpus4008_derived_rigprogram_adapter_v1.py'
+      - 'tests/corpus/test_corpus4008_ik_frontier_ablation_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-heldout-source-only-ik-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  blind-input-and-oracle-firewall-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source only, no native oracle leakage, independent immutable scoring
+        run: |
+          set -euo pipefail
+          python -m pip install -q --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_blind_derived_ik_v1.py tests/corpus/test_corpus4008_derived_rigprogram_adapter_v1.py tests/corpus/test_corpus4008_ik_frontier_ablation_v1.py
+          python -m compileall -q tools/corpus/derive_corpus4008_rigprogram_prior_v1.py tools/corpus/blender_corpus4008_blind_ik_discovery_v1.py tools/corpus/blender_corpus4008_derived_ik_target_assay_v1.py models/axis/experimental_derived_control_adapter_v1.py
+
+  heldout-native-rig-blind-discovery:
+    needs: blind-input-and-oracle-firewall-regressions
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        rig: [rig-bird, rig-fox, rig-horse, rig-human, rig-kaiju, rig-shark]
+    env:
+      RIG: ${{ matrix.rig }}
+      SOURCE_COMMIT: dc2eb3cf06ba0aaeb0c651503d5667f773781522
+      RCLONE_CONFIG: /tmp/realsas-c4008-blind-rig-oracle-private.conf
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/heldout_derived_ik_frontier_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: engine
+      - uses: actions/checkout@v4
+        with:
+          repository: Mesh2Motion/mesh2motion-assets
+          ref: dc2eb3cf06ba0aaeb0c651503d5667f773781522
+          path: upstream-rigs
+          persist-credentials: false
+      - name: Verify upstream CC0 source and exact immutable git SHA
+        run: |
+          set -euo pipefail
+          test "$(git -C upstream-rigs rev-parse HEAD)" = "$SOURCE_COMMIT"
+          test -s upstream-rigs/LICENSE
+          grep -q 'Creative Commons' upstream-rigs/LICENSE
+          test -s "upstream-rigs/rigs/$RIG.blend"
+          python -m compileall -q engine/tools/corpus/blender_corpus4008_blind_ik_discovery_v1.py
+      - name: Require private evidence archive for original rig observations
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "No private Drive: native rig/oracle experiment skipped." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Fetch immutable verified Blender and decompress bounded source asset
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone xz-utils zstd libegl1 libgl1 libgl1-mesa-dri libopengl0
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          root="$RUNNER_TEMP/c4008-derived-rig"
+          mkdir -p "$root/bin" "$root/source" "$root/evidence"
+          cd "$root/bin"
+          curl -fL --retry 4 --max-time 300 https://download.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz -o blender.tar.xz
+          curl -fL --retry 4 --max-time 120 https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256 -o official.sha256
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,re
+          lines=[x for x in Path("official.sha256").read_text().splitlines()
+                 if "blender-4.5.14-linux-x64.tar.xz" in x]
+          assert len(lines)==1
+          expected=re.findall('[0-9a-fA-F]{64}',lines[0])
+          assert len(expected)==1
+          with open("blender.tar.xz","rb") as f:
+              assert hashlib.file_digest(f,"sha256").hexdigest()==expected[0].lower()
+          PY
+          tar -xJf blender.tar.xz
+          printf '050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8  %s\n' "$root/bin/blender-4.5.14-linux-x64/blender" | sha256sum -c
+      - name: Freeze blind source-only candidate graph and independently score held-out native IK
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          PYTHONPATH: ${{ github.workspace }}/engine
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-derived-rig"
+          upstream="$GITHUB_WORKSPACE/upstream-rigs/rigs/$RIG.blend"
+          target="$root/source/$RIG.blend"
+          transport_sha="$(sha256sum "$upstream" | cut -d' ' -f1)"
+          magic="$(head -c 4 "$upstream" | od -An -tx1 | tr -d ' \n')"
+          if test "$magic" = "424c454e"; then
+            cp "$upstream" "$target"
+          elif test "$magic" = "28b52ffd"; then
+            (ulimit -f 262144; timeout 45s zstd -q -d -f "$upstream" -o "$target")
+          else
+            echo "INVALID_PINNED_NATIVE_SOURCE_MAGIC" >&2
+            exit 10
+          fi
+          test "$(head -c 7 "$target")" = BLENDER
+          decoded_sha="$(sha256sum "$target" | cut -d' ' -f1)"
+          timeout 300s "$root/bin/blender-4.5.14-linux-x64/blender" \
+            --background --factory-startup --disable-autoexec --python-exit-code 1 \
+            --python "$GITHUB_WORKSPACE/engine/tools/corpus/blender_corpus4008_blind_ik_discovery_v1.py" -- \
+            --source "$target" --expected-sha "$decoded_sha" \
+            --transport-sha "$transport_sha" --source-commit "$SOURCE_COMMIT" \
+            --asset "$RIG" --output "$root/evidence/$RIG.blind-ik.json"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-derived-rig/evidence"
+          r=json.loads((root/(os.environ["RIG"]+".blind-ik.json")).read_text())
+          p=r["blind_candidate_program"]
+          o=r["native_ik_oracle_evaluation_only"]
+          assert r["training_authorized"] is False
+          assert p["source_rig_ik_constraint_visibility"]=="BLINDED"
+          assert not r["derived_ik_solver_behavior_tested"]
+          print("## Source-only AXIS RigProgram IK candidate discovery",os.environ["RIG"])
+          print("Source weighted distal candidates:",p["source_deform_weighted_distal_count"])
+          print("Blind proposed control chains:",p["discovered_candidate_count"])
+          print("Native held-out IK constraints:",o["oracle_ik_constraint_count"])
+          print("Top-32 half-chain overlap hits:",o["chain_overlap_at_least_half"])
+          print("Top-32 exact native owner effector hits:",o["exact_native_owner_end_effector_recall"])
+          f32=r["native_ik_oracle_frontier_top32_evaluation_only"]
+          f128=r["native_ik_oracle_frontier_top128_evaluation_only"]
+          assert r["heldout_rig_did_not_inform_frontier_policy"] is True
+          print("Frontier top32 half-chain hits:",f32["chain_overlap_at_least_half"])
+          print("Frontier top32 exact owners:",f32["exact_native_owner_end_effector_recall"])
+          print("Frontier top128 half-chain hits:",f128["chain_overlap_at_least_half"])
+          print("Frontier top128 exact owners:",f128["exact_native_owner_end_effector_recall"])
+          print("No manual matching to held-out native constraint names.")
+          print("Native original graph was NOT available to the candidate producer.")
+          print("No solver/deformation/model training PASS.")
+          PY
+      - name: Test source-only derived RigProgram CCD targets and skinned consequences
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          PYTHONPATH: ${{ github.workspace }}/engine
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-derived-rig"
+          target="$root/source/$RIG.blend"
+          decoded_sha="$(sha256sum "$target" | cut -d' ' -f1)"
+          timeout 340s "$root/bin/blender-4.5.14-linux-x64/blender" \
+            --background --factory-startup --disable-autoexec --python-exit-code 1 \
+            --python "$GITHUB_WORKSPACE/engine/tools/corpus/blender_corpus4008_derived_ik_target_assay_v1.py" -- \
+            --source "$target" --expected-sha "$decoded_sha" --asset "$RIG" \
+            --output "$root/evidence/$RIG.source-only-ik-targets.json"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-derived-rig/evidence"
+          d=json.loads((root/(os.environ["RIG"]+".source-only-ik-targets.json")).read_text())
+          assert d["training_authorized"] is False
+          assert d["source_control_mask"]=="ALL_SOURCE_CONSTRAINTS_MUTED"
+          assert d["source_constraint_graph_consumed_by_solver"] is False
+          print("## Source-only generic CCD target assay:",os.environ["RIG"])
+          print("Chains tested:",d["tested_source_only_candidate_chains"])
+          print("Target interventions:",d["source_only_target_trials"])
+          print("Measurable:",d["source_only_target_trials_measurable"])
+          print("Target error reduced >50%:",d["source_only_targets_error_reduced"])
+          print("Moving deformed mesh observed:",d["source_only_targets_with_mesh_response"])
+          print("Native controller graph/rig constraints remain invisible to solver.")
+          print("Joint limits, contact, control equivalence and training: NOT ADMITTED.")
+          PY
+      - name: Quarantine source-only hypotheses and native oracle observations separately
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-derived-rig/evidence"
+          if test -s "$RCLONE_CONFIG" && test -f "$root/$RIG.blind-ik.json"; then
+            rclone copy "$root" "$PRIVATE_OUTPUT" --checksum --retries 3
+            echo "Original native source oracle and blinded candidate SHA archived privately." >> "$GITHUB_STEP_SUMMARY"
+          fi

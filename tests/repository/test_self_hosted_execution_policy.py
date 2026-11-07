@@ -110,7 +110,12 @@ def test_automatic_self_hosted_pr_checks_reject_public_fork_code():
             continue
         if not any(_is_explicit_self_hosted(value) for value in _runner_values(text)):
             continue
-        if path.name == "platform_developer_deploy.yml" and "    if: github.event_name == 'push' && github.ref == 'refs/heads/main'" in text:
+        if path.name == "platform_developer_deploy.yml" and (
+            "  developer-host:\n" not in text
+            and text.count("runs-on: [self-hosted, linux, x64, realsas]") == 1
+            and "    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'" in text
+        ):
+            # Hosted PR checks can coexist with an unreachable-in-PR manual host.
             continue
         if "github.event.pull_request.head.repo.full_name == github.repository" not in text:
             missing.append(path.name)

@@ -345,6 +345,198 @@
       "critical_gaps": [
         "not a training data source"
       ]
+    },
+    {
+      "id": "blender_studio_rain_v3",
+      "name": "Blender Studio Rain v3",
+      "url": "https://studio.blender.org/characters/rain/v3/",
+      "raw_candidate_count": 1,
+      "count_unit": "canonical native production-rig subject, not rig versions",
+      "source_family": "Blender Studio",
+      "kind": "native_full_control_gold_candidate",
+      "status": "ORIGINAL_BLEND_ACQUISITION_AND_LICENSE_RECEIPT_PENDING",
+      "license": "Official page CC-BY: attribution required; commercial/ML rights and any bundled third-party dependencies need individual documentation",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "control_features_claimed": [
+        "IK/FK toggle and snapping",
+        "stretchy IK limbs/spine",
+        "FK hinge",
+        "IK parent switching",
+        "layered face controls",
+        "shape-key correctives"
+      ],
+      "critical_gaps": [
+        "native .blend exact SHA",
+        "independent actual IK/FK manipulation",
+        "Blender bundled python script security sandbox",
+        "model/render/source rights",
+        "dedup lineage"
+      ]
+    },
+    {
+      "id": "blender_studio_snow_v4",
+      "name": "Blender Studio Snow v4",
+      "url": "https://studio.blender.org/characters/snow/v4/",
+      "raw_candidate_count": 1,
+      "count_unit": "canonical native production-rig subject",
+      "source_family": "Blender Studio",
+      "kind": "native_full_control_gold_candidate",
+      "status": "ORIGINAL_BLEND_ACQUISITION_AND_LICENSE_RECEIPT_PENDING",
+      "license": "Official page CC-BY; attribution and original source asset receipts required",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "control_features_claimed": [
+        "IK/FK toggle and snapping",
+        "stretchy IK",
+        "FK hinge",
+        "IK parent switching",
+        "face shape-key correctives"
+      ],
+      "critical_gaps": [
+        "Blender 4.1 authored file compatibility",
+        "baked vs native controller parity",
+        "source rights",
+        "real response/animation court"
+      ]
+    },
+    {
+      "id": "blender_studio_critter_v1",
+      "name": "Blender Studio Critter",
+      "url": "https://studio.blender.org/characters/critter/v1/",
+      "raw_candidate_count": 1,
+      "count_unit": "canonical nonhumanoid production-rig subject",
+      "source_family": "Blender Studio",
+      "kind": "native_full_control_gold_candidate",
+      "status": "ACCESS_AND_ORIGINAL_BLEND_COURT_PENDING",
+      "license": "Official page CC-BY; verify attribution and dependencies",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "control_features_claimed": [
+        "reverse FK setup described",
+        "pose library",
+        "custom scene controls"
+      ],
+      "critical_gaps": [
+        "Blender 5.0 or later required",
+        "regeneration from metarig is not source equivalent",
+        "custom scripts must be sandboxed",
+        "download access",
+        "real constraints and response evidence"
+      ]
+    },
+    {
+      "id": "blender_studio_one_v1",
+      "name": "Blender Studio One",
+      "url": "https://studio.blender.org/characters/one/v1/",
+      "raw_candidate_count": 1,
+      "count_unit": "canonical stylized nonhuman production-rig subject",
+      "source_family": "Blender Studio",
+      "kind": "native_full_control_gold_candidate",
+      "status": "ACCESS_AND_ORIGINAL_BLEND_COURT_PENDING",
+      "license": "Official page CC-BY; verify asset rights",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "control_features_claimed": [
+        "CloudRig generated production rig",
+        "tendril deformation controls in original"
+      ],
+      "critical_gaps": [
+        "Blender 5.0 required",
+        "metarig regeneration differs",
+        "nonnative control machinery",
+        "source-authored runtime verification"
+      ]
+    },
+    {
+      "id": "mesh2motion_original_control_rigs",
+      "name": "Mesh2Motion manually created .blend control rigs",
+      "url": "https://github.com/Mesh2Motion/mesh2motion-assets/tree/main/rigs",
+      "raw_candidate_count": 9,
+      "count_unit": "rig-template families; NOT nine independent character subjects without model binding",
+      "source_family": "Mesh2Motion original source art",
+      "kind": "native_multimorph_control_oracle",
+      "status": "CC0_AUTHOR_STATEMENT_VERIFIED_FILE_SHA_INTERVENTION_PENDING",
+      "license": "Repository CC0; verify original artwork file per file and dependencies",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "control_features_claimed": [
+        "manually authored native Blender rig sources",
+        "skeletons for bird dragon fox horse human kaiju shark snake spider",
+        "custom shapes and source actions"
+      ],
+      "critical_gaps": [
+        "actual IK constraint and controller census still unmeasured",
+        "rig template vs distinct model lineage",
+        "binding to native model",
+        "authored action response",
+        "commercial derivative rights for imported third-party packs"
+      ]
+    },
+    {
+      "id": "cartoon_knight_lucasdmok",
+      "name": "The Cartoon Knight Blender rig",
+      "url": "https://lucasdmok.gumroad.com/l/UsjRz",
+      "raw_candidate_count": 1,
+      "count_unit": "one unique rigged stylized character",
+      "source_family": "Lucas de Miguel",
+      "kind": "native_full_control_candidate",
+      "status": "SOURCE_DOWNLOAD_LICENSE_RECEIPT_AND_SHA_PENDING",
+      "license": "Listing says CC-BY 4.0, but also has inconsistent free-use wording; preserve license document and resolve before product training",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "control_features_claimed": [
+        "limb IK/FK switching",
+        "independently animated arms/legs"
+      ],
+      "critical_gaps": [
+        "free version textures missing; Graphics source RGB blocked",
+        "no face/finger controls",
+        "download+rights proof",
+        "IK/FK intervention"
+      ]
     }
   ]
 }

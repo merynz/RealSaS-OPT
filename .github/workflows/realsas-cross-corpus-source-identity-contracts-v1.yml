@@ -9,6 +9,8 @@ on:
       - "tests/corpus/test_cross_corpus_source_identity_v1.py"
       - "tools/corpus/build_cross_corpus_identity_quarantine_v1.py"
       - "tests/corpus/test_cross_corpus_identity_quarantine_v1.py"
+      - "tools/corpus/build_verified_cross_corpus_source_clusters_v2.py"
+      - "tests/corpus/test_verified_cross_corpus_source_clusters_v2.py"
       - ".github/workflows/realsas-cross-corpus-source-identity-contracts-v1.yml"
   workflow_dispatch:
 
@@ -25,5 +27,5 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install -q --disable-pip-version-check pytest
-          python -m compileall -q tools/corpus/audit_cross_corpus_source_identity_v1.py tools/corpus/build_cross_corpus_identity_quarantine_v1.py
-          PYTHONPATH=. python -m pytest -q tests/corpus/test_cross_corpus_source_identity_v1.py tests/corpus/test_cross_corpus_identity_quarantine_v1.py
+          python -m compileall -q tools/corpus/audit_cross_corpus_source_identity_v1.py tools/corpus/build_cross_corpus_identity_quarantine_v1.py tools/corpus/build_verified_cross_corpus_source_clusters_v2.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_cross_corpus_source_identity_v1.py tests/corpus/test_cross_corpus_identity_quarantine_v1.py tests/corpus/test_verified_cross_corpus_source_clusters_v2.py

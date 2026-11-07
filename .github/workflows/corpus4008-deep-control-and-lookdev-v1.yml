@@ -12,6 +12,8 @@ on:
       - 'tools/corpus/validate_corpus4008_deep_diagnostic_v1.py'
       - 'tests/corpus/test_corpus4008_control_profile_v1.py'
       - 'tests/corpus/test_corpus4008_deep_diagnostic_v1.py'
+      - 'tools/corpus/build_corpus4008_deep_control_matrix_v1.py'
+      - 'tests/corpus/test_corpus4008_deep_control_matrix_v1.py'
   workflow_dispatch:
 
 permissions:
@@ -32,11 +34,13 @@ jobs:
           python -m pip install --disable-pip-version-check pytest
           PYTHONPATH=. python -m pytest -q \
             tests/corpus/test_corpus4008_control_profile_v1.py \
-            tests/corpus/test_corpus4008_deep_diagnostic_v1.py
+            tests/corpus/test_corpus4008_deep_diagnostic_v1.py \
+            tests/corpus/test_corpus4008_deep_control_matrix_v1.py
           python -m compileall -q \
             tools/corpus/blender_corpus4008_control_profile_v1.py \
             tools/corpus/blender_corpus4008_lookdev_study_v1.py \
-            tools/corpus/validate_corpus4008_deep_diagnostic_v1.py
+            tools/corpus/validate_corpus4008_deep_diagnostic_v1.py \
+            tools/corpus/build_corpus4008_deep_control_matrix_v1.py
   original-source-pilot:
     needs: evidence-contracts
     if: github.event.repository.private == false
@@ -74,6 +78,8 @@ jobs:
           rclone copyto "$REMOTE/sources/objaverse_animated_originals/06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115_06e9a576a49eff4a.fbx" "$RUNNER_TEMP/c4008-deep/source/objaverse.fbx" --retries 3
           rclone copyto "$REMOTE/sources/kaykit_cc0/93e6e25213009952276d9cf3_93e6e25213009952.glb" "$RUNNER_TEMP/c4008-deep/source/kaykit.glb" --retries 3
           rclone copyto "$REMOTE/sources/quaternius_cc0/3e0ebe0b075e5c0e365dccc8_3e0ebe0b075e5c0e.obj" "$RUNNER_TEMP/c4008-deep/source/quaternius.obj" --retries 3
+          rclone copyto "$REMOTE/metadata/CANONICAL_VARIANT_SELECTION.json" "$RUNNER_TEMP/c4008-deep/source/selection.json" --retries 3
+          printf 'af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9  %s\n' "$RUNNER_TEMP/c4008-deep/source/selection.json" | sha256sum -c
           printf '06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115  %s\n' "$RUNNER_TEMP/c4008-deep/source/objaverse.fbx" | sha256sum -c
           printf '93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545  %s\n' "$RUNNER_TEMP/c4008-deep/source/kaykit.glb" | sha256sum -c
           printf '3e0ebe0b075e5c0e365dccc8a6483d0a5e872be7613b71297a243028c53d3f3b  %s\n' "$RUNNER_TEMP/c4008-deep/source/quaternius.obj" | sha256sum -c
@@ -126,6 +132,10 @@ jobs:
             --control "$root/output/kaykit.control.json" \
             --lookdev "$root/output/kaykit_lookdev/LOOKDEV_STUDY_V1.json" \
             --output "$root/output/kaykit.deep.validated.json"
+          python -m tools.corpus.build_corpus4008_deep_control_matrix_v1 \
+            --selection "$root/source/selection.json" \
+            --control-receipts "$root/output" \
+            --output "$root/output/matrix"
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json,os
           from pathlib import Path
@@ -142,6 +152,9 @@ jobs:
           d=json.loads((root/'kaykit.deep.validated.json').read_text())
           assert d['training_authorized'] is False
           print('KayKit three same-source render studies SHA-verified: 3')
+          m=json.loads((root/'matrix/CORPUS4008_DEEP_CONTROL_MATRIX_V1.json').read_text())
+          assert m['selected_master_count']==3993 and not m['training_authorized']
+          print('Master per-asset control coverage:',m['control_receipt_status_counts'])
           print('No anatomical front, functional IK or source RGB is qualified.')
           PY
       - name: Persist actual receipts/images in private Drive quarantine only

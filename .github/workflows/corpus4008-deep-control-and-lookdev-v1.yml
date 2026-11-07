@@ -1,0 +1,177 @@
+name: corpus4008-deep-control-and-lookdev-v1
+
+# Isolated diagnostic: independently SHA-verified original FBX/GLB/OBJ.
+# No model admission, no source RGB authority; all actual images/receipts PRIVATE.
+on:
+  push:
+    branches: [corpus4008-deep-control-and-lookdev-audit-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-deep-control-and-lookdev-v1.yml'
+      - 'tools/corpus/blender_corpus4008_control_profile_v1.py'
+      - 'tools/corpus/blender_corpus4008_lookdev_study_v1.py'
+      - 'tools/corpus/validate_corpus4008_deep_diagnostic_v1.py'
+      - 'tests/corpus/test_corpus4008_control_profile_v1.py'
+      - 'tests/corpus/test_corpus4008_deep_diagnostic_v1.py'
+      - 'tools/corpus/build_corpus4008_deep_control_matrix_v1.py'
+      - 'tests/corpus/test_corpus4008_deep_control_matrix_v1.py'
+      - 'tests/corpus/test_corpus4008_lookdev_pixels_v1.py'
+      - 'tools/corpus/audit_corpus4008_lookdev_pixels_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-deep-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidence-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test deep control and render authority firewalls
+        run: |
+          python -m pip install --disable-pip-version-check pytest Pillow
+          PYTHONPATH=. python -m pytest -q \
+            tests/corpus/test_corpus4008_control_profile_v1.py \
+            tests/corpus/test_corpus4008_deep_diagnostic_v1.py \
+            tests/corpus/test_corpus4008_deep_control_matrix_v1.py \
+            tests/corpus/test_corpus4008_lookdev_pixels_v1.py
+          python -m compileall -q \
+            tools/corpus/blender_corpus4008_control_profile_v1.py \
+            tools/corpus/blender_corpus4008_lookdev_study_v1.py \
+            tools/corpus/validate_corpus4008_deep_diagnostic_v1.py \
+            tools/corpus/build_corpus4008_deep_control_matrix_v1.py \
+            tools/corpus/audit_corpus4008_lookdev_pixels_v1.py
+  original-source-pilot:
+    needs: evidence-contracts
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c4008-deep-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/deep_control_lookdev_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check private read-only source access
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "No private Drive secret: zero original-source or render claims." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Pin Blender and verify exact original bytes
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone xz-utils libegl1 libgl1 libgl1-mesa-dri libopengl0
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          mkdir -p "$RUNNER_TEMP/c4008-deep/source" "$RUNNER_TEMP/c4008-deep/runtime" "$RUNNER_TEMP/c4008-deep/output"
+          rclone copyto "$REMOTE/sources/objaverse_animated_originals/06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115_06e9a576a49eff4a.fbx" "$RUNNER_TEMP/c4008-deep/source/objaverse.fbx" --retries 3
+          rclone copyto "$REMOTE/sources/kaykit_cc0/93e6e25213009952276d9cf3_93e6e25213009952.glb" "$RUNNER_TEMP/c4008-deep/source/kaykit.glb" --retries 3
+          rclone copyto "$REMOTE/sources/quaternius_cc0/3e0ebe0b075e5c0e365dccc8_3e0ebe0b075e5c0e.obj" "$RUNNER_TEMP/c4008-deep/source/quaternius.obj" --retries 3
+          rclone copyto "$REMOTE/metadata/CANONICAL_VARIANT_SELECTION.json" "$RUNNER_TEMP/c4008-deep/source/selection.json" --retries 3
+          printf 'af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9  %s\n' "$RUNNER_TEMP/c4008-deep/source/selection.json" | sha256sum -c
+          printf '06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115  %s\n' "$RUNNER_TEMP/c4008-deep/source/objaverse.fbx" | sha256sum -c
+          printf '93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545  %s\n' "$RUNNER_TEMP/c4008-deep/source/kaykit.glb" | sha256sum -c
+          printf '3e0ebe0b075e5c0e365dccc8a6483d0a5e872be7613b71297a243028c53d3f3b  %s\n' "$RUNNER_TEMP/c4008-deep/source/quaternius.obj" | sha256sum -c
+          cd "$RUNNER_TEMP/c4008-deep/runtime"
+          curl -fL --retry 4 --max-time 300 https://download.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz -o blender.tar.xz
+          curl -fL --retry 4 --max-time 120 https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256 -o official.sha256
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,re
+          lines=[x for x in Path('official.sha256').read_text().splitlines()
+                 if 'blender-4.5.14-linux-x64.tar.xz' in x]
+          assert len(lines)==1
+          expected=re.findall('[0-9a-fA-F]{64}',lines[0])
+          assert len(expected)==1
+          with open('blender.tar.xz','rb') as f:
+              assert hashlib.file_digest(f,'sha256').hexdigest()==expected[0].lower()
+          PY
+          tar -xJf blender.tar.xz
+          printf '050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8  %s\n' "$RUNNER_TEMP/c4008-deep/runtime/blender-4.5.14-linux-x64/blender" | sha256sum -c
+      - name: Observe deep IK/controllers/drivers/actions on three real originals
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-deep"
+          binary="$root/runtime/blender-4.5.14-linux-x64/blender"
+          "$binary" --background --factory-startup --python-exit-code 1 --python tools/corpus/blender_corpus4008_control_profile_v1.py -- \
+            --source "$root/source/objaverse.fbx" --expected-sha256 06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115 \
+            --asset-id asset_09178fa704865496d57c11be --candidate-id objaverse_animated_originals:06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115 \
+            --output "$root/output/objaverse.control.json"
+          "$binary" --background --factory-startup --python-exit-code 1 --python tools/corpus/blender_corpus4008_control_profile_v1.py -- \
+            --source "$root/source/kaykit.glb" --expected-sha256 93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545 \
+            --asset-id asset_551ea351b43a1787d0f55536 --candidate-id kaykit_cc0:93e6e25213009952276d9cf3 \
+            --output "$root/output/kaykit.control.json"
+          "$binary" --background --factory-startup --python-exit-code 1 --python tools/corpus/blender_corpus4008_control_profile_v1.py -- \
+            --source "$root/source/quaternius.obj" --expected-sha256 3e0ebe0b075e5c0e365dccc8a6483d0a5e872be7613b71297a243028c53d3f3b \
+            --asset-id asset_102c52015bc540c2fe3f7ef5 --candidate-id quaternius_cc0:3e0ebe0b075e5c0e365dccc8 \
+            --output "$root/output/quaternius.control.json"
+      - name: Render private same-source style comparison on original KayKit GLB
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-deep"
+          python -m pip install --disable-pip-version-check Pillow
+          "$root/runtime/blender-4.5.14-linux-x64/blender" --background --factory-startup --python-exit-code 1 --python tools/corpus/blender_corpus4008_lookdev_study_v1.py -- \
+            --source "$root/source/kaykit.glb" --expected-sha256 93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545 \
+            --asset-id asset_551ea351b43a1787d0f55536 --candidate-id kaykit_cc0:93e6e25213009952276d9cf3 \
+            --output "$root/output/kaykit_lookdev" --resolution 640
+          python -m tools.corpus.validate_corpus4008_deep_diagnostic_v1 \
+            --control "$root/output/kaykit.control.json" \
+            --lookdev "$root/output/kaykit_lookdev/LOOKDEV_STUDY_V1.json" \
+            --output "$root/output/kaykit.deep.validated.json"
+          python -m tools.corpus.audit_corpus4008_lookdev_pixels_v1 \
+            --lookdev-root "$root/output/kaykit_lookdev" \
+            --output "$root/output/kaykit_lookdev/LOOKDEV_PIXEL_AUDIT_V1.json"
+          python -m tools.corpus.build_corpus4008_deep_control_matrix_v1 \
+            --selection "$root/source/selection.json" \
+            --control-receipts "$root/output" \
+            --output "$root/output/matrix"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'c4008-deep/output'
+          print('## Real original-byte source control probe')
+          for name in ('objaverse','kaykit','quaternius'):
+              r=json.loads((root/(name+'.control.json')).read_text())
+              assert r['training_authorized'] is False
+              c=r['imported_control']
+              print(name, 'bones',c['imported_pose_bone_count'],
+                    'imported IK',c['imported_ik_constraint_count'],
+                    'drivers',c['imported_driver_count'],
+                    'action curves',c['imported_action_curve_count'])
+          d=json.loads((root/'kaykit.deep.validated.json').read_text())
+          assert d['training_authorized'] is False
+          print('KayKit three same-source render studies SHA-verified: 3')
+          m=json.loads((root/'matrix/CORPUS4008_DEEP_CONTROL_MATRIX_V1.json').read_text())
+          assert m['selected_master_count']==3993 and not m['training_authorized']
+          print('Master per-asset control coverage:',m['control_receipt_status_counts'])
+          print('No anatomical front, functional IK or source RGB is qualified.')
+          PY
+      - name: Persist actual receipts/images in private Drive quarantine only
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-deep/output"
+          if test -s "$RCLONE_CONFIG" && test -d "$root"; then
+            rclone copy "$root" "$PRIVATE_OUTPUT" --checksum --retries 3
+            echo "Private SHA-sealed imported control and lookdev receipts stored; no public image or model authority." >> "$GITHUB_STEP_SUMMARY"
+          fi

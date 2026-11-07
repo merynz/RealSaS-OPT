@@ -14,6 +14,9 @@ import math
 from collections import Counter
 from pathlib import Path
 
+# Blender bundled Python may ignore PYTHONPATH; bind package root explicitly.
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from tools.corpus.blender_corpus4008_native_source_probe_v1 import (
     import_source, finite_matrix, require, sha,
 )

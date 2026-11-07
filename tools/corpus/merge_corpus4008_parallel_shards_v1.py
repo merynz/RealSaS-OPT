@@ -20,9 +20,8 @@ from tools.corpus.audit_corpus4008_parallel_shard_v1 import (
     read_csv,
     require,
 )
-from tools.corpus.reconcile_corpus4008_recovery_into_source_matrix_v1 import (
-    SELECT_SHA as MASTER_SELECTION_SHA,
-)
+# Pinned to the source-availability Master3993 SHA, rechecked on readback.
+MASTER_SELECTION_SHA = "af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9"
 
 SCHEMA = "RealSaS.Corpus4008Parallel1024ImportedSceneMasterLedger.v1"
 HEADS = ("IRIS_GEOMETRY", "IRIS_SEMANTIC", "IRIS_GRAPHICS",

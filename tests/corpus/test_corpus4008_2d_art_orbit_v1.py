@@ -131,3 +131,15 @@ def test_source_space_framing_can_fit_narrow_character_without_hiding_camera_met
     newheight=0.43*old/scale
     assert newwidth>=0.42
     assert newheight<=0.90
+
+
+def test_actual_alpha_feedback_enlarges_narrow_views_generically():
+    from tools.corpus.blender_corpus4008_2d_art_orbit_pilot_v1 import (
+        source_space_alpha_feedback_scale)
+    original=3.2
+    scaled,changed=source_space_alpha_feedback_scale(original,.369,.523)
+    assert changed and scaled < original
+    assert .369*original/scaled >= .42
+    assert .523*original/scaled <= .95
+    same,changed=source_space_alpha_feedback_scale(original,.51,.61)
+    assert same==original and changed is False

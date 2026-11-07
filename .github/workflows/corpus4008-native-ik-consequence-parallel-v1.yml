@@ -1,0 +1,159 @@
+name: corpus4008-native-ik-consequence-parallel-v1
+
+# Actual original Blender rigs: native constraint target perturbation, joint
+# response and evaluated skin motion. Two concurrently isolated workers.
+# Observations ONLY; no native IK/FX supervision authority is minted.
+on:
+  push:
+    branches: [corpus4008-32shard-parallel-evidence-readback-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-native-ik-consequence-parallel-v1.yml'
+      - 'tools/corpus/blender_corpus4008_native_ik_consequence_v1.py'
+      - 'tests/corpus/test_corpus4008_native_ik_consequence_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-native-ik-intervention-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ik-consequence-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Named-rig/skin evidence and syntax tests
+        run: |
+          set -euo pipefail
+          python -m pip install -q --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_native_ik_consequence_v1.py
+          python -m compileall -q tools/corpus/blender_corpus4008_native_ik_consequence_v1.py
+
+  intervene-native-rig:
+    needs: ik-consequence-regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        rig: [rig-spider, rig-dragon]
+    env:
+      RIG: ${{ matrix.rig }}
+      SOURCE_COMMIT: dc2eb3cf06ba0aaeb0c651503d5667f773781522
+      RCLONE_CONFIG: /tmp/realsas-ik-source-intervention-private.conf
+      OUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/native_ik_consequence_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: engine
+      - uses: actions/checkout@v4
+        with:
+          repository: Mesh2Motion/mesh2motion-assets
+          ref: dc2eb3cf06ba0aaeb0c651503d5667f773781522
+          path: upstream-rigs
+          persist-credentials: false
+      - name: Verify immutable CC0 native source commit without executing scripts
+        run: |
+          set -euo pipefail
+          test "$(git -C upstream-rigs rev-parse HEAD)" = "$SOURCE_COMMIT"
+          test -s upstream-rigs/LICENSE
+          grep -q 'Creative Commons' upstream-rigs/LICENSE
+          test -s "upstream-rigs/rigs/$RIG.blend"
+          python -m compileall -q engine/tools/corpus/blender_corpus4008_native_ik_consequence_v1.py
+      - name: Require private receipt storage
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "PRIVATE_DRIVE_NOT_CONFIGURED_NO_IK_PROOF" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Verify original Blender binary and transport-byte lineage
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone xz-utils zstd libegl1 libgl1 libgl1-mesa-dri libopengl0
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          root="$RUNNER_TEMP/native-ik-court"
+          mkdir -p "$root/bin" "$root/source" "$root/results"
+          cd "$root/bin"
+          curl -fL --retry 4 --max-time 300 https://download.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz -o blender.tar.xz
+          curl -fL --retry 4 --max-time 120 https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256 -o official.sha256
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,re
+          lines=[x for x in Path("official.sha256").read_text().splitlines()
+                 if 'blender-4.5.14-linux-x64.tar.xz' in x]
+          assert len(lines)==1
+          expected=re.findall('[0-9a-fA-F]{64}',lines[0])
+          assert len(expected)==1
+          with open('blender.tar.xz','rb') as f:
+              assert hashlib.file_digest(f,'sha256').hexdigest()==expected[0].lower()
+          PY
+          tar -xJf blender.tar.xz
+          printf '050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8  %s\n' "$root/bin/blender-4.5.14-linux-x64/blender" | sha256sum -c
+      - name: Actually perturb native IK targets, evaluate bones and deformation
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          PYTHONPATH: ${{ github.workspace }}/engine
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/native-ik-court"
+          upstream="$GITHUB_WORKSPACE/upstream-rigs/rigs/$RIG.blend"
+          dst="$root/source/$RIG.blend"
+          transport_sha="$(sha256sum "$upstream" | cut -d ' ' -f1)"
+          magic="$(head -c 4 "$upstream" | od -An -tx1 | tr -d ' \n')"
+          if test "$magic" = "424c454e"; then
+            cp "$upstream" "$dst"
+          elif test "$magic" = "28b52ffd"; then
+            (ulimit -f 262144; timeout 45s zstd -q -d -f "$upstream" -o "$dst")
+          else
+            echo "INVALID_NATIVE_SOURCE_TRANSPORT_MAGIC" >&2
+            exit 10
+          fi
+          test "$(head -c 7 "$dst")" = BLENDER
+          decoded_sha="$(sha256sum "$dst" | cut -d ' ' -f1)"
+          timeout 300s "$root/bin/blender-4.5.14-linux-x64/blender" \
+            --background --factory-startup --disable-autoexec --python-exit-code 1 \
+            --python "$GITHUB_WORKSPACE/engine/tools/corpus/blender_corpus4008_native_ik_consequence_v1.py" -- \
+            --source "$dst" --expected-sha256 "$decoded_sha" \
+            --asset-key "$RIG" --source-transport-sha256 "$transport_sha" \
+            --upstream-commit "$SOURCE_COMMIT" \
+            --output "$root/results/$RIG.ik-consequence.json"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"native-ik-court/results"
+          src=os.environ["RIG"]
+          report=json.loads((root/f"{src}.ik-consequence.json").read_text())
+          assert report["source_scripts_autoexec_disabled"] is True
+          assert report["training_authorized"] is False
+          print("## Native IK causal perturbation:",src)
+          print("Observed original IK constraints:",report["source_ik_constraints_total"])
+          print("Perturbable sampled IK constraints:",report["source_ik_constraints_perturbable"])
+          print("Observed joint + evaluated mesh responses:",
+                report["source_ik_constraints_with_indirect_joint_and_mesh_motion_observed"])
+          print("Entire source rig edit behavior and head training authority: UNKNOWN.")
+          PY
+      - name: Quarantine actual IK consequence observations privately
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/native-ik-court/results"
+          if test -s "$RCLONE_CONFIG" && test -d "$root"; then
+            rclone copy "$root" "$OUT" --checksum --retries 3
+            echo "Original native IK perturbation observations written; no training PASS." >> "$GITHUB_STEP_SUMMARY"
+          fi

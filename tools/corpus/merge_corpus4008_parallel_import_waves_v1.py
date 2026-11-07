@@ -19,9 +19,8 @@ from tools.corpus.reconcile_corpus4008_wave1_source_rig_matrix_v1 import (
     EXPECTED_SHARDS as WAVE1_SHARDS,
     reconcile as reconcile_wave,
 )
-from tools.corpus.reconcile_corpus4008_recovery_into_source_matrix_v1 import (
-    SELECT_SHA as MASTER_SELECTION_SHA,
-)
+# Pinned to the source-availability Master3993 SHA, rechecked on readback.
+MASTER_SELECTION_SHA = "af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9"
 
 WAVE2_SHARDS=tuple(i for i in range(32) if i not in WAVE1_SHARDS)
 WAVE3_SHARDS=tuple(range(32))

@@ -1,0 +1,206 @@
+name: corpus4008-parallel-original-normalization-v1
+
+# 32 ORIGINAL sources, across 8 independently provisioned hosted jobs.
+# One exact SHA-verified source per shard; 4 shards per worker, pinned Blender
+# downloaded once per worker. No source-art/rig/semantic truth or training.
+on:
+  push:
+    branches: [corpus4008-32shard-parallel-evidence-readback-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-parallel-original-normalization-v1.yml'
+      - 'tools/corpus/plan_corpus4008_parallel_normalization_v1.py'
+      - 'tests/corpus/test_corpus4008_parallel_normalization_selector_v1.py'
+      - 'tools/corpus/build_corpus4008_normalization_plan_v1.py'
+      - 'tools/corpus/blender_corpus4008_source_bounds_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-parallel-norm-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  normalization-selector-and-coordinate-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test source selection and exact reversible coordinate plans
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check -q pytest
+          PYTHONPATH=. python -m pytest -q \
+            tests/corpus/test_corpus4008_parallel_normalization_selector_v1.py \
+            tests/corpus/test_corpus4008_normalization_plan_v1.py
+          python -m compileall -q \
+            tools/corpus/plan_corpus4008_parallel_normalization_v1.py \
+            tools/corpus/blender_corpus4008_source_bounds_v1.py \
+            tools/corpus/build_corpus4008_normalization_plan_v1.py
+
+  verify-four-native-sources:
+    needs: normalization-selector-and-coordinate-contracts
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        group: [0, 1, 2, 3, 4, 5, 6, 7]
+    env:
+      GROUP: ${{ matrix.group }}
+      RCLONE_CONFIG: /tmp/realsas-c4008-parallel-normalize-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      OUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/parallel_source_normalization_v1/${{ github.run_id }}-${{ github.run_attempt }}/group-${{ matrix.group }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require source-private Drive
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "NO_PRIVATE_SOURCE__NO_NORMALIZATION_PROOF" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Fetch pinned Blender once for four original source import checks
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone xz-utils libegl1 libgl1 libgl1-mesa-dri libopengl0
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          root="$RUNNER_TEMP/c4008-parallel-norm"
+          mkdir -p "$root/bin" "$root/source" "$root/result"
+          cd "$root/bin"
+          curl -fL --retry 4 --max-time 300 https://download.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz -o blender.tar.xz
+          curl -fL --retry 4 --max-time 120 https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256 -o official.sha256
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,re
+          lines=[x for x in Path('official.sha256').read_text().splitlines()
+                 if 'blender-4.5.14-linux-x64.tar.xz' in x]
+          assert len(lines)==1
+          expected=re.findall('[0-9a-fA-F]{64}',lines[0])
+          assert len(expected)==1
+          with open('blender.tar.xz','rb') as f:
+              assert hashlib.file_digest(f,'sha256').hexdigest()==expected[0].lower()
+          PY
+          tar -xJf blender.tar.xz
+          printf '050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8  %s\n' "$root/bin/blender-4.5.14-linux-x64/blender" | sha256sum -c
+      - name: Run SHA-bound source-normalization on four disjoint shards
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-parallel-norm"
+          binary="$root/bin/blender-4.5.14-linux-x64/blender"
+          : > "$root/result/STATUS.jsonl"
+          for shard in $(seq "$((GROUP*4))" "$((GROUP*4+3))"); do
+            if test "$((shard % 4))" = 0; then
+              old="wave1_source_rig_scene_v1/42387604493-1"
+            else
+              old="wave2_source_rig_scene_v1/42388620135-1"
+            fi
+            rclone copyto "$REMOTE/audits/$old/shard-$shard/PLAN.json" \
+              "$root/result/shard-$shard.PLAN.json" --retries 3
+            rclone copyto "$REMOTE/audits/$old/shard-$shard/RESULTS.jsonl" \
+              "$root/result/shard-$shard.RESULTS.jsonl" --retries 3
+            python -m tools.corpus.plan_corpus4008_parallel_normalization_v1 \
+              --plan "$root/result/shard-$shard.PLAN.json" \
+              --results "$root/result/shard-$shard.RESULTS.jsonl" \
+              --shard "$shard" \
+              --output "$root/result/shard-$shard.SELECTION.json"
+            export SRC_SHARD="$shard" SRC_ROOT="$root"
+            read -r asset source_sha ext source_bytes <<EOF
+          $(python - <<'PY'
+          import json,os,re
+          from pathlib import Path
+          root=Path(os.environ["SRC_ROOT"])/"result"
+          sh=os.environ["SRC_SHARD"]
+          row=json.loads((root/f"shard-{sh}.SELECTION.json").read_text())["candidate"]
+          aid=row["canonical_asset_id"]
+          sha=row["source_sha256"]
+          ext=row["source_ext"]
+          size=row["source_byte_count"]
+          assert re.fullmatch(r"asset_[a-f0-9]{24}",aid)
+          assert re.fullmatch(r"[a-f0-9]{64}",sha)
+          assert ext in (".glb",".fbx",".gltf") and 0<size<=32*1024*1024
+          print(aid,sha,ext,size)
+          PY
+          )
+          EOF
+            original="$REMOTE/audits/original_recovery_full_v1/42374046073-1/shard-$shard/verified_quarantine_objects/$source_sha$ext"
+            target="$root/source/$source_sha$ext"
+            status="ORIGINAL_FETCH_EXCEPTION"
+            if rclone copyto "$original" "$target" --retries 3 >"$root/result/shard-$shard.fetch.log" 2>&1; then
+              status="ORIGINAL_SHA_OR_BYTE_SIZE_FAILURE"
+              if test "$(sha256sum "$target" | cut -d' ' -f1)" = "$source_sha" && \
+                 test "$(stat -c %s "$target")" = "$source_bytes"; then
+                status="NATIVE_SOURCE_BOUNDS_OBSERVATION_EXCEPTION"
+                if timeout 120s "$binary" --background --factory-startup --disable-autoexec --python-exit-code 1 \
+                  --python tools/corpus/blender_corpus4008_source_bounds_v1.py -- \
+                  --source "$target" --source-sha256 "$source_sha" \
+                  --asset-id "$asset" \
+                  --candidate-id "objaverse_animated_originals:$source_sha" \
+                  --output "$root/result/shard-$shard.BOUNDS.json" \
+                  >"$root/result/shard-$shard.blender.log" 2>&1; then
+                  status="SOURCE_NORMALIZATION_PLAN_EXCEPTION"
+                  parent_sha="$(sha256sum "$root/result/shard-$shard.BOUNDS.json" | cut -d' ' -f1)"
+                  if python -m tools.corpus.build_corpus4008_normalization_plan_v1 \
+                    --bounds-observation "$root/result/shard-$shard.BOUNDS.json" \
+                    --bounds-observation-sha256 "$parent_sha" \
+                    --output "$root/result/shard-$shard.NORMALIZATION.json"; then
+                    status="SOURCE_BBOX_REVERSIBLE_PLAN_ONLY"
+                  fi
+                fi
+              fi
+            fi
+            export SRC_STATUS="$status" SRC_AID="$asset" SRC_SHA="$source_sha"
+            python - <<'PY' >> "$root/result/STATUS.jsonl"
+          import os,json
+          print(json.dumps({
+            "shard":int(os.environ["SRC_SHARD"]),
+            "canonical_asset_id":os.environ["SRC_AID"],
+            "original_sha256":os.environ["SRC_SHA"],
+            "status":os.environ["SRC_STATUS"],
+            "source_mesh_vertex_roundtrip_courted":False,
+            "source_skin_bind_parity_courted":False,
+            "anatomical_orientation_courted":False,
+            "materialization_authorized":False,
+            "training_authorized":False,
+          },sort_keys=True))
+          PY
+            rm -f "$target"
+          done
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          from collections import Counter
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-parallel-norm/result"
+          rows=[json.loads(x) for x in (root/"STATUS.jsonl").read_text().splitlines()]
+          assert len(rows)==4
+          assert len({x["original_sha256"] for x in rows})==4
+          assert all(x["training_authorized"] is False for x in rows)
+          print("## Reversible source normalization pilot group",os.environ["GROUP"])
+          print("Four distinct original SHA-bound FIT sources:",dict(Counter(x["status"] for x in rows)))
+          print("Source vertex/bone/skin/IK/2D art independent courts remain UNKNOWN.")
+          PY
+      - name: Store private normalization receipts, never the source originals
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-parallel-norm/result"
+          if test -s "$RCLONE_CONFIG" && test -s "$root/STATUS.jsonl"; then
+            rclone copy "$root" "$OUT" --checksum --retries 3
+            echo "Private four-shard normalization observation written; zero training permissions." >> "$GITHUB_STEP_SUMMARY"
+          fi

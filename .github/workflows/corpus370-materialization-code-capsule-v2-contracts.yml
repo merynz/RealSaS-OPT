@@ -15,6 +15,9 @@ on:
       - 'tests/corpus/test_corpus370_materialization_capsule_v2.py'
 permissions:
   contents: read
+concurrency:
+  group: corpus370-materialization-code-capsule-v2-contracts-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   no-github-private-clone-readiness-exact-code-capsule:
     runs-on: ubuntu-24.04

@@ -1,0 +1,31 @@
+name: one-shot-legacy-pr-teacher-queue-cleanup
+on:
+  push:
+    branches: [ops/stale-physical-queue-cleanup-20261107]
+    paths: ['.github/workflows/one_shot_cancel_stale_physical_queue_20261107.yml']
+permissions:
+  contents: read
+  actions: write
+jobs:
+  cancel-one-old-queue:
+    if: github.repository == 'merynz/RealSaS-OPT'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const id = 42360888895;
+            const {data: r} = await github.rest.actions.getWorkflowRun({owner,repo,run_id:id});
+            if (r.head_sha !== '73994ee5dbebca40e6cb51318438fcb2c641da76' ||
+                r.head_branch !== 'corpus370-three-head-semantic-truth-v1-20261107' ||
+                r.path !== '.github/workflows/truth_teacher_source.yml' ||
+                r.event !== 'pull_request') {
+              core.setFailed('UNEXPECTED_SOURCE_RUN_IDENTITY_REFUSE'); return;
+            }
+            if (!['queued','pending'].includes(r.status)) {
+              core.info('ALREADY_NOT_QUEUED:' + r.status); return;
+            }
+            await github.rest.actions.cancelWorkflowRun({owner,repo,run_id:id});
+            core.info('SCOPED_CANCEL_ACCEPTED:' + id);

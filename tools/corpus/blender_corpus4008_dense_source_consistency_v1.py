@@ -142,6 +142,8 @@ def imported_census(bpy,bounds):
             local_influences+=len(all_groups)
             original_influences+=len(all_groups)
             digest_weight_row(h,oi,int(v.index),all_groups)
+            if not all_groups:
+                local_unweighted+=1
             if armature_bound:
                 mesh_skin_candidate_vertices+=1
                 if not all_groups:mesh_unweighted_vertices+=1

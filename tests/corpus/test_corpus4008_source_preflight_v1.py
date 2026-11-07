@@ -75,3 +75,28 @@ def test_deleted_original_does_not_mint_training(tmp_path):
                         sources_root=src,output_dir=tmp_path/"out")
     assert result["statuses"]["SOURCE_RAW_NOT_FOUND"]==4008
     assert result["training_authorized"] is False
+
+
+def test_two_shards_cover_4008_without_dual_owner(tmp_path):
+    src, master, selected = _fixture(tmp_path)
+    results = [
+        build_census(master_path=master,selection_path=selected,
+                     sources_root=src,output_dir=tmp_path / ("shard"+str(i)),
+                     shard_count=2,shard_index=i)
+        for i in (0,1)
+    ]
+    assert sum(x["assigned_assets"] for x in results) == 4008
+    for i in (0,1):
+        assert results[i]["shard_index"] == i
+        assert results[i]["shard_count"] == 2
+        assert results[i]["statuses"]["OTHER_SHARD_NOT_RUN"] == 4008-results[i]["assigned_assets"]
+        assert results[i]["training_authorized"] is False
+    import json
+    a=json.loads((tmp_path/"shard0"/"CORPUS4008_SOURCE_CENSUS_V1.json").read_text())
+    b=json.loads((tmp_path/"shard1"/"CORPUS4008_SOURCE_CENSUS_V1.json").read_text())
+    left={x["canonical_asset_id"]:x for x in a["subjects"]}
+    right={x["canonical_asset_id"]:x for x in b["subjects"]}
+    assert set(left)==set(right)
+    for k in left:
+        assert (left[k]["source_probe_status"]=="OTHER_SHARD_NOT_RUN") != (
+            right[k]["source_probe_status"]=="OTHER_SHARD_NOT_RUN")

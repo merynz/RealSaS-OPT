@@ -5,10 +5,24 @@ Knight scientific qualification. PostgreSQL owns Registry/Attempts; Temporal
 owns durable workflows; Go owns scheduling; Python runs released adapters.
 Temporal CLI's SQLite development server is explicitly not production-ready.
 
-Code ships from exact canonical `main`. Short PRs validate installation contracts
-without mutating services; a deployment-file change merged to main starts the
-authorized self-hosted install. No GitHub-hosted runner is used. Unrelated model
-or Compiler changes do not reinstall services automatically.
+Only an **explicit Actions `workflow_dispatch` on `main`** installs code on the
+physical WSL developer host. Automatic pull-request and `main` push checks
+validate deployment contracts on **GitHub-hosted** runners; they never request
+a physical host. This restores the 2026-10-08 hosted-first/workstation-isolation
+boundary and prevents each unrelated model/Corpus/Compiler commit from creating
+an indefinite `[self-hosted, linux, x64, realsas]` deployment queue.
+
+To deploy a reviewed exact `main`: open Actions → `platform-developer-deployment`
+→ **Run workflow** → branch `main`. The on-host worker separately checks that
+the remote `main` SHA still matches its checkout, and fails closed on drift.
+Do **not** switch this installer to `ubuntu-latest`: the service manager,
+immutable releases, database and artifact roots are on the WSL physical host.
+
+Code may be newer than the installed developer Platform until such an
+authorized deployment is performed. This is expected, and release-bound research
+must continue to enforce its exact source SHA prerequisites. A deliberate
+deployment may queue if that physical machine is offline; automatic pushes
+must not enqueue it.
 
 ## Once on WSL
 

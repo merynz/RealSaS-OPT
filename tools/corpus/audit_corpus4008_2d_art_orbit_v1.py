@@ -107,10 +107,9 @@ def audit(root, *, enforce=False):
         require(v.get("source_space_orbit_degrees")==45*i,
                 "CAMERA_ORBIT_ANGLE")
         m=v.get("camera_source_space_matrix")
-        require(isinstance(m,list) and len(m)==4 and
-                all(isinstance(row,list) and len(row)==4 and
-                    all(isinstance(x,(int,float)) and math.isfinite(x) for x in row)
-                    for row in m),"CAMERA_MATRIX")
+        require(isinstance(m,list) and len(m)==16 and
+                all(isinstance(x,(int,float)) and math.isfinite(x)
+                    for x in m),"CAMERA_MATRIX")
         images={}
         for mode in MODES:
             images[mode]=safe_png(root,v.get(mode+"_png"),v.get(mode+"_sha256"))
@@ -138,7 +137,7 @@ def audit(root, *, enforce=False):
             "numeric_style_candidate_pass":crop_valid and silhouette_valid,
             "human_2d_art_quality_court":"UNKNOWN",
         })
-    require(len({tuple(tuple(x) for x in v["camera_source_space_matrix"])
+    require(len({tuple(v["camera_source_space_matrix"])
                  for v in rows})==8,"DUPLICATE_CAMERA")
     passed=all(x["numeric_style_candidate_pass"] for x in results)
     report={

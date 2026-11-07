@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
-      RCLONE_CONFIG: ${{ runner.temp }}/c4008-rclone-private.conf
+      RCLONE_CONFIG: /tmp/realsas-c4008-private-rclone.conf
       REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
       PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/source_inventory_v1/${{ github.run_id }}-${{ github.run_attempt }}
     steps:

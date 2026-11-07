@@ -1,0 +1,160 @@
+name: corpus370-semantic-source-group-private-full370-v1
+
+# Runs only when this workflow definition is deliberately introduced/modified.
+# Source and artist naming bytes remain strictly in the authenticated Drive.
+on:
+  push:
+    branches: [corpus370-three-head-semantic-truth-v1-20261107]
+    paths:
+      - '.github/workflows/corpus370-semantic-source-group-private-full370-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-semantic-private-full370-v1
+  cancel-in-progress: false
+
+jobs:
+  admit-private-source-request:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    outputs:
+      ready: ${{ steps.gate.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Contract-test new semantic prior and all-370 source accounting
+        run: |
+          python -m pip install --disable-pip-version-check numpy pytest
+          PYTHONPATH=. python -m pytest -q \
+            tests/corpus/test_corpus370_semantic_teacher_v1.py \
+            tests/corpus/test_corpus370_semantic_source_group_sweep_v1.py
+          python -m py_compile \
+            tools/corpus/run_corpus370_semantic_source_group_sweep_v1.py \
+            models/iris/truth/semantic_source_groups_v1.py
+      - name: Gate real 370-source execution on exact SHA and private credential
+        id: gate
+        env:
+          PRIVATE_RCLONE_PRESENT: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          test "${PRIVATE_RCLONE_PRESENT}" = true || {
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "PRIVATE_DRIVE_CREDENTIAL_NOT_PRESENT__NO_SOURCE_WORK_STARTED" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          }
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+  semantic-original-source-group-candidates:
+    needs: [admit-private-source-request]
+    if: needs.admit-private-source-request.outputs.ready == 'true' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      RCLONE_CONFIG: /tmp/realsas-c370-semantic-private.conf
+      MANIFEST_SHA: cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172
+      PRIVATE_REMOTE: gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      REST: /home/monster/realsas_authority/corpus370_source_rest_courts_v1_8ab2ebf5/SOURCE_REST_COURTS_INDEX.json
+      OUTPUT: /home/monster/realsas_authority/corpus370_semantic_source_groups/${{ github.run_id }}-${{ github.run_attempt }}
+      PRIVATE_DEST: gdrive:corpus370_preparation_v1/hosted_semantic_source_groups_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch exact reviewed PR327 source transport implementation (never moving branch)
+        uses: actions/checkout@v4
+        with:
+          ref: 53c38aab5b6a0fed547b96ab84504cb1d5b06c1a
+          path: corpus370-upstream
+      - name: Verify upstream tool commit and private-safe worker resources
+        run: |
+          set -euo pipefail
+          test "$(git -C corpus370-upstream rev-parse HEAD)" = "53c38aab5b6a0fed547b96ab84504cb1d5b06c1a"
+          test "$(awk '/MemTotal:/{print $2}' /proc/meminfo)" -ge 14000000
+          test "$(df -Pk / | awk 'NR==2{print $4}')" -ge 9000000
+          sudo install -d -o "$USER" -g "$(id -gn)" -m 0700 /home/monster/realsas_authority
+          mkdir -p "$OUTPUT"
+          python3 -m pip install --disable-pip-version-check numpy
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Restore exact V5/Stage50 original inputs from SHA-sealed private Drive
+        env:
+          DRIVE_RCLONE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          printf '%s' "$DRIVE_RCLONE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          rclone lsf "$PRIVATE_REMOTE" --max-depth 1 --files-only >/dev/null
+          mkdir -p "$RUNNER_TEMP/semantic-private-shards" "$RUNNER_TEMP/semantic-private-object-cache"
+          rclone copy "$PRIVATE_REMOTE" "$RUNNER_TEMP/semantic-private-shards" \
+            --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3 --quiet
+          python3 corpus370-upstream/tools/corpus/hosted_v5_private_shards_v1.py hydrate \
+            --manifest "$RUNNER_TEMP/semantic-private-shards/PRIVATE_V5_SHARD_MANIFEST.json" \
+            --expected-manifest-sha256 "$MANIFEST_SHA" \
+            --private-dir "$RUNNER_TEMP/semantic-private-shards" \
+            --object-cache "$RUNNER_TEMP/semantic-private-object-cache" \
+            > "$OUTPUT/PRIVATE_REHYDRATION_LOG.txt" 2>&1
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          test "$(sha256sum "$ROSTER" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+          test "$(sha256sum "$REST" | cut -d' ' -f1)" = 384c92940e1ea8eec7bbb98cf319eeda5f89222c07b782b607998e2067f1d9c8
+          echo "EXACT_V5_STAGE50_REAL_370_SOURCE_BYTES_REHYDRATED"
+      - name: Run first 3 original subject groups under independent Stage50 source bounds
+        run: |
+          set -euo pipefail
+          python3 -u tools/corpus/run_corpus370_semantic_source_group_sweep_v1.py \
+            --v5-index "$V5" --exact-source-roster "$ROSTER" --source-rest-index "$REST" \
+            --semantic-policy canonical/REALSAS_SEMANTIC_PRIOR_POLICY_V1.json \
+            --semantic-hint-policy canonical/REALSAS_SEMANTIC_SOURCE_HINT_POLICY_V1.json \
+            --output-root "$OUTPUT/pilot" --max-subjects 3 \
+            > "$OUTPUT/PRIVATE_PILOT_LOG.txt" 2>&1
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ['OUTPUT'])
+          x=json.loads((root/'pilot/CORPUS370_SEMANTIC_SOURCE_GROUP_SWEEP_V1.json').read_text())
+          assert x['status_counts'].get('MEASURED_SOURCE_GROUP_CANDIDATE_ONLY')==3,x['status_counts']
+          assert x['status_counts'].get('SOURCE_GROUP_FAILURE',0)==0
+          assert x['training_authorized'] is False
+          print("3_REAL_SEMANTIC_SOURCE_GROUP_CANDIDATES_PASS__NOT_TRAINING")
+          PY
+      - name: Produce private source-group candidates for ALL original 370 subject identities
+        run: |
+          set -euo pipefail
+          python3 -u tools/corpus/run_corpus370_semantic_source_group_sweep_v1.py \
+            --v5-index "$V5" --exact-source-roster "$ROSTER" --source-rest-index "$REST" \
+            --semantic-policy canonical/REALSAS_SEMANTIC_PRIOR_POLICY_V1.json \
+            --semantic-hint-policy canonical/REALSAS_SEMANTIC_SOURCE_HINT_POLICY_V1.json \
+            --output-root "$OUTPUT/full" --max-subjects 0 \
+            > "$OUTPUT/PRIVATE_FULL_370_LOG.txt" 2>&1
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          x=json.loads((Path(os.environ['OUTPUT'])/'full/CORPUS370_SEMANTIC_SOURCE_GROUP_SWEEP_V1.json').read_text())
+          assert x['subject_count']==370
+          assert x['source_observation_qualified_count']==352
+          assert x['excluded_observation_count']==18
+          assert x['training_authorized'] is False
+          print('# Corpus370 real original-source semantic teacher group census')
+          print('Training/semantic label authority: FALSE; group prior review pending.')
+          print('Original source identifiers accounted: 370')
+          print('Observation failure subjects (excluded):', x['excluded_observation_count'])
+          print('Source group candidate statuses:',json.dumps(x['status_counts'],sort_keys=True))
+          print('Source-name hint counts:',json.dumps(x['semantic_concept_hint_counts'],sort_keys=True))
+          print('Teacher-only; private source names and per-face supports never published in Actions artifacts.')
+          assert x['status_counts'].get('SOURCE_GROUP_FAILURE',0)==0, 'SEMANTIC_SOURCE_GROUP_FAILURES_REQUIRE_REPAIR'
+          assert x['status_counts'].get('MEASURED_SOURCE_GROUP_CANDIDATE_ONLY')==352
+          PY
+      - name: Persist all original artist names/source-face receipts privately, even on repairable failures
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -s "$RCLONE_CONFIG" && test -d "$OUTPUT"; then
+            rclone copy "$OUTPUT" "$PRIVATE_DEST" \
+              --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3 --quiet
+            echo 'PRIVATE_SEMANTIC_SOURCE_GROUP_RECEIPTS_SAVED'
+          fi

@@ -10,6 +10,7 @@ on:
       - '.github/workflows/corpus4008-blind-derived-ik-oracle-v1.yml'
       - 'tools/corpus/derive_corpus4008_rigprogram_prior_v1.py'
       - 'tools/corpus/blender_corpus4008_blind_ik_discovery_v1.py'
+      - 'tools/corpus/blender_corpus4008_derived_ik_target_assay_v1.py'
       - 'tests/corpus/test_corpus4008_blind_derived_ik_v1.py'
   workflow_dispatch:
 
@@ -31,7 +32,7 @@ jobs:
           set -euo pipefail
           python -m pip install -q --disable-pip-version-check pytest
           PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_blind_derived_ik_v1.py
-          python -m compileall -q tools/corpus/derive_corpus4008_rigprogram_prior_v1.py tools/corpus/blender_corpus4008_blind_ik_discovery_v1.py
+          python -m compileall -q tools/corpus/derive_corpus4008_rigprogram_prior_v1.py tools/corpus/blender_corpus4008_blind_ik_discovery_v1.py tools/corpus/blender_corpus4008_derived_ik_target_assay_v1.py
 
   original-native-rig-blind-discovery:
     needs: blind-input-and-oracle-firewall-regressions
@@ -152,6 +153,38 @@ jobs:
           print("Native original graph was NOT available to the candidate producer.")
           print("No solver/deformation/model training PASS.")
           PY
+      - name: Test source-only derived RigProgram CCD targets and skinned consequences
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          PYTHONPATH: ${D}{{ github.workspace }}/engine
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-derived-rig"
+          target="$root/source/$RIG.blend"
+          decoded_sha="$(sha256sum "$target" | cut -d' ' -f1)"
+          timeout 340s "$root/bin/blender-4.5.14-linux-x64/blender" \
+            --background --factory-startup --disable-autoexec --python-exit-code 1 \
+            --python "$GITHUB_WORKSPACE/engine/tools/corpus/blender_corpus4008_derived_ik_target_assay_v1.py" -- \
+            --source "$target" --expected-sha "$decoded_sha" --asset "$RIG" \
+            --output "$root/evidence/$RIG.source-only-ik-targets.json"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-derived-rig/evidence"
+          d=json.loads((root/(os.environ["RIG"]+".source-only-ik-targets.json")).read_text())
+          assert d["training_authorized"] is False
+          assert d["source_control_mask"]=="ALL_SOURCE_CONSTRAINTS_MUTED"
+          assert d["source_constraint_graph_consumed_by_solver"] is False
+          print("## Source-only generic CCD target assay:",os.environ["RIG"])
+          print("Chains tested:",d["tested_source_only_candidate_chains"])
+          print("Target interventions:",d["source_only_target_trials"])
+          print("Measurable:",d["source_only_target_trials_measurable"])
+          print("Target error reduced >50%:",d["source_only_targets_error_reduced"])
+          print("Moving deformed mesh observed:",d["source_only_targets_with_mesh_response"])
+          print("Native controller graph/rig constraints remain invisible to solver.")
+          print("Joint limits, contact, control equivalence and training: NOT ADMITTED.")
+          PY
       - name: Quarantine source-only hypotheses and native oracle observations separately
         if: always() && steps.gate.outputs.ready == 'true'
         run: |
@@ -159,6 +192,6 @@ jobs:
           umask 077
           root="$RUNNER_TEMP/c4008-derived-rig/evidence"
           if test -s "$RCLONE_CONFIG" && test -f "$root/$RIG.blind-ik.json"; then
-            rclone copyto "$root/$RIG.blind-ik.json" "$PRIVATE_OUTPUT/$RIG.blind-ik.json" --retries 3
+            rclone copy "$root" "$PRIVATE_OUTPUT" --checksum --retries 3
             echo "Original native source oracle and blinded candidate SHA archived privately." >> "$GITHUB_STEP_SUMMARY"
           fi

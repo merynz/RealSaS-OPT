@@ -69,7 +69,7 @@ def configure_scene(bpy, resolution):
     return scene
 
 
-def configure_source_material_diagnostic(bpy):
+def configure_source_material_diagnostic(bpy, center):
     scene = bpy.context.scene
     scene.render.engine = "BLENDER_EEVEE_NEXT"
     scene.render.image_settings.color_mode = "RGBA"
@@ -87,7 +87,7 @@ def configure_source_material_diagnostic(bpy):
         light.data.shape = "DISK"
         light.data.size = 5
         light.rotation_euler = (
-            scene.camera.location * 0 - light.location).to_track_quat(
+            center - light.location).to_track_quat(
             "-Z", "Y").to_euler()
 
 
@@ -120,7 +120,7 @@ def render_study(bpy, *, source, expected_sha256, asset_id,
     outputs = []
     for mode in VIEWS:
         if mode == VIEWS[0]:
-            configure_source_material_diagnostic(bpy)
+            configure_source_material_diagnostic(bpy, center)
         else:
             configure_flat_study(bpy, outline=(mode == VIEWS[2]))
         filename = mode.lower() + ".png"

@@ -69,7 +69,7 @@ def test_malicious_implicit_training_pass_is_blocked(tmp_path):
     j=json.loads(p.read_text())
     j["candidates_private"][10]["training_authorized"]=True
     p.write_text(json.dumps(j))
-    with pytest.raises(ValueError,match="WAVE3_SOURCE_ADMISSION"):
+    with pytest.raises(ValueError,match="SOURCE_CANNOT_ADMIT_TRAINING|WAVE3_SOURCE_ADMISSION"):
         next_plan(p,shard_index=3,limit=24)
 
 

@@ -54,7 +54,7 @@ def diagnostic_camera(bpy, center, radius):
     camera.rotation_euler = (center - camera.location).to_track_quat(
         "-Z", "Y").to_euler()
     camera.data.type = "ORTHO"
-    camera.data.ortho_scale = max(4 * radius, 0.5)
+    camera.data.ortho_scale = max(2.15 * radius, 0.5)
     bpy.context.scene.camera = camera
     return camera
 
@@ -153,10 +153,10 @@ def _flat_or_cel_material(original, *, cel):
         ramp.color_ramp.interpolation = "CONSTANT"
         ramp.color_ramp.elements.remove(ramp.color_ramp.elements[1])
         ramp.color_ramp.elements[0].position = 0
-        ramp.color_ramp.elements[0].color = (0.50, 0.50, 0.50, 1)
-        e1 = ramp.color_ramp.elements.new(0.35)
-        e1.color = (0.77, 0.77, 0.77, 1)
-        e2 = ramp.color_ramp.elements.new(0.72)
+        ramp.color_ramp.elements[0].color = (0.28, 0.28, 0.28, 1)
+        e1 = ramp.color_ramp.elements.new(0.56)
+        e1.color = (0.64, 0.64, 0.64, 1)
+        e2 = ramp.color_ramp.elements.new(0.83)
         e2.color = (1, 1, 1, 1)
         tree.links.new(shift.outputs["Result"], ramp.inputs["Fac"])
         tree.links.new(ramp.outputs["Color"], mix.inputs[2])

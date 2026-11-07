@@ -22,10 +22,13 @@ SCHEMA = "RealSaS.ExternalNativeBlendControlObservation.v1"
 
 
 def run(bpy, source: Path, expected_sha256: str, *,
-        source_repo: str, source_commit: str, asset_key: str):
+        source_repo: str, source_commit: str, asset_key: str,
+        transported_source_sha256: str, transport_encoding: str):
     require(source.is_file() and source.suffix.lower() == ".blend",
             "NATIVE_BLEND_FILE_REQUIRED")
     require(sha(source) == expected_sha256, "EXACT_NATIVE_SOURCE_SHA")
+    require(transport_encoding in ("NATIVE_BLEND", "ZSTANDARD_WRAPPED_BLEND"),
+            "UNSUPPORTED_SOURCE_ENCODING")
     # Critical: no untrusted native .blend scripts may execute in worker.
     require(not bpy.app.autoexec_fail and not bpy.context.preferences.filepaths.use_scripts_auto_execute,
             "AUTOEXEC_MUST_BE_DISABLED")
@@ -39,6 +42,8 @@ def run(bpy, source: Path, expected_sha256: str, *,
         "schema": SCHEMA,
         "status": "ORIGINAL_NATIVE_CONTROL_GRAPH_OBSERVATION_ONLY",
         "native_source_sha256": expected_sha256,
+        "upstream_transport_sha256": transported_source_sha256,
+        "upstream_transport_encoding": transport_encoding,
         "native_source_repo": source_repo,
         "native_source_commit": source_commit,
         "source_asset_key": asset_key,
@@ -61,6 +66,8 @@ def main():
     p.add_argument("--source", type=Path, required=True)
     p.add_argument("--expected-sha256", required=True)
     p.add_argument("--source-repo", required=True)
+    p.add_argument("--transported-source-sha256", required=True)
+    p.add_argument("--transport-encoding", required=True, choices=("NATIVE_BLEND", "ZSTANDARD_WRAPPED_BLEND"))
     p.add_argument("--source-commit", required=True)
     p.add_argument("--asset-key", required=True)
     p.add_argument("--output", type=Path, required=True)
@@ -68,7 +75,9 @@ def main():
     r = run(bpy, a.source.resolve(), a.expected_sha256,
             source_repo=a.source_repo,
             source_commit=a.source_commit,
-            asset_key=a.asset_key)
+            asset_key=a.asset_key,
+            transported_source_sha256=a.transported_source_sha256,
+            transport_encoding=a.transport_encoding)
     a.output.parent.mkdir(parents=True, exist_ok=True)
     a.output.write_text(json.dumps(r, indent=2, sort_keys=True,
                                    allow_nan=False) + "\n")

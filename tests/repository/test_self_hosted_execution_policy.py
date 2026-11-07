@@ -20,6 +20,7 @@ HOSTED_FIRST = {
     "iris_v2_source_contract.yml",
     "living_compile_v4.yml",
     "platform_go_contract_v1.yml",
+    "platform_developer_contracts_hosted.yml",
     "platform_throughput_hydration_contract.yml",
     'appearance_pixel_center_behavioral_v1.yml',
     'appearance_source_contract.yml',
@@ -111,13 +112,6 @@ def test_automatic_self_hosted_pr_checks_reject_public_fork_code():
             continue
         if not any(_is_explicit_self_hosted(value) for value in _runner_values(text)):
             continue
-        if path.name == "platform_developer_deploy.yml" and (
-            "  developer-host:\n" not in text
-            and text.count("runs-on: [self-hosted, linux, x64, realsas]") == 1
-            and "    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'" in text
-        ):
-            # Hosted PR checks can coexist with an unreachable-in-PR manual host.
-            continue
         if "github.event.pull_request.head.repo.full_name == github.repository" not in text:
             missing.append(path.name)
     assert not missing, "Self-hosted PR workflows lacking same-repository firewall: " + ", ".join(missing)
@@ -143,22 +137,26 @@ def test_frozen_r6_training_replays_are_explicit():
         assert not re.search(r"^  (pull_request|push):", text, re.MULTILINE), path.name
 
 
-def test_developer_deployment_is_hosted_by_default_and_explicit_on_physical_host():
-    """No implicit WSL install queue after every main push or PR.
+def test_deployment_signal_is_manual_and_hosted_ci_is_separate():
+    """Successful hosted contracts cannot masquerade as a physical deployment."""
+    physical = (ROOT / ".github/workflows/platform_developer_deploy.yml").read_text()
+    events = physical.split("\non:\n", 1)[1].split("\nconcurrency:", 1)[0]
+    assert "  workflow_dispatch:" in events
+    assert "  pull_request:" not in events and "  push:" not in events
+    assert "name: platform-developer-deployment" in physical
+    assert "cancel-in-progress: false" in physical
+    assert "  developer-host:\n" not in physical
+    job = physical.split("  developer-host-manual:", 1)[1]
+    assert "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'" in job
+    assert "runs-on: [self-hosted, linux, x64, realsas]" in job
+    assert 'test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"' in job
 
-    Exact-main source activation requires an intentionally dispatched physical
-    deployment; hosted CI checks deployment contracts without local mutation.
-    """
-    text = (ROOT / ".github/workflows/platform_developer_deploy.yml").read_text()
-    assert "  push:" in text and "  pull_request:" in text
-    assert "  workflow_dispatch:" in text
-    assert "  developer-contract:" in text
-    assert "runs-on: ubuntu-latest" in text
-    assert "  developer-host:\n" not in text
-    physical_job = text.split("  developer-host-manual:", 1)[1]
-    assert "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'" in physical_job
-    assert "runs-on: [self-hosted, linux, x64, realsas]" in physical_job
-    assert 'test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"' in physical_job
+    hosted = (ROOT / ".github/workflows/platform_developer_contracts_hosted.yml").read_text()
+    assert "name: platform-developer-contracts-hosted" in hosted
+    assert "  pull_request:" in hosted and "  push:" in hosted
+    assert "runs-on: ubuntu-latest" in hosted
+    assert "self-hosted" not in hosted
+    assert "github.event.repository.private == false" in hosted
 
 
 def test_subject_free_v2_orchestration_replays_on_hosted_cpu():

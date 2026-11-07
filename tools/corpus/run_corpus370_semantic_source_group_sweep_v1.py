@@ -27,9 +27,37 @@ from models.iris.truth.semantic_prior_contract_v1 import validate_policy
 from models.iris.truth.semantic_source_groups_v1 import (
     build_semantic_source_groups, validate_hint_policy,
 )
-from tools.corpus.audit_corpus370_v5_source_rest_courts_v1 import (
-    INDEX_SHA as V5_SHA, row_input,
-)
+# Exact V5 source binding adapter is temporarily pinned here because the
+# active Corpus370 PR #327 is not yet merged into main. The semantic teacher
+# research branch must not silently depend on a moving draft branch.
+V5_SHA = "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4"
+
+
+def row_input(row: dict) -> dict:
+    """Match exact V5 historical-V3 versus new-V4 import authority binding."""
+    sid = row["subject_id"]
+    refs = dict(row.get("bindings") or {})
+    producer = row.get("evidence_producer")
+    if producer == "HISTORICAL_V3_PASS_BYTES_RECHECKED":
+        import_ref = row["admitted_import_geometry"]
+        require(row.get("new_v4_admission_claimed") is False,
+                "OLD_V3_NOT_RELABELED_V4:" + sid)
+    else:
+        require(producer == "NEW_V4_REPAIR_FROM_ORIGINAL_FAIL",
+                "UNKNOWN_V5_PRODUCER:" + sid)
+        import_ref = refs["admitted_import_geometry"]
+        require(bool(row.get("parent_failure_receipt")),
+                "V4_REPAIR_WITHOUT_ORIGINAL_FAILURE:" + sid)
+    bindings = {"import": import_ref, "admission": refs["observation_admission"]}
+    for key, ref in bindings.items():
+        require(isinstance(ref, dict) and isinstance(ref.get("path"), str)
+                and re.fullmatch(r"[0-9a-f]{64}",
+                                 str(ref.get("sha256") or "")) is not None,
+                "V5_REF_MALFORMED:" + sid + ":" + key)
+        path = Path(ref["path"])
+        require(path.is_file() and sha(path) == ref["sha256"],
+                "V5_REF_BYTES_DRIFT:" + sid + ":" + key)
+    return bindings
 
 SCHEMA = "RealSaS.Corpus370SemanticSourceGroupSweep.v1"
 REST_SHA = "384c92940e1ea8eec7bbb98cf319eeda5f89222c07b782b607998e2067f1d9c8"

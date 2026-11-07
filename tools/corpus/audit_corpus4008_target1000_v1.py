@@ -47,6 +47,22 @@ HEAD_TARGETS = {
         "SKIN_DEFORMATION_CONSEQUENCE",
     ),
 }
+# A head's core may be taught without asserting optional full-control
+# mechanics, multi-layer graphics, or other advanced targets on that subject.
+# Full-head coverage remains separately measured. Neither tier admits data.
+CORE_HEAD_TARGETS = {
+    "IRIS_GEOMETRY": HEAD_TARGETS["IRIS_GEOMETRY"],
+    "IRIS_SEMANTIC": (
+        "SEMANTIC_CONCEPT", "COMPONENT_INSTANCE_SUPPORT",
+        "SEMANTIC_VIEW_CONSISTENCY",
+    ),
+    "IRIS_GRAPHICS": (
+        "APPEARANCE_CAA", "VISIBILITY_OCCLUSION", "RAY_COMPOSITING",
+    ),
+    "TESSA": HEAD_TARGETS["TESSA"],
+    "AXIS": ("RIG_HIERARCHY", "ANIMATION_KINEMATICS"),
+    "MIRA": ("RIG_HIERARCHY", "SKIN_WEIGHTS"),
+}
 SHA = re.compile(r"^[0-9a-f]{64}$")
 # No training split leakage: only FIT subjects can count towards the 1000
 # training-minimum; TUNE/DEV/CAL/EXTERNAL_HOLDOUT retain separate evidence.
@@ -128,6 +144,7 @@ def audit(selection: Path, receipts: Path, evidence_root: Path,
     require(len(master) == expected_master_count, "MASTER_SIZE")
     # Core requirements: stable canonical identity + immutable registered source.
     counts = defaultdict(set)
+    core_counts = defaultdict(set)
     per_head_strata = defaultdict(lambda: defaultdict(set))
     cluster_splits = defaultdict(set)
     receipts_seen = set()
@@ -169,8 +186,10 @@ def audit(selection: Path, receipts: Path, evidence_root: Path,
                     "UNQUALIFIED_SOURCE_OR_HEAD")
             targets = rec.get("target_truth")
             require(isinstance(targets, dict) and
-                    all(targets.get(t) == "PASS" for t in HEAD_TARGETS[head]),
-                    "INCOMPLETE_HEAD_TARGETS")
+                    all(targets.get(t) == "PASS" for t in CORE_HEAD_TARGETS[head]),
+                    "INCOMPLETE_CORE_TARGETS")
+            all_full_targets = all(
+                targets.get(t) == "PASS" for t in HEAD_TARGETS[head])
             require(evidence_courts(rec, evidence_root), "NO_EVIDENCE")
             lineage = rec.get("source_identity_cluster")
             require(isinstance(lineage, str) and len(lineage) >= 12,
@@ -179,9 +198,11 @@ def audit(selection: Path, receipts: Path, evidence_root: Path,
                     "CROSS_SPLIT_NOT_COURTED")
             cluster_splits[lineage].add(row["split"])
             if row["split"] == "FIT":
-                counts[head].add(lineage)
-                strata = rec.get("morphology_stratum", "UNKNOWN")
-                per_head_strata[head][strata].add(lineage)
+                core_counts[head].add(lineage)
+                if all_full_targets:
+                    counts[head].add(lineage)
+                    strata = rec.get("morphology_stratum", "UNKNOWN")
+                    per_head_strata[head][strata].add(lineage)
             # TUNE / DEV / CAL / HOLDOUT are not FIT subject quota.
         except (ValueError, TypeError, KeyError, OSError, json.JSONDecodeError) as exc:
             reason = str(exc)
@@ -195,6 +216,7 @@ def audit(selection: Path, receipts: Path, evidence_root: Path,
     }
     for head in HEAD_TARGETS:
         counts[head].difference_update(cross_split_clusters)
+        core_counts[head].difference_update(cross_split_clusters)
         for clusters in per_head_strata[head].values():
             clusters.difference_update(cross_split_clusters)
     per_head = {}
@@ -202,6 +224,11 @@ def audit(selection: Path, receipts: Path, evidence_root: Path,
         n = len(counts[head])
         per_head[head] = {
             "target_distinct_fit_subjects": quota,
+            "core_required_target_families": list(CORE_HEAD_TARGETS[head]),
+            "core_evidence_supported_distinct_fit_clusters": len(core_counts[head]),
+            "core_missing_to_quota": max(0, quota-len(core_counts[head])),
+            "core_quota_met_by_receipts": len(core_counts[head]) >= quota,
+            "full_target_coverage_is_stricter": True,
             "evidence_receipt_supported_distinct_fit_clusters": n,
             "missing_to_quota": max(0, quota - n),
             "quota_met_by_receipts": n >= quota,

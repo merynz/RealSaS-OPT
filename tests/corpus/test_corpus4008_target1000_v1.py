@@ -161,3 +161,19 @@ def test_quota_uses_cluster_not_asset_row_or_clip_count(tmp_path):
     r = audit(sel, rs, es, tmp_path / "out.json", quota=2,
               expected_master_count=3)
     assert r["per_head"]["IRIS_GEOMETRY"]["missing_to_quota"] == 1
+
+
+def test_axis_core_can_count_without_falsely_claiming_ik_control(tmp_path):
+    sel, rs, es = fixture(tmp_path)
+    rec = receipt(tmp_path, head="AXIS")
+    del rec["target_truth"]["CONTROL_RESPONSE_CONSEQUENCE"]
+    del rec["target_truth"]["TYPED_CONTROLLABLE_RIG_PROGRAM_TEACHER"]
+    write_json(rs/"axis_core_only.json", rec)
+    r = audit(sel, rs, es, tmp_path/"out.json", quota=1,
+              expected_master_count=2)
+    axis = r["per_head"]["AXIS"]
+    assert axis["core_evidence_supported_distinct_fit_clusters"] == 1
+    assert axis["evidence_receipt_supported_distinct_fit_clusters"] == 0
+    assert axis["core_quota_met_by_receipts"] is True
+    assert axis["quota_met_by_receipts"] is False
+    assert axis["training_authorized"] is False

@@ -27,8 +27,8 @@ def scene(tmp_path, *, nviews=8, alpha_offset=0):
             im.save(p)
         ref=tmp_path/(f"source_material_diagnostic_orbit_{i:02d}.png")
         cel=tmp_path/(f"cel_3band_orbit_{i:02d}.png")
-        matrix=[[1.,0.,0.,0.],[0.,1.,0.,0.],
-                [0.,0.,1.,float(i)],[0.,0.,0.,1.]]
+        matrix=[1.,0.,0.,0.,0.,1.,0.,0.,
+                0.,0.,1.,float(i),0.,0.,0.,1.]
         rows.append({
             "view_id":f"SOURCE_ORBIT_{i:02d}",
             "source_space_orbit_degrees":45*i,

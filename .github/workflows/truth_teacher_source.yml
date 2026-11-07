@@ -1,27 +1,18 @@
 name: truth-teacher-source
+# Native/pinned Blender and local Platform receipts require the real WSL host.
+# Do not enqueue this physical runner for every public PR: hosted source
+# contracts provide automatic PR checks; this is an explicit live witness.
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'tools/truth_foundry/**'
-      - 'tools/platform_cohort_bootstrap_v1.py'
-      - 'compiler/realsas_compiler_services/orchestrator/adapters/truth_foundry_v1.py'
-      - 'compiler/realsas_compiler_services/orchestrator/adapters/truth_foundry_v2.py'
-      - 'canonical/TRUTH_CALIBRATION*'
-      - 'canonical/TEACHER_KINEMATIC*'
-      - 'canonical/FIT8_TRUTH_CALIBRATION*'
-      - 'tests/truth_foundry/**'
-      - 'tests/fixtures/source_scene_v2/blender_teacher_scene_smoke.py'
-      - 'tests/fixtures/source_scene_v2/blender_teacher_observation_rest_smoke.py'
-      - '.github/workflows/truth_teacher_source.yml'
+  workflow_dispatch:
+
 permissions:
   contents: read
 concurrency:
   group: truth-teacher-source-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   native-synthetic-witness:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, linux, x64, realsas]
     timeout-minutes: 10
     steps:

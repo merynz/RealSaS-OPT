@@ -137,12 +137,32 @@ def test_frozen_r6_training_replays_are_explicit():
         assert not re.search(r"^  (pull_request|push):", text, re.MULTILINE), path.name
 
 
-def test_developer_deployment_does_not_queue_physical_host_on_pr():
+def test_developer_deployment_is_hosted_by_default_and_explicit_on_physical_host():
+    """No implicit WSL install queue after every main push or PR.
+
+    Exact-main source activation requires an intentionally dispatched physical
+    deployment; hosted CI checks deployment contracts without local mutation.
+    """
     text = (ROOT / ".github/workflows/platform_developer_deploy.yml").read_text()
-    physical_job = text.split("  developer-host:", 1)[1]
-    assert "if: github.event_name == 'push' && github.ref == 'refs/heads/main'" in physical_job
+    assert "  push:" in text and "  pull_request:" in text
+    assert "  workflow_dispatch:" in text
     assert "  developer-contract:" in text
     assert "runs-on: ubuntu-latest" in text
+    assert "  developer-host:\n" not in text
+    physical_job = text.split("  developer-host-manual:", 1)[1]
+    assert "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'" in physical_job
+    assert "runs-on: [self-hosted, linux, x64, realsas]" in physical_job
+    assert 'test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"' in physical_job
+
+
+def test_native_teacher_physical_witness_is_explicit_main_only():
+    """A truth-foundry PR changes source contracts on hosted CI, not a WSL service."""
+    text = (ROOT / ".github/workflows/truth_teacher_source.yml").read_text()
+    events = text.split("\non:\n", 1)[1].split("\npermissions:", 1)[0]
+    assert "  workflow_dispatch:" in events
+    assert "  pull_request:" not in events and "  push:" not in events
+    assert "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'" in text
+    assert "runs-on: [self-hosted, linux, x64, realsas]" in text
 
 
 def test_historical_family_selector_preserves_frozen_checkout_boundary():

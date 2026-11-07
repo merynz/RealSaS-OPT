@@ -1,0 +1,82 @@
+{
+  "schema": "RealSaS.SemanticPriorPolicy.v1",
+  "version": "2026-11-07-predeploy-v1",
+  "authority": "DESIGNED_PRIOR__NOT_SOURCE_PHYSICS",
+  "product_target": "CONTROLLABLE_PUPPET",
+  "student_inputs_exclude": [
+    "source_object_names",
+    "material_names",
+    "bone_names",
+    "native_action_names",
+    "teacher_component_refs",
+    "annotation_receipts"
+  ],
+  "functional_attributes": [
+    "RIGID_PREFERRED",
+    "FLEXIBLE_DEFORMATION",
+    "SECONDARY_MOTION_ELIGIBLE",
+    "ATTACHMENT_ELIGIBLE",
+    "INDEPENDENT_CONTROL_ELIGIBLE",
+    "PRESENTATION_SEPARABLE"
+  ],
+  "concepts": {
+    "HAIR_LIKE": {
+      "prior": {
+        "FLEXIBLE_DEFORMATION": true,
+        "SECONDARY_MOTION_ELIGIBLE": true
+      }
+    },
+    "CLOTH_LIKE": {
+      "prior": {
+        "FLEXIBLE_DEFORMATION": true,
+        "SECONDARY_MOTION_ELIGIBLE": true
+      }
+    },
+    "RIGID_PLATE_LIKE": {
+      "prior": {
+        "RIGID_PREFERRED": true,
+        "FLEXIBLE_DEFORMATION": false,
+        "SECONDARY_MOTION_ELIGIBLE": false
+      }
+    },
+    "HANDHELD_PROP_LIKE": {
+      "prior": {
+        "RIGID_PREFERRED": true,
+        "ATTACHMENT_ELIGIBLE": true,
+        "INDEPENDENT_CONTROL_ELIGIBLE": true
+      }
+    },
+    "TAIL_LIKE": {
+      "prior": {
+        "FLEXIBLE_DEFORMATION": true,
+        "INDEPENDENT_CONTROL_ELIGIBLE": true
+      }
+    },
+    "WING_LIKE": {
+      "prior": {
+        "FLEXIBLE_DEFORMATION": true,
+        "INDEPENDENT_CONTROL_ELIGIBLE": true
+      }
+    },
+    "ARTICULATED_APPENDAGE_LIKE": {
+      "prior": {
+        "INDEPENDENT_CONTROL_ELIGIBLE": true
+      }
+    },
+    "SURFACE_OVERLAY_LIKE": {
+      "prior": {
+        "PRESENTATION_SEPARABLE": true
+      }
+    },
+    "UNKNOWN": {
+      "prior": {}
+    }
+  },
+  "notes": [
+    "These are explicitly chosen product-design teaching priors, not claims about the original material or physics.",
+    "Unspecified attributes are UNKNOWN and cannot become negative BCE labels.",
+    "Semantic concept is not a joint/control/constraint/skin program, an attachment authority, or drawable identity.",
+    "Only explicitly reviewed source-face support is a candidate; independent source/court and canonical binding remain required.",
+    "Ontology is versioned and open to new morphology concepts; downstream mechanics authority remains AXIS/MIRA/Compiler."
+  ]
+}

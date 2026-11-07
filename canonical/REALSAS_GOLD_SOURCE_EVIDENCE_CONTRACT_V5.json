@@ -1,0 +1,59 @@
+{
+  "schema": "RealSaS.GoldSourceStaticEvidenceContract.v5",
+  "status": "ORIGINAL_SOURCE_SHA_OBSERVATIONS_ONLY_NO_TEACHER_TRUTH",
+  "source_universe": {
+    "master_total": 3993,
+    "core370_total": 370,
+    "gold_228_selected": 228,
+    "quaternius": 191,
+    "kaykit": 37,
+    "historical_master_sha_receipts": 3192,
+    "new_full_source_byte_sha_receipts": 228,
+    "master_sha_receipts_now": 3420,
+    "master_pending_full_sha": 573
+  },
+  "evidence_contract": {
+    "source_sha256": "ACTUAL_ORIGINAL_BYTES_FULL_64HEX",
+    "candidate_token": "MUST_EQUAL_FIRST_24_HEX_OF_FULL_SHA256",
+    "source_identity_cluster": "FIFTY_THREE_EXISTING_CROSS_CORPUS_FULL_SHA_LINKS_PRESERVED",
+    "new_exact_core370_duplicates": 0,
+    "same_file_cross_corpus_pairs": 53,
+    "protected_source_split_links": 16,
+    "source_format_headers": {
+      "fbx_7400": 96,
+      "obj": 64,
+      "blend_279": 63,
+      "glb2": 5
+    },
+    "source_format_is_not_rig_skin_truth": true,
+    "source_original_polygon_address_required": true,
+    "face_triangulation_equivalence_proven": false,
+    "source_legal_ml_rights_courted": false,
+    "source_native_pose_mesh_bind_deformation_parity_courted": false,
+    "source_semantic_drawable_edit_consequence_courted": false,
+    "source_bound_stylized_2d_graphics_courted": false,
+    "model_training_authorized": false
+  },
+  "risk_census": {
+    "obj_original_face_count": 161935,
+    "obj_original_triangle_count": 5914,
+    "obj_original_quad_count": 155858,
+    "obj_original_ngon_gt4_count": 163,
+    "obj_source_with_nontriangle_count": 64,
+    "obj_source_with_ngon_gt4_count": 35,
+    "obj_mtl_references": 64,
+    "obj_with_uv_records": 12,
+    "unselected_gltf_with_unresolved_relative_dependencies": 27,
+    "unselected_gltf_relative_dependency_ref_count": 54,
+    "unselected_gltf_are_selected_master_subjects": false
+  },
+  "target_routing": {
+    "head_count": 6,
+    "targets_per_source": 37,
+    "candidate_routes": 8436,
+    "loss_mask_valid_count": 0,
+    "training_admitted_count": 0
+  },
+  "private_receipt_delivery": "RealSaS_Truth_Foundry_V5_228_Full_SHA_and_OBJ_Topology_Receipts.zip",
+  "no_original_bytes_or_private_hashes_committed_to_repo": true
+}

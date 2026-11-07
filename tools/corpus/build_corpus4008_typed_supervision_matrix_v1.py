@@ -63,6 +63,7 @@ EVIDENCE = {
     "skin_deformation_consequence": ("MIRA", "TESSA"),
     "attachments_sockets_consequence": ("AXIS", "IRIS_GRAPHICS", "MIRA"),
     "stylized_augmented_presentation": ("IRIS_GRAPHICS",),
+    "stylized_2d_game_art_image_target": ("IRIS_GRAPHICS",),
     "human_visual_review": (HEADS, "REQUIRED_ALL"),
 }
 # Correct the tuple container for non-global evidence kinds on access.
@@ -218,6 +219,11 @@ def build(selection, profiles, output, expected_count=3993):
                 "supervision_suitable": False,
                 "training_admitted": False,
                 "candidate_only": bool(present),
+                "image_supervision_target_domain": (
+                    "STYLIZED_2D_GAME_ART_REQUIRED"
+                    if h == "IRIS_GRAPHICS" else None
+                ),
+                "raw_photorealistic_3d_rgb_direct_target_forbidden": h == "IRIS_GRAPHICS",
             }
             if present:
                 head_route[h] += 1
@@ -243,6 +249,7 @@ def build(selection, profiles, output, expected_count=3993):
             "ik_functionality": UNKNOWN,
             "semantic_label_truth": UNKNOWN,
             "graphics_native_rgba_truth": UNKNOWN,
+            "graphics_stylized_2d_art_truth": UNKNOWN,
             "head_suitability": UNKNOWN,
             "training_admitted": False,
         })
@@ -263,6 +270,8 @@ def build(selection, profiles, output, expected_count=3993):
         "source_profile_counts": dict(sorted(source_count.items())),
         "family_imported_observation_counts": dict(sorted(family_observations.items())),
         "per_head_import_observation_candidate_counts": dict(sorted(head_route.items())),
+        "graphics_requires_verified_stylized_2d_art": True,
+        "original_material_rgb_separate_from_2d_style_target": True,
         "per_head_truth_pass": {h: 0 for h in HEADS},
         "per_head_training_admitted": {h: 0 for h in HEADS},
         "explicit_not_verified": [

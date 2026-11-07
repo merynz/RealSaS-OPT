@@ -1,0 +1,132 @@
+{
+  "schema": "RealSaS.Graphics2DArtSupervisionContract.v1",
+  "date": "2026-11-07",
+  "product_requirement": "All IRIS Graphics image supervision must teach verified 2D stylized game-art presentation; raw realistic 3D source renders are not direct Graphics targets.",
+  "evidence_domains": {
+    "NATIVE_SOURCE": [
+      "original authored surface geometry",
+      "native texture/material color",
+      "source original alpha and occlusion",
+      "camera and native pose",
+      "source face and vertex addressing"
+    ],
+    "PRESENTATION": [
+      "2D stylized character color design",
+      "ink/silhouette",
+      "cel light abstraction",
+      "visibility",
+      "camera-specific pose and attachment consistency"
+    ],
+    "POLICY": [
+      "versioned visual style target, not a physical source claim",
+      "anatomical and semantic language not inferred from mesh name"
+    ],
+    "RENDERED_AUGMENTATION": [
+      "geometry-preserving 3D-to-2D shader/stylization derived from SAME original source",
+      "candidate image is not artist-original artwork"
+    ]
+  },
+  "allowed_graphics_image_supervision_classes": [
+    "VERIFIED_NATIVE_2D_SOURCE_ART",
+    "VERIFIED_SOURCE_BOUND_STYLIZED_2D_RENDER"
+  ],
+  "prohibited_direct_graphics_image_supervision_classes": [
+    "PHOTOREALISTIC_3D_RENDER",
+    "UNREVIEWED_3D_RENDER",
+    "UNREVIEWED_CEL_DERIVATIVE",
+    "GENERATED_IMAGE_WITHOUT_SOURCE_ALIGNMENT",
+    "BROKEN_TEXTURE_PARITY",
+    "ANATOMY_UNQUALIFIED_FRONT_LABEL"
+  ],
+  "per_asset_required": {
+    "identity": [
+      "canonical_asset_id",
+      "canonical_source_sha256",
+      "original_source_license",
+      "original_assets_and_packed_texture_hashes",
+      "variant_source_sha256",
+      "renderer_and_recipe_digest",
+      "canonical_lineage_split"
+    ],
+    "source_rights": [
+      "commercial training rights per original",
+      "no generative AI source allowed",
+      "no Mixamo derived AI training",
+      "no source-license laundering via derivative"
+    ],
+    "scene": [
+      "character and prop classification",
+      "morphology and attachments",
+      "pose authority",
+      "source original up/front if canonical view claimed",
+      "source mesh and skin geometry"
+    ],
+    "render": [
+      "fixed camera/view matrix same between appearance and styled target",
+      "native/material reference preserved separately",
+      "RGBA and silhouette mask parity",
+      "source face/pixel support or explicit unknown",
+      "draw order/depth/visibility uncertainty",
+      "all target images immutable and hashed"
+    ],
+    "visual": [
+      "independent visual human review",
+      "minimum silhouette framing/readability",
+      "style resemblance to 2D game art",
+      "source identity retention across 8 views",
+      "consistent accessory/weapon positioning",
+      "no duplicated mirror view treated as unseen geometry",
+      "no deformed or detached parts",
+      "Corpus370-style-domain-consistency independent comparison"
+    ],
+    "consequence": [
+      "pose edits rerender",
+      "view rotation restores consistent layer order",
+      "source texture and alpha provenance",
+      "head-specific target valid mask"
+    ]
+  },
+  "numeric_preconditions_for_rendered_candidate": {
+    "source_to_stylized_alpha_jaccard_min": 0.98,
+    "min_bbox_width_fraction": 0.42,
+    "min_bbox_height_fraction": 0.42,
+    "min_body_alpha_occupancy_fraction": 0.07,
+    "min_unique_source_space_view_orientations": 8,
+    "orientation_matrices_finite": true,
+    "all_view_images_sha256_verified": true,
+    "max_crop_fraction": 0.07,
+    "max_background_alpha_fraction": 0.01
+  },
+  "independent_courts": [
+    "ORIGINAL_SOURCE_RIGHTS_AND_SHA",
+    "ORIGINAL_SOURCE_MATERIAL_TEXTURE_ALPHA",
+    "CAMERA_POSE_VISIBILITY_FACE_CORRESPONDENCE",
+    "ANATOMY_AND_MORPHOLOGY",
+    "2D_GAME_ART_STYLE_REVIEW",
+    "IDENTITY_AND_ATTACHMENT_CONSISTENCY",
+    "RENDER_REPRODUCIBILITY",
+    "MODEL_CONSUMER_LOSS_AND_MASK",
+    "CORE370_2D_ART_DOMAIN_PARITY"
+  ],
+  "truth_authority_policy": "Native SOURCE_RGB and STYLIZED_2D_RGB are distinct typed targets, neither overrides the other. Both require independently accepted evidence. New stylized render cannot claim source-authored 2D art.",
+  "current_admission": "NONE",
+  "training_authorized": false,
+  "cross_corpus_2d_style_continuity": {
+    "reference_cohort": "Core370",
+    "reference_status": "ONLY_INDEPENDENTLY_VISUAL_COURTED_AND_LICENSED_2D_ART_REFERENCES",
+    "quantitative_style_diagnostics": [
+      "palette/hue/luminance distribution with masked foreground",
+      "silhouette framing and density",
+      "stroke/edge spatial scale",
+      "shadow banding",
+      "texel and posterization aliasing",
+      "view consistency",
+      "shape and proportions between 3D source and derived art"
+    ],
+    "hard_gate": "Independent human visual review must confirm consistent 2D game-art style relative to Core370; statistics are suggestions, not proof.",
+    "prohibited_shortcut": "Do not replace real native Core370 art with stylized 3D training labels; do not infer 2D artistry from a raw 3D scene or minimal cel filter.",
+    "reference_style_rig_separation": "Core370 style reference may train presentation but cannot invent source attachments, IK, semantic labels or hidden geometry.",
+    "status": "PENDING_REFERENCE_ART_CURATION",
+    "all_new_stylized_master_images_automatically_qualify": false
+  }
+}

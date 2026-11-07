@@ -1,0 +1,153 @@
+name: corpus4008-private-graphics-2d-art-orbit-v1
+
+# Eight source-space views of SHA-pinned KayKit source with matched reference
+# and deterministic 2D game-art ink candidates. NOT graphics training truth.
+# Everything derived and all images remain private Drive quarantine only.
+on:
+  push:
+    branches: [corpus4008-graphics-2d-art-truth-gates-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-private-graphics-2d-art-orbit-v1.yml'
+      - 'tools/corpus/blender_corpus4008_2d_art_orbit_pilot_v1.py'
+      - 'tools/corpus/finish_corpus4008_2d_art_orbit_v1.py'
+      - 'tools/corpus/audit_corpus4008_2d_art_orbit_v1.py'
+      - 'tests/corpus/test_corpus4008_2d_art_orbit_v1.py'
+      - 'tests/corpus/test_corpus4008_target1000_v1.py'
+      - 'tools/corpus/audit_corpus4008_target1000_v1.py'
+      - 'tools/corpus/build_corpus4008_typed_supervision_matrix_v1.py'
+      - 'canonical/REALSAS_GRAPHICS_2D_ART_SUPERVISION_CONTRACT_V1.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-2d-art-orbit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  style-target-evidence-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test 2D art target, source/camera/alpha proof and source-safe quotas
+        run: |
+          python -m pip install --disable-pip-version-check pillow pytest
+          PYTHONPATH=. python -m pytest -q \
+            tests/corpus/test_corpus4008_2d_art_orbit_v1.py \
+            tests/corpus/test_corpus4008_target1000_v1.py \
+            tests/corpus/test_corpus4008_typed_supervision_matrix_v1.py
+          python -m compileall -q \
+            tools/corpus/blender_corpus4008_2d_art_orbit_pilot_v1.py \
+            tools/corpus/finish_corpus4008_2d_art_orbit_v1.py \
+            tools/corpus/audit_corpus4008_2d_art_orbit_v1.py
+  original-source-8view-pilot:
+    needs: style-target-evidence-contracts
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      RCLONE_CONFIG: /tmp/realsas-2d-art-source-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/graphics_2d_art_orbit_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Drive security gate
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'PRIVATE_DRIVE_ABSENT_NO_STYLE_ART_RENDER_PRODUCED' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Fetch one original GLB and official SHA-pinned Blender
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone xz-utils libegl1 libgl1 libgl1-mesa-dri libopengl0
+          python -m pip install --disable-pip-version-check pillow
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          mkdir -p "$RUNNER_TEMP/c4008-2d-art/source" "$RUNNER_TEMP/c4008-2d-art/runtime" "$RUNNER_TEMP/c4008-2d-art/output"
+          rclone copyto "$REMOTE/sources/kaykit_cc0/93e6e25213009952276d9cf3_93e6e25213009952.glb" \
+            "$RUNNER_TEMP/c4008-2d-art/source/kaykit.glb" --retries 3
+          printf '93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545  %s\n' "$RUNNER_TEMP/c4008-2d-art/source/kaykit.glb" | sha256sum -c
+          cd "$RUNNER_TEMP/c4008-2d-art/runtime"
+          curl -fL --retry 4 --max-time 300 https://download.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz -o blender.tar.xz
+          curl -fL --retry 4 --max-time 120 https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256 -o official.sha256
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,re
+          lines=[x for x in Path('official.sha256').read_text().splitlines()
+                 if 'blender-4.5.14-linux-x64.tar.xz' in x]
+          assert len(lines)==1
+          expected=re.findall('[0-9a-fA-F]{64}',lines[0])
+          assert len(expected)==1
+          with open('blender.tar.xz','rb') as f:
+              assert hashlib.file_digest(f,'sha256').hexdigest()==expected[0].lower()
+          PY
+          tar -xJf blender.tar.xz
+          printf '050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8  %s\n' "$RUNNER_TEMP/c4008-2d-art/runtime/blender-4.5.14-linux-x64/blender" | sha256sum -c
+      - name: Render eight exact source-matched raw-3D reference and cel candidates
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-2d-art"
+          policy_sha="$(sha256sum canonical/REALSAS_GRAPHICS_2D_ART_SUPERVISION_CONTRACT_V1.json | cut -d ' ' -f1)"
+          binary="$root/runtime/blender-4.5.14-linux-x64/blender"
+          "$binary" --background --factory-startup --python-exit-code 1 \
+            --python tools/corpus/blender_corpus4008_2d_art_orbit_pilot_v1.py -- \
+            --source "$root/source/kaykit.glb" \
+            --expected-sha256 93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545 \
+            --asset-id asset_551ea351b43a1787d0f55536 \
+            --candidate-id kaykit_cc0:93e6e25213009952276d9cf3 \
+            --style-policy-sha256 "$policy_sha" \
+            --output "$root/output/kaykit" --resolution 512
+      - name: Make and audit actual source-linked 2D game-art ink candidates
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-2d-art"
+          python -m tools.corpus.finish_corpus4008_2d_art_orbit_v1 \
+            --root "$root/output/kaykit"
+          python -m tools.corpus.audit_corpus4008_2d_art_orbit_v1 \
+            --root "$root/output/kaykit" \
+            --output "$root/output/kaykit/GRAPHICS_2D_ART_PIXEL_AUDIT_V1.json"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-2d-art/output/kaykit"
+          d=json.loads((root/"GRAPHICS_2D_ART_ORBIT_CANDIDATE_V1.json").read_text())
+          q=json.loads((root/"GRAPHICS_2D_ART_PIXEL_AUDIT_V1.json").read_text())
+          assert d["view_count"]==8 and len(d["views"])==8
+          assert q["view_count"]==8 and q["training_authorized"] is False
+          print("## 2D game-art orbit source-pilot")
+          print("24 source/reference/cel/ink PNGs produced from one exact KayKit GLB")
+          print("8 source-space orbits, NOT anatomically qualified orientations")
+          print("Numeric candidate preliminary:",q["numerically_suitable_stylized_2d_candidate"])
+          for v in q["per_view"]:
+              print(v["view_id"],"coverage",round(v["observed_masks"]["inked_2d_candidate"]["mask_occupancy"],4),
+                    "alpha source-vs-2D",round(v["alpha_src_to_2d_jaccard"],4),
+                    "numeric",v["numeric_style_candidate_pass"])
+          print("Source RGB/semantic/motion/graphics-training courts: NOT APPROVED")
+          PY
+      - name: Write all generated images and receipts to private quarantine
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-2d-art/output"
+          if test -s "$RCLONE_CONFIG" && test -d "$root"; then
+            rclone copy "$root" "$PRIVATE_OUTPUT" --checksum --retries 3
+            echo "All eight 2D-art source-bound candidate views persisted privately, no training authority." >> "$GITHUB_STEP_SUMMARY"
+          fi

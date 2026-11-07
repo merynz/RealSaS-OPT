@@ -36,9 +36,18 @@ def adapt_blind_prior_to_rigprogram_parts(
     source_to_proposal_joint_id:Mapping[str,str],
     source_joint_parent_id:Mapping[str,str|None],
     source_joint_tail_P:Mapping[str,Sequence[float]],
+    normalization_receipt_sha256:str,
+    joint_coordinate_domain:str,
     max_controls:int=12,
 ):
     require(1<=max_controls<=64,"CONTROL_LIMIT")
+    require(isinstance(normalization_receipt_sha256,str)
+            and len(normalization_receipt_sha256)==64
+            and all(c in "0123456789abcdef"
+                    for c in normalization_receipt_sha256),
+            "NORMALIZATION_RECEIPT_REQUIRED")
+    require(joint_coordinate_domain=="IMPORTED_SOURCE_WORLD",
+            "MIXED_SOURCE_AND_NORMALIZED_COORDINATES")
     p=source_only_prior
     require(p.get("schema")==BLIND_SCHEMA
             and p.get("source_rig_ik_constraint_visibility")=="BLINDED"
@@ -79,6 +88,8 @@ def adapt_blind_prior_to_rigprogram_parts(
         constraint_id=f"DERIVED_PRIOR:CONSTRAINT:{idx:04d}"
         proof={
             "authority":"INFERRED_IK_PRIOR",
+            "source_world_coordinate_domain":joint_coordinate_domain,
+            "normalization_receipt_sha256":normalization_receipt_sha256,
             "source_only_prior_sha256":p["blind_proposal_sha256"],
             "original_native_IK_not_available_to_producer":True,
             "native_ik_controller_proven":False,

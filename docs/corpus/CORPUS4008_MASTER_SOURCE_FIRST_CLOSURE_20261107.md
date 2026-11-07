@@ -67,3 +67,25 @@ The old render contract `realsas.level_orthographic_z_orbit.v1` uses +Z world-up
 - Keep 370 source families and active semantic/IRIS training prep untouched until this Master Corpus passes its own source gates.
 
 There is no real 4,008-character-count qualification yet. The 3,000+ training target remains an ambition subject to actual character class, source rights, dedup, correct cameras and per-head truth availability.
+
+## 2026-11-07 real remote-source census and recovery progress
+
+The exact previously published Master V3 manifest and selection were verified by full SHA-256:
+- `MASTER_VARIANTS.jsonl`: `475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913`
+- `CANONICAL_VARIANT_SELECTION.json`: `af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9`
+
+The [real GitHub-hosted Drive inventory](https://github.com/merynz/RealSaS-OPT/actions/runs/42371135711) observed **659/4008** source-path matches in the old Drive `sources/` root:
+- Objaverse 416/3765
+- Quaternius 191/191
+- KayKit 37/37
+- Khronos QA-only 15/15
+
+The other **3349** are *not in that old Drive source folder under the expected identity*, rather than demonstrated globally destroyed. The [SHA-pinned metadata recovery audit](https://github.com/merynz/RealSaS-OPT/actions/runs/42371850821) joined **all 3349** one-to-one with old original-source records and upstream Objaverse linked annotations. All 3349 have 40-hex-commit-pinned GitHub blob URLs and historical legal `PASS` records; **135 remain EXTERNAL_HOLDOUT** and must never flow into train. Historical legal PASS is **not** fresh license or training authority.
+
+The [3×(FBX, GLB, glTF) real original-byte pilot](https://github.com/merynz/RealSaS-OPT/actions/runs/42372470068) reacquired **9/9** and independently matched the complete expected SHA-256 for **85,587,565** bytes. Exact source bytes were placed in **PRIVATE Drive quarantine only**, not public Actions artifacts and not the official `sources/` root. This demonstrates a viable retrieval route, not guaranteed accessibility for the other 3340 files.
+
+A bounded follow-up [8-shard source acquisition pilot](https://github.com/merynz/RealSaS-OPT/actions/runs/42372844889) uses frozen 32-way source ownership, at most 16 non-holdout historical-legal-PASS originals per running shard (at most 128 this first wave), 64 MiB per original, max 4 concurrent hosted workers, all exact SHA verified. Every failure/too-large/non-source response remains a typed failure, never a PASS or silent skip. The first wave must be inspected before increasing the sample window.
+
+Exact private source metadata, recovery URLs and staged bytes live solely under the Master V3 `audits/source_inventory_v1`, `audits/source_recovery_v1`, `audits/original_reacquisition_pilot_v1`, and `audits/original_recovery_shards_v1` folders. No original-content data is exported to public workflow artifacts.
+
+**Still open**: active-source current legal review, asset/variant/pose/frame import courts, orientation and camera, 2D presentation, attachments and secondary motion consequences, per-head supervision and admission. A verified source byte is **not** a qualified character or render truth.

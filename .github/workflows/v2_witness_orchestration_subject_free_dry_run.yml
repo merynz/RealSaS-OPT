@@ -29,6 +29,12 @@ on:
       - '.github/workflows/live_authority_map.yml'
       - '.github/workflows/subject2_knight_observation_preflight.yml'
       - '.github/workflows/v2_witness_orchestration_subject_free_dry_run.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/v2_witness_orchestration_subject_free_dry_run.yml'
+      - 'compiler/realsas_compiler_services/orchestrator/**'
+      - 'requirements/mainline-ci.txt'
   workflow_dispatch:
 
 concurrency:
@@ -40,7 +46,9 @@ permissions:
 
 jobs:
   subject-free-stage01-08:
-    runs-on: [self-hosted, linux, x64, realsas]
+    # Synthetic run-local fixture: no WSL services, GPUs or private source needed.
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
       PYTHONPATH: .
@@ -61,6 +69,9 @@ jobs:
           PIP_DEFAULT_TIMEOUT: '60'
         run: |
           python -m pip install --no-input --progress-bar off -r requirements/mainline-ci.txt
+          # Implementation closure imports model adapters; use the canonical
+          # pinned CPU runtime, never a CUDA or workstation-only wheel.
+          python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
 
       - name: Record readiness state and exact implementation closure
         shell: bash

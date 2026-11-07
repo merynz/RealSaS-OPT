@@ -20,6 +20,7 @@ HOSTED_FIRST = {
     "iris_v2_source_contract.yml",
     "living_compile_v4.yml",
     "platform_go_contract_v1.yml",
+    "platform_developer_contracts_hosted.yml",
     "platform_throughput_hydration_contract.yml",
     'appearance_pixel_center_behavioral_v1.yml',
     'appearance_source_contract.yml',
@@ -46,6 +47,7 @@ HOSTED_FIRST = {
     'single_family_data_contract_v1.yml',
     'skin_field_codec_shipping_capacity.yml',
     'tessa_knight_static_survivor_replay_v1.yml',
+    'v2_witness_orchestration_subject_free_dry_run.yml',
 }
 
 
@@ -110,8 +112,6 @@ def test_automatic_self_hosted_pr_checks_reject_public_fork_code():
             continue
         if not any(_is_explicit_self_hosted(value) for value in _runner_values(text)):
             continue
-        if path.name == "platform_developer_deploy.yml" and "    if: github.event_name == 'push' && github.ref == 'refs/heads/main'" in text:
-            continue
         if "github.event.pull_request.head.repo.full_name == github.repository" not in text:
             missing.append(path.name)
     assert not missing, "Self-hosted PR workflows lacking same-repository firewall: " + ", ".join(missing)
@@ -137,12 +137,47 @@ def test_frozen_r6_training_replays_are_explicit():
         assert not re.search(r"^  (pull_request|push):", text, re.MULTILINE), path.name
 
 
-def test_developer_deployment_does_not_queue_physical_host_on_pr():
-    text = (ROOT / ".github/workflows/platform_developer_deploy.yml").read_text()
-    physical_job = text.split("  developer-host:", 1)[1]
-    assert "if: github.event_name == 'push' && github.ref == 'refs/heads/main'" in physical_job
-    assert "  developer-contract:" in text
+def test_deployment_signal_is_manual_and_hosted_ci_is_separate():
+    """Successful hosted contracts cannot masquerade as a physical deployment."""
+    physical = (ROOT / ".github/workflows/platform_developer_deploy.yml").read_text()
+    events = physical.split("\non:\n", 1)[1].split("\nconcurrency:", 1)[0]
+    assert "  workflow_dispatch:" in events
+    assert "  pull_request:" not in events and "  push:" not in events
+    assert "name: platform-developer-deployment" in physical
+    assert "cancel-in-progress: false" in physical
+    assert "  developer-host:\n" not in physical
+    job = physical.split("  developer-host-manual:", 1)[1]
+    assert "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'" in job
+    assert "runs-on: [self-hosted, linux, x64, realsas]" in job
+    assert 'test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"' in job
+
+    hosted = (ROOT / ".github/workflows/platform_developer_contracts_hosted.yml").read_text()
+    assert "name: platform-developer-contracts-hosted" in hosted
+    assert "  pull_request:" in hosted and "  push:" in hosted
+    assert "runs-on: ubuntu-latest" in hosted
+    assert "self-hosted" not in hosted
+    assert "github.event.repository.private == false" in hosted
+
+
+def test_subject_free_v2_orchestration_replays_on_hosted_cpu():
+    """Synthetic Stage01-08 fixture has no physical WSL or private source input."""
+    text = (ROOT / ".github/workflows/v2_witness_orchestration_subject_free_dry_run.yml").read_text()
+    assert "  pull_request:" in text and "  push:" in text
+    assert "github.event.repository.private == false" in text
     assert "runs-on: ubuntu-latest" in text
+    assert "self-hosted" not in text
+    assert "python -m compiler.realsas_compiler_services.orchestrator.mainline execute" in text
+    assert "--target 08_NORMALIZATION_DOMAIN_QUALIFIED" in text
+
+
+def test_native_teacher_physical_witness_is_explicit_main_only():
+    """A truth-foundry PR changes source contracts on hosted CI, not a WSL service."""
+    text = (ROOT / ".github/workflows/truth_teacher_source.yml").read_text()
+    events = text.split("\non:\n", 1)[1].split("\npermissions:", 1)[0]
+    assert "  workflow_dispatch:" in events
+    assert "  pull_request:" not in events and "  push:" not in events
+    assert "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'" in text
+    assert "runs-on: [self-hosted, linux, x64, realsas]" in text
 
 
 def test_historical_family_selector_preserves_frozen_checkout_boundary():

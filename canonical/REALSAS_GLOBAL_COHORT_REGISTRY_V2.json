@@ -1,6 +1,6 @@
 {
   "schema": "RealSaS.GlobalTruthFoundryAllCohortRegistry.v2",
-  "status": "SOURCE_COHORT_SCOPE_RECONCILED__NO_SOURCE_OR_HEAD_TRUTH_ADMISSION",
+  "status": "SOURCE_COHORT_SCOPE_RECONCILED__53_CROSS_CORPUS_IDENTITY_SUSPECTS_QUARANTINED__NO_HEAD_ADMISSION",
   "analysis_date_utc": "2026-11-07",
   "immutable_input_receipts": {
     "master_4008_jsonl_sha256": "475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913",
@@ -27,7 +27,8 @@
     "unified_family_evidence_rows_existing": 57089,
     "all_canonical_facet_slots_including_QA": 140096,
     "all_canonical_head_routes_including_QA": 161986,
-    "all_head_training_admissions": 0
+    "all_head_training_admissions": 0,
+    "head_routes_with_identity_quarantine_overlay": 3922
   },
   "cohorts": [
     {
@@ -78,7 +79,26 @@
     "overlap_exact_SHA_verified_Master_vs_historical_Core_subset": 0,
     "semantic_and_cross_format_identity_finished": false,
     "registered_records_not_equivalent_to_unique_characters": true,
-    "no_train_dev_holdout_reallocation": true
+    "no_train_dev_holdout_reallocation": true,
+    "new_sha96_prefix_crosswalk_pairs": 53,
+    "master_quaternius_sha96_crosswalk_pairs": 48,
+    "master_kaykit_sha96_crosswalk_pairs": 5,
+    "actual_source_bytes_full_sha_verified_pairs": 3,
+    "prefix_matches_awaiting_original_byte_rehash": 50,
+    "protected_split_identity_risk_pairs": 16,
+    "split_distribution_of_pairs": {
+      "FIT": 37,
+      "DEV": 8,
+      "TUNE": 4,
+      "CAL": 3,
+      "EXTERNAL_HOLDOUT": 1
+    },
+    "source_record_ids_quarantined": 106,
+    "target_routes_quarantined": 3922,
+    "protected_split_target_routes_quarantined": 1184,
+    "true_training_leakage_observed": false,
+    "court_resolution": "PENDING_NO_MERGE_NO_TRAINING_PASS",
+    "old_zero_overlap_scope_explanation": "The earlier zero checks compared only 3192 Master SHA-recovered Objaverse originals; it excluded the 228 unrehash Quaternius/KayKit identities."
   },
   "original_master_publisher_counts": {
     "objaverse_animated_originals": 3765,

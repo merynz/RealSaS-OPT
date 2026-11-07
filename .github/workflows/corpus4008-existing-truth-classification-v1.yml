@@ -1,0 +1,96 @@
+name: corpus4008-existing-truth-classification-v1
+
+# READ-ONLY join of existing source evidence: no source imports, Blender,
+# solver experiments, rendering, derivative truth or training admission.
+on:
+  push:
+    branches: [corpus4008-existing-truth-evidence-classification-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-existing-truth-classification-v1.yml'
+      - 'tools/corpus/classify_corpus4008_existing_truth_v1.py'
+      - 'tests/corpus/test_corpus4008_existing_truth_classification_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-existing-truth-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  strict-source-truth-court-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect SHA tampering, forged IK truth, split leakage, QA drift
+        run: |
+          set -euo pipefail
+          python -m pip install -q --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q \
+            tests/corpus/test_corpus4008_existing_truth_classification_v1.py
+          python -m compileall -q tools/corpus/classify_corpus4008_existing_truth_v1.py
+
+  classify-observed-existing-source-truth:
+    needs: strict-source-truth-court-regressions
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      RCLONE_CONFIG: /tmp/realsas-existing-truth-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      SOURCE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/parallel_32shard_readback_v1/42395402328-1/global
+      TRIAGE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/source_court_review_triage_v1/42399311010-1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/existing_truth_classification_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require exact private source evidence lineage
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Join only previous original 1024 source and QA receipts
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-existing-truth"
+          mkdir -p "$root/input" "$root/out"
+          rclone copyto "$SOURCE/CORPUS4008_1024_SHARD_READBACK_SUMMARY_V1.json" \
+            "$root/input/SOURCE_SUMMARY.json" --retries 3
+          rclone copyto "$SOURCE/CORPUS4008_1024_SHARD_READBACK_MATRIX_V1.csv" \
+            "$root/input/SOURCE_MATRIX.csv" --retries 3
+          rclone copyto "$TRIAGE/CORPUS4008_1024_SOURCE_REVIEW_TRIAGE_SUMMARY_V1.json" \
+            "$root/input/QA_SUMMARY.json" --retries 3
+          rclone copyto "$TRIAGE/CORPUS4008_1024_SOURCE_REVIEW_TRIAGE_V1.csv" \
+            "$root/input/QA_MATRIX.csv" --retries 3
+          python -m tools.corpus.classify_corpus4008_existing_truth_v1 \
+            --source-summary "$root/input/SOURCE_SUMMARY.json" \
+            --source-matrix "$root/input/SOURCE_MATRIX.csv" \
+            --triage-summary "$root/input/QA_SUMMARY.json" \
+            --triage-matrix "$root/input/QA_MATRIX.csv" \
+            --output "$root/out"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-existing-truth/out"
+          r=json.loads((root/"EXISTING_EVIDENCE_CLASSIFICATION_SUMMARY_V1.json").read_text())
+          assert r["source_count"]==1024
+          assert r["head_route_count"]==6144
+          assert r["training_authorized"] is False
+          assert not r["source_truth_synthesized"]
+          assert not r["new_mechanical_experiment_executed"]
+          print("## Existing Corpus4008 source-truth classification")
+          print("Original SHA-distinct sources:",r["source_count"])
+          print("Six head-specific evidence route rows:",r["head_route_count"])
+          print("Existing observation and review counts:",r["observation_and_cleanup_counts"])
+          print("All source/native/2D-art/morphology and head training courts: NO NEW PASS")
+          PY
+          rclone copy "$root/out" "$DEST" --checksum --retries 3
+          echo "Full source and head-level evidence classification archived privately; zero new mechanical tests." >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,118 @@
+name: corpus4008-global-wave4-existing-truth-v2
+
+# No Blender, renderer, mechanical experiments, fresh downloads of originals,
+# or source truth promoted from numerical imported-scene observations.
+on:
+  push:
+    branches: [corpus4008-existing-truth-evidence-classification-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-global-wave4-existing-truth-v2.yml'
+      - 'tools/corpus/reconcile_realsas_wave4_global_truth_v2.py'
+      - 'tests/corpus/test_realsas_wave4_global_truth_v2.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-global-wave4-truth-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  existing-source-shard-and-truth-reconciliation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 95
+    env:
+      RCLONE_CONFIG: /tmp/realsas-global3993-readback-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      SOURCE_AVAIL: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/source_availability_matrix_v1/42385366671-1
+      V1: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/global_existing_truth_inventory_v1_20261107
+      IMPORT1024: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/existing_truth_classification_v1/42408599259-1
+      WAVE4: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/wave4_source_rig_scene_v1/42400124187-1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/global_wave4_truth_reconciliation_v2/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require read-only immutable source evidence remote
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Download all previous canonical matrices and 32 existing Wave4 receipt shards
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-global-wave4"
+          mkdir -p "$root/realsas_global_truth_inventory_v1" "$root/wave4" "$root/out"
+          rclone copyto "$SOURCE_AVAIL/SOURCE_AVAILABILITY_MATRIX_V1.csv" "$root/SOURCE_AVAILABILITY_MATRIX_V1.csv" --retries 3
+          rclone copyto "$SOURCE_AVAIL/SOURCE_AVAILABILITY_SUMMARY_V1.json" "$root/SOURCE_AVAILABILITY_SUMMARY_V1.json" --retries 3
+          rclone copyto "$IMPORT1024/SOURCE_EXISTING_EVIDENCE_CLASSIFICATION_V1.csv" "$root/SOURCE_EXISTING_EVIDENCE_CLASSIFICATION_V1.csv" --retries 3
+          rclone copy "$V1" "$root/realsas_global_truth_inventory_v1" --retries 3 --transfers 12 --checkers 16
+          # Every source was already imported by 32 completed hosted workers.
+          # Never download original 3D files or rerun an importer/renderer.
+          # Full scene gz file is not required for summary-only inventory and
+          # must not be implied as rehashed here.
+          rclone copy "$WAVE4" "$root/wave4" \
+            --exclude 'shard-*/logs/**' \
+            --exclude 'shard-*/receipts/*.full.source.json.gz' \
+            --retries 3 --transfers 16 --checkers 16
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-global-wave4/wave4"
+          needed=("PLAN.json","BATCH_STATUS.json","RESULTS.jsonl")
+          missing=[f"shard-{n}/{item}" for n in range(32)
+                   for item in needed if not (root/f"shard-{n}"/item).is_file()]
+          assert not missing, f"MISSING_IMMUTABLE_WAVE4_SOURCE_SHARD:{missing}"
+          print("All 32 Wave4 source-plan/status receipt triads present.")
+          PY
+      - name: Regression — frozen source SHA, split, duplicate and head-admission firewall
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/c4008-global-wave4"
+          python -m compileall -q tools/corpus/reconcile_realsas_wave4_global_truth_v2.py
+          REALSAS_AUDIT_INPUT_ROOT="$root" python tests/corpus/test_realsas_wave4_global_truth_v2.py
+      - name: Reclassify all 3993 source identities with real Wave4 existing source observations
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/c4008-global-wave4"
+          python tools/corpus/reconcile_realsas_wave4_global_truth_v2.py \
+            --v1 "$root/realsas_global_truth_inventory_v1" \
+            --source-availability "$root/SOURCE_AVAILABILITY_MATRIX_V1.csv" \
+            --source-summary "$root/SOURCE_AVAILABILITY_SUMMARY_V1.json" \
+            --wave4 "$root/wave4" --output "$root/out"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-global-wave4/out"
+          s=json.loads((root/"MASTER3993_WAVE4_TRUTH_RECONCILIATION_V2.json").read_text())
+          assert s["source_count"]==3993
+          assert s["master3993_family_cell_count"]==51909
+          assert s["six_head_route_count"]==23958
+          assert all(v==0 for v in s["model_training_admitted"].values())
+          assert s["training_authorized"] is False
+          print("## Existing 3D source / Master3993 V2 classification")
+          print("Unique canonical subjects:",s["source_count"])
+          print("Previously inspected (read-only):",s["baseline_import_success"])
+          print("Wave4 source-only observed:",s["wave4_import_success"])
+          print("Imported-scene sources total:",s["total_existing_import_observations"])
+          print("Import source exceptions:",s["wave4_status_counts"])
+          print("Still without imported-scene observation:",s["remaining_without_import_observation"])
+          print("Source/native/control/2D-art/rights/model truth courts: NO NEW PASS.")
+          print("No original source bytes or full gz receipt SHA rehashed by this summary join.")
+          PY
+      - name: Preserve immutable global truth inventory V2 privately in Master Corpus
+        if: always()
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-global-wave4/out"
+          if test -s "$RCLONE_CONFIG" && test -s "$root/MASTER3993_WAVE4_TRUTH_RECONCILIATION_V2.json"; then
+            rclone copy "$root" "$DEST" --checksum --retries 3
+            echo "SHA-verified Master3993 global Wave4 source evidence V2 archived privately." >> "$GITHUB_STEP_SUMMARY"
+          fi

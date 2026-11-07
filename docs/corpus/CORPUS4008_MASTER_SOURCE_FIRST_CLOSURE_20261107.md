@@ -89,3 +89,17 @@ A bounded follow-up [8-shard source acquisition pilot](https://github.com/merynz
 Exact private source metadata, recovery URLs and staged bytes live solely under the Master V3 `audits/source_inventory_v1`, `audits/source_recovery_v1`, `audits/original_reacquisition_pilot_v1`, and `audits/original_recovery_shards_v1` folders. No original-content data is exported to public workflow artifacts.
 
 **Still open**: active-source current legal review, asset/variant/pose/frame import courts, orientation and camera, 2D presentation, attachments and secondary motion consequences, per-head supervision and admission. A verified source byte is **not** a qualified character or render truth.
+
+## 2026-11-07 original-source recovery and actual Blender imported-scene validation
+
+The [8×16 SHA-verified initial restoration](https://github.com/merynz/RealSaS-OPT/actions/runs/42372844889) completed all eight hosted jobs: **128 attempted**, **127 original source-byte SHA matches** (**304,666,927** accepted bytes), **1 HTTP 404** retained as an explicit failure. The preceding 9-source / 85,587,565-byte pilot overlaps one of those recovered 127 sources; the HTTP 404 is not that overlap, so the two waves provide **135 distinct exact-SHA recovered originals** in private quarantine, not 136 distinct assets.
+
+The [pinned Blender 4.5.14 real-source import](https://github.com/merynz/RealSaS-OPT/actions/runs/42373335212) completed for all three original bytes, preserving rest import separately from animated import:
+- Objaverse original FBX: 1 imported mesh object, 1 armature, **34 bones**, **1 imported action**, **30 indexed geometry components** inside that mesh, 592 indexed open edges and **4 missing external images**. Graphics source-RGB must stay blocked.
+- KayKit original GLB: 13 imported mesh objects, 1 armature, **41 bones**, **76 imported actions**, **6 bone-parented mesh candidates**, 12 mesh objects with indexed open boundaries. The six attachment relations are not runtime consequence truths.
+- Quaternius original OBJ: 1 imported mesh object, 0 armatures/actions, **20 indexed geometry components**, 96 boundary edges, no native OBJ skin or rig.
+- Actual outputs are **importer observations**, not source-native FBX parity and not uncontested semantic classes, CAA, 2D appearance or correct anatomical camera frames. They are held on restricted Drive under `audits/blender_source_pilot_v1`.
+
+A [32-shard bounded source-recovery job](https://github.com/merynz/RealSaS-OPT/actions/runs/42374046073) is initiated for **3,214 historical non-holdout** missing Objaverse original candidates. Each shard has between 85 and 123 source identities, runs only four concurrent hosted workers, and limits each source to 64 MiB. First-wave exact-byte cache is revalidated by full SHA before reuse; no source or training admission, no canonical `sources/` mutation. The 135 original historical external-holdout identities remain protected.
+
+**Next strict Master Corpus gates:** finish and reconcile the 32-shard source receipts and any 404/oversize entries; separately revalidate current commercial source rights; qualify each original Blender/Git LFS/texture dependency, character-vs-prop, anatomical pose/up/front and 8-view native RGB/primitive alignment before building the Semantic / Graphics / TESSA truth targets.

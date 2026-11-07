@@ -98,7 +98,11 @@ def test_deployment_workflow_is_canonical_main_only_for_mutations():
     root = Path(__file__).resolve().parents[2]
     text = (root / ".github/workflows/platform_developer_deploy.yml").read_text()
     assert "runs-on: [self-hosted, linux, x64, realsas]" in text
-    assert "if: github.event_name == 'push' && github.ref == 'refs/heads/main'" in text
+    assert "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'" in text
+    assert "  developer-host:\n" not in text
+    assert "  developer-host-manual:" in text
+    assert "  developer-contract:" in text
+    assert "runs-on: ubuntu-latest" in text
     assert "cancel-in-progress: ${{ github.event_name == 'pull_request' }}" in text
     assert "platform_deploy.py" in text and "platform_deployment_smoke.py" in text
 

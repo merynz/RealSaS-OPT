@@ -49,11 +49,15 @@ jobs:
           names=('rig-snake','rig-spider','rig-dragon')
           for name in names:
               path=Path('upstream-rigs/rigs')/(name+'.blend')
-              assert path.is_file() and path.stat().st_size>1024, f'MISSING_NATIVE_BINARY:{name}'
-              with path.open('rb') as f:
-                  magic=f.read(7)
-              print('Native header:', name, magic.hex(), repr(magic), 'bytes', path.stat().st_size, flush=True)
-              assert magic==b'BLENDER', f'NOT_NATIVE_BLEND_BINARY:{name}'
+              assert path.is_file() and path.stat().st_size>1024, f'MISSING_SOURCE_BYTES:{name}'
+              magic=path.open('rb').read(7)
+              if magic.startswith(b'BLENDER'):
+                  category="NATIVE_BLEND"
+              elif magic[:4]==bytes.fromhex('28b52ffd'):
+                  category="ZSTANDARD_WRAPPED_BLEND"
+              else:
+                  raise ValueError(f'UNSUPPORTED_SOURCE_ENCODING:{name}:{magic.hex()}')
+              print(name, category, 'bytes', path.stat().st_size)
           PY
       - name: Check private Drive configured
         id: gate
@@ -74,7 +78,7 @@ jobs:
           set -euo pipefail
           umask 077
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends rclone xz-utils
+          sudo apt-get install -y -qq --no-install-recommends rclone xz-utils zstd
           printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
           mkdir -p "$RUNNER_TEMP/c4008-native/bin" "$RUNNER_TEMP/c4008-native/output"
           cd "$RUNNER_TEMP/c4008-native/bin"
@@ -101,13 +105,31 @@ jobs:
           set -euo pipefail
           umask 077
           binary="$RUNNER_TEMP/c4008-native/bin/blender-4.5.14-linux-x64/blender"
+          mkdir -p "$RUNNER_TEMP/c4008-native/unwrapped"
           for name in rig-snake rig-spider rig-dragon; do
-            src="$GITHUB_WORKSPACE/upstream-rigs/rigs/$name.blend"
-            original_sha="$(sha256sum "$src" | awk '{print $1}')"
+            raw="$GITHUB_WORKSPACE/upstream-rigs/rigs/$name.blend"
+            dst="$RUNNER_TEMP/c4008-native/unwrapped/$name.blend"
+            original_transport_sha="$(sha256sum "$raw" | cut -d' ' -f1)"
+            header="$(head -c 4 "$raw" | od -An -tx1 | tr -d ' \n')"
+            if test "$header" = "424c454e"; then
+              transport_type="NATIVE_BLEND"
+              cp "$raw" "$dst"
+            elif test "$header" = "28b52ffd"; then
+              transport_type="ZSTANDARD_WRAPPED_BLEND"
+              (ulimit -f 262144; timeout 45s zstd -q -d -f "$raw" -o "$dst")
+            else
+              echo "SOURCE_UNSUPPORTED_TRANSPORT_MAGIC:$name:$header" >&2
+              exit 10
+            fi
+            test -s "$dst"
+            test "$(head -c 7 "$dst")" = BLENDER
+            decoded_sha="$(sha256sum "$dst" | cut -d' ' -f1)"
             "$binary" --background --factory-startup --disable-autoexec --python-exit-code 1 \
               --python "$GITHUB_WORKSPACE/engine/tools/corpus/blender_corpus4008_native_blend_control_probe_v1.py" -- \
-              --source "$src" \
-              --expected-sha256 "$original_sha" \
+              --source "$dst" \
+              --expected-sha256 "$decoded_sha" \
+              --transported-source-sha256 "$original_transport_sha" \
+              --transport-encoding "$transport_type" \
               --source-repo Mesh2Motion/mesh2motion-assets \
               --source-commit "$SOURCE_COMMIT" \
               --asset-key "$name" \
@@ -123,6 +145,8 @@ jobs:
               assert d["training_authorized"] is False
               assert d["source_file_script_execution_disabled"] is True
               assert d["source_native_ik_fk_functionality"] == "UNKNOWN"
+              assert d["upstream_transport_encoding"] in ("NATIVE_BLEND","ZSTANDARD_WRAPPED_BLEND")
+              assert len(d["upstream_transport_sha256"]) == 64
               c=d["profile"]
               print(d["source_asset_key"],
                     "bones",c["imported_pose_bone_count"],

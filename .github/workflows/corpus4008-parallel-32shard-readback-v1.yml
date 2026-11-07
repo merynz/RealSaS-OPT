@@ -1,0 +1,184 @@
+name: corpus4008-parallel-32shard-readback-v1
+
+# Every full imported scene/rig receipt is independently rehashed on 32
+# parallel shard workers, then a global 3993-Master source identity/split audit.
+# No original source bytes are downloaded. No head teacher truth is created.
+on:
+  push:
+    branches: [corpus4008-32shard-parallel-evidence-readback-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-parallel-32shard-readback-v1.yml'
+      - 'tools/corpus/audit_corpus4008_parallel_shard_v1.py'
+      - 'tools/corpus/merge_corpus4008_parallel_shards_v1.py'
+      - 'tests/corpus/test_corpus4008_parallel_shard_merge_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-parallel-source-readback-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prove merge has no duplicate, fake PASS, partial or SHA drift
+        run: |
+          set -euo pipefail
+          python -m pip install -q --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q \
+            tests/corpus/test_corpus4008_parallel_shard_merge_v1.py
+          PYTHONPATH=. python -m compileall -q \
+            tools/corpus/audit_corpus4008_parallel_shard_v1.py \
+            tools/corpus/merge_corpus4008_parallel_shards_v1.py
+
+  independently-audit-one-source-shard:
+    needs: validate-contract
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+    env:
+      SHARD: ${{ matrix.shard }}
+      RCLONE_CONFIG: /tmp/realsas-c4008-audit-32shard-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      OUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/parallel_32shard_readback_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require private Drive source receipts
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "PRIVATE_DRIVE_UNAVAILABLE_NO_SOURCE_AUDIT" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Read back source-scene and control full receipts from two disjoint waves
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          root="$RUNNER_TEMP/c4008-shard-readback"
+          mkdir -p "$root/first/shard-$SHARD/receipts" "$root/next/shard-$SHARD/receipts" "$root/result"
+          if test "$((SHARD % 4))" = 0; then
+            wave="wave1_source_rig_scene_v1/42387604493-1"
+          else
+            wave="wave2_source_rig_scene_v1/42388620135-1"
+          fi
+          prior="$REMOTE/audits/$wave/shard-$SHARD"
+          next="$REMOTE/audits/wave3_source_rig_scene_v1/42389083706-1/shard-$SHARD"
+          for filename in PLAN.json BATCH_STATUS.json RESULTS.jsonl; do
+            rclone copyto "$prior/$filename" "$root/first/shard-$SHARD/$filename" --retries 3
+            rclone copyto "$next/$filename" "$root/next/shard-$SHARD/$filename" --retries 3
+          done
+          rclone copy "$prior/receipts" "$root/first/shard-$SHARD/receipts" --checksum --retries 3
+          rclone copy "$next/receipts" "$root/next/shard-$SHARD/receipts" --checksum --retries 3
+          python -m tools.corpus.audit_corpus4008_parallel_shard_v1 \
+            --shard "$SHARD" --prior "$root/first" --next "$root/next" \
+            --output "$root/result"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-shard-readback/result"
+          v=json.loads((root/"SHARD_READBACK_SUMMARY.json").read_text())
+          print("## Independently audited recovered-original source shard",v["shard"])
+          print("First 8 + additional",v["additional_wave_count"],
+                "exact-source independently rehashed imported observations")
+          print("Status:",v["source_import_status_counts"])
+          print("2D Graphics, source-control IK behavior, actual skin binding and training: NOT ADMITTED")
+          PY
+      - name: Persist shard-level SHA evidence to private Drive only
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-shard-readback/result"
+          if test -s "$RCLONE_CONFIG" && test -f "$root/SHARD_READBACK_SUMMARY.json"; then
+            for f in SHARD_READBACK_SUMMARY.json SHARD_TYPED_OBSERVATIONS.csv; do
+              rclone copyto "$root/$f" "$OUT/shard-$SHARD/$f" --retries 3
+            done
+          fi
+
+  global-source-identity-split-audit:
+    needs: [validate-contract, independently-audit-one-source-shard]
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c4008-global-source-audit-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      OUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/parallel_32shard_readback_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require private evidence readback capability
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Read every shard receipt, preserve 3993 Master lineage and fail closed
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-global-audit"
+          mkdir -p "$root/shards" "$root/out"
+          rclone copyto "$REMOTE/metadata/CANONICAL_VARIANT_SELECTION.json" "$root/selection.json" --retries 3
+          printf 'af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9  %s\n' "$root/selection.json" | sha256sum -c
+          export RCLONE_ROOT="$root"
+          export RCLONE_OUT="$OUT"
+          seq 0 31 | xargs -P 8 -I '{}' sh -c '
+            set -eu
+            mkdir -p "$RCLONE_ROOT/shards/shard-{}"
+            for f in SHARD_READBACK_SUMMARY.json SHARD_TYPED_OBSERVATIONS.csv; do
+              rclone copyto "$RCLONE_OUT/shard-{}/$f" "$RCLONE_ROOT/shards/shard-{}/$f" --retries 3
+            done
+          '
+          python -m tools.corpus.merge_corpus4008_parallel_shards_v1 \
+            --selection "$root/selection.json" \
+            --results-root "$root/shards" \
+            --output "$root/out"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["RUNNER_TEMP"])/"c4008-global-audit/out/CORPUS4008_1024_SHARD_READBACK_SUMMARY_V1.json").read_text())
+          assert len(d["shard_receipts"])==32 and d["training_authorized"] is False
+          assert d["unique_source_candidates_measured"]<=1024
+          print("## Global 32-shard original-source evidence closure")
+          print("Unique original sources:",d["unique_source_candidates_measured"])
+          print("Import status:",d["import_status_counts"])
+          print("Format count:",d["per_format_source_counts"])
+          print("Head-specific *OBSERVATION* counts:",d["head_observation_candidate_counts_not_training"])
+          print("Head-training PASS: ZERO — individual source court admission remains separate.")
+          PY
+      - name: Publish source observations to private Drive, never mint training truth
+        if: always()
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-global-audit/out"
+          if test -s "$RCLONE_CONFIG" && test -f "$root/CORPUS4008_1024_SHARD_READBACK_SUMMARY_V1.json"; then
+            rclone copy "$root" "$OUT/global" --checksum --retries 3
+            echo "Global typed source-observation matrix privately persisted." >> "$GITHUB_STEP_SUMMARY"
+          fi

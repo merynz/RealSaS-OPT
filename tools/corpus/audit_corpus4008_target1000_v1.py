@@ -129,6 +129,7 @@ def audit(selection: Path, receipts: Path, evidence_root: Path,
     # Core requirements: stable canonical identity + immutable registered source.
     counts = defaultdict(set)
     per_head_strata = defaultdict(lambda: defaultdict(set))
+    cluster_splits = defaultdict(set)
     receipts_seen = set()
     rejected = Counter()
     warnings = []
@@ -176,6 +177,7 @@ def audit(selection: Path, receipts: Path, evidence_root: Path,
                     "NO_DEDUP_CLUSTER")
             require(rec.get("cross_split_lineage_court") == "PASS",
                     "CROSS_SPLIT_NOT_COURTED")
+            cluster_splits[lineage].add(row["split"])
             if row["split"] == "FIT":
                 counts[head].add(lineage)
                 strata = rec.get("morphology_stratum", "UNKNOWN")
@@ -186,6 +188,15 @@ def audit(selection: Path, receipts: Path, evidence_root: Path,
             rejected[reason] += 1
             if len(warnings) < 40:
                 warnings.append({"filename": f.name, "reason": reason})
+    # A lineage must not qualify in FIT if any independent source receipt
+    # demonstrates that lineage also lives in TUNE/DEV/CAL/EXTERNAL_HOLDOUT.
+    cross_split_clusters = {
+        cluster for cluster, splits in cluster_splits.items() if len(splits) > 1
+    }
+    for head in HEAD_TARGETS:
+        counts[head].difference_update(cross_split_clusters)
+        for clusters in per_head_strata[head].values():
+            clusters.difference_update(cross_split_clusters)
     per_head = {}
     for head in HEAD_TARGETS:
         n = len(counts[head])
@@ -208,6 +219,8 @@ def audit(selection: Path, receipts: Path, evidence_root: Path,
         "rejected_receipt_reason_counts": dict(sorted(rejected.items())),
         "rejected_receipt_examples": warnings,
         "per_head": per_head,
+        "cross_split_cluster_conflicts_found_in_receipts": len(cross_split_clusters),
+        "cross_split_cluster_conflicts_suppressed_from_fit": True,
         "cross_head_joint_cohort_proven": False,
         "rights_checked_from_source": False,
         "authored_control_ik_courts_completed": False,

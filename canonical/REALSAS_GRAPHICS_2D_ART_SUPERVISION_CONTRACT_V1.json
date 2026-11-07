@@ -76,7 +76,8 @@
       "source identity retention across 8 views",
       "consistent accessory/weapon positioning",
       "no duplicated mirror view treated as unseen geometry",
-      "no deformed or detached parts"
+      "no deformed or detached parts",
+      "Corpus370-style-domain-consistency independent comparison"
     ],
     "consequence": [
       "pose edits rerender",
@@ -104,9 +105,28 @@
     "2D_GAME_ART_STYLE_REVIEW",
     "IDENTITY_AND_ATTACHMENT_CONSISTENCY",
     "RENDER_REPRODUCIBILITY",
-    "MODEL_CONSUMER_LOSS_AND_MASK"
+    "MODEL_CONSUMER_LOSS_AND_MASK",
+    "CORE370_2D_ART_DOMAIN_PARITY"
   ],
   "truth_authority_policy": "Native SOURCE_RGB and STYLIZED_2D_RGB are distinct typed targets, neither overrides the other. Both require independently accepted evidence. New stylized render cannot claim source-authored 2D art.",
   "current_admission": "NONE",
-  "training_authorized": false
+  "training_authorized": false,
+  "cross_corpus_2d_style_continuity": {
+    "reference_cohort": "Core370",
+    "reference_status": "ONLY_INDEPENDENTLY_VISUAL_COURTED_AND_LICENSED_2D_ART_REFERENCES",
+    "quantitative_style_diagnostics": [
+      "palette/hue/luminance distribution with masked foreground",
+      "silhouette framing and density",
+      "stroke/edge spatial scale",
+      "shadow banding",
+      "texel and posterization aliasing",
+      "view consistency",
+      "shape and proportions between 3D source and derived art"
+    ],
+    "hard_gate": "Independent human visual review must confirm consistent 2D game-art style relative to Core370; statistics are suggestions, not proof.",
+    "prohibited_shortcut": "Do not replace real native Core370 art with stylized 3D training labels; do not infer 2D artistry from a raw 3D scene or minimal cel filter.",
+    "reference_style_rig_separation": "Core370 style reference may train presentation but cannot invent source attachments, IK, semantic labels or hidden geometry.",
+    "status": "PENDING_REFERENCE_ART_CURATION",
+    "all_new_stylized_master_images_automatically_qualify": false
+  }
 }

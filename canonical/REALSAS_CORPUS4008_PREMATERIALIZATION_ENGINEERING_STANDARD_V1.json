@@ -1,0 +1,177 @@
+{
+  "schema": "RealSaS.Corpus4008PreMaterializationEngineeringStandard.v1",
+  "created_utc": "2026-11-07",
+  "status": "PROPOSED_GATE_CONTRACT__NO_SOURCE_TRUTH_MINTED",
+  "owner": "SourceEvidenceAndTargetCourts",
+  "scope": "Master4008 source candidates + independently qualified Core370 style reference; evidence-specific, not a universal accept/reject asset boolean",
+  "authority_taxonomy": [
+    "RAW_ORIGINAL_SOURCE",
+    "IMPORTED_OBSERVATION",
+    "INDEPENDENT_SOURCE_TRUTH",
+    "REVIEWED_SEMANTIC_PRIOR",
+    "CAPABILITY_CONTRACT",
+    "REPRESENTATION_POLICY",
+    "2D_STYLIZED_PRESENTATION_TARGET"
+  ],
+  "outcomes": [
+    "PASS",
+    "FAIL",
+    "UNKNOWN",
+    "MASKED",
+    "NOT_APPLICABLE",
+    "QUARANTINED"
+  ],
+  "pipeline": [
+    "00_ACQUISITION_AND_LEGAL_USE_RIGHTS",
+    "01_SHA_SOURCE_IMMUTABILITY_AND_DEPENDENCY_SNAPSHOT",
+    "02_SUBJECT_IDENTITY_CLUSTER_AND_LEAKAGE_FREE_SPLIT",
+    "03_SANDBOXED_NATIVE_IMPORT_AND_DEPENDENCY_RECONCILIATION",
+    "04_SOURCE_SCENE_AUDIT_MESH_TOPOLOGY_ATTACHMENTS_ARMATURE_MATERIAL",
+    "05_SOURCE_POSE_AND_ANATOMICAL_CAMERA_OBSERVATION",
+    "06_REVERSIBLE_SOURCE_NORMALIZATION_PLAN",
+    "07_NORMALIZATION_ROUNDTRIP_AND_GEOMETRY_RIG_SKIN_PARITY",
+    "08_TARGET_SCHEMA_STANDARDIZATION_AND_FAMILY_MASKS",
+    "09_SEMANTIC_REGION_AND_AFFORDANCE_PRIOR_COURTS",
+    "10_GRAPHICS_NATIVE_RGBA_AND_2D_GAME_ART_PRESENTATION_COURTS",
+    "11_MECHANICAL_IK_FK_CONTROL_DEFORMATION_CAUSAL_COURTS",
+    "12_SPLIT_DISTRIBUTION_BIAS_AND_QUALITY_REPORT",
+    "13_PER_HEAD_SUPERVISION_ADMISSION_WITH_INDEPENDENT_EVIDENCE",
+    "14_PREMATERIALIZATION_FREEZE_AND_REPLAY",
+    "15_MATERIALIZATION_SEALED_MODEL_SPECIFIC_CONSUMPTION"
+  ],
+  "normalization": {
+    "source_immutability": "Never edit original bytes; all scene transformations in typed, reversible, immutable derivative with explicit SHA parent",
+    "matrix_convention": "ROW_MAJOR_4X4__COLUMN_VECTOR_RIGHT_MULTIPLICATION",
+    "source_coordinate_domain": "IMPORTED_SOURCE_WORLD__AXIS_UNIT_ORIENTATION_UNTRUSTED",
+    "canonical_coordinate_domain": "OBJECT_CANONICAL_RIGHT_HANDED_CENTERED_ISOTROPIC",
+    "fit_policy": "ONE_SOURCE_BOUNDING_BOX_CENTER_AND_ONE_HALF_EXTENT_FOR_ALL_VIEWS_AND_ALL_POSES",
+    "object_to_iris": "p_iris = N_world_to_iris * p_source_world; one global, invertible similarity transform",
+    "iris_domain": "[-1,1]^3",
+    "tessa_domain": "[-0.5,0.5]^3; tessa = 0.5*iris, backed by existing models/iris/vnext/coordinate_contract_v1.py",
+    "raw_source_unit": "UNKNOWN until measured; normalized coordinates are unitless and must NOT be reported as meters",
+    "source_up_front": "UNKNOWN unless independently source- or anatomy-courted; do not silently rotate alleged humanoid Y/Z",
+    "pose": "SOURCE_BIND_REST__NO_ANIMATION, if proven; never force A/T pose for arbitrary winged, snake, quadruped or sideways-authored source",
+    "mirror_policy": "No unrecorded reflection. Negative determinant requires explicit parity, triangle-winding, normals and attachment court",
+    "skin_policy": "Do not silently renormalize broken weights or swap bone order; exact sparse vertex-joint IDs preserved and independently tested",
+    "bone_policy": "Propagate world/source/rest matrices and deform-bone/control-bone/constraint graph correspondence unchanged",
+    "animation_policy": "seconds using exact rational fps timebase, retain native frame/take provenance, no synthetic clips counted as source",
+    "attachments_policy": "Preserve parent object, bone socket, local and world transforms before and after pose; no welded mesh substitute",
+    "materials_policy": "original material, texture, UV, alpha mode, color space and linear/sRGB decoding remain separately typed",
+    "quaternion_policy": "Canonical wxyz order; source native convention recorded and converted only with reversible explicit mapping",
+    "camera_policy": "ONE_FIXED_COMMON_CENTER_EXTENT_EIGHT_VIEW_GEOMETRY_COURT; per-view zoom only style diagnostic, NEVER source-camera truth",
+    "pixel_policy": "Top-left raster origin, explicit pixel-center and projection/ray, image/camera/source matrices SHA bound",
+    "normal_policy": "Inverse-transpose normal transform and parity check",
+    "occlusion_policy": "Visibility, alpha support, ray depth and layer draw order never inferred solely from geometry silhouette",
+    "limits": {
+      "max_normalization_roundtrip_error_fraction_of_extent": 0.000001,
+      "max_identity_matrix_product_abs_error": 0.000001,
+      "max_isotropic_scale_variation": 1e-8,
+      "min_nonzero_source_extent": 1e-12,
+      "max_skin_weight_row_error_for_source_eligible_pass": 0.000001,
+      "quaternion_unit_tolerance": 0.00001
+    }
+  },
+  "standardization": {
+    "canonical_asset_id": "immutable identity distinct from model views, clips, styles and outfits",
+    "source_sha256": "SHA256 original source bytes; no transcoding identity laundering",
+    "source_identity_cluster": "dedup group; original subject identity and protected split lineage",
+    "tensor_encoding": "float32/float64 known units, finite; int64 indices; boolean valid mask; no zero-filled UNKNOWN",
+    "topology": "face->source mesh object/vertex indices and original polygon identity retained; no silent decimation/retriangulation to teacher",
+    "rig": "source observed bone/constraint/control IDs and full graph; no inferred IK from animation-ready export",
+    "skin": "sparse influence per source vertex, exact bind and rest/bone mapping",
+    "semantic": "separate source-face supported label, candidate name hint, human reviewed designed prior and unknown masks",
+    "graphics": "SOURCE_NATIVE_RGBA separate from STYLIZED_2D_GAME_ART_RGB; stylized target must be reviewed against Core370 art domain",
+    "motion": "source action IDs and curve times, not clip count as subject count",
+    "model_mapping": {
+      "IRIS_GEOMETRY": [
+        "SOURCE_IMPORT",
+        "CAMERA_OBSERVATION",
+        "SURFACE_GEOMETRY_UDF",
+        "SURFACE_NORMALS",
+        "GLOBAL_SOLID_SDF only if separately qualified"
+      ],
+      "IRIS_SEMANTIC": [
+        "SOURCE_FACE_REGION_SUPPORT",
+        "REVIEWED_SEMANTIC_CONCEPT",
+        "AFFORDANCE_DESIGNED_PRIOR",
+        "SEMANTIC_VIEW_CONSISTENCY"
+      ],
+      "IRIS_GRAPHICS": [
+        "SOURCE_APPEARANCE_CAA",
+        "VISIBILITY_OCCLUSION",
+        "RAY_COMPOSITING",
+        "STYLIZED_2D_ART_PRESENTATION",
+        "EDIT_REVEAL_CONSEQUENCE"
+      ],
+      "TESSA": [
+        "SOURCE_TOPOLOGY",
+        "MECHANICAL_SURFACE_TOPOLOGY",
+        "MOTION_CONDITIONED_DEFORMATION"
+      ],
+      "AXIS": [
+        "RIG_HIERARCHY",
+        "ACTION_KINEMATICS",
+        "IK_FK_CONSTRAINT_AND_CONTROL_RESPONSE_WHEN_AVAILABLE"
+      ],
+      "MIRA": [
+        "SOURCE_SKIN_WEIGHTS",
+        "BIND_REST_CORRESPONDENCE",
+        "DEFORMATION_CONSEQUENCE"
+      ]
+    }
+  },
+  "quality": {
+    "legal": "original creator and license snapshot required; all commercial ML training rights independently reviewed; Mixamo excluded; generated source assets excluded",
+    "dedup": "hash + perceptual/geometry lineage and publisher provenance; source identity split preserved across derivatives",
+    "privacy": "do not expose private source URLs/content in public logs",
+    "security": "untrusted Blender files in disposable sandbox, disabled autoexec, no elevated access, resource bound and content hash",
+    "fault_codes": [
+      "IMPORT_CORRUPTION",
+      "AMBIGUOUS_ANATOMICAL_ORIENTATION",
+      "MISSING_EXTERNAL_TEXTURES",
+      "NONMANIFOLD_MESH",
+      "MISSING_SKIN_BIND",
+      "UNSAFE_RIG_SCRIPTS",
+      "BROKEN_CONTROLLER_RESPONSE",
+      "ALPHA_RENDER_MISMATCH",
+      "STYLE_ART_DOMAIN_SHIFT",
+      "LOST_ORIGINAL_FACE_ADDRESS",
+      "DUPLICATE_CROSS_SPLIT_IDENTITY",
+      "LICENSE_NOT_CLEARED",
+      "NO_INDEPENDENT_HEAD_COURT"
+    ],
+    "review_sampling": "stratified morphology/provider/style/control, rare high-risk examples overrepresented; blinded held-out audits",
+    "replay": "versioned parser, Blender version, shader, policy and original-source SHA; readback report and exact parent hashes",
+    "quarantine": "failed or unknown source attributes never repaired into silent positive teacher labels"
+  },
+  "stdgen_plus_reference": {
+    "paper": "https://arxiv.org/html/2601.07660",
+    "original_code": "https://github.com/hyz317/StdGEN",
+    "transfer": [
+      "filter large source candidate set with explicit high-quality and canonicalization rules",
+      "multi-view RGB/depth/normal/semantic renders with exact camera and layer identities",
+      "produce human-understandable semantic disjoint target variants and face-bound masks",
+      "separate global body semantics from fine head/face evidence if native source supports it",
+      "separate original layered appearance evidence from visually completed/artificial hidden content",
+      "standardize multi-modal inputs at teacher interface"
+    ],
+    "do_not_transfer": [
+      "humanoid-only A-pose normalization to unrelated morphology",
+      "VRoid material name heuristic as ground-truth generic semantic label",
+      "fixed body/hair/clothes ontology as universal",
+      "generative occluded texture completion as original source evidence",
+      "implicit semantic layers as proof of native mechanical IK/skin"
+    ],
+    "audit_refresh_trigger": "On relevant new StdGEN++ source/paper/dataset updates, revisit mapping before modifying semantic/graphics truth builder; explicit versioned changes only"
+  },
+  "materialization": {
+    "blocked_until": "all required per-head independent courts, source legal rights, lineage-safe splits, reversible normalization proof and representation-specific target masks PASS",
+    "require_exact_sha_pinned_freeze": true,
+    "normalization_is_not_truth_admission": true,
+    "standardization_is_not_training_admission": true,
+    "no_source_side_effects": true,
+    "legacy_corpus370_authority_preserved": true,
+    "unreviewed_asset_denied": true
+  },
+  "training_authorized": false
+}

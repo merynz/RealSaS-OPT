@@ -5,13 +5,17 @@ on:
     branches: [corpus4008-source-structure-and-camera-audit-v1-20261107]
     paths:
       - 'tools/corpus/probe_corpus4008_source_scene_v1.py'
+      - 'tools/corpus/build_corpus4008_source_preflight_v1.py'
       - 'tests/corpus/test_corpus4008_source_scene_probe_v1.py'
+      - 'tests/corpus/test_corpus4008_source_preflight_v1.py'
       - '.github/workflows/corpus4008-source-scene-preflight-v1.yml'
   pull_request:
     branches: [main]
     paths:
       - 'tools/corpus/probe_corpus4008_source_scene_v1.py'
+      - 'tools/corpus/build_corpus4008_source_preflight_v1.py'
       - 'tests/corpus/test_corpus4008_source_scene_probe_v1.py'
+      - 'tests/corpus/test_corpus4008_source_preflight_v1.py'
       - '.github/workflows/corpus4008-source-scene-preflight-v1.yml'
 
 permissions:
@@ -34,4 +38,4 @@ jobs:
       - name: Verify fail-closed source hierarchy and orientation admission
         run: |
           python -m pip install --disable-pip-version-check pytest
-          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_source_scene_probe_v1.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_source_scene_probe_v1.py tests/corpus/test_corpus4008_source_preflight_v1.py

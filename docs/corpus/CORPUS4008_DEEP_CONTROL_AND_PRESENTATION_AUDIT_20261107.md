@@ -68,3 +68,37 @@ Each workstream writes typed, SHA-locked receipts; **only the admission coordina
 The hosted workflow `corpus4008-deep-control-and-lookdev-v1` gates private source inspection on the configured Drive secret and pins exact original FBX, GLB, OBJ SHA + Blender 4.5.14. It writes control JSON for three sources and three lookdev PNGs for KayKit under a private Drive quarantine path, never public artifacts. A separate validator checks source/asset joins, image hashes, false authority and internal counts.
 
 **Workflow success alone does not claim full factual source rig functionality, camera correctness, source-RGB fidelity, meaningful toon style or training eligibility.**
+
+
+## Real imported-source pilot closeout (2026-11-07)
+
+Hosted private source run: https://github.com/merynz/RealSaS-OPT/actions/runs/42379725713 — **SUCCESS**, both synthetic authority-contract and real source/pixel audit jobs. Exact SHA-verified originals; public CI never holds source PNG artifacts.
+
+Canonical private Drive original receipts: https://drive.google.com/drive/folders/17TCIU4z2EpMSvUSOCfWiOMYNIEZEuq6Q
+
+| Imported evidence | Objaverse FBX | KayKit GLB | Quaternius OBJ |
+|---|---:|---:|---:|
+| Armatures | 1 | 1 | 0 |
+| Pose bones | 34 | 41 | 0 |
+| Imported IK constraints | 0 | 0 | 0 |
+| Imported driver channels | 0 | 0 | 0 |
+| Actions | 1 | 76 | 0 |
+| Action F-curves | 349 | 29,252 | 0 |
+| NLA strips | 0 | 76 | 0 |
+| Imported cameras | 0 | 0 | 0 |
+
+**Important negative distinction:** none of these three imports exposes an IK constraint, but authored source IK absence is **UNKNOWN** and functioning source IK is **UNKNOWN**. The first two imports expose no bone collections/custom control props and every imported bone has use_deform=true; this does not prove no real control rig existed in upstream authoring.
+
+Known source appearance blockers already observed by PR379 source pilot: the Objaverse FBX import reports four missing external images; Quaternius OBJ import cannot locate `Zombie_Male.mtl`. Neither is a qualified native source RGB teacher.
+
+Actual Master control coverage was materialized from SHA-pinned original selection: **3,993** original selected rows, **3** independent imported-control profiles, **3,990 NOT_YET_MEASURED**. The 169 external holdout identities and historical splits are preserved, and 15 QA-only Khronos entries remain outside the 3,993 selection JSON. This is a *coverage census*, not a family PASS census.
+
+The first render composition had only 2.9% alpha occupancy and 1.47% flat-vs-cel RGB difference, so we classified it as a **lookdev quality failure** despite a successful PNG export. The corrected CPU Cycles source-material/flat/3-band cel study (same original SHA, rest, source-space diagnostic camera, mesh) has an independent Pillow-based numeric pixel court:
+- Alpha occupancy ~9.8%; bounding-box width 52.2%, height 44.7%.
+- Flat-vs-cel mean RGB difference ~5.40% of 255 (masked shared pixels).
+- Flat/cel alpha mask Jaccard 1.000; source-vs-style Jaccard ~0.992.
+- `numeric_pilot_gate_pass=true`. This is **not** human style approval, native source material parity, character-space camera admission, or training authorization.
+
+Stylized graphics are exploratory `STYLIZED_...` records; do not overwrite source RGB or assume 2D-art appearance. Future contact sheets must cover more morphologies (including open components, non-human and attached props), held-out poses, readable body/accessory framing, source alpha and rendered evidence correspondence.
+
+**Remaining P0:** independent native authored-rig source graph/intervention court; pose/IK/FK behavior; per-vertex deformation influence; source material/texture parity; anatomically qualified cameras; full multiview visual courts; per-target semantic/graphics/motion admission. No merges or model training from this branch.

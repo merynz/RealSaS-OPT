@@ -30,7 +30,8 @@ def writecsv(path,rows):
 
 def run(pair_file,pair_summary_file,global_roster,quarantine_file,out,
         *,expected_pairs=53,expected_routes_per_source=37,
-        expected_roster_count=4406):
+        expected_roster_count=4406,
+        expected_roster_sha="558289d87a29bda29ff73b617c84a4fbddfdc12f7a88aa72f88e8c3a7fcfb885"):
     summary=json.loads(pair_summary_file.read_text())
     req(summary["schema"]=="RealSaS.CrossCorpusSourceIdentityCourt.v1"
         and summary["training_authorized"] is False
@@ -42,6 +43,7 @@ def run(pair_file,pair_summary_file,global_roster,quarantine_file,out,
     expected_sha=summary.get("pair_file_sha256",summary.get("pairs_sha256"))
     req(sha(pair_file)==expected_sha,"FROZEN_PAIR_HASH")
     pairs=readcsv(pair_file)
+    req(sha(global_roster)==expected_roster_sha,"FROZEN_GLOBAL_SOURCE_ROSTER_SHA")
     sources=readcsv(global_roster)
     quarantined=readcsv(quarantine_file)
     req(len(pairs)==expected_pairs and len(sources)==expected_roster_count,

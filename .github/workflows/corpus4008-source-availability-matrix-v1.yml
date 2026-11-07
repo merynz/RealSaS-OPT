@@ -1,0 +1,114 @@
+name: corpus4008-source-availability-matrix-v1
+
+# Source-evidence reconciliation only. No source truth/rights or training admission.
+on:
+  push:
+    branches: [corpus4008-source-availability-ledger-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-source-availability-matrix-v1.yml'
+      - 'tools/corpus/reconcile_corpus4008_recovery_into_source_matrix_v1.py'
+      - 'tests/corpus/test_corpus4008_source_availability_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-recovery-ledger-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-source-evidence-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Synthetic source identity, holdout and fake PASS regressions
+        run: |
+          python -m pip install --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_source_availability_v1.py
+          python -m compileall -q tools/corpus/reconcile_corpus4008_recovery_into_source_matrix_v1.py
+  reconcile-32-shards:
+    needs: test-source-evidence-contracts
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c4008-source-ledger-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/source_availability_matrix_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require private Drive connector
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'NO_DRIVE_ZERO_SOURCE_RECOVERY_CLAIMS' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Retrieve original immutable Master and 32 signed-plan-lineage shard receipts
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          root="$RUNNER_TEMP/c4008-source-ledger"
+          mkdir -p "$root/shards" "$root/out"
+          rclone copyto "$REMOTE/metadata/CANONICAL_VARIANT_SELECTION.json" "$root/selection.json" --retries 3
+          rclone copyto "$REMOTE/audits/source_recovery_v1/42371850821-1/RECOVERY_PRIVATE.json" "$root/plan.json" --retries 3
+          printf 'af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9  %s\n' "$root/selection.json" | sha256sum -c
+          printf '3c1088fb26d2171ccde8b8dfaac3406a26ba12e16eb3b6506c11c8ccc775426f  %s\n' "$root/plan.json" | sha256sum -c
+          for i in $(seq 0 31); do
+            mkdir -p "$root/shards/shard-$i"
+          done
+          export RCLONE_ROOT="$root"
+          seq 0 31 | xargs -P 8 -I {} sh -c 'rclone copyto "$REMOTE/audits/original_recovery_full_v1/42374046073-1/shard-{}/SHARD_PRIVATE.json" "$RCLONE_ROOT/shards/shard-{}/SHARD_PRIVATE.json" --retries 3'
+          test "$(find "$root/shards" -name SHARD_PRIVATE.json | wc -l)" = 32
+      - name: Reconcile 32 physical source shard receipts to all 3993 Master rows
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-source-ledger"
+          python -m tools.corpus.reconcile_corpus4008_recovery_into_source_matrix_v1 \
+            --selection "$root/selection.json" \
+            --plan "$root/plan.json" \
+            --shards "$root/shards" \
+            --output "$root/out"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'c4008-source-ledger/out'
+          r=json.loads((root/'SOURCE_AVAILABILITY_SUMMARY_V1.json').read_text())
+          expected={
+            'SHA_VERIFIED_RECOVERY_RECEIPT':3192,
+            'RECOVERY_EXCEPTION':22,
+            'PROTECTED_HOLDOUT_ORIGINAL_NOT_TOUCHED':135,
+            'LEGACY_PATH_MATCH_UNREHASHED':644,
+          }
+          assert r['historical_master_source_selected']==3993
+          assert r['source_stage_counts']==expected, r['source_stage_counts']
+          assert r['reported_recovered_sha_receipt_count']==3192
+          assert r['graphics_2d_art_target_required'] and not r['training_authorized']
+          print('## Source recovery reconciled to all 3993 Master subjects')
+          for k,v in sorted(expected.items()):print(k,v)
+          print('All independent source/graphics/semantic/mechanical courts remain pending.')
+          PY
+      - name: Store full private source-stage matrix, no originals or URLs
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-source-ledger/out"
+          if test -s "$RCLONE_CONFIG" && test -f "$root/SOURCE_AVAILABILITY_SUMMARY_V1.json"; then
+            rclone copy "$root" "$PRIVATE_OUTPUT" --checksum --retries 3
+            echo 'Full source-availability evidence stage stored privately; no training admission.' >> "$GITHUB_STEP_SUMMARY"
+          fi

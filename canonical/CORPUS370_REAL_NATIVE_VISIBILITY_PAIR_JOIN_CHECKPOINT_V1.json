@@ -1,0 +1,51 @@
+{
+  "schema": "RealSaS.Corpus370RealNativeVisibilityPairJoinCheckpoint.v1",
+  "status": "PRIVATE_REAL_SOURCE_NATIVE_TEMPORAL_VISIBILITY_AND_CANONICAL_JOIN_MEASURED__OWNER_UNKNOWN",
+  "date_utc": "2026-11-04",
+  "scope": "THREE_SOURCE_EXACT_V5_SUBJECTS__TWO_OPPOSITE_VIEW_RAY_PAIRS_PER_SUBJECT",
+  "parents": {
+    "v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+    "roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+    "source_rest_index_sha256": "384c92940e1ea8eec7bbb98cf319eeda5f89222c07b782b607998e2067f1d9c8",
+    "native_teacher_run_id": 41915393652,
+    "native_teacher_summary_sha256": "5aa3c4d9cc97ab669d2a7a951a4c9d18218ef5ea4d6f58f5b1ff1ac5b89cc272",
+    "palette_run_id": 41902211474,
+    "palette_summary_sha256": "638579beb83edfa90614dd8db5c4da77406862a5cfaa3e8653d0cc67ad93e10e",
+    "independent_visibility_run_id": 41904446622,
+    "visibility_batch_sha256": "fbca92b37ed71975de31b77b91a1fba7871c40b03b4b0ebb5b1695669c43bcbd",
+    "native_visibility_canonical_join_run_id": 41916724594,
+    "private_join_receipt_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a"
+  },
+  "measured": {
+    "source_subject_count": 3,
+    "native_authored_clip_count": 20,
+    "native_sampled_frame_count": 80,
+    "source_hit_pair_count": 6,
+    "source_hit_visible_positive_count": 6,
+    "source_hit_opacity_occluded_negative_count": 6,
+    "source_native_pose_relative_deformation_observed_pairs": 4,
+    "source_native_pose_no_relative_deformation_observed_pairs": 2,
+    "degenerate_pose_pair_count": 0,
+    "failed_source_rest_canonical_join_count": 0,
+    "failed_subject_count": 0,
+    "same_drawable_positives": 0,
+    "different_drawable_negatives": 0
+  },
+  "limitations": {
+    "source_hit_visibility_only": true,
+    "authored_kinematics_are_observational_not_causal": true,
+    "source_pose_isolated_control_court_executed": false,
+    "same_drawable_identity_qualified": false,
+    "different_drawable_identity_qualified": false,
+    "relative_deformation_proves_different_drawable": false,
+    "co_motion_proves_same_drawable": false,
+    "native_canonical_candidate_independently_action_replayed": false,
+    "tessa_teacher_authorized": false,
+    "graphics_family_authority_minted": false,
+    "mechanical_owner_truth_minted": false,
+    "training_authorized": false,
+    "materialization_authorized": false,
+    "subject_source_ids_exposed_publicly": false
+  },
+  "next_scientific_gate": "Run source-authoritative independent action replay and isolated zero/A->B/B->A/common-root sham interventions, then compare split/merge drawable edit-consumer consequences at held-out views and motions. Require real negative and positive owner examples with ABSTAIN; cannot promote 4 observed deformations to DIFFERENT_DRAWABLE labels."
+}

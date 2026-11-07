@@ -1,0 +1,50 @@
+{
+  "schema": "RealSaS.Corpus370NativePosePartitionResearchRequest.v8",
+  "enabled": true,
+  "status": "ACTIVATED_SHA_LOCKED_THREE_NATIVE_AUTHORED_POSE_PARTITION_COURTS",
+  "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
+  "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+  "source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+  "geometric_rays_index_sha256": "0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70",
+  "source_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+  "source_allview_group_batch_sha256": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1",
+  "source_original_parents_unchanged": true,
+  "subject_count": 3,
+  "parallel_hosted_workers": 3,
+  "geometry_views_seen_in_compiler": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "render_edit_response_from_anchor_seen_before_group_selection": false,
+  "native_resolution_full_appearance_caa_authorized": false,
+  "source_rig_pose_response_authorized": false,
+  "human_authored_drawable_identity_qualified": false,
+  "graphics_owner_authorized": false,
+  "tessa_teacher_authorized": false,
+  "materialization_authorized": false,
+  "product_compilation_authorized": false,
+  "training_authorized": false,
+  "note": "V8 reads prior independently SHA-sealed ORIGINAL source rest triangles and REAL authored teacher sampled 32/24/24 native frames. It observes stable source face addresses and every existing nested group face census, deforming pose geometry strain, collapse and best-rigid-fit residual. No Blender full-image render in V8, no actor causal control, no author drawable ownership or training. Original private teacher arrays stay in private Drive.",
+  "rest_pose_only": false,
+  "activated_only_after_contracts": "github actions scoped CI 41991409923 SUCCESS; hosted workflow actionlint 41991399246 SUCCESS",
+  "reference_policy": "SOURCE_FACE_ADDRESS_REPLAY_NOT_AUTHOR_DRAWABLE",
+  "candidate_sizes_if_present": [
+    8,
+    16,
+    32,
+    64
+  ],
+  "native_authored_teacher_summary_sha256": "5aa3c4d9cc97ab669d2a7a951a4c9d18218ef5ea4d6f58f5b1ff1ac5b89cc272",
+  "expected_authored_pose_count_by_worker": [
+    32,
+    24,
+    24
+  ],
+  "all_teacher_artifacts_remain_private": true
+}

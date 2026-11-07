@@ -1,0 +1,41 @@
+name: corpus370-native-source-carrier-contracts-v13b
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-native-source-carrier-contracts-v13b.yml'
+      - 'tools/truth_foundry/blender_corpus370_native_carrier_intervention_v13b.py'
+      - 'tools/corpus/court_corpus370_native_carrier_mechanics_v13b.py'
+      - 'tools/corpus/corpus370_native_action_binding_v13b.py'
+      - 'tools/corpus/run_corpus370_native_carrier_private_v13b.py'
+      - 'tests/corpus/test_corpus370_native_carrier_v13b.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/corpus370-native-source-carrier-contracts-v13b.yml'
+      - 'tools/truth_foundry/blender_corpus370_native_carrier_intervention_v13b.py'
+      - 'tools/corpus/court_corpus370_native_carrier_mechanics_v13b.py'
+      - 'tools/corpus/corpus370_native_action_binding_v13b.py'
+      - 'tools/corpus/run_corpus370_native_carrier_private_v13b.py'
+      - 'tests/corpus/test_corpus370_native_carrier_v13b.py'
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-native-source-carrier-contracts-v13b-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  anonymous-mechanics-negative-controls:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and enforce source-native actuator / null / root / local authority contracts
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/truth_foundry/blender_corpus370_native_carrier_intervention_v13b.py \
+            tools/corpus/court_corpus370_native_carrier_mechanics_v13b.py \
+            tools/corpus/corpus370_native_action_binding_v13b.py \
+            tools/corpus/run_corpus370_native_carrier_private_v13b.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_native_carrier_v13b.py

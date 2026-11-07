@@ -1,0 +1,73 @@
+{
+  "schema": "RealSaS.Corpus370MultiviewGeometryGroupsRealResult.v2",
+  "status": "REAL_TRIPLE_VIEW_GEOMETRY_CONSTRAINTS_MEASURED__CAT_HELDOUT_EDIT_NOT_RECOVERED__NO_OWNER_AUTHORITY",
+  "provenance": {
+    "source_ray_census": "352 SOURCE_SHA_LOCKED_V5_GEOMETRIC_RAY_RECEIPTS",
+    "rays_index_sha256": "0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70",
+    "source_rest_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+    "anonymous_layer_parent_sha256": "47b3f3beb7a3625504ccf8488d6fe0cd8fbe0014421c5e4c77748f829c9f01ca",
+    "hosted_worker_run_id": 41933166417,
+    "run_conclusion": "SUCCESS",
+    "private_batch_sha256": "4d6a6a829a5bad658a8ce78d7fe0bd25b32f100466db378198072435d8b65af9",
+    "private_drive_path": "gdrive:corpus370_preparation_v1/hosted_multiview_geometry_groups_v2/41933166417-1"
+  },
+  "policy": {
+    "geometry_only_training_views": [
+      0,
+      2,
+      6
+    ],
+    "independent_render_edit_diagnostic_view": 4,
+    "geometric_source_hit_hypotheses_are_owner_negative_labels": false,
+    "source_semantics_used_for_training": false,
+    "original_source_faces_unchanged": true,
+    "source_motion_poses_observational_only": true
+  },
+  "measured": {
+    "real_source_subject_count": 3,
+    "source_match_failures": 0,
+    "candidate_subjects_passed": 3,
+    "counterfactual_full_frame_renderer_executed": false,
+    "views_with_edit_expressibility": 2,
+    "per_subject": [
+      {
+        "reference": "CAT",
+        "preexisting_operational_groups": 260,
+        "geometry_conservative_cannotlinks": 13,
+        "additional_source_face_refinements": 0,
+        "selected_groups": 8,
+        "heldout_source_hit_edit_expressibility": 0,
+        "status": "ABSTAIN_TEST_VIEW_EDIT_REGRESSION"
+      },
+      {
+        "reference": "TRICERATOPS",
+        "preexisting_operational_groups": 8,
+        "geometry_conservative_cannotlinks": 22,
+        "additional_source_face_refinements": 16,
+        "selected_groups": 8,
+        "heldout_source_hit_edit_expressibility": 1,
+        "status": "RESEARCH_PROXY_PRESERVED__FULL_RENDER_REQUIRED"
+      },
+      {
+        "reference": "COWFISH",
+        "preexisting_operational_groups": 9,
+        "geometry_conservative_cannotlinks": 19,
+        "additional_source_face_refinements": 8,
+        "selected_groups": 8,
+        "heldout_source_hit_edit_expressibility": 1,
+        "status": "RESEARCH_PROXY_PRESERVED__FULL_RENDER_REQUIRED"
+      }
+    ]
+  },
+  "conclusion": {
+    "additional_three_view_geometric_ray_constraints_do_not_suffice_for_cat": true,
+    "next_actual_ground_truth": "FULL_FIELD_OF_VIEW_SOURCE_RGBA_SOURCEMESH_VS_TRIANGLE_SOUP_PARITY_AND_GROUP_REMOVAL_REPLAY",
+    "author_drawable_identity_qualified": false,
+    "graphics_owner_truth_minted": false,
+    "appearance_caa_total_authority_minted": false,
+    "mechanical_response_truth_minted": false,
+    "product_compilation_authorized": false,
+    "model_training_authorized": false,
+    "materialization_authorized": false
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "schema": "RealSaS.Corpus370ParallelEvidenceCampaign.v1",
+  "status": "ACTIVATED_THREE_INDEPENDENT_GITHUB_HOSTED_EVIDENCE_LANES",
+  "enabled": true,
+  "campaign": "GRAPHICS_8_FRESH__NATIVE_8__370_EVIDENCE_INTERSECTION",
+  "lanes": [
+    "GRAPHICS",
+    "NATIVE",
+    "AUTHORITY"
+  ],
+  "concurrency_model": "THREE_INDEPENDENT_GITHUB_HOSTED_16GIB_CPUS__FAIL_FAST_FALSE",
+  "fixed_sources": {
+    "private_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
+    "v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+    "roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+    "rest_index_sha256": "384c92940e1ea8eec7bbb98cf319eeda5f89222c07b782b607998e2067f1d9c8",
+    "rays_352_sha256": "0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70",
+    "native_three_sha256": "5aa3c4d9cc97ab669d2a7a951a4c9d18218ef5ea4d6f58f5b1ff1ac5b89cc272",
+    "joined_three_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a"
+  },
+  "graphics": {
+    "subject_count": 8,
+    "exclude_prior_three": true,
+    "selection": "DETERMINISTIC_GEOMETRIC_MULTIHIT_ONLY",
+    "materialized_evidence": "PRIVATE_SOURCE_PALETTE_INTERVENTIONS_AND_INDEPENDENT_V1_V2_COURTS"
+  },
+  "native": {
+    "subject_count": 8,
+    "max_frames_per_clip": 4,
+    "selection": "EXISTING_SOURCE_AUTHORED_ELIGIBILITY_DETERMINISTIC",
+    "materialized_evidence": "PRIVATE_NATIVE_TEACHER_EXPORT_AND_COURTS"
+  },
+  "authority": {
+    "subject_count": 370,
+    "admitted_observation": 352,
+    "excluded": 18,
+    "materialized_evidence": "PRIVATE_370_EVIDENCE_INTERSECTION_AND_BLOCKER_REASONS"
+  },
+  "output_visibility": "PRIVATE_DRIVE_ONLY__PUBLIC_AGGREGATES",
+  "lineage_split_authorized": false,
+  "model_training_authorized": false,
+  "graphics_owner_authorized": false,
+  "causal_response_authorized": false,
+  "tessa_teacher_authorized": false,
+  "notes": "Immutable V5 370/352 input, 352 SHA-bound source rays, completed 3-subject source/native/visibility proofs. Three independent workers run Graphics(8 fresh), Native(8 source-authored), Authority(370 evidence intersection) concurrently; all private source/teacher results in Drive, no family promotion/training. No per-subject replacements on failed court."
+}

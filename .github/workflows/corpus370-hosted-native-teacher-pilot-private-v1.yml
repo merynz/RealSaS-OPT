@@ -1,0 +1,207 @@
+name: corpus370-hosted-native-teacher-pilot-private-v1
+
+# An explicitly SHA-pinned, teacher-only, three-subject research probe.
+# Private source bytes and teacher NPZ never enter public Actions artifacts.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - 'canonical/CORPUS370_HOSTED_NATIVE_TEACHER_PILOT_REQUEST_V1.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-hosted-native-teacher-pilot-private-v1
+  cancel-in-progress: false
+
+jobs:
+  validate-private-teacher-request:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.validate.outputs.ready }}
+      manifest_sha: ${{ steps.validate.outputs.manifest_sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require exact source scope and authenticated private transport
+        id: validate
+        env:
+          DRIVE_SECRET_EXISTS: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os,re
+          from pathlib import Path
+          d=json.loads(Path('canonical/CORPUS370_HOSTED_NATIVE_TEACHER_PILOT_REQUEST_V1.json').read_text())
+          assert d["schema"]=="RealSaS.Corpus370HostedNativeTeacherPilotRequest.v1"
+          assert d["source_locked"] is True and d["teacher_only"] is True
+          assert d["training_authorized"] is False
+          assert d["subjects_max"]==3 and d["frames_per_clip_max"]==4
+          assert d["source_v5_sha256"]=="8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4"
+          assert d["exact_roster_sha256"]=="925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355"
+          assert re.fullmatch("[0-9a-f]{64}",d["private_v5_manifest_sha256"])
+          ready=d["enabled"] is True and os.environ["DRIVE_SECRET_EXISTS"]=="true"
+          print("ready="+str(ready).lower())
+          print("manifest_sha="+(d["private_v5_manifest_sha256"] if ready else ""))
+          PY
+
+  three-source-real-authored-temporal-teachers:
+    needs: validate-private-teacher-request
+    if: github.event.repository.private == false && needs.validate-private-teacher-request.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      RCLONE_CONFIG: /tmp/realsas-c370-native-teacher-private.conf
+      MANIFEST_SHA: ${{ needs.validate-private-teacher-request.outputs.manifest_sha }}
+      SOURCE_SHARDS: gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      SOURCE_ARCHIVE_SHA: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_hosted_native_teacher_pilot/${{ github.run_id }}-${{ github.run_attempt }}
+      REMOTE_OUTPUT: gdrive:corpus370_preparation_v1/hosted_native_temporal_pilot_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify 16-GiB CPU runner and disk source staging budget
+        run: |
+          set -euo pipefail
+          test "$(awk '/MemTotal:/{print $2}' /proc/meminfo)" -ge 14000000
+          test "$(df -Pk / | awk 'NR==2{print $4}')" -ge 9000000
+          sudo install -d -o "$USER" -g "$(id -gn)" -m 0700 /home/monster/realsas_authority
+          mkdir -p "$OUTPUT_ROOT"
+      - name: Install audited minimal native tools
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+          python3 -m py_compile \
+            tools/corpus/hosted_v5_private_shards_v1.py \
+            tools/corpus/run_corpus370_v5_native_teacher_temporal_pilot_v1.py \
+            tools/iris_vnext/blender_authored_teacher_export_v4.py \
+            tools/iris_vnext/blender_authored_teacher_export_v4_actions.py
+      - name: Bind private Google Drive credentials in non-logged file
+        env:
+          DRIVE_RCLONE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_RCLONE_CONFIG_B64"
+          printf '%s' "$DRIVE_RCLONE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          rclone lsf "$SOURCE_SHARDS" --max-depth 1 --files-only >/dev/null
+          echo "PRIVATE_NATIVE_TEACHER_DRIVE_READ_PASS"
+      - name: Restore original V5 admission, source files, roster and exact SHA parents
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$RUNNER_TEMP/native-private-shards" "$RUNNER_TEMP/native-object-cache"
+          rclone copy "$SOURCE_SHARDS" "$RUNNER_TEMP/native-private-shards" \
+            --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+          python3 -u tools/corpus/hosted_v5_private_shards_v1.py hydrate \
+            --manifest "$RUNNER_TEMP/native-private-shards/PRIVATE_V5_SHARD_MANIFEST.json" \
+            --expected-manifest-sha256 "$MANIFEST_SHA" \
+            --private-dir "$RUNNER_TEMP/native-private-shards" \
+            --object-cache "$RUNNER_TEMP/native-object-cache" \
+            > "$OUTPUT_ROOT/PRIVATE_SHA_HYDRATE_LOG.txt" 2>&1
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          test "$(sha256sum "$ROSTER" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+          echo "PRIVATE_V5_370_ROSTER_AND_352_ADMITTED_OBSERVATIONS_SHA_EXACT"
+      - name: Census real authored-motion eligibility and prior graphics-pilot overlap
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          from tools.corpus.audit_corpus370_v5_source_rest_courts_v1 import row_input
+          from tools.corpus.run_corpus370_v5_native_teacher_temporal_pilot_v1 import choose_subjects
+          v5=json.loads(Path(os.environ["V5"]).read_text())
+          roster=json.loads(Path(os.environ["ROSTER"]).read_text())
+          assert (v5["prepared_subject_count"],v5["failure_count"])==(352,18)
+          total=0
+          native=set()
+          for row in v5["subjects"]:
+              bindings=row_input(row)
+              admission=json.loads(Path(bindings["admission"]["path"]).read_text())
+              assert admission["subject_id"]==row["subject_id"]
+              assert admission["source_sha256"]==row["source_sha256"]
+              total+=1
+              if admission.get("native_motion_inventory"):
+                  native.add(row["subject_id"])
+          fixed={"corpus_000ca1ae51f9582fde9e",
+                 "corpus_004e16e05b90505ca23c",
+                 "corpus_00a3688e42a29045056b"}
+          selected=choose_subjects(v5,roster,3)
+          assert len(selected)==3
+          assert all(s[0]["subject_id"] in native for s in selected)
+          print("## Exact-source V5 authored action inventory")
+          print("Observation-qualified:",total)
+          print("Has native authored action:",len(native))
+          print("No native action (family MASKED, not zero):",total-len(native))
+          print("Prior graphics three with native authored action:",len(native & fixed))
+          print("Teacher candidates selected by original source/format rule:",len(selected))
+          print("No new source data, no synthetic motion, no training authority")
+          PY
+      - name: Install byte-verified Blender 4.5.14 (same as geometry pilot)
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/native-blender"
+          base=https://download.blender.org/release/Blender4.5
+          archive=blender-4.5.14-linux-x64.tar.xz
+          curl -fL --retry 4 --max-time 300 "$base/$archive" -o "$RUNNER_TEMP/native-blender/$archive"
+          curl -fL --retry 4 --max-time 120 "$base/blender-4.5.14.sha256" -o "$RUNNER_TEMP/native-blender/official.sha256"
+          ARCHIVE="$RUNNER_TEMP/native-blender/$archive" CHECKSUMS="$RUNNER_TEMP/native-blender/official.sha256" python3 - <<'PY'
+          import os,re,hashlib
+          from pathlib import Path
+          path=Path(os.environ['ARCHIVE'])
+          rows=[line for line in Path(os.environ['CHECKSUMS']).read_text().splitlines() if path.name in line]
+          assert len(rows)==1
+          hashes=re.findall(r'[0-9a-fA-F]{64}',rows[0])
+          assert len(hashes)==1
+          with path.open('rb') as stream:
+              assert hashlib.file_digest(stream,'sha256').hexdigest()==hashes[0].lower()
+          PY
+          tar -xJf "$RUNNER_TEMP/native-blender/$archive" -C "$RUNNER_TEMP/native-blender"
+          test "$(sha256sum "$RUNNER_TEMP/native-blender/blender-4.5.14-linux-x64/blender" | cut -d' ' -f1)" = 050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8
+          echo "BLENDER_4_5_14_BINARY_SHA_MATCH"
+      - name: Measure true source-authored motion on three deterministic V5 candidates
+        run: |
+          set -euo pipefail
+          umask 077
+          blender="$RUNNER_TEMP/native-blender/blender-4.5.14-linux-x64/blender"
+          python3 -u tools/corpus/run_corpus370_v5_native_teacher_temporal_pilot_v1.py \
+            --v5-index "$V5" \
+            --exact-source-roster "$ROSTER" \
+            --extracted-source-root "/home/monster/realsas_authority/corpus370_preparation_v1/source_bundle/extracted/$SOURCE_ARCHIVE_SHA" \
+            --blender "$blender" \
+            --output "$OUTPUT_ROOT" \
+            --max-subjects 3 --max-frames 4 \
+            > "$OUTPUT_ROOT/PRIVATE_NATIVE_TEACHER_LOG.txt" 2>&1
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["OUTPUT_ROOT"])/"CORPUS370_V5_AUTHORED_TEMPORAL_PILOT_V1.json"
+          d=json.loads(p.read_text())
+          assert d["schema"]=="RealSaS.Corpus370V5AuthoredTemporalTeacherPilot.v1"
+          assert d["status"]=="PILOT_ALL_SELECTED_ACCOUNTED__CAUSAL_AND_MODEL_ADMISSION_SEPARATE"
+          assert d["training_authorized"] is False and d["no_model_training"] is True
+          assert len(d["results"])==len(d["selected_subject_ids"])==3
+          failures=[x for x in d["results"] if x["status"].startswith("FAIL_")]
+          print("## Real V5 native authored temporal pilot, private teacher-only")
+          print("Measured subject count:",len(d["results"]))
+          print("Nonstatic native authored kinematics:",sum(x["status"].startswith("PASS_") for x in d["results"]))
+          print("Static observed (masked):",sum(x["status"].startswith("MASKED_") for x in d["results"]))
+          print("Failures:",len(failures))
+          print("Causal controls, drawable owners, training and product authority: NOT GRANTED")
+          assert not failures,"NATIVE_TEACHER_PILOT_REAL_FAILURES_REPAIR_REQUIRED"
+          PY
+      - name: Publish private source/pose teachers and receipts even after failure
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -s "$RCLONE_CONFIG" && test -d "$OUTPUT_ROOT"; then
+            rclone copy "$OUTPUT_ROOT" "$REMOTE_OUTPUT" \
+              --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+            echo "NATIVE_TEACHER_PRIVATE_SHA_RECEIPTS_STORED_NO_PUBLIC_NPZ"
+          fi

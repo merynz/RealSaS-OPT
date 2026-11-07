@@ -1,0 +1,131 @@
+name: corpus370-source-repair-real-pilot-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-source-repair-real-pilot-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-source-repair-real-pilot-v1
+  cancel-in-progress: false
+jobs:
+  actual-source-eight-view:
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        subject_id:
+          - corpus_b6e6c534f69bb0336157
+          - corpus_5fdf026c4f23563f9d41
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 100
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      BLENDER: /home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/blender-glibc239
+      UFBX_ROOT: /home/monster/.cache/realsas/ufbx/5955c5c0b042ac2dc6f32955ab206aaec0620cfc
+      PREP: /home/monster/realsas_authority/corpus370_preparation_v1
+      SOURCE_ARCHIVE_SHA: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      ROSTER_SHA: 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+      SID: ${{ matrix.subject_id }}
+      OUTPUT_ROOT: /tmp/corpus370-v4-source-pilot-${{ github.run_id }}-${{ matrix.subject_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert exact runner/source/policy/ufbx prerequisites
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          test -x "$BLENDER"
+          test -f "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json"
+          test "$(sha256sum "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" | cut -d' ' -f1)" = "$ROSTER_SHA"
+          test "$(git -C "$UFBX_ROOT" rev-parse HEAD)" = 5955c5c0b042ac2dc6f32955ab206aaec0620cfc
+          test -f "$PREP/source_bundle/extracted/$SOURCE_ARCHIVE_SHA/SOURCE_BUNDLE_MANIFEST_V1.json"
+          "$PY" - <<'PY'
+          import os, json, hashlib
+          from pathlib import Path
+          from tools.observation.pinned_evaluator_runtime_v1 import launch_options, sha
+          runtime=json.loads(Path("canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json").read_text())
+          blender=Path(os.environ['BLENDER'])
+          assert sha(blender) == runtime['expected_evaluator_binary_sha256'], "CORPUS370_PILOT_RUNTIME_SHA_DRIFT"
+          roster=json.loads((Path(os.environ['PREP'])/"CORPUS370_EXACT_SOURCE_ROSTER_V1.json").read_text())
+          rows=[r for r in roster['subjects'] if r['subject_id']==os.environ['SID']]
+          assert len(rows)==1, "CORPUS370_PILOT_SUBJECT_NOT_IN_EXACT_ROSTER"
+          source=Path(os.environ['PREP'])/"source_bundle"/"extracted"/os.environ['SOURCE_ARCHIVE_SHA']/rows[0]['source_relative_path']
+          assert source.is_file() and sha(source)==rows[0]['source_sha256'], "CORPUS370_PILOT_RAW_SOURCE_DRIFT"
+          print("PILOT_SOURCE_HASH_PASS",os.environ['SID'],source,flush=True)
+          PY
+      - name: Compile independent V2 source-authored FBX bind reader
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUTPUT_ROOT/tools"
+          cc -O2 -std=c99 -I"$UFBX_ROOT" \
+            tools/corpus/ufbx_bind_scene_probe_v2.c "$UFBX_ROOT/ufbx.c" -lm \
+            -o "$OUTPUT_ROOT/tools/ufbx_bind_scene_probe_v2"
+          test -x "$OUTPUT_ROOT/tools/ufbx_bind_scene_probe_v2"
+          sha256sum "$OUTPUT_ROOT/tools/ufbx_bind_scene_probe_v2"
+      - name: Materialize and independently admit one exact 8-view subject
+        run: |
+          set -euo pipefail
+          "$PY" -u tools/corpus/prepare_corpus370_observation_packets_v4.py \
+            --exact-source-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
+            --extracted-source-root "$PREP/source_bundle/extracted/$SOURCE_ARCHIVE_SHA" \
+            --output-root "$OUTPUT_ROOT" \
+            --blender "$BLENDER" \
+            --probe "$OUTPUT_ROOT/tools/ufbx_bind_scene_probe_v2" \
+            --policy canonical/CORPUS370_IRIS_OBSERVATION_POLICY_V1.json \
+            --runtime-request canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json \
+            --subject-id "$SID" | tee "$OUTPUT_ROOT/PILOT_CLI.log"
+      - name: Verify actual emitted eight-view admission and original import
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY'
+          import json,os,hashlib
+          from pathlib import Path
+          from tools.corpus.prepare_corpus370_observation_packets_v4 import _packet_complete,sha256
+          root=Path(os.environ['OUTPUT_ROOT'])
+          blobs=list(root.glob("objects/*/packet/*/IRIS_OBSERVATION_ADMISSION.json"))
+          assert len(blobs)==1,("PILOT_ADMISSION_COUNT",len(blobs))
+          admission=json.loads(blobs[0].read_text())
+          packet=blobs[0].parent
+          assert admission['status']=="PASS_IRIS_BIND_OBSERVATIONS"
+          assert admission['subject_id']==os.environ['SID']
+          assert len(admission['views'])==8
+          policy=json.loads(Path("canonical/CORPUS370_IRIS_OBSERVATION_POLICY_V1.json").read_text())
+          assert _packet_complete(packet,os.environ['SID'],admission['source_sha256'],
+                                  policy,sha256(Path(os.environ['BLENDER']))),"PILOT_PACKET_INTEGRITY"
+          assert all(v['maximum_mask_gap_px'] <= policy['maximum_mask_gap_px']
+                     for v in admission['views']),"PILOT_MASK_THRESHOLD_DRIFT"
+          summary={
+            'schema':'RealSaS.Corpus370V4SingleSourcePilot.v1',
+            'status':'PASS_EIGHT_VIEW_SOURCE_ONLY',
+            'subject_id':os.environ['SID'],
+            'admission_sha256':sha256(blobs[0]),
+            'admitted_import_sha256':sha256(packet/'imported.json'),
+            'maximum_mask_gap_px':max(v['maximum_mask_gap_px'] for v in admission['views']),
+            'original_mask_gap_limit_px':policy['maximum_mask_gap_px'],
+            'training_authorized':False,
+            'platform_attempt_created':False,
+          }
+          path=root/'PILOT_SUMMARY.json'
+          path.write_text(json.dumps(summary,sort_keys=True,indent=2)+'\n')
+          print(json.dumps(summary,sort_keys=True),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-source-v4-pilot-${{ matrix.subject_id }}-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT_ROOT }}/PILOT_SUMMARY.json
+            ${{ env.OUTPUT_ROOT }}/PILOT_CLI.log
+            ${{ env.OUTPUT_ROOT }}/objects/*/logs/*.log
+            ${{ env.OUTPUT_ROOT }}/objects/*/admission/*/IRIS_OBSERVATION_ADMISSION.json
+            ${{ env.OUTPUT_ROOT }}/objects/*/admission/*/*.FAILED.png
+            ${{ env.OUTPUT_ROOT }}/objects/*/packet/*/IRIS_OBSERVATION_ADMISSION.json
+            ${{ env.OUTPUT_ROOT }}/objects/*/packet/*/SOURCE_REST_RENDER_CANDIDATE.json
+            ${{ env.OUTPUT_ROOT }}/objects/*/packet/*/SOURCE_SCENE_SNAPSHOT.json
+            ${{ env.OUTPUT_ROOT }}/objects/*/packet/*/camera_bundle.json
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 1

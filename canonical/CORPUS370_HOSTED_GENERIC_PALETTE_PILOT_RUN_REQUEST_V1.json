@@ -1,0 +1,13 @@
+{
+  "schema": "RealSaS.Corpus370HostedGenericPalettePilotRunRequest.v1",
+  "enabled": true,
+  "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
+  "source_ray_run_id": 41883539256,
+  "source_ray_run_attempt": 1,
+  "training_authorized": false,
+  "notes": "Third independent real 3-subject diagnostic: preserve 352 source ray SHA and original assets; require two distinct opposed view geometries per subject, repeat V2 isolated/conditional colour and removal arms, independent V1+V2 courts. Prior V2 six of six two-source causal measurements were same-view and not owner training labels. New run tests view-transfer, keeps all family and training authority FALSE.",
+  "protocol_revision": "GENERIC_RECIPROCAL_PALETTE_V2",
+  "parent_v1_measured_blender_run": 41899364106,
+  "sampling_policy": "GEOMETRY_ONLY_OPPOSITE_VIEW_DIVERSE_V1",
+  "parent_v2_measured_blender_run": 41901156078
+}

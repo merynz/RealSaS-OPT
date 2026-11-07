@@ -96,3 +96,31 @@ def test_pass_solid_requires_actual_signed_two_class_targets(tmp_path):
     manifest["global_solid"] = reference(solid, iris.GLOBAL_SDF_SCHEMA)
     with pytest.raises(ValueError, match="INSIDE_SIGN"):
         validate(tmp_path, manifest)
+
+
+@pytest.mark.parametrize("source_schema", sorted(iris.UNMATERIALIZED_SOURCE_VISIBILITY_SCHEMAS))
+def test_source_hit_visibility_diagnostic_cannot_be_laundered_to_materialized_pass(tmp_path, source_schema):
+    manifest=iris_subject(tmp_path,"MASKED")
+    manifest["family_status"]["VISIBILITY_OCCLUSION"]="PASS"
+    candidate=tmp_path/"source-hit-candidate.json"
+    candidate.write_text(json.dumps({
+        "schema":source_schema,
+        "status":"PRIVATE_SOURCE_HIT_VISIBILITY_CANDIDATES__GRAPHICS_OWNER_SEPARATE",
+        "training_authorized":False,
+        "graphics_family_authority_minted":False,
+    }))
+    manifest["family_payloads"]={
+        "VISIBILITY_OCCLUSION":[reference(candidate,source_schema)],
+    }
+    with pytest.raises(ValueError,match="SOURCE_HIT_DIAGNOSTIC_NOT_TRAINING_TARGET"):
+        validate(tmp_path,manifest)
+
+
+def test_nonpass_visibility_diagnostic_payload_also_forbidden(tmp_path):
+    manifest=iris_subject(tmp_path,"MASKED")
+    candidate=tmp_path/"visibility.json"
+    schema="RealSaS.Corpus370BoundedSourceHitVisibilityCandidateCourt.v1"
+    candidate.write_text(json.dumps({"schema":schema,"training_authorized":False}))
+    manifest["family_payloads"]={"VISIBILITY_OCCLUSION":[reference(candidate,schema)]}
+    with pytest.raises(ValueError,match="NONPASS_FAMILY_PAYLOAD_FORBIDDEN"):
+        validate(tmp_path,manifest)

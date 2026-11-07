@@ -1,0 +1,75 @@
+name: corpus370-publish-exact-materialization-code-capsule-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - 'canonical/CORPUS370_MATERIALIZATION_CODE_PUBLISH_REQUEST_V1.json'
+permissions:
+  contents: read
+jobs:
+  publish-verified-code-only-to-private-drive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      RCLONE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check no source truth, training or secrets in publication scope
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('canonical/CORPUS370_MATERIALIZATION_CODE_PUBLISH_REQUEST_V1.json').read_text())
+          assert x['schema']=='RealSaS.Corpus370MaterializationCodePublishRequest.v1'
+          assert x['enabled'] is True
+          assert x['code_only'] is True
+          assert x['training_authorized'] is False
+          assert x['materialization_authorized'] is False
+          assert x['real_readiness_checkpoint_required'] is True
+          PY
+      - name: Build immutable exact-commit private-repo-free code capsule
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/verified_code"
+          SHA="$(git rev-parse HEAD)"
+          python3 tools/corpus/build_corpus370_materialization_code_capsule_v1.py \
+            --repo . --code-sha "$SHA" \
+            --output "$RUNNER_TEMP/verified_code/CORPUS370_MATERIALIZATION_CODE_CAPSULE_V1.zip"
+          CODE_SHA="$(sha256sum "$RUNNER_TEMP/verified_code/CORPUS370_MATERIALIZATION_CODE_CAPSULE_V1.zip"|cut -d' ' -f1)"
+          CODE_SHA="$CODE_SHA" SOURCE_SHA="$SHA" python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          z=Path(os.environ['RUNNER_TEMP'])/'verified_code/CORPUS370_MATERIALIZATION_CODE_CAPSULE_V1.zip'
+          r={'schema':'RealSaS.Corpus370MaterializationCodePublication.v1',
+             'status':'PASS_SEALED_EXACT_COMMIT_CODE_ONLY_NOT_CORPUS_MATERIALIZATION',
+             'source_commit':os.environ['SOURCE_SHA'],
+             'code_archive_sha256':os.environ['CODE_SHA'],
+             'code_archive_size_bytes':z.stat().st_size,
+             'code_only':True,
+             'original_corpus_truth_embedded':False,
+             'credentials_embedded':False,
+             'materialization_authorized':False,'training_authorized':False}
+          (z.parent/'CORPUS370_CODE_PUBLICATION_RECEIPT_V1.json').write_text(
+            json.dumps(r,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(r,sort_keys=True))
+          PY
+      - name: Verify exact same SHA bytes stored in PRIVATE Google Drive
+        run: |
+          set -euo pipefail
+          test -n "$RCLONE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+          umask 077
+          export RCLONE_CONFIG="$RUNNER_TEMP/corpus370-code-publication.conf"
+          printf '%s' "$RCLONE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          unset RCLONE_CONFIG_B64
+          SOURCE_SHA="$(git rev-parse HEAD)"
+          REMOTE="gdrive:corpus370_preparation_v1/materialization_code_capsules_v1/$SOURCE_SHA"
+          rclone copy "$RUNNER_TEMP/verified_code" "$REMOTE" --checksum --retries 3
+          EXPECTED="$(sha256sum "$RUNNER_TEMP/verified_code/CORPUS370_MATERIALIZATION_CODE_CAPSULE_V1.zip"|cut -d' ' -f1)"
+          ACTUAL="$(rclone cat "$REMOTE/CORPUS370_MATERIALIZATION_CODE_CAPSULE_V1.zip"|sha256sum|cut -d' ' -f1)"
+          test "$EXPECTED" = "$ACTUAL"
+          echo "CODE_CAPSULE_PRIVATE_DRIVE_FULL_SHA256_READBACK_PASS"
+          echo "SOURCE_COMMIT=$SOURCE_SHA"
+          echo "CODE_ARCHIVE_SHA256=$ACTUAL"

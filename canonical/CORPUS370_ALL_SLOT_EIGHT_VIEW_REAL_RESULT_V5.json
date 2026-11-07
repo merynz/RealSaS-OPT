@@ -1,0 +1,112 @@
+{
+  "schema": "RealSaS.Corpus370AllSlotEightViewRealResult.v5",
+  "status": "THREE_REAL_SOURCE_ALL_SLOT_EIGHT_CAMERA_RENDER_AND_COURT_EXECUTED__TWO_SLOTS_UNOBSERVED__NO_OWNER_AUTHORITY",
+  "verification": {
+    "github_run_id": 41995533913,
+    "workflow": "corpus370-hosted-all-slot-eight-view-edit-private-v5",
+    "jobs_completed_success": 4,
+    "source_workers_success": 3,
+    "private_drive_folder": "gdrive:corpus370_preparation_v1/hosted_all_slot_eight_view_edit_private_v5/41995533913-1",
+    "v5_observation_index_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+    "allview_geometry_parent_sha256": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1",
+    "native_visibility_join_parent_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a"
+  },
+  "method": {
+    "real_original_source_blender": true,
+    "cameras": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "original_rest_pose_only": true,
+    "nominal_raster": [
+      192,
+      192
+    ],
+    "render_arms_per_camera": 12,
+    "rendered_all_operational_source_slots": true,
+    "operational_slots_per_subject": 8,
+    "full_source_field_of_view": true,
+    "private_rgb_and_source_face_addresses": true,
+    "source_author_drawable_partition_derived": false
+  },
+  "measurements": {
+    "real_subjects": 3,
+    "source_workers_failed": 0,
+    "source_noop_parity_views_passed": 24,
+    "source_noop_parity_views_total": 24,
+    "independent_group_slot_courts": 24,
+    "group_slots_with_any_direct_edit_pixel_effect": 22,
+    "group_slots_without_direct_edit_pixel_effect": 2,
+    "group_slots_with_zero_effect_are_owner_negative": false,
+    "total_96_arm_views_per_subject": 288,
+    "source_original_fov_pixel_positions": 884736,
+    "all_arm_pixel_instances": 10616832,
+    "source_vs_soup_p99_max_measured": 0,
+    "noop_rgba_max_error_measured": 0
+  },
+  "per_subject": [
+    {
+      "source_reference": "CAT",
+      "source_worker_ordinal": 0,
+      "source_group_slots": 8,
+      "direct_effect_observed_slots": 7,
+      "source_slots_without_direct_effect": 1,
+      "unobserved_source_slot_id_teacher_only": 7,
+      "per_slot_removal_effect_pixel_count_sum": 50901,
+      "anchor_view4_conditional_reveal_pixels": 2612,
+      "real_source_independent_court_sha256": "c92046695ed4e853a37b70643880a4a451f8c291bb26c059745bfb1c7e756735",
+      "status": "MEASURED_SEVEN_DIRECT_ONE_ABSTAIN__NO_OWNER_TRUTH"
+    },
+    {
+      "source_reference": "TRICERATOPS",
+      "source_worker_ordinal": 1,
+      "source_group_slots": 8,
+      "direct_effect_observed_slots": 8,
+      "source_slots_without_direct_effect": 0,
+      "per_slot_removal_effect_pixel_count_sum": 32481,
+      "anchor_view4_conditional_reveal_pixels": 2194,
+      "real_source_independent_court_sha256": "26b4dfa7349bccddafd0912d91a69392fcef8a44b11ba475ea3ff26934aefb1c",
+      "status": "MEASURED_EIGHT_DIRECT__NO_OWNER_TRUTH"
+    },
+    {
+      "source_reference": "COWFISH",
+      "source_worker_ordinal": 2,
+      "source_group_slots": 8,
+      "direct_effect_observed_slots": 7,
+      "source_slots_without_direct_effect": 1,
+      "unobserved_source_slot_id_teacher_only": 6,
+      "per_slot_removal_effect_pixel_count_sum": 46865,
+      "anchor_view4_conditional_reveal_pixels": 1040,
+      "real_source_independent_court_sha256": "0c2de6e269299c68d72854319740edcdf56a5ca8c9cc417d003a093eabab5a87",
+      "status": "MEASURED_SEVEN_DIRECT_ONE_ABSTAIN__NO_OWNER_TRUTH"
+    }
+  ],
+  "authority": {
+    "direct_pixel_effect_proves_source_render_consequence": true,
+    "zero_direct_effect_proves_redundant_group": false,
+    "group_count_eight_is_verified_optimum": false,
+    "source_drawable_positive_pairs_minted": 0,
+    "source_drawable_negative_pairs_minted": 0,
+    "mechanical_owner_certified": false,
+    "source_pose_and_skin_courted": false,
+    "native_resolution_caa_authorized": false,
+    "graphics_owner_training_authorized": false,
+    "tessa_teacher_authorized": false,
+    "materialization_authorized": false,
+    "product_compilation_authorized": false,
+    "training_authorized": false
+  },
+  "next_research": [
+    "CONDITIONAL_ALL_SLOT_OCCLUDER_PEELING_WITHOUT_SEMANTIC_LABELS",
+    "COMPETING_PARTITION_GRANULARITY_8_16_32_64_AND_COMPLEXITY_CONSEQUENCE",
+    "SOURCE_NATIVE_POSE_AND_INDEPENDENT_MECHANICAL_REPLAY",
+    "CANONICAL_3D_TO_2D_GRAPHICS_CAA_ALPHA_DEPTH_DRAW_ORDER",
+    "LINEAGE_SAFE_PER_HEAD_FAMILY_AUTHORITY"
+  ]
+}

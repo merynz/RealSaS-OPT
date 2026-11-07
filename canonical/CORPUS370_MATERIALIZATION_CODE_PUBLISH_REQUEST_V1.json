@@ -1,0 +1,11 @@
+{
+  "schema": "RealSaS.Corpus370MaterializationCodePublishRequest.v1",
+  "enabled": true,
+  "code_only": true,
+  "training_authorized": false,
+  "materialization_authorized": false,
+  "real_readiness_checkpoint_required": true,
+  "source_repository": "merynz/RealSaS-OPT",
+  "artifact": "CORPUS370_MATERIALIZATION_CODE_CAPSULE_V1.zip",
+  "purpose": "Publish exact immutable source commit minimal materialization consumer code via verified private Drive; no truth, split, dataset, training or model readiness minted. Notebook V2 still requires final sealed pass."
+}

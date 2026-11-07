@@ -1,0 +1,103 @@
+name: corpus370-hosted-v5-portability-census-real-v1
+# One-time READ-ONLY local inventory of original V5 + 352 source-rest truth.
+# Only a path-free SUMMARY is uploaded as a public GitHub Actions artifact.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-hosted-v5-portability-census-real-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-hosted-v5-portability-census-real-v1
+  cancel-in-progress: false
+
+jobs:
+  inventory-contract-hosted:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile V5 source closure inventory independently of any WSL data
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/corpus/plan_corpus370_hosted_portability_v1.py
+          python -m pip install --disable-pip-version-check numpy pytest
+          PYTHONPATH=. python -m pytest -q \
+            tests/corpus/test_corpus370_hosted_portability_v1.py \
+            tests/corpus/test_corpus370_hosted_private_shards_v1.py
+          python -m py_compile tools/corpus/hosted_v5_private_shards_v1.py
+          PYTHONPATH=. python -c "from tools.corpus.plan_corpus370_hosted_portability_v1 import V5_SHA,REST_PIN,ROSTER_SHA; assert all(len(x)==64 for x in (V5_SHA,REST_PIN,ROSTER_SHA))"
+  source-identity-input-bom-on-wsl:
+    needs: inventory-contract-hosted
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      PREP: /home/monster/realsas_authority/corpus370_preparation_v1
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      REST: /home/monster/realsas_authority/corpus370_source_rest_courts_v1_8ab2ebf5/SOURCE_REST_COURTS_INDEX.json
+      SOURCE_ARCHIVE_SHA: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      OUT: /home/monster/realsas_authority/corpus370_hosted_portability_v1
+    steps:
+      - uses: actions/checkout@v4
+      - name: SHA-audit exact V5 references and complete extracted source dependency tree
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          # This is a READ-ONLY source producer identity check. The digest is
+          # compared to the hosted Blender 4.5.14 binary before any teacher migration.
+          blender=/home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
+          test -x "$blender"
+          sha256sum "$blender"
+          mkdir -p "$OUT"
+          "$PY" -u tools/corpus/plan_corpus370_hosted_portability_v1.py \
+            --v5-index "$V5" \
+            --exact-source-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
+            --source-rest-index "$REST" \
+            --source-root "$PREP/source_bundle/extracted/$SOURCE_ARCHIVE_SHA" \
+            --output "$OUT/PRIVATE_EXACT_HOSTED_BOM.json" \
+            --summary-output "$OUT/HOSTED_PORTABILITY_PATH_FREE_SUMMARY.json"
+      - name: Upload private BOM to existing authenticated Drive, not a public artifact
+        run: |
+          set -euo pipefail
+          command -v rclone
+          rclone listremotes | grep -Fx 'gdrive:'
+          rclone copyto "$OUT/PRIVATE_EXACT_HOSTED_BOM.json" \
+            "gdrive:corpus370_preparation_v1/hosted_portability_v1/PRIVATE_EXACT_HOSTED_BOM.json" \
+            --checksum --transfers 1 --timeout 90s
+          echo "PRIVATE_SHA_MANIFEST_UPLOADED_TO_DRIVE_NO_PUBLIC_BYTES"
+      - name: Produce SHA-exact original-path private object shards without a public source artifact
+        run: |
+          set -euo pipefail
+          "$PY" -u tools/corpus/hosted_v5_private_shards_v1.py export \
+            --private-inventory "$OUT/PRIVATE_EXACT_HOSTED_BOM.json" \
+            --output-dir "$OUT/private_shards" \
+            --max-shard-mib 768
+          test -s "$OUT/private_shards/PRIVATE_V5_SHARD_MANIFEST.json"
+      - name: Upload authenticated private V5 shards and seal receipt LAST in Google Drive
+        run: |
+          set -euo pipefail
+          remote="gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards"
+          for shard in "$OUT"/private_shards/private-objects-*.zip; do
+            rclone copyto "$shard" "$remote/$(basename "$shard")" \
+              --checksum --transfers 1 --checkers 1 --timeout 90s --retries 3
+          done
+          rclone copyto "$OUT/private_shards/PRIVATE_V5_SHARD_MANIFEST.json" \
+            "$remote/PRIVATE_V5_SHARD_MANIFEST.json" \
+            --checksum --transfers 1 --timeout 90s
+          rclone copyto "$OUT/private_shards/PUBLIC_PATH_FREE_RECEIPT.json" \
+            "$remote/PUBLIC_PATH_FREE_RECEIPT.json" \
+            --checksum --transfers 1 --timeout 90s
+          echo "PRIVATE_SOURCE_SHARDS_UPLOADED_DRIVE_RECEIPT_LAST"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-hosted-portability-path-free-summary-${{ github.run_id }}
+          path: ${{ env.OUT }}/HOSTED_PORTABILITY_PATH_FREE_SUMMARY.json
+          if-no-files-found: warn
+          retention-days: 14

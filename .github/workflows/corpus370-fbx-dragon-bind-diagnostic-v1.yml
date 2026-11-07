@@ -1,0 +1,95 @@
+name: corpus370-fbx-dragon-bind-diagnostic-v1
+
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-fbx-dragon-bind-diagnostic-v1.yml'
+      - 'tools/corpus/ufbx_bind_scene_diagnostic_v2.c'
+      - 'tools/corpus/compare_fbx_bind_pilot_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-fbx-dragon-bind-diagnostic-v1
+  cancel-in-progress: false
+
+jobs:
+  dragon-source-only:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PREP: /home/monster/realsas_authority/corpus370_preparation_v1
+      UFBX_ROOT: /home/monster/.cache/realsas/ufbx/5955c5c0b042ac2dc6f32955ab206aaec0620cfc
+      SOURCE_SHA: 5a45dcf6ac912b6357ab28ecb9d0b2104e7ee0fdae20d082a180cdc8c65adeba
+      IMPORT_SHA: 93c006ae4ebb0c44b4f98760e9055267039fa636b558bd4e452a0811915d9e4a
+      OUT: /tmp/corpus370-dragon-fbx-bind-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify immutable source, original importer and exact ufbx commit
+        run: |
+          set -euo pipefail
+          ACTUAL_UFBX="$(git -C "$UFBX_ROOT" rev-parse HEAD 2>/dev/null || true)"
+          echo "DIAGNOSTIC_UFBX_REV=${ACTUAL_UFBX:-MISSING}"
+          echo "DIAGNOSTIC_UFBX_C_EXISTS=$([ -f "$UFBX_ROOT/ufbx.c" ] && echo yes || echo no)"
+          echo "DIAGNOSTIC_SOURCE_FROM_EXACT_ROSTER=yes"
+          echo "DIAGNOSTIC_IMPORT_EXISTS=$([ -f "$PREP/observations_v2/objects/957859df240a200395bfc663bbd107fdbf6e655e18fdeb5badfe696d5bb9cf86/imported/corpus_b6e6c534f69bb0336157/imported.json" ] && echo yes || echo no)"
+          test "$ACTUAL_UFBX" = 5955c5c0b042ac2dc6f32955ab206aaec0620cfc
+          test -f "$UFBX_ROOT/ufbx.c"
+          SOURCE="$(/home/monster/realsas_platform/current/bin/realsas-python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path(os.environ['PREP'])
+          roster_path = root / 'CORPUS370_EXACT_SOURCE_ROSTER_V1.json'
+          assert hashlib.sha256(roster_path.read_bytes()).hexdigest() == '925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355', 'DRAGON_ROSTER_HASH_DRIFT'
+          roster = json.loads(roster_path.read_text())
+          rows = [r for r in roster['subjects'] if r['subject_id'] == 'corpus_b6e6c534f69bb0336157']
+          assert len(rows) == 1 and rows[0]['source_sha256'] == os.environ['SOURCE_SHA'], 'DRAGON_ROSTER_SOURCE_BINDING'
+          extracted = root / 'source_bundle' / 'extracted' / '5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9'
+          path = (extracted / rows[0]['source_relative_path']).resolve()
+          assert path.is_relative_to(extracted.resolve()) and path.is_file(), 'DRAGON_SOURCE_MISSING'
+          print(path)
+          PY
+          )"
+          IMPORT="$PREP/observations_v2/objects/957859df240a200395bfc663bbd107fdbf6e655e18fdeb5badfe696d5bb9cf86/imported/corpus_b6e6c534f69bb0336157/imported.json"
+          echo "DRAGON_SOURCE=$SOURCE" >> "$GITHUB_ENV"
+          echo "DRAGON_IMPORTED=$IMPORT" >> "$GITHUB_ENV"
+          test -f "$SOURCE"
+          test -f "$IMPORT"
+          test "$(sha256sum "$SOURCE" | cut -d' ' -f1)" = "$SOURCE_SHA"
+          test "$(sha256sum "$IMPORT" | cut -d' ' -f1)" = "$IMPORT_SHA"
+          mkdir -p "$OUT"
+      - name: Read both default and authored cluster-bind positions, without modifying source
+        run: |
+          set -euo pipefail
+          SOURCE="$DRAGON_SOURCE"
+          IMPORT="$PREP/observations_v2/objects/957859df240a200395bfc663bbd107fdbf6e655e18fdeb5badfe696d5bb9cf86/imported/corpus_b6e6c534f69bb0336157/imported.json"
+          cc -O2 -std=c99 -I"$UFBX_ROOT" tools/corpus/ufbx_bind_scene_diagnostic_v2.c "$UFBX_ROOT/ufbx.c" -lm -o "$OUT/ufbx_bind_diag"
+          "$OUT/ufbx_bind_diag" "$SOURCE" > "$OUT/DRAGON_RAW_BIND_CANDIDATES.json"
+          /home/monster/realsas_platform/current/bin/realsas-python -u tools/corpus/compare_fbx_bind_pilot_v1.py \
+            --source "$SOURCE" --imported "$IMPORT" \
+            --diagnostic "$OUT/DRAGON_RAW_BIND_CANDIDATES.json" \
+            --source-sha256 "$SOURCE_SHA" --import-sha256 "$IMPORT_SHA" \
+            --output "$OUT/DRAGON_BIND_COMPARISON.json"
+          cc -O2 -std=c99 -I"$UFBX_ROOT" tools/corpus/ufbx_bind_scene_probe_v2.c "$UFBX_ROOT/ufbx.c" -lm -o "$OUT/ufbx_bind_v2"
+          "$OUT/ufbx_bind_v2" "$SOURCE" > "$OUT/DRAGON_V2_SOURCE_BIND_REST.json"
+          /home/monster/realsas_platform/current/bin/realsas-python -u tools/corpus/verify_fbx_bind_rest_v2_pilot_v1.py \
+            --source "$SOURCE" --imported "$IMPORT" \
+            --v2 "$OUT/DRAGON_V2_SOURCE_BIND_REST.json" \
+            --source-sha "$SOURCE_SHA" --import-sha "$IMPORT_SHA" \
+            --original-limit 0.00001 --output "$OUT/DRAGON_V2_BIND_REST_PILOT.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-dragon-source-bind-diagnostic-${{ github.run_id }}
+          path: |
+            ${{ env.OUT }}/DRAGON_BIND_COMPARISON.json
+            ${{ env.OUT }}/DRAGON_RAW_BIND_CANDIDATES.json
+            ${{ env.OUT }}/DRAGON_V2_SOURCE_BIND_REST.json
+            ${{ env.OUT }}/DRAGON_V2_BIND_REST_PILOT.json
+          compression-level: 1
+          retention-days: 7
+          if-no-files-found: warn

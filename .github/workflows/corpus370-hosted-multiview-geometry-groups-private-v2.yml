@@ -1,0 +1,167 @@
+name: corpus370-hosted-multiview-geometry-groups-private-v2
+
+# Three selected original V5 sources. 0/2/6: geometry-only proposals.
+# View4: independent previously measured rendered edit proxy, never labels.
+# No raw art upload, no source-triangle lists in public GitHub artifacts.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - 'canonical/CORPUS370_MULTIVIEW_GEOMETRY_GROUPS_V2_REQUEST.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-hosted-multiview-geometry-groups-private-v2
+  cancel-in-progress: false
+
+jobs:
+  validate-preregistered-source-and-authority:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        name: Exact-source SHA, geometry-only hypothesis and heldout gate
+        env:
+          DRIVE_AVAILABLE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os
+          from pathlib import Path
+          d=json.loads(Path("canonical/CORPUS370_MULTIVIEW_GEOMETRY_GROUPS_V2_REQUEST.json").read_text())
+          assert d["schema"]=="RealSaS.Corpus370MultiviewGeometryGroupsRequest.v2"
+          assert d["original_source_rest_native_visibility_run_id"]==41916724594
+          assert d["original_anonymous_layer_run_id"]==41928889420
+          assert d["original_all352_source_rays_run_id"]==41883539256
+          assert d["original_source_native_visibility_join_sha256"]=="e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a"
+          assert d["original_anonymous_layer_summary_sha256"]=="47b3f3beb7a3625504ccf8488d6fe0cd8fbe0014421c5e4c77748f829c9f01ca"
+          assert d["original_all352_rays_index_sha256"]=="0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70"
+          assert d["source_geometric_training_views"]==[0,2,6]
+          assert d["render_edit_holdout_view"]==4
+          assert d["subject_count"]==3 and d["source_locked"] is True
+          for key in ("render_effect_labels_from_geometry",
+                      "geometry_occlusion_as_author_drawable_truth",
+                      "source_semantic_labels_as_student_truth",
+                      "full_frame_appearance_court_passed","materialization_authorized",
+                      "training_authorized","model_training_authorized"):
+              assert d[key] is False,key
+          print("ready="+str(d["enabled"] is True and os.environ["DRIVE_AVAILABLE"]=="true").lower())
+          PY
+
+  independently-evaluate-real-geometry-guided-groups:
+    needs: validate-preregistered-source-and-authority
+    if: needs.validate-preregistered-source-and-authority.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      RCLONE_CONFIG: /tmp/realsas-c370-multiview-groups.conf
+      JOIN_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_visibility_pair_join_v1/41916724594-1
+      ANON_REMOTE: gdrive:corpus370_preparation_v1/hosted_anonymous_layer_pilot_v1/41928889420-1
+      RAYS_REMOTE: gdrive:corpus370_preparation_v1/hosted_source_locus_rays_all352/41883539256-1
+      JOIN_LOCAL: /home/monster/realsas_authority/corpus370_hosted_native_visibility_pairs/41916724594-1
+      ANON_LOCAL: /home/monster/realsas_authority/corpus370_anonymous_layer_private/41928889420-1
+      RAYS_LOCAL: /home/monster/realsas_authority/corpus370_hosted_ray_outputs/41883539256-1
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_multiview_groups_v2/${{ github.run_id }}-${{ github.run_attempt }}
+      OUTPUT_REMOTE: gdrive:corpus370_preparation_v1/hosted_multiview_geometry_groups_v2/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bytecode and adversarial source/heldout separation tests
+        run: |
+          set -euo pipefail
+          test "$(awk '/MemTotal:/{print $2}' /proc/meminfo)" -ge 14000000
+          sudo install -d -o "$USER" -g "$(id -gn)" -m 0700 /home/monster/realsas_authority
+          mkdir -p "$OUTPUT_ROOT"
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/corpus/compile_corpus370_hierarchical_layer_groups_v1.py \
+            tools/corpus/compile_corpus370_multiview_geometry_groups_v2.py \
+            tools/corpus/court_corpus370_multiview_geometry_groups_v2.py \
+            tools/corpus/run_corpus370_multiview_geometry_groups_private_v2.py
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_hierarchical_layer_groups_v1.py \
+            tests/corpus/test_corpus370_multiview_geometry_groups_v2.py
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Authenticate private Drive without logging source credentials
+        env:
+          DRIVE_RCLONE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_RCLONE_CONFIG_B64"
+          printf '%s' "$DRIVE_RCLONE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          for remote in "$JOIN_REMOTE" "$ANON_REMOTE" "$RAYS_REMOTE"; do
+            rclone lsf "$remote" --max-depth 1 >/dev/null
+          done
+          echo "THREE_PRIVATE_SOURCE_PROVENANCE_PARENTS_AUTHENTICATED"
+      - name: Fetch only 3 original private geometry rays and sealed pose/editor candidates
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$JOIN_LOCAL" "$ANON_LOCAL" "$RAYS_LOCAL"
+          rclone copy "$JOIN_REMOTE" "$JOIN_LOCAL" \
+            --checksum --transfers 3 --checkers 3 --timeout 90s --retries 3
+          rclone copy "$ANON_REMOTE" "$ANON_LOCAL" \
+            --checksum --transfers 3 --checkers 3 --timeout 90s --retries 3
+          rclone copyto "$RAYS_REMOTE/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            "$RAYS_LOCAL/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            --checksum --timeout 90s --retries 3
+          test "$(sha256sum "$JOIN_LOCAL/CORPUS370_NATIVE_VISIBILITY_PAIR_JOIN_V1.json" | cut -d' ' -f1)" = e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a
+          test "$(sha256sum "$ANON_LOCAL/CORPUS370_ANON_LAYER_PRIVATE_BATCH_V1.json" | cut -d' ' -f1)" = 47b3f3beb7a3625504ccf8488d6fe0cd8fbe0014421c5e4c77748f829c9f01ca
+          test "$(sha256sum "$RAYS_LOCAL/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" | cut -d' ' -f1)" = 0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70
+          python3 - <<'PY' > "$RUNNER_TEMP/c370-selected-sid.txt"
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["JOIN_LOCAL"])/"CORPUS370_NATIVE_VISIBILITY_PAIR_JOIN_V1.json"
+          x=json.loads(p.read_text())
+          assert len(x["subjects"])==3 and x["training_authorized"] is False
+          for sid in sorted(x["subjects"]):print(sid)
+          PY
+          while IFS= read -r sid; do
+            test -n "$sid"
+            mkdir -p "$RAYS_LOCAL/subjects/$sid"
+            rclone copyto "$RAYS_REMOTE/subjects/$sid/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json" \
+              "$RAYS_LOCAL/subjects/$sid/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json" \
+              --checksum --timeout 90s --retries 3
+          done < "$RUNNER_TEMP/c370-selected-sid.txt"
+          echo "ONLY_THREE_SOURCE_REST_MOTION_AND_MULTIVIEW_GEOMETRIC_RAY_PARENTS"
+      - name: Compile and independently test 0/2/6 constrained anonymous groups against view4
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 -u tools/corpus/run_corpus370_multiview_geometry_groups_private_v2.py \
+            --native-visibility-join-root "$JOIN_LOCAL" \
+            --prior-anonymous-root "$ANON_LOCAL" \
+            --source-geometry-rays-root "$RAYS_LOCAL" \
+            --output-root "$OUTPUT_ROOT" \
+            > "$OUTPUT_ROOT/PRIVATE_MULTIVIEW_GEOMETRY_GROUPS_LOG.txt" 2>&1
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["OUTPUT_ROOT"])/"CORPUS370_MULTIVIEW_GEOMETRY_GROUPS_PRIVATE_BATCH_V2.json"
+          d=json.loads(p.read_text())
+          assert d["candidate_qualified_count"]==3 and d["failure_count"]==0
+          assert d["model_training_authorized"] is False
+          assert d["graphics_owner_authorized"] is False
+          print("## Source-only multiview geometric layer proposal v2")
+          print("Exact original subjects:",d["candidate_qualified_count"])
+          print("Proposed train-only group counts:",sorted(d["selected_group_counts"].values()))
+          print("Independent view4 real ray edit expressible:",d["heldout_proxy_revealed_count"],"/3")
+          print("Geometry constraint != editable owner truth; full-image render remains NOT QUALIFIED")
+          PY
+      - name: Upload all evidence and failures to private Drive only
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -s "$RCLONE_CONFIG" && test -d "$OUTPUT_ROOT"; then
+            rclone copy "$OUTPUT_ROOT" "$OUTPUT_REMOTE" \
+              --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+            echo "PRIVATE_MULTIVIEW_GEOMETRY_EDITS_STORED"
+          fi

@@ -104,3 +104,15 @@ def test_courted_high_precision_structural_fingerprint_can_merge(tmp_path: Path)
     assert result["courted_structural_duplicate_group_count"] == 1
     assert result["review_required_count"] == 0
     assert result["split_authorized"] is True
+
+
+def test_strict_production_lineage_cannot_seal_on_raw_sha_and_paths_alone(tmp_path: Path):
+    # The old research helper deliberately permits a name/source-only grouping
+    # for diagnostic use. Production requires exact independent structural
+    # fingerprints for ALL sources before global unseen can be sealed.
+    r=build(roster(tmp_path),require_complete_structural_fingerprints=True)
+    assert r["status"]=="BLOCKED_INDEPENDENT_STRUCTURAL_FINGERPRINT_COVERAGE_REQUIRED"
+    assert r["split_authorized"] is False
+    assert r["complete_independent_structural_fingerprint_required"] is True
+    assert r["missing_independently_courted_structural_subject_count"]==370
+    assert r["training_authorized"] is False

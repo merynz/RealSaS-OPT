@@ -1,0 +1,96 @@
+name: corpus370-v5-source-locus-geometric-ray-all352-real-v1
+# Manual-only until source-replay OOM isolation is qualified on WSL.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v5-source-locus-geometric-ray-all352-real-v1
+  cancel-in-progress: false
+
+jobs:
+  all352-source-raster-geometry-ray-court:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      REST: /home/monster/realsas_authority/corpus370_source_rest_courts_v1_8ab2ebf5/SOURCE_REST_COURTS_INDEX.json
+      OUTPUT: /home/monster/realsas_authority/corpus370_source_locus_rays_all352_${{ github.sha }}
+      DRIVE: gdrive:corpus370_preparation_v1/source_locus_geometric_rays_all352_${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify 352 geometry/camera admissions are exact V5 bytes
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          test "$(sha256sum "$REST" | cut -d' ' -f1)" = 384c92940e1ea8eec7bbb98cf319eeda5f89222c07b782b607998e2067f1d9c8
+          "$PY" -m py_compile tools/corpus/measure_corpus370_v5_source_locus_rays_v1.py tools/corpus/run_corpus370_wsl_isolated_v1.py
+          command -v systemd-run >/dev/null
+      - name: Measure exact complete source ray stacks for ALL 352 V5 observed sources
+        run: |
+          set -euo pipefail
+          "$PY" -u tools/corpus/run_corpus370_wsl_isolated_v1.py \
+            --unit "realsas-c370-rays-${{ github.run_id }}" \
+            --high-mib 3584 --max-mib 4608 --swap-mib 1024 --cpu-quota 180 \
+            --minimum-ram-gib 5 --minimum-disk-gib 12 \
+            --report-path "$OUTPUT/CORPUS370_WSL_RESOURCE_PREFLIGHT_V1.json" \
+            -- "$PY" -u tools/corpus/measure_corpus370_v5_source_locus_rays_v1.py \
+              --v5-index "$V5" --source-rest-index "$REST" \
+              --output-dir "$OUTPUT" --all
+      - name: Independently check accounting and source SHA-address evidence for 352
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os,hashlib
+          from pathlib import Path
+          root=Path(os.environ['OUTPUT']); p=root/'SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json'
+          d=json.loads(p.read_text())
+          assert d['status']=='PILOT_SUBJECTS_ACCOUNTED__GRAPHICS_AUTHORITY_SEPARATE'
+          assert len(d['subject_results'])==len(d['subject_ids'])==352
+          assert len(set(d['subject_ids']))==352
+          counts={'geometric_rays':0,'ordered_hits':0,'abstain':0}
+          failures=[]
+          for sid,row in d['subject_results'].items():
+              if row['status']!='MEASURED_GEOMETRIC_RAY_CANDIDATE':
+                  failures.append((sid,row.get('reason')));continue
+              ref=row['receipt']; b=Path(ref['path']).read_bytes()
+              assert hashlib.sha256(b).hexdigest()==ref['sha256']
+              payload=json.loads(b)
+              assert payload['source_sha256']==row['source_sha256']
+              assert not payload['authority']['graphics_family_minted']
+              assert not payload['authority']['student_owner_labels_minted']
+              for ray in payload['rays']:
+                  assert ray['source_alpha_compositing_qualified'] is False
+                  assert ray['drawable_ownership_label_minted'] is False
+              counts['geometric_rays']+=row['counts'].get('qualified_geometric_rays',0)
+              counts['ordered_hits']+=row['counts'].get('qualified_geometric_ordered_hit_pairs',0)
+              counts['abstain']+=row['counts'].get('abstain_rays',0)
+          print('## All352 source-locus measured geometric stacks')
+          print('Measured geometry rays:',counts['geometric_rays'])
+          print('Geometric depth-ordered face pairs:',counts['ordered_hits'])
+          print('Explicit ray abstentions:',counts['abstain'])
+          print('Subject measurement failures:',len(failures))
+          print('CAUSAL appearance/alpha/drawable owner authority: NOT granted')
+          if failures:print('Example failures:',json.dumps(failures[:20]))
+          assert not failures,'SOURCE_GEOMETRIC_RAY_REPAIR_REQUIRED'
+          PY
+      - name: Publish source address ray measurements for subsequent rendered palette/alpha courts
+        run: |
+          set -euo pipefail
+          rclone copy "$OUTPUT" "$DRIVE" --checksum --transfers 4 --progress
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v5-source-locus-rays-all352-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json
+            ${{ env.OUTPUT }}/CORPUS370_WSL_RESOURCE_PREFLIGHT_V1.json
+            ${{ env.OUTPUT }}/subjects/*/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 3

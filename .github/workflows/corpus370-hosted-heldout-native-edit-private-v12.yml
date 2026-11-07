@@ -1,0 +1,253 @@
+name: corpus370-hosted-heldout-native-edit-private-v12
+
+# Source-bound PRIVATE original authored-animation + RGBA intervention evidence.
+# Real rendered pixels and source face/teacher annotations remain on private Drive.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - 'canonical/CORPUS370_HOSTED_HELDOUT_NATIVE_EDIT_REQUEST_V12.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-hosted-heldout-native-edit-private-v12
+  cancel-in-progress: false
+
+jobs:
+  validate-original-source-v9-request:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.gate.outputs.ready }}
+      manifest_sha: ${{ steps.gate.outputs.manifest_sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        name: Fail closed on source lineage, authority, and missing private transport
+        env:
+          PRIVATE_DRIVE_CONFIG_PRESENT: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os
+          from pathlib import Path
+          d=json.loads(Path("canonical/CORPUS370_HOSTED_HELDOUT_NATIVE_EDIT_REQUEST_V12.json").read_text())
+          assert d["schema"]=="RealSaS.Corpus370HeldoutNativeEditResearchRequest.v12"
+          import subprocess
+          for filename,blob in (
+            ("canonical/CORPUS370_NATIVE_ANIMATED_SOURCE_RASTER_REAL_RESULT_V9.json","cac396962b3b5976b9cfe660f0bb592a3a7f57ad"),
+            ("canonical/CORPUS370_NATIVE_EDIT_RESPONSE_EQUIVALENCE_REAL_RESULT_V10.json","7f4817551b08012f68c138a2ae5d4d02cd9d2d57"),
+            ("canonical/CORPUS370_HELDOUT_GEOMETRIC_SOURCE_PROBE_PLAN_REAL_RESULT_V11.json","8caa3df4b3809527fc7086592e27aa48cb5b3d41"),
+          ):
+              assert subprocess.check_output(["git","hash-object",filename],text=True).strip()==blob
+          assert d["prior_v9_render_run_id"]==42014234494
+          assert d["prior_v10_court_run_id"]==42017257514
+          assert d["prior_v11_heldout_plan_run_id"]==42024346219
+          assert d["new_heldout_source_face_target_count"]==36
+          assert d["source_anchor_reuse_authorized"] is False
+          assert d["source_original_parents_unchanged"] is True
+          assert d["subject_count"]==d["parallel_hosted_workers"]==3
+          assert d["source_v5_sha256"]=="8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4"
+          assert d["source_roster_sha256"]=="925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355"
+          assert d["private_v5_manifest_sha256"]=="cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172"
+          assert d["geometric_rays_index_sha256"]=="0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70"
+          assert d["source_native_visibility_join_sha256"]=="e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a"
+          assert d["source_allview_group_batch_sha256"]=="1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1"
+          assert d["native_authored_teacher_summary_sha256"]=="5aa3c4d9cc97ab669d2a7a951a4c9d18218ef5ea4d6f58f5b1ff1ac5b89cc272"
+          assert d["expected_authored_pose_count_by_worker"]==[32,24,24]
+          assert d["reference_policy"]=="ANIMATED_ORIGINAL_VS_POSED_SOURCE_FACE_SOUP_NO_SEMANTIC_PRIORS"
+          assert d["candidate_sizes_if_present"]==[8,16,32,64]
+          assert d["all_teacher_artifacts_remain_private"] is True
+          assert d["native_animated_pose_indices_count"]==3
+          assert d["native_animated_camera_views"]==[0,2,4,6]
+          assert d["raster_resolution"]==192 and d["cycles_samples"]==32
+          for key in ("source_rig_pose_response_authorized",
+                      "native_resolution_full_appearance_caa_authorized",
+                      "human_authored_drawable_identity_qualified",
+                      "graphics_owner_authorized", "tessa_teacher_authorized",
+                      "materialization_authorized","product_compilation_authorized",
+                      "training_authorized"):
+              assert d[key] is False,key
+          ready=d["enabled"] is True and os.environ["PRIVATE_DRIVE_CONFIG_PRESENT"]=="true"
+          print("ready="+str(ready).lower())
+          print("manifest_sha="+(d["private_v5_manifest_sha256"] if ready else ""))
+          PY
+
+  original-source-authored-native-pose-workers:
+    needs: validate-original-source-v9-request
+    if: needs.validate-original-source-v9-request.outputs.ready == 'true'
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        subject_ordinal: [0, 1, 2]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 220
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      RCLONE_CONFIG: /tmp/realsas-c370-heldout-v12.conf
+      MANIFEST_SHA: ${{ needs.validate-original-source-v9-request.outputs.manifest_sha }}
+      ORIGINAL_V5_SHARDS: gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards
+      RAYS_REMOTE: gdrive:corpus370_preparation_v1/hosted_source_locus_rays_all352/41883539256-1
+      JOIN_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_visibility_pair_join_v1/41916724594-1
+      GROUP_REMOTE: gdrive:corpus370_preparation_v1/hosted_allview_geometry_groups_v3/41986038051-1
+      NATIVE_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_temporal_pilot_v1/41915393652-1
+      V11_PRIVATE_REMOTE: gdrive:corpus370_preparation_v1/hosted_heldout_source_branch_probe_private_v11/42024346219-1
+      V10_PRIVATE_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_edit_equivalence_private_v10/42017257514-1
+      V11_PRIVATE: /home/monster/realsas_authority/corpus370_v12_parent_v11
+      V10_PRIVATE: /home/monster/realsas_authority/corpus370_v12_parent_v10
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      RAYS_LOCAL: /home/monster/realsas_authority/corpus370_hosted_ray_outputs/41883539256-1
+      JOIN_LOCAL: /home/monster/realsas_authority/corpus370_hosted_native_visibility_pairs/41916724594-1
+      GROUP_LOCAL: /home/monster/realsas_authority/corpus370_allview_groups_v3/41986038051-1
+      NATIVE_LOCAL: /home/monster/realsas_authority/corpus370_hosted_native_teacher_pilot/41915393652-1
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_heldout_native_edit_v12/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.subject_ordinal }}
+      OUTPUT_REMOTE: gdrive:corpus370_preparation_v1/hosted_heldout_native_edit_private_v12/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.subject_ordinal }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate bounded private original-source research host and V12 heldout anti-forgery contracts
+        run: |
+          set -euo pipefail
+          test "$(awk '/MemTotal:/{print $2}' /proc/meminfo)" -ge 14000000
+          test "$(df -Pk / | awk 'NR==2{print $4}')" -ge 9000000
+          sudo install -d -o "$USER" -g "$(id -gn)" -m 0700 /home/monster/realsas_authority
+          mkdir -p "$OUTPUT_ROOT"
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/corpus/corpus370_partition_edit_plan_v7.py \
+            tools/corpus/court_corpus370_heldout_native_edit_v12.py \
+            tools/truth_foundry/blender_corpus370_heldout_native_edit_render_v12.py \
+            tools/corpus/run_corpus370_heldout_native_edit_private_v12.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_heldout_native_edit_v12.py
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Authenticate ephemeral private Drive without exposing original faces
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          for remote in "$ORIGINAL_V5_SHARDS" "$RAYS_REMOTE" "$JOIN_REMOTE" "$GROUP_REMOTE" "$NATIVE_REMOTE" "$V11_PRIVATE_REMOTE" "$V10_PRIVATE_REMOTE"; do
+            rclone lsf "$remote" --max-depth 1 >/dev/null
+          done
+          echo "FIVE_IMMUTABLE_SOURCE_NATIVE_PARENTS_AVAILABLE"
+      - name: SHA hydrate original private V5, source rest, and authored teacher receipts
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$RUNNER_TEMP/private-v5-v12" "$RUNNER_TEMP/private-objects-v12" \
+            "$RAYS_LOCAL" "$JOIN_LOCAL" "$GROUP_LOCAL" "$NATIVE_LOCAL" "$OUTPUT_ROOT"
+          rclone copy "$ORIGINAL_V5_SHARDS" "$RUNNER_TEMP/private-v5-v12" \
+            --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+          python3 -u tools/corpus/hosted_v5_private_shards_v1.py hydrate \
+            --manifest "$RUNNER_TEMP/private-v5-v12/PRIVATE_V5_SHARD_MANIFEST.json" \
+            --expected-manifest-sha256 "$MANIFEST_SHA" \
+            --private-dir "$RUNNER_TEMP/private-v5-v12" \
+            --object-cache "$RUNNER_TEMP/private-objects-v12" \
+            > "$OUTPUT_ROOT/PRIVATE_SOURCE_HYDRATE_V12_LOG.txt" 2>&1
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          test "$(sha256sum "$ROSTER" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+          rclone copy "$JOIN_REMOTE" "$JOIN_LOCAL" --checksum --transfers 2 --checkers 2 --retries 3
+          rclone copy "$GROUP_REMOTE" "$GROUP_LOCAL" --checksum --transfers 2 --checkers 2 --retries 3
+          rclone copy "$NATIVE_REMOTE" "$NATIVE_LOCAL" --checksum --transfers 2 --checkers 2 --retries 3
+          rclone copyto "$RAYS_REMOTE/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            "$RAYS_LOCAL/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" --checksum --retries 3
+          test "$(sha256sum "$JOIN_LOCAL/CORPUS370_NATIVE_VISIBILITY_PAIR_JOIN_V1.json" | cut -d' ' -f1)" = e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a
+          test "$(sha256sum "$GROUP_LOCAL/CORPUS370_ALLVIEW_GEOMETRY_GROUPS_PRIVATE_BATCH_V3.json" | cut -d' ' -f1)" = 1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1
+          test "$(sha256sum "$NATIVE_LOCAL/CORPUS370_V5_AUTHORED_TEMPORAL_PILOT_V1.json" | cut -d' ' -f1)" = 5aa3c4d9cc97ab669d2a7a951a4c9d18218ef5ea4d6f58f5b1ff1ac5b89cc272
+          test "$(sha256sum "$RAYS_LOCAL/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" | cut -d' ' -f1)" = 0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70
+          SUBJECT_ORDINAL=${{ matrix.subject_ordinal }} python3 - <<'PY' > "$RUNNER_TEMP/native-pose-subject.txt"
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["JOIN_LOCAL"])/"CORPUS370_NATIVE_VISIBILITY_PAIR_JOIN_V1.json").read_text())
+          print(sorted(d["subjects"])[int(os.environ["SUBJECT_ORDINAL"])])
+          PY
+          sid="$(cat "$RUNNER_TEMP/native-pose-subject.txt")"
+          test -n "$sid"
+          mkdir -p "$RAYS_LOCAL/subjects/$sid"
+          rclone copyto "$RAYS_REMOTE/subjects/$sid/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json" \
+            "$RAYS_LOCAL/subjects/$sid/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json" --checksum --retries 3
+          mkdir -p "$V11_PRIVATE/${{ matrix.subject_ordinal }}" "$V10_PRIVATE/${{ matrix.subject_ordinal }}"
+          rclone copyto "$V11_PRIVATE_REMOTE/${{ matrix.subject_ordinal }}/PRIVATE_HELDOUT_BRANCH_PROBE_PLAN_V11.json" \
+            "$V11_PRIVATE/${{ matrix.subject_ordinal }}/PRIVATE_HELDOUT_BRANCH_PROBE_PLAN_V11.json" --checksum --retries 3
+          rclone copyto "$V10_PRIVATE_REMOTE/${{ matrix.subject_ordinal }}/PRIVATE_NATIVE_EDIT_EQUIVALENCE_COURT_V10.json" \
+            "$V10_PRIVATE/${{ matrix.subject_ordinal }}/PRIVATE_NATIVE_EDIT_EQUIVALENCE_COURT_V10.json" --checksum --retries 3
+          test -s "$V11_PRIVATE/${{ matrix.subject_ordinal }}/PRIVATE_HELDOUT_BRANCH_PROBE_PLAN_V11.json"
+          test -s "$V10_PRIVATE/${{ matrix.subject_ordinal }}/PRIVATE_NATIVE_EDIT_EQUIVALENCE_COURT_V10.json"
+          echo "V12_SHA_BOUND_UNTESTED_FACES_AND_PRIOR_ORIGINAL_V10_VERDICT_READY"
+      - name: Install byte-verified Blender 4.5.14 real-source renderer
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/blender45"
+          base=https://download.blender.org/release/Blender4.5
+          file=blender-4.5.14-linux-x64.tar.xz
+          curl -fL --retry 4 --max-time 300 "$base/$file" -o "$RUNNER_TEMP/blender45/$file"
+          curl -fL --retry 4 --max-time 120 "$base/blender-4.5.14.sha256" -o "$RUNNER_TEMP/blender45/official.sha256"
+          ARCHIVE="$RUNNER_TEMP/blender45/$file" CHECKSUMS="$RUNNER_TEMP/blender45/official.sha256" python3 - <<'PY'
+          import os,re,hashlib
+          from pathlib import Path
+          f=Path(os.environ["ARCHIVE"])
+          lines=[x for x in Path(os.environ["CHECKSUMS"]).read_text().splitlines() if f.name in x]
+          assert len(lines)==1
+          expected=re.findall(r"[0-9a-fA-F]{64}",lines[0])
+          assert len(expected)==1
+          with f.open("rb") as stream:
+              assert hashlib.file_digest(stream,"sha256").hexdigest()==expected[0].lower()
+          PY
+          tar -xJf "$RUNNER_TEMP/blender45/$file" -C "$RUNNER_TEMP/blender45"
+          test "$(sha256sum "$RUNNER_TEMP/blender45/blender-4.5.14-linux-x64/blender" | cut -d' ' -f1)" = 050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8
+      - name: Render SHA-precommitted 36 V11 heldout source edits on original authored native motions
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 -u tools/corpus/run_corpus370_heldout_native_edit_private_v12.py \
+            --extracted-source-root "/home/monster/realsas_authority/corpus370_preparation_v1/source_bundle/extracted/5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9" \
+            --blender "$RUNNER_TEMP/blender45/blender-4.5.14-linux-x64/blender" \
+            --v5-index "$V5" --exact-roster "$ROSTER" \
+            --geometric-ray-index "$RAYS_LOCAL/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            --original-join-root "$JOIN_LOCAL" \
+            --allview-groups-root "$GROUP_LOCAL" \
+            --native-teacher-root "$NATIVE_LOCAL" \
+            --v11-private-root "$V11_PRIVATE" --v10-private-root "$V10_PRIVATE" \
+            --public-v9 canonical/CORPUS370_NATIVE_ANIMATED_SOURCE_RASTER_REAL_RESULT_V9.json \
+            --public-v10 canonical/CORPUS370_NATIVE_EDIT_RESPONSE_EQUIVALENCE_REAL_RESULT_V10.json \
+            --public-v11 canonical/CORPUS370_HELDOUT_GEOMETRIC_SOURCE_PROBE_PLAN_REAL_RESULT_V11.json \
+            --public-v9-sha256 "decae1f3b38574bf9d69d72665d6f6cc3ec85c252688176a63617e70f7e227b0" \
+            --public-v10-sha256 "$(sha256sum canonical/CORPUS370_NATIVE_EDIT_RESPONSE_EQUIVALENCE_REAL_RESULT_V10.json | cut -d' ' -f1)" \
+            --public-v11-sha256 "$(sha256sum canonical/CORPUS370_HELDOUT_GEOMETRIC_SOURCE_PROBE_PLAN_REAL_RESULT_V11.json | cut -d' ' -f1)" \
+            --output "$OUTPUT_ROOT" --subject-ordinal ${{ matrix.subject_ordinal }} \
+            > "$OUTPUT_ROOT/PRIVATE_HELDOUT_NATIVE_V12_LOG.txt" 2>&1
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["OUTPUT_ROOT"])/"PRIVATE_HELDOUT_NATIVE_EDIT_BATCH_V12.json").read_text())
+          assert d["schema"]=="RealSaS.Corpus370HeldoutNativeEditPrivateBatch.v12"
+          assert d["status"]=="MEASURED_REAL_V11_HELDOUT_NATIVE_EDIT_RESPONSES_V12__NO_OWNER"
+          assert d["heldout_new_source_queries"]==12
+          assert d["native_camera_views"]==[0,2,4,6]
+          assert d["real_render_arm_count"] in (912,1200)
+          assert d["heldout_new_source_queries"]==12
+          assert d["unqualified_original_vs_soup_pose_views"]>=0
+          assert d["graphics_owner_authorized"] is False
+          assert d["training_authorized"] is False
+          print("## Real native motion source/soup; three poses, four original cameras")
+          print("Worker:",d["worker"])
+          print("Real rendered arms:",d["real_render_arm_count"])
+          print("Original/soup qualified parity pose-views:",d["qualified_original_vs_soup_pose_views"],"/12")
+          print("Parity failures remain blocked, no layer authority")
+          PY
+      - name: Preserve private real animated RGBA and any source parity failures
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -s "$RCLONE_CONFIG" && test -d "$OUTPUT_ROOT"; then
+            rclone copy "$OUTPUT_ROOT" "$OUTPUT_REMOTE" \
+              --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+            echo "REAL_HELDOUT_NATIVE_SOURCE_EDIT_PIXEL_COURT_PRIVATE_V12"
+          fi

@@ -1,0 +1,100 @@
+name: corpus370-v5-remaining-76-repair-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths: ['.github/workflows/corpus370-v5-remaining-76-repair-v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-v5-remaining-76-repair-v1
+  cancel-in-progress: false
+jobs:
+  all-original-failures:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 240
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      PREP: /home/monster/realsas_authority/corpus370_preparation_v1
+      PARENT: /home/monster/realsas_authority/corpus370_preparation_v1/observations_rescue_v3/CORPUS370_PREPARED_OBSERVATION_PACKETS_V3.json
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      EXTRACTED: /home/monster/realsas_authority/corpus370_preparation_v1/source_bundle/extracted/5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      BLENDER: /home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/blender-glibc239
+      UFBX_ROOT: /home/monster/.cache/realsas/ufbx/5955c5c0b042ac2dc6f32955ab206aaec0620cfc
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify pinned old sources, runtime and parent outcome count
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          test -x "$BLENDER"
+          test "$(sha256sum "$PARENT" | cut -d' ' -f1)" = 5007b0863eddce70833ad48c4bc26af92a7abd79b618c8dc5c69ade7f43840a7
+          test "$(sha256sum "$ROSTER" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+          test "$(git -C "$UFBX_ROOT" rev-parse HEAD)" = 5955c5c0b042ac2dc6f32955ab206aaec0620cfc
+          "$PY" - <<'PY'
+          import os,json
+          from pathlib import Path
+          from tools.observation.pinned_evaluator_runtime_v1 import sha
+          p=json.loads(Path(os.environ['PARENT']).read_text())
+          request=json.loads(Path('canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json').read_text())
+          assert p['prepared_subject_count']==294 and p['failure_count']==76
+          assert sha(Path(os.environ['BLENDER']))==request['expected_evaluator_binary_sha256']
+          print('SOURCE_V5_FULL_REPAIR_EXACT_PARENTS=PASS',flush=True)
+          PY
+      - name: Verify identical V2 native FBX reader binary build
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUTPUT_ROOT/tools"
+          cc -O2 -std=c99 -I"$UFBX_ROOT" \
+            tools/corpus/ufbx_bind_scene_probe_v2.c "$UFBX_ROOT/ufbx.c" -lm \
+            -o "$OUTPUT_ROOT/tools/ufbx_bind_scene_probe_v2"
+          sha256sum "$OUTPUT_ROOT/tools/ufbx_bind_scene_probe_v2"
+      - name: Attempt only 76 original FAILs; reuse 294 old and any exact V4 pilot successes
+        run: |
+          set -euo pipefail
+          "$PY" -u tools/corpus/rescue_corpus370_observation_delta_v5.py \
+            --parent-index "$PARENT" \
+            --expected-parent-sha256 5007b0863eddce70833ad48c4bc26af92a7abd79b618c8dc5c69ade7f43840a7 \
+            --exact-source-roster "$ROSTER" \
+            --expected-roster-sha256 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355 \
+            --extracted-source-root "$EXTRACTED" \
+            --output-root "$OUTPUT_ROOT" \
+            --blender "$BLENDER" \
+            --probe "$OUTPUT_ROOT/tools/ufbx_bind_scene_probe_v2" \
+            --policy canonical/CORPUS370_IRIS_OBSERVATION_POLICY_V1.json \
+            --runtime-request canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json \
+            | tee "$OUTPUT_ROOT/CORPUS370_V5_REPAIR_LOG.txt"
+      - name: Independently account for final 370 without inventing admission
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ['OUTPUT_ROOT'])/'CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json'
+          x=json.loads(p.read_text())
+          assert x['schema']=="RealSaS.Corpus370PreparedObservationPackets.v5"
+          assert x['historical_v3_pass_preserved_count']==294
+          assert x['original_v3_failures_selected_count']==76
+          assert x['unselected_original_failure_count']==0
+          assert x['new_v4_repaired_count']+x['new_v4_repair_failure_count']==76
+          assert x['prepared_subject_count']+x['failure_count']==370
+          assert len({r['subject_id'] for r in x['subjects']+x['failures']})==370
+          assert x['authority']['old_pass_status_upgraded_to_v4'] is False
+          assert x['training_authorized'] is False
+          print(json.dumps({k:x[k] for k in ('prepared_subject_count','failure_count',
+             'new_v4_repaired_count','new_v4_repair_failure_count',
+             'historical_v3_pass_preserved_count')},sort_keys=True),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v5-76-failure-repair-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT_ROOT }}/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+            ${{ env.OUTPUT_ROOT }}/CORPUS370_V5_REPAIR_LOG.txt
+            ${{ env.OUTPUT_ROOT }}/delta_failures_v5/*.json
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 30

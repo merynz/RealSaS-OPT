@@ -1,0 +1,84 @@
+name: corpus370-v5-delta-repair-real-pilot-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-v5-delta-repair-real-pilot-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-v5-delta-repair-real-pilot-v1
+  cancel-in-progress: false
+jobs:
+  two-repairs-preserve-294:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      PREP: /home/monster/realsas_authority/corpus370_preparation_v1
+      V3_INDEX: /home/monster/realsas_authority/corpus370_preparation_v1/observations_rescue_v3/CORPUS370_PREPARED_OBSERVATION_PACKETS_V3.json
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      EXTRACTED: /home/monster/realsas_authority/corpus370_preparation_v1/source_bundle/extracted/5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      BLENDER: /home/monster/.cache/realsas/blender/official-4.0.2-6fe78c9e/blender-4.0.2-linux-x64/numeric-runtime-239/blender-glibc239
+      UFBX_ROOT: /home/monster/.cache/realsas/ufbx/5955c5c0b042ac2dc6f32955ab206aaec0620cfc
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin original V3 parent, source roster and native binaries
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          test -x "$BLENDER"
+          test "$(sha256sum "$V3_INDEX" | cut -d' ' -f1)" = 5007b0863eddce70833ad48c4bc26af92a7abd79b618c8dc5c69ade7f43840a7
+          test "$(sha256sum "$ROSTER" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+          test "$(git -C "$UFBX_ROOT" rev-parse HEAD)" = 5955c5c0b042ac2dc6f32955ab206aaec0620cfc
+          mkdir -p "$OUTPUT_ROOT/tools"
+          cc -O2 -std=c99 -I"$UFBX_ROOT" tools/corpus/ufbx_bind_scene_probe_v2.c "$UFBX_ROOT/ufbx.c" -lm -o "$OUTPUT_ROOT/tools/ufbx_bind_scene_probe_v2"
+          sha256sum "$OUTPUT_ROOT/tools/ufbx_bind_scene_probe_v2"
+      - name: Preserve all 294 old PASS bytes; repair two originally failed V4 packets
+        run: |
+          set -euo pipefail
+          "$PY" -u tools/corpus/rescue_corpus370_observation_delta_v5.py \
+            --parent-index "$V3_INDEX" \
+            --expected-parent-sha256 5007b0863eddce70833ad48c4bc26af92a7abd79b618c8dc5c69ade7f43840a7 \
+            --exact-source-roster "$ROSTER" \
+            --expected-roster-sha256 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355 \
+            --extracted-source-root "$EXTRACTED" \
+            --output-root "$OUTPUT_ROOT" \
+            --blender "$BLENDER" \
+            --probe "$OUTPUT_ROOT/tools/ufbx_bind_scene_probe_v2" \
+            --policy canonical/CORPUS370_IRIS_OBSERVATION_POLICY_V1.json \
+            --runtime-request canonical/CORPUS370_TRUTH_OPERATOR_REQUEST_V1.json \
+            --subject-id corpus_b6e6c534f69bb0336157 \
+            --subject-id corpus_5fdf026c4f23563f9d41
+      - name: Assert 370 partition and immutable old-pass lineage
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ['OUTPUT_ROOT'])/'CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json'
+          r=json.loads(p.read_text())
+          assert r['schema']=="RealSaS.Corpus370PreparedObservationPackets.v5"
+          assert r['historical_v3_pass_preserved_count']==294
+          assert r['new_v4_repaired_count']==2,(r['new_v4_repaired_count'],r['new_v4_repair_failure_count'])
+          assert r['prepared_subject_count']==296
+          assert r['failure_count']==74
+          assert r['training_authorized'] is False
+          assert len(r['subjects'])+len(r['failures'])==370
+          print('CORPUS370_V5_DELTA_PILOT_PASS: 294 historical + 2 new V4 + 74 preserved old FAIL',flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v5-delta-repair-pilot-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT_ROOT }}/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+            ${{ env.OUTPUT_ROOT }}/delta_failures_v5/*.json
+            ${{ env.OUTPUT_ROOT }}/v4_new/objects/*/logs/*.log
+            ${{ env.OUTPUT_ROOT }}/v4_new/objects/*/admission/*/IRIS_OBSERVATION_ADMISSION.json
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 14

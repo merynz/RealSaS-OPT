@@ -1,0 +1,160 @@
+{
+  "schema": "RealSaS.Corpus370NativeEditResponseEquivalenceRealResult.v10",
+  "status": "THREE_REAL_SOURCE_EDIT_RESPONSE_PAIRWISE_COURTS_PASS__NO_ARTIST_OWNER_AUTHORITY",
+  "date_utc": "2026-11-05",
+  "github_actions_run_id": 42017257514,
+  "github_actions_jobs_succeeded": 4,
+  "private_sha_locked_v9_render_evidence_root": "gdrive:corpus370_preparation_v1/hosted_native_animated_partition_private_v9/42014234494-1",
+  "private_independent_v10_court_root": "gdrive:corpus370_preparation_v1/hosted_native_edit_equivalence_private_v10/42017257514-1",
+  "v9_public_seal_sha256": "decae1f3b38574bf9d69d72665d6f6cc3ec85c252688176a63617e70f7e227b0",
+  "v9_real_blender_arms_reused_without_rerender": 1104,
+  "total_source_pose_camera_cases": 36,
+  "source_native_poses_per_subject": 3,
+  "independent_court_json_sha256_verified_count": 3,
+  "per_subject": [
+    {
+      "source_label": "CAT",
+      "source_id": "corpus_000ca1ae51f9582fde9e",
+      "court_sha256": "c941b618f34c97a5bb95a8790f2a83c5a5c8f1e87c6263c43cc8d49a2d283d2e",
+      "source_sha256": "1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850",
+      "source_edit_target_count": 4,
+      "candidate_group_sizes": [
+        8,
+        16,
+        32,
+        64
+      ],
+      "pairwise_pairs": [
+        {
+          "a": 8,
+          "b": 16,
+          "indistinguishable_tasks": 1,
+          "direct_delta": 14621,
+          "isolation_delta": 47948
+        },
+        {
+          "a": 8,
+          "b": 32,
+          "indistinguishable_tasks": 1,
+          "direct_delta": 59027,
+          "isolation_delta": 139593
+        },
+        {
+          "a": 8,
+          "b": 64,
+          "indistinguishable_tasks": 0,
+          "direct_delta": 65910,
+          "isolation_delta": 192675
+        },
+        {
+          "a": 16,
+          "b": 32,
+          "indistinguishable_tasks": 2,
+          "direct_delta": 44635,
+          "isolation_delta": 94177
+        },
+        {
+          "a": 16,
+          "b": 64,
+          "indistinguishable_tasks": 0,
+          "direct_delta": 51669,
+          "isolation_delta": 147869
+        },
+        {
+          "a": 32,
+          "b": 64,
+          "indistinguishable_tasks": 0,
+          "direct_delta": 7038,
+          "isolation_delta": 54298
+        }
+      ]
+    },
+    {
+      "source_label": "TRICERATOPS",
+      "source_id": "corpus_004e16e05b90505ca23c",
+      "court_sha256": "262f445e97ed05834decbed2eaa84e8a2369ce1121956b9049b956122598afc9",
+      "source_sha256": "ad66b51cc5fc44c9a3429a5b1b98a61621af08d58d102d8a817499bd6a7f5b5a",
+      "source_edit_target_count": 2,
+      "candidate_group_sizes": [
+        8,
+        16,
+        32
+      ],
+      "pairwise_pairs": [
+        {
+          "a": 8,
+          "b": 16,
+          "indistinguishable_tasks": 0,
+          "direct_delta": 721,
+          "isolation_delta": 3120
+        },
+        {
+          "a": 8,
+          "b": 32,
+          "indistinguishable_tasks": 0,
+          "direct_delta": 721,
+          "isolation_delta": 3120
+        },
+        {
+          "a": 16,
+          "b": 32,
+          "indistinguishable_tasks": 2,
+          "direct_delta": 0,
+          "isolation_delta": 0
+        }
+      ]
+    },
+    {
+      "source_label": "COWFISH",
+      "source_id": "corpus_00a3688e42a29045056b",
+      "court_sha256": "3fdb2f787f39cab1f1d461b517655f8bd2844bc8b0e27e5d314d0e3701ea9c95",
+      "source_sha256": "e6898505d56d8057c975b6376f123876dd957347282413cf3fb825754841b989",
+      "source_edit_target_count": 3,
+      "candidate_group_sizes": [
+        8,
+        16,
+        32
+      ],
+      "pairwise_pairs": [
+        {
+          "a": 8,
+          "b": 16,
+          "indistinguishable_tasks": 1,
+          "direct_delta": 4616,
+          "isolation_delta": 9599
+        },
+        {
+          "a": 8,
+          "b": 32,
+          "indistinguishable_tasks": 1,
+          "direct_delta": 4626,
+          "isolation_delta": 9631
+        },
+        {
+          "a": 16,
+          "b": 32,
+          "indistinguishable_tasks": 2,
+          "direct_delta": 10,
+          "isolation_delta": 32
+        }
+      ]
+    }
+  ],
+  "interpretation": {
+    "direct_all_candidate_pairwise_not_finest_trained_as_artist_ground_truth": true,
+    "equivalence_means_only_same_measured_edit_response_on_tested_three_poses_and_four_cameras": true,
+    "source_test_count_is_insufficient_to_certify_global_equivalence": true,
+    "zero_difference_not_same_drawable": true,
+    "nonzero_difference_not_different_drawable": true,
+    "fixed_group_sizes_are_structural_experimental_priors": true,
+    "source_mesh_bone_action_names_not_used_as_student_target": true,
+    "source_identity_teacher_only": true,
+    "training_authorized": false,
+    "graphics_owner_authorized": false,
+    "materialization_authorized": false,
+    "full_caa_authorized": false,
+    "same_drawable_positive_pairs": 0,
+    "different_drawable_negative_pairs": 0
+  },
+  "next_gate": "Independent source-wide nonsemantic branch coverage and adaptive intervention probes, not more motion on same three/four preselected privileged source-hit targets"
+}

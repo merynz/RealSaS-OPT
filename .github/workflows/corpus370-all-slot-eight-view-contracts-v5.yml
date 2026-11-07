@@ -1,0 +1,69 @@
+name: corpus370-all-slot-eight-view-contracts-v5
+
+# Public code/synthetic contract only. Real original art, source coordinates,
+# RGBA arrays and Blender outputs remain in the private hosted evidence lane.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-all-slot-eight-view-contracts-v5.yml'
+      - 'tools/truth_foundry/blender_corpus370_anonymous_all_slot_edit_v5.py'
+      - 'tools/corpus/court_corpus370_all_slot_eight_view_edit_v5.py'
+      - 'tools/corpus/run_corpus370_all_slot_eight_view_edit_private_v5.py'
+      - 'tests/corpus/test_corpus370_all_slot_eight_view_edit_v5.py'
+      - 'canonical/CORPUS370_HOSTED_ALL_SLOT_EIGHT_VIEW_EDIT_REQUEST_V5.json'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/corpus370-all-slot-eight-view-contracts-v5.yml'
+      - 'tools/truth_foundry/blender_corpus370_anonymous_all_slot_edit_v5.py'
+      - 'tools/corpus/court_corpus370_all_slot_eight_view_edit_v5.py'
+      - 'tools/corpus/run_corpus370_all_slot_eight_view_edit_private_v5.py'
+      - 'tests/corpus/test_corpus370_all_slot_eight_view_edit_v5.py'
+      - 'canonical/CORPUS370_HOSTED_ALL_SLOT_EIGHT_VIEW_EDIT_REQUEST_V5.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-all-slot-v5-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source-neutral-slot-census-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python source compile and all-slot negative/positive pixel court
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/truth_foundry/blender_corpus370_anonymous_all_slot_edit_v5.py \
+            tools/corpus/court_corpus370_all_slot_eight_view_edit_v5.py \
+            tools/corpus/run_corpus370_all_slot_eight_view_edit_private_v5.py
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_all_slot_eight_view_edit_v5.py
+      - name: Fail-closed source-only admission contract
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          d=json.loads(Path("canonical/CORPUS370_HOSTED_ALL_SLOT_EIGHT_VIEW_EDIT_REQUEST_V5.json").read_text())
+          assert d["schema"]=="RealSaS.Corpus370AllSlotEightViewEditResearchRequest.v5"
+          assert d["all_source_group_slots_requested"] is True
+          assert d["expected_source_slot_count_from_compiler"]==8
+          assert d["geometry_views_seen_in_compiler"]==list(range(8))
+          assert d["render_test_views"]==list(range(8))
+          assert d["raster_resolution"]==192 and d["cycles_samples"]==32
+          for key in ("graphics_owner_authorized","training_authorized",
+                      "tessa_teacher_authorized","materialization_authorized",
+                      "product_compilation_authorized",
+                      "native_resolution_full_appearance_caa_authorized",
+                      "source_rig_pose_response_authorized"):
+              assert d[key] is False,key
+          print("SOURCE_OWNERSHIP_UNKNOWN__ALL_SLOT_SYNTHETIC_CONTRACT_PASS")
+          PY

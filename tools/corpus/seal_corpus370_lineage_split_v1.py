@@ -60,10 +60,50 @@ def target_count(total: int, fraction: float, minimum: int, maximum: int | None 
 
 
 def lineage_maps(lineage: dict) -> tuple[dict[str, dict], dict[str, str]]:
-    groups = {str(row["lineage_id"]): dict(row) for row in lineage.get("groups") or ()}
+    rows = lineage.get("groups") or ()
+    require(len(rows) == int(lineage.get("lineage_count", -1)),
+            "CORPUS370_SPLIT_LINEAGE_GROUP_CENSUS")
+    groups = {str(row["lineage_id"]): dict(row) for row in rows}
+    require(len(groups) == len(rows), "CORPUS370_SPLIT_LINEAGE_DUPLICATE_GROUP")
     subject_to_lineage = {str(k): str(v) for k, v in (lineage.get("subject_to_lineage") or {}).items()}
     require(len(subject_to_lineage) == int(lineage.get("subject_count", -1)) == 370, "CORPUS370_SPLIT_LINEAGE_SUBJECT_SET")
-    require(set(subject_to_lineage.values()).issubset(groups), "CORPUS370_SPLIT_LINEAGE_GROUP_REF")
+    require(set(subject_to_lineage.values()) == set(groups), "CORPUS370_SPLIT_LINEAGE_GROUP_REF")
+    # A sealed map is not sufficient evidence of a lineage partition: its
+    # reciprocal groups must cover each subject exactly once. Otherwise a
+    # forged/stale group can silently split identical actors across partitions.
+    seen = set()
+    for lineage_id, group in groups.items():
+        members = group.get("subject_ids")
+        require(isinstance(members, list) and members
+                and all(isinstance(sid, str) and sid for sid in members)
+                and len(members) == len(set(members))
+                and group.get("lineage_id") == lineage_id
+                and group.get("subject_count") == len(members),
+                "CORPUS370_SPLIT_LINEAGE_GROUP_MEMBERS")
+        for sid in members:
+            require(sid in subject_to_lineage
+                    and subject_to_lineage[sid] == lineage_id
+                    and sid not in seen,
+                    "CORPUS370_SPLIT_LINEAGE_RECIPROCAL_PARTITION")
+            seen.add(sid)
+    require(seen == set(subject_to_lineage),
+            "CORPUS370_SPLIT_LINEAGE_RECIPROCAL_COVERAGE")
+    # Source-byte identity is a hard lineage link, not merely a publisher
+    # stratification hint. Never allow an identical source SHA in two lineages:
+    # that could put the exact same teacher asset in TRAIN and unseen.
+    source_sha_owner = {}
+    for lineage_id, group in groups.items():
+        hashes = group.get("source_sha256")
+        require(isinstance(hashes, list) and hashes
+                and all(isinstance(h, str) and len(h) == 64
+                        and all(c in "0123456789abcdef" for c in h)
+                        for h in hashes)
+                and len(hashes) == len(set(hashes)),
+                "CORPUS370_SPLIT_LINEAGE_SOURCE_SHA_CENSUS")
+        for source_sha in hashes:
+            previous = source_sha_owner.setdefault(source_sha, lineage_id)
+            require(previous == lineage_id,
+                    "CORPUS370_SPLIT_SOURCE_SHA_CROSS_LINEAGE_LEAKAGE")
     return groups, subject_to_lineage
 
 
@@ -71,6 +111,8 @@ def model_eligible_lineages(rosters: dict, subject_to_lineage: dict[str, str]) -
     result = {}
     for model, payload in (rosters.get("models") or {}).items():
         ids = [str(row["subject_id"]) for row in payload.get("eligible_subjects") or ()]
+        require(len(ids) == len(set(ids)),
+                "CORPUS370_SPLIT_MODEL_DUPLICATE_SUBJECT:" + model)
         require(all(sid in subject_to_lineage for sid in ids), "CORPUS370_SPLIT_MODEL_UNKNOWN_SUBJECT:" + model)
         result[model] = {subject_to_lineage[sid] for sid in ids}
     return result

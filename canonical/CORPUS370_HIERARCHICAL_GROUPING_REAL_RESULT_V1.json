@@ -1,0 +1,72 @@
+{
+  "schema": "RealSaS.Corpus370HierarchicalGroupingRealResult.v1",
+  "status": "REAL_SOURCE_HIERARCHICAL_GROUP_EXECUTED__CAT_HELDOUT_EDIT_REGRESSION__NO_PRODUCT_AUTHORITY",
+  "source_parent": {
+    "native_visibility_canonical_join_run_id": 41916724594,
+    "native_visibility_canonical_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+    "anonymous_layer_parent_run_id": 41928889420,
+    "anonymous_layer_parent_sha256": "47b3f3beb7a3625504ccf8488d6fe0cd8fbe0014421c5e4c77748f829c9f01ca",
+    "first_execution_run_id": 41931588516,
+    "first_execution_diagnostic": "Independent per-source court results produced but final summary serialization failed because NumPy int64 result is not JSON serializable; exact same source parents reused in repair.",
+    "independently_sealed_run_id": 41931981809,
+    "run_conclusion": "SUCCESS",
+    "final_private_receipt_sha256": "058a113f0c9948b4167d412a36326b7d174465d87df3d2cfa316f7fd08e2bb0e",
+    "private_drive_path": "gdrive:corpus370_preparation_v1/hosted_hierarchical_layer_pilot_v1/41931981809-1"
+  },
+  "source_bound": {
+    "subjects_measured": 3,
+    "courts_failed": 0,
+    "parent_atomic_patch_count_sum": 277,
+    "train_view_index": 0,
+    "heldout_view_index": 4,
+    "source_geometry_unchanged": true,
+    "source_triangle_order_unchanged": true,
+    "source_names_used_as_inference_labels": false,
+    "candidate_groups_assessed_per_subject": [
+      8,
+      16,
+      32,
+      64
+    ]
+  },
+  "observations": [
+    {
+      "subject_reference": "CAT",
+      "source_faces": 684,
+      "parent_selected_groups": 260,
+      "train_only_selected_groups": 8,
+      "source_bound_edit_proxy_heldout_fraction": 0,
+      "result": "NEGATIVE_HELDOUT_EDIT_REGRESSION__UNSAFE_TO_RELEASE"
+    },
+    {
+      "subject_reference": "TRICERATOPS",
+      "source_faces": 1334,
+      "parent_selected_groups": 8,
+      "train_only_selected_groups": 8,
+      "source_bound_edit_proxy_heldout_fraction": 1,
+      "result": "RESEARCH_PROXY_PRESERVED__FULL_FRAME_NOT_PROVEN"
+    },
+    {
+      "subject_reference": "COWFISH",
+      "source_faces": 1390,
+      "parent_selected_groups": 9,
+      "train_only_selected_groups": 8,
+      "source_bound_edit_proxy_heldout_fraction": 1,
+      "result": "RESEARCH_PROXY_PRESERVED__FULL_FRAME_NOT_PROVEN"
+    }
+  ],
+  "conclusions": {
+    "train_only_group_compression_does_not_imply_heldout_occlusion_editability": true,
+    "cat_overcompression_is_counterexample": true,
+    "source_geometry_only_cross_view_constraints_next_under_test": true,
+    "cross_view_alpha_depth_full_image_court_executed": false,
+    "real_puppet_drawable_identity_qualified": false,
+    "geometry_occlusion_source_face_ids_allowed_as_student_targets": false,
+    "graphics_owner_training_authorized": false,
+    "mechanical_response_truth_authorized": false,
+    "tessa_teacher_authorized": false,
+    "training_authorized": false,
+    "materialization_authorized": false,
+    "overall_corpus_training_ready": false
+  }
+}

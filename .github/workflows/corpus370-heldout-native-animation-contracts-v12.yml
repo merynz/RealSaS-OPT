@@ -1,0 +1,42 @@
+name: corpus370-heldout-native-animation-contracts-v12
+
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-heldout-native-animation-contracts-v12.yml'
+      - 'tools/truth_foundry/blender_corpus370_heldout_native_edit_render_v12.py'
+      - 'tools/corpus/run_corpus370_heldout_native_edit_private_v12.py'
+      - 'tools/corpus/court_corpus370_heldout_native_edit_v12.py'
+      - 'tests/corpus/test_corpus370_heldout_native_edit_v12.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/corpus370-heldout-native-animation-contracts-v12.yml'
+      - 'tools/truth_foundry/blender_corpus370_heldout_native_edit_render_v12.py'
+      - 'tools/corpus/run_corpus370_heldout_native_edit_private_v12.py'
+      - 'tools/corpus/court_corpus370_heldout_native_edit_v12.py'
+      - 'tests/corpus/test_corpus370_heldout_native_edit_v12.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-heldout-native-animated-contracts-v12-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  independent-heldout-source-court-negative-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compiler checks and 15 synthetic adversarial source authority tests
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/truth_foundry/blender_corpus370_heldout_native_edit_render_v12.py \
+            tools/corpus/run_corpus370_heldout_native_edit_private_v12.py \
+            tools/corpus/court_corpus370_heldout_native_edit_v12.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_heldout_native_edit_v12.py

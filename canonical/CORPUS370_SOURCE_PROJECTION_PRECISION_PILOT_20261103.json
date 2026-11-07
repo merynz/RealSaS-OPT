@@ -1,0 +1,182 @@
+{
+  "schema": "RealSaS.Corpus370PrecisionProjectionBoundedPilot.v1",
+  "status": "BOUNDED_NATIVE_RASTER_DIAGNOSTIC__NO_ADMISSION",
+  "date_utc": "2026-11-03",
+  "evidence": {
+    "fish_group_a": {
+      "run_id": 41739083858,
+      "artifact_ids": [
+        13279837854,
+        13279313405
+      ]
+    },
+    "fish_group_b": {
+      "run_id": 41740642074,
+      "artifact_ids": [
+        13279569663,
+        13280009797
+      ]
+    },
+    "six_subject_48_view_regression": {
+      "run_id": 41725086471,
+      "artifact_ids": [
+        13274295340,
+        13275170107,
+        13273364687
+      ]
+    }
+  },
+  "policy": {
+    "source_views_truth_only": true,
+    "original_maximum_mask_gap_px": 2,
+    "relaxed": false,
+    "precision": "FLOAT32_TRANSFORM_PRECISION_ASSUMPTION",
+    "formula": "q=8*float32_epsilon*max(1,maxabs(projected_pixel_triangle)); orientation_error=2*q*(abs(e0).sum()+abs(e1).sum())+8*q*q; projected face with |det(e0,e1)|<=max(1e-10*norm(e0)*norm(e1),orientation_error) abstains from raster foreground",
+    "abstention_domain": "RASTER_PROJECTION_ONLY__SOURCE_3D_TRIANGLES_UNCHANGED",
+    "unknown_projection_never_encoded_as_negative": true
+  },
+  "fish_subject_count": 13,
+  "former_failing_view_under_original_limit_count": 11,
+  "former_failing_view_still_over_limit_count": 2,
+  "six_subject_reference_view_count": 48,
+  "six_subject_raster_foreground_missing_pixel_count": 0,
+  "results": [
+    {
+      "subject_id": "corpus_5fdf026c4f23563f9d41",
+      "source_name": "Swordfish",
+      "failed_view_index": 4,
+      "original_max_mask_gap_px": 101,
+      "source_native_interval_candidate_max_mask_gap_px": 1,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": true,
+      "observation_admission_minted": false
+    },
+    {
+      "subject_id": "corpus_e24308080ee602953fdd",
+      "source_name": "Sunfish",
+      "failed_view_index": 0,
+      "original_max_mask_gap_px": 76,
+      "source_native_interval_candidate_max_mask_gap_px": 1,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": true,
+      "observation_admission_minted": false
+    },
+    {
+      "subject_id": "corpus_0b2e8ed80eae53e7b62c",
+      "source_name": "GoblinShark",
+      "failed_view_index": 4,
+      "original_max_mask_gap_px": 61.00819617067857,
+      "source_native_interval_candidate_max_mask_gap_px": 1,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": true,
+      "observation_admission_minted": false
+    },
+    {
+      "subject_id": "corpus_16cfb6771ee663bd8628",
+      "source_name": "Betta",
+      "failed_view_index": 4,
+      "original_max_mask_gap_px": 68,
+      "source_native_interval_candidate_max_mask_gap_px": 1.4142135623730951,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": true,
+      "observation_admission_minted": false
+    },
+    {
+      "subject_id": "corpus_5af87385fdc7c9f3f8cd",
+      "source_name": "Humphead",
+      "failed_view_index": 0,
+      "original_max_mask_gap_px": 68.00735254367721,
+      "source_native_interval_candidate_max_mask_gap_px": 1,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": true,
+      "observation_admission_minted": false
+    },
+    {
+      "subject_id": "corpus_6e72ab4983ea74bd6d66",
+      "source_name": "RedSnapper",
+      "failed_view_index": 0,
+      "original_max_mask_gap_px": 60,
+      "source_native_interval_candidate_max_mask_gap_px": 1,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": true,
+      "observation_admission_minted": false
+    },
+    {
+      "subject_id": "corpus_ff809df0ec9aeb956f58",
+      "source_name": "Turbot",
+      "failed_view_index": 4,
+      "original_max_mask_gap_px": 66,
+      "source_native_interval_candidate_max_mask_gap_px": 1,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": true,
+      "observation_admission_minted": false
+    },
+    {
+      "subject_id": "corpus_10c7724eb03932b7f13f",
+      "source_name": "FlowerHorn",
+      "failed_view_index": 4,
+      "original_max_mask_gap_px": 41,
+      "source_native_interval_candidate_max_mask_gap_px": 1,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": true,
+      "observation_admission_minted": false
+    },
+    {
+      "subject_id": "corpus_4e3ad9c573349c333c58",
+      "source_name": "CoralGrouper",
+      "failed_view_index": 0,
+      "original_max_mask_gap_px": 25,
+      "source_native_interval_candidate_max_mask_gap_px": 1,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": true,
+      "observation_admission_minted": false
+    },
+    {
+      "subject_id": "corpus_979c41cce2cb8ad02220",
+      "source_name": "BlackLionFish",
+      "failed_view_index": 0,
+      "original_max_mask_gap_px": 34,
+      "source_native_interval_candidate_max_mask_gap_px": 1,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": true,
+      "observation_admission_minted": false
+    },
+    {
+      "subject_id": "corpus_f768e733487a23d2e63f",
+      "source_name": "Tetra",
+      "failed_view_index": 0,
+      "original_max_mask_gap_px": 24,
+      "source_native_interval_candidate_max_mask_gap_px": 1,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": true,
+      "observation_admission_minted": false
+    },
+    {
+      "subject_id": "corpus_145489b734d05b8a79c8",
+      "source_name": "Lionfish",
+      "failed_view_index": 2,
+      "original_max_mask_gap_px": 2.23606797749979,
+      "source_native_interval_candidate_max_mask_gap_px": 2.23606797749979,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": false,
+      "observation_admission_minted": false
+    },
+    {
+      "subject_id": "corpus_64bc52230fa16970e1fe",
+      "source_name": "CardinalFish",
+      "failed_view_index": 0,
+      "original_max_mask_gap_px": 2.23606797749979,
+      "source_native_interval_candidate_max_mask_gap_px": 2.23606797749979,
+      "original_status": "FAIL",
+      "candidate_view_under_original_limit": false,
+      "observation_admission_minted": false
+    }
+  ],
+  "authority": {
+    "all_8_views_rechecked_per_fish": false,
+    "all_47_mask_errors_resolved": false,
+    "all_370_subjects_admitted": false,
+    "independent_corpus_court_completed": false,
+    "training_authorized": false
+  }
+}

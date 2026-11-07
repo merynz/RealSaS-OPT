@@ -1,0 +1,130 @@
+name: corpus370-original-artist-native-rgba-reference-research-v1
+
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-original-artist-native-rgba-reference-v1.yml'
+      - 'tools/corpus/artist_spine_headless_reference_v1.mjs'
+  pull_request:
+    paths:
+      - '.github/workflows/corpus370-original-artist-native-rgba-reference-v1.yml'
+      - 'tools/corpus/artist_spine_headless_reference_v1.mjs'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-native-art-source-rgba-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  official-original-human-artist-source-render:
+    name: Original source RGBA artist court - ${{ matrix.subject }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - subject: spineboy
+            source_dir: spine-android/app/src/main/assets
+            json_blob: 4a58fecd32a97bad83a9169056c44db3f17dba4e
+            atlas_blob: 33f0db102bfd643ed3f3c021b6821ac2a775ad03
+            expected_active: 18
+          - subject: owl
+            source_dir: examples/owl/export
+            json_blob: d42317f7c0bbe7c8c508765d16b0c643d65fb847
+            atlas_blob: 0c1c5283335b5b162c58a231515ecf1e3741975b
+            expected_active: 25
+          - subject: raptor
+            source_dir: examples/raptor/export
+            json_blob: 27456d62db9f9772a2ca3d0ddad40b21995cddd7
+            atlas_blob: 92387eb054c28ae9c3e2c8f19abf6f3cabd77176
+            expected_active: 35
+    env:
+      SUBJECT: ${{ matrix.subject }}
+      SOURCE_DIR: ${{ matrix.source_dir }}
+      JSON_BLOB: ${{ matrix.json_blob }}
+      ATLAS_BLOB: ${{ matrix.atlas_blob }}
+      EXPECTED_ACTIVE: ${{ matrix.expected_active }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Ephemeral official renderer dependencies under source license
+        run: |
+          set -euo pipefail
+          WORK="$RUNNER_TEMP/real_original_artist_renderer"
+          mkdir -p "$WORK"
+          cp tools/corpus/artist_spine_headless_reference_v1.mjs "$WORK/runner.mjs"
+          cd "$WORK"
+          npm init -y >/dev/null
+          npm install --no-save --no-package-lock \
+            @esotericsoftware/spine-canvaskit@4.3.13 \
+            @esotericsoftware/spine-core@4.3.13 \
+            canvaskit-wasm@0.39.1
+          node --check runner.mjs
+      - name: Download original source JSON, atlas and original art page for evaluation
+        run: |
+          set -euo pipefail
+          BASE="$RUNNER_TEMP/real_original_artist_renderer/source"
+          mkdir -p "$BASE"
+          PREFIX="https://raw.githubusercontent.com/EsotericSoftware/spine-runtimes/4.3/$SOURCE_DIR"
+          for ASSET in "$SUBJECT-pro.json" "$SUBJECT.atlas" "$SUBJECT.png"; do
+            curl --fail --silent --show-error --location --retry 3 \
+              "$PREFIX/$ASSET" --output "$BASE/$ASSET"
+          done
+          test "$(git hash-object "$BASE/$SUBJECT-pro.json")" = "$JSON_BLOB"
+          test "$(git hash-object "$BASE/$SUBJECT.atlas")" = "$ATLAS_BLOB"
+          test "$(file -b --mime-type "$BASE/$SUBJECT.png")" = "image/png"
+          echo "GENUINE_ORIGINAL_AUTHOR_SOURCE_EXPORTED_ART_ASSET_SHA_VERIFIED"
+          sha256sum "$BASE"/*
+      - name: Render only image to algorithm and original hide/isolate to private court
+        run: |
+          set -euo pipefail
+          WORK="$RUNNER_TEMP/real_original_artist_renderer"
+          node "$WORK/runner.mjs" \
+            --source "$WORK/source/$SUBJECT-pro.json" \
+            --atlas "$WORK/source/$SUBJECT.atlas" \
+            --output "$WORK/output"
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const root=path.join(process.env.RUNNER_TEMP,"real_original_artist_renderer","output");
+          const receipt=JSON.parse(fs.readFileSync(path.join(root,"receipt.json"),"utf8"));
+          const input=JSON.parse(fs.readFileSync(path.join(root,"model_input","manifest.json"),"utf8"));
+          const hidden=JSON.parse(fs.readFileSync(path.join(root,"private_artist_court","reference.json"),"utf8"));
+          if(receipt.status!=="OFFICIAL_RUNTIME_ORIGINAL_SOURCE_RGBA_AND_PRIVATE_HIDE_ISOLATE_REFS_PRODUCED__NO_MODEL_OWNER")
+            throw Error("ORIGINAL_AUTHORED_SOURCE_RENDERER_NOT_FINISHED");
+          if(receipt.original_active_attachments_teacher_only!==Number(process.env.EXPECTED_ACTIVE))
+            throw Error("SOURCE_SETUP_AUTHOR_ATTACHMENT_MISMATCH");
+          if(receipt.author_hide_isolate_measured_pair_count!==Number(process.env.EXPECTED_ACTIVE))
+            throw Error("AUTHOR_SOURCE_ORIGINAL_HIDE_ISOLATE_INCOMPLETE");
+          if(!(receipt.original_raster_occupied_alpha_pixels>0) ||
+             !hidden.original_hide_isolate_restoration_exact ||
+             input.original_artist_slot_names_present ||
+             input.original_artist_layer_count_present ||
+             input.source_mesh_face_incidence_present ||
+             !input.consumer_image_only_source_input ||
+             input.training_authorized ||
+             hidden.training_authorized)
+             throw Error("ORIGINAL_SOURCE_IMAGE_REFERENCE_OR_LABEL_LEAKAGE");
+          console.log("REAL_ORIGINAL_HUMAN_ART_REFERENCE_RGBA_IMAGE_AND_HIDE_ISOLATE_COURT_MEASURED");
+          console.log(JSON.stringify({
+            original_source_SHA256:receipt.original_source_export_SHA256,
+            original_merged_image_RGBA_SHA256:receipt.original_rendered_RGBA_SHA256,
+            original_art_alpha_pixel_count:receipt.original_raster_occupied_alpha_pixels,
+            original_active_artist_slot_hide_isolate_cases:receipt.author_hide_isolate_measured_pair_count,
+            original_isolate_nonzero_alpha_cases:receipt.source_isolated_artwork_nonzero_alpha_cases,
+            original_hide_observable_RGBA_effect_cases:receipt.source_hide_causes_observable_RGBA_change_cases,
+            original_hide_unobservable_or_masked_cases:receipt.source_hidden_or_compositor_masked_hide_cases,
+            artist_layer_names_available_to_model:false,
+            original_native_art_project_verified:false,
+            any_model_recovery_run:false,
+            training_authorized:false
+          }));
+          JS
+      - name: Protect original art and private masks against redistribution
+        run: echo "All third-party original art and pixel court remain in ephemeral hosted runner; only verified aggregate measures emitted."

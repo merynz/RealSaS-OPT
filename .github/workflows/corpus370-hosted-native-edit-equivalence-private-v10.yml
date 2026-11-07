@@ -1,0 +1,162 @@
+name: corpus370-hosted-native-edit-equivalence-private-v10
+
+# Independent nonsemantic source-art edit response equivalence, no rerender,
+# no owner/train mint. Immutable V9 exact raw RGBA and signed courts.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - 'canonical/CORPUS370_HOSTED_NATIVE_EDIT_EQUIVALENCE_REQUEST_V10.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-hosted-native-edit-equivalence-private-v10
+  cancel-in-progress: false
+
+jobs:
+  validate-v9-private-source-pixel-lineage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.gate.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        name: Fail closed if original V9 seal changed or private Drive disabled
+        env:
+          PRIVATE_DRIVE_PRESENT: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os,subprocess
+          from pathlib import Path
+          d=json.loads(Path("canonical/CORPUS370_HOSTED_NATIVE_EDIT_EQUIVALENCE_REQUEST_V10.json").read_text())
+          assert d["schema"]=="RealSaS.Corpus370NativeEditResponseEquivalenceResearchRequest.v10"
+          assert d["enabled"] is True and d["subject_count"]==3
+          assert d["previous_real_hosted_v9_run_id"]==42014234494
+          assert d["previous_real_source_render_arm_count"]==1104
+          assert d["previous_real_v9_qualified_pose_views"]==36
+          assert d["native_pose_views_per_subject"]==12
+          assert d["semantic_class_priors_as_target"] is False
+          assert d["finest_partition_promoted_as_artist_truth"] is False
+          assert d["human_artist_drawable_identity_minted"] is False
+          assert d["model_training_authorized"] is False
+          assert d["graphics_owner_authorized"] is False
+          assert d["source_original_v9_git_blob_sha1"]=="cac396962b3b5976b9cfe660f0bb592a3a7f57ad"
+          assert subprocess.check_output(["git","hash-object","canonical/CORPUS370_NATIVE_ANIMATED_SOURCE_RASTER_REAL_RESULT_V9.json"],text=True).strip()==d["source_original_v9_git_blob_sha1"]
+          old=json.loads(Path("canonical/CORPUS370_NATIVE_ANIMATED_SOURCE_RASTER_REAL_RESULT_V9.json").read_text())
+          assert old["schema"]=="RealSaS.Corpus370NativeAnimatedPartitionRealSourceResearchResult.v9"
+          assert old["authority"]["training_authorized"] is False
+          assert old["hosted"]["jobs_succeeded"]==4
+          assert len(old["per_subject"])==3
+          assert {row["label"] for row in old["per_subject"]}=={"CAT","TRICERATOPS","COWFISH"}
+          assert os.environ["PRIVATE_DRIVE_PRESENT"]=="true"
+          print("ready=true")
+          PY
+  three-private-original-v9-edit-equivalence-courts:
+    needs: validate-v9-private-source-pixel-lineage
+    if: needs.validate-v9-private-source-pixel-lineage.outputs.ready == 'true'
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        subject_ordinal: [0,1,2]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c370-v10-private.conf
+      V9_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_animated_partition_private_v9/42014234494-1
+      V10_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_edit_equivalence_private_v10/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.subject_ordinal }}
+      V9_PRIVATE: /tmp/c370-v10-real-source-parent
+      OUTPUT_ROOT: /tmp/c370-v10-real-source-output
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate V10 independent court code and counterfeit negative tests
+        run: |
+          set -euo pipefail
+          test "$(awk '/MemTotal:/{print $2}' /proc/meminfo)" -ge 14000000
+          test "$(df -Pk / | awk 'NR==2{print $4}')" -ge 9000000
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile tools/corpus/court_corpus370_native_edit_equivalence_v10.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_native_edit_equivalence_v10.py
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Authenticate private V9 original evidence transport
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          rclone lsf "$V9_REMOTE" --max-depth 1 >/dev/null
+          echo "PRIVATE_IMMUTABLE_ORIGINAL_V9_RGBA_SOURCE_AVAILABLE"
+      - name: Hydrate exact private source raster, independent V9 court and sample manifest
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$V9_PRIVATE" "$OUTPUT_ROOT"
+          rclone copy "$V9_REMOTE/${{ matrix.subject_ordinal }}" "$V9_PRIVATE" \
+            --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+          SUBJECT_ORDINAL=${{ matrix.subject_ordinal }} python3 - <<'PY' >> "$GITHUB_ENV"
+          import json,os
+          from pathlib import Path
+          d=json.loads(Path("canonical/CORPUS370_NATIVE_ANIMATED_SOURCE_RASTER_REAL_RESULT_V9.json").read_text())
+          ordinal=int(os.environ["SUBJECT_ORDINAL"])
+          labels=["CAT","TRICERATOPS","COWFISH"]
+          row=next(x for x in d["per_subject"] if x["label"]==labels[ordinal])
+          assert row["real_authored_poses"]==3 and row["original_source_camera_views"]==4
+          assert len(row["render_manifest_sha256"])==64
+          print("SOURCE_SUBJECT_ID="+row["subject_id"])
+          print("SOURCE_MANIFEST_SHA="+row["render_manifest_sha256"])
+          PY
+          test -s "$V9_PRIVATE/PRIVATE_ANIMATED_SOURCE_RENDER_MANIFEST_V9.json"
+          test -s "$V9_PRIVATE/PRIVATE_ANIMATED_SOURCE_RENDER_MANIFEST_V9.npz"
+          test -s "$V9_PRIVATE/INDEPENDENT_ANIMATED_NATIVE_RASTER_COURT_V9.json"
+          echo "ORIGINAL_SOURCE_FULL_PIXEL_PARENT_ACQUIRED"
+      - name: Independently re-evaluate all geometry-only native edit pairs without finest-truth selection
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 -u tools/corpus/court_corpus370_native_edit_equivalence_v10.py \
+            --public-v9-result canonical/CORPUS370_NATIVE_ANIMATED_SOURCE_RASTER_REAL_RESULT_V9.json \
+            --subject-id "$SOURCE_SUBJECT_ID" \
+            --manifest "$V9_PRIVATE/PRIVATE_ANIMATED_SOURCE_RENDER_MANIFEST_V9.json" \
+            --expected-manifest-sha256 "$SOURCE_MANIFEST_SHA" \
+            --prior-v9-court "$V9_PRIVATE/INDEPENDENT_ANIMATED_NATIVE_RASTER_COURT_V9.json" \
+            --arrays "$V9_PRIVATE/PRIVATE_ANIMATED_SOURCE_RENDER_MANIFEST_V9.npz" \
+            --output "$OUTPUT_ROOT/PRIVATE_NATIVE_EDIT_EQUIVALENCE_COURT_V10.json" \
+            > "$OUTPUT_ROOT/PRIVATE_NATIVE_EDIT_EQUIVALENCE_COURT_V10_LOG.txt" 2>&1
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import hashlib,json,os
+          from pathlib import Path
+          p=Path(os.environ["OUTPUT_ROOT"])/"PRIVATE_NATIVE_EDIT_EQUIVALENCE_COURT_V10.json"
+          d=json.loads(p.read_text())
+          assert d["schema"]=="RealSaS.Corpus370NativeAnimatedEditResponseEquivalenceCourt.v10"
+          assert d["status"]=="REAL_NATIVE_EDIT_RESPONSE_PAIRWISE_EQUIVALENCE_MEASURED__ARTIST_OWNER_UNKNOWN"
+          assert d["source_camera_pose_cases"]==12
+          assert d["source_edit_task_count"]>=2
+          assert d["artist_same_drawable_positive_pairs"]==0
+          assert d["artist_different_drawable_negative_pairs"]==0
+          assert d["graphics_owner_authorized"] is False
+          assert d["training_authorized"] is False
+          print("## Independently remeasured original V9 private native source edits, V10")
+          print("Source task count:",d["source_edit_task_count"])
+          print("Source 12-pose-view pairwise edit candidates:")
+          for row in d["pairwise_equivalence_classes_scoped_to_tested_source_edits"]:
+              print(row["candidate_a"],"vs",row["candidate_b"],
+                    row["indistinguishable_source_edit_task_count"],"/",
+                    row["total_source_edit_task_count"],"indistinguishable")
+          print("Independent source court SHA256:",hashlib.sha256(p.read_bytes()).hexdigest())
+          print("No artist owner or model training authority.")
+          PY
+      - name: Seal private source receipts and failures on Drive
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -s "$RCLONE_CONFIG" && test -d "$OUTPUT_ROOT"; then
+            rclone copy "$OUTPUT_ROOT" "$V10_REMOTE" \
+              --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+          fi

@@ -1,0 +1,27 @@
+{
+  "schema": "RealSaS.Corpus370MultiviewGeometryGroupsRequest.v2",
+  "status": "ACTIVATED_ORIGINAL_THREE_SOURCE_MULTIVIEW_GEOMETRY_WITH_VIEW4_INDEPENDENT_RENDER_EDIT_HOLDOUT",
+  "enabled": true,
+  "source_locked": true,
+  "original_source_rest_native_visibility_run_id": 41916724594,
+  "original_source_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+  "original_anonymous_layer_run_id": 41928889420,
+  "original_anonymous_layer_summary_sha256": "47b3f3beb7a3625504ccf8488d6fe0cd8fbe0014421c5e4c77748f829c9f01ca",
+  "original_all352_source_rays_run_id": 41883539256,
+  "original_all352_rays_index_sha256": "0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70",
+  "subject_count": 3,
+  "source_geometric_training_views": [
+    0,
+    2,
+    6
+  ],
+  "render_edit_holdout_view": 4,
+  "render_effect_labels_from_geometry": false,
+  "geometry_occlusion_as_author_drawable_truth": false,
+  "source_semantic_labels_as_student_truth": false,
+  "full_frame_appearance_court_passed": false,
+  "materialization_authorized": false,
+  "training_authorized": false,
+  "model_training_authorized": false,
+  "notes": "Production research: source SHA-locked 64 rays per subject. Geometry constraints only views0/2/6. Real previous rendered edit consequence from view4 supplied to separate court after source-only candidate compilation. This does NOT mint semantic/editable owner labels or model training authority."
+}

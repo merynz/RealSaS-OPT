@@ -1,0 +1,101 @@
+{
+  "schema": "RealSaS.Corpus370HeldoutGeometricSourceProbeRealPlanResult.v11",
+  "status": "PASS_THREE_REAL_ORIGINAL_SOURCE_HELDOUT_NON_SEMANTIC_PROBE_PLANS__NO_RENDER_OR_OWNER",
+  "date_utc": "2026-11-05",
+  "hosted_run_id": 42024346219,
+  "hosted_run_url": "https://github.com/merynz/RealSaS-OPT/actions/runs/42024346219",
+  "jobs_succeeded": 4,
+  "original_source_workers_succeeded": 3,
+  "previous_failed_run_id": 42023576821,
+  "previous_failure": "Valid single-child original geometry branch incorrectly rejected; repaired generically by counting it as uninformative instead of fabricating an edit split.",
+  "prior_real_v9_render_run_id": 42014234494,
+  "prior_real_v10_pairwise_court_run_id": 42017257514,
+  "source_input": "SHA-verified original rest meshes and nested anonymous source geometry only; V10 unresolved pair status used only for query priority",
+  "prior_privileged_tested_source_targets_by_subject": [
+    4,
+    2,
+    3
+  ],
+  "new_heldout_source_face_queries_per_subject": 12,
+  "total_new_source_face_queries": 36,
+  "total_splittable_parent_branch_events": 58,
+  "selected_split_parent_branch_events_covered": 50,
+  "branch_event_coverage_scope": "STRUCTURAL_QUERY_DESIGN_ONLY_NOT_RENDER_EVIDENCE",
+  "all_3_private_plan_sha256_verified_against_output_receipts": true,
+  "private_evidence_root": "gdrive:corpus370_preparation_v1/hosted_heldout_source_branch_probe_private_v11/42024346219-1",
+  "per_subject": [
+    {
+      "label": "CAT",
+      "subject_id": "corpus_000ca1ae51f9582fde9e",
+      "source_sha256": "1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850",
+      "candidate_sizes": [
+        8,
+        16,
+        32,
+        64
+      ],
+      "prior_finest_anchors_excluded": 4,
+      "new_heldout_target_count": 12,
+      "potential_source_split_events": 30,
+      "selected_split_events": 22,
+      "prior_entirely_indistinguishable_candidate_pairs": [],
+      "real_source_query_plan_private_sha256": "c8a3a90bf388310b5cc8caf8f30222c46a3c4d92e6b419cdd053417513e59eca"
+    },
+    {
+      "label": "TRICERATOPS",
+      "subject_id": "corpus_004e16e05b90505ca23c",
+      "source_sha256": "ad66b51cc5fc44c9a3429a5b1b98a61621af08d58d102d8a817499bd6a7f5b5a",
+      "candidate_sizes": [
+        8,
+        16,
+        32
+      ],
+      "prior_finest_anchors_excluded": 2,
+      "new_heldout_target_count": 12,
+      "potential_source_split_events": 15,
+      "selected_split_events": 15,
+      "prior_entirely_indistinguishable_candidate_pairs": [
+        {
+          "coarse_size": 16,
+          "fine_size": 32
+        }
+      ],
+      "real_source_query_plan_private_sha256": "4bdfcede3f3f7e84a56d64c402432dd3c1cb4fc6bf9483b92a239c2e252cf3c2"
+    },
+    {
+      "label": "COWFISH",
+      "subject_id": "corpus_00a3688e42a29045056b",
+      "source_sha256": "e6898505d56d8057c975b6376f123876dd957347282413cf3fb825754841b989",
+      "candidate_sizes": [
+        8,
+        16,
+        32
+      ],
+      "prior_finest_anchors_excluded": 3,
+      "new_heldout_target_count": 12,
+      "potential_source_split_events": 13,
+      "selected_split_events": 13,
+      "prior_entirely_indistinguishable_candidate_pairs": [],
+      "real_source_query_plan_private_sha256": "8e14fe4e64be28b749d4d61b944182a5335cbd9e6d65b244c55a82876e6d58ce"
+    }
+  ],
+  "limits": {
+    "source_art_and_target_face_ids_remain_private": true,
+    "real_heldout_source_render_edit_outcomes_measured": false,
+    "no_human_drawable_positives_or_negatives": true,
+    "fixed_group_sizes_are_experimental_priors": true,
+    "original_v10_tested_scope_2_to_4_targets_per_subject": true,
+    "new_query_selection_does_not_prove_ownership": true,
+    "new_query_selection_uses_no_semantic_mesh_or_bone_names": true,
+    "new_query_selection_excludes_prior_finest_source_groups": true,
+    "full_native_resolution_caa_authorized": false,
+    "same_drawable_labels_minted": false,
+    "different_drawable_labels_minted": false,
+    "graphics_owner_authorized": false,
+    "iris_training_authorized": false,
+    "tessa_training_authorized": false,
+    "materialization_authorized": false,
+    "training_authorized": false
+  },
+  "next_science_gate": "Real Blender renderer and independent original-source pixel/CAA court on the 36 pre-registered previously UNTESTED source-face edits. Reassess V10 equivalence only on genuinely new render consequences. No prior semantic taxonomy or fixed output group number."
+}

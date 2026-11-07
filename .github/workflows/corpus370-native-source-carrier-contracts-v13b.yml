@@ -22,7 +22,7 @@ permissions:
   contents: read
 concurrency:
   group: corpus370-native-source-carrier-contracts-v13b-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   anonymous-mechanics-negative-controls:
     runs-on: ubuntu-24.04

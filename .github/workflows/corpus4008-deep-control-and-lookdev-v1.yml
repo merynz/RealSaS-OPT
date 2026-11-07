@@ -100,15 +100,15 @@ jobs:
           umask 077
           root="$RUNNER_TEMP/c4008-deep"
           binary="$root/runtime/blender-4.5.14-linux-x64/blender"
-          "$binary" --background --factory-startup --python tools/corpus/blender_corpus4008_control_profile_v1.py -- \
+          "$binary" --background --factory-startup --python-exit-code 1 --python tools/corpus/blender_corpus4008_control_profile_v1.py -- \
             --source "$root/source/objaverse.fbx" --expected-sha256 06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115 \
             --asset-id asset_09178fa704865496d57c11be --candidate-id objaverse_animated_originals:06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115 \
             --output "$root/output/objaverse.control.json"
-          "$binary" --background --factory-startup --python tools/corpus/blender_corpus4008_control_profile_v1.py -- \
+          "$binary" --background --factory-startup --python-exit-code 1 --python tools/corpus/blender_corpus4008_control_profile_v1.py -- \
             --source "$root/source/kaykit.glb" --expected-sha256 93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545 \
             --asset-id asset_551ea351b43a1787d0f55536 --candidate-id kaykit_cc0:93e6e25213009952276d9cf3 \
             --output "$root/output/kaykit.control.json"
-          "$binary" --background --factory-startup --python tools/corpus/blender_corpus4008_control_profile_v1.py -- \
+          "$binary" --background --factory-startup --python-exit-code 1 --python tools/corpus/blender_corpus4008_control_profile_v1.py -- \
             --source "$root/source/quaternius.obj" --expected-sha256 3e0ebe0b075e5c0e365dccc8a6483d0a5e872be7613b71297a243028c53d3f3b \
             --asset-id asset_102c52015bc540c2fe3f7ef5 --candidate-id quaternius_cc0:3e0ebe0b075e5c0e365dccc8 \
             --output "$root/output/quaternius.control.json"
@@ -118,7 +118,7 @@ jobs:
           set -euo pipefail
           umask 077
           root="$RUNNER_TEMP/c4008-deep"
-          "$root/runtime/blender-4.5.14-linux-x64/blender" --background --factory-startup --python tools/corpus/blender_corpus4008_lookdev_study_v1.py -- \
+          "$root/runtime/blender-4.5.14-linux-x64/blender" --background --factory-startup --python-exit-code 1 --python tools/corpus/blender_corpus4008_lookdev_study_v1.py -- \
             --source "$root/source/kaykit.glb" --expected-sha256 93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545 \
             --asset-id asset_551ea351b43a1787d0f55536 --candidate-id kaykit_cc0:93e6e25213009952 \
             --output "$root/output/kaykit_lookdev" --resolution 640

@@ -177,3 +177,48 @@ def test_axis_core_can_count_without_falsely_claiming_ik_control(tmp_path):
     assert axis["core_quota_met_by_receipts"] is True
     assert axis["quota_met_by_receipts"] is False
     assert axis["training_authorized"] is False
+
+
+def test_graphics_cannot_count_raw_3d_image_supervision(tmp_path):
+    sel, rs, es = fixture(tmp_path)
+    rec = receipt(tmp_path, head="IRIS_GRAPHICS")
+    # Even with an old graphics receipt claiming appearance/occlusion PASS,
+    # there is neither a source-matched 2D game-art target nor style court.
+    write_json(rs/"bad_3d_graphics.json", rec)
+    r=audit(sel,rs,es,tmp_path/"out.json",quota=1,expected_master_count=2)
+    assert r["per_head"]["IRIS_GRAPHICS"]["core_missing_to_quota"] == 1
+    assert r["per_head"]["IRIS_GRAPHICS"]["missing_to_quota"] == 1
+    assert r["rejected_receipt_reason_counts"]
+
+
+def test_graphics_styled_target_needs_independent_style_court(tmp_path):
+    sel, rs, es = fixture(tmp_path)
+    rec=receipt(tmp_path,head="IRIS_GRAPHICS")
+    rec["graphics_image_supervision_domain"]="STYLIZED_2D_GAME_ART"
+    # Claiming target PASS in the row alone is insufficient; the SHA-bound
+    # separate evidence court for real 2D artwork is still mandatory.
+    write_json(rs/"no_style_court.json",rec)
+    r=audit(sel,rs,es,tmp_path/"out.json",quota=1,expected_master_count=2)
+    assert r["per_head"]["IRIS_GRAPHICS"]["core_missing_to_quota"] == 1
+
+
+def test_graphics_style_court_cannot_accept_photorealistic_target(tmp_path):
+    import hashlib
+    sel, rs, es = fixture(tmp_path)
+    rec=receipt(tmp_path,head="IRIS_GRAPHICS")
+    rec["graphics_image_supervision_domain"]="STYLIZED_2D_GAME_ART"
+    p=es/"asset_a_IRIS_GRAPHICS_2d_style.json"
+    write_json(p,{
+      "schema":"RealSaS.IndependentSourceCourt.v1",
+      "asset_id":"asset_a","source_sha256":"a"*64,
+      "court_kind":"2d_style","status":"PASS","independent_review":True,
+      "target_presentation":"PHOTOREALISTIC_3D_RENDER",
+      "training_authorized":False,
+    })
+    rec["independent_evidence_files"]["2d_style"]={
+      "path":p.name,"sha256":hashlib.sha256(p.read_bytes()).hexdigest()
+    }
+    write_json(rs/"bad_style.json",rec)
+    r=audit(sel,rs,es,tmp_path/"out.json",quota=1,expected_master_count=2)
+    assert r["per_head"]["IRIS_GRAPHICS"]["core_missing_to_quota"] == 1
+    assert any("GRAPHICS_2D_STYLE_REQUIRED" in k for k in r["rejected_receipt_reason_counts"])

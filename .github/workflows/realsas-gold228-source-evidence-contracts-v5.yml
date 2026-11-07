@@ -1,0 +1,27 @@
+name: realsas-gold228-source-evidence-contracts-v5
+
+# Only aggregate synthetic test data. No private original 3D model, source SHA,
+# source records, model execution, Blender, datasets or training is accessed.
+on:
+  push:
+    branches: [corpus-global-universe-all-source-truth-v1-20261107]
+    paths:
+      - "canonical/REALSAS_GOLD_SOURCE_EVIDENCE_CONTRACT_V5.json"
+      - "tests/corpus/test_realsas_gold_source_evidence_contract_v5.py"
+      - ".github/workflows/realsas-gold228-source-evidence-contracts-v5.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gold228-evidence-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enforce no source-truth or training admission
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check -q pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_realsas_gold_source_evidence_contract_v5.py

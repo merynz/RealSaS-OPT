@@ -1,0 +1,39 @@
+name: platform-release-disk-safety-v1
+
+on:
+  pull_request:
+    paths:
+      - 'tools/platform_deploy.py'
+      - 'tools/platform_release_budget_v1.py'
+      - 'tools/platform_release_retention_v1.py'
+      - 'tests/platform/test_platform_release_budget_v1.py'
+      - 'tests/platform/test_platform_release_retention_v1.py'
+      - '.github/workflows/platform-release-disk-safety-v1.yml'
+  push:
+    branches: [ops-platform-release-cap-20261107]
+    paths:
+      - 'tools/platform_deploy.py'
+      - 'tools/platform_release_budget_v1.py'
+      - 'tools/platform_release_retention_v1.py'
+      - 'tests/platform/test_platform_release_budget_v1.py'
+      - 'tests/platform/test_platform_release_retention_v1.py'
+      - '.github/workflows/platform-release-disk-safety-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fail-closed-release-retention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run synthetic host disk safety regressions
+        run: |
+          python -m pip install -q --disable-pip-version-check pytest
+          python -m compileall -q tools/platform_deploy.py tools/platform_release_budget_v1.py tools/platform_release_retention_v1.py
+          PYTHONPATH=. python -m pytest -q tests/platform/test_platform_release_budget_v1.py tests/platform/test_platform_release_retention_v1.py

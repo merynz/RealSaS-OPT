@@ -69,6 +69,41 @@ def set_source_space_orbit_frame(bpy, camera, meshes, base_scale):
     }
 
 
+def source_alpha_bbox_fraction(bpy, path: Path):
+    """Read generated original-source diagnostic PNG alpha, no Pillow needed."""
+    from array import array
+    im=bpy.data.images.load(filepath=str(path),check_existing=False)
+    try:
+        w,h=im.size
+        require(w>=256 and h>=256,"SOURCE_ALPHA_IMAGE_DIM")
+        data=array('f',[0.0])*(w*h*4)
+        im.pixels.foreach_get(data)
+        xs=[];ys=[]
+        for i in range(w*h):
+            if data[4*i+3] > 20/255:
+                xs.append(i%w);ys.append(i//w)
+        require(xs,"EMPTY_SOURCE_ALPHA")
+        return {
+            "source_alpha_bbox_fraction_x":(max(xs)-min(xs)+1)/w,
+            "source_alpha_bbox_fraction_y":(max(ys)-min(ys)+1)/h,
+            "source_alpha_occupied_pixels":len(xs),
+        }
+    finally:
+        bpy.data.images.remove(im,do_unlink=True)
+
+
+def source_space_alpha_feedback_scale(current_scale,span_x,span_y):
+    """Generic 1-step image-feedback fit, no per-asset or view-specific hack."""
+    require(all(math.isfinite(x) and x>0 for x in
+                (current_scale,span_x,span_y)),"ALPHA_FEEDBACK_INPUT")
+    if min(span_x,span_y)>=0.46:
+        return current_scale,False
+    ratio=max(min(span_x,span_y)/0.54,
+              max(span_x,span_y)/0.88)
+    require(math.isfinite(ratio) and ratio>0,"ALPHA_FEEDBACK_RATIO")
+    return current_scale*ratio,True
+
+
 def image_ink(source: Path, output: Path):
     from PIL import Image, ImageChops, ImageEnhance, ImageFilter, ImageOps
     im = Image.open(source).convert("RGBA")
@@ -187,6 +222,24 @@ def render_orbit(bpy, *, source: Path, expected_sha256: str,
         bpy.ops.render.render(write_still=True)
         require(source_path.is_file() and source_path.stat().st_size>0,
                 "SOURCE_VIEW_RENDER_EMPTY")
+        preview=source_alpha_bbox_fraction(bpy,source_path)
+        new_scale,need_refit=source_space_alpha_feedback_scale(
+            float(cam.data.ortho_scale),
+            preview["source_alpha_bbox_fraction_x"],
+            preview["source_alpha_bbox_fraction_y"])
+        framing["pre_refit_source_png_alpha_bbox"]=preview
+        framing["source_pixel_alpha_feedback_applied"]=need_refit
+        if need_refit:
+            cam.data.ortho_scale=new_scale
+            bpy.context.view_layer.update()
+            # Re-render source and cel at identical corrected view/camera.
+            scene.render.filepath=str(source_path)
+            bpy.ops.render.render(write_still=True)
+            require(source_path.is_file() and source_path.stat().st_size>0,
+                    "REFIT_SOURCE_RENDER_EMPTY")
+        framing["camera_ortho_scale"]=float(cam.data.ortho_scale)
+        framing["final_source_png_alpha_bbox"]=source_alpha_bbox_fraction(
+            bpy,source_path)
 
         configure_flat_study(bpy, cel=True, original_materials=original_materials)
         cel_path = output/("cel_3band_orbit_%02d.png" % i)

@@ -20,12 +20,13 @@ def _fixture():
         "schema": "RealSaS.Corpus370PreparedObservationPackets.v5",
         "subject_count": 370, "prepared_subject_count": 352,
         "failure_count": 18, "training_authorized": False,
-        "subjects": subjects[:352], "failures": subjects[352:],
+        "subjects": [dict(x) for x in subjects[:352]],
+        "failures": [dict(x) for x in subjects[352:]],
     }
     roster = {
         "schema": "RealSaS.Corpus370ExactSourceRoster.v1",
         "subject_count": 370, "training_authorized": False,
-        "subjects": subjects,
+        "subjects": [dict(x) for x in subjects],
     }
     rest = {
         "schema": "RealSaS.Corpus370V5SourceRestIndependentCourtSweep.v1",

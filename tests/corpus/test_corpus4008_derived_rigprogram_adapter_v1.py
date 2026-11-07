@@ -6,7 +6,7 @@ from dataclasses import replace
 import pytest
 
 from tools.corpus.derive_corpus4008_rigprogram_prior_v1 import discover
-from models.axis.experimental_derived_control_adapter_v1 import (
+from tools.corpus.experimental_axis_derived_control_adapter_v1 import (
     adapt_blind_prior_to_rigprogram_parts,
 )
 from compiler.realsas_compiler_core.rig_program_ir_v1 import (

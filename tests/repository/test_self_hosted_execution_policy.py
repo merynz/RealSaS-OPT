@@ -46,6 +46,7 @@ HOSTED_FIRST = {
     'single_family_data_contract_v1.yml',
     'skin_field_codec_shipping_capacity.yml',
     'tessa_knight_static_survivor_replay_v1.yml',
+    'v2_witness_orchestration_subject_free_dry_run.yml',
 }
 
 
@@ -158,6 +159,17 @@ def test_developer_deployment_is_hosted_by_default_and_explicit_on_physical_host
     assert "if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'" in physical_job
     assert "runs-on: [self-hosted, linux, x64, realsas]" in physical_job
     assert 'test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"' in physical_job
+
+
+def test_subject_free_v2_orchestration_replays_on_hosted_cpu():
+    """Synthetic Stage01-08 fixture has no physical WSL or private source input."""
+    text = (ROOT / ".github/workflows/v2_witness_orchestration_subject_free_dry_run.yml").read_text()
+    assert "  pull_request:" in text and "  push:" in text
+    assert "github.event.repository.private == false" in text
+    assert "runs-on: ubuntu-latest" in text
+    assert "self-hosted" not in text
+    assert "python -m compiler.realsas_compiler_services.orchestrator.mainline execute" in text
+    assert "--target 08_NORMALIZATION_DOMAIN_QUALIFIED" in text
 
 
 def test_native_teacher_physical_witness_is_explicit_main_only():

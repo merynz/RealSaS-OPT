@@ -55,7 +55,7 @@ def receipts(tmp_path):
         "outputs": [],
     }
     for mode in ("SOURCE_MATERIAL_DIAGNOSTIC", "STYLIZED_FLAT_DIAGNOSTIC",
-                 "STYLIZED_OUTLINE_DIAGNOSTIC"):
+                 "STYLIZED_CEL_3BAND_DIAGNOSTIC"):
         filename = mode.lower() + ".png"
         payload = ("test-" + mode).encode()
         (tmp_path / filename).write_bytes(payload)
@@ -99,7 +99,7 @@ def test_stylized_render_cannot_claim_native_rgb(tmp_path):
 
 def test_pixel_or_receipt_tamper_is_rejected(tmp_path):
     c, l = receipts(tmp_path)
-    (tmp_path / "stylized_outline_diagnostic.png").write_bytes(b"changed")
+    (tmp_path / "stylized_cel_3band_diagnostic.png").write_bytes(b"changed")
     with pytest.raises(ValueError, match="LOOKDEV_BYTE_COUNT|LOOKDEV_SHA"):
         verify_pair(c, l, tmp_path)
 

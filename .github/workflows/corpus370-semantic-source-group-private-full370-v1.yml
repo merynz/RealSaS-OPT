@@ -1,6 +1,8 @@
 name: corpus370-semantic-source-group-private-full370-v1
 
 # Runs only when this workflow definition is deliberately introduced/modified.
+# 2026-11-07: second exact-source attempt after isolating the synthetic V5/roster
+# fixture objects; production contract remains unchanged.
 # Source and artist naming bytes remain strictly in the authenticated Drive.
 on:
   push:

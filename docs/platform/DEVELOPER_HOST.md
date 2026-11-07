@@ -7,10 +7,16 @@ Temporal CLI's SQLite development server is explicitly not production-ready.
 
 Only an **explicit Actions `workflow_dispatch` on `main`** installs code on the
 physical WSL developer host. Automatic pull-request and `main` push checks
-validate deployment contracts on **GitHub-hosted** runners; they never request
-a physical host. This restores the 2026-10-08 hosted-first/workstation-isolation
-boundary and prevents each unrelated model/Corpus/Compiler commit from creating
-an indefinite `[self-hosted, linux, x64, realsas]` deployment queue.
+run in the separate **`platform-developer-contracts-hosted`** workflow on
+GitHub-hosted runners; they never request a physical host. The distinct
+**`platform-developer-deployment`** workflow name is reserved for real,
+manual physical deployment. Many downstream `workflow_run` consumers interpret
+its successful completion as deployment evidence, and MUST NOT be triggered
+by hosted contract success. This restores the 2026-10-08 hosted-first/workstation
+isolation boundary without changing those consumers' authority semantics.
+
+Unrelated model/Corpus/Compiler commits no longer generate indefinite
+`[self-hosted, linux, x64, realsas]` installation queues.
 
 To deploy a reviewed exact `main`: open Actions → `platform-developer-deployment`
 → **Run workflow** → branch `main`. The on-host worker separately checks that

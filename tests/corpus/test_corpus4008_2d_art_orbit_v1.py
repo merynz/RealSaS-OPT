@@ -33,6 +33,10 @@ def scene(tmp_path, *, nviews=8, alpha_offset=0):
             "view_id":f"SOURCE_ORBIT_{i:02d}",
             "source_space_orbit_degrees":45*i,
             "camera_source_space_matrix":matrix,
+            "camera_projection_details":{
+                "camera_ortho_scale":2.0,
+                "source_bbox_correction_based_on_not_human_court":True,
+            },
             "source_reference_png":ref.name,
             "source_reference_sha256":sha(ref),
             "cel_candidate_png":cel.name,
@@ -116,3 +120,14 @@ def test_bad_view_matrices_fail_even_if_images_look_good(tmp_path):
     p.write_text(json.dumps(d))
     with pytest.raises(ValueError,match="DUPLICATE_CAMERA"):
         audit(tmp_path)
+
+
+def test_source_space_framing_can_fit_narrow_character_without_hiding_camera_metadata():
+    from tools.corpus.blender_corpus4008_2d_art_orbit_pilot_v1 import choose_ortho_scale
+    old=2.0
+    scale=choose_ortho_scale(old,0.30,0.43)
+    assert 0.5<scale<old
+    newwidth=0.30*old/scale
+    newheight=0.43*old/scale
+    assert newwidth>=0.42
+    assert newheight<=0.90

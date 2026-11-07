@@ -40,12 +40,21 @@ jobs:
         run: |
           set -euo pipefail
           PYTHONPATH=engine python -m compileall -q engine/tools/corpus/blender_corpus4008_native_blend_control_probe_v1.py
+          echo "Pinned upstream repo SHA: $(git -C upstream-rigs rev-parse HEAD)"
           test "$(git -C upstream-rigs rev-parse HEAD)" = "$SOURCE_COMMIT"
+          test -s upstream-rigs/LICENSE
           grep -q 'Creative Commons' upstream-rigs/LICENSE
-          for name in rig-snake rig-spider rig-dragon; do
-            test -s "upstream-rigs/rigs/$name.blend"
-            test "$(head -c 7 "upstream-rigs/rigs/$name.blend")" = BLENDER
-          done
+          python - <<'PY'
+          from pathlib import Path
+          names=('rig-snake','rig-spider','rig-dragon')
+          for name in names:
+              path=Path('upstream-rigs/rigs')/(name+'.blend')
+              assert path.is_file() and path.stat().st_size>1024, f'MISSING_NATIVE_BINARY:{name}'
+              with path.open('rb') as f:
+                  magic=f.read(7)
+              print('Native header:', name, magic.hex(), repr(magic), 'bytes', path.stat().st_size, flush=True)
+              assert magic==b'BLENDER', f'NOT_NATIVE_BLEND_BINARY:{name}'
+          PY
       - name: Check private Drive configured
         id: gate
         env:

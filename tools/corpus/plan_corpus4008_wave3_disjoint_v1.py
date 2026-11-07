@@ -45,11 +45,11 @@ def next_plan(shard_report:Path, *, shard_index:int,
         if not isinstance(val,str) or not SHA.fullmatch(val):continue
         ext=x.get("file_type")
         if ext not in FORMATS:continue
-        if x.get("retrieved_source_sha256")!=val or
-                x.get("private_staged_filename")!=val+ext:
+        if (x.get("retrieved_source_sha256")!=val
+                or x.get("private_staged_filename")!=val+ext):
             continue
-        if not isinstance(x.get("byte_count"),int) or
-                not 0<x["byte_count"]<=max_bytes:
+        if (not isinstance(x.get("byte_count"),int)
+                or not 0<x["byte_count"]<=max_bytes):
             continue
         require(x.get("training_authorized") is False and
                 x.get("current_license_revalidated") is False,

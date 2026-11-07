@@ -1,0 +1,28 @@
+name: realsas-unified-truth-scope-v1
+
+# Synthetic contract tests only. Full private evidence remains in Drive.
+# Never publish source-level matrix, original 3D bytes, or unadmitted teachers.
+on:
+  push:
+    branches: [corpus-global-universe-all-source-truth-v1-20261107]
+    paths:
+      - "tools/corpus/build_realsas_unified_truth_scope_v1.py"
+      - "tests/corpus/test_realsas_unified_truth_scope_v1.py"
+      - ".github/workflows/realsas-unified-truth-scope-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fail-closed-unified-universe-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify no cross-corpus false PASS or holdout leak
+        run: |
+          set -euo pipefail
+          python -m pip install -q --disable-pip-version-check pytest
+          python -m compileall -q tools/corpus/build_realsas_unified_truth_scope_v1.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_realsas_unified_truth_scope_v1.py

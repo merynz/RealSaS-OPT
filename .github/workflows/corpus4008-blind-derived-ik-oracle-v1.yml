@@ -12,6 +12,8 @@ on:
       - 'tools/corpus/blender_corpus4008_blind_ik_discovery_v1.py'
       - 'tools/corpus/blender_corpus4008_derived_ik_target_assay_v1.py'
       - 'tests/corpus/test_corpus4008_blind_derived_ik_v1.py'
+      - 'models/axis/experimental_derived_control_adapter_v1.py'
+      - 'tests/corpus/test_corpus4008_derived_rigprogram_adapter_v1.py'
   workflow_dispatch:
 
 permissions:
@@ -31,8 +33,8 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install -q --disable-pip-version-check pytest
-          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_blind_derived_ik_v1.py
-          python -m compileall -q tools/corpus/derive_corpus4008_rigprogram_prior_v1.py tools/corpus/blender_corpus4008_blind_ik_discovery_v1.py tools/corpus/blender_corpus4008_derived_ik_target_assay_v1.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_blind_derived_ik_v1.py tests/corpus/test_corpus4008_derived_rigprogram_adapter_v1.py
+          python -m compileall -q tools/corpus/derive_corpus4008_rigprogram_prior_v1.py tools/corpus/blender_corpus4008_blind_ik_discovery_v1.py tools/corpus/blender_corpus4008_derived_ik_target_assay_v1.py models/axis/experimental_derived_control_adapter_v1.py
 
   original-native-rig-blind-discovery:
     needs: blind-input-and-oracle-firewall-regressions

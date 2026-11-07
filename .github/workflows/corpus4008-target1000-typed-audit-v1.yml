@@ -1,0 +1,118 @@
+name: corpus4008-target1000-typed-audit-v1
+
+on:
+  push:
+    branches: [corpus4008-target1000-source-scout-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-target1000-typed-audit-v1.yml'
+      - 'tools/corpus/audit_corpus4008_target1000_v1.py'
+      - 'tools/corpus/build_corpus4008_typed_supervision_matrix_v1.py'
+      - 'tests/corpus/test_corpus4008_target1000_v1.py'
+      - 'tests/corpus/test_corpus4008_typed_supervision_matrix_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-target1000-typed-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-to-supervision-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test strict source and model evidence types
+        run: |
+          python -m pip install --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q \
+            tests/corpus/test_corpus4008_target1000_v1.py \
+            tests/corpus/test_corpus4008_typed_supervision_matrix_v1.py
+          python -m compileall -q \
+            tools/corpus/audit_corpus4008_target1000_v1.py \
+            tools/corpus/build_corpus4008_typed_supervision_matrix_v1.py
+  real-private-source-coverage:
+    needs: source-to-supervision-contracts
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c4008-typed-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/typed_supervision_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check readonly private input access
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'PRIVATE_DRIVE_ABSENT_ZERO_SOURCE_OR_TRUTH_CLAIMS' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Fetch exact source master and three independently stored control profiles
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          mkdir -p "$RUNNER_TEMP/c4008-typed/profiles" "$RUNNER_TEMP/c4008-typed/out"
+          rclone copyto "$REMOTE/metadata/CANONICAL_VARIANT_SELECTION.json" \
+            "$RUNNER_TEMP/c4008-typed/selection.json" --retries 3
+          printf 'af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9  %s\n' "$RUNNER_TEMP/c4008-typed/selection.json" | sha256sum -c
+          for kind in objaverse kaykit quaternius; do
+            rclone copyto "$REMOTE/audits/deep_control_lookdev_v1/42379026728-1/$kind.control.json" \
+              "$RUNNER_TEMP/c4008-typed/profiles/$kind.control.json" --retries 3
+          done
+      - name: Build exact per-asset typed matrix and quotas from genuine measured source receipts
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-typed"
+          python -m tools.corpus.build_corpus4008_typed_supervision_matrix_v1 \
+            --selection "$root/selection.json" \
+            --control-profiles "$root/profiles" \
+            --output "$root/out/matrix"
+          mkdir -p "$root/no-independent-courts"
+          python -m tools.corpus.audit_corpus4008_target1000_v1 \
+            --selection "$root/selection.json" \
+            --admission-receipts "$root/no-independent-courts" \
+            --evidence-root "$root/no-independent-courts" \
+            --output "$root/out/target1000_quota.json"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-typed/out"
+          a=json.loads((root/"matrix/TYPED_SUPERVISION_SUMMARY_V1.json").read_text())
+          b=json.loads((root/"target1000_quota.json").read_text())
+          assert a["master_rows"]==3993 and not a["training_authorized"]
+          assert a["source_profile_counts"]["IMPORTED_PROFILE_PRESENT"]==3
+          assert a["source_profile_counts"]["NOT_IMPORTED"]==3990
+          assert all(x["evidence_receipt_supported_distinct_fit_clusters"]==0
+                     for x in b["per_head"].values())
+          print("### Exact Master source×evidence coverage (non-admitting)")
+          print("Rows",a["master_rows"])
+          print("Imported control records",a["source_profile_counts"])
+          print("All six heads independently admitted:",0)
+          print("No autonomous rig/graphics/semantic training authorization.")
+          PY
+      - name: Upload only typed receipts and summaries to private Drive
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-typed/out"
+          if test -s "$RCLONE_CONFIG" && test -f "$root/target1000_quota.json"; then
+            rclone copy "$root" "$PRIVATE_OUTPUT" --checksum --retries 3
+            echo 'Versioned typed coverage/quotas stored private; NO model admission.' >> "$GITHUB_STEP_SUMMARY"
+          fi

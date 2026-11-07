@@ -31,8 +31,8 @@ def _digest(value) -> str:
 def _tokens(value: str) -> set[str]:
     # Source asset naming is arbitrary. Tokenization is only a heuristic:
     # lowercase, separators, and PascalCase. Unmatched remains UNKNOWN.
-    split = re.sub(r"([a-z0-9])([A-Z])", r"\\1 \\2", value)
-    split = re.sub(r"([A-Z])([A-Z][a-z])", r"\\1 \\2", split)
+    split = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", value)
+    split = re.sub(r"([A-Z])([A-Z][a-z])", r"\1 \2", split)
     return set(re.findall(r"[a-z]+", split.lower()))
 
 

@@ -27,7 +27,7 @@ def _fixture(tmp_path):
         asset = "asset_" + str(i).zfill(4)
         row = {
             "canonical_asset_id":asset,"candidate_id":cid,"source_registry_id":provider,
-            "decision":"ADMIT_GEOMETRY_ONLY","split":"EXTERNAL_HOLDOUT" if i==1 else (
+            "decision":"ADMIT_GEOMETRY_ONLY","split":"EXTERNAL_HOLDOUT" if 1<=i<=169 else (
                 "QA_ONLY" if qa else "FIT"),
         }
         master.append(row)
@@ -48,7 +48,7 @@ def test_full_census_4008_with_one_measured_source(tmp_path):
     assert result["raw_source_probe_attempt_count"] == 1
     assert result["statuses"]["OBJ_SOURCE_DOMAINS_OBSERVED__NO_CHARACTER_OR_RENDER_COURT"] == 1
     assert result["statuses"]["SOURCE_RAW_NOT_FOUND"] == 4007
-    assert result["old_holdout_count"] == 1
+    assert result["old_holdout_count"] == 169
     assert result["qa_only_count"] == 15
     assert result["source_camera_qualified_count"] == 0
     assert result["training_authorized"] is False
@@ -100,3 +100,23 @@ def test_two_shards_cover_4008_without_dual_owner(tmp_path):
     for k in left:
         assert (left[k]["source_probe_status"]=="OTHER_SHARD_NOT_RUN") != (
             right[k]["source_probe_status"]=="OTHER_SHARD_NOT_RUN")
+
+
+def test_complete_shard_merge_does_not_promote_truth(tmp_path):
+    from tools.corpus.merge_corpus4008_source_preflight_shards_v1 import merge
+    src,master,selection=_fixture(tmp_path)
+    paths=[]
+    for ix in (0,1):
+        output=tmp_path/("part"+str(ix))
+        build_census(master_path=master,selection_path=selection,
+                     sources_root=src,output_dir=output,shard_count=2,shard_index=ix)
+        paths.append(output/"CORPUS4008_SOURCE_CENSUS_V1.json")
+    doc=merge(paths)
+    assert doc["source_census_count"] == 4008
+    assert doc["statuses"]["OBJ_SOURCE_DOMAINS_OBSERVED__NO_CHARACTER_OR_RENDER_COURT"] == 1
+    assert doc["statuses"]["SOURCE_RAW_NOT_FOUND"] == 4007
+    assert doc["historical_holdout_count"] == 169
+    assert doc["training_authorized"] is False
+    assert doc["semantic_truth_admitted_count"] == 0
+    with pytest.raises(ValueError,match="MISSING_OR_EXTRA_SHARDS"):
+        merge(paths[:1])

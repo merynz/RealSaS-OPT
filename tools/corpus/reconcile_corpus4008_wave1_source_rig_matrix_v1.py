@@ -143,7 +143,9 @@ def reconcile(root:Path,out:Path,expected_shards=EXPECTED_SHARDS):
                 if numeric["armature_count"]>0:
                     head_observation_candidates["AXIS"]+=1
                     head_observation_candidates["TESSA"]+=1
-                if numeric["skin_rows_sampled"]>0:
+                if (numeric["armature_count"]>0
+                    and numeric["skin_rows_sampled"]>numeric["skin_rows_zero_weights"]):
+                    # Merely enumerating vertices does not establish skin.
                     head_observation_candidates["MIRA"]+=1
                 if numeric["observed_ik_constraint_count"]>0:
                     counts["OBSERVED_IMPORTED_IK_SOURCE_ROWS"]+=1

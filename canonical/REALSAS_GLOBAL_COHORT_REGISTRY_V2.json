@@ -1,0 +1,108 @@
+{
+  "schema": "RealSaS.GlobalTruthFoundryAllCohortRegistry.v2",
+  "status": "SOURCE_COHORT_SCOPE_RECONCILED__NO_SOURCE_OR_HEAD_TRUTH_ADMISSION",
+  "analysis_date_utc": "2026-11-07",
+  "immutable_input_receipts": {
+    "master_4008_jsonl_sha256": "475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913",
+    "processed_4036_jsonl_sha256": "97c0b5bb27947689bc9eaacf8a46f1dd1c55b855b49fffaf59361801ba230b49",
+    "master_v1_inventory_sha256": "15e90dbd5ffd470737fb230d9c34138a63b98fcc5057a09450d3239984db20d6"
+  },
+  "counts": {
+    "historical_master_selected": 3993,
+    "master_QA_ONLY_exact_identity": 15,
+    "historical_processed_reject_candidates_not_canonicalized": 28,
+    "core370_canonical_subjects": 370,
+    "tracked_source_and_candidate_records_before_cross_corpus_dedup": 4406,
+    "canonical_subject_records_including_QA": 4378,
+    "imported_master_source_observations": 1024,
+    "imported_master_source_observations_by_provider": {
+      "objaverse_animated_originals": 1024,
+      "quaternius_cc0": 0,
+      "kaykit_cc0": 0
+    },
+    "master_SHA_verified_recovery": 3192,
+    "master_SHA_not_recovery_verified": 801,
+    "full_core370_historical_machine_family_rows": 5180,
+    "master_historical_family_rows": 51909,
+    "unified_family_evidence_rows_existing": 57089,
+    "all_canonical_facet_slots_including_QA": 140096,
+    "all_canonical_head_routes_including_QA": 161986,
+    "all_head_training_admissions": 0
+  },
+  "cohorts": [
+    {
+      "namespace": "MASTER3993",
+      "record_count": 3993,
+      "action": "SOURCE_COURTS_PENDING",
+      "original_split_preserved": true
+    },
+    {
+      "namespace": "CORE370",
+      "record_count": 370,
+      "action": "REVALIDATE_PR327_AND_CROSSCORPUS_SHA_LINEAGE",
+      "historical_origin_counts": {
+        "ESTABLISHED_BASE": 139,
+        "EXPANSION": 231
+      }
+    },
+    {
+      "namespace": "MASTER_QA_ONLY",
+      "record_count": 15,
+      "provider": "khronos_gltf_qa",
+      "action": "QA_ONLY_MASKED_IN_ALL_37_TARGETS",
+      "original_sha_not_yet_courted": true
+    },
+    {
+      "namespace": "MASTER_TECHNICAL_REJECT",
+      "record_count": 28,
+      "provider": "objaverse_animated_originals",
+      "action": "QUARANTINE_AND_INDEPENDENT_REPAIR_REVIEW",
+      "canonical_asset_id_not_present": true
+    },
+    {
+      "namespace": "V18_PLUS_GRAPHICS_RELATIONS",
+      "record_count": null,
+      "role": "EVIDENCE_OVERLAY_NOT_NEW_CHARACTERS",
+      "action": "SOURCE_BOUND_FROZEN_PROOF_CROSSWALK_PENDING"
+    },
+    {
+      "namespace": "OTHER_HISTORICAL_RESEARCH_DATASETS",
+      "record_count": null,
+      "role": "UNRESOLVED_POSSIBLE_OVERLAYS",
+      "action": "EXACT_SOURCE_ID_AND_SHA_CROSSWALK_REQUIRED"
+    }
+  ],
+  "cross_corpus_identity": {
+    "original_master_quaternius_not_rehashed": 191,
+    "original_master_kaykit_not_rehashed": 37,
+    "overlap_exact_SHA_verified_Master_vs_historical_Core_subset": 0,
+    "semantic_and_cross_format_identity_finished": false,
+    "registered_records_not_equivalent_to_unique_characters": true,
+    "no_train_dev_holdout_reallocation": true
+  },
+  "original_master_publisher_counts": {
+    "objaverse_animated_originals": 3765,
+    "quaternius_cc0": 191,
+    "kaykit_cc0": 37
+  },
+  "core370_source_formats": {
+    ".gltf": 196,
+    ".fbx": 111,
+    ".glb": 63
+  },
+  "original_reject_reason_counts": {
+    "too_many_degenerate_faces": 28,
+    "too_many_unweighted_vertices": 2
+  },
+  "guarantees": {
+    "QA_ONLY_never_FIT": true,
+    "historical_rejection_never_auto_training": true,
+    "historical_rig_eligibility_not_native_controller_teacher": true,
+    "imported_geometry_numeric_observation_not_source_truth": true,
+    "source_and_stylized_2D_art_separate": true,
+    "all_unverified_target_masks_closed": true,
+    "source_bytes_mutated": false,
+    "model_training_authorized": false,
+    "materialization_authorized": false
+  }
+}

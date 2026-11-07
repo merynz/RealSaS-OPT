@@ -2,7 +2,7 @@
 from pathlib import Path
 import sys,json,csv,tempfile,os
 sys.path.insert(0,str(Path(__file__).resolve().parent))
-from reconcile_realsas_wave4_global_truth_v2 import run
+from tools.corpus.reconcile_realsas_wave4_global_truth_v2 import run
 ROOT=Path(os.environ.get('REALSAS_AUDIT_INPUT_ROOT','/mnt/data'))
 AV=list(csv.DictReader((ROOT/'SOURCE_AVAILABILITY_MATRIX_V1.csv').open()))
 imported={r['canonical_asset_id'] for r in csv.DictReader((ROOT/'SOURCE_EXISTING_EVIDENCE_CLASSIFICATION_V1.csv').open())}

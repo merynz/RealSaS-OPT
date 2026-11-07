@@ -1,0 +1,97 @@
+name: corpus4008-private-original-reacquisition-pilot-v1
+
+# Strictly bounded three-per-format immutable GitHub blob pilot (9 originals).
+# Exact SHA-256 mismatch is quarantined as failure; only correctly recovered
+# source bytes are copied to a restricted Drive audit folder. NEVER training.
+on:
+  push:
+    branches: [corpus4008-source-structure-and-camera-audit-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-private-original-reacquisition-pilot-v1.yml'
+      - 'tools/corpus/recover_corpus4008_github_original_pilot_v1.py'
+      - 'tests/corpus/test_corpus4008_github_original_pilot_v1.py'
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-source-reacquisition-pilot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  immutable-source-nine-reacquisition:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c4008-pilot-rclone.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/original_reacquisition_pilot_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secure acquisition guards / hash mismatch regression
+        run: |
+          python -m pip install --disable-pip-version-check pytest requests==2.32.3
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_github_original_pilot_v1.py
+      - name: Confirm Drive credential is configured without revealing it
+        id: gate
+        env:
+          SECRET_PRESENT: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$SECRET_PRESENT" = true; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'Private source retention unavailable; no downloads attempted' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Stage original recovery plan in restricted runner temporary directory
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          mkdir -p "$RUNNER_TEMP/c4008-pilot-private"
+          rclone copyto "$REMOTE/audits/source_recovery_v1/42371850821-1/RECOVERY_PRIVATE.json" \
+            "$RUNNER_TEMP/c4008-pilot-private/RECOVERY_PLAN.json" --retries 3
+      - name: Recover 3 each FBX, GLB and glTF from immutable commit only
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m tools.corpus.recover_corpus4008_github_original_pilot_v1 \
+            --plan-private "$RUNNER_TEMP/c4008-pilot-private/RECOVERY_PLAN.json" \
+            --output "$RUNNER_TEMP/c4008-pilot-private/output" \
+            --per-format 3 \
+            --max-original-mib 64
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'c4008-pilot-private/output/RECOVERY_PILOT_PUBLIC_COUNTS.json'
+          d=json.loads(p.read_text())
+          print('## Corpus4008 original byte recovery pilot — no model admission')
+          print('Exact pinned GitHub candidates:',d['candidate_count'])
+          print('Full-SHA original bytes recovered:',d['exact_original_bytes_recovered'])
+          print('Recovery bytes:',d['recovered_byte_count'])
+          print('Source current-license revalidation:',d['current_license_revalidated_count'])
+          print('Training authorized:',d['training_authorized'])
+          for name,n in d['result_statuses'].items():
+              print(name+':',n)
+          PY
+      - name: Publish only verified source bytes to PRIVATE audit quarantine
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-pilot-private/output"
+          if test -s "$RCLONE_CONFIG" && test -s "$root/RECOVERY_PILOT_PRIVATE.json"; then
+            rclone copyto "$root/RECOVERY_PILOT_PRIVATE.json" "$PRIVATE_OUTPUT/RECOVERY_PILOT_PRIVATE.json" --retries 3
+            rclone copyto "$root/RECOVERY_PILOT_PUBLIC_COUNTS.json" "$PRIVATE_OUTPUT/RECOVERY_PILOT_PUBLIC_COUNTS.json" --retries 3
+            if test -d "$root/verified_quarantine_objects"; then
+              rclone copy "$root/verified_quarantine_objects" "$PRIVATE_OUTPUT/verified_quarantine_objects" --retries 3 --checksum
+            fi
+            echo 'Private quarantine receipt published. Official Master source root untouched.'
+          fi

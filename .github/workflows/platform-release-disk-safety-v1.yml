@@ -20,6 +20,10 @@ on:
       - '.github/workflows/platform-release-disk-safety-v1.yml'
   workflow_dispatch:
 
+concurrency:
+  group: platform-release-disk-safety-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

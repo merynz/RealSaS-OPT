@@ -1,0 +1,105 @@
+name: corpus4008-private-objaverse-original-recovery-v1
+
+# Recovery metadata only. Never downloads Objaverse source binaries.
+# The complete per-object link/legal census stays in authenticated Drive.
+on:
+  push:
+    branches: [corpus4008-source-structure-and-camera-audit-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-private-objaverse-original-recovery-v1.yml'
+      - 'tools/corpus/audit_corpus4008_missing_original_recovery_v1.py'
+      - 'tests/corpus/test_corpus4008_missing_original_recovery_v1.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-private-original-recovery-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  recover-missing-originals-metadata-only:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c4008-recovery-rclone.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/source_recovery_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check hosted Drive entitlement without exposing credential
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'Hosted Drive credential absent; no recovery performed.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Static public safe recovery route regression tests
+        run: |
+          python -m pip install --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_missing_original_recovery_v1.py
+      - name: Restore SHA-pinned private metadata; never fetch original sources
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          mkdir -p "$RUNNER_TEMP/c4008-recovery-private"
+          rclone copyto "$REMOTE/audits/source_inventory_v1/42371135711-1/CORPUS4008_REMOTE_SOURCE_INVENTORY_PRIVATE_V1.json" \
+            "$RUNNER_TEMP/c4008-recovery-private/inventory.json" --retries 3
+          rclone copyto "$REMOTE/metadata/SOURCE_CANDIDATES.parquet" \
+            "$RUNNER_TEMP/c4008-recovery-private/SOURCE_CANDIDATES.parquet" --retries 3
+          rclone copyto "$REMOTE/metadata/OBJAVERSE_XL_LINKED_ANNOTATIONS.parquet" \
+            "$RUNNER_TEMP/c4008-recovery-private/LINKED_ANNOTATIONS.parquet" --retries 3
+          test "$(sha256sum "$RUNNER_TEMP/c4008-recovery-private/SOURCE_CANDIDATES.parquet" | cut -d ' ' -f1)" = 5439237f8a62c143cd081a564e11aef7b2c2dd176566d9144e987f5f3a75a25e
+          test "$(sha256sum "$RUNNER_TEMP/c4008-recovery-private/LINKED_ANNOTATIONS.parquet" | cut -d ' ' -f1)" = 1bd139233f756b6acbee88aa7ca59c21a186df17967c1cdf15bb16a8eba8f822
+          python -m pip install --disable-pip-version-check --no-input pandas==2.2.3 pyarrow==18.1.0
+          echo 'PINNED_SOURCE_AND_LINKED_ANNOTATION_PARQUETS_PRESENT__NO_RAW_SOURCE'
+      - name: Join 3349 missing Objaverse originals against exact source-candidate registry
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m tools.corpus.audit_corpus4008_missing_original_recovery_v1 \
+            --source-inventory-private "$RUNNER_TEMP/c4008-recovery-private/inventory.json" \
+            --source-candidates "$RUNNER_TEMP/c4008-recovery-private/SOURCE_CANDIDATES.parquet" \
+            --linked-annotations "$RUNNER_TEMP/c4008-recovery-private/LINKED_ANNOTATIONS.parquet" \
+            --output-private "$RUNNER_TEMP/c4008-recovery-private/RECOVERY_PRIVATE.json" \
+            --output-public "$RUNNER_TEMP/c4008-recovery-private/RECOVERY_SUMMARY_PUBLIC.json"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'c4008-recovery-private/RECOVERY_SUMMARY_PUBLIC.json'
+          a=json.loads(p.read_text())
+          print('## Corpus4008 Objaverse source recovery: metadata only')
+          for k in ['missing_original_count','source_candidate_unique_count',
+                    'source_candidate_missing_count','source_candidate_ambiguous_count',
+                    'upstream_annotation_linked_count','heldout_count','sources_reacquired',
+                    'source_sha256_reverified','training_authorized']:
+              print(k+':',a[k])
+          for k,n in a['retrieval_routes'].items():
+              print(k+':',n)
+          PY
+      - name: Private publication with no public source URLs or original bytes
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-recovery-private"
+          if test -s "$RCLONE_CONFIG" && test -s "$root/RECOVERY_PRIVATE.json"; then
+            rclone copyto "$root/RECOVERY_PRIVATE.json" \
+              "$PRIVATE_OUTPUT/RECOVERY_PRIVATE.json" --retries 3
+            rclone copyto "$root/RECOVERY_SUMMARY_PUBLIC.json" \
+              "$PRIVATE_OUTPUT/RECOVERY_SUMMARY_PUBLIC.json" --retries 3
+            echo '3349-source recovery metadata stored on private Drive; no original data downloaded'
+          fi

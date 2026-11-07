@@ -1,0 +1,94 @@
+{
+  "schema": "RealSaS.SemanticSourceHintPolicy.v1",
+  "authority": "TEACHER_HINT_ONLY__INDEPENDENT_REVIEW_REQUIRED",
+  "default_state": "UNKNOWN",
+  "rules": [
+    {
+      "concept": "HAIR_LIKE",
+      "tokens": [
+        "hair",
+        "ponytail",
+        "bangs",
+        "braid",
+        "pigtail"
+      ]
+    },
+    {
+      "concept": "CLOTH_LIKE",
+      "tokens": [
+        "cloth",
+        "clothing",
+        "cape",
+        "cloak",
+        "skirt",
+        "scarf",
+        "robe",
+        "dress",
+        "fabric",
+        "tassel"
+      ]
+    },
+    {
+      "concept": "RIGID_PLATE_LIKE",
+      "tokens": [
+        "armor",
+        "armour",
+        "helmet",
+        "pauldron",
+        "plate",
+        "shell"
+      ]
+    },
+    {
+      "concept": "HANDHELD_PROP_LIKE",
+      "tokens": [
+        "sword",
+        "spear",
+        "staff",
+        "weapon",
+        "dagger",
+        "axe",
+        "hammer",
+        "shield"
+      ]
+    },
+    {
+      "concept": "TAIL_LIKE",
+      "tokens": [
+        "tail",
+        "caudal"
+      ]
+    },
+    {
+      "concept": "WING_LIKE",
+      "tokens": [
+        "wing"
+      ]
+    },
+    {
+      "concept": "ARTICULATED_APPENDAGE_LIKE",
+      "tokens": [
+        "tentacle",
+        "appendage",
+        "limb",
+        "arm",
+        "leg"
+      ]
+    },
+    {
+      "concept": "SURFACE_OVERLAY_LIKE",
+      "tokens": [
+        "overlay",
+        "decal",
+        "emblem",
+        "badge"
+      ]
+    }
+  ],
+  "training_authorized": false,
+  "notes": [
+    "Names are privileged teacher hints, never final student labels or a qualified semantic region.",
+    "Conflicting hints abstain.",
+    "Hints need curated source support and independent qualified court before supervision."
+  ]
+}

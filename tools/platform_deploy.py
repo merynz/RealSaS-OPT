@@ -24,6 +24,11 @@ import urllib.request
 import uuid
 from pathlib import Path
 
+if __package__:
+    from .platform_release_budget_v1 import require_release_budget
+else:
+    from platform_release_budget_v1 import require_release_budget
+
 ROOT = Path(__file__).resolve().parents[1]
 TEMPORAL_VERSION = "1.9.1"
 TEMPORAL_SHA256 = "09a0326a51db84d02735e53542b9ebd8c4758daf47482a9ab0abce15844e60d5"
@@ -122,6 +127,9 @@ def preflight(root, expected_sha):
     if command(["git", "status", "--porcelain"], cwd=ROOT, capture=True).stdout.strip():
         raise RuntimeError("CLEAN_CANONICAL_CHECKOUT_REQUIRED")
     manager_environment()
+    # Prevent the workstation failure mode: 157 immutable copies consumed ~200GB.
+    # Fail before creating a new release when old copies or host disk are unsafe.
+    require_release_budget(root)
     marker = root / "deployment.json"
     if root.exists() and not marker.exists():
         raise RuntimeError("UNMANAGED_DEPLOY_ROOT: refusing to overwrite existing data")

@@ -30,8 +30,8 @@ HEAD_TARGETS = {
     ),
     "IRIS_GRAPHICS": (
         "APPEARANCE_CAA", "VISIBILITY_OCCLUSION",
-        "RAY_COMPOSITING", "MOTION_CONDITIONED_RGB",
-        "GRAPHIC_EDIT_REVEAL_CONSEQUENCE",
+        "RAY_COMPOSITING", "STYLIZED_2D_ART_PRESENTATION",
+        "MOTION_CONDITIONED_RGB", "GRAPHIC_EDIT_REVEAL_CONSEQUENCE",
     ),
     "TESSA": (
         "MECHANICAL_SURFACE_TOPOLOGY",
@@ -58,6 +58,7 @@ CORE_HEAD_TARGETS = {
     ),
     "IRIS_GRAPHICS": (
         "APPEARANCE_CAA", "VISIBILITY_OCCLUSION", "RAY_COMPOSITING",
+        "STYLIZED_2D_ART_PRESENTATION",
     ),
     "TESSA": HEAD_TARGETS["TESSA"],
     "AXIS": ("RIG_HIERARCHY", "ANIMATION_KINEMATICS"),
@@ -97,10 +98,13 @@ def inside(root: Path, relative: str) -> Path:
 def evidence_courts(rec, root):
     """Check exact SHA-pinned distinct court artifacts; never invent a court."""
     evidence = rec.get("independent_evidence_files")
+    required = set(EVIDENCE_KINDS)
+    if rec["head"] == "IRIS_GRAPHICS":
+        required.add("2d_style")
     require(isinstance(evidence, dict)
-            and set(evidence) == set(EVIDENCE_KINDS), "COURT_FILE_SET")
+            and set(evidence) == required, "COURT_FILE_SET")
     digests = set()
-    for kind in EVIDENCE_KINDS:
+    for kind in sorted(required):
         item = evidence[kind]
         require(isinstance(item, dict), "COURT_FILE_RECORD")
         expected = item.get("sha256")
@@ -121,6 +125,24 @@ def evidence_courts(rec, root):
                 "COURT_IDENTITY")
         require(doc["status"] == "PASS", "COURT_NOT_PASSED")
         require(doc["independent_review"] is True, "COURT_REVIEW")
+        if kind == "2d_style":
+            require(doc.get("target_presentation") == "STYLIZED_2D_GAME_ART",
+                    "GRAPHICS_2D_STYLE_REQUIRED")
+            require(doc.get("source_2d_art_class") in (
+                "VERIFIED_NATIVE_2D_SOURCE_ART",
+                "VERIFIED_SOURCE_BOUND_STYLIZED_2D_RENDER"),
+                "GRAPHICS_SOURCE_OR_DERIVATION_REQUIRED")
+            require(doc.get("original_source_rights_and_material_court") == "PASS",
+                    "GRAPHICS_NATIVE_SOURCE_PARITY_REQUIRED")
+            require(doc.get("source_and_styled_view_binding_court") == "PASS",
+                    "GRAPHICS_VIEW_BINDING_REQUIRED")
+            require(doc.get("distinct_eight_view_art_review") == "PASS",
+                    "GRAPHICS_MULTI_VIEW_2D_REVIEW_REQUIRED")
+            require(doc.get("no_raw_3d_rgb_as_graphics_target") is True,
+                    "GRAPHICS_RAW_3D_TARGET_FORBIDDEN")
+            require(doc.get("original_appearance_and_stylized_targets_are_typed_separately") is True,
+                    "GRAPHICS_SOURCE_STYLE_COLLAPSE")
+
         require(doc.get("training_authorized") is not True,
                 "COURT_PREMATURE_ADMISSION")
     return True
@@ -184,6 +206,10 @@ def audit(selection: Path, receipts: Path, evidence_root: Path,
                     and rec.get("visual_court") == "PASS"
                     and rec.get("head_independent_court") == "PASS",
                     "UNQUALIFIED_SOURCE_OR_HEAD")
+            if head == "IRIS_GRAPHICS":
+                require(rec.get("graphics_image_supervision_domain")
+                        == "STYLIZED_2D_GAME_ART",
+                        "RAW_3D_GRAPHICS_TARGET_FORBIDDEN")
             targets = rec.get("target_truth")
             require(isinstance(targets, dict) and
                     all(targets.get(t) == "PASS" for t in CORE_HEAD_TARGETS[head]),

@@ -1,0 +1,31 @@
+name: realsas-cross-corpus-source-identity-contracts-v1
+
+# Synthetic-only safety: do not publish private Master/Core identities in Actions logs.
+on:
+  push:
+    branches: [corpus-global-universe-all-source-truth-v1-20261107]
+    paths:
+      - "tools/corpus/audit_cross_corpus_source_identity_v1.py"
+      - "tests/corpus/test_cross_corpus_source_identity_v1.py"
+      - "tools/corpus/build_cross_corpus_identity_quarantine_v1.py"
+      - "tests/corpus/test_cross_corpus_identity_quarantine_v1.py"
+      - "tools/corpus/build_verified_cross_corpus_source_clusters_v2.py"
+      - "tests/corpus/test_verified_cross_corpus_source_clusters_v2.py"
+      - ".github/workflows/realsas-cross-corpus-source-identity-contracts-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  identity-and-protected-split-firewall:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail-closed SHA and protected-split tests
+        run: |
+          set -euo pipefail
+          python -m pip install -q --disable-pip-version-check pytest
+          python -m compileall -q tools/corpus/audit_cross_corpus_source_identity_v1.py tools/corpus/build_cross_corpus_identity_quarantine_v1.py tools/corpus/build_verified_cross_corpus_source_clusters_v2.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_cross_corpus_source_identity_v1.py tests/corpus/test_cross_corpus_identity_quarantine_v1.py tests/corpus/test_verified_cross_corpus_source_clusters_v2.py

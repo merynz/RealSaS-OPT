@@ -9,6 +9,7 @@ Resume safely via content-addressed source receipts; exact SHA must match.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 from collections import Counter, defaultdict
@@ -48,7 +49,10 @@ def index_sources(root):
     return buckets
 
 
-def build_census(*, master_path, selection_path, sources_root, output_dir, limit=0):
+def build_census(*, master_path, selection_path, sources_root, output_dir,
+                 limit=0, shard_index=0, shard_count=1):
+    require(type(shard_count) is int and shard_count>=1, "SHARD_COUNT")
+    require(type(shard_index) is int and 0<=shard_index<shard_count, "SHARD_INDEX")
     rows = load_jsonl(master_path)
     selected = json.loads(selection_path.read_text())
     require(len(rows) == 4008, "MASTER_EXPECTS_4008")
@@ -87,7 +91,11 @@ def build_census(*, master_path, selection_path, sources_root, output_dir, limit
             "graphics_training_authorized":False,
             "training_authorized":False,
         }
-        if not paths:
+        assigned = int(hashlib.sha256(candidate.encode("utf-8")).hexdigest(),16)%shard_count == shard_index
+        record["source_shard_owner"] = int(hashlib.sha256(candidate.encode("utf-8")).hexdigest(),16)%shard_count
+        if not assigned:
+            record["source_probe_status"]="OTHER_SHARD_NOT_RUN"
+        elif not paths:
             record["source_probe_status"]="SOURCE_RAW_NOT_FOUND"
         elif len(paths)>1:
             record["source_probe_status"]="AMBIGUOUS_SOURCE_VARIANTS__REVIEW"
@@ -121,6 +129,9 @@ def build_census(*, master_path, selection_path, sources_root, output_dir, limit
       "universe_count":4008,
       "census_entries":len(report),
       "raw_source_probe_attempt_count":scanned,
+      "shard_index":shard_index,
+      "shard_count":shard_count,
+      "assigned_assets":sum(x["source_shard_owner"]==shard_index for x in report),
       "statuses":dict(sorted(Counter(x["source_probe_status"] for x in report).items())),
       "old_holdout_count":sum(x["holdout_locked"] for x in report),
       "qa_only_count":sum(x["qa_only"] for x in report),
@@ -142,10 +153,13 @@ def main():
     parser.add_argument("--sources-root",type=Path,required=True)
     parser.add_argument("--output",type=Path,required=True)
     parser.add_argument("--limit",type=int,default=0)
+    parser.add_argument("--shard-count",type=int,default=1)
+    parser.add_argument("--shard-index",type=int,default=0)
     args=parser.parse_args()
     require(args.limit>=0, "NEGATIVE_BATCH_LIMIT")
     result=build_census(master_path=args.master,selection_path=args.selection,
-                        sources_root=args.sources_root,output_dir=args.output,limit=args.limit)
+                        sources_root=args.sources_root,output_dir=args.output,limit=args.limit,
+                        shard_count=args.shard_count,shard_index=args.shard_index)
     print(json.dumps(result,sort_keys=True))
 
 

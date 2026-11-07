@@ -1,0 +1,141 @@
+name: corpus4008-normalize-standardize-premat-v1
+
+# Additive source-to-IRIS-to-TESSA normalization test.
+# Native SHA-bound source measurement is NOT semantic, rig behavior,
+# commercial rights, graphics-style quality or materialization authority.
+on:
+  push:
+    branches: [corpus4008-pre-materialization-normalization-standardization-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-normalize-standardize-premat-v1.yml'
+      - 'canonical/REALSAS_CORPUS4008_PREMATERIALIZATION_ENGINEERING_STANDARD_V1.json'
+      - 'tools/corpus/blender_corpus4008_source_bounds_v1.py'
+      - 'tools/corpus/build_corpus4008_normalization_plan_v1.py'
+      - 'tools/corpus/validate_corpus4008_prematerialization_v1.py'
+      - 'tests/corpus/test_corpus4008_normalization_plan_v1.py'
+      - 'tests/corpus/test_corpus4008_prematerialization_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-premat-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  standardization-and-normalization-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact-coordinate, source-identity, model masks, preflight regressions
+        run: |
+          set -euo pipefail
+          python -m pip install -q --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q \
+            tests/corpus/test_corpus4008_normalization_plan_v1.py \
+            tests/corpus/test_corpus4008_prematerialization_v1.py
+          python -m compileall -q \
+            tools/corpus/blender_corpus4008_source_bounds_v1.py \
+            tools/corpus/build_corpus4008_normalization_plan_v1.py \
+            tools/corpus/validate_corpus4008_prematerialization_v1.py
+  pin-original-source-and-measure-rest-bounds:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c4008-premat-v1.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/prematerialization_normalization_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require exact private source
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'NO_PRIVATE_SOURCE_NO_NORMALIZATION_RESULT' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Fetch only licensed-status-unknown private original and official Blender binary
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone xz-utils
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          root="$RUNNER_TEMP/c4008-premat"
+          mkdir -p "$root/source" "$root/bin" "$root/evidence"
+          rclone copyto "$REMOTE/sources/kaykit_cc0/93e6e25213009952276d9cf3_93e6e25213009952.glb" \
+            "$root/source/kaykit.glb" --retries 3
+          printf '93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545  %s\n' "$root/source/kaykit.glb" | sha256sum -c
+          cd "$root/bin"
+          curl -fL --retry 4 --max-time 300 https://download.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz -o blender.tar.xz
+          curl -fL --retry 4 --max-time 120 https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256 -o official.sha256
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,re
+          lines=[x for x in Path("official.sha256").read_text().splitlines()
+                 if 'blender-4.5.14-linux-x64.tar.xz' in x]
+          assert len(lines)==1
+          expected=re.findall('[0-9a-fA-F]{64}',lines[0])
+          assert len(expected)==1
+          with open('blender.tar.xz','rb') as f:
+              assert hashlib.file_digest(f,'sha256').hexdigest()==expected[0].lower()
+          PY
+          tar -xJf blender.tar.xz
+          printf '050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8  %s\n' "$root/bin/blender-4.5.14-linux-x64/blender" | sha256sum -c
+      - name: Measure real source bounds, construct reversible plan, preserve UNKNOWN
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-premat"
+          "$root/bin/blender-4.5.14-linux-x64/blender" \
+            --background --factory-startup --disable-autoexec --python-exit-code 1 \
+            --python tools/corpus/blender_corpus4008_source_bounds_v1.py -- \
+            --source "$root/source/kaykit.glb" \
+            --source-sha256 93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545 \
+            --asset-id asset_551ea351b43a1787d0f55536 \
+            --candidate-id kaykit_cc0:93e6e25213009952276d9cf3 \
+            --output "$root/evidence/kaykit.source.bounds.json"
+          parent_sha="$(sha256sum "$root/evidence/kaykit.source.bounds.json" | cut -d' ' -f1)"
+          PYTHONPATH=. python -m tools.corpus.build_corpus4008_normalization_plan_v1 \
+            --bounds-observation "$root/evidence/kaykit.source.bounds.json" \
+            --bounds-observation-sha256 "$parent_sha" \
+            --output "$root/evidence/kaykit.normalization.plan.json"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-premat/evidence"
+          p=json.loads((root/"kaykit.normalization.plan.json").read_text())
+          assert p["original_source_sha256"]=="93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545"
+          assert p["materialization_authorized"] is False
+          assert p["source_anatomical_front"]=="UNKNOWN"
+          assert p["source_skin_bind_and_weight_parity_courted"] is False
+          print("## SHA-bound real source normalization preflight")
+          print("Source: KayKit GLB, 1 original SHA, no teacher authority")
+          print("Source-world → IRIS [-1,1]^3 → TESSA [-.5,.5]^3")
+          print("Global center:",p["global_source_center"])
+          print("Global half extent:",p["global_source_half_extent"])
+          print("Corner normalized roundtrip relative error:",p["max_source_bbox_corner_relative_error"])
+          print("Rig/skin/IK/semantic/style courts: NOT PERFORMED")
+          print("No materialization authorized.")
+          PY
+      - name: Quarantine verified observation receipts only, never original files
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-premat/evidence"
+          if test -s "$RCLONE_CONFIG" && test -d "$root"; then
+            rclone copy "$root" "$PRIVATE_OUTPUT" --checksum --retries 3
+            echo "Private normalization receipts written; no source truth or training authorization." >> "$GITHUB_STEP_SUMMARY"
+          fi

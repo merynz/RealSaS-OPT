@@ -96,6 +96,24 @@ def fetch_one(row, dest, *, max_bytes, session):
         "current_license_revalidated":False,
         "training_authorized":False,
     }
+    # Reuse prior private quarantine object only after fresh FULL SHA verification.
+    # A mismatched cache is never silently overwritten or counted as recovered.
+    cached=dest/(expected+extension)
+    if cached.exists():
+        if cached.is_file():
+            digest=hashlib.sha256()
+            with cached.open("rb") as stream:
+                for chunk in iter(lambda:stream.read(8<<20),b""):
+                    digest.update(chunk)
+            if digest.hexdigest()==expected:
+                out["status"]="EXACT_SOURCE_CACHED_AND_REVERIFIED"
+                out["byte_count"]=cached.stat().st_size
+                out["retrieved_source_sha256"]=expected
+                out["source_bytes_recovered"]=True
+                out["private_staged_filename"]=cached.name
+                return out
+        out["status"]="CACHED_ORIGINAL_SHA_DRIFT__REJECTED"
+        return out
     temp=dest/(expected+".download-partial")
     try:
         with session.get(url,stream=True,timeout=(12,60),allow_redirects=False,

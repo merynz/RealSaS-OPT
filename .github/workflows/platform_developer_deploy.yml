@@ -1,48 +1,14 @@
 name: platform-developer-deployment
 
+# Reserved for an intentionally invoked, exact-main physical deployment.
+# Workflow-run consumers of this NAME represent installed Platform state, not CI.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    # Hosted-only contract verification. Physical deployment is explicit.
-    paths:
-      - 'platform/**'
-      - 'compiler/realsas_compiler_services/platform_worker/**'
-      - 'tools/platform_deploy.py'
-      - 'tools/platform_service.py'
-      - 'tools/platform_deployment_smoke.py'
-      - 'requirements/platform-deployment.txt'
-      - 'requirements/mainline-ci.txt'
-      - 'requirements/platform-worker.txt'
-      - 'requirements/torch-cpu.txt'
-      - 'requirements/truth-family-courts.txt'
-      - 'requirements/torch-cuda.txt'
-      - 'tests/repository/test_platform_deployment.py'
-      - 'tests/repository/test_platform_wheelhouse_v1.py'
-      - 'tests/repository/test_self_hosted_execution_policy.py'
-      - '.github/workflows/platform_developer_deploy.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'platform/**'
-      - 'compiler/realsas_compiler_services/platform_worker/**'
-      - 'tools/platform_deploy.py'
-      - 'tools/platform_service.py'
-      - 'tools/platform_deployment_smoke.py'
-      - 'requirements/platform-deployment.txt'
-      - 'requirements/mainline-ci.txt'
-      - 'requirements/platform-worker.txt'
-      - 'requirements/torch-cpu.txt'
-      - 'requirements/truth-family-courts.txt'
-      - 'requirements/torch-cuda.txt'
-      - 'tests/repository/test_platform_deployment.py'
-      - 'tests/repository/test_platform_wheelhouse_v1.py'
-      - '.github/workflows/platform_developer_deploy.yml'
 
 concurrency:
-  group: platform-developer-deployment-${{ github.ref }}-${{ github.event_name }}
-  # Never interrupt a permanent service switch; obsolete PR tests may cancel.
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: platform-developer-deployment-${{ github.ref }}
+  # Physical deployment is an intentional mutation and must never be interrupted.
+  cancel-in-progress: false
 
 permissions:
   contents: read

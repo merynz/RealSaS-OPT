@@ -36,11 +36,14 @@ def test_persistent_platform_uses_cpu_parent_runtime_not_mira_cuda_profile():
     assert "torch-cuda.txt" not in deployment
     assert "-r truth-family-courts.txt" in deployment
 
-    text = WORKFLOW.read_text(encoding="utf-8")
-    # CUDA profile changes may still exercise deployment contracts, but the
-    # persistent wheelhouse identity is bound only to the admitted CPU runtime.
-    assert "- 'requirements/torch-cpu.txt'" in text
-    for block in text.split("paths = (", 1)[1:]:
+    hosted = (ROOT / ".github/workflows/platform_developer_contracts_hosted.yml").read_text(
+        encoding="utf-8"
+    )
+    # CUDA profile changes still trigger hosted contract checks. The manual
+    # physical install's persistent wheelhouse is CPU-only.
+    assert "- 'requirements/torch-cpu.txt'" in hosted
+    physical = WORKFLOW.read_text(encoding="utf-8")
+    for block in physical.split("paths = (", 1)[1:]:
         assert "requirements/torch-cpu.txt" in block
 
 

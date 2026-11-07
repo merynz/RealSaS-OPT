@@ -16,6 +16,10 @@ on:
       - "corpus370-three-head-semantic-truth-v1-20261107"
   workflow_dispatch:
 
+concurrency:
+  group: corpus370-semantic-teacher-contracts-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   semantic-teacher-contracts:
     runs-on: ubuntu-latest

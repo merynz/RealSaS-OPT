@@ -93,6 +93,7 @@ def render_orbit(bpy, *, source: Path, expected_sha256: str,
     cam.name = "SOURCE_SPACE_ORBIT__ANATOMICAL_FRONT_UNKNOWN"
     cam.data.type = "ORTHO"
     cam.data.ortho_scale = max(2.15 * radius, 0.5)
+    bpy.context.scene.camera = cam
     scene = configure_scene(bpy, resolution)
     scene.render.engine = "CYCLES"
     scene.cycles.device = "CPU"

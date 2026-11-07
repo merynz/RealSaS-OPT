@@ -30,6 +30,45 @@ VIEWS = 8
 VERSION = "real-sas-toon-shader-plus-silhouette-ink-v1"
 
 
+def choose_ortho_scale(base_scale, span_x, span_y, *, target_min=0.58,
+                       target_max=0.86):
+    """Correct source-space framing by actual projected source bounds.
+
+    Object corner bounds can overestimate visible silhouette. Real PNG QA is
+    still authoritative for legibility and crop, not these estimates.
+    """
+    require(all(math.isfinite(x) and x>0 for x in
+                (base_scale,span_x,span_y)),"INVALID_PROJECTED_BOUNDS")
+    # Scale is linear inverse of projected occupied fraction.
+    # If both target spans cannot fit, favor no cropping over minimum span.
+    ratio=max(min(span_x,span_y)/target_min,
+              max(span_x,span_y)/target_max)
+    require(math.isfinite(ratio) and ratio>0,"INVALID_ORTHO_RATIO")
+    return max(0.20, min(10000., base_scale*ratio))
+
+
+def set_source_space_orbit_frame(bpy, camera, meshes, base_scale):
+    from mathutils import Vector
+    cam_inv=camera.matrix_world.inverted()
+    xyz=[]
+    for obj in meshes:
+        for co in obj.bound_box:
+            xyz.append(cam_inv @ (obj.matrix_world @ Vector(co)))
+    require(xyz,"NO_MESH_CAMERA_BOUNDS")
+    # At square resolution with an orthographic camera, width and height
+    # span fractions are both world-space projected span/ortho_scale.
+    raw_span_x=(max(x.x for x in xyz)-min(x.x for x in xyz))/base_scale
+    raw_span_y=(max(x.y for x in xyz)-min(x.y for x in xyz))/base_scale
+    scale=choose_ortho_scale(base_scale,raw_span_x,raw_span_y)
+    camera.data.ortho_scale=scale
+    return {
+        "projected_source_bbox_fraction_x_before_adjustment":raw_span_x,
+        "projected_source_bbox_fraction_y_before_adjustment":raw_span_y,
+        "source_bbox_correction_based_on_not_human_court":True,
+        "camera_ortho_scale":scale,
+    }
+
+
 def image_ink(source: Path, output: Path):
     from PIL import Image, ImageChops, ImageEnhance, ImageFilter, ImageOps
     im = Image.open(source).convert("RGBA")
@@ -93,6 +132,8 @@ def render_orbit(bpy, *, source: Path, expected_sha256: str,
     cam.name = "SOURCE_SPACE_ORBIT__ANATOMICAL_FRONT_UNKNOWN"
     cam.data.type = "ORTHO"
     cam.data.ortho_scale = max(2.15 * radius, 0.5)
+    base_ortho_scale = float(cam.data.ortho_scale)
+    scene_meshes = [ob for ob in bpy.data.objects if ob.type == "MESH"]
     bpy.context.scene.camera = cam
     scene = configure_scene(bpy, resolution)
     scene.render.engine = "CYCLES"
@@ -126,6 +167,9 @@ def render_orbit(bpy, *, source: Path, expected_sha256: str,
         cam.location = center + direction.normalized()*max(radius*3.7, 1.0)
         cam.rotation_euler = (center-cam.location).to_track_quat("-Z", "Y").to_euler()
         bpy.context.view_layer.update()
+        framing = set_source_space_orbit_frame(
+            bpy, cam, scene_meshes, base_ortho_scale)
+        bpy.context.view_layer.update()
         matrix = finite_matrix(cam.matrix_world)
         for ob,idx,mat in original_materials:
             ob.material_slots[idx].material = mat
@@ -158,6 +202,7 @@ def render_orbit(bpy, *, source: Path, expected_sha256: str,
             "view_id": "SOURCE_ORBIT_%02d" % i,
             "source_space_orbit_degrees": 45*i,
             "camera_source_space_matrix": matrix,
+            "camera_projection_details": framing,
             "camera_axis_authored_front_qualified": False,
             "camera_source_up_qualified": False,
             "source_reference_png": source_path.name,

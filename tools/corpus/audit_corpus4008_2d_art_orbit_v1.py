@@ -110,6 +110,14 @@ def audit(root, *, enforce=False):
         require(isinstance(m,list) and len(m)==16 and
                 all(isinstance(x,(int,float)) and math.isfinite(x)
                     for x in m),"CAMERA_MATRIX")
+        frame=v.get("camera_projection_details")
+        require(isinstance(frame,dict),"CAMERA_FRAME_DETAILS")
+        require(frame.get("source_bbox_correction_based_on_not_human_court") is True,
+                "CAMERA_FRAME_AUTHORITY")
+        require(isinstance(frame.get("camera_ortho_scale"),(int,float))
+                and math.isfinite(frame["camera_ortho_scale"])
+                and frame["camera_ortho_scale"]>0,
+                "CAMERA_ORTHO_SCALE")
         images={}
         for mode in MODES:
             images[mode]=safe_png(root,v.get(mode+"_png"),v.get(mode+"_sha256"))

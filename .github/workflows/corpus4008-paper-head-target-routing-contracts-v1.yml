@@ -1,0 +1,42 @@
+name: corpus4008-paper-head-target-routing-contracts-v1
+
+# Pure schema and synthetic regression verification. No private source reads,
+# Blender, external teachers, materialization, training, or compiler effects.
+on:
+  push:
+    branches: [corpus4008-paper-grounded-truth-targets-v1-20261107]
+    paths:
+      - "canonical/CORPUS4008_PAPER_GROUNDED_HEAD_TARGET_BLUEPRINT_V1.json"
+      - "tools/corpus/build_corpus4008_head_target_routes_v1.py"
+      - "tests/corpus/test_corpus4008_paper_grounded_head_target_routes_v1.py"
+      - ".github/workflows/corpus4008-paper-head-target-routing-contracts-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  paper-head-target-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate target schema and fail-closed synthetic safety
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check -q pytest
+          python -m compileall -q tools/corpus/build_corpus4008_head_target_routes_v1.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_paper_grounded_head_target_routes_v1.py
+      - name: Verify no training or materialization admission
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("canonical/CORPUS4008_PAPER_GROUNDED_HEAD_TARGET_BLUEPRINT_V1.json")
+          x=json.loads(p.read_text())
+          assert not x["training_authorized"]
+          assert not x["materialization_authorized"]
+          assert len(x["head_target_catalog"])==37
+          assert all(not t["training_admitted"] and t["loss_mask_if_unverified"] for t in x["head_target_catalog"])
+          print("37 provisional targets, all fail closed")
+          PY

@@ -53,12 +53,13 @@ def merge(paths):
     }
     base = source_maps[0]
     require(len(base) == 4008, "DUPLICATE_ASSET_ID")
+    for rows in source_maps.values():
+        require(len(rows) == 4008 and set(rows) == set(base), "SHARD_ROSTER_DRIFT")
     output = []
     for aid in sorted(base):
         specimens = []
         for index in expected:
             rows = source_maps[index]
-            require(set(rows) == set(base), "SHARD_ROSTER_DRIFT")
             specimens.append(rows[aid])
         expected_owner = int(hashlib.sha256(base[aid]["candidate_id"].encode("utf-8")).hexdigest(),16)%sharded
         for i,r in enumerate(specimens):

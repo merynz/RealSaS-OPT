@@ -72,7 +72,7 @@ jobs:
           set -euo pipefail
           umask 077
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends rclone xz-utils
+          sudo apt-get install -y -qq --no-install-recommends rclone xz-utils libegl1 libgl1 libgl1-mesa-dri libopengl0
           printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
           mkdir -p "$RUNNER_TEMP/c4008-deep/source" "$RUNNER_TEMP/c4008-deep/runtime" "$RUNNER_TEMP/c4008-deep/output"
           rclone copyto "$REMOTE/sources/objaverse_animated_originals/06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115_06e9a576a49eff4a.fbx" "$RUNNER_TEMP/c4008-deep/source/objaverse.fbx" --retries 3

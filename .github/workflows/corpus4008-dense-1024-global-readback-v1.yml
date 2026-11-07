@@ -1,0 +1,120 @@
+name: corpus4008-dense-1024-global-readback-v1
+
+# One coordinator replays complete original source vertex/bone/skin math,
+# verifying every SHA and Master lineage. This is downstream of an ongoing
+# 32-shard original-source run, never a second source import.
+on:
+  push:
+    branches: [corpus4008-dense-normalization-1024-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-dense-1024-global-readback-v1.yml'
+      - 'tools/corpus/reconcile_corpus4008_dense_normalization_1024_v1.py'
+      - 'tests/corpus/test_corpus4008_dense_normalization_global_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-dense1024-global-readback-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  evidence-and-source-admission-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect missing shard, false PASS, corrupted SHA and protected split leaks
+        run: |
+          set -euo pipefail
+          python -m pip install -q --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q \
+            tests/corpus/test_corpus4008_dense_normalization_global_v1.py
+          python -m compileall -q \
+            tools/corpus/reconcile_corpus4008_dense_normalization_1024_v1.py
+
+  global-sha-immutable-source-readback:
+    needs: evidence-and-source-admission-regressions
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 95
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c4008-dense1024-global-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      SOURCE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/dense_source_normalization_1024_v1/42398536035-1
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/dense_source_global_readback_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact trusted private destination
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Detect 32 completed source shards without rerunning original imports
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-dense1024-global"
+          mkdir -p "$root/shards" "$root/out"
+          rclone copyto "$REMOTE/metadata/CANONICAL_VARIANT_SELECTION.json" \
+            "$root/selection.json" --retries 3
+          printf 'af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9  %s\n' "$root/selection.json" | sha256sum -c
+          # The actual dense pipeline started independently and is allowed
+          # to complete without this job guessing completion from partial files.
+          ready=no
+          for attempt in $(seq 1 75); do
+            count="$(rclone lsf "$SOURCE" --dirs-only --max-depth 1 2>/dev/null | grep -Ec '^shard-[0-9]+/$' || :)"
+            if test "$count" = 32; then
+              ready=yes
+              break
+            fi
+            echo "Source-dense shard evidence available: $count of 32 (attempt $attempt)" >> "$GITHUB_STEP_SUMMARY"
+            sleep 45
+          done
+          test "$ready" = yes
+          rclone copy "$SOURCE" "$root/shards" \
+            --include 'shard-*/PLAN.json' \
+            --include 'shard-*/BATCH_SUMMARY.json' \
+            --include 'shard-*/RESULTS.jsonl' \
+            --include 'shard-*/receipts/*.BOUNDS.json' \
+            --include 'shard-*/receipts/*.NORMALIZATION.json' \
+            --include 'shard-*/receipts/*.DENSE.json' \
+            --retries 3 --checkers 16 --transfers 12
+          python -m tools.corpus.reconcile_corpus4008_dense_normalization_1024_v1 \
+            --master "$root/selection.json" \
+            --shards "$root/shards" --output "$root/out"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-dense1024-global/out"
+          s=json.loads((root/"CORPUS4008_DENSE1024_NORMALIZATION_SUMMARY_V1.json").read_text())
+          assert s["source_count"]==1024
+          assert s["training_authorized"] is False
+          assert s["per_head_training_admitted_count"]==0
+          print("## All 1,024 original source-dense numerical trials reconciled")
+          print("Whole imported-vertex/bone/skin numeric successes:",s["imported_source_math_success_count"])
+          print("Failures kept separate:",s["source_failure_reasons"])
+          print("Raw imported vertices:",s["imported_vertex_count_total"])
+          print("Imported rest-bone matrices:",s["imported_bone_rest_matrix_count_total"])
+          print("Sparse vertex-group weight entries:",s["imported_sparse_influence_entries_total"])
+          print("Source anomalies:",s["source_risk_feature_counts"])
+          print("Max relative roundtrip error:",s["max_imported_vertex_coordinate_roundtrip_relative_error"])
+          print("No original source rig, deformation, semantics, Graphics, license or training PASS.")
+          PY
+      - name: Persist global typed source mathematical evidence privately
+        if: always()
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-dense1024-global/out"
+          if test -s "$RCLONE_CONFIG" && test -f "$root/CORPUS4008_DENSE1024_NORMALIZATION_SUMMARY_V1.json"; then
+            rclone copy "$root" "$PRIVATE_OUTPUT" --checksum --retries 3
+            echo 'SHA-bound original source math evidence privately persisted; no training or materialization admission.' >> "$GITHUB_STEP_SUMMARY"
+          fi

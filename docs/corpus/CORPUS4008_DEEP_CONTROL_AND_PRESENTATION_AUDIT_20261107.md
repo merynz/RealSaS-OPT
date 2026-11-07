@@ -102,3 +102,16 @@ The first render composition had only 2.9% alpha occupancy and 1.47% flat-vs-cel
 Stylized graphics are exploratory `STYLIZED_...` records; do not overwrite source RGB or assume 2D-art appearance. Future contact sheets must cover more morphologies (including open components, non-human and attached props), held-out poses, readable body/accessory framing, source alpha and rendered evidence correspondence.
 
 **Remaining P0:** independent native authored-rig source graph/intervention court; pose/IK/FK behavior; per-vertex deformation influence; source material/texture parity; anatomically qualified cameras; full multiview visual courts; per-target semantic/graphics/motion admission. No merges or model training from this branch.
+
+
+## Adjacent PR379 source recovery closure — all 32 shard job receipts (2026-11-07)
+
+Evidence: [Hosted 32-shard run 42374046073](https://github.com/merynz/RealSaS-OPT/actions/runs/42374046073). Independently enumerated each shard's serialized `RealSaS.Corpus4008PinnedGithubOriginalShard.v1` summary from the job logs; no reliance on green job status alone.
+
+- Total eligible missing-path **historical non-holdout** original identities attempted: **3,214 / 3,214**, all 32 shards completed, `deferred_count=0` for every shard.
+- SHA-verified source identities staged or **cached and reverified**: **3,192 / 3,214**, totaling **9,461,446,736 verified source bytes** across successful rows. Cached records must not be double-counted as newly downloaded originals.
+- Typed failures: **19 HTTP 404** and **3 original files exceeding the 64 MiB bounded recovery cap**; **22** eligible source identities remain unresolved.
+- The additional **135 originally missing external holdout** identities remain excluded from this train-candidate wave by design. There were historically **659** Master source-path matches already in Drive, but path presence is not independent full SHA/source-render truth.
+- Every PR379 job succeeded in an *operationally complete shard* sense, **not a 3,214/3,214 recovered-byte success**, and none of the 3,192 sources has automatically become a qualified character, source-RGB teacher or training-admitted target.
+
+**Required downstream:** separate recovery exception ledger for the 19 unavailable immutable URLs and 3 oversize originals, protected holdout audit, full SHA and current licensing/source rights parity, then scene, control, render, semantic and model-specific courts. Do not alter PR379's recovery code from this child branch without an independently reviewed change.

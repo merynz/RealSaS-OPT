@@ -1,0 +1,180 @@
+{
+  "schema": "RealSaS.FullControlRigCourts.v1",
+  "date": "2026-11-07",
+  "principle": "Observational IK != functioning IK. Native .blend rig != independently verified capability. Generated retarget motions != unique subject. Head supervision not required to be all-or-nothing.",
+  "evidence_origin_labels": [
+    "ORIGINAL_SOURCE",
+    "IMPORTED_SCENE",
+    "INDEPENDENT_SOURCE_INTERVENTION",
+    "HUMAN_REVIEWED_SEMANTIC_REGION",
+    "VERSIONED_CAPABILITY_PRIOR",
+    "STYLIZED_AUGMENTATION",
+    "REPRESENTATION_POLICY"
+  ],
+  "immutable_identity_fields": [
+    "source_original_sha256",
+    "canonical_asset_id",
+    "source_identity_cluster",
+    "original_format",
+    "importer_build_sha",
+    "authoring_blender_version",
+    "license_receipt_sha256",
+    "split"
+  ],
+  "evidence_outcomes": [
+    "PASS",
+    "FAIL",
+    "UNKNOWN",
+    "MASKED",
+    "NOT_APPLICABLE"
+  ],
+  "rig_quality_tiers": {
+    "RAW_GEOMETRY": "Meshes/vertex topology only",
+    "DEFORM_RIG": "Bone hierarchy and independently validated skin/bind; no source IK/FK claim",
+    "ANIMATED_DEFORM_RIG": "Deform rig + verified source-timed animation sample and evaluated deformation",
+    "IMPORTED_CONTROL_HINT": "Import shows controller/IK/driver/constraint data; effects not yet independently observed",
+    "VERIFIED_NATIVE_CONTROL": "Native source controller operation, FK/IK switching and response independently observed in authoring environment",
+    "VERIFIED_BEHAVIORAL_CONTROL": "Held-out target perturbations & per-bone/per-vertex/attachment/pixel consequences verified independently"
+  },
+  "control_courts": [
+    {
+      "id": "SOURCE_AUTHORED_CONTROLLER",
+      "checks": [
+        "native file provenance",
+        "full dependency pack",
+        "custom code sandbox, no unattended auto-run",
+        "controller object/pose-bone groups",
+        "user-facing control scope",
+        "authored keyable channels",
+        "control UI dependencies"
+      ]
+    },
+    {
+      "id": "IK_CHAIN_TOPOLOGY",
+      "checks": [
+        "solver type",
+        "effector",
+        "chain length",
+        "pole target",
+        "target parent",
+        "target-space transforms",
+        "constraint weights and mutes",
+        "cycles",
+        "stretch",
+        "limits"
+      ]
+    },
+    {
+      "id": "FK_IK_SWITCH",
+      "checks": [
+        "control properties",
+        "switch sources",
+        "blend mode",
+        "snapping forward and reverse",
+        "matching end-effector frame",
+        "stability after repeated toggles"
+      ]
+    },
+    {
+      "id": "CAUSAL_CONTROL_RESPONSE",
+      "checks": [
+        "change one control input",
+        "measured bone world matrices",
+        "changed skin vertices with correspondence",
+        "attachment anchor world transforms",
+        "stable contact when intended",
+        "held-out poses",
+        "negative unaffected controls",
+        "no stretched/inverted mesh"
+      ]
+    },
+    {
+      "id": "DEFORMATION",
+      "checks": [
+        "bind-rest parity",
+        "skin vertex influence exactness",
+        "shape-key/corrective application",
+        "deformation under extreme poses",
+        "mesh topology identity",
+        "tangent/normal continuity"
+      ]
+    },
+    {
+      "id": "GRAPHICS",
+      "checks": [
+        "original material and packed/external textures",
+        "alpha and color-space parity",
+        "native image vs correct renderer",
+        "8 source/character camera views",
+        "depth/normal/face IDs",
+        "draw order/visibility",
+        "view/pose change",
+        "stylization not replacing source truth"
+      ]
+    },
+    {
+      "id": "SEMANTIC",
+      "checks": [
+        "real character type",
+        "morphology",
+        "source-face region support",
+        "anatomical or functional parts",
+        "source name hints are not labels",
+        "negative and UNKNOWN tags",
+        "designed affordance prior isolated from source truth"
+      ]
+    },
+    {
+      "id": "TRAINING",
+      "checks": [
+        "independent source right to ML use",
+        "dedup canonical cluster",
+        "protected split",
+        "consumer loss bound",
+        "target masks and uncertainty",
+        "no leaked teacher-side names at inference",
+        "evidence receipt hashes"
+      ]
+    }
+  ],
+  "model_truth_bindings": {
+    "IRIS_GEOMETRY": [
+      "source topology",
+      "native surface normals",
+      "UDF",
+      "only signed SDF when justified"
+    ],
+    "IRIS_SEMANTIC": [
+      "reviewed morphological concepts",
+      "source-face component/instance",
+      "versioned affordance prior",
+      "semantic view consistency"
+    ],
+    "IRIS_GRAPHICS": [
+      "native source RGB+alpha",
+      "occlusion order",
+      "ray stack",
+      "appearance across pose and view",
+      "reveal consequence"
+    ],
+    "TESSA": [
+      "animation-ready mesh",
+      "topology addressing",
+      "motion-conditioned deformation consequence"
+    ],
+    "AXIS": [
+      "source rig hierarchy",
+      "observed motion kinematics",
+      "native control graph if available",
+      "independent control response"
+    ],
+    "MIRA": [
+      "exact source skin influences",
+      "binding",
+      "measured held-out deformation"
+    ]
+  },
+  "acceptance_rule": "No family PASS inferred from historical rigged status, import count, source file name, stylized image, duplicate variant or generator-created reconstruction.",
+  "procedural_safety": "Open untrusted .blend only with Blender auto-execution disabled; sandbox and validate dependencies separately. Any script-dependent rig must be explicitly permitted, audited and executed only in isolated disposable environment.",
+  "current_proof_level": "DESIGNED_GATES_ONLY_NO_FULL_CONTROL_ASSET_ADMITTED"
+}

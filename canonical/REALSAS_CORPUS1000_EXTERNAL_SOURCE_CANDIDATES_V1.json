@@ -1,0 +1,542 @@
+{
+  "schema": "RealSaS.Corpus1000ExternalSourceCandidateRegistry.v1",
+  "date": "2026-11-07",
+  "policy": {
+    "minimum_distinct_fit_subjects_per_head": 1000,
+    "required_heads": [
+      "IRIS_GEOMETRY",
+      "IRIS_SEMANTIC",
+      "IRIS_GRAPHICS",
+      "TESSA",
+      "AXIS",
+      "MIRA"
+    ],
+    "counting_unit": "unique canonical source identity cluster per head, not clips, faces, cameras, views, generated styles or rig variants",
+    "new_external_candidates_are_training_authorized": false,
+    "raw_source_and_license_verification_required": true,
+    "per_asset_manual_and_numeric_visual_courts_required": true,
+    "cannot_add_candidate_pool_counts_together": true,
+    "ai_generated_source_assets_ineligible": true,
+    "inference_from_rig_skin_animated_is_not_permitted": true,
+    "target_specific_court_required": true
+  },
+  "sources": [
+    {
+      "id": "realsas_master_existing",
+      "name": "RealSaS Master V3 canonical selection",
+      "url": "https://github.com/merynz/RealSaS-OPT/pull/379",
+      "raw_candidate_count": 3993,
+      "count_unit": "historical selection rows",
+      "source_family": "Master existing 3765 Objaverse, 191 Quaternius, 37 KayKit",
+      "kind": "existing",
+      "status": "CURRENT_AUDIT_REQUIRED",
+      "license": "Historical legal records must undergo contemporary per-asset commercial training rights revalidation",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "critical_gaps": [
+        "real character-vs-prop",
+        "source RGBA",
+        "native animator graph",
+        "functional IK",
+        "real source motion consequences",
+        "texture dependencies",
+        "morphology",
+        "semantic truth"
+      ]
+    },
+    {
+      "id": "linzhan_objaverse_xl_rigged_animated",
+      "name": "Objaverse-XL Rigged & Animated Subset",
+      "url": "https://huggingface.co/datasets/Linzhan/Objaverse-XL-Rigged-Animated",
+      "renders_url": "https://huggingface.co/datasets/Linzhan/Objaverse-XL-Rigged-Animated-Renders",
+      "raw_candidate_count": 7373,
+      "count_unit": "GLB asset entries; 5,305 XL GitHub + 2,068 Objaverse1/Sketchfab identifiers",
+      "source_family": "Objaverse / Objaverse-XL",
+      "kind": "external_high_priority",
+      "status": "SOURCE_IDS_RIGHTS_AND_DEDUP_PENDING",
+      "license": "mixed per object: no blanket permission; metadata ODC-BY only; original rights must be resolved",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "structural_metadata": {
+        "rig_plus_joint_driven_animation_assets": 7373,
+        "single_kinematic_tree": 7128,
+        "animation_clips": 16190,
+        "object_only_motion_clips": 5615,
+        "near_static_clips": 803,
+        "median_joints": 44
+      },
+      "critical_gaps": [
+        "original source/license provenance",
+        "effective object source URL",
+        "same SHA as Master",
+        "character class",
+        "source vs transcoded GLB parity",
+        "scene original textures",
+        "stylized camera/pose",
+        "controller absence may be baked"
+      ]
+    },
+    {
+      "id": "magicarticulate_articulation_xl2",
+      "name": "MagicArticulate Articulation-XL2.0",
+      "url": "https://github.com/Seed3D/MagicArticulate",
+      "raw_candidate_count": 48000,
+      "count_unit": "approximate source dataset models, paper describes over 48K; not commercial qualified",
+      "source_family": "Objaverse-XL derivatives",
+      "kind": "external_rig_skin_research",
+      "status": "LINEAGE_LICENSE_SOURCE_SCENE_PENDING",
+      "license": "Upstream per-object rights unresolved; derivative dataset license does not grant underlying rights",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "critical_gaps": [
+        "overlap with Master and Linzhan",
+        "source-native FBX/GLB binding",
+        "no primary animation/control guarantee",
+        "human/animal/machine/prop category split",
+        "rights"
+      ]
+    },
+    {
+      "id": "anymate_230k",
+      "name": "Anymate",
+      "url": "https://github.com/yfde/Anymate",
+      "raw_candidate_count": 230000,
+      "count_unit": "paper reported rigging/skin examples, not full character source scenes",
+      "source_family": "mixed research-source models",
+      "kind": "external_rig_skin_research",
+      "status": "RESEARCH_REFERENCE_UNTIL_ORIGINAL_RIGHTS_CONFIRMED",
+      "license": "Per-source/commercial training rights not established from code or paper",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "critical_gaps": [
+        "not source RGB",
+        "processed point cloud/vox instead of original mesh scene",
+        "unclear original character class",
+        "may contain generated assets",
+        "source rights and overlap"
+      ]
+    },
+    {
+      "id": "tailorrig_39073",
+      "name": "TailorRig dataset",
+      "url": "https://huggingface.co/datasets/tencent/TailorRig",
+      "raw_candidate_count": 39073,
+      "count_unit": "derived rigged humanoid examples over four subcollections",
+      "source_family": "RigNet, HumanRig, Articulation-XLv2, VRoid",
+      "kind": "external_research_only",
+      "status": "FILTER_AI_GENERATED_HUMANRIG_AND_CHECK_LICENSE",
+      "license": "Upstream rights heterogeneous; not blanket commercial training approved",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "AXIS",
+        "MIRA"
+      ],
+      "critical_gaps": [
+        "HumanRig 11,419 AI-generated examples excluded by RealSaS corpus policy",
+        "strong humanoid bias",
+        "NPZ derivative not source scene/appearance",
+        "Articulation overlap",
+        "VRoid asset policy"
+      ]
+    },
+    {
+      "id": "quaternius_cc0_expansion",
+      "name": "Quaternius CC0 older packs and any verified new non-overlap releases",
+      "url": "https://quaternius.com/",
+      "license_url": "https://quaternius.com/license.html",
+      "raw_candidate_count": null,
+      "count_unit": "packs; actual source subjects must be enumerated",
+      "source_family": "Quaternius",
+      "kind": "curated_stylized_high_priority",
+      "status": "PACK_VERSION_LICENSE_SHA_AND_OVERLAP_PENDING",
+      "license": "Historical packs may be CC0; 2026-08-28 QAL governs later packs only when labeled, standalone redistribution restriction",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "critical_gaps": [
+        "existing Master includes 191 entries",
+        "count unique underlying rigs, meshes, and identities not outfits",
+        "style/source RGB comparison",
+        "source-specific split and rights"
+      ]
+    },
+    {
+      "id": "kaykit_cc0_expansion",
+      "name": "KayKit CC0 animation and character packs",
+      "url": "https://kaylousberg.itch.io/",
+      "raw_candidate_count": null,
+      "count_unit": "character assets, not 161 retargetable clips",
+      "source_family": "KayKit",
+      "kind": "curated_stylized_high_priority",
+      "status": "PACK_VERSION_LICENSE_SHA_AND_OVERLAP_PENDING",
+      "license": "Pack-specific CC0 rights and original asset receipts required",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "critical_gaps": [
+        "existing Master includes 37 entries",
+        "animations retargeted to same rigs are not new subjects",
+        "morphology variety",
+        "original authored IK may not export"
+      ]
+    },
+    {
+      "id": "kenney_animated_characters",
+      "name": "Kenney Animated Characters series",
+      "url": "https://kenney.nl/assets?series=Animated+Characters",
+      "raw_candidate_count": null,
+      "count_unit": "source character identities, variants and textures individually deduped",
+      "source_family": "Kenney",
+      "kind": "curated_stylized_candidate",
+      "status": "ORIGINAL_PACK_LICENSE_SHA_AUDIT_REQUIRED",
+      "license": "Pack-specific CC0, source archive copy and terms receipt required",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "AXIS",
+        "MIRA"
+      ],
+      "critical_gaps": [
+        "small number of common underlying skeletons",
+        "humanoid-only bias",
+        "material textures and animation binding"
+      ]
+    },
+    {
+      "id": "poly_pizza_cc0_character",
+      "name": "Poly Pizza CC0 People & Characters filter",
+      "url": "https://poly.pizza/explore/People-and-Characters?lic=1",
+      "raw_candidate_count": null,
+      "count_unit": "third-party individual CC0 asset candidates",
+      "source_family": "multi-creator incl. Quaternius",
+      "kind": "external_discovery_only",
+      "status": "ORIGINAL_AUTHOR_LICENSE_SHA_AND_DUPLICATE_CHECK",
+      "license": "Per-object CC0 must be checked; aggregation listing not independent license grant",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "critical_gaps": [
+        "high reuse of Quaternius base assets",
+        "skeletal action not guaranteed",
+        "original scene/provenance"
+      ]
+    },
+    {
+      "id": "rig_net_2703",
+      "name": "RigNet ModelsResource-RigNetv1",
+      "url": "https://github.com/zhan-xu/RigNet",
+      "raw_candidate_count": 2703,
+      "count_unit": "rigged video game character dataset models",
+      "source_family": "Models Resource characters",
+      "kind": "research_reference_only",
+      "status": "COMMERCIAL_CHARACTER_IP_UNRESOLVED",
+      "license": "Underlying game character copyright and commercial training rights not established",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "critical_gaps": [
+        "licensed character rights",
+        "skeleton/skin source parity",
+        "some models from copyrighted games"
+      ]
+    },
+    {
+      "id": "deformingthings4d_1972",
+      "name": "DeformingThings4D",
+      "url": "https://github.com/rabbityl/DeformingThings4D",
+      "raw_candidate_count": 1972,
+      "count_unit": "animation sequences, NOT distinct source character subjects",
+      "source_family": "synthetic deforming humanoid/animal sequences",
+      "kind": "research_reference_only",
+      "status": "NONCOMMERCIAL_SOURCE_NOT_PRODUCT_TRAIN",
+      "license": "Dataset research terms, code non-commercial; commercial training not cleared",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "TESSA",
+        "MIRA",
+        "IRIS_GEOMETRY"
+      ],
+      "critical_gaps": [
+        "commercial license",
+        "original artist rights",
+        "number of distinct subjects far smaller than clip count"
+      ]
+    },
+    {
+      "id": "3dcompatpp_10009",
+      "name": "3DCoMPaT++",
+      "url": "https://3dcompat-dataset.org/v2/",
+      "raw_candidate_count": 10009,
+      "count_unit": "3D shapes, many non-character object categories",
+      "source_family": "compositional object semantics/materials",
+      "kind": "semantic_method_research_only",
+      "status": "NOT_CHARACTER_QUOTA_AND_LICENSE_PENDING",
+      "license": "Dataset-specific license review required",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "critical_gaps": [
+        "object/prop predominance",
+        "noncharacter styles not puppet truth",
+        "source rights",
+        "rig motion not present"
+      ]
+    },
+    {
+      "id": "mixamo",
+      "name": "Adobe Mixamo",
+      "url": "https://helpx.adobe.com/tr/creative-cloud/faq/mixamo-faq.html",
+      "license_url": "https://wwwimages2.adobe.com/content/dam/cc/tr/legal/servicetou/Mixamo-Addl-Terms-tr_TR_20210623.pdf",
+      "raw_candidate_count": null,
+      "count_unit": "excluded",
+      "source_family": "Adobe Mixamo",
+      "kind": "blocked",
+      "status": "EXCLUDE_FROM_ALL_AI_ML_TRAINING_AND_TEST",
+      "license": "Adobe Mixamo Additional Terms explicitly prohibit AI/ML training/testing/development from service outputs",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [],
+      "critical_gaps": [
+        "not a training data source"
+      ]
+    },
+    {
+      "id": "blender_studio_rain_v3",
+      "name": "Blender Studio Rain v3",
+      "url": "https://studio.blender.org/characters/rain/v3/",
+      "raw_candidate_count": 1,
+      "count_unit": "canonical native production-rig subject, not rig versions",
+      "source_family": "Blender Studio",
+      "kind": "native_full_control_gold_candidate",
+      "status": "ORIGINAL_BLEND_ACQUISITION_AND_LICENSE_RECEIPT_PENDING",
+      "license": "Official page CC-BY: attribution required; commercial/ML rights and any bundled third-party dependencies need individual documentation",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "control_features_claimed": [
+        "IK/FK toggle and snapping",
+        "stretchy IK limbs/spine",
+        "FK hinge",
+        "IK parent switching",
+        "layered face controls",
+        "shape-key correctives"
+      ],
+      "critical_gaps": [
+        "native .blend exact SHA",
+        "independent actual IK/FK manipulation",
+        "Blender bundled python script security sandbox",
+        "model/render/source rights",
+        "dedup lineage"
+      ]
+    },
+    {
+      "id": "blender_studio_snow_v4",
+      "name": "Blender Studio Snow v4",
+      "url": "https://studio.blender.org/characters/snow/v4/",
+      "raw_candidate_count": 1,
+      "count_unit": "canonical native production-rig subject",
+      "source_family": "Blender Studio",
+      "kind": "native_full_control_gold_candidate",
+      "status": "ORIGINAL_BLEND_ACQUISITION_AND_LICENSE_RECEIPT_PENDING",
+      "license": "Official page CC-BY; attribution and original source asset receipts required",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "control_features_claimed": [
+        "IK/FK toggle and snapping",
+        "stretchy IK",
+        "FK hinge",
+        "IK parent switching",
+        "face shape-key correctives"
+      ],
+      "critical_gaps": [
+        "Blender 4.1 authored file compatibility",
+        "baked vs native controller parity",
+        "source rights",
+        "real response/animation court"
+      ]
+    },
+    {
+      "id": "blender_studio_critter_v1",
+      "name": "Blender Studio Critter",
+      "url": "https://studio.blender.org/characters/critter/v1/",
+      "raw_candidate_count": 1,
+      "count_unit": "canonical nonhumanoid production-rig subject",
+      "source_family": "Blender Studio",
+      "kind": "native_full_control_gold_candidate",
+      "status": "ACCESS_AND_ORIGINAL_BLEND_COURT_PENDING",
+      "license": "Official page CC-BY; verify attribution and dependencies",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "control_features_claimed": [
+        "reverse FK setup described",
+        "pose library",
+        "custom scene controls"
+      ],
+      "critical_gaps": [
+        "Blender 5.0 or later required",
+        "regeneration from metarig is not source equivalent",
+        "custom scripts must be sandboxed",
+        "download access",
+        "real constraints and response evidence"
+      ]
+    },
+    {
+      "id": "blender_studio_one_v1",
+      "name": "Blender Studio One",
+      "url": "https://studio.blender.org/characters/one/v1/",
+      "raw_candidate_count": 1,
+      "count_unit": "canonical stylized nonhuman production-rig subject",
+      "source_family": "Blender Studio",
+      "kind": "native_full_control_gold_candidate",
+      "status": "ACCESS_AND_ORIGINAL_BLEND_COURT_PENDING",
+      "license": "Official page CC-BY; verify asset rights",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "control_features_claimed": [
+        "CloudRig generated production rig",
+        "tendril deformation controls in original"
+      ],
+      "critical_gaps": [
+        "Blender 5.0 required",
+        "metarig regeneration differs",
+        "nonnative control machinery",
+        "source-authored runtime verification"
+      ]
+    },
+    {
+      "id": "mesh2motion_original_control_rigs",
+      "name": "Mesh2Motion manually created .blend control rigs",
+      "url": "https://github.com/Mesh2Motion/mesh2motion-assets/tree/main/rigs",
+      "raw_candidate_count": 9,
+      "count_unit": "rig-template families; NOT nine independent character subjects without model binding",
+      "source_family": "Mesh2Motion original source art",
+      "kind": "native_multimorph_control_oracle",
+      "status": "CC0_AUTHOR_STATEMENT_VERIFIED_FILE_SHA_INTERVENTION_PENDING",
+      "license": "Repository CC0; verify original artwork file per file and dependencies",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "control_features_claimed": [
+        "manually authored native Blender rig sources",
+        "skeletons for bird dragon fox horse human kaiju shark snake spider",
+        "custom shapes and source actions"
+      ],
+      "critical_gaps": [
+        "actual IK constraint and controller census still unmeasured",
+        "rig template vs distinct model lineage",
+        "binding to native model",
+        "authored action response",
+        "commercial derivative rights for imported third-party packs"
+      ]
+    },
+    {
+      "id": "cartoon_knight_lucasdmok",
+      "name": "The Cartoon Knight Blender rig",
+      "url": "https://lucasdmok.gumroad.com/l/UsjRz",
+      "raw_candidate_count": 1,
+      "count_unit": "one unique rigged stylized character",
+      "source_family": "Lucas de Miguel",
+      "kind": "native_full_control_candidate",
+      "status": "SOURCE_DOWNLOAD_LICENSE_RECEIPT_AND_SHA_PENDING",
+      "license": "Listing says CC-BY 4.0, but also has inconsistent free-use wording; preserve license document and resolve before product training",
+      "additional_unique_subjects_proven": 0,
+      "head_opportunity": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "control_features_claimed": [
+        "limb IK/FK switching",
+        "independently animated arms/legs"
+      ],
+      "critical_gaps": [
+        "free version textures missing; Graphics source RGB blocked",
+        "no face/finger controls",
+        "download+rights proof",
+        "IK/FK intervention"
+      ]
+    }
+  ]
+}

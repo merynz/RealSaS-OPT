@@ -79,14 +79,23 @@ jobs:
             sleep 45
           done
           test "$ready" = yes
+          # Download ONLY completed existing receipts; no raw source or rerender.
+          # Explicit source copy prevents silent omission of shard-*/PLAN.json
+          # observed during the first global readback. This is a data-join repair.
           rclone copy "$SOURCE" "$root/shards" \
-            --include 'shard-*/PLAN.json' \
-            --include 'shard-*/BATCH_SUMMARY.json' \
-            --include 'shard-*/RESULTS.jsonl' \
-            --include 'shard-*/receipts/*.BOUNDS.json' \
-            --include 'shard-*/receipts/*.NORMALIZATION.json' \
-            --include 'shard-*/receipts/*.DENSE.json' \
+            --exclude 'shard-*/logs/**' \
             --retries 3 --checkers 16 --transfers 12
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-dense1024-global/shards"
+          required=("PLAN.json","BATCH_SUMMARY.json","RESULTS.jsonl")
+          missing=[f"shard-{i}/{name}"
+                   for i in range(32) for name in required
+                   if not (root/f"shard-{i}"/name).is_file()]
+          assert not missing, f"INCOMPLETE_SHARD_RECEIPT_READBACK:{missing}"
+          print("EXACT_32_SHARD_SOURCE_RECEIPT_FILESET_PRESENT")
+          PY
           python -m tools.corpus.reconcile_corpus4008_dense_normalization_1024_v1 \
             --master "$root/selection.json" \
             --shards "$root/shards" --output "$root/out"

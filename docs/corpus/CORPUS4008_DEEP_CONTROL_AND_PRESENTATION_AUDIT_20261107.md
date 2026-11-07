@@ -36,9 +36,9 @@ Status: **pre-training imported observation + experimental lookdev; independent 
 
 `tools/corpus/blender_corpus4008_lookdev_study_v1.py` renders the SAME original-byte source import/rest and SAME source-space orthographic diagnostic camera three times:
 
-- `SOURCE_MATERIAL_DIAGNOSTIC`: Blender Eevee with basic diagnostic lighting. This is NOT native-source RGB parity, even if textures appear.
-- `STYLIZED_FLAT_DIAGNOSTIC`: Blender Workbench material-color flat shading/cavity, which may discard textures; NOT source-appearance truth.
-- `STYLIZED_OUTLINE_DIAGNOSTIC`: same flat shading with object outlines; NOT source-appearance truth.
+- `SOURCE_MATERIAL_DIAGNOSTIC`: CPU Cycles with basic diagnostic lighting. This is NOT native-source RGB parity, even if textures appear.
+- `STYLIZED_FLAT_DIAGNOSTIC`: CPU Cycles emission-style flattened base color with linked textures if available, which may discard textures; NOT source-appearance truth.
+- `STYLIZED_CEL_3BAND_DIAGNOSTIC`: CPU Cycles three-band cel lighting from normals, multiplication with source base-color graph where linked; NOT source-appearance truth.
 
 All PNGs receive SHA256 hashes, and importer version/camera transform are included in the JSON. One source-space diagnostic view is never labeled FRONT/UP. **NO training data admitted.**
 

@@ -21,7 +21,7 @@ permissions:
   contents: read
 concurrency:
   group: corpus370-native-mechanical-raster-join-contracts-v14-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   native-control-to-rgba-independent-court:
     runs-on: ubuntu-24.04

@@ -106,7 +106,7 @@ def test_prepared_plan_sha_cannot_be_derived_from_different_bounds(tmp_path):
     j=json.loads(p.read_text())
     j["source_world_max"][0]+=1.
     dump(p,j)
-    with pytest.raises(ValueError,match="BOUNDS_RECEIPT_SHA_DRIFT"):
+    with pytest.raises(ValueError,match="SOURCE_BOUND_REPLAY_DRIFT"):
         reconcile(root,selection,tmp_path/"out",
                   expected_master_count=32,expected_master_sha=sha(selection))
 

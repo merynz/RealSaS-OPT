@@ -151,7 +151,8 @@ def render_orbit(bpy, *, source: Path, expected_sha256: str,
                 "CEL_VIEW_RENDER_EMPTY")
 
         target_path = output/("inked_2d_orbit_%02d.png" % i)
-        ink = image_ink(cel_path, target_path)
+        # Non-Blender postprocess generates inked 2D images using Pillow;
+        # do not assume Blender's bundled Python has third-party PIL.
         results.append({
             "view_id": "SOURCE_ORBIT_%02d" % i,
             "source_space_orbit_degrees": 45*i,
@@ -161,10 +162,10 @@ def render_orbit(bpy, *, source: Path, expected_sha256: str,
             "source_reference_png": source_path.name,
             "source_reference_sha256": sha(source_path),
             "cel_candidate_png": cel_path.name,
-            "cel_candidate_sha256": ink["source_stylized_sha256"],
+            "cel_candidate_sha256": sha(cel_path),
             "inked_2d_candidate_png": target_path.name,
-            "inked_2d_candidate_sha256": ink["inked_target_sha256"],
-            "inked_2d_alpha_identical_to_cel": True,
+            "inked_2d_candidate_sha256": None,
+            "inked_2d_alpha_identical_to_cel": None,
             "view_2d_art_truth_admitted": False,
             "source_material_parity_qualified": False,
         })
@@ -172,7 +173,7 @@ def render_orbit(bpy, *, source: Path, expected_sha256: str,
             == source_mesh_objects, "SOURCE_MESH_CHANGED")
     result = {
         "schema": SCHEMA,
-        "status": "EIGHT_SOURCE_SPACE_STYLIZED_VIEWS_DIAGNOSTIC_ONLY",
+        "status": "EIGHT_SOURCE_SPACE_SOURCE_AND_CEL_READY_AWAITING_INK",
         "asset_id": asset_id, "candidate_id": candidate_id,
         "source_sha256": expected_sha256,
         "source_format": source.suffix.lower(),
@@ -181,6 +182,7 @@ def render_orbit(bpy, *, source: Path, expected_sha256: str,
         "style_contract_sha256": reference_policy_sha256,
         "style_class_candidate": "SOURCE_BOUND_2D_GAME_ART_INK_TOON",
         "style_origin": "DETERMINISTIC_NON_GENERATIVE_RENDER",
+        "ink_postprocess_completed": False,
         "source_art_native_2d": False,
         "original_source_rgb_authority_qualified": False,
         "graphics_style_2d_truth_qualified": False,
@@ -207,6 +209,7 @@ def render_orbit(bpy, *, source: Path, expected_sha256: str,
         "views": len(results),
         "style": VERSION,
         "all_2d_style_supervision_unqualified": True,
+        "ink_postprocess_completed": False,
         "training_authorized": False,
     }, sort_keys=True))
     return result

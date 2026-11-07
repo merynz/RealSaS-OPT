@@ -33,7 +33,7 @@ jobs:
       - name: Source only, no native oracle leakage, independent immutable scoring
         run: |
           set -euo pipefail
-          python -m pip install -q --disable-pip-version-check pytest
+          python -m pip install -q --disable-pip-version-check pytest numpy
           PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_blind_derived_ik_v1.py tests/corpus/test_corpus4008_derived_rigprogram_adapter_v1.py tests/corpus/test_corpus4008_ik_frontier_ablation_v1.py
           python -m compileall -q tools/corpus/derive_corpus4008_rigprogram_prior_v1.py tools/corpus/blender_corpus4008_blind_ik_discovery_v1.py tools/corpus/blender_corpus4008_derived_ik_target_assay_v1.py tools/corpus/experimental_axis_derived_control_adapter_v1.py
 

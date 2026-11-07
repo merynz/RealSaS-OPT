@@ -23,7 +23,7 @@ from tools.corpus.blender_corpus4008_native_source_probe_v1 import (
 
 SCHEMA = "RealSaS.Corpus4008LookdevStudy.v1"
 VIEWS = ("SOURCE_MATERIAL_DIAGNOSTIC",
-         "STYLIZED_FLAT_DIAGNOSTIC", "STYLIZED_OUTLINE_DIAGNOSTIC")
+         "STYLIZED_FLAT_DIAGNOSTIC", "STYLIZED_CEL_3BAND_DIAGNOSTIC")
 
 
 def bound_world_points(bpy):
@@ -74,7 +74,10 @@ def configure_scene(bpy, resolution):
 
 def configure_source_material_diagnostic(bpy, center):
     scene = bpy.context.scene
-    scene.render.engine = "BLENDER_EEVEE_NEXT"
+    scene.render.engine = "CYCLES"
+    scene.cycles.device = "CPU"
+    scene.cycles.samples = 12
+    scene.cycles.use_denoising = False
     scene.render.image_settings.color_mode = "RGBA"
     # Lighting is not source-native lighting and does not claim RGB fidelity.
     from mathutils import Vector
@@ -94,16 +97,81 @@ def configure_source_material_diagnostic(bpy, center):
             "-Z", "Y").to_euler()
 
 
-def configure_flat_study(bpy, outline):
+
+def _flat_or_cel_material(original, *, cel):
+    """Clone existing shader graph and reuse linked base color if present.
+
+    The original material is retained untouched; lighting/style output differs.
+    This diagnostic material is never a native appearance reference.
+    """
+    import bpy
+    from mathutils import Vector
+    material = original.copy()
+    material.name = "STUDY_" + ("CEL" if cel else "FLAT") + "_" + original.name
+    material.use_nodes = True
+    tree = material.node_tree
+    output = tree.nodes.new("ShaderNodeOutputMaterial")
+    output.is_active_output = True
+    emission = tree.nodes.new("ShaderNodeEmission")
+    base = None
+    for n in tree.nodes:
+        if n.type == "BSDF_PRINCIPLED":
+            base = n.inputs.get("Base Color")
+            break
+    color_source = base.links[0].from_socket if base is not None and base.is_linked else None
+    if color_source is not None:
+        if cel:
+            mix = tree.nodes.new("ShaderNodeMixRGB")
+            mix.blend_type = "MULTIPLY"
+            mix.inputs[0].default_value = 1.0
+            tree.links.new(color_source, mix.inputs[1])
+            tree.links.new(mix.outputs[0], emission.inputs["Color"])
+        else:
+            tree.links.new(color_source, emission.inputs["Color"])
+    else:
+        rgba = (tuple(base.default_value) if base is not None
+                else tuple(original.diffuse_color))
+        if cel:
+            mix = tree.nodes.new("ShaderNodeMixRGB")
+            mix.blend_type = "MULTIPLY"
+            mix.inputs[0].default_value = 1.0
+            mix.inputs[1].default_value = rgba
+            tree.links.new(mix.outputs[0], emission.inputs["Color"])
+        else:
+            emission.inputs["Color"].default_value = rgba
+    if cel:
+        normal = tree.nodes.new("ShaderNodeNewGeometry")
+        dot = tree.nodes.new("ShaderNodeVectorMath")
+        dot.operation = "DOT_PRODUCT"
+        dot.inputs[1].default_value = Vector((0.4, -0.5, 0.77)).normalized()
+        tree.links.new(normal.outputs["Normal"], dot.inputs[0])
+        shift = tree.nodes.new("ShaderNodeMapRange")
+        shift.inputs["From Min"].default_value = -1.0
+        shift.inputs["From Max"].default_value = 1.0
+        tree.links.new(dot.outputs["Value"], shift.inputs["Value"])
+        ramp = tree.nodes.new("ShaderNodeValToRGB")
+        ramp.color_ramp.interpolation = "CONSTANT"
+        ramp.color_ramp.elements.remove(ramp.color_ramp.elements[1])
+        ramp.color_ramp.elements[0].position = 0
+        ramp.color_ramp.elements[0].color = (0.50, 0.50, 0.50, 1)
+        e1 = ramp.color_ramp.elements.new(0.35)
+        e1.color = (0.77, 0.77, 0.77, 1)
+        e2 = ramp.color_ramp.elements.new(0.72)
+        e2.color = (1, 1, 1, 1)
+        tree.links.new(shift.outputs["Result"], ramp.inputs["Fac"])
+        tree.links.new(ramp.outputs["Color"], mix.inputs[2])
+    tree.links.new(emission.outputs[0], output.inputs["Surface"])
+    return material
+
+
+def configure_flat_study(bpy, *, cel, original_materials):
     scene = bpy.context.scene
-    scene.render.engine = "BLENDER_WORKBENCH"
-    settings = scene.display.shading
-    settings.light = "STUDIO"
-    settings.color_type = "MATERIAL"
-    settings.show_shadows = True
-    settings.show_cavity = True
-    settings.cavity_type = "BOTH"
-    settings.show_object_outline = bool(outline)
+    scene.render.engine = "CYCLES"
+    scene.cycles.device = "CPU"
+    scene.cycles.samples = 8
+    scene.cycles.use_denoising = False
+    for obj, index, mat in original_materials:
+        obj.material_slots[index].material = _flat_or_cel_material(mat, cel=cel)
 
 
 def render_study(bpy, *, source, expected_sha256, asset_id,
@@ -120,12 +188,19 @@ def render_study(bpy, *, source, expected_sha256, asset_id,
     camera = diagnostic_camera(bpy, center, radius)
     scene = configure_scene(bpy, resolution)
     output.mkdir(parents=True, exist_ok=True)
+    original_materials = [
+        (o, i, slot.material)
+        for o in bpy.data.objects if o.type == "MESH"
+        for i, slot in enumerate(o.material_slots)
+        if slot.material is not None
+    ]
     outputs = []
     for mode in VIEWS:
         if mode == VIEWS[0]:
             configure_source_material_diagnostic(bpy, center)
         else:
-            configure_flat_study(bpy, outline=(mode == VIEWS[2]))
+            configure_flat_study(bpy, cel=(mode == VIEWS[2]),
+                                 original_materials=original_materials)
         filename = mode.lower() + ".png"
         path = output / filename
         scene.render.filepath = str(path)

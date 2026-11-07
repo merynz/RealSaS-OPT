@@ -182,6 +182,123 @@ def discover(blind_bones, *, max_depth=4, max_candidates=192):
     return result
 
 
+def discover_articulation_frontiers(
+    blind_bones, *, max_depth=5, max_candidates=512,
+):
+    """Ablation: internal joints of *source-only* weighted distal chains.
+
+    A joint on the path to a distal deform region may itself be a candidate
+    animator effector (e.g. a limb hinge or spine branch); native IK owners
+    and constraints are NOT consulted. This is an ablation inspired by a
+    weakness in the development rigs. It requires fresh, held-out native rigs
+    to evaluate generalization.
+    """
+    require(2<=max_depth<=6 and 1<=max_candidates<=512,
+            "FRONTIER_LIMITS")
+    parents=validate_bones(blind_bones)
+    by_id={b["bone_id"]:b for b in blind_bones}
+    initial=discover(blind_bones,max_depth=max_depth,max_candidates=512)
+    proposals=list(initial["proposals"])
+    source_by_chain={}
+    for p in proposals:
+        key=(p["end_bone_id"],tuple(p["chain_bone_ids"]))
+        source_by_chain[key]=p
+    # Candidate ends are strictly ancestors of a weighted distal leaf.
+    # Do NOT read body-part names, IK chain count, original native
+    # constraints, targets, poles, drivers or Controller collections.
+    frontier_ends={}
+    for base in initial["proposals"]:
+        distal=base["end_bone_id"]
+        dist=0
+        cur=parents[distal]
+        while cur is not None and dist<max_depth-1:
+            dist+=1
+            if cur not in frontier_ends or dist<frontier_ends[cur]:
+                frontier_ends[cur]=dist
+            cur=parents[cur]
+    for end_id,dist in frontier_ends.items():
+        ancestor_list=[]
+        cur=end_id
+        while cur is not None and len(ancestor_list)<max_depth:
+            b=by_id[cur]
+            if math.dist(b["head_source"],b["tail_source"])<=1e-9:
+                break
+            ancestor_list.append(cur)
+            cur=parents[cur]
+        if len(ancestor_list)<2:continue
+        for depth in range(2,len(ancestor_list)+1):
+            path=tuple(reversed(ancestor_list[:depth]))
+            key=(end_id,path)
+            if key in source_by_chain:continue
+            mass=sum(by_id[x]["skin_weight_mass"] for x in path)
+            motion=sum(by_id[x]["source_motion_curve_count"] for x in path)
+            reach=sum(math.dist(by_id[x]["head_source"],
+                                by_id[x]["tail_source"]) for x in path)
+            downstream_support=max(
+                (by_id[x["end_bone_id"]]["skin_influenced_vertices"]
+                 for x in initial["proposals"]
+                 if end_id in x["chain_bone_ids"]),
+                default=0)
+            score=(1.5*math.log1p(downstream_support)
+                   +.25*math.log1p(mass)
+                   +.15*math.log1p(motion)
+                   +.4*math.log1p(reach)
+                   -.07*(depth-2)-.32*dist)
+            require(math.isfinite(score),"FRONTIER_SCORE_NONFINITE")
+            item={
+                "end_bone_id":end_id,
+                "chain_bone_ids":list(path),
+                "path_length_bones":len(path),
+                "ik_control_kind_proposal":"IK_EFFECTOR",
+                "operator_proposal":"IK",
+                "candidate_score":round(score,9),
+                "candidate_family":"STRUCTURAL_ANCESTOR_FRONTIER",
+                "distance_from_weighted_distal_evidence":dist,
+                "candidate_input_families":[
+                    "JOINT_PARENT_FOREST","SOURCE_REST_GEOMETRY",
+                    "IMPORTED_SPARSE_SKIN_INFLUENCE_HINT",
+                    "SOURCE_ACTION_CURVE_COUNT_HINT"],
+                "contact_semantics":"UNKNOWN",
+                "axis_limits":"UNKNOWN",
+                "native_ik_owner_or_chain_used_in_proposal":False,
+                "source_mechanical_functionality_courted":False,
+                "representation_policy_admitted":False,
+            }
+            source_by_chain[key]=item
+    for item in proposals:
+        item["candidate_family"]="WEIGHTED_DEFORM_DISTAL"
+        item["distance_from_weighted_distal_evidence"]=0
+    proposals=list(source_by_chain.values())
+    proposals.sort(key=lambda x:(-x["candidate_score"],
+                                 x["path_length_bones"],
+                                 sha_payload(x["chain_bone_ids"])))
+    result={
+        "schema":SCHEMA,
+        "status":"SOURCE_GRAPH_SKIN_MOTION_IK_PRIORS_ONLY",
+        "source_joint_count":len(blind_bones),
+        "source_deform_weighted_distal_count":initial[
+            "source_deform_weighted_distal_count"],
+        "source_internal_frontier_candidate_joint_count":
+            len(frontier_ends),
+        "discovered_candidate_count":min(max_candidates,len(proposals)),
+        "max_chain_depth_bones":max_depth,
+        "candidate_strategy":
+            "SOURCE_WEIGHTED_DISTAL_PLUS_STRUCTURAL_ANCESTOR_FRONTIERS",
+        "previous_baseline_candidate_sha256":
+            initial["blind_proposal_sha256"],
+        "proposals":proposals[:max_candidates],
+        "source_rig_ik_constraint_visibility":"BLINDED",
+        "source_IK_FK_controller_truth":"UNKNOWN",
+        "validated_working_derived_IK_count":0,
+        "AXIS_RIGPROGRAM_control_proposal_not_compiler_repair":True,
+        "MIRA_skin_deformation_consequence":"NOT_EVALUATED",
+        "commercial_training_rights":"UNKNOWN",
+        "source_training_admitted":False,
+    }
+    result["blind_proposal_sha256"]=sha_payload(result)
+    return result
+
+
 def oracle_evaluate(blind_proposals, truth_rows, *, top_k=32):
     """Post-freeze research scoring. Oracle is forbidden in discover()."""
     require(blind_proposals["schema"]==SCHEMA

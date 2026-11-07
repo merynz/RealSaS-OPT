@@ -40,7 +40,8 @@ def case(tmp_path,prefix_only=False,wrong_digest=False):
 
 def check(tmp_path,paths):
     return run(*paths,tmp_path/"out",expected_pairs=1,
-               expected_routes_per_source=1,expected_roster_count=2)
+               expected_routes_per_source=1,expected_roster_count=2,
+               expected_roster_sha=sha(paths[2]))
 
 def test_proven_same_source_keeps_two_records_and_hard_holdout(tmp_path):
     paths=case(tmp_path)

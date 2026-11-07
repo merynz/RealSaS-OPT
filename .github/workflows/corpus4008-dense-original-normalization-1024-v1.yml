@@ -1,0 +1,140 @@
+name: corpus4008-dense-original-normalization-1024-v1
+
+# Source-world mathematical consistency for all 1024 unique imported FIT
+# originals. Not source-native rig parity, skin deformation, 2D art, or
+# per-head training admission. 32 disjoint source shards, max 8 in parallel.
+on:
+  push:
+    branches: [corpus4008-dense-normalization-1024-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-dense-original-normalization-1024-v1.yml'
+      - 'tools/corpus/blender_corpus4008_dense_source_consistency_v1.py'
+      - 'tools/corpus/plan_corpus4008_dense_normalization_shard_v1.py'
+      - 'tools/corpus/run_corpus4008_dense_normalization_shard_v1.py'
+      - 'tests/corpus/test_corpus4008_dense_normalization_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-dense-1024-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  dense-contract-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate source SHA, FIT firewall, sparse weights and rest matrix replay
+        run: |
+          set -euo pipefail
+          python -m pip install -q --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_dense_normalization_v1.py
+          python -m compileall -q \
+            tools/corpus/blender_corpus4008_dense_source_consistency_v1.py \
+            tools/corpus/plan_corpus4008_dense_normalization_shard_v1.py \
+            tools/corpus/run_corpus4008_dense_normalization_shard_v1.py
+
+  source-scene-full-vertex-bone-skin-consistency:
+    needs: dense-contract-tests
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 105
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+    env:
+      SHARD: ${{ matrix.shard }}
+      RCLONE_CONFIG: /tmp/realsas-c4008-dense-original-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/dense_source_normalization_1024_v1/${{ github.run_id }}-${{ github.run_attempt }}/shard-${{ matrix.shard }}
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require exact original-source evidence private Drive access
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "NO_PRIVATE_SOURCE_EVIDENCE__NO_DENSE_NORMALIZATION" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Install pinned Blender only once per 32-source shard worker
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone xz-utils libegl1 libgl1 libgl1-mesa-dri libopengl0
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          root="$RUNNER_TEMP/c4008-dense"
+          mkdir -p "$root/bin" "$root/source" "$root/output"
+          rclone copyto "$REMOTE/audits/parallel_32shard_readback_v1/42395402328-1/shard-$SHARD/SHARD_READBACK_SUMMARY.json" \
+            "$root/source_readback_summary.json" --retries 3
+          rclone copyto "$REMOTE/audits/parallel_32shard_readback_v1/42395402328-1/shard-$SHARD/SHARD_TYPED_OBSERVATIONS.csv" \
+            "$root/source_readback.csv" --retries 3
+          python -m tools.corpus.plan_corpus4008_dense_normalization_shard_v1 \
+            --summary "$root/source_readback_summary.json" \
+            --observations "$root/source_readback.csv" \
+            --shard "$SHARD" --output "$root/PLAN.json"
+          cd "$root/bin"
+          curl -fL --retry 4 --max-time 300 https://download.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz -o blender.tar.xz
+          curl -fL --retry 4 --max-time 120 https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256 -o official.sha256
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,re
+          lines=[x for x in Path("official.sha256").read_text().splitlines()
+                 if 'blender-4.5.14-linux-x64.tar.xz' in x]
+          assert len(lines)==1
+          expected=re.findall('[0-9a-fA-F]{64}',lines[0])
+          assert len(expected)==1
+          with open('blender.tar.xz','rb') as f:
+              assert hashlib.file_digest(f,'sha256').hexdigest()==expected[0].lower()
+          PY
+          tar -xJf blender.tar.xz
+          printf '050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8  %s\n' "$root/bin/blender-4.5.14-linux-x64/blender" | sha256sum -c
+      - name: Run SHA-pinned dense parity study across 32 unique original FIT imports
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-dense"
+          PYTHONPATH=. python -m tools.corpus.run_corpus4008_dense_normalization_shard_v1 \
+            --root "$root" \
+            --plan "$root/PLAN.json" \
+            --originals-root "$REMOTE/audits/original_recovery_full_v1/42374046073-1" \
+            --blender "$root/bin/blender-4.5.14-linux-x64/blender" \
+            --script "$GITHUB_WORKSPACE/tools/corpus/blender_corpus4008_dense_source_consistency_v1.py" \
+            --output "$root/output"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-dense/output"
+          d=json.loads((root/"BATCH_SUMMARY.json").read_text())
+          assert d["source_count"]==32
+          assert d["training_authorized"] is False
+          print("## Dense source normalization evidence: shard",d["shard"])
+          print("Full original SHA-verified source import attempts:",d["source_count"])
+          print("Importer/mathematical consistency result:",d["status_counts"])
+          print("Native control/skin deformation/2D art/semantic/materialization: NOT APPROVED")
+          PY
+      - name: Persist source-bound typed receipts and import failures privately
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-dense/output"
+          if test -s "$RCLONE_CONFIG" && test -s "$root/RESULTS.jsonl"; then
+            rclone copy "$root" "$PRIVATE_OUTPUT" --checksum --retries 3
+            rclone copyto "$RUNNER_TEMP/c4008-dense/PLAN.json" "$PRIVATE_OUTPUT/PLAN.json" --retries 3
+            echo "Full source-vertex rest-bone and sparse influence numerical receipts private; zero training permissions." >> "$GITHUB_STEP_SUMMARY"
+          fi

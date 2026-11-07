@@ -1,0 +1,84 @@
+name: corpus4008-source-court-triage-v1
+
+# No raw asset import. Evidence-led per-source quality/risk queues, NOT teacher
+# admissibility or a character morphology classification.
+on:
+  push:
+    branches: [corpus4008-dense-normalization-1024-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-source-court-triage-v1.yml'
+      - 'tools/corpus/triage_corpus4008_source_courts_v1.py'
+      - 'tests/corpus/test_corpus4008_source_court_triage_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-source-court-triage-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  risk-triage-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source SHA/risk/rights UNKNOWN and false source truth tests
+        run: |
+          set -euo pipefail
+          python -m pip install -q --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_source_court_triage_v1.py
+          python -m compileall -q tools/corpus/triage_corpus4008_source_courts_v1.py
+  typed-source-review-priority:
+    needs: risk-triage-regressions
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c4008-source-triage-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      SOURCE_PATH: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/parallel_32shard_readback_v1/42395402328-1/global
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/source_court_review_triage_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require exact-private source observation lineage
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Produce 1024 source-by-source review queues from the SHA-pinned global matrix
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/c4008-triage"
+          mkdir -p "$root/input" "$root/out"
+          rclone copyto "$SOURCE_PATH/CORPUS4008_1024_SHARD_READBACK_SUMMARY_V1.json" \
+            "$root/input/summary.json" --retries 3
+          rclone copyto "$SOURCE_PATH/CORPUS4008_1024_SHARD_READBACK_MATRIX_V1.csv" \
+            "$root/input/matrix.csv" --retries 3
+          python -m tools.corpus.triage_corpus4008_source_courts_v1 \
+            --summary "$root/input/summary.json" \
+            --matrix "$root/input/matrix.csv" \
+            --output "$root/out"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os,json
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"c4008-triage/out/CORPUS4008_1024_SOURCE_REVIEW_TRIAGE_SUMMARY_V1.json"
+          r=json.loads(p.read_text())
+          assert r["source_count"]==1024 and r["training_authorized"] is False
+          print("## Source risk and independent court work queue")
+          print("Imported originals:",r["source_count"])
+          print("Review buckets:",r["review_queue_counts"])
+          print("Risk flags:",r["review_warning_counts"])
+          print("All license/anatomy/IK function/Graphics art/model teacher courts: UNADMITTED.")
+          PY
+          rclone copy "$root/out" "$PRIVATE_OUTPUT" --checksum --retries 3
+          echo 'Source-risk review matrix stored privately; no per-head training authority.' >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,80 @@
+{
+  "schema": "RealSaS.UnifiedCorpusCohortRegistry.v1",
+  "status": "PROVISIONAL_DISCOVERY_INCOMPLETE_NO_TRAINING_AUTHORITY",
+  "principle": "Do not infer total distinct characters or training approvals from row counts or source SHA alone.",
+  "cohorts": [
+    {
+      "namespace": "MASTER3993",
+      "role": "CANONICAL_SOURCE_ROSTER",
+      "observed_count": 3993,
+      "source_ref": "RealSaS_Master3993_Core370_Truth_Evidence_20261107_V1.zip/MASTER3993_SOURCE_TRUTH_INVENTORY_V1.csv",
+      "split_policy": "PRESERVE_FIT_TUNE_DEV_CAL_EXTERNAL_HOLDOUT",
+      "source_identity_authority": "PARTIAL_SHA_3192_VERIFIED_AND_801_UNREHASHED",
+      "head_truth_admission": "NONE_BY_THIS_REGISTRY"
+    },
+    {
+      "namespace": "CORE370",
+      "role": "SEPARATE_HISTORICAL_SOURCE_ROSTER",
+      "observed_count": 370,
+      "source_ref": "RealSaS_Master3993_Core370_Truth_Evidence_20261107_V1.zip/CORE370_370_MACHINE_SUBJECTS_V1.csv",
+      "split_policy": "ORIGINAL_SPLIT_REVALIDATION_REQUIRED",
+      "source_identity_authority": "HISTORICAL_MACHINE_SHA_370_REPORTED",
+      "head_truth_admission": "PR327_REVALIDATION_REQUIRED"
+    },
+    {
+      "namespace": "MASTER_QA_ONLY",
+      "role": "QA_AND_EXCEPTION_ROSTER_UNBOUND",
+      "observed_count": 15,
+      "source_ref": "MASTER4008_ORIGINAL_SELECTION_QA_15_PENDING",
+      "split_policy": "NOT_TRAINING_CANDIDATES_UNTIL_ORIGINAL_IDENTITY_AND_RIGHTS",
+      "source_identity_authority": "EXACT_QA_SOURCE_ROSTER_NEEDED",
+      "head_truth_admission": "NONE"
+    },
+    {
+      "namespace": "V18_PLUS_PROOFS",
+      "role": "EVIDENCE_OVERLAY_NOT_DISTINCT_SUBJECTS",
+      "observed_count": null,
+      "source_ref": "PR327_OWNERSHIP_SOURCE_FACE_GRAPHICS_EDIT_REVISIONS",
+      "split_policy": "JOIN_UNDER_NATIVE_SOURCE_AND_CONTRACT_SHA",
+      "source_identity_authority": "CROSSWALK_PENDING",
+      "head_truth_admission": "INDEPENDENT_AUTHORITIES_REQUIRED"
+    },
+    {
+      "namespace": "NATIVE_RIG_CONTROLS",
+      "role": "EVIDENCE_OVERLAY_NOT_DISTINCT_SUBJECTS",
+      "observed_count": null,
+      "source_ref": "PR390_SPIDER_DRAGON_SNAKE_AND_HELDOUT",
+      "split_policy": "RESEARCH_HELDOUT_RESTRICTIONS",
+      "source_identity_authority": "ORIGINAL_SOURCE_SHA_AND_EXPERIMENTAL_SUBJECT_REVALIDATION",
+      "head_truth_admission": "NO_AUTOMATIC_NATIVE_IK_TEACHER"
+    },
+    {
+      "namespace": "OTHER_HISTORICAL_SOURCE_COHORTS",
+      "role": "OPEN_DISCOVERY_REGISTER",
+      "observed_count": null,
+      "source_ref": "OLDER_FIT8_TRUTH139_STAGE50_SOURCE_COHORTS_AND_OTHER_PUBLISHERS",
+      "split_policy": "MUST_NOT_ADD_TO_TRAINING_OR_SOURCE_COUNT_UNTIL_CROSSWALK",
+      "source_identity_authority": "UNINSPECTED",
+      "head_truth_admission": "NONE"
+    }
+  ],
+  "global_counts": {
+    "named_source_rows_before_dedup": 4363,
+    "qa_only_unbound": 15,
+    "named_rows_plus_qa_count": 4378,
+    "known_exact_sha_overlap_verified_subset": 0,
+    "unique_characters_certified": false,
+    "all_known_source_cohorts_exhaustively_discovered": false
+  },
+  "required_admission": [
+    "REVALIDATE_ORIGINAL_CREATOR_RIGHTS",
+    "EXACT_SOURCE_SHA_AND_PUBLISHER_PROVENANCE",
+    "HASH_PERCEPTUAL_GEOMETRY_DEDUP_WITH_SPLIT_FIREWALL",
+    "CHARACTER_VS_PROP_AND_MORPHOLOGY",
+    "NORMALIZATION_ROUNDTRIP_SOURCE_FRAME",
+    "SOURCE_BOUND_FAMILY_COURT",
+    "LOSS_MASK_AND_NEGATIVE_ABSTAIN",
+    "INDEPENDENT_HEAD_TARGET_ADMISSION"
+  ],
+  "all_training_authorized": false
+}

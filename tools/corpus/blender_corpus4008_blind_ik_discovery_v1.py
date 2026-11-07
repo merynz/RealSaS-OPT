@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from tools.corpus.blender_corpus4008_native_source_probe_v1 import sha, require
 from tools.corpus.blender_corpus4008_control_profile_v1 import _action_curves
 from tools.corpus.derive_corpus4008_rigprogram_prior_v1 import (
-    discover, oracle_evaluate, sha_payload,
+    discover, discover_articulation_frontiers, oracle_evaluate, sha_payload,
 )
 
 SCHEMA="RealSaS.Corpus4008BlindNativeIKDiscoverySourceOracleCourt.v1"
@@ -167,9 +167,17 @@ def study(bpy,source,expected_sha,transport_sha,commit,asset):
     # Freeze prediction first. The later call may examine original native
     # controller hints, but cannot update predictions or ranks.
     predicted=discover(source_bones,max_depth=5,max_candidates=192)
+    frontier=discover_articulation_frontiers(
+        source_bones,max_depth=5,max_candidates=512)
     frozen=predicted["blind_proposal_sha256"]
+    frozen_frontier=frontier["blind_proposal_sha256"]
+    # Freeze BOTH hypotheses before touching source-native IK oracle fields.
     oracle=source_oracle_ik(bpy)
     evaluation=oracle_evaluate(predicted,oracle,top_k=32)
+    frontier32=oracle_evaluate(frontier,oracle,top_k=32)
+    frontier128=oracle_evaluate(frontier,oracle,top_k=128)
+    require(frontier["blind_proposal_sha256"]==frozen_frontier,
+            "ORACLE_CONTAMINATED_FRONTIER")
     require(predicted["blind_proposal_sha256"]==frozen,
             "ORACLE_CONTAMINATED_PROPOSAL")
     return {
@@ -185,6 +193,12 @@ def study(bpy,source,expected_sha,transport_sha,commit,asset):
         "source_blind_observation_sha256":sha_payload(source_bones),
         "blind_candidate_program":predicted,
         "native_ik_oracle_evaluation_only":evaluation,
+        "blind_frontier_candidate_program":frontier,
+        "native_ik_oracle_frontier_top32_evaluation_only":frontier32,
+        "native_ik_oracle_frontier_top128_evaluation_only":frontier128,
+        "frontier_ablation_informed_by_spider_dragon_dev_rigs":True,
+        "heldout_rig_did_not_inform_frontier_policy":
+            asset not in ("rig-spider","rig-dragon","rig-snake"),
         "source_native_ik_functional_intervention_court":
             "SEPARATE_EXISTING_EXPERIMENT",
         "derived_ik_solver_behavior_tested":False,
@@ -213,6 +227,8 @@ def main():
     a.output.write_text(json.dumps(result,indent=2,
                                    sort_keys=True,allow_nan=False)+"\n")
     o=result["native_ik_oracle_evaluation_only"]
+    f32=result["native_ik_oracle_frontier_top32_evaluation_only"]
+    f128=result["native_ik_oracle_frontier_top128_evaluation_only"]
     print(json.dumps({
         "asset":a.asset,
         "native_source_ik_oracle_count":o["oracle_ik_constraint_count"],
@@ -221,6 +237,10 @@ def main():
         "top32_owner_effector_hits":o[
             "exact_native_owner_end_effector_recall"],
         "top32_half_chain_overlap_hits":o["chain_overlap_at_least_half"],
+        "frontier_top32_owner_hits":f32["exact_native_owner_end_effector_recall"],
+        "frontier_top32_half_chain_hits":f32["chain_overlap_at_least_half"],
+        "frontier_top128_owner_hits":f128["exact_native_owner_end_effector_recall"],
+        "frontier_top128_half_chain_hits":f128["chain_overlap_at_least_half"],
         "actual_solver_tested":False,
         "training_authorized":False,
     },sort_keys=True))

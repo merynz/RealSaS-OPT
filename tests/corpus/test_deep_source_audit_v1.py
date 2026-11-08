@@ -10,6 +10,20 @@ from tools.corpus.truth_foundry.deep_source_audit_v1 import (
 
 
 class DeepSourceAuditTest(unittest.TestCase):
+    def test_independent_visual_court_schema_requires_source_bound_review(self):
+        root=Path(__file__).resolve().parents[2]
+        p=root/'canonical/REALSAS_PER_ASSET_VISUAL_SEMANTIC_COURT_V1.schema.json'
+        x=json.loads(p.read_text(encoding='utf-8'))
+        required=set(x['required'])
+        for field in ('asset_id','source_sha256','source_visual_refs','character_class',
+                      'morphology','anatomical_frame','style_2d','semantic_regions',
+                      'drawable_evidence','qualification','training_authorized'):
+            self.assertIn(field,required)
+        self.assertEqual(x['properties']['training_authorized'].get('const'),False)
+        self.assertEqual(x['properties']['character_class']['properties']['label']['enum'][-1], 'UNKNOWN')
+        self.assertIn('TANK_GROUND_VEHICLE',x['properties']['character_class']['properties']['label']['enum'])
+        self.assertIn('AIRCRAFT',x['properties']['character_class']['properties']['label']['enum'])
+
     def test_morphology_classification_is_approval_only(self):
         for name in ('HUMAN','HUMANOID_NONHUMAN','QUADRUPED_MAMMAL','DINOSAUR',
                      'ARTHROPOD_MULTILEGGED','TANK_GROUND_VEHICLE','AIRCRAFT',

@@ -51,4 +51,12 @@ def test_deployment_job_allows_network_prefetch_without_relaxing_inner_install_g
     text = WORKFLOW.read_text(encoding="utf-8")
     assert text.count("timeout-minutes: 45") == 1
     deploy = (ROOT / "tools/platform_deploy.py").read_text(encoding="utf-8")
-    assert 'source / "requirements/platform-deployment.txt"], timeout=600)' in deploy
+    assert "provision_shared_venv(root, source, release)" in deploy
+    shared = (ROOT / "tools/platform_shared_python_env_v1.py").read_text(encoding="utf-8")
+    assert 'directory / "platform-deployment.txt"' in shared
+    assert "ensure_venv(cache_root, [], requirement_files=requirements)" in shared
+    # The shared environment builder receives the original offline pip wheelhouse
+    # variables from the workflow, rather than invoking an unguarded pip install.
+    bootstrap = (ROOT / "tools/platform_ci_bootstrap.py").read_text(encoding="utf-8")
+    assert "env = os.environ.copy()" in bootstrap
+    assert "subprocess.run(command, check=True, env=env)" in bootstrap

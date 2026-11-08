@@ -50,3 +50,10 @@ Read this file, review the Actions run and its private Drive SHA summaries, then
 - Verified downloaded 1,950,745-byte ZIP: https://drive.google.com/file/d/1i1MOeb8uB9kIA2O2GNOlibs6zZzqQLwN/view
 - Contains V1 **PRELIMINARY** 4,363 record census, 37-target × 161,431 proposed route matrix, summary SHA digests, plus historic 4,363-ledger inventory. `master_per_asset_physical_census_loaded=0` in this checkpoint because Wave1–4 summary receipts have not yet been rejoined in the remote physical source census. Do not call this fully materialized or training-ready.
 - GitHub regression run: https://github.com/merynz/RealSaS-OPT/actions/runs/42509635548, `local-contract-regressions` **SUCCESS**, `private-source-truth-matrix` **SKIPPED** on PR by design. Do not claim full original source census has run based on that result.
+
+### Per-head 8K strategic target (2026-11-08)
+
+- Superseding contract: `canonical/REALSAS_TRUTH_FOUNDRY_8K_PER_HEAD_COVERAGE_CONTRACT_V2.json` (previous V1 5K preserved as history).
+- The planned goal is **8,000 independent eligible FIT source identity clusters per head**, after real source rights/lineage/target-specific courts; not 8,000 files or copies of clips. Applies to IRIS Geometry, IRIS Semantic, IRIS Graphics, TESSA, AXIS, MIRA separately; advanced targets (RigProgram, edit-reveal, drawable consequence) counted separately.
+- Assumes Anymate or equivalent large source pool becomes genuinely usable; the paper reports 230,716 asset entries but this is not 230,716 licensed RealSaS source scenes. HF processed data exposes pointcloud/voxel/joints/connectivity/skin primarily, not assured 2D art/source-texture/semantic/full native controls.
+- No fabricated admission to meet 8K; all existing head-core admitted counts remain 0 in this proposal. Preserve independent 2D visual qualification and source-rights gate.

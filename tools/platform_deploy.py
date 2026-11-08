@@ -26,8 +26,10 @@ from pathlib import Path
 
 if __package__:
     from .platform_release_budget_v1 import require_release_budget
+    from .platform_release_idempotency_v1 import matching_current_release
 else:
     from platform_release_budget_v1 import require_release_budget
+    from platform_release_idempotency_v1 import matching_current_release
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPORAL_VERSION = "1.9.1"
@@ -112,7 +114,7 @@ def manager_environment():
                            "on WSL run sudo loginctl enable-linger $(id -un), then retry")
 
 
-def preflight(root, expected_sha):
+def preflight(root, expected_sha, authority=None, force_rebuild=False):
     if platform.system() != "Linux" or platform.machine() not in ("x86_64", "amd64"):
         raise RuntimeError("LINUX_AMD64_REQUIRED")
     if os.getuid() == 0:
@@ -127,9 +129,6 @@ def preflight(root, expected_sha):
     if command(["git", "status", "--porcelain"], cwd=ROOT, capture=True).stdout.strip():
         raise RuntimeError("CLEAN_CANONICAL_CHECKOUT_REQUIRED")
     manager_environment()
-    # Prevent the workstation failure mode: 157 immutable copies consumed ~200GB.
-    # Fail before creating a new release when old copies or host disk are unsafe.
-    require_release_budget(root)
     marker = root / "deployment.json"
     if root.exists() and not marker.exists():
         raise RuntimeError("UNMANAGED_DEPLOY_ROOT: refusing to overwrite existing data")
@@ -161,6 +160,24 @@ def preflight(root, expected_sha):
                                 capture_output=True, timeout=10, check=False)
         if result.returncode:
             raise RuntimeError("PLATFORM_PORT_CONFLICT: managed service does not own the active port")
+    # The identical canonical release is already materialized. Its health is
+    # checked by install(); no new bytes will be created on a repeated dispatch.
+    # Force rebuild remains an explicit recovery-only operator choice.
+    identical = (matching_current_release(root, expected_sha, authority)
+                 if authority is not None and not force_rebuild else None)
+    if identical is None:
+        require_release_budget(root)
+
+
+def existing_release_ready():
+    active = subprocess.run(["systemctl", "--user", "is-active",
+                             "realsas-platform.target",
+                             *[f"realsas-platform-{name}.service" for name in UNITS]],
+                            text=True, capture_output=True, check=False, timeout=10)
+    statuses = active.stdout.strip().splitlines()
+    return (len(statuses) == len(UNITS) + 1 and
+            all(value == "active" for value in statuses) and
+            socket_open(8080) and socket_open(7233))
 
 
 def service_units(root):
@@ -207,8 +224,20 @@ def extract_temporal(archive, destination):
         destination.chmod(0o755)
 
 
-def install(root, expected_sha, authority):
-    preflight(root, expected_sha)
+def install(root, expected_sha, authority, *, force_rebuild=False):
+    preflight(root, expected_sha, authority, force_rebuild)
+    if not force_rebuild:
+        existing = matching_current_release(root, expected_sha, authority)
+        if existing is not None:
+            if not existing_release_ready():
+                raise RuntimeError("MATCHING_SHA_PLATFORM_NOT_HEALTHY: existing release "
+                                   "is installed; inspect/restart managed services "
+                                   "instead of wasting a full rebuild. Explicit "
+                                   "--force-rebuild is recovery-only.")
+            print(json.dumps({"status": "NOOP_IDENTICAL_RELEASE",
+                              "code_sha": expected_sha,
+                              "current_release": str(existing)}, sort_keys=True))
+            return
     root.mkdir(parents=True, mode=0o700, exist_ok=True)
     root.chmod(0o700)
     marker = root / "deployment.json"
@@ -299,14 +328,16 @@ def main():
     parser.add_argument("--authority-root", required=True)
     parser.add_argument("--expected-main-sha", required=True)
     parser.add_argument("--preflight-only", action="store_true")
+    parser.add_argument("--force-rebuild", action="store_true",
+                        help="Explicit operator recovery: allow rebuilding an installed SHA")
     args = parser.parse_args()
     root = safe_root(args.root)
     authority = safe_root(args.authority_root)
     if args.preflight_only:
-        preflight(root, args.expected_main_sha)
+        preflight(root, args.expected_main_sha, authority, args.force_rebuild)
         print("DEPLOY_PREFLIGHT_OK: no host writes")
     else:
-        install(root, args.expected_main_sha, authority)
+        install(root, args.expected_main_sha, authority, force_rebuild=args.force_rebuild)
 
 
 if __name__ == "__main__":

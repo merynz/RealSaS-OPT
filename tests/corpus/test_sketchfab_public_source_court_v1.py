@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 import sys
 sys.path.insert(0,str(Path(__file__).parent))
-from sketchfab_public_source_court_v1 import parse_public_record,run,sha
+from tools.corpus.truth_foundry.sketchfab_public_source_court_v1 import parse_public_record,run,sha
 
 UID='a'*32
 

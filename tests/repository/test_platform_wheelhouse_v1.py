@@ -8,6 +8,11 @@ WORKFLOW = ROOT / ".github/workflows/platform_developer_deploy.yml"
 def test_deployment_prewarm_is_exact_persistent_and_before_service_install():
     text = WORKFLOW.read_text(encoding="utf-8")
     assert text.count("Prewarm exact deployment wheelhouse") == 1
+    assert "Check installed release before dependency prewarm (read-only)" in text
+    assert "if: steps.installed-release.outputs.reuse != 'true'" in text
+    assert text.index("Check installed release before dependency prewarm") < text.index(
+        "Prewarm exact deployment wheelhouse"
+    )
     assert text.count("timeout-minutes: 30") == 1
     assert text.count("wheelhouse_root=/home/monster/realsas_platform/wheelhouse") == 1
     assert text.count('echo "PIP_NO_INDEX=1" >> "$GITHUB_ENV"') == 1
@@ -51,4 +56,25 @@ def test_deployment_job_allows_network_prefetch_without_relaxing_inner_install_g
     text = WORKFLOW.read_text(encoding="utf-8")
     assert text.count("timeout-minutes: 45") == 1
     deploy = (ROOT / "tools/platform_deploy.py").read_text(encoding="utf-8")
-    assert 'source / "requirements/platform-deployment.txt"], timeout=600)' in deploy
+    assert "provision_shared_venv(root, source, release)" in deploy
+    shared = (ROOT / "tools/platform_shared_python_env_v1.py").read_text(encoding="utf-8")
+    assert 'directory / "platform-deployment.txt"' in shared
+    assert "ensure_venv(cache_root, [], requirement_files=requirements)" in shared
+    # The shared environment builder receives the original offline pip wheelhouse
+    # variables from the workflow, rather than invoking an unguarded pip install.
+    bootstrap = (ROOT / "tools/platform_ci_bootstrap.py").read_text(encoding="utf-8")
+    assert "env = os.environ.copy()" in bootstrap
+    assert "subprocess.run(command, check=True, env=env)" in bootstrap
+
+
+def test_deployment_reports_disk_headroom_without_cleanup():
+    physical = WORKFLOW.read_text(encoding="utf-8")
+    assert "Host disk and release retention telemetry (read-only)" in physical
+    assert "REALSAS_PLATFORM_RELEASE_COUNT=" in physical
+    assert "::warning title=Platform release retention::" in physical
+    telemetry = physical.split("Host disk and release retention telemetry (read-only)", 1)[1].split(
+        "Preserve engineering execution receipts", 1
+    )[0]
+    assert "shutil.rmtree" not in telemetry
+    assert "systemctl" not in telemetry
+    assert "rm -rf" not in telemetry

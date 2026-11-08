@@ -60,7 +60,21 @@ jobs:
         with:
           go-version: '1.27.1'
           cache: false
+      - name: Check installed release before dependency prewarm (read-only)
+        id: installed-release
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          from pathlib import Path
+          from tools.platform_release_idempotency_v1 import matching_current_release
+          from tools.platform_deploy import existing_release_ready
+
+          root = Path('/home/monster/realsas_platform')
+          authority = Path('/home/monster/realsas_authority')
+          existing = matching_current_release(root, '${{ github.sha }}', authority)
+          print('reuse=' + ('true' if existing is not None and existing_release_ready() else 'false'))
+          PY
       - name: Prewarm exact deployment wheelhouse
+        if: steps.installed-release.outputs.reuse != 'true'
         timeout-minutes: 30
         run: |
           set -euo pipefail
@@ -146,6 +160,30 @@ jobs:
           if not all_services_active(result.stdout):
               startup_diagnostics()
               raise RuntimeError('NOT_ALL_MANAGED_SERVICES_ACTIVE')
+          PY
+      - name: Host disk and release retention telemetry (read-only)
+        if: always()
+        run: |
+          python - <<'PY'
+          import shutil
+          from pathlib import Path
+          from tools.platform_release_budget_v1 import RELEASE_DIR, MAX_EXISTING_RELEASES
+
+          root = Path('/home/monster/realsas_platform')
+          releases = root / 'releases'
+          count = (sum(1 for p in releases.iterdir()
+                       if p.is_dir() and not p.is_symlink() and RELEASE_DIR.fullmatch(p.name))
+                   if releases.is_dir() else 0)
+          print(f'REALSAS_PLATFORM_RELEASE_COUNT={count}')
+          if count >= MAX_EXISTING_RELEASES:
+              print(f'::warning title=Platform release retention::There are {count} installed releases. '
+                    'Plan an audited, service-safe retirement; no automatic science deletion.')
+          for path in (root, Path('/mnt/c'), Path('/mnt/d')):
+              if path.is_dir() and (path == root or path.is_mount()):
+                  free_gib = shutil.disk_usage(path).free / (1 << 30)
+                  print(f'REALSAS_STORAGE_FREE_GIB[{path}]={free_gib:.2f}')
+                  if free_gib < 40:
+                      print(f'::warning title=Platform disk headroom::{path} has only {free_gib:.2f} GiB free')
           PY
       - name: Preserve engineering execution receipts
         if: always()

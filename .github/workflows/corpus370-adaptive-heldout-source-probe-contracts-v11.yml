@@ -19,7 +19,7 @@ permissions:
 
 concurrency:
   group: corpus370-adaptive-heldout-probe-v11-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   nonsemantic-source-query-negative-contracts:

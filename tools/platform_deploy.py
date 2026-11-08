@@ -27,9 +27,11 @@ from pathlib import Path
 if __package__:
     from .platform_release_budget_v1 import require_release_budget
     from .platform_release_idempotency_v1 import matching_current_release
+    from .platform_shared_python_env_v1 import provision_shared_venv
 else:
     from platform_release_budget_v1 import require_release_budget
     from platform_release_idempotency_v1 import matching_current_release
+    from platform_shared_python_env_v1 import provision_shared_venv
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPORAL_VERSION = "1.9.1"
@@ -254,10 +256,11 @@ def install(root, expected_sha, authority, *, force_rebuild=False):
                              capture_output=True, timeout=60).stdout
     with tarfile.open(fileobj=io.BytesIO(archive)) as data:
         data.extractall(source, filter="data")
-    command([sys.executable, "-m", "venv", venv])
+    # One shared, immutable Python dependency environment per exact requirements
+    # and Python patch fingerprint; source and Go outputs remain release-local.
+    # Cache is explicitly outside releases and cannot be reclaimed by release GC.
+    venv, dependency_digest = provision_shared_venv(root, source, release)
     python = venv / "bin/python"
-    command([python, "-m", "pip", "install", "--no-input", "--progress-bar", "off",
-             "-r", source / "requirements/platform-deployment.txt"], timeout=600)
     for name in ("realsas-api", "realsas-control-worker", "realsas-migrate", "realsasctl"):
         flags = ["-ldflags", f"-X main.sourceCodeSHA={expected_sha}"] if name in {"realsas-api", "realsas-control-worker"} else []
         command(["go", "build", *flags, "-o", binaries / name, f"./cmd/{name}"], cwd=source / "platform", timeout=300)
@@ -303,6 +306,7 @@ def install(root, expected_sha, authority, *, force_rebuild=False):
     receipt = {"schema": "RealSaS.DeveloperDeployment.v1", "root": str(root),
                "code_sha": expected_sha, "current_release": str(release), "previous_release": (previous or {}).get("current_release"),
                "temporal_version": TEMPORAL_VERSION, "temporal_archive_sha256": TEMPORAL_SHA256,
+               "developer_python_env_fingerprint": dependency_digest,
                "execution_mode": "LOCAL_DEVELOPER", "production_ready": False,
                "authority_root": str(authority), "state": "STARTING"}
     marker.write_text(json.dumps(receipt, indent=2) + "\n")

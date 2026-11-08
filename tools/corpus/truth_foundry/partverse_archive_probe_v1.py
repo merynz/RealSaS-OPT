@@ -10,6 +10,7 @@ drawable necessity are NOT approved by finding face2label entries.
 from __future__ import annotations
 
 import argparse
+import csv
 from collections import Counter, defaultdict
 import hashlib
 import io
@@ -62,15 +63,17 @@ def parse_face2label(raw, max_faces=500000):
 def inspect_tar_stream(fileobj, out_dir: Path, *,
                        max_members=5000,
                        max_total_staged_bytes=160*1024*1024,
-                       max_json_files=60, max_glbs=5):
+                       max_json_files=60, max_glbs=5, selected=None):
     out_dir.mkdir(parents=True, exist_ok=True)
     written, parsed, rows, stats = 0, 0, [], Counter()
     staged = defaultdict(set)
     members = 0
+    scanned_to_end = True
     with tarfile.open(fileobj=fileobj, mode="r|gz") as tf:
         for member in tf:
             members += 1
             if members > max_members:
+                scanned_to_end = False
                 break
             stats["members_scanned"] += 1
             name = member.name
@@ -105,6 +108,9 @@ def inspect_tar_stream(fileobj, out_dir: Path, *,
             if not UID.fullmatch(uid):
                 stats["unsupported_uid"] += 1
                 continue
+            if selected is not None and uid not in selected:
+                stats["not_in_selection_skipped"] += 1
+                continue
             if member.size > max_size or member.size < 1 or written + member.size > max_total_staged_bytes:
                 stats["size_quarantined"] += 1
                 continue
@@ -119,6 +125,11 @@ def inspect_tar_stream(fileobj, out_dir: Path, *,
             record = {
                 "archive_path":name,
                 "archive_uid":uid,
+                "kind":suffix,
+                "weak_subject_candidate":selected[uid].get("object_type_candidate", "UNKNOWN") if selected else "NOT_TRIAGED",
+                "weak_style_candidate":selected[uid].get("style_candidate", "UNKNOWN") if selected else "NOT_TRIAGED",
+                "provider_reported_original_sha256":selected[uid].get("source_sha256_provider_claim", "") if selected else "",
+                "provider_train_split_claim":selected[uid].get("provider_split", "") if selected else "UNKNOWN",
                 "kind":suffix,
                 "bytes":member.size,
                 "sha256":sha256_bytes(payload),
@@ -155,6 +166,10 @@ def inspect_tar_stream(fileobj, out_dir: Path, *,
         "observed_archive_members":members,
         "staged_total_bytes":written,
         "sampled_source_uids":len(staged),
+        "selected_uid_count": len(selected) if selected else None,
+        "unseen_selection_uids":sorted(set(selected) - set(staged)) if selected else None,
+        "archive_stream_scanned_to_end":scanned_to_end,
+        "selected_complete_two_inputs": sum({"face2label","segmented_glb"} <= v for v in staged.values()),
         "face2label_records_parsed":parsed,
         "source_rights_approved":0,
         "source_geometry_parity_pass":0,
@@ -177,10 +192,37 @@ def main():
     parser.add_argument("--max-staged-mib",type=int,default=160)
     parser.add_argument("--max-json-files",type=int,default=60)
     parser.add_argument("--max-glbs",type=int,default=5)
+    parser.add_argument("--uid-allowlist-csv",type=Path)
+    parser.add_argument("--uid-allowlist-sha256")
     args=parser.parse_args()
     assert re.fullmatch("[a-f0-9]{40}",args.revision), "pinned revision mandatory"
-    assert 0<args.max_members<=20000
-    assert 0<args.max_staged_mib<=512
+    assert 0<args.max_members<=250000
+    assert 0<args.max_staged_mib<=4096
+    selected = None
+    if args.uid_allowlist_csv:
+        raw=args.uid_allowlist_csv.read_bytes()
+        if not args.uid_allowlist_sha256 or hashlib.sha256(raw).hexdigest()!=args.uid_allowlist_sha256:
+            raise ValueError("SELECTION_SHA_MISMATCH")
+        selected = {}
+        with args.uid_allowlist_csv.open(encoding="utf-8",newline="") as fp:
+            rr=csv.DictReader(fp)
+            needed={"partverse_uid","provider_split","source_sha256_provider_claim",
+                    "object_type_candidate","style_candidate"}
+            if not needed.issubset(rr.fieldnames or []):
+                raise ValueError("SELECTION_MISSING_COLUMNS")
+            for row in rr:
+                uid=row["partverse_uid"]
+                if not UID.fullmatch(uid) or uid in selected:
+                    raise ValueError("UNSAFE_OR_DUPLICATE_SELECTION")
+                if row["provider_split"]!="PROVIDER_TRAIN_CANDIDATE":
+                    raise ValueError("SELECTION_CONTAINS_HELDOUT_OR_UNKNOWN")
+                if not re.fullmatch(r"[0-9a-f]{64}",row["source_sha256_provider_claim"]):
+                    raise ValueError("UNVERIFIED_SOURCE_CLAIM_FORMAT")
+                selected[uid] = row
+        if not selected or len(selected)>3000:
+            raise ValueError("SELECTION_COUNT_OUT_OF_RANGE")
+    elif args.uid_allowlist_sha256:
+        raise ValueError("SELECTION_SHA_WITHOUT_FILE")
     import requests
     url=f"https://huggingface.co/datasets/dscdyc/partversexl/resolve/{args.revision}/anno_infos.tar.gz"
     with requests.get(url,stream=True,timeout=(30,240),headers={"User-Agent":"RealSaS-TruthFoundry/1.0"}) as response:
@@ -188,7 +230,8 @@ def main():
         response.raw.decode_content=False
         s=inspect_tar_stream(response.raw,args.out,max_members=args.max_members,
                              max_total_staged_bytes=args.max_staged_mib*1024*1024,
-                             max_json_files=args.max_json_files,max_glbs=args.max_glbs)
+                             max_json_files=args.max_json_files,max_glbs=args.max_glbs,
+                             selected=selected)
         s["upstream_repo"]="dscdyc/partversexl"
         s["pinned_revision"]=args.revision
         (args.out/"PROBE_SUMMARY_V1.json").write_text(json.dumps(s,indent=2)+"\n",encoding="utf-8")

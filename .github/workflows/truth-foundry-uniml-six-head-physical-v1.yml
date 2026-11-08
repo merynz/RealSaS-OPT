@@ -70,7 +70,7 @@ jobs:
         run: |
           set -euo pipefail
           dir="$RUNNER_TEMP/uniml-six-head-physical"
-          python tools/corpus/truth_foundry/uniml_glb_six_head_physical_inventory_v1.py \
+          PYTHONPATH=. python tools/corpus/truth_foundry/uniml_glb_six_head_physical_inventory_v1.py \
             --glb-dir "$dir/glb" --manifest "$dir/manifest.csv" --out "$dir/out"
           python - "$dir/out/SUMMARY_V1.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json,sys

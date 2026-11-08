@@ -7,7 +7,7 @@
 ## Actual source records, not claims
 
 - `MASTER3993_SOURCE_PHYSICAL_CENSUS_V1.csv`: 3,993 Master source records; 2,466 have imported physical summaries, 1,527 unobserved. Also 370 Core records in separate V1 4,363 truth matrix.
-- `tools/corpus/truth_foundry/deep_source_audit_v1.py`: checks every SHA-bound **full compressed imported scene JSON** for all 2,466 Master observed sources, preserves node/mesh/armature/action counts and constraints/texture/attachment evidence. Outputs detailed per asset `jsonl`, 3,993-row coverage and action-by-action independent review tasks. All private to Drive. This is a **new independent readback step** beyond existing physical summary; no labels automatically admitted.
+- `tools/corpus/truth_foundry/deep_source_audit_v1.py`: checks every SHA-bound **full compressed imported scene JSON** for all 2,466 Master observed sources, preserves node/mesh/armature/action counts and constraints/texture/attachment evidence. Outputs detailed per asset `jsonl`, 3,993-row Master coverage, 4,363-row Master+Core roster (Core370 historical evidence explicitly unjoined), and action-by-action independent review tasks. All private to Drive. This is a **new independent readback step** beyond existing physical summary; no labels automatically admitted.
 - Source name, material name, action name, bone name are *teacher-only metadata*, never available in student model input. No morphology or layer label may be derived from name alone.
 
 ## Mandatory description for each asset

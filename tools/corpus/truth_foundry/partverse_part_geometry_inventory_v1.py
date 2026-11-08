@@ -84,15 +84,19 @@ def one_source(src: Path, provider:dict):
             result['raw_mesh_scene_primitive_count']=len(meshes)
             result['triangle_face_count']=sum(len(m.faces) for m in meshes)
             result['vertex_count']=sum(len(m.vertices) for m in meshes)
-            if len(meshes)==1 and len(meshes[0].faces)<=250000:
-                # Connected components are topology, not semantic labels.
-                result['connected_component_count']=len(meshes[0].split(only_watertight=False))
-                result['watertight_source_claim']='PROCESSED_SEGMENTED_MESH_ONLY:'+str(bool(meshes[0].is_watertight))
             if faces:
                 result['face_count_equal_triangles']=(len(faces)==result['triangle_face_count'] and
                     min(faces)==0 and max(faces)==result['triangle_face_count']-1)
                 if result['face_count_equal_triangles']:
                     result['geometry_face_index_order_court']='COUNT_AND_CONTIGUITY_ONLY__ORDER_NOT_VERIFIED'
+            if len(meshes)==1 and len(meshes[0].faces)<=250000:
+                # Component count must not erase source face-count evidence if
+                # trimesh splitting/dependency errors happen on exotic meshes.
+                try:
+                    result['connected_component_count']=len(meshes[0].split(only_watertight=False))
+                    result['watertight_source_claim']='PROCESSED_SEGMENTED_MESH_ONLY:'+str(bool(meshes[0].is_watertight))
+                except Exception as exc:
+                    problems.append('COMPONENT_COUNT:'+type(exc).__name__+':'+str(exc)[:180])
         except Exception as exc:
             problems.append('SEGMENTED_GLB:'+type(exc).__name__+':'+str(exc)[:180])
     if info_path.exists():

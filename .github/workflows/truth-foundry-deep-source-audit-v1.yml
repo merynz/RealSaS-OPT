@@ -1,0 +1,106 @@
+name: truth-foundry-deep-source-audit-v1
+
+on:
+  pull_request:
+    paths:
+      - 'tools/corpus/truth_foundry/deep_source_audit_v1.py'
+      - 'tests/corpus/test_deep_source_audit_v1.py'
+      - '.github/workflows/truth-foundry-deep-source-audit-v1.yml'
+  push:
+    branches: [truth-foundry-source-census-matrix-v1-20261108]
+    paths:
+      - 'tools/corpus/truth_foundry/deep_source_audit_v1.py'
+      - 'tests/corpus/test_deep_source_audit_v1.py'
+      - '.github/workflows/truth-foundry-deep-source-audit-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-deep-source-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  synthetic-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check immutable import evidence / no false semantic training admission
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/deep_source_audit_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_deep_source_audit_v1.py' -v
+
+  exact-deep-readback:
+    if: github.event_name == 'push'
+    needs: [synthetic-contracts]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      RCLONE_CONFIG: /tmp/realsas-foundry-deep-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      PHYSICAL: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_global_source_census_v1/42509443199-1/physical/MASTER3993_SOURCE_PHYSICAL_CENSUS_V1.csv
+      W1: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/wave1_source_rig_scene_v1/42387604493-1
+      W2: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/wave2_source_rig_scene_v1/42388620135-1
+      W3: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/wave3_source_rig_scene_v1/42389083706-1
+      W4: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/wave4_source_rig_scene_v1/42400124187-1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_deep_source_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install isolated read-only rclone credentials
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Read exact immutable source import scene receipts (not original 3D asset bytes)
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/realsas-foundry-deep"
+          mkdir -p "$root"/{wave1,wave2,wave3,wave4,out}
+          rclone copyto "$PHYSICAL" "$root/physical.csv" --retries 3
+          for wave in 1 2 3 4; do
+            ref="W$wave"
+            rclone copy "${!ref}" "$root/wave$wave" \
+              --exclude '**/logs/**' \
+              --exclude '**/PLAN.json' \
+              --exclude '**/BATCH_STATUS.json' \
+              --exclude '**/RESULTS.jsonl' \
+              --retries 3 --transfers 12 --checkers 16
+          done
+          python tools/corpus/truth_foundry/deep_source_audit_v1.py \
+            --physical "$root/physical.csv" \
+            --wave1 "$root/wave1" --wave2 "$root/wave2" \
+            --wave3 "$root/wave3" --wave4 "$root/wave4" \
+            --out "$root/out"
+          python - "$root/out" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import sys,json
+          from pathlib import Path
+          root=Path(sys.argv[1])
+          r=json.loads((root/'MASTER3993_DEEP_AUDIT_SUMMARY_V1.json').read_text())
+          assert r['asset_records']==3993
+          assert r['full_import_evidence_verified']==2466
+          assert r['not_yet_imported']==1527
+          assert not r['training_authorized'] and not r['materialization_authorized']
+          assert r['asset_type_morphology_court_pass']==0
+          print('## Truth Foundry Deep Source Audit — actual full original importer receipts')
+          print('Full imported scene receipt SHA verified:',r['full_import_evidence_verified'])
+          print('Not yet source-imported:',r['not_yet_imported'])
+          print('All source class/morphology, pose, stylized appearance and drawable truth: UNKNOWN until independent visual/causal courts')
+          print('Detailed per-asset JSONL and review tasks private Drive only; no source names leaked into student or public logs.')
+          PY
+      - name: Persist full per-source audit and review tasks privately
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/realsas-foundry-deep/out"
+          test -s "$root/MASTER3993_DEEP_AUDIT_SUMMARY_V1.json"
+          rclone copy "$root" "$DEST" --checksum --retries 3
+          echo 'Deep audit JSONL, source coverage, review task manifest and SHA report archived to immutable private Drive path.' >> "$GITHUB_STEP_SUMMARY"

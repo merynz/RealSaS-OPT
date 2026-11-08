@@ -42,6 +42,7 @@ jobs:
       RCLONE_CONFIG: /tmp/realsas-foundry-deep-private.conf
       REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
       PHYSICAL: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_global_source_census_v1/42509443199-1/physical/MASTER3993_SOURCE_PHYSICAL_CENSUS_V1.csv
+      COHORT_V1: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/global_existing_truth_inventory_v1_20261107/CORE370_370_MACHINE_SUBJECTS_V1.csv
       W1: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/wave1_source_rig_scene_v1/42387604493-1
       W2: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/wave2_source_rig_scene_v1/42388620135-1
       W3: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/wave3_source_rig_scene_v1/42389083706-1
@@ -66,6 +67,7 @@ jobs:
           root="$RUNNER_TEMP/realsas-foundry-deep"
           mkdir -p "$root"/{wave1,wave2,wave3,wave4,out}
           rclone copyto "$PHYSICAL" "$root/physical.csv" --retries 3
+          rclone copyto "$COHORT_V1" "$root/core370.csv" --retries 3
           for wave in 1 2 3 4; do
             ref="W$wave"
             rclone copy "${!ref}" "$root/wave$wave" \
@@ -76,7 +78,7 @@ jobs:
               --retries 3 --transfers 12 --checkers 16
           done
           python tools/corpus/truth_foundry/deep_source_audit_v1.py \
-            --physical "$root/physical.csv" \
+            --physical "$root/physical.csv" --core "$root/core370.csv" \
             --wave1 "$root/wave1" --wave2 "$root/wave2" \
             --wave3 "$root/wave3" --wave4 "$root/wave4" \
             --out "$root/out"
@@ -86,6 +88,7 @@ jobs:
           root=Path(sys.argv[1])
           r=json.loads((root/'MASTER3993_DEEP_AUDIT_SUMMARY_V1.json').read_text())
           assert r['asset_records']==3993
+          assert r['all_corpus_source_records']==4363
           assert r['full_import_evidence_verified']==2466
           assert r['not_yet_imported']==1527
           assert not r['training_authorized'] and not r['materialization_authorized']

@@ -92,3 +92,35 @@ def test_preflight_skips_budget_only_for_matching_complete_release():
     assert src.index("matching_current_release(root, expected_sha, authority)") < src.index(
         "require_release_budget(root)")
     assert "if identical is None:" in src
+
+
+def test_failed_source_archive_discards_unactivated_release(tmp_path, monkeypatch):
+    root = tmp_path / "home" / "monster" / "realsas_platform"
+    authority = tmp_path / "home" / "monster" / "realsas_authority"
+    monkeypatch.setattr(deploy, "preflight", lambda *args, **kwargs: None)
+
+    def fail_archive(*args, **kwargs):
+        raise RuntimeError("ARCHIVE_FAILED_SYNTHETIC")
+
+    monkeypatch.setattr(deploy.subprocess, "run", fail_archive)
+    with pytest.raises(RuntimeError, match="ARCHIVE_FAILED_SYNTHETIC"):
+        deploy.install(root, "a" * 40, authority)
+    assert not list((root / "releases").iterdir())
+
+
+def test_failed_build_never_erases_newly_activated_release(tmp_path, monkeypatch):
+    root = tmp_path / "home" / "monster" / "realsas_platform"
+    authority = tmp_path / "home" / "monster" / "realsas_authority"
+    monkeypatch.setattr(deploy, "preflight", lambda *args, **kwargs: None)
+
+    def fail_after_switch(*args, **kwargs):
+        release = next((root / "releases").iterdir())
+        (root / "current").symlink_to(release)
+        raise RuntimeError("AFTER_SWITCH_SYNTHETIC")
+
+    monkeypatch.setattr(deploy.subprocess, "run", fail_after_switch)
+    with pytest.raises(RuntimeError, match="AFTER_SWITCH_SYNTHETIC"):
+        deploy.install(root, "a" * 40, authority)
+    release = next((root / "releases").iterdir())
+    assert release.exists()
+    assert (root / "current").resolve() == release

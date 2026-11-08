@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import trimesh
 
-from partverse_v18_partition_diagnostic_v1 import analyze, analyze_bytes
+from tools.corpus.truth_foundry.partverse_v18_partition_diagnostic_v1 import analyze, analyze_bytes
 
 class PartVerseV18PartitionDiagnosticTest(unittest.TestCase):
     def test_same_topology_two_part_labels_not_same_drawable(self):

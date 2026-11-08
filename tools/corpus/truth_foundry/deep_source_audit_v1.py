@@ -239,7 +239,7 @@ def analyze_one(row: dict, summary: dict, full: dict, gz_sha: str,
     return source_rec, review
 
 
-def run(physical: Path, wave_roots: tuple[Path, ...], out: Path, *, require_total: int = 2466):
+def run(physical: Path, wave_roots: tuple[Path, ...], out: Path, *, require_total: int = 2466, core: Path | None = None):
     physical_rows = load_csv(physical)
     if len(physical_rows) != 3993:
         fail("MASTER_3993_PHYSICAL_ROSTER")
@@ -287,7 +287,7 @@ def run(physical: Path, wave_roots: tuple[Path, ...], out: Path, *, require_tota
         shape_counts[structural] += 1
         all_counts = a["counts"] if a else {}
         summary_rows.append({
-            "asset_id": aid, "source_sha256": row["source_sha256"],
+            "corpus": "MASTER3993", "asset_id": aid, "source_sha256": row["source_sha256"],
             "provider": row["provider"], "historical_split": row["historical_split"],
             "imported_scene_deep_checked": bool(a),
             "imported_structure_class": structural,
@@ -319,14 +319,50 @@ def run(physical: Path, wave_roots: tuple[Path, ...], out: Path, *, require_tota
                                 "reason": "SOURCE_RECOVERY_OR_IMPORT_REQUIRES_REVIEW"})
     write_csv(out / "MASTER3993_DEEP_AUDIT_COVERAGE_V1.csv", summary_rows)
     write_csv(review_path, reviews)
+    total_master_review_tasks = len(reviews)
+    core_count = 0
+    if core is not None:
+        cohort = load_csv(core)
+        if len(cohort) != 370 or len({r["subject_id"] for r in cohort}) != 370:
+            fail("CORE370_ROSTER_COUNT_OR_IDENTITY")
+        if any(r["training_authorized"] != "False" for r in cohort):
+            fail("CORE370_PREAUTHORIZED")
+        core_count = 370
+        for r in cohort:
+            aid = r["subject_id"]
+            row = {col: "" for col in summary_rows[0]}
+            row.update({
+                "corpus": "CORE370", "asset_id": aid, "source_sha256": r["source_sha256"],
+                "provider": "CORE370_HISTORICAL_SOURCE_ORIGIN_" + r.get("source_origin", "UNKNOWN"),
+                "historical_split": "SEPARATE_CORE370_SPLIT_TO_RECONCILE",
+                "imported_scene_deep_checked": False,
+                "imported_structure_class": "CORE370_HISTORICAL_EVIDENCE_NOT_JOINED_TO_THIS_IMPORT_AUDIT",
+                "character_vs_prop": "UNKNOWN", "morphology": "UNKNOWN",
+                "authored_pose_front_up": "UNKNOWN", "semantic_source_face_truth": "UNKNOWN",
+                "drawable_layerability": "UNKNOWN", "2d_style_suitability": "UNKNOWN",
+                "independent_source_court_passed": False, "training_authorized": False,
+            })
+            summary_rows.append(row)
+            for stage in STAGES:
+                reviews.append({
+                    "asset_id": aid, "source_sha256": r["source_sha256"],
+                    "stage": stage, "observation_state": "CORE370_HISTORICAL_EVIDENCE_NOT_BOUND",
+                    "independent_court_state": "UNKNOWN", "review_receipt_sha256": "",
+                    "training_authorized": False, "reason": "CORE370_PR327_REVALIDATION_AND_53_SHA_LINEAGE_OVERLAY_PENDING",
+                })
+        write_csv(out / "ALL_4363_COHORT_DEEP_AUDIT_COVERAGE_V1.csv", summary_rows)
+        write_csv(out / "ALL_4363_COHORT_REVIEW_TASKS_V1.csv", reviews)
     manifest = {
-        "schema": SCHEMA, "asset_records": len(physical_rows), "full_import_evidence_verified": len(detail),
+        "schema": SCHEMA, "asset_records": len(physical_rows), "core370_historical_records": core_count,
+        "all_corpus_source_records": len(physical_rows) + core_count,
+        "full_import_evidence_verified": len(detail),
         "not_yet_imported": len(physical_rows) - len(detail),
         "source_structure_categories": dict(sorted(shape_counts.items())),
         "asset_type_morphology_court_pass": 0, "source_authored_pose_court_pass": 0,
         "semantic_source_face_court_pass": 0, "drawable_consequence_court_pass": 0,
         "styled_2d_game_art_court_pass": 0, "native_ik_control_functionality_court_pass": 0,
-        "review_task_count": len(reviews), "review_stages_per_asset": list(STAGES),
+        "review_task_count": total_master_review_tasks, "all_corpus_review_task_count": len(reviews),
+        "review_stages_per_asset": list(STAGES),
         "recommended_visual_review_taxonomy": list(MORPH_CLASS),
         "native_source_original_bytes_not_read": True,
         "imported_full_scene_receipts_sha_verified": True,
@@ -341,11 +377,12 @@ def run(physical: Path, wave_roots: tuple[Path, ...], out: Path, *, require_tota
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--physical", type=Path, required=True)
+    p.add_argument("--core", type=Path)
     for i in range(1, 5):
         p.add_argument(f"--wave{i}", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
     args = p.parse_args()
-    print(json.dumps(run(args.physical, tuple(getattr(args, f"wave{i}") for i in range(1, 5)), args.out), indent=2))
+    print(json.dumps(run(args.physical, tuple(getattr(args, f"wave{i}") for i in range(1, 5)), args.out, core=args.core), indent=2))
 
 if __name__ == "__main__":
     main()

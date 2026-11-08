@@ -60,7 +60,21 @@ jobs:
         with:
           go-version: '1.27.1'
           cache: false
+      - name: Check installed release before dependency prewarm (read-only)
+        id: installed-release
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          from pathlib import Path
+          from tools.platform_release_idempotency_v1 import matching_current_release
+          from tools.platform_deploy import existing_release_ready
+
+          root = Path('/home/monster/realsas_platform')
+          authority = Path('/home/monster/realsas_authority')
+          existing = matching_current_release(root, '${{ github.sha }}', authority)
+          print('reuse=' + ('true' if existing is not None and existing_release_ready() else 'false'))
+          PY
       - name: Prewarm exact deployment wheelhouse
+        if: steps.installed-release.outputs.reuse != 'true'
         timeout-minutes: 30
         run: |
           set -euo pipefail

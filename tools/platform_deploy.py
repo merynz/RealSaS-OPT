@@ -15,6 +15,7 @@ import os
 import platform
 import re
 import shlex
+import shutil
 import socket
 import subprocess
 import sys
@@ -248,82 +249,110 @@ def install(root, expected_sha, authority, *, force_rebuild=False):
         marker.write_text(json.dumps({"schema": "RealSaS.DeveloperDeployment.v1", "root": str(root), "state": "PREPARING"}) + "\n")
     release = root / "releases" / f"{expected_sha}-{uuid.uuid4().hex[:8]}"
     release.mkdir(parents=True, mode=0o700)
-    source, binaries, venv = release / "source", release / "bin", release / "venv"
-    source.mkdir()
-    binaries.mkdir()
-    # Immutable source snapshot; source branches never become execution state.
-    archive = subprocess.run(["git", "archive", expected_sha], cwd=ROOT, check=True,
-                             capture_output=True, timeout=60).stdout
-    with tarfile.open(fileobj=io.BytesIO(archive)) as data:
-        data.extractall(source, filter="data")
-    # One shared, immutable Python dependency environment per exact requirements
-    # and Python patch fingerprint; source and Go outputs remain release-local.
-    # Cache is explicitly outside releases and cannot be reclaimed by release GC.
-    venv, dependency_digest = provision_shared_venv(root, source, release)
-    python = venv / "bin/python"
-    for name in ("realsas-api", "realsas-control-worker", "realsas-migrate", "realsasctl"):
-        flags = ["-ldflags", f"-X main.sourceCodeSHA={expected_sha}"] if name in {"realsas-api", "realsas-control-worker"} else []
-        command(["go", "build", *flags, "-o", binaries / name, f"./cmd/{name}"], cwd=source / "platform", timeout=300)
-    # A pinned, checksum-verified official binary, never curl|sh/latest.
-    with urllib.request.urlopen(TEMPORAL_URL, timeout=60) as response:
-        temporal = response.read(64 * 1024 * 1024 + 1)
-    extract_temporal(temporal, binaries / "temporal")
-    for name in ("data", "data/socket", "artifacts", "receipts"):
-        (root / name).mkdir(mode=0o700, exist_ok=True)
-    pgdata = root / "data/postgres"
-    if not (pgdata / "PG_VERSION").exists():
-        if pgdata.exists() and any(pgdata.iterdir()):
-            raise RuntimeError("PARTIAL_PGDATA_REQUIRES_OPERATOR_INSPECTION")
-        command([python, "-c", "import sys; from pgserver import initdb; from pathlib import Path; "
-                 "initdb(['-A','trust','--encoding=UTF8','--no-locale'], pgdata=Path(sys.argv[1]))", pgdata])
-    # Verify imports WITHOUT any inherited Actions environment before switching.
-    library_dir = python_library_dir(python)
-    launcher = binaries / "realsas-python"
-    launcher.write_text(python_launcher(python, library_dir))
-    launcher.chmod(0o755)
-    env = runtime_environment(root, authority, library_dir)
-    command([launcher, "-c", "from compiler.realsas_compiler_services.platform_worker import worker; "
-             "print('Engine imports verified in isolated service environment')"], cwd=source, env=env)
-    units = service_units(root)
-    unit_dir = Path.home() / ".config/systemd/user"
-    unit_dir.mkdir(parents=True, exist_ok=True)
-    for name, text in units.items():
-        # Validate actual built executables before the current symlink exists.
-        (release / name).write_text(text.replace(str(root / "current"), str(release)))
-    command(["systemd-analyze", "--user", "verify", *[release / name for name in units]], timeout=30)
-    # A long dependency build must not switch the host to a superseded main.
-    if command(["git", "ls-remote", "origin", "refs/heads/main"], cwd=ROOT, capture=True).stdout.split()[0] != expected_sha:
-        raise RuntimeError("CANONICAL_MAIN_ADVANCED_DURING_PACKAGE_BUILD: live services unchanged")
-    if previous and previous.get("current_release"):
-        command(["systemctl", "--user", "stop", "realsas-platform.target"], timeout=90)
-    temporary_link = root / f".current-{uuid.uuid4().hex}"
-    temporary_link.symlink_to(release)
-    os.replace(temporary_link, root / "current")
-    (root / "platform.env").write_text("".join(f"{key}={value}\n" for key, value in env.items()))
-    (root / "platform.env").chmod(0o600)
-    for name, text in units.items():
-        (unit_dir / name).write_text(text)
-    receipt = {"schema": "RealSaS.DeveloperDeployment.v1", "root": str(root),
-               "code_sha": expected_sha, "current_release": str(release), "previous_release": (previous or {}).get("current_release"),
-               "temporal_version": TEMPORAL_VERSION, "temporal_archive_sha256": TEMPORAL_SHA256,
-               "developer_python_env_fingerprint": dependency_digest,
-               "execution_mode": "LOCAL_DEVELOPER", "production_ready": False,
-               "authority_root": str(authority), "state": "STARTING"}
-    marker.write_text(json.dumps(receipt, indent=2) + "\n")
-    command(["systemctl", "--user", "daemon-reload"])
-    command(["systemctl", "--user", "enable", "--now", "realsas-platform.target"], timeout=120)
-    deadline = time.monotonic() + 60
-    while time.monotonic() < deadline:
-        active = subprocess.run(["systemctl", "--user", "is-active", *[f"realsas-platform-{name}.service" for name in UNITS]],
-                                text=True, capture_output=True, check=False, timeout=10)
-        if all_services_active(active.stdout) and socket_open(8080) and socket_open(7233):
-            receipt["state"] = "SERVICES_ACTIVE"
-            marker.write_text(json.dumps(receipt, indent=2) + "\n")
-            print(json.dumps(receipt, sort_keys=True))
-            return
-        time.sleep(1)
-    startup_diagnostics()
-    raise RuntimeError("PLATFORM_SERVICES_NOT_READY: startup diagnostics printed; no data was reset")
+    try:
+        source, binaries, venv = release / "source", release / "bin", release / "venv"
+        source.mkdir()
+        binaries.mkdir()
+        # Immutable source snapshot; source branches never become execution state.
+        archive = subprocess.run(["git", "archive", expected_sha], cwd=ROOT, check=True,
+                                 capture_output=True, timeout=60).stdout
+        with tarfile.open(fileobj=io.BytesIO(archive)) as data:
+            data.extractall(source, filter="data")
+        # One shared, immutable Python dependency environment per exact requirements
+        # and Python patch fingerprint; source and Go outputs remain release-local.
+        # Cache is explicitly outside releases and cannot be reclaimed by release GC.
+        venv, dependency_digest = provision_shared_venv(root, source, release)
+        python = venv / "bin/python"
+        for name in ("realsas-api", "realsas-control-worker", "realsas-migrate", "realsasctl"):
+            flags = ["-ldflags", f"-X main.sourceCodeSHA={expected_sha}"] if name in {"realsas-api", "realsas-control-worker"} else []
+            command(["go", "build", *flags, "-o", binaries / name, f"./cmd/{name}"], cwd=source / "platform", timeout=300)
+        # A pinned, checksum-verified official binary, never curl|sh/latest.
+        with urllib.request.urlopen(TEMPORAL_URL, timeout=60) as response:
+            temporal = response.read(64 * 1024 * 1024 + 1)
+        extract_temporal(temporal, binaries / "temporal")
+        for name in ("data", "data/socket", "artifacts", "receipts"):
+            (root / name).mkdir(mode=0o700, exist_ok=True)
+        pgdata = root / "data/postgres"
+        if not (pgdata / "PG_VERSION").exists():
+            if pgdata.exists() and any(pgdata.iterdir()):
+                raise RuntimeError("PARTIAL_PGDATA_REQUIRES_OPERATOR_INSPECTION")
+            command([python, "-c", "import sys; from pgserver import initdb; from pathlib import Path; "
+                     "initdb(['-A','trust','--encoding=UTF8','--no-locale'], pgdata=Path(sys.argv[1]))", pgdata])
+        # Verify imports WITHOUT any inherited Actions environment before switching.
+        library_dir = python_library_dir(python)
+        launcher = binaries / "realsas-python"
+        launcher.write_text(python_launcher(python, library_dir))
+        launcher.chmod(0o755)
+        env = runtime_environment(root, authority, library_dir)
+        command([launcher, "-c", "from compiler.realsas_compiler_services.platform_worker import worker; "
+                 "print('Engine imports verified in isolated service environment')"], cwd=source, env=env)
+        units = service_units(root)
+        unit_dir = Path.home() / ".config/systemd/user"
+        unit_dir.mkdir(parents=True, exist_ok=True)
+        for name, text in units.items():
+            # Validate actual built executables before the current symlink exists.
+            (release / name).write_text(text.replace(str(root / "current"), str(release)))
+        command(["systemd-analyze", "--user", "verify", *[release / name for name in units]], timeout=30)
+        # A long dependency build must not switch the host to a superseded main.
+        if command(["git", "ls-remote", "origin", "refs/heads/main"], cwd=ROOT, capture=True).stdout.split()[0] != expected_sha:
+            raise RuntimeError("CANONICAL_MAIN_ADVANCED_DURING_PACKAGE_BUILD: live services unchanged")
+        if previous and previous.get("current_release"):
+            command(["systemctl", "--user", "stop", "realsas-platform.target"], timeout=90)
+        temporary_link = root / f".current-{uuid.uuid4().hex}"
+        temporary_link.symlink_to(release)
+        os.replace(temporary_link, root / "current")
+        (root / "platform.env").write_text("".join(f"{key}={value}\n" for key, value in env.items()))
+        (root / "platform.env").chmod(0o600)
+        for name, text in units.items():
+            (unit_dir / name).write_text(text)
+        receipt = {"schema": "RealSaS.DeveloperDeployment.v1", "root": str(root),
+                   "code_sha": expected_sha, "current_release": str(release), "previous_release": (previous or {}).get("current_release"),
+                   "temporal_version": TEMPORAL_VERSION, "temporal_archive_sha256": TEMPORAL_SHA256,
+                   "developer_python_env_fingerprint": dependency_digest,
+                   "execution_mode": "LOCAL_DEVELOPER", "production_ready": False,
+                   "authority_root": str(authority), "state": "STARTING"}
+        marker.write_text(json.dumps(receipt, indent=2) + "\n")
+        command(["systemctl", "--user", "daemon-reload"])
+        command(["systemctl", "--user", "enable", "--now", "realsas-platform.target"], timeout=120)
+        deadline = time.monotonic() + 60
+        while time.monotonic() < deadline:
+            active = subprocess.run(["systemctl", "--user", "is-active", *[f"realsas-platform-{name}.service" for name in UNITS]],
+                                    text=True, capture_output=True, check=False, timeout=10)
+            if all_services_active(active.stdout) and socket_open(8080) and socket_open(7233):
+                receipt["state"] = "SERVICES_ACTIVE"
+                marker.write_text(json.dumps(receipt, indent=2) + "\n")
+                print(json.dumps(receipt, sort_keys=True))
+                return
+            time.sleep(1)
+        startup_diagnostics()
+        raise RuntimeError("PLATFORM_SERVICES_NOT_READY: startup diagnostics printed; no data was reset")
+
+    except Exception:
+        # A failed build must not leave another giant orphan release behind.
+        # Never erase the current link target or an explicitly recorded release
+        # after activation; those are operator recovery states.
+        current_link = root / "current"
+        current_target = current_link.resolve(strict=False) if current_link.is_symlink() else None
+        recorded = set()
+        if marker.is_file():
+            try:
+                state = json.loads(marker.read_text())
+                for key in ("current_release", "previous_release"):
+                    value = state.get(key)
+                    if isinstance(value, str) and value:
+                        recorded.add(Path(value))
+            except (OSError, ValueError):
+                # Ambiguous receipts are not deletion authority.
+                recorded.add(release)
+        if (release.is_dir() and not release.is_symlink()
+                and release.parent == root / "releases"
+                and release != current_target and release not in recorded):
+            try:
+                shutil.rmtree(release)
+                print("DISCARDED_UNACTIVATED_RELEASE_AFTER_BUILD_FAILURE", release, file=sys.stderr)
+            except OSError as cleanup_error:
+                print("UNACTIVATED_RELEASE_CLEANUP_FAILED", repr(cleanup_error), file=sys.stderr)
+        raise
 
 
 def main():

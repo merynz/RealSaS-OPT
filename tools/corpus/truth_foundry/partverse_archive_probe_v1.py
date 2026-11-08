@@ -219,7 +219,7 @@ def main():
                 if not re.fullmatch(r"[0-9a-f]{64}",row["source_sha256_provider_claim"]):
                     raise ValueError("UNVERIFIED_SOURCE_CLAIM_FORMAT")
                 selected[uid] = row
-        if not selected or len(selected)>3000:
+        if not selected or len(selected)>5000:
             raise ValueError("SELECTION_COUNT_OUT_OF_RANGE")
     elif args.uid_allowlist_sha256:
         raise ValueError("SELECTION_SHA_WITHOUT_FILE")

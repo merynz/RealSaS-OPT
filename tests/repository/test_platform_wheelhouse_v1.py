@@ -8,6 +8,11 @@ WORKFLOW = ROOT / ".github/workflows/platform_developer_deploy.yml"
 def test_deployment_prewarm_is_exact_persistent_and_before_service_install():
     text = WORKFLOW.read_text(encoding="utf-8")
     assert text.count("Prewarm exact deployment wheelhouse") == 1
+    assert "Check installed release before dependency prewarm (read-only)" in text
+    assert "if: steps.installed-release.outputs.reuse != 'true'" in text
+    assert text.index("Check installed release before dependency prewarm") < text.index(
+        "Prewarm exact deployment wheelhouse"
+    )
     assert text.count("timeout-minutes: 30") == 1
     assert text.count("wheelhouse_root=/home/monster/realsas_platform/wheelhouse") == 1
     assert text.count('echo "PIP_NO_INDEX=1" >> "$GITHUB_ENV"') == 1

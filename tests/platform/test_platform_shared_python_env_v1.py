@@ -96,3 +96,34 @@ def test_shared_env_wrong_root_refused(tmp_path):
     root, source, folder = release(tmp_path, "a" * 40 + "-11111111")
     with pytest.raises(RuntimeError, match="RELEASE_SCOPE_DRIFT"):
         m.provision_shared_venv(root, source, root)
+
+
+def test_real_python_venv_symlink_imports_shared_site_packages(tmp_path, monkeypatch):
+    """Integration of actual stdlib venv with release/venv path; zero network."""
+    import subprocess
+    import venv
+
+    root, source, folder = release(tmp_path, "a" * 40 + "-11111111")
+
+    def bootstrap(cache_root, packages, *, requirement_files):
+        digest = m.fingerprint(packages, requirement_files)
+        dest = cache_root / "venvs" / digest
+        venv.EnvBuilder(with_pip=False).create(dest)
+        package_dir = subprocess.run(
+            [str(dest / "bin/python"), "-c",
+             "import site; print(site.getsitepackages()[0])"],
+            check=True, capture_output=True, text=True
+        ).stdout.strip()
+        (Path(package_dir) / "realsas_shared_probe.py").write_text(
+            "SOURCE='CACHED_IMMUTABLE_ENV'\n")
+        (dest / ".realsas-env.json").write_text(json.dumps({"fingerprint": digest}))
+        return {"venv": str(dest), "fingerprint": digest}
+
+    monkeypatch.setattr(m, "ensure_venv", bootstrap)
+    link, _ = m.provision_shared_venv(root, source, folder)
+    completed = subprocess.run(
+        [str(link / "bin/python"), "-c",
+         "import realsas_shared_probe; print(realsas_shared_probe.SOURCE)"],
+        check=True, capture_output=True, text=True
+    )
+    assert completed.stdout.strip() == "CACHED_IMMUTABLE_ENV"

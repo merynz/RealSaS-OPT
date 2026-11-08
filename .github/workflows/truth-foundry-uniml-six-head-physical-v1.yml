@@ -1,0 +1,97 @@
+name: truth-foundry-uniml-six-head-physical-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-uniml-six-head-physical-v1.yml'
+      - 'tools/corpus/truth_foundry/uniml_glb_six_head_physical_inventory_v1.py'
+      - 'tests/corpus/test_uniml_glb_six_head_physical_inventory_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-six-head-physical-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  structural-evidence-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GLB canonical byte reader
+        run: python -m pip install --no-cache-dir 'Pillow>=10,<13'
+      - name: Verify six-head evidence is not training admission
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/uniml_glb_six_head_physical_inventory_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_uniml_glb_six_head_physical_inventory_v1.py' -v
+
+  private-existing-uniml-canonical-physical-census:
+    needs: [structural-evidence-contracts]
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 395 && github.event.pull_request.head.repo.full_name == 'merynz/RealSaS-OPT' && github.event.pull_request.head.ref == 'truth-foundry-source-census-matrix-v1-20261108'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 85
+    env:
+      RCLONE_CONFIG: /tmp/realsas-six-head-rclone.conf
+      SOURCE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_uniml_rare_glb_v1/42525626086-1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_uniml_six_head_physical_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      SOURCE_MANIFEST_SHA256: 7ad4b8ad6943f7cee817a50868a64637f6ee059ac576218fbf172d99bf9e29dd
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install bounded Drive reader and pixel decoder
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'Pillow>=10,<13'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Read already stored canonical GLBs, never duplicate source files
+        run: |
+          set -euo pipefail
+          umask 077
+          dir="$RUNNER_TEMP/uniml-six-head-physical"
+          mkdir -p "$dir/glb" "$dir/out"
+          python - "$dir" <<'PY'
+          import sys,shutil
+          if shutil.disk_usage(sys.argv[1]).free < 2*1024**3:
+              raise SystemExit('NO_FREE_SCRATCH')
+          PY
+          rclone copyto "$SOURCE/UNIML3D_SOURCE_GLB_EVIDENCE_V1.csv" "$dir/manifest.csv" --retries 3
+          test "$(sha256sum "$dir/manifest.csv" | awk '{print $1}')" = "$SOURCE_MANIFEST_SHA256"
+          rclone copy "$SOURCE/canonical_glb_quarantine" "$dir/glb" --retries 3 --transfers 6
+      - name: Build 84 canonical source six-head physical and target records
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/uniml-six-head-physical"
+          python tools/corpus/truth_foundry/uniml_glb_six_head_physical_inventory_v1.py \
+            --glb-dir "$dir/glb" --manifest "$dir/manifest.csv" --out "$dir/out"
+          python - "$dir/out/SUMMARY_V1.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          s=json.load(open(sys.argv[1]))
+          assert s['source_glbs_canonically_sha_verified']==84
+          assert s['source_download_failures']==12
+          assert s['per_head_targets_written']==84*22
+          assert s['original_source_rights_qualified']==0
+          assert s['graphics_stylized_art_approved']==0
+          assert all(v==0 for v in s['per_head_training_pass'].values())
+          print('## Six-head physical inventory of 84 canonical UniML3D sources')
+          print('Canonical GLBs SHA-verified:',s['source_glbs_canonically_sha_verified'])
+          print('Per-target evidence records:',s['per_head_targets_written'])
+          for k,v in s['observed_counters'].items(): print(k+':',v)
+          print('Original-source truth, art approval and training: NONE PROMOTED')
+          PY
+      - name: Persist only canonical source observations and target receipts
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/uniml-six-head-physical/out"
+          test -s "$dir/UNIML3D_CANONICAL_PHYSICAL_84_ASSETS_V1.csv"
+          test -s "$dir/UNIML3D_CANONICAL_SIX_HEAD_TARGETS_V1.csv"
+          rclone copy "$dir" "$DEST" --checksum --retries 3
+          echo 'Reused previously cached 84 canonical GLBs. Zero raw source bytes newly persisted.' >> "$GITHUB_STEP_SUMMARY"

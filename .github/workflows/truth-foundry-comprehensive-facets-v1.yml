@@ -1,0 +1,99 @@
+name: truth-foundry-comprehensive-facets-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-comprehensive-facets-v1.yml'
+      - 'canonical/REALSAS_TRUTH_FOUNDRY_COMPREHENSIVE_FACETS_V1.json'
+      - 'tools/corpus/truth_foundry/comprehensive_facet_matrix_v1.py'
+      - 'tests/corpus/test_comprehensive_facet_matrix_v1.py'
+  push:
+    branches: [truth-foundry-source-census-matrix-v1-20261108]
+    paths:
+      - '.github/workflows/truth-foundry-comprehensive-facets-v1.yml'
+      - 'canonical/REALSAS_TRUTH_FOUNDRY_COMPREHENSIVE_FACETS_V1.json'
+      - 'tools/corpus/truth_foundry/comprehensive_facet_matrix_v1.py'
+      - 'tests/corpus/test_comprehensive_facet_matrix_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-comprehensive-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  catalog-and-fail-closed-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and test exhaustive evidence inventory rules
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/comprehensive_facet_matrix_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_comprehensive_facet_matrix_v1.py' -v
+
+  private-source-by-facet-inventory:
+    if: github.event_name == 'push'
+    needs: [catalog-and-fail-closed-contracts]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      RCLONE_CONFIG: /tmp/realsas-truth-facet-rclone.conf
+      SOURCE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_global_source_census_v1/42509443199-1/matrix/SOURCE_RECORD_CENSUS_4363.csv
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_comprehensive_facets_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      EXPECT_SHA: b03fc7b378ab5e8f70bd83f55822372eb5516746cc3d0b96286a1e903d0d2d1f
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure private source access from scoped secret
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Read frozen 4363-source census and expand 264 facet coverage
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/truth-facets-v1"
+          mkdir -p "$root/out"
+          rclone copyto "$SOURCE" "$root/SOURCE_RECORD_CENSUS_4363.csv" --retries 3
+          python tools/corpus/truth_foundry/comprehensive_facet_matrix_v1.py \
+            --source-census "$root/SOURCE_RECORD_CENSUS_4363.csv" \
+            --catalog canonical/REALSAS_TRUTH_FOUNDRY_COMPREHENSIVE_FACETS_V1.json \
+            --out "$root/out" --expected-source-sha "$EXPECT_SHA"
+          python - "$root/out" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          from pathlib import Path
+          p=Path(sys.argv[1])
+          r=json.loads((p/'SUMMARY_V1.json').read_text())
+          assert r['source_record_count']==4363
+          assert r['facet_count']==264 and r['group_count']==14
+          assert r['asset_facet_slots']==4363*264
+          assert r['group_review_tasks_open']==4363*14
+          assert r['master_physical_census_bound']==2466
+          assert r['independent_target_court_pass_minted']==0
+          assert not r['training_authorized'] and not r['materialization_authorized']
+          print('## Truth Foundry expanded evidence inventory (not qualified target supervision)')
+          print('Original source records:',r['source_record_count'])
+          print('Independent evidence questions per asset:',r['facet_count'])
+          print('Source x facet review slots:',r['asset_facet_slots'])
+          print('Source x group review tasks:',r['group_review_tasks_open'])
+          print('Imported numeric evidence bound:',r['master_physical_census_bound'])
+          print('Visual/semantic/graphics/rig-causal PASS minted: ZERO')
+          PY
+      - name: Archive provenance-bound private matrix (NO source asset bytes)
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/truth-facets-v1/out"
+          test -s "$root/ASSET_FACET_EVIDENCE_MATRIX_V1.jsonl.gz"
+          test -s "$root/SUMMARY_V1.json"
+          rclone copy "$root" "$DEST" --checksum --retries 3
+          echo 'SHA-addressed 14-domain 264-facet per-asset inventory archived to private Drive.' >> "$GITHUB_STEP_SUMMARY"

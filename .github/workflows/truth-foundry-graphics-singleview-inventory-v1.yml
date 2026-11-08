@@ -60,7 +60,7 @@ jobs:
           rclone copyto "$ROOT/truth_foundry_partverse_wave2_4799_v1/42529564616-1/ASSET_PART_GEOMETRY_EVIDENCE_V1.csv" "$out/in/second.csv" --retries 3
           rclone copyto "$ROOT/truth_foundry_external_pool_metadata_v1/42518887140-1/PARALLEL_ARTICULATION_UNIML_TRIAGE_20261108_V1/ARTICULATION_2500_SOURCE_CANDIDATE_QUEUE.csv" "$out/in/art.csv" --retries 3
           rclone copyto "$ROOT/truth_foundry_external_pool_metadata_v1/42518887140-1/PARALLEL_ARTICULATION_UNIML_TRIAGE_20261108_V1/UNIML3D_2500_DIVERSITY_SOURCE_CANDIDATE_QUEUE.csv" "$out/in/uni.csv" --retries 3
-          rclone copyto "$ROOT/truth_foundry_uniml_rare_glb_v1/42525444732-1/UNIML3D_SOURCE_GLB_EVIDENCE_V1.csv" "$out/in/glb.csv" --retries 3
+          rclone copyto "$ROOT/truth_foundry_uniml_rare_glb_v1/42525626086-1/UNIML3D_SOURCE_GLB_EVIDENCE_V1.csv" "$out/in/glb.csv" --retries 3
           python - "$out/in" <<'PY'
           import sys,hashlib
           from pathlib import Path

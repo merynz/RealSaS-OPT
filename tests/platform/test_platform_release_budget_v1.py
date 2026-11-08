@@ -66,3 +66,20 @@ def test_deployment_preflight_budget_only_for_new_materialization():
     assert source.index("if identical is None:") < source.index(
         "require_release_budget(root)")
     assert "force_rebuild" in source
+
+
+def test_wsl_without_host_mount_fails_closed(tmp_path, monkeypatch):
+    root = tmp_path / "platform"
+    root.mkdir()
+    is_file = Path.is_file
+    read_text = Path.read_text
+    monkeypatch.setattr(Path, "is_mount", lambda self: False)
+    monkeypatch.setattr(Path, "is_file",
+                        lambda self: True if str(self) == "/proc/sys/kernel/osrelease"
+                        else is_file(self))
+    monkeypatch.setattr(Path, "read_text",
+                        lambda self, *args, **kwargs: "5.15.0-Microsoft-WSL2"
+                        if str(self) == "/proc/sys/kernel/osrelease"
+                        else read_text(self, *args, **kwargs))
+    with pytest.raises(RuntimeError, match="WSL_WINDOWS_C_MOUNT_UNAVAILABLE"):
+        budget.require_release_budget(root)

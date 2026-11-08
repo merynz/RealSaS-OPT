@@ -1,0 +1,144 @@
+name: truth-foundry-partverse-selected2500-v1
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/truth-foundry-partverse-selected2500-v1.yml"
+      - "tools/corpus/truth_foundry/partverse_morphology_triage_v1.py"
+      - "tools/corpus/truth_foundry/partverse_part_geometry_inventory_v1.py"
+      - "tools/corpus/truth_foundry/partverse_archive_probe_v1.py"
+      - "tests/corpus/test_partverse_morphology_inventory_v1.py"
+  push:
+    branches: [truth-foundry-source-census-matrix-v1-20261108]
+    paths:
+      - ".github/workflows/truth-foundry-partverse-selected2500-v1.yml"
+      - "tools/corpus/truth_foundry/partverse_morphology_triage_v1.py"
+      - "tools/corpus/truth_foundry/partverse_part_geometry_inventory_v1.py"
+      - "tools/corpus/truth_foundry/partverse_archive_probe_v1.py"
+      - "tests/corpus/test_partverse_morphology_inventory_v1.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partverse-selected2500-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  split-and-geometry-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install mesh fixtures
+        run: python -m pip install --no-cache-dir 'trimesh>=4.5,<5' 'numpy>=1.26,<3'
+      - name: Test morphotype quarantine, provider val seal and face0 evidence
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/partverse_morphology_triage_v1.py tools/corpus/truth_foundry/partverse_part_geometry_inventory_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_partverse_morphology_inventory_v1.py' -v
+          python -m unittest discover -s tests/corpus -p 'test_partverse_archive_probe_v1.py' -v
+
+  private-source-bounded-selected-intake:
+    if: github.event_name == 'push'
+    needs: [split-and-geometry-contracts]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      RCLONE_CONFIG: /tmp/realsas-partverse-selected2500.conf
+      PARTVERSE_REVISION: 09a08f4f13c551bbacc1ff253053fba4ea9b637f
+      QUEUE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_external_pool_metadata_v1/42518887140-1/PARTVERSE_MORPHOLOGY_TRIAGE_20261108_V1/PARTVERSE_CANDIDATE_DOWNLOAD_QUEUE_SPLIT_SAFE_V2.csv
+      QUEUE_SHA256: 24fcfd745e0142feed734ce42b605ebd42dc2e5a64e45b7939964ca8780023c1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_partverse_selected2500_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install bounded 3D audit and Drive client
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'requests>=2.31,<3' 'trimesh>=4.5,<5' 'numpy>=1.26,<3'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Read frozen morphology triage and seal source split
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/partverse-selected2500"
+          mkdir -p "$root/staging" "$root/results"
+          rclone copyto "$QUEUE" "$root/selection.csv" --retries 3
+          test "$(sha256sum "$root/selection.csv" | awk '{print $1}')" = "$QUEUE_SHA256"
+          python - "$root/selection.csv" <<'PY'
+          import csv,sys
+          with open(sys.argv[1],newline='',encoding='utf-8') as f:
+              rows=list(csv.DictReader(f))
+          assert len(rows)==2500
+          assert len({r["partverse_uid"] for r in rows})==2500
+          assert all(r["provider_split"]=="PROVIDER_TRAIN_CANDIDATE" for r in rows)
+          assert all(r["source_original_license_court"]=="UNKNOWN" for r in rows)
+          assert all(r["morphology_visual_court"]=="UNKNOWN" for r in rows)
+          assert all(r["head_training_admitted"]=="False" for r in rows)
+          PY
+      - name: Stream only 2500 selected annotated PartVerse subjects from pinned 9GB archive
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/partverse-selected2500"
+          df -h "$RUNNER_TEMP"
+          python tools/corpus/truth_foundry/partverse_archive_probe_v1.py \
+            --revision "$PARTVERSE_REVISION" --out "$root/staging" \
+            --uid-allowlist-csv "$root/selection.csv" \
+            --uid-allowlist-sha256 "$QUEUE_SHA256" \
+            --max-members 10000000 --max-staged-mib 2048 \
+            --max-json-files 5000 --max-glbs 2500
+          python - "$root/staging/PROBE_SUMMARY_V1.json" <<'PY'
+          import json,sys
+          x=json.load(open(sys.argv[1]))
+          assert x["selected_uid_count"]==2500
+          assert x["archive_stream_scanned_to_end"] is True
+          assert x["staged_total_bytes"]<=2048*1024*1024
+          assert x["source_face_semantic_pass"]==0
+          assert x["training_authorized"] is False
+          PY
+      - name: Inventory actual face-map mesh and zero-label gaps; pack 100-source bundles
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/partverse-selected2500"
+          python tools/corpus/truth_foundry/partverse_part_geometry_inventory_v1.py \
+            --staging-root "$root/staging" \
+            --queue-csv "$root/selection.csv" \
+            --out "$root/results" --max-bundle-uids 100
+          cp "$root/staging/PROBE_SUMMARY_V1.json" "$root/results/ARCHIVE_PROBE_SUMMARY_V1.json"
+          cp "$root/selection.csv" "$root/results/SELECTED_SOURCE_CANDIDATE_ROSTER_V1.csv"
+          python - "$root/results" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          from pathlib import Path
+          p=Path(sys.argv[1])
+          r=json.loads((p/'SUMMARY_V1.json').read_text())
+          assert r['selected_candidates']==2500
+          assert r['head_semantic_training_pass']==0
+          assert r['2d_art_pass']==0
+          assert r['rights_verified']==0
+          print('## PartVerse-XL 2,500 source-selected annotation inventory')
+          print('Selected metadata candidates:',r['selected_candidates'])
+          print('Actually staged annotation subjects:',r['staged_source_uids'])
+          print('Actual segmented meshes with face-ID count match:',r['processed_glb_face_count_contiguity_matches'])
+          print('Auxiliary info part consistency:',r['part_info_consistent_for_listed_labels'])
+          print('Faces not represented in auxiliary info:',r['face_count_missing_in_provider_info_despite_face2label'])
+          print('Source archive bundles:',r['bundle_count'])
+          print('Morpology/style/semantic/rights/drawable head PASS: ZERO')
+          PY
+      - name: Transfer checked bundles and per-asset evidence to private Drive
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/partverse-selected2500/results"
+          test -s "$root/SUMMARY_V1.json"
+          test -s "$root/ASSET_PART_GEOMETRY_EVIDENCE_V1.csv"
+          rclone copy "$root" "$DEST" --checksum --retries 4
+          echo 'Selective, quarantine-only indexed PartVerse annotation shards stored; no 823GB full dump and no fabricated training authority.' >> "$GITHUB_STEP_SUMMARY"

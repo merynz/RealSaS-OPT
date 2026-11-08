@@ -85,7 +85,7 @@ class ExternalPoolTests(unittest.TestCase):
             return str(p)
         result=run(CAT,self.root/"out",api=API(),downloader=downloader)
         self.assertEqual(result["pool_repos_intaken"],4)
-        self.assertEqual(result["provider_metadata_candidate_rows"],5)
+        self.assertEqual(result["provider_metadata_candidate_rows"],6)
         self.assertEqual(result["semantic_regions_reviewed"],0)
         self.assertEqual(result["source_rights_qualified"],0)
         self.assertFalse(result["training_authorized"])

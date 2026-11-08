@@ -31,8 +31,8 @@ def license_class(text):
  if 'noncommercial' in s or 'non-commercial' in s or re.search(r'\bnc\b',s):return 'NONCOMMERCIAL_OR_RESTRICTED'
  if 'no derivatives' in s or 'no-derivatives' in s or re.search(r'\bnd\b',s):return 'NO_DERIVATIVES_OR_RESTRICTED'
  if 'cc0' in s or 'public domain' in s or 'creative commons zero' in s:return 'CC0_OR_PUBLIC_DOMAIN_CLAIM'
- if 'by-sa' in s or 'sharealike' in s:return 'ATTRIBUTION_SHAREALIKE_REVIEW'
- if 'cc-by' in s or 'creative commons attribution' in s:return 'ATTRIBUTION_REVIEW'
+ if 'by-sa' in s or 'sharealike' in s or 'share alike' in s:return 'ATTRIBUTION_SHAREALIKE_REVIEW'
+ if 'cc-by' in s or 'attribution' in s:return 'ATTRIBUTION_REVIEW'
  return 'OTHER_UNREVIEWED_LICENSE'
 
 

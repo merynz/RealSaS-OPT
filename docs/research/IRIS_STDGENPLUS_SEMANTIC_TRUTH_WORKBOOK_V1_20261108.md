@@ -94,3 +94,21 @@ A representative morphology-stratified pilot must include at least: a humanoid w
 6. Compiler.Graphics interaction consequence and drawable policy/consumer gates.
 
 **Research integrity:** Paper description ≠ verified public implementation. No new semantic samples, training PASS, stylized 2D art PASS or product-ready drawable count is claimed here.
+
+
+## Clarification: StdGEN++ is a source-side **TRUTH BUILDER** reference as well as a student training reference (2026-11-08)
+
+Do not describe StdGEN++ solely as "how to train from already separated labels." The paper's **Anime3D-EX data construction** explicitly produces hierarchical supervised render configurations: full character, body + clothing, base body; matching head-focused crops and pixel-aligned facial feature/texture layers. Its stage-2 learning uses semantic-subset rendering to reveal otherwise occluded source surfaces, then stage 3 adds image/mask/semantic/depth/normal losses.
+
+**Our generic teacher pipeline:**
+1. Recover immutable original SHA, qualified source mesh/face addresses, authored native materials/skin, rest-pose/camera and provenance; license and lineage remain separate courts.
+2. Ingest PartVerse-XL `*_face2label.json` and `*_segmented.glb` as **3D part-instance proposal**, not anatomical or functional semantic truth. Verify full/part GLB face ID and geometry parity. If mapping changes through normalization/retriangulation, record explicit source triangle/corner barycentric address and unsupported faces as UNKNOWN.
+3. Review/derive concept, role, instance and part-group hierarchy from source geometry, UV, material, rig influence, motion and cross-view evidence. A many-to-many part ↔ semantic relationship is allowed; UNKNOWN faces remain UNKNOWN. Do not force human body/clothing/hair categories on nonhumans.
+4. Create source-bound candidate sets `P` for `FULL`, `KEEP_SET(P)`, `HIDE_SET(P)`, `ISOLATE(P)`, and intervention poses; each generated receipt contains source SHA, pose/rest, camera, chosen face/part IDs, RGB/RGBA, alpha, **global pixel face-ID + depth + normal + multi-hit visibility where available**, 3D support mask, genuine newly revealed source surfaces and exact generator version.
+5. **Court the teacher itself**: full/part recomposition parity, 3D→2D ID consistency, hide/set reveal with original hidden face, no leakage from artist part labels to student input, source camera and rest fixed, no fictitious occluded completion. For open and modular meshes, never assert global sign/SDF without separate sign qualification.
+6. Only then derive per-head losses: IRIS Semantic 3D instance/role/concept and multi-view pixel mask; IRIS Graphics source visibility, appearance and layered candidate relations. A **distinct source-bound 2D stylization court** is mandatory for student presentation training; native photoreal rendering is not 2D game-art ground truth.
+7. Drawable count, painter order and independent editability are **Compiler.Graphics representation decisions** requiring intervention and counterfactual evidence from 3D pose, camera, control and source alpha. Neither PartVerse part count nor StdGEN++ human semantic count determines them.
+
+**Tests before admission:** at least one per-source nontrivial `HIDE_SET` newly revealed original face; source ↔ part source-face parity PASS; pixel semantic/face-ID consistency PASS; camera/pose provenance PASS; explicit full/partial/unknown semantic region completeness; per-head training loss mask stays false until independent courts. This is a proposed RealSaS derivation policy; **no real PartVerse full/keep/hide audit is yet proven PASS by this document**.
+
+Primary paper: https://arxiv.org/html/2601.07660 (Section III Anime3D-EX and Section IV-D, stages 1–3). PartVerse code: https://github.com/hkdsc/fullpart/blob/main/partverse/get_infos.py (`_face2label.json`, multi-view face ID and visibility render). 

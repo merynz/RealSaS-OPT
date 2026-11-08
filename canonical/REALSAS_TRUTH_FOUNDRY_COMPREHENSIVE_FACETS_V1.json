@@ -3342,7 +3342,7 @@
       "training_authorized": false
     },
     {
-      "id": "2d_art_independent_visual_review",
+      "id": "two_d_art_independent_visual_review",
       "group": "graphics_stylization_2d",
       "domain": "DERIVED",
       "applicability_scope": "RENDERABLE",
@@ -4502,7 +4502,7 @@
       "training_authorized": false
     },
     {
-      "id": "2d_style_art_visual_court",
+      "id": "two_d_style_art_visual_court",
       "group": "quality_qualification",
       "domain": "COURT",
       "applicability_scope": "ALL",

@@ -1,0 +1,416 @@
+{
+  "schema": "RealSaS.ExternalPoolTruthDerivability.v1",
+  "created_utc": "2026-11-08",
+  "objective": "8000+ distinct rights-cleared lineage-safe FIT source identities PER head, NOT 8000 per source pool",
+  "scope": "external source discovery, remote pinned metadata intake and head-target extractability prior to 10K master expansion",
+  "training_admission": false,
+  "pool_admission": false,
+  "no_retroactive_review_pass": true,
+  "five_court_gate": [
+    "PROVIDER_LICENSE_AND_ORIGINAL_ASSET_RIGHTS",
+    "ORIGINAL_SOURCE_SHA_AND_CROSS_CORPUS_LINEAGE",
+    "SOURCE_NATIVE_OR_QUALIFIED_RECONSTRUCTION_PARITY",
+    "HEAD_TARGET_SPECIFIC_TRUTH_BUILDER_AND_INDEPENDENT_COURT",
+    "FIT_ONLY_CONSUMER_INPUT_LEAKAGE_AND_HOLDOUT"
+  ],
+  "head_status_enum": [
+    "PUBLISHED_NATIVE",
+    "SOURCE_RECOVERY",
+    "SOURCE_AND_BUILDER",
+    "REVIEW_REQUIRED",
+    "NO_EVIDENCE"
+  ],
+  "status_meanings": {
+    "PUBLISHED_NATIVE": "Published dataset has some directly useful native evidence for this head. Still needs independent source/court/rights; not ready to train.",
+    "SOURCE_RECOVERY": "Published processed form omits head-critical fields; must recover original 3D source or a separately source-provenanced equivalent before any truth builder.",
+    "SOURCE_AND_BUILDER": "Original or published geometry supports candidate derivation, but a new verified teacher builder and review are mandatory.",
+    "REVIEW_REQUIRED": "Possible source evidence exists; suitability, original license or authority not verified.",
+    "NO_EVIDENCE": "No grounded route from released data alone; requires another source or independent generation with reviewed original evidence."
+  },
+  "truths_not_obtained_by_representation_alone": [
+    "original full 3D topology from 8192 points",
+    "watertight global SDF from modular geometry",
+    "semantic face labels from object/material/bone names",
+    "editable drawable count from connected components",
+    "commercial training rights from a processed dataset's repo-level license",
+    "native IK/controller program from baked skeleton",
+    "stylized 2D art from photoreal materials",
+    "multi-view unseen surface truth from single student input"
+  ],
+  "pools": [
+    {
+      "id": "ANYMATE",
+      "repo_id": "yfdeng/Anymate",
+      "repo_type": "dataset",
+      "documentation": "https://github.com/yfde/Anymate",
+      "primary_identity": "Anymate item name; original Objaverse-XL SHA crosswalk from repository Anymate_id.json and Objaverse-XL annotations must be independently joined",
+      "known_scale": "230K+ processed rigged subjects; 91.3 GB published tensor dataset; source/character dedup unresolved",
+      "metadata_files": [
+        "README.md"
+      ],
+      "heavy_files": [
+        "Anymate_train_0.pt",
+        "Anymate_train_1.pt",
+        "Anymate_train_2.pt",
+        "Anymate_train_3.pt",
+        "Anymate_train_4.pt",
+        "Anymate_train_5.pt",
+        "Anymate_train_6.pt",
+        "Anymate_train_7.pt",
+        "Anymate_test.pt"
+      ],
+      "metadata_acquisition": "HF repo manifest + README; separate source-id SHA index from pinned GitHub original; do not unpickle remote .pt at this stage",
+      "original_source_route": "Objaverse-XL SHA-bound original source, not normalized texture-stripped object.obj",
+      "upstream_caveat": "Published tensor training records have point samples, voxel, skeleton/skin; test split exposes full mesh only for heldout evaluation. Source Blender processing can remove materials and join meshes; trust original bytes only.",
+      "per_head": {
+        "IRIS_GEOMETRY": {
+          "status": "SOURCE_RECOVERY",
+          "builder": "original_mesh_camera_id_depth_normal_multi_view",
+          "requires": [
+            "rights-cleared original mesh",
+            "camera-bound render",
+            "source topology and sign court"
+          ],
+          "note": "pc and vox are auxiliary geometry, not source topology"
+        },
+        "IRIS_SEMANTIC": {
+          "status": "SOURCE_AND_BUILDER",
+          "builder": "source_face_connected_proposals_reviewed_ontology_full_keep_hide",
+          "requires": [
+            "source mesh",
+            "face ID parity",
+            "independent morphological concept review"
+          ]
+        },
+        "IRIS_GRAPHICS": {
+          "status": "SOURCE_RECOVERY",
+          "builder": "native_material_pixel_relink_then_source_bound_stylized_render_and_caa",
+          "requires": [
+            "original textures/UV/alpha",
+            "source-bound art review",
+            "visibility/reveal court"
+          ]
+        },
+        "TESSA": {
+          "status": "SOURCE_RECOVERY",
+          "builder": "source_topology_correspondence_and_articulation_deform_fixtures",
+          "requires": [
+            "original vertices/faces and bind",
+            "source-face ancestry",
+            "pose response if source rig valid"
+          ]
+        },
+        "AXIS": {
+          "status": "PUBLISHED_NATIVE",
+          "builder": "joint_hierarchy_source_rest_and_derived_rigprogram_controls",
+          "requires": [
+            "native joint/connection truth",
+            "source rest/bind parity",
+            "independent controller/constraint teacher"
+          ]
+        },
+        "MIRA": {
+          "status": "PUBLISHED_NATIVE",
+          "builder": "sparse_skin_point_to_source_vertex_and_pose_response",
+          "requires": [
+            "point skin weight parity",
+            "source mesh-vertex bind alignment",
+            "deformation court"
+          ]
+        }
+      }
+    },
+    {
+      "id": "ARTICULATION_XL2",
+      "repo_id": "Seed3D/Articulation-XL2.0",
+      "repo_type": "dataset",
+      "documentation": "https://github.com/Seed3D/MagicArticulate",
+      "primary_identity": "metadata uuid, source, fileIdentifier and Objaverse-XL identity crosswalk",
+      "known_scale": "~48K rigged, deduplicated from larger Objaverse-XL; 39.7 GB released data, cleaned 2025-04",
+      "metadata_files": [
+        "README.md",
+        "meta_Articulation_XL_2.0.csv"
+      ],
+      "heavy_files": [
+        "articulation_xlv2_train.npz",
+        "articulation_xlv2_test.npz",
+        "articulation_xlv2_diverse_pose_train.npz",
+        "articulation_xlv2_diverse_pose_test.npz"
+      ],
+      "metadata_acquisition": "Download metadata CSV and pin immutable repo commit only; no NPZ loading with allow_pickle=True without independent sandbox validation",
+      "original_source_route": "Original Objaverse-XL fileIdentifier under original per-object rights",
+      "upstream_caveat": "Published vertices/faces/normals/joints/bones/sparse skin support TESSA/AXIS/MIRA; NPZ has no assured original material, UV, animation controller or part semantics; train/test split must not leak.",
+      "per_head": {
+        "IRIS_GEOMETRY": {
+          "status": "PUBLISHED_NATIVE",
+          "builder": "mesh_geometry_u_df_and_camera_native_truth",
+          "requires": [
+            "source mesh vertices/faces parity",
+            "normals",
+            "camera and solid court where applicable"
+          ]
+        },
+        "IRIS_SEMANTIC": {
+          "status": "SOURCE_AND_BUILDER",
+          "builder": "source_face_regions_and_reviewed_morphological_ontology",
+          "requires": [
+            "original face IDs or validated NPZ map",
+            "source appearance views",
+            "independent review"
+          ]
+        },
+        "IRIS_GRAPHICS": {
+          "status": "SOURCE_RECOVERY",
+          "builder": "original_material_texture_uv_recovery_and_stylized_art_court",
+          "requires": [
+            "original textures",
+            "source camera render",
+            "2D art/CAA approval"
+          ]
+        },
+        "TESSA": {
+          "status": "PUBLISHED_NATIVE",
+          "builder": "source_face_remesh_and_bend_twist_articulation_surface_courts",
+          "requires": [
+            "vertices/faces",
+            "bind weights",
+            "articulation-region pose deformation comparisons"
+          ]
+        },
+        "AXIS": {
+          "status": "PUBLISHED_NATIVE",
+          "builder": "joint_rest_hierarchy_then_independent_control_program",
+          "requires": [
+            "joints/bones",
+            "rest-bind/world frame",
+            "controller source or separately validated teacher"
+          ]
+        },
+        "MIRA": {
+          "status": "PUBLISHED_NATIVE",
+          "builder": "vertex_skin_sparse_parity_deform_response",
+          "requires": [
+            "weight indices/data",
+            "mesh vertex joint alignment",
+            "deformed pose counterfactual"
+          ]
+        }
+      }
+    },
+    {
+      "id": "PARTVERSE_XL",
+      "repo_id": "dscdyc/partversexl",
+      "repo_type": "dataset",
+      "documentation": "https://github.com/hkdsc/fullpart",
+      "primary_identity": "metadata.csv Objaverse-XL identity; normalized GLB vs part GLB source alignment must be reverified",
+      "known_scale": "~40K objects/320K annotated parts; up to 823 GB; not all human-labeled semantic concepts",
+      "metadata_files": [
+        "README.md",
+        "metadata.csv",
+        "train.csv",
+        "val.csv"
+      ],
+      "heavy_files": [
+        "anno_infos.tar.gz",
+        "normalized_glbs.tar.gz*",
+        "textured_part_glbs.tar.gz*"
+      ],
+      "metadata_acquisition": "Small manifest and CSVs only; source/part bytes require capacity and license checks",
+      "original_source_route": "Matched original Objaverse-XL files and independently validated full normalized GLB/part GLB",
+      "upstream_caveat": "Segmentation follows algorithm plus human correction, but part instance geometry is not an anatomical semantic label, rig role or independently editable drawable. Text captions may be auto-generated.",
+      "per_head": {
+        "IRIS_GEOMETRY": {
+          "status": "SOURCE_AND_BUILDER",
+          "builder": "full_mesh_vs_part_glb_geometry_original_parity",
+          "requires": [
+            "whole GLB",
+            "part GLB source lineage",
+            "face and depth parity"
+          ]
+        },
+        "IRIS_SEMANTIC": {
+          "status": "SOURCE_AND_BUILDER",
+          "builder": "part_instance_source_face_map_then_ontology_annotation_and_multiview_review",
+          "requires": [
+            "textured part GLBs",
+            "whole mesh face correspondence",
+            "reviewed concept and UNKNOWN face masks"
+          ]
+        },
+        "IRIS_GRAPHICS": {
+          "status": "SOURCE_AND_BUILDER",
+          "builder": "part_texture_native_materials_then_2d_approved_stylized_render_and_visibility",
+          "requires": [
+            "part/full source textures",
+            "UV/alpha",
+            "visual quality court",
+            "edit-reveal painter graph"
+          ]
+        },
+        "TESSA": {
+          "status": "SOURCE_AND_BUILDER",
+          "builder": "part_whole_geometry_topology_and_articulation_quality_court",
+          "requires": [
+            "full mesh original face map",
+            "joint influence if found",
+            "pose-bend tests"
+          ]
+        },
+        "AXIS": {
+          "status": "SOURCE_RECOVERY",
+          "builder": "original_rig_recovery_if_present_then_controller_teacher",
+          "requires": [
+            "original rig if exists",
+            "source control parity"
+          ]
+        },
+        "MIRA": {
+          "status": "SOURCE_RECOVERY",
+          "builder": "original_vertex_influence_recovery_then_skin_parity",
+          "requires": [
+            "original skin if present",
+            "bind and deformation checks"
+          ]
+        }
+      },
+      "derived_ownership_notes": "Human post-corrected PART geometry counts as candidate segmentation only; concept annotations remain review-dependent."
+    },
+    {
+      "id": "UNIML3D",
+      "repo_id": "Linzhan/UniML3D",
+      "repo_type": "dataset",
+      "documentation": "https://github.com/Friedrich-M/UniMate",
+      "primary_identity": "dataset and object_type; Objaverse original identifiers and source license crosswalk; no training on independent heldout/Truebones forbidden material",
+      "known_scale": "7430 skeletons, 13769 exported clips; canonical_assets/objaverse approx 6590 GLB; 88 GB dataset total",
+      "metadata_files": [
+        "README.md",
+        "clips.csv",
+        "skeletons.csv"
+      ],
+      "heavy_files": [
+        "canonical_assets/objaverse/*",
+        "features/objaverse/*",
+        "export/objaverse/motions/*"
+      ],
+      "metadata_acquisition": "Pinned index CSVs and license/quality metadata only first",
+      "original_source_route": "Original Objaverse-XL rigged animated source; no Truebones redistribution; Mixamo separate license",
+      "upstream_caveat": "Staged train 11950 clips and 6676 skeletons; 7430 exported skeletons not all training-eligible; canonical face orientation/pose valuable but is not guaranteed original author rest parity.",
+      "per_head": {
+        "IRIS_GEOMETRY": {
+          "status": "SOURCE_AND_BUILDER",
+          "builder": "canonical_rest_mesh_vs_original_geometry_and_camera_parity",
+          "requires": [
+            "canonical GLB",
+            "original Objaverse-XL scene",
+            "geometry source mapping"
+          ]
+        },
+        "IRIS_SEMANTIC": {
+          "status": "SOURCE_AND_BUILDER",
+          "builder": "joint_names_as_weak_hints_plus_face_regions_ontology_review",
+          "requires": [
+            "canonical mesh",
+            "source face IDs",
+            "reviewed semantic labels; never caption-only truth"
+          ]
+        },
+        "IRIS_GRAPHICS": {
+          "status": "SOURCE_RECOVERY",
+          "builder": "source_native_texture_relink_and_2d_art_visibility_court",
+          "requires": [
+            "original textured source",
+            "multiview stylistic render",
+            "source visual review"
+          ]
+        },
+        "TESSA": {
+          "status": "SOURCE_AND_BUILDER",
+          "builder": "canonical_rest_mesh_deformable_topology_correspondence",
+          "requires": [
+            "canonical GLB faces",
+            "native/normalized rest parity",
+            "motion deformation tests"
+          ]
+        },
+        "AXIS": {
+          "status": "PUBLISHED_NATIVE",
+          "builder": "motion_trajectories_and_rest_pose_behavior_court",
+          "requires": [
+            "joint names and facing",
+            "raw source motion joints",
+            "controls separately"
+          ]
+        },
+        "MIRA": {
+          "status": "SOURCE_AND_BUILDER",
+          "builder": "canonical_glb_skin_original_bind_deform_parity",
+          "requires": [
+            "skinned GLB if present",
+            "source joint alignment",
+            "motion response"
+          ]
+        }
+      }
+    },
+    {
+      "id": "OBJAVERSE_PLUSPLUS",
+      "repo_id": null,
+      "repo_type": null,
+      "documentation": "https://arxiv.org/abs/2504.07334",
+      "primary_identity": "Objaverse original UID and released quality annotations when data accessible",
+      "known_scale": "10K manually annotated quality set + larger predicted tags; not a source of rig or semantic face truth",
+      "metadata_files": [],
+      "heavy_files": [],
+      "metadata_acquisition": "No automatic HF metadata ingestion in this contract; identify separately released annotation files and rights",
+      "original_source_route": "Objaverse original per-object licensable source",
+      "upstream_caveat": "Quality/style/texture property tags are **candidate selection hints**, not approved 2D style, source semantic or full rig proof",
+      "per_head": {
+        "IRIS_GEOMETRY": {
+          "status": "REVIEW_REQUIRED",
+          "builder": "quality_first_source_selection_then_original_geometry",
+          "requires": [
+            "original mesh",
+            "geometry court"
+          ]
+        },
+        "IRIS_SEMANTIC": {
+          "status": "SOURCE_RECOVERY",
+          "builder": "original_mesh_semantic_builder",
+          "requires": [
+            "actual source faces",
+            "independent ontology labels"
+          ]
+        },
+        "IRIS_GRAPHICS": {
+          "status": "REVIEW_REQUIRED",
+          "builder": "quality_tags_then_stylized_render_quality_and_source_parity",
+          "requires": [
+            "original textures",
+            "visual review"
+          ]
+        },
+        "TESSA": {
+          "status": "SOURCE_RECOVERY",
+          "builder": "source_topology_articulation_tests",
+          "requires": [
+            "original mesh and rig if present"
+          ]
+        },
+        "AXIS": {
+          "status": "SOURCE_RECOVERY",
+          "builder": "rig_original_and_control_teacher",
+          "requires": [
+            "original native rig"
+          ]
+        },
+        "MIRA": {
+          "status": "SOURCE_RECOVERY",
+          "builder": "source_skin_if_present",
+          "requires": [
+            "original native weights"
+          ]
+        }
+      }
+    }
+  ]
+}

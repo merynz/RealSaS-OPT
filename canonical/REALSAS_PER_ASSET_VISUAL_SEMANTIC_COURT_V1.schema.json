@@ -1,0 +1,402 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RealSaS.TruthFoundry.PerAssetVisualSemanticCourt.v1",
+  "title": "Per asset visual, morphological, semantic and drawable review. Not source truth by default",
+  "type": "object",
+  "required": [
+    "schema",
+    "asset_id",
+    "source_sha256",
+    "ontology_version",
+    "evidence_origin",
+    "reviewer",
+    "source_visual_refs",
+    "character_class",
+    "morphology",
+    "anatomical_frame",
+    "style_2d",
+    "semantic_regions",
+    "drawable_evidence",
+    "qualification",
+    "training_authorized"
+  ],
+  "properties": {
+    "schema": {
+      "const": "RealSaS.TruthFoundry.PerAssetVisualSemanticCourt.v1"
+    },
+    "asset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "identity_cluster_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "ontology_version": {
+      "const": "RealSaS.AssetMorphologyOntology.v1"
+    },
+    "evidence_origin": {
+      "enum": [
+        "HUMAN_SCENE_AND_RENDER_REVIEW",
+        "INDEPENDENTLY_VALIDATED_CLASSIFIER",
+        "SOURCE_3D_CAUSAL_COURT",
+        "AUTO_HINT_ONLY"
+      ]
+    },
+    "reviewer": {
+      "type": "object",
+      "required": [
+        "review_method",
+        "review_receipt_sha256"
+      ],
+      "properties": {
+        "review_method": {
+          "enum": [
+            "HUMAN",
+            "VALIDATED_MODEL_WITH_HUMAN_SPOT_CHECK",
+            "NONE"
+          ]
+        },
+        "review_receipt_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "source_visual_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "render_sha256",
+          "view_kind",
+          "camera_pose_receipt_sha256"
+        ],
+        "properties": {
+          "render_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "view_kind": {
+            "enum": [
+              "CANONICAL_FRONT",
+              "BACK",
+              "LEFT",
+              "RIGHT",
+              "THREE_QUARTER",
+              "REST",
+              "ACTION_FRAME",
+              "ISOLATE",
+              "KEEP_SET",
+              "HIDE_SET",
+              "DEPTH",
+              "NORMAL",
+              "FACE_ID",
+              "STYLIZED_ART"
+            ]
+          },
+          "camera_pose_receipt_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "character_class": {
+      "type": "object",
+      "required": [
+        "label",
+        "status",
+        "reason"
+      ],
+      "properties": {
+        "label": {
+          "enum": [
+            "HUMAN",
+            "HUMANOID_NONHUMAN",
+            "QUADRUPED_MAMMAL",
+            "QUADRUPED_OTHER",
+            "REPTILE",
+            "DINOSAUR",
+            "BIRD",
+            "WINGED_FANTASY",
+            "SERPENTINE",
+            "ARTHROPOD_MULTILEGGED",
+            "AQUATIC",
+            "MONSTER_OTHER",
+            "ROBOT_MECH",
+            "TANK_GROUND_VEHICLE",
+            "OTHER_GROUND_VEHICLE",
+            "AIRCRAFT",
+            "WATERCRAFT",
+            "PROP_TOOL_WEAPON",
+            "BUILDING_ENVIRONMENT",
+            "PLANT",
+            "OTHER",
+            "UNKNOWN"
+          ]
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNKNOWN",
+            "MASKED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "morphology": {
+      "type": "object",
+      "required": [
+        "tags",
+        "limbs",
+        "wings",
+        "tail",
+        "shell",
+        "uncertain_tags"
+      ],
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limbs": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "wings": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "tail": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "shell": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "uncertain_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "anatomical_frame": {
+      "type": "object",
+      "required": [
+        "front_axis",
+        "up_axis",
+        "rest_pose_class",
+        "status"
+      ],
+      "properties": {
+        "front_axis": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "up_axis": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rest_pose_class": {
+          "enum": [
+            "T_POSE",
+            "A_POSE",
+            "NATURAL_NONHUMANOID",
+            "CROUCH",
+            "LOCOMOTION_FRAME",
+            "OTHER",
+            "UNKNOWN"
+          ]
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNKNOWN",
+            "MASKED",
+            "NOT_APPLICABLE"
+          ]
+        }
+      }
+    },
+    "style_2d": {
+      "type": "object",
+      "required": [
+        "source_render_style",
+        "stylized_render_status",
+        "identity_parity_status",
+        "visual_review_status"
+      ],
+      "properties": {
+        "source_render_style": {
+          "enum": [
+            "TWO_D_NATIVE",
+            "STYLIZED_THREE_D",
+            "REALISTIC_THREE_D",
+            "MIXED",
+            "UNKNOWN"
+          ]
+        },
+        "stylized_render_status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNKNOWN",
+            "MASKED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "identity_parity_status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNKNOWN",
+            "MASKED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "visual_review_status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNKNOWN",
+            "MASKED",
+            "NOT_APPLICABLE"
+          ]
+        }
+      }
+    },
+    "semantic_regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "concept",
+          "instance_id",
+          "source_face_address_sha256",
+          "status"
+        ],
+        "properties": {
+          "concept": {
+            "type": "string"
+          },
+          "instance_id": {
+            "type": "string"
+          },
+          "source_face_address_sha256": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "UNKNOWN",
+              "MASKED",
+              "NOT_APPLICABLE"
+            ]
+          }
+        }
+      }
+    },
+    "drawable_evidence": {
+      "type": "object",
+      "required": [
+        "candidate_count",
+        "full_hide_keep_isolate_verified",
+        "edit_reveal_verified",
+        "draw_order_verified",
+        "required_count",
+        "status"
+      ],
+      "properties": {
+        "candidate_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "full_hide_keep_isolate_verified": {
+          "type": "boolean"
+        },
+        "edit_reveal_verified": {
+          "type": "boolean"
+        },
+        "draw_order_verified": {
+          "type": "boolean"
+        },
+        "required_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNKNOWN",
+            "MASKED",
+            "NOT_APPLICABLE"
+          ]
+        }
+      }
+    },
+    "qualification": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "UNKNOWN",
+        "MASKED",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "training_authorized": {
+      "const": false
+    }
+  },
+  "additionalProperties": false,
+  "x-provenance-guard": [
+    "No human review PASS without actual view/camera evidence",
+    "No semantic pass from mesh/material/bone names",
+    "No drawable PASS from connected islands",
+    "No native controller proof from imported action curves",
+    "No conversion of 3D realistic appearance to approved 2D art without independent visual source-paired quality court",
+    "No training admission from this visual receipt"
+  ]
+}

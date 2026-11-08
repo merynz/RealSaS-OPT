@@ -65,3 +65,16 @@ def test_deployment_job_allows_network_prefetch_without_relaxing_inner_install_g
     bootstrap = (ROOT / "tools/platform_ci_bootstrap.py").read_text(encoding="utf-8")
     assert "env = os.environ.copy()" in bootstrap
     assert "subprocess.run(command, check=True, env=env)" in bootstrap
+
+
+def test_deployment_reports_disk_headroom_without_cleanup():
+    physical = WORKFLOW.read_text(encoding="utf-8")
+    assert "Host disk and release retention telemetry (read-only)" in physical
+    assert "REALSAS_PLATFORM_RELEASE_COUNT=" in physical
+    assert "::warning title=Platform release retention::" in physical
+    telemetry = physical.split("Host disk and release retention telemetry (read-only)", 1)[1].split(
+        "Preserve engineering execution receipts", 1
+    )[0]
+    assert "shutil.rmtree" not in telemetry
+    assert "systemctl" not in telemetry
+    assert "rm -rf" not in telemetry

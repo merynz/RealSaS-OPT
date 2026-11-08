@@ -22,6 +22,15 @@
 
 **Human review still required** before deleting historical release snapshots: ensure historical run/replay dependencies and current DB Attempts do not require them. The maintenance tool deliberately refuses to run while the Platform runs.
 
+
+## 2026-11-08 audit of safeguards after returning WSL to C: NVMe
+
+- A failed package build must not leak another managed release: deployment now discards the *new, never-activated, not receipt-referenced* release directory on an ordinary Python exception. It leaves any current, previous, newly activated or ambiguous receipt state untouched and rethrows the original build failure.
+- The Windows host-space guard now fails closed on WSL if the C: mount is missing rather than silently skipping the check. This guard protects C: OS headroom; it is not a general VHD backing-drive detector for future moves to D:.
+- Dedicated CI includes an actual Python stdlib venv and release/venv symlink import smoke (without network) alongside synthetic fingerprint and duplicate-release tests.
+- All source changes are in the draft PR until merged and a new mainline developer Platform deployment explicitly completes. A healthy service status from the previous installed SHA **does not** mean these protections are active on the host.
+- Non-goal: automated destruction of historical release snapshots. Every authorized purge must still protect source/receipt/research references. Warning-only retention thresholds will not, on their own, guarantee that disk use remains bounded. Periodic supervised audits remain required.
+
 ## Operator sequence (no automatic workstation access from ChatGPT)
 
 1. Confirm actual Windows D: drive filesystem is **NTFS**, free capacity is larger than current WSL VHD byte size with margin, verify WSL supports native `--manage --move`. A verified backup of important research state is strongly recommended. Do not unregister the distro.

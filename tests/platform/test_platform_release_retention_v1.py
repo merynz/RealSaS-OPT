@@ -36,6 +36,16 @@ def fake_platform(tmp_path, count=10):
     return root, dirs
 
 
+
+def reference_index(root, referenced=()):
+    authority = root.parent / "realsas_authority"
+    authority.mkdir(parents=True, exist_ok=True)
+    report = authority / "historical_reference_probe.json"
+    report.write_text("\n".join(str(x) for x in referenced) or "no old reference")
+    index = root.parent / "reference_file_list.txt"
+    index.write_text(str(report) + "\n")
+    return index
+
 def test_plan_preserves_current_previous_six_most_recent(tmp_path):
     root, dirs = fake_platform(tmp_path)
     out = m.plan(root, 5)
@@ -58,7 +68,7 @@ def test_active_platform_blocks_without_deletion(tmp_path, monkeypatch):
     def blocked(): raise RuntimeError("PLATFORM_ACTIVE")
     monkeypatch.setattr(m, "target_inactive", blocked)
     with pytest.raises(RuntimeError, match="PLATFORM_ACTIVE"):
-        m.apply(root, 5, m.CONFIRM)
+        m.apply(root, 5, m.CONFIRM, reference_index(root))
     assert all(p.exists() for p in dirs)
 
 
@@ -67,7 +77,7 @@ def test_apply_only_prunes_unreferenced_release_directories(tmp_path, monkeypatc
     monkeypatch.setattr(m, "target_inactive", lambda: None)
     monkeypatch.setattr(m, "check_no_references", lambda _: None)
     monkeypatch.setattr(m, "check_no_mounted_subtrees", lambda _: None)
-    report = m.apply(root, 5, m.CONFIRM)
+    report = m.apply(root, 5, m.CONFIRM, reference_index(root))
     assert report == {"removed": 3, "remaining": 7}
     assert dirs[0].exists() and dirs[1].exists()
     assert (root / "artifacts" / "science.dat").read_text() == "must-preserve"
@@ -92,7 +102,7 @@ def test_unmanaged_directory_is_never_removed(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "target_inactive", lambda: None)
     monkeypatch.setattr(m, "check_no_references", lambda _: None)
     monkeypatch.setattr(m, "check_no_mounted_subtrees", lambda _: None)
-    m.apply(root, 5, m.CONFIRM)
+    m.apply(root, 5, m.CONFIRM, reference_index(root))
     assert (p / "keep.txt").read_text() == "yes"
 
 
@@ -108,3 +118,34 @@ def test_retention_below_minimum_refused(tmp_path):
     root, _ = fake_platform(tmp_path)
     with pytest.raises(RuntimeError, match="RETENTION_COUNT_OUT_OF_SAFE_RANGE"):
         m.plan(root, 2)
+
+def test_historical_release_reference_protected_while_unreferenced_can_prune(tmp_path, monkeypatch):
+    root, dirs = fake_platform(tmp_path)
+    index = reference_index(root, [dirs[3]])
+    preview = m.plan(root, 5, index)
+    assert preview["inspected_historical_reference_records"] == 1
+    assert preview["protected_historical_release_count"] == 1
+    assert str(dirs[3]) not in preview["candidates"]
+    assert preview["candidate_count"] == 2
+    monkeypatch.setattr(m, "target_inactive", lambda: None)
+    monkeypatch.setattr(m, "check_no_references", lambda _: None)
+    monkeypatch.setattr(m, "check_no_mounted_subtrees", lambda _: None)
+    result = m.apply(root, 5, m.CONFIRM, index)
+    assert result["removed"] == 2
+    assert dirs[3].exists()
+
+
+def test_apply_requires_reference_court_even_if_all_services_stopped(tmp_path, monkeypatch):
+    root, dirs = fake_platform(tmp_path)
+    monkeypatch.setattr(m, "target_inactive", lambda: None)
+    with pytest.raises(RuntimeError, match="HISTORICAL_REFERENCE_REVIEW_REQUIRED"):
+        m.apply(root, 5, m.CONFIRM)
+    assert all(p.exists() for p in dirs)
+
+
+def test_missing_historical_reference_record_fails_closed(tmp_path):
+    root, dirs = fake_platform(tmp_path)
+    idx = root.parent / "reference_file_list.txt"
+    idx.write_text(str(root.parent / "realsas_authority" / "missing.json") + "\n")
+    with pytest.raises(RuntimeError, match="RECORD_MISSING_OR_UNTRUSTED"):
+        m.plan(root, 5, idx)

@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: corpus370-native-art-source-rgba-v1-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   official-original-human-artist-source-render:

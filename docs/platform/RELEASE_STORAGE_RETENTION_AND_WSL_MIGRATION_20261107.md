@@ -25,6 +25,8 @@
 
 ## 2026-11-08 audit of safeguards after returning WSL to C: NVMe
 
+- Each manual deployment now emits read-only GitHub Actions telemetry for release count and free space on Linux/C:/D:, annotating 12+ release accumulation and volumes below 40 GiB as warnings; this never stops a service or deletes research.
+
 - A failed package build must not leak another managed release: deployment now discards the *new, never-activated, not receipt-referenced* release directory on an ordinary Python exception. It leaves any current, previous, newly activated or ambiguous receipt state untouched and rethrows the original build failure.
 - The Windows host-space guard now fails closed on WSL if the C: mount is missing rather than silently skipping the check. This guard protects C: OS headroom; it is not a general VHD backing-drive detector for future moves to D:.
 - Dedicated CI includes an actual Python stdlib venv and release/venv symlink import smoke (without network) alongside synthetic fingerprint and duplicate-release tests.

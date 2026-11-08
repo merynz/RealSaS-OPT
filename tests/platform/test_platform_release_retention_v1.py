@@ -33,6 +33,8 @@ def fake_platform(tmp_path, count=10):
     (root / "data").mkdir()
     (root / "data" / "postgres").mkdir()
     (root / "data" / "postgres" / "PG_VERSION").write_text("17")
+    (root / "receipts").mkdir()
+    (root / "research-results").mkdir()
     return root, dirs
 
 

@@ -1,0 +1,32 @@
+name: truth-foundry-forensic-matrix-v3
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-forensic-matrix-v3.yml'
+      - 'tools/corpus/truth_foundry/forensic_matrix_v3.py'
+      - 'tools/corpus/truth_foundry/court_forensic_matrix_v3.py'
+      - 'tests/corpus/test_forensic_v3_contract.py'
+  push:
+    branches: [truth-foundry-source-census-matrix-v1-20261108]
+    paths:
+      - '.github/workflows/truth-foundry-forensic-matrix-v3.yml'
+      - 'tools/corpus/truth_foundry/forensic_matrix_v3.py'
+      - 'tools/corpus/truth_foundry/court_forensic_matrix_v3.py'
+      - 'tests/corpus/test_forensic_v3_contract.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-observation-not-training-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate forensic 264-facet and 37-target non-promotion rules
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/forensic_matrix_v3.py tools/corpus/truth_foundry/court_forensic_matrix_v3.py
+          python -m unittest discover -s tests/corpus -p 'test_forensic_v3_contract.py' -v

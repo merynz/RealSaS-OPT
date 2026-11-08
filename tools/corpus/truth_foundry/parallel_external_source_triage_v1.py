@@ -11,6 +11,13 @@ import pandas as pd
 
 SCHEMA='RealSaS.ExternalParallelSourceTriage.v1'
 CATEGORIES=['rare_morphology','creature_animal','humanoid','mechanical_vehicle','unknown']
+# Conservation rule: all eligible minority morphologies enter the 2,500 candidate
+# queue before common bipeds, while **never** bypassing source/license/visual courts.
+# An uncertain label is NOT proof of non-bipedal anatomy.
+RARE_NON_BIPEDAL=('serpentine','marine','insectoid','avian','quadrupedal','articulated_rigid')
+MORPH_PRIORITY={name:index for index,name in enumerate(RARE_NON_BIPEDAL)}
+MORPH_PRIORITY.update({'bipedal':len(RARE_NON_BIPEDAL),
+                       'uncertain':len(RARE_NON_BIPEDAL)+1})
 
 def digest(p):
  h=hashlib.sha256()
@@ -74,12 +81,17 @@ def build_uniml(path):
  d['candidate_usable_motion']=((pd.to_numeric(d.num_joints,errors='coerce')>=3)&(pd.to_numeric(d.num_clips,errors='coerce')>=1))
  # Add all non-bipedal Objaverse, followed by bipedal to 2500. Diversity is NOT comparable to all-human random selection.
  pool=d[(d.dataset=='objaverse')&d.candidate_usable_motion].copy()
- rank={'serpentine':0,'marine':1,'insectoid':2,'avian':3,'quadrupedal':4,'articulated_rigid':5,'uncertain':6,'bipedal':7}
- pool['morph_rarity_priority']=pool.category.map(rank).fillna(7).astype(int)
+ pool['morph_rarity_priority']=pool.category.map(MORPH_PRIORITY).fillna(len(MORPH_PRIORITY)+1).astype(int)
  pool=pool.sort_values(['morph_rarity_priority','num_clips','num_joints','object_type'],ascending=[True,False,False,True])
  out=pool.head(2500).copy()
  assert len(out)==2500 and (out.dataset=='objaverse').all()
  assert not out[['dataset','object_type']].duplicated().any()
+ # Every usable rare source that fits capacity must be preserved; this is
+ # a candidate queue guarantee, never a supervision quality shortcut.
+ rare_pool=set(pool.loc[pool.category.isin(RARE_NON_BIPEDAL),'object_type'])
+ rare_selected=set(out.loc[out.category.isin(RARE_NON_BIPEDAL),'object_type'])
+ if len(rare_pool)<=2500:
+  assert rare_pool<=rare_selected, 'RARE_MORPHOLOGY_DROPPED_IN_SELECTION'
  return d,out
 
 def run(root,out):
@@ -104,6 +116,12 @@ def run(root,out):
  'uniml_selected_morphology':uniml_group,
  'uniml_all_morphology':u.category.value_counts().to_dict(),
  'uniml_selected_origins':uq.dataset.value_counts().to_dict(),
+ 'rare_morphology_policy':'PRESERVE_ALL_USABLE_NON_BIPEDAL_BEFORE_BIPEDAL__SUBJECT_TO_RIGHTS_SOURCE_AND_VISUAL_COURTS',
+ 'non_bipedal_categories':list(RARE_NON_BIPEDAL),
+ 'uniml_eligible_non_bipedal_candidates':int(((u.dataset=='objaverse') & u.candidate_usable_motion & u.category.isin(RARE_NON_BIPEDAL)).sum()),
+ 'uniml_selected_non_bipedal_candidates':int(uq.category.isin(RARE_NON_BIPEDAL).sum()),
+ 'uniml_selected_bipedal_candidates':int((uq.category=='bipedal').sum()),
+ 'uniml_selected_uncertain_candidates':int((uq.category=='uncertain').sum()),
  'articulation_original_source_sha_crosswalk_verified':0,
  'uniml_original_source_sha_crosswalk_verified':0,
  'new_raw_asset_bytes_downloaded':0,

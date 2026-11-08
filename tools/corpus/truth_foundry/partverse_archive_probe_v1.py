@@ -196,7 +196,7 @@ def main():
     parser.add_argument("--uid-allowlist-sha256")
     args=parser.parse_args()
     assert re.fullmatch("[a-f0-9]{40}",args.revision), "pinned revision mandatory"
-    assert 0<args.max_members<=250000
+    assert 0<args.max_members<=10000000
     assert 0<args.max_staged_mib<=4096
     selected = None
     if args.uid_allowlist_csv:

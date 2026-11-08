@@ -1,0 +1,82 @@
+name: truth-foundry-sketchfab-source-metadata-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-sketchfab-source-metadata-v1.yml'
+      - 'tools/corpus/truth_foundry/sketchfab_public_source_court_v1.py'
+      - 'tests/corpus/test_sketchfab_public_source_court_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  metadata-contract-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate source UID and URL binding plus zero false-rights admission
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/sketchfab_public_source_court_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_sketchfab_public_source_court_v1.py' -v
+
+  private-source-metadata-pilot:
+    needs: [metadata-contract-regression]
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 395 && github.event.pull_request.head.repo.full_name == 'merynz/RealSaS-OPT' && github.event.pull_request.head.ref == 'truth-foundry-source-census-matrix-v1-20261108'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    env:
+      RCLONE_CONFIG: /tmp/realsas-source-license-rclone.conf
+      SRC: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_sketchfab_source_metadata_pilot_v1/20261109_first64/PARTVERSE_SOURCE_LICENSE_PILOT_64.csv
+      SRC_SHA: 43904c596c0455b41abf051992ed1aea1dc2da57c72d9c6ebe4ac0787f02b0a5
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_sketchfab_source_metadata_pilot_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure source quarantine read/write access
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'requests>=2.31,<3'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Validate frozen provider train-only source IDs
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/realsas-source-public-pilot"
+          mkdir -p "$root/out"
+          rclone copyto "$SRC" "$root/queue.csv" --retries 3
+          test "$(sha256sum "$root/queue.csv" | cut -d' ' -f1)" = "$SRC_SHA"
+      - name: Ask public publisher API for source names, licenses and preview identifiers only
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/realsas-source-public-pilot"
+          python tools/corpus/truth_foundry/sketchfab_public_source_court_v1.py \
+            --queue "$root/queue.csv" --queue-sha256 "$SRC_SHA" --out "$root/out"
+          python - "$root/out/SUMMARY_V1.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          x=json.load(open(sys.argv[1]))
+          assert x['selected_sources']==64
+          assert x['independently_verified_commercial_training_rights']==0
+          assert x['independently_reviewed_anatomical_classes']==0
+          assert x['semantic_head_training_pass']==0 and not x['training_authorized']
+          print('## Original source publisher metadata pilot — 64 assets')
+          print('Public model metadata records:',x['source_public_model_metadata_found'])
+          print('Metadata requests attempted:',x['requests_attempted'])
+          print('Unqueried:',x['input_queue_remaining_unqueried'])
+          print('No original file bytes, approved licenses, native image quality or anatomical PASS.')
+          PY
+      - name: Save original-source metadata/rights inspection receipts, no source assets
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/realsas-source-public-pilot/out"
+          test -s "$root/SOURCE_PUBLIC_LICENSE_METADATA_V1.csv"
+          rclone copy "$root" "$DEST" --checksum --retries 3
+          echo 'Source publisher metadata saved; no source asset or image bytes duplicated.' >> "$GITHUB_STEP_SUMMARY"

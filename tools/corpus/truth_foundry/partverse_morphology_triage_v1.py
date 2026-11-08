@@ -105,7 +105,7 @@ def sha(path):
     return h.hexdigest()
 
 
-def run(metadata_path, output_dir, source_roster=None, max_selected=2500):
+def run(metadata_path, output_dir, source_roster=None, max_selected=2500, provider_train=None, provider_val=None):
     output_dir.mkdir(parents=True,exist_ok=True)
     master_sha=set()
     if source_roster:
@@ -113,6 +113,20 @@ def run(metadata_path, output_dir, source_roster=None, max_selected=2500):
             original=list(csv.DictReader(f))
             if len(original)!=4363:raise ValueError('FROZEN_ROSTER_NOT_4363')
             master_sha={x['source_sha256'].lower() for x in original if HEX64.fullmatch(x.get('source_sha256','').lower())}
+    provider_train_uids=set()
+    provider_val_uids=set()
+    if provider_train and provider_val:
+        for source, target in [(provider_train,provider_train_uids),(provider_val,provider_val_uids)]:
+            with source.open('r',encoding='utf-8-sig',newline='') as f:
+                reader=csv.DictReader(f)
+                if 'part_id' not in (reader.fieldnames or []):raise ValueError('PARTVERSE_SPLIT_COLUMN_MISSING')
+                for row in reader:
+                    uid=row['part_id'].strip().lower()
+                    if not re.fullmatch(r'[a-z0-9_-]{20,64}',uid):raise ValueError('PARTVERSE_SPLIT_UID_INVALID')
+                    target.add(uid)
+        if provider_train_uids & provider_val_uids:raise ValueError('PARTVERSE_SPLIT_OVERLAP')
+    elif provider_train or provider_val:
+        raise ValueError('BOTH_SPLIT_FILES_REQUIRED')
     items=[];seen_uids=set();invalid=Counter()
     with metadata_path.open('r',newline='',encoding='utf-8-sig') as f:
         reader=csv.DictReader(f)
@@ -132,6 +146,7 @@ def run(metadata_path, output_dir, source_roster=None, max_selected=2500):
                 'provider':'PARTVERSE_XL','partverse_uid':uid,'source_sha256_provider_claim':orig_sha,
                 'source_url':r['file_identifier'],'aesthetic_provider_score':round(aesthetic,4),
                 'caption_first_vlm':caption[:1024], 'caption_source':caption_status,
+                'provider_split':('PROVIDER_VAL_SEALED' if uid in provider_val_uids else ('PROVIDER_TRAIN_CANDIDATE' if uid in provider_train_uids else 'SPLIT_UNVERIFIED')),
                 'object_type_candidate':kind,'matched_weak_text_categories':';'.join(matches),
                 'style_candidate':style,'triage_tier':tier,
                 'scene_source_original_sha_matches_current_roster':orig_sha in master_sha,
@@ -149,13 +164,14 @@ def run(metadata_path, output_dir, source_roster=None, max_selected=2500):
     caps['UNKNOWN_REVIEW']+=max_selected-sum(caps.values())
     selected=[]
     for category,cap in caps.items():
-        pool=[r for r in items if r['object_type_candidate']==category and r['triage_tier'] not in ('REALISTIC_CHARACTER_DEFER','REALISTIC_VEHICLE_DEFER')]
+        pool=[r for r in items if r['object_type_candidate']==category and r['provider_split']=='PROVIDER_TRAIN_CANDIDATE' and r['triage_tier'] not in ('REALISTIC_CHARACTER_DEFER','REALISTIC_VEHICLE_DEFER')]
         # place explicit stylized claims ahead of unknown claims; aesthetic score
         # is a candidate quality hint, not a validated art label.
         pool.sort(key=lambda x:(x['style_candidate']!='STYLIZED_CLAIM',-x['aesthetic_provider_score'],x['partverse_uid']))
         selected.extend(pool[:cap])
     selected=sorted(selected,key=lambda r:r['partverse_uid'])
     assert len({x['partverse_uid'] for x in selected})==len(selected)
+    if any(x['provider_split']!='PROVIDER_TRAIN_CANDIDATE' for x in selected):raise ValueError('LEAKED_UNVERIFIED_SPLIT')
     all_fields=list(items[0])
     for name,contents in [('PARTVERSE_METADATA_ALL_WEAK_TRIAGE_V1.csv',items),('PARTVERSE_CANDIDATE_DOWNLOAD_QUEUE_V1.csv',selected)]:
         with (output_dir/name).open('w',newline='',encoding='utf-8') as f:
@@ -164,6 +180,8 @@ def run(metadata_path, output_dir, source_roster=None, max_selected=2500):
     manifest={'schema':'RealSaS.PartVerseMorphologyTriage.v1','metadata_sha256':sha(metadata_path),
               'record_count':len(items),'selected_quarantined_count':len(selected),'invalid_rows':dict(invalid),
               'candidate_type_distribution':dict(Counter(x['object_type_candidate'] for x in items)),
+              'provider_split_counts':dict(Counter(x['provider_split'] for x in items)),
+              'selected_with_protected_val_leak':sum(x['provider_split']=='PROVIDER_VAL_SEALED' for x in selected),
               'selected_type_distribution':dict(Counter(x['object_type_candidate'] for x in selected)),
               'style_candidates':dict(Counter(x['style_candidate'] for x in items)),
               'source_roster_exact_SHA_candidate_overlap':sum(x['scene_source_original_sha_matches_current_roster'] for x in items),
@@ -181,5 +199,7 @@ if __name__=='__main__':
     p.add_argument('--source-roster',type=Path)
     p.add_argument('--out',type=Path,required=True)
     p.add_argument('--max-selected',type=int,default=2500)
+    p.add_argument('--provider-train',type=Path,required=True)
+    p.add_argument('--provider-val',type=Path,required=True)
     args=p.parse_args()
-    print(json.dumps(run(args.metadata,args.out,args.source_roster,args.max_selected),indent=2))
+    print(json.dumps(run(args.metadata,args.out,args.source_roster,args.max_selected,args.provider_train,args.provider_val),indent=2))

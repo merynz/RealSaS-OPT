@@ -44,3 +44,9 @@ IRIS Semantic learns source-addressed **concept/instance/region** labels from in
 ## Resume in a new chat
 
 Read this file, review the Actions run and its private Drive SHA summaries, then advance the P0 courts from the **actual** matrix. Every qualified change must be a GitHub commit and an immutable private Drive receipt. No local/chat-only state is authoritative.
+### First persistent matrix checkpoint (2026-11-08)
+
+- Private Drive folder: https://drive.google.com/drive/folders/1UZt6hIGDOz4Kh1gWJYLGjy_cvLvcHNJA
+- Verified downloaded 1,950,745-byte ZIP: https://drive.google.com/file/d/1i1MOeb8uB9kIA2O2GNOlibs6zZzqQLwN/view
+- Contains V1 **PRELIMINARY** 4,363 record census, 37-target × 161,431 proposed route matrix, summary SHA digests, plus historic 4,363-ledger inventory. `master_per_asset_physical_census_loaded=0` in this checkpoint because Wave1–4 summary receipts have not yet been rejoined in the remote physical source census. Do not call this fully materialized or training-ready.
+- GitHub regression run: https://github.com/merynz/RealSaS-OPT/actions/runs/42509635548, `local-contract-regressions` **SUCCESS**, `private-source-truth-matrix` **SKIPPED** on PR by design. Do not claim full original source census has run based on that result.

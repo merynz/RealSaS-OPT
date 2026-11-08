@@ -7,6 +7,8 @@ class TestRightsCrosswalk(unittest.TestCase):
  def test_license_policy_not_automatic_train(self):
   self.assertEqual(license_class('CC0'),'CC0_OR_PUBLIC_DOMAIN_CLAIM')
   self.assertEqual(license_class('CC-BY'),'ATTRIBUTION_REVIEW')
+  self.assertEqual(license_class('Creative Commons - Attribution'),'ATTRIBUTION_REVIEW')
+  self.assertEqual(license_class('Creative Commons - Attribution - Share Alike'),'ATTRIBUTION_SHAREALIKE_REVIEW')
   self.assertEqual(license_class('CC BY-NC-SA 4.0'),'NONCOMMERCIAL_OR_RESTRICTED')
   self.assertEqual(license_class(None),'UNSPECIFIED')
  def test_correct_source_uid(self):

@@ -75,3 +75,53 @@ Read this file, review the Actions run and its private Drive SHA summaries, then
 - Current measured Master physical cohort: 2,466 imported; 1,306 multi-mesh-object, 890 one-mesh-multiple-islands, 270 one-mesh-one-island. 1,884 action-positive, 1,428 image-reference-positive, 883 missing-image-ref-positive. These are **import observations**, not source rights, functional IK or semantics.
 - Deep full compressed source receipt runner and 8 synthetic PASS tests are in PR #395; full 2,466 deep scene readback & private Drive archived run **not yet independently confirmed**. Its synthetic PR check is https://github.com/merynz/RealSaS-OPT/actions/runs/42513706525; private job was skipped on that PR event by design.
 - Review ontology/schema: `canonical/REALSAS_TRUTH_FOUNDRY_PER_ASSET_VISUAL_SEMANTIC_COURT_V1.schema.json` — no semantic/2D/layer PASS without source-linked actual rendering/camera/reviewer/causal proof.
+
+
+## Comprehensive evidence expansion — 264 facets across 14 courts (2026-11-08)
+
+**Verified private Drive output:** https://drive.google.com/drive/folders/1kvIvxDrwNuE1qOlfs_zbQiQocGcNpbJk
+**Frozen input source:** `SOURCE_RECORD_CENSUS_4363.csv`, SHA256 `b03fc7b378ab5e8f70bd83f55822372eb5516746cc3d0b96286a1e903d0d2d1f`.
+**Catalog:** `canonical/REALSAS_TRUTH_FOUNDRY_COMPREHENSIVE_FACETS_V1.json`.
+**Producer:** `tools/corpus/truth_foundry/comprehensive_facet_matrix_v1.py`.
+**Regression:** `tests/corpus/test_comprehensive_facet_matrix_v1.py`.
+**Hosted CI:** `.github/workflows/truth-foundry-comprehensive-facets-v1.yml`.
+
+### Confirmed results (private `SUMMARY_V1.json` and source/receipt hashes)
+
+- 3,993 Master + 370 Core original **source records**, not distinct characters or legally qualified samples.
+- **264 separately owned evidence facets in 14 groups**, not merely the prior 13 broad review stages.
+- **1,151,832 source × facet cells** with explicit importer-observation, historical ID/split, or UNKNOWN state; independent court UNKNOWN everywhere in this *new* matrix.
+- **61,082 source × 14-group review task rows**, OPEN not conducted.
+- **41,922 importer-numeric observation slots** (17 mapped counters × 2,466 Master physical imports). These are arithmetic observations only and cannot be counted as independently accepted head targets.
+- **0** independently qualified head target courts, source-face semantic labels, approved drawable/edit-consequence tests, or training permissions minted in this producer.
+- `ASSET_FACET_EVIDENCE_MATRIX_V1.jsonl.gz` (18,713,037 bytes on Drive) preserves one detailed record per asset with 264 states, separate observation value and actual independent-court status.
+- `FACET_COVERAGE_BY_COHORT_V1.csv`, `GROUP_COVERAGE_BY_COHORT_V1.csv`, `ASSET_GROUP_REVIEW_QUEUE_V1.csv`, `ASSET_FACET_REVIEW_SUMMARY_V1.csv` and SHA manifest are immutable receipt outputs.
+
+### 14 evidence domains (independent, source-addressed)
+
+1. Identity / original SHA / creator / license / cross-format lineage / split and 169 protected external holdouts.
+2. Original scene hierarchy, transforms, authored pose, rest frame, projection/camera matrix.
+3. Physical character/vehicle/prop category, morphology, limb/wing/tail/shell and hybrid anatomies.
+4. Source mesh, original polygon-corner and triangulation lineage, components, open/modular/nonmanifold, UDF/SDF authority and deform-ready topology.
+5. Native rig constraints/controllers/IK/FK/driver evidence, skin weights, bind, and positive/negative deformation.
+6. Motion clips, bone curves, contacts, speed, native-vs-baked provenance, grip and secondary behavior.
+7. Materials, UV, pixel/texture dependencies, alpha/bleed, native RGBA and recolor intervention.
+8. Bound source rendering, camera/depth/normals/face-ID/barycentrics, global ray-stack visibility, hidden areas.
+9. IRIS Semantic face-addressed concept/instance/region, morphological roles, cross-view mask and unknown/negative labels.
+10. IRIS Graphics source-bound 2D art, visual identity/style, source-vs-generated art and atlas checks.
+11. Compiler.Graphics drawable candidate separation, keep/hide/isolate and edit-reveal causal proof, painter/z ordering.
+12. CAA source appearance authority, alpha/confidence, seams, atlas hashes and revision stability.
+13. TESSA/AXIS/MIRA/Compiler Mechanics control-to-surface tests and save/reopen/render/export roundtrip.
+14. Qualification, heldout split, teacher/student leakage, legal rights, consumer/loss binding and eligible materialization.
+
+### Honest boundaries and immediate next production step
+
+The catalog provides **auditable completeness questions, not completed truth acquisition**. The majority of 1,151,832 cells remain UNKNOWN and none of the new independent courts has been executed by this producer. For genuine “as if individually inspected” data:
+
+1. Read the complete 2,466 original imported-scene receipts from `deep_source_audit_v1.py`; do not substitute 22 numeric source counters for original polygons, source face IDs, or rigs. Independently recover the 1,527 unobserved or out-of-scope sources in lineage-safe order.
+2. Generate true source-bound rest/pose/camera render and evidence contact sheets: native RGB/alpha, semantic candidate ID, face/depth/normal/UV, joint/skin and attachment overlays, multiple viewpoints, no false front or anatomy.
+3. Review category/morphology/pose/2D style and source semantic face regions with explicit signed reviewer receipts. StdGEN++ semantic full/keep/hide/isolate is a source-derived *teacher mechanism*, not semantic ontology or automatic drawable authority.
+4. Run behavior intervention courts: color/hide/transform/deform/detach, full and newly revealed source surfaces, all-hit global occlusion, compositor equivalence, attachment and negative-control consequences.
+5. Independently bind each accepted target to Geometry/Semantic/Graphics/TESSA/AXIS/MIRA consumer losses and verify source rights, lineage and split. Only then report a >0 qualified count or materialization eligibility.
+
+**Do not equate the 264 facet definition count or 41,922 import observations with 264 learned labels or 41,922 head-ready targets.**

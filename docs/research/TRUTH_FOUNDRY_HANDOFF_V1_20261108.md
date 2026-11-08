@@ -125,3 +125,15 @@ The catalog provides **auditable completeness questions, not completed truth acq
 5. Independently bind each accepted target to Geometry/Semantic/Graphics/TESSA/AXIS/MIRA consumer losses and verify source rights, lineage and split. Only then report a >0 qualified count or materialization eligibility.
 
 **Do not equate the 264 facet definition count or 41,922 import observations with 264 learned labels or 41,922 head-ready targets.**
+
+
+### Verified full imported-scene readback (independent from aggregate import counts)
+
+Private run receipt: https://drive.google.com/drive/folders/17avud3OMcgAV_klJp2D9QEQtpToQGqtE
+
+- `MASTER2466_FULL_SOURCE_DEEP_AUDIT_V1.jsonl`: **2,466 imported-scene full compressed JSON receipt SHAs independently checked** against associated summary and per-asset source IDs; 1,527 Master records did not have corresponding imported-scene receipts.
+- `MASTER3993_DEEP_AUDIT_COVERAGE_V1.csv` and `MASTER3993_ALL_STAGE_REVIEW_TASKS_V1.csv` (54,985 open prior-stage tasks) retained; source category, anatomical pose, genuine native IK, 2D style, semantic and drawable courts remain zero PASS in this audit.
+- Structural, **not semantic**, breakdown for 3,993 Master: 270 one object/one connected surface, 890 one object/multiple disconnected islands, 95 multi-object/component-balanced, 1,178 multi-object/multiple islands, 33 importer component count inconsistent (review), 1,527 without imported-scene evidence.
+- This readback **does not rehash original 3D asset bytes**, perform human visual inspection or establish source-native authoring semantics. It validates archived imported-scene observations.
+
+**Do not combine** the 54,985 old stage tasks with the new 61,082 broader 14-group review queue as independent asset counts; they are alternative overlapping audit projections.

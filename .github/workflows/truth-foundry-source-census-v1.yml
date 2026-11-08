@@ -1,6 +1,11 @@
 name: truth-foundry-source-census-v1
 
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-source-census-v1.yml'
+      - 'tools/corpus/truth_foundry/**'
+      - 'tests/corpus/test_truth_foundry_v1.py'
   push:
     branches: [truth-foundry-source-census-matrix-v1-20261108]
     paths:
@@ -28,6 +33,7 @@ jobs:
           python -m unittest discover -s tests/corpus -p 'test_truth_foundry_v1.py' -v
 
   private-source-truth-matrix:
+    if: github.event_name == 'push'
     needs: [local-contract-regressions]
     runs-on: ubuntu-24.04
     timeout-minutes: 100

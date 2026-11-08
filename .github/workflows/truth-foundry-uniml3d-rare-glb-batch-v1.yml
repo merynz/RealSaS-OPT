@@ -35,7 +35,7 @@ jobs:
 
   private-rare-source-glb-intake:
     needs: [per-source-budget-and-authority-tests]
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.number == 395 && github.event.pull_request.head.repo.full_name == 'merynz/RealSaS-OPT' && github.event.pull_request.head.ref == 'truth-foundry-source-census-matrix-v1-20261108')
     runs-on: ubuntu-24.04
     timeout-minutes: 95
     env:

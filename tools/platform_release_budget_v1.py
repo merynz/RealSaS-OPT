@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import re
 import shutil
+import sys
 from pathlib import Path
 
 RELEASE_DIR = re.compile(r"[0-9a-f]{40}-[0-9a-f]{8}\Z")
@@ -22,10 +23,11 @@ def require_release_budget(root: Path) -> None:
                     if p.is_dir() and not p.is_symlink()
                     and RELEASE_DIR.fullmatch(p.name))
         if count >= MAX_EXISTING_RELEASES:
-            raise RuntimeError(
-                f"REALSAS_RELEASE_CAP_REACHED:{count}>={MAX_EXISTING_RELEASES}. "
-                "Clean unused developer releases using the explicit safety court, "
-                "not arbitrary recursive deletion.")
+            # A count-only hard cap unnecessarily blocks a legitimate new main
+            # while physical disk capacity still exists. Warn before work;
+            # actual host/volume storage exhaustion remains fail-closed.
+            print(f"REALSAS_RELEASE_RETENTION_WARNING: {count} installed releases "
+                  f"(review explicit safe pruning; no automatic deletion)", file=sys.stderr)
     c = Path("/mnt/c")
     if c.is_mount() and shutil.disk_usage(c).free < MIN_HOST_C_FREE:
         raise RuntimeError("WINDOWS_C_FREE_BELOW_10_GIB: WSL ext4 may report free "

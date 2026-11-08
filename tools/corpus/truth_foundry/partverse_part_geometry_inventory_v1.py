@@ -129,7 +129,7 @@ def run(archive_root:Path, queue_csv:Path, out:Path, max_bundle_uids=100):
     with queue_csv.open('r',newline='',encoding='utf-8') as f:
         rdr=csv.DictReader(f)
         queue={r['partverse_uid']:r for r in rdr}
-    if not queue or len(queue)>3000:raise ValueError('SELECTION_OUT_OF_RANGE')
+    if not queue or len(queue)>5000:raise ValueError('SELECTION_OUT_OF_RANGE')
     if any(r.get('provider_split')!='PROVIDER_TRAIN_CANDIDATE' for r in queue.values()):
         raise ValueError('HELDOUT_SPLIT_IN_QUEUE')
     data=archive_root/'sampled_annotation_data'

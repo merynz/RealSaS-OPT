@@ -58,8 +58,11 @@ def test_linux_disk_low_space_blocks(tmp_path, monkeypatch):
         budget.require_release_budget(root)
 
 
-def test_deployment_preflight_contains_guard_before_marker():
+def test_deployment_preflight_budget_only_for_new_materialization():
     import inspect
     source = inspect.getsource(platform_deploy.preflight)
-    assert source.index("require_release_budget(root)") < source.index(
-        'marker = root / "deployment.json"')
+    assert source.index('marker = root / "deployment.json"') < source.index(
+        "matching_current_release(root, expected_sha, authority)")
+    assert source.index("if identical is None:") < source.index(
+        "require_release_budget(root)")
+    assert "force_rebuild" in source

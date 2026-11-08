@@ -26,7 +26,7 @@ permissions:
 
 concurrency:
   group: corpus370-multi-partition-v7-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   independent-source-proxy-contracts:

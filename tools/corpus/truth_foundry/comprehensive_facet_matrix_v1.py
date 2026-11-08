@@ -12,6 +12,8 @@ import argparse
 from collections import Counter, defaultdict
 import csv
 import gzip
+import io
+from contextlib import contextmanager
 import hashlib
 import json
 from pathlib import Path
@@ -37,6 +39,16 @@ def digest(path: Path) -> str:
         for b in iter(lambda: f.read(4 * 1024 * 1024), b""):
             h.update(b)
     return h.hexdigest()
+
+
+@contextmanager
+def gzip_text_writer(path):
+    # Normalized empty filename and mtime=0 for reproducible SHA receipts.
+    with path.open("wb") as raw:
+        with gzip.GzipFile(filename="", mode="wb", fileobj=raw,
+                           compresslevel=6, mtime=0) as gz:
+            with io.TextIOWrapper(gz, encoding="utf-8", newline="\n") as fp:
+                yield fp
 
 
 def read_csv(path):
@@ -108,8 +120,7 @@ def run(source_csv: Path, catalog_json: Path, out: Path, *,
     for f in facets:
         group_index[f["group"]].append(f)
     # Stable grouped ordering guarantees deterministic text and digest receipts.
-    with gzip.open(out / "ASSET_FACET_EVIDENCE_MATRIX_V1.jsonl.gz", "wt",
-                   encoding="utf-8", compresslevel=6, newline="\n", mtime=None) as handle:
+    with gzip_text_writer(out / "ASSET_FACET_EVIDENCE_MATRIX_V1.jsonl.gz") as handle:
         for row in source:
             cohort = row["corpus"]
             asset_id = row["asset_id"]

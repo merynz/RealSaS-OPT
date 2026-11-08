@@ -10,11 +10,13 @@
 
 ## Changes
 
-`tools/platform_release_budget_v1.py` is executed in `tools/platform_deploy.py::preflight`, **before writing a new release**. It stops installation if:
+## Prevention at the source, not an arbitrary workflow blockade
 
-- **12** matching historical release directories already exist (prevents another 157-copy runaway);
-- Windows-mounted C:\ is under **10 GiB free**, even if Linux ext4 `df` lies about actual host free capacity;
-- Linux deployment filesystem is under **8 GiB free**.
+* Identical canonical \`code_sha\` already installed and healthy: verified \`NOOP_IDENTICAL_RELEASE\`, no copied source, no venv, no rebuilt Go binaries. If the same-SHA installation is unhealthy, report a repair-needed condition rather than silently multiplying copies. Explicit \`--force-rebuild\` is recovery-only.
+* Distinct code revisions with identical *complete recursive requirements* and Python patch version: \`tools/platform_shared_python_env_v1.py\` references one fingerprint-keyed immutable Python environment under \`shared_python_envs\`. The \`release/venv\` symlink points to it. Existing \`platform_ci_bootstrap.ensure_venv\` provides persistent locks, atomic construction and cache receipts. This developer service cache is not a training environment; old releases remain replayable.
+* 12-release threshold: **advisory warning, not a mandatory pause**. Legitimate new releases can proceed.
+* **Hard** preflight stops only when C: is below 10 GiB or Linux filesystem below 8 GiB. The C: condition is conservative OS safety even if WSL is backed by D:, and must be separately reviewed if that becomes intrusive.
+* Unique source commits still have distinct source/bin snapshots, so the count can grow absent periodic approved retention. This PR does **not** silently auto-prune historical releases or interrupt Platform services for cleaning.
 
 `tools/platform_release_retention_v1.py` provides a **read-only-by-default** old-release plan. `--apply` requires a typed confirmation token, inactive `realsas-platform.target` **and every managed service unit**, absence of live process references in `/proc`, no mountpoint within deleted release trees, active/previous deployment marker consistency, and keeping at least five newest release directories. Default retention keeps six newest PLUS active, previous, and top-level release symlink references. `shutil.rmtree` is limited to strict release-name directories under the verified deployment root. It does not traverse or delete `artifacts`, `data`, `receipts`, `realsas_authority` or the working Git repo.
 
@@ -28,8 +30,8 @@
 4. In the moved Ubuntu, run `python3 tools/platform_release_retention_v1.py --retain 6` to inspect candidates. Ensure exact authority links and whether old releases are required by any execution receipts. When in-flight attempts are zero, stop managed Platform only and then explicitly apply `--apply --confirm PRUNE-REALSAS-OLD-RELEASES`. Default never deletes.
 5. Verify `readlink -f ~/realsas_platform/current`, source/bin/venv, service health, `df -h / /mnt/c /mnt/d`, and separate `realsas_authority` hashes.
 
-Never run `wsl --unregister` or manually move/delete `ext4.vhdx`. If native `--move` is unsupported, stop and plan a separately verified export/backup/import migration. **This PR changes code only**, not the operator machine; merging an approved guard deployment is required for protection to become active. Existing 157 release directories will cause the new preflight to block until safely cleaned.
+Never run `wsl --unregister` or manually move/delete `ext4.vhdx`. If native `--move` is unsupported, stop and plan a separately verified export/backup/import migration. **This PR changes code only**, not the operator machine; merging an approved guard deployment is required for protection to become active. Existing 157 release directories will warn but will not block a distinct authorized deployment while actual disk capacity is safe.
 
 ## Tests
 
-Synthetic `tests/platform/test_platform_release_budget_v1.py` and `tests/platform/test_platform_release_retention_v1.py` check count/space cap, zero current/previous loss, fake source/artifact preservation, and fail-closed destructive guard. No workstation data or real deletion in CI. GitHub-hosted workflow `platform-release-disk-safety-v1` does not request a self-hosted runner.
+Synthetic tests cover nonblocking count warnings, actual-volume exhaustion, identical-SHA no-op, cross-commit shared immutable Python env, active/previous retention, and explicit-safe delete scopes. GitHub-hosted workflow `platform-release-disk-safety-v1` does not request a self-hosted runner.

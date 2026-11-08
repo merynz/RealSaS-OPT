@@ -10,6 +10,21 @@ from tools.corpus.truth_foundry.physical_census_v1 import (COUNTS, bucket, run a
 
 
 class TruthFoundryRegression(unittest.TestCase):
+    def test_canonical_8k_goal_preserves_head_specific_gates(self):
+        root=Path(__file__).resolve().parents[2]
+        file=root/'canonical/REALSAS_TRUTH_FOUNDRY_8K_PER_HEAD_COVERAGE_CONTRACT_V2.json'
+        contract=json.loads(file.read_text(encoding='utf-8'))
+        self.assertEqual(contract['min_independent_fit_subjects_per_head'],8000)
+        self.assertEqual(contract['goal_type'],'PLANNING_TARGET_NOT_TRAINING_ADMISSION_GATE')
+        self.assertEqual(set(contract['current_verified_per_head_core_pass']),
+                         {'IRIS_GEOMETRY','IRIS_SEMANTIC','IRIS_GRAPHICS','TESSA','AXIS','MIRA'})
+        self.assertFalse(contract['training_authorized'] if 'training_authorized' in contract else False)
+        self.assertTrue(contract['no_training_promotion'])
+        self.assertTrue(contract['source_original_sha256_required'])
+        self.assertTrue(contract['commercial_rights_required'])
+        self.assertTrue(contract['lineage_cluster_court_required'])
+        self.assertEqual(contract['source_pool_evidence']['training_approved_examples_from_anymate'],0)
+
     def test_37_head_targets_unique(self):
         self.assertEqual(len(COLUMNS), 37)
         self.assertEqual(len({(h, target) for h, target, _, _ in COLUMNS}), 37)

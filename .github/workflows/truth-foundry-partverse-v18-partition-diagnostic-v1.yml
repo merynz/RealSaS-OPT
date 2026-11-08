@@ -1,0 +1,90 @@
+name: truth-foundry-partverse-v18-partition-diagnostic-v1
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-partverse-v18-partition-diagnostic-v1.yml'
+      - 'tools/corpus/truth_foundry/partverse_v18_partition_diagnostic_v1.py'
+      - 'tests/corpus/test_partverse_v18_partition_diagnostic_v1.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: truth-foundry-v18-partverse-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  partition-diagnostic-unit-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install minimal geometry loader
+        run: python -m pip install --no-cache-dir 'trimesh>=4.5,<5' 'numpy>=1.26,<3'
+      - name: Fail closed on label gaps and preserve owner UNKNOWN
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/partverse_v18_partition_diagnostic_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_partverse_v18_partition_diagnostic_v1.py' -v
+
+  original-existing-private-2500-bundle-diagnostic:
+    needs: [partition-diagnostic-unit-contracts]
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 395 && github.event.pull_request.head.repo.full_name == 'merynz/RealSaS-OPT' && github.event.pull_request.head.ref == 'truth-foundry-source-census-matrix-v1-20261108'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      RCLONE_CONFIG: /tmp/truth-foundry-v18-partverse-rclone.conf
+      SOURCE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_partverse_selected2500_v1/42522239139-1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v18_partverse_partition_diagnostic_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install budget-safe source evidence reader
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'trimesh>=4.5,<5' 'numpy>=1.26,<3'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Read existing 25 source bundles only (no additional Drive storage)
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/partverse-v18-diagnostic"
+          mkdir -p "$root"/{bundle_shards,out}
+          rclone copy "$SOURCE/bundle_shards" "$root/bundle_shards" --retries 3 --transfers 6
+          rclone copyto "$SOURCE/SUMMARY_V1.json" "$root/input_manifest.json" --retries 3
+          rclone copyto "$SOURCE/SELECTED_SOURCE_CANDIDATE_ROSTER_V1.csv" "$root/selected_queue.csv" --retries 3
+          python tools/corpus/truth_foundry/partverse_v18_partition_diagnostic_v1.py \
+            --bundle-dir "$root/bundle_shards" \
+            --manifest "$root/input_manifest.json" \
+            --queue "$root/selected_queue.csv" \
+            --out "$root/out"
+          python - "$root/out/SUMMARY_V1.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          r=json.load(open(sys.argv[1]))
+          assert r['source_candidates']==2500
+          assert r['structurally_compared_assets']>=1
+          assert r['native_drawable_pass']==0
+          assert r['original_source_parity_pass']==0
+          assert not r['v18_mechanical_causal_comparison_run']
+          assert r['training_authorized'] is False
+          print('## V18 exploratory partition diagnostic (not drawable ownership)')
+          print('Existing source evidence:',r['source_candidates'])
+          print('GLB/face-label partition candidates with measured connected islands:',r['structurally_compared_assets'])
+          print('Part-vs-topology count disagreements:',r['asset_count_topology_and_part_count_different'])
+          print('Connected topo islands split by PartVerse labels:',r['asset_count_connected_topo_island_split_by_part'])
+          print('Part IDs spanning multiple topology islands:',r['asset_count_part_spans_multiple_islands'])
+          print('Original-source/graphics artist owner/semantic qualification: UNKNOWN, not PASS')
+          PY
+      - name: Archive ONLY numeric comparative receipts to private Drive
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/partverse-v18-diagnostic/out"
+          test -s "$root/SUMMARY_V1.json"
+          test -s "$root/PARTVERSE_V18_PARTITION_DIAGNOSTIC_V1.csv"
+          rclone copy "$root" "$DEST" --checksum --retries 3
+          echo 'No source GLB duplicated in Drive, only diagnostic CSV/JSON.' >> "$GITHUB_STEP_SUMMARY"

@@ -202,5 +202,8 @@ def main():
   print(json.dumps(stylize_postprocess(a.out),indent=2))
 
 if __name__=='__main__':
- if '--' in sys.argv:sys.argv=sys.argv[sys.argv.index('--')+1:]
+ if '--' in sys.argv:
+  # Blender passes script arguments after `--`; argv[0] must remain the
+  # program name, otherwise argparse consumes the first required flag.
+  sys.argv=[sys.argv[0]]+sys.argv[sys.argv.index('--')+1:]
  main()

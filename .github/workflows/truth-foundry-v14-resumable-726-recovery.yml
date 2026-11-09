@@ -99,7 +99,7 @@ jobs:
           python tools/corpus/truth_foundry/evidence_v14/bounded_direct_copy_v14.py \
             --plan "$root/plan" --remote-base "$SOURCE_VARIANTS" \
             --variant-dir "$root/variants" --out "$root/out" \
-            --workers 3 --timeout-seconds 90 --attempts 2
+            --workers 1 --timeout-seconds 90 --attempts 1
           python - "$root/out/DIRECT_COPY_TRANSPORT_V14.json" <<'PY'
           import json,sys
           report=json.load(open(sys.argv[1]))

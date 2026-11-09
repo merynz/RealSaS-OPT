@@ -235,5 +235,16 @@
     "https://github.com/merynz/RealSaS-OPT/pull/306",
     "https://github.com/merynz/RealSaS-OPT/pull/352"
   ],
-  "normative_document": "docs/research/RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_20261109.md"
+  "normative_document": "docs/research/RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_20261109.md",
+  "work_ledger": {
+    "hub_issue": 399,
+    "catalog": "canonical/RSS_VNEXT_WORK_LEDGER_INDEX_V1.json",
+    "agent_protocol": "docs/platform/RSS_VNEXT_AGENT_WORK_LEDGER.md",
+    "status_command": "python tools/ledger/rss_vnext_status.py",
+    "source_of_status": "GITHUB_ISSUE_STATE_WITH_EXPLICIT_COMPLETION_EVIDENCE",
+    "architecture_coding_gaps": "A01-A12",
+    "truth_foundry_gaps": "T01-T11",
+    "source_recovery_gaps": "O01-O02",
+    "task_completion_must_not_imply_model_training_or_product_admission": true
+  }
 }

@@ -1,0 +1,19 @@
+{
+  "schema": "RealSaS.Corpus370AndMasterGapAnalysis.v9",
+  "core370_subjects": 370,
+  "core370_v5_prepared": 352,
+  "core370_v5_mask_fail": 18,
+  "core_cross_stage_comparison": {
+    "('PASS', 'V5_SOURCE_OBSERVATION_PREPARED')": 324,
+    "('PASS', 'V5_SOURCE_OBSERVATION_MASK_FAIL')": 17,
+    "('FAIL', 'V5_SOURCE_OBSERVATION_PREPARED')": 28,
+    "('FAIL', 'V5_SOURCE_OBSERVATION_MASK_FAIL')": 1
+  },
+  "master3993_missing_detailed_scene_receipt": 1527,
+  "rights_and_split_admission_minted": 0,
+  "notes": [
+    "V5 observation is an 8-view mask/import packet gate, not identical to partial SOURCE_IMPORT family.",
+    "A partial family PASS is not full teacher/corpus training admission.",
+    "Master missing source is a missing detailed import receipt, not proof raw bytes do not exist."
+  ]
+}

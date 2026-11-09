@@ -1,0 +1,133 @@
+name: truth-foundry-v11-master-recovery-court
+
+on:
+  push:
+    branches: [truth-foundry-evidence-audit-v9-20261109]
+    paths:
+      - '.github/workflows/truth-foundry-v11-master-recovery-court.yml'
+      - 'tools/corpus/truth_foundry/evidence_v11/**'
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-v11-master-recovery-court.yml'
+      - 'tools/corpus/truth_foundry/evidence_v11/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-v11-master-recovery-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  strict-contract-syntax:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify V11 evidence builder and independent readback scripts compile
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v11
+          python - <<'PY'
+          import json
+          p='tools/corpus/truth_foundry/evidence_v11/SOURCE_INPUT_SHA256_LOCK_V11.json'
+          s=json.load(open(p))
+          assert s['upstream_action_run_id']==42623995606
+          assert len(s['availability'])==len(s['v10_inventory_from_hosted_run_42623995606'])==64
+          PY
+
+  private-3993-master-recovery-into-16397:
+    if: github.event_name == 'push' && github.repository == 'merynz/RealSaS-OPT' && github.ref == 'refs/heads/truth-foundry-evidence-audit-v9-20261109'
+    needs: [strict-contract-syntax]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      RCLONE_CONFIG: /tmp/realsas-truth-v11-rclone.conf
+      ROOT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits
+      SOURCE_V10: truth_foundry_v10_source_bound_court/42623995606-1
+      SOURCE_AVAILABILITY: source_availability_matrix_v1/42385366671-1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v11_master_recovery_court/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install private read-only Drive access
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Read exactly SHA-pinned historical recovery matrix and hosted V10 source matrix
+        run: |
+          set -euo pipefail
+          umask 077
+          d="$RUNNER_TEMP/truth-foundry-v11"
+          mkdir -p "$d/in" "$d/out"
+          rclone copyto "$ROOT/$SOURCE_AVAILABILITY/SOURCE_AVAILABILITY_MATRIX_V1.csv" "$d/in/SOURCE_AVAILABILITY_MATRIX_V1.csv" --retries 3
+          rclone copyto "$ROOT/$SOURCE_V10/SOURCE_INVENTORY_DEEP_16397_V10.csv.gz" "$d/in/SOURCE_INVENTORY_DEEP_16397_V10.csv.gz" --retries 3
+          rclone copyto "$ROOT/$SOURCE_V10/FACET_STATES_EFFECTIVE_V10_16397x264_UNCHANGED.csv.gz" "$d/in/FACET_STATES_EFFECTIVE_V10_16397x264_UNCHANGED.csv.gz" --retries 3
+          rclone copyto "$ROOT/$SOURCE_V10/FACET_VALUES_EFFECTIVE_V10_16397x264_UNCHANGED.csv.gz" "$d/in/FACET_VALUES_EFFECTIVE_V10_16397x264_UNCHANGED.csv.gz" --retries 3
+          rclone copyto "$ROOT/$SOURCE_V10/INDEPENDENT_READBACK_PARTVERSE_V10.json" "$d/in/INDEPENDENT_READBACK_PARTVERSE_V10.json" --retries 3
+          python - "$d/in" <<'PY'
+          from pathlib import Path
+          import hashlib,json,sys
+          d=Path(sys.argv[1]);lock=json.loads(Path('tools/corpus/truth_foundry/evidence_v11/SOURCE_INPUT_SHA256_LOCK_V11.json').read_text())
+          m={'availability':'SOURCE_AVAILABILITY_MATRIX_V1.csv',
+             'v10_inventory_from_hosted_run_42623995606':'SOURCE_INVENTORY_DEEP_16397_V10.csv.gz',
+             'v10_facet_states_unchanged':'FACET_STATES_EFFECTIVE_V10_16397x264_UNCHANGED.csv.gz',
+             'v10_facet_values_unchanged':'FACET_VALUES_EFFECTIVE_V10_16397x264_UNCHANGED.csv.gz'}
+          for k,f in m.items():
+              h=hashlib.sha256((d/f).read_bytes()).hexdigest()
+              assert h==lock[k],f'PINNED_INPUT_SHA_DRIFT:{k}:{h}'
+          prior=json.loads((d/'INDEPENDENT_READBACK_PARTVERSE_V10.json').read_text())
+          assert prior['status']=='PASS_PROCESSED_SOURCE_LEDGER_AND_UNMODIFIED_V9_BASELINE_ONLY'
+          assert prior['court_sha256']['SOURCE_INVENTORY_DEEP_16397_V10.csv.gz']==lock['v10_inventory_from_hosted_run_42623995606']
+          assert prior['source_rows']==16397 and prior['partverse_joined_inventory_rows']==7034
+          assert prior['model_training_admission']==0
+          print('Pinned 4 source inputs and preceding hosted V10 court receipt: PASS')
+          PY
+      - name: Independently bind 3993 historical recovery receipts into 16397 sources and 264 facets
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/truth-foundry-v11"
+          python tools/corpus/truth_foundry/evidence_v11/truth_foundry_master_recovery_v11.py \
+            --availability "$d/in/SOURCE_AVAILABILITY_MATRIX_V1.csv" \
+            --v10-inventory "$d/in/SOURCE_INVENTORY_DEEP_16397_V10.csv.gz" \
+            --v10-facet-states "$d/in/FACET_STATES_EFFECTIVE_V10_16397x264_UNCHANGED.csv.gz" \
+            --v10-facet-values "$d/in/FACET_VALUES_EFFECTIVE_V10_16397x264_UNCHANGED.csv.gz" \
+            --sha-manifest tools/corpus/truth_foundry/evidence_v11/SOURCE_INPUT_SHA256_LOCK_V11.json \
+            --out "$d/out"
+      - name: Re-read full candidate + facet deltas; reject all unapproved mutation
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/truth-foundry-v11"
+          python tools/corpus/truth_foundry/evidence_v11/truth_foundry_verify_master_recovery_v11.py \
+            --availability "$d/in/SOURCE_AVAILABILITY_MATRIX_V1.csv" \
+            --v10-inventory "$d/in/SOURCE_INVENTORY_DEEP_16397_V10.csv.gz" \
+            --v10-states "$d/in/FACET_STATES_EFFECTIVE_V10_16397x264_UNCHANGED.csv.gz" \
+            --v10-values "$d/in/FACET_VALUES_EFFECTIVE_V10_16397x264_UNCHANGED.csv.gz" \
+            --out "$d/out"
+          python - "$d/out" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          from pathlib import Path
+          import sys,json
+          d=Path(sys.argv[1]);s=json.loads((d/'SUMMARY_MASTER_RECOVERY_V11.json').read_text());r=json.loads((d/'INDEPENDENT_READBACK_MASTER_V11.json').read_text())
+          assert r['source_rows']==16397 and r['new_historical_observation_cells']==7185
+          assert s['master_sha_recovery_historical_but_no_deep_import']==726
+          assert r['unchanged_facet_cells']==4321623
+          assert s['new_training_admission']==s['original_source_current_run_rehashed']==0
+          print('## Master3993 historical source availability evidence replay')
+          print('**16397** source records / **264** facet columns; **7185** NEW historical observations')
+          print('Master source row history matched: **3993** (prior deep import **2466**).')
+          print('Historical SHA receipt but missing deep import: **726**; legacy-path-only: **644**; protected holdout: **135**; recovery exception: **22**.')
+          print('Unmodified previous facet cells: **4321623**; *no rights, original-byte current-run SHA, SDF, semantic, Graphics or training admission.*')
+          PY
+      - name: Save source-bound evidence only to versioned private Drive path
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/truth-foundry-v11/out"
+          test -s "$d/INDEPENDENT_READBACK_MASTER_V11.json"
+          rclone copy "$d" "$DEST" --checksum --retries 3
+          echo "Private V11 source receipt replay stored in audits/truth_foundry_v11_master_recovery_court/${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_STEP_SUMMARY"

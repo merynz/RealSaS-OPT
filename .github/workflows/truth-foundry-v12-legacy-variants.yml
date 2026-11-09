@@ -1,0 +1,159 @@
+name: truth-foundry-v12-legacy-variants-1527
+
+on:
+  push:
+    branches: [truth-foundry-evidence-audit-v9-20261109]
+    paths:
+      - '.github/workflows/truth-foundry-v12-legacy-variants.yml'
+      - 'tools/corpus/truth_foundry/evidence_v12/**'
+      - 'tests/corpus/test_variant_court_v12.py'
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-v12-legacy-variants.yml'
+      - 'tools/corpus/truth_foundry/evidence_v12/**'
+      - 'tests/corpus/test_variant_court_v12.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-v12-variants-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  variant-regression-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: No false admission / source ID drift / no files / rig drift negatives
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v12
+          python -m unittest discover -s tests/corpus -p 'test_variant_court_v12.py' -v
+
+  read-private-legacy-variants-and-rebuild:
+    if: github.event_name == 'push' && github.repository == 'merynz/RealSaS-OPT' && github.ref == 'refs/heads/truth-foundry-evidence-audit-v9-20261109'
+    needs: [variant-regression-contracts]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 160
+    env:
+      RCLONE_CONFIG: /tmp/realsas-foundry-v12-private.conf
+      DRIVE_BASE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      SOURCE_V11: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v11_master_recovery_court/42625892351-1
+      SOURCE_QUEUE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v12_variant_input_20261109
+      SOURCE_VARIANTS: gdrive:RealSaS_MASTER_CORPUS_1024_V3/master/variants
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v12_legacy_variant_court/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install private read-only Drive access
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Download SHA-locked V11 baseline and private 1527-source queue
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/truth-foundry-v12"
+          mkdir -p "$root/in" "$root/variants" "$root/out"
+          rclone copyto "$SOURCE_QUEUE/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" --retries 3
+          rclone copyto "$SOURCE_V11/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" --retries 3
+          rclone copyto "$SOURCE_V11/FACET_STATES_EFFECTIVE_V11_16397x264.csv.gz" "$root/in/FACET_STATES_EFFECTIVE_V11_16397x264.csv.gz" --retries 3
+          rclone copyto "$SOURCE_V11/FACET_VALUES_EFFECTIVE_V11_16397x264.csv.gz" "$root/in/FACET_VALUES_EFFECTIVE_V11_16397x264.csv.gz" --retries 3
+          python - "$root/in" <<'PY'
+          from pathlib import Path
+          import json,hashlib,sys
+          r=Path(sys.argv[1]);lock=json.loads(Path('tools/corpus/truth_foundry/evidence_v12/SOURCE_INPUT_SHA256_LOCK_V12.json').read_text())
+          for key,record in lock.items():
+              p=r/record['basename'];raw=p.read_bytes()
+              assert len(raw)==record['bytes'] and hashlib.sha256(raw).hexdigest()==record['sha256'],f'INPUT_SHA_MISMATCH:{key}'
+          print('Four private inputs SHA-pinned and size verified')
+          PY
+      - name: Select only non-holdout variant paths; exclude all normalized.npz and raw models
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/truth-foundry-v12"
+          python - "$root/in" "$root/paths.txt" <<'PY'
+          import csv,gzip,re,sys
+          from pathlib import Path
+          root=Path(sys.argv[1]);dest=Path(sys.argv[2])
+          with gzip.open(root/'SOURCE_INVENTORY_DEEP_16397_V11.csv.gz','rt',newline='') as f:
+              v={r['source_key']:r['master_v11_source_recovery_status'] for r in csv.DictReader(f) if r['pool']=='MASTER3993'}
+          with open(root/'MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv',newline='') as f:rows=list(csv.DictReader(f))
+          assert len(rows)==1527 and len({r['source_key'] for r in rows})==1527
+          selected=[];holdout=0
+          for row in rows:
+              key=row['source_key'];cid=row['candidate_id']
+              assert re.fullmatch(r'[a-z0-9_]+:[a-f0-9]{24,64}',cid), 'BAD_PRIVATE_VARIANT_ID_FORMAT'
+              if v[key]=='PROTECTED_HOLDOUT_ORIGINAL_NOT_TOUCHED':holdout+=1;continue
+              folder=cid.replace(':','_',1)
+              for name in ('admission.json','source_structure.json','technical_audit.json','normalization_meta.json'):
+                  selected.append(folder+'/'+name)
+          assert holdout==135 and len(selected)==1392*4, (holdout,len(selected))
+          dest.write_text('\n'.join(selected)+'\n')
+          print('Expected historical JSON references:',len(selected),'nonholdout candidates:',1392,'untouched protected holdouts:',holdout)
+          PY
+      - name: Read 5568 named historical JSON receipts, recording missing files not fabricating truth
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/truth-foundry-v12"
+          status=0
+          rclone copy "$SOURCE_VARIANTS" "$root/variants" \
+            --files-from "$root/paths.txt" --no-traverse \
+            --transfers 16 --checkers 24 --retries 2 --low-level-retries 3 \
+            > "$root/private_download.log" 2>&1 || status=$?
+          found="$(find "$root/variants" -type f -name '*.json' | wc -l)"
+          echo "Historical variant JSON receipts retrieved: $found / 5568; rclone status=$status"
+          # Partial source metadata is normal, but a total download failure is not.
+          test "$found" -ge 1000 || { echo 'BULK_SOURCE_READ_FAILED_OR_WRONG_INPUT_PATH'; exit 1; }
+          # Do not print the private candidate filenames, raw source paths or log.
+      - name: Court source structure, legacy rig/skin, canonical transforms and rights metadata
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/truth-foundry-v12"
+          python tools/corpus/truth_foundry/evidence_v12/variant_court_v12.py \
+            --queue "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" \
+            --variant-dir "$root/variants" \
+            --baseline-inventory "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" \
+            --baseline-states "$root/in/FACET_STATES_EFFECTIVE_V11_16397x264.csv.gz" \
+            --baseline-values "$root/in/FACET_VALUES_EFFECTIVE_V11_16397x264.csv.gz" \
+            --out "$root/out"
+      - name: Independently verify 16397x264 unchanged cells, source identity and holdout firewall
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/truth-foundry-v12"
+          python tools/corpus/truth_foundry/evidence_v12/verify_variant_court_v12.py \
+            --queue "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" \
+            --baseline-inventory "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" \
+            --baseline-states "$root/in/FACET_STATES_EFFECTIVE_V11_16397x264.csv.gz" \
+            --baseline-values "$root/in/FACET_VALUES_EFFECTIVE_V11_16397x264.csv.gz" \
+            --out "$root/out"
+          python - "$root/out" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          from pathlib import Path
+          import json,sys
+          out=Path(sys.argv[1]);s=json.loads((out/'SUMMARY_VARIANTS_V12.json').read_text());c=json.loads((out/'INDEPENDENT_READBACK_VARIANTS_V12.json').read_text())
+          assert c['status']=='PASS_NO_EXISTING_CELLS_OVERWRITTEN_LEGACY_ONLY'
+          assert s['source_rows']==16397 and s['facet_columns']==264
+          assert s['holdout_source_variants_read']==0 and s['current_rights_court_pass']==s['new_training_admissions']==0
+          print('## V12 hosted legacy-variant deep court (historical sources only)')
+          print('Master missing-import candidates checked:',s['missing_full_import_receipts_examined'])
+          for state,count in sorted(s['legacy_variant_state_counts'].items()):print('-',state+':',count)
+          print('Detail mesh objects:',s['source_ledger_mesh_detail_rows'],'bone-name teacher hints:',s['bone_name_teacher_only_rows'])
+          print('New observed source-addressed facet cells:',s['new_observations'])
+          print('Prior facet cells byte-for-byte preserved:',c['existing_cells_preserved'])
+          print('**0 protected holdout folders fetched; 0 original source byte court, legal clearance, or training PASS minted.**')
+          PY
+      - name: Store private source-derived receipts and 16397-row updated truth matrix
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/truth-foundry-v12/out"
+          test -s "$root/INDEPENDENT_READBACK_VARIANTS_V12.json"
+          rclone copy "$root" "$DEST" --checksum --retries 3 --transfers 8
+          echo 'V12 source-linked receipt CSV/JSONL and raw evidence SHA readback stored in private Drive: audits/truth_foundry_v12_legacy_variant_court/${{ github.run_id }}-${{ github.run_attempt }}' >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,143 @@
+name: truth-foundry-v10-16397-source-part-court
+
+on:
+  push:
+    branches: [truth-foundry-evidence-audit-v9-20261109]
+    paths:
+      - '.github/workflows/truth-foundry-v10-16397-source-part-court.yml'
+      - 'tools/corpus/truth_foundry/evidence_v10/**'
+      - 'tests/corpus/test_truth_foundry_partverse_source_v10.py'
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-v10-16397-source-part-court.yml'
+      - 'tools/corpus/truth_foundry/evidence_v10/**'
+      - 'tests/corpus/test_truth_foundry_partverse_source_v10.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-v10-16397-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  code-and-negative-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile builder, integration and independent validator
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v10
+          python -m unittest discover -s tests/corpus -p test_truth_foundry_partverse_source_v10.py -v
+
+  private-sha-locked-7034-partverse-into-16397:
+    if: github.event_name == 'push' && github.repository == 'merynz/RealSaS-OPT' && github.ref == 'refs/heads/truth-foundry-evidence-audit-v9-20261109'
+    needs: [code-and-negative-contracts]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      RCLONE_CONFIG: /tmp/realsas-foundry-v10-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits
+      SOURCE_PART: truth_foundry_semantic_part_geometry_v1/42590841797-1
+      SOURCE_LICENSE: truth_foundry_partverse_original_license_policy_v2/20261109_7034
+      SOURCE_BASELINE: truth_foundry_v10_source_bound_input_20261109
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v10_source_bound_court/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install private-source rclone reader
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Fetch SHA-pinned original processed receipts and V9 evidence matrix
+        run: |
+          set -euo pipefail
+          umask 077
+          dir="$RUNNER_TEMP/truth-foundry-v10"
+          mkdir -p "$dir/in" "$dir/out"
+          rclone copyto "$REMOTE/$SOURCE_PART/first2500/SOURCE_PART_REGION_EVIDENCE_V1.csv" "$dir/in/region_first.csv" --retries 3
+          rclone copyto "$REMOTE/$SOURCE_PART/second4799/SOURCE_PART_REGION_EVIDENCE_V1.csv" "$dir/in/region_second.csv" --retries 3
+          rclone copyto "$REMOTE/$SOURCE_PART/first2500/SOURCE_PART_ADJACENCY_EVIDENCE_V1.csv" "$dir/in/adjacency_first.csv" --retries 3
+          rclone copyto "$REMOTE/$SOURCE_PART/second4799/SOURCE_PART_ADJACENCY_EVIDENCE_V1.csv" "$dir/in/adjacency_second.csv" --retries 3
+          rclone copyto "$REMOTE/$SOURCE_LICENSE/PARTVERSE_7034_ORIGINAL_SOURCE_LICENSE_TRIAGE_V2.csv" "$dir/in/license.csv" --retries 3
+          rclone copyto "$REMOTE/$SOURCE_BASELINE/SOURCE_INVENTORY_DEEP_16397_V9.csv.gz" "$dir/in/SOURCE_INVENTORY_DEEP_16397_V9.csv.gz" --retries 3
+          rclone copyto "$REMOTE/$SOURCE_BASELINE/FACET_STATES_EFFECTIVE_V9_16397x264.csv.gz" "$dir/in/FACET_STATES_EFFECTIVE_V9_16397x264.csv.gz" --retries 3
+          rclone copyto "$REMOTE/$SOURCE_BASELINE/FACET_VALUES_EFFECTIVE_V9_16397x264.csv.gz" "$dir/in/FACET_VALUES_EFFECTIVE_V9_16397x264.csv.gz" --retries 3
+          python - "$dir/in" <<'PY'
+          from pathlib import Path
+          import json,hashlib,sys
+          d=Path(sys.argv[1]);locked=json.loads(Path('tools/corpus/truth_foundry/evidence_v10/SOURCE_INPUT_SHA256_LOCK_V10.json').read_text())
+          names={'region_first':'region_first.csv','region_second':'region_second.csv','adjacency_first':'adjacency_first.csv','adjacency_second':'adjacency_second.csv','license':'license.csv',
+          'baseline_v9_inventory':'SOURCE_INVENTORY_DEEP_16397_V9.csv.gz','baseline_v9_facet_states':'FACET_STATES_EFFECTIVE_V9_16397x264.csv.gz','baseline_v9_facet_values':'FACET_VALUES_EFFECTIVE_V9_16397x264.csv.gz'}
+          for k,name in names.items():
+              p=d/name
+              h=hashlib.sha256(p.read_bytes()).hexdigest()
+              assert h==locked[k],f'SOURCE_SHA_DRIFT:{k}:{h}'
+          print('All eight inputs independently SHA locked; rights are not qualified')
+          PY
+      - name: Rebuild all 7034 processed part graphs with source original-license metadata separation
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/truth-foundry-v10"
+          python tools/corpus/truth_foundry/evidence_v10/truth_foundry_partverse_source_court_v10.py \
+            --region-first "$d/in/region_first.csv" \
+            --region-second "$d/in/region_second.csv" \
+            --adjacency-first "$d/in/adjacency_first.csv" \
+            --adjacency-second "$d/in/adjacency_second.csv" \
+            --license "$d/in/license.csv" \
+            --sha-manifest tools/corpus/truth_foundry/evidence_v10/SOURCE_INPUT_SHA256_LOCK_V10.json \
+            --out "$d/out"
+      - name: Materialize 26 new source-bound diagnostics into 16397-row inventory
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/truth-foundry-v10"
+          python tools/corpus/truth_foundry/evidence_v10/truth_foundry_integrate_partverse_v10.py \
+            --v9-inventory "$d/in/SOURCE_INVENTORY_DEEP_16397_V9.csv.gz" \
+            --partverse-court "$d/out/PARTVERSE_SOURCE_BOUND_PART_GRAPH_V10_7034.csv.gz" \
+            --out "$d/out"
+          cp "$d/in/FACET_STATES_EFFECTIVE_V9_16397x264.csv.gz" "$d/out/FACET_STATES_EFFECTIVE_V10_16397x264_UNCHANGED.csv.gz"
+          cp "$d/in/FACET_VALUES_EFFECTIVE_V9_16397x264.csv.gz" "$d/out/FACET_VALUES_EFFECTIVE_V10_16397x264_UNCHANGED.csv.gz"
+      - name: Independent raw-part and immutable-inventory readback
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/truth-foundry-v10"
+          python tools/corpus/truth_foundry/evidence_v10/truth_foundry_verify_partverse_v10.py \
+            --directory "$d/out" --v9-inventory "$d/in/SOURCE_INVENTORY_DEEP_16397_V9.csv.gz"
+          python - "$d/out" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          from pathlib import Path
+          d=Path(sys.argv[1])
+          s=json.loads((d/'SUMMARY_PARTVERSE_V10.json').read_text())
+          v=json.loads((d/'INDEPENDENT_READBACK_PARTVERSE_V10.json').read_text())
+          assert v['source_rows']==16397 and v['parts_crosschecked_independently']==69742
+          assert s['counts']['processed_pass']==7028 and s['counts']['missing_processed']==6
+          assert s['original_creator_bytes_rehashed']==0
+          assert s['training_admission']==0 and s['semantic_ontology_pass']==0
+          print('## V10 real source receipt replay — 16397 original records preserved')
+          print('PartVerse original-license UID+SHA **metadata claim** crosswalk:',s['source_rows'])
+          print('Actual processed source part graphs:',s['processed_source_rows'])
+          print('Part regions independently checked:',v['parts_crosschecked_independently'])
+          print('Part adjacencies verified:',s['processed_adjacency_rows'])
+          print('Processed triangles:',s['processed_triangles'])
+          print('Unprocessed-source exceptions:',s['counts']['missing_processed'])
+          print('V9 source inventory rows preserved:',v['source_rows'])
+          print('Added measured source fields per PartVerse candidate:',26)
+          print('Previous 264 facet states/values copied unchanged — no invented target truth')
+          print('**0 original-byte, semantic, 2D art, global SDF or training PASS minted.**')
+          PY
+      - name: Upload only court outputs to private Drive; do not copy source bundles
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/truth-foundry-v10/out"
+          test -s "$d/INDEPENDENT_READBACK_PARTVERSE_V10.json"
+          test -s "$d/SOURCE_INVENTORY_DEEP_16397_V10.csv.gz"
+          rclone copy "$d" "$DEST" --checksum --retries 3
+          echo 'SHA-locked source court outputs archived to private Drive under audits/truth_foundry_v10_source_bound_court/${{ github.run_id }}-${{ github.run_attempt }}' >> "$GITHUB_STEP_SUMMARY"

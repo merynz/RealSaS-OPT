@@ -1,0 +1,31 @@
+{
+  "schema": "RealSaS.DeepTruthMatrixOverlay.v9",
+  "candidate_count": 16397,
+  "facet_count": 264,
+  "new_import_receipt_observations": 7398,
+  "facet_observation_counts": {
+    "modular_vs_welded_vs_multimesh": 2466,
+    "primitive_face_to_scene_node": 2466,
+    "mesh_armature_bind_association": 2466
+  },
+  "existing_facet_data_modified": 0,
+  "master_source_receipt_crosswalk_count": 2466,
+  "core_partial_source_sha_crosswalk_count": 370,
+  "core_partial_family_diagnostic_rows": 5180,
+  "core_v5_observation_vs_partial_import": {
+    "PASS__V5_OBSERVATION_QUALIFIED": 324,
+    "PASS__V5_OBSERVATION_FAILED": 17,
+    "FAIL__V5_OBSERVATION_QUALIFIED": 28,
+    "FAIL__V5_OBSERVATION_FAILED": 1
+  },
+  "core_import_snapshot_is_not_same_court_as_v5_observation": true,
+  "original_source_bytes_rehashed": 0,
+  "new_train_admission": 0,
+  "global_sdf_validity_admitted": 0,
+  "semantic_ontology_admitted": 0,
+  "2d_art_review_admitted": 0,
+  "lineage_safe_split_admitted": 0,
+  "evidence_databases": [
+    "MASTER_CORE_INDEPENDENT_RECEIPT_COURTS_V9.sqlite"
+  ]
+}

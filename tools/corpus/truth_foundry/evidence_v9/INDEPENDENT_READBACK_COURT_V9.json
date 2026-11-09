@@ -1,0 +1,35 @@
+{
+  "schema": "RealSaS.TruthFoundryIndependentReadback.v9",
+  "source_rows_validated": 16397,
+  "facet_columns": 264,
+  "original_facet_cells_preserved": 4321410,
+  "new_observed_cells": 7398,
+  "new_observations_by_facet": {
+    "mesh_armature_bind_association": 2466,
+    "modular_vs_welded_vs_multimesh": 2466,
+    "primitive_face_to_scene_node": 2466
+  },
+  "master_full_import_receipt_sha_crosswalk": 2466,
+  "core_partial_receipt_sha_crosswalk": 370,
+  "untouched_other_source_rows": 13561,
+  "master_mesh_objects_recount": 14351,
+  "core_family_rows_recount": 5180,
+  "core_diagnostic_model_rows_recount": 1480,
+  "core_reconciliation_rows": 370,
+  "master_missing_deep_receipt_queue_rows": 1527,
+  "source_original_sha_rehash_pass_minted": 0,
+  "new_training_admission": 0,
+  "new_anatomical_or_2d_art_court_pass": 0,
+  "new_lineage_split_authority": 0,
+  "global_sdf_pass_minted": 0,
+  "integrity": "PASS_ALL_INDEPENDENT_RECOUNTS__EVIDENCE_ONLY",
+  "artifact_sha256": {
+    "SOURCE_INVENTORY_DEEP_16397_V9.csv.gz": "3e5b15d3cbb264b70a1c1b090a01381f2f5e4441070f27da6d5139bef1d97cb6",
+    "FACET_STATES_EFFECTIVE_V9_16397x264.csv.gz": "f8411c396647d498f217c64485ee63e0c56207f7d09c93b7a0aea8c77ca53172",
+    "FACET_VALUES_EFFECTIVE_V9_16397x264.csv.gz": "8e99c1a85fe72d9189071e2887a8196056811e82ab85e298dfd0d5dde0574b0e",
+    "FACET_DELTA_V9_MASTER_RECEIPT.csv.gz": "f480cdcc559b0253cae5553d9be416f0c07f62340ca81812b1c35e70db28d37c",
+    "MASTER_CORE_INDEPENDENT_RECEIPT_COURTS_V9.sqlite": "f9ce6f309f8c65f85ad8c975c1e818d418bbab11e851506115c0d32bc0200577",
+    "CORE370_V5_VS_PARTIAL_FAMILY_RECONCILIATION_370.csv": "4bce3b29ec4c82458e8bed7ba0603e58e2e3c89bc7c7f1b2c45aa8a1fa116c0e",
+    "MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv": "18234396bf86fa0e9c156c6e3eddb73aa3963870459491a479ffb56974349ab7"
+  }
+}

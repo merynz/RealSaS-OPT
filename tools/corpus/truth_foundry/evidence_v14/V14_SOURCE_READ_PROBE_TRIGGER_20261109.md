@@ -5,3 +5,5 @@ The previous physical run 42666046342 retrieved **zero** normalized derivatives 
 Probe replay #2: startup dependency `numpy` for importing the existing sealed V14 source selector is installed in diagnostic workflow. The first probe failed before any remote variant paths were tested. No change to source selection, truth or model claims.
 
 Probe replay #3: second run fetched the V11 SHA-locked inputs but single remote directory lsf failed before any NPZ download. Removed unnecessary retry flags from the lsf probe and added safe public error-class reporting; no bulk source rerun or extra source admission.
+
+Probe replay #4: one historical NPZ direct `rclone copyto` succeeded, so V14's failing bulk `--files-from` transfer is replaced by SHA-locked per-file `copyto`. This push runs only the small eight-file transport pilot with bounded concurrency, **not the eight-shard full corpus court**. Full run must require independent transport proof.

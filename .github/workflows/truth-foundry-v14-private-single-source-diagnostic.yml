@@ -82,7 +82,7 @@ jobs:
           python tools/corpus/truth_foundry/evidence_v14/bounded_direct_copy_v14.py \
             --plan "$root/plan" --remote-base "$SOURCE_VARIANTS" \
             --variant-dir "$root/variants" --out "$root/out" \
-            --pilot-files 8 --workers 3 --timeout-seconds 90 --attempts 2
+            --pilot-files 8 --workers 1 --timeout-seconds 90 --attempts 1
       - name: Publish sharded direct copy pilot counts
         if: always()
         run: |

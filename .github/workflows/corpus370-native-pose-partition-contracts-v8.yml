@@ -21,7 +21,7 @@ permissions:
 
 concurrency:
   group: corpus370-native-pose-partition-contracts-v8-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   native-authority-negative-contracts:

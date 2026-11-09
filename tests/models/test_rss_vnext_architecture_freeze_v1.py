@@ -36,7 +36,7 @@ class RSSvNextArchitectureFreezeV1Tests(unittest.TestCase):
     def test_gradient_and_discrete_boundaries(self):
         f = self.freeze
         self.assertIn("NOT_DIRECTLY_DIFFERENTIABLE", f["tessa"]["discrete_gradient_policy"])
-        self.assertIn("TOPOLOGY", f["gradient_policy"]["hard_decisions"])
+        self.assertIn("MESH_CONNECTIVITY", f["gradient_policy"]["hard_decisions"])
         self.assertIn("NO_SILENT_MESH_MUTATION_AFTER_RIG_OR_SKIN_BINDING",
                       f["runtime_invariants"])
         self.assertIn("PRE_REPAIR_AND_POST_REPAIR_QUALITY_SEPARATE",

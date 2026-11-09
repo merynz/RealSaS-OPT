@@ -40,7 +40,7 @@ DRIVE_REASON_PATTERNS = (
     ("DAILY_LIMIT_EXCEEDED", r"dailyLimitExceeded"),
     ("STORAGE_QUOTA_EXCEEDED", r"storageQuotaExceeded"),
     ("QUOTA_EXCEEDED_UNSPECIFIED", r"quotaExceeded|quota.exceeded"),
-    ("HTTP_429", r"\\b429\\b|too.many.requests"),
+    ("HTTP_429", r"\b429\b|too.many.requests"),
 )
 
 
@@ -49,9 +49,11 @@ def safe_drive_reason(stderr: bytes) -> str:
     for label, pattern in DRIVE_REASON_PATTERNS:
         if re.search(pattern, excerpt, flags=re.I):
             return label
-    if re.search(r"\\b403\\b|forbidden", excerpt, flags=re.I):
+    if re.search(r"insufficientFilePermissions|access.denied|permission.denied|not.authorized|invalid.grant|unauthoriz", excerpt, flags=re.I):
+        return "EXPLICIT_ACCESS_DENIED"
+    if re.search(r"\b403\b|forbidden", excerpt, flags=re.I):
         return "HTTP_403_UNSPECIFIED"
-    if re.search(r"\\b401\\b|unauthoriz", excerpt, flags=re.I):
+    if re.search(r"\b401\b|unauthoriz", excerpt, flags=re.I):
         return "HTTP_401"
     return "NO_DRIVE_REASON_IDENTIFIED"
 

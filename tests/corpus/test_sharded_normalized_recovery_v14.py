@@ -6,8 +6,10 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest import mock
 
 from tools.corpus.truth_foundry.evidence_v14 import sharded_normalized_recovery_v14 as v14
+from tools.corpus.truth_foundry.evidence_v14 import bounded_direct_copy_v14 as transport
 
 
 class V14RecoveryContracts(unittest.TestCase):
@@ -75,6 +77,43 @@ class V14RecoveryContracts(unittest.TestCase):
             w.writerows(rows)
         with self.assertRaises(AssertionError):
             v14.all_rows(self.queue,self.inventory)
+
+
+
+class V14DriveQuotaSafety(unittest.TestCase):
+    def test_reasons_distinguish_quota_from_permission_without_private_paths(self):
+        cases = (
+            (b'Error 403: userRateLimitExceeded /secret/location', "USER_RATE_LIMIT_EXCEEDED", "RATE_OR_QUOTA"),
+            (b'Error 403: rateLimitExceeded /secret/location', "PROJECT_RATE_LIMIT_EXCEEDED", "RATE_OR_QUOTA"),
+            (b'Error 403: downloadQuotaExceeded /secret/location', "DOWNLOAD_QUOTA_EXCEEDED", "RATE_OR_QUOTA"),
+            (b'Error 403: storageQuotaExceeded /secret/location', "STORAGE_QUOTA_EXCEEDED", "RATE_OR_QUOTA"),
+            (b'Error 403: insufficientFilePermissions /secret/location', "HTTP_403_UNSPECIFIED", "EXPLICIT_ACCESS_DENIED"),
+            (b'Error 403: forbidden /secret/location', "HTTP_403_UNSPECIFIED", "HTTP_403_UNSPECIFIED"),
+        )
+        for raw, reason, category in cases:
+            with self.subTest(reason=reason, category=category):
+                self.assertEqual(transport.safe_drive_reason(raw), reason)
+                self.assertEqual(transport.classify(raw), category)
+                self.assertNotIn("secret", transport.safe_drive_reason(raw))
+
+    def test_rate_limit_never_retries_same_file(self):
+        with tempfile.TemporaryDirectory() as temp:
+            item = "quaternius_" + "a" * 24 + "/normalized.npz"
+            process = SimpleNamespace(returncode=1,
+                stderr=b'Google Drive error 403: userRateLimitExceeded',
+                stdout=b'')
+            with mock.patch.object(transport.subprocess, "run", return_value=process) as caller:
+                result = transport.fetch(item, "gdrive:private", Path(temp), 20, 2)
+            self.assertEqual(result["status"], "RATE_OR_QUOTA")
+            self.assertEqual(result["drive_error_reason"], "USER_RATE_LIMIT_EXCEEDED")
+            self.assertEqual(caller.call_count, 1)
+            self.assertFalse((Path(temp)/item).exists())
+
+    def test_path_allowlist_rejects_source_original_and_traversal(self):
+        with tempfile.TemporaryDirectory() as temp:
+            for item in ("../escape/normalized.npz", "quaternius_" + "a"*24 + "/original.fbx"):
+                with self.subTest(item=item), self.assertRaises(ValueError):
+                    transport.fetch(item, "gdrive:private", Path(temp), 20, 1)
 
 
 if __name__=="__main__":

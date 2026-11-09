@@ -1,0 +1,22 @@
+{
+  "baseline_inventory": {
+    "basename": "SOURCE_INVENTORY_DEEP_16397_V11.csv.gz",
+    "bytes": 2407281,
+    "sha256": "de1a8506b8131d76ec1b0a0e81f26b0d6eed18314a4d9f64581603135c6de8d5"
+  },
+  "baseline_states": {
+    "basename": "FACET_STATES_EFFECTIVE_V11_16397x264.csv.gz",
+    "bytes": 668423,
+    "sha256": "a4ccea1fb5dd475893e0ad749139e3db6ab63388db1b878e4ab219429559c5a8"
+  },
+  "baseline_values": {
+    "basename": "FACET_VALUES_EFFECTIVE_V11_16397x264.csv.gz",
+    "bytes": 849014,
+    "sha256": "62d5034c1e60ff86c5b2cd838499bd0d5bfd8f6b2bb8c71697b32fc215289798"
+  },
+  "queue": {
+    "basename": "MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv",
+    "bytes": 770406,
+    "sha256": "18234396bf86fa0e9c156c6e3eddb73aa3963870459491a479ffb56974349ab7"
+  }
+}

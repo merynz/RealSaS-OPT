@@ -1,0 +1,299 @@
+{
+  "schema": "RealSaS.RSSvNextWorkLedgerIndex.v1",
+  "ledger_id": "RSS.vNext.UnifiedArchitectureAndTruthLedger.v1",
+  "created_at_utc": "2026-11-09",
+  "work_status_authority": "LIVE_GITHUB_ISSUES__NOT_STATIC_JSON",
+  "issue_hub": 399,
+  "repository": "merynz/RealSaS-OPT",
+  "completion_evidence_marker": "RSS_LEDGER_COMPLETION_V1",
+  "closure_policy": {
+    "checked_when": "issue.state=closed AND issue.state_reason=completed AND Completion Evidence heading AND marker AND exact hash AND source/test URL",
+    "due_diligence": "The CLI syntactically verifies a closure receipt, not the scientific truth of a claimed court. Independent agent review and source qualification remain mandatory.",
+    "reopen_on_invalidated_evidence": true,
+    "issue_body_status_sync": "NEVER_EDIT_THIS_STATIC_MANIFEST_TO_MARK_WORK_DONE",
+    "source_code_merge": "SEPARATE_FROM_ISSUE_CLOSE_AND_MODEL_PRODUCT_ADMISSION"
+  },
+  "architecture_source": {
+    "pr": 397,
+    "document": "docs/research/RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_20261109.md",
+    "contract": "canonical/RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_V1_20261109.json",
+    "design_frozen": true,
+    "implementation_proven": false
+  },
+  "tasks": [
+    {
+      "id": "A01",
+      "issue_number": 400,
+      "title": "SharedCharacterCarrierIR.vNext: immutable typed state + exact expert deltas",
+      "scope": "architecture",
+      "depends_on": []
+    },
+    {
+      "id": "A02",
+      "issue_number": 401,
+      "title": "Cross-model surface identity, correspondence, camera frames and invalidation graph",
+      "scope": "architecture",
+      "depends_on": [
+        "A01"
+      ]
+    },
+    {
+      "id": "A03",
+      "issue_number": 402,
+      "title": "IRIS VNext Geometry/Semantic/Graphics as distinct typed learned supervision paths",
+      "scope": "architecture",
+      "depends_on": [
+        "A01",
+        "T02",
+        "T03",
+        "T04"
+      ]
+    },
+    {
+      "id": "A04",
+      "issue_number": 403,
+      "title": "Semantic-aware FlexiCubes + open/modular surface bridge between IRIS/TESSA",
+      "scope": "architecture",
+      "depends_on": [
+        "A01",
+        "A02",
+        "A03",
+        "T02"
+      ]
+    },
+    {
+      "id": "A05",
+      "issue_number": 404,
+      "title": "TESSA animation-ready StructuralMeshCandidate and typed component/attachment graph",
+      "scope": "architecture",
+      "depends_on": [
+        "A01",
+        "A02",
+        "A04",
+        "T05"
+      ]
+    },
+    {
+      "id": "A06",
+      "issue_number": 405,
+      "title": "TESSA multipose consequence gradients + discrete topology structural targets",
+      "scope": "architecture",
+      "depends_on": [
+        "A04",
+        "A05",
+        "T05",
+        "T07"
+      ]
+    },
+    {
+      "id": "A07",
+      "issue_number": 406,
+      "title": "AXIS vNext full authoring RigProgram (beyond SkinTokens skeleton)",
+      "scope": "architecture",
+      "depends_on": [
+        "A01",
+        "A02",
+        "A05",
+        "T06"
+      ]
+    },
+    {
+      "id": "A08",
+      "issue_number": 407,
+      "title": "MIRA vNext SkinTokens codec and exact AXIS/TESSA carrier binding",
+      "scope": "architecture",
+      "depends_on": [
+        "A01",
+        "A02",
+        "A07",
+        "T07"
+      ]
+    },
+    {
+      "id": "A09",
+      "issue_number": 408,
+      "title": "Compiler generic full-control execution with bounded responsibility",
+      "scope": "architecture",
+      "depends_on": [
+        "A07",
+        "A08"
+      ]
+    },
+    {
+      "id": "A10",
+      "issue_number": 409,
+      "title": "Graphics editable drawable graph from same mesh/semantic/structure identity",
+      "scope": "architecture",
+      "depends_on": [
+        "A02",
+        "A03",
+        "A05",
+        "A07",
+        "A08",
+        "T04"
+      ]
+    },
+    {
+      "id": "A11",
+      "issue_number": 410,
+      "title": "RSS.vNext versioned unified training/consumer orchestration and operational authority",
+      "scope": "architecture",
+      "depends_on": [
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "A07",
+        "A08",
+        "A09",
+        "A10",
+        "T10"
+      ]
+    },
+    {
+      "id": "A12",
+      "issue_number": 411,
+      "title": "Architecture freeze promoted to canonical agent-visible main with implementation backlog trace",
+      "scope": "architecture",
+      "depends_on": []
+    },
+    {
+      "id": "T01",
+      "issue_number": 412,
+      "title": "Master inventory: source identity, dedup, character vs prop, morphology, rights",
+      "scope": "truth",
+      "depends_on": []
+    },
+    {
+      "id": "T02",
+      "issue_number": 413,
+      "title": "IRIS Geometry source truth: mesh/normals/depth and conditional sign/UDF",
+      "scope": "truth",
+      "depends_on": [
+        "T01"
+      ]
+    },
+    {
+      "id": "T03",
+      "issue_number": 414,
+      "title": "IRIS Semantic: generic region/instance/affordance evidence from source faces",
+      "scope": "truth",
+      "depends_on": [
+        "T01",
+        "T02"
+      ]
+    },
+    {
+      "id": "T04",
+      "issue_number": 415,
+      "title": "IRIS Graphics: native pixels/UV/art qualification, multiview layer truth and CAA",
+      "scope": "truth",
+      "depends_on": [
+        "T01",
+        "T02",
+        "T03"
+      ]
+    },
+    {
+      "id": "T05",
+      "issue_number": 416,
+      "title": "TESSA animation-ready topology teacher: multipose mechanical consequence",
+      "scope": "truth",
+      "depends_on": [
+        "T02",
+        "T06",
+        "T07"
+      ]
+    },
+    {
+      "id": "T06",
+      "issue_number": 417,
+      "title": "AXIS RigProgram teacher: structural DOF/control and attachment affordance",
+      "scope": "truth",
+      "depends_on": [
+        "T01",
+        "T02"
+      ]
+    },
+    {
+      "id": "T07",
+      "issue_number": 418,
+      "title": "MIRA SkinTokens: exact skin/vertex influence and posed deformation evidence",
+      "scope": "truth",
+      "depends_on": [
+        "T01",
+        "T02",
+        "O02"
+      ]
+    },
+    {
+      "id": "T08",
+      "issue_number": 419,
+      "title": "Unified 264-facet matrix: six-head target projections, masks and coverage ledger",
+      "scope": "truth",
+      "depends_on": [
+        "T01",
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T06",
+        "T07",
+        "O01",
+        "O02"
+      ]
+    },
+    {
+      "id": "T09",
+      "issue_number": 420,
+      "title": "Lineage-safe train/val/unseen split, holdouts and hard-negative qualification",
+      "scope": "truth",
+      "depends_on": [
+        "T01",
+        "T08"
+      ]
+    },
+    {
+      "id": "T10",
+      "issue_number": 421,
+      "title": "RSS.vNext six-head materialization and eligible-training readiness gate",
+      "scope": "truth",
+      "depends_on": [
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T06",
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "id": "T11",
+      "issue_number": 422,
+      "title": "Generic unseen RSS.vNext puppet behavioral proof and full-control admission",
+      "scope": "truth",
+      "depends_on": [
+        "T10",
+        "A11"
+      ]
+    },
+    {
+      "id": "O01",
+      "issue_number": 423,
+      "title": "Recover timed-out V12 1,392 historical variant receipt audit with sharding",
+      "scope": "operations",
+      "depends_on": []
+    },
+    {
+      "id": "O02",
+      "issue_number": 424,
+      "title": "Complete V13/V14 726 normalized derivative sharded recovery and independent reconciliation",
+      "scope": "operations",
+      "depends_on": []
+    }
+  ]
+}

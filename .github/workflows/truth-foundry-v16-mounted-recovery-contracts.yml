@@ -1,0 +1,37 @@
+name: truth-foundry-v16-mounted-recovery-contracts
+
+on:
+  push:
+    branches: [truth-foundry-v16-mounted-evidence-20261110]
+    paths:
+      - '.github/workflows/truth-foundry-v16-mounted-recovery-contracts.yml'
+      - 'tools/corpus/truth_foundry/evidence_v16/**'
+      - 'tests/corpus/test_mounted_recovery_v16.py'
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-v16-mounted-recovery-contracts.yml'
+      - 'tools/corpus/truth_foundry/evidence_v16/**'
+      - 'tests/corpus/test_mounted_recovery_v16.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-v16-contracts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  strict-identity-source-guard-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and strict source-identity/holdout/missing-source regression
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v16 tests/corpus/test_mounted_recovery_v16.py
+          python -m unittest discover -s tests/corpus -p 'test_mounted_recovery_v16.py' -v
+      - name: No private source download or evidence promotion
+        run: |
+          echo "SOURCE_FETCHED=0; TRAINING_ADMISSIONS=0; VERIFIED_HISTORICAL_DERIVATIVE_COURT=not_executed"

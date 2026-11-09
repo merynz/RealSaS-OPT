@@ -1,0 +1,34 @@
+name: truth-foundry-v17-bulk-evidence-contracts
+on:
+  push:
+    branches: [truth-foundry-v17-bulk-evidence-20261110]
+    paths:
+      - 'tools/corpus/truth_foundry/evidence_v17/**'
+      - 'tests/corpus/test_inventory_mass_observations_v17.py'
+      - '.github/workflows/truth-foundry-v17-bulk-evidence-contracts.yml'
+  pull_request:
+    paths:
+      - 'tools/corpus/truth_foundry/evidence_v17/**'
+      - 'tests/corpus/test_inventory_mass_observations_v17.py'
+      - '.github/workflows/truth-foundry-v17-bulk-evidence-contracts.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: truth-foundry-v17-contracts-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-provenance-and-nonpromotion:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and source/holdout/rights/scope negative contracts
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v17 tests/corpus/test_inventory_mass_observations_v17.py
+          python -m unittest discover -s tests/corpus -p 'test_inventory_mass_observations_v17.py' -v
+      - name: Explicitly exclude raw source downloads and admission claims
+        run: |
+          echo "PRIVATE_DATA_DOWNLOADS=0 ORIGINAL_SOURCE_PARITY_ADMISSIONS=0 TRAINING_ADMISSIONS=0"
+          echo "Real V17 16397x264 readback lives with its SHA-bound private data receipt, not in GitHub."

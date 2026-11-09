@@ -155,6 +155,9 @@ def main(argv=None):
   'states':dict(collections.Counter(x['state'] for x in results)),'results':results,
   'training_admissions':0,'original_source_authority':0,'holdouts_touched':0}
  jsonwrite(a.output/'PROGRESS_V16.json',summary)
- return 4 if any(x['state'] in ('SOURCE_READ_IO_BLOCKER','QUARANTINED_COURT_EXCEPTION') for x in results) else 0
+ # A completed workflow must not be green when files were never mounted, even if
+ # zero candidate exceptions occurred. Per-source missing states remain explicit.
+ accepted={'COURTED_DERIVATIVE_ONLY','REHASHED_CHECKPOINT_REUSED'}
+ return 0 if results and all(x['state'] in accepted for x in results) else 4
 
 if __name__=='__main__':sys.exit(main())

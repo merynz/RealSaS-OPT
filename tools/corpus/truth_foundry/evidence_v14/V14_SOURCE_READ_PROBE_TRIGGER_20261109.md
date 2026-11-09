@@ -1,3 +1,5 @@
 # V14 direct-source read diagnostic (2026-11-09)
 
 The previous physical run 42666046342 retrieved **zero** normalized derivatives for all six completed/failed shards, with three transport exit 1 and three 55-minute timeouts. In the older workflow rclone logs remained private ephemeral, therefore quota/path/auth cause is UNKNOWN. This explicit trigger runs only the reviewed micro-probe against at most three SHA-locked, non-holdout historical derivative candidates using direct folder listing and copyto; each subprocess has a strict timeout and prints only redacted error categories. No full shard rerun, no original creator asset download, no rights/teacher/training admission, no automatic merge, and no changes to Truth Foundry V11 matrices. Actual success/failure must be read from Actions diagnostics.
+
+Probe replay #2: startup dependency `numpy` for importing the existing sealed V14 source selector is installed in diagnostic workflow. The first probe failed before any remote variant paths were tested. No change to source selection, truth or model claims.

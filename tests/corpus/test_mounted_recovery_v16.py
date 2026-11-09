@@ -37,6 +37,19 @@ class MountedV16Tests(unittest.TestCase):
    with self.assertRaisesRegex(ValueError,'SHA_LOCK_DRIFT'):
     v16.select(self.queue,self.inventory,0,8)
 
+ def test_missing_files_are_blocked_not_green(self):
+  fake_court=self.root/'fake_court.py';fake_court.write_text('pass\\n')
+  with mock.patch.object(v16,'INPUT_LOCKS',self.fake_lock):
+   with mock.patch.object(v16,'import_court',return_value=object()):
+    code=v16.main(['--queue',str(self.queue),'--inventory',str(self.inventory),
+     '--variants-root',str(self.root/'empty'),
+     '--output',str(self.root/'missing-out'),'--v13-court',str(fake_court),
+     '--shard-index','0','--shard-count','8','--max-sources','1'])
+  self.assertEqual(code,4)
+  report=json.loads((self.root/'missing-out'/'PROGRESS_V16.json').read_text())
+  self.assertEqual(report['states'],{'SOURCE_FILE_NOT_MOUNTED':1})
+  self.assertEqual(report['training_admissions'],0)
+
  def test_path_escape_rejected(self):
   with self.queue.open() as f:rows=list(csv.DictReader(f))
   rows[0]['candidate_id']='../../evil/normalized.npz'

@@ -14,7 +14,10 @@ import pathlib
 import re
 import subprocess
 
-from sharded_normalized_recovery_v14 import read_json, sha
+try:  # Package import for independent unit tests, script import in Actions.
+    from .sharded_normalized_recovery_v14 import read_json, sha
+except ImportError:
+    from sharded_normalized_recovery_v14 import read_json, sha
 
 ALLOWED = re.compile(r"[a-z0-9_]+_[0-9a-f]{24,64}/(?:normalized\.npz|source_structure\.json)\Z")
 ERRORS = {

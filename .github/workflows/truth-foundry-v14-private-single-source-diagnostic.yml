@@ -70,6 +70,34 @@ jobs:
             --baseline-inventory "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" \
             --remote-base "$SOURCE_VARIANTS" \
             --out "$root/out"
+      - name: Validate direct copyto for eight SHA-locked files from one shard (transport-only)
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/v14-probe"
+          mkdir -p "$root/plan" "$root/variants"
+          python tools/corpus/truth_foundry/evidence_v14/sharded_normalized_recovery_v14.py plan \
+            --queue "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" \
+            --baseline-inventory "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" \
+            --out "$root/plan" --shard-index 0 --shard-count 8
+          python tools/corpus/truth_foundry/evidence_v14/bounded_direct_copy_v14.py \
+            --plan "$root/plan" --remote-base "$SOURCE_VARIANTS" \
+            --variant-dir "$root/variants" --out "$root/out" \
+            --pilot-files 8 --workers 3 --timeout-seconds 90 --attempts 2
+      - name: Publish sharded direct copy pilot counts
+        if: always()
+        run: |
+          set -euo pipefail
+          p="$RUNNER_TEMP/v14-probe/out/DIRECT_COPY_TRANSPORT_V14.json"
+          if [ -f "$p" ]; then
+            python - "$p" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          r=json.load(open(sys.argv[1]))
+          print("### Direct-copy pilot: 8 historical derivative paths, no bulk scan")
+          print("Observed actual NPZ copies:",r["actual_npz_copied"])
+          print("Transport states:",r["states"])
+          print("No original source/training authority minted")
+          PY
+          fi
       - name: Publish redacted transport classification only
         if: always()
         run: |

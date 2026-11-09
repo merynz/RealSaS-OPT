@@ -27,7 +27,7 @@ permissions:
 
 concurrency:
   group: corpus370-all-slot-v5-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   source-neutral-slot-census-contracts:

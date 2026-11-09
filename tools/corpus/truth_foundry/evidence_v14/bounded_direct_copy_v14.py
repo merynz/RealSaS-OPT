@@ -8,7 +8,6 @@ safe error-class counters and source-bound SHA receipts. No creator originals.
 from __future__ import annotations
 import argparse
 import collections
-import concurrent.futures
 import hashlib
 import json
 import pathlib
@@ -75,7 +74,7 @@ def fetch(item: str, remote: str, root: pathlib.Path, seconds: int, attempts: in
             result["status"] = classify(p.stderr)
         if dst.is_file():
             dst.unlink()
-        if result["status"] in ("NOT_FOUND", "EXPLICIT_ACCESS_DENIED", "HTTP_401", "CLI", "NPZ_RESOURCE_LIMIT"):
+        if result["status"] in ("NOT_FOUND", "RATE_OR_QUOTA", "HTTP_403_UNSPECIFIED", "EXPLICIT_ACCESS_DENIED", "HTTP_401", "CLI", "NPZ_RESOURCE_LIMIT"):
             break
     return result
 
@@ -86,12 +85,12 @@ def main():
     p.add_argument("--remote-base", required=True)
     p.add_argument("--out", required=True)
     p.add_argument("--variant-dir", required=True)
-    p.add_argument("--workers", type=int, default=3)
+    p.add_argument("--workers", type=int, default=1)
     p.add_argument("--timeout-seconds", type=int, default=110)
-    p.add_argument("--attempts", type=int, default=2)
+    p.add_argument("--attempts", type=int, default=1)
     p.add_argument("--pilot-files", type=int, default=0)
     a = p.parse_args()
-    assert 1 <= a.workers <= 4
+    assert a.workers == 1, "RATE_QUOTA_SAFETY_REQUIRES_SERIAL_TRANSFERS"
     assert 10 <= a.timeout_seconds <= 150
     assert 1 <= a.attempts <= 2
     assert a.pilot_files == 0 or 1 <= a.pilot_files <= 16
@@ -110,16 +109,20 @@ def main():
     root = pathlib.Path(a.variant_dir)
     root.mkdir(parents=True, exist_ok=True)
     results = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=a.workers) as ex:
-        futures = [ex.submit(fetch, item, a.remote_base, root,
-                             a.timeout_seconds, a.attempts) for item in items]
-        for index, future in enumerate(concurrent.futures.as_completed(futures), 1):
-            result = future.result()
-            results.append(result)
-            if index % 10 == 0 or index == len(items):
-                c = collections.Counter(r["status"] for r in results)
-                print(json.dumps({"completed": index, "total": len(items),
-                                  "states": dict(c)}, sort_keys=True), flush=True)
+    circuit_broken = False
+    # STOP before touching hundreds of remote files when Google Drive quota,
+    # 403 or rate limiting is observed. All remaining files stay unattempted.
+    for index, item in enumerate(items, 1):
+        result = fetch(item, a.remote_base, root, a.timeout_seconds, a.attempts)
+        results.append(result)
+        if index % 10 == 0 or index == len(items):
+            c = collections.Counter(r["status"] for r in results)
+            print(json.dumps({"completed": index, "total": len(items),
+                              "states": dict(c)}, sort_keys=True), flush=True)
+        if result["status"] in ("RATE_OR_QUOTA", "HTTP_403_UNSPECIFIED"):
+            circuit_broken = True
+            print("V14_DRIVE_RATE_QUOTA_CIRCUIT_OPEN: remaining requests suppressed",flush=True)
+            break
     summary = {
         "schema": "RealSaS.TruthFoundryV14DirectCopyto.v1",
         "mode": "PILOT_TRANSPORT_ONLY" if a.pilot_files else "FULL_SHARD_TRANSFER",
@@ -127,7 +130,10 @@ def main():
         "plan_filelist_sha256": receipt["file_list_sha256"],
         "shard": receipt["shard_index"],
         "assigned_source_count": receipt["assigned_source_count"],
-        "attempted_files": len(items),
+        "assigned_files": len(items),
+        "attempted_files": len(results),
+        "remaining_unattempted": len(items) - len(results),
+        "rate_or_quota_circuit_open": circuit_broken,
         "actual_npz_copied": sum(x["kind"] == "NPZ" and x["status"] in ("COPIED", "CACHED_REHASHED") for x in results),
         "states": dict(collections.Counter(x["status"] for x in results)),
         "records": sorted(results, key=lambda x:x["path_id_sha256"]),
@@ -137,7 +143,7 @@ def main():
     (dest / "DIRECT_COPY_TRANSPORT_V14.json").write_text(json.dumps(summary,sort_keys=True,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({"shard":summary["shard"],"mode":summary["mode"],
                       "npz":summary["actual_npz_copied"],"states":summary["states"]},sort_keys=True))
-    return 0 if summary["actual_npz_copied"] > 0 else 4
+    return 5 if circuit_broken else (0 if summary["actual_npz_copied"] > 0 else 4)
 
 
 if __name__ == "__main__":

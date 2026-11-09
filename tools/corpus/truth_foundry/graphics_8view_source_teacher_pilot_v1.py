@@ -115,6 +115,8 @@ def render_bpy(selection:Path,glb_dir:Path,out:Path):
     a=math.radians(angle)
     camera.location=center+Vector((math.sin(a),-math.cos(a),0.32)).normalized()*diameter*2.7
     camera.rotation_euler=(center-camera.location).to_track_quat('-Z','Y').to_euler()
+    # Force the actual evaluated camera transform into the evidence receipt.
+    bpy.context.view_layer.update()
     scene.render.filepath=str(out_dir/('orbit_%03d_native.png'%angle))
     bpy.ops.render.render(write_still=True)
     im=Path(scene.render.filepath)

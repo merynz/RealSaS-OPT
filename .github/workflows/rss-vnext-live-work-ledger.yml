@@ -30,6 +30,10 @@ permissions:
   contents: read
   issues: read
 
+concurrency:
+  group: rss-vnext-live-ledger-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   ledger-contract:
     runs-on: ubuntu-24.04

@@ -23,6 +23,7 @@ ERROR_MARKERS = {
     "SOURCE_NOT_FOUND_404": r"(?:\b404\b|not.found|directory.not.found|file.not.found|does.not.exist)",
     "AUTH_EXPIRED": r"(?:invalid.grant|token.expir|oauth|invalid.credentials)",
     "NETWORK_OR_TLS": r"(?:i/o timeout|connection.reset|tls|transport|connection.refused|network.is.unreachable)",
+    "UNSUPPORTED_CLI_FLAG": r"(?:unknown flag|unknown shorthand flag|flag provided but not defined|unknown command|unsupported flag|invalid argument)",
 }
 MAX_BYTES = 450 * 1024 * 1024
 
@@ -67,7 +68,7 @@ def main():
             remote_dir = a.remote_base.rstrip("/") + "/" + folder
             status = run_command(
                 ["rclone", "lsf", remote_dir, "--files-only", "--max-depth", "1",
-                 "--retries", "1", "--low-level-retries", "1"],
+                 ],
                 timeout_seconds=70,
             )
             download = {"transport": "SKIPPED", "error_flags": ["DIRECTORY_NOT_LISTED"]}
@@ -96,7 +97,7 @@ def main():
                 "derived_npz_sha256": content_sha256,
                 "authority": "HISTORICAL_DERIVATIVE_TRANSPORT_ONLY__NO_ORIGINAL_SOURCE_OR_TRAINING_ADMISSION",
             })
-            print(json.dumps({"probe": index, "listed": status["exit_code"] == 0,
+            print(json.dumps({"probe": index, "listed": status["exit_code"] == 0, "list_exit_code": status["exit_code"], "list_flags": status["error_flags"],
                               "copy": download["transport"], "flags": download["error_flags"],
                               "copied": copied, "copied_bytes": nbytes}, sort_keys=True))
     summary = {

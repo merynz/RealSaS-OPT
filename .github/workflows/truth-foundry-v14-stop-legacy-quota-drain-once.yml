@@ -1,0 +1,25 @@
+# One-shot safe stop for legacy V14 bulk downloader.
+# Triggered ONLY on creation/change of THIS file. No remote reads, no secrets,
+# no source requests, no research authority. Shares the original physical
+# workflow's concurrency group, so this small run cancels an older in-progress
+# physical run in the same group without relaunching its 726-source matrix.
+name: truth-foundry-v14-stop-legacy-quota-drain-once
+on:
+  push:
+    branches: [truth-foundry-v14-resumable-726-recovery-20261109]
+    paths:
+      - '.github/workflows/truth-foundry-v14-stop-legacy-quota-drain-once.yml'
+permissions:
+  contents: read
+concurrency:
+  group: truth-foundry-v14-726-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  stop-only-no-source-reads:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Confirm guard does not touch private Drive or start a corpus court
+        run: |
+          echo "ONE_SHOT_LEGACY_V14_QUOTA_GUARD"
+          echo "This job performs zero source downloads and mints zero training admissions."

@@ -1,6 +1,6 @@
 """Negative controls for legacy imported-variant evidence (no student leakage)."""
 import tempfile, pathlib, json, unittest, sys, csv
-sys.path.insert(0,str(pathlib.Path(__file__).parent))
+sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[2]/"tools/corpus/truth_foundry/evidence_v12"))
 from variant_court_v12 import parse_subject
 
 class VariantCourtTests(unittest.TestCase):

@@ -104,7 +104,7 @@ jobs:
           root="$RUNNER_TEMP/truth-foundry-v13"
           status=0
           rclone copy "$SOURCE_VARIANTS" "$root/variants" --files-from "$root/paths.txt" \
-            --no-traverse --transfers 10 --checkers 20 --retries 2 --low-level-retries 3 > "$root/private_download.log" 2>&1 || status=$?
+            --no-traverse --transfers 6 --checkers 12 --retries 2 --low-level-retries 3 > "$root/private_download.log" 2>&1 || status=$?
           count="$(find "$root/variants" -type f -name 'normalized.npz' | wc -l)"
           echo "Normalized derivative files retrieved: $count / 726; source downloader status: $status"
           test "$count" -ge 150 || { echo 'NORMALIZED_SOURCE_RETRIEVAL_FAILURE'; exit 1; }

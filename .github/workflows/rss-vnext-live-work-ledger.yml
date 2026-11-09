@@ -1,0 +1,61 @@
+name: rss-vnext-live-work-ledger
+
+on:
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - 'CURRENT_STATE.md'
+      - 'CURRENT_PLAN.md'
+      - 'README.md'
+      - 'SYSTEM_INDEX.md'
+      - 'canonical/RSS_VNEXT_*'
+      - 'docs/platform/RSS_VNEXT_AGENT_WORK_LEDGER.md'
+      - 'docs/research/RSS_VNEXT_*'
+      - 'tools/ledger/**'
+      - 'tests/models/test_rss_vnext_*'
+      - '.github/workflows/rss-vnext-live-work-ledger.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'canonical/RSS_VNEXT_*'
+      - 'docs/platform/RSS_VNEXT_AGENT_WORK_LEDGER.md'
+      - 'tools/ledger/**'
+      - 'tests/models/test_rss_vnext_*'
+      - '.github/workflows/rss-vnext-live-work-ledger.yml'
+  issues:
+    types: [opened, edited, closed, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  ledger-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate static architecture and dynamic ledger contract without pretending real science
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/ledger
+          python -m unittest discover -s tests/models -p 'test_rss_vnext_architecture_freeze_v1.py' -v
+          python -m unittest discover -s tests/models -p 'test_rss_vnext_live_work_ledger_v1.py' -v
+      - name: Read fresh live GitHub issue state and publish checkbox view
+        if: github.event_name == 'issues' || github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          python tools/ledger/rss_vnext_status.py --format md --output "$RUNNER_TEMP/RSS_VNEXT_LIVE_LEDGER.md"
+          cat "$RUNNER_TEMP/RSS_VNEXT_LIVE_LEDGER.md" >> "$GITHUB_STEP_SUMMARY"
+          python tools/ledger/rss_vnext_status.py --format json --output "$RUNNER_TEMP/RSS_VNEXT_LIVE_LEDGER.json"
+          python - "$RUNNER_TEMP/RSS_VNEXT_LIVE_LEDGER.json" <<'PY'
+          import json,sys
+          report=json.load(open(sys.argv[1]))
+          assert report['read_origin']=='LIVE_GITHUB_API'
+          assert report['total']==25
+          print('Live source/implementation checked issues:',report['checked_completed'],'of',report['total'])
+          print('Closed without completion evidence:',report['closed_unverified'])
+          PY

@@ -26,7 +26,7 @@ permissions:
 
 concurrency:
   group: corpus370-artist-blind-spine-source-v1-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   original-external-spine-source-research:

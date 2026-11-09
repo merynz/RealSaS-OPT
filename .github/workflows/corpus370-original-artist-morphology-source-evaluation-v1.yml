@@ -17,7 +17,7 @@ permissions:
 
 concurrency:
   group: corpus370-original-artist-morphology-v1-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   three-original-human-authored-source-types:

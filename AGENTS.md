@@ -1,3 +1,15 @@
+# RSS.vNext mandatory agent entry — frozen target + LIVE task ledger (2026-11-09)
+
+**READ THIS FIRST on every agent entry.** The accepted future model architecture is **RSS.vNext: one unified character model with IRIS, TESSA, AXIS, MIRA as four cooperating expert owners, one lossless-at-interface evidence-preserving `SharedCharacterCarrierIR.vNext`, and Compiler as sole qualification authority.** The frozen target is **NOT** the currently implemented/trained/unseen-qualified product.
+
+**Required order:** `CURRENT_STATE.md` → `canonical/RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_V1_20261109.json` → `docs/research/RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_20261109.md` → [MASTER live ledger issue #399](https://github.com/merynz/RealSaS-OPT/issues/399) → `docs/platform/RSS_VNEXT_AGENT_WORK_LEDGER.md` → fresh current GitHub/Platform status. `canonical/RSS_VNEXT_WORK_LEDGER_INDEX_V1.json` is a **static ID/dependency catalog**, not progress; run `python tools/ledger/rss_vnext_status.py` to show live checked tasks. Never mark a planned task done because a document/PR exists or synthetic CI passed.
+
+**Immutable ownership:** IRIS Geometry/Semantic/Graphics; TESSA animation-ready structural mesh, components, seams, attachment candidates; AXIS fully editable RigProgram and controls; MIRA SkinTokens/weights on the exact mesh; Compiler generic IK/FK, constraints, graphics/CAA and bounded repairs. One shared typed carrier preserves source/predicted/teacher identities, frames, surface correspondence, evidence masks, source authority and invalidation—not four independent reinterpretations.
+
+**Unfinished implementation:** [A01–A12](https://github.com/merynz/RealSaS-OPT/issues/399); **unfinished data truth/readiness:** [T01–T11](https://github.com/merynz/RealSaS-OPT/issues/399); **operational recovery:** O01/O02. Each item has its own GitHub issue, acceptance gate and completion evidence requirement. Issue closure requires real code/court SHA, independent source proof where applicable; scientific/product state remains Platform-owned. Read the latest status, never assume long-running Actions finished. Existing historical V2 implementation and older IRIS/TESSA V3.1/V3.2/V5 mechanical teacher are evidence/provenance, not the final RSS.vNext architecture. **Do not interfere with active Truth Foundry Actions or protected holdouts.**
+
+---
+
 # RealSaS-OPT Agent Entry Contract
 
 ## Single-view product objective — 2026-11-03

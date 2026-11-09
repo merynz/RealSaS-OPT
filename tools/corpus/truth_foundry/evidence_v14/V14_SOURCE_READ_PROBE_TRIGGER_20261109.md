@@ -7,3 +7,5 @@ Probe replay #2: startup dependency `numpy` for importing the existing sealed V1
 Probe replay #3: second run fetched the V11 SHA-locked inputs but single remote directory lsf failed before any NPZ download. Removed unnecessary retry flags from the lsf probe and added safe public error-class reporting; no bulk source rerun or extra source admission.
 
 Probe replay #4: one historical NPZ direct `rclone copyto` succeeded, so V14's failing bulk `--files-from` transfer is replaced by SHA-locked per-file `copyto`. This push runs only the small eight-file transport pilot with bounded concurrency, **not the eight-shard full corpus court**. Full run must require independent transport proof.
+
+Probe replay #5: eight-file pilot yielded 2/8 copied and 6 ambiguous AUTH-classified failures. Previous classification mistook quota-related HTTP403 for authorization. Updated error classes and reduced to serial one-worker/one-attempt direct-path probe. No full 726 rerun, no source/training admission.

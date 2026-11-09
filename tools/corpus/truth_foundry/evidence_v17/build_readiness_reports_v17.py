@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """Generate provider+facet coverage and protected 726-source transfer plan from V11/V17."""
-import csv,gzip,collections,json,hashlib,pathlib
-B=pathlib.Path('/mnt/data'); O=B/'realsas_truth_v17';I=B/'SOURCE_INVENTORY_DEEP_16397_V11.csv.gz'
+import argparse,csv,gzip,collections,json,hashlib,pathlib
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('--inventory',required=True,type=pathlib.Path)
+p.add_argument('--queue',required=True,type=pathlib.Path)
+p.add_argument('--physical-pilot',required=True,type=pathlib.Path)
+p.add_argument('--out',required=True,type=pathlib.Path)
+args=p.parse_args()
+O=args.out;O.mkdir(parents=True,exist_ok=True);I=args.inventory
 source={}
 with gzip.open(I,'rt',newline='') as f:
  for r in csv.DictReader(f):source[r['source_key']]=r
@@ -29,11 +35,11 @@ with (O/'FACET_COVERAGE_V17.csv').open('w',newline='') as f:
  for facet in facets:
   c=facet_stats[facet];unknown=c['UNKNOWN_UNREVIEWED'];known=16397-unknown
   w.writerow([facet,16397,unknown,known,round(known/16397*100,2),len(c),json.dumps(dict(c),sort_keys=True)])
-queue=list(csv.DictReader(open(B/'MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv')))
+with args.queue.open(newline='',encoding='utf-8') as qfile:
+ queue=list(csv.DictReader(qfile))
 assert len(queue)==1527
 eligible=[];holdouts=[];other=collections.Counter()
-physical=json.loads((B/'realsas_truth_v16/PHYSICAL_PILOT_SUMMARY_V16.json').read_text())
-with open(B/'realsas_truth_v16/PHYSICAL_DERIVATIVE_PILOT_V16.jsonl') as f:
+with args.physical_pilot.open(encoding='utf-8') as f:
  actual={r['source_key']:r for r in map(json.loads,f)}
 assert len(actual)==10
 for r in queue:

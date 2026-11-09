@@ -1,0 +1,78 @@
+name: truth-foundry-v9-canonical-source-replay
+
+on:
+  push:
+    branches: [truth-foundry-evidence-audit-v9-20261109]
+    paths:
+      - '.github/workflows/truth-foundry-v9-canonical-source-replay.yml'
+      - 'tools/corpus/truth_foundry/evidence_v9/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-v9-canonical-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  private-84-canonical-glb-byte-replay-NOT-original-source:
+    if: github.event_name == 'push' && github.repository == 'merynz/RealSaS-OPT' && github.ref == 'refs/heads/truth-foundry-evidence-audit-v9-20261109'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 85
+    env:
+      RCLONE_CONFIG: /tmp/realsas-v9-canonical-reader.conf
+      SOURCE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_uniml_rare_glb_v1/42525626086-1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v9_canonical_replay/${{ github.run_id }}-${{ github.run_attempt }}
+      MANIFEST_SHA256: 7ad4b8ad6943f7cee817a50868a64637f6ee059ac576218fbf172d99bf9e29dd
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SHA-bound canonical GLB reader
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64" || { echo 'Missing Drive read credential'; exit 1; }
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'Pillow>=10,<13'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Fetch 84 original stored canonical GLB bytes and pinned manifest
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/truth-foundry-v9-uniml"
+          mkdir -p "$root/glb" "$root/out"
+          rclone copyto "$SOURCE/UNIML3D_SOURCE_GLB_EVIDENCE_V1.csv" "$root/source_manifest.csv" --retries 3
+          test "$(sha256sum "$root/source_manifest.csv" | awk '{print $1}')" = "$MANIFEST_SHA256"
+          rclone copy "$SOURCE/canonical_glb_quarantine" "$root/glb" --retries 3 --transfers 6
+          test "$(find "$root/glb" -maxdepth 1 -type f -name '*.glb' | wc -l)" -eq 84
+      - name: Independently parse mesh/UV/skin/graphics physical evidence
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/truth-foundry-v9-uniml"
+          PYTHONPATH=. python tools/corpus/truth_foundry/uniml_glb_six_head_physical_inventory_v1.py \
+            --glb-dir "$root/glb" --manifest "$root/source_manifest.csv" --out "$root/out"
+          python - "$root/out/SUMMARY_V1.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          s=json.load(open(sys.argv[1]))
+          assert s['source_glbs_canonically_sha_verified']==84, s
+          assert s['per_head_targets_written']==84*22, s
+          assert s['original_source_rights_qualified']==0, s
+          assert s['graphics_stylized_art_approved']==0, s
+          assert all(v==0 for v in s['per_head_training_pass'].values()), s
+          print("## Genuine hosted 84-canonical-GLB source-byte replay")
+          print("Canonical GLBs re-downloaded and SHA verified: **84**")
+          print("Per-head candidate truth observations:",s["per_head_targets_written"])
+          print("Training/legal/semantic/2D art admissions: **ZERO**")
+          print("Original creator source-byte SHA was **not** re-hashed: these are canonical derivatives.")
+          PY
+      - name: Persist receipts to versioned private Drive path
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/truth-foundry-v9-uniml/out"
+          test -s "$root/SUMMARY_V1.json"
+          test -s "$root/UNIML3D_CANONICAL_PHYSICAL_84_ASSETS_V1.csv"
+          rclone copy "$root" "$DEST" --checksum --retries 3
+          echo 'Private receipts saved under audits/truth_foundry_v9_canonical_replay/${{ github.run_id }}-${{ github.run_attempt }}' >> "$GITHUB_STEP_SUMMARY"

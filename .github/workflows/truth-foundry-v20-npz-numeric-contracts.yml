@@ -1,0 +1,35 @@
+name: truth-foundry-v20-npz-numeric-contracts
+on:
+  push:
+    branches: [truth-foundry-v20-190-npz-numeric-court-20261110]
+    paths:
+      - '.github/workflows/truth-foundry-v20-npz-numeric-contracts.yml'
+      - 'tools/corpus/truth_foundry/evidence_v20/**'
+      - 'tests/corpus/test_npz_court_v20.py'
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-v20-npz-numeric-contracts.yml'
+      - 'tools/corpus/truth_foundry/evidence_v20/**'
+      - 'tests/corpus/test_npz_court_v20.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: truth-foundry-v20-numeric-contracts-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  fail-closed-numeric-source-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install numeric runtime
+        run: python -m pip install --disable-pip-version-check numpy==1.26.4
+      - name: Verify parser and geometry-skin negative tests (synthetic only)
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v20 tests/corpus/test_npz_court_v20.py
+          python -m unittest discover -s tests/corpus -p 'test_npz_court_v20.py' -v
+      - name: Never fetch private user source files in public CI
+        run: |
+          echo "PRIVATE_ORIGINAL_BYTES=0 TRAINING_ADMISSIONS=0 NUMERIC_COURT_REAL_SOURCE_INPUTS=not_requested"

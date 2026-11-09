@@ -1,0 +1,3 @@
+# Truth Foundry V14 — bounded 726 normalized derivative replay
+
+Authorized scope: 726 previously SHA-recovered historical metadata candidates, 8 disjoint deterministic source-key shards; 135 protected holdouts excluded. Reuse V11 source SHA-locked inputs and existing V13 numeric court unchanged. Persist **small independent per-shard receipts only** to private Drive; reconcile only if every shard passes its independent readback. This is NOT creator-original-byte verification, rights clearance, global signed SDF, animation-ready TESSA teacher, Semantic/Graphics source truth or training admission. Stop on material drift or zero derivative files. This push intentionally triggers the physical source court on this review branch.

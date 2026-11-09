@@ -92,25 +92,22 @@ jobs:
             --queue "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" \
             --baseline-inventory "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" \
             --out "$root/plan" --shard-index "${{ matrix.shard }}" --shard-count 8
-      - name: Bounded private download, visible per-shard count
+      - name: Bounded direct-file copyto by SHA-locked shard plan (no bulk recursive scan)
         run: |
           set -euo pipefail
           root="$RUNNER_TEMP/v14"
-          status=0
-          timeout --signal=TERM --kill-after=15s 55m rclone copy "$SOURCE_VARIANTS" "$root/variants" \
-            --files-from "$root/plan/paths.txt" --no-traverse \
-            --transfers 4 --checkers 8 --retries 2 --low-level-retries 3 \
-            > "$root/private_download.log" 2>&1 &
-          pid=$!
-          while kill -0 "$pid" 2>/dev/null; do
-            sleep 75
-            got="$(find "$root/variants" -type f -name 'normalized.npz' | wc -l)"
-            echo "Historical normalized NPZ fetched: $got (shard ${{ matrix.shard }})"
-          done
-          wait "$pid" || status=$?
-          got="$(find "$root/variants" -type f -name 'normalized.npz' | wc -l)"
-          echo "Bounded retrieval complete: got=$got; downloader status=$status"
-          test "$got" -ge 1 || { echo 'NO_HISTORICAL_NPZ__FAIL_CLOSED'; exit 1; }
+          python tools/corpus/truth_foundry/evidence_v14/bounded_direct_copy_v14.py \
+            --plan "$root/plan" --remote-base "$SOURCE_VARIANTS" \
+            --variant-dir "$root/variants" --out "$root/out" \
+            --workers 3 --timeout-seconds 90 --attempts 2
+          python - "$root/out/DIRECT_COPY_TRANSPORT_V14.json" <<'PY'
+          import json,sys
+          report=json.load(open(sys.argv[1]))
+          assert report["mode"]=="FULL_SHARD_TRANSFER"
+          assert report["actual_npz_copied"]>0, "NO_REAL_DERIVATIVE_DOWNLOADED"
+          print("Direct per-file transport observed",report["actual_npz_copied"],
+                "actual normalized NPZs, independently qualified downstream only")
+          PY
       - name: Compute V13 physical numeric court on exact shard
         run: |
           set -euo pipefail

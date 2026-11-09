@@ -1,3 +1,5 @@
+> **RSS.vNext future architecture target (frozen design, 2026-11-09):** Read [freeze](docs/research/RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_20261109.md), [machine contract](canonical/RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_V1_20261109.json) and the [live agent ledger #399](https://github.com/merynz/RealSaS-OPT/issues/399) before implementing new architecture. Owners: IRIS Geometry/Semantic/Graphics → TESSA animation-ready structural mesh → AXIS typed controls/RigProgram ↔ MIRA SkinTokens on exact shared mesh → Compiler qualified mechanics/2D Graphics. The common `SharedCharacterCarrierIR.vNext` preserves all source, frame, region, topology, geometry, graphics, control/skin and lineage evidence without interface-level silent loss. **This target does not replace today's V2 runtime/courts until implementation and qualification**, and does not alter existing product authority. Code gaps A01–A12, truth gaps T01–T11, recovery O01/O02 are individually tracked in issue #399.
+
 # RealSaS Structural System Index
 
 ## 2026-10-11 canonical main

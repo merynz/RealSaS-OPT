@@ -1,0 +1,93 @@
+name: truth-foundry-v14-private-single-source-diagnostic
+
+on:
+  push:
+    branches: [truth-foundry-v14-resumable-726-recovery-20261109]
+    paths:
+      - '.github/workflows/truth-foundry-v14-private-single-source-diagnostic.yml'
+      - 'tools/corpus/truth_foundry/evidence_v14/diagnose_single_source_v14.py'
+      - 'tools/corpus/truth_foundry/evidence_v14/V14_SOURCE_READ_PROBE_TRIGGER_20261109.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-v14-one-source-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  private-single-source-probe:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' &&
+       github.repository == 'merynz/RealSaS-OPT' &&
+       github.ref == 'refs/heads/truth-foundry-v14-resumable-726-recovery-20261109' &&
+       startsWith(github.event.head_commit.message, 'run-v14-probe:'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    env:
+      RCLONE_CONFIG: /tmp/realsas-v14-probe.conf
+      SOURCE_QUEUE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v12_variant_input_20261109
+      SOURCE_V11: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v11_master_recovery_court/42625892351-1
+      SOURCE_VARIANTS: gdrive:RealSaS_MASTER_CORPUS_1024_V3/master/variants
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install private read-only Drive and independent SHA tools
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Fetch pinned V11 queue/inventory and enforce source SHA locks
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/v14-probe"
+          mkdir -p "$root/in" "$root/out"
+          rclone copyto "$SOURCE_QUEUE/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" --retries 2
+          rclone copyto "$SOURCE_V11/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" --retries 2
+          python - "$root/in" <<'PY'
+          import hashlib,json,sys
+          from pathlib import Path
+          root=Path(sys.argv[1])
+          locks=json.loads(Path("tools/corpus/truth_foundry/evidence_v13/SOURCE_INPUT_SHA256_LOCK_V13.json").read_text())
+          for kind,item in locks.items():
+              raw=(root/item["basename"]).read_bytes()
+              assert len(raw)==item["bytes"] and hashlib.sha256(raw).hexdigest()==item["sha256"], "V14_PROBE_SOURCE_LOCK_DRIFT:"+kind
+          print("Source queue and inventory SHA locks: PASS")
+          PY
+      - name: Bounded direct remote directory and NPZ path probe
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/v14-probe"
+          python tools/corpus/truth_foundry/evidence_v14/diagnose_single_source_v14.py \
+            --queue "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" \
+            --baseline-inventory "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" \
+            --remote-base "$SOURCE_VARIANTS" \
+            --out "$root/out"
+      - name: Publish redacted transport classification only
+        if: always()
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/v14-probe/out/TRANSPORT_DIAGNOSTICS_V14.json"
+          if [ -s "$root" ]; then
+            python - "$root" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          r=json.load(open(sys.argv[1]))
+          print("### V14 historical derivative: three bounded direct-path probes")
+          print("V11 hashes:",r["queue_sha256"][:12],r["inventory_sha256"][:12])
+          for p in r["probes"]:
+              print("- Probe",p["probe_index"],"directory:",p["folder_list"]["transport"],
+                    p["folder_list"]["exit_code"],p["folder_list"]["error_flags"],
+                    "copy:",p["file_copy"]["transport"],p["file_copy"].get("exit_code"),
+                    p["file_copy"]["error_flags"],"actual derived NPZ bytes:",p["copied_bytes"])
+          print("No creator-native original source, rights, semantic/geometry teacher or head admission was minted")
+          PY
+          else
+            echo "V14_PROBE_REPORT_MISSING" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi

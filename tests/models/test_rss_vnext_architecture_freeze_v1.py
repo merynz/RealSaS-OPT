@@ -52,6 +52,17 @@ class RSSvNextArchitectureFreezeV1Tests(unittest.TestCase):
         self.assertFalse(status["product_deploy_authorized"])
         self.assertFalse(status["truth_foundry_mutated"])
 
+    def test_agent_entry_and_live_ledger_are_bound_to_freeze(self):
+        ledger = self.freeze["work_ledger"]
+        self.assertEqual(ledger["hub_issue"], 399)
+        self.assertEqual(ledger["catalog"], "canonical/RSS_VNEXT_WORK_LEDGER_INDEX_V1.json")
+        self.assertTrue(ledger["task_completion_must_not_imply_model_training_or_product_admission"])
+        self.assertTrue((ROOT / ledger["catalog"]).is_file())
+        self.assertTrue((ROOT / ledger["agent_protocol"]).is_file())
+        agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("RSS.vNext mandatory agent entry", agents)
+        self.assertIn("rss_vnext_status.py", agents)
+
     def test_document_exists_and_matches_design(self):
         self.assertEqual(
             self.freeze["normative_document"], str(DOCUMENT.relative_to(ROOT)))

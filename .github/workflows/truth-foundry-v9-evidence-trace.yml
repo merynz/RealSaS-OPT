@@ -1,0 +1,43 @@
+name: truth-foundry-v9-evidence-trace
+
+on:
+  push:
+    branches: [truth-foundry-evidence-audit-v9-20261109]
+    paths:
+      - 'tools/corpus/truth_foundry/evidence_v9/**'
+      - '.github/workflows/truth-foundry-v9-evidence-trace.yml'
+  pull_request:
+    paths:
+      - 'tools/corpus/truth_foundry/evidence_v9/**'
+      - '.github/workflows/truth-foundry-v9-evidence-trace.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archived-witness-contract-NOT-raw-source-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check archived V9 counts, hashes and no-promotion invariants
+        run: |
+          set -euo pipefail
+          python tools/corpus/truth_foundry/evidence_v9/check_readback_receipt_v9.py
+      - name: Compile raw V9 builder/verifier snapshots
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v9
+      - name: Publish accurate scope of verification
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## Truth Foundry V9 — archived evidence witness
+          - **16,397** source candidate records × **264** facet columns.
+          - **7,398** new importer-derived structural observations, **4,321,410** unchanged cells.
+          - **370** historical Core family records linked, **2,466** Master derivative receipts recounted.
+          - **0 new training admissions, original-source SHA rehash PASS, global SDF PASS or 2D art PASS.**
+          - **This Action checks only the GitHub-archived witness structure and Python syntax.**
+          - Original V9 work was executed in a separate ChatGPT local container, *not* this GitHub runner.
+          - Actual private raw-source/receipt replay must be implemented and executed separately.
+          EOF

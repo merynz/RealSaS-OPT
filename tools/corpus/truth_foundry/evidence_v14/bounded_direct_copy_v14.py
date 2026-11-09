@@ -28,6 +28,30 @@ ERRORS = {
     "CLI": r"unknown flag|unknown command|invalid argument|flag provided but not defined",
 }
 MAX_NPZ_BYTES = 400 * 1024 * 1024
+# Safe machine-readable reason labels; never record raw Drive error text,
+# private paths, tokens or account identifiers in Actions artifacts.
+DRIVE_REASON_PATTERNS = (
+    ("DOWNLOAD_QUOTA_EXCEEDED", r"downloadQuotaExceeded|download.quota.exceeded"),
+    ("USER_RATE_LIMIT_EXCEEDED", r"userRateLimitExceeded"),
+    ("PROJECT_RATE_LIMIT_EXCEEDED", r"(?<!user)rateLimitExceeded"),
+    ("DAILY_LIMIT_EXCEEDED", r"dailyLimitExceeded"),
+    ("STORAGE_QUOTA_EXCEEDED", r"storageQuotaExceeded"),
+    ("QUOTA_EXCEEDED_UNSPECIFIED", r"quotaExceeded|quota.exceeded"),
+    ("HTTP_429", r"\\b429\\b|too.many.requests"),
+)
+
+
+def safe_drive_reason(stderr: bytes) -> str:
+    excerpt = stderr.decode("utf-8", "replace")[-20000:]
+    for label, pattern in DRIVE_REASON_PATTERNS:
+        if re.search(pattern, excerpt, flags=re.I):
+            return label
+    if re.search(r"\\b403\\b|forbidden", excerpt, flags=re.I):
+        return "HTTP_403_UNSPECIFIED"
+    if re.search(r"\\b401\\b|unauthoriz", excerpt, flags=re.I):
+        return "HTTP_401"
+    return "NO_DRIVE_REASON_IDENTIFIED"
+
 
 
 def classify(stderr: bytes) -> str:
@@ -47,7 +71,8 @@ def fetch(item: str, remote: str, root: pathlib.Path, seconds: int, attempts: in
     dst.parent.mkdir(parents=True, exist_ok=True)
     kind = "NPZ" if item.endswith("/normalized.npz") else "STRUCTURE"
     result = {"kind": kind, "status": "UNKNOWN", "bytes": 0,
-              "sha256": None, "path_id_sha256": hashlib.sha256(item.encode()).hexdigest()}
+              "sha256": None, "path_id_sha256": hashlib.sha256(item.encode()).hexdigest(),
+              "drive_error_reason": "NO_DRIVE_REASON_IDENTIFIED"}
     if dst.exists() and dst.is_file() and dst.stat().st_size:
         result.update(status="CACHED_REHASHED", bytes=dst.stat().st_size, sha256=sha(dst))
         return result
@@ -72,6 +97,7 @@ def fetch(item: str, remote: str, root: pathlib.Path, seconds: int, attempts: in
                 result.update(status="COPIED", bytes=size, sha256=sha(dst))
                 break
             result["status"] = classify(p.stderr)
+            result["drive_error_reason"] = safe_drive_reason(p.stderr)
         if dst.is_file():
             dst.unlink()
         if result["status"] in ("NOT_FOUND", "RATE_OR_QUOTA", "HTTP_403_UNSPECIFIED", "EXPLICIT_ACCESS_DENIED", "HTTP_401", "CLI", "NPZ_RESOURCE_LIMIT"):
@@ -136,13 +162,16 @@ def main():
         "rate_or_quota_circuit_open": circuit_broken,
         "actual_npz_copied": sum(x["kind"] == "NPZ" and x["status"] in ("COPIED", "CACHED_REHASHED") for x in results),
         "states": dict(collections.Counter(x["status"] for x in results)),
+        "drive_error_reasons": dict(collections.Counter(x["drive_error_reason"] for x in results
+            if x["status"] not in ("COPIED", "CACHED_REHASHED"))),
         "records": sorted(results, key=lambda x:x["path_id_sha256"]),
         "original_creator_source_rehash": 0,
         "training_admissions": 0,
     }
     (dest / "DIRECT_COPY_TRANSPORT_V14.json").write_text(json.dumps(summary,sort_keys=True,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({"shard":summary["shard"],"mode":summary["mode"],
-                      "npz":summary["actual_npz_copied"],"states":summary["states"]},sort_keys=True))
+                      "npz":summary["actual_npz_copied"],"states":summary["states"],
+                      "drive_error_reasons":summary["drive_error_reasons"]},sort_keys=True))
     return 5 if circuit_broken else (0 if summary["actual_npz_copied"] > 0 else 4)
 
 

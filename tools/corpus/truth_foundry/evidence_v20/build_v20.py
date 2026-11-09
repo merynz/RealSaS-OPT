@@ -12,7 +12,7 @@ import collections, csv, gzip, hashlib, io, json, os, pathlib, re, zipfile
 import numpy as np
 
 ROOT=pathlib.Path(os.environ.get('REALSAS_TRUTH_ROOT','/mnt/data')).resolve()
-OUT=ROOT/'realsas_truth_v20';OUT.mkdir(exist_ok=True)
+OUT=ROOT/'realsas_truth_v20'
 SRC=OUT/'sources'
 DOC=ROOT/'RealSaS Truth Foundry | V19 726-source structure and NPZ inventory courts.txt'
 PLAN=ROOT/'realsas_truth_v17'/'MASTER726_SAFE_RECOVERY_PLAN_V17.csv.gz'
@@ -133,6 +133,7 @@ def numeric_court(path,structure):
   }
 
 def main():
+ OUT.mkdir(parents=True,exist_ok=True)
  for p,k in [(INPUT_S,'states'),(INPUT_V,'values'),(PLAN,'plan')]:
   if sha_file(p)!=EXPECTED_PRE[k]:raise RuntimeError('BASELINE_SHA_DRIFT:'+k)
  plan=strict_plan();meta,structure,attempts=parse_doc(DOC)

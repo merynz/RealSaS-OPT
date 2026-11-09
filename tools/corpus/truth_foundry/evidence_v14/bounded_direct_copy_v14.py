@@ -19,9 +19,12 @@ from sharded_normalized_recovery_v14 import read_json, sha
 
 ALLOWED = re.compile(r"[a-z0-9_]+_[0-9a-f]{24,64}/(?:normalized\.npz|source_structure\.json)\Z")
 ERRORS = {
+    # Google Drive rate-limit errors often use HTTP 403, not 429.
+    "RATE_OR_QUOTA": r"\b429\b|userRateLimitExceeded|rateLimitExceeded|dailyLimitExceeded|downloadQuotaExceeded|storageQuotaExceeded|quota|rate.limit|too.many.requests",
     "NOT_FOUND": r"\b404\b|not found|directory not found|does not exist",
-    "AUTH": r"\b401\b|\b403\b|access.denied|forbidden|permission|invalid.grant|unauthoriz",
-    "QUOTA": r"\b429\b|quota|rate.limit|too.many.requests|userratelimitexceeded",
+    "EXPLICIT_ACCESS_DENIED": r"insufficientFilePermissions|access.denied|permission.denied|not.authorized|invalid.grant|unauthoriz",
+    "HTTP_401": r"\b401\b",
+    "HTTP_403_UNSPECIFIED": r"\b403\b|forbidden",
     "NETWORK": r"connection.reset|i/o timeout|tls|network|connection refused",
     "CLI": r"unknown flag|unknown command|invalid argument|flag provided but not defined",
 }
@@ -72,7 +75,7 @@ def fetch(item: str, remote: str, root: pathlib.Path, seconds: int, attempts: in
             result["status"] = classify(p.stderr)
         if dst.is_file():
             dst.unlink()
-        if result["status"] in ("NOT_FOUND", "CLI", "NPZ_RESOURCE_LIMIT"):
+        if result["status"] in ("NOT_FOUND", "EXPLICIT_ACCESS_DENIED", "HTTP_401", "CLI", "NPZ_RESOURCE_LIMIT"):
             break
     return result
 

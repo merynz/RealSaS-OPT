@@ -1,0 +1,189 @@
+name: truth-foundry-v14-resumable-726-recovery
+
+on:
+  push:
+    branches: [truth-foundry-v14-resumable-726-recovery-20261109]
+    paths:
+      - '.github/workflows/truth-foundry-v14-resumable-726-recovery.yml'
+      - 'tools/corpus/truth_foundry/evidence_v14/**'
+      - 'tests/corpus/test_sharded_normalized_recovery_v14.py'
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-v14-resumable-726-recovery.yml'
+      - 'tools/corpus/truth_foundry/evidence_v14/**'
+      - 'tests/corpus/test_sharded_normalized_recovery_v14.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-v14-726-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  v14-shard-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Synthetic source-identity, no-holdout and sharding negatives
+        run: |
+          set -euo pipefail
+          python -m pip install --no-cache-dir 'numpy>=1.26,<3'
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v14
+          python -m unittest discover -s tests/corpus -p 'test_sharded_normalized_recovery_v14.py' -v
+
+  independent-shard-court:
+    if: >-
+      github.event_name == 'push' &&
+      github.repository == 'merynz/RealSaS-OPT' &&
+      github.ref == 'refs/heads/truth-foundry-v14-resumable-726-recovery-20261109' &&
+      startsWith(github.event.head_commit.message, 'run-v14:')
+    needs: [v14-shard-regressions]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    env:
+      RCLONE_CONFIG: /tmp/realsas-v14-private.conf
+      SOURCE_V11: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v11_master_recovery_court/42625892351-1
+      SOURCE_QUEUE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v12_variant_input_20261109
+      SOURCE_VARIANTS: gdrive:RealSaS_MASTER_CORPUS_1024_V3/master/variants
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v14_sharded_normalized/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SHA-locked private numeric court environment
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'numpy>=1.26,<3' 'scipy>=1.11,<2'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Fetch V11 canonical metadata inputs and enforce exact SHA
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/v14"
+          mkdir -p "$root/in" "$root/plan" "$root/variants" "$root/out"
+          rclone copyto "$SOURCE_QUEUE/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" --retries 3
+          rclone copyto "$SOURCE_V11/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" --retries 3
+          python - "$root/in" <<'PY'
+          import hashlib,json,sys
+          from pathlib import Path
+          root=Path(sys.argv[1])
+          locks=json.loads(Path('tools/corpus/truth_foundry/evidence_v13/SOURCE_INPUT_SHA256_LOCK_V13.json').read_text())
+          for name,item in locks.items():
+              b=(root/item['basename']).read_bytes()
+              assert len(b)==item['bytes'] and hashlib.sha256(b).hexdigest()==item['sha256'], 'SOURCE_SHA_DRIFT:'+name
+          print('V11 inputs SHA-locked; no original source authority minted')
+          PY
+      - name: Plan one shard with protected holdouts excluded
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/v14"
+          python tools/corpus/truth_foundry/evidence_v14/sharded_normalized_recovery_v14.py plan \
+            --queue "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" \
+            --baseline-inventory "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" \
+            --out "$root/plan" --shard-index "${{ matrix.shard }}" --shard-count 8
+      - name: Bounded direct-file copyto by SHA-locked shard plan (no bulk recursive scan)
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/v14"
+          python tools/corpus/truth_foundry/evidence_v14/bounded_direct_copy_v14.py \
+            --plan "$root/plan" --remote-base "$SOURCE_VARIANTS" \
+            --variant-dir "$root/variants" --out "$root/out" \
+            --workers 1 --timeout-seconds 90 --attempts 1
+          python - "$root/out/DIRECT_COPY_TRANSPORT_V14.json" <<'PY'
+          import json,sys
+          report=json.load(open(sys.argv[1]))
+          assert report["mode"]=="FULL_SHARD_TRANSFER"
+          assert report["actual_npz_copied"]>0, "NO_REAL_DERIVATIVE_DOWNLOADED"
+          print("Direct per-file transport observed",report["actual_npz_copied"],
+                "actual normalized NPZs, independently qualified downstream only")
+          PY
+      - name: Compute V13 physical numeric court on exact shard
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/v14"
+          python tools/corpus/truth_foundry/evidence_v13/normalized_array_court_v13.py \
+            --queue "$root/plan/queue_shard.csv" \
+            --baseline-inventory "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" \
+            --variant-dir "$root/variants" --out "$root/out"
+      - name: Independently rehash and verify exact numeric/skin/source identity
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/v14"
+          python tools/corpus/truth_foundry/evidence_v14/sharded_normalized_recovery_v14.py verify \
+            --plan "$root/plan" \
+            --queue "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" \
+            --baseline-inventory "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" \
+            --variant-dir "$root/variants" --out "$root/out"
+      - name: Upload only compact SHA-locked shard evidence, not raw NPZ
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/v14/out"
+          test -s "$root/INDEPENDENT_SHARD_V14.json"
+          shard="$(printf '%02d' '${{ matrix.shard }}')"
+          rclone copy "$root" "$DEST/shard-$shard" --checksum --retries 3
+          echo "V14 shard-$shard source-derivative court stored privately; no original/training PASS" >> "$GITHUB_STEP_SUMMARY"
+
+  reconcile-shards:
+    if: >-
+      github.event_name == 'push' &&
+      github.repository == 'merynz/RealSaS-OPT' &&
+      github.ref == 'refs/heads/truth-foundry-v14-resumable-726-recovery-20261109' &&
+      startsWith(github.event.head_commit.message, 'run-v14:')
+    needs: [independent-shard-court]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      RCLONE_CONFIG: /tmp/realsas-v14-merge-private.conf
+      SOURCE_V11: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v11_master_recovery_court/42625892351-1
+      SOURCE_QUEUE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v12_variant_input_20261109
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v14_sharded_normalized/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare private readback
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'numpy>=1.26,<3'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Reconcile eight independently court-verified numeric shards
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/v14-merge"
+          mkdir -p "$root/in" "$root/shards" "$root/out"
+          rclone copyto "$SOURCE_QUEUE/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv"
+          rclone copyto "$SOURCE_V11/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz"
+          rclone copy "$DEST" "$root/shards" --max-depth 3 --retries 3
+          python tools/corpus/truth_foundry/evidence_v14/sharded_normalized_recovery_v14.py merge \
+            --queue "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" \
+            --baseline-inventory "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" \
+            --shards "$root/shards" --out "$root/out" --shard-count 8
+      - name: Publish exact reconciled historic derivative evidence
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/v14-merge/out"
+          test -s "$root/SUMMARY_RECONCILED_V14.json"
+          rclone copy "$root" "$DEST/reconciled" --checksum --retries 3
+          python - "$root/SUMMARY_RECONCILED_V14.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          report=json.load(open(sys.argv[1]))
+          assert report['cohort_source_attempts']==726
+          print('Reconciled original-source-unqualified derivatives:',
+                report['observed_normalized_npz'],'/726',report['results'])
+          print('Never original byte parity, training admission, sign authority or animation-ready TESSA proof')
+          PY

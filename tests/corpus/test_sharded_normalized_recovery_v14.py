@@ -69,7 +69,8 @@ class V14RecoveryContracts(unittest.TestCase):
                 baseline_inventory=str(self.inventory), shard_count=8))
 
     def test_invalid_identity_rejected_before_download(self):
-        rows=list(csv.DictReader(self.queue.open()))
+        with self.queue.open() as f:
+            rows=list(csv.DictReader(f))
         rows[0]["candidate_id"]="../escape"
         with self.queue.open("w",newline="") as f:
             w=csv.DictWriter(f,fieldnames=["source_key","candidate_id"])
@@ -87,7 +88,7 @@ class V14DriveQuotaSafety(unittest.TestCase):
             (b'Error 403: rateLimitExceeded /secret/location', "PROJECT_RATE_LIMIT_EXCEEDED", "RATE_OR_QUOTA"),
             (b'Error 403: downloadQuotaExceeded /secret/location', "DOWNLOAD_QUOTA_EXCEEDED", "RATE_OR_QUOTA"),
             (b'Error 403: storageQuotaExceeded /secret/location', "STORAGE_QUOTA_EXCEEDED", "RATE_OR_QUOTA"),
-            (b'Error 403: insufficientFilePermissions /secret/location', "HTTP_403_UNSPECIFIED", "EXPLICIT_ACCESS_DENIED"),
+            (b'Error 403: insufficientFilePermissions /secret/location', "EXPLICIT_ACCESS_DENIED", "EXPLICIT_ACCESS_DENIED"),
             (b'Error 403: forbidden /secret/location', "HTTP_403_UNSPECIFIED", "HTTP_403_UNSPECIFIED"),
         )
         for raw, reason, category in cases:

@@ -1,0 +1,33 @@
+name: truth-foundry-v18-authority-contracts
+on:
+  push:
+    branches: [truth-foundry-v18-authority-audit-20261110]
+    paths:
+      - '.github/workflows/truth-foundry-v18-authority-contracts.yml'
+      - 'tools/corpus/truth_foundry/evidence_v18/**'
+      - 'tests/corpus/test_truth_authority_v18.py'
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-v18-authority-contracts.yml'
+      - 'tools/corpus/truth_foundry/evidence_v18/**'
+      - 'tests/corpus/test_truth_authority_v18.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: truth-foundry-v18-contracts-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  fail-closed-evidence-authority-taxonomy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and bounded negative authority tests (no private Drive)
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v18 tests/corpus/test_truth_authority_v18.py
+          python -m unittest discover -s tests/corpus -p 'test_truth_authority_v18.py' -v
+      - name: Explicit authority labels
+        run: |
+          echo "NO_NEW_SOURCE_COURT=1 TRAINING_ADMISSIONS=0 ORIGINAL_SOURCE_REHASH=0"

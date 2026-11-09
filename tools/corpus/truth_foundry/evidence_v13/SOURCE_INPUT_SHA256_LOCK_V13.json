@@ -1,0 +1,12 @@
+{
+  "baseline_inventory": {
+    "basename": "SOURCE_INVENTORY_DEEP_16397_V11.csv.gz",
+    "bytes": 2407281,
+    "sha256": "6436a6696a55c7643818914b6ebab5a5728d4eae23409d67e6e6d210c2b17ae4"
+  },
+  "queue": {
+    "basename": "MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv",
+    "bytes": 770406,
+    "sha256": "18234396bf86fa0e9c156c6e3eddb73aa3963870459491a479ffb56974349ab7"
+  }
+}

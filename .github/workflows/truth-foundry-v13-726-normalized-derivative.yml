@@ -1,0 +1,145 @@
+name: truth-foundry-v13-726-normalized-derivative
+
+on:
+  push:
+    branches: [truth-foundry-evidence-audit-v9-20261109]
+    paths:
+      - '.github/workflows/truth-foundry-v13-726-normalized-derivative.yml'
+      - 'tools/corpus/truth_foundry/evidence_v13/**'
+      - 'tests/corpus/test_normalized_array_court_v13.py'
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-v13-726-normalized-derivative.yml'
+      - 'tools/corpus/truth_foundry/evidence_v13/**'
+      - 'tests/corpus/test_normalized_array_court_v13.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-v13-726-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  geometry-skin-normalized-negative-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deterministic numeric backend
+        run: python -m pip install --no-cache-dir 'numpy>=1.26,<3' 'scipy>=1.11,<2'
+      - name: Run normals/edge/skin synthetic negatives
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v13
+          python -m unittest discover -s tests/corpus -p 'test_normalized_array_court_v13.py' -v
+
+  private-726-skin-geometry-derivative-court:
+    if: github.event_name == 'push' && github.repository == 'merynz/RealSaS-OPT' && github.ref == 'refs/heads/truth-foundry-evidence-audit-v9-20261109' && startsWith(github.event.head_commit.message, 'run-v13:')
+    needs: [geometry-skin-normalized-negative-tests]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 160
+    env:
+      RCLONE_CONFIG: /tmp/realsas-v13-normalized-private.conf
+      SOURCE_V11: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v11_master_recovery_court/42625892351-1
+      SOURCE_QUEUE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v12_variant_input_20261109
+      SOURCE_VARIANTS: gdrive:RealSaS_MASTER_CORPUS_1024_V3/master/variants
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_v13_normalized_geometry_skin/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install independent NumPy and private Drive tools
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'numpy>=1.26,<3' 'scipy>=1.11,<2'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Download private canonical baseline and queue; enforce SHA locks
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/truth-foundry-v13"
+          mkdir -p "$root/in" "$root/variants" "$root/out"
+          rclone copyto "$SOURCE_QUEUE/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" --retries 3
+          rclone copyto "$SOURCE_V11/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" --retries 3
+          python - "$root/in" <<'PY'
+          import json,hashlib,sys
+          from pathlib import Path
+          root=Path(sys.argv[1]);lock=json.loads(Path('tools/corpus/truth_foundry/evidence_v13/SOURCE_INPUT_SHA256_LOCK_V13.json').read_text())
+          for k,item in lock.items():
+              b=(root/item['basename']).read_bytes()
+              assert len(b)==item['bytes'] and hashlib.sha256(b).hexdigest()==item['sha256'],f'SOURCE_DRIFT:{k}'
+          print('Original historical metadata inputs pinned byte-for-byte')
+          PY
+      - name: Select 726 historic SHA-recovered records; never touch 135 holdouts or unverified paths
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/truth-foundry-v13"
+          python - "$root/in" "$root/paths.txt" <<'PY'
+          from pathlib import Path
+          import csv,gzip,re,sys
+          root=Path(sys.argv[1]);dest=Path(sys.argv[2])
+          with gzip.open(root/'SOURCE_INVENTORY_DEEP_16397_V11.csv.gz','rt',newline='') as f:
+              state={r['source_key']:r['master_v11_source_recovery_status'] for r in csv.DictReader(f) if r['pool']=='MASTER3993'}
+          with open(root/'MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv',newline='') as f:queue=list(csv.DictReader(f))
+          selected=[];count=0;holdout=0
+          for r in queue:
+              if state[r['source_key']]=='PROTECTED_HOLDOUT_ORIGINAL_NOT_TOUCHED':holdout+=1;continue
+              if state[r['source_key']]!='SHA_VERIFIED_RECOVERY_RECEIPT':continue
+              cid=r['candidate_id']
+              assert re.fullmatch(r'[a-z0-9_]+:[a-f0-9]{24,64}',cid),'INVALID_CANDIDATE_ID'
+              folder=cid.replace(':','_',1);selected+=[folder+'/normalized.npz',folder+'/source_structure.json'];count+=1
+          assert len(queue)==1527 and holdout==135 and count==726
+          dest.write_text('\n'.join(selected)+'\n')
+          print('Target historical source-normalized NPZ assets:',count,'historical metadata files:',len(selected),'protected holdouts skipped:',holdout)
+          PY
+      - name: Read numeric source derivatives without rehydrating creator originals
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/truth-foundry-v13"
+          status=0
+          rclone copy "$SOURCE_VARIANTS" "$root/variants" --files-from "$root/paths.txt" \
+            --no-traverse --transfers 10 --checkers 20 --retries 2 --low-level-retries 3 > "$root/private_download.log" 2>&1 || status=$?
+          count="$(find "$root/variants" -type f -name 'normalized.npz' | wc -l)"
+          echo "Normalized derivative files retrieved: $count / 726; source downloader status: $status"
+          test "$count" -ge 150 || { echo 'NORMALIZED_SOURCE_RETRIEVAL_FAILURE'; exit 1; }
+      - name: Measure exact normalized triangles, normals, topological boundaries, hierarchy and dense skin
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/truth-foundry-v13"
+          python tools/corpus/truth_foundry/evidence_v13/normalized_array_court_v13.py \
+            --queue "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" \
+            --baseline-inventory "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" \
+            --variant-dir "$root/variants" --out "$root/out"
+      - name: Independent NPZ rehash/skin-array readback; reject any teacher/rights promotion
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/truth-foundry-v13"
+          python tools/corpus/truth_foundry/evidence_v13/verify_normalized_array_court_v13.py \
+            --queue "$root/in/MASTER1527_MISSING_FULL_IMPORT_RECEIPT_QUEUE.csv" \
+            --baseline-inventory "$root/in/SOURCE_INVENTORY_DEEP_16397_V11.csv.gz" \
+            --variant-dir "$root/variants" --out "$root/out"
+          python - "$root/out" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          from pathlib import Path
+          import json,sys
+          root=Path(sys.argv[1]);s=json.loads((root/'SUMMARY_NORMALIZED_V13.json').read_text());v=json.loads((root/'INDEPENDENT_READBACK_NORMALIZED_V13.json').read_text())
+          assert v['status']=='PASS_DERIVATIVE_ONLY'
+          print('## V13 genuine dense normalized geometry/skin readback')
+          print('Historical SHA-recovered candidates considered:',s['candidate_attempts'])
+          print('Full numeric derivative observations:',v['reverified_npz_bytes'])
+          print('Joint-level exact skin evidence rows:',v['per_joint_rows'])
+          print('Court result buckets:',s['results'])
+          print('**No global SDF sign, source-native texture/UV, mechanical TESSA teacher, rights, or training admission.**')
+          PY
+      - name: Persist private geometry/skin evidence with exact derivative SHA
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/truth-foundry-v13/out"
+          test -s "$out/INDEPENDENT_READBACK_NORMALIZED_V13.json"
+          rclone copy "$out" "$DEST" --checksum --retries 3
+          echo 'V13 source-bound normalized geometry/skin only in private Drive: audits/truth_foundry_v13_normalized_geometry_skin/${{ github.run_id }}-${{ github.run_attempt }}' >> "$GITHUB_STEP_SUMMARY"

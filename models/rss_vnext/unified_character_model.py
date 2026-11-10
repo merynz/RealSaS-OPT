@@ -28,6 +28,7 @@ from models.mira.skin_fsq_codec_v6 import MIRASkinFSQCodecV6, MIRASkinFSQCodecCo
 from models.tessa.v2.generation_v2 import TESSAGrammarStateV2
 from .animation_ready_mesh import RSSvNextAnimationReadyMesh, RSSvNextStructuralMeshCandidate
 from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefinementConfig
+from .semantic_structure import RSSvNextGenericRegionStructure
 from .motion_aware_topology_learning import (
     RSSvNextMotionCourt, RSSvNextTopologyPreferenceConfig,
     RSSvNextTopologyPreferenceResult,
@@ -233,6 +234,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         self.udf = nn.Linear(h, 1)  # always nonnegative, independent of sign authority
         self.sign_logit = nn.Linear(h, 1)  # a proposal, not global-sign qualification
         self.semantic = nn.Linear(h, cfg.region_slots + 1)  # final = UNKNOWN
+        self.semantic_structure = RSSvNextGenericRegionStructure(
+            h, cfg.region_slots, heads=cfg.iris.attention_heads,
+        )
+        self.semantic_to_memory = nn.Linear(cfg.region_slots + 1, h)
         self.affordance = nn.Linear(h, cfg.affordance_classes + 1)
         # Mechanics-first topology: the structural Transformer receives
         # learned deformation-affordance features BEFORE choosing face tokens.
@@ -318,6 +323,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             "unsigned_distance": F.softplus(self.udf(h)).squeeze(-1),
             "sign_logit": self.sign_logit(h).squeeze(-1),
         }
+        regions = self.semantic_structure(h)
         aux = aux_unc = None
         if self.aux_views is not None:
             aux, aux_unc = self.aux_views(tokens)
@@ -330,9 +336,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 query_xyz=xyz,
                 local_features=h,
                 geometry=local,
-                semantic_logits=self.semantic(h),
+                semantic_logits=self.semantic(h) + regions.membership_logits,
                 affordance_logits=self.affordance(h),
                 graphics_logits=self.graphics(h),
+                region_slot_features=regions.region_slots,
+                region_relation_logits=regions.relation_logits,
+                region_relation_valid_mask=regions.relation_valid_mask,
             ),
             aux, aux_unc,
         )
@@ -349,6 +358,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 state.local_features
                 + self.articulation_prior(state.local_features)
                 + self.affordance_to_memory(state.affordance_logits)
+                + self.semantic_to_memory(state.semantic_logits)
             ),
             presentation_source=self.presentation(state.local_features) + self.graphics_to_memory(state.graphics_logits),
         )
@@ -486,7 +496,13 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
     ) -> RSSvNextStructuralMeshCandidate:
         return self.mesh_bridge(
             state.scene_triplanes, topology_token_ids,
-            refine=self.surface_refine, semantics=self.semantic,
+            refine=self.surface_refine,
+            semantics=lambda local_h: (
+                self.semantic(local_h)
+                + self.semantic_structure.assign(
+                    local_h, state.region_slot_features,
+                )
+            ),
             affordances=self.affordance, graphics=self.graphics,
             quality=self.deformation_quality, udf=self.udf,
             sign_logit=self.sign_logit,

@@ -10,7 +10,10 @@ executes. The product must abstain or reject until typed capabilities exist.
 
 import pytest
 
-from models.axis.rig_program_model_v6 import CONSTRAINT_OPERATORS_V6
+from models.axis.rig_program_model_v6 import (
+    AXISRigProgramModelV6, CONSTRAINT_OPERATORS_V6,
+)
+import torch
 from compiler.realsas_compiler_core.rig_constraint_schema_v1 import (
     RIG_CONSTRAINT_OPERATOR_IDS_V1,
     validate_rig_constraint_operator_v1,
@@ -76,4 +79,51 @@ def test_even_supported_operator_cannot_run_with_missing_evidence_arity():
         validate_rig_constraint_operator_v1(
             operator_id="AIM", input_control_count=0,
             output_joint_count=1, has_chain=False, parameters={},
+        )
+
+
+
+def test_runtime_capability_mask_blocks_unsupported_neural_top_choice():
+    logits = torch.full((len(CONSTRAINT_OPERATORS_V6),), -7.)
+    path_idx = CONSTRAINT_OPERATORS_V6.index("PATH")
+    ik_idx = CONSTRAINT_OPERATORS_V6.index("IK")
+    logits[path_idx] = 100.
+    logits[ik_idx] = 3.
+    filtered = AXISRigProgramModelV6.capability_masked_constraint_logits(
+        logits, allowed_constraint_operators=RIG_CONSTRAINT_OPERATOR_IDS_V1,
+    )
+    assert int(filtered.argmax()) == ik_idx
+    assert torch.isneginf(filtered[path_idx])
+    assert filtered[ik_idx] == logits[ik_idx]
+    with pytest.raises(ValueError, match="EXECUTABLE_OPERATOR_SET_INVALID"):
+        AXISRigProgramModelV6.capability_masked_constraint_logits(
+            logits, allowed_constraint_operators=(),
+        )
+    with pytest.raises(ValueError, match="EXECUTABLE_OPERATOR_UNKNOWN"):
+        AXISRigProgramModelV6.capability_masked_constraint_logits(
+            logits, allowed_constraint_operators=("FABRICATED_SOLVER",),
+        )
+
+
+def test_control_generation_requires_explicit_compiler_capabilities():
+    from models.rss_vnext import (
+        RSSvNextConfig, RSSvNextPatchEncoderForTests,
+        RSSvNextUnifiedCharacterModel,
+    )
+    config = RSSvNextConfig.tiny_for_test()
+    model = RSSvNextUnifiedCharacterModel(
+        config,
+        vision_encoder=RSSvNextPatchEncoderForTests(config.iris.image_token_dim),
+    ).eval()
+    images = torch.rand(1, 2, 4, 8, 8)
+    cam = torch.zeros(1, 2, 13)
+    cam[:, :, 3] = cam[:, :, 7] = cam[:, :, 11] = cam[:, :, 12] = 1
+    # This guard runs BEFORE structural topology generation and ensures that
+    # a model-only caller cannot claim runtime control support.
+    with pytest.raises(ValueError, match="RIG_REQUIRES_COMPILER_CAPABILITIES"):
+        model.propose_teacher_free(images, cam, generate_controls=True)
+    with pytest.raises(ValueError, match="UNUSED_COMPILER_CAPABILITIES"):
+        model.propose_teacher_free(
+            images, cam, generate_controls=False,
+            executable_constraint_operators=RIG_CONSTRAINT_OPERATOR_IDS_V1,
         )

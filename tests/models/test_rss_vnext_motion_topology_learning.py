@@ -54,7 +54,8 @@ def examples(cfg):
     for i, seq in enumerate(full):
         tensor[0, i, :len(seq)] = torch.tensor(seq, dtype=torch.long)
         court = evaluate_decoded_topology_v2(seq, config=cfg.tessa)
-        assert court.grammar_valid and court.nonmanifold_edge_count == 0
+        assert court.grammar_valid, court.decode_failure
+        assert court.nonmanifold_edge_count == 0
         decoded = decode_tessa_asset_sequence_v1(seq, cfg=seq_cfg)
         assert len(decoded.faces) == 2
     return tensor

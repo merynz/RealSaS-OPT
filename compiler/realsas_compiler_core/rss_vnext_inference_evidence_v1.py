@@ -54,7 +54,8 @@ def _rows(value, count: int, width: int | None, code: str) -> None:
 
 def _mesh(value: Mapping[str, Any]) -> int:
     expected = {
-        "topology_tokens", "rest_xyz", "faces", "vertex_components",
+        "topology_tokens", "rest_xyz", "base_xyz", "local_features",
+        "faces", "vertex_components",
         "face_components", "normals_xyz", "semantic_logits",
         "presentation_role_logits", "presentation_role_schema_id",
         "affordance_logits", "graphics_logits", "static_quality_logits",
@@ -79,6 +80,10 @@ def _mesh(value: Mapping[str, Any]) -> int:
         _reject("RSS_VNEXT_EVIDENCE_VERTEX_COUNT")
     n = len(verts)
     _rows(verts, n, 3, "RSS_VNEXT_EVIDENCE_VERTEX_XYZ")
+    _rows(value["base_xyz"], n, 3, "RSS_VNEXT_EVIDENCE_BASE_VERTEX_XYZ")
+    _rows(value["local_features"], n, None, "RSS_VNEXT_EVIDENCE_LOCAL_FEATURES")
+    if len({len(row) for row in value["local_features"]}) != 1:
+        _reject("RSS_VNEXT_EVIDENCE_FEATURE_WIDTH_DRIFT")
     _rows(value["normals_xyz"], n, 3, "RSS_VNEXT_EVIDENCE_NORMAL_XYZ")
     for field_name in (
         "semantic_logits", "presentation_role_logits", "affordance_logits",
@@ -150,6 +155,56 @@ def _dynamic(value: Mapping[str, Any], n: int) -> None:
         _reject("RSS_VNEXT_EVIDENCE_SKIN_SIMPLEX")
 
 
+
+
+def _scene(value: Mapping[str, Any]) -> None:
+    """Validate shared semantic/Graphics relations without assigning artist authority."""
+    keys = {
+        "source_semantic_patch_logits", "source_semantic_log_uncertainty",
+        "region_relation_logits", "region_relation_valid_mask",
+        "presentation_role_probabilities",
+        "constructed_camera_features", "constructed_camera_angles",
+        "authority",
+    }
+    if not isinstance(value, Mapping) or set(value) != keys:
+        _reject("RSS_VNEXT_EVIDENCE_SCENE_FIELDS")
+    if value["authority"] != "PREDICTED_FROM_TWO_ORIGINAL_VIEWS":
+        _reject("RSS_VNEXT_EVIDENCE_SCENE_AUTHORITY_DRIFT")
+
+    def walk(raw, *, bool_allowed: bool = False):
+        if isinstance(raw, (list, tuple)):
+            if not raw:
+                _reject("RSS_VNEXT_EVIDENCE_SCENE_EMPTY_TENSOR")
+            for item in raw:
+                walk(item, bool_allowed=bool_allowed)
+        elif type(raw) is bool:
+            if not bool_allowed:
+                _reject("RSS_VNEXT_EVIDENCE_SCENE_BOOL_UNEXPECTED")
+        elif not isinstance(raw, (float, int)) or not math.isfinite(raw):
+            _reject("RSS_VNEXT_EVIDENCE_SCENE_NONFINITE")
+
+    for name in (
+        "source_semantic_patch_logits", "source_semantic_log_uncertainty",
+        "region_relation_logits", "presentation_role_probabilities",
+    ):
+        walk(value[name])
+    mask = value["region_relation_valid_mask"]
+    if not isinstance(mask, (list, tuple)) or not mask:
+        _reject("RSS_VNEXT_EVIDENCE_REGION_RELATION_MASK")
+    walk(mask, bool_allowed=True)
+    if len(value["source_semantic_patch_logits"]) != 2:
+        _reject("RSS_VNEXT_EVIDENCE_SOURCE_PATCH_COUNT")
+    camera = value["constructed_camera_features"]
+    angles = value["constructed_camera_angles"]
+    if (camera is None) != (angles is None):
+        _reject("RSS_VNEXT_EVIDENCE_AUX_CAMERA_PAIR")
+    if camera is not None:
+        if len(camera) not in (4, 6) or len(angles) != len(camera):
+            _reject("RSS_VNEXT_EVIDENCE_AUX_CAMERA_COUNT")
+        for row in camera:
+            _vector(row, 13, "RSS_VNEXT_EVIDENCE_AUX_CAMERA_13D")
+        walk(angles)
+
 @dataclass(frozen=True)
 class RSSvNextInferenceEvidenceIRV1:
     checkpoint_sha256: str
@@ -160,6 +215,7 @@ class RSSvNextInferenceEvidenceIRV1:
     mesh: Mapping[str, Any] | None
     control_events: tuple[Mapping[str, Any], ...] = ()
     dynamic: Mapping[str, Any] | None = None
+    scene: Mapping[str, Any] | None = None
     reason: str = ""
     observed_view_count: int = 2
     auxiliary_view_authority: str = "LEARNED_PREDICTED_ONLY"
@@ -199,6 +255,8 @@ def validate_inference_evidence_v1(
             _reject("RSS_VNEXT_EVIDENCE_SOURCE_DIGEST_REQUIRED")
     if expected_checkpoint_sha256 is not None and value.checkpoint_sha256 != expected_checkpoint_sha256:
         _reject("RSS_VNEXT_EVIDENCE_CHECKPOINT_BINDING_DRIFT")
+    if value.scene is not None:
+        _scene(value.scene)
     if value.mesh_status == "ABSTAIN":
         if value.mesh is not None or value.dynamic is not None or value.control_events or not value.reason:
             _reject("RSS_VNEXT_EVIDENCE_ABSTAIN_MUST_NOT_PROMOTE")

@@ -1,0 +1,37 @@
+name: RSS vNext inference checkpoint and Compiler evidence seam
+on:
+  push:
+    branches:
+      - feat/rss-vnext-inference-compiler-bridge-20261111
+      - main
+    paths:
+      - "models/rss_vnext/inference_checkpoint_v1.py"
+      - "models/rss_vnext/inference_evidence_export_v1.py"
+      - "compiler/realsas_compiler_core/rss_vnext_inference_evidence_v1.py"
+      - "tests/models/test_rss_vnext_inference_checkpoint_bridge_v1.py"
+      - ".github/workflows/rss_vnext_inference_compiler_bridge_cpu.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verified-proposal-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CPU-only model and Compiler dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy scipy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Compile, checkpoint, and run proposal/authority courts
+        env:
+          PYTHONPATH: .
+        run: |
+          python -m compileall -q models/rss_vnext/inference_checkpoint_v1.py models/rss_vnext/inference_evidence_export_v1.py compiler/realsas_compiler_core/rss_vnext_inference_evidence_v1.py tests/models/test_rss_vnext_inference_checkpoint_bridge_v1.py
+          python -m pytest -q tests/models/test_rss_vnext_inference_checkpoint_bridge_v1.py tests/models/test_rss_vnext_compiler_capability_court.py

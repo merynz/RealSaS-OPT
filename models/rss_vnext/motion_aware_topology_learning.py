@@ -12,6 +12,7 @@ used ONLY to produce train-time supervision, never as student conditions.
 This is a preregistration candidate, not a final architecture/loss freeze.
 """
 from dataclasses import dataclass
+import hashlib
 
 import torch
 from torch import Tensor
@@ -167,6 +168,17 @@ def source_relative_topology_preference_loss(
     if not bool(torch.isfinite(candidate_log_prob).all()):
         raise ValueError("RSS_VNEXT_MOTION_LOGPROB_NONFINITE")
     court.validate(k)
+    # Candidate identity must bind to the *exact* grammar token content; a
+    # metadata-only hash is not adequate to protect this consequence join.
+    actual_hashes = []
+    for i in range(k):
+        seq = candidate_tokens[0, i].detach().to(
+            device="cpu", dtype=torch.int64,
+        ).contiguous()
+        # Hash sequence with padding as stored by the materialization court.
+        actual_hashes.append(hashlib.sha256(seq.numpy().tobytes()).hexdigest())
+    if tuple(actual_hashes) != court.candidate_hashes:
+        raise ValueError("RSS_VNEXT_MOTION_CANDIDATE_TOKEN_HASH_DRIFT")
     if not (court.static_cost.device == candidate_log_prob.device
             and court.dynamic_cost.device == candidate_log_prob.device
             and court.valid_mask.device == candidate_log_prob.device):

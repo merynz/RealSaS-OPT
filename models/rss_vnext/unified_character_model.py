@@ -31,6 +31,9 @@ from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefine
 from .semantic_structure import RSSvNextGenericRegionStructure
 from .early_semantic_field import RSSvNextEarlySemanticField
 from .source_ray_evidence import sample_front_back_source_rays
+from .semantic_geometry_prior import (
+    RSSvNextSemanticLayerSpec, semantic_equivalent_signed_field,
+)
 from .motion_aware_topology_learning import (
     RSSvNextMotionCourt, RSSvNextTopologyPreferenceConfig,
     RSSvNextTopologyPreferenceResult,
@@ -239,6 +242,14 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             cfg.iris.image_token_dim, h, cfg.semantic_evidence_channels,
         )
         self.semantic_evidence_to_memory = nn.Linear(cfg.semantic_evidence_channels, h)
+        # Shared semantic probabilities originate in H(x): same spatial
+        # carrier for SDF, RGB/graphics, structural mesh and mechanics.
+        self.presentation_role_head = nn.Sequential(
+            nn.LayerNorm(h), nn.Linear(h, cfg.semantic_role_schema().count),
+        )
+        self.presentation_roles_to_memory = nn.Linear(
+            cfg.semantic_role_schema().count, h, bias=False,
+        )
         self.udf = nn.Linear(h, 1)  # always nonnegative, independent of sign authority
         self.sign_logit = nn.Linear(h, 1)  # a proposal, not global-sign qualification
         self.semantic = nn.Linear(h, cfg.region_slots + 1)  # final = UNKNOWN
@@ -341,6 +352,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             "sign_logit": self.sign_logit(h).squeeze(-1),
         }
         regions = self.semantic_structure(h)
+        presentation_logits = self.presentation_role_head(h)
         outgoing = regions.relation_logits.mean(dim=2)
         incoming = regions.relation_logits.mean(dim=1)
         relation_tokens = (
@@ -364,6 +376,8 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 geometry=local,
                 semantic_logits=self.semantic(h) + regions.membership_logits,
                 semantic_evidence_logits=self.early_semantics.query_field(h),
+                presentation_role_logits=presentation_logits,
+                presentation_role_probabilities=torch.softmax(presentation_logits, dim=-1),
                 affordance_logits=self.affordance(h),
                 graphics_logits=self.graphics(h),
                 region_slot_features=regions.region_slots,
@@ -386,6 +400,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             + self.affordance_to_memory(state.affordance_logits)
             + self.semantic_to_memory(state.semantic_logits)
             + self.semantic_evidence_to_memory(state.semantic_evidence_logits)
+            + self.presentation_roles_to_memory(state.presentation_role_probabilities)
         )
         # Append region+relation tokens in the structural expert's surface
         # stream rather than discarding their identities after classification.
@@ -500,6 +515,26 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             dynamic_mesh_candidate=dynamic,
         )
 
+    def query_semantic_equivalent_field(
+        self,
+        state: RSSvNextSceneState,
+        layer: RSSvNextSemanticLayerSpec,
+        *,
+        signed_domain_qualified: bool,
+    ) -> Tensor:
+        """StdGEN-family geometry change under an explicit source role layer.
+
+        This method cannot assert a solid from image evidence. An admission
+        court must explicitly permit SDF use. Open/UDF meshes use component
+        patch representation and must NOT call this signed-field method.
+        """
+        return semantic_equivalent_signed_field(
+            state.geometry["field"],
+            state.presentation_role_logits,
+            schema=self.cfg.semantic_role_schema(), layer=layer,
+            qualified_signed_domain=signed_domain_qualified,
+        )
+
     def motion_aware_structural_objective(
         self,
         rgba: Tensor,
@@ -546,6 +581,8 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             affordances=self.affordance, graphics=self.graphics,
             quality=self.deformation_quality, udf=self.udf,
             sign_logit=self.sign_logit,
+            role_head=self.presentation_role_head,
+            role_schema_id=self.cfg.semantic_role_schema_id,
             source_authority=source_authority,
         )
         # Requery immutable source rays instead of compressing all visual

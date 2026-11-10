@@ -215,10 +215,13 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         self.vision = vision_encoder
         self.iris = IRISVNextSceneCoreV1(cfg.iris)
         h = cfg.iris.local_feature_dim
+        self.udf = nn.Linear(h, 1)  # always nonnegative, independent of sign authority
+        self.sign_logit = nn.Linear(h, 1)  # a proposal, not global-sign qualification
         self.semantic = nn.Linear(h, cfg.region_slots + 1)  # final = UNKNOWN
         self.affordance = nn.Linear(h, cfg.affordance_classes + 1)
         self.graphics = nn.Sequential(nn.LayerNorm(h), nn.Linear(h, cfg.graphics_channels))
         self.presentation = nn.Sequential(nn.LayerNorm(h), nn.Linear(h, h), nn.GELU())
+        self.graphics_to_memory = nn.Linear(cfg.graphics_channels, h, bias=False)
         self.surface_refine = nn.Sequential(nn.LayerNorm(h), nn.Linear(h, h), nn.GELU(), nn.Linear(h, 3))
         self.deformation_quality = nn.Linear(h, 4)
         self.relation = nn.Sequential(
@@ -277,6 +280,11 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         xyz = self._query_grid.to(planes).expand(b, -1, -1)
         local = self.iris.query(planes, xyz)
         h = local["H"]
+        local = {
+            **local,
+            "unsigned_distance": F.softplus(self.udf(h)).squeeze(-1),
+            "sign_logit": self.sign_logit(h).squeeze(-1),
+        }
         aux = aux_unc = None
         if self.aux_views is not None:
             aux, aux_unc = self.aux_views(tokens)
@@ -305,7 +313,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         return self.tessa.encode_memory(
             scene_source=scene_src,
             surface_source=state.local_features,
-            presentation_source=self.presentation(state.local_features) + state.graphics_logits.mean(dim=-1, keepdim=True),
+            presentation_source=self.presentation(state.local_features) + self.graphics_to_memory(state.graphics_logits),
         )
 
     def _relation_logits(self, state: RSSvNextSceneState, pair_indices: Tensor | None) -> Tensor | None:

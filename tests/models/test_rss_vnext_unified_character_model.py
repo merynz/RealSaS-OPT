@@ -81,16 +81,24 @@ def test_non_two_view_inputs_fail_closed(views):
 
 
 def test_constructed_auxiliary_never_becomes_observed_source():
-    cfg = replace(RSSvNextConfig.tiny_for_test(), aux_constructed_view_latents=6)
+    cfg = replace(RSSvNextConfig.tiny_for_test(), constructed_total_views=6)
     net = model(cfg)
     img, camera = sample()
+    # SOURCE cameras must be a calibrated antipodal pair; predicted view
+    # conditioning is not allowed to infer a false camera ring from metadata.
+    camera[:, 0, 2] = 2
+    camera[:, 1, 2] = -2
+    camera[:, 0, 11] = -1
+    camera[:, 1, 3] = -1
+    camera[:, 1, 11] = 1
     out = net(img, camera)
     assert out.state.observed_image_tokens.shape[1] == 2
     assert out.state.source_view_authority == (
         "SOURCE_OBSERVED_FRONT", "SOURCE_OBSERVED_BACK",
     )
-    assert out.auxiliary_view_latents.shape == (1, 6, 32)
-    assert out.auxiliary_view_log_uncertainty.shape == (1, 6, 1)
+    assert out.auxiliary_view_latents.shape == (1, 4, 32)
+    assert out.auxiliary_view_log_uncertainty.shape == (1, 4, 1)
+    assert out.state.constructed_camera_features.shape == (1, 4, 13)
 
 
 def test_training_gradient_reaches_shared_scene_from_structure_and_skin():

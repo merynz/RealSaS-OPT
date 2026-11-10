@@ -45,6 +45,8 @@ def _mesh_evidence(mesh: RSSvNextStructuralMeshCandidate) -> dict[str, Any]:
     return {
         "topology_tokens": list(mesh.topology_token_ids),
         "rest_xyz": _list(mesh.rest_vertices_iris[0]),
+        "base_xyz": _list(mesh.base_vertices_iris[0]),
+        "local_features": _list(mesh.local_features[0]),
         "faces": _list(mesh.faces),
         "vertex_components": _list(mesh.vertex_component_ids),
         "face_components": _list(mesh.face_component_ids),
@@ -140,6 +142,22 @@ def export_inference_evidence_v1(
         mesh=None if mesh is None else _mesh_evidence(mesh),
         control_events=tuple(serialized_events),
         dynamic=dynamic_payload,
+        scene={
+            "source_semantic_patch_logits": _list(state.source_semantic_patch_logits[0]),
+            "source_semantic_log_uncertainty": _list(state.source_semantic_log_uncertainty[0]),
+            "region_relation_logits": _list(state.region_relation_logits[0]),
+            "region_relation_valid_mask": _list(state.region_relation_valid_mask[0]),
+            "presentation_role_probabilities": _list(state.presentation_role_probabilities[0]),
+            "constructed_camera_features": (
+                None if state.constructed_camera_features is None
+                else _list(state.constructed_camera_features[0])
+            ),
+            "constructed_camera_angles": (
+                None if state.constructed_camera_angles is None
+                else _list(state.constructed_camera_angles[0])
+            ),
+            "authority": "PREDICTED_FROM_TWO_ORIGINAL_VIEWS",
+        },
         reason=str(result.get("mesh_failure") or "INFERENCE_TOPOLOGY_ABSTAIN") if mesh is None else "",
         metadata={
             "source_input_format": "FLOAT_RGBA_0_TO_1",

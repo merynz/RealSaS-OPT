@@ -24,6 +24,7 @@ from models.rss_vnext.motion_aware_topology_learning import (
 from models.rss_vnext.animation_ready_mesh import (
     posed_lbs_from_joint_matrices, deformation_bridge_loss,
     source_pose_surface_consequence_loss, _area_weighted_surface_witnesses,
+    _two_way_surface_chamfer,
 )
 
 
@@ -73,6 +74,7 @@ def evidence(tokens, device="cpu", *, static=(0.02, 0.025), dynamic=(0.2, 0.8),
         source_sha256="fake-synthetic-source-sha-for-unit-tests",
         motion_suite_hash="synthetic-same-pose-suite",
         canonical_binding_hash="synthetic-canonical-binding",
+        source_skin_protocol_hash="synthetic-same-teacher-kinematics-and-weight-transfer",
         candidate_hashes=tuple(hashes),
         reference_authority="QUALIFIED_SOURCE_RELATIVE_MOTION_COURT",
         static_cost=torch.tensor(static, dtype=torch.float32, device=device),
@@ -84,6 +86,9 @@ def evidence(tokens, device="cpu", *, static=(0.02, 0.025), dynamic=(0.2, 0.8),
             "synthetic-same-pose-suite",
         ),
         candidate_canonical_binding_hash=("synthetic-canonical-binding",) * 2,
+        candidate_source_skin_protocol_hash=(
+            "synthetic-same-teacher-kinematics-and-weight-transfer",
+        ) * 2,
     )
 
 
@@ -233,3 +238,45 @@ def test_pose_loss_refuses_missing_motion_supervision():
             mesh, weights, mats, rest, source_poses,
             valid_pose_mask=torch.tensor([False, False]),
         )
+
+
+
+def test_two_static_equivalent_topologies_have_distinct_posed_surfaces():
+    """Actual geometric consequence, not a fabricated reward score.
+
+    At rest, the two meshes tessellate the same flat square. Under a joint
+    movement that lifts exactly one corner, their interpolated interiors differ.
+    That difference is observable by deterministic surface quadrature and can
+    be fed to the discrete topology preference objective.
+    """
+    rest = torch.tensor([
+        [-.5, -.5, 0.0],
+        [.5, -.5, 0.0],
+        [.5, .5, 0.0],
+        [-.5, .5, 0.0],
+    ], dtype=torch.float32)[None]
+    face_a = torch.tensor([[0, 1, 2], [0, 2, 3]], dtype=torch.long)
+    face_b = torch.tensor([[0, 1, 3], [1, 2, 3]], dtype=torch.long)
+    weights = torch.tensor([[
+        [1.0, 0.0], [1.0, 0.0],
+        [0.0, 1.0], [1.0, 0.0],
+    ]])
+    source_joint_matrices = torch.eye(4)[None, None, None].repeat(1, 1, 2, 1, 1)
+    source_joint_matrices[0, 0, 1, 2, 3] = 0.8
+    posed = posed_lbs_from_joint_matrices(rest, weights, source_joint_matrices)[:, 0]
+    assert torch.allclose(posed[0, 2, 2], torch.tensor(.8))
+    source_surface = _area_weighted_surface_witnesses(posed, face_a)
+    candidate_a = _area_weighted_surface_witnesses(posed, face_a)
+    candidate_b = _area_weighted_surface_witnesses(posed, face_b)
+    cost_a = _two_way_surface_chamfer(candidate_a, source_surface)
+    cost_b = _two_way_surface_chamfer(candidate_b, source_surface)
+    assert float(cost_a.detach()) == pytest.approx(0.0, abs=1e-6)
+    assert float(cost_b.detach()) > 0.05
+    cfg = RSSvNextConfig.tiny_for_test()
+    tokens = examples(cfg)
+    court = evidence(tokens, dynamic=(float(cost_a.detach()), float(cost_b.detach())))
+    logp = torch.tensor([-1.0, -1.0], requires_grad=True)
+    out = source_relative_topology_preference_loss(logp, tokens, court)
+    out.loss.backward()
+    assert out.preferred_pairs == ((0, 1),)
+    assert logp.grad[0] < 0 and logp.grad[1] > 0

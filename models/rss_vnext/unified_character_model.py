@@ -814,7 +814,11 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         }
         if generate_controls:
             if mesh is None:
-                raise RuntimeError("RSS_VNEXT_CONTROL_REQUIRES_VALID_PREDICTED_MESH")
+                # A legal failure to generate topology is an ABSTAIN receipt,
+                # not an exception that discards the source-bound evidence.
+                # Never fabricate a placeholder mesh just to decode controls.
+                result["control_status"] = "ABSTAIN_NO_VALID_PREDICTED_MESH"
+                return result
             memory = self._control_memory(out.state, out.structural_memory, mesh)
             events = self.axis.generate_events(
                 memory, tokens_per_joint=self.cfg.skin_tokens_per_joint,

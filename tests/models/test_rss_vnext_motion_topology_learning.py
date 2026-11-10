@@ -23,6 +23,7 @@ from models.rss_vnext.motion_aware_topology_learning import (
 )
 from models.rss_vnext.animation_ready_mesh import (
     posed_lbs_from_joint_matrices, deformation_bridge_loss,
+    source_pose_surface_consequence_loss, _area_weighted_surface_witnesses,
 )
 
 
@@ -151,3 +152,84 @@ def test_grammar_does_not_confuse_decoded_topology_with_dynamic_truth():
     # Valid static topology by itself does NOT imply this passes dynamic G3.
     assert decoded.orientation_qualified is False
     assert len(decoded.faces) == 2
+
+
+
+def test_deformation_source_pose_loss_reaches_shared_mesh_and_skin():
+    """A moving teacher surface must penalize bad student skin, not merely static XYZ."""
+    cfg = RSSvNextConfig.tiny_for_test()
+    net = RSSvNextUnifiedCharacterModel(
+        cfg, vision_encoder=RSSvNextPatchEncoderForTests(cfg.iris.image_token_dim),
+    )
+    rgba = torch.rand(1, 2, 4, 8, 8)
+    cam = torch.zeros(1, 2, 13)
+    cam[:, :, 3] = 1
+    cam[:, :, 7] = 1
+    cam[:, :, 11] = 1
+    cam[:, :, 12] = 1
+    state, _, _ = net.encode_observations(rgba, cam)
+    seq = examples(cfg)[0, 0]
+    seq = seq[seq != cfg.tessa.PAD]
+    mesh = net.build_mesh_candidate(
+        state, seq, source_authority="TEACHER_FORCED_TRAINING_ONLY",
+    )
+    mesh.validate()
+    assert mesh.faces.shape == (2, 3)
+    n = mesh.rest_vertices_iris.shape[1]
+    logits = torch.zeros((1, n, 2), requires_grad=True)
+    weights = torch.softmax(logits, dim=-1)
+    mats = torch.eye(4)[None, None, None].repeat(1, 2, 2, 1, 1)
+    mats[0, 1, 0, 0, 3] = 0.25
+    mats[0, 1, 1, 1, 3] = -0.25
+
+    # A *different* native rig's influence distribution produces a different
+    # posed surface. This stays teacher-only and outside image encoder input.
+    gt_weights = weights.detach().clone()
+    gt_weights[0, :, 0] = 0.88
+    gt_weights[0, :, 1] = 0.12
+    gt_posed = posed_lbs_from_joint_matrices(
+        mesh.rest_vertices_iris.detach(), gt_weights, mats,
+    )
+    source_rest = _area_weighted_surface_witnesses(
+        mesh.rest_vertices_iris.detach(), mesh.faces,
+    ).detach()
+    source_poses = torch.stack([
+        _area_weighted_surface_witnesses(gt_posed[:, p].detach(), mesh.faces)
+        for p in range(2)
+    ])
+    result = source_pose_surface_consequence_loss(
+        mesh, weights, mats, source_rest, source_poses,
+        valid_pose_mask=torch.tensor([True, True]),
+    )
+    assert float(result["posed_surface"]) > 0.0
+    result["total"].backward()
+    assert logits.grad is not None and torch.isfinite(logits.grad).all()
+    assert logits.grad.abs().sum() > 0
+    assert net.iris.scene.scene_queries.grad is not None
+    assert torch.isfinite(net.iris.scene.scene_queries.grad).all()
+    assert net.surface_refine[-1].weight.grad is not None
+
+
+def test_pose_loss_refuses_missing_motion_supervision():
+    cfg = RSSvNextConfig.tiny_for_test()
+    net = RSSvNextUnifiedCharacterModel(
+        cfg, vision_encoder=RSSvNextPatchEncoderForTests(cfg.iris.image_token_dim),
+    )
+    rgba = torch.rand(1, 2, 4, 8, 8)
+    cam = torch.zeros(1, 2, 13)
+    cam[:, :, 3] = cam[:, :, 7] = cam[:, :, 11] = cam[:, :, 12] = 1
+    state, _, _ = net.encode_observations(rgba, cam)
+    seq = examples(cfg)[0, 0]
+    mesh = net.build_mesh_candidate(
+        state, seq[seq != cfg.tessa.PAD],
+        source_authority="TEACHER_FORCED_TRAINING_ONLY",
+    )
+    weights = torch.full((1, mesh.rest_vertices_iris.shape[1], 2), 0.5)
+    mats = torch.eye(4)[None, None, None].repeat(1, 2, 2, 1, 1)
+    rest = _area_weighted_surface_witnesses(mesh.rest_vertices_iris.detach(), mesh.faces)
+    source_poses = torch.stack([rest, rest])
+    with pytest.raises(ValueError, match="MASK_INVALID"):
+        source_pose_surface_consequence_loss(
+            mesh, weights, mats, rest, source_poses,
+            valid_pose_mask=torch.tensor([False, False]),
+        )

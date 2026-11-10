@@ -1,0 +1,37 @@
+name: Controllable puppet 3D mechanics / 8-view consumer CPU
+on:
+  push:
+    branches:
+      - feat/controllable-runtime-consumer-v1-20261111
+    paths:
+      - "compiler/realsas_compiler_core/controllable_puppet_runtime_v1.py"
+      - "tests/compiler/test_controllable_puppet_runtime_v1.py"
+      - ".github/workflows/controllable_puppet_runtime_consumer_cpu.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-consumer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install actual deterministic compiler CPU dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy scipy
+      - name: Compile consumer and run real IK / LBS / eight-view courts
+        env:
+          PYTHONPATH: .
+        run: |
+          python -m compileall -q compiler/realsas_compiler_core/controllable_puppet_runtime_v1.py
+          python -m pytest -q \
+            tests/compiler/test_controllable_puppet_runtime_v1.py \
+            tests/compiler/test_mechanics_control_solver_v1.py \
+            tests/compiler/test_control_motion_ik_integration_v1.py \
+            tests/compiler/test_mechanics_main_subtree_runtime_v1.py

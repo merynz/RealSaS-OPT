@@ -24,7 +24,8 @@ class RSSvNextConfig:
     observed_views: int = 2
     aux_constructed_view_latents: int = 0  # 0, 6, 8: hypotheses, NEVER observed views
     query_grid_side: int = 8  # geometry probes, not source/teacher mesh vertices
-    region_slots: int = 32   # unknown/background additionally modeled by final logit
+    region_slots: int = 32   # anonymous region hypotheses; unknown explicitly represented
+    semantic_evidence_channels: int = 8  # independent masked evidence axes, NOT fixed bodypart classes
     affordance_classes: int = 9
     graphics_channels: int = 5
     relation_width: int = 256
@@ -48,7 +49,8 @@ class RSSvNextConfig:
         if not (2 <= self.query_grid_side <= 32):
             raise ValueError("RSS_VNEXT_QUERY_GRID_SIZE_INVALID")
         if min(
-            self.region_slots, self.affordance_classes, self.graphics_channels,
+            self.region_slots, self.semantic_evidence_channels,
+            self.affordance_classes, self.graphics_channels,
             self.relation_width, self.control_hidden_dim, self.control_layers,
             self.control_heads, self.control_max_seq, self.max_pair_queries,
             self.skin_tokens_per_joint, self.skin_hidden_dim, self.topology_decode_cap,
@@ -96,7 +98,7 @@ class RSSvNextConfig:
                 memory_refinement_layers=0, local_attention_window=128,
                 query_chunk_size=16, gradient_checkpointing=False,
             ),
-            query_grid_side=2, region_slots=4, affordance_classes=5,
+            query_grid_side=2, region_slots=4, semantic_evidence_channels=5, affordance_classes=5,
             graphics_channels=4, relation_width=32,
             control_hidden_dim=32, control_layers=2,
             control_heads=4, control_max_seq=64, skin_hidden_dim=32,
@@ -110,14 +112,19 @@ class RSSvNextSceneState:
     observed_rgba: torch.Tensor
     camera_features: torch.Tensor
     observed_image_tokens: torch.Tensor
+    conditioned_image_tokens: torch.Tensor  # original source tokens remain accessible
+    source_semantic_patch_logits: torch.Tensor  # [B,2,T,K] from image encoder
+    source_semantic_log_uncertainty: torch.Tensor
     scene_triplanes: torch.Tensor
     query_xyz: torch.Tensor
     local_features: torch.Tensor
     geometry: dict[str, torch.Tensor]
-    semantic_logits: torch.Tensor
+    semantic_logits: torch.Tensor  # slot membership, including UNKNOWN
+    semantic_evidence_logits: torch.Tensor  # independent 3D field evidence axes
     affordance_logits: torch.Tensor
     graphics_logits: torch.Tensor
     region_slot_features: torch.Tensor
+    region_relation_tokens: torch.Tensor  # outgoing+incoming graph context per region
     region_relation_logits: torch.Tensor
     region_relation_valid_mask: torch.Tensor
     source_view_authority: tuple[str, str] = ("SOURCE_OBSERVED_FRONT", "SOURCE_OBSERVED_BACK")

@@ -47,6 +47,22 @@ class OwnershipInterventionPreregisrationTests(unittest.TestCase):
         self.spec["student_visible_fields"].append("teacher_material_name")
         self.reject("OWNERSHIP_PILOT_TEACHER_LEAKAGE")
 
+    def test_rejects_unregistered_semantic_student_observation(self) -> None:
+        self.spec["student_visible_fields"].append("semantic_body_name")
+        self.reject("OWNERSHIP_PILOT_STUDENT_OBSERVATIONS_MISSING_OR_EXTRA")
+
+    def test_rejects_unregistered_source_identifier_alias(self) -> None:
+        self.spec["student_visible_fields"].append("mesh_component_id")
+        self.reject("OWNERSHIP_PILOT_STUDENT_OBSERVATIONS_MISSING_OR_EXTRA")
+
+    def test_rejects_duplicate_student_observation(self) -> None:
+        self.spec["student_visible_fields"].append("source_rgb")
+        self.reject("OWNERSHIP_PILOT_STUDENT_OBSERVATIONS_DUPLICATE")
+
+    def test_rejects_missing_student_observation(self) -> None:
+        self.spec["student_visible_fields"].remove("source_alpha")
+        self.reject("OWNERSHIP_PILOT_STUDENT_OBSERVATIONS_MISSING_OR_EXTRA")
+
     def test_rejects_palette_collision_control_removed(self) -> None:
         self.spec["measurement"]["palette_conditions"].remove(
             "COLLISION_DIFFERENT_DOMAINS_SAME_COLOR"

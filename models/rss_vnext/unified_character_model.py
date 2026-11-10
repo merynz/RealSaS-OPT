@@ -825,6 +825,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             seq = AXISSequenceV6.from_events(
                 events, device=memory.device,
             )
+            result["control_sequence"] = seq
             control_out = self.axis(memory, seq)
             if bool((seq.kind_ids == int(RigTokenKindV6.SKIN_CODE)).any()):
                 weights, joint_valid, joints = self.mira(
@@ -833,7 +834,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                     vertex_normals=mesh.normals,
                 )
                 result["dynamic_mesh_candidate"] = self.dynamic_refine(mesh, weights, joints)
+                result["skin_weight_proposal"] = weights
                 result["joint_valid_mask"] = joint_valid
+                result["skin_code_logits"] = control_out["skin_code_logits"]
+                result["joint_hidden"] = joints
         return result
 
 

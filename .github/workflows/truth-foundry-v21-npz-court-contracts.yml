@@ -1,0 +1,32 @@
+name: truth-foundry-v21-npz-court-contracts
+on:
+  push:
+    branches: [truth-foundry-v21-266-npz-numeric-court-20261110]
+    paths:
+      - '.github/workflows/truth-foundry-v21-npz-court-contracts.yml'
+      - 'tools/corpus/truth_foundry/evidence_v21/**'
+      - 'tests/corpus/test_truth_v21.py'
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-v21-npz-court-contracts.yml'
+      - 'tools/corpus/truth_foundry/evidence_v21/**'
+      - 'tests/corpus/test_truth_v21.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: truth-foundry-v21-contracts-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  strict-source-and-authority:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and negative source / admission tests (synthetic)
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v21 tests/corpus/test_truth_v21.py
+          python -m unittest discover -s tests/corpus -p 'test_truth_v21.py' -v
+      - name: No raw source reads in CI
+        run: echo "REAL_COURT_NOT_RUN_IN_PUBLIC_CI=1 TRAINING_ADMISSIONS=0"

@@ -395,6 +395,34 @@ class AXISRigProgramModelV6(nn.Module):
         raw = int(torch.argmax(values, dim=-1).item())
         return raw - 1
 
+    @staticmethod
+    def capability_masked_constraint_logits(
+        logits: Tensor,
+        *,
+        allowed_constraint_operators: Sequence[str],
+    ) -> Tensor:
+        """Typed runtime capability gate, *not* evidence of source semantics.
+
+        The model may learn a wider research vocabulary, but its product
+        proposal must not name an operator the active Compiler cannot execute.
+        Caller provides the genuine executable operator registry; this neural
+        module never imports Compiler or quietly maps unsupported operators
+        to supported ones.
+        """
+        allowed = tuple(allowed_constraint_operators)
+        if not allowed or len(set(allowed)) != len(allowed):
+            raise ValueError("AXIS_V6_EXECUTABLE_OPERATOR_SET_INVALID")
+        unknown = set(allowed) - set(CONSTRAINT_OPERATORS_V6)
+        if unknown:
+            raise ValueError("AXIS_V6_EXECUTABLE_OPERATOR_UNKNOWN")
+        if logits.shape[-1] != len(CONSTRAINT_OPERATORS_V6):
+            raise ValueError("AXIS_V6_CONSTRAINT_LOGIT_WIDTH")
+        mask = torch.full_like(logits, float("-inf"))
+        for i, operator in enumerate(CONSTRAINT_OPERATORS_V6):
+            if operator in allowed:
+                mask[..., i] = 0
+        return logits + mask
+
     @torch.no_grad()
     def generate_events(
         self,
@@ -402,12 +430,20 @@ class AXISRigProgramModelV6(nn.Module):
         *,
         tokens_per_joint: int,
         max_steps: int | None = None,
+        allowed_constraint_operators: Sequence[str] | None = None,
     ) -> tuple[RigProgramEventV6, ...]:
         self.eval()
         if scene_memory.ndim != 3 or scene_memory.shape[0] != 1:
             raise ValueError("AXIS_V6_GENERATION_REQUIRES_BATCH_ONE")
         if tokens_per_joint < 1:
             raise ValueError("AXIS_V6_TOKENS_PER_JOINT_INVALID")
+        if allowed_constraint_operators is not None:
+            # Fail before any expensive causal decode rather than producing
+            # unsupported product constraints and discarding the whole mesh.
+            self.capability_masked_constraint_logits(
+                torch.zeros(len(CONSTRAINT_OPERATORS_V6), device=scene_memory.device),
+                allowed_constraint_operators=allowed_constraint_operators,
+            )
         limit = min(int(max_steps or self.config.max_sequence_length), self.config.max_sequence_length)
         if limit < 2:
             raise ValueError("AXIS_V6_GENERATION_LIMIT_INVALID")
@@ -450,7 +486,13 @@ class AXISRigProgramModelV6(nn.Module):
                 pa = self._pointer(last["pointer_a_logits"], state.joint_count, allow_null=False)
                 pb = self._pointer(last["pointer_b_logits"], state.joint_count, allow_null=False)
             elif kind == RigTokenKindV6.CONSTRAINT:
-                aux = int(torch.argmax(last["constraint_operator_logits"]).item())
+                proposal_logits = last["constraint_operator_logits"]
+                if allowed_constraint_operators is not None:
+                    proposal_logits = self.capability_masked_constraint_logits(
+                        proposal_logits,
+                        allowed_constraint_operators=allowed_constraint_operators,
+                    )
+                aux = int(torch.argmax(proposal_logits).item())
                 pa = self._pointer(last["pointer_a_logits"], state.chain_count, allow_null=True)
                 scalars = tuple(float(v) for v in last["scalar_params"].tolist())
             elif kind == RigTokenKindV6.CONSTRAINT_INPUT:

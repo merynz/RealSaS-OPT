@@ -24,7 +24,7 @@ from .mechanics_control_solver_v1 import (
     deform_mesh_lbs_v1,
     solve_control_pose_v1,
 )
-from .mesh_ir import CanonicalMeshIR
+from .canonical_mesh_ir_v1 import CanonicalMeshIR
 from .playback_full_surface_v3 import (
     CameraProjectionV3,
     project_points_xyz_v3,
@@ -38,8 +38,8 @@ from .playback_runtime_v3 import (
     validate_frame_composition_v3,
     validate_playback_runtime_v3_contract,
 )
-from .rig_ir_v2 import CanonicalRigIRV2
-from .skin_ir_v2 import CanonicalSkinIRV2
+from .canonical_rig_ir_v2 import CanonicalRigIRV2
+from .canonical_skin_ir_v2 import CanonicalSkinIRV2
 from .types import QualificationError
 
 

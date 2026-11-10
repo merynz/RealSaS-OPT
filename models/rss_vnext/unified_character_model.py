@@ -31,6 +31,7 @@ from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefine
 from .semantic_structure import RSSvNextGenericRegionStructure
 from .early_semantic_field import RSSvNextEarlySemanticField
 from .source_ray_evidence import sample_front_back_source_rays
+from .skin_query_field import RSSvNextJointSkinQueryField
 from .multiview_construction import (
     canonical_novel_camera_ring, RSSvNextViewFieldRenderer,
 )
@@ -185,6 +186,15 @@ class RSSvNextSkinCoupler(nn.Module):
         with torch.no_grad():
             book = self.codec.quantizer.token_ids_to_codes(torch.arange(vocab))
         self.register_buffer("codebook", book, persistent=False)
+        self.spatial_decoder = RSSvNextJointSkinQueryField(
+            vertex_feature_dim=cfg.iris.local_feature_dim,
+            joint_feature_dim=cfg.control_hidden_dim,
+            code_dim=self.codec.config.latent_dim,
+            tokens_per_joint=cfg.skin_tokens_per_joint,
+            hidden_dim=cfg.skin_hidden_dim,
+            heads=cfg.skin_query_heads,
+            max_query_chunk=cfg.skin_query_chunk,
+        )
 
     def forward(
         self,
@@ -193,6 +203,8 @@ class RSSvNextSkinCoupler(nn.Module):
         axis_hidden: Tensor,
         skin_code_logits: Tensor,
         sequence: AXISSequenceV6,
+        *,
+        vertex_normals: Tensor | None = None,
     ) -> tuple[Tensor, Tensor, Tensor]:
         if local_features.shape[:2] != vertex_xyz.shape[:2]:
             raise ValueError("RSS_VNEXT_SKIN_VERTEX_DOMAIN_DRIFT")
@@ -222,16 +234,44 @@ class RSSvNextSkinCoupler(nn.Module):
         weight_rows = []
         mask_rows = []
         vfeat = torch.cat((local_features, vertex_xyz), dim=-1)
-        vertex_state = self.codec.vertex_decode(vfeat)
+        vertex_state = (
+            self.codec.vertex_decode(vfeat)
+            if self.cfg.skin_decoder_mode == "DOT_PRODUCT_BASELINE" else None
+        )
         for bi, (jstate, codes) in enumerate(zip(joint_rows, code_rows)):
             probabilities = torch.softmax(codes.float(), dim=-1)
-            expected = probabilities @ self.codebook.float()
-            expected = expected.to(dtype=jstate.dtype).flatten(1)
-            joint_state = self.codec.joint_decode(jstate) + self.codec.code_decode(expected)
-            logits = torch.matmul(vertex_state[bi], joint_state.transpose(0, 1))
-            logits = logits / math.sqrt(self.codec.config.hidden_dim)
-            logits = logits + self.codec.bias_head(joint_state).flatten()[None, :]
-            weights = torch.softmax(logits, dim=-1)
+            # Expected FSQ codes from *causal logits at previous positions*;
+            # no current teacher SKIN_CODE embedding is a decoder input.
+            expected = (probabilities @ self.codebook.float()).to(dtype=jstate.dtype)
+            if self.cfg.skin_decoder_mode == "POINT_QUERY_CROSS_ATTENTION":
+                mask = torch.ones(
+                    (1, jstate.shape[0]), device=jstate.device, dtype=torch.bool,
+                )
+                queried = self.spatial_decoder(
+                    local_features[bi:bi+1], vertex_xyz[bi:bi+1],
+                    jstate[None],
+                    expected.reshape(
+                        1, jstate.shape[0], self.cfg.skin_tokens_per_joint,
+                        self.codec.config.latent_dim,
+                    ),
+                    mask,
+                    vertex_normals=(
+                        None if vertex_normals is None
+                        else vertex_normals[bi:bi+1]
+                    ),
+                )
+                weights = queried.weights[0]
+            else:
+                assert vertex_state is not None
+                joint_state = (
+                    self.codec.joint_decode(jstate)
+                    + self.codec.code_decode(expected.flatten(1))
+                )
+                logits = torch.matmul(
+                    vertex_state[bi], joint_state.transpose(0, 1),
+                ) / math.sqrt(self.codec.config.hidden_dim)
+                logits = logits + self.codec.bias_head(joint_state).flatten()[None, :]
+                weights = torch.softmax(logits, dim=-1)
             weight_rows.append(F.pad(weights, (0, max_j - jstate.shape[0])))
             mask_rows.append(torch.arange(max_j, device=jstate.device) < jstate.shape[0])
         joint_rows_padded = [
@@ -596,6 +636,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 skin_weights, joint_mask, joint_states = self.mira(
                     feat, xyz,
                     controls["hidden"], controls["skin_code_logits"], rig_sequence,
+                    vertex_normals=None if mesh is None else mesh.normals,
                 )
                 if mesh is not None:
                     # Same exact mesh vertices and joint order for rest/skin.
@@ -783,6 +824,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 weights, joint_valid, joints = self.mira(
                     mesh.local_features, mesh.rest_vertices_iris,
                     control_out["hidden"], control_out["skin_code_logits"], seq,
+                    vertex_normals=mesh.normals,
                 )
                 result["dynamic_mesh_candidate"] = self.dynamic_refine(mesh, weights, joints)
                 result["joint_valid_mask"] = joint_valid

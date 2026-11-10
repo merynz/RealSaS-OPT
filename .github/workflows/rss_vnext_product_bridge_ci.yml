@@ -1,0 +1,55 @@
+name: RSS vNext model-to-Compiler-to-runtime contract CPU
+on:
+  push:
+    branches:
+      - main
+      - feat/rss-vnext-main-product-bridge-20261111
+    paths:
+      - "models/rss_vnext/**"
+      - "compiler/realsas_compiler_core/rss_vnext_mechanics_bridge_v1.py"
+      - "compiler/realsas_compiler_core/controllable_puppet_runtime_v1.py"
+      - "tests/models/test_rss_vnext_runtime_checkpoint_v1.py"
+      - "tests/models/test_rss_vnext_inference_candidate_v1.py"
+      - "tests/compiler/test_rss_vnext_mechanics_bridge_v1.py"
+      - ".github/workflows/rss_vnext_product_bridge_ci.yml"
+  pull_request:
+    paths:
+      - "models/rss_vnext/**"
+      - "compiler/realsas_compiler_core/rss_vnext_mechanics_bridge_v1.py"
+      - "tests/**"
+      - ".github/workflows/rss_vnext_product_bridge_ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-to-consumer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pinned-compatible CPU stack for deterministic Compiler
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy pytest
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Source code syntax and actual full bridge proof
+        env:
+          PYTHONPATH: .
+        run: |
+          python -m compileall -q models/rss_vnext compiler/realsas_compiler_core/rss_vnext_mechanics_bridge_v1.py
+          python -m pytest -q \
+            tests/models/test_rss_vnext_runtime_checkpoint_v1.py \
+            tests/models/test_rss_vnext_inference_candidate_v1.py \
+            tests/compiler/test_rss_vnext_mechanics_bridge_v1.py \
+            tests/models/test_rss_vnext_unified_character_model.py \
+            tests/models/test_rss_vnext_skin_query_field.py \
+            tests/models/test_rss_vnext_multiview_construction.py \
+            tests/models/test_rss_vnext_compiler_capability_court.py \
+            tests/compiler/test_controllable_puppet_runtime_v1.py \
+            tests/compiler/test_mechanics_control_solver_v1.py \
+            tests/compiler/test_control_motion_ik_integration_v1.py

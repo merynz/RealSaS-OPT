@@ -46,6 +46,8 @@ def _mesh():
     return {
         "topology_tokens": [128, 129, 4],
         "rest_xyz": [[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+        "base_xyz": [[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+        "local_features": [[.1, .2, .3]] * n,
         "faces": [[0, 1, 2]],
         "vertex_components": [0, 0, 0],
         "face_components": [0],

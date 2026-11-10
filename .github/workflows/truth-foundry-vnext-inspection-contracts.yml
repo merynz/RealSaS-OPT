@@ -1,0 +1,23 @@
+name: Truth Foundry RSSvNext source inspection contracts
+on:
+  pull_request:
+    paths:
+      - 'tools/corpus/truth_foundry/rss_vnext_inspection/**'
+      - 'tests/corpus/test_truth_vnext_inspection_contract.py'
+      - '.github/workflows/truth-foundry-vnext-inspection-contracts.yml'
+  workflow_dispatch:
+jobs:
+  source-court-contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install non-private local numeric dependencies
+        run: python -m pip install 'numpy>=1.24,<3' 'scipy>=1.10,<2'
+      - name: Verify synthetic source and supervision authority firewall
+        run: python tests/corpus/test_truth_vnext_inspection_contract.py -v

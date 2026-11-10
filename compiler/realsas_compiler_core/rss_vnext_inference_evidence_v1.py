@@ -220,6 +220,10 @@ def validate_inference_evidence_v1(
 def seal_inference_evidence_v1(
     value: RSSvNextInferenceEvidenceIRV1,
 ) -> RSSvNextInferenceEvidenceIRV1:
+    # Give a typed qualification error before canonical hashing encounters a
+    # NaN/invalid field. The same validation is repeated after sealing.
+    if value.mesh is not None:
+        _mesh(value.mesh)
     sealed = replace(value, evidence_hash=inference_evidence_hash_v1(value))
     validate_inference_evidence_v1(sealed)
     return sealed

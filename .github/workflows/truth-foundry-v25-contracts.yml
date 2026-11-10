@@ -1,0 +1,23 @@
+name: Truth Foundry V25 synthetic source courts
+on:
+  pull_request:
+    paths:
+      - 'tools/corpus/truth_foundry/evidence_v25/**'
+      - 'tests/corpus/test_truth_v25_*'
+      - '.github/workflows/truth-foundry-v25-contracts.yml'
+  workflow_dispatch:
+jobs:
+  source-evidence-contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Synthetic Drive and worker fail-closed tests
+        run: |
+          python tests/corpus/test_truth_v25_bulk_contracts.py
+          python tests/corpus/test_truth_v25_worker.py

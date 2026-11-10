@@ -8,6 +8,7 @@ from models.rss_vnext import (
     RSSvNextUnifiedCharacterModel,
 )
 from models.rss_vnext.early_semantic_field import masked_source_semantic_evidence_loss
+from models.rss_vnext.source_ray_evidence import sample_front_back_source_rays
 from models.rss_vnext.training_engine import (
     RSSvNextStructuralTrainer, RSSvNextStructuralTrainingBatch,
     RSSvNextTrainingWeights,
@@ -120,3 +121,49 @@ def test_semantic_targets_can_never_be_injected_as_a_third_observation():
     img, cam = source()
     with pytest.raises(ValueError, match="TWO_SOURCE_RGBA"):
         net(torch.cat((img, img[:, 1:2]), dim=1), cam)
+
+
+
+def test_original_source_rays_are_queryable_but_cannot_claim_point_visibility():
+    img = torch.zeros((1, 2, 4, 8, 8))
+    img[:, 0, 0] = .2
+    img[:, 1, 1] = .8
+    img[:, :, 3] = 1
+    cam = torch.zeros((1, 2, 13))
+    cam[:, :, 3] = 1  # right X
+    cam[:, :, 7] = 1  # up Y
+    cam[:, :, 11] = 1  # forward Z
+    cam[:, :, 12] = 1  # half-extent
+    xyz = torch.tensor([[[-.875, -.875, 0], [3, 0, 0]]])
+    source = sample_front_back_source_rays(img, cam, xyz)
+    assert source.rgba.shape == (1, 2, 2, 4)
+    assert source.projection_valid[0, 0].tolist() == [True, True]
+    assert source.projection_valid[0, 1].tolist() == [False, False]
+    assert source.rgba[0, 0, 0, 0] == pytest.approx(.2)
+    assert source.rgba[0, 0, 1, 1] == pytest.approx(.8)
+    assert source.ray_depth_authority == "UNKNOWN_NO_SOURCE_DEPTH"
+    assert source.appearance_authority == "ORIGINAL_RGBA_CAMERA_RAY_NOT_POINT_TEXTURE"
+
+
+def test_mesh_candidate_carries_source_ray_evidence_without_appearance_claim():
+    # Reuse a strict component-safe three-vertex sequence from source codec.
+    import numpy as np
+    from models.tessa.v1.model_v1 import TESSAConfigV1
+    from models.tessa.v1.tokenization_v1 import encode_adjacent_teacher_mesh_v1
+    net = make()
+    rgba, cam = source()
+    state, _, _ = net.encode_observations(rgba, cam)
+    seq = encode_adjacent_teacher_mesh_v1(
+        np.asarray([[-.25, -.25, 0], [.25, -.25, 0], [.25, .25, 0]], dtype=np.float64),
+        np.asarray([[0, 1, 2]], dtype=np.int64),
+        component_id="toy", chart_id="toy",
+        cfg=TESSAConfigV1(coordinate_bins=net.cfg.tessa.coordinate_bins),
+    )
+    mesh = net.build_mesh_candidate(
+        state, torch.tensor(seq.token_ids),
+        source_authority="TEACHER_FORCED_TRAINING_ONLY",
+    )
+    assert mesh.source_ray_evidence is not None
+    assert mesh.source_ray_evidence.rgba.shape[1] == mesh.rest_vertices_iris.shape[1]
+    assert mesh.source_ray_evidence.source_view_count == 2
+    assert not mesh.canonical_mesh_authority

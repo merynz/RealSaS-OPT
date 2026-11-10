@@ -1,0 +1,203 @@
+from __future__ import annotations
+
+from dataclasses import replace
+from copy import deepcopy
+
+import pytest
+import torch
+
+from compiler.realsas_compiler_core.types import QualificationError
+from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
+    RSSvNextInferenceEvidenceIRV1,
+    seal_inference_evidence_v1,
+    validate_inference_evidence_v1,
+)
+from models.rss_vnext import (
+    RSSvNextConfig, RSSvNextUnifiedCharacterModel, RSSvNextPatchEncoderForTests,
+)
+from models.rss_vnext.inference_checkpoint_v1 import (
+    checkpoint_payload_v1, save_inference_checkpoint_v1, load_inference_checkpoint_v1,
+)
+from models.rss_vnext.inference_evidence_export_v1 import export_inference_evidence_v1
+
+
+@pytest.fixture(autouse=True)
+def cpu_deterministic():
+    torch.manual_seed(17)
+    torch.set_num_threads(1)
+
+
+def _network():
+    cfg = RSSvNextConfig.tiny_for_test()
+    return RSSvNextUnifiedCharacterModel(
+        cfg, vision_encoder=RSSvNextPatchEncoderForTests(cfg.iris.image_token_dim),
+    ).eval()
+
+
+def _images():
+    rgba = torch.rand(1, 2, 4, 8, 8)
+    cam = torch.zeros(1, 2, 13)
+    cam[:, :, 3] = cam[:, :, 7] = cam[:, :, 11] = cam[:, :, 12] = 1.0
+    return rgba, cam
+
+
+def _mesh():
+    n = 3
+    return {
+        "topology_tokens": [128, 129, 4],
+        "rest_xyz": [[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+        "faces": [[0, 1, 2]],
+        "vertex_components": [0, 0, 0],
+        "face_components": [0],
+        "normals_xyz": [[0., 0., 1.]] * n,
+        "semantic_logits": [[0., 1.]] * n,
+        "presentation_role_logits": [[.1, .2, .3, .4]] * n,
+        "presentation_role_schema_id": "RSS.vNext.SemanticPresentationRoles.FourWayResearch.v1",
+        "affordance_logits": [[.5, .5]] * n,
+        "graphics_logits": [[.1, .2, .3, .4, .5]] * n,
+        "static_quality_logits": [[0., 0., 0., 0.]] * n,
+        "unsigned_distance": [.1] * n,
+        "sign_logits": [.7] * n,
+        "source_rays": {
+            "rgba": [[[.1, .2, .3, .8], [.2, .3, .4, .4]]] * n,
+            "valid": [[True, True]] * n,
+            "alpha": [[.8, .4]] * n,
+            "appearance_authority": "ORIGINAL_RGBA_CAMERA_RAY_NOT_POINT_TEXTURE",
+            "depth_authority": "UNKNOWN_NO_SOURCE_DEPTH",
+        },
+        "source_authority": "LEARNED_PREDICTED_TOPOLOGY",
+        "signed_solid_authority": "UNQUALIFIED",
+        "canonical_mesh_authority": False,
+    }
+
+
+def _candidate(**override):
+    payload = dict(
+        checkpoint_sha256="a" * 64,
+        observed_front_sha256="b" * 64,
+        observed_back_sha256="c" * 64,
+        camera_binding_sha256="d" * 64,
+        mesh_status="UNQUALIFIED_MESH_CANDIDATE",
+        mesh=_mesh(),
+    )
+    payload.update(override)
+    return RSSvNextInferenceEvidenceIRV1(**payload)
+
+
+def test_checkpoint_roundtrip_has_exact_state_and_no_product_grant(tmp_path):
+    net = _network()
+    path = tmp_path / "unified.pt"
+    digest = save_inference_checkpoint_v1(path, net)
+    assert len(digest) == 64
+    assert checkpoint_payload_v1(net)["qualification_status"] == "INFERENCE_PACKAGING_ONLY_NOT_PRODUCT_RELEASE"
+    loaded = load_inference_checkpoint_v1(
+        path, expected_sha256=digest,
+        vision_encoder=RSSvNextPatchEncoderForTests(net.cfg.iris.image_token_dim),
+        product_mode=False,
+    )
+    assert not loaded.training
+    assert all(not p.requires_grad for p in loaded.parameters())
+    for name, state in net.state_dict().items():
+        assert torch.equal(state, loaded.state_dict()[name]), name
+    rgba, cam = _images()
+    with torch.no_grad():
+        a = net(rgba, cam).continuous_surface_proposal
+        b = loaded(rgba, cam).continuous_surface_proposal
+    assert torch.equal(a, b)
+
+
+def test_checkpoint_refuses_unpinned_wrong_or_product_test_encoder(tmp_path):
+    net = _network()
+    target = tmp_path / "test.pt"
+    digest = save_inference_checkpoint_v1(target, net)
+    with pytest.raises(RuntimeError, match="CHECKPOINT_PIN_REQUIRED"):
+        load_inference_checkpoint_v1(target, expected_sha256="not-hash", vision_encoder=net.vision)
+    with pytest.raises(RuntimeError, match="CHECKPOINT_BYTES_DRIFT"):
+        load_inference_checkpoint_v1(target, expected_sha256="b" * 64, vision_encoder=net.vision)
+    with pytest.raises(RuntimeError, match="TEST_VISION_FORBIDDEN_IN_PRODUCT"):
+        load_inference_checkpoint_v1(target, expected_sha256=digest, vision_encoder=net.vision)
+    with target.open("ab") as fp:
+        fp.write(b"tampered")
+    with pytest.raises(RuntimeError, match="CHECKPOINT_BYTES_DRIFT"):
+        load_inference_checkpoint_v1(
+            target, expected_sha256=digest, vision_encoder=net.vision, product_mode=False,
+        )
+
+
+def test_compiler_accepts_exact_mesh_addressed_evidence_without_minting_product():
+    value = seal_inference_evidence_v1(_candidate())
+    validate_inference_evidence_v1(value, expected_checkpoint_sha256="a" * 64)
+    assert value.qualification_status == "UNQUALIFIED_NEURAL_PROPOSAL_ONLY"
+    assert not value.mesh["canonical_mesh_authority"]
+    with pytest.raises(QualificationError, match="CHECKPOINT_BINDING_DRIFT"):
+        validate_inference_evidence_v1(value, expected_checkpoint_sha256="e" * 64)
+
+
+@pytest.mark.parametrize("change,code", [
+    ({"canonical_mesh_authority": True}, "PREMATURE_AUTHORITY"),
+    ({"source_authority": "TEACHER_FORCED_TRAINING_ONLY"}, "PREMATURE_AUTHORITY"),
+    ({"faces": [[0, 1, 3]]}, "FACE_INVALID"),
+    ({"vertex_components": [0, 1, 0]}, "CROSS_COMPONENT_FACE"),
+    ({"unsigned_distance": [float("nan"), .1, .1]}, "UDF"),
+])
+def test_compiler_rejects_invented_authority_and_bad_addresses(change, code):
+    mesh = _mesh()
+    mesh.update(change)
+    with pytest.raises((QualificationError, ValueError), match=code):
+        seal_inference_evidence_v1(_candidate(mesh=mesh))
+
+
+def test_source_ray_ownership_not_surface_texture():
+    mesh = _mesh()
+    mesh["source_rays"]["depth_authority"] = "KNOWN"
+    with pytest.raises(QualificationError, match="SOURCE_RAY_AUTHORITY"):
+        seal_inference_evidence_v1(_candidate(mesh=mesh))
+
+
+def test_hash_drift_and_abstain_are_fail_closed():
+    value = seal_inference_evidence_v1(_candidate())
+    changed = deepcopy(value.mesh)
+    changed["rest_xyz"][0][0] += .2
+    with pytest.raises(QualificationError, match="HASH_DRIFT"):
+        validate_inference_evidence_v1(replace(value, mesh=changed))
+    abstain = seal_inference_evidence_v1(_candidate(
+        mesh=None, mesh_status="ABSTAIN", reason="TOPOLOGY_SEQUENCE_INCOMPLETE",
+    ))
+    assert abstain.mesh is None
+    with pytest.raises(QualificationError, match="ABSTAIN_MUST_NOT_PROMOTE"):
+        seal_inference_evidence_v1(_candidate(
+            mesh=_mesh(), mesh_status="ABSTAIN", reason="TOPOLOGY_SEQUENCE_INCOMPLETE",
+        ))
+
+
+def test_model_source_state_export_and_source_change_firewall():
+    net = _network()
+    rgba, cam = _images()
+    with torch.no_grad():
+        out = net(rgba, cam)
+    prediction = {
+        "state": out.state,
+        "mesh_status": "ABSTAIN",
+        "mesh_candidate": None,
+        "mesh_failure": "TOPOLOGY_SEQUENCE_INCOMPLETE",
+        "observed_view_count": 2,
+        "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
+        "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
+    }
+    exported = export_inference_evidence_v1(
+        prediction, original_rgba=rgba, original_camera_features=cam,
+        checkpoint_sha256="a" * 64,
+    )
+    assert exported.mesh_status == "ABSTAIN"
+    assert exported.observed_front_sha256 != exported.observed_back_sha256
+    assert exported.mesh is None
+    with pytest.raises(ValueError, match="SOURCE_STATE_MISMATCH"):
+        export_inference_evidence_v1(
+            prediction, original_rgba=rgba.clone() + 0.01,
+            original_camera_features=cam, checkpoint_sha256="a" * 64,
+        )
+    with pytest.raises(ValueError, match="REQUIRES_TWO_RGBA"):
+        export_inference_evidence_v1(
+            prediction, original_rgba=rgba[:, :1],
+            original_camera_features=cam, checkpoint_sha256="a" * 64,
+        )

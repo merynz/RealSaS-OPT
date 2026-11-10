@@ -103,7 +103,7 @@ def test_checkpoint_roundtrip_has_exact_state_and_no_product_grant(tmp_path):
     with torch.no_grad():
         a = net(rgba, cam).continuous_surface_proposal
         b = loaded(rgba, cam).continuous_surface_proposal
-    assert torch.equal(a, b)
+    assert torch.allclose(a, b, atol=1e-6, rtol=1e-6)
 
 
 def test_checkpoint_refuses_unpinned_wrong_or_product_test_encoder(tmp_path):

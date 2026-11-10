@@ -6,6 +6,7 @@ on:
     paths:
       - "models/rss_vnext/**"
       - "tests/models/test_rss_vnext_unified_character_model.py"
+      - "tests/models/test_rss_vnext_motion_topology_learning.py"
       - ".github/workflows/rss_vnext_unified_cpu_smoke.yml"
   workflow_dispatch:
 
@@ -31,5 +32,5 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          python -m compileall -q models/rss_vnext tests/models/test_rss_vnext_unified_character_model.py
-          python -m pytest -q tests/models/test_rss_vnext_unified_character_model.py
+          python -m compileall -q models/rss_vnext tests/models/test_rss_vnext_unified_character_model.py tests/models/test_rss_vnext_motion_topology_learning.py
+          python -m pytest -q tests/models/test_rss_vnext_unified_character_model.py tests/models/test_rss_vnext_motion_topology_learning.py

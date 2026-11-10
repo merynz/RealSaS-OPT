@@ -117,6 +117,9 @@ class RSSvNextSceneState:
     semantic_logits: torch.Tensor
     affordance_logits: torch.Tensor
     graphics_logits: torch.Tensor
+    region_slot_features: torch.Tensor
+    region_relation_logits: torch.Tensor
+    region_relation_valid_mask: torch.Tensor
     source_view_authority: tuple[str, str] = ("SOURCE_OBSERVED_FRONT", "SOURCE_OBSERVED_BACK")
     aux_view_authority: str = "LEARNED_PREDICTED_ONLY"
 

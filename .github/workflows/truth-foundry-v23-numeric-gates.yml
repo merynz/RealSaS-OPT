@@ -1,0 +1,32 @@
+name: truth-foundry-v23-numeric-gates
+on:
+  push:
+    branches: [truth-foundry-v23-366-npz-numeric-court-20261110]
+    paths:
+      - '.github/workflows/truth-foundry-v23-numeric-gates.yml'
+      - 'tools/corpus/truth_foundry/evidence_v23/**'
+      - 'tests/corpus/test_truth_v23.py'
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-v23-numeric-gates.yml'
+      - 'tools/corpus/truth_foundry/evidence_v23/**'
+      - 'tests/corpus/test_truth_v23.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: truth-foundry-v23-numeric-gates-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-identity-and-nonpromotion:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and fail-closed synthetic source gates
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v23 tests/corpus/test_truth_v23.py
+          python -m unittest discover -s tests/corpus -p 'test_truth_v23.py' -v
+      - name: Public CI cannot read source data
+        run: echo "PRIVATE_SOURCE_READS=0 REAL_NUMERIC_COURT=not_executed TRAINING_ADMISSIONS=0"

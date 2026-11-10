@@ -23,6 +23,7 @@ import numpy as np
 import torch
 
 from .unified_character_model import RSSvNextUnifiedCharacterModel
+from models.axis.rig_program_model_v6 import RigTokenKindV6
 
 
 SCHEMA = "RealSaS.RSSvNext.InferenceEvidenceBundle.v1"
@@ -121,7 +122,10 @@ class RSSvNextInferenceEvidenceBundleV1:
                 if archive["mesh_vertex_component"].shape != (mesh.shape[1],):
                     raise ValueError("RSS_VNEXT_CANDIDATE_COMPONENT_IDENTITY")
             if m["status"] == "CONTROL_SKIN_CANDIDATE":
-                if not m.get("rig_events"):
+                events = m.get("rig_events")
+                if (not isinstance(events, list) or len(events) < 4
+                        or events[0].get("kind") != int(RigTokenKindV6.BOS)
+                        or events[-1].get("kind") != int(RigTokenKindV6.EOS)):
                     raise ValueError("RSS_VNEXT_CANDIDATE_RIG_EVENTS_REQUIRED")
                 w = archive["skin_weights"]
                 valid = archive["skin_joint_mask"]
@@ -129,6 +133,11 @@ class RSSvNextInferenceEvidenceBundleV1:
                     raise ValueError("RSS_VNEXT_CANDIDATE_SKIN_MESH_ADDRESS")
                 if valid.shape != (1, w.shape[2]) or not bool(valid.any()):
                     raise ValueError("RSS_VNEXT_CANDIDATE_SKIN_JOINT_MASK")
+                n_joints = sum(e["kind"] == int(RigTokenKindV6.JOINT) for e in events)
+                n_codes = sum(e["kind"] == int(RigTokenKindV6.SKIN_CODE) for e in events)
+                if (n_joints != w.shape[-1] or n_joints == 0
+                        or n_codes != n_joints * int(m.get("skin_tokens_per_joint") or 0)):
+                    raise ValueError("RSS_VNEXT_CANDIDATE_SKIN_TOKEN_COUNT_DRIFT")
                 if np.any(w < -1e-6) or np.max(np.abs(w.sum(axis=-1) - 1.)) > 1e-4:
                     raise ValueError("RSS_VNEXT_CANDIDATE_SKIN_SIMPLEX")
                 if np.any(w[:, :, valid[0] == 0] > 1e-5):
@@ -192,6 +201,10 @@ def build_rss_vnext_inference_evidence_v1(
     if weights is not None and events is None:
         raise ValueError("RSS_VNEXT_CANDIDATE_ORPHAN_SKIN_WEIGHTS")
     if events is not None:
+        n_joints = sum(int(e.kind) == int(RigTokenKindV6.JOINT) for e in events)
+        code_count = sum(int(e.kind) == int(RigTokenKindV6.SKIN_CODE) for e in events)
+        if not n_joints or not code_count or code_count % n_joints:
+            raise ValueError("RSS_VNEXT_CANDIDATE_RIG_SKIN_CODE_GRAMMAR")
         arrays.update({
             "skin_weights": _numeric("skin_weights", weights),
             "skin_joint_mask": _numeric("skin_joint_mask", mask),
@@ -225,6 +238,9 @@ def build_rss_vnext_inference_evidence_v1(
         "mesh_failure": result.get("mesh_failure"),
         "product_revision_id": None,
         "rig_events": rig_events,
+        "skin_tokens_per_joint": (
+            code_count // n_joints if events is not None else 0
+        ),
         "coordinate_domain": "IRIS_XYZ_MINUS1_TO_PLUS1",
         "mesh_identity_policy": "EXACT_TOKEN_ORDER_UNQUALIFIED",
         "appearance_authority": "SOURCE_RAY_ONLY_NOT_UNSEEN_TEXTURE",

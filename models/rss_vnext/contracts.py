@@ -135,6 +135,7 @@ class RSSvNextOutput:
     skin_weight_proposal: torch.Tensor | None
     skin_joint_valid_mask: torch.Tensor | None
     qualification_status: str = "UNQUALIFIED_NEURAL_PROPOSAL"
+    mesh_candidate: object | None = None  # typed RSSvNextStructuralMeshCandidate; no circular import
 
 
 __all__ = [

@@ -749,6 +749,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         *,
         max_topology_tokens: int | None = None,
         generate_controls: bool = False,
+        executable_constraint_operators: tuple[str, ...] | None = None,
     ) -> dict:
         """Free-running constrained topology and mechanical proposal.
 
@@ -758,6 +759,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         """
         if self.training:
             raise RuntimeError("RSS_VNEXT_TEACHER_FREE_REQUIRES_EVAL")
+        if generate_controls and executable_constraint_operators is None:
+            raise ValueError("RSS_VNEXT_RIG_REQUIRES_COMPILER_CAPABILITIES")
+        if not generate_controls and executable_constraint_operators is not None:
+            raise ValueError("RSS_VNEXT_UNUSED_COMPILER_CAPABILITIES")
         if rgba.shape[0] != 1:
             raise ValueError("RSS_VNEXT_MESH_GENERATION_BATCH_ONE_ONLY")
         out = self(rgba, camera_features)
@@ -814,6 +819,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             events = self.axis.generate_events(
                 memory, tokens_per_joint=self.cfg.skin_tokens_per_joint,
                 max_steps=self.cfg.control_max_seq,
+                allowed_constraint_operators=executable_constraint_operators,
             )
             result["control_event_proposal"] = events
             seq = AXISSequenceV6.from_events(

@@ -1,0 +1,33 @@
+name: truth-foundry-v21-npz-numeric-contracts
+on:
+  push:
+    branches: [truth-foundry-v21-266-npz-numeric-court-20261110]
+    paths:
+      - '.github/workflows/truth-foundry-v21-npz-numeric-contracts.yml'
+      - 'tools/corpus/truth_foundry/evidence_v21/**'
+      - 'tests/corpus/test_truth_v21.py'
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-v21-npz-numeric-contracts.yml'
+      - 'tools/corpus/truth_foundry/evidence_v21/**'
+      - 'tests/corpus/test_truth_v21.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: truth-foundry-v21-contracts-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  fail-closed-source-identity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and test offline source admission gates
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v21 tests/corpus/test_truth_v21.py
+          python -m unittest discover -s tests/corpus -p 'test_truth_v21.py' -v
+      - name: Explicit source authority boundary
+        run: |
+          echo "SOURCE_DOWNLOADS=0; TRAINING_ADMISSIONS=0; ORIGINAL_SOURCE_PARITY=unverified"

@@ -1,0 +1,32 @@
+name: truth-foundry-v22-numeric-gates
+on:
+  push:
+    branches: [truth-foundry-v22-334-npz-numeric-court-20261110]
+    paths:
+      - '.github/workflows/truth-foundry-v22-numeric-gates.yml'
+      - 'tools/corpus/truth_foundry/evidence_v22/**'
+      - 'tests/corpus/test_truth_v22.py'
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-v22-numeric-gates.yml'
+      - 'tools/corpus/truth_foundry/evidence_v22/**'
+      - 'tests/corpus/test_truth_v22.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: truth-foundry-v22-numeric-gates-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-identity-and-nonpromotion:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and synthetic fail-closed contracts
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/evidence_v22 tests/corpus/test_truth_v22.py
+          python -m unittest discover -s tests/corpus -p 'test_truth_v22.py' -v
+      - name: CI cannot read user-private Drive source
+        run: echo "PRIVATE_SOURCE_READS=0 ACTUAL_SOURCE_COURT=not_executed TRAINING_ADMISSIONS=0"

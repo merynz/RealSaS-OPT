@@ -11,6 +11,11 @@ on:
       - "tests/models/test_rss_vnext_early_semantics.py"
       - "tests/models/test_rss_vnext_multiview_construction.py"
       - "tests/models/test_rss_vnext_skin_query_field.py"
+      - "tests/models/test_rss_vnext_compiler_capability_court.py"
+      - "tests/compiler/test_mechanics_control_solver_v1.py"
+      - "tests/compiler/test_control_motion_ik_integration_v1.py"
+      - "tests/compiler/test_mechanics_main_subtree_runtime_v1.py"
+      - "tests/compiler/test_control_ready_rig_v2.py"
       - ".github/workflows/rss_vnext_unified_cpu_smoke.yml"
   workflow_dispatch:
 
@@ -36,5 +41,5 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          python -m compileall -q models/rss_vnext tests/models/test_rss_vnext_unified_character_model.py tests/models/test_rss_vnext_motion_topology_learning.py tests/models/test_rss_vnext_structural_trainer.py tests/models/test_rss_vnext_early_semantics.py tests/models/test_rss_vnext_multiview_construction.py tests/models/test_rss_vnext_skin_query_field.py
-          python -m pytest -q tests/models/test_rss_vnext_unified_character_model.py tests/models/test_rss_vnext_motion_topology_learning.py tests/models/test_rss_vnext_structural_trainer.py tests/models/test_rss_vnext_early_semantics.py tests/models/test_rss_vnext_multiview_construction.py tests/models/test_rss_vnext_skin_query_field.py
+          python -m compileall -q models/rss_vnext tests/models/test_rss_vnext_unified_character_model.py tests/models/test_rss_vnext_motion_topology_learning.py tests/models/test_rss_vnext_structural_trainer.py tests/models/test_rss_vnext_early_semantics.py tests/models/test_rss_vnext_multiview_construction.py tests/models/test_rss_vnext_skin_query_field.py tests/models/test_rss_vnext_compiler_capability_court.py tests/compiler/test_mechanics_control_solver_v1.py tests/compiler/test_control_motion_ik_integration_v1.py tests/compiler/test_mechanics_main_subtree_runtime_v1.py tests/compiler/test_control_ready_rig_v2.py
+          python -m pytest -q tests/models/test_rss_vnext_unified_character_model.py tests/models/test_rss_vnext_motion_topology_learning.py tests/models/test_rss_vnext_structural_trainer.py tests/models/test_rss_vnext_early_semantics.py tests/models/test_rss_vnext_multiview_construction.py tests/models/test_rss_vnext_skin_query_field.py tests/models/test_rss_vnext_compiler_capability_court.py tests/compiler/test_mechanics_control_solver_v1.py tests/compiler/test_control_motion_ik_integration_v1.py tests/compiler/test_mechanics_main_subtree_runtime_v1.py tests/compiler/test_control_ready_rig_v2.py

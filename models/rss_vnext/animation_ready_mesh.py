@@ -20,6 +20,7 @@ from models.iris.vnext.scene_core_v1 import IRISVNextSceneCoreV1
 from models.tessa.v1.sequence_codec_v1 import decode_tessa_asset_sequence_v1
 from models.tessa.v2.court_v2 import _codec_config, evaluate_decoded_topology_v2, TESSADecodedTopologyCourtV2
 from models.tessa.v3.config_v3 import TESSAStructuralizerConfigV3
+from .source_ray_evidence import RSSvNextSourceRayEvidence
 from models.tessa.v1.mechanical_objective_v1 import (
     triangle_deformation_metrics_v1, mechanical_consequence_loss_v1,
 )
@@ -45,6 +46,9 @@ class RSSvNextStructuralMeshCandidate:
     chart_identity_status: str = "NOT_DECODED_FROM_V1_GRAMMAR"
     signed_solid_authority: str = "UNQUALIFIED"
     canonical_mesh_authority: bool = False
+    # Original view rays can be queried at these exact candidate vertices,
+    # but have no depth/visibility or point-texture ownership authority.
+    source_ray_evidence: RSSvNextSourceRayEvidence | None = None
 
     def validate(self) -> None:
         xyz = self.rest_vertices_iris
@@ -63,6 +67,8 @@ class RSSvNextStructuralMeshCandidate:
             raise ValueError("RSS_VNEXT_MESH_NONFINITE")
         if self.canonical_mesh_authority:
             raise ValueError("RSS_VNEXT_MESH_CANONICAL_PREMATURE")
+        if self.source_ray_evidence is not None:
+            self.source_ray_evidence.validate(batch=1, points=v)
 
 
 def _normals_indexed(vertices: Tensor, faces: Tensor) -> Tensor:

@@ -165,8 +165,8 @@ def test_shared_source_to_exact_mesh_to_control_to_query_skin_gradient():
     assert out.skin_joint_valid_mask.tolist() == [[True, True]]
     assert out.dynamic_mesh_candidate is not None
     # The same exact topology address domain must traverse all experts.
-    assert mesh.component_ids.shape == (mesh.rest_vertices_iris.shape[1],)
-    assert out.dynamic_mesh_candidate.rest_vertices.shape[:2] == mesh.rest_vertices_iris.shape[:2]
+    assert mesh.vertex_component_ids.shape == (mesh.rest_vertices_iris.shape[1],)
+    assert out.dynamic_mesh_candidate.vertices.shape[:2] == mesh.rest_vertices_iris.shape[:2]
     objective = (
         (out.skin_weight_proposal[:, :, 0] - .83).square().mean()
         + .01 * out.structural_logits.square().mean()

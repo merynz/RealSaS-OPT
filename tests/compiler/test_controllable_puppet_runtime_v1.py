@@ -261,3 +261,49 @@ def test_no_automatic_attachment_invention_and_no_parent_space_guessing():
     s.set_control(ControlTransformIRV1("C_ROOT",translation=(.5,0.,0.)))
     with pytest.raises(QualificationError,match="PARENT_SPACE_INVERSION_REQUIRED"):
         s.drag_world("C_IK",(.5,1.5,0.))
+
+
+
+def test_runtime_snapshot_replays_controls_across_view_changes_without_model():
+    session=ControllablePuppetSessionV1(qualified_synthetic_bundle())
+    session.drag_world("C_IK",(.5,1.5,0.))
+    session.set_view_index(1)
+    pose=session.frame()
+    checkpoint=session.snapshot()
+    assert checkpoint.state_hash==checkpoint.checked_hash()
+    assert checkpoint.view_index==1
+    session.drag_world("C_IK",(-.25,1.75,0.))
+    session.set_view_index(7)
+    assert session.frame().deformed.positions != pose.deformed.positions
+    session.restore(checkpoint)
+    assert session.view_index==1
+    assert session.frame().pose.joints==pose.pose.joints
+    assert session.frame().deformed.positions==pose.deformed.positions
+    assert session.snapshot().state_hash==checkpoint.state_hash
+
+
+def test_runtime_snapshot_tampering_rejected_and_session_state_is_atomic():
+    session=ControllablePuppetSessionV1(qualified_synthetic_bundle())
+    session.set_view_index(2)
+    baseline=session.snapshot()
+    with pytest.raises(QualificationError,match="SNAPSHOT_HASH_DRIFT"):
+        session.restore(replace(baseline,view_index=3))
+    assert session.view_index==2
+    foreign=replace(
+        baseline,product_revision_id="OTHER_RECOMPILED_ASSET",state_hash="",
+    )
+    from compiler.realsas_compiler_core.controllable_puppet_runtime_v1 import replace_snapshot_hash
+    with pytest.raises(QualificationError,match="SNAPSHOT_PARENT_DRIFT"):
+        session.restore(replace_snapshot_hash(foreign))
+    assert session.snapshot().state_hash==baseline.state_hash
+    forged=replace(
+        baseline,
+        control_states=(ControlTransformIRV1("UNKNOWN_CONTROL"),),
+        state_hash="",
+    )
+    with pytest.raises(QualificationError,match="SNAPSHOT_CONTROLS_UNKNOWN"):
+        session.restore(replace_snapshot_hash(forged))
+    forged=replace(baseline,active_attachments=(),state_hash="")
+    with pytest.raises(QualificationError,match="SNAPSHOT_SLOT_COVERAGE"):
+        session.restore(replace_snapshot_hash(forged))
+    assert session.snapshot().state_hash==baseline.state_hash

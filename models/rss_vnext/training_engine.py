@@ -197,13 +197,13 @@ class RSSvNextStructuralTrainer:
                     layer=batch.flexicubes_layer,
                     field_policy="SIGNED_HYPOTHESIS_ONLY",
                 )
-                n = fc_surface.xyz.shape[1]
-                idx = torch.linspace(
-                    0, n - 1, min(n, 512), device=target.device,
-                ).long()
                 # Only source samples are supervision. Neural/proposed FC
                 # vertices enter the differentiable path back into H(x).
                 if target is not None and self.weights.flexicubes_surface > 0:
+                    n = fc_surface.xyz.shape[1]
+                    idx = torch.linspace(
+                        0, n - 1, min(n, 512), device=target.device,
+                    ).long()
                     fc_loss = (
                         symmetric_surface_chamfer_v1(
                             fc_surface.xyz[:, idx], target,

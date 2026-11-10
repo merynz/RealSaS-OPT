@@ -8,6 +8,7 @@ on:
       - "tests/models/test_rss_vnext_unified_character_model.py"
       - "tests/models/test_rss_vnext_motion_topology_learning.py"
       - "tests/models/test_rss_vnext_structural_trainer.py"
+      - "tests/models/test_rss_vnext_early_semantics.py"
       - ".github/workflows/rss_vnext_unified_cpu_smoke.yml"
   workflow_dispatch:
 
@@ -33,5 +34,5 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          python -m compileall -q models/rss_vnext tests/models/test_rss_vnext_unified_character_model.py tests/models/test_rss_vnext_motion_topology_learning.py tests/models/test_rss_vnext_structural_trainer.py
-          python -m pytest -q tests/models/test_rss_vnext_unified_character_model.py tests/models/test_rss_vnext_motion_topology_learning.py tests/models/test_rss_vnext_structural_trainer.py
+          python -m compileall -q models/rss_vnext tests/models/test_rss_vnext_unified_character_model.py tests/models/test_rss_vnext_motion_topology_learning.py tests/models/test_rss_vnext_structural_trainer.py tests/models/test_rss_vnext_early_semantics.py
+          python -m pytest -q tests/models/test_rss_vnext_unified_character_model.py tests/models/test_rss_vnext_motion_topology_learning.py tests/models/test_rss_vnext_structural_trainer.py tests/models/test_rss_vnext_early_semantics.py

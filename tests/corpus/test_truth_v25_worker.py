@@ -1,5 +1,5 @@
 import csv, pathlib, tempfile, sqlite3, json, subprocess, sys, zipfile
-sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))
+sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[2] / 'tools' / 'corpus' / 'truth_foundry' / 'evidence_v25'))
 import corpus_court_worker as c
 
 def test_synthetic_scope_guard():

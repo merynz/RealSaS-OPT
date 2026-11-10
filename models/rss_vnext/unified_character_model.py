@@ -30,6 +30,7 @@ from .animation_ready_mesh import RSSvNextAnimationReadyMesh, RSSvNextStructural
 from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefinementConfig
 from .semantic_structure import RSSvNextGenericRegionStructure
 from .early_semantic_field import RSSvNextEarlySemanticField
+from .source_ray_evidence import sample_front_back_source_rays
 from .motion_aware_topology_learning import (
     RSSvNextMotionCourt, RSSvNextTopologyPreferenceConfig,
     RSSvNextTopologyPreferenceResult,
@@ -533,7 +534,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         *,
         source_authority: str = "LEARNED_PREDICTED_TOPOLOGY",
     ) -> RSSvNextStructuralMeshCandidate:
-        return self.mesh_bridge(
+        mesh = self.mesh_bridge(
             state.scene_triplanes, topology_token_ids,
             refine=self.surface_refine,
             semantics=lambda local_h: (
@@ -547,6 +548,14 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             sign_logit=self.sign_logit,
             source_authority=source_authority,
         )
+        # Requery immutable source rays instead of compressing all visual
+        # evidence into semantic labels or assigning invented hidden textures.
+        mesh.source_ray_evidence = sample_front_back_source_rays(
+            state.observed_rgba, state.camera_features,
+            mesh.rest_vertices_iris,
+        )
+        mesh.validate()
+        return mesh
 
     @torch.no_grad()
     def propose_teacher_free(

@@ -1,0 +1,21 @@
+name: Truth Foundry V26 numeric court contracts
+on:
+  pull_request:
+    paths:
+      - 'tools/corpus/truth_foundry/evidence_v26/**'
+      - 'tests/corpus/test_truth_v26_source_contracts.py'
+      - '.github/workflows/truth-foundry-v26-contracts.yml'
+  workflow_dispatch:
+jobs:
+  synthetic-source-court:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run source-court non-promotion syntactic gates
+        run: python tests/corpus/test_truth_v26_source_contracts.py -v

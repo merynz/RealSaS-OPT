@@ -29,6 +29,7 @@ from models.tessa.v2.generation_v2 import TESSAGrammarStateV2
 from .animation_ready_mesh import RSSvNextAnimationReadyMesh, RSSvNextStructuralMeshCandidate
 from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefinementConfig
 from .semantic_structure import RSSvNextGenericRegionStructure
+from .early_semantic_field import RSSvNextEarlySemanticField
 from .motion_aware_topology_learning import (
     RSSvNextMotionCourt, RSSvNextTopologyPreferenceConfig,
     RSSvNextTopologyPreferenceResult,
@@ -231,6 +232,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         self.vision = vision_encoder
         self.iris = IRISVNextSceneCoreV1(cfg.iris)
         h = cfg.iris.local_feature_dim
+        # Semantic evidence is inferred BEFORE the 3D triplane is constructed;
+        # learned priors act residually on image tokens, not as a replacement.
+        self.early_semantics = RSSvNextEarlySemanticField(
+            cfg.iris.image_token_dim, h, cfg.semantic_evidence_channels,
+        )
+        self.semantic_evidence_to_memory = nn.Linear(cfg.semantic_evidence_channels, h)
         self.udf = nn.Linear(h, 1)  # always nonnegative, independent of sign authority
         self.sign_logit = nn.Linear(h, 1)  # a proposal, not global-sign qualification
         self.semantic = nn.Linear(h, cfg.region_slots + 1)  # final = UNKNOWN
@@ -238,6 +245,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             h, cfg.region_slots, heads=cfg.iris.attention_heads,
         )
         self.semantic_to_memory = nn.Linear(cfg.region_slots + 1, h)
+        # The full directed region graph participates in structural/mechanics
+        # conditioning. Pool both INCOMING and OUTGOING relation evidence;
+        # the unpooled raw relation logits remain in the common carrier.
+        self.region_graph_to_memory = nn.Sequential(
+            nn.LayerNorm(6), nn.Linear(6, h), nn.GELU(), nn.Linear(h, h),
+        )
         self.affordance = nn.Linear(h, cfg.affordance_classes + 1)
         # Mechanics-first topology: the structural Transformer receives
         # learned deformation-affordance features BEFORE choosing face tokens.
@@ -314,7 +327,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             raise ValueError("RSS_VNEXT_VISION_TOKEN_CONTRACT")
         if token_xy.shape != (*tokens.shape[:3], 2):
             raise ValueError("RSS_VNEXT_VISION_XY_CONTRACT")
-        planes = self.iris.encode_scene(tokens, token_xy, camera_features)
+        early_semantics = self.early_semantics(tokens)
+        planes = self.iris.encode_scene(
+            early_semantics.conditioned_image_tokens, token_xy, camera_features,
+        )
         xyz = self._query_grid.to(planes).expand(b, -1, -1)
         local = self.iris.query(planes, xyz)
         h = local["H"]
@@ -324,6 +340,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             "sign_logit": self.sign_logit(h).squeeze(-1),
         }
         regions = self.semantic_structure(h)
+        outgoing = regions.relation_logits.mean(dim=2)
+        incoming = regions.relation_logits.mean(dim=1)
+        relation_tokens = (
+            regions.region_slots
+            + self.region_graph_to_memory(torch.cat((outgoing, incoming), dim=-1))
+        )
         aux = aux_unc = None
         if self.aux_views is not None:
             aux, aux_unc = self.aux_views(tokens)
@@ -332,14 +354,19 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 observed_rgba=rgba,
                 camera_features=camera_features,
                 observed_image_tokens=tokens,
+                conditioned_image_tokens=early_semantics.conditioned_image_tokens,
+                source_semantic_patch_logits=early_semantics.source_patch_logits,
+                source_semantic_log_uncertainty=early_semantics.source_evidence_uncertainty,
                 scene_triplanes=planes,
                 query_xyz=xyz,
                 local_features=h,
                 geometry=local,
                 semantic_logits=self.semantic(h) + regions.membership_logits,
+                semantic_evidence_logits=self.early_semantics.query_field(h),
                 affordance_logits=self.affordance(h),
                 graphics_logits=self.graphics(h),
                 region_slot_features=regions.region_slots,
+                region_relation_tokens=relation_tokens,
                 region_relation_logits=regions.relation_logits,
                 region_relation_valid_mask=regions.relation_valid_mask,
             ),
@@ -352,14 +379,21 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         scene_src = planes.permute(0, 1, 3, 4, 2).reshape(b, p * h * w, c)
         if auxiliary is not None:
             scene_src = torch.cat((scene_src, self.aux_to_scene(auxiliary)), dim=1)
+        surface_evidence = (
+            state.local_features
+            + self.articulation_prior(state.local_features)
+            + self.affordance_to_memory(state.affordance_logits)
+            + self.semantic_to_memory(state.semantic_logits)
+            + self.semantic_evidence_to_memory(state.semantic_evidence_logits)
+        )
+        # Append region+relation tokens in the structural expert's surface
+        # stream rather than discarding their identities after classification.
+        surface_source = torch.cat(
+            (surface_evidence, state.region_relation_tokens), dim=1,
+        )
         return self.tessa.encode_memory(
             scene_source=scene_src,
-            surface_source=(
-                state.local_features
-                + self.articulation_prior(state.local_features)
-                + self.affordance_to_memory(state.affordance_logits)
-                + self.semantic_to_memory(state.semantic_logits)
-            ),
+            surface_source=surface_source,
             presentation_source=self.presentation(state.local_features) + self.graphics_to_memory(state.graphics_logits),
         )
 
@@ -384,8 +418,13 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         mesh: RSSvNextStructuralMeshCandidate | None = None,
     ) -> Tensor:
         # Mesh features remain addressed to the same live scene H(x).
-        context = state.local_features if mesh is None else torch.cat(
-            (state.local_features, mesh.local_features), dim=1,
+        context = (
+            torch.cat((state.local_features, state.region_relation_tokens), dim=1)
+            if mesh is None
+            else torch.cat((
+                state.local_features, state.region_relation_tokens,
+                mesh.local_features,
+            ), dim=1)
         )
         fused, _ = self.control_cross(
             structural, context, context, need_weights=False,

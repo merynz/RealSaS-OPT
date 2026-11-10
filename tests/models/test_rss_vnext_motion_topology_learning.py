@@ -149,6 +149,10 @@ def test_same_two_view_carrier_receives_motion_preference_gradient():
     out.loss.backward()
     assert net.tessa.lm_head.weight.grad is not None
     assert torch.isfinite(net.tessa.lm_head.weight.grad).all()
+    assert net.articulation_prior[-1].weight.grad is not None
+    assert net.articulation_prior[-1].weight.grad.abs().sum() > 0
+    assert net.affordance_to_memory.weight.grad is not None
+    assert net.affordance_to_memory.weight.grad.abs().sum() > 0
     assert net.iris.scene.scene_queries.grad is not None
     assert net.vision.patch.weight.grad is not None
 

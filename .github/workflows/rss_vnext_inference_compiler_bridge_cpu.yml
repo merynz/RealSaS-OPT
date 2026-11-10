@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "models/rss_vnext/inference_checkpoint_v1.py"
+      - "models/rss_vnext/inference_pipeline_v1.py"
+      - "models/rss_vnext/unified_character_model.py"
       - "models/rss_vnext/inference_evidence_export_v1.py"
       - "compiler/realsas_compiler_core/rss_vnext_inference_evidence_v1.py"
       - "tests/models/test_rss_vnext_inference_checkpoint_bridge_v1.py"
@@ -33,5 +35,5 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          python -m compileall -q models/rss_vnext/inference_checkpoint_v1.py models/rss_vnext/inference_evidence_export_v1.py compiler/realsas_compiler_core/rss_vnext_inference_evidence_v1.py tests/models/test_rss_vnext_inference_checkpoint_bridge_v1.py
+          python -m compileall -q models/rss_vnext/inference_checkpoint_v1.py models/rss_vnext/inference_pipeline_v1.py models/rss_vnext/inference_evidence_export_v1.py compiler/realsas_compiler_core/rss_vnext_inference_evidence_v1.py tests/models/test_rss_vnext_inference_checkpoint_bridge_v1.py
           python -m pytest -q tests/models/test_rss_vnext_inference_checkpoint_bridge_v1.py tests/models/test_rss_vnext_compiler_capability_court.py

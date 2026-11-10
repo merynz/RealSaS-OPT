@@ -40,6 +40,8 @@ class RSSvNextStructuralMeshCandidate:
     normals: Tensor                       # [1,V,3], differentiable
     geometry: dict[str, Tensor]           # includes UDF/sign *proposals*
     semantic_logits: Tensor               # [1,V,R+1], UNKNOWN last
+    presentation_role_logits: Tensor      # [1,V,K], StdGEN-style visible material strata
+    presentation_role_schema_id: str
     affordance_logits: Tensor             # [1,V,A+1]
     graphics_logits: Tensor               # [1,V,G]
     static_quality_logits: Tensor         # [1,V,4]
@@ -59,6 +61,13 @@ class RSSvNextStructuralMeshCandidate:
             raise ValueError("RSS_VNEXT_MESH_FACE_SHAPE")
         if bool((self.faces < 0).any()) or int(self.faces.max()) >= v:
             raise ValueError("RSS_VNEXT_MESH_FACE_RANGE")
+        if (
+            self.presentation_role_logits.ndim != 3
+            or self.presentation_role_logits.shape[:2] != (1, v)
+            or not self.presentation_role_schema_id
+            or not torch.isfinite(self.presentation_role_logits).all()
+        ):
+            raise ValueError("RSS_VNEXT_MESH_PRESENTATION_ROLES_NOT_BOUND")
         if self.local_features.shape[:2] != (1, v) or self.normals.shape != (1, v, 3):
             raise ValueError("RSS_VNEXT_MESH_FEATURE_IDENTITY")
         if self.vertex_component_ids.shape != (v,) or self.face_component_ids.shape != (self.faces.shape[0],):
@@ -106,6 +115,8 @@ class RSSvNextAnimationReadyMesh(nn.Module):
         quality: nn.Module,
         udf: nn.Module,
         sign_logit: nn.Module,
+        role_head: nn.Module,
+        role_schema_id: str,
         source_authority: str = "LEARNED_PREDICTED_TOPOLOGY",
     ) -> RSSvNextStructuralMeshCandidate:
         if source_authority not in (
@@ -157,6 +168,8 @@ class RSSvNextAnimationReadyMesh(nn.Module):
             normals=_normals_indexed(rest, faces),
             geometry=geometry,
             semantic_logits=semantics(h),
+            presentation_role_logits=role_head(h),
+            presentation_role_schema_id=role_schema_id,
             affordance_logits=affordances(h),
             graphics_logits=graphics(h),
             static_quality_logits=quality(h),

@@ -234,6 +234,15 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         self.sign_logit = nn.Linear(h, 1)  # a proposal, not global-sign qualification
         self.semantic = nn.Linear(h, cfg.region_slots + 1)  # final = UNKNOWN
         self.affordance = nn.Linear(h, cfg.affordance_classes + 1)
+        # Mechanics-first topology: the structural Transformer receives
+        # learned deformation-affordance features BEFORE choosing face tokens.
+        # These are inferred solely from the same two-image carrier H(x),
+        # not from GT joints/skin/poses at student inference.
+        self.articulation_prior = nn.Sequential(
+            nn.LayerNorm(h), nn.Linear(h, h), nn.GELU(),
+            nn.Linear(h, h),
+        )
+        self.affordance_to_memory = nn.Linear(cfg.affordance_classes + 1, h)
         self.graphics = nn.Sequential(nn.LayerNorm(h), nn.Linear(h, cfg.graphics_channels))
         self.presentation = nn.Sequential(nn.LayerNorm(h), nn.Linear(h, h), nn.GELU())
         self.graphics_to_memory = nn.Linear(cfg.graphics_channels, h, bias=False)
@@ -336,7 +345,11 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             scene_src = torch.cat((scene_src, self.aux_to_scene(auxiliary)), dim=1)
         return self.tessa.encode_memory(
             scene_source=scene_src,
-            surface_source=state.local_features,
+            surface_source=(
+                state.local_features
+                + self.articulation_prior(state.local_features)
+                + self.affordance_to_memory(state.affordance_logits)
+            ),
             presentation_source=self.presentation(state.local_features) + self.graphics_to_memory(state.graphics_logits),
         )
 

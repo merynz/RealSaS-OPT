@@ -136,6 +136,7 @@ class RSSvNextOutput:
     skin_joint_valid_mask: torch.Tensor | None
     qualification_status: str = "UNQUALIFIED_NEURAL_PROPOSAL"
     mesh_candidate: object | None = None  # typed RSSvNextStructuralMeshCandidate; no circular import
+    dynamic_mesh_candidate: object | None = None  # typed RSSvNextDynamicRefinementOutput
 
 
 __all__ = [

@@ -47,8 +47,8 @@ def test_semantic_evidence_forms_before_shared_scene_and_keeps_original_tokens()
     assert torch.equal(state.observed_image_tokens, original)
     assert state.conditioned_image_tokens.shape == original.shape
     assert not torch.allclose(state.conditioned_image_tokens, original)
-    assert state.source_semantic_patch_logits.shape == (1, 2, 4, 5)
-    assert state.semantic_evidence_logits.shape == (1, 8, 5)
+    assert state.source_semantic_patch_logits.shape == (1, 2, 4, 4)
+    assert state.semantic_evidence_logits.shape == (1, 8, 4)
     assert state.region_relation_tokens.shape == (1, 4, 32)
     assert state.region_relation_logits.shape == (1, 4, 4, 3)
     assert state.region_relation_valid_mask[0].diagonal().sum() == 0

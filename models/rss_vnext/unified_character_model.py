@@ -31,6 +31,9 @@ from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefine
 from .semantic_structure import RSSvNextGenericRegionStructure
 from .early_semantic_field import RSSvNextEarlySemanticField
 from .source_ray_evidence import sample_front_back_source_rays
+from .multiview_construction import (
+    canonical_novel_camera_ring, RSSvNextViewFieldRenderer,
+)
 from .semantic_geometry_prior import (
     RSSvNextSemanticLayerSpec, semantic_equivalent_signed_field,
 )
@@ -131,19 +134,30 @@ class RSSvNextAuxiliaryViewLatents(nn.Module):
 
     def __init__(self, input_dim: int, count: int, heads: int):
         super().__init__()
-        if count not in (6, 8):
+        if count not in (4, 6):
             raise ValueError("RSS_VNEXT_AUX_LATENT_COUNT_INVALID")
         self.queries = nn.Parameter(torch.randn(count, input_dim) / math.sqrt(input_dim))
         self.attn = nn.MultiheadAttention(input_dim, heads, batch_first=True)
+        self.target_camera_embed = nn.Sequential(
+            nn.LayerNorm(13), nn.Linear(13, input_dim),
+        )
         self.norm = nn.LayerNorm(input_dim)
         self.uncertainty = nn.Linear(input_dim, 1)
 
-    def forward(self, observed_tokens: Tensor) -> tuple[Tensor, Tensor]:
+    def forward(
+        self, observed_tokens: Tensor, target_cameras: Tensor,
+    ) -> tuple[Tensor, Tensor]:
         b, v, t, d = observed_tokens.shape
         if v != 2:
             raise ValueError("RSS_VNEXT_AUX_REQUIRES_TWO_OBSERVATIONS")
+        if target_cameras.shape != (b, self.queries.shape[0], 13):
+            raise ValueError("RSS_VNEXT_AUX_TARGET_CAMERA_REQUIRED")
         source = observed_tokens.reshape(b, 2 * t, d)
-        q = self.queries[None].expand(b, -1, -1)
+        # Each latent is camera-conditioned. Predicted latents never become
+        # observed images or privileged rays.
+        q = self.queries[None].expand(b, -1, -1) + self.target_camera_embed(
+            target_cameras,
+        )
         out, _ = self.attn(q, source, source, need_weights=False)
         latents = self.norm(q + out)
         return latents, self.uncertainty(latents).clamp(-8, 4)
@@ -289,9 +303,9 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         )
 
         self.aux_views: Optional[RSSvNextAuxiliaryViewLatents] = None
-        if cfg.aux_constructed_view_latents:
+        if cfg.constructed_total_views:
             self.aux_views = RSSvNextAuxiliaryViewLatents(
-                cfg.iris.image_token_dim, cfg.aux_constructed_view_latents,
+                cfg.iris.image_token_dim, cfg.constructed_total_views - 2,
                 cfg.iris.attention_heads,
             )
             self.aux_to_scene = nn.Linear(cfg.iris.image_token_dim, cfg.iris.plane_channels)
@@ -316,6 +330,13 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             self.iris, resolution=cfg.iris.extraction_training_resolution,
         )
         self.fc_surface_position = nn.Linear(3, h, bias=False)
+        # Deliberate EXPERIMENTAL alternative, not StdGEN's upstream
+        # multiclass diffusion. It renders from the SAME 2-source Z/H.
+        self.constructed_view_renderer = RSSvNextViewFieldRenderer(
+            h, hidden_dim=max(h, 32),
+            ray_samples=16 if cfg.iris.scene_layers <= 1 else 48,
+            ray_chunk=128,
+        )
         self.dynamic_refine = RSSvNextDynamicRefinement(
             RSSvNextDynamicRefinementConfig(
                 carrier_dim=cfg.iris.local_feature_dim,
@@ -370,8 +391,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             + self.region_graph_to_memory(torch.cat((outgoing, incoming), dim=-1))
         )
         aux = aux_unc = None
+        novel_ring = None
         if self.aux_views is not None:
-            aux, aux_unc = self.aux_views(tokens)
+            novel_ring = canonical_novel_camera_ring(
+                camera_features, self.cfg.constructed_total_views,
+            )
+            aux, aux_unc = self.aux_views(tokens, novel_ring.novel_cameras)
         return (
             RSSvNextSceneState(
                 observed_rgba=rgba,
@@ -380,6 +405,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 conditioned_image_tokens=early_semantics.conditioned_image_tokens,
                 source_semantic_patch_logits=early_semantics.source_patch_logits,
                 source_semantic_log_uncertainty=early_semantics.source_evidence_uncertainty,
+                constructed_camera_features=(
+                    None if novel_ring is None else novel_ring.novel_cameras
+                ),
+                constructed_camera_angles=(
+                    None if novel_ring is None else novel_ring.novel_angles_rad
+                ),
                 scene_triplanes=planes,
                 query_xyz=xyz,
                 local_features=h,
@@ -396,6 +427,33 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 region_relation_valid_mask=regions.relation_valid_mask,
             ),
             aux, aux_unc,
+        )
+
+    def construct_novel_views(
+        self,
+        state: RSSvNextSceneState,
+        *,
+        height: int,
+        width: int,
+        method: str,
+    ):
+        """Explicit non-StdGEN experimental path, never a source observation.
+
+        Source-parity pre-reconstruction multi-view diffusion remains a
+        separate research gate. This late Z/H renderer is an ablation only.
+        """
+        if method != "EXPERIMENTAL_POST_SCENE_H_RENDER":
+            raise ValueError("RSS_VNEXT_MV_METHOD_NOT_IMPLEMENTED_OR_UNDECLARED")
+        if state.constructed_camera_features is None:
+            raise ValueError("RSS_VNEXT_MV_MUST_CONFIGURE_TOTAL_VIEW_COUNT")
+        ring = canonical_novel_camera_ring(
+            state.camera_features, self.cfg.constructed_total_views,
+        )
+        if not torch.equal(ring.novel_cameras, state.constructed_camera_features):
+            raise ValueError("RSS_VNEXT_MV_CAMERA_STATE_DRIFT")
+        return self.constructed_view_renderer(
+            iris=self.iris, scene_triplanes=state.scene_triplanes,
+            ring=ring, height=height, width=width,
         )
 
     def _structural_memory(

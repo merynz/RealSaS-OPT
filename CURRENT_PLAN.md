@@ -1,3 +1,5 @@
+> **Active implementation direction — 2026-11-11:** Consumer-first RSS.vNext. Product user input is exactly FRONT/BACK RGBA, a unified Z/H scene with separately trainable experts, Compiler qualification, and persistent eight-direction 3D-mechanics/2D-graphics controllable runtime. Merge tested implementation to main; **freeze only after user approval**. Current adapter delivers candidate evidence to existing canonical Rig/Skin/IK/LBS with an external mesh source-court gate, NOT automatic 2-view canonical mesh or finished graphics. Do not change truth/materialization eligibility until producer-consumer contracts are fully verified. See docs/platform/RSS_VNEXT_MAIN_INTEGRATION_READINESS_20261111.md after integration PR.
+
 > **Current work order — 2026-10-28:** Follow
 > [Truth -> LOFO notebook -> Shape integration](docs/research/truth_foundry/DELIVERY_CONTINUATION_20261028.md).
 > Reuse the same eight sources and preserved measurements. Close the outstanding

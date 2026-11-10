@@ -254,3 +254,57 @@ def test_real_checkpoint_two_view_model_to_replayable_compiler_receipt(tmp_path)
         read_compiler_proposal_receipt_v1(
             out_dir, expected_checkpoint_sha256=digest,
         )
+
+
+def test_reuse_existing_axis_decoder_without_minting_canonical_rig():
+    from dataclasses import asdict
+    from models.axis.rig_program_model_v6 import RigProgramEventV6, RigTokenKindV6
+    from models.rss_vnext.candidate_rig_court_v1 import qualify_candidate_rig_program_v1
+
+    kinds = (
+        RigTokenKindV6.BOS,
+        RigTokenKindV6.JOINT,
+        RigTokenKindV6.FRAMES_START,
+        RigTokenKindV6.FRAME,
+        RigTokenKindV6.CONTROLS_START,
+        RigTokenKindV6.CHAINS_START,
+        RigTokenKindV6.CONSTRAINTS_START,
+        RigTokenKindV6.ANCHORS_START,
+        RigTokenKindV6.SKIN_START,
+        *([RigTokenKindV6.SKIN_CODE] * 4),
+        RigTokenKindV6.EOS,
+    )
+    events = []
+    for kind in kinds:
+        kwargs = {}
+        if kind is RigTokenKindV6.JOINT:
+            kwargs = {"coord_indices": (128, 128, 128), "pointer_a": -1}
+        if kind is RigTokenKindV6.FRAME:
+            kwargs = {
+                "pointer_a": 0,
+                "frame_6d": (1., 0., 0., 0., 1., 0.),
+            }
+        if kind is RigTokenKindV6.SKIN_CODE:
+            kwargs = {"skin_code_id": 7}
+        row = asdict(RigProgramEventV6(kind, **kwargs))
+        row["kind"] = int(kind)
+        events.append(row)
+
+    proposal = seal_inference_evidence_v1(_candidate(control_events=tuple(events)))
+    court = qualify_candidate_rig_program_v1(
+        proposal, model_config=RSSvNextConfig.tiny_for_test(),
+        expected_checkpoint_sha256="a" * 64,
+    )
+    assert court.product_authority is False
+    assert len(court.rig_program.proposal.joints) == 1
+    assert len(court.skin_codes.rows) == 1
+    assert court.skin_codes.rows[0].code_ids == (7, 7, 7, 7)
+    assert court.rig_program.proposal.mesh_lineage_hash == court.candidate_mesh_hash
+    with pytest.raises(QualificationError, match="RIG_REQUIRES_VALID_NEURAL_MESH"):
+        qualify_candidate_rig_program_v1(
+            seal_inference_evidence_v1(_candidate(
+                mesh=None, mesh_status="ABSTAIN", reason="NO_VALID_TOPOLOGY",
+            )),
+            model_config=RSSvNextConfig.tiny_for_test(),
+            expected_checkpoint_sha256="a" * 64,
+        )

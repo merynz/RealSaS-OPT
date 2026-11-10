@@ -47,6 +47,11 @@ class RSSvNextConfig:
     skin_tokens_per_joint: int = 4
     skin_fsq_levels: tuple[int, ...] = (5, 5, 5, 5)
     skin_hidden_dim: int = 256
+    # Research ablation: old dot product vs per-vertex attention to all
+    # predicted causal SkinTokens. Select by qualified unseen data, not hype.
+    skin_decoder_mode: str = "DOT_PRODUCT_BASELINE"
+    skin_query_heads: int = 8
+    skin_query_chunk: int = 1024
     topology_decode_cap: int = 128
 
     def validate(self) -> None:
@@ -71,6 +76,15 @@ class RSSvNextConfig:
             raise ValueError("RSS_VNEXT_DIMENSION_INVALID")
         if self.control_hidden_dim % self.control_heads:
             raise ValueError("RSS_VNEXT_CONTROL_HEAD_DIVISIBILITY")
+        if self.skin_decoder_mode not in (
+            "DOT_PRODUCT_BASELINE", "POINT_QUERY_CROSS_ATTENTION",
+        ):
+            raise ValueError("RSS_VNEXT_SKIN_DECODER_MODE_INVALID")
+        if (
+            self.skin_query_heads < 1 or self.skin_hidden_dim % self.skin_query_heads
+            or self.skin_query_chunk < 1 or self.skin_query_chunk > 8192
+        ):
+            raise ValueError("RSS_VNEXT_SKIN_QUERY_CONFIG_INVALID")
         if any(level < 2 for level in self.skin_fsq_levels):
             raise ValueError("RSS_VNEXT_FSQ_LEVEL_INVALID")
         if self.iris.camera_feature_dim != 13:

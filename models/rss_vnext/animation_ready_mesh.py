@@ -194,6 +194,7 @@ def deformation_bridge_loss(
     skin_matrices: Tensor,
     *,
     pose_valid_mask: Tensor,
+    refined_vertices: Tensor | None = None,
     source_reference_jacobian: Tensor | None = None,
     source_reference_normal: Tensor | None = None,
 ) -> dict[str, Tensor]:
@@ -204,18 +205,23 @@ def deformation_bridge_loss(
     This loss does not differentiate discrete face selection.
     """
     mesh.validate()
-    if weights.shape != (1, mesh.rest_vertices_iris.shape[1], skin_matrices.shape[2]):
+    rest = mesh.rest_vertices_iris if refined_vertices is None else refined_vertices
+    if rest.shape != mesh.rest_vertices_iris.shape:
+        raise ValueError("RSS_VNEXT_DEFORM_REFINED_VERTEX_IDENTITY")
+    if not bool(torch.isfinite(rest).all()):
+        raise ValueError("RSS_VNEXT_DEFORM_REFINED_VERTEX_NONFINITE")
+    if weights.shape != (1, rest.shape[1], skin_matrices.shape[2]):
         raise ValueError("RSS_VNEXT_DEFORM_WEIGHT_MESH_IDENTITY")
     if pose_valid_mask.shape != skin_matrices.shape[:2] or pose_valid_mask.dtype != torch.bool:
         raise ValueError("RSS_VNEXT_DEFORM_POSE_MASK")
     if not bool(pose_valid_mask.any()):
         raise ValueError("RSS_VNEXT_DEFORM_NO_QUALIFIED_POSE")
-    posed = posed_lbs_from_joint_matrices(mesh.rest_vertices_iris, weights, skin_matrices)
+    posed = posed_lbs_from_joint_matrices(rest, weights, skin_matrices)
     terms = []
     for p in range(skin_matrices.shape[1]):
         if not bool(pose_valid_mask[0, p]):
             continue
-        metrics = triangle_deformation_metrics_v1(mesh.rest_vertices_iris, posed[:, p], mesh.faces)
+        metrics = triangle_deformation_metrics_v1(rest, posed[:, p], mesh.faces)
         ref_j = None if source_reference_jacobian is None else source_reference_jacobian[:, p]
         ref_n = None if source_reference_normal is None else source_reference_normal[:, p]
         terms.append(mechanical_consequence_loss_v1(

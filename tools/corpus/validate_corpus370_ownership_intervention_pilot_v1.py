@@ -145,9 +145,9 @@ def validate_contract(spec: dict[str, Any]) -> dict[str, Any]:
     student = spec.get("student_visible_fields")
     teacher = spec.get("teacher_only_fields")
     require(isinstance(student, list) and all(isinstance(x, str) for x in student), "OWNERSHIP_PILOT_STUDENT_FIELDS")
-    _set_exact(student, ALLOWED_STUDENT_OBSERVATIONS, "OWNERSHIP_PILOT_STUDENT_OBSERVATIONS")
     _set_exact(teacher, REQUIRED_TEACHER_ONLY, "OWNERSHIP_PILOT_TEACHER_ONLY")
     require(not (set(student) & set(teacher)), "OWNERSHIP_PILOT_TEACHER_LEAKAGE")
+    _set_exact(student, ALLOWED_STUDENT_OBSERVATIONS, "OWNERSHIP_PILOT_STUDENT_OBSERVATIONS")
     require("source_rgb" in student and "source_alpha" in student and "camera" in student, "OWNERSHIP_PILOT_STUDENT_OBSERVATION")
     require(spec.get("forbid_semantic_name_as_owner_label") is True, "OWNERSHIP_PILOT_SEMANTIC_AS_OWNER")
 

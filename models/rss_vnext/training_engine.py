@@ -27,6 +27,7 @@ from .motion_aware_topology_learning import (
     source_relative_topology_preference_loss,
 )
 from .unified_character_model import RSSvNextUnifiedCharacterModel
+from .early_semantic_field import masked_source_semantic_evidence_loss
 
 
 @dataclass
@@ -37,6 +38,10 @@ class RSSvNextStructuralTrainingBatch:
     topology_valid_mask: Tensor | None = None
     motion_candidate_tokens: Tensor | None = None
     motion_court: RSSvNextMotionCourt | None = None
+    # Provisional trainer-level evidence, NOT a frozen Truth Foundry schema.
+    semantic_patch_target: Tensor | None = None  # [B,2,T,K]
+    semantic_patch_mask: Tensor | None = None    # [B,2,T,K], per-axis qualified
+    semantic_qualification_key: str = ""
     source_qualification_key: str = ""
     admission_status: str = ""
 
@@ -45,12 +50,13 @@ class RSSvNextStructuralTrainingBatch:
 class RSSvNextTrainingWeights:
     topology: float = 1.0
     motion_preference: float = 0.2
+    source_semantics: float = 0.2
     clip_gradient_norm: float = 1.0
 
     def validate(self):
-        if min(self.topology, self.motion_preference) < 0:
+        if min(self.topology, self.motion_preference, self.source_semantics) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
-        if self.topology + self.motion_preference <= 0 or self.clip_gradient_norm <= 0:
+        if self.topology + self.motion_preference + self.source_semantics <= 0 or self.clip_gradient_norm <= 0:
             raise ValueError("RSS_VNEXT_TRAIN_WEIGHT_POLICY_INVALID")
 
 
@@ -59,6 +65,8 @@ class RSSvNextTrainingResult:
     total_loss: Tensor
     topology_loss: Tensor | None
     motion_preference_loss: Tensor | None
+    source_semantic_loss: Tensor | None
+    eligible_semantic_patch_labels: int
     eligible_topology_examples: int
     qualified_preference_pairs: int
     gradient_norm: Tensor | None = None
@@ -122,6 +130,21 @@ class RSSvNextStructuralTrainer:
         memory = self.model._structural_memory(state, aux)
         topology = None
         motion = None
+        semantic = None
+        n_semantic = 0
+        if batch.semantic_patch_target is not None:
+            if (batch.semantic_qualification_key == ""
+                    or batch.semantic_patch_mask is None):
+                raise ValueError("RSS_VNEXT_TRAIN_SEMANTIC_QUALIFICATION_REQUIRED")
+            if self.weights.source_semantics > 0:
+                semantic = masked_source_semantic_evidence_loss(
+                    state.source_semantic_patch_logits,
+                    batch.semantic_patch_target,
+                    batch.semantic_patch_mask,
+                )
+                n_semantic = int(batch.semantic_patch_mask.sum().item())
+        elif batch.semantic_patch_mask is not None:
+            raise ValueError("RSS_VNEXT_TRAIN_SEMANTIC_ORPHAN_MASK")
         n_topo = 0
         n_pairs = 0
         if self.weights.topology > 0 and batch.topology_teacher_tokens is not None:
@@ -165,13 +188,14 @@ class RSSvNextStructuralTrainer:
         elif batch.motion_candidate_tokens is not None and batch.motion_court is None:
             raise ValueError("RSS_VNEXT_TRAIN_MOTION_COURT_REQUIRED")
 
-        if topology is None and motion is None:
+        if topology is None and motion is None and semantic is None:
             raise ValueError("RSS_VNEXT_TRAIN_NO_QUALIFIED_OBJECTIVE")
         total = sum(
             weight * loss
             for weight, loss in (
                 (self.weights.topology, topology),
                 (self.weights.motion_preference, motion),
+                (self.weights.source_semantics, semantic),
             )
             if loss is not None
         )
@@ -181,6 +205,8 @@ class RSSvNextStructuralTrainer:
             total_loss=total,
             topology_loss=topology,
             motion_preference_loss=motion,
+            source_semantic_loss=semantic,
+            eligible_semantic_patch_labels=n_semantic,
             eligible_topology_examples=n_topo,
             qualified_preference_pairs=n_pairs,
         )

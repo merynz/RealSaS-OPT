@@ -107,12 +107,11 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
 
         field_policy:
           SIGNED_HYPOTHESIS_ONLY: conditional candidate, not source proof
-          QUALIFIED_SOURCE_SIGNED: requires caller-side source domain admission
+          SIGNED_HYPOTHESIS_ONLY is the *only* supported output authority.
+          Source admission is enforced by the trainer/Compiler independently.
         Other policies (OPEN/UDF/MODULAR) are rejected rather than fabricated.
         """
-        if field_policy not in (
-            "SIGNED_HYPOTHESIS_ONLY", "QUALIFIED_SOURCE_SIGNED",
-        ):
+        if field_policy != "SIGNED_HYPOTHESIS_ONLY":
             raise ValueError("RSS_VNEXT_FC_SIGNED_DOMAIN_NOT_PERMITTED")
         schema.validate()
         layer.validate(schema)

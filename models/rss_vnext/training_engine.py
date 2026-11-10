@@ -28,6 +28,8 @@ from .motion_aware_topology_learning import (
 )
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .early_semantic_field import masked_source_semantic_evidence_loss
+from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
+from models.iris.vnext.flexicubes_v1 import symmetric_surface_chamfer_v1
 
 
 @dataclass
@@ -42,6 +44,12 @@ class RSSvNextStructuralTrainingBatch:
     semantic_patch_target: Tensor | None = None  # [B,2,T,K]
     semantic_patch_mask: Tensor | None = None    # [B,2,T,K], per-axis qualified
     semantic_qualification_key: str = ""
+    # Interim signed-surface training witness; not final foundry supervision.
+    # Requires qualified source, mesh coordinate/camera bind and sample proof.
+    flexicubes_extractor: object | None = None
+    flexicubes_layer: RSSvNextSemanticLayerSpec | None = None
+    flexicubes_reference_surface_xyz: Tensor | None = None  # [1,M,3]
+    flexicubes_signed_source_admission_key: str = ""
     source_qualification_key: str = ""
     admission_status: str = ""
 
@@ -51,12 +59,20 @@ class RSSvNextTrainingWeights:
     topology: float = 1.0
     motion_preference: float = 0.2
     source_semantics: float = 0.2
+    flexicubes_surface: float = 0.3
     clip_gradient_norm: float = 1.0
 
     def validate(self):
-        if min(self.topology, self.motion_preference, self.source_semantics) < 0:
+        if min(
+            self.topology, self.motion_preference, self.source_semantics,
+            self.flexicubes_surface,
+        ) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
-        if self.topology + self.motion_preference + self.source_semantics <= 0 or self.clip_gradient_norm <= 0:
+        if (
+            self.topology + self.motion_preference
+            + self.source_semantics + self.flexicubes_surface <= 0
+            or self.clip_gradient_norm <= 0
+        ):
             raise ValueError("RSS_VNEXT_TRAIN_WEIGHT_POLICY_INVALID")
 
 
@@ -66,6 +82,7 @@ class RSSvNextTrainingResult:
     topology_loss: Tensor | None
     motion_preference_loss: Tensor | None
     source_semantic_loss: Tensor | None
+    flexicubes_surface_loss: Tensor | None
     eligible_semantic_patch_labels: int
     eligible_topology_examples: int
     qualified_preference_pairs: int
@@ -127,7 +144,55 @@ class RSSvNextStructuralTrainer:
         state, aux, _ = self.model.encode_observations(
             batch.rgba, batch.camera_features,
         )
-        memory = self.model._structural_memory(state, aux)
+        fc_surface = None
+        fc_loss = None
+        if any(x is not None for x in (
+            batch.flexicubes_extractor, batch.flexicubes_layer,
+            batch.flexicubes_reference_surface_xyz,
+        )):
+            if (
+                not batch.flexicubes_signed_source_admission_key
+                or batch.flexicubes_extractor is None
+                or batch.flexicubes_layer is None
+                or batch.flexicubes_reference_surface_xyz is None
+            ):
+                raise ValueError("RSS_VNEXT_FC_TRAIN_SIGNED_SOURCE_PROOF_REQUIRED")
+            if state.scene_triplanes.shape[0] != 1:
+                raise ValueError("RSS_VNEXT_FC_TRAIN_RAGGED_SINGLE_ASSET")
+            target = batch.flexicubes_reference_surface_xyz
+            if (
+                target.ndim != 3 or target.shape[0] != 1
+                or target.shape[-1] != 3 or not 3 <= target.shape[1] <= 512
+                or not bool(torch.isfinite(target).all())
+                or target.device != state.scene_triplanes.device
+            ):
+                raise ValueError("RSS_VNEXT_FC_TRAIN_REFERENCE_SURFACE_INVALID")
+            if self.weights.flexicubes_surface > 0:
+                fc_surface = self.model.fc_surface_bridge(
+                    state.scene_triplanes,
+                    extractor=batch.flexicubes_extractor,
+                    role_head=self.model.presentation_role_head,
+                    schema=self.model.cfg.semantic_role_schema(),
+                    layer=batch.flexicubes_layer,
+                    field_policy="SIGNED_HYPOTHESIS_ONLY",
+                )
+                n = fc_surface.xyz.shape[1]
+                idx = torch.linspace(
+                    0, n - 1, min(n, 512), device=target.device,
+                ).long()
+                # Only source samples are supervision. Neural/proposed FC
+                # vertices enter the differentiable path back into H(x).
+                fc_loss = (
+                    symmetric_surface_chamfer_v1(
+                        fc_surface.xyz[:, idx], target,
+                    )
+                    + 0.05 * fc_surface.regularizer.mean()
+                )
+        elif batch.flexicubes_signed_source_admission_key:
+            raise ValueError("RSS_VNEXT_FC_TRAIN_ORPHAN_QUALIFICATION")
+        memory = self.model._structural_memory(
+            state, aux, flexicubes=fc_surface,
+        )
         topology = None
         motion = None
         semantic = None
@@ -188,7 +253,7 @@ class RSSvNextStructuralTrainer:
         elif batch.motion_candidate_tokens is not None and batch.motion_court is None:
             raise ValueError("RSS_VNEXT_TRAIN_MOTION_COURT_REQUIRED")
 
-        if topology is None and motion is None and semantic is None:
+        if topology is None and motion is None and semantic is None and fc_loss is None:
             raise ValueError("RSS_VNEXT_TRAIN_NO_QUALIFIED_OBJECTIVE")
         total = sum(
             weight * loss
@@ -196,6 +261,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.topology, topology),
                 (self.weights.motion_preference, motion),
                 (self.weights.source_semantics, semantic),
+                (self.weights.flexicubes_surface, fc_loss),
             )
             if loss is not None
         )
@@ -206,6 +272,7 @@ class RSSvNextStructuralTrainer:
             topology_loss=topology,
             motion_preference_loss=motion,
             source_semantic_loss=semantic,
+            flexicubes_surface_loss=fc_loss,
             eligible_semantic_patch_labels=n_semantic,
             eligible_topology_examples=n_topo,
             qualified_preference_pairs=n_pairs,

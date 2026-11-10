@@ -26,6 +26,11 @@ from .motion_aware_topology_learning import (
     topology_candidate_log_probs,
     source_relative_topology_preference_loss,
 )
+from .flexicubes_animation_supervision import (
+    RSSvNextFCAnimationTeacher,
+    RSSvNextFCAnimationLossConfig,
+    source_animation_flexicubes_loss,
+)
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .early_semantic_field import masked_source_semantic_evidence_loss
 from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
@@ -49,6 +54,7 @@ class RSSvNextStructuralTrainingBatch:
     flexicubes_extractor: object | None = None
     flexicubes_layer: RSSvNextSemanticLayerSpec | None = None
     flexicubes_reference_surface_xyz: Tensor | None = None  # [1,M,3]
+    flexicubes_animation_teacher: RSSvNextFCAnimationTeacher | None = None
     flexicubes_signed_source_admission_key: str = ""
     source_qualification_key: str = ""
     admission_status: str = ""
@@ -60,17 +66,19 @@ class RSSvNextTrainingWeights:
     motion_preference: float = 0.2
     source_semantics: float = 0.2
     flexicubes_surface: float = 0.3
+    flexicubes_animation: float = 0.0  # explicit opt-in on admitted source motion
     clip_gradient_norm: float = 1.0
 
     def validate(self):
         if min(
             self.topology, self.motion_preference, self.source_semantics,
-            self.flexicubes_surface,
+            self.flexicubes_surface, self.flexicubes_animation,
         ) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
         if (
             self.topology + self.motion_preference
-            + self.source_semantics + self.flexicubes_surface <= 0
+            + self.source_semantics + self.flexicubes_surface
+            + self.flexicubes_animation <= 0
             or self.clip_gradient_norm <= 0
         ):
             raise ValueError("RSS_VNEXT_TRAIN_WEIGHT_POLICY_INVALID")
@@ -83,6 +91,8 @@ class RSSvNextTrainingResult:
     motion_preference_loss: Tensor | None
     source_semantic_loss: Tensor | None
     flexicubes_surface_loss: Tensor | None
+    flexicubes_animation_loss: Tensor | None
+    eligible_animation_pose_count: int
     eligible_semantic_patch_labels: int
     eligible_topology_examples: int
     qualified_preference_pairs: int
@@ -146,28 +156,39 @@ class RSSvNextStructuralTrainer:
         )
         fc_surface = None
         fc_loss = None
+        fc_anim_loss = None
+        fc_anim_count = 0
         if any(x is not None for x in (
             batch.flexicubes_extractor, batch.flexicubes_layer,
             batch.flexicubes_reference_surface_xyz,
+            batch.flexicubes_animation_teacher,
         )):
             if (
                 not batch.flexicubes_signed_source_admission_key
                 or batch.flexicubes_extractor is None
                 or batch.flexicubes_layer is None
-                or batch.flexicubes_reference_surface_xyz is None
+                or (
+                    batch.flexicubes_reference_surface_xyz is None
+                    and batch.flexicubes_animation_teacher is None
+                )
             ):
                 raise ValueError("RSS_VNEXT_FC_TRAIN_SIGNED_SOURCE_PROOF_REQUIRED")
             if state.scene_triplanes.shape[0] != 1:
                 raise ValueError("RSS_VNEXT_FC_TRAIN_RAGGED_SINGLE_ASSET")
             target = batch.flexicubes_reference_surface_xyz
-            if (
+            if target is not None and (
                 target.ndim != 3 or target.shape[0] != 1
                 or target.shape[-1] != 3 or not 3 <= target.shape[1] <= 512
                 or not bool(torch.isfinite(target).all())
                 or target.device != state.scene_triplanes.device
             ):
                 raise ValueError("RSS_VNEXT_FC_TRAIN_REFERENCE_SURFACE_INVALID")
-            if self.weights.flexicubes_surface > 0:
+            if (
+                self.weights.flexicubes_surface > 0 and target is not None
+            ) or (
+                self.weights.flexicubes_animation > 0
+                and batch.flexicubes_animation_teacher is not None
+            ):
                 fc_surface = self.model.fc_surface_bridge(
                     state.scene_triplanes,
                     extractor=batch.flexicubes_extractor,
@@ -182,12 +203,25 @@ class RSSvNextStructuralTrainer:
                 ).long()
                 # Only source samples are supervision. Neural/proposed FC
                 # vertices enter the differentiable path back into H(x).
-                fc_loss = (
-                    symmetric_surface_chamfer_v1(
-                        fc_surface.xyz[:, idx], target,
+                if target is not None and self.weights.flexicubes_surface > 0:
+                    fc_loss = (
+                        symmetric_surface_chamfer_v1(
+                            fc_surface.xyz[:, idx], target,
+                        )
+                        + 0.05 * fc_surface.regularizer.mean()
                     )
-                    + 0.05 * fc_surface.regularizer.mean()
-                )
+                if (
+                    batch.flexicubes_animation_teacher is not None
+                    and self.weights.flexicubes_animation > 0
+                ):
+                    if not self.model.training:
+                        raise RuntimeError("RSS_VNEXT_FC_ANIMATION_TEACHER_TRAIN_ONLY")
+                    result = source_animation_flexicubes_loss(
+                        fc_surface, batch.flexicubes_animation_teacher,
+                        config=RSSvNextFCAnimationLossConfig(),
+                    )
+                    fc_anim_loss = result.total
+                    fc_anim_count = result.pose_count
         elif batch.flexicubes_signed_source_admission_key:
             raise ValueError("RSS_VNEXT_FC_TRAIN_ORPHAN_QUALIFICATION")
         memory = self.model._structural_memory(
@@ -253,7 +287,10 @@ class RSSvNextStructuralTrainer:
         elif batch.motion_candidate_tokens is not None and batch.motion_court is None:
             raise ValueError("RSS_VNEXT_TRAIN_MOTION_COURT_REQUIRED")
 
-        if topology is None and motion is None and semantic is None and fc_loss is None:
+        if (
+            topology is None and motion is None and semantic is None
+            and fc_loss is None and fc_anim_loss is None
+        ):
             raise ValueError("RSS_VNEXT_TRAIN_NO_QUALIFIED_OBJECTIVE")
         total = sum(
             weight * loss
@@ -262,6 +299,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.motion_preference, motion),
                 (self.weights.source_semantics, semantic),
                 (self.weights.flexicubes_surface, fc_loss),
+                (self.weights.flexicubes_animation, fc_anim_loss),
             )
             if loss is not None
         )
@@ -273,6 +311,8 @@ class RSSvNextStructuralTrainer:
             motion_preference_loss=motion,
             source_semantic_loss=semantic,
             flexicubes_surface_loss=fc_loss,
+            flexicubes_animation_loss=fc_anim_loss,
+            eligible_animation_pose_count=fc_anim_count,
             eligible_semantic_patch_labels=n_semantic,
             eligible_topology_examples=n_topo,
             qualified_preference_pairs=n_pairs,

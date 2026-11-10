@@ -75,7 +75,7 @@ def test_invalid_cameras_and_wrong_count_fail_closed():
         with pytest.raises(ValueError, match="TOTAL"):
             canonical_novel_camera_ring(camera, bad)
     wrong_back = camera.clone()
-    wrong_back[:, 1, 2] = -1
+    wrong_back[:, 1, 0] = .3
     with pytest.raises(ValueError, match="ANTIPODAL"):
         canonical_novel_camera_ring(wrong_back, 6)
     wrong_rot = camera.clone()
@@ -143,7 +143,10 @@ def test_generated_views_are_never_student_observations_and_teacher_provenance_i
     )
     with pytest.raises(ValueError,match="TWO_SOURCE_RGBA"):
         net.encode_observations(
-            torch.cat((rgba,novel.rgba[:,:, :, :8, :8]),dim=1),cam,
+            torch.cat((rgba,torch.nn.functional.interpolate(
+                novel.rgba.reshape(4,4,4,4),size=(8,8),
+                mode="bilinear",align_corners=False,
+            ).reshape(1,4,4,8,8)),dim=1),cam,
         )
     target_rgba = novel.rgba.detach().clone()
     target_rgba[:, :, 0] = 0

@@ -19,6 +19,11 @@ from models.rss_vnext.flexicubes_surface_evidence import (
 from models.rss_vnext.semantic_geometry_prior import (
     RSSvNextSemanticLayerSpec, stdgen_style_generic_schema,
 )
+from models.rss_vnext.training_engine import (
+    RSSvNextStructuralTrainer,
+    RSSvNextStructuralTrainingBatch,
+    RSSvNextTrainingWeights,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -158,3 +163,64 @@ def test_structural_transformer_reads_witness_surface_features_without_adopting_
     assert net.vision.patch.weight.grad is not None
     assert net.iris.scene.scene_queries.grad is not None
     # TESSA remains responsible for new topology tokens; FC faces are just a witness.
+
+
+
+def test_exact_fc_and_tessa_share_one_two_view_training_optimizer():
+    """An admitted source surface supervises the real pinned extractor.
+
+    Synthetic sphere labels and analytical signed field are ONLY for this
+    mechanism test. This does not establish real corpus eligibility.
+    """
+    cfg = RSSvNextConfig.tiny_for_test()
+    net = RSSvNextUnifiedCharacterModel(
+        cfg, vision_encoder=RSSvNextPatchEncoderForTests(cfg.iris.image_token_dim),
+    ).train()
+    original = net.iris.query
+
+    def analytic_field_with_learned_carrier(planes, xyz):
+        out = original(planes, xyz)
+        # Ensure a bona-fide signed field while retaining gradients to the
+        # learned geometry field and shared source triplanes.
+        out["field"] = xyz.norm(dim=-1) - .65 + .03 * out["field"]
+        return out
+
+    net.iris.query = analytic_field_with_learned_carrier
+    inp = torch.rand(1, 2, 4, 8, 8)
+    cam = torch.zeros(1, 2, 13)
+    cam[..., 3] = cam[..., 7] = cam[..., 11] = cam[..., 12] = 1
+    teacher_surface = torch.tensor([[
+        [.65, 0, 0], [-.65, 0, 0], [0, .65, 0],
+        [0, -.65, 0], [0, 0, .65], [0, 0, -.65],
+    ]], dtype=torch.float32)
+    batch = RSSvNextStructuralTrainingBatch(
+        rgba=inp, camera_features=cam,
+        flexicubes_extractor=PinnedFlexiCubesV1(_root(), device="cpu"),
+        flexicubes_layer=RSSvNextSemanticLayerSpec(
+            "all", cfg.semantic_role_schema().roles,
+        ),
+        flexicubes_reference_surface_xyz=teacher_surface,
+        flexicubes_signed_source_admission_key="synthetic-unit-only-watertight-sphere",
+        source_qualification_key="synthetic-unit-not-real-admission",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    )
+    trainer = RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters(), lr=1e-4),
+        dataset_manifest_sha256="a"*64,
+        weights=RSSvNextTrainingWeights(
+            topology=0, motion_preference=0, source_semantics=0,
+            flexicubes_surface=1,
+        ),
+    )
+    step = trainer.train_step(batch)
+    assert step.flexicubes_surface_loss is not None
+    assert torch.isfinite(step.flexicubes_surface_loss)
+    assert trainer.global_step == 1
+    assert net.iris.field.field_head.weight.grad is not None
+    assert net.iris.cube_extraction.net[-1].weight.grad is not None
+    assert net.iris.cube_extraction.net[-1].weight.grad.abs().sum() > 0
+    assert net.vision.patch.weight.grad is not None
+
+    batch.flexicubes_signed_source_admission_key = ""
+    with pytest.raises(ValueError, match="SIGNED_SOURCE_PROOF_REQUIRED"):
+        trainer.objective(batch)

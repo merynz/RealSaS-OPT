@@ -2,7 +2,7 @@
 """No live Drive or private files in CI; fail-closed synthetic API contract tests."""
 from __future__ import annotations
 import tempfile,pathlib,csv,json,hashlib,sys
-sys.path.insert(0,str(pathlib.Path(__file__).parent))
+sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[2] / 'tools' / 'corpus' / 'truth_foundry' / 'evidence_v25'))
 import drive_bulk_master_v25 as bulk
 
 class DummyReader(bulk.DriveReader):

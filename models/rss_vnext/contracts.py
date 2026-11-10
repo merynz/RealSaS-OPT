@@ -131,6 +131,8 @@ class RSSvNextSceneState:
     conditioned_image_tokens: torch.Tensor  # original source tokens remain accessible
     source_semantic_patch_logits: torch.Tensor  # [B,2,T,K] from image encoder
     source_semantic_log_uncertainty: torch.Tensor
+    constructed_camera_features: torch.Tensor | None
+    constructed_camera_angles: torch.Tensor | None
     scene_triplanes: torch.Tensor
     query_xyz: torch.Tensor
     local_features: torch.Tensor
@@ -166,6 +168,7 @@ class RSSvNextOutput:
     mesh_candidate: object | None = None  # typed RSSvNextStructuralMeshCandidate; no circular import
     dynamic_mesh_candidate: object | None = None  # typed RSSvNextDynamicRefinementOutput
     flexicubes_surface_evidence: object | None = None  # typed noncanonical surface witness
+    constructed_views: object | None = None  # predicted RGB/alpha/normal, not observed source
 
 
 __all__ = [

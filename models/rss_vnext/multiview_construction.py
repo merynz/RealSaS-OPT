@@ -23,8 +23,8 @@ import torch.nn.functional as F
 
 @dataclass
 class RSSvNextCanonicalCameraRing:
-    novel_cameras: Tensor     # [B,6 or 8,13]
-    novel_angles_rad: Tensor  # [6 or 8], canonical ring around up axis
+    novel_cameras: Tensor     # [B,4 or 6,13], for 6/8 total including source
+    novel_angles_rad: Tensor  # [4 or 6], canonical ring around up axis
     source_cameras: Tensor    # [B,2,13], exact original values
     source_authority: tuple[str, str] = ("SOURCE_FRONT", "SOURCE_BACK")
     novel_authority: str = "PREDICTED_CAMERA_TARGETS_ONLY"
@@ -32,19 +32,19 @@ class RSSvNextCanonicalCameraRing:
 
 def canonical_novel_camera_ring(
     source_cameras: Tensor,
-    count: int,
+    total_views: int,
     *,
     tolerance: float = 0.035,
 ) -> RSSvNextCanonicalCameraRing:
-    """Construct 6 (8 total positions) or 8 (10 total) target viewpoints.
+    """Construct 6 or 8 TOTAL viewpoints, including the two source views.
 
     Camera contract: origin xyz, right xyz, up xyz, forward xyz, ortho
     half-extent. Source must be an admitted antipodal *calibrated* pair.
     Invalid camera estimates fail closed; NEVER silently repair camera poses.
     Front=0°, Back=180°. Target indices exclude BOTH source angles.
     """
-    if count not in (6, 8):
-        raise ValueError("RSS_VNEXT_MV_REQUIRE_6_OR_8_NOVEL")
+    if total_views not in (6, 8):
+        raise ValueError("RSS_VNEXT_MV_REQUIRE_6_OR_8_TOTAL")
     if (source_cameras.ndim != 3 or source_cameras.shape[1:] != (2, 13)
             or not torch.is_floating_point(source_cameras)
             or not bool(torch.isfinite(source_cameras).all())):
@@ -75,7 +75,8 @@ def canonical_novel_camera_ring(
             or bool((right * radial_unit).sum(-1).abs().max() > tolerance)
             or bool((up * radial_unit).sum(-1).abs().max() > tolerance)):
         raise ValueError("RSS_VNEXT_MV_FRONT_BACK_NOT_ANTIPODAL")
-    total = count + 2
+    total = total_views
+    novel_count = total_views - 2
     indices = [i for i in range(1, total) if i != total // 2]
     angles = torch.as_tensor(
         [2 * math.pi * i / total for i in indices],
@@ -87,8 +88,8 @@ def canonical_novel_camera_ring(
     )
     target_right = right[:, None] * cs - radial_unit[:, None] * sn
     target_forward = forward[:, None] * cs - right[:, None] * sn
-    target_up = up[:, None].expand(-1, count, -1)
-    extent = front[:, 12:13, None].expand(-1, count, -1)
+    target_up = up[:, None].expand(-1, novel_count, -1)
+    extent = front[:, 12:13, None].expand(-1, novel_count, -1)
     target = torch.cat(
         (origin, target_right, target_up, target_forward, extent), dim=-1,
     )
@@ -101,7 +102,7 @@ def canonical_novel_camera_ring(
 
 @dataclass
 class RSSvNextConstructedViews:
-    camera_features: Tensor         # [B,V,13]
+    camera_features: Tensor         # [B,V,13] where V=4/6 novel (total 6/8)
     rgba: Tensor                    # [B,V,4,H,W], RGB straight, alpha composited
     normal: Tensor                  # [B,V,3,H,W], predicted vector, not source normals
     depth: Tensor                   # [B,V,1,H,W], relative expected ray depth
@@ -112,7 +113,7 @@ class RSSvNextConstructedViews:
 
     def validate(self) -> None:
         b, v, c, h, w = self.rgba.shape
-        if (v not in (6, 8) or c != 4
+        if (v not in (4, 6) or c != 4
                 or self.camera_features.shape != (b, v, 13)
                 or self.normal.shape != (b, v, 3, h, w)
                 or self.depth.shape != (b, v, 1, h, w)
@@ -130,7 +131,9 @@ class RSSvNextConstructedViews:
 
 
 class RSSvNextViewFieldRenderer(nn.Module):
-    """Novel-view RGB/alpha/normal from SAME continuous 3D H(x).
+    """Experimental POST-scene novel-view RGB/alpha/normal from H(x).
+
+    Not the published StdGEN pre-scene multi-view diffusion mechanism.
 
     View-conditioned colors, learned density and normals; depth order is
     analytically calculated through alpha compositing. It is a hypothesis

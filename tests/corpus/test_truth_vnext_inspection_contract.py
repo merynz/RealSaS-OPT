@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Synthetic-only / no access to private corpus or Drive in CI."""
 import importlib.util,pathlib,sys,tempfile,json,csv,gzip,unittest
-HERE=pathlib.Path(__file__).resolve().parent
+HERE=pathlib.Path(__file__).resolve().parents[2] / 'tools' / 'corpus' / 'truth_foundry' / 'rss_vnext_inspection'
 
 def load(mod_name):
  spec=importlib.util.spec_from_file_location(mod_name,HERE/(mod_name+'.py'))

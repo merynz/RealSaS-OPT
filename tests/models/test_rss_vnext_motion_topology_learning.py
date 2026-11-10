@@ -134,8 +134,8 @@ def test_same_two_view_carrier_receives_motion_preference_gradient():
     assert out.candidate_log_prob.shape == (2,)
     assert out.pair_count == 1
     out.loss.backward()
-    assert net.tessa.decoder.logit_head.weight.grad is not None
-    assert torch.isfinite(net.tessa.decoder.logit_head.weight.grad).all()
+    assert net.tessa.lm_head.weight.grad is not None
+    assert torch.isfinite(net.tessa.lm_head.weight.grad).all()
     assert net.iris.scene.scene_queries.grad is not None
     assert net.vision.patch.weight.grad is not None
 

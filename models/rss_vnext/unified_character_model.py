@@ -28,6 +28,11 @@ from models.mira.skin_fsq_codec_v6 import MIRASkinFSQCodecV6, MIRASkinFSQCodecCo
 from models.tessa.v2.generation_v2 import TESSAGrammarStateV2
 from .animation_ready_mesh import RSSvNextAnimationReadyMesh, RSSvNextStructuralMeshCandidate
 from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefinementConfig
+from .motion_aware_topology_learning import (
+    RSSvNextMotionCourt, RSSvNextTopologyPreferenceConfig,
+    RSSvNextTopologyPreferenceResult,
+    topology_candidate_log_probs, source_relative_topology_preference_loss,
+)
 
 from .contracts import RSSvNextConfig, RSSvNextOutput, RSSvNextSceneState
 
@@ -430,6 +435,33 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             skin_joint_valid_mask=joint_mask,
             mesh_candidate=mesh,
             dynamic_mesh_candidate=dynamic,
+        )
+
+    def motion_aware_structural_objective(
+        self,
+        rgba: Tensor,
+        camera_features: Tensor,
+        *,
+        candidate_tokens: Tensor,
+        qualified_motion_court: RSSvNextMotionCourt,
+        preference_config: RSSvNextTopologyPreferenceConfig = RSSvNextTopologyPreferenceConfig(),
+    ) -> RSSvNextTopologyPreferenceResult:
+        """Train causal face/vertex token choices using measured motion consequences.
+
+        ALL source joint/skin/pose truth enters only `qualified_motion_court`
+        as detached supervised costs. It is never used to form input scene Z.
+        No post-hoc mesh edits, no privileged images, and no self-awarded PASS.
+        """
+        if not self.training:
+            raise RuntimeError("RSS_VNEXT_MOTION_OBJECTIVE_TRAIN_ONLY")
+        state, aux, _ = self.encode_observations(rgba, camera_features)
+        memory = self._structural_memory(state, aux)
+        logprobs = topology_candidate_log_probs(
+            self.tessa, memory, candidate_tokens, config=self.cfg.tessa,
+        )
+        return source_relative_topology_preference_loss(
+            logprobs, candidate_tokens, qualified_motion_court,
+            config=preference_config,
         )
 
     def build_mesh_candidate(

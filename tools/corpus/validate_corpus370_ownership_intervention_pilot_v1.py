@@ -36,6 +36,10 @@ REQUIRED_PRESERVE = {
     "source_mesh", "source_uv", "source_material_alpha", "camera", "time",
     "rig_and_skin_identity", "source_art_bytes",
 }
+ALLOWED_STUDENT_OBSERVATIONS = {
+    "source_rgb", "source_alpha", "camera", "observed_view",
+    "observation_patch_features",
+}
 REQUIRED_TEACHER_ONLY = {
     "source_triangle_id", "source_barycentric", "teacher_material_name",
     "teacher_semantic_name", "source_bone_id", "source_skin_id",
@@ -141,6 +145,7 @@ def validate_contract(spec: dict[str, Any]) -> dict[str, Any]:
     student = spec.get("student_visible_fields")
     teacher = spec.get("teacher_only_fields")
     require(isinstance(student, list) and all(isinstance(x, str) for x in student), "OWNERSHIP_PILOT_STUDENT_FIELDS")
+    _set_exact(student, ALLOWED_STUDENT_OBSERVATIONS, "OWNERSHIP_PILOT_STUDENT_OBSERVATIONS")
     _set_exact(teacher, REQUIRED_TEACHER_ONLY, "OWNERSHIP_PILOT_TEACHER_ONLY")
     require(not (set(student) & set(teacher)), "OWNERSHIP_PILOT_TEACHER_LEAKAGE")
     require("source_rgb" in student and "source_alpha" in student and "camera" in student, "OWNERSHIP_PILOT_STUDENT_OBSERVATION")

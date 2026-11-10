@@ -75,6 +75,7 @@ def evidence(tokens, device="cpu", *, static=(0.02, 0.025), dynamic=(0.2, 0.8),
         motion_suite_hash="synthetic-same-pose-suite",
         canonical_binding_hash="synthetic-canonical-binding",
         source_skin_protocol_hash="synthetic-same-teacher-kinematics-and-weight-transfer",
+        evaluation_stage="PRE_DYNAMIC_REFINEMENT_STRUCTURAL_MESH",
         candidate_hashes=tuple(hashes),
         reference_authority="QUALIFIED_SOURCE_RELATIVE_MOTION_COURT",
         static_cost=torch.tensor(static, dtype=torch.float32, device=device),
@@ -112,6 +113,11 @@ def test_source_binding_and_comparable_geometry_are_mandatory():
         source_relative_topology_preference_loss(scores, tokens, evidence(tokens, bad_hash=True))
     with pytest.raises(ValueError, match="MOTION_CANDIDATE_PROVENANCE_DRIFT"):
         source_relative_topology_preference_loss(scores, tokens, evidence(tokens, bad_motion_suite=True))
+    with pytest.raises(ValueError, match="POSTHOC_REPAIR_REWARD_FORBIDDEN"):
+        source_relative_topology_preference_loss(
+            scores, tokens,
+            replace(evidence(tokens), evaluation_stage="POST_DYNAMIC_REFINEMENT"),
+        )
     with pytest.raises(ValueError, match="NO_QUALIFIED"):
         source_relative_topology_preference_loss(
             scores, tokens, evidence(tokens, static=(0.02, 0.9)),

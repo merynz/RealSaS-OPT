@@ -68,6 +68,14 @@ class AnalyticLearnableScene(nn.Module):
 def test_exact_pinned_flexicubes_backprop_through_signed_field_semantic_and_cube_weights():
     core = AnalyticLearnableScene()
     decoder = nn.Linear(8, 4)
+    # Deterministic *source-style* semantic halfspace x<0.1, intersected
+    # with an analytic sphere. One portion of the extracted surface is driven
+    # by SDF, another by semantic class boundary, so both must get gradients.
+    with torch.no_grad():
+        decoder.weight.zero_()
+        decoder.bias.zero_()
+        decoder.weight[0, 0] = 2.0
+        decoder.bias[0] = -0.2
     bridge = RSSvNextFlexiCubesEvidenceBridge(core, resolution=5)
     source = torch.randn(1, 3, 2, 2, 2, requires_grad=True)
     extractor = PinnedFlexiCubesV1(_root(), device="cpu")

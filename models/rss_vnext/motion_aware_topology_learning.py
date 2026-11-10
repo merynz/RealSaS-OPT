@@ -39,6 +39,7 @@ class RSSvNextMotionCourt:
     # All topology candidates must be judged under the same qualified teacher
     # kinematics / skin-transfer protocol, not their independently predicted skins.
     source_skin_protocol_hash: str
+    evaluation_stage: str  # must measure the original structural mesh before any polish
     candidate_hashes: tuple[str, ...]
     reference_authority: str  # exact source-relative comparison, NOT predicted-view authority
     static_cost: Tensor       # [K] source-match metric
@@ -52,6 +53,8 @@ class RSSvNextMotionCourt:
     def validate(self, k: int) -> None:
         if self.reference_authority != "QUALIFIED_SOURCE_RELATIVE_MOTION_COURT":
             raise ValueError("RSS_VNEXT_MOTION_SOURCE_AUTHORITY_INVALID")
+        if self.evaluation_stage != "PRE_DYNAMIC_REFINEMENT_STRUCTURAL_MESH":
+            raise ValueError("RSS_VNEXT_MOTION_POSTHOC_REPAIR_REWARD_FORBIDDEN")
         if min(map(len, (self.source_sha256, self.motion_suite_hash,
                          self.canonical_binding_hash,
                          self.source_skin_protocol_hash))) == 0:

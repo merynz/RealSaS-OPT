@@ -18,7 +18,7 @@ from torch import Tensor, nn
 import torch.nn.functional as F
 
 from models.iris.vnext.scene_core_v1 import IRISVNextSceneCoreV1
-from models.tessa.v3.model_v3 import TESSAStructuralizerV3
+from models.tessa.v31.model_v31 import TESSAStructuralizerV31
 from models.axis.rig_program_model_v6 import (
     AXISRigProgramModelV6,
     AXISSequenceV6,
@@ -253,7 +253,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             )
             self.aux_to_scene = nn.Linear(cfg.iris.image_token_dim, cfg.iris.plane_channels)
 
-        self.tessa = TESSAStructuralizerV3(
+        self.tessa = TESSAStructuralizerV31(
             scene_input_dim=cfg.iris.plane_channels,
             surface_input_dim=h,
             presentation_input_dim=h,

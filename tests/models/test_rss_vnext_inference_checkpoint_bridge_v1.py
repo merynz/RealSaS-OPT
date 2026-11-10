@@ -201,3 +201,54 @@ def test_model_source_state_export_and_source_change_firewall():
             prediction, original_rgba=rgba[:, :1],
             original_camera_features=cam, checkpoint_sha256="a" * 64,
         )
+
+
+def test_real_checkpoint_two_view_model_to_replayable_compiler_receipt(tmp_path):
+    from models.rss_vnext.inference_pipeline_v1 import (
+        run_two_view_to_compiler_proposal_v1,
+        read_compiler_proposal_receipt_v1,
+    )
+
+    net = _network()
+    checkpoint = tmp_path / "checkpoint.pt"
+    digest = save_inference_checkpoint_v1(checkpoint, net)
+    rgba, cam = _images()
+    # DINOv2 has 14px patch requirements; a 28px research image is also
+    # compatible with the 4px test encoder and with source archive policy.
+    rgba = torch.rand(1, 2, 4, 28, 28)
+    out_dir = tmp_path / "compile_001"
+    receipt = run_two_view_to_compiler_proposal_v1(
+        checkpoint_path=checkpoint,
+        expected_checkpoint_sha256=digest,
+        vision_encoder=RSSvNextPatchEncoderForTests(net.cfg.iris.image_token_dim),
+        observed_rgba=rgba,
+        camera_features=cam,
+        output_directory=out_dir,
+        max_topology_tokens=16,
+        generate_controls=True,
+        product_mode=False,
+    )
+    assert receipt["status"] in ("ABSTAIN", "UNQUALIFIED_MESH_CANDIDATE")
+    assert receipt["product_revision_minted"] is False
+    again, evidence = read_compiler_proposal_receipt_v1(
+        out_dir, expected_checkpoint_sha256=digest,
+    )
+    assert again == receipt
+    assert evidence.mesh_status == receipt["status"]
+    with pytest.raises(RuntimeError, match="OUTPUT_REVISION_ALREADY_EXISTS"):
+        run_two_view_to_compiler_proposal_v1(
+            checkpoint_path=checkpoint, expected_checkpoint_sha256=digest,
+            vision_encoder=RSSvNextPatchEncoderForTests(net.cfg.iris.image_token_dim),
+            observed_rgba=rgba, camera_features=cam, output_directory=out_dir,
+            max_topology_tokens=16, product_mode=False,
+        )
+    with pytest.raises(RuntimeError, match="RECEIPT_AUTHORITY_DRIFT"):
+        read_compiler_proposal_receipt_v1(
+            out_dir, expected_checkpoint_sha256="e" * 64,
+        )
+    with (out_dir / "observed_source_tensors.npz").open("ab") as fh:
+        fh.write(b"attack")
+    with pytest.raises(RuntimeError, match="ARTIFACT_BYTES_DRIFT"):
+        read_compiler_proposal_receipt_v1(
+            out_dir, expected_checkpoint_sha256=digest,
+        )

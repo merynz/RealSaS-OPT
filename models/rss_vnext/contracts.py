@@ -13,6 +13,7 @@ import torch
 from models.iris.vnext.contracts_v1 import IRISVNextConfigV1
 from models.tessa.v3.config_v3 import TESSAStructuralizerConfigV3
 from models.axis.rig_program_model_v6 import AXISRigProgramConfigV6
+from .semantic_geometry_prior import RSSvNextSemanticRoleSchema
 
 
 @dataclass(frozen=True)
@@ -25,7 +26,14 @@ class RSSvNextConfig:
     aux_constructed_view_latents: int = 0  # 0, 6, 8: hypotheses, NEVER observed views
     query_grid_side: int = 8  # geometry probes, not source/teacher mesh vertices
     region_slots: int = 32   # anonymous region hypotheses; unknown explicitly represented
-    semantic_evidence_channels: int = 8  # independent masked evidence axes, NOT fixed bodypart classes
+    # Explicit renderer-trainable 2D/3D presentation roles, NOT morphology or rig.
+    # Same four role order as StdGEN is the baseline; six requires six real
+    # source-renderable role definitions and a new schema ID.
+    semantic_role_names: tuple[str, ...] = (
+        "secondary_form", "focal_detail", "primary_form", "outer_covering",
+    )
+    semantic_role_schema_id: str = "RSS.vNext.SemanticPresentationRoles.FourWayResearch.v1"
+    semantic_evidence_channels: int = 4  # must agree with above schema
     affordance_classes: int = 9
     graphics_channels: int = 5
     relation_width: int = 256
@@ -42,6 +50,9 @@ class RSSvNextConfig:
     def validate(self) -> None:
         self.iris.validate()
         self.tessa.validate()
+        self.semantic_role_schema().validate()
+        if self.semantic_evidence_channels != len(self.semantic_role_names):
+            raise ValueError("RSS_VNEXT_SEMANTIC_ROLE_FIELD_WIDTH_DRIFT")
         if self.observed_views != 2:
             raise ValueError("RSS_VNEXT_REQUIRES_EXACTLY_FRONT_BACK")
         if self.aux_constructed_view_latents not in (0, 6, 8):
@@ -62,6 +73,11 @@ class RSSvNextConfig:
             raise ValueError("RSS_VNEXT_FSQ_LEVEL_INVALID")
         if self.iris.camera_feature_dim != 13:
             raise ValueError("RSS_VNEXT_CAMERA_CONTRACT_DRIFT")
+
+    def semantic_role_schema(self) -> RSSvNextSemanticRoleSchema:
+        return RSSvNextSemanticRoleSchema(
+            roles=self.semantic_role_names, schema_id=self.semantic_role_schema_id,
+        )
 
     def axis_config(self) -> AXISRigProgramConfigV6:
         self.validate()
@@ -98,7 +114,7 @@ class RSSvNextConfig:
                 memory_refinement_layers=0, local_attention_window=128,
                 query_chunk_size=16, gradient_checkpointing=False,
             ),
-            query_grid_side=2, region_slots=4, semantic_evidence_channels=5, affordance_classes=5,
+            query_grid_side=2, region_slots=4, semantic_evidence_channels=4, affordance_classes=5,
             graphics_channels=4, relation_width=32,
             control_hidden_dim=32, control_layers=2,
             control_heads=4, control_max_seq=64, skin_hidden_dim=32,
@@ -120,7 +136,9 @@ class RSSvNextSceneState:
     local_features: torch.Tensor
     geometry: dict[str, torch.Tensor]
     semantic_logits: torch.Tensor  # slot membership, including UNKNOWN
-    semantic_evidence_logits: torch.Tensor  # independent 3D field evidence axes
+    semantic_evidence_logits: torch.Tensor  # non-authoritative field estimates
+    presentation_role_logits: torch.Tensor  # StdGEN-style K-way 3D semantics
+    presentation_role_probabilities: torch.Tensor
     affordance_logits: torch.Tensor
     graphics_logits: torch.Tensor
     region_slot_features: torch.Tensor

@@ -2,7 +2,7 @@
 """V26 synthetic-only evidence contract tests (no private corpus required)."""
 from __future__ import annotations
 import unittest,pathlib,ast
-HERE=pathlib.Path(__file__).resolve().parent
+HERE=pathlib.Path(__file__).resolve().parents[2]/'tools'/'corpus'/'truth_foundry'/'evidence_v26'
 
 class TestV26(unittest.TestCase):
  def test_no_automatic_admission(self):

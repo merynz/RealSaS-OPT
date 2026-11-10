@@ -216,7 +216,7 @@ class RSSvNextStructuralTrainer:
             "torch_cuda_rng": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [],
         }
         # Write and replace atomically on the same filesystem.
-        with tempfile.NamedTemporaryFile(dir=path.parent, prefix=".rssckpt-", delete=False) as f:
+        with tempfile.NamedTemporaryFile(dir=path.parent, prefix="rssckpt-", suffix=".pt", delete=False) as f:
             tmp = Path(f.name)
         try:
             torch.save(payload, tmp)

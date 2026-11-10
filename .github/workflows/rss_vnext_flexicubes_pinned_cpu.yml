@@ -6,6 +6,7 @@ on:
     paths:
       - "models/rss_vnext/**"
       - "tests/models/test_rss_vnext_flexicubes_bridge.py"
+      - "tests/models/test_rss_vnext_flexicubes_animation.py"
       - ".github/workflows/rss_vnext_flexicubes_pinned_cpu.yml"
   workflow_dispatch:
 
@@ -40,4 +41,4 @@ jobs:
         run: |
           export REALSAS_FLEXICUBES_ROOT="${RUNNER_TEMP}/rss-pinned-flexicubes"
           python -m compileall -q models/rss_vnext
-          python -m pytest -q tests/models/test_rss_vnext_flexicubes_bridge.py
+          python -m pytest -q tests/models/test_rss_vnext_flexicubes_bridge.py tests/models/test_rss_vnext_flexicubes_animation.py

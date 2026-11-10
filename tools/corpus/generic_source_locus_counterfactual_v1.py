@@ -125,9 +125,16 @@ def court_manifest(doc):
     rows=doc.get("rows")
     require(isinstance(rows,list) and bool(rows),"LOCUS_EMPTY_BATCH")
     results=[evaluate_row(row) for row in rows]
-    keys={(r["source_sha256"],r["camera_sha256"],r["view_index"],
-           r["pixel_x"],r["pixel_y"]) for r in results}
-    require(len(keys)==len(results),"LOCUS_DUPLICATE_PIXEL_ROW")
+    # One pixel can support several distinct source-locus pair experiments.
+    # Deduplicate the unordered pair, not the pixel: swapping A/B must not
+    # let the same evidence count twice as independent measurements.
+    keys=[]
+    for raw in rows:
+        a,b=_address(raw["locus_a"]),_address(raw["locus_b"])
+        keys.append((raw["source_sha256"],raw["camera_sha256"],
+                     raw["rest_geometry_sha256"],raw["view_index"],
+                     raw["pixel_x"],raw["pixel_y"],tuple(sorted((a,b)))))
+    require(len(set(keys))==len(keys),"LOCUS_DUPLICATE_LOCUS_PAIR_ROW")
     return {
         "schema":"RealSaS.Corpus370GenericLocusCounterfactualBatchCourt.v1",
         "status":"CAUSAL_SOURCE_LOCI_ONLY__GENERIC_OWNER_NOT_CERTIFIED",

@@ -36,6 +36,9 @@ class RSSvNextMotionCourt:
     source_sha256: str
     motion_suite_hash: str
     canonical_binding_hash: str
+    # All topology candidates must be judged under the same qualified teacher
+    # kinematics / skin-transfer protocol, not their independently predicted skins.
+    source_skin_protocol_hash: str
     candidate_hashes: tuple[str, ...]
     reference_authority: str  # exact source-relative comparison, NOT predicted-view authority
     static_cost: Tensor       # [K] source-match metric
@@ -44,17 +47,20 @@ class RSSvNextMotionCourt:
     candidate_source_sha256: tuple[str, ...]
     candidate_motion_suite_hash: tuple[str, ...]
     candidate_canonical_binding_hash: tuple[str, ...]
+    candidate_source_skin_protocol_hash: tuple[str, ...]
 
     def validate(self, k: int) -> None:
         if self.reference_authority != "QUALIFIED_SOURCE_RELATIVE_MOTION_COURT":
             raise ValueError("RSS_VNEXT_MOTION_SOURCE_AUTHORITY_INVALID")
         if min(map(len, (self.source_sha256, self.motion_suite_hash,
-                         self.canonical_binding_hash))) == 0:
+                         self.canonical_binding_hash,
+                         self.source_skin_protocol_hash))) == 0:
             raise ValueError("RSS_VNEXT_MOTION_COURT_PROVENANCE_MISSING")
         for name, hashes, canonical in (
             ("SOURCE", self.candidate_source_sha256, self.source_sha256),
             ("MOTION", self.candidate_motion_suite_hash, self.motion_suite_hash),
             ("BINDING", self.candidate_canonical_binding_hash, self.canonical_binding_hash),
+            ("SKIN_PROTOCOL", self.candidate_source_skin_protocol_hash, self.source_skin_protocol_hash),
         ):
             if len(hashes) != k or any(x != canonical for x in hashes):
                 raise ValueError(f"RSS_VNEXT_MOTION_{name}_CANDIDATE_PROVENANCE_DRIFT")

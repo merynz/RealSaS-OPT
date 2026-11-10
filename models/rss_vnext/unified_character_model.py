@@ -34,6 +34,10 @@ from .source_ray_evidence import sample_front_back_source_rays
 from .semantic_geometry_prior import (
     RSSvNextSemanticLayerSpec, semantic_equivalent_signed_field,
 )
+from .flexicubes_surface_evidence import (
+    RSSvNextFlexiCubesEvidenceBridge,
+    RSSvNextFlexiCubesSurfaceEvidence,
+)
 from .motion_aware_topology_learning import (
     RSSvNextMotionCourt, RSSvNextTopologyPreferenceConfig,
     RSSvNextTopologyPreferenceResult,
@@ -306,6 +310,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         self.axis = AXISRigProgramModelV6(cfg.axis_config())
         self.mira = RSSvNextSkinCoupler(cfg)
         self.mesh_bridge = RSSvNextAnimationReadyMesh(self.iris, cfg.tessa)
+        # FlexiCubes is a DIFFERENTIABLE SURFACE WITNESS for the structural
+        # Transformer, not its final geometry/topology owner. It reuses IRIS H.
+        self.fc_surface_bridge = RSSvNextFlexiCubesEvidenceBridge(
+            self.iris, resolution=cfg.iris.extraction_training_resolution,
+        )
+        self.fc_surface_position = nn.Linear(3, h, bias=False)
         self.dynamic_refine = RSSvNextDynamicRefinement(
             RSSvNextDynamicRefinementConfig(
                 carrier_dim=cfg.iris.local_feature_dim,
@@ -388,7 +398,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             aux, aux_unc,
         )
 
-    def _structural_memory(self, state: RSSvNextSceneState, auxiliary: Tensor | None) -> Tensor:
+    def _structural_memory(
+        self, state: RSSvNextSceneState, auxiliary: Tensor | None,
+        flexicubes: RSSvNextFlexiCubesSurfaceEvidence | None = None,
+    ) -> Tensor:
         planes = state.scene_triplanes
         b, p, c, h, w = planes.shape
         scene_src = planes.permute(0, 1, 3, 4, 2).reshape(b, p * h * w, c)
@@ -407,6 +420,24 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         surface_source = torch.cat(
             (surface_evidence, state.region_relation_tokens), dim=1,
         )
+        if flexicubes is not None:
+            if surface_source.shape[0] != 1:
+                raise ValueError("RSS_VNEXT_FC_BONE_SCENE_BATCH_ONE_ONLY")
+            # Cap attention tokens deterministically, without detaching the
+            # underlying differentiable 3D surface or its local H(x).
+            n = flexicubes.local_features.shape[1]
+            cap = min(256, n)
+            ix = torch.linspace(
+                0, n - 1, cap, device=surface_source.device,
+            ).long()
+            witness_features = (
+                flexicubes.local_features[:, ix]
+                + self.fc_surface_position(flexicubes.xyz[:, ix])
+                + self.presentation_roles_to_memory(
+                    torch.softmax(flexicubes.presentation_role_logits[:, ix], dim=-1),
+                )
+            )
+            surface_source = torch.cat((surface_source, witness_features), dim=1)
         return self.tessa.encode_memory(
             scene_source=scene_src,
             surface_source=surface_source,
@@ -456,10 +487,26 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         rig_sequence: AXISSequenceV6 | None = None,
         pair_indices: Tensor | None = None,
         mesh_teacher_tokens: Tensor | None = None,
+        flexicubes_extractor=None,
+        flexicubes_layer: RSSvNextSemanticLayerSpec | None = None,
     ) -> RSSvNextOutput:
         # No source 3D mesh, teacher joints, skin, or extra image view is accepted.
         state, auxiliary, aux_unc = self.encode_observations(rgba, camera_features)
-        structural_memory = self._structural_memory(state, auxiliary)
+        surface_witness = None
+        if (flexicubes_extractor is None) != (flexicubes_layer is None):
+            raise ValueError("RSS_VNEXT_FC_OPERATOR_AND_LAYER_MUST_BE_TOGETHER")
+        if flexicubes_extractor is not None:
+            surface_witness = self.fc_surface_bridge(
+                state.scene_triplanes,
+                extractor=flexicubes_extractor,
+                role_head=self.presentation_role_head,
+                schema=self.cfg.semantic_role_schema(),
+                layer=flexicubes_layer,
+                field_policy="SIGNED_HYPOTHESIS_ONLY",
+            )
+        structural_memory = self._structural_memory(
+            state, auxiliary, flexicubes=surface_witness,
+        )
         topology_logits = None
         if topology_prefix is not None:
             topology_logits = self.tessa.decode_tokens(
@@ -513,6 +560,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             skin_joint_valid_mask=joint_mask,
             mesh_candidate=mesh,
             dynamic_mesh_candidate=dynamic,
+            flexicubes_surface_evidence=surface_witness,
         )
 
     def query_semantic_equivalent_field(

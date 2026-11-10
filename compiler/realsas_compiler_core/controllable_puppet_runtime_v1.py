@@ -11,8 +11,10 @@ perform cloth collision or create source appearance. Absent capability evidence
 raises QualificationError instead of quietly producing a convincing mock.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 import math
+from .hashing import content_sha256
+from dataclasses import replace
 from typing import Callable, Mapping
 
 import numpy as np
@@ -169,6 +171,28 @@ def _barycentric_2d(
     return w0, w1, w2
 
 
+@dataclass(frozen=True)
+class ControllablePuppetSnapshotV1:
+    """Persistent control state, not a new product or changed model."""
+    product_revision_id: str
+    mesh_lineage_hash: str
+    rig_lineage_hash: str
+    skin_lineage_hash: str
+    view_index: int
+    control_states: tuple[ControlTransformIRV1, ...]
+    active_attachments: tuple[tuple[str, str | None], ...]
+    state_hash: str = ""
+    schema_version: str = "RealSaS.ControllablePuppetSnapshot.v1"
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    def checked_hash(self) -> str:
+        payload = self.to_dict()
+        payload.pop("state_hash", None)
+        return content_sha256(payload)
+
+
 class ControllablePuppetSessionV1:
     """Mutable controls and selection; frozen mesh/rig/skin/source addresses."""
 
@@ -249,6 +273,58 @@ class ControllablePuppetSessionV1:
         gy = (1.0 - 2.0 * float(y) / cam.resolution) * cam.half_extent
         target = origin + right * gx + up * gy + forward * d
         self.drag_world(control_id, tuple(float(v) for v in target))
+
+    def snapshot(self) -> ControllablePuppetSnapshotV1:
+        row = ControllablePuppetSnapshotV1(
+            product_revision_id=self.bundle.product_revision_id,
+            mesh_lineage_hash=self.bundle.mesh.mesh_lineage_hash,
+            rig_lineage_hash=self.bundle.rig.rig_lineage_hash,
+            skin_lineage_hash=self.bundle.skin.skin_lineage_hash,
+            view_index=self.view_index,
+            control_states=tuple(
+                self.control_states[k] for k in sorted(self.control_states)
+            ),
+            active_attachments=tuple(sorted(self.active_attachments.items())),
+        )
+        return replace_snapshot_hash(row)
+
+    def restore(self, snapshot: ControllablePuppetSnapshotV1) -> None:
+        """Atomic replay with source/rig/skin identity and valid controls.
+
+        No inference or scene recompilation occurs. A snapshot from a new
+        ProductRevision, rig or skin cannot silently rebind stale control IDs.
+        """
+        if (snapshot.schema_version != "RealSaS.ControllablePuppetSnapshot.v1"
+                or snapshot.state_hash != snapshot.checked_hash()):
+            raise QualificationError("PUPPET_RUNTIME_SNAPSHOT_HASH_DRIFT")
+        if (snapshot.product_revision_id != self.bundle.product_revision_id
+                or snapshot.mesh_lineage_hash != self.bundle.mesh.mesh_lineage_hash
+                or snapshot.rig_lineage_hash != self.bundle.rig.rig_lineage_hash
+                or snapshot.skin_lineage_hash != self.bundle.skin.skin_lineage_hash):
+            raise QualificationError("PUPPET_RUNTIME_SNAPSHOT_PARENT_DRIFT")
+        if type(snapshot.view_index) is not int or not 0 <= snapshot.view_index < 8:
+            raise QualificationError("PUPPET_RUNTIME_SNAPSHOT_VIEW_INVALID")
+        control_keys = [x.canonical_control_id for x in snapshot.control_states]
+        if (len(control_keys) != len(set(control_keys))
+                or any(k not in self._controls for k in control_keys)):
+            raise QualificationError("PUPPET_RUNTIME_SNAPSHOT_CONTROLS_UNKNOWN")
+        slot_ids = {s.slot_id for s in self.bundle.playback.slots}
+        active = dict(snapshot.active_attachments)
+        if len(active) != len(snapshot.active_attachments) or set(active) != slot_ids:
+            raise QualificationError("PUPPET_RUNTIME_SNAPSHOT_SLOT_COVERAGE")
+        # Transactional state update: validate in a separate session and
+        # only publish to this instance after all checks + solver succeed.
+        candidate = ControllablePuppetSessionV1(self.bundle)
+        for row in snapshot.control_states:
+            candidate.set_control(row)
+        for slot, attachment in snapshot.active_attachments:
+            candidate.set_attachment(slot, attachment)
+        candidate.set_view_index(snapshot.view_index)
+        candidate.frame()
+        self.control_states = candidate.control_states
+        self.active_attachments = candidate.active_attachments
+        self.view_index = candidate.view_index
+        self.selected = None
 
     def set_attachment(self, slot_id: str, attachment_id: str | None) -> None:
         slot_ids = {s.slot_id for s in self.bundle.playback.slots}
@@ -375,7 +451,12 @@ class ControllablePuppetSessionV1:
         return self.selected
 
 
+def replace_snapshot_hash(value: ControllablePuppetSnapshotV1) -> ControllablePuppetSnapshotV1:
+    return replace(value, state_hash=value.checked_hash())
+
+
 __all__ = [
+    "ControllablePuppetSnapshotV1",
     "ControllablePuppetBundleV1",
     "ControllablePuppetSessionV1",
     "PuppetRuntimeFrameV1",

@@ -1,0 +1,45 @@
+name: RSS vNext two-view unified neural smoke
+on:
+  push:
+    branches:
+      - audit/rss-vnext-source-genealogy-20261110
+    paths:
+      - "models/rss_vnext/**"
+      - "tests/models/test_rss_vnext_unified_character_model.py"
+      - "tests/models/test_rss_vnext_motion_topology_learning.py"
+      - "tests/models/test_rss_vnext_structural_trainer.py"
+      - "tests/models/test_rss_vnext_early_semantics.py"
+      - "tests/models/test_rss_vnext_multiview_construction.py"
+      - "tests/models/test_rss_vnext_skin_query_field.py"
+      - "tests/models/test_rss_vnext_compiler_capability_court.py"
+      - "tests/compiler/test_mechanics_control_solver_v1.py"
+      - "tests/compiler/test_control_motion_ik_integration_v1.py"
+      - "tests/compiler/test_mechanics_main_subtree_runtime_v1.py"
+      - "tests/compiler/test_control_ready_rig_v2.py"
+      - ".github/workflows/rss_vnext_unified_cpu_smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cpu:
+    name: CPU forward/backward two-view source firewall
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install narrow CPU test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy scipy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Import/compile and run actual forward-backward source tests
+        env:
+          PYTHONPATH: .
+        run: |
+          python -m compileall -q models/rss_vnext tests/models/test_rss_vnext_unified_character_model.py tests/models/test_rss_vnext_motion_topology_learning.py tests/models/test_rss_vnext_structural_trainer.py tests/models/test_rss_vnext_early_semantics.py tests/models/test_rss_vnext_multiview_construction.py tests/models/test_rss_vnext_skin_query_field.py tests/models/test_rss_vnext_compiler_capability_court.py tests/compiler/test_mechanics_control_solver_v1.py tests/compiler/test_control_motion_ik_integration_v1.py tests/compiler/test_mechanics_main_subtree_runtime_v1.py tests/compiler/test_control_ready_rig_v2.py
+          python -m pytest -q tests/models/test_rss_vnext_unified_character_model.py tests/models/test_rss_vnext_motion_topology_learning.py tests/models/test_rss_vnext_structural_trainer.py tests/models/test_rss_vnext_early_semantics.py tests/models/test_rss_vnext_multiview_construction.py tests/models/test_rss_vnext_skin_query_field.py tests/models/test_rss_vnext_compiler_capability_court.py tests/compiler/test_mechanics_control_solver_v1.py tests/compiler/test_control_motion_ik_integration_v1.py tests/compiler/test_mechanics_main_subtree_runtime_v1.py tests/compiler/test_control_ready_rig_v2.py

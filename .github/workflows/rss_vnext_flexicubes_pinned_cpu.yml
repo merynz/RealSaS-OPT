@@ -1,0 +1,44 @@
+name: RSS vNext pinned FlexiCubes-to-structural CPU court
+on:
+  push:
+    branches:
+      - audit/rss-vnext-source-genealogy-20261110
+    paths:
+      - "models/rss_vnext/**"
+      - "tests/models/test_rss_vnext_flexicubes_bridge.py"
+      - "tests/models/test_rss_vnext_flexicubes_animation.py"
+      - ".github/workflows/rss_vnext_flexicubes_pinned_cpu.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  flexicubes:
+    name: Actual pinned NVIDIA FlexiCubes gradients and TESSA witness
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install narrow CPU dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy pytest
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Fetch exact Apache-2.0 FlexiCubes source (no vendoring or alternate implementation)
+        shell: bash
+        run: |
+          git clone --no-checkout https://github.com/nv-tlabs/FlexiCubes.git "${RUNNER_TEMP}/rss-pinned-flexicubes"
+          git -C "${RUNNER_TEMP}/rss-pinned-flexicubes" checkout --detach 4cc7d6c3d0cee83c011ce36721b81adff0dd7db6
+          git -C "${RUNNER_TEMP}/rss-pinned-flexicubes" rev-parse HEAD
+      - name: Actual pinned-source CPU forward/backward and structural bridge
+        shell: bash
+        env:
+          PYTHONPATH: .
+        run: |
+          export REALSAS_FLEXICUBES_ROOT="${RUNNER_TEMP}/rss-pinned-flexicubes"
+          python -m compileall -q models/rss_vnext
+          python -m pytest -q tests/models/test_rss_vnext_flexicubes_bridge.py tests/models/test_rss_vnext_flexicubes_animation.py

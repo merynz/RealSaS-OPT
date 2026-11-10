@@ -25,6 +25,9 @@ from models.axis.rig_program_model_v6 import (
     RigTokenKindV6,
 )
 from models.mira.skin_fsq_codec_v6 import MIRASkinFSQCodecV6, MIRASkinFSQCodecConfig
+from models.tessa.v2.generation_v2 import TESSAGrammarStateV2
+from .animation_ready_mesh import RSSvNextAnimationReadyMesh, RSSvNextStructuralMeshCandidate
+from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefinementConfig
 
 from .contracts import RSSvNextConfig, RSSvNextOutput, RSSvNextSceneState
 
@@ -161,7 +164,7 @@ class RSSvNextSkinCoupler(nn.Module):
         axis_hidden: Tensor,
         skin_code_logits: Tensor,
         sequence: AXISSequenceV6,
-    ) -> tuple[Tensor, Tensor]:
+    ) -> tuple[Tensor, Tensor, Tensor]:
         if local_features.shape[:2] != vertex_xyz.shape[:2]:
             raise ValueError("RSS_VNEXT_SKIN_VERTEX_DOMAIN_DRIFT")
         if axis_hidden.shape[:2] != sequence.kind_ids.shape:
@@ -178,7 +181,11 @@ class RSSvNextSkinCoupler(nn.Module):
             j = int(joint_pos.numel())
             if j < 1 or int(skin_pos.numel()) != j * t or bool((skin_pos == 0).any()):
                 raise ValueError("RSS_VNEXT_SKIN_CAUSAL_GRAMMAR_INCOMPLETE")
-            joint_rows.append(axis_hidden[bi, joint_pos])
+            if bool((joint_pos == 0).any()):
+                raise ValueError("RSS_VNEXT_SKIN_JOINT_PREDICTION_POSITION_INVALID")
+            # Predict each joint from the preceding causal state, never the
+            # current ground-truth joint embedding.
+            joint_rows.append(axis_hidden[bi, joint_pos - 1])
             # Prediction at k-1 targets code at k: never use current GT token.
             code_rows.append(skin_code_logits[bi, skin_pos - 1].reshape(j, t, -1))
 
@@ -198,7 +205,10 @@ class RSSvNextSkinCoupler(nn.Module):
             weights = torch.softmax(logits, dim=-1)
             weight_rows.append(F.pad(weights, (0, max_j - jstate.shape[0])))
             mask_rows.append(torch.arange(max_j, device=jstate.device) < jstate.shape[0])
-        return torch.stack(weight_rows), torch.stack(mask_rows)
+        joint_rows_padded = [
+            F.pad(x, (0, 0, 0, max_j - x.shape[0])) for x in joint_rows
+        ]
+        return torch.stack(weight_rows), torch.stack(mask_rows), torch.stack(joint_rows_padded)
 
 
 class RSSvNextUnifiedCharacterModel(nn.Module):
@@ -251,6 +261,15 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         self.control_norm = nn.LayerNorm(cfg.tessa.d_model)
         self.axis = AXISRigProgramModelV6(cfg.axis_config())
         self.mira = RSSvNextSkinCoupler(cfg)
+        self.mesh_bridge = RSSvNextAnimationReadyMesh(self.iris, cfg.tessa)
+        self.dynamic_refine = RSSvNextDynamicRefinement(
+            RSSvNextDynamicRefinementConfig(
+                carrier_dim=cfg.iris.local_feature_dim,
+                joint_dim=cfg.control_hidden_dim,
+                width=cfg.relation_width,
+                layers=3,
+            )
+        )
         self.register_buffer("_query_grid", self._make_query_grid(cfg.query_grid_side), persistent=False)
 
     @staticmethod
@@ -332,9 +351,16 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         pb = torch.gather(state.query_xyz, 1, pair_indices[:, :, 1:2].expand(-1, -1, 3))
         return self.relation(torch.cat((a, z, a - z, a * z, pa - pb), dim=-1))
 
-    def _control_memory(self, state: RSSvNextSceneState, structural: Tensor) -> Tensor:
+    def _control_memory(
+        self, state: RSSvNextSceneState, structural: Tensor,
+        mesh: RSSvNextStructuralMeshCandidate | None = None,
+    ) -> Tensor:
+        # Mesh features remain addressed to the same live scene H(x).
+        context = state.local_features if mesh is None else torch.cat(
+            (state.local_features, mesh.local_features), dim=1,
+        )
         fused, _ = self.control_cross(
-            structural, state.local_features, state.local_features, need_weights=False,
+            structural, context, context, need_weights=False,
         )
         return self.control_norm(structural + fused)
 
@@ -346,6 +372,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         topology_prefix: Tensor | None = None,
         rig_sequence: AXISSequenceV6 | None = None,
         pair_indices: Tensor | None = None,
+        mesh_teacher_tokens: Tensor | None = None,
     ) -> RSSvNextOutput:
         # No source 3D mesh, teacher joints, skin, or extra image view is accepted.
         state, auxiliary, aux_unc = self.encode_observations(rgba, camera_features)
@@ -356,17 +383,35 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 memory=structural_memory, input_ids=topology_prefix,
             ).logits
 
+        mesh = None
+        dynamic = None
+        if mesh_teacher_tokens is not None:
+            # Explicit training-only teacher-forcing: the model inference path
+            # neither requires nor accepts privileged source topology.
+            if not self.training:
+                raise ValueError("RSS_VNEXT_TEACHER_MESH_FORBIDDEN_AT_INFERENCE")
+            if state.scene_triplanes.shape[0] != 1:
+                raise ValueError("RSS_VNEXT_RAGGED_MESH_BATCH_ONE_ONLY")
+            mesh = self.build_mesh_candidate(
+                state, mesh_teacher_tokens,
+                source_authority="TEACHER_FORCED_TRAINING_ONLY",
+            )
+
         control_logits = skin_weights = joint_mask = None
         if rig_sequence is not None:
-            controls = self.axis(self._control_memory(state, structural_memory), rig_sequence)
+            controls = self.axis(self._control_memory(state, structural_memory, mesh), rig_sequence)
             control_logits = controls
             kinds = rig_sequence.kind_ids
             if bool((kinds == int(RigTokenKindV6.SKIN_CODE)).any()):
-                skin_weights, joint_mask = self.mira(
-                    state.local_features,
-                    state.query_xyz + state.geometry["extraction_delta"],
+                feat = state.local_features if mesh is None else mesh.local_features
+                xyz = state.query_xyz + state.geometry["extraction_delta"] if mesh is None else mesh.rest_vertices_iris
+                skin_weights, joint_mask, joint_states = self.mira(
+                    feat, xyz,
                     controls["hidden"], controls["skin_code_logits"], rig_sequence,
                 )
+                if mesh is not None:
+                    # Same exact mesh vertices and joint order for rest/skin.
+                    dynamic = self.dynamic_refine(mesh, skin_weights, joint_states)
 
         # Continuous scaffold, NOT a canonical mesh (no faces or qualified sign).
         surface = state.query_xyz + state.geometry["extraction_delta"]
@@ -383,6 +428,24 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             control_logits=control_logits,
             skin_weight_proposal=skin_weights,
             skin_joint_valid_mask=joint_mask,
+            mesh_candidate=mesh,
+            dynamic_mesh_candidate=dynamic,
+        )
+
+    def build_mesh_candidate(
+        self,
+        state: RSSvNextSceneState,
+        topology_token_ids: Tensor | tuple[int, ...],
+        *,
+        source_authority: str = "LEARNED_PREDICTED_TOPOLOGY",
+    ) -> RSSvNextStructuralMeshCandidate:
+        return self.mesh_bridge(
+            state.scene_triplanes, topology_token_ids,
+            refine=self.surface_refine, semantics=self.semantic,
+            affordances=self.affordance, graphics=self.graphics,
+            quality=self.deformation_quality, udf=self.udf,
+            sign_logit=self.sign_logit,
+            source_authority=source_authority,
         )
 
     @torch.no_grad()
@@ -394,41 +457,83 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         max_topology_tokens: int | None = None,
         generate_controls: bool = False,
     ) -> dict:
-        """Never consumes topology/rig teacher tokens; still UNQUALIFIED."""
+        """Free-running constrained topology and mechanical proposal.
+
+        No teacher geometry, rig or additional original views are accepted.
+        Invalid/untrained topology remains ABSTAIN; never substitute a fake
+        grid mesh to make the pipeline green.
+        """
         if self.training:
             raise RuntimeError("RSS_VNEXT_TEACHER_FREE_REQUIRES_EVAL")
+        if rgba.shape[0] != 1:
+            raise ValueError("RSS_VNEXT_MESH_GENERATION_BATCH_ONE_ONLY")
         out = self(rgba, camera_features)
-        limit = min(max_topology_tokens or self.cfg.topology_decode_cap, self.cfg.topology_decode_cap)
+        limit = min(max_topology_tokens or self.cfg.topology_decode_cap,
+                    self.cfg.topology_decode_cap)
         if limit < 2:
             raise ValueError("RSS_VNEXT_DECODE_LIMIT_INVALID")
-        b = rgba.shape[0]
-        ids = torch.full((b, 1), self.cfg.tessa.BOS, device=rgba.device, dtype=torch.long)
-        done = torch.zeros(b, device=rgba.device, dtype=torch.bool)
-        for _ in range(limit - 1):
-            logits = self.tessa.decode_tokens(memory=out.structural_memory, input_ids=ids).logits[:, -1]
-            next_ids = logits.argmax(dim=-1)
-            next_ids = torch.where(done, self.cfg.tessa.EOS, next_ids)
-            ids = torch.cat((ids, next_ids[:, None]), dim=1)
-            done |= next_ids == self.cfg.tessa.EOS
-            if bool(done.all()):
-                break
-        result = {
+        ids = torch.tensor([[self.cfg.tessa.BOS]], device=rgba.device, dtype=torch.long)
+        grammar = TESSAGrammarStateV2()
+        failure = None
+        try:
+            for _ in range(limit - 1):
+                logits = self.tessa.decode_tokens(
+                    memory=out.structural_memory, input_ids=ids,
+                ).logits[0, -1]
+                allowed = grammar.allowed_token_mask(config=self.cfg.tessa, device=ids.device)
+                # Existing V2 grammar allows adjacent-coordinate start before
+                # the seed triangle; reject that path in this strict runner.
+                if grammar.current_component_face_count == 0:
+                    allowed[:self.cfg.tessa.coordinate_bins] = False
+                if not bool(allowed.any()):
+                    failure = "NO_LEGAL_TOPOLOGY_TOKEN"
+                    break
+                tok = int(logits.float().masked_fill(~allowed, float("-inf")).argmax().item())
+                grammar.advance(tok, config=self.cfg.tessa)
+                ids = torch.cat((ids, ids.new_tensor([[tok]])), dim=1)
+                if grammar.complete:
+                    break
+        except (ValueError, RuntimeError) as exc:
+            failure = f"TOPOLOGY_SEQUENCE_INVALID:{type(exc).__name__}:{exc}"
+        mesh = None
+        if grammar.complete and failure is None:
+            try:
+                mesh = self.build_mesh_candidate(out.state, ids[0])
+            except (ValueError, RuntimeError) as exc:
+                failure = f"TOPOLOGY_COURT_REJECTED:{type(exc).__name__}:{exc}"
+        else:
+            failure = failure or "TOPOLOGY_SEQUENCE_INCOMPLETE"
+
+        result: dict = {
             "state": out.state,
             "structural_token_proposal": ids,
-            "continuous_surface_proposal": out.continuous_surface_proposal,
+            "mesh_candidate": mesh,
+            "mesh_status": "UNQUALIFIED_MESH_CANDIDATE" if mesh is not None else "ABSTAIN",
+            "mesh_failure": failure,
             "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
             "observed_view_count": 2,
             "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
         }
         if generate_controls:
-            if b != 1:
-                raise ValueError("RSS_VNEXT_AXIS_V6_GENERATE_BATCH_ONE_ONLY")
-            memory = self._control_memory(out.state, out.structural_memory)
+            if mesh is None:
+                raise RuntimeError("RSS_VNEXT_CONTROL_REQUIRES_VALID_PREDICTED_MESH")
+            memory = self._control_memory(out.state, out.structural_memory, mesh)
             events = self.axis.generate_events(
                 memory, tokens_per_joint=self.cfg.skin_tokens_per_joint,
                 max_steps=self.cfg.control_max_seq,
             )
             result["control_event_proposal"] = events
+            seq = AXISSequenceV6.from_events(
+                events, device=memory.device,
+            )
+            control_out = self.axis(memory, seq)
+            if bool((seq.kind_ids == int(RigTokenKindV6.SKIN_CODE)).any()):
+                weights, joint_valid, joints = self.mira(
+                    mesh.local_features, mesh.rest_vertices_iris,
+                    control_out["hidden"], control_out["skin_code_logits"], seq,
+                )
+                result["dynamic_mesh_candidate"] = self.dynamic_refine(mesh, weights, joints)
+                result["joint_valid_mask"] = joint_valid
         return result
 
 

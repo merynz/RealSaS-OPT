@@ -174,6 +174,8 @@ def build_rss_vnext_inference_evidence_v1(
     mesh = result.get("mesh_candidate")
     if mesh is not None:
         mesh.validate()
+        if mesh.source_authority != "LEARNED_PREDICTED_TOPOLOGY":
+            raise ValueError("RSS_VNEXT_CANDIDATE_TEACHER_FORCED_MESH_FORBIDDEN")
         arrays.update({
             "mesh_rest_xyz": _numeric("mesh_rest_xyz", mesh.rest_vertices_iris),
             "mesh_faces": _numeric("mesh_faces", mesh.faces),

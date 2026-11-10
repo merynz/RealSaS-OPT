@@ -1,3 +1,5 @@
+> **Current RSS.vNext product-input override — 2026-11-11:** The user now requires exactly **two real FRONT/BACK RGBA images** as the product input. Historical deferred single-view and research eight-view paragraphs below are provenance, not the current product observation contract. Constructed six/eight total views are predictions, never additional original observations. Main includes the unified RSS.vNext research model and a separate controllable-puppet runtime consumer, but **no learned ModelRelease, ProductRevision or final architecture freeze is authorized** by their merges. Follow the current code + tests and do not claim deployment readiness before source/mesh, graphics, runtime and Platform qualification close.
+
 # RealSaS-OPT Agent Entry Contract
 
 ## Single-view product objective — 2026-11-03

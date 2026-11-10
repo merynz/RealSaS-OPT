@@ -115,7 +115,28 @@ class GenericSourceLocusTests(unittest.TestCase):
         row=fixture()
         doc={"schema":"RealSaS.Corpus370GenericLocusCounterfactualBatch.v1",
              "training_authorized":False,"rows":[row,copy.deepcopy(row)]}
-        with self.assertRaisesRegex(ValueError,"DUPLICATE_PIXEL_ROW"):
+        with self.assertRaisesRegex(ValueError,"DUPLICATE_LOCUS_PAIR_ROW"):
+            court_manifest(doc)
+
+    def test_distinct_locus_pairs_at_same_pixel_are_preserved(self):
+        first=fixture()
+        second=copy.deepcopy(first)
+        second["locus_b"]["face_index_teacher_only"]=6
+        doc={"schema":"RealSaS.Corpus370GenericLocusCounterfactualBatch.v1",
+             "training_authorized":False,"rows":[first,second]}
+        result=court_manifest(doc)
+        self.assertEqual(len(result["rows"]),2)
+        self.assertEqual(result["two_causal_loci_count"],2)
+        self.assertFalse(result["training_authorized"])
+
+    def test_reversed_locus_pair_cannot_double_count(self):
+        first=fixture()
+        reversed_pair=copy.deepcopy(first)
+        reversed_pair["locus_a"],reversed_pair["locus_b"]=(
+            reversed_pair["locus_b"],reversed_pair["locus_a"])
+        doc={"schema":"RealSaS.Corpus370GenericLocusCounterfactualBatch.v1",
+             "training_authorized":False,"rows":[first,reversed_pair]}
+        with self.assertRaisesRegex(ValueError,"DUPLICATE_LOCUS_PAIR_ROW"):
             court_manifest(doc)
 
     def test_valid_batch_no_training_authority(self):

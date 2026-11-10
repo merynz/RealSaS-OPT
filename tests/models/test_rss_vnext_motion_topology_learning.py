@@ -15,6 +15,7 @@ from models.rss_vnext import (
     RSSvNextConfig, RSSvNextPatchEncoderForTests,
     RSSvNextUnifiedCharacterModel,
 )
+from models.rss_vnext.motion_topology_candidates import propose_component_safe_edge_flips
 from models.rss_vnext.motion_aware_topology_learning import (
     RSSvNextMotionCourt,
     RSSvNextTopologyPreferenceConfig,
@@ -290,3 +291,56 @@ def test_two_static_equivalent_topologies_have_distinct_posed_surfaces():
     out.loss.backward()
     assert out.preferred_pairs == ((0, 1),)
     assert logp.grad[0] < 0 and logp.grad[1] > 0
+
+
+
+def test_safe_edge_flip_generates_real_alternative_face_connectivity():
+    rest = torch.tensor([
+        [-.5, -.5, 0.0], [.5, -.5, 0.0],
+        [.5, .5, 0.0], [-.5, .5, 0.0],
+    ])
+    faces = torch.tensor([[0, 1, 2], [0, 2, 3]], dtype=torch.long)
+    comp = torch.zeros(4, dtype=torch.long)
+    candidates = propose_component_safe_edge_flips(
+        rest, faces, comp, protected_edges=frozenset(),
+        protection_court_identity="toy-source-no-protected-edge",
+    )
+    assert len(candidates) == 1
+    alt = candidates[0]
+    assert alt.removed_edge == (0, 2)
+    assert alt.new_edge == (1, 3)
+    assert alt.faces.shape == faces.shape
+    assert alt.authority == "UNQUALIFIED_COUNTERFACTUAL_TRAINING_CANDIDATE"
+    # Face indices remain in exactly the same vertex array and component.
+    assert alt.faces.max() == 3 and alt.faces.min() == 0
+    # Under a single-joint corner lift, the counterfactual has a different
+    # posed triangle surface. This can be ranked by source motion consequence.
+    lifted = rest.clone()
+    lifted[2, 2] = .8
+    source = _area_weighted_surface_witnesses(lifted[None], faces)
+    alternative = _area_weighted_surface_witnesses(lifted[None], alt.faces)
+    assert float(_two_way_surface_chamfer(alternative, source)) > .05
+
+
+def test_edge_flip_abstains_across_protected_seam_or_nonplanar_hinge():
+    rest = torch.tensor([
+        [-.5, -.5, 0.0], [.5, -.5, 0.0],
+        [.5, .5, 0.0], [-.5, .5, 0.0],
+    ])
+    faces = torch.tensor([[0, 1, 2], [0, 2, 3]], dtype=torch.long)
+    comp = torch.zeros(4, dtype=torch.long)
+    assert not propose_component_safe_edge_flips(
+        rest, faces, comp, protected_edges=frozenset({(0, 2)}),
+        protection_court_identity="toy-protected-mechanical-seam",
+    )
+    altered = rest.clone()
+    altered[3, 2] = .9
+    assert not propose_component_safe_edge_flips(
+        altered, faces, comp, protected_edges=frozenset(),
+        protection_court_identity="toy-nonplanar-hinge-no-safe-flip",
+    )
+    with pytest.raises(ValueError, match="PROTECTION_COURT_REQUIRED"):
+        propose_component_safe_edge_flips(
+            rest, faces, comp, protected_edges=frozenset(),
+            protection_court_identity="",
+        )

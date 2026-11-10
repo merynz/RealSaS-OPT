@@ -1,0 +1,166 @@
+{
+  "schema": "RealSaS.Corpus370MultiPartitionRealSourceEditResult.v7",
+  "status": "REAL_3_SOURCE_NESTED_PARTITION_EDIT_CONSEQUENCES_COURTED__NO_PARTITION_OPTIMUM_OR_OWNER_AUTHORITY",
+  "date_utc": "2026-11-05",
+  "source_identity": {
+    "observation_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+    "roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+    "source_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+    "allview_geometry_layer_batch_sha256": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1",
+    "old_v6_full_peel_real_result_run_id": 41997241779,
+    "private_v7_run_id": 42002891207,
+    "github_run_conclusion": "SUCCESS",
+    "total_jobs_passed": 4,
+    "subject_workers_passed": 3,
+    "subject_workers_failed": 0,
+    "private_drive_folder": "gdrive:corpus370_preparation_v1/hosted_multi_partition_edit_private_v7/42002891207-1",
+    "independently_downloaded_court_json_sha256_matches": 3,
+    "independently_downloaded_court_json_sha256_mismatches": 0,
+    "raw_rgba_npz_replayed_in_new_process": false,
+    "original_art_render_byte_buffers_private": true
+  },
+  "experiment": {
+    "view_count_per_subject": 8,
+    "rest_pose_only": true,
+    "image_grid_resolution": [
+      192,
+      192
+    ],
+    "original_source_oriented_geometry_and_materials_unchanged": true,
+    "source_names_or_material_semantics_as_student_labels": false,
+    "candidate_partition_schema": "RealSaS.Corpus370AllViewGeometryOperationalGroups.v3",
+    "nested_hypotheses_existing_before_v7": true,
+    "reference": "FINEST_AVAILABLE_NESTED_CANDIDATE_IS_A_PROXY_NOT_ARTIST_DRAWABLE_TRUTH",
+    "proxy_targets_from_sha_bound_source_hit_pair_views": [
+      0,
+      4
+    ],
+    "render_arms_over_all_subjects": 736,
+    "reference_biased_toward_finer_partition": true,
+    "programmatic_optimal_partition_selected": false,
+    "native_pose_or_skin_replay_executed": false,
+    "full_native_resolution_caa_qualified": false
+  },
+  "measurements": {
+    "total_subjects": 3,
+    "source_parity_camera_views_passed": 24,
+    "source_parity_camera_views_total": 24,
+    "per_subject": [
+      {
+        "source": "CAT",
+        "subject_ordinal": 0,
+        "available_candidate_group_counts": [
+          8,
+          16,
+          32,
+          64
+        ],
+        "unavailable_requested_candidate_group_counts": [],
+        "initial_refined_atomic_patch_count": 260,
+        "distinct_source_edit_proxy_tasks": 4,
+        "render_arms_per_camera": 44,
+        "total_render_arms": 352,
+        "source_noop_parity_views_passed": 8,
+        "source_direct_edit_delta_pixel_instances_vs_finest_reference": {
+          "8": 34558,
+          "16": 24811,
+          "32": 4197,
+          "64": 0
+        },
+        "source_peel_isolation_delta_pixel_instances_vs_finest_reference": {
+          "8": 147539,
+          "16": 111038,
+          "32": 36525,
+          "64": 0
+        },
+        "independently_courted_receipt_sha256": "b356f8409c9e776e28335a1f985ac09c0e12b75b26a57451182a8979fc05cee9",
+        "status": "REAL_SOURCE_EDIT_PROXY_MEASURED__CAT_8_GROUP_HAS_SUBSTANTIAL_ADDITIONAL_EDIT_EFFECT"
+      },
+      {
+        "source": "TRICERATOPS",
+        "subject_ordinal": 1,
+        "available_candidate_group_counts": [
+          8,
+          16,
+          32
+        ],
+        "unavailable_requested_candidate_group_counts": [
+          64
+        ],
+        "initial_refined_atomic_patch_count": 57,
+        "distinct_source_edit_proxy_tasks": 2,
+        "render_arms_per_camera": 20,
+        "total_render_arms": 160,
+        "source_noop_parity_views_passed": 8,
+        "source_direct_edit_delta_pixel_instances_vs_finest_reference": {
+          "8": 486,
+          "16": 0,
+          "32": 0
+        },
+        "source_peel_isolation_delta_pixel_instances_vs_finest_reference": {
+          "8": 2461,
+          "16": 0,
+          "32": 0
+        },
+        "independently_courted_receipt_sha256": "aa03eaf125008fe813a985fe60cc0b3a83883bb2fc57294af0cdfedc77d0fb2f",
+        "status": "REAL_SOURCE_EDIT_PROXY_MEASURED__SAMPLED_16_AND_32_EQUIVALENT"
+      },
+      {
+        "source": "COWFISH",
+        "subject_ordinal": 2,
+        "available_candidate_group_counts": [
+          8,
+          16,
+          32
+        ],
+        "unavailable_requested_candidate_group_counts": [
+          64
+        ],
+        "initial_refined_atomic_patch_count": 34,
+        "distinct_source_edit_proxy_tasks": 3,
+        "render_arms_per_camera": 28,
+        "total_render_arms": 224,
+        "source_noop_parity_views_passed": 8,
+        "source_direct_edit_delta_pixel_instances_vs_finest_reference": {
+          "8": 2083,
+          "16": 12,
+          "32": 0
+        },
+        "source_peel_isolation_delta_pixel_instances_vs_finest_reference": {
+          "8": 7348,
+          "16": 23,
+          "32": 0
+        },
+        "independently_courted_receipt_sha256": "f17f5d3c7e04fd841a2cf3fa5f248a8cd32d3b1ec9d3a11461b49d7c09a14555",
+        "status": "REAL_SOURCE_EDIT_PROXY_MEASURED__SAMPLED_16_NEAR_FINE_WITH_SMALL_RESIDUAL"
+      }
+    ],
+    "training_subjects_qualified_by_this_result": 0,
+    "graphics_author_drawable_positive_pairs_qualified_by_this_result": 0,
+    "graphics_author_drawable_negative_pairs_qualified_by_this_result": 0
+  },
+  "authority": {
+    "source_edit_consequence_pixels_measured": true,
+    "source_fine_partition_is_true_artist_drawable": false,
+    "optimal_partition_count_minted": false,
+    "cross_subject_fixed_partition_policy_authorized": false,
+    "native_pose_group_persistence_qualified": false,
+    "mechanical_owner_authorized": false,
+    "graphics_owner_authorized": false,
+    "full_caa_qualified": false,
+    "tessa_teacher_authorized": false,
+    "model_training_authorized": false,
+    "materialization_authorized": false,
+    "product_compilation_authorized": false,
+    "training_authorized": false,
+    "observation_pass_roster_subjects": 352,
+    "observation_excluded_subjects": 18
+  },
+  "next_gates": [
+    "INDEPENDENT_NATIVE_POSE_PERSISTENCE_AND_DEFORMING_SKIN_LAYER_IDENTITY",
+    "STRESS_MOTION_AND_SOURCE_RENDER_CONSEQUENCE_OVERLAP_ALPHA_SEAM_DRAW_ORDER",
+    "ORIGINAL_SOURCE_TASK_ORACLES_NOT_JUST_FINEST_CANDIDATE_SELF_REFERENCE",
+    "CAUSAL_INTERVENTION_POSITIVE_NEGATIVE_ABSTAIN_WITH_ROOT_SHAM_AND_INVERSION",
+    "CANONICAL_3D_TO_2D_GRAPHICS_AND_PER_HEAD_LINEAGE_SAFE_TRAINING_MASKS"
+  ]
+}

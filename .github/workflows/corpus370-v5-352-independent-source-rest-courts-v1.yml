@@ -1,0 +1,67 @@
+name: corpus370-v5-352-independent-source-rest-courts-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths: ['.github/workflows/corpus370-v5-352-independent-source-rest-courts-v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-v5-352-independent-source-rest-courts-v1
+  cancel-in-progress: false
+jobs:
+  verify-exact-import-source-surface:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      V5_SHA: 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_source_rest_courts_v1_8ab2ebf5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact 352+18 parent and court code
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          test -f "$V5"
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = "$V5_SHA"
+          "$PY" -m py_compile \
+            tools/corpus/audit_corpus370_v5_source_rest_courts_v1.py \
+            tools/corpus/source_rest_geometry_v1.py \
+            tools/corpus/validate_source_rest_geometry_v1.py
+      - name: Independently court every source-rest geometry from original admitted import
+        run: |
+          set -euo pipefail
+          "$PY" -u tools/corpus/audit_corpus370_v5_source_rest_courts_v1.py \
+            --v5-index "$V5" --output-root "$OUTPUT_ROOT" \
+            | tee "$OUTPUT_ROOT.stdout.log"
+      - name: Reopen independent outcome partition and preserve all 18 unqualified observations
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY'
+          import os,json
+          from pathlib import Path
+          root=Path(os.environ['OUTPUT_ROOT'])
+          d=json.loads((root/'SOURCE_REST_COURTS_INDEX.json').read_text())
+          assert d['schema']=='RealSaS.Corpus370V5SourceRestIndependentCourtSweep.v1'
+          assert d['status']=='FULL_SOURCE_REST_COURT_SWEEP_COMPLETED__FAMILY_ADMISSION_SEPARATE'
+          assert len(d['subjects'])==352 and len(d['excluded_observation_failures'])==18
+          assert len(set(d['subjects'])|{r['subject_id'] for r in d['excluded_observation_failures']})==370
+          assert d['summary']['independent_source_rest_pass']+d['summary']['not_proven_source_rest']==352
+          assert d['training_authorized'] is False
+          assert d['authority']['family_authority_minted'] is False
+          print(json.dumps(d['summary'],sort_keys=True),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v5-source-rest-courts-352-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT_ROOT }}/SOURCE_REST_COURTS_INDEX.json
+            ${{ env.OUTPUT_ROOT }}/failures/*.json
+            ${{ env.OUTPUT_ROOT }}.stdout.log
+          retention-days: 30
+          compression-level: 1
+          if-no-files-found: warn

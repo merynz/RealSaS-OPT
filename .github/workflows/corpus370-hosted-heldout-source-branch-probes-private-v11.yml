@@ -1,0 +1,192 @@
+name: corpus370-hosted-heldout-source-branch-probes-private-v11
+
+# No Blender render here: independently pre-register 12 NEW geometry-only
+# original source triangle interventions per subject from V9/V10 proven sources.
+# Original source triangles and prior teacher edit identities stay on Drive.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - 'canonical/CORPUS370_HOSTED_HELDOUT_SOURCE_PROBE_REQUEST_V11.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-hosted-heldout-source-branch-probes-private-v11
+  cancel-in-progress: false
+
+jobs:
+  source-v9-v10-sealed-parent-validator:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.gate.outputs.ready }}
+      v5_manifest_sha: ${{ steps.gate.outputs.v5_manifest_sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        name: Exact prior source parent and no training or semantic labels
+        env:
+          PRIVATE_DRIVE_PRESENT: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os,subprocess
+          from pathlib import Path
+          d=json.loads(Path("canonical/CORPUS370_HOSTED_HELDOUT_SOURCE_PROBE_REQUEST_V11.json").read_text())
+          assert d["schema"]=="RealSaS.Corpus370HeldoutOriginalSourceBranchResearchRequest.v11"
+          assert d["enabled"] is True
+          assert d["subject_count"]==d["parallel_hosted_workers"]==3
+          assert d["query_budget_per_source"]==12
+          assert d["prior_v9_real_hosted_run_id"]==42014234494
+          assert d["prior_v10_real_hosted_run_id"]==42017257514
+          assert d["source_original_v9_git_blob_sha1"]=="cac396962b3b5976b9cfe660f0bb592a3a7f57ad"
+          assert d["source_original_v10_git_blob_sha1"]=="7f4817551b08012f68c138a2ae5d4d02cd9d2d57"
+          for p,key in (
+            ("canonical/CORPUS370_NATIVE_ANIMATED_SOURCE_RASTER_REAL_RESULT_V9.json","source_original_v9_git_blob_sha1"),
+            ("canonical/CORPUS370_NATIVE_EDIT_RESPONSE_EQUIVALENCE_REAL_RESULT_V10.json","source_original_v10_git_blob_sha1"),
+          ):
+              assert subprocess.check_output(["git","hash-object",p],text=True).strip()==d[key]
+          assert d["prior_v9_public_sha256"]=="decae1f3b38574bf9d69d72665d6f6cc3ec85c252688176a63617e70f7e227b0"
+          assert d["source_v5_shards_manifest_sha256"]=="cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172"
+          assert d["heldout_source_leaf_required"] is True
+          assert d["rest_and_group_proposal_unchanged"] is True
+          assert d["renderer_edit_outcome_unknown"] is True
+          for key in ("fixed_group_count_promoted_as_production_output",
+                      "semantic_labels_as_model_targets","same_drawable_labels_minted",
+                      "different_drawable_labels_minted",
+                      "graphics_owner_authorized","tessa_training_authorized",
+                      "iris_training_authorized","materialization_authorized",
+                      "training_authorized"):
+              assert d[key] is False,key
+          assert os.environ["PRIVATE_DRIVE_PRESENT"]=="true"
+          print("ready=true")
+          print("v5_manifest_sha="+d["source_v5_shards_manifest_sha256"])
+          PY
+
+  independent-original-source-heldout-query-workers:
+    needs: source-v9-v10-sealed-parent-validator
+    if: needs.source-v9-v10-sealed-parent-validator.outputs.ready == 'true'
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        subject_ordinal: [0, 1, 2]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      RCLONE_CONFIG: /tmp/realsas-c370-v11.conf
+      MANIFEST_SHA: ${{ needs.source-v9-v10-sealed-parent-validator.outputs.v5_manifest_sha }}
+      V5_SHARDS_REMOTE: gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards
+      RAYS_REMOTE: gdrive:corpus370_preparation_v1/hosted_source_locus_rays_all352/41883539256-1
+      JOIN_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_visibility_pair_join_v1/41916724594-1
+      GROUP_REMOTE: gdrive:corpus370_preparation_v1/hosted_allview_geometry_groups_v3/41986038051-1
+      V9_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_animated_partition_private_v9/42014234494-1
+      V10_REMOTE: gdrive:corpus370_preparation_v1/hosted_native_edit_equivalence_private_v10/42017257514-1
+      V9_PRIVATE: /tmp/c370-v11-parent-v9
+      V10_PRIVATE: /tmp/c370-v11-parent-v10
+      RAYS_LOCAL: /home/monster/realsas_authority/corpus370_hosted_ray_outputs/41883539256-1
+      JOIN_LOCAL: /home/monster/realsas_authority/corpus370_hosted_native_visibility_pairs/41916724594-1
+      GROUP_LOCAL: /home/monster/realsas_authority/corpus370_allview_groups_v3/41986038051-1
+      OUTPUT_LOCAL: /home/monster/realsas_authority/corpus370_heldout_source_probe_v11/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.subject_ordinal }}
+      OUTPUT_REMOTE: gdrive:corpus370_preparation_v1/hosted_heldout_source_branch_probe_private_v11/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.subject_ordinal }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate V11 synthetic source lineage, no-semantic label and heldout negatives
+        run: |
+          set -euo pipefail
+          sudo install -d -o "$USER" -g "$(id -gn)" -m 0700 /home/monster/realsas_authority
+          mkdir -p "$OUTPUT_LOCAL" "$V9_PRIVATE" "$V10_PRIVATE" "$RAYS_LOCAL" "$JOIN_LOCAL" "$GROUP_LOCAL"
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/corpus/corpus370_adaptive_edit_probe_plan_v11.py \
+            tools/corpus/run_corpus370_heldout_probe_plan_private_v11.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_adaptive_edit_probe_plan_v11.py
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Authenticate private evidence transport
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          for remote in "$V5_SHARDS_REMOTE" "$RAYS_REMOTE" "$JOIN_REMOTE" "$GROUP_REMOTE" "$V9_REMOTE" "$V10_REMOTE"; do
+              rclone lsf "$remote" --max-depth 1 >/dev/null
+          done
+      - name: Hydrate exact original native geometric source plus sealed V9/V10 evidence
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$RUNNER_TEMP/private-v5-v11" "$RUNNER_TEMP/private-objects-v11"
+          rclone copy "$V5_SHARDS_REMOTE" "$RUNNER_TEMP/private-v5-v11" \
+            --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+          python3 -u tools/corpus/hosted_v5_private_shards_v1.py hydrate \
+            --manifest "$RUNNER_TEMP/private-v5-v11/PRIVATE_V5_SHARD_MANIFEST.json" \
+            --expected-manifest-sha256 "$MANIFEST_SHA" \
+            --private-dir "$RUNNER_TEMP/private-v5-v11" \
+            --object-cache "$RUNNER_TEMP/private-objects-v11" \
+            > "$OUTPUT_LOCAL/PRIVATE_V11_SOURCE_HYDRATE_LOG.txt" 2>&1
+          rclone copy "$JOIN_REMOTE" "$JOIN_LOCAL" --checksum --transfers 2 --checkers 2 --retries 3
+          rclone copy "$GROUP_REMOTE" "$GROUP_LOCAL" --checksum --transfers 2 --checkers 2 --retries 3
+          rclone copyto "$RAYS_REMOTE/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            "$RAYS_LOCAL/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" --checksum --retries 3
+          test "$(sha256sum "$JOIN_LOCAL/CORPUS370_NATIVE_VISIBILITY_PAIR_JOIN_V1.json" | cut -d' ' -f1)" = e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a
+          test "$(sha256sum "$GROUP_LOCAL/CORPUS370_ALLVIEW_GEOMETRY_GROUPS_PRIVATE_BATCH_V3.json" | cut -d' ' -f1)" = 1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1
+          test "$(sha256sum "$RAYS_LOCAL/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" | cut -d' ' -f1)" = 0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70
+          SUBJECT_ORDINAL=${{ matrix.subject_ordinal }} python3 - <<'PY' > "$RUNNER_TEMP/v11-source.txt"
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["JOIN_LOCAL"])/"CORPUS370_NATIVE_VISIBILITY_PAIR_JOIN_V1.json").read_text())
+          print(sorted(d["subjects"])[int(os.environ["SUBJECT_ORDINAL"])])
+          PY
+          sid="$(cat "$RUNNER_TEMP/v11-source.txt")"
+          mkdir -p "$RAYS_LOCAL/subjects/$sid" "$V9_PRIVATE/${{ matrix.subject_ordinal }}" "$V10_PRIVATE/${{ matrix.subject_ordinal }}"
+          rclone copyto "$RAYS_REMOTE/subjects/$sid/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json" \
+            "$RAYS_LOCAL/subjects/$sid/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json" --checksum --retries 3
+          rclone copyto "$V9_REMOTE/${{ matrix.subject_ordinal }}/PRIVATE_ANIMATED_SOURCE_RENDER_MANIFEST_V9.json" \
+            "$V9_PRIVATE/${{ matrix.subject_ordinal }}/PRIVATE_ANIMATED_SOURCE_RENDER_MANIFEST_V9.json" --checksum --retries 3
+          rclone copyto "$V10_REMOTE/${{ matrix.subject_ordinal }}/PRIVATE_NATIVE_EDIT_EQUIVALENCE_COURT_V10.json" \
+            "$V10_PRIVATE/${{ matrix.subject_ordinal }}/PRIVATE_NATIVE_EDIT_EQUIVALENCE_COURT_V10.json" --checksum --retries 3
+          echo "EXACT_REAL_SOURCE_AND_HELDOUT_QUERY_PARENTS_READY"
+      - name: Build new source-wide geometric query plan without previous target reuse
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 -u tools/corpus/run_corpus370_heldout_probe_plan_private_v11.py \
+            --public-v9 canonical/CORPUS370_NATIVE_ANIMATED_SOURCE_RASTER_REAL_RESULT_V9.json \
+            --public-v9-sha256 "decae1f3b38574bf9d69d72665d6f6cc3ec85c252688176a63617e70f7e227b0" \
+            --public-v10 canonical/CORPUS370_NATIVE_EDIT_RESPONSE_EQUIVALENCE_REAL_RESULT_V10.json \
+            --public-v10-sha256 "$(sha256sum canonical/CORPUS370_NATIVE_EDIT_RESPONSE_EQUIVALENCE_REAL_RESULT_V10.json | cut -d' ' -f1)" \
+            --original-join-root "$JOIN_LOCAL" --allview-groups-root "$GROUP_LOCAL" \
+            --rays-index "$RAYS_LOCAL/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            --v9-private-root "$V9_PRIVATE" --v10-private-root "$V10_PRIVATE" \
+            --subject-ordinal ${{ matrix.subject_ordinal }} --max-queries 12 \
+            --output "$OUTPUT_LOCAL" \
+            > "$OUTPUT_LOCAL/PRIVATE_V11_HELDOUT_SOURCE_PROBE_LOG.txt" 2>&1
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["OUTPUT_LOCAL"])/"PRIVATE_HELDOUT_BRANCH_PROBE_BATCH_V11.json").read_text())
+          assert d["status"]=="REAL_ORIGINAL_SOURCE_HELDOUT_NONSEMANTIC_PROBE_PLAN_SEALED"
+          assert 4<=d["new_query_count"]<=12
+          assert d["graphics_owner_authorized"] is False
+          assert d["training_authorized"] is False
+          print("## Original source V11 heldout geometry-only branch experiment plan")
+          print("New interventions:",d["new_query_count"])
+          print("Prior finest leaf exclusions:",d["prior_finest_groups_excluded"])
+          print("Splittable source branches covered:",d["new_split_parent_events_covered"],"/",d["possible_split_parent_events"])
+          print("Private plan SHA256:",d["plan_sha256"])
+          print("No owner labels; V11 NOT yet rendered.")
+          PY
+      - name: Preserve privileged source geometric targets on private Drive
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -s "$RCLONE_CONFIG" && test -d "$OUTPUT_LOCAL"; then
+            rclone copy "$OUTPUT_LOCAL" "$OUTPUT_REMOTE" \
+              --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+          fi

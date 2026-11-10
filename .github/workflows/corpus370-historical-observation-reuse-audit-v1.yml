@@ -1,0 +1,70 @@
+name: corpus370-historical-observation-reuse-audit-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths: ['.github/workflows/corpus370-historical-observation-reuse-audit-v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-historical-observation-reuse-audit-v1
+  cancel-in-progress: false
+jobs:
+  read-only-parent-byte-proof:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      PREP: /home/monster/realsas_authority/corpus370_preparation_v1
+      PARENT: /home/monster/realsas_authority/corpus370_preparation_v1/observations_rescue_v3/CORPUS370_PREPARED_OBSERVATION_PACKETS_V3.json
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      OUTPUT: /tmp/corpus370-historical-v3-reuse-${{ github.run_id }}/REUSE_AUDIT.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify parent lineage and original 370 identity
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          test -f "$PARENT"
+          test -f "$ROSTER"
+          test "$(sha256sum "$ROSTER" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+          "$PY" - <<'PY'
+          import os,json
+          from pathlib import Path
+          d=json.loads(Path(os.environ['PARENT']).read_text())
+          assert d['schema']=="RealSaS.Corpus370PreparedObservationPackets.v3", "REUSE_HISTORY_SCHEMA"
+          assert d['parent']['sha256']=="129b173b5d789cf4dc020f883ee8b16db8156380dd0cae939319ad3c279c139a","REUSE_SIGNED_HISTORICAL_PARENT_DRIFT"
+          assert d['subject_count']==370
+          assert d['training_authorized'] is False
+          print("REUSE_SEALED_OLD_PARENT=PASS",d['prepared_subject_count'],d['failure_count'],flush=True)
+          PY
+      - name: Independently rehash original V3 PASS import, 8 rasters and masks
+        run: |
+          set -euo pipefail
+          PARENT_SHA="$(sha256sum "$PARENT" | cut -d' ' -f1)"
+          "$PY" -u tools/corpus/audit_corpus370_historical_observation_reuse_v1.py \
+            --parent-index "$PARENT" --expected-parent-sha256 "$PARENT_SHA" \
+            --roster "$ROSTER" --expected-roster-sha256 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355 \
+            --policy canonical/CORPUS370_IRIS_OBSERVATION_POLICY_V1.json \
+            --output "$OUTPUT"
+      - name: Publish only scoped accounting, no new source admission
+        if: always()
+        run: |
+          if [ -f "$OUTPUT" ]; then
+            "$PY" - <<'PY'
+          import os,json
+          from pathlib import Path
+          d=json.loads(Path(os.environ['OUTPUT']).read_text())
+          print(json.dumps({k:d[k] for k in ('candidate_count','original_success_count',
+             'original_failure_count','exact_old_pass_reusable_count','old_pass_not_proven_count')},sort_keys=True))
+          PY
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-historical-observation-reuse-${{ github.run_id }}
+          path: ${{ env.OUTPUT }}
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 0

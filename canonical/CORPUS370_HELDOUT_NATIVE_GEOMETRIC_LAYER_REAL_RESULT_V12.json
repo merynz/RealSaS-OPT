@@ -1,0 +1,250 @@
+{
+  "schema": "RealSaS.Corpus370HeldoutNativeEditRealSourceResult.v12",
+  "date_utc": "2026-11-05",
+  "status": "PASS_THREE_REAL_SOURCE_V11_PRECOMMITTED_EDIT_RENDER_AND_INDEPENDENT_COURT__NO_DRAWABLE_OWNER",
+  "hosted": {
+    "github_actions_run_id": 42027947576,
+    "run_url": "https://github.com/merynz/RealSaS-OPT/actions/runs/42027947576",
+    "success_jobs": 4,
+    "failed_jobs": 0,
+    "real_blender_original_source_workers": 3,
+    "total_original_authored_pose_instances": 9,
+    "real_source_cameras_per_pose": 4,
+    "total_source_pose_camera_cases": 36,
+    "qualified_original_vs_soup_pose_camera_cases": 36,
+    "total_real_blender_render_arms": 3024,
+    "private_evidence_root": "gdrive:corpus370_preparation_v1/hosted_heldout_native_edit_private_v12/42027947576-1",
+    "source_render_manifest_sha256_verified_by_worker": 3,
+    "independent_v12_private_court_sha256_verified_separately_after_run": 3,
+    "real_rgba_npz_sha256_verified_separately_after_run": 3,
+    "second_independent_raw_rgba_numpy_replay_verified_for": [
+      "CAT_16_VS_32",
+      "TRICERATOPS_16_VS_32"
+    ]
+  },
+  "experiment": {
+    "source_group_preset_sizes_are_only_experimental_structural_priors": [
+      8,
+      16,
+      32,
+      64
+    ],
+    "three_original_source_subjects_only": true,
+    "source_native_action_frames_selected_before_v11": true,
+    "exact_v9_pose_indices_reused": true,
+    "original_source_camera_indices": [
+      0,
+      2,
+      4,
+      6
+    ],
+    "raster_size_pixels": [
+      192,
+      192
+    ],
+    "blender_cycles_samples": 32,
+    "source_original_v9_real_run": 42014234494,
+    "source_original_v10_real_run": 42017257514,
+    "source_original_v11_precommit_run": 42024346219,
+    "v11_new_fine_source_group_targets_preregistered": 36,
+    "v11_source_split_events_covered_by_probes": 50,
+    "v11_total_source_split_events_in_3_hypothesis_trees": 58,
+    "previous_v9_v10_finest_source_group_anchors_excluded": true,
+    "source_appearance_and_authored_pose_replay_sha_verified": true,
+    "real_render_of_all_v11_preselected_new_target_source_faces_completed": true,
+    "source_names_materials_bone_actions_not_used_to_define_drawable_labels": true,
+    "artist_drawable_truth_inferred": false,
+    "all_private_art_and_per_face_probes_kept_off_public_repo": true
+  },
+  "per_subject": [
+    {
+      "label": "CAT",
+      "subject_id": "corpus_000ca1ae51f9582fde9e",
+      "source_sha256": "1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850",
+      "v11_original_heldout_query_plan_sha256": "c8a3a90bf388310b5cc8caf8f30222c46a3c4d92e6b419cdd053417513e59eca",
+      "heldout_new_source_face_queries": 12,
+      "actual_source_pose_camera_cases": 12,
+      "qualified_source_vs_soup_pose_camera_cases": 12,
+      "render_arms": 1200,
+      "native_render_manifest_sha256": "34e42d3718259cbcb8d42771b78d6ee76c5a5bce39a4e54e755d7b7ff1a9a8fa",
+      "independent_court_sha256": "0a0efbe0a28d1de02bc04c4e1fbe220f363b1106ff2ffaca629cf0c61255b699",
+      "raw_rgba_npz_sha256": "143c5c6c3207d709a8a44a20006e6b1e74d11236e9f0f4da649aa4e33ba5a02e",
+      "source_edit_pairwise_results": [
+        {
+          "k_a": 8,
+          "k_b": 16,
+          "observable": 12,
+          "counterexamples": 9,
+          "direct_pixel_instances": 119749,
+          "isolation_pixel_instances": 352006,
+          "previous_v10_equivalence_falsified": false
+        },
+        {
+          "k_a": 8,
+          "k_b": 32,
+          "observable": 12,
+          "counterexamples": 10,
+          "direct_pixel_instances": 150033,
+          "isolation_pixel_instances": 418144,
+          "previous_v10_equivalence_falsified": false
+        },
+        {
+          "k_a": 8,
+          "k_b": 64,
+          "observable": 12,
+          "counterexamples": 12,
+          "direct_pixel_instances": 201936,
+          "isolation_pixel_instances": 574011,
+          "previous_v10_equivalence_falsified": false
+        },
+        {
+          "k_a": 16,
+          "k_b": 32,
+          "observable": 12,
+          "counterexamples": 6,
+          "direct_pixel_instances": 30637,
+          "isolation_pixel_instances": 70038,
+          "previous_v10_equivalence_falsified": false
+        },
+        {
+          "k_a": 16,
+          "k_b": 64,
+          "observable": 12,
+          "counterexamples": 12,
+          "direct_pixel_instances": 82754,
+          "isolation_pixel_instances": 228909,
+          "previous_v10_equivalence_falsified": false
+        },
+        {
+          "k_a": 32,
+          "k_b": 64,
+          "observable": 12,
+          "counterexamples": 12,
+          "direct_pixel_instances": 52143,
+          "isolation_pixel_instances": 161005,
+          "previous_v10_equivalence_falsified": false
+        }
+      ]
+    },
+    {
+      "label": "TRICERATOPS",
+      "subject_id": "corpus_004e16e05b90505ca23c",
+      "source_sha256": "ad66b51cc5fc44c9a3429a5b1b98a61621af08d58d102d8a817499bd6a7f5b5a",
+      "v11_original_heldout_query_plan_sha256": "4bdfcede3f3f7e84a56d64c402432dd3c1cb4fc6bf9483b92a239c2e252cf3c2",
+      "heldout_new_source_face_queries": 12,
+      "actual_source_pose_camera_cases": 12,
+      "qualified_source_vs_soup_pose_camera_cases": 12,
+      "render_arms": 912,
+      "native_render_manifest_sha256": "839311b6d7ea5fd6283470d3607863be0f93444ea714aaa7e3efb37b91713892",
+      "independent_court_sha256": "6464f94c2d87828c200f9a4c103d94aa3a19b967365b6316ce89413f29725f05",
+      "raw_rgba_npz_sha256": "21ffa439422860bebeb7c4276e5885d8c79a0d1360261dea6aecaadd21c8e8cb",
+      "source_edit_pairwise_results": [
+        {
+          "k_a": 8,
+          "k_b": 16,
+          "observable": 12,
+          "counterexamples": 9,
+          "direct_pixel_instances": 101042,
+          "isolation_pixel_instances": 161902,
+          "previous_v10_equivalence_falsified": false
+        },
+        {
+          "k_a": 8,
+          "k_b": 32,
+          "observable": 12,
+          "counterexamples": 12,
+          "direct_pixel_instances": 101174,
+          "isolation_pixel_instances": 164709,
+          "previous_v10_equivalence_falsified": false
+        },
+        {
+          "k_a": 16,
+          "k_b": 32,
+          "observable": 12,
+          "counterexamples": 11,
+          "direct_pixel_instances": 144,
+          "isolation_pixel_instances": 3369,
+          "previous_v10_equivalence_falsified": true
+        }
+      ]
+    },
+    {
+      "label": "COWFISH",
+      "subject_id": "corpus_00a3688e42a29045056b",
+      "source_sha256": "e6898505d56d8057c975b6376f123876dd957347282413cf3fb825754841b989",
+      "v11_original_heldout_query_plan_sha256": "8e14fe4e64be28b749d4d61b944182a5335cbd9e6d65b244c55a82876e6d58ce",
+      "heldout_new_source_face_queries": 12,
+      "actual_source_pose_camera_cases": 12,
+      "qualified_source_vs_soup_pose_camera_cases": 12,
+      "render_arms": 912,
+      "native_render_manifest_sha256": "e7c641a3e8f7f9f3cef4c14ecc7a5e1fc7342f02a4686c6e2299996c209eb169",
+      "independent_court_sha256": "dd6a1f89a5012e2855f73b588285e9756c766f0129d76e764a0356124a078c09",
+      "raw_rgba_npz_sha256": "cd056a3defd387c545b1106d1930738e6286d87aedd2fdd6e3a1257e03360319",
+      "source_edit_pairwise_results": [
+        {
+          "k_a": 8,
+          "k_b": 16,
+          "observable": 12,
+          "counterexamples": 12,
+          "direct_pixel_instances": 13587,
+          "isolation_pixel_instances": 48553,
+          "previous_v10_equivalence_falsified": false
+        },
+        {
+          "k_a": 8,
+          "k_b": 32,
+          "observable": 12,
+          "counterexamples": 12,
+          "direct_pixel_instances": 15981,
+          "isolation_pixel_instances": 60092,
+          "previous_v10_equivalence_falsified": false
+        },
+        {
+          "k_a": 16,
+          "k_b": 32,
+          "observable": 12,
+          "counterexamples": 8,
+          "direct_pixel_instances": 2560,
+          "isolation_pixel_instances": 12404,
+          "previous_v10_equivalence_falsified": false
+        }
+      ]
+    }
+  ],
+  "critical_falsification": {
+    "prior_v10_triceratops_16_vs_32_old_original_source_hit_probes": 2,
+    "prior_v10_triceratops_16_vs_32_old_edit_response_counterexamples": 0,
+    "new_v12_v11_precommitted_16_vs_32_source_target_probes": 12,
+    "new_v12_triceratops_16_vs_32_counterexamples": 11,
+    "new_v12_triceratops_16_vs_32_direct_pixel_instances": 144,
+    "new_v12_triceratops_16_vs_32_isolation_pixel_instances": 3369,
+    "old_v10_test_scoped_equivalence_extrapolation_falsified": true,
+    "artist_same_drawable_or_different_drawable_claim": false,
+    "independent_raw_rgba_second_counter_replay_verified": true
+  },
+  "authority": {
+    "native_resolution_full_appearance_caa_authorized": false,
+    "all_eight_view_native_pose_and_alpha_caa_authorized": false,
+    "source_motion_mechanical_intervention_owner_authorized": false,
+    "artist_same_drawable_positive_pairs": 0,
+    "artist_different_drawable_negative_pairs": 0,
+    "source_bone_mesh_material_semantics_to_model_targets": false,
+    "fine_partition_as_artist_truth": false,
+    "fixed_layer_count_as_product_requirement": false,
+    "graphics_owner_authorized": false,
+    "optimal_group_count_authorized": false,
+    "tessa_training_authorized": false,
+    "iris_training_authorized": false,
+    "materialization_authorized": false,
+    "training_authorized": false,
+    "product_compilation_authorized": false,
+    "observation_pass_subject_count_unchanged": 352,
+    "observation_failure_subject_count_unchanged": 18
+  },
+  "next_gates": [
+    "Additional original subject morphologies with truly new source authoring styles and source-independent heldout action/camera conditions",
+    "Non-taxonomic mechanical intervention with matched sham/root/attachment controls for ambiguity and art-layer identity",
+    "Independent author-edited drawable controls, positive/negative equivalence and split/merge supervision with UNKNOWN masks",
+    "8-camera native resolution original appearance and alpha/occlusion CAA before graphics/IRIS/TESSA teacher admission"
+  ]
+}

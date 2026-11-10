@@ -2,7 +2,7 @@ name: corpus370-closure-input-readback-v1
 on:
   workflow_dispatch:
   push:
-    branches: [corpus400-training-readiness-closure-v1, corpus-family-consumer-bindings-v1, corpus370-materialization-checkpoint-v1]
+    branches: [corpus400-training-readiness-closure-v1, corpus-family-consumer-bindings-v1, corpus370-materialization-checkpoint-v1, corpus370-source-relative-contact-v1-review]
     paths:
       - '.github/workflows/corpus370-closure-input-readback-v1.yml'
       - 'tools/corpus/inspect_corpus370_closure_inputs_v1.py'
@@ -41,6 +41,30 @@ jobs:
               rclone copyto "$OUTPUT/$NAME" "gdrive:corpus370_authority_v2/${GITHUB_RUN_ID}_${NAME}" --checksum
             fi
           done
+      - name: Summarize real Stage49 registry and model head blockers (diagnostic only)
+        if: always()
+        run: |
+          if test -f "$OUTPUT/CORPUS370_CLOSURE_INPUT_READBACK_V1.json"; then
+            /home/monster/realsas_platform/current/bin/realsas-python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ['OUTPUT'])
+          read=json.loads((root/'CORPUS370_CLOSURE_INPUT_READBACK_V1.json').read_text())
+          print('## Corpus370 live Platform/Stage49 closure readback')
+          print('Read-only; all authority and training remain false.')
+          print('Readback source manifests:',len(read.get('family_indexes',[])))
+          print('Partial matrix:',json.dumps(read.get('partial_matrix'),sort_keys=True,default=str)[:6000])
+          checkpoint=root/'CORPUS370_MATERIALIZATION_CHECKPOINT_V1.json'
+          if checkpoint.is_file():
+              c=json.loads(checkpoint.read_text())
+              print('Checkpoint:',c['status'])
+              print('IRIS/TESSA overlap:',json.dumps(c['overlap'],sort_keys=True))
+              print('Outstanding blockers:',json.dumps(c['blockers'],sort_keys=True))
+              for model,row in c['models'].items():
+                  print(model+' eligible subject count:',row['eligible_subject_count'])
+                  print(model+' head coverage:',json.dumps(row['head_subject_coverage'],sort_keys=True))
+          PY
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:

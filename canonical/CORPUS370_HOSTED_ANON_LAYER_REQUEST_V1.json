@@ -1,0 +1,35 @@
+{
+  "schema": "RealSaS.Corpus370HostedAnonymousLayerRequest.v1",
+  "status": "RERUN_SHA_EXACT_ANON_LAYER_WITH_PROSPECTIVE_COMPLEXITY_AND_PIXEL_EVIDENCE_ABSTAIN_GATES",
+  "enabled": true,
+  "original_native_visibility_join_run_id": 41916724594,
+  "original_native_visibility_join_attempt": 1,
+  "original_private_join_receipt_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+  "expected_subjects": 3,
+  "expected_source_hit_pairs": 6,
+  "candidate_types": [
+    "SINGLE_LAYER",
+    "MANIFOLD_COMPONENTS",
+    "GEOMETRY_SEAMS",
+    "MOTION_SEAMS",
+    "GEOMETRY_OR_MOTION_SEAMS",
+    "TRAIN_VIEW_RAY_SEEDED",
+    "ATOMIC_PER_FACE"
+  ],
+  "train_view": 0,
+  "heldout_view": 4,
+  "purpose": "Research anonymous functional graphics partitions; first-hit toggle/reveal expressivity is a bounded proxy, not a full renderer or author drawable identity.",
+  "private_source_only": true,
+  "sha_verified_inputs": true,
+  "student_source_ids_exposed": false,
+  "author_drawable_identity_qualified": false,
+  "graphics_owner_training_authorized": false,
+  "product_compilation_authorized": false,
+  "model_training_authorized": false,
+  "review_quality": {
+    "max_selected_layer_to_face_fraction_before_review": 0.2,
+    "min_selected_slot_count_for_overfragmentation_warning": 33,
+    "minimum_measured_ray_count_before_spatial_sufficiency": 8,
+    "note": "All warnings are research-level, never inferred author drawable ownership or negative examples."
+  }
+}

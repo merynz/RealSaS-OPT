@@ -1,0 +1,114 @@
+name: corpus370-v5-native-temporal-all-v4-real
+# Manual-only while this repository uses an 8 GiB WSL self-hosted runner.
+# Source code pushes must NOT auto-start the heavy Blender corpus.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-v5-native-temporal-all-v4-real
+  cancel-in-progress: false
+
+jobs:
+  exact-authority-native-roster-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Refuse lost source/missing-action subject or altered authoring
+        run: |
+          python -m pip install --disable-pip-version-check numpy scipy pillow pytest
+          PYTHONPATH=. python -m pytest -q \
+            tests/corpus/test_corpus370_v5_native_teacher_all_v1.py \
+            tests/corpus/test_corpus370_v5_native_teacher_temporal_pilot_v1.py \
+            tests/corpus/test_corpus370_v5_native_drive_recovery_v1.py
+
+  full-source-authored-animation-sweep:
+    needs: exact-authority-native-roster-tests
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 240
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      BLENDER: /home/monster/.cache/realsas/blender/blender-4.5.14-linux-x64/blender
+      PREP: /home/monster/realsas_authority/corpus370_preparation_v1
+      SOURCE_ARCHIVE_SHA: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      OUTPUT: /home/monster/realsas_authority/corpus370_native_temporal_v4_full_59df951966a05f3f62e965251dec3d672c28b531
+      DRIVE: gdrive:corpus370_truth_v5_native_temporal_v4/59df951966a05f3f62e965251dec3d672c28b531
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify source and 16-frame teacher producer identities before native 352 sweep
+        run: |
+          set -euo pipefail
+          test -x "$PY" && test -x "$BLENDER"
+          command -v systemd-run >/dev/null
+          command -v rclone >/dev/null
+          rclone listremotes | grep -Fx 'gdrive:'
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          test "$(sha256sum "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+      - name: Restore native truth in OOM-contained memory scope with 45-second checkpoints
+        run: |
+          set -euo pipefail
+          "$PY" -m py_compile tools/corpus/run_corpus370_v5_native_drive_recovery_v1.py
+          "$PY" -m py_compile tools/corpus/run_corpus370_wsl_isolated_v1.py
+          "$PY" -u tools/corpus/run_corpus370_wsl_isolated_v1.py \
+            --unit "realsas-c370-native-${{ github.run_id }}" \
+            --high-mib 3584 --max-mib 4608 --swap-mib 1024 --cpu-quota 180 \
+            --minimum-ram-gib 5 --minimum-disk-gib 12 \
+            --report-path "$OUTPUT/CORPUS370_WSL_RESOURCE_PREFLIGHT_V1.json" \
+            -- "$PY" -u tools/corpus/run_corpus370_v5_native_drive_recovery_v1.py \
+              --python "$PY" \
+              --v5-index "$V5" \
+              --exact-source-roster "$PREP/CORPUS370_EXACT_SOURCE_ROSTER_V1.json" \
+              --extracted-source-root "$PREP/source_bundle/extracted/$SOURCE_ARCHIVE_SHA" \
+              --blender "$BLENDER" \
+              --output "$OUTPUT" \
+              --remote "$DRIVE" \
+              --interval-seconds 45
+      - name: Publish immutable teacher-only source truth bytes and receipts in Drive
+        run: |
+          set -euo pipefail
+          rclone copy "$OUTPUT" "$DRIVE" --checksum --transfers 4 --checkers 8 --progress
+          "$PY" - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ['OUTPUT'])/'CORPUS370_V5_ALL_AUTHORED_TEMPORAL_TEACHER_V1.json'
+          d=json.loads(p.read_text())
+          print('## V5 full native authored temporal mesh teacher')
+          print('Causal intervention court: NOT MINTED; TESSA/IRIS release: NOT AUTHORIZED.')
+          print('Native candidates:',d['native_candidate_count'])
+          print('No authored motion (explicit masked):',d['masked_no_native_subject_count'])
+          print('Original observation fails:',d['observation_fail_count'])
+          print('Real Blender teacher outcomes:',json.dumps(d['rollup'],sort_keys=True))
+          print('Remote transport prefix:',os.environ['DRIVE'])
+          PY
+      - name: Fail closed if any authored-animation subject lacks a valid teacher
+        run: |
+          "$PY" - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ['OUTPUT'])/'CORPUS370_V5_ALL_AUTHORED_TEMPORAL_TEACHER_V1.json').read_text())
+          assert d['status']=='ALL_NATIVE_ACTION_SUBJECTS_ACCOUNTED__CAUSAL_RESPONSE_AND_TRAINING_SEPARATE'
+          assert len(d['results'])==d['native_candidate_count']
+          assert d['observation_fail_count']+d['masked_no_native_subject_count']+d['native_candidate_count']==370
+          assert d['failure_count']==0,'NATIVE_TEMPORAL_SUBJECT_FAILURES_REPAIR_REQUIRED:'+str(d['failure_count'])
+          print('ALL_NATIVE_TEACHER_CANDIDATES_MEASURED__MODEL_ADMISSION_SEPARATE')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-v5-native-temporal-all-v4-${{ github.run_id }}
+          path: |
+            ${{ env.OUTPUT }}/CORPUS370_V5_ALL_AUTHORED_TEMPORAL_TEACHER_V1.json
+            ${{ env.OUTPUT }}/CORPUS370_WSL_RESOURCE_PREFLIGHT_V1.json
+            ${{ env.OUTPUT }}/subjects/*/TEMPORAL_TEACHER_COURT_V1.json
+            ${{ env.OUTPUT }}/subjects/*/teacher.npz.json
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 1

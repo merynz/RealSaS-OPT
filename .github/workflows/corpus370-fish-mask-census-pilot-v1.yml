@@ -1,0 +1,44 @@
+name: corpus370-fish-mask-census-pilot-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths: ['.github/workflows/corpus370-fish-mask-census-pilot-v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-fish-mask-census-pilot-v1
+  cancel-in-progress: false
+jobs:
+  bounded-readback:
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        subjects:
+          - 'corpus_0b2e8ed80eae53e7b62c,corpus_16cfb6771ee663bd8628,corpus_5af87385fdc7c9f3f8cd,corpus_6e72ab4983ea74bd6d66,corpus_ff809df0ec9aeb956f58'
+          - 'corpus_10c7724eb03932b7f13f,corpus_979c41cce2cb8ad02220,corpus_f768e733487a23d2e63f,corpus_4e3ad9c573349c333c58,corpus_64bc52230fa16970e1fe'
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 10
+    env:
+      PREP: /home/monster/realsas_authority/corpus370_preparation_v1
+      OUTPUT: /tmp/corpus370-fish-mask-census-${{ github.run_id }}-${{ strategy.job-index }}
+      SUBJECTS: ${{ matrix.subjects }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read exact admitted import and V0/first-failed original rendered views
+        run: |
+          set -euo pipefail
+          /home/monster/realsas_platform/current/bin/realsas-python -u tools/corpus/export_corpus370_evidence_slice_v1.py \
+            --bundle "$PREP/CORPUS370_PLATFORM_FAMILY_INPUT_BUNDLE_V2.zip" \
+            --expected-sha256 4462b7f90fcff58a8d56b1a975fde4f7f91cbda51417cad5121cf55f25994c5c \
+            --subjects "$SUBJECTS" --preparation-root "$PREP" --output "$OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: corpus370-fish-mask-census-${{ github.run_id }}-${{ strategy.job-index }}
+          path: |
+            ${{ env.OUTPUT }}/EVIDENCE_SLICE.zip
+            ${{ env.OUTPUT }}/EVIDENCE_SLICE_RECEIPT.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7

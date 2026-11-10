@@ -1,0 +1,35 @@
+name: corpus370-native-edit-equivalence-contracts-v10
+
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-native-edit-equivalence-contracts-v10.yml'
+      - 'tools/corpus/court_corpus370_native_edit_equivalence_v10.py'
+      - 'tests/corpus/test_corpus370_native_edit_equivalence_v10.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/corpus370-native-edit-equivalence-contracts-v10.yml'
+      - 'tools/corpus/court_corpus370_native_edit_equivalence_v10.py'
+      - 'tests/corpus/test_corpus370_native_edit_equivalence_v10.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-native-edit-equivalence-contracts-v10-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  original-native-edit-response-negative-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify pairwise native geometry-only edit equivalence with counterfeit/ABSTAIN cases
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile tools/corpus/court_corpus370_native_edit_equivalence_v10.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_native_edit_equivalence_v10.py

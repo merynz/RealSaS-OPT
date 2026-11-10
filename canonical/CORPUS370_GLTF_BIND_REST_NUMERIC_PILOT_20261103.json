@@ -1,0 +1,42 @@
+{
+  "schema": "RealSaS.Corpus370GLTFBindRestPilot.v1",
+  "date_utc": "2026-11-03",
+  "status": "BOUND_SOURCE_REST_NUMERIC_PILOT__NOT_PLATFORM_QUALIFICATION",
+  "source": "GitHub Actions corpus370-evidence-slice-v1 run 41725086471 artifacts 13275170107 and 13273364687; original admitted import SHA and source bytes verified from authenticated slices",
+  "method": "Independent raw glTF node traversal; source-authored skin joint inverse-bind frames apply only to unskinned bone-parent accessories. Skinned body coordinates remain unchanged. Source-to-import bidirectional nearest-vertex Hausdorff divided by source bounding diagonal; no tolerance or mask guard altered.",
+  "samples": [
+    {
+      "subject_id": "corpus_583d22a00ea3b92b3a0a",
+      "source_name": "Characters_Mako.gltf",
+      "source_sha256": "2c86b7ab4019a938a5164fc88176e60460fe266fa33b350eb9af275fcfd369e8",
+      "admitted_import_sha256": "430d20751e393f9dcc44541f7291467f883ac87d75387a06b1960967b6aeae62",
+      "before_relative_vertex_error": 0.27523599526250025,
+      "after_relative_vertex_error": 2.1126216318821817e-7,
+      "bone_parent_attachment_primitive_count": 1
+    },
+    {
+      "subject_id": "truth139_5a84086fb4933610f592",
+      "source_name": "Rogue.gltf",
+      "source_sha256": "5a9eaca0871cd69f554747a1d42870b3bca702ba721d941d909fc530cf18afb8",
+      "admitted_import_sha256": "5f34ab1ed1adea8605484f2c58c32a02a752e55807929a419ff48c2e5af4a7d7",
+      "before_relative_vertex_error": 0.22005264204675123,
+      "after_relative_vertex_error": 1.9845313426212707e-7,
+      "bone_parent_attachment_primitive_count": 7
+    }
+  ],
+  "scope": {
+    "native_fbx_dragon_not_repaired": true,
+    "all_29_bind_errors_resolved": false,
+    "all_47_mask_errors_resolved": false,
+    "complete_render_closure": false,
+    "platform_child_attempt_issued": false,
+    "training_authorized": false,
+    "materialization_authorized": false
+  },
+  "required_next": [
+    "Run V3 prepared observation with exact pinned Blender on representative full 8-view inputs and independent mask court",
+    "Repair native FBX bind reader using source bind matrices",
+    "Rebuild exact source V3 child Attempt release and observation capsule, retain prior failed receipts",
+    "Do not treat pilot geometric parity as admission PASS"
+  ]
+}

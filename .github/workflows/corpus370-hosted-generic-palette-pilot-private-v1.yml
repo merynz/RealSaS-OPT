@@ -1,0 +1,196 @@
+name: corpus370-hosted-generic-palette-pilot-private-v1
+
+# DISABLED by default, SHA-locked one-time 3-source pilot.
+# Never publish corpus, private source addresses, teacher IDs or EXR to Actions.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - 'canonical/CORPUS370_HOSTED_GENERIC_PALETTE_PILOT_RUN_REQUEST_V1.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-hosted-generic-palette-pilot-private-v1
+  cancel-in-progress: false
+
+jobs:
+  validate-private-source-ray-readiness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.req.outputs.ready }}
+      manifest_sha256: ${{ steps.req.outputs.manifest_sha256 }}
+      ray_run: ${{ steps.req.outputs.ray_run }}
+      ray_attempt: ${{ steps.req.outputs.ray_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate disabled-by-default request and private Drive presence
+        id: req
+        env:
+          PRIVATE_DRIVE_SECRET_PRESENT: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os,re
+          from pathlib import Path
+          d=json.loads(Path('canonical/CORPUS370_HOSTED_GENERIC_PALETTE_PILOT_RUN_REQUEST_V1.json').read_text())
+          assert d['schema']=='RealSaS.Corpus370HostedGenericPalettePilotRunRequest.v1'
+          assert d['training_authorized'] is False
+          assert re.fullmatch(r'[0-9a-f]{64}',d['private_v5_manifest_sha256'])
+          assert type(d['source_ray_run_id']) is int and d['source_ray_run_id']>0
+          assert type(d['source_ray_run_attempt']) is int and d['source_ray_run_attempt']>0
+          ready=(d['enabled'] is True and os.environ['PRIVATE_DRIVE_SECRET_PRESENT']=='true')
+          print('ready='+str(ready).lower())
+          print('manifest_sha256='+(d['private_v5_manifest_sha256'] if ready else ''))
+          print('ray_run='+str(d['source_ray_run_id']) if ready else 'ray_run=')
+          print('ray_attempt='+str(d['source_ray_run_attempt']) if ready else 'ray_attempt=')
+          PY
+
+  three-source-reciprocal-generic-palette-blender:
+    needs: validate-private-source-ray-readiness
+    if: github.event.repository.private == false && needs.validate-private-source-ray-readiness.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      RCLONE_CONFIG: /tmp/realsas-c370-generic-palette-rclone.conf
+      MANIFEST_SHA: ${{ needs.validate-private-source-ray-readiness.outputs.manifest_sha256 }}
+      RAY_RUN: ${{ needs.validate-private-source-ray-readiness.outputs.ray_run }}
+      RAY_ATTEMPT: ${{ needs.validate-private-source-ray-readiness.outputs.ray_attempt }}
+      REMOTE_SHARDS: gdrive:corpus370_preparation_v1/hosted_portability_v1/private_v5_shards
+      OUTPUT_ROOT: /home/monster/realsas_authority/corpus370_hosted_palette_reciprocal/${{ github.run_id }}-${{ github.run_attempt }}
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      ROSTER: /home/monster/realsas_authority/corpus370_preparation_v1/CORPUS370_EXACT_SOURCE_ROSTER_V1.json
+      SOURCE_ARCHIVE_SHA: 5c92e77ae07b215fa4234d221faf27659bc0c47a54d2711d6e49db3d820b8fa9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source and output private staging budget
+        run: |
+          set -euo pipefail
+          test "$(awk '/MemTotal:/{print $2}' /proc/meminfo)" -ge 14000000
+          test "$(df -Pk / | awk 'NR==2{print $4}')" -ge 9000000
+          sudo install -d -o "$USER" -g "$(id -gn)" -m 0700 /home/monster/realsas_authority
+      - name: Install numerical controls and private transport
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Authenticate private Drive without logging token
+        env:
+          PRIVATE_DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$PRIVATE_DRIVE_CONFIG_B64"
+          printf '%s' "$PRIVATE_DRIVE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          rclone lsf "$REMOTE_SHARDS" --files-only --max-depth 1 >/dev/null
+          echo "PRIVATE_DRIVE_READ_PASS"
+      - name: Restore byte-for-byte original source and courted rest paths
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/private-shards" "$RUNNER_TEMP/cas"
+          rclone copy "$REMOTE_SHARDS" "$RUNNER_TEMP/private-shards"             --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+          python3 -u tools/corpus/hosted_v5_private_shards_v1.py hydrate             --manifest "$RUNNER_TEMP/private-shards/PRIVATE_V5_SHARD_MANIFEST.json"             --expected-manifest-sha256 "$MANIFEST_SHA"             --private-dir "$RUNNER_TEMP/private-shards"             --object-cache "$RUNNER_TEMP/cas"
+          test "$(sha256sum "$V5" | cut -d' ' -f1)" = 8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4
+          test "$(sha256sum "$ROSTER" | cut -d' ' -f1)" = 925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355
+      - name: Restore actual 352 source-ray receipts and freeze exact preregistered 3-subject pilot
+        run: |
+          set -euo pipefail
+          rayroot="/home/monster/realsas_authority/corpus370_hosted_ray_outputs/$RAY_RUN-$RAY_ATTEMPT"
+          mkdir -p "$rayroot" "$OUTPUT_ROOT"
+          remote="gdrive:corpus370_preparation_v1/hosted_source_locus_rays_all352/$RAY_RUN-$RAY_ATTEMPT"
+          # The 352-way upstream court has already passed. Fetch only its
+          # SHA-bound index + the preregistered 3 exact source-locus receipts.
+          # Avoid downloading unrelated private subjects to this worker.
+          rclone copyto "$remote/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            "$rayroot/SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json" \
+            --checksum --timeout 90s --retries 3
+          for sid in \
+            corpus_000ca1ae51f9582fde9e \
+            corpus_004e16e05b90505ca23c \
+            corpus_00a3688e42a29045056b; do
+            mkdir -p "$rayroot/subjects/$sid"
+            rclone copyto "$remote/subjects/$sid/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json" \
+              "$rayroot/subjects/$sid/SOURCE_LOCUS_GEOMETRIC_RAYS_V1.json" \
+              --checksum --timeout 90s --retries 3
+          done
+          python3 - <<'PY'
+          import os,json
+          from pathlib import Path
+          from tools.corpus.run_corpus370_v5_palette_intervention_pilot_v1 import EXPECTED_SUBJECTS
+          root=Path('/home/monster/realsas_authority/corpus370_hosted_ray_outputs')/(os.environ['RAY_RUN']+'-'+os.environ['RAY_ATTEMPT'])
+          source=root/'SOURCE_LOCUS_GEOMETRIC_RAYS_PILOT_INDEX_V1.json'
+          d=json.loads(source.read_text())
+          assert d['schema']=='RealSaS.Corpus370V5GeometricRayPilotIndex.v1'
+          assert len(d['subject_results'])==352
+          assert d['status']=='PILOT_SUBJECTS_ACCOUNTED__GRAPHICS_AUTHORITY_SEPARATE'
+          assert d['training_authorized'] is False
+          d['subject_ids']=EXPECTED_SUBJECTS
+          d['subject_results']={sid:d['subject_results'][sid] for sid in EXPECTED_SUBJECTS}
+          for row in d['subject_results'].values():
+              assert row['status']=='MEASURED_GEOMETRIC_RAY_CANDIDATE'
+              p=Path(row['receipt']['path'])
+              assert p.is_file() and p.is_relative_to(root)
+          out=Path(os.environ['OUTPUT_ROOT'])/'FIXED_3_SUBJECT_SOURCE_RAYS_INDEX.json'
+          out.write_text(json.dumps(d,sort_keys=True,indent=2)+'\n')
+          print('FIXED_MORPHOLOGY_REVIEW_SUBJECTS_RESTORED__NO_GRAPHICS_OWNER_AUTHORITY')
+          PY
+      - name: Install vendor SHA-verifiable Blender 4.5.14 identical to WSL binary
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/blender"
+          base=https://download.blender.org/release/Blender4.5
+          archive=blender-4.5.14-linux-x64.tar.xz
+          curl -fL --retry 4 --max-time 300 "$base/$archive" -o "$RUNNER_TEMP/blender/$archive"
+          curl -fL --retry 4 --max-time 120 "$base/blender-4.5.14.sha256" -o "$RUNNER_TEMP/blender/official.sha256"
+          ARCHIVE="$RUNNER_TEMP/blender/$archive" CHECKSUMS="$RUNNER_TEMP/blender/official.sha256" python3 - <<'PY'
+          import os,re,hashlib
+          from pathlib import Path
+          path=Path(os.environ['ARCHIVE'])
+          rows=[line for line in Path(os.environ['CHECKSUMS']).read_text().splitlines() if path.name in line]
+          assert len(rows)==1
+          hashes=re.findall(r'[0-9a-fA-F]{64}',rows[0])
+          assert len(hashes)==1 and hashlib.file_digest(path.open('rb'),'sha256').hexdigest()==hashes[0].lower()
+          PY
+          tar -xJf "$RUNNER_TEMP/blender/$archive" -C "$RUNNER_TEMP/blender"
+          test "$(sha256sum "$RUNNER_TEMP/blender/blender-4.5.14-linux-x64/blender" | cut -d' ' -f1)" = 050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8
+      - name: Run real source-preserving RGB/alpha reciprocal interventions on 3 fixed subjects
+        run: |
+          set -euo pipefail
+          python3 -u tools/corpus/run_corpus370_v5_palette_intervention_pilot_v1.py             --v5-index "$V5"             --exact-roster "$ROSTER"             --geometric-ray-index "$OUTPUT_ROOT/FIXED_3_SUBJECT_SOURCE_RAYS_INDEX.json"             --extracted-source-root "/home/monster/realsas_authority/corpus370_preparation_v1/source_bundle/extracted/$SOURCE_ARCHIVE_SHA"             --blender "$RUNNER_TEMP/blender/blender-4.5.14-linux-x64/blender"             --output "$OUTPUT_ROOT"
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          r=json.loads((Path(os.environ['OUTPUT_ROOT'])/'CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json').read_text())
+          assert len(r['subjects'])==3
+          assert r['training_authorized'] is False
+          assert r['graphics_family_authority_minted'] is False
+          print('# Source-exact generic graphics/alpha pilot')
+          print('Measured source-locus palette rows:',r.get('measured_valid_palette_rows',0))
+          print('V2 reciprocal TWO-locus:',r.get('v2_two_causal_locus_rows',0))
+          print('V2 reciprocal ONE-locus:',r.get('v2_one_causal_locus_rows',0))
+          print('V2 reciprocal ABSTAIN:',r.get('v2_abstain_rows',0))
+          print('Failures:',r.get('failure_count',0))
+          print('Graphics owner positives/negatives: 0 / 0 (not certified)')
+          print('Generic owner and training: UNKNOWN / NOT AUTHORIZED')
+          assert r['failure_count']==0,'REAL_SOURCE_PALETTE_PILOT_SUBJECT_REPAIR_REQUIRED'
+          assert r['qualified_same_owner_pairs']==0 and r['qualified_different_owner_pairs']==0
+          attempted=sum(x.get('v2_two_causal_locus_rows',0)+x.get('v2_one_causal_locus_rows',0)+x.get('v2_abstain_rows',0) for x in r['subjects'].values())
+          assert r['v2_two_causal_locus_rows']+r['v2_one_causal_locus_rows']+r['v2_abstain_rows']==attempted,'RECIPROCAL_V2_ROW_CENSUS_DRIFT'
+          # Zero positive causal pairs is a scientific NOT_READY observation,
+          # not a renderer crash and certainly not a negative owner label.
+          if r['v2_two_causal_locus_rows']==0:
+              print('WARNING: NO_TWO_LOCUS_CANDIDATE__OWNER_AND_TRAINING_NOT_READY')
+          assert all(len(set(x.get('sampled_view_indices',[])))==2 for x in r['subjects'].values()),'PILOT_CAMERA_VIEW_DIVERSITY_REQUIRED'
+          PY
+      - name: Save private evidence/causal receipts to Drive even if pilot fails
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -s "$RCLONE_CONFIG" && test -d "$OUTPUT_ROOT"; then
+            rclone copy "$OUTPUT_ROOT"               "gdrive:corpus370_preparation_v1/hosted_generic_palette_reciprocal/$RAY_RUN-$RAY_ATTEMPT/${{ github.run_id }}-${{ github.run_attempt }}"               --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+          fi
+          echo "PRIVATE_GENERIC_PALETTE_DIAGNOSTICS_ONLY__NO_PUBLIC_TRUTH_BYTES"

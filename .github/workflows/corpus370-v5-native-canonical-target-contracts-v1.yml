@@ -1,0 +1,28 @@
+name: corpus370-v5-native-canonical-target-contracts-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-v5-native-canonical-target-contracts-v1.yml'
+      - 'tools/corpus/build_corpus370_v5_source_native_canonical_animation_v1.py'
+      - 'tests/corpus/test_corpus370_v5_source_native_canonical_animation_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-source-rest-bound-canonical-animation-masks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate source→canonical native pose target builder and no teacher/causal promotion
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check numpy pytest
+          python -m py_compile tools/corpus/build_corpus370_v5_source_native_canonical_animation_v1.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus370_v5_source_native_canonical_animation_v1.py

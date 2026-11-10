@@ -1,0 +1,75 @@
+name: corpus370-source-rest-independent-court-pilot-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths: ['.github/workflows/corpus370-source-rest-independent-court-pilot-v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-source-rest-independent-court-pilot-v1
+  cancel-in-progress: false
+jobs:
+  original-import-court:
+    runs-on: [self-hosted, linux, x64, realsas]
+    timeout-minutes: 12
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      PY: /home/monster/realsas_platform/current/bin/realsas-python
+      V5: /home/monster/realsas_authority/corpus370_v5_delta_repair_pilot/CORPUS370_PREPARED_OBSERVATION_PACKETS_V5.json
+      OUT: /tmp/corpus370-source-rest-court-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independently replay exact source-rest geometry in two real V4 PASS packets
+        run: |
+          set -euo pipefail
+          test -x "$PY"
+          test -f "$V5"
+          mkdir -p "$OUT"
+          "$PY" -u - <<'PY'
+          import os,json
+          from pathlib import Path
+          from tools.corpus.source_rest_geometry_v1 import build,sha
+          from tools.corpus.validate_source_rest_geometry_v1 import validate
+          root=Path(os.environ['OUT'])
+          doc=json.loads(Path(os.environ['V5']).read_text())
+          assert doc['schema']=='RealSaS.Corpus370PreparedObservationPackets.v5'
+          assert doc['historical_v3_pass_preserved_count']==294
+          rows={x['subject_id']:x for x in doc['subjects']}
+          selected=('corpus_b6e6c534f69bb0336157','corpus_5fdf026c4f23563f9d41')
+          for sid in selected:
+              row=rows[sid]
+              assert row['evidence_producer']=='NEW_V4_REPAIR_FROM_ORIGINAL_FAIL'
+              packet=Path(row['packet_path'])
+              original=packet/'imported.json'
+              admission=packet/'IRIS_OBSERVATION_ADMISSION.json'
+              candidate=packet/'SOURCE_REST_RENDER_CANDIDATE.json'
+              snapshot=packet/'SOURCE_SCENE_SNAPSHOT.json'
+              for name,path in (('admitted_import_geometry',original),
+                                ('observation_admission',admission),
+                                ('source_rest_candidate',candidate),
+                                ('source_scene_snapshot',snapshot)):
+                  assert sha(path)==row['bindings'][name]['sha256'],(sid,name)
+              manifest=build(sid,row['source_sha256'],original,admission,
+                             candidate,snapshot,root/sid)
+              court=validate(root/sid/'SOURCE_REST_GEOMETRY_MANIFEST_V1.json')
+              assert court['authority']['independent_source_rest_reconstruction_passed']
+              assert court['authority']['training_authorized'] is False
+              p=root/sid/'SOURCE_REST_COURT_RESULT.json'
+              p.write_text(json.dumps(court,sort_keys=True,indent=2)+'\n')
+              print(json.dumps({'event':'SOURCE_REST_INDEPENDENT_PILOT_PASS',
+                                'sid':sid,'vertex_count':court['counts']['vertices'],
+                                'face_count':court['counts']['faces']},
+                               sort_keys=True),flush=True)
+          print('SOURCE_REST_TWO_REAL_OLD_FAIL_REPAIRS_COURTED=PASS',flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corpus370-two-source-rest-independent-courts-${{ github.run_id }}
+          path: |
+            ${{ env.OUT }}/*/SOURCE_REST_GEOMETRY_MANIFEST_V1.json
+            ${{ env.OUT }}/*/SOURCE_REST_COURT_RESULT.json
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 14

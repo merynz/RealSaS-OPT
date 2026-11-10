@@ -1,0 +1,119 @@
+name: corpus370-original-artist-morphology-source-evaluation-v1
+
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-original-artist-morphology-source-evaluation-v1.yml'
+      - 'tools/corpus/author_spine_blind_flatten_v1.py'
+      - 'tools/corpus/artist_blind_topology_leakage_audit_v1.py'
+      - 'tools/corpus/artist_blind_neutral_carrier_v1.py'
+  pull_request:
+    paths:
+      - '.github/workflows/corpus370-original-artist-morphology-source-evaluation-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-original-artist-morphology-v1-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  three-original-human-authored-source-types:
+    name: Original source evaluation - ${{ matrix.subject }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - subject: spineboy
+            path: spine-android/app/src/main/assets/spineboy-pro.json
+            expected_git_blob: 4a58fecd32a97bad83a9169056c44db3f17dba4e
+          - subject: owl
+            path: examples/owl/export/owl-pro.json
+            expected_git_blob: d42317f7c0bbe7c8c508765d16b0c643d65fb847
+          - subject: raptor
+            path: examples/raptor/export/raptor-pro.json
+            expected_git_blob: 27456d62db9f9772a2ca3d0ddad40b21995cddd7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install source geometry audit dependencies
+        run: python3 -m pip install --disable-pip-version-check numpy
+      - name: Verify immutable original human-authored Spine-export source
+        env:
+          SOURCE_PATH: ${{ matrix.path }}
+          SOURCE_GIT_BLOB: ${{ matrix.expected_git_blob }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/original_artist_source"
+          curl --fail --silent --show-error --location --retry 3 \
+            "https://raw.githubusercontent.com/EsotericSoftware/spine-runtimes/4.3/$SOURCE_PATH" \
+            --output "$RUNNER_TEMP/original_artist_source/original.json"
+          ACTUAL="$(git hash-object "$RUNNER_TEMP/original_artist_source/original.json")"
+          test "$ACTUAL" = "$SOURCE_GIT_BLOB"
+          echo "EXTERNAL_ORIGINAL_ARTIST_EXPORT_BLOB_EXACT_MATCH"
+          sha256sum "$RUNNER_TEMP/original_artist_source/original.json"
+      - name: Original author anonymization and topology leakage controls
+        run: |
+          set -euo pipefail
+          BASE="$RUNNER_TEMP/original_artist_source"
+          PYTHONPATH=. python3 tools/corpus/author_spine_blind_flatten_v1.py \
+            --original-source "$BASE/original.json" \
+            --anonymous-input "$BASE/model_input/anonymous_merged.json" \
+            --hidden-court-reference "$BASE/private_court/artist_reference.json" \
+            --receipt "$BASE/summary/source_receipt.json"
+          PYTHONPATH=. python3 tools/corpus/artist_blind_topology_leakage_audit_v1.py predict \
+            --anonymous-input "$BASE/model_input/anonymous_merged.json" \
+            --prediction "$BASE/model_predictions/topological_components.json"
+          PYTHONPATH=. python3 tools/corpus/artist_blind_topology_leakage_audit_v1.py audit \
+            --anonymous-input "$BASE/model_input/anonymous_merged.json" \
+            --prediction "$BASE/model_predictions/topological_components.json" \
+            --private-reference "$BASE/private_court/artist_reference.json" \
+            --receipt "$BASE/summary/topology_leakage_diagnostic.json"
+          PYTHONPATH=. python3 tools/corpus/artist_blind_neutral_carrier_v1.py \
+            --anonymous-input "$BASE/model_input/anonymous_merged.json" \
+            --neutral-carrier "$BASE/model_input/neutral_continuous_grid.json" \
+            --receipt "$BASE/summary/neutral_grid_diagnostic.json" \
+            --cells 24
+          python3 - <<'PY'
+          import os,json
+          from pathlib import Path
+          base=Path(os.environ["RUNNER_TEMP"])/"original_artist_source"
+          receipt=json.loads((base/"summary/source_receipt.json").read_text())
+          leak=json.loads((base/"summary/topology_leakage_diagnostic.json").read_text())
+          neutral=json.loads((base/"summary/neutral_grid_diagnostic.json").read_text())
+          merged=json.loads((base/"model_input/anonymous_merged.json").read_text())
+          hidden=json.loads((base/"private_court/artist_reference.json").read_text())
+          assert receipt["source_triangle_count"]>0
+          assert receipt["setup_supported_attachment_count_teacher_only"]>0
+          assert len(merged["faces"])==len(hidden["artist_slot_id_teacher_only_per_face"])
+          assert merged["original_slot_attachment_bone_names_present"] is False
+          assert receipt["true_artist_layer_benchmark_PASS"] is False
+          assert receipt["editable_native_spine_artist_project_bytes_verified"] is False
+          assert receipt["original_atlas_image_and_author_alpha_CAA_verified"] is False
+          assert leak["this_is_true_artist_drawable_recovery"] is False
+          assert neutral["one_connected_component"] is True
+          assert neutral["artist_drawable_recovery_accuracy"] is None
+          assert not leak["training_authorized"] and not neutral["training_authorized"]
+          print("REAL_ORIGINAL_ARTIST_SOURCE_NEVER_PROMOTED_TO_ART_LAYER_MODEL_TRUTH")
+          print(json.dumps({
+            "source_SHA256":receipt["original_source_SHA256"],
+            "source_slot_count":receipt["original_source_slot_count_teacher_only"],
+            "selected_setup_attachment_count":receipt["setup_active_attachment_count_teacher_only"],
+            "supported_setup_attachment_count":receipt["setup_supported_attachment_count_teacher_only"],
+            "unsupported_masked_setup_attachment_count":receipt["unsupported_original_attachment_count"],
+            "merged_surface_triangles":receipt["source_triangle_count"],
+            "merged_surface_vertices":receipt["source_vertex_count"],
+            "original_source_connected_components":leak["anonymous_topological_component_count"],
+            "original_author_supported_setup_slots":leak["original_artist_setup_supported_slot_count_PRIVATE_COURT_ONLY"],
+            "topological_component_face_purity":leak["source_topology_component_face_purity"],
+            "one_to_one_component_equals_author_slot_leakage":
+                leak["tautological_one_to_one_component_match"],
+            "neutral_grid_components":1,
+            "full_author_appearance_CAA":False,
+            "true_original_artist_layer_recovery_proven":False,
+            "training_authorized":False
+          },sort_keys=True))
+          PY

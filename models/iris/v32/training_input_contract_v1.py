@@ -59,10 +59,26 @@ PAYLOAD_FAMILIES = (
     "CAUSAL_RESPONSE",
 )
 
+# These are source-relative, PRIVATE, teacher-addressed diagnostic evidence.
+# A PASS in their limited visibility courts does NOT imply a materialized,
+# student-observable target for V3.2 and cannot be laundered into an
+# unrestricted VISIBILITY_OCCLUSION family PASS by renaming a manifest cell.
+UNMATERIALIZED_SOURCE_VISIBILITY_SCHEMAS = frozenset({
+    "RealSaS.Corpus370BoundedSourceHitVisibilityCandidateCourt.v1",
+    "RealSaS.Corpus370BoundedSourceHitVisibilityBatchCourt.v1",
+    "RealSaS.Corpus370GenericLocusReciprocalPaletteCourt.v2",
+    "RealSaS.Corpus370GenericLocusReciprocalDocumentCourt.v2",
+    "RealSaS.Corpus370GenericLocusCounterfactualCourt.v1",
+    "RealSaS.Corpus370GenericLocusCounterfactualBatchCourt.v1",
+})
+
 
 def _validate_ref_payload(ref: dict[str, Any], family: str) -> None:
     schema = str(ref.get("schema") or "")
     require(schema, "IRIS_V32_FAMILY_PAYLOAD_SCHEMA:" + family)
+    require(not (family == "VISIBILITY_OCCLUSION" and
+                 schema in UNMATERIALIZED_SOURCE_VISIBILITY_SCHEMAS),
+            "IRIS_V32_SOURCE_HIT_DIAGNOSTIC_NOT_TRAINING_TARGET")
     path = bound_file(ref, expected_schema=schema)
     if path.suffix.lower() == ".json":
         payload = load_json(path)

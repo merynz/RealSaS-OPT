@@ -1,0 +1,35 @@
+name: corpus370-wsl-memory-containment-contracts-v1
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-wsl-memory-containment-contracts-v1.yml'
+      - '.github/workflows/corpus370-v5-native-temporal-all-v4-real.yml'
+      - '.github/workflows/corpus370-v5-source-locus-geometric-ray-all352-real-v1.yml'
+      - '.github/workflows/corpus370-v5-source-palette-intervention-pilot-real-v1.yml'
+      - 'tools/corpus/run_corpus370_wsl_isolated_v1.py'
+      - 'tools/corpus/check_corpus370_runner_capacity_v1.py'
+      - 'tools/corpus/diagnose_corpus370_wsl_runner_v1.py'
+      - 'tests/corpus/test_corpus370_wsl_isolated_v1.py'
+      - 'tools/corpus/probe_corpus370_wsl_scope_v1.py'
+      - 'tests/corpus/test_corpus370_wsl_scope_probe_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-cgroup-fail-closed-hosted:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify cgroup OOM isolation, no unlimited fallback, manual-only workflow policies
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pytest
+          python -m py_compile tools/corpus/run_corpus370_wsl_isolated_v1.py tools/corpus/probe_corpus370_wsl_scope_v1.py
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus370_wsl_isolated_v1.py tests/corpus/test_corpus370_wsl_scope_probe_v1.py

@@ -1,0 +1,150 @@
+{
+  "schema": "RealSaS.Corpus370NativePosePartitionRealResult.v8",
+  "status": "REAL_NATIVE_AUTHORED_POSE_3_SOURCE_COURTS_PASS__FACE_CORRESPONDENCE_ONLY__NO_OWNER_OR_CAA_AUTHORITY",
+  "date_utc": "2026-11-05",
+  "provenance": {
+    "original_v5_source_index_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+    "original_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+    "original_source_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+    "original_allview_geometry_proposal_batch_sha256": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1",
+    "native_original_teacher_pilot_sha256": "5aa3c4d9cc97ab669d2a7a951a4c9d18218ef5ea4d6f58f5b1ff1ac5b89cc272",
+    "github_real_run_id": 42008889188,
+    "github_real_run_status": "SUCCESS",
+    "github_hosted_jobs_passed": 4,
+    "real_source_workers_passed": 3,
+    "private_drive_folder": "gdrive:corpus370_preparation_v1/hosted_native_pose_partition_private_v8/42008889188-1",
+    "per_source_private_court_json_sha256_rechecked_against_runner_receipts": 3,
+    "per_source_sha256_mismatches": 0,
+    "native_teacher_raw_pose_arrays_remain_private": true,
+    "independent_full_npz_replay_in_new_process": false
+  },
+  "scope": {
+    "source_subject_count": 3,
+    "original_authored_action_count": 20,
+    "original_authored_pose_count": 80,
+    "source_faces_covered": 3408,
+    "original_source_rest_face_order_reverified": true,
+    "all_candidates_source_face_ids_persistent_by_construction": true,
+    "original_source_motion_never_used_as_causal_response": true,
+    "original_source_rendered_appearance_in_motion": false,
+    "native_resolution_animated_graphics_caa": false,
+    "student_access_to_source_face_ids": false
+  },
+  "per_source": [
+    {
+      "source_reference": "CAT",
+      "subject_ordinal": 0,
+      "source_sha256": "1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850",
+      "authored_actions": 8,
+      "authored_poses": 32,
+      "same_action_temporal_edges": 24,
+      "source_faces": 684,
+      "source_vertices": 1204,
+      "rest_degenerate_source_faces": 0,
+      "new_pose_face_collapse_instances": 0,
+      "max_vertex_motion_over_source_extent": 0.2682916930675816,
+      "candidates": [
+        8,
+        16,
+        32,
+        64
+      ],
+      "max_local_best_rigid_fit_rmse_over_source_extent_by_candidate": {
+        "8": 0.08384,
+        "16": 0.079552,
+        "32": 0.063509,
+        "64": 0.058915
+      },
+      "independent_court_sha256": "5a195d44940147a3e608fb448f25bcd6e85c74c1f722d08692dc9c49514dbda3",
+      "status": "MEASURED_NATIVE_FACE_DOMAIN_OVER_32_POSES__NO_GRAPHICS_OWNER"
+    },
+    {
+      "source_reference": "TRICERATOPS",
+      "subject_ordinal": 1,
+      "source_sha256": "ad66b51cc5fc44c9a3429a5b1b98a61621af08d58d102d8a817499bd6a7f5b5a",
+      "authored_actions": 6,
+      "authored_poses": 24,
+      "same_action_temporal_edges": 18,
+      "source_faces": 1334,
+      "source_vertices": 669,
+      "rest_degenerate_source_faces": 6,
+      "new_pose_face_collapse_instances": 0,
+      "max_vertex_motion_over_source_extent": 0.6821749930415761,
+      "candidates": [
+        8,
+        16,
+        32
+      ],
+      "unavailable_requested": [
+        64
+      ],
+      "max_local_best_rigid_fit_rmse_over_source_extent_by_candidate": {
+        "8": 0.150597,
+        "16": 0.132101,
+        "32": 0.132101
+      },
+      "independent_court_sha256": "0c77f94094b5b18f9e46db352754112246971233fc9dc7bb78ceed6588fece10",
+      "status": "MEASURED_NATIVE_FACE_DOMAIN_OVER_24_POSES__SIX_REST_DEGENERATES_PRESERVED_NO_NEW_COLLAPSE"
+    },
+    {
+      "source_reference": "COWFISH",
+      "subject_ordinal": 2,
+      "source_sha256": "e6898505d56d8057c975b6376f123876dd957347282413cf3fb825754841b989",
+      "authored_actions": 6,
+      "authored_poses": 24,
+      "same_action_temporal_edges": 18,
+      "source_faces": 1390,
+      "source_vertices": 764,
+      "rest_degenerate_source_faces": 0,
+      "new_pose_face_collapse_instances": 0,
+      "max_vertex_motion_over_source_extent": 0.9074331151938974,
+      "candidates": [
+        8,
+        16,
+        32
+      ],
+      "unavailable_requested": [
+        64
+      ],
+      "max_local_best_rigid_fit_rmse_over_source_extent_by_candidate": {
+        "8": 0.040595,
+        "16": 0.040595,
+        "32": 0.040595
+      },
+      "independent_court_sha256": "b262594df4458199d49660995a31a0be85bf2fac812040bb912c250705ce420e",
+      "status": "MEASURED_NATIVE_FACE_DOMAIN_OVER_24_POSES__NO_GRAPHICS_OWNER"
+    }
+  ],
+  "inference_limits": {
+    "constant_face_labels_prove_authored_drawable_identity": false,
+    "source_kinematic_co_motion_proves_same_drawable": false,
+    "source_relative_motion_proves_different_drawable": false,
+    "rigid_fit_residual_measures_rig_authority": false,
+    "sampled_original_pose_diagnostics_prove_full_animation_playback": false,
+    "native_animated_color_alpha_depth_seam_draw_order_visibility_tested": false,
+    "independent_causal_controls_executed": false,
+    "full_native_resolution_caa_pass": false
+  },
+  "authority": {
+    "source_pose_geometry_correspondence_measured": true,
+    "source_face_group_ids_constant_on_known_sampled_frames": true,
+    "graphics_owner_authorized": false,
+    "same_drawable_positive_pairs": 0,
+    "different_drawable_negative_pairs": 0,
+    "mechanical_causality_authorized": false,
+    "animated_raster_caa_authorized": false,
+    "tessa_teacher_authorized": false,
+    "model_training_authorized": false,
+    "product_compilation_authorized": false,
+    "materialization_authorized": false,
+    "training_authorized": false,
+    "corpus370_observation_pass_subject_count_unchanged": 352,
+    "corpus370_observation_fail_subject_count_unchanged": 18
+  },
+  "next_gates": [
+    "SOURCE_NATIVE_POSE_ORIGINAL_VS_TRIANGLE_SOUP_RENDER_PARITY_AT_COURTED_CAMERA_AND_ACTION_FRAMES",
+    "POSED_ISOLATE_REMOVE_GROUP_ALPHA_Z_SEAMS_AND_DRAW_ORDER_INDEPENDENT_RASTER_COURT",
+    "ORIGINAL_SOURCE_CONTROLLED_BONE_OBJECT_ACTION_ISOLATIONS_WITH_ROOT_SHAM_AND_REVERSAL",
+    "SOURCE_TO_CANONICAL_POSED_MESH_IDENTITY_AND_PER_TARGET_LINEAGE_SAFE_MODEL_LOSS_ADMISSION"
+  ]
+}

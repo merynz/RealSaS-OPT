@@ -1,0 +1,43 @@
+{
+  "schema": "RealSaS.Corpus370PrivateVisibilityOracleReview.v1",
+  "status": "MEASURED_PRIVATE_SOURCE_HIT_ORACLE_REVIEW_ONLY__DRAWABLE_OWNER_UNKNOWN",
+  "date_utc": "2026-11-04",
+  "scope": "THREE_PREREGISTERED_SOURCE_SUBJECTS_TWO_VIEWS_EACH",
+  "provenance": {
+    "source_pilot_github_run_id": 41902211474,
+    "source_pilot_summary_sha256": "638579beb83edfa90614dd8db5c4da77406862a5cfaa3e8653d0cc67ad93e10e",
+    "source_pilot_drive_folder": "gdrive:corpus370_preparation_v1/hosted_generic_palette_reciprocal/41883539256-1/41902211474-1",
+    "visibility_github_run_id": 41904446622,
+    "visibility_batch_sha256": "fbca92b37ed71975de31b77b91a1fba7871c40b03b4b0ebb5b1695669c43bcbd",
+    "visibility_drive_folder": "gdrive:corpus370_preparation_v1/hosted_source_hit_visibility_v1/41902211474/41904446622-1",
+    "method": "Independent private read-back of original source-render manifests and previously independently qualified visibility receipts; pixel reconstruction and causal arms recomputed locally. Does not retrain or modify source data."
+  },
+  "measured": {
+    "subject_count": 3,
+    "evaluated_view_pixel_count": 6,
+    "front_visible_positive_count": 6,
+    "back_opaque_occluded_negative_visibility_count": 6,
+    "back_revealed_by_front_removal_and_recolor_count": 6,
+    "abstain_pixel_count": 0,
+    "max_premultiplied_full_rgba_replay_error": 0,
+    "first_hit_only_baseline_potential_discarded_hidden_source_count": 6
+  },
+  "limitations": {
+    "bounded_to_source_locus": true,
+    "only_two_opposing_views_per_subject": true,
+    "opaque_front_samples_only": true,
+    "first_hit_only_baseline_is_counterfactual_not_executed": true,
+    "source_element_address_is_teacher_only": true,
+    "same_drawable_positive_count": 0,
+    "different_drawable_negative_count": 0,
+    "cut_vs_attachment": "UNKNOWN",
+    "mechanical_owner": "UNKNOWN",
+    "temporal_authority": "NOT_MEASURED_BY_THIS_REVIEW",
+    "tessa_topology_join": "NOT_MEASURED_BY_THIS_REVIEW",
+    "lineage_safe_training_split": "NOT_QUALIFIED_BY_THIS_REVIEW",
+    "graphics_family_authority_minted": false,
+    "training_authorized": false,
+    "materialization_authorized": false
+  },
+  "next_gate": "Same/different drawable requires independent source-relative grouping plus native mechanical/temporal interventions and consumer consequences; retain UNKNOWN until qualified positives and negatives. Do not substitute visibility-negative for different-drawable-negative."
+}

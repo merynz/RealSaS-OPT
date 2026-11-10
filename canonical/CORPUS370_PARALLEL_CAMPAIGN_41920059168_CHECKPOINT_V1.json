@@ -1,0 +1,96 @@
+{
+  "schema": "RealSaS.Corpus370ParallelCampaignEvidenceCheckpoint.v1",
+  "status": "THREE_PARALLEL_PRIVATE_LANES_MEASURED__GRAPHICS_BULK_UPLOAD_AND_OVERALL_RUN_CONCLUSION_PENDING",
+  "campaign_run_id": 41920059168,
+  "campaign_activation_commit": "f9665b8124977a1974f3ad3fdd3d26a8c3004409",
+  "scope": "ORIGINAL_IMMUTABLE_V5_SHA_PINNED_370_352_RESEARCH_ONLY",
+  "parallelism": {
+    "execution": "THREE_SIMULTANEOUS_GITHUB_HOSTED_UBUNTU_24_04_JOBS",
+    "lanes": [
+      "GRAPHICS",
+      "NATIVE",
+      "AUTHORITY"
+    ],
+    "fail_fast": false,
+    "local_wsl_runner_required": false,
+    "source_and_teacher_bytes_private_drive_only": true
+  },
+  "evidence": {
+    "graphics": {
+      "selected_count": 8,
+      "excluded_previous_three": true,
+      "source_strata_measured": {
+        "expanded_corpus": 4,
+        "truth139_base": 4
+      },
+      "real_blender_independent_court_pass_subjects": 8,
+      "failed_subjects": 0,
+      "measured_valid_palette_rows": 16,
+      "two_source_causal_visibility_rows": 16,
+      "single_source_rows": 0,
+      "abstain_rows": 0,
+      "tested_opposite_view_indices": [
+        0,
+        4
+      ],
+      "summary_sha256": "6723ac1b628da144d6a80dddac439a688bceeff5a3b26f6969173cc954493375",
+      "summary_private_path": "gdrive:corpus370_preparation_v1/hosted_parallel_evidence_campaign_v1/41920059168-1/GRAPHICS/CORPUS370_V5_PALETTE_INTERVENTION_PILOT_V1.json",
+      "graphics_owner_pairs_positive": 0,
+      "graphics_owner_pairs_negative": 0,
+      "graphics_family_training_authorized": false,
+      "full_private_subject_upload_complete": "PENDING_FINAL_JOB_CONCLUSION"
+    },
+    "native": {
+      "selected_count": 8,
+      "pass_subjects": 8,
+      "failed_subjects": 0,
+      "authored_clip_count": 132,
+      "sampled_frame_count": 507,
+      "new_since_first_three_subject_pilot": 5,
+      "summary_sha256": "d9abddf350e58b84544c2e8b29362edbd7a8d175a8d41563110e56e9e6b55770",
+      "summary_private_path": "gdrive:corpus370_preparation_v1/hosted_parallel_evidence_campaign_v1/41920059168-1/NATIVE/CORPUS370_V5_AUTHORED_TEMPORAL_PILOT_V1.json",
+      "isolated_causal_controls_executed": false,
+      "response_truth_minted": false,
+      "training_authorized": false
+    },
+    "authority": {
+      "candidate_count": 370,
+      "observation_qualified_count": 352,
+      "observation_failed_count": 18,
+      "independent_source_rest_count": 352,
+      "source_geometric_rays_count": 352,
+      "prior_native_graphics_join_subject_count": 3,
+      "prior_joined_source_hit_pair_count": 6,
+      "summary_sha256": "be7730cb6d3f7e6f00a7e461f0b166d3654822b1a89c696eae76cde4054357fa",
+      "summary_private_path": "gdrive:corpus370_preparation_v1/hosted_parallel_evidence_campaign_v1/41920059168-1/AUTHORITY/CORPUS370_PARALLEL_EVIDENCE_INTERSECTION_V1.json",
+      "not_qualified_families": [
+        "DRAWABLE_OWNERSHIP",
+        "CAUSAL_RESPONSE",
+        "TESSA_TEACHER",
+        "GLOBAL_SOLID_SDF",
+        "APPEARANCE_CAA",
+        "GRAPHICS_RELATIONS"
+      ],
+      "lineage_split_sealed": false,
+      "materialization_authorized": false,
+      "training_authorized": false
+    }
+  },
+  "qualification": {
+    "all_subjects_proven_for_all_truth_families": false,
+    "student_semantic_owner_label_minted": false,
+    "same_drawable_qualified_positive_pairs": 0,
+    "different_drawable_qualified_negative_pairs": 0,
+    "teacher_source_names_in_student_inputs": false,
+    "global_lineage_split_sealed": false,
+    "model_training_authorized": false,
+    "materialization_authorized": false,
+    "pr_merged": false
+  },
+  "next_parallel_phase": [
+    "ISOLATED_ZERO_A_TO_B_B_TO_A_COMMON_ROOT_SHAM_NATIVE_CAUSAL_CONTROL_AND_INDEPENDENT_COURT",
+    "REAL_VIEW_POSE_EDIT_CONSUMER_FOR_DRAWABLE_SPLIT_MERGE_GRAPHICS_RELATIONS",
+    "STAGE49_51_FAMILY_COURTS_AND_TESSA_CONSUMER",
+    "LINEAGE_GLOBAL_HOLDOUT_THEN_SEALED_ROSTER_AND_MATERIALIZATION_READINESS"
+  ]
+}

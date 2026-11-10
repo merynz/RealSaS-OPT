@@ -1,0 +1,53 @@
+{
+  "schema": "RealSaS.Corpus370FullFrameAnonymousEditRequest.v3",
+  "enabled": true,
+  "status": "REPLAY_CONSUMER_V3_SOURCE_FACE_COUNT_SCHEMA_FIX__ORIGINAL_GROUP_SHA_LOCKED",
+  "source_locked": true,
+  "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
+  "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+  "source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+  "geometric_rays_index_sha256": "0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70",
+  "source_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+  "source_subjects": 3,
+  "parallel_hosted_workers": 3,
+  "rest_pose_only": true,
+  "views": [
+    0,
+    4
+  ],
+  "full_field_of_view": true,
+  "raster_resolution": 192,
+  "cycles_samples": 32,
+  "render_arms": [
+    "SOURCE_ORIGINAL",
+    "SOUP_FULL",
+    "SOUP_NOOP",
+    "REMOVE_SELECTED_GROUP_A",
+    "REMOVE_SELECTED_GROUP_B",
+    "REMOVE_BOTH_SELECTED_GROUPS"
+  ],
+  "no_public_source_or_render_artifacts": true,
+  "full_native_resolution_qualified": false,
+  "source_appearance_caa_authorized": false,
+  "graphics_owner_authorized": false,
+  "animation_replay_authorized": false,
+  "model_training_authorized": false,
+  "training_authorized": false,
+  "notes": "Compare full 192x192 source-vs-soup Blender RGBA, no-op and independently suppressible group A/B at view0 and view4 using eight-view source geometry-selected operational layers, with heldout rendered EDIT outcome and source bytes SHA locked. No author drawable/CAA/model training authority.",
+  "run_notes": "Activated after actionlint and contract CI success. Source original 352/370 pipeline and allview v3 source group candidate exact SHA verified. Three Blender 192x192 full-camera-FOV 6-arm renders for views0/4 with independently withheld edit response. NO owner truth, native CAA, product authority or training.",
+  "source_allview_group_batch_sha256": "1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1",
+  "input_geometry_views": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "render_edit_holdout_view": 4,
+  "view4_geometry_is_compiler_input": true,
+  "view4_render_edit_response_used_for_selection": false,
+  "replay_note": "Run 41987627663 source hydration and V3 group SHA passed on all 3; Blender aborted before rendering due obsolete V2 face_count key in V3 consumer. Changed only to source_face_count and added schema regression tests. Source/geometry/source-group receipts unchanged; no authority promotion."
+}

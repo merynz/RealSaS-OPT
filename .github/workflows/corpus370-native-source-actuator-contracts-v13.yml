@@ -1,0 +1,38 @@
+name: corpus370-native-source-actuator-contracts-v13
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-native-source-actuator-contracts-v13.yml'
+      - 'tools/truth_foundry/blender_corpus370_native_actuator_intervention_v13.py'
+      - 'tools/corpus/court_corpus370_native_actuator_mechanics_v13.py'
+      - 'tools/corpus/run_corpus370_native_actuator_private_v13.py'
+      - 'tests/corpus/test_corpus370_native_actuator_v13.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/corpus370-native-source-actuator-contracts-v13.yml'
+      - 'tools/truth_foundry/blender_corpus370_native_actuator_intervention_v13.py'
+      - 'tools/corpus/court_corpus370_native_actuator_mechanics_v13.py'
+      - 'tools/corpus/run_corpus370_native_actuator_private_v13.py'
+      - 'tests/corpus/test_corpus370_native_actuator_v13.py'
+permissions:
+  contents: read
+concurrency:
+  group: corpus370-native-source-actuator-contracts-v13-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  anonymous-mechanics-negative-controls:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and enforce source-native actuator / null / root / local authority contracts
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/truth_foundry/blender_corpus370_native_actuator_intervention_v13.py \
+            tools/corpus/court_corpus370_native_actuator_mechanics_v13.py \
+            tools/corpus/run_corpus370_native_actuator_private_v13.py
+          PYTHONPATH=. python3 -m pytest -q tests/corpus/test_corpus370_native_actuator_v13.py

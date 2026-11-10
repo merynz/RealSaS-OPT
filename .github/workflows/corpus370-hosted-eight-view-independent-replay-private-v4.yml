@@ -1,0 +1,129 @@
+name: corpus370-hosted-eight-view-independent-replay-private-v4
+
+# Re-court original Blender image bytes from a finished 3-worker eight-view
+# render, never trust the worker success flag alone. No original asset import.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - 'canonical/CORPUS370_PRIVATE_EIGHT_VIEW_INDEPENDENT_REPLAY_V4_REQUEST.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-hosted-eight-view-independent-replay-private-v4
+  cancel-in-progress: false
+
+jobs:
+  independently-replay-source-rgba-and-intervention-effects:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      RCLONE_CONFIG: /tmp/c370-independent-eightview-replay.conf
+      SOURCE_REMOTE: gdrive:corpus370_preparation_v1/hosted_persistent_eight_view_edit_private_v4/41991513344-1
+      SOURCE_LOCAL: /home/monster/realsas_authority/corpus370_eightview_private/41991513344-1
+      OUTPUT: /home/monster/realsas_authority/corpus370_eightview_independent/${{ github.run_id }}-${{ github.run_attempt }}/CORPUS370_EIGHT_VIEW_INDEPENDENT_REPLAY_V4.json
+      OUTPUT_REMOTE: gdrive:corpus370_preparation_v1/hosted_eight_view_independent_replay_v4/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify SHA-exact remote run source and no training authority
+        id: gate
+        env:
+          DRIVE_AVAILABLE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os
+          from pathlib import Path
+          d=json.loads(Path('canonical/CORPUS370_PRIVATE_EIGHT_VIEW_INDEPENDENT_REPLAY_V4_REQUEST.json').read_text())
+          assert d["schema"]=="RealSaS.Corpus370PrivateEightViewIndependentReplayRequest.v4"
+          assert d["real_original_blender_run_id"]==41991513344
+          assert d["source_run_head_sha256"]=="ee3fc58b68e1846a8c2040222d3178f6a8df9e6b"
+          assert d["source_allview_group_parent_sha256"]=="1d8b8e2e8018d2cd3b94188f2683424659a8b0735f43c43eb381b6b252a3b8a1"
+          assert d["expected_worker_subject_count"]==3
+          assert d["expected_ordinal_folders"]==[0,1,2]
+          assert d["expected_render_views"]==list(range(8))
+          assert d["persistent_group_source_anchor_view"]==4
+          assert d["replay_original_rgba_arrays"] is True
+          assert d["no_public_images_or_source_faces"] is True
+          for key in ("source_appearance_full_caa_minted",
+                      "artist_drawable_owner_identity_minted",
+                      "model_training_authorized","training_authorized"):
+              assert d[key] is False,key
+          print('ready='+str(d["enabled"] is True and os.environ["DRIVE_AVAILABLE"]=="true").lower())
+          PY
+      - name: Compile and run all real-source anti-forgery tests
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          sudo install -d -o "$USER" -g "$(id -gn)" -m 0700 /home/monster/realsas_authority
+          mkdir -p "$(dirname "$OUTPUT")"
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/corpus/court_corpus370_persistent_eight_view_edit_v4.py \
+            tools/corpus/qualify_corpus370_persistent_eight_view_batch_v4.py
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_persistent_eight_view_edit_v4.py
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends rclone
+      - name: Authenticate private source court receipts, never reveal art
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 --decode > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          rclone lsf "$SOURCE_REMOTE" --max-depth 2 >/dev/null
+          echo "ORIGINAL_PRIVATE_EIGHT_VIEW_IMAGE_COURTS_ACCESSIBLE"
+      - name: Hydrate only pre-existing original eight-view RGBA, receipt and independent court for three subjects
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          for ordinal in 0 1 2; do
+            mkdir -p "$SOURCE_LOCAL/$ordinal"
+            for name in PRIVATE_FULL_FRAME_LAYER_BATCH_RESULT_V4.json \
+                        PRIVATE_FULL_FRAME_LAYER_RENDER_V4.json \
+                        PRIVATE_FULL_FRAME_LAYER_RENDER_V4.npz \
+                        FULL_FRAME_EDITOR_INDEPENDENT_COURT_V4.json; do
+              rclone copyto "$SOURCE_REMOTE/$ordinal/$name" \
+                "$SOURCE_LOCAL/$ordinal/$name" \
+                --checksum --timeout 90s --retries 3
+            done
+          done
+          echo "TWELVE_PRIVILEGED_RAY_AND_RGBA_RECEIPTS_FETCHED__NONE_PUBLIC"
+      - name: Independently recompute all eight-camera full-field edits from source pixels
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 -u tools/corpus/qualify_corpus370_persistent_eight_view_batch_v4.py \
+            --input-root "$SOURCE_LOCAL" --output "$OUTPUT"
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          d=json.loads(Path(os.environ["OUTPUT"]).read_text())
+          assert d["measured_independent_pass_subjects"]==3
+          assert d["failure_count"]==0
+          assert d["replayed_full_fov_pixel_count"]==3*8*192*192
+          assert d["training_authorized"] is False
+          assert d["graphics_owner_authorized"] is False
+          print("## Eight-camera original RGBA independent re-court")
+          print("Three SHA-locked subjects:",d["measured_independent_pass_subjects"])
+          print("Recomputed full-FOV pixels:",d["replayed_full_fov_pixel_count"])
+          print("Edit consequences not author drawable identity, CAA, or training authority")
+          PY
+      - name: Preserve original-image independent court and failures in private Drive
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -s "$RCLONE_CONFIG" && test -f "$OUTPUT"; then
+            rclone copy "$(dirname "$OUTPUT")" "$OUTPUT_REMOTE" \
+              --checksum --transfers 2 --checkers 2 --timeout 90s --retries 3
+            echo "PRIVATE_INDEPENDENT_RGBA_COURTS_STORED"
+          fi

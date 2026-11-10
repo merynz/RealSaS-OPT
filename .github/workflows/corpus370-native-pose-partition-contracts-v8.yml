@@ -1,0 +1,42 @@
+name: corpus370-native-pose-partition-contracts-v8
+
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-native-pose-partition-contracts-v8.yml'
+      - 'tools/corpus/court_corpus370_native_pose_partition_v8.py'
+      - 'tools/corpus/run_corpus370_native_pose_partition_private_v8.py'
+      - 'tests/corpus/test_corpus370_native_pose_partition_v8.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/corpus370-native-pose-partition-contracts-v8.yml'
+      - 'tools/corpus/court_corpus370_native_pose_partition_v8.py'
+      - 'tools/corpus/run_corpus370_native_pose_partition_private_v8.py'
+      - 'tests/corpus/test_corpus370_native_pose_partition_v8.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-native-pose-partition-contracts-v8-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  native-authority-negative-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile V8 and run synthetic forged source/pose/authority cases
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          python3 -m py_compile \
+            tools/corpus/court_corpus370_native_pose_partition_v8.py \
+            tools/corpus/run_corpus370_native_pose_partition_private_v8.py
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_corpus370_native_pose_partition_v8.py

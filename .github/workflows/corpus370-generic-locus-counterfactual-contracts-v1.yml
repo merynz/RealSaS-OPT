@@ -1,0 +1,166 @@
+name: corpus370-generic-locus-counterfactual-contracts-v1
+
+# Diagnostic only: synthetic counterfactual contracts, no private Corpus370 inputs.
+on:
+  push:
+    branches: [corpus370-source-relative-contact-v1-review]
+    paths:
+      - '.github/workflows/corpus370-generic-locus-counterfactual-contracts-v1.yml'
+      - 'tools/corpus/generic_source_locus_counterfactual_v1.py'
+      - 'tools/corpus/court_corpus370_visibility_oracle_consumer_v1.py'
+      - 'tools/corpus/qualify_corpus370_visibility_oracle_batch_v1.py'
+      - 'tools/corpus/diagnose_corpus370_generic_pair_kinematics_v1.py'
+      - 'tools/corpus/court_corpus370_native_bone_counterfactual_v1.py'
+      - 'tools/corpus/compile_corpus370_anonymous_layer_proposals_v1.py'
+      - 'tools/corpus/court_corpus370_anonymous_layer_edit_proxy_v1.py'
+      - 'tools/corpus/run_corpus370_anonymous_layer_private_batch_v1.py'
+      - 'tests/corpus/test_corpus370_anonymous_layer_compiler_v1.py'
+      - 'tools/corpus/compile_corpus370_hierarchical_layer_groups_v1.py'
+      - 'tools/corpus/court_corpus370_hierarchical_layer_groups_v1.py'
+      - 'tests/corpus/test_corpus370_hierarchical_layer_groups_v1.py'
+      - 'tools/corpus/compile_corpus370_multiview_geometry_groups_v2.py'
+      - 'tools/corpus/court_corpus370_multiview_geometry_groups_v2.py'
+      - 'tools/corpus/run_corpus370_multiview_geometry_groups_private_v2.py'
+      - 'tests/corpus/test_corpus370_multiview_geometry_groups_v2.py'
+      - 'tools/corpus/compile_corpus370_allview_geometry_groups_v3.py'
+      - 'tools/corpus/court_corpus370_allview_geometry_groups_v3.py'
+      - 'tests/corpus/test_corpus370_allview_geometry_groups_v3.py'
+      - 'tools/truth_foundry/blender_corpus370_anonymous_full_frame_edit_v3.py'
+      - 'tools/corpus/court_corpus370_anonymous_full_frame_edit_v3.py'
+      - 'tools/corpus/run_corpus370_full_frame_group_edit_private_v3.py'
+      - 'tests/corpus/test_corpus370_anonymous_full_frame_edit_v3.py'
+      - 'tools/truth_foundry/blender_corpus370_anonymous_full_frame_edit_v4.py'
+      - 'tools/corpus/court_corpus370_persistent_eight_view_edit_v4.py'
+      - 'tools/corpus/run_corpus370_persistent_eight_view_edit_private_v4.py'
+      - 'tests/corpus/test_corpus370_persistent_eight_view_edit_v4.py'
+      - 'tools/corpus/qualify_corpus370_persistent_eight_view_batch_v4.py'
+      - '.github/workflows/corpus370-hosted-anonymous-full-frame-allview-private-v3.yml'
+      - 'tools/corpus/run_corpus370_allview_geometry_groups_private_v3.py'
+      - '.github/workflows/corpus370-hosted-allview-geometry-groups-private-v3.yml'
+      - 'tools/truth_foundry/blender_corpus370_anonymous_full_frame_edit_v1.py'
+      - 'tools/corpus/court_corpus370_anonymous_full_frame_edit_v1.py'
+      - 'tests/corpus/test_corpus370_anonymous_full_frame_edit_v1.py'
+      - 'tools/corpus/run_corpus370_full_frame_group_edit_private_v1.py'
+      - 'tools/truth_foundry/blender_corpus370_native_bone_counterfactual_v1.py'
+      - 'tests/corpus/test_corpus370_native_bone_counterfactual_v1.py'
+      - 'tests/corpus/test_corpus370_generic_pair_kinematics_v1.py'
+      - 'tests/corpus/test_corpus370_visibility_oracle_consumer_v1.py'
+      - 'tests/corpus/test_corpus370_visibility_oracle_batch_v1.py'
+      - 'tools/corpus/generic_source_locus_reciprocal_palette_v2.py'
+      - 'tools/corpus/select_generic_source_locus_rays_v1.py'
+      - 'tools/corpus/court_corpus370_source_locus_visibility_v1.py'
+      - 'tools/corpus/qualify_corpus370_hosted_hit_visibility_v1.py'
+      - 'models/iris/v32/training_input_contract_v1.py'
+      - 'tests/corpus/test_partial_materialization_contract_v1.py'
+      - 'tests/corpus/test_corpus370_source_locus_visibility_v1.py'
+      - 'tests/corpus/test_select_generic_source_locus_rays_v1.py'
+      - 'tests/corpus/test_generic_source_locus_reciprocal_palette_v2.py'
+      - 'tools/corpus/run_corpus370_v5_palette_intervention_pilot_v1.py'
+      - 'tests/corpus/test_generic_source_locus_counterfactual_v1.py'
+      - 'tests/corpus/test_corpus370_v5_palette_intervention_v1.py'
+      - 'tools/corpus/validate_corpus370_v5_palette_intervention_v1.py'
+      - 'tools/truth_foundry/blender_corpus370_source_locus_palette_v1.py'
+  pull_request:
+    paths:
+      - '.github/workflows/corpus370-generic-locus-counterfactual-contracts-v1.yml'
+      - 'tools/corpus/generic_source_locus_counterfactual_v1.py'
+      - 'tools/corpus/court_corpus370_visibility_oracle_consumer_v1.py'
+      - 'tools/corpus/qualify_corpus370_visibility_oracle_batch_v1.py'
+      - 'tools/corpus/diagnose_corpus370_generic_pair_kinematics_v1.py'
+      - 'tools/corpus/court_corpus370_native_bone_counterfactual_v1.py'
+      - 'tools/corpus/compile_corpus370_anonymous_layer_proposals_v1.py'
+      - 'tools/corpus/court_corpus370_anonymous_layer_edit_proxy_v1.py'
+      - 'tools/corpus/run_corpus370_anonymous_layer_private_batch_v1.py'
+      - 'tests/corpus/test_corpus370_anonymous_layer_compiler_v1.py'
+      - 'tools/corpus/compile_corpus370_hierarchical_layer_groups_v1.py'
+      - 'tools/corpus/court_corpus370_hierarchical_layer_groups_v1.py'
+      - 'tests/corpus/test_corpus370_hierarchical_layer_groups_v1.py'
+      - 'tools/corpus/compile_corpus370_multiview_geometry_groups_v2.py'
+      - 'tools/corpus/court_corpus370_multiview_geometry_groups_v2.py'
+      - 'tools/corpus/run_corpus370_multiview_geometry_groups_private_v2.py'
+      - 'tests/corpus/test_corpus370_multiview_geometry_groups_v2.py'
+      - 'tools/corpus/compile_corpus370_allview_geometry_groups_v3.py'
+      - 'tools/corpus/court_corpus370_allview_geometry_groups_v3.py'
+      - 'tests/corpus/test_corpus370_allview_geometry_groups_v3.py'
+      - 'tools/truth_foundry/blender_corpus370_anonymous_full_frame_edit_v1.py'
+      - 'tools/corpus/court_corpus370_anonymous_full_frame_edit_v1.py'
+      - 'tests/corpus/test_corpus370_anonymous_full_frame_edit_v1.py'
+      - 'tools/truth_foundry/blender_corpus370_native_bone_counterfactual_v1.py'
+      - 'tests/corpus/test_corpus370_native_bone_counterfactual_v1.py'
+      - 'tests/corpus/test_corpus370_generic_pair_kinematics_v1.py'
+      - 'tests/corpus/test_corpus370_visibility_oracle_consumer_v1.py'
+      - 'tests/corpus/test_corpus370_visibility_oracle_batch_v1.py'
+      - 'tests/corpus/test_generic_source_locus_counterfactual_v1.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus370-generic-locus-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  synthetic-source-locus-contract-no-ownership-promotion:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile independent court and execute all positive/negative fixtures
+        run: |
+          set -euo pipefail
+          python3 -m py_compile \
+            tools/corpus/court_corpus370_visibility_oracle_consumer_v1.py \
+            tools/corpus/qualify_corpus370_visibility_oracle_batch_v1.py \
+            tools/corpus/diagnose_corpus370_generic_pair_kinematics_v1.py \
+            tools/corpus/court_corpus370_native_bone_counterfactual_v1.py \
+            tools/corpus/compile_corpus370_anonymous_layer_proposals_v1.py \
+            tools/corpus/court_corpus370_anonymous_layer_edit_proxy_v1.py \
+            tools/corpus/run_corpus370_anonymous_layer_private_batch_v1.py \
+            tools/corpus/compile_corpus370_hierarchical_layer_groups_v1.py \
+            tools/corpus/court_corpus370_hierarchical_layer_groups_v1.py \
+            tools/corpus/compile_corpus370_multiview_geometry_groups_v2.py \
+            tools/corpus/court_corpus370_multiview_geometry_groups_v2.py \
+            tools/corpus/run_corpus370_multiview_geometry_groups_private_v2.py \
+            tools/corpus/compile_corpus370_allview_geometry_groups_v3.py \
+            tools/corpus/court_corpus370_allview_geometry_groups_v3.py \
+            tools/corpus/run_corpus370_allview_geometry_groups_private_v3.py \
+            tools/truth_foundry/blender_corpus370_anonymous_full_frame_edit_v3.py \
+            tools/corpus/court_corpus370_anonymous_full_frame_edit_v3.py \
+            tools/corpus/run_corpus370_full_frame_group_edit_private_v3.py \
+            tools/truth_foundry/blender_corpus370_anonymous_full_frame_edit_v4.py \
+            tools/corpus/court_corpus370_persistent_eight_view_edit_v4.py \
+            tools/corpus/run_corpus370_persistent_eight_view_edit_private_v4.py \
+            tools/corpus/qualify_corpus370_persistent_eight_view_batch_v4.py \
+            tools/truth_foundry/blender_corpus370_anonymous_full_frame_edit_v1.py \
+            tools/corpus/court_corpus370_anonymous_full_frame_edit_v1.py \
+            tools/corpus/run_corpus370_full_frame_group_edit_private_v1.py \
+            tools/corpus/generic_source_locus_counterfactual_v1.py \
+            tools/corpus/generic_source_locus_reciprocal_palette_v2.py \
+            tools/corpus/select_generic_source_locus_rays_v1.py \
+            tools/corpus/court_corpus370_source_locus_visibility_v1.py \
+            tools/corpus/qualify_corpus370_hosted_hit_visibility_v1.py \
+            models/iris/v32/training_input_contract_v1.py \
+            tools/corpus/run_corpus370_v5_palette_intervention_pilot_v1.py \
+            tools/corpus/validate_corpus370_v5_palette_intervention_v1.py \
+            tools/truth_foundry/blender_corpus370_source_locus_palette_v1.py
+          python3 -m pip install --disable-pip-version-check numpy pytest
+          PYTHONPATH=. python3 -m pytest -q \
+            tests/corpus/test_generic_source_locus_counterfactual_v1.py \
+            tests/corpus/test_generic_source_locus_reciprocal_palette_v2.py \
+            tests/corpus/test_select_generic_source_locus_rays_v1.py \
+            tests/corpus/test_corpus370_source_locus_visibility_v1.py \
+            tests/corpus/test_partial_materialization_contract_v1.py \
+            tests/corpus/test_corpus370_v5_palette_intervention_v1.py \
+            tests/corpus/test_corpus370_source_locus_visibility_v1.py \
+            tests/corpus/test_corpus370_visibility_oracle_consumer_v1.py \
+            tests/corpus/test_corpus370_visibility_oracle_batch_v1.py \
+            tests/corpus/test_corpus370_generic_pair_kinematics_v1.py \
+            tests/corpus/test_corpus370_native_bone_counterfactual_v1.py \
+            tests/corpus/test_corpus370_anonymous_layer_compiler_v1.py \
+            tests/corpus/test_corpus370_hierarchical_layer_groups_v1.py \
+            tests/corpus/test_corpus370_multiview_geometry_groups_v2.py \
+            tests/corpus/test_corpus370_allview_geometry_groups_v3.py \
+            tests/corpus/test_corpus370_anonymous_full_frame_edit_v3.py \
+            tests/corpus/test_corpus370_persistent_eight_view_edit_v4.py \
+            tests/corpus/test_corpus370_anonymous_full_frame_edit_v1.py
+          echo "GENERIC_SOURCE_LOCUS_CONTRACTS_ONLY__NO_MEASURED_SUBJECTS_NO_OWNER_AUTHORITY"

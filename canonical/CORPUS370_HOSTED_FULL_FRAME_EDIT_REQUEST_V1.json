@@ -1,0 +1,39 @@
+{
+  "schema": "RealSaS.Corpus370FullFrameAnonymousEditRequest.v1",
+  "enabled": true,
+  "status": "ACTIVATED_ORIGINAL_THREE_SOURCE_FULL_FOV_RGBA_AND_ANONYMOUS_GROUP_EDIT_REPLAY",
+  "source_locked": true,
+  "private_v5_manifest_sha256": "cb9ffea96b22bb4500b367afe9965d98fa52b99f51dbe4faf5fac8aabc1ae172",
+  "source_v5_sha256": "8ab2ebf526bbf91d78117580b68ed3784e53bcbafdbd326f012e143c924c0ac4",
+  "source_roster_sha256": "925dac90ecbf949375aa3ef5d2ed2f40788ae7dcf5669a02b708ada8d9435355",
+  "geometric_rays_index_sha256": "0eeb24089322d0802567ba9736ada1de03e234bbf133bc91164132a80bec3c70",
+  "source_native_visibility_join_sha256": "e72f3380c2f34cbf3e088218ebfcd4be0f4aa71c9138d4b3d1865a4f4074439a",
+  "source_multiview_group_court_sha256": "4d6a6a829a5bad658a8ce78d7fe0bd25b32f100466db378198072435d8b65af9",
+  "source_subjects": 3,
+  "parallel_hosted_workers": 3,
+  "rest_pose_only": true,
+  "views": [
+    0,
+    4
+  ],
+  "full_field_of_view": true,
+  "raster_resolution": 192,
+  "cycles_samples": 32,
+  "render_arms": [
+    "SOURCE_ORIGINAL",
+    "SOUP_FULL",
+    "SOUP_NOOP",
+    "REMOVE_SELECTED_GROUP_A",
+    "REMOVE_SELECTED_GROUP_B",
+    "REMOVE_BOTH_SELECTED_GROUPS"
+  ],
+  "no_public_source_or_render_artifacts": true,
+  "full_native_resolution_qualified": false,
+  "source_appearance_caa_authorized": false,
+  "graphics_owner_authorized": false,
+  "animation_replay_authorized": false,
+  "model_training_authorized": false,
+  "training_authorized": false,
+  "notes": "First full-FOV bounded downsampled rest-pose appearance & whole anonymous group edit replay on 3 original sources. This is NOT 8-view total CAA, source native motion, hidden texture completion or training admission. All source art, face labels and images remain private Drive.",
+  "run_notes": "Three parallel Ubuntu hosted independent Blender original source rest-pose source-vs-soup and 4 group suppression arms, 2 opposite cameras 192x192, all private Drive. Full production CAA/editable author identity, animation replay and model training remain false."
+}

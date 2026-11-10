@@ -188,6 +188,117 @@ def posed_lbs_from_joint_matrices(
     return torch.einsum("bvj,bpvjk->bpvk", weights, moved)
 
 
+
+def _area_weighted_surface_witnesses(
+    vertices: Tensor,
+    faces: Tensor,
+    *,
+    face_budget: int = 384,
+) -> Tensor:
+    """Deterministic area-aware surface quadrature, same indexed faces.
+
+    Sampling locations are discrete (source face selection not differentiable),
+    but barycentric point XYZ and resulting reconstruction losses ARE
+    differentiable with respect to the continuous rest/posed vertices.
+    This is a training surrogate, not hard collision/visibility proof.
+    """
+    if vertices.ndim != 3 or vertices.shape[0] != 1 or vertices.shape[2] != 3:
+        raise ValueError("RSS_VNEXT_SURFACE_WITNESS_VERTEX_SHAPE")
+    if faces.ndim != 2 or faces.shape[-1] != 3 or not faces.numel():
+        raise ValueError("RSS_VNEXT_SURFACE_WITNESS_FACE_SHAPE")
+    if face_budget < 2 or face_budget > 4096:
+        raise ValueError("RSS_VNEXT_SURFACE_WITNESS_BUDGET")
+    tri = vertices[0, faces]
+    area = 0.5 * torch.cross(
+        tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0],
+        dim=-1,
+    ).norm(dim=-1)
+    if bool((area < 1e-10).any()) or not bool(torch.isfinite(area).all()):
+        raise ValueError("RSS_VNEXT_SURFACE_WITNESS_DEGENERATE_FACE")
+    # Uniform in cumulative surface area, independent of original face count.
+    with torch.no_grad():
+        cdf = area.detach().double().cumsum(0)
+        fractions = (torch.arange(
+            min(face_budget, faces.shape[0]), device=area.device,
+            dtype=torch.float64,
+        ) + .5) / min(face_budget, faces.shape[0])
+        selected = torch.searchsorted(
+            cdf, fractions * cdf[-1], right=False,
+        ).clamp_max(len(faces) - 1)
+    tris = tri[selected]
+    barycentric = torch.tensor(
+        [[1/3, 1/3, 1/3], [.6, .2, .2],
+         [.2, .6, .2], [.2, .2, .6]],
+        device=vertices.device, dtype=vertices.dtype,
+    )
+    return torch.einsum("qjc,sj->qsc", tris, barycentric).reshape(-1, 3)
+
+
+def _two_way_surface_chamfer(predicted: Tensor, reference: Tensor) -> Tensor:
+    if (reference.ndim != 2 or reference.shape[1] != 3
+            or not reference.numel() or not torch.isfinite(reference).all()):
+        raise ValueError("RSS_VNEXT_POSE_REFERENCE_SURFACE_INVALID")
+    distance = torch.cdist(predicted[None].float(), reference[None].float())[0]
+    return distance.amin(-1).mean() + distance.amin(-2).mean()
+
+
+def source_pose_surface_consequence_loss(
+    mesh: RSSvNextStructuralMeshCandidate,
+    weights: Tensor,
+    source_skin_matrices: Tensor,
+    source_rest_samples: Tensor,
+    source_pose_samples: Tensor,
+    *,
+    valid_pose_mask: Tensor,
+    max_sampled_faces: int = 384,
+) -> dict[str, Tensor]:
+    """Differentiable source-conditioned motion geometry loss.
+
+    Teacher-side only. Source rest and posed samples + motion matrices must be
+    qualified to the same original asset/frame/pose. This function has no
+    authority to approve source truth; only accepts the arrays supplied by a
+    separately verifying source-preparation court.
+
+    Learns *rest topology geometry and skin together*: if an edge across a
+    bend makes the posed triangle surface fail to match source motion, this
+    loss penalizes it. Gradients reach vertex XYZ and predicted skin, while
+    discrete face choices must additionally use motion-aware policy learning.
+    """
+    mesh.validate()
+    if source_rest_samples.ndim != 2 or source_rest_samples.shape[1] != 3:
+        raise ValueError("RSS_VNEXT_POSE_REST_REFERENCE_SHAPE")
+    if (source_pose_samples.ndim != 3 or source_pose_samples.shape[2] != 3
+            or source_pose_samples.shape[0] != source_skin_matrices.shape[1]):
+        raise ValueError("RSS_VNEXT_POSE_REFERENCE_SEQUENCE_SHAPE")
+    if (valid_pose_mask.shape != (source_skin_matrices.shape[1],)
+            or valid_pose_mask.dtype != torch.bool or not bool(valid_pose_mask.any())):
+        raise ValueError("RSS_VNEXT_POSE_REFERENCE_MASK_INVALID")
+    posed = posed_lbs_from_joint_matrices(
+        mesh.rest_vertices_iris, weights, source_skin_matrices,
+    )
+    static_points = _area_weighted_surface_witnesses(
+        mesh.rest_vertices_iris, mesh.faces, face_budget=max_sampled_faces,
+    )
+    static_error = _two_way_surface_chamfer(static_points, source_rest_samples)
+    pose_losses = []
+    for pose_idx in range(posed.shape[1]):
+        if not bool(valid_pose_mask[pose_idx]):
+            continue
+        points = _area_weighted_surface_witnesses(
+            posed[:, pose_idx], mesh.faces, face_budget=max_sampled_faces,
+        )
+        pose_losses.append(_two_way_surface_chamfer(
+            points, source_pose_samples[pose_idx],
+        ))
+    dynamic_error = torch.stack(pose_losses).mean()
+    return {
+        "static_surface": static_error,
+        "posed_surface": dynamic_error,
+        "total": static_error + dynamic_error,
+        "qualified_pose_count": valid_pose_mask.sum(),
+    }
+
+
 def deformation_bridge_loss(
     mesh: RSSvNextStructuralMeshCandidate,
     weights: Tensor,
@@ -238,4 +349,5 @@ def deformation_bridge_loss(
 __all__ = [
     "RSSvNextStructuralMeshCandidate", "RSSvNextAnimationReadyMesh",
     "posed_lbs_from_joint_matrices", "deformation_bridge_loss",
+    "source_pose_surface_consequence_loss",
 ]

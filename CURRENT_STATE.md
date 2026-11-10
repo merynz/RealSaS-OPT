@@ -1,3 +1,5 @@
+> **RSS.vNext mainline engineering handoff — 2026-11-11:** Two real FRONT/BACK inputs are now normative. PR #436 introduced the shared-carrier neural research model and PR #437 the independent eight-view interaction consumer, merged to main. A separate integration PR is testing exact-byte checkpoint loading, full nonauthoritative candidate transport, candidate-to-existing-canonical Rig/Skin qualification and runtime session replay. This is **source-code integration only**: no admitted learned checkpoint or scientific full-product PASS; the legacy Go product descriptors still require separate IRIS/TESSA/AXIS/MIRA releases, and 2-view mesh ProductRevision source qualification/Graphics/CAA and live Studio compile route remain open. Final architecture freeze awaits explicit user review. Read docs/platform/RSS_VNEXT_MAIN_INTEGRATION_READINESS_20261111.md once merged.
+
 > **Completed Corpus370 audit and tested repairs — 2026-11-03:**
 > The sealed7a61 worker finished294 inputs:268 COMPUTED_UNQUALIFIED,26 execution
 > failures;76 earlier preparation failures remain separate (47 mask,29 bind-vertex).

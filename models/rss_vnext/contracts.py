@@ -23,7 +23,9 @@ class RSSvNextConfig:
 
     # This is the actual product observation contract. No external 8-view path.
     observed_views: int = 2
-    aux_constructed_view_latents: int = 0  # 0, 6, 8: hypotheses, NEVER observed views
+    # Total observations + predictions (NOT count of added images):
+    # 0=disabled; 6=>2 source+4 predictions; 8=>2 source+6 predictions.
+    constructed_total_views: int = 0
     query_grid_side: int = 8  # geometry probes, not source/teacher mesh vertices
     region_slots: int = 32   # anonymous region hypotheses; unknown explicitly represented
     # Explicit renderer-trainable 2D/3D presentation roles, NOT morphology or rig.
@@ -55,8 +57,8 @@ class RSSvNextConfig:
             raise ValueError("RSS_VNEXT_SEMANTIC_ROLE_FIELD_WIDTH_DRIFT")
         if self.observed_views != 2:
             raise ValueError("RSS_VNEXT_REQUIRES_EXACTLY_FRONT_BACK")
-        if self.aux_constructed_view_latents not in (0, 6, 8):
-            raise ValueError("RSS_VNEXT_AUX_VIEW_COUNT_INVALID")
+        if self.constructed_total_views not in (0, 6, 8):
+            raise ValueError("RSS_VNEXT_TOTAL_VIEW_COUNT_INVALID")
         if not (2 <= self.query_grid_side <= 32):
             raise ValueError("RSS_VNEXT_QUERY_GRID_SIZE_INVALID")
         if min(

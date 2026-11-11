@@ -8,7 +8,8 @@ boundaries, not learned generalization or source graphics qualification.
 
 from hashlib import sha256
 import io
-from types import SimpleNamespace
+from types import SimpleNamespace, ModuleType
+import sys
 
 import numpy as np
 import pytest
@@ -16,6 +17,13 @@ import pytest
 from compiler.realsas_compiler_services.platform_worker import shape_evidence_fanout_v1 as fanout
 from compiler.realsas_compiler_services.platform_worker import shape_capability_v2 as shape_v2
 from tests.compiler.test_product_shape_capability_v2 import _v1_result, _decoded
+
+
+def _mock_heavy_flexicubes_for_cpu_contract_court(monkeypatch):
+    # Do not load neural inference dependencies in the deterministic CPU CAS court.
+    fake = ModuleType("models.iris.vnext.flexicubes_v1")
+    fake.PinnedFlexiCubesV1 = lambda *args, **kwargs: object()
+    monkeypatch.setitem(sys.modules, fake.__name__, fake)
 
 
 def _mock_shape_input_decoder_without_torch(monkeypatch):
@@ -141,8 +149,7 @@ def test_registered_shape_worker_emits_three_distinct_artifacts_from_one_inferen
     ])
     monkeypatch.setattr(worker,"_device_from_environment",lambda:"cpu")
     monkeypatch.setattr(worker,"_flexicubes_root_from_deployment",lambda: "/tmp/synthetic-only")
-    import models.iris.vnext.flexicubes_v1 as fc
-    monkeypatch.setattr(fc,"PinnedFlexiCubesV1",lambda *args,**kwargs:object())
+    _mock_heavy_flexicubes_for_cpu_contract_court(monkeypatch)
     _mock_shape_input_decoder_without_torch(monkeypatch)
     import compiler.realsas_compiler_services.platform_worker.shape_capability_v2 as sv
     def once(*args,**kwargs):
@@ -237,7 +244,7 @@ def test_registered_mesh_consumes_index_but_never_decompresses_unused_neural_sce
 
     def read(ref):
         touched.append(ref["artifact_type"])
-        if ref is index_ref:
+        if ref["artifact_type"] == "RealSaS.ShapeEvidenceFanout":
             return index_bytes
         raise AssertionError("Product Mesh must not reload raw neural scene")
 
@@ -269,8 +276,7 @@ def test_registered_shape_executor_fails_closed_if_scene_is_not_produced(monkeyp
     ])
     monkeypatch.setattr(worker,"_device_from_environment",lambda:"cpu")
     monkeypatch.setattr(worker,"_flexicubes_root_from_deployment",lambda:"/tmp/synthetic-only")
-    import models.iris.vnext.flexicubes_v1 as fc
-    monkeypatch.setattr(fc,"PinnedFlexiCubesV1",lambda *args,**kwargs:object())
+    _mock_heavy_flexicubes_for_cpu_contract_court(monkeypatch)
     import compiler.realsas_compiler_services.platform_worker.scene_input_contract_v2 as si
     monkeypatch.setattr(si,"decode_shape_input_v2",lambda _:SimpleNamespace(
         inputs=object(),source_observation_content_sha256="a"*64,

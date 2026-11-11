@@ -742,6 +742,37 @@ def test_neural_region_evidence_to_live_ik_skin_graphics_projection_one_carrier(
     from tests.compiler.test_controllable_puppet_runtime_v1 import qualified_synthetic_bundle
 
     evidence, mapping, mesh, rig, skin = _qualified_neural_graphics_fixture()
+    # This legacy fixture has a structurally qualified (but NON-EXECUTABLE)
+    # IK_CHAIN_SOLVE_V1 operator. Structural proposal PASS is not enough to
+    # drive Product Mechanics; prove fail-closed behavior before authoring a
+    # *new* explicit product-compatible program, never a hidden Compiler alias.
+    from compiler.realsas_compiler_core.mechanics_control_solver_v1 import solve_control_pose_v1
+    from compiler.realsas_compiler_core.rig_program_ir_v1 import (
+        seal_rig_program_proposal_v1, qualify_rig_program_v1,
+    )
+    from compiler.realsas_compiler_core.canonical_rig_ir_v2 import mint_canonical_rig_v2
+    from tests.compiler.test_control_ready_rig_v2 import _proposal
+    with pytest.raises(QualificationError, match="RIG_CONSTRAINT_OPERATOR_UNSUPPORTED"):
+        solve_control_pose_v1(rig)
+
+    raw = _proposal(mesh)
+    product_constraint = replace(
+        raw.constraints[0], operator_id="IK",
+        parameters={"p0": 1.0, "p1": 1.0, "p2": 1.0},
+    )
+    authored = seal_rig_program_proposal_v1(replace(
+        raw, constraints=(product_constraint,), proposal_lineage_hash="",
+    ))
+    qualified = qualify_rig_program_v1(authored)
+    executable = mint_canonical_rig_v2(mesh, qualified_program=qualified)
+    # One control-program change must never remint the static neural Mesh,
+    # deform-joint identity or learned Skin weights.
+    assert executable.deform_structure_hash == rig.deform_structure_hash
+    assert tuple(j.canonical_joint_id for j in executable.joints) == tuple(
+        j.canonical_joint_id for j in rig.joints
+    )
+    assert executable.control_program_hash != rig.control_program_hash
+    rig = executable
     compiled = compile_neural_region_graphics_on_canonical_puppet_v1(
         evidence=evidence, expected_checkpoint_sha256="a"*64,
         candidate_vertex_ids_by_index=mapping,

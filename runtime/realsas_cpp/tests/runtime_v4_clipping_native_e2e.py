@@ -154,6 +154,91 @@ def _render(demo: Path, package: Path, *, view: str, t: float, out: Path):
     return np.frombuffer(pixels, np.uint8).reshape(height, width, 4)
 
 
+def _three_layer_translucent_fixture(root: Path) -> Path:
+    """Three source-backed layers on ONE posed mesh stack; no fabricated pixels."""
+    faces = np.asarray(((0, 1, 2), (1, 3, 2)), dtype=np.uint32)
+    specs = (
+        ("front", "slot_front", "attachment_front", -.3, .3),
+        ("middle", "slot_middle", "attachment_middle", 0., 0.),
+        ("back", "slot_back", "attachment_back", .3, -.3),
+    )
+    assets = tuple(RuntimeV4AttachmentAsset(
+        name, slot, attachment, AttachmentKind.DEFORMABLE_BODY,
+        TopologyClass.STATIC, _quad(-1, 1, -1, 1, initial_z),
+        faces, hashlib.sha256(name.encode()).hexdigest(),
+    ) for name, slot, attachment, initial_z, _ in specs)
+    slots = tuple(RuntimeV3Slot(slot, "root", i, attachment)
+                  for i, (_, slot, attachment, _, _) in enumerate(specs))
+    views, textures = [], []
+    tex_root = root / "textures"
+    tex_root.mkdir(parents=True, exist_ok=True)
+    palette = ((255, 0, 0, 128), (0, 255, 0, 128), (0, 0, 255, 128))
+    rgba = b"".join(
+        b"".join(bytes(colour) * 4 for colour in palette) for _ in range(4)
+    )
+    for view_idx in range(8):
+        view_id = f"V{view_idx}"
+        texture = tex_root / (view_id + ".png")
+        _write_rgba_png(texture, 12, 4, rgba)
+        raw = texture.read_bytes()
+        textures.append(RuntimeV3TexturePayload(
+            view_id, str(Path("textures") / texture.name),
+            hashlib.sha256(raw).hexdigest(),
+            zlib.crc32(raw) & 0xffffffff, 12, 4,
+        ))
+        overlays = tuple(RuntimeV4ViewAssetOverlay(
+            name, np.asarray([(u, .5)] * 4, dtype=np.float32),
+            np.full(2, provenance_code(AppearanceProvenance.DIRECT_SOURCE), dtype=np.uint8),
+            np.full(2, view_idx, dtype=np.int16),
+        ) for (name, _, _, _, _), u in zip(specs, (.12, .5, .88)))
+        views.append(RuntimeV4ViewOverlay(view_id, view_idx, _camera(view_idx), overlays))
+    compositions = {
+        f"V{v}": RuntimeV3FrameComposition(
+            f"V{v}", tuple(slot for _, slot, _, _, _ in specs),
+            {slot: attachment for _, slot, attachment, _, _ in specs},
+            (),
+        ) for v in range(8)
+    }
+    frames = (
+        RuntimeV4Frame(
+            0., {name: _quad(-1, 1, -1, 1, near)
+                 for name, _, _, near, _ in specs}, compositions,
+        ),
+        RuntimeV4Frame(
+            1., {name: _quad(-1, 1, -1, 1, far)
+                 for name, _, _, _, far in specs}, compositions,
+        ),
+    )
+    clip = RuntimeV4Clip("idle", "translucent", "idle", 1., 30., False, frames, False)
+    contract = RuntimeV4PlaybackContract(slots, assets, tuple(views))
+    out = root / "three_layer_alpha.rss"
+    materialize_runtime_v4_archive(
+        out_path=out, texture_root=root, contract=contract,
+        textures=tuple(textures), clips=(clip,),
+        source_product_state_hash="c"*64, source_proof_bundle_hash="d"*64,
+    )
+    return out
+
+
+def _verify_three_layer_source_over(demo: Path, root: Path) -> None:
+    package = _three_layer_translucent_fixture(root)
+    first = _render(demo, package, view="V0", t=0., out=root/"alpha-first.png")
+    second = _render(demo, package, view="V0", t=1., out=root/"alpha-swapped.png")
+    a = 128. / 255.
+    weights = np.asarray((a, (1-a)*a, (1-a)**2*a))
+    expected = np.round(np.concatenate((255. * weights / weights.sum(),
+                                         [255. * weights.sum()]))).astype(np.int16)
+    pixel = first[4, 4].astype(np.int16)
+    assert np.max(np.abs(pixel-expected)) <= 2, (pixel, expected)
+    assert 0 < pixel[2] < pixel[1] < pixel[0]
+    assert np.all(np.abs(second[4, 4].astype(np.int16) -
+                         expected[[2, 1, 0, 3]]) <= 2), second[4, 4]
+    # Runtime must recalculate camera-local visibility for changed posed XYZ.
+    assert not np.array_equal(first, second)
+    assert first[4, 4, 3] == second[4, 4, 3]
+    print("RUNTIME_V4_POST_POSE_THREE_LAYER_SOURCE_OVER_NATIVE_PASS")
+
+
 def run(demo: Path):
     with tempfile.TemporaryDirectory(prefix="rss-v4-3d-clip-") as tmp:
         root = Path(tmp)
@@ -182,6 +267,8 @@ def run(demo: Path):
         assert tuple(back[1, 6]) == green, back[1, 6]
         assert back[1, 1, 3] == 0, back[1, 1]
         print("RUNTIME_V4_EIGHT_VIEW_CANONICAL_CLIPPING_NATIVE_PASS")
+    with tempfile.TemporaryDirectory(prefix="rss-v4-source-over-") as tmp:
+        _verify_three_layer_source_over(demo, Path(tmp))
 
 
 def main():

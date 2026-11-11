@@ -166,23 +166,52 @@ class MIRASkinFSQCodecV6(nn.Module):
         quantized, token_ids, hard_codes = self.quantizer(latent)
         return token_ids, quantized, hard_codes
 
-    def decode_tokens(self, token_ids: Tensor, vertex_features: Tensor, joint_features: Tensor) -> Tensor:
-        b, n, j = self._check_inputs(vertex_features, joint_features)
+    def _decode_code_vectors(
+        self, codes: Tensor, vertex_features: Tensor, joint_features: Tensor,
+    ) -> Tensor:
+        """One decoder for training STE latents and production discrete tokens.
+
+        Never replace the product token IDs with soft expected latent values.
+        Straight-through quantized codes have the EXACT hard values in the
+        forward pass while preserving a reconstruction gradient to the encoder.
+        """
+        b, _, j = self._check_inputs(vertex_features, joint_features)
+        if tuple(codes.shape) != (
+            b, j, self.config.tokens_per_joint, self.config.latent_dim,
+        ) or not bool(torch.isfinite(codes).all()):
+            raise ValueError("MIRA_V6_CODEC_CODE_VECTOR_SHAPE_OR_VALUE_DRIFT")
+        vectors = codes.reshape(
+            b, j, self.config.tokens_per_joint * self.config.latent_dim,
+        ).to(dtype=vertex_features.dtype)
+        vertex_state = self.vertex_decode(vertex_features)
+        joint_state = self.joint_decode(joint_features) + self.code_decode(vectors)
+        logits = torch.einsum(
+            "bnh,bjh->bnj", vertex_state, joint_state,
+        ) / math.sqrt(float(self.config.hidden_dim))
+        logits = logits + self.bias_head(joint_state).transpose(1, 2)
+        return torch.softmax(logits, dim=-1)
+
+    def decode_tokens(
+        self, token_ids: Tensor, vertex_features: Tensor, joint_features: Tensor,
+    ) -> Tensor:
+        b, _, j = self._check_inputs(vertex_features, joint_features)
         expected = (b, j, self.config.tokens_per_joint)
         if tuple(token_ids.shape) != expected:
             raise ValueError("MIRA_V6_CODEC_TOKEN_SHAPE_DRIFT")
-        codes = self.quantizer.token_ids_to_codes(token_ids).to(dtype=vertex_features.dtype)
-        codes = codes.reshape(b, j, self.config.tokens_per_joint * self.config.latent_dim)
-        v = self.vertex_decode(vertex_features)
-        q = self.joint_decode(joint_features) + self.code_decode(codes)
-        logits = torch.einsum("bnh,bjh->bnj", v, q) / math.sqrt(float(self.config.hidden_dim))
-        logits = logits + self.bias_head(q).transpose(1, 2)
-        return torch.softmax(logits, dim=-1)
+        codes = self.quantizer.token_ids_to_codes(token_ids).to(
+            dtype=vertex_features.dtype,
+        )
+        return self._decode_code_vectors(codes, vertex_features, joint_features)
 
     def forward(self, weights: Tensor, vertex_features: Tensor, joint_features: Tensor) -> dict[str, Tensor]:
         latent = self._encode_latent(weights, vertex_features, joint_features)
         quantized, token_ids, hard_codes = self.quantizer(latent)
-        reconstructed = self.decode_tokens(token_ids, vertex_features, joint_features)
+        # STE: forward values are identical to decode_tokens(token_ids);
+        # unlike an integer-ID roundtrip, gradients from dense skin quality
+        # reach latent_head, vertex_encode and joint_encode.
+        reconstructed = self._decode_code_vectors(
+            quantized, vertex_features, joint_features,
+        )
         target = weights / weights.sum(dim=-1, keepdim=True).clamp_min(self.config.eps)
         reconstruction_loss = F.smooth_l1_loss(reconstructed, target)
         # Unlike MSE(quantized, hard), which is identically zero in the forward

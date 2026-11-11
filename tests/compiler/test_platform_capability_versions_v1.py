@@ -87,7 +87,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert rig["parameters"]["required_models"] == [
         {
             "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
+            "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0",
         }
     ]
 
@@ -102,7 +102,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert skin["parameters"]["required_models"] == [
         {
             "family": "MIRA",
-            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
+            "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0",
         }
     ]
     assert skin["parameters"]["mesh_and_rig_are_canonical_parents"] is True
@@ -113,7 +113,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert product_model_requirements() == [
         {
             "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
+            "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0",
         },
         {
             "family": "IRIS",
@@ -121,7 +121,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
         },
         {
             "family": "MIRA",
-            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
+            "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0",
         },
         {
             "family": "TESSA",
@@ -165,7 +165,7 @@ def test_release_snapshot_v2_carries_implementation_and_model_requirements():
     assert request["manifest"]["model_requirements"] == [
         {
             "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
+            "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0",
             "channel": "RESEARCH",
         },
         {
@@ -175,7 +175,7 @@ def test_release_snapshot_v2_carries_implementation_and_model_requirements():
         },
         {
             "family": "MIRA",
-            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
+            "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0",
             "channel": "RESEARCH",
         },
         {

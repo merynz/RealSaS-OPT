@@ -339,3 +339,10 @@ def test_direct_runtime_bundle_rejects_invalid_skin_simplex():
         ControllablePuppetSessionV1(replace(
             bundle,skin=replace(bundle.skin,rows=bad_rows),
         ))
+
+
+def test_direct_runtime_bundle_rejects_unaddressed_canonical_mesh_face():
+    bundle=qualified_synthetic_bundle()
+    malformed=replace(bundle.mesh,faces=(("MV:0","MV:1","NONEXISTENT"),))
+    with pytest.raises(QualificationError,match="CANONICAL_MESH_FACE_VERTEX_UNKNOWN"):
+        ControllablePuppetSessionV1(replace(bundle,mesh=malformed))

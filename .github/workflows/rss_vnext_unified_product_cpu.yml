@@ -1,0 +1,54 @@
+name: RSS vNext unified product and compiler integration court
+on:
+  push:
+    branches: [main, feat/rss-vnext-unified-product-ci-main-20261111]
+    paths:
+      - "models/rss_vnext/**"
+      - "models/iris/vnext/**"
+      - "models/tessa/**"
+      - "models/axis/**"
+      - "models/mira/**"
+      - "compiler/realsas_compiler_core/**"
+      - "tests/models/test_rss_vnext_*.py"
+      - "tests/compiler/test_controllable_puppet_runtime_v1.py"
+      - "tests/compiler/test_mechanics_control_solver_v1.py"
+      - "tests/compiler/test_playback_runtime_v4_contract_v1.py"
+      - "tests/compiler/test_graphics_v2.py"
+      - ".github/workflows/rss_vnext_unified_product_cpu.yml"
+  pull_request:
+    paths:
+      - "models/rss_vnext/**"
+      - "compiler/realsas_compiler_core/**"
+      - ".github/workflows/rss_vnext_unified_product_cpu.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unified-experts-runtime-court:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy scipy pillow
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Compile unified graph and compiler boundary
+        run: |
+          python -m compileall -q models/rss_vnext models/iris/vnext models/tessa/v31 models/axis models/mira compiler/realsas_compiler_core
+      - name: Model and compiler product regression
+        env:
+          PYTHONPATH: .
+        run: |
+          python -m pytest -q -rs \
+            tests/models/test_rss_vnext_*.py \
+            tests/compiler/test_controllable_puppet_runtime_v1.py \
+            tests/compiler/test_mechanics_control_solver_v1.py \
+            tests/compiler/test_playback_runtime_v4_contract_v1.py \
+            tests/compiler/test_graphics_v2.py

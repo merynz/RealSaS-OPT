@@ -72,9 +72,15 @@ def _adj(faces):
     return out
 
 def _prob(v,label):
-    v=float(v)
-    if not 0<=v<=1:raise QualificationError("GRAPHICS_PROBABILITY_INVALID:"+label)
-    return v
+    try:
+        if isinstance(v, bool):
+            raise ValueError("boolean is not a probability")
+        value=float(v)
+    except (ValueError, TypeError, OverflowError):
+        raise QualificationError("GRAPHICS_PROBABILITY_INVALID:"+label) from None
+    if not 0<=value<=1:
+        raise QualificationError("GRAPHICS_PROBABILITY_INVALID:"+label)
+    return value
 
 def _cycle(edges):
     graph={};nodes=set()
@@ -117,6 +123,16 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
         if a==b or min(a,b)<0 or max(a,b)>=n:raise QualificationError("GRAPHICS_STATIC_RELATION_FACE_INVALID")
         pair=tuple(sorted((a,b)))
         if pair in relations:raise QualificationError("GRAPHICS_STATIC_RELATION_DUPLICATE")
+        # Validate ALL source scores, even if this pair will not merge.
+        # Unused NaN/invalid evidence must not silently survive a court.
+        for label, score in (
+            ("same", r.same_drawable_affinity), ("cut", r.cut_probability),
+            ("attachment", r.attachment_affinity),
+            ("alpha", r.alpha_boundary_probability),
+            ("appearance", r.appearance_boundary_probability),
+            ("confidence", r.confidence),
+        ):
+            _prob(score, label)
         relations[pair]=r
         for f in pair:alpha[f]=max(alpha[f],_prob(r.alpha_boundary_probability,"alpha"))
         if pair in adj and _prob(r.confidence,"confidence")>=policy.relation_confidence_min and _prob(r.same_drawable_affinity,"same")>=policy.same_drawable_min and _prob(r.cut_probability,"cut")<=policy.cut_max and max(_prob(r.alpha_boundary_probability,"alpha"),_prob(r.appearance_boundary_probability,"appearance"))<=policy.boundary_max:uf.union(a,b)
@@ -130,12 +146,19 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
     for r in evidence.view_relations:
         v=int(r.view_index);views_present.add(v);a,b=int(r.face_a),int(r.face_b)
         if v<0 or a==b or min(a,b)<0 or max(a,b)>=n:raise QualificationError("GRAPHICS_VIEW_RELATION_INVALID")
+        for label, score in (
+            ("front", r.front_probability), ("occlusion", r.occlusion_probability),
+            ("vis_a", r.visibility_probability_a),
+            ("vis_b", r.visibility_probability_b), ("view_conf", r.confidence),
+        ):
+            _prob(score, label)
         fa,fb=face_fragment[a],face_fragment[b];vis.setdefault((v,fa),[]).append(_prob(r.visibility_probability_a,"vis_a"));vis.setdefault((v,fb),[]).append(_prob(r.visibility_probability_b,"vis_b"))
         if fa==fb:continue
         conf=_prob(r.confidence,"view_conf");occ=_prob(r.occlusion_probability,"occ");front=_prob(r.front_probability,"front")
         if conf<policy.relation_confidence_min or occ<policy.occlusion_probability_min:continue
         lo,hi=sorted((fa,fb));score=front if fa==lo else 1-front;pair_rows.setdefault((v,lo,hi),[]).append((score,conf*occ,r.evidence_ref))
     view_states=[]
+    had_order_conflict=False
     for v in sorted(views_present):
         raw=[]
         for (vv,lo,hi),rows in sorted(pair_rows.items()):
@@ -146,6 +169,7 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
             else:continue
             raw.append(GraphicsOrderEdgeV1(v,front,back,float(p),tuple(sorted({x[2] for x in rows if x[2]}))))
         kept,removed=_dag(raw)
+        had_order_conflict=had_order_conflict or bool(removed)
         if removed and not policy.allow_unqualified_order_arbitration:
             raise QualificationError("GRAPHICS_SOURCE_ORDER_CONFLICT_UNQUALIFIED")
         visible=[]
@@ -160,17 +184,25 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
     for pair,r in relations.items():
         if r.attachment_affinity<policy.attachment_affinity_min or r.confidence<policy.relation_confidence_min:continue
         m=dict(mechanical.get(pair) or {})
-        if not m or float(m.get("persistent_contact",0))<policy.mechanical_contact_min:continue
+        if not m:
+            continue
+        contact=_prob(m.get("persistent_contact",0),"mechanical_contact")
+        if contact<policy.mechanical_contact_min:
+            continue
         fa,fb=face_fragment[pair[0]],face_fragment[pair[1]]
         if fa==fb:continue
-        bary=tuple(map(float,m.get("barycentric_anchor") or ()))
+        try:
+            bary=tuple(float(x) for x in (m.get("barycentric_anchor") or ()))
+        except (TypeError, ValueError, OverflowError):
+            raise QualificationError("GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID") from None
         try:
             anchor=int(m.get("anchor_face_index",-1))
             child=int(m.get("child_face_index",-1))
         except (ValueError, TypeError, OverflowError):
             raise QualificationError("GRAPHICS_ATTACHMENT_PARENT_CHILD_FACE_BINDING_INVALID") from None
         parent=str(m.get("parent_mechanical_domain_id") or "")
-        if len(bary)!=3 or any(x<-1e-9 for x in bary) or abs(sum(bary)-1)>1e-6:
+        if (len(bary)!=3 or any(not 0<=x<=1 for x in bary)
+                or abs(sum(bary)-1)>1e-6):
             raise QualificationError("GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID")
         # The attachment is an explicit directional relation: child drawable
         # follows a SOURCE-BOUND parent face with an admitted mechanical domain.
@@ -187,8 +219,12 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
         seen_attached_fragments.add(child_fragment)
         attachments.append(GraphicsAttachmentV1(
             child_fragment,parent,anchor,bary,
-            min(float(r.attachment_affinity),float(m["persistent_contact"])),
+            min(float(r.attachment_affinity),contact),
             tuple(x for x in (r.evidence_ref,str(m.get("evidence_ref") or "")) if x),
         ))
-    value=CompiledGraphicsV1(str(canonical_mesh_binding_hash),str(canonical_mesh_skin_binding_hash),str(source_graphics_binding_hash),evidence.evidence_hash,tuple(fragments),tuple(view_states),tuple(attachments),"",metadata={"authority_class":"COMPILED_GRAPHICS","single_canonical_mesh_authority":True,"independent_visual_mesh_allowed":False,"categorical_semantics_used":False,"source_pixels_win_where_observed":True,"runtime_consumption_required":True,"triangle_array_order_is_presentation_authority":False,"silhouette_support_is_2d_only":True,"representation_policy_arbitration_used":bool(policy.allow_unqualified_order_arbitration),"order_arbitration_not_source_truth":True})
+    value=CompiledGraphicsV1(str(canonical_mesh_binding_hash),str(canonical_mesh_skin_binding_hash),str(source_graphics_binding_hash),evidence.evidence_hash,tuple(fragments),tuple(view_states),tuple(attachments),"",metadata={"authority_class":"COMPILED_GRAPHICS","single_canonical_mesh_authority":True,"independent_visual_mesh_allowed":False,"categorical_semantics_used":False,"source_pixels_win_where_observed":True,"runtime_consumption_required":True,"triangle_array_order_is_presentation_authority":False,"silhouette_support_is_2d_only":True,"representation_policy_arbitration_used":had_order_conflict,
+"unresolved_source_order_conflict":had_order_conflict,
+"source_graphics_qualification_status":"UNQUALIFIED_CONFLICT_POLICY" if had_order_conflict else "CANDIDATE_SCHEDULE_ONLY",
+"pose_conditioned_visibility_proven":False,
+"order_arbitration_not_source_truth":True})
     return replace(value,graph_hash=compiled_graphics_hash_v1(value))

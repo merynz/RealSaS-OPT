@@ -691,3 +691,24 @@ def test_runtime_graphics_rejects_rehashed_untethered_order_edges():
     )
     with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_ORDER_EDGE_ADDRESS_INVALID"):
         build_runtime_graphics_v1(bad,face_count=2)
+
+
+def test_complete_eight_way_neural_visibility_never_becomes_source_ray_truth():
+    # Every face has an inferred relation in every view. This is still NOT
+    # an original-source first-hit/occlusion witness or motion-pose evidence.
+    evidence=_graphics_evidence("mesh")
+    compiled=compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="skin",
+        source_graphics_binding_hash="learned-evidence",
+        faces=((0,1,2),(3,4,5),(6,7,8)),evidence=evidence,
+        policy=GraphicsCompilePolicyV1(allow_unqualified_order_arbitration=True),
+    )
+    assert compiled.metadata["view_relation_eight_direction_address_coverage"] is True
+    assert compiled.metadata["learned_visibility_candidate_coverage_complete"] is True
+    assert compiled.metadata["source_visibility_coverage_complete"] is False
+    assert compiled.metadata["source_visibility_requires_independent_ray_receipt"] is True
+    runtime=build_runtime_graphics_v1(compiled,face_count=3)
+    assert runtime.metadata["learned_visibility_candidate_coverage_complete"] is True
+    assert runtime.metadata["source_visibility_coverage_complete"] is False
+    assert runtime.metadata["pose_conditioned_order_execution"] is False

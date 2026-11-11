@@ -6,6 +6,9 @@ on:
       - 'compiler/realsas_compiler_core/rig_program_ir_v1.py'
       - 'compiler/realsas_compiler_core/rig_constraint_schema_v1.py'
       - 'compiler/realsas_compiler_core/skin_code_ir_v1.py'
+      - 'models/rss_vnext/semantic_geometry_prior.py'
+      - 'models/rss_vnext/training_engine.py'
+      - 'tests/models/test_rss_vnext_early_semantics.py'
       - 'compiler/realsas_compiler_core/canonical_mesh_ir_v1.py'
       - 'compiler/realsas_compiler_core/canonical_rig_ir_v2.py'
       - 'compiler/realsas_compiler_core/canonical_skin_ir_v2.py'
@@ -58,6 +61,8 @@ jobs:
             compiler/realsas_compiler_core/rig_program_ir_v1.py \
             compiler/realsas_compiler_core/rig_constraint_schema_v1.py \
             compiler/realsas_compiler_core/skin_code_ir_v1.py \
+            models/rss_vnext/semantic_geometry_prior.py \
+            models/rss_vnext/training_engine.py \
             compiler/realsas_compiler_core/canonical_mesh_ir_v1.py \
             compiler/realsas_compiler_core/canonical_rig_ir_v2.py \
             compiler/realsas_compiler_core/canonical_skin_ir_v2.py \
@@ -68,6 +73,7 @@ jobs:
       - name: Independently verify existing V6 and main integration regressions
         run: |
           python -m pytest -q \
+            tests/models/test_rss_vnext_early_semantics.py \
             tests/compiler/test_canonical_mesh_ir_v1.py \
             tests/compiler/test_control_ready_rig_v2.py \
             tests/compiler/test_rig_program_causal_linear_v1.py \

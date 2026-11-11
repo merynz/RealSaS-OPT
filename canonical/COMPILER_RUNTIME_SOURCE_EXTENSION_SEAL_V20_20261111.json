@@ -30,6 +30,12 @@
       "size_bytes": 33574,
       "git_blob_sha1": "14ad536fb950aa6afacf121951a806aec9539745",
       "reason": "Render canonical mesh-derived mask per view, inverse interval, animated shape, bounded slot scope and strict parse evidence."
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/graphics_v1_contract_test.cpp",
+      "size_bytes": 3671,
+      "git_blob_sha1": "d6c060efe5bff7592999c9e0182abd638447c1bd",
+      "reason": "Previously modified after V19 without an append-only seal; adopt exactly the current tested source bytes rather than rewriting history."
     }
   ],
   "additions": [
@@ -48,7 +54,7 @@
   ],
   "closure": {
     "runtime_realsas_cpp_blob_count": 31,
-    "replacement_count": 2,
+    "replacement_count": 3,
     "addition_count": 2,
     "resulting_sealed_blob_count": 31,
     "unsealed_repository_blob_count_under_subtree": 0

@@ -14,6 +14,7 @@ import math
 
 import torch
 from torch import Tensor, nn
+from torch.nn import functional as F
 
 
 @dataclass
@@ -122,4 +123,82 @@ class RSSvNextGenericRegionStructure(nn.Module):
         )
 
 
-__all__ = ["RSSvNextRegionStructureOutput", "RSSvNextGenericRegionStructure"]
+def qualified_source_region_pair_loss(
+    membership_logits: Tensor,
+    pair_indices: Tensor,
+    pair_same_target: Tensor,
+    pair_qualified_mask: Tensor,
+) -> Tensor:
+    """Permutation-invariant co-region supervision, NOT a drawable truth loss.
+
+    Trusted source pairs describe whether two exact scene-query positions lie
+    in the same declared source REGION (not necessarily a bone, component,
+    mechanical domain or drawable). Unknown pair labels are masked. The
+    model's anonymous region slots are exchangeable, so neither teacher nor
+    compiler may impose arbitrary fixed slot IDs.
+    """
+    if membership_logits.ndim != 3 or membership_logits.shape[-1] < 2:
+        raise ValueError("RSS_VNEXT_REGION_PAIR_MEMBERSHIP_SHAPE")
+    b, n, classes = membership_logits.shape
+    if (
+        pair_indices.ndim != 3 or pair_indices.shape[0] != b
+        or pair_indices.shape[-1] != 2 or pair_indices.dtype != torch.long
+    ):
+        raise ValueError("RSS_VNEXT_REGION_PAIR_INDEX_SHAPE")
+    count = pair_indices.shape[1]
+    if (
+        not count or pair_same_target.shape != (b, count)
+        or pair_qualified_mask.shape != (b, count)
+        or pair_qualified_mask.dtype != torch.bool
+        or not torch.is_floating_point(pair_same_target)
+    ):
+        raise ValueError("RSS_VNEXT_REGION_PAIR_TARGET_SHAPE")
+    if (
+        membership_logits.device != pair_indices.device
+        or membership_logits.device != pair_same_target.device
+        or membership_logits.device != pair_qualified_mask.device
+    ):
+        raise ValueError("RSS_VNEXT_REGION_PAIR_DEVICE_DRIFT")
+    if (
+        not torch.isfinite(membership_logits).all()
+        or pair_indices.numel() and (
+            int(pair_indices.min()) < 0 or int(pair_indices.max()) >= n
+        )
+    ):
+        raise ValueError("RSS_VNEXT_REGION_PAIR_INPUT_INVALID")
+    if bool((pair_indices[..., 0] == pair_indices[..., 1]).any()):
+        raise ValueError("RSS_VNEXT_REGION_PAIR_SELF_PAIR_FORBIDDEN")
+    if not bool(pair_qualified_mask.any()):
+        raise ValueError("RSS_VNEXT_REGION_PAIR_NO_QUALIFIED_LABELS")
+    admitted_targets = pair_same_target[pair_qualified_mask]
+    if (
+        not torch.isfinite(admitted_targets).all()
+        or not bool(((admitted_targets == 0) | (admitted_targets == 1)).all())
+    ):
+        raise ValueError("RSS_VNEXT_REGION_PAIR_SOURCE_BINARY_INVALID")
+
+    probabilities = membership_logits.softmax(dim=-1)
+    left = torch.gather(
+        probabilities, 1, pair_indices[..., 0:1].expand(-1, -1, classes),
+    )
+    right = torch.gather(
+        probabilities, 1, pair_indices[..., 1:2].expand(-1, -1, classes),
+    )
+    # UNKNOWN is an abstention channel, never a positive cluster: two unknown
+    # positions do not become a known common drawable or semantic region.
+    known_joint = (1 - left[..., -1]) * (1 - right[..., -1])
+    same_joint = (left[..., :-1] * right[..., :-1]).sum(dim=-1)
+    conditional = (same_joint / known_joint.clamp_min(1e-8)).clamp(1e-6, 1 - 1e-6)
+    # A known, source-qualified pair must not be solved by collapsing both
+    # vertices into UNKNOWN. Explicit coverage prevents vacuous negative PASS.
+    coverage = -torch.log(known_joint.clamp_min(1e-8))
+    return (
+        F.binary_cross_entropy(conditional[pair_qualified_mask], admitted_targets)
+        + 0.25 * coverage[pair_qualified_mask].mean()
+    )
+
+
+__all__ = [
+    "RSSvNextRegionStructureOutput", "RSSvNextGenericRegionStructure",
+    "qualified_source_region_pair_loss",
+]

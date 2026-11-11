@@ -1,4 +1,5 @@
 import {installAwakenReactor} from './busted_ignition_reactor_v3.js';
+import {apiFetch} from './api_gateway_v1.js';
 const shell = document.querySelector('.awaken-shell');
 const input = document.querySelector('#sourceInput');
 const dropzone = document.querySelector('#dropzone');
@@ -110,7 +111,7 @@ function addLog(message, hot = false) {
 }
 
 async function apiJson(url, options = {}) {
-  const response = await fetch(url, {cache: 'no-store', ...options});
+  const response = await apiFetch(url, {cache: 'no-store', ...options});
   const payload = await response.json();
   if (!response.ok) throw new Error(payload?.message || payload?.error || `HTTP ${response.status}`);
   return payload;
@@ -218,7 +219,7 @@ async function loadBundleImage(bundle, scene) {
   const source = scene?.index?.source_views?.find((row) => Number(row.view_index) === 0);
   const path = source?.assets?.clean_cutout?.path || source?.assets?.raw_image?.path;
   if (!path) return null;
-  const response = await fetch(`/api/blob?bundle=${encodeURIComponent(bundle)}&path=${encodeURIComponent(path)}`, {cache: 'no-store'});
+  const response = await apiFetch(`/api/blob?bundle=${encodeURIComponent(bundle)}&path=${encodeURIComponent(path)}`, {cache: 'no-store'});
   if (!response.ok) return null;
   const blob = await response.blob();
   const url = URL.createObjectURL(blob);
@@ -403,7 +404,7 @@ async function runProductionFlow() {
     step.classList.add('done');
   });
   const workspace = await materializeWorkspace(compileID);
-  openWorkspace.href = workspace.workspace_url || `/workspace?bundle=${encodeURIComponent(workspace.bundle)}`;
+  openWorkspace.href = `./studio.html?bundle=${encodeURIComponent(workspace.bundle)}`;
   openWorkspace.textContent = 'OPEN STUDIO';
   addLog('ProductRevision sealed · proof authority PASS', true);
   updateCompileProgress({percent:100,completed:9,stage:'PROOF PASSED · WORKSPACE READY',running:false});
@@ -458,7 +459,7 @@ awaken.addEventListener('click', async () => {
 
 async function loadProject() {
   try {
-    const response = await fetch('/api/project', {cache: 'no-store'});
+    const response = await apiFetch('/api/project', {cache: 'no-store'});
     project = await response.json();
     const production = response.ok && project?.compile_available && project?.public_compile_gateway;
     modeLabel.textContent = production ? 'PRODUCTION GATEWAY' : 'UI PREVIEW · COMPILER OFFLINE';

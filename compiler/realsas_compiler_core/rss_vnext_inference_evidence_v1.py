@@ -202,6 +202,7 @@ def _scene(value: Mapping[str, Any]) -> None:
     if not isinstance(mask, (list, tuple)) or not mask:
         _reject("RSS_VNEXT_EVIDENCE_REGION_RELATION_MASK")
     walk(mask, bool_allowed=True)
+    slots = len(mask)
     # Neither the anonymous region graph nor the field at H(x) can be used
     # downstream without the exact query addresses and an explicit UNKNOWN
     # membership channel. Reject unaddressed, untyped, or self-edge evidence.
@@ -212,7 +213,7 @@ def _scene(value: Mapping[str, Any]) -> None:
         role = value["presentation_role_probabilities"]
         if not all(isinstance(v, (list, tuple)) and v for v in (xyz, member, graphics, role)):
             _reject("RSS_VNEXT_EVIDENCE_REGION_FIELD_EMPTY")
-        n, slots = len(xyz), len(mask)
+        n = len(xyz)
         if len(member) != n or len(graphics) != n or len(role) != n:
             _reject("RSS_VNEXT_EVIDENCE_REGION_ADDRESS_DRIFT")
         for row in xyz:

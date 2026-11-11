@@ -25,7 +25,7 @@ from .mechanics_control_solver_v1 import (
     solve_control_pose_v1,
     control_world_transforms_v1,
 )
-from .canonical_mesh_ir_v1 import CanonicalMeshIR
+from .canonical_mesh_ir_v1 import CanonicalMeshIR, validate_canonical_mesh_domain_v1
 from .playback_full_surface_v3 import (
     CameraProjectionV3,
     project_points_xyz_v3,
@@ -86,6 +86,7 @@ class ControllablePuppetBundleV1:
         # Sessions may receive already-instantiated IRs, bypassing the CAS
         # deserializers. Re-apply the same structural courts at the interaction
         # boundary instead of treating a matching hash as semantic proof.
+        validate_canonical_mesh_domain_v1(self.mesh)
         validate_canonical_rig_domain_v2(self.rig)
         validate_canonical_skin_domain_v2(self.skin)
         validate_playback_runtime_v3_contract(

@@ -83,6 +83,8 @@ class FiniteScalarQuantizer(nn.Module):
         return torch.sum(indices * radix, dim=-1)
 
     def token_ids_to_indices(self, token_ids: Tensor) -> Tensor:
+        if token_ids.dtype != torch.long:
+            raise ValueError("MIRA_V6_FSQ_TOKEN_DTYPE_INVALID")
         if torch.any(token_ids < 0) or torch.any(token_ids >= self.vocab_size):
             raise ValueError("MIRA_V6_FSQ_TOKEN_OUT_OF_RANGE")
         remaining = token_ids.to(torch.long)

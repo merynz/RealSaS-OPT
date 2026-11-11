@@ -218,6 +218,7 @@ class RSSvNextStructuralTrainer:
         trusted_surface_role_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_region_pair_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_axis_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_signed_source_registry: Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -293,6 +294,19 @@ class RSSvNextStructuralTrainer:
             hashlib.sha256(json.dumps(
                 axis_snapshot, sort_keys=True, separators=(",", ":"), allow_nan=False,
             ).encode("utf8")).hexdigest() if axis_snapshot else ""
+        )
+        signed_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_signed_source_registry or {}).items()
+        }
+        self.trusted_signed_source_registry = MappingProxyType({
+            key: MappingProxyType(value) for key, value in signed_snapshot.items()
+        })
+        self.signed_source_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                signed_snapshot, sort_keys=True, separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest() if signed_snapshot else ""
         )
         self.global_step = 0
 
@@ -381,6 +395,37 @@ class RSSvNextStructuralTrainer:
                 )
             ):
                 raise ValueError("RSS_VNEXT_FC_TRAIN_SIGNED_SOURCE_PROOF_REQUIRED")
+            # StdGEN-style signed extraction is only meaningful in a
+            # previously verified *closed signed solid* source domain.
+            # A data-batch string must not grant source sign/closedness.
+            signed = self.trusted_signed_source_registry.get(
+                batch.flexicubes_signed_source_admission_key,
+            )
+            layer = batch.flexicubes_layer
+            teacher = batch.flexicubes_animation_teacher
+            if (
+                signed is None
+                or signed.get("admission_status") != "QUALIFIED_SOURCE_SIGNED_SOLID"
+                or signed.get("source_component_domain") != "SINGLE_QUALIFIED_CLOSED_COMPONENT"
+                or signed.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
+                or signed.get("source_qualification_key") != batch.source_qualification_key
+                or signed.get("role_schema_id") != self.model.cfg.semantic_role_schema_id
+                or signed.get("layer_name") != layer.name
+                or signed.get("surface_target_sha256") != (
+                    source_surface_tensor_sha256(batch.flexicubes_reference_surface_xyz)
+                    if batch.flexicubes_reference_surface_xyz is not None else None
+                )
+                or signed.get("animation_source_asset_sha256") != (
+                    teacher.source_asset_sha256 if teacher is not None else None
+                )
+                or signed.get("animation_source_rig_sha256") != (
+                    teacher.source_rig_binding_sha256 if teacher is not None else None
+                )
+                or signed.get("animation_source_poses_sha256") != (
+                    teacher.source_pose_suite_sha256 if teacher is not None else None
+                )
+            ):
+                raise ValueError("RSS_VNEXT_FC_SOURCE_SIGNED_DOMAIN_RECEIPT_DRIFT")
             if state.scene_triplanes.shape[0] != 1:
                 raise ValueError("RSS_VNEXT_FC_TRAIN_RAGGED_SINGLE_ASSET")
             target = batch.flexicubes_reference_surface_xyz
@@ -688,6 +733,7 @@ class RSSvNextStructuralTrainer:
             "surface_role_registry_sha256": self.surface_role_registry_sha256,
             "region_pair_registry_sha256": self.region_pair_registry_sha256,
             "axis_teacher_registry_sha256": self.axis_teacher_registry_sha256,
+            "signed_source_registry_sha256": self.signed_source_registry_sha256,
             "global_step": self.global_step,
             "sampler_cursor": int(sampler_cursor),
             "model": self.model.state_dict(),
@@ -724,6 +770,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_REGION_PAIR_REGISTRY_DRIFT")
         if data.get("axis_teacher_registry_sha256", "") != self.axis_teacher_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_AXIS_TEACHER_REGISTRY_DRIFT")
+        if data.get("signed_source_registry_sha256", "") != self.signed_source_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SIGNED_SOURCE_REGISTRY_DRIFT")
         if int(data.get("global_step", -1)) < 0 or int(data.get("sampler_cursor", -1)) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_PROGRESS_INVALID")
         self.model.load_state_dict(data["model"], strict=True)

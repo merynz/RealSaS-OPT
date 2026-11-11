@@ -51,7 +51,7 @@ jobs:
     # is public. If visibility is changed to private during a pause/trip, the job
     # is skipped rather than consuming private-repository Actions minutes.
     if: github.event.repository.private == false
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       PYTHONPATH: .

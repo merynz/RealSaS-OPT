@@ -39,8 +39,8 @@ from .playback_runtime_v3 import (
     validate_frame_composition_v3,
     validate_playback_runtime_v3_contract,
 )
-from .canonical_rig_ir_v2 import CanonicalRigIRV2
-from .canonical_skin_ir_v2 import CanonicalSkinIRV2
+from .canonical_rig_ir_v2 import CanonicalRigIRV2, validate_canonical_rig_domain_v2
+from .canonical_skin_ir_v2 import CanonicalSkinIRV2, validate_canonical_skin_domain_v2
 from .types import QualificationError
 
 
@@ -83,6 +83,11 @@ class ControllablePuppetBundleV1:
             raise QualificationError("PUPPET_RUNTIME_SKIN_MESH_LINEAGE_DRIFT")
         if self.skin.deform_structure_hash != self.rig.deform_structure_hash:
             raise QualificationError("PUPPET_RUNTIME_SKIN_RIG_LINEAGE_DRIFT")
+        # Sessions may receive already-instantiated IRs, bypassing the CAS
+        # deserializers. Re-apply the same structural courts at the interaction
+        # boundary instead of treating a matching hash as semantic proof.
+        validate_canonical_rig_domain_v2(self.rig)
+        validate_canonical_skin_domain_v2(self.skin)
         validate_playback_runtime_v3_contract(
             self.playback, required_view_ids=VIEW_IDS_V1,
         )

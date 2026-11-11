@@ -37,6 +37,10 @@ jobs:
           sudo apt-get install -y -qq cmake g++ libarchive-dev libpng-dev zlib1g-dev
           python -m pip install --upgrade pip
           python -m pip install numpy pytest
+      - name: Exact native source seal gap inventory (read-only)
+        env:
+          PYTHONPATH: .
+        run: python tools/audit_native_runtime_source_seal_gap_v1.py
       - name: Python Compiler V4 contracts
         env:
           PYTHONPATH: .

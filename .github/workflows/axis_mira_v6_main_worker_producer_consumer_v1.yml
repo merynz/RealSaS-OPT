@@ -3,6 +3,12 @@ name: axis-mira-v6-main-worker-producer-consumer-v1
 on:
   pull_request:
     paths:
+      - 'models/axis/rig_program_decode_v6.py'
+      - 'models/axis/rig_program_model_v6.py'
+      - 'models/axis/runtime_checkpoint_v2.py'
+      - 'models/mira/skin_fsq_codec_v6.py'
+      - 'models/mira/runtime_checkpoint_v2.py'
+      - 'tests/models/test_axis_mira_v6_product_runtime.py'
       - 'compiler/realsas_compiler_services/platform_worker/rig_executor_v2.py'
       - 'compiler/realsas_compiler_services/platform_worker/skin_executor_v2.py'
       - 'compiler/realsas_compiler_services/platform_worker/worker.py'

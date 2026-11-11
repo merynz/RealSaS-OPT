@@ -204,9 +204,27 @@ def test_exact_fc_and_tessa_share_one_two_view_training_optimizer():
         source_qualification_key="synthetic-unit-not-real-admission",
         admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
     )
+    from models.rss_vnext.training_engine import source_surface_tensor_sha256
+    # Fixture registry stands in for an *external* scientific source court.
+    # This test proves admission wiring only, not real source qualification.
+    signed_receipt = {
+        "admission_status": "QUALIFIED_SOURCE_SIGNED_SOLID",
+        "source_component_domain": "SINGLE_QUALIFIED_CLOSED_COMPONENT",
+        "dataset_manifest_sha256": "a"*64,
+        "source_qualification_key": batch.source_qualification_key,
+        "role_schema_id": cfg.semantic_role_schema_id,
+        "layer_name": batch.flexicubes_layer.name,
+        "surface_target_sha256": source_surface_tensor_sha256(teacher_surface),
+        "animation_source_asset_sha256": None,
+        "animation_source_rig_sha256": None,
+        "animation_source_poses_sha256": None,
+    }
     trainer = RSSvNextStructuralTrainer(
         net, torch.optim.AdamW(net.parameters(), lr=1e-4),
         dataset_manifest_sha256="a"*64,
+        trusted_signed_source_registry={
+            batch.flexicubes_signed_source_admission_key: signed_receipt,
+        },
         weights=RSSvNextTrainingWeights(
             topology=0, motion_preference=0, source_semantics=0,
             flexicubes_surface=1,
@@ -223,4 +241,11 @@ def test_exact_fc_and_tessa_share_one_two_view_training_optimizer():
 
     batch.flexicubes_signed_source_admission_key = ""
     with pytest.raises(ValueError, match="SIGNED_SOURCE_PROOF_REQUIRED"):
+        trainer.objective(batch)
+    batch.flexicubes_signed_source_admission_key = "forged-source"
+    with pytest.raises(ValueError, match="FC_SOURCE_SIGNED_DOMAIN_RECEIPT_DRIFT"):
+        trainer.objective(batch)
+    batch.flexicubes_signed_source_admission_key = "synthetic-unit-only-watertight-sphere"
+    batch.flexicubes_reference_surface_xyz = teacher_surface + .1
+    with pytest.raises(ValueError, match="FC_SOURCE_SIGNED_DOMAIN_RECEIPT_DRIFT"):
         trainer.objective(batch)

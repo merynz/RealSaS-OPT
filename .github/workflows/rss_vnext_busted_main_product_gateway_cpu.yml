@@ -41,7 +41,8 @@ jobs:
           PYTHONPATH: .
         run: |
           python -m compileall -q product/busted_site product/living_compile/server.py
-          python -m pytest -q tests/product/test_living_compile_v4.py tests/product/test_busted_main_site_gateway_v1.py
+          python -c 'import product.living_compile, product.busted_site; print("MAIN_PRODUCT_IMPORT_OK")'
+          python -m pytest -q --import-mode=importlib tests/product/test_living_compile_v4.py tests/product/test_busted_main_site_gateway_v1.py
       - name: Validate actual JS API origin policy and all BUSTED entry JS imports
         run: |
           node --experimental-default-type=module tests/product/test_busted_api_origin.mjs

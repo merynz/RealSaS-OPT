@@ -1,4 +1,5 @@
 /* Motion Lab plays qualification-owned runtime clips, never synthetic presets. */
+import {apiFetch} from './api_gateway_v1.js';
 (() => {
   'use strict';
   const $=s=>document.querySelector(s), url=new URL(location.href);
@@ -22,7 +23,7 @@
     return labels.find(k=>k!=='Other'&&s.includes(k.toLowerCase()))||'Other';
   }
   async function json(path){
-    const response=await fetch(path,{cache:'no-store'});
+    const response=await apiFetch(path,{cache:'no-store'});
     const payload=await response.json().catch(()=>({}));
     if(!response.ok)throw Error(payload?.message||payload?.error||'Backend not connected ('+response.status+')');
     return payload;
@@ -65,7 +66,7 @@
     const path=source?.assets?.clean_cutout?.path||source?.assets?.raw_image?.path;
     if(!path)return;
     try{
-      const r=await fetch('/api/blob?bundle='+encodeURIComponent(bundle)+'&path='+encodeURIComponent(path));
+      const r=await apiFetch('/api/blob?bundle='+encodeURIComponent(bundle)+'&path='+encodeURIComponent(path));
       if(!r.ok)return;
       sourceUrl=URL.createObjectURL(await r.blob());const img=new Image();
       await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=sourceUrl});

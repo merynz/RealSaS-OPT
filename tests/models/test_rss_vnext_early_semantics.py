@@ -316,3 +316,141 @@ def test_structural_relation_pool_ignores_diagonal_self_edges_and_keeps_gradient
     state.region_relation_tokens.square().mean().backward()
     assert net.semantic_structure.pair[-1].weight.grad is not None
     assert net.semantic_structure.pair[-1].weight.grad.abs().sum() > 0
+
+
+def _qualified_region_pairs(net, rgba, camera):
+    from models.rss_vnext.training_engine import source_surface_tensor_sha256
+    state, _, _ = net.encode_observations(rgba, camera)
+    pairs = torch.tensor([[[0, 1], [2, 3], [4, 5]]], dtype=torch.long)
+    targets = torch.tensor([[1., 0., 1.]], dtype=torch.float32)
+    mask = torch.tensor([[True, True, False]], dtype=torch.bool)
+    receipt = {
+        "admission_status": "QUALIFIED_SOURCE_REGION_PAIR",
+        "dataset_manifest_sha256": "3" * 64,
+        "source_qualification_key": "synthetic-unit-only",
+        "supervision_semantics": "SOURCE_REGION_CO_MEMBERSHIP_NOT_DRAWABLE",
+        "query_xyz_sha256": source_surface_tensor_sha256(state.query_xyz),
+        "pair_indices_sha256": source_surface_tensor_sha256(pairs),
+        "pair_targets_sha256": source_surface_tensor_sha256(targets),
+        "pair_mask_sha256": source_surface_tensor_sha256(mask),
+    }
+    return pairs, targets, mask, receipt
+
+
+def test_source_admitted_anonymous_region_pair_loss_reaches_real_membership_gradient():
+    net = make()
+    rgba, camera = source()
+    pairs, targets, mask, receipt = _qualified_region_pairs(net, rgba, camera)
+    trainer = RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters(), lr=1e-3),
+        dataset_manifest_sha256="3" * 64,
+        weights=RSSvNextTrainingWeights(
+            topology=0, motion_preference=0, source_semantics=0,
+            flexicubes_surface=0, region_pairs=1,
+        ),
+        trusted_region_pair_registry={"admitted-pair": receipt},
+    )
+    batch = RSSvNextStructuralTrainingBatch(
+        rgba=rgba, camera_features=camera,
+        source_region_pair_indices=pairs,
+        source_region_pair_is_same=targets,
+        source_region_pair_mask=mask,
+        source_region_pair_admission_key="admitted-pair",
+        source_qualification_key="synthetic-unit-only",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    )
+    result = trainer.train_step(batch)
+    assert result.topology_loss is None
+    assert result.region_pair_loss is not None
+    assert result.eligible_region_pairs == 2
+    assert torch.isfinite(result.total_loss)
+    assert net.semantic.weight.grad is not None
+    assert net.semantic.weight.grad.abs().sum() > 0
+    assert net.semantic_structure.point[1].weight.grad is not None
+    assert net.semantic_structure.point[1].weight.grad.abs().sum() > 0
+    assert trainer.region_pair_registry_sha256
+
+
+def test_unadmitted_or_modified_source_region_pairs_cannot_train():
+    net = make()
+    rgba, camera = source()
+    pairs, targets, mask, receipt = _qualified_region_pairs(net, rgba, camera)
+    trainer = RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters(), lr=1e-3),
+        dataset_manifest_sha256="3" * 64,
+        weights=RSSvNextTrainingWeights(
+            topology=0, motion_preference=0, source_semantics=0,
+            flexicubes_surface=0, region_pairs=1,
+        ),
+        trusted_region_pair_registry={"approved": receipt},
+    )
+    batch = RSSvNextStructuralTrainingBatch(
+        rgba=rgba, camera_features=camera,
+        source_region_pair_indices=pairs,
+        source_region_pair_is_same=targets,
+        source_region_pair_mask=mask,
+        source_region_pair_admission_key="approved",
+        source_qualification_key="synthetic-unit-only",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    )
+    trainer.objective(batch)
+    batch.source_region_pair_is_same = 1 - targets
+    with pytest.raises(ValueError, match="REGION_PAIR_RECEIPT_SOURCE_OR_ADDRESS_DRIFT"):
+        trainer.objective(batch)
+    batch.source_region_pair_is_same = targets
+    batch.source_region_pair_admission_key = "untrusted"
+    with pytest.raises(ValueError, match="REGION_PAIR_UNTRUSTED_ADMISSION"):
+        trainer.objective(batch)
+
+
+def test_region_pair_unknown_is_not_a_positive_label_or_vacuous_negative():
+    from models.rss_vnext.semantic_structure import qualified_source_region_pair_loss
+
+    pairs = torch.tensor([[[0,1]]], dtype=torch.long)
+    mask = torch.ones((1,1), dtype=torch.bool)
+    unknown = torch.tensor([[[-9.,-9.,9.],[-9.,-9.,9.]]], requires_grad=True)
+    same = torch.tensor([[1.]])
+    different = torch.tensor([[0.]])
+    loss_same = qualified_source_region_pair_loss(unknown, pairs, same, mask)
+    loss_different = qualified_source_region_pair_loss(unknown, pairs, different, mask)
+    assert loss_same > 3.0
+    assert loss_different > 3.0
+    (loss_same + loss_different).backward()
+    assert unknown.grad is not None and torch.isfinite(unknown.grad).all()
+
+    with pytest.raises(ValueError, match="REGION_PAIR_SELF_PAIR_FORBIDDEN"):
+        qualified_source_region_pair_loss(
+            unknown.detach(), torch.tensor([[[0,0]]]), same, mask,
+        )
+    with pytest.raises(ValueError, match="REGION_PAIR_NO_QUALIFIED_LABELS"):
+        qualified_source_region_pair_loss(
+            unknown.detach(), pairs, same, torch.zeros_like(mask),
+        )
+
+
+def test_region_pair_checkpoint_refuses_swapped_teacher_registry(tmp_path):
+    net = make()
+    rho, camera = source()
+    pairs, targets, mask, receipt = _qualified_region_pairs(net, rho, camera)
+    weights = RSSvNextTrainingWeights(
+        topology=0, motion_preference=0, source_semantics=0,
+        flexicubes_surface=0, region_pairs=1,
+    )
+    trainer = RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters()),
+        dataset_manifest_sha256="3" * 64,
+        weights=weights,
+        trusted_region_pair_registry={"qualified": receipt},
+    )
+    path = tmp_path / "region_source_receipt.pt"
+    trainer.save_checkpoint(path, sampler_cursor=4)
+    restored = RSSvNextStructuralTrainer(
+        make(), torch.optim.AdamW(make().parameters()),
+        dataset_manifest_sha256="3" * 64,
+        weights=weights,
+        trusted_region_pair_registry={
+            "qualified": {**receipt, "supervision_semantics": "UNTRUSTED_DRAWABLE_LABEL"}
+        },
+    )
+    with pytest.raises(ValueError, match="CHECKPOINT_REGION_PAIR_REGISTRY_DRIFT"):
+        restored.load_checkpoint(path)

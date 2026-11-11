@@ -255,8 +255,10 @@ def _validate_frame_composition(
     slot_ids = tuple(slot.slot_id for slot in contract.slots)
     slot_set = set(slot_ids)
     allowed_by_slot: dict[str, set[str]] = {slot_id: set() for slot_id in slot_ids}
+    attachment_kind_by_id: dict[str, AttachmentKind] = {}
     for asset in contract.assets:
         allowed_by_slot[asset.slot_id].add(asset.attachment_id)
+        attachment_kind_by_id[asset.attachment_id] = asset.attachment_kind
 
     if set(frame.composition_by_view) != set(required_view_ids):
         raise QualificationError("RUNTIME_V4_FRAME_COMPOSITION_VIEW_SET_MISMATCH")
@@ -273,15 +275,27 @@ def _validate_frame_composition(
             if attachment_id is not None and attachment_id not in allowed_by_slot[slot_id]:
                 raise QualificationError("RUNTIME_V4_ACTIVE_ATTACHMENT_NOT_ALLOWED_FOR_SLOT")
         order_index = {slot_id: i for i, slot_id in enumerate(order)}
+        clip_interval_ids: set[str] = set()
         for interval in composition.clip_intervals:
             if not isinstance(interval, RuntimeV3ClipInterval):
                 raise QualificationError("RUNTIME_V4_CLIP_INTERVAL_TYPE_INVALID")
             if interval.start_slot_id not in slot_set or interval.end_slot_id not in slot_set:
                 raise QualificationError("RUNTIME_V4_CLIP_INTERVAL_SLOT_UNKNOWN")
-            if order_index[interval.start_slot_id] > order_index[interval.end_slot_id]:
+            if order_index[interval.start_slot_id] >= order_index[interval.end_slot_id]:
                 raise QualificationError("RUNTIME_V4_CLIP_INTERVAL_ORDER_INVALID")
             if composition.active_attachment_by_slot[interval.start_slot_id] != interval.clip_attachment_id:
                 raise QualificationError("RUNTIME_V4_CLIP_INTERVAL_ATTACHMENT_NOT_ACTIVE")
+            if interval.clip_attachment_id in clip_interval_ids:
+                raise QualificationError("RUNTIME_V4_CLIP_INTERVAL_DUPLICATE")
+            clip_interval_ids.add(interval.clip_attachment_id)
+            if attachment_kind_by_id.get(interval.clip_attachment_id) != AttachmentKind.CLIPPING:
+                raise QualificationError("RUNTIME_V4_CLIP_INTERVAL_REQUIRES_CLIPPING_ASSET")
+        for slot_id, attachment_id in composition.active_attachment_by_slot.items():
+            if attachment_id is not None and (
+                attachment_kind_by_id.get(attachment_id) == AttachmentKind.CLIPPING
+                and attachment_id not in clip_interval_ids
+            ):
+                raise QualificationError("RUNTIME_V4_ACTIVE_CLIPPING_REQUIRES_INTERVAL")
 
 
 def validate_playback_runtime_v4_contract(

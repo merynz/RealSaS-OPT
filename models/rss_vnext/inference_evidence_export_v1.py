@@ -145,6 +145,12 @@ def export_inference_evidence_v1(
         scene={
             "source_semantic_patch_logits": _list(state.source_semantic_patch_logits[0]),
             "source_semantic_log_uncertainty": _list(state.source_semantic_log_uncertainty[0]),
+            # Retain query-space addresses and anonymous membership, not just
+            # the pair graph. These are 3D hypotheses (including UNKNOWN),
+            # never source segmentation, drawable authority or canonical IDs.
+            "region_query_xyz": _list(state.query_xyz[0]),
+            "region_membership_logits": _list(state.semantic_logits[0]),
+            "region_graphics_logits": _list(state.graphics_logits[0]),
             "region_relation_logits": _list(state.region_relation_logits[0]),
             "region_relation_valid_mask": _list(state.region_relation_valid_mask[0]),
             "presentation_role_probabilities": _list(state.presentation_role_probabilities[0]),

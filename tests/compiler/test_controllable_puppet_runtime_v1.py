@@ -315,3 +315,27 @@ def test_unknown_control_still_fails_closed_during_drag():
     s=ControllablePuppetSessionV1(qualified_synthetic_bundle())
     with pytest.raises(QualificationError,match="CONTROL_UNKNOWN"):
         s.drag_world("NOT_AN_AUTHORED_HANDLE",(.5,1.5,0.))
+
+
+def test_direct_runtime_bundle_rejects_invalid_canonical_rig_hierarchy():
+    bundle=qualified_synthetic_bundle()
+    bad=replace(
+        bundle.rig,
+        joints=(
+            replace(bundle.rig.joints[0],parent_canonical_joint_id="J2"),
+        ) + bundle.rig.joints[1:],
+        deform_root_joint_ids=(),
+    )
+    with pytest.raises(QualificationError,match="CANONICAL_RIG_V2_PARENT_CYCLE"):
+        ControllablePuppetSessionV1(replace(bundle,rig=bad))
+
+
+def test_direct_runtime_bundle_rejects_invalid_skin_simplex():
+    bundle=qualified_synthetic_bundle()
+    bad_rows=(
+        replace(bundle.skin.rows[0],influences=(("J0",0.4),)),
+    ) + bundle.skin.rows[1:]
+    with pytest.raises(QualificationError,match="CANONICAL_SKIN_V2_INFLUENCE_SIMPLEX_DRIFT"):
+        ControllablePuppetSessionV1(replace(
+            bundle,skin=replace(bundle.skin,rows=bad_rows),
+        ))

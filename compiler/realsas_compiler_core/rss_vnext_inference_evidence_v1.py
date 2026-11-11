@@ -325,9 +325,38 @@ def validate_inference_evidence_v1(
             if not value.control_events:
                 _reject("RSS_VNEXT_EVIDENCE_DYNAMIC_WITHOUT_CONTROL")
             _dynamic(value.dynamic, n)
+        # RSS model exports RigProgramEventV6 (one typed causal vocabulary).
+        # Preserve unqualified status while refusing malformed/retagged neural
+        # sequences *before* any model-to-Compiler qualification. Do not try to
+        # infer missing pointers, quantize float codes or invent program tokens.
+        expected_event_fields = {
+            "kind", "coord_indices", "pointer_a", "pointer_b", "pointer_c",
+            "aux_type_id", "dof_mask", "frame_6d", "scalar_params",
+            "skin_code_id", "anchor_parent_kind",
+        }
         for ev in value.control_events:
-            if not isinstance(ev, Mapping) or not ev or "kind" not in ev:
-                _reject("RSS_VNEXT_EVIDENCE_CONTROL_EVENT_INVALID")
+            if not isinstance(ev, Mapping) or set(ev) != expected_event_fields:
+                _reject("RSS_VNEXT_EVIDENCE_CONTROL_EVENT_FIELDS_DRIFT")
+            if type(ev["kind"]) is not int or not 1 <= ev["kind"] <= 18:
+                _reject("RSS_VNEXT_EVIDENCE_CONTROL_EVENT_KIND_INVALID")
+            for key in (
+                "pointer_a", "pointer_b", "pointer_c", "aux_type_id",
+                "skin_code_id", "anchor_parent_kind",
+            ):
+                if type(ev[key]) is not int or ev[key] < -1:
+                    _reject("RSS_VNEXT_EVIDENCE_CONTROL_INTEGER_FIELD_INVALID")
+            indices = ev["coord_indices"]
+            if (not isinstance(indices, (list, tuple)) or len(indices) != 3
+                    or any(type(v) is not int or v < -1 for v in indices)):
+                _reject("RSS_VNEXT_EVIDENCE_CONTROL_COORD_INVALID")
+            for key, width in (("dof_mask", 9), ("frame_6d", 6), ("scalar_params", 4)):
+                _vector(ev[key], width, "RSS_VNEXT_EVIDENCE_CONTROL_FIELD_INVALID:" + key)
+            if any(value not in (0., 1.) for value in ev["dof_mask"]):
+                _reject("RSS_VNEXT_EVIDENCE_CONTROL_DOF_NOT_BINARY")
+            if ev["anchor_parent_kind"] not in (-1, 0, 1):
+                _reject("RSS_VNEXT_EVIDENCE_CONTROL_ANCHOR_PARENT_INVALID")
+        if len(value.control_events) > 4096:
+            _reject("RSS_VNEXT_EVIDENCE_CONTROL_RESOURCE_LIMIT")
     else:
         _reject("RSS_VNEXT_EVIDENCE_MESH_STATUS_INVALID")
     if value.evidence_hash != inference_evidence_hash_v1(value):

@@ -4,6 +4,7 @@ import pytest
 
 from compiler.realsas_compiler_core.graphics_runtime_v1 import build_runtime_graphics_v1
 from compiler.realsas_compiler_core.graphics_v1 import (
+    GraphicsCompilePolicyV1,
     GraphicsStaticRelationEvidenceV1,
     GraphicsViewRelationEvidenceV1,
     build_graphics_evidence_v1,
@@ -42,6 +43,7 @@ def test_graphics_compiles_role_free_order_and_runtime_consumes_materialized_con
         source_graphics_binding_hash="source-graphics",
         faces=faces,
         evidence=evidence,
+        policy=GraphicsCompilePolicyV1(allow_unqualified_order_arbitration=True),
         mechanical_attachment_evidence={
             (0, 1): {
                 "persistent_contact": 0.95,
@@ -114,4 +116,30 @@ def test_graphics_acyclic_source_order_does_not_claim_pose_conditioned_coverage(
     runtime = build_runtime_graphics_v1(compiled, face_count=2)
     assert runtime.metadata["unresolved_source_order_conflict"] is False
     assert runtime.metadata["representation_policy_arbitration_used"] is False
+    assert runtime.metadata["pose_conditioned_order_execution"] is False
+
+
+def test_conflicting_source_front_back_relations_never_silently_become_canonical_truth():
+    faces = ((0, 1, 2), (3, 4, 5), (6, 7, 8))
+    evidence = _graphics_evidence("mesh")
+    with pytest.raises(QualificationError, match="GRAPHICS_SOURCE_ORDER_CONFLICT_UNQUALIFIED"):
+        compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="mesh-skin",
+            source_graphics_binding_hash="source-graphics",
+            faces=faces, evidence=evidence,
+        )
+    preview = compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="mesh-skin",
+        source_graphics_binding_hash="source-graphics",
+        faces=faces, evidence=evidence,
+        policy=GraphicsCompilePolicyV1(
+            allow_unqualified_order_arbitration=True,
+        ),
+    )
+    assert preview.metadata["order_arbitration_not_source_truth"] is True
+    assert any(v.metadata["cycle_edges_removed"] for v in preview.views)
+    runtime = build_runtime_graphics_v1(preview, face_count=3)
+    assert runtime.metadata["unresolved_source_order_conflict"] is True
     assert runtime.metadata["pose_conditioned_order_execution"] is False

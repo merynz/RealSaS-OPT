@@ -24,6 +24,12 @@ import numpy as np
 SCENE_SCHEMA = "RealSaS.IRISSceneEvidence.v1"
 INDEX_SCHEMA = "RealSaS.ShapeEvidenceFanout.v1"
 MAX_SCENE_BYTES = 512 * 1024 * 1024
+_SCENE_VALUES = ("scene_planes", "surface_xyz_iris", "surface_xyz_tessa")
+_DTYPE_RECEIPTS = tuple(f"{name}_source_dtype" for name in _SCENE_VALUES)
+_EXTRACTION_COUNTS = ("extracted_vertex_counts", "extracted_face_counts")
+_SUPPORTED_SCENE_DTYPE_RECEIPTS = frozenset({
+    "float32", "float16", "torch.float32", "torch.float16", "torch.bfloat16",
+})
 
 
 def _digest(data: bytes) -> str:
@@ -43,7 +49,10 @@ def _tensor_array(value: Any) -> np.ndarray:
         if str(detached.dtype) in ("torch.bfloat16", "torch.float16"):
             detached = detached.float()
         value = detached.cpu().contiguous().numpy()
-    return np.asarray(value)
+    array = np.asarray(value)
+    if array.dtype == np.float16:
+        return array.astype(np.float32)
+    return array
 
 
 def _scene_arrays(raw: Mapping[str, np.ndarray]) -> None:
@@ -62,6 +71,20 @@ def _scene_arrays(raw: Mapping[str, np.ndarray]) -> None:
     if any(v.dtype != np.float32 or not np.isfinite(v).all()
            for v in (planes, iris, normalized)):
         raise RuntimeError("SHAPE_FANOUT_SCENE_NUMERIC_INVALID")
+    for name in _EXTRACTION_COUNTS:
+        counts = np.asarray(raw[name])
+        if (
+            counts.shape != (1,) or counts.dtype != np.int64
+            or np.any(counts < 1) or np.any(counts > 10_000_000)
+        ):
+            raise RuntimeError("SHAPE_FANOUT_EXTRACTION_COUNTS_INVALID:" + name)
+    for name in _DTYPE_RECEIPTS:
+        dtype_receipt = np.asarray(raw[name])
+        if (
+            dtype_receipt.shape != (1,)
+            or str(dtype_receipt[0]) not in _SUPPORTED_SCENE_DTYPE_RECEIPTS
+        ):
+            raise RuntimeError("SHAPE_FANOUT_SOURCE_DTYPE_RECEIPT_INVALID:" + name)
     if np.any(np.abs(normalized) > 0.500001):
         raise RuntimeError("SHAPE_FANOUT_TESSA_FRAME_INVALID")
     if not np.array_equal(
@@ -75,6 +98,18 @@ def encode_iris_scene_evidence_v1(surface: Any) -> bytes:
         "scene_planes": _tensor_array(surface.scene_planes),
         "surface_xyz_iris": _tensor_array(surface.surface_xyz_iris),
         "surface_xyz_tessa": _tensor_array(surface.surface_xyz_tessa),
+        "extracted_vertex_counts": np.asarray(
+            surface.extracted_vertex_counts, dtype=np.int64,
+        ),
+        "extracted_face_counts": np.asarray(
+            surface.extracted_face_counts, dtype=np.int64,
+        ),
+        **{
+            f"{name}_source_dtype": np.asarray(
+                [str(getattr(getattr(surface, name), "dtype", ""))]
+            )
+            for name in _SCENE_VALUES
+        },
     }
     _scene_arrays(arrays)
     stream = io.BytesIO()
@@ -88,7 +123,7 @@ def encode_iris_scene_evidence_v1(surface: Any) -> bytes:
 def decode_iris_scene_evidence_v1(data: bytes, *, shape: Any) -> dict[str, np.ndarray]:
     if type(data) is not bytes or not data or len(data) > MAX_SCENE_BYTES:
         raise RuntimeError("SHAPE_FANOUT_SCENE_BYTES_INVALID")
-    names = {"schema", "scene_planes", "surface_xyz_iris", "surface_xyz_tessa"}
+    names = {"schema", *_SCENE_VALUES, *_DTYPE_RECEIPTS, *_EXTRACTION_COUNTS}
     try:
         with ZipFile(io.BytesIO(data)) as archive:
             entries = archive.infolist()

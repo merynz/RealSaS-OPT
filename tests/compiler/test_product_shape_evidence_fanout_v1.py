@@ -18,6 +18,18 @@ from compiler.realsas_compiler_services.platform_worker import shape_capability_
 from tests.compiler.test_product_shape_capability_v2 import _v1_result, _decoded
 
 
+def _mock_shape_input_decoder_without_torch(monkeypatch):
+    # The ShapeInput transport has independent Torch-enabled tests.
+    # The cheap worker CAS court should not import its neural tensor runtime.
+    fake = ModuleType(
+        "compiler.realsas_compiler_services.platform_worker.scene_input_contract_v2"
+    )
+    fake.decode_shape_input_v2 = lambda data: SimpleNamespace(
+        inputs=object(), source_observation_content_sha256="a" * 64,
+    )
+    monkeypatch.setitem(sys.modules, fake.__name__, fake)
+
+
 def _produced(monkeypatch):
     monkeypatch.setattr(shape_v2, "_decode_tessa_asset_sequence_v1", lambda tokens: _decoded())
     with np.load(io.BytesIO(_v1_result().payload), allow_pickle=False) as archive:
@@ -36,6 +48,8 @@ def _produced(monkeypatch):
         scene_planes=np.arange(1 * 3 * 8 * 2 * 2, dtype=np.float32).reshape(1, 3, 8, 2, 2),
         surface_xyz_iris=np.zeros((1, 3, 3), dtype=np.float32),
         surface_xyz_tessa=fields["surface_xyz_tessa"],
+        extracted_vertex_counts=(4,),
+        extracted_face_counts=(1,),
     )
     surface.surface_xyz_iris[0, 0, 0] = np.float32(1.01)
     scene = fanout.encode_iris_scene_evidence_v1(surface)
@@ -70,6 +84,9 @@ def test_same_neural_shape_evidence_reaches_two_independent_consumers_without_me
     assert "rigidity_probability" in mesh_consumer.mechanical
     assert scene_consumer["scene_planes"][0,0,0,0,1] == 1.
     assert scene_consumer["surface_xyz_iris"].shape == (1,3,3)
+    assert scene_consumer["extracted_vertex_counts"].tolist() == [4]
+    assert scene_consumer["extracted_face_counts"].tolist() == [1]
+    assert str(scene_consumer["scene_planes_source_dtype"][0]) == "float32"
     assert scene_consumer["surface_xyz_iris"][0,0,0] == np.float32(1.01)
     assert mesh_consumer.surface_xyz_tessa[0,0,0] == np.float32(.5)
     assert scene_consumer["surface_xyz_iris"][0,0,0] != np.float32(
@@ -126,10 +143,7 @@ def test_registered_shape_worker_emits_three_distinct_artifacts_from_one_inferen
     monkeypatch.setattr(worker,"_flexicubes_root_from_deployment",lambda: "/tmp/synthetic-only")
     import models.iris.vnext.flexicubes_v1 as fc
     monkeypatch.setattr(fc,"PinnedFlexiCubesV1",lambda *args,**kwargs:object())
-    import compiler.realsas_compiler_services.platform_worker.scene_input_contract_v2 as si
-    monkeypatch.setattr(si,"decode_shape_input_v2",lambda data:SimpleNamespace(
-        inputs=object(),source_observation_content_sha256="a"*64,
-    ))
+    _mock_shape_input_decoder_without_torch(monkeypatch)
     import compiler.realsas_compiler_services.platform_worker.shape_capability_v2 as sv
     def once(*args,**kwargs):
         calls.append("model")
@@ -180,6 +194,8 @@ def test_fanout_preserves_bfloat16_scene_values_without_precision_loss():
         ),
         surface_xyz_iris=torch.tensor([[[.25,0,0]]], dtype=torch.bfloat16),
         surface_xyz_tessa=torch.tensor([[[.125,0,0]]], dtype=torch.bfloat16),
+        extracted_vertex_counts=(2,),
+        extracted_face_counts=(1,),
     )
     raw = fanout.encode_iris_scene_evidence_v1(source)
     assert raw
@@ -190,6 +206,8 @@ def test_fanout_preserves_bfloat16_scene_values_without_precision_loss():
             bundle["scene_planes"],
             source.scene_planes.float().cpu().numpy(),
         )
+        assert str(bundle["scene_planes_source_dtype"][0]) == "torch.bfloat16"
+        assert bundle["extracted_vertex_counts"].tolist() == [2]
 
 
 def test_registered_mesh_consumes_index_but_never_decompresses_unused_neural_scene(monkeypatch):
@@ -272,3 +290,16 @@ def test_registered_shape_executor_fails_closed_if_scene_is_not_produced(monkeyp
             }],
         },read_object=lambda ref:b"synthetic",put_bytes=lambda data:saved.append(data))
     assert saved == []
+
+
+def test_scene_sidecar_rejects_rehashed_false_extraction_counts(monkeypatch):
+    shape, scene, _ = _produced(monkeypatch)
+    with np.load(io.BytesIO(scene),allow_pickle=False) as archive:
+        fields={name:np.asarray(archive[name]).copy() for name in archive.files}
+    fields["extracted_face_counts"][0]=0
+    stream=io.BytesIO()
+    np.savez_compressed(stream,**fields)
+    with pytest.raises(RuntimeError,match="SHAPE_FANOUT_EXTRACTION_COUNTS_INVALID"):
+        fanout.decode_iris_scene_evidence_v1(
+            stream.getvalue(),shape=shape_v2.decode_shape_proposal_v2(shape),
+        )

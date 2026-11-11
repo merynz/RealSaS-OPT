@@ -94,6 +94,11 @@ def export_inference_evidence_v1(
         or not bool(torch.isfinite(original_camera_features).all())
     ):
         raise ValueError("RSS_VNEXT_EXPORT_NONFINITE_SOURCE")
+    # Input normalization is an explicit 0..1 source-domain contract.
+    # A negative/out-of-gamut tensor cannot be sealed as ORIGINAL_RGBA
+    # merely because its shape and checkpoint identity match.
+    if bool((original_rgba < 0).any()) or bool((original_rgba > 1).any()):
+        raise ValueError("RSS_VNEXT_EXPORT_SOURCE_RGBA_RANGE")
     if not isinstance(result, Mapping) or result.get("qualification_status") != "UNQUALIFIED_NEURAL_PROPOSAL":
         raise ValueError("RSS_VNEXT_EXPORT_NEURAL_AUTHORITY_INVALID")
     if result.get("observed_view_count") != 2 or result.get("auxiliary_view_authority") != "LEARNED_PREDICTED_ONLY":

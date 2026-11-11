@@ -89,3 +89,46 @@ def test_mira_v6_rejects_negative_teacher_weight():
     bad = torch.tensor([[[1.0, 0.0], [0.5, 0.5], [1.1, -0.1]]])
     with pytest.raises(ValueError, match="WEIGHT_NEGATIVE"):
         model.encode_tokens(bad, vertex, joint)
+
+
+def test_mira_ste_reconstruction_matches_real_discrete_product_decoder_exactly():
+    torch.manual_seed(29)
+    cfg = MIRASkinFSQCodecConfig(
+        vertex_feature_dim=7, joint_feature_dim=25,
+        hidden_dim=32, tokens_per_joint=4, levels=(3, 3, 3),
+    )
+    model = MIRASkinFSQCodecV6(cfg)
+    vertex = torch.randn(1, 9, 7)
+    joint = torch.randn(1, 4, 25)
+    skin = torch.softmax(torch.randn(1, 9, 4), dim=-1)
+    trained = model(skin, vertex, joint)
+    product = model.decode_tokens(trained["token_ids"], vertex, joint)
+    # This is a critical SkinTokens-style STE obligation: no train/product
+    # numerical gap while gradients still flow through the discrete codec.
+    assert torch.equal(trained["reconstructed_weights"], product)
+    assert trained["token_ids"].dtype == torch.long
+
+
+def test_mira_dense_skin_reconstruction_loss_alone_trains_fsq_encoder():
+    torch.manual_seed(31)
+    cfg = MIRASkinFSQCodecConfig(
+        vertex_feature_dim=7, joint_feature_dim=25,
+        hidden_dim=32, tokens_per_joint=3, levels=(3, 5, 3),
+    )
+    model = MIRASkinFSQCodecV6(cfg)
+    vertex = torch.randn(1, 17, 7)
+    joint = torch.randn(1, 4, 25)
+    target = torch.softmax(torch.randn(1, 17, 4), dim=-1)
+    output = model(target, vertex, joint)
+    # IMPORTANT: quantization_loss is deliberately omitted; an encoder trained
+    # by that loss alone never learns whether its codes reconstruct source skin.
+    output["reconstruction_loss"].backward()
+    for param in (
+        model.vertex_encode[0].weight,
+        model.joint_encode[0].weight,
+        model.latent_head.weight,
+        model.code_decode[0].weight,
+    ):
+        assert param.grad is not None
+        assert torch.isfinite(param.grad).all()
+        assert param.grad.abs().sum() > 0

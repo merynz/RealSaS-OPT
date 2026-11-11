@@ -151,3 +151,15 @@ def test_fsq_ste_derivative_matches_bounded_latent_not_unbounded_raw_z():
     assert torch.isfinite(outer).all() and torch.isfinite(center).all()
     assert float(outer.abs().max()) < 1e-5
     assert 0.9 < float(center[0, 0]) < 1.0
+
+
+@pytest.mark.parametrize("dtype", (torch.float32, torch.float64, torch.bool))
+def test_mira_discrete_codec_rejects_non_integer_product_token_tensor(dtype):
+    codec = MIRASkinFSQCodecV6(
+        MIRASkinFSQCodecConfig(7, 25, hidden_dim=16, tokens_per_joint=2, levels=(3,3)),
+    )
+    features = torch.randn(1, 5, 7)
+    joints = torch.randn(1, 2, 25)
+    invalid = torch.zeros((1,2,2),dtype=dtype)
+    with pytest.raises(ValueError, match="FSQ_TOKEN_DTYPE_INVALID"):
+        codec.decode_tokens(invalid, features, joints)

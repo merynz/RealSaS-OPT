@@ -37,7 +37,7 @@ class RSSvNextConfig:
     semantic_role_schema_id: str = "RSS.vNext.SemanticPresentationRoles.FourWayResearch.v1"
     semantic_evidence_channels: int = 4  # must agree with above schema
     affordance_classes: int = 9
-    graphics_channels: int = 5
+    graphics_channels: int = 5  # explicit RGB logits (3) + density + uncertainty
     relation_width: int = 256
     control_hidden_dim: int = 384
     control_layers: int = 8
@@ -58,6 +58,8 @@ class RSSvNextConfig:
         self.iris.validate()
         self.tessa.validate()
         self.semantic_role_schema().validate()
+        if self.graphics_channels != 5:
+            raise ValueError("RSS_VNEXT_GRAPHICS_FIELD_REQUIRES_FIVE_TYPED_CHANNELS")
         if self.semantic_evidence_channels != len(self.semantic_role_names):
             raise ValueError("RSS_VNEXT_SEMANTIC_ROLE_FIELD_WIDTH_DRIFT")
         if self.observed_views != 2:
@@ -131,7 +133,7 @@ class RSSvNextConfig:
                 query_chunk_size=16, gradient_checkpointing=False,
             ),
             query_grid_side=2, region_slots=4, semantic_evidence_channels=4, affordance_classes=5,
-            graphics_channels=4, relation_width=32,
+            graphics_channels=5, relation_width=32,
             control_hidden_dim=32, control_layers=2,
             control_heads=4, control_max_seq=64, skin_hidden_dim=32,
             topology_decode_cap=16,

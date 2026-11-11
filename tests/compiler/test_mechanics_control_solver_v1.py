@@ -309,3 +309,37 @@ def test_lbs_refuses_invalid_pose_scale_without_silent_clamping():
     from compiler.realsas_compiler_core.types import QualificationError
     with pytest.raises(QualificationError,match="MECHANICS_LBS_SCALE_NONPOSITIVE"):
         deform_mesh_lbs_v1(mesh,rig,skin,altered)
+
+
+def test_stretch_weight_zero_is_strict_noop_even_when_target_changes_direction():
+    """A disabled STRETCH operator may report a residual, never deform the limb."""
+    rig = _rig(_mesh())
+    stretch = CanonicalRigConstraintIRV2(
+        "Q_STRETCH", "STRETCH", ("C_IK",), ("J0", "J1", "J2"),
+        "K0", {"p0": 0.0, "p1": 1.5}, "PQ_STRETCH",
+    )
+    target = (ControlTransformIRV1("C_IK", translation=(1.0, 0.0, 0.0)),)
+    baseline = solve_control_pose_v1(replace(rig, constraints=()), target)
+    disabled = solve_control_pose_v1(replace(rig, constraints=(stretch,)), target)
+    assert all(np.allclose(a.solved_P, b.solved_P, atol=1e-12)
+               for a, b in zip(baseline.joints, disabled.joints))
+    assert np.isclose(disabled.constraint_residuals[0][1], 1.0, atol=1e-8)
+
+
+def test_stretch_fractional_weight_blends_positions_and_reports_achieved_endpoint():
+    rig = _rig(_mesh())
+    stretch = CanonicalRigConstraintIRV2(
+        "Q_STRETCH", "STRETCH", ("C_IK",), ("J0", "J1", "J2"),
+        "K0", {"p0": 0.5, "p1": 1.5}, "PQ_STRETCH",
+    )
+    control = (ControlTransformIRV1("C_IK", translation=(1.0, 0.0, 0.0)),)
+    half = solve_control_pose_v1(replace(rig, constraints=(stretch,)), control)
+    full = solve_control_pose_v1(replace(
+        rig, constraints=(replace(stretch, parameters={"p0": 1.0, "p1": 1.5}),)
+    ), control)
+    j1, j2 = half.joints[1:3]
+    assert np.allclose(j1.solved_P, (0.25, 1.0, 0.0), atol=1e-8)
+    assert np.allclose(j2.solved_P, (0.5, 2.0, 0.0), atol=1e-8)
+    assert np.allclose(full.joints[-1].solved_P, (1.0, 2.0, 0.0), atol=1e-8)
+    actual = np.linalg.norm(np.asarray(j2.solved_P) - (1., 2., 0.))
+    assert np.isclose(half.constraint_residuals[0][1], actual, atol=1e-8)

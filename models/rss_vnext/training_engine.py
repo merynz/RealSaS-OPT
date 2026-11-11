@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import tempfile
 from typing import Mapping
+from types import MappingProxyType
 
 import torch
 from torch import Tensor, nn
@@ -162,13 +163,17 @@ class RSSvNextStructuralTrainer:
         self.preference = preference
         self.dataset_manifest_sha256 = dataset_manifest_sha256.lower()
         # The trusted training launcher supplies this, not the data batch.
-        self.trusted_render_registry = {
+        registry_snapshot = {
             str(key): dict(value)
             for key, value in (trusted_render_registry or {}).items()
         }
+        self.trusted_render_registry = MappingProxyType({
+            key: MappingProxyType(value)
+            for key, value in registry_snapshot.items()
+        })
         self.render_registry_sha256 = (
             hashlib.sha256(json.dumps(
-                self.trusted_render_registry, sort_keys=True,
+                registry_snapshot, sort_keys=True,
                 separators=(",", ":"), allow_nan=False,
             ).encode("utf8")).hexdigest()
             if self.trusted_render_registry else ""

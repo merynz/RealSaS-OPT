@@ -2,6 +2,11 @@ name: BUSTED public site — main product source
 
 on:
   push:
+    branches: [main, feat/busted-main-site-and-vnext-gateway-20261111]
+    paths:
+      - "product/busted_site/**"
+      - ".github/workflows/busted_main_product_pages_v1.yml"
+  pull_request:
     branches: [main]
     paths:
       - "product/busted_site/**"
@@ -26,6 +31,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install product court dependencies
+        run: python -m pip install pytest
       - name: Verify complete live frontend was moved to main
         run: python -m pytest -q tests/product/test_busted_main_site_source_v1.py
       - name: Verify every frontend JS module parses
@@ -72,6 +79,7 @@ jobs:
           path: _site
 
   deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: build

@@ -455,3 +455,22 @@ def test_region_pair_checkpoint_refuses_swapped_teacher_registry(tmp_path):
     )
     with pytest.raises(ValueError, match="CHECKPOINT_REGION_PAIR_REGISTRY_DRIFT"):
         restored.load_checkpoint(path)
+
+
+def test_source_region_pair_builder_preserves_unknown_and_never_invents_negative():
+    from models.rss_vnext.semantic_structure import source_region_pairs_from_qualified_labels
+    ids = torch.tensor([[5,5,8,-1]], dtype=torch.long)
+    mask = torch.tensor([[True,True,True,False]])
+    pairs = torch.tensor([[[0,1],[0,2],[0,3],[1,3]]],dtype=torch.long)
+    same, qualified = source_region_pairs_from_qualified_labels(ids,mask,pairs)
+    assert qualified.tolist() == [[True,True,False,False]]
+    assert same.tolist() == [[1.,0.,0.,0.]]
+    # No two unnamed unknown points are declared to be a common region.
+    with pytest.raises(ValueError,match="SOURCE_REGION_ADMITTED_LABEL_INVALID"):
+        source_region_pairs_from_qualified_labels(
+            ids,torch.ones_like(mask),pairs,
+        )
+    with pytest.raises(ValueError,match="SOURCE_REGION_PAIR_ADDRESSES_INVALID"):
+        source_region_pairs_from_qualified_labels(
+            ids,mask,torch.tensor([[[0,0]]],dtype=torch.long),
+        )

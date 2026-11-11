@@ -745,3 +745,144 @@ def test_source_graphics_rgb_checkpoint_is_teacher_registry_bound(tmp_path):
     )
     with pytest.raises(ValueError, match="CHECKPOINT_GRAPHICS_RGB_REGISTRY_DRIFT"):
         other.load_checkpoint(path)
+
+
+def _qualified_source_fields(net, rgba, cameras, *, inside: bool = True, closed: bool = True):
+    state, _, _ = net.encode_observations(rgba, cameras)
+    n = state.query_xyz.shape[1]
+    udf = torch.full((1, n), float("nan"))
+    udf_mask = torch.zeros((1, n), dtype=torch.bool)
+    udf_mask[:, ::2] = True
+    udf[udf_mask] = .1
+    sign = torch.full((1,n),float("nan")) if inside else None
+    sign_mask = torch.zeros((1,n),dtype=torch.bool) if inside else None
+    if inside:
+        sign_mask[:, ::3] = True
+        sign[sign_mask] = 1.0
+    receipt = {
+        "admission_status": "QUALIFIED_SOURCE_QUERY_DISTANCE_FIELDS",
+        "dataset_manifest_sha256": "3"*64,
+        "source_qualification_key": "synthetic-geometry-only",
+        "query_xyz_sha256": source_surface_tensor_sha256(state.query_xyz),
+        "source_coordinate_system": "IRIS_NORMALIZED_SOURCE_XYZ",
+        "teacher_semantics": "SOURCE_UDF_AND_OPTIONAL_NEGATIVE_INSIDE_SIGN",
+        "signed_domain": "SINGLE_QUALIFIED_CLOSED_COMPONENT" if closed else "OPEN_OR_UNKNOWN_UNSIGNED_ONLY",
+        "udf_target_sha256": source_surface_tensor_sha256(udf),
+        "udf_mask_sha256": source_surface_tensor_sha256(udf_mask),
+        "inside_target_sha256": source_surface_tensor_sha256(sign) if inside else None,
+        "inside_mask_sha256": source_surface_tensor_sha256(sign_mask) if inside else None,
+    }
+    return udf, udf_mask, sign, sign_mask, receipt
+
+
+def test_source_udf_and_signed_inside_heads_get_independent_source_admitted_gradients():
+    net = make()
+    rgba, camera = source()
+    udf, udf_mask, inside, inside_mask, receipt = _qualified_source_fields(net, rgba, camera)
+    trainer = RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters(),lr=1e-3),
+        dataset_manifest_sha256="3"*64,
+        trusted_source_field_registry={"source":receipt},
+        weights=RSSvNextTrainingWeights(
+            topology=0, motion_preference=0, source_semantics=0,
+            flexicubes_surface=0, source_udf=1, source_inside_sign=1,
+        ),
+    )
+    batch = RSSvNextStructuralTrainingBatch(
+        rgba=rgba, camera_features=camera,
+        source_udf_target=udf, source_udf_mask=udf_mask,
+        source_inside_sign_target=inside, source_inside_sign_mask=inside_mask,
+        source_field_admission_key="source",
+        source_qualification_key="synthetic-geometry-only",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    )
+    result = trainer.train_step(batch)
+    assert result.source_udf_loss is not None
+    assert result.source_inside_sign_loss is not None
+    assert result.eligible_source_udf_queries == int(udf_mask.sum())
+    assert result.eligible_source_inside_sign_queries == int(inside_mask.sum())
+    for param in (net.udf.weight, net.sign_logit.weight):
+        assert param.grad is not None and torch.isfinite(param.grad).all()
+        assert param.grad.abs().sum() > 0
+    assert net.iris.scene.scene_queries.grad is not None
+    assert net.iris.scene.scene_queries.grad.abs().sum() > 0
+    assert result.graphics_source_rgb_loss is None
+
+
+def test_open_surface_may_train_unsigned_distance_but_never_invents_inside_sign():
+    net = make()
+    rgba, camera = source()
+    udf, mask, _, _, receipt = _qualified_source_fields(
+        net, rgba, camera, inside=False, closed=False,
+    )
+    weights=RSSvNextTrainingWeights(
+        topology=0,motion_preference=0,source_semantics=0,
+        flexicubes_surface=0,source_udf=1,source_inside_sign=0,
+    )
+    trainer=RSSvNextStructuralTrainer(
+        net,torch.optim.AdamW(net.parameters()),
+        dataset_manifest_sha256="3"*64,
+        weights=weights,trusted_source_field_registry={"open":receipt},
+    )
+    batch=RSSvNextStructuralTrainingBatch(
+        rgba=rgba,camera_features=camera,
+        source_udf_target=udf,source_udf_mask=mask,
+        source_field_admission_key="open",
+        source_qualification_key="synthetic-geometry-only",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    )
+    out=trainer.objective(batch)
+    assert out.source_udf_loss is not None
+    assert out.source_inside_sign_loss is None
+    # A forged signed label on an open mesh is not certified by the UDF receipt.
+    inside=torch.zeros_like(udf)
+    inside_mask=mask.clone()
+    # The independent court still fails even if the receipt rehashes the labels.
+    forged={**receipt,
+        "inside_target_sha256":source_surface_tensor_sha256(inside),
+        "inside_mask_sha256":source_surface_tensor_sha256(inside_mask),
+    }
+    challenger=RSSvNextStructuralTrainer(
+        net,torch.optim.AdamW(net.parameters()),
+        dataset_manifest_sha256="3"*64,
+        weights=RSSvNextTrainingWeights(
+            topology=0,motion_preference=0,source_semantics=0,
+            flexicubes_surface=0,source_udf=1,source_inside_sign=1,
+        ),
+        trusted_source_field_registry={"open":forged},
+    )
+    batch.source_inside_sign_target=inside
+    batch.source_inside_sign_mask=inside_mask
+    with pytest.raises(ValueError,match="SOURCE_SIGN_CLOSED_DOMAIN_REQUIRED"):
+        challenger.objective(batch)
+
+
+def test_source_field_query_coordinate_and_label_receipts_cannot_be_reused():
+    net=make()
+    rgba,camera=source()
+    udf,mask,inside,inside_mask,receipt=_qualified_source_fields(net,rgba,camera)
+    trainer=RSSvNextStructuralTrainer(
+        net,torch.optim.AdamW(net.parameters()),
+        dataset_manifest_sha256="3"*64,
+        trusted_source_field_registry={"signed":receipt},
+        weights=RSSvNextTrainingWeights(
+            topology=0,motion_preference=0,source_semantics=0,
+            flexicubes_surface=0,source_udf=1,source_inside_sign=1,
+        ),
+    )
+    batch=RSSvNextStructuralTrainingBatch(
+        rgba=rgba,camera_features=camera,
+        source_udf_target=udf,source_udf_mask=mask,
+        source_inside_sign_target=inside,source_inside_sign_mask=inside_mask,
+        source_field_admission_key="signed",source_qualification_key="synthetic-geometry-only",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    )
+    trainer.objective(batch)
+    batch.source_udf_target=udf.clone()
+    batch.source_udf_target[mask] += .05
+    with pytest.raises(ValueError,match="SOURCE_FIELD_RECEIPT_DRIFT"):
+        trainer.objective(batch)
+    batch.source_udf_target=udf
+    batch.source_field_admission_key="untrusted-key"
+    with pytest.raises(ValueError,match="SOURCE_FIELD_RECEIPT_DRIFT"):
+        trainer.objective(batch)

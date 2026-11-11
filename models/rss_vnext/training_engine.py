@@ -202,8 +202,23 @@ class RSSvNextStructuralTrainer:
         if novel_requested:
             if not all(value is not None for value in novel_fields):
                 raise ValueError("RSS_VNEXT_EIGHT_WAY_TEACHER_INCOMPLETE")
-            if not batch.novel_view_provenance.startswith("QUALIFIED_SOURCE_RENDER:"):
-                raise ValueError("RSS_VNEXT_EIGHT_WAY_SOURCE_RENDER_PROOF_REQUIRED")
+            derived_source_provenance = validate_eight_way_teacher_receipts_v1(
+                observed_rgba=batch.rgba,
+                source_cameras=batch.camera_features,
+                novel_rgba=batch.novel_view_rgba,
+                novel_normal=batch.novel_view_normal,
+                rgb_mask=batch.novel_view_rgb_mask,
+                normal_mask=batch.novel_view_normal_mask,
+                receipts=batch.novel_view_receipts,
+                trusted_registry=self.trusted_render_registry,
+                dataset_manifest_sha256=self.dataset_manifest_sha256,
+                source_qualification_key=batch.source_qualification_key,
+            )
+            if (
+                batch.novel_view_provenance
+                and batch.novel_view_provenance != derived_source_provenance
+            ):
+                raise ValueError("RSS_VNEXT_EIGHT_WAY_UNTRUSTED_PROVENANCE")
             if self.model.cfg.constructed_total_views != 8:
                 raise ValueError("RSS_VNEXT_EIGHT_WAY_MODEL_CONFIGURATION_REQUIRED")
             if self.weights.novel_view <= 0:
@@ -222,7 +237,7 @@ class RSSvNextStructuralTrainer:
                 novel_prediction, batch.novel_view_rgba, batch.novel_view_normal,
                 rgb_qualified_mask=batch.novel_view_rgb_mask,
                 normal_qualified_mask=batch.novel_view_normal_mask,
-                source_render_provenance=batch.novel_view_provenance,
+                source_render_provenance=derived_source_provenance,
             )
             novel_loss = novel_objective["total"]
             novel_count = int(batch.novel_view_rgb_mask.sum().item())
@@ -417,6 +432,7 @@ class RSSvNextStructuralTrainer:
             "architecture_id": self.model.architecture_id,
             "architecture_digest": architecture_digest(self.model.cfg),
             "dataset_manifest_sha256": self.dataset_manifest_sha256,
+            "render_registry_sha256": self.render_registry_sha256,
             "global_step": self.global_step,
             "sampler_cursor": int(sampler_cursor),
             "model": self.model.state_dict(),
@@ -445,6 +461,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_ARCHITECTURE_DIGEST_DRIFT")
         if data.get("dataset_manifest_sha256") != self.dataset_manifest_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_DATASET_MANIFEST_DRIFT")
+        if data.get("render_registry_sha256", "") != self.render_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_RENDER_REGISTRY_DRIFT")
         if int(data.get("global_step", -1)) < 0 or int(data.get("sampler_cursor", -1)) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_PROGRESS_INVALID")
         self.model.load_state_dict(data["model"], strict=True)

@@ -120,7 +120,7 @@ function syncGatewayUI() {
   const ready = Boolean(project?.compile_available && project?.public_compile_gateway);
   // Offline users can inspect the one-shot visual interaction, but no compile
   // action is offered or submitted: the adjacent status is always explicit.
-  awaken.disabled = running || (ready && selectedFiles.length === 0);
+  awaken.disabled = running || (ready && selectedFiles.length !== 2);
   awaken.dataset.ignitionPreview = String(!ready);
   awaken.setAttribute('aria-label', ready ? 'Awaken your character' :
     'Preview ignition interaction — compiler offline');
@@ -128,7 +128,7 @@ function syncGatewayUI() {
     status.querySelector('span').textContent = ready ? 'COMPILER READY' : 'COMPILER OFFLINE';
     status.classList.toggle('ready', ready);
   }
-  awaken.title = ready ? (selectedFiles.length ? 'Compile selected source views' : 'Select a front view first') :
+  awaken.title = ready ? (selectedFiles.length === 2 ? 'Compile FRONT and BACK source views' : 'Select matching FRONT and BACK views') :
     'Preview ignition effect only · compiler offline';
   if (compileAvailability) {
     compileAvailability.textContent = ready ? 'COMPILER READY · VERIFIED GATEWAY' : 'UI PREVIEW · COMPILER OFFLINE';
@@ -328,6 +328,7 @@ async function startIdleReveal(bundle) {
 }
 
 async function startProductionCompile() {
+  if (selectedFiles.length !== 2) throw new Error('RSS.vNext requires FRONT and BACK source views');
   const views = await Promise.all(selectedFiles.map(async (file, index) => ({
     slot: index === 0 ? 'front' : 'back',
     name: file.name,
@@ -429,7 +430,7 @@ async function playAwakenIgnition() {
 
 awaken.addEventListener('click', async () => {
   const ready = Boolean(project?.compile_available && project?.public_compile_gateway);
-  if (running || (ready && !selectedFiles.length)) return;
+  if (running || (ready && selectedFiles.length !== 2)) return;
   running = true;
   try {
     // The charge belongs to a click, not to page load, hover or scrolling.

@@ -28,8 +28,8 @@ function render(files) {
     front.title = frontFile?.name || 'A front source view is required.';
   }
   if (back) {
-    back.textContent = backFile?.name || 'OPTIONAL';
-    back.title = backFile?.name || 'A back source view is optional but recommended.';
+    back.textContent = backFile?.name || 'REQUIRED';
+    back.title = backFile?.name || 'A matching back source view is required for RSS.vNext.';
   }
   frontRow?.classList.toggle('assigned', Boolean(frontFile));
   backRow?.classList.toggle('assigned', Boolean(backFile));

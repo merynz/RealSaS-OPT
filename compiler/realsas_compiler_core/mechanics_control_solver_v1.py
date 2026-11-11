@@ -133,6 +133,38 @@ def _axis_angle(axis: np.ndarray, angle: float) -> np.ndarray:
     ], dtype=np.float64)
 
 
+def _blend_rotation_basis(current: np.ndarray, target: np.ndarray, weight: float) -> np.ndarray:
+    """Shortest-arc SO(3) interpolation; never snap a partially weighted rig.
+
+    For an exact 180-degree difference, choose a deterministic eigen-axis.
+    The result remains a proper orthonormal basis instead of a linear matrix
+    blend, which would shrink or shear canonical skinning transforms.
+    """
+    if weight <= 0.0:
+        return current.copy()
+    if weight >= 1.0:
+        return target.copy()
+    relative = target @ current.T
+    cosine = float(np.clip((np.trace(relative) - 1.0) * 0.5, -1.0, 1.0))
+    angle = math.acos(cosine)
+    if angle <= 1e-10:
+        return current.copy()
+    if math.pi - angle < 1e-5:
+        eigenvalues, eigenvectors = np.linalg.eigh(0.5 * (relative + relative.T))
+        axis = eigenvectors[:, int(np.argmax(eigenvalues))]
+        # Deterministic sign across equivalent 180-degree axes.
+        dominant = int(np.argmax(np.abs(axis)))
+        if axis[dominant] < 0:
+            axis = -axis
+    else:
+        axis = np.asarray((
+            relative[2, 1] - relative[1, 2],
+            relative[0, 2] - relative[2, 0],
+            relative[1, 0] - relative[0, 1],
+        ), dtype=np.float64) / (2.0 * math.sin(angle))
+    return _axis_angle(axis, angle * weight) @ current
+
+
 def _control_world_transforms(rig: CanonicalRigIRV2, authored: Mapping[str, ControlTransformIRV1]):
     controls = {c.canonical_control_id: c for c in rig.controls}
     unknown = set(authored) - set(controls)
@@ -369,7 +401,8 @@ def solve_control_pose_v1(
                 residual = float(np.linalg.norm(solved[-1] - target))
             for jid, value in zip(ids, solved):
                 pos[jid] = pos[jid] * (1.0 - weight) + value * weight
-            residuals.append((constraint.canonical_constraint_id, residual))
+            # Record an achieved endpoint, never the pre-weight FABRIK result.
+            residuals.append((constraint.canonical_constraint_id, float(np.linalg.norm(pos[ids[-1]] - target))))
         elif op in {"COPY_TRANSFORM", "FOLLOW"}:
             target_p, target_r, _ = inputs[0]
             for jid in constraint.output_canonical_joint_ids:
@@ -377,7 +410,11 @@ def solve_control_pose_v1(
                     raise QualificationError("MECHANICS_CONSTRAINT_OUTPUT_UNKNOWN")
                 alpha = weight if op == "FOLLOW" else 1.0
                 pos[jid] = pos[jid] * (1.0 - alpha) + target_p * alpha
-                explicit_rot[jid] = target_r
+                if alpha > 0.0:
+                    explicit_rot[jid] = _blend_rotation_basis(
+                        explicit_rot.get(jid, np.eye(3, dtype=np.float64)),
+                        target_r, alpha,
+                    )
             residuals.append((constraint.canonical_constraint_id, 0.0))
         elif op == "AIM":
             target_p = inputs[0][0]
@@ -387,8 +424,12 @@ def solve_control_pose_v1(
                 if frame is None:
                     raise QualificationError("MECHANICS_AIM_FRAME_MISSING")
                 rest_axis = np.asarray(frame.basis[0], dtype=np.float64)
-                if float(np.linalg.norm(direction)) > 1e-10:
-                    explicit_rot[jid] = _minimal_rotation(rest_axis, direction)
+                if weight > 0.0 and float(np.linalg.norm(direction)) > 1e-10:
+                    aimed = _minimal_rotation(rest_axis, direction)
+                    explicit_rot[jid] = _blend_rotation_basis(
+                        explicit_rot.get(jid, np.eye(3, dtype=np.float64)),
+                        aimed, weight,
+                    )
             residuals.append((constraint.canonical_constraint_id, 0.0))
         elif op == "STRETCH":
             chain = chain_by[str(constraint.canonical_chain_id)]
@@ -411,6 +452,19 @@ def solve_control_pose_v1(
             residuals.append((constraint.canonical_constraint_id, float(np.linalg.norm(pos[ids[-1]] - target))))
         else:  # schema validator should make this unreachable.
             raise QualificationError(f"MECHANICS_OPERATOR_UNREACHABLE:{op}")
+
+    # A later constraint can alter an earlier chain. Report achieved residuals
+    # from the final assembled pose, not intermediate solver states. These are
+    # target-distance measurements; they do not assert global multi-IK feasibility.
+    for index, constraint in enumerate(rig.constraints):
+        if constraint.operator_id in {"IK", "STRETCH"}:
+            chain = chain_by[str(constraint.canonical_chain_id)]
+            effector = chain.canonical_joint_ids[-1]
+            target = cw[constraint.input_canonical_control_ids[0]][0]
+            residuals[index] = (
+                constraint.canonical_constraint_id,
+                float(np.linalg.norm(pos[effector] - target)),
+            )
 
     # Derive a stable rotation for every deform joint from rest->solved child
     # direction unless a direct/constraint rotation already exists.

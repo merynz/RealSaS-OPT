@@ -18,6 +18,7 @@ from typing import Sequence
 
 import torch
 from torch import Tensor, nn
+from torch.nn import functional as F
 
 
 AXIS_V6_PRODUCT_ARCHITECTURE_ID = "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0"
@@ -520,6 +521,148 @@ class AXISRigProgramModelV6(nn.Module):
         raise RuntimeError("AXIS_V6_GENERATION_RESOURCE_LIMIT_EXHAUSTED")
 
 
+def qualified_axis_rig_skin_sequence_loss_v6(
+    model: AXISRigProgramModelV6,
+    scene_memory: Tensor,
+    teacher: AXISSequenceV6,
+    *,
+    tokens_per_joint: int,
+    executable_constraint_operators: Sequence[str],
+    control_intervention_qualified: bool,
+) -> tuple[Tensor, dict[str, Tensor]]:
+    """Source-admitted teacher-forced AXIS V6 autoregressive objective.
+
+    The training launcher, NOT this function, must independently qualify source
+    joints/frames, source skin weights encoded with its pinned MIRA FSQ codec,
+    and observed control/constraint consequences. Labels are never derived
+    from an unqualified student proposal or compiler heuristics.
+    """
+    teacher.validate(model.config)
+    if teacher.kind_ids.shape[1] < 3 or not bool(teacher.attention_mask.all()):
+        raise ValueError("AXIS_V6_TRAIN_COMPLETE_UNPADDED_TEACHER_REQUIRED")
+    if tokens_per_joint < 1:
+        raise ValueError("AXIS_V6_TRAIN_TOKEN_COUNT_INVALID")
+    if teacher.kind_ids.device != scene_memory.device:
+        raise ValueError("AXIS_V6_TRAIN_TEACHER_DEVICE_DRIFT")
+    invalid_operators = set(executable_constraint_operators) - set(CONSTRAINT_OPERATORS_V6)
+    if not executable_constraint_operators or invalid_operators:
+        raise ValueError("AXIS_V6_TRAIN_EXECUTABLE_OPERATORS_INVALID")
+    b, steps = teacher.kind_ids.shape
+    for bi in range(b):
+        state = RigGrammarStateV6()
+        for step in range(steps):
+            try:
+                kind = RigTokenKindV6(int(teacher.kind_ids[bi, step]))
+                state = AXISRigProgramGrammarV6Product.advance(
+                    state, kind, tokens_per_joint=tokens_per_joint,
+                )
+            except (ValueError, TypeError):
+                raise ValueError("AXIS_V6_TRAIN_TEACHER_GRAMMAR_INVALID") from None
+            if kind in (
+                RigTokenKindV6.CONTROL, RigTokenKindV6.CONTROL_TARGET,
+                RigTokenKindV6.CHAIN, RigTokenKindV6.CONSTRAINT,
+                RigTokenKindV6.CONSTRAINT_INPUT, RigTokenKindV6.CONSTRAINT_OUTPUT,
+                RigTokenKindV6.ANCHOR,
+            ) and not control_intervention_qualified:
+                raise ValueError("AXIS_V6_TRAIN_CONTROL_INTERVENTION_PROOF_REQUIRED")
+            if kind == RigTokenKindV6.CONSTRAINT:
+                op = int(teacher.aux_type_ids[bi, step])
+                if not 0 <= op < len(CONSTRAINT_OPERATORS_V6) or (
+                    CONSTRAINT_OPERATORS_V6[op] not in executable_constraint_operators
+                ):
+                    raise ValueError("AXIS_V6_TRAIN_UNEXECUTABLE_CONSTRAINT_LABEL")
+        if state.section != RigSectionV6.DONE:
+            raise ValueError("AXIS_V6_TRAIN_TEACHER_NOT_TERMINATED")
+
+    logits = model(scene_memory, teacher)
+    kinds = teacher.kind_ids[:, 1:]
+    logits_by_target = {key: value[:, :-1] for key, value in logits.items() if key != "hidden"}
+    losses: dict[str, Tensor] = {}
+    losses["token_kind"] = F.cross_entropy(
+        logits_by_target["kind_logits"].reshape(-1, len(RigTokenKindV6)),
+        kinds.reshape(-1),
+    )
+
+    def positions(*types: RigTokenKindV6) -> Tensor:
+        out = torch.zeros_like(kinds, dtype=torch.bool)
+        for kind in types:
+            out |= kinds == int(kind)
+        return out
+
+    def supervised_ce(name: str, targets: Tensor, mask: Tensor, *, offset: int = 0) -> None:
+        if not bool(mask.any()):
+            return
+        selected = targets[:, 1:][mask].long() + offset
+        distribution = logits_by_target[name][mask]
+        if bool(((selected < 0) | (selected >= distribution.shape[-1])).any()):
+            raise ValueError("AXIS_V6_TRAIN_LABEL_OUT_OF_VOCAB:" + name)
+        losses[name] = F.cross_entropy(distribution, selected)
+
+    coord_mask = positions(RigTokenKindV6.JOINT, RigTokenKindV6.CONTROL, RigTokenKindV6.ANCHOR)
+    if bool(coord_mask.any()):
+        coords = teacher.coord_indices[:, 1:][coord_mask]
+        if bool(((coords < 0) | (coords >= model.config.coord_bins)).any()):
+            raise ValueError("AXIS_V6_TRAIN_COORDINATE_LABEL_INVALID")
+        losses["coordinate"] = F.cross_entropy(
+            logits_by_target["coord_logits"][coord_mask].reshape(-1, model.config.coord_bins),
+            coords.reshape(-1),
+        )
+
+    pointer_a = positions(
+        RigTokenKindV6.JOINT, RigTokenKindV6.FRAME,
+        RigTokenKindV6.CONTROL, RigTokenKindV6.CONTROL_TARGET,
+        RigTokenKindV6.CHAIN, RigTokenKindV6.CONSTRAINT,
+        RigTokenKindV6.CONSTRAINT_INPUT, RigTokenKindV6.CONSTRAINT_OUTPUT,
+    )
+    anchor_joint = positions(RigTokenKindV6.ANCHOR) & (
+        teacher.anchor_parent_kind[:, 1:] == 0
+    )
+    anchor_control = positions(RigTokenKindV6.ANCHOR) & (
+        teacher.anchor_parent_kind[:, 1:] == 1
+    )
+    supervised_ce("pointer_a_logits", teacher.pointer_a, pointer_a | anchor_joint, offset=1)
+    supervised_ce(
+        "pointer_b_logits", teacher.pointer_b,
+        positions(RigTokenKindV6.CHAIN) | anchor_control, offset=1,
+    )
+    supervised_ce(
+        "control_kind_logits", teacher.aux_type_ids,
+        positions(RigTokenKindV6.CONTROL),
+    )
+    supervised_ce(
+        "constraint_operator_logits", teacher.aux_type_ids,
+        positions(RigTokenKindV6.CONSTRAINT),
+    )
+    supervised_ce("anchor_parent_logits", teacher.anchor_parent_kind, positions(RigTokenKindV6.ANCHOR))
+    supervised_ce("skin_code_logits", teacher.skin_code_ids, positions(RigTokenKindV6.SKIN_CODE))
+    frame_mask = positions(RigTokenKindV6.FRAME)
+    if bool(frame_mask.any()):
+        truth_frame = teacher.frame_6d[:, 1:][frame_mask]
+        truth_dof = teacher.dof_masks[:, 1:][frame_mask]
+        if (
+            not bool(torch.isfinite(truth_frame).all())
+            or not bool(torch.isfinite(truth_dof).all())
+            or bool(((truth_dof != 0) & (truth_dof != 1)).any())
+        ):
+            raise ValueError("AXIS_V6_TRAIN_FRAME_DOF_LABEL_INVALID")
+        losses["frame"] = F.smooth_l1_loss(logits_by_target["frame_6d"][frame_mask], truth_frame)
+        losses["dof"] = F.binary_cross_entropy_with_logits(
+            logits_by_target["dof_logits"][frame_mask], truth_dof,
+        )
+    param_mask = positions(RigTokenKindV6.CONSTRAINT)
+    if bool(param_mask.any()):
+        truth = teacher.scalar_params[:, 1:][param_mask]
+        if not bool(torch.isfinite(truth).all()):
+            raise ValueError("AXIS_V6_TRAIN_CONSTRAINT_SCALAR_NONFINITE")
+        losses["constraint_scalars"] = F.smooth_l1_loss(
+            logits_by_target["scalar_params"][param_mask], truth,
+        )
+    total = sum(losses.values())
+    if not bool(torch.isfinite(total)):
+        raise ValueError("AXIS_V6_TRAIN_NONFINITE_OBJECTIVE")
+    return total, losses
+
+
 def rotation_6d_to_basis_v6(value: Sequence[float]) -> tuple[tuple[float, float, float], ...]:
     if len(value) != 6 or not all(math.isfinite(float(v)) for v in value):
         raise ValueError("AXIS_V6_FRAME6D_INVALID")
@@ -544,4 +687,5 @@ __all__ = [
     "AXISSequenceV6", "AXIS_V6_PRODUCT_ARCHITECTURE_ID", "CONTROL_KINDS_V6",
     "CONSTRAINT_OPERATORS_V6", "DOF_LABELS_V6", "RigGrammarStateV6", "RigProgramEventV6",
     "RigSectionV6", "RigTokenKindV6", "rotation_6d_to_basis_v6",
+    "qualified_axis_rig_skin_sequence_loss_v6",
 ]

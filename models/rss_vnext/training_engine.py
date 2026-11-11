@@ -14,6 +14,8 @@ import json
 import os
 from pathlib import Path
 import tempfile
+from typing import Mapping
+from types import MappingProxyType
 
 import torch
 from torch import Tensor, nn
@@ -36,6 +38,10 @@ from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .early_semantic_field import masked_source_semantic_evidence_loss
 from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
 from .multiview_construction import qualified_novel_view_loss
+from .eight_way_teacher_court_v1 import (
+    RSSvNextEightWayTeacherReceiptV1,
+    validate_eight_way_teacher_receipts_v1,
+)
 from models.iris.vnext.flexicubes_v1 import symmetric_surface_chamfer_v1
 
 
@@ -57,7 +63,8 @@ class RSSvNextStructuralTrainingBatch:
     novel_view_normal: Tensor | None = None     # [B,6,3,H,W]
     novel_view_rgb_mask: Tensor | None = None   # [B,6,H,W], qualified
     novel_view_normal_mask: Tensor | None = None
-    novel_view_provenance: str = ""              # QUALIFIED_SOURCE_RENDER:<receipt>
+    novel_view_provenance: str = ""              # Optional audit check; never grants authority
+    novel_view_receipts: tuple[RSSvNextEightWayTeacherReceiptV1, ...] | None = None
 
     # Interim signed-surface training witness; not final foundry supervision.
     # Requires qualified source, mesh coordinate/camera bind and sample proof.
@@ -140,6 +147,7 @@ class RSSvNextStructuralTrainer:
         dataset_manifest_sha256: str,
         weights: RSSvNextTrainingWeights = RSSvNextTrainingWeights(),
         preference: RSSvNextTopologyPreferenceConfig = RSSvNextTopologyPreferenceConfig(),
+        trusted_render_registry: Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -154,6 +162,22 @@ class RSSvNextStructuralTrainer:
         self.weights = weights
         self.preference = preference
         self.dataset_manifest_sha256 = dataset_manifest_sha256.lower()
+        # The trusted training launcher supplies this, not the data batch.
+        registry_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_render_registry or {}).items()
+        }
+        self.trusted_render_registry = MappingProxyType({
+            key: MappingProxyType(value)
+            for key, value in registry_snapshot.items()
+        })
+        self.render_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                registry_snapshot, sort_keys=True,
+                separators=(",", ":"), allow_nan=False,
+            ).encode("utf8")).hexdigest()
+            if self.trusted_render_registry else ""
+        )
         self.global_step = 0
 
     def objective(self, batch: RSSvNextStructuralTrainingBatch) -> RSSvNextTrainingResult:
@@ -175,12 +199,31 @@ class RSSvNextStructuralTrainer:
             batch.novel_view_rgba, batch.novel_view_normal,
             batch.novel_view_rgb_mask, batch.novel_view_normal_mask,
         )
-        novel_requested = any(value is not None for value in novel_fields) or bool(batch.novel_view_provenance)
+        novel_requested = (
+            any(value is not None for value in novel_fields)
+            or batch.novel_view_receipts is not None
+            or bool(batch.novel_view_provenance)
+        )
         if novel_requested:
             if not all(value is not None for value in novel_fields):
                 raise ValueError("RSS_VNEXT_EIGHT_WAY_TEACHER_INCOMPLETE")
-            if not batch.novel_view_provenance.startswith("QUALIFIED_SOURCE_RENDER:"):
-                raise ValueError("RSS_VNEXT_EIGHT_WAY_SOURCE_RENDER_PROOF_REQUIRED")
+            derived_source_provenance = validate_eight_way_teacher_receipts_v1(
+                observed_rgba=batch.rgba,
+                source_cameras=batch.camera_features,
+                novel_rgba=batch.novel_view_rgba,
+                novel_normal=batch.novel_view_normal,
+                rgb_mask=batch.novel_view_rgb_mask,
+                normal_mask=batch.novel_view_normal_mask,
+                receipts=batch.novel_view_receipts,
+                trusted_registry=self.trusted_render_registry,
+                dataset_manifest_sha256=self.dataset_manifest_sha256,
+                source_qualification_key=batch.source_qualification_key,
+            )
+            if (
+                batch.novel_view_provenance
+                and batch.novel_view_provenance != derived_source_provenance
+            ):
+                raise ValueError("RSS_VNEXT_EIGHT_WAY_UNTRUSTED_PROVENANCE")
             if self.model.cfg.constructed_total_views != 8:
                 raise ValueError("RSS_VNEXT_EIGHT_WAY_MODEL_CONFIGURATION_REQUIRED")
             if self.weights.novel_view <= 0:
@@ -199,7 +242,7 @@ class RSSvNextStructuralTrainer:
                 novel_prediction, batch.novel_view_rgba, batch.novel_view_normal,
                 rgb_qualified_mask=batch.novel_view_rgb_mask,
                 normal_qualified_mask=batch.novel_view_normal_mask,
-                source_render_provenance=batch.novel_view_provenance,
+                source_render_provenance=derived_source_provenance,
             )
             novel_loss = novel_objective["total"]
             novel_count = int(batch.novel_view_rgb_mask.sum().item())
@@ -394,6 +437,7 @@ class RSSvNextStructuralTrainer:
             "architecture_id": self.model.architecture_id,
             "architecture_digest": architecture_digest(self.model.cfg),
             "dataset_manifest_sha256": self.dataset_manifest_sha256,
+            "render_registry_sha256": self.render_registry_sha256,
             "global_step": self.global_step,
             "sampler_cursor": int(sampler_cursor),
             "model": self.model.state_dict(),
@@ -422,6 +466,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_ARCHITECTURE_DIGEST_DRIFT")
         if data.get("dataset_manifest_sha256") != self.dataset_manifest_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_DATASET_MANIFEST_DRIFT")
+        if data.get("render_registry_sha256", "") != self.render_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_RENDER_REGISTRY_DRIFT")
         if int(data.get("global_step", -1)) < 0 or int(data.get("sampler_cursor", -1)) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_PROGRESS_INVALID")
         self.model.load_state_dict(data["model"], strict=True)

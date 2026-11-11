@@ -253,3 +253,29 @@ def test_rig_v2_runtime_passes_exact_mechanics_capability_mask_to_axis(monkeypat
         _exec("rig", request, read, put)
     assert calls == [RIG_CONSTRAINT_OPERATOR_IDS_V1]
     assert emitted == []
+
+
+@pytest.mark.parametrize("corrupt", [3.75, True, -1, 27])
+def test_skin_code_court_never_coerces_or_repairs_invalid_discrete_token(corrupt):
+    _, _, _, _, mesh, rig, _ = _fixture()
+    original = SkinCodeProposalIR(
+        rows=tuple(JointSkinCodeRowIR(j.source_proposal_joint_id, (2, 3)) for j in rig.joints),
+        rig_program_proposal_hash=rig.proposal_evidence_hash,
+        carrier_evidence_hash=mesh.carrier_evidence_hash,
+        carrier_topology_hash=mesh.carrier_topology_hash,
+        carrier_geometry_hash=mesh.carrier_geometry_hash,
+        codec_architecture_id=skin_executor_v2.MIRA_V6_ARCHITECTURE_ID,
+        codec_checkpoint_hash="d" * 64, codebook_size=27,
+        codes_per_joint=2, model_provenance="SYNTHETIC_TEST_ONLY",
+    )
+    from compiler.realsas_compiler_core.skin_code_ir_v1 import validate_skin_code_proposal_v1
+    forged = seal_skin_code_proposal_v1(replace(
+        original,
+        rows=(replace(original.rows[0], code_ids=(corrupt, 3)),) + original.rows[1:],
+    ))
+    with pytest.raises(QualificationError, match="SKIN_CODE_ID_OUT_OF_DOMAIN"):
+        validate_skin_code_proposal_v1(
+            forged,
+            expected_proposal_joint_ids=tuple(j.source_proposal_joint_id for j in rig.joints),
+            expected_rig_program_proposal_hash=rig.proposal_evidence_hash,
+        )

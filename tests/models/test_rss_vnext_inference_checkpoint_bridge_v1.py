@@ -572,3 +572,34 @@ def test_product_inference_cannot_use_raw_two_view_tensors_without_canonical_sou
             output_directory=tmp_path / "no-canon",
             product_mode=True,
         )
+
+
+def test_neural_axis_v6_event_is_preserved_exactly_at_compiler_evidence_seam():
+    from dataclasses import asdict
+    from models.axis.rig_program_model_v6 import RigProgramEventV6, RigTokenKindV6
+    event = asdict(RigProgramEventV6(RigTokenKindV6.SKIN_CODE, skin_code_id=13))
+    event["kind"] = int(RigTokenKindV6.SKIN_CODE)
+    value = seal_inference_evidence_v1(_candidate(control_events=(event,)))
+    assert value.control_events[0]["skin_code_id"] == 13
+    assert value.control_events[0]["kind"] == 17
+    assert value.qualification_status == "UNQUALIFIED_NEURAL_PROPOSAL_ONLY"
+
+
+@pytest.mark.parametrize("mutation,expected", [
+    ({"skin_code_id": 4.75}, "CONTROL_INTEGER_FIELD_INVALID"),
+    ({"skin_code_id": True}, "CONTROL_INTEGER_FIELD_INVALID"),
+    ({"kind": 99}, "CONTROL_EVENT_KIND_INVALID"),
+    ({"pointer_a": -3}, "CONTROL_INTEGER_FIELD_INVALID"),
+    ({"dof_mask": [0.5]*9}, "CONTROL_DOF_NOT_BINARY"),
+    ({"frame_6d": [float("nan")]*6}, "CONTROL_FIELD_INVALID:frame_6d"),
+    ({"anchor_parent_kind": 7}, "CONTROL_ANCHOR_PARENT_INVALID"),
+    ({"coord_indices": [0, 1]}, "CONTROL_COORD_INVALID"),
+])
+def test_compiler_neural_control_event_rejects_unsupported_or_mutated_fields(mutation, expected):
+    from dataclasses import asdict
+    from models.axis.rig_program_model_v6 import RigProgramEventV6, RigTokenKindV6
+    base = asdict(RigProgramEventV6(RigTokenKindV6.SKIN_CODE, skin_code_id=13))
+    base["kind"] = 17
+    base.update(mutation)
+    with pytest.raises(QualificationError, match=expected):
+        seal_inference_evidence_v1(_candidate(control_events=(base,)))

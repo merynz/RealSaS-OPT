@@ -135,3 +135,19 @@ def test_mira_dense_skin_reconstruction_loss_alone_trains_fsq_encoder():
         assert param.grad is not None
         assert torch.isfinite(param.grad).all()
         assert param.grad.abs().sum() > 0
+
+
+def test_fsq_ste_derivative_matches_bounded_latent_not_unbounded_raw_z():
+    q = FiniteScalarQuantizer((5,))
+    large = torch.tensor([[-9.0], [9.0]], requires_grad=True)
+    medium = torch.tensor([[0.1]], requires_grad=True)
+    ste_large, ids_large, hard_large = q(large)
+    ste_mid, ids_mid, hard_mid = q(medium)
+    assert torch.equal(ste_large.detach(), hard_large)
+    assert torch.equal(ste_mid.detach(), hard_mid)
+    assert ids_large.tolist() == [0, 4]
+    outer = torch.autograd.grad(ste_large.sum(), large)[0]
+    center = torch.autograd.grad(ste_mid.sum(), medium)[0]
+    assert torch.isfinite(outer).all() and torch.isfinite(center).all()
+    assert float(outer.abs().max()) < 1e-5
+    assert 0.9 < float(center[0, 0]) < 1.0

@@ -464,13 +464,19 @@ def solve_control_pose_v1(
                 raise QualificationError("MECHANICS_STRETCH_CHAIN_DEGENERATE")
             ratio = float(np.linalg.norm(target - root)) / total
             max_ratio = max(1.0, float(constraint.parameters.get("p1", 1.5)))
-            ratio = 1.0 + (min(max(ratio, 1.0), max_ratio) - 1.0) * weight
+            ratio = min(max(ratio, 1.0), max_ratio)
             direction = _normalize(target - root, rest[ids[-1]] - rest[ids[0]])
+            # STRETCH weight is an influence on the entire solved chain,
+            # not only the extension ratio. Otherwise p0=0 still straightens
+            # a bent limb and silently changes the puppet.
+            before = [pos[jid].copy() for jid in ids]
+            desired = [root]
             cursor = root
-            pos[ids[0]] = root
-            for i, length in enumerate(rest_lengths):
+            for length in rest_lengths:
                 cursor = cursor + direction * length * ratio
-                pos[ids[i+1]] = cursor.copy()
+                desired.append(cursor.copy())
+            for jid, prior, stretched in zip(ids, before, desired):
+                pos[jid] = prior * (1.0 - weight) + stretched * weight
             residuals.append((constraint.canonical_constraint_id, float(np.linalg.norm(pos[ids[-1]] - target))))
         else:  # schema validator should make this unreachable.
             raise QualificationError(f"MECHANICS_OPERATOR_UNREACHABLE:{op}")

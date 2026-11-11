@@ -41,32 +41,37 @@ func TestProductSkinDescriptorUsesModernParentClosure(t *testing.T) {
 	if got := d.Metadata["mesh_and_rig_are_canonical_parents"]; got != true {
 		t.Fatalf("Mesh/Rig canonical parent contract = %v", got)
 	}
-	if got := d.Metadata["feature_evidence_source"]; got != "PRODUCT_MESH_OUTPUT" {
-		t.Fatalf("RiggingSurface source = %v", got)
+	if got := d.Metadata["executor_contract"]; got != ProductSkinContractV2 {
+		t.Fatalf("active Skin executor contract = %v", got)
 	}
-	if got := d.Metadata["material_support_source"]; got != "PRODUCT_MESH_OUTPUT" {
-		t.Fatalf("material-support source = %v", got)
+	if got := d.Metadata["input_rig_schema_version"]; got != "v2" {
+		t.Fatalf("canonical Rig parent version = %v", got)
+	}
+	if got := d.Metadata["input_skin_code_artifact_type"]; got != "RealSaS.SkinCodeProposalIR" {
+		t.Fatalf("AXIS generated skin-code parent = %v", got)
+	}
+	if got := d.Metadata["input_skin_code_source"]; got != "PRODUCT_RIG_OUTPUT" {
+		t.Fatalf("skin-code provenance = %v", got)
+	}
+	if got := d.Metadata["output_schema_version"]; got != "v2" {
+		t.Fatalf("canonical Skin output version = %v", got)
+	}
+	if got := d.Metadata["compiler_code_search_allowed"]; got != false {
+		t.Fatalf("Compiler must not synthesize or search learned codes = %v", got)
+	}
+	if got := d.Metadata["compiler_code_repair_allowed"]; got != false {
+		t.Fatalf("Compiler must not repair learned codes = %v", got)
+	}
+	if got := d.Metadata["codec_checkpoint_must_match_axis_skin_code"]; got != true {
+		t.Fatalf("MIRA and AXIS checkpoint binding policy = %v", got)
 	}
 	if got := d.Metadata["legacy_stage15_dependency"]; got != false {
 		t.Fatalf("legacy Stage15 dependency = %v", got)
 	}
-	if got := d.Metadata["feature_evidence_is_canonical_parent"]; got != false {
-		t.Fatalf("RiggingSurface canonical parent claim = %v", got)
-	}
-	if got := d.Metadata["material_support_is_canonical_parent"]; got != false {
-		t.Fatalf("material-support canonical parent claim = %v", got)
-	}
-	if got := d.Metadata["inference_compute_contract"]; got != "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF" {
-		t.Fatalf("MIRA compute contract = %v", got)
-	}
-	if got := d.Metadata["cuda_required"]; got != true {
-		t.Fatalf("MIRA CUDA requirement = %v", got)
-	}
-	if got := d.Metadata["cuda_bf16_required"]; got != true {
-		t.Fatalf("MIRA BF16 requirement = %v", got)
-	}
-	if got := d.Metadata["tf32_allowed"]; got != false {
-		t.Fatalf("MIRA TF32 policy = %v", got)
+	for _, obsolete := range []string{"feature_evidence_source", "material_support_source", "decode_chunk", "cuda_bf16_required"} {
+		if _, exists := d.Metadata[obsolete]; exists {
+			t.Fatalf("retired V5 skin contract leaked into V6 active descriptor: %s", obsolete)
+		}
 	}
 	if got := d.Metadata["model_release_admission_owner"]; got != "PLATFORM_MODEL_REQUIREMENTS" {
 		t.Fatalf("model release admission owner = %v", got)
@@ -97,29 +102,12 @@ func TestProductSkinDescriptorUsesModernParentClosure(t *testing.T) {
 			t.Fatalf("operational Platform state leaked into Skin source metadata: %s", forbidden)
 		}
 	}
-	if got := d.Metadata["historical_checkpoint_backed_mira_v55_exists"]; got != true {
-		t.Fatalf("historical MIRA checkpoint claim = %v", got)
-	}
-	if got := d.Metadata["historical_mira_v55_learned_directly_on_exact_m"]; got != true {
-		t.Fatalf("historical direct-on-M learned claim = %v", got)
-	}
-	if got := d.Metadata["historical_mira_v55_terminal_pass"]; got != true {
-		t.Fatalf("historical MIRA terminal pass = %v", got)
-	}
-	if got := d.Metadata["historical_mira_v55_product_authority"]; got != false {
-		t.Fatalf("historical MIRA product authority = %v", got)
-	}
-	if got := d.Metadata["historical_mira_v55_generalization_claimed"]; got != false {
-		t.Fatalf("historical MIRA generalization claim = %v", got)
-	}
-	if got := d.Metadata["historical_mira_v55_compute_profile_preserved"]; got != true {
-		t.Fatalf("historical MIRA compute-profile claim = %v", got)
-	}
-	if got := d.Metadata["current_repo_mira_v55_runtime_source_recovered"]; got != true {
-		t.Fatalf("current MIRA runtime source recovery claim = %v", got)
-	}
-	if got := d.Metadata["current_mira_v55_runtime_package_recovered"]; got != true {
-		t.Fatalf("current MIRA runtime package recovery claim = %v", got)
+	// Historical V5 evidence belongs to archival receipts, not the active
+	// checkpoint-to-product contract.
+	for _, legacy := range []string{"historical_checkpoint_backed_mira_v55_exists", "current_repo_mira_v55_runtime_source_recovered"} {
+		if _, exists := d.Metadata[legacy]; exists {
+			t.Fatalf("archival V5 claim leaked into active V6 catalog: %s", legacy)
+		}
 	}
 	if got := d.Metadata["post_hoc_surface_skin_transfer_allowed"]; got != false {
 		t.Fatalf("post-hoc skin transfer policy = %v", got)

@@ -54,7 +54,7 @@ def build_runtime_graphics_v1(compiled:CompiledGraphicsV1,*,face_count:int):
         # A topological tie-break can make a drawable schedule executable,
         # but cannot prove the removed source-evidence relation was false.
         # Keep representation policy distinct from observed source truth.
-        "source_order_qualified": not any(
+        "unresolved_source_order_conflict": any(
             bool(view.metadata.get("cycle_edges_removed"))
             for view in compiled.views
         ),

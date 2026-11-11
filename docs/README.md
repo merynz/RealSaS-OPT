@@ -4,6 +4,7 @@
 
 | Task | Read |
 |---|---|
+| Frozen RSS.vNext architecture and implementation gaps | [RSS.vNext architecture](research/RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_20261109.md), [agent work ledger](platform/RSS_VNEXT_AGENT_WORK_LEDGER.md), [live GitHub tasks #399](https://github.com/merynz/RealSaS-OPT/issues/399) |
 | Resume development | [Current state](../CURRENT_STATE.md), then [Agent contract](../AGENTS.md) |
 | Replace a model/Compiler component or evolve its DAG | [Execution lanes](platform/EXECUTION_LANES.md) |
 | Admit the diverse Fit8 sources and first renders | [Fit8 admission](corpus/FIT8_ADMISSION.md) |

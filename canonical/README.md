@@ -1,5 +1,13 @@
 # Canonical Authority Index
 
+## RSS.vNext frozen future model — design authority distinct from current execution
+
+- [Frozen model/consumer contract](RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_V1_20261109.json)
+- [Versioned work item/dependency index](RSS_VNEXT_WORK_LEDGER_INDEX_V1.json): **static task catalog only**, live status is GitHub [issue #399](https://github.com/merynz/RealSaS-OPT/issues/399) and `python tools/ledger/rss_vnext_status.py`.
+- [Agent operating protocol](../docs/platform/RSS_VNEXT_AGENT_WORK_LEDGER.md) and [complete architecture rationale](../docs/research/RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_20261109.md).
+- The canonical V2 DAG and prior Experiment/Platform receipts listed below remain **current runtime execution authority** until RSS.vNext implementation, training/courts and production promotion genuinely close.
+
+
 ## Current continuation — 2026-10-08
 
 Read [CURRENT_STATE.md](../CURRENT_STATE.md), [AGENTS.md](../AGENTS.md) and [Execution lanes](../docs/platform/EXECUTION_LANES.md). Source continuation is **main only**. Research execution state belongs to Go Attempts and immutable EngineReleases.

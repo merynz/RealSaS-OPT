@@ -4,6 +4,15 @@ RealSaS compiles qualified multi-view 2D artwork into an editable 2D/2.5D puppet
 
 **Proprietary / all rights reserved.** See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
+## RSS.vNext target architecture — frozen design, not shipped code (2026-11-09)
+
+The **future generic-unseen architecture** is **RSS.vNext**: *one coherent character model with four specialized neural expert responsibilities*: IRIS (3D Geometry/Semantic/Graphics), TESSA (animation-ready structural mesh), AXIS (full editable RigProgram/control structure), and MIRA (SkinTokens/skin influence). Every expert shares a typed evidence-preserving `SharedCharacterCarrierIR.vNext`; the Compiler qualifies and executes generic IK/FK, constraints and source-consistent 2D presentation.
+
+- [Full frozen architecture](docs/research/RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_20261109.md) · [machine contract](canonical/RSS_VNEXT_UNIFIED_CHARACTER_ARCHITECTURE_FREEZE_V1_20261109.json)
+- [Live master work ledger #399](https://github.com/merynz/RealSaS-OPT/issues/399) · [agent completion rules](docs/platform/RSS_VNEXT_AGENT_WORK_LEDGER.md) · `python tools/ledger/rss_vnext_status.py`
+- **Design frozen ≠ implemented/trained/unseen-qualified.** Current V2 code described below remains the compatibility baseline until a reviewed, qualified vNext cutover; Truth Foundry source/rights/supervision closure is the main prerequisite.
+
+
 ## Start here
 
 | Need | Entry |

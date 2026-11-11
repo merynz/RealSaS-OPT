@@ -130,10 +130,13 @@ def _mesh(value: Mapping[str, Any]) -> int:
             _reject("RSS_VNEXT_EVIDENCE_RAY_TWO_SOURCES")
         for view in range(2):
             _vector(ray["rgba"][index][view], 4, "RSS_VNEXT_EVIDENCE_RAY_RGBA")
+            if any(not 0 <= channel <= 1 for channel in ray["rgba"][index][view]):
+                _reject("RSS_VNEXT_EVIDENCE_RAY_RGBA_RANGE")
             if type(ray["valid"][index][view]) is not bool:
                 _reject("RSS_VNEXT_EVIDENCE_RAY_VALID_TYPE")
             alpha = ray["alpha"][index][view]
-            if not isinstance(alpha, (int, float)) or not math.isfinite(alpha):
+            if (type(alpha) not in (int, float)
+                or not math.isfinite(alpha) or not 0 <= alpha <= 1):
                 _reject("RSS_VNEXT_EVIDENCE_RAY_ALPHA")
             if abs(alpha - ray["rgba"][index][view][3]) > 1e-5:
                 _reject("RSS_VNEXT_EVIDENCE_RAY_ALPHA_DRIFT")
@@ -418,8 +421,14 @@ def seal_inference_evidence_v1(
     # NaN/invalid field. The same validation is repeated after sealing.
     if value.mesh is not None:
         _mesh(value.mesh)
-    # Fail with a typed qualification error before hashing illegal numerical
-    # events. A NaN would otherwise raise a generic canonicalization ValueError.
+    # Admission must precede canonical hashing for every optional evidence
+    # family, not just Mesh/AXIS. A poisoned semantic field or dynamic weight
+    # otherwise reaches the JSON hasher before it can raise a typed error.
+    if value.scene is not None:
+        _scene(value.scene)
+    if value.dynamic is not None and value.mesh is not None:
+        _dynamic(value.dynamic, len(value.mesh["rest_xyz"]))
+    # Reject invalid neural causal event fields before content hashing.
     _validate_neural_control_events(value.control_events)
     sealed = replace(value, evidence_hash=inference_evidence_hash_v1(value))
     validate_inference_evidence_v1(sealed)

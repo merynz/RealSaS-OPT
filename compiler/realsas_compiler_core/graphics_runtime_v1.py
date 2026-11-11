@@ -112,10 +112,15 @@ def build_runtime_graphics_v1(compiled:CompiledGraphicsV1,*,face_count:int):
         ),
         # View-index schedules are not a pose-conditioned occlusion solver.
         "pose_conditioned_order_execution": False,
-        "source_visibility_coverage_complete": bool(compiled.views) and not any(
+        # Inference coverage cannot become source-ray truth merely by
+        # materializing eight view schedules. A runtime depth test validates
+        # pose-local geometry, not the missing independent source observation.
+        "source_visibility_coverage_complete": False,
+        "learned_visibility_candidate_coverage_complete": bool(compiled.views) and not any(
             bool(v.metadata.get("visibility_unknown_fragment_ids"))
             for v in compiled.views
         ),
+        "source_visibility_requires_independent_ray_receipt": True,
         "view_relation_eight_direction_address_coverage": tuple(
             sorted(v.view_index for v in compiled.views)
         ) == tuple(range(8)),

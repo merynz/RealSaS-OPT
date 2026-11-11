@@ -978,3 +978,73 @@ def test_semantic_patch_registry_frozen_into_resume_checkpoint(tmp_path):
     with pytest.raises(ValueError,match="CHECKPOINT_SEMANTIC_PATCH_REGISTRY_DRIFT"):
         wrong.load_checkpoint(path)
 
+
+
+def test_semantic_risk_loss_uses_only_qualified_axes_and_does_not_train_logits():
+    from models.rss_vnext.early_semantic_field import masked_semantic_expected_brier_risk_loss
+    logits = torch.zeros((1,2,3,2), requires_grad=True)
+    predicted_log_risk = torch.zeros((1,2,3,1), requires_grad=True)
+    targets = torch.full_like(logits, float("nan"))
+    mask = torch.zeros_like(logits,dtype=torch.bool)
+    targets[0,0,1,0] = 1.
+    targets[0,0,1,1] = 0.
+    mask[0,0,1] = True
+    loss = masked_semantic_expected_brier_risk_loss(
+        logits,predicted_log_risk,targets,mask,
+    )
+    assert float(loss.detach()) == pytest.approx(.0625, abs=1e-7)
+    loss.backward()
+    assert logits.grad is None  # calibrated risk cannot silently replace BCE
+    assert predicted_log_risk.grad is not None
+    assert predicted_log_risk.grad[0,0,1,0] > 0
+    assert torch.count_nonzero(predicted_log_risk.grad[~mask.any(-1)]) == 0
+    with pytest.raises(ValueError,match="RISK_NO_QUALIFIED_AXES"):
+        masked_semantic_expected_brier_risk_loss(
+            logits.detach(),predicted_log_risk.detach(),targets,
+            torch.zeros_like(mask),
+        )
+
+
+def test_early_semantic_risk_head_trains_only_with_sealed_source_teacher():
+    from dataclasses import replace as dc_replace
+    net,_,receipt,batch=_source_semantic_patch_court()
+    weights=RSSvNextTrainingWeights(
+        topology=0,motion_preference=0,source_semantics=0,
+        semantic_risk=1,flexicubes_surface=0,
+    )
+    optimizer=torch.optim.AdamW(net.parameters(),lr=1e-3)
+    trainer=RSSvNextStructuralTrainer(
+        net,optimizer,dataset_manifest_sha256="3"*64,
+        weights=weights,trusted_semantic_patch_registry={"admitted-source-patch":receipt},
+    )
+    result=trainer.train_step(batch)
+    assert result.semantic_risk_loss is not None
+    assert result.source_semantic_loss is None
+    assert result.eligible_semantic_patch_labels == 1
+    assert torch.isfinite(result.total_loss)
+    grad=net.early_semantics.image_uncertainty[-1].weight.grad
+    assert grad is not None and grad.abs().sum() > 0
+    logits_grad=net.early_semantics.image_evidence[-1].weight.grad
+    assert logits_grad is None or logits_grad.abs().sum() == 0
+    forged=batch.semantic_patch_target.clone()
+    forged[0,0,0,0]=0.
+    with pytest.raises(ValueError,match="SEMANTIC_RECEIPT_SOURCE_OR_LABEL_DRIFT"):
+        trainer.objective(dc_replace(batch,semantic_patch_target=forged))
+
+
+def test_semantic_risk_objective_rejects_nonfinite_and_unknown_only():
+    from models.rss_vnext.early_semantic_field import masked_semantic_expected_brier_risk_loss
+    logits=torch.zeros((1,2,1,2))
+    risk=torch.zeros((1,2,1,1))
+    labels=torch.full_like(logits,float("nan"))
+    mask=torch.zeros_like(logits,dtype=torch.bool)
+    labels[0,0,0,0]=0.
+    mask[0,0,0,0]=True
+    with pytest.raises(ValueError,match="RISK_PREDICTION_NONFINITE"):
+        masked_semantic_expected_brier_risk_loss(
+            logits, risk.fill_(float("nan")), labels, mask,
+        )
+    risk.zero_()
+    labels[0,0,0,0]=1.2
+    with pytest.raises(ValueError,match="RISK_TARGET_INVALID"):
+        masked_semantic_expected_brier_risk_loss(logits,risk,labels,mask)

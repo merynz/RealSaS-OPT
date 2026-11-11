@@ -1,41 +1,8 @@
 name: current-runtime-self-hosted-ci
 
+# Legacy V2 current-runtime bake/proof regression is historical reference.
+# RSS.vNext releases are decided by the unified expert/native product courts.
 on:
-  push:
-    branches:
-      - main
-      - restoration/compiler-runtime-promotion-v1-20260903
-    paths:
-      - 'compiler/realsas_compiler_core/**'
-      - 'compiler/realsas_compiler_services/export/**'
-      - 'compiler/realsas_compiler_services/proof/**'
-      - 'compiler/realsas_compiler_services/orchestrator/adapters/runtime_v2.py'
-      - 'compiler/realsas_compiler_services/orchestrator/adapters/appearance_v2.py'
-      - 'runtime/realsas_cpp/**'
-      - 'runtime/reference_v4/**'
-      - 'tests/runtime/**'
-      - 'tests/compiler/test_current_v4_runtime_v2_projection_v1.py'
-      - 'tests/compiler/test_directional_joint_view_binding_v1.py'
-      - 'tests/compiler/test_motion_bake_firewall_v1.py'
-      - 'tests/compiler/test_runtime_v2_native_smoke.py'
-      - 'tests/compiler/test_v2_tail_authority_fail_closed.py'
-      - 'tests/compiler/test_caa_v2_subject_free_policy.py'
-      - 'tests/compiler/test_visibility_and_caa_v2.py'
-      - 'tests/compiler/test_dynamic_appearance_conditioning_v2.py'
-      - 'tests/compiler/test_dynamic_geometry_integrity_v2.py'
-      - 'experiments/single_family_e2e_v1/**'
-      - 'canonical/CAA_V2_SUBJECT_FREE_NUMERICAL_POLICY_20260920.json'
-      - 'canonical/DYNAMIC_APPEARANCE_CONDITIONING_CALIBRATION_V1_20260921.json'
-      - 'canonical/MAIN_POST_MERGE_INTEGRITY_TRIGGER_ONCE_V1_20260904.json'
-      - '.github/workflows/current_runtime_self_hosted_ci.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'compiler/**'
-      - 'runtime/**'
-      - 'tests/runtime/**'
-      - 'experiments/single_family_e2e_v1/**'
-      - '.github/workflows/current_runtime_self_hosted_ci.yml'
   workflow_dispatch:
 
 concurrency:

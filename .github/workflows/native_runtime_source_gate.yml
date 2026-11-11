@@ -1,26 +1,9 @@
 name: Native runtime source gate
 
+# Historical immutable bytes remain available for forensic checks.
+# Active product behavior is gated by rss_vnext_controllable_native_product_e2e.
 on:
-  push:
-    branches-ignore:
-      - playback-stack-v1-20260916
-    paths:
-      - 'runtime/realsas_cpp/**'
-      - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V*.json'
-      - 'tests/repository/test_native_source_seal_lineage.py'
-      - 'tools/verify_native_runtime_source_seal_v2.py'
-      - '.github/workflows/native_runtime_source_gate.yml'
-  pull_request:
-    branches-ignore:
-      - playback-stack-v1-20260916
-    paths:
-      - 'runtime/realsas_cpp/**'
-      - 'canonical/COMPILER_RUNTIME_PROMOTION_SOURCE_SEAL_V1_20260903.json'
-      - 'canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V*.json'
-      - 'tests/repository/test_native_source_seal_lineage.py'
-      - 'tools/verify_native_runtime_source_seal_v2.py'
-      - '.github/workflows/native_runtime_source_gate.yml'
+  workflow_dispatch:
 
 concurrency:
   group: realsas-self-hosted-runtime-${{ github.repository }}-${{ github.ref }}

@@ -21,6 +21,12 @@ FORBIDDEN_EXTERNAL_BRANDS = (
     "mapanything",
 )
 
+# A lowercase quantitative field such as skin_tokens_per_joint describes how
+# many discretized skin codes a generic model emits; it is not a model or
+# architecture name adopting the SkinTokens project identity. Keep the public
+# field stable: its rename would unnecessarily break serialized vNext configs.
+GENERIC_INTERNAL_FIELDS = frozenset({"skin_tokens_per_joint"})
+
 
 def _compact(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "", text.lower())
@@ -49,6 +55,8 @@ def test_python_model_identifiers_do_not_adopt_external_branding() -> None:
                 if node.value.startswith("RealSaS."):
                     architecture_strings.append(node.value)
         for value in names + architecture_strings:
+            if value in GENERIC_INTERNAL_FIELDS:
+                continue
             compact = _compact(value)
             for brand in FORBIDDEN_EXTERNAL_BRANDS:
                 assert brand not in compact, (

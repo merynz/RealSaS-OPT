@@ -1,18 +1,9 @@
 name: runtime-deploy-bake-promotion-gate
 
+# Historical byte-exact deploy-bake promotion is a manual forensic check.
+# RSS.vNext does not freeze future runtime implementations to old bytes.
 on:
-  pull_request:
-    paths:
-      - 'compiler/realsas_compiler_services/export/**'
-      - 'compiler/test_runtime_deploy_bake_service_v1.py'
-      - 'canonical/COMPILER_RUNTIME_DEPLOY_BAKE_PROMOTION_V1_20260903.json'
-      - '.github/workflows/runtime_deploy_bake_promotion_gate.yml'
-  push:
-    paths:
-      - 'compiler/realsas_compiler_services/export/**'
-      - 'compiler/test_runtime_deploy_bake_service_v1.py'
-      - 'canonical/COMPILER_RUNTIME_DEPLOY_BAKE_PROMOTION_V1_20260903.json'
-      - '.github/workflows/runtime_deploy_bake_promotion_gate.yml'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

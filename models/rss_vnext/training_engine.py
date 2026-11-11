@@ -244,6 +244,7 @@ class RSSvNextStructuralTrainer:
         preference: RSSvNextTopologyPreferenceConfig = RSSvNextTopologyPreferenceConfig(),
         trusted_render_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_surface_role_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_semantic_patch_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_region_pair_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_axis_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_signed_source_registry: Mapping[str, Mapping[str, object]] | None = None,
@@ -295,6 +296,23 @@ class RSSvNextStructuralTrainer:
                 allow_nan=False,
             ).encode("utf8")).hexdigest()
             if surface_snapshot else ""
+        )
+        # Early 2D semantic axes are not allowed to self-certify with a
+        # user-supplied string. Bind exact observed rays/cameras and the
+        # per-channel known/unknown teacher bytes at the training launcher.
+        semantic_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_semantic_patch_registry or {}).items()
+        }
+        self.trusted_semantic_patch_registry = MappingProxyType({
+            key: MappingProxyType(value)
+            for key, value in semantic_snapshot.items()
+        })
+        self.semantic_patch_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                semantic_snapshot, sort_keys=True, separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest() if semantic_snapshot else ""
         )
         # This registry is supplied by the trusted training launcher, not by
         # the batch. In particular, component IDs are *not* mechanically
@@ -540,19 +558,48 @@ class RSSvNextStructuralTrainer:
         motion = None
         semantic = None
         n_semantic = 0
-        if batch.semantic_patch_target is not None:
-            if (batch.semantic_qualification_key == ""
+        semantic_requested = (
+            batch.semantic_patch_target is not None
+            or batch.semantic_patch_mask is not None
+            or bool(batch.semantic_qualification_key)
+        )
+        if semantic_requested:
+            if (not batch.semantic_qualification_key
+                    or batch.semantic_patch_target is None
                     or batch.semantic_patch_mask is None):
                 raise ValueError("RSS_VNEXT_TRAIN_SEMANTIC_QUALIFICATION_REQUIRED")
-            if self.weights.source_semantics > 0:
-                semantic = masked_source_semantic_evidence_loss(
-                    state.source_semantic_patch_logits,
-                    batch.semantic_patch_target,
-                    batch.semantic_patch_mask,
-                )
-                n_semantic = int(batch.semantic_patch_mask.sum().item())
-        elif batch.semantic_patch_mask is not None:
-            raise ValueError("RSS_VNEXT_TRAIN_SEMANTIC_ORPHAN_MASK")
+            if self.weights.source_semantics <= 0:
+                raise ValueError("RSS_VNEXT_TRAIN_SEMANTIC_OBJECTIVE_NOT_ENABLED")
+            receipt = self.trusted_semantic_patch_registry.get(
+                batch.semantic_qualification_key,
+            )
+            if receipt is None or receipt.get("admission_status") != "QUALIFIED_SOURCE_SEMANTIC_PATCH_AXES":
+                raise ValueError("RSS_VNEXT_TRAIN_SEMANTIC_UNTRUSTED_ADMISSION")
+            if (
+                receipt.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
+                or receipt.get("source_qualification_key") != batch.source_qualification_key
+                or receipt.get("observed_rgba_sha256") != source_surface_tensor_sha256(batch.rgba)
+                or receipt.get("original_camera_sha256") != source_surface_tensor_sha256(batch.camera_features)
+                or receipt.get("semantic_patch_target_sha256") != source_surface_tensor_sha256(batch.semantic_patch_target)
+                or receipt.get("semantic_patch_mask_sha256") != source_surface_tensor_sha256(batch.semantic_patch_mask)
+                or receipt.get("supervision_semantics") != "ORIGINAL_TWO_VIEW_MASKED_PATCH_AXES_NOT_3D_DRAWABLE"
+            ):
+                raise ValueError("RSS_VNEXT_TRAIN_SEMANTIC_RECEIPT_SOURCE_OR_LABEL_DRIFT")
+            if (
+                batch.semantic_patch_target.shape != state.source_semantic_patch_logits.shape
+                or batch.semantic_patch_mask.shape != batch.semantic_patch_target.shape
+                or batch.semantic_patch_mask.dtype != torch.bool
+                or batch.semantic_patch_target.device != state.source_semantic_patch_logits.device
+                or batch.semantic_patch_mask.device != state.source_semantic_patch_logits.device
+                or not bool(batch.semantic_patch_mask.any())
+            ):
+                raise ValueError("RSS_VNEXT_TRAIN_SEMANTIC_TARGET_SHAPE_OR_MASK_INVALID")
+            semantic = masked_source_semantic_evidence_loss(
+                state.source_semantic_patch_logits,
+                batch.semantic_patch_target,
+                batch.semantic_patch_mask,
+            )
+            n_semantic = int(batch.semantic_patch_mask.sum().item())
 
         # 3D presentation roles live on H(x), not on 2D source patches.
         # Only train this distinct head when a trusted, source-bound receipt
@@ -968,6 +1015,7 @@ class RSSvNextStructuralTrainer:
             "dataset_manifest_sha256": self.dataset_manifest_sha256,
             "render_registry_sha256": self.render_registry_sha256,
             "surface_role_registry_sha256": self.surface_role_registry_sha256,
+            "semantic_patch_registry_sha256": self.semantic_patch_registry_sha256,
             "region_pair_registry_sha256": self.region_pair_registry_sha256,
             "axis_teacher_registry_sha256": self.axis_teacher_registry_sha256,
             "signed_source_registry_sha256": self.signed_source_registry_sha256,
@@ -1005,6 +1053,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_RENDER_REGISTRY_DRIFT")
         if data.get("surface_role_registry_sha256", "") != self.surface_role_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SURFACE_ROLE_REGISTRY_DRIFT")
+        if data.get("semantic_patch_registry_sha256", "") != self.semantic_patch_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SEMANTIC_PATCH_REGISTRY_DRIFT")
         if data.get("region_pair_registry_sha256", "") != self.region_pair_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_REGION_PAIR_REGISTRY_DRIFT")
         if data.get("axis_teacher_registry_sha256", "") != self.axis_teacher_registry_sha256:

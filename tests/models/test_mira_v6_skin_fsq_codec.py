@@ -127,7 +127,10 @@ def test_mira_dense_skin_reconstruction_loss_alone_trains_fsq_encoder():
         model.vertex_encode[0].weight,
         model.joint_encode[0].weight,
         model.latent_head.weight,
-        model.code_decode[0].weight,
+        # With centered FSQ token IDs, decoded code vectors can be all zero:
+        # code_decode.weight then correctly has zero gradient while its bias
+        # and the straight-through encoder still receive reconstruction signal.
+        model.code_decode[0].bias,
     ):
         assert param.grad is not None
         assert torch.isfinite(param.grad).all()

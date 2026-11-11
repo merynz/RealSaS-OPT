@@ -279,3 +279,23 @@ def test_skin_code_court_never_coerces_or_repairs_invalid_discrete_token(corrupt
             expected_proposal_joint_ids=tuple(j.source_proposal_joint_id for j in rig.joints),
             expected_rig_program_proposal_hash=rig.proposal_evidence_hash,
         )
+
+
+@pytest.mark.parametrize("corrupt", [3.5, True])
+def test_cas_json_decode_preserves_invalid_skin_token_until_real_court(corrupt):
+    objects, blobs, refs, read, put, outputs = _cas_objects()
+    typed = skin_executor_v2._skin_code_from_dict(objects["code"])
+    forged = seal_skin_code_proposal_v1(replace(
+        typed,
+        rows=(replace(typed.rows[0], code_ids=(corrupt, 3)),) + typed.rows[1:],
+        proposal_lineage_hash="",
+    ))
+    # This is a complete, self-hash-consistent CAS record, not a truncated
+    # manifest. A serializer that casts to int would silently corrupt/repair
+    # the evidence before the Compiler court could inspect it.
+    blobs["code"] = json.dumps(forged.to_dict(),sort_keys=True).encode()
+    req = _request("skin")
+    req["input_artifacts"] = [refs["mesh"], refs["rig"], refs["code"]]
+    with pytest.raises(QualificationError, match="SKIN_CODE_ID_OUT_OF_DOMAIN"):
+        _exec("skin", req, read, put)
+    assert outputs == []

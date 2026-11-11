@@ -283,3 +283,36 @@ def test_3d_surface_semantic_masked_unknown_not_imputed_and_resume_registry_boun
     )
     with pytest.raises(ValueError, match="SURFACE_ROLE_REGISTRY_DRIFT"):
         incompatible.load_checkpoint(checkpoint)
+
+
+def test_structural_relation_pool_ignores_diagonal_self_edges_and_keeps_gradients():
+    net = make()
+    rgba, camera = source()
+    state, _, _ = net.encode_observations(rgba, camera)
+    raw = state.region_relation_logits
+    valid = state.region_relation_valid_mask.unsqueeze(-1)
+    assert valid.shape == (1, net.cfg.region_slots, net.cfg.region_slots, 1)
+    assert not bool(valid[:, torch.arange(net.cfg.region_slots),
+                          torch.arange(net.cfg.region_slots)].any())
+    masked = raw.masked_fill(~valid, 0.0)
+    outgoing = masked.sum(2) / valid.sum(2).clamp_min(1)
+    incoming = masked.sum(1) / valid.sum(1).clamp_min(1)
+    expected = state.region_slot_features + net.region_graph_to_memory(
+        torch.cat((outgoing, incoming), dim=-1)
+    )
+    assert torch.allclose(state.region_relation_tokens, expected, atol=1e-7)
+
+    # Even extremely large invalid diagonal scores must not alter the
+    # input to topology/control (a self-edge cannot be motion evidence).
+    augmented = raw + torch.eye(raw.shape[1])[None, :, :, None] * 1e4
+    other = augmented.masked_fill(~valid, 0.0)
+    changed = state.region_slot_features + net.region_graph_to_memory(
+        torch.cat((
+            other.sum(2) / valid.sum(2).clamp_min(1),
+            other.sum(1) / valid.sum(1).clamp_min(1),
+        ), dim=-1)
+    )
+    assert torch.allclose(changed, expected, atol=1e-7)
+    state.region_relation_tokens.square().mean().backward()
+    assert net.semantic_structure.pair[-1].weight.grad is not None
+    assert net.semantic_structure.pair[-1].weight.grad.abs().sum() > 0

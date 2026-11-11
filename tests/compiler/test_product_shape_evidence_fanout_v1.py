@@ -277,10 +277,7 @@ def test_registered_shape_executor_fails_closed_if_scene_is_not_produced(monkeyp
     monkeypatch.setattr(worker,"_device_from_environment",lambda:"cpu")
     monkeypatch.setattr(worker,"_flexicubes_root_from_deployment",lambda:"/tmp/synthetic-only")
     _mock_heavy_flexicubes_for_cpu_contract_court(monkeypatch)
-    import compiler.realsas_compiler_services.platform_worker.scene_input_contract_v2 as si
-    monkeypatch.setattr(si,"decode_shape_input_v2",lambda _:SimpleNamespace(
-        inputs=object(),source_observation_content_sha256="a"*64,
-    ))
+    _mock_shape_input_decoder_without_torch(monkeypatch)
     import compiler.realsas_compiler_services.platform_worker.shape_capability_v2 as sv
     monkeypatch.setattr(sv,"run_shape_inference_v2",lambda *args,**kwargs:SimpleNamespace(
         payload=shape,scene_evidence_payload=None,diagnostics={},

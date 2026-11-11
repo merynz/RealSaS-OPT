@@ -42,6 +42,9 @@ from .playback_runtime_v3 import (
 from .canonical_rig_ir_v2 import CanonicalRigIRV2, validate_canonical_rig_domain_v2
 from .canonical_skin_ir_v2 import CanonicalSkinIRV2, validate_canonical_skin_domain_v2
 from .types import QualificationError
+from .graphics_runtime_v1 import (
+    RuntimeGraphicsV1, validate_runtime_graphics_v1,
+)
 
 
 VIEW_IDS_V1 = tuple(f"V{i}" for i in range(8))
@@ -70,6 +73,7 @@ class ControllablePuppetBundleV1:
     product_revision_id: str
     product_qualification_receipt: str
     schema_version: str = "RealSaS.ControllablePuppetBundle.v1"
+    graphics: RuntimeGraphicsV1 | None = None
 
     def validate(self) -> dict[str, CameraProjectionV3]:
         """Reject unaddressed topology and unqualified consumer input."""
@@ -89,6 +93,20 @@ class ControllablePuppetBundleV1:
         validate_canonical_mesh_domain_v1(self.mesh)
         validate_canonical_rig_domain_v2(self.rig)
         validate_canonical_skin_domain_v2(self.skin)
+        if self.graphics is not None:
+            validate_runtime_graphics_v1(
+                self.graphics,
+                canonical_mesh_hash=self.mesh.mesh_lineage_hash,
+                face_count=len(self.mesh.faces),
+            )
+            mechanical_domains = {
+                j.canonical_joint_id for j in self.rig.joints
+            } | {c.canonical_control_id for c in self.rig.controls}
+            if any(
+                a["parent_mechanical_domain_id"] not in mechanical_domains
+                for a in self.graphics.attachments
+            ):
+                raise QualificationError("PUPPET_RUNTIME_GRAPHICS_MECHANICAL_PARENT_UNBOUND")
         validate_playback_runtime_v3_contract(
             self.playback, required_view_ids=VIEW_IDS_V1,
         )
@@ -139,6 +157,24 @@ class ControllablePuppetBundleV1:
 
 
 @dataclass(frozen=True)
+class PuppetGraphicsProjectionV1:
+    """Pose-evaluated Graphics fragment addresses and triangle geometry.
+
+    This is real reprojected canonical 3D geometry, not an RGB render.
+    Presentation order/visibility remain *candidates* where the compiled
+    view has evidence. Missing views remain unknown, never invisible.
+    """
+    graphics_hash: str
+    view_id: str
+    face_fragment_ids: tuple[str, ...]
+    projected_faces: tuple[tuple[tuple[float, float, float], ...], ...]
+    candidate_visible_fragment_ids: tuple[str, ...] | None
+    candidate_presentation_order: tuple[str, ...] | None
+    source_visibility_qualified: bool = False
+    pose_conditioned_order_proven: bool = False
+
+
+@dataclass(frozen=True)
 class PuppetRuntimeFrameV1:
     """Projected draw-command geometry, NOT a rendered pixel/CAA image."""
     view_id: str
@@ -148,6 +184,7 @@ class PuppetRuntimeFrameV1:
     deformed: DeformedMeshIRV1
     product_revision_id: str
     authority: str = "QUALIFIED_SOURCE_GEOMETRY_INTERACTION_CONSUMER"
+    graphics_projection: PuppetGraphicsProjectionV1 | None = None
 
 
 @dataclass(frozen=True)
@@ -330,6 +367,51 @@ class ControllablePuppetSessionV1:
                 vertices=verts,
                 triangles=variant.triangles,
             ))
+        # Graphics Compiler's actual face/fragment ownership is now consumed
+        # on the SAME newly deformed canonical vertices as interaction and
+        # selection. No independent graphics mesh and no baked-frame fallback.
+        graphics_projection = None
+        graph = self.bundle.graphics
+        if graph is not None:
+            canonical_ids = tuple(
+                vertex.canonical_mesh_vertex_id for vertex in self.bundle.mesh.vertices
+            )
+            indices = {vertex_id: i for i, vertex_id in enumerate(canonical_ids)}
+            projected = project_points_xyz_v3(
+                np.stack([xyz[vertex_id] for vertex_id in canonical_ids]),
+                camera,
+            )
+            posed_faces = tuple(
+                tuple(
+                    tuple(float(c) for c in projected[indices[vertex_id]])
+                    for vertex_id in triangle
+                )
+                for triangle in self.bundle.mesh.faces
+            )
+            addressed_view = next(
+                (v for v in graph.views if v.view_index == self.view_index),
+                None,
+            )
+            graphics_projection = PuppetGraphicsProjectionV1(
+                graphics_hash=graph.runtime_graphics_hash,
+                view_id=self.view_id,
+                face_fragment_ids=tuple(
+                    graph.fragment_ids[owner] for owner in graph.face_fragment_index
+                ),
+                projected_faces=posed_faces,
+                candidate_visible_fragment_ids=(
+                    None if addressed_view is None else tuple(
+                        graph.fragment_ids[i]
+                        for i in addressed_view.visible_fragment_indices
+                    )
+                ),
+                candidate_presentation_order=(
+                    None if addressed_view is None else tuple(
+                        graph.fragment_ids[i]
+                        for i in addressed_view.topological_fragment_order
+                    )
+                ),
+            )
         return PuppetRuntimeFrameV1(
             view_id=self.view_id,
             meshes=tuple(visible),
@@ -337,6 +419,7 @@ class ControllablePuppetSessionV1:
             pose=pose,
             deformed=deform,
             product_revision_id=self.bundle.product_revision_id,
+            graphics_projection=graphics_projection,
         )
 
     def pick(
@@ -394,6 +477,7 @@ __all__ = [
     "ControllablePuppetBundleV1",
     "ControllablePuppetSessionV1",
     "PuppetRuntimeFrameV1",
+    "PuppetGraphicsProjectionV1",
     "PuppetPickV1",
     "RuntimeSelectionBindingV1",
     "VIEW_IDS_V1",

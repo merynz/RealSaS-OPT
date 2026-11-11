@@ -346,3 +346,86 @@ def test_direct_runtime_bundle_rejects_unaddressed_canonical_mesh_face():
     malformed=replace(bundle.mesh,faces=(("MV:0","MV:1","NONEXISTENT"),))
     with pytest.raises(QualificationError,match="CANONICAL_MESH_FACE_VERTEX_UNKNOWN"):
         ControllablePuppetSessionV1(replace(bundle,mesh=malformed))
+
+
+def _compiled_graphics_consumed_from_same_synthetic_canonical_mesh(bundle):
+    """Actual Graphics Compiler -> Runtime lowering, no hash-only fixture."""
+    from compiler.realsas_compiler_core.graphics_v1 import (
+        build_graphics_evidence_v1, compile_graphics_v1,
+    )
+    from compiler.realsas_compiler_core.graphics_runtime_v1 import (
+        build_runtime_graphics_v1,
+    )
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash=bundle.mesh.mesh_lineage_hash,
+        static_relations=(),view_relations=(),
+    )
+    compiled=compile_graphics_v1(
+        canonical_mesh_binding_hash=bundle.mesh.mesh_lineage_hash,
+        canonical_mesh_skin_binding_hash=bundle.skin.skin_lineage_hash,
+        source_graphics_binding_hash="synthetic-no-visible-source-rays",
+        faces=((0,1,2),),evidence=evidence,
+    )
+    return build_runtime_graphics_v1(compiled,face_count=len(bundle.mesh.faces))
+
+
+def test_graphics_compiler_faces_are_consumed_on_live_ik_deformed_geometry():
+    """Real Composer->Mechanics->Skin->posed Graphics->camera consumer.
+
+    This is explicitly synthetic canonical input, not claimed model or
+    verified source appearance. It proves the runtime cannot ignore graph
+    content or substitute static/baked geometry after a user drag.
+    """
+    bundle=qualified_synthetic_bundle()
+    graph=_compiled_graphics_consumed_from_same_synthetic_canonical_mesh(bundle)
+    assert len(graph.fragment_ids)==1
+    session=ControllablePuppetSessionV1(replace(bundle,graphics=graph))
+    rest=session.frame()
+    gp=rest.graphics_projection
+    assert gp is not None
+    assert gp.graphics_hash==graph.runtime_graphics_hash
+    assert gp.face_fragment_ids==(graph.fragment_ids[0],)
+    assert len(gp.projected_faces)==len(bundle.mesh.faces)==1
+    assert gp.source_visibility_qualified is False
+    assert gp.candidate_visible_fragment_ids is None
+    assert gp.candidate_presentation_order is None
+    # The same exact Graphics fragment is reprojected on live LBS geometry.
+    session.drag_screen("C_IK",80.,16.)
+    moved=session.frame()
+    assert moved.graphics_projection.graphics_hash==gp.graphics_hash
+    assert moved.graphics_projection.face_fragment_ids==gp.face_fragment_ids
+    assert moved.graphics_projection.projected_faces!=gp.projected_faces
+    assert moved.deformed.positions!=rest.deformed.positions
+    assert moved.deformed.canonical_mesh_vertex_ids==rest.deformed.canonical_mesh_vertex_ids
+    session.set_view_index(1)
+    rotated=session.frame()
+    assert rotated.graphics_projection.view_id=="V1"
+    assert rotated.graphics_projection.projected_faces!=moved.graphics_projection.projected_faces
+    assert rotated.deformed.positions==moved.deformed.positions
+    # Three authoritative data sources agree on the projected vertex address:
+    # canonical face, live deformed vertex, and current camera projection.
+    ids=tuple(v.canonical_mesh_vertex_id for v in bundle.mesh.vertices)
+    by_id=dict(zip(ids,rotated.deformed.positions))
+    from compiler.realsas_compiler_core.playback_full_surface_v3 import project_points_xyz_v3
+    pts=np.stack([by_id[v] for v in bundle.mesh.faces[0]])
+    expected=project_points_xyz_v3(pts,session.cameras["V1"])
+    assert np.allclose(rotated.graphics_projection.projected_faces[0],expected)
+
+
+def test_live_graphics_consumer_refuses_rehashed_foreign_mesh_or_face_assignment():
+    from compiler.realsas_compiler_core.graphics_runtime_v1 import runtime_graphics_hash_v1
+    bundle=qualified_synthetic_bundle()
+    graph=_compiled_graphics_consumed_from_same_synthetic_canonical_mesh(bundle)
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_PARENT_OR_HASH_DRIFT"):
+        ControllablePuppetSessionV1(replace(bundle,graphics=replace(
+            graph,canonical_mesh_binding_hash="f"*64,
+        )))
+    forged=replace(graph,face_fragment_index=(True,),runtime_graphics_hash="")
+    forged=replace(forged,runtime_graphics_hash=runtime_graphics_hash_v1(forged))
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_FACE_FRAGMENT_DOMAIN_INVALID"):
+        ControllablePuppetSessionV1(replace(bundle,graphics=forged))
+    promoted=replace(graph,metadata={**graph.metadata,"source_visibility_coverage_complete":True},runtime_graphics_hash="")
+    promoted=replace(promoted,runtime_graphics_hash=runtime_graphics_hash_v1(promoted))
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_UNSUPPORTED_AUTHORITY"):
+        ControllablePuppetSessionV1(replace(bundle,graphics=promoted))
+

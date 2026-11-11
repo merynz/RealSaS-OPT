@@ -29,6 +29,84 @@ def _topological_order(n,edges):
             if deg[y]==0:ready.append(y);ready.sort()
     if len(order)!=n:raise QualificationError("RUNTIME_GRAPHICS_ORDER_CYCLE")
     return tuple(order)
+def validate_runtime_graphics_v1(
+    value: RuntimeGraphicsV1, *, canonical_mesh_hash: str, face_count: int,
+) -> None:
+    """Independently admit a persisted Graphics runtime graph for live geometry.
+
+    Graph hash alone does not validate face addresses, view ordering or the
+    absence of unsupported source-visibility authority. This check runs at the
+    interactive consumer boundary, not only during Compiler materialization.
+    """
+    if type(value) is not RuntimeGraphicsV1 or value.schema_version != "RealSaS.RuntimeGraphics.v1":
+        raise QualificationError("RUNTIME_GRAPHICS_SCHEMA_INVALID")
+    if (
+        type(face_count) is not int or face_count < 1
+        or value.canonical_mesh_binding_hash != canonical_mesh_hash
+        or value.runtime_graphics_hash != runtime_graphics_hash_v1(value)
+    ):
+        raise QualificationError("RUNTIME_GRAPHICS_PARENT_OR_HASH_DRIFT")
+    if (
+        value.metadata.get("source_visibility_coverage_complete") is not False
+        or value.metadata.get("pose_conditioned_order_execution") is not False
+        or value.metadata.get("source_visibility_requires_independent_ray_receipt") is not True
+    ):
+        raise QualificationError("RUNTIME_GRAPHICS_UNSUPPORTED_AUTHORITY")
+    n = len(value.fragment_ids)
+    if n < 1 or len(set(value.fragment_ids)) != n or any(
+        type(v) is not str or not v for v in value.fragment_ids
+    ):
+        raise QualificationError("RUNTIME_GRAPHICS_FRAGMENT_DOMAIN_INVALID")
+    if (
+        len(value.face_fragment_index) != face_count
+        or any(type(i) is not int or not 0 <= i < n for i in value.face_fragment_index)
+        or set(value.face_fragment_index) != set(range(n))
+    ):
+        raise QualificationError("RUNTIME_GRAPHICS_FACE_FRAGMENT_DOMAIN_INVALID")
+    if (
+        len(value.fragment_support_band_pixels) != n
+        or any(type(i) is not int or not 0 <= i <= 4 for i in value.fragment_support_band_pixels)
+    ):
+        raise QualificationError("RUNTIME_GRAPHICS_SUPPORT_DOMAIN_INVALID")
+    seen = set()
+    for view in value.views:
+        if (
+            type(view) is not RuntimeGraphicsViewV1
+            or view.schema_version != "RealSaS.RuntimeGraphicsView.v1"
+            or type(view.view_index) is not int
+            or not 0 <= view.view_index < 8
+            or view.view_index in seen
+        ):
+            raise QualificationError("RUNTIME_GRAPHICS_VIEW_DOMAIN_INVALID")
+        seen.add(view.view_index)
+        if (
+            len(set(view.visible_fragment_indices)) != len(view.visible_fragment_indices)
+            or any(type(i) is not int or not 0 <= i < n for i in view.visible_fragment_indices)
+            or len(view.topological_fragment_order) != n
+            or set(view.topological_fragment_order) != set(range(n))
+            or any(type(i) is not int for i in view.topological_fragment_order)
+        ):
+            raise QualificationError("RUNTIME_GRAPHICS_VIEW_CONTENT_INVALID")
+        if any(
+            len(edge) != 2 or any(type(i) is not int or not 0 <= i < n for i in edge)
+            for edge in view.order_edges
+        ):
+            raise QualificationError("RUNTIME_GRAPHICS_VIEW_EDGE_INVALID")
+        if view.topological_fragment_order != _topological_order(n, view.order_edges):
+            raise QualificationError("RUNTIME_GRAPHICS_VIEW_ORDER_DRIFT")
+    for attachment in value.attachments:
+        if (
+            not isinstance(attachment, dict)
+            or type(attachment.get("fragment_index")) is not int
+            or not 0 <= attachment["fragment_index"] < n
+            or type(attachment.get("anchor_face_index")) is not int
+            or not 0 <= attachment["anchor_face_index"] < face_count
+            or not isinstance(attachment.get("parent_mechanical_domain_id"), str)
+            or not attachment["parent_mechanical_domain_id"]
+        ):
+            raise QualificationError("RUNTIME_GRAPHICS_ATTACHMENT_DOMAIN_INVALID")
+
+
 def build_runtime_graphics_v1(compiled:CompiledGraphicsV1,*,face_count:int):
     """Materialize graph CONTENT, not merely its hash, for runtime consumption."""
     if compiled.graph_hash!=compiled_graphics_hash_v1(compiled):raise QualificationError("RUNTIME_GRAPHICS_COMPILED_HASH_DRIFT")
@@ -129,4 +207,10 @@ def build_runtime_graphics_v1(compiled:CompiledGraphicsV1,*,face_count:int):
             for v in compiled.views if v.metadata.get("visibility_unknown_fragment_ids")
         },
         "unknown_visibility_raster_policy": "DRAW_GEOMETRY_AND_DEFER_OCCLUSION_TO_DEPTH",
-    });return replace(value,runtime_graphics_hash=runtime_graphics_hash_v1(value))
+    })
+    sealed = replace(value, runtime_graphics_hash=runtime_graphics_hash_v1(value))
+    validate_runtime_graphics_v1(
+        sealed, canonical_mesh_hash=compiled.canonical_mesh_binding_hash,
+        face_count=face_count,
+    )
+    return sealed

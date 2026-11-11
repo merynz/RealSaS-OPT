@@ -205,6 +205,69 @@ def test_model_source_state_export_and_source_change_firewall():
         )
 
 
+def test_compiler_receipt_preserves_addressed_semantic_regions_and_graphics_without_authority():
+    net = _network()
+    rgba, cam = _images()
+    with torch.no_grad():
+        out = net(rgba, cam)
+    prediction = {
+        "state": out.state, "mesh_status": "ABSTAIN",
+        "mesh_candidate": None, "mesh_failure": "TOPOLOGY_SEQUENCE_INCOMPLETE",
+        "observed_view_count": 2,
+        "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
+        "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
+    }
+    evidence = export_inference_evidence_v1(
+        prediction, original_rgba=rgba, original_camera_features=cam,
+        checkpoint_sha256="a" * 64,
+    )
+    scene = evidence.scene
+    assert len(scene["region_query_xyz"]) == out.state.query_xyz.shape[1]
+    assert len(scene["region_membership_logits"]) == len(scene["region_query_xyz"])
+    assert len(scene["region_graphics_logits"]) == len(scene["region_query_xyz"])
+    assert len(scene["region_graphics_logits"][0]) == 5
+    assert len(scene["region_membership_logits"][0]) == net.cfg.region_slots + 1
+    assert scene["authority"] == "PREDICTED_FROM_TWO_ORIGINAL_VIEWS"
+    assert evidence.qualification_status == "UNQUALIFIED_NEURAL_PROPOSAL_ONLY"
+    assert evidence.mesh_status == "ABSTAIN"
+    validate_inference_evidence_v1(evidence)
+
+
+@pytest.mark.parametrize("corruption,error", [
+    ("unaddressed", "REGION_ADDRESS_DRIFT"),
+    ("missing_unknown", "REGION_UNKNOWN_CHANNEL"),
+    ("graphics_width", "GRAPHICS_FIELD_FIVE_CHANNELS"),
+    ("self_edge", "RELATION_SELF_EDGE_MASK_INVALID"),
+])
+def test_semantic_compiler_receipt_rejects_rehashed_unaddressed_or_self_inconsistent_scene(corruption, error):
+    net = _network()
+    rgba, cam = _images()
+    with torch.no_grad():
+        output = net(rgba, cam)
+    evidence = export_inference_evidence_v1(
+        {
+            "state": output.state, "mesh_status": "ABSTAIN",
+            "mesh_candidate": None, "mesh_failure": "TOPOLOGY_SEQUENCE_INCOMPLETE",
+            "observed_view_count": 2,
+            "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
+            "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
+        },
+        original_rgba=rgba, original_camera_features=cam,
+        checkpoint_sha256="a" * 64,
+    )
+    scene = deepcopy(evidence.scene)
+    if corruption == "unaddressed":
+        scene["region_query_xyz"].pop()
+    elif corruption == "missing_unknown":
+        scene["region_membership_logits"][0].pop()
+    elif corruption == "graphics_width":
+        scene["region_graphics_logits"][0].pop()
+    else:
+        scene["region_relation_valid_mask"][0][0] = True
+    with pytest.raises(QualificationError, match=error):
+        seal_inference_evidence_v1(replace(evidence, scene=scene, evidence_hash=""))
+
+
 def test_real_checkpoint_two_view_model_to_replayable_compiler_receipt(tmp_path):
     from models.rss_vnext.inference_pipeline_v1 import (
         run_two_view_to_compiler_proposal_v1,

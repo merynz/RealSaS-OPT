@@ -123,6 +123,51 @@ class RSSvNextGenericRegionStructure(nn.Module):
         )
 
 
+def source_region_pairs_from_qualified_labels(
+    region_ids: Tensor,
+    source_valid_mask: Tensor,
+    pair_indices: Tensor,
+) -> tuple[Tensor, Tensor]:
+    """Materialize pair targets from an externally qualified source region map.
+
+    This builder does NOT qualify its inputs. It cannot infer regions, repair
+    missing source labels, or assert a drawable/control relationship. The
+    trusted foundry must establish these exact 3D query labels, source rights,
+    and receipt hashes independently before the trainer accepts its result.
+    """
+    if region_ids.ndim != 2 or region_ids.dtype != torch.long:
+        raise ValueError("RSS_VNEXT_SOURCE_REGION_IDS_SHAPE")
+    b, n = region_ids.shape
+    if source_valid_mask.shape != (b, n) or source_valid_mask.dtype != torch.bool:
+        raise ValueError("RSS_VNEXT_SOURCE_REGION_MASK_SHAPE")
+    if (
+        pair_indices.ndim != 3 or pair_indices.shape[:1] != (b,)
+        or pair_indices.shape[-1] != 2 or pair_indices.dtype != torch.long
+        or pair_indices.shape[1] < 1
+    ):
+        raise ValueError("RSS_VNEXT_SOURCE_REGION_PAIRS_SHAPE")
+    if not (region_ids.device == source_valid_mask.device == pair_indices.device):
+        raise ValueError("RSS_VNEXT_SOURCE_REGION_DEVICE_DRIFT")
+    if (
+        int(pair_indices.min()) < 0 or int(pair_indices.max()) >= n
+        or bool((pair_indices[..., 0] == pair_indices[..., 1]).any())
+    ):
+        raise ValueError("RSS_VNEXT_SOURCE_REGION_PAIR_ADDRESSES_INVALID")
+    if bool((region_ids[source_valid_mask] < 0).any()):
+        raise ValueError("RSS_VNEXT_SOURCE_REGION_ADMITTED_LABEL_INVALID")
+    left = region_ids.gather(1, pair_indices[..., 0])
+    right = region_ids.gather(1, pair_indices[..., 1])
+    known_left = source_valid_mask.gather(1, pair_indices[..., 0])
+    known_right = source_valid_mask.gather(1, pair_indices[..., 1])
+    pair_mask = known_left & known_right
+    # An unobserved point is never treated as a negative pair.
+    pair_same = torch.where(
+        pair_mask, (left == right).to(torch.float32),
+        torch.zeros_like(left, dtype=torch.float32),
+    )
+    return pair_same, pair_mask
+
+
 def qualified_source_region_pair_loss(
     membership_logits: Tensor,
     pair_indices: Tensor,
@@ -205,4 +250,5 @@ def qualified_source_region_pair_loss(
 __all__ = [
     "RSSvNextRegionStructureOutput", "RSSvNextGenericRegionStructure",
     "qualified_source_region_pair_loss",
+    "source_region_pairs_from_qualified_labels",
 ]

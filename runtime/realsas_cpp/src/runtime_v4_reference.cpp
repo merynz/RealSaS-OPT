@@ -196,6 +196,40 @@ RuntimeData parse_binary(const std::vector<uint8_t>&bytes){
         }
         d.clips.push_back(std::move(c));
     }
+    // Clipping is a geometric presentation operation, not a colored mesh.
+    // Reject broken starts, orphan masks and wrong attachment types before
+    // allocating a framebuffer. Do not silently ignore a clip interval.
+    std::unordered_map<std::string,std::pair<uint32_t,AttachmentKind>> attachment_owner;
+    for(const auto&asset:d.assets)attachment_owner.emplace(
+        asset.attachment_id,std::make_pair(asset.slot_index,asset.kind));
+    for(const auto&clip:d.clips)for(const auto&frame:clip.frames)
+        for(const auto&fv:frame.views){
+            std::vector<uint32_t> rank(d.slots.size());
+            for(uint32_t oi=0;oi<fv.draw_order_slots.size();++oi)
+                rank[fv.draw_order_slots[oi]]=oi;
+            std::unordered_set<std::string> used;
+            for(const auto&interval:fv.clip_intervals){
+                const auto it=attachment_owner.find(interval.clip_attachment_id);
+                if(it==attachment_owner.end()||it->second.first!=interval.start_slot_index
+                    ||it->second.second!=AttachmentKind::Clipping)
+                    throw std::runtime_error("Runtime-v4 clipping interval binding invalid");
+                if(!used.insert(interval.clip_attachment_id).second)
+                    throw std::runtime_error("Runtime-v4 duplicate clipping interval");
+                if(!(rank[interval.start_slot_index]<rank[interval.end_slot_index]))
+                    throw std::runtime_error("Runtime-v4 clipping interval must follow slot order");
+                if(fv.active_attachment_by_slot[interval.start_slot_index]!=interval.clip_attachment_id)
+                    throw std::runtime_error("Runtime-v4 clipping interval start not active");
+            }
+            for(uint32_t si=0;si<fv.active_attachment_by_slot.size();++si){
+                const auto&active=fv.active_attachment_by_slot[si];
+                if(active.empty())continue;
+                const auto it=attachment_owner.find(active);
+                if(it==attachment_owner.end()||it->second.first!=si)
+                    throw std::runtime_error("Runtime-v4 active attachment binding invalid");
+                if(it->second.second==AttachmentKind::Clipping&&!used.count(active))
+                    throw std::runtime_error("Runtime-v4 active clipping asset missing interval");
+            }
+        }
     if(r.offset()!=body.size())throw std::runtime_error("Runtime-v4 binary has trailing data before CRC");
     return d;
 }
@@ -207,6 +241,46 @@ std::array<float,4> sample_bilinear(const View&v,float u,float vv){u=std::clamp(
 void blend_source_over(std::array<float,4>&dst,const std::array<float,4>&src){const float sa=std::clamp(src[3],0.0f,1.0f),da=std::clamp(dst[3],0.0f,1.0f);const float oa=sa+da*(1-sa);if(oa<=1e-8f){dst={0,0,0,0};return;}for(int c=0;c<3;++c)dst[c]=(src[c]*sa+dst[c]*da*(1-sa))/oa;dst[3]=oa;}
 
 size_t choose_frame_pair(const Clip&c,float t,size_t&hi,float&alpha){if(c.frames.size()==1){hi=0;alpha=0;return 0;}float local=t;if(c.loop&&c.duration>0){local=std::fmod(local,c.duration);if(local<0)local+=c.duration;}else local=std::clamp(local,0.0f,c.duration);auto it=std::upper_bound(c.frames.begin(),c.frames.end(),local,[](float x,const Frame&f){return x<f.time;});if(it==c.frames.begin()){hi=0;alpha=0;return 0;}if(it==c.frames.end()){hi=c.frames.size()-1;alpha=0;return hi;}hi=size_t(it-c.frames.begin());size_t lo=hi-1;float dt=c.frames[hi].time-c.frames[lo].time;alpha=dt>0?(local-c.frames[lo].time)/dt:0;return lo;}
+
+struct ActiveClipMaskV4 {
+    uint32_t end_order=0;
+    std::vector<uint8_t> membership;
+};
+
+// This is the same half-integer/top-left triangle coverage primitive used by
+// the native v3 clipping court; v4 first projects the single canonical 3D
+// posed surface into the requested 2D view. No color or source texture is
+// sampled from the clipping asset, and it never writes to depth.
+std::vector<uint8_t> build_clipping_mask_v4(
+    const Asset&asset,const Frame&f0,const Frame&f1,uint32_t ai,
+    float alpha,const Camera&camera,uint32_t width,uint32_t height,bool inverse){
+    const size_t pixels=size_t(width)*height;
+    std::vector<uint8_t>mask(pixels,inverse?1u:0u);
+    std::vector<Vertex>vertices(asset.rest.size());
+    for(size_t i=0;i<vertices.size();++i){
+        const auto&a=f0.asset_vertices.at(ai).at(i);
+        const auto&b=f1.asset_vertices.at(ai).at(i);
+        const Vec3 xyz{
+            a.x+(b.x-a.x)*alpha,
+            a.y+(b.y-a.y)*alpha,
+            a.z+(b.z-a.z)*alpha,
+        };
+        const Vec3 p=project(xyz,camera);
+        vertices[i]={p.x,p.y,p.z,0.0f,0.0f};
+    }
+    for(const auto&face:asset.faces){
+        const Vertex&a=vertices[face[0]],&b=vertices[face[1]],&c=vertices[face[2]];
+        const int minx=std::max(0,int(std::floor(std::min({a.x,b.x,c.x})-.5f)));
+        const int maxx=std::min(int(width)-1,int(std::ceil(std::max({a.x,b.x,c.x})-.5f)));
+        const int miny=std::max(0,int(std::floor(std::min({a.y,b.y,c.y})-.5f)));
+        const int maxy=std::min(int(height)-1,int(std::ceil(std::max({a.y,b.y,c.y})-.5f)));
+        for(int y=miny;y<=maxy;++y)for(int x=minx;x<=maxx;++x){
+            if(reference_raster_v3::cover_pixel_center(a,b,c,x,y).covered)
+                mask[size_t(y)*width+size_t(x)]=inverse?0u:1u;
+        }
+    }
+    return mask;
+}
 
 const Overlay& overlay_for_asset(const View& view, uint32_t asset_index){
     for(const auto& overlay : view.overlays){
@@ -291,7 +365,8 @@ std::vector<uint8_t> ReferenceRuntime::render_rgba(uint32_t ci,uint32_t vi,float
     const Frame&f0=clip.frames[lo];
     const Frame&f1=clip.frames[hi];
     const FrameView&fv=(alpha<0.5f?f0.views[vi]:f1.views[vi]);
-    if(!fv.clip_intervals.empty())throw std::runtime_error("Runtime-v4 P0/P1 native clipping is not yet qualified");
+    // Frame-state selection matches Runtime-v3 (nearest compositing state)
+    // while geometric clip masks use interpolated canonical posed vertices.
 
     const uint32_t output_width=view.camera.resolution;
     const uint32_t output_height=view.camera.resolution;
@@ -301,8 +376,19 @@ std::vector<uint8_t> ReferenceRuntime::render_rgba(uint32_t ci,uint32_t vi,float
     std::vector<DepthSample>depth(pixels);
     std::unordered_map<uint32_t,const Overlay*>overlay_by_asset;
     for(const auto&o:view.overlays)overlay_by_asset.emplace(o.asset_index,&o);
+    std::vector<uint32_t>position(d.slots.size());
+    for(uint32_t rank=0;rank<fv.draw_order_slots.size();++rank)
+        position[fv.draw_order_slots[rank]]=rank;
+    std::unordered_map<std::string,const ClipInterval*>clip_by_id;
+    for(const auto&interval:fv.clip_intervals)
+        clip_by_id.emplace(interval.clip_attachment_id,&interval);
+    std::vector<ActiveClipMaskV4>active_masks;
 
     for(uint32_t semantic_order=0;semantic_order<fv.draw_order_slots.size();++semantic_order){
+        active_masks.erase(std::remove_if(
+            active_masks.begin(),active_masks.end(),
+            [semantic_order](const ActiveClipMaskV4&mask){return semantic_order>mask.end_order;}
+        ),active_masks.end());
         uint32_t slot_index=fv.draw_order_slots[semantic_order];
         const std::string&active=fv.active_attachment_by_slot[slot_index];
         if(active.empty())continue;
@@ -311,7 +397,19 @@ std::vector<uint8_t> ReferenceRuntime::render_rgba(uint32_t ci,uint32_t vi,float
         if(ai==UINT32_MAX)throw std::runtime_error("Active attachment has no Runtime-v4 asset");
         const auto&asset=d.assets[ai];
         if(asset.slot_index!=slot_index)throw std::runtime_error("Active attachment slot mismatch");
-        if(asset.kind==AttachmentKind::Clipping)throw std::runtime_error("Runtime-v4 P0/P1 clipping attachment cannot render before clipping qualification");
+        if(asset.kind==AttachmentKind::Clipping){
+            const auto it=clip_by_id.find(active);
+            if(it==clip_by_id.end()||it->second->start_slot_index!=slot_index)
+                throw std::runtime_error("Runtime-v4 clipping scope missing");
+            ActiveClipMaskV4 mask;
+            mask.end_order=position.at(it->second->end_slot_index);
+            mask.membership=build_clipping_mask_v4(
+                asset,f0,f1,ai,alpha,view.camera,output_width,output_height,
+                it->second->inverse
+            );
+            active_masks.push_back(std::move(mask));
+            continue;
+        }
         auto oit=overlay_by_asset.find(ai);
         if(oit==overlay_by_asset.end())throw std::runtime_error("Missing Runtime-v4 view overlay");
         const Overlay&ov=*oit->second;
@@ -345,6 +443,11 @@ std::vector<uint8_t> ReferenceRuntime::render_rgba(uint32_t ci,uint32_t vi,float
                 if(!bc.covered)continue;
                 float z=reference_raster_v3::interpolate_depth(bc,a,b,c);
                 size_t pi=size_t(y)*output_width+size_t(x);
+                bool permitted=true;
+                for(const auto&mask:active_masks)if(!mask.membership[pi]){
+                    permitted=false;break;
+                }
+                if(!permitted)continue;
                 const uint64_t provenance_rank =
                     ov.provenance.at(fi)==AppearanceProvenance::DirectSource ? 2ull : 1ull;
                 const uint64_t authority_order =

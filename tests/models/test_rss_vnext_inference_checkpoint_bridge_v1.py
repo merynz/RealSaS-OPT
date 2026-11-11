@@ -233,6 +233,36 @@ def test_compiler_receipt_preserves_addressed_semantic_regions_and_graphics_with
     validate_inference_evidence_v1(evidence)
 
 
+def test_existing_v1_relation_only_receipt_remains_readable_but_not_product_evidence():
+    net = _network()
+    rgba, cam = _images()
+    with torch.no_grad():
+        output = net(rgba, cam)
+    full = export_inference_evidence_v1(
+        {
+            "state": output.state, "mesh_status": "ABSTAIN",
+            "mesh_candidate": None, "mesh_failure": "TOPOLOGY_SEQUENCE_INCOMPLETE",
+            "observed_view_count": 2,
+            "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
+            "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
+        },
+        original_rgba=rgba, original_camera_features=cam,
+        checkpoint_sha256="a" * 64,
+    )
+    legacy = deepcopy(full.scene)
+    for field_name in (
+        "region_query_xyz", "region_membership_logits",
+        "region_graphics_logits",
+    ):
+        del legacy[field_name]
+    sealed = seal_inference_evidence_v1(
+        replace(full, scene=legacy, evidence_hash=""),
+    )
+    validate_inference_evidence_v1(sealed)
+    assert sealed.qualification_status == "UNQUALIFIED_NEURAL_PROPOSAL_ONLY"
+    assert "region_query_xyz" not in sealed.scene
+
+
 @pytest.mark.parametrize("corruption,error", [
     ("unaddressed", "REGION_ADDRESS_DRIFT"),
     ("missing_unknown", "REGION_UNKNOWN_CHANNEL"),

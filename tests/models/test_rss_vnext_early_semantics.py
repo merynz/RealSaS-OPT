@@ -444,8 +444,9 @@ def test_region_pair_checkpoint_refuses_swapped_teacher_registry(tmp_path):
     )
     path = tmp_path / "region_source_receipt.pt"
     trainer.save_checkpoint(path, sampler_cursor=4)
+    restored_model = make()
     restored = RSSvNextStructuralTrainer(
-        make(), torch.optim.AdamW(make().parameters()),
+        restored_model, torch.optim.AdamW(restored_model.parameters()),
         dataset_manifest_sha256="3" * 64,
         weights=weights,
         trusted_region_pair_registry={

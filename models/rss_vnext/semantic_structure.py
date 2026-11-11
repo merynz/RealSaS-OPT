@@ -177,21 +177,25 @@ def qualified_source_region_pair_loss(
     ):
         raise ValueError("RSS_VNEXT_REGION_PAIR_SOURCE_BINARY_INVALID")
 
-    probabilities = membership_logits.softmax(dim=-1)
+    # UNKNOWN is NOT a shared region: compare conditional probabilities only
+    # among learned region slots. Compute known-mass in log space, so even
+    # highly confident UNKNOWN predictions receive a useful gradient rather
+    # than underflowing/clamping to a zero-gradient vacuous solution.
+    known_prob = F.softmax(membership_logits[..., :-1], dim=-1)
     left = torch.gather(
-        probabilities, 1, pair_indices[..., 0:1].expand(-1, -1, classes),
+        known_prob, 1, pair_indices[..., 0:1].expand(-1, -1, classes - 1),
     )
     right = torch.gather(
-        probabilities, 1, pair_indices[..., 1:2].expand(-1, -1, classes),
+        known_prob, 1, pair_indices[..., 1:2].expand(-1, -1, classes - 1),
     )
-    # UNKNOWN is an abstention channel, never a positive cluster: two unknown
-    # positions do not become a known common drawable or semantic region.
-    known_joint = (1 - left[..., -1]) * (1 - right[..., -1])
-    same_joint = (left[..., :-1] * right[..., :-1]).sum(dim=-1)
-    conditional = (same_joint / known_joint.clamp_min(1e-8)).clamp(1e-6, 1 - 1e-6)
-    # A known, source-qualified pair must not be solved by collapsing both
-    # vertices into UNKNOWN. Explicit coverage prevents vacuous negative PASS.
-    coverage = -torch.log(known_joint.clamp_min(1e-8))
+    conditional = (left * right).sum(dim=-1).clamp(1e-6, 1 - 1e-6)
+    log_known = torch.logsumexp(
+        F.log_softmax(membership_logits, dim=-1)[..., :-1],
+        dim=-1,
+    )
+    left_coverage = torch.gather(log_known, 1, pair_indices[..., 0])
+    right_coverage = torch.gather(log_known, 1, pair_indices[..., 1])
+    coverage = -(left_coverage + right_coverage)
     return (
         F.binary_cross_entropy(conditional[pair_qualified_mask], admitted_targets)
         + 0.25 * coverage[pair_qualified_mask].mean()

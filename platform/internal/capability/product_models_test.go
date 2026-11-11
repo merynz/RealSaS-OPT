@@ -115,7 +115,6 @@ func TestEngineReleaseModelRequirementsRejectArchitectureAndChannelDrift(t *test
 	}
 }
 
-
 func TestProductShapeMeshRetainIndependentCASSceneEvidence(t *testing.T) {
 	shapeRows, err := (ProductShapeProvider{}).Capabilities(context.Background())
 	if err != nil || len(shapeRows) != 1 {
@@ -132,7 +131,7 @@ func TestProductShapeMeshRetainIndependentCASSceneEvidence(t *testing.T) {
 		t.Fatalf("expected exactly two additional immutable Shape CAS outputs: %+v", aux)
 	}
 	wanted := map[string]string{
-		"iris_scene_evidence": "RealSaS.IRISSceneEvidence/v1",
+		"iris_scene_evidence":   "RealSaS.IRISSceneEvidence/v1",
 		"shape_evidence_fanout": "RealSaS.ShapeEvidenceFanout/v1",
 	}
 	for _, raw := range aux {

@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BUSTED — Bring Your Character to Life</title>
+  <meta name="description" content="Bring your character to life. BUSTED turns artwork into an editable puppet you can pose, animate, and control.">
+  <meta name="theme-color" content="#07111b">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/awaken.css">
+  <link rel="stylesheet" href="./static/css/awaken_input_slots.css">
+  <link rel="stylesheet" href="./static/css/awaken_stage.css">
+  <link rel="stylesheet" href="./static/css/busted_awaken_v3.css">
+  <link rel="stylesheet" href="./static/css/matrix_stage_v5.css">
+  <link rel="stylesheet" href="./static/css/matrix_stage_v6.css?v=6.3.0"><link rel="stylesheet" href="./static/css/busted_components_v6.css">
+  <link rel="stylesheet" href="./static/css/chamber_v1.css?v=1.0.0">
+  <link rel="stylesheet" href="./static/css/awaken_clean_v8.css?v=8.4.0">
+  <link rel="stylesheet" href="./static/css/busted_engine_v1.css?v=1.0.0">
+  <link rel="stylesheet" href="./static/css/busted_spatial_rain_v1.css?v=1.0.0">
+  <link rel="stylesheet" href="./static/css/busted_intake_stage_v2.css?v=2.0.0">
+
+
+  <link rel="stylesheet" href="./static/css/busted_visual_priority_v1.css?v=1.0.0">
+  <link rel="stylesheet" href="./static/css/busted_cinematic_v2.css?v=2.0.0">
+  <link rel="stylesheet" href="./static/css/busted_cinematic_hotfix_v3.css?v=3.2.0">
+  <link rel="stylesheet" href="./static/css/busted_compile_terminal_v1.css?v=1.0.0">
+  <link rel="stylesheet" href="./static/css/busted_awaken_reactor_v3.css?v=3.1.0">
+  <link rel="stylesheet" href="./static/css/busted_product_story_v1.css?v=1.0.0">
+  <link rel="stylesheet" href="./static/css/busted_story_refinement_v2.css?v=2.1.0">
+  <style id="busted-generic-discovery-v1">
+/* Generic structure research — educational, deliberately non-demo visuals.
+ * Makes RealSaS's open morphology problem visually distinct from rig fitting.
+ * Existing product sections retain their layout and animation settings.
+ */
+#technology .busted-generic-difference{
+  margin:18px 0 0;
+  border:1px solid rgba(167,178,248,.34);
+  background:linear-gradient(135deg,rgba(16,25,63,.75),rgba(26,28,68,.80));
+  box-shadow:inset 0 1px 0 rgba(204,211,255,.08);
+}
+#technology .busted-generic-caption{
+  display:flex;justify-content:space-between;align-items:center;gap:18px;
+  padding:16px 21px;
+  border-bottom:1px solid rgba(157,168,242,.22);
+  color:#c4c9f4;
+  font:600 9px/1.5 "IBM Plex Mono",monospace;
+  letter-spacing:.095em;
+}
+#technology .busted-generic-caption span:last-child{color:#8ea4d2}
+#technology .busted-generic-comparison{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 43px minmax(0,1.12fr);
+  align-items:stretch;gap:0;
+}
+#technology .busted-generic-template,
+#technology .busted-generic-discovery{
+  display:flex;flex-direction:column;min-width:0;
+  padding:29px clamp(14px,2vw,29px) 25px;
+}
+#technology .busted-generic-template{
+  background:radial-gradient(ellipse 93% 75% at 50% 0%,rgba(106,114,174,.10),transparent);
+  opacity:.75;
+}
+#technology .busted-generic-discovery{
+  background:
+    radial-gradient(ellipse 98% 85% at 70% 28%,rgba(115,102,245,.20),transparent),
+    linear-gradient(125deg,rgba(68,57,147,.14),rgba(35,45,102,.30));
+  border-left:1px solid rgba(171,168,250,.16);
+}
+#technology .busted-generic-kicker{
+  color:#9bb0e5;font:600 9px/1.4 "IBM Plex Mono",monospace;
+  letter-spacing:.10em;
+}
+#technology .busted-generic-discovery .busted-generic-kicker{color:#d0c6ff}
+#technology .busted-generic-comparison h3{
+  margin:14px 0 12px;color:#f1efff;
+  font:650 clamp(22px,2.04vw,30px)/1.13 "Space Grotesk",sans-serif;
+  letter-spacing:-.045em;
+}
+#technology .busted-generic-comparison p{
+  max-width:360px;margin:0 0 26px;flex:1;
+  color:#a9b7d8;font:400 13px/1.75 "Space Grotesk",sans-serif;
+}
+#technology .busted-generic-discovery p{color:#c1cbed}
+#technology .busted-generic-code{
+  width:100%;
+  padding:13px 0 0;
+  color:#9aaddb;
+  border-top:1px solid rgba(141,154,227,.23);
+  font:600 8px/1.65 "IBM Plex Mono",monospace;
+  letter-spacing:.05em;
+  overflow-wrap:anywhere;
+}
+#technology .busted-generic-discovery .busted-generic-code{color:#c5c2ff}
+#technology .busted-generic-divider{
+  display:flex;align-items:center;justify-content:center;
+  font:400 20px/1 "Space Grotesk",sans-serif;
+  color:#b4b9e7;
+  background:linear-gradient(180deg,rgba(15,24,58,.04),rgba(25,26,70,.38),rgba(15,24,58,.04));
+}
+#technology .busted-generic-caption-note{
+  border-top:1px solid rgba(155,165,241,.17);
+  padding:17px 22px;margin:0;
+  color:#a7b9df;font:400 12px/1.65 "Space Grotesk",sans-serif;
+}
+#technology .busted-control-outcomes{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  border:1px solid rgba(156,164,245,.25);
+  background:linear-gradient(113deg,rgba(22,28,76,.38),rgba(20,29,69,.38));
+  margin-top:18px;
+}
+#technology .busted-control-outcomes>div{
+  padding:24px clamp(13px,1.7vw,23px) 25px;min-width:0;
+}
+#technology .busted-control-outcomes>div+div{border-left:1px solid rgba(155,160,237,.16)}
+#technology .busted-control-outcomes span{
+  color:#a8b4ea;font:600 8px/1.4 "IBM Plex Mono",monospace;
+  letter-spacing:.08em;
+}
+#technology .busted-control-outcomes strong{
+  display:block;margin:12px 0 9px;
+  color:#f0f0ff;font:650 clamp(17px,1.8vw,22px)/1.14 "Space Grotesk",sans-serif;
+  letter-spacing:-.03em;
+}
+#technology .busted-control-outcomes p{
+  margin:0;color:#a9bbdf;font:400 12px/1.7 "Space Grotesk",sans-serif;
+}
+#technology .busted-output-contract{margin-top:18px}
+@media(max-width:720px){
+  #technology .busted-generic-caption{padding:15px;flex-direction:column;align-items:start;gap:5px}
+  #technology .busted-generic-comparison{grid-template-columns:1fr}
+  #technology .busted-generic-template,
+  #technology .busted-generic-discovery{padding:22px 18px}
+  #technology .busted-generic-template{opacity:.8}
+  #technology .busted-generic-divider{height:36px}
+  #technology .busted-generic-discovery{border:0;border-top:1px solid rgba(171,168,250,.18)}
+  #technology .busted-generic-comparison h3{font-size:24px}
+  #technology .busted-generic-comparison p{margin-bottom:16px}
+  #technology .busted-generic-caption-note{padding:14px 17px}
+  #technology .busted-control-outcomes{grid-template-columns:1fr}
+  #technology .busted-control-outcomes>div{padding:20px 17px}
+  #technology .busted-control-outcomes>div+div{
+    border-left:0;border-top:1px solid rgba(155,160,237,.16)
+  }
+  #technology .busted-control-outcomes strong{font-size:22px;margin-top:9px}
+}
+
+</style>
+  <script src="./static/js/rss_vnext_api_gateway_v1.js"></script>
+</head>
+<body>
+  <main class="awaken-shell">
+    <header class="masthead" aria-label="BUSTED navigation">
+      <nav class="mast-links" aria-label="Primary navigation">
+        <a class="brand-home" href="./index.html" aria-current="page"><img class="busted-logomark" src="./static/brand/busted-mark.svg" width="40" height="40" alt=""><span class="brand-name">BUSTED</span></a>
+        <a class="studio-link" href="./studio.html">STUDIO <span aria-hidden="true">↗</span></a>
+      </nav>
+      <div id="mastStatus" class="mast-status"><i></i><span>INTAKE READY</span></div>
+    </header>
+
+    <section id="introduction" class="landing-screen" aria-label="BUSTED introduction">
+      <div class="scene-fog" aria-hidden="true"></div>
+      <div class="scene-vignette" aria-hidden="true"></div>
+      <section class="stage-wrap" aria-label="BUSTED introduction">
+        <div class="hero">
+        <div class="hero-intro">
+          <p class="hero-eyebrow"><span class="eyebrow-marker" aria-hidden="true"></span> SOURCE ART / REAL CONTROL</p>
+          <h1>BRING YOUR<br>CHARACTER<br><span class="hero-title-accent">TO LIFE<span class="hero-title-period">.</span></span></h1>
+          <p class="hero-copy">Your art should do more than sit still.</p>
+          <p class="hero-description">We're building a compiler that discovers how your character is put together — geometry, mechanics and appearance — and turns it into a puppet you can direct.</p>
+          <div class="hero-meta"><span>ARTWORK → PUPPET</span><span>POSE · ANIMATE · EDIT</span></div>
+        </div>
+        <div id="structuralField" class="structural-field" aria-hidden="true">
+          <div class="field-reference field-reference-top"><span>REF / 01</span><span>MORPHOLOGICAL FIELD</span></div>
+          <canvas id="structuralCanvas" width="720" height="780"></canvas>
+          <div class="field-pulse" aria-hidden="true"></div>
+          <div class="field-reference field-reference-bottom"><span>PROCEDURAL TOPOLOGY STUDY</span><span>NOT COMPILED OUTPUT</span></div>
+          <div class="field-ordinate"><span>TOPOLOGY</span><span>ARTICULATION</span><span>DEFORMATION</span></div>
+        </div>
+        </div>
+      </section>
+      <a class="descend-link" href="#artworkGuide" aria-label="Explore how to prepare your character artwork">
+        <span class="descend-icon" aria-hidden="true">↓</span>
+        <span>EXPLORE THE PROCESS <small>START WITH YOUR ARTWORK</small></span>
+      </a>
+      <div class="landing-foot" aria-hidden="true"><span>GEOMETRY</span><span>MECHANICS</span><span>PRESENTATION</span></div>
+    </section>
+
+    <section id="artworkGuide" class="busted-guide" aria-labelledby="guideHeading">
+      <div class="busted-guide-inner">
+        <div class="busted-guide-heading">
+          <div>
+            <p class="busted-section-index"><span>02</span> / PREPARE YOUR ART</p>
+            <h2 id="guideHeading">GIVE IT<br><em>SOMETHING REAL.</em></h2>
+          </div>
+          <div class="busted-guide-intro">
+            <p>Start with the character you already designed. Good reference art helps our models understand its parts, proportions and structure — without asking you to redraw it.</p>
+            <span class="busted-subtle-cap">NO PROMPTS TO LEARN. YOUR ARTWORK IS THE INPUT.</span>
+          </div>
+        </div>
+
+        <div class="busted-guide-cards" aria-label="Preparing character images for compilation">
+          <article class="busted-guide-card">
+            <div class="busted-guide-card-top"><span>INPUT / 01</span><strong>REQUIRED</strong></div>
+            <div class="busted-guide-illustration" aria-hidden="true">
+              <div class="busted-guide-image-outline">
+                <svg viewBox="0 0 120 116" fill="none">
+                  <path d="M41 96V80L30 65V42L46 35L48 27C41 11 50 8 59 8S78 11 70 27L73 35L89 42V65L77 80V96M30 44L20 67L23 85M89 44L99 67L96 85M48 77L46 107M72 77L74 107" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M51 35L59 44L69 35M47 75L74 75M59 44V75" stroke="currentColor" stroke-width="1.1" opacity=".48"/>
+                </svg>
+              </div>
+              <span class="busted-guide-visual-tag">FRONT / FULL CHARACTER</span>
+            </div>
+            <h3>Start with the front.</h3>
+            <p>Show the entire character in one image. Keep its important parts, joints and distinctive shapes visible wherever possible.</p>
+            <div class="busted-guide-format">PNG <i></i> JPG <i></i> WEBP</div>
+          </article>
+          <article class="busted-guide-card">
+            <div class="busted-guide-card-top"><span>INPUT / 02</span><strong class="busted-guide-optional">REQUIRED</strong></div>
+            <div class="busted-guide-illustration" aria-hidden="true">
+              <div class="busted-guide-image-outline busted-guide-image-rear">
+                <svg viewBox="0 0 120 116" fill="none">
+                  <path d="M41 96V80L30 65V42L46 35L48 27C41 11 50 8 59 8S78 11 70 27L73 35L89 42V65L77 80V96M30 44L20 67L23 85M89 44L99 67L96 85M48 77L46 107M72 77L74 107" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M47 35Q59 41 72 35M46 49H74M47 75L73 75" stroke="currentColor" stroke-width="1.1" opacity=".54"/>
+                </svg>
+              </div>
+              <span class="busted-guide-visual-tag">BACK / SAME CHARACTER</span>
+            </div>
+            <h3>Add the back.</h3>
+            <p>The matching back view is the second required source observation. Keep scale, proportions and pose consistent.</p>
+            <div class="busted-guide-format">SAME DESIGN <i></i> SAME PROPORTIONS</div>
+          </article>
+          <article class="busted-guide-card">
+            <div class="busted-guide-card-top"><span>INPUT / 03</span><strong>GOOD PRACTICE</strong></div>
+            <div class="busted-guide-illustration busted-guide-clean" aria-hidden="true">
+              <svg viewBox="0 0 180 126" fill="none">
+                <path d="M34 39H23V21H45M147 39H158V21H136M34 85H23V103H45M147 85H158V103H136" stroke="currentColor" opacity=".85" stroke-width="1.8"/>
+                <path d="M68 84V72L61 66V51L73 46L77 39C74 29 80 23 90 23S106 29 103 39L108 46L120 51V66L113 72V84M61 53L54 70M120 53L127 70M81 84L77 100M100 84L104 100" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="142" cy="97" r="13" stroke="currentColor" opacity=".75"/>
+                <path d="M135 97L140 102L149 91" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+              <span class="busted-guide-visual-tag">CLEAN / READABLE / UNCROPPED</span>
+            </div>
+            <h3>Make the shapes readable.</h3>
+            <p>Prefer a clear silhouette and simple background. Heavy overlaps, hidden connections and cropped parts leave more uncertainty.</p>
+            <div class="busted-guide-format">TRANSPARENT BACKGROUND HELPS</div>
+          </article>
+        </div>
+
+        <div class="busted-input-preflight" aria-label="Input preparation checklist">
+          <div class="busted-input-preflight-head">
+            <div>
+              <span>BEFORE YOU UPLOAD</span>
+              <h3>Give the models a clear starting point.</h3>
+            </div>
+            <span class="busted-preflight-aside">ARTWORK CHECK / NOT AN AUTOMATED VALIDATION</span>
+          </div>
+          <div class="busted-input-preflight-pairs">
+            <div class="busted-preflight-good">
+              <span class="busted-preflight-kicker">HELPS THE COMPILER</span>
+              <p><span aria-hidden="true">+</span> Whole character in frame</p>
+              <p><span aria-hidden="true">+</span> Visible, distinguishable body parts</p>
+              <p><span aria-hidden="true">+</span> Matching front and back proportions</p>
+            </div>
+            <div class="busted-preflight-hard">
+              <span class="busted-preflight-kicker">CAN INTRODUCE UNCERTAINTY</span>
+              <p><span aria-hidden="true">−</span> Cropped appendages or accessories</p>
+              <p><span aria-hidden="true">−</span> Important parts hiding behind others</p>
+              <p><span aria-hidden="true">−</span> Conflicting views or extreme perspective</p>
+            </div>
+          </div>
+          <p class="busted-preflight-note">These are recommendations, not strict style rules. Humanoid proportions are not required. Novel morphologies are the research target; uncertain regions may still need review.</p>
+        </div>
+
+        <div class="busted-guide-howto" aria-label="Prepare and compile a puppet">
+          <p class="busted-guide-howto-title">THE SHORT VERSION</p>
+          <div class="busted-guide-howto-steps">
+            <div><span>01</span><strong>Prepare</strong><small>A clear front image</small></div>
+            <div><span>02</span><strong>Upload</strong><small>Include a matching back view</small></div>
+            <div><span>03</span><strong>Awaken</strong><small>Follow real compile progress</small></div>
+            <div><span>04</span><strong>Make it move</strong><small>Open the verified puppet in Studio</small></div>
+          </div>
+        </div>
+        <div class="busted-guide-bottom">
+          <p><strong>A useful rule:</strong> If you can clearly see which part is which, the compiler has a better starting point. Difficult artwork may still need review and adjustment.</p>
+          <a href="#technology" class="busted-editorial-link">WHAT DO OUR MODELS BUILD? <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section id="technology" class="busted-technology" aria-labelledby="technologyHeading">
+      <div class="busted-technology-inner">
+        <div class="busted-technology-title">
+          <p class="busted-section-index"><span>03</span> / OUR MODELS</p>
+          <h2 id="technologyHeading">NOT A TEMPLATE.<br>YOUR CHARACTER.<br><em>REAL CONTROL.</em></h2>
+          <p>We don't begin by assuming your character has two arms and two legs. Our models are being trained to discover the structure of the character in front of them — and compile how that structure moves.</p>
+        </div>
+        <div class="busted-technology-flow" aria-label="How our models approach the puppet compilation pipeline">
+          <div class="busted-technology-flowtop"><span>UNSEEN ARTWORK</span><span>DISCOVER → COMPILE → CONTROL</span></div>
+          <div class="busted-technology-stages">
+            <article>
+              <div class="busted-technology-stagehead"><span>01</span><i></i><span>SEE</span></div>
+              <h3>Discover its parts.</h3>
+              <p>Discover shapes, connections, depth and hidden surfaces without fixing a humanoid anatomy in advance.</p>
+              <div class="busted-tech-micro">MORPHOLOGY · TOPOLOGY</div>
+            </article>
+            <article>
+              <div class="busted-technology-stagehead"><span>02</span><i></i><span>BUILD</span></div>
+              <h3>Solve how it moves.</h3>
+              <p>Build geometry, joints, influence and graphics relationships for the structure actually found.</p>
+              <div class="busted-tech-micro">GEOMETRY · MECHANICS · GRAPHICS</div>
+            </article>
+            <article>
+              <div class="busted-technology-stagehead"><span>03</span><i></i><span>AWAKEN</span></div>
+              <h3>Give it a living state.</h3>
+              <p>Compile a persistent, controllable puppet with its first Idle. Add compatible motions when you need them.</p>
+              <div class="busted-tech-micro">PUPPET · IDLE · MOTION</div>
+            </article>
+          </div>
+          <div class="busted-generic-difference" aria-label="From fixed templates to generic character understanding">
+            <div class="busted-generic-caption">
+              <span>THE RESEARCH DIFFERENCE</span>
+              <span>UNDERSTAND FIRST · COMPILE SECOND</span>
+            </div>
+            <div class="busted-generic-comparison">
+              <div class="busted-generic-template">
+                <span class="busted-generic-kicker">KNOWN STRUCTURE</span>
+                <h3>Fit the template.</h3>
+                <p>Start with expected bones and find where they belong in an image.</p>
+                <div class="busted-generic-code" aria-hidden="true">HEAD / ARM / ARM / LEG / LEG</div>
+              </div>
+              <div class="busted-generic-divider" aria-hidden="true">≠</div>
+              <div class="busted-generic-discovery">
+                <span class="busted-generic-kicker">OPEN MORPHOLOGY</span>
+                <h3>Discover the character.</h3>
+                <p>Infer the parts, topology, movement relationships and appearance that this character actually has.</p>
+                <div class="busted-generic-code" aria-hidden="true">PARTS → JOINTS → INFLUENCE → CONTROL</div>
+              </div>
+            </div>
+            <p class="busted-generic-caption-note">A knight, a bird, a spider, a serpent: the representation should adapt to the subject, not the other way around.</p>
+          </div>
+          <div class="busted-control-outcomes" aria-label="What structural character understanding enables">
+            <div><span>01 / INTERACT</span><strong>Drag a target.</strong><p>Move a sword tip; let the connected body respond.</p></div>
+            <div><span>02 / TURN</span><strong>Keep the pose.</strong><p>Change direction while mechanics and visual identity stay related.</p></div>
+            <div><span>03 / ACT</span><strong>Choose a motion.</strong><p>Apply an appropriate library preset to the same puppet.</p></div>
+          </div>
+          <div class="busted-model-capabilities" aria-label="Research and compiler capabilities">
+            <div class="busted-model-capabilities-head">
+              <span>UNDER THE HOOD / OUR MODELS</span>
+              <span>ONE CHARACTER · ONE COHERENT SYSTEM</span>
+            </div>
+            <div class="busted-model-capabilities-grid">
+              <div><span>01 / MORPHOLOGY</span><strong>Find the structure</strong><small>Discover parts and relationships, not predefined limb labels.</small></div>
+              <div><span>02 / GRAPHICS</span><strong>Preserve the art</strong><small>Keep depth, visibility and appearance consistent as it moves.</small></div>
+              <div><span>03 / MECHANICS</span><strong>Move as one</strong><small>Know which joints, surfaces and contacts should respond together.</small></div>
+              <div><span>04 / MOTION</span><strong>Adapt the movement</strong><small>Apply compatible presets to the puppet’s own morphology.</small></div>
+            </div>
+          </div>
+          <div class="busted-compile-vs-studio" aria-label="What Compile builds and what Studio lets you do">
+            <div class="busted-compile-role">
+              <span>01 / COMPILE</span>
+              <h3>The character is the result.</h3>
+              <p>Our models and compiler take responsibility for morphology, geometry, rig, influence, layers and the first Idle — before Studio opens.</p>
+              <small>THE HEAVY LIFT HAPPENS HERE</small>
+            </div>
+            <div class="busted-studio-role">
+              <span>02 / STUDIO</span>
+              <h3>Then make it your own.</h3>
+              <p>Grab controls, fine-tune the result, attach motion presets or author a special action. The core puppet should already be there.</p>
+              <small>CREATIVE CONTROL, NOT MANDATORY SETUP</small>
+            </div>
+          </div>
+          <div class="busted-technology-principle">
+            <span class="busted-principle-mark" aria-hidden="true">⌁</span>
+            <p><strong>A generic system shouldn't need a new rig template for every creature.</strong> We are building 3D-aware mechanics beneath the original 2D appearance so unfamiliar characters can become controllable puppets.</p>
+          </div>
+          <div class="busted-technology-foot">
+            <span>STRUCTURE · SOURCE FIDELITY · CONTROL</span>
+            <a href="#awakenChamber" class="busted-editorial-link">PREPARE A CHARACTER <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="awakenChamber" class="awaken-chamber" aria-label="Character intake and compilation">
+      <div id="matrixTypewriter" class="matrix-typewriter" aria-hidden="true"></div>
+      <div class="chamber-inner">
+        <div class="chamber-header">
+          <p class="chamber-eyebrow"><span class="chamber-index">04</span> / CHARACTER COMPILER</p>
+          <h2>START <span class="chamber-dot">HERE.</span></h2>
+          <p id="compileStatusMessage">Upload your artwork. Build a character you can actually control.</p>
+        </div>
+        <div class="chamber-workspace">
+          <div class="chamber-intake">
+            <div class="chamber-docking-label"><span>SOURCE / 01</span><span>FRONT · BACK REQUIRED</span></div>
+        <div class="input-orbit">
+          <div class="orbit-ring orbit-ring-a" aria-hidden="true"></div>
+          <div class="orbit-ring orbit-ring-b" aria-hidden="true"></div>
+          <div class="pedestal-glow" aria-hidden="true"></div>
+
+          <label id="dropzone" class="dropzone" for="sourceInput">
+            <input id="sourceInput" type="file" accept="image/png,image/webp,image/jpeg" multiple>
+            <div class="drop-empty">
+              <span class="drop-symbol" aria-hidden="true">＋</span>
+              <strong>DROP CHARACTER</strong>
+              <span class="drop-subtitle">PNG, JPG or WEBP · FRONT / BACK</span>
+            </div>
+            <div class="drop-preview"><img id="sourcePreview" alt="Selected source character"></div>
+            <span id="viewCount" class="view-count">0 VIEWS</span>
+          </label>
+
+          <div id="inputSlotLedger" class="input-slot-ledger" aria-live="polite" aria-label="Source view assignments">
+            <div class="input-slot required" data-input-slot="front">
+              <span>FRONT</span>
+              <strong id="frontSlotFile">REQUIRED</strong>
+            </div>
+            <button id="swapInputViews" class="swap-input-views" type="button" hidden>SWAP FRONT / BACK</button>
+            <div class="input-slot" data-input-slot="back">
+              <span>BACK</span>
+              <strong id="backSlotFile">REQUIRED</strong>
+            </div>
+          </div>
+        </div>
+
+
+          </div>
+          <div class="chamber-console">
+            <div class="compile-action">
+              <button id="awaken" class="awaken-button" type="button" disabled aria-label="Awaken your character"><span class="awaken-label">AWAKEN</span></button>
+              <p id="compileAvailability" class="compile-availability" role="status">UI PREVIEW · COMPILER OFFLINE</p>
+            </div>
+            <div class="compile-monitor-heading"><span>LIVE COMPILER ACTIVITY</span><span id="compileLiveStage" aria-live="polite">AWAITING SOURCE</span></div>
+        <aside class="telemetry" id="compileMonitor" aria-label="Compiler telemetry">
+          <div id="compileProgressConsole" class="compile-progress-console" data-verified="false" data-running="false" aria-label="Verified compiler stage progress">
+            <div class="progress-head"><span>COMPILER / STAGES SEALED</span><strong id="compileProgressPercent">—%</strong></div>
+            <div id="compileProgressBlocks" class="progress-blocks" aria-hidden="true"></div>
+            <div class="progress-foot"><span id="compileProgressContext">AWAITING VERIFIED EVENTS</span><span id="compileProgressSource">STAGES 0/9</span></div>
+          </div>
+          <div class="pipeline" aria-hidden="true">
+            <div class="pipe-step"><span class="n">01</span><span>Input</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">02</span><span>Shape</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">03</span><span>Mesh</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">04</span><span>Rig</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">05</span><span>Skin</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">06</span><span>Mechanics</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">07</span><span>Graphics</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">08</span><span>Motion</span><i class="state"></i></div>
+            <div class="pipe-step"><span class="n">09</span><span>Proof</span><i class="state"></i></div>
+          </div>
+          <div id="compilerLog" class="compiler-log" aria-live="polite"></div>
+        </aside>
+          </div>
+        </div>
+        <div id="matrixMobileCodeReserve" class="matrix-mobile-code-reserve" aria-hidden="true"></div>
+        <div class="chamber-foot"><span>SOURCE OWNERSHIP RETAINED</span><span>EDITABLE STRUCTURE IS THE PRODUCT</span></div>
+      </div>
+    </section>
+
+    <section id="result" class="result" aria-live="polite">
+      <div class="result-stage">
+        <div class="result-art"><img id="resultPreview" alt="Compiled character preview"></div>
+        <div class="result-stream">
+          <small>PRODUCT PROOF · PASS</small>
+          <h2>QUALIFIED</h2>
+          <a class="open-workspace" href="./studio.html">OPEN STUDIO</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="dev-mode">MODE · <strong id="modeLabel">CHECKING GATEWAY</strong></div>
+  </main>
+  <script src="./static/js/busted_spatial_typing_v4.js?v=4.1.0" defer></script>
+  <script src="./static/js/busted_geometry_core_v3.js?v=3.1.0" defer></script>
+  <script src="./static/js/busted_spatial_rain_v1.js?v=1.3.0" defer></script>
+  <script src="./static/js/busted_stage_rain_v2.js?v=2.3.0" defer></script>
+  <script type="module" src="./static/js/awaken_input_slots.js"></script>
+  <script type="module" src="./static/js/awaken.js?v=7.4.0"></script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+/* BUSTED VISUAL AUTHORITY v1
+ * Controlled compositing contract:
+ * background rain < ambient typing in intake < readable product interface.
+ * This file is intentionally loaded last on every public page.
+ */
+:root{--busted-rain-layer:1;--busted-code-layer:2;--busted-ui-layer:3}
+body{background:#040610!important;isolation:isolate}
+body>.busted-spatial-rain{
+ position:fixed!important;z-index:1!important;isolation:isolate;
+ opacity:.74!important;pointer-events:none!important;
+ mix-blend-mode:screen!important;
+ mask-image:linear-gradient(90deg,rgba(0,0,0,.16),rgba(0,0,0,.58) 32%,#000 75%,rgba(0,0,0,.84))!important;
+}
+body:has(.awaken-shell)>.busted-spatial-rain{opacity:.90!important}
+body:has(.workspace)>.busted-spatial-rain{opacity:.16!important}
+body[data-page="motion"]>.busted-spatial-rain,
+body[data-page="export"]>.busted-spatial-rain{opacity:.23!important}
+/* The page shells have translucent environments; the renderer is BELOW
+ * their text, not a screen-blended canvas over text pixels. */
+.awaken-shell{position:relative!important;z-index:2!important;background:transparent!important}
+.awaken-shell .landing-screen{
+ background:radial-gradient(ellipse 33% 58% at 78% 42%,rgba(37,49,114,.13),transparent 82%),
+ linear-gradient(120deg,rgba(3,5,12,.89),rgba(4,7,16,.66) 58%,rgba(4,6,14,.76))!important;
+}
+.awaken-shell .awaken-chamber{
+ position:relative!important;z-index:1!important;isolation:isolate!important;
+ background:radial-gradient(ellipse 39% 56% at 50% 48%,rgba(34,42,109,.19),transparent 85%),
+ linear-gradient(151deg,rgba(4,6,14,.69),rgba(6,8,18,.68) 58%,rgba(4,5,11,.78))!important;
+}
+.awaken-chamber>#matrixTypewriter{
+ position:absolute!important;inset:0!important;z-index:1!important;
+ pointer-events:none!important;overflow:hidden!important;
+}
+.awaken-chamber>.chamber-inner{position:relative!important;z-index:3!important;isolation:isolate}
+.awaken-chamber .chamber-header,.awaken-chamber .chamber-intake,
+.awaken-chamber .chamber-console,.awaken-chamber .chamber-foot{
+ position:relative;z-index:3;
+}
+#introduction .hero-intro,#introduction .structural-field,
+#introduction .descend-link{position:relative;z-index:3!important}
+#introduction .scene-fog,#introduction .scene-vignette{pointer-events:none}
+body:has(.workspace) :where(.topbar,.studio-stages,.modebar,.requalification-strip,.workspace,.timeline),
+body[data-page="motion"] :where(.site-header,.page-intro,.motion-layout),
+body[data-page="export"] :where(.site-header,.page-intro,.export-layout){
+ position:relative;z-index:3!important;
+}
+/* Brand hierarchy: BUSTED is the product. No consumer-facing RealSaS lockup. */
+.masthead{height:82px!important}
+.brand-home{gap:14px!important;min-width:0}
+.brand-name{font-size:clamp(22px,2vw,27px)!important;letter-spacing:.16em!important}
+.busted-logomark{width:45px!important;height:45px!important}
+.studio-brand-link strong{font-size:19px!important;letter-spacing:.15em!important}
+.studio-brand-link small{letter-spacing:.09em!important;color:#7e90b2!important}
+.site-header .brand span{font-size:clamp(18px,1.5vw,23px)!important;letter-spacing:.14em!important}
+.site-header .brand img{width:44px!important;height:44px!important}
+.mast-status{margin-left:auto}
+/* Public explanation: input flexibility without pretending a 1-view route is
+ * identical to the source-evidence-heavy controlled multi-view compiler. */
+.hero-eyebrow{color:#a6b8e0!important}
+.landing-screen .hero-intro h1{
+ font-size:clamp(52px,5.95vw,106px)!important;
+ line-height:1.02!important;
+ letter-spacing:-.067em!important;
+}
+.landing-screen .hero-title-accent{color:#e2e8ff!important}
+.landing-screen .hero-copy{margin-top:27px!important;font-size:clamp(19px,1.8vw,26px)!important}
+.landing-screen .hero-description{max-width:540px!important;color:#b5c3df!important}
+.landing-screen .hero-meta{gap:0!important}
+/* Awaken is a verb/phase, never the dominant product identity. */
+.awaken-chamber .chamber-header{gap:4px!important;margin-bottom:13px!important}
+.awaken-chamber .chamber-header h2{
+ font-size:clamp(42px,4.8vw,74px)!important;
+ font-weight:650!important;letter-spacing:-.067em!important;
+}
+.awaken-chamber .chamber-header #compileStatusMessage{
+ color:#bec9e5!important;font-size:clamp(12px,1.1vw,15px)!important;
+}
+.awaken-chamber .chamber-intake .dropzone{
+ border-color:rgba(185,200,255,.70)!important;
+ background:linear-gradient(140deg,rgba(18,25,49,.91),rgba(8,12,27,.96))!important;
+ box-shadow:0 18px 65px rgba(0,0,0,.43),0 0 36px rgba(99,119,224,.07)!important;
+}
+.awaken-chamber .chamber-console .awaken-button{
+ background:linear-gradient(120deg,rgba(54,66,144,.57),rgba(30,41,96,.75))!important;
+}
+/* Foreground typing is a syntactic, decoded signal, not a foreground label. */
+.awaken-chamber>#matrixTypewriter .matrix-trace{
+ font-weight:500!important;
+ opacity:var(--trace-opacity)!important;
+ text-shadow:0 0 7px rgba(109,132,248,.17)!important;
+ filter:none!important;
+}
+.awaken-chamber>#matrixTypewriter .matrix-trace-line{
+ color:#b6c8f6!important;
+ text-shadow:0 0 8px rgba(122,143,250,.16);
+}
+.awaken-chamber>#matrixTypewriter .matrix-trace-line.decoding{
+ color:#d7deff!important;
+ text-shadow:0 0 16px rgba(141,159,255,.30);
+}
+.awaken-chamber>#matrixTypewriter .matrix-trace-line.typing::after{
+ color:#dce4ff!important;
+ text-shadow:0 0 9px rgba(172,181,255,.42);
+}
+/* A mobile reserved rail allows typed code without ever painting over input. */
+.matrix-mobile-code-reserve{display:none}
+@media(max-width:760px){
+ .masthead{height:72px!important}
+ .brand-home{gap:9px!important}
+ .brand-name{font-size:19px!important;letter-spacing:.13em!important}
+ .busted-logomark{width:36px!important;height:36px!important}
+ .landing-screen .hero-intro h1{font-size:clamp(44px,10.2vw,65px)!important}
+ .awaken-chamber .chamber-header h2{font-size:clamp(42px,10vw,58px)!important}
+ .awaken-chamber .chamber-foot{margin-top:12px!important}
+ .matrix-mobile-code-reserve{
+   display:block;position:relative;z-index:0;
+   width:min(410px,100%);height:100px;flex:none;margin:12px auto 4px;
+   border-top:1px solid rgba(149,171,234,.13);
+   border-bottom:1px solid rgba(149,171,234,.10);
+   pointer-events:none;
+ }
+ body:has(.awaken-shell)>.busted-spatial-rain{opacity:.78!important}
+ .awaken-chamber>#matrixTypewriter .matrix-trace{
+   opacity:calc(var(--trace-opacity)*.85)!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ body>.busted-spatial-rain{opacity:.16!important}
+ .awaken-chamber>#matrixTypewriter .matrix-trace-line{animation:none!important}
+}

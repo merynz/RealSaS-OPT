@@ -177,7 +177,7 @@ def test_five_channel_graphics_contract_and_invalid_field_rejected():
 def test_eight_way_requires_independent_registry_and_source_binding():
     _, batch, trainer = _fixture()
     with pytest.raises(TypeError):
-        trainer.trusted_render_registry.clear()
+        trainer.trusted_render_registry["not-approved"] = {}
     untrusted = RSSvNextStructuralTrainer(
         trainer.model, torch.optim.AdamW(trainer.model.parameters()),
         dataset_manifest_sha256=trainer.dataset_manifest_sha256,

@@ -109,3 +109,34 @@ def test_strict_checkpoint_resume_and_dataset_binding(tmp_path):
     )
     with pytest.raises(ValueError, match="DATASET_MANIFEST_DRIFT"):
         wrong.load_checkpoint(checkpoint)
+
+
+def test_resume_refuses_changed_semantic_or_motion_objective_policy(tmp_path):
+    base = make_model()
+    policy = RSSvNextTrainingWeights(
+        topology=1., source_semantics=.2, semantic_risk=.4,
+    )
+    original = RSSvNextStructuralTrainer(
+        base, torch.optim.AdamW(base.parameters()),
+        dataset_manifest_sha256=manifest_hash(), weights=policy,
+    )
+    checkpoint = tmp_path / "objective-policy.pt"
+    original.save_checkpoint(checkpoint, sampler_cursor=3)
+    other = make_model()
+    drifted = RSSvNextStructuralTrainer(
+        other, torch.optim.AdamW(other.parameters()),
+        dataset_manifest_sha256=manifest_hash(),
+        weights=RSSvNextTrainingWeights(
+            topology=1., source_semantics=.2, semantic_risk=.5,
+        ),
+    )
+    with pytest.raises(ValueError, match="CHECKPOINT_OBJECTIVE_POLICY_DRIFT"):
+        drifted.load_checkpoint(checkpoint)
+
+
+@pytest.mark.parametrize("invalid", [float("nan"), float("inf"), True])
+def test_nonfinite_or_boolean_loss_weight_never_bypasses_policy_court(invalid):
+    from dataclasses import replace
+    weights = replace(RSSvNextTrainingWeights(), semantic_risk=invalid)
+    with pytest.raises(ValueError, match="WEIGHT_POLICY_NONFINITE_OR_UNTYPED"):
+        weights.validate()

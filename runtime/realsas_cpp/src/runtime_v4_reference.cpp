@@ -372,8 +372,17 @@ std::vector<uint8_t> ReferenceRuntime::render_rgba(uint32_t ci,uint32_t vi,float
     const uint32_t output_height=view.camera.resolution;
     if(output_width==0||output_height==0)throw std::runtime_error("Runtime-v4 output resolution is zero");
     const size_t pixels=size_t(output_width)*output_height;
-    std::vector<std::array<float,4>>color(pixels,{0,0,0,0});
-    std::vector<DepthSample>depth(pixels);
+    // The same canonical posed triangles are reprojected every frame.
+    // A nearest-face Z buffer cannot reproduce source-over on translucent
+    // surfaces: store bounded camera-local fragments and resolve per pixel.
+    // Overflow is an explicit failure, never a silently discarded back layer.
+    struct LayerSample {
+        float depth;
+        uint64_t authority_order;
+        std::array<float,4> rgba;
+    };
+    constexpr size_t kMaxReferenceLayersPerPixel = 64;
+    std::vector<std::vector<LayerSample>> layers(pixels);
     std::unordered_map<uint32_t,const Overlay*>overlay_by_asset;
     for(const auto&o:view.overlays)overlay_by_asset.emplace(o.asset_index,&o);
     std::vector<uint32_t>position(d.slots.size());
@@ -455,25 +464,47 @@ std::vector<uint8_t> ReferenceRuntime::render_rgba(uint32_t ci,uint32_t vi,float
                     | (uint64_t(semantic_order & 0xFFFu)<<50)
                     | (uint64_t(ai & 0xFFFu)<<38)
                     | uint64_t(fi);
-                if(!reference_raster_v3::depth_test_passes(depth[pi],z,authority_order))continue;
+                if(!std::isfinite(z))continue;
                 float u=a.u*bc.w0+b.u*bc.w1+c.u*bc.w2;
                 float v=a.v*bc.w0+b.v*bc.w1+c.v*bc.w2;
                 auto src=sample_bilinear(*binding.view,u,v);
                 if(src[3]<=0)continue;
-                // Flattened 8-view art is treated as nearest-surface opaque/cutout
-                // appearance authority. Camera-forward depth is primary; exact-depth
-                // ties use source-view provenance, then editable slot order, then
-                // stable asset/face identity. Stacked translucency is not inferred.
-                color[pi]=src;
-                const DepthWritePolicy policy=DepthWritePolicy::On;
-                if(reference_raster_v3::should_write_depth(policy,src[3],d.alpha_cutout_threshold))
-                    reference_raster_v3::commit_depth(depth[pi],z,authority_order);
+                auto& stack=layers[pi];
+                if(stack.size()>=kMaxReferenceLayersPerPixel)
+                    throw std::runtime_error("RUNTIME_V4_PIXEL_LAYER_BUDGET_EXCEEDED");
+                stack.push_back({z,authority_order,src});
             }
         }
     }
 
-    std::vector<uint8_t>out(pixels*4);
-    for(size_t i=0;i<pixels;++i)for(int c=0;c<4;++c)out[i*4+size_t(c)]=uint8_t(std::lround(std::clamp(color[i][c],0.0f,1.0f)*255.0f));
+    // For every pixel, depth-sort the *post-pose* source fragments front to
+    // back, with deterministic source-provenance/slot/face tie precedence.
+    // Source-over alpha is mathematically order-dependent, so no view-global
+    // face order can replace this per-ray operation.
+    std::vector<uint8_t> out(pixels*4,0u);
+    for(size_t pi=0;pi<pixels;++pi){
+        auto& stack=layers[pi];
+        if(stack.empty())continue;
+        std::stable_sort(stack.begin(),stack.end(),[](const LayerSample& a,const LayerSample& b){
+            if(a.depth!=b.depth)return a.depth<b.depth;
+            return a.authority_order>b.authority_order;
+        });
+        std::array<double,3> premult{0.,0.,0.};
+        double opacity=0.;
+        for(const auto& frag:stack){
+            const double a=std::clamp(double(frag.rgba[3]),0.,1.);
+            const double contribution=(1.-opacity)*a;
+            for(size_t c=0;c<3;++c)
+                premult[c]+=contribution*std::clamp(double(frag.rgba[c]),0.,1.);
+            opacity+=contribution;
+            if(opacity>=1.-1e-9)break;
+        }
+        if(opacity>0.){
+            for(size_t c=0;c<3;++c)
+                out[pi*4+c]=uint8_t(std::lround(std::clamp(premult[c]/opacity,0.,1.)*255.));
+        }
+        out[pi*4+3]=uint8_t(std::lround(std::clamp(opacity,0.,1.)*255.));
+    }
     return out;
 }
 

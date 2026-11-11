@@ -301,3 +301,35 @@ def test_explicit_cut_court_does_not_turn_weak_ambiguous_relation_into_forced_sp
     )
     assert len(compiled.fragments)==1
     assert compiled.metadata["candidate_merge_blocked_by_cut"]==()
+
+
+def test_unobserved_fragment_visibility_remains_unknown_and_uses_depth_raster_policy():
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(0,1,0.,1.,0.,0.,0.,1.),
+        ),
+        view_relations=(
+            GraphicsViewRelationEvidenceV1(0,0,1,.95,.95,1.,1.,1.),
+        ),
+    )
+    compiled=compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="skin",
+        source_graphics_binding_hash="source",
+        faces=((0,1,2),(3,4,5),(6,7,8)),
+        evidence=evidence,
+    )
+    assert len(compiled.fragments)==3
+    view=compiled.views[0]
+    unknown=(compiled.fragments[2].fragment_id,)
+    assert view.metadata["visibility_unknown_fragment_ids"] == unknown
+    assert unknown[0] in view.visible_fragment_ids
+    assert view.metadata["missing_source_view_visibility_is_not_positive_label"] is True
+    assert compiled.metadata["source_visibility_coverage_complete"] is False
+    runtime=build_runtime_graphics_v1(compiled,face_count=3)
+    assert runtime.metadata["source_visibility_coverage_complete"] is False
+    assert runtime.metadata["unknown_visibility_fragment_ids_by_view"]["0"] == unknown
+    assert runtime.metadata["unknown_visibility_raster_policy"] == (
+        "DRAW_GEOMETRY_AND_DEFER_OCCLUSION_TO_DEPTH"
+    )

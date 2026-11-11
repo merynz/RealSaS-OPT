@@ -64,10 +64,13 @@ def build_runtime_graphics_v1(compiled:CompiledGraphicsV1,*,face_count:int):
         ),
         # View-index schedules are not a pose-conditioned occlusion solver.
         "pose_conditioned_order_execution": False,
-        "source_visibility_coverage_complete": not any(
+        "source_visibility_coverage_complete": bool(compiled.views) and not any(
             bool(v.metadata.get("visibility_unknown_fragment_ids"))
             for v in compiled.views
         ),
+        "view_relation_eight_direction_address_coverage": tuple(
+            sorted(v.view_index for v in compiled.views)
+        ) == tuple(range(8)),
         "unknown_visibility_fragment_ids_by_view": {
             str(v.view_index): tuple(v.metadata.get("visibility_unknown_fragment_ids") or ())
             for v in compiled.views if v.metadata.get("visibility_unknown_fragment_ids")

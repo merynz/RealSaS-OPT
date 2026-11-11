@@ -430,23 +430,15 @@ def test_canonical_graphics_wrapper_rejects_wrong_mesh_binding_despite_valid_par
 
 
 def _qualified_neural_graphics_fixture(*, mutate_candidate=None):
+    """Pure Compiler fixture, no torch/ML dependency in V6 typed courts."""
     from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import (
         canonical_mesh_lineage_hash_v1,
     )
-    from compiler.realsas_compiler_core.canonical_rig_ir_v2 import (
-        mint_canonical_rig_v2,
-    )
-    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import (
-        mint_canonical_skin_v2,
-    )
-    from compiler.realsas_compiler_core.rig_program_ir_v1 import (
-        qualify_rig_program_v1,
-    )
+    from compiler.realsas_compiler_core.canonical_rig_ir_v2 import mint_canonical_rig_v2
+    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import mint_canonical_skin_v2
+    from compiler.realsas_compiler_core.rig_program_ir_v1 import qualify_rig_program_v1
     from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
-        seal_inference_evidence_v1,
-    )
-    from tests.models.test_rss_vnext_inference_checkpoint_bridge_v1 import (
-        _candidate, _mesh_with_addressed_scene_for_region_court,
+        RSSvNextInferenceEvidenceIRV1, seal_inference_evidence_v1,
     )
     from tests.compiler.test_control_ready_rig_v2 import _mesh, _proposal
     from tests.compiler.test_v6_typed_rig_skin_main_integration_v1 import (
@@ -454,25 +446,74 @@ def _qualified_neural_graphics_fixture(*, mutate_candidate=None):
     )
 
     bare = _mesh()
-    network_mesh, scene = _mesh_with_addressed_scene_for_region_court()
-    # The test producer models the legitimate static foundry: neural candidate
-    # geometry is address-identical to the actual minted Mesh, not guessed by
-    # the Graphics compiler. Its receipt must be listed as an upstream parent.
-    network_mesh["rest_xyz"] = [list(v.P) for v in bare.vertices]
-    network_mesh["base_xyz"] = [list(v.P) for v in bare.vertices]
-    network_mesh["faces"] = [
-        [next(i for i, v in enumerate(bare.vertices) if v.canonical_mesh_vertex_id == vid)
-         for vid in face] for face in bare.faces
-    ]
+    n = len(bare.vertices)
+    points = [list(v.P) for v in bare.vertices]
+    indices = {
+        v.canonical_mesh_vertex_id: i for i, v in enumerate(bare.vertices)
+    }
+    network_mesh = {
+        "topology_tokens": [128, 129, 4],
+        "rest_xyz": points,
+        "base_xyz": points,
+        "local_features": [[.1, .2, .3]] * n,
+        "faces": [[indices[vid] for vid in face] for face in bare.faces],
+        "vertex_components": [0] * n,
+        "face_components": [0] * len(bare.faces),
+        "normals_xyz": [[0., 0., 1.]] * n,
+        "semantic_logits": [[4., .2, -3.]] * n,
+        "presentation_role_logits": [[.1, .2, .3, .4]] * n,
+        "presentation_role_schema_id": "RSS.vNext.SemanticPresentationRoles.FourWayResearch.v1",
+        "affordance_logits": [[.5, .5]] * n,
+        "graphics_logits": [[.1, .2, .3, .4, .5]] * n,
+        "static_quality_logits": [[0., 0., 0., 0.]] * n,
+        "unsigned_distance": [.1] * n,
+        "sign_logits": [.7] * n,
+        "source_rays": {
+            "rgba": [[[.1, .2, .3, .8], [.2, .3, .4, .4]]] * n,
+            "valid": [[True, True]] * n,
+            "alpha": [[.8, .4]] * n,
+            "appearance_authority": "ORIGINAL_RGBA_CAMERA_RAY_NOT_POINT_TEXTURE",
+            "depth_authority": "UNKNOWN_NO_SOURCE_DEPTH",
+        },
+        "source_authority": "LEARNED_PREDICTED_TOPOLOGY",
+        "signed_solid_authority": "UNQUALIFIED",
+        "canonical_mesh_authority": False,
+    }
+    scene = {
+        "source_semantic_patch_logits": [[[0., 0., 0., 0.]], [[0., 0., 0., 0.]]],
+        "source_semantic_log_uncertainty": [[[0.]], [[0.]]],
+        "region_relation_logits": [
+            [[0., 0., 0.], [0., 0., 0.]],
+            [[0., 0., 0.], [0., 0., 0.]],
+        ],
+        "region_relation_valid_mask": [[False, True], [True, False]],
+        "presentation_role_probabilities": [[.25, .25, .25, .25]] * n,
+        "constructed_camera_features": None,
+        "constructed_camera_angles": None,
+        "authority": "PREDICTED_FROM_TWO_ORIGINAL_VIEWS",
+        "region_query_xyz": points,
+        "region_membership_logits": [[4., .2, -3.]] * n,
+        "region_graphics_logits": [[0., 0., 0., 0., 0.]] * n,
+    }
     if mutate_candidate:
         mutate_candidate(network_mesh)
-    evidence = seal_inference_evidence_v1(_candidate(mesh=network_mesh, scene=scene))
+    evidence = seal_inference_evidence_v1(RSSvNextInferenceEvidenceIRV1(
+        checkpoint_sha256="a" * 64,
+        observed_front_sha256="b" * 64,
+        observed_back_sha256="c" * 64,
+        camera_binding_sha256="d" * 64,
+        mesh_status="UNQUALIFIED_MESH_CANDIDATE",
+        mesh=network_mesh,
+        scene=scene,
+    ))
     mesh = replace(
         bare, proposal_evidence_refs=(evidence.evidence_hash,),
         mesh_lineage_hash="",
     )
     mesh = replace(mesh, mesh_lineage_hash=canonical_mesh_lineage_hash_v1(mesh))
-    rig = mint_canonical_rig_v2(mesh, qualified_program=qualify_rig_program_v1(_proposal(mesh)))
+    rig = mint_canonical_rig_v2(
+        mesh, qualified_program=qualify_rig_program_v1(_proposal(mesh)),
+    )
     skin = mint_canonical_skin_v2(
         mesh, rig,
         qualified_skin=_qualified_synthetic_carrier_skin(mesh, rig),

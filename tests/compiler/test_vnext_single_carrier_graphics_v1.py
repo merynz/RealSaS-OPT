@@ -12,6 +12,7 @@ from compiler.realsas_compiler_core.graphics_v1 import (
     GraphicsViewRelationEvidenceV1,
     build_graphics_evidence_v1,
     compile_graphics_v1,
+    compiled_graphics_hash_v1,
 )
 from compiler.realsas_compiler_core.types import QualificationError
 
@@ -634,3 +635,59 @@ def test_graphics_evidence_authority_cannot_be_escalated_by_untrusted_metadata()
     )
     assert evidence.metadata["authority_class"] == "LEARNED_RELATION_EVIDENCE_ONLY"
     assert evidence.metadata["categorical_semantics_used"] is False
+
+
+def _sealed_runtime_graphics_mutation(compiled, **changes):
+    candidate=replace(compiled, **changes, graph_hash="")
+    return replace(candidate, graph_hash=compiled_graphics_hash_v1(candidate))
+
+
+def _runtime_address_fixture():
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(0,1,0.,1.,0.,0.,0.,1.),
+        ),
+        view_relations=(
+            GraphicsViewRelationEvidenceV1(0,0,1,.95,.95,1.,1.,1.),
+        ),
+    )
+    return compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="skin",
+        source_graphics_binding_hash="source",
+        faces=((0,1,2),(3,4,5)), evidence=evidence,
+    )
+
+
+@pytest.mark.parametrize("corrupt", [0.5, True, "0", -1, 3])
+def test_runtime_graphics_never_coerces_rehashed_noncanonical_face_address(corrupt):
+    compiled=_runtime_address_fixture()
+    fragments=(replace(compiled.fragments[0],face_indices=(corrupt,)),)+compiled.fragments[1:]
+    bad=_sealed_runtime_graphics_mutation(compiled,fragments=fragments)
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_FACE_OWNER_INVALID"):
+        build_runtime_graphics_v1(bad,face_count=2)
+
+
+def test_runtime_graphics_rejects_rehashed_foreign_or_duplicate_view_addresses():
+    compiled=_runtime_address_fixture()
+    duplicate=_sealed_runtime_graphics_mutation(
+        compiled,views=(compiled.views[0],compiled.views[0]),
+    )
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_VIEW_ADDRESS_INVALID"):
+        build_runtime_graphics_v1(duplicate,face_count=2)
+    foreign=replace(compiled.views[0],visible_fragment_ids=("foreign-fragment",))
+    bad=_sealed_runtime_graphics_mutation(compiled,views=(foreign,))
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_VISIBLE_FRAGMENT_INVALID"):
+        build_runtime_graphics_v1(bad,face_count=2)
+
+
+def test_runtime_graphics_rejects_rehashed_untethered_order_edges():
+    compiled=_runtime_address_fixture()
+    original=compiled.views[0]
+    edge=replace(original.order_edges[0],view_index=1)
+    bad=_sealed_runtime_graphics_mutation(
+        compiled,views=(replace(original,order_edges=(edge,)),),
+    )
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_ORDER_EDGE_ADDRESS_INVALID"):
+        build_runtime_graphics_v1(bad,face_count=2)

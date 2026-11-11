@@ -45,4 +45,23 @@ def build_runtime_graphics_v1(compiled:CompiledGraphicsV1,*,face_count:int):
     for v in sorted(compiled.views,key=lambda r:r.view_index):
         edges=tuple((index[e.front_fragment_id],index[e.back_fragment_id]) for e in v.order_edges);views.append(RuntimeGraphicsViewV1(int(v.view_index),tuple(sorted(index[x] for x in v.visible_fragment_ids)),_topological_order(len(fragments),edges),edges))
     attachments=tuple({"fragment_index":index[a.fragment_id],"parent_mechanical_domain_id":a.parent_mechanical_domain_id,"anchor_face_index":int(a.anchor_face_index),"barycentric_anchor":tuple(map(float,a.barycentric_anchor)),"confidence":float(a.confidence),"evidence_refs":tuple(a.evidence_refs)} for a in compiled.attachments)
-    value=RuntimeGraphicsV1(compiled.canonical_mesh_binding_hash,compiled.graph_hash,tuple(owner),tuple(f.fragment_id for f in fragments),tuple(int(f.support_band_pixels) for f in fragments),tuple(views),attachments,"",metadata={"behaviorally_consumable":True,"hash_only_binding_forbidden":True,"triangle_array_order_is_presentation_authority":False,"single_canonical_mesh_authority":True,"silhouette_support_is_2d_only":True});return replace(value,runtime_graphics_hash=runtime_graphics_hash_v1(value))
+    value=RuntimeGraphicsV1(compiled.canonical_mesh_binding_hash,compiled.graph_hash,tuple(owner),tuple(f.fragment_id for f in fragments),tuple(int(f.support_band_pixels) for f in fragments),tuple(views),attachments,"",metadata={
+        "behaviorally_consumable": True,
+        "hash_only_binding_forbidden": True,
+        "triangle_array_order_is_presentation_authority": False,
+        "single_canonical_mesh_authority": True,
+        "silhouette_support_is_2d_only": True,
+        # A topological tie-break can make a drawable schedule executable,
+        # but cannot prove the removed source-evidence relation was false.
+        # Keep representation policy distinct from observed source truth.
+        "source_order_qualified": not any(
+            bool(view.metadata.get("cycle_edges_removed"))
+            for view in compiled.views
+        ),
+        "representation_policy_arbitration_used": any(
+            bool(view.metadata.get("cycle_edges_removed"))
+            for view in compiled.views
+        ),
+        # View-index schedules are not a pose-conditioned occlusion solver.
+        "pose_conditioned_order_execution": False,
+    });return replace(value,runtime_graphics_hash=runtime_graphics_hash_v1(value))

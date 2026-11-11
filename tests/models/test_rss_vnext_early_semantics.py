@@ -968,8 +968,9 @@ def test_semantic_patch_registry_frozen_into_resume_checkpoint(tmp_path):
     )
     path=tmp_path/"semantic-source-registry.pt"
     trainer.save_checkpoint(path,sampler_cursor=9)
+    other_net=make()
     wrong=RSSvNextStructuralTrainer(
-        make(),torch.optim.AdamW(make().parameters()),dataset_manifest_sha256="3"*64,
+        other_net,torch.optim.AdamW(other_net.parameters()),dataset_manifest_sha256="3"*64,
         weights=weights,trusted_semantic_patch_registry={
             "admitted-source-patch":{**receipt,"source_qualification_key":"unrelated"},
         },

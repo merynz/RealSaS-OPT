@@ -11,7 +11,7 @@ from models.rss_vnext.early_semantic_field import masked_source_semantic_evidenc
 from models.rss_vnext.source_ray_evidence import sample_front_back_source_rays
 from models.rss_vnext.training_engine import (
     RSSvNextStructuralTrainer, RSSvNextStructuralTrainingBatch,
-    RSSvNextTrainingWeights,
+    RSSvNextTrainingWeights, source_surface_tensor_sha256,
 )
 
 
@@ -167,3 +167,119 @@ def test_mesh_candidate_carries_source_ray_evidence_without_appearance_claim():
     assert mesh.source_ray_evidence.rgba.shape[1] == mesh.rest_vertices_iris.shape[1]
     assert mesh.source_ray_evidence.source_view_count == 2
     assert not mesh.canonical_mesh_authority
+
+
+def _qualified_3d_role_case():
+    net = make()
+    rgba, cam = source()
+    state, _, _ = net.encode_observations(rgba, cam)
+    target = (torch.arange(state.query_xyz.shape[1]).reshape(1, -1) % net.cfg.semantic_role_schema().count).long()
+    mask = torch.zeros_like(target, dtype=torch.bool)
+    mask[0, 0] = True
+    mask[0, 2] = True
+    mask[0, 5] = True
+    key = "test-only-source-surface-receipt"
+    registry = {key: {
+        "admission_status": "QUALIFIED_SOURCE_SURFACE_ROLE",
+        "dataset_manifest_sha256": "3" * 64,
+        "source_qualification_key": "toy-source",
+        "role_schema_id": net.cfg.semantic_role_schema_id,
+        "query_xyz_sha256": source_surface_tensor_sha256(state.query_xyz),
+        "role_indices_sha256": source_surface_tensor_sha256(target),
+        "role_mask_sha256": source_surface_tensor_sha256(mask),
+    }}
+    batch = RSSvNextStructuralTrainingBatch(
+        rgba=rgba, camera_features=cam,
+        source_surface_role_indices=target,
+        source_surface_role_mask=mask,
+        source_surface_role_admission_key=key,
+        source_qualification_key="toy-source",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    )
+    return net, registry, batch
+
+
+def test_source_admitted_3d_presentation_role_head_receives_real_gradient():
+    net, registry, batch = _qualified_3d_role_case()
+    trainer = RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters(), lr=1e-3),
+        dataset_manifest_sha256="3" * 64,
+        weights=RSSvNextTrainingWeights(
+            topology=0, motion_preference=0, source_semantics=0,
+            surface_roles=1, flexicubes_surface=0,
+        ),
+        trusted_surface_role_registry=registry,
+    )
+    result = trainer.train_step(batch)
+    assert result.surface_role_loss is not None
+    assert torch.isfinite(result.surface_role_loss)
+    assert result.eligible_surface_role_points == 3
+    assert result.source_semantic_loss is None
+    assert net.presentation_role_head[-1].weight.grad is not None
+    assert net.presentation_role_head[-1].weight.grad.abs().sum() > 0
+    assert net.iris.scene.scene_queries.grad is not None
+    assert net.iris.scene.scene_queries.grad.abs().sum() > 0
+
+
+def test_3d_surface_semantic_receipt_cannot_be_self_certified_or_reused():
+    net, registry, batch = _qualified_3d_role_case()
+    optimizer = torch.optim.AdamW(net.parameters(), lr=1e-3)
+    weights = RSSvNextTrainingWeights(
+        topology=0, motion_preference=0, source_semantics=0,
+        surface_roles=1, flexicubes_surface=0,
+    )
+    without_registry = RSSvNextStructuralTrainer(
+        net, optimizer, dataset_manifest_sha256="3" * 64, weights=weights,
+    )
+    with pytest.raises(ValueError, match="SURFACE_ROLE_UNTRUSTED_ADMISSION"):
+        without_registry.objective(batch)
+    trainer = RSSvNextStructuralTrainer(
+        net, optimizer, dataset_manifest_sha256="3" * 64,
+        weights=weights, trusted_surface_role_registry=registry,
+    )
+    batch.source_surface_role_indices = batch.source_surface_role_indices.clone()
+    batch.source_surface_role_indices[0, 0] = 2
+    with pytest.raises(ValueError, match="RECEIPT_SOURCE_OR_ADDRESS_DRIFT"):
+        trainer.objective(batch)
+
+    batch.source_surface_role_indices[0, 0] = 0
+    batch.source_qualification_key = "different-source"
+    with pytest.raises(ValueError, match="RECEIPT_SOURCE_OR_ADDRESS_DRIFT"):
+        trainer.objective(batch)
+
+
+def test_3d_surface_semantic_masked_unknown_not_imputed_and_resume_registry_bound(tmp_path):
+    from models.rss_vnext.semantic_geometry_prior import masked_qualified_surface_role_loss
+    net, registry, batch = _qualified_3d_role_case()
+    logits = torch.zeros((1, 8, 4), requires_grad=True)
+    labels = batch.source_surface_role_indices.clone()
+    labels[~batch.source_surface_role_mask] = -1
+    loss = masked_qualified_surface_role_loss(
+        logits, labels, batch.source_surface_role_mask,
+        schema=net.cfg.semantic_role_schema(),
+    )
+    loss.backward()
+    assert logits.grad[~batch.source_surface_role_mask].abs().sum() == 0
+    assert logits.grad[batch.source_surface_role_mask].abs().sum() > 0
+    with pytest.raises(ValueError, match="NO_ADMITTED_POINTS"):
+        masked_qualified_surface_role_loss(
+            logits, labels, torch.zeros_like(batch.source_surface_role_mask),
+            schema=net.cfg.semantic_role_schema(),
+        )
+    weights = RSSvNextTrainingWeights(
+        topology=0, motion_preference=0, source_semantics=0,
+        surface_roles=1, flexicubes_surface=0,
+    )
+    trainer = RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters(), lr=1e-3),
+        dataset_manifest_sha256="3" * 64,
+        weights=weights, trusted_surface_role_registry=registry,
+    )
+    checkpoint = tmp_path / "surface-role-receipted.pt"
+    trainer.save_checkpoint(checkpoint, sampler_cursor=0)
+    incompatible = RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters(), lr=1e-3),
+        dataset_manifest_sha256="3" * 64, weights=weights,
+    )
+    with pytest.raises(ValueError, match="SURFACE_ROLE_REGISTRY_DRIFT"):
+        incompatible.load_checkpoint(checkpoint)

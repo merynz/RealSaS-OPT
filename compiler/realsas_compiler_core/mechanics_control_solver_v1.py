@@ -315,6 +315,7 @@ def solve_control_pose_v1(
     rest = {jid: _v3(j.P, "MECHANICS_JOINT_REST_INVALID") for jid, j in joint_by.items()}
     pos = {jid: p.copy() for jid, p in rest.items()}
     explicit_rot: dict[str, np.ndarray] = {}
+    explicit_scale: dict[str, np.ndarray] = {}
 
     # Direct animator controls apply rigid transforms to the entire declared
     # deform subtree. Earlier V1 logic moved only target joints, tearing the
@@ -385,6 +386,7 @@ def solve_control_pose_v1(
                 rel = rest[jid] - rest_c
                 pos[jid] = world_p + world_r @ (rel * world_s)
                 explicit_rot[jid] = world_r
+                explicit_scale[jid] = world_s.copy()
 
     chain_by = {c.canonical_chain_id: c for c in rig.chains}
     residuals: list[tuple[str, float]] = []
@@ -420,7 +422,7 @@ def solve_control_pose_v1(
             # Record an achieved endpoint, never the pre-weight FABRIK result.
             residuals.append((constraint.canonical_constraint_id, float(np.linalg.norm(pos[ids[-1]] - target))))
         elif op in {"COPY_TRANSFORM", "FOLLOW"}:
-            target_p, target_r, _ = inputs[0]
+            target_p, target_r, target_s = inputs[0]
             for jid in constraint.output_canonical_joint_ids:
                 if jid not in pos:
                     raise QualificationError("MECHANICS_CONSTRAINT_OUTPUT_UNKNOWN")
@@ -430,6 +432,10 @@ def solve_control_pose_v1(
                     explicit_rot[jid] = _blend_rotation_basis(
                         explicit_rot.get(jid, np.eye(3, dtype=np.float64)),
                         target_r, alpha,
+                    )
+                    explicit_scale[jid] = (
+                        explicit_scale.get(jid, np.ones(3, dtype=np.float64))
+                        * (1.0 - alpha) + target_s * alpha
                     )
             residuals.append((constraint.canonical_constraint_id, 0.0))
         elif op == "AIM":
@@ -505,6 +511,9 @@ def solve_control_pose_v1(
             rest_P=tuple(map(float, rest[jid])),
             solved_P=tuple(map(float, pos[jid])),
             rotation_basis=tuple(tuple(float(v) for v in row) for row in rotation),
+            scale=tuple(float(v) for v in explicit_scale.get(
+                jid, np.ones(3, dtype=np.float64)
+            )),
         ))
     return MechanicsPoseIRV1(
         joints=tuple(solved_rows),
@@ -553,8 +562,16 @@ def deform_mesh_lbs_v1(
                 raise QualificationError("MECHANICS_LBS_SKIN_JOINT_UNKNOWN")
             jp = joint_pose[jid]
             R = np.asarray(jp.rotation_basis, dtype=np.float64)
+            if R.shape != (3, 3) or not np.isfinite(R).all():
+                raise QualificationError("MECHANICS_LBS_ROTATION_INVALID")
+            scale = _v3(jp.scale, "MECHANICS_LBS_SCALE_INVALID")
+            if np.any(scale <= 0.0):
+                raise QualificationError("MECHANICS_LBS_SCALE_NONPOSITIVE")
             solved_p = _v3(jp.solved_P, "MECHANICS_LBS_SOLVED_JOINT_INVALID")
-            transformed = solved_p + R @ (v - rest_joint[jid])
+            # Pose scale is part of the joint's deformation transform, not
+            # merely its endpoint translation. Apply it to local rest offsets
+            # before rotation so ROOT/FK nonuniform scale survives LBS.
+            transformed = solved_p + R @ ((v - rest_joint[jid]) * scale)
             result += w * transformed
             total += w
         if abs(total - 1.0) > 1e-6 or not np.isfinite(result).all():
@@ -569,6 +586,7 @@ def deform_mesh_lbs_v1(
         rig_lineage_hash=rig.rig_lineage_hash,
         metadata={
             "deformation_method": "LINEAR_BLEND_SKINNING",
+            "joint_scale_consumed": True,
             "mechanical_mesh_authority_preserved": True,
             "visual_rebind_performed": False,
         },
@@ -578,4 +596,5 @@ def deform_mesh_lbs_v1(
 __all__ = [
     "ControlTransformIRV1", "DeformedMeshIRV1", "MechanicsPoseIRV1",
     "SolvedJointTransformIRV1", "deform_mesh_lbs_v1", "solve_control_pose_v1",
+    "control_world_transforms_v1",
 ]

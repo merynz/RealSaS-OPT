@@ -10,6 +10,7 @@ The last-written receipt commits to the source tensor archive and proposal.
 
 from hashlib import sha256
 from pathlib import Path
+from zipfile import ZipFile
 import json
 import os
 
@@ -18,6 +19,11 @@ import torch
 from torch import Tensor, nn
 
 from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.rss_vnext_source_observation_v1 import (
+    RSSvNextTwoViewSourceObservationV1,
+    canonicalize_two_view_source_v1,
+    MAX_BYTES as _MAX_CANONICAL_SOURCE_BYTES,
+)
 from compiler.realsas_compiler_core.rig_constraint_schema_v1 import RIG_CONSTRAINT_OPERATOR_IDS_V1
 from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
     RSSvNextInferenceEvidenceIRV1,
@@ -30,6 +36,7 @@ from .inference_evidence_export_v1 import (
 
 _RECEIPT_SCHEMA = "RealSaS.RSSvNext.SourceToCompilerProposalReceipt.v1"
 _RECEIPT_FILES = ("observed_source_tensors.npz", "neural_evidence.json", "inference_receipt.json")
+_ORIGINAL_SOURCE_FILE = "original_two_view_source.npz"
 _MAX_SOURCE_BYTES = 128 * 1024 * 1024
 
 
@@ -84,6 +91,7 @@ def run_two_view_to_compiler_proposal_v1(
     max_topology_tokens: int | None = None,
     generate_controls: bool = True,
     product_mode: bool = True,
+    source_observation: RSSvNextTwoViewSourceObservationV1 | None = None,
 ) -> dict:
     """Execute pinned checkpoint and commit the proposal with two source frames.
 
@@ -91,10 +99,20 @@ def run_two_view_to_compiler_proposal_v1(
     A successful neural output remains unqualified until existing courts pass.
     """
     _source_preflight(observed_rgba, camera_features)
+    if product_mode and source_observation is None:
+        raise RuntimeError("RSS_VNEXT_PRODUCT_CANONICAL_SOURCE_REQUIRED")
+    if source_observation is not None:
+        if not isinstance(source_observation, RSSvNextTwoViewSourceObservationV1):
+            raise RuntimeError("RSS_VNEXT_SOURCE_CANONICAL_TYPE_REQUIRED")
+        normalized, cameras = source_observation.to_model_tensors(
+            device=str(observed_rgba.device),
+        )
+        if not torch.equal(observed_rgba, normalized) or not torch.equal(camera_features, cameras):
+            raise RuntimeError("RSS_VNEXT_SOURCE_NORMALIZATION_OR_CAMERA_DRIFT")
     target = Path(output_directory).resolve()
     target.mkdir(parents=True, exist_ok=True)
     # Refuse accidental reuse of an existing receipt: revision lineage is immutable.
-    if any((target / name).exists() for name in _RECEIPT_FILES):
+    if any((target / name).exists() for name in (*_RECEIPT_FILES, _ORIGINAL_SOURCE_FILE)):
         raise RuntimeError("RSS_VNEXT_RUN_OUTPUT_REVISION_ALREADY_EXISTS")
     model = load_inference_checkpoint_v1(
         checkpoint_path,
@@ -152,6 +170,27 @@ def run_two_view_to_compiler_proposal_v1(
         "product_revision_minted": False,
         "qualification_status": "COMPILER_EVIDENCE_SEALED_NOT_PRODUCT_QUALIFIED",
     }
+    if source_observation is not None:
+        original = target / _ORIGINAL_SOURCE_FILE
+        original_tmp = original.with_name(original.name + ".tmp")
+        try:
+            with original_tmp.open("wb") as fp:
+                np.savez_compressed(
+                    fp,
+                    native_rgba=source_observation.native_rgba,
+                    camera_features=source_observation.camera_features,
+                    source_rights_claim_sha256=np.asarray(
+                        [source_observation.source_rights_claim_sha256],
+                    ),
+                )
+            os.replace(original_tmp, original)
+        finally:
+            original_tmp.unlink(missing_ok=True)
+        receipt["canonical_source_binding_sha256"] = source_observation.source_binding_sha256
+        receipt["canonical_source_file_sha256"] = _digest_file(original)
+        receipt["source_rights_claim_sha256"] = source_observation.source_rights_claim_sha256
+        receipt["source_rights_verified"] = False
+        receipt["source_normalization"] = "RGBA_UINT8_DIV_255_FLOAT32_NO_COMPOSITE_NO_RECENTER"
     receipt["receipt_hash"] = content_sha256(receipt)
     _atomic_bytes(
         receipt_path,
@@ -204,6 +243,54 @@ def read_compiler_proposal_receipt_v1(
         rgba = torch.from_numpy(archive["observed_rgba"])
         cam = torch.from_numpy(archive["camera_features"])
     _source_preflight(rgba, cam)
+    canonical_fields = {
+        "canonical_source_binding_sha256", "canonical_source_file_sha256",
+        "source_rights_claim_sha256", "source_rights_verified",
+        "source_normalization",
+    }
+    present = canonical_fields.intersection(receipt)
+    if present and present != canonical_fields:
+        raise RuntimeError("RSS_VNEXT_RECEIPT_CANONICAL_SOURCE_FIELDS_INCOMPLETE")
+    original_path = root / _ORIGINAL_SOURCE_FILE
+    if present:
+        if receipt["source_rights_verified"] is not False:
+            raise RuntimeError("RSS_VNEXT_SOURCE_RIGHTS_PREMATURE_AUTHORITY")
+        if receipt["source_normalization"] != "RGBA_UINT8_DIV_255_FLOAT32_NO_COMPOSITE_NO_RECENTER":
+            raise RuntimeError("RSS_VNEXT_SOURCE_NORMALIZATION_POLICY_DRIFT")
+        if (
+            not original_path.is_file()
+            or original_path.stat().st_size > _MAX_CANONICAL_SOURCE_BYTES
+            or _digest_file(original_path) != receipt["canonical_source_file_sha256"]
+        ):
+            raise RuntimeError("RSS_VNEXT_RECEIPT_CANONICAL_SOURCE_BYTES_DRIFT")
+        # Bound decompressed NumPy entries before loading untrusted archives.
+        with ZipFile(original_path) as zf:
+            if len(zf.infolist()) != 3 or any(
+                z.file_size > _MAX_CANONICAL_SOURCE_BYTES for z in zf.infolist()
+            ):
+                raise RuntimeError("RSS_VNEXT_CANONICAL_SOURCE_ARCHIVE_LIMIT")
+        with np.load(original_path, allow_pickle=False) as raw:
+            if set(raw.files) != {
+                "native_rgba", "camera_features", "source_rights_claim_sha256",
+            }:
+                raise RuntimeError("RSS_VNEXT_CANONICAL_SOURCE_ARCHIVE_FIELDS_DRIFT")
+            rights = raw["source_rights_claim_sha256"]
+            if rights.shape != (1,):
+                raise RuntimeError("RSS_VNEXT_CANONICAL_SOURCE_RIGHTS_FIELD_INVALID")
+            canonical = canonicalize_two_view_source_v1(
+                raw["native_rgba"], raw["camera_features"],
+                source_rights_claim_sha256=str(rights[0]),
+            )
+        normalized_rgba, normalized_camera = canonical.to_model_tensors()
+        if (
+            not torch.equal(normalized_rgba, rgba)
+            or not torch.equal(normalized_camera, cam)
+            or canonical.source_binding_sha256 != receipt["canonical_source_binding_sha256"]
+            or canonical.source_rights_claim_sha256 != receipt["source_rights_claim_sha256"]
+        ):
+            raise RuntimeError("RSS_VNEXT_CANONICAL_SOURCE_OBSERVATION_BINDING_DRIFT")
+    elif original_path.exists():
+        raise RuntimeError("RSS_VNEXT_RECEIPT_UNDECLARED_SOURCE_ARTIFACT")
     if (
         _source_tensor_digest(rgba[0, 0]) != evidence.observed_front_sha256
         or _source_tensor_digest(rgba[0, 1]) != evidence.observed_back_sha256
@@ -213,7 +300,40 @@ def read_compiler_proposal_receipt_v1(
     return receipt, evidence
 
 
+@torch.no_grad()
+def run_canonical_two_view_to_compiler_proposal_v1(
+    *,
+    source_observation: RSSvNextTwoViewSourceObservationV1,
+    checkpoint_path: str | Path,
+    expected_checkpoint_sha256: str,
+    vision_encoder: nn.Module,
+    output_directory: str | Path,
+    max_topology_tokens: int | None = None,
+    generate_controls: bool = True,
+    product_mode: bool = True,
+) -> dict:
+    """Only canonical source entry into production-oriented RSS.vNext inference.
+
+    A rights *claim* and a model prediction are not qualification receipts.
+    Source input is never replaced by synthetic camera or novel-view evidence.
+    """
+    rgba, camera = source_observation.to_model_tensors()
+    return run_two_view_to_compiler_proposal_v1(
+        checkpoint_path=checkpoint_path,
+        expected_checkpoint_sha256=expected_checkpoint_sha256,
+        vision_encoder=vision_encoder,
+        observed_rgba=rgba,
+        camera_features=camera,
+        output_directory=output_directory,
+        max_topology_tokens=max_topology_tokens,
+        generate_controls=generate_controls,
+        product_mode=product_mode,
+        source_observation=source_observation,
+    )
+
+
 __all__ = [
     "run_two_view_to_compiler_proposal_v1",
+    "run_canonical_two_view_to_compiler_proposal_v1",
     "read_compiler_proposal_receipt_v1",
 ]

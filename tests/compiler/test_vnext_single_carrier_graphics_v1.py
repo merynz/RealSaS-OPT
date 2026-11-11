@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import pytest
+from dataclasses import replace
 
 from compiler.realsas_compiler_core.graphics_runtime_v1 import build_runtime_graphics_v1
 from compiler.realsas_compiler_core.graphics_v1 import (
     GraphicsCompilePolicyV1,
+    compile_graphics_on_canonical_puppet_v1,
     GraphicsStaticRelationEvidenceV1,
     GraphicsViewRelationEvidenceV1,
     build_graphics_evidence_v1,
@@ -355,3 +357,72 @@ def test_no_view_evidence_never_mints_complete_source_visibility():
     runtime=build_runtime_graphics_v1(compiled,face_count=2)
     assert runtime.metadata["source_visibility_coverage_complete"] is False
     assert runtime.metadata["view_relation_eight_direction_address_coverage"] is False
+
+
+def _canonical_graphics_parents():
+    from tests.compiler.test_v6_typed_rig_skin_main_integration_v1 import (
+        _real_rig_fixture, _qualified_synthetic_carrier_skin,
+    )
+    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import mint_canonical_skin_v2
+    mesh,rig=_real_rig_fixture()
+    skin=mint_canonical_skin_v2(
+        mesh,rig,
+        qualified_skin=_qualified_synthetic_carrier_skin(mesh,rig),
+        skin_code_proposal_hash="a"*64,
+        skin_codec_architecture_id="fixture-codec-not-model-release",
+        skin_codec_checkpoint_hash="b"*64,
+    )
+    return mesh,rig,skin
+
+
+def test_graphics_compiles_only_from_actual_same_canonical_mesh_rig_skin():
+    mesh,rig,skin=_canonical_graphics_parents()
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash=mesh.mesh_lineage_hash,
+        static_relations=(),view_relations=(),
+    )
+    compiled=compile_graphics_on_canonical_puppet_v1(
+        mesh=mesh,rig=rig,skin=skin,source_graphics_binding_hash="source-bound",
+        evidence=evidence,
+    )
+    assert compiled.canonical_mesh_binding_hash==mesh.mesh_lineage_hash
+    assert compiled.canonical_mesh_skin_binding_hash==skin.skin_lineage_hash
+    assert len(compiled.fragments)==1
+    assert compiled.fragments[0].face_indices==(0,)
+    assert compiled.metadata["source_visibility_coverage_complete"] is False
+    runtime=build_runtime_graphics_v1(compiled,face_count=len(mesh.faces))
+    assert runtime.face_fragment_index==(0,)
+    assert runtime.metadata["source_visibility_coverage_complete"] is False
+
+
+def test_canonical_graphics_wrapper_rejects_self_rehashed_cross_puppet_skin():
+    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import (
+        canonical_skin_lineage_hash_v2,
+    )
+    mesh,rig,skin=_canonical_graphics_parents()
+    wrong=replace(skin,mesh_lineage_hash="f"*64,skin_lineage_hash="")
+    wrong=replace(wrong,skin_lineage_hash=canonical_skin_lineage_hash_v2(wrong))
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash=mesh.mesh_lineage_hash,
+        static_relations=(),view_relations=(),
+    )
+    with pytest.raises(QualificationError,match="GRAPHICS_CANONICAL_PUPPET_PARENT_DRIFT"):
+        compile_graphics_on_canonical_puppet_v1(
+            mesh=mesh,rig=rig,skin=wrong,
+            source_graphics_binding_hash="source-bound",
+            evidence=evidence,
+        )
+
+
+def test_canonical_graphics_wrapper_rejects_wrong_mesh_binding_despite_valid_parents():
+    mesh,rig,skin=_canonical_graphics_parents()
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="unrelated-proposal",
+        static_relations=(),view_relations=(),
+    )
+    with pytest.raises(QualificationError,match="GRAPHICS_CANONICAL_MESH_BINDING_DRIFT"):
+        compile_graphics_on_canonical_puppet_v1(
+            mesh=mesh,rig=rig,skin=skin,
+            source_graphics_binding_hash="source-bound",
+            evidence=evidence,
+        )

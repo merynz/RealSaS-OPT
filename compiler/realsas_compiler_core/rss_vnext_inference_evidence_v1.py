@@ -309,6 +309,18 @@ def validate_inference_evidence_v1(
             _reject("RSS_VNEXT_EVIDENCE_ABSTAIN_MUST_NOT_PROMOTE")
     elif value.mesh_status == "UNQUALIFIED_MESH_CANDIDATE":
         n = _mesh(value.mesh)
+        if value.scene is not None and "region_query_xyz" in value.scene:
+            # The candidate mesh queries the SAME region slot vocabulary as
+            # H(x), at exact decoded vertex coordinates. Vocabulary width
+            # mismatch cannot be silently repaired by Compiler.
+            slot_count = len(value.scene["region_relation_valid_mask"])
+            if any(len(row) != slot_count + 1 for row in value.mesh["semantic_logits"]):
+                _reject("RSS_VNEXT_EVIDENCE_MESH_REGION_VOCABULARY_DRIFT")
+            if any(len(row) != 5 for row in value.mesh["graphics_logits"]):
+                _reject("RSS_VNEXT_EVIDENCE_MESH_GRAPHICS_VOCABULARY_DRIFT")
+            roles = len(value.scene["presentation_role_probabilities"][0])
+            if any(len(row) != roles for row in value.mesh["presentation_role_logits"]):
+                _reject("RSS_VNEXT_EVIDENCE_MESH_PRESENTATION_ROLE_VOCABULARY_DRIFT")
         if value.dynamic is not None:
             if not value.control_events:
                 _reject("RSS_VNEXT_EVIDENCE_DYNAMIC_WITHOUT_CONTROL")
@@ -320,6 +332,49 @@ def validate_inference_evidence_v1(
         _reject("RSS_VNEXT_EVIDENCE_MESH_STATUS_INVALID")
     if value.evidence_hash != inference_evidence_hash_v1(value):
         _reject("RSS_VNEXT_EVIDENCE_HASH_DRIFT")
+
+
+def candidate_face_region_readout_v1(
+    value: RSSvNextInferenceEvidenceIRV1,
+) -> tuple[dict[str, Any], ...]:
+    """Deterministically read region evidence at EXACT candidate triangle IDs.
+
+    This is NOT a drawable partition, joint label, source segmentation or
+    independent-control proof.  The model explicitly predicts per-vertex
+    R+UNKNOWN logits on its decoded topology.  Compiler may average those
+    *named-by-index* probability vectors over each face without inventing a
+    new semantic class or guessing source rays/depth.  Face identity stays in
+    the neural mesh proposal's address domain; it must be requalified before
+    any canonical mesh binding or persistent drawable identity is minted.
+    """
+    validate_inference_evidence_v1(value)
+    if value.mesh_status != "UNQUALIFIED_MESH_CANDIDATE" or value.mesh is None:
+        _reject("RSS_VNEXT_FACE_REGION_REQUIRES_MESH_PROPOSAL")
+    if value.scene is None or "region_query_xyz" not in value.scene:
+        _reject("RSS_VNEXT_FACE_REGION_REQUIRES_ADDRESSED_SCENE")
+    mesh = value.mesh
+    result = []
+    for face_index, vertices in enumerate(mesh["faces"]):
+        vector = [0.0] * len(mesh["semantic_logits"][0])
+        for vertex_id in vertices:
+            logits = mesh["semantic_logits"][vertex_id]
+            highest = max(logits)
+            exps = [math.exp(float(x) - highest) for x in logits]
+            normalizer = sum(exps)
+            for i, raw in enumerate(exps):
+                vector[i] += raw / normalizer / 3.0
+        result.append({
+            "candidate_face_index": face_index,
+            "candidate_vertex_indices": tuple(vertices),
+            "candidate_component_id": mesh["face_components"][face_index],
+            "candidate_region_probabilities": tuple(vector[:-1]),
+            "unknown_probability": vector[-1],
+            "candidate_evidence_hash": value.evidence_hash,
+            "checkpoint_sha256": value.checkpoint_sha256,
+            "authority": "UNQUALIFIED_FACE_POOL_OF_LEARNED_VERTEX_MEMBERSHIP",
+            "source_surface_or_drawable_authority": False,
+        })
+    return tuple(result)
 
 
 def seal_inference_evidence_v1(
@@ -339,4 +394,5 @@ __all__ = [
     "inference_evidence_hash_v1",
     "seal_inference_evidence_v1",
     "validate_inference_evidence_v1",
+    "candidate_face_region_readout_v1",
 ]

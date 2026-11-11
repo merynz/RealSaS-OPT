@@ -76,6 +76,12 @@ class RSSvNextStructuralTrainingBatch:
     source_region_pair_is_same: Tensor | None = None  # [B,P] float 0/1; unknown masked
     source_region_pair_mask: Tensor | None = None     # [B,P] bool qualified
     source_region_pair_admission_key: str = ""
+    # Exact H(x)-addressed visible RGB source witnesses. These are original
+    # source-ray samples with independent visibility/occlusion admission,
+    # never invented per-vertex material colors or novel-view pseudo-labels.
+    source_graphics_rgb_target: Tensor | None = None  # [B,Q,3] float [0,1]
+    source_graphics_rgb_mask: Tensor | None = None    # [B,Q] bool
+    source_graphics_rgb_admission_key: str = ""
     # SkinTokens-style causal joint+FSQ sequence, with independent teacher
     # admission. Control/constraint tokens additionally need intervention truth.
     axis_teacher_sequence: AXISSequenceV6 | None = None
@@ -107,6 +113,7 @@ class RSSvNextTrainingWeights:
     source_semantics: float = 0.2
     surface_roles: float = 0.0  # opt-in only with exact-source 3D address receipt
     region_pairs: float = 0.0  # opt-in only with source-bound pair receipt
+    graphics_source_rgb: float = 0.0  # opt-in: qualified original visible rays
     axis_rig_skin_codes: float = 0.0  # opt-in: source rig and MIRA-codec-bound FSQ teacher
     flexicubes_surface: float = 0.3
     flexicubes_animation: float = 0.0  # explicit opt-in on admitted source motion
@@ -116,13 +123,15 @@ class RSSvNextTrainingWeights:
     def validate(self):
         if min(
             self.topology, self.motion_preference, self.source_semantics,
-            self.surface_roles, self.region_pairs, self.axis_rig_skin_codes, self.flexicubes_surface, self.flexicubes_animation,
+            self.surface_roles, self.region_pairs, self.graphics_source_rgb,
+            self.axis_rig_skin_codes, self.flexicubes_surface, self.flexicubes_animation,
             self.novel_view,
         ) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
         if (
             self.topology + self.motion_preference
             + self.source_semantics + self.surface_roles + self.region_pairs
+            + self.graphics_source_rgb
             + self.axis_rig_skin_codes + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view <= 0
             or self.clip_gradient_norm <= 0
@@ -148,6 +157,8 @@ class RSSvNextTrainingResult:
     eligible_surface_role_points: int = 0
     region_pair_loss: Tensor | None = None
     eligible_region_pairs: int = 0
+    graphics_source_rgb_loss: Tensor | None = None
+    eligible_graphics_source_rgb_queries: int = 0
     axis_rig_skin_loss: Tensor | None = None
     eligible_axis_sequences: int = 0
     gradient_norm: Tensor | None = None
@@ -219,6 +230,7 @@ class RSSvNextStructuralTrainer:
         trusted_region_pair_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_axis_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_signed_source_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_graphics_rgb_registry: Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -307,6 +319,19 @@ class RSSvNextStructuralTrainer:
                 signed_snapshot, sort_keys=True, separators=(",", ":"),
                 allow_nan=False,
             ).encode("utf8")).hexdigest() if signed_snapshot else ""
+        )
+        graphics_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_graphics_rgb_registry or {}).items()
+        }
+        self.trusted_graphics_rgb_registry = MappingProxyType({
+            key: MappingProxyType(value) for key, value in graphics_snapshot.items()
+        })
+        self.graphics_rgb_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                graphics_snapshot, sort_keys=True, separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest() if graphics_snapshot else ""
         )
         self.global_step = 0
 
@@ -581,6 +606,58 @@ class RSSvNextStructuralTrainer:
                 batch.source_region_pair_mask,
             )
             n_region_pairs = int(batch.source_region_pair_mask.sum().item())
+        # Graphics can learn source-visible RGB already emitted at H(x)
+        # queries. This does NOT certify depth, density, occlusion, normals or
+        # drawable identity. Each admitted query must be tied to one original
+        # ray; no inferred view may enter this objective as source truth.
+        graphics_rgb_loss = None
+        n_graphics_rgb = 0
+        rgb_fields = (
+            batch.source_graphics_rgb_target,
+            batch.source_graphics_rgb_mask,
+        )
+        rgb_requested = (
+            any(value is not None for value in rgb_fields)
+            or bool(batch.source_graphics_rgb_admission_key)
+        )
+        if rgb_requested:
+            if any(value is None for value in rgb_fields):
+                raise ValueError("RSS_VNEXT_GRAPHICS_RGB_SOURCE_TEACHER_INCOMPLETE")
+            if self.weights.graphics_source_rgb <= 0:
+                raise ValueError("RSS_VNEXT_GRAPHICS_RGB_OBJECTIVE_NOT_ENABLED")
+            teacher_rgb, source_mask = rgb_fields
+            if (
+                teacher_rgb.shape != (*state.graphics_logits.shape[:2], 3)
+                or source_mask.shape != state.graphics_logits.shape[:2]
+                or source_mask.dtype != torch.bool
+                or teacher_rgb.device != state.graphics_logits.device
+                or source_mask.device != state.graphics_logits.device
+                or not bool(source_mask.any())
+                or not bool(torch.isfinite(teacher_rgb).all())
+                or bool(((teacher_rgb < 0) | (teacher_rgb > 1)).any())
+            ):
+                raise ValueError("RSS_VNEXT_GRAPHICS_RGB_SOURCE_TARGET_INVALID")
+            receipt = self.trusted_graphics_rgb_registry.get(
+                batch.source_graphics_rgb_admission_key,
+            )
+            if (
+                receipt is None
+                or receipt.get("admission_status") != "QUALIFIED_SOURCE_VISIBLE_RGB_QUERIES"
+                or receipt.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
+                or receipt.get("source_qualification_key") != batch.source_qualification_key
+                or receipt.get("query_xyz_sha256") != source_surface_tensor_sha256(state.query_xyz)
+                or receipt.get("rgb_target_sha256") != source_surface_tensor_sha256(teacher_rgb)
+                or receipt.get("rgb_mask_sha256") != source_surface_tensor_sha256(source_mask)
+                or receipt.get("original_rgba_sha256") != source_surface_tensor_sha256(batch.rgba)
+                or receipt.get("original_camera_sha256") != source_surface_tensor_sha256(batch.camera_features)
+                or receipt.get("teacher_semantics") != "ORIGINAL_VISIBLE_UNOCCLUDED_RGB_NOT_TEXTURE_OR_DEPTH"
+            ):
+                raise ValueError("RSS_VNEXT_GRAPHICS_RGB_SOURCE_RECEIPT_DRIFT")
+            predicted_rgb = state.graphics_logits[..., :3].sigmoid()
+            graphics_rgb_loss = F.smooth_l1_loss(
+                predicted_rgb[source_mask], teacher_rgb[source_mask],
+            )
+            n_graphics_rgb = int(source_mask.sum().item())
         axis_loss = None
         n_axis = 0
         axis_requested = batch.axis_teacher_sequence is not None or bool(batch.axis_teacher_admission_key)
@@ -665,7 +742,8 @@ class RSSvNextStructuralTrainer:
             topology is None and motion is None and semantic is None
             and fc_loss is None and fc_anim_loss is None
             and novel_loss is None and surface_role_loss is None
-            and region_pair_loss is None and axis_loss is None
+            and region_pair_loss is None
+            and graphics_rgb_loss is None and axis_loss is None
         ):
             raise ValueError("RSS_VNEXT_TRAIN_NO_QUALIFIED_OBJECTIVE")
         total = sum(
@@ -676,6 +754,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.source_semantics, semantic),
                 (self.weights.surface_roles, surface_role_loss),
                 (self.weights.region_pairs, region_pair_loss),
+                (self.weights.graphics_source_rgb, graphics_rgb_loss),
                 (self.weights.axis_rig_skin_codes, axis_loss),
                 (self.weights.flexicubes_surface, fc_loss),
                 (self.weights.flexicubes_animation, fc_anim_loss),
@@ -702,6 +781,8 @@ class RSSvNextStructuralTrainer:
             eligible_surface_role_points=n_surface_role_points,
             region_pair_loss=region_pair_loss,
             eligible_region_pairs=n_region_pairs,
+            graphics_source_rgb_loss=graphics_rgb_loss,
+            eligible_graphics_source_rgb_queries=n_graphics_rgb,
             axis_rig_skin_loss=axis_loss,
             eligible_axis_sequences=n_axis,
         )
@@ -734,6 +815,7 @@ class RSSvNextStructuralTrainer:
             "region_pair_registry_sha256": self.region_pair_registry_sha256,
             "axis_teacher_registry_sha256": self.axis_teacher_registry_sha256,
             "signed_source_registry_sha256": self.signed_source_registry_sha256,
+            "graphics_rgb_registry_sha256": self.graphics_rgb_registry_sha256,
             "global_step": self.global_step,
             "sampler_cursor": int(sampler_cursor),
             "model": self.model.state_dict(),
@@ -772,6 +854,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_AXIS_TEACHER_REGISTRY_DRIFT")
         if data.get("signed_source_registry_sha256", "") != self.signed_source_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SIGNED_SOURCE_REGISTRY_DRIFT")
+        if data.get("graphics_rgb_registry_sha256", "") != self.graphics_rgb_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_GRAPHICS_RGB_REGISTRY_DRIFT")
         if int(data.get("global_step", -1)) < 0 or int(data.get("sampler_cursor", -1)) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_PROGRESS_INVALID")
         self.model.load_state_dict(data["model"], strict=True)

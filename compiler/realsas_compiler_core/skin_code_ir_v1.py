@@ -69,7 +69,10 @@ def validate_skin_code_proposal_v1(
         raise QualificationError("SKIN_CODE_LINEAGE_DRIFT")
     if value.rig_program_proposal_hash != expected_rig_program_proposal_hash:
         raise QualificationError("SKIN_CODE_RIG_PROGRAM_BINDING_DRIFT")
-    if value.codebook_size < 2 or value.codes_per_joint < 1:
+    if (
+        type(value.codebook_size) is not int or value.codebook_size < 2
+        or type(value.codes_per_joint) is not int or value.codes_per_joint < 1
+    ):
         raise QualificationError("SKIN_CODE_CODEC_DOMAIN_INVALID")
     if (
         not value.codec_architecture_id

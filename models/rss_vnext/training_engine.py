@@ -81,6 +81,7 @@ class RSSvNextStructuralTrainingBatch:
     # source-ray samples with independent visibility/occlusion admission,
     # never invented per-vertex material colors or novel-view pseudo-labels.
     source_graphics_rgb_target: Tensor | None = None  # [B,Q,3] float [0,1]
+    source_graphics_view_directions: Tensor | None = None  # [B,Q,3] qualified source first-hit directions
     source_graphics_rgb_mask: Tensor | None = None    # [B,Q] bool
     source_graphics_rgb_admission_key: str = ""
     # SkinTokens-style causal joint+FSQ sequence, with independent teacher
@@ -615,6 +616,7 @@ class RSSvNextStructuralTrainer:
         n_graphics_rgb = 0
         rgb_fields = (
             batch.source_graphics_rgb_target,
+            batch.source_graphics_view_directions,
             batch.source_graphics_rgb_mask,
         )
         rgb_requested = (
@@ -626,11 +628,19 @@ class RSSvNextStructuralTrainer:
                 raise ValueError("RSS_VNEXT_GRAPHICS_RGB_SOURCE_TEACHER_INCOMPLETE")
             if self.weights.graphics_source_rgb <= 0:
                 raise ValueError("RSS_VNEXT_GRAPHICS_RGB_OBJECTIVE_NOT_ENABLED")
-            teacher_rgb, source_mask = rgb_fields
+            teacher_rgb, source_directions, source_mask = rgb_fields
             if (
                 teacher_rgb.shape != (*state.graphics_logits.shape[:2], 3)
+                or source_directions.shape != (*state.graphics_logits.shape[:2], 3)
                 or source_mask.shape != state.graphics_logits.shape[:2]
                 or source_mask.dtype != torch.bool
+                or source_directions.device != state.graphics_logits.device
+                or not bool(torch.isfinite(source_directions).all())
+                or not bool(torch.allclose(
+                    source_directions.norm(dim=-1)[source_mask],
+                    torch.ones_like(source_directions.norm(dim=-1)[source_mask]),
+                    atol=1e-3, rtol=0,
+                ))
                 or teacher_rgb.device != state.graphics_logits.device
                 or source_mask.device != state.graphics_logits.device
                 or not bool(source_mask.any())
@@ -648,13 +658,26 @@ class RSSvNextStructuralTrainer:
                 or receipt.get("source_qualification_key") != batch.source_qualification_key
                 or receipt.get("query_xyz_sha256") != source_surface_tensor_sha256(state.query_xyz)
                 or receipt.get("rgb_target_sha256") != source_surface_tensor_sha256(teacher_rgb)
+                or receipt.get("source_ray_direction_sha256") != source_surface_tensor_sha256(source_directions)
                 or receipt.get("rgb_mask_sha256") != source_surface_tensor_sha256(source_mask)
                 or receipt.get("original_rgba_sha256") != source_surface_tensor_sha256(batch.rgba)
                 or receipt.get("original_camera_sha256") != source_surface_tensor_sha256(batch.camera_features)
-                or receipt.get("teacher_semantics") != "ORIGINAL_VISIBLE_UNOCCLUDED_RGB_NOT_TEXTURE_OR_DEPTH"
+                or receipt.get("teacher_semantics") != "ORIGINAL_OPAQUE_FIRST_HIT_RGB_NOT_TEXTURE_OR_DEPTH"
+                or receipt.get("visibility_mechanism") != "SOURCE_ZBUFFER_FIRST_HIT_OPAQUE"
             ):
                 raise ValueError("RSS_VNEXT_GRAPHICS_RGB_SOURCE_RECEIPT_DRIFT")
-            predicted_rgb = state.graphics_logits[..., :3].sigmoid()
+            # The Graphics head's RGB channels are additive logits, not
+            # standalone RGB! Train through the SAME local ray-direction
+            # decoder used by the experimental renderer's sampled field.
+            # First-hit opaque source evidence is required: translucent
+            # multi-hit source-over cannot be supervised by one RGB target.
+            ray_latent = self.model.constructed_view_renderer.core(
+                torch.cat((state.local_features, source_directions), dim=-1)
+            )
+            predicted_rgb = torch.sigmoid(
+                self.model.constructed_view_renderer.rgb(ray_latent)
+                + state.graphics_logits[..., :3]
+            )
             graphics_rgb_loss = F.smooth_l1_loss(
                 predicted_rgb[source_mask], teacher_rgb[source_mask],
             )

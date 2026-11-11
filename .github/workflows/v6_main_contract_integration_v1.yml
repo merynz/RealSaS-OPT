@@ -15,6 +15,8 @@ on:
       - 'compiler/realsas_compiler_core/mechanics_control_solver_v1.py'
       - 'compiler/realsas_compiler_core/controllable_puppet_runtime_v1.py'
       - 'compiler/realsas_compiler_services/export/playback_v4_control_bridge_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/shape_capability_v2.py'
+      - 'tests/compiler/test_product_shape_capability_v2.py'
       - 'compiler/realsas_compiler_services/platform_worker/rig_executor_v2.py'
       - 'compiler/realsas_compiler_services/platform_worker/skin_executor_v2.py'
       - 'platform/internal/capability/product_rig.go'
@@ -79,6 +81,7 @@ jobs:
         run: |
           python -m pytest -q \
             tests/compiler/test_canonical_mesh_ir_v1.py \
+            tests/compiler/test_product_shape_capability_v2.py \
             tests/compiler/test_vnext_single_carrier_graphics_v1.py \
             tests/compiler/test_control_ready_rig_v2.py \
             tests/compiler/test_rig_program_causal_linear_v1.py \

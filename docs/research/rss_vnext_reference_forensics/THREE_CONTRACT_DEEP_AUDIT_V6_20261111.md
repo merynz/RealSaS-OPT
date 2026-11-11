@@ -2,11 +2,27 @@
 
 **Date:** 2026-11-11 | **Repo:** `merynz/RealSaS-OPT` | **Pinned main:** `ded09c49d311ea965acdb61493a624a9bcfe210a`
 
-**Authority:** `AUDIT_OPEN / FREEZE_DENIED / NO_TRAINING_AUTHORIZATION / NO_PRODUCT_E2E / READ_ONLY_SOURCE_REVIEW`.
+**Authority:** `AUDIT_OPEN / FREEZE_DENIED / NO_TRAINING_AUTHORIZATION / NO_PRODUCT_QUALIFICATION / CANDIDATE_FIXES_IN_REVIEW`.
+
+## V6 implementation continuation — code and test evidence
+
+The V6 report was originally a read-only forensic snapshot pinned to `ded09c49`. Its **original source observations below describe that baseline**, not a claim that the current PR still has those defects. The following corrections are now committed on short-lived review branch `audit/rss-vnext-three-contract-v6-20261111` in PR #448. They have not been merged into `main` or used to mint product authority.
+
+| Ledger ID | Applied repair | Real regression/CI evidence | Remaining boundary |
+|---|---|---|---|
+| C01 | `canonical_rig_ir_v2.py`: entity IDs are mesh-and-proposal-local-addressed; qualification hash stays only as provenance | `test_control_ready_rig_v2.py` control-only and deform-edit regressions; `test_v6_typed_rig_skin_main_integration_v1.py` re-mints same skin from unchanged qualified carrier | persistent across new neural recompile/reindex still needs correspondence and revision migration policy |
+| C02 | `rig_executor_v2.py`: exact `RIG_CONSTRAINT_OPERATOR_IDS_V1` mask supplied to AXIS, followed by a typed per-operator court before canonical mint | `test_axis_mira_v6_worker_producer_consumer_v1.py` CAS-to-generate probe; worker CI green | release Go provider still v1; P01 remains open |
+| M01 | `mechanics_control_solver_v1.py`: zero-weight FOLLOW/AIM leave rotation untouched; fractional rotations interpolate on SO(3) | `test_mechanics_control_solver_v1.py` zero/half-weight, orthonormality and AIM regressions; Mechanics CI green | full DOF compliance and multi-constraint convergence still open |
+| M02 | same solver: target residual is measured after blending and reconciled after all later chain constraints | `test_mechanics_control_solver_v1.py` weighted and subsequent overwrite tests; Mechanics CI green | product behavioral-proof envelope and full-body IK still unproved |
+| CI integrity | three previously missing PR-concurrency declarations, one unsafe site publish cancellation policy, and aggregate fail-closed violation reporting corrected | `platform-developer-contracts-hosted` green | unrelated deployment readiness is not proven |
+
+The named regression jobs (V6 typed, AXIS/MIRA worker, Mechanics subtree, unified model/Compiler, eight-way teacher and Platform developer contracts) reported **success** on the review branch. Workflow conclusions belong to their exact commit SHA; further edits must be reverified. The existing native authored-puppet E2E job is a genuine native consumer test but does **not** establish learned checkpoint-to-deploy closure. No checkpoint was trained and no real source-to-ProductRevision release was executed.
+
+All other V6 ledger items remain open. Do not relabel the original 24 audit obligations as 24 resolved defects or a PASS report; C01/C02/M01/M02 have candidate source repairs and bounded engineering tests only.
 
 ## 1. Decision record
 
-This is the second substantive pass after V4 and V5. It is not an architecture proposal masquerading as an audit: every finding below is split into a source claim, the variable whose truth is needed, the learned/lowered/executed meaning, a falsifier, and the exact acceptance test family. Source files were read through the connected GitHub repository at the commit above; the full repo was NOT cloned locally. Thus no product Python, Go, C++ or native Compiler E2E was run; four isolated equation-level examples and eight ledger-validator negative tests were executed locally, neither of which promotes a product PASS.
+This is the second substantive pass after V4 and V5. It is not an architecture proposal masquerading as an audit: every finding below is split into a source claim, the variable whose truth is needed, the learned/lowered/executed meaning, a falsifier, and the exact acceptance test family. Source files were initially read through the connected GitHub repository at the pinned baseline commit; the full repository was not cloned locally. **This sentence refers to the initial V6 forensic snapshot:** at that point no integrated test was executed. Subsequent fixes and GitHub Actions test outcomes are recorded in the implementation continuation above. Four isolated equation-level examples and eight ledger-validator negatives were also executed locally; these do not promote a product PASS.
 
 The governing contract remains: **observation → learned evidence → finite deterministic Compiler qualification → one canonical puppet → runtime behavior → proof → ProductRevision → Studio.** No preceding stage may infer an unproven value solely because the next stage requires it. Unknown is a legal outcome. Source art wins on observed rays; predicted views are not observations.
 

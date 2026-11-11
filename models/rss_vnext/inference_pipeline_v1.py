@@ -265,8 +265,11 @@ def read_compiler_proposal_receipt_v1(
             raise RuntimeError("RSS_VNEXT_RECEIPT_CANONICAL_SOURCE_BYTES_DRIFT")
         # Bound decompressed NumPy entries before loading untrusted archives.
         with ZipFile(original_path) as zf:
-            if len(zf.infolist()) != 3 or any(
-                z.file_size > _MAX_CANONICAL_SOURCE_BYTES for z in zf.infolist()
+            entries = zf.infolist()
+            if (
+                len(entries) != 3
+                or sum(entry.file_size for entry in entries) > _MAX_CANONICAL_SOURCE_BYTES
+                or any(entry.file_size > _MAX_CANONICAL_SOURCE_BYTES for entry in entries)
             ):
                 raise RuntimeError("RSS_VNEXT_CANONICAL_SOURCE_ARCHIVE_LIMIT")
         with np.load(original_path, allow_pickle=False) as raw:

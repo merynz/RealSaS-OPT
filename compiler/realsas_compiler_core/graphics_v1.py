@@ -373,3 +373,166 @@ def compile_graphics_on_canonical_puppet_v1(
         mechanical_domain_ids=mechanical_domains,
         policy=policy,
     )
+
+def compile_neural_region_graphics_on_canonical_puppet_v1(
+    *,
+    evidence: "RSSvNextInferenceEvidenceIRV1",
+    expected_checkpoint_sha256: str,
+    candidate_vertex_ids_by_index: tuple[str, ...],
+    mesh: CanonicalMeshIR,
+    rig: CanonicalRigIRV2,
+    skin: CanonicalSkinIRV2,
+    max_candidate_pairs: int = 4096,
+    policy: GraphicsCompilePolicyV1 = GraphicsCompilePolicyV1(),
+) -> CompiledGraphicsV1:
+    """Lower *unqualified* learned region affinities onto an actual puppet.
+
+    Source-to-canonical static qualification MUST have already minted the
+    canonical Mesh with this exact neural evidence hash in its provenance.
+    The address correspondence is an explicit upstream compiler input, and
+    every vertex, component partition and oriented face is verified here.
+    This operation NEVER converts same-region probability into source
+    drawable/cut/occlusion truth, invents a visual mesh or promotes a
+    ProductRevision. It only gives the current Graphics representation policy
+    meaningful model-backed candidates on the one qualified mesh.
+    """
+    from math import exp, isfinite
+    from .rss_vnext_inference_evidence_v1 import (
+        candidate_face_region_readout_v1, validate_inference_evidence_v1,
+    )
+
+    validate_inference_evidence_v1(
+        evidence, expected_checkpoint_sha256=expected_checkpoint_sha256,
+    )
+    if evidence.mesh_status != "UNQUALIFIED_MESH_CANDIDATE" or evidence.mesh is None:
+        raise QualificationError("GRAPHICS_NEURAL_CANDIDATE_MESH_REQUIRED")
+    if evidence.evidence_hash not in mesh.proposal_evidence_refs:
+        raise QualificationError("GRAPHICS_NEURAL_STATIC_QUALIFICATION_PARENT_MISSING")
+    if (
+        mesh.mesh_lineage_hash != canonical_mesh_lineage_hash_v1(mesh)
+        or mesh.metadata.get("authority") != "COMPILER_CANONICAL_MESH"
+    ):
+        raise QualificationError("GRAPHICS_NEURAL_CANONICAL_MESH_REQUIRED")
+    validate_canonical_mesh_domain_v1(mesh)
+
+    candidate = evidence.mesh
+    rest = candidate["rest_xyz"]
+    mapping = candidate_vertex_ids_by_index
+    if (
+        len(mapping) != len(rest) or len(mapping) != len(mesh.vertices)
+        or any(type(k) is not str or not k for k in mapping)
+        or len(set(mapping)) != len(mapping)
+    ):
+        raise QualificationError("GRAPHICS_NEURAL_VERTEX_CORRESPONDENCE_INVALID")
+    vertex_by_source = {v.source_candidate_vertex_id: v for v in mesh.vertices}
+    if set(mapping) != set(vertex_by_source):
+        raise QualificationError("GRAPHICS_NEURAL_VERTEX_PARENT_ID_DRIFT")
+    component_to_canonical: dict[int, str] = {}
+    canonical_to_component: dict[str, int] = {}
+    for i, source_id in enumerate(mapping):
+        v = vertex_by_source[source_id]
+        if not all(abs(float(a) - float(b)) <= 1e-6 for a, b in zip(rest[i], v.P)):
+            raise QualificationError("GRAPHICS_NEURAL_VERTEX_POSITION_DRIFT")
+        key = candidate["vertex_components"][i]
+        if (key in component_to_canonical and component_to_canonical[key] != v.component_id
+            or v.component_id in canonical_to_component and canonical_to_component[v.component_id] != key):
+            raise QualificationError("GRAPHICS_NEURAL_COMPONENT_PARTITION_DRIFT")
+        component_to_canonical[key] = v.component_id
+        canonical_to_component[v.component_id] = key
+
+    # Face orientation is essential to ray normals, visibility and sampling.
+    # Accept cyclic index rotations, NEVER a silently flipped winding.
+    def cyclic(face: tuple[str, ...]) -> tuple[tuple[str, ...], ...]:
+        return (face, face[1:] + face[:1], face[2:] + face[:2])
+
+    canonical_face_lookup = {}
+    for i, face in enumerate(mesh.faces):
+        for rotated in cyclic(face):
+            if rotated in canonical_face_lookup:
+                raise QualificationError("GRAPHICS_NEURAL_CANONICAL_FACE_DUPLICATE")
+            canonical_face_lookup[rotated] = i
+    face_map = []
+    for face in candidate["faces"]:
+        named = tuple(
+            vertex_by_source[mapping[vertex_index]].canonical_mesh_vertex_id
+            for vertex_index in face
+        )
+        if named not in canonical_face_lookup:
+            raise QualificationError("GRAPHICS_NEURAL_FACE_TOPOLOGY_OR_WINDING_DRIFT")
+        face_map.append(canonical_face_lookup[named])
+    if (len(face_map) != len(mesh.faces)
+        or len(set(face_map)) != len(mesh.faces)):
+        raise QualificationError("GRAPHICS_NEURAL_FACE_COVERAGE_DRIFT")
+
+    rows = candidate_face_region_readout_v1(evidence)
+    canonical_probs: dict[int, tuple[tuple[float, ...], float]] = {}
+    for row in rows:
+        k = face_map[row["candidate_face_index"]]
+        raw = row["candidate_region_probabilities"]
+        unknown = float(row["unknown_probability"])
+        mass = sum(raw)
+        # UNKNOWN never contributes to a positive relation. A zero known
+        # mass makes this pair unknown rather than artificially different.
+        probs = tuple(float(x) / mass for x in raw) if mass > 1e-9 else tuple(0.0 for _ in raw)
+        canonical_probs[k] = (probs, 1.0 - unknown)
+    ordered_face_vertices = tuple(mesh.faces)
+    adjacency: set[tuple[int, int]] = set()
+    edge_faces: dict[tuple[str, str], list[int]] = {}
+    for face_index, face in enumerate(ordered_face_vertices):
+        for a, b in ((face[0],face[1]), (face[1],face[2]), (face[2],face[0])):
+            edge_faces.setdefault(tuple(sorted((a, b))), []).append(face_index)
+    for indices in edge_faces.values():
+        for i, a in enumerate(indices):
+            for b in indices[i + 1:]:
+                adjacency.add(tuple(sorted((a, b))))
+    if max_candidate_pairs < 0 or len(adjacency) > max_candidate_pairs:
+        raise QualificationError("GRAPHICS_NEURAL_PAIR_RESOURCE_LIMIT")
+
+    relations = []
+    for a, b in sorted(adjacency):
+        left, confidence_a = canonical_probs[a]
+        right, confidence_b = canonical_probs[b]
+        confidence = min(confidence_a, confidence_b)
+        # A learned categorical co-region probability is NOT a proven source
+        # drawable boundary. Compiler may choose a conservative partition,
+        # but no cut or stable independent-edit authority is certified.
+        same = max(0.0, min(1.0, sum(x * y for x, y in zip(left, right))))
+        if confidence < 1e-8:
+            same = 0.0
+        relations.append(GraphicsStaticRelationEvidenceV1(
+            a, b, same, 1.0 - same if confidence >= 1e-8 else 0.5,
+            0.0, 0.5, 0.5, confidence,
+            evidence_ref=evidence.evidence_hash,
+        ))
+
+    compiler_input = build_graphics_evidence_v1(
+        mesh_binding_hash=mesh.mesh_lineage_hash,
+        static_relations=relations,
+        view_relations=(),  # 3D region evidence is not source view/occlusion.
+        metadata={
+            "source_neural_evidence_hash": evidence.evidence_hash,
+            "candidate_mesh_only": True,
+            "qualified_mesh_face_rebinding": True,
+            "cut_semantics": "REGION_DISAGREEMENT_POLICY_NOT_SOURCE_CUT_TRUTH",
+            "attachment_evidence_available": False,
+            "source_visibility_evidence_available": False,
+        },
+    )
+    compiled = compile_graphics_on_canonical_puppet_v1(
+        mesh=mesh, rig=rig, skin=skin,
+        source_graphics_binding_hash=evidence.evidence_hash,
+        evidence=compiler_input, policy=policy,
+    )
+    metadata = dict(compiled.metadata)
+    metadata.update({
+        "origin": "NEURAL_ANONYMOUS_REGION_CANDIDATE",
+        "exact_candidate_to_canonical_face_map": tuple(face_map),
+        "qualified_drawable_source_truth": False,
+        "qualified_source_occlusion": False,
+        "qualified_source_attachments": False,
+        "independent_editability_proven": False,
+        "learned_region_is_not_drawable_truth": True,
+        "source_graphics_qualification_status": "UNQUALIFIED_NEURAL_POLICY_ONLY",
+    })
+    result = replace(compiled, metadata=metadata, graph_hash="")
+    return replace(result, graph_hash=compiled_graphics_hash_v1(result))

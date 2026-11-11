@@ -212,13 +212,14 @@ def test_actual_worker_dispatch_routes_explicit_module_to_mechanics(monkeypatch)
 
 
 def test_mechanics_not_prematurely_registered_as_product_ready():
-    # This PR adds a worker dispatch seam only. V1 upstream rig/skin cannot
-    # provide the required V2 parents, so no Go capability DAG registration yet.
+    # Rig/Skin V6 parent artifacts are now selected by the active product catalog.
+    # Mechanics has its own remaining runtime and qualification gates; its
+    # absence from the registered catalog must not be attributed to V1 parents.
     path = (
         Path(__file__).resolve().parents[2]
         / "platform/internal/capability/contracts/product_capabilities_v1.json"
     )
     semantics = json.loads(path.read_text(encoding="utf-8"))
     assert "product.mechanics" not in semantics["capabilities"]
-    assert semantics["capabilities"]["product.rig"]["metadata"]["output_schema_version"] == "v1"
-    assert semantics["capabilities"]["product.skin"]["metadata"]["output_schema_version"] == "v1"
+    assert semantics["capabilities"]["product.rig"]["metadata"]["output_schema_version"] == "v2"
+    assert semantics["capabilities"]["product.skin"]["metadata"]["output_schema_version"] == "v2"

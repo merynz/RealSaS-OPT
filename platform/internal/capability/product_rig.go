@@ -48,7 +48,7 @@ func (ProductRigProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"skin_code_output_source":         "SAME_AXIS_CAUSAL_SEQUENCE",
 			"resource_step_limit_max":         4096,
 			"maximum_new_tokens":              4096,
-			"required_models":                 []any{
+			"required_models": []any{
 				map[string]any{
 					"family":          "AXIS",
 					"architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0",

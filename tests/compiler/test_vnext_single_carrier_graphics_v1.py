@@ -583,3 +583,71 @@ def test_neural_graphics_rejects_orientation_flipped_candidate_even_when_parent_
             candidate_vertex_ids_by_index=mapping,
             mesh=mesh, rig=rig, skin=skin,
         )
+
+
+@pytest.mark.parametrize("invalid", (0.5, "0", True, None))
+def test_graphics_static_index_is_never_silently_coerced_to_a_face(invalid):
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(invalid, 1, .95, .05, 0.,0.,0.,.9),
+        ),
+        view_relations=(),
+    )
+    with pytest.raises(QualificationError, match="GRAPHICS_STATIC_RELATION_FACE_INVALID"):
+        compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="skin",
+            source_graphics_binding_hash="source",
+            faces=((0,1,2),(1,2,3)),evidence=evidence,
+        )
+
+
+@pytest.mark.parametrize("invalid", (0.5, "0", True, None))
+def test_graphics_view_index_is_never_silently_coerced(invalid):
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(),
+        view_relations=(
+            GraphicsViewRelationEvidenceV1(invalid, 0,1,.95,.9,1.,1.,.95),
+        ),
+    )
+    with pytest.raises(QualificationError, match="GRAPHICS_VIEW_RELATION_INVALID"):
+        compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="skin",
+            source_graphics_binding_hash="source",
+            faces=((0,1,2),(1,2,3)), evidence=evidence,
+        )
+
+
+@pytest.mark.parametrize("invalid", (".9", True, float("nan"), 1.5))
+def test_graphics_probability_policies_and_evidence_reject_invalid_types(invalid):
+    with pytest.raises(QualificationError, match="GRAPHICS_POLICY_INVALID"):
+        GraphicsCompilePolicyV1(same_drawable_min=invalid).validate()
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(0, 1, invalid, .1, 0.,0.,0.,.9),
+        ),
+        view_relations=(),
+    )
+    with pytest.raises(QualificationError, match="GRAPHICS_PROBABILITY_INVALID:same"):
+        compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="skin",
+            source_graphics_binding_hash="source",
+            faces=((0,1,2),(1,2,3)),evidence=evidence,
+        )
+
+
+def test_compiler_neural_region_has_no_source_pixel_authority_after_rebinding():
+    evidence, mapping, mesh, rig, skin = _qualified_neural_graphics_fixture()
+    result = compile_neural_region_graphics_on_canonical_puppet_v1(
+        evidence=evidence, expected_checkpoint_sha256="a"*64,
+        candidate_vertex_ids_by_index=mapping, mesh=mesh,rig=rig,skin=skin,
+    )
+    assert result.metadata["source_pixels_win_where_observed"] is False
+    assert result.metadata["source_graphics_qualification_status"] == (
+        "UNQUALIFIED_NEURAL_POLICY_ONLY"
+    )

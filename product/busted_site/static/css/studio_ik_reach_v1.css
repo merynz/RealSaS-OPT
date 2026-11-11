@@ -1,0 +1,38 @@
+/* BUSTED / IK Reach Studio authoring overlay
+ * UI exposes only explicit, admissible, two-bone animator chains.
+ * This canvas does not itself carry mechanics or runtime authority.
+ */
+.viewport-panel{position:relative}
+.viewport-panel .studio-ik-reach-overlay{
+ position:absolute;z-index:7;display:block;
+ touch-action:none;user-select:none;
+ background:transparent;cursor:crosshair;
+}
+.viewport-panel .studio-ik-reach-overlay[hidden]{display:none!important}
+.viewport-panel .studio-ik-reach-status{
+ position:absolute;z-index:8;left:50%;bottom:14px;
+ transform:translateX(-50%);
+ max-width:min(82%,720px);padding:7px 12px;
+ pointer-events:none;border:1px solid rgba(174,161,255,.31);
+ background:linear-gradient(90deg,rgba(15,18,47,.94),rgba(18,20,52,.90));
+ box-shadow:0 8px 25px rgba(0,0,0,.30),inset 0 1px rgba(181,183,255,.1);
+ color:#c1ccfa;font:600 10px/1.4 "IBM Plex Mono",monospace;
+ letter-spacing:.025em;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;
+}
+.viewport-panel .studio-ik-reach-status[hidden]{display:none!important}
+body[data-studio-workspace="motion"] .director-commands [data-director-command="ik-reach"]{
+ border-color:rgba(160,142,248,.50);color:#d4c8ff;
+}
+body[data-studio-workspace="motion"] .director-commands [data-director-command="ik-reach"].active{
+ background:linear-gradient(105deg,#5650a8,#303876);
+ border-color:#beb0ff;color:#fff;
+ box-shadow:0 0 17px rgba(149,120,251,.19);
+}
+@media(max-width:760px){
+ .viewport-panel .studio-ik-reach-status{
+  max-width:90%;font-size:8px;bottom:9px;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .viewport-panel .studio-ik-reach-overlay{scroll-behavior:auto}
+}

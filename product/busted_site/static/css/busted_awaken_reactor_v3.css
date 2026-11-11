@@ -1,0 +1,145 @@
+/* BUSTED / Reactor AWAKEN v3
+ * Dark, glassy and dead-quiet at rest. One-shot procedural energy exists
+ * strictly on click and is painted inside this exact button border box.
+ * The compact button is CENTERED beneath the upload card; the canvas exactly fits the button.
+ */
+#awakenChamber .chamber-console .compile-action{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  gap:11px!important;
+  width:100%!important;
+  min-width:0!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button{
+  position:relative!important;
+  display:flex!important;
+  box-sizing:border-box!important;
+  flex:none!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:0!important;
+  width:max-content!important;
+  max-width:calc(100% - 24px)!important;
+  min-width:0!important;
+  height:54px!important;
+  min-height:54px!important;
+  margin:0 auto!important;
+  padding:0 31px!important;
+  overflow:hidden!important;
+  border:1px solid rgba(139,157,237,.62)!important;
+  border-radius:1px!important;
+  background:linear-gradient(112deg,rgba(20,29,66,.96) 0%,rgba(24,33,72,.98) 52%,rgba(29,29,70,.96) 100%)!important;
+  color:#dfe8ff!important;
+  box-shadow:inset 0 1px 0 rgba(190,206,255,.115),0 0 19px rgba(91,105,216,.045)!important;
+  text-shadow:none!important;
+  opacity:1!important;
+  filter:none!important;
+  transform:none!important;
+  isolation:isolate!important;
+  cursor:pointer!important;
+  transition:border-color .2s ease,box-shadow .2s ease!important;
+  contain:paint;
+}
+#awakenChamber .chamber-console #awaken.awaken-button::before,
+#awakenChamber .chamber-console #awaken.awaken-button::after{
+  /* Remove the legacy endlessly-sweeping highlight/gradient. */
+  content:none!important;
+  display:none!important;
+  animation:none!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button .awaken-label,
+#awakenChamber .chamber-console #awaken.awaken-button .awaken-glyph{
+  position:relative!important;
+  z-index:3!important;
+  display:block;
+  flex:none;
+  color:#e9edff!important;
+  text-indent:0!important;
+  opacity:1!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button .awaken-label{
+  font:700 15px/1 "IBM Plex Mono",monospace!important;
+  letter-spacing:.14em!important;
+  text-align:center!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button .awaken-glyph{
+  display:none!important; /* AWAKEN must sit in the optical center */
+  transition:none!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button .awaken-ignition-canvas{
+  position:absolute!important;
+  inset:0!important;
+  z-index:2!important;
+  width:100%!important;
+  height:100%!important;
+  display:block;
+  pointer-events:none!important;
+  background:transparent!important;
+  mix-blend-mode:screen;
+}
+#awakenChamber .chamber-console #awaken.awaken-button .awaken-ignition-canvas[hidden]{
+  display:none!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button:not(:disabled):not(.is-charging):not(.is-igniting):not(.is-recovering):hover{
+  border-color:rgba(169,184,255,.87)!important;
+  background:linear-gradient(112deg,rgba(25,37,80,.97),rgba(29,38,79,.97),rgba(34,29,74,.96))!important;
+  box-shadow:inset 0 1px 0 rgba(190,206,255,.17),0 0 20px rgba(95,106,214,.095)!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button.is-charging{
+  border-color:rgba(166,162,247,.96)!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(166,154,255,.14),
+    inset 0 1px 0 rgba(228,226,255,.34),
+    0 0 24px rgba(114,90,248,.28)!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button.is-igniting{
+  border-color:#f7debc!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,238,215,.48),
+    inset 0 0 24px rgba(255,184,107,.45),
+    0 0 39px rgba(255,145,87,.40),
+    0 0 9px rgba(255,243,206,.28)!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button.is-igniting .awaken-label,
+#awakenChamber .chamber-console #awaken.awaken-button.is-igniting .awaken-glyph{
+  color:#fff6e8!important;
+  text-shadow:0 0 9px rgba(255,227,196,.72),0 0 22px rgba(255,181,112,.33)!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button.is-recovering{
+  border-color:rgba(152,155,243,.81)!important;
+  box-shadow:inset 0 1px 0 rgba(221,222,255,.25),0 0 21px rgba(108,91,218,.17)!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button:focus-visible{
+  outline:2px solid #c3ceff!important;
+  outline-offset:3px!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button:disabled{
+  opacity:.58!important;cursor:not-allowed!important;
+  background:rgba(29,38,72,.79)!important;
+  box-shadow:none!important;
+}
+#awakenChamber .chamber-console #awaken.awaken-button[data-ignition-preview="true"]{
+  cursor:pointer!important;
+}
+#awakenChamber .chamber-console .compile-availability{
+  width:100%!important;
+  max-width:100%;
+  margin:0 auto!important;
+  text-align:center!important;
+}
+@media(max-width:760px){
+  #awakenChamber .chamber-console #awaken.awaken-button{
+    height:51px!important;min-height:51px!important;
+    padding:0 27px!important;
+  }
+  #awakenChamber .chamber-console #awaken.awaken-button .awaken-label{
+    font-size:14px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #awakenChamber .chamber-console #awaken.awaken-button,
+  #awakenChamber .chamber-console #awaken.awaken-button .awaken-glyph{
+    transition:none!important;
+  }
+}

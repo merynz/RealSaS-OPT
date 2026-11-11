@@ -4,8 +4,9 @@ from __future__ import annotations
 
 This is a real optimizer/gradient/checkpoint path, NOT the final Truth Foundry
 schema. It consumes only admitted supervision, with explicit masks. Its
-current task scope is structural CE + source-motion preference. Other heads
-are not implicitly admitted or declared training-ready.
+current task scope includes structural topology, source-motion preference,
+early source semantic patch evidence and explicitly qualified 8-way rendered
+appearance supervision. Other heads are not silently declared training-ready.
 """
 from dataclasses import dataclass
 import hashlib
@@ -34,6 +35,7 @@ from .flexicubes_animation_supervision import (
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .early_semantic_field import masked_source_semantic_evidence_loss
 from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
+from .multiview_construction import qualified_novel_view_loss
 from models.iris.vnext.flexicubes_v1 import symmetric_surface_chamfer_v1
 
 
@@ -49,6 +51,14 @@ class RSSvNextStructuralTrainingBatch:
     semantic_patch_target: Tensor | None = None  # [B,2,T,K]
     semantic_patch_mask: Tensor | None = None    # [B,2,T,K], per-axis qualified
     semantic_qualification_key: str = ""
+    # Independently source-rendered 6 novel views; FRONT/BACK remain the only
+    # model observations. These are teacher targets, never encoder inputs.
+    novel_view_rgba: Tensor | None = None       # [B,6,4,H,W]
+    novel_view_normal: Tensor | None = None     # [B,6,3,H,W]
+    novel_view_rgb_mask: Tensor | None = None   # [B,6,H,W], qualified
+    novel_view_normal_mask: Tensor | None = None
+    novel_view_provenance: str = ""              # QUALIFIED_SOURCE_RENDER:<receipt>
+
     # Interim signed-surface training witness; not final foundry supervision.
     # Requires qualified source, mesh coordinate/camera bind and sample proof.
     flexicubes_extractor: object | None = None
@@ -67,18 +77,19 @@ class RSSvNextTrainingWeights:
     source_semantics: float = 0.2
     flexicubes_surface: float = 0.3
     flexicubes_animation: float = 0.0  # explicit opt-in on admitted source motion
+    novel_view: float = 0.0             # opt-in: source-qualified 8-way appearance
     clip_gradient_norm: float = 1.0
 
     def validate(self):
         if min(
             self.topology, self.motion_preference, self.source_semantics,
-            self.flexicubes_surface, self.flexicubes_animation,
+            self.flexicubes_surface, self.flexicubes_animation, self.novel_view,
         ) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
         if (
             self.topology + self.motion_preference
             + self.source_semantics + self.flexicubes_surface
-            + self.flexicubes_animation <= 0
+            + self.flexicubes_animation + self.novel_view <= 0
             or self.clip_gradient_norm <= 0
         ):
             raise ValueError("RSS_VNEXT_TRAIN_WEIGHT_POLICY_INVALID")
@@ -96,6 +107,8 @@ class RSSvNextTrainingResult:
     eligible_semantic_patch_labels: int
     eligible_topology_examples: int
     qualified_preference_pairs: int
+    novel_view_loss: Tensor | None = None
+    eligible_novel_view_pixels: int = 0
     gradient_norm: Tensor | None = None
 
 
@@ -154,6 +167,42 @@ class RSSvNextStructuralTrainer:
         state, aux, _ = self.model.encode_observations(
             batch.rgba, batch.camera_features,
         )
+        # Source-rendered novel target is teacher-only: never append six
+        # privileged RGBA/normal frames to the two-image scene encoder.
+        novel_loss = None
+        novel_count = 0
+        novel_fields = (
+            batch.novel_view_rgba, batch.novel_view_normal,
+            batch.novel_view_rgb_mask, batch.novel_view_normal_mask,
+        )
+        novel_requested = any(value is not None for value in novel_fields) or bool(batch.novel_view_provenance)
+        if novel_requested:
+            if not all(value is not None for value in novel_fields):
+                raise ValueError("RSS_VNEXT_EIGHT_WAY_TEACHER_INCOMPLETE")
+            if not batch.novel_view_provenance.startswith("QUALIFIED_SOURCE_RENDER:"):
+                raise ValueError("RSS_VNEXT_EIGHT_WAY_SOURCE_RENDER_PROOF_REQUIRED")
+            if self.model.cfg.constructed_total_views != 8:
+                raise ValueError("RSS_VNEXT_EIGHT_WAY_MODEL_CONFIGURATION_REQUIRED")
+            if self.weights.novel_view <= 0:
+                raise ValueError("RSS_VNEXT_EIGHT_WAY_OBJECTIVE_NOT_ENABLED")
+            if batch.novel_view_rgba.ndim != 5 or batch.novel_view_rgba.shape[:3] != (batch.rgba.shape[0], 6, 4):
+                raise ValueError("RSS_VNEXT_EIGHT_WAY_RGBA_TARGET_SHAPE")
+            if batch.novel_view_rgba.shape[-1] < 2 or batch.novel_view_rgba.shape[-2] < 2:
+                raise ValueError("RSS_VNEXT_EIGHT_WAY_TARGET_RESOLUTION")
+            novel_prediction = self.model.construct_novel_views(
+                state,
+                height=batch.novel_view_rgba.shape[-2],
+                width=batch.novel_view_rgba.shape[-1],
+                method="EXPERIMENTAL_POST_SCENE_H_RENDER",
+            )
+            novel_objective = qualified_novel_view_loss(
+                novel_prediction, batch.novel_view_rgba, batch.novel_view_normal,
+                rgb_qualified_mask=batch.novel_view_rgb_mask,
+                normal_qualified_mask=batch.novel_view_normal_mask,
+                source_render_provenance=batch.novel_view_provenance,
+            )
+            novel_loss = novel_objective["total"]
+            novel_count = int(batch.novel_view_rgb_mask.sum().item())
         fc_surface = None
         fc_loss = None
         fc_anim_loss = None
@@ -290,6 +339,7 @@ class RSSvNextStructuralTrainer:
         if (
             topology is None and motion is None and semantic is None
             and fc_loss is None and fc_anim_loss is None
+            and novel_loss is None
         ):
             raise ValueError("RSS_VNEXT_TRAIN_NO_QUALIFIED_OBJECTIVE")
         total = sum(
@@ -300,6 +350,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.source_semantics, semantic),
                 (self.weights.flexicubes_surface, fc_loss),
                 (self.weights.flexicubes_animation, fc_anim_loss),
+                (self.weights.novel_view, novel_loss),
             )
             if loss is not None
         )
@@ -316,6 +367,8 @@ class RSSvNextStructuralTrainer:
             eligible_semantic_patch_labels=n_semantic,
             eligible_topology_examples=n_topo,
             qualified_preference_pairs=n_pairs,
+            novel_view_loss=novel_loss,
+            eligible_novel_view_pixels=novel_count,
         )
 
     def train_step(self, batch: RSSvNextStructuralTrainingBatch) -> RSSvNextTrainingResult:

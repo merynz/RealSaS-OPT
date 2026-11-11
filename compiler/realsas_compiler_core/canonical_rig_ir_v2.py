@@ -314,19 +314,17 @@ def validate_canonical_rig_domain_v2(value: CanonicalRigIRV2) -> None:
             raise QualificationError("CANONICAL_RIG_V2_PARENT_UNKNOWN")
     visiting: set[str] = set()
     complete: set[str] = set()
-    def walk(node: str) -> None:
-        if node in complete:
-            return
-        if node in visiting:
-            raise QualificationError("CANONICAL_RIG_V2_PARENT_CYCLE")
-        visiting.add(node)
-        parent = parents[node]
-        if parent is not None:
-            walk(parent)
-        visiting.remove(node)
-        complete.add(node)
     for jid in joints:
-        walk(jid)
+        node = jid
+        path: list[str] = []
+        while node is not None and node not in complete:
+            if node in visiting:
+                raise QualificationError("CANONICAL_RIG_V2_PARENT_CYCLE")
+            visiting.add(node)
+            path.append(node)
+            node = parents[node]
+        complete.update(path)
+        visiting.difference_update(path)
     roots = tuple(sorted(jid for jid, parent in parents.items() if parent is None))
     if value.deform_root_joint_ids != roots:
         raise QualificationError("CANONICAL_RIG_V2_ROOT_SET_DRIFT")
@@ -340,7 +338,7 @@ def validate_canonical_rig_domain_v2(value: CanonicalRigIRV2) -> None:
             raise QualificationError("CANONICAL_RIG_V2_FRAME_BASIS_INVALID")
         if abs(float(np.linalg.det(basis))) <= 1e-8:
             raise QualificationError("CANONICAL_RIG_V2_FRAME_BASIS_DEGENERATE")
-        if not frame.dof_labels or len(set(frame.dof_labels)) != len(frame.dof_labels):
+        if len(set(frame.dof_labels)) != len(frame.dof_labels):
             raise QualificationError("CANONICAL_RIG_V2_FRAME_DOF_INVALID")
 
     controls = ids(value.controls, "canonical_control_id", "CANONICAL_RIG_V2_CONTROL_IDS_INVALID")
@@ -352,19 +350,17 @@ def validate_canonical_rig_domain_v2(value: CanonicalRigIRV2) -> None:
             raise QualificationError("CANONICAL_RIG_V2_CONTROL_PARENT_UNKNOWN")
     visiting.clear()
     complete.clear()
-    def walk_control(node: str) -> None:
-        if node in complete:
-            return
-        if node in visiting:
-            raise QualificationError("CANONICAL_RIG_V2_CONTROL_PARENT_CYCLE")
-        visiting.add(node)
-        parent = control_parents[node]
-        if parent is not None:
-            walk_control(parent)
-        visiting.remove(node)
-        complete.add(node)
     for cid in controls:
-        walk_control(cid)
+        node = cid
+        path: list[str] = []
+        while node is not None and node not in complete:
+            if node in visiting:
+                raise QualificationError("CANONICAL_RIG_V2_CONTROL_PARENT_CYCLE")
+            visiting.add(node)
+            path.append(node)
+            node = control_parents[node]
+        complete.update(path)
+        visiting.difference_update(path)
 
     chain_ids = ids(value.chains, "canonical_chain_id", "CANONICAL_RIG_V2_CHAIN_IDS_INVALID")
     for chain in value.chains:

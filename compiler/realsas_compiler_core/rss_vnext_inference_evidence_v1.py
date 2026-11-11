@@ -282,6 +282,38 @@ def inference_evidence_hash_v1(value: RSSvNextInferenceEvidenceIRV1) -> str:
     return content_sha256(payload)
 
 
+def _validate_neural_control_events(events: tuple[Mapping[str, Any], ...]) -> None:
+    """Validate actual AXIS event domains before canonical hashing and after read."""
+    expected_event_fields = {
+        "kind", "coord_indices", "pointer_a", "pointer_b", "pointer_c",
+        "aux_type_id", "dof_mask", "frame_6d", "scalar_params",
+        "skin_code_id", "anchor_parent_kind",
+    }
+    for ev in events:
+        if not isinstance(ev, Mapping) or set(ev) != expected_event_fields:
+            _reject("RSS_VNEXT_EVIDENCE_CONTROL_EVENT_FIELDS_DRIFT")
+        if type(ev["kind"]) is not int or not 1 <= ev["kind"] <= 18:
+            _reject("RSS_VNEXT_EVIDENCE_CONTROL_EVENT_KIND_INVALID")
+        for key in (
+            "pointer_a", "pointer_b", "pointer_c", "aux_type_id",
+            "skin_code_id", "anchor_parent_kind",
+        ):
+            if type(ev[key]) is not int or ev[key] < -1:
+                _reject("RSS_VNEXT_EVIDENCE_CONTROL_INTEGER_FIELD_INVALID")
+        indices = ev["coord_indices"]
+        if (not isinstance(indices, (list, tuple)) or len(indices) != 3
+                or any(type(v) is not int or v < -1 for v in indices)):
+            _reject("RSS_VNEXT_EVIDENCE_CONTROL_COORD_INVALID")
+        for key, width in (("dof_mask", 9), ("frame_6d", 6), ("scalar_params", 4)):
+            _vector(ev[key], width, "RSS_VNEXT_EVIDENCE_CONTROL_FIELD_INVALID:" + key)
+        if any(value not in (0., 1.) for value in ev["dof_mask"]):
+            _reject("RSS_VNEXT_EVIDENCE_CONTROL_DOF_NOT_BINARY")
+        if ev["anchor_parent_kind"] not in (-1, 0, 1):
+            _reject("RSS_VNEXT_EVIDENCE_CONTROL_ANCHOR_PARENT_INVALID")
+    if len(events) > 4096:
+        _reject("RSS_VNEXT_EVIDENCE_CONTROL_RESOURCE_LIMIT")
+
+
 def validate_inference_evidence_v1(
     value: RSSvNextInferenceEvidenceIRV1,
     *,
@@ -329,34 +361,7 @@ def validate_inference_evidence_v1(
         # Preserve unqualified status while refusing malformed/retagged neural
         # sequences *before* any model-to-Compiler qualification. Do not try to
         # infer missing pointers, quantize float codes or invent program tokens.
-        expected_event_fields = {
-            "kind", "coord_indices", "pointer_a", "pointer_b", "pointer_c",
-            "aux_type_id", "dof_mask", "frame_6d", "scalar_params",
-            "skin_code_id", "anchor_parent_kind",
-        }
-        for ev in value.control_events:
-            if not isinstance(ev, Mapping) or set(ev) != expected_event_fields:
-                _reject("RSS_VNEXT_EVIDENCE_CONTROL_EVENT_FIELDS_DRIFT")
-            if type(ev["kind"]) is not int or not 1 <= ev["kind"] <= 18:
-                _reject("RSS_VNEXT_EVIDENCE_CONTROL_EVENT_KIND_INVALID")
-            for key in (
-                "pointer_a", "pointer_b", "pointer_c", "aux_type_id",
-                "skin_code_id", "anchor_parent_kind",
-            ):
-                if type(ev[key]) is not int or ev[key] < -1:
-                    _reject("RSS_VNEXT_EVIDENCE_CONTROL_INTEGER_FIELD_INVALID")
-            indices = ev["coord_indices"]
-            if (not isinstance(indices, (list, tuple)) or len(indices) != 3
-                    or any(type(v) is not int or v < -1 for v in indices)):
-                _reject("RSS_VNEXT_EVIDENCE_CONTROL_COORD_INVALID")
-            for key, width in (("dof_mask", 9), ("frame_6d", 6), ("scalar_params", 4)):
-                _vector(ev[key], width, "RSS_VNEXT_EVIDENCE_CONTROL_FIELD_INVALID:" + key)
-            if any(value not in (0., 1.) for value in ev["dof_mask"]):
-                _reject("RSS_VNEXT_EVIDENCE_CONTROL_DOF_NOT_BINARY")
-            if ev["anchor_parent_kind"] not in (-1, 0, 1):
-                _reject("RSS_VNEXT_EVIDENCE_CONTROL_ANCHOR_PARENT_INVALID")
-        if len(value.control_events) > 4096:
-            _reject("RSS_VNEXT_EVIDENCE_CONTROL_RESOURCE_LIMIT")
+        _validate_neural_control_events(value.control_events)
     else:
         _reject("RSS_VNEXT_EVIDENCE_MESH_STATUS_INVALID")
     if value.evidence_hash != inference_evidence_hash_v1(value):
@@ -413,6 +418,9 @@ def seal_inference_evidence_v1(
     # NaN/invalid field. The same validation is repeated after sealing.
     if value.mesh is not None:
         _mesh(value.mesh)
+    # Fail with a typed qualification error before hashing illegal numerical
+    # events. A NaN would otherwise raise a generic canonicalization ValueError.
+    _validate_neural_control_events(value.control_events)
     sealed = replace(value, evidence_hash=inference_evidence_hash_v1(value))
     validate_inference_evidence_v1(sealed)
     return sealed

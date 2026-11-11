@@ -22,7 +22,12 @@ class GraphicsCompilePolicyV1:
     same_drawable_min:float=.65; cut_max:float=.35; boundary_max:float=.50; relation_confidence_min:float=.50; front_probability_min:float=.65; occlusion_probability_min:float=.50; visibility_probability_min:float=.50; attachment_affinity_min:float=.70; mechanical_contact_min:float=.75; support_band_alpha_boundary_min:float=.65; maximum_support_band_pixels:int=2; allow_unqualified_order_arbitration:bool=False
     def validate(self):
         vals=(self.same_drawable_min,self.cut_max,self.boundary_max,self.relation_confidence_min,self.front_probability_min,self.occlusion_probability_min,self.visibility_probability_min,self.attachment_affinity_min,self.mechanical_contact_min,self.support_band_alpha_boundary_min)
-        if any(not 0<=float(v)<=1 for v in vals) or not 0<=self.maximum_support_band_pixels<=4: raise QualificationError("GRAPHICS_POLICY_INVALID")
+        if (
+            any(type(v) not in (int,float) or not 0 <= v <= 1 for v in vals)
+            or type(self.maximum_support_band_pixels) is not int
+            or not 0<=self.maximum_support_band_pixels<=4
+        ):
+            raise QualificationError("GRAPHICS_POLICY_INVALID")
 @dataclass(frozen=True)
 class GraphicsStaticRelationEvidenceV1:
     face_a:int; face_b:int; same_drawable_affinity:float; cut_probability:float; attachment_affinity:float; alpha_boundary_probability:float; appearance_boundary_probability:float; confidence:float; evidence_ref:str=""; schema_version:str="RealSaS.GraphicsStaticRelationEvidence.v1"
@@ -116,6 +121,8 @@ def _prob(v,label):
     try:
         if isinstance(v, bool):
             raise ValueError("boolean is not a probability")
+        if type(v) not in (int, float):
+            raise ValueError("probability must be a numeric scalar")
         value=float(v)
     except (ValueError, TypeError, OverflowError):
         raise QualificationError("GRAPHICS_PROBABILITY_INVALID:"+label) from None
@@ -156,14 +163,21 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
     if evidence.evidence_hash!=graphics_evidence_hash_v1(evidence):raise QualificationError("GRAPHICS_EVIDENCE_HASH_DRIFT")
     if evidence.mesh_binding_hash!=canonical_mesh_binding_hash:raise QualificationError("GRAPHICS_CANONICAL_MESH_BINDING_DRIFT")
     if not canonical_mesh_skin_binding_hash or not source_graphics_binding_hash:raise QualificationError("GRAPHICS_REQUIRED_BINDING_EMPTY")
-    tri=tuple(tuple(map(int,f)) for f in faces);n=len(tri)
-    if not n or any(len(f)!=3 for f in tri):raise QualificationError("GRAPHICS_CANONICAL_MESH_INVALID")
+    tri=tuple(tuple(f) for f in faces);n=len(tri)
+    if (
+        not n or any(len(f)!=3 or len(set(f))!=3 or
+                     any(type(index) is not int or index<0 for index in f)
+                     for f in tri)
+    ):
+        raise QualificationError("GRAPHICS_CANONICAL_MESH_INVALID")
     uf=_UF(n);adj=_adj(tri);relations={};alpha=[0.]*n
     merge_candidates=[]
     cut_constraints=[]
     for r in evidence.static_relations:
-        a,b=int(r.face_a),int(r.face_b)
-        if a==b or min(a,b)<0 or max(a,b)>=n:raise QualificationError("GRAPHICS_STATIC_RELATION_FACE_INVALID")
+        a,b=r.face_a,r.face_b
+        if (type(a) is not int or type(b) is not int
+                or a==b or min(a,b)<0 or max(a,b)>=n):
+            raise QualificationError("GRAPHICS_STATIC_RELATION_FACE_INVALID")
         pair=tuple(sorted((a,b)))
         if pair in relations:raise QualificationError("GRAPHICS_STATIC_RELATION_DUPLICATE")
         # Validate ALL source scores, even if this pair will not merge.
@@ -201,8 +215,11 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
         for i in rows:face_fragment[i]=fid
     vis={};pair_rows={};views_present=set()
     for r in evidence.view_relations:
-        v=int(r.view_index);views_present.add(v);a,b=int(r.face_a),int(r.face_b)
-        if v<0 or a==b or min(a,b)<0 or max(a,b)>=n:raise QualificationError("GRAPHICS_VIEW_RELATION_INVALID")
+        v,a,b=r.view_index,r.face_a,r.face_b
+        if (type(v) is not int or type(a) is not int or type(b) is not int
+                or v<0 or a==b or min(a,b)<0 or max(a,b)>=n):
+            raise QualificationError("GRAPHICS_VIEW_RELATION_INVALID")
+        views_present.add(v)
         for label, score in (
             ("front", r.front_probability), ("occlusion", r.occlusion_probability),
             ("vis_a", r.visibility_probability_a),
@@ -271,8 +288,10 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
         except (TypeError, ValueError, OverflowError):
             raise QualificationError("GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID") from None
         try:
-            anchor=int(m.get("anchor_face_index",-1))
-            child=int(m.get("child_face_index",-1))
+            anchor=m.get("anchor_face_index",-1)
+            child=m.get("child_face_index",-1)
+            if type(anchor) is not int or type(child) is not int:
+                raise ValueError("non-integer attachment index")
         except (ValueError, TypeError, OverflowError):
             raise QualificationError("GRAPHICS_ATTACHMENT_PARENT_CHILD_FACE_BINDING_INVALID") from None
         parent=str(m.get("parent_mechanical_domain_id") or "")
@@ -396,7 +415,6 @@ def compile_neural_region_graphics_on_canonical_puppet_v1(
     ProductRevision. It only gives the current Graphics representation policy
     meaningful model-backed candidates on the one qualified mesh.
     """
-    from math import exp, isfinite
     from .rss_vnext_inference_evidence_v1 import (
         candidate_face_region_readout_v1, validate_inference_evidence_v1,
     )
@@ -531,6 +549,7 @@ def compile_neural_region_graphics_on_canonical_puppet_v1(
         "qualified_source_occlusion": False,
         "qualified_source_attachments": False,
         "independent_editability_proven": False,
+        "source_pixels_win_where_observed": False,
         "learned_region_is_not_drawable_truth": True,
         "source_graphics_qualification_status": "UNQUALIFIED_NEURAL_POLICY_ONLY",
     })

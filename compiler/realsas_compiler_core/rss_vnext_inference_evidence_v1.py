@@ -161,6 +161,7 @@ def _scene(value: Mapping[str, Any]) -> None:
     """Validate shared semantic/Graphics relations without assigning artist authority."""
     keys = {
         "source_semantic_patch_logits", "source_semantic_log_uncertainty",
+        "region_query_xyz", "region_membership_logits", "region_graphics_logits",
         "region_relation_logits", "region_relation_valid_mask",
         "presentation_role_probabilities",
         "constructed_camera_features", "constructed_camera_angles",
@@ -192,6 +193,41 @@ def _scene(value: Mapping[str, Any]) -> None:
     if not isinstance(mask, (list, tuple)) or not mask:
         _reject("RSS_VNEXT_EVIDENCE_REGION_RELATION_MASK")
     walk(mask, bool_allowed=True)
+    # Neither the anonymous region graph nor the field at H(x) can be used
+    # downstream without the exact query addresses and an explicit UNKNOWN
+    # membership channel. Reject unaddressed, untyped, or self-edge evidence.
+    xyz = value["region_query_xyz"]
+    member = value["region_membership_logits"]
+    graphics = value["region_graphics_logits"]
+    role = value["presentation_role_probabilities"]
+    if not all(isinstance(v, (list, tuple)) and v for v in (xyz, member, graphics, role)):
+        _reject("RSS_VNEXT_EVIDENCE_REGION_FIELD_EMPTY")
+    n, slots = len(xyz), len(mask)
+    if len(member) != n or len(graphics) != n or len(role) != n:
+        _reject("RSS_VNEXT_EVIDENCE_REGION_ADDRESS_DRIFT")
+    for row in xyz:
+        _vector(row, 3, "RSS_VNEXT_EVIDENCE_REGION_QUERY_XYZ")
+    for row in member:
+        _vector(row, slots + 1, "RSS_VNEXT_EVIDENCE_REGION_UNKNOWN_CHANNEL")
+    for row in graphics:
+        _vector(row, 5, "RSS_VNEXT_EVIDENCE_GRAPHICS_FIELD_FIVE_CHANNELS")
+    role_dim = len(role[0])
+    if role_dim < 2:
+        _reject("RSS_VNEXT_EVIDENCE_ROLE_CHANNEL_INVALID")
+    for row in role:
+        _vector(row, role_dim, "RSS_VNEXT_EVIDENCE_ROLE_CHANNEL_DRIFT")
+        if any(float(v) < 0 or float(v) > 1 for v in row) or abs(sum(row) - 1.0) > 1e-4:
+            _reject("RSS_VNEXT_EVIDENCE_ROLE_SIMPLEX_INVALID")
+    relations = value["region_relation_logits"]
+    if len(relations) != slots:
+        _reject("RSS_VNEXT_EVIDENCE_RELATION_SLOT_COUNT_DRIFT")
+    for i in range(slots):
+        if len(mask[i]) != slots or len(relations[i]) != slots:
+            _reject("RSS_VNEXT_EVIDENCE_RELATION_GRAPH_SHAPE")
+        for j in range(slots):
+            if type(mask[i][j]) is not bool or mask[i][j] != (i != j):
+                _reject("RSS_VNEXT_EVIDENCE_RELATION_SELF_EDGE_MASK_INVALID")
+            _vector(relations[i][j], 3, "RSS_VNEXT_EVIDENCE_RELATION_CHANNEL_DRIFT")
     if len(value["source_semantic_patch_logits"]) != 2:
         _reject("RSS_VNEXT_EVIDENCE_SOURCE_PATCH_COUNT")
     camera = value["constructed_camera_features"]

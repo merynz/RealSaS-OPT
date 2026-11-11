@@ -22,6 +22,7 @@ from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from product.living_compile.common import Json, LivingCompileError
 from product.living_compile.server import LivingCompileApplication, make_handler
+from product.busted_site.checkpoint_installation import inspect_environment
 
 _WORKSPACE_ID = re.compile(r"[A-Za-z0-9_-]{16,80}\Z")
 _PAGES = frozenset((
@@ -120,6 +121,9 @@ class BustedApplication(LivingCompileApplication):
             data, content_type = self.static_bytes(relative)
             return 200, data, content_type
 
+        if parsed.path == "/api/checkpoints/status" and method == "GET":
+            return 200, inspect_environment(), "application/json"
+
         if parsed.path == "/api/project" and method == "GET":
             status, payload, mime = super().dispatch(method, target, body)
             if not isinstance(payload, dict):
@@ -133,6 +137,7 @@ class BustedApplication(LivingCompileApplication):
                 "compile_blockers": [
                     "RSS_VNEXT_PRODUCTREVISION_INFERENCE_TO_COMPILER_BRIDGE_OPEN",
                 ],
+                "checkpoint_inspection": "/api/checkpoints/status",
                 "website_owner": "MAIN_PRODUCT_BUSTED_SITE",
                 "input_policy": "TWO_OBSERVED_VIEWS_FRONT_BACK",
             }, mime

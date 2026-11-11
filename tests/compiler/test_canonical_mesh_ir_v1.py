@@ -195,3 +195,44 @@ def test_canonical_mesh_rejects_static_source_fidelity_failure():
             static_qualification=failed,
             carrier_evidence=carrier,
         )
+
+
+@pytest.mark.parametrize(
+    "mutation,expected",
+    [
+        ("unknown_face_vertex","CANONICAL_MESH_FACE_VERTEX_UNKNOWN"),
+        ("duplicate_vertex_id","CANONICAL_MESH_VERTEX_ID_INVALID"),
+        ("unknown_edge_vertex","CANONICAL_MESH_EDGE_VERTEX_UNKNOWN"),
+        ("nonfinite_xyz","CANONICAL_MESH_VERTEX_POSITION_INVALID"),
+    ],
+)
+def test_rehashed_canonical_mesh_rejects_semantically_invalid_topology(mutation,expected):
+    from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import (
+        canonical_mesh_lineage_hash_v1,
+    )
+    candidate, static, carrier = _fixture()
+    original = mint_canonical_mesh_v1(
+        candidate, static_qualification=static, carrier_evidence=carrier,
+    )
+    if mutation == "unknown_face_vertex":
+        bad = replace(original,faces=((
+            original.faces[0][0], original.faces[0][1], "not-a-vertex",
+        ),))
+    elif mutation == "duplicate_vertex_id":
+        bad = replace(original,vertices=(
+            original.vertices[0],
+            replace(original.vertices[1],
+                    canonical_mesh_vertex_id=original.vertices[0].canonical_mesh_vertex_id),
+        ) + original.vertices[2:])
+    elif mutation == "unknown_edge_vertex":
+        bad = replace(original,edges=((
+            original.edges[0][0], "not-a-vertex",
+        ),) + original.edges[1:])
+    else:
+        bad = replace(original,vertices=(
+            replace(original.vertices[0],P=(float("inf"),0.0,0.0)),
+        ) + original.vertices[1:])
+    bad = replace(bad,mesh_lineage_hash="")
+    bad = replace(bad,mesh_lineage_hash=canonical_mesh_lineage_hash_v1(bad))
+    with pytest.raises(QualificationError,match=expected):
+        canonical_mesh_from_dict_v1(bad.to_dict())

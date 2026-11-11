@@ -1,0 +1,84 @@
+name: BUSTED public site — main product source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "product/busted_site/**"
+      - ".github/workflows/busted_main_product_pages_v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: busted-main-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify complete live frontend was moved to main
+        run: python -m pytest -q tests/product/test_busted_main_site_source_v1.py
+      - name: Verify every frontend JS module parses
+        run: |
+          find product/busted_site/static/js -name '*.js' -print0 |
+            while IFS= read -r -d '' file; do
+              node --input-type=module --check < "$file"
+            done
+      - name: Materialize static site with strictly configured API origin
+        env:
+          BUSTED_PUBLIC_API_BASE: ${{ vars.BUSTED_API_BASE_URL }}
+        run: |
+          mkdir -p _site
+          cp -a product/busted_site/. _site/
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from urllib.parse import urlparse
+          value = os.environ.get("BUSTED_PUBLIC_API_BASE", "").strip()
+          parsed = urlparse(value)
+          if value and not (
+              parsed.scheme == "https"
+              and parsed.hostname
+              and not parsed.username
+              and not parsed.password
+              and parsed.path in ("", "/")
+              and not parsed.query
+              and not parsed.fragment
+          ):
+              raise SystemExit("BUSTED_API_BASE_URL must be a bare HTTPS origin, no path or credentials")
+          doc = {
+              "schema": "RealSaS.BUSTED.SiteGatewayConfig.v1",
+              "api_base_url": value or None,
+          }
+          Path("_site/site-config.json").write_text(
+              json.dumps(doc, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+          )
+          print("BUSTED_SITE_CANONICAL_MAIN_PASS",
+                "api_origin_configured=" + str(bool(value)))
+          PY
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy source from main (no preview branch)
+        id: deployment
+        uses: actions/deploy-pages@v4

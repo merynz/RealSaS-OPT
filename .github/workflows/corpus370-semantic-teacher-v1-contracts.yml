@@ -1,0 +1,36 @@
+name: Corpus370 semantic teacher V1 contract tests
+
+on:
+  pull_request:
+    paths:
+      - "models/iris/truth/semantic_prior_contract_v1.py"
+      - "models/iris/truth/semantic_source_groups_v1.py"
+      - "canonical/REALSAS_SEMANTIC_PRIOR_POLICY_V1.json"
+      - "canonical/REALSAS_SEMANTIC_SOURCE_HINT_POLICY_V1.json"
+      - "tools/corpus/build_corpus370_semantic_teacher_v1.py"
+      - "tools/truth_foundry/blender_corpus370_semantic_source_groups_v1.py"
+      - "tests/corpus/test_corpus370_semantic_teacher_v1.py"
+      - ".github/workflows/corpus370-semantic-teacher-v1-contracts.yml"
+  push:
+    branches:
+      - "corpus370-three-head-semantic-truth-v1-20261107"
+  workflow_dispatch:
+
+concurrency:
+  group: corpus370-semantic-teacher-contracts-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  semantic-teacher-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --disable-pip-version-check numpy pytest
+      - name: Synthetic contract tests (NOT training admission)
+        run: python -m pytest -q tests/corpus/test_corpus370_semantic_teacher_v1.py

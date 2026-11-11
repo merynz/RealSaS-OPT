@@ -1,0 +1,69 @@
+name: corpus370-three-head-truth-status-real-370-v1
+
+on:
+  push:
+    branches: [corpus370-three-head-semantic-truth-v1-20261107]
+    paths:
+      - '.github/workflows/corpus370-three-head-truth-status-real-370-v1.yml'
+      - 'tools/corpus/build_corpus370_three_head_truth_snapshot_v1.py'
+      - 'tests/corpus/test_corpus370_three_head_truth_snapshot_v1.py'
+      - 'canonical/REALSAS_SEMANTIC_PRIOR_POLICY_V1.json'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/corpus370-three-head-truth-status-real-370-v1.yml'
+      - 'tools/corpus/build_corpus370_three_head_truth_snapshot_v1.py'
+      - 'tests/corpus/test_corpus370_three_head_truth_snapshot_v1.py'
+      - 'canonical/REALSAS_SEMANTIC_PRIOR_POLICY_V1.json'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: corpus370-three-head-status-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-370-courted-snapshot-plus-new-truth-gaps:
+    # Historical independently courted Nov 4 archive is not fresh requalification.
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Contract tests before touching real archive
+        run: |
+          python -m pip install --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus370_three_head_truth_snapshot_v1.py
+      - name: Fetch exact previously independently courted 370-source matrix
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 41838505934
+          name: corpus370-v5-current-family-matrix-370-41838505934
+          path: ./parent
+      - name: Reconcile all 370 historical court states and new three-head gaps
+        run: |
+          set -euo pipefail
+          mapfile -d '' files < <(find parent -type f -name CORPUS370_V5_CURRENT_FAMILY_MATRIX_V1.json -print0)
+          test "${#files[@]}" -eq 1
+          echo "EXACT_370_PARENT=$(sha256sum "${files[0]}")"
+          python -m tools.corpus.build_corpus370_three_head_truth_snapshot_v1 \
+            --matrix "${files[0]}" \
+            --policy canonical/REALSAS_SEMANTIC_PRIOR_POLICY_V1.json \
+            --upstream-run-id 41838505934 \
+            --upstream-artifact-id 13327879038 \
+            --output output
+          cat output/CORPUS370_THREE_HEAD_TRUTH_STATUS_V1.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish full 370-subject snapshot for auditing
+        uses: actions/upload-artifact@v4
+        with:
+          name: corpus370-three-head-truth-status-real-370-${{ github.run_id }}
+          path: output/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 1

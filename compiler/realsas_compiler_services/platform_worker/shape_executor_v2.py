@@ -94,13 +94,35 @@ def execute_shape_capability_v2(
         device=device,
         maximum_new_tokens=maximum_new_tokens,
     )
+    if not isinstance(result.scene_evidence_payload, bytes) or not result.scene_evidence_payload:
+        raise RuntimeError("SHAPE_V2_IRIS_SCENE_EVIDENCE_MISSING")
+    from compiler.realsas_compiler_services.platform_worker.shape_evidence_fanout_v1 import (
+        seal_shape_evidence_fanout_v1,
+    )
+    source_sha = source_bound_inputs.source_observation_content_sha256
+    input_sha = str(source_ref.get("content_sha256") or "")
+    # These are three separately addressed immutable CAS artifacts, minted
+    # from ONE model execution. No Compiler stage can discard the raw scene
+    # representation just by selecting the CanonicalMesh projection.
+    index_bytes = seal_shape_evidence_fanout_v1(
+        shape_bytes=result.payload,
+        scene_bytes=result.scene_evidence_payload,
+        source_observation_content_sha256=source_sha,
+        shape_input_content_sha256=input_sha,
+    )
     sealed = put_bytes(result.payload)
+    retained = put_bytes(result.scene_evidence_payload)
+    fanout = put_bytes(index_bytes)
     diagnostics = dict(result.diagnostics)
     diagnostics["model_materialization_seconds"] = float(materialize_seconds)
     diagnostics["input_content_sha256"] = str(source_ref.get("content_sha256") or "")
     diagnostics["inference_device"] = str(device)
     diagnostics["maximum_new_tokens"] = maximum_new_tokens
     diagnostics["model_families"] = list(families)
+    diagnostics["scene_evidence_content_sha256"] = retained["content_sha256"]
+    diagnostics["fanout_index_content_sha256"] = fanout["content_sha256"]
+    diagnostics["neural_scene_preserved_for_other_consumers"] = True
+    diagnostics["compiler_canonical_mesh_authority_claimed"] = False
     return {
         "capability_id": str(request.get("capability_id") or ""),
         "status": "PASS",
@@ -113,7 +135,25 @@ def execute_shape_capability_v2(
                 "content_sha256": sealed["content_sha256"],
                 "size_bytes": sealed["size_bytes"],
                 "authority_class": "LEARNED_SHAPE_PROPOSAL_ONLY",
-            }
+            },
+            {
+                "role": "iris_scene_evidence",
+                "artifact_type": "RealSaS.IRISSceneEvidence",
+                "schema_version": "v1",
+                "storage_key": retained["storage_key"],
+                "content_sha256": retained["content_sha256"],
+                "size_bytes": retained["size_bytes"],
+                "authority_class": "LEARNED_IRIS_SCENE_EVIDENCE_ONLY",
+            },
+            {
+                "role": "shape_evidence_fanout",
+                "artifact_type": "RealSaS.ShapeEvidenceFanout",
+                "schema_version": "v1",
+                "storage_key": fanout["storage_key"],
+                "content_sha256": fanout["content_sha256"],
+                "size_bytes": fanout["size_bytes"],
+                "authority_class": "CONTENT_BOUND_EVIDENCE_INDEX_NOT_PRODUCT_AUTHORITY",
+            },
         ],
         "diagnostics": diagnostics,
         "failure": None,

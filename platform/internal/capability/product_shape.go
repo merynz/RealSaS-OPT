@@ -37,6 +37,13 @@ func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) 
 			"output_artifact_type":  "RealSaS.ShapeProposal",
 			"output_schema_version": "v2",
 			"maximum_new_tokens":    131072,
+			"evidence_fanout_contract": "RealSaS.ShapeEvidenceFanout.v1",
+			"auxiliary_outputs": []any{
+				map[string]any{"role": "iris_scene_evidence", "artifact_type": "RealSaS.IRISSceneEvidence", "schema_version": "v1"},
+				map[string]any{"role": "shape_evidence_fanout", "artifact_type": "RealSaS.ShapeEvidenceFanout", "schema_version": "v1"},
+			},
+			"independent_scene_consumers_do_not_require_mesh": true,
+			"model_scene_evidence_retained_after_mesh_compile": true,
 			"required_models": []any{
 				map[string]any{"family": "IRIS", "architecture_id": "RealSaS.IRIS.VNextEvidenceModel.v3"},
 				map[string]any{"family": "TESSA", "architecture_id": "RealSaS.TESSA.Structuralizer.v3"},

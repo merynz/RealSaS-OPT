@@ -32,6 +32,7 @@ TESSA_COORDINATE_DOMAIN_V2 = "NORMALIZED_HALF_EXTENT__XYZ_IN_MINUS_0P5_PLUS_0P5"
 class ShapeInferenceResultV2:
     payload: bytes
     diagnostics: dict[str, Any]
+    scene_evidence_payload: bytes | None = None
 
 
 @dataclass(frozen=True)
@@ -397,7 +398,11 @@ def run_shape_inference_v2(
             "compiler_frame_authority": False,
         }
     )
-    return ShapeInferenceResultV2(payload=payload, diagnostics=diagnostics)
+    return ShapeInferenceResultV2(
+        payload=payload,
+        diagnostics=diagnostics,
+        scene_evidence_payload=getattr(v1, "scene_evidence_payload", None),
+    )
 
 
 __all__ = [

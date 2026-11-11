@@ -39,6 +39,9 @@ class ShapeInferenceResultV1:
     payload: bytes
     diagnostics: dict[str, Any]
     schema: str = "RealSaS.ShapeInferenceResult.v1"
+    # Preserves IRIS scene planes and un-clipped IRIS-frame witnesses for
+    # independent consumers; never substitute canonical Mesh as their source.
+    scene_evidence_payload: bytes | None = None
 
 
 def _tensor_numpy(value: torch.Tensor, dtype: np.dtype | None = None) -> np.ndarray:
@@ -182,6 +185,10 @@ def run_shape_inference_v1(
     if not court.grammar_valid or court.decode_failure is not None or not court.finite_geometry or not court.within_scale_policy:
         raise RuntimeError("SHAPE_TOPOLOGY_PROPOSAL_INVALID")
 
+    from compiler.realsas_compiler_services.platform_worker.shape_evidence_fanout_v1 import (
+        encode_iris_scene_evidence_v1,
+    )
+    scene_evidence_payload = encode_iris_scene_evidence_v1(surface)
     payload = encode_shape_proposal_v1(
         iris_binding=iris_binding,
         tessa_binding=tessa_binding,
@@ -197,7 +204,10 @@ def run_shape_inference_v1(
         "surface_witness_count": int(surface.surface_xyz_tessa.shape[1]),
         "timings": {key: float(value) for key, value in timings.items()},
     }
-    return ShapeInferenceResultV1(payload=payload, diagnostics=diagnostics)
+    return ShapeInferenceResultV1(
+        payload=payload, diagnostics=diagnostics,
+        scene_evidence_payload=scene_evidence_payload,
+    )
 
 
 # Kept importable for small contract tests which want a lightweight fake proposal.

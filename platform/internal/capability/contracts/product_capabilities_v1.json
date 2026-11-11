@@ -57,7 +57,22 @@
           }
         ],
         "implementation_owner_may_change": true,
-        "stable_product_role_survives_rewiring": true
+        "stable_product_role_survives_rewiring": true,
+        "evidence_fanout_contract": "RealSaS.ShapeEvidenceFanout.v1",
+        "auxiliary_outputs": [
+          {
+            "role": "iris_scene_evidence",
+            "artifact_type": "RealSaS.IRISSceneEvidence",
+            "schema_version": "v1"
+          },
+          {
+            "role": "shape_evidence_fanout",
+            "artifact_type": "RealSaS.ShapeEvidenceFanout",
+            "schema_version": "v1"
+          }
+        ],
+        "independent_scene_consumers_do_not_require_mesh": true,
+        "model_scene_evidence_retained_after_mesh_compile": true
       }
     },
     "product.mesh": {
@@ -112,7 +127,10 @@
         "rig_authority_claimed": false,
         "skin_authority_claimed": false,
         "implementation_owner_may_change": true,
-        "stable_product_role_survives_rewiring": true
+        "stable_product_role_survives_rewiring": true,
+        "requires_shape_evidence_fanout": true,
+        "iris_scene_evidence_loaded_by_mesh": false,
+        "canonical_mesh_replaces_neural_scene": false
       }
     },
     "product.rig": {

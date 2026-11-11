@@ -114,3 +114,53 @@ func TestEngineReleaseModelRequirementsRejectArchitectureAndChannelDrift(t *test
 		t.Fatal("product release accepted research model channel")
 	}
 }
+
+
+func TestProductShapeMeshRetainIndependentCASSceneEvidence(t *testing.T) {
+	shapeRows, err := (ProductShapeProvider{}).Capabilities(context.Background())
+	if err != nil || len(shapeRows) != 1 {
+		t.Fatalf("product.shape descriptor: %v / %d", err, len(shapeRows))
+	}
+	shapeMeta := shapeRows[0].Metadata
+	if shapeMeta["evidence_fanout_contract"] != "RealSaS.ShapeEvidenceFanout.v1" ||
+		shapeMeta["independent_scene_consumers_do_not_require_mesh"] != true ||
+		shapeMeta["model_scene_evidence_retained_after_mesh_compile"] != true {
+		t.Fatalf("product.shape dropped scene fan-out: %+v", shapeMeta)
+	}
+	aux, ok := shapeMeta["auxiliary_outputs"].([]any)
+	if !ok || len(aux) != 2 {
+		t.Fatalf("expected exactly two additional immutable Shape CAS outputs: %+v", aux)
+	}
+	wanted := map[string]string{
+		"iris_scene_evidence": "RealSaS.IRISSceneEvidence/v1",
+		"shape_evidence_fanout": "RealSaS.ShapeEvidenceFanout/v1",
+	}
+	for _, raw := range aux {
+		output, ok := raw.(map[string]any)
+		if !ok {
+			t.Fatalf("untyped auxiliary output: %+v", raw)
+		}
+		role, ok := output["role"].(string)
+		if !ok {
+			t.Fatalf("auxiliary role is not a string: %+v", output)
+		}
+		got := output["artifact_type"].(string) + "/" + output["schema_version"].(string)
+		if wanted[role] != got {
+			t.Fatalf("unexpected Shape evidence output %s: %s", role, got)
+		}
+		delete(wanted, role)
+	}
+	if len(wanted) != 0 {
+		t.Fatalf("missing fan-out artifacts %+v", wanted)
+	}
+	meshRows, err := (ProductMeshProvider{}).Capabilities(context.Background())
+	if err != nil || len(meshRows) != 1 {
+		t.Fatalf("product.mesh descriptor: %v / %d", err, len(meshRows))
+	}
+	meshMeta := meshRows[0].Metadata
+	if meshMeta["requires_shape_evidence_fanout"] != true ||
+		meshMeta["iris_scene_evidence_loaded_by_mesh"] != false ||
+		meshMeta["canonical_mesh_replaces_neural_scene"] != false {
+		t.Fatalf("product.mesh must verify the lightweight index without dropping/decoding parent scene: %+v", meshMeta)
+	}
+}

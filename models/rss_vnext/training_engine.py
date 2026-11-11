@@ -36,7 +36,10 @@ from .flexicubes_animation_supervision import (
     source_animation_flexicubes_loss,
 )
 from .unified_character_model import RSSvNextUnifiedCharacterModel
-from .early_semantic_field import masked_source_semantic_evidence_loss
+from .early_semantic_field import (
+    masked_source_semantic_evidence_loss,
+    masked_semantic_expected_brier_risk_loss,
+)
 from .semantic_structure import qualified_source_region_pair_loss
 from .semantic_geometry_prior import (
     RSSvNextSemanticLayerSpec, masked_qualified_surface_role_loss,
@@ -121,6 +124,7 @@ class RSSvNextTrainingWeights:
     topology: float = 1.0
     motion_preference: float = 0.2
     source_semantics: float = 0.2
+    semantic_risk: float = 0.0  # opt-in: expected masked source-patch Brier risk
     surface_roles: float = 0.0  # opt-in only with exact-source 3D address receipt
     region_pairs: float = 0.0  # opt-in only with source-bound pair receipt
     graphics_source_rgb: float = 0.0  # opt-in: qualified original visible rays
@@ -135,6 +139,7 @@ class RSSvNextTrainingWeights:
     def validate(self):
         if min(
             self.topology, self.motion_preference, self.source_semantics,
+            self.semantic_risk,
             self.surface_roles, self.region_pairs, self.graphics_source_rgb,
             self.source_udf, self.source_inside_sign,
             self.axis_rig_skin_codes, self.flexicubes_surface, self.flexicubes_animation,
@@ -143,7 +148,7 @@ class RSSvNextTrainingWeights:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
         if (
             self.topology + self.motion_preference
-            + self.source_semantics + self.surface_roles + self.region_pairs
+            + self.source_semantics + self.semantic_risk + self.surface_roles + self.region_pairs
             + self.graphics_source_rgb + self.source_udf + self.source_inside_sign
             + self.axis_rig_skin_codes + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view <= 0
@@ -158,6 +163,7 @@ class RSSvNextTrainingResult:
     topology_loss: Tensor | None
     motion_preference_loss: Tensor | None
     source_semantic_loss: Tensor | None
+    semantic_risk_loss: Tensor | None
     flexicubes_surface_loss: Tensor | None
     flexicubes_animation_loss: Tensor | None
     eligible_animation_pose_count: int
@@ -557,6 +563,7 @@ class RSSvNextStructuralTrainer:
         topology = None
         motion = None
         semantic = None
+        semantic_risk_loss = None
         n_semantic = 0
         semantic_requested = (
             batch.semantic_patch_target is not None
@@ -568,7 +575,7 @@ class RSSvNextStructuralTrainer:
                     or batch.semantic_patch_target is None
                     or batch.semantic_patch_mask is None):
                 raise ValueError("RSS_VNEXT_TRAIN_SEMANTIC_QUALIFICATION_REQUIRED")
-            if self.weights.source_semantics <= 0:
+            if self.weights.source_semantics <= 0 and self.weights.semantic_risk <= 0:
                 raise ValueError("RSS_VNEXT_TRAIN_SEMANTIC_OBJECTIVE_NOT_ENABLED")
             receipt = self.trusted_semantic_patch_registry.get(
                 batch.semantic_qualification_key,
@@ -594,11 +601,19 @@ class RSSvNextStructuralTrainer:
                 or not bool(batch.semantic_patch_mask.any())
             ):
                 raise ValueError("RSS_VNEXT_TRAIN_SEMANTIC_TARGET_SHAPE_OR_MASK_INVALID")
-            semantic = masked_source_semantic_evidence_loss(
-                state.source_semantic_patch_logits,
-                batch.semantic_patch_target,
-                batch.semantic_patch_mask,
-            )
+            if self.weights.source_semantics > 0:
+                semantic = masked_source_semantic_evidence_loss(
+                    state.source_semantic_patch_logits,
+                    batch.semantic_patch_target,
+                    batch.semantic_patch_mask,
+                )
+            if self.weights.semantic_risk > 0:
+                semantic_risk_loss = masked_semantic_expected_brier_risk_loss(
+                    state.source_semantic_patch_logits,
+                    state.source_semantic_log_uncertainty,
+                    batch.semantic_patch_target,
+                    batch.semantic_patch_mask,
+                )
             n_semantic = int(batch.semantic_patch_mask.sum().item())
 
         # 3D presentation roles live on H(x), not on 2D source patches.
@@ -936,6 +951,7 @@ class RSSvNextStructuralTrainer:
 
         if (
             topology is None and motion is None and semantic is None
+            and semantic_risk_loss is None
             and fc_loss is None and fc_anim_loss is None
             and novel_loss is None and surface_role_loss is None
             and region_pair_loss is None
@@ -949,6 +965,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.topology, topology),
                 (self.weights.motion_preference, motion),
                 (self.weights.source_semantics, semantic),
+                (self.weights.semantic_risk, semantic_risk_loss),
                 (self.weights.surface_roles, surface_role_loss),
                 (self.weights.region_pairs, region_pair_loss),
                 (self.weights.graphics_source_rgb, graphics_rgb_loss),
@@ -968,6 +985,7 @@ class RSSvNextStructuralTrainer:
             topology_loss=topology,
             motion_preference_loss=motion,
             source_semantic_loss=semantic,
+            semantic_risk_loss=semantic_risk_loss,
             flexicubes_surface_loss=fc_loss,
             flexicubes_animation_loss=fc_anim_loss,
             eligible_animation_pose_count=fc_anim_count,

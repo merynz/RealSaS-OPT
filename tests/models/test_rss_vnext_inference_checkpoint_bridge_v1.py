@@ -603,3 +603,41 @@ def test_compiler_neural_control_event_rejects_unsupported_or_mutated_fields(mut
     base.update(mutation)
     with pytest.raises(QualificationError, match=expected):
         seal_inference_evidence_v1(_candidate(control_events=(base,)))
+
+
+@pytest.mark.parametrize("rgba", [1.01, -0.01, float("nan")])
+def test_original_source_rgba_must_stay_in_normalized_domain_before_export(rgba):
+    source,cameras=_images()
+    source[0,0,0,0,0]=rgba
+    expected=("NONFINITE_SOURCE" if np.isnan(rgba) else "SOURCE_RGBA_RANGE")
+    with pytest.raises(ValueError,match=expected):
+        export_inference_evidence_v1(
+            {},original_rgba=source,original_camera_features=cameras,
+            checkpoint_sha256="a"*64,
+        )
+
+
+@pytest.mark.parametrize("bad", [1.2,-0.1,True])
+def test_compiler_cannot_rehash_invalid_original_rgba_ray_domain(bad):
+    mesh=deepcopy(_mesh())
+    mesh["source_rays"]["rgba"][0][0][0]=bad
+    with pytest.raises(QualificationError,match="RAY_RGBA"):
+        seal_inference_evidence_v1(_candidate(mesh=mesh))
+
+
+def test_semantic_and_dynamic_nan_are_typed_rejections_before_hash():
+    _,scene=_mesh_with_addressed_scene_for_region_court()
+    malformed=deepcopy(scene)
+    malformed["region_graphics_logits"][0][0]=float("nan")
+    with pytest.raises(QualificationError,match="GRAPHICS_FIELD_FIVE_CHANNELS"):
+        seal_inference_evidence_v1(_candidate(scene=malformed))
+
+    dynamic={
+        "vertices": [[0.,0.,0.]]*3,
+        "weights": [[.5,.5],[.5,.5],[float("nan"),.5]],
+        "displacement": [[0.,0.,0.]]*3,
+        "readiness_logits": [[0.,0.,0.,0.]]*3,
+        "authority": "UNQUALIFIED_DYNAMIC_MESH_PROPOSAL",
+    }
+    with pytest.raises(QualificationError,match="SKIN_SHAPE"):
+        seal_inference_evidence_v1(_candidate(dynamic=dynamic))

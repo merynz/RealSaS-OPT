@@ -1,0 +1,46 @@
+name: RSS vNext eight-way source-render training court
+on:
+  push:
+    branches:
+      - feat/rss-vnext-eight-way-training-court-20261111
+      - main
+    paths:
+      - "models/rss_vnext/training_engine.py"
+      - "models/rss_vnext/multiview_construction.py"
+      - "models/rss_vnext/unified_character_model.py"
+      - "tests/models/test_rss_vnext_eight_way_training_v1.py"
+      - "tests/models/test_rss_vnext_multiview_construction.py"
+      - "tests/models/test_rss_vnext_structural_trainer.py"
+      - ".github/workflows/rss_vnext_eight_way_training_cpu.yml"
+  pull_request:
+    paths:
+      - "models/rss_vnext/training_engine.py"
+      - "models/rss_vnext/multiview_construction.py"
+      - "models/rss_vnext/unified_character_model.py"
+      - "tests/models/test_rss_vnext_eight_way_training_v1.py"
+      - ".github/workflows/rss_vnext_eight_way_training_cpu.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eight-way-training-and-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CPU-only dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy scipy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Verify 8-way teacher contract, gradients, and existing trainer
+        env:
+          PYTHONPATH: .
+        run: |
+          python -m compileall -q models/rss_vnext/training_engine.py tests/models/test_rss_vnext_eight_way_training_v1.py
+          python -m pytest -q tests/models/test_rss_vnext_eight_way_training_v1.py tests/models/test_rss_vnext_multiview_construction.py tests/models/test_rss_vnext_structural_trainer.py

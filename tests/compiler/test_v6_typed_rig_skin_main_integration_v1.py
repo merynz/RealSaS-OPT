@@ -173,3 +173,45 @@ def test_main_skin_mint_rejects_valid_hash_but_wrong_skeleton_binding():
             skin_codec_architecture_id="fixture-codec-no-model-release",
             skin_codec_checkpoint_hash="b"*64,
         )
+
+
+def test_control_only_edit_reuses_exact_qualified_skin_without_rebinding():
+    """Exercise real minting courts, not just matching string hashes."""
+    from compiler.realsas_compiler_core.canonical_rig_ir_v2 import mint_canonical_rig_v2
+    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import mint_canonical_skin_v2
+    from compiler.realsas_compiler_core.rig_program_ir_v1 import (
+        qualify_rig_program_v1, seal_rig_program_proposal_v1,
+    )
+    from tests.compiler.test_control_ready_rig_v2 import _mesh, _proposal
+
+    mesh = _mesh()
+    proposal = _proposal(mesh)
+    original_rig = mint_canonical_rig_v2(
+        mesh, qualified_program=qualify_rig_program_v1(proposal),
+    )
+    existing_skin_qualification = _qualified_synthetic_carrier_skin(mesh, original_rig)
+    original_skin = mint_canonical_skin_v2(
+        mesh, original_rig, qualified_skin=existing_skin_qualification,
+        skin_code_proposal_hash="a" * 64,
+        skin_codec_architecture_id="fixture-codec-no-model-release",
+        skin_codec_checkpoint_hash="b" * 64,
+    )
+    altered = seal_rig_program_proposal_v1(replace(
+        proposal,
+        controls=(replace(proposal.controls[0], rest_P=(0.5, 0.0, 0.0)),)
+        + proposal.controls[1:],
+        proposal_lineage_hash="",
+    ))
+    changed_rig = mint_canonical_rig_v2(
+        mesh, qualified_program=qualify_rig_program_v1(altered),
+    )
+    reused = mint_canonical_skin_v2(
+        mesh, changed_rig, qualified_skin=existing_skin_qualification,
+        skin_code_proposal_hash="a" * 64,
+        skin_codec_architecture_id="fixture-codec-no-model-release",
+        skin_codec_checkpoint_hash="b" * 64,
+    )
+    assert changed_rig.control_program_hash != original_rig.control_program_hash
+    assert changed_rig.deform_structure_hash == original_rig.deform_structure_hash
+    assert reused.skin_lineage_hash == original_skin.skin_lineage_hash
+    assert reused.rows == original_skin.rows

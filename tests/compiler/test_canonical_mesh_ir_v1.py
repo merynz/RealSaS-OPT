@@ -203,7 +203,6 @@ def test_canonical_mesh_rejects_static_source_fidelity_failure():
         ("unknown_face_vertex","CANONICAL_MESH_FACE_VERTEX_UNKNOWN"),
         ("duplicate_vertex_id","CANONICAL_MESH_VERTEX_ID_INVALID"),
         ("unknown_edge_vertex","CANONICAL_MESH_EDGE_VERTEX_UNKNOWN"),
-        ("nonfinite_xyz","CANONICAL_MESH_VERTEX_POSITION_INVALID"),
     ],
 )
 def test_rehashed_canonical_mesh_rejects_semantically_invalid_topology(mutation,expected):
@@ -229,10 +228,21 @@ def test_rehashed_canonical_mesh_rejects_semantically_invalid_topology(mutation,
             original.edges[0][0], "not-a-vertex",
         ),) + original.edges[1:])
     else:
-        bad = replace(original,vertices=(
-            replace(original.vertices[0],P=(float("inf"),0.0,0.0)),
-        ) + original.vertices[1:])
+        raise AssertionError("unhandled mesh mutation")
     bad = replace(bad,mesh_lineage_hash="")
     bad = replace(bad,mesh_lineage_hash=canonical_mesh_lineage_hash_v1(bad))
     with pytest.raises(QualificationError,match=expected):
         canonical_mesh_from_dict_v1(bad.to_dict())
+
+
+def test_nonfinite_mesh_vertex_cannot_receive_a_canonical_content_hash():
+    from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import canonical_mesh_lineage_hash_v1
+    candidate, static, carrier = _fixture()
+    mesh = mint_canonical_mesh_v1(
+        candidate, static_qualification=static, carrier_evidence=carrier,
+    )
+    broken = replace(mesh, vertices=(
+        replace(mesh.vertices[0], P=(float("inf"), 0.0, 0.0)),
+    ) + mesh.vertices[1:])
+    with pytest.raises(ValueError, match="non-finite canonical value"):
+        canonical_mesh_lineage_hash_v1(broken)

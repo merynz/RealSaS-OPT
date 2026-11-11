@@ -118,14 +118,27 @@ def test_automatic_self_hosted_pr_checks_reject_public_fork_code():
 
 
 def test_automatic_pr_checks_cancel_superseded_heads():
+    # Report every violation in one run. This remains fail-closed: no known
+    # workflow may evade the test because a different file failed first.
+    missing = []
+    invalid = []
     for path in (ROOT / ".github/workflows").glob("*.yml"):
         text = path.read_text(encoding="utf-8")
-        if re.search(r"^  pull_request:", text, re.MULTILINE):
-            assert re.search(r"^concurrency:", text, re.MULTILINE), path.name
-            value = re.search(r"^  cancel-in-progress: (.+)$", text, re.MULTILINE)
-            assert value and value.group(1) in (
-                "true", "${{ github.event_name == 'pull_request' }}"
-            ), path.name
+        if not re.search(r"^  pull_request:", text, re.MULTILINE):
+            continue
+        if not re.search(r"^concurrency:", text, re.MULTILINE):
+            missing.append(path.name)
+        value = re.search(r"^  cancel-in-progress: (.+)$", text, re.MULTILINE)
+        if not value or value.group(1) not in (
+            "true", "${{ github.event_name == 'pull_request' }}"
+        ):
+            invalid.append(path.name)
+    assert not missing and not invalid, (
+        "Automatic PR concurrency violations: missing concurrency="
+        + ", ".join(sorted(missing))
+        + "; unsafe/missing cancellation="
+        + ", ".join(sorted(invalid))
+    )
 
 
 def test_frozen_r6_training_replays_are_explicit():

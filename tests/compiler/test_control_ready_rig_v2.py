@@ -42,9 +42,9 @@ def _support(surface_id: str) -> SurfaceSupportBinding:
 def _mesh() -> CanonicalMeshIR:
     value = CanonicalMeshIR(
         vertices=(
-            CanonicalMeshVertexIR("MV:0", _support("S:0"), (0.0, 0.0, 0.0), "body", "C:0"),
-            CanonicalMeshVertexIR("MV:1", _support("S:1"), (0.0, 1.0, 0.0), "body", "C:1"),
-            CanonicalMeshVertexIR("MV:2", _support("S:2"), (0.2, 2.0, 0.0), "body", "C:2"),
+            CanonicalMeshVertexIR("MV:0", _support("S:0"), "body", (0.0, 0.0, 0.0), "C:0"),
+            CanonicalMeshVertexIR("MV:1", _support("S:1"), "body", (0.0, 1.0, 0.0), "C:1"),
+            CanonicalMeshVertexIR("MV:2", _support("S:2"), "body", (0.2, 2.0, 0.0), "C:2"),
         ),
         faces=(("MV:0", "MV:1", "MV:2"),),
         edges=(("MV:0", "MV:1"), ("MV:1", "MV:2"), ("MV:0", "MV:2")),
@@ -60,7 +60,13 @@ def _mesh() -> CanonicalMeshIR:
         mesh_lineage_hash="",
         metadata={"authority": "COMPILER_CANONICAL_MESH"},
     )
-    return replace(value, mesh_lineage_hash=canonical_mesh_lineage_hash_v1(value))
+    # Keep this shared synthetic fixture faithful to the canonical constructor:
+    # component_id is a string and P is an XYZ tuple. Older positional-order
+    # corruption was ignored before consumer read-time validation.
+    from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import validate_canonical_mesh_domain_v1
+    sealed = replace(value, mesh_lineage_hash=canonical_mesh_lineage_hash_v1(value))
+    validate_canonical_mesh_domain_v1(sealed)
+    return sealed
 
 
 def _proposal(mesh: CanonicalMeshIR) -> RigProgramProposalIR:

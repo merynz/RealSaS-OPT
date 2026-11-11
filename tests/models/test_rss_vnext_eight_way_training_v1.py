@@ -176,11 +176,15 @@ def test_five_channel_graphics_contract_and_invalid_field_rejected():
 
 def test_eight_way_requires_independent_registry_and_source_binding():
     _, batch, trainer = _fixture()
-    correct = trainer.trusted_render_registry
-    trainer.trusted_render_registry = {}
+    with pytest.raises(TypeError):
+        trainer.trusted_render_registry.clear()
+    untrusted = RSSvNextStructuralTrainer(
+        trainer.model, torch.optim.AdamW(trainer.model.parameters()),
+        dataset_manifest_sha256=trainer.dataset_manifest_sha256,
+        weights=trainer.weights,
+    )
     with pytest.raises(ValueError, match="TRUSTED_REGISTRY_REQUIRED"):
-        trainer.objective(batch)
-    trainer.trusted_render_registry = correct
+        untrusted.objective(batch)
     batch.novel_view_rgba[:, :, 0, 0, 0] += 0.1
     with pytest.raises(ValueError, match="PAYLOAD_DRIFT:novel_rgba"):
         trainer.objective(batch)
@@ -204,6 +208,9 @@ def test_eight_way_registry_is_checkpoint_bound(tmp_path):
     trainer.train_step(batch)
     path = tmp_path / "source-bound.pt"
     trainer.save_checkpoint(path, sampler_cursor=2)
+    # Rebuild the same test source. A different RNG source must be rejected;
+    # this checkpoint court does not accept the identity of another subject.
+    torch.manual_seed(71)
     mirror, _, matched = _fixture()
     assert matched.load_checkpoint(path) == 2
     untrusted = RSSvNextStructuralTrainer(

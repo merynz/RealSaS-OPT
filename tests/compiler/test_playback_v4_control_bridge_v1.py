@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import replace
 from hashlib import sha256
 import os
+import math
 from pathlib import Path
 import subprocess
 import zlib
@@ -12,6 +13,7 @@ import zlib
 import numpy as np
 import pytest
 
+from compiler.realsas_compiler_core.mechanics_control_solver_v1 import ControlTransformIRV1
 from compiler.realsas_compiler_core.controllable_puppet_runtime_v1 import (
     ControllablePuppetSessionV1, VIEW_IDS_V1,
 )
@@ -197,4 +199,86 @@ def test_authored_control_clip_changes_real_native_pixels_in_eight_view_package(
                 assert covered > 0, f"visible canonical surface absent at V{i}"
         if i in (0, 1, 7):
             assert not np.array_equal(images[0], images[1]), f"control effect absent V{i}"
+    assert report.runtime_qualified is False
+
+
+def _rotated_parent_drag_clip_fixture():
+    bundle = qualified_synthetic_bundle()
+    contract = _contract(bundle)
+    session = ControllablePuppetSessionV1(bundle)
+    before = capture_puppet_pose_keyframe_v1(
+        session, time_seconds=0., composition_by_view=_compositions(session),
+    )
+    angle = math.pi / 4
+    session.set_control(ControlTransformIRV1(
+        "C_ROOT",
+        translation=(.2,0.,0.),
+        rotation_quat_wxyz=(math.cos(angle / 2),0.,0.,math.sin(angle / 2)),
+        scale=(1.25,1.4,1.),
+    ))
+    session.drag_screen("C_IK",80.,16.)
+    after = capture_puppet_pose_keyframe_v1(
+        session, time_seconds=1., composition_by_view=_compositions(session),
+    )
+    clip, report = _rebuild(bundle, contract, (before, after))
+    return bundle, contract, (before,after), clip, report
+
+
+def test_parent_rotated_scaled_drag_replays_through_real_motion_compile_bridge():
+    bundle, contract, frames, clip, report = _rotated_parent_drag_clip_fixture()
+    validate_runtime_v4_clip(contract, clip)
+    assert report.runtime_qualified is False
+    controls = {x.canonical_control_id: x for x in report.control_keyframes[1]}
+    assert "C_ROOT" in controls and "C_IK" in controls
+    assert controls["C_ROOT"].scale == (1.25,1.4,1.)
+    actual = np.asarray(frames[1].frame.deformed.positions)
+    replayed = clip.frames[1].canonical_posed_xyz_by_asset["asset:body"]
+    assert np.allclose(replayed, actual, atol=1e-6)
+    assert not np.allclose(
+        clip.frames[0].canonical_posed_xyz_by_asset["asset:body"], replayed,
+    )
+    assert report.mesh_lineage_hash == bundle.mesh.mesh_lineage_hash
+    assert report.control_program_hash == bundle.rig.control_program_hash
+
+
+@pytest.mark.skipif(not os.environ.get("REALSAS_V4_NATIVE_DEMO"), reason="native C++ runtime unavailable")
+def test_rotated_parent_drag_and_lbs_scale_reach_real_cpp_native_pixels(tmp_path: Path):
+    from PIL import Image
+
+    bundle, contract, frames, clip, report = _rotated_parent_drag_clip_fixture()
+    root = tmp_path / "assets"
+    textures = []
+    for view_id in VIEW_IDS_V1:
+        rel = f"textures/{view_id}.png"
+        p = root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        Image.fromarray(
+            np.full((128, 128, 4), (90, 155, 210, 255), dtype=np.uint8),
+        ).save(p)
+        data = p.read_bytes()
+        textures.append(RuntimeV3TexturePayload(
+            view_id, rel, sha256(data).hexdigest(),
+            zlib.crc32(data) & 0xffffffff, 128, 128,
+        ))
+    archive = tmp_path / "controlled_scale.rss"
+    materialize_runtime_v4_archive(
+        out_path=archive, texture_root=root,
+        contract=contract, textures=tuple(textures), clips=(clip,),
+        source_product_state_hash="c" * 64, source_proof_bundle_hash="d" * 64,
+    )
+    demo = os.environ["REALSAS_V4_NATIVE_DEMO"]
+    images = []
+    for t in (0., 1.):
+        png = tmp_path / f"native_{t}.png"
+        result = subprocess.run(
+            [demo, str(archive), "--clip", clip.clip_id,
+             "--view", "V0", "--time", str(t), "--out", str(png)],
+            capture_output=True, text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        images.append(np.asarray(Image.open(png).convert("RGBA")))
+    assert images[0].shape == images[1].shape == (128,128,4)
+    assert np.count_nonzero(images[0][...,3]) > 0
+    assert np.count_nonzero(images[1][...,3]) > 0
+    assert not np.array_equal(images[0],images[1])
     assert report.runtime_qualified is False

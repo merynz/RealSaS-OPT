@@ -249,3 +249,41 @@ def test_exact_fc_and_tessa_share_one_two_view_training_optimizer():
     batch.flexicubes_reference_surface_xyz = teacher_surface + .1
     with pytest.raises(ValueError, match="FC_SOURCE_SIGNED_DOMAIN_RECEIPT_DRIFT"):
         trainer.objective(batch)
+
+
+def test_signed_source_teacher_registry_is_pinned_to_checkpoint(tmp_path):
+    """A new scientific foundry receipt cannot silently reuse old gradients."""
+    cfg = RSSvNextConfig.tiny_for_test()
+    a = RSSvNextUnifiedCharacterModel(
+        cfg, vision_encoder=RSSvNextPatchEncoderForTests(cfg.iris.image_token_dim),
+    )
+    receipt = {
+        "admission_status": "QUALIFIED_SOURCE_SIGNED_SOLID",
+        "source_component_domain": "SINGLE_QUALIFIED_CLOSED_COMPONENT",
+        "dataset_manifest_sha256": "a" * 64,
+        "source_qualification_key": "synthetic-only",
+        "role_schema_id": cfg.semantic_role_schema_id,
+        "layer_name": "all",
+        "surface_target_sha256": "b" * 64,
+        "animation_source_asset_sha256": None,
+        "animation_source_rig_sha256": None,
+        "animation_source_poses_sha256": None,
+    }
+    first = RSSvNextStructuralTrainer(
+        a, torch.optim.AdamW(a.parameters()),
+        dataset_manifest_sha256="a" * 64,
+        trusted_signed_source_registry={"source": receipt},
+    )
+    path = tmp_path / "signed_source_training.pt"
+    first.save_checkpoint(path, sampler_cursor=2)
+    b = RSSvNextUnifiedCharacterModel(
+        cfg, vision_encoder=RSSvNextPatchEncoderForTests(cfg.iris.image_token_dim),
+    )
+    changed = {**receipt, "source_component_domain": "OPEN_SURFACE"}
+    other = RSSvNextStructuralTrainer(
+        b, torch.optim.AdamW(b.parameters()),
+        dataset_manifest_sha256="a" * 64,
+        trusted_signed_source_registry={"source": changed},
+    )
+    with pytest.raises(ValueError, match="CHECKPOINT_SIGNED_SOURCE_REGISTRY_DRIFT"):
+        other.load_checkpoint(path)

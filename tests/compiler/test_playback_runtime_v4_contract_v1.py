@@ -173,3 +173,118 @@ def test_other_view_source_donor_must_differ_from_target_view():
     bad = RuntimeV4PlaybackContract(contract.slots, contract.assets, tuple(views))
     with pytest.raises(QualificationError, match="RUNTIME_V4_OTHER_VIEW_DONOR_MUST_DIFFER_FROM_TARGET_VIEW"):
         validate_playback_runtime_v4_contract(bad)
+
+
+def _clipping_fixture_v4():
+    from dataclasses import replace
+    from compiler.realsas_compiler_core.playback_runtime_v3 import RuntimeV3ClipInterval
+    source_contract, source_clip = _fixture()
+    body = source_contract.assets[0]
+    clipping = RuntimeV4AttachmentAsset(
+        asset_id="clip_asset",
+        slot_id="clip_slot",
+        attachment_id="clip_attachment",
+        attachment_kind=AttachmentKind.CLIPPING,
+        topology_class=TopologyClass.CLIP_DYNAMIC,
+        rest_xyz=body.rest_xyz.copy(),
+        triangles=body.triangles.copy(),
+        sealed_source_hash="b" * 64,
+    )
+    views = []
+    for view in source_contract.views:
+        source = view.assets[0]
+        clip_row = RuntimeV4ViewAssetOverlay(
+            asset_id="clip_asset",
+            uv=source.uv.copy(),
+            provenance_codes=np.asarray(
+                (provenance_code(AppearanceProvenance.UNSEEN),), np.uint8,
+            ),
+            donor_view_indices=np.asarray((-1,), np.int16),
+        )
+        views.append(RuntimeV4ViewOverlay(
+            view.view_id, view.view_index, view.camera,
+            (source, clip_row),
+        ))
+    slots = (
+        RuntimeV3Slot("clip_slot", "root", 0, "clip_attachment"),
+        RuntimeV3Slot("body_slot", "root", 1, "body_attachment"),
+    )
+    contract = RuntimeV4PlaybackContract(
+        slots, (body, clipping), tuple(views),
+    )
+    compositions = {
+        f"V{i}": RuntimeV3FrameComposition(
+            f"V{i}", ("clip_slot", "body_slot"),
+            {"clip_slot": "clip_attachment", "body_slot": "body_attachment"},
+            (RuntimeV3ClipInterval(
+                "clip_attachment", "clip_slot", "body_slot", False,
+            ),),
+        ) for i in range(8)
+    }
+    frames = tuple(RuntimeV4Frame(
+        frame.time_seconds,
+        {"body_asset": body.rest_xyz.copy(), "clip_asset": clipping.rest_xyz.copy()},
+        compositions,
+    ) for frame in source_clip.frames)
+    return contract, replace(source_clip, frames=frames)
+
+
+def test_v4_clipping_contract_eight_views_and_can_be_replayed():
+    contract, clip = _clipping_fixture_v4()
+    validate_playback_runtime_v4_contract(contract)
+    validate_runtime_v4_clip(contract, clip)
+    assert len(clip.frames[0].composition_by_view["V0"].clip_intervals) == 1
+
+
+def test_v4_active_clipping_asset_must_have_scope():
+    from dataclasses import replace
+    contract, clip = _clipping_fixture_v4()
+    comp = clip.frames[0].composition_by_view["V0"]
+    broken = replace(comp, clip_intervals=())
+    frame = replace(clip.frames[0], composition_by_view={
+        **clip.frames[0].composition_by_view, "V0": broken,
+    })
+    with pytest.raises(QualificationError, match="ACTIVE_CLIPPING_REQUIRES_INTERVAL"):
+        validate_runtime_v4_clip(contract, replace(clip, frames=(frame, clip.frames[1])))
+
+
+def test_v4_rejects_clipping_reversed_or_same_slot_range():
+    from dataclasses import replace
+    from compiler.realsas_compiler_core.playback_runtime_v3 import RuntimeV3ClipInterval
+    contract, clip = _clipping_fixture_v4()
+    comp = clip.frames[0].composition_by_view["V0"]
+    for interval in (
+        RuntimeV3ClipInterval("clip_attachment", "body_slot", "clip_slot"),
+        RuntimeV3ClipInterval("clip_attachment", "clip_slot", "clip_slot"),
+    ):
+        broken = replace(comp, clip_intervals=(interval,))
+        frame = replace(clip.frames[0], composition_by_view={
+            **clip.frames[0].composition_by_view, "V0": broken,
+        })
+        with pytest.raises(QualificationError):
+            validate_runtime_v4_clip(contract, replace(clip, frames=(frame, clip.frames[1])))
+
+
+def test_v4_rejects_duplicate_clipping_interval_and_nonclipping_asset():
+    from dataclasses import replace
+    from compiler.realsas_compiler_core.playback_runtime_v3 import RuntimeV3ClipInterval
+    contract, clip = _clipping_fixture_v4()
+    comp = clip.frames[0].composition_by_view["V0"]
+    duplicate = replace(comp, clip_intervals=comp.clip_intervals * 2)
+    frame = replace(clip.frames[0], composition_by_view={
+        **clip.frames[0].composition_by_view, "V0": duplicate,
+    })
+    with pytest.raises(QualificationError, match="CLIP_INTERVAL_DUPLICATE"):
+        validate_runtime_v4_clip(contract, replace(clip, frames=(frame, clip.frames[1])))
+    reversed_comp = replace(
+        comp,
+        draw_order_slot_ids=("body_slot", "clip_slot"),
+        clip_intervals=(RuntimeV3ClipInterval(
+            "body_attachment", "body_slot", "clip_slot",
+        ),),
+    )
+    bad_frame = replace(clip.frames[0], composition_by_view={
+        **clip.frames[0].composition_by_view, "V0": reversed_comp,
+    })
+    with pytest.raises(QualificationError, match="CLIP_INTERVAL_REQUIRES_CLIPPING_ASSET"):
+        validate_runtime_v4_clip(contract, replace(clip, frames=(bad_frame, clip.frames[1])))

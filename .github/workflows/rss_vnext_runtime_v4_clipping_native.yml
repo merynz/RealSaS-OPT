@@ -1,0 +1,54 @@
+name: RSS vNext Runtime V4 Native Clipping & Contract Court
+
+on:
+  push:
+    branches: [main, feat/rss-vnext-runtime-v4-clipping-native-20261111]
+    paths:
+      - "runtime/realsas_cpp/src/runtime_v4_reference.cpp"
+      - "runtime/realsas_cpp/tests/runtime_v4_clipping_native_e2e.py"
+      - "runtime/realsas_cpp/CMakeLists.txt"
+      - "compiler/realsas_compiler_core/playback_runtime_v4.py"
+      - "tests/compiler/test_playback_runtime_v4_contract_v1.py"
+      - ".github/workflows/rss_vnext_runtime_v4_clipping_native.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "runtime/realsas_cpp/**"
+      - "compiler/realsas_compiler_core/playback_runtime_v4.py"
+      - "tests/compiler/test_playback_runtime_v4_contract_v1.py"
+      - ".github/workflows/rss_vnext_runtime_v4_clipping_native.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-mesh-clip-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install native and Python dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq cmake g++ libarchive-dev libpng-dev zlib1g-dev
+          python -m pip install --upgrade pip
+          python -m pip install numpy pytest
+      - name: Exact native source seal gap inventory (read-only)
+        env:
+          PYTHONPATH: .
+        run: python tools/audit_native_runtime_source_seal_gap_v1.py
+      - name: Python Compiler V4 contracts
+        env:
+          PYTHONPATH: .
+        run: |
+          python -m pytest -q tests/compiler/test_playback_runtime_v4_contract_v1.py
+      - name: Build native V3/V4 canonical presentation
+        run: |
+          cmake -S runtime/realsas_cpp -B build/rss-v4-clipping -DCMAKE_BUILD_TYPE=Release -DREALSAS_BUILD_TESTS=ON
+          cmake --build build/rss-v4-clipping --parallel 2
+      - name: Native render and complete regression suite
+        run: ctest --test-dir build/rss-v4-clipping --output-on-failure

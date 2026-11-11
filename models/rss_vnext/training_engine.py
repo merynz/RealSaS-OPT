@@ -14,6 +14,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+from typing import Mapping
 
 import torch
 from torch import Tensor, nn
@@ -36,6 +37,10 @@ from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .early_semantic_field import masked_source_semantic_evidence_loss
 from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
 from .multiview_construction import qualified_novel_view_loss
+from .eight_way_teacher_court_v1 import (
+    RSSvNextEightWayTeacherReceiptV1,
+    validate_eight_way_teacher_receipts_v1,
+)
 from models.iris.vnext.flexicubes_v1 import symmetric_surface_chamfer_v1
 
 
@@ -57,7 +62,8 @@ class RSSvNextStructuralTrainingBatch:
     novel_view_normal: Tensor | None = None     # [B,6,3,H,W]
     novel_view_rgb_mask: Tensor | None = None   # [B,6,H,W], qualified
     novel_view_normal_mask: Tensor | None = None
-    novel_view_provenance: str = ""              # QUALIFIED_SOURCE_RENDER:<receipt>
+    novel_view_provenance: str = ""              # Optional audit check; never grants authority
+    novel_view_receipts: tuple[RSSvNextEightWayTeacherReceiptV1, ...] | None = None
 
     # Interim signed-surface training witness; not final foundry supervision.
     # Requires qualified source, mesh coordinate/camera bind and sample proof.
@@ -140,6 +146,7 @@ class RSSvNextStructuralTrainer:
         dataset_manifest_sha256: str,
         weights: RSSvNextTrainingWeights = RSSvNextTrainingWeights(),
         preference: RSSvNextTopologyPreferenceConfig = RSSvNextTopologyPreferenceConfig(),
+        trusted_render_registry: Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -154,6 +161,18 @@ class RSSvNextStructuralTrainer:
         self.weights = weights
         self.preference = preference
         self.dataset_manifest_sha256 = dataset_manifest_sha256.lower()
+        # The trusted training launcher supplies this, not the data batch.
+        self.trusted_render_registry = {
+            str(key): dict(value)
+            for key, value in (trusted_render_registry or {}).items()
+        }
+        self.render_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                self.trusted_render_registry, sort_keys=True,
+                separators=(",", ":"), allow_nan=False,
+            ).encode("utf8")).hexdigest()
+            if self.trusted_render_registry else ""
+        )
         self.global_step = 0
 
     def objective(self, batch: RSSvNextStructuralTrainingBatch) -> RSSvNextTrainingResult:
@@ -175,7 +194,11 @@ class RSSvNextStructuralTrainer:
             batch.novel_view_rgba, batch.novel_view_normal,
             batch.novel_view_rgb_mask, batch.novel_view_normal_mask,
         )
-        novel_requested = any(value is not None for value in novel_fields) or bool(batch.novel_view_provenance)
+        novel_requested = (
+            any(value is not None for value in novel_fields)
+            or batch.novel_view_receipts is not None
+            or bool(batch.novel_view_provenance)
+        )
         if novel_requested:
             if not all(value is not None for value in novel_fields):
                 raise ValueError("RSS_VNEXT_EIGHT_WAY_TEACHER_INCOMPLETE")

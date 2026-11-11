@@ -47,7 +47,7 @@ func (ProductSkinProvider) Capabilities(context.Context) ([]Descriptor, error) {
 			"legacy_stage15_dependency":      false,
 			"output_artifact_type":           "RealSaS.CanonicalSkinIR",
 			"output_schema_version":          "v2",
-			"carrier_skin_qualification":     map[string]any{
+			"carrier_skin_qualification": map[string]any{
 				"max_simplex_repair_l1":   1.0e-5,
 				"max_total_correction_l1": 1.0e-4,
 				"negative_tolerance":      1.0e-8,

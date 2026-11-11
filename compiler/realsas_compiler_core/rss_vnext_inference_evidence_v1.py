@@ -159,16 +159,25 @@ def _dynamic(value: Mapping[str, Any], n: int) -> None:
 
 def _scene(value: Mapping[str, Any]) -> None:
     """Validate shared semantic/Graphics relations without assigning artist authority."""
-    keys = {
+    # Existing sealed V1 research receipts have a relation-only scene. Keep
+    # them parseable as incomplete, unqualified evidence. The richer producer
+    # must emit the COMPLETE address-bound field trio together; partial fields
+    # cannot be interpreted as drawable/graphics evidence.
+    base_keys = {
         "source_semantic_patch_logits", "source_semantic_log_uncertainty",
-        "region_query_xyz", "region_membership_logits", "region_graphics_logits",
         "region_relation_logits", "region_relation_valid_mask",
         "presentation_role_probabilities",
         "constructed_camera_features", "constructed_camera_angles",
         "authority",
     }
-    if not isinstance(value, Mapping) or set(value) != keys:
+    extended_keys = {
+        "region_query_xyz", "region_membership_logits", "region_graphics_logits",
+    }
+    if not isinstance(value, Mapping) or set(value) not in (
+        base_keys, base_keys | extended_keys,
+    ):
         _reject("RSS_VNEXT_EVIDENCE_SCENE_FIELDS")
+    has_region_field = extended_keys.issubset(value)
     if value["authority"] != "PREDICTED_FROM_TWO_ORIGINAL_VIEWS":
         _reject("RSS_VNEXT_EVIDENCE_SCENE_AUTHORITY_DRIFT")
 
@@ -196,28 +205,29 @@ def _scene(value: Mapping[str, Any]) -> None:
     # Neither the anonymous region graph nor the field at H(x) can be used
     # downstream without the exact query addresses and an explicit UNKNOWN
     # membership channel. Reject unaddressed, untyped, or self-edge evidence.
-    xyz = value["region_query_xyz"]
-    member = value["region_membership_logits"]
-    graphics = value["region_graphics_logits"]
-    role = value["presentation_role_probabilities"]
-    if not all(isinstance(v, (list, tuple)) and v for v in (xyz, member, graphics, role)):
-        _reject("RSS_VNEXT_EVIDENCE_REGION_FIELD_EMPTY")
-    n, slots = len(xyz), len(mask)
-    if len(member) != n or len(graphics) != n or len(role) != n:
-        _reject("RSS_VNEXT_EVIDENCE_REGION_ADDRESS_DRIFT")
-    for row in xyz:
-        _vector(row, 3, "RSS_VNEXT_EVIDENCE_REGION_QUERY_XYZ")
-    for row in member:
-        _vector(row, slots + 1, "RSS_VNEXT_EVIDENCE_REGION_UNKNOWN_CHANNEL")
-    for row in graphics:
-        _vector(row, 5, "RSS_VNEXT_EVIDENCE_GRAPHICS_FIELD_FIVE_CHANNELS")
-    role_dim = len(role[0])
-    if role_dim < 2:
-        _reject("RSS_VNEXT_EVIDENCE_ROLE_CHANNEL_INVALID")
-    for row in role:
-        _vector(row, role_dim, "RSS_VNEXT_EVIDENCE_ROLE_CHANNEL_DRIFT")
-        if any(float(v) < 0 or float(v) > 1 for v in row) or abs(sum(row) - 1.0) > 1e-4:
-            _reject("RSS_VNEXT_EVIDENCE_ROLE_SIMPLEX_INVALID")
+    if has_region_field:
+        xyz = value["region_query_xyz"]
+        member = value["region_membership_logits"]
+        graphics = value["region_graphics_logits"]
+        role = value["presentation_role_probabilities"]
+        if not all(isinstance(v, (list, tuple)) and v for v in (xyz, member, graphics, role)):
+            _reject("RSS_VNEXT_EVIDENCE_REGION_FIELD_EMPTY")
+        n, slots = len(xyz), len(mask)
+        if len(member) != n or len(graphics) != n or len(role) != n:
+            _reject("RSS_VNEXT_EVIDENCE_REGION_ADDRESS_DRIFT")
+        for row in xyz:
+            _vector(row, 3, "RSS_VNEXT_EVIDENCE_REGION_QUERY_XYZ")
+        for row in member:
+            _vector(row, slots + 1, "RSS_VNEXT_EVIDENCE_REGION_UNKNOWN_CHANNEL")
+        for row in graphics:
+            _vector(row, 5, "RSS_VNEXT_EVIDENCE_GRAPHICS_FIELD_FIVE_CHANNELS")
+        role_dim = len(role[0])
+        if role_dim < 2:
+            _reject("RSS_VNEXT_EVIDENCE_ROLE_CHANNEL_INVALID")
+        for row in role:
+            _vector(row, role_dim, "RSS_VNEXT_EVIDENCE_ROLE_CHANNEL_DRIFT")
+            if any(float(v) < 0 or float(v) > 1 for v in row) or abs(sum(row) - 1.0) > 1e-4:
+                _reject("RSS_VNEXT_EVIDENCE_ROLE_SIMPLEX_INVALID")
     relations = value["region_relation_logits"]
     if len(relations) != slots:
         _reject("RSS_VNEXT_EVIDENCE_RELATION_SLOT_COUNT_DRIFT")

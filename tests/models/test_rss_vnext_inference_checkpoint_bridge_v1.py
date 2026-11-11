@@ -355,7 +355,17 @@ def test_reuse_existing_axis_decoder_without_minting_canonical_rig():
     from dataclasses import asdict
     from models.axis.rig_program_model_v6 import RigProgramEventV6, RigTokenKindV6
     from models.rss_vnext.candidate_rig_court_v1 import qualify_candidate_rig_program_v1
+    from models.axis.rig_program_decode_v6 import AXISV6CodecBinding
+    from models.mira.skin_fsq_codec_v6 import MIRA_V6_CODEC_ID
 
+    model_cfg = RSSvNextConfig.tiny_for_test()
+    # The fake codec hash here is test-only provenance; it is NOT an admitted
+    # MIRA runtime checkpoint or learned soft-to-discrete decoder parity.
+    codec = AXISV6CodecBinding(
+        MIRA_V6_CODEC_ID, "e" * 64,
+        model_cfg.axis_config().skin_vocab_size,
+        model_cfg.skin_tokens_per_joint,
+    )
     kinds = (
         RigTokenKindV6.BOS,
         RigTokenKindV6.JOINT,
@@ -387,10 +397,13 @@ def test_reuse_existing_axis_decoder_without_minting_canonical_rig():
 
     proposal = seal_inference_evidence_v1(_candidate(control_events=tuple(events)))
     court = qualify_candidate_rig_program_v1(
-        proposal, model_config=RSSvNextConfig.tiny_for_test(),
+        proposal, model_config=model_cfg,
         expected_checkpoint_sha256="a" * 64,
+        mira_codec_binding=codec,
     )
     assert court.product_authority is False
+    assert court.skin_codes.codec_checkpoint_hash == "e" * 64
+    assert court.skin_codes.codec_checkpoint_hash != proposal.checkpoint_sha256
     assert len(court.rig_program.proposal.joints) == 1
     assert len(court.skin_codes.rows) == 1
     assert court.skin_codes.rows[0].code_ids == (7, 7, 7, 7)
@@ -400,9 +413,22 @@ def test_reuse_existing_axis_decoder_without_minting_canonical_rig():
             seal_inference_evidence_v1(_candidate(
                 mesh=None, mesh_status="ABSTAIN", reason="NO_VALID_TOPOLOGY",
             )),
-            model_config=RSSvNextConfig.tiny_for_test(),
+            model_config=model_cfg,
             expected_checkpoint_sha256="a" * 64,
+            mira_codec_binding=codec,
         )
+    for wrong in (
+        AXISV6CodecBinding(MIRA_V6_CODEC_ID, "a" * 64, codec.codebook_size, codec.tokens_per_joint),
+        AXISV6CodecBinding(MIRA_V6_CODEC_ID, "e" * 64, codec.codebook_size + 1, codec.tokens_per_joint),
+        AXISV6CodecBinding("NOT-MIRA", "e" * 64, codec.codebook_size, codec.tokens_per_joint),
+        AXISV6CodecBinding(MIRA_V6_CODEC_ID, "not-a-digest", codec.codebook_size, codec.tokens_per_joint),
+    ):
+        with pytest.raises(QualificationError, match="INDEPENDENT_MIRA_CODEC_BINDING_REQUIRED"):
+            qualify_candidate_rig_program_v1(
+                proposal, model_config=model_cfg,
+                expected_checkpoint_sha256="a" * 64,
+                mira_codec_binding=wrong,
+            )
 
 
 def _mesh_with_addressed_scene_for_region_court():

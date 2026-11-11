@@ -164,8 +164,11 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
         fa,fb=face_fragment[pair[0]],face_fragment[pair[1]]
         if fa==fb:continue
         bary=tuple(map(float,m.get("barycentric_anchor") or ()))
-        anchor=int(m.get("anchor_face_index",-1))
-        child=int(m.get("child_face_index",-1))
+        try:
+            anchor=int(m.get("anchor_face_index",-1))
+            child=int(m.get("child_face_index",-1))
+        except (ValueError, TypeError, OverflowError):
+            raise QualificationError("GRAPHICS_ATTACHMENT_PARENT_CHILD_FACE_BINDING_INVALID") from None
         parent=str(m.get("parent_mechanical_domain_id") or "")
         if len(bary)!=3 or any(x<-1e-9 for x in bary) or abs(sum(bary)-1)>1e-6:
             raise QualificationError("GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID")

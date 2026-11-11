@@ -244,3 +244,68 @@ def test_aim_with_zero_weight_does_not_overwrite_derived_rotation():
     before = next(j for j in baseline.joints if j.canonical_joint_id == "J1")
     after = next(j for j in zero.joints if j.canonical_joint_id == "J1")
     assert np.allclose(after.rotation_basis, before.rotation_basis)
+
+
+def test_root_nonuniform_scale_and_rotation_affect_actual_skinned_surface():
+    mesh = _mesh()
+    rig = replace(_rig(mesh), constraints=())
+    skin = _skin(mesh, rig)
+    # Skin to root so every vertex has a nonzero rest offset to transform.
+    skin = replace(skin, rows=tuple(
+        replace(row, influences=(("J0", 1.0),)) for row in skin.rows
+    ))
+    q = (float(np.sqrt(.5)), 0.0, 0.0, float(np.sqrt(.5)))
+    pose = solve_control_pose_v1(
+        rig,
+        (ControlTransformIRV1(
+            "C_ROOT", rotation_quat_wxyz=q, scale=(2.0, 3.0, 1.0),
+        ),),
+    )
+    root = next(j for j in pose.joints if j.canonical_joint_id == "J0")
+    assert root.scale == (2.0, 3.0, 1.0)
+    deformed = deform_mesh_lbs_v1(mesh, rig, skin, pose)
+    expected = np.asarray(((0.,0.,0.),(-3.,0.,0.),(-6.,0.,0.)))
+    assert np.allclose(np.asarray(deformed.positions), expected, atol=1e-8)
+    assert deformed.metadata["joint_scale_consumed"] is True
+
+
+def test_copy_and_follow_scale_are_executed_and_zero_weight_is_noop():
+    mesh = _mesh()
+    rig = _rig(mesh)
+    following = CanonicalRigConstraintIRV2(
+        "Q_SCALE", "FOLLOW", ("C_POLE",), ("J1",), None,
+        {"p0": 0.5}, "PQ_SCALE",
+    )
+    q = (float(np.sqrt(.5)),0.,0.,float(np.sqrt(.5)))
+    target=ControlTransformIRV1(
+        "C_POLE", rotation_quat_wxyz=q, scale=(2.,3.,4.),
+    )
+    half=solve_control_pose_v1(
+        replace(rig, constraints=(following,)), (target,),
+    )
+    joint=next(j for j in half.joints if j.canonical_joint_id=="J1")
+    assert np.allclose(joint.scale, (1.5,2.,2.5),atol=1e-9)
+
+    zero=solve_control_pose_v1(
+        replace(rig,constraints=(replace(following,parameters={"p0":0.0}),)),
+        (target,),
+    )
+    joint_zero=next(j for j in zero.joints if j.canonical_joint_id=="J1")
+    assert joint_zero.scale == (1.,1.,1.)
+
+
+def test_lbs_refuses_invalid_pose_scale_without_silent_clamping():
+    mesh=_mesh()
+    rig=replace(_rig(mesh),constraints=())
+    skin=_skin(mesh,rig)
+    pose=solve_control_pose_v1(rig,())
+    altered=replace(
+        pose,
+        joints=(
+            replace(pose.joints[0],scale=(0.,1.,1.)),
+        ) + pose.joints[1:],
+    )
+    import pytest
+    from compiler.realsas_compiler_core.types import QualificationError
+    with pytest.raises(QualificationError,match="MECHANICS_LBS_SCALE_NONPOSITIVE"):
+        deform_mesh_lbs_v1(mesh,rig,skin,altered)

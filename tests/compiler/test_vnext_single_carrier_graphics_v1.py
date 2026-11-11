@@ -7,6 +7,7 @@ from compiler.realsas_compiler_core.graphics_runtime_v1 import build_runtime_gra
 from compiler.realsas_compiler_core.graphics_v1 import (
     GraphicsCompilePolicyV1,
     compile_graphics_on_canonical_puppet_v1,
+    compile_neural_region_graphics_on_canonical_puppet_v1,
     GraphicsStaticRelationEvidenceV1,
     GraphicsViewRelationEvidenceV1,
     build_graphics_evidence_v1,
@@ -425,4 +426,119 @@ def test_canonical_graphics_wrapper_rejects_wrong_mesh_binding_despite_valid_par
             mesh=mesh,rig=rig,skin=skin,
             source_graphics_binding_hash="source-bound",
             evidence=evidence,
+        )
+
+
+def _qualified_neural_graphics_fixture(*, mutate_candidate=None):
+    from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import (
+        canonical_mesh_lineage_hash_v1,
+    )
+    from compiler.realsas_compiler_core.canonical_rig_ir_v2 import (
+        mint_canonical_rig_v2,
+    )
+    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import (
+        mint_canonical_skin_v2,
+    )
+    from compiler.realsas_compiler_core.rig_program_ir_v1 import (
+        qualify_rig_program_v1,
+    )
+    from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
+        seal_inference_evidence_v1,
+    )
+    from tests.models.test_rss_vnext_inference_checkpoint_bridge_v1 import (
+        _candidate, _mesh_with_addressed_scene_for_region_court,
+    )
+    from tests.compiler.test_control_ready_rig_v2 import _mesh, _proposal
+    from tests.compiler.test_v6_typed_rig_skin_main_integration_v1 import (
+        _qualified_synthetic_carrier_skin,
+    )
+
+    bare = _mesh()
+    network_mesh, scene = _mesh_with_addressed_scene_for_region_court()
+    # The test producer models the legitimate static foundry: neural candidate
+    # geometry is address-identical to the actual minted Mesh, not guessed by
+    # the Graphics compiler. Its receipt must be listed as an upstream parent.
+    network_mesh["rest_xyz"] = [list(v.P) for v in bare.vertices]
+    network_mesh["base_xyz"] = [list(v.P) for v in bare.vertices]
+    network_mesh["faces"] = [
+        [next(i for i, v in enumerate(bare.vertices) if v.canonical_mesh_vertex_id == vid)
+         for vid in face] for face in bare.faces
+    ]
+    if mutate_candidate:
+        mutate_candidate(network_mesh)
+    evidence = seal_inference_evidence_v1(_candidate(mesh=network_mesh, scene=scene))
+    mesh = replace(
+        bare, proposal_evidence_refs=(evidence.evidence_hash,),
+        mesh_lineage_hash="",
+    )
+    mesh = replace(mesh, mesh_lineage_hash=canonical_mesh_lineage_hash_v1(mesh))
+    rig = mint_canonical_rig_v2(mesh, qualified_program=qualify_rig_program_v1(_proposal(mesh)))
+    skin = mint_canonical_skin_v2(
+        mesh, rig,
+        qualified_skin=_qualified_synthetic_carrier_skin(mesh, rig),
+        skin_code_proposal_hash="a" * 64,
+        skin_codec_architecture_id="fixture-codec-not-modelrelease",
+        skin_codec_checkpoint_hash="b" * 64,
+    )
+    mapping = tuple(v.source_candidate_vertex_id for v in mesh.vertices)
+    return evidence, mapping, mesh, rig, skin
+
+
+def test_neural_anonymous_regions_lower_into_real_canonical_graphics_without_source_authority():
+    evidence, mapping, mesh, rig, skin = _qualified_neural_graphics_fixture()
+    compiled = compile_neural_region_graphics_on_canonical_puppet_v1(
+        evidence=evidence, expected_checkpoint_sha256="a" * 64,
+        candidate_vertex_ids_by_index=mapping,
+        mesh=mesh, rig=rig, skin=skin,
+    )
+    assert compiled.metadata["origin"] == "NEURAL_ANONYMOUS_REGION_CANDIDATE"
+    assert compiled.metadata["qualified_drawable_source_truth"] is False
+    assert compiled.metadata["qualified_source_occlusion"] is False
+    assert compiled.metadata["qualified_source_attachments"] is False
+    assert compiled.metadata["independent_editability_proven"] is False
+    assert compiled.metadata["exact_candidate_to_canonical_face_map"] == (0,)
+    assert compiled.canonical_mesh_binding_hash == mesh.mesh_lineage_hash
+    assert compiled.canonical_mesh_skin_binding_hash == skin.skin_lineage_hash
+    assert len(compiled.fragments) == len(mesh.faces)
+    assert not compiled.views
+    assert not compiled.attachments
+    runtime = build_runtime_graphics_v1(compiled, face_count=len(mesh.faces))
+    assert runtime.face_fragment_index == (0,)
+    assert runtime.metadata["source_visibility_coverage_complete"] is False
+
+
+def test_neural_graphics_cannot_skip_static_source_qualification_or_relabel_vertex_addresses():
+    evidence, mapping, mesh, rig, skin = _qualified_neural_graphics_fixture()
+    with pytest.raises(QualificationError, match="GRAPHICS_NEURAL_VERTEX_POSITION_DRIFT"):
+        compile_neural_region_graphics_on_canonical_puppet_v1(
+            evidence=evidence, expected_checkpoint_sha256="a" * 64,
+            candidate_vertex_ids_by_index=tuple(reversed(mapping)),
+            mesh=mesh, rig=rig, skin=skin,
+        )
+    without_parent = replace(
+        mesh, proposal_evidence_refs=(), mesh_lineage_hash="",
+    )
+    from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import canonical_mesh_lineage_hash_v1
+    without_parent = replace(
+        without_parent, mesh_lineage_hash=canonical_mesh_lineage_hash_v1(without_parent),
+    )
+    with pytest.raises(QualificationError, match="GRAPHICS_NEURAL_STATIC_QUALIFICATION_PARENT_MISSING"):
+        compile_neural_region_graphics_on_canonical_puppet_v1(
+            evidence=evidence, expected_checkpoint_sha256="a" * 64,
+            candidate_vertex_ids_by_index=mapping,
+            mesh=without_parent, rig=rig, skin=skin,
+        )
+
+
+def test_neural_graphics_rejects_orientation_flipped_candidate_even_when_parent_is_resealed():
+    def invert_winding(mesh):
+        mesh["faces"] = [list(reversed(face)) for face in mesh["faces"]]
+    evidence, mapping, mesh, rig, skin = _qualified_neural_graphics_fixture(
+        mutate_candidate=invert_winding,
+    )
+    with pytest.raises(QualificationError, match="GRAPHICS_NEURAL_FACE_TOPOLOGY_OR_WINDING_DRIFT"):
+        compile_neural_region_graphics_on_canonical_puppet_v1(
+            evidence=evidence, expected_checkpoint_sha256="a" * 64,
+            candidate_vertex_ids_by_index=mapping,
+            mesh=mesh, rig=rig, skin=skin,
         )

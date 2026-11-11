@@ -71,7 +71,7 @@ def test_graphics_compiles_role_free_order_and_runtime_consumes_materialized_con
     # A contradictory source relation was resolved for deterministic display,
     # not independently certified as a true source occlusion order.
     assert runtime.metadata["representation_policy_arbitration_used"] is True
-    assert runtime.metadata["source_order_qualified"] is False
+    assert runtime.metadata["unresolved_source_order_conflict"] is True
     assert runtime.metadata["pose_conditioned_order_execution"] is False
     assert all(len(view.topological_fragment_order) == 3 for view in runtime.views)
 
@@ -112,6 +112,6 @@ def test_graphics_acyclic_source_order_does_not_claim_pose_conditioned_coverage(
         evidence=evidence,
     )
     runtime = build_runtime_graphics_v1(compiled, face_count=2)
-    assert runtime.metadata["source_order_qualified"] is True
+    assert runtime.metadata["unresolved_source_order_conflict"] is False
     assert runtime.metadata["representation_policy_arbitration_used"] is False
     assert runtime.metadata["pose_conditioned_order_execution"] is False

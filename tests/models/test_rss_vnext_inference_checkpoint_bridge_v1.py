@@ -5,6 +5,7 @@ from copy import deepcopy
 
 import pytest
 import torch
+import numpy as np
 
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
@@ -478,3 +479,96 @@ def test_candidate_face_region_readout_abstains_without_exact_topology_or_addres
     legacy = seal_inference_evidence_v1(_candidate(mesh=mesh))
     with pytest.raises(QualificationError, match="FACE_REGION_REQUIRES_ADDRESSED_SCENE"):
         candidate_face_region_readout_v1(legacy)
+
+
+def _canonical_source_for_checkpoint_tests():
+    from compiler.realsas_compiler_core.rss_vnext_source_observation_v1 import (
+        canonicalize_two_view_source_v1,
+    )
+    rgba = np.full((2, 4, 28, 28), 200, dtype=np.uint8)
+    rgba[0, 0, 3, 5] = 100
+    rgba[0, 3] = 255
+    rgba[1, 3] = 230
+    cam = np.zeros((2, 13), dtype=np.float32)
+    cam[:, 7] = 1.0
+    cam[:, 12] = 1.0
+    cam[0, 3] = cam[0, 11] = 1.0
+    cam[1, 3] = cam[1, 11] = -1.0
+    return canonicalize_two_view_source_v1(
+        rgba, cam, source_rights_claim_sha256="4" * 64,
+    )
+
+
+def test_canonical_source_pixel_camera_frame_and_rights_claim_are_bound_without_qualification():
+    from compiler.realsas_compiler_core.rss_vnext_source_observation_v1 import (
+        canonicalize_two_view_source_v1,
+    )
+    src = _canonical_source_for_checkpoint_tests()
+    rgba, cam = src.to_model_tensors()
+    assert rgba.shape == (1, 2, 4, 28, 28)
+    assert rgba[0, 0, 0, 3, 5].item() == pytest.approx(100 / 255)
+    assert torch.equal(cam[0], torch.from_numpy(src.camera_features.copy()))
+    assert src.receipt()["source_or_model_rights_verified"] is False
+    assert src.receipt()["auxiliary_views_observed"] is False
+    assert not src.native_rgba.flags.writeable
+    changed = src.native_rgba.copy()
+    changed[0, 0, 3, 5] += 1
+    other = canonicalize_two_view_source_v1(
+        changed, src.camera_features,
+        source_rights_claim_sha256=src.source_rights_claim_sha256,
+    )
+    assert other.source_binding_sha256 != src.source_binding_sha256
+    flipped = src.camera_features.copy()
+    flipped[1, 3:6] = flipped[0, 3:6]
+    flipped[1, 9:12] = flipped[0, 9:12]
+    with pytest.raises(QualificationError, match="FRONT_BACK_CAMERA_OPPOSITION_REQUIRED"):
+        canonicalize_two_view_source_v1(
+            src.native_rgba, flipped,
+            source_rights_claim_sha256=src.source_rights_claim_sha256,
+        )
+
+
+def test_canonical_two_view_source_checkpoint_to_compiler_is_replayable_and_never_product_pass(tmp_path):
+    from models.rss_vnext.inference_pipeline_v1 import (
+        run_canonical_two_view_to_compiler_proposal_v1,
+        read_compiler_proposal_receipt_v1,
+    )
+    source = _canonical_source_for_checkpoint_tests()
+    net = _network()
+    ckpt = tmp_path / "model.pt"
+    sha = save_inference_checkpoint_v1(ckpt, net)
+    out = tmp_path / "canonical"
+    receipt = run_canonical_two_view_to_compiler_proposal_v1(
+        source_observation=source,
+        checkpoint_path=ckpt,
+        expected_checkpoint_sha256=sha,
+        vision_encoder=RSSvNextPatchEncoderForTests(net.cfg.iris.image_token_dim),
+        output_directory=out, max_topology_tokens=16,
+        generate_controls=True, product_mode=False,
+    )
+    assert receipt["canonical_source_binding_sha256"] == source.source_binding_sha256
+    assert receipt["source_rights_verified"] is False
+    recovered, evidence = read_compiler_proposal_receipt_v1(
+        out, expected_checkpoint_sha256=sha,
+    )
+    assert recovered == receipt
+    assert evidence.qualification_status == "UNQUALIFIED_NEURAL_PROPOSAL_ONLY"
+    assert receipt["product_revision_minted"] is False
+    srcfile = out / "original_two_view_source.npz"
+    srcfile.write_bytes(srcfile.read_bytes() + b"tampered")
+    with pytest.raises(RuntimeError, match="CANONICAL_SOURCE_BYTES_DRIFT"):
+        read_compiler_proposal_receipt_v1(out, expected_checkpoint_sha256=sha)
+
+
+def test_product_inference_cannot_use_raw_two_view_tensors_without_canonical_source(tmp_path):
+    from models.rss_vnext.inference_pipeline_v1 import run_two_view_to_compiler_proposal_v1
+    rgba, cam = _canonical_source_for_checkpoint_tests().to_model_tensors()
+    with pytest.raises(RuntimeError, match="PRODUCT_CANONICAL_SOURCE_REQUIRED"):
+        run_two_view_to_compiler_proposal_v1(
+            checkpoint_path=tmp_path / "missing.pt",
+            expected_checkpoint_sha256="a" * 64,
+            vision_encoder=_network().vision,
+            observed_rgba=rgba, camera_features=cam,
+            output_directory=tmp_path / "no-canon",
+            product_mode=True,
+        )

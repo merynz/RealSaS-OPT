@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - feat/rss-vnext-eight-way-training-court-20261111
+      - feat/rss-vnext-graphics-field-eight-way-20261111
       - main
     paths:
       - "models/rss_vnext/training_engine.py"
+      - "models/rss_vnext/contracts.py"
       - "models/rss_vnext/multiview_construction.py"
       - "models/rss_vnext/unified_character_model.py"
       - "tests/models/test_rss_vnext_eight_way_training_v1.py"

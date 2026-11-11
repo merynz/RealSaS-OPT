@@ -231,9 +231,24 @@ def test_one_optimizer_step_combines_fc_animation_and_tessa_structure():
         cfg=TESSAConfigV1(coordinate_bins=cfg.tessa.coordinate_bins),
     )
     tokens = torch.tensor(triangle.token_ids, dtype=torch.long)[None]
+    # Synthetic teacher identity stands in for an independent signed-source
+    # admission producer; the unit test does not qualify real character truth.
+    signed_receipt = {
+        "admission_status": "QUALIFIED_SOURCE_SIGNED_SOLID",
+        "source_component_domain": "SINGLE_QUALIFIED_CLOSED_COMPONENT",
+        "dataset_manifest_sha256": "f"*64,
+        "source_qualification_key": "synthetic-only",
+        "role_schema_id": cfg.semantic_role_schema_id,
+        "layer_name": layer.name,
+        "surface_target_sha256": None,
+        "animation_source_asset_sha256": teacher.source_asset_sha256,
+        "animation_source_rig_sha256": teacher.source_rig_binding_sha256,
+        "animation_source_poses_sha256": teacher.source_pose_suite_sha256,
+    }
     trainer = RSSvNextStructuralTrainer(
         net, torch.optim.AdamW(net.parameters(), lr=1e-4),
         dataset_manifest_sha256="f" * 64,
+        trusted_signed_source_registry={"synthetic-only": signed_receipt},
         weights=RSSvNextTrainingWeights(
             topology=1., motion_preference=0., source_semantics=0.,
             flexicubes_surface=0., flexicubes_animation=1.,
@@ -264,4 +279,7 @@ def test_one_optimizer_step_combines_fc_animation_and_tessa_structure():
 
     batch.flexicubes_signed_source_admission_key = ""
     with pytest.raises(ValueError, match="SIGNED_SOURCE_PROOF_REQUIRED"):
+        trainer.objective(batch)
+    batch.flexicubes_signed_source_admission_key = "other-source"
+    with pytest.raises(ValueError, match="FC_SOURCE_SIGNED_DOMAIN_RECEIPT_DRIFT"):
         trainer.objective(batch)

@@ -36,7 +36,9 @@ from .flexicubes_animation_supervision import (
 )
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .early_semantic_field import masked_source_semantic_evidence_loss
-from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
+from .semantic_geometry_prior import (
+    RSSvNextSemanticLayerSpec, masked_qualified_surface_role_loss,
+)
 from .multiview_construction import qualified_novel_view_loss
 from .eight_way_teacher_court_v1 import (
     RSSvNextEightWayTeacherReceiptV1,
@@ -57,6 +59,11 @@ class RSSvNextStructuralTrainingBatch:
     semantic_patch_target: Tensor | None = None  # [B,2,T,K]
     semantic_patch_mask: Tensor | None = None    # [B,2,T,K], per-axis qualified
     semantic_qualification_key: str = ""
+    # Explicit 3D query-address source-surface truth, NOT patch projection or
+    # pseudo-labels from the student. Unobserved/ambiguous locations stay masked.
+    source_surface_role_indices: Tensor | None = None  # [B,N] int64
+    source_surface_role_mask: Tensor | None = None     # [B,N] bool
+    source_surface_role_admission_key: str = ""        # external trusted receipt
     # Independently source-rendered 6 novel views; FRONT/BACK remain the only
     # model observations. These are teacher targets, never encoder inputs.
     novel_view_rgba: Tensor | None = None       # [B,6,4,H,W]
@@ -82,6 +89,7 @@ class RSSvNextTrainingWeights:
     topology: float = 1.0
     motion_preference: float = 0.2
     source_semantics: float = 0.2
+    surface_roles: float = 0.0  # opt-in only with exact-source 3D address receipt
     flexicubes_surface: float = 0.3
     flexicubes_animation: float = 0.0  # explicit opt-in on admitted source motion
     novel_view: float = 0.0             # opt-in: source-qualified 8-way appearance
@@ -90,12 +98,13 @@ class RSSvNextTrainingWeights:
     def validate(self):
         if min(
             self.topology, self.motion_preference, self.source_semantics,
-            self.flexicubes_surface, self.flexicubes_animation, self.novel_view,
+            self.surface_roles, self.flexicubes_surface, self.flexicubes_animation,
+            self.novel_view,
         ) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
         if (
             self.topology + self.motion_preference
-            + self.source_semantics + self.flexicubes_surface
+            + self.source_semantics + self.surface_roles + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view <= 0
             or self.clip_gradient_norm <= 0
         ):
@@ -116,6 +125,8 @@ class RSSvNextTrainingResult:
     qualified_preference_pairs: int
     novel_view_loss: Tensor | None = None
     eligible_novel_view_pixels: int = 0
+    surface_role_loss: Tensor | None = None
+    eligible_surface_role_points: int = 0
     gradient_norm: Tensor | None = None
 
 
@@ -127,6 +138,17 @@ def architecture_digest(cfg: RSSvNextConfig) -> str:
         ensure_ascii=True,
     ).encode("utf8")
     return hashlib.sha256(value).hexdigest()
+
+
+def source_surface_tensor_sha256(value: Tensor) -> str:
+    """Stable query/teacher byte identity used by externally admitted receipts."""
+    if not isinstance(value, Tensor):
+        raise ValueError("RSS_VNEXT_SURFACE_ROLE_RECEIPT_TENSOR_REQUIRED")
+    cpu = value.detach().contiguous().cpu()
+    header = json.dumps({
+        "dtype": str(cpu.dtype), "shape": list(cpu.shape),
+    }, sort_keys=True, separators=(",", ":")).encode("utf8")
+    return hashlib.sha256(header + bytes([0]) + cpu.numpy().tobytes()).hexdigest()
 
 
 class RSSvNextStructuralTrainer:
@@ -148,6 +170,7 @@ class RSSvNextStructuralTrainer:
         weights: RSSvNextTrainingWeights = RSSvNextTrainingWeights(),
         preference: RSSvNextTopologyPreferenceConfig = RSSvNextTopologyPreferenceConfig(),
         trusted_render_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_surface_role_registry: Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -177,6 +200,23 @@ class RSSvNextStructuralTrainer:
                 separators=(",", ":"), allow_nan=False,
             ).encode("utf8")).hexdigest()
             if self.trusted_render_registry else ""
+        )
+        # A batch cannot self-certify 3D semantic truth. The launcher's
+        # separate foundry admission registry binds source, dataset, role
+        # schema, query XYZ and exact label/mask bytes before gradients run.
+        surface_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_surface_role_registry or {}).items()
+        }
+        self.trusted_surface_role_registry = MappingProxyType({
+            key: MappingProxyType(value) for key, value in surface_snapshot.items()
+        })
+        self.surface_role_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                surface_snapshot, sort_keys=True, separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest()
+            if surface_snapshot else ""
         )
         self.global_step = 0
 
@@ -336,6 +376,48 @@ class RSSvNextStructuralTrainer:
                 n_semantic = int(batch.semantic_patch_mask.sum().item())
         elif batch.semantic_patch_mask is not None:
             raise ValueError("RSS_VNEXT_TRAIN_SEMANTIC_ORPHAN_MASK")
+
+        # 3D presentation roles live on H(x), not on 2D source patches.
+        # Only train this distinct head when a trusted, source-bound receipt
+        # certifies the exact grid and labeled/masked teacher bytes.
+        surface_role_loss = None
+        n_surface_role_points = 0
+        surface_fields = (
+            batch.source_surface_role_indices,
+            batch.source_surface_role_mask,
+        )
+        surface_requested = (
+            any(x is not None for x in surface_fields)
+            or bool(batch.source_surface_role_admission_key)
+        )
+        if surface_requested:
+            if any(x is None for x in surface_fields):
+                raise ValueError("RSS_VNEXT_SURFACE_ROLE_TEACHER_INCOMPLETE")
+            if not batch.source_surface_role_admission_key:
+                raise ValueError("RSS_VNEXT_SURFACE_ROLE_ADMISSION_KEY_REQUIRED")
+            if self.weights.surface_roles <= 0:
+                raise ValueError("RSS_VNEXT_SURFACE_ROLE_OBJECTIVE_NOT_ENABLED")
+            receipt = self.trusted_surface_role_registry.get(
+                batch.source_surface_role_admission_key
+            )
+            if receipt is None or receipt.get("admission_status") != "QUALIFIED_SOURCE_SURFACE_ROLE":
+                raise ValueError("RSS_VNEXT_SURFACE_ROLE_UNTRUSTED_ADMISSION")
+            if (
+                receipt.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
+                or receipt.get("source_qualification_key") != batch.source_qualification_key
+                or receipt.get("role_schema_id") != self.model.cfg.semantic_role_schema_id
+                or receipt.get("query_xyz_sha256") != source_surface_tensor_sha256(state.query_xyz)
+                or receipt.get("role_indices_sha256") != source_surface_tensor_sha256(batch.source_surface_role_indices)
+                or receipt.get("role_mask_sha256") != source_surface_tensor_sha256(batch.source_surface_role_mask)
+            ):
+                raise ValueError("RSS_VNEXT_SURFACE_ROLE_RECEIPT_SOURCE_OR_ADDRESS_DRIFT")
+            surface_role_loss = masked_qualified_surface_role_loss(
+                state.presentation_role_logits,
+                batch.source_surface_role_indices,
+                batch.source_surface_role_mask,
+                schema=self.model.cfg.semantic_role_schema(),
+            )
+            n_surface_role_points = int(batch.source_surface_role_mask.sum().item())
         n_topo = 0
         n_pairs = 0
         if self.weights.topology > 0 and batch.topology_teacher_tokens is not None:
@@ -382,7 +464,7 @@ class RSSvNextStructuralTrainer:
         if (
             topology is None and motion is None and semantic is None
             and fc_loss is None and fc_anim_loss is None
-            and novel_loss is None
+            and novel_loss is None and surface_role_loss is None
         ):
             raise ValueError("RSS_VNEXT_TRAIN_NO_QUALIFIED_OBJECTIVE")
         total = sum(
@@ -391,6 +473,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.topology, topology),
                 (self.weights.motion_preference, motion),
                 (self.weights.source_semantics, semantic),
+                (self.weights.surface_roles, surface_role_loss),
                 (self.weights.flexicubes_surface, fc_loss),
                 (self.weights.flexicubes_animation, fc_anim_loss),
                 (self.weights.novel_view, novel_loss),
@@ -412,6 +495,8 @@ class RSSvNextStructuralTrainer:
             qualified_preference_pairs=n_pairs,
             novel_view_loss=novel_loss,
             eligible_novel_view_pixels=novel_count,
+            surface_role_loss=surface_role_loss,
+            eligible_surface_role_points=n_surface_role_points,
         )
 
     def train_step(self, batch: RSSvNextStructuralTrainingBatch) -> RSSvNextTrainingResult:
@@ -438,6 +523,7 @@ class RSSvNextStructuralTrainer:
             "architecture_digest": architecture_digest(self.model.cfg),
             "dataset_manifest_sha256": self.dataset_manifest_sha256,
             "render_registry_sha256": self.render_registry_sha256,
+            "surface_role_registry_sha256": self.surface_role_registry_sha256,
             "global_step": self.global_step,
             "sampler_cursor": int(sampler_cursor),
             "model": self.model.state_dict(),
@@ -468,6 +554,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_DATASET_MANIFEST_DRIFT")
         if data.get("render_registry_sha256", "") != self.render_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_RENDER_REGISTRY_DRIFT")
+        if data.get("surface_role_registry_sha256", "") != self.surface_role_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SURFACE_ROLE_REGISTRY_DRIFT")
         if int(data.get("global_step", -1)) < 0 or int(data.get("sampler_cursor", -1)) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_PROGRESS_INVALID")
         self.model.load_state_dict(data["model"], strict=True)
@@ -482,5 +570,5 @@ class RSSvNextStructuralTrainer:
 __all__ = [
     "RSSvNextStructuralTrainingBatch", "RSSvNextTrainingWeights",
     "RSSvNextTrainingResult", "RSSvNextStructuralTrainer",
-    "architecture_digest",
+    "architecture_digest", "source_surface_tensor_sha256",
 ]

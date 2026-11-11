@@ -1,4 +1,5 @@
-const $$ = (selector) => [...document.querySelectorAll(selector)];
+import {apiFetch} from './api_gateway_v1.js';
+const $ = (selector) => [...document.querySelectorAll(selector)];
 const $ = (selector) => document.querySelector(selector);
 
 const STAGES = {
@@ -69,7 +70,7 @@ function setGatewayCapability(project) {
 
 async function loadProductCapabilities() {
   try {
-    const response = await fetch('/api/project');
+    const response = await apiFetch('/api/project');
     const project = await response.json();
     setGatewayCapability(response.ok ? project : null);
   } catch {

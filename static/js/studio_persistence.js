@@ -1,3 +1,4 @@
+import {apiUrl} from './api_gateway_v1.js';
 const nativeFetch = window.fetch.bind(window);
 
 const state = {
@@ -33,7 +34,7 @@ async function ensureSession(bundle) {
   state.bundle = normalized;
   state.requalification = null;
   state.pending = (async () => {
-    const response = await nativeFetch(`/api/studio/session?bundle=${encodeURIComponent(normalized)}`, {
+    const response = await nativeFetch(apiUrl(`/api/studio/session?bundle=${encodeURIComponent(normalized)}`), {
       cache: 'no-store',
       headers: {'Accept': 'application/json'},
     });
@@ -63,7 +64,7 @@ async function history(limit = 50) {
   if (!projectID) return [];
   const safeLimit = Math.max(1, Math.min(200, Number(limit) || 50));
   const response = await nativeFetch(
-    `/api/studio/history?id=${encodeURIComponent(projectID)}&limit=${encodeURIComponent(safeLimit)}`,
+    apiUrl(`/api/studio/history?id=${encodeURIComponent(projectID)}&limit=${encodeURIComponent(safeLimit)}`),
     {cache: 'no-store', headers: {'Accept': 'application/json'}},
   );
   if (!response.ok) throw new Error(`Studio history unavailable (${response.status})`);
@@ -81,7 +82,7 @@ async function restore(revisionNumber) {
     throw new Error('Persisted Studio session required before restore');
   }
 
-  const response = await nativeFetch('/api/studio/restore', {
+  const response = await nativeFetch(apiUrl('/api/studio/restore'), {
     method: 'POST',
     cache: 'no-store',
     headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
@@ -128,7 +129,7 @@ async function requestRequalification() {
   ) {
     throw new Error('A persisted Studio HEAD revision is required before requalification');
   }
-  const response = await nativeFetch('/api/studio/requalify', {
+  const response = await nativeFetch(apiUrl('/api/studio/requalify'), {
     method: 'POST',
     cache: 'no-store',
     headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
@@ -167,7 +168,7 @@ async function requalificationStatus(requalificationID = state.requalification?.
     throw new Error('Valid Studio requalification identity required');
   }
   const response = await nativeFetch(
-    `/api/studio/requalification?project=${encodeURIComponent(projectID)}&id=${encodeURIComponent(id)}`,
+    apiUrl(`/api/studio/requalification?project=${encodeURIComponent(projectID)}&id=${encodeURIComponent(id)}`),
     {cache: 'no-store', headers: {'Accept': 'application/json'}},
   );
   const payload = await readJson(response);

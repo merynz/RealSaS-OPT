@@ -1,11 +1,12 @@
 /* Truthful native export reference: no fake file download or unsupported format promises. */
+import {apiFetch} from './api_gateway_v1.js';
 (() => {
   'use strict';
   const $=s=>document.querySelector(s);
   let bundle='',qualified=false;
   const message=t=>$('#pageMessage').textContent=t;
   async function json(path,options){
-    const r=await fetch(path,{cache:'no-store',...options});
+    const r=await apiFetch(path,{cache:'no-store',...options});
     const payload=await r.json().catch(()=>({}));
     if(!r.ok)throw Error(payload?.message||payload?.error||'Backend not connected ('+r.status+')');
     return payload;

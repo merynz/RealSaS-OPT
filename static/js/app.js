@@ -1,4 +1,5 @@
 import {StudioDocument} from './studio_document.js';
+import {apiFetch} from './api_gateway_v1.js';
 import {StudioOperationJournal} from './studio_operation_journal.js';
 import {StudioDirtyState} from './studio_dirty_state.js';
 
@@ -46,7 +47,7 @@ function toast(message, bad = false) {
 }
 
 async function api(url, options = {}) {
-  const response = await fetch(url, options);
+  const response = await apiFetch(url, options);
   const contentType = response.headers.get('content-type') || '';
   const value = contentType.includes('json') ? await response.json() : await response.blob();
   if (!response.ok) {

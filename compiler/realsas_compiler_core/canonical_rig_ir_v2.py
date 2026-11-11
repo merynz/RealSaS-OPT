@@ -178,6 +178,7 @@ def mint_canonical_rig_v2(
     # Qualification hash includes learned controls/constraints; it cannot seed
     # deform joint or controller identity. A control-only edit must preserve
     # stable IDs and exact deform_structure_hash/skin compatibility.
+    qh = qualified_program.qualification_hash  # provenance only, never entity identity
     identity_namespace = mesh.mesh_lineage_hash
     joint_map = {j.proposal_joint_id: _cid("J", identity_namespace, j.proposal_joint_id) for j in p.joints}
     control_map = {c.proposal_control_id: _cid("C", identity_namespace, c.proposal_control_id) for c in p.controls}

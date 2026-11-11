@@ -38,7 +38,7 @@ def test_product_rig_preserves_fit1_axis_authority_without_stealing_post_bind_me
     assert metadata["required_models"] == [
         {
             "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
+            "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0",
         }
     ]
 

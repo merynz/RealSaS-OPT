@@ -209,6 +209,22 @@ def _control_world_transforms(rig: CanonicalRigIRV2, authored: Mapping[str, Cont
     return memo
 
 
+def control_world_transforms_v1(
+    rig: CanonicalRigIRV2,
+    control_transforms: Sequence[ControlTransformIRV1] = (),
+) -> dict[str, tuple[np.ndarray, np.ndarray, np.ndarray]]:
+    """Resolve the exact Mechanics parent-control world transforms for editors.
+
+    This shares the real solver authority. The editor must never guess a child
+    handle's world position from rest+local delta when a parent is rotated or
+    non-uniformly scaled. Returned arrays are ephemeral, not canonical data.
+    """
+    authored = {state.canonical_control_id: state for state in control_transforms}
+    if len(authored) != len(control_transforms):
+        raise QualificationError("MECHANICS_CONTROL_STATE_DUPLICATE")
+    return _control_world_transforms(rig, authored)
+
+
 def _fabrik(
     rest: list[np.ndarray],
     current: list[np.ndarray],

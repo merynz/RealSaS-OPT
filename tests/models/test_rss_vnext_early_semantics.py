@@ -83,12 +83,6 @@ def test_source_semantic_evidence_is_independent_axes_with_explicit_unknown_mask
 def test_semantic_only_admitted_batch_trains_early_prior_and_shared_encoder():
     net = make()
     optimizer = torch.optim.AdamW(net.parameters(), lr=1e-3)
-    trainer = RSSvNextStructuralTrainer(
-        net, optimizer, dataset_manifest_sha256="3" * 64,
-        weights=RSSvNextTrainingWeights(
-            topology=0, motion_preference=0, source_semantics=1,
-        ),
-    )
     img, cam = source()
     # Source-space patch supervision remains 2 views; completely unlabeled
     # material/role axes do not get forced into negative examples.
@@ -96,6 +90,25 @@ def test_semantic_only_admitted_batch_trains_early_prior_and_shared_encoder():
     mask = torch.zeros_like(target, dtype=torch.bool)
     mask[:, 0, :, :2] = True
     mask[:, 1, ::2, 2:3] = True
+    receipt = {
+        "admission_status": "QUALIFIED_SOURCE_SEMANTIC_PATCH_AXES",
+        "dataset_manifest_sha256": "3" * 64,
+        "source_qualification_key": "synthetic-unit-only",
+        "observed_rgba_sha256": source_surface_tensor_sha256(img),
+        "original_camera_sha256": source_surface_tensor_sha256(cam),
+        "semantic_patch_target_sha256": source_surface_tensor_sha256(target),
+        "semantic_patch_mask_sha256": source_surface_tensor_sha256(mask),
+        "supervision_semantics": "ORIGINAL_TWO_VIEW_MASKED_PATCH_AXES_NOT_3D_DRAWABLE",
+    }
+    trainer = RSSvNextStructuralTrainer(
+        net, optimizer, dataset_manifest_sha256="3" * 64,
+        weights=RSSvNextTrainingWeights(
+            topology=0, motion_preference=0, source_semantics=1,
+        ),
+        trusted_semantic_patch_registry={
+            "qualified-source-render-to-patch-binding": receipt,
+        },
+    )
     batch = RSSvNextStructuralTrainingBatch(
         rgba=img, camera_features=cam,
         semantic_patch_target=target, semantic_patch_mask=mask,
@@ -886,3 +899,81 @@ def test_source_field_query_coordinate_and_label_receipts_cannot_be_reused():
     batch.source_field_admission_key="untrusted-key"
     with pytest.raises(ValueError,match="SOURCE_FIELD_RECEIPT_DRIFT"):
         trainer.objective(batch)
+
+
+def _source_semantic_patch_court():
+    net=make()
+    rgba,cam=source()
+    logits=net.encode_observations(rgba,cam)[0].source_semantic_patch_logits
+    target=torch.full_like(logits, float("nan"))
+    mask=torch.zeros_like(logits,dtype=torch.bool)
+    target[0,0,0,0]=1.
+    mask[0,0,0,0]=True
+    key="admitted-source-patch"
+    receipt={
+        "admission_status": "QUALIFIED_SOURCE_SEMANTIC_PATCH_AXES",
+        "dataset_manifest_sha256":"3"*64,
+        "source_qualification_key":"source-observed",
+        "observed_rgba_sha256":source_surface_tensor_sha256(rgba),
+        "original_camera_sha256":source_surface_tensor_sha256(cam),
+        "semantic_patch_target_sha256":source_surface_tensor_sha256(target),
+        "semantic_patch_mask_sha256":source_surface_tensor_sha256(mask),
+        "supervision_semantics":"ORIGINAL_TWO_VIEW_MASKED_PATCH_AXES_NOT_3D_DRAWABLE",
+    }
+    batch=RSSvNextStructuralTrainingBatch(
+        rgba=rgba,camera_features=cam,
+        semantic_patch_target=target,semantic_patch_mask=mask,
+        semantic_qualification_key=key,source_qualification_key="source-observed",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    )
+    weights=RSSvNextTrainingWeights(
+        topology=0,motion_preference=0,source_semantics=1,flexicubes_surface=0,
+    )
+    return net,weights,receipt,batch
+
+
+def test_semantic_patch_labels_cannot_self_admit_or_replay_foreign_source():
+    from dataclasses import replace as dc_replace
+    net,weights,receipt,batch=_source_semantic_patch_court()
+    untrusted=RSSvNextStructuralTrainer(
+        net,torch.optim.AdamW(net.parameters()),dataset_manifest_sha256="3"*64,
+        weights=weights,
+    )
+    with pytest.raises(ValueError,match="SEMANTIC_UNTRUSTED_ADMISSION"):
+        untrusted.objective(batch)
+    trusted=RSSvNextStructuralTrainer(
+        net,torch.optim.AdamW(net.parameters()),dataset_manifest_sha256="3"*64,
+        weights=weights,trusted_semantic_patch_registry={"admitted-source-patch":receipt},
+    )
+    assert torch.isfinite(trusted.objective(batch).total_loss)
+    tampered=batch.semantic_patch_target.clone()
+    tampered[0,0,0,0]=0.
+    with pytest.raises(ValueError,match="SEMANTIC_RECEIPT_SOURCE_OR_LABEL_DRIFT"):
+        trusted.objective(dc_replace(batch,semantic_patch_target=tampered))
+    altered_camera=batch.camera_features.clone()
+    altered_camera[0,0,0]+=.01
+    with pytest.raises(ValueError,match="SEMANTIC_RECEIPT_SOURCE_OR_LABEL_DRIFT"):
+        trusted.objective(dc_replace(batch,camera_features=altered_camera))
+    tampered_mask=batch.semantic_patch_mask.clone()
+    tampered_mask[0,0,0,0]=False
+    with pytest.raises(ValueError,match="SEMANTIC_RECEIPT_SOURCE_OR_LABEL_DRIFT"):
+        trusted.objective(dc_replace(batch,semantic_patch_mask=tampered_mask))
+
+
+def test_semantic_patch_registry_frozen_into_resume_checkpoint(tmp_path):
+    net,weights,receipt,batch=_source_semantic_patch_court()
+    trainer=RSSvNextStructuralTrainer(
+        net,torch.optim.AdamW(net.parameters()),dataset_manifest_sha256="3"*64,
+        weights=weights,trusted_semantic_patch_registry={"admitted-source-patch":receipt},
+    )
+    path=tmp_path/"semantic-source-registry.pt"
+    trainer.save_checkpoint(path,sampler_cursor=9)
+    wrong=RSSvNextStructuralTrainer(
+        make(),torch.optim.AdamW(make().parameters()),dataset_manifest_sha256="3"*64,
+        weights=weights,trusted_semantic_patch_registry={
+            "admitted-source-patch":{**receipt,"source_qualification_key":"unrelated"},
+        },
+    )
+    with pytest.raises(ValueError,match="CHECKPOINT_SEMANTIC_PATCH_REGISTRY_DRIFT"):
+        wrong.load_checkpoint(path)
+

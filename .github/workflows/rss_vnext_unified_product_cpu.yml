@@ -1,7 +1,7 @@
 name: RSS vNext unified product and compiler integration court
 on:
   push:
-    branches: [main, feat/rss-vnext-unified-product-ci-main-20261111]
+    branches: [main, feat/rss-vnext-unified-product-ci-main-20261111, feat/rss-vnext-eight-way-source-receipt-court-20261111]
     paths:
       - "models/rss_vnext/**"
       - "models/iris/vnext/**"

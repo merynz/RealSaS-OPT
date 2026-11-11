@@ -8,9 +8,10 @@ current task scope includes structural topology, source-motion preference,
 early source semantic patch evidence and explicitly qualified 8-way rendered
 appearance supervision. Other heads are not silently declared training-ready.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import tempfile
@@ -137,6 +138,13 @@ class RSSvNextTrainingWeights:
     clip_gradient_norm: float = 1.0
 
     def validate(self):
+        # NaN/Inf and booleans otherwise bypass comparison-based guards and
+        # poison checkpoint reproducibility while the loss policy looks valid.
+        if any(
+            type(value) not in (float, int) or not math.isfinite(value)
+            for value in asdict(self).values()
+        ):
+            raise ValueError("RSS_VNEXT_TRAIN_WEIGHT_POLICY_NONFINITE_OR_UNTYPED")
         if min(
             self.topology, self.motion_preference, self.source_semantics,
             self.semantic_risk,
@@ -269,6 +277,13 @@ class RSSvNextStructuralTrainer:
         self.optimizer = optimizer
         self.weights = weights
         self.preference = preference
+        # Freeze the full objective / topology-preference policy into the
+        # resumption identity. A semantic-risk or motion weight change is a
+        # different training run, not a transparent continuation of this one.
+        self.objective_policy_sha256 = hashlib.sha256(json.dumps({
+            "weights": asdict(weights),
+            "preference": asdict(preference),
+        }, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf8")).hexdigest()
         self.dataset_manifest_sha256 = dataset_manifest_sha256.lower()
         # The trusted training launcher supplies this, not the data batch.
         registry_snapshot = {
@@ -1031,6 +1046,7 @@ class RSSvNextStructuralTrainer:
             "architecture_id": self.model.architecture_id,
             "architecture_digest": architecture_digest(self.model.cfg),
             "dataset_manifest_sha256": self.dataset_manifest_sha256,
+            "objective_policy_sha256": self.objective_policy_sha256,
             "render_registry_sha256": self.render_registry_sha256,
             "surface_role_registry_sha256": self.surface_role_registry_sha256,
             "semantic_patch_registry_sha256": self.semantic_patch_registry_sha256,
@@ -1067,6 +1083,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_ARCHITECTURE_DIGEST_DRIFT")
         if data.get("dataset_manifest_sha256") != self.dataset_manifest_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_DATASET_MANIFEST_DRIFT")
+        if data.get("objective_policy_sha256") != self.objective_policy_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_OBJECTIVE_POLICY_DRIFT")
         if data.get("render_registry_sha256", "") != self.render_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_RENDER_REGISTRY_DRIFT")
         if data.get("surface_role_registry_sha256", "") != self.surface_role_registry_sha256:

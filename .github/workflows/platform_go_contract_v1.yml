@@ -122,12 +122,15 @@ jobs:
         run: |
           python3 -m pip install --no-input --progress-bar off -r ../requirements/mainline-ci.txt
           python3 -m pip install --no-input --progress-bar off -r ../requirements/platform-worker.txt
-      - name: Create isolated migration database
+      - name: Create isolated migration database in the exact PostgreSQL service container
         working-directory: .
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends postgresql-client
-          PGPASSWORD=postgres createdb -h 127.0.0.1 -U postgres realsas_ci_migrations
+          # postgres:16 already ships a version-matched psql client. Use the
+          # declared service instead of installing a host client from an
+          # unrelated Ubuntu mirror (which can be temporarily unreachable).
+          docker exec "${{ job.services.postgres.id }}" \
+            psql -U postgres -d postgres -v ON_ERROR_STOP=1 \
+            -c "CREATE DATABASE realsas_ci_migrations;"
       - name: Download pinned modules
         run: go mod download
       - name: Format gate

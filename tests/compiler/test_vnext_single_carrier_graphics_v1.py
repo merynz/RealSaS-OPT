@@ -202,3 +202,50 @@ def test_graphics_rejects_unqualified_parent_even_with_valid_face_addresses():
                 allow_unqualified_order_arbitration=True,
             ),
         )
+
+
+@pytest.mark.parametrize("invalid,expected", [
+    ({"persistent_contact": 1.5}, "GRAPHICS_PROBABILITY_INVALID:mechanical_contact"),
+    ({"barycentric_anchor": (float("nan"), .5, .5)}, "GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID"),
+    ({"barycentric_anchor": (-.1, .6, .5)}, "GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID"),
+])
+def test_graphics_attachment_rejects_invalid_numeric_source_evidence(invalid, expected):
+    m = {
+        "persistent_contact": .95,
+        "parent_mechanical_domain_id": "joint:hand",
+        "anchor_face_index": 0,
+        "child_face_index": 1,
+        "barycentric_anchor": (.2, .3, .5),
+        "evidence_ref": "source-contact",
+    }
+    m.update(invalid)
+    with pytest.raises(QualificationError, match=expected):
+        compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="mesh-skin",
+            source_graphics_binding_hash="source",
+            faces=((0,1,2),(3,4,5),(6,7,8)),
+            evidence=_graphics_evidence("mesh"),
+            mechanical_domain_ids=("joint:hand",),
+            mechanical_attachment_evidence={(0,1):m},
+            policy=GraphicsCompilePolicyV1(allow_unqualified_order_arbitration=True),
+        )
+
+
+def test_graphics_invalid_unused_relation_probability_must_not_escape_court():
+    evidence = build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(
+                0,1,1.5,1.,0.,0.,0.,1.,"unused-confidence",
+            ),
+        ),
+        view_relations=(),
+    )
+    with pytest.raises(QualificationError, match="GRAPHICS_PROBABILITY_INVALID:same"):
+        compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="skin",
+            source_graphics_binding_hash="source",
+            faces=((0,1,2),(3,4,5)), evidence=evidence,
+        )

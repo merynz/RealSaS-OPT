@@ -53,13 +53,39 @@ def build_graphics_evidence_v1(*,mesh_binding_hash,static_relations:Iterable[Gra
     value=GraphicsEvidenceV1(str(mesh_binding_hash),static,view,"",metadata={"categorical_semantics_used":False,"authority_class":"LEARNED_RELATION_EVIDENCE_ONLY",**dict(metadata or {})});return replace(value,evidence_hash=graphics_evidence_hash_v1(value))
 
 class _UF:
-    def __init__(self,n):self.p=list(range(n))
+    """Sparse cannot-link constrained union for anonymous drawable candidates.
+
+    A chain of locally high same-drawable affinities cannot transitively erase
+    an explicit high-cut face relation. Sorting candidate edges makes the
+    representation policy deterministic, independent of input row ordering.
+    """
+    def __init__(self,n):
+        self.p=list(range(n))
+        self.members={i:{i} for i in range(n)}
+        self.forbidden={i:set() for i in range(n)}
+
     def find(self,x):
         while self.p[x]!=x:self.p[x]=self.p[self.p[x]];x=self.p[x]
         return x
+
+    def cannot_link(self,a,b):
+        self.forbidden[a].add(b)
+        self.forbidden[b].add(a)
+
     def union(self,a,b):
         a,b=self.find(a),self.find(b)
-        if a!=b:self.p[max(a,b)]=min(a,b)
+        if a==b:
+            return True
+        # Keep union-by-size so each face's membership migrates O(log N)
+        # times; the final fragment identity is sorted face IDs, not UF root.
+        if len(self.members[a])<len(self.members[b]):
+            a,b=b,a
+        if any(self.forbidden[x].intersection(self.members[a])
+               for x in self.members[b]):
+            return False
+        self.p[b]=a
+        self.members[a].update(self.members.pop(b))
+        return True
 
 def _adj(faces):
     e={};out=set()
@@ -118,6 +144,8 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
     tri=tuple(tuple(map(int,f)) for f in faces);n=len(tri)
     if not n or any(len(f)!=3 for f in tri):raise QualificationError("GRAPHICS_CANONICAL_MESH_INVALID")
     uf=_UF(n);adj=_adj(tri);relations={};alpha=[0.]*n
+    merge_candidates=[]
+    cut_constraints=[]
     for r in evidence.static_relations:
         a,b=int(r.face_a),int(r.face_b)
         if a==b or min(a,b)<0 or max(a,b)>=n:raise QualificationError("GRAPHICS_STATIC_RELATION_FACE_INVALID")
@@ -135,7 +163,21 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
             _prob(score, label)
         relations[pair]=r
         for f in pair:alpha[f]=max(alpha[f],_prob(r.alpha_boundary_probability,"alpha"))
-        if pair in adj and _prob(r.confidence,"confidence")>=policy.relation_confidence_min and _prob(r.same_drawable_affinity,"same")>=policy.same_drawable_min and _prob(r.cut_probability,"cut")<=policy.cut_max and max(_prob(r.alpha_boundary_probability,"alpha"),_prob(r.appearance_boundary_probability,"appearance"))<=policy.boundary_max:uf.union(a,b)
+        if r.confidence>=policy.relation_confidence_min:
+            if r.cut_probability >= 1.0-policy.cut_max:
+                cut_constraints.append(pair)
+            if (pair in adj and r.same_drawable_affinity>=policy.same_drawable_min
+                    and r.cut_probability<=policy.cut_max
+                    and max(r.alpha_boundary_probability,r.appearance_boundary_probability)<=policy.boundary_max):
+                merge_candidates.append((
+                    -float(r.confidence*r.same_drawable_affinity),pair,
+                ))
+    for a,b in sorted(cut_constraints):
+        uf.cannot_link(a,b)
+    blocked_merges=[]
+    for _,(a,b) in sorted(merge_candidates):
+        if not uf.union(a,b):
+            blocked_merges.append((a,b))
     groups={}
     for i in range(n):groups.setdefault(uf.find(i),[]).append(i)
     fragments=[];face_fragment={}
@@ -226,5 +268,7 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
 "unresolved_source_order_conflict":had_order_conflict,
 "source_graphics_qualification_status":"UNQUALIFIED_CONFLICT_POLICY" if had_order_conflict else "CANDIDATE_SCHEDULE_ONLY",
 "pose_conditioned_visibility_proven":False,
+"transitive_cut_constraints_enforced":True,
+"candidate_merge_blocked_by_cut":tuple(blocked_merges),
 "order_arbitration_not_source_truth":True})
     return replace(value,graph_hash=compiled_graphics_hash_v1(value))

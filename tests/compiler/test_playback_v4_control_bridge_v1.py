@@ -186,10 +186,15 @@ def test_authored_control_clip_changes_real_native_pixels_in_eight_view_package(
             assert proc.returncode == 0, proc.stderr
             images.append(np.asarray(Image.open(out).convert("RGBA")))
         assert images[0].shape == (128, 128, 4)
-        assert np.count_nonzero(images[0][..., 3]) > 0
-        assert np.count_nonzero(images[1][..., 3]) > 0
-        # Some perspectives may project a strictly edge-on triangle:
-        # the projection need not change pixels in every possible view.
+        # The test mesh is exactly planar in world XY. At 90° / 270° it
+        # projects to a line. A *correct* full-surface renderer must not
+        # fabricate silhouette pixels for an edge-on triangle.
+        for pixels in images:
+            covered = np.count_nonzero(pixels[..., 3])
+            if i in (2, 6):
+                assert covered == 0, f"edge-on source was invented at V{i}"
+            else:
+                assert covered > 0, f"visible canonical surface absent at V{i}"
         if i in (0, 1, 7):
             assert not np.array_equal(images[0], images[1]), f"control effect absent V{i}"
     assert report.runtime_qualified is False

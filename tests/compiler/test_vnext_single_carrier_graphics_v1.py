@@ -333,3 +333,25 @@ def test_unobserved_fragment_visibility_remains_unknown_and_uses_depth_raster_po
     assert runtime.metadata["unknown_visibility_raster_policy"] == (
         "DRAW_GEOMETRY_AND_DEFER_OCCLUSION_TO_DEPTH"
     )
+
+
+def test_no_view_evidence_never_mints_complete_source_visibility():
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(0,1,0.,1.,0.,0.,0.,1.),
+        ),
+        view_relations=(),
+    )
+    compiled=compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="skin",
+        source_graphics_binding_hash="source",
+        faces=((0,1,2),(3,4,5)),
+        evidence=evidence,
+    )
+    assert compiled.metadata["source_visibility_coverage_complete"] is False
+    assert compiled.metadata["view_relation_eight_direction_address_coverage"] is False
+    runtime=build_runtime_graphics_v1(compiled,face_count=2)
+    assert runtime.metadata["source_visibility_coverage_complete"] is False
+    assert runtime.metadata["view_relation_eight_direction_address_coverage"] is False

@@ -103,7 +103,7 @@ def _dag(edges):
         weak=min(c,key=lambda e:(e.confidence,e.front_fragment_id,e.back_fragment_id));kept.remove(weak);removed.append(weak)
     return tuple(sorted(kept,key=lambda e:(e.view_index,e.front_fragment_id,e.back_fragment_id))),tuple(removed)
 
-def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_binding_hash,source_graphics_binding_hash,faces,evidence,mechanical_attachment_evidence=None,policy=GraphicsCompilePolicyV1()):
+def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_binding_hash,source_graphics_binding_hash,faces,evidence,mechanical_attachment_evidence=None,mechanical_domain_ids=(),policy=GraphicsCompilePolicyV1()):
     """Compile role-free relations onto the sole canonical M; no visual mesh exists."""
     policy.validate()
     if evidence.evidence_hash!=graphics_evidence_hash_v1(evidence):raise QualificationError("GRAPHICS_EVIDENCE_HASH_DRIFT")
@@ -153,16 +153,39 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
             values=vis.get((v,f.fragment_id),());p=sum(values)/len(values) if values else 1.
             if p>=policy.visibility_probability_min:visible.append(f.fragment_id)
         view_states.append(GraphicsViewStateV1(v,tuple(sorted(visible)),kept,metadata={"cycle_edges_removed":[x.to_dict() for x in removed],"triangle_array_order_is_presentation_authority":False}))
-    attachments=[];mechanical=dict(mechanical_attachment_evidence or {})
+    attachments=[]
+    mechanical=dict(mechanical_attachment_evidence or {})
+    qualified_domains=frozenset(str(x) for x in mechanical_domain_ids)
+    seen_attached_fragments=set()
     for pair,r in relations.items():
         if r.attachment_affinity<policy.attachment_affinity_min or r.confidence<policy.relation_confidence_min:continue
         m=dict(mechanical.get(pair) or {})
         if not m or float(m.get("persistent_contact",0))<policy.mechanical_contact_min:continue
         fa,fb=face_fragment[pair[0]],face_fragment[pair[1]]
         if fa==fb:continue
-        bary=tuple(map(float,m.get("barycentric_anchor") or ()));anchor=int(m.get("anchor_face_index",-1));parent=str(m.get("parent_mechanical_domain_id") or "")
-        if len(bary)!=3 or any(x<-1e-9 for x in bary) or abs(sum(bary)-1)>1e-6:raise QualificationError("GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID")
-        if not 0<=anchor<n or not parent:raise QualificationError("GRAPHICS_ATTACHMENT_BINDING_INVALID")
-        attachments.append(GraphicsAttachmentV1(fa,parent,anchor,bary,min(float(r.attachment_affinity),float(m["persistent_contact"])),tuple(x for x in (r.evidence_ref,str(m.get("evidence_ref") or "")) if x)))
+        bary=tuple(map(float,m.get("barycentric_anchor") or ()))
+        anchor=int(m.get("anchor_face_index",-1))
+        child=int(m.get("child_face_index",-1))
+        parent=str(m.get("parent_mechanical_domain_id") or "")
+        if len(bary)!=3 or any(x<-1e-9 for x in bary) or abs(sum(bary)-1)>1e-6:
+            raise QualificationError("GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID")
+        # The attachment is an explicit directional relation: child drawable
+        # follows a SOURCE-BOUND parent face with an admitted mechanical domain.
+        # Picking the numerically first face here would attach an arbitrary
+        # drawable, including the actual parent to itself.
+        if (anchor not in pair or child not in pair or anchor==child
+                or face_fragment[anchor]==face_fragment[child]):
+            raise QualificationError("GRAPHICS_ATTACHMENT_PARENT_CHILD_FACE_BINDING_INVALID")
+        if not parent or parent not in qualified_domains:
+            raise QualificationError("GRAPHICS_ATTACHMENT_MECHANICAL_DOMAIN_UNQUALIFIED")
+        child_fragment=face_fragment[child]
+        if child_fragment in seen_attached_fragments:
+            raise QualificationError("GRAPHICS_ATTACHMENT_CHILD_MULTIPLE_PARENTS")
+        seen_attached_fragments.add(child_fragment)
+        attachments.append(GraphicsAttachmentV1(
+            child_fragment,parent,anchor,bary,
+            min(float(r.attachment_affinity),float(m["persistent_contact"])),
+            tuple(x for x in (r.evidence_ref,str(m.get("evidence_ref") or "")) if x),
+        ))
     value=CompiledGraphicsV1(str(canonical_mesh_binding_hash),str(canonical_mesh_skin_binding_hash),str(source_graphics_binding_hash),evidence.evidence_hash,tuple(fragments),tuple(view_states),tuple(attachments),"",metadata={"authority_class":"COMPILED_GRAPHICS","single_canonical_mesh_authority":True,"independent_visual_mesh_allowed":False,"categorical_semantics_used":False,"source_pixels_win_where_observed":True,"runtime_consumption_required":True,"triangle_array_order_is_presentation_authority":False,"silhouette_support_is_2d_only":True,"representation_policy_arbitration_used":bool(policy.allow_unqualified_order_arbitration),"order_arbitration_not_source_truth":True})
     return replace(value,graph_hash=compiled_graphics_hash_v1(value))

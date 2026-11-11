@@ -39,7 +39,7 @@ class RSSvNextCandidateRigCourtV1:
     candidate_mesh_hash: str
     source_evidence_hash: str
     product_authority: bool = False
-    status: str = "QUALIFIED_RIG_PROGRAM_ONLY_NOT_PRODUCT_RIG"
+    status: str = "QUALIFIED_RIG_PROGRAM_ONLY_CODEC_PARITY_NOT_PRODUCT_PROVEN"
 
 
 def _events(raw: tuple[Mapping, ...]) -> tuple[RigProgramEventV6, ...]:
@@ -67,6 +67,7 @@ def qualify_candidate_rig_program_v1(
     *,
     model_config: RSSvNextConfig,
     expected_checkpoint_sha256: str,
+    mira_codec_binding: AXISV6CodecBinding,
 ) -> RSSvNextCandidateRigCourtV1:
     """Execute the existing decoder, structural court and solver vocabulary gate.
 
@@ -100,12 +101,25 @@ def qualify_candidate_rig_program_v1(
         "base_xyz": mesh["base_xyz"], "rest_xyz": mesh["rest_xyz"],
     })
     config = model_config.axis_config()
-    codec = AXISV6CodecBinding(
-        architecture_id=MIRA_V6_CODEC_ID,
-        checkpoint_hash=evidence.checkpoint_sha256,
-        codebook_size=config.skin_vocab_size,
-        tokens_per_joint=model_config.skin_tokens_per_joint,
-    )
+    # The RSS unified inference checkpoint and a MIRA V6 runtime codec are
+    # different artifacts. A model checkpoint digest is NOT automatically a
+    # decoder digest; false parity here would break exact FSQ token meaning.
+    # This binding is still only launcher-provided structural provenance;
+    # proving embedded-soft vs deployed-discrete codec parity is a separate
+    # product qualification gate.
+    if (
+        type(mira_codec_binding) is not AXISV6CodecBinding
+        or mira_codec_binding.architecture_id != MIRA_V6_CODEC_ID
+        or type(mira_codec_binding.checkpoint_hash) is not str
+        or len(mira_codec_binding.checkpoint_hash) != 64
+        or any(c not in "0123456789abcdef" for c in mira_codec_binding.checkpoint_hash)
+        or mira_codec_binding.checkpoint_hash == evidence.checkpoint_sha256
+        or type(mira_codec_binding.codebook_size) is not int
+        or mira_codec_binding.codebook_size != config.skin_vocab_size
+        or type(mira_codec_binding.tokens_per_joint) is not int
+        or mira_codec_binding.tokens_per_joint != model_config.skin_tokens_per_joint
+    ):
+        raise QualificationError("RSS_VNEXT_RIG_INDEPENDENT_MIRA_CODEC_BINDING_REQUIRED")
     proposal, skin = decode_axis_v6_events(
         _events(evidence.control_events),
         config=config,
@@ -117,7 +131,7 @@ def qualify_candidate_rig_program_v1(
         carrier_topology_hash=topology_hash,
         carrier_geometry_hash=geometry_hash,
         model_provenance="RSS.vNext.UnifiedInference:" + evidence.checkpoint_sha256,
-        codec_binding=codec,
+        codec_binding=mira_codec_binding,
     )
     for constraint in proposal.constraints:
         if constraint.operator_id not in RIG_CONSTRAINT_OPERATOR_IDS_V1:

@@ -11,7 +11,7 @@ perform cloth collision or create source appearance. Absent capability evidence
 raises QualificationError instead of quietly producing a convincing mock.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import math
 from typing import Callable, Mapping
 
@@ -23,6 +23,7 @@ from .mechanics_control_solver_v1 import (
     MechanicsPoseIRV1,
     deform_mesh_lbs_v1,
     solve_control_pose_v1,
+    control_world_transforms_v1,
 )
 from .canonical_mesh_ir_v1 import CanonicalMeshIR
 from .playback_full_surface_v3 import (
@@ -208,19 +209,31 @@ class ControllablePuppetSessionV1:
         if len(world_xyz) != 3 or not all(math.isfinite(float(v)) for v in world_xyz):
             raise QualificationError("PUPPET_RUNTIME_DRAG_WORLD_INVALID")
         c = self._controls[control_id]
-        # The Compiler solver treats translation as a delta to declared rest.
-        # Do not silently ignore parent-control transform hierarchies.
-        parent = c.parent_canonical_control_id
-        if parent is not None and parent in self.control_states:
-            parent_state = self.control_states[parent]
-            if (parent_state.translation != (0., 0., 0.)
-                    or parent_state.rotation_quat_wxyz != (1., 0., 0., 0.)
-                    or parent_state.scale != (1., 1., 1.)):
-                raise QualificationError("PUPPET_RUNTIME_PARENT_SPACE_INVERSION_REQUIRED")
-        delta = tuple(
-            float(world_xyz[i]) - float(c.rest_P[i]) for i in range(3)
+        target = np.asarray(world_xyz, dtype=np.float64)
+        # Invert exactly the parent-space equation used by Mechanics:
+        # world = parent_world + parent_R @ ((rest+delta-parent_rest) * parent_S).
+        # This is a known affine inverse, NOT a guessed hidden 3D target.
+        world = control_world_transforms_v1(
+            self.bundle.rig, tuple(self.control_states.values()),
         )
-        self.set_control(ControlTransformIRV1(control_id, translation=delta))
+        parent = c.parent_canonical_control_id
+        if parent is None:
+            local_position = target
+        else:
+            parent_position, parent_rotation, parent_scale = world[parent]
+            if np.any(parent_scale <= 1e-12):
+                raise QualificationError("PUPPET_RUNTIME_PARENT_SCALE_SINGULAR")
+            parent_rest = np.asarray(self._controls[parent].rest_P, dtype=np.float64)
+            local_position = parent_rest + (
+                parent_rotation.T @ (target - parent_position)
+            ) / parent_scale
+        delta = local_position - np.asarray(c.rest_P, dtype=np.float64)
+        if not np.isfinite(delta).all():
+            raise QualificationError("PUPPET_RUNTIME_DRAG_PARENT_INVERSE_NONFINITE")
+        # Drag changes the local translation channel only. The artist's rotation
+        # and scale are not discarded by a subsequent mouse gesture.
+        old = self.control_states.get(control_id, ControlTransformIRV1(control_id))
+        self.set_control(replace(old, translation=tuple(float(v) for v in delta)))
 
     def drag_screen(self, control_id: str, x: float, y: float) -> None:
         """Mouse drag in orthographic camera plane, preserving handle depth.
@@ -233,13 +246,9 @@ class ControllablePuppetSessionV1:
         if not math.isfinite(x) or not math.isfinite(y):
             raise QualificationError("PUPPET_RUNTIME_SCREEN_CURSOR_NONFINITE")
         cam = self.cameras[self.view_id]
-        c = self._controls[control_id]
-        if c.parent_canonical_control_id in self.control_states:
-            p = self.control_states[c.parent_canonical_control_id]
-            if p.translation != (0., 0., 0.) or p.rotation_quat_wxyz != (1., 0., 0., 0.):
-                raise QualificationError("PUPPET_RUNTIME_PARENT_SPACE_INVERSION_REQUIRED")
-        old = self.control_states.get(control_id, ControlTransformIRV1(control_id))
-        reference = np.asarray(c.rest_P, dtype=np.float64) + np.asarray(old.translation, dtype=np.float64)
+        reference = control_world_transforms_v1(
+            self.bundle.rig, tuple(self.control_states.values()),
+        )[control_id][0]
         origin = np.asarray(cam.origin)
         right = np.asarray(cam.right)
         up = np.asarray(cam.screen_up)

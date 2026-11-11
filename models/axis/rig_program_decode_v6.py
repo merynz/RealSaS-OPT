@@ -125,9 +125,21 @@ def validate_axis_v6_product_event_stream(
         ):
             raise ValueError("AXIS_V6_EVENT_GRAMMAR_INVALID")
 
-        for value in (event.pointer_a, event.pointer_b, event.pointer_c, event.aux_type_id):
+        for value in (event.pointer_a, event.pointer_b, event.pointer_c):
             if type(value) is not int or value < -1 or value >= config.max_pointer_entities:
                 raise ValueError("AXIS_V6_EVENT_POINTER_DOMAIN_INVALID")
+        # Aux is a vocabulary class index, not a pointer into causal
+        # entities. Never bound it by max_pointer_entities.
+        if type(event.aux_type_id) is not int:
+            raise ValueError("AXIS_V6_EVENT_AUX_DOMAIN_INVALID")
+        if event.kind == RigTokenKindV6.CONTROL:
+            if not 0 <= event.aux_type_id < len(CONTROL_KINDS_V6):
+                raise ValueError("AXIS_V6_EVENT_AUX_DOMAIN_INVALID")
+        elif event.kind == RigTokenKindV6.CONSTRAINT:
+            if not 0 <= event.aux_type_id < len(CONSTRAINT_OPERATORS_V6):
+                raise ValueError("AXIS_V6_EVENT_AUX_DOMAIN_INVALID")
+        elif event.aux_type_id != -1:
+            raise ValueError("AXIS_V6_EVENT_UNUSED_AUX_INVALID")
         if type(event.skin_code_id) is not int or type(event.anchor_parent_kind) is not int:
             raise ValueError("AXIS_V6_EVENT_INTEGER_DOMAIN_INVALID")
         for values, width in (

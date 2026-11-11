@@ -215,10 +215,28 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
         if removed and not policy.allow_unqualified_order_arbitration:
             raise QualificationError("GRAPHICS_SOURCE_ORDER_CONFLICT_UNQUALIFIED")
         visible=[]
+        visibility_unknown=[]
         for f in fragments:
-            values=vis.get((v,f.fragment_id),());p=sum(values)/len(values) if values else 1.
-            if p>=policy.visibility_probability_min:visible.append(f.fragment_id)
-        view_states.append(GraphicsViewStateV1(v,tuple(sorted(visible)),kept,metadata={"cycle_edges_removed":[x.to_dict() for x in removed],"triangle_array_order_is_presentation_authority":False}))
+            values=vis.get((v,f.fragment_id),())
+            if not values:
+                # Canonical body triangles remain drawable for exact 3D
+                # depth/ray evaluation; absent source view evidence is
+                # UNKNOWN, not learned-visible or learned-hidden.
+                visibility_unknown.append(f.fragment_id)
+                visible.append(f.fragment_id)
+                continue
+            p=sum(values)/len(values)
+            if p>=policy.visibility_probability_min:
+                visible.append(f.fragment_id)
+        view_states.append(GraphicsViewStateV1(
+            v,tuple(sorted(visible)),kept,metadata={
+                "cycle_edges_removed":[x.to_dict() for x in removed],
+                "triangle_array_order_is_presentation_authority":False,
+                "visibility_unknown_fragment_ids":tuple(sorted(visibility_unknown)),
+                "unobserved_visibility_raster_policy":"DRAW_GEOMETRY_AND_DEFER_OCCLUSION_TO_DEPTH",
+                "missing_source_view_visibility_is_not_positive_label":True,
+            },
+        ))
     attachments=[]
     mechanical=dict(mechanical_attachment_evidence or {})
     qualified_domains=frozenset(str(x) for x in mechanical_domain_ids)

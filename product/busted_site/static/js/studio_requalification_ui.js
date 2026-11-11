@@ -1,4 +1,5 @@
 import {requalificationPlan} from './studio_requalification_core.js';
+import {apiFetch} from './api_gateway_v1.js';
 
 const $ = (selector) => document.querySelector(selector);
 let studio = null;
@@ -28,7 +29,7 @@ function boot() {
 
 async function loadCapability() {
   try {
-    const response = await fetch('/api/project', {cache: 'no-store'});
+    const response = await apiFetch('/api/project', {cache: 'no-store'});
     const project = response.ok ? await response.json() : null;
     capability = project?.studio_requalification || null;
   } catch {
@@ -295,7 +296,7 @@ async function requestRequalification() {
     progress = {...progress, terminal: false, stage: 'WORKSPACE', detail: 'ProductRevision sealed. Materializing the new clean Studio workspace.'};
     render(true);
     while (true) {
-      const response = await fetch(`/api/compile/status?id=${encodeURIComponent(compileID)}`, {cache: 'no-store'});
+      const response = await apiFetch(`/api/compile/status?id=${encodeURIComponent(compileID)}`, {cache: 'no-store'});
       const compile = await response.json();
       if (!response.ok) throw new Error(compile?.message || compile?.error || `Workspace status HTTP ${response.status}`);
       const state = String(compile.status || '').toUpperCase();
@@ -306,7 +307,7 @@ async function requestRequalification() {
       await delay(700);
     }
 
-    const response = await fetch(`/api/compile/workspace?id=${encodeURIComponent(compileID)}`, {cache: 'no-store'});
+    const response = await apiFetch(`/api/compile/workspace?id=${encodeURIComponent(compileID)}`, {cache: 'no-store'});
     const workspace = await response.json();
     if (!response.ok || !String(workspace?.workspace_url || '').startsWith('/studio?bundle=')) {
       throw new Error(workspace?.message || workspace?.error || 'New qualified workspace handoff failed');

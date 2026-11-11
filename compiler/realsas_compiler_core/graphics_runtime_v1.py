@@ -32,19 +32,67 @@ def _topological_order(n,edges):
 def build_runtime_graphics_v1(compiled:CompiledGraphicsV1,*,face_count:int):
     """Materialize graph CONTENT, not merely its hash, for runtime consumption."""
     if compiled.graph_hash!=compiled_graphics_hash_v1(compiled):raise QualificationError("RUNTIME_GRAPHICS_COMPILED_HASH_DRIFT")
-    if face_count<=0 or not compiled.fragments:raise QualificationError("RUNTIME_GRAPHICS_INPUT_INVALID")
-    fragments=tuple(compiled.fragments);index={f.fragment_id:i for i,f in enumerate(fragments)}
-    if len(index)!=len(fragments):raise QualificationError("RUNTIME_GRAPHICS_FRAGMENT_ID_DUPLICATE")
+    if type(face_count) is not int or face_count<=0 or not compiled.fragments:
+        raise QualificationError("RUNTIME_GRAPHICS_INPUT_INVALID")
+    fragments=tuple(compiled.fragments)
+    index={f.fragment_id:i for i,f in enumerate(fragments)}
+    if (len(index)!=len(fragments)
+        or any(type(f.fragment_id) is not str or not f.fragment_id for f in fragments)):
+        raise QualificationError("RUNTIME_GRAPHICS_FRAGMENT_ID_DUPLICATE")
     owner=[-1]*face_count
     for i,f in enumerate(fragments):
+        if not f.face_indices:
+            raise QualificationError("RUNTIME_GRAPHICS_FACE_OWNER_INVALID")
+        if type(f.support_band_pixels) is not int or not 0<=f.support_band_pixels<=4:
+            raise QualificationError("RUNTIME_GRAPHICS_SUPPORT_BAND_INVALID")
         for face in f.face_indices:
-            if not 0<=int(face)<face_count or owner[int(face)]!=-1:raise QualificationError("RUNTIME_GRAPHICS_FACE_OWNER_INVALID")
-            owner[int(face)]=i
-    if any(x<0 for x in owner):raise QualificationError("RUNTIME_GRAPHICS_FACE_OWNER_INCOMPLETE")
+            # Never coerce a forged/rehashed 0.7, True, or "0" into canonical
+            # face zero. Content hashes establish identity, not typed validity.
+            if (type(face) is not int or not 0<=face<face_count or owner[face]!=-1):
+                raise QualificationError("RUNTIME_GRAPHICS_FACE_OWNER_INVALID")
+            owner[face]=i
+    if any(x<0 for x in owner):
+        raise QualificationError("RUNTIME_GRAPHICS_FACE_OWNER_INCOMPLETE")
     views=[]
-    for v in sorted(compiled.views,key=lambda r:r.view_index):
-        edges=tuple((index[e.front_fragment_id],index[e.back_fragment_id]) for e in v.order_edges);views.append(RuntimeGraphicsViewV1(int(v.view_index),tuple(sorted(index[x] for x in v.visible_fragment_ids)),_topological_order(len(fragments),edges),edges))
-    attachments=tuple({"fragment_index":index[a.fragment_id],"parent_mechanical_domain_id":a.parent_mechanical_domain_id,"anchor_face_index":int(a.anchor_face_index),"barycentric_anchor":tuple(map(float,a.barycentric_anchor)),"confidence":float(a.confidence),"evidence_refs":tuple(a.evidence_refs)} for a in compiled.attachments)
+    seen_views=set()
+    for v in sorted(compiled.views,key=lambda r:str(r.view_index)):
+        if (type(v.view_index) is not int or not 0<=v.view_index<8
+            or v.view_index in seen_views):
+            raise QualificationError("RUNTIME_GRAPHICS_VIEW_ADDRESS_INVALID")
+        seen_views.add(v.view_index)
+        if (len(set(v.visible_fragment_ids))!=len(v.visible_fragment_ids)
+            or any(x not in index for x in v.visible_fragment_ids)):
+            raise QualificationError("RUNTIME_GRAPHICS_VISIBLE_FRAGMENT_INVALID")
+        edges=[]
+        for e in v.order_edges:
+            if (type(e.view_index) is not int or e.view_index!=v.view_index
+                or e.front_fragment_id not in index or e.back_fragment_id not in index):
+                raise QualificationError("RUNTIME_GRAPHICS_ORDER_EDGE_ADDRESS_INVALID")
+            edges.append((index[e.front_fragment_id],index[e.back_fragment_id]))
+        edges=tuple(edges)
+        views.append(RuntimeGraphicsViewV1(
+            v.view_index,tuple(sorted(index[x] for x in v.visible_fragment_ids)),
+            _topological_order(len(fragments),edges),edges,
+        ))
+    attachments=[]
+    for a in compiled.attachments:
+        if (a.fragment_id not in index or type(a.anchor_face_index) is not int
+            or not 0<=a.anchor_face_index<face_count
+            or not a.parent_mechanical_domain_id):
+            raise QualificationError("RUNTIME_GRAPHICS_ATTACHMENT_ADDRESS_INVALID")
+        if (len(a.barycentric_anchor)!=3
+            or any(type(x) not in (float,int) or not 0<=x<=1 for x in a.barycentric_anchor)
+            or abs(sum(a.barycentric_anchor)-1.0)>1e-6):
+            raise QualificationError("RUNTIME_GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID")
+        attachments.append({
+            "fragment_index":index[a.fragment_id],
+            "parent_mechanical_domain_id":a.parent_mechanical_domain_id,
+            "anchor_face_index":a.anchor_face_index,
+            "barycentric_anchor":tuple(map(float,a.barycentric_anchor)),
+            "confidence":float(a.confidence),
+            "evidence_refs":tuple(a.evidence_refs),
+        })
+    attachments=tuple(attachments)
     value=RuntimeGraphicsV1(compiled.canonical_mesh_binding_hash,compiled.graph_hash,tuple(owner),tuple(f.fragment_id for f in fragments),tuple(int(f.support_band_pixels) for f in fragments),tuple(views),attachments,"",metadata={
         "behaviorally_consumable": True,
         "hash_only_binding_forbidden": True,

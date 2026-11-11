@@ -249,3 +249,55 @@ def test_graphics_invalid_unused_relation_probability_must_not_escape_court():
             source_graphics_binding_hash="source",
             faces=((0,1,2),(3,4,5)), evidence=evidence,
         )
+
+
+def test_transitive_region_affinity_never_erases_an_explicit_nonadjacent_cut():
+    faces=((0,1,2),(1,2,3),(2,3,4))
+    # Locally 0~1 and 1~2; source evidence 0!=2. A normal union-find would
+    # incorrectly collapse all three into one drawable via transitivity.
+    a=GraphicsStaticRelationEvidenceV1(0,1,.99,.01,0.,0.,0.,.98,"same-01")
+    b=GraphicsStaticRelationEvidenceV1(1,2,.98,.01,0.,0.,0.,.97,"same-12")
+    conflict=GraphicsStaticRelationEvidenceV1(0,2,.01,.99,0.,0.,0.,.99,"cut-02")
+    results=[]
+    for relations in ((a,b,conflict),(conflict,b,a)):
+        evidence=build_graphics_evidence_v1(
+            mesh_binding_hash="mesh",static_relations=relations,view_relations=(),
+        )
+        compiled=compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="skin",
+            source_graphics_binding_hash="source",
+            faces=faces,evidence=evidence,
+        )
+        results.append(compiled)
+    first,second=results
+    assert len(first.fragments)==2
+    assert tuple(f.face_indices for f in first.fragments)==((0,1),(2,))
+    assert tuple(f.fragment_id for f in first.fragments)==tuple(
+        f.fragment_id for f in second.fragments
+    )
+    assert first.metadata["transitive_cut_constraints_enforced"] is True
+    assert first.metadata["candidate_merge_blocked_by_cut"] == ((1,2),)
+    assert first.metadata["pose_conditioned_visibility_proven"] is False
+
+
+def test_explicit_cut_court_does_not_turn_weak_ambiguous_relation_into_forced_split():
+    faces=((0,1,2),(1,2,3),(2,3,4))
+    # 0/2 cut is below the qualified candidate-policy confidence threshold.
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(0,1,.99,.01,0.,0.,0.,.99),
+            GraphicsStaticRelationEvidenceV1(1,2,.99,.01,0.,0.,0.,.99),
+            GraphicsStaticRelationEvidenceV1(0,2,.01,.99,0.,0.,0.,.2),
+        ),
+        view_relations=(),
+    )
+    compiled=compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="skin",
+        source_graphics_binding_hash="source",
+        faces=faces,evidence=evidence,
+    )
+    assert len(compiled.fragments)==1
+    assert compiled.metadata["candidate_merge_blocked_by_cut"]==()

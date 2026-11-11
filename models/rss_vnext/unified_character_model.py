@@ -427,8 +427,16 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         }
         regions = self.semantic_structure(h)
         presentation_logits = self.presentation_role_head(h)
-        outgoing = regions.relation_logits.mean(dim=2)
-        incoming = regions.relation_logits.mean(dim=1)
+        # Self-pairs are not relational evidence. Pool ONLY admitted directed
+        # (other-slot) edges, preserving incoming/outgoing distinction.
+        # Earlier mean() included diagonal logits in both directions, letting
+        # an unobservable self-relation condition topology and articulation.
+        relation_valid = regions.relation_valid_mask.unsqueeze(-1)
+        relation_values = regions.relation_logits.masked_fill(~relation_valid, 0.0)
+        outgoing_count = relation_valid.sum(dim=2).clamp_min(1)
+        incoming_count = relation_valid.sum(dim=1).clamp_min(1)
+        outgoing = relation_values.sum(dim=2) / outgoing_count
+        incoming = relation_values.sum(dim=1) / incoming_count
         relation_tokens = (
             regions.region_slots
             + self.region_graph_to_memory(torch.cat((outgoing, incoming), dim=-1))

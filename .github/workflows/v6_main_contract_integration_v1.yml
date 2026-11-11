@@ -9,9 +9,11 @@ on:
       - 'compiler/realsas_compiler_core/canonical_rig_ir_v2.py'
       - 'compiler/realsas_compiler_core/canonical_skin_ir_v2.py'
       - 'compiler/realsas_compiler_core/mechanics_control_solver_v1.py'
+      - 'compiler/realsas_compiler_core/controllable_puppet_runtime_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/rig_executor_v2.py'
       - 'tests/compiler/test_control_ready_rig_v2.py'
       - 'tests/compiler/test_mechanics_control_solver_v1.py'
+      - 'tests/compiler/test_controllable_puppet_runtime_v1.py'
       - 'tests/compiler/test_mechanics_main_subtree_runtime_v1.py'
       - 'tests/compiler/test_control_motion_ik_integration_v1.py'
       - 'tests/compiler/test_rig_program_causal_linear_v1.py'
@@ -46,6 +48,7 @@ jobs:
             compiler/realsas_compiler_core/canonical_rig_ir_v2.py \
             compiler/realsas_compiler_core/canonical_skin_ir_v2.py \
             compiler/realsas_compiler_core/mechanics_control_solver_v1.py \
+            compiler/realsas_compiler_core/controllable_puppet_runtime_v1.py \
             compiler/realsas_compiler_services/platform_worker/rig_executor_v2.py
       - name: Independently verify existing V6 and main integration regressions
         run: |
@@ -54,6 +57,7 @@ jobs:
             tests/compiler/test_rig_program_causal_linear_v1.py \
             tests/compiler/test_v6_typed_rig_skin_main_integration_v1.py \
             tests/compiler/test_mechanics_control_solver_v1.py \
+            tests/compiler/test_controllable_puppet_runtime_v1.py \
             tests/compiler/test_mechanics_main_subtree_runtime_v1.py \
             tests/compiler/test_control_motion_ik_integration_v1.py
       - name: Typed contracts do not mint product or training authority

@@ -180,6 +180,7 @@ class RSSvNextViewFieldRenderer(nn.Module):
         ring: RSSvNextCanonicalCameraRing,
         height: int,
         width: int,
+        graphics_field: nn.Module | None = None,
     ) -> RSSvNextConstructedViews:
         if height < 2 or width < 2 or height * width > self.max_pixels:
             raise ValueError("RSS_VNEXT_MV_RENDER_IMAGE_BUDGET")
@@ -223,9 +224,21 @@ class RSSvNextViewFieldRenderer(nn.Module):
                         points.reshape(1, -1, 3),
                     )["H"][0]
                     n, s = points.shape[:2]
+                    # The five typed Graphics field channels are shared with
+                    # TESSA and the same source-bound H(x). A view-dependent
+                    # residual may add to them but cannot become observed art.
+                    graphics = (
+                        torch.zeros((n * s, 5), dtype=dtype, device=device)
+                        if graphics_field is None else graphics_field(local)
+                    )
+                    if graphics.shape != (n * s, 5) or not bool(torch.isfinite(graphics).all()):
+                        raise ValueError("RSS_VNEXT_MV_GRAPHICS_FIELD_INVALID")
                     view_dir = forward.expand(n * s, -1)
                     latent = self.core(torch.cat((local, view_dir), dim=-1))
-                    sigma = F.softplus(self.density(latent).reshape(n, s))
+                    sigma = F.softplus(
+                        self.density(latent).reshape(n, s)
+                        + graphics[:, 3].reshape(n, s)
+                    )
                     sigma = sigma * inside.to(sigma.dtype)
                     opacity = -torch.expm1(-sigma * step)
                     survive = torch.cat((
@@ -234,7 +247,9 @@ class RSSvNextViewFieldRenderer(nn.Module):
                     ), dim=-1)
                     weights = opacity * survive
                     alpha = weights.sum(dim=-1, keepdim=True).clamp(0, 1)
-                    rgb_samples = torch.sigmoid(self.rgb(latent)).reshape(n, s, 3)
+                    rgb_samples = torch.sigmoid(
+                        self.rgb(latent) + graphics[:, :3]
+                    ).reshape(n, s, 3)
                     rgb_premult = (rgb_samples * weights[..., None]).sum(dim=1)
                     rgb_straight = torch.where(
                         alpha > 1e-6,
@@ -253,8 +268,8 @@ class RSSvNextViewFieldRenderer(nn.Module):
                     relative_depth = ((depths - near) / (far - near)).expand(n, -1)
                     expected_depth = (weights * relative_depth).sum(-1, keepdim=True)
                     logvar = (
-                        self.uncertainty(latent).reshape(n, s)
-                        * weights
+                        (self.uncertainty(latent).reshape(n, s)
+                         + graphics[:, 4].reshape(n, s)) * weights
                     ).sum(dim=-1, keepdim=True) / alpha.clamp_min(1e-6)
                     logvar = logvar.clamp(-8, 4)
                     patches.append(torch.cat((

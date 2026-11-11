@@ -331,6 +331,9 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             nn.Linear(h, h),
         )
         self.affordance_to_memory = nn.Linear(cfg.affordance_classes + 1, h)
+        # StdGEN-inspired queryable appearance field (not observed source truth):
+        # RGB logits [0:3], density logit [3], log uncertainty residual [4].
+        # The camera-aware view renderer consumes this SAME Graphics field.
         self.graphics = nn.Sequential(nn.LayerNorm(h), nn.Linear(h, cfg.graphics_channels))
         self.presentation = nn.Sequential(nn.LayerNorm(h), nn.Linear(h, h), nn.GELU())
         self.graphics_to_memory = nn.Linear(cfg.graphics_channels, h, bias=False)
@@ -494,6 +497,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         return self.constructed_view_renderer(
             iris=self.iris, scene_triplanes=state.scene_triplanes,
             ring=ring, height=height, width=width,
+            graphics_field=self.graphics,
         )
 
     def _structural_memory(

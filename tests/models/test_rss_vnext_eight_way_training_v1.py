@@ -92,6 +92,10 @@ def test_eight_way_source_render_loss_trains_shared_carrier_without_six_extra_ob
     assert out.gradient_norm is not None and torch.isfinite(out.gradient_norm)
     assert model.constructed_view_renderer.rgb.weight.grad is not None
     assert model.constructed_view_renderer.rgb.weight.grad.abs().sum() > 0
+    # Crucial: eight-way appearance now trains the actual IRIS Graphics head,
+    # instead of only the detached post-scene view renderer.
+    assert model.graphics[-1].weight.grad is not None
+    assert model.graphics[-1].weight.grad.abs().sum() > 0
     assert model.iris.scene.scene_queries.grad is not None
     assert model.iris.scene.scene_queries.grad.abs().sum() > 0
     assert model.vision.patch.weight.grad is not None
@@ -128,3 +132,18 @@ def test_eight_way_mask_and_target_fail_closed():
     batch.novel_view_rgba[:, :, 0, 0, 0] = float("nan")
     with pytest.raises(ValueError, match="TEACHER_NONFINITE"):
         trainer.objective(batch)
+
+
+def test_five_channel_graphics_contract_and_invalid_field_rejected():
+    from dataclasses import replace
+    from torch import nn
+    with pytest.raises(ValueError, match="GRAPHICS_FIELD_REQUIRES_FIVE"):
+        replace(RSSvNextConfig.tiny_for_test(), graphics_channels=4).validate()
+    model, batch, _ = _fixture()
+    state, _, _ = model.encode_observations(batch.rgba, batch.camera_features)
+    model.graphics = nn.Linear(model.cfg.iris.local_feature_dim, 4)
+    with pytest.raises(ValueError, match="GRAPHICS_FIELD_INVALID"):
+        model.construct_novel_views(
+            state, height=3, width=3,
+            method="EXPERIMENTAL_POST_SCENE_H_RENDER",
+        )

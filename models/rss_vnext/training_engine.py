@@ -46,6 +46,11 @@ from .eight_way_teacher_court_v1 import (
     validate_eight_way_teacher_receipts_v1,
 )
 from models.iris.vnext.flexicubes_v1 import symmetric_surface_chamfer_v1
+from models.axis.rig_program_model_v6 import (
+    AXISSequenceV6, AXIS_V6_PRODUCT_ARCHITECTURE_ID,
+    qualified_axis_rig_skin_sequence_loss_v6, RigTokenKindV6,
+)
+from compiler.realsas_compiler_core.rig_constraint_schema_v1 import RIG_CONSTRAINT_OPERATOR_IDS_V1
 
 
 @dataclass
@@ -71,6 +76,10 @@ class RSSvNextStructuralTrainingBatch:
     source_region_pair_is_same: Tensor | None = None  # [B,P] float 0/1; unknown masked
     source_region_pair_mask: Tensor | None = None     # [B,P] bool qualified
     source_region_pair_admission_key: str = ""
+    # SkinTokens-style causal joint+FSQ sequence, with independent teacher
+    # admission. Control/constraint tokens additionally need intervention truth.
+    axis_teacher_sequence: AXISSequenceV6 | None = None
+    axis_teacher_admission_key: str = ""
     # Independently source-rendered 6 novel views; FRONT/BACK remain the only
     # model observations. These are teacher targets, never encoder inputs.
     novel_view_rgba: Tensor | None = None       # [B,6,4,H,W]
@@ -98,6 +107,7 @@ class RSSvNextTrainingWeights:
     source_semantics: float = 0.2
     surface_roles: float = 0.0  # opt-in only with exact-source 3D address receipt
     region_pairs: float = 0.0  # opt-in only with source-bound pair receipt
+    axis_rig_skin_codes: float = 0.0  # opt-in: source rig and MIRA-codec-bound FSQ teacher
     flexicubes_surface: float = 0.3
     flexicubes_animation: float = 0.0  # explicit opt-in on admitted source motion
     novel_view: float = 0.0             # opt-in: source-qualified 8-way appearance
@@ -106,13 +116,14 @@ class RSSvNextTrainingWeights:
     def validate(self):
         if min(
             self.topology, self.motion_preference, self.source_semantics,
-            self.surface_roles, self.region_pairs, self.flexicubes_surface, self.flexicubes_animation,
+            self.surface_roles, self.region_pairs, self.axis_rig_skin_codes, self.flexicubes_surface, self.flexicubes_animation,
             self.novel_view,
         ) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
         if (
             self.topology + self.motion_preference
-            + self.source_semantics + self.surface_roles + self.region_pairs + self.flexicubes_surface
+            + self.source_semantics + self.surface_roles + self.region_pairs
+            + self.axis_rig_skin_codes + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view <= 0
             or self.clip_gradient_norm <= 0
         ):
@@ -137,7 +148,31 @@ class RSSvNextTrainingResult:
     eligible_surface_role_points: int = 0
     region_pair_loss: Tensor | None = None
     eligible_region_pairs: int = 0
+    axis_rig_skin_loss: Tensor | None = None
+    eligible_axis_sequences: int = 0
     gradient_norm: Tensor | None = None
+
+
+def axis_teacher_sequence_sha256_v6(teacher: AXISSequenceV6) -> str:
+    """Hash all causal token labels/attributes; a batch cannot self-certify."""
+    return content_fields_sha256({
+        field_name: source_surface_tensor_sha256(getattr(teacher, field_name))
+        for field_name in teacher.__dataclass_fields__
+    })
+
+
+def content_fields_sha256(fields: Mapping[str, str]) -> str:
+    return hashlib.sha256(json.dumps(
+        dict(fields), sort_keys=True, separators=(",", ":"), allow_nan=False,
+    ).encode("utf8")).hexdigest()
+
+
+def frozen_mira_codec_state_sha256_v6(model: RSSvNextUnifiedCharacterModel) -> str:
+    """Exact FSQ codebook+decoder byte identity; no unpinned teacher code IDs."""
+    return content_fields_sha256({
+        key: source_surface_tensor_sha256(value)
+        for key, value in model.mira.codec.state_dict().items()
+    })
 
 
 def architecture_digest(cfg: RSSvNextConfig) -> str:
@@ -182,6 +217,7 @@ class RSSvNextStructuralTrainer:
         trusted_render_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_surface_role_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_region_pair_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_axis_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -245,6 +281,18 @@ class RSSvNextStructuralTrainer:
                 allow_nan=False,
             ).encode("utf8")).hexdigest()
             if region_snapshot else ""
+        )
+        axis_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_axis_teacher_registry or {}).items()
+        }
+        self.trusted_axis_teacher_registry = MappingProxyType({
+            key: MappingProxyType(value) for key, value in axis_snapshot.items()
+        })
+        self.axis_teacher_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                axis_snapshot, sort_keys=True, separators=(",", ":"), allow_nan=False,
+            ).encode("utf8")).hexdigest() if axis_snapshot else ""
         )
         self.global_step = 0
 
@@ -488,6 +536,43 @@ class RSSvNextStructuralTrainer:
                 batch.source_region_pair_mask,
             )
             n_region_pairs = int(batch.source_region_pair_mask.sum().item())
+        axis_loss = None
+        n_axis = 0
+        axis_requested = batch.axis_teacher_sequence is not None or bool(batch.axis_teacher_admission_key)
+        if axis_requested:
+            if batch.axis_teacher_sequence is None or not batch.axis_teacher_admission_key:
+                raise ValueError("RSS_VNEXT_AXIS_TEACHER_INCOMPLETE")
+            if self.weights.axis_rig_skin_codes <= 0:
+                raise ValueError("RSS_VNEXT_AXIS_TEACHER_OBJECTIVE_NOT_ENABLED")
+            teacher = batch.axis_teacher_sequence
+            receipt = self.trusted_axis_teacher_registry.get(batch.axis_teacher_admission_key)
+            if receipt is None or receipt.get("admission_status") != "QUALIFIED_SOURCE_RIG_SKIN_TOKEN_TEACHER":
+                raise ValueError("RSS_VNEXT_AXIS_TEACHER_UNTRUSTED")
+            control_qualified = (
+                receipt.get("intervention_qualification_status")
+                == "QUALIFIED_SOURCE_CONTROL_CONSEQUENCE"
+                and isinstance(receipt.get("source_intervention_sha256"), str)
+                and len(receipt.get("source_intervention_sha256", "")) == 64
+            )
+            if (
+                receipt.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
+                or receipt.get("source_qualification_key") != batch.source_qualification_key
+                or receipt.get("architecture_id") != AXIS_V6_PRODUCT_ARCHITECTURE_ID
+                or receipt.get("teacher_sequence_sha256") != axis_teacher_sequence_sha256_v6(teacher)
+                or receipt.get("mira_codec_state_sha256") != frozen_mira_codec_state_sha256_v6(self.model)
+                or receipt.get("teacher_semantics") != "SOURCE_RIG_AND_PINNED_FSQ_NOT_INFERRED_CONTROLS"
+                or any(parameter.requires_grad for parameter in self.model.mira.codec.parameters())
+            ):
+                raise ValueError("RSS_VNEXT_AXIS_TEACHER_SOURCE_CODEC_OR_SEQUENCE_DRIFT")
+            axis_loss, _axis_components = qualified_axis_rig_skin_sequence_loss_v6(
+                self.model.axis,
+                self.model._control_memory(state, memory),
+                teacher,
+                tokens_per_joint=self.model.cfg.skin_tokens_per_joint,
+                executable_constraint_operators=RIG_CONSTRAINT_OPERATOR_IDS_V1,
+                control_intervention_qualified=control_qualified,
+            )
+            n_axis = int(teacher.kind_ids.shape[0])
         n_topo = 0
         n_pairs = 0
         if self.weights.topology > 0 and batch.topology_teacher_tokens is not None:
@@ -535,7 +620,7 @@ class RSSvNextStructuralTrainer:
             topology is None and motion is None and semantic is None
             and fc_loss is None and fc_anim_loss is None
             and novel_loss is None and surface_role_loss is None
-            and region_pair_loss is None
+            and region_pair_loss is None and axis_loss is None
         ):
             raise ValueError("RSS_VNEXT_TRAIN_NO_QUALIFIED_OBJECTIVE")
         total = sum(
@@ -546,6 +631,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.source_semantics, semantic),
                 (self.weights.surface_roles, surface_role_loss),
                 (self.weights.region_pairs, region_pair_loss),
+                (self.weights.axis_rig_skin_codes, axis_loss),
                 (self.weights.flexicubes_surface, fc_loss),
                 (self.weights.flexicubes_animation, fc_anim_loss),
                 (self.weights.novel_view, novel_loss),
@@ -571,6 +657,8 @@ class RSSvNextStructuralTrainer:
             eligible_surface_role_points=n_surface_role_points,
             region_pair_loss=region_pair_loss,
             eligible_region_pairs=n_region_pairs,
+            axis_rig_skin_loss=axis_loss,
+            eligible_axis_sequences=n_axis,
         )
 
     def train_step(self, batch: RSSvNextStructuralTrainingBatch) -> RSSvNextTrainingResult:
@@ -599,6 +687,7 @@ class RSSvNextStructuralTrainer:
             "render_registry_sha256": self.render_registry_sha256,
             "surface_role_registry_sha256": self.surface_role_registry_sha256,
             "region_pair_registry_sha256": self.region_pair_registry_sha256,
+            "axis_teacher_registry_sha256": self.axis_teacher_registry_sha256,
             "global_step": self.global_step,
             "sampler_cursor": int(sampler_cursor),
             "model": self.model.state_dict(),
@@ -633,6 +722,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SURFACE_ROLE_REGISTRY_DRIFT")
         if data.get("region_pair_registry_sha256", "") != self.region_pair_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_REGION_PAIR_REGISTRY_DRIFT")
+        if data.get("axis_teacher_registry_sha256", "") != self.axis_teacher_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_AXIS_TEACHER_REGISTRY_DRIFT")
         if int(data.get("global_step", -1)) < 0 or int(data.get("sampler_cursor", -1)) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_PROGRESS_INVALID")
         self.model.load_state_dict(data["model"], strict=True)
@@ -648,4 +739,5 @@ __all__ = [
     "RSSvNextStructuralTrainingBatch", "RSSvNextTrainingWeights",
     "RSSvNextTrainingResult", "RSSvNextStructuralTrainer",
     "architecture_digest", "source_surface_tensor_sha256",
+    "axis_teacher_sequence_sha256_v6", "frozen_mira_codec_state_sha256_v6",
 ]

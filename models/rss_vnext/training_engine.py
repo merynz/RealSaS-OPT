@@ -84,6 +84,14 @@ class RSSvNextStructuralTrainingBatch:
     source_graphics_view_directions: Tensor | None = None  # [B,Q,3] qualified source first-hit directions
     source_graphics_rgb_mask: Tensor | None = None    # [B,Q] bool
     source_graphics_rgb_admission_key: str = ""
+    # IRIS query-address source geometry targets. UDF is admissible for an
+    # open surface; inside/outside sign requires independently qualified
+    # closed-solid topology and negative-inside sign convention.
+    source_udf_target: Tensor | None = None            # [B,Q] nonnegative
+    source_udf_mask: Tensor | None = None              # [B,Q] bool
+    source_inside_sign_target: Tensor | None = None    # [B,Q] float 1=inside
+    source_inside_sign_mask: Tensor | None = None      # [B,Q] bool
+    source_field_admission_key: str = ""
     # SkinTokens-style causal joint+FSQ sequence, with independent teacher
     # admission. Control/constraint tokens additionally need intervention truth.
     axis_teacher_sequence: AXISSequenceV6 | None = None
@@ -116,6 +124,8 @@ class RSSvNextTrainingWeights:
     surface_roles: float = 0.0  # opt-in only with exact-source 3D address receipt
     region_pairs: float = 0.0  # opt-in only with source-bound pair receipt
     graphics_source_rgb: float = 0.0  # opt-in: qualified original visible rays
+    source_udf: float = 0.0           # opt-in: source native unsigned distances
+    source_inside_sign: float = 0.0   # opt-in: closed-solid signed occupancy
     axis_rig_skin_codes: float = 0.0  # opt-in: source rig and MIRA-codec-bound FSQ teacher
     flexicubes_surface: float = 0.3
     flexicubes_animation: float = 0.0  # explicit opt-in on admitted source motion
@@ -126,6 +136,7 @@ class RSSvNextTrainingWeights:
         if min(
             self.topology, self.motion_preference, self.source_semantics,
             self.surface_roles, self.region_pairs, self.graphics_source_rgb,
+            self.source_udf, self.source_inside_sign,
             self.axis_rig_skin_codes, self.flexicubes_surface, self.flexicubes_animation,
             self.novel_view,
         ) < 0:
@@ -133,7 +144,7 @@ class RSSvNextTrainingWeights:
         if (
             self.topology + self.motion_preference
             + self.source_semantics + self.surface_roles + self.region_pairs
-            + self.graphics_source_rgb
+            + self.graphics_source_rgb + self.source_udf + self.source_inside_sign
             + self.axis_rig_skin_codes + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view <= 0
             or self.clip_gradient_norm <= 0
@@ -161,6 +172,10 @@ class RSSvNextTrainingResult:
     eligible_region_pairs: int = 0
     graphics_source_rgb_loss: Tensor | None = None
     eligible_graphics_source_rgb_queries: int = 0
+    source_udf_loss: Tensor | None = None
+    source_inside_sign_loss: Tensor | None = None
+    eligible_source_udf_queries: int = 0
+    eligible_source_inside_sign_queries: int = 0
     axis_rig_skin_loss: Tensor | None = None
     eligible_axis_sequences: int = 0
     gradient_norm: Tensor | None = None
@@ -233,6 +248,7 @@ class RSSvNextStructuralTrainer:
         trusted_axis_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_signed_source_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_graphics_rgb_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_source_field_registry: Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -334,6 +350,19 @@ class RSSvNextStructuralTrainer:
                 graphics_snapshot, sort_keys=True, separators=(",", ":"),
                 allow_nan=False,
             ).encode("utf8")).hexdigest() if graphics_snapshot else ""
+        )
+        field_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_source_field_registry or {}).items()
+        }
+        self.trusted_source_field_registry = MappingProxyType({
+            key: MappingProxyType(value) for key, value in field_snapshot.items()
+        })
+        self.source_field_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                field_snapshot, sort_keys=True, separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest() if field_snapshot else ""
         )
         self.global_step = 0
 
@@ -608,6 +637,102 @@ class RSSvNextStructuralTrainer:
                 batch.source_region_pair_mask,
             )
             n_region_pairs = int(batch.source_region_pair_mask.sum().item())
+        # Model geometry heads are learned separately. Source UDF remains
+        # meaningful on open/uncertain surfaces; sign targets require a
+        # closed-solid proof. Neither is made authoritative by a float label.
+        source_udf_loss = None
+        source_inside_sign_loss = None
+        n_source_udf = 0
+        n_source_inside_sign = 0
+        field_items = (
+            (batch.source_udf_target, batch.source_udf_mask),
+            (batch.source_inside_sign_target, batch.source_inside_sign_mask),
+        )
+        field_requested = bool(batch.source_field_admission_key) or any(
+            target is not None or mask is not None
+            for target, mask in field_items
+        )
+        if field_requested:
+            if not batch.source_field_admission_key or not any(
+                target is not None for target, _ in field_items
+            ):
+                raise ValueError("RSS_VNEXT_SOURCE_FIELD_TEACHER_INCOMPLETE")
+            if any((target is None) != (mask is None) for target, mask in field_items):
+                raise ValueError("RSS_VNEXT_SOURCE_FIELD_TEACHER_INCOMPLETE")
+            receipt = self.trusted_source_field_registry.get(
+                batch.source_field_admission_key,
+            )
+            if (
+                receipt is None
+                or receipt.get("admission_status") != "QUALIFIED_SOURCE_QUERY_DISTANCE_FIELDS"
+                or receipt.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
+                or receipt.get("source_qualification_key") != batch.source_qualification_key
+                or receipt.get("query_xyz_sha256") != source_surface_tensor_sha256(state.query_xyz)
+                or receipt.get("source_coordinate_system") != "IRIS_NORMALIZED_SOURCE_XYZ"
+                or receipt.get("udf_target_sha256") != (
+                    source_surface_tensor_sha256(batch.source_udf_target)
+                    if batch.source_udf_target is not None else None
+                )
+                or receipt.get("udf_mask_sha256") != (
+                    source_surface_tensor_sha256(batch.source_udf_mask)
+                    if batch.source_udf_mask is not None else None
+                )
+                or receipt.get("inside_target_sha256") != (
+                    source_surface_tensor_sha256(batch.source_inside_sign_target)
+                    if batch.source_inside_sign_target is not None else None
+                )
+                or receipt.get("inside_mask_sha256") != (
+                    source_surface_tensor_sha256(batch.source_inside_sign_mask)
+                    if batch.source_inside_sign_mask is not None else None
+                )
+                or receipt.get("teacher_semantics") != "SOURCE_UDF_AND_OPTIONAL_NEGATIVE_INSIDE_SIGN"
+                or receipt.get("signed_domain") not in (
+                    "SINGLE_QUALIFIED_CLOSED_COMPONENT",
+                    "OPEN_OR_UNKNOWN_UNSIGNED_ONLY",
+                )
+            ):
+                raise ValueError("RSS_VNEXT_SOURCE_FIELD_RECEIPT_DRIFT")
+            if (
+                batch.source_inside_sign_target is not None
+                and receipt.get("signed_domain") != "SINGLE_QUALIFIED_CLOSED_COMPONENT"
+            ):
+                raise ValueError("RSS_VNEXT_SOURCE_SIGN_CLOSED_DOMAIN_REQUIRED")
+            expected_shape = state.geometry["unsigned_distance"].shape
+            for target, mask in field_items:
+                if target is None:
+                    continue
+                if (
+                    target.shape != expected_shape or mask.shape != expected_shape
+                    or not torch.is_floating_point(target)
+                    or mask.dtype != torch.bool
+                    or target.device != state.query_xyz.device
+                    or mask.device != state.query_xyz.device
+                    or not bool(mask.any())
+                ):
+                    raise ValueError("RSS_VNEXT_SOURCE_FIELD_TARGET_SHAPE_OR_MASK_INVALID")
+                if not bool(torch.isfinite(target[mask]).all()):
+                    raise ValueError("RSS_VNEXT_SOURCE_FIELD_TARGET_NONFINITE")
+            if batch.source_udf_target is not None:
+                if self.weights.source_udf <= 0:
+                    raise ValueError("RSS_VNEXT_SOURCE_UDF_OBJECTIVE_NOT_ENABLED")
+                target, mask = field_items[0]
+                if bool((target[mask] < 0).any()):
+                    raise ValueError("RSS_VNEXT_SOURCE_UDF_TARGET_NEGATIVE")
+                source_udf_loss = F.smooth_l1_loss(
+                    state.geometry["unsigned_distance"][mask], target[mask],
+                )
+                n_source_udf = int(mask.sum().item())
+            if batch.source_inside_sign_target is not None:
+                if self.weights.source_inside_sign <= 0:
+                    raise ValueError("RSS_VNEXT_SOURCE_SIGN_OBJECTIVE_NOT_ENABLED")
+                target, mask = field_items[1]
+                if not bool(((target[mask] == 0) | (target[mask] == 1)).all()):
+                    raise ValueError("RSS_VNEXT_SOURCE_SIGN_TARGET_NOT_BINARY")
+                source_inside_sign_loss = F.binary_cross_entropy_with_logits(
+                    state.geometry["sign_logit"][mask], target[mask],
+                )
+                n_source_inside_sign = int(mask.sum().item())
+
         # Graphics can learn source-visible RGB already emitted at H(x)
         # queries. This does NOT certify depth, density, occlusion, normals or
         # drawable identity. Each admitted query must be tied to one original
@@ -768,6 +893,7 @@ class RSSvNextStructuralTrainer:
             and novel_loss is None and surface_role_loss is None
             and region_pair_loss is None
             and graphics_rgb_loss is None and axis_loss is None
+            and source_udf_loss is None and source_inside_sign_loss is None
         ):
             raise ValueError("RSS_VNEXT_TRAIN_NO_QUALIFIED_OBJECTIVE")
         total = sum(
@@ -779,6 +905,8 @@ class RSSvNextStructuralTrainer:
                 (self.weights.surface_roles, surface_role_loss),
                 (self.weights.region_pairs, region_pair_loss),
                 (self.weights.graphics_source_rgb, graphics_rgb_loss),
+                (self.weights.source_udf, source_udf_loss),
+                (self.weights.source_inside_sign, source_inside_sign_loss),
                 (self.weights.axis_rig_skin_codes, axis_loss),
                 (self.weights.flexicubes_surface, fc_loss),
                 (self.weights.flexicubes_animation, fc_anim_loss),
@@ -807,6 +935,10 @@ class RSSvNextStructuralTrainer:
             eligible_region_pairs=n_region_pairs,
             graphics_source_rgb_loss=graphics_rgb_loss,
             eligible_graphics_source_rgb_queries=n_graphics_rgb,
+            source_udf_loss=source_udf_loss,
+            source_inside_sign_loss=source_inside_sign_loss,
+            eligible_source_udf_queries=n_source_udf,
+            eligible_source_inside_sign_queries=n_source_inside_sign,
             axis_rig_skin_loss=axis_loss,
             eligible_axis_sequences=n_axis,
         )
@@ -840,6 +972,7 @@ class RSSvNextStructuralTrainer:
             "axis_teacher_registry_sha256": self.axis_teacher_registry_sha256,
             "signed_source_registry_sha256": self.signed_source_registry_sha256,
             "graphics_rgb_registry_sha256": self.graphics_rgb_registry_sha256,
+            "source_field_registry_sha256": self.source_field_registry_sha256,
             "global_step": self.global_step,
             "sampler_cursor": int(sampler_cursor),
             "model": self.model.state_dict(),
@@ -880,6 +1013,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SIGNED_SOURCE_REGISTRY_DRIFT")
         if data.get("graphics_rgb_registry_sha256", "") != self.graphics_rgb_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_GRAPHICS_RGB_REGISTRY_DRIFT")
+        if data.get("source_field_registry_sha256", "") != self.source_field_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SOURCE_FIELD_REGISTRY_DRIFT")
         if int(data.get("global_step", -1)) < 0 or int(data.get("sampler_cursor", -1)) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_PROGRESS_INVALID")
         self.model.load_state_dict(data["model"], strict=True)

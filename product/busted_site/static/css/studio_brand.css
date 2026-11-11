@@ -1,0 +1,5 @@
+/* Product brand, editor layout and mechanics remain independent. */
+.brand .studio-brand-link{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
+.brand .studio-brand-link:hover strong,.brand .studio-brand-link:focus-visible strong{color:#f0f8ff}
+.brand .studio-brand-link:focus-visible{outline:2px solid #9bb7cf;outline-offset:4px}
+.brand .studio-brand-link small{font-size:9px;letter-spacing:.08em}

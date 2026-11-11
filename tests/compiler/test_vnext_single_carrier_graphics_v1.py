@@ -712,3 +712,97 @@ def test_complete_eight_way_neural_visibility_never_becomes_source_ray_truth():
     assert runtime.metadata["learned_visibility_candidate_coverage_complete"] is True
     assert runtime.metadata["source_visibility_coverage_complete"] is False
     assert runtime.metadata["pose_conditioned_order_execution"] is False
+
+
+def test_neural_region_evidence_to_live_ik_skin_graphics_projection_one_carrier():
+    """Joined synthetic *consumer* E2E across three questions.
+
+    WHAT: neural region membership is readdressed ONLY via independently
+    minted CanonicalMesh, not asserted as a drawable/source pixel truth.
+    HOW: AXIS-style qualified rig + source-qualified synthetic Skin execute
+    actual Mechanics IK and LBS with stable joint/vertex addresses.
+    LOOKS: Graphics fragments consume new deformed positions at the selected
+    camera, with visible-color/occlusion still UNKNOWN.
+
+    This explicitly does not claim a trained unseen checkpoint, source RGB,
+    a commercial ProductRevision or native final-pixel compositing.
+    """
+    import numpy as np
+    from compiler.realsas_compiler_core.controllable_puppet_runtime_v1 import (
+        ControllablePuppetBundleV1, ControllablePuppetSessionV1,
+        RuntimeSelectionBindingV1, VIEW_IDS_V1,
+    )
+    from compiler.realsas_compiler_core.playback_full_surface_v3 import (
+        build_full_surface_runtime_meshes_v3,
+    )
+    from compiler.realsas_compiler_core.playback_runtime_v3 import (
+        AppearanceProvenance, RuntimeV3AppearancePatch,
+        RuntimeV3PlaybackContract, RuntimeV3Slot,
+    )
+    from tests.compiler.test_controllable_puppet_runtime_v1 import qualified_synthetic_bundle
+
+    evidence, mapping, mesh, rig, skin = _qualified_neural_graphics_fixture()
+    compiled = compile_neural_region_graphics_on_canonical_puppet_v1(
+        evidence=evidence, expected_checkpoint_sha256="a"*64,
+        candidate_vertex_ids_by_index=mapping,
+        mesh=mesh, rig=rig, skin=skin,
+    )
+    graphics = build_runtime_graphics_v1(compiled,face_count=len(mesh.faces))
+    parent = qualified_synthetic_bundle()
+    cameras = parent.cameras_by_view
+    vids = tuple(v.canonical_mesh_vertex_id for v in mesh.vertices)
+    ordered = {vid:i for i,vid in enumerate(vids)}
+    positions = np.asarray([v.P for v in mesh.vertices],dtype=np.float64)
+    faces = np.asarray([[ordered[vid] for vid in face] for face in mesh.faces],dtype=np.int64)
+    uv = np.asarray([[0,1],[1,.5],[0,0]],dtype=np.float64)
+    surface = build_full_surface_runtime_meshes_v3(
+        positions,faces,cameras=cameras,
+        uv_by_view={view:uv for view in VIEW_IDS_V1},
+        slot_id="S_TEST",attachment_id="A_TEST",
+    )
+    playback = RuntimeV3PlaybackContract(
+        slots=(RuntimeV3Slot("S_TEST",rig.joints[0].canonical_joint_id,0,"A_TEST"),),
+        meshes=surface.meshes,
+        appearance_patches=tuple(
+            RuntimeV3AppearancePatch(
+                patch_id=f"AP:{view}", mesh_id=f"{view}:A_TEST",
+                face_indices=(0,),provenance=AppearanceProvenance.UNSEEN,
+                donor_view_index=None,atlas_id=None,
+            ) for view in VIEW_IDS_V1
+        ),
+    )
+    effector = next(c.canonical_control_id for c in rig.controls if c.control_kind=="IK_EFFECTOR")
+    bundle = ControllablePuppetBundleV1(
+        mesh=mesh,rig=rig,skin=skin,playback=playback,
+        cameras_by_view=cameras,
+        vertex_ids_by_attachment={"A_TEST":vids},
+        selection_bindings=(RuntimeSelectionBindingV1(
+            "A_TEST","body","SYNTHETIC_SOURCE_ONLY_NOT_PRODUCT",effector,
+        ),),
+        product_revision_id="SYNTHETIC_NOT_A_PRODUCT_REVISION",
+        product_qualification_receipt="SYNTHETIC_STATIC_QUALIFICATION_FIXTURE",
+        graphics=graphics,
+    )
+    runtime = ControllablePuppetSessionV1(bundle)
+    before = runtime.frame()
+    assert before.graphics_projection is not None
+    assert before.graphics_projection.face_fragment_ids == (graphics.fragment_ids[0],)
+    assert before.graphics_projection.candidate_visible_fragment_ids is None
+    assert before.graphics_projection.source_visibility_qualified is False
+    assert before.graphics_projection.pose_conditioned_order_proven is False
+    assert evidence.evidence_hash in mesh.proposal_evidence_refs
+    assert compiled.metadata["independent_editability_proven"] is False
+    # Execute true target-space IK, then LBS and live Graphics projection.
+    runtime.drag_screen(effector,80.,16.)
+    moved = runtime.frame()
+    assert moved.pose.constraint_residuals[0][1] < 1e-3
+    assert moved.deformed.positions != before.deformed.positions
+    assert moved.deformed.canonical_mesh_vertex_ids == before.deformed.canonical_mesh_vertex_ids
+    assert moved.graphics_projection.face_fragment_ids == before.graphics_projection.face_fragment_ids
+    assert moved.graphics_projection.projected_faces != before.graphics_projection.projected_faces
+    runtime.set_view_index(1)
+    turned = runtime.frame()
+    assert turned.pose.joints == moved.pose.joints
+    assert turned.deformed.positions == moved.deformed.positions
+    assert turned.graphics_projection.projected_faces != moved.graphics_projection.projected_faces
+    assert turned.graphics_projection.source_visibility_qualified is False

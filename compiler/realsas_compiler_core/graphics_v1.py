@@ -3,6 +3,18 @@ from dataclasses import asdict,dataclass,field,replace
 from typing import Any,Iterable,Mapping
 from .hashing import content_sha256
 from .types import QualificationError
+from .canonical_mesh_ir_v1 import (
+    CanonicalMeshIR, canonical_mesh_lineage_hash_v1,
+    validate_canonical_mesh_domain_v1,
+)
+from .canonical_rig_ir_v2 import (
+    CanonicalRigIRV2, canonical_rig_lineage_hash_v2,
+    validate_canonical_rig_domain_v2,
+)
+from .canonical_skin_ir_v2 import (
+    CanonicalSkinIRV2, canonical_skin_lineage_hash_v2,
+    validate_canonical_skin_domain_v2,
+)
 Json=dict[str,Any]
 
 @dataclass(frozen=True)
@@ -49,7 +61,10 @@ def graphics_evidence_hash_v1(v):return _hash(v.to_dict(),"evidence_hash")
 def compiled_graphics_hash_v1(v):return _hash(v.to_dict(),"graph_hash")
 def build_graphics_evidence_v1(*,mesh_binding_hash,static_relations:Iterable[GraphicsStaticRelationEvidenceV1],view_relations:Iterable[GraphicsViewRelationEvidenceV1],metadata:Mapping[str,Any]|None=None):
     static,view=tuple(static_relations),tuple(view_relations)
-    if not mesh_binding_hash or not static: raise QualificationError("GRAPHICS_EVIDENCE_INCOMPLETE")
+    if not mesh_binding_hash:
+        raise QualificationError("GRAPHICS_EVIDENCE_MESH_BINDING_REQUIRED")
+    # A single-face canonical mesh has no possible pair relation. An empty
+    # graph is admissible *as empty evidence*, never a visible-source claim.
     value=GraphicsEvidenceV1(str(mesh_binding_hash),static,view,"",metadata={"categorical_semantics_used":False,"authority_class":"LEARNED_RELATION_EVIDENCE_ONLY",**dict(metadata or {})});return replace(value,evidence_hash=graphics_evidence_hash_v1(value))
 
 class _UF:
@@ -294,3 +309,67 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
 "candidate_merge_blocked_by_cut":tuple(blocked_merges),
 "order_arbitration_not_source_truth":True})
     return replace(value,graph_hash=compiled_graphics_hash_v1(value))
+
+
+def compile_graphics_on_canonical_puppet_v1(
+    *,
+    mesh: CanonicalMeshIR,
+    rig: CanonicalRigIRV2,
+    skin: CanonicalSkinIRV2,
+    source_graphics_binding_hash: str,
+    evidence: GraphicsEvidenceV1,
+    mechanical_attachment_evidence: Mapping[tuple[int,int], Mapping[str,Any]] | None = None,
+    policy: GraphicsCompilePolicyV1 = GraphicsCompilePolicyV1(),
+) -> CompiledGraphicsV1:
+    """Single-mesh-safe entrypoint for Graphics after Mesh/Rig/Skin qualification.
+
+    The historic face-indexed compiler takes only caller-supplied hashes and
+    face arrays; it cannot itself prove those identities belong to the same
+    canonical puppet. This wrapper binds exact canonical bytes and derives
+    face indices and mechanical domains from those real qualified parents.
+    No neural candidate index is accepted as a canonical address without a
+    separately qualified correspondence.
+    """
+    if mesh.mesh_lineage_hash != canonical_mesh_lineage_hash_v1(mesh):
+        raise QualificationError("GRAPHICS_CANONICAL_MESH_HASH_DRIFT")
+    if rig.rig_lineage_hash != canonical_rig_lineage_hash_v2(rig):
+        raise QualificationError("GRAPHICS_CANONICAL_RIG_HASH_DRIFT")
+    if skin.skin_lineage_hash != canonical_skin_lineage_hash_v2(skin):
+        raise QualificationError("GRAPHICS_CANONICAL_SKIN_HASH_DRIFT")
+    validate_canonical_mesh_domain_v1(mesh)
+    validate_canonical_rig_domain_v2(rig)
+    validate_canonical_skin_domain_v2(skin)
+    if (
+        mesh.metadata.get("authority") != "COMPILER_CANONICAL_MESH"
+        or rig.metadata.get("authority") != "COMPILER_CANONICAL_RIG"
+        or skin.metadata.get("authority") != "COMPILER_CANONICAL_SKIN"
+    ):
+        raise QualificationError("GRAPHICS_CANONICAL_PUPPET_AUTHORITY_REQUIRED")
+    if (
+        rig.mesh_lineage_hash != mesh.mesh_lineage_hash
+        or skin.mesh_lineage_hash != mesh.mesh_lineage_hash
+        or skin.deform_structure_hash != rig.deform_structure_hash
+        or skin.mesh_carrier_evidence_hash != mesh.carrier_evidence_hash
+        or skin.mesh_carrier_topology_hash != mesh.carrier_topology_hash
+        or skin.mesh_carrier_geometry_hash != mesh.carrier_geometry_hash
+    ):
+        raise QualificationError("GRAPHICS_CANONICAL_PUPPET_PARENT_DRIFT")
+    vertex_ids = tuple(row.canonical_mesh_vertex_id for row in mesh.vertices)
+    if {row.canonical_mesh_vertex_id for row in skin.rows} != set(vertex_ids):
+        raise QualificationError("GRAPHICS_CANONICAL_SKIN_VERTEX_COVERAGE_DRIFT")
+    index = {vertex_id:i for i,vertex_id in enumerate(vertex_ids)}
+    faces = tuple(tuple(index[vertex_id] for vertex_id in face) for face in mesh.faces)
+    mechanical_domains = tuple(
+        [row.canonical_joint_id for row in rig.joints]
+        + [row.canonical_control_id for row in rig.controls]
+    )
+    return compile_graphics_v1(
+        canonical_mesh_binding_hash=mesh.mesh_lineage_hash,
+        canonical_mesh_skin_binding_hash=skin.skin_lineage_hash,
+        source_graphics_binding_hash=source_graphics_binding_hash,
+        faces=faces,
+        evidence=evidence,
+        mechanical_attachment_evidence=mechanical_attachment_evidence,
+        mechanical_domain_ids=mechanical_domains,
+        policy=policy,
+    )

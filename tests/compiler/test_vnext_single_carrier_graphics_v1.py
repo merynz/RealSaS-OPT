@@ -44,11 +44,13 @@ def test_graphics_compiles_role_free_order_and_runtime_consumes_materialized_con
         faces=faces,
         evidence=evidence,
         policy=GraphicsCompilePolicyV1(allow_unqualified_order_arbitration=True),
+        mechanical_domain_ids=("joint:hand",),
         mechanical_attachment_evidence={
             (0, 1): {
                 "persistent_contact": 0.95,
                 "parent_mechanical_domain_id": "joint:hand",
                 "anchor_face_index": 0,
+                "child_face_index": 1,
                 "barycentric_anchor": (0.2, 0.3, 0.5),
                 "evidence_ref": "mechanical-contact",
             }
@@ -60,6 +62,9 @@ def test_graphics_compiles_role_free_order_and_runtime_consumes_materialized_con
     assert compiled.metadata["independent_visual_mesh_allowed"] is False
     assert len(compiled.fragments) == 3
     assert len(compiled.attachments) == 1
+    # Face 1 is the moving child, face 0 is merely the parent anchor.
+    assert compiled.attachments[0].fragment_id == compiled.fragments[1].fragment_id
+    assert compiled.attachments[0].anchor_face_index == 0
     assert all(
         view.metadata["triangle_array_order_is_presentation_authority"] is False
         for view in compiled.views
@@ -143,3 +148,57 @@ def test_conflicting_source_front_back_relations_never_silently_become_canonical
     runtime = build_runtime_graphics_v1(preview, face_count=3)
     assert runtime.metadata["unresolved_source_order_conflict"] is True
     assert runtime.metadata["pose_conditioned_order_execution"] is False
+
+
+@pytest.mark.parametrize("mutated,code", [
+    ({"child_face_index": None}, "GRAPHICS_ATTACHMENT_PARENT_CHILD_FACE_BINDING_INVALID"),
+    ({"child_face_index": 0}, "GRAPHICS_ATTACHMENT_PARENT_CHILD_FACE_BINDING_INVALID"),
+    ({"anchor_face_index": 2}, "GRAPHICS_ATTACHMENT_PARENT_CHILD_FACE_BINDING_INVALID"),
+    ({"parent_mechanical_domain_id": "nonexistent"}, "GRAPHICS_ATTACHMENT_MECHANICAL_DOMAIN_UNQUALIFIED"),
+])
+def test_graphics_rejects_unbound_or_ambiguous_attachment(mutated, code):
+    evidence = _graphics_evidence("mesh")
+    mechanical = {
+        "persistent_contact": .95,
+        "parent_mechanical_domain_id": "joint:hand",
+        "anchor_face_index": 0,
+        "child_face_index": 1,
+        "barycentric_anchor": (.2, .3, .5),
+        "evidence_ref": "mechanical-contact",
+    }
+    mechanical.update(mutated)
+    with pytest.raises(QualificationError, match=code):
+        compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="mesh-skin",
+            source_graphics_binding_hash="source-graphics",
+            faces=((0,1,2),(3,4,5),(6,7,8)),
+            evidence=evidence,
+            mechanical_domain_ids=("joint:hand",),
+            mechanical_attachment_evidence={(0,1):mechanical},
+            policy=GraphicsCompilePolicyV1(
+                allow_unqualified_order_arbitration=True,
+            ),
+        )
+
+
+def test_graphics_rejects_unqualified_parent_even_with_valid_face_addresses():
+    evidence = _graphics_evidence("mesh")
+    with pytest.raises(QualificationError, match="MECHANICAL_DOMAIN_UNQUALIFIED"):
+        compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="mesh-skin",
+            source_graphics_binding_hash="source-graphics",
+            faces=((0,1,2),(3,4,5),(6,7,8)),
+            evidence=evidence,
+            mechanical_attachment_evidence={(0,1):{
+                "persistent_contact": .95,
+                "parent_mechanical_domain_id": "joint:hand",
+                "anchor_face_index": 0,
+                "child_face_index": 1,
+                "barycentric_anchor": (.2, .3, .5),
+            }},
+            policy=GraphicsCompilePolicyV1(
+                allow_unqualified_order_arbitration=True,
+            ),
+        )

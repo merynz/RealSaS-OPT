@@ -36,6 +36,7 @@ from .flexicubes_animation_supervision import (
 )
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .early_semantic_field import masked_source_semantic_evidence_loss
+from .semantic_structure import qualified_source_region_pair_loss
 from .semantic_geometry_prior import (
     RSSvNextSemanticLayerSpec, masked_qualified_surface_role_loss,
 )
@@ -64,6 +65,12 @@ class RSSvNextStructuralTrainingBatch:
     source_surface_role_indices: Tensor | None = None  # [B,N] int64
     source_surface_role_mask: Tensor | None = None     # [B,N] bool
     source_surface_role_admission_key: str = ""        # external trusted receipt
+    # Exact H(x) query-address region co-membership (source-native or
+    # source-rendered). This is NOT drawable/attachment/motion supervision.
+    source_region_pair_indices: Tensor | None = None  # [B,P,2] long
+    source_region_pair_is_same: Tensor | None = None  # [B,P] float 0/1; unknown masked
+    source_region_pair_mask: Tensor | None = None     # [B,P] bool qualified
+    source_region_pair_admission_key: str = ""
     # Independently source-rendered 6 novel views; FRONT/BACK remain the only
     # model observations. These are teacher targets, never encoder inputs.
     novel_view_rgba: Tensor | None = None       # [B,6,4,H,W]
@@ -90,6 +97,7 @@ class RSSvNextTrainingWeights:
     motion_preference: float = 0.2
     source_semantics: float = 0.2
     surface_roles: float = 0.0  # opt-in only with exact-source 3D address receipt
+    region_pairs: float = 0.0  # opt-in only with source-bound pair receipt
     flexicubes_surface: float = 0.3
     flexicubes_animation: float = 0.0  # explicit opt-in on admitted source motion
     novel_view: float = 0.0             # opt-in: source-qualified 8-way appearance
@@ -98,13 +106,13 @@ class RSSvNextTrainingWeights:
     def validate(self):
         if min(
             self.topology, self.motion_preference, self.source_semantics,
-            self.surface_roles, self.flexicubes_surface, self.flexicubes_animation,
+            self.surface_roles, self.region_pairs, self.flexicubes_surface, self.flexicubes_animation,
             self.novel_view,
         ) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
         if (
             self.topology + self.motion_preference
-            + self.source_semantics + self.surface_roles + self.flexicubes_surface
+            + self.source_semantics + self.surface_roles + self.region_pairs + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view <= 0
             or self.clip_gradient_norm <= 0
         ):
@@ -127,6 +135,8 @@ class RSSvNextTrainingResult:
     eligible_novel_view_pixels: int = 0
     surface_role_loss: Tensor | None = None
     eligible_surface_role_points: int = 0
+    region_pair_loss: Tensor | None = None
+    eligible_region_pairs: int = 0
     gradient_norm: Tensor | None = None
 
 
@@ -171,6 +181,7 @@ class RSSvNextStructuralTrainer:
         preference: RSSvNextTopologyPreferenceConfig = RSSvNextTopologyPreferenceConfig(),
         trusted_render_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_surface_role_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_region_pair_registry: Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -217,6 +228,23 @@ class RSSvNextStructuralTrainer:
                 allow_nan=False,
             ).encode("utf8")).hexdigest()
             if surface_snapshot else ""
+        )
+        # This registry is supplied by the trusted training launcher, not by
+        # the batch. In particular, component IDs are *not* mechanically
+        # reinterpreted as drawable, articulation or attachment ground truth.
+        region_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_region_pair_registry or {}).items()
+        }
+        self.trusted_region_pair_registry = MappingProxyType({
+            key: MappingProxyType(value) for key, value in region_snapshot.items()
+        })
+        self.region_pair_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                region_snapshot, sort_keys=True, separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest()
+            if region_snapshot else ""
         )
         self.global_step = 0
 
@@ -418,6 +446,48 @@ class RSSvNextStructuralTrainer:
                 schema=self.model.cfg.semantic_role_schema(),
             )
             n_surface_role_points = int(batch.source_surface_role_mask.sum().item())
+        region_pair_loss = None
+        n_region_pairs = 0
+        region_fields = (
+            batch.source_region_pair_indices,
+            batch.source_region_pair_is_same,
+            batch.source_region_pair_mask,
+        )
+        region_requested = (
+            any(x is not None for x in region_fields)
+            or bool(batch.source_region_pair_admission_key)
+        )
+        if region_requested:
+            if any(x is None for x in region_fields):
+                raise ValueError("RSS_VNEXT_REGION_PAIR_TEACHER_INCOMPLETE")
+            if not batch.source_region_pair_admission_key:
+                raise ValueError("RSS_VNEXT_REGION_PAIR_ADMISSION_KEY_REQUIRED")
+            if self.weights.region_pairs <= 0:
+                raise ValueError("RSS_VNEXT_REGION_PAIR_OBJECTIVE_NOT_ENABLED")
+            receipt = self.trusted_region_pair_registry.get(
+                batch.source_region_pair_admission_key,
+            )
+            if receipt is None or receipt.get("admission_status") != "QUALIFIED_SOURCE_REGION_PAIR":
+                raise ValueError("RSS_VNEXT_REGION_PAIR_UNTRUSTED_ADMISSION")
+            if (
+                receipt.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
+                or receipt.get("source_qualification_key") != batch.source_qualification_key
+                or receipt.get("query_xyz_sha256") != source_surface_tensor_sha256(state.query_xyz)
+                or receipt.get("pair_indices_sha256") != source_surface_tensor_sha256(batch.source_region_pair_indices)
+                or receipt.get("pair_targets_sha256") != source_surface_tensor_sha256(batch.source_region_pair_is_same)
+                or receipt.get("pair_mask_sha256") != source_surface_tensor_sha256(batch.source_region_pair_mask)
+                or receipt.get("supervision_semantics") != "SOURCE_REGION_CO_MEMBERSHIP_NOT_DRAWABLE"
+            ):
+                raise ValueError("RSS_VNEXT_REGION_PAIR_RECEIPT_SOURCE_OR_ADDRESS_DRIFT")
+            if batch.source_region_pair_indices.shape[1] > self.model.cfg.max_pair_queries:
+                raise ValueError("RSS_VNEXT_REGION_PAIR_RESOURCE_LIMIT")
+            region_pair_loss = qualified_source_region_pair_loss(
+                state.semantic_logits,
+                batch.source_region_pair_indices,
+                batch.source_region_pair_is_same,
+                batch.source_region_pair_mask,
+            )
+            n_region_pairs = int(batch.source_region_pair_mask.sum().item())
         n_topo = 0
         n_pairs = 0
         if self.weights.topology > 0 and batch.topology_teacher_tokens is not None:
@@ -465,6 +535,7 @@ class RSSvNextStructuralTrainer:
             topology is None and motion is None and semantic is None
             and fc_loss is None and fc_anim_loss is None
             and novel_loss is None and surface_role_loss is None
+            and region_pair_loss is None
         ):
             raise ValueError("RSS_VNEXT_TRAIN_NO_QUALIFIED_OBJECTIVE")
         total = sum(
@@ -474,6 +545,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.motion_preference, motion),
                 (self.weights.source_semantics, semantic),
                 (self.weights.surface_roles, surface_role_loss),
+                (self.weights.region_pairs, region_pair_loss),
                 (self.weights.flexicubes_surface, fc_loss),
                 (self.weights.flexicubes_animation, fc_anim_loss),
                 (self.weights.novel_view, novel_loss),
@@ -497,6 +569,8 @@ class RSSvNextStructuralTrainer:
             eligible_novel_view_pixels=novel_count,
             surface_role_loss=surface_role_loss,
             eligible_surface_role_points=n_surface_role_points,
+            region_pair_loss=region_pair_loss,
+            eligible_region_pairs=n_region_pairs,
         )
 
     def train_step(self, batch: RSSvNextStructuralTrainingBatch) -> RSSvNextTrainingResult:
@@ -524,6 +598,7 @@ class RSSvNextStructuralTrainer:
             "dataset_manifest_sha256": self.dataset_manifest_sha256,
             "render_registry_sha256": self.render_registry_sha256,
             "surface_role_registry_sha256": self.surface_role_registry_sha256,
+            "region_pair_registry_sha256": self.region_pair_registry_sha256,
             "global_step": self.global_step,
             "sampler_cursor": int(sampler_cursor),
             "model": self.model.state_dict(),
@@ -556,6 +631,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_RENDER_REGISTRY_DRIFT")
         if data.get("surface_role_registry_sha256", "") != self.surface_role_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SURFACE_ROLE_REGISTRY_DRIFT")
+        if data.get("region_pair_registry_sha256", "") != self.region_pair_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_REGION_PAIR_REGISTRY_DRIFT")
         if int(data.get("global_step", -1)) < 0 or int(data.get("sampler_cursor", -1)) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_PROGRESS_INVALID")
         self.model.load_state_dict(data["model"], strict=True)

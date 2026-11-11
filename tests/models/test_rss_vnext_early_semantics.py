@@ -620,3 +620,115 @@ def test_axis_teacher_source_and_codec_receipts_cannot_be_forged_or_swapped(tmp_
     swapped=_axis_rig_skin_trainer(net,corrupted_receipt)
     with pytest.raises(ValueError,match="CHECKPOINT_AXIS_TEACHER_REGISTRY_DRIFT"):
         swapped.load_checkpoint(tmp_path/"a.pt")
+
+
+def _source_graphics_rgb_fixture(net, rgba, cameras):
+    state, _, _ = net.encode_observations(rgba, cameras)
+    q = state.query_xyz.shape[1]
+    target = torch.rand(1, q, 3)
+    mask = torch.zeros(1, q, dtype=torch.bool)
+    mask[:, ::2] = True
+    receipt = {
+        "admission_status": "QUALIFIED_SOURCE_VISIBLE_RGB_QUERIES",
+        "dataset_manifest_sha256": "3" * 64,
+        "source_qualification_key": "synthetic-visible-ray-fixture",
+        "query_xyz_sha256": source_surface_tensor_sha256(state.query_xyz),
+        "rgb_target_sha256": source_surface_tensor_sha256(target),
+        "rgb_mask_sha256": source_surface_tensor_sha256(mask),
+        "original_rgba_sha256": source_surface_tensor_sha256(rgba),
+        "original_camera_sha256": source_surface_tensor_sha256(cameras),
+        "teacher_semantics": "ORIGINAL_VISIBLE_UNOCCLUDED_RGB_NOT_TEXTURE_OR_DEPTH",
+    }
+    return target, mask, receipt
+
+
+def test_exact_source_graphics_rgb_teacher_reaches_actual_shared_field_gradients():
+    net = make()
+    rgba, cameras = source()
+    target, mask, receipt = _source_graphics_rgb_fixture(net, rgba, cameras)
+    trainer = RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters(), lr=1e-3),
+        dataset_manifest_sha256="3" * 64,
+        trusted_graphics_rgb_registry={"visible": receipt},
+        weights=RSSvNextTrainingWeights(
+            topology=0, motion_preference=0, source_semantics=0,
+            flexicubes_surface=0, graphics_source_rgb=1.0,
+        ),
+    )
+    result = trainer.train_step(RSSvNextStructuralTrainingBatch(
+        rgba=rgba, camera_features=cameras,
+        source_graphics_rgb_target=target,
+        source_graphics_rgb_mask=mask,
+        source_graphics_rgb_admission_key="visible",
+        source_qualification_key="synthetic-visible-ray-fixture",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    ))
+    assert result.graphics_source_rgb_loss is not None
+    assert result.eligible_graphics_source_rgb_queries == int(mask.sum())
+    assert torch.isfinite(result.total_loss)
+    assert net.graphics[-1].weight.grad is not None
+    assert net.graphics[-1].weight.grad.abs().sum() > 0
+    assert net.iris.scene.scene_queries.grad is not None
+    assert net.iris.scene.scene_queries.grad.abs().sum() > 0
+    # This objective does not claim any source depth or multi-hit compositing.
+    assert result.novel_view_loss is None
+    assert result.axis_rig_skin_loss is None
+
+
+def test_source_graphics_rgb_receipt_rejects_relabelled_rays_and_missing_visibility():
+    net = make()
+    rgba, cameras = source()
+    target, mask, receipt = _source_graphics_rgb_fixture(net, rgba, cameras)
+    trainer = RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters(), lr=1e-3),
+        dataset_manifest_sha256="3" * 64,
+        trusted_graphics_rgb_registry={"visible": receipt},
+        weights=RSSvNextTrainingWeights(
+            topology=0, motion_preference=0, source_semantics=0,
+            flexicubes_surface=0, graphics_source_rgb=1.0,
+        ),
+    )
+    batch = RSSvNextStructuralTrainingBatch(
+        rgba=rgba, camera_features=cameras,
+        source_graphics_rgb_target=target,
+        source_graphics_rgb_mask=mask,
+        source_graphics_rgb_admission_key="visible",
+        source_qualification_key="synthetic-visible-ray-fixture",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    )
+    trainer.objective(batch)
+    batch.source_graphics_rgb_target = target + .01
+    with pytest.raises(ValueError, match="GRAPHICS_RGB_SOURCE_RECEIPT_DRIFT"):
+        trainer.objective(batch)
+    batch.source_graphics_rgb_target = target
+    batch.source_graphics_rgb_mask = torch.zeros_like(mask)
+    with pytest.raises(ValueError, match="GRAPHICS_RGB_SOURCE_TARGET_INVALID"):
+        trainer.objective(batch)
+    batch.source_graphics_rgb_mask = mask
+    batch.camera_features = cameras.clone()
+    batch.camera_features[..., 0] += .02
+    with pytest.raises(ValueError, match="GRAPHICS_RGB_SOURCE_RECEIPT_DRIFT"):
+        trainer.objective(batch)
+
+
+def test_source_graphics_rgb_checkpoint_is_teacher_registry_bound(tmp_path):
+    net = make()
+    rgba, cameras = source()
+    _, _, receipt = _source_graphics_rgb_fixture(net, rgba, cameras)
+    trainer = RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters()),
+        dataset_manifest_sha256="3"*64,
+        trusted_graphics_rgb_registry={"visible": receipt},
+    )
+    path = tmp_path / "source_graphics_rgb.pt"
+    trainer.save_checkpoint(path, sampler_cursor=1)
+    other_model = make()
+    other = RSSvNextStructuralTrainer(
+        other_model, torch.optim.AdamW(other_model.parameters()),
+        dataset_manifest_sha256="3"*64,
+        trusted_graphics_rgb_registry={
+            "visible": {**receipt, "teacher_semantics": "UNQUALIFIED_NOVEL_RGB"},
+        },
+    )
+    with pytest.raises(ValueError, match="CHECKPOINT_GRAPHICS_RGB_REGISTRY_DRIFT"):
+        other.load_checkpoint(path)

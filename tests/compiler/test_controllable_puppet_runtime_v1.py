@@ -27,7 +27,9 @@ from compiler.realsas_compiler_core.controllable_puppet_runtime_v1 import (
     ControllablePuppetBundleV1, ControllablePuppetSessionV1,
     RuntimeSelectionBindingV1, VIEW_IDS_V1,
 )
-from compiler.realsas_compiler_core.mechanics_control_solver_v1 import ControlTransformIRV1
+from compiler.realsas_compiler_core.mechanics_control_solver_v1 import (
+    ControlTransformIRV1, control_world_transforms_v1,
+)
 from compiler.realsas_compiler_core.playback_full_surface_v3 import (
     build_full_surface_runtime_meshes_v3,
 )
@@ -250,7 +252,7 @@ def test_product_addresses_and_eight_camera_requirements_are_fail_closed():
         ))
 
 
-def test_no_automatic_attachment_invention_and_no_parent_space_guessing():
+def test_no_automatic_attachment_invention_and_exact_parent_space_inverse():
     s = ControllablePuppetSessionV1(qualified_synthetic_bundle())
     with pytest.raises(QualificationError,match="ATTACHMENT_NOT_BOUND_IN_ALL_VIEWS"):
         s.set_attachment("S_BODY","UNSEEN_SWORD")
@@ -259,5 +261,57 @@ def test_no_automatic_attachment_invention_and_no_parent_space_guessing():
     s.set_attachment("S_BODY","A_BODY")
     assert len(s.frame().meshes)==1
     s.set_control(ControlTransformIRV1("C_ROOT",translation=(.5,0.,0.)))
-    with pytest.raises(QualificationError,match="PARENT_SPACE_INVERSION_REQUIRED"):
-        s.drag_world("C_IK",(.5,1.5,0.))
+    s.drag_world("C_IK",(.5,1.5,0.))
+    world = control_world_transforms_v1(s.bundle.rig, tuple(s.control_states.values()))
+    assert np.allclose(world["C_IK"][0], (.5,1.5,0.))
+    assert np.allclose(s.control_states["C_IK"].translation, (0.,-.5,0.))
+
+
+def test_world_drag_inverts_parent_rotation_nonuniform_scale_and_preserves_child_channels():
+    s = ControllablePuppetSessionV1(qualified_synthetic_bundle())
+    root_q = (math.sqrt(.5), 0., 0., math.sqrt(.5))
+    child_q = (math.cos(.2), math.sin(.2), 0., 0.)
+    s.set_control(ControlTransformIRV1(
+        "C_ROOT", translation=(.5, .25, .25),
+        rotation_quat_wxyz=root_q, scale=(2., 3., 1.5),
+    ))
+    s.set_control(ControlTransformIRV1(
+        "C_IK", translation=(.25, -.4, .1),
+        rotation_quat_wxyz=child_q, scale=(1.1, 1.2, 1.3),
+    ))
+    target=(1.2, 1.75, -.3)
+    before=s.frame().deformed.canonical_mesh_vertex_ids
+    s.drag_world("C_IK", target)
+    world = control_world_transforms_v1(s.bundle.rig, tuple(s.control_states.values()))
+    assert np.allclose(world["C_IK"][0], target, atol=1e-9)
+    assert s.control_states["C_IK"].rotation_quat_wxyz == child_q
+    assert s.control_states["C_IK"].scale == (1.1, 1.2, 1.3)
+    after = s.frame()
+    assert after.deformed.canonical_mesh_vertex_ids == before
+
+
+def test_screen_drag_uses_current_world_depth_after_parent_transform():
+    s=ControllablePuppetSessionV1(qualified_synthetic_bundle())
+    root_q=(math.sqrt(.5),0.,0.,math.sqrt(.5))
+    child_q=(math.cos(.3),0.,0.,math.sin(.3))
+    s.set_control(ControlTransformIRV1(
+        "C_ROOT",translation=(.5,0.,.25),
+        rotation_quat_wxyz=root_q,scale=(2.,3.,1.),
+    ))
+    s.set_control(ControlTransformIRV1(
+        "C_IK", rotation_quat_wxyz=child_q,
+        scale=(.75,1.25,1.),
+    ))
+    old_world=control_world_transforms_v1(s.bundle.rig,tuple(s.control_states.values()))["C_IK"][0]
+    s.set_view_index(0)
+    s.drag_screen("C_IK",80.,16.)
+    new_world=control_world_transforms_v1(s.bundle.rig,tuple(s.control_states.values()))["C_IK"][0]
+    assert np.allclose(new_world,(.5,1.5,float(old_world[2])),atol=1e-8)
+    assert s.control_states["C_IK"].rotation_quat_wxyz == child_q
+    assert s.control_states["C_IK"].scale == (.75,1.25,1.)
+
+
+def test_unknown_control_still_fails_closed_during_drag():
+    s=ControllablePuppetSessionV1(qualified_synthetic_bundle())
+    with pytest.raises(QualificationError,match="CONTROL_UNKNOWN"):
+        s.drag_world("NOT_AN_AUTHORED_HANDLE",(.5,1.5,0.))

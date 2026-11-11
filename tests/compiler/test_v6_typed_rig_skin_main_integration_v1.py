@@ -215,3 +215,42 @@ def test_control_only_edit_reuses_exact_qualified_skin_without_rebinding():
     assert changed_rig.deform_structure_hash == original_rig.deform_structure_hash
     assert reused.skin_lineage_hash == original_skin.skin_lineage_hash
     assert reused.rows == original_skin.rows
+
+
+@pytest.mark.parametrize(
+    "influences,reason",
+    [
+        ((("J:0", 0.75), ("J:1", 0.10)), "INFLUENCE_SIMPLEX_DRIFT"),
+        ((("J:0", -0.25), ("J:1", 1.25)), "INFLUENCE_INVALID"),
+        ((("J:0", 0.5), ("J:0", 0.5)), "JOINT_INFLUENCE_DUPLICATE_OR_EMPTY"),
+        ((), "INFLUENCES_EMPTY"),
+    ],
+)
+def test_rehashed_canonical_skin_still_rejects_semantically_illegal_weights(influences, reason):
+    original = _sealed_skin()
+    rehashed = replace(
+        original,
+        rows=(replace(original.rows[0], influences=influences),),
+        skin_lineage_hash="",
+    )
+    rehashed = replace(
+        rehashed, skin_lineage_hash=canonical_skin_lineage_hash_v2(rehashed),
+    )
+    with pytest.raises(QualificationError, match=reason):
+        canonical_skin_from_dict_v2(rehashed.to_dict())
+
+
+def test_rehashed_canonical_skin_rejects_duplicate_vertex_address():
+    original = _sealed_skin()
+    duplicate_row = replace(
+        original.rows[0], source_carrier_vertex_id="CV:another",
+    )
+    rehashed = replace(
+        original, rows=(original.rows[0], duplicate_row),
+        skin_lineage_hash="",
+    )
+    rehashed = replace(
+        rehashed, skin_lineage_hash=canonical_skin_lineage_hash_v2(rehashed),
+    )
+    with pytest.raises(QualificationError, match="ADDRESS_DUPLICATE"):
+        canonical_skin_from_dict_v2(rehashed.to_dict())

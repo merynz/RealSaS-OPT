@@ -474,3 +474,149 @@ def test_source_region_pair_builder_preserves_unknown_and_never_invents_negative
         source_region_pairs_from_qualified_labels(
             ids,mask,torch.tensor([[[0,0]]],dtype=torch.long),
         )
+
+
+def _source_qualified_axis_teacher_fixture(net, *, with_control=False):
+    from models.axis.rig_program_model_v6 import (
+        RigProgramEventV6, RigTokenKindV6, AXISSequenceV6,
+        AXIS_V6_PRODUCT_ARCHITECTURE_ID,
+    )
+    from models.rss_vnext.training_engine import (
+        axis_teacher_sequence_sha256_v6, frozen_mira_codec_state_sha256_v6,
+    )
+    events = [
+        RigProgramEventV6(RigTokenKindV6.BOS),
+        RigProgramEventV6(RigTokenKindV6.JOINT, coord_indices=(1,2,3)),
+        RigProgramEventV6(RigTokenKindV6.FRAMES_START),
+        RigProgramEventV6(
+            RigTokenKindV6.FRAME, pointer_a=0,
+            dof_mask=(0.,0.,0.,1.,1.,1.,0.,0.,0.),
+            frame_6d=(1.,0.,0.,0.,1.,0.),
+        ),
+        RigProgramEventV6(RigTokenKindV6.CONTROLS_START),
+    ]
+    if with_control:
+        events += [
+            RigProgramEventV6(
+                RigTokenKindV6.CONTROL, coord_indices=(1,2,3),
+                aux_type_id=1, pointer_a=-1,
+            ),
+            RigProgramEventV6(
+                RigTokenKindV6.CONTROL_TARGET, pointer_a=0,
+            ),
+        ]
+    events.extend([
+        RigProgramEventV6(RigTokenKindV6.CHAINS_START),
+        RigProgramEventV6(RigTokenKindV6.CONSTRAINTS_START),
+        RigProgramEventV6(RigTokenKindV6.ANCHORS_START),
+        RigProgramEventV6(RigTokenKindV6.SKIN_START),
+    ])
+    events.extend(
+        RigProgramEventV6(RigTokenKindV6.SKIN_CODE, skin_code_id=i)
+        for i in range(net.cfg.skin_tokens_per_joint)
+    )
+    events.append(RigProgramEventV6(RigTokenKindV6.EOS))
+    teacher=AXISSequenceV6.from_events(events,device=torch.device("cpu"))
+    receipt={
+        "admission_status":"QUALIFIED_SOURCE_RIG_SKIN_TOKEN_TEACHER",
+        "dataset_manifest_sha256":"3"*64,
+        "source_qualification_key":"synthetic-unit-only",
+        "architecture_id":AXIS_V6_PRODUCT_ARCHITECTURE_ID,
+        "teacher_sequence_sha256":axis_teacher_sequence_sha256_v6(teacher),
+        "mira_codec_state_sha256":frozen_mira_codec_state_sha256_v6(net),
+        "teacher_semantics":"SOURCE_RIG_AND_PINNED_FSQ_NOT_INFERRED_CONTROLS",
+    }
+    return teacher,receipt
+
+
+def _axis_rig_skin_trainer(net, receipt):
+    return RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters(), lr=1e-3),
+        dataset_manifest_sha256="3"*64,
+        weights=RSSvNextTrainingWeights(
+            topology=0, motion_preference=0, source_semantics=0,
+            flexicubes_surface=0, axis_rig_skin_codes=1,
+        ),
+        trusted_axis_teacher_registry={"teacher": receipt},
+    )
+
+
+def test_source_rig_and_pinned_mira_skin_code_teacher_updates_true_axis_heads():
+    from models.rss_vnext.training_engine import (
+        axis_teacher_sequence_sha256_v6, frozen_mira_codec_state_sha256_v6,
+    )
+    net=make()
+    net.mira.codec.requires_grad_(False)
+    rgba,cam=source()
+    seq,receipt=_source_qualified_axis_teacher_fixture(net)
+    trainer=_axis_rig_skin_trainer(net,receipt)
+    batch=RSSvNextStructuralTrainingBatch(
+        rgba=rgba,camera_features=cam,
+        axis_teacher_sequence=seq,
+        axis_teacher_admission_key="teacher",
+        source_qualification_key="synthetic-unit-only",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    )
+    codec_before=frozen_mira_codec_state_sha256_v6(net)
+    result=trainer.train_step(batch)
+    assert result.axis_rig_skin_loss is not None
+    assert result.eligible_axis_sequences==1
+    assert result.topology_loss is None
+    assert torch.isfinite(result.total_loss)
+    assert net.axis.kind_head.weight.grad is not None
+    assert net.axis.kind_head.weight.grad.abs().sum() > 0
+    assert net.axis.skin_code_head.weight.grad is not None
+    assert net.axis.skin_code_head.weight.grad.abs().sum() > 0
+    assert net.axis.coord_head.weight.grad is not None
+    assert net.axis.coord_head.weight.grad.abs().sum() > 0
+    assert net.control_cross.in_proj_weight.grad is not None
+    assert net.control_cross.in_proj_weight.grad.abs().sum() > 0
+    assert frozen_mira_codec_state_sha256_v6(net)==codec_before
+    assert axis_teacher_sequence_sha256_v6(seq)==receipt["teacher_sequence_sha256"]
+
+
+def test_axis_control_tokens_refuse_rig_only_teacher_without_source_intervention():
+    net=make()
+    net.mira.codec.requires_grad_(False)
+    rgba,cam=source()
+    seq,receipt=_source_qualified_axis_teacher_fixture(net,with_control=True)
+    trainer=_axis_rig_skin_trainer(net,receipt)
+    batch=RSSvNextStructuralTrainingBatch(
+        rgba=rgba,camera_features=cam,
+        axis_teacher_sequence=seq,axis_teacher_admission_key="teacher",
+        source_qualification_key="synthetic-unit-only",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    )
+    with pytest.raises(ValueError,match="AXIS_V6_TRAIN_CONTROL_INTERVENTION_PROOF_REQUIRED"):
+        trainer.objective(batch)
+    receipt["intervention_qualification_status"]="QUALIFIED_SOURCE_CONTROL_CONSEQUENCE"
+    receipt["source_intervention_sha256"]="9"*64
+    qualified_trainer=_axis_rig_skin_trainer(net,receipt)
+    loss=qualified_trainer.objective(batch)
+    assert loss.axis_rig_skin_loss is not None
+    assert torch.isfinite(loss.total_loss)
+
+
+def test_axis_teacher_source_and_codec_receipts_cannot_be_forged_or_swapped(tmp_path):
+    net=make()
+    net.mira.codec.requires_grad_(False)
+    rgba,cam=source()
+    seq,receipt=_source_qualified_axis_teacher_fixture(net)
+    trainer=_axis_rig_skin_trainer(net,receipt)
+    batch=RSSvNextStructuralTrainingBatch(
+        rgba=rgba,camera_features=cam,axis_teacher_sequence=seq,
+        axis_teacher_admission_key="teacher",
+        source_qualification_key="synthetic-unit-only",
+        admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
+    )
+    trainer.objective(batch)
+    altered=seq.skin_code_ids.clone()
+    altered[0,-2] += 1
+    from dataclasses import replace as dc_replace
+    with pytest.raises(ValueError,match="AXIS_TEACHER_SOURCE_CODEC_OR_SEQUENCE_DRIFT"):
+        trainer.objective(dc_replace(batch,axis_teacher_sequence=dc_replace(seq,skin_code_ids=altered)))
+    trainer.save_checkpoint(tmp_path/"a.pt",sampler_cursor=7)
+    corrupted_receipt={**receipt,"teacher_semantics":"INFERRED_CONTROL_FROM_TOPOLOGY"}
+    swapped=_axis_rig_skin_trainer(net,corrupted_receipt)
+    with pytest.raises(ValueError,match="CHECKPOINT_AXIS_TEACHER_REGISTRY_DRIFT"):
+        swapped.load_checkpoint(tmp_path/"a.pt")

@@ -1,12 +1,17 @@
 from __future__ import annotations
 
-"""Fail-closed authorization of a fixed rigid attachment candidate by Mechanics evidence.
+"""Fail-closed authorization of a fixed rigid surface-pair candidate by Mechanics evidence.
 
 This module deliberately does *not* discover an attachment, owner, held region,
-bone or semantic part. A separate compiler stage may propose a canonical
-``AttachmentSurfaceBindingV1`` candidate. This gate answers only whether a
-held-out-confirmed relative-transport observation supports applying the existing
-rigid surface-anchor consequence to that exact addressed surface pair.
+bone or semantic part. A separate compiler responsibility may propose an exact
+directed held-surface -> holder-surface candidate. This gate answers only whether
+a held-out-confirmed relative-transport observation supports applying the rigid
+surface-anchor consequence to that exact addressed surface pair.
+
+``authorize_rigid_surface_binding_v1`` is retained as a compatibility wrapper
+for the historical ``AttachmentSurfaceBindingV1`` carrier. New canonical product
+code should use ``authorize_rigid_surface_pair_v1`` so causal authorization does
+not require inventing a legacy attachment index or owner label.
 
 Keeping candidate discovery and causal authorization separate prevents a
 privileged teacher reference from silently becoming product structure.
@@ -40,32 +45,30 @@ class MechanicsAttachmentEvidenceGateV1:
     schema_version: str = SCHEMA
 
 
-def authorize_rigid_surface_binding_v1(
+def authorize_rigid_surface_pair_v1(
     *,
-    binding: AttachmentSurfaceBindingV1,
+    held_face: int,
+    holder_face: int,
     evidence_status: str,
     heldout_confirmed: bool,
     evidence_face_a: int,
     evidence_face_b: int,
 ) -> MechanicsAttachmentEvidenceGateV1:
-    """Authorize/reject one already-proposed binding from typed Mechanics evidence.
+    """Authorize/reject one exact directed surface-pair candidate.
 
     Evidence face order is explicit: ``face_a`` must be the candidate held face
     and ``face_b`` the candidate holder face. A mismatch is a qualification
     error rather than an automatic remap because an unordered pair would erase
     the consequence direction.
     """
-    if not isinstance(binding, AttachmentSurfaceBindingV1):
-        raise QualificationError("MECHANICS_ATTACHMENT_BINDING_TYPE_INVALID")
+    if type(held_face) is not int or type(holder_face) is not int or held_face < 0 or holder_face < 0:
+        raise QualificationError("MECHANICS_ATTACHMENT_CANDIDATE_FACE_INVALID")
     if evidence_status not in _ALLOWED_STATUSES:
         raise QualificationError("MECHANICS_ATTACHMENT_EVIDENCE_STATUS_INVALID")
     if type(heldout_confirmed) is not bool:
         raise QualificationError("MECHANICS_ATTACHMENT_HELDOUT_FLAG_INVALID")
     if type(evidence_face_a) is not int or type(evidence_face_b) is not int:
         raise QualificationError("MECHANICS_ATTACHMENT_EVIDENCE_FACE_INVALID")
-
-    held_face = int(binding.held.face_index)
-    holder_face = int(binding.holder.face_index)
     if evidence_face_a != held_face or evidence_face_b != holder_face:
         raise QualificationError("MECHANICS_ATTACHMENT_EVIDENCE_ADDRESS_MISMATCH")
 
@@ -84,4 +87,25 @@ def authorize_rigid_surface_binding_v1(
         evidence_face_b=evidence_face_b,
         binding_held_face=held_face,
         binding_holder_face=holder_face,
+    )
+
+
+def authorize_rigid_surface_binding_v1(
+    *,
+    binding: AttachmentSurfaceBindingV1,
+    evidence_status: str,
+    heldout_confirmed: bool,
+    evidence_face_a: int,
+    evidence_face_b: int,
+) -> MechanicsAttachmentEvidenceGateV1:
+    """Compatibility wrapper for an already-proposed historical binding."""
+    if not isinstance(binding, AttachmentSurfaceBindingV1):
+        raise QualificationError("MECHANICS_ATTACHMENT_BINDING_TYPE_INVALID")
+    return authorize_rigid_surface_pair_v1(
+        held_face=int(binding.held.face_index),
+        holder_face=int(binding.holder.face_index),
+        evidence_status=evidence_status,
+        heldout_confirmed=heldout_confirmed,
+        evidence_face_a=evidence_face_a,
+        evidence_face_b=evidence_face_b,
     )

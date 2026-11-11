@@ -45,7 +45,7 @@ def test_current_sources_do_not_overclaim_an_e2e_product():
 
 def test_detects_producer_consumer_schema_drift_even_if_both_have_valid_names():
     snapshot = deepcopy(read_snapshot())
-    snapshot["capabilities"]["product.skin"]["metadata"]["input_rig_schema_version"] = "v2"
+    snapshot["capabilities"]["product.skin"]["metadata"]["input_rig_schema_version"] = "v1"
     report = evaluate(snapshot)
     assert report["registered_contract_status"] == "FAIL"
     assert "REGISTERED_ARTIFACT_SCHEMA_MISMATCH:product.rig->product.skin" in report["registered_issues"]
@@ -58,7 +58,7 @@ def test_detects_producer_consumer_schema_drift_even_if_both_have_valid_names():
 def test_detects_missing_real_worker_route_not_just_importable_python_module():
     snapshot = deepcopy(read_snapshot())
     snapshot["worker"] = snapshot["worker"].replace(
-        '"RealSaS.ProductSkinInference.v1"', '"RealSaS.ProductSkinInference.test_removed"', 1
+        '"RealSaS.ProductSkinInference.v2"', '"RealSaS.ProductSkinInference.test_removed"', 1
     )
     report = evaluate(snapshot)
     assert "REGISTERED_EXECUTOR_DISPATCH_MISSING:product.skin" in report["registered_issues"]
@@ -95,9 +95,9 @@ def test_premature_mechanics_registration_cannot_forge_v2_parent_versions():
             "input_mesh_artifact_type": "RealSaS.CanonicalMeshIR",
             "input_mesh_schema_version": "v1",
             "input_rig_artifact_type": "RealSaS.CanonicalRigIR",
-            "input_rig_schema_version": "v2",
+            "input_rig_schema_version": "v1",
             "input_skin_artifact_type": "RealSaS.CanonicalSkinIR",
-            "input_skin_schema_version": "v2",
+            "input_skin_schema_version": "v1",
         },
     }
     report = evaluate(snapshot)

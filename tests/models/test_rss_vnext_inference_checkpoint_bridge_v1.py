@@ -11,6 +11,7 @@ from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
     RSSvNextInferenceEvidenceIRV1,
     seal_inference_evidence_v1,
     validate_inference_evidence_v1,
+    candidate_face_region_readout_v1,
 )
 from models.rss_vnext import (
     RSSvNextConfig, RSSvNextUnifiedCharacterModel, RSSvNextPatchEncoderForTests,
@@ -401,3 +402,76 @@ def test_reuse_existing_axis_decoder_without_minting_canonical_rig():
             model_config=RSSvNextConfig.tiny_for_test(),
             expected_checkpoint_sha256="a" * 64,
         )
+
+
+def _mesh_with_addressed_scene_for_region_court():
+    net = _network()
+    rgba, cam = _images()
+    with torch.no_grad():
+        out = net(rgba, cam)
+    source = export_inference_evidence_v1(
+        {
+            "state": out.state, "mesh_status": "ABSTAIN",
+            "mesh_candidate": None, "mesh_failure": "NO_VALID_MESH",
+            "observed_view_count": 2,
+            "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
+            "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
+        },
+        original_rgba=rgba, original_camera_features=cam,
+        checkpoint_sha256="a" * 64,
+    )
+    mesh = _mesh()
+    slots = len(source.scene["region_relation_valid_mask"])
+    mesh["semantic_logits"] = [
+        [4., *([0.] * (slots - 1)), -3.],
+        [0., *([3.] * (slots - 1)), 0.],
+        [0., *([0.] * (slots - 1)), 5.],
+    ]
+    return mesh, source.scene
+
+
+def test_mesh_face_region_readout_is_exactly_addressed_and_never_grants_drawable():
+    mesh, scene = _mesh_with_addressed_scene_for_region_court()
+    evidence = seal_inference_evidence_v1(_candidate(mesh=mesh, scene=scene))
+    faces = candidate_face_region_readout_v1(evidence)
+    assert len(faces) == 1
+    row = faces[0]
+    assert row["candidate_face_index"] == 0
+    assert row["candidate_vertex_indices"] == (0, 1, 2)
+    assert row["candidate_component_id"] == 0
+    assert row["candidate_evidence_hash"] == evidence.evidence_hash
+    assert row["source_surface_or_drawable_authority"] is False
+    assert row["authority"] == "UNQUALIFIED_FACE_POOL_OF_LEARNED_VERTEX_MEMBERSHIP"
+    assert len(row["candidate_region_probabilities"]) == len(scene["region_relation_valid_mask"])
+    assert 0 < row["unknown_probability"] < 1
+    assert sum(row["candidate_region_probabilities"]) + row["unknown_probability"] == pytest.approx(1.)
+
+    # A vertex-order permutation of the same triangle does not change the
+    # region vector. It does change the proposal hash, preserving provenance.
+    rotated = deepcopy(mesh)
+    rotated["faces"] = [[2, 0, 1]]
+    other = seal_inference_evidence_v1(_candidate(mesh=rotated, scene=scene))
+    after = candidate_face_region_readout_v1(other)[0]
+    assert after["candidate_region_probabilities"] == pytest.approx(row["candidate_region_probabilities"])
+    assert after["unknown_probability"] == pytest.approx(row["unknown_probability"])
+    assert after["candidate_evidence_hash"] != row["candidate_evidence_hash"]
+
+
+def test_mesh_region_vocab_cannot_drift_from_shared_scene_or_erase_unknown():
+    mesh, scene = _mesh_with_addressed_scene_for_region_court()
+    mesh["semantic_logits"][0].pop()
+    with pytest.raises(QualificationError, match="MESH_REGION_VOCABULARY_DRIFT"):
+        seal_inference_evidence_v1(_candidate(mesh=mesh, scene=scene))
+
+
+def test_candidate_face_region_readout_abstains_without_exact_topology_or_addresses():
+    mesh, scene = _mesh_with_addressed_scene_for_region_court()
+    no_mesh = seal_inference_evidence_v1(_candidate(
+        mesh=None, scene=scene, mesh_status="ABSTAIN",
+        reason="NO_VALID_MESH",
+    ))
+    with pytest.raises(QualificationError, match="FACE_REGION_REQUIRES_MESH_PROPOSAL"):
+        candidate_face_region_readout_v1(no_mesh)
+    legacy = seal_inference_evidence_v1(_candidate(mesh=mesh))
+    with pytest.raises(QualificationError, match="FACE_REGION_REQUIRES_ADDRESSED_SCENE"):
+        candidate_face_region_readout_v1(legacy)

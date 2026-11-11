@@ -195,9 +195,14 @@ def test_model_source_state_export_and_source_change_firewall():
     assert exported.mesh_status == "ABSTAIN"
     assert exported.observed_front_sha256 != exported.observed_back_sha256
     assert exported.mesh is None
+    # Change exact source bytes *within the admitted [0,1] domain*.
+    # An unbounded +0.01 can also trigger the independent range court, which
+    # correctly rejects out-of-gamut input before source-identity comparison.
+    changed_source = rgba.clone()
+    changed_source[0, 0, 0, 0, 0] = 1.0 - changed_source[0, 0, 0, 0, 0]
     with pytest.raises(ValueError, match="SOURCE_STATE_MISMATCH"):
         export_inference_evidence_v1(
-            prediction, original_rgba=rgba.clone() + 0.01,
+            prediction, original_rgba=changed_source,
             original_camera_features=cam, checkpoint_sha256="a" * 64,
         )
     with pytest.raises(ValueError, match="REQUIRES_TWO_RGBA"):

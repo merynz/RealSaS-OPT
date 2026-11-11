@@ -68,9 +68,41 @@ def build_graphics_evidence_v1(*,mesh_binding_hash,static_relations:Iterable[Gra
     static,view=tuple(static_relations),tuple(view_relations)
     if not mesh_binding_hash:
         raise QualificationError("GRAPHICS_EVIDENCE_MESH_BINDING_REQUIRED")
+    # Numeric and type admission must happen BEFORE canonical hashing;
+    # a NaN must raise a typed qualification error, not a JSON serializer
+    # exception, and no caller may overwrite evidence authority via metadata.
+    for r in static:
+        if type(r) is not GraphicsStaticRelationEvidenceV1 or r.schema_version != "RealSaS.GraphicsStaticRelationEvidence.v1":
+            raise QualificationError("GRAPHICS_STATIC_RELATION_SCHEMA_INVALID")
+        if (type(r.face_a) is not int or type(r.face_b) is not int
+                or r.face_a<0 or r.face_b<0 or r.face_a==r.face_b):
+            raise QualificationError("GRAPHICS_STATIC_RELATION_FACE_INVALID")
+        for label,score in (
+            ("same",r.same_drawable_affinity), ("cut",r.cut_probability),
+            ("attachment",r.attachment_affinity), ("alpha",r.alpha_boundary_probability),
+            ("appearance",r.appearance_boundary_probability), ("confidence",r.confidence),
+        ):
+            _prob(score,label)
+    for r in view:
+        if type(r) is not GraphicsViewRelationEvidenceV1 or r.schema_version != "RealSaS.GraphicsViewRelationEvidence.v1":
+            raise QualificationError("GRAPHICS_VIEW_RELATION_SCHEMA_INVALID")
+        if (type(r.view_index) is not int or r.view_index<0
+                or type(r.face_a) is not int or type(r.face_b) is not int
+                or r.face_a<0 or r.face_b<0 or r.face_a==r.face_b):
+            raise QualificationError("GRAPHICS_VIEW_RELATION_INVALID")
+        for label,score in (
+            ("front",r.front_probability), ("occlusion",r.occlusion_probability),
+            ("vis_a",r.visibility_probability_a), ("vis_b",r.visibility_probability_b),
+            ("view_conf",r.confidence),
+        ):
+            _prob(score,label)
+    meta=dict(metadata or {})
+    meta.update({"categorical_semantics_used":False,
+                 "authority_class":"LEARNED_RELATION_EVIDENCE_ONLY"})
     # A single-face canonical mesh has no possible pair relation. An empty
     # graph is admissible *as empty evidence*, never a visible-source claim.
-    value=GraphicsEvidenceV1(str(mesh_binding_hash),static,view,"",metadata={"categorical_semantics_used":False,"authority_class":"LEARNED_RELATION_EVIDENCE_ONLY",**dict(metadata or {})});return replace(value,evidence_hash=graphics_evidence_hash_v1(value))
+    value=GraphicsEvidenceV1(str(mesh_binding_hash),static,view,"",metadata=meta)
+    return replace(value,evidence_hash=graphics_evidence_hash_v1(value))
 
 class _UF:
     """Sparse cannot-link constrained union for anonymous drawable candidates.

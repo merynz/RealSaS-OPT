@@ -68,6 +68,11 @@ def test_graphics_compiles_role_free_order_and_runtime_consumes_materialized_con
     assert len(runtime.views) == 8
     assert runtime.metadata["hash_only_binding_forbidden"] is True
     assert runtime.metadata["behaviorally_consumable"] is True
+    # A contradictory source relation was resolved for deterministic display,
+    # not independently certified as a true source occlusion order.
+    assert runtime.metadata["representation_policy_arbitration_used"] is True
+    assert runtime.metadata["source_order_qualified"] is False
+    assert runtime.metadata["pose_conditioned_order_execution"] is False
     assert all(len(view.topological_fragment_order) == 3 for view in runtime.views)
 
 
@@ -87,3 +92,26 @@ def test_graphics_cannot_bind_a_second_independent_visual_mesh():
             faces=((0, 1, 2), (3, 4, 5)),
             evidence=evidence,
         )
+
+
+def test_graphics_acyclic_source_order_does_not_claim_pose_conditioned_coverage():
+    evidence = build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(0, 1, 0., 1., 0., .8, .8, 1., "static"),
+        ),
+        view_relations=(
+            GraphicsViewRelationEvidenceV1(0, 0, 1, .95, .9, 1., 1., .95, "view"),
+        ),
+    )
+    compiled = compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="mesh-skin",
+        source_graphics_binding_hash="source-graphics",
+        faces=((0, 1, 2), (3, 4, 5)),
+        evidence=evidence,
+    )
+    runtime = build_runtime_graphics_v1(compiled, face_count=2)
+    assert runtime.metadata["source_order_qualified"] is True
+    assert runtime.metadata["representation_policy_arbitration_used"] is False
+    assert runtime.metadata["pose_conditioned_order_execution"] is False

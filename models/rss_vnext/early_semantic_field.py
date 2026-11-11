@@ -106,7 +106,55 @@ def masked_source_semantic_evidence_loss(
     )
 
 
+def masked_semantic_expected_brier_risk_loss(
+    logits: Tensor,
+    log_uncertainty: Tensor,
+    target: Tensor,
+    qualified_mask: Tensor,
+) -> Tensor:
+    """Supervise predicted patch uncertainty as conditional expected Brier risk.
+
+    Exact per-axis teacher masks decide which semantic observations exist.
+    Unobserved axes may contain NaN but never become positive/negative labels.
+    A patch with no teacher axes never trains uncertainty. This measures
+    source-patch classification error, not source depth or drawable truth.
+
+    The historical 'log_uncertainty' ABI name is kept. Its sigmoid decodes
+    expected Brier risk, not a Gaussian log-variance or proof certificate.
+    """
+    if (
+        logits.ndim != 4 or logits.shape[1] != 2
+        or target.shape != logits.shape
+        or qualified_mask.shape != logits.shape
+        or log_uncertainty.shape != (*logits.shape[:3], 1)
+    ):
+        raise ValueError("RSS_VNEXT_SEMANTIC_RISK_SHAPE")
+    if qualified_mask.dtype != torch.bool:
+        raise ValueError("RSS_VNEXT_SEMANTIC_RISK_MASK_DTYPE")
+    if not bool(qualified_mask.any()):
+        raise ValueError("RSS_VNEXT_SEMANTIC_RISK_NO_QUALIFIED_AXES")
+    if not bool(torch.isfinite(logits).all()) or not bool(torch.isfinite(log_uncertainty).all()):
+        raise ValueError("RSS_VNEXT_SEMANTIC_RISK_PREDICTION_NONFINITE")
+    observed = target[qualified_mask]
+    if not bool(torch.isfinite(observed).all()) or bool(((observed < 0) | (observed > 1)).any()):
+        raise ValueError("RSS_VNEXT_SEMANTIC_RISK_TARGET_INVALID")
+    safe_target = torch.where(qualified_mask, target, torch.zeros_like(target))
+    squared_error = (torch.sigmoid(logits) - safe_target).square()
+    axes_per_patch = qualified_mask.sum(dim=-1)
+    measured_risk = (
+        squared_error.masked_fill(~qualified_mask, 0.).sum(dim=-1)
+        / axes_per_patch.clamp_min(1)
+    ).detach()
+    admitted_patch = axes_per_patch > 0
+    predicted_risk = torch.sigmoid(log_uncertainty[..., 0])
+    return F.mse_loss(
+        predicted_risk[admitted_patch],
+        measured_risk[admitted_patch],
+    )
+
+
 __all__ = [
     "RSSvNextEarlySemanticOutput", "RSSvNextEarlySemanticField",
     "masked_source_semantic_evidence_loss",
+    "masked_semantic_expected_brier_risk_loss",
 ]

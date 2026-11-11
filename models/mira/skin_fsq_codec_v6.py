@@ -98,7 +98,11 @@ class FiniteScalarQuantizer(nn.Module):
     def forward(self, z: Tensor) -> tuple[Tensor, Tensor, Tensor]:
         indices = self._quantize_indices(z)
         hard = self.indices_to_codes(indices).to(dtype=z.dtype)
-        quantized = z + (hard - z).detach()
+        # Backpropagate through the SAME bounded latent used to choose the
+        # discrete FSQ bin. A raw-z STE would incorrectly retain unit gradient
+        # even after tanh is saturated while forward token IDs stay fixed.
+        bounded = torch.tanh(z)
+        quantized = bounded + (hard - bounded).detach()
         token_ids = self.indices_to_token_ids(indices)
         return quantized, token_ids, hard
 

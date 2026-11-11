@@ -459,7 +459,10 @@ def test_mesh_face_region_readout_is_exactly_addressed_and_never_grants_drawable
 
 def test_mesh_region_vocab_cannot_drift_from_shared_scene_or_erase_unknown():
     mesh, scene = _mesh_with_addressed_scene_for_region_court()
-    mesh["semantic_logits"][0].pop()
+    # Keep all vertex rows internally consistent, but drop the UNKNOWN
+    # column from the entire mesh to exercise cross-head vocabulary binding.
+    for row in mesh["semantic_logits"]:
+        row.pop()
     with pytest.raises(QualificationError, match="MESH_REGION_VOCABULARY_DRIFT"):
         seal_inference_evidence_v1(_candidate(mesh=mesh, scene=scene))
 

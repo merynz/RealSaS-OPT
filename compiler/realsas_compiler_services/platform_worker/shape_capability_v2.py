@@ -189,7 +189,15 @@ def _read_v1_payload(payload: bytes) -> dict[str, Any]:
         }
 
 
-def encode_shape_proposal_v2(v1: Any) -> bytes:
+def encode_shape_proposal_v2(
+    v1: Any, *, source_observation_content_sha256: str,
+) -> bytes:
+    if (
+        type(source_observation_content_sha256) is not str
+        or len(source_observation_content_sha256) != 64
+        or any(c not in "0123456789abcdef" for c in source_observation_content_sha256)
+    ):
+        raise RuntimeError("SHAPE_V2_SOURCE_OBSERVATION_CAS_ID_REQUIRED")
     source = _read_v1_payload(bytes(v1.payload))
     _validate_surface_evidence_v2(source)
     token_ids = source["token_ids"]
@@ -227,6 +235,7 @@ def encode_shape_proposal_v2(v1: Any) -> bytes:
             "topology_sequence_sha256": _token_sequence_sha256(token_ids),
             "decoded_topology_sha256": topology_sha,
             "surface_evidence_sha256": _surface_fields_sha256_v2(source),
+            "source_observation_content_sha256": source_observation_content_sha256,
             "decoded_vertex_count": int(len(vertices)),
             "decoded_face_count": int(len(faces)),
             "decoded_component_count": int(decoded.component_count),
@@ -308,6 +317,10 @@ def decode_shape_proposal_v2(payload: bytes) -> DecodedShapeProposalV2:
         raise RuntimeError("SHAPE_V2_COMPILER_FRAME_BINDING_REQUIRED")
     if value.metadata.get("source_geometry_lineage_claimed") is not False:
         raise RuntimeError("SHAPE_V2_SOURCE_GEOMETRY_LINEAGE_CLAIM_FORBIDDEN")
+    source_sha = value.metadata.get("source_observation_content_sha256")
+    if (type(source_sha) is not str or len(source_sha) != 64
+        or any(c not in "0123456789abcdef" for c in source_sha)):
+        raise RuntimeError("SHAPE_V2_SOURCE_OBSERVATION_CAS_ID_REQUIRED")
     if value.metadata.get("proposal_evidence_frame") != TESSA_EVIDENCE_FRAME_V2:
         raise RuntimeError("SHAPE_V2_EVIDENCE_FRAME_DRIFT")
     if value.metadata.get("topology_sequence_sha256") != _token_sequence_sha256(value.token_ids):
@@ -367,9 +380,13 @@ def decode_shape_proposal_v2(payload: bytes) -> DecodedShapeProposalV2:
     return value
 
 
-def run_shape_inference_v2(*args, **kwargs) -> ShapeInferenceResultV2:
+def run_shape_inference_v2(
+    *args, source_observation_content_sha256: str, **kwargs,
+) -> ShapeInferenceResultV2:
     v1 = _run_shape_inference_v1(*args, **kwargs)
-    payload = encode_shape_proposal_v2(v1)
+    payload = encode_shape_proposal_v2(
+        v1, source_observation_content_sha256=source_observation_content_sha256,
+    )
     diagnostics = dict(v1.diagnostics)
     diagnostics.update(
         {

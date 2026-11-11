@@ -77,3 +77,43 @@ def test_source_v1_view_count_is_schema_local_not_silently_flexible():
         assert "PRODUCT_INPUT_V1_RGBA_SHAPE_INVALID" in str(exc)
     else:
         raise AssertionError("v1 source schema must fail closed on wrong view count")
+
+
+def test_source_bound_shape_input_v2_roundtrips_exact_cas_parent_and_model_features():
+    from compiler.realsas_compiler_services.platform_worker.scene_input_contract_v2 import (
+        SHAPE_INPUT_SCHEMA_V2, encode_shape_input_v2, decode_shape_input_v2,
+    )
+    authority=DINOv2FoundationAuthorityV2().authority_hash
+    raw=IRISVNextSceneInputsV1(
+        image_tokens=torch.zeros((1,8,1369,384),dtype=torch.float32),
+        token_xy=torch.zeros((1,8,1369,2),dtype=torch.float32),
+        camera_features=torch.zeros((1,8,13),dtype=torch.float32),
+        foundation_authority_sha256=authority,
+    )
+    payload=encode_shape_input_v2(
+        raw,source_observation_content_sha256="a"*64,
+    )
+    bound=decode_shape_input_v2(payload)
+    assert bound.schema==SHAPE_INPUT_SCHEMA_V2
+    assert bound.source_observation_content_sha256=="a"*64
+    assert torch.equal(bound.inputs.image_tokens,raw.image_tokens)
+    assert torch.equal(bound.inputs.token_xy,raw.token_xy)
+    assert torch.equal(bound.inputs.camera_features,raw.camera_features)
+    assert bound.inputs.foundation_authority_sha256==authority
+
+
+def test_shape_input_v2_rejects_missing_or_malformed_source_cas_digest():
+    import pytest
+    from compiler.realsas_compiler_services.platform_worker.scene_input_contract_v2 import encode_shape_input_v2
+    authority=DINOv2FoundationAuthorityV2().authority_hash
+    raw=IRISVNextSceneInputsV1(
+        image_tokens=torch.zeros((1,8,1369,384),dtype=torch.float32),
+        token_xy=torch.zeros((1,8,1369,2),dtype=torch.float32),
+        camera_features=torch.zeros((1,8,13),dtype=torch.float32),
+        foundation_authority_sha256=authority,
+    )
+    for corrupt in ("", "A"*64, "f"*63, True):
+        with pytest.raises(RuntimeError,match="SOURCE_CAS_ID_INVALID"):
+            encode_shape_input_v2(
+                raw,source_observation_content_sha256=corrupt,
+            )

@@ -14,9 +14,9 @@ from typing import Any, Mapping
 import numpy as np
 import torch
 
-from compiler.realsas_compiler_services.platform_worker.scene_input_contract_v1 import (
-    SHAPE_INPUT_ARTIFACT_TYPE_V1,
-    encode_shape_input_v1,
+from compiler.realsas_compiler_services.platform_worker.scene_input_contract_v2 import (
+    SHAPE_INPUT_ARTIFACT_TYPE_V2,
+    encode_shape_input_v2,
 )
 from compiler.realsas_compiler_services.platform_worker.source_observation_contract_v1 import (
     SOURCE_OBSERVATION_SCHEMA_V1,
@@ -101,6 +101,7 @@ def run_input_inference_v1(
     dino_model: torch.nn.Module,
     loaded_authority: DINOv2LoadedAuthorityV2,
     device: torch.device | str = "cpu",
+    source_observation_content_sha256: str,
 ) -> InputInferenceResultV1:
     """Lower exact v1 source observations into the admitted frozen IRIS input frame."""
     source.validate()
@@ -113,13 +114,18 @@ def run_input_inference_v1(
         native_rgba=source.native_rgba.to(device=device),
         camera_bundle=source.camera_bundle,
     )
-    payload = encode_shape_input_v1(scene_inputs)
+    payload = encode_shape_input_v2(
+        scene_inputs,
+        source_observation_content_sha256=source_observation_content_sha256,
+    )
     return InputInferenceResultV1(
         payload=payload,
         diagnostics={
             "schema": "RealSaS.ProductInputInferenceDiagnostics.v1",
             "authority": INPUT_OUTPUT_AUTHORITY_V1,
-            "output_artifact_type": SHAPE_INPUT_ARTIFACT_TYPE_V1,
+            "output_artifact_type": SHAPE_INPUT_ARTIFACT_TYPE_V2,
+            "shape_input_schema": "RealSaS.ShapeInput.v2",
+            "source_observation_content_sha256": source_observation_content_sha256,
             "source_schema": SOURCE_OBSERVATION_SCHEMA_V1,
             "foundation_authority_sha256": scene_inputs.foundation_authority_sha256,
             "view_count": 8,

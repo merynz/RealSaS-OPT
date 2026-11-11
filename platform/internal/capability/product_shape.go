@@ -33,7 +33,7 @@ func (ProductShapeProvider) Capabilities(context.Context) ([]Descriptor, error) 
 			"interface_contract":    ProductShapeContractV2,
 			"executor_contract":     ProductShapeContractV2,
 			"input_artifact_type":   "RealSaS.ShapeInput",
-			"input_schema_version":  "v1",
+			"input_schema_version":  "v2",
 			"output_artifact_type":  "RealSaS.ShapeProposal",
 			"output_schema_version": "v2",
 			"maximum_new_tokens":    131072,

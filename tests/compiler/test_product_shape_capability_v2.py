@@ -96,7 +96,8 @@ assert shape_capability_v2.SHAPE_PROPOSAL_SCHEMA_V2 == "RealSaS.ShapeProposal.v2
 def test_shape_v2_serializes_scene_frame_topology_without_mesh_authority(monkeypatch):
     monkeypatch.setattr(shape_v2, "_decode_tessa_asset_sequence_v1", lambda tokens: _decoded())
     payload = shape_v2.encode_shape_proposal_v2(
-        _v1_result(schema="RealSaS.ShapeInferenceDiagnostics.v1", canonical_mesh_authority=False)
+        _v1_result(schema="RealSaS.ShapeInferenceDiagnostics.v1", canonical_mesh_authority=False),
+        source_observation_content_sha256="a" * 64,
     )
     value = shape_v2.decode_shape_proposal_v2(payload)
     assert value.metadata["schema"] == "RealSaS.ShapeProposal.v2"
@@ -130,7 +131,9 @@ def test_shape_v2_runs_learned_path_once_then_only_deterministic_decode(monkeypa
         "_decode_tessa_asset_sequence_v1",
         lambda tokens: calls.append("decode") or _decoded(),
     )
-    result = shape_v2.run_shape_inference_v2(object())
+    result = shape_v2.run_shape_inference_v2(
+        object(), source_observation_content_sha256="a" * 64,
+    )
     assert calls == ["learned", "decode"]
     assert result.diagnostics["output_schema"] == "RealSaS.ShapeProposal.v2"
     assert result.diagnostics["canonical_mesh_authority"] is False
@@ -139,7 +142,9 @@ def test_shape_v2_runs_learned_path_once_then_only_deterministic_decode(monkeypa
 
 def test_shape_v2_detects_decoded_topology_byte_drift(monkeypatch):
     monkeypatch.setattr(shape_v2, "_decode_tessa_asset_sequence_v1", lambda tokens: _decoded())
-    payload = shape_v2.encode_shape_proposal_v2(_v1_result())
+    payload = shape_v2.encode_shape_proposal_v2(
+        _v1_result(), source_observation_content_sha256="a" * 64,
+    )
     with np.load(io.BytesIO(payload), allow_pickle=False) as bundle:
         rows = {key: np.asarray(bundle[key]).copy() for key in bundle.files}
     vertices = rows["decoded_vertices_tessa"]
@@ -152,7 +157,9 @@ def test_shape_v2_detects_decoded_topology_byte_drift(monkeypatch):
 
 def _encode_shape_fixture_v2(monkeypatch) -> bytes:
     monkeypatch.setattr(shape_v2, "_decode_tessa_asset_sequence_v1", lambda tokens: _decoded())
-    return shape_v2.encode_shape_proposal_v2(_v1_result())
+    return shape_v2.encode_shape_proposal_v2(
+        _v1_result(), source_observation_content_sha256="a" * 64,
+    )
 
 
 def _rewrite_shape_fixture(payload: bytes, *, rewrite_array=None, rewrite_meta=None) -> bytes:
@@ -260,3 +267,29 @@ def test_shape_v2_archive_rejects_unannounced_payload_family(monkeypatch):
     )
     with pytest.raises(RuntimeError, match="SHAPE_V2_ARCHIVE_FIELDS_OR_RESOURCE_LIMIT"):
         shape_v2.decode_shape_proposal_v2(altered)
+
+
+def test_shape_source_parent_survives_real_shape_codec_to_mesh_consumer(monkeypatch):
+    from compiler.realsas_compiler_services.platform_worker.mesh_executor_v1 import (
+        validate_product_shape_source_lineage_v1,
+    )
+    raw=_encode_shape_fixture_v2(monkeypatch)
+    shape=shape_v2.decode_shape_proposal_v2(raw)
+    assert shape.metadata["source_observation_content_sha256"] == "a"*64
+    validate_product_shape_source_lineage_v1(
+        shape, {"content_sha256":"a"*64},
+    )
+    with pytest.raises(RuntimeError,match="MESH_SHAPE_SOURCE_OBSERVATION_CAS_PARENT_DRIFT"):
+        validate_product_shape_source_lineage_v1(
+            shape, {"content_sha256":"b"*64},
+        )
+    with pytest.raises(RuntimeError,match="MESH_SHAPE_SOURCE_OBSERVATION_CAS_PARENT_DRIFT"):
+        validate_product_shape_source_lineage_v1(shape, {"content_sha256":""})
+
+
+@pytest.mark.parametrize("source_sha", ["", "A"*64, "a"*63, "z"*64])
+def test_shape_v2_cannot_mint_unbound_or_noncanonical_source_cas_sha(source_sha):
+    with pytest.raises(RuntimeError,match="SOURCE_OBSERVATION_CAS_ID_REQUIRED"):
+        shape_v2.encode_shape_proposal_v2(
+            _v1_result(),source_observation_content_sha256=source_sha,
+        )

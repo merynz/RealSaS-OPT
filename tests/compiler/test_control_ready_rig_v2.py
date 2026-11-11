@@ -159,3 +159,62 @@ def test_skin_codes_are_bound_to_exact_rig_proposal_and_never_repaired():
             expected_proposal_joint_ids=tuple(j.proposal_joint_id for j in p.joints),
             expected_rig_program_proposal_hash=p.proposal_lineage_hash,
         )
+
+
+def test_control_only_revision_preserves_deform_joint_identity_and_skin_parent():
+    """An animator edit cannot remint skin-addressed deform joint identities."""
+    mesh = _mesh()
+    original = _proposal(mesh)
+    before = mint_canonical_rig_v2(
+        mesh, qualified_program=qualify_rig_program_v1(original),
+    )
+    edited = replace(
+        original,
+        controls=(
+            replace(original.controls[0], rest_P=(0.25, 0.0, 0.0)),
+        ) + original.controls[1:],
+        proposal_lineage_hash="",
+    )
+    edited = seal_rig_program_proposal_v1(edited)
+    after = mint_canonical_rig_v2(
+        mesh, qualified_program=qualify_rig_program_v1(edited),
+    )
+    assert before.rig_program_qualification_hash != after.rig_program_qualification_hash
+    assert before.rig_lineage_hash != after.rig_lineage_hash
+    assert before.control_program_hash != after.control_program_hash
+    assert before.deform_structure_hash == after.deform_structure_hash
+    assert tuple(j.canonical_joint_id for j in before.joints) == tuple(
+        j.canonical_joint_id for j in after.joints
+    )
+    assert tuple(c.canonical_control_id for c in before.controls) == tuple(
+        c.canonical_control_id for c in after.controls
+    )
+    assert tuple(c.canonical_chain_id for c in before.chains) == tuple(
+        c.canonical_chain_id for c in after.chains
+    )
+    assert canonical_rig_from_dict_v2(after.to_dict()) == after
+
+
+def test_deform_rest_change_invalidates_skin_parent_without_recycling_entity_identity():
+    """Same local joint address may be edited, but deform evidence must change."""
+    mesh = _mesh()
+    before_proposal = _proposal(mesh)
+    before = mint_canonical_rig_v2(
+        mesh, qualified_program=qualify_rig_program_v1(before_proposal),
+    )
+    edited = replace(
+        before_proposal,
+        joints=(
+            before_proposal.joints[0],
+            replace(before_proposal.joints[1], P=(0.0, 1.25, 0.0)),
+        ) + before_proposal.joints[2:],
+        proposal_lineage_hash="",
+    )
+    after = mint_canonical_rig_v2(
+        mesh,
+        qualified_program=qualify_rig_program_v1(seal_rig_program_proposal_v1(edited)),
+    )
+    assert before.deform_structure_hash != after.deform_structure_hash
+    assert tuple(j.canonical_joint_id for j in before.joints) == tuple(
+        j.canonical_joint_id for j in after.joints
+    )

@@ -19,6 +19,7 @@ from types import MappingProxyType
 
 import torch
 from torch import Tensor, nn
+from torch.nn import functional as F
 
 from models.tessa.v2.objective_v2 import (
     TESSAObjectiveWeightsV2, topology_sequence_objective_v2,

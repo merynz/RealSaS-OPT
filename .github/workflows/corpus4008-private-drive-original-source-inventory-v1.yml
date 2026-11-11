@@ -1,0 +1,103 @@
+name: corpus4008-private-drive-original-source-inventory-v1
+
+# This discovers only source filenames/sizes on authenticated Drive. It does
+# NOT download 4008 original assets or claim source/camera/semantic admission.
+# No source IDs, private paths or credentials in public Actions artifacts.
+on:
+  push:
+    branches: [corpus4008-source-structure-and-camera-audit-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-private-drive-original-source-inventory-v1.yml'
+      - 'tools/corpus/build_corpus4008_remote_original_inventory_v1.py'
+      - 'tests/corpus/test_corpus4008_remote_original_inventory_v1.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-private-source-inventory-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  private-master-source-inventory:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c4008-private-rclone.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/source_inventory_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check expected credential availability without revealing secret
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          set -euo pipefail
+          if test "$HAS_DRIVE" != true; then
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'No hosted Drive credential configured; private census not run.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Preflight code contracts on hosted CPU
+        run: |
+          python -m pip install --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_remote_original_inventory_v1.py
+      - name: Bind private Drive credential and list sealed Master Corpus originals
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          test -s "$RCLONE_CONFIG"
+          mkdir -p "$RUNNER_TEMP/c4008-private"
+          rclone copyto "$REMOTE/ledgers/MASTER_VARIANTS.jsonl" "$RUNNER_TEMP/c4008-private/master.jsonl" --retries 3
+          rclone copyto "$REMOTE/metadata/CANONICAL_VARIANT_SELECTION.json" "$RUNNER_TEMP/c4008-private/selection.json" --retries 3
+          test "$(sha256sum "$RUNNER_TEMP/c4008-private/master.jsonl" | cut -d ' ' -f1)" = 475b12c6876a7ba91d8b1b32b6acac29536431134b44a96277a74c2493e86913
+          test "$(sha256sum "$RUNNER_TEMP/c4008-private/selection.json" | cut -d ' ' -f1)" = af2436d2a25a6f715e2d81af14b731837c7b02b609f1a4fc206acb591beb61c9
+          rclone lsjson -R --files-only "$REMOTE/sources" > "$RUNNER_TEMP/c4008-private/source_files.json"
+          test -s "$RUNNER_TEMP/c4008-private/source_files.json"
+          echo "MASTER_4008_PRIVATE_SOURCE_NAMES_OBSERVED__NOT_SOURCE_BYTES"
+      - name: Build exactly 4008 per-asset source path observations
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          python -m tools.corpus.build_corpus4008_remote_original_inventory_v1 \
+            --master "$RUNNER_TEMP/c4008-private/master.jsonl" \
+            --selection "$RUNNER_TEMP/c4008-private/selection.json" \
+            --remote-file-list "$RUNNER_TEMP/c4008-private/source_files.json" \
+            --output-private "$RUNNER_TEMP/c4008-private/CORPUS4008_REMOTE_SOURCE_INVENTORY_PRIVATE_V1.json" \
+            --output-public "$RUNNER_TEMP/c4008-private/CORPUS4008_REMOTE_SOURCE_COUNTS_PUBLIC_V1.json"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"c4008-private/CORPUS4008_REMOTE_SOURCE_COUNTS_PUBLIC_V1.json"
+          d=json.loads(p.read_text())
+          print("## Corpus4008 remote original source inventory")
+          print("Exact master records:", d["subject_count"])
+          print("Historical external holdouts:", d["historical_external_holdout_count"])
+          print("QA only:", d["qa_only_count"])
+          print("Raw source bytes verified:", d["source_bytes_verified_count"])
+          print("Training authorized:", d["training_authorized"])
+          for status,n in d["statuses"].items():
+              print(status+":",n)
+          PY
+      - name: Store full original-source lookup ONLY in authenticated private Drive
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          p="$RUNNER_TEMP/c4008-private/CORPUS4008_REMOTE_SOURCE_INVENTORY_PRIVATE_V1.json"
+          if test -s "$RCLONE_CONFIG" && test -s "$p"; then
+            rclone copyto "$p" "$PRIVATE_OUTPUT/CORPUS4008_REMOTE_SOURCE_INVENTORY_PRIVATE_V1.json" --retries 3
+            rclone copyto "$RUNNER_TEMP/c4008-private/CORPUS4008_REMOTE_SOURCE_COUNTS_PUBLIC_V1.json" \
+              "$PRIVATE_OUTPUT/CORPUS4008_REMOTE_SOURCE_COUNTS_PUBLIC_V1.json" --retries 3
+            echo 'Private SHA-bound inventory stored in restricted Drive, not public Actions artifact.'
+          fi

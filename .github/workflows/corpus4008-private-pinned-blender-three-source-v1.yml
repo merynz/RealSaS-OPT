@@ -1,0 +1,131 @@
+name: corpus4008-private-pinned-blender-three-source-v1
+
+# Actual original bytes (1 FBX, 1 GLB, 1 OBJ). Confidential imported-source
+# receipts remain in private Drive, no public model training data.
+on:
+  push:
+    branches: [corpus4008-source-structure-and-camera-audit-v1-20261107]
+    paths:
+      - '.github/workflows/corpus4008-private-pinned-blender-three-source-v1.yml'
+      - 'tools/corpus/blender_corpus4008_native_source_probe_v1.py'
+      - 'tests/corpus/test_corpus4008_blender_native_source_probe_v1.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus4008-native-source-triple-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-imported-source-scenes:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      RCLONE_CONFIG: /tmp/realsas-c4008-blender-private.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      PRIVATE_OUTPUT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/blender_source_pilot_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test source topology/transform observation contracts
+        run: |
+          python -m pip install --disable-pip-version-check pytest
+          PYTHONPATH=. python -m pytest -q tests/corpus/test_corpus4008_blender_native_source_probe_v1.py
+      - name: Confirm private Drive is configured
+        id: gate
+        env:
+          HAS_DRIVE: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 != '' }}
+        run: |
+          if test "$HAS_DRIVE" = true; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'PRIVATE_DRIVE_ABSENT_NO_ORIGINAL_SOURCE_READ' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Verify source bytes and pinned Blender official binary
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone xz-utils
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          mkdir -p "$RUNNER_TEMP/c4008-blender/source" "$RUNNER_TEMP/c4008-blender/runtime" "$RUNNER_TEMP/c4008-blender/output"
+          cd "$RUNNER_TEMP/c4008-blender/source"
+          rclone copyto "$REMOTE/sources/objaverse_animated_originals/06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115_06e9a576a49eff4a.fbx" objaverse.fbx --retries 3
+          rclone copyto "$REMOTE/sources/kaykit_cc0/93e6e25213009952276d9cf3_93e6e25213009952.glb" kaykit.glb --retries 3
+          rclone copyto "$REMOTE/sources/quaternius_cc0/3e0ebe0b075e5c0e365dccc8_3e0ebe0b075e5c0e.obj" quaternius.obj --retries 3
+          test "$(sha256sum objaverse.fbx | cut -d ' ' -f1)" = 06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115
+          test "$(sha256sum kaykit.glb | cut -d ' ' -f1)" = 93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545
+          test "$(sha256sum quaternius.obj | cut -d ' ' -f1)" = 3e0ebe0b075e5c0e365dccc8a6483d0a5e872be7613b71297a243028c53d3f3b
+          cd "$RUNNER_TEMP/c4008-blender/runtime"
+          curl -fL --retry 4 --max-time 300 https://download.blender.org/release/Blender4.5/blender-4.5.14-linux-x64.tar.xz -o blender.tar.xz
+          curl -fL --retry 4 --max-time 120 https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256 -o official.sha256
+          python - <<'PY'
+          import hashlib,re
+          from pathlib import Path
+          p=Path('blender.tar.xz')
+          lines=[x for x in Path('official.sha256').read_text().splitlines() if 'blender-4.5.14-linux-x64.tar.xz' in x]
+          assert len(lines)==1
+          match=re.findall('[0-9a-fA-F]{64}',lines[0])
+          assert len(match)==1
+          with p.open('rb') as f:assert hashlib.file_digest(f,'sha256').hexdigest()==match[0].lower()
+          PY
+          tar -xJf blender.tar.xz
+          binary="$RUNNER_TEMP/c4008-blender/runtime/blender-4.5.14-linux-x64/blender"
+          test "$(sha256sum "$binary" | cut -d ' ' -f1)" = 050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8
+          echo 'EXACT_SOURCE_BYTES_AND_PINNED_BLENDER_BINARY_VERIFIED'
+      - name: Parse exact imported FBX/GLB/OBJ hierarchies with rest/action isolation
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          umask 077
+          binary="$RUNNER_TEMP/c4008-blender/runtime/blender-4.5.14-linux-x64/blender"
+          input="$RUNNER_TEMP/c4008-blender/source"
+          out="$RUNNER_TEMP/c4008-blender/output"
+          "$binary" --background --factory-startup --python tools/corpus/blender_corpus4008_native_source_probe_v1.py -- \
+            --source "$input/objaverse.fbx" \
+            --expected-sha256 06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115 \
+            --asset-id asset_09178fa704865496d57c11be \
+            --candidate-id objaverse_animated_originals:06e9a576a49eff4a78b11cdbc45068fa52d7705f7b2c0c344a6947551993c115 \
+            --output "$out/objaverse.json"
+          "$binary" --background --factory-startup --python tools/corpus/blender_corpus4008_native_source_probe_v1.py -- \
+            --source "$input/kaykit.glb" \
+            --expected-sha256 93e6e25213009952276d9cf34f5d96a243767334c66f280db0433ddfabb91545 \
+            --asset-id asset_551ea351b43a1787d0f55536 \
+            --candidate-id kaykit_cc0:93e6e25213009952276d9cf3 \
+            --output "$out/kaykit.json"
+          "$binary" --background --factory-startup --python tools/corpus/blender_corpus4008_native_source_probe_v1.py -- \
+            --source "$input/quaternius.obj" \
+            --expected-sha256 3e0ebe0b075e5c0e365dccc8a6483d0a5e872be7613b71297a243028c53d3f3b \
+            --asset-id asset_102c52015bc540c2fe3f7ef5 \
+            --candidate-id quaternius_cc0:3e0ebe0b075e5c0e365dccc8 \
+            --output "$out/quaternius.json"
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"c4008-blender/output"
+          print('## Three exact original-source Blender imports')
+          for kind in ('objaverse','kaykit','quaternius'):
+              d=json.loads((root/(kind+'.json')).read_text())
+              assert d['training_authorized'] is False
+              s=d['imported_source_scene']
+              print(kind+':', 'mesh=',len(s['meshes']),
+                  'armatures=',len(s['armatures']),
+                  'bone-parent attachment candidates=',s['bone_parented_mesh_candidate_count'],
+                  'authored actions imported=',len(d['native_action_names_teacher_only']))
+              assert s['native_camera_courted'] is False
+          print('Anatomical orientation, source RGB, edit consequence and model training: NOT GRANTED')
+          PY
+      - name: Store imported-source matrices and provenance in restricted Drive only
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/c4008-blender/output"
+          if test -s "$RCLONE_CONFIG" && test -f "$root/objaverse.json"; then
+            rclone copy "$root" "$PRIVATE_OUTPUT" --checksum --retries 3
+            echo 'Private native Blender scene import receipts published. Source bytes stay private.'
+          fi

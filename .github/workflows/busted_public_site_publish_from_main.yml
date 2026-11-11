@@ -1,0 +1,103 @@
+name: BUSTED public frontend — publish exact main-owned source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "product/busted_site/**"
+      - ".github/workflows/busted_public_site_publish_from_main.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "product/busted_site/**"
+      - ".github/workflows/busted_public_site_publish_from_main.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: busted-public-site-from-main
+  cancel-in-progress: false
+
+jobs:
+  test-site-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Main-owned public client contract
+        run: |
+          node --experimental-default-type=module tests/product/test_busted_api_origin.mjs
+          node --check product/busted_site/static/js/awaken.js
+          node --check product/busted_site/static/js/app.js
+          node --check product/busted_site/static/js/product_shell.js
+          test -f product/busted_site/index.html
+          test -f product/busted_site/studio.html
+          test -f product/busted_site/static/js/api_gateway_v1.js
+          test -f product/busted_site/runtime-config.js
+  publish:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: test-site-source
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: busted-preview
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: main_source
+      - uses: actions/checkout@v4
+        with:
+          ref: busted-live-preview
+          path: deployed_site
+          persist-credentials: true
+      - name: Build static-only deployment from main (never publish backend Python)
+        env:
+          BUSTED_API_ORIGIN: ${{ vars.BUSTED_PUBLIC_API_ORIGIN }}
+        run: |
+          mkdir -p prepared_site
+          cp main_source/product/busted_site/*.html prepared_site/
+          cp main_source/product/busted_site/*.svg prepared_site/
+          cp main_source/product/busted_site/.nojekyll prepared_site/
+          cp main_source/product/busted_site/PREVIEW_README.md prepared_site/
+          cp -R main_source/product/busted_site/static prepared_site/
+          python - <<'PY'
+          from urllib.parse import urlsplit
+          from pathlib import Path
+          import json
+          import os
+          origin = os.environ.get('BUSTED_API_ORIGIN', '').strip()
+          if origin:
+              parsed = urlsplit(origin)
+              if (parsed.scheme != 'https' or not parsed.hostname
+                  or parsed.username or parsed.password
+                  or parsed.path not in ('', '/')
+                  or parsed.query or parsed.fragment):
+                  raise SystemExit('BUSTED_PUBLIC_API_ORIGIN must be an HTTPS origin without path, credentials or query')
+          Path('prepared_site/runtime-config.js').write_text(
+              'globalThis.__BUSTED_PUBLIC_API_ORIGIN__ = ' + json.dumps(origin) + ';\n',
+              encoding='utf-8',
+          )
+          PY
+          # Only pages/JS/CSS/icons. No models, checkpoints or server code.
+          if find prepared_site -type f | grep -E '\.(py|pt|pth|ckpt|pkl)$'; then
+            echo 'PRIVATE_PRODUCT_ARTIFACT_WOULD_BE_PUBLISHED'
+            exit 1
+          fi
+      - name: Mirror built site without inheriting legacy preview files
+        run: |
+          rsync -a --delete --exclude=.git/ prepared_site/ deployed_site/
+          cd deployed_site
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish BUSTED UI from main ${{ github.sha }}"
+            git push origin HEAD:busted-live-preview
+          fi

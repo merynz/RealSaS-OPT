@@ -286,9 +286,10 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
 "unresolved_source_order_conflict":had_order_conflict,
 "source_graphics_qualification_status":"UNQUALIFIED_CONFLICT_POLICY" if had_order_conflict else "CANDIDATE_SCHEDULE_ONLY",
 "pose_conditioned_visibility_proven":False,
-"source_visibility_coverage_complete":not any(
+"source_visibility_coverage_complete":bool(view_states) and not any(
     v.metadata.get("visibility_unknown_fragment_ids") for v in view_states
 ),
+"view_relation_eight_direction_address_coverage":tuple(sorted(v.view_index for v in view_states))==tuple(range(8)),
 "transitive_cut_constraints_enforced":True,
 "candidate_merge_blocked_by_cut":tuple(blocked_merges),
 "order_arbitration_not_source_truth":True})

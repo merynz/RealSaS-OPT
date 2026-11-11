@@ -24,6 +24,8 @@ on:
       - 'platform/internal/capability/contracts/product_capabilities_v1.json'
       - 'tools/platform_capability_versions.py'
       - 'tests/compiler/test_canonical_mesh_ir_v1.py'
+      - 'tests/compiler/test_vnext_single_carrier_graphics_v1.py'
+      - 'compiler/realsas_compiler_core/graphics_runtime_v1.py'
       - 'tests/compiler/test_control_ready_rig_v2.py'
       - 'tests/compiler/test_mechanics_control_solver_v1.py'
       - 'tests/compiler/test_controllable_puppet_runtime_v1.py'
@@ -74,6 +76,7 @@ jobs:
         run: |
           python -m pytest -q \
             tests/compiler/test_canonical_mesh_ir_v1.py \
+            tests/compiler/test_vnext_single_carrier_graphics_v1.py \
             tests/compiler/test_control_ready_rig_v2.py \
             tests/compiler/test_rig_program_causal_linear_v1.py \
             tests/compiler/test_v6_typed_rig_skin_main_integration_v1.py \

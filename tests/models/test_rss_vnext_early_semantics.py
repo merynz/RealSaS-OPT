@@ -626,6 +626,8 @@ def _source_graphics_rgb_fixture(net, rgba, cameras):
     state, _, _ = net.encode_observations(rgba, cameras)
     q = state.query_xyz.shape[1]
     target = torch.rand(1, q, 3)
+    directions = torch.zeros(1, q, 3)
+    directions[..., 2] = 1.0
     mask = torch.zeros(1, q, dtype=torch.bool)
     mask[:, ::2] = True
     receipt = {
@@ -634,18 +636,20 @@ def _source_graphics_rgb_fixture(net, rgba, cameras):
         "source_qualification_key": "synthetic-visible-ray-fixture",
         "query_xyz_sha256": source_surface_tensor_sha256(state.query_xyz),
         "rgb_target_sha256": source_surface_tensor_sha256(target),
+        "source_ray_direction_sha256": source_surface_tensor_sha256(directions),
         "rgb_mask_sha256": source_surface_tensor_sha256(mask),
         "original_rgba_sha256": source_surface_tensor_sha256(rgba),
         "original_camera_sha256": source_surface_tensor_sha256(cameras),
-        "teacher_semantics": "ORIGINAL_VISIBLE_UNOCCLUDED_RGB_NOT_TEXTURE_OR_DEPTH",
+        "teacher_semantics": "ORIGINAL_OPAQUE_FIRST_HIT_RGB_NOT_TEXTURE_OR_DEPTH",
+        "visibility_mechanism": "SOURCE_ZBUFFER_FIRST_HIT_OPAQUE",
     }
-    return target, mask, receipt
+    return target, directions, mask, receipt
 
 
 def test_exact_source_graphics_rgb_teacher_reaches_actual_shared_field_gradients():
     net = make()
     rgba, cameras = source()
-    target, mask, receipt = _source_graphics_rgb_fixture(net, rgba, cameras)
+    target, directions, mask, receipt = _source_graphics_rgb_fixture(net, rgba, cameras)
     trainer = RSSvNextStructuralTrainer(
         net, torch.optim.AdamW(net.parameters(), lr=1e-3),
         dataset_manifest_sha256="3" * 64,
@@ -658,6 +662,7 @@ def test_exact_source_graphics_rgb_teacher_reaches_actual_shared_field_gradients
     result = trainer.train_step(RSSvNextStructuralTrainingBatch(
         rgba=rgba, camera_features=cameras,
         source_graphics_rgb_target=target,
+        source_graphics_view_directions=directions,
         source_graphics_rgb_mask=mask,
         source_graphics_rgb_admission_key="visible",
         source_qualification_key="synthetic-visible-ray-fixture",
@@ -678,7 +683,7 @@ def test_exact_source_graphics_rgb_teacher_reaches_actual_shared_field_gradients
 def test_source_graphics_rgb_receipt_rejects_relabelled_rays_and_missing_visibility():
     net = make()
     rgba, cameras = source()
-    target, mask, receipt = _source_graphics_rgb_fixture(net, rgba, cameras)
+    target, directions, mask, receipt = _source_graphics_rgb_fixture(net, rgba, cameras)
     trainer = RSSvNextStructuralTrainer(
         net, torch.optim.AdamW(net.parameters(), lr=1e-3),
         dataset_manifest_sha256="3" * 64,
@@ -691,6 +696,7 @@ def test_source_graphics_rgb_receipt_rejects_relabelled_rays_and_missing_visibil
     batch = RSSvNextStructuralTrainingBatch(
         rgba=rgba, camera_features=cameras,
         source_graphics_rgb_target=target,
+        source_graphics_view_directions=directions,
         source_graphics_rgb_mask=mask,
         source_graphics_rgb_admission_key="visible",
         source_qualification_key="synthetic-visible-ray-fixture",
@@ -705,6 +711,13 @@ def test_source_graphics_rgb_receipt_rejects_relabelled_rays_and_missing_visibil
     with pytest.raises(ValueError, match="GRAPHICS_RGB_SOURCE_TARGET_INVALID"):
         trainer.objective(batch)
     batch.source_graphics_rgb_mask = mask
+    rotated_directions = directions.clone()
+    rotated_directions[..., 2] = 0
+    rotated_directions[..., 0] = 1
+    batch.source_graphics_view_directions = rotated_directions
+    with pytest.raises(ValueError, match="GRAPHICS_RGB_SOURCE_RECEIPT_DRIFT"):
+        trainer.objective(batch)
+    batch.source_graphics_view_directions = directions
     batch.camera_features = cameras.clone()
     batch.camera_features[..., 0] += .02
     with pytest.raises(ValueError, match="GRAPHICS_RGB_SOURCE_RECEIPT_DRIFT"):
@@ -714,7 +727,7 @@ def test_source_graphics_rgb_receipt_rejects_relabelled_rays_and_missing_visibil
 def test_source_graphics_rgb_checkpoint_is_teacher_registry_bound(tmp_path):
     net = make()
     rgba, cameras = source()
-    _, _, receipt = _source_graphics_rgb_fixture(net, rgba, cameras)
+    _, _, _, receipt = _source_graphics_rgb_fixture(net, rgba, cameras)
     trainer = RSSvNextStructuralTrainer(
         net, torch.optim.AdamW(net.parameters()),
         dataset_manifest_sha256="3"*64,

@@ -228,7 +228,7 @@ def build_runtime_v4_clip_from_puppet_keyframes_v1(
         )
         arrays = {}
         for asset in contract.assets:
-            subset = np.ascontiguousarray(proven[attachment_indices[asset.attachment_id]],dtype=np.float32)
+            subset = np.ascontiguousarray(proven[list(attachment_indices[asset.attachment_id])],dtype=np.float32)
             arrays[asset.asset_id] = subset
             posed_hashes.append(content_sha256({
                 "asset_id":asset.asset_id,"time":float(sample.time_seconds),

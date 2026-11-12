@@ -297,3 +297,39 @@ __all__ = [
     "read_rss_vnext_embedded_mira_decoder_v1",
     "read_rss_vnext_discrete_skin_replay_v1",
 ]
+
+
+
+def read_rss_vnext_source_ray_replay_cas_v1(
+    ref: dict[str, Any],
+    *, read_object: Callable[[dict[str, Any]], bytes],
+    source, evidence, source_identity_court,
+):
+    """Independently open and validate the derived Compiler source-ray court.
+
+    The caller supplies the already-authenticated original two-view source,
+    learned evidence, and source-identity court. No H(x), independent model,
+    mesh authority, or image appearance is manufactured.
+    """
+    from compiler.realsas_compiler_core.rss_vnext_source_ray_replay_v1 import (
+        SourceRayReplayCourtV1, validate_source_ray_replay_court_v1,
+    )
+    if (
+        type(ref) is not dict
+        or ref.get("role") != "rss_original_source_ray_replay"
+        or ref.get("artifact_type") != "RealSaS.RSSvNextSourceRayReplayCourt"
+        or ref.get("schema_version") != "v1"
+    ):
+        raise RuntimeError("RSS_VNEXT_RAY_REPLAY_CAS_REF_ROLE_INVALID")
+    data = read_object(ref)
+    _cas_bytes(ref, data, error_prefix="RSS_VNEXT_RAY_REPLAY")
+    try:
+        parsed = json.loads(data.decode("utf-8"))
+        receipt = SourceRayReplayCourtV1(**parsed)
+    except (ValueError, UnicodeError, TypeError) as exc:
+        raise RuntimeError("RSS_VNEXT_RAY_REPLAY_CAS_JSON_INVALID") from exc
+    validate_source_ray_replay_court_v1(
+        receipt, source=source, evidence=evidence,
+        source_identity_court=source_identity_court,
+    )
+    return receipt

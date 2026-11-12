@@ -145,6 +145,7 @@ func (RSSvNextMeshCandidateProvider) Capabilities(context.Context) ([]Descriptor
 			"auxiliary_outputs": []any{
 				map[string]any{"role": "rss_sparse_face_relation_candidates", "artifact_type": "RealSaS.RSSvNextSparseCandidateFaceRelations", "schema_version": "v1"},
 				map[string]any{"role": "rss_two_view_raster_diagnostic", "artifact_type": "RealSaS.RSSvNextTwoViewRasterDiagnostic", "schema_version": "v1"},
+				map[string]any{"role": "rss_original_source_ray_replay", "artifact_type": "RealSaS.RSSvNextSourceRayReplayCourt", "schema_version": "v1"},
 				map[string]any{"role": "rss_relation_epistemic_court", "artifact_type": "RealSaS.RSSvNextRelationEpistemicCourt", "schema_version": "v1"},
 				map[string]any{"role": "rss_cross_expert_capability_court", "artifact_type": "RealSaS.RSSvNextCrossExpertCapabilityCourt", "schema_version": "v1"},
 				map[string]any{"role": "rss_canonical_mesh_candidate_bridge", "artifact_type": "RealSaS.RSSvNextCanonicalMeshCandidateBridge", "schema_version": "v1"},

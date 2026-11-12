@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import asdict, replace
 import numpy as np
 import pytest
 import torch
@@ -15,8 +15,9 @@ from compiler.realsas_compiler_core.rss_vnext_source_evidence_binding_v1 import 
     validate_rss_vnext_source_evidence_binding_v1,
 )
 from compiler.realsas_compiler_core.rss_vnext_source_ray_replay_v1 import (
-    replay_original_source_rays_v1,
+    replay_original_source_rays_v1, validate_source_ray_replay_court_v1,
 )
+from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.types import QualificationError
 from models.rss_vnext.inference_evidence_export_v1 import _source_tensor_digest
 from models.rss_vnext.source_ray_evidence import sample_front_back_source_rays
@@ -123,3 +124,62 @@ def test_topology_abstain_does_not_synthesize_sampled_color():
     assert result.state=="ABSTAIN_NO_TOPOLOGY"
     assert result.checked_ray_count==0
     assert not result.canonical_mesh_authority
+
+
+def test_read_side_source_ray_receipt_rejects_changed_authority_and_lineage():
+    src, evidence, bound = _case()
+    replay = replay_original_source_rays_v1(
+        source=src, evidence=evidence, source_identity_court=bound,
+    )
+    validate_source_ray_replay_court_v1(
+        replay, source=src, evidence=evidence, source_identity_court=bound,
+    )
+    for edited in (
+        replace(replay, canonical_mesh_authority=True),
+        replace(replay, source_depth_or_visibility=True),
+        replace(replay, source_binding_sha256="f"*64),
+        replace(replay, checked_ray_count=7),
+        replace(replay, max_channel_error=float("nan")),
+    ):
+        with pytest.raises(QualificationError, match="RSS_VNEXT_RAY_REPLAY_"):
+            validate_source_ray_replay_court_v1(
+                edited, source=src, evidence=evidence, source_identity_court=bound,
+            )
+
+
+def test_rehashed_wrong_ray_count_cannot_masquerade_as_valid_coverage():
+    src, evidence, bound = _case()
+    replay = replay_original_source_rays_v1(
+        source=src, evidence=evidence, source_identity_court=bound,
+    )
+    altered = replace(replay, checked_ray_count=1, court_sha256="")
+    fields = asdict(altered)
+    fields.pop("court_sha256")
+    altered = replace(altered, court_sha256=content_sha256(fields))
+    with pytest.raises(QualificationError, match="RECEIPT_COVERAGE_OR_STATE_DRIFT"):
+        validate_source_ray_replay_court_v1(
+            altered, source=src, evidence=evidence, source_identity_court=bound,
+        )
+
+
+def test_abstain_receipt_is_readable_but_cannot_claim_success():
+    src, evidence, _ = _case()
+    abstain = seal_inference_evidence_v1(replace(
+        evidence, mesh=None, mesh_status="ABSTAIN",
+        reason="NO_VALID_TOPOLOGY", evidence_hash="",
+    ))
+    court = validate_rss_vnext_source_evidence_binding_v1(
+        source=src, evidence=abstain,
+        expected_source_binding_sha256=src.source_binding_sha256,
+    )
+    receipt = replay_original_source_rays_v1(
+        source=src, evidence=abstain, source_identity_court=court,
+    )
+    validate_source_ray_replay_court_v1(
+        receipt, source=src, evidence=abstain, source_identity_court=court,
+    )
+    false = replace(receipt, state="REPLAY_VERIFIED_NO_SURFACE_AUTHORITY")
+    with pytest.raises(QualificationError, match="RECEIPT_ABSTAIN_DRIFT"):
+        validate_source_ray_replay_court_v1(
+            false, source=src, evidence=abstain, source_identity_court=court,
+        )

@@ -44,6 +44,101 @@ SCHEMA = "RealSaS.RSSvNext.CanonicalMeshCandidateBridge.v1"
 _MAX_VERTICES = 250_000
 _MAX_FACES = 500_000
 _SOURCE_BASE_SUPPORT_MAX_DISTANCE = 2.0e-5
+_SOURCE_CORRESPONDENCE_SCHEMA = "RealSaS.RSSvNext.SourceCorrespondenceAdmission.v1"
+_SOURCE_CORRESPONDENCE_REQUIRED = frozenset((
+    "schema", "admission_state", "producer_id",
+    "inference_evidence_hash", "candidate_mesh_sha256",
+    "source_surface_lineage_hash", "partition_lineage_hash",
+    "carrier_policy_lineage_hash", "vertex_support_hash",
+    "component_correspondence_hash",
+    "source_observation_receipt_sha256",
+))
+
+
+def validate_trusted_source_correspondence_v1(
+    *, receipt_sha256: str,
+    trusted_registry: Mapping[str, Mapping[str, Any]] | None,
+    evidence_hash: str,
+    candidate_mesh_sha256: str,
+    source_surface_lineage_hash: str,
+    partition_lineage_hash: str,
+    carrier_policy_lineage_hash: str,
+    source_supports_by_vertex: Mapping[int, SurfaceSupportBinding],
+    source_component_ids_by_candidate_index: Mapping[int, str],
+) -> None:
+    """Require separately registered, exact-byte source support admission.
+
+    This validator checks a platform-owned registration, not a user-supplied
+    digest-as-proof. A registry entry attests correspondence provenance; it
+    cannot itself qualify mesh source fidelity or executable puppet controls.
+    """
+    if not _sha(receipt_sha256) or not isinstance(trusted_registry, Mapping):
+        _fail("INDEPENDENT_SOURCE_ADMISSION_REGISTRY_REQUIRED")
+    receipt = trusted_registry.get(receipt_sha256)
+    if type(receipt) is not dict or set(receipt) != _SOURCE_CORRESPONDENCE_REQUIRED:
+        _fail("SOURCE_CORRESPONDENCE_RECEIPT_UNREGISTERED_OR_SCHEMA_DRIFT")
+    if content_sha256(receipt) != receipt_sha256:
+        _fail("SOURCE_CORRESPONDENCE_RECEIPT_CONTENT_DRIFT")
+    expected = {
+        "schema": _SOURCE_CORRESPONDENCE_SCHEMA,
+        "admission_state": "SOURCE_CORRESPONDENCE_INDEPENDENTLY_ADMITTED",
+        "inference_evidence_hash": evidence_hash,
+        "candidate_mesh_sha256": candidate_mesh_sha256,
+        "source_surface_lineage_hash": source_surface_lineage_hash,
+        "partition_lineage_hash": partition_lineage_hash,
+        "carrier_policy_lineage_hash": carrier_policy_lineage_hash,
+        "vertex_support_hash": content_sha256([
+            {"vertex_index": i, "support": asdict(source_supports_by_vertex[i])}
+            for i in sorted(source_supports_by_vertex)
+        ]),
+        "component_correspondence_hash": content_sha256([
+            {"component_index": i, "source_component_id": source_component_ids_by_candidate_index[i]}
+            for i in sorted(source_component_ids_by_candidate_index)
+        ]),
+    }
+    if any(receipt.get(k) != v for k, v in expected.items()):
+        _fail("SOURCE_CORRESPONDENCE_REGISTERED_PARENT_DRIFT")
+    if (
+        type(receipt["producer_id"]) is not str or not receipt["producer_id"]
+        or receipt["producer_id"].startswith("RealSaS.RSSvNext.CanonicalMeshCandidateBridge")
+        or not _sha(receipt["source_observation_receipt_sha256"])
+    ):
+        _fail("SOURCE_CORRESPONDENCE_INDEPENDENT_PRODUCER_REQUIRED")
+
+
+def build_source_correspondence_receipt_payload_v1(
+    *, evidence_hash: str, candidate_mesh_sha256: str,
+    source_surface_lineage_hash: str, partition_lineage_hash: str,
+    carrier_policy_lineage_hash: str,
+    source_supports_by_vertex: Mapping[int, SurfaceSupportBinding],
+    source_component_ids_by_candidate_index: Mapping[int, str],
+    source_observation_receipt_sha256: str,
+    producer_id: str,
+) -> dict[str, Any]:
+    """Canonical payload format ONLY; never records trust or admits itself.
+
+    The platform's separately qualified source producer must register the
+    payload digest before a candidate compiler is allowed to consume it.
+    """
+    return {
+        "schema": _SOURCE_CORRESPONDENCE_SCHEMA,
+        "admission_state": "SOURCE_CORRESPONDENCE_INDEPENDENTLY_ADMITTED",
+        "producer_id": producer_id,
+        "inference_evidence_hash": evidence_hash,
+        "candidate_mesh_sha256": candidate_mesh_sha256,
+        "source_surface_lineage_hash": source_surface_lineage_hash,
+        "partition_lineage_hash": partition_lineage_hash,
+        "carrier_policy_lineage_hash": carrier_policy_lineage_hash,
+        "vertex_support_hash": content_sha256([
+            {"vertex_index": i, "support": asdict(source_supports_by_vertex[i])}
+            for i in sorted(source_supports_by_vertex)
+        ]),
+        "component_correspondence_hash": content_sha256([
+            {"component_index": i, "source_component_id": source_component_ids_by_candidate_index[i]}
+            for i in sorted(source_component_ids_by_candidate_index)
+        ]),
+        "source_observation_receipt_sha256": source_observation_receipt_sha256,
+    }
 
 
 @dataclass(frozen=True)
@@ -90,6 +185,7 @@ def build_rss_vnext_canonical_mesh_candidate_bridge_v1(
     source_supports_by_vertex: Mapping[int, SurfaceSupportBinding] | None = None,
     source_component_ids_by_candidate_index: Mapping[int, str] | None = None,
     source_correspondence_receipt_sha256: str | None = None,
+    trusted_source_correspondence_registry: Mapping[str, Mapping[str, Any]] | None = None,
     allow_unqualified_neural_basis: bool = False,
 ) -> RSSvNextCanonicalMeshCandidateBridgeV1:
     """Bind existing source-support addresses to TESSA *without* minting Mesh.
@@ -128,6 +224,7 @@ def build_rss_vnext_canonical_mesh_candidate_bridge_v1(
         source_surface, source_partition, source_carrier_policy,
         source_supports_by_vertex, source_component_ids_by_candidate_index,
         source_correspondence_receipt_sha256,
+        trusted_source_correspondence_registry,
     )
     if allow_unqualified_neural_basis and all(x is None for x in supplied):
         from .rss_vnext_neural_mesh_proposal_basis_v1 import (
@@ -166,6 +263,7 @@ def build_rss_vnext_canonical_mesh_candidate_bridge_v1(
             "SOURCE_SURFACE", "SOURCE_PARTITION", "SOURCE_CARRIER_POLICY",
             "PER_VERTEX_SOURCE_SUPPORT", "COMPONENT_SOURCE_CORRESPONDENCE",
             "INDEPENDENT_SOURCE_CORRESPONDENCE_RECEIPT",
+            "INDEPENDENT_SOURCE_CORRESPONDENCE_REGISTRY",
         ), supplied) if val is None)
         return RSSvNextCanonicalMeshCandidateBridgeV1(
             **parent, state="ABSTAIN_SOURCE_CORRESPONDENCE_REQUIRED",
@@ -292,6 +390,20 @@ def build_rss_vnext_canonical_mesh_candidate_bridge_v1(
         face_ids.append(tri)
         for a, b in ((tri[0], tri[1]), (tri[1], tri[2]), (tri[2], tri[0])):
             edges.add(tuple(sorted((a, b))))
+    # Only a registry-owned, exact-content receipt can bind these addresses.
+    # A caller's arbitrary 64-char string was previously accepted as if it
+    # attested independent source correspondence; reject that substitution.
+    validate_trusted_source_correspondence_v1(
+        receipt_sha256=source_correspondence_receipt_sha256,
+        trusted_registry=trusted_source_correspondence_registry,
+        evidence_hash=evidence.evidence_hash,
+        candidate_mesh_sha256=computed_surface.candidate_mesh_sha256,
+        source_surface_lineage_hash=source_surface.geometry_lineage_hash,
+        partition_lineage_hash=source_partition.partition_lineage_hash,
+        carrier_policy_lineage_hash=source_carrier_policy.carrier_policy_lineage_hash,
+        source_supports_by_vertex=source_supports_by_vertex,
+        source_component_ids_by_candidate_index=source_component_ids_by_candidate_index,
+    )
     correspondence_hash = content_sha256({
         "schema": "RealSaS.RSSvNext.ExternalSourceCorrespondenceBinding.v1",
         "original_inference_evidence_hash": evidence.evidence_hash,
@@ -353,4 +465,6 @@ def build_rss_vnext_canonical_mesh_candidate_bridge_v1(
 __all__ = [
     "SCHEMA", "RSSvNextCanonicalMeshCandidateBridgeV1",
     "build_rss_vnext_canonical_mesh_candidate_bridge_v1",
+    "build_source_correspondence_receipt_payload_v1",
+    "validate_trusted_source_correspondence_v1",
 ]

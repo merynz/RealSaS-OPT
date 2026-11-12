@@ -20,6 +20,7 @@ from compiler.realsas_compiler_core.product_authority_v1 import (
 )
 from compiler.realsas_compiler_core.rss_vnext_canonical_mesh_candidate_bridge_v1 import (
     build_rss_vnext_canonical_mesh_candidate_bridge_v1,
+    build_source_correspondence_receipt_payload_v1,
 )
 from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
     seal_inference_evidence_v1,
@@ -73,8 +74,25 @@ def _parents():
         "source_partition": partition, "source_carrier_policy": carrier,
         "source_supports_by_vertex": supports,
         "source_component_ids_by_candidate_index": mapping,
-        "source_correspondence_receipt_sha256": "f" * 64,
+        "source_correspondence_receipt_sha256": None,
+        "trusted_source_correspondence_registry": None,
     }
+    # A synthetic, independently named source-fixture producer registers
+    # exact source/mesh/support parent fields. This never certifies real art.
+    payload = build_source_correspondence_receipt_payload_v1(
+        evidence_hash=evidence.evidence_hash,
+        candidate_mesh_sha256=content_sha256(mesh),
+        source_surface_lineage_hash=src.geometry_lineage_hash,
+        partition_lineage_hash=partition.partition_lineage_hash,
+        carrier_policy_lineage_hash=carrier.carrier_policy_lineage_hash,
+        source_supports_by_vertex=supports,
+        source_component_ids_by_candidate_index=mapping,
+        source_observation_receipt_sha256="f" * 64,
+        producer_id="SYNTHETIC_INDEPENDENT_TEST_SOURCE_FIXTURE",
+    )
+    key = content_sha256(payload)
+    kwargs["source_correspondence_receipt_sha256"] = key
+    kwargs["trusted_source_correspondence_registry"] = {key: payload}
     return kwargs
 
 
@@ -122,12 +140,13 @@ def test_no_source_witness_is_abstain_not_fabricated_identity_support():
         "source_surface", "source_partition", "source_carrier_policy",
         "source_supports_by_vertex", "source_component_ids_by_candidate_index",
         "source_correspondence_receipt_sha256",
+        "trusted_source_correspondence_registry",
     ):
         kw[field] = None
     result = _compile(kw)
     assert result.state == "ABSTAIN_SOURCE_CORRESPONDENCE_REQUIRED"
     assert result.candidate is None
-    assert len(result.missing_requirements) == 6
+    assert len(result.missing_requirements) == 7
     assert not result.canonical_mesh_authority
 
 
@@ -213,3 +232,60 @@ def test_refinement_is_geometry_proposal_not_original_rgba_or_source_visibility(
         assert vertex.metadata["canonical_authority"] is False
     assert not bridge.drawable_authority
     assert not bridge.mechanical_joint_authority
+
+
+@pytest.mark.parametrize("tamper,expected", [
+    ("unregistered_digest", "UNREGISTERED_OR_SCHEMA_DRIFT"),
+    ("replaced_parent_hash", "CONTENT_DRIFT"),
+    ("wrong_source_receipt", "CONTENT_DRIFT"),
+    ("wrong_producer", "CONTENT_DRIFT"),
+])
+def test_source_witness_digest_is_not_sufficient_for_source_admission(tamper, expected):
+    kw = _parents()
+    key = kw["source_correspondence_receipt_sha256"]
+    if tamper == "unregistered_digest":
+        kw["source_correspondence_receipt_sha256"] = "f" * 64
+    else:
+        value = dict(kw["trusted_source_correspondence_registry"][key])
+        if tamper == "replaced_parent_hash":
+            value["source_surface_lineage_hash"] = "a" * 64
+        elif tamper == "wrong_source_receipt":
+            value["source_observation_receipt_sha256"] = "e" * 64
+        else:
+            value["producer_id"] = "RealSaS.RSSvNext.CanonicalMeshCandidateBridge"
+        kw["trusted_source_correspondence_registry"] = {key: value}
+    with pytest.raises(QualificationError, match=expected):
+        _compile(kw)
+
+
+def test_validly_rehashed_but_wrong_component_receipt_cannot_cross_parent_boundary():
+    kw = _parents()
+    key = kw["source_correspondence_receipt_sha256"]
+    value = dict(kw["trusted_source_correspondence_registry"][key])
+    value["component_correspondence_hash"] = "1" * 64
+    new_key = content_sha256(value)
+    kw["trusted_source_correspondence_registry"] = {new_key: value}
+    kw["source_correspondence_receipt_sha256"] = new_key
+    with pytest.raises(QualificationError, match="REGISTERED_PARENT_DRIFT"):
+        _compile(kw)
+
+
+def test_same_receipt_cannot_be_replayed_against_another_source_correspondence():
+    kw = _parents()
+    altered = dict(kw["source_supports_by_vertex"])
+    altered[0] = replace(
+        altered[0], metadata={"same_node_different_source_witness": True},
+    )
+    kw["source_supports_by_vertex"] = altered
+    with pytest.raises(QualificationError, match="REGISTERED_PARENT_DRIFT"):
+        _compile(kw)
+
+
+def test_missing_source_admission_registry_abstains_without_qualifying_candidate():
+    kw = _parents()
+    kw["trusted_source_correspondence_registry"] = None
+    result = _compile(kw)
+    assert result.state == "ABSTAIN_SOURCE_CORRESPONDENCE_REQUIRED"
+    assert "INDEPENDENT_SOURCE_CORRESPONDENCE_REGISTRY" in result.missing_requirements
+    assert result.candidate is None
+    assert result.canonical_mesh_authority is False

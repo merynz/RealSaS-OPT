@@ -21,6 +21,10 @@ on:
       - ".github/workflows/rss_vnext_busted_main_product_gateway_cpu.yml"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 

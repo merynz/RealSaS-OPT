@@ -10,6 +10,7 @@ from models.rss_vnext import (
 from models.rss_vnext.stdgen_slrm_training_driver_v1 import (
     StdGENSLRMBatchV1,StdGENSLRMTrainingLossWeightsV1,
     StdGENSLRMTrainerV1,_digest,
+    STDGEN_SIX_VIEW_TRAINING_PROFILE,RESEARCH_ONE_VIEW_TRAINING_PROFILE,
 )
 from models.rss_vnext.stdgen_scene_conditioning_v1 import (
     CANONICAL_REFERENCE,SIX_VIEW_PRIOR,
@@ -70,6 +71,10 @@ def _batch(stage=STAGE_1,view_count=1):
     )
     receipt=dict(
         admission_status="QUALIFIED_SOURCE_3D_RENDER_MULTILAYER",
+        slrm_training_input_profile=(
+            RESEARCH_ONE_VIEW_TRAINING_PROFILE if view_count==1
+            else STDGEN_SIX_VIEW_TRAINING_PROFILE
+        ),
         dataset_manifest_sha256="f"*64,
         original_source_binding_sha256=batch.source_binding_sha256,
         original_observed_view_count=1,
@@ -100,6 +105,7 @@ def _trainer(model,receipt):
         model,torch.optim.AdamW(model.parameters(),lr=.001),
         dataset_manifest_sha256="f"*64,
         weights=StdGENSLRMTrainingLossWeightsV1(lpips=0.),
+        input_profile=receipt["slrm_training_input_profile"],
         trusted_source_3d_render_registry={"admitted":receipt},
     )
 
@@ -237,3 +243,40 @@ def test_lpips_paper_term_is_required_unless_explicitly_disabled():
             dataset_manifest_sha256="f"*64,
             trusted_source_3d_render_registry={"admitted":receipt},
         )
+
+
+
+def test_published_six_view_baseline_never_accepts_a_single_direct_view():
+    net,batch,receipt=_batch(STAGE_1,1)
+    six=StdGENSLRMTrainerV1(
+        net,torch.optim.AdamW(net.parameters()),
+        dataset_manifest_sha256="f"*64,
+        weights=StdGENSLRMTrainingLossWeightsV1(lpips=0.),
+        trusted_source_3d_render_registry={"admitted":receipt},
+    )
+    with pytest.raises(ValueError,match="SIX_VIEW_BASELINE_VS_ONE_VIEW_ABLATION"):
+        six.objective(batch)
+
+
+def test_original_single_photo_yields_six_generated_slrm_inputs_even_stage1():
+    net,batch,receipt=_batch(STAGE_1,6)
+    assert batch.original_observed_view_count==1
+    six=_trainer(net,receipt)
+    assert six.input_profile==STDGEN_SIX_VIEW_TRAINING_PROFILE
+    assert torch.isfinite(six.train_step(batch)["total"])
+
+
+def test_pretrained_6_view_and_research_one_view_ablation_resume_incompatible(tmp_path):
+    net,batch,receipt=_batch(STAGE_1,6)
+    six=_trainer(net,receipt)
+    filename=tmp_path/"six-view-checkpoint.pt"
+    six.save_checkpoint(filename,sampler_cursor=5)
+    alternate=StdGENSLRMTrainerV1(
+        net,torch.optim.AdamW(net.parameters()),
+        dataset_manifest_sha256="f"*64,
+        weights=StdGENSLRMTrainingLossWeightsV1(lpips=0.),
+        trusted_source_3d_render_registry={"admitted":receipt},
+        input_profile=RESEARCH_ONE_VIEW_TRAINING_PROFILE,
+    )
+    with pytest.raises(ValueError,match="CHECKPOINT_OBJECTIVE_POLICY_DRIFT"):
+        alternate.load_checkpoint(filename)

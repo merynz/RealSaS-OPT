@@ -95,6 +95,10 @@ class StdGENSLRMTrainingLossWeightsV1:
             raise ValueError("RSS_VNEXT_STDGEN_SLRM_NO_ACTIVE_LOSS")
 
 
+STDGEN_SIX_VIEW_TRAINING_PROFILE="STDGEN_2025_SIX_PREDICTED_RGB_SLRM_BASELINE"
+RESEARCH_ONE_VIEW_TRAINING_PROFILE="BUSTED_DIRECT_SINGLE_VIEW_SLRM_ABLATION_NOT_STDGEN"
+
+
 class StdGENSLRMTrainerV1:
     """Actual optimizer step, stages 1/2 with 1/6 source-conditioned H(x).
 
@@ -111,13 +115,19 @@ class StdGENSLRMTrainerV1:
         lpips_loss_fn: Callable[[Tensor,Tensor],Tensor] | None = None,
         weights: StdGENSLRMTrainingLossWeightsV1 = StdGENSLRMTrainingLossWeightsV1(),
         clip_gradient_norm: float=1.,
+        input_profile: str=STDGEN_SIX_VIEW_TRAINING_PROFILE,
     ) -> None:
         weights.validate()
+        if input_profile not in (
+            STDGEN_SIX_VIEW_TRAINING_PROFILE,RESEARCH_ONE_VIEW_TRAINING_PROFILE,
+        ):
+            raise ValueError("RSS_VNEXT_STDGEN_SLRM_TRAINING_PROFILE_INVALID")
         if not _sha(dataset_manifest_sha256) or not isinstance(model,RSSvNextUnifiedCharacterModel):
             raise ValueError("RSS_VNEXT_STDGEN_SLRM_TRAINER_CONFIG")
         if clip_gradient_norm<=0:
             raise ValueError("RSS_VNEXT_STDGEN_SLRM_GRAD_CLIP_INVALID")
         self.model=model;self.optimizer=optimizer;self.weights=weights
+        self.input_profile=input_profile
         self.lpips_loss_fn=lpips_loss_fn
         if weights.lpips>0 and lpips_loss_fn is None:
             raise ValueError("RSS_VNEXT_STDGEN_SLRM_LPIPS_REQUIRED_NOT_MSE_SURROGATE")
@@ -132,19 +142,36 @@ class StdGENSLRMTrainerV1:
             snapshot,sort_keys=True,separators=(",",":"),allow_nan=False,
         ).encode()).hexdigest()
         self.policy_sha256=sha256(json.dumps(
-            asdict(weights),sort_keys=True,separators=(",",":"),
+            {"weights":asdict(weights),"input_profile":input_profile},
+            sort_keys=True,separators=(",",":"),
         ).encode()).hexdigest()
         self.clip_gradient_norm=clip_gradient_norm
         self.global_step=0
 
     def _verify_receipt(self,batch:StdGENSLRMBatchV1) -> None:
         t=batch.source_3d_render_target
+        # Published StdGEN: ONE real product photo -> canonicalization ->
+        # SIX generated orthographic RGBs -> S-LRM. Direct one-view
+        # S-LRM is BUSTED-specific ablation, never advertised as baseline.
+        input_views=batch.conditioning_rgba.shape[1] if batch.conditioning_rgba.ndim==5 else -1
+        if (
+            (self.input_profile==STDGEN_SIX_VIEW_TRAINING_PROFILE and (
+                input_views!=6 or batch.conditioning_authority!=SIX_VIEW_PRIOR
+            )) or
+            (self.input_profile==RESEARCH_ONE_VIEW_TRAINING_PROFILE and (
+                input_views!=1 or batch.conditioning_authority not in (
+                    CANONICAL_REFERENCE,ONE_MEASURED_SOURCE,
+                )
+            ))
+        ):
+            raise ValueError("RSS_VNEXT_STDGEN_SLRM_SIX_VIEW_BASELINE_VS_ONE_VIEW_ABLATION")
         if type(t) is not StdGENJointTargetV1 or not batch.admitted_3d_render_key:
             raise ValueError("RSS_VNEXT_STDGEN_SLRM_SOURCE_TARGET_REQUIRED")
         if t.stage not in (STAGE_1,STAGE_2,STAGE_3):
             raise ValueError("RSS_VNEXT_STDGEN_SLRM_UNKNOWN_STAGE")
         inputs={
             "admission_status":"QUALIFIED_SOURCE_3D_RENDER_MULTILAYER",
+            "slrm_training_input_profile":self.input_profile,
             "dataset_manifest_sha256":self.manifest_sha256,
             "original_source_binding_sha256":batch.source_binding_sha256,
             "original_observed_view_count":batch.original_observed_view_count,
@@ -382,4 +409,6 @@ class StdGENSLRMTrainerV1:
         return int(data["sampler_cursor"])
 
 
-__all__=["StdGENSLRMBatchV1","StdGENSLRMTrainingLossWeightsV1","StdGENSLRMTrainerV1"]
+__all__=["StdGENSLRMBatchV1","StdGENSLRMTrainingLossWeightsV1",
+    "StdGENSLRMTrainerV1","STDGEN_SIX_VIEW_TRAINING_PROFILE",
+    "RESEARCH_ONE_VIEW_TRAINING_PROFILE"]

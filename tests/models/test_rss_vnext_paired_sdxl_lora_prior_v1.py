@@ -10,6 +10,7 @@ from models.rss_vnext.paired_sdxl_lora_prior_v1 import (
     BACKBONE_REPO, SDXLBackboneBindingV1, RSSvNextTwoImageConditionerV1,
     attach_pinned_sdxl_lora_unet_v1, seal_generated_diffusion_image_v1,
     validate_generated_diffusion_image_v1,
+    predict_sdxl_unet_noise_from_two_images_v1,
 )
 
 
@@ -121,6 +122,7 @@ def test_generated_view_is_lower_authority_than_two_unchanged_original_images():
         receipt, original_image_payloads=originals,
         generated_image_payload=generated,
         original_source_binding_sha256="d"*64,
+        expected_binding=model, expected_target_id="CANONICAL_REFERENCE",
     )
     assert receipt.original_image_sha256 != (receipt.generated_image_sha256,) * 2
     assert receipt.original_observed_view_count == 2
@@ -137,6 +139,7 @@ def test_generated_view_is_lower_authority_than_two_unchanged_original_images():
             original_image_payloads=originals,
             generated_image_payload=generated,
             original_source_binding_sha256="d"*64,
+            expected_binding=model, expected_target_id="CANONICAL_REFERENCE",
         )
     with pytest.raises(ValueError, match="GENERATED_RECEIPT_SOURCE_AUTHORITY_DRIFT"):
         validate_generated_diffusion_image_v1(
@@ -144,19 +147,22 @@ def test_generated_view_is_lower_authority_than_two_unchanged_original_images():
             original_image_payloads=(originals[1], originals[0]),
             generated_image_payload=generated,
             original_source_binding_sha256="d"*64,
+            expected_binding=model, expected_target_id="CANONICAL_REFERENCE",
         )
     changed = replace(receipt, target_id="DIFFERENT_TARGET", receipt_hash="")
     payload = asdict(changed)
     payload.pop("receipt_hash")
     forged = replace(changed, receipt_hash=content_sha256(payload))
-    # This currently remains a predicted target, never source; only typed
-    # trusted producer and later geometric consequence checks can qualify it.
-    validate_generated_diffusion_image_v1(
-        forged,
-        original_image_payloads=originals,
-        generated_image_payload=generated,
-        original_source_binding_sha256="d"*64,
-    )
+    # Rehashing a substituted generation target still cannot pass the
+    # consumer's independently expected canonical target.
+    with pytest.raises(ValueError, match="GENERATED_RECEIPT_SOURCE_AUTHORITY_DRIFT"):
+        validate_generated_diffusion_image_v1(
+            forged,
+            original_image_payloads=originals,
+            generated_image_payload=generated,
+            original_source_binding_sha256="d"*64,
+            expected_binding=model, expected_target_id="CANONICAL_REFERENCE",
+        )
 
 
 def test_local_loader_abstains_before_external_pretrained_weights():
@@ -169,3 +175,78 @@ def test_local_loader_abstains_before_external_pretrained_weights():
     with pytest.raises(ValueError, match="BACKBONE_PIN_OR_POLICY_INVALID"):
         bad.validate()
     assert _binding().model_repo == BACKBONE_REPO
+
+
+
+def test_sdxl_unet_true_cross_attention_abi_carries_two_observed_sources():
+    from types import SimpleNamespace
+
+    class RecordingUNet(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.last_context = None
+
+        def forward(self, sample, timestep, *, encoder_hidden_states,
+                    added_cond_kwargs, return_dict):
+            self.last_context = encoder_hidden_states.detach().clone()
+            assert return_dict
+            assert timestep == 17
+            assert encoder_hidden_states.shape == (2, 11, 2048)
+            assert added_cond_kwargs["time_ids"].shape == (2, 6)
+            assert added_cond_kwargs["text_embeds"].shape == (2, 1280)
+            return SimpleNamespace(
+                sample=sample + encoder_hidden_states[:, -1, 0, None, None, None],
+            )
+
+    model = RSSvNextTwoImageConditionerV1(
+        source_dim=32, pose_dim=12, hidden_dim=64,
+        output_dim=2048, queries=4, heads=4,
+    )
+    args = _inputs()
+    image_context = model(**args)
+    unet = RecordingUNet()
+    latents = torch.zeros(2, 4, 8, 8)
+    text = torch.zeros(2, 7, 2048)
+    pooled = torch.randn(2, 1280)
+    time_ids = torch.zeros(2, 6)
+    noise = predict_sdxl_unet_noise_from_two_images_v1(
+        unet=unet, noisy_latents=latents, timestep=17,
+        text_context=text, paired_image_context=image_context,
+        pooled_text_embedding=pooled, time_ids=time_ids,
+    )
+    assert noise.shape == latents.shape
+    assert unet.last_context is not None
+    modified = dict(args)
+    modified["observed_tokens"] = args["observed_tokens"].clone()
+    modified["observed_tokens"][:, 1] += 8.
+    new_image_context = model(**modified)
+    changed_noise = predict_sdxl_unet_noise_from_two_images_v1(
+        unet=unet, noisy_latents=latents, timestep=17,
+        text_context=text, paired_image_context=new_image_context,
+        pooled_text_embedding=pooled, time_ids=time_ids,
+    )
+    assert not torch.allclose(changed_noise, noise)
+
+
+def test_sdxl_unet_requires_extra_time_and_both_reference_contexts():
+    from types import SimpleNamespace
+
+    class HarmlessUNet(torch.nn.Module):
+        def forward(self, sample, timestep, **kwargs):
+            return SimpleNamespace(sample=sample)
+
+    args = dict(
+        unet=HarmlessUNet(), noisy_latents=torch.zeros(1, 4, 8, 8),
+        timestep=5, text_context=torch.zeros(1, 4, 2048),
+        paired_image_context=torch.zeros(1, 5, 2048),
+        pooled_text_embedding=torch.zeros(1, 1280),
+        time_ids=torch.zeros(1, 6),
+    )
+    with pytest.raises(ValueError, match="SDXL_TWO_IMAGE_UNET_INPUT_ABI"):
+        predict_sdxl_unet_noise_from_two_images_v1(
+            **{**args, "paired_image_context": torch.zeros(1, 0, 2048)},
+        )
+    with pytest.raises(ValueError, match="SDXL_TWO_IMAGE_UNET_INPUT_ABI"):
+        predict_sdxl_unet_noise_from_two_images_v1(
+            **{**args, "time_ids": torch.zeros(1, 5)},
+        )

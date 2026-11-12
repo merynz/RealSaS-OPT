@@ -208,7 +208,7 @@ def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_re
     court = json.loads(read(by_role["rss_cross_expert_capability_court"]))
     epistemic = json.loads(read(by_role["rss_relation_epistemic_court"]))
     assert epistemic["state"] == "TYPED_HYPOTHESES_UNQUALIFIED"
-    assert len(epistemic["decisions"]) == 8  # symmetric SAME/CUT, directed ATTACH
+    assert len(epistemic["decisions"]) == 4  # one SAME/CUT, two directed ATTACH
     assert {x["relation_type"] for x in epistemic["decisions"]} == {
         "SAME_DRAWABLE", "CUT_BOUNDARY", "DIRECTED_ATTACHMENT",
     }

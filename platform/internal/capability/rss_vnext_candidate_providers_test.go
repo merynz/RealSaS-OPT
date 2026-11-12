@@ -104,7 +104,6 @@ func TestRSSvNextProvidersAreAlternativesNotParallelIndependentProductModels(t *
 	}
 }
 
-
 func TestRSSvNextCandidateMeshConsumesExactUnifiedShapeNotOldEightViewStages(t *testing.T) {
 	registry, err := Build(
 		context.Background(),

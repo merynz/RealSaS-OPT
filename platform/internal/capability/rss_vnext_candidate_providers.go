@@ -104,7 +104,6 @@ func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descripto
 	}}, nil
 }
 
-
 // RSSvNextMeshCandidateProvider consumes original 2-view source plus the
 // independently addressed RSS neural evidence fanout from one Shape release.
 // This Compiler candidate does NOT mint CanonicalMesh, which still requires
@@ -130,19 +129,19 @@ func (RSSvNextMeshCandidateProvider) Capabilities(context.Context) ([]Descriptor
 		ProductPassAuthority: false,
 		Aliases:              []string{"RSS vNext Mesh Compiler", "Topology Replay"},
 		Metadata: map[string]any{
-			"product_role_id":                        string(ProductRoleMesh),
-			"implementation_class":                   string(ImplementationCompiler),
-			"interface_contract":                     RSSvNextMeshContractV2,
-			"executor_contract":                      RSSvNextMeshContractV2,
-			"input_source_artifact_type":             "RealSaS.RSSvNextTwoViewSource",
-			"input_source_schema_version":            "v1",
-			"input_fanout_artifact_type":             "RealSaS.RSSvNextProductEvidenceFanout",
-			"input_fanout_schema_version":            "v1",
-			"requires_shape_parent_binding":          true,
-			"requires_full_neural_scene_if_abstain":  false,
-			"output_artifact_type":                   "RealSaS.RSSvNextComputedCandidateSurface",
-			"output_schema_version":                  "v1",
-			"auxiliary_outputs":                      []any{
+			"product_role_id":                       string(ProductRoleMesh),
+			"implementation_class":                  string(ImplementationCompiler),
+			"interface_contract":                    RSSvNextMeshContractV2,
+			"executor_contract":                     RSSvNextMeshContractV2,
+			"input_source_artifact_type":            "RealSaS.RSSvNextTwoViewSource",
+			"input_source_schema_version":           "v1",
+			"input_fanout_artifact_type":            "RealSaS.RSSvNextProductEvidenceFanout",
+			"input_fanout_schema_version":           "v1",
+			"requires_shape_parent_binding":         true,
+			"requires_full_neural_scene_if_abstain": false,
+			"output_artifact_type":                  "RealSaS.RSSvNextComputedCandidateSurface",
+			"output_schema_version":                 "v1",
+			"auxiliary_outputs": []any{
 				map[string]any{"role": "rss_sparse_face_relation_candidates", "artifact_type": "RealSaS.RSSvNextSparseCandidateFaceRelations", "schema_version": "v1"},
 			},
 			"canonical_mesh_authority":               false,

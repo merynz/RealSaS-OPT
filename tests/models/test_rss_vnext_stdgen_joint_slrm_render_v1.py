@@ -6,6 +6,7 @@ import pytest
 from models.rss_vnext.stdgen_joint_slrm_render_v1 import (
     STAGE_1,STAGE_2,STAGE_3,StdGENJointTargetV1,
     render_stdgen_joint_rays_v1,render_stdgen_joint_from_shared_scene_v1,
+    StdGENFlexiCubesLayerRasterV1,
     stdgen_joint_stage_loss_v1,
 )
 
@@ -70,22 +71,33 @@ def test_stage3_requires_independent_mesh_render_and_all_3_losses():
     render,*_=_rays()
     with pytest.raises(ValueError,match="STAGE3_REQUIRES_FLEXICUBES_MESH_RENDER"):
         stdgen_joint_stage_loss_v1(render,_target(STAGE_3))
+    mesh=StdGENFlexiCubesLayerRasterV1(
+        rgb_white_composite=torch.tensor([[[.8,.2,.2]]],requires_grad=True),
+        alpha=torch.ones((1,1,1)),
+        semantic_posterior=torch.tensor([[[.2,.8]]],requires_grad=True),
+        normal_xyz=torch.tensor([[[0.,0.,1.]]],requires_grad=True),
+        depth=torch.tensor([[[.6]]],requires_grad=True),
+        flexicubes_deformation_regularizer=torch.tensor(.2,requires_grad=True),
+        source_scene_prediction_sha256="f"*64,
+        mesh_surface_prediction_sha256="e"*64,
+        semantic_layer_name="peeled",rasterizer_identity="test-fake-not-prod",
+    )
     params=dict(
-        mesh_normal=torch.tensor([[[0.,0.,1.]]],requires_grad=True),
-        mesh_depth=torch.tensor([[[.6]]],requires_grad=True),
+        mesh_raster=mesh,
         target_normal=torch.tensor([[[0.,1.,0.]]]),
         target_depth=torch.tensor([[[.3]]]),
         qualified_normal_mask=torch.ones((1,1),dtype=torch.bool),
         qualified_depth_mask=torch.ones((1,1),dtype=torch.bool),
-        flexicubes_deformation_loss=torch.tensor(.2,requires_grad=True),
     )
     loss=stdgen_joint_stage_loss_v1(render,_target(STAGE_3),**params)
     assert torch.allclose(loss["normal_cosine"],torch.tensor(1.))
     assert torch.allclose(loss["depth_l1"],torch.tensor(.3))
     assert torch.allclose(loss["flexicubes_deformation"],torch.tensor(.2))
     loss["total"].backward()
-    assert params["mesh_normal"].grad is not None
-    assert params["mesh_depth"].grad is not None
+    assert mesh.normal_xyz.grad is not None
+    assert mesh.depth.grad is not None
+    assert mesh.rgb_white_composite.grad.abs().sum()>0
+    assert mesh.semantic_posterior.grad.abs().sum()>0
 
 
 def test_generated_pseudotruth_and_bad_role_mask_rejected():
@@ -134,3 +146,35 @@ def test_joint_render_from_one_shared_H_not_separate_semantic_graphics_scene():
 def test_no_unknown_generated_pixel_can_gain_source_authority():
     render,*_=_rays()
     assert render.authority=="PREDICTED_SHARED_TRIPLANE_JOINT_FIELDS_NOT_SOURCE_TRUTH"
+
+
+
+def test_stdgen_stage3_mesh_semantic_graphics_must_not_use_nerf_color():
+    from dataclasses import replace
+    nerf,*_=_rays()
+    mesh=StdGENFlexiCubesLayerRasterV1(
+        rgb_white_composite=torch.tensor([[[.3,.8,.1]]],requires_grad=True),
+        alpha=torch.tensor([[[.8]]],requires_grad=True),
+        semantic_posterior=torch.tensor([[[.1,.9]]],requires_grad=True),
+        normal_xyz=torch.tensor([[[0.,0.,1.]]],requires_grad=True),
+        depth=torch.tensor([[[.6]]],requires_grad=True),
+        flexicubes_deformation_regularizer=torch.tensor(.1,requires_grad=True),
+        source_scene_prediction_sha256="e"*64,
+        mesh_surface_prediction_sha256="f"*64,
+        semantic_layer_name="peeled",rasterizer_identity="nvdiffrast-standin-cpu",
+    )
+    target=_target(STAGE_3)
+    kwargs=dict(mesh_raster=mesh,target_normal=torch.tensor([[[0.,0.,1.]]]),
+        target_depth=torch.tensor([[[.6]]]),
+        qualified_normal_mask=torch.ones((1,1),dtype=torch.bool),
+        qualified_depth_mask=torch.ones((1,1),dtype=torch.bool))
+    loss=stdgen_joint_stage_loss_v1(nerf,target,**kwargs)
+    changed=replace(nerf,rgb_white_composite=torch.zeros_like(nerf.rgb_white_composite),
+        alpha=torch.zeros_like(nerf.alpha),
+        semantic_posterior=torch.zeros_like(nerf.semantic_posterior))
+    unchanged=stdgen_joint_stage_loss_v1(changed,target,**kwargs)
+    assert torch.allclose(loss["total"],unchanged["total"])
+    loss["total"].backward()
+    assert mesh.rgb_white_composite.grad.abs().sum()>0
+    assert mesh.alpha.grad.abs().sum()>0
+    assert mesh.semantic_posterior.grad.abs().sum()>0

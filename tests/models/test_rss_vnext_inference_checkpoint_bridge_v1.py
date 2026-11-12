@@ -337,6 +337,18 @@ def test_real_checkpoint_two_view_model_to_replayable_compiler_receipt(tmp_path)
     )
     assert again == receipt
     assert evidence.mesh_status == receipt["status"]
+    assert receipt["schema"] == "RealSaS.RSSvNext.SourceToCompilerProposalReceipt.v2"
+    assert receipt["neural_scene_schema"] == "RealSaS.RSSvNext.NeuralSceneCarrier.v1"
+    assert receipt["neural_scene_product_authority"] is False
+    assert (out_dir / "rss_vnext_neural_scene.npz").is_file()
+    from models.rss_vnext.inference_pipeline_v1 import read_compiler_neural_scene_v1
+    carrier = read_compiler_neural_scene_v1(
+        out_dir, expected_checkpoint_sha256=digest,
+    )
+    assert carrier["local_features"].shape[0] == 1
+    assert carrier["scene_triplanes"].shape[1] == 3
+    assert carrier["graphics_logits"].shape[-1] == 5
+    assert "geometry__H" in carrier
     with pytest.raises(RuntimeError, match="OUTPUT_REVISION_ALREADY_EXISTS"):
         run_two_view_to_compiler_proposal_v1(
             checkpoint_path=checkpoint, expected_checkpoint_sha256=digest,
@@ -348,6 +360,13 @@ def test_real_checkpoint_two_view_model_to_replayable_compiler_receipt(tmp_path)
         read_compiler_proposal_receipt_v1(
             out_dir, expected_checkpoint_sha256="e" * 64,
         )
+    carrier_copy = (out_dir / "rss_vnext_neural_scene.npz").read_bytes()
+    (out_dir / "rss_vnext_neural_scene.npz").write_bytes(carrier_copy + b"tampered")
+    with pytest.raises(RuntimeError, match="RECEIPT_NEURAL_CARRIER_BYTES_DRIFT"):
+        read_compiler_proposal_receipt_v1(
+            out_dir, expected_checkpoint_sha256=digest,
+        )
+    (out_dir / "rss_vnext_neural_scene.npz").write_bytes(carrier_copy)
     with (out_dir / "observed_source_tensors.npz").open("ab") as fh:
         fh.write(b"attack")
     with pytest.raises(RuntimeError, match="ARTIFACT_BYTES_DRIFT"):
@@ -672,3 +691,85 @@ def test_semantic_and_dynamic_nan_are_typed_rejections_before_hash():
     }
     with pytest.raises(QualificationError,match="SKIN_SHAPE"):
         seal_inference_evidence_v1(_candidate(dynamic=dynamic))
+
+
+def _abstaining_real_rss_scene_for_archive():
+    from models.rss_vnext.neural_scene_archive_v1 import (
+        encode_neural_scene_carrier_v1, read_neural_scene_carrier_v1,
+    )
+    net = _network()
+    rgba, cam = _images()
+    with torch.no_grad():
+        state, _, _ = net.encode_observations(rgba, cam)
+    prediction = {
+        "state": state, "mesh_status": "ABSTAIN",
+        "mesh_candidate": None, "mesh_failure": "TOPOLOGY_SEQUENCE_INCOMPLETE",
+        "observed_view_count": 2,
+        "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
+        "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
+    }
+    evidence = export_inference_evidence_v1(
+        prediction, original_rgba=rgba,
+        original_camera_features=cam, checkpoint_sha256="a" * 64,
+    )
+    payload = encode_neural_scene_carrier_v1(state, evidence=evidence)
+    return state, evidence, payload
+
+
+def test_rss_unified_neural_carrier_preserves_full_h_and_triplanes_even_on_mesh_abstain():
+    from models.rss_vnext.neural_scene_archive_v1 import read_neural_scene_carrier_v1
+    state, evidence, payload = _abstaining_real_rss_scene_for_archive()
+    tensors = read_neural_scene_carrier_v1(payload, evidence=evidence)
+    assert evidence.mesh_status == "ABSTAIN"
+    assert not evidence.mesh
+    for key in (
+        "scene_triplanes", "local_features", "graphics_logits",
+        "semantic_logits", "region_slot_features", "region_relation_tokens",
+        "conditioned_image_tokens", "observed_image_tokens",
+        "region_relation_logits", "region_relation_valid_mask",
+        "source_semantic_patch_logits", "source_semantic_log_uncertainty",
+    ):
+        assert torch.equal(tensors[key], getattr(state, key)), key
+    assert torch.equal(tensors["geometry__H"], state.geometry["H"])
+    assert torch.equal(tensors["geometry__extraction_delta"], state.geometry["extraction_delta"])
+    assert not torch.equal(
+        tensors["observed_image_tokens"], tensors["conditioned_image_tokens"],
+    ) or tensors["observed_image_tokens"].shape == tensors["conditioned_image_tokens"].shape
+    # Full H and scene planes are not in the historical compact Compiler
+    # evidence JSON. The independent archive is therefore not a duplicate.
+    assert "scene_triplanes" not in evidence.scene
+    assert "local_features" not in evidence.scene
+    assert "geometry__H" not in evidence.scene
+
+
+def test_rss_unified_neural_carrier_rejects_cross_checkpoint_and_rehashed_field_drift():
+    from models.rss_vnext.neural_scene_archive_v1 import read_neural_scene_carrier_v1
+    from io import BytesIO
+    state, evidence, payload = _abstaining_real_rss_scene_for_archive()
+    with pytest.raises(RuntimeError, match="NEURAL_CARRIER_BINDING_OR_FIELDS_DRIFT"):
+        read_neural_scene_carrier_v1(
+            payload, evidence=seal_inference_evidence_v1(
+                replace(evidence, checkpoint_sha256="e" * 64, evidence_hash=""),
+            ),
+        )
+    with np.load(BytesIO(payload), allow_pickle=False) as archive:
+        fields = {name: np.asarray(archive[name]).copy() for name in archive.files}
+    # Modify an actually addressed Graphics value, leaving every zip member
+    # parseable and the model-parent manifest untouched.
+    fields["graphics_logits"][0, 0, 0] += np.float32(.125)
+    stream = BytesIO()
+    np.savez_compressed(stream, **fields)
+    with pytest.raises(RuntimeError, match="NEURAL_CARRIER_SHARED_EVIDENCE_DRIFT:graphics_logits"):
+        read_neural_scene_carrier_v1(stream.getvalue(), evidence=evidence)
+
+
+def test_rss_neural_carrier_raw_bfloat16_bits_survive_losslessly():
+    from models.rss_vnext.neural_scene_archive_v1 import (
+        _array_from_tensor, _tensor_from_array,
+    )
+    b = torch.tensor([[-.25, 0.0, .25, 1.5]], dtype=torch.bfloat16)
+    array, dtype = _array_from_tensor("subexpert_H", b)
+    assert dtype == "torch.bfloat16" and array.dtype == np.uint16
+    restored = _tensor_from_array("subexpert_H", array, dtype)
+    assert restored.dtype == torch.bfloat16
+    assert torch.equal(restored, b)

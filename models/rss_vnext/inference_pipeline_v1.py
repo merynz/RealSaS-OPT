@@ -30,13 +30,19 @@ from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
     validate_inference_evidence_v1,
 )
 from .inference_checkpoint_v1 import load_inference_checkpoint_v1
+from .neural_scene_archive_v1 import (
+    SCHEMA as NEURAL_SCENE_SCHEMA,
+    encode_neural_scene_carrier_v1,
+    read_neural_scene_carrier_v1,
+)
 from .inference_evidence_export_v1 import (
     export_inference_evidence_v1, _source_tensor_digest,
 )
 
-_RECEIPT_SCHEMA = "RealSaS.RSSvNext.SourceToCompilerProposalReceipt.v1"
+_RECEIPT_SCHEMA = "RealSaS.RSSvNext.SourceToCompilerProposalReceipt.v2"
 _RECEIPT_FILES = ("observed_source_tensors.npz", "neural_evidence.json", "inference_receipt.json")
 _ORIGINAL_SOURCE_FILE = "original_two_view_source.npz"
+_NEURAL_SCENE_FILE = "rss_vnext_neural_scene.npz"
 _MAX_SOURCE_BYTES = 128 * 1024 * 1024
 
 
@@ -112,7 +118,7 @@ def run_two_view_to_compiler_proposal_v1(
     target = Path(output_directory).resolve()
     target.mkdir(parents=True, exist_ok=True)
     # Refuse accidental reuse of an existing receipt: revision lineage is immutable.
-    if any((target / name).exists() for name in (*_RECEIPT_FILES, _ORIGINAL_SOURCE_FILE)):
+    if any((target / name).exists() for name in (*_RECEIPT_FILES, _ORIGINAL_SOURCE_FILE, _NEURAL_SCENE_FILE)):
         raise RuntimeError("RSS_VNEXT_RUN_OUTPUT_REVISION_ALREADY_EXISTS")
     model = load_inference_checkpoint_v1(
         checkpoint_path,
@@ -139,6 +145,15 @@ def run_two_view_to_compiler_proposal_v1(
     validate_inference_evidence_v1(
         evidence, expected_checkpoint_sha256=expected_checkpoint_sha256,
     )
+    # Persist every model-owned neural carrier field independently of the
+    # canonical decision path. A legal topology ABSTAIN still carries this
+    # scene so Semantic, Graphics and Mechanics never depend on Mesh success.
+    carrier_bytes = encode_neural_scene_carrier_v1(
+        prediction["state"], evidence=evidence,
+    )
+    read_neural_scene_carrier_v1(carrier_bytes, evidence=evidence)
+    carrier_path = target / _NEURAL_SCENE_FILE
+    _atomic_bytes(carrier_path, carrier_bytes)
     source_path, evidence_path, receipt_path = (
         target / _RECEIPT_FILES[0],
         target / _RECEIPT_FILES[1],
@@ -165,6 +180,10 @@ def run_two_view_to_compiler_proposal_v1(
         "checkpoint_sha256": expected_checkpoint_sha256,
         "source_archive_sha256": _digest_file(source_path),
         "evidence_file_sha256": _digest_file(evidence_path),
+        "neural_scene_schema": NEURAL_SCENE_SCHEMA,
+        "neural_scene_file_sha256": _digest_file(carrier_path),
+        "neural_scene_retained_after_mesh_abstain": True,
+        "neural_scene_product_authority": False,
         "evidence_hash": evidence.evidence_hash,
         "observed_view_count": 2,
         "product_revision_minted": False,
@@ -228,6 +247,19 @@ def read_compiler_proposal_receipt_v1(
         or _digest_file(evidence_path) != receipt.get("evidence_file_sha256")
     ):
         raise RuntimeError("RSS_VNEXT_RECEIPT_ARTIFACT_BYTES_DRIFT")
+    if (
+        receipt.get("neural_scene_schema") != NEURAL_SCENE_SCHEMA
+        or receipt.get("neural_scene_retained_after_mesh_abstain") is not True
+        or receipt.get("neural_scene_product_authority") is not False
+    ):
+        raise RuntimeError("RSS_VNEXT_RECEIPT_NEURAL_CARRIER_POLICY_DRIFT")
+    carrier_path = root / _NEURAL_SCENE_FILE
+    if (
+        not carrier_path.is_file()
+        or carrier_path.stat().st_size > 512 * 1024 * 1024
+        or _digest_file(carrier_path) != receipt.get("neural_scene_file_sha256")
+    ):
+        raise RuntimeError("RSS_VNEXT_RECEIPT_NEURAL_CARRIER_BYTES_DRIFT")
     raw = json.loads(evidence_path.read_text("utf-8"))
     evidence = RSSvNextInferenceEvidenceIRV1(**raw)
     validate_inference_evidence_v1(
@@ -235,6 +267,7 @@ def read_compiler_proposal_receipt_v1(
     )
     if evidence.evidence_hash != receipt["evidence_hash"] or evidence.mesh_status != receipt["status"]:
         raise RuntimeError("RSS_VNEXT_RECEIPT_EVIDENCE_DRIFT")
+    read_neural_scene_carrier_v1(carrier_path.read_bytes(), evidence=evidence)
     if source_path.stat().st_size > _MAX_SOURCE_BYTES:
         raise RuntimeError("RSS_VNEXT_RECEIPT_SOURCE_BUNDLE_TOO_LARGE")
     with np.load(source_path, allow_pickle=False) as archive:
@@ -335,7 +368,22 @@ def run_canonical_two_view_to_compiler_proposal_v1(
     )
 
 
+def read_compiler_neural_scene_v1(
+    directory: str | Path,
+    *, expected_checkpoint_sha256: str,
+) -> dict[str, Tensor]:
+    """Independent consumer read, verified against the SAME source+model court."""
+    _, evidence = read_compiler_proposal_receipt_v1(
+        directory, expected_checkpoint_sha256=expected_checkpoint_sha256,
+    )
+    return read_neural_scene_carrier_v1(
+        (Path(directory).resolve() / _NEURAL_SCENE_FILE).read_bytes(),
+        evidence=evidence,
+    )
+
+
 __all__ = [
+    "read_compiler_neural_scene_v1",
     "run_two_view_to_compiler_proposal_v1",
     "run_canonical_two_view_to_compiler_proposal_v1",
     "read_compiler_proposal_receipt_v1",

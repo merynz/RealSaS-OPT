@@ -1,0 +1,123 @@
+name: RSS vNext PR448 stale Actions queue drain
+
+# This housekeeping workflow is intentionally hosted, never self-hosted:
+# an offline private runner cannot block clean-up of orphaned PR check runs.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: rss-vnext-queue-drain-pr448
+  cancel-in-progress: true
+
+jobs:
+  drain-stale-pr448-queue:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.number == 448
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Cancel QUEUED checks for old PR448 commits only
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pullNumber = 448;
+            const expectedBranch = "audit/rss-vnext-three-contract-v6-20261111";
+            const repoFullName = `${owner}/${repo}`;
+            const {data: pr} = await github.rest.pulls.get({
+              owner, repo, pull_number: pullNumber
+            });
+            if (pr.state !== "open" ||
+                pr.head.ref !== expectedBranch ||
+                pr.head.repo.full_name !== repoFullName ||
+                pr.base.ref !== "main") {
+              throw new Error("RSS_QUEUE_DRAIN_PR_BRANCH_OR_BASE_DRIFT");
+            }
+            const activeHead = pr.head.sha;
+            core.info(`Protect current PR #${pullNumber} SHA ${activeHead}`);
+            const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+            async function getStaleQueued() {
+              const all = await github.paginate(
+                github.rest.actions.listWorkflowRunsForRepo,
+                { owner, repo, status: "queued", per_page: 100 },
+              );
+              // GitHub's pull_requests[].head.sha may be rewritten to
+              // the latest PR head even on an OLD run. Always check run.head_sha.
+              return all.filter(run =>
+                run.event === "pull_request" &&
+                run.head_branch === expectedBranch &&
+                run.head_sha !== activeHead &&
+                run.pull_requests?.some(p => p.number === pullNumber)
+              );
+            }
+
+            let requested = 0;
+            let alreadyTransitioned = 0;
+            const failures = [];
+            for (let pass = 1; pass <= 3; pass++) {
+              const stale = await getStaleQueued();
+              core.info(`Pass ${pass}: ${stale.length} stale PR448 queued runs`);
+              if (!stale.length) break;
+              // Small groups avoid GitHub's secondary abuse/rate limiting.
+              for (let i = 0; i < stale.length; i += 4) {
+                const batch = stale.slice(i, i + 4);
+                await Promise.all(batch.map(async run => {
+                  for (let attempt = 0; attempt < 3; attempt++) {
+                    try {
+                      await github.rest.actions.cancelWorkflowRun({
+                        owner, repo, run_id: run.id
+                      });
+                      requested++;
+                      return;
+                    } catch (error) {
+                      const code = Number(error.status || 0);
+                      if (code === 409 || code === 422 || code === 404) {
+                        alreadyTransitioned++;
+                        return;
+                      }
+                      if ((code === 403 || code === 429 ||
+                           code >= 500) && attempt < 2) {
+                        await sleep(1500 * (attempt + 1));
+                        continue;
+                      }
+                      failures.push({id: run.id, status: code,
+                        message: error.message});
+                      return;
+                    }
+                  }
+                }));
+                await sleep(175);
+              }
+              await sleep(1200);
+            }
+            const remaining = await getStaleQueued();
+            const result = {
+              protected_sha: activeHead,
+              stale_requested_cancel: requested,
+              transitioned_before_cancel: alreadyTransitioned,
+              failed_calls: failures.length,
+              remaining_queued: remaining.length,
+              remaining_examples: remaining.slice(0, 12).map(x => x.id),
+            };
+            core.info(JSON.stringify(result));
+            await core.summary
+              .addHeading("RSS vNext PR #448 queue cleanup")
+              .addCodeBlock(JSON.stringify(result, null, 2), "json")
+              .write();
+            if (failures.length || remaining.length) {
+              core.setFailed(
+                `RSS_QUEUE_DRAIN_INCOMPLETE: ${failures.length} failed API calls; `+
+                `${remaining.length} stale runs still queued`
+              );
+            }

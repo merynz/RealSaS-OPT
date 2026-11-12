@@ -126,7 +126,7 @@ def test_mesh_compiler_abstains_without_reading_or_discarding_shared_h(tmp_path,
         request, read_object=no_heavy_scene, put_bytes=put,
     )
     assert result["status"] == "PASS"
-    assert len(result["outputs"]) == 2
+    assert len(result["outputs"]) == 3
     assert "RealSaS.RSSvNextNeuralSceneCarrier" not in read_roles
     assert scene_ref["content_sha256"] in cas  # unchanged!
     decision = json.loads(read(result["outputs"][0]))
@@ -143,6 +143,11 @@ def test_mesh_compiler_abstains_without_reading_or_discarding_shared_h(tmp_path,
         r for r in result["outputs"] if r["role"] == "rss_evidence_continuity"
     )))
     assert continuation["mesh_status"] == "ABSTAIN"
+    court = json.loads(read(next(x for x in result["outputs"]
+        if x["role"] == "rss_cross_expert_capability_court")))
+    assert court["state"] == "ABSTAIN_TOPOLOGY_EXPERTS_RETAINED"
+    assert court["face_count"] == 0
+    assert not any(x["executable_authority"] for x in court["claims"])
     assert not continuation["has_product_authority"]
     assert not continuation["neural_scene_replaced_by_candidate"]
     assert len(continuation["preserved_children"]) == 7
@@ -184,15 +189,27 @@ def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_re
         request, read_object=read, put_bytes=put,
     )
     assert mesh["status"] == "PASS"
-    assert len(mesh["outputs"]) == 3
+    assert len(mesh["outputs"]) == 4
     by_role = {r["role"]: r for r in mesh["outputs"]}
     assert set(by_role) == {
         "rss_computed_surface_candidate",
         "rss_sparse_face_relation_candidates",
+        "rss_cross_expert_capability_court",
         "rss_evidence_continuity",
     }
     out = json.loads(read(by_role["rss_computed_surface_candidate"]))
     relations = json.loads(read(by_role["rss_sparse_face_relation_candidates"]))
+    court = json.loads(read(by_role["rss_cross_expert_capability_court"]))
+    assert court["state"] == "TYPED_CROSS_EXPERT_PROPOSALS_PRESERVED"
+    assert court["face_count"] == 2
+    assert court["directed_attachment_pair_count"] == 2
+    assert court["max_semantic_unknown_probability"] > 0
+    assert all(not c["source_truth_authority"] and not c["executable_authority"]
+               for c in court["claims"])
+    assert {c["capability"] for c in court["claims"]} >= {
+        "SEMANTIC_REGION", "GRAPHICS_2D", "DIRECTED_ATTACHMENT",
+        "ANIMATION_READY_MESH",
+    }
     assert out["state"] == "UNQUALIFIED_COMPUTED_SURFACE_CANDIDATE"
     assert out["topology_token_sequence_sha256"]
     assert out["candidate_mesh_sha256"]
@@ -230,7 +247,7 @@ def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_re
     assert not mesh["diagnostics"]["product_revision_minted"]
     continuation = json.loads(read(by_role["rss_evidence_continuity"]))
     assert continuation["mesh_status"] == "UNQUALIFIED_MESH_CANDIDATE"
-    assert len(continuation["derived_candidates"]) == 2
+    assert len(continuation["derived_candidates"]) == 3
     assert len(continuation["preserved_children"]) == 7
     parent_index_ref = next(r for r in shape["outputs"] if r["role"] == "rss_evidence_fanout")
     parent_index = json.loads(read(parent_index_ref))

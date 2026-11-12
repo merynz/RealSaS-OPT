@@ -199,6 +199,10 @@ def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_re
         request, read_object=read, put_bytes=put,
     )
     assert mesh["status"] == "PASS"
+    assert mesh["diagnostics"]["original_source_tensor_identity_state"] == "EXACT_TWO_OBSERVED_VIEWS_AND_CAMERAS_BOUND"
+    assert len(mesh["diagnostics"]["original_source_tensor_identity_court_hash"]) == 64
+    assert mesh["diagnostics"]["original_source_tensor_identity_is_not_source_fidelity"] is True
+
     assert len(mesh["outputs"]) == 6
     by_role = {r["role"]: r for r in mesh["outputs"]}
     assert set(by_role) == {

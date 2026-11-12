@@ -106,12 +106,11 @@ def render_stdgen_joint_rays_v1(
     weights=effective_alpha*survival
     alpha=weights.sum(-1,keepdim=True).clamp(0.,1.)
     rgb=(torch.sigmoid(rgb_logit.float())*weights[...,None]).sum(dim=-2)
-    # StdGEN Eq(7) sums p at every effective contributing sample, but
-    # for a peeled render only retained classes should be recognized.
-    # Otherwise low-prob excluded classes leak into class supervision.
-    selected=sem*keep_roles[:, :, None].float()
-    selected=selected/selected.sum(-1,keepdim=True).clamp_min(1.e-8)
-    sem_mass=(selected*weights[...,None]).sum(-2)
+    # StdGEN Eq(7) uses the *original* semantic distribution p_i,
+    # weighted by the peeled transmittance T_P and alpha*P_keep.
+    # Do not silently re-normalize roles at samples; that would change
+    # the paper's volume semantic objective and conceal uncertainty.
+    sem_mass=(sem*weights[...,None]).sum(-2)
     posterior=sem_mass/alpha.clamp_min(1.e-8)
     posterior=posterior/posterior.sum(-1,keepdim=True).clamp_min(1.e-8)
     expected=(weights*ray_depth.float()).sum(-1,keepdim=True)/alpha.clamp_min(1.e-8)
@@ -181,17 +180,36 @@ class StdGENJointTargetV1:
     generated_completion_used_as_truth: bool = False
 
 
+@dataclass(frozen=True)
+class StdGENFlexiCubesLayerRasterV1:
+    """Actual differentiable single-layer mesh RASTER output, not NeRF rays.
+
+    This output must be produced from the SAME H(x) via qualified
+    semantic-equivalent signed SDF + pinned FlexiCubes + differentiable
+    2D triangle rasterizer. It NEVER proves a source mesh or observed depth.
+    """
+    rgb_white_composite: Tensor
+    alpha: Tensor
+    semantic_posterior: Tensor
+    normal_xyz: Tensor
+    depth: Tensor
+    flexicubes_deformation_regularizer: Tensor
+    source_scene_prediction_sha256: str
+    mesh_surface_prediction_sha256: str
+    semantic_layer_name: str
+    rasterizer_identity: str
+    authority: str = "PREDICTED_FLEXICUBES_MESH_RASTER_NOT_SOURCE_OBSERVATION"
+
+
 def stdgen_joint_stage_loss_v1(
     predicted: StdGENJointRayOutputV1, target: StdGENJointTargetV1,
     *,
     lpips_loss_fn: Callable[[Tensor,Tensor],Tensor] | None = None,
-    mesh_normal: Tensor | None = None,
-    mesh_depth: Tensor | None = None,
+    mesh_raster: StdGENFlexiCubesLayerRasterV1 | None = None,
     target_normal: Tensor | None = None,
     target_depth: Tensor | None = None,
     qualified_normal_mask: Tensor | None = None,
     qualified_depth_mask: Tensor | None = None,
-    flexicubes_deformation_loss: Tensor | None = None,
 ) -> dict[str,Tensor]:
     """Paper §3.2 L1,L2,L3; stage3 uses REAL mesh renderer outputs.
 
@@ -212,6 +230,37 @@ def stdgen_joint_stage_loss_v1(
         raise ValueError("RSS_VNEXT_STDGEN_JOINT_TEACHER_NOT_ADMITTED_3D_RENDER")
     b,r,_=predicted.rgb_white_composite.shape
     k=predicted.semantic_mass.shape[-1]
+    if target.stage==STAGE_3:
+        if (
+            type(mesh_raster) is not StdGENFlexiCubesLayerRasterV1
+            or mesh_raster.authority != "PREDICTED_FLEXICUBES_MESH_RASTER_NOT_SOURCE_OBSERVATION"
+            or mesh_raster.semantic_layer_name != target.layer_name
+            or len(mesh_raster.source_scene_prediction_sha256)!=64
+            or len(mesh_raster.mesh_surface_prediction_sha256)!=64
+            or not mesh_raster.rasterizer_identity
+        ):
+            raise ValueError("RSS_VNEXT_STDGEN_JOINT_STAGE3_REQUIRES_FLEXICUBES_MESH_RENDER")
+        # Stage3 must use MESH-rendered RGB, mask and semantic maps, not
+        # the Stage2 NeRF predictions plus a substituted mesh depth/normal.
+        active_rgb=mesh_raster.rgb_white_composite
+        active_alpha=mesh_raster.alpha
+        active_sem=mesh_raster.semantic_posterior
+    else:
+        if mesh_raster is not None:
+            raise ValueError("RSS_VNEXT_STDGEN_JOINT_MESH_TARGET_ON_NERF_STAGE")
+        active_rgb=predicted.rgb_white_composite
+        active_alpha=predicted.alpha
+        active_sem=predicted.semantic_posterior
+    if (
+        active_rgb.shape!=(b,r,3) or active_alpha.shape!=(b,r,1)
+        or active_sem.shape!=(b,r,k)
+        or not all(bool(torch.isfinite(x).all()) for x in (
+            active_rgb,active_alpha,active_sem,
+        ))
+        or bool((active_alpha<0).any() or (active_alpha>1).any())
+        or bool((active_sem<0).any() or (active_sem>1).any())
+    ):
+        raise ValueError("RSS_VNEXT_STDGEN_JOINT_ACTIVE_STAGE_RENDER_DOMAIN")
     maskfields=(target.qualified_rgb_mask,target.qualified_mask_mask,target.qualified_role_mask)
     if (
         target.rgb_white.shape!=(b,r,3)
@@ -220,8 +269,7 @@ def stdgen_joint_stage_loss_v1(
         or any(x.shape!=(b,r) or x.dtype!=torch.bool for x in maskfields)
         or not all(bool(torch.isfinite(x).all()) for x in (
             target.rgb_white,target.alpha,
-            predicted.rgb_white_composite,predicted.alpha,
-            predicted.semantic_mass,predicted.expected_depth,
+            active_rgb,active_alpha,active_sem,
         ))
         or bool((target.rgb_white<0).any() or (target.rgb_white>1).any())
         or bool((target.alpha<0).any() or (target.alpha>1).any())
@@ -229,14 +277,14 @@ def stdgen_joint_stage_loss_v1(
         raise ValueError("RSS_VNEXT_STDGEN_JOINT_TARGET_DOMAIN")
     if not bool(any(x.any() for x in maskfields)):
         raise ValueError("RSS_VNEXT_STDGEN_JOINT_NO_TARGET_PIXELS")
-    zero=predicted.alpha.sum()*0.
+    zero=active_alpha.sum()*0.
     rgb_mse=(
-        F.mse_loss(predicted.rgb_white_composite[target.qualified_rgb_mask].float(),
+        F.mse_loss(active_rgb[target.qualified_rgb_mask].float(),
                    target.rgb_white[target.qualified_rgb_mask].float())
         if bool(target.qualified_rgb_mask.any()) else zero
     )
     mask_mse=(
-        F.mse_loss(predicted.alpha[...,0][target.qualified_mask_mask].float(),
+        F.mse_loss(active_alpha[...,0][target.qualified_mask_mask].float(),
                    target.alpha[...,0][target.qualified_mask_mask].float())
         if bool(target.qualified_mask_mask.any()) else zero
     )
@@ -245,7 +293,7 @@ def stdgen_joint_stage_loss_v1(
         y=target.role_indices[labelled]
         if bool(((y<0)|(y>=k)).any()):
             raise ValueError("RSS_VNEXT_STDGEN_JOINT_SEMANTIC_LABEL_INVALID")
-        sem_prob=predicted.semantic_posterior[labelled].float()
+        sem_prob=active_sem[labelled].float()
         semantic_ce=F.nll_loss(sem_prob.clamp_min(1.e-8).log(),y)
     else:
         semantic_ce=zero
@@ -256,42 +304,43 @@ def stdgen_joint_stage_loss_v1(
         if int(r**.5)**2!=r:
             raise ValueError("RSS_VNEXT_STDGEN_JOINT_LPIPS_REQUIRES_SQUARE_RAY_GRID")
         hw=int(r**.5)
-        a=predicted.rgb_white_composite.permute(0,2,1).reshape(b,3,hw,hw)
+        a=active_rgb.permute(0,2,1).reshape(b,3,hw,hw)
         z=target.rgb_white.permute(0,2,1).reshape(b,3,hw,hw)
         terms["lpips"]=lpips_loss_fn(a*2.-1.,z*2.-1.)
     if target.stage==STAGE_3:
         if any(x is None for x in (
-            mesh_normal,mesh_depth,target_normal,target_depth,
-            qualified_normal_mask,qualified_depth_mask,
-            flexicubes_deformation_loss,
+            target_normal,target_depth,qualified_normal_mask,qualified_depth_mask,
         )):
             raise ValueError("RSS_VNEXT_STDGEN_JOINT_STAGE3_REQUIRES_FLEXICUBES_MESH_RENDER")
         if (
-            mesh_normal.shape!=target_normal.shape or mesh_normal.shape!=(b,r,3)
-            or mesh_depth.shape!=target_depth.shape or mesh_depth.shape!=(b,r,1)
+            mesh_raster.normal_xyz.shape!=(b,r,3)
+            or mesh_raster.depth.shape!=(b,r,1)
+            or target_normal.shape!=(b,r,3)
+            or target_depth.shape!=(b,r,1)
             or qualified_normal_mask.shape!=(b,r)
             or qualified_depth_mask.shape!=(b,r)
             or qualified_normal_mask.dtype!=torch.bool
             or qualified_depth_mask.dtype!=torch.bool
+            or mesh_raster.flexicubes_deformation_regularizer.ndim!=0
             or not all(bool(torch.isfinite(v).all()) for v in (
-                mesh_normal,mesh_depth,target_normal,target_depth,
-                flexicubes_deformation_loss,
+                mesh_raster.normal_xyz,mesh_raster.depth,
+                target_normal,target_depth,
+                mesh_raster.flexicubes_deformation_regularizer,
             ))
         ):
             raise ValueError("RSS_VNEXT_STDGEN_JOINT_MESH_TARGET_DOMAIN")
         if not bool(qualified_normal_mask.any()) or not bool(qualified_depth_mask.any()):
             raise ValueError("RSS_VNEXT_STDGEN_JOINT_NO_MESH_SUPERVISION")
-        n=F.normalize(mesh_normal[qualified_normal_mask].float(),dim=-1)
+        n=F.normalize(mesh_raster.normal_xyz[qualified_normal_mask].float(),dim=-1)
         truth=F.normalize(target_normal[qualified_normal_mask].float(),dim=-1)
         terms["normal_cosine"]=(1.-(n*truth).sum(-1)).mean()
         terms["depth_l1"]=F.l1_loss(
-            mesh_depth[...,0][qualified_depth_mask].float(),
+            mesh_raster.depth[...,0][qualified_depth_mask].float(),
             target_depth[...,0][qualified_depth_mask].float(),
         )
-        terms["flexicubes_deformation"]=flexicubes_deformation_loss
+        terms["flexicubes_deformation"]=mesh_raster.flexicubes_deformation_regularizer
     elif any(x is not None for x in (
-        mesh_normal,mesh_depth,target_normal,target_depth,
-        qualified_normal_mask,qualified_depth_mask,flexicubes_deformation_loss,
+        target_normal,target_depth,qualified_normal_mask,qualified_depth_mask,
     )):
         raise ValueError("RSS_VNEXT_STDGEN_JOINT_MESH_TARGET_ON_NERF_STAGE")
     terms["total"]=sum(terms.values())
@@ -303,6 +352,7 @@ def stdgen_joint_stage_loss_v1(
 __all__=[
     "STAGE_1","STAGE_2","STAGE_3",
     "StdGENJointRayOutputV1","StdGENJointTargetV1",
+    "StdGENFlexiCubesLayerRasterV1",
     "render_stdgen_joint_rays_v1",
     "render_stdgen_joint_from_shared_scene_v1",
     "stdgen_joint_stage_loss_v1",

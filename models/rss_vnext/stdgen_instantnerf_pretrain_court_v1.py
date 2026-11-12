@@ -17,7 +17,7 @@ The hash/shape check does not constitute legal review or training quality.
 A synthetic fixture identity exists only to test the algorithm.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from collections.abc import Mapping
 from hashlib import sha256
 from pathlib import Path
@@ -161,7 +161,7 @@ def inspect_stdgen_instantnerf_checkpoint_compatibility_v1(
 def load_verified_stdgen_instantnerf_weights_v1(
     path:str|Path,model:nn.Module,
     *,compatibility:StdGENInstantNeRFCheckpointReceiptV1,
-)->None:
+)->StdGENInstantNeRFCheckpointReceiptV1:
     """Strict pretrain load, and ONLY when the official hash was verified."""
     if (
         type(compatibility) is not StdGENInstantNeRFCheckpointReceiptV1
@@ -183,6 +183,31 @@ def load_verified_stdgen_instantnerf_weights_v1(
     if state.keys()!=model.state_dict().keys():
         raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_MODEL_KEY_DRIFT_ON_LOAD")
     model.load_state_dict(state,strict=True)
+    return replace(compatibility,pretrained_model_loaded=True)
+
+
+def initialize_verified_stdgen_native_instantnerf_v1(
+    *,checkpoint_path:str|Path,local_dino_config_dir:str,
+)->tuple[nn.Module,StdGENInstantNeRFCheckpointReceiptV1]:
+    """Construct the native pretrained backbone, and load *all* official weights.
+
+    This is the only allowed live bootstrap. The receiver may consume its
+    six-view triplanes; importing the upstream NVIDIA-proprietary renderer or
+    pretending the planes are qualified source geometry is forbidden.
+    """
+    from .stdgen_instantnerf_native_v1 import build_stdgen_native_instantnerf_v1
+    model=build_stdgen_native_instantnerf_v1(
+        local_dino_config_dir=local_dino_config_dir,
+    )
+    receipt=inspect_stdgen_instantnerf_checkpoint_compatibility_v1(
+        checkpoint_path,model,
+    )
+    loaded=load_verified_stdgen_instantnerf_weights_v1(
+        checkpoint_path,model,compatibility=receipt,
+    )
+    if not loaded.pretrained_model_loaded:
+        raise RuntimeError("RSS_VNEXT_INSTANTNERF_OFFICIAL_WEIGHTS_NOT_LOADED")
+    return model,loaded
 
 
 __all__=[
@@ -190,4 +215,5 @@ __all__=[
     "StdGENInstantNeRFCheckpointReceiptV1",
     "inspect_stdgen_instantnerf_checkpoint_compatibility_v1",
     "load_verified_stdgen_instantnerf_weights_v1",
+    "initialize_verified_stdgen_native_instantnerf_v1",
 ]

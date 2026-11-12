@@ -103,6 +103,34 @@ class RSSvNextTypedRegionRelationV1:
 
 
 @dataclass(frozen=True)
+class RSSvNextTypedQueryPairV1:
+    """Computed, query-addressed relation, not an executable attachment.
+
+    Predicted relation is the SAME anonymous-slot marginal used by RSS
+    source-supervised typed relation training. Source labels, region identity,
+    contact persistence and anchor coordinates are not inferred by this court.
+    """
+    from_query_index: int
+    to_query_index: int
+    same_drawable_affinity: float
+    cut_affinity: float
+    directed_attachment_affinity: float
+    parent_predicted_known_region_mass: float
+    child_predicted_known_region_mass: float
+    nonself_slot_pair_mass: float
+    parent_predicted_unknown_mass: float
+    child_predicted_unknown_mass: float
+    inference_evidence_hash: str
+    neural_carrier_sha256: str
+    authority: str = NO_PRODUCT_AUTHORITY
+    source_contact_proven: bool = False
+    attachment_anchor_proven: bool = False
+    canonical_face_rebinding_proven: bool = False
+    source_drawable_proven: bool = False
+    source_visibility_proven: bool = False
+
+
+@dataclass(frozen=True)
 class RSSvNextExpertAvailabilityV1:
     semantic_and_presentation: str
     geometry_and_graphics_field: str
@@ -295,6 +323,95 @@ class RSSvNextExpertEvidenceFanoutV1:
         """
         return self._tensors["region_relation_logits"][0].detach().float().clone()
 
+    def query_pair_relations(
+        self, ordered_query_pairs: tuple[tuple[int, int], ...] | list[tuple[int, int]],
+    ) -> tuple[RSSvNextTypedQueryPairV1, ...]:
+        """Vectorized Compiler lowering of the *trained* typed relation.
+
+        O(P*R^2) arithmetic, O(P*R + R^2) temporary memory: no neural
+        reinference, no full N^2 query-pair materialization and no copying
+        the persistent scene or 3D H(x) carrier. The diagonal does not count
+        as a relation, and UNKNOWN stays a separate, reported mass.
+
+        This computes the same conditional known-slot marginal as
+        qualified_source_typed_relation_loss; an argmax slot or arbitrary
+        source part mapping would be an irreversible evidence bottleneck.
+        """
+        if not isinstance(ordered_query_pairs, (tuple, list)):
+            raise QualificationError("RSS_VNEXT_FANOUT_PAIR_BATCH_TYPE_INVALID")
+        if len(ordered_query_pairs) > self.model_config.max_pair_queries:
+            raise QualificationError("RSS_VNEXT_FANOUT_PAIR_BATCH_RESOURCE_LIMIT")
+        if not ordered_query_pairs:
+            return ()
+        for pair in ordered_query_pairs:
+            if not isinstance(pair, (tuple, list)) or len(pair) != 2:
+                raise QualificationError("RSS_VNEXT_FANOUT_QUERY_PAIR_ADDRESS_INVALID")
+            _checked_index(
+                pair[0], self.witness_count,
+                "RSS_VNEXT_FANOUT_QUERY_PAIR_ADDRESS_INVALID",
+            )
+            _checked_index(
+                pair[1], self.witness_count,
+                "RSS_VNEXT_FANOUT_QUERY_PAIR_ADDRESS_INVALID",
+            )
+            if pair[0] == pair[1]:
+                raise QualificationError("RSS_VNEXT_FANOUT_QUERY_PAIR_SELF_EDGE_FORBIDDEN")
+
+        t = self._tensors
+        device = t["semantic_logits"].device
+        indices = torch.tensor(ordered_query_pairs, dtype=torch.long, device=device)
+        member = t["semantic_logits"][0].float()
+        known = torch.softmax(member[..., :-1], dim=-1)
+        unknown = torch.softmax(member, dim=-1)[..., -1]
+        parent = known.index_select(0, indices[:, 0])
+        child = known.index_select(0, indices[:, 1])
+        region_valid = t["region_relation_valid_mask"][0].float()
+        # IMPORTANT: region logits [:2] are symmetric, [2] is directed.
+        # Train and compile share the EXACT conditional normalized formula.
+        relation = torch.sigmoid(t["region_relation_logits"][0].float())
+        # Never form an [P,R,R,3] dense temporary or a full [N,N] matrix.
+        parent_to_other = torch.einsum("pi,ij->pj", parent, region_valid)
+        denominator = (parent_to_other * child).sum(dim=-1)
+        # Force the contracted intermediate to [P,R,C], not [P,R,R,C].
+        # This guards CPU/GPU memory regardless of einsum path selection.
+        parent_to_relation = torch.einsum(
+            "pi,ijc->pjc", parent, relation * region_valid[..., None],
+        )
+        numerator = (parent_to_relation * child[..., None]).sum(dim=1)
+        candidate = (numerator / denominator.clamp_min(1.e-10)[:, None]).clamp(
+            1.e-6, 1. - 1.e-6,
+        )
+        full_known = 1. - unknown
+        rows = []
+        for index, pair in enumerate(ordered_query_pairs):
+            # A vanishing cross-region normalization means the model has
+            # not distinguished two region nodes. No positive attachment
+            # claim may be emitted. We keep the evidence otherwise intact.
+            d = float(denominator[index].item())
+            if d <= 1.e-10:
+                raise QualificationError("RSS_VNEXT_FANOUT_NO_CROSS_REGION_SUPPORT")
+            values = candidate[index].tolist()
+            rows.append(RSSvNextTypedQueryPairV1(
+                from_query_index=int(pair[0]),
+                to_query_index=int(pair[1]),
+                same_drawable_affinity=float(values[0]),
+                cut_affinity=float(values[1]),
+                directed_attachment_affinity=float(values[2]),
+                parent_predicted_known_region_mass=float(full_known[pair[0]].item()),
+                child_predicted_known_region_mass=float(full_known[pair[1]].item()),
+                nonself_slot_pair_mass=d,
+                parent_predicted_unknown_mass=float(unknown[pair[0]].item()),
+                child_predicted_unknown_mass=float(unknown[pair[1]].item()),
+                inference_evidence_hash=self.evidence.evidence_hash,
+                neural_carrier_sha256=self.neural_carrier_sha256,
+            ))
+        return tuple(rows)
+
+    def query_pair_relation(
+        self, from_query_index: int, to_query_index: int,
+    ) -> RSSvNextTypedQueryPairV1:
+        return self.query_pair_relations([(from_query_index, to_query_index)])[0]
+
     def causal_control_events(self) -> tuple[Mapping[str, Any], ...]:
         """Do not execute until AXIS/MIRA independent codec court is passed."""
         return self.evidence.control_events
@@ -330,6 +447,7 @@ def open_rss_vnext_expert_fanout_v1(
 __all__ = [
     "SCHEMA", "REGION_CHANNELS", "GRAPHICS_CHANNELS",
     "RSSvNextTypedSourcePatchV1", "RSSvNextTypedQueryV1",
-    "RSSvNextTypedRegionRelationV1", "RSSvNextExpertAvailabilityV1",
+    "RSSvNextTypedRegionRelationV1", "RSSvNextTypedQueryPairV1",
+    "RSSvNextExpertAvailabilityV1",
     "RSSvNextExpertEvidenceFanoutV1", "open_rss_vnext_expert_fanout_v1",
 ]

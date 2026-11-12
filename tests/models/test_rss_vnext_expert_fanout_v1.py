@@ -203,3 +203,68 @@ def test_fanout_refuses_wrong_checkpoint_and_wrong_expert_config():
               expected_config_digest=architecture_digest(cfg))
     with pytest.raises(QualificationError, match="FROM_SLOT_INVALID"):
         _open(cfg, evidence, carrier).region_relation(-1, 1)
+
+
+
+def test_compiler_batched_query_relations_match_training_marginal_not_argmax_slots():
+    cfg, state, evidence, carrier = _unified_abstaining_evidence()
+    fanout = _open(cfg, evidence, carrier)
+    assert evidence.mesh_status == "ABSTAIN"  # not a prerequisite for shared H
+    pairs = [(0, 1), (1, 0), (2, 3), (6, 7)]
+    rows = fanout.query_pair_relations(pairs)
+    assert len(rows) == len(pairs)
+    assert fanout.query_pair_relation(0, 1) == rows[0]
+    assert fanout.query_pair_relations([]) == ()
+
+    # The model's qualified_source_typed_relation_loss must predict exactly
+    # the same query-addressed marginal that Compiler now consumes.
+    # Using argmax slot assignments would silently discard relation evidence.
+    known = torch.softmax(state.semantic_logits[0, :, :-1].float(), dim=-1)
+    full = torch.softmax(state.semantic_logits[0].float(), dim=-1)
+    scored = torch.sigmoid(state.region_relation_logits[0].float())
+    valid = state.region_relation_valid_mask[0].to(scored.dtype)
+    for ((i, j), row) in zip(pairs, rows):
+        cross = known[i, :, None] * known[j, None, :] * valid
+        expected = (cross[..., None] * scored).sum(dim=(0, 1)) / cross.sum()
+        assert row.same_drawable_affinity == pytest.approx(expected[0].item(), abs=2.e-6)
+        assert row.cut_affinity == pytest.approx(expected[1].item(), abs=2.e-6)
+        assert row.directed_attachment_affinity == pytest.approx(expected[2].item(), abs=2.e-6)
+        assert row.nonself_slot_pair_mass == pytest.approx(cross.sum().item(), abs=2.e-6)
+        assert row.parent_predicted_unknown_mass == pytest.approx(full[i, -1].item(), abs=2.e-6)
+        assert row.child_predicted_unknown_mass == pytest.approx(full[j, -1].item(), abs=2.e-6)
+        assert row.parent_predicted_known_region_mass + row.parent_predicted_unknown_mass == pytest.approx(1., abs=2.e-6)
+        assert row.inference_evidence_hash == evidence.evidence_hash
+        assert row.neural_carrier_sha256 == fanout.neural_carrier_sha256
+        assert not any((
+            row.source_contact_proven, row.attachment_anchor_proven,
+            row.canonical_face_rebinding_proven, row.source_drawable_proven,
+            row.source_visibility_proven,
+        ))
+        assert row.authority == "NEURAL_EVIDENCE_ONLY_NO_PRODUCT_AUTHORITY"
+
+    # Graph channels 0/1 are symmetric by model architecture; attachment
+    # channel 2 is a separate ORDERED calculation, never symmetrized.
+    assert rows[0].same_drawable_affinity == pytest.approx(rows[1].same_drawable_affinity, abs=1.e-6)
+    assert rows[0].cut_affinity == pytest.approx(rows[1].cut_affinity, abs=1.e-6)
+    rev = fanout.query_pair_relations(list(reversed(pairs)))
+    assert rev == tuple(reversed(rows))
+
+
+def test_compiler_relation_batch_enforces_addresses_and_resource_budget_without_carrier_reinfer():
+    cfg, _, evidence, carrier = _unified_abstaining_evidence()
+    fanout = _open(cfg, evidence, carrier)
+    with pytest.raises(QualificationError, match="QUERY_PAIR_ADDRESS_INVALID"):
+        fanout.query_pair_relations([(0, fanout.witness_count)])
+    with pytest.raises(QualificationError, match="QUERY_PAIR_ADDRESS_INVALID"):
+        fanout.query_pair_relations([(True, 1)])
+    with pytest.raises(QualificationError, match="QUERY_PAIR_SELF_EDGE_FORBIDDEN"):
+        fanout.query_pair_relations([(0, 0)])
+    with pytest.raises(QualificationError, match="PAIR_BATCH_TYPE_INVALID"):
+        fanout.query_pair_relations("0:1")
+    with pytest.raises(QualificationError, match="PAIR_BATCH_RESOURCE_LIMIT"):
+        fanout.query_pair_relations(
+            [(0, 1)] * (cfg.max_pair_queries + 1)
+        )
+    assert len(fanout.query_pair_relations(
+        [(0, 1)] * cfg.max_pair_queries,
+    )) == cfg.max_pair_queries

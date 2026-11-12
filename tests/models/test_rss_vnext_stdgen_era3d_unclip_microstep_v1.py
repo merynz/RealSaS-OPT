@@ -65,6 +65,10 @@ class _UNet(nn.Module):
     config=SimpleNamespace(in_channels=8)
     def __init__(self):
         super().__init__()
+        # Each synthetic model owns its config; one negative test must not
+        # mutate the class-wide configuration of subsequent tests.
+        self.config=SimpleNamespace(in_channels=8)
+        self.rowwise_attention_in_unet_features=True
         self.conv=nn.Conv2d(8,4,1)
         self.rowwise_view_features=nn.Conv2d(4,4,1)
     def forward(self,x,t,encoder_hidden_states,class_labels):

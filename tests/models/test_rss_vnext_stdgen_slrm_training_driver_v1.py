@@ -136,6 +136,85 @@ def test_mesh_stage3_cannot_use_nerf_proxy_or_unadmitted_source_sign():
         trainer.objective(batch)
 
 
+def test_stage3_missing_mesh_targets_fail_before_model_forward():
+    net,batch,receipt=_batch(STAGE_3,6)
+    trainer=_trainer(net,receipt)
+    with pytest.raises(ValueError,match="STAGE3_MESH_RENDER_REQUIRED"):
+        trainer.objective(batch)
+
+
+def test_stage3_source_camera_normal_depth_are_individually_bound_to_receipt():
+    from models.rss_vnext.semantic_geometry_prior import RSSvNextSemanticLayerSpec
+    net,batch,receipt=_batch(STAGE_3,6)
+    k=net.cfg.semantic_role_schema().count
+    roles=net.cfg.semantic_role_schema().roles
+    batch=replace(batch,
+        stage3_flexicubes_extractor=object(),
+        stage3_semantic_layer=RSSvNextSemanticLayerSpec(
+            "without_secondary",roles[1:],
+        ),
+        stage3_camera_features=batch.conditioning_cameras.clone(),
+        stage3_hw=(8,8),
+        stage3_target_normal=torch.zeros((1,6*64,3)),
+        stage3_target_depth=torch.ones((1,6*64,1)),
+        stage3_normal_mask=torch.ones((1,6*64),dtype=torch.bool),
+        stage3_depth_mask=torch.ones((1,6*64),dtype=torch.bool),
+    )
+    # A 4-ray teacher cannot masquerade as a six-camera 8x8 mesh teacher.
+    with pytest.raises(ValueError,match="SOURCE_RENDER_DOMAIN"):
+        _trainer(net,receipt).objective(batch)
+    # Match the RGB teacher's six camera pixels, then make the receipts
+    # complete and prove that even one changed target is caught before fit.
+    size=6*64
+    target=replace(batch.source_3d_render_target,
+        rgb_white=torch.rand((1,size,3)),
+        alpha=torch.ones((1,size,1)),
+        role_indices=torch.zeros((1,size),dtype=torch.long),
+        qualified_rgb_mask=torch.ones((1,size),dtype=torch.bool),
+        qualified_mask_mask=torch.ones((1,size),dtype=torch.bool),
+        qualified_role_mask=torch.ones((1,size),dtype=torch.bool),
+    )
+    batch=replace(batch,source_3d_render_target=target)
+    receipt=receipt.copy()
+    receipt.update({
+        "target_rgb_sha256":_digest(target.rgb_white),
+        "target_alpha_sha256":_digest(target.alpha),
+        "target_role_sha256":_digest(target.role_indices),
+        "target_rgb_mask_sha256":_digest(target.qualified_rgb_mask),
+        "target_alpha_mask_sha256":_digest(target.qualified_mask_mask),
+        "target_role_mask_sha256":_digest(target.qualified_role_mask),
+        "independently_qualified_closed_signed_source":True,
+        "stage3_source_camera_sha256":_digest(batch.stage3_camera_features),
+        "stage3_normal_target_sha256":_digest(batch.stage3_target_normal),
+        "stage3_depth_target_sha256":_digest(batch.stage3_target_depth),
+        "stage3_normal_mask_sha256":_digest(batch.stage3_normal_mask),
+        "stage3_depth_mask_sha256":_digest(batch.stage3_depth_mask),
+        "stage3_render_height":8,"stage3_render_width":8,
+        "stage3_world_normal_convention":"SOURCE_GEOMETRIC_NORMAL_WORLD_XYZ",
+        "stage3_metric_depth_convention":"SOURCE_CAMERA_FORWARD_FIRST_HIT_WORLD_UNITS",
+        "stage3_visibility_convention":"SOURCE_3D_ZBUFFER_VISIBLE_ONLY",
+        "stage3_semantic_role_schema_id":net.cfg.semantic_role_schema_id,
+        "stage3_layer_keep_roles":list(roles[1:]),
+    })
+    good=_trainer(net,receipt)
+    # Intentionally do not execute CUDA; _verify_receipt is the precise
+    # launcher boundary, separately tested from actual mesh raster.
+    good._verify_receipt(batch)
+    corrupt=replace(batch,stage3_target_depth=batch.stage3_target_depth+.01)
+    with pytest.raises(ValueError,match="RENDER_RECEIPT_DRIFT"):
+        good._verify_receipt(corrupt)
+    corrupt=replace(batch,stage3_target_normal=batch.stage3_target_normal+.01)
+    with pytest.raises(ValueError,match="RENDER_RECEIPT_DRIFT"):
+        good._verify_receipt(corrupt)
+    corrupt=replace(batch,stage3_camera_features=batch.stage3_camera_features+.001)
+    with pytest.raises(ValueError,match="RENDER_RECEIPT_DRIFT"):
+        good._verify_receipt(corrupt)
+    missing=dict(receipt)
+    missing.pop("stage3_metric_depth_convention")
+    with pytest.raises(ValueError,match="RENDER_RECEIPT_DRIFT"):
+        _trainer(net,missing)._verify_receipt(batch)
+
+
 def test_source_truth_registry_resume_refuses_changes(tmp_path):
     net,batch,receipt=_batch()
     trainer=_trainer(net,receipt)

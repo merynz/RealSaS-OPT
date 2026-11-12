@@ -170,6 +170,77 @@ class StdGENSLRMTrainerV1:
             "source_rights_independently_admitted":True,
             "role_visibility_from_source_3d":True,
         }
+        if t.stage==STAGE_3:
+            stage3=(
+                batch.stage3_flexicubes_extractor,batch.stage3_semantic_layer,
+                batch.stage3_camera_features,batch.stage3_hw,
+                batch.stage3_target_normal,batch.stage3_target_depth,
+                batch.stage3_normal_mask,batch.stage3_depth_mask,
+            )
+            if any(x is None for x in stage3):
+                raise ValueError("RSS_VNEXT_STDGEN_SLRM_STAGE3_MESH_RENDER_REQUIRED")
+            layer=batch.stage3_semantic_layer
+            if getattr(layer,"name",None)!=t.layer_name:
+                raise ValueError("RSS_VNEXT_STDGEN_SLRM_STAGE3_SEMANTIC_LAYER_DRIFT")
+            schema=self.model.cfg.semantic_role_schema()
+            if not hasattr(layer,"validate") or not hasattr(layer,"keep_roles"):
+                raise ValueError("RSS_VNEXT_STDGEN_SLRM_STAGE3_ROLE_LAYER_CONTRACT")
+            layer.validate(schema)
+            expected_keep=torch.tensor(
+                [role in layer.keep_roles for role in schema.roles],
+                device=batch.keep_roles.device,dtype=torch.bool,
+            )[None,None,:].expand_as(batch.keep_roles)
+            if not torch.equal(batch.keep_roles,expected_keep):
+                raise ValueError("RSS_VNEXT_STDGEN_SLRM_STAGE3_RENDER_ROLE_PEEL_MISMATCH")
+            camera=batch.stage3_camera_features
+            normal=batch.stage3_target_normal
+            depth=batch.stage3_target_depth
+            nmask=batch.stage3_normal_mask
+            dmask=batch.stage3_depth_mask
+            hw=batch.stage3_hw
+            if (
+                type(hw) is not tuple or len(hw)!=2
+                or any(type(x) is not int or x<8 or x>1024 for x in hw)
+                or not isinstance(camera,Tensor) or camera.ndim!=3
+                or camera.shape[0]!=1 or camera.shape[1] not in (1,6)
+                or camera.shape[2]!=13
+                or hw[0]*hw[1]*camera.shape[1]!=t.rgb_white.shape[1]
+                or normal.shape!=(*t.rgb_white.shape[:2],3)
+                or depth.shape!=(*t.rgb_white.shape[:2],1)
+                or nmask.shape!=t.alpha.shape[:2]
+                or dmask.shape!=t.alpha.shape[:2]
+                or nmask.dtype!=torch.bool or dmask.dtype!=torch.bool
+                or not bool(nmask.any()) or not bool(dmask.any())
+                or not all(bool(torch.isfinite(x).all()) for x in (camera,normal,depth))
+                or not bool((camera[:,:,12]>0).all())
+                or not bool((t.alpha[...,0][nmask]>0).all())
+                or not bool((t.alpha[...,0][dmask]>0).all())
+                or not bool((depth[...,0][dmask]>=0).all())
+            ):
+                raise ValueError("RSS_VNEXT_STDGEN_SLRM_STAGE3_SOURCE_RENDER_DOMAIN")
+            # Stage3 target normal/depth must have been independently
+            # source-rendered IN THE SAME WORLD/CAMERA convention as mesh.
+            inputs.update({
+                "independently_qualified_closed_signed_source":True,
+                "stage3_source_camera_sha256":_digest(camera),
+                "stage3_normal_target_sha256":_digest(normal),
+                "stage3_depth_target_sha256":_digest(depth),
+                "stage3_normal_mask_sha256":_digest(nmask),
+                "stage3_depth_mask_sha256":_digest(dmask),
+                "stage3_render_height":hw[0],"stage3_render_width":hw[1],
+                "stage3_world_normal_convention":"SOURCE_GEOMETRIC_NORMAL_WORLD_XYZ",
+                "stage3_metric_depth_convention":"SOURCE_CAMERA_FORWARD_FIRST_HIT_WORLD_UNITS",
+                "stage3_visibility_convention":"SOURCE_3D_ZBUFFER_VISIBLE_ONLY",
+                "stage3_semantic_role_schema_id":self.model.cfg.semantic_role_schema_id,
+                "stage3_layer_keep_roles":list(layer.keep_roles),
+            })
+        elif any(x is not None for x in (
+            batch.stage3_flexicubes_extractor,batch.stage3_semantic_layer,
+            batch.stage3_camera_features,batch.stage3_hw,
+            batch.stage3_target_normal,batch.stage3_target_depth,
+            batch.stage3_normal_mask,batch.stage3_depth_mask,
+        )):
+            raise ValueError("RSS_VNEXT_STDGEN_SLRM_MESH_TEACHER_ON_NERF_STAGE")
         receipt=self.trusted_source_3d_render_registry.get(batch.admitted_3d_render_key)
         if receipt is None or any(receipt.get(key)!=value for key,value in inputs.items()):
             raise ValueError("RSS_VNEXT_STDGEN_SLRM_RENDER_RECEIPT_DRIFT")
@@ -195,15 +266,19 @@ class StdGENSLRMTrainerV1:
             conditioning_authority=batch.conditioning_authority,
             generating_checkpoint_sha256=batch.generating_checkpoint_sha256,
         )
-        pred=render_stdgen_joint_from_shared_scene_v1(
-            iris=self.model.iris,scene_triplanes=state.scene_triplanes,
-            sample_xyz=batch.ray_xyz,ray_delta=batch.ray_deltas,
-            ray_depth=batch.ray_depths,ray_direction=batch.ray_directions,
-            keep_roles=batch.keep_roles,
-            shared_graphics_head=self.model.graphics,
-            shared_semantic_role_head=self.model.presentation_role_head,
-        )
         teacher=batch.source_3d_render_target
+        # Stage3 has its OWN mesh raster objective: never consume NeRF RGB,
+        # role, alpha or depth as a stand-in for mesh rendering. Save memory.
+        pred=None
+        if teacher.stage in (STAGE_1,STAGE_2):
+            pred=render_stdgen_joint_from_shared_scene_v1(
+                iris=self.model.iris,scene_triplanes=state.scene_triplanes,
+                sample_xyz=batch.ray_xyz,ray_delta=batch.ray_deltas,
+                ray_depth=batch.ray_depths,ray_direction=batch.ray_directions,
+                keep_roles=batch.keep_roles,
+                shared_graphics_head=self.model.graphics,
+                shared_semantic_role_head=self.model.presentation_role_head,
+            )
         mesh=None
         extra={}
         if teacher.stage==STAGE_3:

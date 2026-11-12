@@ -233,6 +233,48 @@ def attach_pinned_sdxl_lora_unet_v1(
     return unet
 
 
+def predict_sdxl_unet_noise_from_two_images_v1(
+    *, unet: nn.Module, noisy_latents: Tensor, timestep: int | Tensor,
+    text_context: Tensor, paired_image_context: Tensor,
+    pooled_text_embedding: Tensor, time_ids: Tensor,
+) -> Tensor:
+    """Real SDXL UNet ABI: text tokens + TWO original-image reference tokens.
+
+    SDXL additionally requires pooled text embeds and 6 time IDs. This is
+    the denoiser training/forward interface, not a pretrained model test.
+    """
+    if (
+        noisy_latents.ndim != 4 or noisy_latents.shape[1] != 4
+        or text_context.ndim != 3 or paired_image_context.ndim != 3
+        or text_context.shape[0] != noisy_latents.shape[0]
+        or paired_image_context.shape[0] != noisy_latents.shape[0]
+        or text_context.shape[2] != 2048 or paired_image_context.shape[2] != 2048
+        or text_context.shape[1] < 1 or paired_image_context.shape[1] < 1
+        or pooled_text_embedding.ndim != 2
+        or pooled_text_embedding.shape[0] != noisy_latents.shape[0]
+        or time_ids.shape != (noisy_latents.shape[0], 6)
+    ):
+        _fail("SDXL_TWO_IMAGE_UNET_INPUT_ABI")
+    if any(not bool(torch.isfinite(x).all()) for x in (
+        noisy_latents, text_context, paired_image_context,
+        pooled_text_embedding, time_ids,
+    )):
+        _fail("SDXL_TWO_IMAGE_UNET_NONFINITE")
+    context = torch.cat(
+        (text_context, paired_image_context.to(text_context.dtype)), dim=1,
+    )
+    prediction = unet(
+        noisy_latents, timestep, encoder_hidden_states=context,
+        added_cond_kwargs={
+            "text_embeds": pooled_text_embedding, "time_ids": time_ids,
+        },
+        return_dict=True,
+    )
+    if not hasattr(prediction, "sample") or prediction.sample.shape != noisy_latents.shape:
+        _fail("SDXL_TWO_IMAGE_NOISE_PREDICTION_SHAPE")
+    return prediction.sample
+
+
 @dataclass(frozen=True)
 class RSSvNextGeneratedImageV1:
     """A generated completion never gets the authority of source pixels."""
@@ -299,7 +341,9 @@ def validate_generated_diffusion_image_v1(
     receipt: RSSvNextGeneratedImageV1, *,
     original_image_payloads: tuple[bytes, bytes],
     generated_image_payload: bytes, original_source_binding_sha256: str,
+    expected_binding: SDXLBackboneBindingV1, expected_target_id: str,
 ) -> None:
+    expected_binding.validate()
     if (
         type(receipt) is not RSSvNextGeneratedImageV1
         or receipt.schema != SCHEMA or receipt.authority != AUTHORITY
@@ -307,6 +351,11 @@ def validate_generated_diffusion_image_v1(
         or type(receipt.original_image_sha256) is not tuple
         or receipt.original_image_sha256 != tuple(map(_hash_bytes, original_image_payloads))
         or receipt.original_source_binding_sha256 != original_source_binding_sha256
+        or receipt.target_id != expected_target_id
+        or receipt.model_unet_sha256 != expected_binding.unet_checkpoint_sha256
+        or receipt.model_revision != expected_binding.source_repository_revision
+        or receipt.adapter_sha256 != expected_binding.lora_adapter_sha256
+        or not expected_binding.is_trained_for_joint_two_image_conditioning
         or not _hex64(original_source_binding_sha256)
         or receipt.generated_image_sha256 != _hash_bytes(generated_image_payload)
         or receipt.conditioning_original_count != 2
@@ -332,6 +381,7 @@ __all__ = [
     "BACKBONE_REPO", "BACKBONE_LICENSE", "SCHEMA", "AUTHORITY",
     "SDXLBackboneBindingV1", "RSSvNextTwoImageConditionerV1",
     "RSSvNextGeneratedImageV1", "attach_pinned_sdxl_lora_unet_v1",
+    "predict_sdxl_unet_noise_from_two_images_v1",
     "seal_generated_diffusion_image_v1",
     "validate_generated_diffusion_image_v1",
 ]

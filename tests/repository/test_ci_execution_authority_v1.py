@@ -80,6 +80,7 @@ def test_zero_job_orphan_monitor_is_read_only_and_never_an_execution_owner():
     assert "cancelWorkflowRun" not in monitor and "deleteWorkflowRun" not in monitor
     assert "DELETE /repos" not in monitor
     assert "  pull_request:" not in monitor and "  push:" not in monitor
+    assert not (WF / "rss_vnext_pr448_queue_drain.yml").exists(), "Delete unsafe legacy cleanup"
 
 
 def test_gc_and_hosted_first_historical_owners_exist():

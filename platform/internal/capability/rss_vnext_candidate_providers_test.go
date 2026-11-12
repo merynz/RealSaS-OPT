@@ -58,7 +58,7 @@ func TestRSSvNextTwoViewInputAndSingleModelShapeFormOneCandidateRoleGraph(t *tes
 		"neural_scene":            true,
 		"inference_receipt":       true,
 		"unified_model_config":    true,
-		"embedded_mira_decoder":  true,
+		"embedded_mira_decoder":   true,
 		"rss_evidence_fanout":     true,
 	}
 	for _, raw := range aux {

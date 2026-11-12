@@ -206,6 +206,20 @@ def test_two_view_silhouette_and_ray_evidence_cannot_uniquely_identify_3d_depth(
     assert original.original_mesh_sha256 != rest.original_mesh_sha256
     assert not rest.source_fidelity_qualified
 
+    # Even querying exact RGB/alpha from both source rays cannot recover the
+    # altered 3D depth: SAME observed color/rays, DIFFERENT 3D triangle.
+    import torch
+    from models.rss_vnext.source_ray_evidence import sample_front_back_source_rays
+    rgba, cameras = source.to_model_tensors()
+    a = torch.tensor([evidence.mesh["rest_xyz"]], dtype=torch.float32)
+    b = torch.tensor([changed.mesh["rest_xyz"]], dtype=torch.float32)
+    assert float(torch.linalg.norm(a-b)) > 0.3
+    observed_a = sample_front_back_source_rays(rgba, cameras, a)
+    observed_b = sample_front_back_source_rays(rgba, cameras, b)
+    assert torch.equal(observed_a.projection_valid, observed_b.projection_valid)
+    assert torch.allclose(observed_a.rgba, observed_b.rgba, atol=1e-6)
+    assert torch.allclose(observed_a.silhouette_alpha, observed_b.silhouette_alpha, atol=1e-6)
+
 
 def test_oblique_back_camera_improves_linear_rank_but_not_source_correspondence():
     source, evidence, _ = _parents()

@@ -152,7 +152,7 @@ def install_era3d_cleanroom_unet_row_attention_v1(
         setattr(parent,leaf,wrapper)
     denoiser.requires_grad_(True)
     denoiser.rowwise_attention_in_unet_features=True
-    return tuple(path for path,_ in targets)
+    return tuple(path for path,_,_ in targets)
 
 
 __all__=[

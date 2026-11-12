@@ -319,3 +319,111 @@ def test_lossless_registered_style_input_to_single_checkpoint_shape_real_e2e(tmp
             {**input_request, "model_releases": shape_request["model_releases"]},
             read_object=read, put_bytes=put,
         )
+
+
+
+def test_independent_compiler_cas_fanout_reader_validates_index_and_skips_unused_scene(tmp_path, monkeypatch):
+    from compiler.realsas_compiler_services.platform_worker.model_inputs import (
+        behavior_identity_sha256,
+    )
+    from compiler.realsas_compiler_services.platform_worker.rss_vnext_product_fanout_v1 import (
+        validate_rss_vnext_fanout_index_v1,
+        bind_rss_vnext_fanout_refs_v1,
+        read_rss_vnext_neural_evidence_v1,
+        read_rss_vnext_shared_neural_scene_v1,
+    )
+    source, cas, result, request, read, put, vision, checkpoint, config = (
+        _run(tmp_path, monkeypatch)
+    )
+    output_by_role = {x["role"]: x for x in result["outputs"]}
+    index_bytes = read(output_by_role["rss_evidence_fanout"])
+    expected_behavior = behavior_identity_sha256(request["model_releases"][0])
+    index = validate_rss_vnext_fanout_index_v1(
+        index_bytes,
+        expected_source_content_sha256=request["input_artifacts"][0]["content_sha256"],
+        expected_source_binding_sha256=source.source_binding_sha256,
+        expected_checkpoint_sha256=checkpoint,
+        expected_model_release_behavior_sha256=expected_behavior,
+    )
+    child = bind_rss_vnext_fanout_refs_v1(
+        index, input_artifacts=list(result["outputs"]),
+    )
+    def evidence_only(ref):
+        # Critical non-bottleneck proof: Mesh/Semantic can inspect the small
+        # typed evidence without decompressing the full triplane archive.
+        assert ref["artifact_type"] != "RealSaS.RSSvNextNeuralSceneCarrier"
+        return read(ref)
+    proposal = read_rss_vnext_neural_evidence_v1(
+        index, child_refs=child, read_object=evidence_only,
+    )
+    assert proposal.evidence_hash == index["evidence_hash"]
+    assert proposal.mesh_status == index["mesh_status"]
+    shared = read_rss_vnext_shared_neural_scene_v1(
+        index, child_refs=child, read_object=read,
+    )
+    assert torch.equal(shared["local_features"], shared["geometry__H"])
+    assert shared["region_relation_logits"].shape[-1] == 3
+    assert shared["graphics_logits"].shape[-1] == 5
+
+    with pytest.raises(RuntimeError, match="SOURCE_OR_MODEL_BINDING_DRIFT"):
+        validate_rss_vnext_fanout_index_v1(
+            index_bytes, expected_source_content_sha256="f" * 64,
+            expected_source_binding_sha256=source.source_binding_sha256,
+            expected_checkpoint_sha256=checkpoint,
+            expected_model_release_behavior_sha256=expected_behavior,
+        )
+    with pytest.raises(RuntimeError, match="READ_CHILD_BINDING_DRIFT"):
+        bind_rss_vnext_fanout_refs_v1(index, input_artifacts=[
+            {**row, "content_sha256": "0" * 64}
+            if row["role"] == "neural_scene" else row
+            for row in result["outputs"]
+        ])
+    with pytest.raises(RuntimeError, match="READ_MISSING_CHILD"):
+        bind_rss_vnext_fanout_refs_v1(index, input_artifacts=[
+            row for row in result["outputs"]
+            if row["role"] != "neural_scene"
+        ])
+    with pytest.raises(RuntimeError, match="NEURAL_SCENE_CAS_BYTES_DRIFT"):
+        read_rss_vnext_shared_neural_scene_v1(
+            index, child_refs=child,
+            read_object=lambda ref: read(ref) + b"tamper"
+            if ref["artifact_type"] == "RealSaS.RSSvNextNeuralSceneCarrier" else read(ref),
+        )
+
+
+def test_rehashed_rss_fanout_cannot_grant_product_authority_or_drop_shared_scene(tmp_path, monkeypatch):
+    from compiler.realsas_compiler_services.platform_worker.model_inputs import (
+        behavior_identity_sha256,
+    )
+    from compiler.realsas_compiler_services.platform_worker.rss_vnext_product_fanout_v1 import (
+        validate_rss_vnext_fanout_index_v1,
+    )
+    source, cas, result, request, read, put, vision, checkpoint, config = (
+        _run(tmp_path, monkeypatch)
+    )
+    index_ref = next(x for x in result["outputs"] if x["role"] == "rss_evidence_fanout")
+    index = json.loads(read(index_ref))
+    behavior = behavior_identity_sha256(request["model_releases"][0])
+    def verify(value):
+        return validate_rss_vnext_fanout_index_v1(
+            json.dumps(value, sort_keys=True, separators=(",", ":")).encode(),
+            expected_source_content_sha256=request["input_artifacts"][0]["content_sha256"],
+            expected_source_binding_sha256=source.source_binding_sha256,
+            expected_checkpoint_sha256=checkpoint,
+            expected_model_release_behavior_sha256=behavior,
+        )
+    assert verify(index)["mesh_status"] == result["diagnostics"]["mesh_status"]
+    with pytest.raises(RuntimeError, match="PREMATURE_AUTHORITY"):
+        verify({**index, "product_revision_minted": True})
+    with pytest.raises(RuntimeError, match="PREMATURE_AUTHORITY"):
+        verify({**index, "original_source_rights_verified": True})
+    with pytest.raises(RuntimeError, match="CHILD_CARDINALITY"):
+        verify({**index, "children": index["children"][:-1]})
+    altered = json.loads(json.dumps(index))
+    altered["children"][0]["artifact_type"] = "RealSaS.ShapeProposal"
+    with pytest.raises(RuntimeError, match="CHILD_ABI_DRIFT"):
+        verify(altered)
+    swapped = json.loads(json.dumps(index))
+    swapped["children"][0]["content_sha256"] = swapped["children"][1]["content_sha256"]
+    with pytest.raises(RuntimeError, match="CHILD_OMITTED_OR_ALIASED"):
+        verify(swapped)

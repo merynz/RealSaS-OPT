@@ -274,6 +274,20 @@ def execute_rss_vnext_shape_capability_v3(
     data = json.dumps(
         index, sort_keys=True, separators=(",", ":"), allow_nan=False,
     ).encode("utf-8")
+    # Producer runs the SAME cheap structural court as the independent
+    # consumers; no misleading index can be emitted even if model succeeds.
+    from .rss_vnext_product_fanout_v1 import (
+        validate_rss_vnext_fanout_index_v1,
+        bind_rss_vnext_fanout_refs_v1,
+    )
+    validated_index = validate_rss_vnext_fanout_index_v1(
+        data,
+        expected_source_content_sha256=source_ref["content_sha256"],
+        expected_source_binding_sha256=source.source_binding_sha256,
+        expected_checkpoint_sha256=expected_checkpoint_sha,
+        expected_model_release_behavior_sha256=release["behavior_identity_sha256"],
+    )
+    bind_rss_vnext_fanout_refs_v1(validated_index, input_artifacts=refs)
     index_sealed = put_bytes(data)
     if (
         index_sealed.get("content_sha256") != sha256(data).hexdigest()

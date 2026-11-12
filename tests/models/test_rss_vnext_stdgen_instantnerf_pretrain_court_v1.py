@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from hashlib import sha256
 from pathlib import Path
+from collections import OrderedDict
 
 import pytest
 import torch
@@ -29,8 +30,8 @@ def _fixture(tmp_path):
     model=_NativeTiny()
     file=tmp_path/"tiny.ckpt"
     torch.save({
-        "state_dict":{"lrm_generator."+k:v.clone()
-                      for k,v in model.state_dict().items()},
+        "state_dict":OrderedDict(("lrm_generator."+k,v.clone())
+                      for k,v in model.state_dict().items()),
         "epoch":1,
     },file)
     digest=sha256(file.read_bytes()).hexdigest()

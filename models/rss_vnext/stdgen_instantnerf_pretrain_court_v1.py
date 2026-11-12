@@ -18,6 +18,7 @@ A synthetic fixture identity exists only to test the algorithm.
 """
 
 from dataclasses import dataclass
+from collections.abc import Mapping
 from hashlib import sha256
 from pathlib import Path
 
@@ -94,7 +95,7 @@ def _checkpoint_keys(
             )
     except (RuntimeError,ValueError,TypeError,KeyError) as exc:
         raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_SAFE_CHECKPOINT_PARSE") from exc
-    if type(payload) is not dict or type(payload.get("state_dict")) is not dict:
+    if not isinstance(payload,Mapping) or not isinstance(payload.get("state_dict"),Mapping):
         raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_CHECKPOINT_STATE_DICT_REQUIRED")
     sd=payload["state_dict"]
     prefix="lrm_generator."

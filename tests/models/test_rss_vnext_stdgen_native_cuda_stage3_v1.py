@@ -113,3 +113,48 @@ def test_native_nvidia_stage3_first_hit_and_mesh_shared_field_gradients():
     # Fail closed if this ran on a fixture rather than native CUDA.
     assert witness.xyz.device.type == "cuda"
     assert result.rasterizer_identity == RASTER_ID
+
+
+def test_real_cuda_source_layer_zbuffer_matches_independent_cpu_triangles():
+    _require_native_backend()
+    import numpy as np
+    from models.rss_vnext.stdgen_source_layer_truth_v1 import (
+        StdGENSourceOpaqueTriangleSurfaceV1,
+        render_stdgen_source_opaque_peeled_layer_v1,
+    )
+    from models.rss_vnext.stdgen_source_nvdiffrast_v1 import (
+        render_stdgen_opaque_source_layer_gpu_candidate_v1,
+    )
+    near=np.array([[-.7,-.7,.2],[.7,-.7,.2],[0.,.8,.2]],dtype=np.float32)
+    far=near.copy();far[:,2]=.8
+    source=StdGENSourceOpaqueTriangleSurfaceV1(
+        source_mesh_xyz=np.concatenate([far,near]),
+        source_faces=np.array([[0,1,2],[3,4,5]],dtype=np.int64),
+        source_face_rgb_linear=np.array([[.8,.1,.1],[.1,.7,.2]],dtype=np.float32),
+        source_face_role=np.array([1,2],dtype=np.int64),
+        semantic_role_count=3,
+        source_mesh_truth_sha256="a"*64,
+        source_rights_admission_sha256="b"*64,
+        renderer_version_sha256="c"*64,
+        source_colors_from_artist_materials=True,
+        source_roles_independently_assigned=True,
+        source_surface_is_opaque=True,
+    )
+    cam=np.zeros(13,dtype=np.float32)
+    cam[2]=-2.;cam[3]=cam[7]=cam[11]=cam[12]=1.
+    gpu=render_stdgen_opaque_source_layer_gpu_candidate_v1(
+        source=source,camera_13d=cam,height=64,width=64,
+        role_subset=(1,2),
+    )
+    cpu=render_stdgen_source_opaque_peeled_layer_v1(
+        source=source,camera_13d=cam,width=64,height=64,
+        role_subset=(1,2),
+    )
+    yc=xc=32
+    assert cpu.alpha[yc,xc,0]==1 and gpu.alpha[yc,xc,0]==1.
+    assert int(cpu.role_indices[yc,xc])==2
+    assert int(gpu.role_indices[yc,xc])==2
+    assert np.allclose(gpu.rgb_white_linear[yc,xc],cpu.rgb_white[yc,xc],atol=1.e-5)
+    assert abs(float(gpu.metric_depth[yc,xc,0])-2.2)<1.e-4
+    assert np.allclose(gpu.normal_xyz[yc,xc],cpu.normal_xyz[yc,xc],atol=1.e-5)
+    assert gpu.authority=="GPU_RENDER_CANDIDATE__NOT_SOURCE_TEACHER_ADMITTED"

@@ -63,7 +63,7 @@ def test_nerf_multilayer_loss_never_borrows_mesh_stage_normals_depth():
     with pytest.raises(ValueError,match="MESH_TARGET_ON_NERF_STAGE"):
         stdgen_joint_stage_loss_v1(
             render,_target(STAGE_2),
-            mesh_normal=torch.ones((1,1,3)),
+            mesh_raster=object(),
         )
 
 

@@ -213,10 +213,13 @@ def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_re
     relations = json.loads(read(by_role["rss_sparse_face_relation_candidates"]))
     court = json.loads(read(by_role["rss_cross_expert_capability_court"]))
     bridge = json.loads(read(by_role["rss_canonical_mesh_candidate_bridge"]))
-    assert bridge["state"] == "ABSTAIN_SOURCE_CORRESPONDENCE_REQUIRED"
-    assert bridge["candidate"] is None
-    assert "PER_VERTEX_SOURCE_SUPPORT" in bridge["missing_requirements"]
-    assert not bridge["canonical_mesh_authority"]
+    assert bridge["state"] == "UNQUALIFIED_NEURAL_BASIS_CANONICAL_CANDIDATE"
+    assert bridge["candidate"] is not None
+    assert bridge["candidate"]["metadata"]["source_geometry_was_not_independently_observed"] is True
+    assert bridge["source_support_binding_sha256"] is None
+    assert bridge["neural_basis_surface"]["metadata"]["source_surface_qualified"] is False
+    assert "SOURCE_RASTER_FIDELITY_QUALIFICATION" in bridge["missing_requirements"]
+    assert not bridge["canonical_mesh_authority"] and not bridge["source_fidelity_authority"]
     assert mesh["diagnostics"]["canonical_candidate_bridge_state"] == bridge["state"]
     epistemic = json.loads(read(by_role["rss_relation_epistemic_court"]))
     assert epistemic["state"] == "TYPED_HYPOTHESES_UNQUALIFIED"

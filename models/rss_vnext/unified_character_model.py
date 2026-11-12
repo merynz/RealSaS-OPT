@@ -279,6 +279,81 @@ class RSSvNextSkinCoupler(nn.Module):
         ]
         return torch.stack(weight_rows), torch.stack(mask_rows), torch.stack(joint_rows_padded)
 
+    def decode_discrete_skin_v1(
+        self,
+        local_features: Tensor,
+        vertex_xyz: Tensor,
+        joint_hidden: Tensor,
+        skin_code_ids: Tensor,
+        *,
+        vertex_normals: Tensor | None = None,
+    ) -> Tensor:
+        """Replay the EXACT generated FSQ IDs with the embedded MIRA decoder.
+
+        This is a separate executable candidate from the differentiable
+        expected-code training path. It is not a parity claim, a source truth
+        or canonical Skin authority. The decoded array has exact mesh-vertex
+        and causal joint order; the unified checkpoint owns the decoder.
+        """
+        if local_features.ndim != 3:
+            raise ValueError("RSS_VNEXT_DISCRETE_SKIN_VERTEX_RANK")
+        b, v, h = local_features.shape
+        if (
+            vertex_xyz.shape != (b, v, 3)
+            or h != self.cfg.iris.local_feature_dim
+            or joint_hidden.ndim != 3
+            or joint_hidden.shape[0] != b
+            or joint_hidden.shape[2] != self.cfg.control_hidden_dim
+            or not b or not v or not joint_hidden.shape[1]
+        ):
+            raise ValueError("RSS_VNEXT_DISCRETE_SKIN_DOMAIN_DRIFT")
+        j = joint_hidden.shape[1]
+        if (
+            skin_code_ids.dtype != torch.long
+            or skin_code_ids.shape != (b, j, self.cfg.skin_tokens_per_joint)
+        ):
+            raise ValueError("RSS_VNEXT_DISCRETE_SKIN_CODE_ADDRESS_DRIFT")
+        if vertex_normals is not None and vertex_normals.shape != vertex_xyz.shape:
+            raise ValueError("RSS_VNEXT_DISCRETE_SKIN_NORMAL_ADDRESS_DRIFT")
+        tensors = (local_features, vertex_xyz, joint_hidden)
+        if vertex_normals is not None:
+            tensors += (vertex_normals,)
+        if (
+            len({x.device for x in tensors + (skin_code_ids,)}) != 1
+            or len({x.dtype for x in tensors}) != 1
+            or not all(bool(torch.isfinite(x).all()) for x in tensors)
+        ):
+            raise ValueError("RSS_VNEXT_DISCRETE_SKIN_NONFINITE_OR_DEVICE_DRIFT")
+        # The quantizer checks token bounds; no clamping, re-encoding or
+        # interpolation of discrete IDs is permitted at the Compiler boundary.
+        codes = self.codec.quantizer.token_ids_to_codes(skin_code_ids).to(
+            dtype=joint_hidden.dtype,
+        )
+        if self.cfg.skin_decoder_mode == "POINT_QUERY_CROSS_ATTENTION":
+            if vertex_normals is None:
+                raise ValueError("RSS_VNEXT_DISCRETE_SKIN_INDEXED_NORMALS_REQUIRED")
+            mask = torch.ones((b, j), dtype=torch.bool, device=joint_hidden.device)
+            weights = self.spatial_decoder(
+                local_features, vertex_xyz, joint_hidden, codes, mask,
+                vertex_normals=vertex_normals,
+            ).weights
+        else:
+            weights = self.codec.decode_tokens(
+                skin_code_ids,
+                torch.cat((local_features, vertex_xyz), dim=-1),
+                joint_hidden,
+            )
+        if (
+            weights.shape != (b, v, j)
+            or not bool(torch.isfinite(weights).all())
+            or not bool(torch.allclose(
+                weights.sum(dim=-1), torch.ones_like(weights[..., 0]),
+                rtol=0.0, atol=1.e-5,
+            ))
+        ):
+            raise RuntimeError("RSS_VNEXT_DISCRETE_SKIN_DECODER_RESULT_INVALID")
+        return weights
+
 
 class RSSvNextUnifiedCharacterModel(nn.Module):
     """One shared carrier and differentiably coupled expert computation graph."""
@@ -850,6 +925,24 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 )
                 result["dynamic_mesh_candidate"] = self.dynamic_refine(mesh, weights, joints)
                 result["joint_valid_mask"] = joint_valid
+                # SkinTokens-style product IDs must be decoded, not substituted
+                # with the differentiable expected-code weights above. Preserve
+                # BOTH outcomes and exact AXIS hidden joint states for the
+                # Compiler's pinned same-checkpoint replay/parity court.
+                n_joints = int(joint_valid[0].sum().item())
+                code_positions = seq.kind_ids[0] == int(RigTokenKindV6.SKIN_CODE)
+                token_ids = seq.skin_code_ids[0, code_positions].reshape(
+                    1, n_joints, self.cfg.skin_tokens_per_joint,
+                )
+                hidden_joints = joints[:, :n_joints]
+                hard_weights = self.mira.decode_discrete_skin_v1(
+                    mesh.local_features, mesh.rest_vertices_iris,
+                    hidden_joints, token_ids, vertex_normals=mesh.normals,
+                )
+                if hard_weights.shape != weights.shape:
+                    raise RuntimeError("RSS_VNEXT_SKIN_SOFT_DISCRETE_JOINT_DRIFT")
+                result["discrete_skin_weight_proposal"] = hard_weights
+                result["skin_joint_hidden_states"] = hidden_joints
         return result
 
 

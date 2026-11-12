@@ -144,9 +144,20 @@ def _mesh(value: Mapping[str, Any]) -> int:
 
 
 def _dynamic(value: Mapping[str, Any], n: int) -> None:
-    if not isinstance(value, Mapping) or set(value) != {
+    base = {
         "vertices", "weights", "displacement", "readiness_logits", "authority",
-    } or value["authority"] != "UNQUALIFIED_DYNAMIC_MESH_PROPOSAL":
+    }
+    discrete = {
+        "discrete_skin_weights", "skin_joint_hidden_states",
+        "soft_to_discrete_max_abs_difference",
+        "soft_to_discrete_mean_abs_difference",
+        "soft_to_discrete_parity_qualified",
+    }
+    if (
+        not isinstance(value, Mapping)
+        or set(value) not in (base, base | discrete)
+        or value["authority"] != "UNQUALIFIED_DYNAMIC_MESH_PROPOSAL"
+    ):
         _reject("RSS_VNEXT_EVIDENCE_DYNAMIC_AUTHORITY")
     for k, w in (("vertices", 3), ("displacement", 3), ("readiness_logits", 4)):
         _rows(value[k], n, w, "RSS_VNEXT_EVIDENCE_DYNAMIC_SHAPE:" + k)
@@ -156,6 +167,36 @@ def _dynamic(value: Mapping[str, Any], n: int) -> None:
         _reject("RSS_VNEXT_EVIDENCE_SKIN_JOINT_ORDER_DRIFT")
     if any(w < -1e-6 or abs(sum(row) - 1.0) > 1e-5 for row in weights for w in row):
         _reject("RSS_VNEXT_EVIDENCE_SKIN_SIMPLEX")
+    if discrete.issubset(value):
+        hard = value["discrete_skin_weights"]
+        joints = value["skin_joint_hidden_states"]
+        j = len(weights[0])
+        _rows(hard, n, j, "RSS_VNEXT_EVIDENCE_DISCRETE_SKIN_SHAPE")
+        _rows(joints, j, None, "RSS_VNEXT_EVIDENCE_DISCRETE_SKIN_JOINT_STATES")
+        if (
+            not j or not joints[0] or len({len(row) for row in joints}) != 1
+            or any(w < -1e-6 or abs(sum(row) - 1.) > 1.e-5 for row in hard for w in row)
+            or value["soft_to_discrete_parity_qualified"] is not False
+        ):
+            _reject("RSS_VNEXT_EVIDENCE_DISCRETE_SKIN_AUTHORITY_OR_SIMPLEX")
+        errors = [
+            abs(float(a) - float(b))
+            for soft, hard_row in zip(weights, hard)
+            for a, b in zip(soft, hard_row)
+        ]
+        max_diff, mean_diff = max(errors), sum(errors) / len(errors)
+        for k, actual in (
+            ("soft_to_discrete_max_abs_difference", max_diff),
+            ("soft_to_discrete_mean_abs_difference", mean_diff),
+        ):
+            measured = value[k]
+            if (
+                type(measured) not in (float, int)
+                or not math.isfinite(measured)
+                or measured < 0
+                or abs(measured - actual) > 2.e-6
+            ):
+                _reject("RSS_VNEXT_EVIDENCE_DISCRETE_SKIN_PARITY_METRIC_DRIFT")
 
 
 

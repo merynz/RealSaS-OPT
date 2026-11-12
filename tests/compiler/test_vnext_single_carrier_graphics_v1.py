@@ -520,6 +520,47 @@ def _qualified_neural_graphics_fixture(*, mutate_candidate=None):
     return evidence, mapping, mesh, rig, skin
 
 
+def test_rss_typed_graphics_preserves_independent_cut_and_unknown_instead_of_complement():
+    from compiler.realsas_compiler_core.graphics_v1 import (
+        _rss_typed_face_graphics_candidates_v1,
+    )
+    scene = {
+        "region_relation_logits": [
+            [[0., 0., 0.], [2., 2., 3.]],
+            [[2., 2., -3.], [0., 0., 0.]],
+        ],
+        "region_relation_valid_mask": [[False, True], [True, False]],
+    }
+    probabilities = {
+        0: ((.8, .1), .1),
+        1: ((.1, .8), .1),
+    }
+    relation, coverage = _rss_typed_face_graphics_candidates_v1(
+        scene=scene, face_probabilities=probabilities,
+        adjacent_pairs=((0, 1), (1, 0)), evidence_hash="e" * 64,
+    )
+    assert len(relation) == len(coverage) == 2
+    for row in relation:
+        # SAME and CUT are separately learned, not complements of each other.
+        assert row.same_drawable_affinity > .8
+        assert row.cut_probability > .8
+        assert abs(row.cut_probability - (1. - row.same_drawable_affinity)) > .5
+        assert row.evidence_ref == "e" * 64
+    assert relation[0].attachment_affinity > .8
+    assert relation[1].attachment_affinity < .2
+    for row in coverage:
+        assert row["from_predicted_unknown_mass"] == .1
+        assert row["to_predicted_unknown_mass"] == .1
+        assert row["nonself_known_region_pair_mass"] > .6
+    collapsed, abstained = _rss_typed_face_graphics_candidates_v1(
+        scene=scene,
+        face_probabilities={0: ((.9, 0.), .1), 1: ((.9, 0.), .1)},
+        adjacent_pairs=((0, 1),), evidence_hash="e" * 64,
+    )
+    assert collapsed == ()
+    assert abstained[0]["state"] == "ABSTAIN_NO_KNOWN_CROSS_REGION_SUPPORT"
+
+
 def test_neural_anonymous_regions_lower_into_real_canonical_graphics_without_source_authority():
     evidence, mapping, mesh, rig, skin = _qualified_neural_graphics_fixture()
     compiled = compile_neural_region_graphics_on_canonical_puppet_v1(

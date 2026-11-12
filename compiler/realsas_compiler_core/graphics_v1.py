@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import asdict,dataclass,field,replace
+import math
 from typing import Any,Iterable,Mapping
 from .hashing import content_sha256
 from .types import QualificationError
@@ -430,6 +431,94 @@ def compile_graphics_on_canonical_puppet_v1(
         policy=policy,
     )
 
+def _rss_typed_face_graphics_candidates_v1(
+    *, scene, face_probabilities, adjacent_pairs, evidence_hash,
+):
+    """Preserve independent learned SAME, CUT and directed ATTACHMENT logits.
+
+    Inputs are exact TESSA candidate-face memberships rebound to canonical
+    face indices. The 3 channels are independent; CUT IS NOT 1-SAME.
+    UNKNOWN and all cross-slot support remain in a separate coverage ledger.
+    No source appearance, source first-hit, contact or drawable authority is
+    created. A pair with insufficient known cross-slot mass ABSTAINS.
+    """
+    if not isinstance(scene, dict):
+        raise QualificationError("GRAPHICS_TYPED_RSS_SCENE_REQUIRED")
+    raw = scene.get("region_relation_logits")
+    mask = scene.get("region_relation_valid_mask")
+    if not isinstance(raw, (list, tuple)) or not isinstance(mask, (list, tuple)):
+        raise QualificationError("GRAPHICS_TYPED_RSS_RELATION_REQUIRED")
+    n = len(raw)
+    if n < 2 or len(mask) != n or any(
+        not isinstance(row, (tuple, list)) or len(row) != n
+        for row in raw
+    ) or any(
+        not isinstance(row, (tuple, list)) or len(row) != n for row in mask
+    ):
+        raise QualificationError("GRAPHICS_TYPED_RSS_RELATION_SHAPE")
+    for i in range(n):
+        for j in range(n):
+            if mask[i][j] is not (i != j):
+                raise QualificationError("GRAPHICS_TYPED_RSS_RELATION_SELF_MASK")
+            if len(raw[i][j]) != 3 or any(
+                type(x) not in (float, int) or not math.isfinite(x)
+                for x in raw[i][j]
+            ):
+                raise QualificationError("GRAPHICS_TYPED_RSS_RELATION_LOGITS_INVALID")
+            if i != j and any(
+                abs(raw[i][j][channel] - raw[j][i][channel]) > 1e-5
+                for channel in (0, 1)
+            ):
+                raise QualificationError("GRAPHICS_TYPED_RSS_SYMMETRY_INVALID")
+    relation_rows = []
+    coverage = []
+    for fa, fb in adjacent_pairs:
+        left, unknown_left = face_probabilities[fa]
+        right, unknown_right = face_probabilities[fb]
+        if len(left) != n or len(right) != n:
+            raise QualificationError("GRAPHICS_TYPED_RSS_MEMBERSHIP_WIDTH")
+        if not all(0 <= x <= 1 and math.isfinite(x) for x in (
+            *left, *right, unknown_left, unknown_right,
+        )):
+            raise QualificationError("GRAPHICS_TYPED_RSS_MEMBERSHIP_DOMAIN")
+        if abs(sum(left) + unknown_left - 1) > 1e-5 or abs(
+            sum(right) + unknown_right - 1
+        ) > 1e-5:
+            raise QualificationError("GRAPHICS_TYPED_RSS_UNKNOWN_MASS_DRIFT")
+        joint = [
+            (i, j, left[i] * right[j])
+            for i in range(n) for j in range(n) if i != j
+        ]
+        support = sum(w for _, _, w in joint)
+        ledger = {
+            "from_canonical_face_index": fa,
+            "to_canonical_face_index": fb,
+            "from_predicted_unknown_mass": unknown_left,
+            "to_predicted_unknown_mass": unknown_right,
+            "nonself_known_region_pair_mass": support,
+            "state": (
+                "UNQUALIFIED_TYPED_RELATION_CANDIDATE"
+                if support > 1e-6 else "ABSTAIN_NO_KNOWN_CROSS_REGION_SUPPORT"
+            ),
+        }
+        coverage.append(ledger)
+        if support <= 1e-6:
+            continue
+        def sigmoid(x):
+            return 1. / (1. + math.exp(-max(-64., min(64., float(x)))))
+        scores = tuple(
+            sum(w * sigmoid(raw[i][j][k]) for i, j, w in joint) / support
+            for k in range(3)
+        )
+        # Alpha/appearance boundary UNKNOWN; 0.5 is a neutral candidate
+        # placeholder and can never become source boundary qualification.
+        relation_rows.append(GraphicsStaticRelationEvidenceV1(
+            fa, fb, scores[0], scores[1], scores[2], .5, .5,
+            min(1.0, support), evidence_hash,
+        ))
+    return tuple(relation_rows), tuple(coverage)
+
+
 def compile_neural_region_graphics_on_canonical_puppet_v1(
     *,
     evidence: "RSSvNextInferenceEvidenceIRV1",
@@ -525,11 +614,11 @@ def compile_neural_region_graphics_on_canonical_puppet_v1(
         k = face_map[row["candidate_face_index"]]
         raw = row["candidate_region_probabilities"]
         unknown = float(row["unknown_probability"])
-        mass = sum(raw)
-        # UNKNOWN never contributes to a positive relation. A zero known
-        # mass makes this pair unknown rather than artificially different.
-        probs = tuple(float(x) / mass for x in raw) if mass > 1e-9 else tuple(0.0 for _ in raw)
-        canonical_probs[k] = (probs, 1.0 - unknown)
+        # Preserve the original known-slot probability MASS, not a
+        # normalized conditional vector that silently drops UNKNOWN.
+        # Typed region channels are marginalized only over known cross-slot
+        # support and the actual uncertainty survives in the coverage ledger.
+        canonical_probs[k] = (tuple(float(x) for x in raw), unknown)
     ordered_face_vertices = tuple(mesh.faces)
     adjacency: set[tuple[int, int]] = set()
     edge_faces: dict[tuple[str, str], list[int]] = {}
@@ -543,22 +632,15 @@ def compile_neural_region_graphics_on_canonical_puppet_v1(
     if max_candidate_pairs < 0 or len(adjacency) > max_candidate_pairs:
         raise QualificationError("GRAPHICS_NEURAL_PAIR_RESOURCE_LIMIT")
 
-    relations = []
-    for a, b in sorted(adjacency):
-        left, confidence_a = canonical_probs[a]
-        right, confidence_b = canonical_probs[b]
-        confidence = min(confidence_a, confidence_b)
-        # A learned categorical co-region probability is NOT a proven source
-        # drawable boundary. Compiler may choose a conservative partition,
-        # but no cut or stable independent-edit authority is certified.
-        same = max(0.0, min(1.0, sum(x * y for x, y in zip(left, right))))
-        if confidence < 1e-8:
-            same = 0.0
-        relations.append(GraphicsStaticRelationEvidenceV1(
-            a, b, same, 1.0 - same if confidence >= 1e-8 else 0.5,
-            0.0, 0.5, 0.5, confidence,
-            evidence_ref=evidence.evidence_hash,
-        ))
+    # No source-derived 1-SAME shortcut: all THREE learned channels are
+    # independent. A missing graph or vanishing known cross-region support
+    # has no relation candidate and must never mint a fabricated cut.
+    relations, relation_coverage = _rss_typed_face_graphics_candidates_v1(
+        scene=evidence.scene,
+        face_probabilities=canonical_probs,
+        adjacent_pairs=tuple(sorted(adjacency)),
+        evidence_hash=evidence.evidence_hash,
+    )
 
     compiler_input = build_graphics_evidence_v1(
         mesh_binding_hash=mesh.mesh_lineage_hash,
@@ -568,7 +650,10 @@ def compile_neural_region_graphics_on_canonical_puppet_v1(
             "source_neural_evidence_hash": evidence.evidence_hash,
             "candidate_mesh_only": True,
             "qualified_mesh_face_rebinding": True,
-            "cut_semantics": "REGION_DISAGREEMENT_POLICY_NOT_SOURCE_CUT_TRUTH",
+            "cut_semantics": "INDEPENDENT_LEARNED_CUT_HEAD_NOT_SOURCE_CUT_TRUTH",
+            "relation_semantics": "INDEPENDENT_SAME_CUT_DIRECTED_ATTACHMENT",
+            "typed_candidate_pair_coverage": relation_coverage,
+            "predicted_unknown_region_mass_retained": True,
             "attachment_evidence_available": False,
             "source_visibility_evidence_available": False,
         },
@@ -589,6 +674,8 @@ def compile_neural_region_graphics_on_canonical_puppet_v1(
         "source_pixels_win_where_observed": False,
         "learned_region_is_not_drawable_truth": True,
         "source_graphics_qualification_status": "UNQUALIFIED_NEURAL_POLICY_ONLY",
+        "typed_relation_cut_never_derived_as_one_minus_same": True,
+        "typed_candidate_pair_coverage": relation_coverage,
     })
     result = replace(compiled, metadata=metadata, graph_hash="")
     return replace(result, graph_hash=compiled_graphics_hash_v1(result))

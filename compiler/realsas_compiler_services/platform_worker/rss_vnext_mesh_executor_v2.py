@@ -20,6 +20,9 @@ import json
 from typing import Any, Callable, Mapping
 
 from compiler.realsas_compiler_core.hashing import content_sha256
+from compiler.realsas_compiler_core.rss_vnext_source_evidence_binding_v1 import (
+    validate_rss_vnext_source_evidence_binding_v1,
+)
 from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
     RSSvNextInferenceEvidenceIRV1,
 )
@@ -225,6 +228,13 @@ def execute_rss_vnext_mesh_capability_v2(
     evidence = read_rss_vnext_neural_evidence_v1(
         index, child_refs=children, read_object=read_object,
     )
+    # Exact source CAS bytes must match the original tensors and cameras
+    # claimed by the neural evidence. Hash-sealed proposal/index records are
+    # not independently observed source authority, even on TESSA ABSTAIN.
+    source_evidence_court = validate_rss_vnext_source_evidence_binding_v1(
+        source=source, evidence=evidence,
+        expected_source_binding_sha256=index["source_binding_sha256"],
+    )
     # A failed learned TESSA topology is NOT a failure to preserve evidence.
     # Do not allocate huge shared triplanes merely to report mesh abstention.
     if evidence.mesh_status == "ABSTAIN":
@@ -359,6 +369,9 @@ def execute_rss_vnext_mesh_capability_v2(
             "evidence_continuity_hash": continuity["continuity_hash"],
             "all_seven_neural_expert_children_preserved_by_reference": True,
             "source_surface_qualified": False,
+            "original_source_tensor_identity_court_hash": source_evidence_court.court_hash,
+            "original_source_tensor_identity_state": source_evidence_court.state,
+            "original_source_tensor_identity_is_not_source_fidelity": True,
             "canonical_mesh_authority": False,
             "source_visibility_authority": False,
             "executable_rig_skin_qualified": False,

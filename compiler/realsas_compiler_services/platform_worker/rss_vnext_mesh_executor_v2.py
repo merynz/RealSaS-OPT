@@ -33,6 +33,9 @@ from compiler.realsas_compiler_core.rss_vnext_face_relation_schedule_v1 import (
 from compiler.realsas_compiler_core.rss_vnext_cross_expert_capability_court_v1 import (
     compile_rss_vnext_cross_expert_capability_court_v1,
 )
+from compiler.realsas_compiler_core.rss_vnext_canonical_mesh_candidate_bridge_v1 import (
+    build_rss_vnext_canonical_mesh_candidate_bridge_v1,
+)
 from compiler.realsas_compiler_core.rss_vnext_relation_epistemic_court_v1 import (
     adjudicate_rss_vnext_relations_v1,
     learned_face_relation_assertions_v1,
@@ -314,6 +317,17 @@ def execute_rss_vnext_mesh_capability_v2(
         artifact_type="RealSaS.RSSvNextCrossExpertCapabilityCourt",
         put_bytes=put_bytes,
     ))
+    # TESSA indexed topology cannot receive CanonicalMesh authority without
+    # independently addressable source-support correspondences. Emit the
+    # readiness/ABSTAIN decision, never synthesize source nodes from H(x).
+    bridge = build_rss_vnext_canonical_mesh_candidate_bridge_v1(
+        evidence=evidence, computed_surface=surface, model_config=cfg,
+    )
+    output.append(_store_json(
+        asdict(bridge), role="rss_canonical_mesh_candidate_bridge",
+        artifact_type="RealSaS.RSSvNextCanonicalMeshCandidateBridge",
+        put_bytes=put_bytes,
+    ))
     # Transport the exact input CAS references, not a lossy summary, through
     # product.mesh. Even ABSTAIN must retain H(x), both source views, TESSA
     # context, the MIRA decoder and every independent expert readout.
@@ -336,6 +350,7 @@ def execute_rss_vnext_mesh_capability_v2(
             "computed_face_count": len(surface.faces),
             "candidate_mesh_hash": surface.candidate_mesh_sha256,
             "cross_expert_capability_state": court.state,
+            "canonical_candidate_bridge_state": bridge.state,
             "relation_epistemic_state": relation_epistemic.state,
             "independent_executable_capabilities_qualified": False,
             "neural_scene_preserved_parent_cas": children["neural_scene"]["content_sha256"],

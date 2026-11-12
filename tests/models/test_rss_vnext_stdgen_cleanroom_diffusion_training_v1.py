@@ -13,6 +13,7 @@ from models.rss_vnext.stdgen_cleanroom_diffusion_training_v1 import (
     CleanroomDiffusionRenderRecordV1, validate_render_record_v1,
     validate_cleanroom_render_corpus_v1, AttentionLoRALinearV1,
     install_attention_lora_v1, PairedSourceDiffusionConditionerV1,
+    RowWiseRGBNormalViewAttentionV1,
     cleanroom_diffusion_noise_microstep_v1,
 )
 
@@ -149,7 +150,11 @@ def _microcase(stage):
     return dict(source_tokens=src,rendered_target_rgb=targets,
         rendered_target_validity_mask=mask,target_cameras=cameras,
         target_modalities=mods,vae=_FakeVAE(),scheduler=_FakeScheduler(),
-        denoiser=denoiser,conditioner=condition,stage=stage)
+        denoiser=denoiser,conditioner=condition,stage=stage,
+        rowwise_attention=(
+            None if stage==STAGE_CANONICAL else
+            RowWiseRGBNormalViewAttentionV1(latent_channels=3,hidden_width=8,heads=2)
+        ))
 
 
 @pytest.mark.parametrize("stage",[STAGE_CANONICAL,STAGE_MULTIVIEW])
@@ -168,6 +173,12 @@ def test_one_step_cleanroom_2source_conditioned_noise_training_is_differentiable
     loss.backward()
     assert kw["denoiser"].to_q.lora_B.grad.abs().sum()>0
     assert condition.source_projection.weight.grad.abs().sum()>0
+    if stage==STAGE_MULTIVIEW:
+        mixer=kw["rowwise_attention"]
+        # The pretrained denoiser remains initially unchanged. Its new
+        # row-wise residual nevertheless receives a differentiable update.
+        assert mixer.residual.weight.grad is not None
+        assert mixer.residual.weight.grad.abs().sum()>0
     assert not kw["denoiser"].to_q.base.weight.requires_grad
 
 
@@ -184,3 +195,39 @@ def test_training_step_does_not_accept_missing_teacher_pixels_or_wrong_stage():
     kw["scheduler"].config.prediction_type="v_prediction"
     with pytest.raises(ValueError,match="EPSILON_SCHEDULER_REQUIRED"):
         cleanroom_diffusion_noise_microstep_v1(**kw)
+
+
+
+def test_multiview_without_rowwise_interaction_cannot_train_as_stdgen_parity():
+    kw=_microcase(STAGE_MULTIVIEW)
+    kw["rowwise_attention"]=None
+    with pytest.raises(ValueError,match="MULTIVIEW_ROW_ATTENTION_REQUIRED"):
+        cleanroom_diffusion_noise_microstep_v1(**kw)
+
+
+def test_rowwise_view_normal_attention_propagates_across_views_but_not_rows():
+    torch.manual_seed(7)
+    layer=RowWiseRGBNormalViewAttentionV1(
+        latent_channels=3,hidden_width=8,heads=2,row_chunk=2,
+    )
+    a=torch.randn((1,12,3,4,3))
+    cameras=torch.zeros((1,12,13))
+    cameras[:,:,3]=cameras[:,:,7]=cameras[:,:,11]=cameras[:,:,12]=1.
+    modality=torch.tensor([[0]*6+[1]*6],dtype=torch.long)
+    assert torch.equal(layer(a,cameras,modality),a)  # initial residual identity
+    with torch.no_grad():
+        layer.residual.weight[0,0]=1.0
+    before=layer(a,cameras,modality)
+    edited=a.clone()
+    edited[:,0,:,1,:]+=5.
+    after=layer(edited,cameras,modality)
+    # Row 1 in a DIFFERENT view changes through same-row attention.
+    assert not torch.allclose(before[:,1,:,1,:],after[:,1,:,1,:],atol=1e-6)
+    # Row 0 and row 2 cannot receive row-1 edits in this operator.
+    assert torch.allclose(before[:,:,:,0,:],after[:,:,:,0,:],atol=1e-7)
+    assert torch.allclose(before[:,:,:,2,:],after[:,:,:,2,:],atol=1e-7)
+    limited=RowWiseRGBNormalViewAttentionV1(
+        latent_channels=3,max_tokens_per_row=12,
+    )
+    with pytest.raises(ValueError,match="RESOURCE_OR_DOMAIN"):
+        limited(a,cameras,modality)

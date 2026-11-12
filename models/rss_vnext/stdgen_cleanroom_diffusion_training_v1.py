@@ -212,13 +212,90 @@ def install_attention_lora_v1(
     return tuple(candidates)
 
 
+class RowWiseRGBNormalViewAttentionV1(nn.Module):
+    """Cleanroom camera/modality-aware row-wise multi-view latent interaction.
+
+    Reference: StdGEN §3.1 adapts Era3D with memory-efficient row attention
+    across camera views and jointly generated RGB/normal maps. This small
+    independent latent-space attention is a trainable *baseline*, not a copy
+    or a claim of multiscale Era3D feature parity.
+
+    Each image row is a separate attention scope: changing pixels on row y
+    can affect other views' row y, but cannot leak into row y+1 through
+    this module. Rows are chunked; view*latent-width has a hard resource cap.
+    """
+    def __init__(
+        self, latent_channels: int, *,
+        hidden_width: int = 32, heads: int = 4,
+        max_tokens_per_row: int = 2048, row_chunk: int = 4,
+    ):
+        super().__init__()
+        if (
+            latent_channels < 1 or hidden_width < 1 or heads < 1
+            or hidden_width % heads
+            or max_tokens_per_row < 1 or row_chunk not in range(1,9)
+        ):
+            raise ValueError("RSS_VNEXT_DIFFUSION_ROW_ATTENTION_CONFIG")
+        self.latent_channels=latent_channels
+        self.max_tokens_per_row=max_tokens_per_row
+        self.row_chunk=row_chunk
+        self.feature=nn.Linear(latent_channels,hidden_width)
+        self.camera=nn.Linear(13,hidden_width)
+        self.modality=nn.Embedding(2,hidden_width)
+        self.attention=nn.MultiheadAttention(
+            hidden_width,heads,batch_first=True,
+        )
+        self.residual=nn.Linear(hidden_width,latent_channels)
+        # Start identically to the pinned pretrained denoiser. Do not
+        # perturb its distribution before the new attention learns.
+        nn.init.zeros_(self.residual.weight)
+        nn.init.zeros_(self.residual.bias)
+
+    def forward(
+        self, noisy_latents: Tensor, target_cameras: Tensor,
+        target_modalities: Tensor,
+    ) -> Tensor:
+        if noisy_latents.ndim != 5:
+            raise ValueError("RSS_VNEXT_DIFFUSION_ROW_ATTENTION_INPUT")
+        b,v,c,h,w=noisy_latents.shape
+        if (
+            b < 1 or b > 4 or v not in (12,16)
+            or c != self.latent_channels or v*w > self.max_tokens_per_row
+            or target_cameras.shape != (b,v,13)
+            or target_modalities.shape != (b,v)
+            or target_modalities.dtype != torch.long
+            or not bool(torch.isfinite(noisy_latents).all())
+            or not bool(torch.isfinite(target_cameras).all())
+            or bool(((target_modalities < 0) | (target_modalities > 1)).any())
+        ):
+            raise ValueError("RSS_VNEXT_DIFFUSION_ROW_ATTENTION_RESOURCE_OR_DOMAIN")
+        # Coordinates are VIEW x IMAGE ROW x PIXEL. Flatten only view/width,
+        # never image height, so cross-row attention is impossible here.
+        grid=noisy_latents.float().permute(0,3,1,4,2).contiguous()
+        view_ctx=(
+            self.camera(target_cameras.float())
+            + self.modality(target_modalities)
+        )[:,None,:,None,:]
+        results=[]
+        for start in range(0,h,self.row_chunk):
+            row=grid[:,start:start+self.row_chunk]
+            rows=row.shape[1]
+            token=self.feature(row)+view_ctx
+            token=token.reshape(b*rows,v*w,-1)
+            attended,_=self.attention(token,token,token,need_weights=False)
+            update=self.residual(attended).reshape(b,rows,v,w,c)
+            results.append(update)
+        delta=torch.cat(results,dim=1).permute(0,2,4,1,3)
+        return noisy_latents + delta.to(noisy_latents.dtype)
+
+
 class PairedSourceDiffusionConditionerV1(nn.Module):
     """Two source token sets → per-target-camera cross-attention conditioning.
 
     Source tokens must come from a separately pinned image encoder such as
     the existing frozen DINO adapter. No text prompt or single-image averaging
-    silently discards the second source. Does not yet implement Era3D's
-    feature-row attention; that remains a measured training gap.
+    silently discards the second source. Multi-view RGB/normal denoising is
+    additionally coupled by RowWiseRGBNormalViewAttentionV1.
     """
     def __init__(self, source_width: int, conditioning_width: int, heads: int = 4):
         super().__init__()
@@ -271,6 +348,7 @@ def cleanroom_diffusion_noise_microstep_v1(
     target_modalities: Tensor, vae: Any, scheduler: Any,
     denoiser: nn.Module, conditioner: PairedSourceDiffusionConditionerV1,
     stage: str, noise: Tensor | None = None, timesteps: Tensor | None = None,
+    rowwise_attention: RowWiseRGBNormalViewAttentionV1 | None = None,
 ) -> Tensor:
     """One real SD-family epsilon-loss forward/backward-capable training step.
 
@@ -281,6 +359,10 @@ def cleanroom_diffusion_noise_microstep_v1(
     """
     if stage not in (STAGE_CANONICAL, STAGE_MULTIVIEW):
         raise ValueError("RSS_VNEXT_DIFFUSION_UNKNOWN_TRAINING_STAGE")
+    if stage == STAGE_MULTIVIEW and type(rowwise_attention) is not RowWiseRGBNormalViewAttentionV1:
+        raise ValueError("RSS_VNEXT_DIFFUSION_MULTIVIEW_ROW_ATTENTION_REQUIRED")
+    if stage == STAGE_CANONICAL and rowwise_attention is not None:
+        raise ValueError("RSS_VNEXT_DIFFUSION_CANONICAL_NO_MULTIVIEW_ROW_ATTENTION")
     if (
         rendered_target_rgb.ndim != 5 or rendered_target_rgb.shape[2] != 3
         or not torch.is_floating_point(rendered_target_rgb)
@@ -328,6 +410,11 @@ def cleanroom_diffusion_noise_microstep_v1(
     if getattr(scheduler.config,"prediction_type",None) != "epsilon":
         raise ValueError("RSS_VNEXT_DIFFUSION_EPSILON_SCHEDULER_REQUIRED")
     noisy=scheduler.add_noise(latent,noise,timesteps)
+    if rowwise_attention is not None:
+        noisy=rowwise_attention(
+            noisy.reshape(b,v,*noisy.shape[1:]),target_cameras,
+            target_modalities,
+        ).reshape_as(noisy)
     predicted=denoiser(noisy,timesteps,encoder_hidden_states=cond).sample
     if predicted.shape != noise.shape or not bool(torch.isfinite(predicted).all()):
         raise ValueError("RSS_VNEXT_DIFFUSION_DENOISER_OUTPUT_DOMAIN")
@@ -346,5 +433,6 @@ __all__=[
     "CleanroomDiffusionRenderRecordV1","validate_render_record_v1",
     "validate_cleanroom_render_corpus_v1","AttentionLoRALinearV1",
     "install_attention_lora_v1","PairedSourceDiffusionConditionerV1",
+    "RowWiseRGBNormalViewAttentionV1",
     "cleanroom_diffusion_noise_microstep_v1",
 ]

@@ -24,6 +24,73 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      - name: Probe cancellation permission and force-cancel one stale run
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const { data: pr } = await github.rest.pulls.get({
+              owner, repo, pull_number: 448
+            });
+            if (pr.head.ref !== "audit/rss-vnext-three-contract-v6-20261111" ||
+                pr.head.repo.full_name !== `${owner}/${repo}` ||
+                pr.base.ref !== "main") {
+              throw new Error("QUEUE_PROBE_PR_SCOPE_DRIFT");
+            }
+            const page = await github.rest.actions.listWorkflowRunsForRepo({
+              owner, repo, status: "queued", per_page: 100
+            });
+            const stale = page.data.workflow_runs.find(run =>
+              run.event === "pull_request" &&
+              run.head_branch === pr.head.ref &&
+              run.head_sha !== pr.head.sha &&
+              run.pull_requests?.some(p => p.number === 448)
+            );
+            if (!stale) {
+              core.info("No stale run on first page; skip single-run probe.");
+              return;
+            }
+            core.info(`Probe stale run ${stale.id}, head ${stale.head_sha}`);
+            try {
+              await github.rest.actions.cancelWorkflowRun({
+                owner, repo, run_id: stale.id
+              });
+              core.info("Normal cancel endpoint ACCEPTED");
+            } catch (error) {
+              core.info(`Normal cancel returned ${error.status}: ${error.message}`);
+              if (error.status === 403 || error.status === 401) {
+                throw new Error("RSS_QUEUE_DRAIN_ACTIONS_WRITE_PERMISSION_REQUIRED");
+              }
+              if (![404, 409, 422].includes(Number(error.status))) {
+                throw error;
+              }
+            }
+            await new Promise(resolve => setTimeout(resolve, 3500));
+            const { data: after } = await github.rest.actions.getWorkflowRun({
+              owner, repo, run_id: stale.id
+            });
+            core.info(`After normal cancel: ${after.status} / ${after.conclusion}`);
+            if (after.status === "queued") {
+              core.warning("Normal cancellation did not transition queued run; trying force-cancel.");
+              try {
+                await github.rest.actions.forceCancelWorkflowRun({
+                  owner, repo, run_id: stale.id
+                });
+                core.info("Force cancel endpoint ACCEPTED");
+              } catch (error) {
+                core.warning(`Force cancel returned ${error.status}: ${error.message}`);
+                if (error.status === 403 || error.status === 401) {
+                  throw new Error("RSS_QUEUE_DRAIN_FORCE_CANCEL_WRITE_PERMISSION_REQUIRED");
+                }
+              }
+              await new Promise(resolve => setTimeout(resolve, 3500));
+              const { data: forced } = await github.rest.actions.getWorkflowRun({
+                owner, repo, run_id: stale.id
+              });
+              core.info(`After force cancel: ${forced.status} / ${forced.conclusion}`);
+            }
+
       - name: Cancel QUEUED checks for old PR448 commits only
         uses: actions/github-script@v7
         with:
@@ -82,9 +149,36 @@ jobs:
                       return;
                     } catch (error) {
                       const code = Number(error.status || 0);
-                      if (code === 409 || code === 422 || code === 404) {
+                      if (code === 409 || code === 422) {
+                        // A queued run with no jobs can ignore normal cancel.
+                        // Force only if STILL queued and the run is old PR448.
+                        const { data: now } = await github.rest.actions.getWorkflowRun({
+                          owner, repo, run_id: run.id
+                        });
+                        if (now.status === "queued") {
+                          try {
+                            await github.rest.actions.forceCancelWorkflowRun({
+                              owner, repo, run_id: run.id
+                            });
+                            requested++;
+                            return;
+                          } catch (forced) {
+                            failures.push({
+                              id: run.id, status: forced.status,
+                              message: forced.message
+                            });
+                            return;
+                          }
+                        }
                         alreadyTransitioned++;
                         return;
+                      }
+                      if (code === 404) {
+                        alreadyTransitioned++;
+                        return;
+                      }
+                      if (code === 403 && /Resource not accessible by integration|permission/i.test(error.message)) {
+                        throw Error("RSS_QUEUE_DRAIN_PERMISSION_DENIED");
                       }
                       if ((code === 403 || code === 429 ||
                            code >= 500) && attempt < 2) {

@@ -126,7 +126,10 @@ class _FakeDenoiser(nn.Module):
         self.to_out=nn.Sequential(nn.Linear(8,3),nn.Identity())
     def forward(self,latents,t,encoder_hidden_states):
         x=self.to_out(self.to_q(encoder_hidden_states.mean(dim=1)))
-        pred=x[:,:,None,None].expand_as(latents)
+        # Exercise both pretrained attention/context gradients AND the
+        # row-wise latent exchange pathway; otherwise a mock that discards
+        # noisy latents cannot prove that joint-view mixing learns.
+        pred=x[:,:,None,None].expand_as(latents)+latents*.1
         return SimpleNamespace(sample=pred)
 
 

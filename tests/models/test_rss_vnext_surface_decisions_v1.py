@@ -41,7 +41,7 @@ def deterministic_cpu():
     torch.set_num_threads(1)
 
 
-def _real_surface_fixture():
+def _real_surface_fixture(*, two_faces: bool = False):
     model = _network()
     rgba, camera = _images()
     cfg = model.cfg
@@ -49,11 +49,16 @@ def _real_surface_fixture():
     # stream; inference geometry is still from the real shared H(x) and all
     # specialist heads on the single RSS unified model.
     source_vertices = np.asarray([
-        [-.25, -.25, 0.0], [.25, -.25, 0.0], [-.25, .25, 0.0],
-    ], dtype=np.float64)
+        [-.35, -.35, 0.0], [-.15, -.35, 0.0], [-.35, -.15, 0.0],
+    ] + ([
+        [.15, .15, 0.0], [.35, .15, 0.0], [.15, .35, 0.0],
+    ] if two_faces else []), dtype=np.float64)
+    source_faces = np.asarray(
+        [[0, 1, 2], [3, 4, 5]] if two_faces else [[0, 1, 2]],
+        dtype=np.int64,
+    )
     tokens = encode_adjacent_teacher_mesh_v1(
-        source_vertices,
-        np.asarray([[0, 1, 2]], dtype=np.int64),
+        source_vertices, source_faces,
         component_id="SYNTHETIC_TEST_ONLY", chart_id="SYNTHETIC_TEST_ONLY",
         cfg=TESSAConfigV1(coordinate_bins=cfg.tessa.coordinate_bins),
     ).token_ids

@@ -286,6 +286,15 @@ class RSSvNextExpertEvidenceFanoutV1:
             directed_attachment_affinity=_prob(raw[2]),
         )
 
+    def region_relation_matrix_v1(self) -> Tensor:
+        """Bounded R×R typed view; no giant N×N or F×F duplication.
+
+        Return a detached *copy* of the small learned relation expert, never
+        a mutable alias to the shared scene. Consumers must retain the raw
+        directed attachment channel and reject diagonal self-edges.
+        """
+        return self._tensors["region_relation_logits"][0].detach().float().clone()
+
     def causal_control_events(self) -> tuple[Mapping[str, Any], ...]:
         """Do not execute until AXIS/MIRA independent codec court is passed."""
         return self.evidence.control_events

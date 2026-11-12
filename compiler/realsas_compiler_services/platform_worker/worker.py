@@ -383,6 +383,22 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
 
     if (
         str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v3"
+    ):
+        # RSS.vNext's single pinned checkpoint, two original source views
+        # and independently addressed neural evidence. This new executor is
+        # staged for Product registration; the old V2 role remains isolated.
+        from compiler.realsas_compiler_services.platform_worker.rss_vnext_shape_executor_v3 import (
+            execute_rss_vnext_shape_capability_v3,
+        )
+        def run_rss_shape(value):
+            return execute_rss_vnext_shape_capability_v3(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            )
+        return await _with_heartbeat(run_rss_shape, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
         and metadata.get("executor_contract") == "RealSaS.ProductMeshCompile.v1"
     ):
         from compiler.realsas_compiler_services.platform_worker.mesh_executor_v1 import (

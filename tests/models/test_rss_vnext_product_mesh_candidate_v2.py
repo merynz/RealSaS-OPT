@@ -126,7 +126,7 @@ def test_mesh_compiler_abstains_without_reading_or_discarding_shared_h(tmp_path,
         request, read_object=no_heavy_scene, put_bytes=put,
     )
     assert result["status"] == "PASS"
-    assert len(result["outputs"]) == 6
+    assert len(result["outputs"]) == 7
     assert "RealSaS.RSSvNextNeuralSceneCarrier" not in read_roles
     assert scene_ref["content_sha256"] in cas  # unchanged!
     decision = json.loads(read(result["outputs"][0]))
@@ -153,6 +153,11 @@ def test_mesh_compiler_abstains_without_reading_or_discarding_shared_h(tmp_path,
     assert raster["state"] == "ABSTAIN_NO_TOPOLOGY"
     assert raster["views"] == []
     assert raster["canonical_mesh_authority"] is False
+    replay = json.loads(read(next(x for x in result["outputs"]
+        if x["role"] == "rss_original_source_ray_replay")))
+    assert replay["state"] == "ABSTAIN_NO_TOPOLOGY"
+    assert replay["checked_ray_count"] == 0
+    assert replay["canonical_mesh_authority"] is False
     assert bridge["state"] == "ABSTAIN_TESSA_TOPOLOGY"
     assert bridge["candidate"] is None
     assert not bridge["canonical_mesh_authority"]
@@ -208,12 +213,13 @@ def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_re
     assert len(mesh["diagnostics"]["original_source_tensor_identity_court_hash"]) == 64
     assert mesh["diagnostics"]["original_source_tensor_identity_is_not_source_fidelity"] is True
 
-    assert len(mesh["outputs"]) == 7
+    assert len(mesh["outputs"]) == 8
     by_role = {r["role"]: r for r in mesh["outputs"]}
     assert set(by_role) == {
         "rss_computed_surface_candidate",
         "rss_sparse_face_relation_candidates",
         "rss_two_view_raster_diagnostic",
+        "rss_original_source_ray_replay",
         "rss_relation_epistemic_court",
         "rss_cross_expert_capability_court",
         "rss_canonical_mesh_candidate_bridge",
@@ -225,6 +231,13 @@ def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_re
     assert raster["source_fidelity_qualified"] is False
     assert raster["source_color_owner_qualified"] is False
     assert mesh["diagnostics"]["two_view_raster_diagnostic_hash"] == raster["diagnostic_hash"]
+    replay = json.loads(read(by_role["rss_original_source_ray_replay"]))
+    assert replay["schema"] == "RealSaS.RSSvNext.SourceRayReplayCourt.v1"
+    assert replay["inference_evidence_hash"] == raster["inference_evidence_hash"]
+    assert mesh["diagnostics"]["original_source_ray_replay_hash"] == replay["court_sha256"]
+    assert not replay["source_surface_ownership"]
+    assert not replay["source_depth_or_visibility"]
+    assert not replay["material_or_drawable_authority"]
     out = json.loads(read(by_role["rss_computed_surface_candidate"]))
     relations = json.loads(read(by_role["rss_sparse_face_relation_candidates"]))
     court = json.loads(read(by_role["rss_cross_expert_capability_court"]))
@@ -299,7 +312,7 @@ def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_re
     assert not mesh["diagnostics"]["product_revision_minted"]
     continuation = json.loads(read(by_role["rss_evidence_continuity"]))
     assert continuation["mesh_status"] == "UNQUALIFIED_MESH_CANDIDATE"
-    assert len(continuation["derived_candidates"]) == 6
+    assert len(continuation["derived_candidates"]) == 7
     assert len(continuation["preserved_children"]) == 7
     parent_index_ref = next(r for r in shape["outputs"] if r["role"] == "rss_evidence_fanout")
     parent_index = json.loads(read(parent_index_ref))

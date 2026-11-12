@@ -25,6 +25,7 @@ from compiler.realsas_compiler_core.rss_vnext_source_evidence_binding_v1 import 
 )
 from compiler.realsas_compiler_core.rss_vnext_source_ray_replay_v1 import (
     replay_original_source_rays_v1,
+    validate_source_ray_replay_court_v1,
 )
 from compiler.realsas_compiler_core.rss_vnext_two_view_raster_diagnostic_v1 import (
     compile_rss_vnext_two_view_raster_diagnostic_v1,
@@ -245,6 +246,10 @@ def execute_rss_vnext_mesh_capability_v2(
         source=source, evidence=evidence,
         source_identity_court=source_evidence_court,
     )
+    validate_source_ray_replay_court_v1(
+        ray_replay, source=source, evidence=evidence,
+        source_identity_court=source_evidence_court,
+    )
     # Original source-alpha vs TESSA base/rest silhouettes, without inferred
     # hidden surface pixels or source-fidelity authority. This independent
     # measurement is bounded and survives topology ABSTAIN in the CAS DAG.
@@ -303,6 +308,11 @@ def execute_rss_vnext_mesh_capability_v2(
     output.append(_store_json(
         asdict(raster_diagnostic), role="rss_two_view_raster_diagnostic",
         artifact_type="RealSaS.RSSvNextTwoViewRasterDiagnostic",
+        put_bytes=put_bytes,
+    ))
+    output.append(_store_json(
+        asdict(ray_replay), role="rss_original_source_ray_replay",
+        artifact_type="RealSaS.RSSvNextSourceRayReplayCourt",
         put_bytes=put_bytes,
     ))
     if relation is not None:

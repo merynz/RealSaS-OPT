@@ -109,6 +109,8 @@ def replay_original_source_rays_v1(
     mesh=evidence.mesh
     rest=np.asarray(mesh["rest_xyz"],dtype=np.float32)
     n=len(rest)
+    if not np.isfinite(rest).all():
+        _reject("REST_FLOAT32_NOT_REPRESENTABLE")
     if n>_MAX_VERTICES:
         return _seal(SourceRayReplayCourtV1(
             **parent,state="ABSTAIN_VERTEX_BUDGET",checked_ray_count=0,
@@ -132,7 +134,12 @@ def replay_original_source_rays_v1(
             is_valid=np.asarray([row[view] for row in ray["valid"][start:end]],dtype=bool)
             if np.any((valid!=is_valid)&~near):
                 _reject("PROJECTION_VALID_MASK_DRIFT")
-            rgba=_bilinear(source.native_rgba[view],u,v)
+            # torch's producer masks all off-screen rays to zero. Avoid
+            # computing floor/casting huge off-screen coordinates to int64;
+            # those values were never observable image pixels.
+            safe_u=np.where(valid,u,np.float32(2.)).astype(np.float32)
+            safe_v=np.where(valid,v,np.float32(2.)).astype(np.float32)
+            rgba=_bilinear(source.native_rgba[view],safe_u,safe_v)
             rgba[~valid]=0.
             stored=np.asarray([row[view] for row in ray["rgba"][start:end]],dtype=np.float32)
             compare=~near
@@ -152,4 +159,91 @@ def replay_original_source_rays_v1(
     ))
 
 
-__all__ = ["SourceRayReplayCourtV1","replay_original_source_rays_v1"]
+def validate_source_ray_replay_court_v1(
+    value: SourceRayReplayCourtV1,
+    *,
+    source: RSSvNextTwoViewSourceObservationV1,
+    evidence: RSSvNextInferenceEvidenceIRV1,
+    source_identity_court: RSSvNextSourceEvidenceBindingCourtV1,
+) -> None:
+    """Read-side receipt validation, never a source-surface authorization.
+
+    This checks exact authority, parent identity, counters, state, and digest.
+    Independent consumers may additionally replay original pixels; a CAS hash
+    or replay receipt alone is not permission to infer source depth.
+    """
+    if (
+        type(value) is not SourceRayReplayCourtV1
+        or value.schema != SCHEMA
+        or type(value.canonical_mesh_authority) is not bool
+        or any((
+            value.source_surface_ownership,
+            value.source_depth_or_visibility,
+            value.material_or_drawable_authority,
+            value.canonical_mesh_authority,
+        ))
+        or not all(
+            type(x) is bool
+            for x in (
+                value.source_surface_ownership,
+                value.source_depth_or_visibility,
+                value.material_or_drawable_authority,
+                value.canonical_mesh_authority,
+            )
+        )
+        or type(value.checked_ray_count) is not int
+        or type(value.boundary_ambiguous_count) is not int
+        or value.checked_ray_count < 0 or value.boundary_ambiguous_count < 0
+        or type(value.max_channel_error) not in (int,float)
+        or not math.isfinite(value.max_channel_error)
+        or value.max_channel_error < 0 or value.max_channel_error > _ABS_TOLERANCE
+    ):
+        _reject("RECEIPT_AUTHORITY_OR_DOMAIN_DRIFT")
+    validate_rss_vnext_source_evidence_binding_receipt_v1(source_identity_court)
+    validate_inference_evidence_v1(evidence)
+    if (
+        type(source) is not RSSvNextTwoViewSourceObservationV1
+        or value.source_binding_sha256 != source.source_binding_sha256
+        or value.inference_evidence_hash != evidence.evidence_hash
+        or value.source_identity_court_sha256 != source_identity_court.court_hash
+        or source_identity_court.source_binding_sha256 != source.source_binding_sha256
+        or source_identity_court.inference_evidence_hash != evidence.evidence_hash
+    ):
+        _reject("RECEIPT_PARENT_DRIFT")
+    if evidence.mesh_status == "ABSTAIN":
+        if (
+            value.state != "ABSTAIN_NO_TOPOLOGY"
+            or value.checked_ray_count != 0 or value.boundary_ambiguous_count != 0
+            or value.max_channel_error != 0.
+        ):
+            _reject("RECEIPT_ABSTAIN_DRIFT")
+    else:
+        vertex_count=len(evidence.mesh["rest_xyz"])
+        if value.state == "ABSTAIN_VERTEX_BUDGET":
+            if (
+                vertex_count <= _MAX_VERTICES
+                or value.checked_ray_count != 0 or value.boundary_ambiguous_count != 0
+                or value.max_channel_error != 0.
+            ):
+                _reject("RECEIPT_VERTEX_BUDGET_DRIFT")
+        elif (
+            value.state not in (
+                "REPLAY_WITH_NDC_EDGE_UNCERTAINTY",
+                "REPLAY_VERIFIED_NO_SURFACE_AUTHORITY",
+            )
+            or value.checked_ray_count+value.boundary_ambiguous_count != 2*vertex_count
+            or bool(value.boundary_ambiguous_count) != (
+                value.state == "REPLAY_WITH_NDC_EDGE_UNCERTAINTY"
+            )
+        ):
+            _reject("RECEIPT_COVERAGE_OR_STATE_DRIFT")
+    fields=asdict(value)
+    claimed=fields.pop("court_sha256")
+    if claimed != content_sha256(fields):
+        _reject("RECEIPT_HASH_DRIFT")
+
+
+__all__ = [
+    "SourceRayReplayCourtV1","replay_original_source_rays_v1",
+    "validate_source_ray_replay_court_v1",
+]

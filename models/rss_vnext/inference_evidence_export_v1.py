@@ -138,6 +138,30 @@ def export_inference_evidence_v1(
             "readiness_logits": _list(dynamic.readiness_logits[0]),
             "authority": dynamic.authority,
         }
+        hard_weights = result.get("discrete_skin_weight_proposal")
+        joint_states = result.get("skin_joint_hidden_states")
+        if (hard_weights is None) != (joint_states is None):
+            raise ValueError("RSS_VNEXT_EXPORT_DISCRETE_SKIN_PAIR_INCOMPLETE")
+        if hard_weights is not None:
+            if (
+                not isinstance(hard_weights, Tensor)
+                or not isinstance(joint_states, Tensor)
+                or hard_weights.shape != dynamic.weights.shape
+                or joint_states.shape[:2] != (
+                    dynamic.weights.shape[0], dynamic.weights.shape[2],
+                )
+                or not bool(torch.isfinite(hard_weights).all())
+                or not bool(torch.isfinite(joint_states).all())
+            ):
+                raise ValueError("RSS_VNEXT_EXPORT_DISCRETE_SKIN_ADDRESS_DRIFT")
+            error = (dynamic.weights.detach().float() - hard_weights.detach().float()).abs()
+            dynamic_payload.update({
+                "discrete_skin_weights": _list(hard_weights[0]),
+                "skin_joint_hidden_states": _list(joint_states[0]),
+                "soft_to_discrete_max_abs_difference": float(error.amax().item()),
+                "soft_to_discrete_mean_abs_difference": float(error.mean().item()),
+                "soft_to_discrete_parity_qualified": False,
+            })
     value = RSSvNextInferenceEvidenceIRV1(
         checkpoint_sha256=checkpoint_sha256,
         observed_front_sha256=_source_tensor_digest(original_rgba[0, 0]),

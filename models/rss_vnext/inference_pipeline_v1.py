@@ -9,6 +9,7 @@ The last-written receipt commits to the source tensor archive and proposal.
 """
 
 from hashlib import sha256
+from dataclasses import asdict
 from pathlib import Path
 from zipfile import ZipFile
 import json
@@ -44,6 +45,14 @@ _RECEIPT_FILES = ("observed_source_tensors.npz", "neural_evidence.json", "infere
 _ORIGINAL_SOURCE_FILE = "original_two_view_source.npz"
 _NEURAL_SCENE_FILE = "rss_vnext_neural_scene.npz"
 _MAX_SOURCE_BYTES = 128 * 1024 * 1024
+
+
+def _unified_config_digest_v1(cfg) -> str:
+    # Exact architecture_digest used by RSS training/checkpoint admission.
+    return sha256(json.dumps(
+        asdict(cfg), sort_keys=True, separators=(",", ":"),
+        ensure_ascii=True,
+    ).encode("utf8")).hexdigest()
 
 
 def _digest_file(path: Path) -> str:
@@ -178,6 +187,7 @@ def run_two_view_to_compiler_proposal_v1(
         "schema": _RECEIPT_SCHEMA,
         "status": evidence.mesh_status,
         "checkpoint_sha256": expected_checkpoint_sha256,
+        "unified_model_config_sha256": _unified_config_digest_v1(model.cfg),
         "source_archive_sha256": _digest_file(source_path),
         "evidence_file_sha256": _digest_file(evidence_path),
         "neural_scene_schema": NEURAL_SCENE_SCHEMA,
@@ -222,6 +232,7 @@ def read_compiler_proposal_receipt_v1(
     directory: str | Path,
     *,
     expected_checkpoint_sha256: str,
+    _carrier_decoder_follows: bool = False,
 ) -> tuple[dict, RSSvNextInferenceEvidenceIRV1]:
     """Validate persisted artifacts before handing evidence to Compiler courts."""
     root = Path(directory).resolve()
@@ -237,6 +248,9 @@ def read_compiler_proposal_receipt_v1(
         raise RuntimeError("RSS_VNEXT_RECEIPT_HASH_DRIFT")
     if (
         receipt.get("checkpoint_sha256") != expected_checkpoint_sha256
+        or type(receipt.get("unified_model_config_sha256")) is not str
+        or len(receipt["unified_model_config_sha256"]) != 64
+        or any(c not in "0123456789abcdef" for c in receipt["unified_model_config_sha256"])
         or receipt.get("observed_view_count") != 2
         or receipt.get("product_revision_minted") is not False
         or receipt.get("qualification_status") != "COMPILER_EVIDENCE_SEALED_NOT_PRODUCT_QUALIFIED"
@@ -267,7 +281,11 @@ def read_compiler_proposal_receipt_v1(
     )
     if evidence.evidence_hash != receipt["evidence_hash"] or evidence.mesh_status != receipt["status"]:
         raise RuntimeError("RSS_VNEXT_RECEIPT_EVIDENCE_DRIFT")
-    read_neural_scene_carrier_v1(carrier_path.read_bytes(), evidence=evidence)
+    if not _carrier_decoder_follows:
+        read_neural_scene_carrier_v1(carrier_path.read_bytes(), evidence=evidence)
+    # _carrier_decoder_follows is an internal performance seam for consumers
+    # that immediately run the SAME bound neural-carrier court themselves.
+    # The public/default receipt reader never skips full archive validation.
     if source_path.stat().st_size > _MAX_SOURCE_BYTES:
         raise RuntimeError("RSS_VNEXT_RECEIPT_SOURCE_BUNDLE_TOO_LARGE")
     with np.load(source_path, allow_pickle=False) as archive:
@@ -375,6 +393,7 @@ def read_compiler_neural_scene_v1(
     """Independent consumer read, verified against the SAME source+model court."""
     _, evidence = read_compiler_proposal_receipt_v1(
         directory, expected_checkpoint_sha256=expected_checkpoint_sha256,
+        _carrier_decoder_follows=True,
     )
     return read_neural_scene_carrier_v1(
         (Path(directory).resolve() / _NEURAL_SCENE_FILE).read_bytes(),
@@ -382,7 +401,39 @@ def read_compiler_neural_scene_v1(
     )
 
 
+def read_compiler_expert_fanout_v1(
+    directory: str | Path,
+    *,
+    expected_checkpoint_sha256: str,
+    model_config,
+):
+    """Read original RSS two-view + unified scene + typed specialist evidence.
+
+    Receipt verifies all CAS files/observations; the fan-out court decodes the
+    large shared neural archive exactly ONCE. Mesh need not exist. No alternate
+    IRIS V3 independent checkpoint or fixed humanoid semantic adapter.
+    """
+    from compiler.realsas_compiler_core.rss_vnext_expert_fanout_v1 import (
+        open_rss_vnext_expert_fanout_v1,
+    )
+    receipt, evidence = read_compiler_proposal_receipt_v1(
+        directory,
+        expected_checkpoint_sha256=expected_checkpoint_sha256,
+        _carrier_decoder_follows=True,
+    )
+    if _unified_config_digest_v1(model_config) != receipt["unified_model_config_sha256"]:
+        raise RuntimeError("RSS_VNEXT_RECEIPT_UNIFIED_MODEL_CONFIG_DRIFT")
+    return open_rss_vnext_expert_fanout_v1(
+        evidence,
+        (Path(directory).resolve() / _NEURAL_SCENE_FILE).read_bytes(),
+        expected_checkpoint_sha256=expected_checkpoint_sha256,
+        expected_model_config_sha256=receipt["unified_model_config_sha256"],
+        model_config=model_config,
+    )
+
+
 __all__ = [
+    "read_compiler_expert_fanout_v1",
     "read_compiler_neural_scene_v1",
     "run_two_view_to_compiler_proposal_v1",
     "run_canonical_two_view_to_compiler_proposal_v1",

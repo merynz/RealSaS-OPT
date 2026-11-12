@@ -340,7 +340,22 @@ def test_real_checkpoint_two_view_model_to_replayable_compiler_receipt(tmp_path)
     assert receipt["schema"] == "RealSaS.RSSvNext.SourceToCompilerProposalReceipt.v2"
     assert receipt["neural_scene_schema"] == "RealSaS.RSSvNext.NeuralSceneCarrier.v1"
     assert receipt["neural_scene_product_authority"] is False
+    from models.rss_vnext.training_engine import architecture_digest
+    assert receipt["unified_model_config_sha256"] == architecture_digest(net.cfg)
     assert (out_dir / "rss_vnext_neural_scene.npz").is_file()
+    from models.rss_vnext.inference_pipeline_v1 import read_compiler_expert_fanout_v1
+    fanout = read_compiler_expert_fanout_v1(
+        out_dir, expected_checkpoint_sha256=digest, model_config=net.cfg,
+    )
+    assert fanout.evidence.evidence_hash == evidence.evidence_hash
+    assert fanout.availability.canonical_mesh == "NOT_QUALIFIED"
+    assert fanout.query(0).graphics_field_logits
+    assert fanout.region_relation(0, 1).attachment_anchor_xyz is None
+    wrong = replace(net.cfg, semantic_role_names=tuple(reversed(net.cfg.semantic_role_names)))
+    with pytest.raises(RuntimeError, match="RECEIPT_UNIFIED_MODEL_CONFIG_DRIFT"):
+        read_compiler_expert_fanout_v1(
+            out_dir, expected_checkpoint_sha256=digest, model_config=wrong,
+        )
     from models.rss_vnext.inference_pipeline_v1 import read_compiler_neural_scene_v1
     carrier = read_compiler_neural_scene_v1(
         out_dir, expected_checkpoint_sha256=digest,

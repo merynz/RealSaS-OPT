@@ -386,6 +386,30 @@ def cleanroom_diffusion_noise_microstep_v1(
         ))
     ):
         raise ValueError("RSS_VNEXT_DIFFUSION_RENDER_SUPERVISION_DOMAIN")
+    if stage == STAGE_MULTIVIEW:
+        half=v//2
+        # StdGEN/Era3D couples RGB and normal for the SAME camera and
+        # aligned orthographic scanline. Unpaired maps or dissimilar camera
+        # elevations invalidate correspondence and row-wise attention.
+        if (
+            bool((target_modalities[:,:half] != 0).any())
+            or bool((target_modalities[:,half:] != 1).any())
+            or not torch.allclose(
+                target_cameras[:,:half],target_cameras[:,half:],
+                atol=1.e-5,rtol=0.,
+            )
+            or not torch.allclose(
+                target_cameras[:,:,6:9],
+                target_cameras[:,0:1,6:9].expand(-1,v,-1),
+                atol=1.e-4,rtol=0.,
+            )
+            or not torch.allclose(
+                target_cameras[:,:,12],
+                target_cameras[:,0:1,12].expand(-1,v),
+                atol=1.e-4,rtol=0.,
+            )
+        ):
+            raise ValueError("RSS_VNEXT_DIFFUSION_RGB_NORMAL_CAMERA_PAIRING_DRIFT")
     cond = conditioner(source_tokens,target_cameras,target_modalities)
     flat = rendered_target_rgb.reshape(b*v,3,h,w)
     with torch.no_grad():

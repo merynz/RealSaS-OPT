@@ -234,3 +234,21 @@ def test_rowwise_view_normal_attention_propagates_across_views_but_not_rows():
     )
     with pytest.raises(ValueError,match="RESOURCE_OR_DOMAIN"):
         limited(a,cameras,modality)
+
+
+
+def test_stdgen_rgb_normal_views_must_have_identical_camera_and_aligned_scanline():
+    kw=_microcase(STAGE_MULTIVIEW)
+    kw["target_cameras"][0,6,0]=1.
+    with pytest.raises(ValueError,match="RGB_NORMAL_CAMERA_PAIRING_DRIFT"):
+        cleanroom_diffusion_noise_microstep_v1(**kw)
+    kw=_microcase(STAGE_MULTIVIEW)
+    kw["target_modalities"][0,0]=1
+    kw["target_modalities"][0,6]=0
+    with pytest.raises(ValueError,match="RGB_NORMAL_CAMERA_PAIRING_DRIFT"):
+        cleanroom_diffusion_noise_microstep_v1(**kw)
+    kw=_microcase(STAGE_MULTIVIEW)
+    kw["target_cameras"][0,2,7]=-.5
+    kw["target_cameras"][0,8,7]=-.5
+    with pytest.raises(ValueError,match="RGB_NORMAL_CAMERA_PAIRING_DRIFT"):
+        cleanroom_diffusion_noise_microstep_v1(**kw)

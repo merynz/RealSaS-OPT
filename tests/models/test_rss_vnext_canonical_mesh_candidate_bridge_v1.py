@@ -142,15 +142,34 @@ def test_rehashed_semantic_or_graphics_drift_cannot_mint_candidate_bridge():
         _compile(kw)
 
 
-def test_component_support_cannot_cross_an_admitted_partition():
+def test_source_partition_cannot_be_invented_from_disjoint_faces():
     kw = _parents()
-    grouped = kw["source_component_ids_by_candidate_index"]
-    assert len(grouped) == 2
+    # The encoder emits disjoint indexed triangles in ONE TESSA component.
+    # Spatially separated faces alone do not prove separate movable parts.
     mesh = kw["evidence"].mesh
-    other_group = next(x for x in grouped if x != mesh["vertex_components"][0])
-    other_vertex = mesh["vertex_components"].index(other_group)
-    kw["source_supports_by_vertex"][0] = kw["source_supports_by_vertex"][other_vertex]
-    with pytest.raises(QualificationError, match="SOURCE_SUPPORT_COMPONENT_CROSSING"):
+    assert len(set(mesh["vertex_components"])) == 1
+    from compiler.realsas_compiler_core.product_authority_v1 import (
+        ComponentRegionIR, build_mechanical_partition, build_component_carrier_policy,
+        ComponentCarrierDecisionIR,
+    )
+    src = kw["source_surface"]
+    partition = build_mechanical_partition(
+        surface=src,
+        components=(
+            ComponentRegionIR("split-A", ("src-0", "src-1", "src-2")),
+            ComponentRegionIR("split-B", ("src-3", "src-4", "src-5")),
+        ),
+        boundary_constraints=(),
+    )
+    kw["source_partition"] = partition
+    kw["source_carrier_policy"] = build_component_carrier_policy(
+        partition=partition,
+        decisions=(
+            ComponentCarrierDecisionIR("split-A", "MESH", ("synthetic",)),
+            ComponentCarrierDecisionIR("split-B", "MESH", ("synthetic",)),
+        ),
+    )
+    with pytest.raises(QualificationError, match="PARTITION_COMPONENT_COVERAGE_DRIFT"):
         _compile(kw)
 
 
@@ -175,7 +194,7 @@ def test_partial_or_forged_source_correspondence_fails_closed(mode):
     elif mode == "bad_receipt":
         kw["source_correspondence_receipt_sha256"] = "not-a-sha"
     elif mode == "bad_component":
-        kw["source_component_ids_by_candidate_index"] = {0:"component-0"}
+        kw["source_component_ids_by_candidate_index"] = {0:"unmatched-component"}
     else:
         kw["source_partition"] = replace(
             kw["source_partition"], surface_lineage_hash="not-the-source",

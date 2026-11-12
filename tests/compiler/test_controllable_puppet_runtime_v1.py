@@ -412,6 +412,57 @@ def test_graphics_compiler_faces_are_consumed_on_live_ik_deformed_geometry():
     assert np.allclose(rotated.graphics_projection.projected_faces[0],expected)
 
 
+def test_geometry_depth_query_never_claims_source_visibility_or_array_order():
+    from compiler.realsas_compiler_core.pose_depth_visibility_v1 import inspect_pose_depth_pixel_v1
+    near=((0.,0.,1.),(10.,0.,1.),(0.,10.,1.))
+    far=((0.,0.,3.),(10.,0.,3.),(0.,10.,3.))
+    args=dict(view_id="V0",graphics_hash="graph",screen_x=2.,screen_y=2.)
+    a=inspect_pose_depth_pixel_v1(**args,projected_faces=(far,near),
+                                  face_fragment_ids=("FAR","NEAR"))
+    b=inspect_pose_depth_pixel_v1(**args,projected_faces=(near,far),
+                                  face_fragment_ids=("NEAR","FAR"))
+    assert a.state==b.state=="UNIQUE_GEOMETRIC_FRONT"
+    assert a.geometrically_front_face_indices==(1,)
+    assert b.geometrically_front_face_indices==(0,)
+    assert a.geometrically_front_fragment_ids==b.geometrically_front_fragment_ids==("NEAR",)
+    assert a.intersection_depths_by_face==((1,1.),(0,3.))
+    assert a.source_alpha_qualified is False
+    assert a.source_visibility_qualified is False
+    assert a.presentation_order_qualified is False
+    tied=inspect_pose_depth_pixel_v1(**args,projected_faces=(near,near),
+                                     face_fragment_ids=("X","Y"))
+    assert tied.state=="AMBIGUOUS_COPLANAR_FRONT"
+    assert tied.geometrically_front_fragment_ids==("X","Y")
+    miss=inspect_pose_depth_pixel_v1(**{**args,"screen_x":50.},
+                                     projected_faces=(near,),face_fragment_ids=("X",))
+    assert miss.state=="MISS"
+    with pytest.raises(QualificationError,match="POSE_DEPTH_VERTEX_NONFINITE"):
+        inspect_pose_depth_pixel_v1(
+            **args,projected_faces=(((0.,0.,float("nan")),near[1],near[2]),),
+            face_fragment_ids=("X",))
+
+
+def test_live_ik_graphics_depth_query_rebinds_to_current_pose_and_camera():
+    bundle=qualified_synthetic_bundle()
+    graph=_compiled_graphics_consumed_from_same_synthetic_canonical_mesh(bundle)
+    session=ControllablePuppetSessionV1(replace(bundle,graphics=graph))
+    def probe():
+        face=session.frame().graphics_projection.projected_faces[0]
+        return session.inspect_graphics_depth_at(
+            sum(v[0] for v in face)/3.,sum(v[1] for v in face)/3.)
+    rest=probe()
+    assert rest.state=="UNIQUE_GEOMETRIC_FRONT"
+    assert rest.geometrically_front_fragment_ids==graph.fragment_ids
+    session.drag_screen("C_IK",80.,16.)
+    moved=probe()
+    assert moved.pose_projection_hash!=rest.pose_projection_hash
+    assert moved.source_visibility_qualified is False
+    session.set_view_index(1)
+    turned=probe()
+    assert turned.view_id=="V1"
+    assert turned.pose_projection_hash!=moved.pose_projection_hash
+
+
 def test_live_graphics_consumer_refuses_rehashed_foreign_mesh_or_face_assignment():
     from compiler.realsas_compiler_core.graphics_runtime_v1 import runtime_graphics_hash_v1
     bundle=qualified_synthetic_bundle()

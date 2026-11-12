@@ -45,6 +45,9 @@ from .types import QualificationError
 from .graphics_runtime_v1 import (
     RuntimeGraphicsV1, validate_runtime_graphics_v1,
 )
+from .pose_depth_visibility_v1 import (
+    PoseDepthPixelEvidenceV1, inspect_pose_depth_pixel_v1,
+)
 
 
 VIEW_IDS_V1 = tuple(f"V{i}" for i in range(8))
@@ -420,6 +423,19 @@ class ControllablePuppetSessionV1:
             deformed=deform,
             product_revision_id=self.bundle.product_revision_id,
             graphics_projection=graphics_projection,
+        )
+
+    def inspect_graphics_depth_at(self, x: float, y: float) -> PoseDepthPixelEvidenceV1:
+        """Source-agnostic pose-depth query on this session's IK/LBS geometry."""
+        frame = self.frame()
+        p = frame.graphics_projection
+        if p is None:
+            raise QualificationError("PUPPET_RUNTIME_GRAPHICS_DEPTH_REQUIRES_GRAPH")
+        return inspect_pose_depth_pixel_v1(
+            view_id=p.view_id, graphics_hash=p.graphics_hash,
+            projected_faces=p.projected_faces,
+            face_fragment_ids=p.face_fragment_ids,
+            screen_x=x, screen_y=y,
         )
 
     def pick(

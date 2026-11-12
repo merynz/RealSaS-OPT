@@ -76,6 +76,11 @@ class RSSvNextEarlySemanticField(nn.Module):
             source_patch_logits=logits,
             conditioned_image_tokens=image_tokens + self.residual_scale * delta,
             source_evidence_uncertainty=self.image_uncertainty(image_tokens).clamp(-8, 4),
+            authority=(
+                "TWO_SOURCE_VIEW_SEMANTIC_PREDICTION"
+                if image_tokens.shape[1]==2
+                else "STDGEN_NON_SOURCE_REFERENCE_SEMANTIC_HYPOTHESIS_ONLY"
+            ),
         )
 
     def query_field(self, local_h: Tensor) -> Tensor:

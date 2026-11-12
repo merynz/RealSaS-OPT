@@ -82,6 +82,19 @@ def encode_stdgen_conditioning_into_shared_H_v1(
         or bool((conditioning_cameras[:,:,12]<=0).any())
     ):
         raise ValueError("RSS_VNEXT_STDGEN_CONDITIONING_IMAGE_OR_CAMERA_DOMAIN")
+    camera_axes=torch.stack((
+        conditioning_cameras[:,:,3:6],
+        conditioning_cameras[:,:,6:9],
+        conditioning_cameras[:,:,9:12],
+    ),dim=-2)
+    identity=torch.eye(3,device=camera_axes.device,dtype=camera_axes.dtype)
+    if (
+        not bool(torch.allclose(
+            camera_axes@camera_axes.transpose(-1,-2),identity,atol=1.e-3,rtol=0.
+        ))
+        or bool((torch.linalg.det(camera_axes)<.99).any())
+    ):
+        raise ValueError("RSS_VNEXT_STDGEN_CANONICAL_CAMERA_BASIS_INVALID")
     if v==6:
         if (
             conditioning_authority != SIX_VIEW_PRIOR
@@ -107,7 +120,9 @@ def encode_stdgen_conditioning_into_shared_H_v1(
                     raise ValueError("RSS_VNEXT_STDGEN_DUPLICATE_PREDICTED_CAMERA")
     elif (
         conditioning_authority not in (CANONICAL_REFERENCE,ONE_MEASURED_SOURCE)
-        or (conditioning_authority==ONE_MEASURED_SOURCE and generating_checkpoint_sha256 is not None)
+        or (conditioning_authority==ONE_MEASURED_SOURCE and (
+            generating_checkpoint_sha256 is not None or original_observed_view_count!=1
+        ))
         or (conditioning_authority==CANONICAL_REFERENCE and not _hash(generating_checkpoint_sha256))
     ):
         raise ValueError("RSS_VNEXT_STDGEN_ONE_VIEW_PROVENANCE_INVALID")

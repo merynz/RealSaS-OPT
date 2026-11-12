@@ -115,3 +115,23 @@ def test_cleanroom_one_measured_source_cannot_mint_second_observation():
     assert result.generated_multiview_checkpoint_sha256 is None
     assert not result.source_camera_calibration_minted
     assert not result.generated_views_became_source_observation
+
+
+
+def test_single_reference_rejects_invalid_camera_and_fake_source_count():
+    net=model()
+    image=torch.rand((1,1,4,8,8))
+    cam=camera_bank(1)
+    cam[:,:,3]=0.
+    with pytest.raises(ValueError,match="CANONICAL_CAMERA_BASIS_INVALID"):
+        encode_stdgen_conditioning_into_shared_H_v1(
+            net,conditioning_rgba=image,conditioning_cameras=cam,
+            source_binding_sha256="a"*64,original_observed_view_count=1,
+            conditioning_authority=ONE_MEASURED_SOURCE,
+        )
+    with pytest.raises(ValueError,match="ONE_VIEW_PROVENANCE_INVALID"):
+        encode_stdgen_conditioning_into_shared_H_v1(
+            net,conditioning_rgba=image,conditioning_cameras=camera_bank(1),
+            source_binding_sha256="a"*64,original_observed_view_count=2,
+            conditioning_authority=ONE_MEASURED_SOURCE,
+        )

@@ -35,6 +35,14 @@ Names tied to a specific experiment, oracle substrate, corpus triage, one-family
 
 They may be extremely valuable evidence, but they never become canonical ownership merely because they pass.
 
+## Single machine-enforced CI execution authority
+
+See `canonical/CI_EXECUTION_AUTHORITY_V1.json` and `docs/platform/CI_EXECUTION_AUTHORITY.md`.
+Ten RSS.vNext fast checks retain PR synchronize; sixteen full courts run on open,
+reopen, ready-for-review or deliberate dispatch. Before merge run exact-head
+`ci_pr_full_admission_v1.yml`; zero-job queued scheduler artifacts are monitored
+by read-only `ci_queue_sentinel_v1.yml` and cannot be GC'd as cache.
+
 ## Workflow rules
 
 1. New production CI must name the contract it enforces, not a person/family/witness.

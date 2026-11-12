@@ -2,6 +2,8 @@ name: axis-mira-v6-main-runtime-source-security-v1
 
 on:
   pull_request:
+    # Full court runs on opening/ready state, not every intermediate commit.
+    types: [opened, reopened, ready_for_review]
     paths:
       - 'models/axis/rig_program_model_v6.py'
       - 'models/axis/rig_program_decode_v6.py'

@@ -1,0 +1,66 @@
+name: CI PR full-court exact-head admission
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: PR number to validate against exact current head SHA
+        required: true
+        type: number
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ci-exact-pr-admission-${{ inputs.pr_number }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    if: github.event.repository.private == false && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Verify all 26 latest-head PR checks and require ready state
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const policy = JSON.parse(fs.readFileSync('canonical/CI_EXECUTION_AUTHORITY_V1.json','utf8'));
+            const {owner, repo} = context.repo;
+            const pull_number = Number(core.getInput('pr_number') || '${{ inputs.pr_number }}');
+            const {data: pr} = await github.rest.pulls.get({owner,repo,pull_number});
+            if (pr.state !== 'open' || pr.draft || pr.base.ref !== 'main' ||
+                pr.head.repo.full_name !== `${owner}/${repo}`) {
+              throw new Error('CI_FULL_ADMISSION_REQUIRES_OPEN_READY_SAME_REPO_PR_TO_MAIN');
+            }
+            const head = pr.head;
+            const expected = [...policy.pr_policy.fast_on_synchronize,
+              ...policy.pr_policy.full_on_open_reopen_ready_or_explicit_dispatch]
+              .map(name => '.github/workflows/' + name);
+            const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
+              owner,repo, head_sha: head.sha, event:'pull_request', per_page:100
+            });
+            const relevant = runs.filter(run => run.head_sha === head.sha &&
+              run.head_branch === head.ref && run.pull_requests?.some(p => p.number === pull_number));
+            const latest = new Map();
+            for (const run of relevant.sort((a,b)=>b.id-a.id)) {
+              if (!latest.has(run.path)) latest.set(run.path,run);
+            }
+            const rows = expected.map(path => {
+              const run = latest.get(path);
+              return {path, id:run?.id || null, conclusion:run?.conclusion || null,
+                passed:!!run && run.status === 'completed' && run.conclusion === 'success'};
+            });
+            const second = await github.rest.pulls.get({owner,repo,pull_number});
+            if (second.data.head.sha !== head.sha) throw new Error('CI_PR_HEAD_DRIFT_DURING_ADMISSION');
+            const report = {pr:pull_number, head_sha:head.sha, passed:rows.filter(r=>r.passed).length,
+              required:expected.length, rows};
+            core.info(JSON.stringify(report));
+            await core.summary.addHeading('PR exact-head full-court admission')
+              .addCodeBlock(JSON.stringify(report,null,2),'json').write();
+            if (rows.some(r=>!r.passed)) throw new Error('CI_FULL_COURT_NOT_VERIFIED_ON_EXACT_HEAD');

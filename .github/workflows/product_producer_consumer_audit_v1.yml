@@ -2,6 +2,8 @@ name: product-producer-consumer-audit-v1
 
 on:
   pull_request:
+    # Full court runs on opening/ready state, not every intermediate commit.
+    types: [opened, reopened, ready_for_review]
     paths:
       - 'tools/product_producer_consumer_audit_v1.py'
       - 'tests/repository/test_product_producer_consumer_audit_v1.py'

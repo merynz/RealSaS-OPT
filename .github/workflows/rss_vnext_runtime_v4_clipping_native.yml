@@ -11,6 +11,8 @@ on:
       - "tests/compiler/test_playback_runtime_v4_contract_v1.py"
       - ".github/workflows/rss_vnext_runtime_v4_clipping_native.yml"
   pull_request:
+    # Full court runs on opening/ready state, not every intermediate commit.
+    types: [opened, reopened, ready_for_review]
     branches: [main]
     paths:
       - "runtime/realsas_cpp/**"

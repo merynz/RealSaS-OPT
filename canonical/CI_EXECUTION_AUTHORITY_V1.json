@@ -1,0 +1,82 @@
+{
+  "schema": "RealSaS.CIExecutionAuthority.v1",
+  "effective_scope": "RSS_vNext_PR448_INTEGRATION_COURT",
+  "canonical_code_branch": "main",
+  "controller": "GitHub Actions for code CI; Go Platform for durable research/product workflow state",
+  "historical_provenance": {
+    "hosted_and_gc": "1888d91252fdce23843772f3ec0d0e3ddd91b9ae",
+    "pr_cancellation": "eaa9831ef8fa1f0a58e3ec7ca7b53586f8162240",
+    "physical_deploy_manual": "9f9f53674777e961488262182260f039ea06ed77",
+    "gc_implementation": "f293d96ecf5a16db50886034c5e8265a477f189b",
+    "gc_tests": "4634e567aa8779e69899961e328d97d10d389613"
+  },
+  "lanes": {
+    "cpu_contract": "github-hosted ubuntu-latest; public only; never interpret as physical install",
+    "physical_wsl": "explicit workflow_dispatch, exact deployed main SHA, self-hosted/linux/x64/realsas; no PR execution",
+    "learned_gpu": "Notebook/Colab compute worker, verified import into Go Platform",
+    "research_and_product": "Go Platform owns Attempt, ProductRevision, artifacts, EngineRelease and durable scheduling"
+  },
+  "pr_policy": {
+    "fast_on_synchronize": [
+      "proof_service_promotion_gate.yml",
+      "architecture_v4_contract.yml",
+      "current_mainline_self_hosted_ci.yml",
+      "busted_public_site_publish_from_main.yml",
+      "platform_go_contract_v1.yml",
+      "model_mainline_source_gate.yml",
+      "rss_vnext_controllable_native_product_e2e.yml",
+      "platform_developer_contracts_hosted.yml",
+      "rss_vnext_unified_product_cpu.yml",
+      "graphics_v1_behavioral_closure_v1.yml"
+    ],
+    "full_on_open_reopen_ready_or_explicit_dispatch": [
+      "platform_foundation_cache_v1.yml",
+      "axis_mira_v6_main_worker_producer_consumer_v1.yml",
+      "rss_vnext_flexicubes_pinned_cpu.yml",
+      "iris_tessa_scene_memory_v1.yml",
+      "v6_main_contract_integration_v1.yml",
+      "mechanics_main_cas_rest_worker_integration_v1.yml",
+      "single_m_caa_canonical_gate.yml",
+      "vf23_production_policy_e2e_bank.yml",
+      "platform_architecture_map.yml",
+      "axis_mira_v6_main_runtime_sources_v1.yml",
+      "v6_main_mechanics_baseline_integration_v1.yml",
+      "rss_vnext_eight_way_training_cpu.yml",
+      "rss_vnext_busted_main_product_gateway_cpu.yml",
+      "mechanics_main_subtree_runtime_v1.yml",
+      "product_producer_consumer_audit_v1.yml",
+      "rss_vnext_runtime_v4_clipping_native.yml"
+    ],
+    "full_suite_verification": "workflow_dispatch .github/workflows/ci_pr_full_admission_v1.yml; verify all 26 successful runs on the exact latest PR head SHA before merge",
+    "no_stale_run_acceptance": true,
+    "max_automatic_sync_workflows_in_rss_vnext_court": 10,
+    "per_workflow_pr_concurrency_cancel": true,
+    "do_not_start_full_court_per_intermediate_commit": true
+  },
+  "gc": {
+    "owner": "tools/platform_cache_gc.py",
+    "tests": "tests/repository/test_platform_cache_gc.py",
+    "scope": "local persistent cache/hydration only; NOT GitHub Actions run records",
+    "order": [
+      "incomplete_or_temporary",
+      "expired_by_age",
+      "lru_until_soft_watermark"
+    ],
+    "live_lock_protection": true,
+    "disk_safety_floor": true,
+    "atomic_install": true,
+    "source_artifact_identity": "SHA256 and size before hydration, no qualification by cache"
+  },
+  "queue": {
+    "owner": "GitHub Actions service for orphaned zero-job queued records",
+    "sentinel": ".github/workflows/ci_queue_sentinel_v1.yml",
+    "mutations": "No automatic bulk cancellation/deletion; protect current SHA, unrelated PR and completed checks",
+    "escalation": "GitHub Support if zero-job queued records reject cancel/force-cancel/delete",
+    "observed_on": "2026-11-12",
+    "incident_count": 543,
+    "incident_shas": 21,
+    "incident_window_utc": "2026-11-11T20:25:08Z..2026-11-11T20:54:11Z",
+    "incident_pr": 448
+  },
+  "governance_test": "tests/repository/test_ci_execution_authority_v1.py"
+}

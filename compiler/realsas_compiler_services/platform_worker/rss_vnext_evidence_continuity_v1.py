@@ -192,7 +192,10 @@ def validate_rss_vnext_evidence_continuity_v1(
         or derived_refs[1].get("role") != "rss_two_view_raster_diagnostic"
         or derived_refs[1].get("artifact_type") != "RealSaS.RSSvNextTwoViewRasterDiagnostic"
         or derived_refs[1].get("schema_version") != "v1"
-        or (len(derived_refs) == 6 and derived_refs[2].get("role") != "rss_sparse_face_relation_candidates")
+        or derived_refs[2].get("role") != "rss_original_source_ray_replay"
+        or derived_refs[2].get("artifact_type") != "RealSaS.RSSvNextSourceRayReplayCourt"
+        or derived_refs[2].get("schema_version") != "v1"
+        or (len(derived_refs) == 7 and derived_refs[3].get("role") != "rss_sparse_face_relation_candidates")
         or (index.get("mesh_status") == "ABSTAIN" and len(derived_refs) != 6)
         or (index.get("mesh_status") == "UNQUALIFIED_MESH_CANDIDATE" and len(derived_refs) != 7)
     ):

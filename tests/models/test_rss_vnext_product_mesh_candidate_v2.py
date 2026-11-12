@@ -235,6 +235,42 @@ def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_re
     assert replay["schema"] == "RealSaS.RSSvNext.SourceRayReplayCourt.v1"
     assert replay["inference_evidence_hash"] == raster["inference_evidence_hash"]
     assert mesh["diagnostics"]["original_source_ray_replay_hash"] == replay["court_sha256"]
+    # Consumer opens CAS bytes independently and revalidates parent/authority.
+    from compiler.realsas_compiler_services.platform_worker.rss_vnext_product_fanout_v1 import (
+        read_rss_vnext_source_ray_replay_cas_v1, read_rss_vnext_neural_evidence_v1,
+    )
+    from compiler.realsas_compiler_core.rss_vnext_source_evidence_binding_v1 import (
+        validate_rss_vnext_source_evidence_binding_v1,
+    )
+    from compiler.realsas_compiler_services.platform_worker.rss_vnext_source_codec_v1 import (
+        validate_rss_vnext_source_ref_v1,
+    )
+    original_src_ref=original["input_artifacts"][0]
+    decoded_source=validate_rss_vnext_source_ref_v1(original_src_ref, read(original_src_ref))
+    idx_ref=next(x for x in shape["outputs"] if x["role"] == "rss_evidence_fanout")
+    idx=json.loads(read(idx_ref))
+    child_by_role={r["role"]: r for r in shape["outputs"] if r.get("role") in (
+        "neural_evidence", "original_source", "normalized_model_source", "neural_scene",
+        "inference_receipt", "unified_model_config", "embedded_mira_decoder",
+    )}
+    evidence=read_rss_vnext_neural_evidence_v1(
+        idx, child_refs=child_by_role, read_object=read,
+    )
+    identity=validate_rss_vnext_source_evidence_binding_v1(
+        source=decoded_source, evidence=evidence,
+        expected_source_binding_sha256=decoded_source.source_binding_sha256,
+    )
+    reviewed=read_rss_vnext_source_ray_replay_cas_v1(
+        by_role["rss_original_source_ray_replay"],read_object=read,
+        source=decoded_source,evidence=evidence,source_identity_court=identity,
+    )
+    assert reviewed.court_sha256==replay["court_sha256"]
+    with pytest.raises(RuntimeError, match="RSS_VNEXT_RAY_REPLAY_CAS_BYTES_DRIFT"):
+        read_rss_vnext_source_ray_replay_cas_v1(
+            by_role["rss_original_source_ray_replay"],
+            read_object=lambda ref: read(ref)+b"x",
+            source=decoded_source,evidence=evidence,source_identity_court=identity,
+        )
     assert not replay["source_surface_ownership"]
     assert not replay["source_depth_or_visibility"]
     assert not replay["material_or_drawable_authority"]

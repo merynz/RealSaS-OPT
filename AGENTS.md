@@ -238,3 +238,6 @@ A FIT/witness PASS is scoped evidence for the exact subject/apparatus. Engineeri
 9. `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md`
 10. older recovery/scientific material only as needed for provenance
 
+## Canonical CI and runner authority
+
+Read `canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json` before any Actions, runner, cache GC, workflow trigger or Platform execution-lane change. Preserve its main-owned machine-enforced policy; never invent a new runner arrangement because the chat changed. See `docs/platform/PLATFORM_CI_OPERATIONS_AUTHORITY.md`.

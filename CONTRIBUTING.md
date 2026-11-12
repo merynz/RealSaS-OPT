@@ -101,3 +101,5 @@ A PR should state:
 - whether continuation state must change.
 
 Do not combine unrelated scientific interventions into one causal result.
+
+Canonical operational ownership lives in `canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json` and is tested by `tests/repository/test_platform_ci_operations_authority_v1.py`. Keep hosted CPU, manual exact-main WSL, Colab and bounded local GC separate; do not treat zombie zero-job GitHub Actions records as native runner backlog.

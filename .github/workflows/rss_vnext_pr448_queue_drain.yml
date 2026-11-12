@@ -1,10 +1,12 @@
-name: RSS vNext PR448 stale Actions queue drain
+name: RSS vNext PR448 orphan queue cleanup
 
-# This housekeeping workflow is intentionally hosted, never self-hosted:
-# an offline private runner cannot block clean-up of orphaned PR check runs.
+# Do not run on every code commit. One maintenance dispatch only.
+# These are GitHub scheduler records (zero jobs), not self-hosted work.
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [synchronize]
+    paths:
+      - '.github/workflows/rss_vnext_pr448_queue_drain.yml'
   workflow_dispatch:
 
 permissions:
@@ -17,201 +19,134 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  drain-stale-pr448-queue:
+  delete-orphaned-unstarted-pr448-checks:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.event.pull_request.number == 448
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
-      - name: Probe cancellation permission and force-cancel one stale run
+      - name: Verify orphan queue and delete safely if GitHub allows it
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { owner, repo } = context.repo;
-            const { data: pr } = await github.rest.pulls.get({
-              owner, repo, pull_number: 448
-            });
-            if (pr.head.ref !== "audit/rss-vnext-three-contract-v6-20261111" ||
-                pr.head.repo.full_name !== `${owner}/${repo}` ||
-                pr.base.ref !== "main") {
-              throw new Error("QUEUE_PROBE_PR_SCOPE_DRIFT");
-            }
-            const page = await github.rest.actions.listWorkflowRunsForRepo({
-              owner, repo, status: "queued", per_page: 100
-            });
-            const stale = page.data.workflow_runs.find(run =>
-              run.event === "pull_request" &&
-              run.head_branch === pr.head.ref &&
-              run.head_sha !== pr.head.sha &&
-              run.pull_requests?.some(p => p.number === 448)
-            );
-            if (!stale) {
-              core.info("No stale run on first page; skip single-run probe.");
-              return;
-            }
-            core.info(`Probe stale run ${stale.id}, head ${stale.head_sha}`);
-            try {
-              await github.rest.actions.cancelWorkflowRun({
-                owner, repo, run_id: stale.id
-              });
-              core.info("Normal cancel endpoint ACCEPTED");
-            } catch (error) {
-              core.info(`Normal cancel returned ${error.status}: ${error.message}`);
-              if (error.status === 403 || error.status === 401) {
-                throw new Error("RSS_QUEUE_DRAIN_ACTIONS_WRITE_PERMISSION_REQUIRED");
-              }
-              if (![404, 409, 422].includes(Number(error.status))) {
-                throw error;
-              }
-            }
-            await new Promise(resolve => setTimeout(resolve, 3500));
-            const { data: after } = await github.rest.actions.getWorkflowRun({
-              owner, repo, run_id: stale.id
-            });
-            core.info(`After normal cancel: ${after.status} / ${after.conclusion}`);
-            if (after.status === "queued") {
-              core.warning("Normal cancellation did not transition queued run; trying force-cancel.");
-              try {
-                await github.rest.actions.forceCancelWorkflowRun({
-                  owner, repo, run_id: stale.id
-                });
-                core.info("Force cancel endpoint ACCEPTED");
-              } catch (error) {
-                core.warning(`Force cancel returned ${error.status}: ${error.message}`);
-                if (error.status === 403 || error.status === 401) {
-                  throw new Error("RSS_QUEUE_DRAIN_FORCE_CANCEL_WRITE_PERMISSION_REQUIRED");
-                }
-              }
-              await new Promise(resolve => setTimeout(resolve, 3500));
-              const { data: forced } = await github.rest.actions.getWorkflowRun({
-                owner, repo, run_id: stale.id
-              });
-              core.info(`After force cancel: ${forced.status} / ${forced.conclusion}`);
-            }
-
-      - name: Cancel QUEUED checks for old PR448 commits only
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
+            const {owner, repo} = context.repo;
             const pullNumber = 448;
-            const expectedBranch = "audit/rss-vnext-three-contract-v6-20261111";
-            const repoFullName = `${owner}/${repo}`;
+            const targetBranch = "audit/rss-vnext-three-contract-v6-20261111";
             const {data: pr} = await github.rest.pulls.get({
               owner, repo, pull_number: pullNumber
             });
             if (pr.state !== "open" ||
-                pr.head.ref !== expectedBranch ||
-                pr.head.repo.full_name !== repoFullName ||
+                pr.head.ref !== targetBranch ||
+                pr.head.repo.full_name !== `${owner}/${repo}` ||
                 pr.base.ref !== "main") {
-              throw new Error("RSS_QUEUE_DRAIN_PR_BRANCH_OR_BASE_DRIFT");
+              throw new Error("RSS_PR448_QUEUE_CLEANUP_SCOPE_DRIFT");
             }
             const activeHead = pr.head.sha;
-            core.info(`Protect current PR #${pullNumber} SHA ${activeHead}`);
             const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-            async function getStaleQueued() {
-              const all = await github.paginate(
-                github.rest.actions.listWorkflowRunsForRepo,
-                { owner, repo, status: "queued", per_page: 100 },
-              );
-              // GitHub's pull_requests[].head.sha may be rewritten to
-              // the latest PR head even on an OLD run. Always check run.head_sha.
-              return all.filter(run =>
-                run.event === "pull_request" &&
-                run.head_branch === expectedBranch &&
-                run.head_sha !== activeHead &&
-                run.pull_requests?.some(p => p.number === pullNumber)
-              );
+            const all = await github.paginate(
+              github.rest.actions.listWorkflowRunsForRepo,
+              {owner, repo, status: "queued", per_page: 100}
+            );
+            const stale = all.filter(run =>
+              run.event === "pull_request" &&
+              run.head_branch === targetBranch &&
+              run.head_sha !== activeHead &&
+              run.pull_requests?.some(p => p.number === pullNumber)
+            );
+            core.info(`Found ${stale.length} stale queued PR448 runs; protected ${activeHead}`);
+            if (!stale.length) return;
+            // GitHub may report status=queued despite NO job and reject both
+            // cancel and force-cancel with 409. DELETE is the documented
+            // separate REST endpoint. Probe EXACTLY ONE run before batching.
+            const first = stale[0];
+            const {data: jobs} = await github.rest.actions.listJobsForWorkflowRun({
+              owner, repo, run_id: first.id, per_page: 1
+            });
+            if (jobs.total_count !== 0) {
+              throw new Error(`RSS_QUEUE_NON_ORPHAN_JOB_PROTECTED:${first.id}`);
             }
-
-            let requested = 0;
-            let alreadyTransitioned = 0;
-            const failures = [];
-            for (let pass = 1; pass <= 3; pass++) {
-              const stale = await getStaleQueued();
-              core.info(`Pass ${pass}: ${stale.length} stale PR448 queued runs`);
-              if (!stale.length) break;
-              // Small groups avoid GitHub's secondary abuse/rate limiting.
-              for (let i = 0; i < stale.length; i += 4) {
-                const batch = stale.slice(i, i + 4);
-                await Promise.all(batch.map(async run => {
-                  for (let attempt = 0; attempt < 3; attempt++) {
-                    try {
-                      await github.rest.actions.cancelWorkflowRun({
-                        owner, repo, run_id: run.id
-                      });
-                      requested++;
-                      return;
-                    } catch (error) {
-                      const code = Number(error.status || 0);
-                      if (code === 409 || code === 422) {
-                        // A queued run with no jobs can ignore normal cancel.
-                        // Force only if STILL queued and the run is old PR448.
-                        const { data: now } = await github.rest.actions.getWorkflowRun({
-                          owner, repo, run_id: run.id
-                        });
-                        if (now.status === "queued") {
-                          try {
-                            await github.rest.actions.forceCancelWorkflowRun({
-                              owner, repo, run_id: run.id
-                            });
-                            requested++;
-                            return;
-                          } catch (forced) {
-                            failures.push({
-                              id: run.id, status: forced.status,
-                              message: forced.message
-                            });
-                            return;
-                          }
-                        }
-                        alreadyTransitioned++;
-                        return;
-                      }
-                      if (code === 404) {
-                        alreadyTransitioned++;
-                        return;
-                      }
-                      if (code === 403 && /Resource not accessible by integration|permission/i.test(error.message)) {
-                        throw Error("RSS_QUEUE_DRAIN_PERMISSION_DENIED");
-                      }
-                      if ((code === 403 || code === 429 ||
-                           code >= 500) && attempt < 2) {
-                        await sleep(1500 * (attempt + 1));
-                        continue;
-                      }
-                      failures.push({id: run.id, status: code,
-                        message: error.message});
-                      return;
-                    }
-                  }
-                }));
-                await sleep(175);
+            async function deleteRun(run) {
+              return github.request("DELETE /repos/{owner}/{repo}/actions/runs/{run_id}", {
+                owner, repo, run_id: run.id
+              });
+            }
+            try {
+              const response = await deleteRun(first);
+              core.info(`Single-run DELETE probe ${first.id}: HTTP ${response.status}`);
+              if (response.status !== 204) {
+                throw new Error(`RSS_QUEUE_DELETE_HTTP_${response.status}`);
               }
-              await sleep(1200);
+            } catch (error) {
+              core.error(`GitHub refused deletion of orphan ${first.id}: HTTP ${error.status}: ${error.message}`);
+              core.error("This is a GitHub Actions scheduler inconsistency: queued, zero jobs, cancellation/force cancellation rejected.");
+              core.error("Stop here; repository owner must escalate to GitHub Support. Do not retry hundreds of blocked requests.");
+              throw new Error("RSS_QUEUE_GITHUB_BACKEND_SUPPORT_REQUIRED");
             }
-            const remaining = await getStaleQueued();
-            const result = {
-              protected_sha: activeHead,
-              stale_requested_cancel: requested,
-              transitioned_before_cancel: alreadyTransitioned,
-              failed_calls: failures.length,
-              remaining_queued: remaining.length,
-              remaining_examples: remaining.slice(0, 12).map(x => x.id),
+            let deleted = 1;
+            let transitioned = 0;
+            const failures = [];
+            // Only old queued + NO-JOB runs. Never remove completed CI,
+            // current head, other branches or other PRs.
+            for (const run of stale.slice(1)) {
+              try {
+                const {data: current} = await github.rest.actions.getWorkflowRun({
+                  owner, repo, run_id: run.id
+                });
+                if (current.status !== "queued" ||
+                    current.head_sha === activeHead ||
+                    current.head_branch !== targetBranch ||
+                    !current.pull_requests?.some(p => p.number === pullNumber)) {
+                  transitioned++;
+                  continue;
+                }
+                const {data: jobList} = await github.rest.actions.listJobsForWorkflowRun({
+                  owner, repo, run_id: run.id, per_page: 1
+                });
+                if (jobList.total_count !== 0) {
+                  failures.push({id:run.id, reason:"NONEMPTY_JOBS_PROTECTED"});
+                  continue;
+                }
+                await deleteRun(run);
+                deleted++;
+              } catch (error) {
+                failures.push({
+                  id:run.id, status:error.status || 0, message:error.message
+                });
+                if (failures.length >= 5) {
+                  core.warning("Five unexpected delete failures: fail-fast to avoid bulk damage/rate limits");
+                  break;
+                }
+              }
+              if (deleted % 25 === 0) {
+                core.info(`Deleted ${deleted} orphaned PR448 queued run records`);
+                await sleep(250);
+              }
+            }
+            const after = await github.paginate(
+              github.rest.actions.listWorkflowRunsForRepo,
+              {owner, repo, status:"queued", per_page:100}
+            );
+            const remaining = after.filter(run =>
+              run.event === "pull_request" &&
+              run.head_branch === targetBranch &&
+              run.head_sha !== activeHead &&
+              run.pull_requests?.some(p => p.number === pullNumber)
+            );
+            const summary = {
+              protected_current_sha: activeHead,
+              deleted_orphaned_queued_records: deleted,
+              transitioned_without_delete: transitioned,
+              unexpected_failures: failures.slice(0, 8),
+              remaining_old_pr448_queued: remaining.length,
+              remaining_examples: remaining.slice(0, 10).map(x => x.id),
             };
-            core.info(JSON.stringify(result));
+            core.info(JSON.stringify(summary));
             await core.summary
-              .addHeading("RSS vNext PR #448 queue cleanup")
-              .addCodeBlock(JSON.stringify(result, null, 2), "json")
+              .addHeading("PR448 orphaned zero-job GitHub Actions queue")
+              .addCodeBlock(JSON.stringify(summary, null, 2), "json")
               .write();
             if (failures.length || remaining.length) {
-              core.setFailed(
-                `RSS_QUEUE_DRAIN_INCOMPLETE: ${failures.length} failed API calls; `+
-                `${remaining.length} stale runs still queued`
-              );
+              core.setFailed("RSS_QUEUE_ORPHAN_CLEANUP_INCOMPLETE");
             }

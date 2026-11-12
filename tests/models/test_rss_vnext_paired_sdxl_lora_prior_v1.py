@@ -11,6 +11,7 @@ from models.rss_vnext.paired_sdxl_lora_prior_v1 import (
     attach_pinned_sdxl_lora_unet_v1, seal_generated_diffusion_image_v1,
     validate_generated_diffusion_image_v1,
     predict_sdxl_unet_noise_from_two_images_v1,
+    fill_explicitly_missing_original_pixels_v1,
 )
 
 
@@ -250,3 +251,47 @@ def test_sdxl_unet_requires_extra_time_and_both_reference_contexts():
         predict_sdxl_unet_noise_from_two_images_v1(
             **{**args, "time_ids": torch.zeros(1, 5)},
         )
+
+
+
+def test_only_explicitly_missing_original_pixels_may_be_generated():
+    original = torch.full((1, 4, 14, 14), 23, dtype=torch.uint8)
+    original[:, 3] = 255  # observed opaque source, no missing pixels
+    original[:, :, 5, 9] = 0  # explicitly transparent hole, no observed alpha
+    proposed = torch.full_like(original, 211)
+    missing = torch.zeros((1, 1, 14, 14), dtype=torch.bool)
+    missing[:, :, 5, 9] = True
+    repaired = fill_explicitly_missing_original_pixels_v1(
+        original_rgba=original, predicted_same_frame_rgba=proposed,
+        requested_missing_mask=missing,
+        original_frame_contract="EXACT_ORIGINAL_PIXEL_GRID",
+        generated_frame_contract="PREDICTED_SAME_ORIGINAL_PIXEL_GRID",
+    )
+    assert torch.equal(repaired[:, :, 5, 9], proposed[:, :, 5, 9])
+    observed = ~missing.expand_as(original)
+    assert torch.equal(repaired[observed], original[observed])
+    assert torch.equal(original[:, :, 5, 9], torch.zeros(1, 4, dtype=torch.uint8))
+
+
+def test_no_pixel_authority_override_or_reposed_generated_image_mix():
+    original = torch.full((1, 4, 14, 14), 255, dtype=torch.uint8)
+    generated = torch.zeros_like(original)
+    selected = torch.zeros((1, 1, 14, 14), dtype=torch.bool)
+    selected[:, :, 2, 7] = True
+    args = dict(
+        original_rgba=original, predicted_same_frame_rgba=generated,
+        requested_missing_mask=selected,
+        original_frame_contract="EXACT_ORIGINAL_PIXEL_GRID",
+        generated_frame_contract="PREDICTED_SAME_ORIGINAL_PIXEL_GRID",
+    )
+    with pytest.raises(ValueError, match="GENERATED_CANNOT_OVERWRITE_OBSERVED_RGBA"):
+        fill_explicitly_missing_original_pixels_v1(**args)
+    transparent = original.clone()
+    transparent[:, :, 2, 7] = 0
+    with pytest.raises(ValueError, match="EXACT_SAME_SOURCE_PIXEL_FRAME_REQUIRED"):
+        fill_explicitly_missing_original_pixels_v1(
+            **{**args, "original_rgba": transparent,
+               "generated_frame_contract": "REPOSED_CANONICAL_IMAGE"},
+        )
+    # Opaque scene uploads are not quietly treated as transparent sprites.
+    assert torch.equal(original, torch.full_like(original, 255))

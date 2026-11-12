@@ -275,6 +275,41 @@ def predict_sdxl_unet_noise_from_two_images_v1(
     return prediction.sample
 
 
+def fill_explicitly_missing_original_pixels_v1(
+    *, original_rgba: Tensor, predicted_same_frame_rgba: Tensor,
+    requested_missing_mask: Tensor,
+    original_frame_contract: str, generated_frame_contract: str,
+) -> Tensor:
+    """No source overwrite: predict ONLY explicitly transparent missing pixels.
+
+    This helper is allowed only for a generated repair in the EXACT same
+    original 2D pixel grid. Reposed canonical images or changed camera frames
+    cannot be composited here. Transparent pixels are not automatically
+    missing: the caller must mark an explicit subset, and this method does
+    not qualify a source segmentation mask or infer a drawable.
+    """
+    if (
+        original_frame_contract != "EXACT_ORIGINAL_PIXEL_GRID"
+        or generated_frame_contract != "PREDICTED_SAME_ORIGINAL_PIXEL_GRID"
+        or original_rgba.ndim != 4 or original_rgba.shape[1] != 4
+        or original_rgba.dtype != torch.uint8
+        or predicted_same_frame_rgba.shape != original_rgba.shape
+        or predicted_same_frame_rgba.dtype != torch.uint8
+        or requested_missing_mask.shape != (
+            original_rgba.shape[0], 1, *original_rgba.shape[-2:],
+        )
+        or requested_missing_mask.dtype != torch.bool
+    ):
+        _fail("EXACT_SAME_SOURCE_PIXEL_FRAME_REQUIRED")
+    observed = original_rgba[:, 3:4, :, :] > 0
+    if bool((requested_missing_mask & observed).any()):
+        _fail("GENERATED_CANNOT_OVERWRITE_OBSERVED_RGBA")
+    return torch.where(
+        requested_missing_mask.expand_as(original_rgba),
+        predicted_same_frame_rgba, original_rgba,
+    )
+
+
 @dataclass(frozen=True)
 class RSSvNextGeneratedImageV1:
     """A generated completion never gets the authority of source pixels."""
@@ -382,6 +417,7 @@ __all__ = [
     "SDXLBackboneBindingV1", "RSSvNextTwoImageConditionerV1",
     "RSSvNextGeneratedImageV1", "attach_pinned_sdxl_lora_unet_v1",
     "predict_sdxl_unet_noise_from_two_images_v1",
+    "fill_explicitly_missing_original_pixels_v1",
     "seal_generated_diffusion_image_v1",
     "validate_generated_diffusion_image_v1",
 ]

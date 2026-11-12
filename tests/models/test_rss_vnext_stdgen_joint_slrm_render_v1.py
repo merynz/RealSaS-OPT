@@ -126,7 +126,7 @@ def test_joint_render_from_one_shared_H_not_separate_semantic_graphics_scene():
         shared_graphics_head=graphics,
         shared_semantic_role_head=roles,
     )
-    out.rgb_white_composite.sum().backward()
+    (out.rgb_white_composite.sum()+out.semantic_posterior[...,0].sum()).backward()
     assert graphics.weight.grad.abs().sum()>0
     assert roles.weight.grad.abs().sum()>0
 

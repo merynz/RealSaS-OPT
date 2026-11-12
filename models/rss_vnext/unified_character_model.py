@@ -87,22 +87,27 @@ class RSSvNextFrozenDINOv2(nn.Module):
         return self
 
     def forward(self, rgba: Tensor) -> tuple[Tensor, Tensor]:
-        b, v, _, h, w = rgba.shape
-        if v != 2 or rgba.shape[2] != 4:
+        if rgba.ndim != 5 or rgba.shape[1:3] != (2,4):
             raise ValueError("RSS_VNEXT_DINO_EXPECTS_TWO_RGBA")
+        return self.forward_variable_views(rgba)
+
+    def forward_variable_views(self, rgba: Tensor) -> tuple[Tensor, Tensor]:
+        if rgba.ndim != 5 or rgba.shape[1] not in (1,2,6) or rgba.shape[2] != 4:
+            raise ValueError("RSS_VNEXT_STDGEN_DINO_EXPECT_ONE_TWO_OR_SIX_RGBA")
+        b, v, _, h, w = rgba.shape
         if h % 14 or w % 14:
             raise ValueError("RSS_VNEXT_DINO_PATCH_DIVISIBILITY")
         rgb = rgba[:, :, :3]
         alpha = rgba[:, :, 3:4]
         matted = rgb * alpha + (1.0 - alpha)
-        x = ((matted.reshape(b * 2, 3, h, w) - self.mean) / self.std)
+        x = ((matted.reshape(b * v, 3, h, w) - self.mean) / self.std)
         with torch.no_grad():
             tokens = self.backbone(pixel_values=x).last_hidden_state[:, 1:]
         t = tokens.shape[1]
         if t != (h // 14) * (w // 14):
             raise ValueError("RSS_VNEXT_DINO_PATCH_COUNT_DRIFT")
         xy = _xy_grid(h // 14, w // 14, rgba.device, rgba.dtype)
-        return tokens.reshape(b, 2, t, self.expected_dim), xy[None, None].expand(b, 2, -1, -1)
+        return tokens.reshape(b, v, t, self.expected_dim), xy[None, None].expand(b, v, -1, -1)
 
 
 def _xy_grid(h: int, w: int, device, dtype) -> Tensor:
@@ -121,13 +126,20 @@ class RSSvNextPatchEncoderForTests(nn.Module):
         self.patch_size = patch_size
 
     def forward(self, rgba: Tensor) -> tuple[Tensor, Tensor]:
+        if rgba.ndim != 5 or rgba.shape[1:3] != (2,4):
+            raise ValueError("RSS_VNEXT_TEST_PATCH_INPUT_INVALID")
+        return self.forward_variable_views(rgba)
+
+    def forward_variable_views(self, rgba: Tensor) -> tuple[Tensor, Tensor]:
+        if rgba.ndim != 5 or rgba.shape[1] not in (1,2,6) or rgba.shape[2] != 4:
+            raise ValueError("RSS_VNEXT_STDGEN_PATCH_VIEW_COUNT_INVALID")
         b, v, c, h, w = rgba.shape
-        if v != 2 or c != 4 or h % self.patch_size or w % self.patch_size:
+        if h % self.patch_size or w % self.patch_size:
             raise ValueError("RSS_VNEXT_TEST_PATCH_INPUT_INVALID")
         x = self.patch(rgba.reshape(b * v, c, h, w))
         hp, wp = x.shape[-2:]
-        tokens = x.flatten(2).transpose(1, 2).reshape(b, 2, hp * wp, -1)
-        return tokens, _xy_grid(hp, wp, rgba.device, rgba.dtype)[None, None].expand(b, 2, -1, -1)
+        tokens = x.flatten(2).transpose(1, 2).reshape(b, v, hp * wp, -1)
+        return tokens, _xy_grid(hp, wp, rgba.device, rgba.dtype)[None, None].expand(b, v, -1, -1)
 
 
 class RSSvNextAuxiliaryViewLatents(nn.Module):

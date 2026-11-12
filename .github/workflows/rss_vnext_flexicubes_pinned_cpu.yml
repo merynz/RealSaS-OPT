@@ -1,5 +1,13 @@
 name: RSS vNext pinned FlexiCubes-to-structural CPU court
 on:
+  pull_request:
+    # Full court runs on opening/ready state, not every intermediate commit.
+    types: [opened, reopened, ready_for_review]
+    paths:
+      - "models/rss_vnext/**"
+      - "tests/models/test_rss_vnext_flexicubes_bridge.py"
+      - "tests/models/test_rss_vnext_flexicubes_animation.py"
+      - ".github/workflows/rss_vnext_flexicubes_pinned_cpu.yml"
   push:
     branches:
       - audit/rss-vnext-source-genealogy-20261110
@@ -12,6 +20,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   flexicubes:

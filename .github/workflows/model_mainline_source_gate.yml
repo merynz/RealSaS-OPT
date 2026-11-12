@@ -33,6 +33,8 @@ on:
       - 'tests/compiler/**'
       - 'tests/iris/**'
       - 'tests/models/**'
+      - 'canonical/CI_EXECUTION_AUTHORITY_V1.json'
+      - 'tests/repository/test_ci_execution_authority_v1.py'
       - 'tests/repository/test_learned_artifact_registry_v1.py'
       - 'tests/repository/test_current_continuity_authority_v2.py'
       - 'tests/repository/test_model_branding_boundary_v1.py'
@@ -87,6 +89,8 @@ on:
       - 'tests/compiler/**'
       - 'tests/iris/**'
       - 'tests/models/**'
+      - 'canonical/CI_EXECUTION_AUTHORITY_V1.json'
+      - 'tests/repository/test_ci_execution_authority_v1.py'
       - 'tests/repository/test_learned_artifact_registry_v1.py'
       - 'tests/repository/test_current_continuity_authority_v2.py'
       - 'tests/repository/test_model_branding_boundary_v1.py'
@@ -141,6 +145,8 @@ jobs:
           python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
       - name: Current continuity authority gate
         run: python -m pytest -q tests/repository/test_current_continuity_authority_v2.py
+      - name: Machine-enforced CI and Platform execution authority
+        run: python -m pytest -q tests/repository/test_ci_execution_authority_v1.py
       - name: RealSaS model naming boundary
         run: python -m pytest -q tests/repository/test_model_branding_boundary_v1.py
       - name: IRIS byte-equivalence and mainline import firewall
@@ -170,6 +176,8 @@ jobs:
             tests/repository/test_learned_artifact_registry_v1.py \
             experiments/family_selection_v1/test_prefit_family_truth_eligibility_v1.py \
             experiments/family_selection_v1/test_post_freeze_family_selector_v1.py
+      - name: RSS vNext generic semantic and shared-carrier gradient regression
+        run: python -m pytest -q tests/models/test_rss_vnext_early_semantics.py tests/models/test_rss_vnext_inference_checkpoint_bridge_v1.py tests/models/test_rss_vnext_expert_fanout_v1.py tests/models/test_rss_vnext_product_shape_cas_v3.py tests/models/test_rss_vnext_product_mesh_candidate_v2.py tests/models/test_rss_vnext_embedded_mira_decoder_v1.py tests/models/test_rss_vnext_typed_relations_v1.py tests/models/test_rss_vnext_surface_decisions_v1.py tests/models/test_rss_vnext_face_relation_schedule_v1.py tests/models/test_axis_v6_product_conditioned_training.py tests/models/test_mira_v6_skin_fsq_codec.py
       - name: Syntax-compile promoted model packages
         run: |
           python - <<'PY'

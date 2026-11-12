@@ -20,7 +20,7 @@ on:
       - 'requirements/torch-cuda.txt'
       - 'tests/repository/test_platform_deployment.py'
       - 'tests/repository/test_platform_wheelhouse_v1.py'
-      - 'tests/repository/test_self_hosted_execution_policy.py tests/repository/test_platform_ci_operations_authority_v1.py'
+      - 'tests/repository/test_self_hosted_execution_policy.py tests/repository/test_ci_execution_authority_v1.py tests/repository/test_platform_ci_operations_authority_v1.py'
       - '.github/workflows/platform_developer_deploy.yml'
       - '.github/workflows/platform_developer_contracts_hosted.yml'
   pull_request:

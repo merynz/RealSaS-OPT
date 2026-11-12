@@ -165,3 +165,181 @@ def test_lbs_consumes_canonical_skin_and_mechanics_pose():
     assert np.allclose(np.asarray(deformed.positions[0]), np.asarray((0.5, 0.0, 0.0)), atol=1e-6)
     assert deformed.metadata["deformation_method"] == "LINEAR_BLEND_SKINNING"
     assert deformed.metadata["visual_rebind_performed"] is False
+
+
+def test_ik_residual_is_measured_after_weighted_pose_not_before_blending():
+    mesh = _mesh()
+    rig = _rig(mesh)
+    weighted = replace(
+        rig, constraints=(replace(
+            rig.constraints[0], parameters={"p0": 0.25, "p1": 0.0, "p2": 1.0},
+        ),),
+    )
+    target = np.asarray((1.0, 1.5, 0.0), dtype=np.float64)
+    pose = solve_control_pose_v1(
+        weighted,
+        (ControlTransformIRV1("C_IK", translation=(1.0, -0.5, 0.0)),),
+    )
+    endpoint = next(j for j in pose.joints if j.canonical_joint_id == "J2")
+    actual_error = float(np.linalg.norm(np.asarray(endpoint.solved_P) - target))
+    assert actual_error > 0.1
+    assert np.isclose(pose.constraint_residuals[0][1], actual_error, atol=1e-8)
+
+
+def test_ik_residual_accounts_for_later_constraint_overwrite():
+    rig = _rig(_mesh())
+    overriding = CanonicalRigConstraintIRV2(
+        "Q_COPY", "COPY_TRANSFORM", ("C_POLE",), ("J2",),
+        None, {}, "P_Q_COPY",
+    )
+    rig = replace(rig, constraints=rig.constraints + (overriding,))
+    target = np.asarray((1.0, 1.5, 0.0), dtype=np.float64)
+    pose = solve_control_pose_v1(
+        rig,
+        (ControlTransformIRV1("C_IK", translation=(1.0, -0.5, 0.0)),),
+    )
+    endpoint = next(j for j in pose.joints if j.canonical_joint_id == "J2")
+    actual_error = float(np.linalg.norm(np.asarray(endpoint.solved_P) - target))
+    assert np.isclose(actual_error, 0.5, atol=1e-8)
+    assert np.isclose(pose.constraint_residuals[0][1], actual_error, atol=1e-8)
+
+
+def test_follow_zero_and_fractional_weights_preserve_so3_rotation_contract():
+    mesh = _mesh()
+    rig = _rig(mesh)
+    follow = CanonicalRigConstraintIRV2(
+        "Q_FOLLOW", "FOLLOW", ("C_POLE",), ("J1",),
+        None, {"p0": 0.0}, "P_Q_FOLLOW",
+    )
+    q = (float(np.sqrt(0.5)), 0.0, 0.0, float(np.sqrt(0.5)))
+    control = ControlTransformIRV1("C_POLE", rotation_quat_wxyz=q)
+    baseline = solve_control_pose_v1(replace(rig, constraints=()), ())
+    zero = solve_control_pose_v1(replace(rig, constraints=(follow,)), (control,))
+    by_baseline = {row.canonical_joint_id: row for row in baseline.joints}
+    by_zero = {row.canonical_joint_id: row for row in zero.joints}
+    assert np.allclose(by_zero["J1"].solved_P, by_baseline["J1"].solved_P)
+    assert np.allclose(by_zero["J1"].rotation_basis, by_baseline["J1"].rotation_basis)
+
+    half = replace(follow, parameters={"p0": 0.5})
+    blended = solve_control_pose_v1(replace(rig, constraints=(half,)), (control,))
+    joint = next(row for row in blended.joints if row.canonical_joint_id == "J1")
+    basis = np.asarray(joint.rotation_basis)
+    assert np.allclose(joint.solved_P, (0.5, 1.0, 0.0), atol=1e-8)
+    assert np.allclose(basis.T @ basis, np.eye(3), atol=1e-8)
+    assert np.isclose(np.linalg.det(basis), 1.0, atol=1e-8)
+    assert np.allclose(basis[:2, :2], (
+        (np.sqrt(0.5), -np.sqrt(0.5)),
+        (np.sqrt(0.5), np.sqrt(0.5)),
+    ), atol=1e-7)
+
+
+def test_aim_with_zero_weight_does_not_overwrite_derived_rotation():
+    rig = _rig(_mesh())
+    aim = CanonicalRigConstraintIRV2(
+        "Q_AIM", "AIM", ("C_POLE",), ("J1",),
+        None, {"p0": 0.0}, "P_Q_AIM",
+    )
+    baseline = solve_control_pose_v1(replace(rig, constraints=()), ())
+    zero = solve_control_pose_v1(replace(rig, constraints=(aim,)), ())
+    before = next(j for j in baseline.joints if j.canonical_joint_id == "J1")
+    after = next(j for j in zero.joints if j.canonical_joint_id == "J1")
+    assert np.allclose(after.rotation_basis, before.rotation_basis)
+
+
+def test_root_nonuniform_scale_and_rotation_affect_actual_skinned_surface():
+    mesh = _mesh()
+    rig = replace(_rig(mesh), constraints=())
+    skin = _skin(mesh, rig)
+    # Skin to root so every vertex has a nonzero rest offset to transform.
+    skin = replace(skin, rows=tuple(
+        replace(row, influences=(("J0", 1.0),)) for row in skin.rows
+    ))
+    q = (float(np.sqrt(.5)), 0.0, 0.0, float(np.sqrt(.5)))
+    pose = solve_control_pose_v1(
+        rig,
+        (ControlTransformIRV1(
+            "C_ROOT", rotation_quat_wxyz=q, scale=(2.0, 3.0, 1.0),
+        ),),
+    )
+    root = next(j for j in pose.joints if j.canonical_joint_id == "J0")
+    assert root.scale == (2.0, 3.0, 1.0)
+    deformed = deform_mesh_lbs_v1(mesh, rig, skin, pose)
+    expected = np.asarray(((0.,0.,0.),(-3.,0.,0.),(-6.,0.,0.)))
+    assert np.allclose(np.asarray(deformed.positions), expected, atol=1e-8)
+    assert deformed.metadata["joint_scale_consumed"] is True
+
+
+def test_copy_and_follow_scale_are_executed_and_zero_weight_is_noop():
+    mesh = _mesh()
+    rig = _rig(mesh)
+    following = CanonicalRigConstraintIRV2(
+        "Q_SCALE", "FOLLOW", ("C_POLE",), ("J1",), None,
+        {"p0": 0.5}, "PQ_SCALE",
+    )
+    q = (float(np.sqrt(.5)),0.,0.,float(np.sqrt(.5)))
+    target=ControlTransformIRV1(
+        "C_POLE", rotation_quat_wxyz=q, scale=(2.,3.,4.),
+    )
+    half=solve_control_pose_v1(
+        replace(rig, constraints=(following,)), (target,),
+    )
+    joint=next(j for j in half.joints if j.canonical_joint_id=="J1")
+    assert np.allclose(joint.scale, (1.5,2.,2.5),atol=1e-9)
+
+    zero=solve_control_pose_v1(
+        replace(rig,constraints=(replace(following,parameters={"p0":0.0}),)),
+        (target,),
+    )
+    joint_zero=next(j for j in zero.joints if j.canonical_joint_id=="J1")
+    assert joint_zero.scale == (1.,1.,1.)
+
+
+def test_lbs_refuses_invalid_pose_scale_without_silent_clamping():
+    mesh=_mesh()
+    rig=replace(_rig(mesh),constraints=())
+    skin=_skin(mesh,rig)
+    pose=solve_control_pose_v1(rig,())
+    altered=replace(
+        pose,
+        joints=(
+            replace(pose.joints[0],scale=(0.,1.,1.)),
+        ) + pose.joints[1:],
+    )
+    import pytest
+    from compiler.realsas_compiler_core.types import QualificationError
+    with pytest.raises(QualificationError,match="MECHANICS_LBS_SCALE_NONPOSITIVE"):
+        deform_mesh_lbs_v1(mesh,rig,skin,altered)
+
+
+def test_stretch_weight_zero_is_strict_noop_even_when_target_changes_direction():
+    """A disabled STRETCH operator may report a residual, never deform the limb."""
+    rig = _rig(_mesh())
+    stretch = CanonicalRigConstraintIRV2(
+        "Q_STRETCH", "STRETCH", ("C_IK",), ("J0", "J1", "J2"),
+        "K0", {"p0": 0.0, "p1": 1.5}, "PQ_STRETCH",
+    )
+    target = (ControlTransformIRV1("C_IK", translation=(1.0, 0.0, 0.0)),)
+    baseline = solve_control_pose_v1(replace(rig, constraints=()), target)
+    disabled = solve_control_pose_v1(replace(rig, constraints=(stretch,)), target)
+    assert all(np.allclose(a.solved_P, b.solved_P, atol=1e-12)
+               for a, b in zip(baseline.joints, disabled.joints))
+    assert np.isclose(disabled.constraint_residuals[0][1], 1.0, atol=1e-8)
+
+
+def test_stretch_fractional_weight_blends_positions_and_reports_achieved_endpoint():
+    rig = _rig(_mesh())
+    stretch = CanonicalRigConstraintIRV2(
+        "Q_STRETCH", "STRETCH", ("C_IK",), ("J0", "J1", "J2"),
+        "K0", {"p0": 0.5, "p1": 1.5}, "PQ_STRETCH",
+    )
+    control = (ControlTransformIRV1("C_IK", translation=(1.0, 0.0, 0.0)),)
+    half = solve_control_pose_v1(replace(rig, constraints=(stretch,)), control)
+    full = solve_control_pose_v1(replace(
+        rig, constraints=(replace(stretch, parameters={"p0": 1.0, "p1": 1.5}),)
+    ), control)
+    j1, j2 = half.joints[1:3]
+    assert np.allclose(j1.solved_P, (0.25, 1.0, 0.0), atol=1e-8)
+    assert np.allclose(j2.solved_P, (0.5, 2.0, 0.0), atol=1e-8)
+    assert np.allclose(full.joints[-1].solved_P, (1.0, 2.0, 0.0), atol=1e-8)
+    actual = np.linalg.norm(np.asarray(j2.solved_P) - (1., 2., 0.))
+    assert np.isclose(half.constraint_residuals[0][1], actual, atol=1e-8)

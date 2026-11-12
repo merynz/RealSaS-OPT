@@ -10,6 +10,8 @@ otherwise identical skin weights.
 
 from dataclasses import asdict, dataclass, field, replace
 import math
+
+import numpy as np
 from typing import Any, Mapping
 
 from .canonical_mesh_ir_v1 import CanonicalMeshIR, canonical_mesh_lineage_hash_v1
@@ -132,10 +134,18 @@ def canonical_rig_lineage_hash_v2(value: CanonicalRigIRV2) -> str:
     return content_sha256(payload)
 
 
-def _cid(prefix: str, qualification_hash: str, source_id: str) -> str:
+def _cid(prefix: str, identity_namespace: str, source_id: str) -> str:
+    """Stable within the same canonical mesh and proposal-local entity identity.
+
+    Qualification changes may update the control program without renaming deform
+    joints. The deform_structure_hash separately invalidates skin whenever the
+    actual deform structure changes; identity alone never authorizes skin reuse.
+    """
     return prefix + ":" + content_sha256({
-        "qualification_hash": qualification_hash,
-        "source_id": source_id,
+        "schema": "RealSaS.MeshBoundRigEntityIdentity.v1",
+        "mesh_lineage_hash": identity_namespace,
+        "entity_kind": prefix,
+        "source_proposal_id": source_id,
     })[:20]
 
 
@@ -167,10 +177,14 @@ def mint_canonical_rig_v2(
     if p.mesh_lineage_hash != mesh.mesh_lineage_hash:
         raise QualificationError("CANONICAL_RIG_V2_MESH_PARENT_DRIFT")
 
-    qh = qualified_program.qualification_hash
-    joint_map = {j.proposal_joint_id: _cid("J", qh, j.proposal_joint_id) for j in p.joints}
-    control_map = {c.proposal_control_id: _cid("C", qh, c.proposal_control_id) for c in p.controls}
-    chain_map = {c.proposal_chain_id: _cid("K", qh, c.proposal_chain_id) for c in p.chains}
+    # Qualification hash includes learned controls/constraints; it cannot seed
+    # deform joint or controller identity. A control-only edit must preserve
+    # stable IDs and exact deform_structure_hash/skin compatibility.
+    qh = qualified_program.qualification_hash  # provenance only, never entity identity
+    identity_namespace = mesh.mesh_lineage_hash
+    joint_map = {j.proposal_joint_id: _cid("J", identity_namespace, j.proposal_joint_id) for j in p.joints}
+    control_map = {c.proposal_control_id: _cid("C", identity_namespace, c.proposal_control_id) for c in p.controls}
+    chain_map = {c.proposal_chain_id: _cid("K", identity_namespace, c.proposal_chain_id) for c in p.chains}
 
     joints = tuple(
         CanonicalDeformJointIRV2(
@@ -217,7 +231,7 @@ def mint_canonical_rig_v2(
     )
     constraints = tuple(
         CanonicalRigConstraintIRV2(
-            canonical_constraint_id=_cid("Q", qh, c.proposal_constraint_id),
+            canonical_constraint_id=_cid("Q", identity_namespace, c.proposal_constraint_id),
             operator_id=str(c.operator_id),
             input_canonical_control_ids=tuple(control_map[x] for x in c.input_proposal_control_ids),
             output_canonical_joint_ids=tuple(joint_map[x] for x in c.output_proposal_joint_ids),
@@ -230,7 +244,7 @@ def mint_canonical_rig_v2(
     )
     anchors = tuple(
         CanonicalAttachmentAnchorIRV2(
-            canonical_anchor_id=_cid("A", qh, a.proposal_anchor_id),
+            canonical_anchor_id=_cid("A", identity_namespace, a.proposal_anchor_id),
             parent_canonical_joint_id=(None if a.parent_proposal_joint_id is None else joint_map[a.parent_proposal_joint_id]),
             parent_canonical_control_id=(None if a.parent_proposal_control_id is None else control_map[a.parent_proposal_control_id]),
             local_P=tuple(map(float, a.local_P)),  # type: ignore[arg-type]
@@ -267,11 +281,114 @@ def mint_canonical_rig_v2(
             "constraint_execution_authority": "MECHANICS",
             "skin_binding_target": "DEFORM_STRUCTURE_HASH",
             "motion_editing_target": "CONTROL_PROGRAM",
+            "entity_id_policy": "MESH_LINEAGE_AND_PROPOSAL_LOCAL_ID_V1",
+            "control_only_edit_keeps_deform_identity": True,
         },
     )
     value = replace(value, deform_structure_hash=_hash_deform_structure(value))
     value = replace(value, control_program_hash=_hash_control_program(value))
-    return replace(value, rig_lineage_hash=canonical_rig_lineage_hash_v2(value))
+    value = replace(value, rig_lineage_hash=canonical_rig_lineage_hash_v2(value))
+    validate_canonical_rig_domain_v2(value)
+    return value
+
+
+def validate_canonical_rig_domain_v2(value: CanonicalRigIRV2) -> None:
+    """Structural admission on canonical bytes, independent of their self-hash.
+
+    The learned program court runs before minting. This read-time check closes
+    the separate trust boundary when a consumer loads a rehashed artifact.
+    It does not infer, synthesize or change any rig program or source semantics.
+    """
+    def ids(rows, field: str, code: str) -> set[str]:
+        values = [str(getattr(item, field)) for item in rows]
+        if any(not value for value in values) or len(set(values)) != len(values):
+            raise QualificationError(code)
+        return set(values)
+
+    joints = ids(value.joints, "canonical_joint_id", "CANONICAL_RIG_V2_JOINT_IDS_INVALID")
+    if not joints:
+        raise QualificationError("CANONICAL_RIG_V2_JOINT_DOMAIN_EMPTY")
+    parents = {row.canonical_joint_id: row.parent_canonical_joint_id for row in value.joints}
+    for jid, parent in parents.items():
+        if parent is not None and parent not in joints:
+            raise QualificationError("CANONICAL_RIG_V2_PARENT_UNKNOWN")
+    visiting: set[str] = set()
+    complete: set[str] = set()
+    for jid in joints:
+        node = jid
+        path: list[str] = []
+        while node is not None and node not in complete:
+            if node in visiting:
+                raise QualificationError("CANONICAL_RIG_V2_PARENT_CYCLE")
+            visiting.add(node)
+            path.append(node)
+            node = parents[node]
+        complete.update(path)
+        visiting.difference_update(path)
+    roots = tuple(sorted(jid for jid, parent in parents.items() if parent is None))
+    if value.deform_root_joint_ids != roots:
+        raise QualificationError("CANONICAL_RIG_V2_ROOT_SET_DRIFT")
+
+    frames = ids(value.local_frames, "canonical_joint_id", "CANONICAL_RIG_V2_FRAME_IDS_INVALID")
+    if frames != joints:
+        raise QualificationError("CANONICAL_RIG_V2_FRAME_COVERAGE_DRIFT")
+    for frame in value.local_frames:
+        basis = np.asarray(frame.basis, dtype=np.float64)
+        if basis.shape != (3, 3) or not np.isfinite(basis).all():
+            raise QualificationError("CANONICAL_RIG_V2_FRAME_BASIS_INVALID")
+        if abs(float(np.linalg.det(basis))) <= 1e-8:
+            raise QualificationError("CANONICAL_RIG_V2_FRAME_BASIS_DEGENERATE")
+        if len(set(frame.dof_labels)) != len(frame.dof_labels):
+            raise QualificationError("CANONICAL_RIG_V2_FRAME_DOF_INVALID")
+
+    controls = ids(value.controls, "canonical_control_id", "CANONICAL_RIG_V2_CONTROL_IDS_INVALID")
+    control_parents = {row.canonical_control_id: row.parent_canonical_control_id for row in value.controls}
+    for row in value.controls:
+        if not row.control_kind or any(j not in joints for j in row.target_canonical_joint_ids):
+            raise QualificationError("CANONICAL_RIG_V2_CONTROL_TARGET_INVALID")
+        if row.parent_canonical_control_id is not None and row.parent_canonical_control_id not in controls:
+            raise QualificationError("CANONICAL_RIG_V2_CONTROL_PARENT_UNKNOWN")
+    visiting.clear()
+    complete.clear()
+    for cid in controls:
+        node = cid
+        path: list[str] = []
+        while node is not None and node not in complete:
+            if node in visiting:
+                raise QualificationError("CANONICAL_RIG_V2_CONTROL_PARENT_CYCLE")
+            visiting.add(node)
+            path.append(node)
+            node = control_parents[node]
+        complete.update(path)
+        visiting.difference_update(path)
+
+    chain_ids = ids(value.chains, "canonical_chain_id", "CANONICAL_RIG_V2_CHAIN_IDS_INVALID")
+    for chain in value.chains:
+        path = chain.canonical_joint_ids
+        if not path or len(set(path)) != len(path) or any(j not in joints for j in path):
+            raise QualificationError("CANONICAL_RIG_V2_CHAIN_ADDRESS_INVALID")
+        for parent, child in zip(path, path[1:]):
+            if parents[child] != parent:
+                raise QualificationError("CANONICAL_RIG_V2_CHAIN_NONCONTIGUOUS")
+    ids(value.constraints, "canonical_constraint_id", "CANONICAL_RIG_V2_CONSTRAINT_IDS_INVALID")
+    for constraint in value.constraints:
+        if not constraint.operator_id or any(cid not in controls for cid in constraint.input_canonical_control_ids):
+            raise QualificationError("CANONICAL_RIG_V2_CONSTRAINT_INPUT_INVALID")
+        if any(jid not in joints for jid in constraint.output_canonical_joint_ids):
+            raise QualificationError("CANONICAL_RIG_V2_CONSTRAINT_OUTPUT_INVALID")
+        if constraint.canonical_chain_id is not None and constraint.canonical_chain_id not in chain_ids:
+            raise QualificationError("CANONICAL_RIG_V2_CONSTRAINT_CHAIN_UNKNOWN")
+
+    ids(value.attachment_anchors, "canonical_anchor_id", "CANONICAL_RIG_V2_ANCHOR_IDS_INVALID")
+    for anchor in value.attachment_anchors:
+        joint_bound = anchor.parent_canonical_joint_id is not None
+        control_bound = anchor.parent_canonical_control_id is not None
+        if joint_bound == control_bound:
+            raise QualificationError("CANONICAL_RIG_V2_ANCHOR_PARENT_ARITY")
+        if joint_bound and anchor.parent_canonical_joint_id not in joints:
+            raise QualificationError("CANONICAL_RIG_V2_ANCHOR_JOINT_UNKNOWN")
+        if control_bound and anchor.parent_canonical_control_id not in controls:
+            raise QualificationError("CANONICAL_RIG_V2_ANCHOR_CONTROL_UNKNOWN")
 
 
 def canonical_rig_from_dict_v2(payload: Mapping[str, Any]) -> CanonicalRigIRV2:
@@ -323,6 +440,7 @@ def canonical_rig_from_dict_v2(payload: Mapping[str, Any]) -> CanonicalRigIRV2:
         raise QualificationError("CANONICAL_RIG_V2_CONTROL_HASH_DRIFT")
     if value.rig_lineage_hash != canonical_rig_lineage_hash_v2(value):
         raise QualificationError("CANONICAL_RIG_V2_LINEAGE_HASH_DRIFT")
+    validate_canonical_rig_domain_v2(value)
     return value
 
 
@@ -330,4 +448,5 @@ __all__ = [
     "CanonicalAttachmentAnchorIRV2", "CanonicalDeformJointIRV2", "CanonicalJointFrameIRV2",
     "CanonicalRigChainIRV2", "CanonicalRigConstraintIRV2", "CanonicalRigControlIRV2", "CanonicalRigIRV2",
     "canonical_rig_from_dict_v2", "canonical_rig_lineage_hash_v2", "mint_canonical_rig_v2",
+    "validate_canonical_rig_domain_v2",
 ]

@@ -171,9 +171,45 @@ def masked_visible_surface_role_loss(
     return F.cross_entropy(semantic_logits[qualified_visible_mask].float(), values)
 
 
+def masked_qualified_surface_role_loss(
+    role_logits: Tensor,
+    source_surface_role_indices: Tensor,
+    qualified_surface_mask: Tensor,
+    *,
+    schema: RSSvNextSemanticRoleSchema,
+) -> Tensor:
+    """Teacher-only multiclass labels at exact 3D shared-carrier query addresses.
+
+    Only a separately source-admitted surface sample can be supervised.
+    Unobserved/open/ambiguous points are masked, never cast to background.
+    This is not rig, drawable-boundary or visibility authority.
+    """
+    schema.validate()
+    if role_logits.ndim != 3 or role_logits.shape[-1] != schema.count:
+        raise ValueError("RSS_VNEXT_SURFACE_ROLE_LOGITS_SHAPE")
+    if (
+        source_surface_role_indices.shape != role_logits.shape[:2]
+        or qualified_surface_mask.shape != role_logits.shape[:2]
+    ):
+        raise ValueError("RSS_VNEXT_SURFACE_ROLE_TARGET_ADDRESS_SHAPE")
+    if (
+        source_surface_role_indices.dtype != torch.long
+        or qualified_surface_mask.dtype != torch.bool
+    ):
+        raise ValueError("RSS_VNEXT_SURFACE_ROLE_TARGET_DTYPE")
+    if not bool(qualified_surface_mask.any()):
+        raise ValueError("RSS_VNEXT_SURFACE_ROLE_NO_ADMITTED_POINTS")
+    if not bool(torch.isfinite(role_logits).all()):
+        raise ValueError("RSS_VNEXT_SURFACE_ROLE_LOGITS_NONFINITE")
+    valid = source_surface_role_indices[qualified_surface_mask]
+    if bool(((valid < 0) | (valid >= schema.count)).any()):
+        raise ValueError("RSS_VNEXT_SURFACE_ROLE_LABEL_OUT_OF_RANGE")
+    return F.cross_entropy(role_logits[qualified_surface_mask].float(), valid)
+
+
 __all__ = [
     "RSSvNextSemanticRoleSchema", "RSSvNextSemanticLayerSpec",
     "stdgen_style_generic_schema", "stdgen_style_layers",
     "semantic_equivalent_signed_field", "all_semantic_equivalent_layers",
-    "masked_visible_surface_role_loss",
+    "masked_visible_surface_role_loss", "masked_qualified_surface_role_loss",
 ]

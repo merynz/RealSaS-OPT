@@ -78,14 +78,27 @@ jobs:
           python -m pip install --no-input --progress-bar off -r requirements/torch-cpu.txt
       - name: Ensure native graphics build dependencies
         run: |
-          sudo apt-get -o Acquire::Retries=4 -o Acquire::http::Timeout=30 update -qq
-          sudo apt-get -o Acquire::Retries=4 -o Acquire::http::Timeout=30 install -y --no-install-recommends libpng-dev zlib1g-dev
+          # Prefer the pinned hosted image's libraries; only reach APT for
+          # missing native headers. Python/core tests must not depend on an
+          # unnecessary transient Ubuntu mirror DNS round trip.
+          missing=()
+          for package in libpng-dev zlib1g-dev; do
+            if ! dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed'; then
+              missing+=("$package")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 update -qq
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 install -y --no-install-recommends "${missing[@]}"
+          fi
+          pkg-config --modversion libpng
       - name: Compile current Python ownership roots
         run: python -m compileall -q models compiler runtime/reference_v4 tools tests
       - name: Repository governance and readiness
         run: |
           python -m pytest -q \
             tests/repository/test_repository_governance_v1.py \
+            tests/repository/test_ci_execution_authority_v1.py \
             tests/repository/test_platform_ci_operations_authority_v1.py \
             tests/repository/test_fit8_source_identity_v1.py \
             tests/repository/test_source_scene_contract_v2.py \

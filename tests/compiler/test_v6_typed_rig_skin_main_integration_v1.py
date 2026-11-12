@@ -173,3 +173,84 @@ def test_main_skin_mint_rejects_valid_hash_but_wrong_skeleton_binding():
             skin_codec_architecture_id="fixture-codec-no-model-release",
             skin_codec_checkpoint_hash="b"*64,
         )
+
+
+def test_control_only_edit_reuses_exact_qualified_skin_without_rebinding():
+    """Exercise real minting courts, not just matching string hashes."""
+    from compiler.realsas_compiler_core.canonical_rig_ir_v2 import mint_canonical_rig_v2
+    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import mint_canonical_skin_v2
+    from compiler.realsas_compiler_core.rig_program_ir_v1 import (
+        qualify_rig_program_v1, seal_rig_program_proposal_v1,
+    )
+    from tests.compiler.test_control_ready_rig_v2 import _mesh, _proposal
+
+    mesh = _mesh()
+    proposal = _proposal(mesh)
+    original_rig = mint_canonical_rig_v2(
+        mesh, qualified_program=qualify_rig_program_v1(proposal),
+    )
+    existing_skin_qualification = _qualified_synthetic_carrier_skin(mesh, original_rig)
+    original_skin = mint_canonical_skin_v2(
+        mesh, original_rig, qualified_skin=existing_skin_qualification,
+        skin_code_proposal_hash="a" * 64,
+        skin_codec_architecture_id="fixture-codec-no-model-release",
+        skin_codec_checkpoint_hash="b" * 64,
+    )
+    altered = seal_rig_program_proposal_v1(replace(
+        proposal,
+        controls=(replace(proposal.controls[0], rest_P=(0.5, 0.0, 0.0)),)
+        + proposal.controls[1:],
+        proposal_lineage_hash="",
+    ))
+    changed_rig = mint_canonical_rig_v2(
+        mesh, qualified_program=qualify_rig_program_v1(altered),
+    )
+    reused = mint_canonical_skin_v2(
+        mesh, changed_rig, qualified_skin=existing_skin_qualification,
+        skin_code_proposal_hash="a" * 64,
+        skin_codec_architecture_id="fixture-codec-no-model-release",
+        skin_codec_checkpoint_hash="b" * 64,
+    )
+    assert changed_rig.control_program_hash != original_rig.control_program_hash
+    assert changed_rig.deform_structure_hash == original_rig.deform_structure_hash
+    assert reused.skin_lineage_hash == original_skin.skin_lineage_hash
+    assert reused.rows == original_skin.rows
+
+
+@pytest.mark.parametrize(
+    "influences,reason",
+    [
+        ((("J:0", 0.75), ("J:1", 0.10)), "INFLUENCE_SIMPLEX_DRIFT"),
+        ((("J:0", -0.25), ("J:1", 1.25)), "INFLUENCE_INVALID"),
+        ((("J:0", 0.5), ("J:0", 0.5)), "JOINT_INFLUENCE_DUPLICATE_OR_EMPTY"),
+        ((), "INFLUENCES_EMPTY"),
+    ],
+)
+def test_rehashed_canonical_skin_still_rejects_semantically_illegal_weights(influences, reason):
+    original = _sealed_skin()
+    rehashed = replace(
+        original,
+        rows=(replace(original.rows[0], influences=influences),),
+        skin_lineage_hash="",
+    )
+    rehashed = replace(
+        rehashed, skin_lineage_hash=canonical_skin_lineage_hash_v2(rehashed),
+    )
+    with pytest.raises(QualificationError, match=reason):
+        canonical_skin_from_dict_v2(rehashed.to_dict())
+
+
+def test_rehashed_canonical_skin_rejects_duplicate_vertex_address():
+    original = _sealed_skin()
+    duplicate_row = replace(
+        original.rows[0], source_carrier_vertex_id="CV:another",
+    )
+    rehashed = replace(
+        original, rows=(original.rows[0], duplicate_row),
+        skin_lineage_hash="",
+    )
+    rehashed = replace(
+        rehashed, skin_lineage_hash=canonical_skin_lineage_hash_v2(rehashed),
+    )
+    with pytest.raises(QualificationError, match="ADDRESS_DUPLICATE"):
+        canonical_skin_from_dict_v2(rehashed.to_dict())

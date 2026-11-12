@@ -133,6 +133,38 @@ def _axis_angle(axis: np.ndarray, angle: float) -> np.ndarray:
     ], dtype=np.float64)
 
 
+def _blend_rotation_basis(current: np.ndarray, target: np.ndarray, weight: float) -> np.ndarray:
+    """Shortest-arc SO(3) interpolation; never snap a partially weighted rig.
+
+    For an exact 180-degree difference, choose a deterministic eigen-axis.
+    The result remains a proper orthonormal basis instead of a linear matrix
+    blend, which would shrink or shear canonical skinning transforms.
+    """
+    if weight <= 0.0:
+        return current.copy()
+    if weight >= 1.0:
+        return target.copy()
+    relative = target @ current.T
+    cosine = float(np.clip((np.trace(relative) - 1.0) * 0.5, -1.0, 1.0))
+    angle = math.acos(cosine)
+    if angle <= 1e-10:
+        return current.copy()
+    if math.pi - angle < 1e-5:
+        eigenvalues, eigenvectors = np.linalg.eigh(0.5 * (relative + relative.T))
+        axis = eigenvectors[:, int(np.argmax(eigenvalues))]
+        # Deterministic sign across equivalent 180-degree axes.
+        dominant = int(np.argmax(np.abs(axis)))
+        if axis[dominant] < 0:
+            axis = -axis
+    else:
+        axis = np.asarray((
+            relative[2, 1] - relative[1, 2],
+            relative[0, 2] - relative[2, 0],
+            relative[1, 0] - relative[0, 1],
+        ), dtype=np.float64) / (2.0 * math.sin(angle))
+    return _axis_angle(axis, angle * weight) @ current
+
+
 def _control_world_transforms(rig: CanonicalRigIRV2, authored: Mapping[str, ControlTransformIRV1]):
     controls = {c.canonical_control_id: c for c in rig.controls}
     unknown = set(authored) - set(controls)
@@ -175,6 +207,22 @@ def _control_world_transforms(rig: CanonicalRigIRV2, authored: Mapping[str, Cont
     for cid in controls:
         solve(cid)
     return memo
+
+
+def control_world_transforms_v1(
+    rig: CanonicalRigIRV2,
+    control_transforms: Sequence[ControlTransformIRV1] = (),
+) -> dict[str, tuple[np.ndarray, np.ndarray, np.ndarray]]:
+    """Resolve the exact Mechanics parent-control world transforms for editors.
+
+    This shares the real solver authority. The editor must never guess a child
+    handle's world position from rest+local delta when a parent is rotated or
+    non-uniformly scaled. Returned arrays are ephemeral, not canonical data.
+    """
+    authored = {state.canonical_control_id: state for state in control_transforms}
+    if len(authored) != len(control_transforms):
+        raise QualificationError("MECHANICS_CONTROL_STATE_DUPLICATE")
+    return _control_world_transforms(rig, authored)
 
 
 def _fabrik(
@@ -267,6 +315,7 @@ def solve_control_pose_v1(
     rest = {jid: _v3(j.P, "MECHANICS_JOINT_REST_INVALID") for jid, j in joint_by.items()}
     pos = {jid: p.copy() for jid, p in rest.items()}
     explicit_rot: dict[str, np.ndarray] = {}
+    explicit_scale: dict[str, np.ndarray] = {}
 
     # Direct animator controls apply rigid transforms to the entire declared
     # deform subtree. Earlier V1 logic moved only target joints, tearing the
@@ -337,6 +386,7 @@ def solve_control_pose_v1(
                 rel = rest[jid] - rest_c
                 pos[jid] = world_p + world_r @ (rel * world_s)
                 explicit_rot[jid] = world_r
+                explicit_scale[jid] = world_s.copy()
 
     chain_by = {c.canonical_chain_id: c for c in rig.chains}
     residuals: list[tuple[str, float]] = []
@@ -369,15 +419,24 @@ def solve_control_pose_v1(
                 residual = float(np.linalg.norm(solved[-1] - target))
             for jid, value in zip(ids, solved):
                 pos[jid] = pos[jid] * (1.0 - weight) + value * weight
-            residuals.append((constraint.canonical_constraint_id, residual))
+            # Record an achieved endpoint, never the pre-weight FABRIK result.
+            residuals.append((constraint.canonical_constraint_id, float(np.linalg.norm(pos[ids[-1]] - target))))
         elif op in {"COPY_TRANSFORM", "FOLLOW"}:
-            target_p, target_r, _ = inputs[0]
+            target_p, target_r, target_s = inputs[0]
             for jid in constraint.output_canonical_joint_ids:
                 if jid not in pos:
                     raise QualificationError("MECHANICS_CONSTRAINT_OUTPUT_UNKNOWN")
                 alpha = weight if op == "FOLLOW" else 1.0
                 pos[jid] = pos[jid] * (1.0 - alpha) + target_p * alpha
-                explicit_rot[jid] = target_r
+                if alpha > 0.0:
+                    explicit_rot[jid] = _blend_rotation_basis(
+                        explicit_rot.get(jid, np.eye(3, dtype=np.float64)),
+                        target_r, alpha,
+                    )
+                    explicit_scale[jid] = (
+                        explicit_scale.get(jid, np.ones(3, dtype=np.float64))
+                        * (1.0 - alpha) + target_s * alpha
+                    )
             residuals.append((constraint.canonical_constraint_id, 0.0))
         elif op == "AIM":
             target_p = inputs[0][0]
@@ -387,8 +446,12 @@ def solve_control_pose_v1(
                 if frame is None:
                     raise QualificationError("MECHANICS_AIM_FRAME_MISSING")
                 rest_axis = np.asarray(frame.basis[0], dtype=np.float64)
-                if float(np.linalg.norm(direction)) > 1e-10:
-                    explicit_rot[jid] = _minimal_rotation(rest_axis, direction)
+                if weight > 0.0 and float(np.linalg.norm(direction)) > 1e-10:
+                    aimed = _minimal_rotation(rest_axis, direction)
+                    explicit_rot[jid] = _blend_rotation_basis(
+                        explicit_rot.get(jid, np.eye(3, dtype=np.float64)),
+                        aimed, weight,
+                    )
             residuals.append((constraint.canonical_constraint_id, 0.0))
         elif op == "STRETCH":
             chain = chain_by[str(constraint.canonical_chain_id)]
@@ -401,16 +464,35 @@ def solve_control_pose_v1(
                 raise QualificationError("MECHANICS_STRETCH_CHAIN_DEGENERATE")
             ratio = float(np.linalg.norm(target - root)) / total
             max_ratio = max(1.0, float(constraint.parameters.get("p1", 1.5)))
-            ratio = 1.0 + (min(max(ratio, 1.0), max_ratio) - 1.0) * weight
+            ratio = min(max(ratio, 1.0), max_ratio)
             direction = _normalize(target - root, rest[ids[-1]] - rest[ids[0]])
+            # STRETCH weight is an influence on the entire solved chain,
+            # not only the extension ratio. Otherwise p0=0 still straightens
+            # a bent limb and silently changes the puppet.
+            before = [pos[jid].copy() for jid in ids]
+            desired = [root]
             cursor = root
-            pos[ids[0]] = root
-            for i, length in enumerate(rest_lengths):
+            for length in rest_lengths:
                 cursor = cursor + direction * length * ratio
-                pos[ids[i+1]] = cursor.copy()
+                desired.append(cursor.copy())
+            for jid, prior, stretched in zip(ids, before, desired):
+                pos[jid] = prior * (1.0 - weight) + stretched * weight
             residuals.append((constraint.canonical_constraint_id, float(np.linalg.norm(pos[ids[-1]] - target))))
         else:  # schema validator should make this unreachable.
             raise QualificationError(f"MECHANICS_OPERATOR_UNREACHABLE:{op}")
+
+    # A later constraint can alter an earlier chain. Report achieved residuals
+    # from the final assembled pose, not intermediate solver states. These are
+    # target-distance measurements; they do not assert global multi-IK feasibility.
+    for index, constraint in enumerate(rig.constraints):
+        if constraint.operator_id in {"IK", "STRETCH"}:
+            chain = chain_by[str(constraint.canonical_chain_id)]
+            effector = chain.canonical_joint_ids[-1]
+            target = cw[constraint.input_canonical_control_ids[0]][0]
+            residuals[index] = (
+                constraint.canonical_constraint_id,
+                float(np.linalg.norm(pos[effector] - target)),
+            )
 
     # Derive a stable rotation for every deform joint from rest->solved child
     # direction unless a direct/constraint rotation already exists.
@@ -435,6 +517,9 @@ def solve_control_pose_v1(
             rest_P=tuple(map(float, rest[jid])),
             solved_P=tuple(map(float, pos[jid])),
             rotation_basis=tuple(tuple(float(v) for v in row) for row in rotation),
+            scale=tuple(float(v) for v in explicit_scale.get(
+                jid, np.ones(3, dtype=np.float64)
+            )),
         ))
     return MechanicsPoseIRV1(
         joints=tuple(solved_rows),
@@ -483,8 +568,16 @@ def deform_mesh_lbs_v1(
                 raise QualificationError("MECHANICS_LBS_SKIN_JOINT_UNKNOWN")
             jp = joint_pose[jid]
             R = np.asarray(jp.rotation_basis, dtype=np.float64)
+            if R.shape != (3, 3) or not np.isfinite(R).all():
+                raise QualificationError("MECHANICS_LBS_ROTATION_INVALID")
+            scale = _v3(jp.scale, "MECHANICS_LBS_SCALE_INVALID")
+            if np.any(scale <= 0.0):
+                raise QualificationError("MECHANICS_LBS_SCALE_NONPOSITIVE")
             solved_p = _v3(jp.solved_P, "MECHANICS_LBS_SOLVED_JOINT_INVALID")
-            transformed = solved_p + R @ (v - rest_joint[jid])
+            # Pose scale is part of the joint's deformation transform, not
+            # merely its endpoint translation. Apply it to local rest offsets
+            # before rotation so ROOT/FK nonuniform scale survives LBS.
+            transformed = solved_p + R @ ((v - rest_joint[jid]) * scale)
             result += w * transformed
             total += w
         if abs(total - 1.0) > 1e-6 or not np.isfinite(result).all():
@@ -499,6 +592,7 @@ def deform_mesh_lbs_v1(
         rig_lineage_hash=rig.rig_lineage_hash,
         metadata={
             "deformation_method": "LINEAR_BLEND_SKINNING",
+            "joint_scale_consumed": True,
             "mechanical_mesh_authority_preserved": True,
             "visual_rebind_performed": False,
         },
@@ -508,4 +602,5 @@ def deform_mesh_lbs_v1(
 __all__ = [
     "ControlTransformIRV1", "DeformedMeshIRV1", "MechanicsPoseIRV1",
     "SolvedJointTransformIRV1", "deform_mesh_lbs_v1", "solve_control_pose_v1",
+    "control_world_transforms_v1",
 ]

@@ -94,6 +94,11 @@ def export_inference_evidence_v1(
         or not bool(torch.isfinite(original_camera_features).all())
     ):
         raise ValueError("RSS_VNEXT_EXPORT_NONFINITE_SOURCE")
+    # Input normalization is an explicit 0..1 source-domain contract.
+    # A negative/out-of-gamut tensor cannot be sealed as ORIGINAL_RGBA
+    # merely because its shape and checkpoint identity match.
+    if bool((original_rgba < 0).any()) or bool((original_rgba > 1).any()):
+        raise ValueError("RSS_VNEXT_EXPORT_SOURCE_RGBA_RANGE")
     if not isinstance(result, Mapping) or result.get("qualification_status") != "UNQUALIFIED_NEURAL_PROPOSAL":
         raise ValueError("RSS_VNEXT_EXPORT_NEURAL_AUTHORITY_INVALID")
     if result.get("observed_view_count") != 2 or result.get("auxiliary_view_authority") != "LEARNED_PREDICTED_ONLY":
@@ -133,6 +138,30 @@ def export_inference_evidence_v1(
             "readiness_logits": _list(dynamic.readiness_logits[0]),
             "authority": dynamic.authority,
         }
+        hard_weights = result.get("discrete_skin_weight_proposal")
+        joint_states = result.get("skin_joint_hidden_states")
+        if (hard_weights is None) != (joint_states is None):
+            raise ValueError("RSS_VNEXT_EXPORT_DISCRETE_SKIN_PAIR_INCOMPLETE")
+        if hard_weights is not None:
+            if (
+                not isinstance(hard_weights, Tensor)
+                or not isinstance(joint_states, Tensor)
+                or hard_weights.shape != dynamic.weights.shape
+                or joint_states.shape[:2] != (
+                    dynamic.weights.shape[0], dynamic.weights.shape[2],
+                )
+                or not bool(torch.isfinite(hard_weights).all())
+                or not bool(torch.isfinite(joint_states).all())
+            ):
+                raise ValueError("RSS_VNEXT_EXPORT_DISCRETE_SKIN_ADDRESS_DRIFT")
+            error = (dynamic.weights.detach().float() - hard_weights.detach().float()).abs()
+            dynamic_payload.update({
+                "discrete_skin_weights": _list(hard_weights[0]),
+                "skin_joint_hidden_states": _list(joint_states[0]),
+                "soft_to_discrete_max_abs_difference": float(error.amax().item()),
+                "soft_to_discrete_mean_abs_difference": float(error.mean().item()),
+                "soft_to_discrete_parity_qualified": False,
+            })
     value = RSSvNextInferenceEvidenceIRV1(
         checkpoint_sha256=checkpoint_sha256,
         observed_front_sha256=_source_tensor_digest(original_rgba[0, 0]),
@@ -145,6 +174,12 @@ def export_inference_evidence_v1(
         scene={
             "source_semantic_patch_logits": _list(state.source_semantic_patch_logits[0]),
             "source_semantic_log_uncertainty": _list(state.source_semantic_log_uncertainty[0]),
+            # Retain query-space addresses and anonymous membership, not just
+            # the pair graph. These are 3D hypotheses (including UNKNOWN),
+            # never source segmentation, drawable authority or canonical IDs.
+            "region_query_xyz": _list(state.query_xyz[0]),
+            "region_membership_logits": _list(state.semantic_logits[0]),
+            "region_graphics_logits": _list(state.graphics_logits[0]),
             "region_relation_logits": _list(state.region_relation_logits[0]),
             "region_relation_valid_mask": _list(state.region_relation_valid_mask[0]),
             "presentation_role_probabilities": _list(state.presentation_role_probabilities[0]),

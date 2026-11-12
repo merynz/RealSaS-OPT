@@ -200,6 +200,17 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	if rig.Metadata["frame_observability_claimed"] != false {
 		t.Fatalf("rig prematurely claims post-bind observability: %+v", rig.Metadata)
 	}
+	if rig.Metadata["executor_contract"] != ProductRigContractV2 ||
+		rig.Metadata["output_schema_version"] != "v2" ||
+		rig.Metadata["skin_code_output_artifact_type"] != "RealSaS.SkinCodeProposalIR" ||
+		rig.Metadata["skin_code_output_schema_version"] != "v1" ||
+		rig.Metadata["skin_code_output_source"] != "SAME_AXIS_CAUSAL_SEQUENCE" {
+		t.Fatalf("active Rig does not emit V6 Rig + SkinCode contract: %+v", rig.Metadata)
+	}
+	if rig.Metadata["compiler_control_synthesis_allowed"] != false ||
+		rig.Metadata["compiler_constraint_synthesis_allowed"] != false {
+		t.Fatalf("Rig authoring must remain learned, not Compiler-synthesized: %+v", rig.Metadata)
+	}
 
 	skin, ok := registry.Get(ProductSkinCapabilityID)
 	if !ok {
@@ -208,17 +219,26 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	if len(skin.Dependencies) != 2 || skin.Dependencies[0] != ProductMeshCapabilityID || skin.Dependencies[1] != ProductRigCapabilityID {
 		t.Fatalf("skin descriptor=%+v", skin)
 	}
-	if skin.Metadata["feature_evidence_source"] != "PRODUCT_MESH_OUTPUT" || skin.Metadata["material_support_source"] != "PRODUCT_MESH_OUTPUT" {
-		t.Fatalf("skin Mesh evidence sources drift=%+v", skin.Metadata)
-	}
 	if skin.Metadata["legacy_stage15_dependency"] != false {
 		t.Fatalf("skin legacy Stage15 dependency drift=%+v", skin.Metadata)
 	}
 	if skin.Metadata["mesh_and_rig_are_canonical_parents"] != true {
 		t.Fatalf("skin canonical parent metadata=%+v", skin.Metadata)
 	}
-	if skin.Metadata["feature_evidence_is_canonical_parent"] != false || skin.Metadata["material_support_is_canonical_parent"] != false {
-		t.Fatalf("skin feature evidence became canonical parent: %+v", skin.Metadata)
+	if skin.Metadata["executor_contract"] != ProductSkinContractV2 ||
+		skin.Metadata["input_rig_schema_version"] != "v2" ||
+		skin.Metadata["input_skin_code_source"] != "PRODUCT_RIG_OUTPUT" ||
+		skin.Metadata["input_skin_code_artifact_type"] != "RealSaS.SkinCodeProposalIR" ||
+		skin.Metadata["output_schema_version"] != "v2" {
+		t.Fatalf("V6 Skin must decode the exact V6 Rig code output: %+v", skin.Metadata)
+	}
+	if skin.Metadata["compiler_code_search_allowed"] != false ||
+		skin.Metadata["compiler_code_repair_allowed"] != false ||
+		skin.Metadata["codec_checkpoint_must_match_axis_skin_code"] != true {
+		t.Fatalf("V6 Skin code identity and no-repair policy drift: %+v", skin.Metadata)
+	}
+	if _, oldSurfaceInput := skin.Metadata["feature_evidence_source"]; oldSurfaceInput {
+		t.Fatal("V5-only RiggingSurface material input leaked into active Skin V6")
 	}
 }
 

@@ -11,7 +11,7 @@ perform cloth collision or create source appearance. Absent capability evidence
 raises QualificationError instead of quietly producing a convincing mock.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import math
 from typing import Callable, Mapping
 
@@ -23,8 +23,9 @@ from .mechanics_control_solver_v1 import (
     MechanicsPoseIRV1,
     deform_mesh_lbs_v1,
     solve_control_pose_v1,
+    control_world_transforms_v1,
 )
-from .canonical_mesh_ir_v1 import CanonicalMeshIR
+from .canonical_mesh_ir_v1 import CanonicalMeshIR, validate_canonical_mesh_domain_v1
 from .playback_full_surface_v3 import (
     CameraProjectionV3,
     project_points_xyz_v3,
@@ -38,9 +39,15 @@ from .playback_runtime_v3 import (
     validate_frame_composition_v3,
     validate_playback_runtime_v3_contract,
 )
-from .canonical_rig_ir_v2 import CanonicalRigIRV2
-from .canonical_skin_ir_v2 import CanonicalSkinIRV2
+from .canonical_rig_ir_v2 import CanonicalRigIRV2, validate_canonical_rig_domain_v2
+from .canonical_skin_ir_v2 import CanonicalSkinIRV2, validate_canonical_skin_domain_v2
 from .types import QualificationError
+from .graphics_runtime_v1 import (
+    RuntimeGraphicsV1, validate_runtime_graphics_v1,
+)
+from .pose_depth_visibility_v1 import (
+    PoseDepthPixelEvidenceV1, inspect_pose_depth_pixel_v1,
+)
 
 
 VIEW_IDS_V1 = tuple(f"V{i}" for i in range(8))
@@ -69,6 +76,7 @@ class ControllablePuppetBundleV1:
     product_revision_id: str
     product_qualification_receipt: str
     schema_version: str = "RealSaS.ControllablePuppetBundle.v1"
+    graphics: RuntimeGraphicsV1 | None = None
 
     def validate(self) -> dict[str, CameraProjectionV3]:
         """Reject unaddressed topology and unqualified consumer input."""
@@ -82,6 +90,26 @@ class ControllablePuppetBundleV1:
             raise QualificationError("PUPPET_RUNTIME_SKIN_MESH_LINEAGE_DRIFT")
         if self.skin.deform_structure_hash != self.rig.deform_structure_hash:
             raise QualificationError("PUPPET_RUNTIME_SKIN_RIG_LINEAGE_DRIFT")
+        # Sessions may receive already-instantiated IRs, bypassing the CAS
+        # deserializers. Re-apply the same structural courts at the interaction
+        # boundary instead of treating a matching hash as semantic proof.
+        validate_canonical_mesh_domain_v1(self.mesh)
+        validate_canonical_rig_domain_v2(self.rig)
+        validate_canonical_skin_domain_v2(self.skin)
+        if self.graphics is not None:
+            validate_runtime_graphics_v1(
+                self.graphics,
+                canonical_mesh_hash=self.mesh.mesh_lineage_hash,
+                face_count=len(self.mesh.faces),
+            )
+            mechanical_domains = {
+                j.canonical_joint_id for j in self.rig.joints
+            } | {c.canonical_control_id for c in self.rig.controls}
+            if any(
+                a["parent_mechanical_domain_id"] not in mechanical_domains
+                for a in self.graphics.attachments
+            ):
+                raise QualificationError("PUPPET_RUNTIME_GRAPHICS_MECHANICAL_PARENT_UNBOUND")
         validate_playback_runtime_v3_contract(
             self.playback, required_view_ids=VIEW_IDS_V1,
         )
@@ -132,6 +160,24 @@ class ControllablePuppetBundleV1:
 
 
 @dataclass(frozen=True)
+class PuppetGraphicsProjectionV1:
+    """Pose-evaluated Graphics fragment addresses and triangle geometry.
+
+    This is real reprojected canonical 3D geometry, not an RGB render.
+    Presentation order/visibility remain *candidates* where the compiled
+    view has evidence. Missing views remain unknown, never invisible.
+    """
+    graphics_hash: str
+    view_id: str
+    face_fragment_ids: tuple[str, ...]
+    projected_faces: tuple[tuple[tuple[float, float, float], ...], ...]
+    candidate_visible_fragment_ids: tuple[str, ...] | None
+    candidate_presentation_order: tuple[str, ...] | None
+    source_visibility_qualified: bool = False
+    pose_conditioned_order_proven: bool = False
+
+
+@dataclass(frozen=True)
 class PuppetRuntimeFrameV1:
     """Projected draw-command geometry, NOT a rendered pixel/CAA image."""
     view_id: str
@@ -141,6 +187,7 @@ class PuppetRuntimeFrameV1:
     deformed: DeformedMeshIRV1
     product_revision_id: str
     authority: str = "QUALIFIED_SOURCE_GEOMETRY_INTERACTION_CONSUMER"
+    graphics_projection: PuppetGraphicsProjectionV1 | None = None
 
 
 @dataclass(frozen=True)
@@ -208,19 +255,31 @@ class ControllablePuppetSessionV1:
         if len(world_xyz) != 3 or not all(math.isfinite(float(v)) for v in world_xyz):
             raise QualificationError("PUPPET_RUNTIME_DRAG_WORLD_INVALID")
         c = self._controls[control_id]
-        # The Compiler solver treats translation as a delta to declared rest.
-        # Do not silently ignore parent-control transform hierarchies.
-        parent = c.parent_canonical_control_id
-        if parent is not None and parent in self.control_states:
-            parent_state = self.control_states[parent]
-            if (parent_state.translation != (0., 0., 0.)
-                    or parent_state.rotation_quat_wxyz != (1., 0., 0., 0.)
-                    or parent_state.scale != (1., 1., 1.)):
-                raise QualificationError("PUPPET_RUNTIME_PARENT_SPACE_INVERSION_REQUIRED")
-        delta = tuple(
-            float(world_xyz[i]) - float(c.rest_P[i]) for i in range(3)
+        target = np.asarray(world_xyz, dtype=np.float64)
+        # Invert exactly the parent-space equation used by Mechanics:
+        # world = parent_world + parent_R @ ((rest+delta-parent_rest) * parent_S).
+        # This is a known affine inverse, NOT a guessed hidden 3D target.
+        world = control_world_transforms_v1(
+            self.bundle.rig, tuple(self.control_states.values()),
         )
-        self.set_control(ControlTransformIRV1(control_id, translation=delta))
+        parent = c.parent_canonical_control_id
+        if parent is None:
+            local_position = target
+        else:
+            parent_position, parent_rotation, parent_scale = world[parent]
+            if np.any(parent_scale <= 1e-12):
+                raise QualificationError("PUPPET_RUNTIME_PARENT_SCALE_SINGULAR")
+            parent_rest = np.asarray(self._controls[parent].rest_P, dtype=np.float64)
+            local_position = parent_rest + (
+                parent_rotation.T @ (target - parent_position)
+            ) / parent_scale
+        delta = local_position - np.asarray(c.rest_P, dtype=np.float64)
+        if not np.isfinite(delta).all():
+            raise QualificationError("PUPPET_RUNTIME_DRAG_PARENT_INVERSE_NONFINITE")
+        # Drag changes the local translation channel only. The artist's rotation
+        # and scale are not discarded by a subsequent mouse gesture.
+        old = self.control_states.get(control_id, ControlTransformIRV1(control_id))
+        self.set_control(replace(old, translation=tuple(float(v) for v in delta)))
 
     def drag_screen(self, control_id: str, x: float, y: float) -> None:
         """Mouse drag in orthographic camera plane, preserving handle depth.
@@ -233,13 +292,9 @@ class ControllablePuppetSessionV1:
         if not math.isfinite(x) or not math.isfinite(y):
             raise QualificationError("PUPPET_RUNTIME_SCREEN_CURSOR_NONFINITE")
         cam = self.cameras[self.view_id]
-        c = self._controls[control_id]
-        if c.parent_canonical_control_id in self.control_states:
-            p = self.control_states[c.parent_canonical_control_id]
-            if p.translation != (0., 0., 0.) or p.rotation_quat_wxyz != (1., 0., 0., 0.):
-                raise QualificationError("PUPPET_RUNTIME_PARENT_SPACE_INVERSION_REQUIRED")
-        old = self.control_states.get(control_id, ControlTransformIRV1(control_id))
-        reference = np.asarray(c.rest_P, dtype=np.float64) + np.asarray(old.translation, dtype=np.float64)
+        reference = control_world_transforms_v1(
+            self.bundle.rig, tuple(self.control_states.values()),
+        )[control_id][0]
         origin = np.asarray(cam.origin)
         right = np.asarray(cam.right)
         up = np.asarray(cam.screen_up)
@@ -315,6 +370,51 @@ class ControllablePuppetSessionV1:
                 vertices=verts,
                 triangles=variant.triangles,
             ))
+        # Graphics Compiler's actual face/fragment ownership is now consumed
+        # on the SAME newly deformed canonical vertices as interaction and
+        # selection. No independent graphics mesh and no baked-frame fallback.
+        graphics_projection = None
+        graph = self.bundle.graphics
+        if graph is not None:
+            canonical_ids = tuple(
+                vertex.canonical_mesh_vertex_id for vertex in self.bundle.mesh.vertices
+            )
+            indices = {vertex_id: i for i, vertex_id in enumerate(canonical_ids)}
+            projected = project_points_xyz_v3(
+                np.stack([xyz[vertex_id] for vertex_id in canonical_ids]),
+                camera,
+            )
+            posed_faces = tuple(
+                tuple(
+                    tuple(float(c) for c in projected[indices[vertex_id]])
+                    for vertex_id in triangle
+                )
+                for triangle in self.bundle.mesh.faces
+            )
+            addressed_view = next(
+                (v for v in graph.views if v.view_index == self.view_index),
+                None,
+            )
+            graphics_projection = PuppetGraphicsProjectionV1(
+                graphics_hash=graph.runtime_graphics_hash,
+                view_id=self.view_id,
+                face_fragment_ids=tuple(
+                    graph.fragment_ids[owner] for owner in graph.face_fragment_index
+                ),
+                projected_faces=posed_faces,
+                candidate_visible_fragment_ids=(
+                    None if addressed_view is None else tuple(
+                        graph.fragment_ids[i]
+                        for i in addressed_view.visible_fragment_indices
+                    )
+                ),
+                candidate_presentation_order=(
+                    None if addressed_view is None else tuple(
+                        graph.fragment_ids[i]
+                        for i in addressed_view.topological_fragment_order
+                    )
+                ),
+            )
         return PuppetRuntimeFrameV1(
             view_id=self.view_id,
             meshes=tuple(visible),
@@ -322,6 +422,20 @@ class ControllablePuppetSessionV1:
             pose=pose,
             deformed=deform,
             product_revision_id=self.bundle.product_revision_id,
+            graphics_projection=graphics_projection,
+        )
+
+    def inspect_graphics_depth_at(self, x: float, y: float) -> PoseDepthPixelEvidenceV1:
+        """Source-agnostic pose-depth query on this session's IK/LBS geometry."""
+        frame = self.frame()
+        p = frame.graphics_projection
+        if p is None:
+            raise QualificationError("PUPPET_RUNTIME_GRAPHICS_DEPTH_REQUIRES_GRAPH")
+        return inspect_pose_depth_pixel_v1(
+            view_id=p.view_id, graphics_hash=p.graphics_hash,
+            projected_faces=p.projected_faces,
+            face_fragment_ids=p.face_fragment_ids,
+            screen_x=x, screen_y=y,
         )
 
     def pick(
@@ -379,6 +493,7 @@ __all__ = [
     "ControllablePuppetBundleV1",
     "ControllablePuppetSessionV1",
     "PuppetRuntimeFrameV1",
+    "PuppetGraphicsProjectionV1",
     "PuppetPickV1",
     "RuntimeSelectionBindingV1",
     "VIEW_IDS_V1",

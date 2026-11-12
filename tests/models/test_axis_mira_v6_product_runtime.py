@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import hashlib
+from dataclasses import replace
+
+import pytest
 
 import torch
 
@@ -102,6 +105,83 @@ def test_typed_event_decode_preserves_variable_arity_controls_constraints_and_sk
         expected_rig_program_proposal_hash=rig.proposal_lineage_hash,
     )
     assert skin.rows[0].code_ids == (7, 8)
+
+
+
+def _minimal_product_events():
+    return (
+        RigProgramEventV6(RigTokenKindV6.BOS),
+        RigProgramEventV6(RigTokenKindV6.JOINT, coord_indices=(128, 128, 128)),
+        RigProgramEventV6(RigTokenKindV6.FRAMES_START),
+        RigProgramEventV6(RigTokenKindV6.CONTROLS_START),
+        RigProgramEventV6(RigTokenKindV6.CHAINS_START),
+        RigProgramEventV6(RigTokenKindV6.CONSTRAINTS_START),
+        RigProgramEventV6(RigTokenKindV6.ANCHORS_START),
+        RigProgramEventV6(RigTokenKindV6.SKIN_START),
+        RigProgramEventV6(RigTokenKindV6.SKIN_CODE, skin_code_id=2),
+        RigProgramEventV6(RigTokenKindV6.SKIN_CODE, skin_code_id=3),
+        RigProgramEventV6(RigTokenKindV6.EOS),
+    )
+
+
+def _decode_product_events(events, *, config=None, codec=None):
+    cfg = config or AXISRigProgramConfigV6(
+        scene_dim=AXIS_V6_SURFACE_SCENE_DIM, hidden_dim=32, layers=1,
+        heads=4, skin_vocab_size=81,
+    )
+    binding = codec or AXISV6CodecBinding(MIRA_V6_CODEC_ID, "a" * 64, 81, 2)
+    return decode_axis_v6_events(
+        events, config=cfg, codec_binding=binding,
+        normalization_center=(0.0, 0.0, 0.0), normalization_scale=1.0,
+        mesh_lineage_hash="1" * 64, feature_evidence_binding_hash="2" * 64,
+        carrier_evidence_hash="3" * 64, carrier_topology_hash="4" * 64,
+        carrier_geometry_hash="5" * 64, model_provenance="axis-v6-grammar-court",
+    )
+
+
+def test_product_decoder_accepts_complete_joint_coupled_skin_grammar():
+    rig, codes = _decode_product_events(_minimal_product_events())
+    assert len(rig.joints) == 1
+    assert codes.rows[0].code_ids == (2, 3)
+
+
+@pytest.mark.parametrize("mutation,expected", [
+    (lambda e: e[:7] + (e[8],) + e[7:8] + e[9:],
+     "AXIS_V6_EVENT_GRAMMAR_INVALID"),  # skin before SKIN_START
+    (lambda e: e[:-2] + e[-1:],
+     "AXIS_V6_EVENT_GRAMMAR_INVALID"),  # EOS before required skin cardinality
+    (lambda e: e[:-1] + (e[-2], e[-1]),
+     "AXIS_V6_EVENT_GRAMMAR_INVALID"),  # extra skin code
+    (lambda e: e[:2] + (e[0],) + e[2:],
+     "AXIS_V6_EVENT_GRAMMAR_INVALID"),  # BOS inside joints
+    (lambda e: e[:-1] + (e[-1], e[-1]),
+     "AXIS_V6_EVENT_TRAILING_AFTER_EOS"),
+    (lambda e: e[:8] + (replace(e[8], skin_code_id=True),) + e[9:],
+     "AXIS_V6_EVENT_INTEGER_DOMAIN_INVALID"),
+    (lambda e: e[:8] + (replace(e[8], skin_code_id=81),) + e[9:],
+     "AXIS_V6_SKIN_CODE_OUT_OF_CODEC_DOMAIN"),
+    (lambda e: e[:1] + (replace(e[1], coord_indices=(128, True, 128)),) + e[2:],
+     "AXIS_V6_EVENT_COORD_DOMAIN_INVALID"),
+    (lambda e: e[:1] + (replace(e[1], coord_indices=(128, 256, 128)),) + e[2:],
+     "AXIS_V6_EVENT_COORD_DOMAIN_INVALID"),
+])
+def test_product_decoder_fails_closed_on_grammar_and_token_drift(mutation, expected):
+    with pytest.raises(ValueError, match=expected):
+        _decode_product_events(mutation(_minimal_product_events()))
+
+
+def test_product_decoder_codec_vocab_and_sequence_limit_are_product_contracts():
+    with pytest.raises(ValueError, match="AXIS_V6_CODEC_VOCABULARY_DRIFT"):
+        _decode_product_events(
+            _minimal_product_events(),
+            codec=AXISV6CodecBinding(MIRA_V6_CODEC_ID, "a" * 64, 82, 2),
+        )
+    cfg = AXISRigProgramConfigV6(
+        scene_dim=AXIS_V6_SURFACE_SCENE_DIM, hidden_dim=32, layers=1,
+        heads=4, max_sequence_length=10, skin_vocab_size=81,
+    )
+    with pytest.raises(ValueError, match="AXIS_V6_EVENT_STREAM_RESOURCE_LIMIT"):
+        _decode_product_events(_minimal_product_events(), config=cfg)
 
 
 def test_runtime_packages_bind_axis_to_exact_mira_codec(tmp_path):

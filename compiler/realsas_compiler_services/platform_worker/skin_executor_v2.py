@@ -85,7 +85,9 @@ def _skin_code_from_dict(payload: dict[str, Any]):
     return SkinCodeProposalIR(
         rows=tuple(JointSkinCodeRowIR(
             proposal_joint_id=str(r["proposal_joint_id"]),
-            code_ids=tuple(map(int, r.get("code_ids") or ())),
+            # Preserve JSON numeric types until the cryptographic + FSQ
+            # domain court. int(3.7) silently rewrites learned evidence.
+            code_ids=tuple(r.get("code_ids") or ()),
             metadata=dict(r.get("metadata") or {}),
         ) for r in payload.get("rows") or ()),
         rig_program_proposal_hash=str(payload["rig_program_proposal_hash"]),
@@ -94,8 +96,8 @@ def _skin_code_from_dict(payload: dict[str, Any]):
         carrier_geometry_hash=str(payload["carrier_geometry_hash"]),
         codec_architecture_id=str(payload["codec_architecture_id"]),
         codec_checkpoint_hash=str(payload["codec_checkpoint_hash"]),
-        codebook_size=int(payload["codebook_size"]),
-        codes_per_joint=int(payload["codes_per_joint"]),
+        codebook_size=payload["codebook_size"],
+        codes_per_joint=payload["codes_per_joint"],
         model_provenance=str(payload.get("model_provenance") or ""),
         proposal_lineage_hash=str(payload["proposal_lineage_hash"]),
         schema_version=schema,

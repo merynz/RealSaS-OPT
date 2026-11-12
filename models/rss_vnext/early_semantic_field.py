@@ -57,9 +57,14 @@ class RSSvNextEarlySemanticField(nn.Module):
         )
 
     def forward(self, image_tokens: Tensor) -> RSSvNextEarlySemanticOutput:
-        if (image_tokens.ndim != 4 or image_tokens.shape[1] != 2
-                or image_tokens.shape[2] < 1 or image_tokens.shape[-1] != self.image_dim):
+        if image_tokens.ndim != 4 or image_tokens.shape[1] != 2:
             raise ValueError("RSS_VNEXT_SEMANTIC_ONLY_TWO_PATCH_VIEW_INPUT")
+        return self.forward_variable_views(image_tokens)
+
+    def forward_variable_views(self, image_tokens: Tensor) -> RSSvNextEarlySemanticOutput:
+        if (image_tokens.ndim != 4 or image_tokens.shape[1] not in (1,2,6)
+                or image_tokens.shape[2] < 1 or image_tokens.shape[-1] != self.image_dim):
+            raise ValueError("RSS_VNEXT_STDGEN_SEMANTIC_INPUT_VIEW_COUNT")
         if not bool(torch.isfinite(image_tokens).all()):
             raise ValueError("RSS_VNEXT_SEMANTIC_IMAGE_TOKENS_NONFINITE")
         logits = self.image_evidence(image_tokens)
@@ -71,6 +76,11 @@ class RSSvNextEarlySemanticField(nn.Module):
             source_patch_logits=logits,
             conditioned_image_tokens=image_tokens + self.residual_scale * delta,
             source_evidence_uncertainty=self.image_uncertainty(image_tokens).clamp(-8, 4),
+            authority=(
+                "TWO_SOURCE_VIEW_SEMANTIC_PREDICTION"
+                if image_tokens.shape[1]==2
+                else "STDGEN_NON_SOURCE_REFERENCE_SEMANTIC_HYPOTHESIS_ONLY"
+            ),
         )
 
     def query_field(self, local_h: Tensor) -> Tensor:
@@ -106,7 +116,55 @@ def masked_source_semantic_evidence_loss(
     )
 
 
+def masked_semantic_expected_brier_risk_loss(
+    logits: Tensor,
+    log_uncertainty: Tensor,
+    target: Tensor,
+    qualified_mask: Tensor,
+) -> Tensor:
+    """Supervise predicted patch uncertainty as conditional expected Brier risk.
+
+    Exact per-axis teacher masks decide which semantic observations exist.
+    Unobserved axes may contain NaN but never become positive/negative labels.
+    A patch with no teacher axes never trains uncertainty. This measures
+    source-patch classification error, not source depth or drawable truth.
+
+    The historical 'log_uncertainty' ABI name is kept. Its sigmoid decodes
+    expected Brier risk, not a Gaussian log-variance or proof certificate.
+    """
+    if (
+        logits.ndim != 4 or logits.shape[1] != 2
+        or target.shape != logits.shape
+        or qualified_mask.shape != logits.shape
+        or log_uncertainty.shape != (*logits.shape[:3], 1)
+    ):
+        raise ValueError("RSS_VNEXT_SEMANTIC_RISK_SHAPE")
+    if qualified_mask.dtype != torch.bool:
+        raise ValueError("RSS_VNEXT_SEMANTIC_RISK_MASK_DTYPE")
+    if not bool(qualified_mask.any()):
+        raise ValueError("RSS_VNEXT_SEMANTIC_RISK_NO_QUALIFIED_AXES")
+    if not bool(torch.isfinite(logits).all()) or not bool(torch.isfinite(log_uncertainty).all()):
+        raise ValueError("RSS_VNEXT_SEMANTIC_RISK_PREDICTION_NONFINITE")
+    observed = target[qualified_mask]
+    if not bool(torch.isfinite(observed).all()) or bool(((observed < 0) | (observed > 1)).any()):
+        raise ValueError("RSS_VNEXT_SEMANTIC_RISK_TARGET_INVALID")
+    safe_target = torch.where(qualified_mask, target, torch.zeros_like(target))
+    squared_error = (torch.sigmoid(logits) - safe_target).square()
+    axes_per_patch = qualified_mask.sum(dim=-1)
+    measured_risk = (
+        squared_error.masked_fill(~qualified_mask, 0.).sum(dim=-1)
+        / axes_per_patch.clamp_min(1)
+    ).detach()
+    admitted_patch = axes_per_patch > 0
+    predicted_risk = torch.sigmoid(log_uncertainty[..., 0])
+    return F.mse_loss(
+        predicted_risk[admitted_patch],
+        measured_risk[admitted_patch],
+    )
+
+
 __all__ = [
     "RSSvNextEarlySemanticOutput", "RSSvNextEarlySemanticField",
     "masked_source_semantic_evidence_loss",
+    "masked_semantic_expected_brier_risk_loss",
 ]

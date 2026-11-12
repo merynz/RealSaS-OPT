@@ -345,6 +345,20 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
     metadata = dict(request.get("capability_metadata") or {})
     if (
         str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductInputTwoView.v2"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.rss_vnext_input_executor_v2 import (
+            execute_rss_vnext_input_capability_v2,
+        )
+
+        def run_rss_input(value):
+            return execute_rss_vnext_input_capability_v2(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            )
+        return await _with_heartbeat(run_rss_input, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
         and metadata.get("executor_contract") == "RealSaS.ProductInputInference.v1"
     ):
         from compiler.realsas_compiler_services.platform_worker.input_executor_v1 import (
@@ -380,6 +394,35 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
                 value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
             )
         return await _with_heartbeat(run_shape_v2, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v3"
+    ):
+        # RSS.vNext's single pinned checkpoint, two original source views
+        # and independently addressed neural evidence. This new executor is
+        # staged for Product registration; the old V2 role remains isolated.
+        from compiler.realsas_compiler_services.platform_worker.rss_vnext_shape_executor_v3 import (
+            execute_rss_vnext_shape_capability_v3,
+        )
+        def run_rss_shape(value):
+            return execute_rss_vnext_shape_capability_v3(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            )
+        return await _with_heartbeat(run_rss_shape, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductMeshCompile.v2"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.rss_vnext_mesh_executor_v2 import (
+            execute_rss_vnext_mesh_capability_v2,
+        )
+        def run_rss_mesh(value):
+            return execute_rss_vnext_mesh_capability_v2(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            )
+        return await _with_heartbeat(run_rss_mesh, request)
 
     if (
         str(request.get("kind") or "") == "MODULE"

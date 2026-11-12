@@ -84,6 +84,9 @@ def execute_rig_capability_v2(
     from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import canonical_mesh_from_dict_v1
     from compiler.realsas_compiler_core.canonical_rig_ir_v2 import mint_canonical_rig_v2
     from compiler.realsas_compiler_core.rig_program_ir_v1 import qualify_rig_program_v1
+    from compiler.realsas_compiler_core.rig_constraint_schema_v1 import (
+        RIG_CONSTRAINT_OPERATOR_IDS_V1, validate_rig_constraint_operator_v1,
+    )
     from compiler.realsas_compiler_core.skin_code_ir_v1 import validate_skin_code_proposal_v1
     from models.axis.rig_program_decode_v6 import AXISV6CodecBinding, decode_axis_v6_events
     from models.axis.runtime_checkpoint_v2 import load_axis_runtime_model_v2
@@ -137,6 +140,7 @@ def execute_rig_capability_v2(
         conditioning.scene_memory,
         tokens_per_joint=codec.tokens_per_joint,
         max_steps=resource_limit,
+        allowed_constraint_operators=RIG_CONSTRAINT_OPERATOR_IDS_V1,
     )
     inference_seconds = perf_counter() - inference_started
     proposal, skin_codes = decode_axis_v6_events(
@@ -158,6 +162,17 @@ def execute_rig_capability_v2(
         expected_rig_program_proposal_hash=proposal.proposal_lineage_hash,
     )
     qualified = qualify_rig_program_v1(proposal)
+    # The structural court intentionally accepts a wider research language.
+    # Product admission must additionally prove exact Mechanics executability
+    # before minting a canonical rig; neither remap nor invent any operator.
+    for constraint in proposal.constraints:
+        validate_rig_constraint_operator_v1(
+            operator_id=constraint.operator_id,
+            input_control_count=len(constraint.input_proposal_control_ids),
+            output_joint_count=len(constraint.output_proposal_joint_ids),
+            has_chain=constraint.proposal_chain_id is not None,
+            parameters=constraint.parameters,
+        )
     rig = mint_canonical_rig_v2(mesh, qualified_program=qualified)
 
     outputs = [
@@ -190,6 +205,8 @@ def execute_rig_capability_v2(
         "control_synthesis_performed": report.get("control_synthesis_performed"),
         "constraint_synthesis_performed": report.get("constraint_synthesis_performed"),
         "constraint_solver_executed": report.get("constraint_solver_executed"),
+        "mechanics_operator_vocabulary_qualified": True,
+        "mechanics_operator_ids": list(RIG_CONSTRAINT_OPERATOR_IDS_V1),
         "model_materialization_seconds": float(materialize_seconds),
         "model_load_seconds": float(load_seconds),
         "inference_seconds": float(inference_seconds),

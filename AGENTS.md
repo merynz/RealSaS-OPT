@@ -1,9 +1,8 @@
 # RealSaS-OPT Agent Entry Contract
 
+## CI and Platform execution authority
 
-## Canonical CI and runner authority
-
-Read `canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json` before any Actions, runner, cache GC, workflow trigger or Platform execution-lane change. Preserve its main-owned machine-enforced policy; never invent a new runner arrangement because the chat changed. See `docs/platform/PLATFORM_CI_OPERATIONS_AUTHORITY.md`.
+Workflow edits must first read `canonical/CI_EXECUTION_AUTHORITY_V1.json` and `docs/platform/CI_EXECUTION_AUTHORITY.md`. The machine-enforced RSS.vNext PR budget, exact-head full court, hosted/WSL/Colab separation and bounded local GC are not agent-local preferences. Changes require updating the contract and its CI tests together. Never equate zero-job queued GitHub scheduler records with self-hosted runner capacity.
 
 ## Single-view product objective — 2026-11-03
 
@@ -239,3 +238,6 @@ A FIT/witness PASS is scoped evidence for the exact subject/apparatus. Engineeri
 9. `canonical/TRUTH_CORPUS_V1_STATUS_20261004.md`
 10. older recovery/scientific material only as needed for provenance
 
+## Canonical CI and runner authority
+
+Read `canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json` before any Actions, runner, cache GC, workflow trigger or Platform execution-lane change. Preserve its main-owned machine-enforced policy; never invent a new runner arrangement because the chat changed. See `docs/platform/PLATFORM_CI_OPERATIONS_AUTHORITY.md`.

@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from hashlib import sha256
 import io
 import json
+from zipfile import ZipFile
 from typing import Any
 
 import numpy as np
@@ -31,6 +32,7 @@ TESSA_COORDINATE_DOMAIN_V2 = "NORMALIZED_HALF_EXTENT__XYZ_IN_MINUS_0P5_PLUS_0P5"
 class ShapeInferenceResultV2:
     payload: bytes
     diagnostics: dict[str, Any]
+    scene_evidence_payload: bytes | None = None
 
 
 @dataclass(frozen=True)
@@ -84,7 +86,92 @@ def _decoded_topology_sha256(
     return digest.hexdigest()
 
 
+
+# On the registered Shape -> Mesh edge, source-normal/feature/mechanical
+# evidence is an actual consumed array family, not optional decoration.
+# Hash the *exact normalized array bytes*, including shape, dtype and field
+# names. A CAS hash protects transport identity, not an internally inconsistent
+# producer payload that has been independently re-sealed.
+_SURFACE_FIELDS_V2 = (
+    "surface_xyz_tessa", "surface_normal", "surface_h",
+    "stretch_major", "stretch_minor", "tangent_direction_2theta",
+    "bend_demand", "rigidity_probability",
+    "contact_persistence_probability", "contact_persistence_valid",
+)
+_MAX_SHAPE_BYTES_V2 = 512 * 1024 * 1024
+_EXPECTED_NPZ_FIELDS_V1 = frozenset({"metadata_json", "token_ids", *_SURFACE_FIELDS_V2})
+_EXPECTED_NPZ_FIELDS_V2 = frozenset({
+    "metadata_json", "token_ids", "decoded_vertices_tessa", "decoded_faces",
+    "decoded_vertex_component_indices", "decoded_face_component_indices",
+    *_SURFACE_FIELDS_V2,
+})
+
+
+def _bounded_npz_archive(payload: bytes, *, allowed: set[str] | frozenset[str]) -> None:
+    if not isinstance(payload, bytes) or not payload or len(payload) > _MAX_SHAPE_BYTES_V2:
+        raise RuntimeError("SHAPE_V2_ARCHIVE_BYTES_INVALID")
+    try:
+        with ZipFile(io.BytesIO(payload)) as zipfile:
+            entries = zipfile.infolist()
+            if (
+                len(entries) != len(allowed)
+                or {e.filename[:-4] for e in entries if e.filename.endswith(".npy")} != set(allowed)
+                or any(not e.filename.endswith(".npy") or e.file_size > _MAX_SHAPE_BYTES_V2 for e in entries)
+                or sum(e.file_size for e in entries) > _MAX_SHAPE_BYTES_V2
+            ):
+                raise RuntimeError("SHAPE_V2_ARCHIVE_FIELDS_OR_RESOURCE_LIMIT")
+    except RuntimeError:
+        raise
+    except Exception as exc:
+        raise RuntimeError("SHAPE_V2_ARCHIVE_INVALID") from exc
+
+
+def _validate_surface_evidence_v2(fields: dict[str, np.ndarray]) -> None:
+    xyz = np.asarray(fields["surface_xyz_tessa"])
+    n = xyz.shape[1] if xyz.ndim == 3 else 0
+    if xyz.ndim != 3 or xyz.shape != (1, n, 3) or n < 1 or n > 500_000:
+        raise RuntimeError("SHAPE_V2_SURFACE_WITNESS_SHAPE_INVALID")
+    if np.asarray(fields["surface_normal"]).shape != xyz.shape:
+        raise RuntimeError("SHAPE_V2_SURFACE_NORMAL_SHAPE_INVALID")
+    h = np.asarray(fields["surface_h"])
+    if h.ndim != 3 or h.shape[:2] != (1, n) or h.shape[2] < 1:
+        raise RuntimeError("SHAPE_V2_SURFACE_FEATURE_SHAPE_INVALID")
+    for name in ("stretch_major", "stretch_minor", "bend_demand",
+                 "rigidity_probability", "contact_persistence_probability"):
+        if np.asarray(fields[name]).shape != (1, n):
+            raise RuntimeError("SHAPE_V2_MECHANICAL_SHAPE_INVALID:" + name)
+    if np.asarray(fields["tangent_direction_2theta"]).shape != (1, n, 2):
+        raise RuntimeError("SHAPE_V2_MECHANICAL_SHAPE_INVALID:tangent_direction_2theta")
+    valid = np.asarray(fields["contact_persistence_valid"])
+    if valid.shape != (1, n) or valid.dtype != np.uint8 or np.any(valid > 1):
+        raise RuntimeError("SHAPE_V2_MECHANICAL_VALID_MASK_INVALID")
+    for name in _SURFACE_FIELDS_V2:
+        array = np.asarray(fields[name])
+        if name == "contact_persistence_valid":
+            continue
+        if array.dtype != np.float32 or not np.isfinite(array).all():
+            raise RuntimeError("SHAPE_V2_SURFACE_OR_MECHANICAL_NONFINITE:" + name)
+    if np.any(np.linalg.norm(fields["surface_normal"], axis=2) <= 1e-12):
+        raise RuntimeError("SHAPE_V2_SURFACE_NORMAL_DEGENERATE")
+    for name in ("rigidity_probability", "contact_persistence_probability"):
+        array = fields[name]
+        if np.any((array < 0) | (array > 1)):
+            raise RuntimeError("SHAPE_V2_MECHANICAL_PROBABILITY_OUT_OF_DOMAIN:" + name)
+
+
+def _surface_fields_sha256_v2(fields: dict[str, np.ndarray]) -> str:
+    digest = sha256()
+    for name in _SURFACE_FIELDS_V2:
+        array = np.ascontiguousarray(fields[name])
+        digest.update(name.encode("ascii") + b"\\0")
+        digest.update(str(array.dtype).encode("ascii") + b"\\0")
+        digest.update(str(tuple(array.shape)).encode("ascii") + b"\\0")
+        digest.update(array.tobytes(order="C"))
+    return digest.hexdigest()
+
+
 def _read_v1_payload(payload: bytes) -> dict[str, Any]:
+    _bounded_npz_archive(bytes(payload), allowed=_EXPECTED_NPZ_FIELDS_V1)
     with np.load(io.BytesIO(payload), allow_pickle=False) as bundle:
         metadata = json.loads(str(bundle["metadata_json"].reshape(-1)[0]))
         return {
@@ -103,8 +190,17 @@ def _read_v1_payload(payload: bytes) -> dict[str, Any]:
         }
 
 
-def encode_shape_proposal_v2(v1: Any) -> bytes:
+def encode_shape_proposal_v2(
+    v1: Any, *, source_observation_content_sha256: str,
+) -> bytes:
+    if (
+        type(source_observation_content_sha256) is not str
+        or len(source_observation_content_sha256) != 64
+        or any(c not in "0123456789abcdef" for c in source_observation_content_sha256)
+    ):
+        raise RuntimeError("SHAPE_V2_SOURCE_OBSERVATION_CAS_ID_REQUIRED")
     source = _read_v1_payload(bytes(v1.payload))
+    _validate_surface_evidence_v2(source)
     token_ids = source["token_ids"]
     decoded = _decode_tessa_asset_sequence_v1(token_ids.tolist())
     vertices = np.asarray(decoded.vertices_normalized, dtype=np.float64)
@@ -139,6 +235,8 @@ def encode_shape_proposal_v2(v1: Any) -> bytes:
             "tessa_coordinate_domain": TESSA_COORDINATE_DOMAIN_V2,
             "topology_sequence_sha256": _token_sequence_sha256(token_ids),
             "decoded_topology_sha256": topology_sha,
+            "surface_evidence_sha256": _surface_fields_sha256_v2(source),
+            "source_observation_content_sha256": source_observation_content_sha256,
             "decoded_vertex_count": int(len(vertices)),
             "decoded_face_count": int(len(faces)),
             "decoded_component_count": int(decoded.component_count),
@@ -170,6 +268,7 @@ def encode_shape_proposal_v2(v1: Any) -> bytes:
 
 
 def decode_shape_proposal_v2(payload: bytes) -> DecodedShapeProposalV2:
+    _bounded_npz_archive(bytes(payload), allowed=_EXPECTED_NPZ_FIELDS_V2)
     try:
         with np.load(io.BytesIO(bytes(payload)), allow_pickle=False) as bundle:
             required = {
@@ -219,6 +318,10 @@ def decode_shape_proposal_v2(payload: bytes) -> DecodedShapeProposalV2:
         raise RuntimeError("SHAPE_V2_COMPILER_FRAME_BINDING_REQUIRED")
     if value.metadata.get("source_geometry_lineage_claimed") is not False:
         raise RuntimeError("SHAPE_V2_SOURCE_GEOMETRY_LINEAGE_CLAIM_FORBIDDEN")
+    source_sha = value.metadata.get("source_observation_content_sha256")
+    if (type(source_sha) is not str or len(source_sha) != 64
+        or any(c not in "0123456789abcdef" for c in source_sha)):
+        raise RuntimeError("SHAPE_V2_SOURCE_OBSERVATION_CAS_ID_REQUIRED")
     if value.metadata.get("proposal_evidence_frame") != TESSA_EVIDENCE_FRAME_V2:
         raise RuntimeError("SHAPE_V2_EVIDENCE_FRAME_DRIFT")
     if value.metadata.get("topology_sequence_sha256") != _token_sequence_sha256(value.token_ids):
@@ -231,12 +334,60 @@ def decode_shape_proposal_v2(payload: bytes) -> DecodedShapeProposalV2:
     )
     if value.metadata.get("decoded_topology_sha256") != actual_topology_sha:
         raise RuntimeError("SHAPE_V2_DECODED_TOPOLOGY_HASH_DRIFT")
+    if (
+        value.metadata.get("decoded_topology_codec") != "RealSaS.TESSASequenceCodec.v1"
+        or value.metadata.get("tessa_coordinate_domain") != TESSA_COORDINATE_DOMAIN_V2
+        or value.metadata.get("decoded_topology_is_proposal_evidence") is not True
+        or value.metadata.get("source_truth_copied_into_shape") is not False
+        or type(value.metadata.get("decoded_vertex_count")) is not int
+        or value.metadata["decoded_vertex_count"] != len(value.decoded_vertices_tessa)
+        or type(value.metadata.get("decoded_face_count")) is not int
+        or value.metadata["decoded_face_count"] != len(value.decoded_faces)
+    ):
+        raise RuntimeError("SHAPE_V2_TOPOLOGY_AUTHORITY_OR_COUNT_DRIFT")
+    if (len(value.decoded_vertices_tessa) < 1 or len(value.decoded_faces) < 1
+        or not np.isfinite(value.decoded_vertices_tessa).all()
+        or np.any(np.abs(value.decoded_vertices_tessa) > 0.550001)
+        or np.any(value.decoded_faces < 0)
+        or np.any(value.decoded_faces >= len(value.decoded_vertices_tessa))
+        or len(value.decoded_vertex_component_indices) != len(value.decoded_vertices_tessa)
+        or len(value.decoded_face_component_indices) != len(value.decoded_faces)
+        or np.any(value.decoded_vertex_component_indices < 0)
+        or np.any(value.decoded_face_component_indices < 0)):
+        raise RuntimeError("SHAPE_V2_DECODED_GEOMETRY_OR_COMPONENT_DOMAIN_INVALID")
+    fields = {
+        name: (value.mechanical[name] if name in value.mechanical else getattr(value, name))
+        for name in _SURFACE_FIELDS_V2
+    }
+    _validate_surface_evidence_v2(fields)
+    if value.metadata.get("surface_evidence_sha256") != _surface_fields_sha256_v2(fields):
+        raise RuntimeError("SHAPE_V2_SURFACE_EVIDENCE_HASH_DRIFT")
+    # The serialized topology must be the deterministic output of the exact
+    # frozen codec and the exact token sequence, not merely an independently
+    # hashed arbitrary mesh labeled as TESSA-derived.
+    try:
+        decoded = _decode_tessa_asset_sequence_v1(value.token_ids.tolist())
+    except Exception as exc:
+        raise RuntimeError("SHAPE_V2_TOPOLOGY_TOKEN_REPLAY_FAILED") from exc
+    if (
+        not np.array_equal(value.decoded_vertices_tessa, np.asarray(decoded.vertices_normalized, dtype=np.float64))
+        or not np.array_equal(value.decoded_faces, np.asarray(decoded.faces, dtype=np.int64))
+        or not np.array_equal(value.decoded_vertex_component_indices, np.asarray(decoded.vertex_component_indices, dtype=np.int64))
+        or not np.array_equal(value.decoded_face_component_indices, np.asarray(decoded.face_component_indices, dtype=np.int64))
+        or value.metadata.get("decoded_component_count") != int(decoded.component_count)
+        or value.metadata.get("decoded_restart_count") != int(decoded.restart_count)
+    ):
+        raise RuntimeError("SHAPE_V2_TOPOLOGY_TOKEN_DECODE_MISMATCH")
     return value
 
 
-def run_shape_inference_v2(*args, **kwargs) -> ShapeInferenceResultV2:
+def run_shape_inference_v2(
+    *args, source_observation_content_sha256: str, **kwargs,
+) -> ShapeInferenceResultV2:
     v1 = _run_shape_inference_v1(*args, **kwargs)
-    payload = encode_shape_proposal_v2(v1)
+    payload = encode_shape_proposal_v2(
+        v1, source_observation_content_sha256=source_observation_content_sha256,
+    )
     diagnostics = dict(v1.diagnostics)
     diagnostics.update(
         {
@@ -247,7 +398,11 @@ def run_shape_inference_v2(*args, **kwargs) -> ShapeInferenceResultV2:
             "compiler_frame_authority": False,
         }
     )
-    return ShapeInferenceResultV2(payload=payload, diagnostics=diagnostics)
+    return ShapeInferenceResultV2(
+        payload=payload,
+        diagnostics=diagnostics,
+        scene_evidence_payload=getattr(v1, "scene_evidence_payload", None),
+    )
 
 
 __all__ = [

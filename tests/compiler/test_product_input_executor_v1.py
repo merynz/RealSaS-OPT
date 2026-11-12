@@ -39,7 +39,7 @@ def test_input_executor_seals_shape_input_without_product_authority(monkeypatch,
     monkeypatch.setattr(
         executor,
         "run_input_inference_v1",
-        lambda source, **kwargs: SimpleNamespace(
+        lambda source, **kwargs: seen.update(kwargs) or SimpleNamespace(
             payload=b"shape-input",
             diagnostics={
                 "schema": "RealSaS.ProductInputInferenceDiagnostics.v1",
@@ -62,10 +62,12 @@ def test_input_executor_seals_shape_input_without_product_authority(monkeypatch,
     )
     assert result["status"] == "PASS"
     assert result["outputs"][0]["artifact_type"] == "RealSaS.ShapeInput"
+    assert result["outputs"][0]["schema_version"] == "v2"
     assert result["outputs"][0]["authority_class"] == "VERIFIED_SOURCE_DERIVED_SHAPE_INPUT"
     assert result["diagnostics"]["platform_view_count_invariant_claimed"] is False
     assert result["diagnostics"]["source_truth_copied_into_shape"] is False
     assert result["diagnostics"]["source_content_sha256"] == "a" * 64
+    assert seen["source_observation_content_sha256"] == "a" * 64
     assert seen["source_dir"] == deploy_root.resolve() / "foundations/dinov2/source"
     assert seen["weight_path"] == deploy_root.resolve() / "foundations/dinov2/dinov2_vits14_pretrain.pth"
     assert seen["device"] == "cpu"

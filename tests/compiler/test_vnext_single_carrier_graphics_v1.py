@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import pytest
+from dataclasses import replace
 
 from compiler.realsas_compiler_core.graphics_runtime_v1 import build_runtime_graphics_v1
 from compiler.realsas_compiler_core.graphics_v1 import (
+    GraphicsCompilePolicyV1,
+    compile_graphics_on_canonical_puppet_v1,
+    compile_neural_region_graphics_on_canonical_puppet_v1,
     GraphicsStaticRelationEvidenceV1,
     GraphicsViewRelationEvidenceV1,
     build_graphics_evidence_v1,
     compile_graphics_v1,
+    compiled_graphics_hash_v1,
 )
 from compiler.realsas_compiler_core.types import QualificationError
 
@@ -42,11 +47,14 @@ def test_graphics_compiles_role_free_order_and_runtime_consumes_materialized_con
         source_graphics_binding_hash="source-graphics",
         faces=faces,
         evidence=evidence,
+        policy=GraphicsCompilePolicyV1(allow_unqualified_order_arbitration=True),
+        mechanical_domain_ids=("joint:hand",),
         mechanical_attachment_evidence={
             (0, 1): {
                 "persistent_contact": 0.95,
                 "parent_mechanical_domain_id": "joint:hand",
                 "anchor_face_index": 0,
+                "child_face_index": 1,
                 "barycentric_anchor": (0.2, 0.3, 0.5),
                 "evidence_ref": "mechanical-contact",
             }
@@ -58,6 +66,9 @@ def test_graphics_compiles_role_free_order_and_runtime_consumes_materialized_con
     assert compiled.metadata["independent_visual_mesh_allowed"] is False
     assert len(compiled.fragments) == 3
     assert len(compiled.attachments) == 1
+    # Face 1 is the moving child, face 0 is merely the parent anchor.
+    assert compiled.attachments[0].fragment_id == compiled.fragments[1].fragment_id
+    assert compiled.attachments[0].anchor_face_index == 0
     assert all(
         view.metadata["triangle_array_order_is_presentation_authority"] is False
         for view in compiled.views
@@ -68,6 +79,11 @@ def test_graphics_compiles_role_free_order_and_runtime_consumes_materialized_con
     assert len(runtime.views) == 8
     assert runtime.metadata["hash_only_binding_forbidden"] is True
     assert runtime.metadata["behaviorally_consumable"] is True
+    # A contradictory source relation was resolved for deterministic display,
+    # not independently certified as a true source occlusion order.
+    assert runtime.metadata["representation_policy_arbitration_used"] is True
+    assert runtime.metadata["unresolved_source_order_conflict"] is True
+    assert runtime.metadata["pose_conditioned_order_execution"] is False
     assert all(len(view.topological_fragment_order) == 3 for view in runtime.views)
 
 
@@ -87,3 +103,778 @@ def test_graphics_cannot_bind_a_second_independent_visual_mesh():
             faces=((0, 1, 2), (3, 4, 5)),
             evidence=evidence,
         )
+
+
+def test_graphics_acyclic_source_order_does_not_claim_pose_conditioned_coverage():
+    evidence = build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(0, 1, 0., 1., 0., .8, .8, 1., "static"),
+        ),
+        view_relations=(
+            GraphicsViewRelationEvidenceV1(0, 0, 1, .95, .9, 1., 1., .95, "view"),
+        ),
+    )
+    compiled = compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="mesh-skin",
+        source_graphics_binding_hash="source-graphics",
+        faces=((0, 1, 2), (3, 4, 5)),
+        evidence=evidence,
+    )
+    runtime = build_runtime_graphics_v1(compiled, face_count=2)
+    assert runtime.metadata["unresolved_source_order_conflict"] is False
+    assert runtime.metadata["representation_policy_arbitration_used"] is False
+    assert runtime.metadata["pose_conditioned_order_execution"] is False
+
+
+def test_conflicting_source_front_back_relations_never_silently_become_canonical_truth():
+    faces = ((0, 1, 2), (3, 4, 5), (6, 7, 8))
+    evidence = _graphics_evidence("mesh")
+    with pytest.raises(QualificationError, match="GRAPHICS_SOURCE_ORDER_CONFLICT_UNQUALIFIED"):
+        compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="mesh-skin",
+            source_graphics_binding_hash="source-graphics",
+            faces=faces, evidence=evidence,
+        )
+    preview = compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="mesh-skin",
+        source_graphics_binding_hash="source-graphics",
+        faces=faces, evidence=evidence,
+        policy=GraphicsCompilePolicyV1(
+            allow_unqualified_order_arbitration=True,
+        ),
+    )
+    assert preview.metadata["order_arbitration_not_source_truth"] is True
+    assert any(v.metadata["cycle_edges_removed"] for v in preview.views)
+    runtime = build_runtime_graphics_v1(preview, face_count=3)
+    assert runtime.metadata["unresolved_source_order_conflict"] is True
+    assert runtime.metadata["pose_conditioned_order_execution"] is False
+
+
+@pytest.mark.parametrize("mutated,code", [
+    ({"child_face_index": None}, "GRAPHICS_ATTACHMENT_PARENT_CHILD_FACE_BINDING_INVALID"),
+    ({"child_face_index": 0}, "GRAPHICS_ATTACHMENT_PARENT_CHILD_FACE_BINDING_INVALID"),
+    ({"anchor_face_index": 2}, "GRAPHICS_ATTACHMENT_PARENT_CHILD_FACE_BINDING_INVALID"),
+    ({"parent_mechanical_domain_id": "nonexistent"}, "GRAPHICS_ATTACHMENT_MECHANICAL_DOMAIN_UNQUALIFIED"),
+])
+def test_graphics_rejects_unbound_or_ambiguous_attachment(mutated, code):
+    evidence = _graphics_evidence("mesh")
+    mechanical = {
+        "persistent_contact": .95,
+        "parent_mechanical_domain_id": "joint:hand",
+        "anchor_face_index": 0,
+        "child_face_index": 1,
+        "barycentric_anchor": (.2, .3, .5),
+        "evidence_ref": "mechanical-contact",
+    }
+    mechanical.update(mutated)
+    with pytest.raises(QualificationError, match=code):
+        compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="mesh-skin",
+            source_graphics_binding_hash="source-graphics",
+            faces=((0,1,2),(3,4,5),(6,7,8)),
+            evidence=evidence,
+            mechanical_domain_ids=("joint:hand",),
+            mechanical_attachment_evidence={(0,1):mechanical},
+            policy=GraphicsCompilePolicyV1(
+                allow_unqualified_order_arbitration=True,
+            ),
+        )
+
+
+def test_graphics_rejects_unqualified_parent_even_with_valid_face_addresses():
+    evidence = _graphics_evidence("mesh")
+    with pytest.raises(QualificationError, match="MECHANICAL_DOMAIN_UNQUALIFIED"):
+        compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="mesh-skin",
+            source_graphics_binding_hash="source-graphics",
+            faces=((0,1,2),(3,4,5),(6,7,8)),
+            evidence=evidence,
+            mechanical_attachment_evidence={(0,1):{
+                "persistent_contact": .95,
+                "parent_mechanical_domain_id": "joint:hand",
+                "anchor_face_index": 0,
+                "child_face_index": 1,
+                "barycentric_anchor": (.2, .3, .5),
+            }},
+            policy=GraphicsCompilePolicyV1(
+                allow_unqualified_order_arbitration=True,
+            ),
+        )
+
+
+@pytest.mark.parametrize("invalid,expected", [
+    ({"persistent_contact": 1.5}, "GRAPHICS_PROBABILITY_INVALID:mechanical_contact"),
+    ({"barycentric_anchor": (float("nan"), .5, .5)}, "GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID"),
+    ({"barycentric_anchor": (-.1, .6, .5)}, "GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID"),
+])
+def test_graphics_attachment_rejects_invalid_numeric_source_evidence(invalid, expected):
+    m = {
+        "persistent_contact": .95,
+        "parent_mechanical_domain_id": "joint:hand",
+        "anchor_face_index": 0,
+        "child_face_index": 1,
+        "barycentric_anchor": (.2, .3, .5),
+        "evidence_ref": "source-contact",
+    }
+    m.update(invalid)
+    with pytest.raises(QualificationError, match=expected):
+        compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="mesh-skin",
+            source_graphics_binding_hash="source",
+            faces=((0,1,2),(3,4,5),(6,7,8)),
+            evidence=_graphics_evidence("mesh"),
+            mechanical_domain_ids=("joint:hand",),
+            mechanical_attachment_evidence={(0,1):m},
+            policy=GraphicsCompilePolicyV1(allow_unqualified_order_arbitration=True),
+        )
+
+
+def test_graphics_invalid_unused_relation_probability_must_not_escape_court():
+    # Reject before SHA creation; an invalid unused row must not become sealed.
+    with pytest.raises(QualificationError, match="GRAPHICS_PROBABILITY_INVALID:same"):
+        build_graphics_evidence_v1(
+            mesh_binding_hash="mesh",
+            static_relations=(
+                GraphicsStaticRelationEvidenceV1(
+                    0, 1, 1.5, 1., 0., 0., 0., 1., "unused-confidence",
+                ),
+            ),
+            view_relations=(),
+        )
+
+def test_transitive_region_affinity_never_erases_an_explicit_nonadjacent_cut():
+    faces=((0,1,2),(1,2,3),(2,3,4))
+    # Locally 0~1 and 1~2; source evidence 0!=2. A normal union-find would
+    # incorrectly collapse all three into one drawable via transitivity.
+    a=GraphicsStaticRelationEvidenceV1(0,1,.99,.01,0.,0.,0.,.98,"same-01")
+    b=GraphicsStaticRelationEvidenceV1(1,2,.98,.01,0.,0.,0.,.97,"same-12")
+    conflict=GraphicsStaticRelationEvidenceV1(0,2,.01,.99,0.,0.,0.,.99,"cut-02")
+    results=[]
+    for relations in ((a,b,conflict),(conflict,b,a)):
+        evidence=build_graphics_evidence_v1(
+            mesh_binding_hash="mesh",static_relations=relations,view_relations=(),
+        )
+        compiled=compile_graphics_v1(
+            canonical_mesh_binding_hash="mesh",
+            canonical_mesh_skin_binding_hash="skin",
+            source_graphics_binding_hash="source",
+            faces=faces,evidence=evidence,
+        )
+        results.append(compiled)
+    first,second=results
+    assert len(first.fragments)==2
+    assert tuple(f.face_indices for f in first.fragments)==((0,1),(2,))
+    assert tuple(f.fragment_id for f in first.fragments)==tuple(
+        f.fragment_id for f in second.fragments
+    )
+    assert first.metadata["transitive_cut_constraints_enforced"] is True
+    assert first.metadata["candidate_merge_blocked_by_cut"] == ((1,2),)
+    assert first.metadata["pose_conditioned_visibility_proven"] is False
+
+
+def test_explicit_cut_court_does_not_turn_weak_ambiguous_relation_into_forced_split():
+    faces=((0,1,2),(1,2,3),(2,3,4))
+    # 0/2 cut is below the qualified candidate-policy confidence threshold.
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(0,1,.99,.01,0.,0.,0.,.99),
+            GraphicsStaticRelationEvidenceV1(1,2,.99,.01,0.,0.,0.,.99),
+            GraphicsStaticRelationEvidenceV1(0,2,.01,.99,0.,0.,0.,.2),
+        ),
+        view_relations=(),
+    )
+    compiled=compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="skin",
+        source_graphics_binding_hash="source",
+        faces=faces,evidence=evidence,
+    )
+    assert len(compiled.fragments)==1
+    assert compiled.metadata["candidate_merge_blocked_by_cut"]==()
+
+
+def test_unobserved_fragment_visibility_remains_unknown_and_uses_depth_raster_policy():
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(0,1,0.,1.,0.,0.,0.,1.),
+        ),
+        view_relations=(
+            GraphicsViewRelationEvidenceV1(0,0,1,.95,.95,1.,1.,1.),
+        ),
+    )
+    compiled=compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="skin",
+        source_graphics_binding_hash="source",
+        faces=((0,1,2),(3,4,5),(6,7,8)),
+        evidence=evidence,
+    )
+    assert len(compiled.fragments)==3
+    view=compiled.views[0]
+    unknown=(compiled.fragments[2].fragment_id,)
+    assert view.metadata["visibility_unknown_fragment_ids"] == unknown
+    assert unknown[0] in view.visible_fragment_ids
+    assert view.metadata["missing_source_view_visibility_is_not_positive_label"] is True
+    assert compiled.metadata["source_visibility_coverage_complete"] is False
+    runtime=build_runtime_graphics_v1(compiled,face_count=3)
+    assert runtime.metadata["source_visibility_coverage_complete"] is False
+    assert runtime.metadata["unknown_visibility_fragment_ids_by_view"]["0"] == unknown
+    assert runtime.metadata["unknown_visibility_raster_policy"] == (
+        "DRAW_GEOMETRY_AND_DEFER_OCCLUSION_TO_DEPTH"
+    )
+
+
+def test_no_view_evidence_never_mints_complete_source_visibility():
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(0,1,0.,1.,0.,0.,0.,1.),
+        ),
+        view_relations=(),
+    )
+    compiled=compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="skin",
+        source_graphics_binding_hash="source",
+        faces=((0,1,2),(3,4,5)),
+        evidence=evidence,
+    )
+    assert compiled.metadata["source_visibility_coverage_complete"] is False
+    assert compiled.metadata["view_relation_eight_direction_address_coverage"] is False
+    runtime=build_runtime_graphics_v1(compiled,face_count=2)
+    assert runtime.metadata["source_visibility_coverage_complete"] is False
+    assert runtime.metadata["view_relation_eight_direction_address_coverage"] is False
+
+
+def _canonical_graphics_parents():
+    from tests.compiler.test_v6_typed_rig_skin_main_integration_v1 import (
+        _real_rig_fixture, _qualified_synthetic_carrier_skin,
+    )
+    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import mint_canonical_skin_v2
+    mesh,rig=_real_rig_fixture()
+    skin=mint_canonical_skin_v2(
+        mesh,rig,
+        qualified_skin=_qualified_synthetic_carrier_skin(mesh,rig),
+        skin_code_proposal_hash="a"*64,
+        skin_codec_architecture_id="fixture-codec-not-model-release",
+        skin_codec_checkpoint_hash="b"*64,
+    )
+    return mesh,rig,skin
+
+
+def test_graphics_compiles_only_from_actual_same_canonical_mesh_rig_skin():
+    mesh,rig,skin=_canonical_graphics_parents()
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash=mesh.mesh_lineage_hash,
+        static_relations=(),view_relations=(),
+    )
+    compiled=compile_graphics_on_canonical_puppet_v1(
+        mesh=mesh,rig=rig,skin=skin,source_graphics_binding_hash="source-bound",
+        evidence=evidence,
+    )
+    assert compiled.canonical_mesh_binding_hash==mesh.mesh_lineage_hash
+    assert compiled.canonical_mesh_skin_binding_hash==skin.skin_lineage_hash
+    assert len(compiled.fragments)==1
+    assert compiled.fragments[0].face_indices==(0,)
+    assert compiled.metadata["source_visibility_coverage_complete"] is False
+    runtime=build_runtime_graphics_v1(compiled,face_count=len(mesh.faces))
+    assert runtime.face_fragment_index==(0,)
+    assert runtime.metadata["source_visibility_coverage_complete"] is False
+
+
+def test_canonical_graphics_wrapper_rejects_self_rehashed_cross_puppet_skin():
+    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import (
+        canonical_skin_lineage_hash_v2,
+    )
+    mesh,rig,skin=_canonical_graphics_parents()
+    wrong=replace(skin,mesh_lineage_hash="f"*64,skin_lineage_hash="")
+    wrong=replace(wrong,skin_lineage_hash=canonical_skin_lineage_hash_v2(wrong))
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash=mesh.mesh_lineage_hash,
+        static_relations=(),view_relations=(),
+    )
+    with pytest.raises(QualificationError,match="GRAPHICS_CANONICAL_PUPPET_PARENT_DRIFT"):
+        compile_graphics_on_canonical_puppet_v1(
+            mesh=mesh,rig=rig,skin=wrong,
+            source_graphics_binding_hash="source-bound",
+            evidence=evidence,
+        )
+
+
+def test_canonical_graphics_wrapper_rejects_wrong_mesh_binding_despite_valid_parents():
+    mesh,rig,skin=_canonical_graphics_parents()
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="unrelated-proposal",
+        static_relations=(),view_relations=(),
+    )
+    with pytest.raises(QualificationError,match="GRAPHICS_CANONICAL_MESH_BINDING_DRIFT"):
+        compile_graphics_on_canonical_puppet_v1(
+            mesh=mesh,rig=rig,skin=skin,
+            source_graphics_binding_hash="source-bound",
+            evidence=evidence,
+        )
+
+
+def _qualified_neural_graphics_fixture(*, mutate_candidate=None):
+    """Pure Compiler fixture, no torch/ML dependency in V6 typed courts."""
+    from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import (
+        canonical_mesh_lineage_hash_v1,
+    )
+    from compiler.realsas_compiler_core.canonical_rig_ir_v2 import mint_canonical_rig_v2
+    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import mint_canonical_skin_v2
+    from compiler.realsas_compiler_core.rig_program_ir_v1 import qualify_rig_program_v1
+    from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
+        RSSvNextInferenceEvidenceIRV1, seal_inference_evidence_v1,
+    )
+    from tests.compiler.test_control_ready_rig_v2 import _mesh, _proposal
+    from tests.compiler.test_v6_typed_rig_skin_main_integration_v1 import (
+        _qualified_synthetic_carrier_skin,
+    )
+
+    bare = _mesh()
+    n = len(bare.vertices)
+    points = [list(v.P) for v in bare.vertices]
+    indices = {
+        v.canonical_mesh_vertex_id: i for i, v in enumerate(bare.vertices)
+    }
+    network_mesh = {
+        "topology_tokens": [128, 129, 4],
+        "rest_xyz": points,
+        "base_xyz": points,
+        "local_features": [[.1, .2, .3]] * n,
+        "faces": [[indices[vid] for vid in face] for face in bare.faces],
+        "vertex_components": [0] * n,
+        "face_components": [0] * len(bare.faces),
+        "normals_xyz": [[0., 0., 1.]] * n,
+        "semantic_logits": [[4., .2, -3.]] * n,
+        "presentation_role_logits": [[.1, .2, .3, .4]] * n,
+        "presentation_role_schema_id": "RSS.vNext.SemanticPresentationRoles.FourWayResearch.v1",
+        "affordance_logits": [[.5, .5]] * n,
+        "graphics_logits": [[.1, .2, .3, .4, .5]] * n,
+        "static_quality_logits": [[0., 0., 0., 0.]] * n,
+        "unsigned_distance": [.1] * n,
+        "sign_logits": [.7] * n,
+        "source_rays": {
+            "rgba": [[[.1, .2, .3, .8], [.2, .3, .4, .4]]] * n,
+            "valid": [[True, True]] * n,
+            "alpha": [[.8, .4]] * n,
+            "appearance_authority": "ORIGINAL_RGBA_CAMERA_RAY_NOT_POINT_TEXTURE",
+            "depth_authority": "UNKNOWN_NO_SOURCE_DEPTH",
+        },
+        "source_authority": "LEARNED_PREDICTED_TOPOLOGY",
+        "signed_solid_authority": "UNQUALIFIED",
+        "canonical_mesh_authority": False,
+    }
+    scene = {
+        "source_semantic_patch_logits": [[[0., 0., 0., 0.]], [[0., 0., 0., 0.]]],
+        "source_semantic_log_uncertainty": [[[0.]], [[0.]]],
+        "region_relation_logits": [
+            [[0., 0., 0.], [0., 0., 0.]],
+            [[0., 0., 0.], [0., 0., 0.]],
+        ],
+        "region_relation_valid_mask": [[False, True], [True, False]],
+        "presentation_role_probabilities": [[.25, .25, .25, .25]] * n,
+        "constructed_camera_features": None,
+        "constructed_camera_angles": None,
+        "authority": "PREDICTED_FROM_TWO_ORIGINAL_VIEWS",
+        "region_query_xyz": points,
+        "region_membership_logits": [[4., .2, -3.]] * n,
+        "region_graphics_logits": [[0., 0., 0., 0., 0.]] * n,
+    }
+    if mutate_candidate:
+        mutate_candidate(network_mesh)
+    evidence = seal_inference_evidence_v1(RSSvNextInferenceEvidenceIRV1(
+        checkpoint_sha256="a" * 64,
+        observed_front_sha256="b" * 64,
+        observed_back_sha256="c" * 64,
+        camera_binding_sha256="d" * 64,
+        mesh_status="UNQUALIFIED_MESH_CANDIDATE",
+        mesh=network_mesh,
+        scene=scene,
+    ))
+    mesh = replace(
+        bare, proposal_evidence_refs=(evidence.evidence_hash,),
+        mesh_lineage_hash="",
+    )
+    mesh = replace(mesh, mesh_lineage_hash=canonical_mesh_lineage_hash_v1(mesh))
+    rig = mint_canonical_rig_v2(
+        mesh, qualified_program=qualify_rig_program_v1(_proposal(mesh)),
+    )
+    skin = mint_canonical_skin_v2(
+        mesh, rig,
+        qualified_skin=_qualified_synthetic_carrier_skin(mesh, rig),
+        skin_code_proposal_hash="a" * 64,
+        skin_codec_architecture_id="fixture-codec-not-modelrelease",
+        skin_codec_checkpoint_hash="b" * 64,
+    )
+    mapping = tuple(v.source_candidate_vertex_id for v in mesh.vertices)
+    return evidence, mapping, mesh, rig, skin
+
+
+def test_rss_typed_graphics_preserves_independent_cut_and_unknown_instead_of_complement():
+    from compiler.realsas_compiler_core.graphics_v1 import (
+        _rss_typed_face_graphics_candidates_v1,
+    )
+    scene = {
+        "region_relation_logits": [
+            [[0., 0., 0.], [2., 2., 3.]],
+            [[2., 2., -3.], [0., 0., 0.]],
+        ],
+        "region_relation_valid_mask": [[False, True], [True, False]],
+    }
+    probabilities = {
+        0: ((.8, .1), .1),
+        1: ((.1, .8), .1),
+    }
+    relation, coverage = _rss_typed_face_graphics_candidates_v1(
+        scene=scene, face_probabilities=probabilities,
+        adjacent_pairs=((0, 1), (1, 0)), evidence_hash="e" * 64,
+    )
+    assert len(relation) == len(coverage) == 2
+    for row in relation:
+        # SAME and CUT are separately learned, not complements of each other.
+        assert row.same_drawable_affinity > .8
+        assert row.cut_probability > .8
+        assert abs(row.cut_probability - (1. - row.same_drawable_affinity)) > .5
+        assert row.evidence_ref == "e" * 64
+    assert relation[0].attachment_affinity > .8
+    assert relation[1].attachment_affinity < .2
+    for row in coverage:
+        assert row["from_predicted_unknown_mass"] == .1
+        assert row["to_predicted_unknown_mass"] == .1
+        assert row["nonself_known_region_pair_mass"] > .6
+    collapsed, abstained = _rss_typed_face_graphics_candidates_v1(
+        scene=scene,
+        face_probabilities={0: ((.9, 0.), .1), 1: ((.9, 0.), .1)},
+        adjacent_pairs=((0, 1),), evidence_hash="e" * 64,
+    )
+    assert collapsed == ()
+    assert abstained[0]["state"] == "ABSTAIN_NO_KNOWN_CROSS_REGION_SUPPORT"
+
+
+def test_neural_anonymous_regions_lower_into_real_canonical_graphics_without_source_authority():
+    evidence, mapping, mesh, rig, skin = _qualified_neural_graphics_fixture()
+    compiled = compile_neural_region_graphics_on_canonical_puppet_v1(
+        evidence=evidence, expected_checkpoint_sha256="a" * 64,
+        candidate_vertex_ids_by_index=mapping,
+        mesh=mesh, rig=rig, skin=skin,
+    )
+    assert compiled.metadata["origin"] == "NEURAL_ANONYMOUS_REGION_CANDIDATE"
+    assert compiled.metadata["qualified_drawable_source_truth"] is False
+    assert compiled.metadata["qualified_source_occlusion"] is False
+    assert compiled.metadata["qualified_source_attachments"] is False
+    assert compiled.metadata["independent_editability_proven"] is False
+    assert compiled.metadata["exact_candidate_to_canonical_face_map"] == (0,)
+    assert compiled.canonical_mesh_binding_hash == mesh.mesh_lineage_hash
+    assert compiled.canonical_mesh_skin_binding_hash == skin.skin_lineage_hash
+    assert len(compiled.fragments) == len(mesh.faces)
+    assert not compiled.views
+    assert not compiled.attachments
+    runtime = build_runtime_graphics_v1(compiled, face_count=len(mesh.faces))
+    assert runtime.face_fragment_index == (0,)
+    assert runtime.metadata["source_visibility_coverage_complete"] is False
+
+
+def test_neural_graphics_cannot_skip_static_source_qualification_or_relabel_vertex_addresses():
+    evidence, mapping, mesh, rig, skin = _qualified_neural_graphics_fixture()
+    with pytest.raises(QualificationError, match="GRAPHICS_NEURAL_VERTEX_POSITION_DRIFT"):
+        compile_neural_region_graphics_on_canonical_puppet_v1(
+            evidence=evidence, expected_checkpoint_sha256="a" * 64,
+            candidate_vertex_ids_by_index=tuple(reversed(mapping)),
+            mesh=mesh, rig=rig, skin=skin,
+        )
+    without_parent = replace(
+        mesh, proposal_evidence_refs=(), mesh_lineage_hash="",
+    )
+    from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import canonical_mesh_lineage_hash_v1
+    without_parent = replace(
+        without_parent, mesh_lineage_hash=canonical_mesh_lineage_hash_v1(without_parent),
+    )
+    with pytest.raises(QualificationError, match="GRAPHICS_NEURAL_STATIC_QUALIFICATION_PARENT_MISSING"):
+        compile_neural_region_graphics_on_canonical_puppet_v1(
+            evidence=evidence, expected_checkpoint_sha256="a" * 64,
+            candidate_vertex_ids_by_index=mapping,
+            mesh=without_parent, rig=rig, skin=skin,
+        )
+
+
+def test_neural_graphics_rejects_orientation_flipped_candidate_even_when_parent_is_resealed():
+    def invert_winding(mesh):
+        mesh["faces"] = [list(reversed(face)) for face in mesh["faces"]]
+    evidence, mapping, mesh, rig, skin = _qualified_neural_graphics_fixture(
+        mutate_candidate=invert_winding,
+    )
+    with pytest.raises(QualificationError, match="GRAPHICS_NEURAL_FACE_TOPOLOGY_OR_WINDING_DRIFT"):
+        compile_neural_region_graphics_on_canonical_puppet_v1(
+            evidence=evidence, expected_checkpoint_sha256="a" * 64,
+            candidate_vertex_ids_by_index=mapping,
+            mesh=mesh, rig=rig, skin=skin,
+        )
+
+
+@pytest.mark.parametrize("invalid", (0.5, "0", True, None))
+def test_graphics_static_index_is_never_silently_coerced_to_a_face(invalid):
+    with pytest.raises(QualificationError, match="GRAPHICS_STATIC_RELATION_FACE_INVALID"):
+        build_graphics_evidence_v1(
+            mesh_binding_hash="mesh",
+            static_relations=(
+                GraphicsStaticRelationEvidenceV1(invalid,1,.95,.05,0.,0.,0.,.9),
+            ),
+            view_relations=(),
+        )
+
+@pytest.mark.parametrize("invalid", (0.5, "0", True, None))
+def test_graphics_view_index_is_never_silently_coerced(invalid):
+    with pytest.raises(QualificationError, match="GRAPHICS_VIEW_RELATION_INVALID"):
+        build_graphics_evidence_v1(
+            mesh_binding_hash="mesh",
+            static_relations=(),
+            view_relations=(
+                GraphicsViewRelationEvidenceV1(invalid,0,1,.95,.9,1.,1.,.95),
+            ),
+        )
+
+@pytest.mark.parametrize("invalid", (".9", True, float("nan"), 1.5))
+def test_graphics_probability_policies_and_evidence_reject_invalid_types(invalid):
+    with pytest.raises(QualificationError, match="GRAPHICS_POLICY_INVALID"):
+        GraphicsCompilePolicyV1(same_drawable_min=invalid).validate()
+    with pytest.raises(QualificationError, match="GRAPHICS_PROBABILITY_INVALID:same"):
+        build_graphics_evidence_v1(
+            mesh_binding_hash="mesh",
+            static_relations=(
+                GraphicsStaticRelationEvidenceV1(0,1,invalid,.1,0.,0.,0.,.9),
+            ),
+            view_relations=(),
+        )
+
+def test_compiler_neural_region_has_no_source_pixel_authority_after_rebinding():
+    evidence, mapping, mesh, rig, skin = _qualified_neural_graphics_fixture()
+    result = compile_neural_region_graphics_on_canonical_puppet_v1(
+        evidence=evidence, expected_checkpoint_sha256="a"*64,
+        candidate_vertex_ids_by_index=mapping, mesh=mesh,rig=rig,skin=skin,
+    )
+    assert result.metadata["source_pixels_win_where_observed"] is False
+    assert result.metadata["source_graphics_qualification_status"] == (
+        "UNQUALIFIED_NEURAL_POLICY_ONLY"
+    )
+
+
+def test_graphics_evidence_authority_cannot_be_escalated_by_untrusted_metadata():
+    evidence = build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",static_relations=(),view_relations=(),
+        metadata={"authority_class":"PROVEN_SOURCE_DRAWABLE",
+                  "categorical_semantics_used":True},
+    )
+    assert evidence.metadata["authority_class"] == "LEARNED_RELATION_EVIDENCE_ONLY"
+    assert evidence.metadata["categorical_semantics_used"] is False
+
+
+def _sealed_runtime_graphics_mutation(compiled, **changes):
+    candidate=replace(compiled, **changes, graph_hash="")
+    return replace(candidate, graph_hash=compiled_graphics_hash_v1(candidate))
+
+
+def _runtime_address_fixture():
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash="mesh",
+        static_relations=(
+            GraphicsStaticRelationEvidenceV1(0,1,0.,1.,0.,0.,0.,1.),
+        ),
+        view_relations=(
+            GraphicsViewRelationEvidenceV1(0,0,1,.95,.95,1.,1.,1.),
+        ),
+    )
+    return compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="skin",
+        source_graphics_binding_hash="source",
+        faces=((0,1,2),(3,4,5)), evidence=evidence,
+    )
+
+
+@pytest.mark.parametrize("corrupt", [0.5, True, "0", -1, 3])
+def test_runtime_graphics_never_coerces_rehashed_noncanonical_face_address(corrupt):
+    compiled=_runtime_address_fixture()
+    fragments=(replace(compiled.fragments[0],face_indices=(corrupt,)),)+compiled.fragments[1:]
+    bad=_sealed_runtime_graphics_mutation(compiled,fragments=fragments)
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_FACE_OWNER_INVALID"):
+        build_runtime_graphics_v1(bad,face_count=2)
+
+
+def test_runtime_graphics_rejects_rehashed_foreign_or_duplicate_view_addresses():
+    compiled=_runtime_address_fixture()
+    duplicate=_sealed_runtime_graphics_mutation(
+        compiled,views=(compiled.views[0],compiled.views[0]),
+    )
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_VIEW_ADDRESS_INVALID"):
+        build_runtime_graphics_v1(duplicate,face_count=2)
+    foreign=replace(compiled.views[0],visible_fragment_ids=("foreign-fragment",))
+    bad=_sealed_runtime_graphics_mutation(compiled,views=(foreign,))
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_VISIBLE_FRAGMENT_INVALID"):
+        build_runtime_graphics_v1(bad,face_count=2)
+
+
+def test_runtime_graphics_rejects_rehashed_untethered_order_edges():
+    compiled=_runtime_address_fixture()
+    original=compiled.views[0]
+    edge=replace(original.order_edges[0],view_index=1)
+    bad=_sealed_runtime_graphics_mutation(
+        compiled,views=(replace(original,order_edges=(edge,)),),
+    )
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_ORDER_EDGE_ADDRESS_INVALID"):
+        build_runtime_graphics_v1(bad,face_count=2)
+
+
+def test_complete_eight_way_neural_visibility_never_becomes_source_ray_truth():
+    # Every face has an inferred relation in every view. This is still NOT
+    # an original-source first-hit/occlusion witness or motion-pose evidence.
+    evidence=_graphics_evidence("mesh")
+    compiled=compile_graphics_v1(
+        canonical_mesh_binding_hash="mesh",
+        canonical_mesh_skin_binding_hash="skin",
+        source_graphics_binding_hash="learned-evidence",
+        faces=((0,1,2),(3,4,5),(6,7,8)),evidence=evidence,
+        policy=GraphicsCompilePolicyV1(allow_unqualified_order_arbitration=True),
+    )
+    assert compiled.metadata["view_relation_eight_direction_address_coverage"] is True
+    assert compiled.metadata["learned_visibility_candidate_coverage_complete"] is True
+    assert compiled.metadata["source_visibility_coverage_complete"] is False
+    assert compiled.metadata["source_visibility_requires_independent_ray_receipt"] is True
+    runtime=build_runtime_graphics_v1(compiled,face_count=3)
+    assert runtime.metadata["learned_visibility_candidate_coverage_complete"] is True
+    assert runtime.metadata["source_visibility_coverage_complete"] is False
+    assert runtime.metadata["pose_conditioned_order_execution"] is False
+
+
+def test_neural_region_evidence_to_live_ik_skin_graphics_projection_one_carrier():
+    """Joined synthetic *consumer* E2E across three questions.
+
+    WHAT: neural region membership is readdressed ONLY via independently
+    minted CanonicalMesh, not asserted as a drawable/source pixel truth.
+    HOW: AXIS-style qualified rig + source-qualified synthetic Skin execute
+    actual Mechanics IK and LBS with stable joint/vertex addresses.
+    LOOKS: Graphics fragments consume new deformed positions at the selected
+    camera, with visible-color/occlusion still UNKNOWN.
+
+    This explicitly does not claim a trained unseen checkpoint, source RGB,
+    a commercial ProductRevision or native final-pixel compositing.
+    """
+    import numpy as np
+    from compiler.realsas_compiler_core.controllable_puppet_runtime_v1 import (
+        ControllablePuppetBundleV1, ControllablePuppetSessionV1,
+        RuntimeSelectionBindingV1, VIEW_IDS_V1,
+    )
+    from compiler.realsas_compiler_core.playback_full_surface_v3 import (
+        build_full_surface_runtime_meshes_v3,
+    )
+    from compiler.realsas_compiler_core.playback_runtime_v3 import (
+        AppearanceProvenance, RuntimeV3AppearancePatch,
+        RuntimeV3PlaybackContract, RuntimeV3Slot,
+    )
+    from tests.compiler.test_controllable_puppet_runtime_v1 import qualified_synthetic_bundle
+
+    evidence, mapping, mesh, rig, skin = _qualified_neural_graphics_fixture()
+    # This legacy fixture has a structurally qualified (but NON-EXECUTABLE)
+    # IK_CHAIN_SOLVE_V1 operator. Structural proposal PASS is not enough to
+    # drive Product Mechanics; prove fail-closed behavior before authoring a
+    # *new* explicit product-compatible program, never a hidden Compiler alias.
+    from compiler.realsas_compiler_core.mechanics_control_solver_v1 import solve_control_pose_v1
+    from compiler.realsas_compiler_core.rig_program_ir_v1 import (
+        seal_rig_program_proposal_v1, qualify_rig_program_v1,
+    )
+    from compiler.realsas_compiler_core.canonical_rig_ir_v2 import mint_canonical_rig_v2
+    from tests.compiler.test_control_ready_rig_v2 import _proposal
+    with pytest.raises(QualificationError, match="RIG_CONSTRAINT_OPERATOR_UNSUPPORTED"):
+        solve_control_pose_v1(rig)
+
+    raw = _proposal(mesh)
+    product_constraint = replace(
+        raw.constraints[0], operator_id="IK",
+        parameters={"p0": 1.0, "p1": 1.0, "p2": 1.0},
+    )
+    authored = seal_rig_program_proposal_v1(replace(
+        raw, constraints=(product_constraint,), proposal_lineage_hash="",
+    ))
+    qualified = qualify_rig_program_v1(authored)
+    executable = mint_canonical_rig_v2(mesh, qualified_program=qualified)
+    # One control-program change must never remint the static neural Mesh,
+    # deform-joint identity or learned Skin weights.
+    assert executable.deform_structure_hash == rig.deform_structure_hash
+    assert tuple(j.canonical_joint_id for j in executable.joints) == tuple(
+        j.canonical_joint_id for j in rig.joints
+    )
+    assert executable.control_program_hash != rig.control_program_hash
+    rig = executable
+    compiled = compile_neural_region_graphics_on_canonical_puppet_v1(
+        evidence=evidence, expected_checkpoint_sha256="a"*64,
+        candidate_vertex_ids_by_index=mapping,
+        mesh=mesh, rig=rig, skin=skin,
+    )
+    graphics = build_runtime_graphics_v1(compiled,face_count=len(mesh.faces))
+    parent = qualified_synthetic_bundle()
+    cameras = parent.cameras_by_view
+    vids = tuple(v.canonical_mesh_vertex_id for v in mesh.vertices)
+    ordered = {vid:i for i,vid in enumerate(vids)}
+    positions = np.asarray([v.P for v in mesh.vertices],dtype=np.float64)
+    faces = np.asarray([[ordered[vid] for vid in face] for face in mesh.faces],dtype=np.int64)
+    uv = np.asarray([[0,1],[1,.5],[0,0]],dtype=np.float64)
+    surface = build_full_surface_runtime_meshes_v3(
+        positions,faces,cameras=cameras,
+        uv_by_view={view:uv for view in VIEW_IDS_V1},
+        slot_id="S_TEST",attachment_id="A_TEST",
+    )
+    playback = RuntimeV3PlaybackContract(
+        slots=(RuntimeV3Slot("S_TEST",rig.joints[0].canonical_joint_id,0,"A_TEST"),),
+        meshes=surface.meshes,
+        appearance_patches=tuple(
+            RuntimeV3AppearancePatch(
+                patch_id=f"AP:{view}", mesh_id=f"{view}:A_TEST",
+                face_indices=(0,),provenance=AppearanceProvenance.UNSEEN,
+                donor_view_index=None,atlas_id=None,
+            ) for view in VIEW_IDS_V1
+        ),
+    )
+    effector = next(c.canonical_control_id for c in rig.controls if c.control_kind=="IK_EFFECTOR")
+    bundle = ControllablePuppetBundleV1(
+        mesh=mesh,rig=rig,skin=skin,playback=playback,
+        cameras_by_view=cameras,
+        vertex_ids_by_attachment={"A_TEST":vids},
+        selection_bindings=(RuntimeSelectionBindingV1(
+            "A_TEST","body","SYNTHETIC_SOURCE_ONLY_NOT_PRODUCT",effector,
+        ),),
+        product_revision_id="SYNTHETIC_NOT_A_PRODUCT_REVISION",
+        product_qualification_receipt="SYNTHETIC_STATIC_QUALIFICATION_FIXTURE",
+        graphics=graphics,
+    )
+    runtime = ControllablePuppetSessionV1(bundle)
+    before = runtime.frame()
+    assert before.graphics_projection is not None
+    assert before.graphics_projection.face_fragment_ids == (graphics.fragment_ids[0],)
+    assert before.graphics_projection.candidate_visible_fragment_ids is None
+    assert before.graphics_projection.source_visibility_qualified is False
+    assert before.graphics_projection.pose_conditioned_order_proven is False
+    assert evidence.evidence_hash in mesh.proposal_evidence_refs
+    assert compiled.metadata["independent_editability_proven"] is False
+    # Execute true target-space IK, then LBS and live Graphics projection.
+    runtime.drag_screen(effector,80.,16.)
+    moved = runtime.frame()
+    assert moved.pose.constraint_residuals[0][1] < 1e-3
+    assert moved.deformed.positions != before.deformed.positions
+    assert moved.deformed.canonical_mesh_vertex_ids == before.deformed.canonical_mesh_vertex_ids
+    assert moved.graphics_projection.face_fragment_ids == before.graphics_projection.face_fragment_ids
+    assert moved.graphics_projection.projected_faces != before.graphics_projection.projected_faces
+    runtime.set_view_index(1)
+    turned = runtime.frame()
+    assert turned.pose.joints == moved.pose.joints
+    assert turned.deformed.positions == moved.deformed.positions
+    assert turned.graphics_projection.projected_faces != moved.graphics_projection.projected_faces
+    assert turned.graphics_projection.source_visibility_qualified is False

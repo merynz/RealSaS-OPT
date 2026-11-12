@@ -16,16 +16,16 @@ on:
       - ".github/workflows/rss_vnext_controllable_native_product_e2e.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-permissions:
-  contents: read
-
 jobs:
   controllable-native:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -34,8 +34,23 @@ jobs:
           python-version: "3.11"
       - name: Runtime dependencies
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq cmake g++ libarchive-dev libpng-dev zlib1g-dev
+          # Prefer hosted image packages. Avoid unconditional APT requests:
+          # transient Ubuntu mirror DNS failures must not block a native court
+          # when its exact compiler/PNG/archive dependencies are already present.
+          required=(cmake g++ libarchive-dev libpng-dev zlib1g-dev)
+          missing=()
+          for package in "${required[@]}"; do
+            if ! dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed'; then
+              missing+=("$package")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            echo "Missing native packages: ${missing[*]}"
+            sudo apt-get -o Acquire::Retries=2 update -qq
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=2 install -y -qq --no-install-recommends "${missing[@]}"
+          fi
+          cmake --version
+          pkg-config --modversion libpng libarchive
           python -m pip install numpy scipy pytest pillow
       - name: Build native eight-view renderer
         run: |

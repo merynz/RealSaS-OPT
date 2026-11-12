@@ -7,6 +7,8 @@ on:
       - main
     paths:
       - "models/rss_vnext/training_engine.py"
+      - "models/rss_vnext/semantic_geometry_prior.py"
+      - "tests/models/test_rss_vnext_early_semantics.py"
       - "models/rss_vnext/contracts.py"
       - "models/rss_vnext/multiview_construction.py"
       - "models/rss_vnext/unified_character_model.py"
@@ -15,8 +17,12 @@ on:
       - "tests/models/test_rss_vnext_structural_trainer.py"
       - ".github/workflows/rss_vnext_eight_way_training_cpu.yml"
   pull_request:
+    # Full court runs on opening/ready state, not every intermediate commit.
+    types: [opened, reopened, ready_for_review]
     paths:
       - "models/rss_vnext/training_engine.py"
+      - "models/rss_vnext/semantic_geometry_prior.py"
+      - "tests/models/test_rss_vnext_early_semantics.py"
       - "models/rss_vnext/multiview_construction.py"
       - "models/rss_vnext/unified_character_model.py"
       - "tests/models/test_rss_vnext_eight_way_training_v1.py"
@@ -48,5 +54,5 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          python -m compileall -q models/rss_vnext/training_engine.py tests/models/test_rss_vnext_eight_way_training_v1.py
-          python -m pytest -q tests/models/test_rss_vnext_eight_way_training_v1.py tests/models/test_rss_vnext_multiview_construction.py tests/models/test_rss_vnext_structural_trainer.py
+          python -m compileall -q models/rss_vnext/training_engine.py models/rss_vnext/semantic_geometry_prior.py tests/models/test_rss_vnext_eight_way_training_v1.py tests/models/test_rss_vnext_early_semantics.py
+          python -m pytest -q tests/models/test_rss_vnext_eight_way_training_v1.py tests/models/test_rss_vnext_multiview_construction.py tests/models/test_rss_vnext_structural_trainer.py tests/models/test_rss_vnext_early_semantics.py

@@ -33,7 +33,7 @@ func (ProductInputProvider) Capabilities(context.Context) ([]Descriptor, error) 
 			"input_artifact_type":                   "RealSaS.SourceObservation",
 			"input_schema_version":                  "v1",
 			"output_artifact_type":                  "RealSaS.ShapeInput",
-			"output_schema_version":                 "v1",
+			"output_schema_version":                 "v2",
 			"platform_view_count_invariant":         false,
 			"source_truth_copied_into_output":       false,
 			"scientific_contract_is_replaceable":    true,

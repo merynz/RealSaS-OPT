@@ -27,7 +27,9 @@ from compiler.realsas_compiler_core.controllable_puppet_runtime_v1 import (
     ControllablePuppetBundleV1, ControllablePuppetSessionV1,
     RuntimeSelectionBindingV1, VIEW_IDS_V1,
 )
-from compiler.realsas_compiler_core.mechanics_control_solver_v1 import ControlTransformIRV1
+from compiler.realsas_compiler_core.mechanics_control_solver_v1 import (
+    ControlTransformIRV1, control_world_transforms_v1,
+)
 from compiler.realsas_compiler_core.playback_full_surface_v3 import (
     build_full_surface_runtime_meshes_v3,
 )
@@ -250,7 +252,7 @@ def test_product_addresses_and_eight_camera_requirements_are_fail_closed():
         ))
 
 
-def test_no_automatic_attachment_invention_and_no_parent_space_guessing():
+def test_no_automatic_attachment_invention_and_exact_parent_space_inverse():
     s = ControllablePuppetSessionV1(qualified_synthetic_bundle())
     with pytest.raises(QualificationError,match="ATTACHMENT_NOT_BOUND_IN_ALL_VIEWS"):
         s.set_attachment("S_BODY","UNSEEN_SWORD")
@@ -259,5 +261,222 @@ def test_no_automatic_attachment_invention_and_no_parent_space_guessing():
     s.set_attachment("S_BODY","A_BODY")
     assert len(s.frame().meshes)==1
     s.set_control(ControlTransformIRV1("C_ROOT",translation=(.5,0.,0.)))
-    with pytest.raises(QualificationError,match="PARENT_SPACE_INVERSION_REQUIRED"):
-        s.drag_world("C_IK",(.5,1.5,0.))
+    s.drag_world("C_IK",(.5,1.5,0.))
+    world = control_world_transforms_v1(s.bundle.rig, tuple(s.control_states.values()))
+    assert np.allclose(world["C_IK"][0], (.5,1.5,0.))
+    assert np.allclose(s.control_states["C_IK"].translation, (0.,-.5,0.))
+
+
+def test_world_drag_inverts_parent_rotation_nonuniform_scale_and_preserves_child_channels():
+    s = ControllablePuppetSessionV1(qualified_synthetic_bundle())
+    root_q = (math.sqrt(.5), 0., 0., math.sqrt(.5))
+    child_q = (math.cos(.2), math.sin(.2), 0., 0.)
+    s.set_control(ControlTransformIRV1(
+        "C_ROOT", translation=(.5, .25, .25),
+        rotation_quat_wxyz=root_q, scale=(2., 3., 1.5),
+    ))
+    s.set_control(ControlTransformIRV1(
+        "C_IK", translation=(.25, -.4, .1),
+        rotation_quat_wxyz=child_q, scale=(1.1, 1.2, 1.3),
+    ))
+    target=(1.2, 1.75, -.3)
+    before=s.frame().deformed.canonical_mesh_vertex_ids
+    s.drag_world("C_IK", target)
+    world = control_world_transforms_v1(s.bundle.rig, tuple(s.control_states.values()))
+    assert np.allclose(world["C_IK"][0], target, atol=1e-9)
+    assert s.control_states["C_IK"].rotation_quat_wxyz == child_q
+    assert s.control_states["C_IK"].scale == (1.1, 1.2, 1.3)
+    after = s.frame()
+    assert after.deformed.canonical_mesh_vertex_ids == before
+
+
+def test_screen_drag_uses_current_world_depth_after_parent_transform():
+    s=ControllablePuppetSessionV1(qualified_synthetic_bundle())
+    root_q=(math.sqrt(.5),0.,0.,math.sqrt(.5))
+    child_q=(math.cos(.3),0.,0.,math.sin(.3))
+    s.set_control(ControlTransformIRV1(
+        "C_ROOT",translation=(.5,0.,.25),
+        rotation_quat_wxyz=root_q,scale=(2.,3.,1.),
+    ))
+    s.set_control(ControlTransformIRV1(
+        "C_IK", rotation_quat_wxyz=child_q,
+        scale=(.75,1.25,1.),
+    ))
+    old_world=control_world_transforms_v1(s.bundle.rig,tuple(s.control_states.values()))["C_IK"][0]
+    s.set_view_index(0)
+    s.drag_screen("C_IK",80.,16.)
+    new_world=control_world_transforms_v1(s.bundle.rig,tuple(s.control_states.values()))["C_IK"][0]
+    assert np.allclose(new_world,(.5,1.5,float(old_world[2])),atol=1e-8)
+    assert s.control_states["C_IK"].rotation_quat_wxyz == child_q
+    assert s.control_states["C_IK"].scale == (.75,1.25,1.)
+
+
+def test_unknown_control_still_fails_closed_during_drag():
+    s=ControllablePuppetSessionV1(qualified_synthetic_bundle())
+    with pytest.raises(QualificationError,match="CONTROL_UNKNOWN"):
+        s.drag_world("NOT_AN_AUTHORED_HANDLE",(.5,1.5,0.))
+
+
+def test_direct_runtime_bundle_rejects_invalid_canonical_rig_hierarchy():
+    bundle=qualified_synthetic_bundle()
+    bad=replace(
+        bundle.rig,
+        joints=(
+            replace(bundle.rig.joints[0],parent_canonical_joint_id="J2"),
+        ) + bundle.rig.joints[1:],
+        deform_root_joint_ids=(),
+    )
+    with pytest.raises(QualificationError,match="CANONICAL_RIG_V2_PARENT_CYCLE"):
+        ControllablePuppetSessionV1(replace(bundle,rig=bad))
+
+
+def test_direct_runtime_bundle_rejects_invalid_skin_simplex():
+    bundle=qualified_synthetic_bundle()
+    bad_rows=(
+        replace(bundle.skin.rows[0],influences=(("J0",0.4),)),
+    ) + bundle.skin.rows[1:]
+    with pytest.raises(QualificationError,match="CANONICAL_SKIN_V2_INFLUENCE_SIMPLEX_DRIFT"):
+        ControllablePuppetSessionV1(replace(
+            bundle,skin=replace(bundle.skin,rows=bad_rows),
+        ))
+
+
+def test_direct_runtime_bundle_rejects_unaddressed_canonical_mesh_face():
+    bundle=qualified_synthetic_bundle()
+    malformed=replace(bundle.mesh,faces=(("MV:0","MV:1","NONEXISTENT"),))
+    with pytest.raises(QualificationError,match="CANONICAL_MESH_FACE_VERTEX_UNKNOWN"):
+        ControllablePuppetSessionV1(replace(bundle,mesh=malformed))
+
+
+def _compiled_graphics_consumed_from_same_synthetic_canonical_mesh(bundle):
+    """Actual Graphics Compiler -> Runtime lowering, no hash-only fixture."""
+    from compiler.realsas_compiler_core.graphics_v1 import (
+        build_graphics_evidence_v1, compile_graphics_v1,
+    )
+    from compiler.realsas_compiler_core.graphics_runtime_v1 import (
+        build_runtime_graphics_v1,
+    )
+    evidence=build_graphics_evidence_v1(
+        mesh_binding_hash=bundle.mesh.mesh_lineage_hash,
+        static_relations=(),view_relations=(),
+    )
+    compiled=compile_graphics_v1(
+        canonical_mesh_binding_hash=bundle.mesh.mesh_lineage_hash,
+        canonical_mesh_skin_binding_hash=bundle.skin.skin_lineage_hash,
+        source_graphics_binding_hash="synthetic-no-visible-source-rays",
+        faces=((0,1,2),),evidence=evidence,
+    )
+    return build_runtime_graphics_v1(compiled,face_count=len(bundle.mesh.faces))
+
+
+def test_graphics_compiler_faces_are_consumed_on_live_ik_deformed_geometry():
+    """Real Composer->Mechanics->Skin->posed Graphics->camera consumer.
+
+    This is explicitly synthetic canonical input, not claimed model or
+    verified source appearance. It proves the runtime cannot ignore graph
+    content or substitute static/baked geometry after a user drag.
+    """
+    bundle=qualified_synthetic_bundle()
+    graph=_compiled_graphics_consumed_from_same_synthetic_canonical_mesh(bundle)
+    assert len(graph.fragment_ids)==1
+    session=ControllablePuppetSessionV1(replace(bundle,graphics=graph))
+    rest=session.frame()
+    gp=rest.graphics_projection
+    assert gp is not None
+    assert gp.graphics_hash==graph.runtime_graphics_hash
+    assert gp.face_fragment_ids==(graph.fragment_ids[0],)
+    assert len(gp.projected_faces)==len(bundle.mesh.faces)==1
+    assert gp.source_visibility_qualified is False
+    assert gp.candidate_visible_fragment_ids is None
+    assert gp.candidate_presentation_order is None
+    # The same exact Graphics fragment is reprojected on live LBS geometry.
+    session.drag_screen("C_IK",80.,16.)
+    moved=session.frame()
+    assert moved.graphics_projection.graphics_hash==gp.graphics_hash
+    assert moved.graphics_projection.face_fragment_ids==gp.face_fragment_ids
+    assert moved.graphics_projection.projected_faces!=gp.projected_faces
+    assert moved.deformed.positions!=rest.deformed.positions
+    assert moved.deformed.canonical_mesh_vertex_ids==rest.deformed.canonical_mesh_vertex_ids
+    session.set_view_index(1)
+    rotated=session.frame()
+    assert rotated.graphics_projection.view_id=="V1"
+    assert rotated.graphics_projection.projected_faces!=moved.graphics_projection.projected_faces
+    assert rotated.deformed.positions==moved.deformed.positions
+    # Three authoritative data sources agree on the projected vertex address:
+    # canonical face, live deformed vertex, and current camera projection.
+    ids=tuple(v.canonical_mesh_vertex_id for v in bundle.mesh.vertices)
+    by_id=dict(zip(ids,rotated.deformed.positions))
+    from compiler.realsas_compiler_core.playback_full_surface_v3 import project_points_xyz_v3
+    pts=np.stack([by_id[v] for v in bundle.mesh.faces[0]])
+    expected=project_points_xyz_v3(pts,session.cameras["V1"])
+    assert np.allclose(rotated.graphics_projection.projected_faces[0],expected)
+
+
+def test_geometry_depth_query_never_claims_source_visibility_or_array_order():
+    from compiler.realsas_compiler_core.pose_depth_visibility_v1 import inspect_pose_depth_pixel_v1
+    near=((0.,0.,1.),(10.,0.,1.),(0.,10.,1.))
+    far=((0.,0.,3.),(10.,0.,3.),(0.,10.,3.))
+    args=dict(view_id="V0",graphics_hash="graph",screen_x=2.,screen_y=2.)
+    a=inspect_pose_depth_pixel_v1(**args,projected_faces=(far,near),
+                                  face_fragment_ids=("FAR","NEAR"))
+    b=inspect_pose_depth_pixel_v1(**args,projected_faces=(near,far),
+                                  face_fragment_ids=("NEAR","FAR"))
+    assert a.state==b.state=="UNIQUE_GEOMETRIC_FRONT"
+    assert a.geometrically_front_face_indices==(1,)
+    assert b.geometrically_front_face_indices==(0,)
+    assert a.geometrically_front_fragment_ids==b.geometrically_front_fragment_ids==("NEAR",)
+    assert a.intersection_depths_by_face==((1,1.),(0,3.))
+    assert a.source_alpha_qualified is False
+    assert a.source_visibility_qualified is False
+    assert a.presentation_order_qualified is False
+    tied=inspect_pose_depth_pixel_v1(**args,projected_faces=(near,near),
+                                     face_fragment_ids=("X","Y"))
+    assert tied.state=="AMBIGUOUS_COPLANAR_FRONT"
+    assert tied.geometrically_front_fragment_ids==("X","Y")
+    miss=inspect_pose_depth_pixel_v1(**{**args,"screen_x":50.},
+                                     projected_faces=(near,),face_fragment_ids=("X",))
+    assert miss.state=="MISS"
+    with pytest.raises(QualificationError,match="POSE_DEPTH_VERTEX_NONFINITE"):
+        inspect_pose_depth_pixel_v1(
+            **args,projected_faces=(((0.,0.,float("nan")),near[1],near[2]),),
+            face_fragment_ids=("X",))
+
+
+def test_live_ik_graphics_depth_query_rebinds_to_current_pose_and_camera():
+    bundle=qualified_synthetic_bundle()
+    graph=_compiled_graphics_consumed_from_same_synthetic_canonical_mesh(bundle)
+    session=ControllablePuppetSessionV1(replace(bundle,graphics=graph))
+    def probe():
+        face=session.frame().graphics_projection.projected_faces[0]
+        return session.inspect_graphics_depth_at(
+            sum(v[0] for v in face)/3.,sum(v[1] for v in face)/3.)
+    rest=probe()
+    assert rest.state=="UNIQUE_GEOMETRIC_FRONT"
+    assert rest.geometrically_front_fragment_ids==graph.fragment_ids
+    session.drag_screen("C_IK",80.,16.)
+    moved=probe()
+    assert moved.pose_projection_hash!=rest.pose_projection_hash
+    assert moved.source_visibility_qualified is False
+    session.set_view_index(1)
+    turned=probe()
+    assert turned.view_id=="V1"
+    assert turned.pose_projection_hash!=moved.pose_projection_hash
+
+
+def test_live_graphics_consumer_refuses_rehashed_foreign_mesh_or_face_assignment():
+    from compiler.realsas_compiler_core.graphics_runtime_v1 import runtime_graphics_hash_v1
+    bundle=qualified_synthetic_bundle()
+    graph=_compiled_graphics_consumed_from_same_synthetic_canonical_mesh(bundle)
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_PARENT_OR_HASH_DRIFT"):
+        ControllablePuppetSessionV1(replace(bundle,graphics=replace(
+            graph,canonical_mesh_binding_hash="f"*64,
+        )))
+    forged=replace(graph,face_fragment_index=(True,),runtime_graphics_hash="")
+    forged=replace(forged,runtime_graphics_hash=runtime_graphics_hash_v1(forged))
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_FACE_FRAGMENT_DOMAIN_INVALID"):
+        ControllablePuppetSessionV1(replace(bundle,graphics=forged))
+    promoted=replace(graph,metadata={**graph.metadata,"source_visibility_coverage_complete":True},runtime_graphics_hash="")
+    promoted=replace(promoted,runtime_graphics_hash=runtime_graphics_hash_v1(promoted))
+    with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_UNSUPPORTED_AUTHORITY"):
+        ControllablePuppetSessionV1(replace(bundle,graphics=promoted))
+

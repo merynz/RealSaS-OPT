@@ -5,12 +5,14 @@ from copy import deepcopy
 
 import pytest
 import torch
+import numpy as np
 
 from compiler.realsas_compiler_core.types import QualificationError
 from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
     RSSvNextInferenceEvidenceIRV1,
     seal_inference_evidence_v1,
     validate_inference_evidence_v1,
+    candidate_face_region_readout_v1,
 )
 from models.rss_vnext import (
     RSSvNextConfig, RSSvNextUnifiedCharacterModel, RSSvNextPatchEncoderForTests,
@@ -193,9 +195,14 @@ def test_model_source_state_export_and_source_change_firewall():
     assert exported.mesh_status == "ABSTAIN"
     assert exported.observed_front_sha256 != exported.observed_back_sha256
     assert exported.mesh is None
+    # Change exact source bytes *within the admitted [0,1] domain*.
+    # An unbounded +0.01 can also trigger the independent range court, which
+    # correctly rejects out-of-gamut input before source-identity comparison.
+    changed_source = rgba.clone()
+    changed_source[0, 0, 0, 0, 0] = 1.0 - changed_source[0, 0, 0, 0, 0]
     with pytest.raises(ValueError, match="SOURCE_STATE_MISMATCH"):
         export_inference_evidence_v1(
-            prediction, original_rgba=rgba.clone() + 0.01,
+            prediction, original_rgba=changed_source,
             original_camera_features=cam, checkpoint_sha256="a" * 64,
         )
     with pytest.raises(ValueError, match="REQUIRES_TWO_RGBA"):
@@ -203,6 +210,99 @@ def test_model_source_state_export_and_source_change_firewall():
             prediction, original_rgba=rgba[:, :1],
             original_camera_features=cam, checkpoint_sha256="a" * 64,
         )
+
+
+def test_compiler_receipt_preserves_addressed_semantic_regions_and_graphics_without_authority():
+    net = _network()
+    rgba, cam = _images()
+    with torch.no_grad():
+        out = net(rgba, cam)
+    prediction = {
+        "state": out.state, "mesh_status": "ABSTAIN",
+        "mesh_candidate": None, "mesh_failure": "TOPOLOGY_SEQUENCE_INCOMPLETE",
+        "observed_view_count": 2,
+        "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
+        "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
+    }
+    evidence = export_inference_evidence_v1(
+        prediction, original_rgba=rgba, original_camera_features=cam,
+        checkpoint_sha256="a" * 64,
+    )
+    scene = evidence.scene
+    assert len(scene["region_query_xyz"]) == out.state.query_xyz.shape[1]
+    assert len(scene["region_membership_logits"]) == len(scene["region_query_xyz"])
+    assert len(scene["region_graphics_logits"]) == len(scene["region_query_xyz"])
+    assert len(scene["region_graphics_logits"][0]) == 5
+    assert len(scene["region_membership_logits"][0]) == net.cfg.region_slots + 1
+    assert scene["authority"] == "PREDICTED_FROM_TWO_ORIGINAL_VIEWS"
+    assert evidence.qualification_status == "UNQUALIFIED_NEURAL_PROPOSAL_ONLY"
+    assert evidence.mesh_status == "ABSTAIN"
+    validate_inference_evidence_v1(evidence)
+
+
+def test_existing_v1_relation_only_receipt_remains_readable_but_not_product_evidence():
+    net = _network()
+    rgba, cam = _images()
+    with torch.no_grad():
+        output = net(rgba, cam)
+    full = export_inference_evidence_v1(
+        {
+            "state": output.state, "mesh_status": "ABSTAIN",
+            "mesh_candidate": None, "mesh_failure": "TOPOLOGY_SEQUENCE_INCOMPLETE",
+            "observed_view_count": 2,
+            "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
+            "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
+        },
+        original_rgba=rgba, original_camera_features=cam,
+        checkpoint_sha256="a" * 64,
+    )
+    legacy = deepcopy(full.scene)
+    for field_name in (
+        "region_query_xyz", "region_membership_logits",
+        "region_graphics_logits",
+    ):
+        del legacy[field_name]
+    sealed = seal_inference_evidence_v1(
+        replace(full, scene=legacy, evidence_hash=""),
+    )
+    validate_inference_evidence_v1(sealed)
+    assert sealed.qualification_status == "UNQUALIFIED_NEURAL_PROPOSAL_ONLY"
+    assert "region_query_xyz" not in sealed.scene
+
+
+@pytest.mark.parametrize("corruption,error", [
+    ("unaddressed", "REGION_ADDRESS_DRIFT"),
+    ("missing_unknown", "REGION_UNKNOWN_CHANNEL"),
+    ("graphics_width", "GRAPHICS_FIELD_FIVE_CHANNELS"),
+    ("self_edge", "RELATION_SELF_EDGE_MASK_INVALID"),
+])
+def test_semantic_compiler_receipt_rejects_rehashed_unaddressed_or_self_inconsistent_scene(corruption, error):
+    net = _network()
+    rgba, cam = _images()
+    with torch.no_grad():
+        output = net(rgba, cam)
+    evidence = export_inference_evidence_v1(
+        {
+            "state": output.state, "mesh_status": "ABSTAIN",
+            "mesh_candidate": None, "mesh_failure": "TOPOLOGY_SEQUENCE_INCOMPLETE",
+            "observed_view_count": 2,
+            "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
+            "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
+        },
+        original_rgba=rgba, original_camera_features=cam,
+        checkpoint_sha256="a" * 64,
+    )
+    scene = deepcopy(evidence.scene)
+    if corruption == "unaddressed":
+        scene["region_query_xyz"].pop()
+    elif corruption == "missing_unknown":
+        scene["region_membership_logits"][0].pop()
+    elif corruption == "graphics_width":
+        scene["region_graphics_logits"][0].pop()
+    else:
+        scene["region_relation_valid_mask"][0][0] = True
+    with pytest.raises(QualificationError, match=error):
+        seal_inference_evidence_v1(replace(evidence, scene=scene, evidence_hash=""))
 
 
 def test_real_checkpoint_two_view_model_to_replayable_compiler_receipt(tmp_path):
@@ -237,6 +337,36 @@ def test_real_checkpoint_two_view_model_to_replayable_compiler_receipt(tmp_path)
     )
     assert again == receipt
     assert evidence.mesh_status == receipt["status"]
+    assert receipt["schema"] == "RealSaS.RSSvNext.SourceToCompilerProposalReceipt.v2"
+    assert receipt["neural_scene_schema"] == "RealSaS.RSSvNext.NeuralSceneCarrier.v1"
+    assert receipt["neural_scene_product_authority"] is False
+    from models.rss_vnext.training_engine import architecture_digest
+    assert receipt["unified_model_config_sha256"] == architecture_digest(net.cfg)
+    assert (out_dir / "rss_vnext_neural_scene.npz").is_file()
+    assert (out_dir / "rss_vnext_unified_model_config.json").is_file()
+    assert (out_dir / "rss_vnext_embedded_mira_decoder.pt").is_file()
+    assert receipt["embedded_mira_independent_release_required"] is False
+    from models.rss_vnext.inference_pipeline_v1 import read_compiler_expert_fanout_v1
+    fanout = read_compiler_expert_fanout_v1(
+        out_dir, expected_checkpoint_sha256=digest, model_config=net.cfg,
+    )
+    assert fanout.evidence.evidence_hash == evidence.evidence_hash
+    assert fanout.availability.canonical_mesh == "NOT_QUALIFIED"
+    assert fanout.query(0).graphics_field_logits
+    assert fanout.region_relation(0, 1).attachment_anchor_xyz is None
+    wrong = replace(net.cfg, semantic_role_names=tuple(reversed(net.cfg.semantic_role_names)))
+    with pytest.raises(RuntimeError, match="RECEIPT_UNIFIED_MODEL_CONFIG_DRIFT"):
+        read_compiler_expert_fanout_v1(
+            out_dir, expected_checkpoint_sha256=digest, model_config=wrong,
+        )
+    from models.rss_vnext.inference_pipeline_v1 import read_compiler_neural_scene_v1
+    carrier = read_compiler_neural_scene_v1(
+        out_dir, expected_checkpoint_sha256=digest,
+    )
+    assert carrier["local_features"].shape[0] == 1
+    assert carrier["scene_triplanes"].shape[1] == 3
+    assert carrier["graphics_logits"].shape[-1] == 5
+    assert "geometry__H" in carrier
     with pytest.raises(RuntimeError, match="OUTPUT_REVISION_ALREADY_EXISTS"):
         run_two_view_to_compiler_proposal_v1(
             checkpoint_path=checkpoint, expected_checkpoint_sha256=digest,
@@ -248,6 +378,13 @@ def test_real_checkpoint_two_view_model_to_replayable_compiler_receipt(tmp_path)
         read_compiler_proposal_receipt_v1(
             out_dir, expected_checkpoint_sha256="e" * 64,
         )
+    carrier_copy = (out_dir / "rss_vnext_neural_scene.npz").read_bytes()
+    (out_dir / "rss_vnext_neural_scene.npz").write_bytes(carrier_copy + b"tampered")
+    with pytest.raises(RuntimeError, match="RECEIPT_NEURAL_CARRIER_BYTES_DRIFT"):
+        read_compiler_proposal_receipt_v1(
+            out_dir, expected_checkpoint_sha256=digest,
+        )
+    (out_dir / "rss_vnext_neural_scene.npz").write_bytes(carrier_copy)
     with (out_dir / "observed_source_tensors.npz").open("ab") as fh:
         fh.write(b"attack")
     with pytest.raises(RuntimeError, match="ARTIFACT_BYTES_DRIFT"):
@@ -260,7 +397,17 @@ def test_reuse_existing_axis_decoder_without_minting_canonical_rig():
     from dataclasses import asdict
     from models.axis.rig_program_model_v6 import RigProgramEventV6, RigTokenKindV6
     from models.rss_vnext.candidate_rig_court_v1 import qualify_candidate_rig_program_v1
+    from models.axis.rig_program_decode_v6 import AXISV6CodecBinding
+    from models.mira.skin_fsq_codec_v6 import MIRA_V6_CODEC_ID
 
+    model_cfg = RSSvNextConfig.tiny_for_test()
+    # The fake codec hash here is test-only provenance; it is NOT an admitted
+    # MIRA runtime checkpoint or learned soft-to-discrete decoder parity.
+    codec = AXISV6CodecBinding(
+        MIRA_V6_CODEC_ID, "e" * 64,
+        model_cfg.axis_config().skin_vocab_size,
+        model_cfg.skin_tokens_per_joint,
+    )
     kinds = (
         RigTokenKindV6.BOS,
         RigTokenKindV6.JOINT,
@@ -292,10 +439,13 @@ def test_reuse_existing_axis_decoder_without_minting_canonical_rig():
 
     proposal = seal_inference_evidence_v1(_candidate(control_events=tuple(events)))
     court = qualify_candidate_rig_program_v1(
-        proposal, model_config=RSSvNextConfig.tiny_for_test(),
+        proposal, model_config=model_cfg,
         expected_checkpoint_sha256="a" * 64,
+        mira_codec_binding=codec,
     )
     assert court.product_authority is False
+    assert court.skin_codes.codec_checkpoint_hash == "e" * 64
+    assert court.skin_codes.codec_checkpoint_hash != proposal.checkpoint_sha256
     assert len(court.rig_program.proposal.joints) == 1
     assert len(court.skin_codes.rows) == 1
     assert court.skin_codes.rows[0].code_ids == (7, 7, 7, 7)
@@ -305,6 +455,339 @@ def test_reuse_existing_axis_decoder_without_minting_canonical_rig():
             seal_inference_evidence_v1(_candidate(
                 mesh=None, mesh_status="ABSTAIN", reason="NO_VALID_TOPOLOGY",
             )),
-            model_config=RSSvNextConfig.tiny_for_test(),
+            model_config=model_cfg,
             expected_checkpoint_sha256="a" * 64,
+            mira_codec_binding=codec,
         )
+    for wrong in (
+        AXISV6CodecBinding(MIRA_V6_CODEC_ID, "a" * 64, codec.codebook_size, codec.tokens_per_joint),
+        AXISV6CodecBinding(MIRA_V6_CODEC_ID, "e" * 64, codec.codebook_size + 1, codec.tokens_per_joint),
+        AXISV6CodecBinding("NOT-MIRA", "e" * 64, codec.codebook_size, codec.tokens_per_joint),
+        AXISV6CodecBinding(MIRA_V6_CODEC_ID, "not-a-digest", codec.codebook_size, codec.tokens_per_joint),
+    ):
+        with pytest.raises(QualificationError, match="INDEPENDENT_MIRA_CODEC_BINDING_REQUIRED"):
+            qualify_candidate_rig_program_v1(
+                proposal, model_config=model_cfg,
+                expected_checkpoint_sha256="a" * 64,
+                mira_codec_binding=wrong,
+            )
+
+
+def _mesh_with_addressed_scene_for_region_court():
+    net = _network()
+    rgba, cam = _images()
+    with torch.no_grad():
+        out = net(rgba, cam)
+    source = export_inference_evidence_v1(
+        {
+            "state": out.state, "mesh_status": "ABSTAIN",
+            "mesh_candidate": None, "mesh_failure": "NO_VALID_MESH",
+            "observed_view_count": 2,
+            "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
+            "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
+        },
+        original_rgba=rgba, original_camera_features=cam,
+        checkpoint_sha256="a" * 64,
+    )
+    mesh = _mesh()
+    slots = len(source.scene["region_relation_valid_mask"])
+    mesh["semantic_logits"] = [
+        [4., *([0.] * (slots - 1)), -3.],
+        [0., *([3.] * (slots - 1)), 0.],
+        [0., *([0.] * (slots - 1)), 5.],
+    ]
+    return mesh, source.scene
+
+
+def test_mesh_face_region_readout_is_exactly_addressed_and_never_grants_drawable():
+    mesh, scene = _mesh_with_addressed_scene_for_region_court()
+    evidence = seal_inference_evidence_v1(_candidate(mesh=mesh, scene=scene))
+    faces = candidate_face_region_readout_v1(evidence)
+    assert len(faces) == 1
+    row = faces[0]
+    assert row["candidate_face_index"] == 0
+    assert row["candidate_vertex_indices"] == (0, 1, 2)
+    assert row["candidate_component_id"] == 0
+    assert row["candidate_evidence_hash"] == evidence.evidence_hash
+    assert row["source_surface_or_drawable_authority"] is False
+    assert row["authority"] == "UNQUALIFIED_FACE_POOL_OF_LEARNED_VERTEX_MEMBERSHIP"
+    assert len(row["candidate_region_probabilities"]) == len(scene["region_relation_valid_mask"])
+    assert 0 < row["unknown_probability"] < 1
+    assert sum(row["candidate_region_probabilities"]) + row["unknown_probability"] == pytest.approx(1.)
+
+    # A vertex-order permutation of the same triangle does not change the
+    # region vector. It does change the proposal hash, preserving provenance.
+    rotated = deepcopy(mesh)
+    rotated["faces"] = [[2, 0, 1]]
+    other = seal_inference_evidence_v1(_candidate(mesh=rotated, scene=scene))
+    after = candidate_face_region_readout_v1(other)[0]
+    assert after["candidate_region_probabilities"] == pytest.approx(row["candidate_region_probabilities"])
+    assert after["unknown_probability"] == pytest.approx(row["unknown_probability"])
+    assert after["candidate_evidence_hash"] != row["candidate_evidence_hash"]
+
+
+def test_mesh_region_vocab_cannot_drift_from_shared_scene_or_erase_unknown():
+    mesh, scene = _mesh_with_addressed_scene_for_region_court()
+    # Keep all vertex rows internally consistent, but drop the UNKNOWN
+    # column from the entire mesh to exercise cross-head vocabulary binding.
+    for row in mesh["semantic_logits"]:
+        row.pop()
+    with pytest.raises(QualificationError, match="MESH_REGION_VOCABULARY_DRIFT"):
+        seal_inference_evidence_v1(_candidate(mesh=mesh, scene=scene))
+
+
+def test_candidate_face_region_readout_abstains_without_exact_topology_or_addresses():
+    mesh, scene = _mesh_with_addressed_scene_for_region_court()
+    no_mesh = seal_inference_evidence_v1(_candidate(
+        mesh=None, scene=scene, mesh_status="ABSTAIN",
+        reason="NO_VALID_MESH",
+    ))
+    with pytest.raises(QualificationError, match="FACE_REGION_REQUIRES_MESH_PROPOSAL"):
+        candidate_face_region_readout_v1(no_mesh)
+    legacy = seal_inference_evidence_v1(_candidate(mesh=mesh))
+    with pytest.raises(QualificationError, match="FACE_REGION_REQUIRES_ADDRESSED_SCENE"):
+        candidate_face_region_readout_v1(legacy)
+
+
+def _canonical_source_for_checkpoint_tests():
+    from compiler.realsas_compiler_core.rss_vnext_source_observation_v1 import (
+        canonicalize_two_view_source_v1,
+    )
+    rgba = np.full((2, 4, 28, 28), 200, dtype=np.uint8)
+    rgba[0, 0, 3, 5] = 100
+    rgba[0, 3] = 255
+    rgba[1, 3] = 230
+    cam = np.zeros((2, 13), dtype=np.float32)
+    cam[:, 7] = 1.0
+    cam[:, 12] = 1.0
+    cam[0, 3] = cam[0, 11] = 1.0
+    cam[1, 3] = cam[1, 11] = -1.0
+    return canonicalize_two_view_source_v1(
+        rgba, cam, source_rights_claim_sha256="4" * 64,
+    )
+
+
+def test_canonical_source_pixel_camera_frame_and_rights_claim_are_bound_without_qualification():
+    from compiler.realsas_compiler_core.rss_vnext_source_observation_v1 import (
+        canonicalize_two_view_source_v1,
+    )
+    src = _canonical_source_for_checkpoint_tests()
+    rgba, cam = src.to_model_tensors()
+    assert rgba.shape == (1, 2, 4, 28, 28)
+    assert rgba[0, 0, 0, 3, 5].item() == pytest.approx(100 / 255)
+    assert torch.equal(cam[0], torch.from_numpy(src.camera_features.copy()))
+    assert src.receipt()["source_or_model_rights_verified"] is False
+    assert src.receipt()["auxiliary_views_observed"] is False
+    assert not src.native_rgba.flags.writeable
+    changed = src.native_rgba.copy()
+    changed[0, 0, 3, 5] += 1
+    other = canonicalize_two_view_source_v1(
+        changed, src.camera_features,
+        source_rights_claim_sha256=src.source_rights_claim_sha256,
+    )
+    assert other.source_binding_sha256 != src.source_binding_sha256
+    flipped = src.camera_features.copy()
+    flipped[1, 3:6] = flipped[0, 3:6]
+    flipped[1, 9:12] = flipped[0, 9:12]
+    with pytest.raises(QualificationError, match="FRONT_BACK_CAMERA_OPPOSITION_REQUIRED"):
+        canonicalize_two_view_source_v1(
+            src.native_rgba, flipped,
+            source_rights_claim_sha256=src.source_rights_claim_sha256,
+        )
+
+
+def test_canonical_two_view_source_checkpoint_to_compiler_is_replayable_and_never_product_pass(tmp_path):
+    from models.rss_vnext.inference_pipeline_v1 import (
+        run_canonical_two_view_to_compiler_proposal_v1,
+        read_compiler_proposal_receipt_v1,
+    )
+    source = _canonical_source_for_checkpoint_tests()
+    net = _network()
+    ckpt = tmp_path / "model.pt"
+    sha = save_inference_checkpoint_v1(ckpt, net)
+    out = tmp_path / "canonical"
+    receipt = run_canonical_two_view_to_compiler_proposal_v1(
+        source_observation=source,
+        checkpoint_path=ckpt,
+        expected_checkpoint_sha256=sha,
+        vision_encoder=RSSvNextPatchEncoderForTests(net.cfg.iris.image_token_dim),
+        output_directory=out, max_topology_tokens=16,
+        generate_controls=True, product_mode=False,
+    )
+    assert receipt["canonical_source_binding_sha256"] == source.source_binding_sha256
+    assert receipt["source_rights_verified"] is False
+    recovered, evidence = read_compiler_proposal_receipt_v1(
+        out, expected_checkpoint_sha256=sha,
+    )
+    assert recovered == receipt
+    assert evidence.qualification_status == "UNQUALIFIED_NEURAL_PROPOSAL_ONLY"
+    assert receipt["product_revision_minted"] is False
+    srcfile = out / "original_two_view_source.npz"
+    srcfile.write_bytes(srcfile.read_bytes() + b"tampered")
+    with pytest.raises(RuntimeError, match="CANONICAL_SOURCE_BYTES_DRIFT"):
+        read_compiler_proposal_receipt_v1(out, expected_checkpoint_sha256=sha)
+
+
+def test_product_inference_cannot_use_raw_two_view_tensors_without_canonical_source(tmp_path):
+    from models.rss_vnext.inference_pipeline_v1 import run_two_view_to_compiler_proposal_v1
+    rgba, cam = _canonical_source_for_checkpoint_tests().to_model_tensors()
+    with pytest.raises(RuntimeError, match="PRODUCT_CANONICAL_SOURCE_REQUIRED"):
+        run_two_view_to_compiler_proposal_v1(
+            checkpoint_path=tmp_path / "missing.pt",
+            expected_checkpoint_sha256="a" * 64,
+            vision_encoder=_network().vision,
+            observed_rgba=rgba, camera_features=cam,
+            output_directory=tmp_path / "no-canon",
+            product_mode=True,
+        )
+
+
+def test_neural_axis_v6_event_is_preserved_exactly_at_compiler_evidence_seam():
+    from dataclasses import asdict
+    from models.axis.rig_program_model_v6 import RigProgramEventV6, RigTokenKindV6
+    event = asdict(RigProgramEventV6(RigTokenKindV6.SKIN_CODE, skin_code_id=13))
+    event["kind"] = int(RigTokenKindV6.SKIN_CODE)
+    value = seal_inference_evidence_v1(_candidate(control_events=(event,)))
+    assert value.control_events[0]["skin_code_id"] == 13
+    assert value.control_events[0]["kind"] == 17
+    assert value.qualification_status == "UNQUALIFIED_NEURAL_PROPOSAL_ONLY"
+
+
+@pytest.mark.parametrize("mutation,expected", [
+    ({"skin_code_id": 4.75}, "CONTROL_INTEGER_FIELD_INVALID"),
+    ({"skin_code_id": True}, "CONTROL_INTEGER_FIELD_INVALID"),
+    ({"kind": 99}, "CONTROL_EVENT_KIND_INVALID"),
+    ({"pointer_a": -3}, "CONTROL_INTEGER_FIELD_INVALID"),
+    ({"dof_mask": [0.5]*9}, "CONTROL_DOF_NOT_BINARY"),
+    ({"frame_6d": [float("nan")]*6}, "CONTROL_FIELD_INVALID:frame_6d"),
+    ({"anchor_parent_kind": 7}, "CONTROL_ANCHOR_PARENT_INVALID"),
+    ({"coord_indices": [0, 1]}, "CONTROL_COORD_INVALID"),
+])
+def test_compiler_neural_control_event_rejects_unsupported_or_mutated_fields(mutation, expected):
+    from dataclasses import asdict
+    from models.axis.rig_program_model_v6 import RigProgramEventV6, RigTokenKindV6
+    base = asdict(RigProgramEventV6(RigTokenKindV6.SKIN_CODE, skin_code_id=13))
+    base["kind"] = 17
+    base.update(mutation)
+    with pytest.raises(QualificationError, match=expected):
+        seal_inference_evidence_v1(_candidate(control_events=(base,)))
+
+
+@pytest.mark.parametrize("rgba", [1.01, -0.01, float("nan")])
+def test_original_source_rgba_must_stay_in_normalized_domain_before_export(rgba):
+    source,cameras=_images()
+    source[0,0,0,0,0]=rgba
+    expected=("NONFINITE_SOURCE" if np.isnan(rgba) else "SOURCE_RGBA_RANGE")
+    with pytest.raises(ValueError,match=expected):
+        export_inference_evidence_v1(
+            {},original_rgba=source,original_camera_features=cameras,
+            checkpoint_sha256="a"*64,
+        )
+
+
+@pytest.mark.parametrize("bad", [1.2,-0.1,True])
+def test_compiler_cannot_rehash_invalid_original_rgba_ray_domain(bad):
+    mesh=deepcopy(_mesh())
+    mesh["source_rays"]["rgba"][0][0][0]=bad
+    with pytest.raises(QualificationError,match="RAY_RGBA"):
+        seal_inference_evidence_v1(_candidate(mesh=mesh))
+
+
+def test_semantic_and_dynamic_nan_are_typed_rejections_before_hash():
+    _,scene=_mesh_with_addressed_scene_for_region_court()
+    malformed=deepcopy(scene)
+    malformed["region_graphics_logits"][0][0]=float("nan")
+    with pytest.raises(QualificationError,match="GRAPHICS_FIELD_FIVE_CHANNELS"):
+        seal_inference_evidence_v1(_candidate(scene=malformed))
+
+    dynamic={
+        "vertices": [[0.,0.,0.]]*3,
+        "weights": [[.5,.5],[.5,.5],[float("nan"),.5]],
+        "displacement": [[0.,0.,0.]]*3,
+        "readiness_logits": [[0.,0.,0.,0.]]*3,
+        "authority": "UNQUALIFIED_DYNAMIC_MESH_PROPOSAL",
+    }
+    with pytest.raises(QualificationError,match="SKIN_SHAPE"):
+        seal_inference_evidence_v1(_candidate(dynamic=dynamic))
+
+
+def _abstaining_real_rss_scene_for_archive():
+    from models.rss_vnext.neural_scene_archive_v1 import (
+        encode_neural_scene_carrier_v1, read_neural_scene_carrier_v1,
+    )
+    net = _network()
+    rgba, cam = _images()
+    with torch.no_grad():
+        state, _, _ = net.encode_observations(rgba, cam)
+    prediction = {
+        "state": state, "mesh_status": "ABSTAIN",
+        "mesh_candidate": None, "mesh_failure": "TOPOLOGY_SEQUENCE_INCOMPLETE",
+        "observed_view_count": 2,
+        "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
+        "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
+    }
+    evidence = export_inference_evidence_v1(
+        prediction, original_rgba=rgba,
+        original_camera_features=cam, checkpoint_sha256="a" * 64,
+    )
+    payload = encode_neural_scene_carrier_v1(state, evidence=evidence)
+    return state, evidence, payload
+
+
+def test_rss_unified_neural_carrier_preserves_full_h_and_triplanes_even_on_mesh_abstain():
+    from models.rss_vnext.neural_scene_archive_v1 import read_neural_scene_carrier_v1
+    state, evidence, payload = _abstaining_real_rss_scene_for_archive()
+    tensors = read_neural_scene_carrier_v1(payload, evidence=evidence)
+    assert evidence.mesh_status == "ABSTAIN"
+    assert not evidence.mesh
+    for key in (
+        "scene_triplanes", "local_features", "graphics_logits",
+        "semantic_logits", "region_slot_features", "region_relation_tokens",
+        "conditioned_image_tokens", "observed_image_tokens",
+        "region_relation_logits", "region_relation_valid_mask",
+        "source_semantic_patch_logits", "source_semantic_log_uncertainty",
+    ):
+        assert torch.equal(tensors[key], getattr(state, key)), key
+    assert torch.equal(tensors["geometry__H"], state.geometry["H"])
+    assert torch.equal(tensors["geometry__extraction_delta"], state.geometry["extraction_delta"])
+    assert not torch.equal(
+        tensors["observed_image_tokens"], tensors["conditioned_image_tokens"],
+    ) or tensors["observed_image_tokens"].shape == tensors["conditioned_image_tokens"].shape
+    # Full H and scene planes are not in the historical compact Compiler
+    # evidence JSON. The independent archive is therefore not a duplicate.
+    assert "scene_triplanes" not in evidence.scene
+    assert "local_features" not in evidence.scene
+    assert "geometry__H" not in evidence.scene
+
+
+def test_rss_unified_neural_carrier_rejects_cross_checkpoint_and_rehashed_field_drift():
+    from models.rss_vnext.neural_scene_archive_v1 import read_neural_scene_carrier_v1
+    from io import BytesIO
+    state, evidence, payload = _abstaining_real_rss_scene_for_archive()
+    with pytest.raises(RuntimeError, match="NEURAL_CARRIER_BINDING_OR_FIELDS_DRIFT"):
+        read_neural_scene_carrier_v1(
+            payload, evidence=seal_inference_evidence_v1(
+                replace(evidence, checkpoint_sha256="e" * 64, evidence_hash=""),
+            ),
+        )
+    with np.load(BytesIO(payload), allow_pickle=False) as archive:
+        fields = {name: np.asarray(archive[name]).copy() for name in archive.files}
+    # Modify an actually addressed Graphics value, leaving every zip member
+    # parseable and the model-parent manifest untouched.
+    fields["graphics_logits"][0, 0, 0] += np.float32(.125)
+    stream = BytesIO()
+    np.savez_compressed(stream, **fields)
+    with pytest.raises(RuntimeError, match="NEURAL_CARRIER_SHARED_EVIDENCE_DRIFT:graphics_logits"):
+        read_neural_scene_carrier_v1(stream.getvalue(), evidence=evidence)
+
+
+def test_rss_neural_carrier_raw_bfloat16_bits_survive_losslessly():
+    from models.rss_vnext.neural_scene_archive_v1 import (
+        _array_from_tensor, _tensor_from_array,
+    )
+    b = torch.tensor([[-.25, 0.0, .25, 1.5]], dtype=torch.bfloat16)
+    array, dtype = _array_from_tensor("subexpert_H", b)
+    assert dtype == "torch.bfloat16" and array.dtype == np.uint16
+    restored = _tensor_from_array("subexpert_H", array, dtype)
+    assert restored.dtype == torch.bfloat16
+    assert torch.equal(restored, b)

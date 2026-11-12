@@ -130,10 +130,13 @@ def _mesh(value: Mapping[str, Any]) -> int:
             _reject("RSS_VNEXT_EVIDENCE_RAY_TWO_SOURCES")
         for view in range(2):
             _vector(ray["rgba"][index][view], 4, "RSS_VNEXT_EVIDENCE_RAY_RGBA")
+            if any(not 0 <= channel <= 1 for channel in ray["rgba"][index][view]):
+                _reject("RSS_VNEXT_EVIDENCE_RAY_RGBA_RANGE")
             if type(ray["valid"][index][view]) is not bool:
                 _reject("RSS_VNEXT_EVIDENCE_RAY_VALID_TYPE")
             alpha = ray["alpha"][index][view]
-            if not isinstance(alpha, (int, float)) or not math.isfinite(alpha):
+            if (type(alpha) not in (int, float)
+                or not math.isfinite(alpha) or not 0 <= alpha <= 1):
                 _reject("RSS_VNEXT_EVIDENCE_RAY_ALPHA")
             if abs(alpha - ray["rgba"][index][view][3]) > 1e-5:
                 _reject("RSS_VNEXT_EVIDENCE_RAY_ALPHA_DRIFT")
@@ -141,9 +144,20 @@ def _mesh(value: Mapping[str, Any]) -> int:
 
 
 def _dynamic(value: Mapping[str, Any], n: int) -> None:
-    if not isinstance(value, Mapping) or set(value) != {
+    base = {
         "vertices", "weights", "displacement", "readiness_logits", "authority",
-    } or value["authority"] != "UNQUALIFIED_DYNAMIC_MESH_PROPOSAL":
+    }
+    discrete = {
+        "discrete_skin_weights", "skin_joint_hidden_states",
+        "soft_to_discrete_max_abs_difference",
+        "soft_to_discrete_mean_abs_difference",
+        "soft_to_discrete_parity_qualified",
+    }
+    if (
+        not isinstance(value, Mapping)
+        or set(value) not in (base, base | discrete)
+        or value["authority"] != "UNQUALIFIED_DYNAMIC_MESH_PROPOSAL"
+    ):
         _reject("RSS_VNEXT_EVIDENCE_DYNAMIC_AUTHORITY")
     for k, w in (("vertices", 3), ("displacement", 3), ("readiness_logits", 4)):
         _rows(value[k], n, w, "RSS_VNEXT_EVIDENCE_DYNAMIC_SHAPE:" + k)
@@ -153,21 +167,61 @@ def _dynamic(value: Mapping[str, Any], n: int) -> None:
         _reject("RSS_VNEXT_EVIDENCE_SKIN_JOINT_ORDER_DRIFT")
     if any(w < -1e-6 or abs(sum(row) - 1.0) > 1e-5 for row in weights for w in row):
         _reject("RSS_VNEXT_EVIDENCE_SKIN_SIMPLEX")
+    if discrete.issubset(value):
+        hard = value["discrete_skin_weights"]
+        joints = value["skin_joint_hidden_states"]
+        j = len(weights[0])
+        _rows(hard, n, j, "RSS_VNEXT_EVIDENCE_DISCRETE_SKIN_SHAPE")
+        _rows(joints, j, None, "RSS_VNEXT_EVIDENCE_DISCRETE_SKIN_JOINT_STATES")
+        if (
+            not j or not joints[0] or len({len(row) for row in joints}) != 1
+            or any(w < -1e-6 or abs(sum(row) - 1.) > 1.e-5 for row in hard for w in row)
+            or value["soft_to_discrete_parity_qualified"] is not False
+        ):
+            _reject("RSS_VNEXT_EVIDENCE_DISCRETE_SKIN_AUTHORITY_OR_SIMPLEX")
+        errors = [
+            abs(float(a) - float(b))
+            for soft, hard_row in zip(weights, hard)
+            for a, b in zip(soft, hard_row)
+        ]
+        max_diff, mean_diff = max(errors), sum(errors) / len(errors)
+        for k, actual in (
+            ("soft_to_discrete_max_abs_difference", max_diff),
+            ("soft_to_discrete_mean_abs_difference", mean_diff),
+        ):
+            measured = value[k]
+            if (
+                type(measured) not in (float, int)
+                or not math.isfinite(measured)
+                or measured < 0
+                or abs(measured - actual) > 2.e-6
+            ):
+                _reject("RSS_VNEXT_EVIDENCE_DISCRETE_SKIN_PARITY_METRIC_DRIFT")
 
 
 
 
 def _scene(value: Mapping[str, Any]) -> None:
     """Validate shared semantic/Graphics relations without assigning artist authority."""
-    keys = {
+    # Existing sealed V1 research receipts have a relation-only scene. Keep
+    # them parseable as incomplete, unqualified evidence. The richer producer
+    # must emit the COMPLETE address-bound field trio together; partial fields
+    # cannot be interpreted as drawable/graphics evidence.
+    base_keys = {
         "source_semantic_patch_logits", "source_semantic_log_uncertainty",
         "region_relation_logits", "region_relation_valid_mask",
         "presentation_role_probabilities",
         "constructed_camera_features", "constructed_camera_angles",
         "authority",
     }
-    if not isinstance(value, Mapping) or set(value) != keys:
+    extended_keys = {
+        "region_query_xyz", "region_membership_logits", "region_graphics_logits",
+    }
+    if not isinstance(value, Mapping) or set(value) not in (
+        base_keys, base_keys | extended_keys,
+    ):
         _reject("RSS_VNEXT_EVIDENCE_SCENE_FIELDS")
+    has_region_field = extended_keys.issubset(value)
     if value["authority"] != "PREDICTED_FROM_TWO_ORIGINAL_VIEWS":
         _reject("RSS_VNEXT_EVIDENCE_SCENE_AUTHORITY_DRIFT")
 
@@ -192,6 +246,43 @@ def _scene(value: Mapping[str, Any]) -> None:
     if not isinstance(mask, (list, tuple)) or not mask:
         _reject("RSS_VNEXT_EVIDENCE_REGION_RELATION_MASK")
     walk(mask, bool_allowed=True)
+    slots = len(mask)
+    # Neither the anonymous region graph nor the field at H(x) can be used
+    # downstream without the exact query addresses and an explicit UNKNOWN
+    # membership channel. Reject unaddressed, untyped, or self-edge evidence.
+    if has_region_field:
+        xyz = value["region_query_xyz"]
+        member = value["region_membership_logits"]
+        graphics = value["region_graphics_logits"]
+        role = value["presentation_role_probabilities"]
+        if not all(isinstance(v, (list, tuple)) and v for v in (xyz, member, graphics, role)):
+            _reject("RSS_VNEXT_EVIDENCE_REGION_FIELD_EMPTY")
+        n = len(xyz)
+        if len(member) != n or len(graphics) != n or len(role) != n:
+            _reject("RSS_VNEXT_EVIDENCE_REGION_ADDRESS_DRIFT")
+        for row in xyz:
+            _vector(row, 3, "RSS_VNEXT_EVIDENCE_REGION_QUERY_XYZ")
+        for row in member:
+            _vector(row, slots + 1, "RSS_VNEXT_EVIDENCE_REGION_UNKNOWN_CHANNEL")
+        for row in graphics:
+            _vector(row, 5, "RSS_VNEXT_EVIDENCE_GRAPHICS_FIELD_FIVE_CHANNELS")
+        role_dim = len(role[0])
+        if role_dim < 2:
+            _reject("RSS_VNEXT_EVIDENCE_ROLE_CHANNEL_INVALID")
+        for row in role:
+            _vector(row, role_dim, "RSS_VNEXT_EVIDENCE_ROLE_CHANNEL_DRIFT")
+            if any(float(v) < 0 or float(v) > 1 for v in row) or abs(sum(row) - 1.0) > 1e-4:
+                _reject("RSS_VNEXT_EVIDENCE_ROLE_SIMPLEX_INVALID")
+    relations = value["region_relation_logits"]
+    if len(relations) != slots:
+        _reject("RSS_VNEXT_EVIDENCE_RELATION_SLOT_COUNT_DRIFT")
+    for i in range(slots):
+        if len(mask[i]) != slots or len(relations[i]) != slots:
+            _reject("RSS_VNEXT_EVIDENCE_RELATION_GRAPH_SHAPE")
+        for j in range(slots):
+            if type(mask[i][j]) is not bool or mask[i][j] != (i != j):
+                _reject("RSS_VNEXT_EVIDENCE_RELATION_SELF_EDGE_MASK_INVALID")
+            _vector(relations[i][j], 3, "RSS_VNEXT_EVIDENCE_RELATION_CHANNEL_DRIFT")
     if len(value["source_semantic_patch_logits"]) != 2:
         _reject("RSS_VNEXT_EVIDENCE_SOURCE_PATCH_COUNT")
     camera = value["constructed_camera_features"]
@@ -235,6 +326,38 @@ def inference_evidence_hash_v1(value: RSSvNextInferenceEvidenceIRV1) -> str:
     return content_sha256(payload)
 
 
+def _validate_neural_control_events(events: tuple[Mapping[str, Any], ...]) -> None:
+    """Validate actual AXIS event domains before canonical hashing and after read."""
+    expected_event_fields = {
+        "kind", "coord_indices", "pointer_a", "pointer_b", "pointer_c",
+        "aux_type_id", "dof_mask", "frame_6d", "scalar_params",
+        "skin_code_id", "anchor_parent_kind",
+    }
+    for ev in events:
+        if not isinstance(ev, Mapping) or set(ev) != expected_event_fields:
+            _reject("RSS_VNEXT_EVIDENCE_CONTROL_EVENT_FIELDS_DRIFT")
+        if type(ev["kind"]) is not int or not 1 <= ev["kind"] <= 18:
+            _reject("RSS_VNEXT_EVIDENCE_CONTROL_EVENT_KIND_INVALID")
+        for key in (
+            "pointer_a", "pointer_b", "pointer_c", "aux_type_id",
+            "skin_code_id", "anchor_parent_kind",
+        ):
+            if type(ev[key]) is not int or ev[key] < -1:
+                _reject("RSS_VNEXT_EVIDENCE_CONTROL_INTEGER_FIELD_INVALID")
+        indices = ev["coord_indices"]
+        if (not isinstance(indices, (list, tuple)) or len(indices) != 3
+                or any(type(v) is not int or v < -1 for v in indices)):
+            _reject("RSS_VNEXT_EVIDENCE_CONTROL_COORD_INVALID")
+        for key, width in (("dof_mask", 9), ("frame_6d", 6), ("scalar_params", 4)):
+            _vector(ev[key], width, "RSS_VNEXT_EVIDENCE_CONTROL_FIELD_INVALID:" + key)
+        if any(value not in (0., 1.) for value in ev["dof_mask"]):
+            _reject("RSS_VNEXT_EVIDENCE_CONTROL_DOF_NOT_BINARY")
+        if ev["anchor_parent_kind"] not in (-1, 0, 1):
+            _reject("RSS_VNEXT_EVIDENCE_CONTROL_ANCHOR_PARENT_INVALID")
+    if len(events) > 4096:
+        _reject("RSS_VNEXT_EVIDENCE_CONTROL_RESOURCE_LIMIT")
+
+
 def validate_inference_evidence_v1(
     value: RSSvNextInferenceEvidenceIRV1,
     *,
@@ -262,17 +385,74 @@ def validate_inference_evidence_v1(
             _reject("RSS_VNEXT_EVIDENCE_ABSTAIN_MUST_NOT_PROMOTE")
     elif value.mesh_status == "UNQUALIFIED_MESH_CANDIDATE":
         n = _mesh(value.mesh)
+        if value.scene is not None and "region_query_xyz" in value.scene:
+            # The candidate mesh queries the SAME region slot vocabulary as
+            # H(x), at exact decoded vertex coordinates. Vocabulary width
+            # mismatch cannot be silently repaired by Compiler.
+            slot_count = len(value.scene["region_relation_valid_mask"])
+            if any(len(row) != slot_count + 1 for row in value.mesh["semantic_logits"]):
+                _reject("RSS_VNEXT_EVIDENCE_MESH_REGION_VOCABULARY_DRIFT")
+            if any(len(row) != 5 for row in value.mesh["graphics_logits"]):
+                _reject("RSS_VNEXT_EVIDENCE_MESH_GRAPHICS_VOCABULARY_DRIFT")
+            roles = len(value.scene["presentation_role_probabilities"][0])
+            if any(len(row) != roles for row in value.mesh["presentation_role_logits"]):
+                _reject("RSS_VNEXT_EVIDENCE_MESH_PRESENTATION_ROLE_VOCABULARY_DRIFT")
         if value.dynamic is not None:
             if not value.control_events:
                 _reject("RSS_VNEXT_EVIDENCE_DYNAMIC_WITHOUT_CONTROL")
             _dynamic(value.dynamic, n)
-        for ev in value.control_events:
-            if not isinstance(ev, Mapping) or not ev or "kind" not in ev:
-                _reject("RSS_VNEXT_EVIDENCE_CONTROL_EVENT_INVALID")
+        # RSS model exports RigProgramEventV6 (one typed causal vocabulary).
+        # Preserve unqualified status while refusing malformed/retagged neural
+        # sequences *before* any model-to-Compiler qualification. Do not try to
+        # infer missing pointers, quantize float codes or invent program tokens.
+        _validate_neural_control_events(value.control_events)
     else:
         _reject("RSS_VNEXT_EVIDENCE_MESH_STATUS_INVALID")
     if value.evidence_hash != inference_evidence_hash_v1(value):
         _reject("RSS_VNEXT_EVIDENCE_HASH_DRIFT")
+
+
+def candidate_face_region_readout_v1(
+    value: RSSvNextInferenceEvidenceIRV1,
+) -> tuple[dict[str, Any], ...]:
+    """Deterministically read region evidence at EXACT candidate triangle IDs.
+
+    This is NOT a drawable partition, joint label, source segmentation or
+    independent-control proof.  The model explicitly predicts per-vertex
+    R+UNKNOWN logits on its decoded topology.  Compiler may average those
+    *named-by-index* probability vectors over each face without inventing a
+    new semantic class or guessing source rays/depth.  Face identity stays in
+    the neural mesh proposal's address domain; it must be requalified before
+    any canonical mesh binding or persistent drawable identity is minted.
+    """
+    validate_inference_evidence_v1(value)
+    if value.mesh_status != "UNQUALIFIED_MESH_CANDIDATE" or value.mesh is None:
+        _reject("RSS_VNEXT_FACE_REGION_REQUIRES_MESH_PROPOSAL")
+    if value.scene is None or "region_query_xyz" not in value.scene:
+        _reject("RSS_VNEXT_FACE_REGION_REQUIRES_ADDRESSED_SCENE")
+    mesh = value.mesh
+    result = []
+    for face_index, vertices in enumerate(mesh["faces"]):
+        vector = [0.0] * len(mesh["semantic_logits"][0])
+        for vertex_id in vertices:
+            logits = mesh["semantic_logits"][vertex_id]
+            highest = max(logits)
+            exps = [math.exp(float(x) - highest) for x in logits]
+            normalizer = sum(exps)
+            for i, raw in enumerate(exps):
+                vector[i] += raw / normalizer / 3.0
+        result.append({
+            "candidate_face_index": face_index,
+            "candidate_vertex_indices": tuple(vertices),
+            "candidate_component_id": mesh["face_components"][face_index],
+            "candidate_region_probabilities": tuple(vector[:-1]),
+            "unknown_probability": vector[-1],
+            "candidate_evidence_hash": value.evidence_hash,
+            "checkpoint_sha256": value.checkpoint_sha256,
+            "authority": "UNQUALIFIED_FACE_POOL_OF_LEARNED_VERTEX_MEMBERSHIP",
+            "source_surface_or_drawable_authority": False,
+        })
+    return tuple(result)
 
 
 def seal_inference_evidence_v1(
@@ -282,6 +462,15 @@ def seal_inference_evidence_v1(
     # NaN/invalid field. The same validation is repeated after sealing.
     if value.mesh is not None:
         _mesh(value.mesh)
+    # Admission must precede canonical hashing for every optional evidence
+    # family, not just Mesh/AXIS. A poisoned semantic field or dynamic weight
+    # otherwise reaches the JSON hasher before it can raise a typed error.
+    if value.scene is not None:
+        _scene(value.scene)
+    if value.dynamic is not None and value.mesh is not None:
+        _dynamic(value.dynamic, len(value.mesh["rest_xyz"]))
+    # Reject invalid neural causal event fields before content hashing.
+    _validate_neural_control_events(value.control_events)
     sealed = replace(value, evidence_hash=inference_evidence_hash_v1(value))
     validate_inference_evidence_v1(sealed)
     return sealed
@@ -292,4 +481,5 @@ __all__ = [
     "inference_evidence_hash_v1",
     "seal_inference_evidence_v1",
     "validate_inference_evidence_v1",
+    "candidate_face_region_readout_v1",
 ]

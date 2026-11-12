@@ -110,6 +110,55 @@ def _load_bound_json_policy(
     return payload, actual
 
 
+def validate_product_shape_source_lineage_v1(shape: Any, source_ref: dict[str, Any]) -> None:
+    """Assert the exact original SourceObservation CAS parent of ShapeInput.
+
+    A correct shape topology or high-confidence IRIS witness does not establish
+    that it came from the source being qualified by product.mesh. The
+    SourceObservation CAS parent must survive Input -> Shape -> Mesh without
+    replacement, and the producer's raw rights/camera checks remain separate.
+    """
+    observed = str(source_ref.get("content_sha256") or "")
+    claimed = getattr(shape, "metadata", {}).get("source_observation_content_sha256")
+    if (
+        type(claimed) is not str or len(claimed) != 64
+        or any(c not in "0123456789abcdef" for c in claimed)
+        or len(observed) != 64
+        or any(c not in "0123456789abcdef" for c in observed)
+        or claimed != observed
+    ):
+        raise RuntimeError("MESH_SHAPE_SOURCE_OBSERVATION_CAS_PARENT_DRIFT")
+
+
+def validate_product_shape_fanout_refs_v1(
+    request: dict[str, Any],
+    *,
+    shape: Any,
+    shape_ref: dict[str, Any],
+    source_ref: dict[str, Any],
+    read_object: Callable[[dict[str, Any]], bytes],
+) -> dict[str, Any]:
+    """Consume a lightweight, source-bound evidence index, not the huge scene.
+
+    The dependency fan-out is resolved by Platform CAS. Mesh validates that
+    source, ShapeProposal, and retained scene are truly linked, while the
+    entire neural scene remains independently readable by other capabilities.
+    """
+    from compiler.realsas_compiler_services.platform_worker.shape_evidence_fanout_v1 import (
+        validate_fanout_index_refs_v1,
+    )
+
+    scene_ref = _one(request, "RealSaS.IRISSceneEvidence", "v1")
+    index_ref = _one(request, "RealSaS.ShapeEvidenceFanout", "v1")
+    return validate_fanout_index_refs_v1(
+        read_object(index_ref),
+        shape=shape,
+        shape_content_sha256=str(shape_ref.get("content_sha256") or ""),
+        scene_content_sha256=str(scene_ref.get("content_sha256") or ""),
+        source_observation_content_sha256=str(source_ref.get("content_sha256") or ""),
+    )
+
+
 def execute_mesh_capability_v1(
     request: dict[str, Any],
     *,
@@ -182,6 +231,11 @@ def execute_mesh_capability_v1(
         raise RuntimeError("MESH_LEGACY_PRECOMPUTED_COURT_INPUT_FORBIDDEN")
 
     shape = decode_shape_proposal_v2(read_object(shape_ref))
+    validate_product_shape_source_lineage_v1(shape, source_ref)
+    shape_fanout = validate_product_shape_fanout_refs_v1(
+        request, shape=shape, shape_ref=shape_ref, source_ref=source_ref,
+        read_object=read_object,
+    )
     source = decode_source_observation_arrays_v1(read_object(source_ref))
     cameras = qualified_camera_set_from_dict(_json_payload(read_object, camera_ref))
     observation = qualified_observation_set_from_dict(
@@ -489,6 +543,10 @@ def execute_mesh_capability_v1(
         "source_fidelity_binding_hash": source_fidelity_binding.binding_hash,
         "frame_binding_hash": frame_binding.binding_hash,
         "shape_proposal_content_sha256": shape_content_sha,
+        "neural_scene_evidence_content_sha256": shape_fanout["iris_scene_evidence_content_sha256"],
+        "shape_input_content_sha256": shape_fanout["shape_input_content_sha256"],
+        "retained_neural_evidence_fanout_qualified": True,
+        "retained_scene_reloaded_for_mesh": False,
         "mesh_policy_document_sha256": expected_mesh_policy_sha,
         "shape_surface_court_policy_sha256": surface_policy_sha,
         "source_fidelity_policy_sha256": source_fidelity_sha,

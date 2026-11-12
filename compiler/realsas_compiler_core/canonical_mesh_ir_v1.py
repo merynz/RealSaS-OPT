@@ -70,6 +70,38 @@ def canonical_mesh_lineage_hash_v1(value: CanonicalMeshIR) -> str:
     return content_sha256(payload)
 
 
+def validate_canonical_mesh_domain_v1(value: CanonicalMeshIR) -> None:
+    """Validate actual mesh address topology after mint or artifact read.
+
+    SHA consistency only proves byte integrity. This court prevents a rehashed
+    candidate from impersonating a usable canonical geometry basis.
+    It does not grant source-surface or dynamic quality authority.
+    """
+    if not value.vertices or not value.faces:
+        raise QualificationError("CANONICAL_MESH_EMPTY")
+    ids = [str(vertex.canonical_mesh_vertex_id) for vertex in value.vertices]
+    source_ids = [str(vertex.source_candidate_vertex_id) for vertex in value.vertices]
+    if (any(not vid for vid in ids) or len(set(ids)) != len(ids)
+            or any(not sid for sid in source_ids) or len(set(source_ids)) != len(source_ids)):
+        raise QualificationError("CANONICAL_MESH_VERTEX_ID_INVALID")
+    for vertex in value.vertices:
+        if not vertex.component_id:
+            raise QualificationError("CANONICAL_MESH_COMPONENT_ID_EMPTY")
+        if len(vertex.P) != 3 or not all(math.isfinite(float(v)) for v in vertex.P):
+            raise QualificationError("CANONICAL_MESH_VERTEX_POSITION_INVALID")
+    known = set(ids)
+    for face in value.faces:
+        if len(face) != 3 or len(set(face)) != 3:
+            raise QualificationError("CANONICAL_MESH_FACE_INVALID")
+        if any(vertex_id not in known for vertex_id in face):
+            raise QualificationError("CANONICAL_MESH_FACE_VERTEX_UNKNOWN")
+    for edge in value.edges:
+        if len(edge) != 2 or edge[0] == edge[1]:
+            raise QualificationError("CANONICAL_MESH_EDGE_INVALID")
+        if any(vertex_id not in known for vertex_id in edge):
+            raise QualificationError("CANONICAL_MESH_EDGE_VERTEX_UNKNOWN")
+
+
 def _stable_vertex_id(candidate: CanonicalMeshCandidateIR, candidate_vertex_id: str) -> str:
     return "MV:" + content_sha256(
         {
@@ -205,7 +237,9 @@ def mint_canonical_mesh_v1(
             "repair_after_mesh_birth_requires_new_mesh_lineage": True,
         },
     )
-    return replace(value, mesh_lineage_hash=canonical_mesh_lineage_hash_v1(value))
+    sealed = replace(value, mesh_lineage_hash=canonical_mesh_lineage_hash_v1(value))
+    validate_canonical_mesh_domain_v1(sealed)
+    return sealed
 
 
 def _support_from_dict(payload: Mapping[str, Any]) -> SurfaceSupportBinding:
@@ -288,6 +322,7 @@ def canonical_mesh_from_dict_v1(payload: Mapping[str, Any]) -> CanonicalMeshIR:
         raise QualificationError("CANONICAL_MESH_LEARNED_FAMILY_SCHEMA_FORBIDDEN")
     if value.metadata.get("dynamic_qualification_claimed") is not False:
         raise QualificationError("CANONICAL_MESH_PREMATURE_DYNAMIC_AUTHORITY")
+    validate_canonical_mesh_domain_v1(value)
     return value
 
 
@@ -297,4 +332,5 @@ __all__ = [
     "canonical_mesh_from_dict_v1",
     "canonical_mesh_lineage_hash_v1",
     "mint_canonical_mesh_v1",
+    "validate_canonical_mesh_domain_v1",
 ]

@@ -4,7 +4,9 @@
     "product.input": {
       "entry_module": "compiler.realsas_compiler_services.platform_worker.input_executor_v1",
       "policy": {
-        "allowed_modes": ["DEVELOPER"],
+        "allowed_modes": [
+          "DEVELOPER"
+        ],
         "product_pass_authority": false
       },
       "metadata": {
@@ -15,7 +17,7 @@
         "input_artifact_type": "RealSaS.SourceObservation",
         "input_schema_version": "v1",
         "output_artifact_type": "RealSaS.ShapeInput",
-        "output_schema_version": "v1",
+        "output_schema_version": "v2",
         "platform_view_count_invariant": false,
         "source_truth_copied_into_output": false,
         "scientific_contract_is_replaceable": true,
@@ -26,9 +28,13 @@
     "product.shape": {
       "entry_module": "compiler.realsas_compiler_services.platform_worker.shape_executor_v2",
       "policy": {
-        "allowed_modes": ["DEVELOPER"],
+        "allowed_modes": [
+          "DEVELOPER"
+        ],
         "product_pass_authority": false,
-        "dependencies": ["product.input"]
+        "dependencies": [
+          "product.input"
+        ]
       },
       "metadata": {
         "product_role_id": "shape",
@@ -36,7 +42,7 @@
         "interface_contract": "RealSaS.ProductShapeInference.v2",
         "executor_contract": "RealSaS.ProductShapeInference.v2",
         "input_artifact_type": "RealSaS.ShapeInput",
-        "input_schema_version": "v1",
+        "input_schema_version": "v2",
         "output_artifact_type": "RealSaS.ShapeProposal",
         "output_schema_version": "v2",
         "maximum_new_tokens": 131072,
@@ -51,13 +57,30 @@
           }
         ],
         "implementation_owner_may_change": true,
-        "stable_product_role_survives_rewiring": true
+        "stable_product_role_survives_rewiring": true,
+        "evidence_fanout_contract": "RealSaS.ShapeEvidenceFanout.v1",
+        "auxiliary_outputs": [
+          {
+            "role": "iris_scene_evidence",
+            "artifact_type": "RealSaS.IRISSceneEvidence",
+            "schema_version": "v1"
+          },
+          {
+            "role": "shape_evidence_fanout",
+            "artifact_type": "RealSaS.ShapeEvidenceFanout",
+            "schema_version": "v1"
+          }
+        ],
+        "independent_scene_consumers_do_not_require_mesh": true,
+        "model_scene_evidence_retained_after_mesh_compile": true
       }
     },
     "product.mesh": {
       "entry_module": "compiler.realsas_compiler_services.platform_worker.mesh_executor_v1",
       "policy": {
-        "allowed_modes": ["DEVELOPER"],
+        "allowed_modes": [
+          "DEVELOPER"
+        ],
         "product_pass_authority": false,
         "dependencies": [
           "product.shape",
@@ -86,7 +109,7 @@
         "support_binding": {
           "max_support_nodes": 4,
           "max_graph_hops": 2,
-          "inverse_distance_power": 2.0
+          "inverse_distance_power": 2
         },
         "static_repair": {
           "collapse_batch_size": 32,
@@ -104,13 +127,18 @@
         "rig_authority_claimed": false,
         "skin_authority_claimed": false,
         "implementation_owner_may_change": true,
-        "stable_product_role_survives_rewiring": true
+        "stable_product_role_survives_rewiring": true,
+        "requires_shape_evidence_fanout": true,
+        "iris_scene_evidence_loaded_by_mesh": false,
+        "canonical_mesh_replaces_neural_scene": false
       }
     },
     "product.rig": {
-      "entry_module": "compiler.realsas_compiler_services.platform_worker.rig_executor_v1",
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.rig_executor_v2",
       "policy": {
-        "allowed_modes": ["DEVELOPER"],
+        "allowed_modes": [
+          "DEVELOPER"
+        ],
         "product_pass_authority": false,
         "dependencies": [
           "product.mesh"
@@ -119,42 +147,51 @@
       "metadata": {
         "product_role_id": "rig",
         "implementation_class": "HYBRID",
-        "interface_contract": "RealSaS.ProductRigInference.v1",
-        "executor_contract": "RealSaS.ProductRigInference.v1",
+        "interface_contract": "RealSaS.ProductRigInference.v2",
+        "executor_contract": "RealSaS.ProductRigInference.v2",
         "input_mesh_artifact_type": "RealSaS.CanonicalMeshIR",
         "input_mesh_schema_version": "v1",
         "feature_evidence_type": "RealSaS.RiggingSurfaceIR",
         "feature_evidence_version": "v1",
         "feature_evidence_source": "PRODUCT_MESH_OUTPUT",
         "output_artifact_type": "RealSaS.CanonicalRigIR",
-        "output_schema_version": "v1",
-        "resource_step_limit_max": 256,
+        "output_schema_version": "v2",
+        "resource_step_limit_max": 4096,
         "required_models": [
           {
             "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1"
+            "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0"
           }
         ],
         "model_checkpoint_artifact_type": "RealSaS.AXISRuntimeCheckpoint",
-        "model_checkpoint_schema_version": "v1",
+        "model_checkpoint_schema_version": "v2",
         "mesh_is_canonical_parent": true,
         "feature_evidence_is_canonical_parent": false,
         "legacy_stage15_dependency": false,
         "canonical_root_semantics": "NON_EMPTY_DEFORM_ROOT_SET",
-        "current_axis_root_semantics": "SINGLE_HARD_CAUSAL_TREE_IMPLEMENTATION_DETAIL",
+        "current_axis_root_semantics": "LEARNED_CAUSAL_PARENT_FOREST",
         "hard_parent_authority_preserved": true,
         "compiler_parent_reselection_allowed": false,
         "frame_observability_claimed": false,
         "post_bind_frame_observability_required": true,
         "fit_allowed_during_product_execution": false,
         "implementation_owner_may_change": true,
-        "stable_product_role_survives_rewiring": true
+        "stable_product_role_survives_rewiring": true,
+        "skin_code_output_artifact_type": "RealSaS.SkinCodeProposalIR",
+        "skin_code_output_schema_version": "v1",
+        "skin_code_output_source": "SAME_AXIS_CAUSAL_SEQUENCE",
+        "maximum_new_tokens": 4096,
+        "compiler_control_synthesis_allowed": false,
+        "compiler_constraint_synthesis_allowed": false,
+        "constraint_execution_authority": "MECHANICS"
       }
     },
     "product.skin": {
-      "entry_module": "compiler.realsas_compiler_services.platform_worker.skin_executor_v1",
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.skin_executor_v2",
       "policy": {
-        "allowed_modes": ["DEVELOPER"],
+        "allowed_modes": [
+          "DEVELOPER"
+        ],
         "product_pass_authority": false,
         "dependencies": [
           "product.mesh",
@@ -164,63 +201,55 @@
       "metadata": {
         "product_role_id": "skin",
         "implementation_class": "HYBRID",
-        "interface_contract": "RealSaS.ProductSkinInference.v1",
-        "executor_contract": "RealSaS.ProductSkinInference.v1",
+        "interface_contract": "RealSaS.ProductSkinInference.v2",
+        "executor_contract": "RealSaS.ProductSkinInference.v2",
         "input_mesh_artifact_type": "RealSaS.CanonicalMeshIR",
         "input_mesh_schema_version": "v1",
         "input_rig_artifact_type": "RealSaS.CanonicalRigIR",
-        "input_rig_schema_version": "v1",
-        "feature_evidence_type": "RealSaS.RiggingSurfaceIR",
-        "feature_evidence_version": "v1",
-        "feature_evidence_source": "PRODUCT_MESH_OUTPUT",
-        "material_support_type": "RealSaS.TESSAMaterialSupportFieldIR",
-        "material_support_version": "v1",
-        "material_support_source": "PRODUCT_MESH_OUTPUT",
+        "input_rig_schema_version": "v2",
         "legacy_stage15_dependency": false,
         "output_artifact_type": "RealSaS.CanonicalSkinIR",
-        "output_schema_version": "v1",
-        "decode_chunk": 512,
+        "output_schema_version": "v2",
         "carrier_skin_qualification": {
           "max_simplex_repair_l1": 0.00001,
           "max_total_correction_l1": 0.0001,
-          "negative_tolerance": 0.00000001,
+          "negative_tolerance": 1e-8,
           "max_influences": 41
         },
         "required_models": [
           {
             "family": "MIRA",
-            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5"
+            "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0"
           }
         ],
         "model_checkpoint_artifact_type": "RealSaS.MIRARuntimeCheckpoint",
-        "model_checkpoint_schema_version": "v1",
+        "model_checkpoint_schema_version": "v2",
         "mesh_and_rig_are_canonical_parents": true,
-        "feature_evidence_is_canonical_parent": false,
-        "material_support_is_canonical_parent": false,
-        "inference_compute_contract": "CUDA_BF16_BACKBONE_FP32_READOUT_TF32_OFF",
-        "cuda_required": true,
-        "cuda_bf16_required": true,
-        "tf32_allowed": false,
         "model_release_admission_owner": "PLATFORM_MODEL_REQUIREMENTS",
-        "research_execution_model_channels": ["RESEARCH", "CANDIDATE"],
-        "product_execution_model_channels": ["PRODUCTION"],
+        "research_execution_model_channels": [
+          "RESEARCH",
+          "CANDIDATE"
+        ],
+        "product_execution_model_channels": [
+          "PRODUCTION"
+        ],
         "operational_model_state_embedded_in_source": false,
-        "historical_checkpoint_backed_mira_v55_exists": true,
-        "historical_mira_v55_learned_directly_on_exact_m": true,
-        "historical_mira_v55_terminal_pass": true,
-        "historical_mira_v55_composite_schema": "RealSaS.MIRAMDirectComposite.v5_5",
-        "historical_mira_v55_result_schema": "RealSaS.MIRAMDirectResult.v5_5",
-        "historical_mira_v55_product_authority": false,
-        "historical_mira_v55_generalization_claimed": false,
-        "historical_mira_v55_compute_profile_preserved": true,
-        "current_repo_mira_v55_runtime_source_recovered": true,
-        "current_mira_v55_runtime_package_recovered": true,
-        "canonical_parents": ["CANONICAL_MESH", "CANONICAL_RIG"],
+        "canonical_parents": [
+          "CANONICAL_MESH",
+          "CANONICAL_RIG"
+        ],
         "post_hoc_surface_skin_transfer_allowed": false,
         "hidden_repair_allowed": false,
         "fit_allowed_during_product_execution": false,
         "implementation_owner_may_change": true,
-        "stable_product_role_survives_rewiring": true
+        "stable_product_role_survives_rewiring": true,
+        "input_skin_code_artifact_type": "RealSaS.SkinCodeProposalIR",
+        "input_skin_code_schema_version": "v1",
+        "input_skin_code_source": "PRODUCT_RIG_OUTPUT",
+        "compiler_code_search_allowed": false,
+        "compiler_code_repair_allowed": false,
+        "axis_rerun_allowed": false,
+        "codec_checkpoint_must_match_axis_skin_code": true
       }
     }
   }

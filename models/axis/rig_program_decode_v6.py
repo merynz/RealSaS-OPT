@@ -32,6 +32,9 @@ from models.axis.rig_program_model_v6 import (
     CONSTRAINT_OPERATORS_V6,
     CONTROL_KINDS_V6,
     DOF_LABELS_V6,
+    AXISRigProgramGrammarV6Product,
+    RigGrammarStateV6,
+    RigSectionV6,
     RigProgramEventV6,
     RigTokenKindV6,
     rotation_6d_to_basis_v6,
@@ -88,6 +91,103 @@ def _chain_path(start_id: str, end_id: str, parent_by: dict[str, str | None]) ->
     return (start_id, end_id)
 
 
+def validate_axis_v6_product_event_stream(
+    events: Sequence[RigProgramEventV6],
+    *,
+    config: AXISRigProgramConfigV6,
+    codec_binding: AXISV6CodecBinding,
+) -> None:
+    """Independent consumer court for AXIS's causal rig+skin grammar.
+
+    The autoregressive producer masks illegal kinds, but the product decoder
+    also accepts persisted/model-provided sequences. BOS/EOS alone cannot
+    establish section ordering or the exact joint-coupled skin-code cardinality.
+    Do not repair or truncate the proposed program at this boundary.
+    """
+    if codec_binding.tokens_per_joint < 1 or codec_binding.codebook_size < 2:
+        raise ValueError("AXIS_V6_CODEC_BINDING_INVALID")
+    if (
+        type(config.skin_vocab_size) is not int
+        or config.skin_vocab_size != codec_binding.codebook_size
+    ):
+        raise ValueError("AXIS_V6_CODEC_VOCABULARY_DRIFT")
+    if not events or len(events) > config.max_sequence_length:
+        raise ValueError("AXIS_V6_EVENT_STREAM_RESOURCE_LIMIT")
+    if events[0].kind != RigTokenKindV6.BOS or events[-1].kind != RigTokenKindV6.EOS:
+        raise ValueError("AXIS_V6_EVENT_BOUNDARY_INVALID")
+
+    state = RigGrammarStateV6()
+    for index, event in enumerate(events):
+        if type(event) is not RigProgramEventV6 or type(event.kind) is not RigTokenKindV6:
+            raise ValueError("AXIS_V6_EVENT_TYPED_DOMAIN_INVALID")
+        if event.kind not in AXISRigProgramGrammarV6Product.allowed_kinds(
+            state, tokens_per_joint=codec_binding.tokens_per_joint,
+        ):
+            raise ValueError("AXIS_V6_EVENT_GRAMMAR_INVALID")
+
+        for value in (event.pointer_a, event.pointer_b, event.pointer_c):
+            if type(value) is not int or value < -1 or value >= config.max_pointer_entities:
+                raise ValueError("AXIS_V6_EVENT_POINTER_DOMAIN_INVALID")
+        # Aux is a vocabulary class index, not a pointer into causal
+        # entities. Never bound it by max_pointer_entities.
+        if type(event.aux_type_id) is not int:
+            raise ValueError("AXIS_V6_EVENT_AUX_DOMAIN_INVALID")
+        if event.kind == RigTokenKindV6.CONTROL:
+            if not 0 <= event.aux_type_id < len(CONTROL_KINDS_V6):
+                raise ValueError("AXIS_V6_EVENT_AUX_DOMAIN_INVALID")
+        elif event.kind == RigTokenKindV6.CONSTRAINT:
+            if not 0 <= event.aux_type_id < len(CONSTRAINT_OPERATORS_V6):
+                raise ValueError("AXIS_V6_EVENT_AUX_DOMAIN_INVALID")
+        elif event.aux_type_id != -1:
+            raise ValueError("AXIS_V6_EVENT_UNUSED_AUX_INVALID")
+        if type(event.skin_code_id) is not int or type(event.anchor_parent_kind) is not int:
+            raise ValueError("AXIS_V6_EVENT_INTEGER_DOMAIN_INVALID")
+        for values, width in (
+            (event.coord_indices, 3), (event.dof_mask, len(DOF_LABELS_V6)),
+            (event.frame_6d, 6), (event.scalar_params, 4),
+        ):
+            if not isinstance(values, (tuple, list)) or len(values) != width:
+                raise ValueError("AXIS_V6_EVENT_VECTOR_DOMAIN_INVALID")
+        if any(type(x) is not int or x < -1 for x in event.coord_indices):
+            raise ValueError("AXIS_V6_EVENT_COORD_DOMAIN_INVALID")
+        coordinate_kinds = (
+            RigTokenKindV6.JOINT, RigTokenKindV6.CONTROL, RigTokenKindV6.ANCHOR,
+        )
+        if event.kind in coordinate_kinds:
+            if any(x < 0 or x >= config.coord_bins for x in event.coord_indices):
+                raise ValueError("AXIS_V6_EVENT_COORD_DOMAIN_INVALID")
+        elif tuple(event.coord_indices) != (-1, -1, -1):
+            raise ValueError("AXIS_V6_EVENT_UNUSED_COORD_INVALID")
+        if any(
+            isinstance(x, bool) or not isinstance(x, (float, int)) or not math.isfinite(x)
+            for x in (*event.dof_mask, *event.frame_6d, *event.scalar_params)
+        ):
+            raise ValueError("AXIS_V6_EVENT_CONTINUOUS_DOMAIN_INVALID")
+        if any(x not in (0.0, 1.0) for x in event.dof_mask):
+            raise ValueError("AXIS_V6_EVENT_DOF_DOMAIN_INVALID")
+        if event.kind == RigTokenKindV6.SKIN_CODE:
+            if not 0 <= event.skin_code_id < codec_binding.codebook_size:
+                raise ValueError("AXIS_V6_SKIN_CODE_OUT_OF_CODEC_DOMAIN")
+        elif event.skin_code_id != -1:
+            raise ValueError("AXIS_V6_EVENT_UNUSED_SKIN_CODE_INVALID")
+        if event.kind == RigTokenKindV6.ANCHOR:
+            if event.anchor_parent_kind not in (0, 1):
+                raise ValueError("AXIS_V6_ANCHOR_PARENT_KIND_INVALID")
+        elif event.anchor_parent_kind != -1:
+            raise ValueError("AXIS_V6_EVENT_UNUSED_ANCHOR_KIND_INVALID")
+
+        state = AXISRigProgramGrammarV6Product.advance(
+            state, event.kind, tokens_per_joint=codec_binding.tokens_per_joint,
+        )
+        if max(state.joint_count, state.control_count, state.chain_count) > config.max_pointer_entities:
+            raise ValueError("AXIS_V6_EVENT_ENTITY_RESOURCE_LIMIT")
+        if state.section == RigSectionV6.DONE and index != len(events) - 1:
+            raise ValueError("AXIS_V6_EVENT_TRAILING_AFTER_EOS")
+
+    if state.section != RigSectionV6.DONE:
+        raise ValueError("AXIS_V6_EVENT_UNFINISHED_GRAMMAR")
+
+
 def decode_axis_v6_events(
     events: Sequence[RigProgramEventV6],
     *,
@@ -102,8 +202,9 @@ def decode_axis_v6_events(
     model_provenance: str,
     codec_binding: AXISV6CodecBinding,
 ) -> tuple[RigProgramProposalIR, SkinCodeProposalIR]:
-    if not events or events[0].kind != RigTokenKindV6.BOS or events[-1].kind != RigTokenKindV6.EOS:
-        raise ValueError("AXIS_V6_EVENT_BOUNDARY_INVALID")
+    validate_axis_v6_product_event_stream(
+        events, config=config, codec_binding=codec_binding,
+    )
     center = tuple(float(v) for v in normalization_center)
     if len(center) != 3 or not all(math.isfinite(v) for v in center):
         raise ValueError("AXIS_V6_NORMALIZATION_CENTER_INVALID")

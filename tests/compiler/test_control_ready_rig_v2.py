@@ -42,9 +42,9 @@ def _support(surface_id: str) -> SurfaceSupportBinding:
 def _mesh() -> CanonicalMeshIR:
     value = CanonicalMeshIR(
         vertices=(
-            CanonicalMeshVertexIR("MV:0", _support("S:0"), (0.0, 0.0, 0.0), "body", "C:0"),
-            CanonicalMeshVertexIR("MV:1", _support("S:1"), (0.0, 1.0, 0.0), "body", "C:1"),
-            CanonicalMeshVertexIR("MV:2", _support("S:2"), (0.2, 2.0, 0.0), "body", "C:2"),
+            CanonicalMeshVertexIR("MV:0", _support("S:0"), "body", (0.0, 0.0, 0.0), "C:0"),
+            CanonicalMeshVertexIR("MV:1", _support("S:1"), "body", (0.0, 1.0, 0.0), "C:1"),
+            CanonicalMeshVertexIR("MV:2", _support("S:2"), "body", (0.2, 2.0, 0.0), "C:2"),
         ),
         faces=(("MV:0", "MV:1", "MV:2"),),
         edges=(("MV:0", "MV:1"), ("MV:1", "MV:2"), ("MV:0", "MV:2")),
@@ -60,7 +60,13 @@ def _mesh() -> CanonicalMeshIR:
         mesh_lineage_hash="",
         metadata={"authority": "COMPILER_CANONICAL_MESH"},
     )
-    return replace(value, mesh_lineage_hash=canonical_mesh_lineage_hash_v1(value))
+    # Keep this shared synthetic fixture faithful to the canonical constructor:
+    # component_id is a string and P is an XYZ tuple. Older positional-order
+    # corruption was ignored before consumer read-time validation.
+    from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import validate_canonical_mesh_domain_v1
+    sealed = replace(value, mesh_lineage_hash=canonical_mesh_lineage_hash_v1(value))
+    validate_canonical_mesh_domain_v1(sealed)
+    return sealed
 
 
 def _proposal(mesh: CanonicalMeshIR) -> RigProgramProposalIR:
@@ -159,3 +165,117 @@ def test_skin_codes_are_bound_to_exact_rig_proposal_and_never_repaired():
             expected_proposal_joint_ids=tuple(j.proposal_joint_id for j in p.joints),
             expected_rig_program_proposal_hash=p.proposal_lineage_hash,
         )
+
+
+def test_control_only_revision_preserves_deform_joint_identity_and_skin_parent():
+    """An animator edit cannot remint skin-addressed deform joint identities."""
+    mesh = _mesh()
+    original = _proposal(mesh)
+    before = mint_canonical_rig_v2(
+        mesh, qualified_program=qualify_rig_program_v1(original),
+    )
+    edited = replace(
+        original,
+        controls=(
+            replace(original.controls[0], rest_P=(0.25, 0.0, 0.0)),
+        ) + original.controls[1:],
+        proposal_lineage_hash="",
+    )
+    edited = seal_rig_program_proposal_v1(edited)
+    after = mint_canonical_rig_v2(
+        mesh, qualified_program=qualify_rig_program_v1(edited),
+    )
+    assert before.rig_program_qualification_hash != after.rig_program_qualification_hash
+    assert before.rig_lineage_hash != after.rig_lineage_hash
+    assert before.control_program_hash != after.control_program_hash
+    assert before.deform_structure_hash == after.deform_structure_hash
+    assert tuple(j.canonical_joint_id for j in before.joints) == tuple(
+        j.canonical_joint_id for j in after.joints
+    )
+    assert tuple(c.canonical_control_id for c in before.controls) == tuple(
+        c.canonical_control_id for c in after.controls
+    )
+    assert tuple(c.canonical_chain_id for c in before.chains) == tuple(
+        c.canonical_chain_id for c in after.chains
+    )
+    assert canonical_rig_from_dict_v2(after.to_dict()) == after
+
+
+def test_deform_rest_change_invalidates_skin_parent_without_recycling_entity_identity():
+    """Same local joint address may be edited, but deform evidence must change."""
+    mesh = _mesh()
+    before_proposal = _proposal(mesh)
+    before = mint_canonical_rig_v2(
+        mesh, qualified_program=qualify_rig_program_v1(before_proposal),
+    )
+    edited = replace(
+        before_proposal,
+        joints=(
+            before_proposal.joints[0],
+            replace(before_proposal.joints[1], P=(0.0, 1.25, 0.0)),
+        ) + before_proposal.joints[2:],
+        proposal_lineage_hash="",
+    )
+    after = mint_canonical_rig_v2(
+        mesh,
+        qualified_program=qualify_rig_program_v1(seal_rig_program_proposal_v1(edited)),
+    )
+    assert before.deform_structure_hash != after.deform_structure_hash
+    assert tuple(j.canonical_joint_id for j in before.joints) == tuple(
+        j.canonical_joint_id for j in after.joints
+    )
+
+
+def _rehash_rig_after_test_mutation(value):
+    """Simulate an internally consistent but semantically invalid CAS payload."""
+    from compiler.realsas_compiler_core.canonical_rig_ir_v2 import (
+        _hash_control_program, _hash_deform_structure,
+        canonical_rig_lineage_hash_v2,
+    )
+    value=replace(value,deform_structure_hash="",control_program_hash="",rig_lineage_hash="")
+    value=replace(value,deform_structure_hash=_hash_deform_structure(value))
+    value=replace(value,control_program_hash=_hash_control_program(value))
+    return replace(value,rig_lineage_hash=canonical_rig_lineage_hash_v2(value))
+
+
+def test_rehashed_canonical_rig_rejects_cyclic_joint_hierarchy():
+    mesh=_mesh()
+    rig=mint_canonical_rig_v2(mesh,qualified_program=qualify_rig_program_v1(_proposal(mesh)))
+    cyclic=replace(rig,
+        joints=(replace(rig.joints[0],parent_canonical_joint_id=rig.joints[-1].canonical_joint_id),)
+               + rig.joints[1:],
+        deform_root_joint_ids=(),
+    )
+    cyclic=_rehash_rig_after_test_mutation(cyclic)
+    with pytest.raises(QualificationError, match="CANONICAL_RIG_V2_PARENT_CYCLE"):
+        canonical_rig_from_dict_v2(cyclic.to_dict())
+
+
+def test_rehashed_canonical_rig_rejects_missing_local_frame():
+    mesh=_mesh()
+    rig=mint_canonical_rig_v2(mesh,qualified_program=qualify_rig_program_v1(_proposal(mesh)))
+    broken=_rehash_rig_after_test_mutation(replace(rig,local_frames=rig.local_frames[:-1]))
+    with pytest.raises(QualificationError,match="CANONICAL_RIG_V2_FRAME_COVERAGE_DRIFT"):
+        canonical_rig_from_dict_v2(broken.to_dict())
+
+
+def test_rehashed_canonical_rig_rejects_non_contiguous_kinematic_chain():
+    mesh=_mesh()
+    rig=mint_canonical_rig_v2(mesh,qualified_program=qualify_rig_program_v1(_proposal(mesh)))
+    bad_chain=replace(rig.chains[0], canonical_joint_ids=(
+        rig.joints[0].canonical_joint_id, rig.joints[2].canonical_joint_id,
+    ))
+    broken=_rehash_rig_after_test_mutation(replace(rig,chains=(bad_chain,)))
+    with pytest.raises(QualificationError, match="CANONICAL_RIG_V2_CHAIN_NONCONTIGUOUS"):
+        canonical_rig_from_dict_v2(broken.to_dict())
+
+
+def test_rehashed_canonical_rig_rejects_unknown_parent_control():
+    mesh=_mesh()
+    rig=mint_canonical_rig_v2(mesh,qualified_program=qualify_rig_program_v1(_proposal(mesh)))
+    bad_control=replace(rig.controls[1], parent_canonical_control_id="missing-parent")
+    broken=_rehash_rig_after_test_mutation(replace(
+        rig,controls=(rig.controls[0],bad_control)+rig.controls[2:],
+    ))
+    with pytest.raises(QualificationError, match="CANONICAL_RIG_V2_CONTROL_PARENT_UNKNOWN"):
+        canonical_rig_from_dict_v2(broken.to_dict())

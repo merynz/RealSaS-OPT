@@ -35,9 +35,13 @@ Names tied to a specific experiment, oracle substrate, corpus triage, one-family
 
 They may be extremely valuable evidence, but they never become canonical ownership merely because they pass.
 
-## Main-owned CI/runner/GC machine authority
+## Single machine-enforced CI execution authority
 
-`canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json`, `docs/platform/PLATFORM_CI_OPERATIONS_AUTHORITY.md` and `tests/repository/test_platform_ci_operations_authority_v1.py` are the canonical policy. Read-only stale-queue observation uses `ci_queue_sentinel_v1.yml`; never use local cache GC as an Actions cleanup mechanism.
+See `canonical/CI_EXECUTION_AUTHORITY_V1.json` and `docs/platform/CI_EXECUTION_AUTHORITY.md`.
+Ten RSS.vNext fast checks retain PR synchronize; sixteen full courts run on open,
+reopen, ready-for-review or deliberate dispatch. Before merge run exact-head
+`ci_pr_full_admission_v1.yml`; zero-job queued scheduler artifacts are monitored
+by read-only `ci_queue_sentinel_v1.yml` and cannot be GC'd as cache.
 
 ## Workflow rules
 
@@ -47,3 +51,7 @@ They may be extremely valuable evidence, but they never become canonical ownersh
 4. Branch-specific hard-coding is allowed only for deliberately temporary migration/restoration gates and should be removed or generalized before merge to canonical main.
 5. Duplicate workflows with overlapping claims should eventually be consolidated, but deletion happens only after their unique evidence/coverage is catalogued.
 6. Green CI is necessary evidence, never sufficient scientific authority by itself.
+
+## Main-owned CI/runner/GC machine authority
+
+`canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json`, `docs/platform/PLATFORM_CI_OPERATIONS_AUTHORITY.md` and `tests/repository/test_platform_ci_operations_authority_v1.py` are the canonical policy. Read-only stale-queue observation uses `ci_queue_sentinel_v1.yml`; never use local cache GC as an Actions cleanup mechanism.

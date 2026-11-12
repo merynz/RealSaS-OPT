@@ -55,6 +55,42 @@ def canonical_skin_lineage_hash_v2(value: CanonicalSkinIRV2) -> str:
     return content_sha256(payload)
 
 
+def validate_canonical_skin_domain_v2(value: CanonicalSkinIRV2) -> None:
+    """Recheck semantic invariants after deserialization, not just a self-hash.
+
+    A valid content digest proves bytes are unchanged; it never proves that
+    those bytes encode a legal simplex or a unique canonical vertex address.
+    Parent mesh/rig membership is independently checked by their consumers.
+    """
+    if not value.rows:
+        raise QualificationError("CANONICAL_SKIN_V2_ROWS_EMPTY")
+    vertex_ids: set[str] = set()
+    source_ids: set[str] = set()
+    for row in value.rows:
+        vid = str(row.canonical_mesh_vertex_id)
+        sid = str(row.source_carrier_vertex_id)
+        if not vid or not sid:
+            raise QualificationError("CANONICAL_SKIN_V2_ADDRESS_EMPTY")
+        if vid in vertex_ids or sid in source_ids:
+            raise QualificationError("CANONICAL_SKIN_V2_ADDRESS_DUPLICATE")
+        vertex_ids.add(vid)
+        source_ids.add(sid)
+        if not row.influences:
+            raise QualificationError("CANONICAL_SKIN_V2_INFLUENCES_EMPTY")
+        joints: set[str] = set()
+        total = 0.0
+        for jid, weight in row.influences:
+            if not jid or jid in joints:
+                raise QualificationError("CANONICAL_SKIN_V2_JOINT_INFLUENCE_DUPLICATE_OR_EMPTY")
+            joints.add(jid)
+            w = float(weight)
+            if not math.isfinite(w) or w < 0.0:
+                raise QualificationError("CANONICAL_SKIN_V2_INFLUENCE_INVALID")
+            total += w
+        if not math.isfinite(total) or abs(total - 1.0) > 1e-6:
+            raise QualificationError("CANONICAL_SKIN_V2_INFLUENCE_SIMPLEX_DRIFT")
+
+
 def _qualified_skin_hash(value: QualifiedCarrierSkinIR) -> str:
     return content_sha256({
         "carrier_evidence_hash": value.carrier_evidence_hash,
@@ -162,7 +198,9 @@ def mint_canonical_skin_v2(
             "compiler_code_search_or_repair_performed": False,
         },
     )
-    return replace(value, skin_lineage_hash=canonical_skin_lineage_hash_v2(value))
+    sealed = replace(value, skin_lineage_hash=canonical_skin_lineage_hash_v2(value))
+    validate_canonical_skin_domain_v2(sealed)
+    return sealed
 
 
 def canonical_skin_from_dict_v2(payload: Mapping[str, Any]) -> CanonicalSkinIRV2:
@@ -192,10 +230,12 @@ def canonical_skin_from_dict_v2(payload: Mapping[str, Any]) -> CanonicalSkinIRV2
     )
     if value.skin_lineage_hash != canonical_skin_lineage_hash_v2(value):
         raise QualificationError("CANONICAL_SKIN_V2_LINEAGE_HASH_DRIFT")
+    validate_canonical_skin_domain_v2(value)
     return value
 
 
 __all__ = [
     "CanonicalSkinIRV2", "CanonicalSkinRowIRV2", "canonical_skin_from_dict_v2",
     "canonical_skin_lineage_hash_v2", "mint_canonical_skin_v2",
+    "validate_canonical_skin_domain_v2",
 ]

@@ -69,9 +69,17 @@ def validate_skin_code_proposal_v1(
         raise QualificationError("SKIN_CODE_LINEAGE_DRIFT")
     if value.rig_program_proposal_hash != expected_rig_program_proposal_hash:
         raise QualificationError("SKIN_CODE_RIG_PROGRAM_BINDING_DRIFT")
-    if value.codebook_size < 2 or value.codes_per_joint < 1:
+    if (
+        type(value.codebook_size) is not int or value.codebook_size < 2
+        or type(value.codes_per_joint) is not int or value.codes_per_joint < 1
+    ):
         raise QualificationError("SKIN_CODE_CODEC_DOMAIN_INVALID")
-    if not value.codec_architecture_id or len(value.codec_checkpoint_hash) < 8:
+    if (
+        not value.codec_architecture_id
+        or not isinstance(value.codec_checkpoint_hash, str)
+        or len(value.codec_checkpoint_hash) != 64
+        or any(x not in "0123456789abcdef" for x in value.codec_checkpoint_hash)
+    ):
         raise QualificationError("SKIN_CODE_CODEC_IDENTITY_REQUIRED")
     if not value.model_provenance:
         raise QualificationError("SKIN_CODE_MODEL_PROVENANCE_REQUIRED")
@@ -86,8 +94,9 @@ def validate_skin_code_proposal_v1(
         if len(row.code_ids) != value.codes_per_joint:
             raise QualificationError("SKIN_CODE_COUNT_PER_JOINT_DRIFT")
         for code in row.code_ids:
-            code = int(code)
-            if code < 0 or code >= value.codebook_size:
+            # JSON numbers such as 4.7 or booleans must NOT be coerced into a
+            # different learned token. Compiler cannot repair or round FSQ IDs.
+            if type(code) is not int or code < 0 or code >= value.codebook_size:
                 raise QualificationError("SKIN_CODE_ID_OUT_OF_DOMAIN")
 
 

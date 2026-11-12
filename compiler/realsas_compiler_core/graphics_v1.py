@@ -1,16 +1,34 @@
 from __future__ import annotations
 from dataclasses import asdict,dataclass,field,replace
+import math
 from typing import Any,Iterable,Mapping
 from .hashing import content_sha256
 from .types import QualificationError
+from .canonical_mesh_ir_v1 import (
+    CanonicalMeshIR, canonical_mesh_lineage_hash_v1,
+    validate_canonical_mesh_domain_v1,
+)
+from .canonical_rig_ir_v2 import (
+    CanonicalRigIRV2, canonical_rig_lineage_hash_v2,
+    validate_canonical_rig_domain_v2,
+)
+from .canonical_skin_ir_v2 import (
+    CanonicalSkinIRV2, canonical_skin_lineage_hash_v2,
+    validate_canonical_skin_domain_v2,
+)
 Json=dict[str,Any]
 
 @dataclass(frozen=True)
 class GraphicsCompilePolicyV1:
-    same_drawable_min:float=.65; cut_max:float=.35; boundary_max:float=.50; relation_confidence_min:float=.50; front_probability_min:float=.65; occlusion_probability_min:float=.50; visibility_probability_min:float=.50; attachment_affinity_min:float=.70; mechanical_contact_min:float=.75; support_band_alpha_boundary_min:float=.65; maximum_support_band_pixels:int=2
+    same_drawable_min:float=.65; cut_max:float=.35; boundary_max:float=.50; relation_confidence_min:float=.50; front_probability_min:float=.65; occlusion_probability_min:float=.50; visibility_probability_min:float=.50; attachment_affinity_min:float=.70; mechanical_contact_min:float=.75; support_band_alpha_boundary_min:float=.65; maximum_support_band_pixels:int=2; allow_unqualified_order_arbitration:bool=False
     def validate(self):
         vals=(self.same_drawable_min,self.cut_max,self.boundary_max,self.relation_confidence_min,self.front_probability_min,self.occlusion_probability_min,self.visibility_probability_min,self.attachment_affinity_min,self.mechanical_contact_min,self.support_band_alpha_boundary_min)
-        if any(not 0<=float(v)<=1 for v in vals) or not 0<=self.maximum_support_band_pixels<=4: raise QualificationError("GRAPHICS_POLICY_INVALID")
+        if (
+            any(type(v) not in (int,float) or not 0 <= v <= 1 for v in vals)
+            or type(self.maximum_support_band_pixels) is not int
+            or not 0<=self.maximum_support_band_pixels<=4
+        ):
+            raise QualificationError("GRAPHICS_POLICY_INVALID")
 @dataclass(frozen=True)
 class GraphicsStaticRelationEvidenceV1:
     face_a:int; face_b:int; same_drawable_affinity:float; cut_probability:float; attachment_affinity:float; alpha_boundary_probability:float; appearance_boundary_probability:float; confidence:float; evidence_ref:str=""; schema_version:str="RealSaS.GraphicsStaticRelationEvidence.v1"
@@ -49,17 +67,78 @@ def graphics_evidence_hash_v1(v):return _hash(v.to_dict(),"evidence_hash")
 def compiled_graphics_hash_v1(v):return _hash(v.to_dict(),"graph_hash")
 def build_graphics_evidence_v1(*,mesh_binding_hash,static_relations:Iterable[GraphicsStaticRelationEvidenceV1],view_relations:Iterable[GraphicsViewRelationEvidenceV1],metadata:Mapping[str,Any]|None=None):
     static,view=tuple(static_relations),tuple(view_relations)
-    if not mesh_binding_hash or not static: raise QualificationError("GRAPHICS_EVIDENCE_INCOMPLETE")
-    value=GraphicsEvidenceV1(str(mesh_binding_hash),static,view,"",metadata={"categorical_semantics_used":False,"authority_class":"LEARNED_RELATION_EVIDENCE_ONLY",**dict(metadata or {})});return replace(value,evidence_hash=graphics_evidence_hash_v1(value))
+    if not mesh_binding_hash:
+        raise QualificationError("GRAPHICS_EVIDENCE_MESH_BINDING_REQUIRED")
+    # Numeric and type admission must happen BEFORE canonical hashing;
+    # a NaN must raise a typed qualification error, not a JSON serializer
+    # exception, and no caller may overwrite evidence authority via metadata.
+    for r in static:
+        if type(r) is not GraphicsStaticRelationEvidenceV1 or r.schema_version != "RealSaS.GraphicsStaticRelationEvidence.v1":
+            raise QualificationError("GRAPHICS_STATIC_RELATION_SCHEMA_INVALID")
+        if (type(r.face_a) is not int or type(r.face_b) is not int
+                or r.face_a<0 or r.face_b<0 or r.face_a==r.face_b):
+            raise QualificationError("GRAPHICS_STATIC_RELATION_FACE_INVALID")
+        for label,score in (
+            ("same",r.same_drawable_affinity), ("cut",r.cut_probability),
+            ("attachment",r.attachment_affinity), ("alpha",r.alpha_boundary_probability),
+            ("appearance",r.appearance_boundary_probability), ("confidence",r.confidence),
+        ):
+            _prob(score,label)
+    for r in view:
+        if type(r) is not GraphicsViewRelationEvidenceV1 or r.schema_version != "RealSaS.GraphicsViewRelationEvidence.v1":
+            raise QualificationError("GRAPHICS_VIEW_RELATION_SCHEMA_INVALID")
+        if (type(r.view_index) is not int or r.view_index<0
+                or type(r.face_a) is not int or type(r.face_b) is not int
+                or r.face_a<0 or r.face_b<0 or r.face_a==r.face_b):
+            raise QualificationError("GRAPHICS_VIEW_RELATION_INVALID")
+        for label,score in (
+            ("front",r.front_probability), ("occlusion",r.occlusion_probability),
+            ("vis_a",r.visibility_probability_a), ("vis_b",r.visibility_probability_b),
+            ("view_conf",r.confidence),
+        ):
+            _prob(score,label)
+    meta=dict(metadata or {})
+    meta.update({"categorical_semantics_used":False,
+                 "authority_class":"LEARNED_RELATION_EVIDENCE_ONLY"})
+    # A single-face canonical mesh has no possible pair relation. An empty
+    # graph is admissible *as empty evidence*, never a visible-source claim.
+    value=GraphicsEvidenceV1(str(mesh_binding_hash),static,view,"",metadata=meta)
+    return replace(value,evidence_hash=graphics_evidence_hash_v1(value))
 
 class _UF:
-    def __init__(self,n):self.p=list(range(n))
+    """Sparse cannot-link constrained union for anonymous drawable candidates.
+
+    A chain of locally high same-drawable affinities cannot transitively erase
+    an explicit high-cut face relation. Sorting candidate edges makes the
+    representation policy deterministic, independent of input row ordering.
+    """
+    def __init__(self,n):
+        self.p=list(range(n))
+        self.members={i:{i} for i in range(n)}
+        self.forbidden={i:set() for i in range(n)}
+
     def find(self,x):
         while self.p[x]!=x:self.p[x]=self.p[self.p[x]];x=self.p[x]
         return x
+
+    def cannot_link(self,a,b):
+        self.forbidden[a].add(b)
+        self.forbidden[b].add(a)
+
     def union(self,a,b):
         a,b=self.find(a),self.find(b)
-        if a!=b:self.p[max(a,b)]=min(a,b)
+        if a==b:
+            return True
+        # Keep union-by-size so each face's membership migrates O(log N)
+        # times; the final fragment identity is sorted face IDs, not UF root.
+        if len(self.members[a])<len(self.members[b]):
+            a,b=b,a
+        if any(self.forbidden[x].intersection(self.members[a])
+               for x in self.members[b]):
+            return False
+        self.p[b]=a
+        self.members[a].update(self.members.pop(b))
+        return True
 
 def _adj(faces):
     e={};out=set()
@@ -72,9 +151,17 @@ def _adj(faces):
     return out
 
 def _prob(v,label):
-    v=float(v)
-    if not 0<=v<=1:raise QualificationError("GRAPHICS_PROBABILITY_INVALID:"+label)
-    return v
+    try:
+        if isinstance(v, bool):
+            raise ValueError("boolean is not a probability")
+        if type(v) not in (int, float):
+            raise ValueError("probability must be a numeric scalar")
+        value=float(v)
+    except (ValueError, TypeError, OverflowError):
+        raise QualificationError("GRAPHICS_PROBABILITY_INVALID:"+label) from None
+    if not 0<=value<=1:
+        raise QualificationError("GRAPHICS_PROBABILITY_INVALID:"+label)
+    return value
 
 def _cycle(edges):
     graph={};nodes=set()
@@ -103,23 +190,56 @@ def _dag(edges):
         weak=min(c,key=lambda e:(e.confidence,e.front_fragment_id,e.back_fragment_id));kept.remove(weak);removed.append(weak)
     return tuple(sorted(kept,key=lambda e:(e.view_index,e.front_fragment_id,e.back_fragment_id))),tuple(removed)
 
-def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_binding_hash,source_graphics_binding_hash,faces,evidence,mechanical_attachment_evidence=None,policy=GraphicsCompilePolicyV1()):
+def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_binding_hash,source_graphics_binding_hash,faces,evidence,mechanical_attachment_evidence=None,mechanical_domain_ids=(),policy=GraphicsCompilePolicyV1()):
     """Compile role-free relations onto the sole canonical M; no visual mesh exists."""
     policy.validate()
     if evidence.evidence_hash!=graphics_evidence_hash_v1(evidence):raise QualificationError("GRAPHICS_EVIDENCE_HASH_DRIFT")
     if evidence.mesh_binding_hash!=canonical_mesh_binding_hash:raise QualificationError("GRAPHICS_CANONICAL_MESH_BINDING_DRIFT")
     if not canonical_mesh_skin_binding_hash or not source_graphics_binding_hash:raise QualificationError("GRAPHICS_REQUIRED_BINDING_EMPTY")
-    tri=tuple(tuple(map(int,f)) for f in faces);n=len(tri)
-    if not n or any(len(f)!=3 for f in tri):raise QualificationError("GRAPHICS_CANONICAL_MESH_INVALID")
+    tri=tuple(tuple(f) for f in faces);n=len(tri)
+    if (
+        not n or any(len(f)!=3 or len(set(f))!=3 or
+                     any(type(index) is not int or index<0 for index in f)
+                     for f in tri)
+    ):
+        raise QualificationError("GRAPHICS_CANONICAL_MESH_INVALID")
     uf=_UF(n);adj=_adj(tri);relations={};alpha=[0.]*n
+    merge_candidates=[]
+    cut_constraints=[]
     for r in evidence.static_relations:
-        a,b=int(r.face_a),int(r.face_b)
-        if a==b or min(a,b)<0 or max(a,b)>=n:raise QualificationError("GRAPHICS_STATIC_RELATION_FACE_INVALID")
+        a,b=r.face_a,r.face_b
+        if (type(a) is not int or type(b) is not int
+                or a==b or min(a,b)<0 or max(a,b)>=n):
+            raise QualificationError("GRAPHICS_STATIC_RELATION_FACE_INVALID")
         pair=tuple(sorted((a,b)))
         if pair in relations:raise QualificationError("GRAPHICS_STATIC_RELATION_DUPLICATE")
+        # Validate ALL source scores, even if this pair will not merge.
+        # Unused NaN/invalid evidence must not silently survive a court.
+        for label, score in (
+            ("same", r.same_drawable_affinity), ("cut", r.cut_probability),
+            ("attachment", r.attachment_affinity),
+            ("alpha", r.alpha_boundary_probability),
+            ("appearance", r.appearance_boundary_probability),
+            ("confidence", r.confidence),
+        ):
+            _prob(score, label)
         relations[pair]=r
         for f in pair:alpha[f]=max(alpha[f],_prob(r.alpha_boundary_probability,"alpha"))
-        if pair in adj and _prob(r.confidence,"confidence")>=policy.relation_confidence_min and _prob(r.same_drawable_affinity,"same")>=policy.same_drawable_min and _prob(r.cut_probability,"cut")<=policy.cut_max and max(_prob(r.alpha_boundary_probability,"alpha"),_prob(r.appearance_boundary_probability,"appearance"))<=policy.boundary_max:uf.union(a,b)
+        if r.confidence>=policy.relation_confidence_min:
+            if r.cut_probability >= 1.0-policy.cut_max:
+                cut_constraints.append(pair)
+            if (pair in adj and r.same_drawable_affinity>=policy.same_drawable_min
+                    and r.cut_probability<=policy.cut_max
+                    and max(r.alpha_boundary_probability,r.appearance_boundary_probability)<=policy.boundary_max):
+                merge_candidates.append((
+                    -float(r.confidence*r.same_drawable_affinity),pair,
+                ))
+    for a,b in sorted(cut_constraints):
+        uf.cannot_link(a,b)
+    blocked_merges=[]
+    for _,(a,b) in sorted(merge_candidates):
+        if not uf.union(a,b):
+            blocked_merges.append((a,b))
     groups={}
     for i in range(n):groups.setdefault(uf.find(i),[]).append(i)
     fragments=[];face_fragment={}
@@ -128,14 +248,24 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
         for i in rows:face_fragment[i]=fid
     vis={};pair_rows={};views_present=set()
     for r in evidence.view_relations:
-        v=int(r.view_index);views_present.add(v);a,b=int(r.face_a),int(r.face_b)
-        if v<0 or a==b or min(a,b)<0 or max(a,b)>=n:raise QualificationError("GRAPHICS_VIEW_RELATION_INVALID")
+        v,a,b=r.view_index,r.face_a,r.face_b
+        if (type(v) is not int or type(a) is not int or type(b) is not int
+                or v<0 or a==b or min(a,b)<0 or max(a,b)>=n):
+            raise QualificationError("GRAPHICS_VIEW_RELATION_INVALID")
+        views_present.add(v)
+        for label, score in (
+            ("front", r.front_probability), ("occlusion", r.occlusion_probability),
+            ("vis_a", r.visibility_probability_a),
+            ("vis_b", r.visibility_probability_b), ("view_conf", r.confidence),
+        ):
+            _prob(score, label)
         fa,fb=face_fragment[a],face_fragment[b];vis.setdefault((v,fa),[]).append(_prob(r.visibility_probability_a,"vis_a"));vis.setdefault((v,fb),[]).append(_prob(r.visibility_probability_b,"vis_b"))
         if fa==fb:continue
         conf=_prob(r.confidence,"view_conf");occ=_prob(r.occlusion_probability,"occ");front=_prob(r.front_probability,"front")
         if conf<policy.relation_confidence_min or occ<policy.occlusion_probability_min:continue
         lo,hi=sorted((fa,fb));score=front if fa==lo else 1-front;pair_rows.setdefault((v,lo,hi),[]).append((score,conf*occ,r.evidence_ref))
     view_states=[]
+    had_order_conflict=False
     for v in sorted(views_present):
         raw=[]
         for (vv,lo,hi),rows in sorted(pair_rows.items()):
@@ -145,21 +275,407 @@ def compile_graphics_v1(*,canonical_mesh_binding_hash,canonical_mesh_skin_bindin
             elif score<=1-policy.front_probability_min:front,back,p=hi,lo,1-score
             else:continue
             raw.append(GraphicsOrderEdgeV1(v,front,back,float(p),tuple(sorted({x[2] for x in rows if x[2]}))))
-        kept,removed=_dag(raw);visible=[]
+        kept,removed=_dag(raw)
+        had_order_conflict=had_order_conflict or bool(removed)
+        if removed and not policy.allow_unqualified_order_arbitration:
+            raise QualificationError("GRAPHICS_SOURCE_ORDER_CONFLICT_UNQUALIFIED")
+        visible=[]
+        visibility_unknown=[]
         for f in fragments:
-            values=vis.get((v,f.fragment_id),());p=sum(values)/len(values) if values else 1.
-            if p>=policy.visibility_probability_min:visible.append(f.fragment_id)
-        view_states.append(GraphicsViewStateV1(v,tuple(sorted(visible)),kept,metadata={"cycle_edges_removed":[x.to_dict() for x in removed],"triangle_array_order_is_presentation_authority":False}))
-    attachments=[];mechanical=dict(mechanical_attachment_evidence or {})
+            values=vis.get((v,f.fragment_id),())
+            if not values:
+                # Canonical body triangles remain drawable for exact 3D
+                # depth/ray evaluation; absent source view evidence is
+                # UNKNOWN, not learned-visible or learned-hidden.
+                visibility_unknown.append(f.fragment_id)
+                visible.append(f.fragment_id)
+                continue
+            p=sum(values)/len(values)
+            if p>=policy.visibility_probability_min:
+                visible.append(f.fragment_id)
+        view_states.append(GraphicsViewStateV1(
+            v,tuple(sorted(visible)),kept,metadata={
+                "cycle_edges_removed":[x.to_dict() for x in removed],
+                "triangle_array_order_is_presentation_authority":False,
+                "visibility_unknown_fragment_ids":tuple(sorted(visibility_unknown)),
+                "unobserved_visibility_raster_policy":"DRAW_GEOMETRY_AND_DEFER_OCCLUSION_TO_DEPTH",
+                "missing_source_view_visibility_is_not_positive_label":True,
+            },
+        ))
+    attachments=[]
+    mechanical=dict(mechanical_attachment_evidence or {})
+    qualified_domains=frozenset(str(x) for x in mechanical_domain_ids)
+    seen_attached_fragments=set()
     for pair,r in relations.items():
         if r.attachment_affinity<policy.attachment_affinity_min or r.confidence<policy.relation_confidence_min:continue
         m=dict(mechanical.get(pair) or {})
-        if not m or float(m.get("persistent_contact",0))<policy.mechanical_contact_min:continue
+        if not m:
+            continue
+        contact=_prob(m.get("persistent_contact",0),"mechanical_contact")
+        if contact<policy.mechanical_contact_min:
+            continue
         fa,fb=face_fragment[pair[0]],face_fragment[pair[1]]
         if fa==fb:continue
-        bary=tuple(map(float,m.get("barycentric_anchor") or ()));anchor=int(m.get("anchor_face_index",-1));parent=str(m.get("parent_mechanical_domain_id") or "")
-        if len(bary)!=3 or any(x<-1e-9 for x in bary) or abs(sum(bary)-1)>1e-6:raise QualificationError("GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID")
-        if not 0<=anchor<n or not parent:raise QualificationError("GRAPHICS_ATTACHMENT_BINDING_INVALID")
-        attachments.append(GraphicsAttachmentV1(fa,parent,anchor,bary,min(float(r.attachment_affinity),float(m["persistent_contact"])),tuple(x for x in (r.evidence_ref,str(m.get("evidence_ref") or "")) if x)))
-    value=CompiledGraphicsV1(str(canonical_mesh_binding_hash),str(canonical_mesh_skin_binding_hash),str(source_graphics_binding_hash),evidence.evidence_hash,tuple(fragments),tuple(view_states),tuple(attachments),"",metadata={"authority_class":"COMPILED_GRAPHICS","single_canonical_mesh_authority":True,"independent_visual_mesh_allowed":False,"categorical_semantics_used":False,"source_pixels_win_where_observed":True,"runtime_consumption_required":True,"triangle_array_order_is_presentation_authority":False,"silhouette_support_is_2d_only":True})
+        try:
+            bary=tuple(float(x) for x in (m.get("barycentric_anchor") or ()))
+        except (TypeError, ValueError, OverflowError):
+            raise QualificationError("GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID") from None
+        try:
+            anchor=m.get("anchor_face_index",-1)
+            child=m.get("child_face_index",-1)
+            if type(anchor) is not int or type(child) is not int:
+                raise ValueError("non-integer attachment index")
+        except (ValueError, TypeError, OverflowError):
+            raise QualificationError("GRAPHICS_ATTACHMENT_PARENT_CHILD_FACE_BINDING_INVALID") from None
+        parent=str(m.get("parent_mechanical_domain_id") or "")
+        if (len(bary)!=3 or any(not 0<=x<=1 for x in bary)
+                or abs(sum(bary)-1)>1e-6):
+            raise QualificationError("GRAPHICS_ATTACHMENT_BARYCENTRIC_INVALID")
+        # The attachment is an explicit directional relation: child drawable
+        # follows a SOURCE-BOUND parent face with an admitted mechanical domain.
+        # Picking the numerically first face here would attach an arbitrary
+        # drawable, including the actual parent to itself.
+        if (anchor not in pair or child not in pair or anchor==child
+                or face_fragment[anchor]==face_fragment[child]):
+            raise QualificationError("GRAPHICS_ATTACHMENT_PARENT_CHILD_FACE_BINDING_INVALID")
+        if not parent or parent not in qualified_domains:
+            raise QualificationError("GRAPHICS_ATTACHMENT_MECHANICAL_DOMAIN_UNQUALIFIED")
+        child_fragment=face_fragment[child]
+        if child_fragment in seen_attached_fragments:
+            raise QualificationError("GRAPHICS_ATTACHMENT_CHILD_MULTIPLE_PARENTS")
+        seen_attached_fragments.add(child_fragment)
+        attachments.append(GraphicsAttachmentV1(
+            child_fragment,parent,anchor,bary,
+            min(float(r.attachment_affinity),contact),
+            tuple(x for x in (r.evidence_ref,str(m.get("evidence_ref") or "")) if x),
+        ))
+    value=CompiledGraphicsV1(str(canonical_mesh_binding_hash),str(canonical_mesh_skin_binding_hash),str(source_graphics_binding_hash),evidence.evidence_hash,tuple(fragments),tuple(view_states),tuple(attachments),"",metadata={"authority_class":"COMPILED_GRAPHICS","single_canonical_mesh_authority":True,"independent_visual_mesh_allowed":False,"categorical_semantics_used":False,"source_pixels_win_where_observed":True,"runtime_consumption_required":True,"triangle_array_order_is_presentation_authority":False,"silhouette_support_is_2d_only":True,"representation_policy_arbitration_used":had_order_conflict,
+"unresolved_source_order_conflict":had_order_conflict,
+"source_graphics_qualification_status":"UNQUALIFIED_CONFLICT_POLICY" if had_order_conflict else "CANDIDATE_SCHEDULE_ONLY",
+"pose_conditioned_visibility_proven":False,
+# Learned view-relation coverage is a candidate prediction, NEVER an
+# independent source-ray first-hit/occlusion receipt. This contract has no
+# source-ray witness input from which source-visibility PASS could be minted.
+"source_visibility_coverage_complete":False,
+"learned_visibility_candidate_coverage_complete":bool(view_states) and not any(
+    v.metadata.get("visibility_unknown_fragment_ids") for v in view_states
+),
+"source_visibility_requires_independent_ray_receipt":True,
+"view_relation_eight_direction_address_coverage":tuple(sorted(v.view_index for v in view_states))==tuple(range(8)),
+"transitive_cut_constraints_enforced":True,
+"candidate_merge_blocked_by_cut":tuple(blocked_merges),
+"order_arbitration_not_source_truth":True})
     return replace(value,graph_hash=compiled_graphics_hash_v1(value))
+
+
+def compile_graphics_on_canonical_puppet_v1(
+    *,
+    mesh: CanonicalMeshIR,
+    rig: CanonicalRigIRV2,
+    skin: CanonicalSkinIRV2,
+    source_graphics_binding_hash: str,
+    evidence: GraphicsEvidenceV1,
+    mechanical_attachment_evidence: Mapping[tuple[int,int], Mapping[str,Any]] | None = None,
+    policy: GraphicsCompilePolicyV1 = GraphicsCompilePolicyV1(),
+) -> CompiledGraphicsV1:
+    """Single-mesh-safe entrypoint for Graphics after Mesh/Rig/Skin qualification.
+
+    The historic face-indexed compiler takes only caller-supplied hashes and
+    face arrays; it cannot itself prove those identities belong to the same
+    canonical puppet. This wrapper binds exact canonical bytes and derives
+    face indices and mechanical domains from those real qualified parents.
+    No neural candidate index is accepted as a canonical address without a
+    separately qualified correspondence.
+    """
+    if mesh.mesh_lineage_hash != canonical_mesh_lineage_hash_v1(mesh):
+        raise QualificationError("GRAPHICS_CANONICAL_MESH_HASH_DRIFT")
+    if rig.rig_lineage_hash != canonical_rig_lineage_hash_v2(rig):
+        raise QualificationError("GRAPHICS_CANONICAL_RIG_HASH_DRIFT")
+    if skin.skin_lineage_hash != canonical_skin_lineage_hash_v2(skin):
+        raise QualificationError("GRAPHICS_CANONICAL_SKIN_HASH_DRIFT")
+    validate_canonical_mesh_domain_v1(mesh)
+    validate_canonical_rig_domain_v2(rig)
+    validate_canonical_skin_domain_v2(skin)
+    if (
+        mesh.metadata.get("authority") != "COMPILER_CANONICAL_MESH"
+        or rig.metadata.get("authority") != "COMPILER_CANONICAL_RIG"
+        or skin.metadata.get("authority") != "COMPILER_CANONICAL_SKIN"
+    ):
+        raise QualificationError("GRAPHICS_CANONICAL_PUPPET_AUTHORITY_REQUIRED")
+    if (
+        rig.mesh_lineage_hash != mesh.mesh_lineage_hash
+        or skin.mesh_lineage_hash != mesh.mesh_lineage_hash
+        or skin.deform_structure_hash != rig.deform_structure_hash
+        or skin.mesh_carrier_evidence_hash != mesh.carrier_evidence_hash
+        or skin.mesh_carrier_topology_hash != mesh.carrier_topology_hash
+        or skin.mesh_carrier_geometry_hash != mesh.carrier_geometry_hash
+    ):
+        raise QualificationError("GRAPHICS_CANONICAL_PUPPET_PARENT_DRIFT")
+    vertex_ids = tuple(row.canonical_mesh_vertex_id for row in mesh.vertices)
+    if {row.canonical_mesh_vertex_id for row in skin.rows} != set(vertex_ids):
+        raise QualificationError("GRAPHICS_CANONICAL_SKIN_VERTEX_COVERAGE_DRIFT")
+    index = {vertex_id:i for i,vertex_id in enumerate(vertex_ids)}
+    faces = tuple(tuple(index[vertex_id] for vertex_id in face) for face in mesh.faces)
+    mechanical_domains = tuple(
+        [row.canonical_joint_id for row in rig.joints]
+        + [row.canonical_control_id for row in rig.controls]
+    )
+    return compile_graphics_v1(
+        canonical_mesh_binding_hash=mesh.mesh_lineage_hash,
+        canonical_mesh_skin_binding_hash=skin.skin_lineage_hash,
+        source_graphics_binding_hash=source_graphics_binding_hash,
+        faces=faces,
+        evidence=evidence,
+        mechanical_attachment_evidence=mechanical_attachment_evidence,
+        mechanical_domain_ids=mechanical_domains,
+        policy=policy,
+    )
+
+def _rss_typed_face_graphics_candidates_v1(
+    *, scene, face_probabilities, adjacent_pairs, evidence_hash,
+):
+    """Preserve independent learned SAME, CUT and directed ATTACHMENT logits.
+
+    Inputs are exact TESSA candidate-face memberships rebound to canonical
+    face indices. The 3 channels are independent; CUT IS NOT 1-SAME.
+    UNKNOWN and all cross-slot support remain in a separate coverage ledger.
+    No source appearance, source first-hit, contact or drawable authority is
+    created. A pair with insufficient known cross-slot mass ABSTAINS.
+    """
+    if not isinstance(scene, dict):
+        raise QualificationError("GRAPHICS_TYPED_RSS_SCENE_REQUIRED")
+    raw = scene.get("region_relation_logits")
+    mask = scene.get("region_relation_valid_mask")
+    if not isinstance(raw, (list, tuple)) or not isinstance(mask, (list, tuple)):
+        raise QualificationError("GRAPHICS_TYPED_RSS_RELATION_REQUIRED")
+    n = len(raw)
+    if n < 2 or len(mask) != n or any(
+        not isinstance(row, (tuple, list)) or len(row) != n
+        for row in raw
+    ) or any(
+        not isinstance(row, (tuple, list)) or len(row) != n for row in mask
+    ):
+        raise QualificationError("GRAPHICS_TYPED_RSS_RELATION_SHAPE")
+    for i in range(n):
+        for j in range(n):
+            if mask[i][j] is not (i != j):
+                raise QualificationError("GRAPHICS_TYPED_RSS_RELATION_SELF_MASK")
+            if len(raw[i][j]) != 3 or any(
+                type(x) not in (float, int) or not math.isfinite(x)
+                for x in raw[i][j]
+            ):
+                raise QualificationError("GRAPHICS_TYPED_RSS_RELATION_LOGITS_INVALID")
+            if i != j and any(
+                abs(raw[i][j][channel] - raw[j][i][channel]) > 1e-5
+                for channel in (0, 1)
+            ):
+                raise QualificationError("GRAPHICS_TYPED_RSS_SYMMETRY_INVALID")
+    relation_rows = []
+    coverage = []
+    for fa, fb in adjacent_pairs:
+        left, unknown_left = face_probabilities[fa]
+        right, unknown_right = face_probabilities[fb]
+        if len(left) != n or len(right) != n:
+            raise QualificationError("GRAPHICS_TYPED_RSS_MEMBERSHIP_WIDTH")
+        if not all(0 <= x <= 1 and math.isfinite(x) for x in (
+            *left, *right, unknown_left, unknown_right,
+        )):
+            raise QualificationError("GRAPHICS_TYPED_RSS_MEMBERSHIP_DOMAIN")
+        if abs(sum(left) + unknown_left - 1) > 1e-5 or abs(
+            sum(right) + unknown_right - 1
+        ) > 1e-5:
+            raise QualificationError("GRAPHICS_TYPED_RSS_UNKNOWN_MASS_DRIFT")
+        joint = [
+            (i, j, left[i] * right[j])
+            for i in range(n) for j in range(n) if i != j
+        ]
+        support = sum(w for _, _, w in joint)
+        ledger = {
+            "from_canonical_face_index": fa,
+            "to_canonical_face_index": fb,
+            "from_predicted_unknown_mass": unknown_left,
+            "to_predicted_unknown_mass": unknown_right,
+            "nonself_known_region_pair_mass": support,
+            "state": (
+                "UNQUALIFIED_TYPED_RELATION_CANDIDATE"
+                if support > 1e-6 else "ABSTAIN_NO_KNOWN_CROSS_REGION_SUPPORT"
+            ),
+        }
+        coverage.append(ledger)
+        if support <= 1e-6:
+            continue
+        def sigmoid(x):
+            return 1. / (1. + math.exp(-max(-64., min(64., float(x)))))
+        scores = tuple(
+            sum(w * sigmoid(raw[i][j][k]) for i, j, w in joint) / support
+            for k in range(3)
+        )
+        # Alpha/appearance boundary UNKNOWN; 0.5 is a neutral candidate
+        # placeholder and can never become source boundary qualification.
+        relation_rows.append(GraphicsStaticRelationEvidenceV1(
+            fa, fb, scores[0], scores[1], scores[2], .5, .5,
+            min(1.0, support), evidence_hash,
+        ))
+    return tuple(relation_rows), tuple(coverage)
+
+
+def compile_neural_region_graphics_on_canonical_puppet_v1(
+    *,
+    evidence: "RSSvNextInferenceEvidenceIRV1",
+    expected_checkpoint_sha256: str,
+    candidate_vertex_ids_by_index: tuple[str, ...],
+    mesh: CanonicalMeshIR,
+    rig: CanonicalRigIRV2,
+    skin: CanonicalSkinIRV2,
+    max_candidate_pairs: int = 4096,
+    policy: GraphicsCompilePolicyV1 = GraphicsCompilePolicyV1(),
+) -> CompiledGraphicsV1:
+    """Lower *unqualified* learned region affinities onto an actual puppet.
+
+    Source-to-canonical static qualification MUST have already minted the
+    canonical Mesh with this exact neural evidence hash in its provenance.
+    The address correspondence is an explicit upstream compiler input, and
+    every vertex, component partition and oriented face is verified here.
+    This operation NEVER converts same-region probability into source
+    drawable/cut/occlusion truth, invents a visual mesh or promotes a
+    ProductRevision. It only gives the current Graphics representation policy
+    meaningful model-backed candidates on the one qualified mesh.
+    """
+    from .rss_vnext_inference_evidence_v1 import (
+        candidate_face_region_readout_v1, validate_inference_evidence_v1,
+    )
+
+    validate_inference_evidence_v1(
+        evidence, expected_checkpoint_sha256=expected_checkpoint_sha256,
+    )
+    if evidence.mesh_status != "UNQUALIFIED_MESH_CANDIDATE" or evidence.mesh is None:
+        raise QualificationError("GRAPHICS_NEURAL_CANDIDATE_MESH_REQUIRED")
+    if evidence.evidence_hash not in mesh.proposal_evidence_refs:
+        raise QualificationError("GRAPHICS_NEURAL_STATIC_QUALIFICATION_PARENT_MISSING")
+    if (
+        mesh.mesh_lineage_hash != canonical_mesh_lineage_hash_v1(mesh)
+        or mesh.metadata.get("authority") != "COMPILER_CANONICAL_MESH"
+    ):
+        raise QualificationError("GRAPHICS_NEURAL_CANONICAL_MESH_REQUIRED")
+    validate_canonical_mesh_domain_v1(mesh)
+
+    candidate = evidence.mesh
+    rest = candidate["rest_xyz"]
+    mapping = candidate_vertex_ids_by_index
+    if (
+        len(mapping) != len(rest) or len(mapping) != len(mesh.vertices)
+        or any(type(k) is not str or not k for k in mapping)
+        or len(set(mapping)) != len(mapping)
+    ):
+        raise QualificationError("GRAPHICS_NEURAL_VERTEX_CORRESPONDENCE_INVALID")
+    vertex_by_source = {v.source_candidate_vertex_id: v for v in mesh.vertices}
+    if set(mapping) != set(vertex_by_source):
+        raise QualificationError("GRAPHICS_NEURAL_VERTEX_PARENT_ID_DRIFT")
+    component_to_canonical: dict[int, str] = {}
+    canonical_to_component: dict[str, int] = {}
+    for i, source_id in enumerate(mapping):
+        v = vertex_by_source[source_id]
+        if not all(abs(float(a) - float(b)) <= 1e-6 for a, b in zip(rest[i], v.P)):
+            raise QualificationError("GRAPHICS_NEURAL_VERTEX_POSITION_DRIFT")
+        key = candidate["vertex_components"][i]
+        if (key in component_to_canonical and component_to_canonical[key] != v.component_id
+            or v.component_id in canonical_to_component and canonical_to_component[v.component_id] != key):
+            raise QualificationError("GRAPHICS_NEURAL_COMPONENT_PARTITION_DRIFT")
+        component_to_canonical[key] = v.component_id
+        canonical_to_component[v.component_id] = key
+
+    # Face orientation is essential to ray normals, visibility and sampling.
+    # Accept cyclic index rotations, NEVER a silently flipped winding.
+    def cyclic(face: tuple[str, ...]) -> tuple[tuple[str, ...], ...]:
+        return (face, face[1:] + face[:1], face[2:] + face[:2])
+
+    canonical_face_lookup = {}
+    for i, face in enumerate(mesh.faces):
+        for rotated in cyclic(face):
+            if rotated in canonical_face_lookup:
+                raise QualificationError("GRAPHICS_NEURAL_CANONICAL_FACE_DUPLICATE")
+            canonical_face_lookup[rotated] = i
+    face_map = []
+    for face in candidate["faces"]:
+        named = tuple(
+            vertex_by_source[mapping[vertex_index]].canonical_mesh_vertex_id
+            for vertex_index in face
+        )
+        if named not in canonical_face_lookup:
+            raise QualificationError("GRAPHICS_NEURAL_FACE_TOPOLOGY_OR_WINDING_DRIFT")
+        face_map.append(canonical_face_lookup[named])
+    if (len(face_map) != len(mesh.faces)
+        or len(set(face_map)) != len(mesh.faces)):
+        raise QualificationError("GRAPHICS_NEURAL_FACE_COVERAGE_DRIFT")
+
+    rows = candidate_face_region_readout_v1(evidence)
+    canonical_probs: dict[int, tuple[tuple[float, ...], float]] = {}
+    for row in rows:
+        k = face_map[row["candidate_face_index"]]
+        raw = row["candidate_region_probabilities"]
+        unknown = float(row["unknown_probability"])
+        # Preserve the original known-slot probability MASS, not a
+        # normalized conditional vector that silently drops UNKNOWN.
+        # Typed region channels are marginalized only over known cross-slot
+        # support and the actual uncertainty survives in the coverage ledger.
+        canonical_probs[k] = (tuple(float(x) for x in raw), unknown)
+    ordered_face_vertices = tuple(mesh.faces)
+    adjacency: set[tuple[int, int]] = set()
+    edge_faces: dict[tuple[str, str], list[int]] = {}
+    for face_index, face in enumerate(ordered_face_vertices):
+        for a, b in ((face[0],face[1]), (face[1],face[2]), (face[2],face[0])):
+            edge_faces.setdefault(tuple(sorted((a, b))), []).append(face_index)
+    for indices in edge_faces.values():
+        for i, a in enumerate(indices):
+            for b in indices[i + 1:]:
+                adjacency.add(tuple(sorted((a, b))))
+    if max_candidate_pairs < 0 or len(adjacency) > max_candidate_pairs:
+        raise QualificationError("GRAPHICS_NEURAL_PAIR_RESOURCE_LIMIT")
+
+    # No source-derived 1-SAME shortcut: all THREE learned channels are
+    # independent. A missing graph or vanishing known cross-region support
+    # has no relation candidate and must never mint a fabricated cut.
+    relations, relation_coverage = _rss_typed_face_graphics_candidates_v1(
+        scene=evidence.scene,
+        face_probabilities=canonical_probs,
+        adjacent_pairs=tuple(sorted(adjacency)),
+        evidence_hash=evidence.evidence_hash,
+    )
+
+    compiler_input = build_graphics_evidence_v1(
+        mesh_binding_hash=mesh.mesh_lineage_hash,
+        static_relations=relations,
+        view_relations=(),  # 3D region evidence is not source view/occlusion.
+        metadata={
+            "source_neural_evidence_hash": evidence.evidence_hash,
+            "candidate_mesh_only": True,
+            "qualified_mesh_face_rebinding": True,
+            "cut_semantics": "INDEPENDENT_LEARNED_CUT_HEAD_NOT_SOURCE_CUT_TRUTH",
+            "relation_semantics": "INDEPENDENT_SAME_CUT_DIRECTED_ATTACHMENT",
+            "typed_candidate_pair_coverage": relation_coverage,
+            "predicted_unknown_region_mass_retained": True,
+            "attachment_evidence_available": False,
+            "source_visibility_evidence_available": False,
+        },
+    )
+    compiled = compile_graphics_on_canonical_puppet_v1(
+        mesh=mesh, rig=rig, skin=skin,
+        source_graphics_binding_hash=evidence.evidence_hash,
+        evidence=compiler_input, policy=policy,
+    )
+    metadata = dict(compiled.metadata)
+    metadata.update({
+        "origin": "NEURAL_ANONYMOUS_REGION_CANDIDATE",
+        "exact_candidate_to_canonical_face_map": tuple(face_map),
+        "qualified_drawable_source_truth": False,
+        "qualified_source_occlusion": False,
+        "qualified_source_attachments": False,
+        "independent_editability_proven": False,
+        "source_pixels_win_where_observed": False,
+        "learned_region_is_not_drawable_truth": True,
+        "source_graphics_qualification_status": "UNQUALIFIED_NEURAL_POLICY_ONLY",
+        "typed_relation_cut_never_derived_as_one_minus_same": True,
+        "typed_candidate_pair_coverage": relation_coverage,
+    })
+    result = replace(compiled, metadata=metadata, graph_hash="")
+    return replace(result, graph_hash=compiled_graphics_hash_v1(result))

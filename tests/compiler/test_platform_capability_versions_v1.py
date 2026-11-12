@@ -82,12 +82,19 @@ def test_product_capability_implementations_are_complete_and_semantic():
 
     rig = specs["product.rig"]
     assert rig["policy"]["dependencies"] == ["product.mesh"]
+    assert rig["entry_module"] == "compiler.realsas_compiler_services.platform_worker.rig_executor_v2"
+    assert rig["parameters"]["executor_contract"] == "RealSaS.ProductRigInference.v2"
+    assert rig["parameters"]["output_schema_version"] == "v2"
+    assert rig["parameters"]["skin_code_output_artifact_type"] == "RealSaS.SkinCodeProposalIR"
+    assert rig["parameters"]["skin_code_output_source"] == "SAME_AXIS_CAUSAL_SEQUENCE"
+    assert rig["parameters"]["compiler_control_synthesis_allowed"] is False
+    assert rig["parameters"]["compiler_constraint_synthesis_allowed"] is False
     assert rig["parameters"]["feature_evidence_source"] == "PRODUCT_MESH_OUTPUT"
     assert rig["parameters"]["legacy_stage15_dependency"] is False
     assert rig["parameters"]["required_models"] == [
         {
             "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
+            "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0",
         }
     ]
 
@@ -96,24 +103,32 @@ def test_product_capability_implementations_are_complete_and_semantic():
         "product.mesh",
         "product.rig",
     ]
-    assert skin["parameters"]["feature_evidence_source"] == "PRODUCT_MESH_OUTPUT"
-    assert skin["parameters"]["material_support_source"] == "PRODUCT_MESH_OUTPUT"
+    assert skin["entry_module"] == "compiler.realsas_compiler_services.platform_worker.skin_executor_v2"
+    assert skin["parameters"]["executor_contract"] == "RealSaS.ProductSkinInference.v2"
+    assert skin["parameters"]["input_rig_schema_version"] == "v2"
+    assert skin["parameters"]["input_skin_code_artifact_type"] == "RealSaS.SkinCodeProposalIR"
+    assert skin["parameters"]["input_skin_code_schema_version"] == "v1"
+    assert skin["parameters"]["input_skin_code_source"] == "PRODUCT_RIG_OUTPUT"
+    assert skin["parameters"]["output_schema_version"] == "v2"
     assert skin["parameters"]["legacy_stage15_dependency"] is False
     assert skin["parameters"]["required_models"] == [
         {
             "family": "MIRA",
-            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
+            "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0",
         }
     ]
     assert skin["parameters"]["mesh_and_rig_are_canonical_parents"] is True
-    assert skin["parameters"]["feature_evidence_is_canonical_parent"] is False
-    assert skin["parameters"]["material_support_is_canonical_parent"] is False
+    assert skin["parameters"]["compiler_code_search_allowed"] is False
+    assert skin["parameters"]["compiler_code_repair_allowed"] is False
+    assert skin["parameters"]["codec_checkpoint_must_match_axis_skin_code"] is True
+    assert "feature_evidence_source" not in skin["parameters"]
+    assert "material_support_source" not in skin["parameters"]
     assert skin["parameters"]["operational_model_state_embedded_in_source"] is False
 
     assert product_model_requirements() == [
         {
             "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
+            "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0",
         },
         {
             "family": "IRIS",
@@ -121,7 +136,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
         },
         {
             "family": "MIRA",
-            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
+            "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0",
         },
         {
             "family": "TESSA",
@@ -165,7 +180,7 @@ def test_release_snapshot_v2_carries_implementation_and_model_requirements():
     assert request["manifest"]["model_requirements"] == [
         {
             "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS41.BFSHardParent.OrderedDiscreteXYZ256.FrozenCausal.v5_4_1",
+            "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0",
             "channel": "RESEARCH",
         },
         {
@@ -175,7 +190,7 @@ def test_release_snapshot_v2_carries_implementation_and_model_requirements():
         },
         {
             "family": "MIRA",
-            "architecture_id": "RealSaS.MIRA.DirectCarrierSimplex.Axis541.v5_5",
+            "architecture_id": "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0",
             "channel": "RESEARCH",
         },
         {

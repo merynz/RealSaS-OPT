@@ -11,6 +11,8 @@ on:
       - "tests/compiler/test_playback_runtime_v4_contract_v1.py"
       - ".github/workflows/rss_vnext_runtime_v4_clipping_native.yml"
   pull_request:
+    # Full court runs on opening/ready state, not every intermediate commit.
+    types: [opened, reopened, ready_for_review]
     branches: [main]
     paths:
       - "runtime/realsas_cpp/**"
@@ -19,16 +21,16 @@ on:
       - ".github/workflows/rss_vnext_runtime_v4_clipping_native.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-permissions:
-  contents: read
-
 jobs:
   canonical-mesh-clip-e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -37,8 +39,23 @@ jobs:
           python-version: "3.11"
       - name: Install native and Python dependencies
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq cmake g++ libarchive-dev libpng-dev zlib1g-dev
+          # Prefer hosted image packages. Avoid unconditional APT requests:
+          # transient Ubuntu mirror DNS failures must not block a native court
+          # when its exact compiler/PNG/archive dependencies are already present.
+          required=(cmake g++ libarchive-dev libpng-dev zlib1g-dev)
+          missing=()
+          for package in "${required[@]}"; do
+            if ! dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed'; then
+              missing+=("$package")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            echo "Missing native packages: ${missing[*]}"
+            sudo apt-get -o Acquire::Retries=2 update -qq
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=2 install -y -qq --no-install-recommends "${missing[@]}"
+          fi
+          cmake --version
+          pkg-config --modversion libpng libarchive
           python -m pip install --upgrade pip
           python -m pip install numpy pytest
       - name: Exact native source seal gap inventory (read-only)

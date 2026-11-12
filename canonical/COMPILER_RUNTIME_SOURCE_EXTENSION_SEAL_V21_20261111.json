@@ -1,0 +1,43 @@
+{
+  "schema": "realsas.compiler_runtime_source_extension_seal.v21",
+  "sealed_on": "2026-11-11",
+  "prior_extension": {
+    "path": "canonical/COMPILER_RUNTIME_SOURCE_EXTENSION_SEAL_V20_20261111.json",
+    "git_blob_sha1": "5f14b5bcf69b172f1efc0d59919ee2a6e33a90f3",
+    "role": "IMMUTABLE_PRIOR_EXTENSION_PROVENANCE"
+  },
+  "authority": {
+    "extension_scope": "RSS_VNEXT_V4_POST_POSE_PER_RAY_SOURCE_OVER_TRANSPARENCY_WITH_NATIVE_THREE_LAYER_PERTURBATION_COURT",
+    "historical_base_seal_mutated": false,
+    "prior_extension_mutated": false,
+    "product_pass_claimed": false,
+    "scientific_pass_claimed": false,
+    "native_source_over_behavior_test_added": true,
+    "source_order_recomputed_from_post_pose_depth": true,
+    "source_observation_provenance_still_required": true,
+    "runtime_role": "subordinate_deployment_consumer",
+    "subtree_closure": "ALL_REPOSITORY_BLOBS_UNDER_RUNTIME_REALSAS_CPP_AT_SEAL_TIME"
+  },
+  "replacements": [
+    {
+      "path": "runtime/realsas_cpp/src/runtime_v4_reference.cpp",
+      "size_bytes": 34739,
+      "git_blob_sha1": "58fe9ba8e1ad2cd60276c429c05cce78c8631b19",
+      "reason": "Native per-pixel bounded source-over stack recomputes posed depth and composites actual source texture alpha; fails closed on stack overflow."
+    },
+    {
+      "path": "runtime/realsas_cpp/tests/runtime_v4_clipping_native_e2e.py",
+      "size_bytes": 12027,
+      "git_blob_sha1": "de1b6225d70ada53a8a4f633bf8a2475d244079c",
+      "reason": "Three translucent source-backed layers verify distinct depth order under pose changes and composited RGB/alpha in native C++."
+    }
+  ],
+  "additions": [],
+  "closure": {
+    "runtime_realsas_cpp_blob_count": 31,
+    "replacement_count": 2,
+    "addition_count": 0,
+    "resulting_sealed_blob_count": 31,
+    "unsealed_repository_blob_count_under_subtree": 0
+  }
+}

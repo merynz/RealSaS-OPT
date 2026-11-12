@@ -15,7 +15,7 @@ from typing import Any, Callable
 
 INPUT_EXECUTOR_CONTRACT_V1 = "RealSaS.ProductInputInference.v1"
 SOURCE_OBSERVATION_ARTIFACT_TYPE_V1 = "RealSaS.SourceObservation"
-SHAPE_INPUT_ARTIFACT_TYPE_V1 = "RealSaS.ShapeInput"
+SHAPE_INPUT_ARTIFACT_TYPE_V2 = "RealSaS.ShapeInput"
 INPUT_OUTPUT_AUTHORITY_V1 = "VERIFIED_SOURCE_DERIVED_SHAPE_INPUT"
 
 
@@ -103,6 +103,7 @@ def execute_input_capability_v1(
     load_seconds = perf_counter() - load_started
     result = run_input_inference_v1(
         source,
+        source_observation_content_sha256=str(source_ref.get("content_sha256") or ""),
         dino_model=dino_model,
         loaded_authority=loaded_authority,
         device=device,
@@ -119,8 +120,8 @@ def execute_input_capability_v1(
         "outputs": [
             {
                 "role": "shape_input",
-                "artifact_type": SHAPE_INPUT_ARTIFACT_TYPE_V1,
-                "schema_version": "v1",
+                "artifact_type": SHAPE_INPUT_ARTIFACT_TYPE_V2,
+                "schema_version": "v2",
                 "storage_key": sealed["storage_key"],
                 "content_sha256": sealed["content_sha256"],
                 "size_bytes": sealed["size_bytes"],

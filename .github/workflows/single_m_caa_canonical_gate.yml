@@ -2,6 +2,8 @@
 name: single-m-caa-canonical-gate
 on:
   pull_request:
+    # Full court runs on opening/ready state, not every intermediate commit.
+    types: [opened, reopened, ready_for_review]
     paths:
       - 'compiler/**'
       - 'runtime/**'

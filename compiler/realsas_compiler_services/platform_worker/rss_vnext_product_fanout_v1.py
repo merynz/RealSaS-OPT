@@ -232,6 +232,45 @@ def read_rss_vnext_embedded_mira_decoder_v1(
     )
 
 
+def read_rss_vnext_discrete_skin_replay_v1(
+    index: Mapping[str, Any], *,
+    child_refs: Mapping[str, dict[str, Any]],
+    read_object: Callable[[dict[str, Any]], bytes],
+):
+    """Replay actual generated FSQ IDs with the pinned MIRA child, on demand.
+
+    Never trigger this GPU/CPU-heavy consumer during Input, Geometry, Semantic
+    or candidate Mesh. It cannot grant CanonicalSkin, joint DOF or authority.
+    """
+    from compiler.realsas_compiler_core.rss_vnext_discrete_skin_replay_v1 import (
+        replay_rss_vnext_discrete_skin_candidate_v1,
+    )
+
+    evidence = read_rss_vnext_neural_evidence_v1(
+        index, child_refs=child_refs, read_object=read_object,
+    )
+    if evidence.mesh_status == "ABSTAIN" or evidence.dynamic is None:
+        raise RuntimeError("RSS_VNEXT_SKIN_REPLAY_ABSTAIN_NO_EXECUTABLE_EVIDENCE")
+    if "discrete_skin_weights" not in evidence.dynamic:
+        raise RuntimeError("RSS_VNEXT_SKIN_REPLAY_ABSTAIN_LEGACY_SOFT_ONLY")
+    model_config = read_rss_vnext_unified_model_config_v1(
+        index, child_refs=child_refs, read_object=read_object,
+    )
+    decoder, binding = read_rss_vnext_embedded_mira_decoder_v1(
+        index, child_refs=child_refs, read_object=read_object,
+        model_config=model_config,
+    )
+    return replay_rss_vnext_discrete_skin_candidate_v1(
+        mesh=evidence.mesh, dynamic=evidence.dynamic,
+        control_events=evidence.control_events,
+        model_config=model_config,
+        decoder=decoder,
+        checkpoint_sha256=index["unified_checkpoint_sha256"],
+        inference_evidence_hash=evidence.evidence_hash,
+        embedded_decoder_sha256=binding.checkpoint_hash,
+    )
+
+
 def read_rss_vnext_shared_neural_scene_v1(
     index: Mapping[str, Any],
     *,
@@ -256,4 +295,5 @@ __all__ = [
     "read_rss_vnext_neural_evidence_v1", "read_rss_vnext_shared_neural_scene_v1",
     "read_rss_vnext_unified_model_config_v1",
     "read_rss_vnext_embedded_mira_decoder_v1",
+    "read_rss_vnext_discrete_skin_replay_v1",
 ]

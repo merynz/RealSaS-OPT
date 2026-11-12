@@ -23,6 +23,9 @@ from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.rss_vnext_source_evidence_binding_v1 import (
     validate_rss_vnext_source_evidence_binding_v1,
 )
+from compiler.realsas_compiler_core.rss_vnext_source_ray_replay_v1 import (
+    replay_original_source_rays_v1,
+)
 from compiler.realsas_compiler_core.rss_vnext_two_view_raster_diagnostic_v1 import (
     compile_rss_vnext_two_view_raster_diagnostic_v1,
 )
@@ -238,6 +241,10 @@ def execute_rss_vnext_mesh_capability_v2(
         source=source, evidence=evidence,
         expected_source_binding_sha256=index["source_binding_sha256"],
     )
+    ray_replay = replay_original_source_rays_v1(
+        source=source, evidence=evidence,
+        source_identity_court=source_evidence_court,
+    )
     # Original source-alpha vs TESSA base/rest silhouettes, without inferred
     # hidden surface pixels or source-fidelity authority. This independent
     # measurement is bounded and survives topology ABSTAIN in the CAS DAG.
@@ -388,6 +395,9 @@ def execute_rss_vnext_mesh_capability_v2(
             "original_source_tensor_identity_state": source_evidence_court.state,
             "two_view_raster_diagnostic_state": raster_diagnostic.state,
             "two_view_raster_diagnostic_hash": raster_diagnostic.diagnostic_hash,
+            "original_source_ray_replay_state": ray_replay.state,
+            "original_source_ray_replay_hash": ray_replay.court_sha256,
+            "original_source_ray_replay_is_not_texture_authority": True,
             "two_view_raster_diagnostic_is_not_source_fidelity": True,
             "original_source_tensor_identity_is_not_source_fidelity": True,
             "canonical_mesh_authority": False,

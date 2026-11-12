@@ -263,3 +263,59 @@ def test_real_production_worker_fails_closed_if_pinned_local_dino_is_unavailable
         execute_rss_vnext_shape_capability_v3(
             request, read_object=read, put_bytes=put,
         )
+
+
+
+def test_lossless_registered_style_input_to_single_checkpoint_shape_real_e2e(tmp_path, monkeypatch):
+    from compiler.realsas_compiler_services.platform_worker.rss_vnext_input_executor_v2 import (
+        EXECUTOR_CONTRACT as INPUT_CONTRACT,
+        execute_rss_vnext_input_capability_v2,
+    )
+    source, cas, shape_request, read, put, vision, checkpoint, config = (
+        _make_executor_fixture(tmp_path, monkeypatch)
+    )
+    source_ref = shape_request["input_artifacts"][0]
+    input_request = {
+        "kind": "MODULE", "capability_id": "product.input",
+        "execution_id": "unit-two-view",
+        "capability_metadata": {"executor_contract": INPUT_CONTRACT},
+        "input_artifacts": [source_ref],
+        "model_releases": [],
+    }
+    input_result = execute_rss_vnext_input_capability_v2(
+        input_request, read_object=read, put_bytes=put,
+    )
+    assert input_result["status"] == "PASS"
+    assert len(input_result["outputs"]) == 1
+    forwarded = input_result["outputs"][0]
+    assert forwarded["content_sha256"] == source_ref["content_sha256"]
+    assert forwarded["size_bytes"] == source_ref["size_bytes"]
+    assert read(forwarded) == read(source_ref)
+    assert input_result["diagnostics"]["no_reencoding_or_resampling"]
+    assert not input_result["diagnostics"]["independent_dino_inference_performed"]
+    # The v2 Input output is the EXACT typed artifact expected by RSS Shape,
+    # not a lossy eight-view ShapeInput feature proxy.
+    shape_result = execute_rss_vnext_shape_capability_v3(
+        {**shape_request, "input_artifacts": [forwarded]},
+        read_object=read, put_bytes=put,
+        test_vision_encoder_factory=vision,
+    )
+    assert shape_result["status"] == "PASS"
+    assert shape_result["diagnostics"]["unified_inference_count"] == 1
+    index_ref = next(x for x in shape_result["outputs"] if x["role"] == "rss_evidence_fanout")
+    index = json.loads(read(index_ref))
+    assert index["source_artifact_sha256"] == forwarded["content_sha256"]
+    assert index["source_binding_sha256"] == source.source_binding_sha256
+    assert index["unified_checkpoint_sha256"] == checkpoint
+    assert all(row["content_sha256"] in cas for row in index["children"])
+    with pytest.raises(RuntimeError, match="EXACT_TWO_VIEW_SOURCE_REQUIRED"):
+        execute_rss_vnext_input_capability_v2(
+            {**input_request, "input_artifacts": [{
+                **source_ref, "artifact_type": "RealSaS.SourceObservation",
+            }]}, read_object=read, put_bytes=put,
+        )
+    with pytest.raises(RuntimeError, match="MODEL_RELEASE_FORBIDDEN"):
+        execute_rss_vnext_input_capability_v2(
+            {**input_request, "model_releases": shape_request["model_releases"]},
+            read_object=read, put_bytes=put,
+        )

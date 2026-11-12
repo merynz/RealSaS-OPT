@@ -345,6 +345,20 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
     metadata = dict(request.get("capability_metadata") or {})
     if (
         str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductInputTwoView.v2"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.rss_vnext_input_executor_v2 import (
+            execute_rss_vnext_input_capability_v2,
+        )
+
+        def run_rss_input(value):
+            return execute_rss_vnext_input_capability_v2(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            )
+        return await _with_heartbeat(run_rss_input, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
         and metadata.get("executor_contract") == "RealSaS.ProductInputInference.v1"
     ):
         from compiler.realsas_compiler_services.platform_worker.input_executor_v1 import (

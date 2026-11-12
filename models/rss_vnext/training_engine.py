@@ -41,7 +41,11 @@ from .early_semantic_field import (
     masked_source_semantic_evidence_loss,
     masked_semantic_expected_brier_risk_loss,
 )
-from .semantic_structure import qualified_source_region_pair_loss
+from .semantic_structure import (
+    qualified_source_region_pair_loss,
+    qualified_source_typed_relation_loss,
+    TYPED_REGION_RELATION_CHANNELS_V1,
+)
 from .semantic_geometry_prior import (
     RSSvNextSemanticLayerSpec, masked_qualified_surface_role_loss,
 )
@@ -81,6 +85,13 @@ class RSSvNextStructuralTrainingBatch:
     source_region_pair_is_same: Tensor | None = None  # [B,P] float 0/1; unknown masked
     source_region_pair_mask: Tensor | None = None     # [B,P] bool qualified
     source_region_pair_admission_key: str = ""
+    # Three independent SOURCE-BOUND relation teachers over exact 3D query
+    # pairs; these are NOT fixed anonymous slot labels. In particular, a part
+    # segmentation cannot supply an attachment/contact/motion teacher.
+    source_typed_relation_pair_indices: Tensor | None = None  # [B,P,2]
+    source_typed_relation_target: Tensor | None = None         # [B,P,3]
+    source_typed_relation_mask: Tensor | None = None           # [B,P,3] bool
+    source_typed_relation_admission_key: str = ""
     # Exact H(x)-addressed visible RGB source witnesses. These are original
     # source-ray samples with independent visibility/occlusion admission,
     # never invented per-vertex material colors or novel-view pseudo-labels.
@@ -128,6 +139,7 @@ class RSSvNextTrainingWeights:
     semantic_risk: float = 0.0  # opt-in: expected masked source-patch Brier risk
     surface_roles: float = 0.0  # opt-in only with exact-source 3D address receipt
     region_pairs: float = 0.0  # opt-in only with source-bound pair receipt
+    typed_relations: float = 0.0  # source-confirmed drawable/cut/directed attachment
     graphics_source_rgb: float = 0.0  # opt-in: qualified original visible rays
     source_udf: float = 0.0           # opt-in: source native unsigned distances
     source_inside_sign: float = 0.0   # opt-in: closed-solid signed occupancy
@@ -148,7 +160,8 @@ class RSSvNextTrainingWeights:
         if min(
             self.topology, self.motion_preference, self.source_semantics,
             self.semantic_risk,
-            self.surface_roles, self.region_pairs, self.graphics_source_rgb,
+            self.surface_roles, self.region_pairs, self.typed_relations,
+            self.graphics_source_rgb,
             self.source_udf, self.source_inside_sign,
             self.axis_rig_skin_codes, self.flexicubes_surface, self.flexicubes_animation,
             self.novel_view,
@@ -157,7 +170,7 @@ class RSSvNextTrainingWeights:
         if (
             self.topology + self.motion_preference
             + self.source_semantics + self.semantic_risk + self.surface_roles + self.region_pairs
-            + self.graphics_source_rgb + self.source_udf + self.source_inside_sign
+            + self.typed_relations + self.graphics_source_rgb + self.source_udf + self.source_inside_sign
             + self.axis_rig_skin_codes + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view <= 0
             or self.clip_gradient_norm <= 0
@@ -184,6 +197,8 @@ class RSSvNextTrainingResult:
     eligible_surface_role_points: int = 0
     region_pair_loss: Tensor | None = None
     eligible_region_pairs: int = 0
+    typed_relation_loss: Tensor | None = None
+    eligible_typed_relation_channels: tuple[int, int, int] = (0, 0, 0)
     graphics_source_rgb_loss: Tensor | None = None
     eligible_graphics_source_rgb_queries: int = 0
     source_udf_loss: Tensor | None = None
@@ -260,6 +275,7 @@ class RSSvNextStructuralTrainer:
         trusted_surface_role_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_semantic_patch_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_region_pair_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_typed_relation_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_axis_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_signed_source_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_graphics_rgb_registry: Mapping[str, Mapping[str, object]] | None = None,
@@ -351,6 +367,23 @@ class RSSvNextStructuralTrainer:
                 allow_nan=False,
             ).encode("utf8")).hexdigest()
             if region_snapshot else ""
+        )
+        # Source-space *typed* relation teaching has a separate registry;
+        # it must not borrow co-region supervision and call it attachment.
+        typed_relation_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_typed_relation_registry or {}).items()
+        }
+        self.trusted_typed_relation_registry = MappingProxyType({
+            key: MappingProxyType(value)
+            for key, value in typed_relation_snapshot.items()
+        })
+        self.typed_relation_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                typed_relation_snapshot, sort_keys=True, separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest()
+            if typed_relation_snapshot else ""
         )
         axis_snapshot = {
             str(key): dict(value)
@@ -714,6 +747,67 @@ class RSSvNextStructuralTrainer:
                 batch.source_region_pair_mask,
             )
             n_region_pairs = int(batch.source_region_pair_mask.sum().item())
+        # Source-bound typed pair relations, unlike anonymous slot co-membership,
+        # have THREE distinct qualifications. A source semantic part ID cannot
+        # masquerade as a drawable edit-consequence or mechanical attachment.
+        typed_relation_loss = None
+        typed_relation_counts = (0, 0, 0)
+        typed_fields = (
+            batch.source_typed_relation_pair_indices,
+            batch.source_typed_relation_target,
+            batch.source_typed_relation_mask,
+        )
+        typed_requested = (
+            any(x is not None for x in typed_fields)
+            or bool(batch.source_typed_relation_admission_key)
+        )
+        if typed_requested:
+            if any(x is None for x in typed_fields):
+                raise ValueError("RSS_VNEXT_TYPED_RELATION_TEACHER_INCOMPLETE")
+            if not batch.source_typed_relation_admission_key:
+                raise ValueError("RSS_VNEXT_TYPED_RELATION_ADMISSION_KEY_REQUIRED")
+            if self.weights.typed_relations <= 0:
+                raise ValueError("RSS_VNEXT_TYPED_RELATION_OBJECTIVE_NOT_ENABLED")
+            receipt = self.trusted_typed_relation_registry.get(
+                batch.source_typed_relation_admission_key,
+            )
+            if receipt is None or receipt.get("admission_status") != "QUALIFIED_SOURCE_TYPED_REGION_RELATIONS":
+                raise ValueError("RSS_VNEXT_TYPED_RELATION_UNTRUSTED_ADMISSION")
+            channels = receipt.get("channel_source_authority")
+            verified_kinds = (
+                "QUALIFIED_SOURCE_EDIT_DRAWABLE_CONSEQUENCE",
+                "QUALIFIED_SOURCE_GEOMETRIC_SEPARABILITY",
+                "QUALIFIED_SOURCE_CONTACT_AND_MOTION_INTERVENTION",
+            )
+            if (
+                receipt.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
+                or receipt.get("source_qualification_key") != batch.source_qualification_key
+                or receipt.get("query_xyz_sha256") != source_surface_tensor_sha256(state.query_xyz)
+                or receipt.get("pair_indices_sha256") != source_surface_tensor_sha256(batch.source_typed_relation_pair_indices)
+                or receipt.get("typed_targets_sha256") != source_surface_tensor_sha256(batch.source_typed_relation_target)
+                or receipt.get("typed_mask_sha256") != source_surface_tensor_sha256(batch.source_typed_relation_mask)
+                or receipt.get("original_rgba_sha256") != source_surface_tensor_sha256(batch.rgba)
+                or receipt.get("original_camera_sha256") != source_surface_tensor_sha256(batch.camera_features)
+                or receipt.get("supervision_semantics") != "SOURCE_QUERY_PAIR_TYPED_DRAWABLE_CUT_DIRECTED_ATTACHMENT_MASKED_V1"
+                or not isinstance(channels, dict)
+                or set(channels) != set(TYPED_REGION_RELATION_CHANNELS_V1)
+                or batch.source_typed_relation_pair_indices.shape[1] > self.model.cfg.max_pair_queries
+            ):
+                raise ValueError("RSS_VNEXT_TYPED_RELATION_RECEIPT_SOURCE_OR_ADDRESS_DRIFT")
+            for index, name in enumerate(TYPED_REGION_RELATION_CHANNELS_V1):
+                is_admitted = bool(batch.source_typed_relation_mask[..., index].any())
+                expected = verified_kinds[index] if is_admitted else "UNAVAILABLE"
+                if channels[name] != expected:
+                    raise ValueError("RSS_VNEXT_TYPED_RELATION_CHANNEL_AUTHORITY_INVALID:" + name)
+            typed_relation_loss, typed_relation_counts = qualified_source_typed_relation_loss(
+                state.semantic_logits,
+                state.region_relation_logits,
+                state.region_relation_valid_mask,
+                batch.source_typed_relation_pair_indices,
+                batch.source_typed_relation_target,
+                batch.source_typed_relation_mask,
+            )
+
         # Model geometry heads are learned separately. Source UDF remains
         # meaningful on open/uncertain surfaces; sign targets require a
         # closed-solid proof. Neither is made authoritative by a float label.
@@ -970,6 +1064,7 @@ class RSSvNextStructuralTrainer:
             and fc_loss is None and fc_anim_loss is None
             and novel_loss is None and surface_role_loss is None
             and region_pair_loss is None
+            and typed_relation_loss is None
             and graphics_rgb_loss is None and axis_loss is None
             and source_udf_loss is None and source_inside_sign_loss is None
         ):
@@ -983,6 +1078,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.semantic_risk, semantic_risk_loss),
                 (self.weights.surface_roles, surface_role_loss),
                 (self.weights.region_pairs, region_pair_loss),
+                (self.weights.typed_relations, typed_relation_loss),
                 (self.weights.graphics_source_rgb, graphics_rgb_loss),
                 (self.weights.source_udf, source_udf_loss),
                 (self.weights.source_inside_sign, source_inside_sign_loss),
@@ -1013,6 +1109,8 @@ class RSSvNextStructuralTrainer:
             eligible_surface_role_points=n_surface_role_points,
             region_pair_loss=region_pair_loss,
             eligible_region_pairs=n_region_pairs,
+            typed_relation_loss=typed_relation_loss,
+            eligible_typed_relation_channels=typed_relation_counts,
             graphics_source_rgb_loss=graphics_rgb_loss,
             eligible_graphics_source_rgb_queries=n_graphics_rgb,
             source_udf_loss=source_udf_loss,
@@ -1051,6 +1149,7 @@ class RSSvNextStructuralTrainer:
             "surface_role_registry_sha256": self.surface_role_registry_sha256,
             "semantic_patch_registry_sha256": self.semantic_patch_registry_sha256,
             "region_pair_registry_sha256": self.region_pair_registry_sha256,
+            "typed_relation_registry_sha256": self.typed_relation_registry_sha256,
             "axis_teacher_registry_sha256": self.axis_teacher_registry_sha256,
             "signed_source_registry_sha256": self.signed_source_registry_sha256,
             "graphics_rgb_registry_sha256": self.graphics_rgb_registry_sha256,
@@ -1093,6 +1192,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SEMANTIC_PATCH_REGISTRY_DRIFT")
         if data.get("region_pair_registry_sha256", "") != self.region_pair_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_REGION_PAIR_REGISTRY_DRIFT")
+        if data.get("typed_relation_registry_sha256", "") != self.typed_relation_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_TYPED_RELATION_REGISTRY_DRIFT")
         if data.get("axis_teacher_registry_sha256", "") != self.axis_teacher_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_AXIS_TEACHER_REGISTRY_DRIFT")
         if data.get("signed_source_registry_sha256", "") != self.signed_source_registry_sha256:

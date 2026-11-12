@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from hashlib import sha256
 from types import SimpleNamespace
 import pytest
 import torch
@@ -17,7 +18,7 @@ from models.rss_vnext.stdgen_cleanroom_diffusion_training_v1 import (
 
 
 def _render(asset="a", split="train", group="c", poses=True, count=6):
-    def h(x): return (x*64)[:64]
+    def h(x): return sha256(str(x).encode("utf-8")).hexdigest()
     return CleanroomDiffusionRenderRecordV1(
         source_asset_lineage_sha256=h(asset),
         dedup_family_sha256=h(group),
@@ -34,6 +35,7 @@ def _render(asset="a", split="train", group="c", poses=True, count=6):
         multiview_target_depth_sha256=tuple(h(str(i+40)) for i in range(count)),
         renderer_version_sha256=h("z"),
         source_pose_truth_available=poses,
+        source_asset_training_rights_independently_admitted=True,
     )
 
 

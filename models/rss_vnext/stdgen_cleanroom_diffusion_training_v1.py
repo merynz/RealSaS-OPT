@@ -63,7 +63,7 @@ class CleanroomDiffusionRenderRecordV1:
     schema: str = _TRAINING_SCHEMA
     training_truth_class: str = _RENDER_OWNER
     generated_diffusion_images_are_training_targets: bool = False
-    source_asset_training_rights_independently_admitted: bool = True
+    source_asset_training_rights_independently_admitted: bool = False
 
 
 def validate_render_record_v1(record: CleanroomDiffusionRenderRecordV1) -> None:
@@ -170,15 +170,19 @@ class AttentionLoRALinearV1(nn.Module):
             raise ValueError("RSS_VNEXT_DIFFUSION_LORA_CONFIG")
         self.base = linear
         self.base.requires_grad_(False)
-        self.lora_A = nn.Parameter(torch.empty((rank, linear.in_features)))
-        self.lora_B = nn.Parameter(torch.zeros((linear.out_features, rank)))
+        # Train LoRA factors in FP32 while keeping the original SD UNet
+        # projection and its half/bfloat16 dtype immutable.
+        self.lora_A = nn.Parameter(torch.empty((rank, linear.in_features),
+            device=linear.weight.device, dtype=torch.float32))
+        self.lora_B = nn.Parameter(torch.zeros((linear.out_features, rank),
+            device=linear.weight.device, dtype=torch.float32))
         nn.init.kaiming_uniform_(self.lora_A, a=math.sqrt(5))
         self.scale = alpha / rank
 
     def forward(self, x: Tensor) -> Tensor:
-        return self.base(x) + (
-            F.linear(F.linear(x, self.lora_A), self.lora_B) * self.scale
-        )
+        base = self.base(x)
+        delta = F.linear(F.linear(x.float(), self.lora_A), self.lora_B)
+        return base + (delta * self.scale).to(base.dtype)
 
 
 def install_attention_lora_v1(

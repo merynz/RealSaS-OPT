@@ -202,7 +202,7 @@ class StdGENFlexiCubesLayerRasterV1:
 
 
 def stdgen_joint_stage_loss_v1(
-    predicted: StdGENJointRayOutputV1, target: StdGENJointTargetV1,
+    predicted: StdGENJointRayOutputV1 | None, target: StdGENJointTargetV1,
     *,
     lpips_loss_fn: Callable[[Tensor,Tensor],Tensor] | None = None,
     mesh_raster: StdGENFlexiCubesLayerRasterV1 | None = None,
@@ -228,8 +228,16 @@ def stdgen_joint_stage_loss_v1(
         or target.stage not in (STAGE_1,STAGE_2,STAGE_3)
     ):
         raise ValueError("RSS_VNEXT_STDGEN_JOINT_TEACHER_NOT_ADMITTED_3D_RENDER")
-    b,r,_=predicted.rgb_white_composite.shape
-    k=predicted.semantic_mass.shape[-1]
+    if target.stage==STAGE_3:
+        if mesh_raster is None:
+            raise ValueError("RSS_VNEXT_STDGEN_JOINT_STAGE3_REQUIRES_FLEXICUBES_MESH_RENDER")
+        b,r,_=mesh_raster.rgb_white_composite.shape
+        k=mesh_raster.semantic_posterior.shape[-1]
+    else:
+        if type(predicted) is not StdGENJointRayOutputV1:
+            raise ValueError("RSS_VNEXT_STDGEN_JOINT_NERF_STAGE_RAYS_REQUIRED")
+        b,r,_=predicted.rgb_white_composite.shape
+        k=predicted.semantic_mass.shape[-1]
     if target.stage==STAGE_3:
         if (
             type(mesh_raster) is not StdGENFlexiCubesLayerRasterV1

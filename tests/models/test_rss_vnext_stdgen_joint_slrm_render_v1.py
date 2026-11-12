@@ -100,6 +100,32 @@ def test_stage3_requires_independent_mesh_render_and_all_3_losses():
     assert mesh.semantic_posterior.grad.abs().sum()>0
 
 
+def test_mesh_stage3_does_not_require_any_nerf_ray_prediction():
+    from dataclasses import replace
+    mesh=StdGENFlexiCubesLayerRasterV1(
+        rgb_white_composite=torch.ones((1,1,3),requires_grad=True)*.4,
+        alpha=torch.ones((1,1,1),requires_grad=True)*.8,
+        semantic_posterior=torch.tensor([[[.2,.8]]],requires_grad=True),
+        normal_xyz=torch.tensor([[[0.,0.,1.]]],requires_grad=True),
+        depth=torch.tensor([[[.6]]],requires_grad=True),
+        flexicubes_deformation_regularizer=torch.tensor(.1,requires_grad=True),
+        source_scene_prediction_sha256="a"*64,mesh_surface_prediction_sha256="b"*64,
+        semantic_layer_name="peeled",rasterizer_identity="nvdiffrast-cpu-standin",
+    )
+    terms=stdgen_joint_stage_loss_v1(
+        None,_target(STAGE_3),mesh_raster=mesh,
+        target_normal=torch.tensor([[[0.,0.,1.]]]),
+        target_depth=torch.tensor([[[.5]]]),
+        qualified_normal_mask=torch.ones((1,1),dtype=torch.bool),
+        qualified_depth_mask=torch.ones((1,1),dtype=torch.bool),
+    )
+    terms["total"].backward()
+    assert torch.isfinite(terms["total"])
+    assert mesh.semantic_posterior.grad.abs().sum()>0
+    with pytest.raises(ValueError,match="NERF_STAGE_RAYS_REQUIRED"):
+        stdgen_joint_stage_loss_v1(None,_target(STAGE_1))
+
+
 def test_generated_pseudotruth_and_bad_role_mask_rejected():
     from dataclasses import replace
     render,*_=_rays()

@@ -28,6 +28,7 @@ _CHILD_ROLES = frozenset((
 _DERIVED_ROLES = frozenset((
     "rss_computed_surface_candidate", "rss_sparse_face_relation_candidates",
     "rss_cross_expert_capability_court",
+    "rss_relation_epistemic_court",
 ))
 _FIELDS = frozenset((
     "schema", "source_ref", "fanout_index_ref", "preserved_children",
@@ -93,12 +94,13 @@ def seal_rss_vnext_evidence_continuity_v1(
         raise RuntimeError("RSS_VNEXT_CONTINUITY_CHILD_BINDING_DRIFT")
     if (
         type(derived_refs) is not tuple
-        or len(derived_refs) not in (2, 3)
+        or len(derived_refs) not in (3, 4)
         or {r.get("role") for r in derived_refs} - _DERIVED_ROLES
         or derived_refs[0].get("role") != "rss_computed_surface_candidate"
+        or derived_refs[-2].get("role") != "rss_relation_epistemic_court"
         or derived_refs[-1].get("role") != "rss_cross_expert_capability_court"
         or len({r.get("role") for r in derived_refs}) != len(derived_refs)
-        or (index["mesh_status"] == "ABSTAIN" and len(derived_refs) != 2)
+        or (index["mesh_status"] == "ABSTAIN" and len(derived_refs) != 3)
     ):
         raise RuntimeError("RSS_VNEXT_CONTINUITY_DERIVED_CANDIDATE_DOMAIN")
     children = [_reference(bound[role]) for role in sorted(_CHILD_ROLES)]

@@ -33,6 +33,10 @@ from compiler.realsas_compiler_core.rss_vnext_face_relation_schedule_v1 import (
 from compiler.realsas_compiler_core.rss_vnext_cross_expert_capability_court_v1 import (
     compile_rss_vnext_cross_expert_capability_court_v1,
 )
+from compiler.realsas_compiler_core.rss_vnext_relation_epistemic_court_v1 import (
+    adjudicate_rss_vnext_relations_v1,
+    learned_face_relation_assertions_v1,
+)
 from compiler.realsas_compiler_services.platform_worker.rss_vnext_evidence_continuity_v1 import (
     ARTIFACT_TYPE as CONTINUITY_ARTIFACT_TYPE,
     ROLE as CONTINUITY_ROLE,
@@ -272,6 +276,22 @@ def execute_rss_vnext_mesh_capability_v2(
             artifact_type="RealSaS.RSSvNextSparseCandidateFaceRelations",
             put_bytes=put_bytes,
         ))
+    # Keep all three learned relation channels independently typed. The
+    # actual scores remain UNQUALIFIED, not boolean contact, cut, z-buffer
+    # order or source truth; no averaging or implicit binary complement.
+    relation_epistemic = adjudicate_rss_vnext_relations_v1(
+        learned_face_relation_assertions_v1(
+            relation, inference_evidence_hash=evidence.evidence_hash,
+            candidate_mesh_sha256=surface.candidate_mesh_sha256,
+        ) if relation is not None else (),
+        inference_evidence_hash=evidence.evidence_hash,
+        candidate_mesh_sha256=surface.candidate_mesh_sha256,
+    )
+    output.append(_store_json(
+        asdict(relation_epistemic), role="rss_relation_epistemic_court",
+        artifact_type="RealSaS.RSSvNextRelationEpistemicCourt",
+        put_bytes=put_bytes,
+    ))
     # Reconcile specialist proposals against exact topology/source address
     # ownership. This court cannot mint a rig, drawable or source appearance.
     court = compile_rss_vnext_cross_expert_capability_court_v1(
@@ -304,6 +324,7 @@ def execute_rss_vnext_mesh_capability_v2(
             "computed_face_count": len(surface.faces),
             "candidate_mesh_hash": surface.candidate_mesh_sha256,
             "cross_expert_capability_state": court.state,
+            "relation_epistemic_state": relation_epistemic.state,
             "independent_executable_capabilities_qualified": False,
             "neural_scene_preserved_parent_cas": children["neural_scene"]["content_sha256"],
             "neural_scene_replaced_by_surface": False,

@@ -239,15 +239,12 @@ def test_refinement_is_geometry_proposal_not_original_rgba_or_source_visibility(
     ("replaced_parent_hash", "CONTENT_DRIFT"),
     ("wrong_source_receipt", "CONTENT_DRIFT"),
     ("wrong_producer", "CONTENT_DRIFT"),
-    ("registry_absent", "INDEPENDENT_SOURCE_ADMISSION_REGISTRY_REQUIRED"),
 ])
 def test_source_witness_digest_is_not_sufficient_for_source_admission(tamper, expected):
     kw = _parents()
     key = kw["source_correspondence_receipt_sha256"]
     if tamper == "unregistered_digest":
         kw["source_correspondence_receipt_sha256"] = "f" * 64
-    elif tamper == "registry_absent":
-        kw["trusted_source_correspondence_registry"] = None
     else:
         value = dict(kw["trusted_source_correspondence_registry"][key])
         if tamper == "replaced_parent_hash":
@@ -282,3 +279,13 @@ def test_same_receipt_cannot_be_replayed_against_another_source_correspondence()
     kw["source_supports_by_vertex"] = altered
     with pytest.raises(QualificationError, match="REGISTERED_PARENT_DRIFT"):
         _compile(kw)
+
+
+def test_missing_source_admission_registry_abstains_without_qualifying_candidate():
+    kw = _parents()
+    kw["trusted_source_correspondence_registry"] = None
+    result = _compile(kw)
+    assert result.state == "ABSTAIN_SOURCE_CORRESPONDENCE_REQUIRED"
+    assert "INDEPENDENT_SOURCE_CORRESPONDENCE_REGISTRY" in result.missing_requirements
+    assert result.candidate is None
+    assert result.canonical_mesh_authority is False

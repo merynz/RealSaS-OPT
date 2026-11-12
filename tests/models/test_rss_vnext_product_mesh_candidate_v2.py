@@ -216,7 +216,7 @@ def test_mesh_refuses_parent_swaps_and_missing_config_child(tmp_path, monkeypatc
             }},
             read_object=read, put_bytes=put,
         )
-    with pytest.raises(RuntimeError, match="EXPECTS_SOURCE_INDEX_AND_SIX_CHILDREN"):
+    with pytest.raises(RuntimeError, match="EXPECTS_SOURCE_INDEX_AND_SEVEN_CHILDREN"):
         execute_rss_vnext_mesh_capability_v2(
             {**req, "input_artifacts": [
                 x for x in req["input_artifacts"]

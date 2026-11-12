@@ -93,6 +93,7 @@ func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descripto
 				map[string]any{"role": "neural_scene", "artifact_type": "RealSaS.RSSvNextNeuralSceneCarrier", "schema_version": "v1"},
 				map[string]any{"role": "inference_receipt", "artifact_type": "RealSaS.RSSvNextInferenceReceipt", "schema_version": "v2"},
 				map[string]any{"role": "unified_model_config", "artifact_type": "RealSaS.RSSvNextUnifiedModelConfig", "schema_version": "v1"},
+				map[string]any{"role": "embedded_mira_decoder", "artifact_type": "RealSaS.RSSvNextEmbeddedMIRADecoder", "schema_version": "v1"},
 				map[string]any{"role": "rss_evidence_fanout", "artifact_type": "RealSaS.RSSvNextProductEvidenceFanout", "schema_version": "v1"},
 			},
 			"input_observed_front_back_only":     true,

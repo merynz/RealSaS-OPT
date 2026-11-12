@@ -57,6 +57,9 @@ _RSS_RECEIPT_FILES = (
     ("unified_model_config", "rss_vnext_unified_model_config.json",
      "RealSaS.RSSvNextUnifiedModelConfig", "v1",
      "EXACT_CODEC_AND_SPECIALIST_ARCHITECTURE_NO_PRODUCT_AUTHORITY"),
+    ("embedded_mira_decoder", "rss_vnext_embedded_mira_decoder.pt",
+     "RealSaS.RSSvNextEmbeddedMIRADecoder", "v1",
+     "EXACT_UNIFIED_MODEL_SUBMODULE_WEIGHTS_NOT_SKIN_AUTHORITY"),
 )
 
 

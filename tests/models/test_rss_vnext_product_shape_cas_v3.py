@@ -171,6 +171,7 @@ def test_one_rss_checkpoint_emits_six_independent_cas_outputs_even_on_abstain(tm
     assert set(by_role) == {
         "original_source", "normalized_model_source", "neural_evidence",
         "neural_scene", "inference_receipt", "unified_model_config",
+        "embedded_mira_decoder",
         "rss_evidence_fanout",
     }
     assert len({row["content_sha256"] for row in result["outputs"]}) == len(by_role)
@@ -183,7 +184,7 @@ def test_one_rss_checkpoint_emits_six_independent_cas_outputs_even_on_abstain(tm
     assert not index["original_source_rights_verified"]
     assert not index["canonical_mesh_authority"]
     assert index["topology_abstain_retains_shared_carrier"]
-    assert len(index["children"]) == 6
+    assert len(index["children"]) == 7
     assert {x["content_sha256"] for x in index["children"]} == {
         by_role[x["role"]]["content_sha256"] for x in index["children"]
     }
@@ -191,6 +192,12 @@ def test_one_rss_checkpoint_emits_six_independent_cas_outputs_even_on_abstain(tm
     receipt = json.loads(read(by_role["inference_receipt"]))
     evidence = json.loads(read(by_role["neural_evidence"]))
     assert receipt["checkpoint_sha256"] == checkpoint
+    assert receipt["embedded_mira_decoder_schema"] == "RealSaS.RSSvNext.EmbeddedMIRADecoder.v1"
+    assert receipt["embedded_mira_decoder_file_sha256"] == by_role[
+        "embedded_mira_decoder"
+    ]["content_sha256"]
+    assert receipt["embedded_mira_independent_release_required"] is False
+    assert receipt["embedded_mira_discrete_runtime_parity_qualified"] is False
     from models.rss_vnext.model_config_archive_v1 import (
         decode_rss_vnext_unified_model_config_v1,
     )
@@ -224,7 +231,7 @@ def test_one_rss_checkpoint_emits_six_independent_cas_outputs_even_on_abstain(tm
     assert tensors["region_relation_logits"].shape[-1] == 3
     assert tensors["graphics_logits"].shape[-1] == 5
     assert torch.equal(tensors["geometry__H"], tensors["local_features"])
-    assert len(cas) == 9  # canonical source + checkpoint + seven output CAS
+    assert len(cas) == 10  # canonical source + checkpoint + eight Shape output CAS
 
 
 def test_wrong_model_family_and_untrusted_source_fail_before_inference(tmp_path, monkeypatch):
@@ -345,6 +352,7 @@ def test_independent_compiler_cas_fanout_reader_validates_index_and_skips_unused
         read_rss_vnext_neural_evidence_v1,
         read_rss_vnext_shared_neural_scene_v1,
         read_rss_vnext_unified_model_config_v1,
+        read_rss_vnext_embedded_mira_decoder_v1,
     )
     source, cas, result, request, read, put, vision, checkpoint, config = (
         _run(tmp_path, monkeypatch)
@@ -366,6 +374,15 @@ def test_independent_compiler_cas_fanout_reader_validates_index_and_skips_unused
         index, child_refs=child, read_object=read,
     )
     assert cfg == config
+    decoder, codec_binding = read_rss_vnext_embedded_mira_decoder_v1(
+        index, child_refs=child, read_object=read, model_config=cfg,
+    )
+    assert decoder.codec.config.vocab_size == cfg.axis_config().skin_vocab_size
+    assert codec_binding.checkpoint_hash == child[
+        "embedded_mira_decoder"
+    ]["content_sha256"]
+    assert codec_binding.checkpoint_hash != checkpoint
+    assert codec_binding.tokens_per_joint == cfg.skin_tokens_per_joint
     def evidence_only(ref):
         # Critical non-bottleneck proof: Mesh/Semantic can inspect the small
         # typed evidence without decompressing the full triplane archive.

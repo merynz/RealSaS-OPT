@@ -344,6 +344,8 @@ def test_real_checkpoint_two_view_model_to_replayable_compiler_receipt(tmp_path)
     assert receipt["unified_model_config_sha256"] == architecture_digest(net.cfg)
     assert (out_dir / "rss_vnext_neural_scene.npz").is_file()
     assert (out_dir / "rss_vnext_unified_model_config.json").is_file()
+    assert (out_dir / "rss_vnext_embedded_mira_decoder.pt").is_file()
+    assert receipt["embedded_mira_independent_release_required"] is False
     from models.rss_vnext.inference_pipeline_v1 import read_compiler_expert_fanout_v1
     fanout = read_compiler_expert_fanout_v1(
         out_dir, expected_checkpoint_sha256=digest, model_config=net.cfg,

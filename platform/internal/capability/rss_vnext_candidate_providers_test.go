@@ -49,8 +49,8 @@ func TestRSSvNextTwoViewInputAndSingleModelShapeFormOneCandidateRoleGraph(t *tes
 		t.Fatalf("RSS model ABI drift: %+v", requirements[0])
 	}
 	aux, ok := shape.Metadata["auxiliary_outputs"].([]any)
-	if !ok || len(aux) != 6 {
-		t.Fatalf("RSS must preserve six independently consumable CAS outputs: %+v", aux)
+	if !ok || len(aux) != 7 {
+		t.Fatalf("RSS must preserve seven independently consumable CAS outputs: %+v", aux)
 	}
 	wanted := map[string]bool{
 		"original_source":         true,
@@ -58,6 +58,7 @@ func TestRSSvNextTwoViewInputAndSingleModelShapeFormOneCandidateRoleGraph(t *tes
 		"neural_scene":            true,
 		"inference_receipt":       true,
 		"unified_model_config":    true,
+		"embedded_mira_decoder":  true,
 		"rss_evidence_fanout":     true,
 	}
 	for _, raw := range aux {

@@ -67,8 +67,8 @@ def _read_cas(ref: dict[str, Any], read_object: Callable[[dict[str, Any]], bytes
 
 def _parents(request: dict[str, Any]):
     refs = list(request.get("input_artifacts") or ())
-    if len(refs) != 8 or any(type(x) is not dict for x in refs):
-        raise RuntimeError("RSS_VNEXT_MESH_EXPECTS_SOURCE_INDEX_AND_SIX_CHILDREN")
+    if len(refs) != 9 or any(type(x) is not dict for x in refs):
+        raise RuntimeError("RSS_VNEXT_MESH_EXPECTS_SOURCE_INDEX_AND_SEVEN_CHILDREN")
     sources = [x for x in refs if x.get("artifact_type") == SOURCE_ARTIFACT_TYPE]
     indexes = [x for x in refs if x.get("artifact_type") == INDEX_ARTIFACT_TYPE]
     if len(sources) != 1 or len(indexes) != 1:
@@ -105,6 +105,7 @@ def _read_receipt(
         "unified_model_config_sha256": index["unified_model_config_sha256"],
         "unified_model_config_file_sha256": children["unified_model_config"]["content_sha256"],
         "neural_scene_file_sha256": children["neural_scene"]["content_sha256"],
+        "embedded_mira_decoder_file_sha256": children["embedded_mira_decoder"]["content_sha256"],
         "evidence_file_sha256": children["neural_evidence"]["content_sha256"],
         "source_archive_sha256": children["normalized_model_source"]["content_sha256"],
         "canonical_source_file_sha256": children["original_source"]["content_sha256"],
@@ -119,6 +120,9 @@ def _read_receipt(
         receipt.get("source_rights_verified") is not False
         or receipt.get("product_revision_minted") is not False
         or receipt.get("neural_scene_product_authority") is not False
+        or receipt.get("embedded_mira_decoder_schema") != "RealSaS.RSSvNext.EmbeddedMIRADecoder.v1"
+        or receipt.get("embedded_mira_independent_release_required") is not False
+        or receipt.get("embedded_mira_discrete_runtime_parity_qualified") is not False
         or receipt.get("observed_view_count") != 2
     ):
         raise RuntimeError("RSS_VNEXT_MESH_INFERENCE_RECEIPT_PREMATURE_AUTHORITY")

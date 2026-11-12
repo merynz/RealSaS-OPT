@@ -27,6 +27,7 @@ _CHILDREN = {
     "neural_scene": ("RealSaS.RSSvNextNeuralSceneCarrier", "v1"),
     "inference_receipt": ("RealSaS.RSSvNextInferenceReceipt", "v2"),
     "unified_model_config": ("RealSaS.RSSvNextUnifiedModelConfig", "v1"),
+    "embedded_mira_decoder": ("RealSaS.RSSvNextEmbeddedMIRADecoder", "v1"),
 }
 _INDEX_FIELDS = {
     "schema", "source_artifact_sha256", "source_binding_sha256",
@@ -203,6 +204,34 @@ def read_rss_vnext_unified_model_config_v1(
     )
 
 
+def read_rss_vnext_embedded_mira_decoder_v1(
+    index: Mapping[str, Any], *,
+    child_refs: Mapping[str, dict[str, Any]],
+    read_object: Callable[[dict[str, Any]], bytes],
+    model_config: Any,
+):
+    """Open pinned SkinTokens-style FSQ decoder only when Mechanics needs it.
+
+    Metadata-only Mesh and Semantic readers never materialize decoder weights.
+    Returned AXIS codec binding uses actual serialized MIRA submodule bytes,
+    not an arbitrary external model-release hash. Product skin authorization
+    remains a separate dense-deformation and discrete-code parity court.
+    """
+    from models.rss_vnext.embedded_mira_decoder_v1 import (
+        load_embedded_mira_decoder_v1,
+    )
+    row = child_refs["embedded_mira_decoder"]
+    payload = read_object(row)
+    _cas_bytes(row, payload, error_prefix="RSS_VNEXT_EMBEDDED_MIRA")
+    return load_embedded_mira_decoder_v1(
+        payload,
+        expected_parent_unified_checkpoint_sha256=index["unified_checkpoint_sha256"],
+        expected_subcheckpoint_sha256=row["content_sha256"],
+        expected_model_config_sha256=index["unified_model_config_sha256"],
+        model_config=model_config,
+    )
+
+
 def read_rss_vnext_shared_neural_scene_v1(
     index: Mapping[str, Any],
     *,
@@ -226,4 +255,5 @@ __all__ = [
     "validate_rss_vnext_fanout_index_v1", "bind_rss_vnext_fanout_refs_v1",
     "read_rss_vnext_neural_evidence_v1", "read_rss_vnext_shared_neural_scene_v1",
     "read_rss_vnext_unified_model_config_v1",
+    "read_rss_vnext_embedded_mira_decoder_v1",
 ]

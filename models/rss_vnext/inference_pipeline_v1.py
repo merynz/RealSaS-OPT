@@ -31,6 +31,10 @@ from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
     validate_inference_evidence_v1,
 )
 from .inference_checkpoint_v1 import load_inference_checkpoint_v1
+from .embedded_mira_decoder_v1 import (
+    SCHEMA as EMBEDDED_MIRA_SCHEMA,
+    encode_embedded_mira_decoder_v1,
+)
 from .model_config_archive_v1 import (
     encode_rss_vnext_unified_model_config_v1,
     decode_rss_vnext_unified_model_config_v1,
@@ -49,6 +53,7 @@ _RECEIPT_FILES = ("observed_source_tensors.npz", "neural_evidence.json", "infere
 _ORIGINAL_SOURCE_FILE = "original_two_view_source.npz"
 _NEURAL_SCENE_FILE = "rss_vnext_neural_scene.npz"
 _UNIFIED_CONFIG_FILE = "rss_vnext_unified_model_config.json"
+_EMBEDDED_MIRA_FILE = "rss_vnext_embedded_mira_decoder.pt"
 _MAX_SOURCE_BYTES = 128 * 1024 * 1024
 
 
@@ -132,7 +137,7 @@ def run_two_view_to_compiler_proposal_v1(
     target = Path(output_directory).resolve()
     target.mkdir(parents=True, exist_ok=True)
     # Refuse accidental reuse of an existing receipt: revision lineage is immutable.
-    if any((target / name).exists() for name in (*_RECEIPT_FILES, _ORIGINAL_SOURCE_FILE, _NEURAL_SCENE_FILE, _UNIFIED_CONFIG_FILE)):
+    if any((target / name).exists() for name in (*_RECEIPT_FILES, _ORIGINAL_SOURCE_FILE, _NEURAL_SCENE_FILE, _UNIFIED_CONFIG_FILE, _EMBEDDED_MIRA_FILE)):
         raise RuntimeError("RSS_VNEXT_RUN_OUTPUT_REVISION_ALREADY_EXISTS")
     model = load_inference_checkpoint_v1(
         checkpoint_path,
@@ -159,6 +164,13 @@ def run_two_view_to_compiler_proposal_v1(
     validate_inference_evidence_v1(
         evidence, expected_checkpoint_sha256=expected_checkpoint_sha256,
     )
+    # Export the actual embedded MIRA FSQ + spatial decoder weights from this
+    # SAME unified checkpoint. No fake independent MIRA model release or
+    # launcher-supplied codec digest is allowed to establish skin-code meaning.
+    mira_decoder_bytes = encode_embedded_mira_decoder_v1(
+        model, parent_unified_checkpoint_sha256=expected_checkpoint_sha256,
+    )
+    _atomic_bytes(target / _EMBEDDED_MIRA_FILE, mira_decoder_bytes)
     # Persist the exact codec/model architecture separately so Compiler
     # can replay TESSA and the joint region schema WITHOUT loading a second
     # checkpoint or guessing hidden training configuration.
@@ -201,6 +213,10 @@ def run_two_view_to_compiler_proposal_v1(
         "checkpoint_sha256": expected_checkpoint_sha256,
         "unified_model_config_sha256": _unified_config_digest_v1(model.cfg),
         "unified_model_config_file_sha256": _digest_file(target / _UNIFIED_CONFIG_FILE),
+        "embedded_mira_decoder_schema": EMBEDDED_MIRA_SCHEMA,
+        "embedded_mira_decoder_file_sha256": _digest_file(target / _EMBEDDED_MIRA_FILE),
+        "embedded_mira_independent_release_required": False,
+        "embedded_mira_discrete_runtime_parity_qualified": False,
         "source_archive_sha256": _digest_file(source_path),
         "evidence_file_sha256": _digest_file(evidence_path),
         "neural_scene_schema": NEURAL_SCENE_SCHEMA,
@@ -280,6 +296,16 @@ def read_compiler_proposal_receipt_v1(
         or receipt.get("neural_scene_product_authority") is not False
     ):
         raise RuntimeError("RSS_VNEXT_RECEIPT_NEURAL_CARRIER_POLICY_DRIFT")
+    mira_path = root / _EMBEDDED_MIRA_FILE
+    if (
+        receipt.get("embedded_mira_decoder_schema") != EMBEDDED_MIRA_SCHEMA
+        or receipt.get("embedded_mira_independent_release_required") is not False
+        or receipt.get("embedded_mira_discrete_runtime_parity_qualified") is not False
+        or not mira_path.is_file()
+        or mira_path.stat().st_size > 512 * 1024 * 1024
+        or _digest_file(mira_path) != receipt.get("embedded_mira_decoder_file_sha256")
+    ):
+        raise RuntimeError("RSS_VNEXT_RECEIPT_EMBEDDED_MIRA_PARENT_OR_BYTES_DRIFT")
     cfg_path = root / _UNIFIED_CONFIG_FILE
     if (
         not cfg_path.is_file()

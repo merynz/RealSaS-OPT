@@ -35,6 +35,10 @@ Names tied to a specific experiment, oracle substrate, corpus triage, one-family
 
 They may be extremely valuable evidence, but they never become canonical ownership merely because they pass.
 
+## Main-owned CI/runner/GC machine authority
+
+`canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json`, `docs/platform/PLATFORM_CI_OPERATIONS_AUTHORITY.md` and `tests/repository/test_platform_ci_operations_authority_v1.py` are the canonical policy. Read-only stale-queue observation uses `ci_queue_sentinel_v1.yml`; never use local cache GC as an Actions cleanup mechanism.
+
 ## Workflow rules
 
 1. New production CI must name the contract it enforces, not a person/family/witness.

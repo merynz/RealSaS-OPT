@@ -22,6 +22,9 @@ from compiler.realsas_compiler_services.platform_worker.rss_vnext_mesh_executor_
     PARENT_BINDING_SCHEMA,
     execute_rss_vnext_mesh_capability_v2,
 )
+from compiler.realsas_compiler_services.platform_worker.rss_vnext_evidence_continuity_v1 import (
+    validate_rss_vnext_evidence_continuity_v1,
+)
 from models.rss_vnext.unified_character_model import RSSvNextUnifiedCharacterModel
 from models.tessa.v1.model_v1 import TESSAConfigV1
 from models.tessa.v1.tokenization_v1 import encode_adjacent_teacher_mesh_v1
@@ -123,7 +126,7 @@ def test_mesh_compiler_abstains_without_reading_or_discarding_shared_h(tmp_path,
         request, read_object=no_heavy_scene, put_bytes=put,
     )
     assert result["status"] == "PASS"
-    assert len(result["outputs"]) == 1
+    assert len(result["outputs"]) == 2
     assert "RealSaS.RSSvNextNeuralSceneCarrier" not in read_roles
     assert scene_ref["content_sha256"] in cas  # unchanged!
     decision = json.loads(read(result["outputs"][0]))
@@ -135,6 +138,37 @@ def test_mesh_compiler_abstains_without_reading_or_discarding_shared_h(tmp_path,
     assert not decision["independent_editability_authority"]
     assert not result["diagnostics"]["product_revision_minted"]
     assert not result["diagnostics"]["executable_rig_skin_qualified"]
+    # ABSTAIN preserves every independent expert's original artifact bytes.
+    continuation = json.loads(read(next(
+        r for r in result["outputs"] if r["role"] == "rss_evidence_continuity"
+    )))
+    assert continuation["mesh_status"] == "ABSTAIN"
+    assert not continuation["has_product_authority"]
+    assert not continuation["neural_scene_replaced_by_candidate"]
+    assert len(continuation["preserved_children"]) == 7
+    assert {r["role"] for r in continuation["preserved_children"]} == {
+        "original_source", "normalized_model_source", "neural_evidence",
+        "neural_scene", "inference_receipt", "unified_model_config",
+        "embedded_mira_decoder",
+    }
+    fanout_ref = next(r for r in shape["outputs"] if r["role"] == "rss_evidence_fanout")
+    index = json.loads(read(fanout_ref))
+    children = {r["role"]: r for r in shape["outputs"] if r["role"] in {
+        child["role"] for child in index["children"]
+    }}
+    validate_rss_vnext_evidence_continuity_v1(
+        continuation, index=index, source_ref=original["input_artifacts"][0],
+        index_ref=fanout_ref, child_refs=children,
+        derived_refs=tuple(r for r in result["outputs"] if r["role"] != "rss_evidence_continuity"),
+    )
+    broken = json.loads(json.dumps(continuation))
+    broken["preserved_children"].pop()
+    with pytest.raises(RuntimeError, match="CONTINUITY_RECEIPT_HASH_OR_AUTHORITY_DRIFT"):
+        validate_rss_vnext_evidence_continuity_v1(
+            broken, index=index, source_ref=original["input_artifacts"][0],
+            index_ref=fanout_ref, child_refs=children,
+            derived_refs=tuple(r for r in result["outputs"] if r["role"] != "rss_evidence_continuity"),
+        )
 
 
 def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_relation(tmp_path, monkeypatch):
@@ -150,11 +184,12 @@ def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_re
         request, read_object=read, put_bytes=put,
     )
     assert mesh["status"] == "PASS"
-    assert len(mesh["outputs"]) == 2
+    assert len(mesh["outputs"]) == 3
     by_role = {r["role"]: r for r in mesh["outputs"]}
     assert set(by_role) == {
         "rss_computed_surface_candidate",
         "rss_sparse_face_relation_candidates",
+        "rss_evidence_continuity",
     }
     out = json.loads(read(by_role["rss_computed_surface_candidate"]))
     relations = json.loads(read(by_role["rss_sparse_face_relation_candidates"]))
@@ -193,6 +228,16 @@ def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_re
     assert mesh["diagnostics"]["canonical_mesh_authority"] is False
     assert mesh["diagnostics"]["executable_rig_skin_qualified"] is False
     assert not mesh["diagnostics"]["product_revision_minted"]
+    continuation = json.loads(read(by_role["rss_evidence_continuity"]))
+    assert continuation["mesh_status"] == "UNQUALIFIED_MESH_CANDIDATE"
+    assert len(continuation["derived_candidates"]) == 2
+    assert len(continuation["preserved_children"]) == 7
+    parent_index_ref = next(r for r in shape["outputs"] if r["role"] == "rss_evidence_fanout")
+    parent_index = json.loads(read(parent_index_ref))
+    assert continuation["evidence_hash"] == parent_index["evidence_hash"]
+    assert continuation["fanout_index_ref"]["content_sha256"] == parent_index_ref["content_sha256"]
+    assert continuation["source_ref"]["content_sha256"] == original["input_artifacts"][0]["content_sha256"]
+    assert mesh["diagnostics"]["all_seven_neural_expert_children_preserved_by_reference"]
 
 
 def test_mesh_refuses_parent_swaps_and_missing_config_child(tmp_path, monkeypatch):

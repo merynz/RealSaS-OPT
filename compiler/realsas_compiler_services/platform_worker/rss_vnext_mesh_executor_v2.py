@@ -30,6 +30,11 @@ from compiler.realsas_compiler_core.rss_vnext_surface_decisions_v1 import (
 from compiler.realsas_compiler_core.rss_vnext_face_relation_schedule_v1 import (
     compile_rss_vnext_sparse_face_relations_v1,
 )
+from compiler.realsas_compiler_services.platform_worker.rss_vnext_evidence_continuity_v1 import (
+    ARTIFACT_TYPE as CONTINUITY_ARTIFACT_TYPE,
+    ROLE as CONTINUITY_ROLE,
+    seal_rss_vnext_evidence_continuity_v1,
+)
 from compiler.realsas_compiler_services.platform_worker.rss_vnext_source_codec_v1 import (
     ARTIFACT_TYPE as SOURCE_ARTIFACT_TYPE,
     validate_rss_vnext_source_ref_v1,
@@ -247,6 +252,8 @@ def execute_rss_vnext_mesh_capability_v2(
             fanout, surface, requested_face_pairs=pair_list,
         )
 
+    # A candidate mesh is a DERIVED VIEW; the original seven model/source
+    # children must remain separately addressable by every later expert.
     output = [
         _store_json(
             asdict(surface),
@@ -262,6 +269,17 @@ def execute_rss_vnext_mesh_capability_v2(
             artifact_type="RealSaS.RSSvNextSparseCandidateFaceRelations",
             put_bytes=put_bytes,
         ))
+    # Transport the exact input CAS references, not a lossy summary, through
+    # product.mesh. Even ABSTAIN must retain H(x), both source views, TESSA
+    # context, the MIRA decoder and every independent expert readout.
+    continuity = seal_rss_vnext_evidence_continuity_v1(
+        index=index, source_ref=source_ref, index_ref=index_ref,
+        child_refs=children, derived_refs=tuple(output),
+    )
+    output.append(_store_json(
+        continuity, role=CONTINUITY_ROLE,
+        artifact_type=CONTINUITY_ARTIFACT_TYPE, put_bytes=put_bytes,
+    ))
     return {
         "capability_id": "product.mesh",
         "status": "PASS",
@@ -274,6 +292,8 @@ def execute_rss_vnext_mesh_capability_v2(
             "candidate_mesh_hash": surface.candidate_mesh_sha256,
             "neural_scene_preserved_parent_cas": children["neural_scene"]["content_sha256"],
             "neural_scene_replaced_by_surface": False,
+            "evidence_continuity_hash": continuity["continuity_hash"],
+            "all_seven_neural_expert_children_preserved_by_reference": True,
             "source_surface_qualified": False,
             "canonical_mesh_authority": False,
             "source_visibility_authority": False,

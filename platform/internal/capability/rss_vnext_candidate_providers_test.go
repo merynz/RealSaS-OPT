@@ -49,14 +49,15 @@ func TestRSSvNextTwoViewInputAndSingleModelShapeFormOneCandidateRoleGraph(t *tes
 		t.Fatalf("RSS model ABI drift: %+v", requirements[0])
 	}
 	aux, ok := shape.Metadata["auxiliary_outputs"].([]any)
-	if !ok || len(aux) != 5 {
-		t.Fatalf("RSS must preserve five independently consumable CAS outputs: %+v", aux)
+	if !ok || len(aux) != 6 {
+		t.Fatalf("RSS must preserve six independently consumable CAS outputs: %+v", aux)
 	}
 	wanted := map[string]bool{
 		"original_source":         true,
 		"normalized_model_source": true,
 		"neural_scene":            true,
 		"inference_receipt":       true,
+		"unified_model_config":    true,
 		"rss_evidence_fanout":     true,
 	}
 	for _, raw := range aux {
@@ -100,5 +101,58 @@ func TestRSSvNextProvidersAreAlternativesNotParallelIndependentProductModels(t *
 	)
 	if err == nil || !strings.Contains(err.Error(), "duplicate capability id") {
 		t.Fatalf("Historical and RSS product.shape both active: %v", err)
+	}
+}
+
+
+func TestRSSvNextCandidateMeshConsumesExactUnifiedShapeNotOldEightViewStages(t *testing.T) {
+	registry, err := Build(
+		context.Background(),
+		RSSvNextInputCandidateProvider{},
+		RSSvNextShapeCandidateProvider{},
+		RSSvNextMeshCandidateProvider{},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resolved, err := registry.Resolve(ProductMeshCapabilityID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(resolved) != 3 || resolved[0].ID != ProductInputCapabilityID ||
+		resolved[1].ID != ProductShapeCapabilityID ||
+		resolved[2].ID != ProductMeshCapabilityID {
+		t.Fatalf("RSS Input→Shape→Mesh dependency drift: %+v", resolved)
+	}
+	mesh, ok := registry.Get(ProductMeshCapabilityID)
+	if !ok || mesh.Metadata["executor_contract"] != RSSvNextMeshContractV2 ||
+		mesh.Metadata["input_source_artifact_type"] != "RealSaS.RSSvNextTwoViewSource" ||
+		mesh.Metadata["input_fanout_artifact_type"] != "RealSaS.RSSvNextProductEvidenceFanout" ||
+		mesh.Metadata["output_artifact_type"] != "RealSaS.RSSvNextComputedCandidateSurface" ||
+		mesh.Metadata["requires_shape_parent_binding"] != true ||
+		mesh.Metadata["independent_model_inference_forbidden"] != true ||
+		mesh.Metadata["learned_evidence_retained_by_reference"] != true ||
+		mesh.Metadata["canonical_mesh_authority"] != false ||
+		mesh.ProductPassAuthority {
+		t.Fatalf("RSS Mesh v2 candidate contract drift: %+v", mesh)
+	}
+	requirements, err := descriptorRequiredModels(mesh)
+	if err != nil || len(requirements) != 0 {
+		t.Fatalf("RSS mesh must not bring its own independent checkpoints: %+v / %v", requirements, err)
+	}
+	// Active platform release still awaits the source-aware responsibility
+	// ledger and downstream canonical geometry/mechanics admission switch.
+	_, err = ProductModelRequirements(registry)
+	if err == nil || !strings.Contains(err.Error(), "PRODUCT_MODEL_REQUIREMENT_") {
+		t.Fatalf("RSS candidate wrongly admitted against old ledger: %v", err)
+	}
+
+	_, err = Build(
+		context.Background(),
+		ProductMeshProvider{}, RSSvNextMeshCandidateProvider{},
+		RSSvNextInputCandidateProvider{}, RSSvNextShapeCandidateProvider{},
+	)
+	if err == nil || !strings.Contains(err.Error(), "duplicate capability id") {
+		t.Fatalf("Old and new Mesh simultaneously registered: %v", err)
 	}
 }

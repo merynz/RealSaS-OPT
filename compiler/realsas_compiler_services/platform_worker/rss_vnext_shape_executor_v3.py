@@ -54,6 +54,9 @@ _RSS_RECEIPT_FILES = (
     ("inference_receipt", "inference_receipt.json",
      "RealSaS.RSSvNextInferenceReceipt", "v2",
      "PINNED_SOURCE_AND_UNIFIED_CHECKPOINT_PROVENANCE"),
+    ("unified_model_config", "rss_vnext_unified_model_config.json",
+     "RealSaS.RSSvNextUnifiedModelConfig", "v1",
+     "EXACT_CODEC_AND_SPECIALIST_ARCHITECTURE_NO_PRODUCT_AUTHORITY"),
 )
 
 

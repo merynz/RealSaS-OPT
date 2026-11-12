@@ -26,6 +26,7 @@ _CHILDREN = {
     "neural_evidence": ("RealSaS.RSSvNextInferenceEvidence", "v1"),
     "neural_scene": ("RealSaS.RSSvNextNeuralSceneCarrier", "v1"),
     "inference_receipt": ("RealSaS.RSSvNextInferenceReceipt", "v2"),
+    "unified_model_config": ("RealSaS.RSSvNextUnifiedModelConfig", "v1"),
 }
 _INDEX_FIELDS = {
     "schema", "source_artifact_sha256", "source_binding_sha256",
@@ -183,6 +184,25 @@ def read_rss_vnext_neural_evidence_v1(
     return evidence
 
 
+def read_rss_vnext_unified_model_config_v1(
+    index: Mapping[str, Any], *,
+    child_refs: Mapping[str, dict[str, Any]],
+    read_object: Callable[[dict[str, Any]], bytes],
+):
+    """Read exact model architecture, not another checkpoint or guessed codec."""
+    from models.rss_vnext.model_config_archive_v1 import (
+        decode_rss_vnext_unified_model_config_v1,
+    )
+    row = child_refs["unified_model_config"]
+    payload = read_object(row)
+    _cas_bytes(row, payload, error_prefix="RSS_VNEXT_MODEL_CONFIG")
+    return decode_rss_vnext_unified_model_config_v1(
+        payload,
+        expected_checkpoint_sha256=index["unified_checkpoint_sha256"],
+        expected_config_sha256=index["unified_model_config_sha256"],
+    )
+
+
 def read_rss_vnext_shared_neural_scene_v1(
     index: Mapping[str, Any],
     *,
@@ -205,4 +225,5 @@ __all__ = [
     "SCHEMA", "INDEX_ARTIFACT_TYPE",
     "validate_rss_vnext_fanout_index_v1", "bind_rss_vnext_fanout_refs_v1",
     "read_rss_vnext_neural_evidence_v1", "read_rss_vnext_shared_neural_scene_v1",
+    "read_rss_vnext_unified_model_config_v1",
 ]

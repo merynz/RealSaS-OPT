@@ -170,7 +170,8 @@ def test_one_rss_checkpoint_emits_six_independent_cas_outputs_even_on_abstain(tm
     by_role = {row["role"]: row for row in result["outputs"]}
     assert set(by_role) == {
         "original_source", "normalized_model_source", "neural_evidence",
-        "neural_scene", "inference_receipt", "rss_evidence_fanout",
+        "neural_scene", "inference_receipt", "unified_model_config",
+        "rss_evidence_fanout",
     }
     assert len({row["content_sha256"] for row in result["outputs"]}) == len(by_role)
     index = json.loads(read(by_role["rss_evidence_fanout"]))
@@ -182,7 +183,7 @@ def test_one_rss_checkpoint_emits_six_independent_cas_outputs_even_on_abstain(tm
     assert not index["original_source_rights_verified"]
     assert not index["canonical_mesh_authority"]
     assert index["topology_abstain_retains_shared_carrier"]
-    assert len(index["children"]) == 5
+    assert len(index["children"]) == 6
     assert {x["content_sha256"] for x in index["children"]} == {
         by_role[x["role"]]["content_sha256"] for x in index["children"]
     }
@@ -190,6 +191,18 @@ def test_one_rss_checkpoint_emits_six_independent_cas_outputs_even_on_abstain(tm
     receipt = json.loads(read(by_role["inference_receipt"]))
     evidence = json.loads(read(by_role["neural_evidence"]))
     assert receipt["checkpoint_sha256"] == checkpoint
+    from models.rss_vnext.model_config_archive_v1 import (
+        decode_rss_vnext_unified_model_config_v1,
+    )
+    replayed_cfg = decode_rss_vnext_unified_model_config_v1(
+        read(by_role["unified_model_config"]),
+        expected_checkpoint_sha256=checkpoint,
+        expected_config_sha256=receipt["unified_model_config_sha256"],
+    )
+    assert replayed_cfg == config
+    assert receipt["unified_model_config_file_sha256"] == by_role[
+        "unified_model_config"
+    ]["content_sha256"]
     assert receipt["source_rights_claim_sha256"] == src.source_rights_claim_sha256
     assert receipt["product_revision_minted"] is False
     assert evidence["mesh_status"] == index["mesh_status"]
@@ -211,7 +224,7 @@ def test_one_rss_checkpoint_emits_six_independent_cas_outputs_even_on_abstain(tm
     assert tensors["region_relation_logits"].shape[-1] == 3
     assert tensors["graphics_logits"].shape[-1] == 5
     assert torch.equal(tensors["geometry__H"], tensors["local_features"])
-    assert len(cas) == 8  # original canonical source + checkpoint + six child CAS
+    assert len(cas) == 9  # canonical source + checkpoint + seven output CAS
 
 
 def test_wrong_model_family_and_untrusted_source_fail_before_inference(tmp_path, monkeypatch):
@@ -331,6 +344,7 @@ def test_independent_compiler_cas_fanout_reader_validates_index_and_skips_unused
         bind_rss_vnext_fanout_refs_v1,
         read_rss_vnext_neural_evidence_v1,
         read_rss_vnext_shared_neural_scene_v1,
+        read_rss_vnext_unified_model_config_v1,
     )
     source, cas, result, request, read, put, vision, checkpoint, config = (
         _run(tmp_path, monkeypatch)
@@ -348,6 +362,10 @@ def test_independent_compiler_cas_fanout_reader_validates_index_and_skips_unused
     child = bind_rss_vnext_fanout_refs_v1(
         index, input_artifacts=list(result["outputs"]),
     )
+    cfg = read_rss_vnext_unified_model_config_v1(
+        index, child_refs=child, read_object=read,
+    )
+    assert cfg == config
     def evidence_only(ref):
         # Critical non-bottleneck proof: Mesh/Semantic can inspect the small
         # typed evidence without decompressing the full triplane archive.

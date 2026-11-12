@@ -92,6 +92,7 @@ func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descripto
 				map[string]any{"role": "normalized_model_source", "artifact_type": "RealSaS.RSSvNextModelSourceTensors", "schema_version": "v1"},
 				map[string]any{"role": "neural_scene", "artifact_type": "RealSaS.RSSvNextNeuralSceneCarrier", "schema_version": "v1"},
 				map[string]any{"role": "inference_receipt", "artifact_type": "RealSaS.RSSvNextInferenceReceipt", "schema_version": "v2"},
+				map[string]any{"role": "unified_model_config", "artifact_type": "RealSaS.RSSvNextUnifiedModelConfig", "schema_version": "v1"},
 				map[string]any{"role": "rss_evidence_fanout", "artifact_type": "RealSaS.RSSvNextProductEvidenceFanout", "schema_version": "v1"},
 			},
 			"input_observed_front_back_only":     true,
@@ -99,6 +100,57 @@ func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descripto
 			"learned_model_results_not_product":  true,
 			"independent_iris_tessa_forbidden":   true,
 			"responsibility_ids":                 responsibilities,
+		},
+	}}, nil
+}
+
+
+// RSSvNextMeshCandidateProvider consumes original 2-view source plus the
+// independently addressed RSS neural evidence fanout from one Shape release.
+// This Compiler candidate does NOT mint CanonicalMesh, which still requires
+// source surface qualification, geometry and presentation courts. It remains
+// an alternate, unregistered provider until all product downstream contracts
+// migrate. Do not silently relabel ShapeProposal.v2 into neural evidence.
+type RSSvNextMeshCandidateProvider struct{}
+
+const RSSvNextMeshContractV2 = "RealSaS.ProductMeshCompile.v2"
+
+func (RSSvNextMeshCandidateProvider) Capabilities(context.Context) ([]Descriptor, error) {
+	responsibilities, err := responsibilityIDsForRole(ProductRoleMesh)
+	if err != nil {
+		return nil, err
+	}
+	return []Descriptor{{
+		ID:                   ProductMeshCapabilityID,
+		Kind:                 KindModule,
+		OwnerModuleID:        "product.mesh",
+		ExecutorActivity:     "engine.execute_capability.v1",
+		Dependencies:         []string{ProductShapeCapabilityID},
+		AllowedModes:         []Mode{ModeDeveloper},
+		ProductPassAuthority: false,
+		Aliases:              []string{"RSS vNext Mesh Compiler", "Topology Replay"},
+		Metadata: map[string]any{
+			"product_role_id":                        string(ProductRoleMesh),
+			"implementation_class":                   string(ImplementationCompiler),
+			"interface_contract":                     RSSvNextMeshContractV2,
+			"executor_contract":                      RSSvNextMeshContractV2,
+			"input_source_artifact_type":             "RealSaS.RSSvNextTwoViewSource",
+			"input_source_schema_version":            "v1",
+			"input_fanout_artifact_type":             "RealSaS.RSSvNextProductEvidenceFanout",
+			"input_fanout_schema_version":            "v1",
+			"requires_shape_parent_binding":          true,
+			"requires_full_neural_scene_if_abstain":  false,
+			"output_artifact_type":                   "RealSaS.RSSvNextComputedCandidateSurface",
+			"output_schema_version":                  "v1",
+			"auxiliary_outputs":                      []any{
+				map[string]any{"role": "rss_sparse_face_relation_candidates", "artifact_type": "RealSaS.RSSvNextSparseCandidateFaceRelations", "schema_version": "v1"},
+			},
+			"canonical_mesh_authority":               false,
+			"learned_evidence_retained_by_reference": true,
+			"independent_model_inference_forbidden":  true,
+			"requires_legacy_eight_view_stages":      false,
+			"required_models":                        []any{},
+			"responsibility_ids":                     responsibilities,
 		},
 	}}, nil
 }

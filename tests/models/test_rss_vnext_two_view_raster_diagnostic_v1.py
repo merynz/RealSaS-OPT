@@ -161,3 +161,81 @@ def test_receipt_tamper_and_premature_fidelity_claim_fail():
         validate_rss_vnext_two_view_raster_diagnostic_v1(replace(
             result,inference_evidence_hash="f"*64,
         ))
+
+
+
+def test_two_view_silhouette_and_ray_evidence_cannot_uniquely_identify_3d_depth():
+    source, evidence, bound = _parents(height=20, width=28)
+    original = _measure(source, evidence, bound)
+    original_witness = original.views[0]["two_view_source_depth_observability"]
+    assert original_witness["effective_rank"] == 2
+    assert original_witness["source_point_correspondence_authority"] == (
+        "UNKNOWN_NOT_SOURCE_OBSERVED"
+    )
+    assert original_witness["counterfactual_status"] == (
+        "DISTINCT_3D_GEOMETRY_SAME_TWO_SOURCE_PROJECTIONS"
+    )
+    assert original_witness["counterfactual_3d_vertex_displacement_world"] > 0
+    assert original_witness["counterfactual_max_two_view_pixel_drift"] < 1e-6
+    assert not original_witness["source_depth_or_surface_completion_authority"]
+    assert not original_witness["canonical_mesh_authority"]
+
+    # Real 3D shape changed substantially; BOTH independently observed
+    # front/back masks still give perfect projected silhouette overlap.
+    mesh = dict(evidence.mesh)
+    mesh["rest_xyz"] = [
+        [x, y, z + (0.2 if i % 2 == 0 else -0.2)]
+        for i, (x, y, z) in enumerate(evidence.mesh["rest_xyz"])
+    ]
+    changed = seal_inference_evidence_v1(replace(
+        evidence, mesh=mesh, evidence_hash="",
+    ))
+    rebound = validate_rss_vnext_source_evidence_binding_v1(
+        source=source, evidence=changed,
+        expected_source_binding_sha256=source.source_binding_sha256,
+    )
+    rest = _measure(source, changed, rebound)
+    validate_rss_vnext_two_view_raster_diagnostic_v1(rest)
+    for before, after in zip(original.views, rest.views):
+        a = before["geometry"]["rest"]["binary_projected_raster_sha256"]
+        b = after["geometry"]["rest"]["binary_projected_raster_sha256"]
+        assert a == b
+        measured = after["geometry"]["rest"]["alpha_comparison"]["alpha_nonzero"]["metrics"]
+        assert measured["recall"] == pytest.approx(1.)
+        assert measured["precision"] == pytest.approx(1.)
+    assert original.original_mesh_sha256 != rest.original_mesh_sha256
+    assert not rest.source_fidelity_qualified
+
+
+def test_oblique_back_camera_improves_linear_rank_but_not_source_correspondence():
+    source, evidence, _ = _parents()
+    cameras = source.camera_features.copy()
+    angle = .2
+    from math import cos, sin
+    cameras[1, 3:6] = [-cos(angle), 0., sin(angle)]
+    cameras[1, 9:12] = [-sin(angle), 0., -cos(angle)]
+    tilted = canonicalize_two_view_source_v1(
+        source.native_rgba.copy(), cameras,
+        source_rights_claim_sha256=source.source_rights_claim_sha256,
+    )
+    rgba, camera = tilted.to_model_tensors()
+    reobserved = seal_inference_evidence_v1(replace(
+        evidence,
+        observed_front_sha256=_source_tensor_digest(rgba[0, 0]),
+        observed_back_sha256=_source_tensor_digest(rgba[0, 1]),
+        camera_binding_sha256=_source_tensor_digest(camera),
+        evidence_hash="",
+    ))
+    court = validate_rss_vnext_source_evidence_binding_v1(
+        source=tilted, evidence=reobserved,
+        expected_source_binding_sha256=tilted.source_binding_sha256,
+    )
+    result = _measure(tilted, reobserved, court)
+    witness = result.views[0]["two_view_source_depth_observability"]
+    assert witness["effective_rank"] == 3
+    assert witness["counterfactual_status"] == "NOT_EVALUATED_NO_COMMON_NULLSPACE"
+    assert witness["source_point_correspondence_authority"] == (
+        "UNKNOWN_NOT_SOURCE_OBSERVED"
+    )
+    assert not witness["source_depth_or_surface_completion_authority"]
+    assert not result.canonical_mesh_authority

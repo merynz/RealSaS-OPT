@@ -26,10 +26,11 @@ _MAX_FACE_INDEX = 16_000_000
 _TYPES = frozenset((
     "SAME_DRAWABLE", "CUT_BOUNDARY", "DIRECTED_ATTACHMENT",
     "FRONT_ORDER", "MECHANICAL_CONTACT", "STRUCTURAL_CONTINUITY",
+    "SHARES_INDEXED_EDGE", "SAME_CANDIDATE_COMPONENT",
 ))
 _UNDIRECTED = frozenset((
     "SAME_DRAWABLE", "CUT_BOUNDARY", "MECHANICAL_CONTACT",
-    "STRUCTURAL_CONTINUITY",
+    "STRUCTURAL_CONTINUITY", "SHARES_INDEXED_EDGE", "SAME_CANDIDATE_COMPONENT",
 ))
 _OBSERVED_ORIGINS = frozenset((
     "SOURCE_NATIVE_UNVERIFIED", "SOURCE_RENDERED_UNVERIFIED",
@@ -206,8 +207,14 @@ def adjudicate_rss_vnext_relations_v1(
             state = "PREDICTED_RELATION_UNADMITTED"
             cause = "NEURAL_SCORE_IS_NOT_BOOLEAN_OR_EXECUTABLE_WITNESS"
         elif positive or negative:
-            state = "UNQUALIFIED_ASSERTION"
-            cause = "POLARITY_WITHOUT_INDEPENDENT_SOURCE_OR_INTERVENTION_COURT"
+            if kind in ("SHARES_INDEXED_EDGE", "SAME_CANDIDATE_COMPONENT") and all(
+                x.origin == "DERIVED_CANDIDATE_GEOMETRY" for x in ordered
+            ):
+                state = "DERIVED_CANDIDATE_GEOMETRY_NOT_SOURCE_TRUTH"
+                cause = "RECOMPUTABLE_CANDIDATE_PRIMITIVE_NOT_EXECUTABLE_AUTHORITY"
+            else:
+                state = "UNQUALIFIED_ASSERTION"
+                cause = "POLARITY_WITHOUT_INDEPENDENT_SOURCE_OR_INTERVENTION_COURT"
         else:
             state = "ABSTAIN_NO_POLARITY"
             cause = "UNKNOWN_IS_NOT_A_NEGATIVE"
@@ -231,6 +238,77 @@ def adjudicate_rss_vnext_relations_v1(
         state=state, decisions=tuple(decisions),
         unrepresentable_assertions=unknown,
     )
+
+
+
+def derive_candidate_topology_relations_v1(
+    *, evidence: object, surface: object,
+    requested_face_pairs: tuple[tuple[int, int], ...] | list[tuple[int, int]],
+) -> tuple[RSSvNextTypedRelationAssertionV1, ...]:
+    """Compute two geometry facts without training ANY semantic relation head.
+
+    TESSA face incidence / component labels are facts about the candidate,
+    never source editability, a drawable split, a joint or contact. Subsequent
+    Compiler/renderer/mechanics courts must admit those capabilities separately.
+    """
+    from .rss_vnext_inference_evidence_v1 import RSSvNextInferenceEvidenceIRV1
+    from .rss_vnext_surface_decisions_v1 import RSSvNextComputedCandidateSurfaceV1
+    if type(evidence) is not RSSvNextInferenceEvidenceIRV1 or type(surface) is not RSSvNextComputedCandidateSurfaceV1:
+        _fail("DERIVATION_TYPED_PARENTS_REQUIRED")
+    if (
+        surface.source_inference_evidence_hash != evidence.evidence_hash
+        or surface.candidate_mesh_sha256 != (
+            content_sha256(evidence.mesh) if evidence.mesh is not None else None
+        )
+    ):
+        _fail("DERIVATION_SOURCE_MESH_LINEAGE_DRIFT")
+    if type(requested_face_pairs) not in (list, tuple) or len(requested_face_pairs) > 4096:
+        _fail("DERIVATION_PAIR_RESOURCE_LIMIT")
+    if evidence.mesh_status == "ABSTAIN":
+        if requested_face_pairs or surface.faces or evidence.mesh is not None:
+            _fail("DERIVATION_ABSTAIN_MUST_NOT_INVENT_FACES")
+        return ()
+    mesh = evidence.mesh
+    if (
+        evidence.mesh_status != "UNQUALIFIED_MESH_CANDIDATE"
+        or not isinstance(mesh, dict)
+        or surface.state != "UNQUALIFIED_COMPUTED_SURFACE_CANDIDATE"
+        or len(surface.faces) != len(mesh["faces"])
+    ):
+        _fail("DERIVATION_INDEXED_MESH_REQUIRED")
+    for i, face in enumerate(surface.faces):
+        if (
+            face.candidate_face_index != i
+            or tuple(face.candidate_vertex_indices) != tuple(mesh["faces"][i])
+            or face.candidate_component_index != mesh["face_components"][i]
+        ):
+            _fail("DERIVATION_FACE_ADDRESS_DRIFT")
+    seen = set()
+    witness_ref = content_sha256(asdict(surface))
+    results = []
+    for pair in requested_face_pairs:
+        if (
+            type(pair) not in (tuple, list) or len(pair) != 2
+            or any(type(x) is not int or not 0 <= x < len(surface.faces) for x in pair)
+            or pair[0] == pair[1] or tuple(pair) in seen
+        ):
+            _fail("DERIVATION_PAIR_ADDRESS_INVALID")
+        seen.add(tuple(pair))
+        a, b = surface.faces[pair[0]], surface.faces[pair[1]]
+        shared_edge = len(set(a.candidate_vertex_indices) & set(b.candidate_vertex_indices)) == 2
+        same_component = a.candidate_component_index == b.candidate_component_index
+        for kind, truth in (
+            ("SHARES_INDEXED_EDGE", shared_edge),
+            ("SAME_CANDIDATE_COMPONENT", same_component),
+        ):
+            results.append(RSSvNextTypedRelationAssertionV1(
+                relation_type=kind, from_face_index=pair[0], to_face_index=pair[1],
+                inference_evidence_hash=evidence.evidence_hash,
+                candidate_mesh_sha256=surface.candidate_mesh_sha256,
+                witness_ref=witness_ref, origin="DERIVED_CANDIDATE_GEOMETRY",
+                truth="POSITIVE" if truth else "NEGATIVE",
+            ))
+    return tuple(results)
 
 
 def learned_face_relation_assertions_v1(
@@ -277,4 +355,5 @@ __all__ = [
     "SCHEMA", "RSSvNextTypedRelationAssertionV1",
     "RSSvNextEpistemicRelationDecisionV1", "RSSvNextRelationEpistemicCourtV1",
     "adjudicate_rss_vnext_relations_v1", "learned_face_relation_assertions_v1",
+    "derive_candidate_topology_relations_v1",
 ]

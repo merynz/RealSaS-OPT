@@ -150,3 +150,54 @@ def test_abstain_after_topology_failure_and_finite_resource_envelope():
     assert all(not x.executable_authority for x in v.decisions)
     with pytest.raises(QualificationError, match="ASSERTION_RESOURCE_LIMIT"):
         _court(*([_claim()] * 16_385))
+
+
+def test_compiler_calculates_candidate_topology_without_any_relation_truth_labels():
+    from compiler.realsas_compiler_core.rss_vnext_relation_epistemic_court_v1 import (
+        derive_candidate_topology_relations_v1,
+    )
+    from tests.models.test_rss_vnext_cross_expert_capability_court_v1 import _ready
+    from models.rss_vnext.training_engine import RSSvNextTrainingWeights
+
+    assert RSSvNextTrainingWeights().typed_relations == 0.0
+    cfg, evidence, surface, _ = _ready()
+    calculated = derive_candidate_topology_relations_v1(
+        evidence=evidence, surface=surface,
+        requested_face_pairs=[(0, 1), (1, 0)],
+    )
+    assert len(calculated) == 4
+    assert {x.relation_type for x in calculated} == {
+        "SHARES_INDEXED_EDGE", "SAME_CANDIDATE_COMPONENT",
+    }
+    assert all(x.origin == "DERIVED_CANDIDATE_GEOMETRY" for x in calculated)
+    assert all(x.predicted_probability is None for x in calculated)
+    assert next(x for x in calculated if x.relation_type == "SHARES_INDEXED_EDGE").truth == "NEGATIVE"
+    court = adjudicate_rss_vnext_relations_v1(
+        list(calculated), inference_evidence_hash=evidence.evidence_hash,
+        candidate_mesh_sha256=content_sha256(evidence.mesh),
+    )
+    assert court.state == "TYPED_HYPOTHESES_UNQUALIFIED"
+    assert len(court.decisions) == 2
+    assert all(d.state == "DERIVED_CANDIDATE_GEOMETRY_NOT_SOURCE_TRUTH"
+               and not d.executable_authority and not d.source_truth_authority
+               for d in court.decisions)
+
+
+def test_derived_geometry_rejects_forged_candidate_face_binding():
+    from compiler.realsas_compiler_core.rss_vnext_relation_epistemic_court_v1 import (
+        derive_candidate_topology_relations_v1,
+    )
+    from tests.models.test_rss_vnext_cross_expert_capability_court_v1 import _ready
+    cfg, evidence, surface, _ = _ready()
+    changed = replace(surface.faces[0], candidate_component_index=31415)
+    with pytest.raises(QualificationError, match="DERIVATION_FACE_ADDRESS_DRIFT"):
+        derive_candidate_topology_relations_v1(
+            evidence=evidence,
+            surface=replace(surface, faces=(changed, *surface.faces[1:])),
+            requested_face_pairs=[(0, 1)],
+        )
+    with pytest.raises(QualificationError, match="DERIVATION_PAIR_ADDRESS_INVALID"):
+        derive_candidate_topology_relations_v1(
+            evidence=evidence, surface=surface,
+            requested_face_pairs=[(0, 1), (0, 1)],
+        )

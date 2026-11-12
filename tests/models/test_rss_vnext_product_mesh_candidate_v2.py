@@ -208,17 +208,19 @@ def test_live_shape_to_compiler_tessa_geometry_semantic_graphics_and_directed_re
     court = json.loads(read(by_role["rss_cross_expert_capability_court"]))
     epistemic = json.loads(read(by_role["rss_relation_epistemic_court"]))
     assert epistemic["state"] == "TYPED_HYPOTHESES_UNQUALIFIED"
-    assert len(epistemic["decisions"]) == 4  # one SAME/CUT, two directed ATTACH
+    assert len(epistemic["decisions"]) == 6  # four hypotheses + two Compiler primitives
     assert {x["relation_type"] for x in epistemic["decisions"]} == {
         "SAME_DRAWABLE", "CUT_BOUNDARY", "DIRECTED_ATTACHMENT",
+        "SHARES_INDEXED_EDGE", "SAME_CANDIDATE_COMPONENT",
     }
     assert all(not d["executable_authority"] and not d["source_truth_authority"]
                for d in epistemic["decisions"])
     assert all(x["truth"] == "UNKNOWN" for decision in epistemic["decisions"]
-               for x in decision["assertions"])
-    assert all(decision["state"] in ("PREDICTED_RELATION_UNADMITTED",
-                                    "ABSTAIN_NO_POLARITY")
-               for decision in epistemic["decisions"])
+               for x in decision["assertions"] if x["origin"] == "LEARNED_HYPOTHESIS")
+    assert all(decision["state"] in (
+        "PREDICTED_RELATION_UNADMITTED", "ABSTAIN_NO_POLARITY",
+        "DERIVED_CANDIDATE_GEOMETRY_NOT_SOURCE_TRUTH")
+        for decision in epistemic["decisions"])
     assert court["state"] == "TYPED_CROSS_EXPERT_PROPOSALS_PRESERVED"
     assert court["face_count"] == 2
     assert court["directed_attachment_pair_count"] == 2

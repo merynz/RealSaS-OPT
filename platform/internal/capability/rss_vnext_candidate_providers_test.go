@@ -53,11 +53,11 @@ func TestRSSvNextTwoViewInputAndSingleModelShapeFormOneCandidateRoleGraph(t *tes
 		t.Fatalf("RSS must preserve five independently consumable CAS outputs: %+v", aux)
 	}
 	wanted := map[string]bool{
-		"original_source": true,
+		"original_source":         true,
 		"normalized_model_source": true,
-		"neural_scene": true,
-		"inference_receipt": true,
-		"rss_evidence_fanout": true,
+		"neural_scene":            true,
+		"inference_receipt":       true,
+		"rss_evidence_fanout":     true,
 	}
 	for _, raw := range aux {
 		row, ok := raw.(map[string]any)

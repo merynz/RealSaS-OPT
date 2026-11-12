@@ -14,7 +14,7 @@ const (
 	RSSvNextInputContractV2 = "RealSaS.ProductInputTwoView.v2"
 	RSSvNextShapeContractV3 = "RealSaS.ProductShapeInference.v3"
 	RSSvNextModelFamily     = "RSSVNEXT"
-	RSSvNextArchitectureID = "RSS.vNext.UnifiedCharacterCompiler.v1"
+	RSSvNextArchitectureID  = "RSS.vNext.UnifiedCharacterCompiler.v1"
 )
 
 func (RSSvNextInputCandidateProvider) Capabilities(context.Context) ([]Descriptor, error) {
@@ -41,7 +41,7 @@ func (RSSvNextInputCandidateProvider) Capabilities(context.Context) ([]Descripto
 			"output_schema_version":                 "v1",
 			"original_observed_view_count":          2,
 			"source_copy_policy":                    "BYTE_IDENTICAL_CAS_REUSE",
-			"model_inference_in_input_forbidden":     true,
+			"model_inference_in_input_forbidden":    true,
 			"platform_view_count_invariant":         false,
 			"source_rights_verified_by_input":       false,
 			"stable_product_role_survives_rewiring": true,
@@ -71,16 +71,16 @@ func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descripto
 		ProductPassAuthority: false,
 		Aliases:              []string{"RSS vNext Unified", "Geometry", "Mechanics", "Semantic", "Graphics"},
 		Metadata: map[string]any{
-			"product_role_id":                string(ProductRoleShape),
-			"implementation_class":          string(ImplementationModel),
-			"interface_contract":            RSSvNextShapeContractV3,
-			"executor_contract":             RSSvNextShapeContractV3,
-			"input_artifact_type":           "RealSaS.RSSvNextTwoViewSource",
-			"input_schema_version":          "v1",
-			"output_artifact_type":          "RealSaS.RSSvNextInferenceEvidence",
-			"output_schema_version":         "v1",
-			"fanout_contract":               "RealSaS.RSSvNext.ProductEvidenceFanout.v1",
-			"maximum_new_tokens":            131072,
+			"product_role_id":       string(ProductRoleShape),
+			"implementation_class":  string(ImplementationModel),
+			"interface_contract":    RSSvNextShapeContractV3,
+			"executor_contract":     RSSvNextShapeContractV3,
+			"input_artifact_type":   "RealSaS.RSSvNextTwoViewSource",
+			"input_schema_version":  "v1",
+			"output_artifact_type":  "RealSaS.RSSvNextInferenceEvidence",
+			"output_schema_version": "v1",
+			"fanout_contract":       "RealSaS.RSSvNext.ProductEvidenceFanout.v1",
+			"maximum_new_tokens":    131072,
 			"required_models": []any{
 				map[string]any{
 					"family":          RSSvNextModelFamily,
@@ -96,8 +96,8 @@ func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descripto
 			},
 			"input_observed_front_back_only":     true,
 			"neural_scene_survives_mesh_abstain": true,
-			"learned_model_results_not_product": true,
-			"independent_iris_tessa_forbidden":  true,
+			"learned_model_results_not_product":  true,
+			"independent_iris_tessa_forbidden":   true,
 			"responsibility_ids":                 responsibilities,
 		},
 	}}, nil

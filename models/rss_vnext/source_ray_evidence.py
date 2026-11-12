@@ -95,7 +95,12 @@ def sample_front_back_source_rays(
         raise ValueError("RSS_VNEXT_SOURCE_RAY_HALF_EXTENT")
     relative = points_xyz[:, :, None, :] - camera[:, None, :, :3]
     u = (relative * right[:, None]).sum(dim=-1) / half[:, None]
-    v = (relative * up[:, None]).sum(dim=-1) / half[:, None]
+    # Camera 13D stores WORLD/SCREEN-UP, whereas grid_sample's normalized
+    # y increases DOWN the image. Mirror the vertical sign to agree with
+    # Canonical Runtime project_points_xyz_v3 (screen_up -> negative y).
+    # The previous +up convention sampled the vertically opposite source ray,
+    # corrupting per-vertex RGBA/alpha evidence despite valid CAS hashes.
+    v = -(relative * up[:, None]).sum(dim=-1) / half[:, None]
     projected = torch.stack((u, v), dim=-1)
     valid = (projected.abs() <= 1).all(dim=-1)
 

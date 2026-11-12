@@ -17,8 +17,9 @@ permissions:
   contents: write
 
 concurrency:
-  group: busted-public-site-from-main
-  cancel-in-progress: false
+  # Never let PR validation cancel an in-progress main publication.
+  group: busted-public-site-from-main-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test-site-source:

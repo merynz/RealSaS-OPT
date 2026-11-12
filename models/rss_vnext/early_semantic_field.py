@@ -57,9 +57,14 @@ class RSSvNextEarlySemanticField(nn.Module):
         )
 
     def forward(self, image_tokens: Tensor) -> RSSvNextEarlySemanticOutput:
-        if (image_tokens.ndim != 4 or image_tokens.shape[1] != 2
-                or image_tokens.shape[2] < 1 or image_tokens.shape[-1] != self.image_dim):
+        if image_tokens.ndim != 4 or image_tokens.shape[1] != 2:
             raise ValueError("RSS_VNEXT_SEMANTIC_ONLY_TWO_PATCH_VIEW_INPUT")
+        return self.forward_variable_views(image_tokens)
+
+    def forward_variable_views(self, image_tokens: Tensor) -> RSSvNextEarlySemanticOutput:
+        if (image_tokens.ndim != 4 or image_tokens.shape[1] not in (1,2,6)
+                or image_tokens.shape[2] < 1 or image_tokens.shape[-1] != self.image_dim):
+            raise ValueError("RSS_VNEXT_STDGEN_SEMANTIC_INPUT_VIEW_COUNT")
         if not bool(torch.isfinite(image_tokens).all()):
             raise ValueError("RSS_VNEXT_SEMANTIC_IMAGE_TOKENS_NONFINITE")
         logits = self.image_evidence(image_tokens)
@@ -71,6 +76,11 @@ class RSSvNextEarlySemanticField(nn.Module):
             source_patch_logits=logits,
             conditioned_image_tokens=image_tokens + self.residual_scale * delta,
             source_evidence_uncertainty=self.image_uncertainty(image_tokens).clamp(-8, 4),
+            authority=(
+                "TWO_SOURCE_VIEW_SEMANTIC_PREDICTION"
+                if image_tokens.shape[1]==2
+                else "STDGEN_NON_SOURCE_REFERENCE_SEMANTIC_HYPOTHESIS_ONLY"
+            ),
         )
 
     def query_field(self, local_h: Tensor) -> Tensor:

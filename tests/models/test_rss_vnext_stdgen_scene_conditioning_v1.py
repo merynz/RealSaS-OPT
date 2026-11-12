@@ -43,7 +43,7 @@ def camera_bank(v):
 @pytest.mark.parametrize("views,auth",[ (1,CANONICAL_REFERENCE),(6,SIX_VIEW_PRIOR)])
 def test_srlm_single_and_six_view_reuse_same_iris_H_graphics_semantic_weights(views,auth):
     net=model()
-    images=torch.rand((1,views,4,8,8))
+    images=torch.rand((1,views,4,16,16))
     cams=camera_bank(views)
     result=encode_stdgen_conditioning_into_shared_H_v1(
         net,conditioning_rgba=images,conditioning_cameras=cams,
@@ -73,8 +73,8 @@ def test_srlm_single_and_six_view_reuse_same_iris_H_graphics_semantic_weights(vi
 
 def test_original_two_view_public_input_is_still_strictly_separate():
     net=model()
-    one=torch.rand((1,1,4,8,8))
-    six=torch.rand((1,6,4,8,8))
+    one=torch.rand((1,1,4,16,16))
+    six=torch.rand((1,6,4,16,16))
     with pytest.raises(ValueError,match="ONLY_TWO_SOURCE_RGBA"):
         net.encode_observations(one,camera_bank(1))
     with pytest.raises(ValueError,match="ONLY_TWO_SOURCE_RGBA"):
@@ -85,7 +85,7 @@ def test_original_two_view_public_input_is_still_strictly_separate():
 
 def test_six_views_not_source_and_duplicate_or_wrong_camera_rejected():
     net=model()
-    images=torch.rand((1,6,4,8,8))
+    images=torch.rand((1,6,4,16,16))
     cams=camera_bank(6)
     with pytest.raises(ValueError,match="SIX_VIEWS_MUST_BE_GENERATED_PRIOR"):
         encode_stdgen_conditioning_into_shared_H_v1(
@@ -105,7 +105,7 @@ def test_six_views_not_source_and_duplicate_or_wrong_camera_rejected():
 def test_cleanroom_one_measured_source_cannot_mint_second_observation():
     net=model()
     result=encode_stdgen_conditioning_into_shared_H_v1(
-        net,conditioning_rgba=torch.rand((1,1,4,8,8)),
+        net,conditioning_rgba=torch.rand((1,1,4,16,16)),
         conditioning_cameras=camera_bank(1),
         source_binding_sha256="a"*64,
         original_observed_view_count=1,
@@ -120,7 +120,7 @@ def test_cleanroom_one_measured_source_cannot_mint_second_observation():
 
 def test_single_reference_rejects_invalid_camera_and_fake_source_count():
     net=model()
-    image=torch.rand((1,1,4,8,8))
+    image=torch.rand((1,1,4,16,16))
     cam=camera_bank(1)
     cam[:,:,3]=0.
     with pytest.raises(ValueError,match="CANONICAL_CAMERA_BASIS_INVALID"):

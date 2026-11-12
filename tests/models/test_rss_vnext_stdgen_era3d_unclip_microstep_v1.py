@@ -46,7 +46,7 @@ class _Clip(nn.Module):
         super().__init__()
         self.dummy=nn.Parameter(torch.ones(1),requires_grad=False)
     def forward(self,x):
-        return SimpleNamespace(image_embeds=x.mean(dim=(-1,-2)))
+        return SimpleNamespace(image_embeds=x.mean(dim=(-1,-2)).repeat(1,2))
 
 
 class _Norm:

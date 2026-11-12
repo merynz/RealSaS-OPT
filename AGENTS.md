@@ -1,5 +1,10 @@
 # RealSaS-OPT Agent Entry Contract
 
+
+## Canonical CI and runner authority
+
+Read `canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json` before any Actions, runner, cache GC, workflow trigger or Platform execution-lane change. Preserve its main-owned machine-enforced policy; never invent a new runner arrangement because the chat changed. See `docs/platform/PLATFORM_CI_OPERATIONS_AUTHORITY.md`.
+
 ## Single-view product objective — 2026-11-03
 
 Before IRIS foundation/training work, read

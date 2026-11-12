@@ -1,0 +1,51 @@
+{
+  "schema": "RealSaS.PlatformCIAndCacheOperationsAuthority.v1",
+  "owner": "main",
+  "purpose": "single operational root for CI execution lanes, workflow scheduling guardrails, WSL physical deployment, local persistent cache GC, and GitHub Actions queue classification",
+  "references": {
+    "hosted_first_migration": "1888d91252fdce23843772f3ec0d0e3ddd91b9ae",
+    "pr_queue_cancel": "eaa9831ef8fa1f0a58e3ec7ca7b53586f8162240",
+    "manual_wsl_deploy": "9f9f53674777e961488262182260f039ea06ed77",
+    "gc_engine": "f293d96ecf5a16db50886034c5e8265a477f189b",
+    "gc_tests": "4634e567aa8779e69899961e328d97d10d389613"
+  },
+  "lanes": {
+    "cpu_pr_checks": "GitHub-hosted Linux on public repo only; use per-PR concurrency and cancel superseded runs",
+    "native_and_deployment": "self-hosted linux x64 realsas, explicitly dispatched, exact canonical main SHA; never an automatic PR deployment",
+    "learned_gpu": "Colab or Notebook compute worker with strict subject/release/checkpoint evidence; importer is not proof",
+    "workflow_state": "Go Platform/Temporal and immutable CAS; Actions only code and reproducibility checks"
+  },
+  "workflow_budget": {
+    "max_workflow_files": 430,
+    "workflow_budget_changes_require_policy_update": true,
+    "pr_concurrency_and_cancel_required": true,
+    "avoid_routine_old_scientific_workflow_auto_fanout": true,
+    "rss_vnext_subordinate_court": "canonical/CI_EXECUTION_AUTHORITY_V1.json (activated with RSS.vNext PR #448; not superseding this root)"
+  },
+  "gc": {
+    "engine": "tools/platform_cache_gc.py",
+    "tests": "tests/repository/test_platform_cache_gc.py",
+    "priority": [
+      "temporary_or_incomplete",
+      "expired_by_age",
+      "lru_to_soft_watermark"
+    ],
+    "lock_safe": true,
+    "atomic_install": true,
+    "minimum_free_disk": true,
+    "size_sha256_hydration": true,
+    "verified_CAS_authority_not_automatically_deleted": true
+  },
+  "queue": {
+    "read_only_monitor": ".github/workflows/ci_queue_sentinel_v1.yml",
+    "distinguish_queued_workflow_from_queued_job": true,
+    "stale_zero_job_records_have_no_local_runner_assignment": true,
+    "automation_must_not_bulk_cancel_or_delete": true,
+    "github_support_required_on_cancel_force_cancel_delete_409_403": true,
+    "incident_pr448_20261112": {
+      "stale_records": 543,
+      "commit_shas": 21,
+      "window_utc": "2026-11-11T20:25:08Z..2026-11-11T20:54:11Z"
+    }
+  }
+}

@@ -72,6 +72,8 @@ Runner policy is checked in `tests/repository/test_self_hosted_execution_policy.
 Frozen historical training and recovery replays are manual reproducibility.
 Automatic PR workflows cancel superseded heads in their workflow/PR group.
 
+Canonical operational ownership lives in `canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json` and is tested by `tests/repository/test_platform_ci_operations_authority_v1.py`. Keep hosted CPU, manual exact-main WSL, Colab and bounded local GC separate; do not treat zombie zero-job GitHub Actions records as native runner backlog.
+
 ## Local checks
 
 ```bash

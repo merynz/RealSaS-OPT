@@ -322,6 +322,7 @@ def execute_rss_vnext_mesh_capability_v2(
     # readiness/ABSTAIN decision, never synthesize source nodes from H(x).
     bridge = build_rss_vnext_canonical_mesh_candidate_bridge_v1(
         evidence=evidence, computed_surface=surface, model_config=cfg,
+        allow_unqualified_neural_basis=True,
     )
     output.append(_store_json(
         asdict(bridge), role="rss_canonical_mesh_candidate_bridge",

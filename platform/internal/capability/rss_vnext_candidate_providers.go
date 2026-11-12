@@ -150,6 +150,7 @@ func (RSSvNextMeshCandidateProvider) Capabilities(context.Context) ([]Descriptor
 				map[string]any{"role": "rss_evidence_continuity", "artifact_type": "RealSaS.RSSvNextEvidenceContinuity", "schema_version": "v1"},
 			},
 			"canonical_mesh_authority":               false,
+			"canonical_candidate_basis":              "TESSA_NEURAL_PROPOSAL_SOURCE_RASTER_QUALIFICATION_PENDING",
 			"learned_evidence_retained_by_reference": true,
 			"independent_model_inference_forbidden":  true,
 			"requires_legacy_eight_view_stages":      false,

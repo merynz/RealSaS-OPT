@@ -55,6 +55,12 @@ class RSSvNextCanonicalMeshCandidateBridgeV1:
     missing_requirements: tuple[str, ...]
     candidate: CanonicalMeshCandidateIR | None
     source_support_binding_sha256: str | None
+    # Optional typed TESSA-only basis. It is NEVER independently observed
+    # source 3D geometry. The actual SourceFidelity court must still run.
+    neural_basis_surface: RiggingSurfaceIR | None = None
+    neural_basis_partition: MechanicalPartitionIR | None = None
+    neural_basis_carrier_policy: ComponentCarrierPolicyIR | None = None
+    neural_basis_lineage_sha256: str | None = None
     schema: str = SCHEMA
     canonical_mesh_authority: bool = False
     source_fidelity_authority: bool = False
@@ -84,6 +90,7 @@ def build_rss_vnext_canonical_mesh_candidate_bridge_v1(
     source_supports_by_vertex: Mapping[int, SurfaceSupportBinding] | None = None,
     source_component_ids_by_candidate_index: Mapping[int, str] | None = None,
     source_correspondence_receipt_sha256: str | None = None,
+    allow_unqualified_neural_basis: bool = False,
 ) -> RSSvNextCanonicalMeshCandidateBridgeV1:
     """Bind existing source-support addresses to TESSA *without* minting Mesh.
 
@@ -122,6 +129,38 @@ def build_rss_vnext_canonical_mesh_candidate_bridge_v1(
         source_supports_by_vertex, source_component_ids_by_candidate_index,
         source_correspondence_receipt_sha256,
     )
+    if allow_unqualified_neural_basis and all(x is None for x in supplied):
+        from .rss_vnext_neural_mesh_proposal_basis_v1 import (
+            build_rss_vnext_neural_mesh_candidate_basis_v1,
+        )
+        neural = build_rss_vnext_neural_mesh_candidate_basis_v1(
+            evidence=evidence, computed_surface=computed_surface,
+            model_config=model_config,
+        )
+        if (
+            neural.candidate.metadata.get("source_geometry_was_not_independently_observed")
+            is not True
+            or neural.canonical_mesh_authority or neural.source_fidelity_authority
+        ):
+            _fail("NEURAL_BASIS_CANNOT_MINT_SOURCE_AUTHORITY")
+        return RSSvNextCanonicalMeshCandidateBridgeV1(
+            **parent,
+            state="UNQUALIFIED_NEURAL_BASIS_CANONICAL_CANDIDATE",
+            missing_requirements=(
+                "SOURCE_RASTER_FIDELITY_QUALIFICATION",
+                "STATIC_MESH_QUALITY_AND_CONDITIONING",
+                "QUALIFIED_MECHANICAL_CARRIER",
+                "CANONICAL_MESH_MINT",
+                "POSE_DEFORMATION_QUALITY",
+                "GRAPHICS_2D_SOURCE_APPEARANCE",
+            ),
+            candidate=neural.candidate,
+            source_support_binding_sha256=None,
+            neural_basis_surface=neural.neural_surface,
+            neural_basis_partition=neural.neural_partition,
+            neural_basis_carrier_policy=neural.neural_carrier_policy,
+            neural_basis_lineage_sha256=neural.basis_hash,
+        )
     if any(x is None for x in supplied):
         missing = tuple(key for key, val in zip((
             "SOURCE_SURFACE", "SOURCE_PARTITION", "SOURCE_CARRIER_POLICY",

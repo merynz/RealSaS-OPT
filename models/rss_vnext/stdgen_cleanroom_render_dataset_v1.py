@@ -94,7 +94,15 @@ def _image(file: Path, *, mode: str) -> np.ndarray:
         im.load()
         if im.format!="PNG" or im.width>2048 or im.height>2048 or min(im.size)<16:
             raise ValueError("RSS_VNEXT_STDGEN_RENDER_IMAGE_DOMAIN")
-        arr=np.array(im.convert(mode),dtype=np.uint8)
+        if mode=="MASK":
+            # Renderer may store a grayscale mask or use the PNG alpha
+            # channel. Luminance of an RGBA PNG is NOT its coverage.
+            if im.mode in ("RGBA","LA") or "transparency" in im.info:
+                arr=np.array(im.convert("RGBA"),dtype=np.uint8)[:,:,3]
+            else:
+                arr=np.array(im.convert("L"),dtype=np.uint8)
+        else:
+            arr=np.array(im.convert(mode),dtype=np.uint8)
     return arr
 
 
@@ -182,7 +190,7 @@ class StdGENCleanroomRenderedSixViewDatasetV1(Dataset):
             "multiview_target_alpha":record.multiview_target_alpha_sha256,
         }
         for key,digests in expected.items():
-            mode="L" if key=="multiview_target_alpha" else "RGBA"
+            mode="MASK" if key=="multiview_target_alpha" else "RGBA"
             arrays[key]=[]
             for file,hexdigest in zip(paths[key],digests):
                 if _digest(file)!=hexdigest:

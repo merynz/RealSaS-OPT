@@ -6,6 +6,8 @@ on:
     workflows: [platform-developer-deployment]
     types: [completed]
   pull_request:
+    # Full court runs on opening/ready state, not every intermediate commit.
+    types: [opened, reopened, ready_for_review]
     branches: [main]
     paths:
       - 'tools/platform_foundation_cache_v1.py'

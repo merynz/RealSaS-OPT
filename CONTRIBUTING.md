@@ -72,6 +72,12 @@ Runner policy is checked in `tests/repository/test_self_hosted_execution_policy.
 Frozen historical training and recovery replays are manual reproducibility.
 Automatic PR workflows cancel superseded heads in their workflow/PR group.
 
+The executable RSS.vNext CI budget and exact-head admission are defined in
+`canonical/CI_EXECUTION_AUTHORITY_V1.json`, with tests in
+`tests/repository/test_ci_execution_authority_v1.py`. Full verification runs on
+PR open/reopen/ready or explicit dispatch, not every transient commit. Local
+cache GC is distinct from GitHub's zero-job workflow-run cleanup.
+
 ## Local checks
 
 ```bash

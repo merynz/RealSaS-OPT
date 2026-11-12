@@ -2,6 +2,8 @@ name: v6-main-contract-integration-v1
 
 on:
   pull_request:
+    # Full court runs on opening/ready state, not every intermediate commit.
+    types: [opened, reopened, ready_for_review]
     paths:
       - 'compiler/realsas_compiler_core/rig_program_ir_v1.py'
       - 'compiler/realsas_compiler_core/rig_constraint_schema_v1.py'

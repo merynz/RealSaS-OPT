@@ -19,6 +19,8 @@ on:
       - '.github/workflows/vf23_production_policy_e2e_bank.yml'
   workflow_dispatch:
   pull_request:
+    # Full court runs on opening/ready state, not every intermediate commit.
+    types: [opened, reopened, ready_for_review]
     branches: [main]
     paths:
       - 'compiler/**'

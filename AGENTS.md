@@ -1,5 +1,9 @@
 # RealSaS-OPT Agent Entry Contract
 
+## CI and Platform execution authority
+
+Workflow edits must first read `canonical/CI_EXECUTION_AUTHORITY_V1.json` and `docs/platform/CI_EXECUTION_AUTHORITY.md`. The machine-enforced RSS.vNext PR budget, exact-head full court, hosted/WSL/Colab separation and bounded local GC are not agent-local preferences. Changes require updating the contract and its CI tests together. Never equate zero-job queued GitHub scheduler records with self-hosted runner capacity.
+
 ## Single-view product objective — 2026-11-03
 
 Before IRIS foundation/training work, read

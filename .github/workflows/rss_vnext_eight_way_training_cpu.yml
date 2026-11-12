@@ -17,6 +17,8 @@ on:
       - "tests/models/test_rss_vnext_structural_trainer.py"
       - ".github/workflows/rss_vnext_eight_way_training_cpu.yml"
   pull_request:
+    # Full court runs on opening/ready state, not every intermediate commit.
+    types: [opened, reopened, ready_for_review]
     paths:
       - "models/rss_vnext/training_engine.py"
       - "models/rss_vnext/semantic_geometry_prior.py"

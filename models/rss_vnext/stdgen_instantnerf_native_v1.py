@@ -112,28 +112,39 @@ class _StdGENNativeSynthesizer(nn.Module):
         self.decoder = _StdGENNativeOSGDecoder(cfg.triplane_channels)
 
     def forward_points(self, planes: Tensor, points: Tensor) -> dict[str, Tensor]:
-        if (planes.ndim != 5 or planes.shape[1] != 3 or
-                points.ndim != 3 or points.shape[:1] != planes.shape[:1] or
-                points.shape[-1] != 3 or
-                not torch.isfinite(points).all()):
-            raise ValueError("RSS_VNEXT_INSTANTNERF_QUERY_DOMAIN")
-        b, _, c, h, w = planes.shape
-        x,y,z = points.unbind(dim=-1)
-        # Plane ordering XY / XZ / YZ is the pretrain convention.
-        uv = torch.stack((
-            torch.stack((x,y), dim=-1),
-            torch.stack((x,z), dim=-1),
-            torch.stack((y,z), dim=-1),
-        ), dim=1)
-        samples = F.grid_sample(
-            planes.reshape(3*b, c, h, w),
-            uv.reshape(3*b, points.shape[1], 1, 2),
-            mode="bilinear", padding_mode="zeros", align_corners=False,
-        )
-        features = samples.squeeze(-1).reshape(b, 3, c, -1).permute(
-            0, 3, 1, 2
-        ).reshape(b, points.shape[1], 3*c)
-        return self.decoder(features)
+        return self.decoder(sample_stdgen_instantnerf_triplanes_v1(planes, points))
+
+
+def sample_stdgen_instantnerf_triplanes_v1(
+    planes: Tensor, points: Tensor,
+) -> Tensor:
+    """Exact EG3D/InstantNeRF projection convention, implemented independently.
+
+    Reference project_onto_planes(): XY, XZ, ZY (not YZ). Box warp is 2,
+    padding is zeros and interpolation uses align_corners=False.
+    This ordering matters for pretrained checkpoint parity.
+    """
+    if (planes.ndim != 5 or planes.shape[1] != 3 or
+            points.ndim != 3 or points.shape[:1] != planes.shape[:1] or
+            points.shape[-1] != 3 or
+            not torch.isfinite(points).all() or
+            not torch.isfinite(planes).all()):
+        raise ValueError("RSS_VNEXT_INSTANTNERF_QUERY_DOMAIN")
+    b, _, c, h, w = planes.shape
+    x,y,z = points.unbind(dim=-1)
+    uv = torch.stack((
+        torch.stack((x,y), dim=-1),
+        torch.stack((x,z), dim=-1),
+        torch.stack((z,y), dim=-1),
+    ), dim=1)
+    samples = F.grid_sample(
+        planes.reshape(3*b, c, h, w),
+        uv.reshape(3*b, points.shape[1], 1, 2),
+        mode="bilinear", padding_mode="zeros", align_corners=False,
+    )
+    return samples.squeeze(-1).reshape(b, 3, c, -1).permute(
+        0, 3, 1, 2
+    ).reshape(b, points.shape[1], 3*c)
 
 
 class _StdGENNativeCameraDINO(nn.Module):
@@ -229,4 +240,5 @@ def build_stdgen_native_instantnerf_v1(*, local_dino_config_dir: str
 
 
 __all__ = ["StdGENNativeInstantNeRFV1", "StdGENNativeTriplaneTransformerV1",
-           "build_stdgen_native_instantnerf_v1"]
+           "build_stdgen_native_instantnerf_v1",
+           "sample_stdgen_instantnerf_triplanes_v1"]

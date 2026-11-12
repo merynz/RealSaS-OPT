@@ -140,6 +140,95 @@ def _metrics(
     return result
 
 
+
+
+def _two_view_depth_nullspace_witness(
+    source: RSSvNextTwoViewSourceObservationV1,
+    xyz: np.ndarray,
+    *,
+    width: int, height: int,
+) -> dict[str, Any]:
+    """Prove what the two *observed* orthographic camera planes cannot see.
+
+    SVD of the four image-coordinate Jacobian rows exposes any shared depth
+    nullspace. With exact front/back orthographic cameras both projections are
+    unchanged by moving 3D mesh vertices along that nullspace. The witness
+    perturbs alternating vertices to show even a *different surface shape*
+    can have identical 2D silhouettes and source-ray samples. This is an
+    identifiability check, NOT an invented depth teacher or model output.
+
+    With nonparallel cameras a full-rank Jacobian does not prove triangulation:
+    actual source point correspondences and depth remain unobserved.
+    """
+    cameras = np.asarray(source.camera_features, dtype=np.float64)
+    rows = np.stack((
+        cameras[0, 3:6] / cameras[0, 12],
+        cameras[0, 6:9] / cameras[0, 12],
+        cameras[1, 3:6] / cameras[1, 12],
+        cameras[1, 6:9] / cameras[1, 12],
+    ), axis=0)
+    _, sigma, vh = np.linalg.svd(rows, full_matrices=True)
+    if (
+        sigma.shape != (3,)
+        or not np.isfinite(sigma).all()
+        or float(sigma[0]) <= 0.0
+    ):
+        _fail("SOURCE_CAMERA_PROJECTION_SVD_INVALID")
+    tolerance = float(sigma[0]) * 1.0e-5
+    effective_rank = int(np.count_nonzero(sigma > tolerance))
+    axis = np.array(vh[-1], dtype=np.float64)
+    pivot = int(np.argmax(np.abs(axis)))
+    if axis[pivot] < 0:
+        axis *= -1.0
+    displacement = float(np.min(cameras[:, 12])) * .2
+    result: dict[str, Any] = {
+        "method": "TWO_ORIGINAL_ORTHOGRAPHIC_CAMERA_IMAGE_JACOBIAN_SVD",
+        "effective_rank": effective_rank,
+        "singular_values": [float(v) for v in sigma],
+        "rank_tolerance": tolerance,
+        "weakest_projection_axis_xyz": [float(v) for v in axis],
+        "original_camera_projection_matrix_sha256": content_sha256(rows.tolist()),
+        "source_point_correspondence_authority": "UNKNOWN_NOT_SOURCE_OBSERVED",
+        "source_depth_or_surface_completion_authority": False,
+        "canonical_mesh_authority": False,
+        "counterfactual_status": "NOT_EVALUATED_NO_COMMON_NULLSPACE",
+        "counterfactual_3d_vertex_displacement_world": None,
+        "counterfactual_max_two_view_pixel_drift": None,
+        "counterfactual_mesh_sha256": None,
+    }
+    if effective_rank != 2:
+        return result
+    counterfactual = np.array(xyz, dtype=np.float64, copy=True)
+    signs = np.where(
+        np.arange(len(counterfactual)) % 2 == 0, 1.0, -1.0
+    )
+    counterfactual += signs[:, None] * displacement * axis[None, :]
+    maximum = 0.0
+    for view_index in (0, 1):
+        actual = _project(
+            xyz, source.camera_features[view_index], view_index,
+            width=width, height=height,
+        )
+        changed = _project(
+            counterfactual, source.camera_features[view_index], view_index,
+            width=width, height=height,
+        )
+        maximum = max(
+            maximum, float(np.max(np.abs(changed[:, :2] - actual[:, :2])))
+        )
+    result.update({
+        "counterfactual_status": (
+            "DISTINCT_3D_GEOMETRY_SAME_TWO_SOURCE_PROJECTIONS"
+            if maximum <= 1.0e-4
+            else "NUMERICAL_NULLSPACE_WITNESS_UNSTABLE"
+        ),
+        "counterfactual_3d_vertex_displacement_world": displacement,
+        "counterfactual_max_two_view_pixel_drift": maximum,
+        "counterfactual_mesh_sha256": content_sha256(counterfactual.tolist()),
+    })
+    return result
+
+
 def compile_rss_vnext_two_view_raster_diagnostic_v1(
     *,
     source: RSSvNextTwoViewSourceObservationV1,
@@ -179,6 +268,12 @@ def compile_rss_vnext_two_view_raster_diagnostic_v1(
             **parent, state="ABSTAIN_RESOURCE_BUDGET", views=(), diagnostic_hash="",
         ))
     faces = np.asarray(raw_mesh["faces"], dtype=np.int64)
+    # This independently derived evidence prevents a 100% two-view silhouette
+    # match being misread as uniqueness of the 3D canonical surface.
+    depth_witness = _two_view_depth_nullspace_witness(
+        source, np.asarray(raw_mesh["rest_xyz"], dtype=np.float64),
+        width=w, height=h,
+    )
     rows = []
     raster_empty = False
     for view in range(2):
@@ -191,6 +286,7 @@ def compile_rss_vnext_two_view_raster_diagnostic_v1(
             "source_depth_authority": "UNKNOWN_NO_SOURCE_DEPTH",
             "source_color_owner_authority": "UNKNOWN_NO_SOURCE_POINT_CORRESPONDENCE",
             "raster_rule": "EXISTING_HALF_INTEGER_TOP_LEFT_BINARY_SILHOUETTE",
+            "two_view_source_depth_observability": depth_witness,
         }
         for candidate_name, field in (("base", "base_xyz"), ("rest", "rest_xyz")):
             xyz = np.asarray(raw_mesh[field], dtype=np.float64)

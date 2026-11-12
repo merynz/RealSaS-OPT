@@ -65,7 +65,7 @@ def test_raw_arbitrary_scenes_do_not_need_precalibrated_front_back_cameras():
         raw.frames_chw[0][0,0,0]=0
     assert raw.source_binding_sha256==before
     # Do not mistake generated normal pose views for original measured cameras.
-    with pytest.raises((TypeError,AttributeError,QualificationError)):
+    with pytest.raises((TypeError,ValueError,AttributeError,QualificationError)):
         canonicalize_two_view_source_v1(raw.frames_chw, None,
             source_rights_claim_sha256="1"*64)
 

@@ -51,6 +51,35 @@ def _as_plain_config(config: Any) -> dict:
     return raw
 
 
+def _first_party_lora_recipe(unet: nn.Module) -> list[dict[str, Any]]:
+    """Export only explicitly supported PEFT LoRA, never unknown adapters."""
+    raw = getattr(unet, "peft_config", None) or {}
+    if not isinstance(raw, dict):
+        raise RuntimeError("RSS_VNEXT_BUNDLE_UNSUPPORTED_PEFT_CONFIGURATION")
+    out = []
+    approved = {"to_q", "to_k", "to_v", "to_out.0"}
+    for name, cfg in sorted(raw.items()):
+        targets = set(getattr(cfg, "target_modules", ()) or ())
+        if (
+            not isinstance(name, str) or not name
+            or not targets or not targets.issubset(approved)
+            or getattr(cfg, "peft_type", None) != "LORA"
+            and str(getattr(cfg, "peft_type", "")) != "PeftType.LORA"
+            or getattr(cfg, "use_dora", False)
+            or float(getattr(cfg, "lora_dropout", 0.)) != 0.
+        ):
+            raise RuntimeError("RSS_VNEXT_BUNDLE_UNSUPPORTED_PEFT_LORA")
+        out.append({
+            "name": name,
+            "rank": int(cfg.r),
+            "alpha": float(cfg.lora_alpha),
+            "target_modules": sorted(targets),
+        })
+    if not out and any("lora_" in key for key in unet.state_dict()):
+        raise RuntimeError("RSS_VNEXT_BUNDLE_UNDECLARED_LORA_STATE")
+    return out
+
+
 def _stage_spec(stage: RSSvNextPinnedDiffusionStageV1) -> dict[str, Any]:
     if (
         type(stage) is not RSSvNextPinnedDiffusionStageV1
@@ -77,6 +106,7 @@ def _stage_spec(stage: RSSvNextPinnedDiffusionStageV1) -> dict[str, Any]:
         },
         "vae_scale_factor": stage.vae_scale_factor,
         "alpha": "CONV_3_TO_1_KERNEL_ONE",
+        "denoiser_lora": _first_party_lora_recipe(stage.denoiser),
     }
     row = stage.rowwise_attention
     if stage.stage == STAGE_MULTIVIEW:
@@ -103,7 +133,7 @@ def _build_stage_from_spec(
         type(spec) is not dict
         or set(spec) != {
             "stage", "denoiser", "vae", "scheduler", "conditioner",
-            "vae_scale_factor", "alpha", "rowwise",
+            "vae_scale_factor", "alpha", "rowwise", "denoiser_lora",
         }
         or spec["stage"] != expected_stage
         or spec["alpha"] != "CONV_3_TO_1_KERNEL_ONE"
@@ -118,6 +148,38 @@ def _build_stage_from_spec(
     except ImportError as exc:
         raise RuntimeError("RSS_VNEXT_BUNDLE_DIFFUSERS_RUNTIME_REQUIRED") from exc
     unet = UNet2DConditionModel.from_config(spec["denoiser"])
+    adapters = spec["denoiser_lora"]
+    if type(adapters) is not list or len(adapters) > 8:
+        raise RuntimeError("RSS_VNEXT_BUNDLE_PEFT_LORA_MANIFEST_INVALID")
+    if adapters:
+        try:
+            from peft import LoraConfig
+        except ImportError as exc:
+            raise RuntimeError("RSS_VNEXT_BUNDLE_PEFT_RUNTIME_REQUIRED") from exc
+        allowed = {"to_q", "to_k", "to_v", "to_out.0"}
+        names = set()
+        for item in adapters:
+            if (
+                type(item) is not dict
+                or set(item) != {"name", "rank", "alpha", "target_modules"}
+                or type(item["name"]) is not str or not item["name"]
+                or item["name"] in names
+                or type(item["rank"]) is not int or not 1 <= item["rank"] <= 64
+                or type(item["alpha"]) not in (int, float)
+                or not 0 < item["alpha"] <= 256
+                or type(item["target_modules"]) is not list
+                or len(item["target_modules"]) != len(set(item["target_modules"]))
+                or not set(item["target_modules"]).issubset(allowed)
+            ):
+                raise RuntimeError("RSS_VNEXT_BUNDLE_PEFT_LORA_MANIFEST_INVALID")
+            names.add(item["name"])
+            unet.add_adapter(
+                LoraConfig(
+                    r=item["rank"], lora_alpha=item["alpha"],
+                    target_modules=item["target_modules"],
+                    init_lora_weights=True,
+                ), adapter_name=item["name"],
+            )
     vae = AutoencoderKL.from_config(spec["vae"])
     scheduler = DDIMScheduler.from_config(spec["scheduler"])
     values = spec["conditioner"]

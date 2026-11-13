@@ -459,7 +459,11 @@
         "raw_source_rgb_image_plane_candidate_artifact_type": "RealSaS.RSSvNextSourceRGBImagePlaneCandidates",
         "raw_source_rgb_image_plane_candidate_schema_version": "v1",
         "raw_source_rgb_source_surface_ownership_qualified": false,
-        "raw_source_rgb_source_camera_observed": false
+        "raw_source_rgb_source_camera_observed": false,
+        "raw_mesh_uv_texture_atlas_artifact_type": "RealSaS.RSSvNextMeshUVTextureAtlasCandidate",
+        "raw_mesh_uv_texture_atlas_schema_version": "v1",
+        "raw_mesh_uv_texture_surface_ownership_qualified": false,
+        "raw_mesh_uv_2d_draw_order_independent": true
       }
     },
     "product.motion": {
@@ -541,7 +545,10 @@
         "input_dynamic_integrity_schema_version": "v1",
         "input_raw_source_rgb_image_plane_artifact_type": "RealSaS.RSSvNextSourceRGBImagePlaneCandidates",
         "input_raw_source_rgb_image_plane_schema_version": "v1",
-        "raw_source_rgb_independent_pixel_replay_required": true
+        "raw_source_rgb_independent_pixel_replay_required": true,
+        "input_raw_mesh_uv_texture_atlas_artifact_type": "RealSaS.RSSvNextMeshUVTextureAtlasCandidate",
+        "input_raw_mesh_uv_texture_atlas_schema_version": "v1",
+        "raw_mesh_uv_texture_atlas_replay_required": true
       }
     }
   }

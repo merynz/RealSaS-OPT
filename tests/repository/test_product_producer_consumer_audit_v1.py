@@ -13,8 +13,9 @@ def test_registered_product_contracts_and_executors_are_consistent_on_main():
     assert report["registered_issues"] == []
     ids = {row["capability_id"] for row in report["registered_capabilities"]}
     assert ids == {"product.input", "product.shape", "product.mesh", "product.rig", "product.skin", "product.mechanics", "product.graphics", "product.motion", "product.proof"}
-    assert len(report["registered_edges"]) == 17
-    assert {row["status"] for row in report["registered_edges"]} == {"MATCH"}
+    assert len(report["registered_edges"]) == 25
+    assert {row["status"] for row in report["registered_edges"]} == {"MATCH", "LINEAGE_ONLY"}
+    assert sum(row["status"] == "LINEAGE_ONLY" for row in report["registered_edges"]) == 5
 
 
 def test_current_sources_do_not_overclaim_an_e2e_product():
@@ -57,7 +58,7 @@ def test_detects_producer_consumer_schema_drift_even_if_both_have_valid_names():
 def test_detects_missing_real_worker_route_not_just_importable_python_module():
     snapshot = deepcopy(read_snapshot())
     snapshot["worker"] = snapshot["worker"].replace(
-        '"RealSaS.ProductSkinInference.v2"', '"RealSaS.ProductSkinInference.test_removed"', 1
+        '"RealSaS.ProductSkinInference.v3"', '"RealSaS.ProductSkinInference.test_removed"', 1
     )
     report = evaluate(snapshot)
     assert "REGISTERED_EXECUTOR_DISPATCH_MISSING:product.skin" in report["registered_issues"]
@@ -65,8 +66,8 @@ def test_detects_missing_real_worker_route_not_just_importable_python_module():
 
 def test_detects_go_provider_omission_despite_json_descriptor():
     snapshot = deepcopy(read_snapshot())
-    assert "ProductSkinProvider{}" in snapshot["go_catalog"]
-    snapshot["go_catalog"] = snapshot["go_catalog"].replace("ProductSkinProvider{},", "", 1)
+    assert "RSSvNextSkinCandidateProvider{}" in snapshot["go_catalog"]
+    snapshot["go_catalog"] = snapshot["go_catalog"].replace("RSSvNextSkinCandidateProvider{},", "", 1)
     report = evaluate(snapshot)
     assert "REGISTERED_GO_JSON_CATALOG_DRIFT" in report["registered_issues"]
 

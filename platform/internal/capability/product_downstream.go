@@ -60,7 +60,16 @@ func (ProductMechanicsProvider) Capabilities(context.Context) ([]Descriptor, err
 	metadata["control_intervention_policy"] = intervention
 	metadata["auxiliary_outputs"] = []any{
 		map[string]any{"role": "mechanics_intervention_court", "artifact_type": "RealSaS.MechanicsInterventionCourt", "schema_version": "v1"},
+		map[string]any{"role": "mechanics_dynamic_integrity_court", "artifact_type": "RealSaS.MechanicsDynamicIntegrityCourt", "schema_version": "v1"},
 	}
+	metadata["dynamic_integrity_policy"] = map[string]any{
+		"enabled":                 true,
+		"max_faces":               1024,
+		"max_controls":            128,
+		"relative_translation":    0.02,
+		"max_constraint_residual": 0.001,
+	}
+	metadata["dynamic_integrity_not_source_contact_or_secondary_motion"] = true
 	metadata["source_contact_qualified_by_intervention"] = false
 	metadata["learned_secondary_motion_qualified_by_intervention"] = false
 	metadata["can_mint_product_revision"] = false
@@ -140,6 +149,9 @@ func (ProductProofProvider) Capabilities(context.Context) ([]Descriptor, error) 
 	metadata["input_mechanics_intervention_artifact_type"] = "RealSaS.MechanicsInterventionCourt"
 	metadata["input_mechanics_intervention_schema_version"] = "v1"
 	metadata["mechanics_intervention_required"] = true
+	metadata["dynamic_integrity_court_required"] = true
+	metadata["input_dynamic_integrity_artifact_type"] = "RealSaS.MechanicsDynamicIntegrityCourt"
+	metadata["input_dynamic_integrity_schema_version"] = "v1"
 	metadata["canonical_cross_expert_parent_reopen_required"] = true
 	metadata["output_artifact_type"] = "RealSaS.ProductProofDiagnostic"
 	metadata["output_schema_version"] = "v1"

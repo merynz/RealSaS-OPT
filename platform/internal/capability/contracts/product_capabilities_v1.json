@@ -358,7 +358,7 @@
         "allowed_modes": [
           "DEVELOPER"
         ],
-        "product_pass_authority": false,
+        "product_pass_authority": true,
         "dependencies": [
           "product.mechanics",
           "product.graphics",

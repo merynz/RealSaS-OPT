@@ -7,159 +7,165 @@ import (
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 )
 
-func TestProductModelRequirementsFollowActiveTerrain(t *testing.T) {
-	registry, err := Build(context.Background(), ProductInputProvider{}, ProductShapeProvider{})
+func rssUnifiedTestRegistry(t *testing.T) *Registry {
+	t.Helper()
+	registry, err := Build(
+		context.Background(),
+		RSSvNextInputCandidateProvider{},
+		RSSvNextShapeCandidateProvider{},
+		RSSvNextMeshCandidateProvider{},
+		RSSvNextRigCandidateProvider{},
+		RSSvNextSkinCandidateProvider{},
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
+	return registry
+}
+
+func TestProductModelRequirementsFollowOneUnifiedAttemptNotFourWorkerReleases(t *testing.T) {
+	registry := rssUnifiedTestRegistry(t)
 	rows, err := ProductModelRequirements(registry)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(rows) != 2 {
-		t.Fatalf("requirements=%d want=2", len(rows))
+	if len(rows) != 1 {
+		t.Fatalf("RSS model requirement=%d want=1: %+v", len(rows), rows)
 	}
-	if rows[0].Family != "IRIS" || rows[0].ArchitectureID != "RealSaS.IRIS.VNextEvidenceModel.v3" || rows[0].RoleID != ProductRoleShape {
-		t.Fatalf("iris requirement=%+v", rows[0])
+	rss := rows[0]
+	if rss.Family != RSSvNextModelFamily || rss.ArchitectureID != RSSvNextArchitectureID ||
+		rss.RoleID != ProductRoleShape || rss.CapabilityID != ProductShapeCapabilityID {
+		t.Fatalf("one Shape execution owns the learned release: %+v", rss)
 	}
-	if rows[1].Family != "TESSA" || rows[1].ArchitectureID != "RealSaS.TESSA.Structuralizer.v3" || rows[1].RoleID != ProductRoleShape {
-		t.Fatalf("tessa requirement=%+v", rows[1])
+	families, err := RequiredModelFamilies(registry)
+	if err != nil || len(families) != 1 || families[0] != RSSvNextModelFamily {
+		t.Fatalf("RSS learned family ownership=%v / %v", families, err)
 	}
 }
 
-func TestProductModelRequirementsIncludeAxisAndMiraForFullCatalog(t *testing.T) {
+func TestProductModelRequirementsExactlyOneForFullNineRoleCatalog(t *testing.T) {
 	registry := productProvidersTestRegistry(t)
 	rows, err := ProductModelRequirements(registry)
+	if err != nil || len(rows) != 1 ||
+		rows[0].Family != RSSvNextModelFamily ||
+		rows[0].RoleID != ProductRoleShape {
+		t.Fatalf("nine-role RSS model requirements=%+v / %v", rows, err)
+	}
+	terrain, err := ResponsibilityTerrain(registry)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(rows) != 4 {
-		t.Fatalf("requirements=%d want=4", len(rows))
+	claimed := map[string]bool{}
+	for _, item := range terrain {
+		if item.ModelFamily == RSSvNextModelFamily {
+			claimed[item.ResponsibilityID] = true
+			if item.ModelExecutionCapabilityID != "product.shape" {
+				t.Fatalf("RSS expert must originate from Shape release: %+v", item)
+			}
+		}
 	}
-	byFamily := map[string]ProductModelRequirement{}
-	for _, row := range rows {
-		byFamily[row.Family] = row
-	}
-	axis := byFamily["AXIS"]
-	if axis.ArchitectureID != "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0" || axis.RoleID != ProductRoleRig {
-		t.Fatalf("axis requirement=%+v", axis)
-	}
-	mira := byFamily["MIRA"]
-	if mira.ArchitectureID != "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0" || mira.RoleID != ProductRoleSkin {
-		t.Fatalf("mira requirement=%+v", mira)
-	}
-	if byFamily["IRIS"].RoleID != ProductRoleShape || byFamily["TESSA"].RoleID != ProductRoleShape {
-		t.Fatalf("shape requirements=%+v", byFamily)
+	for _, id := range []string{
+		"shape.shared_scene_evidence", "shape.topology_proposal",
+		"rig.structure_proposal", "skin.influence_proposal",
+	} {
+		if !claimed[id] {
+			t.Fatalf("missing unified source ownership for %s", id)
+		}
 	}
 }
 
-func TestFullProductCatalogEngineReleaseRequiresAxisAndMira(t *testing.T) {
+func TestFullProductCatalogEngineReleaseRejectsIndependentAxisMiraIrisTessa(t *testing.T) {
 	registry := productProvidersTestRegistry(t)
-	valid := []release.ModelRequirement{
-		{Family: "AXIS", ArchitectureID: "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0", Channel: "PRODUCTION"},
-		{Family: "IRIS", ArchitectureID: "RealSaS.IRIS.VNextEvidenceModel.v3", Channel: "PRODUCTION"},
-		{Family: "MIRA", ArchitectureID: "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0", Channel: "PRODUCTION"},
-		{Family: "TESSA", ArchitectureID: "RealSaS.TESSA.Structuralizer.v3", Channel: "PRODUCTION"},
-	}
+	valid := []release.ModelRequirement{{
+		Family: RSSvNextModelFamily, ArchitectureID: RSSvNextArchitectureID,
+		Channel: "PRODUCTION",
+	}}
 	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, valid); err != nil {
-		t.Fatalf("full product model set rejected: %v", err)
+		t.Fatal(err)
 	}
-	missingAxis := []release.ModelRequirement{valid[1], valid[2], valid[3]}
-	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, missingAxis); err == nil {
-		t.Fatal("full product catalog accepted an EngineRelease without AXIS")
+	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, nil); err == nil {
+		t.Fatal("accepted empty model set")
 	}
-	missingMira := []release.ModelRequirement{valid[0], valid[1], valid[3]}
-	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, missingMira); err == nil {
-		t.Fatal("full product catalog accepted an EngineRelease without MIRA")
+	legacy := append(append([]release.ModelRequirement{}, valid...), release.ModelRequirement{
+		Family: "MIRA", ArchitectureID: "RealSaS.MIRA.CarrierNativeFSQSkinCodec.v6_0", Channel:"PRODUCTION",
+	})
+	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, legacy); err == nil {
+		t.Fatal("admitted independent MIRA model with RSS unified checkpoint")
 	}
-	wrongAxis := append([]release.ModelRequirement(nil), valid...)
-	wrongAxis[0].ArchitectureID = "wrong"
-	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, wrongAxis); err == nil {
-		t.Fatal("active product.rig accepted AXIS architecture drift")
-	}
-	wrongMira := append([]release.ModelRequirement(nil), valid...)
-	wrongMira[2].ArchitectureID = "wrong"
-	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, wrongMira); err == nil {
-		t.Fatal("active product.skin accepted MIRA architecture drift")
+	wrong := []release.ModelRequirement{{
+		Family: RSSvNextModelFamily, ArchitectureID: "wrong",
+		Channel: "PRODUCTION",
+	}}
+	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, wrong); err == nil {
+		t.Fatal("accepted unified architecture drift")
 	}
 }
 
 func TestEngineReleaseModelRequirementsRejectArchitectureAndChannelDrift(t *testing.T) {
-	registry, err := Build(context.Background(), ProductInputProvider{}, ProductShapeProvider{})
+	registry, err := Build(context.Background(), RSSvNextInputCandidateProvider{}, RSSvNextShapeCandidateProvider{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	valid := []release.ModelRequirement{
-		{Family: "IRIS", ArchitectureID: "RealSaS.IRIS.VNextEvidenceModel.v3", Channel: "PRODUCTION"},
-		{Family: "TESSA", ArchitectureID: "RealSaS.TESSA.Structuralizer.v3", Channel: "PRODUCTION"},
-	}
+	valid := []release.ModelRequirement{{
+		Family: RSSvNextModelFamily, ArchitectureID: RSSvNextArchitectureID,
+		Channel: "PRODUCTION",
+	}}
 	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, valid); err != nil {
 		t.Fatal(err)
 	}
-	research := []release.ModelRequirement{
-		{Family: "IRIS", ArchitectureID: "RealSaS.IRIS.VNextEvidenceModel.v3", Channel: "RESEARCH"},
-		{Family: "TESSA", ArchitectureID: "RealSaS.TESSA.Structuralizer.v3", Channel: "CANDIDATE"},
-	}
+	research := []release.ModelRequirement{{
+		Family: RSSvNextModelFamily, ArchitectureID: RSSvNextArchitectureID,
+		Channel: "RESEARCH",
+	}}
 	if err := validateEngineReleaseModelRequirements(registry, release.PurposeResearch, research); err != nil {
 		t.Fatal(err)
 	}
-	wrongArchitecture := append([]release.ModelRequirement(nil), valid...)
-	wrongArchitecture[1].ArchitectureID = "wrong"
-	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, wrongArchitecture); err == nil {
+	wrong := append([]release.ModelRequirement(nil), valid...)
+	wrong[0].ArchitectureID="bad"
+	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, wrong); err == nil {
 		t.Fatal("architecture drift accepted")
 	}
-	wrongChannel := append([]release.ModelRequirement(nil), valid...)
-	wrongChannel[0].Channel = "RESEARCH"
-	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, wrongChannel); err == nil {
-		t.Fatal("product release accepted research model channel")
+	wrong = append([]release.ModelRequirement(nil), valid...)
+	wrong[0].Channel="RESEARCH"
+	if err := validateEngineReleaseModelRequirements(registry, release.PurposeProduct, wrong); err == nil {
+		t.Fatal("product release accepted research channel")
 	}
 }
 
-func TestProductShapeMeshRetainIndependentCASSceneEvidence(t *testing.T) {
-	shapeRows, err := (ProductShapeProvider{}).Capabilities(context.Background())
-	if err != nil || len(shapeRows) != 1 {
-		t.Fatalf("product.shape descriptor: %v / %d", err, len(shapeRows))
+func TestProductShapeMeshRetainSevenCASChildrenAndOneCanonicalMesh(t *testing.T) {
+	shapeRows, err := (RSSvNextShapeCandidateProvider{}).Capabilities(context.Background())
+	if err != nil || len(shapeRows)!=1 {
+		t.Fatalf("Shape descriptor=%v / %d",err,len(shapeRows))
 	}
 	shapeMeta := shapeRows[0].Metadata
-	if shapeMeta["evidence_fanout_contract"] != "RealSaS.ShapeEvidenceFanout.v1" ||
-		shapeMeta["independent_scene_consumers_do_not_require_mesh"] != true ||
-		shapeMeta["model_scene_evidence_retained_after_mesh_compile"] != true {
-		t.Fatalf("product.shape dropped scene fan-out: %+v", shapeMeta)
+	if shapeMeta["fanout_contract"]!="RealSaS.RSSvNext.ProductEvidenceFanout.v1" ||
+		shapeMeta["neural_scene_survives_mesh_abstain"]!=true ||
+		shapeMeta["independent_iris_tessa_forbidden"]!=true {
+		t.Fatalf("missing one-inference retained fanout: %+v",shapeMeta)
 	}
-	aux, ok := shapeMeta["auxiliary_outputs"].([]any)
-	if !ok || len(aux) != 2 {
-		t.Fatalf("expected exactly two additional immutable Shape CAS outputs: %+v", aux)
+	aux,ok:=shapeMeta["auxiliary_outputs"].([]any)
+	if !ok || len(aux)!=7 {
+		t.Fatalf("expected seven independently retained Shape CAS children %+v",aux)
 	}
-	wanted := map[string]string{
-		"iris_scene_evidence":   "RealSaS.IRISSceneEvidence/v1",
-		"shape_evidence_fanout": "RealSaS.ShapeEvidenceFanout/v1",
+	meshRows,err:=(RSSvNextMeshCandidateProvider{}).Capabilities(context.Background())
+	if err!=nil || len(meshRows)!=1 {
+		t.Fatalf("mesh descriptor=%v / %d",err,len(meshRows))
 	}
-	for _, raw := range aux {
-		output, ok := raw.(map[string]any)
-		if !ok {
-			t.Fatalf("untyped auxiliary output: %+v", raw)
+	meshMeta:=meshRows[0].Metadata
+	if meshMeta["output_artifact_type"]!="RealSaS.CanonicalMeshIR" ||
+		meshMeta["canonical_mesh_required_for_product_execution"]!=true ||
+		meshMeta["input_shape_artifact_type"]!="RealSaS.RSSvNextInferenceEvidence" ||
+		meshMeta["independent_model_inference_forbidden"]!=true {
+		t.Fatalf("canonical product mesh is not source-gated: %+v",meshMeta)
+	}
+	if x,ok:=meshMeta["two_view_static_policy_sha256"].(string);!ok||len(x)!=64 {
+		t.Fatalf("source-raster policy must be content pinned: %+v",meshMeta)
+	}
+	// The research adapter still exists as an explicit non-active legacy
+	// implementation; it must not enter the current ModelRelease catalog.
+	for _, provider := range ProductProviders() {
+		if provider == nil {
+			t.Fatal("nil product provider")
 		}
-		role, ok := output["role"].(string)
-		if !ok {
-			t.Fatalf("auxiliary role is not a string: %+v", output)
-		}
-		got := output["artifact_type"].(string) + "/" + output["schema_version"].(string)
-		if wanted[role] != got {
-			t.Fatalf("unexpected Shape evidence output %s: %s", role, got)
-		}
-		delete(wanted, role)
-	}
-	if len(wanted) != 0 {
-		t.Fatalf("missing fan-out artifacts %+v", wanted)
-	}
-	meshRows, err := (ProductMeshProvider{}).Capabilities(context.Background())
-	if err != nil || len(meshRows) != 1 {
-		t.Fatalf("product.mesh descriptor: %v / %d", err, len(meshRows))
-	}
-	meshMeta := meshRows[0].Metadata
-	if meshMeta["requires_shape_evidence_fanout"] != true ||
-		meshMeta["iris_scene_evidence_loaded_by_mesh"] != false ||
-		meshMeta["canonical_mesh_replaces_neural_scene"] != false {
-		t.Fatalf("product.mesh must verify the lightweight index without dropping/decoding parent scene: %+v", meshMeta)
 	}
 }

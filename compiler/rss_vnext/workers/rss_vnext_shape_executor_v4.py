@@ -164,6 +164,8 @@ def _raw_source_ref(request: dict[str, Any]) -> dict[str, Any] | None:
         raise RuntimeError("RSS_VNEXT_SHAPE_V4_TWO_DIFFERENT_SOURCE_AUTHORITIES")
     if not raw:
         return None
+    if len(raw) != len(refs):
+        raise RuntimeError("RSS_VNEXT_SHAPE_V4_EXTRA_PARENT_NOT_SOURCE")
     if len(raw) not in (1, 2) or any(
         row.get(key) != raw[0].get(key)
         for row in raw[1:]

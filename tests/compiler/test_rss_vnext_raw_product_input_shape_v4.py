@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from hashlib import sha256
+from dataclasses import replace
 import io
 import json
 from pathlib import Path
@@ -23,6 +24,10 @@ from compiler.rss_vnext.workers.rss_vnext_shape_executor_v4 import (
     execute_rss_vnext_shape_capability_v4,
 )
 from tests.models.test_rss_vnext_uncalibrated_neural_scene_v1 import _bundle
+from models.rss_vnext.animation_ready_mesh import RSSvNextStructuralMeshCandidate
+from compiler.rss_vnext.workers.rss_vnext_shape_executor_v4 import (
+    _tensor_archive, _tessa_candidate_tensors_v1,
+)
 
 
 class MemoryCAS:
@@ -171,11 +176,111 @@ def test_raw_shape_runs_two_actual_generators_and_persists_only_candidate_cas(
         assert archive["scene_triplanes"].shape[1] == 3
         assert np.isfinite(archive["local_features"]).all()
         assert archive["graphics_logits"].shape[-1] == 5
+        assert archive["tessa_topology_token_ids"].shape == (1, receipt["tessa_token_count"])
+        assert receipt["tessa_mesh_candidate_present"] == (
+            "tessa_candidate_faces" in archive.files
+        )
+        assert "original_source_ray_depth" not in archive.files
+        if receipt["tessa_mesh_candidate_present"]:
+            assert archive["tessa_candidate_rest_vertices"].shape[1] == (
+                receipt["tessa_mesh_candidate_vertex_count"]
+            )
+            assert archive["tessa_candidate_faces"].shape[0] == (
+                receipt["tessa_mesh_candidate_face_count"]
+            )
     with np.load(io.BytesIO(cas.read_object(result["outputs"][1]))) as archive:
         assert archive["generated_rgba"].shape[1] == 6
         assert archive["generated_normals"].shape[1] == 6
         assert archive["generated_virtual_cameras"].shape == (1, 6, 13)
 
+
+
+def _learned_tessa_candidate_for_cas():
+    # An independently constructible typed candidate: valid indexed geometry,
+    # not a source camera/ray, teacher state, or admitted canonical mesh.
+    return RSSvNextStructuralMeshCandidate(
+        topology_token_ids=(7, 8, 9),
+        source_authority="LEARNED_PREDICTED_TOPOLOGY",
+        topology_court=None,
+        base_vertices_iris=torch.tensor([[
+            [0., 0., 0.], [0.5, 0., 0.], [0., 0.5, 0.],
+        ]]),
+        rest_vertices_iris=torch.tensor([[
+            [0., 0., 0.], [0.5, 0., 0.], [0., 0.5, 0.],
+        ]]),
+        faces=torch.tensor([[0, 1, 2]], dtype=torch.int64),
+        vertex_component_ids=torch.zeros(3, dtype=torch.int64),
+        face_component_ids=torch.zeros(1, dtype=torch.int64),
+        local_features=torch.ones(1, 3, 8),
+        normals=torch.ones(1, 3, 3),
+        geometry={
+            "unsigned_distance": torch.ones(1, 3),
+            "sign_logit": torch.zeros(1, 3),
+        },
+        semantic_logits=torch.zeros(1, 3, 4),
+        presentation_role_logits=torch.ones(1, 3, 2),
+        presentation_role_schema_id="RealSaS.Test.UnqualifiedPresentation",
+        affordance_logits=torch.zeros(1, 3, 5),
+        graphics_logits=torch.zeros(1, 3, 5),
+        static_quality_logits=torch.zeros(1, 3, 4),
+    )
+
+
+def test_raw_tessa_candidate_is_preserved_without_source_promotion():
+    mesh = _learned_tessa_candidate_for_cas()
+    proposal = {
+        "structural_token_proposal": torch.tensor([[7, 8, 9]]),
+        "mesh_status": "UNQUALIFIED_MESH_CANDIDATE",
+        "mesh_candidate": mesh,
+    }
+    arrays, receipt = _tessa_candidate_tensors_v1(proposal)
+    with np.load(io.BytesIO(_tensor_archive(**arrays))) as archive:
+        assert archive["tessa_topology_token_ids"].tolist() == [[7, 8, 9]]
+        assert archive["tessa_candidate_faces"].tolist() == [[0, 1, 2]]
+        assert archive["tessa_candidate_vertex_components"].tolist() == [0, 0, 0]
+        assert archive["tessa_candidate_rest_vertices"].shape == (1, 3, 3)
+        assert archive["tessa_candidate_graphics_logits"].shape == (1, 3, 5)
+        assert "source_ray_evidence" not in archive.files
+    assert receipt["tessa_mesh_candidate_present"] is True
+    assert receipt["tessa_mesh_candidate_vertex_count"] == 3
+    assert receipt["tessa_mesh_candidate_face_count"] == 1
+    assert receipt["tessa_mesh_candidate_authority"] == "UNQUALIFIED_LEARNED_PROPOSAL_ONLY"
+
+
+def test_raw_tessa_abstain_retains_tokens_not_fabricated_faces():
+    arrays, receipt = _tessa_candidate_tensors_v1({
+        "structural_token_proposal": torch.tensor([[7, 8]]),
+        "mesh_status": "ABSTAIN",
+        "mesh_candidate": None,
+    })
+    assert set(arrays) == {"tessa_topology_token_ids"}
+    assert receipt["tessa_token_count"] == 2
+    assert receipt["tessa_mesh_candidate_present"] is False
+    with pytest.raises(RuntimeError, match="STATUS_OR_CANDIDATE"):
+        _tessa_candidate_tensors_v1({
+            "structural_token_proposal": torch.tensor([[7, 8]]),
+            "mesh_status": "UNQUALIFIED_MESH_CANDIDATE",
+            "mesh_candidate": None,
+        })
+
+
+def test_raw_tessa_cannot_promote_qualified_mesh_or_add_source_rays():
+    mesh = _learned_tessa_candidate_for_cas()
+    original = {
+        "structural_token_proposal": torch.tensor([[7, 8, 9]]),
+        "mesh_status": "UNQUALIFIED_MESH_CANDIDATE",
+        "mesh_candidate": mesh,
+    }
+    with pytest.raises(RuntimeError, match="PREMATURE_SOURCE_AUTHORITY"):
+        _tessa_candidate_tensors_v1({
+            **original, "mesh_candidate": replace(
+                mesh, canonical_mesh_authority=True,
+            ),
+        })
+    with pytest.raises(RuntimeError, match="PREMATURE_SOURCE_AUTHORITY"):
+        _tessa_candidate_tensors_v1({
+            **original, "structural_token_proposal": torch.tensor([[7, 8, 10]]),
+        })
 
 def test_raw_and_calibrated_sources_cannot_be_mixed_by_shape():
     cas = MemoryCAS()
@@ -192,6 +297,23 @@ def test_raw_and_calibrated_sources_cannot_be_mixed_by_shape():
             test_vision_encoder_factory=lambda: object(),
         )
 
+
+
+def test_raw_shape_rejects_extra_unrecognized_parent_before_loading():
+    cas = MemoryCAS()
+    raw, _ = _source(cas)
+    req = _shape_req(raw)
+    req["input_artifacts"].append({
+        "artifact_type": "RealSaS.OtherSourceEvidence",
+        "schema_version": "v1",
+        **cas.put_bytes(b"not-an-original-source"),
+    })
+    with pytest.raises(RuntimeError, match="EXTRA_PARENT_NOT_SOURCE"):
+        execute_rss_vnext_shape_capability_v4(
+            req, read_object=cas.read_object,
+            put_bytes=cas.put_bytes,
+            test_vision_encoder_factory=lambda: object(),
+        )
 
 def test_raw_source_cas_tampering_is_rejected_before_checkpoint_loading():
     cas = MemoryCAS()

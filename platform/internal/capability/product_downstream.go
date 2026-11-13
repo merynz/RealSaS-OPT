@@ -100,6 +100,7 @@ func (ProductGraphicsProvider) Capabilities(context.Context) ([]Descriptor, erro
 	metadata["input_source_artifact_type"] = "RealSaS.RSSvNextUncalibratedTwoImageSource"
 	metadata["alternate_calibrated_source_artifact_type"] = "RealSaS.RSSvNextTwoViewSource"
 	metadata["raw_scene_artifact_type"] = "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier"
+	metadata["raw_scene_schema_version"] = "v1"
 	metadata["raw_construction_receipt_artifact_type"] = "RealSaS.RSSvNextUncalibratedConstructionReceipt"
 	metadata["raw_typed_region_relation_mask_required"] = true
 	metadata["raw_source_alpha_static_mesh_replay_required"] = true

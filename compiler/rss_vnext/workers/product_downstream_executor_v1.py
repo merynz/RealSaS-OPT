@@ -497,9 +497,17 @@ def execute_graphics_capability_v1(
             native_receipt["receipt_hash"] = content_sha256(native_receipt)
     raw_source_rgb = None
     raw_source_rgb_summary = None
+    raw_texture_atlas = None
+    raw_texture_manifest = None
     if compiled.metadata.get("origin") == "RAW_TWO_IMAGE_UNIFIED_H_TYPED_GRAPHICS_CANDIDATES":
         raw_source_rgb, raw_source_rgb_summary = _raw_source_rgb_candidate_from_cas_v1(
             request, read_object, mesh,
+        )
+        from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
+            compile_rss_vnext_uv_texture_atlas_v1,
+        )
+        raw_texture_atlas, raw_texture_manifest = compile_rss_vnext_uv_texture_atlas_v1(
+            source_rgb_candidates=raw_source_rgb, mesh=mesh,
         )
     rendered = build_runtime_graphics_v1(compiled,face_count=len(mesh.faces))
     outputs = [
@@ -522,6 +530,13 @@ def execute_graphics_capability_v1(
             kind="RealSaS.RSSvNextSourceRGBImagePlaneCandidates",
             put_bytes=put_bytes,
         ))
+    if raw_texture_atlas is not None:
+        outputs.append(_seal_binary_candidate_v1(
+            raw_texture_atlas,
+            role="rss_canonical_mesh_uv_texture_atlas_candidate",
+            kind="RealSaS.RSSvNextMeshUVTextureAtlasCandidate",
+            put_bytes=put_bytes,
+        ))
     return {
         "capability_id":"product.graphics","status":"PASS",
         "outputs":outputs,"failure":None,
@@ -538,6 +553,20 @@ def execute_graphics_capability_v1(
                 if raw_source_rgb_summary is not None else 0
             ),
             "source_rgb_surface_ownership_qualified": False,
+            "mesh_uv_texture_atlas_candidate_present": raw_texture_atlas is not None,
+            "mesh_uv_texture_atlas_size": (
+                raw_texture_manifest["atlas_size"] if raw_texture_manifest is not None else None
+            ),
+            "mesh_uv_texels_per_original_view": (
+                raw_texture_manifest["source_view_color_texel_counts"]
+                if raw_texture_manifest is not None else [0, 0]
+            ),
+            "mesh_uv_source_conflict_texels": (
+                raw_texture_manifest["source_view_conflict_texel_count"]
+                if raw_texture_manifest is not None else 0
+            ),
+            "mesh_uv_texture_surface_ownership_qualified": False,
+            "graphics_draw_order_independent_of_uv_atlas": True,
             "graphics_source_kind":source_kind,
             "mechanics_intervention_court_hash": (
                 intervention["court_hash"] if intervention is not None else None

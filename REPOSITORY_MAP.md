@@ -8,7 +8,8 @@ This map is **human navigation**; it is not a competing architecture configurati
 | --- | --- |
 | `models/rss_vnext/` | One shared model inference; specialist evidence fanout |
 | `models/iris/`, `models/tessa/`, `models/axis/`, `models/mira/` | Geometry, topology, articulation and skin expert implementations |
-| `compiler/` | Evidence adjudication, canonical IR, Mechanics, Graphics, Motion, Proof |
+| `compiler/rss_vnext/` | Unified RSS.vNext-specific courts and workers (byte-identical relocation) |
+| `compiler/realsas_compiler_core/`, `compiler/realsas_compiler_services/` | Shared canonical primitives, mechanics, graphics, motion, proof and compatibility machinery |
 | `runtime/` | Interactive puppet, skin deformation, native rendering |
 | `product/` | BUSTED Awaken/Studio |
 | `platform/` | Go control plane, releases, CAS, workflow ownership and ProductRevision |

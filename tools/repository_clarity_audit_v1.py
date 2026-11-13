@@ -44,6 +44,7 @@ PRODUCT_READER_ROOTS = (
     "models/axis/",
     "models/mira/",
     "compiler/realsas_compiler_services/platform_worker/",
+    "compiler/rss_vnext/workers/",
 )
 WORKFLOW_EVENTS = frozenset({
     "push", "pull_request", "pull_request_target", "schedule",

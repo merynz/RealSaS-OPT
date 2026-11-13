@@ -1,0 +1,107 @@
+{
+  "schema": "RealSaS.RSSvNextCompilerSourceRelocation.v1",
+  "source_commit": "40aa72d10a9ddc575be9e490f77ae0a65b8b3498",
+  "content_identity": "GIT_BLOB_SHA1_UNCHANGED",
+  "paths": [
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_canonical_mesh_candidate_bridge_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_canonical_mesh_candidate_bridge_v1.py",
+      "git_blob_sha1": "3dbaeb7d5e37ac5cd792b62eefb5d31667ebf56c"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_cleanroom_diffusion_source_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_cleanroom_diffusion_source_v1.py",
+      "git_blob_sha1": "e707e70098e25bbe50c8b4bbb04ec826a38ed773"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_cross_expert_capability_court_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_cross_expert_capability_court_v1.py",
+      "git_blob_sha1": "181d802f89c333f08d026e764647b5170dec1d0c"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_discrete_skin_replay_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_discrete_skin_replay_v1.py",
+      "git_blob_sha1": "9e89ae61bf7af3601d3a9b592831b06e9c9ca7d3"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_expert_fanout_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_expert_fanout_v1.py",
+      "git_blob_sha1": "18e14adc74aeb417cbe9905fd7d3fe8a14ad050c"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_face_relation_schedule_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_face_relation_schedule_v1.py",
+      "git_blob_sha1": "a7ca03e7c5650ffcd573f51ab29c4141f48a0347"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_inference_evidence_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_inference_evidence_v1.py",
+      "git_blob_sha1": "61d8f8a1b684ea83a5edeab763de32b4f3c17e27"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_neural_mesh_proposal_basis_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_neural_mesh_proposal_basis_v1.py",
+      "git_blob_sha1": "7b9563a5814e7a6e40fd23ff78cc344a39843416"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_relation_epistemic_court_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_relation_epistemic_court_v1.py",
+      "git_blob_sha1": "e5a1d9374bba244bb76996e13765f3fecb807b17"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_source_evidence_binding_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_source_evidence_binding_v1.py",
+      "git_blob_sha1": "6e75098c945dd67748d2402aee5559d5162e4ace"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_source_observation_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_source_observation_v1.py",
+      "git_blob_sha1": "cbd9529347f0a3f66bf5597dbb716f36e33c8a8c"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_source_ray_replay_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_source_ray_replay_v1.py",
+      "git_blob_sha1": "80f7c2edf293df1a0daed9de96ad4287bb405160"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_surface_decisions_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_surface_decisions_v1.py",
+      "git_blob_sha1": "8a56bcf8de4958113620ab30c3f317c635513edb"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_core/rss_vnext_two_view_raster_diagnostic_v1.py",
+      "new_path": "compiler/rss_vnext/core/rss_vnext_two_view_raster_diagnostic_v1.py",
+      "git_blob_sha1": "8f05b13a5afc514a4b8334d710571cf9da2542c4"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_services/platform_worker/rss_vnext_evidence_continuity_v1.py",
+      "new_path": "compiler/rss_vnext/workers/rss_vnext_evidence_continuity_v1.py",
+      "git_blob_sha1": "ebcd7413e2981d6963efe1542d076dcc427d1fd7"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_services/platform_worker/rss_vnext_input_executor_v2.py",
+      "new_path": "compiler/rss_vnext/workers/rss_vnext_input_executor_v2.py",
+      "git_blob_sha1": "039f07bf47976c157ee85129e18cf46d8a24ff67"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_services/platform_worker/rss_vnext_mesh_executor_v2.py",
+      "new_path": "compiler/rss_vnext/workers/rss_vnext_mesh_executor_v2.py",
+      "git_blob_sha1": "14d03913b1a86b57ee68fb5f841077a0b3770506"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_services/platform_worker/rss_vnext_product_fanout_v1.py",
+      "new_path": "compiler/rss_vnext/workers/rss_vnext_product_fanout_v1.py",
+      "git_blob_sha1": "5ff02ecb59eb6496fe3da5d6770e02222497f328"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_services/platform_worker/rss_vnext_shape_executor_v3.py",
+      "new_path": "compiler/rss_vnext/workers/rss_vnext_shape_executor_v3.py",
+      "git_blob_sha1": "1e7f7fa0823ec1ba92b193feb652ea5886ba5000"
+    },
+    {
+      "old_path": "compiler/realsas_compiler_services/platform_worker/rss_vnext_source_codec_v1.py",
+      "new_path": "compiler/rss_vnext/workers/rss_vnext_source_codec_v1.py",
+      "git_blob_sha1": "13cb53c21eba2c6f7544fbdfb8360062192c9e82"
+    }
+  ]
+}

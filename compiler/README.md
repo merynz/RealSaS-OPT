@@ -1,4 +1,4 @@
-# RealSaS Compiler
+> **RSS.vNext product source home:** [`compiler/rss_vnext/`](rss_vnext/). The specialist compiler courts and workers are consolidated there; shared canonical Mechanical/Graphics/Motion/Proof primitives remain below. Source relocation does not change original module import IDs. Full native renderer/Proof qualification remains open.\n\n# RealSaS Compiler
 
 ## Canonical authority
 

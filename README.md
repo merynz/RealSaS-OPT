@@ -9,7 +9,7 @@
 | Area | Product-facing source |
 | --- | --- |
 | Unified inference and specialist evidence | [`models/rss_vnext/`](models/rss_vnext/) and [IRIS/TESSA/AXIS/MIRA](models/README.md) |
-| Canonical compilation and independent qualification | [`compiler/`](compiler/) |
+| Canonical compilation and independent qualification | [`compiler/rss_vnext/`](compiler/rss_vnext/) |
 | Deform, render and edit consumers | [`runtime/`](runtime/) |
 | Awaken and Studio | [`product/`](product/) |
 | Releases, capability DAG, artifacts and ProductRevision | [`platform/`](platform/) |

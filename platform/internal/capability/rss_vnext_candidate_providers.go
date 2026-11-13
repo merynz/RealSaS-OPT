@@ -161,7 +161,7 @@ func (RSSvNextMeshCandidateProvider) Capabilities(context.Context) ([]Descriptor
 				"component_min_foreground_fraction":  0.005,
 			},
 			"two_view_static_policy_stage": "PROVISIONAL_PRETRAINING_NEEDS_UNSEEN_CALIBRATION",
-			"auxiliary_outputs":                             []any{
+			"auxiliary_outputs": []any{
 				map[string]any{"role": "rss_sparse_face_relation_candidates", "artifact_type": "RealSaS.RSSvNextSparseCandidateFaceRelations", "schema_version": "v1"},
 				map[string]any{"role": "rss_two_view_raster_diagnostic", "artifact_type": "RealSaS.RSSvNextTwoViewRasterDiagnostic", "schema_version": "v1"},
 				map[string]any{"role": "rss_original_source_ray_replay", "artifact_type": "RealSaS.RSSvNextSourceRayReplayCourt", "schema_version": "v1"},

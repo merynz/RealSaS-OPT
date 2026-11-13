@@ -74,10 +74,11 @@ def test_two_original_images_neural_shape_mesh_rig_skin_mechanics_graphics_runti
         req, read_object=cas.read_object, put_bytes=cas.put_bytes,
     )
     assert out["status"] == "PASS"
-    assert len(out["outputs"]) == 3
+    assert len(out["outputs"]) == 4
     assert set(x["artifact_type"] for x in out["outputs"]) == {
         "RealSaS.CompiledGraphics", "RealSaS.RuntimeGraphics",
         "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
+        "RealSaS.RSSvNextObservedRGBHypothesisSamples",
     }
     diagnostics = out["diagnostics"]
     assert diagnostics["source_appearance_qualified"] is False
@@ -95,6 +96,25 @@ def test_two_original_images_neural_shape_mesh_rig_skin_mechanics_graphics_runti
     assert receipt["source_hidden_surface_qualified"] is False
     assert receipt["pose_conditioned_visibility_qualified"] is False
     assert receipt["product_revision_minted"] is False
+    rgb = json.loads(cas.read_object(out["outputs"][3]))
+    assert rgb["schema"] == "RealSaS.RSSvNext.OriginalRGBProjectedCandidate.v1"
+    assert rgb["source_rgb_pixels_observed"] is True
+    assert rgb["source_rgb_to_canonical_face_ownership_qualified"] is False
+    assert rgb["source_appearance_release_qualified"] is False
+    assert rgb["product_revision_minted"] is False
+    assert len(rgb["views"]) == 2
+    assert rgb["sample_count"] > 0
+    for view in rgb["views"]:
+        assert view["original_source_rgb_pixels_observed"] is True
+        assert view["projected_face_correspondence_is_original_source_truth"] is False
+        assert view["sampled_source_opaque_interior_count"] > 0
+        assert all(
+            sample["rgba8_observed"] == [180, 35, 15, 255]
+            and sample["candidate_face_index"] == 0
+            and sample["candidate_face_owner_is_source_truth"] is False
+            for sample in view["samples"]
+        )
+    assert receipt["source_original_rgb_candidate_hash"] == rgb["candidate_hash"]
 
 
 def test_raw_graphics_consumes_real_mechanics_nonrest_intervention_and_dynamic_court(

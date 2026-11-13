@@ -314,7 +314,8 @@
           "enabled": true,
           "max_probed_controls": 128,
           "relative_translation": 0.02,
-          "max_constraint_residual": 0.001
+          "max_constraint_residual": 0.001,
+          "max_full_mesh_deformation_probes": 4
         },
         "auxiliary_outputs": [
           {

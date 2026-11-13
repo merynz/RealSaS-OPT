@@ -92,6 +92,62 @@ def test_real_original_images_reopen_to_eight_unqualified_native_graphics_views(
     assert f"graphics={compiled.graph_hash}" in verified.stdout
     assert f"runtime={runtime.runtime_graphics_hash}" in verified.stdout
 
+    # The same immutable original alpha silhouettes used for Mesh
+    # admission must have the SAME half-integer/top-left triangle coverage
+    # in the native runtime. Cameras here are explicitly fitted HYPOTHESES.
+    from compiler.rss_vnext.workers.rss_vnext_raw_mesh_admission_v1 import (
+        _observed_alpha, _project_fitted,
+    )
+    from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
+        rasterize_triangles_half_integer_top_left,
+    )
+    from tests.compiler.test_rss_vnext_raw_mesh_admission_v1 import (
+        _triangle_source_and_scene,
+    )
+    source, scene, _ = _triangle_source_and_scene()
+    xyz = scene["tessa_candidate_rest_vertices"][0]
+    faces = scene["tessa_candidate_faces"]
+    for view_index in range(2):
+        observed, blocker = _observed_alpha(source, view_index)
+        assert blocker is None
+        height, width = observed.shape
+        projected, camera = _project_fitted(xyz, observed, view_index)
+        assert camera["source_camera_was_observed"] is False
+        triangles = [
+            tuple(
+                tuple(float(x) for x in projected[int(vertex_id)])
+                for vertex_id in face
+            ) for face in faces
+        ]
+        expected = rasterize_triangles_half_integer_top_left(
+            triangles, width=width, height=height,
+        )
+        raster_input = tmp_path / f"fitted_triangle_view_{view_index}.bin"
+        payload = bytearray(struct.pack("<III", width, height, len(triangles)))
+        for tri in triangles:
+            payload.extend(struct.pack("<6d", *(v for point in tri for v in point)))
+        raster_input.write_bytes(payload)
+        expected_file = tmp_path / f"expected_view_{view_index}.bin"
+        expected_file.write_bytes(expected)
+        native = subprocess.run(
+            [str(executable), str(binary), str(raster_input),
+             str(expected_file)],
+            capture_output=True, text=True, check=True,
+        )
+        assert "RAW_GFX_STATIC_G5_RASTER_PIXEL_EQUIVALENCE_PASS" in native.stdout
+        # A different expected source pixel cannot be accepted as parity.
+        bad_alpha = bytearray(expected)
+        bad_alpha[len(expected) // 2] ^= 1
+        bad_expected_file = tmp_path / f"forged_view_{view_index}.bin"
+        bad_expected_file.write_bytes(bad_alpha)
+        denied = subprocess.run(
+            [str(executable), str(binary), str(raster_input),
+             str(bad_expected_file)],
+            capture_output=True, text=True,
+        )
+        assert denied.returncode != 0
+        assert "RAW_GFX_NATIVE_STATIC_RASTER_PIXEL_MISMATCH" in denied.stderr
+
     # A missing view-domain must never be "repaired" to eight on C++ read.
     # Magic[8], version[4], faces[4], fragments[4], view_count[4].
     malformed = bytearray(raw)

@@ -8,7 +8,10 @@ import "context"
 // product.rig, never a second parallel rig capability.
 type RSSvNextRigCandidateProvider struct{}
 
-const RSSvNextRigContractV3 = "RealSaS.ProductRigInference.v3"
+const (
+	RSSvNextRigContractV3 = "RealSaS.ProductRigInference.v3"
+	RSSvNextRigContractV4 = "RealSaS.ProductRigInference.v4"
+)
 
 func (RSSvNextRigCandidateProvider) Capabilities(context.Context) ([]Descriptor, error) {
 	responsibilities, err := responsibilityIDsForRole(ProductRoleRig)
@@ -18,10 +21,16 @@ func (RSSvNextRigCandidateProvider) Capabilities(context.Context) ([]Descriptor,
 	metadata := map[string]any{}
 	metadata["product_role_id"] = string(ProductRoleRig)
 	metadata["implementation_class"] = string(ImplementationCompiler)
-	metadata["interface_contract"] = RSSvNextRigContractV3
-	metadata["executor_contract"] = RSSvNextRigContractV3
+	metadata["interface_contract"] = RSSvNextRigContractV4
+	metadata["executor_contract"] = RSSvNextRigContractV4
 	metadata["required_models"] = []any{}
-	metadata["input_source_artifact_type"] = "RealSaS.RSSvNextTwoViewSource"
+	metadata["input_source_artifact_type"] = "RealSaS.RSSvNextUncalibratedTwoImageSource"
+	metadata["alternate_calibrated_source_artifact_type"] = "RealSaS.RSSvNextTwoViewSource"
+	metadata["raw_scene_artifact_type"] = "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier"
+	metadata["raw_receipt_artifact_type"] = "RealSaS.RSSvNextUncalibratedConstructionReceipt"
+	metadata["raw_model_config_artifact_type"] = "RealSaS.RSSvNextUnifiedModelConfig"
+	metadata["raw_embedded_mira_decoder_artifact_type"] = "RealSaS.RSSvNextEmbeddedMIRADecoder"
+	metadata["raw_canonical_mesh_static_alpha_replay_required"] = true
 	metadata["input_source_schema_version"] = "v1"
 	metadata["input_fanout_artifact_type"] = "RealSaS.RSSvNextProductEvidenceFanout"
 	metadata["input_fanout_schema_version"] = "v1"

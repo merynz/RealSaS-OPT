@@ -521,6 +521,19 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
             )
         return await _with_heartbeat(run_rig_v2, request)
 
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductRigInference.v4"
+    ):
+        from compiler.rss_vnext.workers.rss_vnext_rig_executor_v4 import (
+            execute_rss_vnext_rig_capability_v4,
+        )
+        return await _with_heartbeat(
+            lambda value: execute_rss_vnext_rig_capability_v4(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            ), request,
+        )
+
     # RSS.vNext one-checkpoint Rig worker consumes the exact original Shape
     # fanout and a separately qualified canonical static mesh. It must not
     # load or infer an independent AXIS/MIRA release.

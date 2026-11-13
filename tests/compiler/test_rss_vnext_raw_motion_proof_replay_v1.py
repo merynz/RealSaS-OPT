@@ -154,3 +154,18 @@ def test_raw_proof_requires_graphics_compilation_receipt_even_with_matching_hash
     ]
     with pytest.raises(RuntimeError, match="RAW_GRAPHICS_PARENT_CARDINALITY"):
         _proof(cas, request)
+
+
+def test_raw_proof_refuses_source_and_receipt_downgrade_to_legacy(
+    tmp_path,
+):
+    cas, request, _, _ = _complete_product_preflight(tmp_path)
+    request["input_artifacts"] = [
+        row for row in request["input_artifacts"]
+        if row["artifact_type"] not in {
+            "RealSaS.RSSvNextUncalibratedTwoImageSource",
+            "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
+        }
+    ]
+    with pytest.raises(RuntimeError, match="ORPHAN_RAW_GRAPHICS_RECEIPT"):
+        _proof(cas, request)

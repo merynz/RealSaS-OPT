@@ -54,5 +54,6 @@ return []Descriptor{{
 		AllowedModes:         []Mode{ModeDeveloper},
 		ProductPassAuthority: false,
 		Aliases:              []string{"RSS vNext Canonical Rig", "Unified AXIS Controls"},
-		Metadata: metadata,	}}, nil
+		Metadata: metadata,
+	}}, nil
 }

@@ -431,7 +431,7 @@ def execute_proof_capability_v1(
             reopened_runtime.get("schema_version") != "RealSaS.RuntimeGraphics.v1"
             or reopened_runtime.get("runtime_graphics_hash")
             != rebuilt_runtime.runtime_graphics_hash
-            or reopened_runtime != rebuilt_runtime.to_dict()
+            or content_sha256(reopened_runtime) != content_sha256(rebuilt_runtime.to_dict())
         ):
             raise RuntimeError("PRODUCT_PROOF_RUNTIME_GRAPHICS_REPLAY_DRIFT")
     intervention = _read_graphics_mechanics_intervention_v1(

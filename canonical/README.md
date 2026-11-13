@@ -1,3 +1,5 @@
+> **Inherited name, mixed contents — 13 November 2026.** `canonical/` is **not** the active RSS.vNext architecture folder. It contains old sealed Knight/FIT forensic artifacts alongside some still-referenced machine policies and provenance. Dated continuation claims below describe their historical periods, not current product capability selection. Read [the executable product catalog](../platform/internal/capability/contracts/product_capabilities_v1.json), [current system ownership](../SYSTEM_INDEX.md), and [repository map](../REPOSITORY_MAP.md) first. The [historical index](../historical/README.md) is the human entry to archived evidence. Immutable source paths and verified consumers prevent safe bulk renaming today.
+
 # Canonical Authority Index
 
 ## Current continuation — 2026-10-08

@@ -1,0 +1,35 @@
+name: R29 R6 Sketchfab NoAI signal capability probe
+on:
+  push:
+    branches: [audit/rights-metadata-r4-20261113]
+    paths: [.github/workflows/rights_noai_signal_probe_r6.yml]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+    - name: Query public model metadata for known blocked and control sources
+      run: |
+        python - <<'PY'
+        import json,time,urllib.request,urllib.error
+        blocked=['019bb9695162464886824f050792a4e5','0e2203eae6214b5bbb1624b458cc4251','2ab5b1e3b5c3401eaa024f4488b7c1d8','4983ac47fa674c1e8e9230c8afa4546e']
+        control=['005bd524d42341c792d25891317c18b9','061993bf183b4460b0a1253d2307247e','0062789374034e5396d2c8ff0504e67c']
+        for uid in blocked+control:
+         u='https://api.sketchfab.com/v3/models/'+uid
+         req=urllib.request.Request(u,headers={'User-Agent':'RealSaS-Rights-Verification/1.0'})
+         try:
+          with urllib.request.urlopen(req,timeout=20) as r:
+           o=json.load(r)
+          tags=o.get('tags') or []
+          tagvalues=[str(t.get('slug',t.get('name',''))) if isinstance(t,dict) else str(t) for t in tags]
+          flags={k:o[k] for k in o if 'ai' in k.lower() or 'license' in k.lower() or k.lower() in ('restricted','tags')}
+          flags.pop('tags',None)
+          status={'uid':uid,'known_legacy_noai':uid in blocked,'status':200,
+                  'tag_slugs':tagvalues,'flag_fields':flags,'model_fields':sorted(o.keys())}
+         except urllib.error.HTTPError as e:status={'uid':uid,'known_legacy_noai':uid in blocked,'status':e.code}
+         except Exception as e:status={'uid':uid,'known_legacy_noai':uid in blocked,'status':type(e).__name__,'message':str(e)[:100]}
+         print('PROBE_RESULT',json.dumps(status,ensure_ascii=False),flush=True)
+         time.sleep(0.3)
+        PY

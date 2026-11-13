@@ -92,7 +92,8 @@ func (ProductMotionProvider) Capabilities(context.Context) ([]Descriptor, error)
 	metadata["output_artifact_type"] = "RealSaS.CanonicalMotionIR"
 	metadata["output_schema_version"] = "v2"
 	metadata["required_models"] = []any{}
-	metadata["animation_source_input_required"] = true
+	metadata["animation_source_input_required"] = false
+	metadata["default_rest_hold_policy"] = "DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1"
 	metadata["can_mint_product_revision"] = false
 	return downstreamDescriptor(ProductRoleMotion, []string{"product.rig", "product.mechanics"}, metadata)
 }

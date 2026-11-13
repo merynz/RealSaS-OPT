@@ -12,7 +12,8 @@ from tools.truth_foundry.native_blender_attachment_inventory_v1 import (
 
 def _constraint(kind="CHILD_OF",target="Rig",bone="Grip",**overrides):
     row={
-        "name":"Constraint","type":kind,"mute":False,"influence":1.,
+        "name":"Constraint","type":kind,"mute":False,"enabled":True,
+        "is_valid":True,"influence":1.,
         "target":target,"target_type":"ARMATURE","subtarget":bone,
         "mix_mode":"REPLACE" if kind=="COPY_TRANSFORMS" else None,
     }
@@ -95,6 +96,8 @@ def test_full_active_rigid_constraint_to_existing_bone_is_candidate_only(constra
 @pytest.mark.parametrize("constraint",[
     _constraint("CHILD_OF",use_location_x=False),
     _constraint("CHILD_OF",mute=True),
+    _constraint("CHILD_OF",enabled=False),
+    _constraint("CHILD_OF",is_valid=False),
     _constraint("COPY_TRANSFORMS",mix_mode="BEFORE_FULL"),
     _constraint("COPY_TRANSFORMS",influence=.5),
     _constraint("COPY_LOCATION"),

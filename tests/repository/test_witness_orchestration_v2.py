@@ -361,15 +361,20 @@ def test_implementation_closure_hash_changes_when_critical_bytes_change(monkeypa
     assert mutated != baseline
 
 
-def test_engineer_facing_navigation_describes_current_v2_not_historical_repair_branch():
+def test_engineer_facing_navigation_selects_rss_vnext_and_preserves_v2_provenance():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     canonical_index = (ROOT / "canonical" / "README.md").read_text(encoding="utf-8")
     system_index = (ROOT / "SYSTEM_INDEX.md").read_text(encoding="utf-8")
+    old_index = (
+        ROOT / "historical/repository/SYSTEM_INDEX_20261011.md"
+    ).read_text(encoding="utf-8")
 
-    assert "Current product architecture — RealSaS V2" in readme
-    assert "43-stage" in readme
+    assert "RSS.vNext" in readme
+    assert "product_capabilities_v1.json" in readme
     assert "repair/mage-full-subject-reclosure-20260912" not in readme
-    assert "V2_IMPLEMENTATION_READINESS.json" in canonical_index
-    assert "Current continuation details" in system_index
-    assert "appearance_authority_v2.py" in system_index
-    assert "runtime_authority_v2.py" in system_index
+    assert "Inherited name" in canonical_index
+    assert "RSS.vNext" in system_index
+    assert "product_capabilities_v1.json" in system_index
+    assert "43-stage" in old_index or "46-stage" in old_index
+    assert "appearance_authority_v2.py" in old_index
+    assert "runtime_authority_v2.py" in old_index

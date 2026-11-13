@@ -78,8 +78,20 @@ def _one_canonical_source(request: dict[str, Any]) -> dict[str, Any]:
         if ref.get("artifact_type") == RSS_SOURCE_ARTIFACT
         and ref.get("schema_version") == RSS_SOURCE_VERSION
     ]
-    if len(matches) != 1:
+    # Go binds the goal's original source and the byte-identical result of
+    # product.input as separate *semantic* artifacts. Both may appear here
+    # with different artifact IDs despite identical CAS bytes. This is a valid
+    # producer-consumer edge only if their exact immutable bytes agree.
+    # Standalone compiler invocations supply just one.
+    if len(matches) not in (1, 2):
         raise RuntimeError("RSS_VNEXT_SHAPE_TWO_VIEW_SOURCE_CARDINALITY")
+    if len(matches) == 2 and any(
+        row.get(key) != matches[0].get(key)
+        for row in matches[1:] for key in (
+            "content_sha256", "size_bytes", "storage_key",
+        )
+    ):
+        raise RuntimeError("RSS_VNEXT_SHAPE_GO_INPUT_SOURCE_BYTES_DRIFT")
     if any(
         ref.get("artifact_type") in {
             "RealSaS.SourceObservation", "RealSaS.ShapeInput",

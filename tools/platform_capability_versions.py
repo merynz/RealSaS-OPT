@@ -57,6 +57,23 @@ def _required_model_families_by_role() -> dict[str, set[str]]:
         role_id = str(row.get("role_id") or "").strip()
         if not role_id:
             raise RuntimeError("RESPONSIBILITY_MODEL_ROLE_MISSING:" + family)
+        # Learned expert evidence may be *consumed* by Rig/Skin even though
+        # their model was executed once, upstream in Shape. Mirror the Go
+        # ResponsibilityTerrain model_execution_capability_id contract.
+        origin = str(row.get("model_execution_capability_id") or "").strip()
+        if origin:
+            if not origin.startswith("product.") or origin.count(".") != 1:
+                raise RuntimeError("RESPONSIBILITY_MODEL_EXECUTION_OWNER_INVALID:" + origin)
+            origin_role = origin.split(".", 1)[1]
+            if origin_role != role_id:
+                meta = _capability_semantics().get("product." + role_id, {})
+                policy = meta.get("policy") or {}
+                if origin not in policy.get("dependencies", []):
+                    raise RuntimeError(
+                        "RESPONSIBILITY_UPSTREAM_MODEL_EVIDENCE_DEPENDENCY_MISSING:"
+                        + role_id + ":" + origin
+                    )
+            role_id = origin_role
         out.setdefault(role_id, set()).add(family)
     return out
 

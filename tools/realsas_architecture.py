@@ -54,11 +54,15 @@ def architecture_registry() -> dict[str, Any]:
 
 
 def module_path(module_name: str) -> str | None:
-    rel = module_name.replace(".", "/")
-    for candidate in (ROOT / f"{rel}.py", ROOT / rel / "__init__.py"):
-        if candidate.is_file():
-            return candidate.relative_to(ROOT).as_posix()
-    return None
+    # The same immutable relocation map governs architecture discovery and
+    # capability implementation hashes. No second path inference policy.
+    source = mainline._local_module_path(module_name)
+    if source is None:
+        return None
+    resolved = source.resolve()
+    if not resolved.is_relative_to(ROOT.resolve()):
+        raise RuntimeError("ARCHITECTURE_MODULE_SOURCE_OUTSIDE_REPOSITORY:" + module_name)
+    return resolved.relative_to(ROOT.resolve()).as_posix()
 
 
 def owner_roots(registry: dict[str, Any]) -> list[tuple[str, str]]:

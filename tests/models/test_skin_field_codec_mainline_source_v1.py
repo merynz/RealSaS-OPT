@@ -5,7 +5,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "experiments" / "geppetto_arachne_r6_20260901"
-TARGET = ROOT / "models" / "skin_field_codec" / "v1"
+TARGET = ROOT / "historical" / "model_sources" / "skin_field_codec" / "v1"
 
 
 class SkinFieldCodecMainlineSourceV1(unittest.TestCase):

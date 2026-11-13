@@ -462,3 +462,39 @@ def test_rehashed_rss_fanout_cannot_grant_product_authority_or_drop_shared_scene
     swapped["children"][0]["content_sha256"] = swapped["children"][1]["content_sha256"]
     with pytest.raises(RuntimeError, match="CHILD_OMITTED_OR_ALIASED"):
         verify(swapped)
+
+
+def test_go_product_input_duplicate_semantic_artifacts_must_share_identical_cas():
+    from compiler.realsas_compiler_services.platform_worker.rss_vnext_shape_executor_v3 import (
+        _one_canonical_source,
+    )
+    original = {
+        "id": "source-original",
+        "role": "input:0000",
+        "artifact_type": ARTIFACT_TYPE, "schema_version": SCHEMA_VERSION,
+        "storage_key": "cas/" + "a" * 64,
+        "content_sha256": "a" * 64, "size_bytes": 128,
+    }
+    lossless_input = {
+        **original, "id": "product-input-output", "role": "input:0001",
+    }
+    # Go registers different artifact IDs for the same bytes. Shape must
+    # consume the source once, not mistake the copied source for two views.
+    assert _one_canonical_source({"input_artifacts": [original]}) == original
+    assert _one_canonical_source({
+        "input_artifacts": [original, lossless_input],
+    }) == original
+    for field, bad in (
+        ("content_sha256", "b" * 64),
+        ("size_bytes", 127),
+        ("storage_key", "cas/other"),
+    ):
+        changed = {**lossless_input, field: bad}
+        with pytest.raises(RuntimeError, match="GO_INPUT_SOURCE_BYTES_DRIFT"):
+            _one_canonical_source({
+                "input_artifacts": [original, changed],
+            })
+    with pytest.raises(RuntimeError, match="TWO_VIEW_SOURCE_CARDINALITY"):
+        _one_canonical_source({
+            "input_artifacts": [original, lossless_input, lossless_input],
+        })

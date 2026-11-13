@@ -1,44 +1,35 @@
-# Repository Map
+# Repository map · RSS.vNext
 
-Canonical code continuation is `main`. Start with [CURRENT_STATE.md](CURRENT_STATE.md), [AGENTS.md](AGENTS.md) and [Execution lanes](docs/platform/EXECUTION_LANES.md). This map is navigation, not scientific authority.
+This map is **human navigation**; it is not a competing architecture configuration. For executable roles, always inspect `platform/internal/capability/contracts/product_capabilities_v1.json` at the checked-out commit. The checked-out catalog is the source of truth. This integrated source tree selects nine RSS.vNext product roles; ProductRevision PASS remains fail-closed.
 
-## Executable homes
+## Active product-facing homes
 
-| Path | Role |
-|---|---|
-| `platform/` | Go API/CLI, Registry, release DAGs, Attempts/ProductRevisions, scheduling and durable workflow control |
-| `models/iris/` | Geometry/surface evidence |
-| `models/tessa/` | Learned topology/geometry proposals |
-| `models/axis/` | Required rig proposals |
-| `models/mira/` | Carrier-native skin proposals |
-| `compiler/realsas_compiler_core/` | Typed identity, binding, qualification, appearance, motion and product contracts |
-| `compiler/realsas_compiler_services/platform_worker/` | Engine activities and verified CAS stage-input hydration |
-| `compiler/realsas_compiler_services/orchestrator/` | Current 46-stage Compiler compatibility plan and scientific stage execution |
-| `compiler/realsas_compiler_services/` | Subordinate deterministic proof, repair and export services |
-| `runtime/realsas_cpp/` | Qualified native package consumption and rendering |
-| `tools/platform_release_snapshot.py` | Source-only stage/DAG version snapshot for a release |
-| `tests/` | Ownership, semantic, adversarial and integration contracts |
+| Path | Responsibility |
+| --- | --- |
+| `models/rss_vnext/` | One shared model inference; specialist evidence fanout |
+| `models/iris/`, `models/tessa/`, `models/axis/`, `models/mira/` | Geometry, topology, articulation and skin expert implementations |
+| `compiler/rss_vnext/` | Unified RSS.vNext-specific courts and workers (single physical home; 4 modules subsequently updated from the product integration) |
+| `compiler/realsas_compiler_core/`, `compiler/realsas_compiler_services/` | Shared canonical primitives, mechanics, graphics, motion, proof and compatibility machinery |
+| `runtime/` | Interactive puppet, skin deformation, native rendering |
+| `product/` | BUSTED Awaken/Studio |
+| `platform/` | Go control plane, releases, CAS, workflow ownership and ProductRevision |
+| `tests/`, `tools/` | Tests, engineering and source-derived audits |
 
-Legacy Geppetto/Arachne/ATLAS directories and identifiers preserve schema/checkpoint compatibility. Public architecture names are IRIS/TESSA/AXIS/MIRA; see [SYSTEM_INDEX.md](SYSTEM_INDEX.md) for ownership.
+## Retained history and scientific apparatus
 
-## Documentation and evidence
+| Path | Status |
+| --- | --- |
+| `historical/model_sources/arachne/`, `historical/model_sources/geppetto/`, `historical/model_sources/skin_field_codec/` | Byte-preserved old model lineage with original `models.*` Python import aliases. Do not claim ProductRelease authority. |
+| `canonical/` | Legacy mixed namespace: historical experiment/forensic records **and** machine policies with path-bound consumers |
+| `historical/`, `restoration/` | Historic documentation and restoration records |
+| `experiments/`, `research/`, `notebooks/`, `prereg/`, `prospective/` | Research evidence, notebooks, proposals; no automatic product authority |
+| `docs/` | Guidance and reference; dated narratives can be stale |
+| `.github/workflows/` | GitHub Actions; not a mirror of the active product DAG |
 
-| Path | Read as |
-|---|---|
-| `docs/platform/` | Current operator contract and architecture decisions |
-| `docs/repository/` | Repository structure and contribution rules |
-| `canonical/` | Current contracts plus sealed scientific provenance; enter through its index |
-| `experiments/` | Bounded research apparatus and records, without product authority |
-| `prospective/` | Unpromoted hypotheses/plans |
-| `historical/` | Preserved snapshots and catalog of older sealed records |
-| `restoration/` | Restoration-era source/audit provenance |
+The inherited `canonical/` directory name should not be used as an assertion of present authority. However `canonical/CI_EXECUTION_AUTHORITY_V1.json` and `canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json` are still referenced by active tests, workflows and operators. Preserve their exact paths until atomic migration.
 
-Machine authority begins with [Canonical index](canonical/README.md). Generated `REHYDRATION_PACKET.md` and `LIVE_AUTHORITY_MAP.md` are navigation/cache views.
+## Machine-visible housekeeping
 
-## Execution state
+`python tools/repository_clarity_audit_v1.py --json` reports live catalog roles, static legacy imports, workflow triggers and CI budget classification. The **430-file workflow budget is a ceiling**, not a recommended count.
 
-Go Attempts and Registry artifacts own ongoing research state. Every release binds an immutable DAG; research DAGs may add/remove/rewire nodes while preserving unrelated artifacts. Product state belongs to qualified ProductRevisions.
-
-Compatibility Engine executions also keep run-local ledgers at `$REALSAS_AUTHORITY_ROOT/runs/<run_id>/ACTIVE_RUN_V2.json`. The repository's `canonical/ACTIVE_RUN_V2.json` is implementation governance, not a subject witness ledger.
-
-Current witness authorization and qualification remain explicit. Historical branch names, frozen GIFs and green CI alone do not mint new scientific or product authority.
+Move or rename a historical file only after cataloging path consumers, hashes, dynamic loaders, workflows and regression tests. Git history preserves commits but does **not** repair hard-coded runtime or scientific provenance paths.

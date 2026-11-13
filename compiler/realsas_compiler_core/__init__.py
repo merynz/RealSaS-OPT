@@ -9,6 +9,10 @@ not silently promoted into the current execution closure.
 from __future__ import annotations
 
 from pathlib import Path as _Path
+# Stable canonical imports resolve RSS.vNext-specific source from a single home.
+_RSS_VNEXT_CORE = _Path(__file__).resolve().parents[1] / "rss_vnext" / "core"
+if _RSS_VNEXT_CORE.is_dir():
+    __path__.append(str(_RSS_VNEXT_CORE))
 import base64 as _base64
 import hashlib as _hashlib
 import io as _io

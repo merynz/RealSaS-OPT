@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def test_arachne_v5_checkpoint_authority_matches_promoted_witness() -> None:
     a = sealed_arachne_v5_fit1_authority()
-    witness = json.loads((ROOT / "models/arachne/v5/PROMOTED_MAGE_FIT_WITNESS_V1.json").read_text())
+    witness = json.loads((ROOT / "historical/model_sources/arachne/v5/PROMOTED_MAGE_FIT_WITNESS_V1.json").read_text())
     manifest = json.loads((ROOT / "canonical/ARACHNE_A1_V5_FIT1_EVIDENCE_MANIFEST_V1.json").read_text())
 
     assert witness["status"] == "FIT1_FROZEN_PROMOTED"

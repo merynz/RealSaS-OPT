@@ -7,9 +7,9 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 OLD_SOURCE = ROOT / "experiments" / "geppetto_arachne_r6_20260901"
-OLD_TARGET = ROOT / "models" / "geppetto" / "v2"
+OLD_TARGET = ROOT / "historical" / "model_sources" / "geppetto" / "v2"
 FROZEN_SOURCE = ROOT / "experiments" / "geppetto_reference_strength_fullstack_v1"
-CURRENT = ROOT / "models" / "geppetto" / "reference_strength_v1"
+CURRENT = ROOT / "historical" / "model_sources" / "geppetto" / "reference_strength_v1"
 
 FROZEN_SOURCE_COMMIT = "f7be46f0a97df62a793ebf91b22297c894854f39"
 FROZEN_CANDIDATE_GIT_BLOB = "e9b626815c63a96ac1d390580e1aa19f8bf1cfb2"
@@ -89,8 +89,8 @@ class GeppettoMainlineSourceV1(unittest.TestCase):
             self.assertTrue((OLD_SOURCE / name).is_file(), name)
 
     def test_readme_declares_reference_strength_as_current_fit1_source(self) -> None:
-        root_readme = (ROOT / "models" / "geppetto" / "README.md").read_text(encoding="utf-8")
-        self.assertIn("models/geppetto/reference_strength_v1/", root_readme)
+        root_readme = (ROOT / "historical" / "model_sources" / "geppetto" / "README.md").read_text(encoding="utf-8")
+        self.assertIn("models/geppetto/reference_strength_v1/", root_readme)  # frozen historical text
         self.assertIn("FIT1", root_readme)
         self.assertIn("Arachne", root_readme)
 

@@ -32,8 +32,8 @@ for stage in PLAN["stages"]:
 for base in (
     ROOT/"compiler/realsas_compiler_core",
     ROOT/"models/iris",
-    ROOT/"models/geppetto",
-    ROOT/"models/arachne",
+    ROOT/"historical/model_sources/geppetto",
+    ROOT/"historical/model_sources/arachne",
 ):
     if base.exists(): files.update(base.rglob("*.py"))
 

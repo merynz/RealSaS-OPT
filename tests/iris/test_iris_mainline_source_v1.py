@@ -48,7 +48,7 @@ MAINLINE_PYTHON_ROOTS = (
 # models/ tensorization module before the candidate imports it. No other dated
 # experiments.* import is admitted anywhere in the current mainline.
 GEPPETTO_FROZEN_CANDIDATE = Path(
-    "models/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py"
+    "historical/model_sources/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py"
 )
 GEPPETTO_HISTORICAL_TENSORIZATION = (
     "experiments.geppetto_reference_strength_fullstack_v1."
@@ -120,7 +120,9 @@ class IrisMainlineSourceV1(unittest.TestCase):
                     else:
                         violations.append(f"{rel} -> {module}")
         self.assertEqual(violations, [], "\n".join(violations))
-        self.assertEqual(observed_approved, APPROVED_FROZEN_IMPORT_SEAMS)
+        # The only frozen exception now lives under historical/ and is no
+        # longer part of the active mainline source sweep.
+        self.assertEqual(observed_approved, set())
 
     def test_geppetto_frozen_import_seam_resolves_to_promoted_module(self) -> None:
         package = importlib.import_module("models.geppetto.reference_strength_v1")
@@ -128,7 +130,7 @@ class IrisMainlineSourceV1(unittest.TestCase):
         promoted = importlib.import_module(GEPPETTO_PROMOTED_TENSORIZATION)
         historical = sys.modules.get(GEPPETTO_HISTORICAL_TENSORIZATION)
         self.assertIs(historical, promoted)
-        self.assertTrue(Path(promoted.__file__).resolve().is_relative_to(ROOT / "models"))
+        self.assertTrue(Path(promoted.__file__).resolve().is_relative_to(ROOT / "historical/model_sources"))
 
         candidate = importlib.import_module(
             "models.geppetto.reference_strength_v1.geppetto_reference_strength_candidate_v1"

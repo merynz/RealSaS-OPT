@@ -10,14 +10,14 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 MAINLINE_ROOTS = (ROOT / "models", ROOT / "compiler", ROOT / "runtime")
 FROZEN_GEPPETTO_COMPAT_PATH = Path(
-    "models/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py"
+    "historical/model_sources/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py"
 )
 FROZEN_GEPPETTO_COMPAT_MODULE = (
     "experiments.geppetto_reference_strength_fullstack_v1."
     "rigging_surface_tensorization_v1"
 )
 PROMOTED_GEPPETTO_TENSORIZATION = (
-    ROOT / "models/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py"
+    ROOT / "historical/model_sources/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py"
 )
 
 
@@ -25,9 +25,9 @@ class CanonicalMainReadinessV1(unittest.TestCase):
     def test_living_system_homes_exist(self) -> None:
         required = (
             "models/iris/v2/model_v2.py",
-            "models/geppetto/v2/geppetto_candidate_v2.py",
-            "models/skin_field_codec/v1/skin_field_codec_v1.py",
-            "models/arachne/v2/arachne_candidate_v2.py",
+            "historical/model_sources/geppetto/v2/geppetto_candidate_v2.py",
+            "historical/model_sources/skin_field_codec/v1/skin_field_codec_v1.py",
+            "historical/model_sources/arachne/v2/arachne_candidate_v2.py",
             "compiler/realsas_compiler_core/substrate/surface.py",
             "compiler/realsas_compiler_core/substrate/local_geometry.py",
             "compiler/realsas_compiler_core/substrate/iris_v2.py",
@@ -176,10 +176,23 @@ class CanonicalMainReadinessV1(unittest.TestCase):
         self.assertIn("SurfaceAddressing", state)
         self.assertIn("Complete Appearance Authority", state)
         self.assertIn("43-stage", state)
-        self.assertIn("Canonical mesh domain", index)
-        self.assertIn("Appearance / CAA", index)
-        self.assertIn("surface_addressing_v1.py", index)
-        self.assertIn("dependency DAG", index)
+        # Product ownership is read from the executable catalog; the old
+        # V2/StageGraph narrative remains scientific provenance only.
+        catalog = json.loads(
+            (ROOT / "platform/internal/capability/contracts/product_capabilities_v1.json")
+            .read_text(encoding="utf-8")
+        )
+        self.assertIn("product.mesh", catalog["capabilities"])
+        self.assertIn("product.shape", catalog["capabilities"])
+        self.assertIn("RSS.vNext", index)
+        self.assertIn("product_capabilities_v1.json", index)
+        historical = ROOT / "historical/repository/SYSTEM_INDEX_20261011.md"
+        self.assertTrue(historical.is_file())
+        old_index = historical.read_text(encoding="utf-8")
+        self.assertIn("Canonical mesh domain", old_index)
+        self.assertIn("Appearance / CAA", old_index)
+        self.assertIn("surface_addressing_v1.py", old_index)
+        self.assertIn("dependency DAG", old_index)
 
     def test_v2_first_witness_presentation_runtime_capability_is_explicitly_excluded(self) -> None:
         plan = json.loads(

@@ -28,17 +28,22 @@ def test_product_rig_preserves_fit1_axis_authority_without_stealing_post_bind_me
     assert architecture["axis_diffusion_runtime_authority"] is False
     assert architecture["axis_geometry_authority"] == "ORDERED_256_BIN_XYZ_ARGMAX"
 
-    assert metadata["hard_parent_authority_preserved"] is True
+    # The FIT1 witness is historical, not the active RSS.vNext product
+    # architecture. Preserve its no-reparenting invariant while checking the
+    # actual one-checkpoint Rig lowering instead of requiring old V6 metadata.
+    assert metadata["single_checkpoint_inference_reused"] is True
+    assert metadata["canonical_mesh_parent_required"] is True
     assert metadata["compiler_parent_reselection_allowed"] is False
-    assert metadata["frame_observability_claimed"] is False
-    assert metadata["post_bind_frame_observability_required"] is True
-    assert metadata["mesh_is_canonical_parent"] is True
-    assert metadata["feature_evidence_is_canonical_parent"] is False
-    assert metadata["fit_allowed_during_product_execution"] is False
-    assert metadata["required_models"] == [
+    assert metadata["compiler_control_synthesis_allowed"] is False
+    assert metadata["compiler_constraint_synthesis_allowed"] is False
+    assert metadata["source_joint_truth_claimed"] is False
+    assert metadata["post_bind_mechanics_and_skin_qualification_required"] is True
+    assert metadata["independent_axis_model_release_allowed"] is False
+    assert metadata["required_models"] == []
+    assert capabilities["product.shape"]["metadata"]["required_models"] == [
         {
-            "family": "AXIS",
-            "architecture_id": "RealSaS.AXIS.RigProgram.TypedCausal.ControlSkin.v6_0",
+            "family": "RSSVNEXT",
+            "architecture_id": "RSS.vNext.UnifiedCharacterCompiler.v1",
         }
     ]
 

@@ -26,11 +26,12 @@
       "authority_kind": "LEARNED_EVIDENCE",
       "exclusive": true,
       "execution_owner_class": "MODEL",
-      "owner_component": "IRIS",
-      "model_family": "IRIS",
+      "owner_component": "RSS_UNIFIED_IRIS",
+      "model_family": "RSSVNEXT",
       "canonical_transform_id": "shared_scene_encode",
       "data_reduction": "BOUNDED_LOSSY",
-      "source_truth_retained": true
+      "source_truth_retained": true,
+      "model_execution_capability_id": "product.shape"
     },
     {
       "id": "shape.topology_proposal",
@@ -39,11 +40,12 @@
       "authority_kind": "PROPOSAL",
       "exclusive": true,
       "execution_owner_class": "MODEL",
-      "owner_component": "TESSA",
-      "model_family": "TESSA",
+      "owner_component": "RSS_UNIFIED_TESSA",
+      "model_family": "RSSVNEXT",
       "canonical_transform_id": "topology_proposal_decode",
       "data_reduction": "GENERATIVE_PROPOSAL",
-      "source_truth_retained": true
+      "source_truth_retained": true,
+      "model_execution_capability_id": "product.shape"
     },
     {
       "id": "mesh.static_topology_qualification",
@@ -88,11 +90,12 @@
       "authority_kind": "PROPOSAL",
       "exclusive": true,
       "execution_owner_class": "MODEL",
-      "owner_component": "AXIS",
-      "model_family": "AXIS",
+      "owner_component": "RSS_UNIFIED_AXIS",
+      "model_family": "RSSVNEXT",
       "canonical_transform_id": "axis_structure_proposal",
       "data_reduction": "GENERATIVE_PROPOSAL",
-      "source_truth_retained": true
+      "source_truth_retained": true,
+      "model_execution_capability_id": "product.shape"
     },
     {
       "id": "rig.structure_qualification",
@@ -125,11 +128,12 @@
       "authority_kind": "PROPOSAL",
       "exclusive": true,
       "execution_owner_class": "MODEL",
-      "owner_component": "MIRA",
-      "model_family": "MIRA",
+      "owner_component": "RSS_UNIFIED_MIRA",
+      "model_family": "RSSVNEXT",
       "canonical_transform_id": "mira_influence_proposal",
       "data_reduction": "GENERATIVE_PROPOSAL",
-      "source_truth_retained": true
+      "source_truth_retained": true,
+      "model_execution_capability_id": "product.shape"
     },
     {
       "id": "skin.influence_legality_qualification",

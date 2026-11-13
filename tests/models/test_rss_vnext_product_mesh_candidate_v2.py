@@ -420,3 +420,89 @@ def test_model_config_and_scene_drift_cannot_cross_mesh_compiler_boundary(tmp_pa
             {**req, "goal_parameters": {"requested_face_pairs": [[0, 0]]}},
             read_object=read, put_bytes=put,
         )
+
+
+def test_go_platform_ordinal_input_roles_rehydrate_exact_neural_children(tmp_path, monkeypatch):
+    """Go's execution artifact roles are input:000N, never Shape output names.
+
+    The independently sealed Shape index must reattach semantic roles without
+    losing H(x), replacing decoder bytes or forging canonical mesh authority.
+    """
+    monkeypatch.setattr(
+        RSSvNextUnifiedCharacterModel, "propose_teacher_free", _abstain_inference,
+    )
+    _, _, shape, original, read, put, *_ = run_shape(tmp_path, monkeypatch)
+    request = _make_mesh_request(shape, original)
+    request["input_artifacts"] = [
+        {**ref, "role": f"input:{i:04d}"}
+        for i, ref in enumerate(request["input_artifacts"])
+    ]
+    result = execute_rss_vnext_mesh_capability_v2(
+        request, read_object=read, put_bytes=put,
+    )
+    assert result["status"] == "PASS"
+    assert result["diagnostics"]["canonical_candidate_bridge_state"] == "ABSTAIN_TESSA_TOPOLOGY"
+    continuation = json.loads(read(next(
+        row for row in result["outputs"]
+        if row["role"] == "rss_evidence_continuity"
+    )))
+    assert {row["role"] for row in continuation["preserved_children"]} == {
+        "original_source", "normalized_model_source", "neural_evidence",
+        "neural_scene", "inference_receipt", "unified_model_config",
+        "embedded_mira_decoder",
+    }
+    assert continuation["has_product_authority"] is False
+    assert continuation["neural_scene_replaced_by_candidate"] is False
+
+    # A duplicated decoder artifact cannot be used to stand in for missing
+    # model configuration simply by changing its transport ordinal.
+    broken = [dict(row) for row in request["input_artifacts"]]
+    idx = next(i for i, row in enumerate(broken)
+               if row["artifact_type"] == "RealSaS.RSSvNextUnifiedModelConfig")
+    decoder = next(row for row in broken
+                   if row["artifact_type"] == "RealSaS.RSSvNextEmbeddedMIRADecoder")
+    broken[idx] = {**decoder, "role": f"input:{idx:04d}"}
+    with pytest.raises(RuntimeError, match="DUPLICATE_CHILD|MISSING_CHILD"):
+        execute_rss_vnext_mesh_capability_v2(
+            {**request, "input_artifacts": broken},
+            read_object=read, put_bytes=put,
+        )
+
+
+def test_static_canonical_mesh_requires_a_complete_immutable_release_policy():
+    from compiler.realsas_compiler_services.platform_worker.rss_vnext_mesh_static_admission_v1 import (
+        maybe_admit_rss_vnext_static_mesh_v1,
+    )
+    # A healthy topology cannot turn into CanonicalMesh through a missing,
+    # partially supplied, or mutable raster acceptance policy.
+    assert maybe_admit_rss_vnext_static_mesh_v1(
+        metadata={}, source=None, evidence=None, source_identity_court=None,
+        diagnostic=None, computed_surface=None, canonical_bridge=None,
+        model_config=None,
+    ) is None
+    with pytest.raises(RuntimeError,match="STATIC_RELEASE_POLICY_INCOMPLETE"):
+        maybe_admit_rss_vnext_static_mesh_v1(
+            metadata={"two_view_static_policy_sha256":"a"*64},
+            source=None, evidence=None, source_identity_court=None,
+            diagnostic=None, computed_surface=None, canonical_bridge=None,
+            model_config=None,
+        )
+    policy = {
+        "min_recall":0.9, "min_precision":0.9,
+        "max_largest_coherent_hole_fraction":0.1,
+        "max_interior_uncovered_fraction":0.1,
+        "min_component_recall":0.9,
+        "max_silhouette_edge_p95_px":2.0,
+        "source_alpha_threshold":128,
+        "component_min_foreground_fraction":0.005,
+        "schema":"RealSaS.RSSvNext.TwoObservedViewMeshPolicy.v1",
+    }
+    with pytest.raises(RuntimeError,match="STATIC_RELEASE_POLICY_SHA_DRIFT"):
+        maybe_admit_rss_vnext_static_mesh_v1(
+            metadata={"two_view_static_policy":policy,
+                      "two_view_static_policy_sha256":"f"*64,
+                      "mesh_policy_document_sha256":"f"*64},
+            source=None, evidence=None, source_identity_court=None,
+            diagnostic=None, computed_surface=None, canonical_bridge=None,
+            model_config=None,
+        )

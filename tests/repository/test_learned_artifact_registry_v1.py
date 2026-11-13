@@ -9,6 +9,19 @@ ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "canonical" / "LEARNED_ARTIFACT_REGISTRY_V1_20260904.json"
 GIT_SHA1 = re.compile(r"^[0-9a-f]{40}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
+def _relocated_model_source(path: str) -> Path:
+    original = ROOT / path
+    if original.exists():
+        return original
+    for legacy in ("geppetto", "arachne", "skin_field_codec"):
+        prefix = "models/" + legacy + "/"
+        if path.startswith(prefix):
+            mapped = ROOT / "historical/model_sources" / path[len("models/"):]
+            if mapped.exists():
+                return mapped
+    return original
+
+
 CURRENT_STAGES = (
     "IRIS_V2",
     "GEPPETTO_V2",
@@ -56,8 +69,8 @@ def test_current_learned_state_is_explicit_and_fail_closed_before_fit() -> None:
         assert stage["authorized_claims"] == [], stage_name
         assert stage["shipping_authority"] is False, stage_name
         assert "SHIPPING_OBSERVATION_ONLY_INFERENCE" in stage["forbidden_claims"], stage_name
-        assert (ROOT / stage["code_root"]).is_dir(), stage_name
-        assert (ROOT / stage["checkpoint_contract"]).is_file(), stage_name
+        assert _relocated_model_source(stage["code_root"]).is_dir(), stage_name
+        assert _relocated_model_source(stage["checkpoint_contract"]).is_file(), stage_name
 
 
 def test_quarantined_weights_live_in_same_registry_and_cannot_ship() -> None:

@@ -50,7 +50,7 @@ if contains(rig,"confidence01=float(j.confidence)") and contains(opt,"selected_n
 # Arachne confidence/coverage typed seam
 types="compiler/realsas_compiler_core/types.py"
 skin="compiler/realsas_compiler_core/skin.py"
-prop="models/arachne/v4/proposal_v4.py"
+prop="historical/model_sources/arachne/v4/proposal_v4.py"
 if contains(types,"class SkinInfluenceProposal") and not contains(types,"row_confidence") and not contains(prop,"row_confidence"):
     findings.append({
       "id":"P1_ARACHNE_PER_ROW_UNCERTAINTY_NOT_TYPED",

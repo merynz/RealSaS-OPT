@@ -61,6 +61,12 @@ def test_frontend_calls_public_configurable_api_not_pages_fake_compiler():
         assert "apiFetch(" in source
     with pytest.raises(LivingCompileError, match="compile-from-UI"):
         app.dispatch("POST", "/api/compile/start", {"views": []})
+    awaken = (SITE / "static/js/awaken.js").read_text("utf8")
+    assert "RSS_VNEXT_REQUIRED_SOURCE_VIEWS = 2" in awaken
+    assert "selectedFiles.length !== RSS_VNEXT_REQUIRED_SOURCE_VIEWS" in awaken
+    assert "RSS_VNEXT_TWO_OBSERVED_VIEWS_FRONT_AND_BACK_REQUIRED" in awaken
+    assert "slot: index === 0 ? 'front' : 'back'" in awaken
+
 
 
 def test_public_workspace_only_accepts_opaque_ids_under_declared_root(tmp_path: Path):

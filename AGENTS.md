@@ -1,3 +1,5 @@
+> **RSS.vNext precedence (2026-11-13).** Before following any historical handoff, inspect `platform/internal/capability/contracts/product_capabilities_v1.json` at the exact branch SHA, then `SYSTEM_INDEX.md` and `REPOSITORY_MAP.md`. The integrated source tree selects nine product roles; Proof remains the sole fail-closed ProductPASS decision owner. **Do not substitute Knight FIT1/V4, Geppetto/Arachne or old StageGraph claims for active RSS.vNext ownership.** Proof remains fail-closed until independent evidence is present. Source release admission and trained checkpoint are a separate final gate. The byte-preserved legacy Geppetto/Arachne/SkinFieldCodec sources were relocated under `historical/model_sources/` with import aliases and source receipts. Do not move remaining sealed `canonical/` artifacts or Actions without consumer/identity/trigger audit. For a live source-derived repository/CI inventory use `python tools/repository_clarity_audit_v1.py --json`.
+
 # RealSaS-OPT Agent Entry Contract
 
 ## CI and Platform execution authority

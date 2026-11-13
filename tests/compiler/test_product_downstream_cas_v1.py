@@ -1,0 +1,364 @@
+from __future__ import annotations
+
+"""Executable downstream CAS courts, not merely source-file existence checks."""
+
+from hashlib import sha256
+import json
+import pytest
+
+from compiler.realsas_compiler_core.canonical_mechanics_ir_v1 import mint_canonical_mechanics_v1
+from compiler.realsas_compiler_core.canonical_motion_ir_v2 import canonical_motion_from_dict_v2
+from compiler.realsas_compiler_core.graphics_v1 import build_graphics_evidence_v1
+from compiler.realsas_compiler_core.graphics_runtime_v1 import RuntimeGraphicsV1
+from compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1 import (
+    GRAPHICS_CONTRACT, MOTION_CONTRACT, PROOF_CONTRACT,
+    execute_graphics_capability_v1, execute_motion_capability_v2,
+    execute_proof_capability_v1,
+)
+from tests.compiler.test_mechanics_cas_worker_main_v1 import _fixture
+from tests.compiler.test_control_motion_v2 import _proposal
+
+
+class _Cas:
+    def __init__(self):
+        self.items: dict[str, bytes] = {}
+
+    def put_bytes(self, raw):
+        digest = sha256(raw).hexdigest()
+        self.items[digest] = raw
+        return {"storage_key":digest,"content_sha256":digest,"size_bytes":len(raw)}
+
+    def put(self, obj, kind, version):
+        data = obj.to_dict() if hasattr(obj,"to_dict") else obj
+        ref = self.put_bytes((json.dumps(data,sort_keys=True)+"\n").encode())
+        return {**ref,"artifact_type":kind,"schema_version":version}
+
+    def read_object(self, ref):
+        return self.items[ref["storage_key"]]
+
+
+def _requests():
+    _,_,_,_,mesh,rig,skin = _fixture()
+    mechanics = mint_canonical_mechanics_v1(mesh,rig,skin)
+    cas = _Cas()
+    refs = [
+        cas.put(mesh,"RealSaS.CanonicalMeshIR","v1"),
+        cas.put(rig,"RealSaS.CanonicalRigIR","v2"),
+        cas.put(skin,"RealSaS.CanonicalSkinIR","v2"),
+        cas.put(mechanics,"RealSaS.CanonicalMechanicsIR","v1"),
+    ]
+    evidence = build_graphics_evidence_v1(
+        mesh_binding_hash=mesh.mesh_lineage_hash,
+        static_relations=(),view_relations=(),
+    )
+    refs.append(cas.put(evidence,"RealSaS.GraphicsEvidence","v1"))
+    refs.append(cas.put(_proposal(rig,mechanics),"RealSaS.ControlMotionClipProposalIR","v1"))
+    def request(role,contract):
+        return {
+            "capability_id":"product."+role,"kind":"MODULE",
+            "capability_metadata":{"executor_contract":contract},
+            "model_releases":[],"input_artifacts":list(refs),
+        }
+    return cas,mesh,rig,skin,mechanics,request
+
+
+def test_graphics_and_motion_are_real_replayed_cas_consumers_and_proof_abstains():
+    cas,mesh,rig,skin,mechanics,request = _requests()
+    graphics = execute_graphics_capability_v1(
+        request("graphics",GRAPHICS_CONTRACT),
+        read_object=cas.read_object,put_bytes=cas.put_bytes,
+    )
+    assert graphics["status"] == "PASS"
+    assert [x["artifact_type"] for x in graphics["outputs"]] == [
+        "RealSaS.CompiledGraphics","RealSaS.RuntimeGraphics",
+    ]
+    assert graphics["diagnostics"]["source_appearance_qualified"] is False
+    assert graphics["diagnostics"]["product_revision_minted"] is False
+
+    motion = execute_motion_capability_v2(
+        request("motion",MOTION_CONTRACT),
+        read_object=cas.read_object,put_bytes=cas.put_bytes,
+    )
+    assert motion["status"] == "PASS"
+    assert [x["artifact_type"] for x in motion["outputs"]] == [
+        "RealSaS.QualifiedControlMotionIR","RealSaS.CanonicalMotionIR",
+    ]
+    m = canonical_motion_from_dict_v2(json.loads(
+        cas.read_object(motion["outputs"][1])
+    ))
+    assert m.mechanics_lineage_hash == mechanics.mechanics_lineage_hash
+    assert len(m.control_tracks) == 1
+
+    proof_req = request("proof",PROOF_CONTRACT)
+    proof_req["input_artifacts"] += [graphics["outputs"][0],motion["outputs"][1]]
+    proof = execute_proof_capability_v1(
+        proof_req,read_object=cas.read_object,put_bytes=cas.put_bytes,
+    )
+    assert proof["status"] == "FAIL"
+    assert proof["failure"]["code"] == "PRODUCT_PROOF_INDEPENDENT_WITNESSES_MISSING"
+    assert proof["outputs"] == []
+    assert proof["diagnostics"]["product_pass_authority"] is False
+    assert proof["diagnostics"]["product_revision_minted"] is False
+
+
+def test_graphics_tamper_or_foreign_mesh_cannot_cross_downstream_cas():
+    cas,mesh,rig,skin,mechanics,request = _requests()
+    req = request("graphics",GRAPHICS_CONTRACT)
+    evidence_ref = next(x for x in req["input_artifacts"] if x["artifact_type"]=="RealSaS.GraphicsEvidence")
+    raw = json.loads(cas.read_object(evidence_ref))
+    raw["mesh_binding_hash"] = "f"*64
+    cas.items[evidence_ref["storage_key"]] = json.dumps(raw).encode()
+    with pytest.raises(RuntimeError,match="INPUT_CAS_DRIFT"):
+        execute_graphics_capability_v1(
+            req,read_object=cas.read_object,put_bytes=cas.put_bytes,
+        )
+
+
+def test_motion_inherits_upstream_model_release_without_second_inference():
+    # Platform passes the Attempt's model identities to every stage, even when
+    # the downstream compiler does not need a second model.
+    cas,mesh,rig,skin,mechanics,request = _requests()
+    req = request("motion",MOTION_CONTRACT)
+    req["model_releases"] = [{"family":"RSSVNEXT"}]
+    result = execute_motion_capability_v2(
+        req,read_object=cas.read_object,put_bytes=cas.put_bytes,
+    )
+    assert result["status"] == "PASS"
+    assert result["diagnostics"]["product_revision_minted"] is False
+
+
+def test_motion_cannot_request_its_own_model_family():
+    cas,mesh,rig,skin,mechanics,request = _requests()
+    req = request("motion",MOTION_CONTRACT)
+    req["capability_metadata"]["required_models"] = [
+        {"family":"MIRA","architecture_id":"unsupported-independent-worker"}
+    ]
+    with pytest.raises(RuntimeError,match="CONTRACT_OR_MODEL_DRIFT"):
+        execute_motion_capability_v2(
+            req,read_object=cas.read_object,put_bytes=cas.put_bytes,
+        )
+
+
+def test_policy_rest_hold_is_explicitly_not_synthetic_animation_or_source_truth():
+    cas,mesh,rig,skin,mechanics,request = _requests()
+    req = request("motion",MOTION_CONTRACT)
+    req["input_artifacts"] = [
+        row for row in req["input_artifacts"]
+        if row["artifact_type"] != "RealSaS.ControlMotionClipProposalIR"
+    ]
+    with pytest.raises(RuntimeError,match="PRODUCT_MOTION_SOURCE_AMBIGUOUS_OR_ABSENT"):
+        execute_motion_capability_v2(
+            req,read_object=cas.read_object,put_bytes=cas.put_bytes,
+        )
+    req["capability_metadata"]["default_rest_hold_policy"] = "DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1"
+    result = execute_motion_capability_v2(
+        req,read_object=cas.read_object,put_bytes=cas.put_bytes,
+    )
+    assert result["status"] == "PASS"
+    assert result["diagnostics"]["motion_source_kind"] == "COMPILER_POLICY_REST_HOLD_NOT_ANIMATED_IDLE"
+    value = canonical_motion_from_dict_v2(json.loads(cas.read_object(result["outputs"][1])))
+    assert value.intent == "REST_HOLD_POLICY"
+    assert value.control_tracks == ()
+    assert value.metadata["editable_motion_space"] == "ANIMATOR_CONTROLS"
+    assert result["diagnostics"]["source_motion_independently_verified"] is False
+
+
+def test_graphics_native_one_trigger_path_uses_shape_inference_without_manual_evidence(monkeypatch):
+    """Transport E2E. Full neural face replay has its own compiler court."""
+    from compiler.realsas_compiler_core.graphics_v1 import (
+        compile_graphics_on_canonical_puppet_v1,
+    )
+    import compiler.realsas_compiler_services.platform_worker.rss_vnext_graphics_consumer_v1 as native
+    cas, mesh, rig, skin, mechanics, request = _requests()
+    req = request("graphics", GRAPHICS_CONTRACT)
+    req["input_artifacts"] = [
+        row for row in req["input_artifacts"]
+        if row["artifact_type"] != "RealSaS.GraphicsEvidence"
+    ]
+    call = {"count": 0}
+    def native_compile(request, *, canonical_mesh, canonical_rig, canonical_skin, read_object):
+        assert canonical_mesh.mesh_lineage_hash == mesh.mesh_lineage_hash
+        assert canonical_rig.rig_lineage_hash == rig.rig_lineage_hash
+        assert canonical_skin.skin_lineage_hash == skin.skin_lineage_hash
+        call["count"] += 1
+        evidence = build_graphics_evidence_v1(
+            mesh_binding_hash=mesh.mesh_lineage_hash,
+            static_relations=(), view_relations=(),
+        )
+        compiled = compile_graphics_on_canonical_puppet_v1(
+            mesh=mesh, rig=rig, skin=skin,
+            source_graphics_binding_hash=evidence.evidence_hash,
+            evidence=evidence,
+        )
+        return compiled, {
+            "schema": "RealSaS.RSSvNext.GraphicsNativeCandidateReceipt.v1",
+            "graph_hash": compiled.graph_hash,
+            "source_appearance_qualified": False,
+            "product_revision_minted": False,
+        }
+    monkeypatch.setattr(native, "compile_rss_vnext_shape_native_graphics_v1", native_compile)
+    result = execute_graphics_capability_v1(
+        req, read_object=cas.read_object, put_bytes=cas.put_bytes,
+    )
+    assert call["count"] == 1
+    assert result["status"] == "PASS"
+    assert result["diagnostics"]["graphics_source_kind"] == (
+        "SINGLE_RSSVNEXT_SHAPE_INFERENCE_REGION_CANDIDATES"
+    )
+    assert result["diagnostics"]["source_appearance_qualified"] is False
+    assert result["diagnostics"]["pose_conditioned_occlusion_qualified"] is False
+    assert result["diagnostics"]["attachment_socket_qualified"] is False
+    assert result["diagnostics"]["product_revision_minted"] is False
+    assert [r["artifact_type"] for r in result["outputs"]] == [
+        "RealSaS.CompiledGraphics",
+        "RealSaS.RuntimeGraphics",
+        "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
+    ]
+
+
+def test_graphics_requires_and_rebinds_exact_mechanics_intervention_in_active_catalog():
+    from compiler.realsas_compiler_core.mechanics_intervention_court_v1 import (
+        compile_mechanics_intervention_court_v1,
+    )
+    from compiler.realsas_compiler_core.hashing import content_sha256
+    cas, mesh, rig, skin, mechanics, request = _requests()
+    intervention = compile_mechanics_intervention_court_v1(
+        mesh, rig, skin, mechanics,
+    )
+    req = request("graphics", GRAPHICS_CONTRACT)
+    req["capability_metadata"]["mechanics_intervention_required"] = True
+    with pytest.raises(RuntimeError,match="MECHANICS_INTERVENTION_REQUIRED"):
+        execute_graphics_capability_v1(
+            req, read_object=cas.read_object, put_bytes=cas.put_bytes,
+        )
+    court_ref = cas.put(
+        intervention, "RealSaS.MechanicsInterventionCourt", "v1",
+    )
+    req["input_artifacts"].append(court_ref)
+    result = execute_graphics_capability_v1(
+        req, read_object=cas.read_object, put_bytes=cas.put_bytes,
+    )
+    assert result["status"] == "PASS"
+    assert result["diagnostics"]["mechanics_intervention_court_hash"] == intervention.court_hash
+    assert result["diagnostics"]["mechanical_source_contact_qualified"] is False
+    compiled = json.loads(cas.read_object(result["outputs"][0]))
+    assert compiled["metadata"]["mechanics_intervention_court_hash"] == intervention.court_hash
+    assert compiled["metadata"]["source_attachment_contact_qualified"] is False
+    assert compiled["metadata"]["secondary_motion_qualified"] is False
+
+    altered = intervention.to_dict()
+    altered["canonical_rig_lineage_hash"] = "f" * 64
+    body = dict(altered)
+    body.pop("court_hash")
+    altered["court_hash"] = content_sha256(body)
+    foreign = cas.put(
+        altered, "RealSaS.MechanicsInterventionCourt", "v1",
+    )
+    req["input_artifacts"][-1] = foreign
+    with pytest.raises(RuntimeError,match="INTERVENTION_PARENT_OR_HASH_DRIFT"):
+        execute_graphics_capability_v1(
+            req, read_object=cas.read_object, put_bytes=cas.put_bytes,
+        )
+
+    # Even with the original receipt, two different identity slots for the
+    # intervention witness cannot silently choose a convenient first row.
+    req["input_artifacts"][-1] = court_ref
+    req["input_artifacts"].append(court_ref)
+    with pytest.raises(RuntimeError,match="INTERVENTION_CARDINALITY"):
+        execute_graphics_capability_v1(
+            req, read_object=cas.read_object, put_bytes=cas.put_bytes,
+        )
+
+
+def _proof_with_complete_canonical_parents():
+    from compiler.realsas_compiler_core.mechanics_intervention_court_v1 import (
+        compile_mechanics_intervention_court_v1,
+    )
+    cas, mesh, rig, skin, mechanics, request = _requests()
+    intervention = compile_mechanics_intervention_court_v1(mesh, rig, skin, mechanics)
+    intervention_ref = cas.put(
+        intervention, "RealSaS.MechanicsInterventionCourt", "v1",
+    )
+    graphics_req = request("graphics", GRAPHICS_CONTRACT)
+    graphics_req["capability_metadata"]["mechanics_intervention_required"] = True
+    graphics_req["input_artifacts"].append(intervention_ref)
+    graphics = execute_graphics_capability_v1(
+        graphics_req, read_object=cas.read_object, put_bytes=cas.put_bytes,
+    )
+    motion = execute_motion_capability_v2(
+        request("motion", MOTION_CONTRACT),
+        read_object=cas.read_object, put_bytes=cas.put_bytes,
+    )
+    proof = request("proof", PROOF_CONTRACT)
+    proof["capability_metadata"].update({
+        "mechanics_intervention_required": True,
+        "runtime_graphics_required": True,
+    })
+    proof["input_artifacts"] += [
+        intervention_ref, *graphics["outputs"][:2], motion["outputs"][1],
+    ]
+    return cas, proof, intervention
+
+
+def test_proof_independently_reopens_all_canonical_graph_edges_before_fail_closed():
+    cas, request, intervention = _proof_with_complete_canonical_parents()
+    result = execute_proof_capability_v1(
+        request, read_object=cas.read_object, put_bytes=cas.put_bytes,
+    )
+    assert result["status"] == "FAIL"
+    assert result["failure"]["code"] == "PRODUCT_PROOF_INDEPENDENT_WITNESSES_MISSING"
+    d = result["diagnostics"]
+    assert d["typed_canonical_mesh_rig_skin_reopened"] is True
+    assert d["typed_motion_reopened"] is True
+    assert d["graphics_runtime_face_order_recomputed"] is True
+    assert d["persisted_graphics_runtime_replayed"] is True
+    assert d["mechanics_intervention_court_hash"] == intervention.court_hash
+    assert d["source_visibility_independent_witness_present"] is False
+    assert d["source_contact_independent_witness_present"] is False
+    assert d["product_revision_minted"] is False
+
+
+def test_proof_rejects_resealed_graphics_runtime_that_disagrees_with_compiler():
+    cas, request, intervention = _proof_with_complete_canonical_parents()
+    runtime = next(
+        row for row in request["input_artifacts"]
+        if row["artifact_type"] == "RealSaS.RuntimeGraphics"
+    )
+    tampered = json.loads(cas.read_object(runtime))
+    tampered["face_fragment_index"][0] = 9
+    from compiler.realsas_compiler_core.hashing import content_sha256
+    body = dict(tampered)
+    body.pop("runtime_graphics_hash")
+    tampered["runtime_graphics_hash"] = content_sha256(body)
+    foreign = cas.put(tampered, "RealSaS.RuntimeGraphics", "v1")
+    request["input_artifacts"] = [
+        foreign if row is runtime else row
+        for row in request["input_artifacts"]
+    ]
+    with pytest.raises(RuntimeError, match="RUNTIME_GRAPHICS_REPLAY_DRIFT"):
+        execute_proof_capability_v1(
+            request, read_object=cas.read_object, put_bytes=cas.put_bytes,
+        )
+
+
+def test_proof_rejects_rehashed_graph_with_out_of_range_face_address():
+    cas, request, intervention = _proof_with_complete_canonical_parents()
+    compiled = next(
+        row for row in request["input_artifacts"]
+        if row["artifact_type"] == "RealSaS.CompiledGraphics"
+    )
+    corrupted = json.loads(cas.read_object(compiled))
+    corrupted["fragments"][0]["face_indices"] = [999]
+    from compiler.realsas_compiler_core.hashing import content_sha256
+    body = dict(corrupted)
+    body.pop("graph_hash")
+    corrupted["graph_hash"] = content_sha256(body)
+    foreign = cas.put(corrupted, "RealSaS.CompiledGraphics", "v1")
+    request["input_artifacts"] = [
+        foreign if row is compiled else row
+        for row in request["input_artifacts"]
+    ]
+    with pytest.raises(Exception, match="RUNTIME_GRAPHICS_FACE_OWNER_INVALID"):
+        execute_proof_capability_v1(
+            request, read_object=cas.read_object, put_bytes=cas.put_bytes,
+        )

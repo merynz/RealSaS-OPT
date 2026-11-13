@@ -1,0 +1,70 @@
+{
+  "schema": "RealSaS.RSSvNextProductIntegrationLineage.v1",
+  "product_source_ref": "feat/rss-vnext-product-role-closure-20261113",
+  "product_source_sha": "5d1869118cd8483714bb3e6406e19ff44f20f97f",
+  "layout_source_sha": "776410449cc1794c5236e4993a1a72f33159b84b",
+  "base_main": "40aa72d10a9ddc575be9e490f77ae0a65b8b3498",
+  "product_files": 59,
+  "migrated_files": [
+    {
+      "from": "compiler/realsas_compiler_core/rss_vnext_canonical_rig_lowering_v1.py",
+      "to": "compiler/rss_vnext/core/rss_vnext_canonical_rig_lowering_v1.py",
+      "status": "added"
+    },
+    {
+      "from": "compiler/realsas_compiler_core/rss_vnext_surface_decisions_v1.py",
+      "to": "compiler/rss_vnext/core/rss_vnext_surface_decisions_v1.py",
+      "status": "modified"
+    },
+    {
+      "from": "compiler/realsas_compiler_core/rss_vnext_two_view_mesh_qualification_v1.py",
+      "to": "compiler/rss_vnext/core/rss_vnext_two_view_mesh_qualification_v1.py",
+      "status": "added"
+    },
+    {
+      "from": "compiler/realsas_compiler_services/platform_worker/product_downstream_executor_v1.py",
+      "to": "compiler/rss_vnext/workers/product_downstream_executor_v1.py",
+      "status": "added"
+    },
+    {
+      "from": "compiler/realsas_compiler_services/platform_worker/rss_vnext_cas_parent_v1.py",
+      "to": "compiler/rss_vnext/workers/rss_vnext_cas_parent_v1.py",
+      "status": "added"
+    },
+    {
+      "from": "compiler/realsas_compiler_services/platform_worker/rss_vnext_graphics_consumer_v1.py",
+      "to": "compiler/rss_vnext/workers/rss_vnext_graphics_consumer_v1.py",
+      "status": "added"
+    },
+    {
+      "from": "compiler/realsas_compiler_services/platform_worker/rss_vnext_mesh_executor_v2.py",
+      "to": "compiler/rss_vnext/workers/rss_vnext_mesh_executor_v2.py",
+      "status": "modified"
+    },
+    {
+      "from": "compiler/realsas_compiler_services/platform_worker/rss_vnext_mesh_static_admission_v1.py",
+      "to": "compiler/rss_vnext/workers/rss_vnext_mesh_static_admission_v1.py",
+      "status": "added"
+    },
+    {
+      "from": "compiler/realsas_compiler_services/platform_worker/rss_vnext_product_fanout_v1.py",
+      "to": "compiler/rss_vnext/workers/rss_vnext_product_fanout_v1.py",
+      "status": "modified"
+    },
+    {
+      "from": "compiler/realsas_compiler_services/platform_worker/rss_vnext_rig_executor_v3.py",
+      "to": "compiler/rss_vnext/workers/rss_vnext_rig_executor_v3.py",
+      "status": "added"
+    },
+    {
+      "from": "compiler/realsas_compiler_services/platform_worker/rss_vnext_shape_executor_v3.py",
+      "to": "compiler/rss_vnext/workers/rss_vnext_shape_executor_v3.py",
+      "status": "modified"
+    },
+    {
+      "from": "compiler/realsas_compiler_services/platform_worker/rss_vnext_skin_executor_v3.py",
+      "to": "compiler/rss_vnext/workers/rss_vnext_skin_executor_v3.py",
+      "status": "added"
+    }
+  ]
+}

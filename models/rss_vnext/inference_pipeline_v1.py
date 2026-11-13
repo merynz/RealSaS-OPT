@@ -147,6 +147,8 @@ def run_two_view_to_compiler_proposal_v1(
         product_mode=product_mode,
     )
     bundle = getattr(model, "_pinned_neural_bundle", None)
+    if product_mode and bundle is None:
+        raise RuntimeError("RSS_VNEXT_SHAPE_THREE_STAGE_BUNDLE_REQUIRED")
     generation = None
     if bundle is not None:
         if source_observation is None:

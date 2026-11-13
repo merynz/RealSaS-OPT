@@ -34,35 +34,51 @@ func partialReleaseTestGraph(t *testing.T) *stagegraph.Graph {
 	return graph
 }
 
-func TestPartialEngineReleaseAdmitsOnlyExecutableProductRoles(t *testing.T) {
+func TestStageOnlyResearchReleaseRetainsFullRSSProductDescriptorGraph(t *testing.T) {
 	registry, err := BuildEngineReleaseRegistry(context.Background(), partialReleaseTestGraph(t))
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, capabilityID := range []string{ProductInputCapabilityID, ProductShapeCapabilityID} {
-		if _, ok := registry.Get(capabilityID); !ok {
-			t.Fatalf("partial release lost executable role %s", capabilityID)
+	// The 2026 RSS source catalog is stage-independent: it is legal for
+	// a RESEARCH release to pin its nine descriptors. Admission does not
+	// imply a successful execution, trained checkpoint or ProductRevision.
+	for _, capabilityID := range []string{
+		ProductInputCapabilityID, ProductShapeCapabilityID,
+		ProductMeshCapabilityID, ProductRigCapabilityID,
+		ProductSkinCapabilityID, ProductMechanicsCapabilityID,
+		ProductGraphicsCapabilityID, ProductMotionCapabilityID,
+		ProductProofCapabilityID,
+	} {
+		row, ok := registry.Get(capabilityID)
+		if !ok {
+			t.Fatalf("research source catalog lost RSS role %s", capabilityID)
+		}
+		if row.ProductPassAuthority && capabilityID != ProductProofCapabilityID {
+			t.Fatalf("non-Proof role claimed ProductPASS: %s", capabilityID)
 		}
 	}
-	for _, capabilityID := range []string{ProductMeshCapabilityID, ProductRigCapabilityID} {
-		if _, ok := registry.Get(capabilityID); ok {
-			t.Fatalf("partial release advertised unavailable role %s", capabilityID)
+	expected := []string{
+		ProductInputCapabilityID, ProductShapeCapabilityID,
+		ProductMeshCapabilityID, ProductRigCapabilityID,
+		ProductSkinCapabilityID, ProductMechanicsCapabilityID,
+		ProductGraphicsCapabilityID, ProductMotionCapabilityID,
+		ProductProofCapabilityID,
+	}
+	for _, role := range expected {
+		closure, err := registry.Resolve(role)
+		if err != nil || len(closure) == 0 || closure[len(closure)-1].ID != role {
+			t.Fatalf("role graph unresolved: %s: %+v / %v", role, closure, err)
 		}
 	}
-
 	modelRequirements, err := ProductModelRequirements(registry)
 	if err != nil {
 		t.Fatal(err)
 	}
-	families := map[string]bool{}
-	for _, row := range modelRequirements {
-		families[row.Family] = true
-	}
-	if !families["IRIS"] || !families["TESSA"] || len(families) != 2 {
-		t.Fatalf("partial release model requirements=%+v", modelRequirements)
-	}
-	if families["AXIS"] {
-		t.Fatalf("partial release required AXIS without admitted Rig: %+v", modelRequirements)
+	if len(modelRequirements) != 1 ||
+		modelRequirements[0].Family != RSSvNextModelFamily ||
+		modelRequirements[0].ArchitectureID != RSSvNextArchitectureID ||
+		modelRequirements[0].CapabilityID != ProductShapeCapabilityID {
+		t.Fatalf("research release selected independent specialist releases: %+v", modelRequirements)
 	}
 }
 

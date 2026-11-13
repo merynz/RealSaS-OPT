@@ -166,7 +166,7 @@ def bind_rss_vnext_fanout_refs_v1(
             continue
         if role in by_role:
             raise RuntimeError("RSS_VNEXT_FANOUT_READ_DUPLICATE_CHILD")
-        by_role[role] = row
+        by_role[role] = {**row, "role": role}
     if set(by_role) != set(_CHILDREN):
         raise RuntimeError("RSS_VNEXT_FANOUT_READ_MISSING_CHILD")
     for indexed in index["children"]:

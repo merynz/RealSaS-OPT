@@ -1,0 +1,144 @@
+{
+  "schema": "RealSaS.TruthFoundryHeadSupervisionQuotas.v1",
+  "date_utc": "2026-11-08",
+  "parent_pr": 395,
+  "authority": "METRIC_AND_VALIDATION_POLICY_ONLY__NO_TRAINING_ADMISSION",
+  "primary_semantic_reference": {
+    "paper": "https://arxiv.org/abs/2601.07660",
+    "public_prior_repo": "https://github.com/hyz317/StdGEN",
+    "notes": "StdGEN++ paper is methodology. Public StdGEN repo is not an asserted full ++ training builder."
+  },
+  "count_unit": "unique independently verified source identity cluster per head meeting all required CORE targets",
+  "min_independent_fit_subjects_per_head": 5000,
+  "commercial_rights_required": true,
+  "source_original_sha256_required": true,
+  "lineage_cluster_court_required": true,
+  "heldout_never_counted": true,
+  "exclude_ai_generated_originals": true,
+  "exclude_candidate_and_import_only_as_qualified": true,
+  "no_semantics_from_source_names": true,
+  "no_drawable_truth_from_mesh_component_count": true,
+  "no_graphics_2d_truth_from_native_photoreal_render": true,
+  "no_unknown_as_negative": true,
+  "admissible_split": [
+    "FIT"
+  ],
+  "qualification_states": [
+    "PASS",
+    "FAIL",
+    "MASKED",
+    "UNKNOWN",
+    "NOT_APPLICABLE"
+  ],
+  "core_targets_by_head": {
+    "IRIS_GEOMETRY": [
+      "mesh_surface_xyz",
+      "surface_topology_faces",
+      "camera_depth",
+      "camera_normals"
+    ],
+    "IRIS_SEMANTIC": [
+      "source_face_region_support",
+      "instance_component_membership",
+      "semantic_multiview_consistency"
+    ],
+    "IRIS_GRAPHICS": [
+      "source_native_rgba_evidence",
+      "approved_stylized_2d_rgba",
+      "visibility_occlusion_order"
+    ],
+    "TESSA": [
+      "source_face_component_graph",
+      "mesh_connectivity_and_charts",
+      "rig_aware_deformability"
+    ],
+    "AXIS": [
+      "skeleton_graph",
+      "rest_bind_reference",
+      "motion_joint_trajectories"
+    ],
+    "MIRA": [
+      "sparse_vertex_joint_influences",
+      "bind_skin_joint_alignment",
+      "deformed_vertex_response"
+    ]
+  },
+  "advanced_truth_to_count_separately": {
+    "IRIS_GEOMETRY": [
+      "udf_occupancy",
+      "solid_sdf_sign_conditional"
+    ],
+    "IRIS_SEMANTIC": [
+      "generic_morphological_roles"
+    ],
+    "IRIS_GRAPHICS": [
+      "ray_depth_compositing",
+      "edit_reveal_presentation",
+      "alpha_edge_and_bleed"
+    ],
+    "TESSA": [
+      "motion_surface_correspondence"
+    ],
+    "AXIS": [
+      "typed_rigprogram_controllers",
+      "end_effector_contact_limits",
+      "control_attachment_consequence",
+      "derived_ik_separate_channel"
+    ],
+    "MIRA": [
+      "unaffected_negative_regions",
+      "attachment_influence_relation"
+    ]
+  },
+  "compiler_graphics_proof_targets": [
+    "drawable_necessity_three_way",
+    "layer_source_visibility_relation",
+    "edit_reveal_presentation"
+  ],
+  "golden_core_definition": "Same unique FIT identity cluster qualifies all six head CORE groups with independent source, rights, split, and target receipts; additionally report graphics consequence and controller/deform advanced coverage. No assumption Core370 has full truth.",
+  "semantic_evidence_requirements": [
+    "reviewed per-face or per-corner semantic concept with immutable source address and explicit unknown support",
+    "renderer source face-ID and camera/pose evidence for cross-view semantic map",
+    "source-name/artist-bone labels used only as privileged teacher hints, never student inputs",
+    "full/keep/hide/isolate observations and positive-negative edit consequence as separate Graphics/Compiler qualification",
+    "skin weight/mesh component cannot independently establish semantic identity"
+  ],
+  "graphics_evidence_requirements": [
+    "source_native_rgba and stylized_2d_rgba are distinct supervision types",
+    "independent stylized game-art visual review and source geometry/alpha/identity parity",
+    "realistic 3D source is not source-wide rejection; it may serve Geometry/TESSA/AXIS/MIRA independently"
+  ],
+  "target_status_field_contract": {
+    "source_sha256": "hex64 verified original source",
+    "source_cluster_id": "stable verified lineage cluster ID; never filename or guessed visual match",
+    "head": "one of six heads",
+    "target": "37-target v1 catalog target",
+    "historical_split": "FIT, TUNE, DEV, CAL, EXTERNAL_HOLDOUT or QA",
+    "status": "PASS/FAIL/MASKED/UNKNOWN/NOT_APPLICABLE",
+    "source_rights_court_pass": "boolean true, independently verified",
+    "identity_court_pass": "boolean true, independently verified",
+    "target_court_receipt_sha256": "hex64 actual independent court output",
+    "model_consumer_contract_pass": "boolean true for real matching head target/loss",
+    "training_authorized": "boolean true only after separate admission; coverage audit NEVER grants it"
+  },
+  "current_verified_per_head_core_pass": {
+    "IRIS_GEOMETRY": 0,
+    "IRIS_SEMANTIC": 0,
+    "IRIS_GRAPHICS": 0,
+    "TESSA": 0,
+    "AXIS": 0,
+    "MIRA": 0
+  },
+  "workflow_phases": [
+    "PHYSICAL_INVENTORY",
+    "LINEAGE_RIGHTS",
+    "SOURCE_FACE_SEMANTIC_PROPOSALS",
+    "INDEPENDENT_SEMANTIC_REVIEW",
+    "SOURCE_BOUND_MULTI_VIEW_REGION_VISIBILITY",
+    "GRAPHICS_LAYER_CONSEQUENCE",
+    "TARGET_COURTS",
+    "HEAD_CORE_COVERAGE",
+    "MATERIALIZE_ELIGIBLE_ONLY"
+  ],
+  "no_training_promotion": true
+}

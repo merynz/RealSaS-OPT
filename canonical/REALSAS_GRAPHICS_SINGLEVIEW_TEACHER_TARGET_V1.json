@@ -1,0 +1,668 @@
+{
+  "backside_target_policy": {
+    "3d_source_known_back": "Teacher exact source back appearance where recovered materials, normals, camera and source-face pixels validate",
+    "cannot_infer": "Unique original back design of arbitrary unseen one-view artwork",
+    "occluded_interior": "Source-backed only, UNKNOWN if absent; generated hallucination is not negative truth",
+    "unseen_probability": "Calibrate confidence; allow alternative plausible completions and user edits",
+    "user_front_only_back": "INFERRED_HYPOTHESIS_NOT_SOURCE_PHYSICS"
+  },
+  "consumer_head_targets": {
+    "AXIS": [
+      "axis_native_control_or_unknown",
+      "attachment_deform_and_control_edit_replay"
+    ],
+    "IRIS_GEOMETRY": [
+      "geometry_surface_source_address",
+      "eight_source_depth_normal_faceid_uv_renders",
+      "source_true_back_target_scored_teacher_only"
+    ],
+    "IRIS_GRAPHICS": [
+      "eight_native_rgba_renders",
+      "stylized_art_identity_review",
+      "source_true_back_target_scored_teacher_only",
+      "predicted_six_conditioning_rgb_normals",
+      "unseen_back_uncertainty_and_alternatives",
+      "alpha_compositor_atlas_caa_roundtrip"
+    ],
+    "IRIS_SEMANTIC": [
+      "semantic_face_instance_or_unknown_mask",
+      "same_subject_part_full_keep_hide",
+      "source_true_back_target_scored_teacher_only"
+    ],
+    "MIRA": [
+      "mira_skin_deform_visible_change",
+      "occluded_edit_reveal_true_source_pixels"
+    ],
+    "TESSA": [
+      "tessa_remesh_source_face_mapping",
+      "geometry_surface_source_address",
+      "source_heldout_faces_loss_mask"
+    ]
+  },
+  "facet_count": 48,
+  "facets": [
+    {
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "source_rights_and_identity",
+      "id": "original_asset_sha256_rehashed",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "source_rights_and_identity",
+      "id": "source_original_rights_verified",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "source_rights_and_identity",
+      "id": "source_creator_lineage_dedup",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "source_rights_and_identity",
+      "id": "subject_fit_heldout_seal",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "source_rights_and_identity",
+      "id": "original_scene_transform_parity",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "source_native_graphics",
+      "id": "native_texture_pixel_sha",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "source_native_graphics",
+      "id": "native_uv_texel_mesh_face_parity",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "source_native_graphics",
+      "id": "native_alpha_blend_cutout_mode",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "source_native_graphics",
+      "id": "material_node_graph_and_procedural_reconstruction",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "source_native_graphics",
+      "id": "linear_srgb_tonemap_contract",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "source_native_graphics",
+      "id": "source_rgba_alpha_edge_bleed_gate",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "source_native_graphics",
+      "id": "source_native_image_multi_view_identity",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "eight_view_teacher",
+      "id": "exact_source_front_axis_verified",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "eight_view_teacher",
+      "id": "eight_exact_azimuth_camera_receipts",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "eight_view_teacher",
+      "id": "eight_native_rgba_renders",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GEOMETRY"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "eight_view_teacher",
+      "id": "eight_source_depth_normal_faceid_uv_renders",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "eight_view_teacher",
+      "id": "all_hit_occlusion_and_hidden_surface",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "eight_view_teacher",
+      "id": "back_180_degree_source_surface_gt",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "eight_view_teacher",
+      "id": "front_0_degree_source_camera_gt",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "eight_view_teacher",
+      "id": "camera_crop_pose_and_scale_shared_identity",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "stylized_2d",
+      "id": "toon_shader_recipe_source_bound",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "stylized_2d",
+      "id": "stylized_art_identity_review",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "stylized_2d",
+      "id": "silhouette_and_rim_line_consistency",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "stylized_2d",
+      "id": "view_0_to_180_palette_line_coherence",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "stylized_2d",
+      "id": "stylized_source_texture_preservation",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "stylized_2d",
+      "id": "shaded_highlights_vs_handpaint_authority",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "stylized_2d",
+      "id": "art_lineage_without_ai_source",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "single_view_student_target",
+      "id": "single_student_front_rgba_observation",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "single_view_student_target",
+      "id": "student_camera_estimate_not_teacher_camera",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "single_view_student_target",
+      "id": "predicted_six_conditioning_rgb_normals",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "single_view_student_target",
+      "id": "source_teacher_cameras_hidden_from_student",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "single_view_student_target",
+      "id": "source_true_back_target_scored_teacher_only",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "single_view_student_target",
+      "id": "source_true_side_targets_scored_teacher_only",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "TESSA"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "single_view_student_target",
+      "id": "source_heldout_faces_loss_mask",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "single_view_student_target",
+      "id": "unseen_back_uncertainty_and_alternatives",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "single_view_student_target",
+      "id": "no_teacher_target_leakage_counterfactual",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_SEMANTIC"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "puppet_graphics_causality",
+      "id": "same_subject_part_full_keep_hide",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "puppet_graphics_causality",
+      "id": "draw_order_at_8_views_and_pose_changes",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "MIRA"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "puppet_graphics_causality",
+      "id": "occluded_edit_reveal_true_source_pixels",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "AXIS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "puppet_graphics_causality",
+      "id": "attachment_deform_and_control_edit_replay",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "puppet_graphics_causality",
+      "id": "alpha_compositor_atlas_caa_roundtrip",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GRAPHICS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "puppet_graphics_causality",
+      "id": "identity_persistence_after_edit_export",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "cross_head_couplings",
+      "id": "geometry_surface_source_address",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_SEMANTIC"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "cross_head_couplings",
+      "id": "semantic_face_instance_or_unknown_mask",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "TESSA"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "cross_head_couplings",
+      "id": "tessa_remesh_source_face_mapping",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "AXIS"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "cross_head_couplings",
+      "id": "axis_native_control_or_unknown",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "MIRA"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "cross_head_couplings",
+      "id": "mira_skin_deform_visible_change",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    },
+    {
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "default_observation": "UNKNOWN",
+      "group": "cross_head_couplings",
+      "id": "compiler_raycast_visibility_source_lock",
+      "independent_court_status": "NOT_RUN",
+      "required_evidence": "original source SHA/teacher receipt, explicit visibility or provenance and independent court",
+      "training_label_authorized": false
+    }
+  ],
+  "groups": 7,
+  "head_8k_fit_target": {
+    "AXIS": 8000,
+    "IRIS_GEOMETRY": 8000,
+    "IRIS_GRAPHICS": 8000,
+    "IRIS_SEMANTIC": 8000,
+    "MIRA": 8000,
+    "TESSA": 8000
+  },
+  "input_modes": {
+    "predicted_multiview_conditioning": {
+      "count": 6,
+      "name": "SynthesizedConditioningCamera",
+      "origin": "MODEL_PREDICTED_NOT_SOURCE_OBSERVED"
+    },
+    "source_teacher_views": {
+      "azimuth_degrees": [
+        0,
+        45,
+        90,
+        135,
+        180,
+        225,
+        270,
+        315
+      ],
+      "count": 8,
+      "name": "SourceTeacherCamera",
+      "never_expose_to_student": true,
+      "origin": "SOURCE_3D_RENDER_ONLY_TARGETS_OR_TRAIN_TEACHER"
+    },
+    "user_real_observation": {
+      "count": 1,
+      "name": "UserObservedCamera",
+      "pixel_origin": "USER_PROVIDED_OR_SYNTHETIC_2D_RENDER",
+      "true_original_camera_available": false
+    }
+  },
+  "leakage_negative_tests": [
+    "Changing heldout back target does not alter front-only student forward pass",
+    "Changing source exact camera matrices leaves student features unchanged",
+    "Source-only semantic concept names and full scene metadata are not conditioning",
+    "Same creator/character/rig/style family cannot cross train/heldout",
+    "Source-observed back pixels only used for training targets and heldout scoring, never predicted views"
+  ],
+  "main_bottlenecks": [
+    "Original source bytes and license",
+    "renderable native texture pixels and UV",
+    "source anatomical front and camera qualification",
+    "approved stylized 2D art visual court",
+    "source-vs-predicted oneview leakage",
+    "heldout independent unseen morphology"
+  ],
+  "not_training_admission": true,
+  "purpose": "Independently source-bound front/back 1-view prior truth for IRIS Graphics, shared six-head teacher and 2D art court",
+  "schema": "RealSaS.GraphicsSingleViewTeacherTargetContract.v1",
+  "stylization_policy": {
+    "approved": "APPROVED_STYLIZED_2D_ART needs visual review, source identity, palette, outline, layer alpha and eight-view coherence",
+    "native": "NATIVE_SOURCE_APPEARANCE is physical source RGB/alpha under exact camera",
+    "shader": "SOURCE_BOUND_SHADER_STYLIZATION_CANDIDATE is not approved 2D game-art",
+    "unknown": "PREDICTED_2D_COMPLETION cannot overwrite source-observed appearance or become reference truth"
+  }
+}

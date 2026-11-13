@@ -1,0 +1,92 @@
+name: truth-foundry-partverse-archive-probe-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-partverse-archive-probe-v1.yml'
+      - 'tools/corpus/truth_foundry/partverse_archive_probe_v1.py'
+      - 'tests/corpus/test_partverse_archive_probe_v1.py'
+  push:
+    branches: [truth-foundry-source-census-matrix-v1-20261108]
+    paths:
+      - '.github/workflows/truth-foundry-partverse-archive-probe-v1.yml'
+      - 'tools/corpus/truth_foundry/partverse_archive_probe_v1.py'
+      - 'tests/corpus/test_partverse_archive_probe_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-partverse-probe-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  contract-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate bounded archive read and proof separation
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/partverse_archive_probe_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_partverse_archive_probe_v1.py' -v
+
+  trusted-small-partverse-archive-intake:
+    if: github.event_name == 'push'
+    needs: [contract-regressions]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      RCLONE_CONFIG: /tmp/realsas-partverse-probe.conf
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_partverse_archive_probe_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      PARTVERSE_REVISION: 09a08f4f13c551bbacc1ff253053fba4ea9b637f
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure scoped private Drive and public HTTP source
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'requests>=2.31,<3'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Stream only small set of face maps and meshes from pinned XL annotation archive
+        run: |
+          set -euo pipefail
+          umask 077
+          out="$RUNNER_TEMP/partverse-archive-probe"
+          mkdir -p "$out"
+          python tools/corpus/truth_foundry/partverse_archive_probe_v1.py \
+            --revision "$PARTVERSE_REVISION" \
+            --out "$out" \
+            --max-members 2400 --max-staged-mib 128 \
+            --max-json-files 60 --max-glbs 3
+          python - "$out" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import sys,json
+          from pathlib import Path
+          d=json.loads((Path(sys.argv[1])/'PROBE_SUMMARY_V1.json').read_text())
+          assert d['observed_archive_members']>0
+          assert d['staged_total_bytes']<=128*1024*1024
+          assert not d['training_authorized']
+          assert not d['full_archive_processed']
+          print('## PartVerse-XL raw evidence sample')
+          print('Archive members scanned:',d['observed_archive_members'])
+          print('Face maps parsed:',d['face2label_records_parsed'])
+          print('Candidate source UIDs:',d['sampled_source_uids'])
+          print('Sample bytes:',d['staged_total_bytes'])
+          print('Semantic/rights/drawable qualified:',0)
+          print('No entire archive persisted; bounded source evidence only.')
+          PY
+      - name: Preserve bounded raw source evidence and manifest to private Drive
+        run: |
+          set -euo pipefail
+          umask 077
+          out="$RUNNER_TEMP/partverse-archive-probe"
+          test -s "$out/PROBE_SUMMARY_V1.json"
+          rclone copy "$out" "$DEST" --checksum --retries 3
+          echo 'Bounded original PartVerse-XL face/part evidence staged in private Drive (quarantine).' >> "$GITHUB_STEP_SUMMARY"

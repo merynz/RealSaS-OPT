@@ -1,0 +1,98 @@
+name: truth-foundry-external-pool-metadata-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-external-pool-metadata-v1.yml'
+      - 'canonical/REALSAS_TRUTH_FOUNDRY_EXTERNAL_POOL_DERIVABILITY_V1.json'
+      - 'tools/corpus/truth_foundry/external_pool_metadata_intake_v1.py'
+      - 'tests/corpus/test_external_pool_metadata_intake_v1.py'
+  push:
+    branches: [truth-foundry-source-census-matrix-v1-20261108]
+    paths:
+      - '.github/workflows/truth-foundry-external-pool-metadata-v1.yml'
+      - 'canonical/REALSAS_TRUTH_FOUNDRY_EXTERNAL_POOL_DERIVABILITY_V1.json'
+      - 'tools/corpus/truth_foundry/external_pool_metadata_intake_v1.py'
+      - 'tests/corpus/test_external_pool_metadata_intake_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-external-metadata-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source-derivability-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate per-head source route and fail-closed metadata logic
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/external_pool_metadata_intake_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_external_pool_metadata_intake_v1.py' -v
+
+  trusted-private-metadata-intake:
+    if: github.event_name == 'push'
+    needs: [source-derivability-contracts]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      RCLONE_CONFIG: /tmp/realsas-external-pool-rclone.conf
+      SOURCE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_global_source_census_v1/42509443199-1/matrix/SOURCE_RECORD_CENSUS_4363.csv
+      EXPECT_SHA: b03fc7b378ab5e8f70bd83f55822372eb5516746cc3d0b96286a1e903d0d2d1f
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_external_pool_metadata_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      HF_HOME: /tmp/realsas-hf-metadata-cache
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install metadata reader and restricted Drive connector
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'huggingface_hub>=0.34,<2'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Pin original source roster and download public, metadata-only dataset indexes
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/realsas-external-pools"
+          mkdir -p "$root/out"
+          rclone copyto "$SOURCE" "$root/SOURCE_RECORD_CENSUS_4363.csv" --retries 3
+          test "$(sha256sum "$root/SOURCE_RECORD_CENSUS_4363.csv" | awk '{print $1}')" = "$EXPECT_SHA"
+          python tools/corpus/truth_foundry/external_pool_metadata_intake_v1.py \
+            --catalog canonical/REALSAS_TRUTH_FOUNDRY_EXTERNAL_POOL_DERIVABILITY_V1.json \
+            --source-census "$root/SOURCE_RECORD_CENSUS_4363.csv" \
+            --out "$root/out"
+          python - "$root/out" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import sys,json
+          from pathlib import Path
+          r=json.loads((Path(sys.argv[1])/'SUMMARY_V1.json').read_text())
+          assert r['pool_repos_intaken']==4
+          assert r['provider_metadata_candidate_rows']>0
+          assert r['source_rights_qualified']==0
+          assert r['independent_head_training_admitted']==0
+          assert not r['training_authorized'] and not r['materialization_authorized']
+          print('## External 10K candidate source discovery — metadata only')
+          print('Pinned public pool revisions:',r['pool_repos_intaken'])
+          print('Provider metadata candidate rows:',r['provider_metadata_candidate_rows'])
+          print('SHA candidate cross-references not yet deduplicated:',r['possible_cross_corpus_sha_matches_unqualified'])
+          print('Original bytes/right/semantic/drawable independent approvals: ZERO')
+          print('No 3D source models, .pt, .npz or 823 GB part archives downloaded.')
+          PY
+      - name: Persist immutable private metadata quarantine (not training data)
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/realsas-external-pools/out"
+          test -s "$root/SUMMARY_V1.json"
+          test -s "$root/PROVIDER_METADATA_CANDIDATES_V1.csv"
+          rclone copy "$root" "$DEST" --checksum --retries 3
+          echo 'Pinned metadata CSV and per-pool source/hf file SHA manifests archived to private Drive. All rights and head truth admission gates closed.' >> "$GITHUB_STEP_SUMMARY"

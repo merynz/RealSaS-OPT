@@ -1,0 +1,122 @@
+name: truth-foundry-source-census-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-source-census-v1.yml'
+      - 'tools/corpus/truth_foundry/**'
+      - 'tests/corpus/test_truth_foundry_v1.py'
+  push:
+    branches: [truth-foundry-source-census-matrix-v1-20261108]
+    paths:
+      - '.github/workflows/truth-foundry-source-census-v1.yml'
+      - 'tools/corpus/truth_foundry/**'
+      - 'tests/corpus/test_truth_foundry_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-source-census-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  local-contract-regressions:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python contract tests (no secrets or asset bytes)
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry
+          python -m unittest discover -s tests/corpus -p 'test_truth_foundry_v1.py' -v
+
+  private-source-truth-matrix:
+    if: github.event_name == 'push'
+    needs: [local-contract-regressions]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    env:
+      RCLONE_CONFIG: /tmp/realsas-truth-foundry-drive.conf
+      REMOTE: gdrive:RealSaS_MASTER_CORPUS_1024_V3
+      V1: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/global_existing_truth_inventory_v1_20261107
+      V2: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/global_wave4_truth_reconciliation_v2/42413075814-1
+      W1: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/wave1_source_rig_scene_v1/42387604493-1
+      W2: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/wave2_source_rig_scene_v1/42388620135-1
+      W3: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/wave3_source_rig_scene_v1/42389083706-1
+      W4: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/wave4_source_rig_scene_v1/42400124187-1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_global_source_census_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure private Drive access
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Download frozen cohorts and importer summaries (no original models)
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/realsas-truth-foundry"
+          mkdir -p "$root"/{v1,v2,wave1,wave2,wave3,wave4,physical,matrix}
+          rclone copy "$V1" "$root/v1" --retries 3 --transfers 12 --checkers 16
+          rclone copy "$V2" "$root/v2" --retries 3 --transfers 12 --checkers 16
+          for wave in 1 2 3 4; do
+            ref="W$wave"
+            rclone copy "${!ref}" "$root/wave$wave" \
+              --exclude '**/*.gz' --exclude '**/logs/**' \
+              --retries 3 --transfers 12 --checkers 16
+          done
+          test -s "$root/v2/MASTER3993_SOURCE_TRUTH_INVENTORY_V2.csv"
+          test -s "$root/v1/CORE370_370_MACHINE_SUBJECTS_V1.csv"
+          test -s "$root/v1/MASTER1024_DENSE_NUMERIC_EVIDENCE_COURT_V1.csv"
+          test -s "$root/v1/CORE370_5180_MACHINE_TRUTH_FAMILY_CELLS_V1.csv"
+      - name: Build exact 2466 physical importer census, refuse missing receipts
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/realsas-truth-foundry"
+          python tools/corpus/truth_foundry/physical_census_v1.py \
+            --master-v2 "$root/v2/MASTER3993_SOURCE_TRUTH_INVENTORY_V2.csv" \
+            --wave1 "$root/wave1" --wave2 "$root/wave2" \
+            --wave3 "$root/wave3" --wave4 "$root/wave4" \
+            --output "$root/physical"
+      - name: Generate 4363 source records x 37 proposed targets, all fail-closed
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/realsas-truth-foundry"
+          python tools/corpus/truth_foundry/target_matrix_v1.py \
+            --master "$root/v2/MASTER3993_SOURCE_TRUTH_INVENTORY_V2.csv" \
+            --core "$root/v1/CORE370_370_MACHINE_SUBJECTS_V1.csv" \
+            --dense "$root/v1/MASTER1024_DENSE_NUMERIC_EVIDENCE_COURT_V1.csv" \
+            --core-families "$root/v1/CORE370_5180_MACHINE_TRUTH_FAMILY_CELLS_V1.csv" \
+            --physical "$root/physical/MASTER3993_SOURCE_PHYSICAL_CENSUS_V1.csv" \
+            --output "$root/matrix"
+          python - "$root" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          from pathlib import Path
+          root=Path(sys.argv[1]); physical=json.loads((root/'physical/MASTER3993_PHYSICAL_CENSUS_SUMMARY_V1.json').read_text()); matrix=json.loads((root/'matrix/SUMMARY_V1.json').read_text())
+          assert physical['imported_source_observations']==2466
+          assert matrix['source_record_count']==4363 and matrix['head_target_route_count']==161431
+          assert matrix['master_per_asset_physical_census_loaded']==2466
+          assert matrix['training_authorized'] is False and matrix['materialization_authorized'] is False
+          print('## RealSaS Truth Foundry — source physical census + proposed head targets')
+          print('Master observed physical source summaries:',physical['imported_source_observations'])
+          print('Master unobserved:',physical['import_unobserved'])
+          print('Master + Core source records:',matrix['source_record_count'])
+          print('Proposed 37-target source route slots:',matrix['head_target_route_count'])
+          print('Unique characters, semantic labels, 2D art, training and materialization: UNQUALIFIED')
+          PY
+      - name: Archive immutable private evidence matrix (not a training corpus)
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/realsas-truth-foundry"
+          rclone copy "$root/matrix" "$DEST/matrix" --checksum --retries 3
+          rclone copy "$root/physical" "$DEST/physical" --checksum --retries 3
+          printf '\nPrivate SHA-addressed Truth Foundry matrix saved under Drive audits/truth_foundry_global_source_census_v1.\n' >> "$GITHUB_STEP_SUMMARY"

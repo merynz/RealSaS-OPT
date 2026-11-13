@@ -1,0 +1,114 @@
+name: truth-foundry-partverse-objaverse-license-crosswalk-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-partverse-objaverse-license-crosswalk-v1.yml'
+      - 'tools/corpus/truth_foundry/partverse_objaverse_original_license_crosswalk_v1.py'
+      - 'tests/corpus/test_partverse_objaverse_original_license_crosswalk_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-original-licensing-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  strict-identity-and-licensing-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate SHA identity and license claim semantics
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/partverse_objaverse_original_license_crosswalk_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_partverse_objaverse_original_license_crosswalk_v1.py' -v
+
+  original-public-parquet-source-crosswalk:
+    needs: [strict-identity-and-licensing-regression]
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 395 && github.event.pull_request.head.repo.full_name == 'merynz/RealSaS-OPT' && github.event.pull_request.head.ref == 'truth-foundry-source-census-matrix-v1-20261108'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    env:
+      RCLONE_CONFIG: /tmp/realsas-original-licenses-rclone.conf
+      ROOT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_partverse_objaverse_original_license_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      UPSTREAM_PARQUET: https://huggingface.co/datasets/allenai/objaverse-xl/resolve/main/sketchfab/sketchfab.parquet
+      UPSTREAM_PARQUET_SHA256: 6462ef2ecf39069e210f6df1416e8a28ca931039e3c7fe6aa3dca593115c64e3
+      WAVE1_SHA256: 305e17b217e40ca46135dea6fac9aadd15c1b26dd13f140aaffe482201c9eabd
+      WAVE2_SHA256: 163cd1d376557b5ae77998149a40ae742467471db43eb98063fa1c6e18f1061e
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Parquet reader with bounded memory and private Drive connector
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'pyarrow>=19,<24' 'requests>=2.31,<3'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: SHA-pin two existing PartVerse face/mesh inventories (not source GLBs)
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/partverse-original-license-crosswalk"
+          mkdir -p "$root/in" "$root/out"
+          rclone copyto "$ROOT/truth_foundry_partverse_selected2500_v1/42522239139-1/ASSET_PART_GEOMETRY_EVIDENCE_V1.csv" "$root/in/wave1.csv" --retries 3
+          rclone copyto "$ROOT/truth_foundry_partverse_wave2_4799_v1/42529564616-1/ASSET_PART_GEOMETRY_EVIDENCE_V1.csv" "$root/in/wave2.csv" --retries 3
+          test "$(sha256sum "$root/in/wave1.csv" | awk '{print $1}')" = "$WAVE1_SHA256"
+          test "$(sha256sum "$root/in/wave2.csv" | awk '{print $1}')" = "$WAVE2_SHA256"
+      - name: Download only 79.6MB official Objaverse-XL Sketchfab metadata to ephemeral runner
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/partverse-original-license-crosswalk"
+          python - "$UPSTREAM_PARQUET" "$root/in/sketchfab.parquet" <<'PY'
+          import requests,sys,shutil
+          from pathlib import Path
+          if shutil.disk_usage(Path(sys.argv[2]).parent).free < 2*1024**3:
+              raise SystemExit('INSUFFICIENT_SCRATCH')
+          with requests.get(sys.argv[1],stream=True,timeout=(20,120),headers={'User-Agent':'RealSaS-TruthFoundry/1.0'}) as response:
+              response.raise_for_status()
+              n=0
+              with open(sys.argv[2],'wb') as f:
+                  for chunk in response.iter_content(chunk_size=4*1024*1024):
+                      n+=len(chunk)
+                      if n>115*1024*1024:raise SystemExit('UPSTREAM_PARQUET_BUDGET_EXCEEDED')
+                      f.write(chunk)
+          print('Public source metadata downloaded:',n)
+          PY
+          test "$(sha256sum "$root/in/sketchfab.parquet" | awk '{print $1}')" = "$UPSTREAM_PARQUET_SHA256"
+      - name: Exact sha+UID source metadata and license claim join for 7034 PartVerse assets
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/partverse-original-license-crosswalk"
+          PYTHONPATH=. python tools/corpus/truth_foundry/partverse_objaverse_original_license_crosswalk_v1.py \
+            --parquet "$root/in/sketchfab.parquet" \
+            --wave1 "$root/in/wave1.csv" --wave2 "$root/in/wave2.csv" --out "$root/out"
+          python - "$root/out/SUMMARY_V1.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import sys,json
+          s=json.load(open(sys.argv[1]))
+          assert s['source_rows']==7034 and s['head_route_rows']==7034*6
+          assert s['independently_licensed_for_commercial_ml']==0
+          assert s['actual_original_source_bytes_rehashed']==0
+          assert s['training_authorized']==False
+          print('## PartVerse original-source metadata/rights crosswalk (NOT train admission)')
+          print('Source records:',s['source_rows'])
+          print('Official Objaverse-XL Sketchfab parquet rows scanned:',s['official_sketchfab_parquet_scanned_records'])
+          print('Join states:',s['match_state_counts'])
+          print('License claim buckets:',s['source_license_claim_class_counts'])
+          print('Original-bytes / legal/semantic/graphics head truth PASS: ZERO')
+          PY
+      - name: Retain only compact source identity and license claim receipts in private Drive
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/partverse-original-license-crosswalk/out"
+          test -s "$root/SUMMARY_V1.json"
+          test -s "$root/PARTVERSE_7034_ORIGINAL_PROVIDER_SHA_LICENSE_CROSSWALK_V1.csv"
+          rclone copy "$root" "$DEST" --checksum --retries 3
+          echo 'No original 3D files and no 79.6MB source metadata parquet duplicated to Drive.' >> "$GITHUB_STEP_SUMMARY"

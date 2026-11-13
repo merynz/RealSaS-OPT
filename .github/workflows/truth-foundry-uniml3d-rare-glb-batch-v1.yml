@@ -1,0 +1,123 @@
+name: truth-foundry-uniml3d-rare-glb-batch-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-uniml3d-rare-glb-batch-v1.yml'
+      - 'tools/corpus/truth_foundry/selective_glb_intake_v1.py'
+      - 'tests/corpus/test_selective_glb_intake_v1.py'
+  push:
+    branches: [truth-foundry-source-census-matrix-v1-20261108]
+    paths:
+      - '.github/workflows/truth-foundry-uniml3d-rare-glb-batch-v1.yml'
+      - 'tools/corpus/truth_foundry/selective_glb_intake_v1.py'
+      - 'tests/corpus/test_selective_glb_intake_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uniml-rare-glb-batch-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  per-source-budget-and-authority-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test pinned queue rare morphology preservation and non-admission
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/selective_glb_intake_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_selective_glb_intake_v1.py' -v
+
+  private-rare-source-glb-intake:
+    needs: [per-source-budget-and-authority-tests]
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.number == 395 && github.event.pull_request.head.repo.full_name == 'merynz/RealSaS-OPT' && github.event.pull_request.head.ref == 'truth-foundry-source-census-matrix-v1-20261108')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 95
+    env:
+      RCLONE_CONFIG: /tmp/realsas-truth-uniml-rclone.conf
+      UNIML_REPO_REV: d0f19d943038fb782a26c2a615bd9b3d4f3a8728
+      SELECTED_QUEUE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_external_pool_metadata_v1/42518887140-1/PARALLEL_ARTICULATION_UNIML_TRIAGE_20261108_V1/UNIML3D_2500_DIVERSITY_SOURCE_CANDIDATE_QUEUE.csv
+      QUEUE_SHA256: 653ab31e1e25d20c1737f71c3af080a1f4562ebf204311353afc8fb6e609de43
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_uniml_rare_glb_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure isolated scoped private Drive credentials
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'requests>=2.31,<3'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Fail closed when Drive space or runner scratch space is unsafe
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/uniml-rare-source-batch-v1"
+          mkdir -p "$root"
+          rclone about gdrive: --json > "$root/drive-quota.json"
+          python - "$root/drive-quota.json" <<'PY'
+          import json,sys,shutil
+          q=json.load(open(sys.argv[1]))
+          free=q.get('free')
+          if isinstance(free,dict): free=free.get('value')
+          if free is None or int(free) < 20*1024**3:
+              raise SystemExit('Drive reported free space unavailable or <20 GiB; NO DOWNLOAD')
+          local=shutil.disk_usage('/tmp')
+          if local.free < 4*1024**3:
+              raise SystemExit('Hosted scratch space <4 GiB; NO DOWNLOAD')
+          print('Drive free GiB',round(int(free)/1024**3,2))
+          print('Runner scratch GiB',round(local.free/1024**3,2))
+          PY
+      - name: Retrieve frozen 2500-source morphology-selected Objaverse queue
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/uniml-rare-source-batch-v1"
+          rclone copyto "$SELECTED_QUEUE" "$root/UNIML3D_2500_QUEUE.csv" --retries 3
+          test "$(sha256sum "$root/UNIML3D_2500_QUEUE.csv" | awk '{print $1}')" = "$QUEUE_SHA256"
+      - name: Stream at most 96 rare-source GLBs with per-object SHA and native inventory
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/uniml-rare-source-batch-v1"
+          python tools/corpus/truth_foundry/selective_glb_intake_v1.py \
+            --queue "$root/UNIML3D_2500_QUEUE.csv" \
+            --queue-sha256 "$QUEUE_SHA256" \
+            --revision "$UNIML_REPO_REV" \
+            --max-selected 96 --max-total-mib 768 --max-file-mib 25 \
+            --out "$root/out"
+          python - "$root/out/SUMMARY_V1.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          s=json.load(open(sys.argv[1]))
+          assert s['selected_subjects']==96
+          assert s['downloaded_bytes_total']<=768*1024**2
+          assert s['rights_qualified_count']==0
+          assert s['model_training_qualified_count']==0
+          assert s['training_authorized'] is False
+          if s['glb_structure_pass_count']==0:
+              raise SystemExit('No GLB validated: inspect upstream paths/revision before persisting')
+          print('## UniML3D rare morphology GLB intake — SHA quarantined, source only')
+          print('Selected rare-leaning subjects:',s['selected_subjects'])
+          print('Downloaded source canonical GLBs:',s['downloaded_glb_count'])
+          print('Structurally valid meshes:',s['glb_structure_pass_count'])
+          print('Bytes persisted:',s['downloaded_bytes_total'])
+          print('Qualified full-head semantic/art/rights truth: 0')
+          PY
+      - name: Preserve only selected SHA-addressed GLBs and inventory; no complete dataset copy
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/uniml-rare-source-batch-v1/out"
+          test -s "$root/SUMMARY_V1.json"
+          test -s "$root/UNIML3D_SOURCE_GLB_EVIDENCE_V1.csv"
+          rclone copy "$root" "$DEST" --checksum --retries 3 --transfers 4
+          echo 'Selected UniML3D rigged canonical GLBs archived into private evidence quarantine; rights and training gates CLOSED.' >> "$GITHUB_STEP_SUMMARY"

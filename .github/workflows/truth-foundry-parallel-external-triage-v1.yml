@@ -1,0 +1,32 @@
+name: truth-foundry-parallel-external-triage-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-parallel-external-triage-v1.yml'
+      - 'tools/corpus/truth_foundry/parallel_external_source_triage_v1.py'
+      - 'tests/corpus/test_parallel_external_source_triage_v1.py'
+  push:
+    branches: [truth-foundry-source-census-matrix-v1-20261108]
+    paths:
+      - '.github/workflows/truth-foundry-parallel-external-triage-v1.yml'
+      - 'tools/corpus/truth_foundry/parallel_external_source_triage_v1.py'
+      - 'tests/corpus/test_parallel_external_source_triage_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-classification-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install metadata dataframe dependency
+        run: python -m pip install --no-cache-dir 'pandas>=2.2,<3'
+      - name: Validate source-selection logic without granting truth admission
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/parallel_external_source_triage_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_parallel_external_source_triage_v1.py' -v

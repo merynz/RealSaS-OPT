@@ -1,0 +1,4785 @@
+{
+  "schema": "RealSaS.TruthFoundryComprehensiveEvidenceFacetCatalog.v1",
+  "created_date_utc": "2026-11-08",
+  "scope": "source-evidence, derived teacher, intervention, presentation, consumers, independent courts",
+  "status": "FACET_DEFINITION_ONLY__NO_NEW_TRUTH_PASS",
+  "facet_count": 264,
+  "group_count": 14,
+  "reference_truth_foundry_pr": 395,
+  "reference_architecture": "IRIS geometry/semantic/graphics, TESSA, AXIS, MIRA, Compiler.Graphics",
+  "policy": [
+    "Every source is subject to exhaustive multi-domain review with evidence receipt and explicit UNKNOWN; never equate importer counters with original author physics.",
+    "Count mechanical data and stylized 2D data independently; do not reject whole record based solely on realistic source materials.",
+    "Every group is observable/derivable/consumer-dependent with independent court, provenance and head ownership.",
+    "Negative truth requires actual independent test or exhaustive annotation; do not infer from missing imported operators.",
+    "No semantic/drawable or morphology truth from object names, material names, disconnected islands or unsourced generated images.",
+    "Source truth, capability contract, representation policy and student input are distinct types.",
+    "Unseen protection applies to creator, rig lineage, geometry, cross-format, style and subject, not filename only.",
+    "Never train, materialize, or mint PASS from this catalog itself."
+  ],
+  "facets": [
+    {
+      "id": "original_source_full_byte_sha",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "original_asset_provider_locator",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "creator_and_publisher_chain",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_pack_version_commit",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_license_full_text_receipt",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "commercial_ml_train_permission",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "derivative_and_republication_restrictions",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "ai_generated_source_exclusion",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "archive_manifest_dependency_sha",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "creator_level_lineage_cluster",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_geometry_semantic_duplicate",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "cross_format_and_lod_equivalence",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "historical_split_source_firewall",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "external_holdout_seal",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "attribution_obligations",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "original_vs_transcoded_parity",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_filename_collision",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "original_asset_recovery_status",
+      "group": "identity_rights_lineage",
+      "domain": "IDENTITY",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_IDENTITY_RIGHTS_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible identity receipts; independently validated by SOURCE_IDENTITY_RIGHTS_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "original_object_collection_hierarchy",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "importer_object_hierarchy_parity",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "local_to_world_transform_chain",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "unit_scale_handedness",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "negative_determinant_and_mirror",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "original_up_axis",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "anatomical_front_axis",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "canonical_frame_transform",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "author_rest_pose_vs_action_pose",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "pose_class_and_confidence",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "rig_bind_pose_difference",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "camera_intrinsics_projection",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "camera_extrinsics_and_matrix",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "perspective_vs_orthographic",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "view_orbit_source_space_uniqueness",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "frame_crop_and_subject_coverage",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "animation_frame_to_camera_binding",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "bone_and_attachment_view_silhouette",
+      "group": "scene_transforms_camera",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_SCENE_CAMERA_POSE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_SCENE_CAMERA_POSE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "character_vs_vehicle_prop_environment",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "human_humanoid_animal_monster_machine_class",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "species_taxonomy_multilabel",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "anatomical_limb_branch_count",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "tail_and_antenna_presence",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "wing_and_flight_appendage_structure",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "paw_hoof_claw_digit_types",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "shell_exoskeleton_hard_surface",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "multiple_head_neck_body_segments",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "radial_serpentine_arachnid_forms",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "vehicle_wheel_track_turret_propeller",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "assymetric_morphology",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "joint_count_vs_anatomical_joint",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "primary_controlled_subject_vs_scene_props",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "weapon_and_equipment_instances",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "morphological_role_evidence",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "nonhumanoid_default_rest_pose",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "image_based_character_identity_review",
+      "group": "asset_identity_morphology",
+      "domain": "SEMANTIC",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS"
+      ],
+      "independent_court": "SOURCE_MORPHOLOGY_CHARACTER_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible semantic receipts; independently validated by SOURCE_MORPHOLOGY_CHARACTER_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_vertex_face_count",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "vertex_count",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "original_polygon_corner_identity",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "triangulation_source_face_barycentric_map",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "degenerate_sliver_zero_area_faces",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "boundary_loops_and_open_surfaces",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "mesh_boundary_edges",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "nonmanifold_and_self_intersection",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "mesh_nonmanifold_edges",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "watertightness_and_connected_components",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "mesh_object_vs_connected_island",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "mesh_disconnected_components",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "modular_vs_welded_vs_multimesh",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "geometry_spatial_scale_and_bounds",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "normal_orientation_consistency",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "tangent_bitangent_validity",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "uv_chart_seam_and_island",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "material_slot_to_polygon_mapping",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "primitive_face_to_scene_node",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "pose_induced_mesh_intersections",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "joint_neighborhood_edge_flow",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "surface_uv_deformation_quality",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_sdf_sign_court_or_mask",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "udf_occupancy_and_surface_sampling",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "lod_simplification_lineage",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "interior_exterior_shells_nested_assembly",
+      "group": "geometry_topology",
+      "domain": "SOURCE",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "TESSA",
+        "IRIS_SEMANTIC",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_GEOMETRY_TOPOLOGY_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_GEOMETRY_TOPOLOGY_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "joint_parent_hierarchy_and_cycles",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "observed_bone_count",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "joint_rest_and_bind_world_local_matrices",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "bone_orientation_roll_and_axis",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "deform_vs_control_bones",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "mesh_armature_bind_association",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "skin_sparse_influence_index_weight",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "skin_rows_sampled",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "skin_weight_normalization",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "skin_rows_bad_sum",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "zero_weight_vertices_and_unbound_mesh",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "skin_rows_zero_weights",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "overweight_negative_nonfinite_influences",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "bone_joint_cap_and_influence_distribution",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "rigid_bone_parented_components",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "bone_parented_mesh_candidates",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "attachment_socket_frame_parent",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "native_ik_fk_constraint_graph",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "observed_ik_constraint_count",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "driver_expression_dependencies",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "observed_driver_channel_count",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "controller_input_output_program",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "ik_pole_target_end_effector",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "joint_limits_rotation_translation",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "joint_symmetry_and_left_right",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "hierarchy_kinematic_reachability",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "skin_bind_pose_rest_parity",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "deform_intervention_positive_region",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "deform_intervention_negative_region",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "deform_twist_bend_collapse",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "secondary_motion_spring_eligible",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "occlusion_edit_consequence_under_pose",
+      "group": "rig_skin_deformation",
+      "domain": "SOURCE",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_RIG_SKIN_DEFORM_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_RIG_SKIN_DEFORM_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_action_curve_inventory",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "observed_action_count",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "clip_frame_rate_and_range",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "action_to_armature_binding",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "animated_bone_and_curve_channels",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "observed_action_curve_count",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "root_motion_and_local_frame",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "retargeted_vs_native_authored_motion",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "idle_run_jump_slash_roll_death_tags",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "motion_contact_phase_foot_ground",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "grip_weapon_hand_constraint",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "secondary_tail_wing_hair_dynamics",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "joint_pose_trajectory_validity",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "animation_rest_to_action_transition",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "nondeform_control_channel_anim",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "observed_nondeform_bone_count",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "ik_fk_switch_runtime_result",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "joint_limit_collision_and_protection",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "loop_continuity_and_action_endpoints",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "motion_speed_temporal_scaling",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_render_motion_consistency",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "native_action_vs_baked_export_authority",
+      "group": "motion_behavior",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "AXIS",
+        "MIRA",
+        "TESSA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_MOTION_BEHAVIOR_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_MOTION_BEHAVIOR_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_material_slot_inventory",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "material_count",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "native_texture_image_references",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "image_count",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "packed_vs_external_texture_pixels",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "missing_dependency_relink_verified",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": "image_dependency_missing_count",
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "texture_image_original_sha",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "uv_pixel_source_address_mapping",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "alpha_mode_cutout_blend_opaque",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "alpha_premultiply_straight_conversion",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "normal_roughness_metalness_maps",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "material_node_shader_graph",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "material_color_space_and_tonemap",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "procedural_vs_baked_material",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "texture_overlap_paint_bleed",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "texture_resize_atlas_integrity",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_native_rgba_pixel_parity",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "foreground_background_alpha_validity",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_material_boundary_not_semantic",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "recolor_intervention_pixel_consequence",
+      "group": "materials_textures_alpha",
+      "domain": "SOURCE",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "IRIS_GEOMETRY"
+      ],
+      "independent_court": "SOURCE_MATERIAL_TEXTURE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible source receipts; independently validated by SOURCE_MATERIAL_TEXTURE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_full_rgba_render",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_depth_linear_camera_z",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_normal_world_camera_xyz",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_instance_id_pass",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_face_id_pixel_pass",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_uv_barycentric_pixel_pass",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_silhouette_and_alpha_pass",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "all_hit_rays_depth_stack",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "first_hit_vs_second_hidden_surface",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "projection_face_pixel_parity",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "view_space_depth_quantization",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "self_occlusion_and_occluder_identity",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "front_back_side_eight_direction_views",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "one_front_student_input_court",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "six_predicted_view_teacher_separation",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "render_lighting_and_environment_lock",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_surface_coverage_fraction",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "hidden_unseen_area_confidence",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_shading_vs_stylized_art_parity",
+      "group": "render_source_observations",
+      "domain": "OBSERVATION",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_RENDER_ID_DEPTH_NORMAL_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible observation receipts; independently validated by SOURCE_RENDER_ID_DEPTH_NORMAL_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_face_concept_review",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "per_surface_instance_identity",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "semantic_ontology_version_abstention",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "semantic_morphological_role_instances",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "anatomical_body_part_surface",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "garment_armor_hair_surface",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "surface_overlay_and_accessory",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "rigid_plate_flexible_region_boundary",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "part_to_component_many_to_many",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "same_concept_multi_instance_id",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "visible_mask_semantic_view_consistency",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "semantic_cross_view_hidden_region",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_name_only_teacher_hint_isolation",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "reviewed_negative_ambiguous_support",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "semantic_part_material_conflict_resolution",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "semantic_open_mesh_component_multiplicity",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "semantic_source_face_polyg_corner_lineage",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "semantic_rare_morphology_generalization",
+      "group": "semantic_source_regions",
+      "domain": "DERIVED",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "SOURCE_FACE_SEMANTIC_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_FACE_SEMANTIC_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "native_vs_stylized_rgb_target_typed",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_bound_stylized_render_recipe",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "style_domain_fit_2d_game_art",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "silhouette_and_palette_coherence",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "cel_shading_quantization_ink",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "texture_replaced_vs_original_provenance",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "material_color_to_style_identity_parity",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "animation_view_2d_identity_consistency",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "alpha_edges_bleed_halos_caa",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "occluded_surface_art_completeness",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "face_texture_atlas_2d_chart",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "art_texture_render_roundtrip",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "two_d_art_independent_visual_review",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "style_morphology_cross_domain_balance",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "sprite_export_nonauthority_separation",
+      "group": "graphics_stylization_2d",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC"
+      ],
+      "independent_court": "SOURCE_BOUND_2D_ART_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_BOUND_2D_ART_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "full_keep_hide_isolate_render_pairs",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "newly_revealed_hidden_source_faces",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "same_drawable_candidate_surface_support",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "drawable_split_necessity_three_way",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_face_to_drawable_slot",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "layer_overlap_alpha_compositing",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "draw_order_at_view_change",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "all_hit_ray_visibility_dependency",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "positive_recolor_response_area",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "negative_recolor_unaffected_area",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "rigid_transform_independent_controllability",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "deform_transform_independent_controllability",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "detachment_remove_reparent_behavior",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "attachment_direction_control_deps",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "grip_contact_visibility_consequence",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "backface_hair_cloth_reveal",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "painter_sort_vs_zbuffer_equivalence",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "layer_chart_overlap_seam_stability",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "edit_consequence_renderer_repro",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "compiler_graphics_policy_choice_proof",
+      "group": "graphics_drawable_causality",
+      "domain": "BEHAVIOR",
+      "applicability_scope": "CHARACTER",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "IRIS_SEMANTIC",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible behavior receipts; independently validated by SOURCE_DRAWABLE_EDIT_CONSEQUENCE_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "total_source_appearance_authority",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "per_face_surface_atlas_hashes",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_texture_vs_atlas_identity",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "view_alpha_eroded_confidence",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "zvisible_normal_angle_gate",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "seam_stitch_color_continuity",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "alpha_bleed_vs_straight_control",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "draw_order_provenance_hash",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "material_visibility_owner_mapping",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_background_clear_parity",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "hidden_face_unseen_completion_policy",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "atlas_disconnected_chart_stability",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "edit_replay_texture_unchanged",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "reopen_revision_artifact_consistency",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "frozen_source_camera_rest_consistency",
+      "group": "caa_canonical_artifact",
+      "domain": "DERIVED",
+      "applicability_scope": "RENDERABLE",
+      "consumer_heads": [
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "SOURCE_APPEARANCE_CAA_PROOF_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible derived receipts; independently validated by SOURCE_APPEARANCE_CAA_PROOF_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "tessa_animation_ready_face_chart",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "tessa_topology_deform_compatibility",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "axis_rigprogram_grammar_validity",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "axis_control_target_chain_constraint",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "axis_ik_sword_tip_behavioral_test",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "axis_negative_control_unaffected",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "mira_vertex_skin_codec_fidelity",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "mira_skin_retarget_mesh_correspondence",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "compiler_ik_operator_coverage",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "compiler_rigid_deform_attachment_contract",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "compiler_3d_to_2d_visibility_replay",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "compiler_45_degree_character_rotation",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "runtime_controller_to_mesh_consequence",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "puppet_edit_save_reopen_identity",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "motion_speed_parameter_effect",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "engine_agnostic_export_roundtrip",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "animation_clip_reimport_pose_consistency",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "compiler_no_invented_source_claim",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "product_revision_source_authority",
+      "group": "compiler_mechanics_products",
+      "domain": "PRODUCT",
+      "applicability_scope": "ARTICULATED",
+      "consumer_heads": [
+        "TESSA",
+        "AXIS",
+        "MIRA",
+        "IRIS_GRAPHICS"
+      ],
+      "independent_court": "COMPILER_RUNTIME_PRODUCT_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible product receipts; independently validated by COMPILER_RUNTIME_PRODUCT_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_rights_independent_pass",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_original_byte_digest_pass",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "teacher_import_geometry_parity",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "lineage_split_safe_holdout",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "render_camera_pose_qualification",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "semantic_ontology_review_receipt",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "two_d_style_art_visual_court",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "functional_rig_source_intervention",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "skin_deformation_negative_court",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "source_target_consumer_head_binding",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "training_loss_mask_and_unknown",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "per_target_applicability_decision",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "head_core_contract_full_coverage",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "head_advanced_contract_coverage",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "per_morphology_fit_count",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "unseen_subject_lineage_seal",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "materialization_bundle_hash_readback",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "teacher_student_input_leakage_test",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "random_fixture_reproducibility_test",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    },
+    {
+      "id": "independent_human_spot_check_scope",
+      "group": "quality_qualification",
+      "domain": "COURT",
+      "applicability_scope": "ALL",
+      "consumer_heads": [
+        "IRIS_GEOMETRY",
+        "IRIS_SEMANTIC",
+        "IRIS_GRAPHICS",
+        "TESSA",
+        "AXIS",
+        "MIRA"
+      ],
+      "independent_court": "INDEPENDENT_HEAD_ADMISSION_COURT",
+      "evidence_required": "SHA-bound original-source or reproducible court receipts; independently validated by INDEPENDENT_HEAD_ADMISSION_COURT; explicit uncertainty and source lineage",
+      "preexisting_numeric_observation_field": null,
+      "label_authority": "NONE_UNTIL_INDEPENDENT_COURT",
+      "default_state": "UNKNOWN",
+      "training_authorized": false
+    }
+  ]
+}

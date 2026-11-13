@@ -1,0 +1,122 @@
+name: truth-foundry-semantic-part-geometry-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-semantic-part-geometry-v1.yml'
+      - 'tools/corpus/truth_foundry/semantic_part_geometry_v1.py'
+      - 'tests/corpus/test_semantic_part_geometry_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-semantic-part-geometry-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  semantic-geometry-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deterministic mesh fixture dependencies
+        run: python -m pip install --no-cache-dir 'trimesh>=4.5,<5' 'numpy>=1.26,<3'
+      - name: Validate processed part receipts and prevent silent training admission
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/semantic_part_geometry_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_semantic_part_geometry_v1.py' -v
+
+  private-part-source-court:
+    needs: [semantic-geometry-contracts]
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 395 && github.event.pull_request.head.repo.full_name == 'merynz/RealSaS-OPT' && github.event.pull_request.head.ref == 'truth-foundry-source-census-matrix-v1-20261108'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        wave: [first2500, second4799]
+    env:
+      RCLONE_CONFIG: /tmp/realsas-semantic-part-geometry-rclone.conf
+      ROOT: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_semantic_part_geometry_v1/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.wave }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Connect scoped private Drive
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'trimesh>=4.5,<5' 'numpy>=1.26,<3'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Reuse existing immutable PartVerse bundle shards without storage duplication
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/semantic-parts-${{ matrix.wave }}"
+          mkdir -p "$root/bundles" "$root/out"
+          case "${{ matrix.wave }}" in
+            first2500)
+              source="$ROOT/truth_foundry_partverse_selected2500_v1/42522239139-1"
+              queue_file="SELECTED_SOURCE_CANDIDATE_ROSTER_V1.csv"
+              expected_staged=2500
+              ;;
+            second4799)
+              source="$ROOT/truth_foundry_partverse_wave2_4799_v1/42529564616-1"
+              queue_file="SELECTED_WAVE2_SOURCE_QUEUE_V1.csv"
+              expected_staged=4534
+              ;;
+            *) echo "UNKNOWN_WAVE"; exit 1 ;;
+          esac
+          echo "$expected_staged" > "$root/expected_staged"
+          rclone copy "$source/bundle_shards" "$root/bundles" --retries 3 --transfers 6
+          rclone copyto "$source/SUMMARY_V1.json" "$root/manifest.json" --retries 3
+          rclone copyto "$source/$queue_file" "$root/queue.csv" --retries 3
+          test -s "$root/manifest.json"
+          test -s "$root/queue.csv"
+          df -h "$RUNNER_TEMP"
+      - name: Measure source processed GLB part mesh topology and semantic candidate area
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/semantic-parts-${{ matrix.wave }}"
+          missing=""
+          if [ "${{ matrix.wave }}" = "second4799" ]; then missing="--allow-receipted-missing"; fi
+          python tools/corpus/truth_foundry/semantic_part_geometry_v1.py \
+            --bundle-dir "$root/bundles" --manifest "$root/manifest.json" \
+            --queue "$root/queue.csv" --out "$root/out" $missing
+          python - "$root/out" "$root/expected_staged" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          from pathlib import Path
+          d=json.loads((Path(sys.argv[1])/'SUMMARY_V1.json').read_text())
+          expected=int(Path(sys.argv[2]).read_text())
+          assert d['archive_staged_source_records']==expected
+          assert d['processed_mesh_label_geometry_observation_count']>=expected-40
+          assert d['per_part_source_region_observations']>expected
+          assert d['source_original_geometry_parity_pass']==0
+          assert d['anatomical_semantic_concept_pass']==0
+          assert d['stylized_2d_art_pass']==0
+          assert d['drawable_edit_causality_pass']==0
+          assert d['independent_training_eligible']==0
+          assert d['training_authorized']==False
+          print('## IRIS Semantic source-part geometry observations (not anatomical/graphics PASS)')
+          for k in ('candidate_source_records','archive_staged_source_records','missing_provider_records',
+                    'processed_mesh_label_geometry_observation_count','per_part_source_region_observations',
+                    'per_part_adjacency_pairs_observed','source_processing_errors','processed_faces_sum'):
+              print(k+':',d[k])
+          print('Independent semantic/2D/drawable/original source/rights target PASS: ZERO')
+          PY
+      - name: Store ONLY small per-asset per-part and adjacency graph receipts to Drive
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/semantic-parts-${{ matrix.wave }}/out"
+          test -s "$root/SUMMARY_V1.json"
+          test -s "$root/SOURCE_PART_REGION_EVIDENCE_V1.csv"
+          test -s "$root/SOURCE_PART_ADJACENCY_EVIDENCE_V1.csv"
+          rclone copy "$root" "$DEST" --checksum --retries 3 --transfers 4
+          echo 'Stored evidence receipts, not duplicate processed source GLBs.' >> "$GITHUB_STEP_SUMMARY"

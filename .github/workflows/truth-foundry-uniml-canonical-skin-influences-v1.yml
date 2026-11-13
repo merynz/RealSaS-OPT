@@ -1,0 +1,107 @@
+name: truth-foundry-uniml-canonical-skin-influences-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-uniml-canonical-skin-influences-v1.yml'
+      - 'tools/corpus/truth_foundry/uniml_skin_influence_audit_v1.py'
+      - 'tests/corpus/test_uniml_skin_influence_audit_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-uniml-skin-influence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  numeric-weight-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test 4-lane source skin weights and bad palette/sparse/buffer safety
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/uniml_skin_influence_audit_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_uniml_skin_influence_audit_v1.py' -v
+
+  private-original-sha-pinned-84-canonical-weight-intake:
+    needs: [numeric-weight-contracts]
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 395 && github.event.pull_request.head.repo.full_name == 'merynz/RealSaS-OPT' && github.event.pull_request.head.ref == 'truth-foundry-source-census-matrix-v1-20261108'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      RCLONE_CONFIG: /tmp/truth-foundry-uniml-skin-rclone.conf
+      SOURCE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_uniml_rare_glb_v1/42525626086-1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_uniml_skin_influence_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      INPUT_SHA256: 7ad4b8ad6943f7cee817a50868a64637f6ee059ac576218fbf172d99bf9e29dd
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure private read and receipt-only write connection
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Check ephemeral space and recover canonical files only to runner scratch
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/uniml-skin-84"
+          mkdir -p "$root/glbs" "$root/out"
+          python - "$root" <<'PY'
+          import shutil,sys
+          if shutil.disk_usage(sys.argv[1]).free < 2*1024**3:
+              raise SystemExit('SCRATCH_BUDGET_UNSAFE')
+          PY
+          rclone copyto "$SOURCE/UNIML3D_SOURCE_GLB_EVIDENCE_V1.csv" "$root/manifest.csv" --retries 3
+          test "$(sha256sum "$root/manifest.csv" | awk '{print $1}')" = "$INPUT_SHA256"
+          rclone copy "$SOURCE/canonical_glb_quarantine" "$root/glbs" --retries 3 --transfers 6
+      - name: Decode real per-vertex joint influence distributions and bind array counts
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/uniml-skin-84"
+          python tools/corpus/truth_foundry/uniml_skin_influence_audit_v1.py \
+            --glb-dir "$root/glbs" --manifest "$root/manifest.csv" --out "$root/out"
+          python - "$root/out/SUMMARY_V1.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          d=json.load(open(sys.argv[1]))
+          assert d['canonical_glb_sha_verified']==84
+          assert d['actual_numeric_skin_data_observed_sources']>0
+          assert d['decoded_skinned_vertices']>0
+          assert d['joint_palette_weight_matrix_rows']>0
+          assert d['source_original_bytes_courted']==0
+          assert d['mira_deformation_teacher_pass']==0
+          assert d['axis_controller_proof_pass']==0
+          assert not d['training_authorized']
+          assert all(v==0 for v in d['per_head_training_admission'].values())
+          print('## Real decoded canonical skin/weight numerical source observations')
+          for name in ('canonical_glb_sha_verified','actual_numeric_skin_data_observed_sources',
+                       'decoded_skinned_vertices','joint_palette_weight_matrix_rows',
+                       'zero_weight_vertices','weight_sum_out_of_tolerance_vertices',
+                       'invalid_palette_weight_influences','unsupported_primitive_count'):
+              print(name+':',d[name])
+          print('Original source, motion, IK, MIRA causal teacher, rights and training: OPEN')
+          PY
+      - name: Archive tiny per-source and per-joint CSV receipts only
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/uniml-skin-84/out"
+          test -s "$root/SUMMARY_V1.json"
+          test -s "$root/UNIML3D_ACTUAL_CANONICAL_SKIN_WEIGHT_V1.csv"
+          test -s "$root/UNIML3D_JOINT_INFLUENCE_MATRIX_V1.csv"
+          python - "$root" <<'PY'
+          from pathlib import Path
+          import sys
+          size=sum(x.stat().st_size for x in Path(sys.argv[1]).iterdir() if x.is_file())
+          if size>16*1024**2:raise SystemExit('OUTPUT_BUDGET_EXCEEDED')
+          print('Receipt bytes',size)
+          PY
+          rclone copy "$root" "$DEST" --checksum --retries 3
+          echo 'Only source-addressed numerical receipts persisted; no duplicate GLBs or trained targets.' >> "$GITHUB_STEP_SUMMARY"

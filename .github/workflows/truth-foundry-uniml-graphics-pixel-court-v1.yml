@@ -1,0 +1,95 @@
+name: truth-foundry-uniml-graphics-pixel-court-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-uniml-graphics-pixel-court-v1.yml'
+      - 'tools/corpus/truth_foundry/glb_pixel_court_v1.py'
+      - 'tests/corpus/test_glb_pixel_court_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-uniml-graphics-pixel-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  canonical-pixel-court-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Minimal source pixel reader dependencies
+        run: python -m pip install --no-cache-dir 'Pillow>=10,<13'
+      - name: Test UV, image decode, alpha and original rights gates
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/glb_pixel_court_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_glb_pixel_court_v1.py' -v
+
+  private-uniml-source-pixels:
+    needs: [canonical-pixel-court-regression]
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 395 && github.event.pull_request.head.repo.full_name == 'merynz/RealSaS-OPT' && github.event.pull_request.head.ref == 'truth-foundry-source-census-matrix-v1-20261108'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      RCLONE_CONFIG: /tmp/realsas-glb-graphics-pixel-rclone.conf
+      SOURCE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_uniml_rare_glb_v1/42525626086-1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_graphics_uniml_pixel_court_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      INPUT_SHA256: 7ad4b8ad6943f7cee817a50868a64637f6ee059ac576218fbf172d99bf9e29dd
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secure Drive config and Pillow
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'Pillow>=10,<13'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Verify enough ephemeral scratch, read existing canonical GLBs only
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/glb-graphics-pixel-84"
+          mkdir -p "$root/glbs" "$root/out"
+          python - "$root" <<'PY'
+          import sys,shutil
+          assert shutil.disk_usage(sys.argv[1]).free>2*1024**3, 'scratch space low'
+          PY
+          rclone copyto "$SOURCE/UNIML3D_SOURCE_GLB_EVIDENCE_V1.csv" "$root/manifest.csv" --retries 3
+          test "$(sha256sum "$root/manifest.csv" | awk '{print $1}')" = "$INPUT_SHA256"
+          rclone copy "$SOURCE/canonical_glb_quarantine" "$root/glbs" --retries 3 --transfers 6
+      - name: Read embedded original canonical pixels / material texture and UV evidence
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/glb-graphics-pixel-84"
+          python tools/corpus/truth_foundry/glb_pixel_court_v1.py \
+            --glb-dir "$root/glbs" --source-manifest-csv "$root/manifest.csv" --out "$root/out"
+          python - "$root/out/SUMMARY_V1.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          s=json.load(open(sys.argv[1]))
+          assert s['analyzed_source_canonical_glbs']==84
+          assert s['verified_same_canonical_byte_sha']==84
+          assert s['embedded_image_decoded_source_count']>0
+          assert s['stylized_2d_art_approved']==0
+          assert s['front_to_back_student_prior_train_pairs_admitted']==0
+          assert s['source_rights_qualified']==0
+          print('## Real GLB canonical source RGB/UV coverage, not approved 2D art')
+          for k in ('analyzed_source_canonical_glbs','embedded_image_decoded_source_count',
+                    'texture_and_uv_rasterization_candidate_count','pixel_decoded_images_total'):
+              print(k, s[k])
+          print('Source rights / approved 2D art / 8-view teacher / 1-view training: ZERO')
+          PY
+      - name: Archive only per-source pixel SHA, UV and alpha audit receipts
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/glb-graphics-pixel-84/out"
+          test -s "$root/CANONICAL_GLB_GRAPHICS_PIXEL_EVIDENCE_V1.csv"
+          rclone copy "$root" "$DEST" --checksum --retries 3
+          echo 'No duplicate GLB or original textures uploaded to Drive.' >> "$GITHUB_STEP_SUMMARY"

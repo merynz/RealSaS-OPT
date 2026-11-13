@@ -1,0 +1,145 @@
+name: truth-foundry-graphics-8view-teacher-pilot-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-graphics-8view-teacher-pilot-v1.yml'
+      - 'tools/corpus/truth_foundry/graphics_8view_source_teacher_pilot_v1.py'
+      - 'tests/corpus/test_graphics_8view_source_teacher_pilot_v1.py'
+      - 'tools/corpus/truth_foundry/graphics_eight_view_pixel_quality_court_v1.py'
+      - 'tests/corpus/test_graphics_eight_view_pixel_quality_court_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-graphics-teacher-render-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source-camera-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pixel validation dependency
+        run: python -m pip install --no-cache-dir 'Pillow>=10,<13'
+      - name: Test six rare morphologies, source/student separation and camera pixel QA
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/graphics_8view_source_teacher_pilot_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_graphics_8view_source_teacher_pilot_v1.py' -v
+          python -m unittest discover -s tests/corpus -p 'test_graphics_eight_view_pixel_quality_court_v1.py' -v
+
+  private-source-eight-view-render:
+    needs: [source-camera-contracts]
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 395 && github.event.pull_request.head.repo.full_name == 'merynz/RealSaS-OPT' && github.event.pull_request.head.ref == 'truth-foundry-source-census-matrix-v1-20261108'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    env:
+      RCLONE_CONFIG: /tmp/realsas-graphics-teacher-rclone.conf
+      SOURCE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_uniml_rare_glb_v1/42525626086-1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_graphics_eight_view_teacher_pilot_v1/${{ github.run_id }}-${{ github.run_attempt }}
+      INPUT_SHA256: 7ad4b8ad6943f7cee817a50868a64637f6ee059ac576218fbf172d99bf9e29dd
+      SELECTION_SHA256: 2a07ddf3a89078ff01324442d8fe53a0cea9660082351c1108874fd096e5885a
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender with private Drive transfer and image court tools
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends blender rclone
+          python -m pip install --no-cache-dir 'Pillow>=10,<13'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          blender --version | head -4
+      - name: Choose exact original six source canonical GLBs without duplicating Drive bytes
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/graphics-teacher-six-rare"
+          mkdir -p "$root/glb" "$root/out"
+          python - "$root" <<'PY'
+          import sys,shutil
+          if shutil.disk_usage(sys.argv[1]).free < 8*1024**3:
+              raise SystemExit('INSUFFICIENT_RENDER_SCRATCH')
+          PY
+          rclone copyto "$SOURCE/UNIML3D_SOURCE_GLB_EVIDENCE_V1.csv" "$root/manifest.csv" --retries 3
+          test "$(sha256sum "$root/manifest.csv" | awk '{print $1}')" = "$INPUT_SHA256"
+          python tools/corpus/truth_foundry/graphics_8view_source_teacher_pilot_v1.py \
+            --select --manifest "$root/manifest.csv" --out "$root/selected.csv"
+          test "$(sha256sum "$root/selected.csv" | awk '{print $1}')" = "$SELECTION_SHA256"
+          python - "$root/selected.csv" "$SOURCE" "$root/download_sources.txt" <<'PY'
+          import sys,csv
+          with open(sys.argv[1],newline='') as f:rows=list(csv.DictReader(f))
+          with open(sys.argv[3],'w') as f:
+              for r in rows:
+                  f.write(r['object_type']+'\n')
+          PY
+          while IFS= read -r uid; do
+            rclone copyto "$SOURCE/canonical_glb_quarantine/$uid.glb" "$root/glb/$uid.glb" --retries 3
+          done < "$root/download_sources.txt"
+          python - "$root/selected.csv" "$root/glb" <<'PY'
+          import sys,csv,hashlib
+          from pathlib import Path
+          with open(sys.argv[1],newline='') as f:rows=list(csv.DictReader(f))
+          for r in rows:
+              file=Path(sys.argv[2])/(r['object_type']+'.glb')
+              if hashlib.sha256(file.read_bytes()).hexdigest()!=r['glb_sha256']:
+                  raise SystemExit('SOURCE_GLB_SHA_MISMATCH:'+r['object_type'])
+          print('Six morphology-diverse source GLBs SHA matched, no originals approved')
+          PY
+      - name: Render 8 real source-relative orientations per GLB with exact camera receipts
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/graphics-teacher-six-rare"
+          blender --background --threads 2 \
+            --python tools/corpus/truth_foundry/graphics_8view_source_teacher_pilot_v1.py -- \
+            --render --selection "$root/selected.csv" --glb-dir "$root/glb" --out "$root/out"
+          python tools/corpus/truth_foundry/graphics_8view_source_teacher_pilot_v1.py \
+            --postprocess --out "$root/out"
+          cp "$root/selected.csv" "$root/out/SIX_SOURCE_SELECTED_MANIFEST_V1.csv"
+          python tools/corpus/truth_foundry/graphics_eight_view_pixel_quality_court_v1.py --out "$root/out"
+          python - "$root/out/SUMMARY_V1.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          s=json.load(open(sys.argv[1]))
+          assert s['canonical_source_orbit_native_renders']==48
+          assert s['source_relative_8_direction_complete_count']==6
+          assert s['posterized_2d_art_candidates_not_approved']==48
+          assert s['original_source_rights_verified']==0
+          assert s['original_2d_art_approved']==0
+          assert s['single_view_student_prior_pairs_admitted']==0
+          print('## 6 rare morphologies × 8 source-relative cameras = 48 native RGBA targets')
+          print('Real source relative views:',s['canonical_source_orbit_native_renders'])
+          print('2D stylization candidates:',s['posterized_2d_art_candidates_not_approved'])
+          q=json.load(open(sys.argv[1].replace('SUMMARY_V1.json','SOURCE_VIEW_QUALITY_SUMMARY_V1.json')))
+          assert q['source_relative_view_receipts_validated']==48
+          assert q['camera_matrices_distinct_within_source']==6
+          assert q['nonempty_native_silhouette_views']==48
+          assert q['alpha_same_native_vs_stylized_views']==48
+          assert q['training_authorized'] is False
+          print('Pixel and camera QA receipts:',q['source_relative_view_receipts_validated'])
+          print('Measured 0-vs-180 source-relative pixel pairs:',q['source_relative_pair_0_180_measured'])
+          print('Native and posterized alpha pixel identical:',q['alpha_same_native_vs_stylized_views'])
+          print('Known original anatomical front/source authority/2D art approval: NONE')
+          PY
+      - name: Save compressed PNG view pairs plus source camera receipts to private Drive
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/graphics-teacher-six-rare/out"
+          test -s "$root/SUMMARY_V1.json"
+          test -s "$root/SOURCE_VIEW_QUALITY_SUMMARY_V1.json"
+          test -s "$root/SOURCE_RELATIVE_ORBIT_8VIEW_QUALITY_V1.csv"
+          python - "$root" <<'PY'
+          import sys
+          from pathlib import Path
+          total=sum(p.stat().st_size for p in Path(sys.argv[1]).rglob('*') if p.is_file())
+          if total>200*1024**2:raise SystemExit('PRIVATE_RENDER_OUTPUT_BUDGET_EXCEEDED')
+          print('Only private raster+camera receipts; total bytes',total)
+          PY
+          rclone copy "$root" "$DEST" --checksum --retries 4
+          echo 'No canonical 3D GLB duplicated. Source-relative camera 0° != verified anatomical front.' >> "$GITHUB_STEP_SUMMARY"

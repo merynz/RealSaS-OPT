@@ -1,0 +1,162 @@
+name: truth-foundry-partverse-wave2-4799-v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/truth-foundry-partverse-wave2-4799-v1.yml'
+      - 'tools/corpus/truth_foundry/partverse_wave2_source_selection_v1.py'
+  push:
+    branches: [truth-foundry-source-census-matrix-v1-20261108]
+    paths:
+      - '.github/workflows/truth-foundry-partverse-wave2-4799-v1.yml'
+      - 'tools/corpus/truth_foundry/partverse_wave2_source_selection_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truth-foundry-partverse-wave2-4799-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  archive-segmentation-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install lean GLB reader
+        run: python -m pip install --no-cache-dir 'trimesh>=4.5,<5' 'numpy>=1.26,<3'
+      - name: Test safe archive extraction and semantic non-admission
+        run: |
+          set -euo pipefail
+          python -m compileall -q tools/corpus/truth_foundry/partverse_wave2_source_selection_v1.py
+          python -m unittest discover -s tests/corpus -p 'test_partverse_archive_probe_v1.py' -v
+          python -m unittest discover -s tests/corpus -p 'test_partverse_morphology_inventory_v1.py' -v
+
+  quarantined-wave2-source-parts:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.number == 395 && github.event.pull_request.head.repo.full_name == 'merynz/RealSaS-OPT' && github.event.pull_request.head.ref == 'truth-foundry-source-census-matrix-v1-20261108')
+    needs: [archive-segmentation-contracts]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    env:
+      RCLONE_CONFIG: /tmp/realsas-partverse-wave2-rclone.conf
+      PARTVERSE_REVISION: 09a08f4f13c551bbacc1ff253053fba4ea9b637f
+      QUEUE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_external_pool_metadata_v1/42518887140-1/PARTVERSE_WAVE2_4799_20261108_V1/PARTVERSE_WAVE2_4799_SOURCE_QUEUE_V1.csv
+      QUEUE_SHA256: b59381c5d514b1b3fc5da7fcb7886f18cb5e21bde8cc89df72b3777aced78a13
+      FIRST_WAVE_QUEUE: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_partverse_selected2500_v1/42522239139-1/SELECTED_SOURCE_CANDIDATE_ROSTER_V1.csv
+      FIRST_WAVE_QUEUE_SHA256: 24fcfd745e0142feed734ce42b605ebd42dc2e5a64e45b7939964ca8780023c1
+      DEST: gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_partverse_wave2_4799_v1/${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure scoped Drive and geometry probe environment
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --no-cache-dir 'requests>=2.31,<3' 'trimesh>=4.5,<5' 'numpy>=1.26,<3'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+      - name: Protect Drive quota and ephemeral scratch before downloading any raw source
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/realsas-partverse-wave2-4799"
+          mkdir -p "$root/staged" "$root/results"
+          rclone about gdrive: --json > "$root/drive_quota.json"
+          python - "$root/drive_quota.json" "$root" <<'PY'
+          import json,sys,shutil
+          q=json.load(open(sys.argv[1]))
+          free=q.get('free')
+          if isinstance(free,dict): free=free.get('value')
+          if free is None or int(free)<25*1024**3:
+              raise SystemExit('Insufficient known Drive free space: require >=25 GiB; no raw data downloaded')
+          disk=shutil.disk_usage(sys.argv[2]).free
+          if disk<7*1024**3:
+              raise SystemExit('Insufficient hosted ephemeral disk: require >=7 GiB')
+          print('Drive free GiB',round(int(free)/1024**3,2))
+          print('Temporary scratch GiB',round(disk/1024**3,2))
+          PY
+      - name: SHA-seal Wave2 candidate list and prove zero overlap with first 2500
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/realsas-partverse-wave2-4799"
+          rclone copyto "$QUEUE" "$root/new.csv" --retries 3
+          rclone copyto "$FIRST_WAVE_QUEUE" "$root/first.csv" --retries 3
+          test "$(sha256sum "$root/new.csv" | awk '{print $1}')" = "$QUEUE_SHA256"
+          test "$(sha256sum "$root/first.csv" | awk '{print $1}')" = "$FIRST_WAVE_QUEUE_SHA256"
+          python - "$root/new.csv" "$root/first.csv" <<'PY'
+          import sys,csv
+          def records(p):
+              with open(p,encoding='utf-8',newline='') as f:return list(csv.DictReader(f))
+          new,old=records(sys.argv[1]),records(sys.argv[2])
+          a={r['partverse_uid'] for r in new}; b={r['partverse_uid'] for r in old}
+          assert len(a)==len(new)==4799 and len(b)==len(old)==2500
+          assert not a & b
+          assert all(r['provider_split']=='PROVIDER_TRAIN_CANDIDATE' for r in new)
+          assert all(r['head_training_admitted']=='False' for r in new)
+          assert all(r['source_original_license_court']=='UNKNOWN' for r in new)
+          assert not any(r['scene_source_original_sha_matches_current_roster']=='True' for r in new)
+          assert len({r['source_sha256_provider_claim'] for r in new})==4799
+          print('Wave2 4799 source UIDs are disjoint from prior 2500 and protect upstream validation')
+          PY
+      - name: Stream only Wave2 face-map info and processed GLB from pinned PartVerse archive
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/realsas-partverse-wave2-4799"
+          python tools/corpus/truth_foundry/partverse_archive_probe_v1.py \
+            --revision "$PARTVERSE_REVISION" \
+            --uid-allowlist-csv "$root/new.csv" \
+            --uid-allowlist-sha256 "$QUEUE_SHA256" \
+            --out "$root/staged" --max-members 10000000 \
+            --max-staged-mib 3072 --max-json-files 9600 --max-glbs 4800
+          python - "$root/staged/PROBE_SUMMARY_V1.json" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1]))
+          assert d['selected_uid_count']==4799
+          assert d['archive_stream_scanned_to_end']
+          assert d['staged_total_bytes']<=3072*1024**2
+          assert d['source_face_semantic_pass']==0
+          assert d['training_authorized']==False
+          assert d['face2label_records_parsed']>0
+          print('Staged PartVerse segmented source face maps:',d['face2label_records_parsed'])
+          PY
+      - name: Audit real processed source face/mesh identity and archive only selected shards
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/realsas-partverse-wave2-4799"
+          python tools/corpus/truth_foundry/partverse_part_geometry_inventory_v1.py \
+            --staging-root "$root/staged" \
+            --queue-csv "$root/new.csv" \
+            --out "$root/results" --max-bundle-uids 100
+          cp "$root/staged/PROBE_SUMMARY_V1.json" "$root/results/ARCHIVE_PROBE_SUMMARY_V1.json"
+          cp "$root/new.csv" "$root/results/SELECTED_WAVE2_SOURCE_QUEUE_V1.csv"
+          python - "$root/results/SUMMARY_V1.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          d=json.load(open(sys.argv[1]))
+          assert d['selected_candidates']==4799
+          assert d['head_semantic_training_pass']==0
+          assert d['2d_art_pass']==0
+          assert d['rights_verified']==0
+          print('## PartVerse second-wave 3D part/mesh evidence (quarantine only)')
+          print('New selected source candidates:',d['selected_candidates'])
+          print('Actually staged annotated sources:',d['staged_source_uids'])
+          print('GLB face count/ID contiguity observations:',d['processed_glb_face_count_contiguity_matches'])
+          print('Missing source IDs:',d['missing_selected_source_uids'])
+          print('Original rights, semantic roles, drawable and 2D art PASS: ZERO')
+          PY
+      - name: Copy only Wave2 selected annotation bundles and source-specific inventory
+        run: |
+          set -euo pipefail
+          umask 077
+          root="$RUNNER_TEMP/realsas-partverse-wave2-4799/results"
+          test -s "$root/ASSET_PART_GEOMETRY_EVIDENCE_V1.csv"
+          test -s "$root/SUMMARY_V1.json"
+          rclone copy "$root" "$DEST" --checksum --retries 3 --transfers 4
+          echo 'Wave2 source SHA/part maps audited, stored in private Drive; earlier 2500 not duplicated.' >> "$GITHUB_STEP_SUMMARY"

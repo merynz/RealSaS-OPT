@@ -63,11 +63,11 @@ func (ProductMechanicsProvider) Capabilities(context.Context) ([]Descriptor, err
 		map[string]any{"role": "mechanics_dynamic_integrity_court", "artifact_type": "RealSaS.MechanicsDynamicIntegrityCourt", "schema_version": "v1"},
 	}
 	metadata["dynamic_integrity_policy"] = map[string]any{
-		"enabled":                 true,
-		"max_faces":               1024,
-		"max_controls":            128,
-		"relative_translation":    0.02,
-		"max_constraint_residual":  0.001,
+		"enabled":                true,
+		"max_faces":              1024,
+		"max_controls":           128,
+		"relative_translation":   0.02,
+		"max_constraint_residual": 0.001,
 	}
 	metadata["dynamic_integrity_not_source_contact_or_secondary_motion"] = true
 	metadata["source_contact_qualified_by_intervention"] = false

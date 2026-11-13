@@ -9,10 +9,14 @@ on:
       - "models/axis/**"
       - "models/mira/**"
       - "compiler/realsas_compiler_core/**"
+      - "compiler/realsas_compiler_services/platform_worker/rss_vnext_*.py"
+      - "compiler/realsas_compiler_services/platform_worker/product_downstream_executor_v1.py"
       - "tests/models/test_rss_vnext_*.py"
       - "tests/compiler/test_controllable_puppet_runtime_v1.py"
       - "tests/compiler/test_mechanics_control_solver_v1.py"
       - "tests/compiler/test_mechanics_intervention_court_v1.py"
+      - "tests/compiler/test_rss_vnext_go_cas_double_bind_v1.py"
+      - "tests/compiler/test_product_downstream_cas_v1.py"
       - "tests/compiler/test_playback_runtime_v4_contract_v1.py"
       - "tests/compiler/test_graphics_v2.py"
       - ".github/workflows/rss_vnext_unified_product_cpu.yml"
@@ -56,5 +60,7 @@ jobs:
             tests/compiler/test_controllable_puppet_runtime_v1.py \
             tests/compiler/test_mechanics_control_solver_v1.py \
             tests/compiler/test_mechanics_intervention_court_v1.py \
+            tests/compiler/test_rss_vnext_go_cas_double_bind_v1.py \
+            tests/compiler/test_product_downstream_cas_v1.py \
             tests/compiler/test_playback_runtime_v4_contract_v1.py \
             tests/compiler/test_graphics_v2.py

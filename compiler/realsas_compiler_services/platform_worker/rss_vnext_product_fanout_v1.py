@@ -171,9 +171,11 @@ def bind_rss_vnext_fanout_refs_v1(
         raise RuntimeError("RSS_VNEXT_FANOUT_READ_MISSING_CHILD")
     for indexed in index["children"]:
         row = by_role[indexed["role"]]
+        # Transport ordinal never replaces the role sealed in the index.
+        # Every semantic child is uniquely located by exact type/schema and
+        # verified against the independently content-addressed index row.
         if any(row.get(key) != indexed[key] for key in (
-            "role", "artifact_type", "schema_version", "content_sha256",
-            "size_bytes",
+            "artifact_type", "schema_version", "content_sha256", "size_bytes",
         )) or not row.get("storage_key"):
             raise RuntimeError("RSS_VNEXT_FANOUT_READ_CHILD_BINDING_DRIFT")
     return by_role

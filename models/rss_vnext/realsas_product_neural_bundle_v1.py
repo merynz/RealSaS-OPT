@@ -18,6 +18,9 @@ from typing import Any
 import torch
 from torch import nn
 
+from .realsas_denoiser_architecture_v1 import (
+    ACTIVE_DENOISER_ABI, validate_paired_denoiser_abi_v1,
+)
 from .realsas_cleanroom_diffusion_training_v1 import (
     STAGE_CANONICAL, STAGE_MULTIVIEW,
     PairedSourceDiffusionConditionerV1,
@@ -94,8 +97,15 @@ def _stage_spec(stage: RSSvNextPinnedDiffusionStageV1) -> dict[str, Any]:
     ):
         raise RuntimeError("RSS_VNEXT_BUNDLE_UNSUPPORTED_STAGE_ARCHITECTURE")
     cond = stage.conditioner
+    execution_abi = validate_paired_denoiser_abi_v1(
+        stage.denoiser,
+        conditioning_width=cond.source_projection.out_features,
+        latent_row_attention=stage.rowwise_attention,
+        require_explicit_config=True,
+    )
     spec = {
         "stage": stage.stage,
+        "denoiser_execution_abi": execution_abi,
         "denoiser": _as_plain_config(stage.denoiser.config),
         "vae": _as_plain_config(stage.vae.config),
         "scheduler": _as_plain_config(stage.scheduler.config),
@@ -132,10 +142,12 @@ def _build_stage_from_spec(
     if (
         type(spec) is not dict
         or set(spec) != {
-            "stage", "denoiser", "vae", "scheduler", "conditioner",
+            "stage", "denoiser", "scheduler", "vae", "conditioner",
             "vae_scale_factor", "alpha", "rowwise", "denoiser_lora",
+            "denoiser_execution_abi",
         }
         or spec["stage"] != expected_stage
+        or spec["denoiser_execution_abi"] != ACTIVE_DENOISER_ABI
         or spec["alpha"] != "CONV_3_TO_1_KERNEL_ONE"
         or type(spec["conditioner"]) is not dict
         or set(spec["conditioner"]) != {
@@ -148,6 +160,12 @@ def _build_stage_from_spec(
     except ImportError as exc:
         raise RuntimeError("RSS_VNEXT_BUNDLE_DIFFUSERS_RUNTIME_REQUIRED") from exc
     unet = UNet2DConditionModel.from_config(spec["denoiser"])
+    validate_paired_denoiser_abi_v1(
+        unet,
+        conditioning_width=spec["conditioner"]["conditioning_width"],
+        latent_row_attention=None,
+        require_explicit_config=True,
+    )
     adapters = spec["denoiser_lora"]
     if type(adapters) is not list or len(adapters) > 8:
         raise RuntimeError("RSS_VNEXT_BUNDLE_PEFT_LORA_MANIFEST_INVALID")

@@ -113,10 +113,25 @@ def test_graphics_tamper_or_foreign_mesh_cannot_cross_downstream_cas():
         )
 
 
-def test_motion_rejects_neural_sidecar_instead_of_qualifying_a_clip():
+def test_motion_inherits_upstream_model_release_without_second_inference():
+    # Platform passes the Attempt's model identities to every stage, even when
+    # the downstream compiler does not need a second model.
     cas,mesh,rig,skin,mechanics,request = _requests()
     req = request("motion",MOTION_CONTRACT)
     req["model_releases"] = [{"family":"RSSVNEXT"}]
+    result = execute_motion_capability_v2(
+        req,read_object=cas.read_object,put_bytes=cas.put_bytes,
+    )
+    assert result["status"] == "PASS"
+    assert result["diagnostics"]["product_revision_minted"] is False
+
+
+def test_motion_cannot_request_its_own_model_family():
+    cas,mesh,rig,skin,mechanics,request = _requests()
+    req = request("motion",MOTION_CONTRACT)
+    req["capability_metadata"]["required_models"] = [
+        {"family":"MIRA","architecture_id":"unsupported-independent-worker"}
+    ]
     with pytest.raises(RuntimeError,match="CONTRACT_OR_MODEL_DRIFT"):
         execute_motion_capability_v2(
             req,read_object=cas.read_object,put_bytes=cas.put_bytes,

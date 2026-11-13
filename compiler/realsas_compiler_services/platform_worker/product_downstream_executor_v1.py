@@ -9,7 +9,7 @@ authorize ProductRevision. Proof deliberately abstains until the source,
 runtime, pose/appearance and edit-consequence gates are implemented.
 """
 
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from hashlib import sha256
 import json
 from typing import Any, Callable, Mapping
@@ -108,16 +108,79 @@ def _canonical_parents(request, read_object):
     return mesh,rig,skin,mechanics
 
 
+def _read_graphics_mechanics_intervention_v1(request, read_object, mesh, rig, skin, mechanics):
+    """Strict ancestor CAS court, never a source-contact or secondary-motion pass."""
+    refs = [
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict and row.get("artifact_type") == "RealSaS.MechanicsInterventionCourt"
+        and row.get("schema_version") == "v1"
+    ]
+    requirement = (request.get("capability_metadata") or {}).get(
+        "mechanics_intervention_required", False,
+    )
+    if type(requirement) is not bool or len(refs) > 1:
+        raise RuntimeError("PRODUCT_GRAPHICS_MECHANICS_INTERVENTION_CARDINALITY")
+    if not refs:
+        if requirement:
+            raise RuntimeError("PRODUCT_GRAPHICS_MECHANICS_INTERVENTION_REQUIRED")
+        return None
+    from compiler.realsas_compiler_core.hashing import content_sha256
+
+    receipt = _read(
+        request, read_object, "RealSaS.MechanicsInterventionCourt", "v1",
+    )
+    unsealed = dict(receipt)
+    claimed_hash = unsealed.pop("court_hash", None)
+    if (
+        receipt.get("schema") != "RealSaS.MechanicsInterventionCourt.v1"
+        or receipt.get("status") != "MEASURED_COMPILER_CONTROL_INTERVENTIONS_NOT_SOURCE_BEHAVIOR"
+        or claimed_hash != content_sha256(unsealed)
+        or receipt.get("canonical_mesh_lineage_hash") != mesh.mesh_lineage_hash
+        or receipt.get("canonical_rig_lineage_hash") != rig.rig_lineage_hash
+        or receipt.get("canonical_skin_lineage_hash") != skin.skin_lineage_hash
+        or receipt.get("canonical_mechanics_lineage_hash") != mechanics.mechanics_lineage_hash
+    ):
+        raise RuntimeError("PRODUCT_GRAPHICS_MECHANICS_INTERVENTION_PARENT_OR_HASH_DRIFT")
+    probes = receipt.get("probes")
+    control_ids = [row.canonical_control_id for row in rig.controls]
+    if (
+        type(probes) is not list or len(probes) != len(control_ids)
+        or any(type(row) is not dict or row.get("control_id") != control_ids[i]
+               for i, row in enumerate(probes))
+        or type(receipt.get("control_count")) is not int
+        or receipt["control_count"] != len(control_ids)
+        or type(receipt.get("anchor_count")) is not int
+        or receipt["anchor_count"] != len(rig.attachment_anchors)
+        or type(receipt.get("full_mesh_deformation_probe_count")) is not int
+        or not 1 <= receipt["full_mesh_deformation_probe_count"] <= len(control_ids)
+        or receipt.get("full_mesh_deformation_complete") is not (
+            receipt["full_mesh_deformation_probe_count"] == len(control_ids)
+        )
+    ):
+        raise RuntimeError("PRODUCT_GRAPHICS_MECHANICS_INTERVENTION_CONTROL_OR_SOCKET_COVERAGE")
+    for claim in (
+        "source_attachment_contact_qualified", "learned_secondary_motion_qualified",
+        "collision_qualified", "source_pose_quality_qualified",
+        "edit_consequence_qualified", "product_revision_minted",
+    ):
+        if receipt.get(claim) is not False:
+            raise RuntimeError("PRODUCT_GRAPHICS_MECHANICS_INTERVENTION_FALSE_AUTHORITY:" + claim)
+    return receipt
+
+
 def execute_graphics_capability_v1(
     request: dict[str, Any], *, read_object: Callable, put_bytes: Callable,
 ) -> dict[str, Any]:
     _require(request, "product.graphics", GRAPHICS_CONTRACT)
     mesh,rig,skin,mechanics = _canonical_parents(request,read_object)
+    intervention = _read_graphics_mechanics_intervention_v1(
+        request, read_object, mesh, rig, skin, mechanics,
+    )
 
     from compiler.realsas_compiler_core.graphics_v1 import (
         GraphicsStaticRelationEvidenceV1, GraphicsViewRelationEvidenceV1,
         GraphicsEvidenceV1, graphics_evidence_hash_v1,
-        compile_graphics_on_canonical_puppet_v1,
+        compile_graphics_on_canonical_puppet_v1, compiled_graphics_hash_v1,
     )
     from compiler.realsas_compiler_core.graphics_runtime_v1 import build_runtime_graphics_v1
 
@@ -173,6 +236,33 @@ def execute_graphics_capability_v1(
         )
         source_kind = "SINGLE_RSSVNEXT_SHAPE_INFERENCE_REGION_CANDIDATES"
 
+    if intervention is not None:
+        from compiler.realsas_compiler_core.hashing import content_sha256
+
+        # The compiler's Graphics result is content-addressed to the exact
+        # non-rest solver/socket witness. Neither neural attachment affinity
+        # nor a static raster can substitute for source contact authority.
+        bound = replace(
+            compiled,
+            metadata={
+                **compiled.metadata,
+                "canonical_mechanics_lineage_hash": mechanics.mechanics_lineage_hash,
+                "mechanics_intervention_court_hash": intervention["court_hash"],
+                "mechanical_socket_pose_probes_consumed": intervention["control_count"],
+                "source_attachment_contact_qualified": False,
+                "secondary_motion_qualified": False,
+            },
+            graph_hash="",
+        )
+        compiled = replace(bound, graph_hash=compiled_graphics_hash_v1(bound))
+        if native_receipt is not None:
+            native_receipt = {
+                **native_receipt,
+                "candidate_graph_hash": compiled.graph_hash,
+                "mechanics_intervention_court_hash": intervention["court_hash"],
+            }
+            native_receipt.pop("receipt_hash", None)
+            native_receipt["receipt_hash"] = content_sha256(native_receipt)
     rendered = build_runtime_graphics_v1(compiled,face_count=len(mesh.faces))
     outputs = [
         _seal(compiled,role="compiled_graphics",kind="RealSaS.CompiledGraphics",
@@ -198,6 +288,13 @@ def execute_graphics_capability_v1(
             "graphics_runtime_hash":rendered.runtime_graphics_hash,
             "source_appearance_qualified":False,
             "graphics_source_kind":source_kind,
+            "mechanics_intervention_court_hash": (
+                intervention["court_hash"] if intervention is not None else None
+            ),
+            "mechanical_socket_pose_probes_consumed": (
+                intervention["control_count"] if intervention is not None else 0
+            ),
+            "mechanical_source_contact_qualified":False,
             "source_visibility_qualified":False,
             "pose_conditioned_occlusion_qualified":False,
             "attachment_socket_qualified":False,

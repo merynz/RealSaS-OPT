@@ -102,7 +102,7 @@ func (ProductMotionProvider) Capabilities(context.Context) ([]Descriptor,error) 
 
 func (ProductProofProvider) Capabilities(context.Context) ([]Descriptor,error) {
     return downstreamDescriptor(ProductRoleProof,
-        []string{"product.mesh","product.rig","product.skin","product.mechanics","product.graphics","product.motion"},
+        []string{"product.mechanics","product.graphics","product.motion"},
         map[string]any{
             "implementation_class":string(ImplementationCompiler),
             "interface_contract":ProductProofContractV1,

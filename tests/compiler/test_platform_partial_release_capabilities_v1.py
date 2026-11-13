@@ -32,9 +32,9 @@ def _assert_smoke_release_projection(plan, name):
     # current release is independently qualified to mint a ProductRevision.
     assert {role for role in roles
             if specs[role]["policy"]["product_pass_authority"]} == {"product.proof"}
-    assert all(specs[role]["metadata"].get("can_mint_product_revision") is False
+    assert all(specs[role]["parameters"].get("can_mint_product_revision") is False
                for role in roles)
-    assert specs["product.proof"]["metadata"]["product_revision_requires_independent_admission"] is True
+    assert specs["product.proof"]["parameters"]["product_revision_requires_independent_admission"] is True
     assert len(plan["stages"]) in (1, 2)
     assert request["manifest"]["contract_version"] == "RealSaS.EngineReleaseManifest.v2"
 

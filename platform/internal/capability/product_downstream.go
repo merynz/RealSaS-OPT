@@ -28,7 +28,9 @@ func downstreamDescriptor(role ProductRoleID, dependencies []string, metadata ma
         ExecutorActivity: "engine.execute_capability.v1",
         Dependencies: dependencies,
         AllowedModes: []Mode{ModeDeveloper},
-        ProductPassAuthority: false,
+        // This declares who may *decide* a product PASS; the worker still
+        // returns WAITING until independent product witnesses are admitted.
+        ProductPassAuthority: role == ProductRoleProof,
         Metadata: metadata,
     }}, nil
 }

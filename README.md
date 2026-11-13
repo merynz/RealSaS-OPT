@@ -27,4 +27,4 @@ Canonical development continues on `main`. PRs are review/integration surfaces, 
 
 **Proprietary / all rights reserved.** See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-**Root layout:** Current product code lives in `models/`, `compiler/`, `runtime/`, `product/`, `platform/`; verification lives in `tests/`, `tools/`. Historic proposals, preregistrations and restoration records have been moved out of root to [`historical/`](historical/README.md) with SHA receipts. `canonical/` is **not yet** fully migrated: some CI and lineage policies are path-bound and must be migrated separately.
+**Root layout:** Current product code lives in `models/`, `compiler/`, `runtime/`, `product/`, `platform/`; verification lives in `tests/`, `tools/`. Historic notebooks, proposals, preregistrations and restoration records have been moved out of root to [`historical/`](historical/README.md) with SHA receipts. `canonical/` is **not yet** fully migrated: some CI and lineage policies are path-bound and must be migrated separately.

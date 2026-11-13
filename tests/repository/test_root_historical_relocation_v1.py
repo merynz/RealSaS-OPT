@@ -13,7 +13,7 @@ def test_legacy_research_roots_physically_archived_without_symlinks():
         (ROOT / "historical/ROOT_COLLECTION_RELOCATION_V1.json").read_text()
     )
     assert manifest["schema"] == "RealSaS.RootHistoricalCollectionRelocation.v1"
-    assert len(manifest["paths"]) == 17
+    assert len(manifest["paths"]) == 23
     for row in manifest["paths"]:
         assert not (ROOT / row["old_path"]).exists(), row["old_path"]
         f = ROOT / row["new_path"]
@@ -22,7 +22,7 @@ def test_legacy_research_roots_physically_archived_without_symlinks():
             b"blob " + str(len(data)).encode() + bytes([0]) + data
         ).hexdigest()
         assert actual == row["original_git_blob_sha1"], row["new_path"]
-    for root in ("prereg", "prospective", "restoration", "research"):
+    for root in ("prereg", "prospective", "restoration", "research", "notebooks"):
         assert not (ROOT / root).exists(), root
 
 

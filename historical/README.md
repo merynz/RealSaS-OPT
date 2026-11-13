@@ -1,6 +1,6 @@
 # Historical Record Index
 
-**Root research archives:** [Preregistrations](prereg/), [Prospective proposals](prospective/), [Restoration](restoration/), [Research evidence](research/), and [original-path SHA receipts](ROOT_COLLECTION_RELOCATION_V1.json) were physically moved here; root-level legacy collection names were removed without symlink replacements.
+**Root research archives:** [Old notebooks](notebooks/), [Preregistrations](prereg/), [Prospective proposals](prospective/), [Restoration](restoration/), [Research evidence](research/), and [original-path SHA receipts](ROOT_COLLECTION_RELOCATION_V1.json) were physically moved here; root-level legacy collection names were removed without symlink replacements.
 
 Old Geppetto, Arachne and SkinFieldCodec Python sources now live under [model_sources](model_sources/README.md), with byte-identical relocation receipts and preserved `models.*` import compatibility. This placement is historical storage, not product inference authority.
 

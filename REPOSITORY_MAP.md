@@ -22,7 +22,7 @@ This map is **human navigation**; it is not a competing architecture configurati
 | `historical/model_sources/arachne/`, `historical/model_sources/geppetto/`, `historical/model_sources/skin_field_codec/` | Byte-preserved old model lineage with original `models.*` Python import aliases. Do not claim ProductRelease authority. |
 | `canonical/` | Legacy mixed namespace: historical experiment/forensic records **and** machine policies with path-bound consumers |
 | `historical/` | Historic documentation and restoration records |
-| `experiments/`, `notebooks/`; archived `research/`, `prereg/`, `prospective/` now below `historical/` | Research evidence, notebooks, proposals; no automatic product authority |
+| `experiments/` (path-bound scientific apparatus); legacy notebooks, `research/`, `prereg/`, `prospective/` now below `historical/` | Research evidence, notebooks, proposals; no automatic product authority |
 | `docs/` | Guidance and reference; dated narratives can be stale |
 | `.github/workflows/` | Live GitHub Actions (~222), active RSS.vNext courts and still-referenced operators |
 | `historical/ci_workflows/` | Disabled, byte-preserved 2026 scientific workflow definitions and original SHA manifests |

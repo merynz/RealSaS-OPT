@@ -2,12 +2,10 @@ package capability
 
 import "context"
 
-// RSSvNextInputCandidateProvider is the proposed REPLACEMENT for product.input.
-//
-// This is an alternate provider of the same stable capability ID, never a
-// concurrent second product.input. It is deliberately NOT in ProductProviders
-// until the source upload and downstream Compiler/Studio release courts move
-// together. Its executable Python boundary already has a real CAS E2E court.
+// RSSvNextInputCandidateProvider is the active one-trigger two-view Input
+// boundary. It remains a replaceable provider of the stable product.input
+// role, never a second parallel product.input. Source rights and final
+// ProductRevision proof are separate downstream admission gates.
 type RSSvNextInputCandidateProvider struct{}
 
 const (
@@ -50,10 +48,10 @@ func (RSSvNextInputCandidateProvider) Capabilities(context.Context) ([]Descripto
 	}}, nil
 }
 
-// RSSvNextShapeCandidateProvider replaces the historical separate IRIS/TESSA
-// provider when the ONE unified RSS release is admitted. The production Go
-// ProductProviders list and responsibility ledger still name the historical
-// family split; this candidate is not the active release catalog.
+// RSSvNextShapeCandidateProvider is the active one-checkpoint Shape provider.
+// It emits seven independently addressable specialist CAS children. IRIS,
+// TESSA, AXIS and MIRA remain expert responsibilities inside RSSVNEXT; they
+// are not four ModelReleases or independent downstream inference jobs.
 type RSSvNextShapeCandidateProvider struct{}
 
 func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descriptor, error) {
@@ -105,12 +103,11 @@ func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descripto
 	}}, nil
 }
 
-// RSSvNextMeshCandidateProvider consumes original 2-view source plus the
-// independently addressed RSS neural evidence fanout from one Shape release.
-// This Compiler candidate does NOT mint CanonicalMesh, which still requires
-// source surface qualification, geometry and presentation courts. It remains
-// an alternate, unregistered provider until all product downstream contracts
-// migrate. Do not silently relabel ShapeProposal.v2 into neural evidence.
+// RSSvNextMeshCandidateProvider consumes the observed front/back source and
+// the exact RSS Shape fanout. The active Mesh role requires a static
+// CanonicalMesh or fails closed; TESSA candidates alone never count. The
+// frozen mechanical policy and provisional two-view source raster policy are
+// independently pinned. ProductRevision and 2D appearance remain unqualified.
 type RSSvNextMeshCandidateProvider struct{}
 
 const RSSvNextMeshContractV2 = "RealSaS.ProductMeshCompile.v2"

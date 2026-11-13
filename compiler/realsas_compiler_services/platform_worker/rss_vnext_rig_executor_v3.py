@@ -47,14 +47,9 @@ EXECUTOR_CONTRACT = "RealSaS.ProductRigInference.v3"
 
 
 def _one(request, kind: str, version: str) -> dict[str, Any]:
-    found = [
-        row for row in request.get("input_artifacts") or ()
-        if type(row) is dict and row.get("artifact_type") == kind
-        and row.get("schema_version") == version
-    ]
-    if len(found) != 1:
-        raise RuntimeError("RSS_VNEXT_RIG_PARENT_CARDINALITY:" + kind)
-    return found[0]
+    from .rss_vnext_cas_parent_v1 import select_rss_vnext_parent_v1
+
+    return select_rss_vnext_parent_v1(request, kind, version)
 
 
 def _cas(ref, reader: Callable, *, limit: int = 256 * 1024 * 1024) -> bytes:

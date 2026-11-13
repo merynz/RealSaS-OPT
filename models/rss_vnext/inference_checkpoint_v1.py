@@ -220,6 +220,18 @@ def load_inference_checkpoint_v1(
         payload = torch.load(source, map_location="cpu", weights_only=True)
     except Exception as exc:
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_DECODE_FAILED") from exc
+    if isinstance(payload, Mapping) and payload.get("schema") == (
+        "RealSaS.RSSvNext.UnifiedThreeStageNeuralRelease.v1"
+    ):
+        from .realsas_product_neural_bundle_v1 import load_product_neural_bundle_v1
+        bundle = load_product_neural_bundle_v1(
+            source, expected_sha256=expected_sha256,
+            vision_encoder=vision_encoder, device=device,
+            product_mode=product_mode,
+        )
+        model = bundle.model
+        model._pinned_neural_bundle = bundle
+        return model
     if not isinstance(payload, Mapping):
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_PAYLOAD_INVALID")
     schema = payload.get("schema")

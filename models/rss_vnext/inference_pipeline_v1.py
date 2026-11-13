@@ -146,15 +146,52 @@ def run_two_view_to_compiler_proposal_v1(
         device=observed_rgba.device,
         product_mode=product_mode,
     )
-    prediction = model.propose_teacher_free(
-        observed_rgba,
-        camera_features,
-        max_topology_tokens=max_topology_tokens,
-        generate_controls=generate_controls,
-        executable_constraint_operators=(
-            tuple(RIG_CONSTRAINT_OPERATOR_IDS_V1) if generate_controls else None
-        ),
-    )
+    bundle = getattr(model, "_pinned_neural_bundle", None)
+    generation = None
+    if bundle is not None:
+        if source_observation is None:
+            raise RuntimeError("RSS_VNEXT_GENERATIVE_RELEASE_REQUIRES_BOUND_ORIGINAL_SOURCE")
+        from .realsas_product_neural_bundle_v1 import RSSvNextPinnedNeuralBundleV1
+        from .realsas_two_source_construction_v1 import run_two_source_neural_construction_v1
+        from .realsas_virtual_camera_policy_v1 import target_canonical_and_six_cameras_v1
+        if type(bundle) is not RSSvNextPinnedNeuralBundleV1:
+            raise RuntimeError("RSS_VNEXT_GENERATIVE_RELEASE_UNKNOWN_RUNTIME_BUNDLE")
+        canonical_cameras, six_cameras = target_canonical_and_six_cameras_v1(
+            1, device=str(observed_rgba.device), dtype=observed_rgba.dtype,
+        )
+        def _generation_seed(role: str) -> int:
+            import hashlib
+            digest = hashlib.sha256((
+                source_observation.source_binding_sha256
+                + expected_checkpoint_sha256 + role
+            ).encode()).digest()
+            return int.from_bytes(digest[:8], "big") % (2**63)
+        generation = run_two_source_neural_construction_v1(
+            model=model, observed_rgba=observed_rgba,
+            original_camera_features=camera_features,
+            source_binding_sha256=source_observation.source_binding_sha256,
+            canonical_cameras=canonical_cameras,
+            six_view_cameras=six_cameras,
+            canonical_sampler=bundle.canonical,
+            multiview_sampler=bundle.multiview,
+            image_size=bundle.image_size,
+            denoise_steps=bundle.denoise_steps,
+            canonical_seed=_generation_seed("CANONICAL"),
+            multiview_seed=_generation_seed("MULTIVIEW"),
+            max_topology_tokens=max_topology_tokens,
+            generate_controls=generate_controls,
+        )
+        prediction = generation.proposal
+    else:
+        prediction = model.propose_teacher_free(
+            observed_rgba,
+            camera_features,
+            max_topology_tokens=max_topology_tokens,
+            generate_controls=generate_controls,
+            executable_constraint_operators=(
+                tuple(RIG_CONSTRAINT_OPERATOR_IDS_V1) if generate_controls else None
+            ),
+        )
     evidence = export_inference_evidence_v1(
         prediction,
         original_rgba=observed_rgba,
@@ -228,6 +265,13 @@ def run_two_view_to_compiler_proposal_v1(
         "product_revision_minted": False,
         "qualification_status": "COMPILER_EVIDENCE_SEALED_NOT_PRODUCT_QUALIFIED",
     }
+    if generation is not None:
+        receipt["scene_construction_policy"] = "TWO_ORIGINAL_TO_CANONICAL_TO_SIX_GENERATED_RGB_NORMAL"
+        receipt["generation_checkpoint_binding_sha256"] = generation.construction_checkpoint_binding_sha256
+        receipt["canonical_stage_checkpoint_sha256"] = generation.canonical_checkpoint_sha256
+        receipt["multiview_stage_checkpoint_sha256"] = generation.multiview_checkpoint_sha256
+        receipt["generated_view_count"] = 6
+        receipt["generated_source_observation"] = False
     if source_observation is not None:
         original = target / _ORIGINAL_SOURCE_FILE
         original_tmp = original.with_name(original.name + ".tmp")

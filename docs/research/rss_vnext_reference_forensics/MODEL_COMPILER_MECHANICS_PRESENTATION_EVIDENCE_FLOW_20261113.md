@@ -167,3 +167,31 @@ Source-materialization contract still to implement independently with corpus/nat
 **Critical distinctions:** `RIGID_RELATIVE_TRANSPORT_SUPPORTED` alone ≠ authored attachment. `NONRIGID_RELATIVE_TRANSPORT_SUPPORTED` alone ≠ no attachment. `NO_FACE` is an explicit source inventory negative, not absence of documentation. A correct AXIS pointer and source coordinate ≠ correct learned AXIS program on unseen. No source motion truth by itself qualifies artistic drawable boundaries, compositing or unseen RGB.
 
 **Latest CPU test court** at `e93c4d1ad6e8eb1e2fc04f2a4b51b8118412aeee`: **509 passed / 8 skipped**, including the new native-source three-state and AXIS-parent-codec tests. NVIDIA FlexiCubes pinned source and native Stage-3 CUDA courts remain skipped on CPU. The native source/AXIS admission and unseen runtime proof are NOT completed by this CI.
+
+
+## J. Source Blender native attachment inventory + parent/root frame extraction (2026-11-13)
+
+**Source acquisition remains independent of the model:** The actual source-native teacher is already implemented by `tools/iris_vnext/blender_authored_teacher_export_v1.py`, with exact imported FBX/GLB file SHA256, observation-admission SHA256, sorted non-helper renderable mesh objects, original source triangle/vertex/owner topology, sampled native source animation action/frame identities, and source-world rest/posed NPZ bytes. New source-only code **reuses this original transport**, not a second geometric or animation truth estimator.
+
+- `tools/truth_foundry/native_blender_attachment_inventory_v1.py`: pure Python, deterministic object-to-native-armature-bone inventory. Exact original teacher face owners are preserved. Explicit bone parent, fully active `CHILD_OF` (all location/rotation/scale axes), and `COPY_TRANSFORMS` in `REPLACE` mode may produce `UNQUALIFIED_AUTHORED_BONE_LINK_CANDIDATE` only when they agree on a unique armature/bone and Blender reports `enabled=True`, `is_valid=True`, `mute=False`, influence exactly 1. Conflicts, partial/unsupported constraints, nonbone object parenting, or ambiguous source frame remain ABSTAIN; armature deform modifiers are **not rigid attachment ownership**. Empty renderable mesh owners are retained as source identity but have **no face address**. All outputs explicitly deny holder-face, contact, exhaustive-empty, and trainer admission authority.
+- `tools/truth_foundry/blender_native_attachment_inventory_v1.py`: runs in pinned native Blender importer, checks original asset/observation/teacher receipt/NPZ SHA256 and original mesh object identities, compares exact source rest and per-frame evaluated geometry with the original sealed native teacher. Reuses its animation actions, sampled frames, and **per-action pose/NLA reset policy**. Outputs `native_attachment_inventory.json` and `native_attachment_parent_root_frames.npz`; for a unique authored bone-link candidate, captures the source armature-root and pose-bone parent world matrices at rest and matched source action frames. Other action/armature cells remain NaN + `sample_available=False` and cannot be treated as zero motion. The complete object/mesh constraints and separately indexed armature bone hierarchy/pose-bone constraints are preserved as a hashed diagnostic graph.
+- `tools/truth_foundry/audit_blender_native_attachment_receipt_v1.py`: Blender-independent readback, recomputes inventory from the original teacher `face_owner` and source authoring records, checks source/teacher/importer/subject/action-frame lineage, armature/bone graph hash, missing-frame masks, 4×4 affine parent/root transforms and scale/shear violations. Non-SE3 source motion frames are **diagnosed but never used to qualify rigid source interventions**.
+
+Run (with exact **existing** native teacher receipt and NPZ):
+```bash
+blender -b --python tools/truth_foundry/blender_native_attachment_inventory_v1.py -- \
+  --source /native/character.glb --expected-source-sha256 SOURCE_SHA \
+  --subject-id SUBJECT --observation-admission /native/admission.json \
+  --teacher-receipt /native/teacher.npz.json \
+  --expected-teacher-receipt-sha256 TEACHER_RECEIPT_SHA \
+  --teacher-npz /native/teacher.npz --output-directory /native/attachment_inventory
+
+python -m tools.truth_foundry.audit_blender_native_attachment_receipt_v1 \
+  --source /native/character.glb --teacher-receipt /native/teacher.npz.json \
+  --teacher-npz /native/teacher.npz --observation-admission /native/admission.json \
+  --inventory-directory /native/attachment_inventory
+```
+
+API references used when defining the conservative constraint inspector: official Blender Python `ChildOfConstraint`, `CopyTransformsConstraint`, and `Constraint.enabled/is_valid` specification (https://docs.blender.org/api/4.5/).
+
+**Important open proof:** This exporter does not have the real source Blender/.blend or FBX/GLB assets in its CI runner, so **no real native-source execution has yet been claimed**. An authored Blender bone-parent or constraint still does **not** say which particular source holder triangle is the grip surface. Nor is an absent constraint proof of an exhaustively empty source socket inventory. Real owner-to-held/holder-face authoring and intervention selection still need a separately verified materialization/qualification lane that can feed the previous §I source candidate, §H native face reindex, and AXIS teacher registry. Under no condition should this diagnostic inventory self-mint a `QUALIFIED_SOURCE_NATIVE_ATTACHMENT_FACE_REINDEX` row, a verified NO_FACE, or a real ProductRevision. Next empirical action: run the exporter against actual admitted native corpus sources and record source-qualifying/unknown/error proportions, then bind only proven authored links to independent parent-vs-root interventions.

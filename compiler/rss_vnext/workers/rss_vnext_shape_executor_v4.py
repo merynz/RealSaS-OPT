@@ -357,6 +357,8 @@ def execute_rss_vnext_shape_capability_v4(
     if state.camera_features is not None:
         raise RuntimeError("RSS_VNEXT_SHAPE_V4_SOURCE_CAMERA_WAS_INVENTED")
     tessa_tensors, tessa_receipt = _tessa_candidate_tensors_v1(proposal)
+    from dataclasses import asdict
+    tessa_decoder_config = asdict(model.cfg.tessa)
     axis_tensors, axis_receipt = _raw_axis_mira_candidates_v1(proposal)
     scene_bytes = _tensor_archive(
         **tessa_tensors,
@@ -406,6 +408,7 @@ def execute_rss_vnext_shape_capability_v4(
         "product_revision_minted": False,
         "mesh_status": proposal["mesh_status"],
         **tessa_receipt,
+        "tessa_decoder_config": tessa_decoder_config,
         **axis_receipt,
     }
     receipt_ref = _cas_ref(

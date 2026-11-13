@@ -51,7 +51,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
 
     mesh = specs["product.mesh"]
     assert mesh["policy"]["dependencies"] == ["product.shape"]
-    assert mesh["parameters"]["executor_contract"] == "RealSaS.ProductMeshCompile.v2"
+    assert mesh["parameters"]["executor_contract"] == "RealSaS.ProductMeshCompile.v3"
     assert mesh["parameters"]["output_artifact_type"] == "RealSaS.CanonicalMeshIR"
     assert mesh["parameters"]["output_schema_version"] == "v1"
     assert mesh["parameters"]["requires_shape_parent_binding"] is True

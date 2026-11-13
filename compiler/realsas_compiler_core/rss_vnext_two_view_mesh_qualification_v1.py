@@ -200,7 +200,7 @@ def qualify_rss_vnext_two_view_mesh_v1(
             triangles, width=width, height=height,
         )
         from hashlib import sha256
-        if hashlib.sha256(predicted).hexdigest() != row["geometry"]["rest"]["binary_projected_raster_sha256"]:
+        if sha256(predicted).hexdigest() != row["geometry"]["rest"]["binary_projected_raster_sha256"]:
             raise QualificationError("RSS_VNEXT_TWO_VIEW_REPLAY_RASTER_HASH_DRIFT")
         source_mask = bytes((rgba[i, 3] >= static_policy.source_alpha_threshold).astype(np.uint8).ravel())
         components = source_connected_component_recall_metrics(

@@ -214,3 +214,57 @@ def test_graphics_native_one_trigger_path_uses_shape_inference_without_manual_ev
         "RealSaS.RuntimeGraphics",
         "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
     ]
+
+
+def test_graphics_requires_and_rebinds_exact_mechanics_intervention_in_active_catalog():
+    from compiler.realsas_compiler_core.mechanics_intervention_court_v1 import (
+        compile_mechanics_intervention_court_v1,
+    )
+    from compiler.realsas_compiler_core.hashing import content_sha256
+    cas, mesh, rig, skin, mechanics, request = _requests()
+    intervention = compile_mechanics_intervention_court_v1(
+        mesh, rig, skin, mechanics,
+    )
+    req = request("graphics", GRAPHICS_CONTRACT)
+    req["capability_metadata"]["mechanics_intervention_required"] = True
+    with pytest.raises(RuntimeError,match="MECHANICS_INTERVENTION_REQUIRED"):
+        execute_graphics_capability_v1(
+            req, read_object=cas.read_object, put_bytes=cas.put_bytes,
+        )
+    court_ref = cas.put(
+        intervention, "RealSaS.MechanicsInterventionCourt", "v1",
+    )
+    req["input_artifacts"].append(court_ref)
+    result = execute_graphics_capability_v1(
+        req, read_object=cas.read_object, put_bytes=cas.put_bytes,
+    )
+    assert result["status"] == "PASS"
+    assert result["diagnostics"]["mechanics_intervention_court_hash"] == intervention.court_hash
+    assert result["diagnostics"]["mechanical_source_contact_qualified"] is False
+    compiled = json.loads(cas.read_object(result["outputs"][0]))
+    assert compiled["metadata"]["mechanics_intervention_court_hash"] == intervention.court_hash
+    assert compiled["metadata"]["source_attachment_contact_qualified"] is False
+    assert compiled["metadata"]["secondary_motion_qualified"] is False
+
+    altered = intervention.to_dict()
+    altered["canonical_rig_lineage_hash"] = "f" * 64
+    body = dict(altered)
+    body.pop("court_hash")
+    altered["court_hash"] = content_sha256(body)
+    foreign = cas.put(
+        altered, "RealSaS.MechanicsInterventionCourt", "v1",
+    )
+    req["input_artifacts"][-1] = foreign
+    with pytest.raises(RuntimeError,match="INTERVENTION_PARENT_OR_HASH_DRIFT"):
+        execute_graphics_capability_v1(
+            req, read_object=cas.read_object, put_bytes=cas.put_bytes,
+        )
+
+    # Even with the original receipt, two different identity slots for the
+    # intervention witness cannot silently choose a convenient first row.
+    req["input_artifacts"][-1] = court_ref
+    req["input_artifacts"].append(court_ref)
+    with pytest.raises(RuntimeError,match="INTERVENTION_CARDINALITY"):
+        execute_graphics_capability_v1(
+            req, read_object=cas.read_object, put_bytes=cas.put_bytes,
+        )

@@ -197,6 +197,110 @@ def _read_dynamic_integrity_proof_v1(
     )
 
 
+def _replay_raw_source_graphics_proof_v1(
+    request: dict, read_object: Callable, *, mesh, rig, skin,
+    mechanics, compiled, intervention,
+) -> dict[str, Any] | None:
+    """Independently replay original alpha + neural typed Graphics at Proof.
+
+    A compiled candidate hash and even a newly rehashed receipt are insufficient:
+    replay the two *original uploaded image bytes*, the one-checkpoint Shape
+    scene, the TESSA source-alpha Mesh qualification, and anonymous typed
+    face graph from CAS. The public product remains FAIL until source RGB,
+    moving occlusion, renderer, contact and edit evidence are independently
+    qualified; this court only seals the static candidate's actual lineage.
+    """
+    raw_type = "RealSaS.RSSvNextUncalibratedTwoImageSource"
+    receipt_type = "RealSaS.RSSvNextGraphicsNativeCandidateReceipt"
+    refs = request.get("input_artifacts") or ()
+    raws = [
+        r for r in refs if type(r) is dict and r.get("artifact_type") == raw_type
+    ]
+    supplied = [
+        r for r in refs if type(r) is dict
+        and r.get("artifact_type") == receipt_type
+    ]
+    if not raws:
+        if supplied or compiled.metadata.get("origin") == (
+            "RAW_TWO_IMAGE_UNIFIED_H_TYPED_GRAPHICS_CANDIDATES"
+        ):
+            raise RuntimeError("PRODUCT_PROOF_ORPHAN_RAW_GRAPHICS_RECEIPT")
+        return None
+    if (
+        len(raws) not in (1, 2)
+        or len(supplied) != 1
+        or supplied[0].get("schema_version") != "v1"
+        or any(r.get("schema_version") != "v1" for r in raws)
+    ):
+        raise RuntimeError("PRODUCT_PROOF_RAW_GRAPHICS_PARENT_CARDINALITY")
+    from .rss_vnext_graphics_consumer_v1 import _raw_two_image_graphics_v1
+    from compiler.realsas_compiler_core.graphics_v1 import (
+        compiled_graphics_hash_v1,
+    )
+    from compiler.realsas_compiler_core.hashing import content_sha256
+    # The caller already reopened all canonical parents and the persisted
+    # Graphics/Runtime graph. This is a *second* compiler evaluation from
+    # source CAS, never a second ModelRelease/inference invocation.
+    replayed_graph, replayed_receipt = _raw_two_image_graphics_v1(
+        request, canonical_mesh=mesh, canonical_rig=rig,
+        canonical_skin=skin, read_object=read_object,
+    )
+    if intervention is not None:
+        bound = replace(replayed_graph, metadata={
+            **replayed_graph.metadata,
+            "canonical_mechanics_lineage_hash": mechanics.mechanics_lineage_hash,
+            "mechanics_intervention_court_hash": intervention["court_hash"],
+            "mechanical_socket_pose_probes_consumed": intervention["control_count"],
+            "source_attachment_contact_qualified": False,
+            "secondary_motion_qualified": False,
+        }, graph_hash="")
+        replayed_graph = replace(
+            bound, graph_hash=compiled_graphics_hash_v1(bound),
+        )
+        replayed_receipt = {
+            **replayed_receipt,
+            "candidate_graph_hash": replayed_graph.graph_hash,
+            "mechanics_intervention_court_hash": intervention["court_hash"],
+        }
+        replayed_receipt.pop("receipt_hash", None)
+        replayed_receipt["receipt_hash"] = content_sha256(replayed_receipt)
+    if (
+        compiled.graph_hash != replayed_graph.graph_hash
+        or content_sha256(compiled.to_dict()) != content_sha256(replayed_graph.to_dict())
+    ):
+        raise RuntimeError("PRODUCT_PROOF_RAW_GRAPHICS_SOURCE_REPLAY_MISMATCH")
+    claimed_receipt = _read(
+        request, read_object, receipt_type, "v1",
+    )
+    if (
+        claimed_receipt.get("schema") !=
+        "RealSaS.RSSvNext.GraphicsNativeCandidateReceipt.v1"
+        or claimed_receipt.get("receipt_hash") != content_sha256({
+            key: value for key, value in claimed_receipt.items()
+            if key != "receipt_hash"
+        })
+        or content_sha256(claimed_receipt) != content_sha256(replayed_receipt)
+        or claimed_receipt.get("candidate_graph_hash") != compiled.graph_hash
+        or claimed_receipt.get("graphics_source_observation_qualified") is not False
+        or claimed_receipt.get("source_hidden_surface_qualified") is not False
+        or claimed_receipt.get("pose_conditioned_visibility_qualified") is not False
+        or claimed_receipt.get("attachment_socket_authority") is not False
+        or claimed_receipt.get("product_revision_minted") is not False
+    ):
+        raise RuntimeError("PRODUCT_PROOF_RAW_GRAPHICS_RECEIPT_REPLAY_MISMATCH")
+    return {
+        "original_two_image_source_binding_replayed": True,
+        "original_alpha_static_mesh_qualification_recomputed": True,
+        "same_checkpoint_typed_graphics_recomputed": True,
+        "original_source_rgb_appearance_qualified": False,
+        "source_camera_observed": False,
+        "dynamic_source_visibility_qualified": False,
+        "source_attachment_contact_qualified": False,
+        "graphics_receipt_hash": replayed_receipt["receipt_hash"],
+        "compiled_graphics_graph_hash": replayed_graph.graph_hash,
+    }
+
+
 def execute_graphics_capability_v1(
     request: dict[str, Any], *, read_object: Callable, put_bytes: Callable,
 ) -> dict[str, Any]:
@@ -473,6 +577,11 @@ def execute_proof_capability_v1(
         != intervention["court_hash"]
     ):
         raise RuntimeError("PRODUCT_PROOF_GRAPHICS_MECHANICS_WITNESS_DRIFT")
+    raw_replay = _replay_raw_source_graphics_proof_v1(
+        request, read_object, mesh=mesh, rig=rig, skin=skin,
+        mechanics=mechanics, compiled=compiled,
+        intervention=intervention,
+    )
     dynamic_integrity = _read_dynamic_integrity_proof_v1(
         request, read_object, mesh, rig, skin, mechanics,
     )
@@ -525,6 +634,8 @@ def execute_proof_capability_v1(
             "graphics": compiled.graph_hash,
             "motion": motion.motion_lineage_hash,
         }),
+        "raw_original_source_graphics_replay": raw_replay,
+        "raw_two_image_replay_completed": raw_replay is not None,
         "source_visibility_independent_witness_present": False,
         "source_contact_independent_witness_present": False,
         "missing_independent_witnesses": list(missing),

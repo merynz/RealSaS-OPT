@@ -56,8 +56,8 @@ func TestBuildEngineReleaseRegistryIncludesCurrentProductClosure(t *testing.T) {
 		StageCapabilityID("07_OBSERVATION_CONTRACT_QUALIFIED"),
 		StageCapabilityID("08_NORMALIZATION_DOMAIN_QUALIFIED"),
 		ProductInputCapabilityID, ProductShapeCapabilityID, ProductMeshCapabilityID,
-		ProductRigCapabilityID, ProductSkinCapabilityID, ProductMechanicsCapabilityID,
-		ProductGraphicsCapabilityID, ProductMotionCapabilityID, ProductProofCapabilityID,
+		ProductRigCapabilityID, ProductSkinCapabilityID, "product.mechanics",
+		"product.graphics", "product.motion", "product.proof",
 	} {
 		if _, ok := registry.Get(id); !ok {
 			t.Fatalf("release registry missing %s", id)

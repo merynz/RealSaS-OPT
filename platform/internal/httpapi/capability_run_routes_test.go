@@ -42,10 +42,10 @@ func TestCapabilityRunHandlerPreservesExistingReadRoutes(t *testing.T) {
 func TestProductCapabilityCompileRejectsIncompleteEnvelopeBeforeDatabase(t *testing.T) {
 	handler := (API{}).HandlerWithCapabilityRun()
 	for _, body := range []string{
-		\`{}\`,
-		\`{"engine_release_id":"00000000-0000-0000-0000-000000000000","subject_id":"00000000-0000-0000-0000-000000000000"}\`,
-		\`{"unknown":true}\`,
-		\`{} {}\`,
+		`{}`,
+		`{"engine_release_id":"00000000-0000-0000-0000-000000000000","subject_id":"00000000-0000-0000-0000-000000000000"}`,
+		`{"unknown":true}`,
+		`{} {}`,
 	} {
 		response := httptest.NewRecorder()
 		handler.ServeHTTP(response, httptest.NewRequest(

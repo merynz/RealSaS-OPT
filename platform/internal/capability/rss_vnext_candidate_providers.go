@@ -158,7 +158,7 @@ func (RSSvNextMeshCandidateProvider) Capabilities(context.Context) ([]Descriptor
 			"canonical_mesh_required_for_product_execution": true,
 			"two_view_static_policy_sha256":                 "f7850b67193323f2ca37fb0c5f53111c187352d234c7ef54303e4880a3612bfb",
 			"mesh_policy_document_sha256":                   "66791e0e309209d28d16e56a550846de6f2edd87347806139e137e6f12d07c01",
-			"two_view_static_policy": map[string]any{
+			"two_view_static_policy":                        map[string]any{
 				"schema":                             "RealSaS.RSSvNext.TwoObservedViewMeshPolicy.v1",
 				"min_recall":                         0.9,
 				"min_precision":                      0.9,
@@ -169,8 +169,8 @@ func (RSSvNextMeshCandidateProvider) Capabilities(context.Context) ([]Descriptor
 				"source_alpha_threshold":             128,
 				"component_min_foreground_fraction":  0.005,
 			},
-			"two_view_static_policy_stage": "PROVISIONAL_PRETRAINING_NEEDS_UNSEEN_CALIBRATION",
-			"auxiliary_outputs": []any{
+			"two_view_static_policy_stage":                  "PROVISIONAL_PRETRAINING_NEEDS_UNSEEN_CALIBRATION",
+			"auxiliary_outputs":                             []any{
 				map[string]any{"role": "rss_sparse_face_relation_candidates", "artifact_type": "RealSaS.RSSvNextSparseCandidateFaceRelations", "schema_version": "v1"},
 				map[string]any{"role": "rss_two_view_raster_diagnostic", "artifact_type": "RealSaS.RSSvNextTwoViewRasterDiagnostic", "schema_version": "v1"},
 				map[string]any{"role": "rss_original_source_ray_replay", "artifact_type": "RealSaS.RSSvNextSourceRayReplayCourt", "schema_version": "v1"},
@@ -179,13 +179,13 @@ func (RSSvNextMeshCandidateProvider) Capabilities(context.Context) ([]Descriptor
 				map[string]any{"role": "rss_canonical_mesh_candidate_bridge", "artifact_type": "RealSaS.RSSvNextCanonicalMeshCandidateBridge", "schema_version": "v1"},
 				map[string]any{"role": "rss_evidence_continuity", "artifact_type": "RealSaS.RSSvNextEvidenceContinuity", "schema_version": "v1"},
 			},
-			"canonical_mesh_authority":               false,
-			"canonical_candidate_basis":              "TESSA_NEURAL_PROPOSAL_SOURCE_RASTER_QUALIFICATION_PENDING",
-			"learned_evidence_retained_by_reference": true,
-			"independent_model_inference_forbidden":  true,
-			"requires_legacy_eight_view_stages":      false,
-			"required_models":                        []any{},
-			"responsibility_ids":                     responsibilities,
+			"canonical_mesh_authority":                      false,
+			"canonical_candidate_basis":                     "TESSA_NEURAL_PROPOSAL_SOURCE_RASTER_QUALIFICATION_PENDING",
+			"learned_evidence_retained_by_reference":        true,
+			"independent_model_inference_forbidden":         true,
+			"requires_legacy_eight_view_stages":             false,
+			"required_models":                               []any{},
+			"responsibility_ids":                            responsibilities,
 		},
 	}}, nil
 }

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 """Two observed-view orthographic ray evidence, not invented 3D supervision.
 
-Inspired by StdGEN's source-image appearance/silhouette supervision, but
-deliberately avoids StdGEN's named hair/cloth/body-part ontology and forced
+Inspired by RealSaS's source-image appearance/silhouette supervision, but
+deliberately avoids RealSaS's named hair/cloth/body-part ontology and forced
 global-signed-solid prior.
 
 Important epistemic distinction:

@@ -29,7 +29,7 @@ class RSSvNextConfig:
     query_grid_side: int = 8  # geometry probes, not source/teacher mesh vertices
     region_slots: int = 32   # anonymous region hypotheses; unknown explicitly represented
     # Explicit renderer-trainable 2D/3D presentation roles, NOT morphology or rig.
-    # Same four role order as StdGEN is the baseline; six requires six real
+    # Same four role order as RealSaS is the baseline; six requires six real
     # source-renderable role definitions and a new schema ID.
     semantic_role_names: tuple[str, ...] = (
         "secondary_form", "focal_detail", "primary_form", "outer_covering",
@@ -157,7 +157,7 @@ class RSSvNextSceneState:
     geometry: dict[str, torch.Tensor]
     semantic_logits: torch.Tensor  # slot membership, including UNKNOWN
     semantic_evidence_logits: torch.Tensor  # non-authoritative field estimates
-    presentation_role_logits: torch.Tensor  # StdGEN-style K-way 3D semantics
+    presentation_role_logits: torch.Tensor  # RealSaS-style K-way 3D semantics
     presentation_role_probabilities: torch.Tensor
     affordance_logits: torch.Tensor
     graphics_logits: torch.Tensor

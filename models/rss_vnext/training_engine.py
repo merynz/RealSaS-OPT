@@ -50,10 +50,10 @@ from .semantic_geometry_prior import (
     RSSvNextSemanticLayerSpec, masked_qualified_surface_role_loss,
 )
 from .multiview_construction import qualified_novel_view_loss
-from .stdgen_joint_slrm_render_v1 import (
-    STAGE_1, STAGE_2, STAGE_3, StdGENJointTargetV1,
-    render_stdgen_joint_from_shared_scene_v1,
-    stdgen_joint_stage_loss_v1,
+from .realsas_joint_slrm_render_v1 import (
+    STAGE_1, STAGE_2, STAGE_3, RealSaSJointTargetV1,
+    render_realsas_joint_from_shared_scene_v1,
+    realsas_joint_stage_loss_v1,
 )
 from .eight_way_teacher_court_v1 import (
     RSSvNextEightWayTeacherReceiptV1,
@@ -125,16 +125,16 @@ class RSSvNextStructuralTrainingBatch:
     novel_view_provenance: str = ""              # Optional audit check; never grants authority
     novel_view_receipts: tuple[RSSvNextEightWayTeacherReceiptV1, ...] | None = None
 
-    # StdGEN §3.2 joint geometry+RGB+semantic *ray-rendered* supervision.
+    # the CVPR 2025 reference §3.2 joint geometry+RGB+semantic *ray-rendered* supervision.
     # Stage 1: full exterior. Stage 2: source 3D renderer peeled layers.
     # A signed mesh teacher MUST NOT be fabricated from these NeRF rays.
-    stdgen_joint_ray_xyz: Tensor | None = None        # [B,R,S,3] camera rays
-    stdgen_joint_ray_delta: Tensor | None = None      # [B,R,S] sample intervals
-    stdgen_joint_ray_depth: Tensor | None = None      # [B,R,S] ray coordinates
-    stdgen_joint_ray_direction: Tensor | None = None  # [B,R,3]
-    stdgen_joint_keep_roles: Tensor | None = None     # [B,R,K] bool
-    stdgen_joint_target: StdGENJointTargetV1 | None = None
-    stdgen_joint_teacher_admission_key: str = ""
+    realsas_joint_ray_xyz: Tensor | None = None        # [B,R,S,3] camera rays
+    realsas_joint_ray_delta: Tensor | None = None      # [B,R,S] sample intervals
+    realsas_joint_ray_depth: Tensor | None = None      # [B,R,S] ray coordinates
+    realsas_joint_ray_direction: Tensor | None = None  # [B,R,3]
+    realsas_joint_keep_roles: Tensor | None = None     # [B,R,K] bool
+    realsas_joint_target: RealSaSJointTargetV1 | None = None
+    realsas_joint_teacher_admission_key: str = ""
 
     # Interim signed-surface training witness; not final foundry supervision.
     # Requires qualified source, mesh coordinate/camera bind and sample proof.
@@ -163,7 +163,7 @@ class RSSvNextTrainingWeights:
     flexicubes_surface: float = 0.3
     flexicubes_animation: float = 0.0  # explicit opt-in on admitted source motion
     novel_view: float = 0.0             # opt-in: source-qualified 8-way appearance
-    stdgen_joint_slrm: float = 0.0      # opt-in: jointly rendered 3D scene teacher
+    realsas_joint_slrm: float = 0.0      # opt-in: jointly rendered 3D scene teacher
     clip_gradient_norm: float = 1.0
 
     def validate(self):
@@ -181,7 +181,7 @@ class RSSvNextTrainingWeights:
             self.graphics_source_rgb,
             self.source_udf, self.source_inside_sign,
             self.axis_rig_skin_codes, self.flexicubes_surface, self.flexicubes_animation,
-            self.novel_view, self.stdgen_joint_slrm,
+            self.novel_view, self.realsas_joint_slrm,
         ) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
         if (
@@ -190,7 +190,7 @@ class RSSvNextTrainingWeights:
             + self.typed_relations + self.graphics_source_rgb + self.source_udf + self.source_inside_sign
             + self.axis_rig_skin_codes + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view
-            + self.stdgen_joint_slrm <= 0
+            + self.realsas_joint_slrm <= 0
             or self.clip_gradient_norm <= 0
         ):
             raise ValueError("RSS_VNEXT_TRAIN_WEIGHT_POLICY_INVALID")
@@ -225,8 +225,8 @@ class RSSvNextTrainingResult:
     eligible_source_inside_sign_queries: int = 0
     axis_rig_skin_loss: Tensor | None = None
     eligible_axis_sequences: int = 0
-    stdgen_joint_slrm_loss: Tensor | None = None
-    eligible_stdgen_joint_rays: int = 0
+    realsas_joint_slrm_loss: Tensor | None = None
+    eligible_realsas_joint_rays: int = 0
     gradient_norm: Tensor | None = None
 
 
@@ -300,7 +300,7 @@ class RSSvNextStructuralTrainer:
         trusted_signed_source_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_graphics_rgb_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_source_field_registry: Mapping[str, Mapping[str, object]] | None = None,
-        trusted_stdgen_joint_scene_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_realsas_joint_scene_registry: Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -459,12 +459,12 @@ class RSSvNextStructuralTrainer:
         )
         joint_snapshot = {
             str(key): dict(value)
-            for key, value in (trusted_stdgen_joint_scene_registry or {}).items()
+            for key, value in (trusted_realsas_joint_scene_registry or {}).items()
         }
-        self.trusted_stdgen_joint_scene_registry = MappingProxyType({
+        self.trusted_realsas_joint_scene_registry = MappingProxyType({
             key: MappingProxyType(value) for key, value in joint_snapshot.items()
         })
-        self.stdgen_joint_registry_sha256 = (
+        self.realsas_joint_registry_sha256 = (
             hashlib.sha256(json.dumps(
                 joint_snapshot, sort_keys=True, separators=(",", ":"),
                 allow_nan=False,
@@ -486,20 +486,20 @@ class RSSvNextStructuralTrainer:
         joint_loss = None
         joint_rays = 0
         joint_fields = (
-            batch.stdgen_joint_ray_xyz, batch.stdgen_joint_ray_delta,
-            batch.stdgen_joint_ray_depth, batch.stdgen_joint_ray_direction,
-            batch.stdgen_joint_keep_roles, batch.stdgen_joint_target,
+            batch.realsas_joint_ray_xyz, batch.realsas_joint_ray_delta,
+            batch.realsas_joint_ray_depth, batch.realsas_joint_ray_direction,
+            batch.realsas_joint_keep_roles, batch.realsas_joint_target,
         )
-        if any(value is not None for value in joint_fields) or batch.stdgen_joint_teacher_admission_key:
-            if any(value is None for value in joint_fields) or not batch.stdgen_joint_teacher_admission_key:
-                raise ValueError("RSS_VNEXT_STDGEN_JOINT_TRAINING_TEACHER_INCOMPLETE")
-            if self.weights.stdgen_joint_slrm <= 0:
-                raise ValueError("RSS_VNEXT_STDGEN_JOINT_TRAINING_WEIGHT_REQUIRED")
+        if any(value is not None for value in joint_fields) or batch.realsas_joint_teacher_admission_key:
+            if any(value is None for value in joint_fields) or not batch.realsas_joint_teacher_admission_key:
+                raise ValueError("RSS_VNEXT_REALSAS_JOINT_TRAINING_TEACHER_INCOMPLETE")
+            if self.weights.realsas_joint_slrm <= 0:
+                raise ValueError("RSS_VNEXT_REALSAS_JOINT_TRAINING_WEIGHT_REQUIRED")
             xyz,delta,depth,direction,keep,target = joint_fields
-            if type(target) is not StdGENJointTargetV1:
-                raise ValueError("RSS_VNEXT_STDGEN_JOINT_TARGET_TYPE_INVALID")
+            if type(target) is not RealSaSJointTargetV1:
+                raise ValueError("RSS_VNEXT_REALSAS_JOINT_TARGET_TYPE_INVALID")
             if target.stage not in (STAGE_1,STAGE_2):
-                raise ValueError("RSS_VNEXT_STDGEN_JOINT_FLEXICUBES_STAGE_MESH_RENDER_REQUIRED")
+                raise ValueError("RSS_VNEXT_REALSAS_JOINT_FLEXICUBES_STAGE_MESH_RENDER_REQUIRED")
             k = self.model.cfg.semantic_role_schema().count
             b,r,s,_=xyz.shape if xyz.ndim==4 else (0,0,0,0)
             if (
@@ -510,11 +510,11 @@ class RSSvNextStructuralTrainer:
                 or (target.stage==STAGE_1 and not bool(keep.all()))
                 or (target.stage==STAGE_2 and bool(keep.all()))
             ):
-                raise ValueError("RSS_VNEXT_STDGEN_JOINT_RAY_OR_PEEL_STAGE_DOMAIN")
+                raise ValueError("RSS_VNEXT_REALSAS_JOINT_RAY_OR_PEEL_STAGE_DOMAIN")
             # The independent renderer admission binds all tensors and the
             # original input identity. A batch string is NOT a teacher receipt.
-            receipt=self.trusted_stdgen_joint_scene_registry.get(
-                batch.stdgen_joint_teacher_admission_key
+            receipt=self.trusted_realsas_joint_scene_registry.get(
+                batch.realsas_joint_teacher_admission_key
             )
             expected={
                 "admission_status":"QUALIFIED_SOURCE_RENDERED_3D_JOINT_SCENE",
@@ -542,15 +542,15 @@ class RSSvNextStructuralTrainer:
                 "drawable_or_attachment_teacher":False,
             }
             if receipt is None or any(receipt.get(key)!=value for key,value in expected.items()):
-                raise ValueError("RSS_VNEXT_STDGEN_JOINT_RENDER_TEACHER_RECEIPT_DRIFT")
-            rendered=render_stdgen_joint_from_shared_scene_v1(
+                raise ValueError("RSS_VNEXT_REALSAS_JOINT_RENDER_TEACHER_RECEIPT_DRIFT")
+            rendered=render_realsas_joint_from_shared_scene_v1(
                 iris=self.model.iris,scene_triplanes=state.scene_triplanes,
                 sample_xyz=xyz,ray_delta=delta,ray_depth=depth,
                 ray_direction=direction,keep_roles=keep,
                 shared_graphics_head=self.model.graphics,
                 shared_semantic_role_head=self.model.presentation_role_head,
             )
-            joint_parts=stdgen_joint_stage_loss_v1(rendered,target)
+            joint_parts=realsas_joint_stage_loss_v1(rendered,target)
             joint_loss=joint_parts["total"]
             joint_rays=int(target.qualified_rgb_mask.sum().item())
         # Source-rendered novel target is teacher-only: never append six
@@ -627,7 +627,7 @@ class RSSvNextStructuralTrainer:
                 )
             ):
                 raise ValueError("RSS_VNEXT_FC_TRAIN_SIGNED_SOURCE_PROOF_REQUIRED")
-            # StdGEN-style signed extraction is only meaningful in a
+            # RealSaS-style signed extraction is only meaningful in a
             # previously verified *closed signed solid* source domain.
             # A data-batch string must not grant source sign/closedness.
             signed = self.trusted_signed_source_registry.get(
@@ -1191,7 +1191,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.flexicubes_surface, fc_loss),
                 (self.weights.flexicubes_animation, fc_anim_loss),
                 (self.weights.novel_view, novel_loss),
-                (self.weights.stdgen_joint_slrm, joint_loss),
+                (self.weights.realsas_joint_slrm, joint_loss),
             )
             if loss is not None
         )
@@ -1225,8 +1225,8 @@ class RSSvNextStructuralTrainer:
             eligible_source_inside_sign_queries=n_source_inside_sign,
             axis_rig_skin_loss=axis_loss,
             eligible_axis_sequences=n_axis,
-            stdgen_joint_slrm_loss=joint_loss,
-            eligible_stdgen_joint_rays=joint_rays,
+            realsas_joint_slrm_loss=joint_loss,
+            eligible_realsas_joint_rays=joint_rays,
         )
 
     def train_step(self, batch: RSSvNextStructuralTrainingBatch) -> RSSvNextTrainingResult:
@@ -1262,7 +1262,7 @@ class RSSvNextStructuralTrainer:
             "signed_source_registry_sha256": self.signed_source_registry_sha256,
             "graphics_rgb_registry_sha256": self.graphics_rgb_registry_sha256,
             "source_field_registry_sha256": self.source_field_registry_sha256,
-            "stdgen_joint_registry_sha256": self.stdgen_joint_registry_sha256,
+            "realsas_joint_registry_sha256": self.realsas_joint_registry_sha256,
             "global_step": self.global_step,
             "sampler_cursor": int(sampler_cursor),
             "model": self.model.state_dict(),
@@ -1309,8 +1309,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SIGNED_SOURCE_REGISTRY_DRIFT")
         if data.get("graphics_rgb_registry_sha256", "") != self.graphics_rgb_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_GRAPHICS_RGB_REGISTRY_DRIFT")
-        if data.get("stdgen_joint_registry_sha256", "") != self.stdgen_joint_registry_sha256:
-            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_STDGEN_JOINT_REGISTRY_DRIFT")
+        if data.get("realsas_joint_registry_sha256", "") != self.realsas_joint_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_REALSAS_JOINT_REGISTRY_DRIFT")
         if data.get("source_field_registry_sha256", "") != self.source_field_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SOURCE_FIELD_REGISTRY_DRIFT")
         if int(data.get("global_step", -1)) < 0 or int(data.get("sampler_cursor", -1)) < 0:

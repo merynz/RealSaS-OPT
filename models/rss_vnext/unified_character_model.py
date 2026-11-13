@@ -93,7 +93,7 @@ class RSSvNextFrozenDINOv2(nn.Module):
 
     def forward_variable_views(self, rgba: Tensor) -> tuple[Tensor, Tensor]:
         if rgba.ndim != 5 or rgba.shape[1] not in (1,2,6) or rgba.shape[2] != 4:
-            raise ValueError("RSS_VNEXT_STDGEN_DINO_EXPECT_ONE_TWO_OR_SIX_RGBA")
+            raise ValueError("RSS_VNEXT_REALSAS_DINO_EXPECT_ONE_TWO_OR_SIX_RGBA")
         b, v, _, h, w = rgba.shape
         if h % 14 or w % 14:
             raise ValueError("RSS_VNEXT_DINO_PATCH_DIVISIBILITY")
@@ -132,7 +132,7 @@ class RSSvNextPatchEncoderForTests(nn.Module):
 
     def forward_variable_views(self, rgba: Tensor) -> tuple[Tensor, Tensor]:
         if rgba.ndim != 5 or rgba.shape[1] not in (1,2,6) or rgba.shape[2] != 4:
-            raise ValueError("RSS_VNEXT_STDGEN_PATCH_VIEW_COUNT_INVALID")
+            raise ValueError("RSS_VNEXT_REALSAS_PATCH_VIEW_COUNT_INVALID")
         b, v, c, h, w = rgba.shape
         if h % self.patch_size or w % self.patch_size:
             raise ValueError("RSS_VNEXT_TEST_PATCH_INPUT_INVALID")
@@ -418,7 +418,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             nn.Linear(h, h),
         )
         self.affordance_to_memory = nn.Linear(cfg.affordance_classes + 1, h)
-        # StdGEN-inspired queryable appearance field (not observed source truth):
+        # RealSaS-inspired queryable appearance field (not observed source truth):
         # RGB logits [0:3], density logit [3], log uncertainty residual [4].
         # The camera-aware view renderer consumes this SAME Graphics field.
         self.graphics = nn.Sequential(nn.LayerNorm(h), nn.Linear(h, cfg.graphics_channels))
@@ -460,7 +460,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             self.iris, resolution=cfg.iris.extraction_training_resolution,
         )
         self.fc_surface_position = nn.Linear(3, h, bias=False)
-        # Deliberate EXPERIMENTAL alternative, not StdGEN's upstream
+        # Deliberate EXPERIMENTAL alternative, not RealSaS's upstream
         # multiclass diffusion. It renders from the SAME 2-source Z/H.
         self.constructed_view_renderer = RSSvNextViewFieldRenderer(
             h, hidden_dim=max(h, 32),
@@ -575,7 +575,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         width: int,
         method: str,
     ):
-        """Explicit non-StdGEN experimental path, never a source observation.
+        """Explicit non-RealSaS experimental path, never a source observation.
 
         Source-parity pre-reconstruction multi-view diffusion remains a
         separate research gate. This late Z/H renderer is an ablation only.
@@ -768,7 +768,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         *,
         signed_domain_qualified: bool,
     ) -> Tensor:
-        """StdGEN-family geometry change under an explicit source role layer.
+        """RealSaS-family geometry change under an explicit source role layer.
 
         This method cannot assert a solid from image evidence. An admission
         court must explicitly permit SDF use. Open/UDF meshes use component

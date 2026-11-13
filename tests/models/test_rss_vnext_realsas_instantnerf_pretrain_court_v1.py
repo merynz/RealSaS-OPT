@@ -8,10 +8,10 @@ import pytest
 import torch
 from torch import nn
 
-from models.rss_vnext.stdgen_instantnerf_pretrain_court_v1 import (
-    StdGENInstantNeRFArchitectureV1,
-    inspect_stdgen_instantnerf_checkpoint_compatibility_v1,
-    load_verified_stdgen_instantnerf_weights_v1,
+from models.rss_vnext.realsas_instantnerf_pretrain_court_v1 import (
+    RealSaSInstantNeRFArchitectureV1,
+    inspect_realsas_instantnerf_checkpoint_compatibility_v1,
+    load_verified_realsas_instantnerf_weights_v1,
 )
 from models.rss_vnext import (
     RSSvNextConfig,RSSvNextPatchEncoderForTests,RSSvNextUnifiedCharacterModel,
@@ -40,7 +40,7 @@ def _fixture(tmp_path):
 
 def test_checkpoint_model_exact_matching_accepts_only_non_prod_fixture(tmp_path):
     native,file,digest=_fixture(tmp_path)
-    receipt=inspect_stdgen_instantnerf_checkpoint_compatibility_v1(
+    receipt=inspect_realsas_instantnerf_checkpoint_compatibility_v1(
         file,native,expected_sha256=digest,unit_test_override=True,
     )
     assert receipt.exact_key_and_shape_match
@@ -49,7 +49,7 @@ def test_checkpoint_model_exact_matching_accepts_only_non_prod_fixture(tmp_path)
     assert not receipt.source_code_imported
     assert not receipt.approved_as_source_observation
     with pytest.raises(ValueError,match="REAL_CHECKPOINT_ADMISSION_REQUIRED"):
-        load_verified_stdgen_instantnerf_weights_v1(
+        load_verified_realsas_instantnerf_weights_v1(
             file,native,compatibility=receipt,
         )
 
@@ -61,7 +61,7 @@ def test_unrelated_iris_model_never_gets_partial_instantnerf_weights(tmp_path):
         cfg,vision_encoder=RSSvNextPatchEncoderForTests(cfg.iris.image_token_dim),
     )
     with pytest.raises(ValueError,match="NOT_LOAD_COMPATIBLE_WITH_TARGET_MODEL"):
-        inspect_stdgen_instantnerf_checkpoint_compatibility_v1(
+        inspect_realsas_instantnerf_checkpoint_compatibility_v1(
             file,iris,expected_sha256=digest,unit_test_override=True,
         )
 
@@ -69,11 +69,11 @@ def test_unrelated_iris_model_never_gets_partial_instantnerf_weights(tmp_path):
 def test_checkpoint_digest_tamper_and_published_architecture_fail_closed(tmp_path):
     native,file,digest=_fixture(tmp_path)
     with pytest.raises(ValueError,match="PINNED_SHA256_MISMATCH"):
-        inspect_stdgen_instantnerf_checkpoint_compatibility_v1(file,native)
+        inspect_realsas_instantnerf_checkpoint_compatibility_v1(file,native)
     with pytest.raises(ValueError,match="TEST_HASH_CONTRACT"):
-        inspect_stdgen_instantnerf_checkpoint_compatibility_v1(
+        inspect_realsas_instantnerf_checkpoint_compatibility_v1(
             file,native,expected_sha256="1"*64,unit_test_override=True,
         )
     from dataclasses import replace
     with pytest.raises(ValueError,match="PUBLISHED_ARCHITECTURE_DRIFT"):
-        replace(StdGENInstantNeRFArchitectureV1(),transformer_width=768).check_published()
+        replace(RealSaSInstantNeRFArchitectureV1(),transformer_width=768).check_published()

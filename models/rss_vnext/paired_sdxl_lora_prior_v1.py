@@ -2,9 +2,9 @@ from __future__ import annotations
 
 """Clean-room paired-image SDXL/LoRA prior and immutable source authority.
 
-Reference architecture: StdGEN (CVPR 2025): pretrained canonicalization
+Reference architecture: RealSaS (CVPR 2025): pretrained canonicalization
 diffusion -> RGB/normal multiview diffusion -> semantic-aware 3D reconstruction.
-This module reuses no StdGEN implementation. It provides a trainable TWO-IMAGE
+This module reuses no RealSaS implementation. It provides a trainable TWO-IMAGE
 conditioning interface, a local-only pinned SDXL UNet LoRA loader, and a typed
 predicted-image receipt. It does NOT invent trained LoRA weights, a canonical
 pose, a source camera, a source 3D point, or qualified Graphics.

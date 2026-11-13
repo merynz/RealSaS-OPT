@@ -7,12 +7,12 @@ import torch
 from models.rss_vnext import (
     RSSvNextConfig,RSSvNextPatchEncoderForTests,RSSvNextUnifiedCharacterModel,
 )
-from models.rss_vnext.stdgen_scene_conditioning_v1 import (
+from models.rss_vnext.realsas_scene_conditioning_v1 import (
     CANONICAL_REFERENCE,SIX_VIEW_PRIOR,ONE_MEASURED_SOURCE,
-    encode_stdgen_conditioning_into_shared_H_v1,
+    encode_realsas_conditioning_into_shared_H_v1,
 )
-from models.rss_vnext.stdgen_joint_slrm_render_v1 import (
-    render_stdgen_joint_from_shared_scene_v1,
+from models.rss_vnext.realsas_joint_slrm_render_v1 import (
+    render_realsas_joint_from_shared_scene_v1,
 )
 
 
@@ -45,7 +45,7 @@ def test_srlm_single_and_six_view_reuse_same_iris_H_graphics_semantic_weights(vi
     net=model()
     images=torch.rand((1,views,4,16,16))
     cams=camera_bank(views)
-    result=encode_stdgen_conditioning_into_shared_H_v1(
+    result=encode_realsas_conditioning_into_shared_H_v1(
         net,conditioning_rgba=images,conditioning_cameras=cams,
         source_binding_sha256="a"*64,original_observed_view_count=1,
         conditioning_authority=auth,generating_checkpoint_sha256="b"*64,
@@ -55,7 +55,7 @@ def test_srlm_single_and_six_view_reuse_same_iris_H_graphics_semantic_weights(vi
     assert result.original_observed_view_count==1
     assert not result.generated_views_became_source_observation
     assert not result.scene_geometry_is_source_truth
-    rays=render_stdgen_joint_from_shared_scene_v1(
+    rays=render_realsas_joint_from_shared_scene_v1(
         iris=net.iris,scene_triplanes=result.scene_triplanes,
         sample_xyz=torch.rand((1,2,3,3))*.5,
         ray_delta=torch.ones((1,2,3))*.25,
@@ -88,14 +88,14 @@ def test_six_views_not_source_and_duplicate_or_wrong_camera_rejected():
     images=torch.rand((1,6,4,16,16))
     cams=camera_bank(6)
     with pytest.raises(ValueError,match="SIX_VIEWS_MUST_BE_GENERATED_PRIOR"):
-        encode_stdgen_conditioning_into_shared_H_v1(
+        encode_realsas_conditioning_into_shared_H_v1(
             net,conditioning_rgba=images,conditioning_cameras=cams,
             source_binding_sha256="a"*64,original_observed_view_count=2,
             conditioning_authority=ONE_MEASURED_SOURCE,
         )
     cams[:,2]=cams[:,1]
     with pytest.raises(ValueError,match="DUPLICATE_PREDICTED_CAMERA"):
-        encode_stdgen_conditioning_into_shared_H_v1(
+        encode_realsas_conditioning_into_shared_H_v1(
             net,conditioning_rgba=images,conditioning_cameras=cams,
             source_binding_sha256="a"*64,original_observed_view_count=2,
             conditioning_authority=SIX_VIEW_PRIOR,generating_checkpoint_sha256="b"*64,
@@ -104,7 +104,7 @@ def test_six_views_not_source_and_duplicate_or_wrong_camera_rejected():
 
 def test_cleanroom_one_measured_source_cannot_mint_second_observation():
     net=model()
-    result=encode_stdgen_conditioning_into_shared_H_v1(
+    result=encode_realsas_conditioning_into_shared_H_v1(
         net,conditioning_rgba=torch.rand((1,1,4,16,16)),
         conditioning_cameras=camera_bank(1),
         source_binding_sha256="a"*64,
@@ -124,13 +124,13 @@ def test_single_reference_rejects_invalid_camera_and_fake_source_count():
     cam=camera_bank(1)
     cam[:,:,3]=0.
     with pytest.raises(ValueError,match="CANONICAL_CAMERA_BASIS_INVALID"):
-        encode_stdgen_conditioning_into_shared_H_v1(
+        encode_realsas_conditioning_into_shared_H_v1(
             net,conditioning_rgba=image,conditioning_cameras=cam,
             source_binding_sha256="a"*64,original_observed_view_count=1,
             conditioning_authority=ONE_MEASURED_SOURCE,
         )
     with pytest.raises(ValueError,match="ONE_VIEW_PROVENANCE_INVALID"):
-        encode_stdgen_conditioning_into_shared_H_v1(
+        encode_realsas_conditioning_into_shared_H_v1(
             net,conditioning_rgba=image,conditioning_cameras=camera_bank(1),
             source_binding_sha256="a"*64,original_observed_view_count=2,
             conditioning_authority=ONE_MEASURED_SOURCE,

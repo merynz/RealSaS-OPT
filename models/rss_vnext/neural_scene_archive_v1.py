@@ -200,6 +200,20 @@ def encode_neural_scene_carrier_v1(
         "source_visibility_authority": False,
         "independently_reusable_by_semantic_graphics_mechanics": True,
     }
+    if getattr(state, "generated_view_count", 0):
+        if (
+            state.scene_conditioning_authority != "GENERATED_SIX_VIEW_SHARED_SCENE"
+            or state.generated_view_count != 6
+            or not isinstance(state.generating_checkpoint_sha256, str)
+            or len(state.generating_checkpoint_sha256) != 64
+            or any(c not in "0123456789abcdef" for c in state.generating_checkpoint_sha256)
+        ):
+            raise RuntimeError("RSS_VNEXT_NEURAL_CARRIER_GENERATION_PARENT_INVALID")
+        metadata.update({
+            "scene_construction_authority": state.scene_conditioning_authority,
+            "generated_view_count": state.generated_view_count,
+            "generation_checkpoint_sha256": state.generating_checkpoint_sha256,
+        })
     stream = io.BytesIO()
     np.savez_compressed(
         stream,
@@ -216,6 +230,7 @@ def encode_neural_scene_carrier_v1(
 
 def read_neural_scene_carrier_v1(
     payload: bytes, *, evidence: RSSvNextInferenceEvidenceIRV1,
+    expected_generation_checkpoint_sha256: str | None = None,
 ) -> dict[str, Tensor]:
     if type(payload) is not bytes or not 1 <= len(payload) <= MAX_ARCHIVE_BYTES:
         raise RuntimeError("RSS_VNEXT_NEURAL_CARRIER_ARCHIVE_BYTES_INVALID")
@@ -237,15 +252,36 @@ def read_neural_scene_carrier_v1(
                 raise RuntimeError("RSS_VNEXT_NEURAL_CARRIER_MANIFEST_SHAPE")
             metadata = json.loads(str(meta_raw[0]))
             names = set(zf.files) - {"metadata_json"}
-            if not isinstance(metadata, dict) or set(metadata) != {
+            base_keys = {
                 "schema", "checkpoint_sha256", "observed_front_sha256",
                 "observed_back_sha256", "camera_binding_sha256",
                 "inference_evidence_hash", "tensor_dtypes",
                 "source_rgba_stored_separately", "canonical_mesh_authority",
                 "source_visibility_authority",
                 "independently_reusable_by_semantic_graphics_mechanics",
-            }:
+            }
+            generation_keys = {
+                "scene_construction_authority", "generated_view_count",
+                "generation_checkpoint_sha256",
+            }
+            if not isinstance(metadata, dict) or set(metadata) not in (
+                base_keys, base_keys | generation_keys,
+            ):
                 raise RuntimeError("RSS_VNEXT_NEURAL_CARRIER_MANIFEST_FIELDS")
+            has_generation = generation_keys.issubset(metadata)
+            if has_generation and (
+                metadata["scene_construction_authority"] != "GENERATED_SIX_VIEW_SHARED_SCENE"
+                or metadata["generated_view_count"] != 6
+                or type(metadata["generation_checkpoint_sha256"]) is not str
+                or len(metadata["generation_checkpoint_sha256"]) != 64
+                or any(c not in "0123456789abcdef" for c in metadata["generation_checkpoint_sha256"])
+            ):
+                raise RuntimeError("RSS_VNEXT_NEURAL_CARRIER_GENERATION_AUTHORITY_DRIFT")
+            if expected_generation_checkpoint_sha256 is not None and (
+                not has_generation or
+                metadata["generation_checkpoint_sha256"] != expected_generation_checkpoint_sha256
+            ):
+                raise RuntimeError("RSS_VNEXT_NEURAL_CARRIER_GENERATION_PARENT_DRIFT")
             if (
                 metadata["schema"] != SCHEMA
                 or {k: metadata[k] for k in _binding(evidence)} != _binding(evidence)

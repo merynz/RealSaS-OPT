@@ -5,7 +5,7 @@ import pytest
 import torch
 from torch import nn
 
-from models.rss_vnext.stdgen_era3d_unet_row_attention_v1 import (
+from models.rss_vnext.realsas_era3d_unet_row_attention_v1 import (
     Era3DUNetFeatureRowAttentionV1,
     install_era3d_cleanroom_unet_row_attention_v1,
 )

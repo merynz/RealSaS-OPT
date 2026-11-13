@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """RSS.vNext two-source 2->6/8 total camera and predicted-view contract court.
 
-This is an experimental post-scene baseline, NOT StdGEN multi-view diffusion
+This is an experimental post-scene baseline, NOT RealSaS multi-view diffusion
 parity. Tests exercise forward/backward and source authority. Toy tensors do
 NOT imply generated unseen images are accurate.
 """
@@ -113,7 +113,7 @@ def test_experimental_render_outputs_actual_rgb_alpha_normal_and_gradients(total
     state, _, _ = net.encode_observations(rgba, source)
     assert state.observed_rgba is rgba
     with pytest.raises(ValueError, match="NOT_IMPLEMENTED"):
-        net.construct_novel_views(state,height=4,width=4,method="STDGEN_PRE_SCENE_DIFFUSION")
+        net.construct_novel_views(state,height=4,width=4,method="REALSAS_PRE_SCENE_DIFFUSION")
     rendered = net.construct_novel_views(
         state, height=4, width=4, method="EXPERIMENTAL_POST_SCENE_H_RENDER",
     )

@@ -13,8 +13,8 @@ from models.rss_vnext.training_engine import (
     RSSvNextStructuralTrainingBatch,RSSvNextStructuralTrainer,
     RSSvNextTrainingWeights,source_surface_tensor_sha256,
 )
-from models.rss_vnext.stdgen_joint_slrm_render_v1 import (
-    STAGE_1,STAGE_2,STAGE_3,StdGENJointTargetV1,
+from models.rss_vnext.realsas_joint_slrm_render_v1 import (
+    STAGE_1,STAGE_2,STAGE_3,RealSaSJointTargetV1,
 )
 
 
@@ -42,7 +42,7 @@ def sample(stage=STAGE_1):
     keep=torch.ones((b,r,cfg.semantic_role_schema().count),dtype=torch.bool)
     if stage==STAGE_2:
         keep[...,0]=False
-    target=StdGENJointTargetV1(
+    target=RealSaSJointTargetV1(
         rgb_white=torch.rand((b,r,3)),
         alpha=torch.rand((b,r,1)),
         role_indices=torch.tensor([[1,2,1,3]],dtype=torch.long),
@@ -57,13 +57,13 @@ def sample(stage=STAGE_1):
         rgba=rgba,camera_features=cameras,
         source_qualification_key="sample-asset-qualified-for-test-only",
         admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
-        stdgen_joint_ray_xyz=xyz,
-        stdgen_joint_ray_delta=delta,
-        stdgen_joint_ray_depth=depth,
-        stdgen_joint_ray_direction=directions,
-        stdgen_joint_keep_roles=keep,
-        stdgen_joint_target=target,
-        stdgen_joint_teacher_admission_key="verified-3d-target-fixture",
+        realsas_joint_ray_xyz=xyz,
+        realsas_joint_ray_delta=delta,
+        realsas_joint_ray_depth=depth,
+        realsas_joint_ray_direction=directions,
+        realsas_joint_keep_roles=keep,
+        realsas_joint_target=target,
+        realsas_joint_teacher_admission_key="verified-3d-target-fixture",
     )
     h=source_surface_tensor_sha256
     receipt=dict(
@@ -97,14 +97,14 @@ def test_training_uses_actual_same_H_for_joint_geo_graphics_semantic(stage):
         dataset_manifest_sha256="f"*64,
         weights=RSSvNextTrainingWeights(
             topology=0.,motion_preference=0.,source_semantics=0.,
-            flexicubes_surface=0.,stdgen_joint_slrm=1.,
+            flexicubes_surface=0.,realsas_joint_slrm=1.,
         ),
-        trusted_stdgen_joint_scene_registry={"verified-3d-target-fixture":receipt},
+        trusted_realsas_joint_scene_registry={"verified-3d-target-fixture":receipt},
     )
     result=trainer.train_step(batch)
-    assert result.stdgen_joint_slrm_loss is not None
-    assert torch.isfinite(result.stdgen_joint_slrm_loss)
-    assert result.eligible_stdgen_joint_rays==4
+    assert result.realsas_joint_slrm_loss is not None
+    assert torch.isfinite(result.realsas_joint_slrm_loss)
+    assert result.eligible_realsas_joint_rays==4
     assert trainer.global_step==1
     assert net.graphics[-1].weight.grad.abs().sum()>0
     assert net.presentation_role_head[-1].weight.grad.abs().sum()>0
@@ -113,22 +113,22 @@ def test_training_uses_actual_same_H_for_joint_geo_graphics_semantic(stage):
 
 def test_untrusted_peeled_gt_or_fake_3d_receipt_cannot_train():
     net,batch,receipt=sample(STAGE_2)
-    weights=RSSvNextTrainingWeights(stdgen_joint_slrm=1.)
+    weights=RSSvNextTrainingWeights(realsas_joint_slrm=1.)
     bad=receipt.copy()
     bad["generated_diffusion_truth"]=True
     trainer=RSSvNextStructuralTrainer(
         net,torch.optim.AdamW(net.parameters()),dataset_manifest_sha256="f"*64,
         weights=weights,
-        trusted_stdgen_joint_scene_registry={"verified-3d-target-fixture":bad},
+        trusted_realsas_joint_scene_registry={"verified-3d-target-fixture":bad},
     )
     with pytest.raises(ValueError,match="JOINT_RENDER_TEACHER_RECEIPT_DRIFT"):
         trainer.objective(batch)
     good=RSSvNextStructuralTrainer(
         net,torch.optim.AdamW(net.parameters()),dataset_manifest_sha256="f"*64,
         weights=weights,
-        trusted_stdgen_joint_scene_registry={"verified-3d-target-fixture":receipt},
+        trusted_realsas_joint_scene_registry={"verified-3d-target-fixture":receipt},
     )
-    batch.stdgen_joint_keep_roles[0,0,0]=True
+    batch.realsas_joint_keep_roles[0,0,0]=True
     with pytest.raises(ValueError,match="JOINT_RENDER_TEACHER_RECEIPT_DRIFT"):
         good.objective(batch)
 
@@ -138,8 +138,8 @@ def test_no_nerf_ray_can_mint_flexicubes_mesh_teacher():
     trainer=RSSvNextStructuralTrainer(
         net,torch.optim.AdamW(net.parameters()),
         dataset_manifest_sha256="f"*64,
-        weights=RSSvNextTrainingWeights(stdgen_joint_slrm=1.),
-        trusted_stdgen_joint_scene_registry={"verified-3d-target-fixture":receipt},
+        weights=RSSvNextTrainingWeights(realsas_joint_slrm=1.),
+        trusted_realsas_joint_scene_registry={"verified-3d-target-fixture":receipt},
     )
     with pytest.raises(ValueError,match="FLEXICUBES_STAGE_MESH_RENDER_REQUIRED"):
         trainer.objective(batch)
@@ -149,7 +149,7 @@ def test_checkpoint_refuses_changed_source_joint_render_registry(tmp_path):
     net,batch,receipt=sample()
     trainer=RSSvNextStructuralTrainer(
         net,torch.optim.AdamW(net.parameters()),dataset_manifest_sha256="f"*64,
-        trusted_stdgen_joint_scene_registry={"verified-3d-target-fixture":receipt},
+        trusted_realsas_joint_scene_registry={"verified-3d-target-fixture":receipt},
     )
     file=tmp_path/"checkpoint.pt"
     trainer.save_checkpoint(file,sampler_cursor=4)
@@ -157,7 +157,7 @@ def test_checkpoint_refuses_changed_source_joint_render_registry(tmp_path):
     updated["target_alpha_sha256"]="1"*64
     other=RSSvNextStructuralTrainer(
         net,torch.optim.AdamW(net.parameters()),dataset_manifest_sha256="f"*64,
-        trusted_stdgen_joint_scene_registry={"verified-3d-target-fixture":updated},
+        trusted_realsas_joint_scene_registry={"verified-3d-target-fixture":updated},
     )
-    with pytest.raises(ValueError,match="CHECKPOINT_STDGEN_JOINT_REGISTRY_DRIFT"):
+    with pytest.raises(ValueError,match="CHECKPOINT_REALSAS_JOINT_REGISTRY_DRIFT"):
         other.load_checkpoint(file)

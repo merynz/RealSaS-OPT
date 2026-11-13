@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-"""Fail-closed ORIGINAL InstantNeRF ancestry court for StdGEN S-LRM.
+"""Fail-closed ORIGINAL InstantNeRF ancestry court for RealSaS S-LRM.
 
-StdGEN CVPR2025 initializes NeRF S-LRM from the InstantMesh InstantNeRF
+RealSaS CVPR2025 initializes NeRF S-LRM from the InstantMesh InstantNeRF
 large model; source release uses DINO ViT-B/16 (not RSS DINOv2-S),
 transformer width 1024, 16 layers and heads, triplane 32->64, 80 channels,
 128 ray samples. The public model card for TencentARC/InstantMesh supplies
@@ -27,12 +27,12 @@ from torch import nn
 
 _OFFICIAL_SHA="530a344ea9b856e012492b9644ab73532ddf7c06d548f60c489e49a528322fb9"
 _HF_MODEL="TencentARC/InstantMesh/instant_nerf_large.ckpt"
-_REAL_ID="STDGEN_2025_PRETRAINED_INSTANTNERF_LARGE_16L_VITB16"
+_REAL_ID="REALSAS_2025_PRETRAINED_INSTANTNERF_LARGE_16L_VITB16"
 _TEST_ID="SYNTHETIC_CHECKPOINT_UNIT_TEST_NO_UPSTREAM_PROOF"
 
 
 @dataclass(frozen=True)
-class StdGENInstantNeRFArchitectureV1:
+class RealSaSInstantNeRFArchitectureV1:
     encoder_name:str="facebook/dino-vitb16"
     encoder_feature_dim:int=768
     transformer_width:int=1024
@@ -44,12 +44,12 @@ class StdGENInstantNeRFArchitectureV1:
     ray_samples:int=128
 
     def check_published(self) -> None:
-        if self != StdGENInstantNeRFArchitectureV1():
-            raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_PUBLISHED_ARCHITECTURE_DRIFT")
+        if self != RealSaSInstantNeRFArchitectureV1():
+            raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_PUBLISHED_ARCHITECTURE_DRIFT")
 
 
 @dataclass(frozen=True)
-class StdGENInstantNeRFCheckpointReceiptV1:
+class RealSaSInstantNeRFCheckpointReceiptV1:
     checkpoint_sha256:str
     model_card_source:str
     source_architecture_id:str
@@ -78,13 +78,13 @@ def _checkpoint_keys(
         not path.is_file() or path.is_symlink() or path.suffix!=".ckpt"
         or path.stat().st_size>2_500_000_000 or path.stat().st_size<100
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_CHECKPOINT_FILE_DOMAIN")
+        raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_CHECKPOINT_FILE_DOMAIN")
     digest=_file_digest(path)
     if unit_test_override:
         if expected_sha256==_OFFICIAL_SHA or digest!=expected_sha256:
-            raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_TEST_HASH_CONTRACT")
+            raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_TEST_HASH_CONTRACT")
     elif expected_sha256!=_OFFICIAL_SHA or digest!=_OFFICIAL_SHA:
-        raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_PINNED_SHA256_MISMATCH")
+        raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_PINNED_SHA256_MISMATCH")
     # Only metadata allocations: 1.51GB official checkpoint must NOT
     # materialize its tensors merely to inspect and compare shapes.
     try:
@@ -94,9 +94,9 @@ def _checkpoint_keys(
                 path,map_location="cpu",weights_only=True,mmap=True,
             )
     except (RuntimeError,ValueError,TypeError,KeyError) as exc:
-        raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_SAFE_CHECKPOINT_PARSE") from exc
+        raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_SAFE_CHECKPOINT_PARSE") from exc
     if not isinstance(payload,Mapping) or not isinstance(payload.get("state_dict"),Mapping):
-        raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_CHECKPOINT_STATE_DICT_REQUIRED")
+        raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_CHECKPOINT_STATE_DICT_REQUIRED")
     sd=payload["state_dict"]
     prefix="lrm_generator."
     keys={
@@ -105,46 +105,46 @@ def _checkpoint_keys(
         if isinstance(k,str) and k.startswith(prefix) and isinstance(v,torch.Tensor)
     }
     if not keys or len(keys)!=len(set(keys)):
-        raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_PREFIXED_TENSORS_REQUIRED")
+        raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_PREFIXED_TENSORS_REQUIRED")
     return digest,keys
 
 
-def inspect_stdgen_instantnerf_checkpoint_compatibility_v1(
+def inspect_realsas_instantnerf_checkpoint_compatibility_v1(
     path:str|Path,model:nn.Module, *,
     expected_sha256:str=_OFFICIAL_SHA,
     unit_test_override:bool=False,
-)->StdGENInstantNeRFCheckpointReceiptV1:
+)->RealSaSInstantNeRFCheckpointReceiptV1:
     """Compare all original InstantNeRF state tensor keys, not just shapes.
 
     Never auto-remap an InstantNeRF weight into a loosely named RSS IRIS
     tensor. Exact compatibility is mandatory before load.
     """
     if not isinstance(model,nn.Module):
-        raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_NATIVE_MODEL_REQUIRED")
+        raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_NATIVE_MODEL_REQUIRED")
     filename=Path(path)
     digest,keys=_checkpoint_keys(
         filename,expected_sha256=expected_sha256,
         unit_test_override=unit_test_override,
     )
     if not unit_test_override:
-        StdGENInstantNeRFArchitectureV1().check_published()
+        RealSaSInstantNeRFArchitectureV1().check_published()
         positions=keys.get("transformer.pos_embed")
         deconv=keys.get("transformer.deconv.weight")
         if positions!=(1,3*32*32,1024) or deconv!=(1024,80,2,2):
-            raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_16L_TRIPLANE_SHAPE_MISMATCH")
+            raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_16L_TRIPLANE_SHAPE_MISMATCH")
         for i in range(16):
             anchor=f"transformer.layers.{i}.self_attn.in_proj_weight"
             if keys.get(anchor)!=(3072,1024):
-                raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_ATTENTION_LAYER_SHAPE_DRIFT")
+                raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_ATTENTION_LAYER_SHAPE_DRIFT")
     target={k:tuple(v.shape) for k,v in model.state_dict().items()}
     if keys!=target:
         missing=sorted(set(keys)^set(target))
         bad=sorted(k for k in set(keys)&set(target) if keys[k]!=target[k])
         excerpt=", ".join((missing+bad)[:4])
         raise ValueError(
-            "RSS_VNEXT_STDGEN_INSTANTNERF_NOT_LOAD_COMPATIBLE_WITH_TARGET_MODEL:"+excerpt
+            "RSS_VNEXT_REALSAS_INSTANTNERF_NOT_LOAD_COMPATIBLE_WITH_TARGET_MODEL:"+excerpt
         )
-    return StdGENInstantNeRFCheckpointReceiptV1(
+    return RealSaSInstantNeRFCheckpointReceiptV1(
         checkpoint_sha256=digest,
         model_card_source=_TEST_ID if unit_test_override else _HF_MODEL,
         source_architecture_id=_TEST_ID if unit_test_override else _REAL_ID,
@@ -158,13 +158,13 @@ def inspect_stdgen_instantnerf_checkpoint_compatibility_v1(
     )
 
 
-def load_verified_stdgen_instantnerf_weights_v1(
+def load_verified_realsas_instantnerf_weights_v1(
     path:str|Path,model:nn.Module,
-    *,compatibility:StdGENInstantNeRFCheckpointReceiptV1,
+    *,compatibility:RealSaSInstantNeRFCheckpointReceiptV1,
 )->None:
     """Strict pretrain load, and ONLY when the official hash was verified."""
     if (
-        type(compatibility) is not StdGENInstantNeRFCheckpointReceiptV1
+        type(compatibility) is not RealSaSInstantNeRFCheckpointReceiptV1
         or compatibility.test_fixture_only
         or compatibility.checkpoint_sha256!=_OFFICIAL_SHA
         or compatibility.source_architecture_id!=_REAL_ID
@@ -172,22 +172,22 @@ def load_verified_stdgen_instantnerf_weights_v1(
         or compatibility.pretrained_model_loaded
         or not isinstance(model,nn.Module)
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_REAL_CHECKPOINT_ADMISSION_REQUIRED")
+        raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_REAL_CHECKPOINT_ADMISSION_REQUIRED")
     if _file_digest(Path(path))!=_OFFICIAL_SHA:
-        raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_LOAD_DIGEST_DRIFT")
+        raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_LOAD_DIGEST_DRIFT")
     # Safe Torch loader accepts only tensors / containers / primitives.
     contents=torch.load(Path(path),map_location="cpu",weights_only=True,mmap=True)
     prefix="lrm_generator."
     state={k[len(prefix):]:v for k,v in contents["state_dict"].items()
            if isinstance(k,str) and k.startswith(prefix)}
     if state.keys()!=model.state_dict().keys():
-        raise ValueError("RSS_VNEXT_STDGEN_INSTANTNERF_MODEL_KEY_DRIFT_ON_LOAD")
+        raise ValueError("RSS_VNEXT_REALSAS_INSTANTNERF_MODEL_KEY_DRIFT_ON_LOAD")
     model.load_state_dict(state,strict=True)
 
 
 __all__=[
-    "StdGENInstantNeRFArchitectureV1",
-    "StdGENInstantNeRFCheckpointReceiptV1",
-    "inspect_stdgen_instantnerf_checkpoint_compatibility_v1",
-    "load_verified_stdgen_instantnerf_weights_v1",
+    "RealSaSInstantNeRFArchitectureV1",
+    "RealSaSInstantNeRFCheckpointReceiptV1",
+    "inspect_realsas_instantnerf_checkpoint_compatibility_v1",
+    "load_verified_realsas_instantnerf_weights_v1",
 ]

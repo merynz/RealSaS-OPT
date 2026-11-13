@@ -47,7 +47,7 @@ func rssVNextMeshParentBinding(
 		return nil, errors.New("RSS_VNEXT_MESH_UNIFIED_ARCHITECTURE_DRIFT")
 	}
 	if model.ArtifactType != "RealSaS.RSSvNextUnifiedInferenceCheckpoint" ||
-		model.ArtifactSchemaVersion != "v1" {
+		(model.ArtifactSchemaVersion != "v1" && model.ArtifactSchemaVersion != "v2") {
 		return nil, errors.New("RSS_VNEXT_MESH_CHECKPOINT_ABI_DRIFT")
 	}
 	if err := semantic.ValidateSHA256(model.CheckpointContentSHA256); err != nil {

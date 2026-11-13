@@ -3,11 +3,11 @@ from __future__ import annotations
 import torch
 import pytest
 
-from models.rss_vnext.stdgen_joint_slrm_render_v1 import (
-    STAGE_1,STAGE_2,STAGE_3,StdGENJointTargetV1,
-    render_stdgen_joint_rays_v1,render_stdgen_joint_from_shared_scene_v1,
-    StdGENFlexiCubesLayerRasterV1,
-    stdgen_joint_stage_loss_v1,
+from models.rss_vnext.realsas_joint_slrm_render_v1 import (
+    STAGE_1,STAGE_2,STAGE_3,RealSaSJointTargetV1,
+    render_realsas_joint_rays_v1,render_realsas_joint_from_shared_scene_v1,
+    RealSaSFlexiCubesLayerRasterV1,
+    realsas_joint_stage_loss_v1,
 )
 
 
@@ -18,7 +18,7 @@ def _rays(*,remove_cover=False):
     rgb=torch.tensor([[[[6.,-6.,-6.],[-6.,-6.,6.]]]],requires_grad=True)
     roles=torch.tensor([[[[8.,-8.],[-8.,8.]]]],requires_grad=True)
     keep=torch.tensor([[[not remove_cover,True]]],dtype=torch.bool)
-    render=render_stdgen_joint_rays_v1(
+    render=render_realsas_joint_rays_v1(
         density_logit=density,rgb_logit=rgb,role_logits=roles,
         ray_delta=torch.ones((1,1,2)),
         ray_depth=torch.tensor([[[.2,.8]]]),
@@ -29,7 +29,7 @@ def _rays(*,remove_cover=False):
 
 
 def _target(stage=STAGE_1):
-    return StdGENJointTargetV1(
+    return RealSaSJointTargetV1(
         rgb_white=torch.rand((1,1,3)),
         alpha=torch.ones((1,1,1)),
         role_indices=torch.tensor([[1]],dtype=torch.long),
@@ -48,7 +48,7 @@ def test_occluded_surface_peeling_exposes_inner_rgb_and_semantic_and_geometry_gr
     assert all_view.rgb_premultiplied[0,0,0]>all_view.rgb_premultiplied[0,0,2]
     assert peeled.rgb_premultiplied[0,0,2]>peeled.rgb_premultiplied[0,0,0]
     assert peeled.semantic_posterior[0,0,1]>all_view.semantic_posterior[0,0,1]
-    losses=stdgen_joint_stage_loss_v1(all_view,_target())
+    losses=realsas_joint_stage_loss_v1(all_view,_target())
     losses["total"].backward()
     assert density.grad.abs().sum()>0
     assert rgb.grad.abs().sum()>0
@@ -57,11 +57,11 @@ def test_occluded_surface_peeling_exposes_inner_rgb_and_semantic_and_geometry_gr
 
 def test_nerf_multilayer_loss_never_borrows_mesh_stage_normals_depth():
     render,*_=_rays(remove_cover=True)
-    loss=stdgen_joint_stage_loss_v1(render,_target(STAGE_2))
+    loss=realsas_joint_stage_loss_v1(render,_target(STAGE_2))
     assert set(loss)=={"rgb_mse","mask_mse","semantic_ce","total"}
     assert torch.isfinite(loss["total"])
     with pytest.raises(ValueError,match="MESH_TARGET_ON_NERF_STAGE"):
-        stdgen_joint_stage_loss_v1(
+        realsas_joint_stage_loss_v1(
             render,_target(STAGE_2),
             mesh_raster=object(),
         )
@@ -70,8 +70,8 @@ def test_nerf_multilayer_loss_never_borrows_mesh_stage_normals_depth():
 def test_stage3_requires_independent_mesh_render_and_all_3_losses():
     render,*_=_rays()
     with pytest.raises(ValueError,match="STAGE3_REQUIRES_FLEXICUBES_MESH_RENDER"):
-        stdgen_joint_stage_loss_v1(render,_target(STAGE_3))
-    mesh=StdGENFlexiCubesLayerRasterV1(
+        realsas_joint_stage_loss_v1(render,_target(STAGE_3))
+    mesh=RealSaSFlexiCubesLayerRasterV1(
         rgb_white_composite=torch.tensor([[[.8,.2,.2]]],requires_grad=True),
         alpha=torch.ones((1,1,1)),
         semantic_posterior=torch.tensor([[[.2,.8]]],requires_grad=True),
@@ -89,7 +89,7 @@ def test_stage3_requires_independent_mesh_render_and_all_3_losses():
         qualified_normal_mask=torch.ones((1,1),dtype=torch.bool),
         qualified_depth_mask=torch.ones((1,1),dtype=torch.bool),
     )
-    loss=stdgen_joint_stage_loss_v1(render,_target(STAGE_3),**params)
+    loss=realsas_joint_stage_loss_v1(render,_target(STAGE_3),**params)
     assert torch.allclose(loss["normal_cosine"],torch.tensor(1.))
     assert torch.allclose(loss["depth_l1"],torch.tensor(.3))
     assert torch.allclose(loss["flexicubes_deformation"],torch.tensor(.2))
@@ -102,7 +102,7 @@ def test_stage3_requires_independent_mesh_render_and_all_3_losses():
 
 def test_mesh_stage3_does_not_require_any_nerf_ray_prediction():
     from dataclasses import replace
-    mesh=StdGENFlexiCubesLayerRasterV1(
+    mesh=RealSaSFlexiCubesLayerRasterV1(
         rgb_white_composite=torch.ones((1,1,3),requires_grad=True)*.4,
         alpha=torch.ones((1,1,1),requires_grad=True)*.8,
         semantic_posterior=torch.tensor([[[.2,.8]]],requires_grad=True),
@@ -112,7 +112,7 @@ def test_mesh_stage3_does_not_require_any_nerf_ray_prediction():
         source_scene_prediction_sha256="a"*64,mesh_surface_prediction_sha256="b"*64,
         semantic_layer_name="peeled",rasterizer_identity="nvdiffrast-cpu-standin",
     )
-    terms=stdgen_joint_stage_loss_v1(
+    terms=realsas_joint_stage_loss_v1(
         None,_target(STAGE_3),mesh_raster=mesh,
         target_normal=torch.tensor([[[0.,0.,1.]]]),
         target_depth=torch.tensor([[[.5]]]),
@@ -123,17 +123,17 @@ def test_mesh_stage3_does_not_require_any_nerf_ray_prediction():
     assert torch.isfinite(terms["total"])
     assert mesh.semantic_posterior.grad.abs().sum()>0
     with pytest.raises(ValueError,match="NERF_STAGE_RAYS_REQUIRED"):
-        stdgen_joint_stage_loss_v1(None,_target(STAGE_1))
+        realsas_joint_stage_loss_v1(None,_target(STAGE_1))
 
 
 def test_generated_pseudotruth_and_bad_role_mask_rejected():
     from dataclasses import replace
     render,*_=_rays()
     with pytest.raises(ValueError,match="TEACHER_NOT_ADMITTED_3D_RENDER"):
-        stdgen_joint_stage_loss_v1(
+        realsas_joint_stage_loss_v1(
             render,replace(_target(),generated_completion_used_as_truth=True))
     with pytest.raises(ValueError,match="JOINT_RAY_GEOMETRY_OR_ROLE_DOMAIN"):
-        render_stdgen_joint_rays_v1(
+        render_realsas_joint_rays_v1(
             density_logit=torch.ones((1,1,2)),
             rgb_logit=torch.zeros((1,1,2,3)),
             role_logits=torch.ones((1,1,2,2)),
@@ -153,7 +153,7 @@ def test_joint_render_from_one_shared_H_not_separate_semantic_graphics_scene():
     graphics=nn.Linear(3,5)
     roles=nn.Linear(3,2)
     coords=torch.tensor([[[[.1,.1,.1],[.2,.1,.1]]]],requires_grad=True)
-    out=render_stdgen_joint_from_shared_scene_v1(
+    out=render_realsas_joint_from_shared_scene_v1(
         iris=_MiniIRIS(),
         scene_triplanes=torch.zeros((1,3,2,2,2)),
         sample_xyz=coords,
@@ -175,10 +175,10 @@ def test_no_unknown_generated_pixel_can_gain_source_authority():
 
 
 
-def test_stdgen_stage3_mesh_semantic_graphics_must_not_use_nerf_color():
+def test_realsas_stage3_mesh_semantic_graphics_must_not_use_nerf_color():
     from dataclasses import replace
     nerf,*_=_rays()
-    mesh=StdGENFlexiCubesLayerRasterV1(
+    mesh=RealSaSFlexiCubesLayerRasterV1(
         rgb_white_composite=torch.tensor([[[.3,.8,.1]]],requires_grad=True),
         alpha=torch.tensor([[[.8]]],requires_grad=True),
         semantic_posterior=torch.tensor([[[.1,.9]]],requires_grad=True),
@@ -194,11 +194,11 @@ def test_stdgen_stage3_mesh_semantic_graphics_must_not_use_nerf_color():
         target_depth=torch.tensor([[[.6]]]),
         qualified_normal_mask=torch.ones((1,1),dtype=torch.bool),
         qualified_depth_mask=torch.ones((1,1),dtype=torch.bool))
-    loss=stdgen_joint_stage_loss_v1(nerf,target,**kwargs)
+    loss=realsas_joint_stage_loss_v1(nerf,target,**kwargs)
     changed=replace(nerf,rgb_white_composite=torch.zeros_like(nerf.rgb_white_composite),
         alpha=torch.zeros_like(nerf.alpha),
         semantic_posterior=torch.zeros_like(nerf.semantic_posterior))
-    unchanged=stdgen_joint_stage_loss_v1(changed,target,**kwargs)
+    unchanged=realsas_joint_stage_loss_v1(changed,target,**kwargs)
     assert torch.allclose(loss["total"],unchanged["total"])
     loss["total"].backward()
     assert mesh.rgb_white_composite.grad.abs().sum()>0

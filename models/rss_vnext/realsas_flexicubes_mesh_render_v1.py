@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-"""Live StdGEN stage3: FlexiCubes layered mesh -> nvdiffrast RGB/semantic.
+"""Live RealSaS stage3: FlexiCubes layered mesh -> nvdiffrast RGB/semantic.
 
-Reference: StdGEN CVPR2025 §3.2 Stage3 Eq(10) uses semantic-equivalent SDF,
+Reference: RealSaS CVPR2025 §3.2 Stage3 Eq(10) uses semantic-equivalent SDF,
 FlexiCubes and mesh RGB/semantic/normal/depth raster supervision. This
 independently written adapter consumes the EXISTING PINNED NVIDIA
 FlexiCubes witness, queries the SAME IRIS H(x) for appearance and roles,
 then uses nvdiffrast's GPU differentiation primitives. It never copies
-released StdGEN code/weights and never mints source-surface ownership.
+released RealSaS code/weights and never mints source-surface ownership.
 
 Prerequisites for actual training: local trusted NVIDIA nvdiffrast runtime
 with GPU support, aligned source-render teacher with exact camera and
@@ -26,7 +26,7 @@ import torch.nn.functional as F
 
 from models.iris.vnext.flexicubes_v1 import vertex_normals_v1
 from .flexicubes_surface_evidence import RSSvNextFlexiCubesSurfaceEvidence
-from .stdgen_joint_slrm_render_v1 import StdGENFlexiCubesLayerRasterV1
+from .realsas_joint_slrm_render_v1 import RealSaSFlexiCubesLayerRasterV1
 
 RASTER_ID="NVLABS_NVDIFFRAST_FLEXICUBES_SHARED_H_STAGE3_V1"
 
@@ -51,7 +51,7 @@ def _camera_check(cameras: Tensor) -> None:
         or not bool(torch.isfinite(cameras).all())
         or bool((cameras[:,:,12]<=0).any())
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_STAGE3_CAMERA_DOMAIN")
+        raise ValueError("RSS_VNEXT_REALSAS_STAGE3_CAMERA_DOMAIN")
     xyz=torch.stack((
         cameras[:,:,3:6],cameras[:,:,6:9],cameras[:,:,9:12],
     ),dim=-2)
@@ -60,10 +60,10 @@ def _camera_check(cameras: Tensor) -> None:
         torch.eye(3,device=xyz.device,dtype=xyz.dtype),
         atol=1.e-3,rtol=0.,
     )) or bool((torch.linalg.det(xyz)<.99).any()):
-        raise ValueError("RSS_VNEXT_STDGEN_STAGE3_CAMERA_ORTHONORMAL")
+        raise ValueError("RSS_VNEXT_REALSAS_STAGE3_CAMERA_ORTHONORMAL")
 
 
-def render_stdgen_layered_flexicubes_mesh_v1(
+def render_realsas_layered_flexicubes_mesh_v1(
     *,
     witness: RSSvNextFlexiCubesSurfaceEvidence,
     iris: nn.Module,
@@ -76,7 +76,7 @@ def render_stdgen_layered_flexicubes_mesh_v1(
     raster_backend: Any = None,
     raster_context: Any = None,
     query_chunk: int = 65536,
-) -> StdGENFlexiCubesLayerRasterV1:
+) -> RealSaSFlexiCubesLayerRasterV1:
     """Differentiable mesh-stage producer for L3, from signed H(x) witness.
 
     Per-view z-buffer/first-hit computed by NVIDIA rasterization; NDC camera
@@ -92,7 +92,7 @@ def render_stdgen_layered_flexicubes_mesh_v1(
         or len(source_scene_prediction_sha256)!=64
         or any(x not in "0123456789abcdef" for x in source_scene_prediction_sha256)
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_STAGE3_WITNESS_AUTHORITY")
+        raise ValueError("RSS_VNEXT_REALSAS_STAGE3_WITNESS_AUTHORITY")
     k=witness.presentation_role_logits.shape[-1]
     d=witness.local_features.shape[-1]
     witness.validate(carrier_dim=d,role_count=k)
@@ -106,21 +106,21 @@ def render_stdgen_layered_flexicubes_mesh_v1(
         or n>250000 or nf>250000
         or query_chunk<128 or query_chunk>262144
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_STAGE3_RESOURCE_BUDGET")
+        raise ValueError("RSS_VNEXT_REALSAS_STAGE3_RESOURCE_BUDGET")
     if (
         scene_triplanes.ndim!=5 or scene_triplanes.shape[:2]!=(1,3)
         or scene_triplanes.device!=witness.xyz.device
         or cameras.device!=witness.xyz.device
         or not bool(torch.isfinite(scene_triplanes).all())
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_STAGE3_SHARED_SCENE_DRIFT")
+        raise ValueError("RSS_VNEXT_REALSAS_STAGE3_SHARED_SCENE_DRIFT")
     if witness.xyz.device.type!="cuda" and raster_backend is None:
-        raise RuntimeError("RSS_VNEXT_STDGEN_STAGE3_NVDIFFRAST_GPU_REQUIRED")
+        raise RuntimeError("RSS_VNEXT_REALSAS_STAGE3_NVDIFFRAST_GPU_REQUIRED")
     if raster_backend is None:
         try:
             import nvdiffrast.torch as dr
         except ImportError as exc:
-            raise RuntimeError("RSS_VNEXT_STDGEN_STAGE3_NVDIFFRAST_INSTALL_REQUIRED") from exc
+            raise RuntimeError("RSS_VNEXT_REALSAS_STAGE3_NVDIFFRAST_INSTALL_REQUIRED") from exc
     else:
         dr=raster_backend
     if raster_context is None:
@@ -139,7 +139,7 @@ def render_stdgen_layered_flexicubes_mesh_v1(
             lower=forward.min()-.05
             upper=forward.max()+.05
         if float((upper-lower).detach())<=1.e-5:
-            raise ValueError("RSS_VNEXT_STDGEN_STAGE3_DEGENERATE_DEPTH_RANGE")
+            raise ValueError("RSS_VNEXT_REALSAS_STAGE3_DEGENERATE_DEPTH_RANGE")
         z=(forward-lower)*2./(upper-lower)-1.
         clip=torch.stack((
             right,up,z,torch.ones_like(right),
@@ -166,7 +166,7 @@ def render_stdgen_layered_flexicubes_mesh_v1(
             graphics=graphics_head(h)
             logits=semantic_role_head(h)
             if graphics.shape[-1]!=5 or logits.shape[-1]!=k:
-                raise ValueError("RSS_VNEXT_STDGEN_STAGE3_SHARED_HEAD_CONTRACT")
+                raise ValueError("RSS_VNEXT_REALSAS_STAGE3_SHARED_HEAD_CONTRACT")
             rgba_chunks.append(torch.sigmoid(graphics[...,0:3].float()))
             role_chunks.append(F.softmax(logits.float(),dim=-1))
         rgb=torch.cat(rgba_chunks,dim=1).reshape(1,height,width,3)
@@ -190,7 +190,7 @@ def render_stdgen_layered_flexicubes_mesh_v1(
         for i in range(5)
     ]
     rgb,alpha,semantic,normal,depth=grouped
-    return StdGENFlexiCubesLayerRasterV1(
+    return RealSaSFlexiCubesLayerRasterV1(
         rgb_white_composite=rgb,alpha=alpha,
         semantic_posterior=semantic,
         normal_xyz=normal,depth=depth,
@@ -202,4 +202,4 @@ def render_stdgen_layered_flexicubes_mesh_v1(
     )
 
 
-__all__=["RASTER_ID","render_stdgen_layered_flexicubes_mesh_v1"]
+__all__=["RASTER_ID","render_realsas_layered_flexicubes_mesh_v1"]

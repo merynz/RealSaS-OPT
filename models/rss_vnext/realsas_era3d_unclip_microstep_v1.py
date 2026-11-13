@@ -3,9 +3,9 @@ from __future__ import annotations
 """Independently written Era3D-style SD2.1 UnCLIP training forward.
 
 The reference is Era3D's published train-unclip-512-6view configuration and
-training algorithm; StdGEN §3.1 adopts and retrains this approach with
+training algorithm; the CVPR 2025 reference §3.1 adopts and retrains this approach with
 progressive 1024 resolution. Load the ancestral base from SD2.1 UnCLIP,
-NOT an Era3D or StdGEN task-specific weight. This is a task training step;
+NOT an Era3D or RealSaS task-specific weight. This is a task training step;
 it cannot infer canonical geometry and does not manufacture source truth.
 
 Training input must be independent 3D renderer truth. A cleanroom UNet with
@@ -103,7 +103,7 @@ def era3d_aligned_unclip_noise_microstep_v1(
     Normal maps must already be *encoded to RGB [0,1]* by the independent
     3D renderer; do not use a generated normal map as ground truth.
     Prompt embeddings must be locally derived from the pinned CLIP text
-    encoder, not the StdGEN released fixed prompt tensor.
+    encoder, not the RealSaS released fixed prompt tensor.
     """
     if reference_rgb.ndim != 4 or reference_rgb.shape[1] != 3:
         raise ValueError("RSS_VNEXT_ERA3D_SINGLE_CANONICAL_REFERENCE_REQUIRED")

@@ -7,8 +7,8 @@ import torch
 from models.rss_vnext import (
     RSSvNextConfig,RSSvNextPatchEncoderForTests,RSSvNextUnifiedCharacterModel,
 )
-from models.rss_vnext.stdgen_slrm_stage1_lora_v1 import (
-    StdGENAttentionWeightLoRAV1,install_rss_stdgen_stage1_attention_lora_v1,
+from models.rss_vnext.realsas_slrm_stage1_lora_v1 import (
+    RealSaSAttentionWeightLoRAV1,install_rss_realsas_stage1_attention_lora_v1,
 )
 
 
@@ -47,7 +47,7 @@ def test_zero_init_attention_lora_preserves_existing_scene_forward():
     net=_model().eval()
     torch.manual_seed(41)
     baseline=_scene(net).detach().clone()
-    receipt=install_rss_stdgen_stage1_attention_lora_v1(net,rank=4,alpha=4.)
+    receipt=install_rss_realsas_stage1_attention_lora_v1(net,rank=4,alpha=4.)
     torch.manual_seed(41)
     after=_scene(net)
     assert torch.allclose(baseline,after,atol=1.e-6)
@@ -59,12 +59,12 @@ def test_zero_init_attention_lora_preserves_existing_scene_forward():
     assert any("self_attn" in x for x in receipt.attention_module_paths)
     assert any("multihead_attn" in x for x in receipt.attention_module_paths)
     with pytest.raises(ValueError,match="MODEL_OR_REINSTALL"):
-        install_rss_stdgen_stage1_attention_lora_v1(net)
+        install_rss_realsas_stage1_attention_lora_v1(net)
 
 
 def test_true_stage1_lora_semantic_gradients_but_old_geometry_graphics_frozen():
     net=_model().train()
-    receipt=install_rss_stdgen_stage1_attention_lora_v1(net,rank=4,alpha=4.)
+    receipt=install_rss_realsas_stage1_attention_lora_v1(net,rank=4,alpha=4.)
     optimizer=torch.optim.AdamW((p for p in net.parameters() if p.requires_grad),lr=1.e-3)
     planes=_scene(net)
     local=net.iris.query(planes,torch.rand((1,6,3)))["H"]
@@ -89,4 +89,4 @@ def test_true_stage1_lora_semantic_gradients_but_old_geometry_graphics_frozen():
 
 def test_invalid_rank_or_double_install_fail_closed():
     with pytest.raises(ValueError,match="WEIGHT_SHAPE_OR_RANK"):
-        StdGENAttentionWeightLoRAV1((4,4),rank=16,alpha=16.)
+        RealSaSAttentionWeightLoRAV1((4,4),rank=16,alpha=16.)

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Actual geometry-derived StdGEN S-LRM source layer teachers (opaque subset).
+"""Actual geometry-derived RealSaS S-LRM source layer teachers (opaque subset).
 
 Rasterized RGB, mask, semantic front-surface role, normal and *source* depth
 derive from the same independent triangulated source geometry. Holding out
@@ -20,11 +20,11 @@ import json
 import numpy as np
 import torch
 
-from .stdgen_joint_slrm_render_v1 import (
-    StdGENJointTargetV1,STAGE_1,STAGE_2,STAGE_3,
+from .realsas_joint_slrm_render_v1 import (
+    RealSaSJointTargetV1,STAGE_1,STAGE_2,STAGE_3,
 )
 
-_SCHEMA="RealSaS.RSSvNext.StdGENSource3DLayerRaster.v1"
+_SCHEMA="RealSaS.RSSvNext.RealSaSSource3DLayerRaster.v1"
 _PIXEL_BUDGET=128*128
 _FACE_TEST_BUDGET=1_000_000
 
@@ -41,7 +41,7 @@ def _sha(s:object) -> bool:
 
 
 @dataclass(frozen=True,eq=False)
-class StdGENSourceOpaqueTriangleSurfaceV1:
+class RealSaSSourceOpaqueTriangleSurfaceV1:
     source_mesh_xyz:np.ndarray    # [V,3] float32; source pose resolved
     source_faces:np.ndarray       # [F,3] int64, exact source triangles
     source_face_rgb_linear:np.ndarray  # [F,3] float32, independently decoded source
@@ -91,17 +91,17 @@ class StdGENSourceOpaqueTriangleSurfaceV1:
             or self.source_surface_is_opaque is not True
             or self.source_scene_contains_unmodeled_occluders is not False
         ):
-            raise ValueError("RSS_VNEXT_STDGEN_SOURCE_TRIANGLE_TRUTH_NOT_QUALIFIED")
+            raise ValueError("RSS_VNEXT_REALSAS_SOURCE_TRIANGLE_TRUTH_NOT_QUALIFIED")
         triangle=self.source_mesh_xyz[self.source_faces]
         norms=np.linalg.norm(np.cross(
             triangle[:,1]-triangle[:,0],triangle[:,2]-triangle[:,0],
         ),axis=-1)
         if np.any(norms<1.e-8):
-            raise ValueError("RSS_VNEXT_STDGEN_SOURCE_DEGENERATE_TRIANGLE")
+            raise ValueError("RSS_VNEXT_REALSAS_SOURCE_DEGENERATE_TRIANGLE")
 
 
 @dataclass(frozen=True,eq=False)
-class StdGENSourceOpaqueLayerRasterV1:
+class RealSaSSourceOpaqueLayerRasterV1:
     rgb_white:np.ndarray          # [H,W,3] linear [0,1]
     alpha:np.ndarray              # [H,W,1] binary
     role_indices:np.ndarray       # [H,W] int64, -1 for background
@@ -119,13 +119,13 @@ class StdGENSourceOpaqueLayerRasterV1:
 
     def as_training_target(
         self,*,stage:str,layer_name:str,
-    )->StdGENJointTargetV1:
+    )->RealSaSJointTargetV1:
         if stage not in (STAGE_1,STAGE_2,STAGE_3):
-            raise ValueError("RSS_VNEXT_STDGEN_LAYER_STAGE_INVALID")
+            raise ValueError("RSS_VNEXT_REALSAS_LAYER_STAGE_INVALID")
         if not layer_name:
-            raise ValueError("RSS_VNEXT_STDGEN_LAYER_NAME_REQUIRED")
+            raise ValueError("RSS_VNEXT_REALSAS_LAYER_NAME_REQUIRED")
         h,w=self.role_indices.shape
-        return StdGENJointTargetV1(
+        return RealSaSJointTargetV1(
             rgb_white=torch.from_numpy(self.rgb_white.reshape(1,h*w,3).copy()),
             alpha=torch.from_numpy(self.alpha.reshape(1,h*w,1).copy()),
             role_indices=torch.from_numpy(self.role_indices.reshape(1,h*w).copy()),
@@ -137,11 +137,11 @@ class StdGENSourceOpaqueLayerRasterV1:
         )
 
 
-def render_stdgen_source_opaque_peeled_layer_v1(
-    *,source:StdGENSourceOpaqueTriangleSurfaceV1,
+def render_realsas_source_opaque_peeled_layer_v1(
+    *,source:RealSaSSourceOpaqueTriangleSurfaceV1,
     camera_13d:np.ndarray,width:int,height:int,
     role_subset:tuple[int,...],
-)->StdGENSourceOpaqueLayerRasterV1:
+)->RealSaSSourceOpaqueLayerRasterV1:
     """Top-left pixel-centre barycentrics, per-pixel true source depth.
 
     For each pixel, first-hit = smallest camera-forward ray distance.
@@ -161,10 +161,10 @@ def render_stdgen_source_opaque_peeled_layer_v1(
         or width<8 or height<8 or width*height>_PIXEL_BUDGET
         or width*height*len(source.source_faces)>_FACE_TEST_BUDGET
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_SOURCE_LAYER_CAMERA_OR_BUDGET")
+        raise ValueError("RSS_VNEXT_REALSAS_SOURCE_LAYER_CAMERA_OR_BUDGET")
     axes=np.stack((camera_13d[3:6],camera_13d[6:9],camera_13d[9:12]))
     if not np.allclose(axes@axes.T,np.eye(3),atol=1.e-3,rtol=0.) or np.linalg.det(axes)<.99:
-        raise ValueError("RSS_VNEXT_STDGEN_SOURCE_LAYER_CAMERA_BASIS")
+        raise ValueError("RSS_VNEXT_REALSAS_SOURCE_LAYER_CAMERA_BASIS")
     delta=source.source_mesh_xyz.astype(np.float64)-camera_13d[:3].astype(np.float64)
     u=(delta@camera_13d[3:6])/float(camera_13d[12])
     v=(delta@camera_13d[6:9])/float(camera_13d[12])
@@ -228,7 +228,7 @@ def render_stdgen_source_opaque_peeled_layer_v1(
         output_mask_sha256=_hash(alpha),
     )
     receipt=sha256(json.dumps(payload,sort_keys=True,separators=(",",":")).encode()).hexdigest()
-    return StdGENSourceOpaqueLayerRasterV1(
+    return RealSaSSourceOpaqueLayerRasterV1(
         rgb_white=rgb_white,alpha=alpha,role_indices=indices,
         metric_depth=depth,normal_xyz=normal,visible_valid_mask=valid,
         unambiguous_mask=~ambiguous,
@@ -239,7 +239,7 @@ def render_stdgen_source_opaque_peeled_layer_v1(
 
 
 __all__=[
-    "StdGENSourceOpaqueTriangleSurfaceV1",
-    "StdGENSourceOpaqueLayerRasterV1",
-    "render_stdgen_source_opaque_peeled_layer_v1",
+    "RealSaSSourceOpaqueTriangleSurfaceV1",
+    "RealSaSSourceOpaqueLayerRasterV1",
+    "render_realsas_source_opaque_peeled_layer_v1",
 ]

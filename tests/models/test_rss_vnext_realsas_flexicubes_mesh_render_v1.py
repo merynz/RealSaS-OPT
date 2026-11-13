@@ -6,8 +6,8 @@ import torch
 from torch import nn
 
 from models.rss_vnext.flexicubes_surface_evidence import RSSvNextFlexiCubesSurfaceEvidence
-from models.rss_vnext.stdgen_flexicubes_mesh_render_v1 import (
-    RASTER_ID,render_stdgen_layered_flexicubes_mesh_v1,
+from models.rss_vnext.realsas_flexicubes_mesh_render_v1 import (
+    RASTER_ID,render_realsas_layered_flexicubes_mesh_v1,
 )
 
 
@@ -60,7 +60,7 @@ def test_same_H_and_actual_mesh_channels_flow_to_stage3_raster_contract():
     witness=_witness()
     rgb_head=nn.Linear(4,5)
     role_head=nn.Linear(4,2)
-    out=render_stdgen_layered_flexicubes_mesh_v1(
+    out=render_realsas_layered_flexicubes_mesh_v1(
         witness=witness,iris=_MiniIRIS(),scene_triplanes=torch.zeros((1,3,1,1,1)),
         graphics_head=rgb_head,semantic_role_head=role_head,
         cameras=_camera(),height=8,width=8,
@@ -83,7 +83,7 @@ def test_same_H_and_actual_mesh_channels_flow_to_stage3_raster_contract():
 def test_unqualified_source_or_non_gpu_native_backend_refused():
     w=_witness()
     with pytest.raises(RuntimeError,match="NVDIFFRAST_GPU_REQUIRED"):
-        render_stdgen_layered_flexicubes_mesh_v1(
+        render_realsas_layered_flexicubes_mesh_v1(
             witness=w,iris=_MiniIRIS(),scene_triplanes=torch.zeros((1,3,1,1,1)),
             graphics_head=nn.Linear(4,5),semantic_role_head=nn.Linear(4,2),
             cameras=_camera(),height=8,width=8,
@@ -91,7 +91,7 @@ def test_unqualified_source_or_non_gpu_native_backend_refused():
         )
     w.source_policy="SOURCE_MEASURED"
     with pytest.raises(ValueError,match="WITNESS_AUTHORITY"):
-        render_stdgen_layered_flexicubes_mesh_v1(
+        render_realsas_layered_flexicubes_mesh_v1(
             witness=w,iris=_MiniIRIS(),scene_triplanes=torch.zeros((1,3,1,1,1)),
             graphics_head=nn.Linear(4,5),semantic_role_head=nn.Linear(4,2),
             cameras=_camera(),height=8,width=8,

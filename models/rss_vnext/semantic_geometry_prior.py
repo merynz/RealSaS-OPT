@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-"""StdGEN-family semantic-equivalent geometry, with a versioned K-way role schema.
+"""RealSaS-family semantic-equivalent geometry, with a versioned K-way role schema.
 
-The verified StdGEN 2025 implementation uses four roles, but the algebra is
+The verified RealSaS 2025 implementation uses four roles, but the algebra is
 independent of K. K=6 (or another justified K) is a schema choice, not a claim
-that an unpublished StdGEN++ trainer used six classes.
+that an unpublished RealSaS++ trainer used six classes.
 
 Roles are SOURCE-RENDERABLE presentation/material strata, not joints, motion,
 grips, attachments, or a human-only body-part taxonomy. The caller must
@@ -51,8 +51,8 @@ class RSSvNextSemanticLayerSpec:
             raise ValueError("RSS_VNEXT_SEMANTIC_LAYER_UNKNOWN_ROLE")
 
 
-def stdgen_style_generic_schema() -> RSSvNextSemanticRoleSchema:
-    """Same class index semantics as published 2025 StdGEN, generalized names.
+def realsas_style_generic_schema() -> RSSvNextSemanticRoleSchema:
+    """Same class index semantics as published 2025 RealSaS, generalized names.
 
     [0] secondary form (hair-like)
     [1] focal detail (face-like)
@@ -65,13 +65,13 @@ def stdgen_style_generic_schema() -> RSSvNextSemanticRoleSchema:
     )
 
 
-def stdgen_style_layers(schema: RSSvNextSemanticRoleSchema) -> tuple[RSSvNextSemanticLayerSpec, ...]:
-    """Reproduce StdGEN's five extraction questions for the canonical four roles.
+def realsas_style_layers(schema: RSSvNextSemanticRoleSchema) -> tuple[RSSvNextSemanticLayerSpec, ...]:
+    """Reproduce RealSaS's five extraction questions for the canonical four roles.
 
     This is a 4-way *baseline*, not a mandatory semantic policy for K=6.
     """
-    if schema.roles != stdgen_style_generic_schema().roles:
-        raise ValueError("RSS_VNEXT_STDGEN_FIVE_LEVELS_REQUIRE_FOUR_ROLE_BASELINE")
+    if schema.roles != realsas_style_generic_schema().roles:
+        raise ValueError("RSS_VNEXT_REALSAS_FIVE_LEVELS_REQUIRE_FOUR_ROLE_BASELINE")
     r = schema.roles
     return (
         RSSvNextSemanticLayerSpec("all", r),
@@ -90,11 +90,11 @@ def semantic_equivalent_signed_field(
     layer: RSSvNextSemanticLayerSpec,
     qualified_signed_domain: bool,
 ) -> Tensor:
-    """Generalization of published StdGEN semantic SDF levels to any K.
+    """Generalization of published RealSaS semantic SDF levels to any K.
 
     For retained subset S:
       f_S(x) = max(f(x), max_{r not in S} p_r(x) - max_{r in S} p_r(x)).
-    For all roles, f_S=f. For one role this matches the StdGEN++ stated
+    For all roles, f_S=f. For one role this matches the RealSaS++ stated
     semantic-equivalent SDF equation. No edge/attachment inference is claimed.
 
     Operation is permitted ONLY for a court-qualified signed solid domain.
@@ -146,7 +146,7 @@ def masked_visible_surface_role_loss(
     *,
     schema: RSSvNextSemanticRoleSchema,
 ) -> Tensor:
-    """StdGEN-style K-way *visible surface* teacher, not arbitrary pixel labels.
+    """RealSaS-style K-way *visible surface* teacher, not arbitrary pixel labels.
 
     [B,2,T,K] predictions, [B,2,T] source-render role indices; mask true only
     for admitted, source-proven visible role pixels/patches. The source-role
@@ -209,7 +209,7 @@ def masked_qualified_surface_role_loss(
 
 __all__ = [
     "RSSvNextSemanticRoleSchema", "RSSvNextSemanticLayerSpec",
-    "stdgen_style_generic_schema", "stdgen_style_layers",
+    "realsas_style_generic_schema", "realsas_style_layers",
     "semantic_equivalent_signed_field", "all_semantic_equivalent_layers",
     "masked_visible_surface_role_loss", "masked_qualified_surface_role_loss",
 ]

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Strict 3D-rendered StdGEN canonical/multiview truth materialization.
+"""Strict 3D-rendered RealSaS canonical/multiview truth materialization.
 
 This is a *consumer* for asset renderer outputs (Blender/GLTF pipeline).
 Every image must have been rendered from an independently admitted 3D asset
@@ -10,7 +10,7 @@ See CleanroomDiffusionRenderRecordV1 for lineage, rigged/static pose
 eligibility and family-level train/val/unseen separation.
 
 Only the six-elevation=0-degree orthographic reference views are eligible
-for the StdGEN/Era3D baseline: azimuth [-90,-45,0,45,90,180]. Other camera
+for the RealSaS/Era3D baseline: azimuth [-90,-45,0,45,90,180]. Other camera
 patterns require a different independently qualified model contract.
 """
 
@@ -25,14 +25,14 @@ from PIL import Image
 import torch
 from torch.utils.data import Dataset
 
-from .stdgen_cleanroom_diffusion_training_v1 import (
+from .realsas_cleanroom_diffusion_training_v1 import (
     CleanroomDiffusionRenderRecordV1,
     validate_cleanroom_render_corpus_v1,
 )
 
 
-_SCHEMA="RealSaS.RSSvNext.StdGENCleanroomRenderedSixViewDataset.v1"
-_CAMERA_SCHEMA="STDGEN_ZERO_ELEVATION_SIX_ORTHOGRAPHIC_AZIMUTH_V1"
+_SCHEMA="RealSaS.RSSvNext.RealSaSCleanroomRenderedSixViewDataset.v1"
+_CAMERA_SCHEMA="REALSAS_ZERO_ELEVATION_SIX_ORTHOGRAPHIC_AZIMUTH_V1"
 _AZIMUTHS=(-90,-45,0,45,90,180)
 _FILE_KEYS=(
     "input_scene_rgb","canonical_target_rgb",
@@ -49,7 +49,7 @@ _TUPLE_FIELDS=frozenset({
 
 def _record_from_json(value: Any) -> CleanroomDiffusionRenderRecordV1:
     if type(value) is not dict:
-        raise ValueError("RSS_VNEXT_STDGEN_RENDER_RECORD_NOT_OBJECT")
+        raise ValueError("RSS_VNEXT_REALSAS_RENDER_RECORD_NOT_OBJECT")
     attributes=dict(value)
     for key in _TUPLE_FIELDS:
         if key in attributes and type(attributes[key]) is list:
@@ -57,7 +57,7 @@ def _record_from_json(value: Any) -> CleanroomDiffusionRenderRecordV1:
     try:
         return CleanroomDiffusionRenderRecordV1(**attributes)
     except (TypeError,ValueError) as exc:
-        raise ValueError("RSS_VNEXT_STDGEN_RENDER_RECORD_INVALID") from exc
+        raise ValueError("RSS_VNEXT_REALSAS_RENDER_RECORD_INVALID") from exc
 
 
 def _inside(root: Path, relative: str) -> Path:
@@ -66,18 +66,18 @@ def _inside(root: Path, relative: str) -> Path:
         or not relative or relative.startswith("/")
         or "\\" in relative or "\x00" in relative
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_RENDER_PATH_INVALID")
+        raise ValueError("RSS_VNEXT_REALSAS_RENDER_PATH_INVALID")
     path=Path(relative)
     if any(part in (".","..") for part in path.parts):
-        raise ValueError("RSS_VNEXT_STDGEN_RENDER_PATH_TRAVERSAL")
+        raise ValueError("RSS_VNEXT_REALSAS_RENDER_PATH_TRAVERSAL")
     candidate=root
     for part in path.parts:
         candidate=candidate/part
         if candidate.is_symlink():
-            raise ValueError("RSS_VNEXT_STDGEN_RENDER_SYMLINK_FORBIDDEN")
+            raise ValueError("RSS_VNEXT_REALSAS_RENDER_SYMLINK_FORBIDDEN")
     final=candidate.resolve(strict=True)
     if not final.is_relative_to(root.resolve()) or not final.is_file():
-        raise ValueError("RSS_VNEXT_STDGEN_RENDER_PATH_OUTSIDE_ROOT")
+        raise ValueError("RSS_VNEXT_REALSAS_RENDER_PATH_OUTSIDE_ROOT")
     return final
 
 
@@ -93,7 +93,7 @@ def _image(file: Path, *, mode: str) -> np.ndarray:
     with Image.open(file) as im:
         im.load()
         if im.format!="PNG" or im.width>2048 or im.height>2048 or min(im.size)<16:
-            raise ValueError("RSS_VNEXT_STDGEN_RENDER_IMAGE_DOMAIN")
+            raise ValueError("RSS_VNEXT_REALSAS_RENDER_IMAGE_DOMAIN")
         if mode=="MASK":
             # Renderer may store a grayscale mask or use the PNG alpha
             # channel. Luminance of an RGBA PNG is NOT its coverage.
@@ -106,22 +106,22 @@ def _image(file: Path, *, mode: str) -> np.ndarray:
     return arr
 
 
-class StdGENCleanroomRenderedSixViewDatasetV1(Dataset):
+class RealSaSCleanroomRenderedSixViewDatasetV1(Dataset):
     """Train/validation samples with verified 3D-source canonical supervision.
 
     The training reference is the *rendered canonical source* (not the user
-    image). This is StdGEN's 1-reference Era3D baseline. The existing
+    image). This is RealSaS's 1-reference Era3D baseline. The existing
     paired-user-source conditioner remains an ablation in another module.
     """
     def __init__(self, manifest: str | Path, *, split: str="train") -> None:
         super().__init__()
         manifest=Path(manifest)
         if not manifest.is_file() or manifest.is_symlink():
-            raise ValueError("RSS_VNEXT_STDGEN_RENDER_MANIFEST_MISSING")
+            raise ValueError("RSS_VNEXT_REALSAS_RENDER_MANIFEST_MISSING")
         try:
             raw=json.loads(manifest.read_text("utf-8"))
         except (ValueError,UnicodeError) as exc:
-            raise ValueError("RSS_VNEXT_STDGEN_RENDER_MANIFEST_JSON_INVALID") from exc
+            raise ValueError("RSS_VNEXT_REALSAS_RENDER_MANIFEST_JSON_INVALID") from exc
         if (
             type(raw) is not dict or raw.get("schema")!=_SCHEMA
             or raw.get("camera_schema")!=_CAMERA_SCHEMA
@@ -130,19 +130,19 @@ class StdGENCleanroomRenderedSixViewDatasetV1(Dataset):
             or raw.get("contains_diffusion_generated_training_targets") is not False
             or type(raw.get("items")) is not list or not raw["items"]
         ):
-            raise ValueError("RSS_VNEXT_STDGEN_RENDER_MANIFEST_CONTRACT")
+            raise ValueError("RSS_VNEXT_REALSAS_RENDER_MANIFEST_CONTRACT")
         self.root=manifest.parent.resolve()
         self.entries=[]
         records=[]
         for item in raw["items"]:
             if type(item) is not dict:
-                raise ValueError("RSS_VNEXT_STDGEN_RENDER_ITEM_INVALID")
+                raise ValueError("RSS_VNEXT_REALSAS_RENDER_ITEM_INVALID")
             record=_record_from_json(item.get("truth_record"))
             files=item.get("files")
             if type(files) is not dict or set(files)!=set(_FILE_KEYS):
-                raise ValueError("RSS_VNEXT_STDGEN_RENDER_MODALITIES_INVALID")
+                raise ValueError("RSS_VNEXT_REALSAS_RENDER_MODALITIES_INVALID")
             if record.generated_diffusion_images_are_training_targets:
-                raise ValueError("RSS_VNEXT_STDGEN_GENERATED_PSEUDOTRUTH_REJECTED")
+                raise ValueError("RSS_VNEXT_REALSAS_GENERATED_PSEUDOTRUTH_REJECTED")
             expected={
                 "input_scene_rgb":record.input_scene_rgb_sha256,
                 "canonical_target_rgb":record.canonical_target_rgb_sha256,
@@ -155,12 +155,12 @@ class StdGENCleanroomRenderedSixViewDatasetV1(Dataset):
             for key,hashes in expected.items():
                 paths=files[key]
                 if type(paths) is not list or len(paths)!=len(hashes):
-                    raise ValueError("RSS_VNEXT_STDGEN_RENDER_MODALITY_LENGTH_DRIFT")
+                    raise ValueError("RSS_VNEXT_REALSAS_RENDER_MODALITY_LENGTH_DRIFT")
                 resolved[key]=[]
                 for path,expected_digest in zip(paths,hashes):
                     full=_inside(self.root,path)
                     if _digest(full)!=expected_digest:
-                        raise ValueError("RSS_VNEXT_STDGEN_RENDER_TRUTH_HASH_DRIFT")
+                        raise ValueError("RSS_VNEXT_REALSAS_RENDER_TRUTH_HASH_DRIFT")
                     resolved[key].append(full)
             records.append(record)
             if record.split==split:
@@ -172,7 +172,7 @@ class StdGENCleanroomRenderedSixViewDatasetV1(Dataset):
         self.corpus_report=validate_cleanroom_render_corpus_v1(records)
         self.manifest_sha256=_digest(manifest)
         if not self.entries:
-            raise ValueError("RSS_VNEXT_STDGEN_RENDER_SPLIT_EMPTY")
+            raise ValueError("RSS_VNEXT_REALSAS_RENDER_SPLIT_EMPTY")
         self.split=split
 
     def __len__(self) -> int:
@@ -194,18 +194,18 @@ class StdGENCleanroomRenderedSixViewDatasetV1(Dataset):
             arrays[key]=[]
             for file,hexdigest in zip(paths[key],digests):
                 if _digest(file)!=hexdigest:
-                    raise ValueError("RSS_VNEXT_STDGEN_RENDER_TRUTH_HASH_CHANGED_DURING_TRAINING")
+                    raise ValueError("RSS_VNEXT_REALSAS_RENDER_TRUTH_HASH_CHANGED_DURING_TRAINING")
                 arrays[key].append(_image(file,mode=mode))
         ref=arrays["canonical_target_rgb"][0]
         height,width=ref.shape[:2]
         for key,values in arrays.items():
             if any(x.shape[:2]!=(height,width) for x in values):
-                raise ValueError("RSS_VNEXT_STDGEN_RENDER_CROSS_CAMERA_RESOLUTION_DRIFT")
+                raise ValueError("RSS_VNEXT_REALSAS_RENDER_CROSS_CAMERA_RESOLUTION_DRIFT")
 
         def rgb(value: np.ndarray) -> torch.Tensor:
             alpha=value[:,:,3:4].astype(np.float32)/255.
             color=value[:,:,:3].astype(np.float32)/255.
-            # White composite as in StdGEN/Era3D training.
+            # White composite as in RealSaS/Era3D training.
             color=color*alpha+(1.-alpha)
             return torch.from_numpy(color.transpose(2,0,1).copy())
         def mask(value: np.ndarray) -> torch.Tensor:
@@ -227,4 +227,4 @@ class StdGENCleanroomRenderedSixViewDatasetV1(Dataset):
         }
 
 
-__all__=["StdGENCleanroomRenderedSixViewDatasetV1"]
+__all__=["RealSaSCleanroomRenderedSixViewDatasetV1"]

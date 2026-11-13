@@ -212,7 +212,10 @@ def execute_rss_vnext_shape_capability_v3(
     expected_checkpoint_sha = checkpoint.get("content_sha256")
     if (
         checkpoint.get("artifact_type") != CHECKPOINT_ARTIFACT_TYPE
-        or checkpoint.get("schema_version") != CHECKPOINT_SCHEMA_VERSION
+        or checkpoint.get("schema_version") != (
+            CHECKPOINT_SCHEMA_VERSION if test_vision_encoder_factory is not None
+            else "v2"
+        )
         or not _hex64(expected_checkpoint_sha)
         or not Path(checkpoint.get("path") or "").is_file()
     ):

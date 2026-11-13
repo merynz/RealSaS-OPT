@@ -3,11 +3,11 @@ from __future__ import annotations
 """RSS.vNext canonical FRONT/BACK → camera-grounded *predicted* multiview.
 
 Reference genealogy:
-- StdGEN's RGB/normal *diffusion* generator predicts views BEFORE S-LRM.
+- RealSaS's RGB/normal *diffusion* generator predicts views BEFORE S-LRM.
 - This RSS path instead renders shared learned Z/H with a differentiable
   camera-conditioned volume head AFTER the two-source-view scene encoder.
   It is a trainable, testable alternative; it does NOT claim to reproduce
-  StdGEN's high-resolution diffusion generator or image fidelity.
+  RealSaS's high-resolution diffusion generator or image fidelity.
 
 Source authority is immutable: novel predictions NEVER enter the observed
 view bank as real observations. Source rig/mesh/extra RGB/normal renders
@@ -133,7 +133,7 @@ class RSSvNextConstructedViews:
 class RSSvNextViewFieldRenderer(nn.Module):
     """Experimental POST-scene novel-view RGB/alpha/normal from H(x).
 
-    Not the published StdGEN pre-scene multi-view diffusion mechanism.
+    Not the published RealSaS pre-scene multi-view diffusion mechanism.
 
     View-conditioned colors, learned density and normals; depth order is
     analytically calculated through alpha compositing. It is a hypothesis

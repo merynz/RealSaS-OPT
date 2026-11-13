@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """RSS.vNext semantic evidence is learned DURING construction of shared Z.
 
-This is NOT a fixed human-anatomy ontology and NOT StdGEN's hard-coded
+This is NOT a fixed human-anatomy ontology and NOT RealSaS's hard-coded
 hair/cloth/canonical-solid manipulation. The independent evidence channels
 can be masked per channel, per source view and per patch by admitted teacher
 data; missing observations are UNKNOWN, not a negative category.
@@ -64,7 +64,7 @@ class RSSvNextEarlySemanticField(nn.Module):
     def forward_variable_views(self, image_tokens: Tensor) -> RSSvNextEarlySemanticOutput:
         if (image_tokens.ndim != 4 or image_tokens.shape[1] not in (1,2,6)
                 or image_tokens.shape[2] < 1 or image_tokens.shape[-1] != self.image_dim):
-            raise ValueError("RSS_VNEXT_STDGEN_SEMANTIC_INPUT_VIEW_COUNT")
+            raise ValueError("RSS_VNEXT_REALSAS_SEMANTIC_INPUT_VIEW_COUNT")
         if not bool(torch.isfinite(image_tokens).all()):
             raise ValueError("RSS_VNEXT_SEMANTIC_IMAGE_TOKENS_NONFINITE")
         logits = self.image_evidence(image_tokens)
@@ -79,7 +79,7 @@ class RSSvNextEarlySemanticField(nn.Module):
             authority=(
                 "TWO_SOURCE_VIEW_SEMANTIC_PREDICTION"
                 if image_tokens.shape[1]==2
-                else "STDGEN_NON_SOURCE_REFERENCE_SEMANTIC_HYPOTHESIS_ONLY"
+                else "REALSAS_NON_SOURCE_REFERENCE_SEMANTIC_HYPOTHESIS_ONLY"
             ),
         )
 

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-"""StdGEN-faithful 1/6-view neural scene input, separate from original rays.
+"""RealSaS-owned 1/6-view neural scene construction, separate from original rays.
 
 The older product camera/SourceObservation ABI intentionally stays EXACTLY
 two real calibrated FRONT/BACK images; it must never be populated from a
 diffusion model. This module instead handles:
-  - one *canonical reference* RGB/A image (StdGEN one-view baseline), or
-  - six RGB/A images from a multi-view diffusion model (StdGEN S-LRM input).
+  - one *canonical reference* RGB/A image (single-view research baseline), or
+  - six RGB/A images from a multi-view diffusion model (six-view neural reconstruction input).
 The common IRIS 3D triplane and existing geometry/Graphics/semantic heads
 are reused, not duplicated. An input produced by diffusion is a hypothesis.
 
@@ -20,14 +20,14 @@ import torch
 from torch import Tensor
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 
-CANONICAL_REFERENCE="STDGEN_SINGLE_CANONICAL_REFERENCE_PREDICTION"
-SIX_VIEW_PRIOR="STDGEN_SIX_PREDICTED_RGB_VIEWS"
-ONE_MEASURED_SOURCE="STDGEN_SINGLE_MEASURED_SOURCE_CAMERA"
+CANONICAL_REFERENCE="REALSAS_SINGLE_CANONICAL_REFERENCE_PREDICTION"
+SIX_VIEW_PRIOR="REALSAS_SIX_PREDICTED_RGB_VIEWS"
+ONE_MEASURED_SOURCE="REALSAS_SINGLE_MEASURED_SOURCE_CAMERA"
 _SIX_AZIMUTH=(-90,-45,0,45,90,180)
 
 
 @dataclass(frozen=True)
-class StdGENSceneConditioningV1:
+class RealSaSSceneConditioningV1:
     scene_triplanes: Tensor
     source_binding_sha256: str
     scene_conditioning_authority: str
@@ -45,19 +45,20 @@ def _hash(value: str) -> bool:
     return type(value) is str and len(value)==64 and all(x in "0123456789abcdef" for x in value)
 
 
-def encode_stdgen_conditioning_into_shared_H_v1(
+def encode_realsas_conditioning_into_shared_H_v1(
     model: RSSvNextUnifiedCharacterModel, *,
     conditioning_rgba: Tensor, conditioning_cameras: Tensor,
     source_binding_sha256: str,
     original_observed_view_count: int,
     conditioning_authority: str,
     generating_checkpoint_sha256: str | None = None,
-) -> StdGENSceneConditioningV1:
+    conditioning_normals: Tensor | None = None,
+) -> RealSaSSceneConditioningV1:
     """One canonical view or six aligned diffusion-generated views -> H(x).
 
     No field becomes original source observations and no generated camera
     receives calibrated-observation authority. The six-view format mirrors
-    StdGEN infer_slrm.py's six RGB views; generated normals stay a separate
+    the six-view generative reconstruction arrangement; generated normals stay a separate
     refinement prior, not six additional "source views".
     """
     if (
@@ -69,7 +70,7 @@ def encode_stdgen_conditioning_into_shared_H_v1(
         or conditioning_rgba.shape[1] not in (1,6)
         or conditioning_rgba.shape[2]!=4
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_CONDITIONING_SOURCE_OR_VIEW_DOMAIN")
+        raise ValueError("RSS_VNEXT_REALSAS_CONDITIONING_SOURCE_OR_VIEW_DOMAIN")
     b,v,_,h,w=conditioning_rgba.shape
     if (
         b<1 or b>8 or max(h,w)>2048 or min(h,w)<14
@@ -81,7 +82,7 @@ def encode_stdgen_conditioning_into_shared_H_v1(
         or bool((conditioning_rgba<0).any() or (conditioning_rgba>1).any())
         or bool((conditioning_cameras[:,:,12]<=0).any())
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_CONDITIONING_IMAGE_OR_CAMERA_DOMAIN")
+        raise ValueError("RSS_VNEXT_REALSAS_CONDITIONING_IMAGE_OR_CAMERA_DOMAIN")
     camera_axes=torch.stack((
         conditioning_cameras[:,:,3:6],
         conditioning_cameras[:,:,6:9],
@@ -94,13 +95,13 @@ def encode_stdgen_conditioning_into_shared_H_v1(
         ))
         or bool((torch.linalg.det(camera_axes)<.99).any())
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_CANONICAL_CAMERA_BASIS_INVALID")
+        raise ValueError("RSS_VNEXT_REALSAS_CANONICAL_CAMERA_BASIS_INVALID")
     if v==6:
         if (
             conditioning_authority != SIX_VIEW_PRIOR
             or not _hash(generating_checkpoint_sha256)
         ):
-            raise ValueError("RSS_VNEXT_STDGEN_SIX_VIEWS_MUST_BE_GENERATED_PRIOR")
+            raise ValueError("RSS_VNEXT_REALSAS_SIX_VIEWS_MUST_BE_GENERATED_PRIOR")
         cameras=conditioning_cameras
         axes=torch.stack((cameras[:,:,3:6],cameras[:,:,6:9],cameras[:,:,9:12]),dim=-2)
         gram=axes@axes.transpose(-1,-2)
@@ -111,13 +112,13 @@ def encode_stdgen_conditioning_into_shared_H_v1(
             or not bool(torch.allclose(cameras[:,:,6:9],cameras[:,0:1,6:9].expand(-1,v,-1),atol=1.e-3,rtol=0))
             or not bool(torch.allclose(cameras[:,:,12],cameras[:,0:1,12].expand(-1,v),atol=1.e-3,rtol=0))
         ):
-            raise ValueError("RSS_VNEXT_STDGEN_SIX_VIEW_ORTHOGRAPHIC_ALIGNMENT")
+            raise ValueError("RSS_VNEXT_REALSAS_SIX_VIEW_ORTHOGRAPHIC_ALIGNMENT")
         # Reject six repeated cameras: equivalent to source duplication,
         # not a multi-view reconstruction input.
         for i in range(v):
             for j in range(i+1,v):
                 if bool(torch.allclose(cameras[:,i,9:12],cameras[:,j,9:12],atol=.001,rtol=0)):
-                    raise ValueError("RSS_VNEXT_STDGEN_DUPLICATE_PREDICTED_CAMERA")
+                    raise ValueError("RSS_VNEXT_REALSAS_DUPLICATE_PREDICTED_CAMERA")
     elif (
         conditioning_authority not in (CANONICAL_REFERENCE,ONE_MEASURED_SOURCE)
         or (conditioning_authority==ONE_MEASURED_SOURCE and (
@@ -125,20 +126,33 @@ def encode_stdgen_conditioning_into_shared_H_v1(
         ))
         or (conditioning_authority==CANONICAL_REFERENCE and not _hash(generating_checkpoint_sha256))
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_ONE_VIEW_PROVENANCE_INVALID")
+        raise ValueError("RSS_VNEXT_REALSAS_ONE_VIEW_PROVENANCE_INVALID")
 
     if not hasattr(model.vision,"forward_variable_views"):
-        raise ValueError("RSS_VNEXT_STDGEN_BACKBONE_HAS_NO_VARIABLE_VIEW_ADAPTER")
+        raise ValueError("RSS_VNEXT_REALSAS_BACKBONE_HAS_NO_VARIABLE_VIEW_ADAPTER")
     # IMPORTANT: encode_observations() only accepts 2 ORIGINAL views.
     # This bypass does not change those original rays or their cameras.
     tokens,xy=model.vision.forward_variable_views(conditioning_rgba)
+    if conditioning_normals is not None:
+        if (
+            v != 6 or conditioning_normals.shape != (b, v, 3, h, w)
+            or not bool(torch.isfinite(conditioning_normals).all())
+            or bool(((conditioning_normals < -1.0001) | (conditioning_normals > 1.0001)).any())
+        ):
+            raise ValueError("RSS_VNEXT_PREDICTED_NORMAL_CONDITIONING_INVALID")
+        normal_rgb = (conditioning_normals + 1.) * .5
+        normal_rgba = torch.cat((normal_rgb, conditioning_rgba[:, :, 3:4]), dim=2)
+        normal_tokens, normal_xy = model.vision.forward_variable_views(normal_rgba)
+        if normal_tokens.shape != tokens.shape or not torch.equal(normal_xy,xy):
+            raise ValueError("RSS_VNEXT_NORMAL_RGB_PATCH_GRID_DRIFT")
+        tokens = tokens + model.normal_condition_proj(normal_tokens)
     early=model.early_semantics.forward_variable_views(tokens)
     planes=model.iris.encode_scene(
         early.conditioned_image_tokens,xy,conditioning_cameras,
     )
     if planes.ndim!=5 or planes.shape[:2]!=(b,3):
-        raise ValueError("RSS_VNEXT_STDGEN_SHARED_SCENE_CARRIER_SHAPE")
-    return StdGENSceneConditioningV1(
+        raise ValueError("RSS_VNEXT_REALSAS_SHARED_SCENE_CARRIER_SHAPE")
+    return RealSaSSceneConditioningV1(
         scene_triplanes=planes,
         source_binding_sha256=source_binding_sha256,
         scene_conditioning_authority=conditioning_authority,
@@ -155,5 +169,5 @@ def encode_stdgen_conditioning_into_shared_H_v1(
 
 __all__=[
     "CANONICAL_REFERENCE","SIX_VIEW_PRIOR","ONE_MEASURED_SOURCE",
-    "StdGENSceneConditioningV1","encode_stdgen_conditioning_into_shared_H_v1",
+    "RealSaSSceneConditioningV1","encode_realsas_conditioning_into_shared_H_v1",
 ]

@@ -147,7 +147,12 @@ class RSSvNextDualSpatialSupportResearchV1(nn.Module):
         ):
             raise ValueError("RSS_VNEXT_INTERIOR_SUPPORT_CARRIER_DOMAIN")
         chosen = _fps_indices(grid_xyz, self.support_count)
-        anchors = grid_xyz.gather(1, chosen[...,None].expand(-1,-1,3))
+        # Use interior support rather than box-boundary corners: otherwise
+        # both field sampling and clamp can saturate before the first step.
+        # Scale is fixed and independent of teacher skeleton coordinates.
+        anchors = 0.70 * grid_xyz.gather(
+            1,chosen[...,None].expand(-1,-1,3)
+        )
         if mode == "FIXED_VOLUME_SUPPORT":
             coords = anchors
         else:

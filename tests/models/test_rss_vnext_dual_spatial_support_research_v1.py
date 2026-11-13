@@ -87,8 +87,10 @@ def test_interior_coordinates_are_student_predictions_and_h_gradient_is_live():
     )
     assert torch.any((shifted.support_xyz-out.support_xyz).abs()>1e-5)
     state.scene_triplanes.retain_grad()
-    objective=shifted.interior_tokens.square().mean()
-    objective=objective+shifted.surface_tokens.square().mean()
+    # A full LayerNorm output's squared mean is approximately constant;
+    # use channel-selective losses to test meaningful backprop instead.
+    objective=shifted.interior_tokens[...,0].square().mean()
+    objective=objective+shifted.surface_tokens[...,1].square().mean()
     objective=objective+0.03*shifted.support_xyz.square().mean()
     objective.backward()
     assert state.scene_triplanes.grad is not None
@@ -105,6 +107,16 @@ def test_interior_coordinates_are_student_predictions_and_h_gradient_is_live():
 def test_teacher_centerlines_are_only_used_in_separate_receipted_loss():
     model,state,_,_=_scene()
     research,out=_apply(model,state)
+    # A zero-initialized final coordinate head intentionally learns first;
+    # after a coordinate update, source geometry gradients can also reach H.
+    # This is a gradient-ownership probe, not a synthetic training success.
+    with torch.no_grad():
+        research.position_head[-1].weight.normal_(0.,0.025)
+    out=research(
+        iris=model.iris,scene_planes=state.scene_triplanes,
+        grid_xyz=state.query_xyz,grid_h=state.local_features,
+        mode="LEARNED_INTERIOR_SUPPORT",
+    )
     bone=torch.tensor([[[-.6,0.,0.],[0.,0.,0.],[.4,.2,0.],
                         [float("nan"),0.,0.]]])
     mask=torch.tensor([[True,True,True,False]])

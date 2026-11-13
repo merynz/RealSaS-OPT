@@ -117,8 +117,8 @@ func SubmitProductCapabilityCompile(
 		SubjectID:        &subjectID,
 		Targets:          []string{"product.proof"},
 		InputArtifactIDs: append([]uuid.UUID(nil), loaded.ArtifactIDs...),
-		IdempotencyKey: req.IdempotencyKey,
-		RequestedBy: req.RequestedBy,
+		IdempotencyKey:   req.IdempotencyKey,
+		RequestedBy:      req.RequestedBy,
 	}, capability.GoalProductCompile)
 }
 

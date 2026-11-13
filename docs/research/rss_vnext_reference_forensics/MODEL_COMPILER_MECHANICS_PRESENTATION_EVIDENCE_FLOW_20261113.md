@@ -95,3 +95,45 @@ A complete local-frame/surface-attachment hypothesis needs to keep **three diffe
 The real two-view model/H(x)/TESSA synthetic multi-component + AXIS V6 + Semantic relation joint CPU test suite reported **448 passed, 8 skipped** (NVIDIA native CUDA/FlexiCubes absent); this proves *cross-expert dataflow invariants*, not true source recognition or trained attachment accuracy. Positive candidate status means only that typed evidence domains are mutually addressable; same-component ownership absence, non-socket anchors, forged evidence, reverse direction, duplicate/out-of-domain requests and unknown region relations must be fail-closed or remain UNKNOWN.
 
 **Still missing and not satisfiable by geometric Compiler heuristics:** an independently trained, source-supervised *anchor-to-component/face* correspondence policy (or justified equivalent evidence derived from a future structural stage), exact admitted joint/control parent rest-frame binding, and held-out relative-motion/attach-detach tests. Only then may the existing `mechanics_attachment_evidence_gate_v1.py` and `rigid_attachment_surface_anchor_v1.py` promote a selected pair to an executable rigid attachment. This must be planned as a true **model output plus training evidence**, not added as a free Compiler nearest-face inference.
+
+
+## G. Socket→TESSA face correspondence: learned producer, training objective, and end-to-end evidence transfer (2026-11-13)
+
+**Status: CODED / CPU-CONTRACT VERIFIED; NOT TRAINED ON ADMITTED SOURCE / NOT PRODUCT-QUALIFIED.** This section supersedes section F's statement that a *producer module is missing*. The **real qualified source materializer and held-out model proof remain missing**.
+
+### 1. Model-owned proposal, not Compiler discovery
+
+`models/rss_vnext/attachment_face_correspondence_v1.py` adds `RSSvNextSocketFaceCorrespondenceHeadV1` inside `RSSvNextUnifiedCharacterModel`'s *single checkpoint*. It consumes:
+
+- TESSA's **exact indexed candidate mesh**: for each face, the pooled original shared IRIS vertex `H(x)`, refined XYZ, normals, TESSA component IDs, and anonymous region-membership probabilities including UNKNOWN.
+- AXIS V6's **real causal hidden state** at each `ANCHOR` and at its parent `SOCKET_CONTROL`; the parent-local coordinate bins are an explicit input. The head does not decode an anchor to absolute mesh/world coordinates by guessing a parent transform.
+- The original anonymous region relation matrix `[R,R,3]`; the 3rd channel remains the directionally ordered attachment hypothesis, *not* a source-contact verdict.
+
+Separate learned categorical `HELD` and `HOLDER` logits have shape `[A,F+1]`; index `F` is **NO_FACE**. The selector proposes bounded ordered pairs from the candidate face domain, never searches mesh geometry for a nearest matching part and never asks Compiler to discover ownership from proximity. Pairs are model hypotheses and may be UNKNOWN. Complexity for base scoring is `O(A·F)` rather than dense `O(A·F²)`; the optional pair ranking examines bounded top-k role candidates. The head's mere registration expands the single checkpoint state-dict: older checkpoints must not be silently loaded with `strict=False`.
+
+### 2. Source-trainable, not source-fed
+
+`RSSvNextStructuralTrainer` now has opt-in `anchor_face_correspondence` loss/weight and `trusted_anchor_face_registry`, pinned into training-resume digest. The trainer takes the same **teacher-forced training-only TESSA topology** and the admitted **AXIS source-rig program** to compute student features from the two original images. Source native `[anchor,HELD,HOLDER]` face-index labels and masks enter **only** the separate CE loss. The trusted registry binds exact source/dataset, original observed views/cameras, AXIS causal program, TESSA topology and label/mask bytes. Each eligible face label must be demonstrably reindexed into that TESSA candidate's face namespace. Missing target is masked UNKNOWN; index F is only a verified source-native no-attachment negative. A source object that has two nearby components without native grip/attachment evidence **cannot** supply a positive teacher.
+
+Source-materialization contract still to implement independently with corpus/native rig+mesh:
+1. Identify a **source-native parent/held object attachment** with explicit authoring metadata or independently qualified source motion/intervention; do not equate skin proximity, shared UV or component names with an attachment.
+2. Preserve the exact native geometry and **TESSA teaching topology face reindex** (check source triangle IDs, component group, coordinate frame and any remesh map); abstain when source and reconstructed faces cannot be mapped.
+3. Encode the same AXIS teacher program, anchored parent-frame roles, positive/verified negative labels and masks, source hashes, family eligibility, intervention origin, decoy negatives and lineage-deduplicated splits.
+4. Keep local anchor vs world frame separate and verify held-out motion/contact; no training receipt can self-certify runtime authority or source truth from generated images.
+
+`tests/models/test_rss_vnext_attachment_face_correspondence_v1.py` and `tests/models/test_rss_vnext_anchor_face_trainer_v1.py` exercise the **actual combined neural graph** and optimizer backpropagation into the IRIS scene, AXIS and the new face head, with source-receipt tamper and checkpoint-resume protection. Fixtures deliberately *simulate* independently admitted receipts: they do NOT create real source admission.
+
+### 3. Model → evidence archive → Compiler → bounded candidate join
+
+- `models/rss_vnext/inference_anchor_face_export_v1.py` exports student-generated `HELD/HOLDER/NO_FACE` and source-independent face logits selection, refusing teacher-forced mesh source authority. It checks exact TESSA mesh topology, component IDs, generated AXIS events, checkpoint-evidence binding.
+- `compiler/realsas_compiler_core/rss_vnext_socket_face_archive_v1.py` seals the typed selected proposals against exact checkpoint, original `RSSvNextInferenceEvidenceIRV1`, source-derived candidate mesh and AXIS stream. The original complete neural scene and other experts stay preserved; the sidecar cannot grant canonical/product/contact/attachment authority.
+- `models/rss_vnext/inference_pipeline_v1.py` atomically writes **optional** `rss_vnext_neural_anchor_face.json` with a pinned SHA256 entry in the existing inference receipt and replays it at read time. Undeclared extra files and mismatching bytes fail closed. `read_compiler_model_selected_socket_face_join_v1` opens original evidence+carrier and converts the *model-selected* ordered pairs into requests for the Compiler court.
+- Crucially, `compile_model_selected_rss_vnext_socket_face_join_v1` independently **recomputes and checks** the original Semantic directional relation and UNKNOWN mass for the requested exact `(HELD,HOLDER)` faces. A rehashed model-side affinity cannot overwrite the saved original source-bound neural field. The existing `rss_vnext_socket_face_join_v1.py` maintains candidate-only status and lists missing runtime witnesses.
+
+`tests/models/test_rss_vnext_socket_face_archive_v1.py` exercises a pinned two-view unified checkpoint and the persisted receipt writer/reader, with an *explicitly synthetic known-valid TESSA token + AXIS event fixture*, plus forged sidecar, different checkpoint/mesh/component, model NO_FACE and undeclared-file negatives.
+
+**CI:** Latest observed RSS CPU model–Compiler integration on `4f715c305787034b84ee2e12fbcab27b0b869af5` completed **473 passed, 8 skipped**. Native NVIDIA CUDA/FlexiCubes paths are among skips; these results prove interface, gradient, dataflow and tamper invariants only. The single-source qualified GPU training, real source face-mapping corpus, held-out grip decoys, true 45° interactive body solve, fully qualified appearance and ProductRevision remain open.
+
+**Architecture alert:** The existing AXIS causal teacher loss uses `_control_memory(state, structural)`, whereas this new attachment head trains via `_control_memory(state, structural, teacher_mesh)` to expose indexed mesh features. This is legitimate to test different supervised consumers, but before freezing training we must ablate/resolve the distribution difference and ensure the AXIS program is conditioned on the same mesh-available representation at source training and teacher-free inference.
+
+**Never infer from a PASS here:** canonical source mesh, correct part owners, hidden pixels, source contact, rigid grip, collision correctness, secondary motion physics, guaranteed drawable separability, or publishable puppet.

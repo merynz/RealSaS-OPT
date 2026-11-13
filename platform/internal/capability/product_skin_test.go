@@ -126,8 +126,17 @@ func TestSkinIsCataloguedWithoutEmbeddingLiveActivationState(t *testing.T) {
 				continue
 			}
 			found = true
-			if descriptor.Metadata["model_release_admission_owner"] != "PLATFORM_MODEL_REQUIREMENTS" {
-				t.Fatalf("Skin admission escaped Platform model selection: %+v", descriptor.Metadata)
+			models, err := descriptorRequiredModels(descriptor)
+			if err != nil || len(models) != 0 ||
+				descriptor.Metadata["single_checkpoint_inference_reused"] != true ||
+				descriptor.Metadata["independent_mira_model_release_allowed"] != false ||
+				descriptor.Metadata["exact_embedded_mira_decoder_replayed"] != true {
+				t.Fatalf("Skin must only consume embedded MIRA from the single RSS model: %+v / %v", descriptor.Metadata, err)
+			}
+			for _, forbidden := range []string{"activation_state", "activation_blocker", "current_platform_mira_modelrelease_bound"} {
+				if _, exists := descriptor.Metadata[forbidden]; exists {
+					t.Fatalf("live activation state leaked into Skin source: %s", forbidden)
+				}
 			}
 		}
 	}

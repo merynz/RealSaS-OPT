@@ -79,11 +79,12 @@ func TestRSSvNextTwoViewInputAndSingleModelShapeFormOneCandidateRoleGraph(t *tes
 	if err != nil || len(graph) != 2 {
 		t.Fatalf("RSS product roles not resolvable: %+v / %v", graph, err)
 	}
-	// The old responsibility ledger currently pins IRIS and TESSA families.
-	// Do not falsely report this candidate as an admitted production release.
-	_, err = ProductModelRequirements(registry)
-	if err == nil || !strings.Contains(err.Error(), "PRODUCT_MODEL_REQUIREMENT_") {
-		t.Fatalf("Old responsibility ledger unexpectedly admitted new RSS release: %v", err)
+	// The current responsibility ledger routes four specialist proposals
+	// to this one Shape checkpoint, with no separate IRIS/TESSA releases.
+	models, err := ProductModelRequirements(registry)
+	if err != nil || len(models) != 1 || models[0].Family != RSSvNextModelFamily ||
+		models[0].CapabilityID != ProductShapeCapabilityID {
+		t.Fatalf("single RSS inference origin drift: %+v / %v", models, err)
 	}
 }
 
@@ -128,7 +129,8 @@ func TestRSSvNextCandidateMeshConsumesExactUnifiedShapeNotOldEightViewStages(t *
 	if !ok || mesh.Metadata["executor_contract"] != RSSvNextMeshContractV2 ||
 		mesh.Metadata["input_source_artifact_type"] != "RealSaS.RSSvNextTwoViewSource" ||
 		mesh.Metadata["input_fanout_artifact_type"] != "RealSaS.RSSvNextProductEvidenceFanout" ||
-		mesh.Metadata["output_artifact_type"] != "RealSaS.RSSvNextComputedCandidateSurface" ||
+		mesh.Metadata["output_artifact_type"] != "RealSaS.CanonicalMeshIR" ||
+		mesh.Metadata["canonical_mesh_required_for_product_execution"] != true ||
 		mesh.Metadata["requires_shape_parent_binding"] != true ||
 		mesh.Metadata["independent_model_inference_forbidden"] != true ||
 		mesh.Metadata["learned_evidence_retained_by_reference"] != true ||
@@ -140,11 +142,9 @@ func TestRSSvNextCandidateMeshConsumesExactUnifiedShapeNotOldEightViewStages(t *
 	if err != nil || len(requirements) != 0 {
 		t.Fatalf("RSS mesh must not bring its own independent checkpoints: %+v / %v", requirements, err)
 	}
-	// Active platform release still awaits the source-aware responsibility
-	// ledger and downstream canonical geometry/mechanics admission switch.
-	_, err = ProductModelRequirements(registry)
-	if err == nil || !strings.Contains(err.Error(), "PRODUCT_MODEL_REQUIREMENT_") {
-		t.Fatalf("RSS candidate wrongly admitted against old ledger: %v", err)
+	models, err := ProductModelRequirements(registry)
+	if err != nil || len(models) != 1 || models[0].Family != RSSvNextModelFamily {
+		t.Fatalf("candidate mesh introduced separate checkpoint: %+v / %v", models, err)
 	}
 
 	_, err = Build(

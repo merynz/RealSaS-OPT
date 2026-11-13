@@ -73,6 +73,8 @@ def _constraint_row(c)->dict:
         "name":str(c.name),
         "type":str(c.type),
         "mute":getattr(c,"mute",None),
+        "enabled":getattr(c,"enabled",None),
+        "is_valid":getattr(c,"is_valid",None),
         "influence":getattr(c,"influence",None),
         "target":None if owner is None else str(owner.name),
         "target_type":None if owner is None else str(owner.type),

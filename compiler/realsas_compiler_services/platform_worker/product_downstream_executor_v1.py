@@ -121,33 +121,58 @@ def execute_graphics_capability_v1(
     )
     from compiler.realsas_compiler_core.graphics_runtime_v1 import build_runtime_graphics_v1
 
-    supplied = _read(request,read_object,"RealSaS.GraphicsEvidence","v1")
-    if supplied.get("schema_version") != "RealSaS.GraphicsEvidence.v1":
-        raise RuntimeError("PRODUCT_GRAPHICS_EVIDENCE_SCHEMA_DRIFT")
-    try:
-        evidence = GraphicsEvidenceV1(
-            mesh_binding_hash=supplied["mesh_binding_hash"],
-            static_relations=tuple(
-                GraphicsStaticRelationEvidenceV1(**row)
-                for row in supplied["static_relations"]),
-            view_relations=tuple(
-                GraphicsViewRelationEvidenceV1(**row)
-                for row in supplied["view_relations"]),
-            evidence_hash=supplied["evidence_hash"],
-            metadata=supplied.get("metadata") or {},
+    # In the active one-trigger product route, Shape v3 already emitted the
+    # shared Semantic/Graphics scene. A manually authored GraphicsEvidence
+    # source must NOT be a hidden prerequisite for product.graphics.
+    supplied_refs = [
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict and row.get("artifact_type") == "RealSaS.GraphicsEvidence"
+        and row.get("schema_version") == "v1"
+    ]
+    if len(supplied_refs) > 1:
+        raise RuntimeError("PRODUCT_GRAPHICS_AMBIGUOUS_EXTERNAL_EVIDENCE")
+    native_receipt = None
+    if supplied_refs:
+        # Explicit legacy/test evidence remains a separate, inspectable
+        # authority scope. It does not become source-observed appearance.
+        supplied = _read(request,read_object,"RealSaS.GraphicsEvidence","v1")
+        if supplied.get("schema_version") != "RealSaS.GraphicsEvidence.v1":
+            raise RuntimeError("PRODUCT_GRAPHICS_EVIDENCE_SCHEMA_DRIFT")
+        try:
+            evidence = GraphicsEvidenceV1(
+                mesh_binding_hash=supplied["mesh_binding_hash"],
+                static_relations=tuple(
+                    GraphicsStaticRelationEvidenceV1(**row)
+                    for row in supplied["static_relations"]),
+                view_relations=tuple(
+                    GraphicsViewRelationEvidenceV1(**row)
+                    for row in supplied["view_relations"]),
+                evidence_hash=supplied["evidence_hash"],
+                metadata=supplied.get("metadata") or {},
+            )
+        except (ValueError, KeyError, TypeError) as exc:
+            raise RuntimeError("PRODUCT_GRAPHICS_EVIDENCE_DECODE_INVALID") from exc
+        if (
+            evidence.evidence_hash != graphics_evidence_hash_v1(evidence)
+            or evidence.mesh_binding_hash != mesh.mesh_lineage_hash
+        ):
+            raise RuntimeError("PRODUCT_GRAPHICS_EVIDENCE_HASH_OR_MESH_DRIFT")
+        compiled = compile_graphics_on_canonical_puppet_v1(
+            mesh=mesh,rig=rig,skin=skin,
+            source_graphics_binding_hash=evidence.evidence_hash,
+            evidence=evidence,
         )
-    except (ValueError, KeyError, TypeError) as exc:
-        raise RuntimeError("PRODUCT_GRAPHICS_EVIDENCE_DECODE_INVALID") from exc
-    if (
-        evidence.evidence_hash != graphics_evidence_hash_v1(evidence)
-        or evidence.mesh_binding_hash != mesh.mesh_lineage_hash
-    ):
-        raise RuntimeError("PRODUCT_GRAPHICS_EVIDENCE_HASH_OR_MESH_DRIFT")
-    compiled = compile_graphics_on_canonical_puppet_v1(
-        mesh=mesh,rig=rig,skin=skin,
-        source_graphics_binding_hash=evidence.evidence_hash,
-        evidence=evidence,
-    )
+        source_kind = "EXPLICIT_GRAPHICS_EVIDENCE_NOT_RSS_SOURCE_TRUTH"
+    else:
+        from .rss_vnext_graphics_consumer_v1 import (
+            compile_rss_vnext_shape_native_graphics_v1,
+        )
+        compiled, native_receipt = compile_rss_vnext_shape_native_graphics_v1(
+            request, canonical_mesh=mesh, canonical_rig=rig,
+            canonical_skin=skin, read_object=read_object,
+        )
+        source_kind = "SINGLE_RSSVNEXT_SHAPE_INFERENCE_REGION_CANDIDATES"
+
     rendered = build_runtime_graphics_v1(compiled,face_count=len(mesh.faces))
     outputs = [
         _seal(compiled,role="compiled_graphics",kind="RealSaS.CompiledGraphics",
@@ -155,6 +180,13 @@ def execute_graphics_capability_v1(
         _seal(rendered,role="runtime_graphics_candidate",
               kind="RealSaS.RuntimeGraphics",version="v1",put_bytes=put_bytes),
     ]
+    if native_receipt is not None:
+        outputs.append(_seal(
+            native_receipt,
+            role="rss_graphics_native_candidate_receipt",
+            kind="RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
+            version="v1", put_bytes=put_bytes,
+        ))
     return {
         "capability_id":"product.graphics","status":"PASS",
         "outputs":outputs,"failure":None,
@@ -165,6 +197,10 @@ def execute_graphics_capability_v1(
             "graphics_graph_hash":compiled.graph_hash,
             "graphics_runtime_hash":rendered.runtime_graphics_hash,
             "source_appearance_qualified":False,
+            "graphics_source_kind":source_kind,
+            "source_visibility_qualified":False,
+            "pose_conditioned_occlusion_qualified":False,
+            "attachment_socket_qualified":False,
             "product_revision_minted":False,
         }
     }

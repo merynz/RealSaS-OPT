@@ -294,6 +294,11 @@ def run()->None:
         ):
             _fail("NATIVE_TEACHER_ACTION_FRAME_ROW_INVALID")
         if last_action!=sample["action"]:
+            # Match the original native teacher's exact per-action reset.
+            # Carrying pose/NLA evaluation from the previous clip can create
+            # false root/parent motion even if frame numbers are identical.
+            if last_action is not None:
+                native._neutralize_animation()
             active_armature=native._activate_action(action_by_name[sample["action"]])
             last_action=sample["action"]
         if active_armature!=sample["armature"]:

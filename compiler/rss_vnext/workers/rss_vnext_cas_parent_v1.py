@@ -50,6 +50,31 @@ def select_rss_vnext_parent_v1(
     return dict(first)
 
 
+
+def read_rss_vnext_parent_cas_v1(
+    ref: Mapping[str, Any], reader, *, limit: int = 256 * 1024 * 1024,
+) -> bytes:
+    """Read and authenticate exact CAS bytes without loading rig/model weights."""
+    from hashlib import sha256
+
+    if (
+        not isinstance(ref, Mapping)
+        or type(ref.get("size_bytes")) is not int
+        or ref["size_bytes"] < 0
+        or ref["size_bytes"] > limit
+    ):
+        raise RuntimeError("RSS_VNEXT_RIG_CAS_RESOURCE_LIMIT")
+    data = reader(ref)
+    if (
+        type(data) is not bytes
+        or len(data) != ref["size_bytes"]
+        or sha256(data).hexdigest() != ref.get("content_sha256")
+    ):
+        raise RuntimeError("RSS_VNEXT_RIG_CAS_BYTES_OR_HASH_DRIFT")
+    return data
+
+
 __all__ = [
     "SOURCE_KIND", "SOURCE_VERSION", "select_rss_vnext_parent_v1",
+    "read_rss_vnext_parent_cas_v1",
 ]

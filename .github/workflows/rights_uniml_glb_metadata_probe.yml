@@ -31,6 +31,7 @@ jobs:
           for label,obj in [('asset',d.get('asset',{})),('extras',d.get('extras',{}))]:
            if isinstance(obj,dict):hit[label]={k:str(v)[:180] for k,v in obj.items() if 'source' in k.lower() or 'licen' in k.lower() or 'copyright' in k.lower() or 'author' in k.lower() or 'origin' in k.lower() or k=='generator'}
           extras_count=sum(1 for obj in d.get('nodes',[]) if isinstance(obj,dict) and 'extras' in obj)
+          print('GLB_NODE_EXTRAS',uid,[{'node_name':x.get('name',''),'extras':str(x.get('extras'))[:850]} for x in d.get('nodes',[]) if isinstance(x,dict) and x.get('extras')][:5],flush=True)
           print('GLB_PROVENANCE',json.dumps({'uid':uid,'http':r.status_code,'json_bytes':n,'source_fields':hit,'extra_nodes':extras_count,
                'asset_keys':list(d.get('asset',{})),'top_keys':list(d.keys())}),flush=True)
          except Exception as e:print('GLB_PROBE_ERROR',uid,type(e).__name__,str(e)[:240],flush=True)

@@ -70,12 +70,21 @@ func (ProductGraphicsProvider) Capabilities(context.Context) ([]Descriptor, erro
 	metadata["input_mechanics_schema_version"] = "v1"
 	metadata["input_evidence_artifact_type"] = "RealSaS.GraphicsEvidence"
 	metadata["input_evidence_schema_version"] = "v1"
+	metadata["input_evidence_optional_legacy"] = true
+	metadata["manual_graphics_evidence_required"] = false
+	metadata["input_source_artifact_type"] = "RealSaS.RSSvNextTwoViewSource"
+	metadata["input_source_schema_version"] = "v1"
+	metadata["input_fanout_artifact_type"] = "RealSaS.RSSvNextProductEvidenceFanout"
+	metadata["input_fanout_schema_version"] = "v1"
+	metadata["same_shape_inference_graphics_consumed"] = true
+	metadata["source_visibility_qualified_by_graphics"] = false
+	metadata["attachment_socket_qualified_by_graphics"] = false
 	metadata["output_artifact_type"] = "RealSaS.CompiledGraphics"
 	metadata["output_schema_version"] = "v1"
 	metadata["required_models"] = []any{}
 	metadata["source_appearance_qualified_by_graphics_evidence"] = false
 	metadata["can_mint_product_revision"] = false
-	return downstreamDescriptor(ProductRoleGraphics, []string{"product.mesh", "product.rig", "product.skin", "product.mechanics"}, metadata)
+	return downstreamDescriptor(ProductRoleGraphics, []string{"product.shape", "product.mesh", "product.rig", "product.skin", "product.mechanics"}, metadata)
 }
 
 func (ProductMotionProvider) Capabilities(context.Context) ([]Descriptor, error) {

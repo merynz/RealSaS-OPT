@@ -132,7 +132,7 @@ func TestEngineReleaseModelRequirementsRejectArchitectureAndChannelDrift(t *test
 	}
 }
 
-func TestProductShapeMeshRetainSevenCASChildrenAndOneCanonicalMesh(t *testing.T) {
+func TestProductShapeMeshRetainRawFiveCASAndCalibratedAlternate(t *testing.T) {
 	shapeRows, err := (RSSvNextShapeCandidateProvider{}).Capabilities(context.Background())
 	if err != nil || len(shapeRows) != 1 {
 		t.Fatalf("Shape descriptor=%v / %d", err, len(shapeRows))
@@ -144,8 +144,14 @@ func TestProductShapeMeshRetainSevenCASChildrenAndOneCanonicalMesh(t *testing.T)
 		t.Fatalf("missing one-inference retained fanout: %+v", shapeMeta)
 	}
 	aux, ok := shapeMeta["auxiliary_outputs"].([]any)
-	if !ok || len(aux) != 7 {
-		t.Fatalf("expected seven independently retained Shape CAS children %+v", aux)
+	if !ok || len(aux) != 4 ||
+		shapeMeta["output_artifact_type"] != "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier" {
+		t.Fatalf("expected one raw NeuralScene plus four companion CAS outputs %+v", shapeMeta)
+	}
+	calibrated, ok := shapeMeta["calibrated_auxiliary_outputs"].([]any)
+	if !ok || len(calibrated) != 7 ||
+		shapeMeta["alternate_calibrated_output_artifact_type"] != "RealSaS.RSSvNextInferenceEvidence" {
+		t.Fatalf("expected explicit calibrated evidence plus seven CAS children %+v", shapeMeta)
 	}
 	meshRows, err := (RSSvNextMeshCandidateProvider{}).Capabilities(context.Background())
 	if err != nil || len(meshRows) != 1 {
@@ -154,7 +160,9 @@ func TestProductShapeMeshRetainSevenCASChildrenAndOneCanonicalMesh(t *testing.T)
 	meshMeta := meshRows[0].Metadata
 	if meshMeta["output_artifact_type"] != "RealSaS.CanonicalMeshIR" ||
 		meshMeta["canonical_mesh_required_for_product_execution"] != true ||
-		meshMeta["input_shape_artifact_type"] != "RealSaS.RSSvNextInferenceEvidence" ||
+		meshMeta["input_shape_artifact_type"] != "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier" ||
+		meshMeta["alternate_calibrated_shape_artifact_type"] != "RealSaS.RSSvNextInferenceEvidence" ||
+		meshMeta["raw_static_court_before_canonical_mint"] != true ||
 		meshMeta["independent_model_inference_forbidden"] != true {
 		t.Fatalf("canonical product mesh is not source-gated: %+v", meshMeta)
 	}

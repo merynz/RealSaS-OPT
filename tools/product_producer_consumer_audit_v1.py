@@ -134,7 +134,7 @@ def _go_registered_roles(source: str) -> set[str]:
     if start < 0 or end < 0:
         raise ValueError("GO_PRODUCT_PROVIDER_CATALOG_MISSING")
     declared = re.findall(
-        r"\\b(?:Product|RSSvNext)(Input|Shape|Mesh|Rig|Skin|Mechanics|Graphics|Motion|Proof)(?:Candidate)?Provider\\{\\}",
+        r"\b(?:Product|RSSvNext)(Input|Shape|Mesh|Rig|Skin|Mechanics|Graphics|Motion|Proof)(?:Candidate)?Provider\{\}",
         source[start:end],
     )
     return {"product." + role.lower() for role in declared}

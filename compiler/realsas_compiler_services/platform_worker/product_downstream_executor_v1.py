@@ -177,7 +177,8 @@ def execute_motion_capability_v2(
     from compiler.realsas_compiler_core.canonical_rig_ir_v2 import canonical_rig_from_dict_v2
     from compiler.realsas_compiler_core.canonical_mechanics_ir_v1 import canonical_mechanics_from_dict_v1
     from compiler.realsas_compiler_core.control_motion_ir_v1 import (
-        control_motion_proposal_from_dict_v1, qualify_control_motion_v1,
+        ControlMotionClipProposalIRV1, control_motion_proposal_from_dict_v1,
+        qualify_control_motion_v1, seal_control_motion_proposal_v1,
     )
     from compiler.realsas_compiler_core.canonical_motion_ir_v2 import mint_canonical_motion_v2
 
@@ -185,8 +186,42 @@ def execute_motion_capability_v2(
         _read(request,read_object,"RealSaS.CanonicalRigIR","v2"))
     mechanics = canonical_mechanics_from_dict_v1(
         _read(request,read_object,"RealSaS.CanonicalMechanicsIR","v1"))
-    proposal = control_motion_proposal_from_dict_v1(
-        _read(request,read_object,"RealSaS.ControlMotionClipProposalIR","v1"))
+    proposed = [
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict
+        and row.get("artifact_type") == "RealSaS.ControlMotionClipProposalIR"
+    ]
+    if len(proposed) == 1:
+        proposal = control_motion_proposal_from_dict_v1(
+            _read(request,read_object,"RealSaS.ControlMotionClipProposalIR","v1"))
+        motion_source = "EXTERNAL_CONTROL_MOTION_PROPOSAL"
+    elif not proposed and (
+        (request.get("capability_metadata") or {}).get("default_rest_hold_policy")
+        == "DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1"
+    ):
+        # A control-ready puppet must be able to stand still. No invented
+        # animation, breathing cycle, artist motion, learned pose or retargeting
+        # is hidden behind a compelling-looking Idle clip.
+        proposal = seal_control_motion_proposal_v1(ControlMotionClipProposalIRV1(
+            proposal_clip_id="POLICY_REST_HOLD",
+            display_name="Rest Hold",
+            intent="REST_HOLD_POLICY",
+            duration_seconds=1.0,
+            loop=True,
+            tracks=(),
+            rig_lineage_hash=rig.rig_lineage_hash,
+            control_program_hash=rig.control_program_hash,
+            mechanics_lineage_hash=mechanics.mechanics_lineage_hash,
+            metadata={
+                "representation_policy":"DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1",
+                "authored_motion_present":False,
+                "animated_idle_quality_proven":False,
+                "source_motion_authority":False,
+            },
+        ))
+        motion_source = "COMPILER_POLICY_REST_HOLD_NOT_ANIMATED_IDLE"
+    else:
+        raise RuntimeError("PRODUCT_MOTION_SOURCE_AMBIGUOUS_OR_ABSENT")
     qualified = qualify_control_motion_v1(proposal,rig=rig,mechanics=mechanics)
     motion = mint_canonical_motion_v2(qualified)
     outputs = [
@@ -204,6 +239,7 @@ def execute_motion_capability_v2(
             "mechanics_lineage_hash":mechanics.mechanics_lineage_hash,
             "motion_lineage_hash":motion.motion_lineage_hash,
             "clip_count":1,
+            "motion_source_kind":motion_source,
             "source_motion_independently_verified":False,
             "product_revision_minted":False,
         }

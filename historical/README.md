@@ -149,3 +149,6 @@ Rebuild this catalog with `python tools/build_documentation_index.py`.
 The external v0.5 archive remains byte authority for its own historical
 source. Only explicitly promoted, regression-gated mechanisms belong in
 current executable homes.
+
+
+Historical CI: [207 branch-specific VF11 workflow definitions](ci_workflows/vf11_20260921/README.md), byte-preserved and no longer automatically discovered on main.

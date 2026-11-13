@@ -3,8 +3,8 @@ from __future__ import annotations
 """Two genuine uncalibrated uploads -> pinned generative H(x) construction.
 
 Original files remain byte-exact in upstream CAS. This is an unqualified
-neural scene candidate, not a calibrated source, a source-ray replay, or a
-product artifact. It uses the SAME two-stage sampler and six-view IRIS
+neural scene and AXIS/MIRA candidates, not a calibrated source,
+a source-ray replay, or a product artifact. It uses the SAME two-stage sampler and six-view IRIS
 construction as calibrated RSS.vNext inference and learned S-LRM training.
 """
 
@@ -122,7 +122,7 @@ def run_uncalibrated_two_image_neural_scene_v1(
         canonical_seed=canonical_seed,
         multiview_seed=multiview_seed,
         max_topology_tokens=max_topology_tokens,
-        generate_controls=False,
+        generate_controls=True,
     )
     state = construction.proposal["state"]
     mesh = construction.proposal.get("mesh_candidate")
@@ -136,7 +136,10 @@ def run_uncalibrated_two_image_neural_scene_v1(
         )
         or construction.original_camera_calibrated
         or (mesh is not None and mesh.source_ray_evidence is not None)
-        or construction.proposal.get("control_event_proposal")
+        or (mesh is None and construction.proposal.get("control_event_proposal"))
+        or (mesh is not None and construction.proposal.get("control_status") != (
+            "UNQUALIFIED_AXISMIRA_CONTROL_CANDIDATE"
+        ))
         or construction.product_revision_minted
     ):
         raise RuntimeError("RSS_VNEXT_RAW_NEURAL_FALSE_SOURCE_PROJECTION")

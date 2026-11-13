@@ -551,6 +551,7 @@ def _axis_rig_skin_trainer(net, receipt):
             flexicubes_surface=0, axis_rig_skin_codes=1,
         ),
         trusted_axis_teacher_registry={"teacher": receipt},
+        axis_training_policy="RIG_ONLY_PRETRAIN",
     )
 
 

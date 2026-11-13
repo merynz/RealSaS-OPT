@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Typed expert ownership on the one RSS.vNext neural carrier.
 
-StdGEN informs semantic presentation roles, AniGen informs geometry/mechanics
+RealSaS informs semantic presentation roles, AniGen informs geometry/mechanics
 coherence, SkinTokens informs joint/weight coupling. Learned roles, adjacency,
 RGB logits and attachment affinities are NOT executable capabilities.
 The full model evidence remains immutable in CAS; this court references it.

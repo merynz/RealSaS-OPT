@@ -17,7 +17,7 @@ from models.rss_vnext.flexicubes_surface_evidence import (
     RSSvNextFlexiCubesSurfaceEvidence,
 )
 from models.rss_vnext.semantic_geometry_prior import (
-    RSSvNextSemanticLayerSpec, stdgen_style_generic_schema,
+    RSSvNextSemanticLayerSpec, realsas_style_generic_schema,
 )
 from models.rss_vnext.training_engine import (
     RSSvNextStructuralTrainer,
@@ -86,7 +86,7 @@ def test_exact_pinned_flexicubes_backprop_through_signed_field_semantic_and_cube
     extractor = PinnedFlexiCubesV1(_root(), device="cpu")
     evidence = bridge(
         source, extractor=extractor, role_head=decoder,
-        schema=stdgen_style_generic_schema(),
+        schema=realsas_style_generic_schema(),
         layer=RSSvNextSemanticLayerSpec(
             "without_secondary", ("focal_detail", "primary_form", "outer_covering"),
         ),
@@ -116,11 +116,11 @@ def test_open_or_unknown_signed_domain_abstains_not_faked():
     bridge = RSSvNextFlexiCubesEvidenceBridge(core, resolution=3)
     extractor = PinnedFlexiCubesV1(_root(), device="cpu")
     planes = torch.zeros(1, 3, 2, 2, 2)
-    layer = RSSvNextSemanticLayerSpec("all", stdgen_style_generic_schema().roles)
+    layer = RSSvNextSemanticLayerSpec("all", realsas_style_generic_schema().roles)
     with pytest.raises(ValueError, match="SIGNED_DOMAIN_NOT_PERMITTED"):
         bridge(
             planes, extractor=extractor, role_head=role,
-            schema=stdgen_style_generic_schema(), layer=layer,
+            schema=realsas_style_generic_schema(), layer=layer,
             field_policy="OPEN_OR_UNKNOWN_UDF",
         )
 

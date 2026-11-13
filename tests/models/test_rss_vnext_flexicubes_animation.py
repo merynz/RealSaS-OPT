@@ -25,7 +25,7 @@ from models.rss_vnext.animation_ready_mesh import (
 )
 from models.rss_vnext.semantic_geometry_prior import (
     RSSvNextSemanticLayerSpec,
-    stdgen_style_generic_schema,
+    realsas_style_generic_schema,
 )
 from models.rss_vnext import (
     RSSvNextConfig, RSSvNextPatchEncoderForTests,
@@ -120,9 +120,9 @@ def _real_fc_surface():
     bridge = RSSvNextFlexiCubesEvidenceBridge(core, resolution=5)
     surface = bridge(
         planes, extractor=_pinned(), role_head=role,
-        schema=stdgen_style_generic_schema(),
+        schema=realsas_style_generic_schema(),
         layer=RSSvNextSemanticLayerSpec(
-            "all", stdgen_style_generic_schema().roles,
+            "all", realsas_style_generic_schema().roles,
         ),
         field_policy="SIGNED_HYPOTHESIS_ONLY",
     )

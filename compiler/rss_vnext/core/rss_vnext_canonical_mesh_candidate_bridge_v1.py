@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """RSS.vNext -> existing CanonicalMeshCandidateIR; never new Mesh authority.
 
-StdGEN's multiview color/geometry/semantic extraction is upstream. TESSA
+RealSaS's multiview color/geometry/semantic extraction is upstream. TESSA
 owns indexed mesh proposals and FlexiCubes may refine geometry, but none of
 those learned values is a source-support correspondence. This bridge only
 runs if an external source-support witness explicitly binds EACH indexed

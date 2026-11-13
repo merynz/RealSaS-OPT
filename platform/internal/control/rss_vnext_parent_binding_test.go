@@ -43,6 +43,23 @@ func TestRSSVNextMeshParentBindingReplaysExactPythonModelIdentity(t *testing.T) 
 	}
 }
 
+func TestRSSVNextMeshParentBindingAcceptsSingleSealedReconstructionBundleV2(t *testing.T) {
+	refs, models := rssMeshParentFixture()
+	models[0].ArtifactSchemaVersion = "v2"
+	result, err := rssVNextMeshParentBinding(refs, models)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result["checkpoint_sha256"] != strings.Repeat("b", 64) {
+		t.Fatalf("checkpoint identity drift: %+v", result)
+	}
+	models[0].ArtifactSchemaVersion = "v3"
+	if _, err := rssVNextMeshParentBinding(refs, models); err == nil ||
+		!strings.Contains(err.Error(), "CHECKPOINT_ABI_DRIFT") {
+		t.Fatalf("invalid checkpoint ABI admitted: %v", err)
+	}
+}
+
 func TestRSSVNextMeshParentBindingRejectsWrongSourceCheckpointOrModelFamily(t *testing.T) {
 	refs, models := rssMeshParentFixture()
 	cases := []struct {

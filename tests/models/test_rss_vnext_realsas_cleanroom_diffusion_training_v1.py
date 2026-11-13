@@ -8,7 +8,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from models.rss_vnext.stdgen_cleanroom_diffusion_training_v1 import (
+from models.rss_vnext.realsas_cleanroom_diffusion_training_v1 import (
     STAGE_CANONICAL, STAGE_MULTIVIEW,
     CleanroomDiffusionRenderRecordV1, validate_render_record_v1,
     validate_cleanroom_render_corpus_v1, AttentionLoRALinearV1,
@@ -201,7 +201,7 @@ def test_training_step_does_not_accept_missing_teacher_pixels_or_wrong_stage():
 
 
 
-def test_multiview_without_rowwise_interaction_cannot_train_as_stdgen_parity():
+def test_multiview_without_rowwise_interaction_cannot_train_as_realsas_parity():
     kw=_microcase(STAGE_MULTIVIEW)
     kw["rowwise_attention"]=None
     with pytest.raises(ValueError,match="MULTIVIEW_ROW_ATTENTION_REQUIRED"):
@@ -237,7 +237,7 @@ def test_rowwise_view_normal_attention_propagates_across_views_but_not_rows():
 
 
 
-def test_stdgen_rgb_normal_views_must_have_identical_camera_and_aligned_scanline():
+def test_realsas_rgb_normal_views_must_have_identical_camera_and_aligned_scanline():
     kw=_microcase(STAGE_MULTIVIEW)
     kw["target_cameras"][0,6,0]=1.
     with pytest.raises(ValueError,match="RGB_NORMAL_CAMERA_PAIRING_DRIFT"):

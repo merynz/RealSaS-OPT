@@ -3,12 +3,12 @@ from __future__ import annotations
 import pytest
 import torch
 
-from models.rss_vnext.stdgen_joint_slrm_render_v1 import StdGENFlexiCubesLayerRasterV1
-from models.rss_vnext.stdgen_inside_out_refinement_v1 import (
-    StdGENGeneratedMeshGuidanceV1,
-    stdgen_outer_inner_collision_loss_v1,
-    stdgen_generated_refinement_objective_v1,
-    refine_stdgen_one_layer_v1,
+from models.rss_vnext.realsas_joint_slrm_render_v1 import RealSaSFlexiCubesLayerRasterV1
+from models.rss_vnext.realsas_inside_out_refinement_v1 import (
+    RealSaSGeneratedMeshGuidanceV1,
+    realsas_outer_inner_collision_loss_v1,
+    realsas_generated_refinement_objective_v1,
+    refine_realsas_one_layer_v1,
 )
 
 
@@ -19,7 +19,7 @@ def seed():
 
 
 def _guidance():
-    return StdGENGeneratedMeshGuidanceV1(
+    return RealSaSGeneratedMeshGuidanceV1(
         expected_mask=torch.ones((1,4,1)),
         expected_normal_world=torch.tensor([[[0.,0.,1.]]*4]),
         known_mask=torch.ones((1,4),dtype=torch.bool),
@@ -33,7 +33,7 @@ def _raster(vertices,layer="outer"):
     depth=vertices[:,2].mean()
     normal=torch.stack((torch.zeros_like(depth),torch.zeros_like(depth),
                         torch.ones_like(depth)))[None,None].expand(1,4,3)
-    return StdGENFlexiCubesLayerRasterV1(
+    return RealSaSFlexiCubesLayerRasterV1(
         rgb_white_composite=torch.ones((1,4,3)),
         alpha=vertices[:,2].mean().sigmoid().expand(1,4,1),
         semantic_posterior=torch.ones((1,4,2))*.5,
@@ -53,13 +53,13 @@ def test_exact_paper_outer_inside_collision_is_zero_when_outside_and_positive_wh
     outer_inside=inside.clone()
     outer_inside[:,2]=-.2
     outer_inside.requires_grad_(True)
-    score=stdgen_outer_inner_collision_loss_v1(outer_inside,inside,normal)
+    score=realsas_outer_inner_collision_loss_v1(outer_inside,inside,normal)
     assert torch.allclose(score,torch.tensor(.008),atol=1.e-6)
     score.backward()
     assert outer_inside.grad[:,2].lt(0).all()
     outside=inside.clone()
     outside[:,2]=.2
-    assert stdgen_outer_inner_collision_loss_v1(outside,inside,normal)==0.
+    assert realsas_outer_inner_collision_loss_v1(outside,inside,normal)==0.
 
 
 def test_refinement_optimizes_outer_vertices_but_cannot_change_fixed_inner():
@@ -68,7 +68,7 @@ def test_refinement_optimizes_outer_vertices_but_cannot_change_fixed_inner():
     normal=torch.tensor([[0.,0.,1.]]*3)
     initial=inner.clone()
     initial[:,2]=-.2
-    refined=refine_stdgen_one_layer_v1(
+    refined=refine_realsas_one_layer_v1(
         layer_name="outer",initial_vertices_xyz=initial,
         face_indices=torch.tensor([[0,1,2]]),guidance=_guidance(),
         rasterize_vertices=_raster,
@@ -83,7 +83,7 @@ def test_refinement_optimizes_outer_vertices_but_cannot_change_fixed_inner():
 def test_generated_normal_mask_objective_is_differentiable_but_not_source_truth():
     verts=torch.randn((3,3),requires_grad=True)
     raster=_raster(verts)
-    terms=stdgen_generated_refinement_objective_v1(
+    terms=realsas_generated_refinement_objective_v1(
         raster=raster,guidance=_guidance(),current_outer_xyz=verts,
     )
     terms["total"].backward()
@@ -104,7 +104,7 @@ def test_invalid_source_authority_or_unknown_normal_frame_rejected():
 def test_malformed_layer_raster_never_optimizes_other_identity():
     verts=torch.ones((3,3))
     with pytest.raises(ValueError,match="LAYER_RASTER_MISMATCH"):
-        refine_stdgen_one_layer_v1(
+        refine_realsas_one_layer_v1(
             layer_name="outer",initial_vertices_xyz=verts,
             face_indices=torch.tensor([[0,1,2]]),
             guidance=_guidance(),

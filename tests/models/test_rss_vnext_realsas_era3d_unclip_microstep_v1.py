@@ -6,7 +6,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from models.rss_vnext.stdgen_era3d_unclip_microstep_v1 import (
+from models.rss_vnext.realsas_era3d_unclip_microstep_v1 import (
     expand_pretrained_unclip_input_conv_v1,
     era3d_aligned_unclip_noise_microstep_v1,
 )

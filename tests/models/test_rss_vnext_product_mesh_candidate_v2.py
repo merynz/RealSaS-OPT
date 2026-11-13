@@ -467,3 +467,42 @@ def test_go_platform_ordinal_input_roles_rehydrate_exact_neural_children(tmp_pat
             {**request, "input_artifacts": broken},
             read_object=read, put_bytes=put,
         )
+
+
+def test_static_canonical_mesh_requires_a_complete_immutable_release_policy():
+    from compiler.realsas_compiler_services.platform_worker.rss_vnext_mesh_static_admission_v1 import (
+        maybe_admit_rss_vnext_static_mesh_v1,
+    )
+    # A healthy topology cannot turn into CanonicalMesh through a missing,
+    # partially supplied, or mutable raster acceptance policy.
+    assert maybe_admit_rss_vnext_static_mesh_v1(
+        metadata={}, source=None, evidence=None, source_identity_court=None,
+        diagnostic=None, computed_surface=None, canonical_bridge=None,
+        model_config=None,
+    ) is None
+    with pytest.raises(RuntimeError,match="STATIC_RELEASE_POLICY_INCOMPLETE"):
+        maybe_admit_rss_vnext_static_mesh_v1(
+            metadata={"two_view_static_policy_sha256":"a"*64},
+            source=None, evidence=None, source_identity_court=None,
+            diagnostic=None, computed_surface=None, canonical_bridge=None,
+            model_config=None,
+        )
+    policy = {
+        "min_recall":0.9, "min_precision":0.9,
+        "max_largest_coherent_hole_fraction":0.1,
+        "max_interior_uncovered_fraction":0.1,
+        "min_component_recall":0.9,
+        "max_silhouette_edge_p95_px":2.0,
+        "source_alpha_threshold":128,
+        "component_min_foreground_fraction":0.005,
+        "schema":"RealSaS.RSSvNext.TwoObservedViewMeshPolicy.v1",
+    }
+    with pytest.raises(RuntimeError,match="STATIC_RELEASE_POLICY_SHA_DRIFT"):
+        maybe_admit_rss_vnext_static_mesh_v1(
+            metadata={"two_view_static_policy":policy,
+                      "two_view_static_policy_sha256":"f"*64,
+                      "mesh_policy_document_sha256":"f"*64},
+            source=None, evidence=None, source_identity_court=None,
+            diagnostic=None, computed_surface=None, canonical_bridge=None,
+            model_config=None,
+        )

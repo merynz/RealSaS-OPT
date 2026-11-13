@@ -210,9 +210,16 @@ def _seal_binary_candidate_v1(
     body: bytes, *, role: str, kind: str, put_bytes: Callable,
 ) -> dict[str, Any]:
     from compiler.rss_vnext.workers.rss_vnext_source_rgb_projection_candidate_v1 import (
-        MAX_ARTIFACT_BYTES,
+        MAX_ARTIFACT_BYTES as MAX_RGB_CAS,
     )
-    if not body or len(body) > MAX_ARTIFACT_BYTES:
+    from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
+        MAX_ARTIFACT_BYTES as MAX_UV_CAS,
+    )
+    budget = (
+        MAX_UV_CAS if kind == "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
+        else MAX_RGB_CAS
+    )
+    if not body or len(body) > budget:
         raise RuntimeError("PRODUCT_GRAPHICS_SOURCE_RGB_CAS_BUDGET")
     ref = put_bytes(body)
     if (

@@ -48,6 +48,9 @@ from .graphics_runtime_v1 import (
 from .pose_depth_visibility_v1 import (
     PoseDepthPixelEvidenceV1, inspect_pose_depth_pixel_v1,
 )
+from .pose_depth_raster_v1 import (
+    PoseDepthRasterV1, rasterize_pose_depth_v1,
+)
 from .mechanics_attachment_socket_runtime_v1 import (
     solve_attachment_socket_world_v1,
 )
@@ -447,6 +450,27 @@ class ControllablePuppetSessionV1:
             graphics_projection=graphics_projection,
             socket_world_positions=socket_world,
             socket_view_positions=socket_view,
+        )
+
+    def inspect_graphics_depth_raster(
+        self, width: int, height: int,
+        *, max_face_pixel_tests: int = 4_000_000,
+    ) -> PoseDepthRasterV1:
+        """On-demand full-frame face ownership on the current IK/LBS pose.
+
+        This cannot produce RGB pixels, fill unobserved texture, or prove
+        source-visible regions. Coplanar fronts remain explicitly ambiguous.
+        """
+        frame = self.frame()
+        p = frame.graphics_projection
+        if p is None:
+            raise QualificationError("PUPPET_RUNTIME_GRAPHICS_DEPTH_REQUIRES_GRAPH")
+        return rasterize_pose_depth_v1(
+            view_id=p.view_id, graphics_hash=p.graphics_hash,
+            projected_faces=p.projected_faces,
+            face_fragment_ids=p.face_fragment_ids,
+            width=width, height=height,
+            max_face_pixel_tests=max_face_pixel_tests,
         )
 
     def inspect_graphics_depth_at(self, x: float, y: float) -> PoseDepthPixelEvidenceV1:

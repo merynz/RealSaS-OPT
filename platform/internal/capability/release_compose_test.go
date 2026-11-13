@@ -65,7 +65,7 @@ func TestBuildEngineReleaseRegistryIncludesCurrentProductClosure(t *testing.T) {
 	}
 	for _, testcase := range []struct {
 		target string
-		want []string
+		want   []string
 	}{
 		{ProductRigCapabilityID, []string{ProductInputCapabilityID, ProductShapeCapabilityID,
 			ProductMeshCapabilityID, ProductRigCapabilityID}},
@@ -105,11 +105,11 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 		t.Fatalf("product provider count=%d want=9", len(providers))
 	}
 	registry := productProvidersTestRegistry(t)
-	for _, testcase := range []struct{
-		id string
+	for _, testcase := range []struct {
+		id           string
 		dependencies []string
-		contract string
-		modelCount int
+		contract     string
+		modelCount   int
 	}{
 		{ProductInputCapabilityID, nil, RSSvNextInputContractV2, 0},
 		{ProductShapeCapabilityID, []string{ProductInputCapabilityID}, RSSvNextShapeContractV3, 1},

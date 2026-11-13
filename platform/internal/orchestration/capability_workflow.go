@@ -1,12 +1,29 @@
 package orchestration
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
+
+// A PRODUCT_COMPILE may execute the nine roles, but cannot inherit developer
+// promotion. Only the terminal product.proof role may authorize admission.
+func validateCapabilityWorkflowAuthority(goal ResolvedCapabilityGoal) error {
+	switch {
+	case goal.GoalType == "DEVELOPER_RUN" && goal.PromotionPolicy == "NEVER":
+		return nil
+	case goal.GoalType == "PRODUCT_COMPILE" && goal.PromotionPolicy == "QUALIFIED_PRODUCT_ONLY":
+		if len(goal.Steps) == 0 || goal.Steps[len(goal.Steps)-1].CapabilityID != "product.proof" {
+			return errors.New("PRODUCT_CAPABILITY_TERMINAL_PROOF_REQUIRED")
+		}
+		return nil
+	default:
+		return errors.New("CAPABILITY_GOAL_PROMOTION_AUTHORITY_INVALID")
+	}
+}
 
 func CapabilityWorkflow(ctx workflow.Context, input CapabilityWorkflowInput) (CapabilityWorkflowResult, error) {
 	platformCtx := workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
@@ -37,11 +54,9 @@ func CapabilityWorkflow(ctx workflow.Context, input CapabilityWorkflowInput) (Ca
 	if err := workflow.ExecuteActivity(platformCtx, ResolveCapabilityGoalActivityName, input).Get(ctx, &goal); err != nil {
 		return CapabilityWorkflowResult{}, err
 	}
-	if goal.PromotionPolicy != "NEVER" {
+	if err := validateCapabilityWorkflowAuthority(goal); err != nil {
 		return CapabilityWorkflowResult{}, temporal.NewNonRetryableApplicationError(
-			"developer capability workflow cannot promote product state",
-			"CapabilityPromotionContractViolation",
-			nil,
+			err.Error(), "CapabilityPromotionContractViolation", err,
 		)
 	}
 

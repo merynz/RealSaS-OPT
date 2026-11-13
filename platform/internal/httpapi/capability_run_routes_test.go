@@ -37,3 +37,22 @@ func TestCapabilityRunHandlerPreservesExistingReadRoutes(t *testing.T) {
 		t.Fatalf("%d %s", response.Code, response.Body.String())
 	}
 }
+
+
+func TestProductCapabilityCompileRejectsIncompleteEnvelopeBeforeDatabase(t *testing.T) {
+	handler := (API{}).HandlerWithCapabilityRun()
+	for _, body := range []string{
+		\`{}\`,
+		\`{"engine_release_id":"00000000-0000-0000-0000-000000000000","subject_id":"00000000-0000-0000-0000-000000000000"}\`,
+		\`{"unknown":true}\`,
+		\`{} {}\`,
+	} {
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, httptest.NewRequest(
+			"POST", "/v1/product/capabilities/compile", strings.NewReader(body),
+		))
+		if response.Code != 400 {
+			t.Fatalf("body=%s status=%d response=%s", body, response.Code, response.Body.String())
+		}
+	}
+}

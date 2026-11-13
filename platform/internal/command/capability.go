@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/merynz/RealSaS-OPT/platform/internal/capability"
+	subjectinput "github.com/merynz/RealSaS-OPT/platform/internal/input"
 	"github.com/merynz/RealSaS-OPT/platform/internal/persistence"
 	"github.com/merynz/RealSaS-OPT/platform/internal/release"
 	"github.com/merynz/RealSaS-OPT/platform/internal/semantic"
@@ -72,10 +73,64 @@ type CapabilityReceipt struct {
 	ReusedIdempotencyKey bool
 }
 
+type ProductCapabilityCompileRequest struct {
+	EngineReleaseID uuid.UUID `json:"engine_release_id"`
+	SubjectID       uuid.UUID `json:"subject_id"`
+	SubjectInputID  uuid.UUID `json:"subject_input_id"`
+	IdempotencyKey  string    `json:"idempotency_key"`
+	RequestedBy     string    `json:"requested_by"`
+}
+
+// SubmitProductCapabilityCompile accepts only a sealed, exact two-view source
+// and the single terminal product.proof target. It does NOT reuse developer
+// promotion authority or accept arbitrary caller-selected capability targets.
+// The DB trigger freezes the full PRODUCTION ModelRelease envelope atomically.
+func SubmitProductCapabilityCompile(
+	ctx context.Context, pool *pgxpool.Pool, req ProductCapabilityCompileRequest,
+) (CapabilityReceipt, error) {
+	if pool == nil || req.EngineReleaseID == uuid.Nil || req.SubjectID == uuid.Nil ||
+		req.SubjectInputID == uuid.Nil || req.IdempotencyKey == "" || req.RequestedBy == "" {
+		return CapabilityReceipt{}, errors.New("PRODUCT_CAPABILITY_COMPILE_IDENTITY_REQUIRED")
+	}
+	loaded, err := subjectinput.Load(ctx, pool, req.SubjectInputID, req.SubjectID)
+	if err != nil {
+		return CapabilityReceipt{}, err
+	}
+	if len(loaded.RootInputs) != 1 || len(loaded.ArtifactIDs) != 1 ||
+		loaded.RootInputs[0].ArtifactType != "RealSaS.RSSvNextTwoViewSource" {
+		return CapabilityReceipt{}, errors.New("PRODUCT_CAPABILITY_TWO_VIEW_SOURCE_ONLY")
+	}
+	var schemaVersion string
+	if err := pool.QueryRow(ctx, `
+		SELECT t.schema_version
+		FROM artifacts a JOIN artifact_types t ON t.id=a.artifact_type_id
+		WHERE a.id=$1
+	`, loaded.ArtifactIDs[0]).Scan(&schemaVersion); err != nil {
+		return CapabilityReceipt{}, err
+	}
+	if schemaVersion != "v1" {
+		return CapabilityReceipt{}, errors.New("PRODUCT_CAPABILITY_SOURCE_SCHEMA_DRIFT")
+	}
+	subjectID := req.SubjectID
+	return submitCapabilityGoal(ctx, pool, CapabilityRunRequest{
+		EngineReleaseID: req.EngineReleaseID,
+		SubjectID: &subjectID,
+		Targets: []string{"product.proof"},
+		InputArtifactIDs: append([]uuid.UUID(nil), loaded.ArtifactIDs...),
+		IdempotencyKey: req.IdempotencyKey,
+		RequestedBy: req.RequestedBy,
+	}, capability.GoalProductCompile)
+}
+
 func SubmitCapabilityRun(
-	ctx context.Context,
-	pool *pgxpool.Pool,
-	req CapabilityRunRequest,
+	ctx context.Context, pool *pgxpool.Pool, req CapabilityRunRequest,
+) (CapabilityReceipt, error) {
+	return submitCapabilityGoal(ctx, pool, req, capability.GoalDeveloperRun)
+}
+
+func submitCapabilityGoal(
+	ctx context.Context, pool *pgxpool.Pool,
+	req CapabilityRunRequest, goalType capability.GoalType,
 ) (CapabilityReceipt, error) {
 	if pool == nil || req.EngineReleaseID == uuid.Nil {
 		return CapabilityReceipt{}, errors.New("pool and engine_release_id are required")
@@ -101,10 +156,31 @@ func SubmitCapabilityRun(
 	if err != nil {
 		return CapabilityReceipt{}, err
 	}
+	promotion := capability.PromotionNever
+	isProduct := goalType == capability.GoalProductCompile
+	if isProduct {
+		promotion = capability.PromotionQualifiedProductOnly
+		if req.SubjectID == nil || *req.SubjectID == uuid.Nil ||
+			len(req.InputArtifactIDs) != 1 || len(req.Targets) != 1 ||
+			req.Targets[0] != "product.proof" ||
+			req.CompilerBridge != nil || len(req.Parameters) != 0 {
+			return CapabilityReceipt{}, errors.New("PRODUCT_CAPABILITY_GOAL_ENVELOPE_INVALID")
+		}
+		purpose, models, err := release.LoadModelRequirements(ctx, pool, req.EngineReleaseID)
+		if err != nil {
+			return CapabilityReceipt{}, err
+		}
+		if purpose != release.PurposeProduct ||
+			len(models) != 1 || models[0].Family != capability.RSSvNextModelFamily ||
+			models[0].ArchitectureID != capability.RSSvNextArchitectureID ||
+			models[0].Channel != "PRODUCTION" {
+			return CapabilityReceipt{}, errors.New("PRODUCT_CAPABILITY_PRODUCTION_RELEASE_REQUIRED")
+		}
+	}
 	goal := capability.Goal{
-		Type:            capability.GoalDeveloperRun,
+		Type:            goalType,
 		Targets:         append([]string(nil), req.Targets...),
-		PromotionPolicy: capability.PromotionNever,
+		PromotionPolicy: promotion,
 	}
 	resolved, err := goal.Validate(snapshot.Registry)
 	if err != nil {
@@ -180,8 +256,12 @@ func SubmitCapabilityRun(
 		return CapabilityReceipt{}, err
 	}
 
+	specSchema := "RealSaS.DeveloperCapabilityRunSpec.v1"
+	if isProduct {
+		specSchema = "RealSaS.ProductCapabilityCompileSpec.v1"
+	}
 	spec := map[string]any{
-		"schema":                    "RealSaS.DeveloperCapabilityRunSpec.v1",
+		"schema":                    specSchema,
 		"engine_release_id":         req.EngineReleaseID.String(),
 		"engine_release_sha256":     releaseSHA,
 		"capability_set_sha256":     snapshot.CapabilitySetSHA256,
@@ -190,7 +270,7 @@ func SubmitCapabilityRun(
 		"target_model_requirements": targetModelRequirements,
 		"input_artifacts":           artifactRows,
 		"parameters":                normalizedParameters,
-		"promotion_policy":          string(capability.PromotionNever),
+		"promotion_policy":          string(promotion),
 	}
 	if req.SubjectID != nil {
 		spec["subject_id"] = req.SubjectID.String()
@@ -252,17 +332,26 @@ func SubmitCapabilityRun(
 		attemptID := uuid.New()
 		goalID := uuid.New()
 		commandID := uuid.New()
+		attemptKind := "developer"
+		if isProduct {
+			attemptKind = "compile_candidate"
+		}
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO attempts
 			  (id,subject_id,engine_release_id,kind,spec_sha256,created_by,final_state)
-			VALUES ($1,$2,$3,'developer',$4,$5,'OPEN')
-		`, attemptID, req.SubjectID, req.EngineReleaseID, specSHA, req.RequestedBy); err != nil {
+			VALUES ($1,$2,$3,$4,$5,$6,'OPEN')
+		`, attemptID, req.SubjectID, req.EngineReleaseID, attemptKind, specSHA, req.RequestedBy); err != nil {
 			return err
 		}
-		if err := snapshotDeveloperTargetModels(
-			ctx, tx, attemptID, req.EngineReleaseID, targetModelRequirements,
-		); err != nil {
-			return err
+		// compile_candidate uses the existing SQL trigger to snapshot the
+		// exact full production ModelRelease envelope; only a developer run
+		// selects the target-scoped model subset in application code.
+		if !isProduct {
+			if err := snapshotDeveloperTargetModels(
+				ctx, tx, attemptID, req.EngineReleaseID, targetModelRequirements,
+			); err != nil {
+				return err
+			}
 		}
 		if requiresCompilerBridge {
 			if _, err := tx.Exec(ctx, `
@@ -280,8 +369,9 @@ func SubmitCapabilityRun(
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO execution_goals
 			  (id,attempt_id,goal_type,promotion_policy,target_capability_ids,resolved_capability_ids,parameters,spec_sha256)
-			VALUES ($1,$2,'DEVELOPER_RUN','NEVER',$3,$4,$5,$6)
-		`, goalID, attemptID, targetsJSON, resolvedJSON, paramsJSON, specSHA); err != nil {
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+		`, goalID, attemptID, string(goalType), string(promotion),
+			targetsJSON, resolvedJSON, paramsJSON, specSHA); err != nil {
 			return err
 		}
 		for ordinal, artifact := range artifactRows {
@@ -331,13 +421,17 @@ func SubmitCapabilityRun(
 			"targets":                   req.Targets,
 			"resolved_capabilities":     resolvedIDs,
 			"target_model_requirements": targetModelRequirements,
-			"promotion_policy":          "NEVER",
+			"promotion_policy":          string(promotion),
 			"compiler_bridge_used":      requiresCompilerBridge,
 		})
+		auditAction := "DEVELOPER_CAPABILITY_RUN_ACCEPTED"
+		if isProduct {
+			auditAction = "PRODUCT_CAPABILITY_COMPILE_ACCEPTED"
+		}
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO audit_events(actor,action,subject_id,attempt_id,payload)
-			VALUES ($1,'DEVELOPER_CAPABILITY_RUN_ACCEPTED',$2,$3,$4)
-		`, req.RequestedBy, req.SubjectID, attemptID, auditBody); err != nil {
+			VALUES ($1,$2,$3,$4,$5)
+		`, req.RequestedBy, auditAction, req.SubjectID, attemptID, auditBody); err != nil {
 			return err
 		}
 		out = CapabilityReceipt{CommandID: commandID, AttemptID: attemptID, ExecutionGoalID: goalID}

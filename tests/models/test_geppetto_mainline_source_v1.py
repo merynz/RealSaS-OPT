@@ -90,7 +90,7 @@ class GeppettoMainlineSourceV1(unittest.TestCase):
 
     def test_readme_declares_reference_strength_as_current_fit1_source(self) -> None:
         root_readme = (ROOT / "historical" / "model_sources" / "geppetto" / "README.md").read_text(encoding="utf-8")
-        self.assertIn("historical/model_sources/geppetto/reference_strength_v1/", root_readme)
+        self.assertIn("models/geppetto/reference_strength_v1/", root_readme)  # frozen historical text
         self.assertIn("FIT1", root_readme)
         self.assertIn("Arachne", root_readme)
 

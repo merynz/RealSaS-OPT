@@ -360,9 +360,6 @@
         ],
         "product_pass_authority": false,
         "dependencies": [
-          "product.mesh",
-          "product.rig",
-          "product.skin",
           "product.mechanics",
           "product.graphics",
           "product.motion"

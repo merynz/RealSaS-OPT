@@ -10,6 +10,7 @@ import json
 import os
 import re
 from pathlib import Path
+from functools import lru_cache
 from time import perf_counter
 from typing import Any
 
@@ -607,12 +608,55 @@ def build_fresh_run_ledger(
     return ledger
 
 
+@lru_cache(maxsize=1)
+def _local_source_relocation_paths() -> dict[str, Path]:
+    """Resolve stable import names to byte-owned moved source, never to a shim.
+
+    Exact source relocations are data, not a new model/Compiler authority. The
+    active implementation-closure hash still reads the *actual* module bytes.
+    """
+    manifests = (
+        ROOT / "historical/model_sources/RELOCATION_MANIFEST_V1.json",
+        ROOT / "compiler/rss_vnext/RELOCATION_MANIFEST_V1.json",
+        ROOT / "compiler/rss_vnext/INTEGRATION_LINEAGE_V1.json",
+    )
+    out: dict[str, Path] = {}
+    for manifest in manifests:
+        if not manifest.is_file():
+            continue
+        rows = json.loads(manifest.read_text(encoding="utf-8"))
+        for record in (rows.get("paths") or rows.get("migrated_files") or []):
+            source = str(record.get("old_path") or record.get("from") or "")
+            target = str(record.get("new_path") or record.get("to") or "")
+            if not source.endswith(".py") or not target.endswith(".py"):
+                continue
+            module = source[:-3].replace("/", ".")
+            if module.endswith(".__init__"):
+                module = module[: -len(".__init__")]
+            rel = Path(target)
+            if rel.is_absolute() or ".." in rel.parts:
+                raise RuntimeError("LOCAL_SOURCE_RELOCATION_UNSAFE:" + module)
+            resolved = (ROOT / rel).resolve()
+            if ROOT not in resolved.parents or not resolved.is_file():
+                raise RuntimeError("LOCAL_SOURCE_RELOCATION_MISSING:" + module)
+            previous = out.get(module)
+            if previous is not None and previous != resolved:
+                raise RuntimeError("LOCAL_SOURCE_RELOCATION_CONFLICT:" + module)
+            out[module] = resolved
+    return out
+
+
 def _local_module_path(module_name: str) -> Path | None:
     rel = Path(*str(module_name).split("."))
     file_path = (ROOT / rel).with_suffix(".py")
+    init_path = ROOT / rel / "__init__.py"
+    relocated = _local_source_relocation_paths().get(str(module_name))
+    if relocated is not None:
+        if file_path.is_file() or init_path.is_file():
+            raise RuntimeError("LOCAL_SOURCE_DUPLICATE_OWNER:" + str(module_name))
+        return relocated
     if file_path.is_file():
         return file_path.resolve()
-    init_path = ROOT / rel / "__init__.py"
     if init_path.is_file():
         return init_path.resolve()
     return None

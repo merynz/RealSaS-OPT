@@ -43,6 +43,42 @@ func TestRSSVNextMeshParentBindingReplaysExactPythonModelIdentity(t *testing.T) 
 	}
 }
 
+func TestRSSVNextMeshParentBindingAcceptsRawTwoImageAndByteIdenticalGoCopy(t *testing.T) {
+	refs, models := rssMeshParentFixture()
+	refs[0].ArtifactType = "RealSaS.RSSvNextUncalibratedTwoImageSource"
+	refs[0].SizeBytes = 2048
+	refs[0].StorageKey = "cas/source"
+	copied := refs[0]
+	copied.Role = "input:0001"
+	copied.ID = "different-semantic-artifact-id"
+	got, err := rssVNextMeshParentBinding([]orchestration.ArtifactRef{refs[0], copied}, models)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got["source_content_sha256"] != refs[0].ContentSHA256 {
+		t.Fatalf("raw source identity drift: %+v", got)
+	}
+	cases := []struct {
+		name string
+		edit func(*orchestration.ArtifactRef)
+	}{
+		{"different stored bytes", func(r *orchestration.ArtifactRef) { r.ContentSHA256 = strings.Repeat("d", 64) }},
+		{"different byte length", func(r *orchestration.ArtifactRef) { r.SizeBytes++ }},
+		{"different object key", func(r *orchestration.ArtifactRef) { r.StorageKey = "cas/other" }},
+		{"different source authority", func(r *orchestration.ArtifactRef) { r.ArtifactType = "RealSaS.RSSvNextTwoViewSource" }},
+	}
+	for _, testcase := range cases {
+		t.Run(testcase.name, func(t *testing.T) {
+			drift := copied
+			testcase.edit(&drift)
+			_, err := rssVNextMeshParentBinding([]orchestration.ArtifactRef{refs[0], drift}, models)
+			if err == nil || !strings.Contains(err.Error(), "SOURCE_ARTIFACT_CARDINALITY") {
+				t.Fatalf("expected raw parent mismatch, got %v", err)
+			}
+		})
+	}
+}
+
 func TestRSSVNextMeshParentBindingAcceptsSingleSealedReconstructionBundleV2(t *testing.T) {
 	refs, models := rssMeshParentFixture()
 	models[0].ArtifactSchemaVersion = "v2"
@@ -69,7 +105,8 @@ func TestRSSVNextMeshParentBindingRejectsWrongSourceCheckpointOrModelFamily(t *t
 		code   string
 	}{
 		{"no source", nil, models, "SOURCE_ARTIFACT_REQUIRED"},
-		{"duplicate source", append(append([]orchestration.ArtifactRef{}, refs...), refs...), models, "SOURCE_ARTIFACT_CARDINALITY"},
+		{"triple source", append(append(append([]orchestration.ArtifactRef{}, refs...), refs...), refs...), models, "SOURCE_ARTIFACT_CARDINALITY"},
+		{"mixed source", append(append([]orchestration.ArtifactRef{}, refs...), orchestration.ArtifactRef{ArtifactType: "RealSaS.RSSvNextUncalibratedTwoImageSource", SchemaVersion: "v1", ContentSHA256: strings.Repeat("c", 64)}), models, "SOURCE_ARTIFACT_CARDINALITY"},
 		{"wrong source sha", []orchestration.ArtifactRef{{ArtifactType: "RealSaS.RSSvNextTwoViewSource", SchemaVersion: "v1", ContentSHA256: "bad"}}, models, "SOURCE_SHA_INVALID"},
 		{"legacy families", refs, append(append([]modelselection.Selection{}, models...), modelselection.Selection{Family: "AXIS"}), "SINGLE_ATTEMPT_MODEL_REQUIRED"},
 		{"wrong model checkpoint", refs, func() []modelselection.Selection {

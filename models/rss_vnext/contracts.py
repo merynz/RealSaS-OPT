@@ -185,6 +185,7 @@ class RSSvNextOutput:
     qualification_status: str = "UNQUALIFIED_NEURAL_PROPOSAL"
     mesh_candidate: object | None = None  # typed RSSvNextStructuralMeshCandidate; no circular import
     dynamic_mesh_candidate: object | None = None  # typed RSSvNextDynamicRefinementOutput
+    anchor_face_candidate: object | None = None  # typed neural socket face proposal; not source authority
     flexicubes_surface_evidence: object | None = None  # typed noncanonical surface witness
     constructed_views: object | None = None  # predicted RGB/alpha/normal, not observed source
 

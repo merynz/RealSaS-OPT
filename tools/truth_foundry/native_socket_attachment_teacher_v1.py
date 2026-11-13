@@ -132,16 +132,28 @@ def _max_parent_face_transport(
 
 
 def _parent_excitation(
-    *, rest:np.ndarray, discovery:np.ndarray, validation:np.ndarray,
-    subject_scale:float,
+    *, parent_rest:np.ndarray, parent_discovery:np.ndarray,
+    parent_validation:np.ndarray,
+    root_rest:np.ndarray, root_discovery:np.ndarray,
+    root_validation:np.ndarray, subject_scale:float,
 )->tuple[float,float]:
+    # Subtract source root motion! Rotating the entire character is NOT
+    # a source control intervention that distinguishes socket ownership.
+    rest_relative=np.linalg.inv(root_rest)@parent_rest
     counts=[]
-    for bank in (discovery,validation):
-        delta=[
-            max(_angle(rest[:3,:3],p[:3,:3]),
-                float(np.linalg.norm(p[:3,3]-rest[:3,3])/subject_scale))
-            for p in bank
-        ]
+    for parents,roots in (
+        (parent_discovery,root_discovery),
+        (parent_validation,root_validation),
+    ):
+        delta=[]
+        for parent,root in zip(parents,roots):
+            rel=np.linalg.inv(root)@parent
+            delta.append(max(
+                _angle(rest_relative[:3,:3],rel[:3,:3]),
+                float(np.linalg.norm(
+                    rel[:3,3]-rest_relative[:3,3],
+                )/subject_scale),
+            ))
         counts.append(max(delta))
     return tuple(counts)
 
@@ -215,6 +227,9 @@ def build_native_socket_attachment_teacher_candidate_v1(
     parent_rest_world:np.ndarray,
     parent_discovery_world:np.ndarray,
     parent_validation_world:np.ndarray,
+    root_rest_world:np.ndarray,
+    root_discovery_world:np.ndarray,
+    root_validation_world:np.ndarray,
     source_asset_sha256:str,
     source_intervention_bank_sha256:str,
     subject_scale:float,
@@ -274,11 +289,11 @@ def build_native_socket_attachment_teacher_candidate_v1(
         world[:,:3],rest,atol=1.e-6*subject_scale,rtol=0,
     ):
         _fail("NATIVE_TO_TESSA_COORDINATE_FRAME_NOT_PROVEN")
-    if not np.isclose(
-        abs(np.linalg.det(transform[:3,:3])),0.,atol=1.e-10,
-    ) and not np.linalg.cond(transform[:3,:3])>1.e8:
-        pass
-    else:
+    if (
+        abs(float(np.linalg.det(transform[:3,:3])))<=1.e-10
+        or not np.isfinite(np.linalg.cond(transform[:3,:3]))
+        or np.linalg.cond(transform[:3,:3])>1.e8
+    ):
         _fail("SOURCE_NORMALIZATION_NONINVERTIBLE")
     # Must match the independently measured canonical normalized mesh exactly.
     from tools.truth_foundry.native_tessa_face_reindex_v1 import (
@@ -299,14 +314,27 @@ def build_native_socket_attachment_teacher_candidate_v1(
     validation_parent=_homogeneous_frames(
         parent_validation_world,name="VALIDATION_PARENT",
     )
+    rest_root=_homogeneous_frames(
+        np.asarray(root_rest_world)[None],name="REST_ROOT",
+    )[0]
+    discovery_root=_homogeneous_frames(
+        root_discovery_world,name="DISCOVERY_ROOT",
+    )
+    validation_root=_homogeneous_frames(
+        root_validation_world,name="VALIDATION_ROOT",
+    )
     if (
         len(discovery_parent)!=len(discovery)
         or len(validation_parent)!=len(validation)
+        or len(discovery_root)!=len(discovery)
+        or len(validation_root)!=len(validation)
     ):
-        _fail("PARENT_POSE_TIMEBASE_MISMATCH")
+        _fail("PARENT_ROOT_POSE_TIMEBASE_MISMATCH")
     disc_exc,val_exc=_parent_excitation(
-        rest=rest_parent,discovery=discovery_parent,
-        validation=validation_parent,subject_scale=subject_scale,
+        parent_rest=rest_parent,parent_discovery=discovery_parent,
+        parent_validation=validation_parent,root_rest=rest_root,
+        root_discovery=discovery_root,root_validation=validation_root,
+        subject_scale=subject_scale,
     )
     # A global-body-only passive dataset is not an independent action.
     # Caller must also supply trusted native source intervention provenance.
@@ -337,6 +365,10 @@ def build_native_socket_attachment_teacher_candidate_v1(
         "parent_rest":_tensor_digest(rest_parent),
         "parent_discovery":_tensor_digest(discovery_parent),
         "parent_validation":_tensor_digest(validation_parent),
+        "root_rest":_tensor_digest(rest_root),
+        "root_discovery":_tensor_digest(discovery_root),
+        "root_validation":_tensor_digest(validation_root),
+        "normalized_to_world":_tensor_digest(transform),
         "source_asset":source_asset_sha256,
         "source_intervention_bank":source_intervention_bank_sha256,
     })

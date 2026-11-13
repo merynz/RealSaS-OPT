@@ -411,7 +411,7 @@
         "can_mint_product_revision": false,
         "input_evidence_optional_legacy": true,
         "manual_graphics_evidence_required": false,
-        "input_source_artifact_type": "RealSaS.RSSvNextTwoViewSource",
+        "input_source_artifact_type": "RealSaS.RSSvNextUncalibratedTwoImageSource",
         "input_source_schema_version": "v1",
         "input_fanout_artifact_type": "RealSaS.RSSvNextProductEvidenceFanout",
         "input_fanout_schema_version": "v1",
@@ -421,7 +421,12 @@
         "input_mechanics_intervention_artifact_type": "RealSaS.MechanicsInterventionCourt",
         "input_mechanics_intervention_schema_version": "v1",
         "mechanics_intervention_required": true,
-        "mechanics_intervention_not_source_contact": true
+        "mechanics_intervention_not_source_contact": true,
+        "alternate_calibrated_source_artifact_type": "RealSaS.RSSvNextTwoViewSource",
+        "raw_scene_artifact_type": "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
+        "raw_construction_receipt_artifact_type": "RealSaS.RSSvNextUncalibratedConstructionReceipt",
+        "raw_typed_region_relation_mask_required": true,
+        "raw_source_alpha_static_mesh_replay_required": true
       }
     },
     "product.motion": {

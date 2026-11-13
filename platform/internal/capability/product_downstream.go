@@ -97,7 +97,12 @@ func (ProductGraphicsProvider) Capabilities(context.Context) ([]Descriptor, erro
 	metadata["input_evidence_schema_version"] = "v1"
 	metadata["input_evidence_optional_legacy"] = true
 	metadata["manual_graphics_evidence_required"] = false
-	metadata["input_source_artifact_type"] = "RealSaS.RSSvNextTwoViewSource"
+	metadata["input_source_artifact_type"] = "RealSaS.RSSvNextUncalibratedTwoImageSource"
+	metadata["alternate_calibrated_source_artifact_type"] = "RealSaS.RSSvNextTwoViewSource"
+	metadata["raw_scene_artifact_type"] = "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier"
+	metadata["raw_construction_receipt_artifact_type"] = "RealSaS.RSSvNextUncalibratedConstructionReceipt"
+	metadata["raw_typed_region_relation_mask_required"] = true
+	metadata["raw_source_alpha_static_mesh_replay_required"] = true
 	metadata["input_source_schema_version"] = "v1"
 	metadata["input_fanout_artifact_type"] = "RealSaS.RSSvNextProductEvidenceFanout"
 	metadata["input_fanout_schema_version"] = "v1"

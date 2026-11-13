@@ -36,7 +36,7 @@ from compiler.realsas_compiler_core.types import QualificationError
 from compiler.rss_vnext.workers.rss_vnext_mesh_executor_v3 import (
     RAW_SOURCE, RAW_SCENE, RAW_VIEWS, RAW_RECEIPT,
     RAW_CONFIG, RAW_DECODER,
-    SCENE_REQUIRED, MESH_KEYS, AXIS_MIRA_KEYS,
+    SCENE_REQUIRED, MESH_KEYS, AXIS_MIRA_KEYS, RAW_GRAPHICS_KEYS,
     _archive, _validate_candidate, _validate_raw_axis_mira,
 )
 from compiler.rss_vnext.workers.rss_vnext_raw_mesh_admission_v1 import (
@@ -151,7 +151,7 @@ def execute_rss_vnext_rig_capability_v4(
         raise RuntimeError("RSS_VNEXT_RIG_V4_SOURCE_OR_MODEL_PARENT_DRIFT")
     scene = _archive(
         _bytes(scene_ref, read_object),
-        required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS | AXIS_MIRA_KEYS,
+        required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS | AXIS_MIRA_KEYS | RAW_GRAPHICS_KEYS,
     )
     measured = _validate_candidate(scene, receipt)
     controls = _validate_raw_axis_mira(scene, receipt, measured)

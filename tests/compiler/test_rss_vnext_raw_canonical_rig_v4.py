@@ -80,6 +80,16 @@ def _positive_fixture(tmp_path, *, with_discrete_skin=False):
         "tessa_candidate_sign_logits": np.zeros((1, n), np.float32),
     })
     if with_discrete_skin:
+        r = 3
+        mask = np.ones((1, r, r), dtype=np.uint8)
+        for i in range(r):
+            mask[0, i, i] = 0
+        scene["region_relation_valid_mask"] = mask
+        scene["region_relation_logits"] = np.zeros((1, r, r, 3), np.float32)
+        scene["presentation_role_probabilities"] = np.full((1, n, 4), .25, np.float32)
+        scene["source_semantic_patch_logits"] = np.zeros((1, 2, 4), np.float32)
+        scene["source_semantic_log_uncertainty"] = np.zeros((1, 2), np.float32)
+    if with_discrete_skin:
         # Compute the hard weights through the actual pinned MIRA decoder.
         # Synthetic hidden AXIS states are explicit; no learned success claim.
         jhidden = torch.zeros(1, 1, bundle.model.cfg.control_hidden_dim)

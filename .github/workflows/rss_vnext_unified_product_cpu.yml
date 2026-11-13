@@ -75,6 +75,7 @@ jobs:
             tests/compiler/test_canonical_socket_runtime_v1.py \
             tests/compiler/test_pose_depth_raster_v1.py \
             tests/compiler/test_rss_vnext_go_cas_double_bind_v1.py \
+            tests/compiler/test_rss_vnext_raw_product_input_shape_v4.py \
             tests/compiler/test_product_downstream_cas_v1.py \
             tests/compiler/test_playback_runtime_v4_contract_v1.py \
             tests/compiler/test_graphics_v2.py \

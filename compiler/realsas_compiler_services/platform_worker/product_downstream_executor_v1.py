@@ -382,26 +382,71 @@ def execute_motion_capability_v2(
 def execute_proof_capability_v1(
     request: dict[str, Any], *, read_object: Callable, put_bytes: Callable,
 ) -> dict[str, Any]:
-    _require(request,"product.proof",PROOF_CONTRACT)
-    # The proof role is registered so the DAG is honest and schedulable, but
-    # candidate Graphics and Motion do not prove source rays, GPU compositing,
-    # collision, animation edit consequence, or portable RSS runtime replay.
-    # Not even a syntactically valid graph may mint ProductRevision here.
-    mechanics = _read(request,read_object,"RealSaS.CanonicalMechanicsIR","v1")
-    graphics = _read(request,read_object,"RealSaS.CompiledGraphics","v1")
-    motion = _read(request,read_object,"RealSaS.CanonicalMotionIR","v2")
+    _require(request, "product.proof", PROOF_CONTRACT)
+    # A structurally valid canonical tuple is not independent source proof,
+    # but even a permanently FAIL-closed Proof must not tolerate fraudulent
+    # rehashed parent content in the final Engine execution envelope.
+    from compiler.realsas_compiler_core.canonical_motion_ir_v2 import (
+        canonical_motion_from_dict_v2,
+    )
+    from compiler.realsas_compiler_core.graphics_reopen_v1 import (
+        reopen_compiled_graphics_v1,
+    )
+    from compiler.realsas_compiler_core.hashing import content_sha256
+
+    mesh, rig, skin, mechanics = _canonical_parents(request, read_object)
+    graphics_payload = _read(
+        request, read_object, "RealSaS.CompiledGraphics", "v1",
+    )
+    motion = canonical_motion_from_dict_v2(
+        _read(request, read_object, "RealSaS.CanonicalMotionIR", "v2")
+    )
+    compiled, rebuilt_runtime = reopen_compiled_graphics_v1(
+        graphics_payload, face_count=len(mesh.faces),
+    )
     if (
-        mechanics.get("schema_version") != "RealSaS.CanonicalMechanicsIR.v1"
-        or graphics.get("schema_version") != "RealSaS.CompiledGraphics.v1"
-        or motion.get("schema_version") != "RealSaS.CanonicalMotionIR.v2"
+        compiled.canonical_mesh_binding_hash != mesh.mesh_lineage_hash
+        or compiled.canonical_mesh_skin_binding_hash != skin.skin_lineage_hash
+        or motion.rig_lineage_hash != rig.rig_lineage_hash
+        or motion.control_program_hash != rig.control_program_hash
+        or motion.mechanics_lineage_hash != mechanics.mechanics_lineage_hash
     ):
-        raise RuntimeError("PRODUCT_PROOF_PARENT_SCHEMA_INVALID")
-    if (
-        graphics.get("canonical_mesh_binding_hash") != mechanics.get("mesh_lineage_hash")
-        or motion.get("mechanics_lineage_hash") != mechanics.get("mechanics_lineage_hash")
-        or graphics.get("canonical_mesh_skin_binding_hash") != mechanics.get("skin_lineage_hash")
+        raise RuntimeError("PRODUCT_PROOF_CANONICAL_PARENT_LINEAGE_DRIFT")
+    metadata = request.get("capability_metadata") or {}
+    require_runtime = metadata.get("runtime_graphics_required", False)
+    if type(require_runtime) is not bool:
+        raise RuntimeError("PRODUCT_PROOF_RUNTIME_GRAPHICS_POLICY_TYPE")
+    runtime_refs = [
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict and row.get("artifact_type") == "RealSaS.RuntimeGraphics"
+        and row.get("schema_version") == "v1"
+    ]
+    if len(runtime_refs) > 1 or (require_runtime and len(runtime_refs) != 1):
+        raise RuntimeError("PRODUCT_PROOF_RUNTIME_GRAPHICS_CARDINALITY")
+    if runtime_refs:
+        reopened_runtime = _read(
+            request, read_object, "RealSaS.RuntimeGraphics", "v1",
+        )
+        if (
+            reopened_runtime.get("schema_version") != "RealSaS.RuntimeGraphics.v1"
+            or reopened_runtime.get("runtime_graphics_hash")
+            != rebuilt_runtime.runtime_graphics_hash
+            or reopened_runtime != rebuilt_runtime.to_dict()
+        ):
+            raise RuntimeError("PRODUCT_PROOF_RUNTIME_GRAPHICS_REPLAY_DRIFT")
+    intervention = _read_graphics_mechanics_intervention_v1(
+        request, read_object, mesh, rig, skin, mechanics,
+    )
+    if intervention is not None and (
+        compiled.metadata.get("canonical_mechanics_lineage_hash")
+        != mechanics.mechanics_lineage_hash
+        or compiled.metadata.get("mechanics_intervention_court_hash")
+        != intervention["court_hash"]
     ):
-        raise RuntimeError("PRODUCT_PROOF_PARENT_LINEAGE_DRIFT")
+        raise RuntimeError("PRODUCT_PROOF_GRAPHICS_MECHANICS_WITNESS_DRIFT")
+    # This court has rechecked the whole present canonical graph and pose
+    # authority. ProductPASS still requires independent source pixels/rays,
+    # native parity, time-varying collision/contact and edit consequences.
     missing = (
         "SOURCE_APPEARANCE_AND_POSE_VISIBILITY",
         "NATIVE_GRAPHICS_RENDERER_PARITY",
@@ -409,28 +454,43 @@ def execute_proof_capability_v1(
         "EDIT_CONSEQUENCE_AND_RUNTIME_RSS_REOPEN",
         "SOURCE_AND_MODEL_RELEASE_ADMISSION",
     )
-    # The Go capability orchestrator commits any non-PASS MODULE result as
-    # terminal FAIL, unlike its special STAGE external-evidence WAIT protocol.
-    # Return an explicit qualification failure: there is no registered source
-    # signal that could safely unblock a suspended product.proof MODULE job.
     diagnostics = {
-        "schema":"RealSaS.ProductProofDiagnostics.v1",
-        "parent_artifacts_replayed":True,
-        "missing_independent_witnesses":list(missing),
-        "product_pass_authority":False,
-        "product_revision_minted":False,
+        "schema": "RealSaS.ProductProofDiagnostics.v1",
+        "parent_artifacts_replayed": True,
+        "typed_canonical_mesh_rig_skin_reopened": True,
+        "typed_motion_reopened": True,
+        "graphics_runtime_face_order_recomputed": True,
+        "persisted_graphics_runtime_replayed": bool(runtime_refs),
+        "mechanics_intervention_court_hash": (
+            intervention["court_hash"] if intervention is not None else None
+        ),
+        "graphics_graph_hash": compiled.graph_hash,
+        "motion_lineage_hash": motion.motion_lineage_hash,
+        "canonical_parent_binding_hash": content_sha256({
+            "mesh": mesh.mesh_lineage_hash,
+            "rig": rig.rig_lineage_hash,
+            "skin": skin.skin_lineage_hash,
+            "mechanics": mechanics.mechanics_lineage_hash,
+            "graphics": compiled.graph_hash,
+            "motion": motion.motion_lineage_hash,
+        }),
+        "source_visibility_independent_witness_present": False,
+        "source_contact_independent_witness_present": False,
+        "missing_independent_witnesses": list(missing),
+        "product_pass_authority": False,
+        "product_revision_minted": False,
     }
     return {
-        "capability_id":"product.proof",
-        "status":"FAIL",
-        "outputs":[],
-        "failure":{
-            "code":"PRODUCT_PROOF_INDEPENDENT_WITNESSES_MISSING",
-            "class":"QUALIFICATION",
-            "reported_owner_module_id":"product.proof",
-            "diagnostics":diagnostics,
+        "capability_id": "product.proof",
+        "status": "FAIL",
+        "outputs": [],
+        "failure": {
+            "code": "PRODUCT_PROOF_INDEPENDENT_WITNESSES_MISSING",
+            "class": "QUALIFICATION",
+            "reported_owner_module_id": "product.proof",
+            "diagnostics": diagnostics,
         },
-        "diagnostics":diagnostics,
+        "diagnostics": diagnostics,
     }
 
 

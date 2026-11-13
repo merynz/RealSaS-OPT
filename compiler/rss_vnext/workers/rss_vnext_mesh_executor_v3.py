@@ -186,6 +186,7 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
         "tessa_candidate_base_vertices", "tessa_candidate_rest_vertices",
         "tessa_candidate_faces", "tessa_candidate_vertex_components",
         "tessa_candidate_face_components",
+        "tessa_candidate_unsigned_distance", "tessa_candidate_sign_logits",
     }:
         a = arrays[key]
         if (

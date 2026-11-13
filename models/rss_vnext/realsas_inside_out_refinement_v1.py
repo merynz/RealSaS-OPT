@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""StdGEN CVPR2025 §3.3, Eqs.(12-13): inside-out mesh refinement.
+"""RealSaS CVPR2025 §3.3, Eqs.(12-13): inside-out mesh refinement.
 
 Unlike S-LRM Stage3 training, this is an inference-time, per-character
 differentiable mesh optimization. The GENERATED six-view normal/mask maps
@@ -11,7 +11,7 @@ frozen inner normal.
 
 No anatomy is hard-coded: the compiler/representation policy chooses
 layer order; this optimization does not infer joint or drawable identity.
-Published StdGEN additionally employs edge collapse/split/flip remeshing,
+Published RealSaS additionally employs edge collapse/split/flip remeshing,
 high-resolution backprojection coloring and ExplicitTarget optimization;
 these remain independent operations and are NOT silently approximated.
 """
@@ -25,8 +25,8 @@ import torch
 from torch import Tensor,nn
 import torch.nn.functional as F
 
-from .stdgen_joint_slrm_render_v1 import StdGENFlexiCubesLayerRasterV1
-from .stdgen_flexicubes_mesh_render_v1 import render_stdgen_layered_flexicubes_mesh_v1
+from .realsas_joint_slrm_render_v1 import RealSaSFlexiCubesLayerRasterV1
+from .realsas_flexicubes_mesh_render_v1 import render_realsas_layered_flexicubes_mesh_v1
 from .flexicubes_surface_evidence import RSSvNextFlexiCubesSurfaceEvidence
 
 
@@ -35,7 +35,7 @@ def _sha(v:object)->bool:
 
 
 @dataclass(frozen=True)
-class StdGENGeneratedMeshGuidanceV1:
+class RealSaSGeneratedMeshGuidanceV1:
     expected_mask:Tensor        # [1,R,1] 0..1
     expected_normal_world:Tensor # [1,R,3] normalized in world frame
     known_mask:Tensor           # [1,R] bool
@@ -54,7 +54,7 @@ class StdGENGeneratedMeshGuidanceV1:
             or self.expected_mask.ndim!=3 or self.expected_mask.shape[0]!=1
             or self.expected_mask.shape[-1]!=1
         ):
-            raise ValueError("RSS_VNEXT_STDGEN_REFINEMENT_GENERATED_PRIOR_REQUIRED")
+            raise ValueError("RSS_VNEXT_REALSAS_REFINEMENT_GENERATED_PRIOR_REQUIRED")
         r=self.expected_mask.shape[1]
         if (
             r<1 or r>6*1024*1024
@@ -71,17 +71,17 @@ class StdGENGeneratedMeshGuidanceV1:
             or bool((self.expected_mask<0).any())
             or bool((self.expected_mask>1).any())
         ):
-            raise ValueError("RSS_VNEXT_STDGEN_REFINEMENT_GUIDANCE_DOMAIN")
+            raise ValueError("RSS_VNEXT_REALSAS_REFINEMENT_GUIDANCE_DOMAIN")
         lengths=self.expected_normal_world[self.normal_valid_mask].norm(dim=-1)
         if not bool(torch.allclose(lengths,torch.ones_like(lengths),atol=1.e-3,rtol=0)):
-            raise ValueError("RSS_VNEXT_STDGEN_REFINEMENT_WORLD_NORMALS_NOT_UNIT")
+            raise ValueError("RSS_VNEXT_REALSAS_REFINEMENT_WORLD_NORMALS_NOT_UNIT")
 
 
-def stdgen_outer_inner_collision_loss_v1(
+def realsas_outer_inner_collision_loss_v1(
     outer_xyz:Tensor,inner_xyz:Tensor,inner_normal_xyz:Tensor,
     *,outer_chunk:int=256,max_pairwise_elements:int=4_000_000,
 )->Tensor:
-    """Exact StdGEN Eq13: mean relu((v_inner-v_outer) dot n_inner)^3."""
+    """Exact RealSaS Eq13: mean relu((v_inner-v_outer) dot n_inner)^3."""
     if (
         outer_xyz.ndim!=2 or outer_xyz.shape[1]!=3
         or inner_xyz.ndim!=2 or inner_xyz.shape[1]!=3
@@ -99,14 +99,14 @@ def stdgen_outer_inner_collision_loss_v1(
             torch.ones_like(inner_normal_xyz[:,0]),atol=1.e-3,rtol=0.,
         ))
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_REFINEMENT_COLLISION_MESH_DOMAIN")
+        raise ValueError("RSS_VNEXT_REALSAS_REFINEMENT_COLLISION_MESH_DOMAIN")
     inner=inner_xyz.detach()
     normals=inner_normal_xyz.detach()
     if inner.shape[0]>max_pairwise_elements:
-        raise ValueError("RSS_VNEXT_STDGEN_REFINEMENT_COLLISION_RESOURCE_BUDGET")
+        raise ValueError("RSS_VNEXT_REALSAS_REFINEMENT_COLLISION_RESOURCE_BUDGET")
     size=min(outer_chunk,max_pairwise_elements//inner.shape[0])
     if size<1:
-        raise ValueError("RSS_VNEXT_STDGEN_REFINEMENT_COLLISION_RESOURCE_BUDGET")
+        raise ValueError("RSS_VNEXT_REALSAS_REFINEMENT_COLLISION_RESOURCE_BUDGET")
     losses=[]
     for start in range(0,len(outer_xyz),size):
         v=outer_xyz[start:start+size]
@@ -118,9 +118,9 @@ def stdgen_outer_inner_collision_loss_v1(
     return torch.cat(losses).mean()
 
 
-def stdgen_generated_refinement_objective_v1(
-    *,raster:StdGENFlexiCubesLayerRasterV1,
-    guidance:StdGENGeneratedMeshGuidanceV1,
+def realsas_generated_refinement_objective_v1(
+    *,raster:RealSaSFlexiCubesLayerRasterV1,
+    guidance:RealSaSGeneratedMeshGuidanceV1,
     current_outer_xyz:Tensor,
     fixed_inner_xyz:Tensor|None=None,
     fixed_inner_normals:Tensor|None=None,
@@ -131,7 +131,7 @@ def stdgen_generated_refinement_objective_v1(
     """Paper Eq12+13, no diffusion generated maps become source targets."""
     guidance.validate()
     if (
-        type(raster) is not StdGENFlexiCubesLayerRasterV1
+        type(raster) is not RealSaSFlexiCubesLayerRasterV1
         or raster.authority!="PREDICTED_FLEXICUBES_MESH_RASTER_NOT_SOURCE_OBSERVATION"
         or raster.rgb_white_composite.shape[:2]!=guidance.expected_mask.shape[:2]
         or raster.alpha.shape!=guidance.expected_mask.shape
@@ -144,7 +144,7 @@ def stdgen_generated_refinement_objective_v1(
         ))
         or (fixed_inner_xyz is None)!=(fixed_inner_normals is None)
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_REFINEMENT_RENDER_OR_POLICY_CONTRACT")
+        raise ValueError("RSS_VNEXT_REALSAS_REFINEMENT_RENDER_OR_POLICY_CONTRACT")
     zero=raster.alpha.sum()*0.
     mask_loss=F.mse_loss(
         raster.alpha[guidance.known_mask].float(),
@@ -154,19 +154,19 @@ def stdgen_generated_refinement_objective_v1(
     norm_target=guidance.expected_normal_world[guidance.normal_valid_mask].float()
     normal_loss=(norm_pred-norm_target).square().sum(-1).mean()
     collision=(
-        stdgen_outer_inner_collision_loss_v1(
+        realsas_outer_inner_collision_loss_v1(
             current_outer_xyz,fixed_inner_xyz,fixed_inner_normals,
         ) if fixed_inner_xyz is not None else zero
     )
     total=mask_weight*mask_loss+normal_weight*normal_loss+collision_weight*collision
     if not bool(torch.isfinite(total)):
-        raise ValueError("RSS_VNEXT_STDGEN_REFINEMENT_OBJECTIVE_NONFINITE")
+        raise ValueError("RSS_VNEXT_REALSAS_REFINEMENT_OBJECTIVE_NONFINITE")
     return {"mask_mse":mask_loss,"normal_l2":normal_loss,
             "outer_inner_penetration":collision,"total":total}
 
 
 @dataclass(frozen=True)
-class StdGENRefinedLayerV1:
+class RealSaSRefinedLayerV1:
     layer_name:str
     refined_xyz:Tensor
     face_indices:Tensor
@@ -177,17 +177,17 @@ class StdGENRefinedLayerV1:
     authority:str="OPTIMIZED_GENERATED_LAYER_GEOMETRY_NOT_OBSERVED_SOURCE"
 
 
-def refine_stdgen_one_layer_v1(
+def refine_realsas_one_layer_v1(
     *,layer_name:str,
     initial_vertices_xyz:Tensor,face_indices:Tensor,
-    guidance:StdGENGeneratedMeshGuidanceV1,
-    rasterize_vertices:Callable[[Tensor],StdGENFlexiCubesLayerRasterV1],
+    guidance:RealSaSGeneratedMeshGuidanceV1,
+    rasterize_vertices:Callable[[Tensor],RealSaSFlexiCubesLayerRasterV1],
     fixed_inner_xyz:Tensor|None=None,
     fixed_inner_normals:Tensor|None=None,
     steps:int=100,lr:float=.01,
     mask_weight:float=1.,normal_weight:float=1.,collision_weight:float=1.,
     max_vertex_displacement:float|None=None,
-) -> StdGENRefinedLayerV1:
+) -> RealSaSRefinedLayerV1:
     """One inner-to-outer optimization stage with previous layers frozen."""
     guidance.validate()
     if (
@@ -207,7 +207,7 @@ def refine_stdgen_one_layer_v1(
             or max_vertex_displacement<=0
         ))
     ):
-        raise ValueError("RSS_VNEXT_STDGEN_REFINEMENT_LAYER_GEOMETRY_OR_OPTIMIZER")
+        raise ValueError("RSS_VNEXT_REALSAS_REFINEMENT_LAYER_GEOMETRY_OR_OPTIMIZER")
     initial=initial_vertices_xyz.detach().float()
     inner=fixed_inner_xyz.detach().float() if fixed_inner_xyz is not None else None
     normals=fixed_inner_normals.detach().float() if fixed_inner_normals is not None else None
@@ -218,8 +218,8 @@ def refine_stdgen_one_layer_v1(
         optimizer.zero_grad(set_to_none=True)
         raster=rasterize_vertices(vertex)
         if raster.semantic_layer_name!=layer_name:
-            raise ValueError("RSS_VNEXT_STDGEN_REFINEMENT_LAYER_RASTER_MISMATCH")
-        terms=stdgen_generated_refinement_objective_v1(
+            raise ValueError("RSS_VNEXT_REALSAS_REFINEMENT_LAYER_RASTER_MISMATCH")
+        terms=realsas_generated_refinement_objective_v1(
             raster=raster,guidance=guidance,current_outer_xyz=vertex,
             fixed_inner_xyz=inner,fixed_inner_normals=normals,
             mask_weight=mask_weight,normal_weight=normal_weight,
@@ -227,7 +227,7 @@ def refine_stdgen_one_layer_v1(
         )
         grad=torch.autograd.grad(terms["total"],vertex,allow_unused=False)[0]
         if not bool(torch.isfinite(grad).all()):
-            raise ValueError("RSS_VNEXT_STDGEN_REFINEMENT_NONFINITE_VERTEX_GRADIENT")
+            raise ValueError("RSS_VNEXT_REALSAS_REFINEMENT_NONFINITE_VERTEX_GRADIENT")
         vertex.grad=grad
         torch.nn.utils.clip_grad_norm_([vertex],1.,error_if_nonfinite=True)
         optimizer.step()
@@ -239,7 +239,7 @@ def refine_stdgen_one_layer_v1(
                     initial+direction*(max_vertex_displacement/distance.clamp_min(1.e-8)).clamp(max=1.)
                 )
         score=float(terms["total"].detach())
-    return StdGENRefinedLayerV1(
+    return RealSaSRefinedLayerV1(
         layer_name=layer_name,refined_xyz=vertex.detach().clone(),
         face_indices=face_indices.detach().clone(),
         source_binding_sha256=guidance.original_source_binding_sha256,
@@ -248,18 +248,18 @@ def refine_stdgen_one_layer_v1(
     )
 
 
-def stdgen_witness_refinement_renderer_v1(
+def realsas_witness_refinement_renderer_v1(
     *,vertex_xyz:Tensor,witness:RSSvNextFlexiCubesSurfaceEvidence,
     iris:nn.Module,scene_triplanes:Tensor,
     graphics_head:nn.Module,semantic_role_head:nn.Module,
     cameras:Tensor,height:int,width:int,
     source_scene_prediction_sha256:str,
-)->StdGENFlexiCubesLayerRasterV1:
+)->RealSaSFlexiCubesLayerRasterV1:
     """Bridge to the LIVE NVIDIA mesh raster, not a synthetic proxy."""
     if vertex_xyz.ndim!=2 or vertex_xyz.shape!=witness.xyz[0].shape:
-        raise ValueError("RSS_VNEXT_STDGEN_REFINEMENT_WITNESS_VERTEX_DRIFT")
+        raise ValueError("RSS_VNEXT_REALSAS_REFINEMENT_WITNESS_VERTEX_DRIFT")
     updated=replace(witness,xyz=vertex_xyz[None])
-    return render_stdgen_layered_flexicubes_mesh_v1(
+    return render_realsas_layered_flexicubes_mesh_v1(
         witness=updated,iris=iris,scene_triplanes=scene_triplanes,
         graphics_head=graphics_head,semantic_role_head=semantic_role_head,
         cameras=cameras,height=height,width=width,
@@ -268,9 +268,9 @@ def stdgen_witness_refinement_renderer_v1(
 
 
 __all__=[
-    "StdGENGeneratedMeshGuidanceV1","StdGENRefinedLayerV1",
-    "stdgen_outer_inner_collision_loss_v1",
-    "stdgen_generated_refinement_objective_v1",
-    "refine_stdgen_one_layer_v1",
-    "stdgen_witness_refinement_renderer_v1",
+    "RealSaSGeneratedMeshGuidanceV1","RealSaSRefinedLayerV1",
+    "realsas_outer_inner_collision_loss_v1",
+    "realsas_generated_refinement_objective_v1",
+    "refine_realsas_one_layer_v1",
+    "realsas_witness_refinement_renderer_v1",
 ]

@@ -221,7 +221,9 @@ def _replay_raw_source_graphics_proof_v1(
         and r.get("artifact_type") == receipt_type
     ]
     if not raws:
-        if supplied:
+        if supplied or compiled.metadata.get("origin") == (
+            "RAW_TWO_IMAGE_UNIFIED_H_TYPED_GRAPHICS_CANDIDATES"
+        ):
             raise RuntimeError("PRODUCT_PROOF_ORPHAN_RAW_GRAPHICS_RECEIPT")
         return None
     if (

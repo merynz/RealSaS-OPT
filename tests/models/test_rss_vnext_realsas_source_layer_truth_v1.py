@@ -5,11 +5,11 @@ import numpy as np
 import pytest
 import torch
 
-from models.rss_vnext.stdgen_source_layer_truth_v1 import (
-    StdGENSourceOpaqueTriangleSurfaceV1,
-    render_stdgen_source_opaque_peeled_layer_v1,
+from models.rss_vnext.realsas_source_layer_truth_v1 import (
+    RealSaSSourceOpaqueTriangleSurfaceV1,
+    render_realsas_source_opaque_peeled_layer_v1,
 )
-from models.rss_vnext.stdgen_joint_slrm_render_v1 import STAGE_1,STAGE_2
+from models.rss_vnext.realsas_joint_slrm_render_v1 import STAGE_1,STAGE_2
 
 
 def source():
@@ -19,7 +19,7 @@ def source():
         [-.6,-.6,.4],[.6,-.6,.4],[0,.7,.4],
         [-.6,-.6,0.],[.6,-.6,0.],[0,.7,0.],
     ],dtype=np.float32)
-    return StdGENSourceOpaqueTriangleSurfaceV1(
+    return RealSaSSourceOpaqueTriangleSurfaceV1(
         source_mesh_xyz=verts,
         source_faces=np.array([[0,1,2],[3,4,5]],dtype=np.int64),
         source_face_rgb_linear=np.array([[1,0,0],[0,0,1]],dtype=np.float32),
@@ -46,10 +46,10 @@ def camera():
 
 def test_real_source_zbuffer_reveals_occluded_inner_geometry_after_peeling():
     src=source()
-    full=render_stdgen_source_opaque_peeled_layer_v1(
+    full=render_realsas_source_opaque_peeled_layer_v1(
         source=src,camera_13d=camera(),width=16,height=16,role_subset=(0,1),
     )
-    back=render_stdgen_source_opaque_peeled_layer_v1(
+    back=render_realsas_source_opaque_peeled_layer_v1(
         source=src,camera_13d=camera(),width=16,height=16,role_subset=(1,),
     )
     hit=np.argwhere(full.visible_valid_mask & back.visible_valid_mask)
@@ -71,23 +71,23 @@ def test_real_source_zbuffer_reveals_occluded_inner_geometry_after_peeling():
 def test_source_qualifications_and_3d_triangle_budget_fail_closed():
     src=source()
     with pytest.raises(ValueError,match="TRIANGLE_TRUTH_NOT_QUALIFIED"):
-        render_stdgen_source_opaque_peeled_layer_v1(
+        render_realsas_source_opaque_peeled_layer_v1(
             source=replace(src,source_colors_from_artist_materials=False),
             camera_13d=camera(),width=16,height=16,role_subset=(0,),
         )
     with pytest.raises(ValueError,match="CAMERA_OR_BUDGET"):
-        render_stdgen_source_opaque_peeled_layer_v1(
+        render_realsas_source_opaque_peeled_layer_v1(
             source=src,camera_13d=camera(),width=1024,height=1024,role_subset=(1,),
         )
     with pytest.raises(ValueError,match="CAMERA_OR_BUDGET"):
-        render_stdgen_source_opaque_peeled_layer_v1(
+        render_realsas_source_opaque_peeled_layer_v1(
             source=src,camera_13d=camera(),width=16,height=16,role_subset=(7,),
         )
 
 
 def test_generated_views_do_not_create_source_surface_truth():
     src=source()
-    a=render_stdgen_source_opaque_peeled_layer_v1(
+    a=render_realsas_source_opaque_peeled_layer_v1(
         source=src,camera_13d=camera(),width=16,height=16,role_subset=(1,),
     )
     assert a.is_generated_diffusion_prediction is False
@@ -104,6 +104,6 @@ def test_unmodelled_occluder_or_transparency_is_not_silently_flattened():
         replace(src,source_roles_independently_assigned=False),
     ):
         with pytest.raises(ValueError,match="TRIANGLE_TRUTH_NOT_QUALIFIED"):
-            render_stdgen_source_opaque_peeled_layer_v1(
+            render_realsas_source_opaque_peeled_layer_v1(
                 source=changed,camera_13d=camera(),width=16,height=16,role_subset=(0,1),
             )

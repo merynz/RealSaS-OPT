@@ -7,16 +7,16 @@ import pytest
 from models.rss_vnext import (
     RSSvNextConfig,RSSvNextPatchEncoderForTests,RSSvNextUnifiedCharacterModel,
 )
-from models.rss_vnext.stdgen_slrm_training_driver_v1 import (
-    StdGENSLRMBatchV1,StdGENSLRMTrainingLossWeightsV1,
-    StdGENSLRMTrainerV1,_digest,
-    STDGEN_SIX_VIEW_TRAINING_PROFILE,RESEARCH_ONE_VIEW_TRAINING_PROFILE,
+from models.rss_vnext.realsas_slrm_training_driver_v1 import (
+    RealSaSSLRMBatchV1,RealSaSSLRMTrainingLossWeightsV1,
+    RealSaSSLRMTrainerV1,_digest,
+    REALSAS_SIX_VIEW_TRAINING_PROFILE,RESEARCH_ONE_VIEW_TRAINING_PROFILE,
 )
-from models.rss_vnext.stdgen_scene_conditioning_v1 import (
+from models.rss_vnext.realsas_scene_conditioning_v1 import (
     CANONICAL_REFERENCE,SIX_VIEW_PRIOR,
 )
-from models.rss_vnext.stdgen_joint_slrm_render_v1 import (
-    STAGE_1,STAGE_2,STAGE_3,StdGENJointTargetV1,
+from models.rss_vnext.realsas_joint_slrm_render_v1 import (
+    STAGE_1,STAGE_2,STAGE_3,RealSaSJointTargetV1,
 )
 
 
@@ -49,7 +49,7 @@ def _batch(stage=STAGE_1,view_count=1):
     direc=torch.zeros((b,r,3));direc[...,2]=1.
     keep=torch.ones((b,r,k),dtype=torch.bool)
     if stage!=STAGE_1:keep[...,0]=False
-    gt=StdGENJointTargetV1(
+    gt=RealSaSJointTargetV1(
         rgb_white=torch.rand((b,r,3)),alpha=torch.rand((b,r,1)),
         role_indices=torch.tensor([[1,2,0,1]]),
         qualified_rgb_mask=torch.ones((b,r),dtype=torch.bool),
@@ -60,7 +60,7 @@ def _batch(stage=STAGE_1,view_count=1):
         stage=stage,
     )
     auth=CANONICAL_REFERENCE if view_count==1 else SIX_VIEW_PRIOR
-    batch=StdGENSLRMBatchV1(
+    batch=RealSaSSLRMBatchV1(
         conditioning_rgba=views,conditioning_cameras=cams,
         conditioning_authority=auth,source_binding_sha256="b"*64,
         original_observed_view_count=1,
@@ -73,7 +73,7 @@ def _batch(stage=STAGE_1,view_count=1):
         admission_status="QUALIFIED_SOURCE_3D_RENDER_MULTILAYER",
         slrm_training_input_profile=(
             RESEARCH_ONE_VIEW_TRAINING_PROFILE if view_count==1
-            else STDGEN_SIX_VIEW_TRAINING_PROFILE
+            else REALSAS_SIX_VIEW_TRAINING_PROFILE
         ),
         dataset_manifest_sha256="f"*64,
         original_source_binding_sha256=batch.source_binding_sha256,
@@ -101,17 +101,17 @@ def _batch(stage=STAGE_1,view_count=1):
 
 
 def _trainer(model,receipt):
-    return StdGENSLRMTrainerV1(
+    return RealSaSSLRMTrainerV1(
         model,torch.optim.AdamW(model.parameters(),lr=.001),
         dataset_manifest_sha256="f"*64,
-        weights=StdGENSLRMTrainingLossWeightsV1(lpips=0.),
+        weights=RealSaSSLRMTrainingLossWeightsV1(lpips=0.),
         input_profile=receipt["slrm_training_input_profile"],
         trusted_source_3d_render_registry={"admitted":receipt},
     )
 
 
 @pytest.mark.parametrize("stage,views",[(STAGE_1,1),(STAGE_2,6)])
-def test_stdgen_slrm_actual_1or6_multiview_conditioned_train_step(stage,views):
+def test_realsas_slrm_actual_1or6_multiview_conditioned_train_step(stage,views):
     net,batch,receipt=_batch(stage,views)
     trainer=_trainer(net,receipt)
     initial=net.iris.view_bank.image_projection.weight.clone().detach()
@@ -238,7 +238,7 @@ def test_source_truth_registry_resume_refuses_changes(tmp_path):
 def test_lpips_paper_term_is_required_unless_explicitly_disabled():
     net,batch,receipt=_batch()
     with pytest.raises(ValueError,match="LPIPS_REQUIRED_NOT_MSE_SURROGATE"):
-        StdGENSLRMTrainerV1(
+        RealSaSSLRMTrainerV1(
             net,torch.optim.AdamW(net.parameters()),
             dataset_manifest_sha256="f"*64,
             trusted_source_3d_render_registry={"admitted":receipt},
@@ -248,10 +248,10 @@ def test_lpips_paper_term_is_required_unless_explicitly_disabled():
 
 def test_published_six_view_baseline_never_accepts_a_single_direct_view():
     net,batch,receipt=_batch(STAGE_1,1)
-    six=StdGENSLRMTrainerV1(
+    six=RealSaSSLRMTrainerV1(
         net,torch.optim.AdamW(net.parameters()),
         dataset_manifest_sha256="f"*64,
-        weights=StdGENSLRMTrainingLossWeightsV1(lpips=0.),
+        weights=RealSaSSLRMTrainingLossWeightsV1(lpips=0.),
         trusted_source_3d_render_registry={"admitted":receipt},
     )
     with pytest.raises(ValueError,match="SIX_VIEW_BASELINE_VS_ONE_VIEW_ABLATION"):
@@ -262,7 +262,7 @@ def test_original_single_photo_yields_six_generated_slrm_inputs_even_stage1():
     net,batch,receipt=_batch(STAGE_1,6)
     assert batch.original_observed_view_count==1
     six=_trainer(net,receipt)
-    assert six.input_profile==STDGEN_SIX_VIEW_TRAINING_PROFILE
+    assert six.input_profile==REALSAS_SIX_VIEW_TRAINING_PROFILE
     assert torch.isfinite(six.train_step(batch)["total"])
 
 
@@ -271,10 +271,10 @@ def test_pretrained_6_view_and_research_one_view_ablation_resume_incompatible(tm
     six=_trainer(net,receipt)
     filename=tmp_path/"six-view-checkpoint.pt"
     six.save_checkpoint(filename,sampler_cursor=5)
-    alternate=StdGENSLRMTrainerV1(
+    alternate=RealSaSSLRMTrainerV1(
         net,torch.optim.AdamW(net.parameters()),
         dataset_manifest_sha256="f"*64,
-        weights=StdGENSLRMTrainingLossWeightsV1(lpips=0.),
+        weights=RealSaSSLRMTrainingLossWeightsV1(lpips=0.),
         trusted_source_3d_render_registry={"admitted":receipt},
         input_profile=RESEARCH_ONE_VIEW_TRAINING_PROFILE,
     )

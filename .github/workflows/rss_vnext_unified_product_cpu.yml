@@ -24,6 +24,9 @@ on:
       - "tests/compiler/test_graphics_v2.py"
       - "tests/compiler/test_rss_vnext_compiler_storage_compat_v1.py"
       - "tests/repository/test_rss_vnext_historical_model_import_compat_v1.py"
+      - "tests/repository/test_product_producer_consumer_audit_v1.py"
+      - "tests/repository/test_fit1_mechanical_product_role_alignment_v1.py"
+      - "tools/product_producer_consumer_audit_v1.py"
       - ".github/workflows/rss_vnext_unified_product_cpu.yml"
   pull_request:
     paths:
@@ -75,4 +78,6 @@ jobs:
             tests/compiler/test_playback_runtime_v4_contract_v1.py \
             tests/compiler/test_graphics_v2.py \
             tests/compiler/test_rss_vnext_compiler_storage_compat_v1.py \
-            tests/repository/test_rss_vnext_historical_model_import_compat_v1.py
+            tests/repository/test_rss_vnext_historical_model_import_compat_v1.py \
+            tests/repository/test_product_producer_consumer_audit_v1.py \
+            tests/repository/test_fit1_mechanical_product_role_alignment_v1.py

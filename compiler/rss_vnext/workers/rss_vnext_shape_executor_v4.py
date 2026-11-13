@@ -146,6 +146,89 @@ def _tessa_candidate_tensors_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
     return tensors, receipt
 
 
+def _raw_axis_mira_candidates_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
+    """Retain the original unified AXIS causal events and addressed MIRA evidence.
+
+    One generation per Shape execution; no compiler can synthesize a missing
+    joint, constraint, skin code, or unseen source viewpoint. This is a proposal
+    receipt with exact model lineage, never a canonical rig/skin.
+    """
+    from dataclasses import asdict
+    import torch
+    from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
+        _validate_neural_control_events,
+    )
+    from models.rss_vnext.animation_ready_mesh import RSSvNextStructuralMeshCandidate
+
+    mesh = proposal.get("mesh_candidate")
+    state = proposal.get("control_status")
+    if mesh is None:
+        if (
+            state != "ABSTAIN_NO_VALID_PREDICTED_MESH"
+            or proposal.get("control_event_proposal")
+            or proposal.get("dynamic_mesh_candidate") is not None
+            or proposal.get("discrete_skin_weight_proposal") is not None
+        ):
+            raise RuntimeError("RSS_VNEXT_SHAPE_V4_AXIS_CONTROL_WITHOUT_MESH")
+        return {}, {
+            "axis_mira_control_status": state,
+            "axis_mira_control_events": [],
+            "axis_mira_control_event_count": 0,
+            "axis_mira_control_events_sha256": None,
+            "axis_mira_discrete_skin_candidate_present": False,
+            "axis_mira_control_authority": "NO_CONTROL_CANDIDATE",
+        }
+    if type(mesh) is not RSSvNextStructuralMeshCandidate or (
+        state != "UNQUALIFIED_AXISMIRA_CONTROL_CANDIDATE"
+    ):
+        raise RuntimeError("RSS_VNEXT_SHAPE_V4_AXIS_CONTROL_STATUS")
+    events = proposal.get("control_event_proposal")
+    if not isinstance(events, (tuple, list)) or not 1 <= len(events) <= 4096:
+        raise RuntimeError("RSS_VNEXT_SHAPE_V4_AXIS_CAUSAL_EVENTS_REQUIRED")
+    rows = []
+    for event in events:
+        row = asdict(event)
+        row["kind"] = int(event.kind)
+        rows.append(row)
+    _validate_neural_control_events(tuple(rows))
+    event_bytes = json.dumps(
+        rows, sort_keys=True, separators=(",", ":"), allow_nan=False,
+    ).encode("utf-8")
+    tensors = {}
+    dynamic = proposal.get("dynamic_mesh_candidate")
+    hard = proposal.get("discrete_skin_weight_proposal")
+    hidden = proposal.get("skin_joint_hidden_states")
+    joint_mask = proposal.get("joint_valid_mask")
+    if (dynamic is None) != (hard is None) or (hard is None) != (hidden is None):
+        raise RuntimeError("RSS_VNEXT_SHAPE_V4_MIRA_DYNAMIC_AND_DISCRETE_PAIR")
+    if dynamic is not None:
+        dynamic.validate()
+        if dynamic.source_mesh is not mesh or not isinstance(hard, torch.Tensor) or (
+            hard.shape != dynamic.weights.shape
+            or hidden.ndim != 3
+            or hidden.shape[:2] != (1, hard.shape[2])
+            or joint_mask is None
+        ):
+            raise RuntimeError("RSS_VNEXT_SHAPE_V4_MIRA_VERTEX_OR_JOINT_DRIFT")
+        tensors = {
+            "axis_mira_dynamic_vertices": dynamic.vertices,
+            "axis_mira_soft_skin_weights": dynamic.weights,
+            "axis_mira_discrete_skin_weights": hard,
+            "axis_mira_joint_hidden_states": hidden,
+            "axis_mira_dynamic_displacement": dynamic.displacement,
+            "axis_mira_readiness_logits": dynamic.readiness_logits,
+            "axis_mira_joint_valid_mask": joint_mask.to(dtype=torch.uint8),
+        }
+    return tensors, {
+        "axis_mira_control_status": state,
+        "axis_mira_control_events": rows,
+        "axis_mira_control_event_count": len(rows),
+        "axis_mira_control_events_sha256": sha256(event_bytes).hexdigest(),
+        "axis_mira_discrete_skin_candidate_present": hard is not None,
+        "axis_mira_control_authority": "LEARNED_CAUSAL_CONTROL_NOT_CANONICAL_RIG_SKIN",
+    }
+
+
 def _raw_source_ref(request: dict[str, Any]) -> dict[str, Any] | None:
     refs = request.get("input_artifacts") or ()
     if not isinstance(refs, (list, tuple)) or any(type(ref) is not dict for ref in refs):
@@ -274,8 +357,10 @@ def execute_rss_vnext_shape_capability_v4(
     if state.camera_features is not None:
         raise RuntimeError("RSS_VNEXT_SHAPE_V4_SOURCE_CAMERA_WAS_INVENTED")
     tessa_tensors, tessa_receipt = _tessa_candidate_tensors_v1(proposal)
+    axis_tensors, axis_receipt = _raw_axis_mira_candidates_v1(proposal)
     scene_bytes = _tensor_archive(
         **tessa_tensors,
+        **axis_tensors,
         scene_triplanes=state.scene_triplanes,
         query_xyz=state.query_xyz,
         local_features=state.local_features,
@@ -321,6 +406,7 @@ def execute_rss_vnext_shape_capability_v4(
         "product_revision_minted": False,
         "mesh_status": proposal["mesh_status"],
         **tessa_receipt,
+        **axis_receipt,
     }
     receipt_ref = _cas_ref(
         (json.dumps(receipt, sort_keys=True, separators=(",", ":"), allow_nan=False)

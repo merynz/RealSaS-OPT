@@ -978,8 +978,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         """
         if self.training:
             raise RuntimeError("RSS_VNEXT_TEACHER_FREE_REQUIRES_EVAL")
-        if camera_features is None and generate_controls:
-            raise RuntimeError("RSS_VNEXT_UNCALIBRATED_CONTROL_PROOF_NOT_READY")
+        if camera_features is None and generate_controls and (
+            generated_rgba is None or generated_cameras is None
+            or generated_normals is None or generation_checkpoint_sha256 is None
+            or source_binding_sha256 is None
+        ):
+            raise RuntimeError("RSS_VNEXT_RAW_CONTROLS_REQUIRE_PINNED_GENERATED_SCENE")
         if generate_controls and executable_constraint_operators is None:
             raise ValueError("RSS_VNEXT_RIG_REQUIRES_COMPILER_CAPABILITIES")
         if not generate_controls and executable_constraint_operators is not None:
@@ -1066,6 +1070,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 allowed_constraint_operators=executable_constraint_operators,
             )
             result["control_event_proposal"] = events
+            result["control_status"] = "UNQUALIFIED_AXISMIRA_CONTROL_CANDIDATE"
             seq = AXISSequenceV6.from_events(
                 events, device=memory.device,
             )

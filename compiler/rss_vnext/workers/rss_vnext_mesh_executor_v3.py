@@ -49,6 +49,13 @@ MESH_KEYS = {
     "tessa_candidate_static_quality_logits",
     "tessa_candidate_unsigned_distance", "tessa_candidate_sign_logits",
 }
+AXIS_MIRA_KEYS = {
+    "axis_mira_dynamic_vertices", "axis_mira_soft_skin_weights",
+    "axis_mira_discrete_skin_weights", "axis_mira_joint_hidden_states",
+    "axis_mira_dynamic_displacement", "axis_mira_readiness_logits",
+    "axis_mira_joint_valid_mask",
+}
+
 VIEWS_REQUIRED = {
     "canonical_rgba", "generated_rgba",
     "generated_normals", "generated_virtual_cameras",
@@ -223,6 +230,95 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
     }
 
 
+def _validate_raw_axis_mira(
+    scene: dict[str, np.ndarray], receipt: dict,
+    mesh: dict[str, Any],
+) -> dict[str, Any]:
+    """Consume exact AXIS/MIRA candidates rather than re-inferring rig/skin.
+
+    The raw source has no observed camera; structural/control programs remain
+    learned proposals with no canonical mechanics or contact authority.
+    """
+    from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
+        _validate_neural_control_events,
+    )
+    status = receipt.get("axis_mira_control_status")
+    fields = set(scene) & AXIS_MIRA_KEYS
+    if status is None and not fields:
+        return {"control_state": "LEGACY_NOT_GENERATED", "control_event_count": 0,
+                "discrete_skin_present": False}
+    events = receipt.get("axis_mira_control_events")
+    count = receipt.get("axis_mira_control_event_count")
+    digest = receipt.get("axis_mira_control_events_sha256")
+    hard = receipt.get("axis_mira_discrete_skin_candidate_present")
+    authority = receipt.get("axis_mira_control_authority")
+    if type(events) is not list or type(count) is not int or len(events) != count:
+        raise RuntimeError("RSS_VNEXT_RAW_MESH_AXIS_EVENTS_CARDINALITY")
+    if status == "ABSTAIN_NO_VALID_PREDICTED_MESH":
+        if (
+            mesh["mesh_state"] != "ABSTAIN" or count != 0 or digest is not None
+            or hard is not False or fields or authority != "NO_CONTROL_CANDIDATE"
+        ):
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_ABSTAIN_HAS_RIG_OR_SKIN")
+        return {"control_state": status, "control_event_count": 0,
+                "discrete_skin_present": False}
+    if (
+        status != "UNQUALIFIED_AXISMIRA_CONTROL_CANDIDATE"
+        or mesh["mesh_state"] != "UNQUALIFIED_MESH_CANDIDATE"
+        or not 1 <= count <= 4096
+        or authority != "LEARNED_CAUSAL_CONTROL_NOT_CANONICAL_RIG_SKIN"
+        or type(hard) is not bool
+    ):
+        raise RuntimeError("RSS_VNEXT_RAW_MESH_AXIS_PROPOSAL_STATUS")
+    _validate_neural_control_events(tuple(events))
+    event_bytes = json.dumps(
+        events, sort_keys=True, separators=(",", ":"), allow_nan=False,
+    ).encode("utf-8")
+    if not _digest(digest) or sha256(event_bytes).hexdigest() != digest:
+        raise RuntimeError("RSS_VNEXT_RAW_MESH_AXIS_EVENTS_HASH_DRIFT")
+    if hard is not bool(fields):
+        raise RuntimeError("RSS_VNEXT_RAW_MESH_MIRA_SKIN_PRESENCE_DRIFT")
+    if hard and fields != AXIS_MIRA_KEYS:
+        raise RuntimeError("RSS_VNEXT_RAW_MESH_PARTIAL_MIRA_ADDRESSING")
+    if not hard:
+        return {"control_state": status, "control_event_count": count,
+                "discrete_skin_present": False}
+    n = mesh["candidate_vertices"]
+    xyz, delta, quality = (
+        scene["axis_mira_dynamic_vertices"],
+        scene["axis_mira_dynamic_displacement"],
+        scene["axis_mira_readiness_logits"],
+    )
+    soft = scene["axis_mira_soft_skin_weights"]
+    discrete = scene["axis_mira_discrete_skin_weights"]
+    hidden = scene["axis_mira_joint_hidden_states"]
+    joint_mask = scene["axis_mira_joint_valid_mask"]
+    j = soft.shape[-1] if soft.ndim == 3 else 0
+    if (
+        xyz.shape != (1, n, 3) or delta.shape != xyz.shape
+        or quality.shape != (1, n, 4)
+        or soft.shape != (1, n, j) or j < 1
+        or discrete.shape != soft.shape
+        or hidden.ndim != 3 or hidden.shape[:2] != (1, j)
+        or joint_mask.shape != (1, j)
+        or joint_mask.dtype.kind not in "iu"
+        or not np.isin(joint_mask, [0, 1]).all()
+        or not np.allclose(soft.sum(-1), 1, atol=1e-5)
+        or not np.allclose(discrete.sum(-1), 1, atol=1e-5)
+        or (soft < -1e-6).any() or (discrete < -1e-6).any()
+    ):
+        raise RuntimeError("RSS_VNEXT_RAW_MESH_MIRA_JOINT_OR_VERTEX_ADDRESS_DRIFT")
+    return {
+        "control_state": status,
+        "control_event_count": count,
+        "discrete_skin_present": True,
+        "discrete_skin_joints": int(j),
+        "discrete_skin_max_simplex_error": float(
+            np.max(np.abs(discrete.sum(-1) - 1.)),
+        ),
+    }
+
+
 def execute_rss_vnext_mesh_capability_v3(
     request: dict[str, Any], *,
     read_object: Callable[[dict[str, Any]], bytes],
@@ -315,7 +411,7 @@ def execute_rss_vnext_mesh_capability_v3(
         raise RuntimeError("RSS_VNEXT_RAW_MESH_SOURCE_OR_CHECKPOINT_PARENT_DRIFT")
     scene = _archive(
         _cas(scene_ref, read_object),
-        required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS,
+        required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS | AXIS_MIRA_KEYS,
     )
     views = _archive(
         _cas(views_ref, read_object),
@@ -333,6 +429,7 @@ def execute_rss_vnext_mesh_capability_v3(
     ):
         raise RuntimeError("RSS_VNEXT_RAW_MESH_SHARED_H_DOMAIN_DRIFT")
     measured = _validate_candidate(scene, receipt)
+    controls_measured = _validate_raw_axis_mira(scene, receipt, measured)
     diagnostics = {
         "schema": "RealSaS.RSSvNext.RawMeshCompilerCourt.v1",
         "source_content_sha256": source["content_sha256"],
@@ -347,6 +444,7 @@ def execute_rss_vnext_mesh_capability_v3(
         "canonical_mesh_minted": False,
         "product_revision_minted": False,
         **measured,
+        **controls_measured,
     }
     # Shape already retained every candidate CAS artifact. No inferred
     # camera, candidate triangle or generated normal is an independently

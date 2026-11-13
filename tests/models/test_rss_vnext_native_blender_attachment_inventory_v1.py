@@ -227,3 +227,59 @@ def test_zero_triangle_renderable_owner_preserves_source_identity_without_held_f
     assert not empty.held_face_selected
     assert got.owners[1].source_face_start==0
     assert got.owners[1].source_face_count==4
+
+
+def test_blender_exporter_actual_python_source_parses_and_roundtrips_authoring_fields():
+    """Validate the Blender script's real schema extraction without bpy.
+
+    This is NOT a Blender runtime pass: evaluate only two pure extraction
+    functions from their actual source AST, with typed fake Blender objects.
+    """
+    import ast
+    from pathlib import Path
+    from types import SimpleNamespace
+    script=Path(__file__).resolve().parents[2]/(
+        "tools/truth_foundry/blender_native_attachment_inventory_v1.py"
+    )
+    tree=ast.parse(script.read_text("utf8"),filename=str(script))
+    selected=[
+        node for node in tree.body
+        if isinstance(node,ast.FunctionDef)
+        and node.name in ("_constraint_row","_source_row")
+    ]
+    assert len(selected)==2
+    scope={}
+    exec(compile(ast.Module(body=selected,type_ignores=[]),
+                 str(script),"exec"),scope)
+    rig=SimpleNamespace(name="Rig",type="ARMATURE")
+    constraint=SimpleNamespace(
+        name="GripParent",type="CHILD_OF",target=rig,subtarget="Grip",
+        mute=False,enabled=True,is_valid=True,influence=1.,
+        inverse_matrix=np.eye(4),
+        **{f"use_{axis}_{dim}":True
+           for axis in ("location","rotation","scale")
+           for dim in ("x","y","z")}
+    )
+    mod=SimpleNamespace(
+        name="ArmatureDeform",type="ARMATURE",object=rig,
+    )
+    sword=SimpleNamespace(
+        name="Sword",parent=rig,parent_type="BONE",parent_bone="Grip",
+        constraints=[constraint],modifiers=[mod],
+    )
+    row=scope["_source_row"](sword,0)
+    assert row["constraints"][0]["enabled"] is True
+    assert row["constraints"][0]["is_valid"] is True
+    assert row["constraints"][0]["use_scale_z"] is True
+    assert row["constraints"][0]["inverse_matrix"]==np.eye(4).tolist()
+    assert row["parent_type"]=="BONE"
+    assert row["parent_bone"]=="Grip"
+    assert row["modifiers"][0]["type"]=="ARMATURE"
+    classifier=_court([row,_owner(1,"Body")]).owners[0]
+    assert classifier.state=="UNQUALIFIED_AUTHORED_BONE_LINK_CANDIDATE"
+    assert classifier.authoring_mechanism=="BONE_PARENT+CHILD_OF"
+    assert not classifier.holder_face_known
+    constraint.is_valid=False
+    invalid=scope["_source_row"](sword,0)
+    classified=_court([invalid,_owner(1,"Body")]).owners[0]
+    assert classified.state=="ABSTAIN_AMBIGUOUS_OR_PARTIAL_SOURCE_BINDING"

@@ -328,10 +328,23 @@
             "role": "mechanics_intervention_court",
             "artifact_type": "RealSaS.MechanicsInterventionCourt",
             "schema_version": "v1"
+          },
+          {
+            "role": "mechanics_dynamic_integrity_court",
+            "artifact_type": "RealSaS.MechanicsDynamicIntegrityCourt",
+            "schema_version": "v1"
           }
         ],
         "source_contact_qualified_by_intervention": false,
-        "learned_secondary_motion_qualified_by_intervention": false
+        "learned_secondary_motion_qualified_by_intervention": false,
+        "dynamic_integrity_policy": {
+          "enabled": true,
+          "max_faces": 1024,
+          "max_controls": 128,
+          "relative_translation": 0.02,
+          "max_constraint_residual": 0.001
+        },
+        "dynamic_integrity_not_source_contact_or_secondary_motion": true
       }
     },
     "product.graphics": {
@@ -458,7 +471,10 @@
         "input_mechanics_intervention_artifact_type": "RealSaS.MechanicsInterventionCourt",
         "input_mechanics_intervention_schema_version": "v1",
         "mechanics_intervention_required": true,
-        "canonical_cross_expert_parent_reopen_required": true
+        "canonical_cross_expert_parent_reopen_required": true,
+        "dynamic_integrity_court_required": true,
+        "input_dynamic_integrity_artifact_type": "RealSaS.MechanicsDynamicIntegrityCourt",
+        "input_dynamic_integrity_schema_version": "v1"
       }
     }
   }

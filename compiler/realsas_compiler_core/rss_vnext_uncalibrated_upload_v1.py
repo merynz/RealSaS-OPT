@@ -4,9 +4,8 @@ from __future__ import annotations
 
 This is upstream of existing RSSvNextTwoViewSourceObservationV1, which requires
 two measured antipodal 13D cameras. An arbitrary user upload cannot be
-silently cast into that calibrated source schema. StdGEN (CVPR 2025) applies
-learned A-pose canonicalization and multiview diffusion after preparing the
-reference image. Our generic two-view LoRA candidate will need jointly
+silently cast into that calibrated source schema. Published character-reconstruction methods apply learned canonicalization
+and multiview diffusion before scene reconstruction. Our generic two-view LoRA candidate will need jointly
 conditioned pose/camera estimation; this source envelope preserves both input
 files until trained canonicalization exists.
 

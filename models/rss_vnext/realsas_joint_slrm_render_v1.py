@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""the CVPR 2025 multi-view reference §3.2 clean-room joint S-LRM ray rendering and losses.
+"""First-party joint ray rendering and training losses, informed by CVPR 2025 §3.2.
 
 The *same* 3D H(x) is decoded into geometry-density, RGB, and semantic
 probabilities. Outer-to-inner training selectively removes covering semantic
@@ -106,7 +106,7 @@ def render_realsas_joint_rays_v1(
     weights=effective_alpha*survival
     alpha=weights.sum(-1,keepdim=True).clamp(0.,1.)
     rgb=(torch.sigmoid(rgb_logit.float())*weights[...,None]).sum(dim=-2)
-    # RealSaS Eq(7) uses the *original* semantic distribution p_i,
+    # The published CVPR 2025 Eq(7) uses the *original* semantic distribution p_i,
     # weighted by the peeled transmittance T_P and alpha*P_keep.
     # Do not silently re-normalize roles at samples; that would change
     # the paper's volume semantic objective and conceal uncertainty.

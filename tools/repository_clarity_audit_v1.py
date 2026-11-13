@@ -15,6 +15,27 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+ROOT_DISPOSITIONS = {
+    ".github": "CI_AND_REPOSITORY_ENFORCEMENT",
+    "assets": "SHARED_BINARY_ASSETS",
+    "canonical": "MIXED_HISTORIC_EVIDENCE_AND_PATH_BOUND_MACHINE_POLICIES",
+    "compiler": "PRODUCT_COMPILER_AND_COMPATIBILITY",
+    "docs": "HUMAN_DOCS_AND_HISTORICAL_REFERENCE",
+    "experiments": "RESEARCH_APPARATUS",
+    "historical": "HISTORICAL_PROVENANCE",
+    "models": "PRODUCT_EXPERTS_AND_LEGACY_COMPATIBILITY",
+    "notebooks": "RESEARCH_COMPUTE_NOTEBOOKS",
+    "platform": "ACTIVE_PLATFORM_AND_COMPATIBILITY",
+    "prereg": "SCIENTIFIC_PREREGISTRATION",
+    "product": "ACTIVE_BUSTED_PRODUCT_UI_AND_GATEWAY",
+    "prospective": "UNPROMOTED_RESEARCH_PROPOSALS",
+    "requirements": "DEPENDENCY_LOCKS_AND_REQUIREMENTS",
+    "research": "SCIENTIFIC_REFERENCE",
+    "restoration": "RESTORATION_PROVENANCE",
+    "runtime": "PRODUCT_RUNTIME_AND_COMPATIBILITY",
+    "tests": "EXECUTABLE_REGRESSIONS_ALL_ERAS",
+    "tools": "OPERATORS_ALL_ERAS",
+}
 LEGACY_MODEL_PREFIXES = ("models.arachne", "models.geppetto", "models.skin_field_codec")
 PRODUCT_READER_ROOTS = (
     "models/rss_vnext/",
@@ -140,11 +161,19 @@ def census(root: Path) -> dict:
     missing_named_workflows = sorted(
         name for name in named if ".github/workflows/" + name not in file_set
     )
+    actual_directories = {
+        rel.split("/", 1)[0] for rel in files if "/" in rel
+    }
     return {
         "schema": "RealSaS.RepositoryClarityAudit.v1",
-        "scope": "TRACKED_MAIN_CHECKOUT_READ_ONLY",
+        "scope": "TRACKED_CHECKOUT_READ_ONLY",
         "tracked_files": len(files),
         "root_file_counts": dict(sorted(root_counts.items())),
+        "directory_dispositions": {
+            name: ROOT_DISPOSITIONS.get(name, "UNCLASSIFIED_NEEDS_OWNER")
+            for name in sorted(actual_directories)
+        },
+        "unclassified_directories": sorted(actual_directories - ROOT_DISPOSITIONS.keys()),
         "active_catalog_roles": roles,
         "active_product_role_count": len(roles),
         "workflows": {
@@ -178,6 +207,7 @@ def main() -> None:
         print(json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False))
     else:
         print("Tracked files:", data["tracked_files"])
+        print("Unclassified top-level directories:", data["unclassified_directories"])
         print("Active product roles:", ", ".join(data["active_catalog_roles"]))
         print("Workflows:", data["workflows"]["yaml_count"], data["workflows"]["actual_by_class"])
         print("Unreviewed auto-trigger workflows:", len(data["workflows"]["other_automatic"]))

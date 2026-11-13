@@ -26,6 +26,13 @@ def test_legacy_model_imports_are_real_dependencies():
 
 def test_live_catalog_and_ci_policy_are_read_not_duplicated():
     result = census(REPO)
+    assert result["unclassified_directories"] == []
+    assert result["directory_dispositions"]["canonical"] == (
+        "MIXED_HISTORIC_EVIDENCE_AND_PATH_BOUND_MACHINE_POLICIES"
+    )
+    assert result["directory_dispositions"]["models"] == (
+        "PRODUCT_EXPERTS_AND_LEGACY_COMPATIBILITY"
+    )
     assert "product.input" in result["active_catalog_roles"]
     assert result["active_product_role_count"] >= 5
     workflows = result["workflows"]

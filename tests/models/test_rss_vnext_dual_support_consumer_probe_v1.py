@@ -123,7 +123,7 @@ def test_real_tessa_and_axis_losses_reach_interior_support_and_original_iris():
         research.position_head[-1].weight.grad,
         research.surface_from_interior.in_proj_weight.grad,
         research.interior_from_surface.in_proj_weight.grad,
-        net.tessa.memory.surface.cross.in_proj_weight.grad,
+        net.tessa.memory.surface.cross.q_proj_weight.grad,
         net.axis.kind_head.weight.grad,
     ):
         assert grad is not None

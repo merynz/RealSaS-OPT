@@ -1,0 +1,128 @@
+name: R29 R9 Articulation plus PartVerse original CC license census
+on:
+  push:
+    branches: [audit/rights-metadata-r4-20261113]
+    paths: [.github/workflows/rights_articulation_partverse_r9.yml]
+permissions:
+  contents: read
+concurrency:
+  group: r29-r9-articulation-partverse
+  cancel-in-progress: false
+jobs:
+  crosswalk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      RCLONE_CONFIG: /tmp/r29-r9-drive.conf
+    steps:
+    - name: Fetch pinned provenance and upstream provider data (CPU, no assets)
+      run: |
+        set -euo pipefail
+        umask 077
+        test -n "$DRIVE_CONFIG_B64"
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq --no-install-recommends rclone
+        python -m pip install -q 'pyarrow>=19,<24' 'requests>=2.31,<3'
+        printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+        mkdir -p "$RUNNER_TEMP/r29r9"
+        rclone copyto "gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_partverse_original_license_policy_v2/20261109_7034/PARTVERSE_7034_ORIGINAL_SOURCE_LICENSE_TRIAGE_V2.csv" "$RUNNER_TEMP/r29r9/partverse.csv" --retries 2
+        test "$(sha256sum "$RUNNER_TEMP/r29r9/partverse.csv" | cut -d' ' -f1)" = "2599e230876099d53ccf65e8c17e30b2fe07e0d764f9373ec1e25e094c761f02"
+        python - "$RUNNER_TEMP/r29r9" <<'PY'
+        from pathlib import Path
+        import requests,hashlib,sys
+        root=Path(sys.argv[1])
+        sources=[('articulation.csv','https://huggingface.co/datasets/Seed3D/Articulation-XL2.0/resolve/main/meta_Articulation_XL_2.0.csv','f5174ce23e319c9663e0d0ecf8ec8854d37497020ade7ac344d9b4ed13323a75',18000000),
+                 ('sketchfab.parquet','https://huggingface.co/datasets/allenai/objaverse-xl/resolve/main/sketchfab/sketchfab.parquet','6462ef2ecf39069e210f6df1416e8a28ca931039e3c7fe6aa3dca593115c64e3',130000000)]
+        for name,url,expected,limit in sources:
+         h=hashlib.sha256();n=0
+         with requests.get(url,stream=True,timeout=(25,120),headers={'User-Agent':'RealSaS-Rights-Census/9'}) as r:
+          r.raise_for_status()
+          with (root/name).open('wb') as f:
+           for part in r.iter_content(2*1024*1024):
+            if part:
+             n+=len(part)
+             if n>limit:raise RuntimeError('METADATA_OVER_SIZE_LIMIT:'+name)
+             h.update(part);f.write(part)
+         if h.hexdigest()!=expected:raise RuntimeError('METADATA_SHA_MISMATCH:'+name+':'+h.hexdigest())
+         print('R9_PIN_OK',name,n,flush=True)
+        PY
+    - name: Join 6,622 Articulation Sketchfab sources against exact upstream UID and classify real license
+      run: |
+        python - "$RUNNER_TEMP/r29r9" <<'PY'
+        from pathlib import Path
+        import csv,collections,json,re,sys,hashlib
+        import pyarrow.parquet as pq
+        root=Path(sys.argv[1]);art=list(csv.DictReader((root/'articulation.csv').open(encoding='utf-8-sig')))
+        p=list(csv.DictReader((root/'partverse.csv').open(encoding='utf-8-sig')))
+        assert len(art)==48637 and len(p)==7034
+        hex32=re.compile(r'^[0-9a-f]{32}$')
+        a=[x for x in art if x['source'].strip().lower()=='sketchfab']
+        assert len(a)==6622
+        ids={x['fileIdentifier'].strip().rsplit('/',1)[-1].lower() for x in a}
+        assert len(ids)==6622 and all(hex32.fullmatch(uid) for uid in ids)
+        pp=pq.ParquetFile(root/'sketchfab.parquet')
+        need=['fileIdentifier','license','sha256','source']
+        assert set(need).issubset(pp.schema_arrow.names)
+        byid=collections.defaultdict(list); scanned=0
+        for batch in pp.iter_batches(batch_size=20000,columns=need):
+         b=batch.to_pydict()
+         for i in range(batch.num_rows):
+          scanned+=1
+          if str(b['source'][i]).lower()!='sketchfab':continue
+          ident=str(b['fileIdentifier'][i] or '')
+          uid=ident.rsplit('/',1)[-1].lower()
+          if uid in ids:byid[uid].append((str(b['license'][i] or ''),str(b['sha256'][i] or ''),ident))
+        def lic(v):
+         n=re.sub(r'[^a-z0-9]+',' ',v.lower()).strip()
+         if 'non commercial' in n or 'noncommercial' in n or re.search(r'\bnc\b',n):return 'NC_RESTRICTED'
+         if 'share alike' in n or 'sharealike' in n or re.search(r'\bsa\b',n):return 'SA_REVIEW'
+         if 'no derivatives' in n or 'noderivatives' in n or re.search(r'\bnd\b',n):return 'ND_REVIEW'
+         if 'cc0' in n or 'public domain' in n or 'creative commons zero' in n:return 'CC0'
+         if 'attribution' in n or 'cc by' in n:return 'CC_BY'
+         return 'UNKNOWN'
+        def char(c):
+         return any(k in c.lower() for k in ['character','anthropomorphic','animal','mythical creature','anatomy','toy'])
+        detail=[];count=collections.Counter()
+        for x in a:
+         uid=x['fileIdentifier'].strip().rsplit('/',1)[-1].lower()
+         candidates=byid.get(uid,[])
+         distinct=set(candidates)
+         if len(distinct)==1:
+          l,sh,url=next(iter(distinct));cls=lic(l);match='UNIQUE_SOURCE_UID'
+         else:
+          l=sh=url='';cls='UNKNOWN';match='NOT_FOUND' if not candidates else 'AMBIGUOUS'
+         category=x.get('category_label','')
+         row={'dataset':'Articulation-XL2.0','source_uid':uid,'articulation_uuid':x['uuid'],'original_file_identifier':url,
+              'original_sha_claim':sh,'original_license_raw':l,'license_class':cls,'source_metadata_match':match,
+              'category_label':category,'morphology_tag_candidate':int(char(category)),
+              'has_noai_live_proof':False,'rights_final_approved':False,'source_url':x['fileIdentifier']}
+         detail.append(row);count[(cls,int(char(category)),match)]+=1
+        ppuid={x['uid'] for x in p if x.get('corrected_license_class_v2') in ('ATTRIBUTION_REVIEW','CC0_OR_PUBLIC_DOMAIN_CLAIM')}
+        aruid={x['source_uid'] for x in detail if x['license_class'] in ('CC_BY','CC0') and x['morphology_tag_candidate']}
+        ar_alluid={x['source_uid'] for x in detail if x['license_class'] in ('CC_BY','CC0')}
+        union=ppuid | aruid
+        cross=ppuid & aruid
+        summary={'schema':'RealSaS.R29.R9.CharacterOriginalLicenseUnion.v1',
+          'articulation_all':len(art),'articulation_sketchfab':len(a),'upstream_scanned':scanned,
+          'articulation_source_uid_exact_unique':sum(x['source_metadata_match']=='UNIQUE_SOURCE_UID' for x in detail),
+          'articulation_license_classes':dict(collections.Counter(x['license_class'] for x in detail)),
+          'articulation_morphology_tag_license_classes':dict(collections.Counter(x['license_class'] for x in detail if x['morphology_tag_candidate'])),
+          'partverse_permissive_source_uids':len(ppuid),'articulation_permissive_all_uids':len(ar_alluid),
+          'articulation_permissive_morphology_tag_uids':len(aruid),'source_uid_overlap':len(cross),
+          'union_permissive_source_uid_morphology_candidates':len(union),
+          'independent_live_noai_verified':0,'training_admitted':0,
+          'warning':'Original metadata license claim; Articulation category tags are not R2.8 certification; live NoAI and artwork-rights exceptions still require review.'}
+        with (root/'R29_R9_ARTICULATION_SKETCHFAB_LICENSE_CROSSWALK.csv').open('w',newline='',encoding='utf-8') as f:
+         w=csv.DictWriter(f,fieldnames=list(detail[0]));w.writeheader();w.writerows(detail)
+        (root/'R29_R9_SUMMARY.json').write_text(json.dumps(summary,indent=2,sort_keys=True))
+        print('R9_FINAL_SUMMARY',json.dumps(summary,ensure_ascii=False),flush=True)
+        assert len(detail)==6622
+        PY
+    - name: Upload compact source licence crosswalk to private Drive
+      run: |
+        set -euo pipefail
+        dst="gdrive:RSS.vNext Corpus/Part2_R2_9_COMMERCIAL_TRAINING_RIGHTS/R29_R9_ARTICULATION_PARTVERSE_UNION/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+        rclone copyto "$RUNNER_TEMP/r29r9/R29_R9_ARTICULATION_SKETCHFAB_LICENSE_CROSSWALK.csv" "$dst/R29_R9_ARTICULATION_SKETCHFAB_LICENSE_CROSSWALK.csv" --retries 3
+        rclone copyto "$RUNNER_TEMP/r29r9/R29_R9_SUMMARY.json" "$dst/R29_R9_SUMMARY.json" --retries 3
+        cat "$RUNNER_TEMP/r29r9/R29_R9_SUMMARY.json" >> "$GITHUB_STEP_SUMMARY"

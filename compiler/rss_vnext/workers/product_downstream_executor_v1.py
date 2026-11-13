@@ -293,6 +293,12 @@ def _replay_raw_source_graphics_proof_v1(
     if not raws:
         if any(
             type(row) is dict and row.get("artifact_type")
+            == "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
+            for row in refs
+        ):
+            raise RuntimeError("PRODUCT_PROOF_ORPHAN_RAW_UV_TEXTURE_ATLAS")
+        if any(
+            type(row) is dict and row.get("artifact_type")
             == "RealSaS.RSSvNextSourceRGBImagePlaneCandidates"
             for row in refs
         ):
@@ -390,12 +396,44 @@ def _replay_raw_source_graphics_proof_v1(
         or claimed_rgb_manifest.get("mesh_lineage_hash") != mesh.mesh_lineage_hash
     ):
         raise RuntimeError("PRODUCT_PROOF_RAW_SOURCE_RGB_PIXEL_FACE_REPLAY_MISMATCH")
+    from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
+        ARTIFACT_TYPE as UV_ATLAS_TYPE,
+        MAX_ARTIFACT_BYTES as MAX_UV_BYTES,
+        compile_rss_vnext_uv_texture_atlas_v1,
+        reopen_rss_vnext_uv_texture_atlas_v1,
+    )
+    uv_refs = [
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict and row.get("artifact_type") == UV_ATLAS_TYPE
+    ]
+    if len(uv_refs) != 1 or uv_refs[0].get("schema_version") != "v1":
+        raise RuntimeError("PRODUCT_PROOF_RAW_UV_TEXTURE_ATLAS_CARDINALITY")
+    uv_bytes = read_rss_vnext_parent_cas_v1(
+        uv_refs[0], read_object, limit=MAX_UV_BYTES,
+    )
+    _, uv_claim = reopen_rss_vnext_uv_texture_atlas_v1(uv_bytes)
+    uv_expected, uv_receipt = compile_rss_vnext_uv_texture_atlas_v1(
+        source_rgb_candidates=expected_rgb, mesh=mesh,
+    )
+    if (
+        uv_bytes != uv_expected
+        or uv_claim != uv_receipt
+        or uv_claim["canonical_mesh_lineage_hash"] != mesh.mesh_lineage_hash
+        or uv_claim["original_rgb_candidate_sha256"] != sha256(raw_rgb).hexdigest()
+    ):
+        raise RuntimeError("PRODUCT_PROOF_RAW_UV_TEXTURE_ATLAS_SOURCE_REPLAY_MISMATCH")
     return {
         "original_two_image_source_binding_replayed": True,
         "original_alpha_static_mesh_qualification_recomputed": True,
         "original_rgb_source_pixel_face_candidates_recomputed": True,
         "original_rgb_image_plane_sample_count": expected_rgb_manifest["sample_count"],
         "original_rgb_image_plane_cas_sha256": sha256(raw_rgb).hexdigest(),
+        "mesh_uv_atlas_compiled_from_real_original_rgb": True,
+        "mesh_uv_texture_atlas_recomputed_independently": True,
+        "mesh_uv_texture_atlas_cas_sha256": sha256(uv_bytes).hexdigest(),
+        "mesh_uv_texture_atlas_size": uv_claim["atlas_size"],
+        "mesh_uv_texture_surface_owner_source_qualified": False,
+        "mesh_uv_draw_order_is_separately_compiled": True,
         "original_rgb_surface_owner_source_qualified": False,
         "same_checkpoint_typed_graphics_recomputed": True,
         "original_source_rgb_appearance_qualified": False,

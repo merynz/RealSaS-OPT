@@ -201,6 +201,7 @@ def build_raw_source_rgb_image_plane_candidates_v1(
         "schema": SCHEMA,
         "source_binding_sha256": source.source_binding_sha256,
         "mesh_lineage_hash": mesh.mesh_lineage_hash,
+        "mesh_face_count": len(mesh.faces),
         "view_summaries": summaries,
         "source_original_rgb_observation": True,
         "rgb_values_are_nearest_resampled_original_pixels": True,
@@ -241,6 +242,16 @@ def decode_raw_source_rgb_image_plane_candidates_v1(
     if type(data) is not bytes or len(data) > MAX_ARTIFACT_BYTES:
         raise RuntimeError("SOURCE_RGB_REOPEN_CAS_BUDGET")
     try:
+        with ZipFile(io.BytesIO(data)) as check:
+            records = check.infolist()
+            if (
+                len(records) != len(_KEYS)
+                or {r.filename for r in records} != {k + ".npy" for k in _KEYS}
+                or any(r.file_size > 8 * 1024 * 1024 or r.compress_type != ZIP_DEFLATED
+                       for r in records)
+                or sum(r.file_size for r in records) > 10 * 1024 * 1024
+            ):
+                raise RuntimeError("SOURCE_RGB_REOPEN_ZIP_RESOURCE_OR_KEYS")
         with np.load(io.BytesIO(data), allow_pickle=False) as archive:
             if set(archive.files) != _KEYS:
                 raise RuntimeError("SOURCE_RGB_REOPEN_ARRAY_KEYS")
@@ -250,19 +261,27 @@ def decode_raw_source_rgb_image_plane_candidates_v1(
         raise RuntimeError("SOURCE_RGB_REOPEN_INVALID_ARCHIVE") from exc
     count = manifest.get("sample_count") if type(manifest) is dict else None
     if (
-        manifest.get("schema") != SCHEMA
+        type(manifest) is not dict
+        or manifest.get("schema") != SCHEMA
         or type(count) is not int or not 0 <= count <= 2 * MAX_PER_VIEW
+        or type(manifest.get("mesh_face_count")) is not int
+        or not 1 <= manifest["mesh_face_count"] <= 32768
         or arrays["view_index_u8"].shape != (count,)
         or arrays["view_index_u8"].dtype != np.uint8
         or arrays["pixel_xy_u16"].shape != (count, 2)
         or arrays["pixel_xy_u16"].dtype != np.uint16
         or arrays["face_index_i32"].shape != (count,)
         or arrays["face_index_i32"].dtype != np.int32
+        or not ((arrays["face_index_i32"] >= 0)
+                & (arrays["face_index_i32"] < manifest["mesh_face_count"])).all()
         or arrays["barycentric_f32"].shape != (count, 3)
         or arrays["barycentric_f32"].dtype != np.float32
         or arrays["source_rgba_u8"].shape != (count, 4)
         or arrays["source_rgba_u8"].dtype != np.uint8
         or not np.isin(arrays["view_index_u8"], [0, 1]).all()
+        or (arrays["source_rgba_u8"][:, 3] != 255).any()
+        or type(manifest.get("view_summaries")) is not list
+        or len(manifest["view_summaries"]) != 2
         or not np.isfinite(arrays["barycentric_f32"]).all()
         or not np.allclose(arrays["barycentric_f32"].sum(axis=1), 1., atol=5.e-5)
         or manifest.get("source_rgb_surface_ownership_qualified") is not False

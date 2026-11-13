@@ -298,6 +298,23 @@ def test_raw_and_calibrated_sources_cannot_be_mixed_by_shape():
         )
 
 
+
+def test_raw_shape_rejects_extra_unrecognized_parent_before_loading():
+    cas = MemoryCAS()
+    raw, _ = _source(cas)
+    req = _shape_req(raw)
+    req["input_artifacts"].append({
+        "artifact_type": "RealSaS.OtherSourceEvidence",
+        "schema_version": "v1",
+        **cas.put_bytes(b"not-an-original-source"),
+    })
+    with pytest.raises(RuntimeError, match="EXTRA_PARENT_NOT_SOURCE"):
+        execute_rss_vnext_shape_capability_v4(
+            req, read_object=cas.read_object,
+            put_bytes=cas.put_bytes,
+            test_vision_encoder_factory=lambda: object(),
+        )
+
 def test_raw_source_cas_tampering_is_rejected_before_checkpoint_loading():
     cas = MemoryCAS()
     raw, _ = _source(cas)

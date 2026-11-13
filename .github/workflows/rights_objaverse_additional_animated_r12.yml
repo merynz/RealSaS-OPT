@@ -1,0 +1,138 @@
+name: R29 R12 additional original CC animated characters from Objaverse archive
+on:
+  push:
+    branches: [audit/rights-metadata-r4-20261113]
+    paths: [.github/workflows/rights_objaverse_additional_animated_r12.yml]
+permissions:
+  contents: read
+concurrency:
+  group: r29-r12-archive-scan
+  cancel-in-progress: false
+jobs:
+  scan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      RCLONE_CONFIG: /tmp/r29-r12-drive.conf
+    steps:
+    - name: Bootstrap license metadata scan (no 3D files, no GPU)
+      run: |
+        set -euo pipefail
+        umask 077
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq --no-install-recommends rclone
+        python -m pip install --quiet 'requests>=2.31,<3'
+        printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+        mkdir -p "$RUNNER_TEMP/r29r12"
+        rclone copyto "gdrive:RSS.vNext Corpus/Part2_R2_9_COMMERCIAL_TRAINING_RIGHTS/R29_R10_ARCHIVED_NOAI/43462879141-1/R29_R10_ARCHIVED_NOAI_LICENSE_CREATOR.csv" "$RUNNER_TEMP/r29r12/known_11996.csv" --retries 3
+        test "$(sha256sum "$RUNNER_TEMP/r29r12/known_11996.csv" | cut -d' ' -f1)" = "b380e2e4187f991cfc907377fd650feb607146e058ab87f50a5d331899d8c39a"
+    - name: Scan 800K annotated sources and identify additional CC-licensed animated characters
+      run: |
+        python - "$RUNNER_TEMP/r29r12" <<'PY'
+        import csv,collections,concurrent.futures,gzip,hashlib,json,re,sys,time,requests
+        from pathlib import Path
+        root=Path(sys.argv[1])
+        with (root/'known_11996.csv').open(newline='',encoding='utf-8-sig') as f:
+         known={x['uid'] for x in csv.DictReader(f)}
+        assert len(known)==11996
+        base='https://huggingface.co/datasets/allenai/objaverse/resolve/main/metadata/'
+        include=re.compile(r'\b(?:character|creature|humanoid|anthropomorphic|animal|animated|animation|rigged|skinned|skeleton|knight|warrior|robot|dinosaur|dragon|monster|goblin|orc|elf|demon|witch|wizard|soldier|zombie|bird|cat|dog|fox|wolf|lion|tiger|bear|horse|snake|lizard|frog|turtle|fish|shark|octopus|spider|insect|bug|bat|deer|dragonfly|walk(?:ing)?|run(?:ning)?|idle|dance|dancing)\b',re.I)
+        exclude=re.compile(r'\b(?:pokemon|pikachu|mario|sonic|naruto|dragonball|dragon ball|minecraft|disney|mickey|spiderman|spider man|marvel|star wars|fortnite|overwatch|league of legends|spongebob|simpsons|nintendo|legend of zelda|zelda|one piece|hello kitty)\b',re.I)
+        def parse_license(raw):
+         x=(raw or '').lower().strip()
+         if x in ('by','cc-by','cc by','cc-by-4.0','cc_by','attribution','creative commons attribution'):return 'CC_BY'
+         if x in ('cc0','zero','cc-zero','public domain','cc0 1.0'):return 'CC0'
+         return None
+        def scan_item(i):
+         shard=f'000-{i:03d}'
+         url=base+shard+'.json.gz'
+         last=''
+         for attempt in range(3):
+          try:
+           r=requests.get(url,timeout=(30,180),headers={'User-Agent':'RealSaS-Rights-Expansion/12'})
+           r.raise_for_status()
+           if len(r.content)>14000000:raise ValueError('OVERSIZE_SHARD')
+           digest=hashlib.sha256(r.content).hexdigest()
+           obj=json.loads(gzip.decompress(r.content))
+           out=[];count=collections.Counter()
+           for uid,d in obj.items():
+            count['all']+=1
+            if uid in known:continue
+            raw=d.get('license') or ''
+            if isinstance(raw,dict):raw=raw.get('slug') or raw.get('label') or ''
+            license_class=parse_license(str(raw))
+            if not license_class:continue
+            count['cc_pos']+=1
+            if not d.get('isDownloadable',True):continue
+            try:ac=int(d.get('animationCount') or 0)
+            except (TypeError,ValueError):ac=0
+            if ac<1:continue
+            count['cc_animated']+=1
+            tags=d.get('tags') or []
+            tagstrings=[str(t.get('slug',t.get('name',''))) if isinstance(t,dict) else str(t) for t in tags]
+            tagset={t.lower().strip() for t in tagstrings}
+            if 'noai' in tagset:
+             count['archived_noai']+=1
+             continue
+            if 'createdwithai' in tagset or 'created-with-ai' in tagset:
+             count['archived_ai_created']+=1
+             continue
+            name=str(d.get('name') or '')
+            labels=name+' '+' '.join(tagstrings)
+            tagged=bool(include.search(labels))
+            branded=bool(exclude.search(labels))
+            if branded:count['known_franchise_title']+=1
+            elif tagged:count['strong_character_keyword']+=1
+            else:count['animated_no_character_keyword']+=1
+            user=d.get('user') or {}
+            if not isinstance(user,dict):user={}
+            out.append({'source_uid':uid,'archived_license':str(raw),'license_class':license_class,
+             'creator':user.get('username',''),'name':name,'animation_count':ac,
+             'face_count':d.get('faceCount') or 0,'character_keyword_candidate':int(tagged),
+             'known_franchise_risk':int(branded),'archived_noai_tag':False,
+             'historical_tags':json.dumps(tagstrings[:25],ensure_ascii=False),
+             'source_url':'https://sketchfab.com/3d-models/'+uid,
+             'source_evidence':'https://huggingface.co/datasets/allenai/objaverse/tree/main/metadata',
+             'current_noai_verified':False,'training_admitted':False})
+           return shard,digest,len(obj),count,out,''
+          except Exception as e:
+           last=type(e).__name__+':'+str(e)[:120];time.sleep(4*(attempt+1))
+         return shard,'',0,collections.Counter(),[],last
+        allrows=[];counts=collections.Counter();receipts=[];errors=[]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+         for i,(sh,dig,n,c,rows,error) in enumerate(pool.map(scan_item,range(160)),1):
+          counts.update(c);allrows+=rows
+          receipts.append({'shard':sh,'sha256':dig,'object_count':n,'candidate_count':len(rows),'error':error})
+          if error:errors.append(sh)
+          if i%20==0:print('R12_PROGRESS',i,160,'strong',counts['strong_character_keyword'],'noai',counts['archived_noai'],'errors',len(errors),flush=True)
+        strong=[r for r in allrows if r['character_keyword_candidate'] and not r['known_franchise_risk']]
+        counts['strong_rows']=len(strong)
+        assert not errors,'METADATA_SHARD_DOWNLOAD_FAILED'
+        assert len({r['source_uid'] for r in strong})==len(strong)
+        def save(name,rows):
+         with (root/name).open('w',newline='',encoding='utf-8') as f:
+          w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
+        save('R29_R12_ADDITIONAL_CC_ANIMATED_CHARACTER_CANDIDATES.csv',strong)
+        save('R29_R12_SHARD_HASH_RECEIPTS.csv',receipts)
+        summary={'schema':'RealSaS.R29.R12.AdditionalCCAnimatedCharacterCandidates.v1',
+           'known_source_uid_excluded':len(known),'archive_records_scanned':counts['all'],
+           'CC_BY_CC0_unseen_source_candidates':counts['cc_pos'],
+           'new_animated_CC_BY_CC0':counts['cc_animated'],
+           'new_animated_character_keyword_candidates':counts['strong_character_keyword'],
+           'new_animated_franchise_risk_excluded':counts['known_franchise_title'],
+           'archived_noai_excluded':counts['archived_noai'],
+           'archived_createdwithai_excluded':counts['archived_ai_created'],
+           'new_selected_source_uids':len(strong),'new_selected_sha256':hashlib.sha256((root/'R29_R12_ADDITIONAL_CC_ANIMATED_CHARACTER_CANDIDATES.csv').read_bytes()).hexdigest(),
+           'training_admitted':0,'important':'Keyword candidates, not verified rigged character identity or current NoAI. Source licenses are CC claims, not blanket author-rights guarantees.'}
+        (root/'R29_R12_SUMMARY.json').write_text(json.dumps(summary,indent=2,sort_keys=True))
+        print('R12_SUMMARY',json.dumps(summary),flush=True)
+        PY
+    - name: Persist compact candidate source rights and SHA evidence privately
+      run: |
+        set -euo pipefail
+        dest="gdrive:RSS.vNext Corpus/Part2_R2_9_COMMERCIAL_TRAINING_RIGHTS/R29_R12_ADDITIONAL_CC_ANIMATED/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+        for name in R29_R12_ADDITIONAL_CC_ANIMATED_CHARACTER_CANDIDATES.csv R29_R12_SHARD_HASH_RECEIPTS.csv R29_R12_SUMMARY.json; do
+          rclone copyto "$RUNNER_TEMP/r29r12/$name" "$dest/$name" --retries 3
+        done
+        cat "$RUNNER_TEMP/r29r12/R29_R12_SUMMARY.json" >> "$GITHUB_STEP_SUMMARY"

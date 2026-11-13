@@ -510,6 +510,48 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
             )
         return await _with_heartbeat(run_mechanics_rest, request)
 
+    # Canonical downstream product graph: typed Graphics and Motion compilers
+    # can pass locally, while Proof cannot claim release/product authority from
+    # only candidate inputs. ProductRevision stays Platform-owned.
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductGraphicsCompile.v1"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1 import (
+            execute_graphics_capability_v1,
+        )
+        return await _with_heartbeat(
+            lambda value: execute_graphics_capability_v1(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            ), request,
+        )
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductMotionCompile.v2"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1 import (
+            execute_motion_capability_v2,
+        )
+        return await _with_heartbeat(
+            lambda value: execute_motion_capability_v2(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            ), request,
+        )
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductProofCompile.v1"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1 import (
+            execute_proof_capability_v1,
+        )
+        return await _with_heartbeat(
+            lambda value: execute_proof_capability_v1(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            ), request,
+        )
+
     if str(request.get("kind") or "") != "STAGE":
         return {
             "capability_id": str(request.get("capability_id") or ""),

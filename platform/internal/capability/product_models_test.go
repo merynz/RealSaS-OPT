@@ -141,24 +141,24 @@ func TestProductShapeMeshRetainSevenCASChildrenAndOneCanonicalMesh(t *testing.T)
 	if shapeMeta["fanout_contract"] != "RealSaS.RSSvNext.ProductEvidenceFanout.v1" ||
 		shapeMeta["neural_scene_survives_mesh_abstain"] != true ||
 		shapeMeta["independent_iris_tessa_forbidden"] != true {
-		t.Fatalf("missing one-inference retained fanout: %+v",shapeMeta)
+		t.Fatalf("missing one-inference retained fanout: %+v", shapeMeta)
 	}
-	aux, ok :=shapeMeta["auxiliary_outputs"].([]any)
+	aux, ok := shapeMeta["auxiliary_outputs"].([]any)
 	if !ok || len(aux) != 7 {
 		t.Fatalf("expected seven independently retained Shape CAS children %+v", aux)
 	}
-	meshRows, err :=(RSSvNextMeshCandidateProvider{}).Capabilities(context.Background())
+	meshRows, err := (RSSvNextMeshCandidateProvider{}).Capabilities(context.Background())
 	if err != nil || len(meshRows) != 1 {
 		t.Fatalf("mesh descriptor=%v / %d", err, len(meshRows))
 	}
-	meshMeta:=meshRows[0].Metadata
+	meshMeta := meshRows[0].Metadata
 	if meshMeta["output_artifact_type"] != "RealSaS.CanonicalMeshIR" ||
 		meshMeta["canonical_mesh_required_for_product_execution"] != true ||
 		meshMeta["input_shape_artifact_type"] != "RealSaS.RSSvNextInferenceEvidence" ||
 		meshMeta["independent_model_inference_forbidden"] != true {
 		t.Fatalf("canonical product mesh is not source-gated: %+v", meshMeta)
 	}
-	if x, ok :=meshMeta["two_view_static_policy_sha256"].(string);!ok || len(x)!=64 {
+	if x, ok := meshMeta["two_view_static_policy_sha256"].(string); !ok || len(x) != 64 {
 		t.Fatalf("source-raster policy must be content pinned: %+v", meshMeta)
 	}
 	// The research adapter still exists as an explicit non-active legacy
